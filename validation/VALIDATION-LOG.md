@@ -6,3 +6,5 @@
 | 20260329T112521Z-dry-run | dry-run | scenario-01-seoul-outdoor-wind.json | high | 0 | 0 | ok |
 | 20260329T114849Z-live | live | scenario-01-seoul-outdoor-wind.json | medium | 11 | 1 | warning_list |
 | 20260329T115033Z-live | live | scenario-01-seoul-outdoor-wind.json | medium | 11 | 1 | weather_current |
+| 20260329T115727Z-live | live | scenario-01-seoul-outdoor-wind.json | medium | 11 | 1 | weather_current |
+| 20260329T115743Z-live | live | scenario-01-seoul-outdoor-wind.json | medium | 11 | 1 | weather_current |
