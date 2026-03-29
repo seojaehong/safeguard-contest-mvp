@@ -1,0 +1,955 @@
+{
+  "generatedAt": "2026-03-29T11:50:39.716322+00:00",
+  "mode": "live",
+  "api_status": {
+    "weather_current": {
+      "ok": false,
+      "error": "Command '['curl', '-sS', '--fail', '--max-time', '12', '-G', 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst', '--data-urlencode', 'ServiceKey=cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==', '--data-urlencode', 'pageNo=1', '--data-urlencode', 'numOfRows=20', '--data-urlencode', 'dataType=JSON', '--data-urlencode', 'base_date=20260329', '--data-urlencode', 'base_time=1000', '--data-urlencode', 'nx=60', '--data-urlencode', 'ny=127']' returned non-zero exit status 22."
+    },
+    "warning_list": {
+      "ok": true
+    },
+    "heat_impact": {
+      "ok": true
+    },
+    "cold_impact": {
+      "ok": true
+    },
+    "msds_list": {
+      "ok": true
+    },
+    "disaster_cases": {
+      "ok": true
+    },
+    "fatal_cases": {
+      "ok": true
+    },
+    "legal_search": {
+      "ok": true
+    },
+    "media_links": {
+      "ok": true
+    },
+    "msds_detail_2": {
+      "ok": true
+    },
+    "msds_detail_8": {
+      "ok": true
+    },
+    "msds_detail_15": {
+      "ok": true
+    }
+  },
+  "input": {
+    "location": {
+      "name": "서울",
+      "nx": 60,
+      "ny": 127,
+      "stnId": 108,
+      "regId": "11B00000"
+    },
+    "work_type": "옥외 철골 작업",
+    "work_time": "주간",
+    "materials": [
+      "벤젠"
+    ],
+    "hazard_keywords": [
+      "추락",
+      "지게차"
+    ],
+    "language": "ko"
+  },
+  "weather": {
+    "current": {
+      "error": "Command '['curl', '-sS', '--fail', '--max-time', '12', '-G', 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst', '--data-urlencode', 'ServiceKey=cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==', '--data-urlencode', 'pageNo=1', '--data-urlencode', 'numOfRows=20', '--data-urlencode', 'dataType=JSON', '--data-urlencode', 'base_date=20260329', '--data-urlencode', 'base_time=1000', '--data-urlencode', 'nx=60', '--data-urlencode', 'ny=127']' returned non-zero exit status 22."
+    },
+    "warnings": {
+      "request": {
+        "ServiceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+        "pageNo": 1,
+        "numOfRows": 20,
+        "dataType": "JSON",
+        "stnId": 108,
+        "fromTmFc": "20260328",
+        "toTmFc": "20260329"
+      },
+      "response": {
+        "response": {
+          "header": {
+            "resultCode": "00",
+            "resultMsg": "NORMAL_SERVICE"
+          },
+          "body": {
+            "dataType": "JSON",
+            "items": {
+              "item": [
+                {
+                  "stnId": "108",
+                  "title": "[특보] 제03-151호 : 2026.03.28.10:00 / 건조주의보 발표 (*)",
+                  "tmFc": 202603281000,
+                  "tmSeq": 151
+                }
+              ]
+            },
+            "pageNo": 1,
+            "numOfRows": 20,
+            "totalCount": 1
+          }
+        }
+      }
+    },
+    "impact": {
+      "heatwave": {
+        "request": {
+          "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+          "pageNo": 1,
+          "numOfRows": 10,
+          "dataType": "JSON",
+          "regId": "11B00000",
+          "tm": "20260329"
+        },
+        "response": {
+          "response": {
+            "header": {
+              "resultCode": "03",
+              "resultMsg": "NO_DATA"
+            }
+          }
+        }
+      },
+      "coldwave": {
+        "request": {
+          "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+          "pageNo": 1,
+          "numOfRows": 10,
+          "dataType": "JSON",
+          "regId": "11B00000",
+          "tm": "20260329"
+        },
+        "response": {
+          "response": {
+            "header": {
+              "resultCode": "03",
+              "resultMsg": "NO_DATA"
+            }
+          }
+        }
+      }
+    }
+  },
+  "materials": {
+    "list": {
+      "request": {
+        "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+        "searchWrd": "벤젠",
+        "searchCnd": 0,
+        "pageNo": 1,
+        "numOfRows": 3
+      },
+      "header": {
+        "resultCode": "00",
+        "resultMsg": "NORMAL SERVICE."
+      },
+      "items": [
+        {
+          "chemId": "001008",
+          "chemNameKor": "벤젠",
+          "casNo": "71-43-2",
+          "lastDate": "2025-09-17"
+        },
+        {
+          "chemId": "001089",
+          "chemNameKor": "에틸벤젠",
+          "casNo": "100-41-4",
+          "lastDate": "2025-08-08"
+        },
+        {
+          "chemId": "001633",
+          "chemNameKor": "아조벤젠",
+          "casNo": "103-33-3",
+          "lastDate": "2025-07-23"
+        }
+      ]
+    },
+    "details": [
+      {
+        "detailNo": 2,
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL SERVICE."
+        },
+        "items": [
+          {
+            "msdsItemNameKor": "유해성·위험성 분류",
+            "itemDetail": "인화성 액체 : 구분2|피부 부식성/피부 자극성 : 구분2|심한 눈 손상성/눈 자극성 : 구분2|생식세포 변이원성 : 구분1A|발암성 : 구분1B|특정표적장기 독성(반복 노출) : 구분1|흡인 유해성 : 구분1|만성 수생환경 유해성 : 구분2"
+          },
+          {
+            "msdsItemNameKor": "예방조치문구를 포함한 경고표지 항목",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "그림문자",
+            "itemDetail": "GHS02.gif|GHS07.gif|GHS08.gif|GHS09.gif"
+          },
+          {
+            "msdsItemNameKor": "신호어",
+            "itemDetail": "위험"
+          },
+          {
+            "msdsItemNameKor": "유해·위험문구",
+            "itemDetail": "H225 : 고인화성 액체 및 증기|H304 : 삼켜서 기도로 유입되면 치명적일 수 있음|H315 : 피부에 자극을 일으킴|H319 : 눈에 심한 자극을 일으킴|H340 : 유전적인 결함을 일으킬 수 있음(유전적인 결함을 일으키는 노출 경로를 기재한다. 단, 다른 노출경로에 의해 유전적인 결함을 일으키지 않는다는 결정적인 증거가 있는 경우에 한한다.)|H350 : 암을 일으킬 수 있음(암을 일으키는 노출 경로를 기재한다. 단, 다른 노출경로에 의해 암을 일으키지 않는다는 결정적인 증거가 있는 경우에 한한다.)|H372 : 장기간 또는 반복노출 되면 장기(영향을 받는 것으로 알려진 모든 장기를 명시한다.)에 손상을 일으킴(특정표적장기독성(반복노출)을 일으키는 노출 경로를 기재. 단, 다른 노출경로에 의해 특정표적장기독성(반복노출)을 일으키지 않는다는 결정적인 증거가 있는 경우에 한한다.)|H411 : 장기적인 영향에 의해 수생생물에게 유독함"
+          },
+          {
+            "msdsItemNameKor": "예방조치문구",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "예방",
+            "itemDetail": "P201 : 사용 전 취급 설명서를 확보하시오.|P202 : 모든 안전 예방조치 문구를 읽고 이해하기 전에는 취급하지 마시오.|P210 : 열,고온의 표면,스파크,화염 및 그 밖의 점화원으로부터 멀리하시오.금연|P233 : 용기를 단단히 밀폐하시오.|P240 : 용기와 수용설비를 접지하시오.|P241 : 방폭형[전기/환기/조명/…]설비를 사용하시오.|P242 : 스파크가 발생하지 않는 도구를 사용하시오.|P243 : 정전기 방지 조치를 취하시오.|P260 : 분진/흄/가스/미스트/증기/스프레이를(을)흡입하지 마시오.|P264 : 취급 후에는…을(를)철저히 씻으시오.|P270 : 이 제품을 사용할 때에는 먹거나,마시거나 흡연하지 마시오.|P273 : 환경으로 배출하지 마시오.|P280 : 보호장갑/보호의/보안경/안면보호구를(을)착용하시오."
+          },
+          {
+            "msdsItemNameKor": "대응",
+            "itemDetail": "P301+P310 : 삼켰다면:즉시 의료기관/의사/…의 진찰을 받으시오.|P302+P352 : 피부에 묻으면:다량의 물/…(으)로 씻으시오.|P303+P361+P353 : 피부(또는 머리카락)에 묻으면:오염된 모든 의류를 즉시 벗으시오.피부를 물로 씻으시오[또는 샤워하시오].|P305+P351+P338 : 눈에 묻으면:몇 분간 물로 조심해서 씻으시오.가능하면 콘택트렌즈를 제거하시오.계속 씻으시오.|P308+P313 : 노출되거나 노출이 우려되면:의학적인 조치/조언을 받으시오.|P314 : 불편함을 느끼면 의학적인 조치/조언을 받으시오.|P321 : …처치를 하시오.|P331 : 토하게 하지 마시오.|P332+P313 : 피부 자극이 나타나면:의학적인 조치/조언을 받으시오.|P337+P313 : 눈에 자극이 지속되면:의학적인 조치/조언을 받으시오.|P362+P364 : 오염된 의류를 벗고 다시 사용 전 세척하시오.|P370+P378 : 화재 시:불을 끄기 위해…을(를)사용하시오.|P391 : 누출물을 모으시오."
+          },
+          {
+            "msdsItemNameKor": "저장",
+            "itemDetail": "P403+P235 : 환기가 잘 되는 곳에 보관하시오.저온으로 유지하시오.|P405 : 잠금장치를 하여 저장하시오."
+          },
+          {
+            "msdsItemNameKor": "폐기",
+            "itemDetail": "P501 : 폐기물 관련 법령에 따라 내용물/용기를 폐기하시오"
+          },
+          {
+            "msdsItemNameKor": "유해성·위험성 분류기준에 포함되지 않는 기타 유해성·위험성(예. 분진폭발 위험성)",
+            "itemDetail": "자료없음"
+          }
+        ]
+      },
+      {
+        "detailNo": 8,
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL SERVICE."
+        },
+        "items": [
+          {
+            "msdsItemNameKor": "화학물질의 노출기준, 생물학적 노출기준 등",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "국내규정",
+            "itemDetail": "|TWA : 0.5ppm |STEL : 2.5ppm(허용기준)"
+          },
+          {
+            "msdsItemNameKor": "ACGIH 규정",
+            "itemDetail": "TWA 0.5 ppm  STEL 2.5 ppm"
+          },
+          {
+            "msdsItemNameKor": "생물학적 노출기준",
+            "itemDetail": "|15 (Methyl chloroform in endexhaled air, prior to last shift of workweek)\n10mg/l(Trichloroacetic acid in urine, end of workweek)"
+          },
+          {
+            "msdsItemNameKor": "기타 노출기준",
+            "itemDetail": "자료없음"
+          },
+          {
+            "msdsItemNameKor": "적절한 공학적 관리",
+            "itemDetail": "|공정격리, 국소배기를 사용하거나, 공기수준을 노출기준 이하로 조절하는 다른 공학적 관리를 하시오.||이 물질을 저장하거나 사용하는 설비는 세안설비와 안전 샤워를 설치하시오."
+          },
+          {
+            "msdsItemNameKor": "개인보호구",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "호흡기 보호",
+            "itemDetail": "|노출되는 물질의 물리화학적 특성에 맞는 한국산업안전보건공단의 인증을 필한 호흡용 보호구를 착용하시오"
+          },
+          {
+            "msdsItemNameKor": "눈 보호",
+            "itemDetail": "|눈의 자극을 일으키거나 기타 건강상의 장해를 일으키는 증기 상태의 유기물질로부터 눈을 보호하기 위해서는 보안경 혹은 통기성 고글을 착용하시오||근로자가 접근이 용이한 위치에 긴급세척시설(샤워식) 및 세안설비를 설치하시오"
+          },
+          {
+            "msdsItemNameKor": "손 보호",
+            "itemDetail": "|화학물질의 물리적 및 화학적 특성을 고려하여 적절한 재질의 보호장갑을 착용하시오"
+          },
+          {
+            "msdsItemNameKor": "신체 보호",
+            "itemDetail": "|화학물질의 물리적 및 화학적 특성을 고려하여 적절한 재질의 보호의복을 착용하시오"
+          }
+        ]
+      },
+      {
+        "detailNo": 15,
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL SERVICE."
+        },
+        "items": [
+          {
+            "msdsItemNameKor": "산업안전보건법에 의한 규제",
+            "itemDetail": "작업환경측정대상물질 (측정주기 : 6개월)|관리대상유해물질 |특수건강진단대상물질 (진단주기 : 6개월)|특별관리물질 |공정안전보고서(PSM) 제출 대상물질 |노출기준설정물질|허용기준설정물질"
+          },
+          {
+            "msdsItemNameKor": "화학물질관리법에 의한 규제",
+            "itemDetail": "사고대비물질 |인체만성유해성물질"
+          },
+          {
+            "msdsItemNameKor": "화학물질의 등록 및 평가 등에 관한 법률 규제",
+            "itemDetail": "기존화학물질 |인체만성유해성물질 |중점관리물질"
+          },
+          {
+            "msdsItemNameKor": "위험물안전관리법에 의한 규제",
+            "itemDetail": "제4류 인화성액체 제1석유류 비수용성액체 (200L)"
+          },
+          {
+            "msdsItemNameKor": "폐기물관리법에 의한 규제",
+            "itemDetail": "지정폐기물"
+          },
+          {
+            "msdsItemNameKor": "기타 국내 및 외국법에 의한 규제",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "국내규제",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "기타 국내 규제",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "국외규제",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(OSHA 규정)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(CERCLA 규정)",
+            "itemDetail": "4.53599kg (10lb)"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(EPCRA 302 규정)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(EPCRA 304 규정)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(EPCRA 313 규정)",
+            "itemDetail": "해당됨"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(로테르담협약물질)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(스톡홀름협약물질)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(몬트리올의정서물질)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "EU 분류정보(확정분류결과)",
+            "itemDetail": "Flam. Liq. 2\nCarc. 1A\nMuta. 1B\nAsp. Tox. 1\nSTOT RE 1\nSkin Irrit. 2\nEye Irrit. 2"
+          },
+          {
+            "msdsItemNameKor": "EU 분류정보(위험문구)",
+            "itemDetail": "H225\nH350\nH340\nH304\nH372 **\nH315\nH319"
+          },
+          {
+            "msdsItemNameKor": "EU 분류정보(안전문구)",
+            "itemDetail": "해당없음"
+          }
+        ]
+      }
+    ]
+  },
+  "cases": {
+    "disaster": {
+      "request": {
+        "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+        "pageNo": 1,
+        "numOfRows": 5,
+        "business": "제조업",
+        "keyword": "추락",
+        "callApiId": 1060
+      },
+      "response": {
+        "body": {
+          "pageNo": 1,
+          "totalCount": 6273,
+          "numOfRows": 5,
+          "items": {
+            "item": [
+              {
+                "business": "건설업",
+                "contents": "인천시 미추홀구 소재 현장에서 재해자가 이동식 비계에 올라가 미장 작업을 하던 중  개방된 창호 개구부를 통해 지상 1층 바닥(높이: 24.4m)으로 떨어짐",
+                "atcflcnt": 1,
+                "keyword": "이동식 비계에서 떨어짐",
+                "boardno": "20260320133457359SS7"
+              },
+              {
+                "business": "건설업",
+                "contents": "강원도 인제군 소재 OOO 공사현장에서 재해자가 철골 구조물 상부에서 철판 설치 작업을 하던 중,철판을 고정한 클램프가 이탈하면서 중심을 잃고 바닥으로 떨어짐",
+                "atcflcnt": 1,
+                "keyword": "철판설치 작업 중 추락",
+                "boardno": "20260320133358ILB4RM"
+              },
+              {
+                "business": "건설업",
+                "contents": "서울시 소재 OO 공사현장에서 옥탑층 엘리베이터 피트 외벽의 비계를 설치하지 않은 공간에서거푸집 설치 작업을 하던 중, 지하 1층 바닥으로 떨어짐",
+                "atcflcnt": 1,
+                "keyword": "거푸집 설치 작업 중 추락",
+                "boardno": "20260320133308L7EDRX"
+              },
+              {
+                "business": "건설업",
+                "contents": "전남 고흥군 소재 OOOO에서 굴착기가 터파기 작업 후 경사로를  내려오던 중, 궤도가 측구에 빠져 굴착기가 넘어진 후 전도됨",
+                "atcflcnt": 1,
+                "keyword": "경사로 이동 중 굴착기 전도",
+                "boardno": "202603201332075TXH1U"
+              },
+              {
+                "business": "건설업",
+                "contents": "울산 울주군에 소재한 OO철거공사 현장에서 천장크레인을 철거하던 중, 레일이 완전히 절단되지 않은 상태로 해체 작업을 진행하던 과정에서 분리하려던 레일과 연결된 다른 레일이 함께 낙하(4.5M)하며 반동하였고 그 여파로 하부에 있던 재해자를 타격함",
+                "atcflcnt": 1,
+                "keyword": "천장크레인 해체 중 낙하물에 맞음",
+                "boardno": "20260320133113N6ERXP"
+              }
+            ]
+          }
+        },
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL_CODE"
+        }
+      }
+    },
+    "fatal": {
+      "request": {
+        "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+        "pageNo": 1,
+        "numOfRows": 5,
+        "callApiId": 1040
+      },
+      "response": {
+        "body": {
+          "pageNo": 1,
+          "totalCount": 2776,
+          "numOfRows": 5,
+          "items": {
+            "item": [
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260327182759HB42A6&bbsAtcflNo=E0802000030001' data-filename='0325경기안성.jpg' style='width: 931px;' data-tboard-img-cvrt='Y'></p><p><br></p><p>2026. 3. 25. (수), 11:21경경기 안성시 소재 공사현장에서배수관 매설 작업 중굴착면의 토사가 붕괴되어 재해자가 매몰(사망 1명)※ 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다.</p><div><br></div>",
+                "keyword": "[3/25, 경기 안성시] 굴착면의 토사가 붕괴되어 매몰",
+                "arno": "20260327182759HB42A6"
+              },
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260327182641GU83SZ&bbsAtcflNo=E0802000030001' data-filename='0323충북청주.jpg' style='width: 931px;' data-tboard-img-cvrt='Y'></p><p><br></p><p>2026. 3. 23. (월), 13:44경충북 청주시 소재 공사현장에서2층 철골보에 올라간 재해자가고소작업대로 이동하던 중 지상으로 떨어짐(사망 1명, 높이: 5.7m)※ 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다.</p><div><br></div>",
+                "keyword": "[3/23, 충북 청주시] 철골 보에서 고소작업대로 이동하던 중 떨어짐",
+                "arno": "20260327182641GU83SZ"
+              },
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260325094927T6EGDB&bbsAtcflNo=E0802000030001' data-filename='image.png' style='width: 100%;' data-tboard-img-cvrt='Y'></p><p></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span lang='EN-US' style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Arial;color:#333333;mso-font-kerning:0pt'>2026. 3. 22. (</span><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Arial;color:#333333;mso-font-kerning:0pt'>일<span lang='EN-US'>), 11:00</span>경</span></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span lang='EN-US' style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Arial;color:#333333;mso-font-kerning:0pt'></span><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>인천광역시 연수구 소재 제조업 사업장 내 캐노피에서</span></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'><br></span></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>재해자가 배관 보온 작업 중<span lang='EN-US'><o:p></o:p></span></span></p><p></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>바닥 마감재가 탈락되며 떨어짐</span></p><p></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span lang='EN-US' style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>(</span><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>사망 <span lang='EN-US'>1</span>명<span lang='EN-US'>)<o:p></o:p></span></span></p><p></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:&quot;맑은 고딕&quot;;color:#333333;mso-font-kerning:0pt'>※</span><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Arial;color:#333333;mso-font-kerning:0pt'> 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다<span lang='EN-US'>.</span></span></p>",
+                "keyword": "[3/22, 인천 연수구] 배관 보온 작업 중 떨어짐",
+                "arno": "20260325094927T6EGDB"
+              },
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260321105944Y6XF06&bbsAtcflNo=E0802000030001' data-filename='0319울산남구.jpg' style='width: 931px;' data-tboard-img-cvrt='Y'></p><p><br></p><p>2026. 3. 19. (목), 10:09경울산 남구 부두 야적장에서도보로 이동하던 재해자가운행 중인 지게차에 부딪힘(사망 1명)※ 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다.</p><div><br></div>",
+                "keyword": "[3/19, 울산 남구] 운행 중인 지게차에 부딪힘",
+                "arno": "20260321105944Y6XF06"
+              },
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260321105857CWI1SL&bbsAtcflNo=E0802000030001' data-filename='0317충북단양군.jpg' style='width: 931px;' data-tboard-img-cvrt='Y'>.</p><p><br></p><p>2026. 3. 17. (화), 08:55경충북 단양군 소재 공사현장에서재해자가 천장 조명 설치 작업 중밟은 천장 마감재가 파손되어 바닥으로 떨어짐(사망 1명, 높이: 7.5m)※ 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다.</p><div><br></div>",
+                "keyword": "[3/17, 충북 단양군] 천장에 올라가 작업 중 떨어짐",
+                "arno": "20260321105857CWI1SL"
+              }
+            ]
+          }
+        },
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL_CODE"
+        }
+      }
+    }
+  },
+  "legal": {
+    "request": {
+      "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+      "pageNo": 1,
+      "numOfRows": 5,
+      "searchValue": "추락",
+      "category": 0,
+      "dataType": "JSON"
+    },
+    "response": {
+      "response": {
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL_SERVICE"
+        },
+        "body": {
+          "associated_word": [
+            "산업안전보건",
+            "안전보건공단",
+            "산업안전보건공단",
+            "산업안전",
+            "안전보건",
+            "산업보건"
+          ],
+          "categorycount": {
+            "1": 0,
+            "11": 0,
+            "2": 2,
+            "3": 2,
+            "4": 8,
+            "5": 7,
+            "6": 786,
+            "7": 203,
+            "8": 0,
+            "9": 0
+          },
+          "total_media": [
+            {
+              "category": "6",
+              "content": "연구보고서우리 법규에서 안전모는 추락용 보호구임을 명시한 것과 관련하여 국내외 법규, 관련 기준 및 표준 등의 문헌고찰을 통하여 산업현장의 안전모와 추락에 대한 개념 및 추락용 보호구로서의 안전모의 보호성능을 다시 검토하고, 산업재해 감소에 기여할 수 있는 개정(안)을 제시",
+              "doc_id": "KOSHA06_31287_1",
+              "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=31287",
+              "highlight_content": "연구보고서우리 법규에서 안전모는 <em class='smart'>추락</em>용 보호구임을 명시한 것과 관련하여 국내외 법규, 관련 기준 및 표준 등의 문헌고찰을 통하여 산업현장의 안전모와 <em class='smart'>추락</em>에 대한 개념 및 <em class='smart'>추락</em>용 보호구로서의 안전모의 보호성능을 다시 검토하고, 산업재해 감소에 기여할 수 있는 개정(안)을 제시",
+              "image_path": [
+                "t"
+              ],
+              "keyword": "보호구, 추락, 안전모, 개인용 보호구, 추락위험방지, 추락재해방지, 안전대",
+              "med_thumb_yn": "Y",
+              "media_style": "책자",
+              "score": 54.741016,
+              "title": "추락보호구로서의 안전모 관련 기준 등 개정 연구"
+            },
+            {
+              "category": "6",
+              "content": "「사고사망감축 100일 긴급대책」에 따른 2019년 상반기 광주지역본부 관내 건설업종에서 발생한 추락 사망사고 사례 및 예방대책",
+              "doc_id": "KOSHA06_40671_1",
+              "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=40671",
+              "highlight_content": "「사고사망감축 100일 긴급대책」에 따른 2019년 상반기 광주지역본부 관내 건설업종에서 발생한 <em class='smart'>추락</em> 사망사고 사례 및 예방대책",
+              "image_path": [],
+              "keyword": "추락사고, 건설, 추락, 광주,건설,추락",
+              "med_thumb_yn": "N",
+              "media_style": "책자",
+              "score": 47.641556,
+              "title": "2019년 상반기 광주지역본부 관내 건설업종 추락 사망사고 사례 및 예방대책"
+            },
+            {
+              "category": "6",
+              "content": "태양광설비 지붕작업 추락사고 예방 교안\n- 태양광 설비작업 재해예방을 위한 교육자료(PPT)",
+              "doc_id": "KOSHA06_42182_1",
+              "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=42182",
+              "highlight_content": "태양광설비 지붕작업 <em class='smart'>추락</em>사고 예방 교안\n- 태양광 설비작업 재해예방을 위한 교육자료(PPT)",
+              "image_path": [],
+              "keyword": "태양광, 설비, 추락, 지붕, 예방, 교안, 고지대",
+              "med_thumb_yn": "N",
+              "media_style": "교안(PPT)",
+              "score": 50.62342,
+              "title": "태양광설비 지붕작업 추락사고 예방 교안"
+            },
+            {
+              "category": "6",
+              "content": "Construction_Falling from a work foothold and getting stabbed by a vertical rebar 건설_작업발판에서추락하여수직철근에_찔림",
+              "doc_id": "KOSHA06_32053_1",
+              "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=32053",
+              "highlight_content": "Construction_Falling from a work foothold and getting stabbed by a vertical rebar 건설_작업발판에서<em class='smart'>추락</em>하여수직철근에_찔림",
+              "image_path": [],
+              "keyword": "건설,작업,발판,추락,찔림,안전",
+              "med_thumb_yn": "N",
+              "media_style": "교안(PPT)",
+              "score": 43.239704,
+              "title": "Construction_Falling from a work foothold and getting stabbed by a vertical rebar 건설_작업발판에서추락하여수직철근에_찔림"
+            },
+            {
+              "category": "6",
+              "content": "[일터에서의 안전보건 OPL] 추락에 의한 위험방지",
+              "doc_id": "KOSHA06_35785_1",
+              "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=35785",
+              "highlight_content": "[일터에서의 안전보건 OPL] <em class='smart'>추락</em>에 의한 위험방지",
+              "image_path": [
+                "t"
+              ],
+              "keyword": "추락,떨어짐,방지,작업발판,방호,OPL",
+              "med_thumb_yn": "Y",
+              "media_style": "OPS",
+              "score": 74.32028,
+              "title": "[일터에서의 안전보건 OPL] 추락에 의한 위험방지"
+            },
+            {
+              "category": "6",
+              "content": "건설현장 추락사고 예방 좋은예 나쁜예",
+              "doc_id": "KOSHA06_42054_1",
+              "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=42054",
+              "highlight_content": "건설현장 <em class='smart'>추락</em>사고 예방 좋은예 나쁜예",
+              "image_path": [],
+              "keyword": "건설, 추락, 사고, 예방, 예시, 재해, 안전대, 보호구, 떨어짐",
+              "med_thumb_yn": "N",
+              "media_style": "OPS",
+              "score": 71.80607,
+              "title": "건설현장 추락사고 예방 좋은예 나쁜예"
+            },
+            {
+              "category": "6",
+              "content": "건설현장 추락사고예방을 위한 카드북",
+              "doc_id": "KOSHA06_43293_1",
+              "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=43293",
+              "highlight_content": "건설현장 <em class='smart'>추락</em>사고예방을 위한 카드북",
+              "image_path": [
+                "t"
+              ],
+              "keyword": "추락, 건설,10분, TBM, 안전미팅, 3대, 안전수칙, 점검표, 카드북, 안전난간, 작업발판, 개구부, 보호구",
+              "med_thumb_yn": "Y",
+              "media_style": "리플릿",
+              "score": 52.672623,
+              "title": "(캠페인) 건설현장 추락사고예방 카드북"
+            },
+            {
+              "category": "6",
+              "content": "태양광발전 지붕작업 추락사고 예방 리플릿\n- 태양광 설비작업 재해예방을 위한 교육용 자료",
+              "doc_id": "KOSHA06_42261_1",
+              "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=42261",
+              "highlight_content": "태양광발전 지붕작업 <em class='smart'>추락</em>사고 예방 리플릿\n- 태양광 설비작업 재해예방을 위한 교육용 자료",
+              "image_path": [
+                "t"
+              ],
+              "keyword": "태양광, 설비, 지붕, 추락, 예방, 보조금, 지원",
+              "med_thumb_yn": "Y",
+              "media_style": "리플릿",
+              "score": 50.244064,
+              "title": "태양광설비 지붕작업 추락사고예방 리플릿"
+            }
+          ],
+          "totalCount": 1008,
+          "dataType": "JSON",
+          "pageNo": 0,
+          "numOfRows": 5,
+          "items": {
+            "item": [
+              {
+                "category": "2",
+                "content": "① 법 제84조제1항에서 \"대통령령으로 정하는 것\"이란 다음 각 호의 어느 하나에 해당하는 것을 말한다.\n\t\t1.  다음 각 목의 어느 하나에 해당하는 기계 또는 설비\n\t\t\t가.  프레스\n\t\t\t나.  전단기 및 절곡기(折曲機)\n\t\t\t다.  크레인\n\t\t\t라.  리프트\n\t\t\t마.  압력용기\n\t\t\t바.  롤러기\n\t\t\t사.  사출성형기(射出成形機)\n\t\t\t아.  고소(高所) 작업대\n\t\t\t자.  곤돌라\n\t\t2.  다음 각 목의 어느 하나에 해당하는 방호장치\n\t\t\t가.  프레스 및 전단기 방호장치\n\t\t\t나.  양중기용(揚重機用) 과부하 방지장치\n\t\t\t다.  보일러 압력방출용 안전밸브\n\t\t\t라.  압력용기 압력방출용 안전밸브\n\t\t\t마.  압력용기 압력방출용 파열판\n\t\t\t바.  절연용 방호구 및 활선작업용(活線作業用) 기구\n\t\t\t사.  방폭구조(防爆構造) 전기기계ㆍ기구 및 부품\n\t\t\t아.  추락ㆍ낙하 및 붕괴 등의 위험 방지 및 보호에 필요한 가설기자재로서 고용노동부장관이 정하여 고시하는 것\n\t\t\t자.  충돌ㆍ협착 등의 위험 방지에 필요한 산업용 로봇 방호장치로서 고용노동부장관이 정하여 고시하는 것\n\t\t3.  다음 각 목의 어느 하나에 해당하는 보호구\n\t\t\t가.  추락 및 감전 위험방지용 안전모\n\t\t\t나.  안전화\n\t\t\t다.  안전장갑\n\t\t\t라.  방진마스크\n\t\t\t마.  방독마스크\n\t\t\t바.  송기(送氣)마스크\n\t\t\t사.  전동식 호흡보호구\n\t\t\t아.  보호복\n\t\t\t자.  안전대\n\t\t\t차.  차광(遮光) 및 비산물(飛散物) 위험방지용 보안경\n\t\t\t카.  용접용 보안면\n\t\t\t타.  방음용 귀마개 또는 귀덮개\n② 안전인증대상기계등의 세부적인 종류, 규격 및 형식은 고용노동부장관이 정하여 고시한다.",
+                "doc_id": "KOSHA02_000006000000000000000074000",
+                "highlight_content": "① 법 제84조제1항에서 \"대통령령으로 정하는 것\"이란 다음 각 호의 어느 하나에 해당하는 것을 말한다.\n\t\t1.  다음 각 목의 어느 하나에 해당하는 기계 또는 설비\n\t\t\t가.  프레스\n\t\t\t나.  전단기 및 절곡기(折曲機)\n\t\t\t다.  크레인\n\t\t\t라.  리프트\n\t\t\t마.  압력용기\n\t\t\t바.  롤러기\n\t\t\t사.  사출성형기(射出成形機)\n\t\t\t아.  고소(高所) 작업대\n\t\t\t자.  곤돌라\n\t\t2.  다음 각 목의 어느 하나에 해당하는 방호장치\n\t\t\t가.  프레스 및 전단기 방호장치\n\t\t\t나.  양중기용(揚重機用) 과부하 방지장치\n\t\t\t다.  보일러 압력방출용 안전밸브\n\t\t\t라.  압력용기 압력방출용 안전밸브\n\t\t\t마.  압력용기 압력방출용 파열판\n\t\t\t바.  절연용 방호구 및 활선작업용(活線作業用) 기구\n\t\t\t사.  방폭구조(防爆構造) 전기기계ㆍ기구 및 부품\n\t\t\t아.  추락ㆍ낙하 및 붕괴 등의 위험 방지 및 보호에 필요한 가설기자재로서 고용노동부장관이 정하여 고시하는 것\n\t\t\t자.  충돌ㆍ협착 등의 위험 방지에 필요한 산업용 로봇 방호장치로서 고용노동부장관이 정하여 고시하는 것\n\t\t3.  다음 각 목의 어느 하나에 해당하는 보호구\n\t\t\t가.  <em class='smart'>추락</em> 및 감전 위험방지용 안전모\n\t\t\t나.  안전화\n\t\t\t다.  안전장갑\n\t\t\t라.  방진마스크\n\t\t\t마.  방독마스크\n\t\t\t바.  송기(送氣)마스크\n\t\t\t사.  전동식 호흡보호구\n\t\t\t아.  보호복\n\t\t\t자.  안전대\n\t\t\t차.  차광(遮光) 및 비산물(飛散物) 위험방지용 보안경\n\t\t\t카.  용접용 보안면\n\t\t\t타.  방음용 귀마개 또는 귀덮개\n② 안전인증대상기계등의 세부적인 종류, 규격 및 형식은 고용노동부장관이 정하여 고시한다.",
+                "score": 26.396795,
+                "title": "제74조 안전인증대상기계등"
+              },
+              {
+                "category": "2",
+                "content": "안전보건진단의 종류 및 내용(제46조제1항 관련)                           종류    진단내용                                                    종합진단1. 경영ㆍ관리적 사항에 대한 평가                                      가. 산업재해 예방계획의 적정성                                      나. 안전ㆍ보건 관리조직과 그 직무의 적정성                          다. 산업안전보건위원회 설치ㆍ운영, 명예산업안전감독관의           역할 등 근로자의 참여 정도                                            라. 안전보건관리규정 내용의 적정성                                2. 산업재해 또는 사고의 발생 원인(산업재해 또는 사고가 발           생한 경우만 해당한다)                                               3. 작업조건 및 작업방법에 대한 평가                                 4. 유해ㆍ위험요인에 대한 측정 및 분석                                 가. 기계ㆍ기구 또는 그 밖의 설비에 의한 위험성                      나. 폭발성ㆍ물반응성ㆍ자기반응성ㆍ자기발열성 물질, 자연발         화성 액체ㆍ고체 및 인화성 액체 등에 의한 위험성                       다. 전기ㆍ열 또는 그 밖의 에너지에 의한 위험성                      라. 추락, 붕괴, 낙하, 비래(飛來) 등으로 인한 위험성                 마. 그 밖에 기계ㆍ기구ㆍ설비ㆍ장치ㆍ구축물ㆍ시설물ㆍ원재          료 및 공정 등에 의한 위험성                                           바. 법 제118조제1항에 따른 허가대상물질, 고용노동부령으로         정하는 관리대상 유해물질 및 온도ㆍ습도ㆍ환기ㆍ소음ㆍ                진동ㆍ분진, 유해광선 등의 유해성 또는 위험성                        5. 보호구, 안전ㆍ보건장비 및 작업환경 개선시설의 적정성             6. 유해물질의 사용ㆍ보관ㆍ저장, 물질안전보건자료의 작성, 근         로자 교육 및 경고표시 부착의 적정성                                 7. 그 밖에 작업환경 및 근로자 건강 유지ㆍ증진 등 보건관리           의 개선을 위하여 필요한 사항                                안전진단종합진단 내용 중 제2호ㆍ제3호, 제4호가목부터 마목까지 및            제5호 중 안전 관련 사항                                     보건진단종합진단 내용 중 제2호ㆍ제3호, 제4호바목, 제5호 중 보건 관          련 사항, 제6호 및 제7호",
+                "doc_id": "KOSHA02_[별표 14] 안전보건진단의 종류 및 내용(제46조제1항 관련)",
+                "highlight_content": "안전보건진단의 종류 및 내용(제46조제1항 관련)                           종류    진단내용                                                    종합진단1. 경영ㆍ관리적 사항에 대한 평가                                      가. 산업재해 예방계획의 적정성                                      나. 안전ㆍ보건 관리조직과 그 직무의 적정성                          다. 산업안전보건위원회 설치ㆍ운영, 명예산업안전감독관의           역할 등 근로자의 참여 정도                                            라. 안전보건관리규정 내용의 적정성                                2. 산업재해 또는 사고의 발생 원인(산업재해 또는 사고가 발           생한 경우만 해당한다)                                               3. 작업조건 및 작업방법에 대한 평가                                 4. 유해ㆍ위험요인에 대한 측정 및 분석                                 가. 기계ㆍ기구 또는 그 밖의 설비에 의한 위험성                      나. 폭발성ㆍ물반응성ㆍ자기반응성ㆍ자기발열성 물질, 자연발         화성 액체ㆍ고체 및 인화성 액체 등에 의한 위험성                       다. 전기ㆍ열 또는 그 밖의 에너지에 의한 위험성                      라. <em class='smart'>추락</em>, 붕괴, 낙하, 비래(飛來) 등으로 인한 위험성                 마. 그 밖에 기계ㆍ기구ㆍ설비ㆍ장치ㆍ구축물ㆍ시설물ㆍ원재          료 및 공정 등에 의한 위험성                                           바. 법 제118조제1항에 따른 허가대상물질, 고용노동부령으로         정하는 관리대상 유해물질 및 온도ㆍ습도ㆍ환기ㆍ소음ㆍ                진동ㆍ분진, 유해광선 등의 유해성 또는 위험성                        5. 보호구, 안전ㆍ보건장비 및 작업환경 개선시설의 적정성             6. 유해물질의 사용ㆍ보관ㆍ저장, 물질안전보건자료의 작성, 근         로자 교육 및 경고표시 부착의 적정성                                 7. 그 밖에 작업환경 및 근로자 건강 유지ㆍ증진 등 보건관리           의 개선을 위하여 필요한 사항                                안전진단종합진단 내용 중 제2호ㆍ제3호, 제4호가목부터 마목까지 및            제5호 중 안전 관련 사항                                     보건진단종합진단 내용 중 제2호ㆍ제3호, 제4호바목, 제5호 중 보건 관          련 사항, 제6호 및 제7호",
+                "image_path": [
+                  "/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/산업안전보건법 시행령(별표)/안전보건진단의 종류 및 내용(제46조제1항 관련)(산업안전보건법 시행령)_별표 14_01.png"
+                ],
+                "score": 25.890657,
+                "title": "[별표 14] 안전보건진단의 종류 및 내용(제46조제1항 관련)"
+              },
+              {
+                "category": "3",
+                "content": "안전 및 보건에 관한 평가의 내용(제74조제2항 및 제78조제4항 관련)                                                                                                                  종류    평가항목                                                                    종합평가1. 작업조건 및 작업방법에 대한 평가                                                 2. 유해ㆍ위험요인에 대한 측정 및 분석                                                가. 기계ㆍ기구 또는 그 밖의 설비에 의한 위험성                                      나. 폭발성ㆍ물반응성ㆍ자기반응성ㆍ자기발열성 물질, 자연발화                        성 액체ㆍ고체 및 인화성 액체 등에 의한 위험성                                        다. 전기ㆍ열 또는 그 밖의 에너지에 의한 위험성                                      라. 추락, 붕괴, 낙하, 비래 등으로 인한 위험성                                       마. 그 밖에 기계ㆍ기구ㆍ설비ㆍ장치ㆍ구축물ㆍ시설물ㆍ원재료                         및 공정 등에 의한 위험성                                                             바. 영 제88조에 따른 허가 대상 유해물질, 고용노동부령으로 정                       하는 관리 대상 유해물질 및 온도ㆍ습도ㆍ환기ㆍ소음ㆍ진동                             ㆍ분진, 유해광선 등의 유해성 또는 위험성                                            3. 보호구, 안전ㆍ보건장비 및 작업환경 개선시설의 적정성                             4. 유해물질의 사용ㆍ보관ㆍ저장, 물질안전보건자료의 작성,                            근로자 교육 및 경고표시 부착의 적정성                                                가. 화학물질 안전보건 정보의 제공                                                   나. 수급인 안전보건교육 지원에 관한 사항                                            다. 화학물질 경고표시 부착에 관한 사항 등                                          5. 수급인의 안전보건관리 능력의 적정성                                               가. 안전보건관리체제(안전ㆍ보건관리자, 안전보건관리담당자,                         관리감독자 선임관계 등)                                                              나. 건강검진 현황(신규자는 배치전건강진단 실시여부 확인 등)                         다. 특별안전보건교육 실시 여부 등                                                  6. 그 밖에 작업환경 및 근로자 건강 유지ㆍ증진 등 보건관리                           의 개선을 위하여 필요한 사항                                                안전평가종합평가 항목 중 제1호의 사항, 제2호가목부터 마목까지의 사항,                       제3호 중 안전 관련 사항, 제5호의 사항                                       보건평가종합평가 항목 중 제1호의 사항, 제2호바목의 사항, 제3호 중 보                        건 관련 사항, 제4호ㆍ제5호 및 제6호의 사항                                                                                                                              ※ 비고: 세부 평가항목별로 평가 내용을 작성하고, 최종 의견(‘적정’, ‘조건부 적정’,     ‘부적정’ 등)을 첨부해야 한다.",
+                "doc_id": "KOSHA03_[별표 12] 안전 및 보건에 관한 평가의 내용(제74조제2항 및 제78조제4항 관련)",
+                "highlight_content": "안전 및 보건에 관한 평가의 내용(제74조제2항 및 제78조제4항 관련)                                                                                                                  종류    평가항목                                                                    종합평가1. 작업조건 및 작업방법에 대한 평가                                                 2. 유해ㆍ위험요인에 대한 측정 및 분석                                                가. 기계ㆍ기구 또는 그 밖의 설비에 의한 위험성                                      나. 폭발성ㆍ물반응성ㆍ자기반응성ㆍ자기발열성 물질, 자연발화                        성 액체ㆍ고체 및 인화성 액체 등에 의한 위험성                                        다. 전기ㆍ열 또는 그 밖의 에너지에 의한 위험성                                      라. <em class='smart'>추락</em>, 붕괴, 낙하, 비래 등으로 인한 위험성                                       마. 그 밖에 기계ㆍ기구ㆍ설비ㆍ장치ㆍ구축물ㆍ시설물ㆍ원재료                         및 공정 등에 의한 위험성                                                             바. 영 제88조에 따른 허가 대상 유해물질, 고용노동부령으로 정                       하는 관리 대상 유해물질 및 온도ㆍ습도ㆍ환기ㆍ소음ㆍ진동                             ㆍ분진, 유해광선 등의 유해성 또는 위험성                                            3. 보호구, 안전ㆍ보건장비 및 작업환경 개선시설의 적정성                             4. 유해물질의 사용ㆍ보관ㆍ저장, 물질안전보건자료의 작성,                            근로자 교육 및 경고표시 부착의 적정성                                                가. 화학물질 안전보건 정보의 제공                                                   나. 수급인 안전보건교육 지원에 관한 사항                                            다. 화학물질 경고표시 부착에 관한 사항 등                                          5. 수급인의 안전보건관리 능력의 적정성                                               가. 안전보건관리체제(안전ㆍ보건관리자, 안전보건관리담당자,                         관리감독자 선임관계 등)                                                              나. 건강검진 현황(신규자는 배치전건강진단 실시여부 확인 등)                         다. 특별안전보건교육 실시 여부 등                                                  6. 그 밖에 작업환경 및 근로자 건강 유지ㆍ증진 등 보건관리                           의 개선을 위하여 필요한 사항                                                안전평가종합평가 항목 중 제1호의 사항, 제2호가목부터 마목까지의 사항,                       제3호 중 안전 관련 사항, 제5호의 사항                                       보건평가종합평가 항목 중 제1호의 사항, 제2호바목의 사항, 제3호 중 보                        건 관련 사항, 제4호ㆍ제5호 및 제6호의 사항                                                                                                                              ※ 비고: 세부 평가항목별로 평가 내용을 작성하고, 최종 의견(‘적정’, ‘조건부 적정’,     ‘부적정’ 등)을 첨부해야 한다.",
+                "image_path": [
+                  "/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/산업안전보건법 시행규칙(별표 및 별지)/안전 및 보건에 관한 평가의 내용(제74조제2항 및 제78조제4항 관련)(산업안전보건법 시행규칙)_별표 12_01.png",
+                  "/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/산업안전보건법 시행규칙(별표 및 별지)/안전 및 보건에 관한 평가의 내용(제74조제2항 및 제78조제4항 관련)(산업안전보건법 시행규칙)_별표 12_02.png"
+                ],
+                "score": 26.536213,
+                "title": "[별표 12] 안전 및 보건에 관한 평가의 내용(제74조제2항 및 제78조제4항 관련)"
+              },
+              {
+                "category": "3",
+                "content": "산업재해조사표                                                                                                        접수번호                  접수일자              처리일자                            처리기간    14일            ※ 뒤쪽의 작성방법을 읽고 작성하시기 바라며, [  ]에는 해당하는 곳에 √ 표시를 합니다.               (앞쪽)            Ⅰ.       ①산재관리번호                    사업자등록번호                                                        사업장    (사업개시번호)                                                                                        정보                  ②사업장명                      ③근로자 수                                                                               ④업종                          소재지      (    -    )                                                                   ⑤재해자가 사내 원도급인 사업장명             ⑥재해자가 파견근로자       파견사업주 사업장명                     수급인 소속인 경우                              인 경우                                                             (건설업 제외)                                                    사업장 산재관리번호                                       사업장 산재관리번호                                 (사업개시번호)                                            (사업개시번호)                                      건설업만  발주자                        [  ]민간  [  ]국가ㆍ지방자치단체  [  ]공공기관                        작성                            ⑦원수급 사업장명                공사현장 명                                                                                                                                                 ⑧원수급 사업장 산재                                                                                              관리번호(사업개시번호)                                                                                                                    ⑨공사종류                    공정률                    %       공사금액    백만원     ※ 아래 항목은 재해자별로 각각 작성하되, 같은 재해로 재해자가 여러 명이 발생한 경우에는 별지에 추가로 적습니다.      Ⅱ.       성명            주민등록번호 앞 7자리                                             재해                      (외국인등록번호)          - *   *   *   *   *   *                 정보                                                                                                              주소                                                                휴대전화     -      -                                 국적    [  ]내국인  [  ]외국인 [국적:        ⑩체류자격:         ]  ⑪직업                                                입사일            년     월     일    ⑫같은 종류업무 근속                      년        월                                                        기간                                                                                ⑬고용형태[  ]상용  [  ]임시  [  ]일용  [  ]무급가족종사자  [  ]자영업자  [  ]그 밖의 사항 [        ]                           ⑭근무형태[  ]정상  [  ]2교대  [  ]3교대  [  ]4교대  [  ]시간제  [  ]그 밖의 사항 [           ]                                 ⑮상해종류                  상해부위                          휴업예상          휴업  [    ]일              (질병명)                  (질병부위)                        일수                                                                                                                                                                              사망 여부       [  ] 사망           Ⅲ.           발생일시      [      ]년 [    ]월 [    ]일 [    ]요일 [    ]시 [    ]분                           재해      재해  발생      발생발생장소                                                                                          개요 및   개요  원인          재해관련 작업유형                                                                                                                  재해발생 당시 상황                                                                                                          재해발생원인                                                                                            Ⅳ.                                                                                                                 재발                                                                                                                방지                                                                                                                계획                                                                                                                 ※ 재발방지 계획 이행을 위한 안전보건교육 및 기술지도 등을 한국산업안전보즉시 기술지원 서비스 요청 [  ]              건공단에서 무료로 제공하고 있으니 즉시 기술지원 서비스를 받으려는 경우 오                                            른쪽에 √ 표시를 하시기 바랍니다.                                                                                    ※ 근로복지공단은 재해자의 개인정보를 활용하는 것에 동의하는 사람에 한 산재보험급여 신청방법 안내를 위한           정하여 해당 재해자에게 산재보험급여의 신청방법을 안내하고 있으니 관련   재해자의 개인정보 활용 동의 [  ]            안내를 받으려는 재해자는 오른쪽에 √ 표시를 하시기 바랍니다.                                                        작성자 성명                                                                                                                                                                                                                                 작성자 전화번호                                   작성일               년          월        일                                                                                                                                              사업주                                                       (서명 또는 인)                                                                                                                                                                    근로자대표(재해자)                                        (서명 또는 인)                                           (      )지방고용노동청장(지청장) 귀하                                                                                처리절차                                                                                                                                                                                        신청서  접 수   확인ㆍ검토  결 재                                                               작성                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          신청인                      문서 접수                 산업안전ㆍ보건업무                  지방고용노동청                                          담당부서                  담당부서                            (지청)장                                  재해 분류자 기입란          발생형태              □□□        기인물              □□□□□                      (사업장에서는 적지 않습니다)작업지역ㆍ공정          □□□      작업내용            □□□                                                                                                                                                     (뒤쪽)                                                                                                                           작 성 방 법                                                                                                                           Ⅰ. 사업장 정보                                                                                                                         ①산재관리번호(사업개시번호): 근로복지공단에 산업재해보상보험 가입이 되어 있으면 그 가입번호를 적고 사업장등록번호 기입란에         는 국세청의 사업자등록번호를 적습니다. 다만, 근로복지공단의 산업재해보상보험에 가입이 되어 있지 않은 경우 사업자등록번호만 적         습니다.                                                                                                                                   ※ 산재보험 일괄 적용 사업장은 산재관리번호와 사업개시번호를 모두 적습니다.                                                         ②사업장명 : 재해자가 사업주와 근로계약을 체결하여 실제로 급여를 받는 사업장명을 적습니다. 파견근로자가 재해를 입은 경우에는        실제적으로 지휘ㆍ명령을 받는 사용사업주의 사업장명을 적습니다. [예: 아파트를 건설하는 종합건설업의 하수급 사업장 소속 근로자          가 작업 중 재해를 입은 경우 재해자가 실제로 하수급 사업장의 사업주와 근로계약을 체결하였다면 하수급 사업장명을 적습니다.]               ③근로자 수: 사업장의 최근 근로자 수를 적습니다(정규직, 일용직ㆍ임시직 근로자, 훈련생 등 포함).                                       ④업종: 국가데이터처(www.kostat.go.kr)의 통계분류 항목에서 한국표준산업분류를 참조하여 세세분류(5자리)를 적습니다. 다만, 한국       표준산업분류 세세분류를 알 수 없는 경우 아래와 같이 한국표준산업명과 주요 생산품을 추가로 적습니다.                                       [예: 제철업, 시멘트제조업, 아파트건설업, 공작기계도매업, 일반화물자동차 운송업, 중식음식점업, 건축물 일반청소업 등 ]                ⑤재해자가 사내 수급인 소속인 경우(건설업 제외): 원도급인 사업장명과 산재관리번호(사업개시번호)를 적습니다.                             ※ 원도급인 사업장이 산재보험 일괄 적용 사업장인 경우에는 원도급인 사업장 산재관리번호와 사업개시번호를 모두 적습니다.              ⑥재해자가 파견근로자인 경우: 파견사업주의 사업장명과 산재관리번호(사업개시번호)를 적습니다.                                            ※ 파견사업주의 사업장이 산재보험 일괄 적용 사업장인 경우에는 파견사업주의 사업장 산재관리번호와 사업개시번호를 모두 적습         니다.                                                                                                                                   ⑦원수급 사업장명: 재해자가 소속되거나 관리되고 있는 사업장이 하수급 사업장인 경우에만 적습니다.                                      ⑧원수급 사업장 산재관리번호(사업개시번호): 원수급 사업장이 산재보험 일괄 적용 사업장인 경우에는 원수급 사업장 산재관리번호와       사업개시번호를 모두 적습니다.                                                                                                           ⑨공사 종류, 공정률, 공사금액 : 수급 받은 단위공사에 대한 현황이 아닌 원수급 사업장의 공사 현황을 적습니다.                            가. 공사 종류: 재해 당시 진행 중인 공사 종류를 말합니다. [예: 아파트, 연립주택, 상가, 도로, 공장, 댐, 플랜트시설, 전기공사 등]        나. 공정률: 재해 당시 건설 현장의 공사 진척도로 전체 공정률을 적습니다.(단위공정률이 아님)                                         Ⅱ. 재해자 정보                                                                                                                         ⑩체류자격: 「출입국관리법 시행령」 별표 1에 따른 체류자격(기호)을 적습니다.(예: E-1, E-7, E-9 등)                                    ⑪직업: 국가데이터처(www.kostat.go.kr)의 통계분류 항목에서 한국표준직업분류를 참조하여 세세분류(5자리)를 적습니다. 다만, 한국       표준직업분류 세세분류를 알 수 없는 경우 알고 있는 직업명을 적고, 재해자가 평소 수행하는 주요 업무내용 및 직위를 추가로 적습니         다.                                                                                                                                        [예: 토목감리기술자, 전문간호사, 인사 및 노무사무원, 한식조리사, 철근공, 미장공, 프레스조작원, 선반기조작원, 시내버스 운전       원, 건물내부청소원 등]                                                                                                                  ⑫같은 종류 업무 근속기간: 과거 다른 회사의 경력부터 현직 경력(동일ㆍ유사  업무 근무경력)까지 합하여 적습니다.(질병의 경우 관련     작업근무기간)                                                                                                                           ⑬고용형태: 근로자가 사업장 또는 타인과 명시적 또는 내재적으로 체결한 고용계약 형태를 적습니다.                                        가. 상용: 고용계약기간을 정하지 않았거나 고용계약기간이 1년 이상인 사람                                                               나. 임시: 고용계약기간을 정하여 고용된 사람으로서 고용계약기간이 1개월 이상 1년 미만인 사람                                           다. 일용: 고용계약기간이 1개월 미만인 사람 또는 매일 고용되어 근로의 대가로 일급 또는 일당제 급여를 받고 일하는 사람                  라. 자영업자: 혼자 또는 그 동업자로서 근로자를 고용하지 않은 사람                                                                     마. 무급가족종사자: 사업주의 가족으로 임금을 받지 않는 사람                                                                           바. 그 밖의 사항: 교육ㆍ훈련생 등                                                                                                    ⑭근무형태  : 평소 근로자의 작업 수행시간 등 업무를 수행하는 형태를 적습니다.                                                          가. 정상: 사업장의 정규 업무 개시시각과 종료시각(통상 오전 9시 전후에 출근하여 오후 6시 전후에 퇴근하는 것) 사이에 업무수행하      는 것을 말합니다.                                                                                                                        나. 2교대, 3교대, 4교대: 격일제근무, 같은 작업에 2개조, 3개조, 4개조로 순환하면서 업무수행하는 것을 말합니다.                         다. 시간제 : 가목의 ‘정상’ 근무형태에서 규정하고 있는 주당 근무시간보다 짧은 근로시간 동안 업무수행하는 것을 말합니다.              다. 그 밖의 사항: 고정적인 심야(야간)근무 등을 말합니다.                                                                             ⑮상해종류(질병명): 재해로 발생된 신체적 특성 또는 상해 형태를 적습니다.                                                                 [예: 골절, 절단, 타박상, 찰과상, 중독ㆍ질식, 화상, 감전, 뇌진탕, 고혈압, 뇌졸중, 피부염, 진폐, 수근관증후군 등]                    상해부위(질병부위): 재해로 피해가 발생된 신체 부위를 적습니다.                                                                           [예: 머리, 눈, 목, 어깨, 팔, 손, 손가락, 등, 척추, 몸통, 다리, 발, 발가락, 전신, 신체내부기관(소화ㆍ신경ㆍ순환ㆍ호흡배설) 등]        ※ 상해종류 및 상해부위가 둘 이상이면 상해 정도가 심한 것부터 적습니다.                                                             휴업예상일수: 재해발생일을 제외한 3일 이상의 결근 등으로 회사에 출근하지 못한 일수를 적습니다.(추정 시 의사의 진단 소견을           참조)                                                                                                                                 Ⅲ. 재해발생정보                                                                                                                        재해발생 개요:  재해원인의 상세한 분석이 가능하도록 발생일시[년, 월, 일, 요일, 시(24시 기준), 분], 발생 장소(공정 포함), 재해관     련 작업유형(누가 어떤 기계ㆍ설비를 다루면서 무슨 작업을 하고 있었는지), 재해발생 당시 상황[재해 발생 당시 기계ㆍ설비ㆍ구조물이        나 작업환경 등의 불안전한 상태(예시: 떨어짐, 무너짐 등)와 재해자나 동료 근로자가 어떠한 불안전한 행동(예시: 넘어짐, 까임 등)을        했는지]을 상세히 적습니다.                                                                                                                [작성예시]                                                                                                                                                         발생일시  2013년 5월 30일 금요일 14시 30분                                                                                                                        발생장소  사출성형부 플라스틱 용기 생산 1팀 사출공정에서                                                                                                          재해관련  재해자 000가 사출성형기 2호기에서 플라스틱 용기를 꺼낸 후 금형을 점검하던 중                                              작업유형                                                                                                                                                          재해발생  재해자가 점검중임을 모르던 동료 근로자 000가 사출성형기 조작 스위치를 가동하여 금형 사이                                  당시 상황 에 재해자가 끼어 사망하였음                                                                                                                            재해발생 원인: 재해가 발생한 사업장에서 재해발생 원인을 인적 요인(무의식 행동, 착오, 피로, 연령, 커뮤니케이션 등), 설비적 요        인(기계ㆍ설비의 설계상 결함, 방호장치의 불량, 작업표준화의 부족, 점검ㆍ정비의 부족 등), 작업ㆍ환경적 요인(작업정보의 부적절,          작업자세ㆍ동작의 결함, 작업방법의 부적절, 작업환경 조건의 불량 등), 관리적 요인(관리조직의 결함, 규정ㆍ매뉴얼의 불비ㆍ불철저,         안전교육의 부족, 지도감독의 부족 등)을 적습니다.                                                                                      Ⅳ. 재발방지계획                                                                                                                         \"19. 재해발생 원인\"을 토대로 재발방지 계획을 적습니다.",
+                "doc_id": "KOSHA03_[서식 30] 산업재해조사표",
+                "highlight_content": "산업재해조사표                                                                                                        접수번호                  접수일자              처리일자                            처리기간    14일            ※ 뒤쪽의 작성방법을 읽고 작성하시기 바라며, [  ]에는 해당하는 곳에 √ 표시를 합니다.               (앞쪽)            Ⅰ.       ①산재관리번호                    사업자등록번호                                                        사업장    (사업개시번호)                                                                                        정보                  ②사업장명                      ③근로자 수                                                                               ④업종                          소재지      (    -    )                                                                   ⑤재해자가 사내 원도급인 사업장명             ⑥재해자가 파견근로자       파견사업주 사업장명                     수급인 소속인 경우                              인 경우                                                             (건설업 제외)                                                    사업장 산재관리번호                                       사업장 산재관리번호                                 (사업개시번호)                                            (사업개시번호)                                      건설업만  발주자                        [  ]민간  [  ]국가ㆍ지방자치단체  [  ]공공기관                        작성                            ⑦원수급 사업장명                공사현장 명                                                                                                                                                 ⑧원수급 사업장 산재                                                                                              관리번호(사업개시번호)                                                                                                                    ⑨공사종류                    공정률                    %       공사금액    백만원     ※ 아래 항목은 재해자별로 각각 작성하되, 같은 재해로 재해자가 여러 명이 발생한 경우에는 별지에 추가로 적습니다.      Ⅱ.       성명            주민등록번호 앞 7자리                                             재해                      (외국인등록번호)          - *   *   *   *   *   *                 정보                                                                                                              주소                                                                휴대전화     -      -                                 국적    [  ]내국인  [  ]외국인 [국적:        ⑩체류자격:         ]  ⑪직업                                                입사일            년     월     일    ⑫같은 종류업무 근속                      년        월                                                        기간                                                                                ⑬고용형태[  ]상용  [  ]임시  [  ]일용  [  ]무급가족종사자  [  ]자영업자  [  ]그 밖의 사항 [        ]                           ⑭근무형태[  ]정상  [  ]2교대  [  ]3교대  [  ]4교대  [  ]시간제  [  ]그 밖의 사항 [           ]                                 ⑮상해종류                  상해부위                          휴업예상          휴업  [    ]일              (질병명)                  (질병부위)                        일수                                                                                                                                                                              사망 여부       [  ] 사망           Ⅲ.           발생일시      [      ]년 [    ]월 [    ]일 [    ]요일 [    ]시 [    ]분                           재해      재해  발생      발생발생장소                                                                                          개요 및   개요  원인          재해관련 작업유형                                                                                                                  재해발생 당시 상황                                                                                                          재해발생원인                                                                                            Ⅳ.                                                                                                                 재발                                                                                                                방지                                                                                                                계획                                                                                                                 ※ 재발방지 계획 이행을 위한 안전보건교육 및 기술지도 등을 한국산업안전보즉시 기술지원 서비스 요청 [  ]              건공단에서 무료로 제공하고 있으니 즉시 기술지원 서비스를 받으려는 경우 오                                            른쪽에 √ 표시를 하시기 바랍니다.                                                                                    ※ 근로복지공단은 재해자의 개인정보를 활용하는 것에 동의하는 사람에 한 산재보험급여 신청방법 안내를 위한           정하여 해당 재해자에게 산재보험급여의 신청방법을 안내하고 있으니 관련   재해자의 개인정보 활용 동의 [  ]            안내를 받으려는 재해자는 오른쪽에 √ 표시를 하시기 바랍니다.                                                        작성자 성명                                                                                                                                                                                                                                 작성자 전화번호                                   작성일               년          월        일                                                                                                                                              사업주                                                       (서명 또는 인)                                                                                                                                                                    근로자대표(재해자)                                        (서명 또는 인)                                           (      )지방고용노동청장(지청장) 귀하                                                                                처리절차                                                                                                                                                                                        신청서  접 수   확인ㆍ검토  결 재                                                               작성                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          신청인                      문서 접수                 산업안전ㆍ보건업무                  지방고용노동청                                          담당부서                  담당부서                            (지청)장                                  재해 분류자 기입란          발생형태              □□□        기인물              □□□□□                      (사업장에서는 적지 않습니다)작업지역ㆍ공정          □□□      작업내용            □□□                                                                                                                                                     (뒤쪽)                                                                                                                           작 성 방 법                                                                                                                           Ⅰ. 사업장 정보                                                                                                                         ①산재관리번호(사업개시번호): 근로복지공단에 산업재해보상보험 가입이 되어 있으면 그 가입번호를 적고 사업장등록번호 기입란에         는 국세청의 사업자등록번호를 적습니다. 다만, 근로복지공단의 산업재해보상보험에 가입이 되어 있지 않은 경우 사업자등록번호만 적         습니다.                                                                                                                                   ※ 산재보험 일괄 적용 사업장은 산재관리번호와 사업개시번호를 모두 적습니다.                                                         ②사업장명 : 재해자가 사업주와 근로계약을 체결하여 실제로 급여를 받는 사업장명을 적습니다. 파견근로자가 재해를 입은 경우에는        실제적으로 지휘ㆍ명령을 받는 사용사업주의 사업장명을 적습니다. [예: 아파트를 건설하는 종합건설업의 하수급 사업장 소속 근로자          가 작업 중 재해를 입은 경우 재해자가 실제로 하수급 사업장의 사업주와 근로계약을 체결하였다면 하수급 사업장명을 적습니다.]               ③근로자 수: 사업장의 최근 근로자 수를 적습니다(정규직, 일용직ㆍ임시직 근로자, 훈련생 등 포함).                                       ④업종: 국가데이터처(www.kostat.go.kr)의 통계분류 항목에서 한국표준산업분류를 참조하여 세세분류(5자리)를 적습니다. 다만, 한국       표준산업분류 세세분류를 알 수 없는 경우 아래와 같이 한국표준산업명과 주요 생산품을 추가로 적습니다.                                       [예: 제철업, 시멘트제조업, 아파트건설업, 공작기계도매업, 일반화물자동차 운송업, 중식음식점업, 건축물 일반청소업 등 ]                ⑤재해자가 사내 수급인 소속인 경우(건설업 제외): 원도급인 사업장명과 산재관리번호(사업개시번호)를 적습니다.                             ※ 원도급인 사업장이 산재보험 일괄 적용 사업장인 경우에는 원도급인 사업장 산재관리번호와 사업개시번호를 모두 적습니다.              ⑥재해자가 파견근로자인 경우: 파견사업주의 사업장명과 산재관리번호(사업개시번호)를 적습니다.                                            ※ 파견사업주의 사업장이 산재보험 일괄 적용 사업장인 경우에는 파견사업주의 사업장 산재관리번호와 사업개시번호를 모두 적습         니다.                                                                                                                                   ⑦원수급 사업장명: 재해자가 소속되거나 관리되고 있는 사업장이 하수급 사업장인 경우에만 적습니다.                                      ⑧원수급 사업장 산재관리번호(사업개시번호): 원수급 사업장이 산재보험 일괄 적용 사업장인 경우에는 원수급 사업장 산재관리번호와       사업개시번호를 모두 적습니다.                                                                                                           ⑨공사 종류, 공정률, 공사금액 : 수급 받은 단위공사에 대한 현황이 아닌 원수급 사업장의 공사 현황을 적습니다.                            가. 공사 종류: 재해 당시 진행 중인 공사 종류를 말합니다. [예: 아파트, 연립주택, 상가, 도로, 공장, 댐, 플랜트시설, 전기공사 등]        나. 공정률: 재해 당시 건설 현장의 공사 진척도로 전체 공정률을 적습니다.(단위공정률이 아님)                                         Ⅱ. 재해자 정보                                                                                                                         ⑩체류자격: 「출입국관리법 시행령」 별표 1에 따른 체류자격(기호)을 적습니다.(예: E-1, E-7, E-9 등)                                    ⑪직업: 국가데이터처(www.kostat.go.kr)의 통계분류 항목에서 한국표준직업분류를 참조하여 세세분류(5자리)를 적습니다. 다만, 한국       표준직업분류 세세분류를 알 수 없는 경우 알고 있는 직업명을 적고, 재해자가 평소 수행하는 주요 업무내용 및 직위를 추가로 적습니         다.                                                                                                                                        [예: 토목감리기술자, 전문간호사, 인사 및 노무사무원, 한식조리사, 철근공, 미장공, 프레스조작원, 선반기조작원, 시내버스 운전       원, 건물내부청소원 등]                                                                                                                  ⑫같은 종류 업무 근속기간: 과거 다른 회사의 경력부터 현직 경력(동일ㆍ유사  업무 근무경력)까지 합하여 적습니다.(질병의 경우 관련     작업근무기간)                                                                                                                           ⑬고용형태: 근로자가 사업장 또는 타인과 명시적 또는 내재적으로 체결한 고용계약 형태를 적습니다.                                        가. 상용: 고용계약기간을 정하지 않았거나 고용계약기간이 1년 이상인 사람                                                               나. 임시: 고용계약기간을 정하여 고용된 사람으로서 고용계약기간이 1개월 이상 1년 미만인 사람                                           다. 일용: 고용계약기간이 1개월 미만인 사람 또는 매일 고용되어 근로의 대가로 일급 또는 일당제 급여를 받고 일하는 사람                  라. 자영업자: 혼자 또는 그 동업자로서 근로자를 고용하지 않은 사람                                                                     마. 무급가족종사자: 사업주의 가족으로 임금을 받지 않는 사람                                                                           바. 그 밖의 사항: 교육ㆍ훈련생 등                                                                                                    ⑭근무형태  : 평소 근로자의 작업 수행시간 등 업무를 수행하는 형태를 적습니다.                                                          가. 정상: 사업장의 정규 업무 개시시각과 종료시각(통상 오전 9시 전후에 출근하여 오후 6시 전후에 퇴근하는 것) 사이에 업무수행하      는 것을 말합니다.                                                                                                                        나. 2교대, 3교대, 4교대: 격일제근무, 같은 작업에 2개조, 3개조, 4개조로 순환하면서 업무수행하는 것을 말합니다.                         다. 시간제 : 가목의 ‘정상’ 근무형태에서 규정하고 있는 주당 근무시간보다 짧은 근로시간 동안 업무수행하는 것을 말합니다.              다. 그 밖의 사항: 고정적인 심야(야간)근무 등을 말합니다.                                                                             ⑮상해종류(질병명): 재해로 발생된 신체적 특성 또는 상해 형태를 적습니다.                                                                 [예: 골절, 절단, 타박상, 찰과상, 중독ㆍ질식, 화상, 감전, 뇌진탕, 고혈압, 뇌졸중, 피부염, 진폐, 수근관증후군 등]                    상해부위(질병부위): 재해로 피해가 발생된 신체 부위를 적습니다.                                                                           [예: 머리, 눈, 목, 어깨, 팔, 손, 손가락, 등, 척추, 몸통, 다리, 발, 발가락, 전신, 신체내부기관(소화ㆍ신경ㆍ순환ㆍ호흡배설) 등]        ※ 상해종류 및 상해부위가 둘 이상이면 상해 정도가 심한 것부터 적습니다.                                                             휴업예상일수: 재해발생일을 제외한 3일 이상의 결근 등으로 회사에 출근하지 못한 일수를 적습니다.(추정 시 의사의 진단 소견을           참조)                                                                                                                                 Ⅲ. 재해발생정보                                                                                                                        재해발생 개요:  재해원인의 상세한 분석이 가능하도록 발생일시[년, 월, 일, 요일, 시(24시 기준), 분], 발생 장소(공정 포함), 재해관     련 작업유형(누가 어떤 기계ㆍ설비를 다루면서 무슨 작업을 하고 있었는지), 재해발생 당시 상황[재해 발생 당시 기계ㆍ설비ㆍ구조물이        나 작업환경 등의 불안전한 상태(예시: <em class='smart'>떨어짐</em>, 무너짐 등)와 재해자나 동료 근로자가 어떠한 불안전한 행동(예시: 넘어짐, 까임 등)을        했는지]을 상세히 적습니다.                                                                                                                [작성예시]                                                                                                                                                         발생일시  2013년 5월 30일 금요일 14시 30분                                                                                                                        발생장소  사출성형부 플라스틱 용기 생산 1팀 사출공정에서                                                                                                          재해관련  재해자 000가 사출성형기 2호기에서 플라스틱 용기를 꺼낸 후 금형을 점검하던 중                                              작업유형                                                                                                                                                          재해발생  재해자가 점검중임을 모르던 동료 근로자 000가 사출성형기 조작 스위치를 가동하여 금형 사이                                  당시 상황 에 재해자가 끼어 사망하였음                                                                                                                            재해발생 원인: 재해가 발생한 사업장에서 재해발생 원인을 인적 요인(무의식 행동, 착오, 피로, 연령, 커뮤니케이션 등), 설비적 요        인(기계ㆍ설비의 설계상 결함, 방호장치의 불량, 작업표준화의 부족, 점검ㆍ정비의 부족 등), 작업ㆍ환경적 요인(작업정보의 부적절,          작업자세ㆍ동작의 결함, 작업방법의 부적절, 작업환경 조건의 불량 등), 관리적 요인(관리조직의 결함, 규정ㆍ매뉴얼의 불비ㆍ불철저,         안전교육의 부족, 지도감독의 부족 등)을 적습니다.                                                                                      Ⅳ. 재발방지계획                                                                                                                         \"19. 재해발생 원인\"을 토대로 재발방지 계획을 적습니다.",
+                "image_path": [
+                  "/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/산업안전보건법 시행규칙(별표 및 별지)/산업재해조사표(산업안전보건법 시행규칙)_서식 30_01.png",
+                  "/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/산업안전보건법 시행규칙(별표 및 별지)/산업재해조사표(산업안전보건법 시행규칙)_서식 30_02.png"
+                ],
+                "score": 13.371039,
+                "title": "[서식 30] 산업재해조사표"
+              },
+              {
+                "category": "4",
+                "content": "사업주는 교량에서 궤도와 그 밖의 관련 설비의 보수ㆍ점검 등의 작업을 하는 경우에 추락 위험을 방지할 수 있도록 안전난간 또는 안전망을 설치하거나 안전대를 지급하여 착용하게 하여야 한다.",
+                "doc_id": "KOSHA04_002000008000004000000000418000",
+                "highlight_content": "사업주는 교량에서 궤도와 그 밖의 관련 설비의 보수ㆍ점검 등의 작업을 하는 경우에 <em class='smart'>추락</em> 위험을 방지할 수 있도록 안전난간 또는 안전망을 설치하거나 안전대를 지급하여 착용하게 하여야 한다.",
+                "score": 82.37949,
+                "title": "제418조 교량에서의 추락 방지"
+              },
+              {
+                "category": "4",
+                "content": "① 사업주는 크레인을 사용하여 근로자를 운반하거나 근로자를 달아 올린 상태에서 작업에 종사시켜서는 아니 된다. 다만, 크레인에 전용 탑승설비를 설치하고 추락 위험을 방지하기 위하여 다음 각 호의 조치를 한 경우에는 그러하지 아니하다.\n\t\t1.  탑승설비가 뒤집히거나 떨어지지 않도록 필요한 조치를 할 것\n\t\t2.  안전대나 구명줄을 설치하고, 안전난간을 설치할 수 있는 구조인 경우에는 안전난간을 설치할 것\n\t\t3.  탑승설비를 하강시킬 때에는 동력하강방법으로 할 것\n② 사업주는 이동식 크레인을 사용하여 근로자를 운반하거나 근로자를 달아 올린 상태에서 작업에 종사시켜서는 안 된다. 다만, 작업 장소의 구조, 지형 등으로 고소작업대를 사용하기가 곤란하여 이동식 크레인 중 기중기를 한국산업표준에서 정하는 안전기준에 따라 사용하는 경우는 제외한다. <개정 2022.10.18>\n③ 사업주는 내부에 비상정지장치ㆍ조작스위치 등 탑승조작장치가 설치되어 있지 아니한 리프트의 운반구에 근로자를 탑승시켜서는 아니 된다. 다만, 리프트의 수리ㆍ조정 및 점검 등의 작업을 하는 경우로서 그 작업에 종사하는 근로자가 추락할 위험이 없도록 조치를 한 경우에는 그러하지 아니하다.\n④ 사업주는 자동차정비용 리프트에 근로자를 탑승시켜서는 아니 된다. 다만, 자동차정비용 리프트의 수리ㆍ조정 및 점검 등의 작업을 할 때에 그 작업에 종사하는 근로자가 위험해질 우려가 없도록 조치한 경우에는 그러하지 아니하다. <개정 2019.4.19>\n⑤ 사업주는 곤돌라의 운반구에 근로자를 탑승시켜서는 아니 된다. 다만, 추락 위험을 방지하기 위하여 다음 각 호의 조치를 한 경우에는 그러하지 아니하다.\n\t\t1.  운반구가 뒤집히거나 떨어지지 않도록 필요한 조치를 할 것\n\t\t2.  안전대나 구명줄을 설치하고, 안전난간을 설치할 수 있는 구조인 경우이면 안전난간을 설치할 것\n⑥ 사업주는 소형화물용 엘리베이터에 근로자를 탑승시켜서는 아니 된다. 다만, 소형화물용 엘리베이터의 수리ㆍ조정 및 점검 등의 작업을 하는 경우에는 그러하지 아니하다. <개정 2019.4.19>\n⑦ 사업주는 차량계 하역운반기계(화물자동차는 제외한다)를 사용하여 작업을 하는 경우 승차석이 아닌 위치에 근로자를 탑승시켜서는 아니 된다. 다만, 추락 등의 위험을 방지하기 위한 조치를 한 경우에는 그러하지 아니하다.\n⑧ 사업주는 화물자동차 적재함에 근로자를 탑승시켜서는 아니 된다. 다만, 화물자동차에 울 등을 설치하여 추락을 방지하는 조치를 한 경우에는 그러하지 아니하다.\n⑨ 사업주는 운전 중인 컨베이어 등에 근로자를 탑승시켜서는 아니 된다. 다만, 근로자를 운반할 수 있는 구조를 갖춘 컨베이어 등으로서 추락ㆍ접촉 등에 의한 위험을 방지할 수 있는 조치를 한 경우에는 그러하지 아니하다.\n⑩ 사업주는 이삿짐운반용 리프트 운반구에 근로자를 탑승시켜서는 아니 된다. 다만, 이삿짐운반용 리프트의 수리ㆍ조정 및 점검 등의 작업을 할 때에 그 작업에 종사하는 근로자가 추락할 위험이 없도록 조치한 경우에는 그러하지 아니하다.\n⑪ 사업주는 전조등, 제동등, 후미등, 후사경 또는 제동장치가 정상적으로 작동되지 아니하는 이륜자동차(「자동차관리법」 제3조제1항제5호에 따른 이륜자동차를 말한다. 이하 같다)에 근로자를 탑승시켜서는 아니 된다. <신설 2017.3.3, 2024.6.28>",
+                "doc_id": "KOSHA04_002000001000001000000000086000",
+                "highlight_content": "① 사업주는 크레인을 사용하여 근로자를 운반하거나 근로자를 달아 올린 상태에서 작업에 종사시켜서는 아니 된다. 다만, 크레인에 전용 탑승설비를 설치하고 <em class='smart'>추락</em> 위험을 방지하기 위하여 다음 각 호의 조치를 한 경우에는 그러하지 아니하다.\n\t\t1.  탑승설비가 뒤집히거나 떨어지지 않도록 필요한 조치를 할 것\n\t\t2.  안전대나 구명줄을 설치하고, 안전난간을 설치할 수 있는 구조인 경우에는 안전난간을 설치할 것\n\t\t3.  탑승설비를 하강시킬 때에는 동력하강방법으로 할 것\n② 사업주는 이동식 크레인을 사용하여 근로자를 운반하거나 근로자를 달아 올린 상태에서 작업에 종사시켜서는 안 된다. 다만, 작업 장소의 구조, 지형 등으로 고소작업대를 사용하기가 곤란하여 이동식 크레인 중 기중기를 한국산업표준에서 정하는 안전기준에 따라 사용하는 경우는 제외한다. <개정 2022.10.18>\n③ 사업주는 내부에 비상정지장치ㆍ조작스위치 등 탑승조작장치가 설치되어 있지 아니한 리프트의 운반구에 근로자를 탑승시켜서는 아니 된다. 다만, 리프트의 수리ㆍ조정 및 점검 등의 작업을 하는 경우로서 그 작업에 종사하는 근로자가 추락할 위험이 없도록 조치를 한 경우에는 그러하지 아니하다.\n④ 사업주는 자동차정비용 리프트에 근로자를 탑승시켜서는 아니 된다. 다만, 자동차정비용 리프트의 수리ㆍ조정 및 점검 등의 작업을 할 때에 그 작업에 종사하는 근로자가 위험해질 우려가 없도록 조치한 경우에는 그러하지 아니하다. <개정 2019.4.19>\n⑤ 사업주는 곤돌라의 운반구에 근로자를 탑승시켜서는 아니 된다. 다만, <em class='smart'>추락</em> 위험을 방지하기 위하여 다음 각 호의 조치를 한 경우에는 그러하지 아니하다.\n\t\t1.  운반구가 뒤집히거나 떨어지지 않도록 필요한 조치를 할 것\n\t\t2.  안전대나 구명줄을 설치하고, 안전난간을 설치할 수 있는 구조인 경우이면 안전난간을 설치할 것\n⑥ 사업주는 소형화물용 엘리베이터에 근로자를 탑승시켜서는 아니 된다. 다만, 소형화물용 엘리베이터의 수리ㆍ조정 및 점검 등의 작업을 하는 경우에는 그러하지 아니하다. <개정 2019.4.19>\n⑦ 사업주는 차량계 하역운반기계(화물자동차는 제외한다)를 사용하여 작업을 하는 경우 승차석이 아닌 위치에 근로자를 탑승시켜서는 아니 된다. 다만, <em class='smart'>추락</em> 등의 위험을 방지하기 위한 조치를 한 경우에는 그러하지 아니하다.\n⑧ 사업주는 화물자동차 적재함에 근로자를 탑승시켜서는 아니 된다. 다만, 화물자동차에 울 등을 설치하여 추락을 방지하는 조치를 한 경우에는 그러하지 아니하다.\n⑨ 사업주는 운전 중인 컨베이어 등에 근로자를 탑승시켜서는 아니 된다. 다만, 근로자를 운반할 수 있는 구조를 갖춘 컨베이어 등으로서 추락ㆍ접촉 등에 의한 위험을 방지할 수 있는 조치를 한 경우에는 그러하지 아니하다.\n⑩ 사업주는 이삿짐운반용 리프트 운반구에 근로자를 탑승시켜서는 아니 된다. 다만, 이삿짐운반용 리프트의 수리ㆍ조정 및 점검 등의 작업을 할 때에 그 작업에 종사하는 근로자가 추락할 위험이 없도록 조치한 경우에는 그러하지 아니하다.\n⑪ 사업주는 전조등, 제동등, 후미등, 후사경 또는 제동장치가 정상적으로 작동되지 아니하는 이륜자동차(「자동차관리법」 제3조제1항제5호에 따른 이륜자동차를 말한다. 이하 같다)에 근로자를 탑승시켜서는 아니 된다. <신설 2017.3.3, 2024.6.28>",
+                "score": 33.115337,
+                "title": "제86조 탑승의 제한"
+              },
+              {
+                "category": "4",
+                "content": "① 사업주는 근로자가 지붕 위에서 작업을 할 때에 추락하거나 넘어질 위험이 있는 경우에는 다음 각 호의 조치를 해야 한다.\n\t\t1.  지붕의 가장자리에 제13조에 따른 안전난간을 설치할 것\n\t\t2.  채광창(skylight)에는 견고한 구조의 덮개를 설치할 것\n\t\t3.  슬레이트 등 강도가 약한 재료로 덮은 지붕에는 폭 30센티미터 이상의 발판을 설치할 것\n② 사업주는 작업 환경 등을 고려할 때 제1항제1호에 따른 조치를 하기 곤란한 경우에는 제42조제2항 각 호의 기준을 갖춘 추락방호망을 설치해야 한다. 다만, 사업주는 작업 환경 등을 고려할 때 추락방호망을 설치하기 곤란한 경우에는 근로자에게 안전대를 착용하도록 하는 등 추락 위험을 방지하기 위하여 필요한 조치를 해야 한다.",
+                "doc_id": "KOSHA04_001000006000001000000000045000",
+                "highlight_content": "① 사업주는 근로자가 지붕 위에서 작업을 할 때에 추락하거나 넘어질 위험이 있는 경우에는 다음 각 호의 조치를 해야 한다.\n\t\t1.  지붕의 가장자리에 제13조에 따른 안전난간을 설치할 것\n\t\t2.  채광창(skylight)에는 견고한 구조의 덮개를 설치할 것\n\t\t3.  슬레이트 등 강도가 약한 재료로 덮은 지붕에는 폭 30센티미터 이상의 발판을 설치할 것\n② 사업주는 작업 환경 등을 고려할 때 제1항제1호에 따른 조치를 하기 곤란한 경우에는 제42조제2항 각 호의 기준을 갖춘 추락방호망을 설치해야 한다. 다만, 사업주는 작업 환경 등을 고려할 때 추락방호망을 설치하기 곤란한 경우에는 근로자에게 안전대를 착용하도록 하는 등 <em class='smart'>추락</em> 위험을 방지하기 위하여 필요한 조치를 해야 한다.",
+                "score": 31.473263,
+                "title": "제45조 지붕 위에서의 위험 방지"
+              },
+              {
+                "category": "4",
+                "content": "① 사업주는 열차 운행 중에 열차를 점검ㆍ수리하거나 그 밖에 이와 유사한 작업을 할 때에 열차에 의하여 근로자에게 접촉ㆍ충돌ㆍ감전 또는 추락 등의 위험이 발생할 우려가 있는 경우에는 다음 각 호의 조치를 하여야 한다. <개정 2019.1.31>\n\t\t1.  열차의 운전이 정지된 후 작업을 하도록 하고, 점검 등의 작업 완료 후 열차 운전을 시작하기 전에 반드시 작업자와 신호하여 접촉위험이 없음을 확인하고 운전을 재개하도록 할 것\n\t\t2.  열차의 유동 방지를 위하여 차바퀴막이 등 필요한 조치를 할 것\n\t\t3.  노출된 열차충전부에 잔류전하 방전조치를 하거나 근로자에게 절연보호구를 지급하여 착용하도록 할 것\n\t\t4.  열차의 상판에서 작업을 하는 경우에는 그 주변에 작업발판 또는 안전매트를 설치할 것\n② 열차의 정기적인 점검ㆍ정비 등의 작업은 지정된 정비차고지 또는 열차에 근로자가 끼이거나 열차와 근로자가 충돌할 위험이 없는 유치선(留置線) 등의 장소에서 하여야 한다.",
+                "doc_id": "KOSHA04_002000008000001000000000409000",
+                "highlight_content": "① 사업주는 열차 운행 중에 열차를 점검ㆍ수리하거나 그 밖에 이와 유사한 작업을 할 때에 열차에 의하여 근로자에게 접촉ㆍ충돌ㆍ감전 또는 <em class='smart'>추락</em> 등의 위험이 발생할 우려가 있는 경우에는 다음 각 호의 조치를 하여야 한다. <개정 2019.1.31>\n\t\t1.  열차의 운전이 정지된 후 작업을 하도록 하고, 점검 등의 작업 완료 후 열차 운전을 시작하기 전에 반드시 작업자와 신호하여 접촉위험이 없음을 확인하고 운전을 재개하도록 할 것\n\t\t2.  열차의 유동 방지를 위하여 차바퀴막이 등 필요한 조치를 할 것\n\t\t3.  노출된 열차충전부에 잔류전하 방전조치를 하거나 근로자에게 절연보호구를 지급하여 착용하도록 할 것\n\t\t4.  열차의 상판에서 작업을 하는 경우에는 그 주변에 작업발판 또는 안전매트를 설치할 것\n② 열차의 정기적인 점검ㆍ정비 등의 작업은 지정된 정비차고지 또는 열차에 근로자가 끼이거나 열차와 근로자가 충돌할 위험이 없는 유치선(留置線) 등의 장소에서 하여야 한다.",
+                "score": 27.96841,
+                "title": "제409조 열차의 점검ㆍ수리 등"
+              },
+              {
+                "category": "4",
+                "content": "① 사업주는 곤돌라형 달비계를 설치하는 경우에는 다음 각 호의 사항을 준수해야 한다. <개정 2021.11.19>\n\t\t1.  다음 각 목의 어느 하나에 해당하는 와이어로프를 달비계에 사용해서는 아니 된다.\n\t\t\t가.  이음매가 있는 것\n\t\t\t나.  와이어로프의 한 꼬임[(스트랜드(strand)를 말한다. 이하 같다)]에서 끊어진 소선(素線)[필러(pillar)선은 제외한다)]의 수가 10퍼센트 이상(비자전로프의 경우에는 끊어진 소선의 수가 와이어로프 호칭지름의 6배 길이 이내에서 4개 이상이거나 호칭지름 30배 길이 이내에서 8개 이상)인 것\n\t\t\t다.  지름의 감소가 공칭지름의 7퍼센트를 초과하는 것\n\t\t\t라.  꼬인 것\n\t\t\t마.  심하게 변형되거나 부식된 것\n\t\t\t바.  열과 전기충격에 의해 손상된 것\n\t\t2.  다음 각 목의 어느 하나에 해당하는 달기 체인을 달비계에 사용해서는 아니 된다.\n\t\t\t가.  달기 체인의 길이가 달기 체인이 제조된 때의 길이의 5퍼센트를 초과한 것\n\t\t\t나.  링의 단면지름이 달기 체인이 제조된 때의 해당 링의 지름의 10퍼센트를 초과하여 감소한 것\n\t\t\t다.  균열이 있거나 심하게 변형된 것\n\t\t3.  삭제 <2021.11.19>\n\t\t4.  달기 강선 및 달기 강대는 심하게 손상ㆍ변형 또는 부식된 것을 사용하지 않도록 할 것\n\t\t5.  달기 와이어로프, 달기 체인, 달기 강선, 달기 강대는 한쪽 끝을 비계의 보 등에, 다른 쪽 끝을 내민 보, 앵커볼트 또는 건축물의 보 등에 각각 풀리지 않도록 설치할 것\n\t\t6.  작업발판은 폭을 40센티미터 이상으로 하고 틈새가 없도록 할 것\n\t\t7.  작업발판의 재료는 뒤집히거나 떨어지지 않도록 비계의 보 등에 연결하거나 고정시킬 것\n\t\t8.  비계가 흔들리거나 뒤집히는 것을 방지하기 위하여 비계의 보ㆍ작업발판 등에 버팀을 설치하는 등 필요한 조치를 할 것\n\t\t9.  선반 비계에서는 보의 접속부 및 교차부를 철선ㆍ이음철물 등을 사용하여 확실하게 접속시키거나 단단하게 연결시킬 것\n\t\t10.  근로자의 추락 위험을 방지하기 위하여 다음 각 목의 조치를 할 것\n\t\t\t가.  달비계에 구명줄을 설치할 것\n\t\t\t나.  근로자에게 안전대를 착용하도록 하고 근로자가 착용한 안전줄을 달비계의 구명줄에 체결(締結)하도록 할 것\n\t\t\t다.  달비계에 안전난간을 설치할 수 있는 구조인 경우에는 달비계에 안전난간을 설치할 것\n② 사업주는 작업의자형 달비계를 설치하는 경우에는 다음 각 호의 사항을 준수해야 한다. <신설 2021.11.19>\n\t\t1.  달비계의 작업대는 나무 등 근로자의 하중을 견딜 수 있는 강도의 재료를 사용하여 견고한 구조로 제작할 것\n\t\t2.  작업대의 4개 모서리에 로프를 매달아 작업대가 뒤집히거나 떨어지지 않도록 연결할 것\n\t\t3.  작업용 섬유로프는 콘크리트에 매립된 고리, 건축물의 콘크리트 또는 철재 구조물 등 2개 이상의 견고한 고정점에 풀리지 않도록 결속(結束)할 것\n\t\t4.  작업용 섬유로프와 구명줄은 다른 고정점에 결속되도록 할 것\n\t\t5.  작업하는 근로자의 하중을 견딜 수 있을 정도의 강도를 가진 작업용 섬유로프, 구명줄 및 고정점을 사용할 것\n\t\t6.  근로자가 작업용 섬유로프에 작업대를 연결하여 하강하는 방법으로 작업을 하는 경우 근로자의 조종 없이는 작업대가 하강하지 않도록 할 것\n\t\t7.  작업용 섬유로프 또는 구명줄이 결속된 고정점의 로프는 다른 사람이 풀지 못하게 하고 작업 중임을 알리는 경고표지를 부착할 것\n\t\t8.  작업용 섬유로프와 구명줄이 건물이나 구조물의 끝부분, 날카로운 물체 등에 의하여 절단되거나 마모(磨耗)될 우려가 있는 경우에는 로프에 이를 방지할 수 있는 보호 덮개를 씌우는 등의 조치를 할 것\n\t\t9.  달비계에 다음 각 목의 작업용 섬유로프 또는 안전대의 섬유벨트를 사용하지 않을 것\n\t\t\t가.  꼬임이 끊어진 것\n\t\t\t나.  심하게 손상되거나 부식된 것\n\t\t\t다.  2개 이상의 작업용 섬유로프 또는 섬유벨트를 연결한 것\n\t\t\t라.  작업높이보다 길이가 짧은 것\n\t\t10.  근로자의 추락 위험을 방지하기 위하여 다음 각 목의 조치를 할 것\n\t\t\t가.  달비계에 구명줄을 설치할 것\n\t\t\t나.  근로자에게 안전대를 착용하도록 하고 근로자가 착용한 안전줄을 달비계의 구명줄에 체결(締結)하도록 할 것",
+                "doc_id": "KOSHA04_001000007000004000000000063000",
+                "highlight_content": "① 사업주는 곤돌라형 달비계를 설치하는 경우에는 다음 각 호의 사항을 준수해야 한다. <개정 2021.11.19>\n\t\t1.  다음 각 목의 어느 하나에 해당하는 와이어로프를 달비계에 사용해서는 아니 된다.\n\t\t\t가.  이음매가 있는 것\n\t\t\t나.  와이어로프의 한 꼬임[(스트랜드(strand)를 말한다. 이하 같다)]에서 끊어진 소선(素線)[필러(pillar)선은 제외한다)]의 수가 10퍼센트 이상(비자전로프의 경우에는 끊어진 소선의 수가 와이어로프 호칭지름의 6배 길이 이내에서 4개 이상이거나 호칭지름 30배 길이 이내에서 8개 이상)인 것\n\t\t\t다.  지름의 감소가 공칭지름의 7퍼센트를 초과하는 것\n\t\t\t라.  꼬인 것\n\t\t\t마.  심하게 변형되거나 부식된 것\n\t\t\t바.  열과 전기충격에 의해 손상된 것\n\t\t2.  다음 각 목의 어느 하나에 해당하는 달기 체인을 달비계에 사용해서는 아니 된다.\n\t\t\t가.  달기 체인의 길이가 달기 체인이 제조된 때의 길이의 5퍼센트를 초과한 것\n\t\t\t나.  링의 단면지름이 달기 체인이 제조된 때의 해당 링의 지름의 10퍼센트를 초과하여 감소한 것\n\t\t\t다.  균열이 있거나 심하게 변형된 것\n\t\t3.  삭제 <2021.11.19>\n\t\t4.  달기 강선 및 달기 강대는 심하게 손상ㆍ변형 또는 부식된 것을 사용하지 않도록 할 것\n\t\t5.  달기 와이어로프, 달기 체인, 달기 강선, 달기 강대는 한쪽 끝을 비계의 보 등에, 다른 쪽 끝을 내민 보, 앵커볼트 또는 건축물의 보 등에 각각 풀리지 않도록 설치할 것\n\t\t6.  작업발판은 폭을 40센티미터 이상으로 하고 틈새가 없도록 할 것\n\t\t7.  작업발판의 재료는 뒤집히거나 떨어지지 않도록 비계의 보 등에 연결하거나 고정시킬 것\n\t\t8.  비계가 흔들리거나 뒤집히는 것을 방지하기 위하여 비계의 보ㆍ작업발판 등에 버팀을 설치하는 등 필요한 조치를 할 것\n\t\t9.  선반 비계에서는 보의 접속부 및 교차부를 철선ㆍ이음철물 등을 사용하여 확실하게 접속시키거나 단단하게 연결시킬 것\n\t\t10.  근로자의 <em class='smart'>추락</em> 위험을 방지하기 위하여 다음 각 목의 조치를 할 것\n\t\t\t가.  달비계에 구명줄을 설치할 것\n\t\t\t나.  근로자에게 안전대를 착용하도록 하고 근로자가 착용한 안전줄을 달비계의 구명줄에 체결(締結)하도록 할 것\n\t\t\t다.  달비계에 안전난간을 설치할 수 있는 구조인 경우에는 달비계에 안전난간을 설치할 것\n② 사업주는 작업의자형 달비계를 설치하는 경우에는 다음 각 호의 사항을 준수해야 한다. <신설 2021.11.19>\n\t\t1.  달비계의 작업대는 나무 등 근로자의 하중을 견딜 수 있는 강도의 재료를 사용하여 견고한 구조로 제작할 것\n\t\t2.  작업대의 4개 모서리에 로프를 매달아 작업대가 뒤집히거나 떨어지지 않도록 연결할 것\n\t\t3.  작업용 섬유로프는 콘크리트에 매립된 고리, 건축물의 콘크리트 또는 철재 구조물 등 2개 이상의 견고한 고정점에 풀리지 않도록 결속(結束)할 것\n\t\t4.  작업용 섬유로프와 구명줄은 다른 고정점에 결속되도록 할 것\n\t\t5.  작업하는 근로자의 하중을 견딜 수 있을 정도의 강도를 가진 작업용 섬유로프, 구명줄 및 고정점을 사용할 것\n\t\t6.  근로자가 작업용 섬유로프에 작업대를 연결하여 하강하는 방법으로 작업을 하는 경우 근로자의 조종 없이는 작업대가 하강하지 않도록 할 것\n\t\t7.  작업용 섬유로프 또는 구명줄이 결속된 고정점의 로프는 다른 사람이 풀지 못하게 하고 작업 중임을 알리는 경고표지를 부착할 것\n\t\t8.  작업용 섬유로프와 구명줄이 건물이나 구조물의 끝부분, 날카로운 물체 등에 의하여 절단되거나 마모(磨耗)될 우려가 있는 경우에는 로프에 이를 방지할 수 있는 보호 덮개를 씌우는 등의 조치를 할 것\n\t\t9.  달비계에 다음 각 목의 작업용 섬유로프 또는 안전대의 섬유벨트를 사용하지 않을 것\n\t\t\t가.  꼬임이 끊어진 것\n\t\t\t나.  심하게 손상되거나 부식된 것\n\t\t\t다.  2개 이상의 작업용 섬유로프 또는 섬유벨트를 연결한 것\n\t\t\t라.  작업높이보다 길이가 짧은 것\n\t\t10.  근로자의 <em class='smart'>추락</em> 위험을 방지하기 위하여 다음 각 목의 조치를 할 것\n\t\t\t가.  달비계에 구명줄을 설치할 것\n\t\t\t나.  근로자에게 안전대를 착용하도록 하고 근로자가 착용한 안전줄을 달비계의 구명줄에 체결(締結)하도록 할 것",
+                "score": 25.304129,
+                "title": "제63조 달비계의 구조"
+              },
+              {
+                "category": "5",
+                "content": "이 고시는 「산업안전보건법」제13조에 따라 추락 재해방지를 위하여 사용되는 방망, 안전대, 지지로우프,  표준안전난간의 설치 및 관리에 관하여 사업주에게 지도·권고할 기술상의  지침을 규정함을 목적으로 한다.",
+                "doc_id": "KOSHA05_추락재해방지표준안전작업지침000000001000000000000000000000001000",
+                "highlight_content": "이 고시는 「산업안전보건법」제13조에 따라 <em class='smart'>추락</em> 재해방지를 위하여 사용되는 방망, 안전대, 지지로우프,  표준안전난간의 설치 및 관리에 관하여 사업주에게 지도·권고할 기술상의  지침을 규정함을 목적으로 한다.",
+                "score": 35.874733,
+                "title": "추락재해방지표준안전작업지침 제1조 목적"
+              },
+              {
+                "category": "5",
+                "content": "비계 및 작업발판을 설치할 때는 다음 각 호의 사항을 준수하여야 한다.  1. 달비계등 전면에 걸쳐 설치하는 전면비계는 추락 방지용 방망을 연결 설치하여 사용해야 한다.  2. 달기틀 및 달비계용 달기체인은 \"가설기자재 성능검정규격\"에 적합한 것이어야 한다.",
+                "doc_id": "KOSHA05_철골공사표준안전작업지침000000005000000000000000000000013000",
+                "highlight_content": "비계 및 작업발판을 설치할 때는 다음 각 호의 사항을 준수하여야 한다.  1. 달비계등 전면에 걸쳐 설치하는 전면비계는 <em class='smart'>추락</em> 방지용 방망을 연결 설치하여 사용해야 한다.  2. 달기틀 및 달비계용 달기체인은 \"가설기자재 성능검정규격\"에 적합한 것이어야 한다.",
+                "score": 34.81495,
+                "title": "철골공사표준안전작업지침 제13조 비계"
+              },
+              {
+                "category": "5",
+                "content": "① 용광로, 열풍로, 송풍기, 주선 설비, 제진기 및 가스세척기의 작업상 또는 작업용 보도에 통하는 계단 및 사다리에는 담당근로자 외의 출입을 금지하고 출입금지의 표지를 설치하여야 한다.  ② 용광로 및 그 부속설비의 작업상 작업용 보도 또는 계단은 비에 맞지 않도록 조치하여야 한다.  ③ 용광로로 통하는 열풍관 등 가스가 통하는 관 주위에 있는 작업용 보도는 가스 중독된 근로자를 쉽게 발견할 수 있도록 창살형 등의 구조로 만들어야 한다.  ④ 용광로의 원재료 투입고 주위에는 근로자가 노 안에 추락 또는 전도하지 않도록 방책 및 미끄럼방지판을 설치하여야 한다.",
+                "doc_id": "KOSHA05_제1차 금속산업 안전작업지침000000003000000000000000000000008000",
+                "highlight_content": "① 용광로, 열풍로, 송풍기, 주선 설비, 제진기 및 가스세척기의 작업상 또는 작업용 보도에 통하는 계단 및 사다리에는 담당근로자 외의 출입을 금지하고 출입금지의 표지를 설치하여야 한다.  ② 용광로 및 그 부속설비의 작업상 작업용 보도 또는 계단은 비에 맞지 않도록 조치하여야 한다.  ③ 용광로로 통하는 열풍관 등 가스가 통하는 관 주위에 있는 작업용 보도는 가스 중독된 근로자를 쉽게 발견할 수 있도록 창살형 등의 구조로 만들어야 한다.  ④ 용광로의 원재료 투입고 주위에는 근로자가 노 안에 <em class='smart'>추락</em> 또는 전도하지 않도록 방책 및 미끄럼방지판을 설치하여야 한다.",
+                "score": 29.810333,
+                "title": "제1차 금속산업 안전작업지침 제8조 작업상 및 작업용 보도"
+              },
+              {
+                "category": "5",
+                "content": "천공작업을 할 때는 다음 각 호의 사항을 준수하여야 한다.  1. 발파공의 크기는 사용할 화약류의 직경보다 클 것  2. 1차 발파된 지역에서 천공작업을 하는 경우 다음 각 목의 사항을 따를 것    가. 전 지역에 폭파되지 않은 화약의 유무를 세밀히 조사하여 확인될 때까지 천공하지 말 것    나. 가목에 따른 확인 결과 화약류를 발견하지 못하였다 하더라도 천공 구멍에 천공기, 곡괭이 또는 금속재 봉 등을 삽입하지 말 것    다. 불발된 발파공에서부터 15m 이내에서는 동력 기계를 이용한 천공작업을 금지할 것   3. 천공작업과 장약작업은 같은 작업장소에서 병행하지 않아야 하고, 작업장소 간에 충분한 안전거리를 확보할 것  4. 천공작업으로 인해 발생하는 먼지는 가능한 한 물을 뿌리는 등 습식으로 제거할 것  5. 천공작업 중 근로자가 추락할 우려가 있는 때에는 작업발판을 설치하고 안전대를 착용토록 하는 등의 방법으로 추락 방지 조치를 할 것  6. 오거 및 천공기가 작동할 때는 관계 근로자가 아닌 사람의 출입을 금지할 것  7. 천공기를 이동할 때는 드릴 등 작업공구류는 안전한 위치에 두어야 하며, 송전선 아래나 그 주위로 이동할 때는 특히 주의할 것  8. 천공작업을 하는 때에는 회전체에 끼이지 않도록 주의할 것",
+                "doc_id": "KOSHA05_발파작업표준안전작업지침000000003000000000000000000000012000",
+                "highlight_content": "천공작업을 할 때는 다음 각 호의 사항을 준수하여야 한다.  1. 발파공의 크기는 사용할 화약류의 직경보다 클 것  2. 1차 발파된 지역에서 천공작업을 하는 경우 다음 각 목의 사항을 따를 것    가. 전 지역에 폭파되지 않은 화약의 유무를 세밀히 조사하여 확인될 때까지 천공하지 말 것    나. 가목에 따른 확인 결과 화약류를 발견하지 못하였다 하더라도 천공 구멍에 천공기, 곡괭이 또는 금속재 봉 등을 삽입하지 말 것    다. 불발된 발파공에서부터 15m 이내에서는 동력 기계를 이용한 천공작업을 금지할 것   3. 천공작업과 장약작업은 같은 작업장소에서 병행하지 않아야 하고, 작업장소 간에 충분한 안전거리를 확보할 것  4. 천공작업으로 인해 발생하는 먼지는 가능한 한 물을 뿌리는 등 습식으로 제거할 것  5. 천공작업 중 근로자가 추락할 우려가 있는 때에는 작업발판을 설치하고 안전대를 착용토록 하는 등의 방법으로 <em class='smart'>추락</em> 방지 조치를 할 것  6. 오거 및 천공기가 작동할 때는 관계 근로자가 아닌 사람의 출입을 금지할 것  7. 천공기를 이동할 때는 드릴 등 작업공구류는 안전한 위치에 두어야 하며, 송전선 아래나 그 주위로 이동할 때는 특히 주의할 것  8. 천공작업을 하는 때에는 회전체에 끼이지 않도록 주의할 것",
+                "score": 26.622196,
+                "title": "발파작업표준안전작업지침 제12조 천공"
+              },
+              {
+                "category": "5",
+                "content": "사업주는 강관비계를 조립하여 사용함에 있어서 다음 각 호의 사항을 준수하여야 한다.  1. 하단부에는 깔판(밑받침 철물), 받침목 등을 사용하고 밑둥잡이를 설치해야 한다.  2. 비계기둥 간격은 띠장 방향에서는 1.5미터 내지 1.8미터, 장선 방향에서는 1.5미터 이하이어야 하며, 비계기둥의 최고부로 부터 아래방향으로 31미터를 넘는 비계 기둥은 2본의 강관으로 묶어 세워야 한다.  3. 띠장간격은 1.5미터 이하로 설치하여야 하며, 지상에서 첫 번째 띠장은 높이 2미터 이하의 위치에 설치하여야 한다.  4. 장선간격은 1.5미터 이하로 설치하고, 비계기둥과 띠장의 교차부에서는 비계기둥에 결속하고, 그 중간부분에서는 띠장에 결속한다.  5. 비계기둥간의 적재하중은 400킬로그램을 초과하지 아니하도록 하여야 한다.  6. 벽연결은 수직으로 5미터, 수평으로 5미터 이내마다 연결하여야 한다.  7. 기둥간격 10미터 마다 45도 각도의 처마방향 가새를 설치해야 하며, 모든 비계기둥은 가새에 결속하여야 한다.  8. 작업대에는 안전난간을 설치하여야 한다.  9. 작업대의 구조는 추락 및 낙하물 방지조치를 설치하여야 한다.  10. 작업발판 설치가 필요한 경우에는 쌍줄비계이어야 하며, 연결 및 이음철물은 가설기자재 성능검정 규격에 규정된 것을 사용하여야 한다.",
+                "doc_id": "KOSHA05_가설공사 표준안전 작업지침000000002000002000000000000000008000",
+                "highlight_content": "사업주는 강관비계를 조립하여 사용함에 있어서 다음 각 호의 사항을 준수하여야 한다.  1. 하단부에는 깔판(밑받침 철물), 받침목 등을 사용하고 밑둥잡이를 설치해야 한다.  2. 비계기둥 간격은 띠장 방향에서는 1.5미터 내지 1.8미터, 장선 방향에서는 1.5미터 이하이어야 하며, 비계기둥의 최고부로 부터 아래방향으로 31미터를 넘는 비계 기둥은 2본의 강관으로 묶어 세워야 한다.  3. 띠장간격은 1.5미터 이하로 설치하여야 하며, 지상에서 첫 번째 띠장은 높이 2미터 이하의 위치에 설치하여야 한다.  4. 장선간격은 1.5미터 이하로 설치하고, 비계기둥과 띠장의 교차부에서는 비계기둥에 결속하고, 그 중간부분에서는 띠장에 결속한다.  5. 비계기둥간의 적재하중은 400킬로그램을 초과하지 아니하도록 하여야 한다.  6. 벽연결은 수직으로 5미터, 수평으로 5미터 이내마다 연결하여야 한다.  7. 기둥간격 10미터 마다 45도 각도의 처마방향 가새를 설치해야 하며, 모든 비계기둥은 가새에 결속하여야 한다.  8. 작업대에는 안전난간을 설치하여야 한다.  9. 작업대의 구조는 <em class='smart'>추락</em> 및 낙하물 방지조치를 설치하여야 한다.  10. 작업발판 설치가 필요한 경우에는 쌍줄비계이어야 하며, 연결 및 이음철물은 가설기자재 성능검정 규격에 규정된 것을 사용하여야 한다.",
+                "score": 26.142927,
+                "title": "가설공사 표준안전 작업지침 제8조 강관비계"
+              },
+              {
+                "category": "7",
+                "content": "이 지침은 하수슬러지 탄화공정에서 발생하는 화재·폭발, 끼임(협착), 떨어짐(추락), 및 화상 등 재해 유형별 유해·위험요소를 파악하여, 발생 가능한 사고를 사전에 예방하기 위해 필요한 사항을 제시하는 데 그 목적이 있다.",
+                "doc_id": "KOSHA07_하수슬러지 탄화공정의 안전작업에 관한 기술지침_1",
+                "highlight_content": "이 지침은 하수슬러지 탄화공정에서 발생하는 화재·폭발, 끼임(협착), <em class='smart'>떨어짐</em>(<em class='smart'>추락</em>), 및 화상 등 재해 유형별 유해·위험요소를 파악하여, 발생 가능한 사고를 사전에 예방하기 위해 필요한 사항을 제시하는 데 그 목적이 있다.",
+                "score": 69.8285,
+                "title": " 하수슬러지 탄화공정의 안전작업에 관한 기술지침 - 목적"
+              },
+              {
+                "category": "7",
+                "content": "7.1. 차량의 승·하차 시 유의사항\n\n (1) 하차 시 무릎에 손상을 줄뿐만 아니라 넘어질 수 있으므로 차량에서 뛰어내리지 않도록 해야 한다.\n\n (2) 발판과 손잡이를 항상 잡도록 한다.\n\n (3) 운전석에서 내려오기 전에 잠깐의 여유를 가지고 차량과 접하고 있는 하역장이나 캣워크를 확인한 뒤 손잡이를 잡고 내려오는 것이 바람직하다.\n\n (4) 차량으로부터 하차 시 넘어짐을 야기할 수 있는 구덩이나 연석 등의 편평하지 않는 바닥이 있는지 확인한다. \n\n7.2. 적재칸의 바닥관리\n\n  적재 및 하역 작업이 주로 행해지는 적재칸의 바닥이 미끄러울 경우 떨어짐 사고의 주된 원인이 된다. 따라서 적재칸 바닥을 항상 양호한 상태로 유지하는 것은 중요하다.\n\n (1) 송진 혹은 인조잔디 등 미끄럼 방지 바닥재를 사용하거나, 코팅제를 사용   한다.\n\n (2) 바닥 표면을 거칠게 하는 마감재를 사용한다.\n\n (3) 떨어짐 위험구역을 색상으로 표시하거나 조명이 구별되게 한다.\n\n7.3. 차량의 안전관리 점검\n \n (1) 적재 및 하역 작업 시 운송차량이 움직이지 않도록 안전한 곳에 세우고 브레이크를 채운다.\n\n\n (2) 발판이나 손잡이 등의 상태가 양호한지 사용 전 검사를 수행한다.\n\n (3) 떨어짐을 야기할 수 있는 손상된 발판 등의 부속물들을 즉시 수리한다.\n\n (4) 적재칸은 로프 혹은 포장 등이 바닥에 방치되어 있지 않도록 정리한다. 특히, 로프는 양 측면에 잘 보관되도록 하여 작업자의 발이 걸려 넘어지지 않도록 한다.\n\n (5) 캣워크나 및 적재칸 바닥의 기름 혹은 진흙 등은 넘어짐을 유발할 수 있으므로 즉시 제거한다.\n\n (6) 냉동 차량의 경우 바닥에 물이나 얼음이 있지 않도록 수시로 점검한다.\n\n7.4. 차량에서의 떨어짐 재해가 많이 발생하는 곳의 방지책\n\n (1) 테일 리프트\n\n  (가) 화물의 적재와 하역을 위해 차량 후면에 설치되는 테일 리프트는 비교적 낮은 높이 특히, 이동 중에 작업자의 떨어짐 재해가 빈번하게 일어난다. 따라서, 테일 리프트 바닥면과 승강대 바닥은 미끄럼 방지 표면처리가 되어 있어야 하며, 테일 리프트의 상승 시 떨어짐을 방지하기 위해 난간이 설치되어 있어야 한다. \n\n  (나) 화물이 떨어지지 않도록 모서리 보호대를 설치해야 한다.\n\n  (다) 적절하게 부착된 손잡이나 난간을 이용한다.\n\n (2) 배터리 보호대 혹은 물품보관대\n\n운송차량에 설치되어 있는 물품보관대와 배터리 보호대 덮개는 작업자가 발을 딛고 설 수가 있는데 이때 표면이 미끄러우면 떨어짐 사고를 유발할 수 있다. 따라서 이들 덮개는 미끄럼 방지 처리가 된 재료를 사용하여야    한다.\n\n (3) 운전석 발판\n\n운전자가 이용하게 되는 운전석 발판의 표면은 미끄럼 방지가 되어 있어야 하고 특히, 젖어 있는 상태에서 운전자는 반드시 미끄럼 방지 안전화를 착용해야 한다.\n\n (4) 냉동 탑차(Refrigerated vehicle)\n\n  (가) 냉동 탑차 적재칸의 바닥은 항상 얼음조각으로 미끄러울 수 있다. 따라서, 수시로 바닥을 점검하여 물기나 얼음 등을 제거한다. 적재칸에 제습기를 설치하는 것이 바람직하다.\n\n  (나) 처음 발을 딛는 발판의 높이는 무릎에 무리가 가지 않으면서 구부릴 수 있는 높이여야 한다. 일반적으로 지상으로부터 400 mm가 적절하며,   700 mm가 넘지 않도록 한다.\n\n  (다) 미끄럼 방지를 위한 발판의 깊이는 200 mm 정도가 적합하다.\n\n(라) 발판의 높이와 깊이는 동일하게 하는 것이 가장 바람직하다.\n\n (5) 차량 표면\n\n  작업자가 발을 딛는 차량 표면은 일정 시간 사용하면 마모가 되어 미끄럼방지 기능이 떨어지므로 정기적인 점검을 통해 교체하거나 수리를 하도록한다.\n\n (6) 손잡이와 난간\n\n  (가) 난간은 강재 등의 단단한 재료로 고정되어 있어야 하고, 손으로 잡는 부분인 손잡이는 미끄럼 방지 재질로 되어 있어야 한다.\n\n  (나) 손잡이나 난간은 승·하차 시 손에 꼭 맞게 쥘 수 있어야 한다. 손잡이와 난간은 사람들의 손 크기나 몸 크기에 관계없이 모두 쉽게 쥘 수 있게 \n\n만들어야 한다.\n\n (7) 전향륜\n\n  (가) 전향륜 위의 발판 표면은 미끄럼을 방지하기 위해 체크 무늬 모양의 재질로 한다. 특히, 습기, 비, 기타 오염물질로 인해 넘어짐이 발생되지 않도록 한다.\n\n  (나) 발판 특히, 연료탱크 위의 발판의 높이는 적절해야 한다.\n\n  (다) 발판들의 간격은 일정해야 한다.\n\n  (라) 발판의 재질은 휘어지지 않는 재질로 만들어야 한다.\n\n  (마) 난간은 작업자의 접근이 용이해야 한다.\n\n  (바) 연료가 발판 위로 떨어지지 않도록 한다.\n\n (8) 적재칸\n\n  화물 적재칸으로 접근할 때는 주로 차체에 장착된 발판을 사용하는 것이 좋으나 경우에 따라 접이식 발판도 사용 가능하다.\n\n  (가) 접이식 발판은 차량에서 떨어지지 않도록 장착해야 한다.\n\n  (나) 손잡이는 적절한 간격으로 작업자가 쉽게 잡을 수 있는 위치에 있어야 \n     한다.\n\n  (다) 안전성 측면에서는 사다리 보다는 차량에 고정 장착된 발판이 더 낫다.\n\n  (라) 발판은 다른 장비 사용에 지장이 없도록 측면 혹은 후면의 적절한 곳에 위치시킨다.\n\n\n  (마) 적절한 손잡이와 가드레일을 사용하도록 한다.\n\n  (바) 작업자가 화물 위로 올라가서 적재 및 하역작업 시 화물의 넘어짐과 화물에 의한 근로자의 넘어짐 재해가 발생하지 않도록 가능한 방안을 강구한다.\n\n7.5. 안전화\n\n  작업 중 넘어짐 사고 방지를 위해 적절한 안전화 착용은 중요하다. \n\n (1) 안전화의 선택 \n \n  물체의 떨어짐에 의한 상해를 방지할 수 있도록 신발 앞 부분이 선심(Safety toe cap)으로 덧대어 있어야 하고, 바닥이 미끄럼 방지 재질로 되어 있어야 한다. 특히, 미끄럼 방지 처리가 된 바닥면이 일정 마모상태가 되면 즉시 교체해야 한다.\n\n (2) 안전화의 착용 \n \n  안전화는 작업자의 발에 맞게 조임줄로 묶은 뒤 착용한다. \n\n (3) 안전화의 보관 \n\n  작업 종료 후에는 흙, 먼지, 기름 등 오염물질들을 제거하고 세척 후 건조한 곳에 보관한다.",
+                "doc_id": "KOSHA07_운송용 차량에서의 작업 시 떨어짐 사고를 방지하기 위한 기술지침_7",
+                "highlight_content": "7.1. 차량의 승·하차 시 유의사항\n\n (1) 하차 시 무릎에 손상을 줄뿐만 아니라 넘어질 수 있으므로 차량에서 뛰어내리지 않도록 해야 한다.\n\n (2) 발판과 손잡이를 항상 잡도록 한다.\n\n (3) 운전석에서 내려오기 전에 잠깐의 여유를 가지고 차량과 접하고 있는 하역장이나 캣워크를 확인한 뒤 손잡이를 잡고 내려오는 것이 바람직하다.\n\n (4) 차량으로부터 하차 시 넘어짐을 야기할 수 있는 구덩이나 연석 등의 편평하지 않는 바닥이 있는지 확인한다. \n\n7.2. 적재칸의 바닥관리\n\n  적재 및 하역 작업이 주로 행해지는 적재칸의 바닥이 미끄러울 경우 <em class='smart'>떨어짐</em> 사고의 주된 원인이 된다. 따라서 적재칸 바닥을 항상 양호한 상태로 유지하는 것은 중요하다.\n\n (1) 송진 혹은 인조잔디 등 미끄럼 방지 바닥재를 사용하거나, 코팅제를 사용   한다.\n\n (2) 바닥 표면을 거칠게 하는 마감재를 사용한다.\n\n (3) <em class='smart'>떨어짐</em> 위험구역을 색상으로 표시하거나 조명이 구별되게 한다.\n\n7.3. 차량의 안전관리 점검\n \n (1) 적재 및 하역 작업 시 운송차량이 움직이지 않도록 안전한 곳에 세우고 브레이크를 채운다.\n\n\n (2) 발판이나 손잡이 등의 상태가 양호한지 사용 전 검사를 수행한다.\n\n (3) 떨어짐을 야기할 수 있는 손상된 발판 등의 부속물들을 즉시 수리한다.\n\n (4) 적재칸은 로프 혹은 포장 등이 바닥에 방치되어 있지 않도록 정리한다. 특히, 로프는 양 측면에 잘 보관되도록 하여 작업자의 발이 걸려 넘어지지 않도록 한다.\n\n (5) 캣워크나 및 적재칸 바닥의 기름 혹은 진흙 등은 넘어짐을 유발할 수 있으므로 즉시 제거한다.\n\n (6) 냉동 차량의 경우 바닥에 물이나 얼음이 있지 않도록 수시로 점검한다.\n\n7.4. 차량에서의 <em class='smart'>떨어짐</em> 재해가 많이 발생하는 곳의 방지책\n\n (1) 테일 리프트\n\n  (가) 화물의 적재와 하역을 위해 차량 후면에 설치되는 테일 리프트는 비교적 낮은 높이 특히, 이동 중에 작업자의 <em class='smart'>떨어짐</em> 재해가 빈번하게 일어난다. 따라서, 테일 리프트 바닥면과 승강대 바닥은 미끄럼 방지 표면처리가 되어 있어야 하며, 테일 리프트의 상승 시 떨어짐을 방지하기 위해 난간이 설치되어 있어야 한다. \n\n  (나) 화물이 떨어지지 않도록 모서리 보호대를 설치해야 한다.\n\n  (다) 적절하게 부착된 손잡이나 난간을 이용한다.\n\n (2) 배터리 보호대 혹은 물품보관대\n\n운송차량에 설치되어 있는 물품보관대와 배터리 보호대 덮개는 작업자가 발을 딛고 설 수가 있는데 이때 표면이 미끄러우면 <em class='smart'>떨어짐</em> 사고를 유발할 수 있다. 따라서 이들 덮개는 미끄럼 방지 처리가 된 재료를 사용하여야    한다.\n\n (3) 운전석 발판\n\n운전자가 이용하게 되는 운전석 발판의 표면은 미끄럼 방지가 되어 있어야 하고 특히, 젖어 있는 상태에서 운전자는 반드시 미끄럼 방지 안전화를 착용해야 한다.\n\n (4) 냉동 탑차(Refrigerated vehicle)\n\n  (가) 냉동 탑차 적재칸의 바닥은 항상 얼음조각으로 미끄러울 수 있다. 따라서, 수시로 바닥을 점검하여 물기나 얼음 등을 제거한다. 적재칸에 제습기를 설치하는 것이 바람직하다.\n\n  (나) 처음 발을 딛는 발판의 높이는 무릎에 무리가 가지 않으면서 구부릴 수 있는 높이여야 한다. 일반적으로 지상으로부터 400 mm가 적절하며,   700 mm가 넘지 않도록 한다.\n\n  (다) 미끄럼 방지를 위한 발판의 깊이는 200 mm 정도가 적합하다.\n\n(라) 발판의 높이와 깊이는 동일하게 하는 것이 가장 바람직하다.\n\n (5) 차량 표면\n\n  작업자가 발을 딛는 차량 표면은 일정 시간 사용하면 마모가 되어 미끄럼방지 기능이 떨어지므로 정기적인 점검을 통해 교체하거나 수리를 하도록한다.\n\n (6) 손잡이와 난간\n\n  (가) 난간은 강재 등의 단단한 재료로 고정되어 있어야 하고, 손으로 잡는 부분인 손잡이는 미끄럼 방지 재질로 되어 있어야 한다.\n\n  (나) 손잡이나 난간은 승·하차 시 손에 꼭 맞게 쥘 수 있어야 한다. 손잡이와 난간은 사람들의 손 크기나 몸 크기에 관계없이 모두 쉽게 쥘 수 있게 \n\n만들어야 한다.\n\n (7) 전향륜\n\n  (가) 전향륜 위의 발판 표면은 미끄럼을 방지하기 위해 체크 무늬 모양의 재질로 한다. 특히, 습기, 비, 기타 오염물질로 인해 넘어짐이 발생되지 않도록 한다.\n\n  (나) 발판 특히, 연료탱크 위의 발판의 높이는 적절해야 한다.\n\n  (다) 발판들의 간격은 일정해야 한다.\n\n  (라) 발판의 재질은 휘어지지 않는 재질로 만들어야 한다.\n\n  (마) 난간은 작업자의 접근이 용이해야 한다.\n\n  (바) 연료가 발판 위로 떨어지지 않도록 한다.\n\n (8) 적재칸\n\n  화물 적재칸으로 접근할 때는 주로 차체에 장착된 발판을 사용하는 것이 좋으나 경우에 따라 접이식 발판도 사용 가능하다.\n\n  (가) 접이식 발판은 차량에서 떨어지지 않도록 장착해야 한다.\n\n  (나) 손잡이는 적절한 간격으로 작업자가 쉽게 잡을 수 있는 위치에 있어야 \n     한다.\n\n  (다) 안전성 측면에서는 사다리 보다는 차량에 고정 장착된 발판이 더 낫다.\n\n  (라) 발판은 다른 장비 사용에 지장이 없도록 측면 혹은 후면의 적절한 곳에 위치시킨다.\n\n\n  (마) 적절한 손잡이와 가드레일을 사용하도록 한다.\n\n  (바) 작업자가 화물 위로 올라가서 적재 및 하역작업 시 화물의 넘어짐과 화물에 의한 근로자의 넘어짐 재해가 발생하지 않도록 가능한 방안을 강구한다.\n\n7.5. 안전화\n\n  작업 중 넘어짐 사고 방지를 위해 적절한 안전화 착용은 중요하다. \n\n (1) 안전화의 선택 \n \n  물체의 떨어짐에 의한 상해를 방지할 수 있도록 신발 앞 부분이 선심(Safety toe cap)으로 덧대어 있어야 하고, 바닥이 미끄럼 방지 재질로 되어 있어야 한다. 특히, 미끄럼 방지 처리가 된 바닥면이 일정 마모상태가 되면 즉시 교체해야 한다.\n\n (2) 안전화의 착용 \n \n  안전화는 작업자의 발에 맞게 조임줄로 묶은 뒤 착용한다. \n\n (3) 안전화의 보관 \n\n  작업 종료 후에는 흙, 먼지, 기름 등 오염물질들을 제거하고 세척 후 건조한 곳에 보관한다.",
+                "score": 68.40667,
+                "title": " 운송용 차량에서의 작업 시 떨어짐 사고를 방지하기 위한 기술지침 - 떨어짐 사고에 대한 방지대책"
+              },
+              {
+                "category": "7",
+                "content": "이 지침은 경량철골 천장, 벽체 칸막이 작업공사에서 발생할 수 있는 떨어짐(추락), 물체에 맞음(낙하), 넘어짐(전도), 감전, 베임, 불균형 및 무리한 동작 등 건강장애의 재해예방을 위하여 작업단계별 안전·보건사항 및 안전·보건시설에 관한 기술적 사항 등을 정함을 목적으로 한다.",
+                "doc_id": "KOSHA07_내장공사의 안전보건작업 지침_1",
+                "highlight_content": "이 지침은 경량철골 천장, 벽체 칸막이 작업공사에서 발생할 수 있는 <em class='smart'>떨어짐</em>(<em class='smart'>추락</em>), 물체에 맞음(낙하), 넘어짐(전도), 감전, 베임, 불균형 및 무리한 동작 등 건강장애의 재해예방을 위하여 작업단계별 안전·보건사항 및 안전·보건시설에 관한 기술적 사항 등을 정함을 목적으로 한다.",
+                "score": 68.37551,
+                "title": " 내장공사의 안전보건작업 지침 - 목적"
+              },
+              {
+                "category": "7",
+                "content": "(1) 추락(떨어짐)\n\n(2) 전도(넘어짐)\n\n(3) 협착(끼임)\n\n(4) 수작업 및 들어올리기\n\n(5) 물건과의 충돌(부딪침)\n\n(6) 운송\n\n(7) 기계 관련(사일로 출입 시)",
+                "doc_id": "KOSHA07_식음료 제조업의 재해 예방에 관한 기술지침_4",
+                "highlight_content": "(1) <em class='smart'>추락</em>(<em class='smart'>떨어짐</em>)\n\n(2) 전도(넘어짐)\n\n(3) 협착(끼임)\n\n(4) 수작업 및 들어올리기\n\n(5) 물건과의 충돌(부딪침)\n\n(6) 운송\n\n(7) 기계 관련(사일로 출입 시)",
+                "score": 67.895065,
+                "title": " 식음료 제조업의 재해 예방에 관한 기술지침 - 업무상 사고의 유발 요인 "
+              },
+              {
+                "category": "7",
+                "content": "(1) 관리감독자는 작업 전에 위험성평가를 실시하고 근로자에게 작업위험요인과 이에 대한 대응방법, 화재 예방 등에 대하여 교육을 실시하여야 한다.\n<img src=\"/upload/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/코샤가이드/내장공사의 안전보건작업 지침_5_안전작업 공통 사항_01.png\"> </img> \n<그림 1> 작업 전 근로자 교육\n\n (2) 관리감독자는 작업전 당일의 안전작업방법과 유해위험요인 등 근로자가 지켜야할 사항에 대하여  위험예지활동(TBM : Tool Box Meeting)을 실시하고 안전시설설치 및 관리감독자 배치 등 사전 안전조치를 하여야 하며 안전보건점검을 통해 이행여부를 확인하여야 한다.\n<img src=\"/upload/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/코샤가이드/내장공사의 안전보건작업 지침_5_안전작업 공통 사항_02.png\"> </img>              \n<그림 2> 위험예지활동(TBM : Tool Box Meeting)\n\n (3) 작업장 출입구 및 내부에는 충분한 조도를 확보(보통작업 150 럭스 이상)하여야 한다 \n (4) 자재를 반입 및 반출 시 전동 지게차, 핸드 파레트 트럭(Hand Pallet Truck) 등을 이용하고 인력 운반을 최소화 하여야 한다.\n\n<img src=\"/upload/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/코샤가이드/내장공사의 안전보건작업 지침_5_안전작업 공통 사항_03.png\"> </img>\n<그림 3> 운반용 장비\n\n (5) 벽체, 천장 작업 시 이동식 비계를 사용하는 경우에는 작업발판을 설치하고 안전난간 등 떨어짐(추락)방지 시설을 설치하여야 하며  바퀴고정장치, 아웃트리거, 승강용사다리 등을 설치하여야 한다.\n<img src=\"/upload/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/코샤가이드/내장공사의 안전보건작업 지침_5_안전작업 공통 사항_04.png\"> </img>\n<그림 4> 이동식 비계\n\n (6) 작업 전에 근로자 이동통로, 자재보관장소 및 운반통로를 확보하여야 하며, 작업 중 자재에 걸려 넘어지지 않도록 정리?정돈하여야 한다.\n (7) 전기기계?기구 사용 시 누전, 합선, 과부하 등에 의한 감전 및 화재 등으로 인한 재해를 예방하기 위하여 사용 전에 점검하여야 한다.\n (8) 핸드그라인더, 조명 등 전기기계?기구 사용 시, 접지가 되어 있는 분전반의 누전차단기를 통하여 전원을 인출하여야 한다.\n<img src=\"/upload/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/코샤가이드/내장공사의 안전보건작업 지침_5_안전작업 공통 사항_05.png\"> </img>  \n<그림 5> 가설 분전반\n\n   (9) 핸드그라인더 및 절단기 커버 등의 방호장치를 점검하여야 한다.\n   (10) 고속절단기 사용 시 안전덮개 설치 및 불티 비산방지 조치를 하여야 한다.\n   (11) 안전모, 안전대, 보안면, 방진마스크 등 보호구를 착용하여야 한다. \n   (12) 자재운반 작업 시에는 근골격계 질환예방을 위한 무게의 적정성이 유지(남자 20~30kgf, 여자 10~15kgf이하)되어야 하며, 5kgf이상의 자재를 들어서 운반하는 경우 취급 물품에 대하여 작업근로자가 쉽게 알아 볼 수 있도록 물품의 중량과 무게중심에 대하여 사전에 안전교육을 실시하여야 한다.\n   (13) 작업높이에 따라 적합한 작업발판을 사용하여야 한다.\n   (14) 떨어짐(추락)의 위험이 있는 작업발판에는 안전난간 등 떨어짐(추락) 방호조치를 하여야 한다.\n   (15) 작업 종료 후 작업발판과 잔여자재에 대하여 정리 정돈 및 청소를 시행한다.\n   (16) 화재의 위험이 있은 장소에는 소화기, 방화수 등을 비치하여 화재 발생시 초기에 소화할 수 있도록 하여야 한다.\n<img src=\"/upload/nfs/t3qai/nifi/flow/data/smartsearch/attached/이미지 추출/코샤가이드/내장공사의 안전보건작업 지침_5_안전작업 공통 사항_06.png\"> </img>\n<그림 6> 소방기구",
+                "doc_id": "KOSHA07_내장공사의 안전보건작업 지침_5",
+                "highlight_content": "(1) 관리감독자는 작업 전에 위험성평가를 실시하고 근로자에게 작업위험요인과 이에 대한 대응방법, 화재 예방 등에 대하여 교육을 실시하여야 한다.\n </img> \n<그림 1> 작업 전 근로자 교육\n\n (2) 관리감독자는 작업전 당일의 안전작업방법과 유해위험요인 등 근로자가 지켜야할 사항에 대하여  위험예지활동(TBM : Tool Box Meeting)을 실시하고 안전시설설치 및 관리감독자 배치 등 사전 안전조치를 하여야 하며 안전보건점검을 통해 이행여부를 확인하여야 한다.\n </img>              \n<그림 2> 위험예지활동(TBM : Tool Box Meeting)\n\n (3) 작업장 출입구 및 내부에는 충분한 조도를 확보(보통작업 150 럭스 이상)하여야 한다 \n (4) 자재를 반입 및 반출 시 전동 지게차, 핸드 파레트 트럭(Hand Pallet Truck) 등을 이용하고 인력 운반을 최소화 하여야 한다.\n\n </img>\n<그림 6> 소방기구",
+                "score": 61.635513,
+                "title": " 내장공사의 안전보건작업 지침 - 안전작업 공통 사항"
+              },
+              {
+                "category": "6",
+                "content": "건설업 추락 사고사망 발생 위험현장에 부착할 (예방)포스터\n- 안전대를 걸겠습니까? 생명을 걸겠습니까?",
+                "doc_id": "KOSHA06_42139_1",
+                "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=42139",
+                "highlight_content": "건설업 <em class='smart'>추락</em> 사고사망 발생 위험현장에 부착할 (예방)포스터\n- 안전대를 걸겠습니까? 생명을 걸겠습니까?",
+                "image_path": [
+                  "t"
+                ],
+                "keyword": "추락, 떨어짐, 포스터, 현장배송, 비계, 안전대",
+                "med_thumb_yn": "Y",
+                "media_style": "포스터",
+                "score": 75.14746,
+                "title": "안전보건 포스터(추락)"
+              },
+              {
+                "category": "6",
+                "content": "[일터에서의 안전보건 OPL] 추락에 의한 위험방지",
+                "doc_id": "KOSHA06_35785_1",
+                "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=35785",
+                "highlight_content": "[일터에서의 안전보건 OPL] <em class='smart'>추락</em>에 의한 위험방지",
+                "image_path": [
+                  "t"
+                ],
+                "keyword": "추락,떨어짐,방지,작업발판,방호,OPL",
+                "med_thumb_yn": "Y",
+                "media_style": "OPS",
+                "score": 74.32028,
+                "title": "[일터에서의 안전보건 OPL] 추락에 의한 위험방지"
+              },
+              {
+                "category": "6",
+                "content": "건설현장 추락사고 예방 좋은예 나쁜예",
+                "doc_id": "KOSHA06_42054_1",
+                "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=42054",
+                "highlight_content": "건설현장 <em class='smart'>추락</em>사고 예방 좋은예 나쁜예",
+                "image_path": [],
+                "keyword": "건설, 추락, 사고, 예방, 예시, 재해, 안전대, 보호구, 떨어짐",
+                "med_thumb_yn": "N",
+                "media_style": "OPS",
+                "score": 71.80607,
+                "title": "건설현장 추락사고 예방 좋은예 나쁜예"
+              },
+              {
+                "category": "6",
+                "content": "[중대재해사례]달비계 고정로프가 풀리면서 추락",
+                "doc_id": "KOSHA06_31162_1",
+                "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=31162",
+                "highlight_content": "[중대재해사례]달비계 고정로프가 풀리면서 <em class='smart'>추락</em>",
+                "image_path": [
+                  "t"
+                ],
+                "keyword": "건설업,건설,달비계,고정로프,풀림,추락,떨어짐,견출공",
+                "med_thumb_yn": "Y",
+                "media_style": "OPS",
+                "score": 71.39905,
+                "title": "[중대재해사례]달비계 고정로프가 풀리면서 추락"
+              },
+              {
+                "category": "6",
+                "content": "고소작업자를 위한 추락 방지 장치(개인보호구) - 선택",
+                "doc_id": "KOSHA06_35910_1",
+                "filepath": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=35910",
+                "highlight_content": "고소작업자를 위한 <em class='smart'>추락</em> 방지 장치(개인보호구) - 선택",
+                "image_path": [
+                  "h"
+                ],
+                "keyword": "고소작업자, 안전대, 추락방지, 보호구, 떨어짐, 추락",
+                "med_thumb_yn": "Y",
+                "media_style": "OPS",
+                "score": 71.336266,
+                "title": "고소작업자를 위한 추락 방지 장치(개인보호구) - 선택"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "guides": {
+    "request": {
+      "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+      "ctgr04_kr": "Y",
+      "pageNo": 1,
+      "numOfRows": 5,
+      "callApiId": 1030
+    },
+    "response": {
+      "body": {
+        "pageNo": 1,
+        "totalCount": 28941,
+        "numOfRows": 5,
+        "items": {
+          "item": [
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list4/master-detail4?medSeq=52123",
+              "MED_COMPY_DY": "2026-03-24",
+              "MED_SJ_NM": "중대산업사고 예방 가이드"
+            },
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=52239",
+              "MED_COMPY_DY": "2026-03-23",
+              "MED_SJ_NM": "(비계, 추락)계절별, 시기별 위험요인 홍보 포스터(4월)"
+            },
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=52261",
+              "MED_COMPY_DY": "2026-03-23",
+              "MED_SJ_NM": "(밀폐환기)계절별, 시기별 위험요인 홍보 포스터(6월)"
+            },
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=52238",
+              "MED_COMPY_DY": "2026-03-23",
+              "MED_SJ_NM": "(지게차 부딪힘) 계절별, 시기별 위험요인 홍보 포스터(3월)"
+            },
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=52246",
+              "MED_COMPY_DY": "2026-03-23",
+              "MED_SJ_NM": "(발열성질환) 계절별, 시기별 위험요인 홍보 포스터(10월)"
+            }
+          ]
+        }
+      },
+      "header": {
+        "resultCode": "00",
+        "resultMsg": "NORMAL_CODE"
+      }
+    }
+  },
+  "weather_legal_links": [],
+  "risk_summary": {
+    "level": "medium",
+    "reasons": [
+      "유해물질 취급 정보 존재",
+      "유사 재해사례 존재",
+      "최근 사고사망 속보 존재"
+    ]
+  },
+  "briefings": {
+    "admin": {
+      "title": "관리자용 브리핑",
+      "risk_level": "medium",
+      "actions": []
+    },
+    "worker": {
+      "title": "작업자용 브리핑",
+      "risk_level": "medium",
+      "message": "유해물질 취급 정보 존재 / 유사 재해사례 존재 / 최근 사고사망 속보 존재"
+    },
+    "foreigner": {
+      "title": "Foreigner Briefing",
+      "risk_level": "medium",
+      "message": "Check weather risks, legal precautions, and material safety instructions before work."
+    }
+  }
+}
