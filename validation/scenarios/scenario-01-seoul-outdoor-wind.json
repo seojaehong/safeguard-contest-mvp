@@ -1,0 +1,14 @@
+{
+  "location": {
+    "name": "서울",
+    "nx": 60,
+    "ny": 127,
+    "stnId": 108,
+    "regId": "11B00000"
+  },
+  "work_type": "옥외 철골 작업",
+  "work_time": "주간",
+  "materials": ["벤젠"],
+  "hazard_keywords": ["추락", "지게차"],
+  "language": "ko"
+}

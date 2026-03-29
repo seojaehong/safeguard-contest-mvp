@@ -1,0 +1,263 @@
+{
+  "generatedAt": "2026-03-29T11:25:21.645598+00:00",
+  "mode": "dry-run",
+  "api_status": {},
+  "input": {
+    "location": {
+      "name": "서울",
+      "nx": 60,
+      "ny": 127,
+      "stnId": 108,
+      "regId": "11B00000"
+    },
+    "work_type": "옥외 철골 작업",
+    "work_time": "주간",
+    "materials": [
+      "벤젠"
+    ],
+    "hazard_keywords": [
+      "추락",
+      "지게차"
+    ],
+    "language": "ko"
+  },
+  "weather": {
+    "current": {
+      "request": {
+        "mode": "dry-run"
+      },
+      "response": {
+        "response": {
+          "header": {
+            "resultCode": "00",
+            "resultMsg": "NORMAL_SERVICE"
+          },
+          "body": {
+            "items": {
+              "item": [
+                {
+                  "category": "T1H",
+                  "obsrValue": "29.0"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "warnings": {
+      "request": {
+        "mode": "dry-run"
+      },
+      "response": {
+        "response": {
+          "header": {
+            "resultCode": "00",
+            "resultMsg": "NORMAL_SERVICE"
+          },
+          "body": {
+            "items": {
+              "item": [
+                {
+                  "title": "[특보] 강풍주의보 발표"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "impact": {
+      "heatwave": {
+        "request": {
+          "mode": "dry-run"
+        },
+        "response": {
+          "response": {
+            "header": {
+              "resultCode": "03",
+              "resultMsg": "NO_DATA"
+            }
+          }
+        }
+      },
+      "coldwave": {
+        "request": {
+          "mode": "dry-run"
+        },
+        "response": {
+          "response": {
+            "header": {
+              "resultCode": "03",
+              "resultMsg": "NO_DATA"
+            }
+          }
+        }
+      }
+    }
+  },
+  "materials": {
+    "list": {
+      "request": {
+        "mode": "dry-run"
+      },
+      "header": {
+        "resultCode": "00",
+        "resultMsg": "NORMAL SERVICE."
+      },
+      "items": [
+        {
+          "chemId": "001008",
+          "chemNameKor": "벤젠",
+          "casNo": "71-43-2",
+          "lastDate": "2025-09-17"
+        }
+      ]
+    },
+    "details": [
+      {
+        "detailNo": 2,
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL SERVICE."
+        },
+        "items": [
+          {
+            "msdsItemNameKor": "유해성·위험성",
+            "itemDetail": "인화성 및 흡입 유해성"
+          }
+        ]
+      }
+    ]
+  },
+  "cases": {
+    "disaster": {
+      "request": {
+        "mode": "dry-run"
+      },
+      "response": {
+        "body": {
+          "items": {
+            "item": [
+              {
+                "business": "제조업",
+                "keyword": "지게차 관련 재해",
+                "contents": "장비 작업 중 충돌 및 협착 재해"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "fatal": {
+      "request": {
+        "mode": "dry-run"
+      },
+      "response": {
+        "body": {
+          "items": {
+            "item": [
+              {
+                "keyword": "최근 사고사망 속보",
+                "contents": "예시 이미지 링크"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "legal": {
+    "request": {
+      "mode": "dry-run"
+    },
+    "response": {
+      "response": {
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL_SERVICE"
+        },
+        "body": {
+          "items": {
+            "item": [
+              {
+                "title": "작업중지 및 피난",
+                "content": "급박한 위험 시 작업중지 검토"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "guides": {
+    "request": {
+      "mode": "dry-run"
+    },
+    "response": {
+      "body": {
+        "items": {
+          "item": [
+            {
+              "MED_SJ_NM": "호우·태풍 대비 사업장 안전관리 가이드",
+              "MED_URL": "https://www.kosha.or.kr/"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "weather_legal_links": [
+    {
+      "weather_type": "strong_wind",
+      "legal_strength": "indirect",
+      "legal_basis": [
+        {
+          "type": "regulation",
+          "name": "산업안전보건기준에 관한 규칙 제349조(작업중지 및 피난)",
+          "note": "급박한 위험이 있는 경우 작업중지 및 피난",
+          "url": "https://www.law.go.kr/LSW/joStmdInfoP.do?joBrNo=00&joNo=0349&lsiSeq=54458"
+        }
+      ],
+      "guide_basis": [
+        {
+          "type": "kosha",
+          "name": "호우·태풍 대비 사업장 안전관리 가이드",
+          "url": "https://www.kosha.or.kr/kosha/report/kosha_weather_news.do?articleNo=450616&attachNo=256149&mode=download"
+        }
+      ],
+      "briefing_rule": {
+        "label": "작업중지·피난 검토",
+        "message_template": "강풍 위험이 확인되었습니다. 작업유형에 따라 급박한 위험이 있으면 작업중지 및 피난 등 안전조치 검토가 필요합니다."
+      }
+    }
+  ],
+  "risk_summary": {
+    "level": "high",
+    "reasons": [
+      "작업중지·피난 검토",
+      "유해물질 취급 정보 존재",
+      "유사 재해사례 존재",
+      "최근 사고사망 속보 존재"
+    ]
+  },
+  "briefings": {
+    "admin": {
+      "title": "관리자용 브리핑",
+      "risk_level": "high",
+      "actions": [
+        "강풍 위험이 확인되었습니다. 작업유형에 따라 급박한 위험이 있으면 작업중지 및 피난 등 안전조치 검토가 필요합니다."
+      ]
+    },
+    "worker": {
+      "title": "작업자용 브리핑",
+      "risk_level": "high",
+      "message": "작업중지·피난 검토 / 유해물질 취급 정보 존재 / 유사 재해사례 존재 / 최근 사고사망 속보 존재"
+    },
+    "foreigner": {
+      "title": "Foreigner Briefing",
+      "risk_level": "high",
+      "message": "Check weather risks, legal precautions, and material safety instructions before work."
+    }
+  }
+}

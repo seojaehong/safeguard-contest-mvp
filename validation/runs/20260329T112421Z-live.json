@@ -1,0 +1,568 @@
+{
+  "generatedAt": "2026-03-29T11:24:50.960375+00:00",
+  "mode": "live",
+  "api_status": {
+    "weather_current": {
+      "ok": false,
+      "error": "Command '['curl', '-sS', '--fail', '--max-time', '12', '-G', 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst', '--data-urlencode', 'ServiceKey=cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==', '--data-urlencode', 'pageNo=1', '--data-urlencode', 'numOfRows=20', '--data-urlencode', 'dataType=JSON', '--data-urlencode', 'base_date=20260329', '--data-urlencode', 'base_time=1000', '--data-urlencode', 'nx=60', '--data-urlencode', 'ny=127']' returned non-zero exit status 28."
+    },
+    "warning_list": {
+      "ok": true
+    },
+    "heat_impact": {
+      "ok": true
+    },
+    "cold_impact": {
+      "ok": true
+    },
+    "msds_list": {
+      "ok": true
+    },
+    "disaster_cases": {
+      "ok": true
+    },
+    "fatal_cases": {
+      "ok": true
+    },
+    "legal_search": {
+      "ok": false,
+      "error": "Command '['curl', '-sS', '--fail', '--max-time', '12', '-G', 'https://apis.data.go.kr/B552468/srch/smartSearch', '--data-urlencode', 'serviceKey=cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==', '--data-urlencode', 'pageNo=1', '--data-urlencode', 'numOfRows=5', '--data-urlencode', 'searchValue=추락', '--data-urlencode', 'category=0', '--data-urlencode', 'dataType=JSON']' returned non-zero exit status 28."
+    },
+    "media_links": {
+      "ok": true
+    },
+    "msds_detail_2": {
+      "ok": true
+    },
+    "msds_detail_8": {
+      "ok": true
+    },
+    "msds_detail_15": {
+      "ok": true
+    }
+  },
+  "input": {
+    "location": {
+      "name": "서울",
+      "nx": 60,
+      "ny": 127,
+      "stnId": 108,
+      "regId": "11B00000"
+    },
+    "work_type": "옥외 철골 작업",
+    "work_time": "주간",
+    "materials": [
+      "벤젠"
+    ],
+    "hazard_keywords": [
+      "추락",
+      "지게차"
+    ],
+    "language": "ko"
+  },
+  "weather": {
+    "current": {
+      "error": "Command '['curl', '-sS', '--fail', '--max-time', '12', '-G', 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst', '--data-urlencode', 'ServiceKey=cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==', '--data-urlencode', 'pageNo=1', '--data-urlencode', 'numOfRows=20', '--data-urlencode', 'dataType=JSON', '--data-urlencode', 'base_date=20260329', '--data-urlencode', 'base_time=1000', '--data-urlencode', 'nx=60', '--data-urlencode', 'ny=127']' returned non-zero exit status 28."
+    },
+    "warnings": {
+      "request": {
+        "ServiceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+        "pageNo": 1,
+        "numOfRows": 20,
+        "dataType": "JSON",
+        "stnId": 108,
+        "fromTmFc": "20260328",
+        "toTmFc": "20260329"
+      },
+      "response": {
+        "response": {
+          "header": {
+            "resultCode": "00",
+            "resultMsg": "NORMAL_SERVICE"
+          },
+          "body": {
+            "dataType": "JSON",
+            "items": {
+              "item": [
+                {
+                  "stnId": "108",
+                  "title": "[특보] 제03-151호 : 2026.03.28.10:00 / 건조주의보 발표 (*)",
+                  "tmFc": 202603281000,
+                  "tmSeq": 151
+                }
+              ]
+            },
+            "pageNo": 1,
+            "numOfRows": 20,
+            "totalCount": 1
+          }
+        }
+      }
+    },
+    "impact": {
+      "heatwave": {
+        "request": {
+          "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+          "pageNo": 1,
+          "numOfRows": 10,
+          "dataType": "JSON",
+          "regId": "11B00000",
+          "tm": "20260329"
+        },
+        "response": {
+          "response": {
+            "header": {
+              "resultCode": "03",
+              "resultMsg": "NO_DATA"
+            }
+          }
+        }
+      },
+      "coldwave": {
+        "request": {
+          "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+          "pageNo": 1,
+          "numOfRows": 10,
+          "dataType": "JSON",
+          "regId": "11B00000",
+          "tm": "20260329"
+        },
+        "response": {
+          "response": {
+            "header": {
+              "resultCode": "03",
+              "resultMsg": "NO_DATA"
+            }
+          }
+        }
+      }
+    }
+  },
+  "materials": {
+    "list": {
+      "request": {
+        "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+        "searchWrd": "벤젠",
+        "searchCnd": 0,
+        "pageNo": 1,
+        "numOfRows": 3
+      },
+      "header": {
+        "resultCode": "00",
+        "resultMsg": "NORMAL SERVICE."
+      },
+      "items": [
+        {
+          "chemId": "001008",
+          "chemNameKor": "벤젠",
+          "casNo": "71-43-2",
+          "lastDate": "2025-09-17"
+        },
+        {
+          "chemId": "001089",
+          "chemNameKor": "에틸벤젠",
+          "casNo": "100-41-4",
+          "lastDate": "2025-08-08"
+        },
+        {
+          "chemId": "001633",
+          "chemNameKor": "아조벤젠",
+          "casNo": "103-33-3",
+          "lastDate": "2025-07-23"
+        }
+      ]
+    },
+    "details": [
+      {
+        "detailNo": 2,
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL SERVICE."
+        },
+        "items": [
+          {
+            "msdsItemNameKor": "유해성·위험성 분류",
+            "itemDetail": "인화성 액체 : 구분2|피부 부식성/피부 자극성 : 구분2|심한 눈 손상성/눈 자극성 : 구분2|생식세포 변이원성 : 구분1A|발암성 : 구분1B|특정표적장기 독성(반복 노출) : 구분1|흡인 유해성 : 구분1|만성 수생환경 유해성 : 구분2"
+          },
+          {
+            "msdsItemNameKor": "예방조치문구를 포함한 경고표지 항목",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "그림문자",
+            "itemDetail": "GHS02.gif|GHS07.gif|GHS08.gif|GHS09.gif"
+          },
+          {
+            "msdsItemNameKor": "신호어",
+            "itemDetail": "위험"
+          },
+          {
+            "msdsItemNameKor": "유해·위험문구",
+            "itemDetail": "H225 : 고인화성 액체 및 증기|H304 : 삼켜서 기도로 유입되면 치명적일 수 있음|H315 : 피부에 자극을 일으킴|H319 : 눈에 심한 자극을 일으킴|H340 : 유전적인 결함을 일으킬 수 있음(유전적인 결함을 일으키는 노출 경로를 기재한다. 단, 다른 노출경로에 의해 유전적인 결함을 일으키지 않는다는 결정적인 증거가 있는 경우에 한한다.)|H350 : 암을 일으킬 수 있음(암을 일으키는 노출 경로를 기재한다. 단, 다른 노출경로에 의해 암을 일으키지 않는다는 결정적인 증거가 있는 경우에 한한다.)|H372 : 장기간 또는 반복노출 되면 장기(영향을 받는 것으로 알려진 모든 장기를 명시한다.)에 손상을 일으킴(특정표적장기독성(반복노출)을 일으키는 노출 경로를 기재. 단, 다른 노출경로에 의해 특정표적장기독성(반복노출)을 일으키지 않는다는 결정적인 증거가 있는 경우에 한한다.)|H411 : 장기적인 영향에 의해 수생생물에게 유독함"
+          },
+          {
+            "msdsItemNameKor": "예방조치문구",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "예방",
+            "itemDetail": "P201 : 사용 전 취급 설명서를 확보하시오.|P202 : 모든 안전 예방조치 문구를 읽고 이해하기 전에는 취급하지 마시오.|P210 : 열,고온의 표면,스파크,화염 및 그 밖의 점화원으로부터 멀리하시오.금연|P233 : 용기를 단단히 밀폐하시오.|P240 : 용기와 수용설비를 접지하시오.|P241 : 방폭형[전기/환기/조명/…]설비를 사용하시오.|P242 : 스파크가 발생하지 않는 도구를 사용하시오.|P243 : 정전기 방지 조치를 취하시오.|P260 : 분진/흄/가스/미스트/증기/스프레이를(을)흡입하지 마시오.|P264 : 취급 후에는…을(를)철저히 씻으시오.|P270 : 이 제품을 사용할 때에는 먹거나,마시거나 흡연하지 마시오.|P273 : 환경으로 배출하지 마시오.|P280 : 보호장갑/보호의/보안경/안면보호구를(을)착용하시오."
+          },
+          {
+            "msdsItemNameKor": "대응",
+            "itemDetail": "P301+P310 : 삼켰다면:즉시 의료기관/의사/…의 진찰을 받으시오.|P302+P352 : 피부에 묻으면:다량의 물/…(으)로 씻으시오.|P303+P361+P353 : 피부(또는 머리카락)에 묻으면:오염된 모든 의류를 즉시 벗으시오.피부를 물로 씻으시오[또는 샤워하시오].|P305+P351+P338 : 눈에 묻으면:몇 분간 물로 조심해서 씻으시오.가능하면 콘택트렌즈를 제거하시오.계속 씻으시오.|P308+P313 : 노출되거나 노출이 우려되면:의학적인 조치/조언을 받으시오.|P314 : 불편함을 느끼면 의학적인 조치/조언을 받으시오.|P321 : …처치를 하시오.|P331 : 토하게 하지 마시오.|P332+P313 : 피부 자극이 나타나면:의학적인 조치/조언을 받으시오.|P337+P313 : 눈에 자극이 지속되면:의학적인 조치/조언을 받으시오.|P362+P364 : 오염된 의류를 벗고 다시 사용 전 세척하시오.|P370+P378 : 화재 시:불을 끄기 위해…을(를)사용하시오.|P391 : 누출물을 모으시오."
+          },
+          {
+            "msdsItemNameKor": "저장",
+            "itemDetail": "P403+P235 : 환기가 잘 되는 곳에 보관하시오.저온으로 유지하시오.|P405 : 잠금장치를 하여 저장하시오."
+          },
+          {
+            "msdsItemNameKor": "폐기",
+            "itemDetail": "P501 : 폐기물 관련 법령에 따라 내용물/용기를 폐기하시오"
+          },
+          {
+            "msdsItemNameKor": "유해성·위험성 분류기준에 포함되지 않는 기타 유해성·위험성(예. 분진폭발 위험성)",
+            "itemDetail": "자료없음"
+          }
+        ]
+      },
+      {
+        "detailNo": 8,
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL SERVICE."
+        },
+        "items": [
+          {
+            "msdsItemNameKor": "화학물질의 노출기준, 생물학적 노출기준 등",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "국내규정",
+            "itemDetail": "|TWA : 0.5ppm |STEL : 2.5ppm(허용기준)"
+          },
+          {
+            "msdsItemNameKor": "ACGIH 규정",
+            "itemDetail": "TWA 0.5 ppm  STEL 2.5 ppm"
+          },
+          {
+            "msdsItemNameKor": "생물학적 노출기준",
+            "itemDetail": "|15 (Methyl chloroform in endexhaled air, prior to last shift of workweek)\n10mg/l(Trichloroacetic acid in urine, end of workweek)"
+          },
+          {
+            "msdsItemNameKor": "기타 노출기준",
+            "itemDetail": "자료없음"
+          },
+          {
+            "msdsItemNameKor": "적절한 공학적 관리",
+            "itemDetail": "|공정격리, 국소배기를 사용하거나, 공기수준을 노출기준 이하로 조절하는 다른 공학적 관리를 하시오.||이 물질을 저장하거나 사용하는 설비는 세안설비와 안전 샤워를 설치하시오."
+          },
+          {
+            "msdsItemNameKor": "개인보호구",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "호흡기 보호",
+            "itemDetail": "|노출되는 물질의 물리화학적 특성에 맞는 한국산업안전보건공단의 인증을 필한 호흡용 보호구를 착용하시오"
+          },
+          {
+            "msdsItemNameKor": "눈 보호",
+            "itemDetail": "|눈의 자극을 일으키거나 기타 건강상의 장해를 일으키는 증기 상태의 유기물질로부터 눈을 보호하기 위해서는 보안경 혹은 통기성 고글을 착용하시오||근로자가 접근이 용이한 위치에 긴급세척시설(샤워식) 및 세안설비를 설치하시오"
+          },
+          {
+            "msdsItemNameKor": "손 보호",
+            "itemDetail": "|화학물질의 물리적 및 화학적 특성을 고려하여 적절한 재질의 보호장갑을 착용하시오"
+          },
+          {
+            "msdsItemNameKor": "신체 보호",
+            "itemDetail": "|화학물질의 물리적 및 화학적 특성을 고려하여 적절한 재질의 보호의복을 착용하시오"
+          }
+        ]
+      },
+      {
+        "detailNo": 15,
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL SERVICE."
+        },
+        "items": [
+          {
+            "msdsItemNameKor": "산업안전보건법에 의한 규제",
+            "itemDetail": "작업환경측정대상물질 (측정주기 : 6개월)|관리대상유해물질 |특수건강진단대상물질 (진단주기 : 6개월)|특별관리물질 |공정안전보고서(PSM) 제출 대상물질 |노출기준설정물질|허용기준설정물질"
+          },
+          {
+            "msdsItemNameKor": "화학물질관리법에 의한 규제",
+            "itemDetail": "사고대비물질 |인체만성유해성물질"
+          },
+          {
+            "msdsItemNameKor": "화학물질의 등록 및 평가 등에 관한 법률 규제",
+            "itemDetail": "기존화학물질 |인체만성유해성물질 |중점관리물질"
+          },
+          {
+            "msdsItemNameKor": "위험물안전관리법에 의한 규제",
+            "itemDetail": "제4류 인화성액체 제1석유류 비수용성액체 (200L)"
+          },
+          {
+            "msdsItemNameKor": "폐기물관리법에 의한 규제",
+            "itemDetail": "지정폐기물"
+          },
+          {
+            "msdsItemNameKor": "기타 국내 및 외국법에 의한 규제",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "국내규제",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "기타 국내 규제",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "국외규제",
+            "itemDetail": ""
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(OSHA 규정)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(CERCLA 규정)",
+            "itemDetail": "4.53599kg (10lb)"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(EPCRA 302 규정)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(EPCRA 304 규정)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(EPCRA 313 규정)",
+            "itemDetail": "해당됨"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(로테르담협약물질)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(스톡홀름협약물질)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "미국관리정보(몬트리올의정서물질)",
+            "itemDetail": "해당없음"
+          },
+          {
+            "msdsItemNameKor": "EU 분류정보(확정분류결과)",
+            "itemDetail": "Flam. Liq. 2\nCarc. 1A\nMuta. 1B\nAsp. Tox. 1\nSTOT RE 1\nSkin Irrit. 2\nEye Irrit. 2"
+          },
+          {
+            "msdsItemNameKor": "EU 분류정보(위험문구)",
+            "itemDetail": "H225\nH350\nH340\nH304\nH372 **\nH315\nH319"
+          },
+          {
+            "msdsItemNameKor": "EU 분류정보(안전문구)",
+            "itemDetail": "해당없음"
+          }
+        ]
+      }
+    ]
+  },
+  "cases": {
+    "disaster": {
+      "request": {
+        "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+        "pageNo": 1,
+        "numOfRows": 5,
+        "business": "제조업",
+        "keyword": "추락",
+        "callApiId": 1060
+      },
+      "response": {
+        "body": {
+          "pageNo": 1,
+          "totalCount": 6273,
+          "numOfRows": 5,
+          "items": {
+            "item": [
+              {
+                "business": "건설업",
+                "contents": "인천시 미추홀구 소재 현장에서 재해자가 이동식 비계에 올라가 미장 작업을 하던 중  개방된 창호 개구부를 통해 지상 1층 바닥(높이: 24.4m)으로 떨어짐",
+                "atcflcnt": 1,
+                "keyword": "이동식 비계에서 떨어짐",
+                "boardno": "20260320133457359SS7"
+              },
+              {
+                "business": "건설업",
+                "contents": "강원도 인제군 소재 OOO 공사현장에서 재해자가 철골 구조물 상부에서 철판 설치 작업을 하던 중,철판을 고정한 클램프가 이탈하면서 중심을 잃고 바닥으로 떨어짐",
+                "atcflcnt": 1,
+                "keyword": "철판설치 작업 중 추락",
+                "boardno": "20260320133358ILB4RM"
+              },
+              {
+                "business": "건설업",
+                "contents": "서울시 소재 OO 공사현장에서 옥탑층 엘리베이터 피트 외벽의 비계를 설치하지 않은 공간에서거푸집 설치 작업을 하던 중, 지하 1층 바닥으로 떨어짐",
+                "atcflcnt": 1,
+                "keyword": "거푸집 설치 작업 중 추락",
+                "boardno": "20260320133308L7EDRX"
+              },
+              {
+                "business": "건설업",
+                "contents": "전남 고흥군 소재 OOOO에서 굴착기가 터파기 작업 후 경사로를  내려오던 중, 궤도가 측구에 빠져 굴착기가 넘어진 후 전도됨",
+                "atcflcnt": 1,
+                "keyword": "경사로 이동 중 굴착기 전도",
+                "boardno": "202603201332075TXH1U"
+              },
+              {
+                "business": "건설업",
+                "contents": "울산 울주군에 소재한 OO철거공사 현장에서 천장크레인을 철거하던 중, 레일이 완전히 절단되지 않은 상태로 해체 작업을 진행하던 과정에서 분리하려던 레일과 연결된 다른 레일이 함께 낙하(4.5M)하며 반동하였고 그 여파로 하부에 있던 재해자를 타격함",
+                "atcflcnt": 1,
+                "keyword": "천장크레인 해체 중 낙하물에 맞음",
+                "boardno": "20260320133113N6ERXP"
+              }
+            ]
+          }
+        },
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL_CODE"
+        }
+      }
+    },
+    "fatal": {
+      "request": {
+        "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+        "pageNo": 1,
+        "numOfRows": 5,
+        "callApiId": 1040
+      },
+      "response": {
+        "body": {
+          "pageNo": 1,
+          "totalCount": 2776,
+          "numOfRows": 5,
+          "items": {
+            "item": [
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260327182759HB42A6&bbsAtcflNo=E0802000030001' data-filename='0325경기안성.jpg' style='width: 931px;' data-tboard-img-cvrt='Y'></p><p><br></p><p>2026. 3. 25. (수), 11:21경경기 안성시 소재 공사현장에서배수관 매설 작업 중굴착면의 토사가 붕괴되어 재해자가 매몰(사망 1명)※ 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다.</p><div><br></div>",
+                "keyword": "[3/25, 경기 안성시] 굴착면의 토사가 붕괴되어 매몰",
+                "arno": "20260327182759HB42A6"
+              },
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260327182641GU83SZ&bbsAtcflNo=E0802000030001' data-filename='0323충북청주.jpg' style='width: 931px;' data-tboard-img-cvrt='Y'></p><p><br></p><p>2026. 3. 23. (월), 13:44경충북 청주시 소재 공사현장에서2층 철골보에 올라간 재해자가고소작업대로 이동하던 중 지상으로 떨어짐(사망 1명, 높이: 5.7m)※ 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다.</p><div><br></div>",
+                "keyword": "[3/23, 충북 청주시] 철골 보에서 고소작업대로 이동하던 중 떨어짐",
+                "arno": "20260327182641GU83SZ"
+              },
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260325094927T6EGDB&bbsAtcflNo=E0802000030001' data-filename='image.png' style='width: 100%;' data-tboard-img-cvrt='Y'></p><p></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span lang='EN-US' style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Arial;color:#333333;mso-font-kerning:0pt'>2026. 3. 22. (</span><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Arial;color:#333333;mso-font-kerning:0pt'>일<span lang='EN-US'>), 11:00</span>경</span></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span lang='EN-US' style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Arial;color:#333333;mso-font-kerning:0pt'></span><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>인천광역시 연수구 소재 제조업 사업장 내 캐노피에서</span></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'><br></span></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>재해자가 배관 보온 작업 중<span lang='EN-US'><o:p></o:p></span></span></p><p></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>바닥 마감재가 탈락되며 떨어짐</span></p><p></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span lang='EN-US' style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>(</span><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:굴림;mso-font-kerning:0pt'>사망 <span lang='EN-US'>1</span>명<span lang='EN-US'>)<o:p></o:p></span></span></p><p></p><p class='MsoNormal' align='left' style='margin-bottom: 0cm; line-height: normal; word-break: keep-all;'><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:&quot;맑은 고딕&quot;;color:#333333;mso-font-kerning:0pt'>※</span><span style='font-size:14.0pt;mso-fareast-font-family:&quot;맑은 고딕&quot;;mso-fareast-theme-font:minor-latin;mso-bidi-font-family:Arial;color:#333333;mso-font-kerning:0pt'> 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다<span lang='EN-US'>.</span></span></p>",
+                "keyword": "[3/22, 인천 연수구] 배관 보온 작업 중 떨어짐",
+                "arno": "20260325094927T6EGDB"
+              },
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260321105944Y6XF06&bbsAtcflNo=E0802000030001' data-filename='0319울산남구.jpg' style='width: 931px;' data-tboard-img-cvrt='Y'></p><p><br></p><p>2026. 3. 19. (목), 10:09경울산 남구 부두 야적장에서도보로 이동하던 재해자가운행 중인 지게차에 부딪힘(사망 1명)※ 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다.</p><div><br></div>",
+                "keyword": "[3/19, 울산 남구] 운행 중인 지게차에 부딪힘",
+                "arno": "20260321105944Y6XF06"
+              },
+              {
+                "contents": "<p><img src='https://portal.kosha.or.kr/api/compn24/auth/stdtboard/getImage.do?bbsId=B2025021314108&pstNo=20260321105857CWI1SL&bbsAtcflNo=E0802000030001' data-filename='0317충북단양군.jpg' style='width: 931px;' data-tboard-img-cvrt='Y'>.</p><p><br></p><p>2026. 3. 17. (화), 08:55경충북 단양군 소재 공사현장에서재해자가 천장 조명 설치 작업 중밟은 천장 마감재가 파손되어 바닥으로 떨어짐(사망 1명, 높이: 7.5m)※ 위 내용은 신고 및 현재 파악된 내용으로 조사결과에 따라 변경될 수 있습니다.</p><div><br></div>",
+                "keyword": "[3/17, 충북 단양군] 천장에 올라가 작업 중 떨어짐",
+                "arno": "20260321105857CWI1SL"
+              }
+            ]
+          }
+        },
+        "header": {
+          "resultCode": "00",
+          "resultMsg": "NORMAL_CODE"
+        }
+      }
+    }
+  },
+  "legal": {
+    "response": {
+      "body": {
+        "items": {
+          "item": []
+        }
+      }
+    },
+    "error": "Command '['curl', '-sS', '--fail', '--max-time', '12', '-G', 'https://apis.data.go.kr/B552468/srch/smartSearch', '--data-urlencode', 'serviceKey=cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==', '--data-urlencode', 'pageNo=1', '--data-urlencode', 'numOfRows=5', '--data-urlencode', 'searchValue=추락', '--data-urlencode', 'category=0', '--data-urlencode', 'dataType=JSON']' returned non-zero exit status 28."
+  },
+  "guides": {
+    "request": {
+      "serviceKey": "cGnyjDsjAqd6Bb1Q8GIvLq2b0NCzxq9x2zk8LsuqlJYN7QK6d4G3S7LhXylldwNKFYvz1SRT/WjCutEL4wa/MQ==",
+      "ctgr04_kr": "Y",
+      "pageNo": 1,
+      "numOfRows": 5,
+      "callApiId": 1030
+    },
+    "response": {
+      "body": {
+        "pageNo": 1,
+        "totalCount": 28941,
+        "numOfRows": 5,
+        "items": {
+          "item": [
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list4/master-detail4?medSeq=52123",
+              "MED_COMPY_DY": "2026-03-24",
+              "MED_SJ_NM": "중대산업사고 예방 가이드"
+            },
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=52239",
+              "MED_COMPY_DY": "2026-03-23",
+              "MED_SJ_NM": "(비계, 추락)계절별, 시기별 위험요인 홍보 포스터(4월)"
+            },
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=52261",
+              "MED_COMPY_DY": "2026-03-23",
+              "MED_SJ_NM": "(밀폐환기)계절별, 시기별 위험요인 홍보 포스터(6월)"
+            },
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=52238",
+              "MED_COMPY_DY": "2026-03-23",
+              "MED_SJ_NM": "(지게차 부딪힘) 계절별, 시기별 위험요인 홍보 포스터(3월)"
+            },
+            {
+              "MED_URL": "https://portal.kosha.or.kr/archive/cent-archive/master-arch/master-list1/master-detail1?medSeq=52246",
+              "MED_COMPY_DY": "2026-03-23",
+              "MED_SJ_NM": "(발열성질환) 계절별, 시기별 위험요인 홍보 포스터(10월)"
+            }
+          ]
+        }
+      },
+      "header": {
+        "resultCode": "00",
+        "resultMsg": "NORMAL_CODE"
+      }
+    }
+  },
+  "weather_legal_links": [],
+  "risk_summary": {
+    "level": "medium",
+    "reasons": [
+      "유해물질 취급 정보 존재",
+      "유사 재해사례 존재",
+      "최근 사고사망 속보 존재"
+    ]
+  },
+  "briefings": {
+    "admin": {
+      "title": "관리자용 브리핑",
+      "risk_level": "medium",
+      "actions": []
+    },
+    "worker": {
+      "title": "작업자용 브리핑",
+      "risk_level": "medium",
+      "message": "유해물질 취급 정보 존재 / 유사 재해사례 존재 / 최근 사고사망 속보 존재"
+    },
+    "foreigner": {
+      "title": "Foreigner Briefing",
+      "risk_level": "medium",
+      "message": "Check weather risks, legal precautions, and material safety instructions before work."
+    }
+  }
+}
