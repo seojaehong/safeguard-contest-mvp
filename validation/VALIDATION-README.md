@@ -17,3 +17,5 @@
 - `runs/*.json` : 실행 산출물 원본
 - `VALIDATION-LOG.md` : 실행 요약 누적
 - `LATEST.md` : 가장 최근 판정 요약
+- `CONTEST-TEST-MATRIX-2026-03-31.md` : 공모전 기준 테스트 표
+- `DEFENSIVE-UPGRADE-ROADMAP-2026-03-31.md` : 감점 방지/방어 기능 업그레이드 방향
