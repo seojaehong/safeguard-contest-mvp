@@ -1,4 +1,4 @@
-import { DetailRecord, SearchResult } from "./types";
+import { AskResponse, DetailRecord, SearchResult } from "./types";
 
 export const mockDetails: DetailRecord[] = [
   {
@@ -14,6 +14,8 @@ export const mockDetails: DetailRecord[] = [
       "교육/보호구/위험성평가 문서 여부 점검"
     ],
     sourceUrl: "https://www.law.go.kr/",
+    sourceLabel: "법제처 법령",
+    sourceSystem: "mock",
     tags: ["산안법", "안전조치", "위험성평가"]
   },
   {
@@ -29,6 +31,8 @@ export const mockDetails: DetailRecord[] = [
       "사고 후 대응보다 사전 증빙체계가 중요"
     ],
     sourceUrl: "https://www.law.go.kr/",
+    sourceLabel: "법제처 법령",
+    sourceSystem: "mock",
     tags: ["중대재해", "경영책임자", "도급"]
   },
   {
@@ -44,6 +48,8 @@ export const mockDetails: DetailRecord[] = [
       "실질 지휘·감독 관계 존재 여부"
     ],
     sourceUrl: "https://www.law.go.kr/",
+    sourceLabel: "법제처 판례",
+    sourceSystem: "mock",
     tags: ["판례", "도급", "원청책임"]
   },
   {
@@ -59,6 +65,8 @@ export const mockDetails: DetailRecord[] = [
       "증빙기록의 유무가 결과에 영향"
     ],
     sourceUrl: "https://www.law.go.kr/",
+    sourceLabel: "법제처 판례",
+    sourceSystem: "mock",
     tags: ["판례", "안전교육", "보호구"]
   }
 ];
@@ -69,6 +77,91 @@ export const mockSearchResults: SearchResult[] = mockDetails.map((item) => ({
   title: item.title,
   summary: item.summary,
   citation: item.citation,
-  sourceLabel: item.type === "law" ? "법제처 법령" : "법제처 판례",
+  sourceLabel: item.sourceLabel || (item.type === "law" ? "법제처 법령" : "법제처 판례"),
+  sourceSystem: item.sourceSystem || "mock",
+  sourceUrl: item.sourceUrl,
   tags: item.tags
 }));
+
+const defaultQuestion = "서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 오후 강풍 예보. 오늘 TBM과 위험성평가 초안을 만들어줘.";
+
+function inferScenario(question: string) {
+  const normalized = question.trim() || defaultQuestion;
+  const workerMatch = normalized.match(/(\d+)\s*명/);
+  const workerCount = workerMatch ? Number(workerMatch[1]) : 5;
+
+  return {
+    siteName: normalized.includes("성수") ? "서울 성수동 근린생활시설 현장" : "대표 데모 현장",
+    workSummary: normalized,
+    workerCount,
+    weatherNote: normalized.includes("강풍") ? "오후 강풍 예보, 이동식 비계 흔들림 주의" : "기본 위험요인 중심 점검"
+  };
+}
+
+export function buildMockAskResponse(question: string, citations: SearchResult[], mode: AskResponse["mode"], statusDetail: string): AskResponse {
+  const scenario = inferScenario(question);
+
+  return {
+    question: question.trim() || defaultQuestion,
+    answer: [
+      `${scenario.siteName}의 주요 위험은 이동식 비계 작업 중 추락과 강풍에 따른 전도 가능성입니다.`,
+      "MVP 데모에서는 현장 설명 한 줄만 입력해도 위험 요약, 위험성평가 초안, TBM 브리핑, TBM 일지 초안을 한 번에 생성하는 흐름을 보여줍니다.",
+      "실무에서는 작업 전 비계 고정상태, 추락방호, 작업중지 기준, 작업자 역할 분담을 먼저 확인해야 합니다."
+    ].join("\n\n"),
+    practicalPoints: [
+      "작업 시작 전 비계 바퀴 고정과 아웃트리거 상태를 재확인한다",
+      "풍속 상승 시 외벽 가장자리 작업을 즉시 중지하는 기준을 공유한다",
+      "작업자 5명 전원이 추락방지구와 보호구 착용 여부를 상호 점검한다"
+    ],
+    citations,
+    mode,
+    scenario,
+    riskSummary: {
+      title: "이동식 비계 외벽 도장 작업",
+      riskLevel: "상",
+      topRisk: "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+      immediateActions: [
+        "작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검",
+        "풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기",
+        "작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인"
+      ]
+    },
+    deliverables: {
+      riskAssessmentDraft: [
+        "1. 작업명: 이동식 비계를 활용한 외벽 도장 작업",
+        "2. 주요 유해·위험요인: 추락, 비계 전도, 도장자재 낙하, 강풍으로 인한 자세 불안정",
+        "3. 위험성 수준: 상",
+        "4. 감소대책: 비계 점검표 확인, 바퀴 잠금 및 수평 확보, 추락방지구 착용, 강풍 시 작업중지, 하부 출입통제",
+        "5. 확인 책임자: 현장소장 / 작업반장"
+      ].join("\n"),
+      tbmBriefing: [
+        "오늘 작업은 외벽 도장 작업이며 이동식 비계를 사용합니다.",
+        "가장 큰 위험은 추락과 강풍으로 인한 비계 흔들림입니다.",
+        "비계 고정상태와 발판 상태를 먼저 확인하고, 보호구 미착용자는 작업에 투입하지 않습니다.",
+        "돌풍이 불거나 비계 흔들림이 느껴지면 즉시 '작업중지'를 선언하고 지상으로 이동합니다.",
+        "하부 통제구역 밖 인원 접근을 막고 자재 낙하에 주의합니다."
+      ].join("\n"),
+      tbmLogDraft: [
+        "TBM 일시: 2026-03-29 08:00",
+        `대상 작업: ${scenario.workSummary}`,
+        `참석 인원: ${scenario.workerCount}명`,
+        "전달 사항: 비계 점검, 추락방지구 착용, 강풍 시 작업중지, 하부 출입통제",
+        "작업자 확인: 전원 구두 복창 및 서명 예정"
+      ].join("\n"),
+      kakaoMessage: [
+        "[오늘 작업 안전공지]",
+        `현장: ${scenario.siteName}`,
+        "작업: 이동식 비계 외벽 도장",
+        "핵심위험: 강풍 시 비계 흔들림 및 추락",
+        "필수조치: 비계 바퀴 잠금 확인 / 안전대-보호구 착용 / 돌풍 시 즉시 작업중지 / 하부 출입통제",
+        "TBM 내용 확인 후 작업 시작 바랍니다."
+      ].join("\n")
+    },
+    status: {
+      lawgo: mode === "live" ? "live" : mode === "fallback" ? "fallback" : "mock",
+      ai: mode === "live" ? "live" : mode === "fallback" ? "fallback" : "mock",
+      summary: mode === "live" ? "라이브 응답" : mode === "fallback" ? "라이브 실패 후 데모 응답으로 전환" : "데모 응답",
+      detail: statusDetail
+    }
+  };
+}

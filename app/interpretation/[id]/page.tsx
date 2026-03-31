@@ -1,15 +1,15 @@
 import { notFound } from "next/navigation";
 import { loadDetail } from "@/lib/search";
 
-export default async function PrecedentDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function InterpretationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const item = await loadDetail(id);
-  if (!item || item.type !== "precedent") return notFound();
+  if (!item || item.type !== "interpretation") return notFound();
 
   return (
     <main className="container grid">
       <div className="row">
-        <span className="badge">판례 상세</span>
+        <span className="badge">해석례 상세</span>
         {item.citation ? <span className="badge">{item.citation}</span> : null}
         {item.sourceLabel ? <span className="badge">{item.sourceLabel}</span> : null}
       </div>
@@ -17,7 +17,7 @@ export default async function PrecedentDetailPage({ params }: { params: Promise<
         <div className="h2">{item.title}</div>
         <div className="muted">{item.summary}</div>
         <hr />
-        <div className="h3">판단 포인트</div>
+        <div className="h3">실무 포인트</div>
         <ul>{item.points.map((p) => <li key={p}>{p}</li>)}</ul>
         <hr />
         <div className="h3">요약 본문</div>

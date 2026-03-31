@@ -8,7 +8,11 @@ export default async function LawDetailPage({ params }: { params: Promise<{ id: 
 
   return (
     <main className="container grid">
-      <div className="row"><span className="badge">법령 상세</span>{item.citation ? <span className="badge">{item.citation}</span> : null}</div>
+      <div className="row">
+        <span className="badge">법령 상세</span>
+        {item.citation ? <span className="badge">{item.citation}</span> : null}
+        {item.sourceLabel ? <span className="badge">{item.sourceLabel}</span> : null}
+      </div>
       <section className="card list">
         <div className="h2">{item.title}</div>
         <div className="muted">{item.summary}</div>
