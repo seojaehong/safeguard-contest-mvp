@@ -1,20 +1,17 @@
 import OpenAI from "openai";
 import { AskResponse, SearchResult } from "./types";
+import { buildMockAskResponse } from "./mock-data";
 
 const apiKey = process.env.OPENAI_API_KEY;
 
 export async function generateAnswer(question: string, citations: SearchResult[]): Promise<AskResponse> {
   if (!apiKey) {
-    return {
-      answer: `질문: ${question}\n\n현재는 데모 모드라 실제 모델 호출 없이, 검색된 법령/판례를 바탕으로 답변 형식만 보여줍니다. 내일 API 키와 실데이터를 연결하면 실제 근거 기반 응답으로 바뀝니다.`,
-      practicalPoints: [
-        "관련 법령과 판례를 먼저 좁혀서 보여준다",
-        "핵심 체크포인트를 실무 언어로 요약한다",
-        "답변마다 출처를 붙인다"
-      ],
+    return buildMockAskResponse(
+      question,
       citations,
-      mode: "mock"
-    };
+      "mock",
+      "OPENAI_API_KEY가 없어 AI 호출 없이 데모 산출물을 구성했습니다."
+    );
   }
 
   const client = new OpenAI({ apiKey });
@@ -34,14 +31,19 @@ export async function generateAnswer(question: string, citations: SearchResult[]
   });
 
   const answer = response.output_text || "답변을 생성하지 못했습니다.";
-  return {
-    answer,
-    practicalPoints: [
-      "적용 조문과 판례를 함께 본다",
-      "실무 문서/체크리스트 반영 포인트를 별도로 정리한다",
-      "최종 법률 판단은 전문가 검토가 필요함을 표시한다"
-    ],
+  const live = buildMockAskResponse(
+    question,
     citations,
-    mode: "live"
+    "live",
+    "Law.go와 AI 응답을 결합한 라이브 모드입니다."
+  );
+  return {
+    ...live,
+    answer,
+    status: {
+      ...live.status,
+      lawgo: "live" as const,
+      ai: "live" as const
+    }
   };
 }
