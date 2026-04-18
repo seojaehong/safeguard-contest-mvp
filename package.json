@@ -9,7 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "dryrun:api": "./scripts/run_daily_dryrun.sh",
-    "dryrun:documents": "./scripts/run_daily_document_dryrun.sh"
+    "dryrun:documents": "./scripts/run_daily_document_dryrun.sh",
+    "publish:dryrun": "node ./scripts/publish_document_dryrun_snapshot.mjs"
   },
   "dependencies": {
     "korean-law-mcp": "^2.1.6",

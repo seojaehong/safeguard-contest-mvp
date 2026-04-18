@@ -3,10 +3,13 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PORT="${SAFETYGUARD_PORT:-3021}"
+COUNT="${SAFETYGUARD_DRYRUN_COUNT:-100}"
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
-OUT_DIR="$ROOT/logs/dryrun-documents/$RUN_ID"
+OUT_DIR="$ROOT/logs/dryrun-api/$RUN_ID"
 PID_FILE="$OUT_DIR/server.pid"
 SERVER_LOG="$OUT_DIR/server.log"
+SUMMARY="$OUT_DIR/summary.json"
+DETAILS="$OUT_DIR/details.json"
 
 mkdir -p "$OUT_DIR"
 
@@ -27,7 +30,7 @@ PORT="$PORT" npm run start > "$SERVER_LOG" 2>&1 &
 echo $! > "$PID_FILE"
 
 python3 - <<PY
-import time, urllib.request
+import time, urllib.request, urllib.error
 url = 'http://127.0.0.1:${PORT}/api/search?q=test'
 last = None
 for _ in range(120):
@@ -44,10 +47,9 @@ raise SystemExit(1)
 PY
 
 SAFETYGUARD_BASE_URL="http://127.0.0.1:${PORT}" \
+SAFETYGUARD_DRYRUN_COUNT="$COUNT" \
 SAFETYGUARD_OUT_DIR="$OUT_DIR" \
-node "$ROOT/scripts/dryrun_document_runner.mjs" > "$OUT_DIR/runner.log" 2>&1
+node "$ROOT/scripts/dryrun_api_runner.mjs" > "$OUT_DIR/runner.log" 2>&1
 
-node "$ROOT/scripts/publish_document_dryrun_snapshot.mjs" > "$OUT_DIR/publish.log" 2>&1
-
-echo "$OUT_DIR/report.md"
-echo "$OUT_DIR/summary.json"
+echo "$SUMMARY"
+echo "$DETAILS"
