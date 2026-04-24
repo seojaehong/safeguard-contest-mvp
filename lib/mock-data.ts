@@ -83,6 +83,25 @@ export const mockSearchResults: SearchResult[] = mockDetails.map((item) => ({
   tags: item.tags
 }));
 
+export function buildSourceMix(citations: SearchResult[]): NonNullable<AskResponse["sourceMix"]> {
+  const counts = citations.reduce<Record<string, number>>((acc, item) => {
+    const key = item.sourceSystem || "unknown";
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  return {
+    total: citations.length,
+    counts,
+    koreanLawMcp: {
+      enabled: false,
+      configured: false,
+      keySource: "none",
+      summary: "korean-law-mcp 비활성화"
+    }
+  };
+}
+
 const defaultQuestion = "서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 오후 강풍 예보. 오늘 TBM과 위험성평가 초안을 만들어줘.";
 
 function inferScenario(question: string) {
@@ -114,6 +133,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       "작업자 5명 전원이 추락방지구와 보호구 착용 여부를 상호 점검한다"
     ],
     citations,
+    sourceMix: buildSourceMix(citations),
     mode,
     scenario,
     riskSummary: {
@@ -161,7 +181,8 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       lawgo: mode === "live" ? "live" : mode === "fallback" ? "fallback" : "mock",
       ai: mode === "live" ? "live" : mode === "fallback" ? "fallback" : "mock",
       summary: mode === "live" ? "라이브 응답" : mode === "fallback" ? "라이브 실패 후 데모 응답으로 전환" : "데모 응답",
-      detail: statusDetail
+      detail: statusDetail,
+      policyNote: "실 API 호출은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
     }
   };
 }

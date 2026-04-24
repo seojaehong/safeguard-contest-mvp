@@ -2,6 +2,7 @@ import { AskResponse } from "./types";
 import { generateAnswer } from "./ai";
 import { buildMockAskResponse, mockSearchResults } from "./mock-data";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
+import { summarizeLegalSourceMix } from "./legal-sources";
 
 export async function runSearch(query: string) {
   return searchLegalSources(query);
@@ -12,13 +13,18 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const citations = await searchLegalSources(question);
     const response = await generateAnswer(question, citations.slice(0, 6));
     const koreanLawMcpCount = citations.filter((item) => item.sourceSystem === "korean-law-mcp").length;
+    const sourceMix = summarizeLegalSourceMix(citations);
 
     if (!koreanLawMcpCount) {
-      return response;
+      return {
+        ...response,
+        sourceMix
+      };
     }
 
     return {
       ...response,
+      sourceMix,
       status: {
         ...response.status,
         detail: `${response.status.detail} / korean-law-mcp 근거 ${koreanLawMcpCount}건 보강`

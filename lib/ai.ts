@@ -3,6 +3,43 @@ import { AskResponse, SearchResult } from "./types";
 import { buildMockAskResponse } from "./mock-data";
 
 const apiKey = process.env.OPENAI_API_KEY;
+const RESPONSE_TIMEOUT_MS = 20_000;
+const RETRY_DELAY_MS = 500;
+
+async function wait(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withTimeout<T>(task: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  let timeoutHandle: NodeJS.Timeout | undefined;
+
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutHandle = setTimeout(() => reject(new Error(`${label} timeout after ${timeoutMs}ms`)), timeoutMs);
+  });
+
+  try {
+    return await Promise.race([task, timeoutPromise]);
+  } finally {
+    if (timeoutHandle) clearTimeout(timeoutHandle);
+  }
+}
+
+async function withRetry<T>(runner: () => Promise<T>, attempts: number, label: string): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await runner();
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts - 1) {
+        await wait(RETRY_DELAY_MS);
+      }
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(`${label} failed`);
+}
 
 export async function generateAnswer(question: string, citations: SearchResult[]): Promise<AskResponse> {
   if (!apiKey) {
@@ -25,10 +62,19 @@ export async function generateAnswer(question: string, citations: SearchResult[]
     `질문: ${question}`
   ].join("\n");
 
-  const response = await client.responses.create({
-    model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-    input: prompt
-  });
+  const response = await withRetry(
+    () =>
+      withTimeout(
+        client.responses.create({
+          model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+          input: prompt
+        }),
+        RESPONSE_TIMEOUT_MS,
+        "OpenAI response"
+      ),
+    2,
+    "OpenAI response"
+  );
 
   const answer = response.output_text || "답변을 생성하지 못했습니다.";
   const live = buildMockAskResponse(
@@ -43,7 +89,8 @@ export async function generateAnswer(question: string, citations: SearchResult[]
     status: {
       ...live.status,
       lawgo: "live" as const,
-      ai: "live" as const
+      ai: "live" as const,
+      policyNote: "OpenAI 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
     }
   };
 }

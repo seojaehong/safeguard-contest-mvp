@@ -32,6 +32,16 @@ export type AskResponse = {
   answer: string;
   practicalPoints: string[];
   citations: SearchResult[];
+  sourceMix?: {
+    total: number;
+    counts: Record<string, number>;
+    koreanLawMcp: {
+      enabled: boolean;
+      configured: boolean;
+      keySource: "KOREAN_LAW_MCP_LAW_OC" | "LAWGO_OC" | "none";
+      summary: string;
+    };
+  };
   mode: "mock" | "live" | "fallback";
   scenario: {
     siteName: string;
@@ -56,5 +66,6 @@ export type AskResponse = {
     ai: "mock" | "live" | "fallback";
     summary: string;
     detail: string;
+    policyNote?: string;
   };
 };

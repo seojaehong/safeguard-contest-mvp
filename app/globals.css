@@ -32,6 +32,7 @@ body { min-height: 100vh; }
 .subtitle { font-size: 18px; line-height: 1.6; color: var(--muted); margin: 0; }
 .h2 { font-size: 24px; font-weight: 800; margin: 0 0 12px; }
 .h3 { font-size: 18px; font-weight: 700; margin: 0 0 10px; }
+.small-title { max-width: none; font-size: 34px; }
 pre { white-space: pre-wrap; line-height: 1.55; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 .two { display: grid; gap: 16px; grid-template-columns: 1.2fr 0.8fr; }
@@ -41,14 +42,16 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 .badge-risk { border-color: rgba(196, 99, 45, 0.25); color: #7e3412; background: rgba(196, 99, 45, 0.08); }
 .mini-grid { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .stat { display: grid; gap: 6px; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255, 255, 255, 0.5); }
+.action-card { min-height: 132px; align-content: start; }
 .lead { margin: 0; font-size: 17px; line-height: 1.6; }
 .surface { background: rgba(255, 255, 255, 0.44); }
+.citation-item { padding: 14px; border: 1px solid rgba(106, 78, 46, 0.14); border-radius: 16px; background: rgba(255, 255, 255, 0.4); }
+.relevance-note { color: #6a4e2e; line-height: 1.5; }
 @media (max-width: 900px) {
   .two, .three, .risk-grid, .mini-grid { grid-template-columns: 1fr; }
   .title { font-size: 30px; max-width: none; }
+  .small-title { font-size: 28px; }
 }
-
-.dryrun CSS append
 .dryrun-card { border-color: rgba(194, 120, 38, 0.28); }
 .dryrun-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .dryrun-preview-grid { margin-top: 8px; }
