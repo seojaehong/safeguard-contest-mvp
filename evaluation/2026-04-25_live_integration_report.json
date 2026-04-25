@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-04-25T06:07:48.961Z",
+  "integrations": {
+    "lawgo": "live",
+    "gemini": "live",
+    "weather": "live",
+    "work24": "live",
+    "kosha": "fallback"
+  },
+  "representativeAsk": {
+    "ok": true,
+    "citationCount": 6,
+    "status": {
+      "lawgo": "live",
+      "ai": "live",
+      "weather": "live",
+      "work24": "live",
+      "kosha": "fallback"
+    }
+  },
+  "scenarioE2E": {
+    "totalRuns": 4,
+    "okCount": 4,
+    "failCount": 0,
+    "avgMs": 18578,
+    "p95Ms": 21117
+  }
+}

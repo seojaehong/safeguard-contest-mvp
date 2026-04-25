@@ -1,5 +1,6 @@
 export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
+export type IntegrationMode = "mock" | "live" | "fallback";
 
 export type SearchResult = {
   id: string;
@@ -45,9 +46,50 @@ export type AskResponse = {
   mode: "mock" | "live" | "fallback";
   scenario: {
     siteName: string;
+    companyName: string;
+    companyType: string;
     workSummary: string;
     workerCount: number;
     weatherNote: string;
+  };
+  externalData: {
+    weather: {
+      source: "kma";
+      mode: IntegrationMode;
+      locationLabel: string;
+      summary: string;
+      forecastTime?: string;
+      temperatureC?: string;
+      windSpeedMps?: string;
+      precipitationProbability?: string;
+      actions: string[];
+      detail: string;
+    };
+    training: {
+      source: "work24";
+      mode: IntegrationMode;
+      detail: string;
+      recommendations: Array<{
+        title: string;
+        institution: string;
+        startDate: string;
+        endDate: string;
+        cost?: string;
+        target?: string;
+        url: string;
+        reason: string;
+      }>;
+    };
+    kosha: {
+      source: "kosha";
+      mode: IntegrationMode;
+      detail: string;
+      references: Array<{
+        title: string;
+        summary: string;
+        url: string;
+      }>;
+    };
   };
   riskSummary: {
     title: string;
@@ -65,8 +107,11 @@ export type AskResponse = {
     kakaoMessage: string;
   };
   status: {
-    lawgo: "mock" | "live" | "fallback";
-    ai: "mock" | "live" | "fallback";
+    lawgo: IntegrationMode;
+    ai: IntegrationMode;
+    weather: IntegrationMode;
+    work24: IntegrationMode;
+    kosha: IntegrationMode;
     summary: string;
     detail: string;
     policyNote?: string;

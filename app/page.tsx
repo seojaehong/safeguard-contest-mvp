@@ -111,8 +111,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <p className="lead">{data.riskSummary.topRisk}</p>
           <div className="mini-grid">
             <div className="stat">
+              <span className="muted">업체</span>
+              <strong>{data.scenario.companyName}</strong>
+            </div>
+            <div className="stat">
               <span className="muted">현장</span>
               <strong>{data.scenario.siteName}</strong>
+            </div>
+            <div className="stat">
+              <span className="muted">업종</span>
+              <strong>{data.scenario.companyType}</strong>
             </div>
             <div className="stat">
               <span className="muted">인원</span>
@@ -132,6 +140,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className="row">
             <span className="badge">Law.go: {data.status.lawgo}</span>
             <span className="badge">AI: {data.status.ai}</span>
+            <span className="badge">Weather: {data.status.weather}</span>
+            <span className="badge">Work24: {data.status.work24}</span>
+            <span className="badge">KOSHA: {data.status.kosha}</span>
             <span className="badge">Mode: {data.mode}</span>
             <span className="badge">근거 {data.citations.length}건</span>
           </div>
@@ -160,6 +171,41 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <span className="badge">Action {index + 1}</span>
               <strong>{item}</strong>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="three">
+        <div className="card list">
+          <div className="h3">기상청 위험 신호</div>
+          <div className="muted small">{data.externalData.weather.detail}</div>
+          <p className="lead">{data.externalData.weather.summary}</p>
+          <div className="small muted">지역: {data.externalData.weather.locationLabel}{data.externalData.weather.forecastTime ? ` · 예보시각 ${data.externalData.weather.forecastTime}` : ""}</div>
+          <ul>
+            {data.externalData.weather.actions.map((item) => <li key={item}>{item}</li>)}
+          </ul>
+        </div>
+        <div className="card list">
+          <div className="h3">고용24 추천 교육</div>
+          <div className="muted small">{data.externalData.training.detail}</div>
+          {data.externalData.training.recommendations.length ? data.externalData.training.recommendations.map((item) => (
+            <div key={`${item.title}-${item.startDate}`} className="stat">
+              <strong>{item.title}</strong>
+              <span className="muted">{item.institution}</span>
+              <span className="small">{item.startDate} ~ {item.endDate}</span>
+              {item.cost ? <span className="small">{item.cost}</span> : null}
+              <span className="small muted">{item.reason}</span>
+            </div>
+          )) : <p className="muted">추천 교육 결과가 없으면 안전교육 기록 초안 중심으로 시연합니다.</p>}
+        </div>
+        <div className="card list">
+          <div className="h3">KOSHA 공식 가이드</div>
+          <div className="muted small">{data.externalData.kosha.detail}</div>
+          {data.externalData.kosha.references.map((item) => (
+            <a key={item.url} href={item.url} className="citation-item" target="_blank" rel="noreferrer">
+              <strong>{item.title}</strong>
+              <div className="small muted">{item.summary}</div>
+            </a>
           ))}
         </div>
       </section>

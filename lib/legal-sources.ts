@@ -91,6 +91,14 @@ export async function searchLegalSources(query: string): Promise<SearchResult[]>
     2,
     "Law.go search"
   ).catch(() => filterMockResults(query));
+  const fallbackPrimary =
+    primary.length || query.trim() === "산업안전보건법"
+      ? []
+      : await withRetry(
+          () => withTimeout(searchLawGo("산업안전보건법"), SEARCH_TIMEOUT_MS, "Law.go fallback search"),
+          2,
+          "Law.go fallback search"
+        ).catch(() => []);
 
   const secondary = await withRetry(
     () => withTimeout(searchKoreanLawMcp(query), SEARCH_TIMEOUT_MS, "korean-law-mcp search"),
@@ -98,7 +106,7 @@ export async function searchLegalSources(query: string): Promise<SearchResult[]>
     "korean-law-mcp search"
   ).catch(() => []);
 
-  return mergeResults(primary, secondary).slice(0, 10);
+  return mergeResults(mergeResults(primary, fallbackPrimary), secondary).slice(0, 10);
 }
 
 export async function loadLegalDetail(id: string): Promise<DetailRecord | null> {

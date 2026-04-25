@@ -1,5 +1,24 @@
 import { AskResponse, DetailRecord, SearchResult } from "./types";
 
+type ScenarioProfile = {
+  id: string;
+  companyName: string;
+  companyType: string;
+  siteName: string;
+  workName: string;
+  processName: string;
+  weatherNote: string;
+  riskLevel: AskResponse["riskSummary"]["riskLevel"];
+  topRisk: string;
+  hazards: [string, string, string];
+  actions: [string, string, string];
+  educationName: string;
+  educationTargets: string;
+  questions: [string, string, string];
+  educationPoints: [string, string, string];
+  keywords: string[];
+};
+
 export const mockDetails: DetailRecord[] = [
   {
     id: "law-osha-main",
@@ -83,6 +102,145 @@ export const mockSearchResults: SearchResult[] = mockDetails.map((item) => ({
   tags: item.tags
 }));
 
+export const demoScenarioProfiles: ScenarioProfile[] = [
+  {
+    id: "construction-painting",
+    companyName: "세이프건설",
+    companyType: "건설업",
+    siteName: "서울 성수동 근린생활시설 현장",
+    workName: "외벽 도장 작업",
+    processName: "이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제",
+    weatherNote: "오후 강풍 예보, 이동식 비계 흔들림 주의",
+    riskLevel: "상",
+    topRisk: "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+    hazards: [
+      "이동식 비계 승·하강 및 작업발판 이동 중 추락",
+      "강풍 시 비계 전도와 공구·자재 낙하",
+      "지게차 동선 인접 구간에서 작업자 충돌"
+    ],
+    actions: [
+      "작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검",
+      "풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기",
+      "작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인"
+    ],
+    educationName: "외벽 도장 작업 전 위험요인 및 보호구 착용 교육",
+    educationTargets: "외벽 도장 작업자, 신호수, 신규 투입자",
+    questions: [
+      "강풍 시 작업중지 판단은 누가 하고, 팀원에게 어떻게 전파할 것인가?",
+      "이동식 비계 고정상태와 보호구 착용은 누가 상호 확인했는가?",
+      "지게차 동선 접근금지 구역과 신호수 위치를 전원이 알고 있는가?"
+    ],
+    educationPoints: [
+      "강풍 체감 또는 비계 흔들림 발생 시 즉시 작업중지 후 지상 대기",
+      "이동식 비계 작업 전 바퀴 잠금, 발판 고정, 안전난간 상태를 상호 확인",
+      "지게차 접근 시 신호수 지시에 따라 이동하고 작업반경 내 무단 진입 금지"
+    ],
+    keywords: ["성수", "도장", "비계", "강풍", "건설", "외벽"]
+  },
+  {
+    id: "logistics-forklift",
+    companyName: "한빛로지스",
+    companyType: "물류업",
+    siteName: "인천 남동공단 물류센터",
+    workName: "상하차 및 피킹 작업",
+    processName: "지게차 상하차, 랙 피킹, 출하 동선 분리",
+    weatherNote: "실내 작업, 출하량 증가로 동선 혼잡",
+    riskLevel: "상",
+    topRisk: "지게차 동선과 보행 동선이 겹치면서 충돌하거나 적재물이 낙하할 위험",
+    hazards: [
+      "지게차 회차 구간에서 보행자 충돌",
+      "상부 랙 피킹 중 적재물 낙하",
+      "출하 집중 시간대 교차동선 혼잡"
+    ],
+    actions: [
+      "지게차 전용 동선과 보행 동선을 바닥표시와 차단봉으로 분리",
+      "상하차 구간 진입 전 신호수 배치와 후진 경보 확인",
+      "고중량 적재물 하역 전 작업반경을 비우고 낙하위험 구역을 통제"
+    ],
+    educationName: "물류센터 지게차 동선 및 적재물 낙하 예방 교육",
+    educationTargets: "지게차 운전자, 피킹 작업자, 신규 출하 인력",
+    questions: [
+      "후진·회차 구간에서 보행자 통제는 누가 책임지고 있는가?",
+      "상부 랙 작업 전 낙하위험 구역을 모두 비웠는가?",
+      "신규 투입자가 지게차 경고음과 진입금지 구역을 이해했는가?"
+    ],
+    educationPoints: [
+      "지게차 접근 시 작업을 멈추고 신호수 지시에 따라 이동",
+      "상부 랙 피킹 전 헬멧 착용과 낙하위험 구역 비우기",
+      "출하 집중 시간대에는 교차동선 대신 일방통행 동선 준수"
+    ],
+    keywords: ["물류", "지게차", "상하차", "피킹", "출하", "로지스"]
+  },
+  {
+    id: "manufacturing-hotwork",
+    companyName: "그린메탈",
+    companyType: "제조업",
+    siteName: "창원 산업단지 금속가공 공장",
+    workName: "용접·절단 화기작업",
+    processName: "금속 절단, 아크 용접, 가연물 통제, 화재감시",
+    weatherNote: "실내 공정, 용접 흄과 비산불꽃 집중 관리 필요",
+    riskLevel: "상",
+    topRisk: "용접 비산불꽃과 가연물이 맞물리며 화재가 발생하거나 작업자가 화상·흡입 위험에 노출될 수 있음",
+    hazards: [
+      "용접 비산불꽃에 의한 화재",
+      "절단 작업 중 화상 및 보호구 미착용",
+      "용접 흄 체류로 인한 호흡기 노출"
+    ],
+    actions: [
+      "화기작업 전 가연물 제거와 소화기 배치, 화재감시자 지정",
+      "용접면·방염장갑·보안경 등 보호구 착용 상태 확인",
+      "국소배기와 환기설비를 가동하고 밀폐구역 작업을 제한"
+    ],
+    educationName: "화기작업 허가 및 용접 화재예방 교육",
+    educationTargets: "용접공, 절단작업자, 화재감시자",
+    questions: [
+      "오늘 작업구역에서 제거되지 않은 가연물은 없는가?",
+      "화재감시자와 비상소화 설비 위치를 모두 알고 있는가?",
+      "환기 불량 구역에서 작업중지 기준을 공유했는가?"
+    ],
+    educationPoints: [
+      "화기작업 허가 확인 후 가연물 제거와 차폐막 설치",
+      "용접 작업 전 방염장갑, 보안경, 용접면 착용 상태 확인",
+      "흄 체류나 화재 징후 발견 시 즉시 작업중지 후 보고"
+    ],
+    keywords: ["용접", "절단", "화기", "제조", "금속", "메탈"]
+  },
+  {
+    id: "facility-maintenance",
+    companyName: "이지시설관리",
+    companyType: "시설관리업",
+    siteName: "서울 강남 복합건물 지하 기계실",
+    workName: "지하 기계실 점검 및 정비 작업",
+    processName: "펌프·배관 점검, 전기판넬 주변 정리, 협소공간 출입",
+    weatherNote: "지하 협소공간, 미끄럼 및 감전 위험 동시 관리",
+    riskLevel: "중",
+    topRisk: "누수와 습기로 인해 미끄러짐과 감전 위험이 동시에 발생할 수 있음",
+    hazards: [
+      "누수 구간 미끄러짐",
+      "전기판넬 주변 정비 중 감전",
+      "협소공간 출입 시 단독작업 위험"
+    ],
+    actions: [
+      "누수 구간 즉시 표시 후 미끄럼 방지조치와 배수 확인",
+      "전기판넬 접근 전 차단·잠금표시와 절연 보호구 확인",
+      "지하 기계실 출입 시 2인 1조와 연락체계를 유지"
+    ],
+    educationName: "시설관리 협소공간·감전 예방 교육",
+    educationTargets: "시설관리 기사, 전기 협력업체, 신규 점검 인력",
+    questions: [
+      "전기 차단·잠금표시 절차를 작업 전 모두 확인했는가?",
+      "누수 구간과 미끄럼 위험 구역을 전원이 알고 있는가?",
+      "협소공간 출입 시 연락체계와 비상호출 수단을 준비했는가?"
+    ],
+    educationPoints: [
+      "누수 구간 발견 즉시 표시하고 임시 배수 후 작업 진행",
+      "차단기 잠금표시 없이 전기판넬에 접근하지 않기",
+      "협소공간은 단독 출입을 금지하고 2인 1조 원칙 준수"
+    ],
+    keywords: ["시설", "기계실", "지하", "감전", "누수", "시설관리"]
+  }
+];
+
 export function buildSourceMix(citations: SearchResult[]): NonNullable<AskResponse["sourceMix"]> {
   const counts = citations.reduce<Record<string, number>>((acc, item) => {
     const key = item.sourceSystem || "unknown";
@@ -104,46 +262,70 @@ export function buildSourceMix(citations: SearchResult[]): NonNullable<AskRespon
 
 const defaultQuestion = "서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 오후 강풍 예보. 오늘 TBM과 위험성평가 초안을 만들어줘.";
 
+function inferWorkerCount(question: string) {
+  const workerMatch = question.match(/(\d+)\s*명/);
+  return workerMatch ? Number(workerMatch[1]) : 5;
+}
+
+function pickScenarioProfile(question: string) {
+  const normalized = question.trim().toLowerCase();
+
+  const scored = demoScenarioProfiles.map((profile) => ({
+    profile,
+    score: profile.keywords.reduce((acc, keyword) => acc + (normalized.includes(keyword.toLowerCase()) ? 1 : 0), 0)
+  }));
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0]?.score ? scored[0].profile : demoScenarioProfiles[0];
+}
+
 function inferScenario(question: string) {
   const normalized = question.trim() || defaultQuestion;
-  const workerMatch = normalized.match(/(\d+)\s*명/);
-  const workerCount = workerMatch ? Number(workerMatch[1]) : 5;
+  const workerCount = inferWorkerCount(normalized);
+  const profile = pickScenarioProfile(normalized);
 
   return {
-    siteName: normalized.includes("성수") ? "서울 성수동 근린생활시설 현장" : "대표 데모 현장",
+    companyName: profile.companyName,
+    companyType: profile.companyType,
+    siteName: profile.siteName,
     workSummary: normalized,
     workerCount,
-    weatherNote: normalized.includes("강풍") ? "오후 강풍 예보, 이동식 비계 흔들림 주의" : "기본 위험요인 중심 점검"
+    weatherNote: normalized.includes("강풍") ? "오후 강풍 예보, 작업중지 기준 공유 필요" : profile.weatherNote,
+    profile
   };
 }
 
 function buildOfficialStyleRiskAssessment(scenario: ReturnType<typeof inferScenario>) {
+  const { profile } = scenario;
+
   return [
     "위험성평가표(초안)",
     "",
-    `작업명: 외벽 도장 작업`,
-    `공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 작업구간 하부 통제`,
+    `업체명: ${scenario.companyName}`,
+    `업종: ${scenario.companyType}`,
+    `작업명: ${profile.workName}`,
+    `공정/세부작업: ${profile.processName}`,
     `작업장소: ${scenario.siteName}`,
     `작업인원: ${scenario.workerCount}명`,
     `기상 및 작업조건: ${scenario.weatherNote}`,
     "",
     "[유해·위험요인 및 감소대책]",
-    "1. 세부작업: 이동식 비계 승·하강 및 작업발판 이동",
-    "   - 유해·위험요인: 비계 흔들림, 작업발판 미고정, 추락",
-    "   - 현재 위험성: 상",
-    "   - 위험성 감소대책: 바퀴 잠금, 아웃트리거·수평 상태 점검, 작업 전 고정핀 확인, 추락방지구 착용",
+    `1. 세부작업: ${profile.hazards[0]}`,
+    `   - 유해·위험요인: ${profile.hazards[0]}`,
+    `   - 현재 위험성: ${profile.riskLevel}`,
+    `   - 위험성 감소대책: ${profile.actions[0]}`,
     "   - 잔여 위험성: 중",
     "",
-    "2. 세부작업: 외벽 도장 중 강풍 대응",
-    "   - 유해·위험요인: 돌풍에 따른 비계 전도, 자재·공구 낙하",
-    "   - 현재 위험성: 상",
-    "   - 위험성 감소대책: 강풍 체감 시 즉시 작업중지, 자재 고정, 하부 출입통제, 작업반장 판단 기준 공유",
+    `2. 세부작업: ${profile.hazards[1]}`,
+    `   - 유해·위험요인: ${profile.hazards[1]}`,
+    `   - 현재 위험성: ${profile.riskLevel === "상" ? "상" : "중"}`,
+    `   - 위험성 감소대책: ${profile.actions[1]}`,
     "   - 잔여 위험성: 중",
     "",
-    "3. 세부작업: 지게차 동선 인접 구간 통과 및 자재 이동",
-    "   - 유해·위험요인: 지게차-작업자 충돌, 자재 낙하",
+    `3. 세부작업: ${profile.hazards[2]}`,
+    `   - 유해·위험요인: ${profile.hazards[2]}`,
     "   - 현재 위험성: 중",
-    "   - 위험성 감소대책: 동선 분리, 신호수 배치, 작업반경 내 접근통제, 하역 전 사전 신호 확인",
+    `   - 위험성 감소대책: ${profile.actions[2]}`,
     "   - 잔여 위험성: 하",
     "",
     "[확인]",
@@ -154,111 +336,95 @@ function buildOfficialStyleRiskAssessment(scenario: ReturnType<typeof inferScena
 }
 
 function buildOfficialStyleTbmBriefing(scenario: ReturnType<typeof inferScenario>) {
+  const { profile } = scenario;
+
   return [
     "작업 전 안전점검회의(TBM) 브리핑(초안)",
     "",
-    `일시: 작업 시작 전`,
+    "일시: 작업 시작 전",
     `장소: ${scenario.siteName}`,
-    `오늘 작업: 외벽 도장 작업 및 자재 이동`,
+    `업체명: ${scenario.companyName}`,
+    `오늘 작업: ${profile.workName}`,
     `참석 대상: 작업자 ${scenario.workerCount}명, 작업반장, 관리감독자`,
     "",
     "[오늘 공유할 주요 위험요인]",
-    `1. ${scenario.weatherNote}`,
-    "2. 이동식 비계 사용 중 추락 및 전도",
-    "3. 지게차 동선과 작업자 충돌 위험",
+    `1. ${profile.hazards[0]}`,
+    `2. ${profile.hazards[1]}`,
+    `3. ${profile.hazards[2]}`,
     "",
-    "[안전작업방법]",
-    "- 비계 바퀴 잠금, 발판 고정, 수평 상태 확인 후 작업 시작",
-    "- 보호구(안전모, 안전대, 안전화) 착용 상태 상호 점검",
-    "- 돌풍 또는 흔들림 체감 시 즉시 작업중지 후 지상 대기",
-    "- 지게차 운행 중에는 신호수 지시에 따라 동선 분리",
+    "[즉시 조치]",
+    `- ${profile.actions[0]}`,
+    `- ${profile.actions[1]}`,
+    `- ${profile.actions[2]}`,
     "",
     "[비상시 조치]",
-    "- 추락·낙하 위험 발생 시 즉시 작업중지 및 현장 통제",
     "- 부상자 발생 시 응급조치 후 현장책임자 보고",
     "- 미조치 위험요인은 작업 재개 전 반드시 공유",
+    "- 신규 투입자와 외국인 근로자는 이해 여부를 추가 확인",
     "",
     "[확인 질문]",
-    "1. 강풍 시 작업중지 기준을 모두 알고 있는가?",
-    "2. 이동식 비계 고정상태를 확인했는가?",
-    "3. 지게차 접근 시 누구 지시에 따라 이동할지 알고 있는가?"
+    `1. ${profile.questions[0]}`,
+    `2. ${profile.questions[1]}`,
+    `3. ${profile.questions[2]}`
   ].join("\n");
 }
 
 function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
+  const { profile } = scenario;
+
   return [
     "작업 전 안전점검회의(TBM) 일지(초안)",
     "",
-    `일시: 2026-03-29 08:00`,
+    "일시: 2026-04-25 08:00",
+    `업체명: ${scenario.companyName}`,
     `작업장소: ${scenario.siteName}`,
     `작업내용: ${scenario.workSummary}`,
     `참석인원: ${scenario.workerCount}명`,
     "실시자: 작업반장 / 관리감독자",
     "",
     "[전달 내용]",
-    "- 이동식 비계 점검 결과 및 추락방지 조치 공유",
-    "- 강풍 예보에 따른 작업중지 기준 및 하부 통제구역 설정",
-    "- 지게차 동선 분리, 신호수 배치, 자재 낙하 예방조치 설명",
+    `- ${profile.actions[0]}`,
+    `- ${profile.actions[1]}`,
+    `- ${profile.actions[2]}`,
     "",
     "[작업 전 일일 안전점검 시행 결과]",
-    "- 비계 바퀴 잠금: 확인",
-    "- 발판 및 안전난간 상태: 확인",
-    "- 보호구 착용 여부: 확인",
-    "- 지게차 접근 통제: 조치 예정 및 작업 전 재확인",
+    "- 주요 보호구 착용 상태: 확인",
+    "- 위험구역 표시 및 통제: 확인",
+    "- 신규 투입자·외국인 근로자 대상 추가 설명: 예정",
     "",
     "[미조치 위험요인 / 후속조치]",
-    "- 강풍 강도 상승 시 작업중지 여부를 작업반장이 최종 판단",
-    "- 지게차 작업반경 접근금지 표지 재설치 필요",
+    `- ${profile.questions[0]}`,
+    `- ${profile.questions[1]}`,
     "",
     "[작업자 확인]",
     "TBM 내용 숙지 여부: 전원 구두 복창 및 서명 예정"
   ].join("\n");
 }
 
-function buildSafetyEducationPoints() {
-  return [
-    "강풍 체감 또는 비계 흔들림 발생 시 즉시 작업중지 후 지상 대기",
-    "이동식 비계 작업 전 바퀴 잠금, 발판 고정, 안전난간 상태를 상호 확인",
-    "지게차 접근 시 신호수 지시에 따라 이동하고 작업반경 내 무단 진입 금지"
-  ];
-}
-
-function buildTbmQuestions() {
-  return [
-    "강풍 시 작업중지 판단은 누가 하고, 팀원에게 어떻게 전파할 것인가?",
-    "이동식 비계 고정상태와 보호구 착용은 누가 상호 확인했는가?",
-    "지게차 동선 접근금지 구역과 신호수 위치를 전원이 알고 있는가?"
-  ];
-}
-
 function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inferScenario>) {
-  const educationPoints = buildSafetyEducationPoints();
+  const { profile } = scenario;
 
   return [
     "당일 안전교육 기록(초안)",
     "",
-    "교육명: 외벽 도장 작업 전 위험요인 및 보호구 착용 교육",
+    `교육명: ${profile.educationName}`,
     "교육구분: 신규 투입자 및 당일 작업자 특별안전보건교육 연계 설명",
     "교육일시: 작업 시작 전 15분",
     `교육장소: ${scenario.siteName}`,
-    `교육대상: 외벽 도장 작업자 ${scenario.workerCount}명, 신호수, 신규 투입자`,
+    `교육대상: ${profile.educationTargets}, 총 ${scenario.workerCount}명`,
     "교육 실시자: 현장소장 / 관리감독자",
     "확인자: 작업반장 / 작업자 대표",
     "",
     "[교육내용]",
     `- 오늘 작업 개요: ${scenario.workSummary}`,
-    `- 기상 및 현장 조건: ${scenario.weatherNote}`,
-    "- 이동식 비계 작업 전 점검 항목과 추락방지구 착용 기준",
-    "- 지게차 동선 분리, 하부 통제구역 설정, 신호수 지시 준수",
-    "- 강풍 체감 시 작업중지, 대피, 재개 판단 절차",
-    "",
-    "[핵심 위험요인]",
-    "- 이동식 비계 흔들림 및 전도",
-    "- 외벽 가장자리 작업 중 추락",
-    "- 지게차 접근 시 충돌 및 자재 낙하",
+    `- 작업 조건: ${scenario.weatherNote}`,
+    `- 핵심 위험요인: ${profile.hazards.join(", ")}`,
+    `- 즉시 조치: ${profile.actions.join(", ")}`,
     "",
     "[보호구 및 작업방법 강조사항]",
-    ...educationPoints.map((item) => `- ${item}`),
+    `- ${profile.educationPoints[0]}`,
+    `- ${profile.educationPoints[1]}`,
+    `- ${profile.educationPoints[2]}`,
     "",
     "[교육 후 확인]",
     "- 신규 투입자 포함 전원이 작업중지 기준을 구두 복창",
@@ -269,33 +435,61 @@ function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inf
 
 export function buildMockAskResponse(question: string, citations: SearchResult[], mode: AskResponse["mode"], statusDetail: string): AskResponse {
   const scenario = inferScenario(question);
-  const safetyEducationPoints = buildSafetyEducationPoints();
-  const tbmQuestions = buildTbmQuestions();
+  const profile = scenario.profile;
 
   return {
     question: question.trim() || defaultQuestion,
     answer: [
-      `${scenario.siteName}의 주요 위험은 이동식 비계 작업 중 추락과 강풍에 따른 전도 가능성입니다.`,
-      "MVP 데모에서는 현장 설명 한 줄만 입력해도 위험 요약, 위험성평가 초안, TBM 브리핑, TBM 일지 초안을 한 번에 생성하는 흐름을 보여줍니다.",
-      "실무에서는 작업 전 비계 고정상태, 추락방호, 작업중지 기준, 작업자 역할 분담을 먼저 확인해야 합니다."
+      `${scenario.companyName} ${scenario.siteName}의 주요 위험은 ${profile.topRisk}입니다.`,
+      `${scenario.companyType} 현장 기준으로 위험 요약, 위험성평가 초안, TBM 브리핑, TBM 일지, 안전교육 기록을 한 번에 생성하는 흐름을 제공합니다.`,
+      "실무에서는 작업 전 위험구역 통제, 보호구 확인, 신규 투입자 이해 여부까지 같이 확인해야 합니다."
     ].join("\n\n"),
     practicalPoints: [
-      "작업 시작 전 비계 바퀴 고정과 아웃트리거 상태를 재확인한다",
-      "풍속 상승 시 외벽 가장자리 작업을 즉시 중지하는 기준을 공유한다",
-      "작업자 5명 전원이 추락방지구와 보호구 착용 여부를 상호 점검한다"
+      profile.actions[0],
+      profile.actions[1],
+      profile.actions[2]
     ],
     citations,
     sourceMix: buildSourceMix(citations),
     mode,
-    scenario,
+    scenario: {
+      companyName: scenario.companyName,
+      companyType: scenario.companyType,
+      siteName: scenario.siteName,
+      workSummary: scenario.workSummary,
+      workerCount: scenario.workerCount,
+      weatherNote: scenario.weatherNote
+    },
+    externalData: {
+      weather: {
+        source: "kma",
+        mode: "mock",
+        locationLabel: scenario.siteName,
+        summary: scenario.weatherNote,
+        actions: [profile.actions[1]],
+        detail: "대표 시나리오 기반 기상 주의 문구"
+      },
+      training: {
+        source: "work24",
+        mode: "mock",
+        detail: "대표 시나리오 기반 교육 연계 문구",
+        recommendations: []
+      },
+      kosha: {
+        source: "kosha",
+        mode: "fallback",
+        detail: "대표 시나리오 기반 KOSHA 가이드 보강 문구",
+        references: []
+      }
+    },
     riskSummary: {
-      title: "이동식 비계 외벽 도장 작업",
-      riskLevel: "상",
-      topRisk: "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+      title: `${scenario.companyType} ${profile.workName}`,
+      riskLevel: profile.riskLevel,
+      topRisk: profile.topRisk,
       immediateActions: [
-        "작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검",
-        "풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기",
-        "작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인"
+        profile.actions[0],
+        profile.actions[1],
+        profile.actions[2]
       ]
     },
     deliverables: {
@@ -303,20 +497,31 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       tbmBriefing: buildOfficialStyleTbmBriefing(scenario),
       tbmLogDraft: buildOfficialStyleTbmLog(scenario),
       safetyEducationRecordDraft: buildOfficialStyleSafetyEducationRecord(scenario),
-      safetyEducationPoints,
-      tbmQuestions,
+      safetyEducationPoints: [
+        profile.educationPoints[0],
+        profile.educationPoints[1],
+        profile.educationPoints[2]
+      ],
+      tbmQuestions: [
+        profile.questions[0],
+        profile.questions[1],
+        profile.questions[2]
+      ],
       kakaoMessage: [
-        "[오늘 작업 안전공지]",
+        `[오늘 작업 안전공지] ${scenario.companyName}`,
         `현장: ${scenario.siteName}`,
-        "작업: 이동식 비계 외벽 도장",
-        "핵심위험: 강풍 시 비계 흔들림 및 추락",
-        "필수조치: 비계 바퀴 잠금 확인 / 안전대-보호구 착용 / 돌풍 시 즉시 작업중지 / 하부 출입통제",
+        `작업: ${profile.workName}`,
+        `핵심위험: ${profile.topRisk}`,
+        `필수조치: ${profile.actions[0]} / ${profile.actions[1]} / ${profile.actions[2]}`,
         "TBM 및 당일 안전교육 내용 확인 후 작업 시작 바랍니다."
       ].join("\n")
     },
     status: {
       lawgo: mode === "live" ? "live" : mode === "fallback" ? "fallback" : "mock",
       ai: mode === "live" ? "live" : mode === "fallback" ? "fallback" : "mock",
+      weather: "mock",
+      work24: "mock",
+      kosha: "fallback",
       summary: mode === "live" ? "라이브 응답" : mode === "fallback" ? "라이브 실패 후 데모 응답으로 전환" : "데모 응답",
       detail: statusDetail,
       policyNote: "실 API 호출은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
