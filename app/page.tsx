@@ -32,6 +32,26 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           심사위원이 한 번에 이해할 수 있도록 대표 시나리오 1개를 기준으로 위험 요약, 즉시 조치, 법령 근거, 위험성평가 초안,
           TBM 브리핑, TBM 일지 초안, 안전교육 기록 초안, 전달용 메시지까지 한 화면에서 이어서 보여줍니다.
         </p>
+        <div className="two channel-grid">
+          <div className="card list channel-card primary">
+            <div className="h3">시연 채널 1순위: 웹</div>
+            <div className="muted small">발표심사 전까지 URL과 화면캡처를 계속 업데이트할 수 있고, 홈 화면에서 전체 가치사슬을 한 번에 보여줄 수 있습니다.</div>
+            <ul>
+              <li>문제 상황 입력부터 위험성평가, TBM, 안전교육 기록까지 한 번에 시연</li>
+              <li>근거 출처, live / partial / mock 상태, fallback 정책을 같은 화면에서 설명</li>
+              <li>공모전 제출용 URL과 동영상 시연 파일 제작에 가장 유리한 형태</li>
+            </ul>
+          </div>
+          <div className="card list channel-card secondary">
+            <div className="h3">보조 채널: 카카오톡</div>
+            <div className="muted small">카카오톡은 메인 제품이 아니라, 생성된 산출물을 현장에 바로 공유하는 마지막 전파 채널로 두는 구성이 적합합니다.</div>
+            <ul>
+              <li>작업반장과 작업자에게 요약 메시지를 빠르게 전달</li>
+              <li>웹 시연 후 현장 적용성을 보여주는 2단계 데모로 사용</li>
+              <li>심사위원에게는 실사용 확장성보다 실행 전파 수단으로 설명</li>
+            </ul>
+          </div>
+        </div>
         <form action="/" method="GET" className="card list surface">
           <div className="h3">문제 상황 입력</div>
           <p className="muted">대표 데모 시나리오를 기본값으로 두고, 장소·인원·위험요인만 바꿔도 같은 흐름으로 재시연할 수 있습니다.</p>
@@ -197,8 +217,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <section className="two">
         <div className="card list">
-          <div className="h3">카카오톡 전달용 메시지</div>
-          <div className="muted small">현장 공유 메시지로 바로 붙여넣을 수 있는 축약본입니다.</div>
+          <div className="h3">현장 전파용 카카오톡 메시지</div>
+          <div className="muted small">웹에서 생성한 산출물을 현장에 바로 전파하는 보조 채널용 축약본입니다.</div>
           <pre>{data.deliverables.kakaoMessage}</pre>
           <hr />
           <div className="h3">현재 입력</div>

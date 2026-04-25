@@ -49,6 +49,9 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 .relevance-note { color: #6a4e2e; line-height: 1.5; }
 .prompt-card { background: linear-gradient(180deg, rgba(245, 250, 244, 0.95), rgba(236, 245, 234, 0.92)); }
 .education-point { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid rgba(47, 107, 95, 0.16); border-radius: 16px; background: rgba(255, 255, 255, 0.52); line-height: 1.55; }
+.channel-grid { margin-top: 4px; }
+.channel-card.primary { border-color: rgba(196, 99, 45, 0.22); background: linear-gradient(180deg, rgba(255, 250, 244, 0.96), rgba(249, 238, 224, 0.92)); }
+.channel-card.secondary { border-color: rgba(47, 107, 95, 0.18); background: linear-gradient(180deg, rgba(244, 249, 246, 0.96), rgba(234, 243, 239, 0.92)); }
 @media (max-width: 900px) {
   .two, .three, .risk-grid, .mini-grid { grid-template-columns: 1fr; }
   .title { font-size: 30px; max-width: none; }
