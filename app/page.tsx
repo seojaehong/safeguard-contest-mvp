@@ -11,6 +11,12 @@ function getModeBadgeLabel(mode: "mock" | "live" | "fallback") {
   return "데모 모드";
 }
 
+function buildStatusTone(mode: "mock" | "live" | "fallback") {
+  if (mode === "live") return "ok";
+  if (mode === "fallback") return "warn";
+  return "neutral";
+}
+
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const params = await searchParams;
   const q = params.q || defaultQuestion;
@@ -18,56 +24,133 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const dryrun = getLatestDryrunSnapshot();
   const sourceMix = data.sourceMix?.counts || {};
   const sourceMixEntries = Object.entries(sourceMix);
+  const statusCards = [
+    { label: "Law.go", value: data.status.lawgo },
+    { label: "AI", value: data.status.ai },
+    { label: "Weather", value: data.status.weather },
+    { label: "Work24", value: data.status.work24 },
+    { label: "KOSHA", value: data.status.kosha }
+  ];
 
   return (
-    <main className="container grid">
-      <section className="hero grid">
-        <div className="row">
-          <span className="badge">공모전 골든패스</span>
-          <span className="badge">위험성평가 + TBM + 안전교육</span>
-          <span className="badge">{getModeBadgeLabel(data.mode)}</span>
-        </div>
-        <h1 className="title">오늘 작업 설명 한 줄을 위험성평가·TBM·안전교육 기록으로 바꾸는 안전 코파일럿</h1>
-        <p className="subtitle">
-          심사위원이 한 번에 이해할 수 있도록 대표 시나리오 1개를 기준으로 위험 요약, 즉시 조치, 법령 근거, 위험성평가 초안,
-          TBM 브리핑, TBM 일지 초안, 안전교육 기록 초안, 전달용 메시지까지 한 화면에서 이어서 보여줍니다.
-        </p>
-        <div className="two channel-grid">
-          <div className="card list channel-card primary">
-            <div className="h3">시연 채널 1순위: 웹</div>
-            <div className="muted small">발표심사 전까지 URL과 화면캡처를 계속 업데이트할 수 있고, 홈 화면에서 전체 가치사슬을 한 번에 보여줄 수 있습니다.</div>
-            <ul>
-              <li>문제 상황 입력부터 위험성평가, TBM, 안전교육 기록까지 한 번에 시연</li>
-              <li>근거 출처, live / partial / mock 상태, fallback 정책을 같은 화면에서 설명</li>
-              <li>공모전 제출용 URL과 동영상 시연 파일 제작에 가장 유리한 형태</li>
-            </ul>
-          </div>
-          <div className="card list channel-card secondary">
-            <div className="h3">보조 채널: 카카오톡</div>
-            <div className="muted small">카카오톡은 메인 제품이 아니라, 생성된 산출물을 현장에 바로 공유하는 마지막 전파 채널로 두는 구성이 적합합니다.</div>
-            <ul>
-              <li>작업반장과 작업자에게 요약 메시지를 빠르게 전달</li>
-              <li>웹 시연 후 현장 적용성을 보여주는 2단계 데모로 사용</li>
-              <li>심사위원에게는 실사용 확장성보다 실행 전파 수단으로 설명</li>
-            </ul>
-          </div>
-        </div>
-        <form action="/" method="GET" className="card list surface">
-          <div className="h3">문제 상황 입력</div>
-          <p className="muted">대표 데모 시나리오를 기본값으로 두고, 장소·인원·위험요인만 바꿔도 같은 흐름으로 재시연할 수 있습니다.</p>
-          <textarea
-            name="q"
-            className="textarea"
-            defaultValue={q}
-            placeholder="예: 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 오후 강풍 예보, 추락·지게차 위험"
-          />
+    <main className="container grid page-shell">
+      <section className="hero hero-split">
+        <div className="hero-main list">
           <div className="row">
-            <button type="submit" className="button">결과 생성</button>
-            <a href={`/ask?q=${encodeURIComponent(q)}`} className="button secondary">질문형 보조 화면</a>
-            <a href="/search?q=강풍 추락 지게차 안전보건" className="button secondary">근거 탐색 보조 화면</a>
-            <Link href="/dryrun" className="button secondary">신뢰성 로그</Link>
+            <span className="badge">공모전 골든패스</span>
+            <span className="badge">실행 문서 생성형 코파일럿</span>
+            <span className="badge">{getModeBadgeLabel(data.mode)}</span>
           </div>
-        </form>
+          <h1 className="title hero-title">오늘 작업 한 줄을 위험성평가·TBM·안전교육 기록으로 바꾸는 SafeGuard</h1>
+          <p className="subtitle">
+            심사위원이 첫 화면에서 바로 이해할 수 있도록, 현장 설명 입력 한 번으로 위험 판단, 법령 근거, 위험성평가 초안,
+            TBM 브리핑, 안전교육 기록, 카카오 전파까지 하나의 흐름으로 압축해 보여줍니다.
+          </p>
+          <div className="hero-points">
+            <div className="hero-point">
+              <span className="hero-kicker">문제</span>
+              <strong>작업 전 판단과 문서화가 늦어져 사고예방이 뒤로 밀립니다.</strong>
+            </div>
+            <div className="hero-point">
+              <span className="hero-kicker">해결</span>
+              <strong>위험요약, 위험성평가, TBM, 교육기록을 동시에 생성해 바로 실행합니다.</strong>
+            </div>
+            <div className="hero-point">
+              <span className="hero-kicker">효과</span>
+              <strong>법령 근거, 기상 신호, 교육 연계를 한 화면에서 설명 가능한 시연으로 만듭니다.</strong>
+            </div>
+          </div>
+          <form action="/" method="GET" className="card list hero-form">
+            <div className="h3">문제 상황 입력</div>
+            <p className="muted">대표 시나리오를 기본값으로 두고, 장소·인원·위험요인만 바꿔도 같은 흐름으로 재시연할 수 있습니다.</p>
+            <textarea
+              name="q"
+              className="textarea"
+              defaultValue={q}
+              placeholder="예: 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 오후 강풍 예보, 추락·지게차 위험"
+            />
+            <div className="row">
+              <button type="submit" className="button">결과 생성</button>
+              <a href={`/ask?q=${encodeURIComponent(q)}`} className="button secondary">질문형 보조 화면</a>
+              <a href="/search?q=강풍 추락 지게차 안전보건" className="button secondary">근거 탐색 보조 화면</a>
+              <Link href="/dryrun" className="button secondary">신뢰성 로그</Link>
+            </div>
+          </form>
+        </div>
+
+        <aside className="hero-rail list">
+          <div className="card rail-card signal-card">
+            <div className="row">
+              <span className="badge">대표 시나리오</span>
+              <span className={`status-pill ${buildStatusTone(data.mode)}`}>{data.mode}</span>
+            </div>
+            <div className="h3">오늘 시연 포인트</div>
+            <div className="rail-metric-grid">
+              <div className="stat compact">
+                <span className="muted">업체</span>
+                <strong>{data.scenario.companyName}</strong>
+              </div>
+              <div className="stat compact">
+                <span className="muted">업종</span>
+                <strong>{data.scenario.companyType}</strong>
+              </div>
+              <div className="stat compact">
+                <span className="muted">인원</span>
+                <strong>{data.scenario.workerCount}명</strong>
+              </div>
+              <div className="stat compact">
+                <span className="muted">근거</span>
+                <strong>{data.citations.length}건</strong>
+              </div>
+            </div>
+            <p className="lead">{data.riskSummary.topRisk}</p>
+          </div>
+
+          <div className="card rail-card">
+            <div className="h3">실데이터 상태</div>
+            <div className="status-grid">
+              {statusCards.map((item) => (
+                <div key={item.label} className={`status-chip ${buildStatusTone(item.value)}`}>
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                </div>
+              ))}
+            </div>
+            <p className="small muted">{data.status.detail}</p>
+          </div>
+
+          <div className="card rail-card">
+            <div className="h3">시연 채널 전략</div>
+            <div className="list">
+              <div className="channel-line">
+                <span className="badge">웹 메인</span>
+                <span>전체 가치사슬과 증빙을 한 화면에서 시연</span>
+              </div>
+              <div className="channel-line">
+                <span className="badge">카카오 보조</span>
+                <span>현장 전파 메시지로 실제 사용성을 마무리</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section className="card process-card">
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <div className="h2">시연 흐름</div>
+            <p className="muted">심사위원이 이해해야 하는 핵심은 검색이 아니라 실행 문서 생성입니다.</p>
+          </div>
+          <span className="badge">입력 1회 → 산출물 5종</span>
+        </div>
+        <div className="process-strip">
+          {["문제 입력", "위험 판단", "근거 확인", "문서 생성", "현장 전파"].map((item, index) => (
+            <div key={item} className="process-step">
+              <span className="process-index">0{index + 1}</span>
+              <strong>{item}</strong>
+            </div>
+          ))}
+        </div>
       </section>
 
       {dryrun ? (
@@ -75,7 +158,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
               <div className="h3">최근 검증 상태</div>
-              <p className="muted">심사용 신뢰성 증거로, 최근 문서형 드라이런의 성공 여부와 응답 속도만 요약해서 보여줍니다.</p>
+              <p className="muted">심사용 신뢰성 증거로, 최근 드라이런 성공 여부와 응답 속도만 요약합니다.</p>
             </div>
             <Link href="/dryrun" className="button secondary">세부 로그 보기</Link>
           </div>
@@ -101,8 +184,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </section>
       ) : null}
 
-      <section className="risk-grid">
-        <div className="card list risk-card">
+      <section className="dashboard-grid">
+        <div className="card list risk-card highlight-card">
           <div className="row">
             <div className="h2">오늘 위험 3개</div>
             <span className={`badge badge-risk risk-${data.riskSummary.riskLevel}`}>위험도 {data.riskSummary.riskLevel}</span>
@@ -119,14 +202,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <strong>{data.scenario.siteName}</strong>
             </div>
             <div className="stat">
-              <span className="muted">업종</span>
-              <strong>{data.scenario.companyType}</strong>
-            </div>
-            <div className="stat">
-              <span className="muted">인원</span>
-              <strong>{data.scenario.workerCount}명</strong>
-            </div>
-            <div className="stat">
               <span className="muted">기상/특이사항</span>
               <strong>{data.scenario.weatherNote}</strong>
             </div>
@@ -135,20 +210,27 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             {data.riskSummary.immediateActions.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </div>
-        <div className="card list">
-          <div className="h3">신뢰성 상태</div>
-          <div className="row">
-            <span className="badge">Law.go: {data.status.lawgo}</span>
-            <span className="badge">AI: {data.status.ai}</span>
-            <span className="badge">Weather: {data.status.weather}</span>
-            <span className="badge">Work24: {data.status.work24}</span>
-            <span className="badge">KOSHA: {data.status.kosha}</span>
-            <span className="badge">Mode: {data.mode}</span>
-            <span className="badge">근거 {data.citations.length}건</span>
+
+        <div className="card list judge-card">
+          <div className="h3">심사 포인트 요약</div>
+          <div className="judge-grid">
+            <div className="stat compact">
+              <span className="muted">완성도</span>
+              <strong>입력부터 전파까지 1개 흐름</strong>
+            </div>
+            <div className="stat compact">
+              <span className="muted">데이터·AI 활용</span>
+              <strong>Law.go, 기상청, 고용24, Gemini</strong>
+            </div>
+            <div className="stat compact">
+              <span className="muted">실용성</span>
+              <strong>위험성평가·TBM·교육기록 즉시 생성</strong>
+            </div>
+            <div className="stat compact">
+              <span className="muted">차별성</span>
+              <strong>검색형이 아닌 실행 문서 생성형</strong>
+            </div>
           </div>
-          <p className="lead">{data.status.summary}</p>
-          <p className="muted">{data.status.detail}</p>
-          {data.status.policyNote ? <p className="small muted">{data.status.policyNote}</p> : null}
           {sourceMixEntries.length ? (
             <div className="list">
               <div className="h3">출처 구성</div>
@@ -163,7 +245,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </section>
 
-      <section className="card list">
+      <section className="card list action-panel">
         <div className="h2">즉시 조치</div>
         <div className="three">
           {data.riskSummary.immediateActions.map((item, index) => (
@@ -175,7 +257,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </section>
 
-      <section className="three">
+      <section className="three data-panels">
         <div className="card list">
           <div className="h3">기상청 위험 신호</div>
           <div className="muted small">{data.externalData.weather.detail}</div>
@@ -215,7 +297,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       </section>
 
-      <section className="three">
+      <section className="three deliverable-grid">
         <div className="card list">
           <div className="h3">위험성평가 초안</div>
           <div className="muted small">현장 점검표와 위험성평가 문서 초안으로 바로 옮겨 적을 수 있는 형식입니다.</div>
@@ -240,7 +322,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <pre>{data.deliverables.safetyEducationRecordDraft}</pre>
         </div>
         <div className="card list prompt-card">
-          <div className="h3">오늘 팀에 다시 물어야 할 질문 3개</div>
+          <div className="h3">현장 대화 유도 질문</div>
           <div className="muted small">문서 자동생성에 그치지 않고, 작업 전 대화를 다시 열어주는 질문형 가이드입니다.</div>
           <div className="list">
             {data.deliverables.tbmQuestions.map((item, index) => (
@@ -251,7 +333,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             ))}
           </div>
           <hr />
-          <div className="h3">교육용 핵심 문구 3개</div>
+          <div className="h3">교육용 핵심 문구</div>
           <div className="list">
             {data.deliverables.safetyEducationPoints.map((item, index) => (
               <div key={item} className="education-point">
