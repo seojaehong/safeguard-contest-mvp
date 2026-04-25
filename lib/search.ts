@@ -28,15 +28,17 @@ export async function runAsk(question: string): Promise<AskResponse> {
       ? `\n\n[추천 후속 교육]\n${training.recommendations.map((item, index) => `${index + 1}. ${item.title} / ${item.institution} / ${item.startDate}~${item.endDate}`).join("\n")}`
       : "";
     const koshaAppendix = kosha.references.length
-      ? `\n\n[KOSHA 공식 가이드]\n${kosha.references.map((item, index) => `${index + 1}. ${item.title}`).join("\n")}`
+      ? `\n\n[KOSHA 공식 가이드]\n${kosha.references.map((item, index) => `${index + 1}. ${item.title} (${item.category})`).join("\n")}`
       : "";
+    const koshaImpactLines = kosha.references.slice(0, 2).map((item) => item.impact);
 
     const enriched: AskResponse = {
       ...response,
       answer: [
         response.answer,
         `[기상 신호] ${weather.summary}`,
-        training.recommendations.length ? `[교육 연계] ${training.recommendations[0].title}` : ""
+        training.recommendations.length ? `[교육 연계] ${training.recommendations[0].title}` : "",
+        kosha.references.length ? `[KOSHA 보강] ${kosha.references[0].title}` : ""
       ].filter(Boolean).join("\n\n"),
       externalData: {
         weather,
@@ -46,7 +48,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
       deliverables: {
         ...response.deliverables,
         safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${trainingAppendix}`,
-        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}`,
+        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${koshaImpactLines.length ? `\n\n[KOSHA 반영 포인트]\n- ${koshaImpactLines.join("\n- ")}` : ""}`,
         tbmLogDraft: `${response.deliverables.tbmLogDraft}${koshaAppendix}`
       },
       status: {

@@ -86,7 +86,9 @@ export type AskResponse = {
       detail: string;
       references: Array<{
         title: string;
+        category: string;
         summary: string;
+        impact: string;
         url: string;
       }>;
     };

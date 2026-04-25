@@ -203,8 +203,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className="muted small">{data.externalData.kosha.detail}</div>
           {data.externalData.kosha.references.map((item) => (
             <a key={item.url} href={item.url} className="citation-item" target="_blank" rel="noreferrer">
+              <div className="row">
+                <span className="badge">{item.category}</span>
+                <span className="badge">KOSHA</span>
+              </div>
               <strong>{item.title}</strong>
               <div className="small muted">{item.summary}</div>
+              <div className="small relevance-note">{item.impact}</div>
             </a>
           ))}
         </div>
