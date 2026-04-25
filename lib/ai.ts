@@ -2,9 +2,21 @@ import OpenAI from "openai";
 import { AskResponse, SearchResult } from "./types";
 import { buildMockAskResponse } from "./mock-data";
 
-const apiKey = process.env.OPENAI_API_KEY;
+const openAiApiKey = process.env.OPENAI_API_KEY?.trim();
+const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const RESPONSE_TIMEOUT_MS = 20_000;
+const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "45000", 10);
 const RETRY_DELAY_MS = 500;
+
+type GeminiGenerateContentResponse = {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string;
+      }>;
+    };
+  }>;
+};
 
 async function wait(ms: number) {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -41,27 +53,12 @@ async function withRetry<T>(runner: () => Promise<T>, attempts: number, label: s
   throw lastError instanceof Error ? lastError : new Error(`${label} failed`);
 }
 
-export async function generateAnswer(question: string, citations: SearchResult[]): Promise<AskResponse> {
-  if (!apiKey) {
-    return buildMockAskResponse(
-      question,
-      citations,
-      "mock",
-      "OPENAI_API_KEY가 없어 AI 호출 없이 데모 산출물을 구성했습니다."
-    );
+async function generateWithOpenAI(prompt: string) {
+  if (!openAiApiKey) {
+    throw new Error("OPENAI_API_KEY is not set");
   }
 
-  const client = new OpenAI({ apiKey });
-  const prompt = [
-    "당신은 산업안전/노무 실무용 리서치 코파일럿이다.",
-    "질문에 대해 과장 없이 한국어로 답하라.",
-    "실무 체크포인트 3개를 포함하라.",
-    "반드시 제공된 근거 목록 범위 안에서만 답하라.",
-    "근거 목록:",
-    ...citations.map((c, i) => `${i + 1}. ${c.title} | ${c.summary} | ${c.citation || ""}`),
-    `질문: ${question}`
-  ].join("\n");
-
+  const client = new OpenAI({ apiKey: openAiApiKey });
   const response = await withRetry(
     () =>
       withTimeout(
@@ -76,21 +73,118 @@ export async function generateAnswer(question: string, citations: SearchResult[]
     "OpenAI response"
   );
 
-  const answer = response.output_text || "답변을 생성하지 못했습니다.";
+  return {
+    answer: response.output_text || "답변을 생성하지 못했습니다.",
+    providerLabel: "OpenAI",
+    policyNote: "OpenAI 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
+  };
+}
+
+async function generateWithGemini(prompt: string) {
+  if (!geminiApiKey) {
+    throw new Error("GEMINI_API_KEY is not set");
+  }
+
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
+
+  const response = await withRetry(
+    async () =>
+      withTimeout(
+        fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: prompt }]
+              }
+            ]
+          })
+        }),
+        GEMINI_TIMEOUT_MS,
+        "Gemini response"
+      ),
+    2,
+    "Gemini response"
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "");
+    throw new Error(`Gemini API error ${response.status}: ${errorText || "empty response"}`);
+  }
+
+  const parsed = (await response.json()) as GeminiGenerateContentResponse;
+  const answer = parsed.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim();
+
+  if (!answer) {
+    throw new Error("Gemini response did not include answer text");
+  }
+
+  return {
+    answer,
+    providerLabel: "Gemini",
+    policyNote: "Gemini 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
+  };
+}
+
+function trimCitationText(text: string, maxLength: number) {
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+function buildPrompt(question: string, citations: SearchResult[]) {
+  const trimmedQuestion = trimCitationText(question.trim(), 220);
+  const compactCitations = citations.slice(0, 4).map((citation, index) => {
+    const title = trimCitationText(citation.title, 60);
+    const summary = trimCitationText(citation.summary, 100);
+    const citationText = trimCitationText(citation.citation || "", 40);
+    return `${index + 1}. ${title} | ${summary}${citationText ? ` | ${citationText}` : ""}`;
+  });
+
+  return [
+    "당신은 산업안전 실무용 코파일럿이다.",
+    "반드시 제공된 근거 목록 범위 안에서만 한국어로 답하라.",
+    "출력 순서는 1) 핵심 판단 2) 즉시 조치 3) 실무 체크포인트 3개다.",
+    "불확실한 내용은 단정하지 말고 검토 필요라고 표현하라.",
+    "근거 목록:",
+    ...compactCitations,
+    `질문: ${trimmedQuestion}`
+  ].join("\n");
+}
+
+export async function generateAnswer(question: string, citations: SearchResult[]): Promise<AskResponse> {
+  if (!geminiApiKey && !openAiApiKey) {
+    return buildMockAskResponse(
+      question,
+      citations,
+      "mock",
+      "GEMINI_API_KEY와 OPENAI_API_KEY가 없어 AI 호출 없이 데모 산출물을 구성했습니다."
+    );
+  }
+
+  const prompt = buildPrompt(question, citations);
+
+  const response = geminiApiKey
+    ? await generateWithGemini(prompt)
+    : await generateWithOpenAI(prompt);
+
   const live = buildMockAskResponse(
     question,
     citations,
     "live",
-    "Law.go와 AI 응답을 결합한 라이브 모드입니다."
+    `Law.go와 ${response.providerLabel} 응답을 결합한 라이브 모드입니다.`
   );
   return {
     ...live,
-    answer,
+    answer: response.answer,
     status: {
       ...live.status,
       lawgo: "live" as const,
       ai: "live" as const,
-      policyNote: "OpenAI 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
+      policyNote: response.policyNote
     }
   };
 }

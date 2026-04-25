@@ -117,6 +117,104 @@ function inferScenario(question: string) {
   };
 }
 
+function buildOfficialStyleRiskAssessment(scenario: ReturnType<typeof inferScenario>) {
+  return [
+    "위험성평가표(초안)",
+    "",
+    `작업명: 외벽 도장 작업`,
+    `공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 작업구간 하부 통제`,
+    `작업장소: ${scenario.siteName}`,
+    `작업인원: ${scenario.workerCount}명`,
+    `기상 및 작업조건: ${scenario.weatherNote}`,
+    "",
+    "[유해·위험요인 및 감소대책]",
+    "1. 세부작업: 이동식 비계 승·하강 및 작업발판 이동",
+    "   - 유해·위험요인: 비계 흔들림, 작업발판 미고정, 추락",
+    "   - 현재 위험성: 상",
+    "   - 위험성 감소대책: 바퀴 잠금, 아웃트리거·수평 상태 점검, 작업 전 고정핀 확인, 추락방지구 착용",
+    "   - 잔여 위험성: 중",
+    "",
+    "2. 세부작업: 외벽 도장 중 강풍 대응",
+    "   - 유해·위험요인: 돌풍에 따른 비계 전도, 자재·공구 낙하",
+    "   - 현재 위험성: 상",
+    "   - 위험성 감소대책: 강풍 체감 시 즉시 작업중지, 자재 고정, 하부 출입통제, 작업반장 판단 기준 공유",
+    "   - 잔여 위험성: 중",
+    "",
+    "3. 세부작업: 지게차 동선 인접 구간 통과 및 자재 이동",
+    "   - 유해·위험요인: 지게차-작업자 충돌, 자재 낙하",
+    "   - 현재 위험성: 중",
+    "   - 위험성 감소대책: 동선 분리, 신호수 배치, 작업반경 내 접근통제, 하역 전 사전 신호 확인",
+    "   - 잔여 위험성: 하",
+    "",
+    "[확인]",
+    "위험성평가 실시자: 현장소장 / 관리감독자",
+    "근로자 참여 확인: 작업 전 TBM에서 공유 및 복창 확인",
+    "조치 완료 예정일: 작업 시작 전 즉시"
+  ].join("\n");
+}
+
+function buildOfficialStyleTbmBriefing(scenario: ReturnType<typeof inferScenario>) {
+  return [
+    "작업 전 안전점검회의(TBM) 브리핑(초안)",
+    "",
+    `일시: 작업 시작 전`,
+    `장소: ${scenario.siteName}`,
+    `오늘 작업: 외벽 도장 작업 및 자재 이동`,
+    `참석 대상: 작업자 ${scenario.workerCount}명, 작업반장, 관리감독자`,
+    "",
+    "[오늘 공유할 주요 위험요인]",
+    `1. ${scenario.weatherNote}`,
+    "2. 이동식 비계 사용 중 추락 및 전도",
+    "3. 지게차 동선과 작업자 충돌 위험",
+    "",
+    "[안전작업방법]",
+    "- 비계 바퀴 잠금, 발판 고정, 수평 상태 확인 후 작업 시작",
+    "- 보호구(안전모, 안전대, 안전화) 착용 상태 상호 점검",
+    "- 돌풍 또는 흔들림 체감 시 즉시 작업중지 후 지상 대기",
+    "- 지게차 운행 중에는 신호수 지시에 따라 동선 분리",
+    "",
+    "[비상시 조치]",
+    "- 추락·낙하 위험 발생 시 즉시 작업중지 및 현장 통제",
+    "- 부상자 발생 시 응급조치 후 현장책임자 보고",
+    "- 미조치 위험요인은 작업 재개 전 반드시 공유",
+    "",
+    "[확인 질문]",
+    "1. 강풍 시 작업중지 기준을 모두 알고 있는가?",
+    "2. 이동식 비계 고정상태를 확인했는가?",
+    "3. 지게차 접근 시 누구 지시에 따라 이동할지 알고 있는가?"
+  ].join("\n");
+}
+
+function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
+  return [
+    "작업 전 안전점검회의(TBM) 일지(초안)",
+    "",
+    `일시: 2026-03-29 08:00`,
+    `작업장소: ${scenario.siteName}`,
+    `작업내용: ${scenario.workSummary}`,
+    `참석인원: ${scenario.workerCount}명`,
+    "실시자: 작업반장 / 관리감독자",
+    "",
+    "[전달 내용]",
+    "- 이동식 비계 점검 결과 및 추락방지 조치 공유",
+    "- 강풍 예보에 따른 작업중지 기준 및 하부 통제구역 설정",
+    "- 지게차 동선 분리, 신호수 배치, 자재 낙하 예방조치 설명",
+    "",
+    "[작업 전 일일 안전점검 시행 결과]",
+    "- 비계 바퀴 잠금: 확인",
+    "- 발판 및 안전난간 상태: 확인",
+    "- 보호구 착용 여부: 확인",
+    "- 지게차 접근 통제: 조치 예정 및 작업 전 재확인",
+    "",
+    "[미조치 위험요인 / 후속조치]",
+    "- 강풍 강도 상승 시 작업중지 여부를 작업반장이 최종 판단",
+    "- 지게차 작업반경 접근금지 표지 재설치 필요",
+    "",
+    "[작업자 확인]",
+    "TBM 내용 숙지 여부: 전원 구두 복창 및 서명 예정"
+  ].join("\n");
+}
+
 export function buildMockAskResponse(question: string, citations: SearchResult[], mode: AskResponse["mode"], statusDetail: string): AskResponse {
   const scenario = inferScenario(question);
 
@@ -147,27 +245,9 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       ]
     },
     deliverables: {
-      riskAssessmentDraft: [
-        "1. 작업명: 이동식 비계를 활용한 외벽 도장 작업",
-        "2. 주요 유해·위험요인: 추락, 비계 전도, 도장자재 낙하, 강풍으로 인한 자세 불안정",
-        "3. 위험성 수준: 상",
-        "4. 감소대책: 비계 점검표 확인, 바퀴 잠금 및 수평 확보, 추락방지구 착용, 강풍 시 작업중지, 하부 출입통제",
-        "5. 확인 책임자: 현장소장 / 작업반장"
-      ].join("\n"),
-      tbmBriefing: [
-        "오늘 작업은 외벽 도장 작업이며 이동식 비계를 사용합니다.",
-        "가장 큰 위험은 추락과 강풍으로 인한 비계 흔들림입니다.",
-        "비계 고정상태와 발판 상태를 먼저 확인하고, 보호구 미착용자는 작업에 투입하지 않습니다.",
-        "돌풍이 불거나 비계 흔들림이 느껴지면 즉시 '작업중지'를 선언하고 지상으로 이동합니다.",
-        "하부 통제구역 밖 인원 접근을 막고 자재 낙하에 주의합니다."
-      ].join("\n"),
-      tbmLogDraft: [
-        "TBM 일시: 2026-03-29 08:00",
-        `대상 작업: ${scenario.workSummary}`,
-        `참석 인원: ${scenario.workerCount}명`,
-        "전달 사항: 비계 점검, 추락방지구 착용, 강풍 시 작업중지, 하부 출입통제",
-        "작업자 확인: 전원 구두 복창 및 서명 예정"
-      ].join("\n"),
+      riskAssessmentDraft: buildOfficialStyleRiskAssessment(scenario),
+      tbmBriefing: buildOfficialStyleTbmBriefing(scenario),
+      tbmLogDraft: buildOfficialStyleTbmLog(scenario),
       kakaoMessage: [
         "[오늘 작업 안전공지]",
         `현장: ${scenario.siteName}`,

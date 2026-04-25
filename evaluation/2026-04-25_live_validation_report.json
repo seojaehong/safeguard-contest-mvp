@@ -1,0 +1,39 @@
+{
+  "task": "gemini-live-and-demo-output-validation",
+  "generatedAt": "2026-04-25T12:46:25",
+  "artifacts": {
+    "summaryReport": "evaluation/2026-04-25_live_validation_report.json",
+    "formatResearch": "docs/2026-04-25_official_output_format_research.md"
+  },
+  "counts": {
+    "pageE2EOk": 4,
+    "pageE2EFail": 0,
+    "apiDryrunTotal": 10,
+    "apiDryrunOk": 10,
+    "apiDryrunFail": 0,
+    "documentDryrunTotal": 10,
+    "documentDryrunOk": 10,
+    "documentDryrunFail": 0
+  },
+  "timing": {
+    "apiDryrunAvgMs": 6173,
+    "apiDryrunP95Ms": 15463,
+    "documentDryrunAvgMs": 16335,
+    "documentDryrunP95Ms": 38528
+  },
+  "result": {
+    "geminiDirect": "ok",
+    "shortAskMode": "live",
+    "longAskMode": "live",
+    "searchMode": "mock-source",
+    "lawgoLiveVerified": false,
+    "publicDataLiveVerified": false
+  },
+  "notes": [
+    "Gemini direct API call succeeded with the updated key.",
+    "After prompt compaction and Gemini-specific timeout tuning, the long representative scenario also returned live.",
+    "Search and citations still rely on mock source data because the current Law.go adapter remains a placeholder and LAWGO_MOCK_MODE is still true.",
+    "Public-data service key was received, but the current Next.js request path does not yet exercise those live adapters directly.",
+    "Detailed transient runtime logs were intentionally not committed; this file preserves the validation summary only."
+  ]
+}

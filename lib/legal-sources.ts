@@ -45,10 +45,30 @@ function filterMockResults(query: string) {
   const normalizedQuery = query.trim().toLowerCase();
   if (!normalizedQuery) return mockSearchResults;
 
-  return mockSearchResults.filter((item) => {
-    const haystack = [item.title, item.summary, item.citation || "", ...(item.tags || [])].join(" ").toLowerCase();
-    return haystack.includes(normalizedQuery);
-  });
+  const tokens = normalizedQuery
+    .split(/[\s,./()\-]+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 2);
+
+  return mockSearchResults
+    .map((item) => {
+      const haystack = [item.title, item.summary, item.citation || "", ...(item.tags || [])].join(" ").toLowerCase();
+      if (haystack.includes(normalizedQuery)) {
+        return { item, score: 100 };
+      }
+
+      let score = 0;
+      for (const token of tokens) {
+        if (haystack.includes(token)) {
+          score += item.title.toLowerCase().includes(token) ? 3 : 1;
+        }
+      }
+
+      return { item, score };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.item);
 }
 
 function mergeResults(primary: SearchResult[], secondary: SearchResult[]) {
