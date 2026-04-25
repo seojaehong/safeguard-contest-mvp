@@ -215,8 +215,62 @@ function buildOfficialStyleTbmLog(scenario: ReturnType<typeof inferScenario>) {
   ].join("\n");
 }
 
+function buildSafetyEducationPoints() {
+  return [
+    "강풍 체감 또는 비계 흔들림 발생 시 즉시 작업중지 후 지상 대기",
+    "이동식 비계 작업 전 바퀴 잠금, 발판 고정, 안전난간 상태를 상호 확인",
+    "지게차 접근 시 신호수 지시에 따라 이동하고 작업반경 내 무단 진입 금지"
+  ];
+}
+
+function buildTbmQuestions() {
+  return [
+    "강풍 시 작업중지 판단은 누가 하고, 팀원에게 어떻게 전파할 것인가?",
+    "이동식 비계 고정상태와 보호구 착용은 누가 상호 확인했는가?",
+    "지게차 동선 접근금지 구역과 신호수 위치를 전원이 알고 있는가?"
+  ];
+}
+
+function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inferScenario>) {
+  const educationPoints = buildSafetyEducationPoints();
+
+  return [
+    "당일 안전교육 기록(초안)",
+    "",
+    "교육명: 외벽 도장 작업 전 위험요인 및 보호구 착용 교육",
+    "교육구분: 신규 투입자 및 당일 작업자 특별안전보건교육 연계 설명",
+    "교육일시: 작업 시작 전 15분",
+    `교육장소: ${scenario.siteName}`,
+    `교육대상: 외벽 도장 작업자 ${scenario.workerCount}명, 신호수, 신규 투입자`,
+    "교육 실시자: 현장소장 / 관리감독자",
+    "확인자: 작업반장 / 작업자 대표",
+    "",
+    "[교육내용]",
+    `- 오늘 작업 개요: ${scenario.workSummary}`,
+    `- 기상 및 현장 조건: ${scenario.weatherNote}`,
+    "- 이동식 비계 작업 전 점검 항목과 추락방지구 착용 기준",
+    "- 지게차 동선 분리, 하부 통제구역 설정, 신호수 지시 준수",
+    "- 강풍 체감 시 작업중지, 대피, 재개 판단 절차",
+    "",
+    "[핵심 위험요인]",
+    "- 이동식 비계 흔들림 및 전도",
+    "- 외벽 가장자리 작업 중 추락",
+    "- 지게차 접근 시 충돌 및 자재 낙하",
+    "",
+    "[보호구 및 작업방법 강조사항]",
+    ...educationPoints.map((item) => `- ${item}`),
+    "",
+    "[교육 후 확인]",
+    "- 신규 투입자 포함 전원이 작업중지 기준을 구두 복창",
+    "- 보호구 착용 상태를 상호 점검 후 서명 예정",
+    "- 외국인 근로자 배치 시 쉬운 문장 안내 또는 다국어 브리핑 확장 가능"
+  ].join("\n");
+}
+
 export function buildMockAskResponse(question: string, citations: SearchResult[], mode: AskResponse["mode"], statusDetail: string): AskResponse {
   const scenario = inferScenario(question);
+  const safetyEducationPoints = buildSafetyEducationPoints();
+  const tbmQuestions = buildTbmQuestions();
 
   return {
     question: question.trim() || defaultQuestion,
@@ -248,13 +302,16 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       riskAssessmentDraft: buildOfficialStyleRiskAssessment(scenario),
       tbmBriefing: buildOfficialStyleTbmBriefing(scenario),
       tbmLogDraft: buildOfficialStyleTbmLog(scenario),
+      safetyEducationRecordDraft: buildOfficialStyleSafetyEducationRecord(scenario),
+      safetyEducationPoints,
+      tbmQuestions,
       kakaoMessage: [
         "[오늘 작업 안전공지]",
         `현장: ${scenario.siteName}`,
         "작업: 이동식 비계 외벽 도장",
         "핵심위험: 강풍 시 비계 흔들림 및 추락",
         "필수조치: 비계 바퀴 잠금 확인 / 안전대-보호구 착용 / 돌풍 시 즉시 작업중지 / 하부 출입통제",
-        "TBM 내용 확인 후 작업 시작 바랍니다."
+        "TBM 및 당일 안전교육 내용 확인 후 작업 시작 바랍니다."
       ].join("\n")
     },
     status: {

@@ -59,6 +59,9 @@ export type AskResponse = {
     riskAssessmentDraft: string;
     tbmBriefing: string;
     tbmLogDraft: string;
+    safetyEducationRecordDraft: string;
+    safetyEducationPoints: string[];
+    tbmQuestions: string[];
     kakaoMessage: string;
   };
   status: {

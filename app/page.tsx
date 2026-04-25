@@ -24,13 +24,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <section className="hero grid">
         <div className="row">
           <span className="badge">공모전 골든패스</span>
-          <span className="badge">위험성평가 + TBM + 일지 초안</span>
+          <span className="badge">위험성평가 + TBM + 안전교육</span>
           <span className="badge">{getModeBadgeLabel(data.mode)}</span>
         </div>
-        <h1 className="title">오늘 작업 설명 한 줄을 위험성평가와 TBM 초안으로 바꾸는 안전 코파일럿</h1>
+        <h1 className="title">오늘 작업 설명 한 줄을 위험성평가·TBM·안전교육 기록으로 바꾸는 안전 코파일럿</h1>
         <p className="subtitle">
           심사위원이 한 번에 이해할 수 있도록 대표 시나리오 1개를 기준으로 위험 요약, 즉시 조치, 법령 근거, 위험성평가 초안,
-          TBM 브리핑, TBM 일지 초안, 전달용 메시지까지 한 화면에서 이어서 보여줍니다.
+          TBM 브리핑, TBM 일지 초안, 안전교육 기록 초안, 전달용 메시지까지 한 화면에서 이어서 보여줍니다.
         </p>
         <form action="/" method="GET" className="card list surface">
           <div className="h3">문제 상황 입력</div>
@@ -164,13 +164,46 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <section className="two">
         <div className="card list">
+          <div className="h3">안전교육 기록 초안</div>
+          <div className="muted small">TBM과 위험성평가 결과를 당일 교육기록까지 연결해 현장 실행의 닫힌 루프를 보여줍니다.</div>
+          <pre>{data.deliverables.safetyEducationRecordDraft}</pre>
+        </div>
+        <div className="card list prompt-card">
+          <div className="h3">오늘 팀에 다시 물어야 할 질문 3개</div>
+          <div className="muted small">문서 자동생성에 그치지 않고, 작업 전 대화를 다시 열어주는 질문형 가이드입니다.</div>
+          <div className="list">
+            {data.deliverables.tbmQuestions.map((item, index) => (
+              <div key={item} className="stat">
+                <span className="badge">Question {index + 1}</span>
+                <strong>{item}</strong>
+              </div>
+            ))}
+          </div>
+          <hr />
+          <div className="h3">교육용 핵심 문구 3개</div>
+          <div className="list">
+            {data.deliverables.safetyEducationPoints.map((item, index) => (
+              <div key={item} className="education-point">
+                <span className="badge">Point {index + 1}</span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+          <div className="small muted">
+            확장 포인트: 외국인 근로자용 쉬운 문장 브리핑, 다국어 안내, 취업·안전교육 연계 정보
+          </div>
+        </div>
+      </section>
+
+      <section className="two">
+        <div className="card list">
           <div className="h3">카카오톡 전달용 메시지</div>
           <div className="muted small">현장 공유 메시지로 바로 붙여넣을 수 있는 축약본입니다.</div>
           <pre>{data.deliverables.kakaoMessage}</pre>
           <hr />
           <div className="h3">현재 입력</div>
           <pre>{data.question}</pre>
-          <div className="small muted">향후 확장: 외국인 근로자용 쉬운 문장 브리핑, 다국어/TTS 안내</div>
+          <div className="small muted">향후 확장: 외국인 근로자용 쉬운 문장 브리핑, 다국어/TTS 안내, 교육기관 정보 연계</div>
         </div>
         <CitationList citations={data.citations} question={data.question} />
       </section>
