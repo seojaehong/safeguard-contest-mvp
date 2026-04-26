@@ -6,3 +6,4 @@ package-lock.json
 logs/dryrun-api/
 logs/dryrun-documents/
 logs/dryrun-documents/
+.vercel

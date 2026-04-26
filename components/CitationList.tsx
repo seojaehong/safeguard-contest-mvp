@@ -1,10 +1,11 @@
 import { SearchResult } from "@/lib/types";
 import Link from "next/link";
+import type { Route } from "next";
 
-function getCitationHref(item: SearchResult) {
-  if (item.type === "law") return `/law/${item.id}`;
-  if (item.type === "precedent") return `/precedent/${item.id}`;
-  return `/interpretation/${item.id}`;
+function getCitationHref(item: SearchResult): Route {
+  if (item.type === "law") return `/law/${item.id}` as Route;
+  if (item.type === "precedent") return `/precedent/${item.id}` as Route;
+  return `/interpretation/${item.id}` as Route;
 }
 
 function describeRelevance(item: SearchResult, question?: string) {
@@ -29,7 +30,7 @@ export function CitationList({ citations, question }: { citations: SearchResult[
       <div className="h3">근거 출처</div>
       <div className="muted small">법령, 판례, 해석례를 묶어 현재 작업의 위험 판단과 산출물 문구를 뒷받침합니다.</div>
       {citations.map((c) => {
-        const href = getCitationHref(c) as any;
+        const href = getCitationHref(c);
         return (
           <Link key={c.id} href={href} className="list citation-item">
             <div className="row">

@@ -1,10 +1,11 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { SearchResult } from "@/lib/types";
 
-function getDetailHref(item: SearchResult) {
-  if (item.type === "law") return `/law/${item.id}`;
-  if (item.type === "precedent") return `/precedent/${item.id}`;
-  return `/interpretation/${item.id}`;
+function getDetailHref(item: SearchResult): Route {
+  if (item.type === "law") return `/law/${item.id}` as Route;
+  if (item.type === "precedent") return `/precedent/${item.id}` as Route;
+  return `/interpretation/${item.id}` as Route;
 }
 
 function getTypeLabel(item: SearchResult) {
@@ -24,7 +25,7 @@ function getRelevanceText(item: SearchResult) {
 }
 
 export function ResultCard({ item }: { item: SearchResult }) {
-  const href = getDetailHref(item) as any;
+  const href = getDetailHref(item);
   return (
     <Link href={href} className="card list">
       <div className="row">

@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-04-26T10:26:13.430Z",
+  "build": "passed",
+  "typecheck": "passed",
+  "scenarioE2E": {
+    "totalRuns": 4,
+    "okCount": 4,
+    "failCount": 0,
+    "avgMs": 19593,
+    "p95Ms": 23715
+  },
+  "reviewFixes": [
+    "removed any casts from typed route links",
+    "disabled incremental cache for typecheck script",
+    "removed negative letter spacing from UI stylesheet"
+  ],
+  "vercelDeployment": "pending"
+}

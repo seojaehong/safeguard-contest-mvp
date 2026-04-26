@@ -30,7 +30,7 @@ body { min-height: 100vh; }
 .button.secondary { background: transparent; border: 1px solid var(--line); color: var(--text); }
 .badge { display: inline-flex; padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; background: rgba(255, 255, 255, 0.55); }
 .list { display: grid; gap: 12px; }
-.title { font-size: 42px; line-height: 1.04; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.04em; max-width: 10ch; }
+.title { font-size: 42px; line-height: 1.04; font-weight: 800; margin: 0 0 12px; letter-spacing: 0; max-width: 10ch; }
 .subtitle { font-size: 18px; line-height: 1.6; color: var(--muted); margin: 0; }
 .h2 { font-size: 24px; font-weight: 800; margin: 0 0 12px; }
 .h3 { font-size: 18px; font-weight: 700; margin: 0 0 10px; }
@@ -78,7 +78,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 .signal-card { background: linear-gradient(180deg, rgba(255, 247, 235, 0.98), rgba(250, 236, 213, 0.94)); }
 .hero-points { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .hero-point { display: grid; gap: 8px; padding: 16px; border-radius: 18px; border: 1px solid rgba(106, 78, 46, 0.16); background: rgba(255, 255, 255, 0.48); }
-.hero-kicker { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent3); }
+.hero-kicker { font-size: 12px; font-weight: 700; letter-spacing: 0; text-transform: uppercase; color: var(--accent3); }
 .rail-metric-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .status-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .status-chip { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 11px 13px; border-radius: 14px; border: 1px solid rgba(106, 78, 46, 0.14); background: rgba(255, 255, 255, 0.56); }
@@ -90,7 +90,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 .process-card { padding: 22px; }
 .process-strip { display: grid; gap: 12px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .process-step { display: grid; gap: 8px; padding: 16px; border-radius: 18px; border: 1px solid rgba(29, 51, 65, 0.12); background: linear-gradient(180deg, rgba(246, 248, 249, 0.86), rgba(255, 255, 255, 0.56)); }
-.process-index { font-size: 12px; font-weight: 800; color: var(--accent3); letter-spacing: 0.08em; }
+.process-index { font-size: 12px; font-weight: 800; color: var(--accent3); letter-spacing: 0; }
 .dashboard-grid { display: grid; gap: 16px; grid-template-columns: 1.2fr 0.8fr; }
 .highlight-card { min-height: 100%; }
 .judge-card { background: linear-gradient(180deg, rgba(244, 248, 250, 0.96), rgba(236, 242, 246, 0.9)); }
