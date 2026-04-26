@@ -31,11 +31,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <section className="workspace-hero">
         <div className="command-panel card">
-          <div className="eyebrow">작업 전 10분 정리</div>
-          <h1>오늘 작업을 안전 문서팩으로 정리하세요.</h1>
+          <div className="eyebrow">Safe workpack</div>
+          <h1>안전문서, 바로 작성</h1>
           <p>
-            현장 상황을 한 줄로 입력하면 위험성평가표, TBM 브리핑, 회의록,
-            안전교육일지, 현장 공유 메시지까지 한 번에 준비합니다.
+            현장 상황을 입력하면 위험성평가표, TBM, 안전교육일지,
+            공유 메시지를 한 번에 준비합니다.
           </p>
           <form action="/" method="GET" className="command-form">
             <label htmlFor="q">현장 상황</label>
@@ -113,40 +113,47 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <WorkpackEditor data={data} />
 
-      <section className="two product-section">
-        <article className="card list">
-          <div className="eyebrow">Field briefing</div>
-          <div className="h2">작업 전 확인 질문</div>
-          <div className="question-list">
+      <section className="field-notes">
+        <article className="compact-panel">
+          <div className="compact-head">
+            <span className="eyebrow">Check</span>
+            <strong>작업 전 확인 질문</strong>
+          </div>
+          <div className="compact-list">
             {data.deliverables.tbmQuestions.map((item) => (
-              <div key={item} className="question-row">{item}</div>
+              <div key={item} className="compact-row">{item}</div>
             ))}
           </div>
         </article>
-        <article className="card list">
-          <div className="eyebrow">Education handoff</div>
-          <div className="h2">교육 핵심 문구</div>
-          <div className="question-list">
+        <article className="compact-panel">
+          <div className="compact-head">
+            <span className="eyebrow">Teach</span>
+            <strong>교육 핵심 문구</strong>
+          </div>
+          <div className="compact-list">
             {data.deliverables.safetyEducationPoints.map((item) => (
-              <div key={item} className="question-row">{item}</div>
+              <div key={item} className="compact-row">{item}</div>
             ))}
           </div>
         </article>
       </section>
 
-      <section className="reference-grid" id="references">
-        <article className="card list">
-          <div className="eyebrow">Weather</div>
-          <div className="h2">기상 작업 신호</div>
-          <p className="lead">{data.externalData.weather.summary}</p>
-          <ul>
+      <section className="reference-strip" id="references">
+        <article className="reference-card">
+          <div className="compact-head">
+            <span className="eyebrow">Weather</span>
+            <strong>{data.externalData.weather.summary}</strong>
+          </div>
+          <ul className="plain-list">
             {data.externalData.weather.actions.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </article>
 
-        <article className="card list">
-          <div className="eyebrow">Training</div>
-          <div className="h2">후속 교육 추천</div>
+        <article className="reference-card">
+          <div className="compact-head">
+            <span className="eyebrow">Training</span>
+            <strong>후속 교육</strong>
+          </div>
           {primaryTraining ? (
             <a href={primaryTraining.url} target="_blank" rel="noreferrer" className="training-card">
               <strong>{primaryTraining.title}</strong>
@@ -159,9 +166,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           )}
         </article>
 
-        <article className="card list">
-          <div className="eyebrow">KOSHA</div>
-          <div className="h2">작업 기준 참고</div>
+        <article className="reference-card">
+          <div className="compact-head">
+            <span className="eyebrow">KOSHA</span>
+            <strong>작업 기준</strong>
+          </div>
           {data.externalData.kosha.references.slice(0, 2).map((item) => (
             <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="training-card">
               <strong>{item.title}</strong>
@@ -172,11 +181,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </article>
       </section>
 
-      <section className="two product-section">
-        <CitationList citations={data.citations} question={data.question} />
-        <article className="card list">
-          <div className="eyebrow">Share</div>
-          <div className="h2">현장 공유용 메시지</div>
+      <section className="handoff-section">
+        <div className="evidence-panel">
+          <CitationList citations={data.citations} question={data.question} />
+        </div>
+        <article className="share-panel">
+          <div className="compact-head">
+            <span className="eyebrow">Share</span>
+            <strong>현장 공유 메시지</strong>
+          </div>
           <pre>{data.deliverables.kakaoMessage}</pre>
         </article>
       </section>

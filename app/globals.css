@@ -186,11 +186,11 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 }
 
 .command-panel h1 {
-  max-width: 11ch;
+  max-width: 8ch;
   margin: 10px 0 14px;
-  font-size: clamp(46px, 5.8vw, 82px);
-  line-height: 0.95;
-  letter-spacing: -0.055em;
+  font-size: clamp(46px, 5.4vw, 74px);
+  line-height: 1;
+  letter-spacing: -0.05em;
 }
 
 .command-panel p {
@@ -458,7 +458,10 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .two,
 .three,
 .reference-grid,
-.product-section {
+.product-section,
+.field-notes,
+.reference-strip,
+.handoff-section {
   display: grid;
   gap: 18px;
 }
@@ -470,6 +473,94 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .three,
 .reference-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.field-notes {
+  grid-template-columns: 1fr 1fr;
+}
+
+.compact-panel,
+.reference-card,
+.share-panel {
+  border: 1px solid rgba(226, 222, 213, 0.9);
+  border-radius: 24px;
+  background: rgba(255, 253, 248, 0.72);
+  box-shadow: 0 16px 44px rgba(38, 34, 27, 0.05);
+}
+
+.compact-panel,
+.reference-card {
+  padding: 18px;
+}
+
+.compact-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.compact-head strong {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.compact-list {
+  display: grid;
+  gap: 8px;
+}
+
+.compact-row {
+  padding: 10px 0;
+  border-top: 1px solid rgba(226, 222, 213, 0.82);
+  color: #333b48;
+  line-height: 1.55;
+}
+
+.compact-row:first-child {
+  border-top: 0;
+}
+
+.reference-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.plain-list {
+  color: #424b59;
+  font-size: 14px;
+}
+
+.reference-card .training-card {
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.handoff-section {
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+}
+
+.evidence-panel > .card {
+  min-height: 0;
+  padding: 18px;
+  box-shadow: 0 16px 44px rgba(38, 34, 27, 0.05);
+}
+
+.share-panel {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 18px;
+}
+
+.share-panel pre {
+  max-height: 260px;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid rgba(226, 222, 213, 0.9);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  font-size: 14px;
 }
 
 .product-section .card,
@@ -537,6 +628,9 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   .two,
   .three,
   .reference-grid,
+  .field-notes,
+  .reference-strip,
+  .handoff-section,
   .action-strip {
     grid-template-columns: 1fr;
   }
@@ -580,7 +674,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
   .command-panel h1 {
     max-width: none;
-    font-size: 44px;
+    font-size: 42px;
   }
 
   .summary-grid,
