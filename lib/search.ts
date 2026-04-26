@@ -11,6 +11,16 @@ export async function runSearch(query: string) {
   return searchLegalSources(query);
 }
 
+function inferLegalEvidenceMode(sourceMix: ReturnType<typeof summarizeLegalSourceMix>): AskResponse["status"]["lawgo"] {
+  if ((sourceMix.counts.lawgo || 0) > 0 || (sourceMix.counts["korean-law-mcp"] || 0) > 0) {
+    return "live";
+  }
+  if ((sourceMix.counts.mock || 0) > 0) {
+    return "fallback";
+  }
+  return "mock";
+}
+
 export async function runAsk(question: string): Promise<AskResponse> {
   try {
     const [rawCitations, weather, training, kosha] = await Promise.all([
@@ -24,6 +34,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const response = await generateAnswer(question, citations.slice(0, 6));
     const koreanLawMcpCount = citations.filter((item) => item.sourceSystem === "korean-law-mcp").length;
     const sourceMix = summarizeLegalSourceMix(citations);
+    const legalEvidenceMode = inferLegalEvidenceMode(sourceMix);
     const trainingAppendix = training.recommendations.length
       ? `\n\n[추천 후속 교육]\n${training.recommendations.map((item, index) => `${index + 1}. ${item.title} / ${item.institution} / ${item.startDate}~${item.endDate}`).join("\n")}`
       : "";
@@ -53,10 +64,11 @@ export async function runAsk(question: string): Promise<AskResponse> {
       },
       status: {
         ...response.status,
+        lawgo: legalEvidenceMode,
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / ${weather.detail} / ${training.detail} / ${kosha.detail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${kosha.detail}`
       },
       sourceMix
     };
