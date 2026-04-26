@@ -4,6 +4,8 @@ import { buildMockAskResponse } from "./mock-data";
 
 const openAiApiKey = process.env.OPENAI_API_KEY?.trim();
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
+const openAiModel = process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini";
+const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
 const RESPONSE_TIMEOUT_MS = 20_000;
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "45000", 10);
 const RETRY_DELAY_MS = 500;
@@ -63,7 +65,7 @@ async function generateWithOpenAI(prompt: string) {
     () =>
       withTimeout(
         client.responses.create({
-          model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+          model: openAiModel,
           input: prompt
         }),
         RESPONSE_TIMEOUT_MS,
@@ -85,8 +87,7 @@ async function generateWithGemini(prompt: string) {
     throw new Error("GEMINI_API_KEY is not set");
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
 
   const response = await withRetry(
     async () =>
