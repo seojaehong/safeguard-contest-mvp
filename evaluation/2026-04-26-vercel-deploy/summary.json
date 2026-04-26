@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-04-26T19:40:50.7023750+09:00",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "deploymentUrl": "https://safeguard-contest-8qmnuumip-seojaehongs-projects.vercel.app",
+  "home": {
+    "statusCode": 200,
+    "containsCopilot": true,
+    "containsFlow": true,
+    "containsKosha": true,
+    "elapsedMs": 21154
+  },
+  "apiAsk": {
+    "statusCode": 200,
+    "responseMode": "live",
+    "lawgo": "fallback",
+    "ai": "live",
+    "weather": "live",
+    "work24": "live",
+    "kosha": "fallback",
+    "hasRiskAssessment": true,
+    "hasTbmBriefing": true,
+    "hasTbmLog": true,
+    "hasSafetyEducation": true,
+    "citationCount": 2,
+    "sourceMix": {
+      "mock": 2
+    },
+    "elapsedMs": 24660
+  },
+  "localValidation": {
+    "typecheck": "passed",
+    "build": "passed",
+    "scenarioE2e": "4/4 passed"
+  }
+}
