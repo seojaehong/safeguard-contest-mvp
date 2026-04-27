@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-04-27T23:33:00.9269191+09:00",
+  "url": "https://node.pe.kr/webhook/safeguard-workpack",
+  "statusCode": 200,
+  "providerStatus": "partial",
+  "summary": {
+    "requested": 3,
+    "sent": 2,
+    "failed": 0,
+    "partial": 0,
+    "unconfigured": 1
+  },
+  "channelResults": [
+    {
+      "channel": "email",
+      "provider": "smtp",
+      "status": "sent",
+      "message": "SMTP accepted email message",
+      "recipients": [
+        "ic***@gmail.com"
+      ]
+    },
+    {
+      "channel": "sms",
+      "provider": "solapi",
+      "status": "sent",
+      "httpStatus": 200,
+      "message": "Solapi accepted all SMS messages",
+      "recipients": [
+        {
+          "to": "010****2647",
+          "ok": true,
+          "httpStatus": 200,
+          "response": "{\"type\":\"SMS\",\"statusMessage\":\"정상 접수(이통사로 접수 예정)\",\"statusCode\":\"2000\",\"masked\":true}"
+        }
+      ]
+    },
+    {
+      "channel": "band",
+      "status": "unconfigured",
+      "provider": "band",
+      "message": "Band API access is pending review"
+    }
+  ],
+  "message": "SafeGuard 문서팩 일부 채널 전파가 완료되었습니다.",
+  "recipients": [
+    {
+      "name": "SafeGuard Live Smoke",
+      "email": "ic***@gmail.com",
+      "phone": "010****2647"
+    }
+  ]
+}

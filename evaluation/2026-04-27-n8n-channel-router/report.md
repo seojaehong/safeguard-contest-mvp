@@ -34,8 +34,31 @@ Observed result:
 
 The invalid-secret response currently returns a JSON rejection body rather than a non-200 HTTP status because the last-node webhook mode is being used for stable response bodies.
 
+## Live Provider Result
+Live provider smoke file:
+
+```text
+evaluation/2026-04-27-n8n-channel-router/email-solapi-live-smoke.json
+```
+
+Observed result:
+
+- Email: Gmail SMTP accepted the message.
+- SMS: Solapi accepted the message and returned a normal receipt status.
+- Band: left as `unconfigured` because API access is still under review.
+
+Recipient identifiers and provider response details are masked in the evidence file.
+
+Follow-up SMS delivery status:
+
+```text
+evaluation/2026-04-27-n8n-channel-router/solapi-delivery-status.md
+```
+
+Solapi accepted the SMS request, but the later carrier delivery status failed with the anti-spoofing/sender-number protection reason. The integration is working; the remaining blocker is sender-number verification or anti-spoofing configuration in the Solapi console.
+
 ## Remaining Inputs Needed
-To enable actual outbound delivery, add provider URLs and tokens to Oracle n8n `.env`, not to the repository.
+To enable the remaining channels, add provider URLs and tokens to Oracle n8n `.env`, not to the repository.
 
 ```text
 SAFEGUARD_EMAIL_WEBHOOK_URL=

@@ -76,6 +76,15 @@ The router also accepts common aliases such as `EMAIL_WEBHOOK_URL`, `SMS_WEBHOOK
 
 This keeps the product demo stable while making channel credentials a server-side operation.
 
+## Current Provider Status
+- Email: Gmail SMTP is configured on the Oracle n8n server and accepted the live smoke email.
+- SMS: Solapi is configured on the Oracle n8n server and accepted the API request. Carrier delivery then failed because the sender number is blocked by anti-spoofing/sender-number verification.
+- Band: API access is still under review, so the workflow returns a pending/unconfigured status for this channel.
+- Kakao: channel and AlimTalk template setup are required before live use.
+
 ## Evidence
 - Workflow template: `evaluation/2026-04-27-n8n-channel-router/safeguard-workflow-lastnode-router.json`
 - Public webhook smoke: `evaluation/2026-04-27-n8n-channel-router/public-channel-router-smoke.json`
+- Email/Solapi live smoke: `evaluation/2026-04-27-n8n-channel-router/email-solapi-live-smoke.json`
+- Solapi delivery status: `evaluation/2026-04-27-n8n-channel-router/solapi-delivery-status.md`
+- Kakao setup guide: `docs/kakao_alimtalk_setup.md`
