@@ -6,6 +6,10 @@ const openAiApiKey = process.env.OPENAI_API_KEY?.trim();
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const openAiModel = process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini";
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.0-flash,gemini-2.0-flash-lite,gemini-flash-latest")
+  .split(",")
+  .map((model) => model.trim())
+  .filter(Boolean);
 const RESPONSE_TIMEOUT_MS = 20_000;
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "45000", 10);
 const RETRY_DELAY_MS = 500;
@@ -82,12 +86,12 @@ async function generateWithOpenAI(prompt: string) {
   };
 }
 
-async function generateWithGemini(prompt: string) {
+async function generateWithGeminiModel(prompt: string, model: string) {
   if (!geminiApiKey) {
     throw new Error("GEMINI_API_KEY is not set");
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
 
   const response = await withRetry(
     async () =>
@@ -126,9 +130,25 @@ async function generateWithGemini(prompt: string) {
 
   return {
     answer,
-    providerLabel: "Gemini",
+    providerLabel: `Gemini (${model})`,
     policyNote: "Gemini 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
   };
+}
+
+async function generateWithGemini(prompt: string) {
+  const models = [...new Set([geminiModel, ...geminiFallbackModels])];
+  let lastError: unknown;
+
+  for (const model of models) {
+    try {
+      return await generateWithGeminiModel(prompt, model);
+    } catch (error) {
+      lastError = error;
+      console.error(`Gemini model failed: ${model}`, error);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Gemini model chain failed");
 }
 
 function trimCitationText(text: string, maxLength: number) {
@@ -169,7 +189,11 @@ export async function generateAnswer(question: string, citations: SearchResult[]
   const prompt = buildPrompt(question, citations);
 
   const response = geminiApiKey
-    ? await generateWithGemini(prompt)
+    ? await generateWithGemini(prompt).catch((error) => {
+        if (!openAiApiKey) throw error;
+        console.error("Gemini model chain failed; falling back to OpenAI", error);
+        return generateWithOpenAI(prompt);
+      })
     : await generateWithOpenAI(prompt);
 
   const live = buildMockAskResponse(
