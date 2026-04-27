@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { CitationList } from "@/components/CitationList";
 import { WorkpackEditor } from "@/components/WorkpackEditor";
+import { defaultDemoScenario, demoScenarios } from "@/lib/demo-scenarios";
 import { runAsk } from "@/lib/search";
 
-const defaultQuestion = "서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM 초안을 만들어줘.";
-
-export default async function HomePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ q?: string; scenario?: string }> }) {
   const params = await searchParams;
-  const q = params.q || defaultQuestion;
+  const selectedScenario = demoScenarios.find((scenario) => scenario.id === params.scenario) || defaultDemoScenario;
+  const q = params.q || selectedScenario.question;
   const data = await runAsk(q);
   const primaryTraining = data.externalData.training.recommendations[0];
 
@@ -51,6 +51,18 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <a href="#workpack" className="button secondary">결과 편집</a>
             </div>
           </form>
+          <div className="scenario-picker">
+            {demoScenarios.map((scenario) => (
+              <Link
+                key={scenario.id}
+                href={`/?scenario=${scenario.id}`}
+                className={`scenario-chip ${scenario.id === selectedScenario.id && !params.q ? "active" : ""}`}
+              >
+                <strong>{scenario.label}</strong>
+                <span>{scenario.region} · {scenario.industry} · {scenario.hasForeignWorkers ? "외국인 포함" : "외국인 없음"} · {scenario.skillMix}</span>
+              </Link>
+            ))}
+          </div>
         </div>
 
         <div className="today-panel card list">

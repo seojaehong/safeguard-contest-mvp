@@ -28,8 +28,32 @@ type SheetRow = {
   item: string;
   content: string;
 };
+type TemplateKind = "sheet" | "word" | "hwp";
+type TemplatePreset = {
+  kind: TemplateKind;
+  label: string;
+  description: string;
+};
 
 let rhwpModulePromise: Promise<RhwpModule> | null = null;
+
+const templatePresets: TemplatePreset[] = [
+  {
+    kind: "sheet",
+    label: "Excel 시트형",
+    description: "현장 표 양식처럼 행·열로 입력하고 결재 파일에 붙이기 좋은 형태"
+  },
+  {
+    kind: "word",
+    label: "Word 보고서형",
+    description: "본문과 표를 함께 보여주는 점검 보고서형 문서"
+  },
+  {
+    kind: "hwp",
+    label: "HWPX 제출형",
+    description: "한글 문서에서 열기 쉬운 공식 서식 항목 중심 문서"
+  }
+];
 
 const documentMeta: EditableDocument[] = [
   {
@@ -191,6 +215,60 @@ function buildExcelHtml(title: string, rows: SheetRow[]) {
 </html>`;
 }
 
+function buildWordHtml(title: string, rows: SheetRow[]) {
+  const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
+    acc[row.section] = [...(acc[row.section] || []), row];
+    return acc;
+  }, {});
+  const sections = Object.entries(grouped).map(([section, sectionRows]) => `
+    <h2>${escapeHtml(section)}</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody>${sectionRows.map((row) => `<tr><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td></tr>`).join("")}</tbody>
+    </table>
+  `).join("");
+
+  return `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(title)}</title>
+  <style>
+    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; margin: 34px; color: #1d2430; line-height: 1.6; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    h2 { margin: 24px 0 8px; font-size: 16px; border-left: 4px solid #21594f; padding-left: 8px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 12px; }
+    th, td { border: 1px solid #9aa4b2; padding: 9px; vertical-align: top; font-size: 13px; }
+    th { background: #e8f1ed; }
+    .meta { color: #657084; margin-bottom: 18px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>${escapeHtml(title)}</h1>
+  <div class="meta">SafeGuard 공식자료 기반 초안 · 현장 검토 후 사용</div>
+  ${sections}
+</body>
+</html>`;
+}
+
+function buildHwpTemplateText(title: string, rows: SheetRow[]) {
+  const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
+    acc[row.section] = [...(acc[row.section] || []), row];
+    return acc;
+  }, {});
+
+  return [
+    `${title}(초안)`,
+    "SafeGuard 공식자료 기반 서식 · 현장 검토 후 사용",
+    "",
+    ...Object.entries(grouped).flatMap(([section, sectionRows]) => [
+      `[${section}]`,
+      ...sectionRows.map((row) => `${row.item}. ${row.content}`),
+      ""
+    ])
+  ].join("\n");
+}
+
 async function loadRhwp() {
   if (!rhwpModulePromise) {
     rhwpModulePromise = (async () => {
@@ -251,9 +329,11 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   const [values, setValues] = useState<Record<DocumentKey, string>>(initialValues);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
+  const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedText = values[selected.key];
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
+  const selectedRows = buildRowsForDocument(selected, values);
 
   function updateValue(value: string) {
     setValues((current) => ({ ...current, [selected.key]: value }));
@@ -283,8 +363,11 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   }
 
   function downloadXls() {
-    const rows = buildRowsForDocument(selected, values);
-    downloadBlob(new Blob([buildExcelHtml(selected.title, rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${baseName}.xls`);
+    downloadBlob(new Blob([buildExcelHtml(selected.title, selectedRows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${baseName}.xls`);
+  }
+
+  function downloadDoc() {
+    downloadBlob(new Blob([buildWordHtml(selected.title, selectedRows)], { type: "application/msword;charset=utf-8" }), `${baseName}.doc`);
   }
 
   function downloadJpg() {
@@ -319,7 +402,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   async function downloadHwpx() {
     setHwpxStatus("building");
     try {
-      const blob = await buildHwpxWithRhwp(`${selected.title}\n\n${selectedText}`);
+      const blob = await buildHwpxWithRhwp(buildHwpTemplateText(selected.title, selectedRows));
       downloadBlob(blob, `${baseName}.hwpx`);
       setHwpxStatus("idle");
     } catch (error) {
@@ -341,6 +424,18 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   function downloadAllXls() {
     const rows = buildRowsForAll(values);
     downloadBlob(new Blob([buildExcelHtml("SafeGuard 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeguard-workpack.xls`);
+  }
+
+  function downloadTemplate() {
+    if (templateKind === "sheet") {
+      downloadXls();
+      return;
+    }
+    if (templateKind === "word") {
+      downloadDoc();
+      return;
+    }
+    void downloadHwpx();
   }
 
   async function copySheetsTsv() {
@@ -386,6 +481,20 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
           ))}
         </div>
         <div className="sheet-export-panel">
+          <div className="template-picker" aria-label="서식 템플릿 선택">
+            {templatePresets.map((preset) => (
+              <button
+                key={preset.kind}
+                type="button"
+                className={`template-card ${preset.kind === templateKind ? "active" : ""}`}
+                onClick={() => setTemplateKind(preset.kind)}
+              >
+                <strong>{preset.label}</strong>
+                <span>{preset.description}</span>
+              </button>
+            ))}
+          </div>
+          <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
           <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
           <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
           <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
@@ -407,6 +516,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
             <button type="button" className="button secondary" onClick={downloadJson}>JSON</button>
             <button type="button" className="button secondary" onClick={downloadCsv}>CSV</button>
             <button type="button" className="button secondary" onClick={downloadXls}>XLS</button>
+            <button type="button" className="button secondary" onClick={downloadDoc}>DOC</button>
             <button type="button" className="button secondary" onClick={downloadHtml}>HTML</button>
             <button type="button" className="button secondary" onClick={downloadJpg}>JPG</button>
             <button type="button" className="button secondary" onClick={printPdf}>PDF</button>
