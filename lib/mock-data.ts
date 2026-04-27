@@ -1,4 +1,6 @@
 import { AskResponse, DetailRecord, SearchResult } from "./types";
+import { selectFallbackAccidentCases } from "./accident-cases";
+import { buildForeignWorkerBriefing, buildForeignWorkerTransmission } from "./foreign-worker";
 
 type ScenarioProfile = {
   id: string;
@@ -565,6 +567,29 @@ function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inf
 export function buildMockAskResponse(question: string, citations: SearchResult[], mode: AskResponse["mode"], statusDetail: string): AskResponse {
   const scenario = inferScenario(question);
   const profile = scenario.profile;
+  const responseScenario = {
+    companyName: scenario.companyName,
+    companyType: scenario.companyType,
+    siteName: scenario.siteName,
+    workSummary: scenario.workSummary,
+    workerCount: scenario.workerCount,
+    weatherNote: scenario.weatherNote
+  };
+  const riskSummary = {
+    title: `${scenario.companyType} ${profile.workName}`,
+    riskLevel: profile.riskLevel,
+    topRisk: profile.topRisk,
+    immediateActions: [
+      profile.actions[0],
+      profile.actions[1],
+      profile.actions[2]
+    ]
+  };
+  const foreignWorkerInput = {
+    question: question.trim() || defaultQuestion,
+    scenario: responseScenario,
+    riskSummary
+  };
 
   return {
     question: question.trim() || defaultQuestion,
@@ -581,14 +606,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
     citations,
     sourceMix: buildSourceMix(citations),
     mode,
-    scenario: {
-      companyName: scenario.companyName,
-      companyType: scenario.companyType,
-      siteName: scenario.siteName,
-      workSummary: scenario.workSummary,
-      workerCount: scenario.workerCount,
-      weatherNote: scenario.weatherNote
-    },
+    scenario: responseScenario,
     externalData: {
       weather: {
         source: "kma",
@@ -609,23 +627,22 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
         mode: "fallback",
         detail: "대표 시나리오 기반 KOSHA 가이드 보강 문구",
         references: []
+      },
+      accidentCases: {
+        source: "kosha-accident",
+        mode: "fallback",
+        detail: "대표 시나리오 기반 유사 재해사례 보강 문구",
+        cases: selectFallbackAccidentCases(question)
       }
     },
-    riskSummary: {
-      title: `${scenario.companyType} ${profile.workName}`,
-      riskLevel: profile.riskLevel,
-      topRisk: profile.topRisk,
-      immediateActions: [
-        profile.actions[0],
-        profile.actions[1],
-        profile.actions[2]
-      ]
-    },
+    riskSummary,
     deliverables: {
       riskAssessmentDraft: buildOfficialStyleRiskAssessment(scenario),
       tbmBriefing: buildOfficialStyleTbmBriefing(scenario),
       tbmLogDraft: buildOfficialStyleTbmLog(scenario),
       safetyEducationRecordDraft: buildOfficialStyleSafetyEducationRecord(scenario),
+      foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
+      foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
       safetyEducationPoints: [
         profile.educationPoints[0],
         profile.educationPoints[1],

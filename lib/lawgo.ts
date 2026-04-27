@@ -5,6 +5,40 @@ const oc = process.env.LAWGO_OC?.trim() || "";
 const mockMode = process.env.LAWGO_MOCK_MODE === "force" || !oc;
 const baseUrl = "http://www.law.go.kr/DRF";
 
+type JsonRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readRecord(record: JsonRecord | undefined, key: string): JsonRecord | undefined {
+  const value = record?.[key];
+  return isRecord(value) ? value : undefined;
+}
+
+function readString(record: JsonRecord | undefined, key: string) {
+  const value = record?.[key];
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  if (isRecord(value)) {
+    const content = value.content;
+    if (typeof content === "string") return content;
+    if (typeof content === "number") return String(content);
+  }
+  return "";
+}
+
+function readContent(value: unknown) {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  if (isRecord(value)) {
+    const content = value.content;
+    if (typeof content === "string") return content;
+    if (typeof content === "number") return String(content);
+  }
+  return "";
+}
+
 function tokenizeQuery(query: string) {
   return query
     .toLowerCase()
@@ -303,41 +337,53 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
   const response = await fetch(url.toString(), { cache: "no-store" });
   const text = await response.text();
   if (!response.ok) return null;
-  const data = JSON.parse(text) as Record<string, any>;
+  const parsedJson = JSON.parse(text) as unknown;
+  if (!isRecord(parsedJson)) return null;
 
   if (parsed.type === "law") {
-    const basic = data?.법령?.기본정보 || {};
-    const department = typeof basic.소관부처 === "object" ? basic.소관부처?.content : basic.소관부처;
-    const body = JSON.stringify(data?.법령?.조문?.조문단위 || []).slice(0, 1200);
+    const law = readRecord(parsedJson, "법령");
+    const basic = readRecord(law, "기본정보") || {};
+    const articles = readRecord(readRecord(law, "조문"), "조문단위");
+    const department = readString(basic, "소관부처");
+    const body = JSON.stringify(articles || []).slice(0, 1200);
+    const lawName = readString(basic, "법령명_한글");
+    const lawKind = readContent(basic.법종구분);
+    const promNo = readString(basic, "공포번호");
+    const effectiveDate = readString(basic, "시행일자");
+    const lawId = readString(basic, "법령ID");
     return {
       id,
       type: "law",
-      title: basic.법령명_한글 || `법령 ${parsed.raw}`,
-      citation: compact([basic.법종구분?.content, basic.공포번호 ? `공포 ${basic.공포번호}` : undefined]).join(" · "),
-      summary: compact([department, basic.시행일자 ? `시행 ${basic.시행일자}` : undefined]).join(" · "),
+      title: lawName || `법령 ${parsed.raw}`,
+      citation: compact([lawKind, promNo ? `공포 ${promNo}` : undefined]).join(" · "),
+      summary: compact([department, effectiveDate ? `시행 ${effectiveDate}` : undefined]).join(" · "),
       body: body || "Law.go 법령 상세 본문을 불러왔습니다.",
       points: compact([
         department ? `소관부처 ${department}` : undefined,
-        basic.시행일자 ? `시행일 ${basic.시행일자}` : undefined
+        effectiveDate ? `시행일 ${effectiveDate}` : undefined
       ]),
       sourceLabel: "Law.go 법령",
       sourceSystem: "lawgo",
-      sourceUrl: basic.법령ID ? `https://www.law.go.kr/lsInfoP.do?lsiSeq=${basic.법령ID}` : "https://www.law.go.kr/"
+      sourceUrl: lawId ? `https://www.law.go.kr/lsInfoP.do?lsiSeq=${lawId}` : "https://www.law.go.kr/"
     };
   }
 
   if (parsed.type === "prec") {
-    const prec = data?.PrecService || {};
+    const prec = readRecord(parsedJson, "PrecService") || {};
+    const title = readString(prec, "사건명");
+    const court = readString(prec, "법원명");
+    const caseNumber = readString(prec, "사건번호");
+    const decisionDate = readString(prec, "선고일자");
     return {
       id,
       type: "precedent",
-      title: prec.사건명 || `판례 ${parsed.raw}`,
-      citation: compact([prec.법원명, prec.사건번호, prec.선고일자 ? `선고 ${prec.선고일자}` : undefined]).join(" · "),
-      summary: stripHtml(prec.판결요지 || prec.판시사항 || "Law.go 판례 상세"),
-      body: stripHtml(prec.판례내용 || ""),
+      title: title || `판례 ${parsed.raw}`,
+      citation: compact([court, caseNumber, decisionDate ? `선고 ${decisionDate}` : undefined]).join(" · "),
+      summary: stripHtml(readString(prec, "판결요지") || readString(prec, "판시사항") || "Law.go 판례 상세"),
+      body: stripHtml(readString(prec, "판례내용")),
       points: compact([
-        prec.법원명 ? `법원 ${prec.법원명}` : undefined,
-        prec.사건번호 ? `사건번호 ${prec.사건번호}` : undefined
+        court ? `법원 ${court}` : undefined,
+        caseNumber ? `사건번호 ${caseNumber}` : undefined
       ]),
       sourceLabel: "Law.go 판례",
       sourceSystem: "lawgo",
@@ -345,17 +391,24 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
     };
   }
 
-  const expc = data?.ExpcService || {};
+  const expc = readRecord(parsedJson, "ExpcService") || {};
+  const title = readString(expc, "안건명");
+  const agency = readString(expc, "해석기관명");
+  const responseDate = readString(expc, "회신일자");
+  const question = readString(expc, "질의요지");
+  const reason = readString(expc, "이유");
+  const answer = readString(expc, "회답");
+  const questionAgency = readString(expc, "질의기관명");
   return {
     id,
     type: "interpretation",
-    title: expc.안건명 || `해석례 ${parsed.raw}`,
-    citation: compact([expc.해석기관명, expc.회신일자 ? `회신 ${expc.회신일자}` : undefined]).join(" · "),
-    summary: stripHtml(expc.회답 || expc.질의요지 || "Law.go 해석례 상세"),
-    body: stripHtml(`${expc.질의요지 || ""}\n\n${expc.이유 || ""}`),
+    title: title || `해석례 ${parsed.raw}`,
+    citation: compact([agency, responseDate ? `회신 ${responseDate}` : undefined]).join(" · "),
+    summary: stripHtml(answer || question || "Law.go 해석례 상세"),
+    body: stripHtml(`${question}\n\n${reason}`),
     points: compact([
-      expc.질의기관명 ? `질의기관 ${expc.질의기관명}` : undefined,
-      expc.해석기관명 ? `해석기관 ${expc.해석기관명}` : undefined
+      questionAgency ? `질의기관 ${questionAgency}` : undefined,
+      agency ? `해석기관 ${agency}` : undefined
     ]),
     sourceLabel: "Law.go 해석례",
     sourceSystem: "lawgo",

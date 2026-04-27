@@ -29,6 +29,10 @@ type WeatherEnvelope = {
 };
 
 const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUBLIC_DATA_API_KEY?.trim() || "";
+const weatherCache = new Map<string, {
+  expiresAt: number;
+  value: Awaited<ReturnType<typeof fetchWeatherSignal>>;
+}>();
 
 const locationMap: Array<{ keywords: string[]; config: LocationConfig }> = [
   { keywords: ["성수", "강남", "서울"], config: { label: "서울", area1: "11", nx: 61, ny: 125 } },
@@ -135,6 +139,15 @@ export async function fetchWeatherSignal(question: string): Promise<{
   }
 
   const { baseDate, baseTime } = formatKmaBaseDate();
+  const cacheKey = `${location.label}:${baseDate}:${baseTime}`;
+  const cached = weatherCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return {
+      ...cached.value,
+      detail: `${cached.value.detail} / in-memory cache`
+    };
+  }
+
   const url = new URL("https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst");
   url.searchParams.set("serviceKey", serviceKey);
   url.searchParams.set("pageNo", "1");
@@ -147,14 +160,18 @@ export async function fetchWeatherSignal(question: string): Promise<{
 
   try {
     const response = await fetch(url.toString(), { cache: "no-store" });
-    const parsed = (await response.json()) as WeatherEnvelope;
+    const text = await response.text();
+    if (!response.ok) {
+      throw new Error(text.slice(0, 160) || `HTTP ${response.status}`);
+    }
+    const parsed = JSON.parse(text) as WeatherEnvelope;
     const items = parsed.response?.body?.items?.item || [];
-    if (!response.ok || !items.length) {
+    if (!items.length) {
       throw new Error(parsed.response?.header?.resultMsg || "기상청 응답이 비어 있습니다.");
     }
 
     const snapshot = pickForecastSnapshot(items);
-    return {
+    const value = {
       source: "kma",
       mode: "live",
       locationLabel: location.label,
@@ -165,7 +182,12 @@ export async function fetchWeatherSignal(question: string): Promise<{
       precipitationProbability: snapshot.precipitationProbability,
       actions: snapshot.actions,
       detail: `기상청 단기예보 live 호출 성공 (${location.label}, base ${baseDate} ${baseTime})`
-    };
+    } as const;
+    weatherCache.set(cacheKey, {
+      expiresAt: Date.now() + 30 * 60_000,
+      value
+    });
+    return value;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return {

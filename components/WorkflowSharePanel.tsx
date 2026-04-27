@@ -40,13 +40,16 @@ function buildBriefPayload(data: AskResponse) {
       riskAssessmentDraft: data.deliverables.riskAssessmentDraft,
       tbmBriefing: data.deliverables.tbmBriefing,
       tbmLogDraft: data.deliverables.tbmLogDraft,
-      safetyEducationRecordDraft: data.deliverables.safetyEducationRecordDraft
+      safetyEducationRecordDraft: data.deliverables.safetyEducationRecordDraft,
+      foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
+      foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission
     },
     evidence: {
       citations: data.citations.slice(0, 5),
       weather: data.externalData.weather,
       training: data.externalData.training.recommendations.slice(0, 3),
-      kosha: data.externalData.kosha.references.slice(0, 3)
+      kosha: data.externalData.kosha.references.slice(0, 3),
+      accidentCases: data.externalData.accidentCases.cases.slice(0, 3)
     },
     status: data.status
   };

@@ -12,6 +12,8 @@ type DocumentKey =
   | "tbmBriefing"
   | "tbmLogDraft"
   | "safetyEducationRecordDraft"
+  | "foreignWorkerBriefing"
+  | "foreignWorkerTransmission"
   | "kakaoMessage";
 
 type EditableDocument = {
@@ -79,6 +81,18 @@ const documentMeta: EditableDocument[] = [
     title: "안전보건교육 기록",
     description: "교육대상, 교육내용, 확인방법, 후속 교육 추천을 분리해 남깁니다.",
     fileBase: "safety-education"
+  },
+  {
+    key: "foreignWorkerBriefing",
+    title: "외국인 근로자 출력본",
+    description: "쉬운 한국어와 상위 체류국가 언어 기본팩을 함께 제공하는 교육용 출력본입니다.",
+    fileBase: "foreign-worker-briefing"
+  },
+  {
+    key: "foreignWorkerTransmission",
+    title: "외국인 근로자 전송본",
+    description: "문자·카카오·밴드로 전송하기 좋은 짧은 다국어 안전공지입니다.",
+    fileBase: "foreign-worker-message"
   },
   {
     key: "kakaoMessage",
@@ -321,6 +335,8 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
       tbmBriefing: data.deliverables.tbmBriefing,
       tbmLogDraft: data.deliverables.tbmLogDraft,
       safetyEducationRecordDraft: data.deliverables.safetyEducationRecordDraft,
+      foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
+      foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission,
       kakaoMessage: data.deliverables.kakaoMessage
     }),
     [data]

@@ -2,6 +2,24 @@ export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
 export type IntegrationMode = "mock" | "live" | "fallback";
 
+export type AccidentCase = {
+  title: string;
+  industry?: string;
+  accidentType?: string;
+  summary: string;
+  preventionPoint: string;
+  sourceUrl?: string;
+  matchedReason: string;
+};
+
+export type ForeignWorkerLanguage = {
+  code: string;
+  label: string;
+  nativeLabel: string;
+  rationale: string;
+  lines: string[];
+};
+
 export type SearchResult = {
   id: string;
   type: SourceType;
@@ -101,6 +119,12 @@ export type AskResponse = {
         templateHints?: string[];
       }>;
     };
+    accidentCases: {
+      source: "kosha-accident";
+      mode: IntegrationMode;
+      detail: string;
+      cases: AccidentCase[];
+    };
   };
   riskSummary: {
     title: string;
@@ -113,6 +137,8 @@ export type AskResponse = {
     tbmBriefing: string;
     tbmLogDraft: string;
     safetyEducationRecordDraft: string;
+    foreignWorkerBriefing: string;
+    foreignWorkerTransmission: string;
     safetyEducationPoints: string[];
     tbmQuestions: string[];
     kakaoMessage: string;

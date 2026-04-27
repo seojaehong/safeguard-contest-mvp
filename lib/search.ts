@@ -6,6 +6,8 @@ import { summarizeLegalSourceMix } from "./legal-sources";
 import { fetchWeatherSignal } from "./weather";
 import { fetchTrainingRecommendations } from "./work24";
 import { fetchKoshaReferences } from "./kosha";
+import { fetchAccidentCases } from "./accident-cases";
+import { buildForeignWorkerBriefing, buildForeignWorkerTransmission } from "./foreign-worker";
 
 export async function runSearch(query: string) {
   return searchLegalSources(query);
@@ -63,13 +65,29 @@ function formatSafetyEducationOfficialAppendix(references: Awaited<ReturnType<ty
   ].join("\n");
 }
 
+function formatAccidentCaseAppendix(accidentCases: Awaited<ReturnType<typeof fetchAccidentCases>>["cases"]) {
+  if (!accidentCases.length) return "";
+
+  return [
+    "",
+    "[유사 재해사례 기반 예방 포인트]",
+    ...accidentCases.slice(0, 3).map((item, index) => [
+      `${index + 1}. ${item.title}${item.industry ? ` / ${item.industry}` : ""}${item.accidentType ? ` / ${item.accidentType}` : ""}`,
+      `   - 사례 요약: ${item.summary}`,
+      `   - 예방 포인트: ${item.preventionPoint}`,
+      `   - 매핑 이유: ${item.matchedReason}`
+    ].join("\n"))
+  ].join("\n");
+}
+
 export async function runAsk(question: string): Promise<AskResponse> {
   try {
-    const [rawCitations, weather, training, kosha] = await Promise.all([
+    const [rawCitations, weather, training, kosha, accidentCases] = await Promise.all([
       searchLegalSources(question),
       fetchWeatherSignal(question),
       fetchTrainingRecommendations(question),
-      fetchKoshaReferences(question)
+      fetchKoshaReferences(question),
+      fetchAccidentCases(question)
     ]);
     const citations = rawCitations.length ? rawCitations : await searchLegalSources("산업안전보건법");
 
@@ -93,6 +111,12 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const safetyEducationOfficialAppendix = formatSafetyEducationOfficialAppendix(kosha.references);
     const koshaImpactLines = kosha.references.slice(0, 2).map((item) => item.impact);
     const trainingFitLines = training.recommendations.slice(0, 2).map((item) => `${item.title}: ${item.fitLabel || "조건부 후보"} - ${item.fitReason || item.reason}`);
+    const accidentAppendix = formatAccidentCaseAppendix(accidentCases.cases);
+    const foreignWorkerInput = {
+      question,
+      scenario: response.scenario,
+      riskSummary: response.riskSummary
+    };
 
     const enriched: AskResponse = {
       ...response,
@@ -100,20 +124,25 @@ export async function runAsk(question: string): Promise<AskResponse> {
         response.answer,
         `[기상 신호] ${weather.summary}`,
         training.recommendations.length ? `[교육 연계] ${training.recommendations[0].title} (${training.recommendations[0].fitLabel || "조건부 후보"})` : "",
-        kosha.references.length ? `[KOSHA 보강] ${kosha.references[0].title} (${kosha.references[0].verified ? "공식 링크 확인" : "사전 매핑"})` : ""
+        kosha.references.length ? `[KOSHA 보강] ${kosha.references[0].title} (${kosha.references[0].verified ? "공식 링크 확인" : "사전 매핑"})` : "",
+        accidentCases.cases.length ? `[유사 재해사례] ${accidentCases.cases[0].title}: ${accidentCases.cases[0].preventionPoint}` : ""
       ].filter(Boolean).join("\n\n"),
       externalData: {
         weather,
         training,
-        kosha
+        kosha,
+        accidentCases
       },
       deliverables: {
         ...response.deliverables,
         riskAssessmentDraft: `${response.deliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}`,
-        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${koshaImpactLines.length ? `\n\n[KOSHA 매뉴얼·Guide 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}`,
+        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${koshaImpactLines.length ? `\n\n[KOSHA 매뉴얼·Guide 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${accidentAppendix}`,
         tbmLogDraft: `${response.deliverables.tbmLogDraft}${koshaAppendix}`
           .trim(),
-        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${trainingAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${kosha.references.length ? `\n\n[공식 교육자료 반영]\n- ${kosha.references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("안전교육일지")).slice(0, 2).map((item) => `${item.title}: ${item.summary}`).join("\n- ")}` : ""}`
+        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${trainingAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${kosha.references.length ? `\n\n[공식 교육자료 반영]\n- ${kosha.references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("안전교육일지")).slice(0, 2).map((item) => `${item.title}: ${item.summary}`).join("\n- ")}` : ""}${accidentAppendix}`,
+        foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
+        foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
+        kakaoMessage: `${response.deliverables.kakaoMessage}\n\n[외국인 근로자 공지]\n${buildForeignWorkerTransmission(foreignWorkerInput).split("\n").slice(0, 8).join("\n")}`
       },
       status: {
         ...response.status,
@@ -121,7 +150,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${kosha.detail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${kosha.detail} / ${accidentCases.detail}`
       },
       sourceMix
     };

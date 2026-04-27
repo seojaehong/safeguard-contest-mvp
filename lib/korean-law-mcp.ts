@@ -6,7 +6,7 @@ import { extractTag, parseInterpretationXML, parsePrecedentXML, stripHtml } from
 import { DetailRecord, SearchResult } from "./types";
 
 type KoreanLawMcpSourceType = "law" | "precedent" | "interpretation";
-type JsonRecord = Record<string, any>;
+type JsonRecord = Record<string, unknown>;
 
 type KoreanLawMcpConfig = {
   enabled: boolean;
@@ -44,8 +44,15 @@ function createClient() {
   return new LawApiClient({ apiKey: config.apiKey });
 }
 
-function normalizeText(text?: string | null) {
-  return stripHtml(text || "").replace(/\s+/g, " ").trim();
+function normalizeText(text?: unknown) {
+  if (typeof text === "string") return stripHtml(text).replace(/\s+/g, " ").trim();
+  if (typeof text === "number") return String(text);
+  if (typeof text === "object" && text !== null && "content" in text) {
+    const content = (text as { content?: unknown }).content;
+    if (typeof content === "string") return stripHtml(content).replace(/\s+/g, " ").trim();
+    if (typeof content === "number") return String(content);
+  }
+  return "";
 }
 
 function truncateText(text: string, maxLength = 180) {
@@ -54,11 +61,11 @@ function truncateText(text: string, maxLength = 180) {
   return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
-function compact(parts: Array<string | undefined | null>) {
+function compact(parts: unknown[]) {
   return parts.map((part) => normalizeText(part)).filter(Boolean);
 }
 
-function buildSummary(parts: Array<string | undefined | null>, fallback: string) {
+function buildSummary(parts: unknown[], fallback: string) {
   const normalizedParts = compact(parts);
   return normalizedParts.length ? normalizedParts.join(" · ") : fallback;
 }
@@ -66,6 +73,10 @@ function buildSummary(parts: Array<string | undefined | null>, fallback: string)
 function toArray<T>(value: T | T[] | undefined | null): T[] {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
+}
+
+function isJsonRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function buildId(type: KoreanLawMcpSourceType, rawId: string) {
@@ -223,7 +234,7 @@ export async function searchKoreanLawMcp(query: string, limit = DEFAULT_SEARCH_L
 }
 
 function formatLawArticlePreview(lawData: JsonRecord) {
-  const rawUnits = lawData.조문 && typeof lawData.조문 === "object" ? lawData.조문.조문단위 : undefined;
+  const rawUnits = isJsonRecord(lawData.조문) ? lawData.조문.조문단위 : undefined;
   const articleUnits = toArray<JsonRecord>(rawUnits as JsonRecord | JsonRecord[] | undefined);
   const previews: string[] = [];
 
@@ -239,7 +250,7 @@ function formatLawArticlePreview(lawData: JsonRecord) {
     let mainContent = "";
 
     if (rawContent) {
-      const flattened = flattenContent(rawContent);
+      const flattened = flattenContent(rawContent as Parameters<typeof flattenContent>[0]);
       const normalized = normalizeText(flattened);
       if (normalized) {
         const headerPattern = new RegExp(`^${displayNum.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:\\([^)]*\\))?\\s*`);
@@ -247,7 +258,7 @@ function formatLawArticlePreview(lawData: JsonRecord) {
       }
     }
 
-    const paragraphContent = unit.항 ? normalizeText(extractHangContent(unit.항)) : "";
+    const paragraphContent = unit.항 ? normalizeText(extractHangContent(unit.항 as Parameters<typeof extractHangContent>[0])) : "";
     const body = cleanHtml([mainContent, paragraphContent].filter(Boolean).join("\n")).trim();
 
     if (body) {
@@ -296,7 +307,7 @@ async function loadLawDetail(client: LawApiClient, mst: string): Promise<DetailR
   const lawId = normalizeText(basicInfo.법령ID);
   const lawType = normalizeText(basicInfo.법령구분명);
 
-  const rawUnits = lawData.조문 && typeof lawData.조문 === "object" ? lawData.조문.조문단위 : undefined;
+  const rawUnits = isJsonRecord(lawData.조문) ? lawData.조문.조문단위 : undefined;
   const articleUnits = toArray<JsonRecord>(rawUnits as JsonRecord | JsonRecord[] | undefined).filter((unit) => unit.조문여부 === "조문");
   const articleTitles = articleUnits
     .map((unit) => {
@@ -328,7 +339,7 @@ async function loadLawDetail(client: LawApiClient, mst: string): Promise<DetailR
   });
 }
 
-function buildSections(sections: Array<{ label: string; text?: string | null }>) {
+function buildSections(sections: Array<{ label: string; text?: unknown }>) {
   return sections
     .map(({ label, text }) => {
       const normalized = normalizeText(text);

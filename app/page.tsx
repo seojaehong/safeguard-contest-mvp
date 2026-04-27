@@ -11,6 +11,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const q = params.q || selectedScenario.question;
   const data = await runAsk(q);
   const primaryTraining = data.externalData.training.recommendations[0];
+  const primaryAccidentCase = data.externalData.accidentCases.cases[0];
+  const foreignBriefingPreview = data.deliverables.foreignWorkerTransmission.split(/\r?\n/).filter(Boolean).slice(0, 6);
 
   return (
     <main className="product-shell">
@@ -98,13 +100,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <div className="output-panel card list">
           <div className="panel-heading">
             <span className="eyebrow">생성된 문서</span>
-            <strong>5종 준비 완료</strong>
+            <strong>7종 준비 완료</strong>
           </div>
           {[
             "위험성평가표",
             "TBM 브리핑",
             "TBM 기록",
             "안전보건교육 기록",
+            "외국인 출력본",
+            "외국인 전송본",
             "현장 공유 메시지"
           ].map((item) => (
             <div key={item} className="output-row">
@@ -149,6 +153,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             ))}
           </div>
         </article>
+        <article className="compact-panel">
+          <div className="compact-head">
+            <span className="eyebrow">Foreign</span>
+            <strong>외국인 전송 미리보기</strong>
+          </div>
+          <div className="compact-list">
+            {foreignBriefingPreview.map((item) => (
+              <div key={item} className="compact-row">{item}</div>
+            ))}
+          </div>
+        </article>
       </section>
 
       <section className="reference-strip" id="references">
@@ -160,6 +175,25 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <ul className="plain-list">
             {data.externalData.weather.actions.map((item) => <li key={item}>{item}</li>)}
           </ul>
+        </article>
+
+        <article className="reference-card">
+          <div className="compact-head">
+            <span className="eyebrow">Accident</span>
+            <strong>유사 재해사례</strong>
+          </div>
+          {primaryAccidentCase ? (
+            <a href={primaryAccidentCase.sourceUrl || "https://www.kosha.or.kr/"} target="_blank" rel="noreferrer" className="training-card">
+              <strong>{primaryAccidentCase.title}</strong>
+              <em className="fit-pill">{data.externalData.accidentCases.mode === "live" ? "live" : "fallback"}</em>
+              <span>{[primaryAccidentCase.industry, primaryAccidentCase.accidentType].filter(Boolean).join(" · ")}</span>
+              <small>{primaryAccidentCase.summary}</small>
+              <small>{primaryAccidentCase.preventionPoint}</small>
+              <small>{primaryAccidentCase.matchedReason}</small>
+            </a>
+          ) : (
+            <p className="muted">유사 재해사례가 없으면 위험성평가와 TBM 문구만 사용합니다.</p>
+          )}
         </article>
 
         <article className="reference-card">
