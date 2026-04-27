@@ -33,6 +33,11 @@ N8N_PUBLIC_BASE=
 - `npm.cmd run typecheck`: passed after build regenerated `.next/types`
 - Route smoke: passed
 - n8n workflow import: passed
+- Vercel production smoke: passed
+
+## Deployment
+- Production URL: https://safeguard-contest-mvp.vercel.app
+- Deployment URL: https://safeguard-contest-n32qch50t-seojaehongs-projects.vercel.app
 
 ## Remaining Operator Step
 서버2 n8n 컨테이너에 `SAFEGUARD_WEBHOOK_TOKEN`을 넣고 워크플로우를 활성화해야 production webhook이 실제 전송을 받는다. 공개 Vercel에서 바로 전송하려면 `N8N_PUBLIC_BASE`로 접근 가능한 HTTPS reverse proxy 또는 tunnel이 필요하다.
