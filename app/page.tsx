@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CitationList } from "@/components/CitationList";
 import { WorkpackEditor } from "@/components/WorkpackEditor";
+import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import { defaultDemoScenario, demoScenarios } from "@/lib/demo-scenarios";
 import { runAsk } from "@/lib/search";
 
@@ -31,11 +32,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       <section className="workspace-hero">
         <div className="command-panel card">
-          <div className="eyebrow">Safe workpack</div>
-          <h1>안전문서, 바로 작성</h1>
+          <div className="eyebrow">SafeGuard</div>
+          <h1>작업 전 문서팩</h1>
           <p>
-            현장 상황을 입력하면 위험성평가표, TBM, 안전교육일지,
-            공유 메시지를 한 번에 준비합니다.
+            오늘 작업을 입력하면 위험성평가표, TBM, 안전보건교육 기록,
+            현장 전파 메시지를 한 번에 준비합니다.
           </p>
           <form action="/" method="GET" className="command-form">
             <label htmlFor="q">현장 상황</label>
@@ -48,7 +49,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             />
             <div className="command-actions">
               <button type="submit" className="button">문서팩 생성</button>
-              <a href="#workpack" className="button secondary">결과 편집</a>
+              <a href="#workpack" className="button secondary">수정·다운로드</a>
             </div>
           </form>
           <div className="scenario-picker">
@@ -201,13 +202,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <div className="evidence-panel">
           <CitationList citations={data.citations} question={data.question} />
         </div>
-        <article className="share-panel">
-          <div className="compact-head">
-            <span className="eyebrow">Share</span>
-            <strong>현장 공유 메시지</strong>
-          </div>
-          <pre>{data.deliverables.kakaoMessage}</pre>
-        </article>
+        <WorkflowSharePanel data={data} />
       </section>
     </main>
   );

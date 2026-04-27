@@ -1,0 +1,180 @@
+import { NextRequest, NextResponse } from "next/server";
+
+type WorkflowChannel = "email" | "sms" | "kakao" | "band";
+
+type WorkflowRequest = {
+  channels?: WorkflowChannel[];
+  recipients?: string[];
+  operatorNote?: string;
+  workpack?: unknown;
+};
+
+type WorkflowSuccessResponse = {
+  ok?: boolean;
+  workflowRunId?: string;
+  providerStatus?: string;
+  message?: string;
+};
+
+const ALLOWED_CHANNELS: WorkflowChannel[] = ["email", "sms", "kakao", "band"];
+const TIMEOUT_MS = 20_000;
+const RETRY_COUNT = 1;
+
+function trimSlashes(value: string) {
+  return value.replace(/^\/+|\/+$/g, "");
+}
+
+function resolveWebhookConfig() {
+  const explicitUrl = process.env.N8N_WEBHOOK_URL?.trim();
+  const publicBase = process.env.N8N_PUBLIC_BASE?.trim();
+  const internalBase = process.env.N8N_INTERNAL_BASE?.trim();
+  const path = process.env.N8N_WEBHOOK_PATH?.trim();
+  const token = process.env.N8N_WEBHOOK_TOKEN || process.env.N8N_WEBHOOK_SECRET;
+
+  if (explicitUrl && token) {
+    return { url: explicitUrl, token };
+  }
+
+  const base = publicBase || internalBase;
+  if (base && path && token) {
+    return {
+      url: `${base.replace(/\/+$/g, "")}/webhook/${trimSlashes(path)}`,
+      token
+    };
+  }
+
+  return {
+    url: "",
+    token: token || ""
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseChannels(value: unknown): WorkflowChannel[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is WorkflowChannel => (
+    typeof item === "string" && ALLOWED_CHANNELS.includes(item as WorkflowChannel)
+  ));
+}
+
+function parseRecipients(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 50);
+}
+
+async function postWithTimeout(url: string, secret: string, payload: Record<string, unknown>) {
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt <= RETRY_COUNT; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-safeguard-secret": secret
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+
+      const text = await response.text();
+      if (!response.ok) {
+        throw new Error(`n8n webhook returned ${response.status}: ${text.slice(0, 300)}`);
+      }
+
+      if (!text) {
+        return { ok: true, message: "n8n 웹훅이 전파 요청을 접수했습니다." } satisfies WorkflowSuccessResponse;
+      }
+
+      try {
+        const parsed = JSON.parse(text) as unknown;
+        if (isRecord(parsed)) {
+          return parsed as WorkflowSuccessResponse;
+        }
+      } catch (error) {
+        console.warn("n8n webhook returned non-JSON response", error);
+      }
+
+      return { ok: true, message: text.slice(0, 300) } satisfies WorkflowSuccessResponse;
+    } catch (error) {
+      clearTimeout(timeout);
+      lastError = error;
+      console.warn(`n8n webhook attempt ${attempt + 1} failed`, error);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("n8n webhook request failed");
+}
+
+export async function POST(request: NextRequest) {
+  const webhookConfig = resolveWebhookConfig();
+
+  let body: WorkflowRequest;
+  try {
+    const parsed = await request.json() as unknown;
+    body = isRecord(parsed) ? parsed : {};
+  } catch (error) {
+    console.warn("workflow dispatch body parse failed", error);
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      message: "요청 본문을 해석하지 못했습니다."
+    }, { status: 400 });
+  }
+
+  const channels = parseChannels(body.channels);
+  const recipients = parseRecipients(body.recipients);
+
+  if (!body.workpack || channels.length === 0) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      message: "문서팩과 전파 채널을 확인해 주세요."
+    }, { status: 400 });
+  }
+
+  if (!webhookConfig.url || !webhookConfig.token) {
+    return NextResponse.json({
+      ok: false,
+      configured: false,
+      message: "n8n 웹훅 환경변수가 아직 없습니다. N8N_INTERNAL_BASE, N8N_WEBHOOK_PATH, N8N_WEBHOOK_TOKEN을 넣으면 자동 전파가 켜집니다."
+    });
+  }
+
+  const payload = {
+    event: "safeguard.workpack.dispatch",
+    sentAt: new Date().toISOString(),
+    channels,
+    recipients,
+    operatorNote: typeof body.operatorNote === "string" ? body.operatorNote : "",
+    workpack: body.workpack
+  };
+
+  try {
+    const workflowResponse = await postWithTimeout(webhookConfig.url, webhookConfig.token, payload);
+    return NextResponse.json({
+      ok: workflowResponse.ok ?? true,
+      configured: true,
+      workflowRunId: workflowResponse.workflowRunId,
+      providerStatus: workflowResponse.providerStatus,
+      message: workflowResponse.message || "n8n 웹훅이 전파 요청을 접수했습니다."
+    });
+  } catch (error) {
+    console.error("workflow dispatch failed", error);
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      message: error instanceof Error ? error.message : "n8n 전파 요청에 실패했습니다."
+    }, { status: 502 });
+  }
+}
