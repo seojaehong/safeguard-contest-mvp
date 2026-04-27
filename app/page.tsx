@@ -90,8 +90,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {[
             "위험성평가표",
             "TBM 브리핑",
-            "TBM 회의록",
-            "안전교육일지",
+            "TBM 기록",
+            "안전보건교육 기록",
             "현장 공유 메시지"
           ].map((item) => (
             <div key={item} className="output-row">
@@ -170,15 +170,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <article className="reference-card">
           <div className="compact-head">
             <span className="eyebrow">KOSHA</span>
-            <strong>작업 기준</strong>
+            <strong>공식 서식 근거</strong>
           </div>
           {data.externalData.kosha.references.slice(0, 2).map((item) => (
             <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="training-card">
               <strong>{item.title}</strong>
               <em className="fit-pill">{item.verified ? "공식 링크 확인" : "사전 매핑"}</em>
-              <span>{item.category} · {(item.appliedTo || ["위험성평가", "TBM"]).join(", ")}</span>
+              <span>{item.agency || "KOSHA"} · {item.category}</span>
+              <small>반영 문서: {(item.appliesTo || item.appliedTo || ["위험성평가", "TBM"]).join(", ")}</small>
+              <small>서식 힌트: {(item.templateHints || []).join(", ") || item.category}</small>
               <small>{item.summary}</small>
-              <small>{item.impact}</small>
             </a>
           ))}
         </article>

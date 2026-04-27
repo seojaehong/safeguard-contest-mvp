@@ -1,0 +1,116 @@
+[
+  {
+    "id": "scaffold",
+    "mode": "live",
+    "lawgo": "live",
+    "ai": "live",
+    "weather": "live",
+    "work24": "live",
+    "kosha": "live",
+    "koshaVerifiedCount": 5,
+    "koshaTitles": [
+      "KOSHA 위험성평가 사업안내",
+      "KOSHA 위험성평가 교육자료",
+      "KOSHA 작업 전 안전점검회의(TBM) OPS",
+      "고용노동부 TBM 정기교육 시간 인정 안내",
+      "산업안전보건교육 가이드북"
+    ],
+    "trainingTop": "[스킬업] 건설안전기사 필기 1편 (개정)",
+    "trainingFit": "현장 적합",
+    "riskHasOfficial": true,
+    "tbmHasRecord": true,
+    "educationHasOfficial": true
+  },
+  {
+    "id": "forklift",
+    "mode": "live",
+    "lawgo": "live",
+    "ai": "live",
+    "weather": "live",
+    "work24": "live",
+    "kosha": "live",
+    "koshaVerifiedCount": 7,
+    "koshaTitles": [
+      "KOSHA 위험성평가 사업안내",
+      "KOSHA 위험성평가 교육자료",
+      "KOSHA 작업 전 안전점검회의(TBM) OPS",
+      "고용노동부 TBM 정기교육 시간 인정 안내",
+      "산업안전보건교육 가이드북",
+      "지게차의 안전작업에 관한 기술지원규정",
+      "지게차의 안전작업계획서 작성지침"
+    ],
+    "trainingTop": "외국인근로자 취업교육(1반)",
+    "trainingFit": "조건부 후보",
+    "riskHasOfficial": true,
+    "tbmHasRecord": true,
+    "educationHasOfficial": true
+  },
+  {
+    "id": "hotwork",
+    "mode": "live",
+    "lawgo": "live",
+    "ai": "live",
+    "weather": "live",
+    "work24": "fallback",
+    "kosha": "live",
+    "koshaVerifiedCount": 6,
+    "koshaTitles": [
+      "KOSHA 위험성평가 사업안내",
+      "KOSHA 위험성평가 교육자료",
+      "KOSHA 작업 전 안전점검회의(TBM) OPS",
+      "고용노동부 TBM 정기교육 시간 인정 안내",
+      "산업안전보건교육 가이드북",
+      "화기작업 화재·폭발 예방 매뉴얼"
+    ],
+    "trainingTop": null,
+    "trainingFit": null,
+    "riskHasOfficial": true,
+    "tbmHasRecord": true,
+    "educationHasOfficial": true
+  },
+  {
+    "id": "confined",
+    "mode": "live",
+    "lawgo": "live",
+    "ai": "live",
+    "weather": "live",
+    "work24": "live",
+    "kosha": "live",
+    "koshaVerifiedCount": 6,
+    "koshaTitles": [
+      "KOSHA 위험성평가 사업안내",
+      "KOSHA 위험성평가 교육자료",
+      "KOSHA 작업 전 안전점검회의(TBM) OPS",
+      "고용노동부 TBM 정기교육 시간 인정 안내",
+      "산업안전보건교육 가이드북",
+      "KOSHA Guide 밀폐공간 위험관리"
+    ],
+    "trainingTop": "[인재키움]물질안전보건자료 검증 실무(GHS-MSDS)_서울_대면",
+    "trainingFit": "현장 적합",
+    "riskHasOfficial": true,
+    "tbmHasRecord": true,
+    "educationHasOfficial": true
+  },
+  {
+    "id": "foreign",
+    "mode": "live",
+    "lawgo": "live",
+    "ai": "live",
+    "weather": "live",
+    "work24": "live",
+    "kosha": "live",
+    "koshaVerifiedCount": 5,
+    "koshaTitles": [
+      "KOSHA 위험성평가 사업안내",
+      "KOSHA 위험성평가 교육자료",
+      "KOSHA 작업 전 안전점검회의(TBM) OPS",
+      "고용노동부 TBM 정기교육 시간 인정 안내",
+      "산업안전보건교육 가이드북"
+    ],
+    "trainingTop": "외국인 취업교육(안성리조트2026)",
+    "trainingFit": "대상 적합",
+    "riskHasOfficial": true,
+    "tbmHasRecord": true,
+    "educationHasOfficial": true
+  }
+]

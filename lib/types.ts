@@ -88,6 +88,8 @@ export type AskResponse = {
       detail: string;
       references: Array<{
         title: string;
+        agency?: "KOSHA" | "MOEL";
+        kind?: "guide" | "manual" | "education" | "research" | "board" | "press";
         category: string;
         summary: string;
         impact: string;
@@ -95,6 +97,8 @@ export type AskResponse = {
         verified?: boolean;
         sourceKind?: "guide" | "manual" | "education" | "research" | "board";
         appliedTo?: string[];
+        appliesTo?: string[];
+        templateHints?: string[];
       }>;
     };
   };

@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-04-27T18:35:47",
+  "homeStatus": 200,
+  "hasCsv": false,
+  "hasXls": false,
+  "hasGoogleSheets": false,
+  "riskHasOfficialFlow": true,
+  "tbmHasSheetFriendlyRecord": true,
+  "educationHasOfficialFlow": true,
+  "koshaReferenceCount": 7,
+  "officialAgencies": [
+    "KOSHA",
+    "MOEL"
+  ]
+}
