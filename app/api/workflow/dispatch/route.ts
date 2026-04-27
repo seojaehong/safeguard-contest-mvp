@@ -29,13 +29,14 @@ function resolveWebhookConfig() {
   const publicBase = process.env.N8N_PUBLIC_BASE?.trim();
   const internalBase = process.env.N8N_INTERNAL_BASE?.trim();
   const path = process.env.N8N_WEBHOOK_PATH?.trim();
-  const token = process.env.N8N_WEBHOOK_TOKEN || process.env.N8N_WEBHOOK_SECRET;
+  const token = (process.env.N8N_WEBHOOK_TOKEN || process.env.N8N_WEBHOOK_SECRET || "").trim();
+  const isHosted = Boolean(process.env.VERCEL || process.env.VERCEL_URL);
 
   if (explicitUrl && token) {
     return { url: explicitUrl, token };
   }
 
-  const base = publicBase || internalBase;
+  const base = isHosted ? publicBase : internalBase || publicBase;
   if (base && path && token) {
     return {
       url: `${base.replace(/\/+$/g, "")}/webhook/${trimSlashes(path)}`,
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: false,
       configured: false,
-      message: "n8n 웹훅 환경변수가 아직 없습니다. N8N_INTERNAL_BASE, N8N_WEBHOOK_PATH, N8N_WEBHOOK_TOKEN을 넣으면 자동 전파가 켜집니다."
+      message: "n8n 웹훅 환경변수가 아직 없습니다. 로컬/서버 내부는 N8N_INTERNAL_BASE, Vercel은 N8N_PUBLIC_BASE와 N8N_WEBHOOK_PATH, N8N_WEBHOOK_TOKEN을 넣으면 자동 전파가 켜집니다."
     });
   }
 

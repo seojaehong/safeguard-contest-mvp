@@ -202,10 +202,7 @@ export function buildForeignWorkerBriefing(input: BriefingInput) {
 export function buildForeignWorkerTransmission(input: BriefingInput) {
   const languages = pickLanguages(input.question);
   const languageDigest = languages.slice(0, hasForeignWorkerContext(input.question) ? 10 : 5)
-    .map((language) => [
-      `${language.label}(${language.nativeLabel})`,
-      ...language.lines
-    ].join("\n"))
+    .map((language) => buildForeignWorkerLanguageMessage(input, language))
     .join("\n\n");
 
   return [
@@ -220,6 +217,20 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
     languageDigest,
     "",
     "관리자 확인: 이 문구는 현장 통역 또는 관리자 확인 후 전송하세요."
+  ].join("\n");
+}
+
+export function buildForeignWorkerLanguageMessage(input: BriefingInput, language: ForeignWorkerLanguage) {
+  return [
+    `[SafeGuard ${language.label} 안전공지] ${input.scenario.companyName}`,
+    `현장: ${input.scenario.siteName}`,
+    `작업: ${input.scenario.workSummary}`,
+    `핵심 위험: ${input.riskSummary.topRisk}`,
+    "",
+    `${language.label}(${language.nativeLabel})`,
+    ...language.lines.map((line) => `- ${line}`),
+    "",
+    "관리자 확인: 현장 통역 또는 해당 언어 가능자 확인 후 전송하세요."
   ].join("\n");
 }
 

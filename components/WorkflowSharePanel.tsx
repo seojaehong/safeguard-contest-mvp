@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { AskResponse } from "@/lib/types";
 
 type Channel = "email" | "sms" | "kakao" | "band";
+type MessageTarget = "manager" | `foreign:${string}`;
 
 type DispatchResult = {
   ok: boolean;
@@ -20,6 +21,23 @@ const channelOptions: Array<{ key: Channel; label: string; helper: string }> = [
   { key: "band", label: "밴드", helper: "현장 팀 게시" }
 ];
 
+function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
+  const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
+  if (!language) return data.deliverables.foreignWorkerTransmission;
+
+  return [
+    `[SafeGuard ${language.label} 안전공지] ${data.scenario.companyName}`,
+    `현장: ${data.scenario.siteName}`,
+    `작업: ${data.scenario.workSummary}`,
+    `핵심 위험: ${data.riskSummary.topRisk}`,
+    "",
+    `${language.label}(${language.nativeLabel})`,
+    ...language.lines.map((line) => `- ${line}`),
+    "",
+    "관리자 확인: 현장 통역 또는 해당 언어 가능자 확인 후 전송하세요."
+  ].join("\n");
+}
+
 function splitRecipients(value: string) {
   return value
     .split(/[\n,;]/)
@@ -27,7 +45,12 @@ function splitRecipients(value: string) {
     .filter(Boolean);
 }
 
-function buildBriefPayload(data: AskResponse) {
+function buildBriefPayload(data: AskResponse, selectedMessage: string, selectedTarget: MessageTarget) {
+  const selectedLanguageCode = selectedTarget.startsWith("foreign:") ? selectedTarget.replace("foreign:", "") : "";
+  const selectedLanguage = selectedLanguageCode
+    ? data.deliverables.foreignWorkerLanguages.find((item) => item.code === selectedLanguageCode)
+    : undefined;
+
   return {
     companyName: data.scenario.companyName,
     siteName: data.scenario.siteName,
@@ -35,14 +58,25 @@ function buildBriefPayload(data: AskResponse) {
     riskLevel: data.riskSummary.riskLevel,
     topRisk: data.riskSummary.topRisk,
     immediateActions: data.riskSummary.immediateActions,
-    message: data.deliverables.kakaoMessage,
+    message: selectedMessage,
+    messageTarget: selectedLanguage ? "foreign-worker" : "manager",
+    messageLanguage: selectedLanguage ? {
+      code: selectedLanguage.code,
+      label: selectedLanguage.label,
+      nativeLabel: selectedLanguage.nativeLabel
+    } : {
+      code: "ko",
+      label: "한국어",
+      nativeLabel: "한국어"
+    },
     documents: {
       riskAssessmentDraft: data.deliverables.riskAssessmentDraft,
       tbmBriefing: data.deliverables.tbmBriefing,
       tbmLogDraft: data.deliverables.tbmLogDraft,
       safetyEducationRecordDraft: data.deliverables.safetyEducationRecordDraft,
       foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
-      foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission
+      foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission,
+      foreignWorkerLanguages: data.deliverables.foreignWorkerLanguages
     },
     evidence: {
       citations: data.citations.slice(0, 5),
@@ -57,12 +91,20 @@ function buildBriefPayload(data: AskResponse) {
 
 export function WorkflowSharePanel({ data }: { data: AskResponse }) {
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(["email"]);
+  const [selectedMessageTarget, setSelectedMessageTarget] = useState<MessageTarget>("manager");
   const [recipients, setRecipients] = useState("");
   const [note, setNote] = useState("작업 전 TBM에서 공유하고, 교육 확인 서명까지 받은 뒤 보관해 주세요.");
   const [isSending, setIsSending] = useState(false);
   const [result, setResult] = useState<DispatchResult | null>(null);
 
   const recipientList = useMemo(() => splitRecipients(recipients), [recipients]);
+  const selectedMessage = useMemo(() => {
+    if (selectedMessageTarget === "manager") {
+      return data.deliverables.kakaoMessage;
+    }
+
+    return buildForeignLanguageMessage(data, selectedMessageTarget.replace("foreign:", ""));
+  }, [data, selectedMessageTarget]);
 
   function toggleChannel(channel: Channel) {
     setSelectedChannels((current) => (
@@ -74,7 +116,7 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
 
   async function copyMessage() {
     try {
-      await navigator.clipboard.writeText(data.deliverables.kakaoMessage);
+      await navigator.clipboard.writeText(selectedMessage);
       setResult({
         ok: true,
         configured: true,
@@ -101,7 +143,7 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
           channels: selectedChannels,
           recipients: recipientList,
           operatorNote: note,
-          workpack: buildBriefPayload(data)
+          workpack: buildBriefPayload(data, selectedMessage, selectedMessageTarget)
         })
       });
       const payload = await response.json() as DispatchResult;
@@ -142,6 +184,40 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
         ))}
       </div>
 
+      <div className="message-target-box">
+        <div className="compact-head">
+          <span className="eyebrow">Message</span>
+          <strong>공유 메시지 선택</strong>
+        </div>
+        <p className="muted">
+          관리자용 한국어를 기본으로 보내고, 외국인 작업자가 있으면 언어별 안전공지로 바꿔 전송합니다.
+        </p>
+        <div className="language-picker" aria-label="공유 메시지 언어 선택">
+          <button
+            type="button"
+            className={`language-chip ${selectedMessageTarget === "manager" ? "active" : ""}`}
+            onClick={() => setSelectedMessageTarget("manager")}
+          >
+            관리자용 한국어
+          </button>
+          {data.deliverables.foreignWorkerLanguages.map((language) => {
+            const key = `foreign:${language.code}` as const;
+            return (
+              <button
+                key={language.code}
+                type="button"
+                className={`language-chip ${selectedMessageTarget === key ? "active" : ""}`}
+                onClick={() => setSelectedMessageTarget(key)}
+                title={language.rationale}
+              >
+                {language.label}
+                <span>{language.nativeLabel}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <label className="field-label" htmlFor="workflow-recipients">받는 사람</label>
       <textarea
         id="workflow-recipients"
@@ -178,7 +254,7 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
         </p>
       ) : null}
 
-      <pre>{data.deliverables.kakaoMessage}</pre>
+      <pre>{selectedMessage}</pre>
     </article>
   );
 }

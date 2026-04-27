@@ -59,6 +59,8 @@ function buildLiveQueries(query: string) {
 
   if (hasSafetyKeywords || looksLikeNaturalSentence) {
     candidates.push("산업안전보건법");
+    candidates.push("산업안전보건기준에 관한 규칙");
+    candidates.push("위험성평가");
     candidates.push("산업안전 안전조치");
   }
 
@@ -73,10 +75,12 @@ function buildLiveQueries(query: string) {
   }
 
   if (normalized.includes("교육") || normalized.includes("보호구") || normalized.includes("신규")) {
+    candidates.push("산업안전보건교육");
     candidates.push("안전교육 보호구");
   }
 
   if (normalized.includes("도급") || normalized.includes("하청") || normalized.includes("협력")) {
+    candidates.push("중대재해 처벌 등에 관한 법률");
     candidates.push("도급 안전보건조치");
   }
 
@@ -278,7 +282,7 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
       fetchLawGo("lawSearch.do", { target: "expc", query: candidate }).then(parseExpcResults).catch(() => [])
     ]);
 
-    const merged = dedupe([...laws, ...precedents, ...interpretations]).slice(0, 10);
+    const merged = dedupe([...laws, ...interpretations, ...precedents]).slice(0, 10);
     if (precedents.length) {
       return merged;
     }

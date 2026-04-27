@@ -678,6 +678,47 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   background: var(--accent-soft);
 }
 
+.message-target-box {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(226, 222, 213, 0.86);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.language-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.language-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(207, 199, 185, 0.78);
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.language-chip span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.language-chip.active {
+  border-color: rgba(33, 89, 79, 0.36);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
 .field-label {
   color: #3b424f;
   font-size: 13px;

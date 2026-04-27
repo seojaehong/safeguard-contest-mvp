@@ -1,6 +1,6 @@
 import { AskResponse, DetailRecord, SearchResult } from "./types";
 import { selectFallbackAccidentCases } from "./accident-cases";
-import { buildForeignWorkerBriefing, buildForeignWorkerTransmission } from "./foreign-worker";
+import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
 
 type ScenarioProfile = {
   id: string;
@@ -643,6 +643,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       safetyEducationRecordDraft: buildOfficialStyleSafetyEducationRecord(scenario),
       foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
       foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
+      foreignWorkerLanguages: getDefaultForeignWorkerLanguages(foreignWorkerInput.question),
       safetyEducationPoints: [
         profile.educationPoints[0],
         profile.educationPoints[1],

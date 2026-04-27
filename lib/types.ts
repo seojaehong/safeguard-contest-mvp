@@ -139,6 +139,7 @@ export type AskResponse = {
     safetyEducationRecordDraft: string;
     foreignWorkerBriefing: string;
     foreignWorkerTransmission: string;
+    foreignWorkerLanguages: ForeignWorkerLanguage[];
     safetyEducationPoints: string[];
     tbmQuestions: string[];
     kakaoMessage: string;

@@ -95,6 +95,29 @@ function buildMappedPrecedents(precedents: SearchResult[]) {
   }));
 }
 
+function rankLegalResults(results: SearchResult[]) {
+  const typeWeight: Record<SearchResult["type"], number> = {
+    law: 0,
+    interpretation: 1,
+    precedent: 2
+  };
+  const systemWeight: Record<string, number> = {
+    lawgo: 0,
+    "korean-law-mcp": 1,
+    mock: 2
+  };
+
+  return [...results].sort((a, b) => {
+    const typeDiff = typeWeight[a.type] - typeWeight[b.type];
+    if (typeDiff !== 0) return typeDiff;
+
+    const systemDiff = (systemWeight[a.sourceSystem || "mock"] ?? 3) - (systemWeight[b.sourceSystem || "mock"] ?? 3);
+    if (systemDiff !== 0) return systemDiff;
+
+    return a.title.localeCompare(b.title, "ko");
+  });
+}
+
 export async function searchLegalSources(query: string): Promise<SearchResult[]> {
   const primary = await withRetry(
     () => withTimeout(searchLawGo(query), SEARCH_TIMEOUT_MS, "Law.go search"),
@@ -126,7 +149,7 @@ export async function searchLegalSources(query: string): Promise<SearchResult[]>
         "Law.go precedent mapping"
       ).then(buildMappedPrecedents).catch(() => []);
 
-  return mergeResults(mappedPrecedents, merged).slice(0, 10);
+  return rankLegalResults(mergeResults(merged, mappedPrecedents)).slice(0, 10);
 }
 
 export async function loadLegalDetail(id: string): Promise<DetailRecord | null> {
