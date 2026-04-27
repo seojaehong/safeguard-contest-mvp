@@ -21,6 +21,17 @@ N8N_PUBLIC_BASE=
 - Listener: `*:5679` all-interface
 - SafeGuard target: `5678`
 
+## Production Webhook Check
+- Workflow ID: `SafeGuardWorkpackDispatch`
+- Workflow active: `true`
+- Active version present: `true`
+- Trigger count: `1`
+- Webhook path: `/webhook/safeguard-workpack`
+- Webhook registered: `true`
+- Internal URL: `http://127.0.0.1:5678/webhook/safeguard-workpack`
+- Good-token smoke: HTTP `200`
+- Bad-token smoke: HTTP `200`, empty body. This means the webhook is registered, but the n8n response branch should be hardened before treating token rejection as audited evidence.
+
 ## Files
 - `components/WorkflowSharePanel.tsx`
 - `app/api/workflow/dispatch/route.ts`
