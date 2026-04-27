@@ -82,13 +82,18 @@ function formatAccidentCaseAppendix(accidentCases: Awaited<ReturnType<typeof fet
 
 export async function runAsk(question: string): Promise<AskResponse> {
   try {
-    const [rawCitations, weather, training, kosha, accidentCases] = await Promise.all([
+    const accidentCasesPromise = fetchAccidentCases(question, {
+      requestTimeoutMs: 5_000,
+      retryCount: 0,
+      budgetLabel: "KOSHA accident case enrichment budget"
+    });
+    const [rawCitations, weather, training, kosha] = await Promise.all([
       searchLegalSources(question),
       fetchWeatherSignal(question),
       fetchTrainingRecommendations(question),
-      fetchKoshaReferences(question),
-      fetchAccidentCases(question)
+      fetchKoshaReferences(question)
     ]);
+    const accidentCases = await accidentCasesPromise;
     const citations = rawCitations.length ? rawCitations : await searchLegalSources("산업안전보건법");
 
     const response = await generateAnswer(question, citations.slice(0, 6)).catch((error) => {

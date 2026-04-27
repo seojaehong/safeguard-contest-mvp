@@ -9,6 +9,16 @@ type AccidentCaseResult = {
 
 type JsonRecord = Record<string, unknown>;
 type RankedAccidentCase = AccidentCase & { rank: number };
+type ParseResult =
+  | { kind: "ok"; cases: AccidentCase[]; detail: string }
+  | { kind: "empty"; cases: []; detail: string }
+  | { kind: "api_error" | "parse_error"; cases: []; detail: string };
+
+type FetchOptions = {
+  requestTimeoutMs?: number;
+  retryCount?: number;
+  budgetLabel?: string;
+};
 
 const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUBLIC_DATA_API_KEY?.trim() || "";
 const REQUEST_TIMEOUT_MS = 20_000;
@@ -53,9 +63,9 @@ function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchWithTimeout(url: string) {
+async function fetchWithTimeout(url: string, timeoutMs: number) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(url, {
@@ -73,17 +83,18 @@ async function fetchWithTimeout(url: string) {
   }
 }
 
-async function fetchWithRetry(url: string) {
+async function fetchWithRetry(url: string, options: Required<FetchOptions>) {
   let lastError: unknown;
-  for (let attempt = 0; attempt <= RETRY_COUNT; attempt += 1) {
+  for (let attempt = 0; attempt <= options.retryCount; attempt += 1) {
     try {
-      return await fetchWithTimeout(url);
+      return await fetchWithTimeout(url, options.requestTimeoutMs);
     } catch (error) {
       lastError = error;
-      if (attempt < RETRY_COUNT) await wait(400);
+      if (attempt < options.retryCount) await wait(400);
     }
   }
-  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+  const message = lastError instanceof Error ? lastError.message : String(lastError);
+  throw new Error(`${options.budgetLabel}: ${message}`);
 }
 
 function buildUrl(question: string) {
@@ -244,22 +255,88 @@ export function selectFallbackAccidentCases(question: string): AccidentCase[] {
   return [fallback[0], fallback[1], fallback[2]];
 }
 
-function parseAccidentCases(question: string, text: string) {
+function stripXmlForDetail(text: string) {
+  return text
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 240);
+}
+
+function parseAccidentCases(question: string, text: string): ParseResult {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return {
+      kind: "empty",
+      cases: [],
+      detail: "KOSHA 국내재해사례 API 응답이 비어 있습니다."
+    };
+  }
+
+  if (trimmed.startsWith("<")) {
+    return {
+      kind: "parse_error",
+      cases: [],
+      detail: `KOSHA 국내재해사례 API가 JSON이 아닌 XML/HTML 응답을 반환했습니다: ${stripXmlForDetail(trimmed)}`
+    };
+  }
+
   try {
     const parsed = JSON.parse(text) as unknown;
-    return readArrayEnvelope(parsed)
+    if (isRecord(parsed)) {
+      const header = isRecord(parsed.header)
+        ? parsed.header
+        : isRecord(parsed.response) && isRecord(parsed.response.header)
+          ? parsed.response.header
+          : undefined;
+      const resultCode = header ? readString(header, ["resultCode", "returnReasonCode"]) : "";
+      const resultMessage = header ? readString(header, ["resultMsg", "returnAuthMsg", "message"]) : "";
+      if (resultCode && resultCode !== "00") {
+        return {
+          kind: "api_error",
+          cases: [],
+          detail: `KOSHA 국내재해사례 API 오류 응답: ${resultCode}${resultMessage ? ` / ${resultMessage}` : ""}`
+        };
+      }
+    }
+
+    const cases = readArrayEnvelope(parsed)
       .map((record) => toAccidentCase(question, record))
       .filter((item): item is AccidentCase => Boolean(item))
       .map((item) => rankAccidentCase(question, item))
       .sort((a, b) => b.rank - a.rank)
       .map(({ rank, ...item }) => item)
       .slice(0, 3);
+
+    if (!cases.length) {
+      return {
+        kind: "empty",
+        cases: [],
+        detail: "KOSHA 국내재해사례 API 호출은 완료됐지만 응답에서 표시 가능한 사례를 찾지 못했습니다."
+      };
+    }
+
+    return {
+      kind: "ok",
+      cases,
+      detail: "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다."
+    };
   } catch {
-    return [];
+    return {
+      kind: "parse_error",
+      cases: [],
+      detail: `KOSHA 국내재해사례 API JSON 파싱 실패: ${trimmed.slice(0, 240)}`
+    };
   }
 }
 
-export async function fetchAccidentCases(question: string): Promise<AccidentCaseResult> {
+export async function fetchAccidentCases(question: string, options: FetchOptions = {}): Promise<AccidentCaseResult> {
+  const resolvedOptions: Required<FetchOptions> = {
+    requestTimeoutMs: options.requestTimeoutMs ?? REQUEST_TIMEOUT_MS,
+    retryCount: options.retryCount ?? RETRY_COUNT,
+    budgetLabel: options.budgetLabel ?? "KOSHA accident case request"
+  };
+
   if (!serviceKey) {
     return {
       source: "kosha-accident",
@@ -270,13 +347,13 @@ export async function fetchAccidentCases(question: string): Promise<AccidentCase
   }
 
   try {
-    const text = await fetchWithRetry(buildUrl(question));
-    const cases = parseAccidentCases(question, text);
-    if (!cases.length) {
+    const text = await fetchWithRetry(buildUrl(question), resolvedOptions);
+    const parsed = parseAccidentCases(question, text);
+    if (parsed.kind !== "ok") {
       return {
         source: "kosha-accident",
         mode: "fallback",
-        detail: "KOSHA 국내재해사례 API 호출은 완료됐지만 응답에서 표시 가능한 사례를 찾지 못했습니다.",
+        detail: `${parsed.detail} fallback fixture로 전환했습니다.`,
         cases: selectFallbackAccidentCases(question)
       };
     }
@@ -284,8 +361,8 @@ export async function fetchAccidentCases(question: string): Promise<AccidentCase
     return {
       source: "kosha-accident",
       mode: "live",
-      detail: "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다.",
-      cases
+      detail: parsed.detail,
+      cases: parsed.cases
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
