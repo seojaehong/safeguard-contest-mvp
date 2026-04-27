@@ -6,7 +6,7 @@ const openAiApiKey = process.env.OPENAI_API_KEY?.trim();
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const openAiModel = process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini";
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
-const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.0-flash,gemini-2.0-flash-lite,gemini-flash-latest")
+const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-flash-latest,gemini-2.5-flash-lite")
   .split(",")
   .map((model) => model.trim())
   .filter(Boolean);
