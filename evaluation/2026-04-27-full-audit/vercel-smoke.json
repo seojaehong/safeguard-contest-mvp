@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-04-27T10:58:27",
+  "url": "https://safeguard-contest-mvp.vercel.app",
+  "askMode": "live",
+  "lawgo": "live",
+  "ai": "live",
+  "weather": "live",
+  "work24": "live",
+  "kosha": "live",
+  "citationCount": 4,
+  "lawgoPrecedentCount": 3,
+  "trainingFit": "현장 적합",
+  "koshaVerifiedCount": 4,
+  "homeStatus": 200,
+  "homeHasWorkpack": true
+}

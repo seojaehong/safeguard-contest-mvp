@@ -77,7 +77,20 @@ Observed response:
 - `evaluation/2026-04-27-full-audit/final-summary.json`
 - `evaluation/2026-04-27-full-audit/ask-response-final.json`
 - `evaluation/2026-04-27-full-audit/search-response-final.json`
+- `evaluation/2026-04-27-full-audit/vercel-smoke.json`
 - `evaluation/2026-04-27-full-audit/server-final.log`
+
+## Deployment smoke
+
+- Production URL: `https://safeguard-contest-mvp.vercel.app`
+- `/api/ask`: live
+- Law.go: live
+- AI: live
+- KMA weather: live
+- Work24: live
+- KOSHA: live
+- Law.go mapped precedents: 3
+- KOSHA verified references: 4
 
 ## Remaining risk
 
