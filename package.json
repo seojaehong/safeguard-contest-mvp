@@ -14,6 +14,7 @@
     "publish:dryrun": "node ./scripts/publish_document_dryrun_snapshot.mjs"
   },
   "dependencies": {
+    "@rhwp/core": "0.7.6",
     "korean-law-mcp": "^2.1.6",
     "next": "15.5.15",
     "openai": "^4.95.0",

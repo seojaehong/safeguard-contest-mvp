@@ -3,6 +3,10 @@
 import { useMemo, useState } from "react";
 import { AskResponse } from "@/lib/types";
 
+declare global {
+  var measureTextWidth: ((font: string, text: string) => number) | undefined;
+}
+
 type DocumentKey =
   | "riskAssessmentDraft"
   | "tbmBriefing"
@@ -16,6 +20,10 @@ type EditableDocument = {
   description: string;
   fileBase: string;
 };
+
+type RhwpModule = typeof import("@rhwp/core");
+
+let rhwpModulePromise: Promise<RhwpModule> | null = null;
 
 const documentMeta: EditableDocument[] = [
   {
@@ -49,11 +57,6 @@ const documentMeta: EditableDocument[] = [
     fileBase: "field-message"
   }
 ];
-
-type ZipEntry = {
-  path: string;
-  content: string;
-};
 
 function sanitizeFileName(value: string) {
   return value.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, "-").slice(0, 80) || "safeguard";
@@ -99,110 +102,45 @@ function buildHtml(title: string, body: string) {
 </html>`;
 }
 
-function crc32(bytes: Uint8Array) {
-  let crc = 0xffffffff;
-  for (const byte of bytes) {
-    crc ^= byte;
-    for (let index = 0; index < 8; index += 1) {
-      crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
-    }
-  }
-  return (crc ^ 0xffffffff) >>> 0;
-}
+async function loadRhwp() {
+  if (!rhwpModulePromise) {
+    rhwpModulePromise = (async () => {
+      let canvasContext: CanvasRenderingContext2D | null = null;
+      let lastFont = "";
+      globalThis.measureTextWidth = (font: string, text: string) => {
+        if (!canvasContext) {
+          canvasContext = document.createElement("canvas").getContext("2d");
+        }
+        if (!canvasContext) return text.length * 12;
+        if (font !== lastFont) {
+          canvasContext.font = font;
+          lastFont = font;
+        }
+        return canvasContext.measureText(text).width;
+      };
 
-function writeUint16(target: number[], value: number) {
-  target.push(value & 0xff, (value >>> 8) & 0xff);
-}
-
-function writeUint32(target: number[], value: number) {
-  target.push(value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, (value >>> 24) & 0xff);
-}
-
-function appendBytes(target: number[], bytes: Uint8Array) {
-  bytes.forEach((byte) => target.push(byte));
-}
-
-function createZip(entries: ZipEntry[]) {
-  const encoder = new TextEncoder();
-  const output: number[] = [];
-  const centralDirectory: number[] = [];
-
-  for (const entry of entries) {
-    const pathBytes = encoder.encode(entry.path);
-    const contentBytes = encoder.encode(entry.content);
-    const checksum = crc32(contentBytes);
-    const offset = output.length;
-
-    writeUint32(output, 0x04034b50);
-    writeUint16(output, 20);
-    writeUint16(output, 0x0800);
-    writeUint16(output, 0);
-    writeUint16(output, 0);
-    writeUint16(output, 0);
-    writeUint32(output, checksum);
-    writeUint32(output, contentBytes.length);
-    writeUint32(output, contentBytes.length);
-    writeUint16(output, pathBytes.length);
-    writeUint16(output, 0);
-    appendBytes(output, pathBytes);
-    appendBytes(output, contentBytes);
-
-    writeUint32(centralDirectory, 0x02014b50);
-    writeUint16(centralDirectory, 20);
-    writeUint16(centralDirectory, 20);
-    writeUint16(centralDirectory, 0x0800);
-    writeUint16(centralDirectory, 0);
-    writeUint16(centralDirectory, 0);
-    writeUint16(centralDirectory, 0);
-    writeUint32(centralDirectory, checksum);
-    writeUint32(centralDirectory, contentBytes.length);
-    writeUint32(centralDirectory, contentBytes.length);
-    writeUint16(centralDirectory, pathBytes.length);
-    writeUint16(centralDirectory, 0);
-    writeUint16(centralDirectory, 0);
-    writeUint16(centralDirectory, 0);
-    writeUint16(centralDirectory, 0);
-    writeUint32(centralDirectory, 0);
-    writeUint32(centralDirectory, offset);
-    appendBytes(centralDirectory, pathBytes);
+      const rhwp = await import("@rhwp/core");
+      await rhwp.default({ module_or_path: "/rhwp_bg.wasm" });
+      return rhwp;
+    })();
   }
 
-  const centralOffset = output.length;
-  output.push(...centralDirectory);
-  writeUint32(output, 0x06054b50);
-  writeUint16(output, 0);
-  writeUint16(output, 0);
-  writeUint16(output, entries.length);
-  writeUint16(output, entries.length);
-  writeUint32(output, centralDirectory.length);
-  writeUint32(output, centralOffset);
-  writeUint16(output, 0);
-
-  return new Blob([new Uint8Array(output)], { type: "application/zip" });
+  return rhwpModulePromise;
 }
 
-function buildHwpx(title: string, body: string) {
-  const lines = body.split("\n").map((line) => `<p>${escapeHtml(line || " ")}</p>`).join("");
-  const entries: ZipEntry[] = [
-    {
-      path: "mimetype",
-      content: "application/hwp+zip"
-    },
-    {
-      path: "version.xml",
-      content: `<?xml version="1.0" encoding="UTF-8"?><version app="SafeGuard" version="1.0" />`
-    },
-    {
-      path: "Contents/content.hpf",
-      content: `<?xml version="1.0" encoding="UTF-8"?><package><metadata><title>${escapeHtml(title)}</title></metadata><manifest><item href="section0.xml" media-type="text/xml" /></manifest></package>`
-    },
-    {
-      path: "Contents/section0.xml",
-      content: `<?xml version="1.0" encoding="UTF-8"?><section><h1>${escapeHtml(title)}</h1>${lines}</section>`
-    }
-  ];
-
-  return createZip(entries);
+async function buildHwpxWithRhwp(body: string) {
+  const { HwpDocument } = await loadRhwp();
+  const document = HwpDocument.createEmpty();
+  try {
+    document.createBlankDocument();
+    document.insertText(0, 0, 0, body);
+    const exported = document.exportHwpx();
+    const buffer = new ArrayBuffer(exported.byteLength);
+    new Uint8Array(buffer).set(exported);
+    return new Blob([buffer], { type: "application/hwp+zip" });
+  } finally {
+    document.free();
+  }
 }
 
 function buildCombinedText(values: Record<DocumentKey, string>) {
@@ -222,6 +160,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   );
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("riskAssessmentDraft");
   const [values, setValues] = useState<Record<DocumentKey, string>>(initialValues);
+  const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedText = values[selected.key];
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
@@ -277,8 +216,16 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
     image.src = svgUrl;
   }
 
-  function downloadHwpx() {
-    downloadBlob(buildHwpx(selected.title, selectedText), `${baseName}.hwpx`);
+  async function downloadHwpx() {
+    setHwpxStatus("building");
+    try {
+      const blob = await buildHwpxWithRhwp(`${selected.title}\n\n${selectedText}`);
+      downloadBlob(blob, `${baseName}.hwpx`);
+      setHwpxStatus("idle");
+    } catch (error) {
+      console.error("rhwp HWPX export failed", error);
+      setHwpxStatus("error");
+    }
   }
 
   function downloadAll() {
@@ -332,9 +279,14 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
             <button type="button" className="button secondary" onClick={downloadHtml}>HTML</button>
             <button type="button" className="button secondary" onClick={downloadJpg}>JPG</button>
             <button type="button" className="button secondary" onClick={printPdf}>PDF</button>
-            <button type="button" className="button" onClick={downloadHwpx}>HWPX</button>
+            <button type="button" className="button" onClick={downloadHwpx} disabled={hwpxStatus === "building"}>
+              {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX"}
+            </button>
           </div>
         </div>
+        {hwpxStatus === "error" ? (
+          <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
+        ) : null}
         <textarea
           className="document-textarea"
           value={selectedText}
