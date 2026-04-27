@@ -24,6 +24,7 @@ Candidate source:
 - `한국산업안전보건공단_국내재해사례`
 - Public API family observed in official/public references: `B552468/disaster_api02`
 - Expected role: match work type and risk factor to similar accident cases, then add "similar case warning" to TBM and education output.
+- Research note: public references point to a 2025 KOSHA domestic disaster case API URL change notice. Before implementation, verify the exact current endpoint and response fields from the public data portal using the issued service key.
 
 Implementation target:
 - `lib/accident-cases.ts`
@@ -47,6 +48,7 @@ Candidate APIs:
 - Naver Cloud Papago Translation API for Korean-to-foreign-language field briefing.
 - Google Cloud Translation API with glossary support for safety terms.
 - Gemini can also generate simple Korean and multilingual draft text, but official translation API is stronger for operational claims.
+- Exclude old Kakao translation API as a primary candidate unless a current Kakao official replacement is confirmed.
 
 Implementation target:
 - `lib/translation.ts`
@@ -67,6 +69,9 @@ Target capabilities:
 - Worker communication
 - Evidence and audit trail
 - Multilingual worker support
+- Admin-ready exports and audit logs
+- Mobile-first field confirmation
+- Offline or low-connectivity fallback for worksites
 
 Near-term SafeGuard version:
 - Input one work scenario.
@@ -75,6 +80,44 @@ Near-term SafeGuard version:
 - Add similar accident cases.
 - Create simple Korean and translated worker briefing.
 - Send through n8n to field channels.
+
+## Product-Level Implementation Roadmap
+### PR 1: Evidence Layer
+- Add `lib/accident-cases.ts` with KOSHA disaster case adapter, 20s timeout, 1 retry, fallback fixtures.
+- Add typed `AccidentCase` and `AskResponse.externalData.accidentCases`.
+- Render `유사 재해사례` on the home screen with work-risk mapping rationale.
+- Append similar case warning to TBM and safety education records.
+
+### PR 2: Citation Layer
+- Replace loose Law.go JSON parsing with typed guards.
+- Add stable source labels and direct Law.go links for statutes, precedents, and interpretations.
+- Show a short "why this source matters" line per citation.
+- Add tests or smoke scripts for statute, precedent, and interpretation retrieval.
+
+### PR 3: Foreign Worker Layer
+- Add simple Korean worker briefing.
+- Add translation adapter with provider slots for Papago and Google Cloud Translation.
+- Add glossary-preserving translation prompt/fallback for safety terms.
+- Add foreign worker briefing to exports and n8n payload.
+
+### PR 4: SaaS Operating Layer
+- Add corrective action checklist and completion status.
+- Add worker confirmation fields.
+- Add incident/near-miss learning section.
+- Add n8n provider routes for email/SMS/Kakao/BAND after public proxy is attached.
+
+## First UI Shape
+- Top card: "오늘 작업 위험"
+- Evidence strip: Law.go, KOSHA disaster cases, weather, Work24 training
+- Workpack editor: risk assessment, TBM, education, foreign worker briefing
+- Dispatch panel: copy first, n8n automation second
+- Audit note: generated time, sources, fallback status
+
+## Evidence Quality Rules
+- Do not say a document is legally final.
+- Say "초안", "보조", "현장 확인 후 사용".
+- Similar accident cases are examples for prevention, not proof that the same accident will happen.
+- Translations are field briefing aids and require manager or interpreter confirmation.
 
 ## PR Scope
 Recommended next PR title:
