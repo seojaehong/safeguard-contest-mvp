@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-04-27T23:49:53.6720648+09:00",
+  "sentMessage": "[SafeGuard] 시연 현장 작업 전 안전공유\n\n핵심위험: 강풍 시 비계·사다리 작업 중 추락 위험\n즉시조치: 작업 전 고정상태, 안전대, 접근통제선 확인\nTBM 확인: 작업중지 기준과 지게차 동선을 전원에게 공유하세요.\n\n최종 테스트 23:49:52",
+  "statusCode": 200,
+  "providerStatus": "sent",
+  "summary": {
+    "requested": 1,
+    "sent": 1,
+    "failed": 0,
+    "partial": 0,
+    "unconfigured": 0
+  },
+  "channelResults": [
+    {
+      "channel": "sms",
+      "provider": "solapi",
+      "status": "sent",
+      "httpStatus": 200,
+      "message": "Solapi accepted all SMS messages",
+      "recipients": [
+        {
+          "to": "010****2647",
+          "ok": true,
+          "httpStatus": 200,
+          "response": "{\"type\":\"LMS\",\"statusMessage\":\"정상 접수(이통사로 접수 예정)\",\"statusCode\":\"2000\",\"masked\":true}"
+        }
+      ]
+    }
+  ],
+  "message": "SafeGuard 문서팩 전파가 완료되었습니다.",
+  "messageId": "M4V202604272349519YRQNJBLG5XL8JJ"
+}
