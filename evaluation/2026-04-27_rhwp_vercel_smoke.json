@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-04-27T10:24:00+09:00",
+  "url": "https://safeguard-contest-mvp.vercel.app",
+  "deploymentUrl": "https://safeguard-contest-mlr1qbnji-seojaehongs-projects.vercel.app",
+  "checks": {
+    "homeStatus": 200,
+    "hwpxButtonVisible": true,
+    "rhwpWasmStatus": 200,
+    "rhwpWasmBytes": 4069304
+  }
+}
