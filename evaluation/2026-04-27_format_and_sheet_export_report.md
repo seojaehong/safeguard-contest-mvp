@@ -17,6 +17,7 @@ Date: 2026-04-27
   - full workpack CSV
   - full workpack XLS
   - Google Sheets flow: copies TSV to clipboard and opens `https://sheets.new`
+- Hardened `/api/ask` so an AI provider failure no longer discards already-fetched official references, weather, Work24, and Law.go evidence.
 
 ## Verification
 
@@ -37,6 +38,7 @@ Date: 2026-04-27
 - Representative response included official risk-assessment flow: true
 - Representative response included TBM photo/video record memo: true
 - Representative response included safety education official sections: true
+- AI fallback keeps official evidence chain: true
 
 ## Notes
 
