@@ -622,6 +622,23 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
         detail: "대표 시나리오 기반 교육 연계 문구",
         recommendations: []
       },
+      koshaEducation: {
+        source: "kosha-edu",
+        mode: "fallback",
+        detail: "대표 시나리오 기반 KOSHA 교육포털 연계 문구",
+        recommendations: [
+          {
+            title: "KOSHA 안전보건교육포털 교육과정 검색",
+            provider: "한국산업안전보건공단",
+            target: "근로자·관리감독자",
+            educationMethod: "집체·온라인·혼합 과정",
+            url: "https://edu.kosha.or.kr/",
+            reason: "KOSHA 공식 교육포털에서 후속 안전교육 후보를 확인합니다.",
+            fitLabel: "공식 포털",
+            fitReason: "공식 교육포털 연계 fallback 후보입니다."
+          }
+        ]
+      },
       kosha: {
         source: "kosha",
         mode: "fallback",

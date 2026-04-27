@@ -11,6 +11,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const q = params.q || selectedScenario.question;
   const data = await runAsk(q);
   const primaryTraining = data.externalData.training.recommendations[0];
+  const primaryKoshaEducation = data.externalData.koshaEducation.recommendations[0];
   const primaryAccidentCase = data.externalData.accidentCases.cases[0];
   const foreignBriefingPreview = data.deliverables.foreignWorkerTransmission.split(/\r?\n/).filter(Boolean).slice(0, 6);
 
@@ -212,6 +213,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           ) : (
             <p className="muted">추천 교육이 없으면 안전교육일지 초안을 그대로 사용합니다.</p>
           )}
+          {primaryKoshaEducation ? (
+            <a href={primaryKoshaEducation.url} target="_blank" rel="noreferrer" className="training-card">
+              <strong>{primaryKoshaEducation.title}</strong>
+              <em className="fit-pill">{primaryKoshaEducation.fitLabel}</em>
+              <span>{primaryKoshaEducation.provider}</span>
+              <small>{primaryKoshaEducation.target} · {primaryKoshaEducation.educationMethod}</small>
+              <small>{primaryKoshaEducation.fitReason}</small>
+            </a>
+          ) : null}
         </article>
 
         <article className="reference-card">

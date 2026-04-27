@@ -82,6 +82,7 @@ function buildBriefPayload(data: AskResponse, selectedMessage: string, selectedT
       citations: data.citations.slice(0, 5),
       weather: data.externalData.weather,
       training: data.externalData.training.recommendations.slice(0, 3),
+      koshaEducation: data.externalData.koshaEducation.recommendations.slice(0, 3),
       kosha: data.externalData.kosha.references.slice(0, 3),
       accidentCases: data.externalData.accidentCases.cases.slice(0, 3)
     },

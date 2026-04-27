@@ -100,6 +100,21 @@ export type AskResponse = {
         fitReason?: string;
       }>;
     };
+    koshaEducation: {
+      source: "kosha-edu";
+      mode: IntegrationMode;
+      detail: string;
+      recommendations: Array<{
+        title: string;
+        provider: string;
+        target: string;
+        educationMethod: string;
+        url: string;
+        reason: string;
+        fitLabel: "공식 포털" | "대상 적합" | "현장 적합" | "조건부 후보";
+        fitReason: string;
+      }>;
+    };
     kosha: {
       source: "kosha";
       mode: IntegrationMode;

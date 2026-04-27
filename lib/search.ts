@@ -5,6 +5,7 @@ import { loadLegalDetail, searchLegalSources } from "./legal-sources";
 import { summarizeLegalSourceMix } from "./legal-sources";
 import { fetchWeatherSignal } from "./weather";
 import { fetchTrainingRecommendations } from "./work24";
+import { fetchKoshaEducationRecommendations } from "./kosha-education";
 import { fetchKoshaReferences } from "./kosha";
 import { fetchAccidentCases } from "./accident-cases";
 import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
@@ -151,10 +152,11 @@ export async function runAsk(question: string): Promise<AskResponse> {
       retryCount: 0,
       budgetLabel: "KOSHA accident case enrichment budget"
     });
-    const [rawCitations, weather, training, kosha] = await Promise.all([
+    const [rawCitations, weather, training, koshaEducation, kosha] = await Promise.all([
       searchLegalSources(question),
       fetchWeatherSignal(question),
       fetchTrainingRecommendations(question),
+      fetchKoshaEducationRecommendations(question),
       fetchKoshaReferences(question)
     ]);
     const accidentCases = await accidentCasesPromise;
@@ -174,6 +176,9 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const legalEvidenceMode = inferLegalEvidenceMode(sourceMix);
     const trainingAppendix = training.recommendations.length
       ? `\n\n[추천 후속 교육]\n${training.recommendations.map((item, index) => `${index + 1}. ${item.title} / ${item.institution} / ${item.startDate}~${item.endDate}`).join("\n")}`
+      : "";
+    const koshaEducationAppendix = koshaEducation.recommendations.length
+      ? `\n\n[KOSHA 교육포털 연계]\n${koshaEducation.recommendations.map((item, index) => `${index + 1}. ${item.title} / ${item.provider} / ${item.target} / ${item.fitLabel}`).join("\n")}`
       : "";
     const koshaAppendix = formatOfficialTemplateAppendix(kosha.references);
     const riskAssessmentOfficialAppendix = formatRiskAssessmentOfficialAppendix(kosha.references);
@@ -205,6 +210,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
       externalData: {
         weather,
         training,
+        koshaEducation,
         kosha,
         accidentCases
       },
@@ -214,7 +220,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
         tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${koshaImpactLines.length ? `\n\n[KOSHA 매뉴얼·Guide 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${tbmLegalAppendix}${tbmSeriousAccidentAppendix}${accidentAppendix}`,
         tbmLogDraft: `${response.deliverables.tbmLogDraft}${koshaAppendix}`
           .trim(),
-        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${kosha.references.length ? `\n\n[공식 교육자료 반영]\n- ${kosha.references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("안전교육일지")).slice(0, 2).map((item) => `${item.title}: ${item.summary}`).join("\n- ")}` : ""}${accidentAppendix}`,
+        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${kosha.references.length ? `\n\n[공식 교육자료 반영]\n- ${kosha.references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("안전교육일지")).slice(0, 2).map((item) => `${item.title}: ${item.summary}`).join("\n- ")}` : ""}${accidentAppendix}`,
         foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
         foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
         foreignWorkerLanguages: getDefaultForeignWorkerLanguages(foreignWorkerInput.question),
@@ -226,7 +232,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${kosha.detail} / ${accidentCases.detail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${accidentCases.detail}`
       },
       sourceMix
     };
