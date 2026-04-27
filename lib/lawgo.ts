@@ -1,9 +1,9 @@
 import { mockDetails, mockSearchResults } from "./mock-data";
 import { DetailRecord, SearchResult } from "./types";
 
-const mockMode = process.env.LAWGO_MOCK_MODE !== "false";
 const oc = process.env.LAWGO_OC?.trim() || "";
-const baseUrl = "https://www.law.go.kr/DRF";
+const mockMode = process.env.LAWGO_MOCK_MODE === "force" || !oc;
+const baseUrl = "http://www.law.go.kr/DRF";
 
 function tokenizeQuery(query: string) {
   return query
@@ -25,7 +25,25 @@ function buildLiveQueries(query: string) {
 
   if (hasSafetyKeywords || looksLikeNaturalSentence) {
     candidates.push("산업안전보건법");
-    candidates.push("산업안전");
+    candidates.push("산업안전 안전조치");
+  }
+
+  if (normalized.includes("비계") || normalized.includes("추락") || normalized.includes("고소")) {
+    candidates.push("추락 안전조치");
+    candidates.push("비계 추락");
+  }
+
+  if (normalized.includes("지게차") || normalized.includes("충돌") || normalized.includes("동선")) {
+    candidates.push("지게차 안전조치");
+    candidates.push("충돌 안전조치");
+  }
+
+  if (normalized.includes("교육") || normalized.includes("보호구") || normalized.includes("신규")) {
+    candidates.push("안전교육 보호구");
+  }
+
+  if (normalized.includes("도급") || normalized.includes("하청") || normalized.includes("협력")) {
+    candidates.push("도급 안전보건조치");
   }
 
   if (tokens.length) {
@@ -34,6 +52,27 @@ function buildLiveQueries(query: string) {
   }
 
   candidates.push(normalized);
+
+  return [...new Set(candidates.filter(Boolean))];
+}
+
+function buildPrecedentQueries(query: string) {
+  const normalized = query.trim();
+  const candidates = [
+    ...buildLiveQueries(query),
+    "산업재해 손해배상 안전조치",
+    "안전교육 보호구 산업재해",
+    "추락 안전조치 산업재해",
+    "도급 안전보건조치 산업재해"
+  ];
+
+  if (normalized.includes("지게차")) {
+    candidates.unshift("지게차 산업재해");
+  }
+
+  if (normalized.includes("비계") || normalized.includes("추락")) {
+    candidates.unshift("비계 추락 산업재해");
+  }
 
   return [...new Set(candidates.filter(Boolean))];
 }
@@ -196,6 +235,8 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
   }
 
   const candidates = buildLiveQueries(query);
+  let bestResults: SearchResult[] = [];
+
   for (const candidate of candidates) {
     const [laws, precedents, interpretations] = await Promise.all([
       fetchLawGo("lawSearch.do", { target: "law", query: candidate }).then(parseLawResults).catch(() => []),
@@ -204,8 +245,41 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
     ]);
 
     const merged = dedupe([...laws, ...precedents, ...interpretations]).slice(0, 10);
-    if (merged.length) {
+    if (precedents.length) {
       return merged;
+    }
+    if (!bestResults.length && merged.length) {
+      bestResults = merged;
+    }
+  }
+
+  const precedentResults = await searchLawGoPrecedents(query, 4).catch(() => []);
+  if (precedentResults.length) {
+    return dedupe([...precedentResults, ...bestResults]).slice(0, 10);
+  }
+
+  return bestResults;
+}
+
+export async function searchLawGoPrecedents(query: string, limit = 4): Promise<SearchResult[]> {
+  if (mockMode) {
+    return mockSearchResults.filter((item) => item.type === "precedent").slice(0, limit);
+  }
+
+  const collected: SearchResult[] = [];
+  for (const candidate of buildPrecedentQueries(query)) {
+    const precedents = await fetchLawGo("lawSearch.do", { target: "prec", query: candidate })
+      .then(parsePrecResults)
+      .catch(() => []);
+
+    collected.push(...precedents.map((item) => ({
+      ...item,
+      tags: compact([...(item.tags || []), "Law.go 판례검색", candidate])
+    })));
+
+    const merged = dedupe(collected);
+    if (merged.length) {
+      return merged.slice(0, limit);
     }
   }
 

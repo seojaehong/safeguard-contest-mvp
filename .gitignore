@@ -7,3 +7,5 @@ logs/dryrun-api/
 logs/dryrun-documents/
 logs/dryrun-documents/
 .vercel
+evaluation/**/*.log
+evaluation/**/*.pid

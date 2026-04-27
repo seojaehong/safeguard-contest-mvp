@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-04-27T10:52:57",
+  "apiAsk": {
+    "mode": "live",
+    "lawgo": "live",
+    "ai": "live",
+    "weather": "live",
+    "work24": "live",
+    "kosha": "live",
+    "citationCount": 6,
+    "lawgoPrecedentCount": 3,
+    "sourceCounts": {
+      "lawgo": 9
+    }
+  },
+  "integrations": {
+    "weatherMode": "live",
+    "work24Mode": "live",
+    "trainingTop": "[스킬업] 건설안전기사 필기 1편 (개정)",
+    "trainingFit": "현장 적합",
+    "koshaMode": "live",
+    "koshaVerifiedCount": 4,
+    "koshaReferenceCount": 4,
+    "koshaTitles": [
+      "KOSHA 작업 전 안전점검회의(TBM) 안내",
+      "KOSHA 위험성평가 교육자료",
+      "KOSHA Guide: 추락재해 예방",
+      "지게차의 안전작업에 관한 기술지원규정"
+    ]
+  },
+  "uiAndAssets": {
+    "searchCount": 9,
+    "searchLawgoPrecedentCount": 3,
+    "wasmStatus": 200,
+    "wasmBytes": 4069304,
+    "homeStatus": 200,
+    "homeHasFit": true,
+    "homeHasKosha": true,
+    "homeHasWorkpack": true
+  }
+}

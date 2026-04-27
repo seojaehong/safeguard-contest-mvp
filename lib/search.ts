@@ -39,17 +39,18 @@ export async function runAsk(question: string): Promise<AskResponse> {
       ? `\n\n[추천 후속 교육]\n${training.recommendations.map((item, index) => `${index + 1}. ${item.title} / ${item.institution} / ${item.startDate}~${item.endDate}`).join("\n")}`
       : "";
     const koshaAppendix = kosha.references.length
-      ? `\n\n[KOSHA 공식 가이드]\n${kosha.references.map((item, index) => `${index + 1}. ${item.title} (${item.category})`).join("\n")}`
+      ? `\n\n[KOSHA 공식 자료 확인]\n${kosha.references.map((item, index) => `${index + 1}. ${item.title} (${item.category}) - ${item.verified ? "확인됨" : "확인 필요"}\n   요약: ${item.summary}\n   반영: ${item.appliedTo?.join(", ") || "위험성평가/TBM"}`).join("\n")}`
       : "";
     const koshaImpactLines = kosha.references.slice(0, 2).map((item) => item.impact);
+    const trainingFitLines = training.recommendations.slice(0, 2).map((item) => `${item.title}: ${item.fitLabel || "조건부 후보"} - ${item.fitReason || item.reason}`);
 
     const enriched: AskResponse = {
       ...response,
       answer: [
         response.answer,
         `[기상 신호] ${weather.summary}`,
-        training.recommendations.length ? `[교육 연계] ${training.recommendations[0].title}` : "",
-        kosha.references.length ? `[KOSHA 보강] ${kosha.references[0].title}` : ""
+        training.recommendations.length ? `[교육 연계] ${training.recommendations[0].title} (${training.recommendations[0].fitLabel || "조건부 후보"})` : "",
+        kosha.references.length ? `[KOSHA 보강] ${kosha.references[0].title} (${kosha.references[0].verified ? "공식 링크 확인" : "사전 매핑"})` : ""
       ].filter(Boolean).join("\n\n"),
       externalData: {
         weather,
@@ -58,9 +59,10 @@ export async function runAsk(question: string): Promise<AskResponse> {
       },
       deliverables: {
         ...response.deliverables,
-        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${trainingAppendix}`,
-        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${koshaImpactLines.length ? `\n\n[KOSHA 반영 포인트]\n- ${koshaImpactLines.join("\n- ")}` : ""}`,
+        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${koshaImpactLines.length ? `\n\n[KOSHA 매뉴얼·Guide 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}`,
         tbmLogDraft: `${response.deliverables.tbmLogDraft}${koshaAppendix}`
+          .trim(),
+        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${trainingAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${kosha.references.length ? `\n\n[KOSHA 교육 반영]\n- ${kosha.references.slice(0, 2).map((item) => `${item.title}: ${item.summary}`).join("\n- ")}` : ""}`
       },
       status: {
         ...response.status,

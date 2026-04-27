@@ -1,0 +1,150 @@
+{
+  "q": "이동식 비계 추락 안전조치 판례",
+  "count": 9,
+  "results": [
+    {
+      "id": "lawgo-law-276853",
+      "type": "law",
+      "title": "산업안전보건법",
+      "summary": "고용노동부 · 법률 · 공포 20251001",
+      "citation": "법률 · 공포 20251001",
+      "sourceLabel": "Law.go 법령",
+      "sourceSystem": "lawgo",
+      "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=001766",
+      "tags": [
+        "법률",
+        "고용노동부",
+        "Law.go"
+      ]
+    },
+    {
+      "id": "lawgo-law-284771",
+      "type": "law",
+      "title": "산업안전보건법 시행령",
+      "summary": "고용노동부 · 대통령령 · 공포 20260324",
+      "citation": "대통령령 · 공포 20260324",
+      "sourceLabel": "Law.go 법령",
+      "sourceSystem": "lawgo",
+      "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=003786",
+      "tags": [
+        "대통령령",
+        "고용노동부",
+        "Law.go"
+      ]
+    },
+    {
+      "id": "lawgo-law-271485",
+      "type": "law",
+      "title": "산업안전보건법 시행규칙",
+      "summary": "고용노동부 · 고용노동부령 · 공포 20250530",
+      "citation": "고용노동부령 · 공포 20250530",
+      "sourceLabel": "Law.go 법령",
+      "sourceSystem": "lawgo",
+      "sourceUrl": "https://www.law.go.kr/lsInfoP.do?lsiSeq=007364",
+      "tags": [
+        "고용노동부령",
+        "고용노동부",
+        "Law.go"
+      ]
+    },
+    {
+      "id": "lawgo-prec-616523",
+      "type": "precedent",
+      "title": "산업안전보건법위반·중대재해처벌등에관한법률위반(산업재해치사)[중대재해 처벌 등에 관한 법률 부칙 제1조 제1항 단서의 ‘상시 근로자가 50명 미만인 사업 또는 사업장’의 해석이 문제된 사건]",
+      "summary": "대법원 · 2025도15060 · 선고 2026.01.29",
+      "citation": "대법원 · 2025도15060",
+      "sourceLabel": "Law.go 판례",
+      "sourceSystem": "lawgo",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=prec&amp;ID=616523&amp;type=HTML&amp;mobileYn=",
+      "tags": [
+        "대법원",
+        "Law.go"
+      ]
+    },
+    {
+      "id": "lawgo-prec-617207",
+      "type": "precedent",
+      "title": "업무상과실치사·산업안전보건법위반·중대재해처벌등에관한법률위반(산업재해치사)",
+      "summary": "대전지방법원 · 2025노860 · 선고 2025.08.27",
+      "citation": "대전지방법원 · 2025노860",
+      "sourceLabel": "Law.go 판례",
+      "sourceSystem": "lawgo",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=prec&amp;ID=617207&amp;type=HTML&amp;mobileYn=",
+      "tags": [
+        "대전지방법원",
+        "Law.go"
+      ]
+    },
+    {
+      "id": "lawgo-prec-608417",
+      "type": "precedent",
+      "title": "건축물관리법위반·업무상과실치사·업무상과실치상·산업안전보건법위반[도급인이 산업안전보건법 제63조에 따라 부담하는 안전·보건조치의무의 내용이 문제된 사건]",
+      "summary": "대법원 · 2025도4428 · 선고 2025.08.14",
+      "citation": "대법원 · 2025도4428",
+      "sourceLabel": "Law.go 판례",
+      "sourceSystem": "lawgo",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=prec&amp;ID=608417&amp;type=HTML&amp;mobileYn=",
+      "tags": [
+        "대법원",
+        "Law.go"
+      ]
+    },
+    {
+      "id": "lawgo-expc-343113",
+      "type": "interpretation",
+      "title": "경상남도 남해군 - 공공행정에서 비현업업무에 종사하는 사람이 산업안전보건위원회의 근로자위원이 될 수 있는지(「산업안전보건법 시행령」 별표 1 제4호가목 등 관련)",
+      "summary": "법제처 · 경상남도 남해군 · 회신 2026.04.22",
+      "citation": "법제처 · 회신 2026.04.22",
+      "sourceLabel": "Law.go 해석례",
+      "sourceSystem": "lawgo",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343113&amp;type=HTML&amp;mobileYn=",
+      "tags": [
+        "법제처",
+        "경상남도 남해군",
+        "Law.go"
+      ]
+    },
+    {
+      "id": "lawgo-expc-314491",
+      "type": "interpretation",
+      "title": "고용노동부 - ‘3일 이상의 휴업’이 연속적인 기간을 의미하는지 여부(「산업안전보건법 시행규칙」 제4조 등 관련)",
+      "summary": "법제처 · 고용노동부 · 회신 2014.07.16",
+      "citation": "법제처 · 회신 2014.07.16",
+      "sourceLabel": "Law.go 해석례",
+      "sourceSystem": "lawgo",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=314491&amp;type=HTML&amp;mobileYn=",
+      "tags": [
+        "법제처",
+        "고용노동부",
+        "Law.go"
+      ]
+    },
+    {
+      "id": "lawgo-expc-343005",
+      "type": "interpretation",
+      "title": "고용노동부 - 국가기관 또는 지방자치단체가 유해작업 도급금지 의무 등을 위반한 경우 「산업안전보건법」 제161조제1항에 따라 과징금을 부과할 수 있는지(「산업안전보건법」 제161조제1항 등 관련)",
+      "summary": "법제처 · 고용노동부 · 회신 2026.03.30",
+      "citation": "법제처 · 회신 2026.03.30",
+      "sourceLabel": "Law.go 해석례",
+      "sourceSystem": "lawgo",
+      "sourceUrl": "https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=expc&amp;ID=343005&amp;type=HTML&amp;mobileYn=",
+      "tags": [
+        "법제처",
+        "고용노동부",
+        "Law.go"
+      ]
+    }
+  ],
+  "sourceMix": {
+    "total": 9,
+    "counts": {
+      "lawgo": 9
+    },
+    "koreanLawMcp": {
+      "enabled": false,
+      "configured": false,
+      "keySource": "LAWGO_OC",
+      "summary": "korean-law-mcp 비활성화"
+    }
+  }
+}

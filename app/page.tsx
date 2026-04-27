@@ -157,9 +157,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {primaryTraining ? (
             <a href={primaryTraining.url} target="_blank" rel="noreferrer" className="training-card">
               <strong>{primaryTraining.title}</strong>
+              <em className="fit-pill">{primaryTraining.fitLabel || "조건부 후보"}</em>
               <span>{primaryTraining.institution}</span>
               <small>{primaryTraining.startDate} ~ {primaryTraining.endDate}</small>
-              <small>{primaryTraining.reason}</small>
+              <small>{primaryTraining.fitReason || primaryTraining.reason}</small>
             </a>
           ) : (
             <p className="muted">추천 교육이 없으면 안전교육일지 초안을 그대로 사용합니다.</p>
@@ -174,7 +175,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {data.externalData.kosha.references.slice(0, 2).map((item) => (
             <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="training-card">
               <strong>{item.title}</strong>
-              <span>{item.category}</span>
+              <em className="fit-pill">{item.verified ? "공식 링크 확인" : "사전 매핑"}</em>
+              <span>{item.category} · {(item.appliedTo || ["위험성평가", "TBM"]).join(", ")}</span>
+              <small>{item.summary}</small>
               <small>{item.impact}</small>
             </a>
           ))}

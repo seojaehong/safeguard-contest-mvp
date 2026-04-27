@@ -9,7 +9,12 @@ type Work24Course = {
   target?: string;
   url: string;
   reason: string;
+  fitLabel: "현장 적합" | "대상 적합" | "조건부 후보";
+  fitReason: string;
+  rank: number;
 };
+
+type PublicWork24Course = Omit<Work24Course, "rank">;
 
 const authKey = process.env.WORK24_AUTH_KEY?.trim() || "";
 
@@ -61,9 +66,69 @@ function parseCourses(xml: string) {
       cost: cost ? `${Number(cost).toLocaleString("ko-KR")}원` : undefined,
       target,
       url,
-      reason
+      reason,
+      fitLabel: "조건부 후보" as const,
+      fitReason: "현장 상황과 교육명 매칭 전 원천 과정입니다.",
+      rank: 50
     };
   }).filter((item) => item.title && item.url);
+}
+
+function scoreCourseFit(question: string, course: Work24Course): Work24Course {
+  const normalized = question.toLowerCase();
+  const title = course.title.toLowerCase();
+  const target = (course.target || "").toLowerCase();
+  const text = `${title} ${target}`;
+  const asksForeignWorker = ["외국인", "이주", "다국어", "foreign"].some((keyword) => normalized.includes(keyword));
+  const asksConstruction = ["건설", "비계", "추락", "고소", "외벽", "도장"].some((keyword) => normalized.includes(keyword));
+  const asksLogistics = ["지게차", "상하차", "물류", "동선"].some((keyword) => normalized.includes(keyword));
+  const isSafetyCourse = ["안전", "산업안전", "보호구", "위험", "msds", "관리감독"].some((keyword) => text.includes(keyword));
+  const isForeignCourse = text.includes("외국인");
+  const isConstructionCourse = ["건설", "비계", "추락"].some((keyword) => text.includes(keyword));
+  const isLogisticsCourse = ["지게차", "물류", "하역"].some((keyword) => text.includes(keyword));
+
+  if (asksForeignWorker && isForeignCourse) {
+    return {
+      ...course,
+      fitLabel: "대상 적합",
+      fitReason: "질문에 외국인 근로자 또는 다국어 안내가 포함되어 교육 대상이 직접 맞습니다.",
+      rank: 10
+    };
+  }
+
+  if (isSafetyCourse && ((asksConstruction && isConstructionCourse) || (asksLogistics && isLogisticsCourse))) {
+    return {
+      ...course,
+      fitLabel: "현장 적합",
+      fitReason: "작업 위험 키워드와 교육 주제가 직접 연결되어 당일 후속 교육 후보로 적합합니다.",
+      rank: 12
+    };
+  }
+
+  if (isSafetyCourse) {
+    return {
+      ...course,
+      fitLabel: "현장 적합",
+      fitReason: "교육명에 안전·위험관리 주제가 포함되어 사업주 후속 교육 후보로 사용할 수 있습니다.",
+      rank: 18
+    };
+  }
+
+  if (isForeignCourse) {
+    return {
+      ...course,
+      fitLabel: "조건부 후보",
+      fitReason: "외국인 근로자가 실제 투입되는 현장일 때만 직접 연계하는 후속 교육 후보입니다.",
+      rank: asksForeignWorker ? 20 : 35
+    };
+  }
+
+  return {
+    ...course,
+    fitLabel: "조건부 후보",
+    fitReason: "현장 위험과 직접 매칭되지는 않아 보조 후보로만 표시합니다.",
+    rank: 60
+  };
 }
 
 async function fetchCourseXml(params: Record<string, string>) {
@@ -95,7 +160,7 @@ export async function fetchTrainingRecommendations(question: string): Promise<{
   source: "work24";
   mode: IntegrationMode;
   detail: string;
-  recommendations: Work24Course[];
+  recommendations: PublicWork24Course[];
 }> {
   if (!authKey) {
     return {
@@ -114,16 +179,21 @@ export async function fetchTrainingRecommendations(question: string): Promise<{
       fetchCourseXml({ srchNcs1: "23", srchTraProcessNm: "안전", ...(area1 ? { srchTraArea1: area1 } : {}) })
     ]);
 
-    const merged = [...parseCourses(foreignXml), ...parseCourses(safetyXml)];
-    const unique = merged.filter((item, index, arr) => arr.findIndex((other) => other.title === item.title && other.startDate === item.startDate) === index).slice(0, 3);
+    const merged = [...parseCourses(foreignXml), ...parseCourses(safetyXml)]
+      .map((item) => scoreCourseFit(question, item))
+      .sort((a, b) => a.rank - b.rank);
+    const unique = merged
+      .filter((item, index, arr) => arr.findIndex((other) => other.title === item.title && other.startDate === item.startDate) === index)
+      .slice(0, 3);
+    const recommendations = unique.map(({ rank, ...item }) => item);
 
     return {
       source: "work24",
-      mode: unique.length ? "live" : "fallback",
-      detail: unique.length
-        ? `고용24 사업주훈련 live 호출 성공${area1 ? ` (지역코드 ${area1})` : ""}`
+      mode: recommendations.length ? "live" : "fallback",
+      detail: recommendations.length
+        ? `고용24 사업주훈련 live 호출 성공${area1 ? ` (지역코드 ${area1})` : ""}. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다.`
         : "고용24 사업주훈련 live 호출은 성공했지만 추천 결과가 비어 있습니다.",
-      recommendations: unique
+      recommendations
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

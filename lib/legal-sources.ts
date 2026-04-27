@@ -1,4 +1,4 @@
-import { getDetail as getLawGoDetail, searchAll as searchLawGo } from "./lawgo";
+import { getDetail as getLawGoDetail, searchAll as searchLawGo, searchLawGoPrecedents } from "./lawgo";
 import { getKoreanLawMcpDetail, getKoreanLawMcpStatus, isKoreanLawMcpId, searchKoreanLawMcp } from "./korean-law-mcp";
 import { mockSearchResults } from "./mock-data";
 import { DetailRecord, SearchResult } from "./types";
@@ -85,6 +85,16 @@ function mergeResults(primary: SearchResult[], secondary: SearchResult[]) {
   return merged;
 }
 
+function buildMappedPrecedents(precedents: SearchResult[]) {
+  return precedents.map((item) => ({
+    ...item,
+    summary: item.summary.includes("오늘 작업")
+      ? item.summary
+      : `${item.summary} · 오늘 작업의 위험요인과 연결해 관리감독·교육·보호구·작업중지 판단 근거로 검토합니다.`,
+    tags: [...(item.tags || []), "작업위험 매핑"]
+  }));
+}
+
 export async function searchLegalSources(query: string): Promise<SearchResult[]> {
   const primary = await withRetry(
     () => withTimeout(searchLawGo(query), SEARCH_TIMEOUT_MS, "Law.go search"),
@@ -106,7 +116,17 @@ export async function searchLegalSources(query: string): Promise<SearchResult[]>
     "korean-law-mcp search"
   ).catch(() => []);
 
-  return mergeResults(mergeResults(primary, fallbackPrimary), secondary).slice(0, 10);
+  const merged = mergeResults(mergeResults(primary, fallbackPrimary), secondary);
+  const livePrecedentCount = merged.filter((item) => item.type === "precedent" && item.sourceSystem !== "mock").length;
+  const mappedPrecedents = livePrecedentCount
+    ? []
+    : await withRetry(
+        () => withTimeout(searchLawGoPrecedents(query, 3), SEARCH_TIMEOUT_MS, "Law.go precedent mapping"),
+        2,
+        "Law.go precedent mapping"
+      ).then(buildMappedPrecedents).catch(() => []);
+
+  return mergeResults(mappedPrecedents, merged).slice(0, 10);
 }
 
 export async function loadLegalDetail(id: string): Promise<DetailRecord | null> {

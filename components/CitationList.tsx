@@ -12,6 +12,12 @@ function describeRelevance(item: SearchResult, question?: string) {
   const normalizedQuestion = (question || "").toLowerCase();
   const tags = item.tags || [];
 
+  if (item.type === "precedent") {
+    if (tags.some((tag) => tag.includes("작업위험 매핑") || tag.includes("Law.go 판례검색"))) {
+      return "Law.go 판례검색으로 현재 작업의 위험요인과 유사한 안전조치·교육·보호구 쟁점을 매핑한 근거입니다.";
+    }
+    return "사고 이후 책임 판단에서 어떤 안전조치가 문제 되는지 확인해 문서 문구를 보강하는 근거입니다.";
+  }
   if (normalizedQuestion.includes("강풍") || normalizedQuestion.includes("돌풍")) {
     return "오늘 작업의 기상 위험과 연결해 즉시 조치 기준을 설명하는 근거입니다.";
   }
@@ -36,6 +42,7 @@ export function CitationList({ citations, question }: { citations: SearchResult[
             <div className="row">
               <span className="badge">{c.type === "law" ? "법령" : c.type === "precedent" ? "판례" : "해석례"}</span>
               <span className="badge">{c.sourceLabel}</span>
+              {c.tags?.some((tag) => tag.includes("작업위험 매핑")) ? <span className="badge">작업위험 매핑</span> : null}
             </div>
             <strong>{c.title}</strong>
             <span className="muted">{c.summary}</span>

@@ -78,6 +78,8 @@ export type AskResponse = {
         target?: string;
         url: string;
         reason: string;
+        fitLabel?: "현장 적합" | "대상 적합" | "조건부 후보";
+        fitReason?: string;
       }>;
     };
     kosha: {
@@ -90,6 +92,9 @@ export type AskResponse = {
         summary: string;
         impact: string;
         url: string;
+        verified?: boolean;
+        sourceKind?: "guide" | "manual" | "education" | "research" | "board";
+        appliedTo?: string[];
       }>;
     };
   };
