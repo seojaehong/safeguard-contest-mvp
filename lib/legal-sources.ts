@@ -125,7 +125,7 @@ export async function searchLegalSources(query: string): Promise<SearchResult[]>
     "Law.go search"
   ).catch(() => filterMockResults(query));
   const fallbackPrimary =
-    primary.length || query.trim() === "산업안전보건법"
+    (primary.some((item) => item.type === "law") && primary.length) || query.trim() === "산업안전보건법"
       ? []
       : await withRetry(
           () => withTimeout(searchLawGo("산업안전보건법"), SEARCH_TIMEOUT_MS, "Law.go fallback search"),
