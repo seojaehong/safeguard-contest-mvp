@@ -26,8 +26,12 @@ function readArrayRecords(value: unknown): JsonRecord[] {
   return [];
 }
 
-function readNestedRecords(record: JsonRecord | undefined, key: string): JsonRecord[] {
-  return readArrayRecords(readValue(record, key));
+function readNestedUnitRecords(record: JsonRecord | undefined, key: string, unitKey: string): JsonRecord[] {
+  const wrappers = readArrayRecords(readValue(record, key));
+  return wrappers.flatMap((wrapper) => {
+    const units = readArrayRecords(readValue(wrapper, unitKey));
+    return units.length ? units : [wrapper];
+  });
 }
 
 function readString(record: JsonRecord | undefined, key: string) {
@@ -169,6 +173,15 @@ function compact(parts: Array<string | undefined>) {
   return parts.map((part) => (part || "").trim()).filter(Boolean);
 }
 
+function normalizeLawText(text: string) {
+  return stripHtml(text)
+    .replace(/\u00a0/g, " ")
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function isSafetyArticle(text: string) {
   return /안전|보건|위험|유해|교육|보호구|작업|도급|기계|추락|비계|중지|관리감독|조치|근로자|사업주/.test(text);
 }
@@ -177,24 +190,52 @@ function lawSourceUrl(lawSerial: string) {
   return lawSerial ? `https://www.law.go.kr/lsInfoP.do?lsiSeq=${encodeURIComponent(lawSerial)}` : "https://www.law.go.kr/";
 }
 
+function removeDuplicateArticleHeading(text: string, heading: string, articleTitle: string) {
+  let normalized = normalizeLawText(text);
+  if (!normalized) return "";
+
+  const escapedHeading = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  normalized = normalized.replace(new RegExp(`^${escapedHeading}\\s*`), "").trim();
+
+  if (articleTitle) {
+    const escapedTitle = articleTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    normalized = normalized.replace(new RegExp(`^\\(${escapedTitle}\\)\\s*`), "").trim();
+    normalized = normalized.replace(new RegExp(`^${escapedHeading}\\(${escapedTitle}\\)\\s*`), "").trim();
+  }
+
+  return normalized;
+}
+
+function formatNestedLawLine(text: string, depth: 1 | 2) {
+  const normalized = normalizeLawText(text);
+  if (!normalized) return "";
+  return `${depth === 1 ? "  " : "    "}${normalized}`;
+}
+
 function formatArticleUnit(article: JsonRecord) {
   const articleNo = readString(article, "조문번호") || readString(article, "조문키");
   const articleTitle = readString(article, "조문제목");
-  const articleContent = stripHtml(readString(article, "조문내용"));
-  const paragraphs = readNestedRecords(article, "항")
-    .map((paragraph) => {
-      const paragraphText = stripHtml(readString(paragraph, "항내용"));
-      const subItems = readNestedRecords(paragraph, "호")
-        .map((subItem) => stripHtml(readString(subItem, "호내용")))
-        .filter(Boolean)
-        .map((subItem) => `  - ${subItem}`);
-      return [paragraphText, ...subItems].filter(Boolean).join("\n");
-    })
-    .filter(Boolean);
   const heading = compact([
     articleNo ? `제${articleNo}조` : undefined,
     articleTitle ? `(${articleTitle})` : undefined
   ]).join("");
+  const articleContent = removeDuplicateArticleHeading(readString(article, "조문내용"), heading, articleTitle);
+  const paragraphs = readNestedUnitRecords(article, "항", "항단위")
+    .map((paragraph) => {
+      const paragraphText = normalizeLawText(readString(paragraph, "항내용"));
+      const subItems = readNestedUnitRecords(paragraph, "호", "호단위")
+        .map((subItem) => {
+          const subItemText = formatNestedLawLine(readString(subItem, "호내용"), 1);
+          const mokItems = readNestedUnitRecords(subItem, "목", "목단위")
+            .map((mokItem) => formatNestedLawLine(readString(mokItem, "목내용"), 2))
+            .filter(Boolean);
+          return [subItemText, ...mokItems].filter(Boolean).join("\n");
+        })
+        .filter(Boolean)
+        .filter((subItem) => subItem.trim() !== paragraphText.trim());
+      return [paragraphText, ...subItems].filter(Boolean).join("\n");
+    })
+    .filter(Boolean);
 
   return [heading, articleContent, ...paragraphs].filter(Boolean).join("\n").trim();
 }
@@ -219,7 +260,7 @@ function formatLawDetailBody(articleUnits: JsonRecord[]) {
     "",
     "[주요 조문 요약]",
     selectedArticles.length
-      ? selectedArticles.map((article, index) => `${index + 1}. ${article}`).join("\n\n")
+      ? selectedArticles.join("\n\n")
       : "Law.go 상세 원문에서 조문을 직접 확인해 주세요. SafeGuard는 이 근거를 현장 문서 초안 작성 보조 근거로만 사용합니다."
   ].join("\n");
 }
