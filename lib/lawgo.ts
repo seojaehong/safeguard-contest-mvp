@@ -3,7 +3,7 @@ import { DetailRecord, SearchResult } from "./types";
 
 const oc = process.env.LAWGO_OC?.trim() || process.env.LAW_OC?.trim() || "";
 const mockMode = process.env.LAWGO_MOCK_MODE === "force" || !oc;
-const baseUrl = "http://www.law.go.kr/DRF";
+const baseUrl = "https://www.law.go.kr/DRF";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -480,7 +480,10 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
     console.error("Failed to fetch Law.go detail response", error);
     return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
   }
-  if (!response.ok) return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
+  if (!response.ok) {
+    console.error("Law.go detail response was not ok", { status: response.status, type: parsed.type, id });
+    return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
+  }
   let parsedJson: unknown;
   try {
     parsedJson = JSON.parse(text) as unknown;
