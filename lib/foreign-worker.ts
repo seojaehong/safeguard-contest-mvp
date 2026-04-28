@@ -15,6 +15,32 @@ type LanguageTemplate = {
   lines: [string, string, string];
 };
 
+type SafetyKeyword =
+  | "fall"
+  | "scaffold"
+  | "wind"
+  | "forklift"
+  | "chemical"
+  | "fire"
+  | "confined"
+  | "electric"
+  | "heat"
+  | "slip"
+  | "heavyLoad"
+  | "crane"
+  | "excavation";
+
+type LocalizedPack = {
+  work: string;
+  risk: string;
+  actions: string;
+  ask: string;
+  supervisor: string;
+  workLabels: Record<string, string>;
+  hazardLabels: Record<SafetyKeyword, string>;
+  actionLabels: Partial<Record<SafetyKeyword, string>>;
+};
+
 const languageTemplates: LanguageTemplate[] = [
   {
     code: "vi",
@@ -159,6 +185,227 @@ function pickLanguages(question: string): ForeignWorkerLanguage[] {
   }));
 }
 
+function detectSafetyKeywords(input: BriefingInput): SafetyKeyword[] {
+  const text = `${input.question} ${input.scenario.workSummary} ${input.riskSummary.topRisk} ${input.riskSummary.immediateActions.join(" ")}`;
+  const candidates: Array<[SafetyKeyword, RegExp]> = [
+    ["fall", /추락|떨어|fall/i],
+    ["scaffold", /비계|scaffold/i],
+    ["wind", /강풍|돌풍|wind/i],
+    ["forklift", /지게차|forklift/i],
+    ["chemical", /화학|세제|물질|chemical/i],
+    ["fire", /화기|용접|절단|화재|fire|welding/i],
+    ["confined", /밀폐|산소|질식|confined/i],
+    ["electric", /감전|전기|electric/i],
+    ["heat", /폭염|고온|온열|heat/i],
+    ["slip", /미끄럼|젖음|slip/i],
+    ["heavyLoad", /중량|운반|근골격|heavy/i],
+    ["crane", /크레인|crane/i],
+    ["excavation", /굴착|매설|excavation/i]
+  ];
+
+  const detected = candidates.flatMap(([keyword, pattern]) => pattern.test(text) ? [keyword] : []);
+  return detected.length ? detected : ["fall"];
+}
+
+function detectWorkLabelKey(input: BriefingInput) {
+  const text = `${input.question} ${input.scenario.workSummary}`;
+  if (/외벽|도장|비계/.test(text)) return "paintingScaffold";
+  if (/지게차|상하차|피킹/.test(text)) return "forkliftLoading";
+  if (/용접|절단|화기/.test(text)) return "hotWork";
+  if (/밀폐|기계실|배수/.test(text)) return "confinedInspection";
+  if (/세척|화학세제|청소/.test(text)) return "chemicalCleaning";
+  if (/박스|적재|운반/.test(text)) return "manualHandling";
+  if (/굴착|열수송관|매설/.test(text)) return "excavation";
+  return "general";
+}
+
+function localizedPacks(): Record<string, LocalizedPack> {
+  const fallbackHazards: Record<SafetyKeyword, string> = {
+    fall: "fall hazard",
+    scaffold: "mobile scaffold movement",
+    wind: "strong wind",
+    forklift: "forklift route conflict",
+    chemical: "chemical exposure",
+    fire: "fire or hot-work hazard",
+    confined: "confined-space hazard",
+    electric: "electric shock",
+    heat: "heat illness",
+    slip: "slip hazard",
+    heavyLoad: "heavy-load handling",
+    crane: "crane or lifting hazard",
+    excavation: "excavation and buried utility hazard"
+  };
+
+  return {
+    en: {
+      work: "Today's work",
+      risk: "Main hazards for this job",
+      actions: "Before starting",
+      ask: "If you do not understand, stop and ask the supervisor to explain again.",
+      supervisor: "Supervisor check: confirm this message with an interpreter or a worker who can read this language.",
+      workLabels: {
+        paintingScaffold: "Exterior painting using a mobile scaffold",
+        forkliftLoading: "Forklift loading/unloading and picking work",
+        hotWork: "Welding, cutting, and other hot work",
+        confinedInspection: "Underground machine-room inspection with possible confined-space risk",
+        chemicalCleaning: "Factory floor cleaning using chemical detergent",
+        manualHandling: "Heavy box stacking and manual handling",
+        excavation: "Excavation work with equipment and buried utility checks",
+        general: "The work described in today's briefing"
+      },
+      hazardLabels: fallbackHazards,
+      actionLabels: {
+        wind: "Stop scaffold or outdoor work if strong wind increases or the scaffold moves.",
+        scaffold: "Lock wheels, keep guardrails in place, and do not move the scaffold with a worker on it.",
+        fall: "Wear fall-protection PPE and stay inside the safe work platform.",
+        forklift: "Separate the forklift route from worker walking paths before work starts.",
+        chemical: "Check the safety data sheet, ventilation, goggles, and gloves before use.",
+        fire: "Remove combustibles, assign a fire watch, and keep extinguishers ready.",
+        confined: "Measure oxygen and harmful gas before entry and keep a watcher outside.",
+        electric: "Shut off power where needed and keep wet areas away from electrical panels.",
+        heat: "Take water and rest breaks, and report dizziness immediately.",
+        slip: "Dry wet floors and mark slippery entrances before moving loads.",
+        heavyLoad: "Use carts or team lifting and stop if back or shoulder pain occurs.",
+        crane: "Keep workers out of the lifting radius and confirm the signal person.",
+        excavation: "Confirm buried utilities and keep workers away from the excavation edge."
+      }
+    },
+    vi: {
+      work: "Công việc hôm nay",
+      risk: "Nguy cơ chính của công việc này",
+      actions: "Trước khi bắt đầu",
+      ask: "Nếu chưa hiểu, hãy dừng lại và yêu cầu quản lý giải thích lại.",
+      supervisor: "Quản lý xác nhận: kiểm tra lại nội dung này với phiên dịch hoặc người biết ngôn ngữ này.",
+      workLabels: {
+        paintingScaffold: "Sơn tường ngoài bằng giàn giáo di động",
+        forkliftLoading: "Bốc dỡ và lấy hàng bằng xe nâng",
+        hotWork: "Hàn, cắt và công việc có lửa",
+        confinedInspection: "Kiểm tra phòng máy ngầm, có thể có nguy cơ không gian kín",
+        chemicalCleaning: "Vệ sinh sàn nhà xưởng bằng hóa chất",
+        manualHandling: "Xếp và vận chuyển thùng nặng",
+        excavation: "Đào đất và kiểm tra công trình ngầm",
+        general: "Công việc được quản lý hướng dẫn hôm nay"
+      },
+      hazardLabels: {
+        ...fallbackHazards,
+        fall: "nguy cơ rơi ngã",
+        scaffold: "giàn giáo di động rung hoặc lật",
+        wind: "gió mạnh",
+        forklift: "đường xe nâng giao với lối đi bộ",
+        chemical: "tiếp xúc hóa chất",
+        fire: "nguy cơ cháy khi hàn/cắt"
+      },
+      actionLabels: {
+        wind: "Nếu gió mạnh hơn hoặc giàn giáo rung, hãy dừng công việc ngay.",
+        scaffold: "Khóa bánh xe, kiểm tra lan can và không di chuyển giàn giáo khi có người ở trên.",
+        fall: "Mang dây an toàn và thiết bị bảo hộ, chỉ làm việc trong khu vực an toàn.",
+        forklift: "Tách đường xe nâng và lối đi bộ trước khi bắt đầu.",
+        chemical: "Kiểm tra thông gió, kính bảo hộ và găng tay trước khi dùng hóa chất.",
+        fire: "Dọn vật dễ cháy, bố trí người giám sát cháy và chuẩn bị bình chữa cháy."
+      }
+    },
+    zh: {
+      work: "今天的作业",
+      risk: "本作业的主要危险",
+      actions: "开始前",
+      ask: "如果没有理解，请停止作业并请现场负责人再次说明。",
+      supervisor: "管理人员确认：请由翻译或懂该语言的人员确认后再发送。",
+      workLabels: {
+        paintingScaffold: "使用移动脚手架进行外墙涂装",
+        forkliftLoading: "叉车装卸和拣货作业",
+        hotWork: "焊接、切割等动火作业",
+        confinedInspection: "地下机房检查，可能存在有限空间风险",
+        chemicalCleaning: "使用化学清洁剂清洗工厂地面",
+        manualHandling: "重物堆放和人工搬运",
+        excavation: "开挖作业及地下埋设物确认",
+        general: "今天现场说明的作业"
+      },
+      hazardLabels: {
+        ...fallbackHazards,
+        fall: "坠落危险",
+        scaffold: "移动脚手架晃动或倾倒",
+        wind: "强风",
+        forklift: "叉车路线与人员通道交叉",
+        chemical: "化学品接触",
+        fire: "动火火灾危险"
+      },
+      actionLabels: {
+        wind: "如风力增强或脚手架晃动，请立即停止作业。",
+        scaffold: "锁好脚轮，确认护栏，禁止载人移动脚手架。",
+        fall: "佩戴防坠落防护用品，只在安全平台内作业。",
+        forklift: "作业前分离叉车路线和人员通道。",
+        chemical: "使用化学品前确认通风、护目镜和手套。",
+        fire: "清除可燃物，安排火灾监护人并准备灭火器。"
+      }
+    },
+    mn: {
+      work: "Өнөөдрийн ажил",
+      risk: "Энэ ажлын гол аюул",
+      actions: "Ажил эхлэхийн өмнө",
+      ask: "Ойлгоогүй бол ажлаа зогсоож, ахлагчаас дахин тайлбар хүсээрэй.",
+      supervisor: "Ахлагчийн баталгаажуулалт: орчуулагч эсвэл энэ хэлийг мэддэг хүнээр шалгуулна.",
+      workLabels: {
+        paintingScaffold: "Зөөврийн шат ашиглан гадна ханын будаг хийх ажил",
+        forkliftLoading: "Сэрээт ачигчаар ачих, буулгах ажил",
+        hotWork: "Гагнах, огтлох халуун ажил",
+        confinedInspection: "Далд/доод өрөөний үзлэг, битүү орчны эрсдэлтэй",
+        chemicalCleaning: "Химийн бодис ашиглан шал цэвэрлэх ажил",
+        manualHandling: "Хүнд хайрцаг өрөх, гараар зөөх ажил",
+        excavation: "Ухалт ба далд шугам шалгах ажил",
+        general: "Өнөөдрийн зааварт тайлбарласан ажил"
+      },
+      hazardLabels: {
+        ...fallbackHazards,
+        fall: "өндрөөс унах эрсдэл",
+        scaffold: "зөөврийн шат ганхах эсвэл унах",
+        wind: "хүчтэй салхи",
+        forklift: "сэрээт ачигч ба явган хүний зам огтлолцох",
+        chemical: "химийн бодист өртөх",
+        fire: "галтай ажлын галын эрсдэл"
+      },
+      actionLabels: {
+        wind: "Салхи хүчтэй болох эсвэл шат ганхвал ажлыг шууд зогсооно.",
+        scaffold: "Дугуйг түгжиж, хамгаалалтын хашлагыг шалгана.",
+        fall: "Унахаас хамгаалах хэрэгсэл өмсөж, аюулгүй тавцан дотор ажиллана.",
+        forklift: "Ажил эхлэхээс өмнө ачигчийн зам ба явган хүний замыг тусгаарлана."
+      }
+    }
+  };
+}
+
+function getPack(language: ForeignWorkerLanguage): LocalizedPack {
+  const packs = localizedPacks();
+  return packs[language.code] || packs.en;
+}
+
+function buildTaskSpecificLines(input: BriefingInput, language: ForeignWorkerLanguage) {
+  const pack = getPack(language);
+  const keywords = detectSafetyKeywords(input);
+  const workLabel = pack.workLabels[detectWorkLabelKey(input)] || pack.workLabels.general;
+  const hazards = keywords.map((keyword) => pack.hazardLabels[keyword]).filter(Boolean).slice(0, 5);
+  const actions = keywords
+    .map((keyword) => pack.actionLabels[keyword])
+    .filter((line): line is string => Boolean(line))
+    .slice(0, 3);
+  const fallbackActions = input.riskSummary.immediateActions.slice(0, 3);
+
+  return [
+    `${pack.work}: ${workLabel}`,
+    `${pack.risk}: ${hazards.join(", ")}`,
+    `${pack.actions}: ${actions[0] || fallbackActions[0] || language.lines[0]}`,
+    actions[1] || fallbackActions[1] || language.lines[1],
+    actions[2] || fallbackActions[2] || language.lines[2],
+    pack.ask
+  ];
+}
+
+export function buildForeignWorkerLanguages(input: BriefingInput) {
+  return pickLanguages(input.question).map((language) => ({
+    ...language,
+    lines: buildTaskSpecificLines(input, language)
+  }));
+}
+
 function buildEasyKoreanLines(input: BriefingInput) {
   const actions = input.riskSummary.immediateActions.slice(0, 3);
   return [
@@ -180,7 +427,7 @@ function buildEasyKoreanLines(input: BriefingInput) {
 }
 
 export function buildForeignWorkerBriefing(input: BriefingInput) {
-  const languages = pickLanguages(input.question);
+  const languages = buildForeignWorkerLanguages(input);
   const languageSections = languages.map((language) => [
     `[${language.label} / ${language.nativeLabel}]`,
     `- ${language.rationale}`,
@@ -200,7 +447,7 @@ export function buildForeignWorkerBriefing(input: BriefingInput) {
 }
 
 export function buildForeignWorkerTransmission(input: BriefingInput) {
-  const languages = pickLanguages(input.question);
+  const languages = buildForeignWorkerLanguages(input);
   const languageDigest = languages.slice(0, hasForeignWorkerContext(input.question) ? 10 : 5)
     .map((language) => buildForeignWorkerLanguageMessage(input, language))
     .join("\n\n");
@@ -221,6 +468,7 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
 }
 
 export function buildForeignWorkerLanguageMessage(input: BriefingInput, language: ForeignWorkerLanguage) {
+  const pack = getPack(language);
   return [
     `[SafeGuard ${language.label} 안전공지] ${input.scenario.companyName}`,
     `현장: ${input.scenario.siteName}`,
@@ -230,7 +478,7 @@ export function buildForeignWorkerLanguageMessage(input: BriefingInput, language
     `${language.label}(${language.nativeLabel})`,
     ...language.lines.map((line) => `- ${line}`),
     "",
-    "관리자 확인: 현장 통역 또는 해당 언어 가능자 확인 후 전송하세요."
+    pack.supervisor
   ].join("\n");
 }
 

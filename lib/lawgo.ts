@@ -16,6 +16,20 @@ function readRecord(record: JsonRecord | undefined, key: string): JsonRecord | u
   return isRecord(value) ? value : undefined;
 }
 
+function readValue(record: JsonRecord | undefined, key: string): unknown {
+  return record?.[key];
+}
+
+function readArrayRecords(value: unknown): JsonRecord[] {
+  if (Array.isArray(value)) return value.filter(isRecord);
+  if (isRecord(value)) return [value];
+  return [];
+}
+
+function readNestedRecords(record: JsonRecord | undefined, key: string): JsonRecord[] {
+  return readArrayRecords(readValue(record, key));
+}
+
 function readString(record: JsonRecord | undefined, key: string) {
   const value = record?.[key];
   if (typeof value === "string") return value;
@@ -155,6 +169,79 @@ function compact(parts: Array<string | undefined>) {
   return parts.map((part) => (part || "").trim()).filter(Boolean);
 }
 
+function isSafetyArticle(text: string) {
+  return /안전|보건|위험|유해|교육|보호구|작업|도급|기계|추락|비계|중지|관리감독|조치|근로자|사업주/.test(text);
+}
+
+function lawSourceUrl(lawSerial: string) {
+  return lawSerial ? `https://www.law.go.kr/lsInfoP.do?lsiSeq=${encodeURIComponent(lawSerial)}` : "https://www.law.go.kr/";
+}
+
+function formatArticleUnit(article: JsonRecord) {
+  const articleNo = readString(article, "조문번호") || readString(article, "조문키");
+  const articleTitle = readString(article, "조문제목");
+  const articleContent = stripHtml(readString(article, "조문내용"));
+  const paragraphs = readNestedRecords(article, "항")
+    .map((paragraph) => {
+      const paragraphText = stripHtml(readString(paragraph, "항내용"));
+      const subItems = readNestedRecords(paragraph, "호")
+        .map((subItem) => stripHtml(readString(subItem, "호내용")))
+        .filter(Boolean)
+        .map((subItem) => `  - ${subItem}`);
+      return [paragraphText, ...subItems].filter(Boolean).join("\n");
+    })
+    .filter(Boolean);
+  const heading = compact([
+    articleNo ? `제${articleNo}조` : undefined,
+    articleTitle ? `(${articleTitle})` : undefined
+  ]).join("");
+
+  return [heading, articleContent, ...paragraphs].filter(Boolean).join("\n").trim();
+}
+
+function buildLawDocumentReflection() {
+  return [
+    "[현장 문서 반영]",
+    "- 위험성평가표: 유해·위험요인 파악, 위험성 결정, 감소대책 수립의 기준 근거로 사용합니다.",
+    "- TBM 기록: 작업중지 기준, 보호구 착용, 위험구역 통제, 역할 확인 문구를 설명하는 근거로 사용합니다.",
+    "- 안전보건교육 기록: 신규·외국인·미숙련 근로자에게 반드시 공유한 내용과 이해 확인 항목을 남기는 근거로 사용합니다.",
+    "- 작업계획서: 현장 조건, 작업순서, 감시자·신호수 배치, 사진 증빙 항목을 보강하는 근거로 사용합니다."
+  ].join("\n");
+}
+
+function formatLawDetailBody(articleUnits: JsonRecord[]) {
+  const articleTexts = articleUnits.map(formatArticleUnit).filter(Boolean);
+  const safetyArticles = articleTexts.filter(isSafetyArticle);
+  const selectedArticles = (safetyArticles.length ? safetyArticles : articleTexts).slice(0, 8);
+
+  return [
+    buildLawDocumentReflection(),
+    "",
+    "[주요 조문 요약]",
+    selectedArticles.length
+      ? selectedArticles.map((article, index) => `${index + 1}. ${article}`).join("\n\n")
+      : "Law.go 상세 원문에서 조문을 직접 확인해 주세요. SafeGuard는 이 근거를 현장 문서 초안 작성 보조 근거로만 사용합니다."
+  ].join("\n");
+}
+
+function buildLawFallbackDetail(id: string, raw: string): DetailRecord {
+  return {
+    id,
+    type: "law",
+    title: `법령 ${raw}`,
+    citation: "Law.go 법령",
+    summary: "Law.go 상세 응답을 즉시 해석하지 못해 원문 확인 링크와 문서 반영 기준을 먼저 표시합니다.",
+    body: formatLawDetailBody([]),
+    points: [
+      "위험성평가·TBM·안전보건교육 기록의 근거 초안으로만 사용합니다.",
+      "원문 링크에서 최신 법령 본문을 함께 확인해야 합니다."
+    ],
+    sourceLabel: "Law.go 법령",
+    sourceSystem: "lawgo",
+    sourceUrl: lawSourceUrl(raw)
+  };
+}
+
 function parseLawResults(xml: string): SearchResult[] {
   return Array.from(xml.matchAll(/<law\b[^>]*>([\s\S]*?)<\/law>/g)).slice(0, 4).map((match) => {
     const content = match[1];
@@ -173,7 +260,7 @@ function parseLawResults(xml: string): SearchResult[] {
       citation: compact([lawType, promDate ? `공포 ${promDate}` : undefined]).join(" · ") || undefined,
       sourceLabel: "Law.go 법령",
       sourceSystem: "lawgo" as const,
-      sourceUrl: lawId ? `https://www.law.go.kr/lsInfoP.do?lsiSeq=${lawId}` : "https://www.law.go.kr/",
+      sourceUrl: mst ? lawSourceUrl(mst) : lawId ? `https://www.law.go.kr/법령/${encodeURIComponent(title)}` : "https://www.law.go.kr/",
       tags: compact([lawType, department, "Law.go"])
     };
   }).filter((item) => item.title);
@@ -340,21 +427,27 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
 
   const response = await fetch(url.toString(), { cache: "no-store" });
   const text = await response.text();
-  if (!response.ok) return null;
-  const parsedJson = JSON.parse(text) as unknown;
-  if (!isRecord(parsedJson)) return null;
+  if (!response.ok) return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
+  let parsedJson: unknown;
+  try {
+    parsedJson = JSON.parse(text) as unknown;
+  } catch (error) {
+    console.error("Failed to parse Law.go detail response", error);
+    return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
+  }
+  if (!isRecord(parsedJson)) return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
 
   if (parsed.type === "law") {
     const law = readRecord(parsedJson, "법령");
+    if (!law) return buildLawFallbackDetail(id, parsed.raw);
     const basic = readRecord(law, "기본정보") || {};
-    const articles = readRecord(readRecord(law, "조문"), "조문단위");
+    const articles = readArrayRecords(readValue(readRecord(law, "조문"), "조문단위"));
     const department = readString(basic, "소관부처");
-    const body = JSON.stringify(articles || []).slice(0, 1200);
+    const body = formatLawDetailBody(articles);
     const lawName = readString(basic, "법령명_한글");
     const lawKind = readContent(basic.법종구분);
     const promNo = readString(basic, "공포번호");
     const effectiveDate = readString(basic, "시행일자");
-    const lawId = readString(basic, "법령ID");
     return {
       id,
       type: "law",
@@ -364,11 +457,13 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
       body: body || "Law.go 법령 상세 본문을 불러왔습니다.",
       points: compact([
         department ? `소관부처 ${department}` : undefined,
-        effectiveDate ? `시행일 ${effectiveDate}` : undefined
+        effectiveDate ? `시행일 ${effectiveDate}` : undefined,
+        "위험성평가·TBM·안전보건교육 기록의 반영 근거로 사용",
+        "법률 검토 최종 의견이 아니라 현장 문서 초안 작성 보조 근거"
       ]),
       sourceLabel: "Law.go 법령",
       sourceSystem: "lawgo",
-      sourceUrl: lawId ? `https://www.law.go.kr/lsInfoP.do?lsiSeq=${lawId}` : "https://www.law.go.kr/"
+      sourceUrl: lawSourceUrl(parsed.raw)
     };
   }
 

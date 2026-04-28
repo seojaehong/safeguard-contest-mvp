@@ -8,7 +8,7 @@ import { fetchTrainingRecommendations } from "./work24";
 import { fetchKoshaEducationRecommendations } from "./kosha-education";
 import { fetchKoshaReferences } from "./kosha";
 import { fetchAccidentCases } from "./accident-cases";
-import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
+import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission } from "./foreign-worker";
 
 export async function runSearch(query: string) {
   return searchLegalSources(query);
@@ -198,6 +198,8 @@ export async function runAsk(question: string): Promise<AskResponse> {
       riskSummary: response.riskSummary
     };
 
+    const foreignWorkerLanguages = buildForeignWorkerLanguages(foreignWorkerInput);
+
     const enriched: AskResponse = {
       ...response,
       answer: [
@@ -227,7 +229,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
         photoEvidenceDraft: `${response.deliverables.photoEvidenceDraft}\n\n[확인 근거 첨부]\n- 법령·해석례·판례: ${citations.slice(0, 3).map((item) => item.title).join(" / ") || "현장 문서 확인 후 첨부"}\n- KOSHA 자료: ${kosha.references.slice(0, 2).map((item) => item.title).join(" / ") || "현장 작업유형 확인 후 첨부"}\n- 유사 재해사례: ${accidentCases.cases.slice(0, 2).map((item) => item.title).join(" / ") || "사례 확인 후 첨부"}`,
         foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
         foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
-        foreignWorkerLanguages: getDefaultForeignWorkerLanguages(foreignWorkerInput.question),
+        foreignWorkerLanguages,
         kakaoMessage: `${response.deliverables.kakaoMessage}\n\n[외국인 근로자 공지]\n${buildForeignWorkerTransmission(foreignWorkerInput).split("\n").slice(0, 8).join("\n")}`
       },
       status: {
