@@ -113,20 +113,20 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 }
 
 .command-center-shell {
-  width: min(1480px, calc(100% - 28px));
+  width: min(1500px, calc(100% - 28px));
   margin: 0 auto;
   padding: 14px 0 52px;
   display: grid;
-  gap: 16px;
+  gap: 18px;
 }
 
 .command-topbar {
   position: sticky;
   top: 10px;
   z-index: 20;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
   padding: 10px 12px;
   border: 1px solid rgba(226, 222, 213, 0.86);
@@ -136,19 +136,155 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   backdrop-filter: blur(18px);
 }
 
+.safeclaw-lockup .brand-mark {
+  border-radius: 10px 16px 16px 10px;
+  background:
+    linear-gradient(135deg, rgba(33, 89, 79, 0.95), rgba(23, 27, 34, 1));
+}
+
+.command-stepper {
+  justify-content: center;
+}
+
+.command-stepper a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid transparent;
+}
+
+.command-stepper a span {
+  color: var(--accent-warm);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.command-stepper a.active {
+  border-color: rgba(33, 89, 79, 0.2);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 850;
+}
+
+.topbar-status {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  min-width: 150px;
+  padding: 7px 10px;
+  border: 1px solid rgba(226, 222, 213, 0.88);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.topbar-status span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.topbar-status b {
+  color: var(--ink);
+  font-size: 13px;
+}
+
 .command-viewport {
   min-height: calc(100vh - 112px);
   display: grid;
-  grid-template-columns: 116px minmax(0, 1fr) 360px;
+  grid-template-columns: 270px minmax(0, 1fr) 360px;
   gap: 16px;
   align-items: stretch;
 }
 
+.command-left-panel,
 .mission-rail,
 .command-side {
   display: grid;
   gap: 12px;
   align-content: start;
+}
+
+.command-left-panel {
+  position: sticky;
+  top: 92px;
+  height: fit-content;
+}
+
+.left-panel-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(226, 222, 213, 0.78);
+  border-radius: 24px;
+  background: rgba(255, 253, 248, 0.68);
+  box-shadow: 0 16px 44px rgba(38, 34, 27, 0.05);
+  padding: 18px;
+}
+
+.current-site-card {
+  min-height: 210px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(184, 95, 36, 0.12), transparent 34%),
+    rgba(255, 253, 248, 0.72);
+}
+
+.current-site-card strong {
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.current-site-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.site-tag-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.site-tag-grid span {
+  border: 1px solid rgba(33, 89, 79, 0.18);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 6px 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.recent-list {
+  display: grid;
+  gap: 8px;
+}
+
+.recent-list button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  border: 1px solid rgba(226, 222, 213, 0.82);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.52);
+  padding: 11px;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.recent-list button:hover {
+  border-color: rgba(33, 89, 79, 0.28);
+  background: #fffefb;
+}
+
+.recent-list strong {
+  font-size: 13px;
+}
+
+.recent-list span {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .mission-rail {
@@ -194,7 +330,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .command-main {
   overflow: hidden;
   min-height: 680px;
-  padding: clamp(24px, 4vw, 54px);
+  padding: clamp(22px, 3vw, 38px);
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 24px;
@@ -203,16 +339,37 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
     linear-gradient(145deg, rgba(255, 253, 248, 0.98), rgba(246, 242, 232, 0.9));
 }
 
+.command-main-studio {
+  position: relative;
+}
+
+.workflow-progress {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 28px 28px 0 0;
+  background: rgba(226, 222, 213, 0.72);
+}
+
+.workflow-progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-warm));
+  transition: width 0.35s ease;
+}
+
 .command-copy {
   max-width: 920px;
 }
 
 .command-copy h1 {
-  max-width: 760px;
+  max-width: 720px;
   margin: 10px 0 16px;
-  font-size: clamp(42px, 6.4vw, 96px);
-  line-height: 0.96;
-  letter-spacing: -0.065em;
+  font-size: clamp(38px, 4.8vw, 72px);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
 }
 
 .command-copy p {
@@ -233,9 +390,22 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   background: rgba(255, 255, 255, 0.64);
 }
 
+.console-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
 .command-console label {
   color: #3b424f;
   font-weight: 900;
+}
+
+.console-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .command-console-input {
@@ -278,6 +448,13 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+}
+
+.quick-scenario small {
+  align-self: end;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 850;
 }
 
 .quick-scenario.active {
@@ -379,6 +556,22 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .brief-stat-grid b {
   font-size: 14px;
   line-height: 1.35;
+}
+
+.brief-signal-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.brief-signal-row span {
+  border: 1px solid rgba(226, 222, 213, 0.9);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--muted);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .output-line {
@@ -1500,6 +1693,23 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
     grid-template-columns: 1fr;
   }
 
+  .command-topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .command-stepper {
+    justify-content: flex-start;
+  }
+
+  .topbar-status {
+    justify-items: start;
+  }
+
+  .command-left-panel {
+    position: static;
+    grid-template-columns: 1fr 1fr;
+  }
+
   .mission-rail {
     position: static;
     display: flex;
@@ -1559,7 +1769,6 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
     position: static;
     align-items: flex-start;
     border-radius: 24px;
-    flex-direction: column;
   }
 
   .topnav {
@@ -1580,6 +1789,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   }
 
   .quick-scenario-grid,
+  .command-left-panel,
   .command-side,
   .brief-stat-grid,
   .empty-preview-grid {

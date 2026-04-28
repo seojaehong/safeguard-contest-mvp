@@ -89,3 +89,15 @@ When modifying UI, use this prompt:
 
 > Build SafeGuard as an inspection-ready industrial safety workspace. Make it feel like Vercel/Linear-level precision applied to Korean field safety documents, with Notion/Airtable-like editable document surfaces. Remove demo language. Use operational status labels and keep the workflow from job input to document pack to evidence to field dispatch.
 
+## Imported SafeClaw Design Direction
+
+The `safeclaw.zip` design exploration is adopted as a product direction, not as a direct visual copy. Apply the following principles when refactoring screens:
+
+- Use a 3-zone workspace: left context and recent workpacks, center command input and document generation, right operational status and output checklist.
+- Keep a top workflow stepper visible on desktop: `작업 입력 -> 위험 판단 -> 문서팩 -> 근거 -> 전파`.
+- Prefer compact operational copy over large marketing copy.
+- Use progress and state indicators to show that evidence matching and document writing are active work, not a static report.
+- Treat generated outputs as editable work surfaces, with document names and export actions always close to the content.
+- Keep example data as quick-start field cases, never as visible demo language.
+- Use warm institutional colors, dark ink, green verification, amber attention, and paper-like surfaces.
+- If a live provider is unavailable, preserve the user workflow with a clearly labeled operational state and a verified fallback where available.
