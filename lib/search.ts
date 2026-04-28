@@ -152,17 +152,15 @@ export async function runAsk(question: string): Promise<AskResponse> {
       retryCount: 0,
       budgetLabel: "KOSHA accident case enrichment budget"
     });
-    const [rawCitations, weather, training, koshaEducation, kosha] = await Promise.all([
-      searchLegalSources(question),
-      fetchWeatherSignal(question),
-      fetchTrainingRecommendations(question),
-      fetchKoshaEducationRecommendations(question),
-      fetchKoshaReferences(question)
-    ]);
-    const accidentCases = await accidentCasesPromise;
-    const citations = rawCitations.length ? rawCitations : await searchLegalSources("산업안전보건법");
+    const rawCitationsPromise = searchLegalSources(question);
+    const weatherPromise = fetchWeatherSignal(question);
+    const trainingPromise = fetchTrainingRecommendations(question);
+    const koshaEducationPromise = fetchKoshaEducationRecommendations(question);
+    const koshaPromise = fetchKoshaReferences(question);
 
-    const response = await generateAnswer(question, citations.slice(0, 6)).catch((error) => {
+    const rawCitations = await rawCitationsPromise;
+    const citations = rawCitations.length ? rawCitations : await searchLegalSources("산업안전보건법");
+    const responsePromise = generateAnswer(question, citations.slice(0, 6)).catch((error) => {
       const message = error instanceof Error ? error.message : String(error);
       return buildMockAskResponse(
         question,
@@ -171,6 +169,14 @@ export async function runAsk(question: string): Promise<AskResponse> {
         `AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다. 사유: ${message}`
       );
     });
+    const [weather, training, koshaEducation, kosha, accidentCases, response] = await Promise.all([
+      weatherPromise,
+      trainingPromise,
+      koshaEducationPromise,
+      koshaPromise,
+      accidentCasesPromise,
+      responsePromise
+    ]);
     const koreanLawMcpCount = citations.filter((item) => item.sourceSystem === "korean-law-mcp").length;
     const sourceMix = summarizeLegalSourceMix(citations);
     const legalEvidenceMode = inferLegalEvidenceMode(sourceMix);
