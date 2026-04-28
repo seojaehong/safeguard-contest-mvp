@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-04-28T23:53:21.9682287+09:00",
+  "url": "https://safeguard-contest-mvp.vercel.app/",
+  "commit": "2e7f8ec",
+  "home": {
+    "ms": 1329,
+    "hasTopStepper": true,
+    "hasLiveStatus": true,
+    "hasFieldBrief": true,
+    "hasRecentWorkpacks": true,
+    "hasRightPanel": false,
+    "hasQuickChips": true,
+    "hasOutputCards": true,
+    "hasDispatchPreview": true,
+    "hasUserFacingDemoCopy": false,
+    "bytes": 14095
+  },
+  "ask": {
+    "ms": 37917,
+    "weatherMode": "live",
+    "weatherSummary": "단시간 맑음, 강수없음, 기온 11℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보 반영)",
+    "weatherSignalCount": 3,
+    "weatherEndpoints": [
+      "초단기실황",
+      "초단기예보",
+      "단기예보"
+    ],
+    "weatherSignalModes": [
+      "live",
+      "live",
+      "live"
+    ],
+    "weatherDetail": "기상청 초단기실황 호출 성공 (서울, base 20260428 2300) / 기상청 초단기예보 호출 성공 (서울, base 20260428 2330) / 기상청 단기예보 호출 성공 (서울, base 20260428 2300)",
+    "hasRiskAssessment": true,
+    "hasTbm": true,
+    "hasEducation": true,
+    "hasForeignTransmission": true
+  }
+}
