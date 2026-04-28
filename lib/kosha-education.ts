@@ -20,6 +20,14 @@ type KoshaEduApiResponse = {
       comCdNm?: string;
     }>;
     eduCrsList?: Array<Record<string, unknown>>;
+    eduInstList?: Array<{
+      crclmSrcSeCd?: string;
+      comCdNm?: string;
+    }>;
+    eduSrchList?: Array<{
+      id?: string;
+      label?: string;
+    }>;
   };
 };
 
@@ -38,6 +46,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function readString(record: Record<string, unknown>, key: string) {
   const value = record[key];
   return typeof value === "string" || typeof value === "number" ? String(value) : "";
+}
+
+function compactDate(value: string) {
+  if (!/^\d{8}$/.test(value)) return value;
+  return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
 }
 
 async function postKoshaEdu(endpoint: string, body: Record<string, unknown>) {
@@ -134,8 +147,20 @@ function mapCourse(course: Record<string, unknown>, question: string): KoshaEduc
   if (!title) return null;
   const flags = classifyQuestion(question);
   const url = `${BASE_URL}/?crclmEstblNo=${encodeURIComponent(readString(course, "crclmEstblNo"))}&crclmCyclNo=${encodeURIComponent(readString(course, "crclmCyclNo"))}&eduYr=${encodeURIComponent(readString(course, "eduYr"))}`;
-  const target = readString(course, "eduFldLclsfNm") || "안전보건교육";
-  const method = readString(course, "eduWayCd") || (readString(course, "onlineYn") === "Y" ? "온라인" : "교육포털");
+  const target = readString(course, "eduFldLclsfNm") || readString(course, "eduTrgtCd") || "안전보건교육";
+  const method = readString(course, "onlineYn") === "OFF"
+    ? "집체교육"
+    : readString(course, "onlineYn") === "ON"
+      ? "온라인"
+      : readString(course, "eduWayCd") || "교육포털";
+  const schedule = readString(course, "eduYmd") || [
+    compactDate(readString(course, "eduBgngYmd")),
+    compactDate(readString(course, "eduEndYmd"))
+  ].filter(Boolean).join(" ~ ");
+  const place = readString(course, "eduPlcNm");
+  const capacity = [readString(course, "aplyNope"), readString(course, "eduPscpCnt")]
+    .filter(Boolean)
+    .join("/");
   const fitLabel = flags.asksForeignWorker && title.includes("외국인")
     ? "대상 적합"
     : title.includes("안전") || title.includes("위험") || title.includes("관리감독")
@@ -148,7 +173,7 @@ function mapCourse(course: Record<string, unknown>, question: string): KoshaEduc
     target,
     educationMethod: method,
     url,
-    reason: "KOSHA 교육포털 과정목록 API에서 조회된 교육 후보입니다.",
+    reason: [schedule, place, capacity ? `신청/정원 ${capacity}` : ""].filter(Boolean).join(" · ") || "KOSHA 교육포털 과정목록 API에서 조회된 교육 후보입니다.",
     fitLabel,
     fitReason: fitLabel === "조건부 후보"
       ? "교육명과 현장 위험 키워드가 직접 일치하는지 관리자 확인이 필요합니다."
@@ -156,36 +181,87 @@ function mapCourse(course: Record<string, unknown>, question: string): KoshaEduc
   };
 }
 
+function scoreCourse(question: string, course: KoshaEducationRecommendation) {
+  const normalized = question.toLowerCase();
+  const haystack = `${course.title} ${course.target} ${course.reason}`.toLowerCase();
+  let score = 0;
+
+  for (const keyword of ["외국인", "다국어", "이주"]) {
+    if (normalized.includes(keyword) && haystack.includes("외국인")) score += 30;
+  }
+  for (const keyword of ["건설", "비계", "추락", "굴착", "크레인"]) {
+    if (normalized.includes(keyword) && hasAny(haystack, ["건설", "위험성", "안전보건", "중대재해"])) score += 12;
+  }
+  for (const keyword of ["지게차", "물류", "상하차"]) {
+    if (normalized.includes(keyword) && hasAny(haystack, ["지게차", "운반", "안전보건"])) score += 12;
+  }
+  for (const keyword of ["관리감독", "사업주", "경영책임"]) {
+    if (normalized.includes(keyword) && hasAny(haystack, ["관리감독", "사업주", "경영책임", "중대재해"])) score += 12;
+  }
+  if (hasAny(haystack, ["안전", "위험성", "중대재해", "외국인"])) score += 5;
+  if (course.fitLabel === "대상 적합") score += 8;
+  if (course.fitLabel === "현장 적합") score += 4;
+
+  return score;
+}
+
 async function tryFetchCourses(question: string) {
   const flags = classifyQuestion(question);
-  const searchWord = flags.asksForeignWorker
-    ? "외국인"
-    : flags.asksLogistics
-      ? "지게차"
-      : flags.asksConstruction
-        ? "건설"
-        : "안전";
+  const eduWayCd = ["01", "02", "03", "04", "05"];
+  const targetCandidates = flags.asksForeignWorker
+    ? ["48", "34", "00"]
+    : flags.asksManagement
+      ? ["10", "12", "00"]
+      : ["34", "12", "00"];
+  const collected: KoshaEducationRecommendation[] = [];
 
-  const response = await postKoshaEdu("selectEduCrsList", {
-    eduWayCd: ["01", "02", "03", "04", "05"],
-    eduTrgtCd: flags.asksForeignWorker ? ["48"] : ["00"],
-    crclmSrcSeCd: "30",
-    rgnSeCd: "ALL",
-    chargedEduYn: "ALL",
-    aplyYn: "ALL",
-    comboSrch1: "hmpgExpsrCrclmNm",
-    comboSrch2: "ALL",
-    srchInfo: searchWord,
-    rgnInclYn: false,
-    eduRgnCd: "ALL",
-    sortByOrder: 1,
-    page: 1,
-    rowsPerPage: 6,
-    totalCount: 0
-  });
+  for (const eduTrgtCd of targetCandidates) {
+    const instResponse = await postKoshaEdu("selectEduInst", { eduWayCd, eduTrgtCd: [eduTrgtCd] }).catch(() => null);
+    const instList = instResponse?.payload?.eduInstList || [
+      { crclmSrcSeCd: "10", comCdNm: "공단 일선기관" },
+      { crclmSrcSeCd: "20", comCdNm: "공단 교육원" },
+      { crclmSrcSeCd: "30", comCdNm: "공단 본부" }
+    ];
 
-  const courses = response.payload?.eduCrsList || [];
-  return courses.map((course) => mapCourse(course, question)).filter((course): course is KoshaEducationRecommendation => Boolean(course));
+    for (const inst of instList.slice(0, 3)) {
+      const sourceCode = inst.crclmSrcSeCd || "10";
+      const searchResponse = await postKoshaEdu("selectRgnSrchSeCd", {
+        eduWayCd,
+        eduTrgtCd: [eduTrgtCd],
+        eduInstCd: sourceCode
+      }).catch(() => null);
+      const comboSrch1 = searchResponse?.payload?.eduSrchList?.[0]?.id || "ALL";
+      const response = await postKoshaEdu("selectEduCrsList", {
+        eduWayCd,
+        eduTrgtCd: [eduTrgtCd],
+        crclmSrcSeCd: sourceCode,
+        rgnSeCd: "ALL",
+        chargedEduYn: "ALL",
+        aplyYn: "ALL",
+        comboSrch1,
+        comboSrch2: "ALL",
+        srchInfo: "",
+        rgnInclYn: false,
+        eduRgnCd: "ALL",
+        sortByOrder: 1,
+        page: 1,
+        rowsPerPage: 12,
+        totalCount: 0
+      }).catch(() => null);
+
+      const courses = response?.payload?.eduCrsList || [];
+      collected.push(...courses.map((course) => mapCourse(course, question)).filter((course): course is KoshaEducationRecommendation => Boolean(course)));
+      if (collected.length >= 12) break;
+    }
+    if (collected.length >= 12) break;
+  }
+
+  return collected
+    .map((course) => ({ course, score: scoreCourse(question, course) }))
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.course)
+    .filter((item, index, arr) => arr.findIndex((other) => other.title === item.title && other.reason === item.reason) === index)
+    .slice(0, 3);
 }
 
 export async function fetchKoshaEducationRecommendations(question: string): Promise<{
