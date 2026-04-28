@@ -754,6 +754,42 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   color: #9a3d18;
 }
 
+.workflow-result p {
+  margin: 0;
+}
+
+.workflow-channel-results {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.workflow-channel-result {
+  display: grid;
+  grid-template-columns: minmax(64px, 0.7fr) minmax(72px, 0.8fr) 1fr;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(33, 89, 79, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 253, 248, 0.72);
+  padding: 8px 10px;
+}
+
+.workflow-channel-result span {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.workflow-channel-result.failed span,
+.workflow-channel-result.unconfigured span {
+  color: #9a3d18;
+}
+
+.workflow-channel-result small {
+  color: var(--muted);
+  font-weight: 650;
+}
+
 .share-panel pre {
   max-height: 260px;
   overflow: auto;

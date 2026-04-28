@@ -12,6 +12,23 @@ type DispatchResult = {
   message: string;
   workflowRunId?: string;
   providerStatus?: string;
+  channelResults?: DispatchChannelResult[];
+  summary?: {
+    requested?: number;
+    sent?: number;
+    failed?: number;
+    partial?: number;
+    unconfigured?: number;
+    skipped?: number;
+  };
+};
+
+type DispatchChannelResult = {
+  channel?: string;
+  provider?: string;
+  status?: string;
+  message?: string;
+  httpStatus?: number;
 };
 
 const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
@@ -43,25 +60,6 @@ function splitRecipients(value: string) {
     .split(/[\n,;]/)
     .map((item) => item.trim())
     .filter(Boolean);
-}
-
-function hasEmailRecipient(recipients: string[]) {
-  return recipients.some((item) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item));
-}
-
-function hasPhoneRecipient(recipients: string[]) {
-  return recipients.some((item) => item.replace(/[^0-9]/g, "").length >= 10);
-}
-
-function filterDispatchChannels(channels: Channel[], recipients: string[]) {
-  const hasEmail = hasEmailRecipient(recipients);
-  const hasPhone = hasPhoneRecipient(recipients);
-
-  return channels.filter((channel) => {
-    if (channel === "email") return hasEmail;
-    if (channel === "sms") return hasPhone;
-    return true;
-  });
 }
 
 function buildBriefPayload(data: AskResponse, selectedMessage: string, selectedTarget: MessageTarget) {
@@ -113,6 +111,30 @@ function buildBriefPayload(data: AskResponse, selectedMessage: string, selectedT
   };
 }
 
+function formatChannelName(channel?: string) {
+  const option = channelOptions.find((item) => item.key === channel);
+  return option?.label || channel || "채널";
+}
+
+function formatChannelStatus(status?: string) {
+  if (status === "sent") return "전송 완료";
+  if (status === "failed") return "전송 실패";
+  if (status === "unconfigured") return "설정 필요";
+  if (status === "skipped") return "보류";
+  if (status === "partial") return "일부 전송";
+  return status || "접수";
+}
+
+function formatChannelMeta(item: DispatchChannelResult) {
+  const parts = [
+    item.provider,
+    typeof item.httpStatus === "number" ? `HTTP ${item.httpStatus}` : "",
+    item.message
+  ].filter((part): part is string => Boolean(part));
+
+  return parts.join(" · ");
+}
+
 export function WorkflowSharePanel({ data }: { data: AskResponse }) {
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(["email"]);
   const [selectedMessageTarget, setSelectedMessageTarget] = useState<MessageTarget>("manager");
@@ -160,18 +182,6 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
   }
 
   async function dispatchWorkflow() {
-    const dispatchChannels = filterDispatchChannels(selectedChannels, recipientList);
-    const skippedChannels = selectedChannels.filter((channel) => !dispatchChannels.includes(channel));
-
-    if (!dispatchChannels.length) {
-      setResult({
-        ok: false,
-        configured: true,
-        message: "선택한 채널에 맞는 수신자를 입력해 주세요. 메일은 이메일 주소, 문자는 휴대폰 번호가 필요합니다."
-      });
-      return;
-    }
-
     setIsSending(true);
     setResult(null);
     try {
@@ -179,21 +189,14 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          channels: dispatchChannels,
+          channels: selectedChannels,
           recipients: recipientList,
-          operatorNote: skippedChannels.length
-            ? `${note}\n\n제외된 채널: ${skippedChannels.map((channel) => channelOptions.find((item) => item.key === channel)?.label || channel).join(", ")}. 해당 수신자 형식이 없어 자동 제외했습니다.`
-            : note,
+          operatorNote: note,
           workpack: buildBriefPayload(data, selectedMessage, selectedMessageTarget)
         })
       });
       const payload = await response.json() as DispatchResult;
-      setResult({
-        ...payload,
-        message: skippedChannels.length
-          ? `${payload.message} 제외된 채널: ${skippedChannels.map((channel) => channelOptions.find((item) => item.key === channel)?.label || channel).join(", ")}.`
-          : payload.message
-      });
+      setResult(payload);
     } catch (error) {
       console.error("workflow dispatch request failed", error);
       setResult({
@@ -275,7 +278,7 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
         placeholder="메일, 전화번호, 카카오/밴드 대상 식별자를 줄바꿈 또는 쉼표로 입력"
       />
       <p className="muted small">
-        메일은 이메일 주소가 있을 때, 문자는 휴대폰 번호가 있을 때 전송합니다. 형식이 맞지 않는 채널은 전송 요청에서 자동 제외됩니다.
+        수신자를 비워두면 운영 기본 수신자에게 전송합니다. 별도 수신자는 이메일 주소나 휴대폰 번호를 줄바꿈으로 입력해 주세요.
       </p>
 
       <label className="field-label" htmlFor="workflow-note">전달 메모</label>
@@ -299,10 +302,26 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
       </div>
 
       {result ? (
-        <p className={result.ok ? "workflow-result ok" : "workflow-result error"}>
-          {result.message}
-          {result.workflowRunId ? ` 실행 ID: ${result.workflowRunId}` : ""}
-        </p>
+        <div className={result.ok ? "workflow-result ok" : "workflow-result error"}>
+          <p>
+            {result.message}
+            {result.workflowRunId ? ` 실행 ID: ${result.workflowRunId}` : ""}
+          </p>
+          {result.channelResults?.length ? (
+            <div className="workflow-channel-results" aria-label="채널별 전송 결과">
+              {result.channelResults.map((item, index) => (
+                <div
+                  key={`${item.channel || "channel"}-${index}`}
+                  className={`workflow-channel-result ${item.status || "received"}`}
+                >
+                  <strong>{formatChannelName(item.channel)}</strong>
+                  <span>{formatChannelStatus(item.status)}</span>
+                  {formatChannelMeta(item) ? <small>{formatChannelMeta(item)}</small> : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       <pre>{selectedMessage}</pre>

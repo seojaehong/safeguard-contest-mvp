@@ -14,6 +14,8 @@ type WorkflowSuccessResponse = {
   workflowRunId?: string;
   providerStatus?: string;
   message?: string;
+  channelResults?: unknown;
+  summary?: unknown;
 };
 
 const ALLOWED_CHANNELS: WorkflowChannel[] = ["email", "sms", "kakao", "band"];
@@ -168,6 +170,8 @@ export async function POST(request: NextRequest) {
       configured: true,
       workflowRunId: workflowResponse.workflowRunId,
       providerStatus: workflowResponse.providerStatus,
+      channelResults: workflowResponse.channelResults,
+      summary: workflowResponse.summary,
       message: workflowResponse.message || "n8n 웹훅이 전파 요청을 접수했습니다."
     });
   } catch (error) {
