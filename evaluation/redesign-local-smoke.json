@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-04-28T17:26:23.2679924+09:00",
+  "homeMs": 156,
+  "status": 200,
+  "hasCommandCenter": true,
+  "hasImmediateShell": true,
+  "noServerGeneratedRisk": true,
+  "logPath": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\evaluation\\redesign-local-server.log"
+}
