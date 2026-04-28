@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AskResponse } from "@/lib/types";
+import type { RecipientSuggestion, WorkerDispatchTarget } from "@/lib/workspace";
 
 type Channel = "email" | "sms" | "kakao" | "band";
 type MessageTarget = "manager" | `foreign:${string}`;
@@ -29,6 +30,14 @@ type DispatchChannelResult = {
   status?: string;
   message?: string;
   httpStatus?: number;
+};
+
+type WorkflowSharePanelProps = {
+  data: AskResponse;
+  recipientSuggestions?: RecipientSuggestion[];
+  targetWorkers?: WorkerDispatchTarget[];
+  authToken?: string;
+  workpackId?: string | null;
 };
 
 const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
@@ -62,7 +71,12 @@ function splitRecipients(value: string) {
     .filter(Boolean);
 }
 
-function buildBriefPayload(data: AskResponse, selectedMessage: string, selectedTarget: MessageTarget) {
+function buildBriefPayload(
+  data: AskResponse,
+  selectedMessage: string,
+  selectedTarget: MessageTarget,
+  targetWorkers: WorkerDispatchTarget[]
+) {
   const selectedLanguageCode = selectedTarget.startsWith("foreign:") ? selectedTarget.replace("foreign:", "") : "";
   const selectedLanguage = selectedLanguageCode
     ? data.deliverables.foreignWorkerLanguages.find((item) => item.code === selectedLanguageCode)
@@ -107,6 +121,7 @@ function buildBriefPayload(data: AskResponse, selectedMessage: string, selectedT
       kosha: data.externalData.kosha.references.slice(0, 3),
       accidentCases: data.externalData.accidentCases.cases.slice(0, 3)
     },
+    targetWorkers,
     status: data.status
   };
 }
@@ -135,7 +150,13 @@ function formatChannelMeta(item: DispatchChannelResult) {
   return parts.join(" · ");
 }
 
-export function WorkflowSharePanel({ data }: { data: AskResponse }) {
+export function WorkflowSharePanel({
+  data,
+  recipientSuggestions = [],
+  targetWorkers = [],
+  authToken,
+  workpackId
+}: WorkflowSharePanelProps) {
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(["email"]);
   const [selectedMessageTarget, setSelectedMessageTarget] = useState<MessageTarget>("manager");
   const [recipients, setRecipients] = useState("");
@@ -144,6 +165,10 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
   const [result, setResult] = useState<DispatchResult | null>(null);
 
   const recipientList = useMemo(() => splitRecipients(recipients), [recipients]);
+  const dispatchRecipients = useMemo(
+    () => [...new Set([...recipientSuggestions.map((item) => item.value), ...recipientList])],
+    [recipientList, recipientSuggestions]
+  );
   const selectedMessage = useMemo(() => {
     if (selectedMessageTarget === "manager") {
       return data.deliverables.kakaoMessage;
@@ -181,6 +206,41 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
     }
   }
 
+  async function saveDispatchLog(payload: DispatchResult, sentRecipients: string[]) {
+    if (!authToken || !workpackId || !payload.channelResults?.length) return;
+
+    const selectedLanguageCode = selectedMessageTarget.startsWith("foreign:")
+      ? selectedMessageTarget.replace("foreign:", "")
+      : "ko";
+
+    try {
+      await fetch("/api/dispatch-logs", {
+        method: "POST",
+        headers: {
+          "authorization": `Bearer ${authToken}`,
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          workpackId,
+          scenario: data.scenario,
+          logs: payload.channelResults.map((item) => ({
+            channel: item.channel || "unknown",
+            targetLabel: targetWorkers.map((worker) => worker.displayName).join(", ") || "운영 기본 수신자",
+            targetContact: sentRecipients.join(", "),
+            languageCode: selectedLanguageCode,
+            provider: item.provider,
+            providerStatus: item.status,
+            workflowRunId: payload.workflowRunId,
+            failureReason: item.status === "failed" || item.status === "unconfigured" ? item.message : "",
+            payload: item
+          }))
+        })
+      });
+    } catch (error) {
+      console.warn("dispatch log save failed", error);
+    }
+  }
+
   async function dispatchWorkflow() {
     setIsSending(true);
     setResult(null);
@@ -190,13 +250,14 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           channels: selectedChannels,
-          recipients: recipientList,
+          recipients: dispatchRecipients,
           operatorNote: note,
-          workpack: buildBriefPayload(data, selectedMessage, selectedMessageTarget)
+          workpack: buildBriefPayload(data, selectedMessage, selectedMessageTarget, targetWorkers)
         })
       });
       const payload = await response.json() as DispatchResult;
       setResult(payload);
+      await saveDispatchLog(payload, dispatchRecipients);
     } catch (error) {
       console.error("workflow dispatch request failed", error);
       setResult({
@@ -275,10 +336,19 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
         className="textarea workflow-textarea"
         value={recipients}
         onChange={(event) => setRecipients(event.target.value)}
-        placeholder="메일, 전화번호, 카카오/밴드 대상 식별자를 줄바꿈 또는 쉼표로 입력"
+        placeholder="추가 수신자가 있으면 메일 또는 휴대폰 번호를 입력"
       />
+      {recipientSuggestions.length ? (
+        <div className="recipient-chip-list" aria-label="선택된 근로자 전파 대상">
+          {recipientSuggestions.map((recipient) => (
+            <span key={`${recipient.channel}-${recipient.value}`} className="recipient-chip">
+              {recipient.label} · {recipient.languageLabel}
+            </span>
+          ))}
+        </div>
+      ) : null}
       <p className="muted small">
-        수신자를 비워두면 운영 기본 수신자에게 전송합니다. 별도 수신자는 이메일 주소나 휴대폰 번호를 줄바꿈으로 입력해 주세요.
+        선택된 근로자의 연락처는 자동 포함됩니다. 수신자를 비워두고 근로자 연락처도 없으면 운영 기본 수신자에게 전송합니다.
       </p>
 
       <label className="field-label" htmlFor="workflow-note">전달 메모</label>

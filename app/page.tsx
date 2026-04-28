@@ -1,26 +1,13 @@
 import Link from "next/link";
-import { CitationList } from "@/components/CitationList";
-import { WorkpackEditor } from "@/components/WorkpackEditor";
-import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
+import { FieldOperationsWorkspace } from "@/components/FieldOperationsWorkspace";
 import { defaultFieldExample, fieldExamples } from "@/lib/field-examples";
 import { runAsk } from "@/lib/search";
-import { IntegrationMode } from "@/lib/types";
-
-function formatConnectionLabel(mode: IntegrationMode) {
-  if (mode === "live") return "연결됨";
-  if (mode === "fallback") return "일부 근거 보류";
-  return "연결 점검 필요";
-}
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ q?: string; scenario?: string }> }) {
   const params = await searchParams;
   const selectedExample = fieldExamples.find((example) => example.id === params.scenario) || defaultFieldExample;
   const q = params.q || selectedExample.question;
   const data = await runAsk(q);
-  const primaryTraining = data.externalData.training.recommendations[0];
-  const primaryKoshaEducation = data.externalData.koshaEducation.recommendations[0];
-  const primaryAccidentCase = data.externalData.accidentCases.cases[0];
-  const foreignBriefingPreview = data.deliverables.foreignWorkerTransmission.split(/\r?\n/).filter(Boolean).slice(0, 6);
 
   return (
     <main className="product-shell">
@@ -139,125 +126,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         ))}
       </section>
 
-      <WorkpackEditor data={data} />
-
-      <section className="field-notes">
-        <article className="compact-panel">
-          <div className="compact-head">
-            <span className="eyebrow">Check</span>
-            <strong>작업 전 확인 질문</strong>
-          </div>
-          <div className="compact-list">
-            {data.deliverables.tbmQuestions.map((item) => (
-              <div key={item} className="compact-row">{item}</div>
-            ))}
-          </div>
-        </article>
-        <article className="compact-panel">
-          <div className="compact-head">
-            <span className="eyebrow">Teach</span>
-            <strong>교육 핵심 문구</strong>
-          </div>
-          <div className="compact-list">
-            {data.deliverables.safetyEducationPoints.map((item) => (
-              <div key={item} className="compact-row">{item}</div>
-            ))}
-          </div>
-        </article>
-        <article className="compact-panel">
-          <div className="compact-head">
-            <span className="eyebrow">Foreign</span>
-            <strong>외국인 전송 미리보기</strong>
-          </div>
-          <div className="compact-list">
-            {foreignBriefingPreview.map((item) => (
-              <div key={item} className="compact-row">{item}</div>
-            ))}
-          </div>
-        </article>
-      </section>
-
-      <section className="reference-strip" id="references">
-        <article className="reference-card">
-          <div className="compact-head">
-            <span className="eyebrow">Weather</span>
-            <strong>{data.externalData.weather.summary}</strong>
-          </div>
-          <ul className="plain-list">
-            {data.externalData.weather.actions.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        </article>
-
-        <article className="reference-card">
-          <div className="compact-head">
-            <span className="eyebrow">Accident</span>
-            <strong>유사 재해사례</strong>
-          </div>
-          {primaryAccidentCase ? (
-            <a href={primaryAccidentCase.sourceUrl || "https://www.kosha.or.kr/"} target="_blank" rel="noreferrer" className="training-card">
-              <strong>{primaryAccidentCase.title}</strong>
-              <em className="fit-pill">{formatConnectionLabel(data.externalData.accidentCases.mode)}</em>
-              <span>{[primaryAccidentCase.industry, primaryAccidentCase.accidentType].filter(Boolean).join(" · ")}</span>
-              <small>{primaryAccidentCase.summary}</small>
-              <small>{primaryAccidentCase.preventionPoint}</small>
-              <small>{primaryAccidentCase.matchedReason}</small>
-            </a>
-          ) : (
-            <p className="muted">유사 재해사례가 없으면 위험성평가와 TBM 문구만 사용합니다.</p>
-          )}
-        </article>
-
-        <article className="reference-card">
-          <div className="compact-head">
-            <span className="eyebrow">Training</span>
-            <strong>후속 교육</strong>
-          </div>
-          {primaryTraining ? (
-            <a href={primaryTraining.url} target="_blank" rel="noreferrer" className="training-card">
-              <strong>{primaryTraining.title}</strong>
-              <em className="fit-pill">{primaryTraining.fitLabel || "조건부 후보"}</em>
-              <span>{primaryTraining.institution}</span>
-              <small>{primaryTraining.startDate} ~ {primaryTraining.endDate}</small>
-              <small>{primaryTraining.fitReason || primaryTraining.reason}</small>
-            </a>
-          ) : (
-            <p className="muted">추천 교육이 없으면 안전교육일지 초안을 그대로 사용합니다.</p>
-          )}
-          {primaryKoshaEducation ? (
-            <a href={primaryKoshaEducation.url} target="_blank" rel="noreferrer" className="training-card">
-              <strong>{primaryKoshaEducation.title}</strong>
-              <em className="fit-pill">{primaryKoshaEducation.fitLabel}</em>
-              <span>{primaryKoshaEducation.provider}</span>
-              <small>{primaryKoshaEducation.target} · {primaryKoshaEducation.educationMethod}</small>
-              <small>{primaryKoshaEducation.fitReason}</small>
-            </a>
-          ) : null}
-        </article>
-
-        <article className="reference-card">
-          <div className="compact-head">
-            <span className="eyebrow">KOSHA</span>
-            <strong>공식 서식 근거</strong>
-          </div>
-          {data.externalData.kosha.references.slice(0, 2).map((item) => (
-            <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="training-card">
-              <strong>{item.title}</strong>
-              <em className="fit-pill">{item.verified ? "공식 링크 확인" : "작업유형 매핑"}</em>
-              <span>{item.agency || "KOSHA"} · {item.category}</span>
-              <small>반영 문서: {(item.appliesTo || item.appliedTo || ["위험성평가", "TBM"]).join(", ")}</small>
-              <small>서식 힌트: {(item.templateHints || []).join(", ") || item.category}</small>
-              <small>{item.summary}</small>
-            </a>
-          ))}
-        </article>
-      </section>
-
-      <section className="handoff-section">
-        <div className="evidence-panel">
-          <CitationList citations={data.citations} question={data.question} />
-        </div>
-        <WorkflowSharePanel data={data} />
-      </section>
+      <FieldOperationsWorkspace data={data} />
     </main>
   );
 }

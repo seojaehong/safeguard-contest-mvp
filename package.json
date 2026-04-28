@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@rhwp/core": "0.7.6",
+    "@supabase/supabase-js": "^2.105.0",
     "korean-law-mcp": "^2.1.6",
     "next": "15.5.15",
     "openai": "^4.95.0",

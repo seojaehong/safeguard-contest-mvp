@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-04-28T03:31:06.661Z",
+  "scope": "product-workspace-upgrade",
+  "checks": [
+    {
+      "name": "typecheck",
+      "command": "npm.cmd run typecheck",
+      "ok": true
+    },
+    {
+      "name": "production-build",
+      "command": "npm.cmd run build",
+      "ok": true
+    }
+  ],
+  "implemented": {
+    "fieldWorkspace": true,
+    "workerEducationPanel": true,
+    "maskedContactDisplay": true,
+    "supabaseMigrationFile": true,
+    "supabaseWriteApis": true,
+    "dispatchLogApi": true,
+    "databaseApplied": false
+  },
+  "notes": [
+    "Supabase migration file was added but not applied to a remote database.",
+    "Worker data is limited to job assignment, safety education, language, nationality, and dispatch contact fields.",
+    "Sensitive identity fields are intentionally excluded."
+  ]
+}
