@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-04-28T17:58:17.4663923+09:00",
+  "url": "https://safeguard-contest-mvp.vercel.app/law/lawgo-law-276853",
+  "status": 200,
+  "ms": 2068,
+  "commit": "6e45094",
+  "hasLawViewer": true,
+  "hasArticleHeading": true,
+  "hasParagraph": true,
+  "hasSubitem": true,
+  "hasArticle6": true,
+  "hasArticle8": true,
+  "hasPreTag": false,
+  "hasDuplicateOrdinalPrefix": false,
+  "isEmptyFallbackDetail": false,
+  "usesVerifiedSnapshot": true,
+  "bytes": 12814
+}
