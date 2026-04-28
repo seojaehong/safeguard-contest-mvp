@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-04-28T15:36:59.4409393+09:00",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "askMode": "live",
+  "statusSummary": "연결됨",
+  "englishLines": [
+    "Today's work: Exterior painting using a mobile scaffold",
+    "Main hazards for this job: fall hazard, mobile scaffold movement, strong wind, forklift route conflict",
+    "Before starting: Wear fall-protection PPE and stay inside the safe work platform.",
+    "Lock wheels, keep guardrails in place, and do not move the scaffold with a worker on it.",
+    "Stop scaffold or outdoor work if strong wind increases or the scaffold moves.",
+    "If you do not understand, stop and ask the supervisor to explain again."
+  ],
+  "englishHasTask": true,
+  "lawStatusCode": 200,
+  "lawHasReflection": true,
+  "lawHasDocumentTitle": true
+}
