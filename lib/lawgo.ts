@@ -4,6 +4,10 @@ import { DetailRecord, SearchResult } from "./types";
 const oc = process.env.LAWGO_OC?.trim() || process.env.LAW_OC?.trim() || "";
 const mockMode = process.env.LAWGO_MOCK_MODE === "force" || !oc;
 const baseUrl = "https://www.law.go.kr/DRF";
+const lawGoHeaders = {
+  Accept: "application/json, application/xml, text/xml, */*",
+  "User-Agent": "SafeGuard/1.0 (+https://safeguard-contest-mvp.vercel.app; evidence-fetch)"
+};
 
 type JsonRecord = Record<string, unknown>;
 
@@ -363,7 +367,7 @@ async function fetchLawGo(endpoint: string, params: Record<string, string>) {
   Object.entries(params).forEach(([key, value]) => {
     if (value) url.searchParams.set(key, value);
   });
-  const response = await fetch(url.toString(), { cache: "no-store" });
+  const response = await fetch(url.toString(), { cache: "no-store", headers: lawGoHeaders });
   const text = await response.text();
   if (!response.ok) {
     throw new Error(text.slice(0, 160));
@@ -474,7 +478,7 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
   let response: Response;
   let text: string;
   try {
-    response = await fetch(url.toString(), { cache: "no-store" });
+    response = await fetch(url.toString(), { cache: "no-store", headers: lawGoHeaders });
     text = await response.text();
   } catch (error) {
     console.error("Failed to fetch Law.go detail response", error);
