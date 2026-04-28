@@ -429,6 +429,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
+  const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null);
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedText = values[selected.key];
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
@@ -436,6 +437,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
 
   function updateValue(value: string) {
     setValues((current) => ({ ...current, [selected.key]: value }));
+    setLastEditedAt(new Date());
   }
 
   function downloadText() {
@@ -538,6 +540,9 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   }
 
   async function copySheetsTsv() {
+    const confirmed = window.confirm("Google 계정 연동이 필요합니다. 새 시트가 본인 드라이브에 열리고, 복사된 표 데이터를 붙여넣어 사용합니다.");
+    if (!confirmed) return;
+
     const rows = buildLaunchSheetRows(values);
     try {
       await navigator.clipboard.writeText(buildDelimited(rows, "\t"));
@@ -561,8 +566,8 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   return (
     <section className="workpack-shell" id="workpack">
       <div className="workpack-sidebar card list">
-        <div>
-          <div className="eyebrow">SafeGuard Workpack</div>
+          <div>
+          <div className="eyebrow">SafeGuard 문서팩</div>
           <div className="h2">오늘 문서팩</div>
           <p className="muted">현장에서 바로 수정하고 내려받을 수 있는 작업 전 산출물입니다.</p>
         </div>
@@ -587,6 +592,8 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
                 type="button"
                 className={`template-card ${preset.kind === templateKind ? "active" : ""}`}
                 onClick={() => setTemplateKind(preset.kind)}
+                aria-label={`${preset.label} 서식 선택`}
+                aria-pressed={preset.kind === templateKind}
               >
                 <strong>{preset.label}</strong>
                 <span>{preset.description}</span>
@@ -594,9 +601,14 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
             ))}
           </div>
           <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
-          <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
-          <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
-          <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
+          <details className="advanced-downloads">
+            <summary>전체 다운로드</summary>
+            <div className="advanced-download-grid">
+              <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
+              <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
+              <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
+            </div>
+          </details>
           <button type="button" className="button" onClick={copySheetsTsv}>Google Sheets로 열기</button>
           {sheetStatus === "copied" ? <p className="muted small">시트형 TSV를 복사했습니다. 새 구글시트에 붙여넣으면 표로 들어갑니다.</p> : null}
           {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패했습니다. CSV 또는 XLS로 내려받아 업로드해 주세요.</p> : null}
@@ -606,22 +618,31 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
       <div className="card document-editor">
         <div className="document-toolbar">
           <div>
-            <div className="eyebrow">Editable document</div>
+            <div className="eyebrow">편집 문서</div>
             <div className="h2">{selected.title}</div>
             <p className="muted">{selected.description}</p>
+            <p className="editor-status" aria-live="polite">
+              저장됨(브라우저 임시) · {selectedText.length.toLocaleString("ko-KR")}자
+              {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
+            </p>
           </div>
           <div className="download-bar">
-            <button type="button" className="button secondary" onClick={downloadText}>TXT</button>
-            <button type="button" className="button secondary" onClick={downloadJson}>JSON</button>
-            <button type="button" className="button secondary" onClick={downloadCsv}>CSV</button>
+            <button type="button" className="button secondary" onClick={printPdf}>PDF</button>
             <button type="button" className="button secondary" onClick={downloadXls}>XLS</button>
             <button type="button" className="button secondary" onClick={downloadDoc}>DOC</button>
-            <button type="button" className="button secondary" onClick={downloadHtml}>HTML</button>
-            <button type="button" className="button secondary" onClick={downloadJpg}>JPG</button>
-            <button type="button" className="button secondary" onClick={printPdf}>PDF</button>
             <button type="button" className="button" onClick={downloadHwpx} disabled={hwpxStatus === "building"}>
               {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX"}
             </button>
+            <details className="advanced-downloads inline">
+              <summary>더보기</summary>
+              <div className="advanced-download-grid">
+                <button type="button" className="button secondary" onClick={downloadText}>TXT</button>
+                <button type="button" className="button secondary" onClick={downloadJson}>JSON</button>
+                <button type="button" className="button secondary" onClick={downloadCsv}>CSV</button>
+                <button type="button" className="button secondary" onClick={downloadHtml}>HTML</button>
+                <button type="button" className="button secondary" onClick={downloadJpg}>JPG</button>
+              </div>
+            </details>
           </div>
         </div>
         {hwpxStatus === "error" ? (

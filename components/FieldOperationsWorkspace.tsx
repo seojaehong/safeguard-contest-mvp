@@ -37,6 +37,7 @@ type WorkerDraft = {
   languageLabel: string;
   isForeignWorker: boolean;
   phone: string;
+  consent: boolean;
 };
 
 let supabaseBrowserClient: SupabaseClient | null = null;
@@ -60,7 +61,8 @@ function buildInitialWorkerDraft(): WorkerDraft {
     nationality: "대한민국",
     languageLabel: "한국어",
     isForeignWorker: false,
-    phone: ""
+    phone: "",
+    consent: false
   };
 }
 
@@ -153,10 +155,10 @@ function AdminAccessPanel({
     return (
       <article className="workspace-panel card">
         <div className="compact-head">
-          <span className="eyebrow">Workspace</span>
-          <strong>저장소 연결 대기</strong>
+          <span className="eyebrow">작업공간</span>
+          <strong>관리자 계정 연결 필요</strong>
         </div>
-        <p className="muted small">Supabase URL과 anon key를 설정하면 관리자 로그인, 근로자 명단, 문서팩 이력이 활성화됩니다.</p>
+        <p className="muted small">문서팩 이력과 근로자 명단 저장은 관리자 계정 연결 후 활성화됩니다. 지금은 현재 화면에서 생성·수정·다운로드를 진행할 수 있습니다.</p>
       </article>
     );
   }
@@ -164,7 +166,7 @@ function AdminAccessPanel({
   return (
     <article className="workspace-panel card">
       <div className="compact-head">
-        <span className="eyebrow">Admin</span>
+        <span className="eyebrow">관리자</span>
         <strong>{session ? "관리자 연결됨" : "관리자 로그인"}</strong>
       </div>
       {session ? (
@@ -225,7 +227,7 @@ function WorkerEducationPanel({
   return (
     <article className="workspace-panel card worker-panel">
       <div className="compact-head">
-        <span className="eyebrow">Workers</span>
+        <span className="eyebrow">근로자</span>
         <strong>근로자·교육 확인</strong>
       </div>
       <div className="worker-summary-grid">
@@ -242,7 +244,12 @@ function WorkerEducationPanel({
           return (
             <div key={worker.id} className={`worker-card ${selected ? "selected" : ""}`}>
               <label className="worker-card-head">
-                <input type="checkbox" checked={selected} onChange={() => onToggleWorker(worker.id)} />
+                <input
+                  type="checkbox"
+                  checked={selected}
+                  onChange={() => onToggleWorker(worker.id)}
+                  aria-label={`${worker.displayName} 전파 대상 선택`}
+                />
                 <span>
                   <strong>{worker.displayName}</strong>
                   <small>{worker.role} · {worker.nationality} · {worker.languageLabel}</small>
@@ -254,13 +261,15 @@ function WorkerEducationPanel({
                 <span>{worker.phone ? `문자 ${maskPhone(worker.phone)}` : "연락처 필요"}</span>
               </div>
               <p className="muted small">{record?.memo || worker.trainingSummary}</p>
-              <div className="worker-actions">
+              <div className="worker-actions" role="radiogroup" aria-label={`${worker.displayName} 교육 확인 상태`}>
                 {(["이수", "당일 교육 예정", "확인 필요"] as WorkerTrainingStatus[]).map((status) => (
                   <button
                     key={status}
                     type="button"
                     className={`status-chip ${worker.trainingStatus === status ? "active" : ""}`}
                     onClick={() => updateTrainingStatus(worker, status)}
+                    role="radio"
+                    aria-checked={worker.trainingStatus === status}
                   >
                     {status}
                   </button>
@@ -273,16 +282,32 @@ function WorkerEducationPanel({
 
       <div className="worker-add-box">
         <strong>근로자 빠른 추가</strong>
-        <input className="input" value={draft.displayName} onChange={(event) => setDraft((current) => ({ ...current, displayName: event.target.value }))} placeholder="표시명" />
+        <input className="input" value={draft.displayName} onChange={(event) => setDraft((current) => ({ ...current, displayName: event.target.value }))} placeholder="표시명" aria-label="근로자 표시명" />
         <div className="two-inputs">
-          <input className="input" value={draft.role} onChange={(event) => setDraft((current) => ({ ...current, role: event.target.value }))} placeholder="역할" />
-          <input className="input" value={draft.phone} onChange={(event) => setDraft((current) => ({ ...current, phone: event.target.value }))} placeholder="휴대폰" />
+          <input className="input" value={draft.role} onChange={(event) => setDraft((current) => ({ ...current, role: event.target.value }))} placeholder="역할" aria-label="근로자 역할" />
+          <input
+            className="input"
+            value={draft.phone}
+            onChange={(event) => setDraft((current) => ({ ...current, phone: event.target.value }))}
+            placeholder="휴대폰(010-0000-0000)"
+            aria-label="근로자 휴대폰 번호"
+            inputMode="tel"
+            pattern="^01[0-9]-?\\d{3,4}-?\\d{4}$"
+          />
         </div>
         <div className="two-inputs">
-          <input className="input" value={draft.nationality} onChange={(event) => setDraft((current) => ({ ...current, nationality: event.target.value }))} placeholder="국적" />
-          <input className="input" value={draft.languageLabel} onChange={(event) => setDraft((current) => ({ ...current, languageLabel: event.target.value }))} placeholder="주 사용 언어" />
+          <input className="input" value={draft.nationality} onChange={(event) => setDraft((current) => ({ ...current, nationality: event.target.value }))} placeholder="국적" aria-label="근로자 국적" />
+          <input className="input" value={draft.languageLabel} onChange={(event) => setDraft((current) => ({ ...current, languageLabel: event.target.value }))} placeholder="주 사용 언어" aria-label="근로자 주 사용 언어" />
         </div>
-        <button type="button" className="button secondary full-button" onClick={addWorker}>명단에 추가</button>
+        <label className="consent-check">
+          <input
+            type="checkbox"
+            checked={draft.consent}
+            onChange={(event) => setDraft((current) => ({ ...current, consent: event.target.checked }))}
+          />
+          <span>연락처·국적·언어 정보를 교육 확인과 현장 전파 목적으로 사용합니다.</span>
+        </label>
+        <button type="button" className="button secondary full-button" onClick={addWorker} disabled={!draft.displayName.trim() || !draft.consent}>명단에 추가</button>
       </div>
     </article>
   );
@@ -293,7 +318,7 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
     <section className="evidence-impact-grid" id="references">
       <article className="workspace-panel card">
         <div className="compact-head">
-          <span className="eyebrow">Evidence</span>
+          <span className="eyebrow">근거</span>
           <strong>문서 반영 근거</strong>
         </div>
         <div className="impact-list">
@@ -402,7 +427,7 @@ function WorkpackHistoryPanel({
   return (
     <article className="workspace-panel card">
       <div className="compact-head">
-        <span className="eyebrow">History</span>
+          <span className="eyebrow">이력</span>
         <strong>문서팩·교육 이력</strong>
       </div>
       <p className="muted small">작업자 배치, 교육 확인, 근거 요약, 문서팩 산출물을 같은 이력으로 저장합니다.</p>
@@ -478,7 +503,7 @@ export function FieldOperationsWorkspace({ data }: { data: AskResponse }) {
     <section className="field-workspace" id="workpack">
       <aside className="workspace-rail card" aria-label="SafeGuard 작업 단계">
         <div className="compact-head">
-          <span className="eyebrow">Flow</span>
+          <span className="eyebrow">흐름</span>
           <strong>작업공간</strong>
         </div>
         {[
@@ -502,7 +527,7 @@ export function FieldOperationsWorkspace({ data }: { data: AskResponse }) {
         <EvidenceImpactPanel data={data} />
       </main>
 
-      <aside className="workspace-side">
+      <aside className="workspace-side" id="workers">
         <AdminAccessPanel session={session} onSessionChange={setSession} />
         <WorkerEducationPanel
           workers={workers}

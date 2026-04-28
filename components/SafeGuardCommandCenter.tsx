@@ -23,6 +23,7 @@ type WorkflowStep = {
 };
 
 type StepStatus = "done" | "active" | "pending" | "locked";
+type StepAnchor = "command" | "risk" | "workpack" | "workers" | "dispatch";
 
 type FieldBrief = {
   companyName: string;
@@ -42,6 +43,14 @@ const workflowSteps: WorkflowStep[] = [
   { id: "04", key: "workers", label: "작업자 선택", caption: "언어·채널" },
   { id: "05", key: "dispatch", label: "현장 전파", caption: "Email · SMS" }
 ];
+
+const stepAnchors: Record<WorkflowStep["key"], StepAnchor> = {
+  input: "command",
+  risk: "risk",
+  pack: "workpack",
+  workers: "workers",
+  dispatch: "dispatch"
+};
 
 const outputItems = [
   "위험성평가표",
@@ -108,7 +117,20 @@ function elapsedLabel(state: GenerationState) {
 function operationalStatus(data: AskResponse | null, state: GenerationState) {
   if (state === "error") return "연결 점검 필요";
   if (data) return data.status.summary || "근거 연결됨";
-  return "입력 후 확인";
+  return "입력 대기";
+}
+
+function statusDetailCopy(state: GenerationState) {
+  if (state === "generating") return "법령·기상·교육·재해사례를 확인하고 있습니다.";
+  if (state === "ready") return "문서팩 편집과 현장 전파를 진행할 수 있습니다.";
+  if (state === "error") return "외부 연결 상태를 확인한 뒤 다시 시도해 주세요.";
+  return "현장 상황을 입력하고 문서팩 생성을 시작하세요.";
+}
+
+function riskToneClass(level: string) {
+  if (level.includes("상")) return "risk-high";
+  if (level.includes("중")) return "risk-medium";
+  return "risk-low";
 }
 
 function inferLocationFromText(text: string, fallback: string) {
@@ -198,6 +220,13 @@ export function SafeGuardCommandCenter({
   const [message, setMessage] = useState("");
   const [state, setState] = useState<GenerationState>("idle");
   const [isPending, startTransition] = useTransition();
+  const [checkedActions, setCheckedActions] = useState<boolean[]>([]);
+
+  function scrollToStep(anchor: StepAnchor) {
+    const target = document.getElementById(anchor);
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   async function generateWorkpack(nextQuestion = question) {
     const trimmed = nextQuestion.trim();
@@ -220,6 +249,7 @@ export function SafeGuardCommandCenter({
       const payload = await response.json() as AskResponse;
       startTransition(() => {
         setData(payload);
+        setCheckedActions(payload.riskSummary.immediateActions.map(() => false));
         setState("ready");
         setMessage("문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요.");
       });
@@ -256,33 +286,40 @@ export function SafeGuardCommandCenter({
   const fieldBrief = data ? buildApiFieldBrief(data, selectedExample) : buildInputFieldBrief(question, selectedExample);
   const currentLawCount = lawCount(data, state);
   const currentDocProgress = docProgress(data, state);
+  const inputLimit = 600;
+  const inputWarning = question.length > Math.floor(inputLimit * 0.9);
 
   return (
     <main className="command-center-shell">
       <header className="command-topbar">
-        <Link href="/" className="brand-lockup safeclaw-lockup">
+        <Link href="/" className="brand-lockup safeclaw-lockup" aria-label="SafeGuard 홈으로 이동">
           <span className="brand-mark">S</span>
           <span>
             <strong>SafeGuard</strong>
-            <small>Safety workpack OS</small>
+            <small>현장 안전 문서팩</small>
           </span>
         </Link>
-        <nav className="topnav command-stepper" aria-label="작업 단계">
+        <nav className="topnav command-stepper" aria-label="작업 단계" role="tablist">
           {workflowSteps.map((step) => (
-            <a
-              href={step.key === "input" ? "#command" : step.key === "pack" ? "#workpack" : "#references"}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={step.key === currentStep}
+              aria-current={step.key === currentStep ? "step" : undefined}
+              aria-controls={stepAnchors[step.key]}
               className={step.key === currentStep ? "active" : ""}
               key={step.key}
+              onClick={() => scrollToStep(stepAnchors[step.key])}
             >
               <StepDot status={statuses[step.key]} />
               <span className="step-copy">
                 <small>{step.id} · {statuses[step.key] === "done" ? "완료" : statuses[step.key] === "active" ? "진행 중" : step.caption}</small>
                 <strong>{step.label}</strong>
               </span>
-            </a>
+            </button>
           ))}
         </nav>
-        <div className="topbar-status">
+        <div className="topbar-status" aria-live="polite">
           <span>{statusCopy(state)}</span>
           <b>{operationalStatus(data, state)}</b>
         </div>
@@ -292,8 +329,8 @@ export function SafeGuardCommandCenter({
         <aside className="command-left-panel">
           <section className="left-panel-card live-status-widget">
             <div className="left-widget-head">
-              <span>LIVE STATUS</span>
-              <b>{state === "idle" ? "READY" : state === "generating" ? "MATCHING" : state === "ready" ? "COMPLETE" : "CHECK"}</b>
+              <span>연결 상태</span>
+              <b>{state === "idle" ? "대기" : state === "generating" ? "확인 중" : state === "ready" ? "완료" : "점검"}</b>
             </div>
             <div className="status-row-list">
               <div className={`status-row ${statusRowState(state !== "idle")}`}>
@@ -320,7 +357,7 @@ export function SafeGuardCommandCenter({
 
           <section className="left-panel-card field-brief-mini">
             <div className="left-widget-head">
-              <span>FIELD BRIEF</span>
+              <span>현장 브리프</span>
               <b>{fieldBrief.sourceLabel}</b>
             </div>
             <div className="brief-mini-grid">
@@ -357,11 +394,11 @@ export function SafeGuardCommandCenter({
 
           <section className="left-panel-card">
             <div className="left-widget-head">
-              <span>RECENT WORKPACKS</span>
+              <span>최근 문서팩</span>
               <b>전체</b>
             </div>
             <div className="recent-list">
-              {recentWorkpacks.map((item) => (
+              {recentWorkpacks.length ? recentWorkpacks.map((item) => (
                 <button type="button" key={item.title}>
                   <i aria-hidden="true" />
                   <span>
@@ -369,14 +406,16 @@ export function SafeGuardCommandCenter({
                     <small>{item.time} · {item.law}건 · {item.docs}/6</small>
                   </span>
                 </button>
-              ))}
+              )) : (
+                <p className="muted small">최근 문서팩이 없습니다. 첫 문서팩을 생성하면 여기에 표시됩니다.</p>
+              )}
             </div>
           </section>
         </aside>
 
         <section className="command-main card command-main-studio">
           <div className="command-copy">
-            <span className="eyebrow">Inspection-ready workspace</span>
+            <span className="eyebrow">현장 문서 작업공간</span>
             <h1>오늘 작업을 한 줄로, 실행 가능한 안전 문서팩으로.</h1>
             <p>
               현장 조건을 입력하면 위험성평가, 작업계획, TBM, 안전교육, 외국인 안내문,
@@ -387,29 +426,38 @@ export function SafeGuardCommandCenter({
           <form className="command-console" onSubmit={submit}>
             <div className="console-head">
               <label htmlFor="field-command-input">현장 상황 입력</label>
-              <span>{question.length}자</span>
+              <span className={inputWarning ? "counter warning" : "counter"}>{question.length}/{inputLimit}자</span>
             </div>
             <textarea
               id="field-command-input"
               className="textarea command-console-input"
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
-              placeholder="예: 외벽 도장, 이동식 비계, 작업자 5명, 오후 강풍, 신규 투입자, 지게차 동선 혼재"
+              maxLength={inputLimit}
+              placeholder="오늘 작업 내용을 한 줄로 입력하세요."
+              aria-describedby="field-command-tips"
             />
+            <p className="input-helper" id="field-command-tips">
+              작성 팁: 지역, 업종, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부, 핵심 위험을 포함하면 정확도가 올라갑니다.
+            </p>
             <div className="command-actions">
-              <button type="submit" className="button command-primary" disabled={busy}>
-                {busy ? "근거 확인 중" : "선택한 현장으로 생성"}
+              <button type="submit" className="button command-primary" disabled={busy} aria-busy={busy}>
+                {busy ? <span className="button-spinner" aria-hidden="true" /> : null}
+                {busy ? "법령 매칭 중" : "선택한 현장으로 생성"}
               </button>
               <button
                 type="button"
                 className="button secondary"
                 onClick={() => {
+                  if (question !== selectedExample.question && !window.confirm("현재 입력한 내용을 예시 문장으로 되돌릴까요?")) {
+                    return;
+                  }
                   setQuestion(selectedExample.question);
                   setData(null);
                   setState("idle");
                 }}
               >
-                현재 예시 복원
+                예시로 되돌리기
               </button>
             </div>
           </form>
@@ -422,23 +470,28 @@ export function SafeGuardCommandCenter({
                 type="button"
                 className={`quick-chip ${example.id === selectedExample.id ? "active" : ""}`}
                 onClick={() => selectExample(example)}
+                aria-pressed={example.id === selectedExample.id}
               >
+                {example.id === selectedExample.id ? <span aria-hidden="true">✓</span> : null}
                 {example.label}
               </button>
             ))}
           </div>
 
-          <section className="evidence-live-panel" id="references">
+          <section className="evidence-live-panel" id="risk">
             <div className="compact-head">
-              <span className="eyebrow">Evidence matching</span>
+              <span className="eyebrow">근거 매칭</span>
               <strong>{currentLawCount ? `${currentLawCount}건 연결` : "생성 후 연결"}</strong>
             </div>
             <p>{message || "선택한 현장 설명을 기준으로 법령, 기상, KOSHA 자료, 교육 추천을 연결합니다."}</p>
+            <div className="inline-progress" aria-label={`문서 작성 진행률 ${currentDocProgress}/6`}>
+              <span style={{ width: `${Math.max(8, (currentDocProgress / 6) * 100)}%` }} />
+            </div>
           </section>
 
           <section className="output-card-grid" id="workpack">
             <div className="compact-head">
-              <span className="eyebrow">Generated documents</span>
+              <span className="eyebrow">생성 문서</span>
               <strong>{currentDocProgress}/6</strong>
             </div>
             <div className="doc-card-list">
@@ -446,15 +499,21 @@ export function SafeGuardCommandCenter({
                 <article key={item} className={data ? "doc-card done" : busy && index < 2 ? "doc-card active" : "doc-card"}>
                   <span>DOC · 0{index + 1}</span>
                   <strong>{item}</strong>
-                  <p>{data ? "편집과 다운로드 가능" : busy && index < 2 ? "작성 중" : "대기"}</p>
+                  <p>{data ? "편집·다운로드 준비" : busy && index < 2 ? "작성 중" : "생성 대기"}</p>
+                  {data ? (
+                    <div className="doc-card-actions">
+                      <button type="button" onClick={() => scrollToStep("workpack")}>편집</button>
+                      <button type="button" onClick={() => scrollToStep("workpack")}>다운로드</button>
+                    </div>
+                  ) : null}
                 </article>
               ))}
             </div>
           </section>
 
-          <section className="dispatch-preview-panel">
+          <section className="dispatch-preview-panel" id="dispatch">
             <div>
-              <span className="eyebrow">Dispatch</span>
+              <span className="eyebrow">현장 전파</span>
               <strong>현장 전파 준비</strong>
             </div>
             <p>문서팩 생성 후 작업자 언어와 채널을 선택해 메일·문자 전송을 요청합니다.</p>
@@ -467,7 +526,7 @@ export function SafeGuardCommandCenter({
           <section className="result-ribbon" aria-label="생성 결과 요약">
             <article>
               <span>위험도</span>
-              <strong>{data.riskSummary.riskLevel}</strong>
+              <strong className={`risk-badge ${riskToneClass(data.riskSummary.riskLevel)}`}>위험도 {data.riskSummary.riskLevel}</strong>
             </article>
             <article>
               <span>핵심 위험</span>
@@ -476,6 +535,7 @@ export function SafeGuardCommandCenter({
             <article>
               <span>연결 상태</span>
               <strong>{data.status.summary}</strong>
+              <small className="muted">{statusDetailCopy(state)}</small>
             </article>
           </section>
           <section className="action-strip">
@@ -483,6 +543,14 @@ export function SafeGuardCommandCenter({
               <article key={item} className="action-tile">
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <strong>{item}</strong>
+                <label className="action-check">
+                  <input
+                    type="checkbox"
+                    checked={checkedActions[index] || false}
+                    onChange={(event) => setCheckedActions((current) => current.map((checked, itemIndex) => itemIndex === index ? event.target.checked : checked))}
+                  />
+                  확인 완료
+                </label>
               </article>
             ))}
           </section>
@@ -491,7 +559,7 @@ export function SafeGuardCommandCenter({
       ) : (
         <section className="empty-workspace card" id="workpack">
           <div>
-            <span className="eyebrow">Workspace ready</span>
+            <span className="eyebrow">작업공간 준비</span>
             <h2>생성 버튼을 누르면 작업공간이 열립니다.</h2>
             <p>
               첫 화면은 즉시 열리고, 라이브 근거 확인은 문서팩 생성 시점에 실행됩니다.

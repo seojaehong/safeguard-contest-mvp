@@ -43,8 +43,8 @@ type WorkflowSharePanelProps = {
 const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
   { key: "email", label: "메일", helper: "관리자·원청 보고", enabled: true },
   { key: "sms", label: "문자", helper: "작업자 즉시 공지", enabled: true },
-  { key: "kakao", label: "카카오", helper: "알림톡 템플릿 연결 후 사용", enabled: false },
-  { key: "band", label: "밴드", helper: "채널 심사 완료 후 사용", enabled: false }
+  { key: "kakao", label: "카카오", helper: "채널 연결 필요", enabled: false },
+  { key: "band", label: "밴드", helper: "팀 채널 연결 필요", enabled: false }
 ];
 
 function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
@@ -150,6 +150,11 @@ function formatChannelMeta(item: DispatchChannelResult) {
   return parts.join(" · ");
 }
 
+function previewLines(message: string) {
+  const lines = message.split(/\r?\n/).filter(Boolean);
+  return lines.slice(0, 8);
+}
+
 export function WorkflowSharePanel({
   data,
   recipientSuggestions = [],
@@ -242,6 +247,11 @@ export function WorkflowSharePanel({
   }
 
   async function dispatchWorkflow() {
+    const channelLabel = selectedChannels.map((channel) => formatChannelName(channel)).join(", ");
+    const recipientLabel = dispatchRecipients.length ? `${dispatchRecipients.length}건` : "운영 기본 수신자";
+    const confirmed = window.confirm(`${channelLabel}로 ${recipientLabel}에게 현장 공유 메시지를 전송하시겠습니까?\n\n전송 전 메시지와 수신자를 한 번 더 확인해 주세요.`);
+    if (!confirmed) return;
+
     setIsSending(true);
     setResult(null);
     try {
@@ -273,7 +283,7 @@ export function WorkflowSharePanel({
   return (
     <article className="share-panel workflow-panel">
       <div className="compact-head">
-        <span className="eyebrow">Send</span>
+        <span className="eyebrow">전파</span>
         <strong>현장 전파</strong>
       </div>
       <p className="muted">
@@ -289,6 +299,8 @@ export function WorkflowSharePanel({
             onClick={() => toggleChannel(channel.key)}
             disabled={!channel.enabled}
             aria-disabled={!channel.enabled}
+            aria-pressed={selectedChannels.includes(channel.key)}
+            aria-label={`${channel.label} 채널 ${selectedChannels.includes(channel.key) ? "선택됨" : "선택"}`}
           >
             <strong>{channel.label}</strong>
             <span>{channel.helper}</span>
@@ -309,6 +321,7 @@ export function WorkflowSharePanel({
             type="button"
             className={`language-chip ${selectedMessageTarget === "manager" ? "active" : ""}`}
             onClick={() => setSelectedMessageTarget("manager")}
+            aria-pressed={selectedMessageTarget === "manager"}
           >
             관리자용 한국어
           </button>
@@ -321,6 +334,8 @@ export function WorkflowSharePanel({
                 className={`language-chip ${selectedMessageTarget === key ? "active" : ""}`}
                 onClick={() => setSelectedMessageTarget(key)}
                 title={language.rationale}
+                aria-pressed={selectedMessageTarget === key}
+                aria-label={`${language.label} 공유 메시지 선택`}
               >
                 {language.label}
                 <span>{language.nativeLabel}</span>
@@ -336,7 +351,7 @@ export function WorkflowSharePanel({
         className="textarea workflow-textarea"
         value={recipients}
         onChange={(event) => setRecipients(event.target.value)}
-        placeholder="추가 수신자가 있으면 메일 또는 휴대폰 번호를 입력"
+        placeholder="추가 수신자가 있으면 메일 또는 휴대폰 번호를 입력(쉼표·줄바꿈 구분)"
       />
       {recipientSuggestions.length ? (
         <div className="recipient-chip-list" aria-label="선택된 근로자 전파 대상">
@@ -371,6 +386,17 @@ export function WorkflowSharePanel({
         <button type="button" className="button secondary" onClick={copyMessage}>메시지 복사</button>
       </div>
 
+      <div className="message-preview-phone" aria-label="휴대폰 공유 메시지 미리보기">
+        <div className="phone-shell">
+          <div className="phone-status">SafeGuard 현장공지</div>
+          <div className="phone-bubble">
+            {previewLines(selectedMessage).map((line, index) => (
+              <p key={`${line}-${index}`}>{line}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {result ? (
         <div className={result.ok ? "workflow-result ok" : "workflow-result error"}>
           <p>
@@ -394,7 +420,7 @@ export function WorkflowSharePanel({
         </div>
       ) : null}
 
-      <pre>{selectedMessage}</pre>
+      <pre aria-label="선택한 공유 메시지 원문">{selectedMessage}</pre>
     </article>
   );
 }
