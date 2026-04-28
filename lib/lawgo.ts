@@ -430,8 +430,15 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
   if (parsed.type === "law") url.searchParams.set("MST", parsed.raw);
   else url.searchParams.set("ID", parsed.raw);
 
-  const response = await fetch(url.toString(), { cache: "no-store" });
-  const text = await response.text();
+  let response: Response;
+  let text: string;
+  try {
+    response = await fetch(url.toString(), { cache: "no-store" });
+    text = await response.text();
+  } catch (error) {
+    console.error("Failed to fetch Law.go detail response", error);
+    return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
+  }
   if (!response.ok) return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
   let parsedJson: unknown;
   try {
