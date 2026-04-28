@@ -287,6 +287,62 @@ function buildLawFallbackDetail(id: string, raw: string): DetailRecord {
   };
 }
 
+function buildCachedIndustrialSafetyLawDetail(id: string, raw: string): DetailRecord | null {
+  if (raw !== "276853") return null;
+
+  const body = [
+    buildLawDocumentReflection(),
+    "",
+    "[주요 조문 요약]",
+    [
+      "제5조(사업주 등의 의무)",
+      "① 사업주는 산업재해 예방을 위한 기준, 쾌적한 작업환경 조성 및 근로조건 개선, 해당 사업장의 안전 및 보건에 관한 정보 제공 등을 이행하여 근로자의 안전 및 건강을 유지ㆍ증진시키고 국가의 산업재해 예방정책을 따라야 한다.",
+      "  1. 이 법과 이 법에 따른 명령으로 정하는 산업재해 예방을 위한 기준",
+      "  2. 근로자의 신체적 피로와 정신적 스트레스 등을 줄일 수 있는 쾌적한 작업환경의 조성 및 근로조건 개선",
+      "  3. 해당 사업장의 안전 및 보건에 관한 정보를 근로자에게 제공",
+      "② 건설물을 발주ㆍ설계ㆍ건설하는 자 등은 이 법과 이 법에 따른 명령으로 정하는 기준을 지켜야 하고, 사용하는 물건으로 인하여 발생하는 산업재해를 방지하기 위하여 필요한 조치를 하여야 한다.",
+      "  3. 건설물을 발주ㆍ설계ㆍ건설하는 자"
+    ].join("\n"),
+    "",
+    [
+      "제6조(근로자의 의무)",
+      "근로자는 이 법과 이 법에 따른 명령으로 정하는 산업재해 예방을 위한 기준을 지켜야 하며, 사업주 또는 「근로기준법」 제101조에 따른 근로감독관, 공단 등 관계인이 실시하는 산업재해 예방에 관한 조치에 따라야 한다."
+    ].join("\n"),
+    "",
+    [
+      "제8조(협조 요청 등)",
+      "① 고용노동부장관은 제7조제1항에 따른 기본계획을 효율적으로 시행하기 위하여 필요하다고 인정할 때에는 관계 행정기관의 장 또는 「공공기관의 운영에 관한 법률」 제4조에 따른 공공기관의 장에게 필요한 협조를 요청할 수 있다.",
+      "④ 고용노동부장관은 산업재해 예방을 위하여 필요하다고 인정할 때에는 사업주, 사업주단체, 그 밖의 관계인에게 필요한 사항을 권고하거나 협조를 요청할 수 있다.",
+      "⑤ 고용노동부장관은 산업재해 예방을 위하여 중앙행정기관의 장과 지방자치단체의 장 또는 공단 등 관련 기관ㆍ단체의 장에게 다음 각 호의 정보 또는 자료의 제공 및 관계 전산망의 이용을 요청할 수 있다.",
+      "  1. 「부가가치세법」 제8조 및 「법인세법」 제111조에 따른 사업자등록에 관한 정보",
+      "  2. 「고용보험법」 제15조에 따른 근로자의 피보험자격의 취득 및 상실 등에 관한 정보",
+      "  3. 그 밖에 산업재해 예방사업을 수행하기 위하여 필요한 정보 또는 자료로서 대통령령으로 정하는 정보 또는 자료"
+    ].join("\n")
+  ].join("\n");
+
+  return {
+    id,
+    type: "law",
+    title: "산업안전보건법",
+    citation: "법률 · 공포 21065",
+    summary: "고용노동부 · 시행 20251001 · Law.go 검증 스냅샷",
+    body,
+    points: [
+      "소관부처 고용노동부",
+      "시행일 20251001",
+      "위험성평가·TBM·안전보건교육 기록의 반영 근거로 사용",
+      "Vercel-Law.go 상세 호출 실패 시에도 공식 조문 스냅샷으로 화면 공백을 방지"
+    ],
+    sourceLabel: "Law.go 법령",
+    sourceSystem: "lawgo",
+    sourceUrl: lawSourceUrl(raw)
+  };
+}
+
+function buildLawDetailFallback(id: string, raw: string): DetailRecord {
+  return buildCachedIndustrialSafetyLawDetail(id, raw) || buildLawFallbackDetail(id, raw);
+}
+
 function parseLawResults(xml: string): SearchResult[] {
   return Array.from(xml.matchAll(/<law\b[^>]*>([\s\S]*?)<\/law>/g)).slice(0, 4).map((match) => {
     const content = match[1];
@@ -461,7 +517,7 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
   if (mockMode) {
     const mock = mockDetails.find((item) => item.id === id);
     if (mock) return mock;
-    if (parsed?.type === "law") return buildLawFallbackDetail(id, parsed.raw);
+    if (parsed?.type === "law") return buildLawDetailFallback(id, parsed.raw);
     return null;
   }
   ensureConfigured();
@@ -482,24 +538,24 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
     text = await response.text();
   } catch (error) {
     console.error("Failed to fetch Law.go detail response", error);
-    return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
+    return parsed.type === "law" ? buildLawDetailFallback(id, parsed.raw) : null;
   }
   if (!response.ok) {
     console.error("Law.go detail response was not ok", { status: response.status, type: parsed.type, id });
-    return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
+    return parsed.type === "law" ? buildLawDetailFallback(id, parsed.raw) : null;
   }
   let parsedJson: unknown;
   try {
     parsedJson = JSON.parse(text) as unknown;
   } catch (error) {
     console.error("Failed to parse Law.go detail response", error);
-    return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
+    return parsed.type === "law" ? buildLawDetailFallback(id, parsed.raw) : null;
   }
-  if (!isRecord(parsedJson)) return parsed.type === "law" ? buildLawFallbackDetail(id, parsed.raw) : null;
+  if (!isRecord(parsedJson)) return parsed.type === "law" ? buildLawDetailFallback(id, parsed.raw) : null;
 
   if (parsed.type === "law") {
     const law = readRecord(parsedJson, "법령");
-    if (!law) return buildLawFallbackDetail(id, parsed.raw);
+    if (!law) return buildLawDetailFallback(id, parsed.raw);
     const basic = readRecord(law, "기본정보") || {};
     const articles = readArrayRecords(readValue(readRecord(law, "조문"), "조문단위"));
     const department = readString(basic, "소관부처");
