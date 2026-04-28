@@ -36,7 +36,7 @@ a { color: inherit; text-decoration: none; }
 button,
 textarea,
 input { font: inherit; }
-pre { margin: 0; white-space: pre-wrap; line-height: 1.58; font-family: inherit; }
+pre { margin: 0; white-space: pre-wrap; line-height: 1.66; font-family: inherit; letter-spacing: 0.006em; word-spacing: 0.025em; }
 ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .container,
@@ -661,7 +661,19 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .dispatch-preview-panel p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.58;
+  line-height: 1.68;
+  letter-spacing: 0.012em;
+  word-spacing: 0.05em;
+}
+
+.dispatch-preview-panel > div {
+  display: grid;
+  gap: 4px;
+}
+
+.dispatch-preview-panel strong {
+  letter-spacing: 0.015em;
+  word-spacing: 0.04em;
 }
 
 .doc-card-list {
@@ -713,6 +725,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .dispatch-preview-panel {
   grid-template-columns: minmax(160px, 0.32fr) minmax(0, 1fr);
   align-items: center;
+  column-gap: 30px;
   background:
     linear-gradient(90deg, rgba(232, 241, 237, 0.74), rgba(255, 255, 255, 0.56));
 }
@@ -1526,7 +1539,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .channel-card {
   display: grid;
-  gap: 4px;
+  gap: 6px;
   border: 1px solid rgba(207, 199, 185, 0.78);
   border-radius: 16px;
   padding: 12px;
@@ -1538,12 +1551,15 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .channel-card strong {
   font-size: 14px;
+  letter-spacing: 0.012em;
+  word-spacing: 0.035em;
 }
 
 .channel-card span {
   color: var(--muted);
   font-size: 11px;
-  line-height: 1.45;
+  line-height: 1.58;
+  letter-spacing: 0.012em;
 }
 
 .channel-card.active {
@@ -1559,7 +1575,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .message-target-box {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   border: 1px solid rgba(226, 222, 213, 0.86);
   border-radius: 18px;
   padding: 14px;
@@ -1583,6 +1599,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   color: var(--ink);
   font-size: 12px;
   font-weight: 850;
+  letter-spacing: 0.012em;
   cursor: pointer;
 }
 
@@ -1602,11 +1619,16 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   color: #3b424f;
   font-size: 13px;
   font-weight: 850;
+  letter-spacing: 0.014em;
+  word-spacing: 0.04em;
 }
 
 .workflow-textarea {
   min-height: 86px;
   resize: vertical;
+  line-height: 1.65;
+  letter-spacing: 0.008em;
+  word-spacing: 0.035em;
 }
 
 .workflow-result {
@@ -1847,11 +1869,17 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .impact-card {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   border: 1px solid rgba(226, 222, 213, 0.9);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.54);
   padding: 12px;
+}
+
+.impact-card strong {
+  line-height: 1.35;
+  letter-spacing: 0.012em;
+  word-spacing: 0.04em;
 }
 
 .impact-card span,
@@ -1859,6 +1887,9 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .recipient-chip {
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.58;
+  letter-spacing: 0.01em;
+  word-spacing: 0.035em;
 }
 
 .product-section .card,
@@ -1879,14 +1910,22 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .training-card,
 .citation-item {
   display: grid;
-  gap: 8px;
-  padding: 15px;
+  gap: 10px;
+  padding: 17px;
+  letter-spacing: 0.006em;
+  word-spacing: 0.032em;
+}
+
+.citation-item strong {
+  line-height: 1.38;
+  letter-spacing: 0.012em;
+  word-spacing: 0.04em;
 }
 
 .citation-group {
   display: grid;
-  gap: 10px;
-  padding-top: 8px;
+  gap: 12px;
+  padding-top: 12px;
   border-top: 1px solid rgba(226, 222, 213, 0.82);
 }
 
@@ -1894,6 +1933,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .training-card small,
 .citation-item .muted {
   color: var(--muted);
+  line-height: 1.62;
 }
 
 .fit-pill {
@@ -2062,7 +2102,9 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   gap: 10px;
   align-items: flex-start;
   color: var(--ink);
-  line-height: 1.5;
+  line-height: 1.62;
+  letter-spacing: 0.008em;
+  word-spacing: 0.03em;
 }
 
 .action-check input,
