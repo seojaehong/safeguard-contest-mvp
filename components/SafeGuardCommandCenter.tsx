@@ -16,10 +16,13 @@ type SafeGuardCommandCenterProps = {
 type GenerationState = "idle" | "generating" | "ready" | "error";
 
 type WorkflowStep = {
-  key: "input" | "risk" | "pack" | "evidence" | "dispatch";
+  key: "input" | "risk" | "pack" | "workers" | "dispatch";
+  id: string;
   label: string;
   caption: string;
 };
+
+type StepStatus = "done" | "active" | "pending" | "locked";
 
 type FieldBrief = {
   companyName: string;
@@ -33,11 +36,11 @@ type FieldBrief = {
 };
 
 const workflowSteps: WorkflowStep[] = [
-  { key: "input", label: "작업 입력", caption: "현장·인원·조건" },
-  { key: "risk", label: "위험 판단", caption: "위험요인·즉시조치" },
-  { key: "pack", label: "문서팩", caption: "편집·다운로드" },
-  { key: "evidence", label: "근거", caption: "법령·KOSHA·사례" },
-  { key: "dispatch", label: "전파", caption: "메일·문자·다국어" }
+  { id: "01", key: "input", label: "작업 입력", caption: "현장·작업·조건" },
+  { id: "02", key: "risk", label: "위험 판단", caption: "법령 매칭" },
+  { id: "03", key: "pack", label: "문서팩 생성", caption: "6종 산출물" },
+  { id: "04", key: "workers", label: "작업자 선택", caption: "언어·채널" },
+  { id: "05", key: "dispatch", label: "현장 전파", caption: "Email · SMS" }
 ];
 
 const outputItems = [
@@ -50,10 +53,10 @@ const outputItems = [
 ];
 
 const recentWorkpacks = [
-  "외벽 도장 · 이동식 비계",
-  "지게차 상하차 · 보행동선",
-  "용접·절단 화기작업",
-  "밀폐공간 펌프 점검"
+  { title: "외벽 도장 · 이동식 비계", time: "오늘 08:14", law: 12, docs: 6 },
+  { title: "지게차 상하차 · 보행동선", time: "어제 16:22", law: 8, docs: 6 },
+  { title: "용접·절단 화기작업", time: "어제 10:05", law: 14, docs: 6 },
+  { title: "밀폐공간 펌프 점검", time: "04.27 09:18", law: 9, docs: 5 }
 ];
 
 function statusCopy(state: GenerationState) {
@@ -66,15 +69,40 @@ function statusCopy(state: GenerationState) {
 function activeStep(state: GenerationState): WorkflowStep["key"] {
   if (state === "generating") return "risk";
   if (state === "ready") return "pack";
-  if (state === "error") return "evidence";
+  if (state === "error") return "risk";
   return "input";
 }
 
-function progressWidth(state: GenerationState) {
-  if (state === "ready") return "100%";
-  if (state === "generating") return "48%";
-  if (state === "error") return "74%";
-  return "16%";
+function stepStatuses(state: GenerationState): Record<WorkflowStep["key"], StepStatus> {
+  if (state === "generating") {
+    return { input: "done", risk: "active", pack: "pending", workers: "locked", dispatch: "locked" };
+  }
+  if (state === "ready") {
+    return { input: "done", risk: "done", pack: "active", workers: "pending", dispatch: "pending" };
+  }
+  if (state === "error") {
+    return { input: "done", risk: "active", pack: "pending", workers: "locked", dispatch: "locked" };
+  }
+  return { input: "active", risk: "pending", pack: "pending", workers: "locked", dispatch: "locked" };
+}
+
+function lawCount(data: AskResponse | null, state: GenerationState) {
+  if (data) return data.citations.length;
+  if (state === "generating") return 3;
+  return 0;
+}
+
+function docProgress(data: AskResponse | null, state: GenerationState) {
+  if (data) return 6;
+  if (state === "generating") return 2;
+  return 0;
+}
+
+function elapsedLabel(state: GenerationState) {
+  if (state === "generating") return "진행 중";
+  if (state === "ready") return "완료";
+  if (state === "error") return "점검";
+  return "대기";
 }
 
 function operationalStatus(data: AskResponse | null, state: GenerationState) {
@@ -128,6 +156,29 @@ function buildApiFieldBrief(data: AskResponse, fallbackExample: FieldExample): F
     sourceLabel: data.externalData.weather.mode === "live" ? "API 반영 브리프" : "입력+보강 브리프",
     foreignWorkerSignal: inferForeignSignal(data.question, fallbackExample.hasForeignWorkers)
   };
+}
+
+function statusRowState(active: boolean, warning = false) {
+  if (warning) return "warn";
+  return active ? "live" : "pending";
+}
+
+function StepDot({ status }: { status: StepStatus }) {
+  if (status === "done") {
+    return (
+      <span className="step-dot done" aria-hidden="true">
+        ✓
+      </span>
+    );
+  }
+  if (status === "locked") {
+    return (
+      <span className="step-dot locked" aria-hidden="true">
+        ▣
+      </span>
+    );
+  }
+  return <span className={`step-dot ${status}`} aria-hidden="true" />;
 }
 
 export function SafeGuardCommandCenter({
@@ -201,7 +252,10 @@ export function SafeGuardCommandCenter({
 
   const busy = state === "generating" || isPending;
   const currentStep = activeStep(state);
+  const statuses = stepStatuses(state);
   const fieldBrief = data ? buildApiFieldBrief(data, selectedExample) : buildInputFieldBrief(question, selectedExample);
+  const currentLawCount = lawCount(data, state);
+  const currentDocProgress = docProgress(data, state);
 
   return (
     <main className="command-center-shell">
@@ -214,14 +268,17 @@ export function SafeGuardCommandCenter({
           </span>
         </Link>
         <nav className="topnav command-stepper" aria-label="작업 단계">
-          {workflowSteps.map((step, index) => (
+          {workflowSteps.map((step) => (
             <a
               href={step.key === "input" ? "#command" : step.key === "pack" ? "#workpack" : "#references"}
               className={step.key === currentStep ? "active" : ""}
               key={step.key}
             >
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              {step.label}
+              <StepDot status={statuses[step.key]} />
+              <span className="step-copy">
+                <small>{step.id} · {statuses[step.key] === "done" ? "완료" : statuses[step.key] === "active" ? "진행 중" : step.caption}</small>
+                <strong>{step.label}</strong>
+              </span>
             </a>
           ))}
         </nav>
@@ -233,26 +290,84 @@ export function SafeGuardCommandCenter({
 
       <section className="command-viewport" id="command">
         <aside className="command-left-panel">
-          <section className="left-panel-card current-site-card">
-            <span className="eyebrow">Current site</span>
-            <strong>{selectedExample.companyName}</strong>
-            <p>{selectedExample.region} · {selectedExample.industry}</p>
+          <section className="left-panel-card live-status-widget">
+            <div className="left-widget-head">
+              <span>LIVE STATUS</span>
+              <b>{state === "idle" ? "READY" : state === "generating" ? "MATCHING" : state === "ready" ? "COMPLETE" : "CHECK"}</b>
+            </div>
+            <div className="status-row-list">
+              <div className={`status-row ${statusRowState(state !== "idle")}`}>
+                <span>현재 단계</span>
+                <b>{statusCopy(state)}</b>
+              </div>
+              <div className="status-row pending">
+                <span>경과</span>
+                <b>{elapsedLabel(state)}</b>
+              </div>
+              <div className={`status-row ${statusRowState(currentLawCount > 0)}`}>
+                <span>법령 매칭</span>
+                <b>{currentLawCount}건</b>
+              </div>
+              <div className={`status-row ${statusRowState(currentDocProgress > 0)}`}>
+                <span>문서 작성</span>
+                <b>{currentDocProgress}/6</b>
+              </div>
+            </div>
+            <div className="left-progress" aria-hidden="true">
+              <span style={{ width: `${Math.max(8, (currentDocProgress / 6) * 100)}%` }} />
+            </div>
+          </section>
+
+          <section className="left-panel-card field-brief-mini">
+            <div className="left-widget-head">
+              <span>FIELD BRIEF</span>
+              <b>{fieldBrief.sourceLabel}</b>
+            </div>
+            <div className="brief-mini-grid">
+              <div>
+                <span>현장</span>
+                <b>{fieldBrief.siteName}</b>
+              </div>
+              <div>
+                <span>업종</span>
+                <b>{fieldBrief.industry}</b>
+              </div>
+              <div>
+                <span>작업</span>
+                <b>{fieldBrief.workSummary}</b>
+              </div>
+              <div>
+                <span>날씨</span>
+                <b className="amber">{fieldBrief.weather}</b>
+              </div>
+              <div>
+                <span>인원</span>
+                <b>{fieldBrief.workerCount}</b>
+              </div>
+              <div>
+                <span>언어</span>
+                <b>{fieldBrief.foreignWorkerSignal}</b>
+              </div>
+            </div>
             <div className="site-tag-grid">
               <span>{selectedExample.skillMix}</span>
-              <span>{selectedExample.hasForeignWorkers ? "외국인 포함" : "국내 인력"}</span>
+              <span>{fieldBrief.companyName}</span>
             </div>
           </section>
 
           <section className="left-panel-card">
-            <div className="compact-head">
-              <span className="eyebrow">Recent</span>
-              <small>작업 이력</small>
+            <div className="left-widget-head">
+              <span>RECENT WORKPACKS</span>
+              <b>전체</b>
             </div>
             <div className="recent-list">
               {recentWorkpacks.map((item) => (
-                <button type="button" key={item}>
-                  <strong>{item}</strong>
-                  <span>문서팩 6종 · 근거 연결</span>
+                <button type="button" key={item.title}>
+                  <i aria-hidden="true" />
+                  <span>
+                    <strong>{item.title}</strong>
+                    <small>{item.time} · {item.law}건 · {item.docs}/6</small>
+                  </span>
                 </button>
               ))}
             </div>
@@ -260,13 +375,9 @@ export function SafeGuardCommandCenter({
         </aside>
 
         <section className="command-main card command-main-studio">
-          <div className="workflow-progress" aria-hidden="true">
-            <span style={{ width: progressWidth(state) }} />
-          </div>
-
           <div className="command-copy">
             <span className="eyebrow">Inspection-ready workspace</span>
-            <h1>작업 설명을 안전 문서팩으로 정리하세요.</h1>
+            <h1>오늘 작업을 한 줄로, 실행 가능한 안전 문서팩으로.</h1>
             <p>
               현장 조건을 입력하면 위험성평가, 작업계획, TBM, 안전교육, 외국인 안내문,
               현장 전파 메시지를 하나의 작업공간에서 편집하고 내보낼 수 있습니다.
@@ -303,72 +414,52 @@ export function SafeGuardCommandCenter({
             </div>
           </form>
 
-          <div className="quick-scenario-grid" aria-label="현장 예시">
+          <div className="quick-scenario-chips" aria-label="현장 예시">
+            <span>예시 불러오기 →</span>
             {examples.map((example) => (
               <button
                 key={example.id}
                 type="button"
-                className={`quick-scenario ${example.id === selectedExample.id ? "active" : ""}`}
+                className={`quick-chip ${example.id === selectedExample.id ? "active" : ""}`}
                 onClick={() => selectExample(example)}
               >
-                <strong>{example.label}</strong>
-                <span>{example.region} · {example.industry} · {example.skillMix}</span>
-                <small>선택 후 API 생성</small>
+                {example.label}
               </button>
             ))}
           </div>
+
+          <section className="evidence-live-panel" id="references">
+            <div className="compact-head">
+              <span className="eyebrow">Evidence matching</span>
+              <strong>{currentLawCount ? `${currentLawCount}건 연결` : "생성 후 연결"}</strong>
+            </div>
+            <p>{message || "선택한 현장 설명을 기준으로 법령, 기상, KOSHA 자료, 교육 추천을 연결합니다."}</p>
+          </section>
+
+          <section className="output-card-grid" id="workpack">
+            <div className="compact-head">
+              <span className="eyebrow">Generated documents</span>
+              <strong>{currentDocProgress}/6</strong>
+            </div>
+            <div className="doc-card-list">
+              {outputItems.map((item, index) => (
+                <article key={item} className={data ? "doc-card done" : busy && index < 2 ? "doc-card active" : "doc-card"}>
+                  <span>DOC · 0{index + 1}</span>
+                  <strong>{item}</strong>
+                  <p>{data ? "편집과 다운로드 가능" : busy && index < 2 ? "작성 중" : "대기"}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="dispatch-preview-panel">
+            <div>
+              <span className="eyebrow">Dispatch</span>
+              <strong>현장 전파 준비</strong>
+            </div>
+            <p>문서팩 생성 후 작업자 언어와 채널을 선택해 메일·문자 전송을 요청합니다.</p>
+          </section>
         </section>
-
-        <aside className="command-side">
-          <section className="status-board card">
-            <div className="compact-head">
-              <span className="eyebrow">Run state</span>
-              <strong>{statusCopy(state)}</strong>
-            </div>
-            <p>{message || "입력 후 생성하면 문서팩, 근거, 근로자 안내, 전파 상태가 작업공간에 표시됩니다."}</p>
-            <div className={`status-orb ${state}`} aria-hidden="true" />
-          </section>
-
-          <section className="field-brief-card card">
-            <div className="compact-head">
-              <span className="eyebrow">필드 브리프</span>
-              <small>{fieldBrief.sourceLabel}</small>
-            </div>
-            <strong>{fieldBrief.workSummary}</strong>
-            <div className="brief-stat-grid">
-              <div>
-                <span>업체</span>
-                <b>{fieldBrief.companyName}</b>
-              </div>
-              <div>
-                <span>현장</span>
-                <b>{fieldBrief.siteName}</b>
-              </div>
-              <div>
-                <span>인원</span>
-                <b>{fieldBrief.workerCount}</b>
-              </div>
-              <div>
-                <span>날씨/조건</span>
-                <b>{fieldBrief.weather}</b>
-              </div>
-            </div>
-            <div className="brief-signal-row">
-              <span>{fieldBrief.industry}</span>
-              <span>{fieldBrief.foreignWorkerSignal}</span>
-            </div>
-          </section>
-
-          <section className="output-stack card">
-            <span className="eyebrow">문서팩 항목</span>
-            {outputItems.map((item) => (
-              <div key={item} className={data ? "output-line ready" : "output-line"}>
-                <span>{item}</span>
-                <strong>{data ? "준비" : "대기"}</strong>
-              </div>
-            ))}
-          </section>
-        </aside>
       </section>
 
       {data ? (

@@ -91,13 +91,14 @@ When modifying UI, use this prompt:
 
 ## Imported SafeClaw Design Direction
 
-The `safeclaw.zip` design exploration is adopted as a product direction, not as a direct visual copy. Apply the following principles when refactoring screens:
+The `SafeGuard Workspace _standalone_.html` and `safeclaw.zip` design exploration are adopted as the product direction, not as a direct visual copy. The current source of truth is `V1 · Split + Top Stepper`.
 
-- Use a 3-zone workspace: left context and recent workpacks, center command input and document generation, right operational status and output checklist.
-- Keep a top workflow stepper visible on desktop: `작업 입력 -> 위험 판단 -> 문서팩 -> 근거 -> 전파`.
+- Use a split workspace: a sticky 320px left panel plus one main workspace. Do not add a permanent right panel on the home screen.
+- Left panel widgets are fixed in this order: `Live Status`, `Field Brief`, `Recent Workpacks`.
+- Keep a full-width top workflow stepper visible on desktop: `작업 입력 -> 위험 판단 -> 문서팩 생성 -> 작업자 선택 -> 현장 전파`.
 - Prefer compact operational copy over large marketing copy.
 - Use progress and state indicators to show that evidence matching and document writing are active work, not a static report.
 - Treat generated outputs as editable work surfaces, with document names and export actions always close to the content.
-- Keep example data as quick-start field cases, never as visible demo language.
+- Keep example data as quick-start field cases shown as compact chips below the textarea, never as visible demo language.
 - Use warm institutional colors, dark ink, green verification, amber attention, and paper-like surfaces.
 - If a live provider is unavailable, preserve the user workflow with a clearly labeled operational state and a verified fallback where available.

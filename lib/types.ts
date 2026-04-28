@@ -82,6 +82,17 @@ export type AskResponse = {
       precipitationProbability?: string;
       actions: string[];
       detail: string;
+      signals?: Array<{
+        endpoint: "초단기실황" | "초단기예보" | "단기예보";
+        mode: IntegrationMode;
+        summary: string;
+        detail: string;
+        forecastTime?: string;
+        temperatureC?: string;
+        windSpeedMps?: string;
+        precipitationProbability?: string;
+        precipitationType?: string;
+      }>;
     };
     training: {
       source: "work24";
