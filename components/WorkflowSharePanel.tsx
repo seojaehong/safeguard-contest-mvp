@@ -70,10 +70,14 @@ function buildBriefPayload(data: AskResponse, selectedMessage: string, selectedT
       nativeLabel: "한국어"
     },
     documents: {
+      workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
       riskAssessmentDraft: data.deliverables.riskAssessmentDraft,
+      workPlanDraft: data.deliverables.workPlanDraft,
       tbmBriefing: data.deliverables.tbmBriefing,
       tbmLogDraft: data.deliverables.tbmLogDraft,
       safetyEducationRecordDraft: data.deliverables.safetyEducationRecordDraft,
+      emergencyResponseDraft: data.deliverables.emergencyResponseDraft,
+      photoEvidenceDraft: data.deliverables.photoEvidenceDraft,
       foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
       foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission,
       foreignWorkerLanguages: data.deliverables.foreignWorkerLanguages
@@ -168,7 +172,7 @@ export function WorkflowSharePanel({ data }: { data: AskResponse }) {
         <strong>현장 전파</strong>
       </div>
       <p className="muted">
-        Oracle n8n 웹훅을 연결하면 지금 보이는 문서팩을 메일, 문자, 카카오, 밴드로 자동 전송합니다.
+        선택한 채널로 문서팩 요약과 현장 공유 메시지를 전송합니다. 채널별 연결 상태는 전송 결과에서 확인합니다.
       </p>
 
       <div className="channel-grid" aria-label="전파 채널 선택">

@@ -8,10 +8,14 @@ declare global {
 }
 
 type DocumentKey =
+  | "workpackSummaryDraft"
   | "riskAssessmentDraft"
+  | "workPlanDraft"
   | "tbmBriefing"
   | "tbmLogDraft"
   | "safetyEducationRecordDraft"
+  | "emergencyResponseDraft"
+  | "photoEvidenceDraft"
   | "foreignWorkerBriefing"
   | "foreignWorkerTransmission"
   | "kakaoMessage";
@@ -59,10 +63,22 @@ const templatePresets: TemplatePreset[] = [
 
 const documentMeta: EditableDocument[] = [
   {
+    key: "workpackSummaryDraft",
+    title: "점검결과 요약",
+    description: "현장명, 작업조건, 핵심 위험, 즉시조치, 연결 상태를 첫 장으로 정리합니다.",
+    fileBase: "workpack-summary"
+  },
+  {
     key: "riskAssessmentDraft",
     title: "위험성평가표",
     description: "KOSHA 절차에 맞춰 사전준비, 위험요인, 감소대책, 조치 확인을 정리합니다.",
     fileBase: "risk-assessment"
+  },
+  {
+    key: "workPlanDraft",
+    title: "작업계획서",
+    description: "작업구간, 작업순서, 장비·인원, 허가·첨부, 작업중지 기준을 정리합니다.",
+    fileBase: "work-plan"
   },
   {
     key: "tbmBriefing",
@@ -81,6 +97,18 @@ const documentMeta: EditableDocument[] = [
     title: "안전보건교육 기록",
     description: "교육대상, 교육내용, 확인방법, 후속 교육 추천을 분리해 남깁니다.",
     fileBase: "safety-education"
+  },
+  {
+    key: "emergencyResponseDraft",
+    title: "비상대응 절차",
+    description: "사고 징후, 초기조치, 보고체계, 현장보존, 재발방지 흐름을 정리합니다.",
+    fileBase: "emergency-response"
+  },
+  {
+    key: "photoEvidenceDraft",
+    title: "사진/증빙",
+    description: "작업 전·후 사진, TBM/교육 증빙, 확인자와 보관 위치를 남깁니다.",
+    fileBase: "photo-evidence"
   },
   {
     key: "foreignWorkerBriefing",
@@ -195,6 +223,26 @@ function buildRowsForAll(values: Record<DocumentKey, string>) {
   return documentMeta.flatMap((meta) => buildRowsForDocument(meta, values));
 }
 
+function buildLaunchSheetRows(values: Record<DocumentKey, string>) {
+  const sheetMap: Array<{ sheet: string; keys: DocumentKey[] }> = [
+    { sheet: "0. 문서팩 요약", keys: ["workpackSummaryDraft"] },
+    { sheet: "1. 위험성평가", keys: ["riskAssessmentDraft"] },
+    { sheet: "2. 작업계획서", keys: ["workPlanDraft"] },
+    { sheet: "3. TBM 및 일일점검", keys: ["tbmBriefing", "tbmLogDraft"] },
+    { sheet: "4. 안전보건교육", keys: ["safetyEducationRecordDraft", "foreignWorkerBriefing", "foreignWorkerTransmission"] },
+    { sheet: "5. 비상대응", keys: ["emergencyResponseDraft"] },
+    { sheet: "6. 사진/증빙", keys: ["photoEvidenceDraft"] }
+  ];
+
+  return sheetMap.flatMap(({ sheet, keys }) => (
+    keys.flatMap((key) => {
+      const meta = documentMeta.find((item) => item.key === key);
+      if (!meta) return [];
+      return buildRowsForDocument(meta, values).map((row) => ({ ...row, section: `${sheet} / ${row.section}` }));
+    })
+  ));
+}
+
 function escapeCell(value: string) {
   return `"${value.replace(/"/g, "\"\"")}"`;
 }
@@ -226,6 +274,37 @@ function buildExcelHtml(title: string, rows: SheetRow[]) {
     <tbody>${tableRows}</tbody>
   </table>
 </body>
+</html>`;
+}
+
+function buildLaunchWorkbookHtml(title: string, rows: SheetRow[]) {
+  const groups = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
+    const [sheet] = row.section.split(" / ");
+    acc[sheet] = [...(acc[sheet] || []), row];
+    return acc;
+  }, {});
+  const sections = Object.entries(groups).map(([sheet, sheetRows]) => `
+    <h2>${escapeHtml(sheet)}</h2>
+    <table>
+      <thead><tr><th>문서</th><th>섹션</th><th>항목</th><th>내용</th></tr></thead>
+      <tbody>${sheetRows.map((row) => `<tr><td>${escapeHtml(row.document)}</td><td>${escapeHtml(row.section.replace(`${sheet} / `, ""))}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td></tr>`).join("")}</tbody>
+    </table>
+  `).join("");
+
+  return `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(title)}</title>
+  <style>
+    body { font-family: "Malgun Gothic", sans-serif; color: #1d2430; }
+    h2 { margin: 22px 0 8px; color: #21594f; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 18px; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; }
+    th { background: #e8f1ed; font-weight: 700; }
+  </style>
+</head>
+<body>${sections}</body>
 </html>`;
 }
 
@@ -331,17 +410,21 @@ function buildCombinedText(values: Record<DocumentKey, string>) {
 export function WorkpackEditor({ data }: { data: AskResponse }) {
   const initialValues = useMemo<Record<DocumentKey, string>>(
     () => ({
+      workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
       riskAssessmentDraft: data.deliverables.riskAssessmentDraft,
+      workPlanDraft: data.deliverables.workPlanDraft,
       tbmBriefing: data.deliverables.tbmBriefing,
       tbmLogDraft: data.deliverables.tbmLogDraft,
       safetyEducationRecordDraft: data.deliverables.safetyEducationRecordDraft,
+      emergencyResponseDraft: data.deliverables.emergencyResponseDraft,
+      photoEvidenceDraft: data.deliverables.photoEvidenceDraft,
       foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
       foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission,
       kakaoMessage: data.deliverables.kakaoMessage
     }),
     [data]
   );
-  const [selectedKey, setSelectedKey] = useState<DocumentKey>("riskAssessmentDraft");
+  const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<Record<DocumentKey, string>>(initialValues);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
@@ -433,13 +516,13 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   }
 
   function downloadAllCsv() {
-    const rows = buildRowsForAll(values);
+    const rows = buildLaunchSheetRows(values);
     downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, ",")}`], { type: "text/csv;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeguard-workpack.csv`);
   }
 
   function downloadAllXls() {
-    const rows = buildRowsForAll(values);
-    downloadBlob(new Blob([buildExcelHtml("SafeGuard 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeguard-workpack.xls`);
+    const rows = buildLaunchSheetRows(values);
+    downloadBlob(new Blob([buildLaunchWorkbookHtml("SafeGuard 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeguard-workpack.xls`);
   }
 
   function downloadTemplate() {
@@ -455,7 +538,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   }
 
   async function copySheetsTsv() {
-    const rows = buildRowsForAll(values);
+    const rows = buildLaunchSheetRows(values);
     try {
       await navigator.clipboard.writeText(buildDelimited(rows, "\t"));
       setSheetStatus("copied");

@@ -341,7 +341,7 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
     return {
       source: "kosha-accident",
       mode: "fallback",
-      detail: "DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 후보 API를 호출하지 못했습니다.",
+      detail: "DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 연결을 확인해야 합니다.",
       cases: selectFallbackAccidentCases(question)
     };
   }
@@ -353,7 +353,7 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
       return {
         source: "kosha-accident",
         mode: "fallback",
-        detail: `${parsed.detail} fallback fixture로 전환했습니다.`,
+        detail: `${parsed.detail} 기본 재해사례 근거로 전환했습니다.`,
         cases: selectFallbackAccidentCases(question)
       };
     }
@@ -369,7 +369,7 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
     return {
       source: "kosha-accident",
       mode: "fallback",
-      detail: `KOSHA 국내재해사례 fallback: ${message}`,
+      detail: `KOSHA 국내재해사례 연결 점검 필요: ${message}`,
       cases: selectFallbackAccidentCases(question)
     };
   }

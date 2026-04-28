@@ -1,4 +1,4 @@
-export type DemoScenario = {
+export type FieldExample = {
   id: string;
   label: string;
   region: string;
@@ -12,7 +12,7 @@ export type DemoScenario = {
   question: string;
 };
 
-export const demoScenarios: DemoScenario[] = [
+export const fieldExamples: FieldExample[] = [
   {
     id: "seoul-construction-windy",
     label: "서울 건설 · 강풍 · 신규 혼재",
@@ -93,4 +93,4 @@ export const demoScenarios: DemoScenario[] = [
   }
 ];
 
-export const defaultDemoScenario = demoScenarios[0];
+export const defaultFieldExample = fieldExamples[0];

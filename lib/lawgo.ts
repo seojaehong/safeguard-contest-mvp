@@ -138,7 +138,7 @@ function scoreMockResult(item: SearchResult, query: string) {
 
 function ensureConfigured() {
   if (!oc) {
-    throw new Error("LAWGO_OC is not set. For now use LAWGO_MOCK_MODE=true.");
+    throw new Error("LAWGO_OC is not set. Law.go credentials are required for hosted evidence search.");
   }
 }
 

@@ -2,13 +2,20 @@ import Link from "next/link";
 import { CitationList } from "@/components/CitationList";
 import { WorkpackEditor } from "@/components/WorkpackEditor";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
-import { defaultDemoScenario, demoScenarios } from "@/lib/demo-scenarios";
+import { defaultFieldExample, fieldExamples } from "@/lib/field-examples";
 import { runAsk } from "@/lib/search";
+import { IntegrationMode } from "@/lib/types";
+
+function formatConnectionLabel(mode: IntegrationMode) {
+  if (mode === "live") return "연결됨";
+  if (mode === "fallback") return "일부 근거 보류";
+  return "연결 점검 필요";
+}
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ q?: string; scenario?: string }> }) {
   const params = await searchParams;
-  const selectedScenario = demoScenarios.find((scenario) => scenario.id === params.scenario) || defaultDemoScenario;
-  const q = params.q || selectedScenario.question;
+  const selectedExample = fieldExamples.find((example) => example.id === params.scenario) || defaultFieldExample;
+  const q = params.q || selectedExample.question;
   const data = await runAsk(q);
   const primaryTraining = data.externalData.training.recommendations[0];
   const primaryKoshaEducation = data.externalData.koshaEducation.recommendations[0];
@@ -56,11 +63,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           </form>
           <div className="scenario-picker">
-            {demoScenarios.map((scenario) => (
+            {fieldExamples.map((scenario) => (
               <Link
                 key={scenario.id}
                 href={`/?scenario=${scenario.id}`}
-                className={`scenario-chip ${scenario.id === selectedScenario.id && !params.q ? "active" : ""}`}
+                className={`scenario-chip ${scenario.id === selectedExample.id && !params.q ? "active" : ""}`}
               >
                 <strong>{scenario.label}</strong>
                 <span>{scenario.region} · {scenario.industry} · {scenario.hasForeignWorkers ? "외국인 포함" : "외국인 없음"} · {scenario.skillMix}</span>
@@ -101,13 +108,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <div className="output-panel card list">
           <div className="panel-heading">
             <span className="eyebrow">생성된 문서</span>
-            <strong>7종 준비 완료</strong>
+            <strong>11종 준비 완료</strong>
           </div>
           {[
             "위험성평가표",
+            "작업계획서",
             "TBM 브리핑",
             "TBM 기록",
             "안전보건교육 기록",
+            "비상대응 절차",
+            "사진/증빙",
             "외국인 출력본",
             "외국인 전송본",
             "현장 공유 메시지"
@@ -186,7 +196,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {primaryAccidentCase ? (
             <a href={primaryAccidentCase.sourceUrl || "https://www.kosha.or.kr/"} target="_blank" rel="noreferrer" className="training-card">
               <strong>{primaryAccidentCase.title}</strong>
-              <em className="fit-pill">{data.externalData.accidentCases.mode === "live" ? "live" : "fallback"}</em>
+              <em className="fit-pill">{formatConnectionLabel(data.externalData.accidentCases.mode)}</em>
               <span>{[primaryAccidentCase.industry, primaryAccidentCase.accidentType].filter(Boolean).join(" · ")}</span>
               <small>{primaryAccidentCase.summary}</small>
               <small>{primaryAccidentCase.preventionPoint}</small>
@@ -232,7 +242,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {data.externalData.kosha.references.slice(0, 2).map((item) => (
             <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="training-card">
               <strong>{item.title}</strong>
-              <em className="fit-pill">{item.verified ? "공식 링크 확인" : "사전 매핑"}</em>
+              <em className="fit-pill">{item.verified ? "공식 링크 확인" : "작업유형 매핑"}</em>
               <span>{item.agency || "KOSHA"} · {item.category}</span>
               <small>반영 문서: {(item.appliesTo || item.appliedTo || ["위험성평가", "TBM"]).join(", ")}</small>
               <small>서식 힌트: {(item.templateHints || []).join(", ") || item.category}</small>

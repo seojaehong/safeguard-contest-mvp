@@ -36,6 +36,12 @@ function describeRelevance(item: SearchResult, question?: string) {
   return "현재 작업 조건과 유사한 위험 판단 기준을 빠르게 확인하기 위한 근거입니다.";
 }
 
+function sourceStatusLabel(item: SearchResult) {
+  if (item.sourceSystem === "lawgo") return "법제처 인용";
+  if (item.sourceSystem === "korean-law-mcp") return "추가 근거";
+  return "기본 근거";
+}
+
 export function CitationList({ citations, question }: { citations: SearchResult[]; question?: string }) {
   return (
     <div className="card list">
@@ -57,7 +63,7 @@ export function CitationList({ citations, question }: { citations: SearchResult[
                 <Link key={c.id} href={href} className="list citation-item">
                   <div className="row">
                     <span className="badge">{c.sourceLabel}</span>
-                    <span className="badge">{c.sourceSystem === "lawgo" ? "Law.go 인용" : c.sourceSystem === "korean-law-mcp" ? "MCP 보강" : "fallback"}</span>
+                    <span className="badge">{sourceStatusLabel(c)}</span>
                     {c.tags?.some((tag) => tag.includes("작업위험 매핑")) ? <span className="badge">작업위험 매핑</span> : null}
                   </div>
                   <strong>{c.title}</strong>

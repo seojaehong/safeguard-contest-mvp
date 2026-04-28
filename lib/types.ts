@@ -148,10 +148,14 @@ export type AskResponse = {
     immediateActions: string[];
   };
   deliverables: {
+    workpackSummaryDraft: string;
     riskAssessmentDraft: string;
+    workPlanDraft: string;
     tbmBriefing: string;
     tbmLogDraft: string;
     safetyEducationRecordDraft: string;
+    emergencyResponseDraft: string;
+    photoEvidenceDraft: string;
     foreignWorkerBriefing: string;
     foreignWorkerTransmission: string;
     foreignWorkerLanguages: ForeignWorkerLanguage[];

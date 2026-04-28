@@ -51,7 +51,7 @@ async function postKoshaEdu(endpoint: string, body: Record<string, unknown>) {
         "content-type": "application/json",
         "origin": BASE_URL,
         "referer": `${BASE_URL}/`,
-        "user-agent": "SafeGuard contest MVP"
+        "user-agent": "SafeGuard safety-workpack"
       },
       body: JSON.stringify(body),
       signal: controller.signal,
@@ -210,7 +210,7 @@ export async function fetchKoshaEducationRecommendations(question: string): Prom
     return {
       source: "kosha-edu",
       mode: "live",
-      detail: `KOSHA 교육포털 live 메타데이터 확인 성공. 교육대상 ${targetNames.length}개, 과정 후보 ${courseRecommendations.length}건을 반영했습니다.`,
+      detail: `KOSHA 교육포털 메타데이터 확인 성공. 교육대상 ${targetNames.length}개, 과정 후보 ${courseRecommendations.length}건을 반영했습니다.`,
       recommendations
     };
   } catch (error) {
@@ -218,7 +218,7 @@ export async function fetchKoshaEducationRecommendations(question: string): Prom
     return {
       source: "kosha-edu",
       mode: "fallback",
-      detail: `KOSHA 교육포털 fallback: ${message}`,
+      detail: `KOSHA 교육포털 연결 점검 필요: ${message}`,
       recommendations: buildFallbackRecommendations(question, ["근로자", "외국인근로자", "관리감독자"])
     };
   }

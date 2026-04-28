@@ -132,9 +132,9 @@ export async function fetchWeatherSignal(question: string): Promise<{
       source: "kma",
       mode: "fallback",
       locationLabel: location.label,
-      summary: "기상청 서비스 키가 없어 대표 시나리오 기준 기상 주의 문구를 사용합니다.",
+      summary: "기상청 서비스 키가 없어 현장 기상 주의 문구를 보수적으로 적용합니다.",
       actions: ["작업 전 기상 변화에 따른 작업중지 기준을 공유"],
-      detail: "DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 live 예보를 호출하지 못했습니다."
+      detail: "DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 기상청 예보 연결을 확인해야 합니다."
     };
   }
 
@@ -181,7 +181,7 @@ export async function fetchWeatherSignal(question: string): Promise<{
       windSpeedMps: snapshot.windSpeedMps,
       precipitationProbability: snapshot.precipitationProbability,
       actions: snapshot.actions,
-      detail: `기상청 단기예보 live 호출 성공 (${location.label}, base ${baseDate} ${baseTime})`
+      detail: `기상청 단기예보 호출 성공 (${location.label}, base ${baseDate} ${baseTime})`
     } as const;
     weatherCache.set(cacheKey, {
       expiresAt: Date.now() + 30 * 60_000,
@@ -194,9 +194,9 @@ export async function fetchWeatherSignal(question: string): Promise<{
       source: "kma",
       mode: "fallback",
       locationLabel: location.label,
-      summary: "기상청 live 호출에 실패해 대표 시나리오 기준 기상 주의 문구를 사용합니다.",
+      summary: "기상청 호출에 실패해 현장 기상 주의 문구를 보수적으로 적용합니다.",
       actions: ["기상 변화 가능성을 고려해 작업중지 기준과 대피 절차를 재확인"],
-      detail: `기상청 단기예보 fallback: ${message}`
+      detail: `기상청 단기예보 연결 점검 필요: ${message}`
     };
   }
 }

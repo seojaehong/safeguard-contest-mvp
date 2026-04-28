@@ -183,7 +183,7 @@ export async function generateAnswer(question: string, citations: SearchResult[]
       question,
       citations,
       "mock",
-      "GEMINI_API_KEY와 OPENAI_API_KEY가 없어 AI 호출 없이 데모 산출물을 구성했습니다."
+      "AI 제공자 키가 없어 규정 기반 문서팩으로 구성했습니다."
     );
   }
 
@@ -201,7 +201,7 @@ export async function generateAnswer(question: string, citations: SearchResult[]
     question,
     citations,
     "live",
-    `Law.go와 ${response.providerLabel} 응답을 결합한 라이브 모드입니다.`
+    `Law.go와 ${response.providerLabel} 응답을 결합했습니다.`
   );
   return {
     ...live,
