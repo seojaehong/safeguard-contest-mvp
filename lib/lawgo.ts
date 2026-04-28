@@ -1,7 +1,7 @@
 import { mockDetails, mockSearchResults } from "./mock-data";
 import { DetailRecord, SearchResult } from "./types";
 
-const oc = process.env.LAWGO_OC?.trim() || "";
+const oc = process.env.LAWGO_OC?.trim() || process.env.LAW_OC?.trim() || "";
 const mockMode = process.env.LAWGO_MOCK_MODE === "force" || !oc;
 const baseUrl = "http://www.law.go.kr/DRF";
 
@@ -152,7 +152,7 @@ function scoreMockResult(item: SearchResult, query: string) {
 
 function ensureConfigured() {
   if (!oc) {
-    throw new Error("LAWGO_OC is not set. Law.go credentials are required for hosted evidence search.");
+    throw new Error("LAWGO_OC or LAW_OC is not set. Law.go credentials are required for hosted evidence search.");
   }
 }
 
@@ -412,10 +412,15 @@ export async function searchLawGoPrecedents(query: string, limit = 4): Promise<S
 }
 
 export async function getDetail(id: string): Promise<DetailRecord | null> {
-  if (mockMode) return mockDetails.find((item) => item.id === id) || null;
+  const parsed = parseLawId(id);
+  if (mockMode) {
+    const mock = mockDetails.find((item) => item.id === id);
+    if (mock) return mock;
+    if (parsed?.type === "law") return buildLawFallbackDetail(id, parsed.raw);
+    return null;
+  }
   ensureConfigured();
 
-  const parsed = parseLawId(id);
   if (!parsed) return null;
 
   const url = new URL(`${baseUrl}/lawService.do`);

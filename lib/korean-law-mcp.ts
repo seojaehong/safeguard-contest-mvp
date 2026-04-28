@@ -12,7 +12,7 @@ type KoreanLawMcpConfig = {
   enabled: boolean;
   apiKey: string;
   configured: boolean;
-  keySource: "KOREAN_LAW_MCP_LAW_OC" | "LAWGO_OC" | "none";
+  keySource: "KOREAN_LAW_MCP_LAW_OC" | "LAWGO_OC" | "LAW_OC" | "none";
 };
 
 const KLM_LAW_PREFIX = "klm-law-";
@@ -22,14 +22,16 @@ const DEFAULT_SEARCH_LIMIT = 3;
 
 function getConfig(): KoreanLawMcpConfig {
   const explicitKey = process.env.KOREAN_LAW_MCP_LAW_OC?.trim() || "";
-  const fallbackKey = process.env.LAWGO_OC?.trim() || "";
+  const lawgoKey = process.env.LAWGO_OC?.trim() || "";
+  const legacyLawKey = process.env.LAW_OC?.trim() || "";
+  const fallbackKey = lawgoKey || legacyLawKey;
   const apiKey = explicitKey || fallbackKey;
 
   return {
     enabled: process.env.KOREAN_LAW_MCP_ENABLED === "true",
     apiKey,
     configured: process.env.KOREAN_LAW_MCP_ENABLED === "true" && Boolean(apiKey),
-    keySource: explicitKey ? "KOREAN_LAW_MCP_LAW_OC" : fallbackKey ? "LAWGO_OC" : "none"
+    keySource: explicitKey ? "KOREAN_LAW_MCP_LAW_OC" : lawgoKey ? "LAWGO_OC" : legacyLawKey ? "LAW_OC" : "none"
   };
 }
 
@@ -39,7 +41,7 @@ function createClient() {
     throw new Error("KOREAN_LAW_MCP_ENABLED가 false라 보강 검색을 사용하지 않습니다.");
   }
   if (!config.apiKey) {
-    throw new Error("KOREAN_LAW_MCP_LAW_OC 또는 LAWGO_OC가 필요합니다.");
+    throw new Error("KOREAN_LAW_MCP_LAW_OC, LAWGO_OC 또는 LAW_OC가 필요합니다.");
   }
   return new LawApiClient({ apiKey: config.apiKey });
 }

@@ -57,7 +57,7 @@ export type AskResponse = {
     koreanLawMcp: {
       enabled: boolean;
       configured: boolean;
-      keySource: "KOREAN_LAW_MCP_LAW_OC" | "LAWGO_OC" | "none";
+      keySource: "KOREAN_LAW_MCP_LAW_OC" | "LAWGO_OC" | "LAW_OC" | "none";
       summary: string;
     };
   };
