@@ -29,17 +29,18 @@
 
 - `npm.cmd run build`: passed.
 - `npm.cmd run typecheck`: passed after build regenerated `.next/types`.
-- `npm.cmd run smoke:orchestration-download`: passed against production before this deploy. It confirmed current production already returns live `KOSHA 국내재해사례/사고사망` evidence and all 12 download artifacts.
+- `npm.cmd run smoke:orchestration-download`: passed against production after deployment.
+
+## Production Smoke Result
+
+- 대상 URL: `https://safeguard-contest-mvp.vercel.app`
+- 기상청: live, signal count 5. 초단기실황, 초단기예보, 단기예보, 기상특보, 영향예보 호출 경로가 WeatherSignal에 반영됐다.
+- KOSHA 국내재해사례/첨부파일/사고사망: live, count 3. 국내재해사례와 사고사망 게시판 근거가 TBM과 교육 사례에 반영됐다.
+- KOSHA 스마트검색/자료링크/MSDS: fallback, count 0. 호출은 수행했지만 스마트검색은 `UNKNOWN_ERROR(null)`, 자료 링크는 항목 없는 정상 응답, MSDS는 화학물질 키워드 없음으로 기록됐다.
+- 다운로드: TXT, JSON, CSV, XLS, DOC, HTML, HWPX, PDF, JPG, 전체 TXT, 전체 CSV, 전체 XLS 총 12개 artifact 생성 성공.
 
 ## Next Evidence Gate
 
-After deployment, rerun:
-
-```powershell
-npm.cmd run smoke:orchestration-download
-```
-
-Expected changes:
-
-- Weather signal count should increase from 3 to up to 5 when `기상특보` and `영향예보` endpoints return usable data.
-- API mapping should include `KOSHA 스마트검색/자료링크/MSDS` with either live references or a guide-dependent detail message.
+- `안전보건자료 링크 서비스 코드 목록.xlsx`를 확보하면 제작형태, 업종, 재해유형, 외국어 코드를 고정 파라미터로 바꾼다.
+- `안전보건법령 스마트검색 활용가이드.docx`를 확보하면 `smartSearch`의 검색 파라미터 후보 probing을 제거하고 단일 명세 기반 호출로 바꾼다.
+- `건설업 일별 중대재해 현황` endpoint와 요청 변수를 확인해 건설업 시나리오의 별도 보조 근거로 추가한다.
