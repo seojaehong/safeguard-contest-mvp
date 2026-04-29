@@ -58,7 +58,7 @@
 - 대상 URL: `https://safeguard-contest-mvp.vercel.app`
 - 기상청: live, signal count 5. 초단기실황, 초단기예보, 단기예보, 기상특보, 영향예보 호출 경로가 WeatherSignal에 반영됐다.
 - KOSHA 국내재해사례/첨부파일/사고사망: live, count 3. 국내재해사례와 사고사망 게시판 근거가 TBM과 교육 사례에 반영됐다.
-- KOSHA 스마트검색/자료링크/MSDS: fallback, count 0. 호출은 수행했지만 스마트검색은 `UNKNOWN_ERROR(null)`, 자료 링크는 항목 없는 정상 응답, MSDS는 화학물질 키워드 없음으로 기록됐다.
+- KOSHA 스마트검색/자료링크/MSDS: live, count 2. 스마트검색과 자료링크 근거가 문서 반영 근거로 연결됐다. MSDS는 화학물질 키워드가 없는 물류 시나리오라 의도적으로 건너뛰었다.
 - 다운로드: TXT, JSON, CSV, XLS, DOC, HTML, HWPX, PDF, JPG, 전체 TXT, 전체 CSV, 전체 XLS 총 12개 artifact 생성 성공.
 
 ## Next Evidence Gate
