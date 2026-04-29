@@ -1,0 +1,201 @@
+{
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "generatedAt": "2026-04-29T00:22:03.190Z",
+  "elapsedMs": 30584,
+  "question": "대구 달서구 창고업 고중량 박스 적재 및 수작업 운반. 작업자 5명, 숙련자 중심, 오늘 날씨를 반영해 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
+  "weather": {
+    "status": 200,
+    "elapsedMs": 376,
+    "mode": "live",
+    "summary": "단시간 구름많음, 강수없음, 기온 15℃, 풍속 1m/s (초단기실황/초단기예보/단기예보 반영)",
+    "signalCount": 3
+  },
+  "ask": {
+    "status": 200,
+    "elapsedMs": 27438,
+    "mode": "live",
+    "statusSummary": "연결됨",
+    "documentCount": 11
+  },
+  "apiMapping": [
+    {
+      "source": "기상청 현재/초단기/단기",
+      "callPath": [
+        "/api/weather 선조회",
+        "/api/ask 내부 fetchWeatherSignal"
+      ],
+      "mode": "live",
+      "reflectedIn": [
+        "현장 브리프 날씨",
+        "위험성평가표 작업조건",
+        "TBM 기상 신호",
+        "작업중지 기준"
+      ],
+      "evidence": "단시간 구름많음, 강수없음, 기온 15℃, 풍속 1m/s (초단기실황/초단기예보/단기예보 반영)",
+      "count": 3
+    },
+    {
+      "source": "Law.go + korean-law-mcp",
+      "callPath": [
+        "/api/ask 내부 searchLegalSources"
+      ],
+      "mode": "live",
+      "reflectedIn": [
+        "근거 출처",
+        "위험성평가표 반영 근거",
+        "TBM 기록 반영 근거",
+        "사진/증빙 확인 근거"
+      ],
+      "evidence": "korean-law-mcp 비활성화",
+      "count": 6
+    },
+    {
+      "source": "Gemini",
+      "callPath": [
+        "/api/ask 내부 generateAnswer"
+      ],
+      "mode": "live",
+      "reflectedIn": [
+        "점검결과 요약",
+        "위험성평가표",
+        "TBM",
+        "안전보건교육",
+        "외국인 전송본"
+      ],
+      "evidence": "산업안전 실무용 코파일럿으로서, 대구 달서구 창고업의 고중량 박스 적재 및 수작업 운반 작업에 대한 질문에 제공된 근거 목록 범위 내에서 답변 드립니다.\n\n---\n\n### 1) 핵심 판단\n\n대구 달서구 창고업에서 고중량 박스 적재 및 수작업 운반 작업을 수행하는 사업주는 해당 작업으로 ",
+      "count": 11
+    },
+    {
+      "source": "Work24 훈련과정",
+      "callPath": [
+        "/api/ask 내부 fetchTrainingRecommendations"
+      ],
+      "mode": "live",
+      "reflectedIn": [
+        "후속 교육",
+        "안전보건교육 기록",
+        "교육 추천 카드"
+      ],
+      "evidence": "고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다.",
+      "count": 3
+    },
+    {
+      "source": "KOSHA 안전보건교육포털",
+      "callPath": [
+        "/api/ask 내부 fetchKoshaEducationRecommendations"
+      ],
+      "mode": "live",
+      "reflectedIn": [
+        "후속 교육",
+        "안전보건교육 기록",
+        "KOSHA 교육 카드"
+      ],
+      "evidence": "KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다.",
+      "count": 3
+    },
+    {
+      "source": "KOSHA 공식자료/가이드",
+      "callPath": [
+        "/api/ask 내부 fetchKoshaReferences"
+      ],
+      "mode": "live",
+      "reflectedIn": [
+        "위험성평가 절차",
+        "TBM 기록 항목",
+        "안전보건교육 서식"
+      ],
+      "evidence": "KOSHA·고용노동부 공식 자료 URL 4건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다.",
+      "count": 5
+    },
+    {
+      "source": "KOSHA 재해사례",
+      "callPath": [
+        "/api/ask 내부 fetchAccidentCases"
+      ],
+      "mode": "fallback",
+      "reflectedIn": [
+        "유사 재해사례",
+        "TBM 예방 포인트",
+        "교육 사례"
+      ],
+      "evidence": "KOSHA 국내재해사례 API 오류 응답: 99 / UNKNOWN_ERROR 기본 재해사례 근거로 전환했습니다.",
+      "count": 3
+    }
+  ],
+  "downloads": [
+    {
+      "format": "TXT",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.txt",
+      "bytes": 5834,
+      "ok": true
+    },
+    {
+      "format": "JSON",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.json",
+      "bytes": 6490,
+      "ok": true
+    },
+    {
+      "format": "CSV",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.csv",
+      "bytes": 9189,
+      "ok": true
+    },
+    {
+      "format": "XLS",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.xls",
+      "bytes": 15347,
+      "ok": true
+    },
+    {
+      "format": "DOC",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.doc",
+      "bytes": 9617,
+      "ok": true
+    },
+    {
+      "format": "HTML",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.html",
+      "bytes": 6412,
+      "ok": true
+    },
+    {
+      "format": "HWPX",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.hwpx",
+      "bytes": 10094,
+      "ok": true
+    },
+    {
+      "format": "PDF",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.pdf",
+      "bytes": 275894,
+      "ok": true
+    },
+    {
+      "format": "JPG",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.jpg",
+      "bytes": 173146,
+      "ok": true
+    },
+    {
+      "format": "ALL_TXT",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.txt",
+      "bytes": 45642,
+      "ok": true
+    },
+    {
+      "format": "ALL_CSV",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.csv",
+      "bytes": 69127,
+      "ok": true
+    },
+    {
+      "format": "ALL_XLS",
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.xls",
+      "bytes": 99302,
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "failCount": 0
+}

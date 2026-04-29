@@ -142,7 +142,7 @@ function downloadBlob(blob: Blob, fileName: string) {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function escapeHtml(value: string) {
@@ -256,23 +256,69 @@ function buildDelimited(rows: SheetRow[], delimiter: "," | "\t") {
 }
 
 function buildExcelHtml(title: string, rows: SheetRow[]) {
-  const tableRows = rows.map((row) => `<tr><td>${escapeHtml(row.document)}</td><td>${escapeHtml(row.section)}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td></tr>`).join("");
+  const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
+    acc[row.section] = [...(acc[row.section] || []), row];
+    return acc;
+  }, {});
+  const summaryRows = Object.entries(grouped).map(([section, sectionRows]) => `
+    <tr>
+      <td>${escapeHtml(section)}</td>
+      <td>${sectionRows.length}</td>
+      <td>${escapeHtml(sectionRows.slice(0, 2).map((row) => row.item).join(", "))}</td>
+    </tr>
+  `).join("");
+  const tableRows = Object.entries(grouped).map(([section, sectionRows]) => `
+    <tr class="section-row"><td colspan="4">${escapeHtml(section)}</td></tr>
+    ${sectionRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인</td></tr>`).join("")}
+  `).join("");
   return `<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(title)}</title>
+  <!--[if gte mso 9]>
+  <xml>
+    <x:ExcelWorkbook>
+      <x:ExcelWorksheets>
+        <x:ExcelWorksheet>
+          <x:Name>${escapeHtml(title).slice(0, 28)}</x:Name>
+          <x:WorksheetOptions><x:FitToPage/><x:Print><x:FitWidth>1</x:FitWidth><x:FitHeight>0</x:FitHeight></x:Print></x:WorksheetOptions>
+        </x:ExcelWorksheet>
+      </x:ExcelWorksheets>
+    </x:ExcelWorkbook>
+  </xml>
+  <![endif]-->
   <style>
-    table { border-collapse: collapse; width: 100%; font-family: "Malgun Gothic", sans-serif; }
-    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; }
-    th { background: #e8f1ed; font-weight: 700; }
+    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; color: #17201d; }
+    .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 14px; }
+    .cover h1 { margin: 0 0 8px; font-size: 22px; }
+    .cover p { margin: 0; color: #5e6677; }
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: "Malgun Gothic", sans-serif; margin-bottom: 14px; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; word-break: keep-all; }
+    th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
+    .summary th { background: #6f4b26; }
+    .section-row td { background: #e8f1ed; color: #1f4d43; font-weight: 700; font-size: 14px; border-top: 2px solid #1f4d43; }
+    .center { text-align: center; width: 42px; }
+    .check-cell { text-align: center; color: #6f4b26; width: 90px; }
+    .note { color: #5e6677; font-size: 12px; margin-top: 10px; }
   </style>
 </head>
 <body>
+  <div class="cover">
+    <h1>${escapeHtml(title)}</h1>
+    <p>SafeGuard 현장 문서팩 · 검토/확인/서명용 Excel 서식</p>
+  </div>
+  <table class="summary">
+    <colgroup><col style="width: 34%;" /><col style="width: 12%;" /><col style="width: 54%;" /></colgroup>
+    <thead><tr><th>섹션</th><th>항목 수</th><th>주요 항목</th></tr></thead>
+    <tbody>${summaryRows}</tbody>
+  </table>
   <table>
-    <thead><tr><th>문서</th><th>섹션</th><th>항목</th><th>내용</th></tr></thead>
+    <colgroup><col style="width: 6%;" /><col style="width: 22%;" /><col style="width: 60%;" /><col style="width: 12%;" /></colgroup>
+    <thead><tr><th>No.</th><th>항목</th><th>내용</th><th>확인</th></tr></thead>
     <tbody>${tableRows}</tbody>
   </table>
+  <p class="note">본 파일은 공식자료 기반 초안입니다. 현장관리자가 작업 전 최종 확인 후 사용하세요.</p>
 </body>
 </html>`;
 }
@@ -427,6 +473,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<Record<DocumentKey, string>>(initialValues);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
+  const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
   const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null);
@@ -472,6 +519,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   }
 
   function downloadJpg() {
+    setImageStatus("idle");
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754">
       <rect width="100%" height="100%" fill="#fffaf1"/>
       <foreignObject x="60" y="60" width="1120" height="1634">
@@ -496,6 +544,11 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
         if (blob) downloadBlob(blob, `${baseName}.jpg`);
         URL.revokeObjectURL(svgUrl);
       }, "image/jpeg", 0.92);
+    };
+    image.onerror = () => {
+      console.error("JPG export failed: SVG image could not be rendered");
+      URL.revokeObjectURL(svgUrl);
+      setImageStatus("error");
     };
     image.src = svgUrl;
   }
@@ -544,19 +597,30 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
     if (!confirmed) return;
 
     const rows = buildLaunchSheetRows(values);
+    const sheetWindow = window.open("https://sheets.new", "_blank", "noopener,noreferrer");
     try {
       await navigator.clipboard.writeText(buildDelimited(rows, "\t"));
       setSheetStatus("copied");
-      window.open("https://sheets.new", "_blank", "noopener,noreferrer");
+      if (!sheetWindow) {
+        window.location.href = "https://sheets.new";
+      }
     } catch (error) {
       console.error("Google Sheets TSV copy failed", error);
       setSheetStatus("error");
+      downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, "\t")}`], { type: "text/tab-separated-values;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-google-sheets.tsv`);
+      if (!sheetWindow) {
+        window.location.href = "https://sheets.new";
+      }
     }
   }
 
   function printPdf() {
     const popup = window.open("", "_blank", "width=900,height=1100");
-    if (!popup) return;
+    if (!popup) {
+      console.error("PDF print window was blocked");
+      downloadHtml();
+      return;
+    }
     popup.document.write(buildHtml(selected.title, selectedText));
     popup.document.close();
     popup.focus();
@@ -627,7 +691,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
             </p>
           </div>
           <div className="download-bar">
-            <button type="button" className="button secondary" onClick={printPdf}>PDF</button>
+            <button type="button" className="button secondary" onClick={printPdf}>PDF 저장/인쇄</button>
             <button type="button" className="button secondary" onClick={downloadXls}>XLS</button>
             <button type="button" className="button secondary" onClick={downloadDoc}>DOC</button>
             <button type="button" className="button" onClick={downloadHwpx} disabled={hwpxStatus === "building"}>
@@ -647,6 +711,9 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
         </div>
         {hwpxStatus === "error" ? (
           <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
+        ) : null}
+        {imageStatus === "error" ? (
+          <p className="export-error">JPG 변환 중 오류가 발생했습니다. HTML 또는 PDF 저장/인쇄를 먼저 사용해 주세요.</p>
         ) : null}
         <textarea
           className="document-textarea"
