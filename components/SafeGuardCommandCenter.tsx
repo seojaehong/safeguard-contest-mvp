@@ -36,6 +36,14 @@ type FieldBrief = {
   foreignWorkerSignal: string;
 };
 
+type WeatherBrief = AskResponse["externalData"]["weather"];
+
+type WeatherBriefResponse = {
+  ok: boolean;
+  weather?: WeatherBrief;
+  message?: string;
+};
+
 const workflowSteps: WorkflowStep[] = [
   { id: "01", key: "input", label: "작업 입력", caption: "현장·작업·조건" },
   { id: "02", key: "risk", label: "위험 판단", caption: "법령 매칭" },
@@ -120,6 +128,20 @@ function operationalStatus(data: AskResponse | null, state: GenerationState) {
   return "입력 대기";
 }
 
+function weatherStatusLabel(data: AskResponse | null, weather: WeatherBrief | null, loading: boolean) {
+  const currentWeather = data?.externalData.weather || weather;
+  if (loading) return "확인 중";
+  if (currentWeather?.mode === "live") return "현재 반영";
+  if (currentWeather) return "보강 필요";
+  return "대기";
+}
+
+function apiStackLabel(data: AskResponse | null, weather: WeatherBrief | null) {
+  if (data) return "7개 조합";
+  if (weather?.mode === "live") return "기상 선조회";
+  return "생성 시 조합";
+}
+
 function statusDetailCopy(state: GenerationState) {
   if (state === "generating") return "법령·기상·교육·재해사례를 확인하고 있습니다.";
   if (state === "ready") return "문서팩 편집과 현장 전파를 진행할 수 있습니다.";
@@ -154,15 +176,21 @@ function inferForeignSignal(text: string, fallback: boolean) {
   return fallback ? "외국인 포함 가능" : "국내 인력 중심";
 }
 
-function buildInputFieldBrief(question: string, example: FieldExample): FieldBrief {
+function buildInputFieldBrief(
+  question: string,
+  example: FieldExample,
+  weather: WeatherBrief | null,
+  isWeatherLoading: boolean
+): FieldBrief {
+  const weatherSummary = weather?.summary || inferWeatherFromText(question, example.weatherSignal);
   return {
     companyName: example.companyName,
-    siteName: inferLocationFromText(question, example.region),
+    siteName: weather?.locationLabel || inferLocationFromText(question, example.region),
     industry: example.industry,
     workSummary: example.workType,
     workerCount: inferWorkerCountFromText(question),
-    weather: inferWeatherFromText(question, example.weatherSignal),
-    sourceLabel: "입력문 자동 추출",
+    weather: isWeatherLoading ? "현재 기상 확인 중" : weatherSummary,
+    sourceLabel: isWeatherLoading ? "기상청 확인 중" : weather?.mode === "live" ? "현재 기상 반영" : "입력+기상 보강",
     foreignWorkerSignal: inferForeignSignal(question, example.hasForeignWorkers)
   };
 }
@@ -221,6 +249,8 @@ export function SafeGuardCommandCenter({
   const [state, setState] = useState<GenerationState>("idle");
   const [isPending, startTransition] = useTransition();
   const [checkedActions, setCheckedActions] = useState<boolean[]>([]);
+  const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
+  const [isWeatherLoading, setIsWeatherLoading] = useState(false);
 
   function scrollToStep(anchor: StepAnchor) {
     const target = document.getElementById(anchor);
@@ -269,9 +299,39 @@ export function SafeGuardCommandCenter({
     setSelectedExampleId(example.id);
     setQuestion(example.question);
     setData(null);
+    setLiveWeather(null);
     setState("idle");
     setMessage(`${example.label} 현장 예시를 불러왔습니다. 필요하면 작업 조건을 수정한 뒤 생성하세요.`);
   }
+
+  useEffect(() => {
+    const trimmed = question.trim();
+    if (data || trimmed.length < 8) return;
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      setIsWeatherLoading(true);
+      fetch(`/api/weather?question=${encodeURIComponent(trimmed)}`, { signal: controller.signal })
+        .then(async (response) => {
+          const payload = await response.json() as WeatherBriefResponse;
+          if (!response.ok || !payload.ok || !payload.weather) {
+            throw new Error(payload.message || `weather request failed: HTTP ${response.status}`);
+          }
+          setLiveWeather(payload.weather);
+        })
+        .catch((error: unknown) => {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          console.warn("weather brief refresh failed", error);
+          setLiveWeather(null);
+        })
+        .finally(() => setIsWeatherLoading(false));
+    }, 500);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [data, question]);
 
   useEffect(() => {
     if (!autoGenerate) return;
@@ -283,7 +343,7 @@ export function SafeGuardCommandCenter({
   const busy = state === "generating" || isPending;
   const currentStep = activeStep(state);
   const statuses = stepStatuses(state);
-  const fieldBrief = data ? buildApiFieldBrief(data, selectedExample) : buildInputFieldBrief(question, selectedExample);
+  const fieldBrief = data ? buildApiFieldBrief(data, selectedExample) : buildInputFieldBrief(question, selectedExample, liveWeather, isWeatherLoading);
   const currentLawCount = lawCount(data, state);
   const currentDocProgress = docProgress(data, state);
   const inputLimit = 600;
@@ -337,9 +397,9 @@ export function SafeGuardCommandCenter({
                 <span>현재 단계</span>
                 <b>{statusCopy(state)}</b>
               </div>
-              <div className="status-row pending">
-                <span>경과</span>
-                <b>{elapsedLabel(state)}</b>
+              <div className={`status-row ${statusRowState(Boolean(data?.externalData.weather.mode === "live" || liveWeather?.mode === "live"), isWeatherLoading)}`}>
+                <span>기상청 현재</span>
+                <b>{weatherStatusLabel(data, liveWeather, isWeatherLoading)}</b>
               </div>
               <div className={`status-row ${statusRowState(currentLawCount > 0)}`}>
                 <span>법령 매칭</span>
@@ -348,6 +408,10 @@ export function SafeGuardCommandCenter({
               <div className={`status-row ${statusRowState(currentDocProgress > 0)}`}>
                 <span>문서 작성</span>
                 <b>{currentDocProgress}/6</b>
+              </div>
+              <div className={`status-row ${statusRowState(Boolean(data || liveWeather?.mode === "live"))}`}>
+                <span>API 조합</span>
+                <b>{apiStackLabel(data, liveWeather)}</b>
               </div>
             </div>
             <div className="left-progress" aria-hidden="true">
@@ -483,7 +547,7 @@ export function SafeGuardCommandCenter({
               <span className="eyebrow">근거 매칭</span>
               <strong>{currentLawCount ? `${currentLawCount}건 연결` : "생성 후 연결"}</strong>
             </div>
-            <p>{message || "선택한 현장 설명을 기준으로 법령, 기상, KOSHA 자료, 교육 추천을 연결합니다."}</p>
+            <p>{message || "기상청은 현재 지역 조건을 먼저 확인하고, 생성 시 법령·판례·해석례·KOSHA·교육·재해사례·AI를 조합합니다."}</p>
             <div className="inline-progress" aria-label={`문서 작성 진행률 ${currentDocProgress}/6`}>
               <span style={{ width: `${Math.max(8, (currentDocProgress / 6) * 100)}%` }} />
             </div>
