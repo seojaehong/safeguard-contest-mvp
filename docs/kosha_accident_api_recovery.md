@@ -34,3 +34,7 @@ Vercel production smoke에서 `KOSHA 재해사례`가 `fallback`으로 표시됐
 - 배포 후 `npm.cmd run smoke:orchestration-download`에서 `KOSHA 재해사례` mode가 `live`로 바뀌는지 확인한다.
 - 그래도 `fallback`이면 Vercel production의 `DATA_GO_KR_SERVICE_KEY` 값이 로컬과 다른지 확인해야 한다.
 - Vercel CLI에서 env 값을 조회하려면 현재 터미널에 Vercel login/token이 필요하다.
+
+## 추가 조치
+
+서비스키 후보 재시도 후에도 production에서만 `UNKNOWN_ERROR`가 유지되면, Vercel 기본 함수 리전이 해외로 배정되어 공공 API 응답이 달라지는 케이스를 의심한다. 그래서 `vercel.json`에 `regions: ["icn1"]`을 지정해 API Route 실행 리전을 Seoul로 고정한다.
