@@ -8,9 +8,10 @@ type AccidentCaseResult = {
 };
 
 type JsonRecord = Record<string, unknown>;
-type RankedAccidentCase = AccidentCase & { rank: number };
+type AccidentCaseWithMeta = AccidentCase & { boardNo?: string };
+type RankedAccidentCase = AccidentCaseWithMeta & { rank: number };
 type ParseResult =
-  | { kind: "ok"; cases: AccidentCase[]; detail: string }
+  | { kind: "ok"; cases: AccidentCaseWithMeta[]; detail: string }
   | { kind: "empty"; cases: []; detail: string }
   | { kind: "api_error" | "parse_error"; cases: []; detail: string };
 
@@ -199,6 +200,63 @@ function buildUrlCandidates(question: string) {
   });
 }
 
+function buildAttachmentUrl(boardNo: string, key: string) {
+  const url = new URL("https://apis.data.go.kr/B552468/disaster_api02/getdisaster_api02");
+  url.searchParams.set("serviceKey", key);
+  url.searchParams.set("boardno", boardNo);
+  url.searchParams.set("pageNo", "1");
+  url.searchParams.set("numOfRows", "10");
+  url.searchParams.set("callApiId", "1070");
+  url.searchParams.set("_type", "json");
+  return url.toString();
+}
+
+function buildRawAttachmentUrl(boardNo: string, key: string) {
+  return `https://apis.data.go.kr/B552468/disaster_api02/getdisaster_api02?serviceKey=${key}&boardno=${encodeURIComponent(boardNo)}&pageNo=1&numOfRows=10&callApiId=1070&_type=json`;
+}
+
+function buildFatalAccidentUrl(question: string, key: string) {
+  const url = new URL("https://apis.data.go.kr/B552468/news_api02/getNews_api02");
+  url.searchParams.set("serviceKey", key);
+  url.searchParams.set("pageNo", "1");
+  url.searchParams.set("numOfRows", "6");
+  url.searchParams.set("callApiId", "1040");
+  url.searchParams.set("_type", "json");
+  url.searchParams.set("keyword", pickKeyword(question));
+  return url.toString();
+}
+
+function buildAttachmentUrlCandidates(boardNo: string) {
+  const candidates = [
+    { label: "attachment:urlsearchparams:raw", url: buildAttachmentUrl(boardNo, serviceKey) },
+    { label: "attachment:raw-query:raw", url: buildRawAttachmentUrl(boardNo, serviceKey) }
+  ];
+  const decodedKey = safeDecodeServiceKey(serviceKey);
+  if (decodedKey !== serviceKey) {
+    candidates.push(
+      { label: "attachment:urlsearchparams:decoded", url: buildAttachmentUrl(boardNo, decodedKey) },
+      { label: "attachment:raw-query:decoded", url: buildRawAttachmentUrl(boardNo, decodedKey) }
+    );
+  }
+  const seen = new Set<string>();
+  return candidates.filter((candidate) => {
+    if (seen.has(candidate.url)) return false;
+    seen.add(candidate.url);
+    return true;
+  });
+}
+
+function buildFatalAccidentUrlCandidates(question: string) {
+  const candidates = [
+    { label: "fatal:urlsearchparams:raw", url: buildFatalAccidentUrl(question, serviceKey) }
+  ];
+  const decodedKey = safeDecodeServiceKey(serviceKey);
+  if (decodedKey !== serviceKey) {
+    candidates.push({ label: "fatal:urlsearchparams:decoded", url: buildFatalAccidentUrl(question, decodedKey) });
+  }
+  return candidates;
+}
+
 function pickKeyword(question: string) {
   const candidates = ["비계", "추락", "지게차", "충돌", "용접", "화재", "절단", "감전", "밀폐", "화학", "세척", "폭염", "온열"];
   return candidates.find((keyword) => question.includes(keyword)) || "산업재해";
@@ -225,7 +283,7 @@ function matchedReasonFor(question: string, item: AccidentCase) {
     : "현재 작업과 같은 산업안전 핵심 위험을 예방 포인트로 연결했습니다.";
 }
 
-function rankAccidentCase(question: string, item: AccidentCase): RankedAccidentCase {
+function rankAccidentCase(question: string, item: AccidentCaseWithMeta): RankedAccidentCase {
   const normalized = question.toLowerCase();
   const haystack = `${item.title} ${item.industry || ""} ${item.accidentType || ""} ${item.summary}`.toLowerCase();
   const signals = [
@@ -258,7 +316,7 @@ function rankAccidentCase(question: string, item: AccidentCase): RankedAccidentC
   };
 }
 
-function toAccidentCase(question: string, record: JsonRecord): AccidentCase | null {
+function toAccidentCase(question: string, record: JsonRecord): AccidentCaseWithMeta | null {
   const title = readString(record, ["title", "accidentTitle", "sagoNm", "caseTitle", "keyword", "재해명", "사고명", "제목"]);
   const summary = readString(record, ["summary", "accidentContent", "sagoCn", "caseSummary", "contents", "content", "재해개요", "사고개요", "내용"]);
   const preventionPoint = readString(record, ["prevention", "preventCn", "preventiveMeasure", "preventionPoint", "예방대책", "재발방지대책"]);
@@ -276,7 +334,43 @@ function toAccidentCase(question: string, record: JsonRecord): AccidentCase | nu
     summary: summary || "KOSHA 국내재해사례 API에서 유사 재해사례를 확인했습니다.",
     preventionPoint: preventionPoint || "작업 전 위험요인 공유, 보호구 착용, 작업중지 기준 확인을 예방 포인트로 적용합니다.",
     sourceUrl: sourceUrl || (boardNo ? `https://www.kosha.or.kr/kosha/data/industrialAccidentStatus.do?mode=view&boardNo=${boardNo}` : FALLBACK_SOURCE_URL),
-    matchedReason: ""
+    sourceType: "domestic-case" as const,
+    matchedReason: "",
+    boardNo: boardNo || undefined
+  };
+
+  return {
+    ...item,
+    matchedReason: matchedReasonFor(question, item)
+  };
+}
+
+function stripHtml(value: string) {
+  return value
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function toFatalAccidentCase(question: string, record: JsonRecord): AccidentCaseWithMeta | null {
+  const title = readString(record, ["keyword", "title", "제목"]);
+  const contents = stripHtml(readString(record, ["contents", "content", "내용"]));
+  const articleNo = readString(record, ["arno", "articleNo", "pstNo", "게시글번호"]);
+  if (!title && !contents) return null;
+
+  const item: AccidentCaseWithMeta = {
+    title: title || "KOSHA 사고사망 사례",
+    industry: pickBusiness(contents || question) || undefined,
+    accidentType: "사고사망",
+    summary: contents || "KOSHA 사고사망 게시판에서 유사 중대위험 사례를 확인했습니다.",
+    preventionPoint: "작업 전 사망사고 유사 위험을 TBM에서 공유하고, 작업중지 기준·출입통제·보호구 착용을 재확인합니다.",
+    sourceUrl: articleNo ? `https://www.kosha.or.kr/kosha/data/machine.do?mode=view&articleNo=${articleNo}` : "https://www.kosha.or.kr/kosha/data/machine.do",
+    sourceType: "fatal-accident",
+    matchedReason: "",
+    boardNo: articleNo || undefined
   };
 
   return {
@@ -348,6 +442,134 @@ function stripXmlForDetail(text: string) {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 240);
+}
+
+function normalizeKoshaFileUrl(url: string) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `https://www.kosha.or.kr${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+function parseAttachment(text: string) {
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    const records = readArrayEnvelope(parsed);
+    for (const record of records) {
+      const filePath = readString(record, ["filepath", "filePath", "fileDownloadUrl", "downloadUrl", "url"]);
+      const fileName = readString(record, ["filenm", "fileNm", "fileName", "파일명"]);
+      if (filePath) {
+        return {
+          url: normalizeKoshaFileUrl(filePath),
+          fileName
+        };
+      }
+    }
+  } catch (error) {
+    console.warn("KOSHA accident attachment parse failed", error);
+  }
+  return null;
+}
+
+async function fetchAttachment(boardNo: string, options: Required<FetchOptions>) {
+  for (const candidate of buildAttachmentUrlCandidates(boardNo)) {
+    try {
+      const text = await fetchWithRetry(candidate.url, {
+        ...options,
+        requestTimeoutMs: Math.min(options.requestTimeoutMs, 6_000),
+        retryCount: 0,
+        budgetLabel: `${options.budgetLabel} (${candidate.label})`
+      });
+      const attachment = parseAttachment(text);
+      if (attachment) return attachment;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn(`KOSHA accident attachment failed: ${candidate.label}: ${message}`);
+    }
+  }
+  return null;
+}
+
+async function enrichAttachments(cases: AccidentCaseWithMeta[], options: Required<FetchOptions>) {
+  const enriched = await Promise.all(cases.map(async (item) => {
+    if (!item.boardNo || item.sourceType === "fatal-accident") return item;
+    const attachment = await fetchAttachment(item.boardNo, options);
+    if (!attachment) return item;
+    return {
+      ...item,
+      sourceUrl: attachment.url,
+      sourceType: "attachment" as const,
+      attachmentName: attachment.fileName || undefined,
+      matchedReason: `${item.matchedReason} 첨부파일${attachment.fileName ? `(${attachment.fileName})` : ""}을 근거 링크로 연결했습니다.`
+    };
+  }));
+
+  return enriched.map(({ boardNo, ...item }) => item);
+}
+
+function parseFatalAccidentCases(question: string, text: string): ParseResult {
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    if (isRecord(parsed)) {
+      const header = isRecord(parsed.header)
+        ? parsed.header
+        : isRecord(parsed.response) && isRecord(parsed.response.header)
+          ? parsed.response.header
+          : undefined;
+      const resultCode = header ? readString(header, ["resultCode", "returnReasonCode"]) : "";
+      const resultMessage = header ? readString(header, ["resultMsg", "returnAuthMsg", "message"]) : "";
+      if (resultCode && resultCode !== "00") {
+        return {
+          kind: "api_error",
+          cases: [],
+          detail: `KOSHA 사고사망 API 오류 응답: ${resultCode}${resultMessage ? ` / ${resultMessage}` : ""}`
+        };
+      }
+    }
+
+    const cases = readArrayEnvelope(parsed)
+      .map((record) => toFatalAccidentCase(question, record))
+      .filter((item): item is AccidentCaseWithMeta => Boolean(item))
+      .map((item) => rankAccidentCase(question, item))
+      .sort((a, b) => b.rank - a.rank)
+      .map(({ rank, ...item }) => item)
+      .slice(0, 1);
+
+    return cases.length
+      ? { kind: "ok", cases, detail: "KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다." }
+      : { kind: "empty", cases: [], detail: "KOSHA 사고사망 API 호출은 완료됐지만 표시 가능한 사례를 찾지 못했습니다." };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      kind: "parse_error",
+      cases: [],
+      detail: `KOSHA 사고사망 API JSON 파싱 실패: ${message}`
+    };
+  }
+}
+
+async function fetchFatalAccidents(question: string, options: Required<FetchOptions>) {
+  const failureDetails: string[] = [];
+  for (const candidate of buildFatalAccidentUrlCandidates(question)) {
+    try {
+      const text = await fetchWithRetry(candidate.url, {
+        ...options,
+        requestTimeoutMs: Math.min(options.requestTimeoutMs, 6_000),
+        retryCount: 0,
+        budgetLabel: `${options.budgetLabel} (${candidate.label})`
+      });
+      const parsed = parseFatalAccidentCases(question, text);
+      if (parsed.kind === "ok") return parsed;
+      failureDetails.push(`${candidate.label}: ${parsed.detail}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      failureDetails.push(`${candidate.label}: ${message}`);
+    }
+  }
+  return {
+    kind: "empty" as const,
+    cases: [],
+    detail: failureDetails.length ? failureDetails.join(" | ") : "KOSHA 사고사망 후보가 없습니다."
+  };
 }
 
 function parseAccidentCases(question: string, text: string): ParseResult {
@@ -437,11 +659,15 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
   try {
     const proxyResult = await fetchProxy(question, resolvedOptions);
     if (proxyResult?.kind === "ok") {
+      const [cases, fatalCases] = await Promise.all([
+        enrichAttachments(proxyResult.cases, resolvedOptions),
+        fetchFatalAccidents(question, resolvedOptions)
+      ]);
       return {
         source: "kosha-accident",
         mode: "live",
-        detail: `${proxyResult.detail} 연결 방식: relay`,
-        cases: proxyResult.cases
+        detail: `${proxyResult.detail} 연결 방식: relay${fatalCases.cases.length ? ` / ${fatalCases.detail}` : ""}`,
+        cases: [...cases, ...fatalCases.cases].slice(0, 3)
       };
     }
     if (proxyResult) {
@@ -457,11 +683,16 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
         });
         const parsed = parseAccidentCases(question, text);
         if (parsed.kind === "ok") {
+          const [cases, fatalCases] = await Promise.all([
+            enrichAttachments(parsed.cases, resolvedOptions),
+            fetchFatalAccidents(question, resolvedOptions)
+          ]);
+          const mergedCases = [...cases, ...fatalCases.cases].slice(0, 3);
           return {
             source: "kosha-accident",
             mode: "live",
-            detail: `${parsed.detail} 연결 방식: ${candidate.label}`,
-            cases: parsed.cases
+            detail: `${parsed.detail} 연결 방식: ${candidate.label}${fatalCases.cases.length ? ` / ${fatalCases.detail}` : ""}`,
+            cases: mergedCases
           };
         }
         failureDetails.push(`${candidate.label}: ${parsed.detail}`);

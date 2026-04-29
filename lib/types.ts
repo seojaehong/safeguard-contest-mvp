@@ -9,6 +9,8 @@ export type AccidentCase = {
   summary: string;
   preventionPoint: string;
   sourceUrl?: string;
+  sourceType?: "domestic-case" | "fatal-accident" | "attachment" | "fallback";
+  attachmentName?: string;
   matchedReason: string;
 };
 
