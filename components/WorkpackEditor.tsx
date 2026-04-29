@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AskResponse } from "@/lib/types";
 
 declare global {
@@ -471,6 +471,25 @@ function buildCombinedText(values: Record<DocumentKey, string>) {
   return documentMeta.map((item) => `# ${item.title}\n\n${values[item.key]}`).join("\n\n---\n\n");
 }
 
+function parseStoredValues(raw: string | null, fallback: Record<DocumentKey, string>) {
+  if (!raw) return fallback;
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return fallback;
+
+    const record = parsed as Partial<Record<DocumentKey, unknown>>;
+    return documentMeta.reduce<Record<DocumentKey, string>>((acc, item) => {
+      const value = record[item.key];
+      acc[item.key] = typeof value === "string" ? value : fallback[item.key];
+      return acc;
+    }, { ...fallback });
+  } catch (error) {
+    console.warn("workpack local draft parse failed", error);
+    return fallback;
+  }
+}
+
 export function WorkpackEditor({ data }: { data: AskResponse }) {
   const initialValues = useMemo<Record<DocumentKey, string>>(
     () => ({
@@ -488,6 +507,10 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
     }),
     [data]
   );
+  const storageKey = useMemo(
+    () => `safeguard-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}`,
+    [data.question, data.scenario.companyName, data.scenario.siteName]
+  );
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<Record<DocumentKey, string>>(initialValues);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
@@ -500,8 +523,32 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
   const selectedRows = buildRowsForDocument(selected, values);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      setValues(initialValues);
+      return;
+    }
+
+    const stored = parseStoredValues(window.localStorage.getItem(storageKey), initialValues);
+    setValues(stored);
+    setLastEditedAt(null);
+  }, [initialValues, storageKey]);
+
+  function saveLocalDraft(nextValues: Record<DocumentKey, string>) {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(nextValues));
+    } catch (error) {
+      console.warn("workpack local draft save failed", error);
+    }
+  }
+
   function updateValue(value: string) {
-    setValues((current) => ({ ...current, [selected.key]: value }));
+    setValues((current) => {
+      const nextValues = { ...current, [selected.key]: value };
+      saveLocalDraft(nextValues);
+      return nextValues;
+    });
     setLastEditedAt(new Date());
   }
 
@@ -704,20 +751,20 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
             <div className="h2">{selected.title}</div>
             <p className="muted">{selected.description}</p>
             <p className="editor-status" aria-live="polite">
-              저장됨(브라우저 임시) · {selectedText.length.toLocaleString("ko-KR")}자
+              자동저장됨(이 브라우저) · 이력 저장은 관리자 로그인 후 · {selectedText.length.toLocaleString("ko-KR")}자
               {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
             </p>
           </div>
           <div className="download-bar">
             <button type="button" className="button secondary" onClick={printPdf}>PDF 저장/인쇄</button>
             <button type="button" className="button secondary" onClick={downloadXls}>XLS</button>
-            <button type="button" className="button secondary" onClick={downloadDoc}>DOC</button>
             <button type="button" className="button" onClick={downloadHwpx} disabled={hwpxStatus === "building"}>
               {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX"}
             </button>
             <details className="advanced-downloads inline">
-              <summary>더보기</summary>
+              <summary>베타 형식</summary>
               <div className="advanced-download-grid">
+                <button type="button" className="button secondary" onClick={downloadDoc}>DOC</button>
                 <button type="button" className="button secondary" onClick={downloadText}>TXT</button>
                 <button type="button" className="button secondary" onClick={downloadJson}>JSON</button>
                 <button type="button" className="button secondary" onClick={downloadCsv}>CSV</button>

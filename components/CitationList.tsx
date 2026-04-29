@@ -60,10 +60,11 @@ export function CitationList({ citations, question }: { citations: SearchResult[
             {groupItems.map((c) => {
               const href = getCitationHref(c);
               return (
-                <Link key={c.id} href={href} className="list citation-item">
+                <Link key={c.id} href={href} className="list citation-item" target="_blank" rel="noopener noreferrer">
                   <div className="row">
                     <span className="badge">{c.sourceLabel}</span>
                     <span className="badge">{sourceStatusLabel(c)}</span>
+                    <span className="badge">새 탭</span>
                     {c.tags?.some((tag) => tag.includes("작업위험 매핑")) ? <span className="badge">작업위험 매핑</span> : null}
                   </div>
                   <strong>{c.title}</strong>

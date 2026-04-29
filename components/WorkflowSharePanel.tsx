@@ -43,8 +43,8 @@ type WorkflowSharePanelProps = {
 const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
   { key: "email", label: "메일", helper: "관리자·원청 보고", enabled: true },
   { key: "sms", label: "문자", helper: "작업자 즉시 공지", enabled: true },
-  { key: "kakao", label: "카카오", helper: "채널 연결 필요", enabled: false },
-  { key: "band", label: "밴드", helper: "팀 채널 연결 필요", enabled: false }
+  { key: "kakao", label: "카카오", helper: "준비 중 · 채널 승인 후 활성화", enabled: false },
+  { key: "band", label: "밴드", helper: "준비 중 · 팀 채널 승인 후 활성화", enabled: false }
 ];
 
 function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
@@ -312,6 +312,7 @@ export function WorkflowSharePanel({
           >
             <strong>{channel.label}</strong>
             <span>{channel.helper}</span>
+            {!channel.enabled ? <em>준비 중</em> : null}
           </button>
         ))}
       </div>

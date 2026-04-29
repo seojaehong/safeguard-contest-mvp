@@ -155,10 +155,10 @@ function AdminAccessPanel({
     return (
       <article className="workspace-panel card">
         <div className="compact-head">
-          <span className="eyebrow">작업공간</span>
-          <strong>관리자 계정 연결 필요</strong>
+          <span className="eyebrow">이력 저장</span>
+          <strong>로그인 후 저장 가능</strong>
         </div>
-        <p className="muted small">문서팩 이력과 근로자 명단 저장은 관리자 계정 연결 후 활성화됩니다. 지금은 현재 화면에서 생성·수정·다운로드를 진행할 수 있습니다.</p>
+        <p className="muted small">문서 생성·편집·다운로드·전파는 바로 사용할 수 있습니다. 관리자 로그인 시 작업자, 교육, 전파 이력이 저장됩니다.</p>
       </article>
     );
   }
@@ -314,6 +314,10 @@ function WorkerEducationPanel({
 }
 
 function EvidenceImpactPanel({ data }: { data: AskResponse }) {
+  const koshaReferences = data.externalData.kosha.references.slice(0, 3);
+  const accidentCases = data.externalData.accidentCases.cases.slice(0, 2);
+  const hasEvidenceImpact = koshaReferences.length > 0 || accidentCases.length > 0;
+
   return (
     <section className="evidence-impact-grid" id="references">
       <article className="workspace-panel card">
@@ -322,20 +326,26 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
           <strong>문서 반영 근거</strong>
         </div>
         <div className="impact-list">
-          {data.externalData.kosha.references.slice(0, 3).map((item) => (
+          {koshaReferences.map((item) => (
             <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="impact-card">
               <strong>{item.title}</strong>
               <span>{item.agency || "KOSHA"} · {(item.appliesTo || item.appliedTo || ["위험성평가표"]).join(", ")}</span>
               <small>{item.summary}</small>
             </a>
           ))}
-          {data.externalData.accidentCases.cases.slice(0, 2).map((item) => (
+          {accidentCases.map((item) => (
             <a key={item.title} href={item.sourceUrl || "https://www.kosha.or.kr/"} target="_blank" rel="noreferrer" className="impact-card">
               <strong>{item.title}</strong>
               <span>유사 재해사례 · TBM/교육 반영</span>
               <small>{item.preventionPoint}</small>
             </a>
           ))}
+          {!hasEvidenceImpact ? (
+            <div className="impact-empty-state">
+              <strong>공식자료 반영 대기</strong>
+              <span>문서팩은 생성됐지만 KOSHA 자료 또는 재해사례 반영 근거가 아직 확인되지 않았습니다. 법령 근거와 현장 조치 문구는 계속 확인할 수 있습니다.</span>
+            </div>
+          ) : null}
         </div>
       </article>
       <CitationList citations={data.citations} question={data.question} />
@@ -462,6 +472,13 @@ export function FieldOperationsWorkspace({ data }: { data: AskResponse }) {
     [selectedWorkers]
   );
   const workerSummary = summarizeWorkers(selectedWorkers);
+  const pilotChecklist = [
+    ["API", "근거 확인", `${data.citations.length}건 · ${data.status.summary || "연결됨"}`],
+    ["DOC", "문서팩", "Excel·HWPX 우선"],
+    ["EDU", "작업자·교육", `${workerSummary.selectedCount}명 · 교육확인 ${workerSummary.educationPendingCount ? "필요" : "완료"}`],
+    ["SEND", "현장 전파", "메일·문자 중심"],
+    ["SAVE", "이력 저장", session ? "관리자 연결됨" : "로그인 후 저장"]
+  ] as const;
 
   function toggleWorker(id: string) {
     startTransition(() => {
@@ -501,21 +518,14 @@ export function FieldOperationsWorkspace({ data }: { data: AskResponse }) {
 
   return (
     <section className="field-workspace" id="workpack">
-      <aside className="workspace-rail card" aria-label="SafeGuard 작업 단계">
+      <aside className="workspace-rail card" aria-label="SafeGuard 파일럿 체크리스트">
         <div className="compact-head">
-          <span className="eyebrow">흐름</span>
-          <strong>작업공간</strong>
+          <span className="eyebrow">운영 체크</span>
+          <strong>파일럿 체크리스트</strong>
         </div>
-        {[
-          ["01", "작업 생성", "오늘 작업 조건과 위험을 입력합니다."],
-          ["02", "근로자 배치", `${workerSummary.selectedCount}명 선택, 교육확인 ${workerSummary.educationPendingCount ? "필요" : "완료"}`],
-          ["03", "문서팩 편집", "위험성평가·TBM·교육기록을 수정합니다."],
-          ["04", "근거 확인", "법령·KOSHA·재해사례 반영 위치를 봅니다."],
-          ["05", "현장 전파", "선택한 근로자에게 언어별 메시지를 보냅니다."],
-          ["06", "이력 저장", "문서팩·교육·전파 결과를 남깁니다."]
-        ].map(([step, title, helper]) => (
-          <div key={step} className="workspace-step">
-            <span>{step}</span>
+        {pilotChecklist.map(([code, title, helper]) => (
+          <div key={code} className="workspace-step">
+            <span>{code}</span>
             <strong>{title}</strong>
             <small>{helper}</small>
           </div>

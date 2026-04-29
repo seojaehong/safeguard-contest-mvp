@@ -80,9 +80,16 @@ const totalDocumentCount = outputItems.length;
 
 function statusCopy(state: GenerationState) {
   if (state === "generating") return "문서 생성 중";
-  if (state === "ready") return "작업공간 준비됨";
+  if (state === "ready") return "문서팩 준비됨";
   if (state === "error") return "연결 점검 필요";
   return "작업 입력 대기";
+}
+
+function stepStatusCopy(status: StepStatus) {
+  if (status === "done") return "완료";
+  if (status === "active") return "진행 중";
+  if (status === "locked") return "잠김";
+  return "대기";
 }
 
 function activeStep(state: GenerationState): WorkflowStep["key"] {
@@ -372,10 +379,11 @@ export function SafeGuardCommandCenter({
               className={step.key === currentStep ? "active" : ""}
               key={step.key}
               onClick={() => scrollToStep(stepAnchors[step.key])}
+              title={step.caption}
             >
               <StepDot status={statuses[step.key]} />
               <span className="step-copy">
-                <small>{step.id} · {statuses[step.key] === "done" ? "완료" : statuses[step.key] === "active" ? "진행 중" : step.caption}</small>
+                <small>{step.id} · {stepStatusCopy(statuses[step.key])}</small>
                 <strong>{step.label}</strong>
               </span>
             </button>
@@ -417,7 +425,7 @@ export function SafeGuardCommandCenter({
               </div>
             </div>
             <div className="left-progress" aria-hidden="true">
-              <span style={{ width: `${Math.max(8, (currentDocProgress / 6) * 100)}%` }} />
+              <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
             </div>
           </section>
 
