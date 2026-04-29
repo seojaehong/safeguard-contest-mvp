@@ -425,7 +425,7 @@ function WorkpackHistoryPanel({
   }
 
   return (
-    <article className="workspace-panel card">
+    <article className="workspace-panel card" id="history">
       <div className="compact-head">
           <span className="eyebrow">이력</span>
         <strong>문서팩·교육 이력</strong>

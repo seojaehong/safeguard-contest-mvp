@@ -343,14 +343,26 @@ function buildLaunchWorkbookHtml(title: string, rows: SheetRow[]) {
   <meta charset="utf-8" />
   <title>${escapeHtml(title)}</title>
   <style>
-    body { font-family: "Malgun Gothic", sans-serif; color: #1d2430; }
-    h2 { margin: 22px 0 8px; color: #21594f; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 18px; }
-    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; }
-    th { background: #e8f1ed; font-weight: 700; }
+    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; color: #17201d; }
+    .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 16px; }
+    .cover h1 { margin: 0 0 8px; font-size: 24px; }
+    .cover p { margin: 0; color: #5e6677; }
+    h2 { margin: 24px 0 8px; color: #21594f; border-left: 5px solid #21594f; padding-left: 9px; }
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-bottom: 18px; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; word-break: keep-all; }
+    th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
+    td:nth-child(1) { width: 18%; }
+    td:nth-child(2) { width: 20%; }
+    td:nth-child(3) { width: 12%; text-align: center; }
   </style>
 </head>
-<body>${sections}</body>
+<body>
+  <div class="cover">
+    <h1>${escapeHtml(title)}</h1>
+    <p>위험성평가·작업계획·TBM·안전보건교육·비상대응·증빙을 한 파일에 묶은 현장 검토용 Excel 문서팩입니다.</p>
+  </div>
+  ${sections}
+</body>
 </html>`;
 }
 
@@ -404,7 +416,13 @@ function buildHwpTemplateText(title: string, rows: SheetRow[]) {
       `[${section}]`,
       ...sectionRows.map((row) => `${row.item}. ${row.content}`),
       ""
-    ])
+    ]),
+    "[확인/서명]",
+    "작성자: ____________________",
+    "관리감독자: ____________________",
+    "교육/TBM 확인자: ____________________",
+    "보관 위치: ____________________",
+    "확인일시: ______년 ____월 ____일 ____시 ____분"
   ].join("\n");
 }
 

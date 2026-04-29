@@ -666,6 +666,52 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   word-spacing: 0.05em;
 }
 
+.api-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.api-proof {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(226, 222, 213, 0.88);
+  border-radius: 16px;
+  background: rgba(255, 253, 248, 0.66);
+  padding: 11px;
+}
+
+.api-proof strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.api-proof span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.api-proof small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.api-proof.live {
+  border-color: rgba(33, 89, 79, 0.24);
+  background: rgba(232, 241, 237, 0.72);
+}
+
+.api-proof.live span {
+  color: var(--accent);
+}
+
+.api-proof.warn {
+  border-color: rgba(184, 95, 36, 0.24);
+  background: rgba(255, 240, 223, 0.62);
+}
+
 .dispatch-preview-panel > div {
   display: grid;
   gap: 4px;
@@ -1685,6 +1731,44 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   font-weight: 650;
 }
 
+.dispatch-confirm-panel {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(33, 89, 79, 0.24);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(33, 89, 79, 0.1), transparent 36%),
+    rgba(255, 253, 248, 0.88);
+  padding: 14px;
+}
+
+.dispatch-confirm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dispatch-confirm-grid div {
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(226, 222, 213, 0.86);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.56);
+  padding: 10px;
+}
+
+.dispatch-confirm-grid span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.dispatch-confirm-grid strong {
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .share-panel pre {
   max-height: 260px;
   overflow: auto;
@@ -2064,6 +2148,16 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   transition: width 0.25s ease;
 }
 
+.inline-progress.animated span {
+  background-size: 200% 100%;
+  animation: progressGlide 1.2s linear infinite;
+}
+
+@keyframes progressGlide {
+  from { background-position: 0 0; }
+  to { background-position: 200% 0; }
+}
+
 .doc-card-actions {
   display: flex;
   gap: 8px;
@@ -2286,7 +2380,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   .reference-strip,
   .handoff-section,
   .action-strip,
-  .doc-card-list {
+  .doc-card-list,
+  .api-proof-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2346,7 +2441,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   .command-left-panel,
   .command-side,
   .brief-stat-grid,
-  .empty-preview-grid {
+  .empty-preview-grid,
+  .dispatch-confirm-grid {
     grid-template-columns: 1fr;
   }
 

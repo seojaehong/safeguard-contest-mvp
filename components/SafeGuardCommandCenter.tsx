@@ -16,14 +16,14 @@ type SafeGuardCommandCenterProps = {
 type GenerationState = "idle" | "generating" | "ready" | "error";
 
 type WorkflowStep = {
-  key: "input" | "risk" | "pack" | "workers" | "dispatch";
+  key: "input" | "risk" | "pack" | "workers" | "dispatch" | "history";
   id: string;
   label: string;
   caption: string;
 };
 
 type StepStatus = "done" | "active" | "pending" | "locked";
-type StepAnchor = "command" | "risk" | "workpack" | "workers" | "dispatch";
+type StepAnchor = "command" | "risk" | "workpack" | "workers" | "dispatch" | "history";
 
 type FieldBrief = {
   companyName: string;
@@ -46,10 +46,11 @@ type WeatherBriefResponse = {
 
 const workflowSteps: WorkflowStep[] = [
   { id: "01", key: "input", label: "작업 입력", caption: "현장·작업·조건" },
-  { id: "02", key: "risk", label: "위험 판단", caption: "법령 매칭" },
-  { id: "03", key: "pack", label: "문서팩 생성", caption: "6종 산출물" },
-  { id: "04", key: "workers", label: "작업자 선택", caption: "언어·채널" },
-  { id: "05", key: "dispatch", label: "현장 전파", caption: "Email · SMS" }
+  { id: "02", key: "risk", label: "API 근거 확인", caption: "법령·기상·교육" },
+  { id: "03", key: "pack", label: "문서팩 편집", caption: "Excel · HWPX" },
+  { id: "04", key: "workers", label: "작업자·교육", caption: "언어·이수" },
+  { id: "05", key: "dispatch", label: "현장 전파", caption: "메일 · 문자" },
+  { id: "06", key: "history", label: "이력 저장", caption: "문서·교육·전파" }
 ];
 
 const stepAnchors: Record<WorkflowStep["key"], StepAnchor> = {
@@ -57,24 +58,25 @@ const stepAnchors: Record<WorkflowStep["key"], StepAnchor> = {
   risk: "risk",
   pack: "workpack",
   workers: "workers",
-  dispatch: "dispatch"
+  dispatch: "dispatch",
+  history: "history"
 };
 
 const outputItems = [
+  "점검결과 요약",
   "위험성평가표",
   "작업계획서",
+  "TBM 브리핑",
   "TBM 기록",
   "안전보건교육 기록",
+  "비상대응 절차",
+  "사진/증빙",
   "외국인 근로자 안내문",
+  "외국인 전송본",
   "현장 전파 메시지"
 ];
 
-const recentWorkpacks = [
-  { title: "외벽 도장 · 이동식 비계", time: "오늘 08:14", law: 12, docs: 6 },
-  { title: "지게차 상하차 · 보행동선", time: "어제 16:22", law: 8, docs: 6 },
-  { title: "용접·절단 화기작업", time: "어제 10:05", law: 14, docs: 6 },
-  { title: "밀폐공간 펌프 점검", time: "04.27 09:18", law: 9, docs: 5 }
-];
+const totalDocumentCount = outputItems.length;
 
 function statusCopy(state: GenerationState) {
   if (state === "generating") return "문서 생성 중";
@@ -92,15 +94,15 @@ function activeStep(state: GenerationState): WorkflowStep["key"] {
 
 function stepStatuses(state: GenerationState): Record<WorkflowStep["key"], StepStatus> {
   if (state === "generating") {
-    return { input: "done", risk: "active", pack: "pending", workers: "locked", dispatch: "locked" };
+    return { input: "done", risk: "active", pack: "pending", workers: "locked", dispatch: "locked", history: "locked" };
   }
   if (state === "ready") {
-    return { input: "done", risk: "done", pack: "active", workers: "pending", dispatch: "pending" };
+    return { input: "done", risk: "done", pack: "active", workers: "pending", dispatch: "pending", history: "pending" };
   }
   if (state === "error") {
-    return { input: "done", risk: "active", pack: "pending", workers: "locked", dispatch: "locked" };
+    return { input: "done", risk: "active", pack: "pending", workers: "locked", dispatch: "locked", history: "locked" };
   }
-  return { input: "active", risk: "pending", pack: "pending", workers: "locked", dispatch: "locked" };
+  return { input: "active", risk: "pending", pack: "pending", workers: "locked", dispatch: "locked", history: "locked" };
 }
 
 function lawCount(data: AskResponse | null, state: GenerationState) {
@@ -110,8 +112,8 @@ function lawCount(data: AskResponse | null, state: GenerationState) {
 }
 
 function docProgress(data: AskResponse | null, state: GenerationState) {
-  if (data) return 6;
-  if (state === "generating") return 2;
+  if (data) return totalDocumentCount;
+  if (state === "generating") return 3;
   return 0;
 }
 
@@ -144,7 +146,7 @@ function apiStackLabel(data: AskResponse | null, weather: WeatherBrief | null) {
 
 function statusDetailCopy(state: GenerationState) {
   if (state === "generating") return "법령·기상·교육·재해사례를 확인하고 있습니다.";
-  if (state === "ready") return "문서팩 편집과 현장 전파를 진행할 수 있습니다.";
+  if (state === "ready") return "문서팩 편집, 작업자 교육 확인, 전파, 이력 저장을 진행할 수 있습니다.";
   if (state === "error") return "외부 연결 상태를 확인한 뒤 다시 시도해 주세요.";
   return "현장 상황을 입력하고 문서팩 생성을 시작하세요.";
 }
@@ -407,7 +409,7 @@ export function SafeGuardCommandCenter({
               </div>
               <div className={`status-row ${statusRowState(currentDocProgress > 0)}`}>
                 <span>문서 작성</span>
-                <b>{currentDocProgress}/6</b>
+                <b>{currentDocProgress}/{totalDocumentCount}</b>
               </div>
               <div className={`status-row ${statusRowState(Boolean(data || liveWeather?.mode === "live"))}`}>
                 <span>API 조합</span>
@@ -459,20 +461,18 @@ export function SafeGuardCommandCenter({
           <section className="left-panel-card">
             <div className="left-widget-head">
               <span>최근 문서팩</span>
-              <b>전체</b>
+              <b>{data ? "현재 작업" : "대기"}</b>
             </div>
             <div className="recent-list">
-              {recentWorkpacks.length ? recentWorkpacks.map((item) => (
-                <button type="button" key={item.title}>
+              {data ? (
+                <button type="button" onClick={() => scrollToStep("workpack")}>
                   <i aria-hidden="true" />
                   <span>
-                    <strong>{item.title}</strong>
-                    <small>{item.time} · {item.law}건 · {item.docs}/6</small>
+                    <strong>{data.scenario.workSummary}</strong>
+                    <small>방금 생성 · 근거 {data.citations.length}건 · 문서 {totalDocumentCount}/{totalDocumentCount}</small>
                   </span>
                 </button>
-              )) : (
-                <p className="muted small">최근 문서팩이 없습니다. 첫 문서팩을 생성하면 여기에 표시됩니다.</p>
-              )}
+              ) : <p className="muted small">최근 문서팩이 없습니다. 첫 문서팩을 생성하면 여기에 표시됩니다.</p>}
             </div>
           </section>
         </aside>
@@ -483,7 +483,7 @@ export function SafeGuardCommandCenter({
             <h1>오늘 작업을 한 줄로, 실행 가능한 안전 문서팩으로.</h1>
             <p>
               현장 조건을 입력하면 위험성평가, 작업계획, TBM, 안전교육, 외국인 안내문,
-              현장 전파 메시지를 하나의 작업공간에서 편집하고 내보낼 수 있습니다.
+              현장 전파 메시지와 이력 저장까지 하나의 작업공간에서 처리합니다.
             </p>
           </div>
 
@@ -547,21 +547,35 @@ export function SafeGuardCommandCenter({
               <span className="eyebrow">근거 매칭</span>
               <strong>{currentLawCount ? `${currentLawCount}건 연결` : "생성 후 연결"}</strong>
             </div>
-            <p>{message || "기상청은 현재 지역 조건을 먼저 확인하고, 생성 시 법령·판례·해석례·KOSHA·교육·재해사례·AI를 조합합니다."}</p>
-            <div className="inline-progress" aria-label={`문서 작성 진행률 ${currentDocProgress}/6`}>
-              <span style={{ width: `${Math.max(8, (currentDocProgress / 6) * 100)}%` }} />
+            <p>{message || "기상청은 현재 지역 조건을 먼저 확인하고, 생성 시 법령·해석례·판례·KOSHA·교육·재해사례·AI를 조합합니다."}</p>
+            <div className="api-proof-grid" aria-label="API 조합 반영 위치">
+              {[
+                ["기상청", data?.externalData.weather.mode || liveWeather?.mode, "현장 브리프·TBM·작업중지 기준"],
+                ["Law.go", data?.status.lawgo, "위험성평가·TBM·교육 근거"],
+                ["Work24", data?.status.work24, "후속 교육 추천"],
+                ["KOSHA", data?.status.kosha, "공식자료·재해사례"]
+              ].map(([label, mode, impact]) => (
+                <div key={label} className={mode === "live" ? "api-proof live" : mode ? "api-proof warn" : "api-proof"}>
+                  <strong>{label}</strong>
+                  <span>{mode === "live" ? "연결됨" : mode ? "일부 근거 보류" : "생성 후 확인"}</span>
+                  <small>{impact}</small>
+                </div>
+              ))}
+            </div>
+            <div className={`inline-progress ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${currentDocProgress}/${totalDocumentCount}`}>
+              <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
             </div>
           </section>
 
           <section className="output-card-grid" id="workpack">
             <div className="compact-head">
               <span className="eyebrow">생성 문서</span>
-              <strong>{currentDocProgress}/6</strong>
+              <strong>{currentDocProgress}/{totalDocumentCount}</strong>
             </div>
             <div className="doc-card-list">
               {outputItems.map((item, index) => (
                 <article key={item} className={data ? "doc-card done" : busy && index < 2 ? "doc-card active" : "doc-card"}>
-                  <span>DOC · 0{index + 1}</span>
+                  <span>DOC · {String(index + 1).padStart(2, "0")}</span>
                   <strong>{item}</strong>
                   <p>{data ? "편집·다운로드 준비" : busy && index < 2 ? "작성 중" : "생성 대기"}</p>
                   {data ? (
@@ -575,7 +589,7 @@ export function SafeGuardCommandCenter({
             </div>
           </section>
 
-          <section className="dispatch-preview-panel" id="dispatch">
+          <section className="dispatch-preview-panel" id="dispatch-overview">
             <div>
               <span className="eyebrow">현장 전파</span>
               <strong>현장 전파 준비</strong>

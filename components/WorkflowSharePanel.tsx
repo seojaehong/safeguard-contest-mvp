@@ -155,6 +155,13 @@ function previewLines(message: string) {
   return lines.slice(0, 8);
 }
 
+function formatMessageTargetLabel(data: AskResponse, selectedTarget: MessageTarget) {
+  if (selectedTarget === "manager") return "관리자용 한국어";
+  const languageCode = selectedTarget.replace("foreign:", "");
+  const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
+  return language ? `${language.label}(${language.nativeLabel})` : "외국인 근로자 전송본";
+}
+
 export function WorkflowSharePanel({
   data,
   recipientSuggestions = [],
@@ -162,11 +169,12 @@ export function WorkflowSharePanel({
   authToken,
   workpackId
 }: WorkflowSharePanelProps) {
-  const [selectedChannels, setSelectedChannels] = useState<Channel[]>(["email"]);
+  const [selectedChannels, setSelectedChannels] = useState<Channel[]>(["email", "sms"]);
   const [selectedMessageTarget, setSelectedMessageTarget] = useState<MessageTarget>("manager");
   const [recipients, setRecipients] = useState("");
   const [note, setNote] = useState("작업 전 TBM에서 공유하고, 교육 확인 서명까지 받은 뒤 보관해 주세요.");
   const [isSending, setIsSending] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [result, setResult] = useState<DispatchResult | null>(null);
 
   const recipientList = useMemo(() => splitRecipients(recipients), [recipients]);
@@ -247,12 +255,8 @@ export function WorkflowSharePanel({
   }
 
   async function dispatchWorkflow() {
-    const channelLabel = selectedChannels.map((channel) => formatChannelName(channel)).join(", ");
-    const recipientLabel = dispatchRecipients.length ? `${dispatchRecipients.length}건` : "운영 기본 수신자";
-    const confirmed = window.confirm(`${channelLabel}로 ${recipientLabel}에게 현장 공유 메시지를 전송하시겠습니까?\n\n전송 전 메시지와 수신자를 한 번 더 확인해 주세요.`);
-    if (!confirmed) return;
-
     setIsSending(true);
+    setIsConfirming(false);
     setResult(null);
     try {
       const response = await fetch("/api/workflow/dispatch", {
@@ -280,8 +284,12 @@ export function WorkflowSharePanel({
     }
   }
 
+  const channelLabel = selectedChannels.map((channel) => formatChannelName(channel)).join(", ");
+  const recipientLabel = dispatchRecipients.length ? `${dispatchRecipients.length}건` : "운영 기본 수신자";
+  const targetLabel = formatMessageTargetLabel(data, selectedMessageTarget);
+
   return (
-    <article className="share-panel workflow-panel">
+    <article className="share-panel workflow-panel" id="dispatch">
       <div className="compact-head">
         <span className="eyebrow">전파</span>
         <strong>현장 전파</strong>
@@ -378,13 +386,36 @@ export function WorkflowSharePanel({
         <button
           type="button"
           className="button"
-          onClick={dispatchWorkflow}
+          onClick={() => setIsConfirming(true)}
           disabled={isSending || selectedChannels.length === 0}
         >
-          {isSending ? "전파 요청 중" : "자동 전파"}
+          {isSending ? "전파 요청 중" : "전송 확인"}
         </button>
         <button type="button" className="button secondary" onClick={copyMessage}>메시지 복사</button>
       </div>
+
+      {isConfirming ? (
+        <div className="dispatch-confirm-panel" role="dialog" aria-modal="false" aria-label="현장 전파 전 확인">
+          <div className="compact-head">
+            <span className="eyebrow">전송 전 확인</span>
+            <strong>{channelLabel || "채널 미선택"}</strong>
+          </div>
+          <div className="dispatch-confirm-grid">
+            <div><span>수신</span><strong>{recipientLabel}</strong></div>
+            <div><span>언어</span><strong>{targetLabel}</strong></div>
+            <div><span>대상 작업자</span><strong>{targetWorkers.length ? `${targetWorkers.length}명` : "운영 기본"}</strong></div>
+          </div>
+          <p className="muted small">전송 후 provider 응답을 채널별로 표시하고, 관리자 로그인 상태에서는 전파 이력을 저장합니다.</p>
+          <div className="command-actions">
+            <button type="button" className="button" onClick={dispatchWorkflow} disabled={isSending}>
+              {isSending ? "전파 요청 중" : "지금 전송"}
+            </button>
+            <button type="button" className="button secondary" onClick={() => setIsConfirming(false)} disabled={isSending}>
+              취소
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <div className="message-preview-phone" aria-label="휴대폰 공유 메시지 미리보기">
         <div className="phone-shell">
