@@ -159,7 +159,7 @@ export type AskResponse = {
       detail: string;
       references: Array<{
         title: string;
-        service: "안전보건법령 스마트검색" | "안전보건자료 링크" | "MSDS";
+        service: "안전보건법령 스마트검색" | "안전보건자료 링크" | "MSDS" | "건설업 일별 중대재해";
         summary: string;
         url: string;
         reflectedIn: string[];

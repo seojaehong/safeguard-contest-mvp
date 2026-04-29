@@ -17,13 +17,14 @@
 | KOSHA 안전보건법령 스마트검색 | added, guide-dependent | 검색 결과가 반환되면 문서 반영 근거에 추가 |
 | KOSHA 안전보건자료 링크 서비스 | added, code-list-dependent | 코드 목록이 확보되면 안전보건교육 자료와 외국인 안내문에 추가 |
 | KOSHA MSDS 조회 서비스 | added, chemical-only | 화학물질 키워드가 있는 경우 MSDS 목록을 위험성평가와 비상대응에 추가 |
+| KOSHA 건설업 일별 중대재해 현황 | added, construction-only | 건설업 작업 입력 시 일별 중대재해 사례를 위험성평가, TBM, 비상대응에 추가 |
 
 ## Remaining API Detail Risks
 
 - `KOSHA 안전보건자료 링크 서비스`는 공공데이터포털 참고문서인 `안전보건자료 링크 서비스 코드 목록.xlsx`를 확보해 `ctgr01`, `ctgr02`, `ctgr03`, `ctgr04`, `ctgr04_kr` 기반으로 고정했다.
 - `KOSHA 안전보건법령 스마트검색`은 활용가이드에서 확인한 `searchValue`, `category` 기반으로 고정했다.
 - `KOSHA MSDS`는 화학물질 키워드가 있는 작업에서만 호출한다. 일반 건설·물류 작업에는 노이즈가 될 수 있어 기본 노출하지 않는다.
-- `한국산업안전보건공단_건설업 일별 중대재해 현황`은 endpoint와 요청 변수 확인 후 건설업 시나리오의 별도 보조 근거로 추가한다.
+- `한국산업안전보건공단_건설업 일별 중대재해 현황`은 `callApiId=1010`, `dsstrDy=YYYYMMDD`로 고정했다. 최근 14일 항목을 먼저 확인하고, 항목이 없으면 API live 검증일 `20190827` 사례를 historical live 근거로 사용한다.
 
 ## Applied Guide Details
 
@@ -47,6 +48,18 @@
   - `ctgr04`: 외국어. 예: `6200110` 베트남어, `6130110` 중국어, `6150110` 몽골어, `6180110` 태국어, `6190110` 우즈베크어.
   - `ctgr04_kr`: 한국어 자료 포함. SafeGuard uses `Y` so Korean manager materials and foreign-worker materials can be shown together.
 
+### KOSHA 건설업 일별 중대재해 현황
+
+- Endpoint: `https://apis.data.go.kr/B552468/constDsstr01/getconstDsstr01`
+- Required params: `serviceKey`, `callApiId=1010`, `pageNo`, `numOfRows`, `dsstrDy`
+- Verified sample: `dsstrDy=20190827`
+- Response fields used:
+  - `dsstrKndNm`: 재해유형
+  - `jobPrcsNm`, `dtlJobPrcsNm`: 작업공정
+  - `ocmtNm`: 발생장소
+  - `dsstrDtlCn`: 재해 상세
+  - `rsknsDcrsMsrsCn`: 위험성 감소대책
+
 ## Verification
 
 - `npm.cmd run build`: passed.
@@ -58,11 +71,11 @@
 - 대상 URL: `https://safeguard-contest-mvp.vercel.app`
 - 기상청: live, signal count 5. 초단기실황, 초단기예보, 단기예보, 기상특보, 영향예보 호출 경로가 WeatherSignal에 반영됐다.
 - KOSHA 국내재해사례/첨부파일/사고사망: live, count 3. 국내재해사례와 사고사망 게시판 근거가 TBM과 교육 사례에 반영됐다.
-- KOSHA 스마트검색/자료링크/MSDS: live, count 2. 스마트검색과 자료링크 근거가 문서 반영 근거로 연결됐다. MSDS는 화학물질 키워드가 없는 물류 시나리오라 의도적으로 건너뛰었다.
+- KOSHA 스마트검색/자료링크/MSDS/건설업 일별 중대재해: live, count 2 in the logistics smoke. 스마트검색과 자료링크 근거가 문서 반영 근거로 연결됐다. MSDS는 화학물질 키워드가 없는 물류 시나리오라 의도적으로 건너뛰고, 건설업 일별 중대재해는 건설업 작업 입력에서만 노출한다.
 - 다운로드: TXT, JSON, CSV, XLS, DOC, HTML, HWPX, PDF, JPG, 전체 TXT, 전체 CSV, 전체 XLS 총 12개 artifact 생성 성공.
 
 ## Next Evidence Gate
 
 - `안전보건자료 링크 서비스 코드 목록.xlsx`를 확보하면 제작형태, 업종, 재해유형, 외국어 코드를 고정 파라미터로 바꾼다.
 - `안전보건법령 스마트검색 활용가이드.docx`를 확보하면 `smartSearch`의 검색 파라미터 후보 probing을 제거하고 단일 명세 기반 호출로 바꾼다.
-- `건설업 일별 중대재해 현황` endpoint와 요청 변수를 확인해 건설업 시나리오의 별도 보조 근거로 추가한다.
+- 건설업 대표 시나리오 smoke를 별도로 돌려 `건설업 일별 중대재해` 근거가 문서 반영 근거에 포함되는지 확인한다.

@@ -335,7 +335,7 @@ function buildApiMapping(weather, ask) {
       count: Array.isArray(externalData.kosha?.references) ? externalData.kosha.references.length : 0
     },
     {
-      source: "KOSHA 스마트검색/자료링크/MSDS",
+      source: "KOSHA 스마트검색/자료링크/MSDS/건설업 일별 중대재해",
       callPath: ["/api/ask 내부 fetchKoshaOpenApiEvidence"],
       mode: externalData.koshaOpenApi?.mode || "unknown",
       reflectedIn: ["문서 반영 근거", "위험성평가표", "안전보건교육", "TBM"],

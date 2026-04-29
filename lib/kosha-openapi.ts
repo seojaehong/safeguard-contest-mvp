@@ -8,7 +8,7 @@ export type KoshaOpenApiEvidence = {
   detail: string;
   references: Array<{
     title: string;
-    service: "안전보건법령 스마트검색" | "안전보건자료 링크" | "MSDS";
+    service: "안전보건법령 스마트검색" | "안전보건자료 링크" | "MSDS" | "건설업 일별 중대재해";
     summary: string;
     url: string;
     reflectedIn: string[];
@@ -21,6 +21,7 @@ const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUB
 const REQUEST_TIMEOUT_MS = 8_000;
 const KOSHA_SMART_SEARCH_URL = "http://apis.data.go.kr/B552468/srch/smartSearch";
 const KOSHA_MEDIA_URL = "https://apis.data.go.kr/B552468/selectMediaList01/getselectMediaList01";
+const KOSHA_CONSTRUCTION_DAILY_URL = "https://apis.data.go.kr/B552468/constDsstr01/getconstDsstr01";
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -113,6 +114,22 @@ function pickForeignLanguageCode(question: string) {
   return "";
 }
 
+function isConstructionScenario(question: string) {
+  return ["건설", "비계", "추락", "외벽", "고소", "슬라브", "굴착", "철근", "콘크리트"].some((keyword) => question.includes(keyword));
+}
+
+function toYyyymmdd(date: Date) {
+  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function kstDateOffset(days: number) {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60_000;
+  const kst = new Date(utc + 9 * 60 * 60_000);
+  kst.setDate(kst.getDate() + days);
+  return toYyyymmdd(kst);
+}
+
 function pickChemicalKeyword(question: string) {
   const candidates = ["톨루엔", "아세톤", "메탄올", "에탄올", "염산", "수산화나트륨", "세척제", "페인트", "신나"];
   return candidates.find((keyword) => question.includes(keyword)) || "";
@@ -153,6 +170,24 @@ function parseJsonRecords(text: string) {
       }
     }
     return { records: readArrayEnvelope(parsed), detail: "정상 응답" };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { records: [], detail: `JSON 파싱 실패: ${message}` };
+  }
+}
+
+function parseJsonRecordsWithBody(text: string) {
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    const base = parseJsonRecords(text);
+    if (base.records.length) return base;
+    if (isRecord(parsed) && isRecord(parsed.body)) {
+      return {
+        records: readArrayEnvelope(parsed.body),
+        detail: "정상 응답"
+      };
+    }
+    return base;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return { records: [], detail: `JSON 파싱 실패: ${message}` };
@@ -262,6 +297,60 @@ async function fetchMsds(question: string): Promise<KoshaOpenApiFetchResult> {
   return { detail: details.join(" | ") };
 }
 
+async function fetchConstructionDailyDisaster(question: string): Promise<KoshaOpenApiFetchResult> {
+  if (!isConstructionScenario(question)) {
+    return { detail: "건설업 작업 키워드가 없어 건설업 일별 중대재해 현황 호출을 건너뜁니다." };
+  }
+
+  const candidateDates = [
+    ...Array.from({ length: 14 }, (_, index) => kstDateOffset(-index)),
+    "20190827"
+  ];
+  const details: string[] = [];
+
+  for (const dsstrDy of candidateDates) {
+    const url = new URL(KOSHA_CONSTRUCTION_DAILY_URL);
+    url.searchParams.set("serviceKey", serviceKey);
+    url.searchParams.set("pageNo", "1");
+    url.searchParams.set("numOfRows", "5");
+    url.searchParams.set("callApiId", "1010");
+    url.searchParams.set("dsstrDy", dsstrDy);
+
+    try {
+      const parsed = parseJsonRecordsWithBody(await fetchText(url.toString()));
+      if (!parsed.records.length) {
+        details.push(`${dsstrDy}: ${parsed.detail}, 항목 없음`);
+        continue;
+      }
+
+      return parsed.records.slice(0, 2).map((record) => {
+        const disasterType = readString(record, ["dsstrKndNm", "disasterType", "재해유형"]);
+        const workProcess = readString(record, ["jobPrcsNm", "dtlJobPrcsNm", "작업공정"]);
+        const place = readString(record, ["ocmtNm", "place", "발생장소"]);
+        const detail = readString(record, ["dsstrDtlCn", "contents", "내용"]);
+        const prevention = readString(record, ["rsknsDcrsMsrsCn", "prevention", "감소대책"]);
+
+        return {
+          title: `건설업 일별 중대재해 ${disasterType || "현황"}${workProcess ? ` · ${workProcess}` : ""}`,
+          service: "건설업 일별 중대재해" as const,
+          summary: stripMarkup([
+            place ? `장소: ${place}` : "",
+            detail ? `사례: ${detail}` : "",
+            prevention ? `감소대책: ${prevention}` : ""
+          ].filter(Boolean).join(" / ")) || "KOSHA 건설업 일별 중대재해 현황에서 작업 관련 중대재해 사례를 확인했습니다.",
+          url: KOSHA_CONSTRUCTION_DAILY_URL,
+          reflectedIn: ["위험성평가표", "TBM", "비상대응 절차", "문서 반영 근거"]
+        };
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      details.push(`${dsstrDy}: ${message}`);
+    }
+  }
+
+  return { detail: `건설업 일별 중대재해 현황 표시 항목 없음. ${details.slice(0, 5).join(" / ")}` };
+}
+
 export async function fetchKoshaOpenApiEvidence(question: string): Promise<KoshaOpenApiEvidence> {
   if (!serviceKey) {
     return {
@@ -272,15 +361,16 @@ export async function fetchKoshaOpenApiEvidence(question: string): Promise<Kosha
     };
   }
 
-  const [smartSearch, media, msds] = await Promise.all([
+  const [smartSearch, media, msds, constructionDaily] = await Promise.all([
     fetchSmartSearch(question),
     fetchSafetyMedia(question),
-    fetchMsds(question)
+    fetchMsds(question),
+    fetchConstructionDailyDisaster(question)
   ]);
-  const references = [smartSearch, media, msds]
+  const references = [smartSearch, media, msds, constructionDaily]
     .flatMap((item): KoshaOpenApiReference[] => Array.isArray(item) ? item : [])
     .slice(0, 5);
-  const details = [smartSearch, media, msds]
+  const details = [smartSearch, media, msds, constructionDaily]
     .filter((item): item is { detail: string } => !Array.isArray(item))
     .map((item) => item.detail)
     .filter(Boolean);
