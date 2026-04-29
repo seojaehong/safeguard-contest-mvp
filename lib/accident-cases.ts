@@ -702,6 +702,17 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
       }
     }
 
+    const fatalOnlyResult = await fetchFatalAccidents(question, resolvedOptions);
+    if (fatalOnlyResult.kind === "ok") {
+      return {
+        source: "kosha-accident",
+        mode: "live",
+        detail: `${fatalOnlyResult.detail} / 국내재해사례 후보는 보류됐지만 사고사망 게시판 live 근거를 우선 반영했습니다. 실패 상세: ${failureDetails.join(" | ")}`,
+        cases: fatalOnlyResult.cases.slice(0, 3)
+      };
+    }
+    failureDetails.push(`fatal-only: ${fatalOnlyResult.detail}`);
+
     return {
       source: "kosha-accident",
       mode: "fallback",

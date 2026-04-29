@@ -32,7 +32,7 @@ type WeatherEnvelope = {
 };
 
 type KmaSignal = {
-  endpoint: "초단기실황" | "초단기예보" | "단기예보";
+  endpoint: "초단기실황" | "초단기예보" | "단기예보" | "기상특보" | "영향예보";
   mode: IntegrationMode;
   summary: string;
   detail: string;
@@ -41,6 +41,52 @@ type KmaSignal = {
   windSpeedMps?: string;
   precipitationProbability?: string;
   precipitationType?: string;
+};
+
+type WeatherWarningItem = {
+  title?: string;
+  tmFc?: string;
+  stnId?: string;
+  stnNm?: string;
+  wrn?: string;
+  lvl?: string;
+  cmd?: string;
+};
+
+type WeatherWarningEnvelope = {
+  response?: {
+    header?: {
+      resultCode?: string;
+      resultMsg?: string;
+    };
+    body?: {
+      items?: {
+        item?: WeatherWarningItem[] | WeatherWarningItem;
+      };
+    };
+  };
+};
+
+type ImpactForecastItem = {
+  regId?: string;
+  regName?: string;
+  tmEf?: string;
+  clsfc?: string;
+  value?: string;
+};
+
+type ImpactForecastEnvelope = {
+  response?: {
+    header?: {
+      resultCode?: string;
+      resultMsg?: string;
+    };
+    body?: {
+      items?: {
+        item?: ImpactForecastItem[] | ImpactForecastItem;
+      };
+    };
+  };
 };
 
 type WeatherSignal = {
@@ -89,6 +135,12 @@ function toKst(now = new Date()) {
 
 function yyyymmdd(date: Date) {
   return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function yyyymmddOffset(days: number, now = new Date()) {
+  const kst = toKst(now);
+  kst.setDate(kst.getDate() + days);
+  return yyyymmdd(kst);
 }
 
 function formatKmaBaseDate(now = new Date()) {
@@ -200,6 +252,101 @@ async function fetchKmaItems(
     throw new Error(parsed.response?.header?.resultMsg || `${endpoint} 응답이 비어 있습니다.`);
   }
   return items;
+}
+
+function normalizeArray<T>(item?: T[] | T) {
+  if (Array.isArray(item)) return item;
+  return item ? [item] : [];
+}
+
+async function fetchWarningSignal(location: LocationConfig): Promise<KmaSignal> {
+  try {
+    const url = new URL("https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnList");
+    url.searchParams.set("serviceKey", serviceKey);
+    url.searchParams.set("pageNo", "1");
+    url.searchParams.set("numOfRows", "20");
+    url.searchParams.set("dataType", "JSON");
+    url.searchParams.set("stnId", "108");
+    url.searchParams.set("fromTmFc", yyyymmddOffset(-1));
+    url.searchParams.set("toTmFc", yyyymmddOffset(1));
+
+    const text = await fetchWithTimeout(url.toString(), "기상특보");
+    const parsed = JSON.parse(text) as WeatherWarningEnvelope;
+    const resultCode = parsed.response?.header?.resultCode;
+    if (resultCode && resultCode !== "00") {
+      throw new Error(parsed.response?.header?.resultMsg || `기상특보 resultCode ${resultCode}`);
+    }
+    const items = normalizeArray(parsed.response?.body?.items?.item);
+    const relevant = items.filter((item) => {
+      const haystack = `${item.title || ""} ${item.stnNm || ""}`;
+      return !item.stnNm || haystack.includes(location.label) || haystack.includes("전국");
+    });
+    const picked = relevant[0] || items[0];
+
+    return {
+      endpoint: "기상특보",
+      mode: "live",
+      summary: picked
+        ? `최근 특보 확인: ${picked.title || picked.stnNm || "특보 정보"}`
+        : "최근 발표 특보 없음",
+      forecastTime: picked?.tmFc,
+      detail: picked
+        ? `기상청 기상특보 조회 성공 (${picked.stnNm || "전국"}, ${picked.tmFc || "발표시각 미표기"})`
+        : `기상청 기상특보 조회 성공 (${location.label}, 최근 특보 없음)`
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      endpoint: "기상특보",
+      mode: "fallback",
+      summary: "기상특보 연결 보류",
+      detail: `기상청 기상특보 연결 점검 필요: ${message}`
+    };
+  }
+}
+
+async function fetchImpactForecastSignal(location: LocationConfig): Promise<KmaSignal> {
+  try {
+    const url = new URL("https://apis.data.go.kr/1360000/ImpactInfoService/getHWImpactValue");
+    url.searchParams.set("serviceKey", serviceKey);
+    url.searchParams.set("pageNo", "1");
+    url.searchParams.set("numOfRows", "30");
+    url.searchParams.set("dataType", "JSON");
+    url.searchParams.set("tm", yyyymmddOffset(0));
+
+    const text = await fetchWithTimeout(url.toString(), "영향예보");
+    const parsed = JSON.parse(text) as ImpactForecastEnvelope;
+    const resultCode = parsed.response?.header?.resultCode;
+    if (resultCode && resultCode !== "00") {
+      throw new Error(parsed.response?.header?.resultMsg || `영향예보 resultCode ${resultCode}`);
+    }
+    const items = normalizeArray(parsed.response?.body?.items?.item);
+    const relevant = items.filter((item) => {
+      const haystack = `${item.regName || ""} ${item.clsfc || ""}`;
+      return haystack.includes(location.label) || item.clsfc === "산업";
+    });
+    const picked = relevant.find((item) => item.clsfc === "산업") || relevant[0] || items[0];
+
+    return {
+      endpoint: "영향예보",
+      mode: "live",
+      summary: picked
+        ? `영향예보 ${picked.clsfc || "분야"} ${picked.value || "정보"} (${picked.regName || location.label})`
+        : "폭염·한파 영향예보 발표 없음",
+      forecastTime: picked?.tmEf,
+      detail: picked
+        ? `기상청 영향예보 조회 성공 (${picked.regName || location.label}, ${picked.clsfc || "분야 미표기"})`
+        : `기상청 영향예보 조회 성공 (${location.label}, 발표 자료 없음)`
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      endpoint: "영향예보",
+      mode: "fallback",
+      summary: "영향예보 연결 보류",
+      detail: `기상청 영향예보 연결 점검 필요: ${message}`
+    };
+  }
 }
 
 async function fetchUltraNowSignal(location: LocationConfig): Promise<KmaSignal> {
@@ -326,8 +473,16 @@ function buildWeatherActions(signals: KmaSignal[]) {
   const maxWind = Math.max(0, ...windValues);
   const maxPop = Math.max(0, ...liveSignals.map((signal) => Number(signal.precipitationProbability || "0")).filter((value) => Number.isFinite(value)));
   const hasRain = liveSignals.some((signal) => signal.precipitationType && signal.precipitationType !== "강수없음");
+  const warning = liveSignals.find((signal) => signal.endpoint === "기상특보" && !signal.summary.includes("없음"));
+  const impact = liveSignals.find((signal) => signal.endpoint === "영향예보" && /주의|경고|위험|심각/.test(signal.summary));
 
   const actions: string[] = [];
+  if (warning) {
+    actions.push("기상특보가 확인되어 작업 전 작업중지 기준과 옥외·고소작업 허용 여부를 관리감독자가 재판단");
+  }
+  if (impact) {
+    actions.push("폭염·한파 영향예보가 확인되어 휴식, 음수, 보온·냉방, 취약 작업자 배치를 별도 점검");
+  }
   if (maxWind >= 7) {
     actions.push("강풍 가능성이 있어 고소작업과 비계 작업의 작업중지 기준을 재확인");
   }
@@ -383,7 +538,9 @@ export async function fetchWeatherSignal(question: string): Promise<WeatherSigna
   const signals = await Promise.all([
     fetchUltraNowSignal(location),
     fetchUltraForecastSignal(location),
-    fetchVillageForecastSignal(location)
+    fetchVillageForecastSignal(location),
+    fetchWarningSignal(location),
+    fetchImpactForecastSignal(location)
   ]);
   const liveSignals = signals.filter((signal) => signal.mode === "live");
   const preferred = liveSignals.find((signal) => signal.endpoint === "초단기예보")

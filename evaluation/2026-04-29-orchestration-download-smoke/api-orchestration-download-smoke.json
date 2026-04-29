@@ -1,25 +1,25 @@
 {
   "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-04-29T14:00:16.707Z",
-  "elapsedMs": 26748,
+  "generatedAt": "2026-04-29T14:23:21.261Z",
+  "elapsedMs": 30568,
   "question": "대구 달서구 창고업 고중량 박스 적재 및 수작업 운반. 작업자 5명, 숙련자 중심, 오늘 날씨를 반영해 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 1092,
+    "elapsedMs": 1422,
     "mode": "live",
     "summary": "단시간 흐림, 강수없음, 기온 14℃, 풍속 1m/s (초단기실황/초단기예보/단기예보 반영)",
     "signalCount": 3
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 23062,
+    "elapsedMs": 26243,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
   },
   "apiMapping": [
     {
-      "source": "기상청 현재/초단기/단기",
+      "source": "기상청 현재/초단기/단기/특보/영향예보",
       "callPath": [
         "/api/weather 선조회",
         "/api/ask 내부 fetchWeatherSignal"
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "네, 대구 달서구 창고업의 고중량 박스 적재 및 수작업 운반 작업과 관련하여 현장 검토용 초안을 작성해 드립니다.\n\n---\n\n### 1. 핵심 판단\n\n대구 달서구 창고업의 '고중량 박스 적재 및 수작업 운반' 작업은 작업자 5명의 숙련자 중심이라 하더라도 **근골격계 질환 발생 위험**",
+      "evidence": "## 1) 핵심 판단\n\n대구 달서구 창고업의 고중량 박스 적재 및 수작업 운반 작업은 근골격계 부담작업 및 물체 떨어짐, 넘어짐 등 다양한 산업재해 발생 위험이 높은 작업입니다. 특히 5명의 숙련자 중심이라 하더라도 반복적인 고중량 작업은 작업자의 피로도를 높이고 근골격계 질환 발생 위",
       "count": 11
     },
     {
@@ -108,17 +108,32 @@
       "count": 5
     },
     {
-      "source": "KOSHA 재해사례",
+      "source": "KOSHA 스마트검색/자료링크/MSDS",
+      "callPath": [
+        "/api/ask 내부 fetchKoshaOpenApiEvidence"
+      ],
+      "mode": "unknown",
+      "reflectedIn": [
+        "문서 반영 근거",
+        "위험성평가표",
+        "안전보건교육",
+        "TBM"
+      ],
+      "evidence": "",
+      "count": 0
+    },
+    {
+      "source": "KOSHA 국내재해사례/첨부파일/사고사망",
       "callPath": [
         "/api/ask 내부 fetchAccidentCases"
       ],
-      "mode": "fallback",
+      "mode": "live",
       "reflectedIn": [
         "유사 재해사례",
         "TBM 예방 포인트",
         "교육 사례"
       ],
-      "evidence": "KOSHA 국내재해사례 API 후보 호출이 모두 실패했습니다. urlsearchparams:raw: KOSHA 국내재해사례 API 오류 응답: 99 / UNKNOWN_ERROR | raw-query:raw: KOSHA 국내재해사례 API 오류 응답: 99 / UNKNOWN_ERROR 기본 재해사례 근거로 전환했습니다.",
+      "evidence": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다.",
       "count": 3
     }
   ],
@@ -168,7 +183,7 @@
     {
       "format": "PDF",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.pdf",
-      "bytes": 275903,
+      "bytes": 275904,
       "ok": true
     },
     {
@@ -180,19 +195,19 @@
     {
       "format": "ALL_TXT",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.txt",
-      "bytes": 45636,
+      "bytes": 47244,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.csv",
-      "bytes": 69121,
+      "bytes": 70729,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.xls",
-      "bytes": 99296,
+      "bytes": 100904,
       "ok": true
     }
   ],

@@ -85,7 +85,7 @@ export type AskResponse = {
       actions: string[];
       detail: string;
       signals?: Array<{
-        endpoint: "초단기실황" | "초단기예보" | "단기예보";
+        endpoint: "초단기실황" | "초단기예보" | "단기예보" | "기상특보" | "영향예보";
         mode: IntegrationMode;
         summary: string;
         detail: string;
@@ -152,6 +152,18 @@ export type AskResponse = {
       mode: IntegrationMode;
       detail: string;
       cases: AccidentCase[];
+    };
+    koshaOpenApi?: {
+      source: "kosha-openapi";
+      mode: IntegrationMode;
+      detail: string;
+      references: Array<{
+        title: string;
+        service: "안전보건법령 스마트검색" | "안전보건자료 링크" | "MSDS";
+        summary: string;
+        url: string;
+        reflectedIn: string[];
+      }>;
     };
   };
   riskSummary: {

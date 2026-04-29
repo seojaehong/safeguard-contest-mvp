@@ -287,7 +287,7 @@ function buildApiMapping(weather, ask) {
   const sourceMix = ask.sourceMix || {};
   return [
     {
-      source: "기상청 현재/초단기/단기",
+      source: "기상청 현재/초단기/단기/특보/영향예보",
       callPath: ["/api/weather 선조회", "/api/ask 내부 fetchWeatherSignal"],
       mode: externalData.weather?.mode || weather.weather?.mode || "unknown",
       reflectedIn: ["현장 브리프 날씨", "위험성평가표 작업조건", "TBM 기상 신호", "작업중지 기준"],
@@ -335,7 +335,15 @@ function buildApiMapping(weather, ask) {
       count: Array.isArray(externalData.kosha?.references) ? externalData.kosha.references.length : 0
     },
     {
-      source: "KOSHA 재해사례",
+      source: "KOSHA 스마트검색/자료링크/MSDS",
+      callPath: ["/api/ask 내부 fetchKoshaOpenApiEvidence"],
+      mode: externalData.koshaOpenApi?.mode || "unknown",
+      reflectedIn: ["문서 반영 근거", "위험성평가표", "안전보건교육", "TBM"],
+      evidence: externalData.koshaOpenApi?.detail || "",
+      count: Array.isArray(externalData.koshaOpenApi?.references) ? externalData.koshaOpenApi.references.length : 0
+    },
+    {
+      source: "KOSHA 국내재해사례/첨부파일/사고사망",
       callPath: ["/api/ask 내부 fetchAccidentCases"],
       mode: externalData.accidentCases?.mode || "unknown",
       reflectedIn: ["유사 재해사례", "TBM 예방 포인트", "교육 사례"],
