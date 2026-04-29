@@ -21,6 +21,8 @@ type FetchOptions = {
 };
 
 const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUBLIC_DATA_API_KEY?.trim() || "";
+const proxyUrl = process.env.KOSHA_ACCIDENT_PROXY_URL?.trim() || "";
+const proxyToken = process.env.KOSHA_ACCIDENT_PROXY_TOKEN?.trim() || "";
 const REQUEST_TIMEOUT_MS = 20_000;
 const RETRY_COUNT = 1;
 const FALLBACK_SOURCE_URL = "https://www.kosha.or.kr/kosha/data/industrialAccidentStatus.do";
@@ -97,6 +99,50 @@ async function fetchWithRetry(url: string, options: Required<FetchOptions>) {
   throw new Error(`${options.budgetLabel}: ${message}`);
 }
 
+async function fetchProxy(question: string, options: Required<FetchOptions>): Promise<ParseResult | null> {
+  if (!proxyUrl) return null;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.requestTimeoutMs);
+  try {
+    const response = await fetch(proxyUrl, {
+      method: "POST",
+      cache: "no-store",
+      signal: controller.signal,
+      headers: {
+        "content-type": "application/json",
+        ...(proxyToken ? { "x-safeguard-secret": proxyToken } : {})
+      },
+      body: JSON.stringify({
+        question,
+        keyword: pickKeyword(question),
+        business: pickBusiness(question),
+        pageNo: 1,
+        numOfRows: 100,
+        callApiId: "1060"
+      })
+    });
+    const text = await response.text();
+    if (!response.ok) {
+      return {
+        kind: "api_error",
+        cases: [],
+        detail: `KOSHA 재해사례 relay HTTP ${response.status}: ${text.slice(0, 180)}`
+      };
+    }
+    return parseAccidentCases(question, text);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      kind: "api_error",
+      cases: [],
+      detail: `KOSHA 재해사례 relay 연결 실패: ${message}`
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function appendCommonParams(url: URL, question: string) {
   url.searchParams.set("pageNo", "1");
   url.searchParams.set("numOfRows", "100");
@@ -160,9 +206,9 @@ function pickKeyword(question: string) {
 
 function pickBusiness(question: string) {
   if (["건설", "비계", "추락", "외벽"].some((keyword) => question.includes(keyword))) return "건설업";
-  if (["물류", "지게차", "상하차", "창고"].some((keyword) => question.includes(keyword))) return "운수창고업";
+  if (["조선", "선박", "조선소"].some((keyword) => question.includes(keyword))) return "조선업";
   if (["제조", "용접", "절단", "금속"].some((keyword) => question.includes(keyword))) return "제조업";
-  if (["청소", "세척", "서비스"].some((keyword) => question.includes(keyword))) return "서비스업";
+  if (["물류", "지게차", "상하차", "창고", "청소", "세척", "서비스", "시설"].some((keyword) => question.includes(keyword))) return "서비스업";
   return "";
 }
 
@@ -389,6 +435,19 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
 
   const failureDetails: string[] = [];
   try {
+    const proxyResult = await fetchProxy(question, resolvedOptions);
+    if (proxyResult?.kind === "ok") {
+      return {
+        source: "kosha-accident",
+        mode: "live",
+        detail: `${proxyResult.detail} 연결 방식: relay`,
+        cases: proxyResult.cases
+      };
+    }
+    if (proxyResult) {
+      failureDetails.push(`relay: ${proxyResult.detail}`);
+    }
+
     const candidates = buildUrlCandidates(question);
     for (const candidate of candidates) {
       try {

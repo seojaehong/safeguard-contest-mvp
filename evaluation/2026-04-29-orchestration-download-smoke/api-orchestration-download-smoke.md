@@ -1,39 +1,42 @@
 # SafeGuard API 조합 및 다운로드 스모크
 
-- 생성시각: 2026-04-29T13:40:29.111Z
+- 생성시각: 2026-04-29T14:00:16.707Z
 - 대상 URL: https://safeguard-contest-mvp.vercel.app
 - 질문: 대구 달서구 창고업 고중량 박스 적재 및 수작업 운반. 작업자 5명, 숙련자 중심, 오늘 날씨를 반영해 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.
-- 기상 선조회: live / 단시간 구름많음, 강수없음, 기온 15℃, 풍속 1m/s (초단기실황/초단기예보/단기예보 반영)
+- 기상 선조회: live / 단시간 흐림, 강수없음, 기온 14℃, 풍속 1m/s (초단기실황/초단기예보/단기예보 반영)
 - /api/ask: live / 문서 11종
 
 ## API 반영 맵
 
 | API | 호출 경로 | 상태 | 반영 위치 | 건수/신호 | 증거 |
 | --- | --- | --- | --- | ---: | --- |
-| 기상청 현재/초단기/단기 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 3 | 단시간 구름많음, 강수없음, 기온 15℃, 풍속 1m/s (초단기실황/초단기예보/단기예보 반영) |
+| 기상청 현재/초단기/단기 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 3 | 단시간 흐림, 강수없음, 기온 14℃, 풍속 1m/s (초단기실황/초단기예보/단기예보 반영) |
 | Law.go + korean-law-mcp | /api/ask 내부 searchLegalSources | live | 근거 출처<br>위험성평가표 반영 근거<br>TBM 기록 반영 근거<br>사진/증빙 확인 근거 | 6 | korean-law-mcp 비활성화 |
-| Gemini | /api/ask 내부 generateAnswer | live | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | 대구 달서구 창고업 현장의 고중량물 취급 및 하절기 작업에 대한 안전보건 검토 초안입니다.
+| Gemini | /api/ask 내부 generateAnswer | live | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | 네, 대구 달서구 창고업의 고중량 박스 적재 및 수작업 운반 작업과 관련하여 현장 검토용 초안을 작성해 드립니다.
 
-### 1) 핵심 판단
-*   **유해·위험요인:** 산업안전보건법 제36조(위험성평가)에 근거하여, 고중량 박스 수작업 운반 시 **근골격계 질환 발생 위험** 및 대구 지역의 기온 특성에 따 |
+---
+
+### 1. 핵심 판단
+
+대구 달서구 창고업의 '고중량 박스 적재 및 수작업 운반' 작업은 작업자 5명의 숙련자 중심이라 하더라도 **근골격계 질환 발생 위험** |
 | Work24 훈련과정 | /api/ask 내부 fetchTrainingRecommendations | live | 후속 교육<br>안전보건교육 기록<br>교육 추천 카드 | 3 | 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. |
 | KOSHA 안전보건교육포털 | /api/ask 내부 fetchKoshaEducationRecommendations | live | 후속 교육<br>안전보건교육 기록<br>KOSHA 교육 카드 | 3 | KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. |
 | KOSHA 공식자료/가이드 | /api/ask 내부 fetchKoshaReferences | live | 위험성평가 절차<br>TBM 기록 항목<br>안전보건교육 서식 | 5 | KOSHA·고용노동부 공식 자료 URL 4건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. |
-| KOSHA 재해사례 | /api/ask 내부 fetchAccidentCases | fallback | 유사 재해사례<br>TBM 예방 포인트<br>교육 사례 | 3 | KOSHA 국내재해사례 API 오류 응답: 99 / UNKNOWN_ERROR 기본 재해사례 근거로 전환했습니다. |
+| KOSHA 재해사례 | /api/ask 내부 fetchAccidentCases | fallback | 유사 재해사례<br>TBM 예방 포인트<br>교육 사례 | 3 | KOSHA 국내재해사례 API 후보 호출이 모두 실패했습니다. urlsearchparams:raw: KOSHA 국내재해사례 API 오류 응답: 99 / UNKNOWN_ERROR / raw-query:raw: KOSHA 국내재해사례 API 오류 응답: 99 / UNKNOWN_ERROR 기 |
 
 ## 다운로드 생성 결과
 
 | 형식 | 결과 | 바이트 | 파일 |
 | --- | --- | ---: | --- |
-| TXT | ok | 5839 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.txt |
-| JSON | ok | 6495 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.json |
-| CSV | ok | 9194 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.csv |
-| XLS | ok | 15352 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.xls |
-| DOC | ok | 9622 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.doc |
-| HTML | ok | 6417 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.html |
-| HWPX | ok | 10216 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.hwpx |
-| PDF | ok | 277624 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.pdf |
-| JPG | ok | 173123 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.jpg |
-| ALL_TXT | ok | 45662 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-safeguard-workpack.txt |
-| ALL_CSV | ok | 69147 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-safeguard-workpack.csv |
-| ALL_XLS | ok | 99322 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-safeguard-workpack.xls |
+| TXT | ok | 5834 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.txt |
+| JSON | ok | 6490 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.json |
+| CSV | ok | 9189 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.csv |
+| XLS | ok | 15347 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.xls |
+| DOC | ok | 9617 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.doc |
+| HTML | ok | 6412 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.html |
+| HWPX | ok | 10222 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.hwpx |
+| PDF | ok | 275903 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.pdf |
+| JPG | ok | 173146 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-risk-assessment.jpg |
+| ALL_TXT | ok | 45636 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-safeguard-workpack.txt |
+| ALL_CSV | ok | 69121 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-safeguard-workpack.csv |
+| ALL_XLS | ok | 99296 | evaluation\2026-04-29-orchestration-download-smoke\files\대성창고-safeguard-workpack.xls |
