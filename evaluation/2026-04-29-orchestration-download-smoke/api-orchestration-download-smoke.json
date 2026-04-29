@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-04-29T13:07:25.422Z",
-  "elapsedMs": 36246,
+  "generatedAt": "2026-04-29T13:10:42.680Z",
+  "elapsedMs": 39355,
   "question": "대구 달서구 창고업 고중량 박스 적재 및 수작업 운반. 작업자 5명, 숙련자 중심, 오늘 날씨를 반영해 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 1209,
+    "elapsedMs": 2033,
     "mode": "live",
     "summary": "단시간 구름많음, 강수없음, 기온 15℃, 풍속 2m/s (초단기실황/초단기예보/단기예보 반영)",
     "signalCount": 3
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 32658,
+    "elapsedMs": 35094,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "귀하께서 제공하신 대구 달서구 창고업의 고중량 박스 적재 및 수작업 운반 작업과 관련하여, 작업자 5명(숙련자 중심) 및 오늘 날씨를 반영한 위험성평가, TBM, 안전보건교육 기록 초안을 현장 검토용으로 작성합니다.\n\n---\n\n### 1) 핵심 판단\n\n대구 달서구 창고의 고중량 박스 수",
+      "evidence": "### 1. 핵심 판단\n\n제공된 현장 조건(대구 달서구 창고업, 고중량 박스 적재 및 수작업 운반, 작업자 5명, 숙련자 중심, 오늘 날씨 반영)을 바탕으로, 산업안전보건법령 및 관련 해석례에 따라 잠재적인 위험 요소를 파악하고 이에 대한 기본적인 관리 방안을 수립할 필요가 있습니다. ",
       "count": 11
     },
     {
@@ -168,7 +168,7 @@
     {
       "format": "PDF",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.pdf",
-      "bytes": 275988,
+      "bytes": 275882,
       "ok": true
     },
     {
