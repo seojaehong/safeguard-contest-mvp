@@ -20,10 +20,32 @@
 
 ## Remaining API Detail Risks
 
-- `KOSHA 안전보건자료 링크 서비스`는 공공데이터포털 참고문서인 `안전보건자료 링크 서비스 코드 목록.xlsx`의 제작형태, 업종, 재해유형, 외국어 코드가 있어야 정확한 조건 검색이 가능하다.
-- `KOSHA 안전보건법령 스마트검색`은 활용가이드의 정확한 검색 파라미터가 확인되면 candidate parameter probing을 고정 파라미터로 바꿔야 한다.
+- `KOSHA 안전보건자료 링크 서비스`는 공공데이터포털 참고문서인 `안전보건자료 링크 서비스 코드 목록.xlsx`를 확보해 `ctgr01`, `ctgr02`, `ctgr03`, `ctgr04`, `ctgr04_kr` 기반으로 고정했다.
+- `KOSHA 안전보건법령 스마트검색`은 활용가이드에서 확인한 `searchValue`, `category` 기반으로 고정했다.
 - `KOSHA MSDS`는 화학물질 키워드가 있는 작업에서만 호출한다. 일반 건설·물류 작업에는 노이즈가 될 수 있어 기본 노출하지 않는다.
 - `한국산업안전보건공단_건설업 일별 중대재해 현황`은 endpoint와 요청 변수 확인 후 건설업 시나리오의 별도 보조 근거로 추가한다.
+
+## Applied Guide Details
+
+### KOSHA 안전보건법령 스마트검색
+
+- Base URL: `http://apis.data.go.kr/B552468/srch/smartSearch`
+- Required params: `serviceKey`, `pageNo`, `numOfRows`, `searchValue`, `category`
+- Category mapping:
+  - `0`: 전체
+  - `6`: 미디어
+  - `7`: KOSHA GUIDE
+  - `8`: 중대재해처벌법
+
+### KOSHA 안전보건자료 링크 서비스
+
+- Endpoint: `https://apis.data.go.kr/B552468/selectMediaList01/getselectMediaList01`
+- Code params:
+  - `ctgr01`: 제작형태. SafeGuard default is `12` for OPS.
+  - `ctgr02`: 업종. `1` 공통업종, `2` 제조, `3` 건설, `4` 서비스, `6` 기타.
+  - `ctgr03`: 재해유형. 예: `11000001` 떨어짐, `11000007` 끼임, `11000004` 부딪힘, `11000011` 화재, `11000014` 화학물질누출·접촉.
+  - `ctgr04`: 외국어. 예: `6200110` 베트남어, `6130110` 중국어, `6150110` 몽골어, `6180110` 태국어, `6190110` 우즈베크어.
+  - `ctgr04_kr`: 한국어 자료 포함. SafeGuard uses `Y` so Korean manager materials and foreign-worker materials can be shown together.
 
 ## Verification
 

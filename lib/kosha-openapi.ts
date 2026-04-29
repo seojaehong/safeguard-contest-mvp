@@ -19,6 +19,8 @@ type KoshaOpenApiReference = KoshaOpenApiEvidence["references"][number];
 
 const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUBLIC_DATA_API_KEY?.trim() || "";
 const REQUEST_TIMEOUT_MS = 8_000;
+const KOSHA_SMART_SEARCH_URL = "http://apis.data.go.kr/B552468/srch/smartSearch";
+const KOSHA_MEDIA_URL = "https://apis.data.go.kr/B552468/selectMediaList01/getselectMediaList01";
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -41,7 +43,9 @@ function readArrayEnvelope(value: unknown): JsonRecord[] {
     value.items,
     isRecord(value.items) ? value.items.item : undefined,
     isRecord(value.response) && isRecord(value.response.body) && isRecord(value.response.body.items) ? value.response.body.items.item : undefined,
+    isRecord(value.response) && isRecord(value.response.body) ? value.response.body.total_media : undefined,
     isRecord(value.body) && isRecord(value.body.items) ? value.body.items.item : undefined,
+    isRecord(value.body) ? value.body.total_media : undefined,
     value.data,
     value.list,
     value.result
@@ -58,6 +62,55 @@ function readArrayEnvelope(value: unknown): JsonRecord[] {
 function pickKeyword(question: string) {
   const candidates = ["보호구", "비계", "추락", "지게차", "끼임", "용접", "화재", "밀폐공간", "감전", "MSDS", "세척제", "화학물질"];
   return candidates.find((keyword) => question.includes(keyword)) || "위험성평가";
+}
+
+function stripMarkup(value: string) {
+  return value
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function pickSmartSearchCategory(question: string) {
+  if (["중대재해", "중대재해처벌"].some((keyword) => question.includes(keyword))) return "8";
+  if (["가이드", "KOSHA GUIDE", "지침", "작업지침"].some((keyword) => question.includes(keyword))) return "7";
+  if (["교육", "자료", "외국인", "다국어", "동영상", "PPT"].some((keyword) => question.includes(keyword))) return "6";
+  return "0";
+}
+
+function pickMediaIndustryCode(question: string) {
+  if (["건설", "비계", "추락", "외벽"].some((keyword) => question.includes(keyword))) return "3";
+  if (["제조", "용접", "절단", "금속", "화학"].some((keyword) => question.includes(keyword))) return "2";
+  if (["물류", "창고", "서비스", "청소", "시설", "세척"].some((keyword) => question.includes(keyword))) return "4";
+  return "1";
+}
+
+function pickMediaAccidentTypeCode(question: string) {
+  if (["추락", "떨어", "비계", "고소"].some((keyword) => question.includes(keyword))) return "11000001";
+  if (["끼임", "협착", "지게차"].some((keyword) => question.includes(keyword))) return "11000007";
+  if (["충돌", "부딪", "동선"].some((keyword) => question.includes(keyword))) return "11000004";
+  if (["깔림", "전도", "뒤집"].some((keyword) => question.includes(keyword))) return "11000003";
+  if (["화재", "용접", "불티"].some((keyword) => question.includes(keyword))) return "11000011";
+  if (["폭발", "파열"].some((keyword) => question.includes(keyword))) return "11000010";
+  if (["감전", "전기"].some((keyword) => question.includes(keyword))) return "11000009";
+  if (["넘어짐", "미끄럼", "우천"].some((keyword) => question.includes(keyword))) return "11000002";
+  if (["화학", "세척제", "물질", "MSDS"].some((keyword) => question.includes(keyword))) return "11000014";
+  if (["절단", "베임", "찔림"].some((keyword) => question.includes(keyword))) return "11000008";
+  if (["무리한", "수작업", "중량", "박스", "근골격"].some((keyword) => question.includes(keyword))) return "11000012";
+  return "";
+}
+
+function pickForeignLanguageCode(question: string) {
+  if (["베트남", "vietnam"].some((keyword) => question.toLowerCase().includes(keyword.toLowerCase()))) return "6200110";
+  if (["중국", "china", "chinese"].some((keyword) => question.toLowerCase().includes(keyword.toLowerCase()))) return "6130110";
+  if (["몽골", "mongol"].some((keyword) => question.toLowerCase().includes(keyword.toLowerCase()))) return "6150110";
+  if (["태국", "thai"].some((keyword) => question.toLowerCase().includes(keyword.toLowerCase()))) return "6180110";
+  if (["우즈벡", "uzbek"].some((keyword) => question.toLowerCase().includes(keyword.toLowerCase()))) return "6190110";
+  if (["외국인", "다국어", "foreign"].some((keyword) => question.toLowerCase().includes(keyword.toLowerCase()))) return "6200110";
+  return "";
 }
 
 function pickChemicalKeyword(question: string) {
@@ -122,54 +175,51 @@ type KoshaOpenApiFetchResult = KoshaOpenApiReference[] | { detail: string };
 
 async function fetchSmartSearch(question: string): Promise<KoshaOpenApiFetchResult> {
   const keyword = pickKeyword(question);
-  const params = ["keyword", "searchKeyword", "srchWrd", "query"];
-  const details: string[] = [];
+  const url = new URL(KOSHA_SMART_SEARCH_URL);
+  url.searchParams.set("serviceKey", serviceKey);
+  url.searchParams.set("pageNo", "1");
+  url.searchParams.set("numOfRows", "5");
+  url.searchParams.set("searchValue", keyword);
+  url.searchParams.set("category", pickSmartSearchCategory(question));
 
-  for (const param of params) {
-    const url = new URL("https://apis.data.go.kr/B552468/srch/smartSearch");
-    url.searchParams.set("serviceKey", serviceKey);
-    url.searchParams.set("pageNo", "1");
-    url.searchParams.set("numOfRows", "5");
-    url.searchParams.set("_type", "json");
-    url.searchParams.set(param, keyword);
-    try {
-      const parsed = parseJsonRecords(await fetchText(url.toString()));
-      if (parsed.records.length) {
-        return parsed.records.slice(0, 2).map((record) => ({
-          title: readString(record, ["title", "ttl", "sj", "lawNm", "guideNm"]) || `KOSHA 스마트검색: ${keyword}`,
-          service: "안전보건법령 스마트검색" as const,
-          summary: readString(record, ["summary", "contents", "cn", "content", "desc"]) || "KOSHA 안전보건법령 스마트검색에서 관련 자료를 확인했습니다.",
-          url: readString(record, ["url", "link", "detailUrl"]) || "https://apis.data.go.kr/B552468/srch/smartSearch",
-          reflectedIn: ["문서 반영 근거", "위험성평가표", "TBM"]
-        }));
-      }
-      details.push(`${param}: ${parsed.detail}`);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      details.push(`${param}: ${message}`);
-    }
+  try {
+    const parsed = parseJsonRecords(await fetchText(url.toString()));
+    if (!parsed.records.length) return { detail: `smartSearch searchValue=${keyword}: ${parsed.detail}` };
+    return parsed.records.slice(0, 2).map((record) => ({
+      title: readString(record, ["title", "ttl", "sj", "lawNm", "guideNm"]) || `KOSHA 스마트검색: ${keyword}`,
+      service: "안전보건법령 스마트검색" as const,
+      summary: stripMarkup(readString(record, ["summary", "contents", "cn", "content", "desc", "highlight_content"])) || "KOSHA 안전보건법령 스마트검색에서 관련 자료를 확인했습니다.",
+      url: readString(record, ["filepath", "url", "link", "detailUrl"]) || KOSHA_SMART_SEARCH_URL,
+      reflectedIn: ["문서 반영 근거", "위험성평가표", "TBM"]
+    }));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { detail: `smartSearch searchValue=${keyword}: ${message}` };
   }
-
-  return { detail: details.join(" | ") };
 }
 
 async function fetchSafetyMedia(question: string): Promise<KoshaOpenApiFetchResult> {
-  const keyword = pickKeyword(question);
-  const url = new URL("https://apis.data.go.kr/B552468/selectMediaList01/getselectMediaList01");
+  const accidentTypeCode = pickMediaAccidentTypeCode(question);
+  const languageCode = pickForeignLanguageCode(question);
+  const url = new URL(KOSHA_MEDIA_URL);
   url.searchParams.set("serviceKey", serviceKey);
   url.searchParams.set("pageNo", "1");
   url.searchParams.set("numOfRows", "5");
   url.searchParams.set("_type", "json");
-  url.searchParams.set("keyword", keyword);
+  url.searchParams.set("ctgr01", "12");
+  url.searchParams.set("ctgr02", pickMediaIndustryCode(question));
+  if (accidentTypeCode) url.searchParams.set("ctgr03", accidentTypeCode);
+  if (languageCode) url.searchParams.set("ctgr04", languageCode);
+  url.searchParams.set("ctgr04_kr", "Y");
 
   try {
     const parsed = parseJsonRecords(await fetchText(url.toString()));
     if (!parsed.records.length) return { detail: parsed.detail };
     return parsed.records.slice(0, 2).map((record) => ({
-      title: readString(record, ["title", "ttl", "mediaTitle", "sj"]) || `KOSHA 안전보건자료: ${keyword}`,
+      title: readString(record, ["title", "ttl", "mediaTitle", "sj", "dataNm", "name"]) || "KOSHA 안전보건자료",
       service: "안전보건자료 링크" as const,
-      summary: readString(record, ["summary", "contents", "desc", "mediaCn"]) || "KOSHA 안전보건자료 링크 서비스에서 관련 자료를 확인했습니다.",
-      url: readString(record, ["url", "link", "mediaUrl", "fileUrl"]) || "https://apis.data.go.kr/B552468/selectMediaList01/getselectMediaList01",
+      summary: stripMarkup(readString(record, ["summary", "contents", "desc", "mediaCn", "cont", "dataCn"])) || "KOSHA 안전보건자료 링크 서비스에서 관련 자료를 확인했습니다.",
+      url: readString(record, ["url", "link", "mediaUrl", "fileUrl", "filepath"]) || KOSHA_MEDIA_URL,
       reflectedIn: ["안전보건교육 기록", "외국인 근로자 출력본", "문서 반영 근거"]
     }));
   } catch (error) {
