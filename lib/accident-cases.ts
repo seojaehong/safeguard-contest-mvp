@@ -97,9 +97,7 @@ async function fetchWithRetry(url: string, options: Required<FetchOptions>) {
   throw new Error(`${options.budgetLabel}: ${message}`);
 }
 
-function buildUrl(question: string) {
-  const url = new URL("https://apis.data.go.kr/B552468/disaster_api02/getdisaster_api02");
-  url.searchParams.set("serviceKey", serviceKey);
+function appendCommonParams(url: URL, question: string) {
   url.searchParams.set("pageNo", "1");
   url.searchParams.set("numOfRows", "100");
   url.searchParams.set("callApiId", "1060");
@@ -109,7 +107,50 @@ function buildUrl(question: string) {
   const business = pickBusiness(question);
   if (keyword) url.searchParams.set("keyword", keyword);
   if (business) url.searchParams.set("business", business);
+}
+
+function buildUrl(question: string, key: string) {
+  const url = new URL("https://apis.data.go.kr/B552468/disaster_api02/getdisaster_api02");
+  url.searchParams.set("serviceKey", key);
+  appendCommonParams(url, question);
   return url.toString();
+}
+
+function buildRawServiceKeyUrl(question: string, key: string) {
+  const url = new URL("https://apis.data.go.kr/B552468/disaster_api02/getdisaster_api02");
+  appendCommonParams(url, question);
+  const query = url.searchParams.toString();
+  return `${url.origin}${url.pathname}?serviceKey=${key}&${query}`;
+}
+
+function safeDecodeServiceKey(key: string) {
+  try {
+    return decodeURIComponent(key);
+  } catch (error) {
+    console.warn("KOSHA accident service key decode failed", error);
+    return key;
+  }
+}
+
+function buildUrlCandidates(question: string) {
+  const candidates = [
+    { label: "urlsearchparams:raw", url: buildUrl(question, serviceKey) },
+    { label: "raw-query:raw", url: buildRawServiceKeyUrl(question, serviceKey) }
+  ];
+  const decodedKey = safeDecodeServiceKey(serviceKey);
+  if (decodedKey !== serviceKey) {
+    candidates.push(
+      { label: "urlsearchparams:decoded", url: buildUrl(question, decodedKey) },
+      { label: "raw-query:decoded", url: buildRawServiceKeyUrl(question, decodedKey) }
+    );
+  }
+
+  const seen = new Set<string>();
+  return candidates.filter((candidate) => {
+    if (seen.has(candidate.url)) return false;
+    seen.add(candidate.url);
+    return true;
+  });
 }
 
 function pickKeyword(question: string) {
@@ -346,23 +387,36 @@ export async function fetchAccidentCases(question: string, options: FetchOptions
     };
   }
 
+  const failureDetails: string[] = [];
   try {
-    const text = await fetchWithRetry(buildUrl(question), resolvedOptions);
-    const parsed = parseAccidentCases(question, text);
-    if (parsed.kind !== "ok") {
-      return {
-        source: "kosha-accident",
-        mode: "fallback",
-        detail: `${parsed.detail} 기본 재해사례 근거로 전환했습니다.`,
-        cases: selectFallbackAccidentCases(question)
-      };
+    const candidates = buildUrlCandidates(question);
+    for (const candidate of candidates) {
+      try {
+        const text = await fetchWithRetry(candidate.url, {
+          ...resolvedOptions,
+          budgetLabel: `${resolvedOptions.budgetLabel} (${candidate.label})`
+        });
+        const parsed = parseAccidentCases(question, text);
+        if (parsed.kind === "ok") {
+          return {
+            source: "kosha-accident",
+            mode: "live",
+            detail: `${parsed.detail} 연결 방식: ${candidate.label}`,
+            cases: parsed.cases
+          };
+        }
+        failureDetails.push(`${candidate.label}: ${parsed.detail}`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        failureDetails.push(`${candidate.label}: ${message}`);
+      }
     }
 
     return {
       source: "kosha-accident",
-      mode: "live",
-      detail: parsed.detail,
-      cases: parsed.cases
+      mode: "fallback",
+      detail: `KOSHA 국내재해사례 API 후보 호출이 모두 실패했습니다. ${failureDetails.join(" | ")} 기본 재해사례 근거로 전환했습니다.`,
+      cases: selectFallbackAccidentCases(question)
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
