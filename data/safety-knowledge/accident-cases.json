@@ -1,0 +1,67 @@
+[
+  {
+    "id": "accident-fall-scaffold",
+    "hazardId": "fall-scaffold",
+    "title": "비계·작업발판 추락 유사사례",
+    "industry": "건설업",
+    "accidentType": "추락",
+    "summary": "작업발판, 난간, 안전대, 강풍 조건을 점검하지 않으면 추락 위험이 커진다.",
+    "preventionPoint": "작업 전 비계 고정, 난간, 안전대, 작업중지 기준을 TBM에서 확인한다.",
+    "sourceIds": [
+      "kosha-domestic-accident-cases",
+      "kosha-fatal-accident-board"
+    ]
+  },
+  {
+    "id": "accident-forklift-contact",
+    "hazardId": "forklift-traffic",
+    "title": "지게차와 보행자 동선 겹침 유사사례",
+    "industry": "물류·제조",
+    "accidentType": "충돌·끼임",
+    "summary": "하역구역에서 보행자와 지게차 동선이 겹치면 충돌·끼임 위험이 높다.",
+    "preventionPoint": "운행경로 분리, 신호수, 접근금지 표시, 후진 경보 확인을 작업 전 체크한다.",
+    "sourceIds": [
+      "kosha-domestic-accident-cases",
+      "kosha-forklift-plan"
+    ]
+  },
+  {
+    "id": "accident-hot-work-fire",
+    "hazardId": "hot-work-fire",
+    "title": "용접 불티 화재 유사사례",
+    "industry": "제조·건설",
+    "accidentType": "화재",
+    "summary": "용접·절단 불티가 가연물에 옮겨 붙으면 작업 종료 후에도 화재로 이어질 수 있다.",
+    "preventionPoint": "화기작업 허가, 가연물 제거, 화재감시자, 잔불 확인을 기록한다.",
+    "sourceIds": [
+      "kosha-hot-work-manual",
+      "kosha-fatal-accident-board"
+    ]
+  },
+  {
+    "id": "accident-confined-space-poisoning",
+    "hazardId": "confined-space",
+    "title": "밀폐공간 산소결핍·중독 유사사례",
+    "industry": "시설·건설",
+    "accidentType": "질식·중독",
+    "summary": "출입 전 측정과 환기 없이 들어가면 산소결핍 또는 유해가스 중독 위험이 있다.",
+    "preventionPoint": "산소·유해가스 측정, 환기, 감시인, 구조절차를 작업 전 확인한다.",
+    "sourceIds": [
+      "kosha-domestic-accident-cases",
+      "kosha-smart-search"
+    ]
+  },
+  {
+    "id": "accident-chemical-exposure",
+    "hazardId": "chemical-msds",
+    "title": "세척제·용제 노출 유사사례",
+    "industry": "제조·서비스",
+    "accidentType": "화학물질 노출",
+    "summary": "MSDS 확인 없이 세척제나 용제를 취급하면 피부·호흡기 노출과 누출 대응 실패 위험이 있다.",
+    "preventionPoint": "MSDS, 보호구, 환기, 누출 시 대피·차단 절차를 안전교육에 반영한다.",
+    "sourceIds": [
+      "kosha-msds",
+      "kosha-media-link"
+    ]
+  }
+]

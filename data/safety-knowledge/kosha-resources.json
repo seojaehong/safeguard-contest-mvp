@@ -1,0 +1,180 @@
+[
+  {
+    "id": "kosha-risk-assessment-program",
+    "agency": "KOSHA",
+    "title": "KOSHA 위험성평가 사업안내",
+    "sourceType": "official-guide",
+    "url": "https://www.kosha.or.kr/kosha/business/rskassessment.do",
+    "appliesTo": [
+      "riskAssessment",
+      "safetyEducation"
+    ],
+    "summary": "유해·위험요인 파악, 위험성 결정, 감소대책 수립·실행, 공유·기록 흐름을 위험성평가 문서 구조에 반영한다."
+  },
+  {
+    "id": "kosha-4m-risk-manual",
+    "agency": "KOSHA",
+    "title": "KOSHA 4M 기법 위험성평가 메뉴얼",
+    "sourceType": "official-manual",
+    "url": "https://oshri.kosha.or.kr/kosha/data/rskassessmentd.do?articleNo=84457&mode=view",
+    "appliesTo": [
+      "riskAssessment"
+    ],
+    "summary": "Man, Machine, Media, Management 관점으로 위험요인을 점검하고 위험성평가표의 누락을 줄인다."
+  },
+  {
+    "id": "kosha-tbm-ops",
+    "agency": "KOSHA",
+    "title": "작업 전 안전점검회의(TBM) OPS",
+    "sourceType": "official-guide",
+    "url": "https://edu.kosha.or.kr/headquater/support/assist/noticeboard/details?bbsEsntlNo=2913",
+    "appliesTo": [
+      "tbmBriefing",
+      "tbmLog",
+      "safetyEducation"
+    ],
+    "summary": "작업내용, 위험요인, 안전대책, 참석자 확인, 기록 메모 항목을 TBM 문서에 반영한다."
+  },
+  {
+    "id": "moel-tbm-education-credit",
+    "agency": "MOEL",
+    "title": "TBM 정기교육 시간 인정 안내",
+    "sourceType": "press",
+    "url": "https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=16488",
+    "appliesTo": [
+      "tbmLog",
+      "safetyEducation"
+    ],
+    "summary": "위험성평가 결과를 반영한 TBM을 교육 증빙으로 활용할 수 있음을 안전교육 기록에 보조 문구로 반영한다."
+  },
+  {
+    "id": "kosha-safety-education-guidebook",
+    "agency": "KOSHA",
+    "title": "산업안전보건교육 가이드북",
+    "sourceType": "official-guidebook",
+    "url": "https://oshri.kosha.or.kr/kosha/intro/gyeonggiBranch_A.do?articleNo=414441&attachNo=233889&mode=download",
+    "appliesTo": [
+      "safetyEducation"
+    ],
+    "summary": "교육대상, 교육내용, 확인방법, 후속 교육 추천 항목을 안전보건교육 기록에 분리한다."
+  },
+  {
+    "id": "kosha-forklift-plan",
+    "agency": "KOSHA",
+    "title": "지게차의 안전작업계획서 작성지침",
+    "sourceType": "official-guide",
+    "url": "https://oshri.kosha.or.kr/kosha/intro/northernGyeonggiBranch_A.do?articleNo=351943&attachNo=199463&mode=download",
+    "appliesTo": [
+      "riskAssessment",
+      "workPlan",
+      "tbmBriefing"
+    ],
+    "summary": "지게차 작업계획, 운행경로, 신호방법, 접근금지구역 확인 항목을 보강한다."
+  },
+  {
+    "id": "kosha-hot-work-manual",
+    "agency": "KOSHA",
+    "title": "화기작업 화재·폭발 예방 매뉴얼",
+    "sourceType": "official-manual",
+    "url": "https://kosha.or.kr/kosha/data/screening_e.do?articleNo=235017&attachNo=113021&mode=download",
+    "appliesTo": [
+      "riskAssessment",
+      "tbmBriefing",
+      "safetyEducation",
+      "emergencyResponse"
+    ],
+    "summary": "작업허가, 가연물 제거, 화재감시자, 소화설비 확인 문구를 보강한다."
+  },
+  {
+    "id": "kosha-smart-search",
+    "agency": "KOSHA",
+    "title": "안전보건법령 스마트검색",
+    "sourceType": "open-api",
+    "url": "https://apis.data.go.kr/B552468/srch/smartSearch",
+    "appliesTo": [
+      "evidence",
+      "riskAssessment",
+      "tbmBriefing"
+    ],
+    "summary": "법령, KOSHA GUIDE, 안전보건 미디어 자료를 키워드로 검색해 문서 반영 근거 후보를 찾는다."
+  },
+  {
+    "id": "kosha-media-link",
+    "agency": "KOSHA",
+    "title": "안전보건자료 링크 서비스",
+    "sourceType": "open-api",
+    "url": "https://apis.data.go.kr/B552468/selectMediaList01/getselectMediaList01",
+    "appliesTo": [
+      "safetyEducation",
+      "foreignWorkerBriefing",
+      "evidence"
+    ],
+    "summary": "제작형태, 업종, 재해유형, 외국어 조건으로 교육·홍보 자료 링크를 찾는다."
+  },
+  {
+    "id": "kosha-domestic-accident-cases",
+    "agency": "KOSHA",
+    "title": "국내재해사례 게시판 정보 조회서비스",
+    "sourceType": "open-api",
+    "url": "https://apis.data.go.kr/B552468/disaster_api02/getdisaster_api02",
+    "appliesTo": [
+      "riskAssessment",
+      "tbmBriefing",
+      "safetyEducation",
+      "emergencyResponse"
+    ],
+    "summary": "유사 재해사례를 위험성평가와 TBM 예방 포인트에 연결한다."
+  },
+  {
+    "id": "kosha-fatal-accident-board",
+    "agency": "KOSHA",
+    "title": "사고사망 게시판 정보 조회서비스",
+    "sourceType": "open-api",
+    "url": "https://apis.data.go.kr/B552468/news_api02/getNews_api02",
+    "appliesTo": [
+      "riskAssessment",
+      "tbmBriefing",
+      "emergencyResponse"
+    ],
+    "summary": "사고사망 일자, 장소, 사고개요, 피해 규모를 예방 포인트에 연결한다."
+  },
+  {
+    "id": "kosha-msds",
+    "agency": "KOSHA",
+    "title": "물질안전보건자료 조회 서비스",
+    "sourceType": "open-api",
+    "url": "https://apis.data.go.kr/B552468/msdschem/getChemList",
+    "appliesTo": [
+      "chemical",
+      "riskAssessment",
+      "safetyEducation",
+      "emergencyResponse"
+    ],
+    "summary": "화학물질 유해성, 응급조치, 누출, 보호구, 법적 규제 항목의 원문 근거를 연결한다."
+  },
+  {
+    "id": "lawgo-industrial-safety-law",
+    "agency": "MOLEG",
+    "title": "법제처 국가법령정보 산업안전보건법",
+    "sourceType": "law",
+    "url": "https://www.law.go.kr/법령/산업안전보건법",
+    "appliesTo": [
+      "legalEvidence",
+      "riskAssessment",
+      "safetyEducation"
+    ],
+    "summary": "사업주와 근로자의 안전보건 조치 의무를 문서 근거 초안에 연결한다."
+  },
+  {
+    "id": "lawgo-serious-accident-law",
+    "agency": "MOLEG",
+    "title": "법제처 국가법령정보 중대재해 처벌 등에 관한 법률",
+    "sourceType": "law",
+    "url": "https://www.law.go.kr/법령/중대재해처벌등에관한법률",
+    "appliesTo": [
+      "emergencyResponse",
+      "riskAssessment"
+    ],
+    "summary": "경영책임자 등의 안전보건 확보 의무를 비상대응과 관리체계 점검 문구에 보조 반영한다."
+  }
+]

@@ -1,0 +1,295 @@
+[
+  {
+    "id": "fall-scaffold",
+    "title": "비계·고소작업 추락",
+    "keywords": [
+      "비계",
+      "추락",
+      "고소",
+      "외벽",
+      "작업발판",
+      "안전대"
+    ],
+    "primaryDocuments": [
+      "riskAssessment",
+      "tbmBriefing",
+      "safetyEducation",
+      "photoEvidence"
+    ],
+    "controls": [
+      "작업발판·난간·바퀴 잠금 확인",
+      "안전대와 안전모 착용 확인",
+      "강풍·우천 시 작업중지 기준 공유",
+      "추락 위험구역 출입통제"
+    ],
+    "sourceIds": [
+      "kosha-risk-assessment-program",
+      "kosha-4m-risk-manual",
+      "kosha-smart-search",
+      "lawgo-industrial-safety-law"
+    ],
+    "liveEvidence": [],
+    "qualityFlags": {
+      "hasOfficialSource": true,
+      "hasControls": true,
+      "hasDocumentMapping": true,
+      "hasSourceUrl": true
+    }
+  },
+  {
+    "id": "forklift-traffic",
+    "title": "지게차·보행자 동선 충돌",
+    "keywords": [
+      "지게차",
+      "동선",
+      "상하차",
+      "보행자",
+      "충돌",
+      "끼임"
+    ],
+    "primaryDocuments": [
+      "riskAssessment",
+      "workPlan",
+      "tbmBriefing",
+      "tbmLog"
+    ],
+    "controls": [
+      "지게차 운행경로와 보행동선 분리",
+      "신호수 배치와 사각지대 확인",
+      "하역구역 접근금지 표시",
+      "운전 전 점검과 후진 경보 확인"
+    ],
+    "sourceIds": [
+      "kosha-forklift-plan",
+      "kosha-domestic-accident-cases",
+      "kosha-smart-search",
+      "lawgo-industrial-safety-law"
+    ],
+    "liveEvidence": [],
+    "qualityFlags": {
+      "hasOfficialSource": true,
+      "hasControls": true,
+      "hasDocumentMapping": true,
+      "hasSourceUrl": true
+    }
+  },
+  {
+    "id": "hot-work-fire",
+    "title": "용접·절단 화기작업 화재",
+    "keywords": [
+      "용접",
+      "절단",
+      "화기",
+      "불티",
+      "가연물",
+      "화재감시자"
+    ],
+    "primaryDocuments": [
+      "riskAssessment",
+      "workPlan",
+      "tbmBriefing",
+      "emergencyResponse"
+    ],
+    "controls": [
+      "화기작업 허가와 화재감시자 지정",
+      "가연물 제거 또는 방염포 설치",
+      "소화기와 비상대응 경로 확인",
+      "작업 후 잔불 확인"
+    ],
+    "sourceIds": [
+      "kosha-hot-work-manual",
+      "kosha-msds",
+      "kosha-fatal-accident-board",
+      "lawgo-industrial-safety-law"
+    ],
+    "liveEvidence": [],
+    "qualityFlags": {
+      "hasOfficialSource": true,
+      "hasControls": true,
+      "hasDocumentMapping": true,
+      "hasSourceUrl": true
+    }
+  },
+  {
+    "id": "confined-space",
+    "title": "밀폐공간 산소결핍·중독",
+    "keywords": [
+      "밀폐공간",
+      "맨홀",
+      "탱크",
+      "산소결핍",
+      "유해가스",
+      "환기"
+    ],
+    "primaryDocuments": [
+      "riskAssessment",
+      "tbmBriefing",
+      "safetyEducation",
+      "emergencyResponse"
+    ],
+    "controls": [
+      "출입 전 산소·유해가스 측정",
+      "환기와 감시인 배치",
+      "구조장비와 구조절차 공유",
+      "단독작업 금지"
+    ],
+    "sourceIds": [
+      "kosha-smart-search",
+      "kosha-domestic-accident-cases",
+      "lawgo-industrial-safety-law"
+    ],
+    "liveEvidence": [],
+    "qualityFlags": {
+      "hasOfficialSource": true,
+      "hasControls": true,
+      "hasDocumentMapping": true,
+      "hasSourceUrl": true
+    }
+  },
+  {
+    "id": "chemical-msds",
+    "title": "화학물질·세척제 노출",
+    "keywords": [
+      "화학물질",
+      "세척제",
+      "MSDS",
+      "유해성",
+      "누출",
+      "보호구"
+    ],
+    "primaryDocuments": [
+      "riskAssessment",
+      "safetyEducation",
+      "emergencyResponse",
+      "foreignWorkerBriefing"
+    ],
+    "controls": [
+      "MSDS 확인",
+      "보안경·장갑·호흡보호구 지정",
+      "누출 시 대피·환기·차단 절차 공유",
+      "외국인 근로자 쉬운 문장 안내"
+    ],
+    "sourceIds": [
+      "kosha-msds",
+      "kosha-media-link",
+      "lawgo-industrial-safety-law"
+    ],
+    "liveEvidence": [],
+    "qualityFlags": {
+      "hasOfficialSource": true,
+      "hasControls": true,
+      "hasDocumentMapping": true,
+      "hasSourceUrl": true
+    }
+  },
+  {
+    "id": "weather-wind-rain-heat",
+    "title": "강풍·우천·폭염 작업조건",
+    "keywords": [
+      "강풍",
+      "우천",
+      "폭염",
+      "미끄럼",
+      "기상특보",
+      "풍속"
+    ],
+    "primaryDocuments": [
+      "riskAssessment",
+      "tbmBriefing",
+      "tbmLog",
+      "workPlan"
+    ],
+    "controls": [
+      "기상청 현재·예보 신호 확인",
+      "작업중지 판단자 지정",
+      "미끄럼·전도 위험구역 통제",
+      "휴식·수분·그늘 기준 공유"
+    ],
+    "sourceIds": [
+      "kosha-risk-assessment-program",
+      "lawgo-industrial-safety-law"
+    ],
+    "liveEvidence": [],
+    "qualityFlags": {
+      "hasOfficialSource": true,
+      "hasControls": true,
+      "hasDocumentMapping": true,
+      "hasSourceUrl": true
+    }
+  },
+  {
+    "id": "foreign-worker-briefing",
+    "title": "외국인 근로자 안전교육·전송",
+    "keywords": [
+      "외국인",
+      "다국어",
+      "신규",
+      "베트남어",
+      "중국어",
+      "몽골어",
+      "태국어"
+    ],
+    "primaryDocuments": [
+      "foreignWorkerBriefing",
+      "foreignWorkerTransmission",
+      "safetyEducation",
+      "dispatch"
+    ],
+    "controls": [
+      "쉬운 한국어 우선 작성",
+      "국적·주 사용 언어별 핵심 문장 제공",
+      "관리자 또는 통역 확인 문구 포함",
+      "전송 로그와 교육 확인 기록 연결"
+    ],
+    "sourceIds": [
+      "kosha-media-link",
+      "kosha-safety-education-guidebook",
+      "moel-tbm-education-credit"
+    ],
+    "liveEvidence": [],
+    "qualityFlags": {
+      "hasOfficialSource": true,
+      "hasControls": true,
+      "hasDocumentMapping": true,
+      "hasSourceUrl": true
+    }
+  },
+  {
+    "id": "risk-assessment-tbm-loop",
+    "title": "위험성평가·TBM·교육 닫힌 루프",
+    "keywords": [
+      "위험성평가",
+      "TBM",
+      "안전교육",
+      "작업 전",
+      "기록"
+    ],
+    "primaryDocuments": [
+      "workpackSummary",
+      "riskAssessment",
+      "tbmBriefing",
+      "tbmLog",
+      "safetyEducation"
+    ],
+    "controls": [
+      "위험요인 파악",
+      "감소대책 수립",
+      "TBM 공유",
+      "교육 확인",
+      "사진·증빙 보관"
+    ],
+    "sourceIds": [
+      "kosha-risk-assessment-program",
+      "kosha-tbm-ops",
+      "moel-tbm-education-credit",
+      "kosha-safety-education-guidebook"
+    ],
+    "liveEvidence": [],
+    "qualityFlags": {
+      "hasOfficialSource": true,
+      "hasControls": true,
+      "hasDocumentMapping": true,
+      "hasSourceUrl": true
+    }
+  }
+]
