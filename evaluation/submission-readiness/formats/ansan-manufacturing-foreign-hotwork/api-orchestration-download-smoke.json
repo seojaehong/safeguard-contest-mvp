@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-04-30T14:02:30.486Z",
-  "elapsedMs": 18198,
+  "generatedAt": "2026-04-30T14:12:26.947Z",
+  "elapsedMs": 20423,
   "question": "그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 외국인 근로자 2명과 신규 작업자 1명 포함, 작업자 6명, 실내 고온과 환기 불량, 가연물 인접. 화재감시자와 다국어 안전교육까지 반영해 위험성평가, TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 170,
+    "elapsedMs": 886,
     "mode": "live",
     "summary": "단시간 흐림, 강수없음, 기온 14℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 15009,
+    "elapsedMs": 16995,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "그린메탈 안산 공장 배관 용접·절단 작업과 관련하여, 제공된 근거 법령을 바탕으로 현장 검토용 안전관리 초안을 다음과 같이 작성합니다.\n\n---\n\n### 1) 핵심 판단\n본 작업은 **산업안전보건기준에 관한 규칙 제241조(화재위험이 있는 작업 시의 준수사항)**에 따른 고위험 화기작업",
+      "evidence": "그린메탈 경기 안산 공장 배관 용접·절단 화기작업에 대한 현장 검토용 초안입니다. 본 초안은 제공된 법령 근거(산업안전보건법 및 시행령·시행규칙 등)를 바탕으로 작성되었습니다.\n\n### 1. 핵심 판단\n*   **위험요인 식별:** 화기작업(용접·절단)에 따른 불꽃 비산 및 가연물 인화",
       "count": 11
     },
     {
@@ -183,7 +183,7 @@
     {
       "format": "PDF",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.pdf",
-      "bytes": 285346,
+      "bytes": 285348,
       "ok": true
     },
     {

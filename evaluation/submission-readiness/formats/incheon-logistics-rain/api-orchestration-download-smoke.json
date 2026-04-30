@@ -1,20 +1,20 @@
 {
   "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-04-30T14:02:12.172Z",
-  "elapsedMs": 37326,
+  "generatedAt": "2026-04-30T14:12:06.433Z",
+  "elapsedMs": 21011,
   "question": "한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업. 숙련 지게차 운전자 2명과 피킹 인력 6명, 우천 후 출입구 바닥 젖음, 보행 동선과 지게차 동선이 겹친다. 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 139,
+    "elapsedMs": 1102,
     "mode": "live",
-    "summary": "단시간 흐림, 강수없음, 기온 15℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+    "summary": "단시간 흐림, 강수없음, 기온 15℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 34210,
-    "mode": "live",
-    "statusSummary": "연결됨",
+    "elapsedMs": 17375,
+    "mode": "fallback",
+    "statusSummary": "일부 근거 보류",
     "documentCount": 11
   },
   "apiMapping": [
@@ -31,7 +31,7 @@
         "TBM 기상 신호",
         "작업중지 기준"
       ],
-      "evidence": "단시간 흐림, 강수없음, 기온 15℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+      "evidence": "단시간 흐림, 강수없음, 기온 15℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
       "count": 5
     },
     {
@@ -54,7 +54,7 @@
       "callPath": [
         "/api/ask 내부 generateAnswer"
       ],
-      "mode": "live",
+      "mode": "fallback",
       "reflectedIn": [
         "점검결과 요약",
         "위험성평가표",
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업 현장에 대한 안전 검토 초안입니다. 본 문서는 현장 확인 및 보완이 필요한 초안이며, 법정 최종본이 아님을 유의하시기 바랍니다.\n\n### 1) 핵심 판단\n현재 현장은 **산업안전보건법 제36조(위험성평가)** 및 동법 시행규칙에 근거",
+      "evidence": "한빛로지스 인천 남동공단 물류센터의 주요 위험은 지게차 동선과 보행 동선이 겹치면서 충돌하거나 적재물이 낙하할 위험입니다.\n\n물류업 현장 기준으로 위험 요약, 위험성평가 초안, TBM 브리핑, TBM 일지, 안전교육 기록을 한 번에 생성하는 흐름을 제공합니다.\n\n실무에서는 작업 전 위험",
       "count": 11
     },
     {
@@ -183,7 +183,7 @@
     {
       "format": "PDF",
       "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.pdf",
-      "bytes": 287511,
+      "bytes": 287514,
       "ok": true
     },
     {

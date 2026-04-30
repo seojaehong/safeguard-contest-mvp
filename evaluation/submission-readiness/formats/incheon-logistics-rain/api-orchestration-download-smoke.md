@@ -1,21 +1,22 @@
 # SafeGuard API 조합 및 다운로드 스모크
 
-- 생성시각: 2026-04-30T14:02:12.172Z
+- 생성시각: 2026-04-30T14:12:06.433Z
 - 대상 URL: https://safeguard-contest-mvp.vercel.app
 - 질문: 한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업. 숙련 지게차 운전자 2명과 피킹 인력 6명, 우천 후 출입구 바닥 젖음, 보행 동선과 지게차 동선이 겹친다. 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.
-- 기상 선조회: live / 단시간 흐림, 강수없음, 기온 15℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)
-- /api/ask: live / 문서 11종
+- 기상 선조회: live / 단시간 흐림, 강수없음, 기온 15℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)
+- /api/ask: fallback / 문서 11종
 
 ## API 반영 맵
 
 | API | 호출 경로 | 상태 | 반영 위치 | 건수/신호 | 증거 |
 | --- | --- | --- | --- | ---: | --- |
-| 기상청 현재/초단기/단기/특보/영향예보 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 5 | 단시간 흐림, 강수없음, 기온 15℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영) |
+| 기상청 현재/초단기/단기/특보/영향예보 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 5 | 단시간 흐림, 강수없음, 기온 15℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영) |
 | Law.go + korean-law-mcp | /api/ask 내부 searchLegalSources | live | 근거 출처<br>위험성평가표 반영 근거<br>TBM 기록 반영 근거<br>사진/증빙 확인 근거 | 6 | korean-law-mcp 비활성화 |
-| Gemini | /api/ask 내부 generateAnswer | live | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | 한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업 현장에 대한 안전 검토 초안입니다. 본 문서는 현장 확인 및 보완이 필요한 초안이며, 법정 최종본이 아님을 유의하시기 바랍니다.
+| Gemini | /api/ask 내부 generateAnswer | fallback | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | 한빛로지스 인천 남동공단 물류센터의 주요 위험은 지게차 동선과 보행 동선이 겹치면서 충돌하거나 적재물이 낙하할 위험입니다.
 
-### 1) 핵심 판단
-현재 현장은 **산업안전보건법 제36조(위험성평가)** 및 동법 시행규칙에 근거 |
+물류업 현장 기준으로 위험 요약, 위험성평가 초안, TBM 브리핑, TBM 일지, 안전교육 기록을 한 번에 생성하는 흐름을 제공합니다.
+
+실무에서는 작업 전 위험 |
 | Work24 훈련과정 | /api/ask 내부 fetchTrainingRecommendations | live | 후속 교육<br>안전보건교육 기록<br>교육 추천 카드 | 1 | 고용24 사업주훈련 호출 성공 (지역코드 28). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. |
 | KOSHA 안전보건교육포털 | /api/ask 내부 fetchKoshaEducationRecommendations | live | 후속 교육<br>안전보건교육 기록<br>KOSHA 교육 카드 | 3 | KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. |
 | KOSHA 공식자료/가이드 | /api/ask 내부 fetchKoshaReferences | live | 위험성평가 절차<br>TBM 기록 항목<br>안전보건교육 서식 | 7 | KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. |
@@ -33,7 +34,7 @@
 | DOC | ok | 10376 | evaluation\submission-readiness\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.doc |
 | HTML | ok | 6897 | evaluation\submission-readiness\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.html |
 | HWPX | ok | 10539 | evaluation\submission-readiness\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.hwpx |
-| PDF | ok | 287511 | evaluation\submission-readiness\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.pdf |
+| PDF | ok | 287514 | evaluation\submission-readiness\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.pdf |
 | JPG | ok | 164996 | evaluation\submission-readiness\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.jpg |
 | ALL_TXT | ok | 49472 | evaluation\submission-readiness\formats\incheon-logistics-rain\files\한빛로지스-safeguard-workpack.txt |
 | ALL_CSV | ok | 74205 | evaluation\submission-readiness\formats\incheon-logistics-rain\files\한빛로지스-safeguard-workpack.csv |
