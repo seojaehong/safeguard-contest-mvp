@@ -365,10 +365,10 @@ function sanitizeWorkSummary(question: string, fallback: string) {
 
 function format4mLine(hazard: string) {
   const checks = [
-    ["Man", /신규|작업자|외국인|고령|숙련|보호구|추락/.test(hazard) ? "중점" : "확인"],
-    ["Machine", /비계|지게차|장비|도구|용접|세척기|대차|펌프/.test(hazard) ? "중점" : "확인"],
-    ["Media", /강풍|우천|폭염|고온|환기|밀폐|젖음|작업환경|동선/.test(hazard) ? "중점" : "확인"],
-    ["Management", /통제|신호|작업중지|관리|교육|허가|동선/.test(hazard) ? "중점" : "확인"]
+    ["Man", /신규|작업자|외국인|고령|숙련|보호구|추락|끼임|충돌|낙하/.test(hazard) ? "중점" : "확인"],
+    ["Machine", /비계|지게차|장비|도구|용접|세척기|대차|펌프|랙|팔레트|전도|끼임|낙하/.test(hazard) ? "중점" : "확인"],
+    ["Media", /강풍|우천|폭염|고온|환기|밀폐|젖음|작업환경|동선|흄|비산|출하|혼잡/.test(hazard) ? "중점" : "확인"],
+    ["Management", /통제|신호|작업중지|관리|교육|허가|동선|감시|분리|혼잡|화재/.test(hazard) ? "중점" : "확인"]
   ];
 
   return `   - 4M 체크: ${checks.map(([label, status]) => `${label}:${status === "중점" ? "■" : "□"}`).join(" ")} / 중점 확인: ${checks.filter(([, status]) => status === "중점").map(([label]) => label).join(", ") || "현장 확인"}`;
@@ -386,7 +386,13 @@ function inferScenario(question: string) {
     siteName: profile.siteName,
     workSummary,
     workerCount,
-    weatherNote: normalized.includes("강풍") ? "오후 강풍 예보, 작업중지 기준 공유 필요" : profile.weatherNote,
+    weatherNote: normalized.includes("강풍")
+      ? "오후 강풍 예보, 작업중지 기준 공유 필요"
+      : /우천|젖음|비|강수/.test(normalized)
+        ? "우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요"
+        : /고온|폭염|온열/.test(normalized)
+          ? "고온 작업조건, 온열질환 예방과 휴식 기준 공유 필요"
+          : profile.weatherNote,
     profile
   };
 }
