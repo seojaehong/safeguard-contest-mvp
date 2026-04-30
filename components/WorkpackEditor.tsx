@@ -7,7 +7,7 @@ declare global {
   var measureTextWidth: ((font: string, text: string) => number) | undefined;
 }
 
-type DocumentKey =
+export type DocumentKey =
   | "workpackSummaryDraft"
   | "riskAssessmentDraft"
   | "workPlanDraft"
@@ -39,6 +39,8 @@ type TemplatePreset = {
   kind: TemplateKind;
   label: string;
   description: string;
+  previewTitle: string;
+  previewBullets: string[];
 };
 
 let rhwpModulePromise: Promise<RhwpModule> | null = null;
@@ -47,17 +49,23 @@ const templatePresets: TemplatePreset[] = [
   {
     kind: "sheet",
     label: "Excel 시트형",
-    description: "현장 표 양식처럼 행·열로 입력하고 결재 파일에 붙이기 좋은 형태"
+    description: "현장 표 양식처럼 행·열로 입력하고 결재 파일에 붙이기 좋은 형태",
+    previewTitle: "표지 + 섹션 요약 + 확인 칸",
+    previewBullets: ["섹션별 행·열 구조", "No./항목/내용/확인 컬럼", "인쇄 폭 1페이지 기준"]
   },
   {
     kind: "word",
     label: "Word 보고서형",
-    description: "본문과 표를 함께 보여주는 점검 보고서형 문서"
+    description: "본문과 표를 함께 보여주는 점검 보고서형 문서",
+    previewTitle: "보고서 헤더 + 본문 표",
+    previewBullets: ["제목/메타/섹션 헤더", "본문형 설명과 표 혼합", "원청·관리자 보고용"]
   },
   {
     kind: "hwp",
     label: "HWPX 제출형",
-    description: "한글 문서에서 열기 쉬운 공식 서식 항목 중심 문서"
+    description: "한글 문서에서 열기 쉬운 공식 서식 항목 중심 문서",
+    previewTitle: "한글 서식 + 확인/서명란",
+    previewBullets: ["공식 서식 항목명 유지", "확인자·관리감독자 서명란", "한컴오피스 제출 흐름"]
   }
 ];
 
@@ -490,7 +498,15 @@ function parseStoredValues(raw: string | null, fallback: Record<DocumentKey, str
   }
 }
 
-export function WorkpackEditor({ data, focusToken = 0 }: { data: AskResponse; focusToken?: number }) {
+export function WorkpackEditor({
+  data,
+  focusToken = 0,
+  requestedDocumentKey
+}: {
+  data: AskResponse;
+  focusToken?: number;
+  requestedDocumentKey?: DocumentKey;
+}) {
   const initialValues = useMemo<Record<DocumentKey, string>>(
     () => ({
       workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
@@ -522,6 +538,7 @@ export function WorkpackEditor({ data, focusToken = 0 }: { data: AskResponse; fo
   const editorRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
+  const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
   const selectedRows = buildRowsForDocument(selected, values);
@@ -540,12 +557,15 @@ export function WorkpackEditor({ data, focusToken = 0 }: { data: AskResponse; fo
   useEffect(() => {
     if (!focusToken) return;
 
+    if (requestedDocumentKey) {
+      setSelectedKey(requestedDocumentKey);
+    }
     setShowFocusCue(true);
     editorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 360);
     const timer = window.setTimeout(() => setShowFocusCue(false), 2200);
     return () => window.clearTimeout(timer);
-  }, [focusToken]);
+  }, [focusToken, requestedDocumentKey]);
 
   function saveLocalDraft(nextValues: Record<DocumentKey, string>) {
     if (typeof window === "undefined") return;
@@ -742,6 +762,15 @@ export function WorkpackEditor({ data, focusToken = 0 }: { data: AskResponse; fo
               </button>
             ))}
           </div>
+          <div className={`template-preview template-${templateKind}`} aria-live="polite">
+            <span>{selectedTemplate.label} 미리보기</span>
+            <strong>{selectedTemplate.previewTitle}</strong>
+            <ul>
+              {selectedTemplate.previewBullets.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
           <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
           <details className="advanced-downloads">
             <summary>전체 다운로드</summary>
@@ -777,12 +806,12 @@ export function WorkpackEditor({ data, focusToken = 0 }: { data: AskResponse; fo
             <details className="advanced-downloads inline">
               <summary>베타 형식</summary>
               <div className="advanced-download-grid">
-                <button type="button" className="button secondary" onClick={downloadDoc}>DOC</button>
-                <button type="button" className="button secondary" onClick={downloadText}>TXT</button>
-                <button type="button" className="button secondary" onClick={downloadJson}>JSON</button>
-                <button type="button" className="button secondary" onClick={downloadCsv}>CSV</button>
-                <button type="button" className="button secondary" onClick={downloadHtml}>HTML</button>
-                <button type="button" className="button secondary" onClick={downloadJpg}>JPG</button>
+                <button type="button" className="button secondary" onClick={downloadDoc} title="Word 또는 한글에서 열 수 있는 보고서형 문서">DOC</button>
+                <button type="button" className="button secondary" onClick={downloadText} title="메신저·메일 본문에 붙여넣기 쉬운 순수 텍스트">TXT</button>
+                <button type="button" className="button secondary" onClick={downloadJson} title="외부 시스템 연동과 자동화용 구조화 데이터">JSON</button>
+                <button type="button" className="button secondary" onClick={downloadCsv} title="엑셀·구글시트 업로드용 행 데이터">CSV</button>
+                <button type="button" className="button secondary" onClick={downloadHtml} title="웹 게시·브라우저 인쇄용 문서">HTML</button>
+                <button type="button" className="button secondary" onClick={downloadJpg} title="단톡방 이미지 공유와 현장 게시용 이미지">JPG</button>
               </div>
             </details>
           </div>

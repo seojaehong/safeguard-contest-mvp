@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, startTransition } from "react";
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
-import { WorkpackEditor } from "@/components/WorkpackEditor";
+import { WorkpackEditor, type DocumentKey } from "@/components/WorkpackEditor";
 import type { AskResponse } from "@/lib/types";
 import {
   buildDefaultWorkers,
@@ -449,7 +449,15 @@ function WorkpackHistoryPanel({
   );
 }
 
-export function FieldOperationsWorkspace({ data, editorFocusToken = 0 }: { data: AskResponse; editorFocusToken?: number }) {
+export function FieldOperationsWorkspace({
+  data,
+  editorFocusToken = 0,
+  requestedDocumentKey
+}: {
+  data: AskResponse;
+  editorFocusToken?: number;
+  requestedDocumentKey?: DocumentKey;
+}) {
   const [session, setSession] = useState<Session | null>(null);
   const [workers, setWorkers] = useState<WorkerProfile[]>(() => buildDefaultWorkers(data));
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(() => buildDefaultWorkers(data).map((worker) => worker.id));
@@ -533,7 +541,7 @@ export function FieldOperationsWorkspace({ data, editorFocusToken = 0 }: { data:
       </aside>
 
       <main className="workspace-canvas">
-        <WorkpackEditor data={data} focusToken={editorFocusToken} />
+        <WorkpackEditor data={data} focusToken={editorFocusToken} requestedDocumentKey={requestedDocumentKey} />
         <EvidenceImpactPanel data={data} />
       </main>
 

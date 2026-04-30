@@ -349,16 +349,42 @@ function pickScenarioProfile(question: string) {
   return scored[0]?.score ? scored[0].profile : fieldScenarioProfiles[0];
 }
 
+function sanitizeWorkSummary(question: string, fallback: string) {
+  const normalized = (question.trim() || fallback)
+    .replace(/\s+/g, " ")
+    .replace(/오늘\s*/g, "")
+    .replace(/(위험성평가|위험성 평가|TBM|안전보건교육|안전교육|기록|초안|문서팩|작업계획서|일지)(와|과|,|·|\s)*/g, "")
+    .replace(/(까지\s*)?(반영해|포함해|연계해|고려해)?\s*(만들어\s*줘|작성해\s*줘|생성해\s*줘|정리해\s*줘|만들어주세요|작성해주세요|생성해주세요|정리해주세요)\.?$/i, "")
+    .replace(/[,.]\s*$/, "")
+    .trim();
+
+  const sentences = normalized.split(/(?<=[.!?。])\s+/).filter(Boolean);
+  const workSentence = sentences.find((sentence) => /작업|점검|운반|도장|상하차|용접|세척|굴착|피킹|적재/.test(sentence));
+  return (workSentence || normalized || fallback).replace(/\.$/, "").trim();
+}
+
+function format4mLine(hazard: string) {
+  const checks = [
+    ["Man", /신규|작업자|외국인|고령|숙련|보호구|추락/.test(hazard) ? "중점" : "확인"],
+    ["Machine", /비계|지게차|장비|도구|용접|세척기|대차|펌프/.test(hazard) ? "중점" : "확인"],
+    ["Media", /강풍|우천|폭염|고온|환기|밀폐|젖음|작업환경|동선/.test(hazard) ? "중점" : "확인"],
+    ["Management", /통제|신호|작업중지|관리|교육|허가|동선/.test(hazard) ? "중점" : "확인"]
+  ];
+
+  return `   - 4M 체크: ${checks.map(([label, status]) => `${label}:${status === "중점" ? "■" : "□"}`).join(" ")} / 중점 확인: ${checks.filter(([, status]) => status === "중점").map(([label]) => label).join(", ") || "현장 확인"}`;
+}
+
 function inferScenario(question: string) {
   const normalized = question.trim() || defaultQuestion;
   const workerCount = inferWorkerCount(normalized);
   const profile = pickScenarioProfile(normalized);
+  const workSummary = sanitizeWorkSummary(normalized, profile.workName);
 
   return {
     companyName: profile.companyName,
     companyType: profile.companyType,
     siteName: profile.siteName,
-    workSummary: normalized,
+    workSummary,
     workerCount,
     weatherNote: normalized.includes("강풍") ? "오후 강풍 예보, 작업중지 기준 공유 필요" : profile.weatherNote,
     profile
@@ -421,15 +447,15 @@ function buildOfficialStyleRiskAssessment(scenario: ReturnType<typeof inferScena
     "[2. 유해·위험요인 파악]",
     `1. 세부작업: ${profile.hazards[0]}`,
     `   - 유해·위험요인: ${profile.hazards[0]}`,
-    "   - 4M 관점: 작업자(Man), 장비·도구(Machine), 작업환경(Media), 관리체계(Management) 확인",
+    format4mLine(profile.hazards[0]),
     "",
     `2. 세부작업: ${profile.hazards[1]}`,
     `   - 유해·위험요인: ${profile.hazards[1]}`,
-    "   - 4M 관점: 작업자(Man), 장비·도구(Machine), 작업환경(Media), 관리체계(Management) 확인",
+    format4mLine(profile.hazards[1]),
     "",
     `3. 세부작업: ${profile.hazards[2]}`,
     `   - 유해·위험요인: ${profile.hazards[2]}`,
-    "   - 4M 관점: 작업자(Man), 장비·도구(Machine), 작업환경(Media), 관리체계(Management) 확인",
+    format4mLine(profile.hazards[2]),
     "",
     "[3. 위험성 결정]",
     `1. ${profile.hazards[0]}`,

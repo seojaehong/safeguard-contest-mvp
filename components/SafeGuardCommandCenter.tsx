@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { FieldOperationsWorkspace } from "@/components/FieldOperationsWorkspace";
+import type { DocumentKey } from "@/components/WorkpackEditor";
 import type { AskResponse } from "@/lib/types";
 import type { FieldExample } from "@/lib/field-examples";
 
@@ -62,18 +63,18 @@ const stepAnchors: Record<WorkflowStep["key"], StepAnchor> = {
   history: "history"
 };
 
-const outputItems = [
-  "점검결과 요약",
-  "위험성평가표",
-  "작업계획서",
-  "TBM 브리핑",
-  "TBM 기록",
-  "안전보건교육 기록",
-  "비상대응 절차",
-  "사진/증빙",
-  "외국인 근로자 안내문",
-  "외국인 전송본",
-  "현장 전파 메시지"
+const outputItems: Array<{ title: string; key: DocumentKey }> = [
+  { title: "점검결과 요약", key: "workpackSummaryDraft" },
+  { title: "위험성평가표", key: "riskAssessmentDraft" },
+  { title: "작업계획서", key: "workPlanDraft" },
+  { title: "TBM 브리핑", key: "tbmBriefing" },
+  { title: "TBM 기록", key: "tbmLogDraft" },
+  { title: "안전보건교육 기록", key: "safetyEducationRecordDraft" },
+  { title: "비상대응 절차", key: "emergencyResponseDraft" },
+  { title: "사진/증빙", key: "photoEvidenceDraft" },
+  { title: "외국인 근로자 안내문", key: "foreignWorkerBriefing" },
+  { title: "외국인 전송본", key: "foreignWorkerTransmission" },
+  { title: "현장 전파 메시지", key: "kakaoMessage" }
 ];
 
 const totalDocumentCount = outputItems.length;
@@ -270,6 +271,7 @@ export function SafeGuardCommandCenter({
   const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [editorFocusToken, setEditorFocusToken] = useState(0);
+  const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("workpackSummaryDraft");
 
   function scrollToStep(anchor: StepAnchor) {
     const target = document.getElementById(anchor);
@@ -277,7 +279,8 @@ export function SafeGuardCommandCenter({
     target.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function focusWorkpackEditor() {
+  function focusWorkpackEditor(key: DocumentKey) {
+    setRequestedDocumentKey(key);
     scrollToStep("workpack");
     setEditorFocusToken((current) => current + 1);
   }
@@ -604,14 +607,14 @@ export function SafeGuardCommandCenter({
             </div>
             <div className="doc-card-list">
               {outputItems.map((item, index) => (
-                <article key={item} className={data ? "doc-card done" : busy && index < 2 ? "doc-card active" : "doc-card"}>
+                <article key={item.key} className={data ? "doc-card done" : busy && index < 2 ? "doc-card active" : "doc-card"}>
                   <span>DOC · {String(index + 1).padStart(2, "0")}</span>
-                  <strong>{item}</strong>
+                  <strong>{item.title}</strong>
                   <p>{data ? "편집·다운로드 준비" : busy && index < 2 ? "작성 중" : "생성 대기"}</p>
                   {data ? (
                     <div className="doc-card-actions">
-                      <button type="button" onClick={focusWorkpackEditor}>편집</button>
-                      <button type="button" onClick={focusWorkpackEditor}>다운로드</button>
+                      <button type="button" onClick={() => focusWorkpackEditor(item.key)}>편집</button>
+                      <button type="button" onClick={() => focusWorkpackEditor(item.key)}>다운로드</button>
                     </div>
                   ) : null}
                 </article>
@@ -662,7 +665,11 @@ export function SafeGuardCommandCenter({
               </article>
             ))}
           </section>
-          <FieldOperationsWorkspace data={data} editorFocusToken={editorFocusToken} />
+          <FieldOperationsWorkspace
+            data={data}
+            editorFocusToken={editorFocusToken}
+            requestedDocumentKey={requestedDocumentKey}
+          />
         </>
       ) : (
         <section className="empty-workspace card" id="workpack">

@@ -338,6 +338,40 @@ function localizedPacks(): Record<string, LocalizedPack> {
         fire: "清除可燃物，安排火灾监护人并准备灭火器。"
       }
     },
+    th: {
+      work: "งานวันนี้",
+      risk: "อันตรายหลักของงานนี้",
+      actions: "ก่อนเริ่มงาน",
+      ask: "หากไม่เข้าใจ ให้หยุดงานและขอให้หัวหน้างานอธิบายอีกครั้ง",
+      supervisor: "การยืนยันของหัวหน้างาน: ตรวจข้อความนี้กับล่ามหรือผู้ที่อ่านภาษานี้ได้ก่อนส่ง",
+      workLabels: {
+        paintingScaffold: "งานทาสีผนังภายนอกโดยใช้นั่งร้านเคลื่อนที่",
+        forkliftLoading: "งานขนถ่ายและหยิบสินค้าโดยใช้รถยก",
+        hotWork: "งานเชื่อม งานตัด และงานที่มีประกายไฟ",
+        confinedInspection: "ตรวจห้องเครื่องใต้ดินที่อาจมีความเสี่ยงพื้นที่อับอากาศ",
+        chemicalCleaning: "ทำความสะอาดพื้นโรงงานด้วยสารเคมี",
+        manualHandling: "จัดเรียงกล่องหนักและยกด้วยมือ",
+        excavation: "งานขุดและตรวจสอบสาธารณูปโภคใต้ดิน",
+        general: "งานที่อธิบายในบรีฟวันนี้"
+      },
+      hazardLabels: {
+        ...fallbackHazards,
+        fall: "ความเสี่ยงตกจากที่สูง",
+        scaffold: "นั่งร้านเคลื่อนที่สั่นหรือพลิกคว่ำ",
+        wind: "ลมแรง",
+        forklift: "เส้นทางรถยกตัดกับทางเดินคน",
+        chemical: "การสัมผัสสารเคมี",
+        fire: "ความเสี่ยงไฟไหม้จากงานที่มีประกายไฟ"
+      },
+      actionLabels: {
+        wind: "หากลมแรงขึ้นหรือนั่งร้านสั่น ให้หยุดงานทันที",
+        scaffold: "ล็อกล้อ ตรวจราวกันตก และห้ามเคลื่อนย้ายนั่งร้านขณะมีคนอยู่ด้านบน",
+        fall: "สวมอุปกรณ์ป้องกันการตกและทำงานภายในพื้นที่ปลอดภัยเท่านั้น",
+        forklift: "แยกเส้นทางรถยกและทางเดินคนก่อนเริ่มงาน",
+        chemical: "ตรวจการระบายอากาศ แว่นตานิรภัย และถุงมือก่อนใช้สารเคมี",
+        fire: "เคลียร์วัสดุติดไฟ จัดผู้เฝ้าระวังไฟ และเตรียมถังดับเพลิง"
+      }
+    },
     mn: {
       work: "Өнөөдрийн ажил",
       risk: "Энэ ажлын гол аюул",
@@ -368,6 +402,168 @@ function localizedPacks(): Record<string, LocalizedPack> {
         scaffold: "Дугуйг түгжиж, хамгаалалтын хашлагыг шалгана.",
         fall: "Унахаас хамгаалах хэрэгсэл өмсөж, аюулгүй тавцан дотор ажиллана.",
         forklift: "Ажил эхлэхээс өмнө ачигчийн зам ба явган хүний замыг тусгаарлана."
+      }
+    },
+    uz: {
+      work: "Bugungi ish",
+      risk: "Bu ishdagi asosiy xavflar",
+      actions: "Ish boshlashdan oldin",
+      ask: "Tushunmagan bo'lsangiz, ishni to'xtating va rahbardan yana tushuntirishni so'rang.",
+      supervisor: "Rahbar tasdig'i: xabarni tarjimon yoki shu tilni biladigan xodim bilan tekshiring.",
+      workLabels: {
+        paintingScaffold: "Ko'chma havozadan foydalanib tashqi devorni bo'yash",
+        forkliftLoading: "Yuk ko'targich bilan yuklash, tushirish va terish",
+        hotWork: "Payvandlash, kesish va olovli ishlar",
+        confinedInspection: "Yer osti mashina xonasini tekshirish, yopiq joy xavfi bor",
+        chemicalCleaning: "Kimyoviy vosita bilan sex polini tozalash",
+        manualHandling: "Og'ir qutilarni taxlash va qo'lda tashish",
+        excavation: "Qazish va yer osti tarmoqlarini tekshirish",
+        general: "Bugungi brifingda tushuntirilgan ish"
+      },
+      hazardLabels: {
+        ...fallbackHazards,
+        fall: "balandlikdan yiqilish xavfi",
+        scaffold: "ko'chma havoza silkinishi yoki ag'darilishi",
+        wind: "kuchli shamol",
+        forklift: "yuk ko'targich yo'li va piyoda yo'li kesishishi",
+        chemical: "kimyoviy modda ta'siri",
+        fire: "olovli ishda yong'in xavfi"
+      },
+      actionLabels: {
+        wind: "Shamol kuchaysa yoki havoza qimirlay boshlasa, ishni darhol to'xtating.",
+        scaffold: "G'ildiraklarni qulflang, panjaralarni tekshiring va odam bor paytda havozani siljitmang.",
+        fall: "Yiqilishdan saqlovchi himoya vositalarini taqing va xavfsiz platformada ishlang.",
+        forklift: "Ish boshlanishidan oldin yuk ko'targich yo'li va piyoda yo'lini ajrating.",
+        chemical: "Kimyoviy vositadan oldin shamollatish, ko'zoynak va qo'lqopni tekshiring.",
+        fire: "Yonuvchi narsalarni olib tashlang, yong'in kuzatuvchisini belgilang va o't o'chirgich tayyorlang."
+      }
+    },
+    ne: {
+      work: "आजको काम",
+      risk: "यस कामका मुख्य जोखिमहरू",
+      actions: "काम सुरु गर्नु अघि",
+      ask: "नबुझेमा काम रोक्नुहोस् र सुपरभाइजरलाई फेरि बुझाउन भन्नुहोस्।",
+      supervisor: "सुपरभाइजर पुष्टि: यो सन्देश अनुवादक वा यो भाषा जान्ने व्यक्तिसँग जाँच गर्नुहोस्।",
+      workLabels: {
+        paintingScaffold: "चलायमान स्काफोल्ड प्रयोग गरी बाहिरी भित्तामा रंग लगाउने काम",
+        forkliftLoading: "फोर्कलिफ्ट लोड/अनलोड र पिकिङ काम",
+        hotWork: "वेल्डिङ, काट्ने र आगो प्रयोग हुने काम",
+        confinedInspection: "भूमिगत मेसिन कोठा निरीक्षण, बन्द ठाउँ जोखिम हुन सक्छ",
+        chemicalCleaning: "रसायन प्रयोग गरी कारखाना भुइँ सफा गर्ने काम",
+        manualHandling: "गह्रौं बाकस राख्ने र हातले बोक्ने काम",
+        excavation: "खन्ने काम र भूमिगत लाइन जाँच",
+        general: "आजको ब्रिफिङमा वर्णन गरिएको काम"
+      },
+      hazardLabels: {
+        ...fallbackHazards,
+        fall: "खस्ने जोखिम",
+        scaffold: "चलायमान स्काफोल्ड हल्लिने वा पल्टिने",
+        wind: "बलियो हावा",
+        forklift: "फोर्कलिफ्ट बाटो र पैदल बाटो जुध्ने",
+        chemical: "रसायन सम्पर्क",
+        fire: "आगो प्रयोग हुने कामको आगलागी जोखिम"
+      },
+      actionLabels: {
+        wind: "हावा बलियो भयो वा स्काफोल्ड हल्लियो भने तुरुन्त काम रोक्नुहोस्।",
+        scaffold: "पाङ्ग्रा लक गर्नुहोस्, रेलिङ जाँच गर्नुहोस्, मानिस माथि हुँदा स्काफोल्ड नसार्नुहोस्।",
+        fall: "खस्नबाट जोगाउने सुरक्षा उपकरण लगाउनुहोस् र सुरक्षित प्लेटफर्मभित्र काम गर्नुहोस्।",
+        forklift: "काम अघि फोर्कलिफ्ट बाटो र पैदल बाटो अलग गर्नुहोस्।"
+      }
+    },
+    km: {
+      work: "ការងារថ្ងៃនេះ",
+      risk: "ហានិភ័យសំខាន់នៃការងារនេះ",
+      actions: "មុនចាប់ផ្តើម",
+      ask: "បើមិនយល់ សូមឈប់ការងារ ហើយសួរអ្នកគ្រប់គ្រងឱ្យពន្យល់ម្តងទៀត។",
+      supervisor: "ការបញ្ជាក់ពីអ្នកគ្រប់គ្រង៖ សូមពិនិត្យជាមួយអ្នកបកប្រែ ឬអ្នកដែលចេះភាសានេះ។",
+      workLabels: {
+        paintingScaffold: "លាបពណ៌ជញ្ជាំងក្រៅដោយប្រើរន្ទាចល័ត",
+        forkliftLoading: "ដឹកទំនិញឡើងចុះ និងរើសទំនិញដោយរថយន្តលើក",
+        hotWork: "ផ្សារ កាត់ និងការងារមានភ្លើង",
+        confinedInspection: "ពិនិត្យបន្ទប់ម៉ាស៊ីនក្រោមដី ដែលអាចមានហានិភ័យកន្លែងបិទជិត",
+        chemicalCleaning: "សម្អាតជាន់រោងចក្រដោយប្រើសារធាតុគីមី",
+        manualHandling: "រៀបប្រអប់ធ្ងន់ និងលើកដោយដៃ",
+        excavation: "ការជីក និងពិនិត្យបណ្តាញក្រោមដី",
+        general: "ការងារដែលបានពន្យល់ក្នុងការណែនាំថ្ងៃនេះ"
+      },
+      hazardLabels: {
+        ...fallbackHazards,
+        fall: "ហានិភ័យធ្លាក់ពីកម្ពស់",
+        scaffold: "រន្ទាចល័តរង្គើ ឬដួល",
+        wind: "ខ្យល់ខ្លាំង",
+        forklift: "ផ្លូវរថយន្តលើកកាត់ផ្លូវដើរ",
+        chemical: "ប៉ះពាល់សារធាតុគីមី",
+        fire: "ហានិភ័យភ្លើងក្នុងការងារមានភ្លើង"
+      },
+      actionLabels: {
+        wind: "បើខ្យល់ខ្លាំង ឬរន្ទារង្គើ សូមឈប់ការងារភ្លាមៗ។",
+        scaffold: "ចាក់សោកង់ ពិនិត្យរបាំងការពារ ហើយកុំរុញរន្ទាពេលមានមនុស្សនៅលើ។",
+        fall: "ពាក់ឧបករណ៍ការពារការធ្លាក់ ហើយធ្វើការនៅលើវេទិកាសុវត្ថិភាពប៉ុណ្ណោះ។",
+        forklift: "បំបែកផ្លូវរថយន្តលើក និងផ្លូវដើរមុនចាប់ផ្តើមការងារ។"
+      }
+    },
+    id: {
+      work: "Pekerjaan hari ini",
+      risk: "Bahaya utama pekerjaan ini",
+      actions: "Sebelum mulai",
+      ask: "Jika belum paham, hentikan pekerjaan dan minta supervisor menjelaskan lagi.",
+      supervisor: "Pemeriksaan supervisor: pastikan pesan ini dengan penerjemah atau pekerja yang memahami bahasa ini.",
+      workLabels: {
+        paintingScaffold: "Pengecatan dinding luar menggunakan perancah bergerak",
+        forkliftLoading: "Bongkar muat dan picking menggunakan forklift",
+        hotWork: "Pengelasan, pemotongan, dan pekerjaan panas",
+        confinedInspection: "Inspeksi ruang mesin bawah tanah dengan risiko ruang terbatas",
+        chemicalCleaning: "Pembersihan lantai pabrik menggunakan bahan kimia",
+        manualHandling: "Penyusunan kotak berat dan pengangkutan manual",
+        excavation: "Pekerjaan galian dan pemeriksaan utilitas bawah tanah",
+        general: "Pekerjaan yang dijelaskan dalam briefing hari ini"
+      },
+      hazardLabels: {
+        ...fallbackHazards,
+        fall: "risiko jatuh",
+        scaffold: "perancah bergerak bergoyang atau terguling",
+        wind: "angin kencang",
+        forklift: "jalur forklift bertemu jalur pejalan kaki",
+        chemical: "paparan bahan kimia",
+        fire: "risiko kebakaran pada pekerjaan panas"
+      },
+      actionLabels: {
+        wind: "Jika angin makin kencang atau perancah bergerak, hentikan pekerjaan segera.",
+        scaffold: "Kunci roda, periksa pagar pengaman, dan jangan pindahkan perancah saat ada pekerja di atasnya.",
+        fall: "Gunakan APD pencegah jatuh dan bekerja hanya di platform aman.",
+        forklift: "Pisahkan jalur forklift dan jalur pejalan kaki sebelum pekerjaan dimulai."
+      }
+    },
+    my: {
+      work: "ယနေ့လုပ်ငန်း",
+      risk: "ဤလုပ်ငန်း၏ အဓိကအန္တရာယ်များ",
+      actions: "လုပ်ငန်းမစတင်မီ",
+      ask: "နားမလည်ပါက အလုပ်ရပ်ပြီး ကြီးကြပ်သူအား ထပ်မံရှင်းပြရန် တောင်းဆိုပါ။",
+      supervisor: "ကြီးကြပ်သူအတည်ပြုချက် - ဤစာကို ဘာသာပြန်သူ သို့မဟုတ် ဤဘာသာစကားနားလည်သူနှင့် စစ်ဆေးပါ။",
+      workLabels: {
+        paintingScaffold: "ရွှေ့ပြောင်းနိုင်သော ငြမ်းဖြင့် အပြင်နံရံ ဆေးသုတ်ခြင်း",
+        forkliftLoading: "ဖော့ကလစ်ဖြင့် တင်ချခြင်းနှင့် ပစ္စည်းရွေးခြင်း",
+        hotWork: "ဝဲလ်ဒင်း၊ ဖြတ်တောက်ခြင်းနှင့် မီးသုံးလုပ်ငန်း",
+        confinedInspection: "မြေအောက်စက်ခန်း စစ်ဆေးခြင်း၊ ပိတ်ထားသောနေရာ အန္တရာယ်ရှိနိုင်",
+        chemicalCleaning: "ဓာတုပစ္စည်းဖြင့် စက်ရုံကြမ်းပြင် သန့်ရှင်းရေး",
+        manualHandling: "လေးသောသေတ္တာများ စီခြင်းနှင့် လက်ဖြင့်သယ်ခြင်း",
+        excavation: "တူးဖော်ခြင်းနှင့် မြေအောက်လိုင်း စစ်ဆေးခြင်း",
+        general: "ယနေ့ briefing တွင် ရှင်းပြထားသောလုပ်ငန်း"
+      },
+      hazardLabels: {
+        ...fallbackHazards,
+        fall: "ပြုတ်ကျနိုင်သော အန္တရာယ်",
+        scaffold: "ရွှေ့ပြောင်းငြမ်း လှုပ်ခြင်း သို့မဟုတ် လဲခြင်း",
+        wind: "လေပြင်း",
+        forklift: "ဖော့ကလစ်လမ်းကြောင်းနှင့် လူသွားလမ်း ထပ်နေခြင်း",
+        chemical: "ဓာတုပစ္စည်း ထိတွေ့ခြင်း",
+        fire: "မီးသုံးလုပ်ငန်း မီးလောင်အန္တရာယ်"
+      },
+      actionLabels: {
+        wind: "လေပြင်းလာပါက သို့မဟုတ် ငြမ်းလှုပ်ပါက အလုပ်ကို ချက်ချင်းရပ်ပါ။",
+        scaffold: "ဘီးကိုလော့ခ်ချပါ၊ ကာရံကိုစစ်ဆေးပါ၊ လူရှိနေချိန်တွင် ငြမ်းကို မရွှေ့ပါနှင့်။",
+        fall: "ပြုတ်ကျမှုကာကွယ်ရေး ပစ္စည်းဝတ်ဆင်ပြီး လုံခြုံသော platform အတွင်းသာ လုပ်ကိုင်ပါ။",
+        forklift: "အလုပ်မစတင်မီ ဖော့ကလစ်လမ်းနှင့် လူသွားလမ်းကို ခွဲခြားပါ။"
       }
     }
   };
