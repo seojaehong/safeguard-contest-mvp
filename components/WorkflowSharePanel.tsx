@@ -38,6 +38,7 @@ type WorkflowSharePanelProps = {
   targetWorkers?: WorkerDispatchTarget[];
   authToken?: string;
   workpackId?: string | null;
+  ensureWorkpackSaved?: () => Promise<string | null>;
 };
 
 const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
@@ -167,7 +168,8 @@ export function WorkflowSharePanel({
   recipientSuggestions = [],
   targetWorkers = [],
   authToken,
-  workpackId
+  workpackId,
+  ensureWorkpackSaved
 }: WorkflowSharePanelProps) {
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(["email", "sms"]);
   const [selectedMessageTarget, setSelectedMessageTarget] = useState<MessageTarget>("manager");
@@ -219,8 +221,8 @@ export function WorkflowSharePanel({
     }
   }
 
-  async function saveDispatchLog(payload: DispatchResult, sentRecipients: string[]) {
-    if (!authToken || !workpackId || !payload.channelResults?.length) return;
+  async function saveDispatchLog(payload: DispatchResult, sentRecipients: string[], savedWorkpackId: string | null) {
+    if (!authToken || !savedWorkpackId || !payload.channelResults?.length) return;
 
     const selectedLanguageCode = selectedMessageTarget.startsWith("foreign:")
       ? selectedMessageTarget.replace("foreign:", "")
@@ -234,7 +236,7 @@ export function WorkflowSharePanel({
           "content-type": "application/json"
         },
         body: JSON.stringify({
-          workpackId,
+          workpackId: savedWorkpackId,
           scenario: data.scenario,
           logs: payload.channelResults.map((item) => ({
             channel: item.channel || "unknown",
@@ -259,6 +261,7 @@ export function WorkflowSharePanel({
     setIsConfirming(false);
     setResult(null);
     try {
+      const savedWorkpackId = workpackId || await ensureWorkpackSaved?.() || null;
       const response = await fetch("/api/workflow/dispatch", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -271,7 +274,7 @@ export function WorkflowSharePanel({
       });
       const payload = await response.json() as DispatchResult;
       setResult(payload);
-      await saveDispatchLog(payload, dispatchRecipients);
+      await saveDispatchLog(payload, dispatchRecipients, savedWorkpackId);
     } catch (error) {
       console.error("workflow dispatch request failed", error);
       setResult({

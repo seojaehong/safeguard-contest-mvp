@@ -28,6 +28,17 @@ type SaveResponse = {
   savedCount?: number;
 };
 
+type StorageStatusLabel = "비회원 임시 저장" | "관리자 로그인 필요" | "관리자 이력 저장 완료" | "저장 실패";
+
+type WorkspaceSaveSnapshot = {
+  ok: boolean;
+  label: StorageStatusLabel;
+  message: string;
+  workpackId: string | null;
+  savedAt: string | null;
+  savedCount: number;
+};
+
 type WorkerDraft = {
   displayName: string;
   role: string;
@@ -100,9 +111,11 @@ function buildEvidenceSummary(data: AskResponse) {
 
 function AdminAccessPanel({
   session,
+  storageSnapshot,
   onSessionChange
 }: {
   session: Session | null;
+  storageSnapshot: WorkspaceSaveSnapshot;
   onSessionChange: (session: Session | null) => void;
 }) {
   const [email, setEmail] = useState("");
@@ -156,7 +169,7 @@ function AdminAccessPanel({
       <article className="workspace-panel card">
         <div className="compact-head">
           <span className="eyebrow">이력 저장</span>
-          <strong>비회원도 다운로드 가능</strong>
+          <strong>{storageSnapshot.label}</strong>
         </div>
         <p className="muted small">PDF·XLS·HWPX 다운로드와 메일·문자 전파는 바로 사용할 수 있습니다. 관리자 로그인 시 작업자, 교육, 전파 이력이 저장됩니다.</p>
       </article>
@@ -167,11 +180,17 @@ function AdminAccessPanel({
     <article className="workspace-panel card">
       <div className="compact-head">
         <span className="eyebrow">관리자</span>
-        <strong>{session ? "관리자 연결됨" : "관리자 로그인"}</strong>
+        <strong>{session ? storageSnapshot.label : "관리자 로그인"}</strong>
       </div>
       {session ? (
         <>
           <p className="muted small">{session.user.email || "관리자"} 계정으로 문서팩과 교육 이력을 저장합니다.</p>
+          <div className="storage-status-grid" aria-label="저장 상태">
+            <div><span>문서팩 ID</span><strong>{storageSnapshot.workpackId || "저장 전"}</strong></div>
+            <div><span>저장 항목</span><strong>{storageSnapshot.savedCount}건</strong></div>
+            <div><span>저장 시각</span><strong>{storageSnapshot.savedAt ? new Date(storageSnapshot.savedAt).toLocaleString("ko-KR") : "대기"}</strong></div>
+          </div>
+          <p className="muted small">{storageSnapshot.message}</p>
           <button type="button" className="button secondary full-button" onClick={signOut}>로그아웃</button>
         </>
       ) : (
@@ -354,81 +373,22 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
 }
 
 function WorkpackHistoryPanel({
-  data,
   session,
-  workers,
-  selectedWorkers,
-  educationRecords,
-  onSavedWorkpack
+  storageSnapshot,
+  onSaveWorkspace
 }: {
-  data: AskResponse;
   session: Session | null;
-  workers: WorkerProfile[];
-  selectedWorkers: WorkerProfile[];
-  educationRecords: EducationRecordDraft[];
-  onSavedWorkpack: (id: string | null) => void;
+  storageSnapshot: WorkspaceSaveSnapshot;
+  onSaveWorkspace: () => Promise<WorkspaceSaveSnapshot>;
 }) {
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState("");
-
-  async function postJson<TResponse>(url: string, body: unknown): Promise<TResponse> {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "authorization": `Bearer ${session?.access_token || ""}`,
-        "content-type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
-    return await response.json() as TResponse;
-  }
 
   async function saveWorkspace() {
-    if (!session) {
-      setMessage("관리자 로그인 후 문서팩과 교육 이력을 저장할 수 있습니다.");
-      return;
-    }
-
     setIsSaving(true);
-    setMessage("");
     try {
-      const workerResponse = await postJson<SaveResponse>("/api/workers", {
-        scenario: data.scenario,
-        workers
-      });
-      if (!workerResponse.ok) {
-        setMessage(workerResponse.message);
-        return;
-      }
-
-      const workpackResponse = await postJson<SaveResponse>("/api/workpacks", {
-        question: data.question,
-        scenario: data.scenario,
-        deliverables: data.deliverables,
-        evidenceSummary: buildEvidenceSummary(data),
-        workerSummary: {
-          ...summarizeWorkers(selectedWorkers),
-          selectedWorkers: buildWorkerDispatchTargets(selectedWorkers)
-        },
-        status: data.status
-      });
-      if (!workpackResponse.ok || !workpackResponse.workpackId) {
-        setMessage(workpackResponse.message);
-        return;
-      }
-
-      const educationResponse = await postJson<SaveResponse>("/api/education-records", {
-        scenario: data.scenario,
-        workpackId: workpackResponse.workpackId,
-        workerMap: workerResponse.workerMap || {},
-        workers,
-        records: educationRecords.filter((record) => selectedWorkers.some((worker) => worker.id === record.workerId))
-      });
-      onSavedWorkpack(workpackResponse.workpackId);
-      setMessage(`${workpackResponse.message} ${educationResponse.message}`);
+      await onSaveWorkspace();
     } catch (error) {
       console.error("workspace save failed", error);
-      setMessage("작업공간 저장 중 오류가 발생했습니다. Supabase 설정과 로그인 상태를 확인해 주세요.");
     } finally {
       setIsSaving(false);
     }
@@ -441,10 +401,14 @@ function WorkpackHistoryPanel({
         <strong>문서팩·교육 이력</strong>
       </div>
       <p className="muted small">작업자 배치, 교육 확인, 근거 요약, 문서팩 산출물을 같은 이력으로 저장합니다.</p>
+      <div className="history-save-card">
+        <span>{storageSnapshot.label}</span>
+        <strong>{storageSnapshot.workpackId || "저장 전"}</strong>
+        <small>{storageSnapshot.message}</small>
+      </div>
       <button type="button" className="button full-button" onClick={saveWorkspace} disabled={isSaving}>
-        {isSaving ? "저장 중" : "작업공간 저장"}
+        {isSaving ? "저장 중" : session ? "작업공간 저장" : "관리자 로그인 후 저장"}
       </button>
-      {message ? <p className="muted small">{message}</p> : null}
     </article>
   );
 }
@@ -462,6 +426,14 @@ export function FieldOperationsWorkspace({
   const [workers, setWorkers] = useState<WorkerProfile[]>(() => buildDefaultWorkers(data));
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(() => buildDefaultWorkers(data).map((worker) => worker.id));
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
+  const [storageSnapshot, setStorageSnapshot] = useState<WorkspaceSaveSnapshot>({
+    ok: false,
+    label: "비회원 임시 저장",
+    message: "문서 편집 내용은 이 브라우저에 임시 저장됩니다. 관리자 로그인 후 이력을 저장할 수 있습니다.",
+    workpackId: null,
+    savedAt: null,
+    savedCount: 0
+  });
 
   const selectedWorkers = useMemo(
     () => workers.filter((worker) => selectedWorkerIds.includes(worker.id)),
@@ -487,6 +459,103 @@ export function FieldOperationsWorkspace({
     ["SEND", "현장 전파", "메일·문자 중심"],
     ["SAVE", "이력 저장", session ? "관리자 연결됨" : "다운로드 가능"]
   ] as const;
+
+  async function postJson<TResponse>(url: string, body: unknown): Promise<TResponse> {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "authorization": `Bearer ${session?.access_token || ""}`,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+    return await response.json() as TResponse;
+  }
+
+  function setStorageFailure(message: string) {
+    const snapshot: WorkspaceSaveSnapshot = {
+      ok: false,
+      label: "저장 실패",
+      message,
+      workpackId: savedWorkpackId,
+      savedAt: null,
+      savedCount: 0
+    };
+    setStorageSnapshot(snapshot);
+    return snapshot;
+  }
+
+  async function saveWorkspaceToSupabase(): Promise<WorkspaceSaveSnapshot> {
+    if (!session) {
+      const snapshot: WorkspaceSaveSnapshot = {
+        ok: false,
+        label: "관리자 로그인 필요",
+        message: "관리자 로그인 후 문서팩, 작업자, 교육 확인, 전파 이력을 저장할 수 있습니다.",
+        workpackId: savedWorkpackId,
+        savedAt: null,
+        savedCount: 0
+      };
+      setStorageSnapshot(snapshot);
+      return snapshot;
+    }
+
+    try {
+      const workerResponse = await postJson<SaveResponse>("/api/workers", {
+        scenario: data.scenario,
+        workers
+      });
+      if (!workerResponse.ok) return setStorageFailure(workerResponse.message);
+
+      const workpackResponse = await postJson<SaveResponse>("/api/workpacks", {
+        question: data.question,
+        scenario: data.scenario,
+        deliverables: data.deliverables,
+        evidenceSummary: buildEvidenceSummary(data),
+        workerSummary: {
+          ...summarizeWorkers(selectedWorkers),
+          selectedWorkers: buildWorkerDispatchTargets(selectedWorkers)
+        },
+        status: data.status
+      });
+      if (!workpackResponse.ok || !workpackResponse.workpackId) {
+        return setStorageFailure(workpackResponse.message);
+      }
+
+      const selectedEducationRecords = educationRecords.filter((record) => (
+        selectedWorkers.some((worker) => worker.id === record.workerId)
+      ));
+      const educationResponse = await postJson<SaveResponse>("/api/education-records", {
+        scenario: data.scenario,
+        workpackId: workpackResponse.workpackId,
+        workerMap: workerResponse.workerMap || {},
+        workers,
+        records: selectedEducationRecords
+      });
+      if (!educationResponse.ok) return setStorageFailure(educationResponse.message);
+
+      const savedCount = 1 + workers.length + (educationResponse.savedCount || selectedEducationRecords.length);
+      const snapshot: WorkspaceSaveSnapshot = {
+        ok: true,
+        label: "관리자 이력 저장 완료",
+        message: `${workpackResponse.message} ${workerResponse.message} ${educationResponse.message}`,
+        workpackId: workpackResponse.workpackId,
+        savedAt: new Date().toISOString(),
+        savedCount
+      };
+      setSavedWorkpackId(workpackResponse.workpackId);
+      setStorageSnapshot(snapshot);
+      return snapshot;
+    } catch (error) {
+      console.error("workspace save failed", error);
+      return setStorageFailure("작업공간 저장 중 오류가 발생했습니다. Supabase 설정과 로그인 상태를 확인해 주세요.");
+    }
+  }
+
+  async function ensureWorkpackSaved() {
+    if (savedWorkpackId) return savedWorkpackId;
+    const snapshot = await saveWorkspaceToSupabase();
+    return snapshot.workpackId;
+  }
 
   function toggleWorker(id: string) {
     startTransition(() => {
@@ -546,7 +615,7 @@ export function FieldOperationsWorkspace({
       </main>
 
       <aside className="workspace-side" id="workers">
-        <AdminAccessPanel session={session} onSessionChange={setSession} />
+        <AdminAccessPanel session={session} storageSnapshot={storageSnapshot} onSessionChange={setSession} />
         <WorkerEducationPanel
           workers={workers}
           selectedWorkerIds={selectedWorkerIds}
@@ -561,14 +630,12 @@ export function FieldOperationsWorkspace({
           targetWorkers={targetWorkers}
           authToken={session?.access_token}
           workpackId={savedWorkpackId}
+          ensureWorkpackSaved={ensureWorkpackSaved}
         />
         <WorkpackHistoryPanel
-          data={data}
           session={session}
-          workers={workers}
-          selectedWorkers={selectedWorkers}
-          educationRecords={educationRecords}
-          onSavedWorkpack={setSavedWorkpackId}
+          storageSnapshot={storageSnapshot}
+          onSaveWorkspace={saveWorkspaceToSupabase}
         />
       </aside>
     </section>

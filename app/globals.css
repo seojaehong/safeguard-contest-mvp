@@ -2682,6 +2682,41 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   padding: 16px;
 }
 
+.storage-status-grid,
+.history-save-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(226, 222, 213, 0.86);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.52);
+  padding: 12px;
+}
+
+.storage-status-grid {
+  grid-template-columns: 1fr;
+}
+
+.storage-status-grid div {
+  display: grid;
+  gap: 4px;
+}
+
+.storage-status-grid span,
+.history-save-card span,
+.history-save-card small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.storage-status-grid strong,
+.history-save-card strong {
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 .workspace-step {
   display: grid;
   gap: 4px;
