@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 import { initSync, HwpDocument } from "@rhwp/core";
 
 const baseUrl = process.env.SAFEGUARD_BASE_URL || "https://safeguard-contest-mvp.vercel.app";
-const outDir = process.env.SAFEGUARD_OUT_DIR || path.join(process.cwd(), "evaluation", "2026-04-29-orchestration-download-smoke");
+const outDir = path.resolve(process.env.SAFEGUARD_OUT_DIR || path.join(process.cwd(), "evaluation", "2026-04-29-orchestration-download-smoke"));
 const chromePath = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const question = process.env.SAFEGUARD_SMOKE_QUESTION || "대구 달서구 창고업 고중량 박스 적재 및 수작업 운반. 작업자 5명, 숙련자 중심, 오늘 날씨를 반영해 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.";
 
@@ -263,6 +263,15 @@ function runChrome(args) {
   childProcess.execFileSync(executable, args, { stdio: "ignore" });
 }
 
+function waitForFile(pathToCheck, minBytes = 1, timeoutMs = 5000) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    if (sizeOf(pathToCheck) >= minBytes) return true;
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100);
+  }
+  return sizeOf(pathToCheck) >= minBytes;
+}
+
 async function fetchJson(url, init) {
   const startedAt = Date.now();
   const response = await fetch(url, init);
@@ -378,7 +387,9 @@ function writeDownloads(ask, filesDir) {
   const jpgPath = path.join(filesDir, `${company}-${sampleMeta[2]}.jpg`);
   const userDataDir = path.join(os.tmpdir(), `safeguard-chrome-${Date.now()}`);
   runChrome(["--headless=new", "--disable-gpu", "--no-sandbox", `--user-data-dir=${userDataDir}`, `--print-to-pdf=${pdfPath}`, pathToFileURL(htmlPath).href]);
+  waitForFile(pdfPath, 1000);
   runChrome(["--headless=new", "--disable-gpu", "--no-sandbox", `--user-data-dir=${userDataDir}`, "--window-size=1240,1754", `--screenshot=${jpgPath}`, pathToFileURL(htmlPath).href]);
+  waitForFile(jpgPath, 1000);
 
   const allRows = documentMeta.flatMap(([key, title]) => parseSheetRows(title, values[key]));
   const allTxtPath = path.join(filesDir, `${company}-safeguard-workpack.txt`);
