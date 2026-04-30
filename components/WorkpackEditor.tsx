@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AskResponse } from "@/lib/types";
 
 declare global {
@@ -490,7 +490,7 @@ function parseStoredValues(raw: string | null, fallback: Record<DocumentKey, str
   }
 }
 
-export function WorkpackEditor({ data }: { data: AskResponse }) {
+export function WorkpackEditor({ data, focusToken = 0 }: { data: AskResponse; focusToken?: number }) {
   const initialValues = useMemo<Record<DocumentKey, string>>(
     () => ({
       workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
@@ -518,6 +518,9 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
   const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null);
+  const [showFocusCue, setShowFocusCue] = useState(false);
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedText = values[selected.key];
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
@@ -533,6 +536,16 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
     setValues(stored);
     setLastEditedAt(null);
   }, [initialValues, storageKey]);
+
+  useEffect(() => {
+    if (!focusToken) return;
+
+    setShowFocusCue(true);
+    editorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 360);
+    const timer = window.setTimeout(() => setShowFocusCue(false), 2200);
+    return () => window.clearTimeout(timer);
+  }, [focusToken]);
 
   function saveLocalDraft(nextValues: Record<DocumentKey, string>) {
     if (typeof window === "undefined") return;
@@ -744,7 +757,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
         </div>
       </div>
 
-      <div className="card document-editor">
+      <div className={`card document-editor ${showFocusCue ? "editor-focus-cue" : ""}`} ref={editorRef}>
         <div className="document-toolbar">
           <div>
             <div className="eyebrow">편집 문서</div>
@@ -780,7 +793,13 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
         {imageStatus === "error" ? (
           <p className="export-error">JPG 변환 중 오류가 발생했습니다. HTML 또는 PDF 저장/인쇄를 먼저 사용해 주세요.</p>
         ) : null}
+        {showFocusCue ? (
+          <p className="editor-focus-message" aria-live="polite">
+            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF·XLS·HWPX로 바로 내려받을 수 있습니다.
+          </p>
+        ) : null}
         <textarea
+          ref={textareaRef}
           className="document-textarea"
           value={selectedText}
           onChange={(event) => updateValue(event.target.value)}

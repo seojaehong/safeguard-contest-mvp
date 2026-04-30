@@ -151,6 +151,15 @@ function apiStackLabel(data: AskResponse | null, weather: WeatherBrief | null) {
   return "생성 시 조합";
 }
 
+function compactWeatherBrief(weather: string) {
+  const [summary, ...detailParts] = weather.split(" (");
+  const detail = detailParts.length ? `(${detailParts.join(" (")}` : "";
+  return {
+    summary: summary.trim() || weather,
+    detail: detail.trim()
+  };
+}
+
 function statusDetailCopy(state: GenerationState) {
   if (state === "generating") return "법령·기상·교육·재해사례를 확인하고 있습니다.";
   if (state === "ready") return "문서팩 편집, 작업자 교육 확인, 전파, 이력 저장을 진행할 수 있습니다.";
@@ -260,11 +269,17 @@ export function SafeGuardCommandCenter({
   const [checkedActions, setCheckedActions] = useState<boolean[]>([]);
   const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
+  const [editorFocusToken, setEditorFocusToken] = useState(0);
 
   function scrollToStep(anchor: StepAnchor) {
     const target = document.getElementById(anchor);
     if (!target) return;
     target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function focusWorkpackEditor() {
+    scrollToStep("workpack");
+    setEditorFocusToken((current) => current + 1);
   }
 
   async function generateWorkpack(nextQuestion = question) {
@@ -357,6 +372,7 @@ export function SafeGuardCommandCenter({
   const currentDocProgress = docProgress(data, state);
   const inputLimit = 600;
   const inputWarning = question.length > Math.floor(inputLimit * 0.9);
+  const weatherBrief = compactWeatherBrief(fieldBrief.weather);
 
   return (
     <main className="command-center-shell">
@@ -445,11 +461,17 @@ export function SafeGuardCommandCenter({
               </div>
               <div>
                 <span>작업</span>
-                <b>{fieldBrief.workSummary}</b>
+                <b className="brief-clamp" title={fieldBrief.workSummary}>{fieldBrief.workSummary}</b>
               </div>
               <div>
                 <span>날씨</span>
-                <b className="amber">{fieldBrief.weather}</b>
+                <b className="amber">{weatherBrief.summary}</b>
+                {weatherBrief.detail ? (
+                  <details className="brief-meta">
+                    <summary>출처</summary>
+                    <small>{weatherBrief.detail}</small>
+                  </details>
+                ) : null}
               </div>
               <div>
                 <span>인원</span>
@@ -588,8 +610,8 @@ export function SafeGuardCommandCenter({
                   <p>{data ? "편집·다운로드 준비" : busy && index < 2 ? "작성 중" : "생성 대기"}</p>
                   {data ? (
                     <div className="doc-card-actions">
-                      <button type="button" onClick={() => scrollToStep("workpack")}>편집</button>
-                      <button type="button" onClick={() => scrollToStep("workpack")}>다운로드</button>
+                      <button type="button" onClick={focusWorkpackEditor}>편집</button>
+                      <button type="button" onClick={focusWorkpackEditor}>다운로드</button>
                     </div>
                   ) : null}
                 </article>
@@ -640,7 +662,7 @@ export function SafeGuardCommandCenter({
               </article>
             ))}
           </section>
-          <FieldOperationsWorkspace data={data} />
+          <FieldOperationsWorkspace data={data} editorFocusToken={editorFocusToken} />
         </>
       ) : (
         <section className="empty-workspace card" id="workpack">

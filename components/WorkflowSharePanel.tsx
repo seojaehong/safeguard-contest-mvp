@@ -43,8 +43,8 @@ type WorkflowSharePanelProps = {
 const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
   { key: "email", label: "메일", helper: "관리자·원청 보고", enabled: true },
   { key: "sms", label: "문자", helper: "작업자 즉시 공지", enabled: true },
-  { key: "kakao", label: "카카오", helper: "준비 중 · 채널 승인 후 활성화", enabled: false },
-  { key: "band", label: "밴드", helper: "준비 중 · 팀 채널 승인 후 활성화", enabled: false }
+  { key: "kakao", label: "카카오", helper: "준비 중 · 승인 후 알림 신청", enabled: false },
+  { key: "band", label: "밴드", helper: "준비 중 · 팀 채널 연결 대기", enabled: false }
 ];
 
 function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
@@ -316,6 +316,9 @@ export function WorkflowSharePanel({
           </button>
         ))}
       </div>
+      <p className="channel-readiness-note">
+        현재 즉시 전송 채널은 메일·문자입니다. 카카오·밴드는 채널 승인이 끝나면 같은 전파 흐름에 연결됩니다.
+      </p>
 
       <div className="message-target-box">
         <div className="compact-head">
@@ -354,13 +357,16 @@ export function WorkflowSharePanel({
         </div>
       </div>
 
-      <label className="field-label" htmlFor="workflow-recipients">받는 사람</label>
+      <div className="recipient-section-head">
+        <label className="field-label" htmlFor="workflow-recipients">수신자 추가/관리</label>
+        <span>{recipientLabel}</span>
+      </div>
       <textarea
         id="workflow-recipients"
         className="textarea workflow-textarea"
         value={recipients}
         onChange={(event) => setRecipients(event.target.value)}
-        placeholder="추가 수신자가 있으면 메일 또는 휴대폰 번호를 입력(쉼표·줄바꿈 구분)"
+        placeholder="예: safety@example.com, 010-1234-5678"
       />
       {recipientSuggestions.length ? (
         <div className="recipient-chip-list" aria-label="선택된 근로자 전파 대상">
@@ -372,7 +378,7 @@ export function WorkflowSharePanel({
         </div>
       ) : null}
       <p className="muted small">
-        선택된 근로자의 연락처는 자동 포함됩니다. 수신자를 비워두고 근로자 연락처도 없으면 운영 기본 수신자에게 전송합니다.
+        선택된 근로자 연락처는 자동 포함됩니다. 메일·문자만 선택하면 위 수신자와 근로자 연락처로 실제 전송됩니다.
       </p>
 
       <label className="field-label" htmlFor="workflow-note">전달 메모</label>

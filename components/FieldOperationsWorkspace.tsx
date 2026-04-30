@@ -156,9 +156,9 @@ function AdminAccessPanel({
       <article className="workspace-panel card">
         <div className="compact-head">
           <span className="eyebrow">이력 저장</span>
-          <strong>로그인 후 저장 가능</strong>
+          <strong>비회원도 다운로드 가능</strong>
         </div>
-        <p className="muted small">문서 생성·편집·다운로드·전파는 바로 사용할 수 있습니다. 관리자 로그인 시 작업자, 교육, 전파 이력이 저장됩니다.</p>
+        <p className="muted small">PDF·XLS·HWPX 다운로드와 메일·문자 전파는 바로 사용할 수 있습니다. 관리자 로그인 시 작업자, 교육, 전파 이력이 저장됩니다.</p>
       </article>
     );
   }
@@ -449,7 +449,7 @@ function WorkpackHistoryPanel({
   );
 }
 
-export function FieldOperationsWorkspace({ data }: { data: AskResponse }) {
+export function FieldOperationsWorkspace({ data, editorFocusToken = 0 }: { data: AskResponse; editorFocusToken?: number }) {
   const [session, setSession] = useState<Session | null>(null);
   const [workers, setWorkers] = useState<WorkerProfile[]>(() => buildDefaultWorkers(data));
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(() => buildDefaultWorkers(data).map((worker) => worker.id));
@@ -477,7 +477,7 @@ export function FieldOperationsWorkspace({ data }: { data: AskResponse }) {
     ["DOC", "문서팩", "Excel·HWPX 우선"],
     ["EDU", "작업자·교육", `${workerSummary.selectedCount}명 · 교육확인 ${workerSummary.educationPendingCount ? "필요" : "완료"}`],
     ["SEND", "현장 전파", "메일·문자 중심"],
-    ["SAVE", "이력 저장", session ? "관리자 연결됨" : "로그인 후 저장"]
+    ["SAVE", "이력 저장", session ? "관리자 연결됨" : "다운로드 가능"]
   ] as const;
 
   function toggleWorker(id: string) {
@@ -533,7 +533,7 @@ export function FieldOperationsWorkspace({ data }: { data: AskResponse }) {
       </aside>
 
       <main className="workspace-canvas">
-        <WorkpackEditor data={data} />
+        <WorkpackEditor data={data} focusToken={editorFocusToken} />
         <EvidenceImpactPanel data={data} />
       </main>
 
