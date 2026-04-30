@@ -411,6 +411,7 @@ export function SafeGuardCommandCenter({
         <div className="topbar-status" aria-live="polite">
           <span>{statusCopy(state)}</span>
           <b>{operationalStatus(data, state)}</b>
+          <Link href="/demo" className="topbar-v2-link">v2 시연</Link>
         </div>
       </header>
 
