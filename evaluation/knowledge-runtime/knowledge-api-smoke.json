@@ -1,0 +1,47 @@
+{
+  "verdict": "pass",
+  "generatedAt": "2026-04-30T23:48:01.422Z",
+  "elapsedMs": 8,
+  "seedDatabase": {
+    "hazards": 8,
+    "officialSources": 14,
+    "legalMappings": 3,
+    "templates": 4
+  },
+  "internalApis": [
+    "/api/knowledge/match",
+    "/api/knowledge/ingest",
+    "/api/knowledge/regenerate"
+  ],
+  "scenario": "서울 성수동 외벽 도장 작업. 이동식 비계 사용, 오후 강풍, 신규 작업자 포함, 추락과 지게차 동선 위험.",
+  "matchedHazards": [
+    {
+      "id": "fall-scaffold",
+      "title": "비계·고소작업 추락",
+      "score": 3
+    },
+    {
+      "id": "forklift-traffic",
+      "title": "지게차·보행자 동선 충돌",
+      "score": 2
+    },
+    {
+      "id": "weather-wind-rain-heat",
+      "title": "강풍·우천·폭염 작업조건",
+      "score": 1
+    },
+    {
+      "id": "foreign-worker-briefing",
+      "title": "외국인 근로자 안전교육·전송",
+      "score": 1
+    }
+  ],
+  "rawEventValidation": {
+    "ok": true,
+    "errors": []
+  },
+  "storagePolicy": {
+    "current": "stateless validation and regeneration bundle",
+    "next": "Supabase knowledge_events or DailyEntry snapshots after migration approval"
+  }
+}

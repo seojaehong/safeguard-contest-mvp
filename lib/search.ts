@@ -10,6 +10,7 @@ import { fetchKoshaReferences } from "./kosha";
 import { fetchAccidentCases } from "./accident-cases";
 import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
 import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission } from "./foreign-worker";
+import { matchSafetyKnowledge } from "./safety-knowledge";
 
 export async function runSearch(query: string) {
   return searchLegalSources(query);
@@ -92,6 +93,21 @@ function formatKoshaOpenApiAppendix(references: Awaited<ReturnType<typeof fetchK
       `${index + 1}. ${item.service} · ${item.title}`,
       `   - 반영 위치: ${item.reflectedIn.join(", ")}`,
       `   - 요약: ${item.summary}`
+    ].join("\n"))
+  ].join("\n");
+}
+
+function formatSafetyKnowledgeAppendix(matches: ReturnType<typeof matchSafetyKnowledge>, target: "risk" | "tbm" | "education") {
+  if (!matches.length) return "";
+
+  const targetLabel = target === "risk" ? "위험성평가표" : target === "tbm" ? "TBM" : "안전보건교육";
+  return [
+    "",
+    `[내부 지식 DB 반영: ${targetLabel}]`,
+    ...matches.slice(0, 3).map((item, index) => [
+      `${index + 1}. ${item.title}`,
+      `   - 통제대책: ${item.controls.slice(0, 3).join(" / ")}`,
+      `   - 근거 묶음: ${item.sources.slice(0, 2).map((source) => source.title).join(" / ") || "기초 지식 DB"}`
     ].join("\n"))
   ].join("\n");
 }
@@ -216,6 +232,10 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const trainingFitLines = training.recommendations.slice(0, 2).map((item) => `${item.title}: ${item.fitLabel || "조건부 후보"} - ${item.fitReason || item.reason}`);
     const accidentAppendix = formatAccidentCaseAppendix(accidentCases.cases);
     const koshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references);
+    const safetyKnowledgeMatches = matchSafetyKnowledge(question, 4);
+    const safetyKnowledgeAppendix = formatSafetyKnowledgeAppendix(safetyKnowledgeMatches, "risk");
+    const safetyKnowledgeTbmAppendix = formatSafetyKnowledgeAppendix(safetyKnowledgeMatches, "tbm");
+    const safetyKnowledgeEducationAppendix = formatSafetyKnowledgeAppendix(safetyKnowledgeMatches, "education");
     const foreignWorkerInput = {
       question,
       scenario: response.scenario,
@@ -239,17 +259,30 @@ export async function runAsk(question: string): Promise<AskResponse> {
         koshaEducation,
         kosha,
         koshaOpenApi,
-        accidentCases
+        accidentCases,
+        safetyKnowledge: {
+          source: "safety-knowledge",
+          mode: "live",
+          detail: `기초 지식 DB ${safetyKnowledgeMatches.length}건을 문서팩 반영 후보로 매칭했습니다.`,
+          matches: safetyKnowledgeMatches.map((item) => ({
+            id: item.id,
+            title: item.title,
+            primaryDocuments: item.primaryDocuments,
+            controls: item.controls,
+            sourceTitles: item.sources.map((source) => source.title),
+            legalMappingTitles: item.legalMappings.map((legalItem) => legalItem.title)
+          }))
+        }
       },
       deliverables: {
         ...response.deliverables,
         workpackSummaryDraft: `${response.deliverables.workpackSummaryDraft}\n\n[연결 상태 요약]\n- 법령 근거: ${legalEvidenceMode === "live" ? "연결됨" : "일부 근거 보류"}\n- 기상: ${weather.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- 후속 교육: ${training.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- KOSHA 자료: ${kosha.mode === "live" ? "연결됨" : "일부 근거 보류"}`,
-        riskAssessmentDraft: `${response.deliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${koshaOpenApiAppendix}`,
-        workPlanDraft: `${response.deliverables.workPlanDraft}${riskLegalAppendix}${koshaImpactLines.length ? `\n\n[KOSHA 작업계획 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${koshaOpenApiAppendix}`,
-        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${koshaImpactLines.length ? `\n\n[KOSHA 매뉴얼·Guide 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${tbmLegalAppendix}${tbmSeriousAccidentAppendix}${accidentAppendix}${koshaOpenApiAppendix}`,
+        riskAssessmentDraft: `${response.deliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${safetyKnowledgeAppendix}${koshaOpenApiAppendix}`,
+        workPlanDraft: `${response.deliverables.workPlanDraft}${riskLegalAppendix}${koshaImpactLines.length ? `\n\n[KOSHA 작업계획 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${safetyKnowledgeAppendix}${koshaOpenApiAppendix}`,
+        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${koshaImpactLines.length ? `\n\n[KOSHA 매뉴얼·Guide 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${tbmLegalAppendix}${tbmSeriousAccidentAppendix}${safetyKnowledgeTbmAppendix}${accidentAppendix}${koshaOpenApiAppendix}`,
         tbmLogDraft: `${response.deliverables.tbmLogDraft}${koshaAppendix}`
           .trim(),
-        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${kosha.references.length ? `\n\n[공식 교육자료 반영]\n- ${kosha.references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("안전교육일지")).slice(0, 2).map((item) => `${item.title}: ${item.summary}`).join("\n- ")}` : ""}${accidentAppendix}${koshaOpenApiAppendix}`,
+        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${kosha.references.length ? `\n\n[공식 교육자료 반영]\n- ${kosha.references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("안전교육일지")).slice(0, 2).map((item) => `${item.title}: ${item.summary}`).join("\n- ")}` : ""}${safetyKnowledgeEducationAppendix}${accidentAppendix}${koshaOpenApiAppendix}`,
         emergencyResponseDraft: `${response.deliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}`,
         photoEvidenceDraft: `${response.deliverables.photoEvidenceDraft}\n\n[확인 근거 첨부]\n- 법령·해석례·판례: ${citations.slice(0, 3).map((item) => item.title).join(" / ") || "현장 문서 확인 후 첨부"}\n- KOSHA 자료: ${kosha.references.slice(0, 2).map((item) => item.title).join(" / ") || "현장 작업유형 확인 후 첨부"}\n- 유사 재해사례: ${accidentCases.cases.slice(0, 2).map((item) => item.title).join(" / ") || "사례 확인 후 첨부"}`,
         foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
@@ -263,7 +296,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건`
       },
       sourceMix
     };

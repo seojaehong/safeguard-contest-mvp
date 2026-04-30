@@ -13,6 +13,7 @@
     "smoke:orchestration-download": "node ./scripts/prod_orchestration_download_smoke.mjs",
     "smoke:submission": "node ./scripts/submission_readiness_smoke.mjs",
     "knowledge:seed": "node ./scripts/build_safety_knowledge_seed.mjs",
+    "knowledge:smoke": "node ./scripts/knowledge_runtime_smoke.mjs",
     "dryrun:api": "./scripts/run_daily_dryrun.sh",
     "dryrun:documents": "./scripts/run_daily_document_dryrun.sh",
     "publish:dryrun": "node ./scripts/publish_document_dryrun_snapshot.mjs"

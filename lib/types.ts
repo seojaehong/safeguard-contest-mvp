@@ -165,6 +165,19 @@ export type AskResponse = {
         reflectedIn: string[];
       }>;
     };
+    safetyKnowledge?: {
+      source: "safety-knowledge";
+      mode: IntegrationMode;
+      detail: string;
+      matches: Array<{
+        id: string;
+        title: string;
+        primaryDocuments: string[];
+        controls: string[];
+        sourceTitles: string[];
+        legalMappingTitles: string[];
+      }>;
+    };
   };
   riskSummary: {
     title: string;
