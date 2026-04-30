@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-04-30T13:19:10.9991937Z",
+  "url": "https://safeguard-contest-mvp.vercel.app/demo?scenario=seoul-construction-windy&step=3&speed=slow",
+  "statusCode": 200,
+  "elapsedMs": 960,
+  "ok": true,
+  "checks": [
+    {
+      "text": "생성 결과",
+      "present": true
+    },
+    {
+      "text": "11종 문서팩",
+      "present": true
+    },
+    {
+      "text": "위험성평가표",
+      "present": true
+    },
+    {
+      "text": "TBM 브리핑",
+      "present": true
+    },
+    {
+      "text": "문서 반영 근거",
+      "present": true
+    },
+    {
+      "text": "기상청",
+      "present": true
+    },
+    {
+      "text": "Law.go",
+      "present": true
+    },
+    {
+      "text": "Work24",
+      "present": true
+    },
+    {
+      "text": "KOSHA",
+      "present": true
+    }
+  ]
+}
