@@ -535,8 +535,6 @@ export function SafeGuardCommandCenter({
 
   return (
     <main className="command-center-shell">
-      <SafeClawHomepage onStart={() => scrollToStep("command")} />
-
       <header className="command-topbar workspace-command-topbar">
         <Link href="/" className="brand-lockup safeclaw-lockup" aria-label="SafeClaw 홈으로 이동">
           <span className="brand-mark">SC</span>

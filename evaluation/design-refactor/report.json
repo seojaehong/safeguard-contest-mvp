@@ -1,0 +1,47 @@
+{
+  "name": "safeclaw-design-refactor-phase-1",
+  "createdAt": "2026-05-02",
+  "sourcePrototype": "C:/Users/iceam/Downloads/SafeClaw Prototype _standalone_.html",
+  "status": "pass_with_notice",
+  "summary": "Landing and workspace were split so the public root behaves like a branded SafeClaw product site while the existing workpack engine remains available at /workspace.",
+  "routes": {
+    "/": {
+      "purpose": "SafeClaw landing",
+      "firstLoadJs": "109 kB",
+      "pageSize": "2.82 kB"
+    },
+    "/workspace": {
+      "purpose": "Existing safety workpack generator",
+      "firstLoadJs": "191 kB",
+      "pageSize": "85.5 kB"
+    }
+  },
+  "changes": [
+    "Added SafeClawLanding component",
+    "Moved command-center entry flow to /workspace",
+    "Redirected root query links to /workspace",
+    "Updated landing link and CTA styles"
+  ],
+  "validation": {
+    "build": "pass",
+    "typecheck": "pass_after_build",
+    "httpRootSmoke": {
+      "hasLandingHero": true,
+      "hasWorkspaceCopy": false
+    },
+    "httpWorkspaceSmoke": {
+      "hasWorkspaceCopy": true,
+      "hasLandingHero": false,
+      "hasCommandInput": true
+    },
+    "rootScenarioRedirect": {
+      "statusCode": 307,
+      "location": "/workspace?scenario=seoul-construction-windy"
+    },
+    "browserMcp": "not_available_target_closed"
+  },
+  "notices": [
+    "The Playwright browser MCP target was already closed, so the route smoke was completed through local HTTP checks.",
+    "The full 16-screen prototype migration remains a follow-up task."
+  ]
+}

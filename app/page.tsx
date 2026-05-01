@@ -1,17 +1,14 @@
-import { SafeGuardCommandCenter } from "@/components/SafeGuardCommandCenter";
-import { defaultFieldExample, fieldExamples } from "@/lib/field-examples";
+import { redirect } from "next/navigation";
+import { SafeClawLanding } from "@/components/SafeClawLanding";
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ q?: string; scenario?: string }> }) {
   const params = await searchParams;
-  const selectedExample = fieldExamples.find((example) => example.id === params.scenario) || defaultFieldExample;
-  const q = params.q || selectedExample.question;
+  if (params.q || params.scenario) {
+    const query = new URLSearchParams();
+    if (params.q) query.set("q", params.q);
+    if (params.scenario) query.set("scenario", params.scenario);
+    redirect(`/workspace?${query.toString()}`);
+  }
 
-  return (
-    <SafeGuardCommandCenter
-      examples={fieldExamples}
-      initialScenarioId={selectedExample.id}
-      initialQuestion={q}
-      autoGenerate={Boolean(params.q)}
-    />
-  );
+  return <SafeClawLanding />;
 }

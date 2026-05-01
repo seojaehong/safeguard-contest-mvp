@@ -1,0 +1,30 @@
+# SafeClaw Design Refactor Log
+
+## Phase 1 - Landing / Workspace Split
+
+SafeClaw now starts as a branded product site instead of opening directly into the workpack generator.
+
+- `/` renders the new SafeClaw OS landing shell.
+- `/workspace` keeps the existing workpack generation flow intact.
+- `/?q=...` and `/?scenario=...` redirect to `/workspace` with the same query, so existing scenario links continue to work.
+- The first landing CTA opens `/workspace`; the 30-second demo CTA opens `/demo`.
+
+## What Changed
+
+- Added a dedicated `SafeClawLanding` component based on the approved dark HUD brand direction.
+- Removed the embedded landing block from the command-center workspace.
+- Preserved the existing API orchestration, document generation, evidence, export, and dispatch UI under `/workspace`.
+- Added link styling for the new landing navigation, CTA, and terminal-style action buttons.
+
+## What Is Not Yet Done
+
+- The full 16-screen prototype has not been fully migrated yet.
+- Workspace, document editor, evidence library, workers, dispatch, TBM mode, archive, knowledge DB, API, and settings still need the SafeClaw shell treatment.
+- The old command-center CSS remains in use inside `/workspace` until the next screen-by-screen refactor pass.
+
+## Next Pass
+
+1. Replace the `/workspace` shell with the SafeClaw app shell.
+2. Split major operational areas into product routes: documents, evidence, workers, dispatch, TBM, archive, knowledge, API, and settings.
+3. Keep all existing working features while replacing the presentation layer.
+4. Add browser screenshot evidence for desktop and mobile after each screen migration.
