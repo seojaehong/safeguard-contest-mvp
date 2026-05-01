@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-05-01T07:48:04.183Z",
-  "elapsedMs": 49195,
+  "generatedAt": "2026-05-01T08:44:56.545Z",
+  "elapsedMs": 56643,
   "question": "그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 외국인 근로자 2명과 신규 작업자 1명 포함, 작업자 6명, 실내 고온과 환기 불량, 가연물 인접. 화재감시자와 다국어 안전교육까지 반영해 위험성평가, TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 458,
+    "elapsedMs": 189,
     "mode": "live",
     "summary": "단시간 맑음, 강수없음, 기온 19℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 45510,
+    "elapsedMs": 53708,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "그린메탈 경기 안산 공장 배관 용접·절단 화기작업에 대한 현장 검토용 초안입니다.\n\n---\n\n### **1) 핵심 판단**\n그린메탈 안산 공장의 배관 용접·절단 화기작업은 화재 및 폭발 위험이 매우 높은 작업입니다. 특히 실내 고온, 환기 불량, 가연물 인접이라는 악조건과 함께 외국인 ",
+      "evidence": "## 현장 검토용 초안: 안산 공장 배관 용접·절단 화기작업 안전 관리\n\n### 1) 핵심 판단\n\n그린메탈 안산 공장의 배관 용접·절단 화기작업은 실내 고온, 환기 불량, 가연물 인접 환경에서 진행되며, 외국인 근로자 2명과 신규 작업자 1명을 포함한 총 6명의 근로자가 참여하므로, *",
       "count": 11
     },
     {
@@ -141,73 +141,73 @@
     {
       "format": "TXT",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.txt",
-      "bytes": 7968,
+      "bytes": 7838,
       "ok": true
     },
     {
       "format": "JSON",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.json",
-      "bytes": 8520,
+      "bytes": 8390,
       "ok": true
     },
     {
       "format": "CSV",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.csv",
-      "bytes": 12171,
+      "bytes": 12041,
       "ok": true
     },
     {
       "format": "XLS",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.xls",
-      "bytes": 19123,
+      "bytes": 18993,
       "ok": true
     },
     {
       "format": "DOC",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.doc",
-      "bytes": 12365,
+      "bytes": 12235,
       "ok": true
     },
     {
       "format": "HTML",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.html",
-      "bytes": 8546,
+      "bytes": 8416,
       "ok": true
     },
     {
       "format": "HWPX",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.hwpx",
-      "bytes": 11183,
+      "bytes": 11108,
       "ok": true
     },
     {
       "format": "PDF",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.pdf",
-      "bytes": 297416,
+      "bytes": 298511,
       "ok": true
     },
     {
       "format": "JPG",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.jpg",
-      "bytes": 165124,
+      "bytes": 165155,
       "ok": true
     },
     {
       "format": "ALL_TXT",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.txt",
-      "bytes": 79030,
+      "bytes": 78380,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.csv",
-      "bytes": 115834,
+      "bytes": 115184,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.xls",
-      "bytes": 154700,
+      "bytes": 154050,
       "ok": true
     }
   ],

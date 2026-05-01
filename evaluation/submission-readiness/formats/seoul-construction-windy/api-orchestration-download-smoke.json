@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-05-01T07:46:29.891Z",
-  "elapsedMs": 56632,
+  "generatedAt": "2026-05-01T08:43:04.364Z",
+  "elapsedMs": 46473,
   "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 1639,
+    "elapsedMs": 138,
     "mode": "live",
-    "summary": "단시간 맑음, 강수없음, 기온 24℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+    "summary": "단시간 맑음, 강수없음, 기온 23℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 52179,
+    "elapsedMs": 43643,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -31,7 +31,7 @@
         "TBM 기상 신호",
         "작업중지 기준"
       ],
-      "evidence": "단시간 맑음, 강수없음, 기온 24℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+      "evidence": "단시간 맑음, 강수없음, 기온 23℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
       "count": 5
     },
     {
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "세이프건설 성수동 현장 외벽 도장 작업의 오늘의 위험성평가, TBM, 안전보건교육 초안입니다. 법정 제출 최종본이 아닌 현장 실무 검토용으로 활용하시기 바랍니다.\n\n---\n\n### 1) 핵심 판단\n\n세이프건설 서울 성수동 근린생활시설 외벽 도장 작업은 이동식 비계 사용, 강풍 예보, 지",
+      "evidence": "세이프건설 성수동 근린생활시설 외벽 도장 작업 현장 검토용 초안을 바로 작성합니다.\n\n---\n\n### 1) 핵심 판단\n\n세이프건설의 서울 성수동 근린생활시설 외벽 도장 작업은 이동식 비계 사용, 신규 투입자 1명 포함 총 5명의 작업자 투입, 오후 강풍 예보, 그리고 추락 및 지게차 동",
       "count": 11
     },
     {
@@ -141,49 +141,49 @@
     {
       "format": "TXT",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.txt",
-      "bytes": 8226,
+      "bytes": 8243,
       "ok": true
     },
     {
       "format": "JSON",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.json",
-      "bytes": 8775,
+      "bytes": 8792,
       "ok": true
     },
     {
       "format": "CSV",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.csv",
-      "bytes": 12585,
+      "bytes": 12602,
       "ok": true
     },
     {
       "format": "XLS",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.xls",
-      "bytes": 19636,
+      "bytes": 19653,
       "ok": true
     },
     {
       "format": "DOC",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.doc",
-      "bytes": 12689,
+      "bytes": 12706,
       "ok": true
     },
     {
       "format": "HTML",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.html",
-      "bytes": 8804,
+      "bytes": 8821,
       "ok": true
     },
     {
       "format": "HWPX",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.hwpx",
-      "bytes": 11192,
+      "bytes": 11230,
       "ok": true
     },
     {
       "format": "PDF",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.pdf",
-      "bytes": 300864,
+      "bytes": 297979,
       "ok": true
     },
     {
@@ -195,19 +195,19 @@
     {
       "format": "ALL_TXT",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.txt",
-      "bytes": 85227,
+      "bytes": 85312,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.csv",
-      "bytes": 122712,
+      "bytes": 122797,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.xls",
-      "bytes": 161937,
+      "bytes": 162022,
       "ok": true
     }
   ],

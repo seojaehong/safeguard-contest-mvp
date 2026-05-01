@@ -248,10 +248,11 @@ async function runDispatchSmoke(askPayload, storageSmoke) {
   const hasUnconfiguredOfficialChannel = [emailStatus, smsStatus].some((status) => status === "unconfigured" || status === "skipped");
   const emailSent = emailStatus === "sent";
   const smsSent = smsStatus === "sent";
-  const smsCarrierNotice = smsStatus === "failed";
+  const smsProviderNotice = smsStatus === "failed" || smsStatus === "partial";
+  const workflowResponded = dispatchResponse.ok && dispatchResponse.parsed?.configured === true;
   const verdictValue = dispatchResponse.parsed?.ok === true && emailSent && smsSent
     ? "pass"
-    : dispatchResponse.parsed?.ok === true && emailSent && smsCarrierNotice && !hasUnconfiguredOfficialChannel
+    : workflowResponded && emailSent && smsProviderNotice && !hasUnconfiguredOfficialChannel
       ? "pass_with_notice"
       : "blocked";
 
@@ -274,7 +275,7 @@ async function runDispatchSmoke(askPayload, storageSmoke) {
           provider: item.provider,
           providerStatus: item.status,
           workflowRunId: dispatchResponse.parsed?.workflowRunId,
-          failureReason: item.status === "failed" || item.status === "unconfigured" ? item.message : "",
+          failureReason: item.status === "failed" || item.status === "partial" || item.status === "unconfigured" ? item.message : "",
           payload: item
         }))
       })

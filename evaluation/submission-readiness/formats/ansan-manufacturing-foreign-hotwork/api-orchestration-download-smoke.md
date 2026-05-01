@@ -1,6 +1,6 @@
 # SafeGuard API 조합 및 다운로드 스모크
 
-- 생성시각: 2026-05-01T07:48:04.183Z
+- 생성시각: 2026-05-01T08:44:56.545Z
 - 대상 URL: https://safeguard-contest-mvp.vercel.app
 - 질문: 그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 외국인 근로자 2명과 신규 작업자 1명 포함, 작업자 6명, 실내 고온과 환기 불량, 가연물 인접. 화재감시자와 다국어 안전교육까지 반영해 위험성평가, TBM, 안전보건교육 기록을 만들어줘.
 - 기상 선조회: live / 단시간 맑음, 강수없음, 기온 19℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)
@@ -12,12 +12,11 @@
 | --- | --- | --- | --- | ---: | --- |
 | 기상청 현재/초단기/단기/특보/영향예보 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 5 | 단시간 맑음, 강수없음, 기온 19℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영) |
 | Law.go + korean-law-mcp | /api/ask 내부 searchLegalSources | live | 근거 출처<br>위험성평가표 반영 근거<br>TBM 기록 반영 근거<br>사진/증빙 확인 근거 | 6 | korean-law-mcp 비활성화 |
-| Gemini | /api/ask 내부 generateAnswer | live | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | 그린메탈 경기 안산 공장 배관 용접·절단 화기작업에 대한 현장 검토용 초안입니다.
+| Gemini | /api/ask 내부 generateAnswer | live | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | ## 현장 검토용 초안: 안산 공장 배관 용접·절단 화기작업 안전 관리
 
----
+### 1) 핵심 판단
 
-### **1) 핵심 판단**
-그린메탈 안산 공장의 배관 용접·절단 화기작업은 화재 및 폭발 위험이 매우 높은 작업입니다. 특히 실내 고온, 환기 불량, 가연물 인접이라는 악조건과 함께 외국인  |
+그린메탈 안산 공장의 배관 용접·절단 화기작업은 실내 고온, 환기 불량, 가연물 인접 환경에서 진행되며, 외국인 근로자 2명과 신규 작업자 1명을 포함한 총 6명의 근로자가 참여하므로, * |
 | Work24 훈련과정 | /api/ask 내부 fetchTrainingRecommendations | live | 후속 교육<br>안전보건교육 기록<br>교육 추천 카드 | 3 | 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. |
 | KOSHA 안전보건교육포털 | /api/ask 내부 fetchKoshaEducationRecommendations | live | 후속 교육<br>안전보건교육 기록<br>KOSHA 교육 카드 | 3 | KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. |
 | KOSHA 공식자료/가이드 | /api/ask 내부 fetchKoshaReferences | live | 위험성평가 절차<br>TBM 기록 항목<br>안전보건교육 서식 | 6 | KOSHA·고용노동부 공식 자료 URL 6건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. |
@@ -28,15 +27,15 @@
 
 | 형식 | 결과 | 바이트 | 파일 |
 | --- | --- | ---: | --- |
-| TXT | ok | 7968 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.txt |
-| JSON | ok | 8520 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.json |
-| CSV | ok | 12171 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.csv |
-| XLS | ok | 19123 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.xls |
-| DOC | ok | 12365 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.doc |
-| HTML | ok | 8546 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.html |
-| HWPX | ok | 11183 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.hwpx |
-| PDF | ok | 297416 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.pdf |
-| JPG | ok | 165124 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.jpg |
-| ALL_TXT | ok | 79030 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-safeguard-workpack.txt |
-| ALL_CSV | ok | 115834 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-safeguard-workpack.csv |
-| ALL_XLS | ok | 154700 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-safeguard-workpack.xls |
+| TXT | ok | 7838 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.txt |
+| JSON | ok | 8390 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.json |
+| CSV | ok | 12041 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.csv |
+| XLS | ok | 18993 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.xls |
+| DOC | ok | 12235 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.doc |
+| HTML | ok | 8416 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.html |
+| HWPX | ok | 11108 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.hwpx |
+| PDF | ok | 298511 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.pdf |
+| JPG | ok | 165155 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-risk-assessment.jpg |
+| ALL_TXT | ok | 78380 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-safeguard-workpack.txt |
+| ALL_CSV | ok | 115184 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-safeguard-workpack.csv |
+| ALL_XLS | ok | 154050 | evaluation\submission-readiness\formats\ansan-manufacturing-foreign-hotwork\files\그린메탈-safeguard-workpack.xls |

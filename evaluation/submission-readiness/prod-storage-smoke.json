@@ -1,5 +1,25 @@
 {
-  "verdict": "blocked",
-  "message": "SAFEGUARD_AUTH_TOKEN이 없어 Production 저장 API를 인증 호출하지 못했습니다.",
-  "configured": false
+  "verdict": "pass",
+  "configured": true,
+  "workpackId": "b8f952ec-cdcb-4d9f-a823-93c3b1c9c1ac",
+  "worker": {
+    "ok": true,
+    "configured": true,
+    "workerMap": {
+      "submission-worker-manager": "d3f38814-9825-4c1f-890f-09a436f25b0e"
+    },
+    "message": "근로자 명단을 저장했습니다."
+  },
+  "workpack": {
+    "ok": true,
+    "configured": true,
+    "workpackId": "b8f952ec-cdcb-4d9f-a823-93c3b1c9c1ac",
+    "message": "문서팩과 작업 배치 요약을 저장했습니다."
+  },
+  "education": {
+    "ok": true,
+    "configured": true,
+    "savedCount": 1,
+    "message": "교육 확인 이력을 저장했습니다."
+  }
 }

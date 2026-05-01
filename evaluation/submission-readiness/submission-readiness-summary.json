@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-05-01T07:48:04.197Z",
+  "generatedAt": "2026-05-01T08:44:56.564Z",
   "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "elapsedMs": 288088,
-  "overall": "blocked",
+  "elapsedMs": 326508,
+  "overall": "pass_with_notice",
   "gates": [
     {
       "name": "ask-orchestration",
@@ -12,7 +12,7 @@
           "id": "seoul-construction-windy",
           "title": "서울 건설 강풍",
           "status": 200,
-          "elapsedMs": 40105,
+          "elapsedMs": 70741,
           "verdict": "pass",
           "missingDeliverables": [],
           "formatChecks": [
@@ -44,7 +44,7 @@
           "id": "incheon-logistics-rain",
           "title": "인천 물류 우천",
           "status": 200,
-          "elapsedMs": 57785,
+          "elapsedMs": 40317,
           "verdict": "pass",
           "missingDeliverables": [],
           "formatChecks": [
@@ -76,7 +76,7 @@
           "id": "ansan-manufacturing-foreign-hotwork",
           "title": "안산 제조 화기 외국인 포함",
           "status": 200,
-          "elapsedMs": 38492,
+          "elapsedMs": 48844,
           "verdict": "pass",
           "missingDeliverables": [],
           "formatChecks": [
@@ -108,15 +108,69 @@
     },
     {
       "name": "storage",
-      "verdict": "blocked",
-      "message": "SAFEGUARD_AUTH_TOKEN이 없어 Production 저장 API를 인증 호출하지 못했습니다.",
-      "configured": false
+      "verdict": "pass",
+      "configured": true,
+      "workpackId": "b8f952ec-cdcb-4d9f-a823-93c3b1c9c1ac",
+      "worker": {
+        "ok": true,
+        "configured": true,
+        "workerMap": {
+          "submission-worker-manager": "d3f38814-9825-4c1f-890f-09a436f25b0e"
+        },
+        "message": "근로자 명단을 저장했습니다."
+      },
+      "workpack": {
+        "ok": true,
+        "configured": true,
+        "workpackId": "b8f952ec-cdcb-4d9f-a823-93c3b1c9c1ac",
+        "message": "문서팩과 작업 배치 요약을 저장했습니다."
+      },
+      "education": {
+        "ok": true,
+        "configured": true,
+        "savedCount": 1,
+        "message": "교육 확인 이력을 저장했습니다."
+      }
     },
     {
       "name": "dispatch",
       "verdict": "pass_with_notice",
-      "message": "SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니어서 실제 메일·문자 발송은 실행하지 않았습니다.",
-      "requested": false
+      "requested": true,
+      "response": {
+        "ok": false,
+        "configured": true,
+        "workflowRunId": "58",
+        "providerStatus": "partial",
+        "channelResults": [
+          {
+            "channel": "email",
+            "provider": "smtp",
+            "status": "sent",
+            "message": "SMTP accepted email message"
+          },
+          {
+            "channel": "sms",
+            "provider": "solapi",
+            "status": "failed",
+            "message": "Solapi SMS dispatch returned errors",
+            "httpStatus": 400
+          }
+        ],
+        "summary": {
+          "requested": 2,
+          "sent": 1,
+          "failed": 1,
+          "unconfigured": 0,
+          "skipped": 0
+        },
+        "message": "SafeGuard 문서팩 일부 채널 전파가 완료되었습니다."
+      },
+      "logResponse": {
+        "ok": true,
+        "configured": true,
+        "savedCount": 2,
+        "message": "전파 이력을 저장했습니다."
+      }
     },
     {
       "name": "formats",
@@ -132,49 +186,49 @@
             {
               "format": "TXT",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.txt",
-              "bytes": 8226,
+              "bytes": 8243,
               "ok": true
             },
             {
               "format": "JSON",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.json",
-              "bytes": 8775,
+              "bytes": 8792,
               "ok": true
             },
             {
               "format": "CSV",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.csv",
-              "bytes": 12585,
+              "bytes": 12602,
               "ok": true
             },
             {
               "format": "XLS",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.xls",
-              "bytes": 19636,
+              "bytes": 19653,
               "ok": true
             },
             {
               "format": "DOC",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.doc",
-              "bytes": 12689,
+              "bytes": 12706,
               "ok": true
             },
             {
               "format": "HTML",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.html",
-              "bytes": 8804,
+              "bytes": 8821,
               "ok": true
             },
             {
               "format": "HWPX",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.hwpx",
-              "bytes": 11192,
+              "bytes": 11230,
               "ok": true
             },
             {
               "format": "PDF",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.pdf",
-              "bytes": 300864,
+              "bytes": 297979,
               "ok": true
             },
             {
@@ -186,19 +240,19 @@
             {
               "format": "ALL_TXT",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.txt",
-              "bytes": 85227,
+              "bytes": 85312,
               "ok": true
             },
             {
               "format": "ALL_CSV",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.csv",
-              "bytes": 122712,
+              "bytes": 122797,
               "ok": true
             },
             {
               "format": "ALL_XLS",
               "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.xls",
-              "bytes": 161937,
+              "bytes": 162022,
               "ok": true
             }
           ]
@@ -213,73 +267,73 @@
             {
               "format": "TXT",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.txt",
-              "bytes": 7965,
+              "bytes": 8124,
               "ok": true
             },
             {
               "format": "JSON",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.json",
-              "bytes": 8520,
+              "bytes": 8679,
               "ok": true
             },
             {
               "format": "CSV",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.csv",
-              "bytes": 12168,
+              "bytes": 12327,
               "ok": true
             },
             {
               "format": "XLS",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.xls",
-              "bytes": 19120,
+              "bytes": 19279,
               "ok": true
             },
             {
               "format": "DOC",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.doc",
-              "bytes": 12362,
+              "bytes": 12521,
               "ok": true
             },
             {
               "format": "HTML",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.html",
-              "bytes": 8543,
+              "bytes": 8702,
               "ok": true
             },
             {
               "format": "HWPX",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.hwpx",
-              "bytes": 11140,
+              "bytes": 11171,
               "ok": true
             },
             {
               "format": "PDF",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.pdf",
-              "bytes": 298436,
+              "bytes": 297183,
               "ok": true
             },
             {
               "format": "JPG",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.jpg",
-              "bytes": 164898,
+              "bytes": 164855,
               "ok": true
             },
             {
               "format": "ALL_TXT",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.txt",
-              "bytes": 65054,
+              "bytes": 65849,
               "ok": true
             },
             {
               "format": "ALL_CSV",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.csv",
-              "bytes": 94999,
+              "bytes": 95794,
               "ok": true
             },
             {
               "format": "ALL_XLS",
               "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.xls",
-              "bytes": 129098,
+              "bytes": 129893,
               "ok": true
             }
           ]
@@ -294,73 +348,73 @@
             {
               "format": "TXT",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.txt",
-              "bytes": 7968,
+              "bytes": 7838,
               "ok": true
             },
             {
               "format": "JSON",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.json",
-              "bytes": 8520,
+              "bytes": 8390,
               "ok": true
             },
             {
               "format": "CSV",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.csv",
-              "bytes": 12171,
+              "bytes": 12041,
               "ok": true
             },
             {
               "format": "XLS",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.xls",
-              "bytes": 19123,
+              "bytes": 18993,
               "ok": true
             },
             {
               "format": "DOC",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.doc",
-              "bytes": 12365,
+              "bytes": 12235,
               "ok": true
             },
             {
               "format": "HTML",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.html",
-              "bytes": 8546,
+              "bytes": 8416,
               "ok": true
             },
             {
               "format": "HWPX",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.hwpx",
-              "bytes": 11183,
+              "bytes": 11108,
               "ok": true
             },
             {
               "format": "PDF",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.pdf",
-              "bytes": 297416,
+              "bytes": 298511,
               "ok": true
             },
             {
               "format": "JPG",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.jpg",
-              "bytes": 165124,
+              "bytes": 165155,
               "ok": true
             },
             {
               "format": "ALL_TXT",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.txt",
-              "bytes": 79030,
+              "bytes": 78380,
               "ok": true
             },
             {
               "format": "ALL_CSV",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.csv",
-              "bytes": 115834,
+              "bytes": 115184,
               "ok": true
             },
             {
               "format": "ALL_XLS",
               "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.xls",
-              "bytes": 154700,
+              "bytes": 154050,
               "ok": true
             }
           ]

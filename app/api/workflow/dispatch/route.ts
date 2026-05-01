@@ -31,6 +31,7 @@ type WorkflowChannelResult = {
 type WorkflowSummary = {
   requested: number;
   sent: number;
+  partial: number;
   failed: number;
   unconfigured: number;
   skipped: number;
@@ -133,6 +134,7 @@ function normalizeChannelResults(value: unknown, requestedChannels: WorkflowChan
 function summarizeChannelResults(results: WorkflowChannelResult[]): WorkflowSummary {
   return results.reduce<WorkflowSummary>((summary, item) => {
     if (item.status === "sent") summary.sent += 1;
+    if (item.status === "partial") summary.partial += 1;
     if (item.status === "failed") summary.failed += 1;
     if (item.status === "unconfigured") summary.unconfigured += 1;
     if (item.status === "skipped") summary.skipped += 1;
@@ -140,6 +142,7 @@ function summarizeChannelResults(results: WorkflowChannelResult[]): WorkflowSumm
   }, {
     requested: results.length,
     sent: 0,
+    partial: 0,
     failed: 0,
     unconfigured: 0,
     skipped: 0

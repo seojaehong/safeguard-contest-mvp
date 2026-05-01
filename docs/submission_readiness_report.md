@@ -116,16 +116,17 @@ SAFEGUARD_DISPATCH_RECIPIENTS=<email-or-phone>
 
 ## 2026-05-01 제출 직전 스모크 결과
 
-`npm.cmd run build`, `npm.cmd run typecheck`, `npm.cmd run smoke:submission`을 다시 실행했다. `typecheck`는 build와 병렬 실행하면 `.next/types` 재생성 타이밍 때문에 실패할 수 있어, build 완료 후 단독 실행 기준으로 통과했다.
+`npm.cmd run typecheck`, `npm.cmd run build`, `SAFEGUARD_AUTH_TOKEN`과 실제 수신자를 넣은 `npm.cmd run smoke:submission`을 다시 실행했다.
 
 | 게이트 | 결과 | 비고 |
 |---|---|---|
 | 정적 빌드 | `pass` | Next.js production build 통과 |
 | 타입 검사 | `pass` | `npm.cmd run typecheck` 단독 실행 통과 |
 | API 조합 문서 생성 | `pass` | 서울 건설 강풍, 인천 물류 우천, 안산 제조 화기·외국인 포함 3개 시나리오 모두 11종 산출물 생성 |
-| 관리자 저장 | `blocked` | 현재 실행 셸에 `SAFEGUARD_AUTH_TOKEN`이 없어 Production 저장 API 인증 호출 미실행 |
-| 메일·문자 전파 | `pass_with_notice` | `SAFEGUARD_RUN_LIVE_DISPATCH=1` 미지정으로 실제 발송 미실행 |
+| 관리자 저장 | `pass` | Supabase Auth 토큰으로 Production 저장 API 호출. `workpackId=b8f952ec-cdcb-4d9f-a823-93c3b1c9c1ac`, 근로자 1건, 교육기록 1건 저장 |
+| 메일·문자 전파 | `pass_with_notice` | n8n `workflowRunId=58`. 메일은 SMTP `sent`, 전파 로그 2건 저장. 문자는 Solapi `failed/http 400`으로 provider 점검 필요 |
 | 제출 서식 | `pass` | 3개 시나리오 모두 PDF, HWPX, XLS, 전체 XLS 생성 확인 |
+| 전체 판정 | `pass_with_notice` | 제출 흐름은 닫혔고, SMS 실수신은 Solapi 발신번호·수신자·provider 응답 상세 재점검 항목으로 남김 |
 
 생성된 증거 파일:
 
@@ -136,13 +137,4 @@ SAFEGUARD_DISPATCH_RECIPIENTS=<email-or-phone>
 - `evaluation/submission-readiness/formats/**/api-orchestration-download-smoke.json`
 - `evaluation/submission-readiness/formats/**/files/*`
 
-제출 접수 자체의 차단 항목은 아니다. 다만 “운영화 완료”로 발표하려면 아래 값을 넣고 동일 명령을 한 번 더 실행해야 한다.
-
-```powershell
-$env:SAFEGUARD_AUTH_TOKEN="<Supabase access token>"
-$env:SAFEGUARD_RUN_LIVE_DISPATCH="1"
-$env:SAFEGUARD_DISPATCH_RECIPIENTS="<email-or-phone>"
-npm.cmd run smoke:submission
-```
-
-현재 기준 제출 전략은 `문서 생성·공공데이터 조합·서식 다운로드는 pass`, `관리자 저장과 실제 전파는 제출 직전 운영 검증 항목`으로 설명한다.
+현재 기준 제출 전략은 `문서 생성·공공데이터 조합·관리자 저장·메일 전파·전파 로그·서식 다운로드는 pass`, `SMS 실수신은 Solapi provider notice`로 설명한다. 문자 기능은 UI와 n8n 경로, 로그 저장까지 닫혔으나 통신 provider가 오류를 반환했으므로, 제출 발표에서는 “메일은 실발송 완료, 문자는 provider 재점검 중이며 동일 전파 로그에 남는다”로 말한다.
