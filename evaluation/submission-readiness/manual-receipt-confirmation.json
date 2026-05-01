@@ -1,0 +1,26 @@
+{
+  "verifiedAt": "2026-05-01T17:55:00+09:00",
+  "verifier": "project-owner",
+  "scenario": "서울 건설 강풍",
+  "workflowRunId": "58",
+  "channels": [
+    {
+      "channel": "email",
+      "receiptConfirmed": true,
+      "note": "드라이런 메일 수신 확인"
+    },
+    {
+      "channel": "sms",
+      "receiptConfirmed": true,
+      "note": "드라이런 문자 수신 확인. 자동 provider 응답은 Solapi http 400 notice로 남았으나 실제 단말 수신은 확인됨"
+    }
+  ],
+  "messagePreview": {
+    "title": "[오늘 작업 안전공지] 세이프건설",
+    "site": "서울 성수동 근린생활시설 현장",
+    "work": "외벽 도장 작업",
+    "topRisk": "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+    "foreignWorkerNoticeIncluded": true
+  },
+  "submissionConclusion": "메일과 문자는 실제 수신 확인 완료. 자동 smoke 판정은 provider 응답 보수성 때문에 pass_with_notice로 유지한다."
+}

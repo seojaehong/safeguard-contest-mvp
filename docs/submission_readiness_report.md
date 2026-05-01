@@ -128,13 +128,16 @@ SAFEGUARD_DISPATCH_RECIPIENTS=<email-or-phone>
 | 제출 서식 | `pass` | 3개 시나리오 모두 PDF, HWPX, XLS, 전체 XLS 생성 확인 |
 | 전체 판정 | `pass_with_notice` | 제출 흐름은 닫혔고, SMS 실수신은 Solapi 발신번호·수신자·provider 응답 상세 재점검 항목으로 남김 |
 
+추가 수동 확인: 프로젝트 오너가 드라이런 메일과 문자를 실제 수신했다. 자동 smoke의 Solapi `failed/http 400`은 provider 응답 notice로 유지하되, 실제 단말 수신 증빙은 `evaluation/submission-readiness/manual-receipt-confirmation.json`에 별도 기록했다.
+
 생성된 증거 파일:
 
 - `evaluation/submission-readiness/submission-readiness-summary.json`
 - `evaluation/submission-readiness/prod-storage-smoke.json`
 - `evaluation/submission-readiness/prod-dispatch-smoke.json`
+- `evaluation/submission-readiness/manual-receipt-confirmation.json`
 - `evaluation/submission-readiness/document-format-verification.json`
 - `evaluation/submission-readiness/formats/**/api-orchestration-download-smoke.json`
 - `evaluation/submission-readiness/formats/**/files/*`
 
-현재 기준 제출 전략은 `문서 생성·공공데이터 조합·관리자 저장·메일 전파·전파 로그·서식 다운로드는 pass`, `SMS 실수신은 Solapi provider notice`로 설명한다. 문자 기능은 UI와 n8n 경로, 로그 저장까지 닫혔으나 통신 provider가 오류를 반환했으므로, 제출 발표에서는 “메일은 실발송 완료, 문자는 provider 재점검 중이며 동일 전파 로그에 남는다”로 말한다.
+현재 기준 제출 전략은 `문서 생성·공공데이터 조합·관리자 저장·메일 전파·문자 전파 수신 확인·전파 로그·서식 다운로드는 pass`, `자동 smoke의 SMS provider 응답은 notice`로 설명한다. 문자 기능은 UI와 n8n 경로, 로그 저장, 실제 단말 수신까지 확인됐으나 provider 응답이 보수적으로 실패를 반환했으므로, 제출 발표에서는 “메일·문자는 실제 수신 확인 완료, provider 응답 상세는 전파 로그에 남는다”로 말한다.
