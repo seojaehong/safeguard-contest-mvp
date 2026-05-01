@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-05-01T22:04:06.9957309+09:00",
+  "route": "/api/workpack/remediate",
+  "httpOk": true,
+  "configured": true,
+  "providerLabel": "Gemini (gemini-2.5-flash)",
+  "documentKey": "riskAssessmentDraft",
+  "textLength": 320,
+  "sourceCount": 5,
+  "checks": [
+    {
+      "name": "returns-ok",
+      "passed": true
+    },
+    {
+      "name": "returns-insertable-text",
+      "passed": true
+    },
+    {
+      "name": "preserves-rubric-item",
+      "passed": true
+    }
+  ]
+}

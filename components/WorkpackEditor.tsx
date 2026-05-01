@@ -5,7 +5,8 @@ import { AskResponse } from "@/lib/types";
 import {
   evaluatePublicSafetyRubric,
   rubricCategoryLabel,
-  rubricStatusLabel
+  rubricStatusLabel,
+  type RubricEvaluationItem
 } from "@/lib/safety-document-rubric";
 
 declare global {
@@ -46,6 +47,19 @@ type TemplatePreset = {
   description: string;
   previewTitle: string;
   previewBullets: string[];
+};
+type RemediationDraft = {
+  itemId: string;
+  text: string;
+  status: "ready" | "error";
+  message: string;
+  providerLabel: string | null;
+  policyNote: string;
+  sources: Array<{
+    title: string;
+    agency: string;
+    url: string;
+  }>;
 };
 
 let rhwpModulePromise: Promise<RhwpModule> | null = null;
@@ -518,6 +532,53 @@ function parseStoredValues(raw: string | null, fallback: Record<DocumentKey, str
   }
 }
 
+function readObject(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null;
+}
+
+function readText(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function readRemediationDraft(itemId: string, value: unknown): RemediationDraft {
+  const record = readObject(value);
+  if (!record) {
+    return {
+      itemId,
+      text: "",
+      status: "error",
+      message: "보완 제안 응답을 읽지 못했습니다.",
+      providerLabel: null,
+      policyNote: "",
+      sources: []
+    };
+  }
+
+  const sourcesValue = record.sources;
+  const sources = Array.isArray(sourcesValue)
+    ? sourcesValue.map((source) => {
+        const sourceRecord = readObject(source);
+        return sourceRecord
+          ? {
+              title: readText(sourceRecord.title),
+              agency: readText(sourceRecord.agency),
+              url: readText(sourceRecord.url)
+            }
+          : null;
+      }).filter((source): source is RemediationDraft["sources"][number] => Boolean(source && source.title))
+    : [];
+
+  return {
+    itemId,
+    text: readText(record.text),
+    status: record.ok === true ? "ready" : "error",
+    message: readText(record.message) || (record.ok === true ? "보완 제안을 생성했습니다." : "보완 제안을 생성하지 못했습니다."),
+    providerLabel: readText(record.providerLabel) || null,
+    policyNote: readText(record.policyNote),
+    sources
+  };
+}
+
 export function WorkpackEditor({
   data,
   focusToken = 0,
@@ -555,6 +616,8 @@ export function WorkpackEditor({
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
   const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null);
   const [showFocusCue, setShowFocusCue] = useState(false);
+  const [remediationDrafts, setRemediationDrafts] = useState<Record<string, RemediationDraft>>({});
+  const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
@@ -607,6 +670,73 @@ export function WorkpackEditor({
       return nextValues;
     });
     setLastEditedAt(new Date());
+  }
+
+  function updateRemediationDraft(itemId: string, text: string) {
+    setRemediationDrafts((current) => {
+      const existing = current[itemId];
+      if (!existing) return current;
+      return {
+        ...current,
+        [itemId]: {
+          ...existing,
+          text
+        }
+      };
+    });
+  }
+
+  function insertRemediationDraft(itemId: string) {
+    const draft = remediationDrafts[itemId];
+    if (!draft || !draft.text.trim()) return;
+    const separator = selectedText.trim() ? "\n\n" : "";
+    updateValue(`${selectedText.trimEnd()}${separator}${draft.text.trim()}`);
+    setRemediationDrafts((current) => {
+      const next = { ...current };
+      delete next[itemId];
+      return next;
+    });
+    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 120);
+  }
+
+  async function requestRemediation(item: RubricEvaluationItem) {
+    setRemediationLoadingId(item.id);
+    try {
+      const response = await fetch("/api/workpack/remediate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          question: data.question,
+          documentKey: selected.key,
+          documentText: selectedText,
+          rubricItemId: item.id
+        })
+      });
+      const payload = await response.json().catch(() => null) as unknown;
+      const draft = readRemediationDraft(item.id, payload);
+      setRemediationDrafts((current) => ({
+        ...current,
+        [item.id]: response.ok ? draft : { ...draft, status: "error" }
+      }));
+    } catch (error) {
+      console.error("workpack remediation request failed", error);
+      setRemediationDrafts((current) => ({
+        ...current,
+        [item.id]: {
+          itemId: item.id,
+          text: "",
+          status: "error",
+          message: "보완 제안 요청 중 오류가 발생했습니다.",
+          providerLabel: null,
+          policyNote: "",
+          sources: []
+        }
+      }));
+    } finally {
+      setRemediationLoadingId(null);
+    }
   }
 
   function downloadText() {
@@ -886,13 +1016,76 @@ export function WorkpackEditor({
           </p>
         ) : null}
         <div className="selected-rubric-strip" aria-label={`${selected.title} 제출 전 점검`}>
-          {selectedRubricItems.length ? selectedRubricItems.map((item) => (
-            <div key={item.id} className={`selected-rubric-item ${item.status}`}>
-              <span>{rubricCategoryLabel(item.category)}</span>
-              <strong>{item.title}</strong>
-              <small>{rubricStatusLabel(item.status)} · {item.status === "fulfilled" ? "현재 문서에 반영되어 있습니다." : item.improvementAction}</small>
-            </div>
-          )) : (
+          {selectedRubricItems.length ? selectedRubricItems.map((item) => {
+            const draft = remediationDrafts[item.id];
+            return (
+              <div key={item.id} className={`selected-rubric-item ${item.status}`}>
+                <span>{rubricCategoryLabel(item.category)}</span>
+                <strong>{item.title}</strong>
+                <small>{rubricStatusLabel(item.status)} · {item.status === "fulfilled" ? "현재 문서에 반영되어 있습니다." : item.improvementAction}</small>
+                {item.status !== "fulfilled" ? (
+                  <div className="remediation-actions">
+                    <button
+                      type="button"
+                      className="button secondary"
+                      onClick={() => requestRemediation(item)}
+                      disabled={remediationLoadingId === item.id}
+                    >
+                      {remediationLoadingId === item.id ? "보완 생성 중" : "보완 문구 생성"}
+                    </button>
+                  </div>
+                ) : null}
+                {draft ? (
+                  <div className={`remediation-draft ${draft.status}`}>
+                    <div className="compact-head">
+                      <span className="eyebrow">AI 보완 제안</span>
+                      <strong>{draft.status === "ready" ? "편집 후 삽입 가능" : "생성 확인 필요"}</strong>
+                    </div>
+                    <textarea
+                      className="remediation-textarea"
+                      value={draft.text}
+                      onChange={(event) => updateRemediationDraft(item.id, event.target.value)}
+                      aria-label={`${item.title} 보완 제안 편집`}
+                    />
+                    <p className="muted small">
+                      {draft.providerLabel ? `${draft.providerLabel} · ` : ""}
+                      {draft.policyNote || draft.message}
+                    </p>
+                    {draft.sources.length ? (
+                      <div className="remediation-sources">
+                        {draft.sources.map((source) => (
+                          <a key={`${item.id}-${source.title}`} href={source.url} target="_blank" rel="noreferrer">
+                            {source.agency} · {source.title}
+                          </a>
+                        ))}
+                      </div>
+                    ) : null}
+                    <div className="remediation-actions">
+                      <button
+                        type="button"
+                        className="button"
+                        onClick={() => insertRemediationDraft(item.id)}
+                        disabled={draft.status !== "ready" || !draft.text.trim()}
+                      >
+                        문서에 삽입
+                      </button>
+                      <button
+                        type="button"
+                        className="button secondary"
+                        onClick={() => setRemediationDrafts((current) => {
+                          const next = { ...current };
+                          delete next[item.id];
+                          return next;
+                        })}
+                      >
+                        닫기
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            );
+          }) : (
             <div className="selected-rubric-item fulfilled">
               <span>현장 운영 추천</span>
               <strong>문서별 직접 점검 항목 없음</strong>
