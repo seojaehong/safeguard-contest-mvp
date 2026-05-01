@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-05-01T01:34:37.7185337Z",
+  "supabaseCliAvailableViaNpmExec": true,
+  "supabaseInitCreated": [
+    "supabase/config.toml",
+    "supabase/.gitignore"
+  ],
+  "directDbAttempt": {
+    "host": "db.pleyuknjnprsckssxvrh.supabase.co",
+    "result": "blocked",
+    "reason": "host resolves to IPv6 only and current Windows network has no IPv6 route"
+  },
+  "poolerAttempt": {
+    "reason": "guessed pooler tenants were not found; exact pooler URI or Supabase access token is required",
+    "result": "blocked"
+  },
+  "migrationFiles": [
+    "supabase/migrations/001_init.sql",
+    "supabase/migrations/002_workspace_productization.sql",
+    "supabase/migrations/003_knowledge_runtime.sql"
+  ],
+  "verdict": "blocked",
+  "nextRequiredInputs": [
+    "SUPABASE_ACCESS_TOKEN for supabase login/link",
+    "or exact Supabase pooler URI from Dashboard > Project Settings > Database > Connection string > Transaction pooler"
+  ]
+}
