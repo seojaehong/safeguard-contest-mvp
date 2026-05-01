@@ -336,6 +336,8 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
   const koshaReferences = data.externalData.kosha.references.slice(0, 3);
   const accidentCases = data.externalData.accidentCases.cases.slice(0, 2);
   const hasEvidenceImpact = koshaReferences.length > 0 || accidentCases.length > 0;
+  const officialFallbackUrl = "https://www.kosha.or.kr/kosha/data/guidance.do";
+  const safeExternalUrl = (url?: string) => (url && /^https?:\/\//.test(url) ? url : officialFallbackUrl);
 
   return (
     <section className="evidence-impact-grid" id="references">
@@ -345,15 +347,27 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
           <strong>문서 반영 근거</strong>
         </div>
         <div className="impact-list">
-          {koshaReferences.map((item) => (
-            <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="impact-card">
+          {koshaReferences.map((item, index) => (
+            <a
+              key={`${item.title}-${index}`}
+              href={safeExternalUrl(item.url)}
+              target="_blank"
+              rel="noreferrer"
+              className="impact-card"
+            >
               <strong>{item.title}</strong>
               <span>{item.agency || "KOSHA"} · {(item.appliesTo || item.appliedTo || ["위험성평가표"]).join(", ")}</span>
               <small>{item.summary}</small>
             </a>
           ))}
-          {accidentCases.map((item) => (
-            <a key={item.title} href={item.sourceUrl || "https://www.kosha.or.kr/"} target="_blank" rel="noreferrer" className="impact-card">
+          {accidentCases.map((item, index) => (
+            <a
+              key={`${item.title}-${index}`}
+              href={safeExternalUrl(item.sourceUrl)}
+              target="_blank"
+              rel="noreferrer"
+              className="impact-card"
+            >
               <strong>{item.title}</strong>
               <span>유사 재해사례 · TBM/교육 반영</span>
               <small>{item.preventionPoint}</small>

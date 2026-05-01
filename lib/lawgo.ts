@@ -186,10 +186,6 @@ function normalizeLawText(text: string) {
     .trim();
 }
 
-function isSafetyArticle(text: string) {
-  return /안전|보건|위험|유해|교육|보호구|작업|도급|기계|추락|비계|중지|관리감독|조치|근로자|사업주/.test(text);
-}
-
 function lawSourceUrl(lawSerial: string) {
   return lawSerial ? `https://www.law.go.kr/lsInfoP.do?lsiSeq=${encodeURIComponent(lawSerial)}` : "https://www.law.go.kr/";
 }
@@ -256,16 +252,14 @@ function buildLawDocumentReflection() {
 
 function formatLawDetailBody(articleUnits: JsonRecord[]) {
   const articleTexts = articleUnits.map(formatArticleUnit).filter(Boolean);
-  const safetyArticles = articleTexts.filter(isSafetyArticle);
-  const selectedArticles = (safetyArticles.length ? safetyArticles : articleTexts).slice(0, 8);
 
   return [
     buildLawDocumentReflection(),
     "",
-    "[주요 조문 요약]",
-    selectedArticles.length
-      ? selectedArticles.join("\n\n")
-      : "Law.go 상세 원문에서 조문을 직접 확인해 주세요. SafeGuard는 이 근거를 현장 문서 초안 작성 보조 근거로만 사용합니다."
+    "[법령 전문]",
+    articleTexts.length
+      ? articleTexts.join("\n\n")
+      : "Law.go 상세 원문에서 조문 전문을 확인해 주세요. SafeGuard는 이 근거를 현장 문서 초안 작성 보조 근거로만 사용합니다."
   ].join("\n");
 }
 
@@ -293,7 +287,7 @@ function buildCachedIndustrialSafetyLawDetail(id: string, raw: string): DetailRe
   const body = [
     buildLawDocumentReflection(),
     "",
-    "[주요 조문 요약]",
+    "[기초 조문 스냅샷]",
     [
       "제5조(사업주 등의 의무)",
       "① 사업주는 산업재해 예방을 위한 기준, 쾌적한 작업환경 조성 및 근로조건 개선, 해당 사업장의 안전 및 보건에 관한 정보 제공 등을 이행하여 근로자의 안전 및 건강을 유지ㆍ증진시키고 국가의 산업재해 예방정책을 따라야 한다.",
@@ -325,13 +319,13 @@ function buildCachedIndustrialSafetyLawDetail(id: string, raw: string): DetailRe
     type: "law",
     title: "산업안전보건법",
     citation: "법률 · 공포 21065",
-    summary: "고용노동부 · 시행 20251001 · Law.go 검증 스냅샷",
+    summary: "고용노동부 · 시행 20251001 · Law.go 상세 호출 실패 시 사용하는 기초 조문 스냅샷",
     body,
     points: [
       "소관부처 고용노동부",
       "시행일 20251001",
       "위험성평가·TBM·안전보건교육 기록의 반영 근거로 사용",
-      "Vercel-Law.go 상세 호출 실패 시에도 공식 조문 스냅샷으로 화면 공백을 방지"
+      "Law.go 상세 호출이 성공하면 조문 전문을 우선 표시하고, 실패 시에만 기초 조문 스냅샷으로 화면 공백을 방지"
     ],
     sourceLabel: "Law.go 법령",
     sourceSystem: "lawgo",

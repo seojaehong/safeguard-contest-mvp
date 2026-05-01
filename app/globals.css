@@ -2154,11 +2154,32 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .sheet-export-panel {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .sheet-export-panel .button {
   width: 100%;
+}
+
+.sheets-action-box {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(33, 89, 79, 0.2);
+  border-radius: 18px;
+  background: rgba(232, 241, 237, 0.48);
+  padding: 10px;
+}
+
+.knowledge-link {
+  display: inline-flex;
+  justify-content: center;
+  border: 1px solid rgba(207, 199, 185, 0.86);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  padding: 9px 12px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 850;
 }
 
 .template-picker {
@@ -2652,22 +2673,28 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .field-workspace {
   display: grid;
-  grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr) minmax(340px, 0.46fr);
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.38fr);
   gap: 18px;
   align-items: start;
 }
 
 .workspace-rail,
 .workspace-side {
-  position: sticky;
-  top: 88px;
   display: grid;
   gap: 12px;
   padding: 16px;
 }
 
 .workspace-rail {
-  align-content: start;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-content: stretch;
+  position: static;
+}
+
+.workspace-side {
+  position: sticky;
+  top: 88px;
 }
 
 .workspace-canvas {
@@ -2723,6 +2750,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   border: 1px solid rgba(226, 222, 213, 0.86);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.5);
+  min-height: 92px;
   padding: 12px;
 }
 
@@ -3331,6 +3359,10 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   .workspace-rail,
   .workspace-side {
     position: static;
+  }
+
+  .workspace-rail {
+    grid-template-columns: 1fr;
   }
 
   .document-toolbar {

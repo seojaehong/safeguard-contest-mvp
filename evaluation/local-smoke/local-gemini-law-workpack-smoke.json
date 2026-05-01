@@ -1,0 +1,77 @@
+{
+  "generatedAt": "2026-05-01T15:44:26.3259979+09:00",
+  "baseUrl": "http://127.0.0.1:3011",
+  "askMode": "live",
+  "citationCount": 6,
+  "firstCitationSummaries": [
+    {
+      "id": "lawgo-law-276853",
+      "type": "law",
+      "title": "산업안전보건법",
+      "summary": "산업안전보건법은 위험성평가, TBM, 안전보건교육 등 모든 안전보건 조치 의무의 기본 법적 근거로, 오늘 작업 문서에 필수 반영됩니다.",
+      "tags": [
+        "법률",
+        "고용노동부",
+        "Law.go",
+        "위험성평가",
+        "TBM",
+        "안전보건교육",
+        "AI 근거매핑"
+      ]
+    },
+    {
+      "id": "lawgo-law-271485",
+      "type": "law",
+      "title": "산업안전보건법 시행규칙",
+      "summary": "산업안전보건법 시행규칙은 위험성평가, 안전보건교육 등 법의 구체적 이행 절차와 기준을 명시하여, 오늘 작업 문서 작성의 세부 근거가 됩니다.",
+      "tags": [
+        "고용노동부령",
+        "고용노동부",
+        "Law.go",
+        "위험성평가",
+        "TBM",
+        "안전보건교육",
+        "AI 근거매핑"
+      ]
+    },
+    {
+      "id": "lawgo-law-284771",
+      "type": "law",
+      "title": "산업안전보건법 시행령",
+      "summary": "산업안전보건법 시행령은 법에서 위임된 사항과 시행에 필요한 사항을 규정하여, 사업주의 안전보건 조치 의무 범위 등을 명확히 합니다.",
+      "tags": [
+        "대통령령",
+        "고용노동부",
+        "Law.go",
+        "위험성평가",
+        "TBM",
+        "안전보건교육",
+        "AI 근거매핑"
+      ]
+    },
+    {
+      "id": "lawgo-prec-608417",
+      "type": "precedent",
+      "title": "건축물관리법위반·업무상과실치사·업무상과실치상·산업안전보건법위반[도급인이 산업안전보건법 제63조에 따라 부담하는 안전·보건조치의무의 내용이 문제된 사건]",
+      "summary": "도급인의 안전·보건 조치 의무 내용을 다룬 판례로, 세이프건설 외벽 도장 작업 시 안전 조치 이행 여부를 점검하는 보조 근거로 활용됩니다.",
+      "tags": [
+        "대법원",
+        "Law.go",
+        "위험성평가",
+        "TBM",
+        "안전보건교육",
+        "AI 근거매핑"
+      ]
+    }
+  ],
+  "hasAiEvidenceMappingTag": true,
+  "documentCount": 14,
+  "riskAssessmentHasLegalAppendix": true,
+  "tbmBriefingHasLegalAppendix": true,
+  "tbmLogHasLegalAppendix": true,
+  "educationHasLegalAppendix": true,
+  "knowledgePageOk": true,
+  "lawDetailId": "lawgo-law-276853",
+  "lawDetailHasFullTextMarker": true,
+  "lawDetailHasSnapshotMarker": true
+}

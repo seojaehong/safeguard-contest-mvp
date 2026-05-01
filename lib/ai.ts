@@ -180,6 +180,117 @@ function buildPrompt(question: string, citations: SearchResult[]) {
   ].join("\n");
 }
 
+type CitationMapping = {
+  id: string;
+  summary: string;
+  tags: string[];
+  rank: number;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function readStringArray(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.map(readString).filter(Boolean).slice(0, 6);
+}
+
+function extractJsonArray(text: string) {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = fenced?.[1] || text;
+  const start = candidate.indexOf("[");
+  const end = candidate.lastIndexOf("]");
+  if (start < 0 || end < start) return [];
+  const parsed = JSON.parse(candidate.slice(start, end + 1)) as unknown;
+  return Array.isArray(parsed) ? parsed : [];
+}
+
+function parseCitationMappings(text: string): CitationMapping[] {
+  try {
+    return extractJsonArray(text)
+      .map((item): CitationMapping | null => {
+        if (!isRecord(item)) return null;
+        const id = readString(item.id);
+        const summary = readString(item.summary);
+        const rankValue = item.rank;
+        const rank = typeof rankValue === "number" && Number.isFinite(rankValue) ? rankValue : 999;
+        if (!id || !summary) return null;
+        return {
+          id,
+          summary: trimCitationText(summary, 180),
+          tags: readStringArray(item.tags),
+          rank
+        };
+      })
+      .filter((item): item is CitationMapping => Boolean(item));
+  } catch (error) {
+    console.error("Failed to parse Gemini citation mapping JSON", error);
+    return [];
+  }
+}
+
+function buildCitationMappingPrompt(question: string, citations: SearchResult[]) {
+  const evidence = citations.slice(0, 10).map((item, index) => ({
+    index: index + 1,
+    id: item.id,
+    type: item.type,
+    title: trimCitationText(item.title, 120),
+    summary: trimCitationText(item.summary, 180),
+    citation: trimCitationText(item.citation || "", 80),
+    source: item.sourceLabel
+  }));
+
+  return [
+    "당신은 산업안전 문서팩의 근거 매핑 편집자다.",
+    "목표는 검색된 법령·해석례·판례를 오늘 작업 조건에 맞게 재정렬하고, 화면과 문서에 들어갈 '연결 이유'를 짧고 정확하게 쓰는 것이다.",
+    "절대 새로운 법령, 사건번호, 출처, 사실관계를 만들지 말라. 제공된 id만 사용하라.",
+    "법령은 1차 근거, 해석례는 적용범위 보조 근거, 판례는 이행 여부 점검 보조 근거로만 설명하라.",
+    "현재 작업과 약한 근거는 낮은 순위로 보내고, summary에 '직접 근거가 아니라 보조 검토 근거'라고 명시하라.",
+    "반드시 JSON 배열만 반환하라. 각 원소 형식은 {\"id\":\"...\",\"rank\":1,\"summary\":\"...\",\"tags\":[\"위험성평가\",\"TBM\"]} 이다.",
+    "summary는 한국어 90자 안팎으로 쓰고, 어떤 문서에 반영되는지 포함하라.",
+    `작업 조건: ${trimCitationText(question.trim(), 420)}`,
+    `근거 후보 JSON: ${JSON.stringify(evidence)}`
+  ].join("\n");
+}
+
+export async function enhanceLegalEvidenceMappings(question: string, citations: SearchResult[]): Promise<SearchResult[]> {
+  if (!citations.length || (!geminiApiKey && !openAiApiKey)) return citations;
+
+  const prompt = buildCitationMappingPrompt(question, citations);
+  const response = geminiApiKey
+    ? await generateWithGemini(prompt).catch((error) => {
+        if (!openAiApiKey) throw error;
+        console.error("Gemini legal evidence mapping failed; falling back to OpenAI", error);
+        return generateWithOpenAI(prompt);
+      })
+    : await generateWithOpenAI(prompt);
+
+  const mappings = parseCitationMappings(response.answer);
+  if (!mappings.length) return citations;
+
+  const byId = new Map(mappings.map((item) => [item.id, item]));
+  return citations
+    .map((citation) => {
+      const mapping = byId.get(citation.id);
+      if (!mapping) return citation;
+      return {
+        ...citation,
+        summary: mapping.summary,
+        tags: [...new Set([...(citation.tags || []), ...mapping.tags, "AI 근거매핑"])]
+      };
+    })
+    .sort((left, right) => {
+      const leftRank = byId.get(left.id)?.rank ?? 999;
+      const rightRank = byId.get(right.id)?.rank ?? 999;
+      return leftRank - rightRank;
+    });
+}
+
 export async function generateAnswer(question: string, citations: SearchResult[]): Promise<AskResponse> {
   if (!geminiApiKey && !openAiApiKey) {
     return buildMockAskResponse(

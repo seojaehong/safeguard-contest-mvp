@@ -678,6 +678,14 @@ export function WorkpackEditor({
     downloadBlob(new Blob([buildLaunchWorkbookHtml("SafeGuard 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeguard-workpack.xls`);
   }
 
+  function downloadSheetsTsv() {
+    const rows = buildLaunchSheetRows(values);
+    downloadBlob(
+      new Blob([`\uFEFF${buildDelimited(rows, "\t")}`], { type: "text/tab-separated-values;charset=utf-8" }),
+      `${sanitizeFileName(data.scenario.companyName)}-google-sheets.tsv`
+    );
+  }
+
   function downloadTemplate() {
     if (templateKind === "sheet") {
       downloadXls();
@@ -691,7 +699,7 @@ export function WorkpackEditor({
   }
 
   async function copySheetsTsv() {
-    const confirmed = window.confirm("Google 계정 연동이 필요합니다. 새 시트가 본인 드라이브에 열리고, 복사된 표 데이터를 붙여넣어 사용합니다.");
+    const confirmed = window.confirm("새 Google Sheets를 열고 표 데이터를 클립보드에 복사합니다. 열린 빈 시트의 A1 셀에 Ctrl+V로 붙여넣으면 문서팩 표가 들어갑니다.");
     if (!confirmed) return;
 
     const rows = buildLaunchSheetRows(values);
@@ -705,7 +713,7 @@ export function WorkpackEditor({
     } catch (error) {
       console.error("Google Sheets TSV copy failed", error);
       setSheetStatus("error");
-      downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, "\t")}`], { type: "text/tab-separated-values;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-google-sheets.tsv`);
+      downloadSheetsTsv();
       if (!sheetWindow) {
         window.location.href = "https://sheets.new";
       }
@@ -780,9 +788,14 @@ export function WorkpackEditor({
               <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
             </div>
           </details>
-          <button type="button" className="button" onClick={copySheetsTsv}>Google Sheets로 열기</button>
-          {sheetStatus === "copied" ? <p className="muted small">시트형 TSV를 복사했습니다. 새 구글시트에 붙여넣으면 표로 들어갑니다.</p> : null}
-          {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패했습니다. CSV 또는 XLS로 내려받아 업로드해 주세요.</p> : null}
+          <div className="sheets-action-box">
+            <button type="button" className="button" onClick={copySheetsTsv}>새 Google Sheets 열기 + 표 복사</button>
+            <button type="button" className="button secondary" onClick={downloadSheetsTsv}>Sheets용 TSV 다운로드</button>
+            <p className="muted small">Google API/OAuth 없이 자동 입력은 하지 않습니다. 새 시트가 열리면 A1 셀에 붙여넣거나 TSV를 업로드해 사용하세요.</p>
+          </div>
+          {sheetStatus === "copied" ? <p className="muted small">표 데이터를 복사했습니다. 열린 Google Sheets의 A1 셀에 Ctrl+V로 붙여넣어 주세요.</p> : null}
+          {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패해 TSV 파일을 내려받았습니다. Google Sheets에서 파일 가져오기로 업로드해 주세요.</p> : null}
+          <a className="knowledge-link" href="/knowledge">LLM 위키·지식 DB 확인</a>
         </div>
       </div>
 
