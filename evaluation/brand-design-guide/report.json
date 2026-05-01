@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-05-01T22:45:00+09:00",
+  "scope": "SafeClaw brand guide visual application",
+  "sourceArtifacts": [
+    "C:/Users/iceam/Downloads/safeclaw Brand Guide _standalone_.html",
+    "C:/Users/iceam/Downloads/safeclaw (Remix).zip"
+  ],
+  "appliedRules": {
+    "brandMark": "SC black square with Hazard Yellow signal",
+    "palette": ["sc-black", "sc-hazard-yellow", "steel neutrals", "semantic ok/warning/danger"],
+    "radius": "4px component corners",
+    "shadow": "decorative shadows removed from main product surfaces",
+    "typography": "Korean-first body with mono HUD labels",
+    "actions": "primary action uses Hazard Yellow; secondary controls use steel-neutral surfaces",
+    "exception": "worker-facing safety notices may use limited safety pictograms"
+  },
+  "changedSurfaces": [
+    "app/globals.css",
+    "components/SafeGuardCommandCenter.tsx",
+    "components/V2DemoExperience.tsx",
+    "CONTEXT.md",
+    "docs/safeclaw_brand_design_guide.md"
+  ],
+  "relatedDryruns": [
+    {
+      "path": "evaluation/workpack-remediation/report.json",
+      "result": "Gemini remediation route live smoke passed"
+    },
+    {
+      "path": "evaluation/public-safety-rubric/report.json",
+      "result": "public safety document rubric build/typecheck passed"
+    },
+    {
+      "path": "evaluation/brand-safeclaw-transition/report.json",
+      "result": "SafeClaw naming and worker-message exception build/typecheck passed"
+    }
+  ],
+  "validation": {
+    "typecheck": "passed: npm.cmd run typecheck",
+    "build": "passed: npm.cmd run build",
+    "routeCount": 19
+  },
+  "verdict": "pass_with_notice",
+  "notice": "Brand guide is now represented as product tokens and component overrides. A later pixel pass should delete legacy soft-demo CSS instead of only overriding it."
+}

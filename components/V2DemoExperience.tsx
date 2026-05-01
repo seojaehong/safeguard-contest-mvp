@@ -197,7 +197,7 @@ export function V2DemoExperience({
     <main className="v2-shell demo-mode-shell">
       <header className="v2-nav">
         <Link href="/" className="brand-lockup" aria-label="SafeClaw 홈">
-          <span className="brand-mark">S</span>
+          <span className="brand-mark">SC</span>
           <span>
             <strong>SafeClaw v2</strong>
             <small>제품 시연 모드</small>

@@ -21,6 +21,200 @@
   --font-multilingual: "Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", system-ui, sans-serif;
 }
 
+/* SafeClaw Brand Guide alignment
+   Source: safeclaw Brand Guide standalone. This layer keeps the current
+   workflow intact while shifting the product from soft demo UI to field
+   instrument UI: steel surfaces, hazard-yellow actions, 4px corners, no shadow. */
+:root {
+  --sc-black: #0a0a0b;
+  --sc-steel-950: #14171a;
+  --sc-steel-800: #2d3339;
+  --sc-steel-650: #58616b;
+  --sc-steel-300: #c5ccd3;
+  --sc-steel-120: #e7eaee;
+  --sc-steel-060: #f4f5f6;
+  --sc-paper: #faf9f5;
+  --sc-hazard-yellow: #ffd400;
+  --sc-warning: #ff8a00;
+  --sc-danger: #d92d20;
+  --sc-ok: #067647;
+  --bg: var(--sc-paper);
+  --paper: #ffffff;
+  --panel: #ffffff;
+  --panel-strong: #ffffff;
+  --ink: var(--sc-black);
+  --muted: var(--sc-steel-650);
+  --line: var(--sc-steel-120);
+  --line-strong: var(--sc-steel-300);
+  --accent: var(--sc-steel-950);
+  --accent-warm: var(--sc-warning);
+  --accent-soft: var(--sc-steel-060);
+  --danger-soft: #fff4e5;
+  --shadow: none;
+  --radius-lg: 4px;
+  --radius-md: 4px;
+  --radius-sm: 4px;
+  --font-base: "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-hud: "Geist Mono", "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+}
+
+body {
+  background: var(--sc-paper);
+  letter-spacing: 0.012em;
+}
+
+.card,
+.left-panel-card,
+.command-main,
+.document-editor,
+.workpack-sidebar,
+.product-section .card,
+.reference-grid .card,
+.hero,
+.process-card,
+.dryrun-card,
+.risk-card,
+.judge-card,
+.action-panel,
+.scenario-chip,
+.template-card,
+.doc-tab,
+.selected-rubric-item,
+.rubric-item,
+.remediation-draft,
+.workflow-channel-card,
+.worker-card,
+.dispatch-confirm-box,
+.phone-shell,
+.evidence-panel > .card {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  background: #ffffff !important;
+}
+
+.command-topbar,
+.topbar {
+  border-radius: 0 !important;
+  background: rgba(250, 249, 245, 0.96) !important;
+  box-shadow: none !important;
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--sc-hazard-yellow);
+  border-radius: 0 !important;
+  background: var(--sc-black) !important;
+  color: var(--sc-hazard-yellow) !important;
+  font-family: var(--font-hud);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.brand-lockup strong,
+.h2,
+.command-copy h1,
+.command-panel h1 {
+  letter-spacing: -0.012em;
+}
+
+.eyebrow,
+.step-copy small,
+.topbar-status span,
+.left-widget-head span,
+.status-row span,
+.brief-mini-grid span,
+.doc-card span,
+.template-preview span,
+.comparison-head span,
+.roadmap-item span {
+  font-family: var(--font-hud);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.button {
+  border: 1px solid var(--sc-black) !important;
+  border-radius: 4px !important;
+  background: var(--sc-hazard-yellow) !important;
+  color: var(--sc-black) !important;
+  box-shadow: none !important;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  transform: none !important;
+}
+
+.button:hover {
+  background: #eec600 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.button.secondary,
+.topnav a,
+.topnav button,
+.doc-card-actions button,
+.recipient-chip,
+.language-chip,
+.status-pill,
+.topbar-v2-link {
+  border: 1px solid var(--sc-steel-300) !important;
+  border-radius: 4px !important;
+  background: #ffffff !important;
+  color: var(--sc-steel-950) !important;
+  box-shadow: none !important;
+}
+
+.scenario-chip.active,
+.template-card.active,
+.doc-tab.active,
+.command-stepper button.active {
+  border-color: var(--sc-black) !important;
+  background: var(--sc-steel-060) !important;
+  box-shadow: inset 4px 0 0 var(--sc-hazard-yellow) !important;
+}
+
+.step-dot.done,
+.status-row.live,
+.rubric-item.fulfilled,
+.selected-rubric-item.fulfilled {
+  border-color: rgba(6, 118, 71, 0.35) !important;
+  background: #ecfdf3 !important;
+}
+
+.status-row.warn,
+.rubric-item.needs-improvement,
+.selected-rubric-item.needs-improvement,
+.workflow-result.error {
+  border-color: rgba(255, 138, 0, 0.45) !important;
+  background: #fff8e1 !important;
+}
+
+.risk-badge,
+.risk-badge.risk-high {
+  border-radius: 4px !important;
+  background: var(--sc-black) !important;
+  color: var(--sc-hazard-yellow) !important;
+}
+
+.left-progress,
+.rubric-meter {
+  border-radius: 0 !important;
+  background: var(--sc-steel-120) !important;
+}
+
+.left-progress span,
+.rubric-meter span {
+  border-radius: 0 !important;
+  background: var(--sc-hazard-yellow) !important;
+}
+
+.document-editor.editor-focus-cue {
+  border-color: var(--sc-black) !important;
+  box-shadow: inset 4px 0 0 var(--sc-hazard-yellow) !important;
+  transform: none !important;
+}
+
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 html,
@@ -3625,4 +3819,81 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
     min-height: 460px;
     padding: 18px;
   }
+}
+
+/* Final SafeClaw brand cascade guard. Keep this at the end so later legacy
+   demo styles cannot reintroduce soft gradients or rounded-card defaults. */
+body {
+  background: var(--sc-paper) !important;
+}
+
+.command-main,
+.document-editor,
+.status-board,
+.field-brief-card,
+.output-stack,
+.empty-workspace {
+  background: #ffffff !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+.command-topbar,
+.topbar {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.card,
+.left-panel-card,
+.workpack-sidebar,
+.command-panel,
+.today-panel,
+.output-panel,
+.product-section .card,
+.reference-grid .card,
+.scenario-chip,
+.template-card,
+.doc-tab,
+.doc-card,
+.selected-rubric-item,
+.rubric-item,
+.remediation-draft,
+.workflow-channel-card,
+.worker-card,
+.phone-shell {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+.button,
+.full-button {
+  border: 1px solid var(--sc-black) !important;
+  border-radius: 4px !important;
+  background: var(--sc-hazard-yellow) !important;
+  color: var(--sc-black) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.button.secondary,
+.topnav a,
+.topnav button,
+.doc-card-actions button,
+.recipient-chip,
+.language-chip,
+.status-pill,
+.topbar-v2-link,
+.recent-list button,
+.demo-mode-badges button,
+.scenario-strip button {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+.brand-mark,
+.safeclaw-lockup .brand-mark {
+  border-radius: 0 !important;
+  background: var(--sc-black) !important;
+  color: var(--sc-hazard-yellow) !important;
 }

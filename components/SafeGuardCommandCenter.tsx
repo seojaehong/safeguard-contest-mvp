@@ -381,7 +381,7 @@ export function SafeGuardCommandCenter({
     <main className="command-center-shell">
       <header className="command-topbar">
         <Link href="/" className="brand-lockup safeclaw-lockup" aria-label="SafeClaw 홈으로 이동">
-          <span className="brand-mark">S</span>
+          <span className="brand-mark">SC</span>
           <span>
             <strong>SafeClaw</strong>
             <small>현장 안전 문서팩</small>

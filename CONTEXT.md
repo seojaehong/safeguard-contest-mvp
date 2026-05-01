@@ -23,3 +23,9 @@ User-facing copy should call this `제출 전 점검` or `서식 완성도 점�
 ### Remediation Generation
 
 `보완 생성` means SafeClaw proposes missing text or fields for the user to review. The user remains responsible for final site-specific confirmation.
+
+### SafeClaw Brand System
+
+SafeClaw uses a field-instrument brand system, not a soft demo landing-page style. Product screens should use steel-neutral surfaces, Hazard Yellow for primary action only, 4px corners, no decorative shadow, Korean-first command copy, and mono HUD labels only for status, numbers, and source tags.
+
+Worker-facing safety notices are the only exception to the no-pictogram rule. Limited safety pictograms may be used there when they improve comprehension for multilingual or low-literacy recipients.
