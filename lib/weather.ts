@@ -153,6 +153,47 @@ type LivingWeatherIndexEnvelope = {
   };
 };
 
+type ErythemalUvItem = {
+  euv_predc_idx?: string;
+  yr?: string;
+  mm?: string;
+  day?: string;
+  hm?: string;
+  lat?: string;
+  lot?: string;
+  stdg_cd?: string;
+  stdg_addr?: string;
+};
+
+type ErythemalUvEnvelope = {
+  header?: {
+    resultCode?: string;
+    resultMsg?: string;
+  };
+  body?: {
+    totalCount?: string;
+    items?: {
+      item?: ErythemalUvItem[] | ErythemalUvItem;
+    };
+    numOfRows?: string;
+    pageNo?: string;
+  };
+  response?: {
+    header?: {
+      resultCode?: string;
+      resultMsg?: string;
+    };
+    body?: {
+      totalCount?: string;
+      items?: {
+        item?: ErythemalUvItem[] | ErythemalUvItem;
+      };
+      numOfRows?: string;
+      pageNo?: string;
+    };
+  };
+};
+
 type WeatherSignal = {
   source: "kma";
   mode: IntegrationMode;
@@ -217,6 +258,14 @@ function formatLivingIndexTime(now = new Date()) {
     kst.setDate(kst.getDate() - 1);
   }
   return `${yyyymmdd(kst)}${baseHour.slice(0, 2)}`;
+}
+
+function formatKstHour(now = new Date()) {
+  const kst = toKst(now);
+  return {
+    date: yyyymmdd(kst),
+    time: `${String(kst.getHours()).padStart(2, "0")}00`
+  };
 }
 
 function formatKmaBaseDate(now = new Date()) {
@@ -559,12 +608,19 @@ async function fetchLivingHeatIndexSignal(location: LocationConfig): Promise<Kma
 
 async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSignal> {
   try {
+    const { date, time } = formatKstHour();
     const url = new URL(kierErythemalUvEndpoint);
     url.searchParams.set("serviceKey", serviceKey);
     url.searchParams.set("pageNo", url.searchParams.get("pageNo") || "1");
     url.searchParams.set("numOfRows", url.searchParams.get("numOfRows") || "10");
-    if (!url.searchParams.has("dataType")) {
-      url.searchParams.set("dataType", "JSON");
+    if (!url.searchParams.has("type")) {
+      url.searchParams.set("type", "json");
+    }
+    if (!url.searchParams.has("date")) {
+      url.searchParams.set("date", date);
+    }
+    if (!url.searchParams.has("time")) {
+      url.searchParams.set("time", time);
     }
     if (!url.searchParams.has("areaNo")) {
       url.searchParams.set("areaNo", location.areaNo);
@@ -578,27 +634,32 @@ async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSign
     if (!url.searchParams.has("lat")) {
       url.searchParams.set("lat", String(location.latitude));
     }
-    if (!url.searchParams.has("lon")) {
-      url.searchParams.set("lon", String(location.longitude));
+    if (!url.searchParams.has("lot")) {
+      url.searchParams.set("lot", String(location.longitude));
     }
 
     const text = await fetchWithTimeout(url.toString(), "실시간 홍반자외선");
-    const parsed = JSON.parse(text) as LivingWeatherIndexEnvelope;
-    const resultCode = parsed.response?.header?.resultCode;
+    const parsed = JSON.parse(text) as ErythemalUvEnvelope;
+    const header = parsed.header || parsed.response?.header;
+    const body = parsed.body || parsed.response?.body;
+    const resultCode = header?.resultCode;
     if (resultCode && resultCode !== "00") {
-      throw new Error(parsed.response?.header?.resultMsg || `실시간 홍반자외선 resultCode ${resultCode}`);
+      throw new Error(header?.resultMsg || `실시간 홍반자외선 resultCode ${resultCode}`);
     }
-    const item = normalizeArray(parsed.response?.body?.items?.item)[0];
-    const uvIndex = item ? firstIndexValue(item) : "";
+    const item = normalizeArray(body?.items?.item)[0];
+    if (!item) {
+      throw new Error(`NO_DATA totalCount ${body?.totalCount || "0"}`);
+    }
+    const uvIndex = item?.euv_predc_idx || "";
     const risk = uvRiskLabel(uvIndex);
 
     return {
       endpoint: "실시간 홍반자외선",
       mode: "live",
       summary: `홍반자외선 ${uvIndex || "확인됨"}${risk ? ` (${risk})` : ""}`,
-      forecastTime: item?.date,
+      forecastTime: item ? `${item.yr || ""}${item.mm || ""}${item.day || ""} ${item.hm || ""}`.trim() : `${date} ${time}`,
       uvIndex,
-      detail: `한국에너지기술연구원 실시간 홍반자외선 조회 성공 (${location.label})`
+      detail: `한국에너지기술연구원 실시간 홍반자외선 조회 성공 (${location.label}, lat ${location.latitude}, lot ${location.longitude})`
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
