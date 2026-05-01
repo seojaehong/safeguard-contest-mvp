@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 
@@ -44,6 +44,9 @@ const hazards = await readJson("data/safety-knowledge/hazards.json");
 const resources = await readJson("data/safety-knowledge/kosha-resources.json");
 const legalMap = await readJson("data/safety-knowledge/legal-map.json");
 const templates = await readJson("data/safety-knowledge/templates.json");
+const migrationExists = await stat(path.join(root, "supabase", "migrations", "003_knowledge_runtime.sql"))
+  .then(() => true)
+  .catch(() => false);
 
 const scenario = "서울 성수동 외벽 도장 작업. 이동식 비계 사용, 오후 강풍, 신규 작업자 포함, 추락과 지게차 동선 위험.";
 const matches = matchHazards(hazards, scenario);
@@ -66,7 +69,7 @@ await mkdir(outDir, { recursive: true });
 
 const elapsedMs = Math.round(performance.now() - startedAt);
 const report = {
-  verdict: matches.length > 0 && rawEventErrors.length === 0 ? "pass" : "blocked",
+  verdict: matches.length > 0 && rawEventErrors.length === 0 && migrationExists ? "pass" : "blocked",
   generatedAt: new Date().toISOString(),
   elapsedMs,
   seedDatabase: {
@@ -80,6 +83,11 @@ const report = {
     "/api/knowledge/ingest",
     "/api/knowledge/regenerate"
   ],
+  migration: {
+    file: "supabase/migrations/003_knowledge_runtime.sql",
+    exists: migrationExists,
+    tables: ["daily_entries", "knowledge_events", "knowledge_regeneration_runs"]
+  },
   scenario,
   matchedHazards: matches.slice(0, 4),
   rawEventValidation: {

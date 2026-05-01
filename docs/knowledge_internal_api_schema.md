@@ -50,7 +50,7 @@ Response:
 
 ### `POST /api/knowledge/ingest`
 
-live API 호출 결과 또는 수동 확인 자료를 원본 이벤트로 검증한다. 지금은 영구 저장하지 않고 재생성 후보를 반환한다.
+live API 호출 결과 또는 수동 확인 자료를 원본 이벤트로 검증한다. Supabase와 관리자 토큰이 있으면 `knowledge_events`에 저장하고, 없으면 stateless 검증 결과만 반환한다.
 
 Request:
 
@@ -74,8 +74,10 @@ Response:
 ```json
 {
   "ok": true,
-  "configured": false,
-  "storageMode": "stateless",
+  "configured": true,
+  "storageMode": "persistent",
+  "savedEventId": "uuid",
+  "savedRunId": "uuid",
   "event": {},
   "proposedWikiUpdate": {
     "hazardIds": ["hazard_scaffold_fall"],
@@ -88,7 +90,7 @@ Response:
 
 ### `POST /api/knowledge/regenerate`
 
-기초 지식 DB와 원본 이벤트를 묶어 AI 재생성에 사용할 bundle을 만든다. 이 API 자체는 LLM을 호출하지 않는다.
+기초 지식 DB와 원본 이벤트를 묶어 AI 재생성에 사용할 bundle을 만든다. 기본은 bundle 생성만 수행하고, `generate: true`일 때만 Gemini 또는 OpenAI를 호출한다.
 
 Request:
 
@@ -96,7 +98,8 @@ Request:
 {
   "question": "서울 성수동 외벽 도장, 이동식 비계, 강풍",
   "rawEvents": [],
-  "limit": 4
+  "limit": 4,
+  "generate": true
 }
 ```
 
@@ -105,9 +108,16 @@ Response:
 ```json
 {
   "ok": true,
-  "configured": false,
-  "storageMode": "stateless",
+  "configured": true,
+  "storageMode": "persistent",
+  "savedRunId": "uuid",
   "aiReady": true,
+  "generated": {
+    "configured": true,
+    "text": "AI가 생성한 지식 위키 초안",
+    "providerLabel": "Gemini (gemini-2.5-flash)",
+    "policyNote": "Gemini 응답 정책"
+  },
   "bundle": {
     "question": "서울 성수동 외벽 도장, 이동식 비계, 강풍",
     "matchedHazards": [],
@@ -137,15 +147,23 @@ type KnowledgeRawEvent = {
 };
 ```
 
-## 저장 전략
+## Migration 003 저장 전략
 
-현재 Vercel 런타임 파일시스템은 영구 저장소가 아니다. 따라서 원본 이벤트를 제품적으로 누적하려면 다음 중 하나가 필요하다.
+`supabase/migrations/003_knowledge_runtime.sql`은 다음 테이블을 추가한다.
 
-- Supabase `knowledge_events` 테이블: 원본 이벤트, 반영 문서, 검수 상태, 생성자, 생성 시각을 append-only로 저장한다.
-- Supabase `daily_entries` 스냅샷: 현장별·일자별로 기상, 법령, 교육, KOSHA 응답을 동결한다.
-- Object Storage: 큰 원본 JSON, PDF, HWPX, 이미지 증빙은 별도 객체로 저장하고 DB에는 참조만 둔다.
+- `daily_entries`: 현장별·일자별 기상, 법령, 교육, KOSHA, 재해사례, 지식 DB 스냅샷을 동결한다.
+- `knowledge_events`: live 호출 원본 이벤트와 문서 반영 위치, 검수 상태를 저장한다.
+- `knowledge_regeneration_runs`: AI 재생성 bundle, provider, 생성 결과, 검수 상태를 저장한다.
 
-DB migration은 기존 데이터에 영향을 줄 수 있으므로 별도 승인 후 진행한다.
+큰 원본 JSON, PDF, HWPX, 이미지 증빙은 후속 단계에서 Object Storage에 저장하고 DB에는 참조만 두는 구조가 적합하다.
+
+## Obsidian 사용 판단
+
+Obsidian은 런타임 필수가 아니다. `knowledge/` 폴더를 vault로 열면 사람이 markdown wiki를 검수하기 좋지만, 서비스는 Supabase와 내부 API만으로 작동해야 한다. 따라서 Obsidian CLI는 제출 기준 기능이 아니라 운영자 편의 기능으로 둔다.
+
+## Gemini 사용 판단
+
+Gemini는 지식 위키 초안 재생성에 적합하다. 다만 모든 요청에서 호출하면 비용과 지연이 커지므로 `/api/knowledge/regenerate`에서 `generate: true`일 때만 호출한다. 기본 경로는 seed DB 매칭과 bundle 생성으로 유지한다.
 
 ## Ask 경로 반영
 

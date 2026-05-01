@@ -217,3 +217,29 @@ export async function generateAnswer(question: string, citations: SearchResult[]
     }
   };
 }
+
+export async function generateKnowledgeText(prompt: string) {
+  if (!geminiApiKey && !openAiApiKey) {
+    return {
+      configured: false,
+      text: "",
+      providerLabel: null,
+      policyNote: "AI 제공자 키가 없어 지식 위키 초안을 생성하지 않았습니다."
+    };
+  }
+
+  const response = geminiApiKey
+    ? await generateWithGemini(prompt).catch((error) => {
+        if (!openAiApiKey) throw error;
+        console.error("Gemini knowledge generation failed; falling back to OpenAI", error);
+        return generateWithOpenAI(prompt);
+      })
+    : await generateWithOpenAI(prompt);
+
+  return {
+    configured: true,
+    text: response.answer,
+    providerLabel: response.providerLabel,
+    policyNote: response.policyNote
+  };
+}

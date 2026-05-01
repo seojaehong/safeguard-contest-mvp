@@ -1,6 +1,6 @@
 {
   "verdict": "pass",
-  "generatedAt": "2026-04-30T23:48:01.422Z",
+  "generatedAt": "2026-05-01T01:04:39.346Z",
   "elapsedMs": 8,
   "seedDatabase": {
     "hazards": 8,
@@ -13,6 +13,15 @@
     "/api/knowledge/ingest",
     "/api/knowledge/regenerate"
   ],
+  "migration": {
+    "file": "supabase/migrations/003_knowledge_runtime.sql",
+    "exists": true,
+    "tables": [
+      "daily_entries",
+      "knowledge_events",
+      "knowledge_regeneration_runs"
+    ]
+  },
   "scenario": "서울 성수동 외벽 도장 작업. 이동식 비계 사용, 오후 강풍, 신규 작업자 포함, 추락과 지게차 동선 위험.",
   "matchedHazards": [
     {
