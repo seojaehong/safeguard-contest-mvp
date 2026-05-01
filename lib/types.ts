@@ -2,6 +2,26 @@ export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
 export type IntegrationMode = "mock" | "live" | "fallback";
 
+export type AccidentCase = {
+  title: string;
+  industry?: string;
+  accidentType?: string;
+  summary: string;
+  preventionPoint: string;
+  sourceUrl?: string;
+  sourceType?: "domestic-case" | "fatal-accident" | "attachment" | "fallback";
+  attachmentName?: string;
+  matchedReason: string;
+};
+
+export type ForeignWorkerLanguage = {
+  code: string;
+  label: string;
+  nativeLabel: string;
+  rationale: string;
+  lines: string[];
+};
+
 export type SearchResult = {
   id: string;
   type: SourceType;
@@ -39,7 +59,7 @@ export type AskResponse = {
     koreanLawMcp: {
       enabled: boolean;
       configured: boolean;
-      keySource: "KOREAN_LAW_MCP_LAW_OC" | "LAWGO_OC" | "none";
+      keySource: "KOREAN_LAW_MCP_LAW_OC" | "LAWGO_OC" | "LAW_OC" | "none";
       summary: string;
     };
   };
@@ -64,6 +84,17 @@ export type AskResponse = {
       precipitationProbability?: string;
       actions: string[];
       detail: string;
+      signals?: Array<{
+        endpoint: "초단기실황" | "초단기예보" | "단기예보" | "기상특보" | "영향예보";
+        mode: IntegrationMode;
+        summary: string;
+        detail: string;
+        forecastTime?: string;
+        temperatureC?: string;
+        windSpeedMps?: string;
+        precipitationProbability?: string;
+        precipitationType?: string;
+      }>;
     };
     training: {
       source: "work24";
@@ -80,6 +111,21 @@ export type AskResponse = {
         reason: string;
         fitLabel?: "현장 적합" | "대상 적합" | "조건부 후보";
         fitReason?: string;
+      }>;
+    };
+    koshaEducation: {
+      source: "kosha-edu";
+      mode: IntegrationMode;
+      detail: string;
+      recommendations: Array<{
+        title: string;
+        provider: string;
+        target: string;
+        educationMethod: string;
+        url: string;
+        reason: string;
+        fitLabel: "공식 포털" | "대상 적합" | "현장 적합" | "조건부 후보";
+        fitReason: string;
       }>;
     };
     kosha: {
@@ -101,6 +147,37 @@ export type AskResponse = {
         templateHints?: string[];
       }>;
     };
+    accidentCases: {
+      source: "kosha-accident";
+      mode: IntegrationMode;
+      detail: string;
+      cases: AccidentCase[];
+    };
+    koshaOpenApi?: {
+      source: "kosha-openapi";
+      mode: IntegrationMode;
+      detail: string;
+      references: Array<{
+        title: string;
+        service: "안전보건법령 스마트검색" | "안전보건자료 링크" | "MSDS" | "건설업 일별 중대재해";
+        summary: string;
+        url: string;
+        reflectedIn: string[];
+      }>;
+    };
+    safetyKnowledge?: {
+      source: "safety-knowledge";
+      mode: IntegrationMode;
+      detail: string;
+      matches: Array<{
+        id: string;
+        title: string;
+        primaryDocuments: string[];
+        controls: string[];
+        sourceTitles: string[];
+        legalMappingTitles: string[];
+      }>;
+    };
   };
   riskSummary: {
     title: string;
@@ -109,10 +186,17 @@ export type AskResponse = {
     immediateActions: string[];
   };
   deliverables: {
+    workpackSummaryDraft: string;
     riskAssessmentDraft: string;
+    workPlanDraft: string;
     tbmBriefing: string;
     tbmLogDraft: string;
     safetyEducationRecordDraft: string;
+    emergencyResponseDraft: string;
+    photoEvidenceDraft: string;
+    foreignWorkerBriefing: string;
+    foreignWorkerTransmission: string;
+    foreignWorkerLanguages: ForeignWorkerLanguage[];
     safetyEducationPoints: string[];
     tbmQuestions: string[];
     kakaoMessage: string;

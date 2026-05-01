@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-04-28T01:21:00.000Z",
+  "checks": [
+    {
+      "name": "n8n direct empty-recipient fallback",
+      "path": "Oracle n8n /webhook/safeguard-workpack",
+      "workflowRunId": "51",
+      "providerStatus": "sent",
+      "summary": {
+        "requested": 2,
+        "sent": 2,
+        "failed": 0,
+        "partial": 0,
+        "unconfigured": 0,
+        "skipped": 0
+      },
+      "channels": [
+        {
+          "channel": "email",
+          "provider": "smtp",
+          "status": "sent"
+        },
+        {
+          "channel": "sms",
+          "provider": "solapi",
+          "status": "sent",
+          "httpStatus": 200,
+          "statusMessage": "정상 접수(이통사로 접수 예정)"
+        }
+      ]
+    },
+    {
+      "name": "Vercel API dispatch empty-recipient fallback",
+      "path": "https://safeguard-contest-mvp.vercel.app/api/workflow/dispatch",
+      "workflowRunId": "52",
+      "ok": true,
+      "configured": true,
+      "providerStatus": "sent",
+      "message": "SafeGuard 문서팩 전파가 완료되었습니다."
+    }
+  ],
+  "fix": {
+    "cause": "SafeGuard UI can send an empty recipients array; n8n previously treated this as an unconfigured channel.",
+    "resolution": "n8n now falls back to SAFEGUARD_DEFAULT_EMAIL/SAFEGUARD_DEFAULT_PHONE, then SMTP_USER/SOLAPI_SENDER, when recipients are empty."
+  }
+}

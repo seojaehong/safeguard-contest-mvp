@@ -1,0 +1,120 @@
+{
+  "generatedAt": "2026-04-28T00:53:15.475Z",
+  "baseUrl": "http://127.0.0.1:3022",
+  "elapsedMs": 26637,
+  "apiAskStatus": 200,
+  "apiAskOk": true,
+  "dispatchStatus": null,
+  "dispatchOk": null,
+  "scenario": {
+    "companyName": "클린온",
+    "companyType": "서비스업",
+    "siteName": "광주 하남산단 공장 세척 구역",
+    "workSummary": "한국지역난방공사 열수송관 굴착공사. 작업자 7명, 외국인 근로자 2명, 신규 투입자 1명, 이동식 크레인과 굴착기 사용, 매설물 확인 필요. 오늘 작업 전 문서팩을 만들어줘.",
+    "workerCount": 7,
+    "weatherNote": "실내 환기 제한, 화학물질 노출과 미끄럼 위험 동시 관리"
+  },
+  "documents": {
+    "workpackSummaryDraft": true,
+    "riskAssessmentDraft": true,
+    "workPlanDraft": true,
+    "tbmBriefing": true,
+    "tbmLogDraft": true,
+    "safetyEducationRecordDraft": true,
+    "emergencyResponseDraft": true,
+    "photoEvidenceDraft": true,
+    "foreignWorkerBriefing": true,
+    "foreignWorkerTransmission": true,
+    "kakaoMessage": true
+  },
+  "connections": [
+    {
+      "name": "Law.go / korean-law-mcp",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM",
+        "안전보건교육",
+        "사진/증빙"
+      ],
+      "detail": "Law.go와 Gemini (gemini-2.5-flash) 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 단기예보 호출 성공 (서울, base 20260428 0800) / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다."
+    },
+    {
+      "name": "Gemini",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "핵심 판단",
+        "문서팩 본문"
+      ],
+      "detail": "Gemini 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
+    },
+    {
+      "name": "기상청",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM"
+      ],
+      "detail": "기상청 단기예보 호출 성공 (서울, base 20260428 0800)"
+    },
+    {
+      "name": "Work24",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "안전보건교육",
+        "후속 교육"
+      ],
+      "detail": "고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다."
+    },
+    {
+      "name": "KOSHA 교육",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "안전보건교육",
+        "후속 교육"
+      ],
+      "detail": "KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다."
+    },
+    {
+      "name": "KOSHA 공식자료",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "위험성평가표",
+        "TBM",
+        "안전보건교육"
+      ],
+      "detail": "KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다."
+    },
+    {
+      "name": "KOSHA 재해사례",
+      "keyPresent": true,
+      "liveStatus": "연결됨",
+      "reflectedIn": [
+        "TBM",
+        "안전보건교육",
+        "비상대응",
+        "사진/증빙"
+      ],
+      "detail": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다."
+    },
+    {
+      "name": "n8n dispatch",
+      "keyPresent": true,
+      "liveStatus": "설정 점검만 수행",
+      "reflectedIn": [
+        "현장 전파"
+      ],
+      "detail": "로컬/서버 내부에서는 N8N_INTERNAL_BASE를 사용할 수 있습니다."
+    }
+  ],
+  "userFacingStatusPolicy": "연결됨 / 일부 근거 보류 / 연결 점검 필요",
+  "rawStatusDetail": "Law.go와 Gemini (gemini-2.5-flash) 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 단기예보 호출 성공 (서울, base 20260428 0800) / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다."
+}

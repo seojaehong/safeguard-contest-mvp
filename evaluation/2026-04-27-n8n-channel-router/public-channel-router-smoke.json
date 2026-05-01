@@ -1,0 +1,55 @@
+{
+  "generatedAt": "2026-04-27T23:19:44.6870794+09:00",
+  "url": "https://node.pe.kr/webhook/safeguard-workpack",
+  "validStatusCode": 200,
+  "validBody": {
+    "ok": true,
+    "workflowRunId": "31",
+    "providerStatus": "unconfigured",
+    "channelResults": [
+      {
+        "channel": "email",
+        "status": "unconfigured",
+        "message": "email provider URL is not configured"
+      },
+      {
+        "channel": "sms",
+        "status": "unconfigured",
+        "message": "sms provider URL is not configured"
+      },
+      {
+        "channel": "kakao",
+        "status": "unconfigured",
+        "message": "kakao provider URL is not configured"
+      },
+      {
+        "channel": "band",
+        "status": "unconfigured",
+        "message": "band provider URL is not configured"
+      }
+    ],
+    "summary": {
+      "requested": 4,
+      "sent": 0,
+      "failed": 0,
+      "unconfigured": 4
+    },
+    "message": "SafeGuard 전파 요청은 접수됐지만 채널 provider 키가 아직 설정되지 않았습니다.",
+    "subject": "[SafeGuard] 세이프건설 작업 전 문서팩",
+    "recipients": [
+      {
+        "phone": "01000000000",
+        "email": "site@example.com",
+        "name": "현장소장"
+      }
+    ],
+    "messagePreview": "오늘 강풍 작업은 추락 방지와 지게차 동선 분리를 확인하세요."
+  },
+  "invalidStatusCode": 200,
+  "invalidBody": {
+    "ok": false,
+    "providerStatus": "rejected",
+    "message": "SafeGuard secret header is missing or invalid."
+  },
+  "note": "Provider keys are not configured yet, so channel dispatch returns unconfigured instead of failing."
+}

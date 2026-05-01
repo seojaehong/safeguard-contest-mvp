@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-04-29T09:01:48.3644959+09:00",
+  "url": "https://safeguard-contest-mvp.vercel.app/api/weather",
+  "statusCode": 200,
+  "elapsedMs": 7895,
+  "ok": true,
+  "mode": "live",
+  "locationLabel": "서울",
+  "summary": "단시간 맑음, 강수없음, 기온 14℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보 반영)",
+  "signalCount": 3,
+  "liveSignalCount": 3,
+  "endpoints": [
+    "초단기실황",
+    "초단기예보",
+    "단기예보"
+  ],
+  "deployment": "https://safeguard-contest-aqm633va9-seojaehongs-projects.vercel.app"
+}

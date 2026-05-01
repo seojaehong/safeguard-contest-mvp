@@ -6,6 +6,10 @@ const openAiApiKey = process.env.OPENAI_API_KEY?.trim();
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const openAiModel = process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini";
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-flash-latest,gemini-2.5-flash-lite")
+  .split(",")
+  .map((model) => model.trim())
+  .filter(Boolean);
 const RESPONSE_TIMEOUT_MS = 20_000;
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "45000", 10);
 const RETRY_DELAY_MS = 500;
@@ -82,12 +86,12 @@ async function generateWithOpenAI(prompt: string) {
   };
 }
 
-async function generateWithGemini(prompt: string) {
+async function generateWithGeminiModel(prompt: string, model: string) {
   if (!geminiApiKey) {
     throw new Error("GEMINI_API_KEY is not set");
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
 
   const response = await withRetry(
     async () =>
@@ -126,9 +130,25 @@ async function generateWithGemini(prompt: string) {
 
   return {
     answer,
-    providerLabel: "Gemini",
+    providerLabel: `Gemini (${model})`,
     policyNote: "Gemini 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
   };
+}
+
+async function generateWithGemini(prompt: string) {
+  const models = [...new Set([geminiModel, ...geminiFallbackModels])];
+  let lastError: unknown;
+
+  for (const model of models) {
+    try {
+      return await generateWithGeminiModel(prompt, model);
+    } catch (error) {
+      lastError = error;
+      console.error(`Gemini model failed: ${model}`, error);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Gemini model chain failed");
 }
 
 function trimCitationText(text: string, maxLength: number) {
@@ -147,7 +167,11 @@ function buildPrompt(question: string, citations: SearchResult[]) {
 
   return [
     "당신은 산업안전 실무용 코파일럿이다.",
+    "사용자가 현장 조건을 제공하면, 법정 제출 최종본이 아니라 현장 검토용 초안을 바로 작성하라.",
+    "현장 실측값이 부족하다는 이유로 생성을 거절하지 말고, 부족한 항목은 '현장 확인 필요'로 표시하라.",
+    "'직접 생성은 불가능합니다', '제공할 수 없습니다' 같은 거절 문장으로 시작하지 말라.",
     "반드시 제공된 근거 목록 범위 안에서만 한국어로 답하라.",
+    "법령정보를 먼저 근거로 삼고, 판례와 해석례는 보조 근거로만 연결하라.",
     "출력 순서는 1) 핵심 판단 2) 즉시 조치 3) 실무 체크포인트 3개다.",
     "불확실한 내용은 단정하지 말고 검토 필요라고 표현하라.",
     "근거 목록:",
@@ -162,21 +186,25 @@ export async function generateAnswer(question: string, citations: SearchResult[]
       question,
       citations,
       "mock",
-      "GEMINI_API_KEY와 OPENAI_API_KEY가 없어 AI 호출 없이 데모 산출물을 구성했습니다."
+      "AI 제공자 키가 없어 규정 기반 문서팩으로 구성했습니다."
     );
   }
 
   const prompt = buildPrompt(question, citations);
 
   const response = geminiApiKey
-    ? await generateWithGemini(prompt)
+    ? await generateWithGemini(prompt).catch((error) => {
+        if (!openAiApiKey) throw error;
+        console.error("Gemini model chain failed; falling back to OpenAI", error);
+        return generateWithOpenAI(prompt);
+      })
     : await generateWithOpenAI(prompt);
 
   const live = buildMockAskResponse(
     question,
     citations,
     "live",
-    `Law.go와 ${response.providerLabel} 응답을 결합한 라이브 모드입니다.`
+    `Law.go와 ${response.providerLabel} 응답을 결합했습니다.`
   );
   return {
     ...live,
@@ -187,5 +215,31 @@ export async function generateAnswer(question: string, citations: SearchResult[]
       ai: "live" as const,
       policyNote: response.policyNote
     }
+  };
+}
+
+export async function generateKnowledgeText(prompt: string) {
+  if (!geminiApiKey && !openAiApiKey) {
+    return {
+      configured: false,
+      text: "",
+      providerLabel: null,
+      policyNote: "AI 제공자 키가 없어 지식 위키 초안을 생성하지 않았습니다."
+    };
+  }
+
+  const response = geminiApiKey
+    ? await generateWithGemini(prompt).catch((error) => {
+        if (!openAiApiKey) throw error;
+        console.error("Gemini knowledge generation failed; falling back to OpenAI", error);
+        return generateWithOpenAI(prompt);
+      })
+    : await generateWithOpenAI(prompt);
+
+  return {
+    configured: true,
+    text: response.answer,
+    providerLabel: response.providerLabel,
+    policyNote: response.policyNote
   };
 }

@@ -1,0 +1,9 @@
+{
+  "elapsedMs": 28487,
+  "mode": "live",
+  "weather": "fallback",
+  "accidentMode": "fallback",
+  "accidentCount": 3,
+  "accidentDetail": "KOSHA 국내재해사례 fallback: KOSHA accident case enrichment budget: Unauthorized\n",
+  "statusDetail": "Law.go와 Gemini (gemini-2.5-flash) 응답을 결합한 라이브 모드입니다. / 법령 근거 상태: live / 기상청 단기예보 fallback: Unauthorized\n / 고용24 사업주훈련 live 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA·고용노동부 공식 자료 URL 6건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 국내재해사례 fallback: KOSHA accident case enrichment budget: Unauthorized\n"
+}

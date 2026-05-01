@@ -1,0 +1,35 @@
+[
+  {
+    "id": "work24-foreign-worker-employment-education",
+    "title": "외국인근로자 취업교육",
+    "provider": "고용24/직업훈련 정보",
+    "appliesTo": [
+      "foreignWorkerBriefing",
+      "safetyEducation"
+    ],
+    "fitRule": "외국인, 신규 투입자, 다국어, 쉬운 문장 안내가 있는 현장에서 후속 교육 후보로 노출한다.",
+    "caution": "당일 TBM 또는 사업장 자체 안전보건교육을 대체하지 않는다."
+  },
+  {
+    "id": "kosha-skillup-construction-safety",
+    "title": "건설안전기사·건설안전 관련 과정",
+    "provider": "KOSHA/안전보건교육포털 또는 Work24",
+    "appliesTo": [
+      "safetyEducation",
+      "managerTraining"
+    ],
+    "fitRule": "건설, 비계, 추락, 작업계획서 키워드가 있는 현장에서 관리자·감독자 후속 교육 후보로 노출한다.",
+    "caution": "현장 작업 전 교육 확인과 별도로 후속 역량 강화용으로 표시한다."
+  },
+  {
+    "id": "kosha-chemical-msds-education",
+    "title": "화학물질·MSDS 안전교육",
+    "provider": "KOSHA 안전보건자료/교육자료",
+    "appliesTo": [
+      "chemical",
+      "safetyEducation"
+    ],
+    "fitRule": "세척제, 산성 약품, 용제, 페인트, 신나, MSDS 키워드가 있는 현장에서 우선 노출한다.",
+    "caution": "물질별 최신 MSDS 원문 확인 후 사용한다."
+  }
+]

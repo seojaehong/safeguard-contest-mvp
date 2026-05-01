@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-04-28T20:12:07.1869762+09:00",
+  "commit": "working-tree-before-commit",
+  "route": "/",
+  "hasLeftPanel": true,
+  "hasStepper": true,
+  "hasFieldBrief": true,
+  "hasApiGenerationCopy": true,
+  "hasUserFacingDemoCopy": false,
+  "bytes": 12448
+}

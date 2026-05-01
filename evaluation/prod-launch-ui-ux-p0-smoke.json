@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-04-29T00:39:45.4297919+09:00",
+  "url": "https://safeguard-contest-mvp.vercel.app/",
+  "statusCode": 200,
+  "elapsedMs": 1187,
+  "containsSafeGuard": true,
+  "containsStepNavigation": true,
+  "containsProductCopy": true,
+  "deployment": "https://safeguard-contest-85ua37th8-seojaehongs-projects.vercel.app",
+  "alias": "https://safeguard-contest-mvp.vercel.app"
+}

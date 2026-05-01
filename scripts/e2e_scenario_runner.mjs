@@ -33,7 +33,7 @@ try {
   pageChecks = {
     homeStatus: homeResponse.status,
     askPageStatus: askPageResponse.status,
-    ok: homeResponse.ok && askPageResponse.ok && homeHtml.includes("공모전 골든패스") && askHtml.includes("질문형 확인 화면"),
+    ok: homeResponse.ok && askPageResponse.ok && homeHtml.includes("작업 전 문서팩") && askHtml.includes("질문형 확인 화면"),
   };
 } catch (error) {
   pageChecks = {
@@ -68,7 +68,12 @@ for (const testCase of testCases) {
       typeof askJson?.deliverables?.riskAssessmentDraft === "string" &&
       typeof askJson?.deliverables?.tbmBriefing === "string" &&
       typeof askJson?.deliverables?.tbmLogDraft === "string" &&
-      typeof askJson?.deliverables?.safetyEducationRecordDraft === "string";
+      typeof askJson?.deliverables?.safetyEducationRecordDraft === "string" &&
+      typeof askJson?.deliverables?.foreignWorkerBriefing === "string" &&
+      typeof askJson?.deliverables?.foreignWorkerTransmission === "string";
+    const hasAccidentCases =
+      Array.isArray(askJson?.externalData?.accidentCases?.cases) &&
+      askJson.externalData.accidentCases.cases.length > 0;
     const companyMatched = askJson?.scenario?.companyName === testCase.companyName;
     const searchWorked = apiSearchResponse.ok && Array.isArray(searchJson?.results);
 
@@ -77,6 +82,7 @@ for (const testCase of testCases) {
       apiAskResponse.ok &&
       searchWorked &&
       hasDeliverables &&
+      hasAccidentCases &&
       companyMatched
     );
 
@@ -97,6 +103,8 @@ for (const testCase of testCases) {
       companyName: askJson?.scenario?.companyName || null,
       companyType: askJson?.scenario?.companyType || null,
       searchCount: searchJson?.count ?? null,
+      accidentCaseCount: askJson?.externalData?.accidentCases?.cases?.length ?? 0,
+      foreignWorkerBriefingLength: String(askJson?.deliverables?.foreignWorkerBriefing || "").length,
       answerPreview: String(askJson?.answer || "").slice(0, 180)
     });
   } catch (error) {

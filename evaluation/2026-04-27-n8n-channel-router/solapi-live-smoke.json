@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-04-27T23:25:55.3221531+09:00",
+  "url": "https://node.pe.kr/webhook/safeguard-workpack",
+  "statusCode": 200,
+  "providerStatus": "failed",
+  "summary": {
+    "requested": 1,
+    "sent": 0,
+    "failed": 1,
+    "partial": 0,
+    "unconfigured": 0
+  },
+  "channelResults": [
+    {
+      "channel": "sms",
+      "status": "failed",
+      "message": "crypto is not defined"
+    }
+  ],
+  "message": "SafeGuard 문서팩 전파 중 오류가 발생했습니다."
+}

@@ -1,0 +1,735 @@
+{
+  "generatedAt": "2026-04-27T23:58:44.945798",
+  "root": "C:\\Users\\iceam\\OneDrive\\_40_안전",
+  "totalCandidateCount": 498,
+  "categoryCounts": {
+    "industry_guide": 104,
+    "inspection_checklist": 86,
+    "risk_assessment": 129,
+    "safety_education": 25,
+    "safety_management_system": 121,
+    "tbm_or_prework": 33
+  },
+  "topCandidates": [
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\1.2022_하반기\\2.1219-1220 김포\\0.사업장자료\\김포열병합 시운전 위험성평가_rev.0.xlsx",
+      "extension": ".xlsx",
+      "size": 387918,
+      "lastWriteTime": "2022-12-19T17:27:13",
+      "reason": "keywords=위험성평가, 위험성, 시운전 위험성; template_hints=rev; ext=.xlsx",
+      "priorityMetric": 53
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\0.2022_상반기\\4. 서인천(0525-0527)\\1.결과보고서\\참고자료\\■화학물질 위험성평가 외.hwp",
+      "extension": ".hwp",
+      "size": 63488,
+      "lastWriteTime": "2022-05-26T20:31:41",
+      "reason": "keywords=위험성평가, 위험성, 화학물질 위험성; template_hints=보고서; ext=.hwp",
+      "priorityMetric": 42
+    },
+    {
+      "category": "safety_education",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\위험성보고서작성\\문진숙\\0.서진산업\\0.1회차\\주식회사 서진산업(1회차)\\(회사자료)\\안전보건교육일지.pdf",
+      "extension": ".pdf",
+      "size": 2166494,
+      "lastWriteTime": "2023-05-08T11:30:10",
+      "reason": "keywords=안전보건교육, 교육일지, 교육; template_hints=교육일지, 보고서; ext=.pdf",
+      "priorityMetric": 41
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.위험성평가관련자료(최신)\\3.위험성평가 관련 서식.hwp",
+      "extension": ".hwp",
+      "size": 62976,
+      "lastWriteTime": "2023-05-19T13:29:10",
+      "reason": "keywords=위험성평가, 위험성; template_hints=서식, 최신; ext=.hwp",
+      "priorityMetric": 39
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.위험성평가관련자료(최신)\\6.(참고)위험성평가컨설팅 양식(대화형기법)_지게차,추락.hwp",
+      "extension": ".hwp",
+      "size": 4038656,
+      "lastWriteTime": "2023-05-19T13:28:29",
+      "reason": "keywords=위험성평가, 위험성; template_hints=양식, 최신; ext=.hwp",
+      "priorityMetric": 39
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\00.안전보건시스템,계획(관리체계)\\6. 활용 서식 모음_'중대재해처벌법 - 복사본.hwp",
+      "extension": ".hwp",
+      "size": 871936,
+      "lastWriteTime": "2023-06-19T19:12:09",
+      "reason": "keywords=중대재해, 활용 서식; template_hints=서식, 활용 서식; ext=.hwp",
+      "priorityMetric": 39
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\00.안전보건시스템,계획(관리체계)\\6. 활용 서식 모음_'중대재해처벌법.hwp",
+      "extension": ".hwp",
+      "size": 871936,
+      "lastWriteTime": "2023-06-19T19:12:09",
+      "reason": "keywords=중대재해, 활용 서식; template_hints=서식, 활용 서식; ext=.hwp",
+      "priorityMetric": 39
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\350718_유해위험요인_자기관리(위험성평가)_인식태도조사_및_시범사업_성과평가_2012_최종보고서.pdf",
+      "extension": ".pdf",
+      "size": 8419372,
+      "lastWriteTime": "2023-01-30T21:59:46",
+      "reason": "keywords=위험성평가, 위험성, 유해위험; template_hints=최종, 보고서; ext=.pdf",
+      "priorityMetric": 38
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\산업재해현황_20230130.xlsx",
+      "extension": ".xlsx",
+      "size": 6918,
+      "lastWriteTime": "2023-01-30T21:38:48",
+      "reason": "keywords=위험성평가, 위험성; ext=.xlsx",
+      "priorityMetric": 38
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\안전매뉴얼(202312_실무자단체제출)\\안전보건관리체계 구축 실시 매뉴얼 작성 제안서\\1. 안전보건매뉴얼-최종.pdf",
+      "extension": ".pdf",
+      "size": 4397415,
+      "lastWriteTime": "2023-12-19T12:00:12",
+      "reason": "keywords=안전보건관리체계, 안전보건매뉴얼, 매뉴얼; template_hints=실시, 최종; ext=.pdf",
+      "priorityMetric": 38
+    },
+    {
+      "category": "inspection_checklist",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\0.건설\\12.21_건설업_중대산업재해_예방을_위한_자율점검표(첨부_건설산재예방정책과).hwp",
+      "extension": ".hwp",
+      "size": 1672704,
+      "lastWriteTime": "2022-06-02T10:18:32",
+      "reason": "keywords=점검표, 자율점검; template_hints=점검표; ext=.hwp",
+      "priorityMetric": 35
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.위험성평가관련자료(최신)\\2.위험성평가 규정.hwp",
+      "extension": ".hwp",
+      "size": 1255424,
+      "lastWriteTime": "2023-05-19T13:31:28",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최신; ext=.hwp",
+      "priorityMetric": 35
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.체계구축 지원서류\\2020 위험성평가 지침해설서 - 관련 서식.hwp",
+      "extension": ".hwp",
+      "size": 62976,
+      "lastWriteTime": "2023-05-19T13:29:10",
+      "reason": "keywords=위험성평가, 위험성; template_hints=서식; ext=.hwp",
+      "priorityMetric": 35
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.체계구축 지원서류\\안전보건관리체계 구축 컨설팅 매뉴얼(최종본).hwp",
+      "extension": ".hwp",
+      "size": 5810176,
+      "lastWriteTime": "2023-10-27T14:41:47",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최종; ext=.hwp",
+      "priorityMetric": 35
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.체계구축 지원서류\\위험성평가컨설팅 양식(대화형기법)_지게차,추락_v1.hwp",
+      "extension": ".hwp",
+      "size": 4038656,
+      "lastWriteTime": "2023-05-19T13:28:29",
+      "reason": "keywords=위험성평가, 위험성; template_hints=양식; ext=.hwp",
+      "priorityMetric": 35
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\21.로봇\\협동운전 위험성평가 보고서.hwp",
+      "extension": ".hwp",
+      "size": 23040,
+      "lastWriteTime": "2023-02-16T15:54:20",
+      "reason": "keywords=위험성평가, 위험성; template_hints=보고서; ext=.hwp",
+      "priorityMetric": 35
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\1.2022_하반기\\3.1222-1223 문경\\1.점검표\\④ 도급인의 위험성평가(이정도).hwpx",
+      "extension": ".hwpx",
+      "size": 78698,
+      "lastWriteTime": "2022-12-22T14:33:03",
+      "reason": "keywords=위험성평가, 위험성; template_hints=점검표; ext=.hwpx",
+      "priorityMetric": 35
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\00.안전보건시스템,계획(관리체계)\\안전보건관리체계 구축 컨설팅 매뉴얼(최종본).hwp",
+      "extension": ".hwp",
+      "size": 5778944,
+      "lastWriteTime": "2022-04-05T15:21:00",
+      "reason": "keywords=안전보건관리체계, 매뉴얼; template_hints=최종; ext=.hwp",
+      "priorityMetric": 35
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\위험성보고서작성\\k2b.xlsx",
+      "extension": ".xlsx",
+      "size": 9745,
+      "lastWriteTime": "2023-05-10T17:40:28",
+      "reason": "keywords=위험성; template_hints=보고서; ext=.xlsx",
+      "priorityMetric": 34
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\위험성보고서작성\\문진숙\\1.엘에프라인\\0.1회차\\기계 및 기구 리스트.xlsx",
+      "extension": ".xlsx",
+      "size": 9483,
+      "lastWriteTime": "2023-05-18T14:10:30",
+      "reason": "keywords=위험성; template_hints=보고서; ext=.xlsx",
+      "priorityMetric": 34
+    },
+    {
+      "category": "safety_education",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\0.건설\\1.4 2023년 건설업 기초안전보건교육 표준교재(별첨 건설산재예방정책과)7.pdf",
+      "extension": ".pdf",
+      "size": 28098140,
+      "lastWriteTime": "2023-01-13T15:05:15",
+      "reason": "keywords=안전보건교육, 교육, 기초안전보건교육; ext=.pdf",
+      "priorityMetric": 34
+    },
+    {
+      "category": "safety_education",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\1.2022_하반기\\0.1117-1124_태안\\1.협력사\\3.협력사회신자료\\2.한전산업개발\\중대재해처벌법 이행상태 점검 관련 사업장 안전보건교육 실시결과(한전산업개발).hwp",
+      "extension": ".hwp",
+      "size": 99840,
+      "lastWriteTime": "2022-11-23T16:26:18",
+      "reason": "keywords=안전보건교육, 교육; template_hints=실시; ext=.hwp",
+      "priorityMetric": 34
+    },
+    {
+      "category": "safety_education",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\1.2022_하반기\\0.1117-1124_태안\\1.협력사\\3.협력사회신자료\\9.hkc\\hkc2\\(주)HKC ⑪ 사업장 안전보건교육 실시결과 여부.hwp",
+      "extension": ".hwp",
+      "size": 18944,
+      "lastWriteTime": "2022-11-23T16:27:16",
+      "reason": "keywords=안전보건교육, 교육; template_hints=실시; ext=.hwp",
+      "priorityMetric": 34
+    },
+    {
+      "category": "tbm_or_prework",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\1.2022_하반기\\0.1117-1124_태안\\7. 태안(0608-0616)\\3. 결과보고서\\태안발전본부 정기점검표-221127_최종.hwp",
+      "extension": ".hwp",
+      "size": 1800192,
+      "lastWriteTime": "2022-12-22T10:04:38",
+      "reason": "keywords=정기점검표; template_hints=점검표, 최종, 보고서; ext=.hwp",
+      "priorityMetric": 34
+    },
+    {
+      "category": "inspection_checklist",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\12.중대재해처벌법\\중대재해 안전보건관리체계 구축 및 사업장 이행점검 확인표-실무자단체(이상국) -목차수정.hwp",
+      "extension": ".hwp",
+      "size": 6355456,
+      "lastWriteTime": "2023-03-09T19:36:23",
+      "reason": "keywords=확인표, 이행점검; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\공단\\2023년 위험성평가 중심 안전보건관리체계 구축 컨설팅_사업계획서_경기지역본부_230202(수정중).hwp",
+      "extension": ".hwp",
+      "size": 5115904,
+      "lastWriteTime": "2023-02-02T10:16:35",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\공단\\2023년 위험성평가 중심 안전보건관리체계 구축 컨설팅_사업계획서_서울광역본부_230202(수정중).hwp",
+      "extension": ".hwp",
+      "size": 5123584,
+      "lastWriteTime": "2023-02-02T10:16:52",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\공단\\2023년 위험성평가 중심 안전보건관리체계 구축 컨설팅_사업계획서_인천광역본부_230202(수정중).hwp",
+      "extension": ".hwp",
+      "size": 5115904,
+      "lastWriteTime": "2023-02-02T10:16:45",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\공단\\2023년 위험성평가 중심 안전보건관리체계 구축 컨설팅_사업계획서_인천광역본부_230202.hwp",
+      "extension": ".hwp",
+      "size": 5162496,
+      "lastWriteTime": "2023-02-02T10:16:20",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\'22년_안전보건관리체계_컨설팅_사업_수행기관_공고문(최종)_추가_수정_210110.hwp",
+      "extension": ".hwp",
+      "size": 316416,
+      "lastWriteTime": "2023-01-30T22:22:44",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최종; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\6-18_(KOSHA_18001)_인증업무처리규칙-별표.hwp",
+      "extension": ".hwp",
+      "size": 460288,
+      "lastWriteTime": "2023-01-31T00:47:36",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\안전보건경영시스템(KOSHA-MS)_인증업무처리규칙_제정_전문_2019.05.02.hwp",
+      "extension": ".hwp",
+      "size": 422400,
+      "lastWriteTime": "2023-01-30T22:56:07",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.체계구축 지원서류\\위험성평가 규정.hwp",
+      "extension": ".hwp",
+      "size": 1255424,
+      "lastWriteTime": "2023-05-19T13:31:28",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\00.안전보건시스템,계획(관리체계)\\중규모기업을 위한 안전보건관리체계 구축 컨설팅 매뉴얼.hwp",
+      "extension": ".hwp",
+      "size": 5812736,
+      "lastWriteTime": "2022-12-01T21:40:24",
+      "reason": "keywords=안전보건관리체계, 매뉴얼; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\안전매뉴얼(202312_실무자단체제출)\\붙임 1. 신청서(안전보건관리체계 구축 실시 매뉴얼)_실무기관 위너스(김진관,조대진,서재홍).hwp",
+      "extension": ".hwp",
+      "size": 502784,
+      "lastWriteTime": "2023-12-19T13:14:02",
+      "reason": "keywords=안전보건관리체계, 매뉴얼; template_hints=실시; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\안전매뉴얼(202312_실무자단체제출)\\안전보건관리체계 구축 실시 매뉴얼 작성 제안서\\붙임 1. 신청서(안전보건관리체계 구축 실시 매뉴얼)_실무기관 위너스(김진관,조대진,서재홍).hwp",
+      "extension": ".hwp",
+      "size": 502784,
+      "lastWriteTime": "2023-12-19T13:14:04",
+      "reason": "keywords=안전보건관리체계, 매뉴얼; template_hints=실시; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\어린이집\\1. 어린이집 중대재해 안전계획서.hwp",
+      "extension": ".hwp",
+      "size": 186368,
+      "lastWriteTime": "2023-02-08T17:19:39",
+      "reason": "keywords=중대재해, 안전계획; template_hints=안전계획; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\위험성보고서작성\\안전보건관리체계 구축 컨설팅 매뉴얼.hwp",
+      "extension": ".hwp",
+      "size": 5867008,
+      "lastWriteTime": "2023-04-22T11:03:58",
+      "reason": "keywords=안전보건관리체계, 매뉴얼; template_hints=보고서; ext=.hwp",
+      "priorityMetric": 31
+    },
+    {
+      "category": "inspection_checklist",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\0.건설\\건설업 중대산업재해 예방을 위한 자율점검표.pdf",
+      "extension": ".pdf",
+      "size": 1276427,
+      "lastWriteTime": "2022-06-02T10:18:20",
+      "reason": "keywords=점검표, 자율점검; template_hints=점검표; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "inspection_checklist",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\0.안전보건실무길잡이\\1.11 화학업종 중소기업을 위한 안전보건관리 자율점검표(별첨).pdf",
+      "extension": ".pdf",
+      "size": 1693287,
+      "lastWriteTime": "2023-03-29T10:11:58",
+      "reason": "keywords=점검표, 자율점검; template_hints=점검표; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "inspection_checklist",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\00.안전보건시스템,계획(관리체계)\\건설업 자율점검표(고위험 기인물 12종).pdf",
+      "extension": ".pdf",
+      "size": 304581,
+      "lastWriteTime": "2023-03-27T10:19:51",
+      "reason": "keywords=점검표, 자율점검; template_hints=점검표; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\P-140-2020 작업위험성평가(JSA)에 관한 기술지침.pdf",
+      "extension": ".pdf",
+      "size": 869150,
+      "lastWriteTime": "2023-01-30T21:51:42",
+      "reason": "keywords=위험성평가, JSA, 위험성; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\안전보건시스템 선진화방안연구(최종보고서).pdf",
+      "extension": ".pdf",
+      "size": 5105982,
+      "lastWriteTime": "2023-01-30T22:25:28",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최종, 보고서; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\정량적위험성평가(CPQRA)방법_도입_방안_마련_연구_최종보고서.pdf",
+      "extension": ".pdf",
+      "size": 7036456,
+      "lastWriteTime": "2023-01-30T21:46:48",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최종, 보고서; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.위험성평가관련자료(최신)\\0.2022_위험성평가_지침해설서.pdf",
+      "extension": ".pdf",
+      "size": 4324112,
+      "lastWriteTime": "2023-01-03T11:24:46",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최신; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.위험성평가관련자료(최신)\\1.쉽고 간편한 위험성평가 방법 안내서(안)_게시용.pdf",
+      "extension": ".pdf",
+      "size": 4154365,
+      "lastWriteTime": "2023-03-29T14:38:45",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최신; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.위험성평가관련자료(최신)\\4.kras(위험성평가사이트)사용자매뉴얼.pdf",
+      "extension": ".pdf",
+      "size": 4311543,
+      "lastWriteTime": "2023-05-19T13:26:45",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최신; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.위험성평가관련자료(최신)\\5.산재예방요율제 제도 안내 리플릿.pdf",
+      "extension": ".pdf",
+      "size": 1336037,
+      "lastWriteTime": "2023-05-19T13:29:58",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최신; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\16.위험성평가\\0.체계구축 지원서류\\(최종)디자인_위험성평가_중심의_안전보건관리체계_구축_컨설팅(위탁)_매뉴얼.pdf",
+      "extension": ".pdf",
+      "size": 18981591,
+      "lastWriteTime": "2023-10-27T14:42:54",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최종; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\안전매뉴얼(202312_실무자단체제출)\\안전보건관리체계 구축 실시 매뉴얼 작성 제안서\\230705한국공인실무자단체-2023년 산업안전매뉴얼-내지(v2)(최종).pdf",
+      "extension": ".pdf",
+      "size": 37345400,
+      "lastWriteTime": "2023-12-19T12:00:16",
+      "reason": "keywords=안전보건관리체계, 매뉴얼; template_hints=실시, 최종; ext=.pdf",
+      "priorityMetric": 30
+    },
+    {
+      "category": "tbm_or_prework",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\1.2022_하반기\\2.1219-1220 김포\\4. 군산발전본부 정기점검표_1214(최종).hwp",
+      "extension": ".hwp",
+      "size": 321024,
+      "lastWriteTime": "2022-12-20T14:23:56",
+      "reason": "keywords=정기점검표; template_hints=점검표, 최종; ext=.hwp",
+      "priorityMetric": 30
+    },
+    {
+      "category": "tbm_or_prework",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\1.2022_하반기\\2.1219-1220 김포\\5. 김포건설본부 정기점검표(12.19-20)_최종.hwp",
+      "extension": ".hwp",
+      "size": 188928,
+      "lastWriteTime": "2022-12-22T09:25:09",
+      "reason": "keywords=정기점검표; template_hints=점검표, 최종; ext=.hwp",
+      "priorityMetric": 30
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\0.2022_상반기\\0_한국서부발전 안전보건 매뉴얼, 절차서 지침서 송부(PDF 변환)_220222\\붙임1,2_개정전문 및 비교표\\지침서\\지01.(전문) 사업장_위험성평가_최종.pdf",
+      "extension": ".pdf",
+      "size": 467726,
+      "lastWriteTime": "2022-02-22T15:08:08",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최종; ext=.pdf",
+      "priorityMetric": 29
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\0.2022_상반기\\0_한국서부발전 안전보건 매뉴얼, 절차서 지침서 송부(PDF 변환)_220222\\붙임1,2_개정전문 및 비교표\\지침서\\지02.(전문) 설비위험성평가_최종.pdf",
+      "extension": ".pdf",
+      "size": 552315,
+      "lastWriteTime": "2022-02-22T15:08:08",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최종; ext=.pdf",
+      "priorityMetric": 29
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\0.2022_상반기\\0_한국서부발전 안전보건 매뉴얼, 절차서 지침서 송부(PDF 변환)_220222\\붙임1,2_개정전문 및 비교표\\지침서\\지03.(전문) 작업활동 위험성평가_최종.pdf",
+      "extension": ".pdf",
+      "size": 761687,
+      "lastWriteTime": "2022-02-22T15:08:08",
+      "reason": "keywords=위험성평가, 위험성; template_hints=최종; ext=.pdf",
+      "priorityMetric": 29
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\서부발전\\0.2022_상반기\\0_한국서부발전 안전보건 매뉴얼, 절차서 지침서 송부(PDF 변환)_220222\\붙임1,2_개정전문 및 비교표\\안전보건매뉴얼\\(전문) 안전보건매뉴얼_최종.pdf",
+      "extension": ".pdf",
+      "size": 909222,
+      "lastWriteTime": "2022-02-22T13:43:28",
+      "reason": "keywords=안전보건매뉴얼, 매뉴얼; template_hints=최종; ext=.pdf",
+      "priorityMetric": 29
+    },
+    {
+      "category": "tbm_or_prework",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\0.교육\\0.tbm\\230209 작업 전 안전점검회의 가이드(배포용).docx",
+      "extension": ".docx",
+      "size": 15246222,
+      "lastWriteTime": "2023-06-19T20:18:25",
+      "reason": "keywords=TBM, 작업 전; ext=.docx",
+      "priorityMetric": 29
+    },
+    {
+      "category": "tbm_or_prework",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\0.교육\\0.tbm\\230209 작업 전 안전점검회의 가이드(배포용)1.docx",
+      "extension": ".docx",
+      "size": 21119205,
+      "lastWriteTime": "2023-06-19T20:19:09",
+      "reason": "keywords=TBM, 작업 전; ext=.docx",
+      "priorityMetric": 29
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\곤줄박이\\한국가스전문검사기관협회 .hwpx",
+      "extension": ".hwpx",
+      "size": 49483,
+      "lastWriteTime": "2023-05-15T07:59:05",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwpx",
+      "priorityMetric": 28
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\1.19_2022년_재해조사_대상_사망사고_발생_현황_결과_발표(중대산업재해감독과).hwpx",
+      "extension": ".hwpx",
+      "size": 1063198,
+      "lastWriteTime": "2023-01-30T21:40:28",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwpx",
+      "priorityMetric": 28
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\위험성보고서작성\\문진숙\\0.서진산업\\0.1회차\\주식회사 서진산업(1회차)\\(회사자료)\\위험성평가 실시 서진산업.hwp",
+      "extension": ".hwp",
+      "size": 97000448,
+      "lastWriteTime": "2023-05-17T09:39:10",
+      "reason": "keywords=위험성평가, 위험성; template_hints=실시, 보고서; ext=.hwp",
+      "priorityMetric": 28
+    },
+    {
+      "category": "inspection_checklist",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\14.근골격계\\참고자료\\01_부담작업체크리스트.hwp",
+      "extension": ".hwp",
+      "size": 262656,
+      "lastWriteTime": "2022-11-28T12:40:05",
+      "reason": "keywords=체크리스트; template_hints=체크리스트; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "inspection_checklist",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\14.근골격계\\참고자료\\[첨부1]부담작업체크리스트.hwp",
+      "extension": ".hwp",
+      "size": 262656,
+      "lastWriteTime": "2022-11-28T12:40:26",
+      "reason": "keywords=체크리스트; template_hints=체크리스트; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\2023년 위험성평가 중심 안전보건관리체계 구축 컨설팅(재홍).hwp",
+      "extension": ".hwp",
+      "size": 557568,
+      "lastWriteTime": "2023-01-31T09:52:49",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\2021년_산업재해현황분석.hwp",
+      "extension": ".hwp",
+      "size": 18323968,
+      "lastWriteTime": "2023-01-30T21:37:33",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\2022.9월말 산업재해현황(홈페이지).hwp",
+      "extension": ".hwp",
+      "size": 1422336,
+      "lastWriteTime": "2023-01-30T21:41:32",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\5.안전보건경영시스템(ISO_45001)_기타자료.hwp",
+      "extension": ".hwp",
+      "size": 722432,
+      "lastWriteTime": "2023-01-30T22:26:11",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\R2201275.hwp",
+      "extension": ".hwp",
+      "size": 245760,
+      "lastWriteTime": "2023-01-30T22:29:24",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\위험성평가심사표.hwp",
+      "extension": ".hwp",
+      "size": 47104,
+      "lastWriteTime": "2023-01-30T22:00:19",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "risk_assessment",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\0.위험성평가제안\\참고자료\\중장기 발전방안.hwp",
+      "extension": ".hwp",
+      "size": 443392,
+      "lastWriteTime": "2023-01-30T22:24:18",
+      "reason": "keywords=위험성평가, 위험성; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "safety_management_system",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\어린이집\\안전계획 서식 (4).hwp",
+      "extension": ".hwp",
+      "size": 390656,
+      "lastWriteTime": "2023-02-08T17:18:24",
+      "reason": "keywords=안전계획; template_hints=서식, 안전계획; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "tbm_or_prework",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\0.건설\\(붙임2) 건설공사 등 안전점검표.hwp",
+      "extension": ".hwp",
+      "size": 1032192,
+      "lastWriteTime": "2023-01-13T15:05:24",
+      "reason": "keywords=안전점검표; template_hints=점검표; ext=.hwp",
+      "priorityMetric": 27
+    },
+    {
+      "category": "industry_guide",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\13.안전보건관리체계구축가이드\\65기타금속제품제조업(웹용).pdf",
+      "extension": ".pdf",
+      "size": 36894059,
+      "lastWriteTime": "2022-12-14T00:57:54",
+      "reason": "keywords=제조업, 가이드; ext=.pdf",
+      "priorityMetric": 26
+    },
+    {
+      "category": "industry_guide",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\13.안전보건관리체계구축가이드\\구조용 금속제품 제조업 안전보건관리체계 구축 가이드.pdf",
+      "extension": ".pdf",
+      "size": 33634392,
+      "lastWriteTime": "2022-12-14T01:02:13",
+      "reason": "keywords=제조업, 가이드; ext=.pdf",
+      "priorityMetric": 26
+    },
+    {
+      "category": "industry_guide",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\13.안전보건관리체계구축가이드\\목재 가구 제조업(C. 3202) 안전보건관리체계 구축 가이드.pdf",
+      "extension": ".pdf",
+      "size": 14911584,
+      "lastWriteTime": "2022-12-19T09:55:42",
+      "reason": "keywords=제조업, 가이드; ext=.pdf",
+      "priorityMetric": 26
+    },
+    {
+      "category": "industry_guide",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\13.안전보건관리체계구축가이드\\사업시설 유지 관리 서비스업 안전보건관리체계 구축 가이드.pdf",
+      "extension": ".pdf",
+      "size": 34497174,
+      "lastWriteTime": "2022-12-14T01:02:38",
+      "reason": "keywords=서비스업, 가이드; ext=.pdf",
+      "priorityMetric": 26
+    },
+    {
+      "category": "industry_guide",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\13.안전보건관리체계구축가이드\\섬유제품 제조업(C.13) 안전보건관리체계 구축 가이드.pdf",
+      "extension": ".pdf",
+      "size": 14011771,
+      "lastWriteTime": "2022-12-14T00:55:55",
+      "reason": "keywords=제조업, 가이드; ext=.pdf",
+      "priorityMetric": 26
+    },
+    {
+      "category": "industry_guide",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\13.안전보건관리체계구축가이드\\식료품 제조업(C. 10) 안전보건관리체계 구축 가이드.pdf",
+      "extension": ".pdf",
+      "size": 9027483,
+      "lastWriteTime": "2022-12-14T00:59:13",
+      "reason": "keywords=제조업, 가이드; ext=.pdf",
+      "priorityMetric": 26
+    },
+    {
+      "category": "industry_guide",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\13.안전보건관리체계구축가이드\\육상화물취급업 안전보건관리체계 구축 가이드.pdf",
+      "extension": ".pdf",
+      "size": 36032327,
+      "lastWriteTime": "2022-12-14T01:01:57",
+      "reason": "keywords=육상화물, 가이드; ext=.pdf",
+      "priorityMetric": 26
+    },
+    {
+      "category": "industry_guide",
+      "path": "C:\\Users\\iceam\\OneDrive\\_40_안전\\00.참고자료\\13.안전보건관리체계구축가이드\\일반 목적용 기계 제조업(C. 291) 안전보건관리체계 구축 가이드.pdf",
+      "extension": ".pdf",
+      "size": 15309978,
+      "lastWriteTime": "2022-12-19T09:56:40",
+      "reason": "keywords=제조업, 가이드; ext=.pdf",
+      "priorityMetric": 26
+    }
+  ]
+}

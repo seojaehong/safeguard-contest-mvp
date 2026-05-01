@@ -1,0 +1,88 @@
+{
+  "updatedAt": "2026-04-27T14:27:59Z",
+  "createdAt": "2026-04-27T10:20:23.517Z",
+  "id": "SafeGuardWorkpackDispatch",
+  "name": "SafeGuard Workpack Dispatch",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "safeguard-workpack",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "SafeGuard Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "safeguard-workpack-dispatch"
+    },
+    {
+      "parameters": {
+        "jsCode": "const nodeCrypto = require('crypto');\nconst net = require('net');\nconst tls = require('tls');\nconst https = require('https');\nconst { URL } = require('url');\n\nconst incoming = $json;\nconst headers = incoming.headers || {};\nconst body = incoming.body || incoming;\nconst secret = headers['x-safeguard-secret'] || headers['X-Safeguard-Secret'] || headers['x-SafeGuard-secret'];\n\nif (!secret || secret !== $env.SAFEGUARD_WEBHOOK_TOKEN) {\n  return [{ json: { ok: false, providerStatus: 'rejected', message: 'SafeGuard secret header is missing or invalid.' } }];\n}\n\nconst workpack = body.workpack || {};\nconst channels = Array.isArray(body.channels) ? body.channels : [];\nconst recipients = Array.isArray(body.recipients) ? body.recipients : [];\nconst message = workpack.message || '';\nconst payload = {\n  event: body.event || 'safeguard.workpack.dispatch',\n  receivedAt: new Date().toISOString(),\n  subject: `[SafeGuard] ${workpack.companyName || workpack.siteName || '현장'} 작업 전 문서팩`,\n  channels,\n  recipients,\n  operatorNote: body.operatorNote || '',\n  message,\n  text: `${message}\\n\\n${body.operatorNote || ''}`.trim(),\n  workpack,\n  documents: workpack.documents || {},\n  evidence: workpack.evidence || {},\n  meta: {\n    messageTarget: workpack.messageTarget || 'manager',\n    messageLanguage: workpack.messageLanguage || { code: 'ko', label: '한국어' },\n    riskLevel: workpack.riskLevel || '',\n    topRisk: workpack.topRisk || ''\n  }\n};\n\nconst env = $env;\nconst configs = {\n  email: {\n    url: env.SAFEGUARD_EMAIL_WEBHOOK_URL || env.EMAIL_WEBHOOK_URL,\n    token: env.SAFEGUARD_EMAIL_WEBHOOK_TOKEN || env.EMAIL_WEBHOOK_TOKEN,\n    smtpHost: env.SMTP_HOST,\n    smtpPort: env.SMTP_PORT,\n    smtpUser: env.SMTP_USER,\n    smtpPass: env.SMTP_PASS\n  },\n  sms: {\n    url: env.SAFEGUARD_SMS_WEBHOOK_URL || env.SMS_WEBHOOK_URL,\n    token: env.SAFEGUARD_SMS_WEBHOOK_TOKEN || env.SMS_WEBHOOK_TOKEN,\n    solapiKey: env.SOLAPI_API_KEY,\n    solapiSecret: env.SOLAPI_API_SECRET,\n    solapiSender: env.SOLAPI_SENDER,\n    solapiBaseUrl: env.SOLAPI_BASE_URL || 'https://api.solapi.com'\n  },\n  kakao: { url: env.SAFEGUARD_KAKAO_WEBHOOK_URL || env.KAKAO_WEBHOOK_URL, token: env.SAFEGUARD_KAKAO_WEBHOOK_TOKEN || env.KAKAO_WEBHOOK_TOKEN },\n  band: { url: env.SAFEGUARD_BAND_WEBHOOK_URL || env.BAND_WEBHOOK_URL, token: env.SAFEGUARD_BAND_WEBHOOK_TOKEN || env.BAND_WEBHOOK_TOKEN },\n  slack: { url: env.SAFEGUARD_SLACK_WEBHOOK_URL || env.SLACK_WEBHOOK_URL, token: env.SAFEGUARD_SLACK_WEBHOOK_TOKEN || env.SLACK_WEBHOOK_TOKEN },\n  discord: { url: env.SAFEGUARD_DISCORD_WEBHOOK_URL || env.DISCORD_WEBHOOK_URL, token: env.SAFEGUARD_DISCORD_WEBHOOK_TOKEN || env.DISCORD_WEBHOOK_TOKEN }\n};\n\nfunction normalizePhone(value) {\n  return String(value || '').replace(/[^0-9]/g, '');\n}\n\nfunction maskPhone(value) {\n  return normalizePhone(value).replace(/(\\d{3})\\d+(\\d{4})/, '$1****$2');\n}\n\nfunction recipientPhones() {\n  const phones = [];\n  for (const recipient of recipients) {\n    const phone = normalizePhone(recipient.phone || recipient.mobile || recipient.tel);\n    if (phone) phones.push(phone);\n  }\n  return [...new Set(phones)];\n}\n\nfunction recipientEmails() {\n  const emails = [];\n  for (const recipient of recipients) {\n    const email = String(recipient.email || recipient.mail || '').trim();\n    if (email) emails.push(email);\n  }\n  return [...new Set(emails)];\n}\n\nfunction maskEmail(value) {\n  const [name, domain] = String(value || '').split('@');\n  if (!domain) return value;\n  return `${name.slice(0, 2)}***@${domain}`;\n}\n\nfunction encodeHeader(value) {\n  return `=?UTF-8?B?${Buffer.from(String(value), 'utf8').toString('base64')}?=`;\n}\n\nfunction foldBase64(value) {\n  return Buffer.from(String(value), 'utf8').toString('base64').replace(/(.{76})/g, '$1\\r\\n');\n}\n\nfunction hmacSha256Hex(secretValue, value) {\n  return nodeCrypto.createHmac('sha256', secretValue).update(value).digest('hex');\n}\n\nfunction postJson(urlValue, headers, body) {\n  return new Promise((resolve, reject) => {\n    const url = new URL(urlValue);\n    const data = JSON.stringify(body);\n    const req = https.request({\n      method: 'POST',\n      hostname: url.hostname,\n      port: url.port || 443,\n      path: `${url.pathname}${url.search}`,\n      headers: { ...headers, 'content-length': Buffer.byteLength(data) },\n      timeout: 20000,\n    }, (res) => {\n      let responseText = '';\n      res.setEncoding('utf8');\n      res.on('data', (chunk) => { responseText += chunk; });\n      res.on('end', () => resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode, text: responseText }));\n    });\n    req.on('timeout', () => req.destroy(new Error('Provider request timed out')));\n    req.on('error', reject);\n    req.write(data);\n    req.end();\n  });\n}\n\nasync function sendSolapiSms(config) {\n  if (!config.solapiKey || !config.solapiSecret || !config.solapiSender) {\n    return { channel: 'sms', status: 'unconfigured', provider: 'solapi', message: 'Solapi API key, secret, or sender is not configured' };\n  }\n\n  const phones = recipientPhones();\n  if (!phones.length) {\n    return { channel: 'sms', status: 'unconfigured', provider: 'solapi', message: 'No SMS recipient phone number was provided' };\n  }\n\n  const text = payload.text.slice(0, 900);\n  const results = [];\n  for (const to of phones) {\n    const date = new Date().toISOString();\n    const salt = nodeCrypto.randomUUID ? nodeCrypto.randomUUID() : nodeCrypto.randomBytes(16).toString('hex');\n    const signature = hmacSha256Hex(config.solapiSecret, date + salt);\n    const authorization = `HMAC-SHA256 apiKey=${config.solapiKey}, date=${date}, salt=${salt}, signature=${signature}`;\n    const response = await postJson(`${config.solapiBaseUrl}/messages/v4/send`, { 'content-type': 'application/json', authorization }, { message: { to, from: normalizePhone(config.solapiSender), text } });\n    results.push({ to: maskPhone(to), ok: response.ok, httpStatus: response.status, response: response.text.slice(0, 240) });\n  }\n\n  const sent = results.filter((item) => item.ok).length;\n  return {\n    channel: 'sms',\n    provider: 'solapi',\n    status: sent === results.length ? 'sent' : sent > 0 ? 'partial' : 'failed',\n    httpStatus: results[0]?.httpStatus,\n    message: sent === results.length ? 'Solapi accepted all SMS messages' : 'Solapi SMS dispatch returned errors',\n    recipients: results\n  };\n}\nfunction createSmtpClient(host, port) {\n  let socket;\n  let buffer = '';\n  const waiters = [];\n\n  function attach(nextSocket) {\n    socket = nextSocket;\n    socket.setEncoding('utf8');\n    socket.on('data', (chunk) => {\n      buffer += chunk;\n      flush();\n    });\n    socket.on('error', (error) => {\n      while (waiters.length) waiters.shift().reject(error);\n    });\n  }\n\n  function completeResponse(text) {\n    const lines = text.split(/\\r?\\n/).filter(Boolean);\n    if (!lines.length) return false;\n    const last = lines[lines.length - 1];\n    return /^\\d{3} /.test(last);\n  }\n\n  function flush() {\n    if (!waiters.length || !completeResponse(buffer)) return;\n    const waiter = waiters.shift();\n    const text = buffer;\n    buffer = '';\n    waiter.resolve(text);\n  }\n\n  function read() {\n    return new Promise((resolve, reject) => {\n      waiters.push({ resolve, reject });\n      flush();\n    });\n  }\n\n  async function expect(prefix) {\n    const response = await read();\n    const prefixes = Array.isArray(prefix) ? prefix : [prefix];\n    if (!prefixes.some((item) => response.startsWith(item))) {\n      throw new Error(`SMTP expected ${prefixes.join('/')} but got ${response.slice(0, 120)}`);\n    }\n    return response;\n  }\n\n  async function send(command, prefix) {\n    socket.write(`${command}\\r\\n`);\n    return await expect(prefix);\n  }\n\n  async function connect() {\n    await new Promise((resolve, reject) => {\n      const raw = net.connect({ host, port: Number(port || 587) }, resolve);\n      raw.once('error', reject);\n      attach(raw);\n    });\n    await expect('220');\n  }\n\n  async function startTls() {\n    await send('EHLO safeguard.local', '250');\n    await send('STARTTLS', '220');\n    socket = tls.connect({ socket, servername: host });\n    attach(socket);\n    await new Promise((resolve, reject) => {\n      socket.once('secureConnect', resolve);\n      socket.once('error', reject);\n    });\n    await send('EHLO safeguard.local', '250');\n  }\n\n  async function auth(user, pass) {\n    await send('AUTH LOGIN', '334');\n    await send(Buffer.from(user).toString('base64'), '334');\n    await send(Buffer.from(pass).toString('base64'), '235');\n  }\n\n  async function mail(from, toList, subject, text) {\n    await send(`MAIL FROM:<${from}>`, '250');\n    for (const to of toList) await send(`RCPT TO:<${to}>`, ['250', '251']);\n    await send('DATA', '354');\n    const body = [\n      `From: SafeGuard <${from}>`,\n      `To: ${toList.join(', ')}`,\n      `Subject: ${encodeHeader(subject)}`,\n      'MIME-Version: 1.0',\n      'Content-Type: text/plain; charset=UTF-8',\n      'Content-Transfer-Encoding: base64',\n      '',\n      foldBase64(text),\n      '.',\n    ].join('\\r\\n');\n    socket.write(`${body}\\r\\n`);\n    await expect('250');\n    await send('QUIT', '221');\n  }\n\n  return { connect, startTls, auth, mail };\n}\n\nasync function sendSmtpEmail(config) {\n  if (!config.smtpHost || !config.smtpUser || !config.smtpPass) {\n    return { channel: 'email', status: 'unconfigured', provider: 'smtp', message: 'SMTP host, user, or password is not configured' };\n  }\n  const emails = recipientEmails();\n  if (!emails.length) {\n    return { channel: 'email', status: 'unconfigured', provider: 'smtp', message: 'No email recipient address was provided' };\n  }\n  const client = createSmtpClient(config.smtpHost, config.smtpPort || 587);\n  await client.connect();\n  await client.startTls();\n  await client.auth(config.smtpUser, config.smtpPass);\n  await client.mail(config.smtpUser, emails, payload.subject, payload.text);\n  return {\n    channel: 'email',\n    provider: 'smtp',\n    status: 'sent',\n    message: 'SMTP accepted email message',\n    recipients: emails.map(maskEmail)\n  };\n}\n\nasync function sendWebhook(channel, config) {\n  if (!config.url) {\n    return { channel, status: 'unconfigured', message: `${channel} provider URL is not configured` };\n  }\n\n  const sendHeaders = { 'content-type': 'application/json' };\n  if (config.token) sendHeaders.authorization = `Bearer ${config.token}`;\n\n  const sendBody = {\n    channel,\n    subject: payload.subject,\n    recipients: payload.recipients,\n    message: payload.message,\n    text: payload.text,\n    operatorNote: payload.operatorNote,\n    meta: payload.meta,\n    workpack: payload.workpack,\n    documents: payload.documents,\n    evidence: payload.evidence\n  };\n\n  const response = await fetch(config.url, { method: 'POST', headers: sendHeaders, body: JSON.stringify(sendBody) });\n  const responseText = await response.text();\n  return {\n    channel,\n    status: response.ok ? 'sent' : 'failed',\n    httpStatus: response.status,\n    message: response.ok ? `${channel} provider accepted` : responseText.slice(0, 300)\n  };\n}\n\nasync function send(channel) {\n  const config = configs[channel] || {};\n  try {\n    if (channel === 'sms') {\n      if (config.url) return await sendWebhook(channel, config);\n      return await sendSolapiSms(config);\n    }\n    if (channel === 'email') {\n      if (config.url) return await sendWebhook(channel, config);\n      return await sendSmtpEmail(config);\n    }\n    if (channel === 'band' && !config.url) {\n      return { channel, status: 'unconfigured', provider: 'band', message: 'Band API access is pending review' };\n    }\n    return await sendWebhook(channel, config);\n  } catch (error) {\n    return { channel, status: 'failed', message: error.message || String(error) };\n  }\n}\n\nconst requested = payload.channels.length ? payload.channels : ['email'];\nconst results = [];\nfor (const channel of requested) {\n  results.push(await send(channel));\n}\n\nconst sent = results.filter((item) => item.status === 'sent').length;\nconst failed = results.filter((item) => item.status === 'failed').length;\nconst partial = results.filter((item) => item.status === 'partial').length;\nconst unconfigured = results.filter((item) => item.status === 'unconfigured').length;\nconst providerStatus = failed > 0 ? (sent > 0 || partial > 0 ? 'partial' : 'failed') : sent > 0 || partial > 0 ? (unconfigured > 0 ? 'partial' : 'sent') : 'unconfigured';\nconst messageText = providerStatus === 'sent'\n  ? 'SafeGuard 문서팩 전파가 완료되었습니다.'\n  : providerStatus === 'partial'\n    ? 'SafeGuard 문서팩 일부 채널 전파가 완료되었습니다.'\n    : providerStatus === 'unconfigured'\n      ? 'SafeGuard 전파 요청은 접수됐지만 일부 채널 provider 키가 아직 설정되지 않았습니다.'\n      : 'SafeGuard 문서팩 전파 중 오류가 발생했습니다.';\n\nreturn [{\n  json: {\n    ok: failed === 0,\n    workflowRunId: $execution.id,\n    providerStatus,\n    channelResults: results,\n    summary: { requested: requested.length, sent, failed, partial, unconfigured },\n    message: messageText,\n    subject: payload.subject,\n    recipients: payload.recipients.map((recipient) => ({ ...recipient, email: recipient.email ? maskEmail(recipient.email) : recipient.email, phone: recipient.phone ? maskPhone(recipient.phone) : recipient.phone })),\n    messagePreview: payload.message.slice(0, 240)\n  }\n}];"
+      },
+      "id": "validate-and-dispatch",
+      "name": "Validate Secret and Dispatch Channels",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "SafeGuard Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Secret and Dispatch Channels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "d7e49f1c-7795-4044-9ac0-3cec7da8b49d",
+  "activeVersionId": "d7e49f1c-7795-4044-9ac0-3cec7da8b49d",
+  "versionCounter": 55,
+  "triggerCount": 1,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-04-27T10:20:23.529Z",
+      "createdAt": "2026-04-27T10:20:23.529Z",
+      "role": "workflow:owner",
+      "workflowId": "SafeGuardWorkpackDispatch",
+      "projectId": "xmS5c3PtZwZ0KzYE",
+      "project": {
+        "updatedAt": "2026-04-09T11:02:55.129Z",
+        "createdAt": "2026-04-03T13:27:51.018Z",
+        "id": "xmS5c3PtZwZ0KzYE",
+        "name": "재홍 서 <admin@winhr.co.kr>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "143edc18-e550-44e0-82d9-ca1c42e14ad3"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-04-30T23:32:56.809Z",
+  "version": "phase0-seed",
+  "policy": {
+    "crawlMode": "curated-official-seed",
+    "sourcePolicy": "official-url-preserved",
+    "legalDisclaimer": "공식자료 기반 초안이며 원문 확인 후 사용"
+  },
+  "artifacts": [
+    "data/safety-knowledge/manifest.json",
+    "data/safety-knowledge/hazards.json",
+    "data/safety-knowledge/legal-map.json",
+    "data/safety-knowledge/kosha-resources.json",
+    "data/safety-knowledge/accident-cases.json",
+    "data/safety-knowledge/training-map.json",
+    "data/safety-knowledge/templates.json",
+    "knowledge/SCHEMA.md",
+    "knowledge/log.md",
+    "knowledge/wiki/index.md",
+    "knowledge/wiki/hazards/*.md",
+    "knowledge/wiki/forms/*.md",
+    "evaluation/safety-knowledge-seed/safety-knowledge-seed-report.json",
+    "evaluation/safety-knowledge-seed/safety-knowledge-seed-report.md"
+  ],
+  "counts": {
+    "hazards": 8,
+    "officialSources": 14,
+    "legalMappings": 3,
+    "accidentCases": 5,
+    "trainingItems": 3,
+    "templates": 4
+  }
+}

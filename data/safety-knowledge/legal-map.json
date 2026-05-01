@@ -1,0 +1,36 @@
+[
+  {
+    "id": "industrial-safety-health-act-general-duty",
+    "sourceId": "lawgo-industrial-safety-law",
+    "title": "산업안전보건법 사업주·근로자 안전보건 조치",
+    "appliesTo": [
+      "riskAssessment",
+      "tbmBriefing",
+      "safetyEducation"
+    ],
+    "plainLanguage": "사업주와 근로자가 산업재해 예방을 위해 지켜야 할 기준과 조치 의무를 현장 문서의 기본 근거로 쓴다.",
+    "caution": "조문 번호와 최신 시행일은 Law.go 원문에서 다시 확인한다."
+  },
+  {
+    "id": "industrial-safety-health-act-education",
+    "sourceId": "lawgo-industrial-safety-law",
+    "title": "산업안전보건법 안전보건교육",
+    "appliesTo": [
+      "safetyEducation",
+      "tbmLog"
+    ],
+    "plainLanguage": "작업 전 교육, 보호구, 작업중지 기준, 신규 투입자 안내를 안전보건교육 기록으로 남기는 근거 축이다.",
+    "caution": "교육 인정 여부는 작업 내용과 기록 방식에 따라 현장 검토가 필요하다."
+  },
+  {
+    "id": "serious-accident-prevention-system",
+    "sourceId": "lawgo-serious-accident-law",
+    "title": "중대재해처벌법 안전보건 확보 체계",
+    "appliesTo": [
+      "emergencyResponse",
+      "workpackSummary"
+    ],
+    "plainLanguage": "위험요인 확인, 개선대책, 보고체계, 재발방지 기록을 관리체계 점검 문구로 연결한다.",
+    "caution": "법적 책임 판단을 대신하지 않고 관리체계 기록 보조 근거로만 쓴다."
+  }
+]

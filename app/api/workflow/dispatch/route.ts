@@ -14,6 +14,26 @@ type WorkflowSuccessResponse = {
   workflowRunId?: string;
   providerStatus?: string;
   message?: string;
+  channelResults?: unknown;
+  summary?: unknown;
+};
+
+type WorkflowChannelStatus = "sent" | "failed" | "unconfigured" | "skipped" | "partial";
+
+type WorkflowChannelResult = {
+  channel: WorkflowChannel;
+  provider: string;
+  status: WorkflowChannelStatus;
+  message: string;
+  httpStatus?: number;
+};
+
+type WorkflowSummary = {
+  requested: number;
+  sent: number;
+  failed: number;
+  unconfigured: number;
+  skipped: number;
 };
 
 const ALLOWED_CHANNELS: WorkflowChannel[] = ["email", "sms", "kakao", "band"];
@@ -29,13 +49,14 @@ function resolveWebhookConfig() {
   const publicBase = process.env.N8N_PUBLIC_BASE?.trim();
   const internalBase = process.env.N8N_INTERNAL_BASE?.trim();
   const path = process.env.N8N_WEBHOOK_PATH?.trim();
-  const token = process.env.N8N_WEBHOOK_TOKEN || process.env.N8N_WEBHOOK_SECRET;
+  const token = (process.env.N8N_WEBHOOK_TOKEN || process.env.N8N_WEBHOOK_SECRET || "").trim();
+  const isHosted = Boolean(process.env.VERCEL || process.env.VERCEL_URL);
 
   if (explicitUrl && token) {
     return { url: explicitUrl, token };
   }
 
-  const base = publicBase || internalBase;
+  const base = isHosted ? publicBase : internalBase || publicBase;
   if (base && path && token) {
     return {
       url: `${base.replace(/\/+$/g, "")}/webhook/${trimSlashes(path)}`,
@@ -67,6 +88,62 @@ function parseRecipients(value: unknown): string[] {
     .map((item) => item.trim())
     .filter(Boolean)
     .slice(0, 50);
+}
+
+function parseChannelStatus(value: unknown): WorkflowChannelStatus {
+  if (value === "sent" || value === "failed" || value === "unconfigured" || value === "skipped" || value === "partial") {
+    return value;
+  }
+
+  return "skipped";
+}
+
+function parseHttpStatus(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function normalizeChannelResults(value: unknown, requestedChannels: WorkflowChannel[]): WorkflowChannelResult[] {
+  const byChannel = new Map<WorkflowChannel, WorkflowChannelResult>();
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (!isRecord(item)) continue;
+      const channel = item.channel;
+      if (typeof channel !== "string" || !ALLOWED_CHANNELS.includes(channel as WorkflowChannel)) continue;
+      byChannel.set(channel as WorkflowChannel, {
+        channel: channel as WorkflowChannel,
+        provider: typeof item.provider === "string" ? item.provider : "n8n",
+        status: parseChannelStatus(item.status),
+        message: typeof item.message === "string" ? item.message : "채널 처리 결과가 반환되었습니다.",
+        httpStatus: parseHttpStatus(item.httpStatus)
+      });
+    }
+  }
+
+  return requestedChannels.map((channel) => (
+    byChannel.get(channel) || {
+      channel,
+      provider: "n8n",
+      status: "skipped",
+      message: "n8n 응답에서 이 채널의 provider 결과를 확인하지 못했습니다."
+    }
+  ));
+}
+
+function summarizeChannelResults(results: WorkflowChannelResult[]): WorkflowSummary {
+  return results.reduce<WorkflowSummary>((summary, item) => {
+    if (item.status === "sent") summary.sent += 1;
+    if (item.status === "failed") summary.failed += 1;
+    if (item.status === "unconfigured") summary.unconfigured += 1;
+    if (item.status === "skipped") summary.skipped += 1;
+    return summary;
+  }, {
+    requested: results.length,
+    sent: 0,
+    failed: 0,
+    unconfigured: 0,
+    skipped: 0
+  });
 }
 
 async function postWithTimeout(url: string, secret: string, payload: Record<string, unknown>) {
@@ -147,7 +224,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: false,
       configured: false,
-      message: "n8n 웹훅 환경변수가 아직 없습니다. N8N_INTERNAL_BASE, N8N_WEBHOOK_PATH, N8N_WEBHOOK_TOKEN을 넣으면 자동 전파가 켜집니다."
+      message: "현장 전파 연결을 확인해야 합니다. 메일·문자·카카오·밴드 전송 설정을 점검해 주세요."
     });
   }
 
@@ -162,11 +239,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const workflowResponse = await postWithTimeout(webhookConfig.url, webhookConfig.token, payload);
+    const channelResults = normalizeChannelResults(workflowResponse.channelResults, channels);
+    const summary = summarizeChannelResults(channelResults);
     return NextResponse.json({
       ok: workflowResponse.ok ?? true,
       configured: true,
       workflowRunId: workflowResponse.workflowRunId,
       providerStatus: workflowResponse.providerStatus,
+      channelResults,
+      summary,
       message: workflowResponse.message || "n8n 웹훅이 전파 요청을 접수했습니다."
     });
   } catch (error) {

@@ -6,13 +6,13 @@ import { extractTag, parseInterpretationXML, parsePrecedentXML, stripHtml } from
 import { DetailRecord, SearchResult } from "./types";
 
 type KoreanLawMcpSourceType = "law" | "precedent" | "interpretation";
-type JsonRecord = Record<string, any>;
+type JsonRecord = Record<string, unknown>;
 
 type KoreanLawMcpConfig = {
   enabled: boolean;
   apiKey: string;
   configured: boolean;
-  keySource: "KOREAN_LAW_MCP_LAW_OC" | "LAWGO_OC" | "none";
+  keySource: "KOREAN_LAW_MCP_LAW_OC" | "LAWGO_OC" | "LAW_OC" | "none";
 };
 
 const KLM_LAW_PREFIX = "klm-law-";
@@ -22,14 +22,16 @@ const DEFAULT_SEARCH_LIMIT = 3;
 
 function getConfig(): KoreanLawMcpConfig {
   const explicitKey = process.env.KOREAN_LAW_MCP_LAW_OC?.trim() || "";
-  const fallbackKey = process.env.LAWGO_OC?.trim() || "";
+  const lawgoKey = process.env.LAWGO_OC?.trim() || "";
+  const legacyLawKey = process.env.LAW_OC?.trim() || "";
+  const fallbackKey = lawgoKey || legacyLawKey;
   const apiKey = explicitKey || fallbackKey;
 
   return {
     enabled: process.env.KOREAN_LAW_MCP_ENABLED === "true",
     apiKey,
     configured: process.env.KOREAN_LAW_MCP_ENABLED === "true" && Boolean(apiKey),
-    keySource: explicitKey ? "KOREAN_LAW_MCP_LAW_OC" : fallbackKey ? "LAWGO_OC" : "none"
+    keySource: explicitKey ? "KOREAN_LAW_MCP_LAW_OC" : lawgoKey ? "LAWGO_OC" : legacyLawKey ? "LAW_OC" : "none"
   };
 }
 
@@ -39,13 +41,20 @@ function createClient() {
     throw new Error("KOREAN_LAW_MCP_ENABLED가 false라 보강 검색을 사용하지 않습니다.");
   }
   if (!config.apiKey) {
-    throw new Error("KOREAN_LAW_MCP_LAW_OC 또는 LAWGO_OC가 필요합니다.");
+    throw new Error("KOREAN_LAW_MCP_LAW_OC, LAWGO_OC 또는 LAW_OC가 필요합니다.");
   }
   return new LawApiClient({ apiKey: config.apiKey });
 }
 
-function normalizeText(text?: string | null) {
-  return stripHtml(text || "").replace(/\s+/g, " ").trim();
+function normalizeText(text?: unknown) {
+  if (typeof text === "string") return stripHtml(text).replace(/\s+/g, " ").trim();
+  if (typeof text === "number") return String(text);
+  if (typeof text === "object" && text !== null && "content" in text) {
+    const content = (text as { content?: unknown }).content;
+    if (typeof content === "string") return stripHtml(content).replace(/\s+/g, " ").trim();
+    if (typeof content === "number") return String(content);
+  }
+  return "";
 }
 
 function truncateText(text: string, maxLength = 180) {
@@ -54,11 +63,11 @@ function truncateText(text: string, maxLength = 180) {
   return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
-function compact(parts: Array<string | undefined | null>) {
+function compact(parts: unknown[]) {
   return parts.map((part) => normalizeText(part)).filter(Boolean);
 }
 
-function buildSummary(parts: Array<string | undefined | null>, fallback: string) {
+function buildSummary(parts: unknown[], fallback: string) {
   const normalizedParts = compact(parts);
   return normalizedParts.length ? normalizedParts.join(" · ") : fallback;
 }
@@ -66,6 +75,10 @@ function buildSummary(parts: Array<string | undefined | null>, fallback: string)
 function toArray<T>(value: T | T[] | undefined | null): T[] {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
+}
+
+function isJsonRecord(value: unknown): value is JsonRecord {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function buildId(type: KoreanLawMcpSourceType, rawId: string) {
@@ -223,7 +236,7 @@ export async function searchKoreanLawMcp(query: string, limit = DEFAULT_SEARCH_L
 }
 
 function formatLawArticlePreview(lawData: JsonRecord) {
-  const rawUnits = lawData.조문 && typeof lawData.조문 === "object" ? lawData.조문.조문단위 : undefined;
+  const rawUnits = isJsonRecord(lawData.조문) ? lawData.조문.조문단위 : undefined;
   const articleUnits = toArray<JsonRecord>(rawUnits as JsonRecord | JsonRecord[] | undefined);
   const previews: string[] = [];
 
@@ -239,7 +252,7 @@ function formatLawArticlePreview(lawData: JsonRecord) {
     let mainContent = "";
 
     if (rawContent) {
-      const flattened = flattenContent(rawContent);
+      const flattened = flattenContent(rawContent as Parameters<typeof flattenContent>[0]);
       const normalized = normalizeText(flattened);
       if (normalized) {
         const headerPattern = new RegExp(`^${displayNum.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:\\([^)]*\\))?\\s*`);
@@ -247,7 +260,7 @@ function formatLawArticlePreview(lawData: JsonRecord) {
       }
     }
 
-    const paragraphContent = unit.항 ? normalizeText(extractHangContent(unit.항)) : "";
+    const paragraphContent = unit.항 ? normalizeText(extractHangContent(unit.항 as Parameters<typeof extractHangContent>[0])) : "";
     const body = cleanHtml([mainContent, paragraphContent].filter(Boolean).join("\n")).trim();
 
     if (body) {
@@ -296,7 +309,7 @@ async function loadLawDetail(client: LawApiClient, mst: string): Promise<DetailR
   const lawId = normalizeText(basicInfo.법령ID);
   const lawType = normalizeText(basicInfo.법령구분명);
 
-  const rawUnits = lawData.조문 && typeof lawData.조문 === "object" ? lawData.조문.조문단위 : undefined;
+  const rawUnits = isJsonRecord(lawData.조문) ? lawData.조문.조문단위 : undefined;
   const articleUnits = toArray<JsonRecord>(rawUnits as JsonRecord | JsonRecord[] | undefined).filter((unit) => unit.조문여부 === "조문");
   const articleTitles = articleUnits
     .map((unit) => {
@@ -328,7 +341,7 @@ async function loadLawDetail(client: LawApiClient, mst: string): Promise<DetailR
   });
 }
 
-function buildSections(sections: Array<{ label: string; text?: string | null }>) {
+function buildSections(sections: Array<{ label: string; text?: unknown }>) {
   return sections
     .map(({ label, text }) => {
       const normalized = normalizeText(text);

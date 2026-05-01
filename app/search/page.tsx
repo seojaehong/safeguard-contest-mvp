@@ -11,19 +11,19 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     <main className="container grid">
       <section className="hero grid">
         <div className="row">
-          <span className="badge">보조 화면</span>
+          <span className="badge">근거 탐색</span>
           <span className="badge">통합 근거 탐색</span>
-          <span className="badge">Law.go-first + korean-law-mcp 보강</span>
+          <span className="badge">법제처 우선 + 보조 근거</span>
         </div>
-        <h1 className="title small-title">근거 검색 보조 화면</h1>
+        <h1 className="title small-title">근거 검색</h1>
         <p className="subtitle">
-          홈 데모에서 보여준 위험 요약과 산출물을 더 깊게 파고드는 화면입니다. 심사위원에게는 “검색”보다 “설명 가능한 근거 탐색” 역할로 설명합니다.
+          위험성평가, TBM, 안전교육 문구에 연결할 법령·판례·해석례 근거를 확인합니다.
         </p>
       </section>
       <SearchBox initialQuery={q} />
       <div className="card list">
         <div className="h3">검색 결과 {results.length}건</div>
-        <div className="muted">기본 Law.go 흐름을 유지하면서, 설정 시 korean-law-mcp가 법령·판례·해석례를 추가로 보강합니다.</div>
+        <div className="muted">법제처 법령정보를 우선 확인하고, 설정된 보조 근거가 있으면 판례·해석례를 함께 정리합니다.</div>
       </div>
       <section className="list">
         {results.map((item) => <ResultCard key={item.id} item={item} />)}

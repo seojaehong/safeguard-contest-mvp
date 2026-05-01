@@ -1,17 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AskResponse } from "@/lib/types";
 
 declare global {
   var measureTextWidth: ((font: string, text: string) => number) | undefined;
 }
 
-type DocumentKey =
+export type DocumentKey =
+  | "workpackSummaryDraft"
   | "riskAssessmentDraft"
+  | "workPlanDraft"
   | "tbmBriefing"
   | "tbmLogDraft"
   | "safetyEducationRecordDraft"
+  | "emergencyResponseDraft"
+  | "photoEvidenceDraft"
+  | "foreignWorkerBriefing"
+  | "foreignWorkerTransmission"
   | "kakaoMessage";
 
 type EditableDocument = {
@@ -33,6 +39,8 @@ type TemplatePreset = {
   kind: TemplateKind;
   label: string;
   description: string;
+  previewTitle: string;
+  previewBullets: string[];
 };
 
 let rhwpModulePromise: Promise<RhwpModule> | null = null;
@@ -41,26 +49,44 @@ const templatePresets: TemplatePreset[] = [
   {
     kind: "sheet",
     label: "Excel 시트형",
-    description: "현장 표 양식처럼 행·열로 입력하고 결재 파일에 붙이기 좋은 형태"
+    description: "현장 표 양식처럼 행·열로 입력하고 결재 파일에 붙이기 좋은 형태",
+    previewTitle: "표지 + 섹션 요약 + 확인 칸",
+    previewBullets: ["섹션별 행·열 구조", "No./항목/내용/확인 컬럼", "인쇄 폭 1페이지 기준"]
   },
   {
     kind: "word",
     label: "Word 보고서형",
-    description: "본문과 표를 함께 보여주는 점검 보고서형 문서"
+    description: "본문과 표를 함께 보여주는 점검 보고서형 문서",
+    previewTitle: "보고서 헤더 + 본문 표",
+    previewBullets: ["제목/메타/섹션 헤더", "본문형 설명과 표 혼합", "원청·관리자 보고용"]
   },
   {
     kind: "hwp",
     label: "HWPX 제출형",
-    description: "한글 문서에서 열기 쉬운 공식 서식 항목 중심 문서"
+    description: "한글 문서에서 열기 쉬운 공식 서식 항목 중심 문서",
+    previewTitle: "한글 서식 + 확인/서명란",
+    previewBullets: ["공식 서식 항목명 유지", "확인자·관리감독자 서명란", "한컴오피스 제출 흐름"]
   }
 ];
 
 const documentMeta: EditableDocument[] = [
   {
+    key: "workpackSummaryDraft",
+    title: "점검결과 요약",
+    description: "현장명, 작업조건, 핵심 위험, 즉시조치, 연결 상태를 첫 장으로 정리합니다.",
+    fileBase: "workpack-summary"
+  },
+  {
     key: "riskAssessmentDraft",
     title: "위험성평가표",
     description: "KOSHA 절차에 맞춰 사전준비, 위험요인, 감소대책, 조치 확인을 정리합니다.",
     fileBase: "risk-assessment"
+  },
+  {
+    key: "workPlanDraft",
+    title: "작업계획서",
+    description: "작업구간, 작업순서, 장비·인원, 허가·첨부, 작업중지 기준을 정리합니다.",
+    fileBase: "work-plan"
   },
   {
     key: "tbmBriefing",
@@ -79,6 +105,30 @@ const documentMeta: EditableDocument[] = [
     title: "안전보건교육 기록",
     description: "교육대상, 교육내용, 확인방법, 후속 교육 추천을 분리해 남깁니다.",
     fileBase: "safety-education"
+  },
+  {
+    key: "emergencyResponseDraft",
+    title: "비상대응 절차",
+    description: "사고 징후, 초기조치, 보고체계, 현장보존, 재발방지 흐름을 정리합니다.",
+    fileBase: "emergency-response"
+  },
+  {
+    key: "photoEvidenceDraft",
+    title: "사진/증빙",
+    description: "작업 전·후 사진, TBM/교육 증빙, 확인자와 보관 위치를 남깁니다.",
+    fileBase: "photo-evidence"
+  },
+  {
+    key: "foreignWorkerBriefing",
+    title: "외국인 근로자 출력본",
+    description: "쉬운 한국어와 상위 체류국가 언어 기본팩을 함께 제공하는 교육용 출력본입니다.",
+    fileBase: "foreign-worker-briefing"
+  },
+  {
+    key: "foreignWorkerTransmission",
+    title: "외국인 근로자 전송본",
+    description: "문자·카카오·밴드로 전송하기 좋은 짧은 다국어 안전공지입니다.",
+    fileBase: "foreign-worker-message"
   },
   {
     key: "kakaoMessage",
@@ -100,7 +150,7 @@ function downloadBlob(blob: Blob, fileName: string) {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function escapeHtml(value: string) {
@@ -181,6 +231,26 @@ function buildRowsForAll(values: Record<DocumentKey, string>) {
   return documentMeta.flatMap((meta) => buildRowsForDocument(meta, values));
 }
 
+function buildLaunchSheetRows(values: Record<DocumentKey, string>) {
+  const sheetMap: Array<{ sheet: string; keys: DocumentKey[] }> = [
+    { sheet: "0. 문서팩 요약", keys: ["workpackSummaryDraft"] },
+    { sheet: "1. 위험성평가", keys: ["riskAssessmentDraft"] },
+    { sheet: "2. 작업계획서", keys: ["workPlanDraft"] },
+    { sheet: "3. TBM 및 일일점검", keys: ["tbmBriefing", "tbmLogDraft"] },
+    { sheet: "4. 안전보건교육", keys: ["safetyEducationRecordDraft", "foreignWorkerBriefing", "foreignWorkerTransmission"] },
+    { sheet: "5. 비상대응", keys: ["emergencyResponseDraft"] },
+    { sheet: "6. 사진/증빙", keys: ["photoEvidenceDraft"] }
+  ];
+
+  return sheetMap.flatMap(({ sheet, keys }) => (
+    keys.flatMap((key) => {
+      const meta = documentMeta.find((item) => item.key === key);
+      if (!meta) return [];
+      return buildRowsForDocument(meta, values).map((row) => ({ ...row, section: `${sheet} / ${row.section}` }));
+    })
+  ));
+}
+
 function escapeCell(value: string) {
   return `"${value.replace(/"/g, "\"\"")}"`;
 }
@@ -194,23 +264,112 @@ function buildDelimited(rows: SheetRow[], delimiter: "," | "\t") {
 }
 
 function buildExcelHtml(title: string, rows: SheetRow[]) {
-  const tableRows = rows.map((row) => `<tr><td>${escapeHtml(row.document)}</td><td>${escapeHtml(row.section)}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td></tr>`).join("");
+  const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
+    acc[row.section] = [...(acc[row.section] || []), row];
+    return acc;
+  }, {});
+  const summaryRows = Object.entries(grouped).map(([section, sectionRows]) => `
+    <tr>
+      <td>${escapeHtml(section)}</td>
+      <td>${sectionRows.length}</td>
+      <td>${escapeHtml(sectionRows.slice(0, 2).map((row) => row.item).join(", "))}</td>
+    </tr>
+  `).join("");
+  const tableRows = Object.entries(grouped).map(([section, sectionRows]) => `
+    <tr class="section-row"><td colspan="4">${escapeHtml(section)}</td></tr>
+    ${sectionRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인</td></tr>`).join("")}
+  `).join("");
+  return `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(title)}</title>
+  <!--[if gte mso 9]>
+  <xml>
+    <x:ExcelWorkbook>
+      <x:ExcelWorksheets>
+        <x:ExcelWorksheet>
+          <x:Name>${escapeHtml(title).slice(0, 28)}</x:Name>
+          <x:WorksheetOptions><x:FitToPage/><x:Print><x:FitWidth>1</x:FitWidth><x:FitHeight>0</x:FitHeight></x:Print></x:WorksheetOptions>
+        </x:ExcelWorksheet>
+      </x:ExcelWorksheets>
+    </x:ExcelWorkbook>
+  </xml>
+  <![endif]-->
+  <style>
+    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; color: #17201d; }
+    .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 14px; }
+    .cover h1 { margin: 0 0 8px; font-size: 22px; }
+    .cover p { margin: 0; color: #5e6677; }
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: "Malgun Gothic", sans-serif; margin-bottom: 14px; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; word-break: keep-all; }
+    th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
+    .summary th { background: #6f4b26; }
+    .section-row td { background: #e8f1ed; color: #1f4d43; font-weight: 700; font-size: 14px; border-top: 2px solid #1f4d43; }
+    .center { text-align: center; width: 42px; }
+    .check-cell { text-align: center; color: #6f4b26; width: 90px; }
+    .note { color: #5e6677; font-size: 12px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <h1>${escapeHtml(title)}</h1>
+    <p>SafeGuard 현장 문서팩 · 검토/확인/서명용 Excel 서식</p>
+  </div>
+  <table class="summary">
+    <colgroup><col style="width: 34%;" /><col style="width: 12%;" /><col style="width: 54%;" /></colgroup>
+    <thead><tr><th>섹션</th><th>항목 수</th><th>주요 항목</th></tr></thead>
+    <tbody>${summaryRows}</tbody>
+  </table>
+  <table>
+    <colgroup><col style="width: 6%;" /><col style="width: 22%;" /><col style="width: 60%;" /><col style="width: 12%;" /></colgroup>
+    <thead><tr><th>No.</th><th>항목</th><th>내용</th><th>확인</th></tr></thead>
+    <tbody>${tableRows}</tbody>
+  </table>
+  <p class="note">본 파일은 공식자료 기반 초안입니다. 현장관리자가 작업 전 최종 확인 후 사용하세요.</p>
+</body>
+</html>`;
+}
+
+function buildLaunchWorkbookHtml(title: string, rows: SheetRow[]) {
+  const groups = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
+    const [sheet] = row.section.split(" / ");
+    acc[sheet] = [...(acc[sheet] || []), row];
+    return acc;
+  }, {});
+  const sections = Object.entries(groups).map(([sheet, sheetRows]) => `
+    <h2>${escapeHtml(sheet)}</h2>
+    <table>
+      <thead><tr><th>문서</th><th>섹션</th><th>항목</th><th>내용</th></tr></thead>
+      <tbody>${sheetRows.map((row) => `<tr><td>${escapeHtml(row.document)}</td><td>${escapeHtml(row.section.replace(`${sheet} / `, ""))}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td></tr>`).join("")}</tbody>
+    </table>
+  `).join("");
+
   return `<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(title)}</title>
   <style>
-    table { border-collapse: collapse; width: 100%; font-family: "Malgun Gothic", sans-serif; }
-    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; }
-    th { background: #e8f1ed; font-weight: 700; }
+    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; color: #17201d; }
+    .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 16px; }
+    .cover h1 { margin: 0 0 8px; font-size: 24px; }
+    .cover p { margin: 0; color: #5e6677; }
+    h2 { margin: 24px 0 8px; color: #21594f; border-left: 5px solid #21594f; padding-left: 9px; }
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-bottom: 18px; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; word-break: keep-all; }
+    th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
+    td:nth-child(1) { width: 18%; }
+    td:nth-child(2) { width: 20%; }
+    td:nth-child(3) { width: 12%; text-align: center; }
   </style>
 </head>
 <body>
-  <table>
-    <thead><tr><th>문서</th><th>섹션</th><th>항목</th><th>내용</th></tr></thead>
-    <tbody>${tableRows}</tbody>
-  </table>
+  <div class="cover">
+    <h1>${escapeHtml(title)}</h1>
+    <p>위험성평가·작업계획·TBM·안전보건교육·비상대응·증빙을 한 파일에 묶은 현장 검토용 Excel 문서팩입니다.</p>
+  </div>
+  ${sections}
 </body>
 </html>`;
 }
@@ -265,7 +424,13 @@ function buildHwpTemplateText(title: string, rows: SheetRow[]) {
       `[${section}]`,
       ...sectionRows.map((row) => `${row.item}. ${row.content}`),
       ""
-    ])
+    ]),
+    "[확인/서명]",
+    "작성자: ____________________",
+    "관리감독자: ____________________",
+    "교육/TBM 확인자: ____________________",
+    "보관 위치: ____________________",
+    "확인일시: ______년 ____월 ____일 ____시 ____분"
   ].join("\n");
 }
 
@@ -314,29 +479,110 @@ function buildCombinedText(values: Record<DocumentKey, string>) {
   return documentMeta.map((item) => `# ${item.title}\n\n${values[item.key]}`).join("\n\n---\n\n");
 }
 
-export function WorkpackEditor({ data }: { data: AskResponse }) {
+function parseStoredValues(raw: string | null, fallback: Record<DocumentKey, string>) {
+  if (!raw) return fallback;
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return fallback;
+
+    const record = parsed as Partial<Record<DocumentKey, unknown>>;
+    return documentMeta.reduce<Record<DocumentKey, string>>((acc, item) => {
+      const value = record[item.key];
+      acc[item.key] = typeof value === "string" ? value : fallback[item.key];
+      return acc;
+    }, { ...fallback });
+  } catch (error) {
+    console.warn("workpack local draft parse failed", error);
+    return fallback;
+  }
+}
+
+export function WorkpackEditor({
+  data,
+  focusToken = 0,
+  requestedDocumentKey
+}: {
+  data: AskResponse;
+  focusToken?: number;
+  requestedDocumentKey?: DocumentKey;
+}) {
   const initialValues = useMemo<Record<DocumentKey, string>>(
     () => ({
+      workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
       riskAssessmentDraft: data.deliverables.riskAssessmentDraft,
+      workPlanDraft: data.deliverables.workPlanDraft,
       tbmBriefing: data.deliverables.tbmBriefing,
       tbmLogDraft: data.deliverables.tbmLogDraft,
       safetyEducationRecordDraft: data.deliverables.safetyEducationRecordDraft,
+      emergencyResponseDraft: data.deliverables.emergencyResponseDraft,
+      photoEvidenceDraft: data.deliverables.photoEvidenceDraft,
+      foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
+      foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission,
       kakaoMessage: data.deliverables.kakaoMessage
     }),
     [data]
   );
-  const [selectedKey, setSelectedKey] = useState<DocumentKey>("riskAssessmentDraft");
+  const storageKey = useMemo(
+    () => `safeguard-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}`,
+    [data.question, data.scenario.companyName, data.scenario.siteName]
+  );
+  const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<Record<DocumentKey, string>>(initialValues);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
+  const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
+  const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null);
+  const [showFocusCue, setShowFocusCue] = useState(false);
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
+  const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
   const selectedRows = buildRowsForDocument(selected, values);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      setValues(initialValues);
+      return;
+    }
+
+    const stored = parseStoredValues(window.localStorage.getItem(storageKey), initialValues);
+    setValues(stored);
+    setLastEditedAt(null);
+  }, [initialValues, storageKey]);
+
+  useEffect(() => {
+    if (!focusToken) return;
+
+    if (requestedDocumentKey) {
+      setSelectedKey(requestedDocumentKey);
+    }
+    setShowFocusCue(true);
+    editorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 360);
+    const timer = window.setTimeout(() => setShowFocusCue(false), 2200);
+    return () => window.clearTimeout(timer);
+  }, [focusToken, requestedDocumentKey]);
+
+  function saveLocalDraft(nextValues: Record<DocumentKey, string>) {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(nextValues));
+    } catch (error) {
+      console.warn("workpack local draft save failed", error);
+    }
+  }
+
   function updateValue(value: string) {
-    setValues((current) => ({ ...current, [selected.key]: value }));
+    setValues((current) => {
+      const nextValues = { ...current, [selected.key]: value };
+      saveLocalDraft(nextValues);
+      return nextValues;
+    });
+    setLastEditedAt(new Date());
   }
 
   function downloadText() {
@@ -371,6 +617,7 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   }
 
   function downloadJpg() {
+    setImageStatus("idle");
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754">
       <rect width="100%" height="100%" fill="#fffaf1"/>
       <foreignObject x="60" y="60" width="1120" height="1634">
@@ -396,6 +643,11 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
         URL.revokeObjectURL(svgUrl);
       }, "image/jpeg", 0.92);
     };
+    image.onerror = () => {
+      console.error("JPG export failed: SVG image could not be rendered");
+      URL.revokeObjectURL(svgUrl);
+      setImageStatus("error");
+    };
     image.src = svgUrl;
   }
 
@@ -417,13 +669,13 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   }
 
   function downloadAllCsv() {
-    const rows = buildRowsForAll(values);
+    const rows = buildLaunchSheetRows(values);
     downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, ",")}`], { type: "text/csv;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeguard-workpack.csv`);
   }
 
   function downloadAllXls() {
-    const rows = buildRowsForAll(values);
-    downloadBlob(new Blob([buildExcelHtml("SafeGuard 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeguard-workpack.xls`);
+    const rows = buildLaunchSheetRows(values);
+    downloadBlob(new Blob([buildLaunchWorkbookHtml("SafeGuard 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeguard-workpack.xls`);
   }
 
   function downloadTemplate() {
@@ -439,20 +691,34 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   }
 
   async function copySheetsTsv() {
-    const rows = buildRowsForAll(values);
+    const confirmed = window.confirm("Google 계정 연동이 필요합니다. 새 시트가 본인 드라이브에 열리고, 복사된 표 데이터를 붙여넣어 사용합니다.");
+    if (!confirmed) return;
+
+    const rows = buildLaunchSheetRows(values);
+    const sheetWindow = window.open("https://sheets.new", "_blank", "noopener,noreferrer");
     try {
       await navigator.clipboard.writeText(buildDelimited(rows, "\t"));
       setSheetStatus("copied");
-      window.open("https://sheets.new", "_blank", "noopener,noreferrer");
+      if (!sheetWindow) {
+        window.location.href = "https://sheets.new";
+      }
     } catch (error) {
       console.error("Google Sheets TSV copy failed", error);
       setSheetStatus("error");
+      downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, "\t")}`], { type: "text/tab-separated-values;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-google-sheets.tsv`);
+      if (!sheetWindow) {
+        window.location.href = "https://sheets.new";
+      }
     }
   }
 
   function printPdf() {
     const popup = window.open("", "_blank", "width=900,height=1100");
-    if (!popup) return;
+    if (!popup) {
+      console.error("PDF print window was blocked");
+      downloadHtml();
+      return;
+    }
     popup.document.write(buildHtml(selected.title, selectedText));
     popup.document.close();
     popup.focus();
@@ -462,8 +728,8 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
   return (
     <section className="workpack-shell" id="workpack">
       <div className="workpack-sidebar card list">
-        <div>
-          <div className="eyebrow">SafeGuard Workpack</div>
+          <div>
+          <div className="eyebrow">SafeGuard 문서팩</div>
           <div className="h2">오늘 문서팩</div>
           <p className="muted">현장에서 바로 수정하고 내려받을 수 있는 작업 전 산출물입니다.</p>
         </div>
@@ -488,47 +754,81 @@ export function WorkpackEditor({ data }: { data: AskResponse }) {
                 type="button"
                 className={`template-card ${preset.kind === templateKind ? "active" : ""}`}
                 onClick={() => setTemplateKind(preset.kind)}
+                aria-label={`${preset.label} 서식 선택`}
+                aria-pressed={preset.kind === templateKind}
               >
                 <strong>{preset.label}</strong>
                 <span>{preset.description}</span>
               </button>
             ))}
           </div>
+          <div className={`template-preview template-${templateKind}`} aria-live="polite">
+            <span>{selectedTemplate.label} 미리보기</span>
+            <strong>{selectedTemplate.previewTitle}</strong>
+            <ul>
+              {selectedTemplate.previewBullets.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
           <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
-          <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
-          <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
-          <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
+          <details className="advanced-downloads">
+            <summary>전체 다운로드</summary>
+            <div className="advanced-download-grid">
+              <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
+              <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
+              <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
+            </div>
+          </details>
           <button type="button" className="button" onClick={copySheetsTsv}>Google Sheets로 열기</button>
           {sheetStatus === "copied" ? <p className="muted small">시트형 TSV를 복사했습니다. 새 구글시트에 붙여넣으면 표로 들어갑니다.</p> : null}
           {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패했습니다. CSV 또는 XLS로 내려받아 업로드해 주세요.</p> : null}
         </div>
       </div>
 
-      <div className="card document-editor">
+      <div className={`card document-editor ${showFocusCue ? "editor-focus-cue" : ""}`} ref={editorRef}>
         <div className="document-toolbar">
           <div>
-            <div className="eyebrow">Editable document</div>
+            <div className="eyebrow">편집 문서</div>
             <div className="h2">{selected.title}</div>
             <p className="muted">{selected.description}</p>
+            <p className="editor-status" aria-live="polite">
+              자동저장됨(이 브라우저) · 이력 저장은 관리자 로그인 후 · {selectedText.length.toLocaleString("ko-KR")}자
+              {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
+            </p>
           </div>
           <div className="download-bar">
-            <button type="button" className="button secondary" onClick={downloadText}>TXT</button>
-            <button type="button" className="button secondary" onClick={downloadJson}>JSON</button>
-            <button type="button" className="button secondary" onClick={downloadCsv}>CSV</button>
+            <button type="button" className="button secondary" onClick={printPdf}>PDF 저장/인쇄</button>
             <button type="button" className="button secondary" onClick={downloadXls}>XLS</button>
-            <button type="button" className="button secondary" onClick={downloadDoc}>DOC</button>
-            <button type="button" className="button secondary" onClick={downloadHtml}>HTML</button>
-            <button type="button" className="button secondary" onClick={downloadJpg}>JPG</button>
-            <button type="button" className="button secondary" onClick={printPdf}>PDF</button>
             <button type="button" className="button" onClick={downloadHwpx} disabled={hwpxStatus === "building"}>
               {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX"}
             </button>
+            <details className="advanced-downloads inline">
+              <summary>베타 형식</summary>
+              <div className="advanced-download-grid">
+                <button type="button" className="button secondary" onClick={downloadDoc} title="Word 또는 한글에서 열 수 있는 보고서형 문서">DOC</button>
+                <button type="button" className="button secondary" onClick={downloadText} title="메신저·메일 본문에 붙여넣기 쉬운 순수 텍스트">TXT</button>
+                <button type="button" className="button secondary" onClick={downloadJson} title="외부 시스템 연동과 자동화용 구조화 데이터">JSON</button>
+                <button type="button" className="button secondary" onClick={downloadCsv} title="엑셀·구글시트 업로드용 행 데이터">CSV</button>
+                <button type="button" className="button secondary" onClick={downloadHtml} title="웹 게시·브라우저 인쇄용 문서">HTML</button>
+                <button type="button" className="button secondary" onClick={downloadJpg} title="단톡방 이미지 공유와 현장 게시용 이미지">JPG</button>
+              </div>
+            </details>
           </div>
         </div>
         {hwpxStatus === "error" ? (
           <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
         ) : null}
+        {imageStatus === "error" ? (
+          <p className="export-error">JPG 변환 중 오류가 발생했습니다. HTML 또는 PDF 저장/인쇄를 먼저 사용해 주세요.</p>
+        ) : null}
+        {showFocusCue ? (
+          <p className="editor-focus-message" aria-live="polite">
+            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF·XLS·HWPX로 바로 내려받을 수 있습니다.
+          </p>
+        ) : null}
         <textarea
+          ref={textareaRef}
           className="document-textarea"
           value={selectedText}
           onChange={(event) => updateValue(event.target.value)}

@@ -1,0 +1,96 @@
+{
+  "xlsxFamilies": [
+    {
+      "family": "owner-contractor-safety-document-check",
+      "sheetNames": [
+        "0. 점검결과 요약",
+        "1. 위험성평가의 적정성",
+        "2. 작업계획서 작성 상태",
+        "3. 시공자 산업재해 대응체계 등",
+        "4. 안전보건대장 작성관리 점검"
+      ],
+      "safeGuardUse": "Use as the main spreadsheet export structure for inspection-ready workpacks."
+    },
+    {
+      "family": "contractor-safety-management-level-evaluation",
+      "sheetNames": [
+        "0. 점검결과 요약",
+        "1. 위험성평가",
+        "2. 작업계획서 작성 및 이행절차",
+        "3. 위험작업 안전관리",
+        "4. 시공사 안전보건관리",
+        "5. 관리감독체계",
+        "맞춤형컨설팅 실시"
+      ],
+      "safeGuardUse": "Use as a later quality gate and consulting recommendation structure."
+    }
+  ],
+  "hwpxFamilies": [
+    {
+      "family": "construction-and-safety-supervision-log",
+      "fields": [
+        "공사명",
+        "일시",
+        "주요업무",
+        "구분",
+        "업무 내용",
+        "특이 사항",
+        "품질관리",
+        "안전관리",
+        "기타사항"
+      ],
+      "safeGuardUse": "Add daily log and safety supervision export tabs."
+    },
+    {
+      "family": "major-accident-response-procedure",
+      "fields": [
+        "목적",
+        "적용대상",
+        "용어의 정의",
+        "유해위험요인 분류",
+        "보고체계",
+        "초기조치",
+        "재발방지"
+      ],
+      "safeGuardUse": "Add emergency response and incident report workflow."
+    },
+    {
+      "family": "district-heating-pipe-work-plan",
+      "fields": [
+        "작업구간",
+        "공사명",
+        "작성자",
+        "확인자",
+        "작성일",
+        "작업계획 작성 주체",
+        "작업계획 확인 순서",
+        "안전작업허가서 첨부"
+      ],
+      "safeGuardUse": "Add work-plan document tab between risk assessment and TBM."
+    },
+    {
+      "family": "risk-assessment-operation-rule",
+      "fields": [
+        "현장소장",
+        "단위사업장 대표",
+        "안전관리자",
+        "위험성평가 담당",
+        "관리감독자",
+        "근로자대표",
+        "사업장명",
+        "문서번호"
+      ],
+      "safeGuardUse": "Add role ownership fields to risk assessment output."
+    }
+  ],
+  "imageEvidenceFamilies": [
+    {
+      "family": "field-inspection-photos",
+      "safeGuardUse": "Add photo evidence slots, before/after fields, and confirmation owner fields to exports."
+    },
+    {
+      "family": "stop-work-right-and-signaler-examples",
+      "safeGuardUse": "Add stop-work criteria and signaler placement checks to TBM and daily checklist."
+    }
+  ]
+}

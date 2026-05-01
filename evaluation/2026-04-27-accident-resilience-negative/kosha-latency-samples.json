@@ -1,0 +1,58 @@
+[
+  {
+    "run": 1,
+    "ok": true,
+    "elapsedMs": 917,
+    "status": 200,
+    "bytes": 22534
+  },
+  {
+    "run": 2,
+    "ok": true,
+    "elapsedMs": 438,
+    "status": 200,
+    "bytes": 22534
+  },
+  {
+    "run": 3,
+    "ok": true,
+    "elapsedMs": 1943,
+    "status": 200,
+    "bytes": 22534
+  },
+  {
+    "run": 4,
+    "ok": true,
+    "elapsedMs": 1196,
+    "status": 200,
+    "bytes": 22534
+  },
+  {
+    "run": 5,
+    "ok": true,
+    "elapsedMs": 225,
+    "status": 200,
+    "bytes": 22534
+  },
+  {
+    "run": 6,
+    "ok": true,
+    "elapsedMs": 1214,
+    "status": 200,
+    "bytes": 22534
+  },
+  {
+    "run": 7,
+    "ok": true,
+    "elapsedMs": 226,
+    "status": 200,
+    "bytes": 22534
+  },
+  {
+    "run": 8,
+    "ok": true,
+    "elapsedMs": 217,
+    "status": 200,
+    "bytes": 22534
+  }
+]

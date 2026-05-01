@@ -1,0 +1,17 @@
+{
+  "mode": "live",
+  "koshaEducationMode": "live",
+  "koshaEducationDetail": "KOSHA 교육포털 live 메타데이터 확인 성공. 교육대상 26개, 과정 후보 0건을 반영했습니다.",
+  "koshaEducationCount": 3,
+  "firstKoshaEducation": {
+    "title": "외국인근로자 대상 안전보건교육 확인",
+    "provider": "한국산업안전보건공단",
+    "target": "외국인근로자",
+    "educationMethod": "교육포털 대상별 과정 확인",
+    "url": "https://edu.kosha.or.kr",
+    "reason": "외국인 근로자 또는 다국어 안내 맥락이 있어 KOSHA 교육대상 코드의 외국인근로자 항목을 연결합니다.",
+    "fitLabel": "대상 적합",
+    "fitReason": "KOSHA 교육포털 대상 목록에서 외국인근로자 항목을 live 확인했습니다."
+  },
+  "hasKoshaEducationAppendix": true
+}

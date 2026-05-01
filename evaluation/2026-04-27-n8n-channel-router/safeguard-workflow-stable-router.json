@@ -1,0 +1,107 @@
+[
+  {
+    "id": "SafeGuardWorkpackDispatch",
+    "name": "SafeGuard Workpack Dispatch",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "safeguard-workpack",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "webhook",
+        "name": "SafeGuard Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "safeguard-workpack-dispatch"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$json.headers['x-safeguard-secret']}}",
+                "operation": "equals",
+                "value2": "={{$env.SAFEGUARD_WEBHOOK_TOKEN}}"
+              }
+            ]
+          }
+        },
+        "id": "check-secret",
+        "name": "Check SafeGuard Secret",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          260,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst body = $json.body || $json;\nconst workpack = body.workpack || {};\nconst channels = Array.isArray(body.channels) && body.channels.length ? body.channels : ['email'];\nconst recipients = Array.isArray(body.recipients) ? body.recipients : [];\nconst results = channels.map((channel) => ({\n  channel,\n  status: 'unconfigured',\n  message: `${channel} provider credential is not configured yet`\n}));\nreturn [{\n  json: {\n    ok: true,\n    workflowRunId: $execution.id,\n    providerStatus: 'unconfigured',\n    channelResults: results,\n    summary: {\n      requested: channels.length,\n      sent: 0,\n      failed: 0,\n      unconfigured: results.length\n    },\n    subject: `[SafeGuard] ${workpack.companyName || workpack.siteName || '현장'} 작업 전 문서팩`,\n    recipients,\n    message: 'SafeGuard 전파 요청은 접수됐지만 채널 provider 키가 아직 설정되지 않았습니다.',\n    messagePreview: String(workpack.message || '').slice(0, 240),\n    acceptedPayload: {\n      channels,\n      recipients,\n      operatorNote: body.operatorNote || '',\n      messageTarget: workpack.messageTarget || 'manager',\n      messageLanguage: workpack.messageLanguage || { code: 'ko', label: '한국어' }\n    }\n  }\n}];\n"
+        },
+        "id": "dispatch-stub",
+        "name": "Prepare Channel Dispatch Status",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          540,
+          -120
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nreturn [{\n  json: {\n    ok: false,\n    providerStatus: 'rejected',\n    message: 'SafeGuard secret header is missing or invalid.'\n  }\n}];\n"
+        },
+        "id": "respond-rejected",
+        "name": "Respond Rejected",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          540,
+          120
+        ]
+      }
+    ],
+    "connections": {
+      "SafeGuard Webhook": {
+        "main": [
+          [
+            {
+              "node": "Check SafeGuard Secret",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check SafeGuard Secret": {
+        "main": [
+          [
+            {
+              "node": "Prepare Channel Dispatch Status",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Respond Rejected",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1"
+    }
+  }
+]

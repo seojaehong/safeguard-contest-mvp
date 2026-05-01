@@ -1,0 +1,64 @@
+{
+  "generatedAt": "2026-04-30T13:05:48.206Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "elapsedMs": 2433,
+  "ok": true,
+  "checks": [
+    {
+      "route": "/",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 936,
+      "hasSafeGuard": true,
+      "hasV2Signal": true
+    },
+    {
+      "route": "/demo",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 290,
+      "hasSafeGuard": true,
+      "hasV2Signal": true
+    },
+    {
+      "route": "/demo?scenario=ansan-manufacturing-foreign-hotwork&step=3&speed=fast",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 57,
+      "hasSafeGuard": true,
+      "hasV2Signal": true
+    },
+    {
+      "route": "/why",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 266,
+      "hasSafeGuard": true,
+      "hasV2Signal": true
+    },
+    {
+      "route": "/preview",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 261,
+      "hasSafeGuard": true,
+      "hasV2Signal": true
+    },
+    {
+      "route": "/trust",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 290,
+      "hasSafeGuard": true,
+      "hasV2Signal": true
+    },
+    {
+      "route": "/roadmap",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 333,
+      "hasSafeGuard": true,
+      "hasV2Signal": true
+    }
+  ]
+}

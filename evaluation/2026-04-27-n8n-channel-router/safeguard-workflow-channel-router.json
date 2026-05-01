@@ -1,0 +1,161 @@
+[
+  {
+    "id": "SafeGuardWorkpackDispatch",
+    "name": "SafeGuard Workpack Dispatch",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "safeguard-workpack",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "webhook",
+        "name": "SafeGuard Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "safeguard-workpack-dispatch"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{$headers['x-safeguard-secret']}}",
+                "operation": "equals",
+                "value2": "={{$env.SAFEGUARD_WEBHOOK_TOKEN}}"
+              }
+            ]
+          }
+        },
+        "id": "check-secret",
+        "name": "Check SafeGuard Secret",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          260,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $json.body || $json;\nconst workpack = body.workpack || {};\nconst channels = Array.isArray(body.channels) ? body.channels : [];\nconst recipients = Array.isArray(body.recipients) ? body.recipients : [];\nconst message = workpack.message || '';\nconst documents = workpack.documents || {};\nconst evidence = workpack.evidence || {};\n\nreturn [{\n  json: {\n    event: body.event || 'safeguard.workpack.dispatch',\n    receivedAt: new Date().toISOString(),\n    subject: `[SafeGuard] ${workpack.companyName || workpack.siteName || '현장'} 작업 전 문서팩`,\n    channels,\n    recipients,\n    operatorNote: body.operatorNote || '',\n    message,\n    text: `${message}\\n\\n${body.operatorNote || ''}`.trim(),\n    workpack,\n    documents,\n    evidence,\n    meta: {\n      messageTarget: workpack.messageTarget || 'manager',\n      messageLanguage: workpack.messageLanguage || { code: 'ko', label: '한국어' },\n      riskLevel: workpack.riskLevel || '',\n      topRisk: workpack.topRisk || ''\n    }\n  }\n}];"
+        },
+        "id": "format-message",
+        "name": "Format Dispatch Payload",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          520,
+          -120
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const payload = $json;\nconst env = $env;\nconst configs = {\n  email: { url: env.SAFEGUARD_EMAIL_WEBHOOK_URL || env.EMAIL_WEBHOOK_URL, token: env.SAFEGUARD_EMAIL_WEBHOOK_TOKEN || env.EMAIL_WEBHOOK_TOKEN },\n  sms: { url: env.SAFEGUARD_SMS_WEBHOOK_URL || env.SOLAPI_WEBHOOK_URL || env.SMS_WEBHOOK_URL, token: env.SAFEGUARD_SMS_WEBHOOK_TOKEN || env.SOLAPI_WEBHOOK_TOKEN || env.SMS_WEBHOOK_TOKEN },\n  kakao: { url: env.SAFEGUARD_KAKAO_WEBHOOK_URL || env.KAKAO_WEBHOOK_URL, token: env.SAFEGUARD_KAKAO_WEBHOOK_TOKEN || env.KAKAO_WEBHOOK_TOKEN },\n  band: { url: env.SAFEGUARD_BAND_WEBHOOK_URL || env.BAND_WEBHOOK_URL, token: env.SAFEGUARD_BAND_WEBHOOK_TOKEN || env.BAND_WEBHOOK_TOKEN },\n  slack: { url: env.SAFEGUARD_SLACK_WEBHOOK_URL || env.SLACK_WEBHOOK_URL, token: env.SAFEGUARD_SLACK_WEBHOOK_TOKEN || env.SLACK_WEBHOOK_TOKEN },\n  discord: { url: env.SAFEGUARD_DISCORD_WEBHOOK_URL || env.DISCORD_WEBHOOK_URL, token: env.SAFEGUARD_DISCORD_WEBHOOK_TOKEN || env.DISCORD_WEBHOOK_TOKEN }\n};\n\nasync function send(channel) {\n  const config = configs[channel] || {};\n  if (!config.url) {\n    return { channel, status: 'unconfigured', message: `${channel} provider URL is not configured` };\n  }\n\n  const headers = { 'content-type': 'application/json' };\n  if (config.token) headers.authorization = `Bearer ${config.token}`;\n\n  const body = {\n    channel,\n    subject: payload.subject,\n    recipients: payload.recipients,\n    message: payload.message,\n    text: payload.text,\n    operatorNote: payload.operatorNote,\n    meta: payload.meta,\n    workpack: payload.workpack,\n    documents: payload.documents,\n    evidence: payload.evidence\n  };\n\n  try {\n    const response = await fetch(config.url, { method: 'POST', headers, body: JSON.stringify(body) });\n    const responseText = await response.text();\n    return {\n      channel,\n      status: response.ok ? 'sent' : 'failed',\n      httpStatus: response.status,\n      message: response.ok ? `${channel} provider accepted` : responseText.slice(0, 300)\n    };\n  } catch (error) {\n    return { channel, status: 'failed', message: error.message || String(error) };\n  }\n}\n\nconst requested = payload.channels.length ? payload.channels : ['email'];\nconst results = [];\nfor (const channel of requested) {\n  results.push(await send(channel));\n}\n\nconst sent = results.filter((item) => item.status === 'sent').length;\nconst failed = results.filter((item) => item.status === 'failed').length;\nconst unconfigured = results.filter((item) => item.status === 'unconfigured').length;\nconst providerStatus = sent > 0 && failed === 0 ? 'sent' : sent > 0 ? 'partial' : unconfigured === results.length ? 'unconfigured' : 'failed';\n\nreturn [{\n  json: {\n    ok: failed === 0,\n    providerStatus,\n    channelResults: results,\n    summary: { requested: requested.length, sent, failed, unconfigured },\n    subject: payload.subject,\n    recipients: payload.recipients,\n    messagePreview: payload.message.slice(0, 240)\n  }\n}];"
+        },
+        "id": "dispatch-channels",
+        "name": "Dispatch Channels",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          780,
+          -120
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { ok: $json.ok, workflowRunId: $execution.id, providerStatus: $json.providerStatus, channelResults: $json.channelResults, summary: $json.summary, message: $json.providerStatus === 'sent' ? 'SafeGuard 문서팩 전파가 완료되었습니다.' : $json.providerStatus === 'partial' ? 'SafeGuard 문서팩 일부 채널 전파가 완료되었습니다.' : $json.providerStatus === 'unconfigured' ? 'SafeGuard 전파 요청은 접수됐지만 채널 provider 키가 아직 설정되지 않았습니다.' : 'SafeGuard 문서팩 전파 중 오류가 발생했습니다.' } }}",
+          "options": {}
+        },
+        "id": "respond-success",
+        "name": "Respond Success",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          1040,
+          -120
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { ok: false, providerStatus: 'rejected', message: 'SafeGuard secret header is missing or invalid.' } }}",
+          "options": {
+            "responseCode": 401
+          }
+        },
+        "id": "respond-rejected",
+        "name": "Respond Rejected",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          520,
+          120
+        ]
+      }
+    ],
+    "connections": {
+      "SafeGuard Webhook": {
+        "main": [
+          [
+            {
+              "node": "Check SafeGuard Secret",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check SafeGuard Secret": {
+        "main": [
+          [
+            {
+              "node": "Format Dispatch Payload",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Respond Rejected",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Dispatch Payload": {
+        "main": [
+          [
+            {
+              "node": "Dispatch Channels",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dispatch Channels": {
+        "main": [
+          [
+            {
+              "node": "Respond Success",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1"
+    }
+  }
+]

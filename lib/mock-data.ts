@@ -1,4 +1,6 @@
 import { AskResponse, DetailRecord, SearchResult } from "./types";
+import { selectFallbackAccidentCases } from "./accident-cases";
+import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
 
 type ScenarioProfile = {
   id: string;
@@ -102,7 +104,7 @@ export const mockSearchResults: SearchResult[] = mockDetails.map((item) => ({
   tags: item.tags
 }));
 
-export const demoScenarioProfiles: ScenarioProfile[] = [
+export const fieldScenarioProfiles: ScenarioProfile[] = [
   {
     id: "construction-painting",
     companyName: "세이프건설",
@@ -338,29 +340,94 @@ function inferWorkerCount(question: string) {
 function pickScenarioProfile(question: string) {
   const normalized = question.trim().toLowerCase();
 
-  const scored = demoScenarioProfiles.map((profile) => ({
+  const scored = fieldScenarioProfiles.map((profile) => ({
     profile,
     score: profile.keywords.reduce((acc, keyword) => acc + (normalized.includes(keyword.toLowerCase()) ? 1 : 0), 0)
   }));
 
   scored.sort((a, b) => b.score - a.score);
-  return scored[0]?.score ? scored[0].profile : demoScenarioProfiles[0];
+  return scored[0]?.score ? scored[0].profile : fieldScenarioProfiles[0];
+}
+
+function sanitizeWorkSummary(question: string, fallback: string) {
+  const normalized = (question.trim() || fallback)
+    .replace(/\s+/g, " ")
+    .replace(/오늘\s*/g, "")
+    .replace(/(위험성평가|위험성 평가|TBM|안전보건교육|안전교육|기록|초안|문서팩|작업계획서|일지)(와|과|,|·|\s)*/g, "")
+    .replace(/(까지\s*)?(반영해|포함해|연계해|고려해)?\s*(만들어\s*줘|작성해\s*줘|생성해\s*줘|정리해\s*줘|만들어주세요|작성해주세요|생성해주세요|정리해주세요)\.?$/i, "")
+    .replace(/[,.]\s*$/, "")
+    .trim();
+
+  const sentences = normalized.split(/(?<=[.!?。])\s+/).filter(Boolean);
+  const workSentence = sentences.find((sentence) => /작업|점검|운반|도장|상하차|용접|세척|굴착|피킹|적재/.test(sentence));
+  return (workSentence || normalized || fallback).replace(/\.$/, "").trim();
+}
+
+function format4mLine(hazard: string) {
+  const checks = [
+    ["Man", /신규|작업자|외국인|고령|숙련|보호구|추락|끼임|충돌|낙하/.test(hazard) ? "중점" : "확인"],
+    ["Machine", /비계|지게차|장비|도구|용접|세척기|대차|펌프|랙|팔레트|전도|끼임|낙하/.test(hazard) ? "중점" : "확인"],
+    ["Media", /강풍|우천|폭염|고온|환기|밀폐|젖음|작업환경|동선|흄|비산|출하|혼잡/.test(hazard) ? "중점" : "확인"],
+    ["Management", /통제|신호|작업중지|관리|교육|허가|동선|감시|분리|혼잡|화재/.test(hazard) ? "중점" : "확인"]
+  ];
+
+  return `   - 4M 체크: ${checks.map(([label, status]) => `${label}:${status === "중점" ? "■" : "□"}`).join(" ")} / 중점 확인: ${checks.filter(([, status]) => status === "중점").map(([label]) => label).join(", ") || "현장 확인"}`;
 }
 
 function inferScenario(question: string) {
   const normalized = question.trim() || defaultQuestion;
   const workerCount = inferWorkerCount(normalized);
   const profile = pickScenarioProfile(normalized);
+  const workSummary = sanitizeWorkSummary(normalized, profile.workName);
 
   return {
     companyName: profile.companyName,
     companyType: profile.companyType,
     siteName: profile.siteName,
-    workSummary: normalized,
+    workSummary,
     workerCount,
-    weatherNote: normalized.includes("강풍") ? "오후 강풍 예보, 작업중지 기준 공유 필요" : profile.weatherNote,
+    weatherNote: normalized.includes("강풍")
+      ? "오후 강풍 예보, 작업중지 기준 공유 필요"
+      : /우천|젖음|비|강수/.test(normalized)
+        ? "우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요"
+        : /고온|폭염|온열/.test(normalized)
+          ? "고온 작업조건, 온열질환 예방과 휴식 기준 공유 필요"
+          : profile.weatherNote,
     profile
   };
+}
+
+function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>) {
+  const { profile } = scenario;
+
+  return [
+    "점검결과 요약(초안)",
+    "현장 문서팩 첫 장 · 작업 전 검토용",
+    "",
+    `업체명: ${scenario.companyName}`,
+    `업종: ${scenario.companyType}`,
+    `현장명: ${scenario.siteName}`,
+    `작업명: ${profile.workName}`,
+    `작업인원: ${scenario.workerCount}명`,
+    `작업조건: ${scenario.weatherNote}`,
+    "",
+    "[핵심 판단]",
+    `- 위험수준: ${profile.riskLevel}`,
+    `- 핵심 위험: ${profile.topRisk}`,
+    "",
+    "[즉시 조치]",
+    `1. ${profile.actions[0]}`,
+    `2. ${profile.actions[1]}`,
+    `3. ${profile.actions[2]}`,
+    "",
+    "[문서팩 구성]",
+    "- 위험성평가표: 위험요인, 감소대책, 담당자, 확인 근거",
+    "- 작업계획서: 작업구간, 작업순서, 장비·인원, 작업중지 기준",
+    "- TBM 및 일일점검: 작업 전 질문, 참석자 확인, 작업 전·중·후 확인",
+    "- 안전보건교육: 교육대상, 교육내용, 이해도 확인, 후속 교육",
+    "- 비상대응: 즉시조치, 보고체계, 현장보존, 재발방지",
+    "- 사진/증빙: 조치 전·후 사진, 설명, 확인자"
+  ].join("\n");
 }
 
 function buildOfficialStyleRiskAssessment(scenario: ReturnType<typeof inferScenario>) {
@@ -386,15 +453,15 @@ function buildOfficialStyleRiskAssessment(scenario: ReturnType<typeof inferScena
     "[2. 유해·위험요인 파악]",
     `1. 세부작업: ${profile.hazards[0]}`,
     `   - 유해·위험요인: ${profile.hazards[0]}`,
-    "   - 4M 관점: 작업자(Man), 장비·도구(Machine), 작업환경(Media), 관리체계(Management) 확인",
+    format4mLine(profile.hazards[0]),
     "",
     `2. 세부작업: ${profile.hazards[1]}`,
     `   - 유해·위험요인: ${profile.hazards[1]}`,
-    "   - 4M 관점: 작업자(Man), 장비·도구(Machine), 작업환경(Media), 관리체계(Management) 확인",
+    format4mLine(profile.hazards[1]),
     "",
     `3. 세부작업: ${profile.hazards[2]}`,
     `   - 유해·위험요인: ${profile.hazards[2]}`,
-    "   - 4M 관점: 작업자(Man), 장비·도구(Machine), 작업환경(Media), 관리체계(Management) 확인",
+    format4mLine(profile.hazards[2]),
     "",
     "[3. 위험성 결정]",
     `1. ${profile.hazards[0]}`,
@@ -430,6 +497,46 @@ function buildOfficialStyleRiskAssessment(scenario: ReturnType<typeof inferScena
     "근로자 참여 확인: 작업 전 TBM에서 공유 및 복창 확인",
     "조치 완료 예정일: 작업 시작 전 즉시",
     "미조치 항목 처리: 작업 보류 또는 책임자 승인 후 재평가"
+  ].join("\n");
+}
+
+function buildOfficialStyleWorkPlan(scenario: ReturnType<typeof inferScenario>) {
+  const { profile } = scenario;
+
+  return [
+    "작업계획서(초안)",
+    "현장 서식 기준: 작업구간, 작업순서, 장비·인원, 허가·첨부, 확인자 중심",
+    "",
+    `공사명: ${scenario.siteName}`,
+    `작업구간: ${profile.processName}`,
+    `작성자: 관리감독자 / 작업반장`,
+    "확인자: 현장소장 / 안전관리자",
+    "작성일: 작업 시작 전",
+    "",
+    "[1. 작업개요]",
+    `- 작업명: ${profile.workName}`,
+    `- 작업내용: ${scenario.workSummary}`,
+    `- 작업인원: ${scenario.workerCount}명`,
+    `- 작업조건: ${scenario.weatherNote}`,
+    "",
+    "[2. 작업순서]",
+    "- 작업 전 작업구역 설정, 보호구 확인, 장비 상태 점검",
+    `- 주요 작업 수행: ${profile.processName}`,
+    "- 작업 중 위험구역 출입통제와 작업중지 기준 수시 확인",
+    "- 작업 종료 후 정리정돈, 잔여 위험요인 확인, 사진/기록 보관",
+    "",
+    "[3. 장비·인원·허가 확인]",
+    "- 장비/도구: 작업계획서 또는 안전작업허가서 첨부자료로 확인",
+    "- 작업자: 신규 투입자, 외국인 근로자, 협력업체 인원 별도 확인",
+    "- 허가/첨부: 고위험 작업은 안전작업허가서, 위험성평가표, TBM 기록을 함께 보관",
+    "",
+    "[4. 작업중지 기준]",
+    `- ${profile.questions[0]}`,
+    `- ${profile.questions[1]}`,
+    `- ${profile.questions[2]}`,
+    "",
+    "[5. 확인 근거]",
+    "- 위험성평가표, TBM 기록, 안전보건교육 기록, 사진/영상 증빙을 같은 문서팩으로 묶어 확인합니다."
   ].join("\n");
 }
 
@@ -473,6 +580,72 @@ function buildOfficialStyleTbmBriefing(scenario: ReturnType<typeof inferScenario
     `1. ${profile.questions[0]}`,
     `2. ${profile.questions[1]}`,
     `3. ${profile.questions[2]}`
+  ].join("\n");
+}
+
+function buildEmergencyResponseDraft(scenario: ReturnType<typeof inferScenario>) {
+  const { profile } = scenario;
+
+  return [
+    "비상대응 절차(초안)",
+    "중대재해·산업재해 발생 대비 현장 초기대응 기록",
+    "",
+    `현장명: ${scenario.siteName}`,
+    `작업명: ${profile.workName}`,
+    "적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체",
+    "",
+    "[1. 사고 징후 및 즉시 중지]",
+    `- 핵심 위험: ${profile.topRisk}`,
+    "- 사고 징후, 아차사고, 위험 발견 시 작업자는 즉시 작업을 중지하고 작업반장에게 보고합니다.",
+    "- 추가 피해 가능성이 있으면 위험구역 접근을 통제하고 전원을 안전한 장소로 이동시킵니다.",
+    "",
+    "[2. 초기조치]",
+    "- 부상자 구조와 응급조치를 우선하되, 구조자 2차 사고 위험을 먼저 확인합니다.",
+    "- 전기, 화기, 장비, 차량 등 추가 위험원을 정지 또는 격리합니다.",
+    "- 필요한 경우 119, 원청/발주자, 안전관리자에게 즉시 연락합니다.",
+    "",
+    "[3. 보고체계]",
+    "- 최초 발견자 → 작업반장 → 관리감독자 → 현장소장 → 발주자/원청 안전 담당 순으로 보고합니다.",
+    "- 보고 내용은 사고시간, 장소, 작업내용, 피해상황, 초기조치, 추가 위험 여부를 포함합니다.",
+    "",
+    "[4. 현장보존 및 재발방지]",
+    "- 인명구조와 추가 피해 방지를 제외하고 현장을 임의 변경하지 않습니다.",
+    "- 사진/영상, TBM 기록, 위험성평가표, 교육 기록을 함께 보관합니다.",
+    "- 재개 전 위험성평가를 다시 수행하고 감소대책 이행 여부를 확인합니다."
+  ].join("\n");
+}
+
+function buildPhotoEvidenceDraft(scenario: ReturnType<typeof inferScenario>) {
+  const { profile } = scenario;
+
+  return [
+    "사진/증빙 기록(초안)",
+    "현장 점검 및 제출 대응용 첨부 슬롯",
+    "",
+    `현장명: ${scenario.siteName}`,
+    `작업명: ${profile.workName}`,
+    "",
+    "[1. 작업 전 사진]",
+    "- 작업구역 전경:",
+    "- 보호구 착용 상태:",
+    "- 장비/도구 점검 상태:",
+    "- 위험구역 출입통제 상태:",
+    "",
+    "[2. 조치 전·후 사진]",
+    `- 위험요인 1: ${profile.hazards[0]}`,
+    `- 조치내용: ${profile.actions[0]}`,
+    `- 위험요인 2: ${profile.hazards[1]}`,
+    `- 조치내용: ${profile.actions[1]}`,
+    "",
+    "[3. TBM 및 교육 증빙]",
+    "- TBM 실시 사진 또는 모바일 기록:",
+    "- 참석자 확인 또는 서명:",
+    "- 신규/외국인 근로자 이해도 확인:",
+    "",
+    "[4. 확인자]",
+    "- 촬영자:",
+    "- 확인자:",
+    "- 보관 위치: 작업일지, 모바일 앱, 문서팩 첨부자료"
   ].join("\n");
 }
 
@@ -565,6 +738,29 @@ function buildOfficialStyleSafetyEducationRecord(scenario: ReturnType<typeof inf
 export function buildMockAskResponse(question: string, citations: SearchResult[], mode: AskResponse["mode"], statusDetail: string): AskResponse {
   const scenario = inferScenario(question);
   const profile = scenario.profile;
+  const responseScenario = {
+    companyName: scenario.companyName,
+    companyType: scenario.companyType,
+    siteName: scenario.siteName,
+    workSummary: scenario.workSummary,
+    workerCount: scenario.workerCount,
+    weatherNote: scenario.weatherNote
+  };
+  const riskSummary = {
+    title: `${scenario.companyType} ${profile.workName}`,
+    riskLevel: profile.riskLevel,
+    topRisk: profile.topRisk,
+    immediateActions: [
+      profile.actions[0],
+      profile.actions[1],
+      profile.actions[2]
+    ]
+  };
+  const foreignWorkerInput = {
+    question: question.trim() || defaultQuestion,
+    scenario: responseScenario,
+    riskSummary
+  };
 
   return {
     question: question.trim() || defaultQuestion,
@@ -581,14 +777,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
     citations,
     sourceMix: buildSourceMix(citations),
     mode,
-    scenario: {
-      companyName: scenario.companyName,
-      companyType: scenario.companyType,
-      siteName: scenario.siteName,
-      workSummary: scenario.workSummary,
-      workerCount: scenario.workerCount,
-      weatherNote: scenario.weatherNote
-    },
+    scenario: responseScenario,
     externalData: {
       weather: {
         source: "kma",
@@ -601,31 +790,52 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       training: {
         source: "work24",
         mode: "mock",
-        detail: "대표 시나리오 기반 교육 연계 문구",
+        detail: "현장 예시 기반 교육 연계 문구",
         recommendations: []
+      },
+      koshaEducation: {
+        source: "kosha-edu",
+        mode: "fallback",
+        detail: "대표 시나리오 기반 KOSHA 교육포털 연계 문구",
+        recommendations: [
+          {
+            title: "KOSHA 안전보건교육포털 교육과정 검색",
+            provider: "한국산업안전보건공단",
+            target: "근로자·관리감독자",
+            educationMethod: "집체·온라인·혼합 과정",
+            url: "https://edu.kosha.or.kr/",
+            reason: "KOSHA 공식 교육포털에서 후속 안전교육 후보를 확인합니다.",
+            fitLabel: "공식 포털",
+            fitReason: "공식 교육포털 연계 fallback 후보입니다."
+          }
+        ]
       },
       kosha: {
         source: "kosha",
         mode: "fallback",
         detail: "대표 시나리오 기반 KOSHA 가이드 보강 문구",
         references: []
+      },
+      accidentCases: {
+        source: "kosha-accident",
+        mode: "fallback",
+        detail: "대표 시나리오 기반 유사 재해사례 보강 문구",
+        cases: selectFallbackAccidentCases(question)
       }
     },
-    riskSummary: {
-      title: `${scenario.companyType} ${profile.workName}`,
-      riskLevel: profile.riskLevel,
-      topRisk: profile.topRisk,
-      immediateActions: [
-        profile.actions[0],
-        profile.actions[1],
-        profile.actions[2]
-      ]
-    },
+    riskSummary,
     deliverables: {
+      workpackSummaryDraft: buildWorkpackSummaryDraft(scenario),
       riskAssessmentDraft: buildOfficialStyleRiskAssessment(scenario),
+      workPlanDraft: buildOfficialStyleWorkPlan(scenario),
       tbmBriefing: buildOfficialStyleTbmBriefing(scenario),
       tbmLogDraft: buildOfficialStyleTbmLog(scenario),
       safetyEducationRecordDraft: buildOfficialStyleSafetyEducationRecord(scenario),
+      emergencyResponseDraft: buildEmergencyResponseDraft(scenario),
+      photoEvidenceDraft: buildPhotoEvidenceDraft(scenario),
+      foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
+      foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
+      foreignWorkerLanguages: getDefaultForeignWorkerLanguages(foreignWorkerInput.question),
       safetyEducationPoints: [
         profile.educationPoints[0],
         profile.educationPoints[1],
@@ -651,7 +861,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       weather: "mock",
       work24: "mock",
       kosha: "fallback",
-      summary: mode === "live" ? "라이브 응답" : mode === "fallback" ? "라이브 실패 후 데모 응답으로 전환" : "데모 응답",
+      summary: mode === "live" ? "연결됨" : mode === "fallback" ? "일부 근거 보류" : "연결 점검 필요",
       detail: statusDetail,
       policyNote: "실 API 호출은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
     }

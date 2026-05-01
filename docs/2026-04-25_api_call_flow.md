@@ -8,6 +8,7 @@
 3. 긴 자연어 질문은 `산업안전보건법` 중심 fallback 질의로 한 번 더 보강
 4. 설정 시 `korean-law-mcp`를 추가로 조회해 근거를 보강
 5. `runAsk`는 동시에 `기상청`, `고용24`, `KOSHA` 보강 데이터를 병렬 수집
+   - 기상청은 `초단기실황`, `초단기예보`, `단기예보`를 같은 위치 격자(nx/ny)로 병렬 확인한다.
 6. 수집한 citations를 `generateAnswer`로 넘겨 Gemini 또는 OpenAI 응답 생성
 7. AI 호출 실패 시 `buildMockAskResponse`로 fallback
 8. 최종적으로 `AskResponse` 또는 검색 결과를 페이지/API 응답으로 반환
@@ -27,7 +28,7 @@
 
 ## 현재 상태 정리
 - `Law.go`: live adapter 구현 완료
-- `기상청 단기예보`: live adapter 구현 완료
+- `기상청 초단기실황/초단기예보/단기예보`: live adapter 구현 완료
 - `고용24 사업주훈련/교육 추천`: live adapter 구현 완료
 - `KOSHA`: 현재는 공식 가이드 링크 기반 fallback 보강 경로
 - `korean-law-mcp`: 설정 시 보강 가능
@@ -45,4 +46,4 @@
 - `/api/ask` 응답 구조와 산출물 필드
 - `/api/search` 검색 결과 응답 구조
 - 업체별 시나리오가 올바른 회사명과 업종으로 매핑되는지
-- Law.go, 기상청, 고용24 live 응답이 status와 외부 데이터 필드에 반영되는지
+- Law.go, 기상청 3종 응답, 고용24 live 응답이 status와 외부 데이터 필드에 반영되는지

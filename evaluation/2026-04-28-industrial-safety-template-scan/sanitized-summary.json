@@ -1,0 +1,50 @@
+{
+  "sourceDirectoryLabel": "OneDrive/_30_컨설팅/2025/산업안전",
+  "elapsedSeconds": 30.54,
+  "fileCount": 1032,
+  "byExtension": {
+    ".jpg": 924,
+    ".xlsx": 45,
+    ".hwpx": 44,
+    ".pdf": 10,
+    ".zip": 2,
+    ".hwp": 2,
+    ".bmp": 2,
+    ".png": 2,
+    ".pptx": 1
+  },
+  "byTopFolder": {
+    "central": 651,
+    "bundang": 192,
+    "pyeongtaek": 86,
+    "dongtan": 85,
+    "recommended-procedures-and-forms": 8,
+    "root": 5,
+    "reference": 5
+  },
+  "categoryCounts": {
+    "photo_evidence": 720,
+    "inspection": 59,
+    "contractor_owner": 23,
+    "risk_assessment": 8,
+    "work_plan": 4,
+    "tbm_prework": 2,
+    "emergency_response": 2,
+    "education": 1
+  },
+  "structuredCounts": {
+    "xlsx": 45,
+    "pptx": 1,
+    "hwpx": 44,
+    "pdf": 10
+  },
+  "imageCount": 928,
+  "imageByTopFolder": {
+    "central": 592,
+    "bundang": 180,
+    "dongtan": 79,
+    "pyeongtaek": 77
+  },
+  "privacyNote": "Raw local paths, personal names, company names, and original text dumps are intentionally not included in this committed summary."
+}
+

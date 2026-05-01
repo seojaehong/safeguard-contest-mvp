@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-05-01T01:22:27.5844023Z",
+  "supabaseUrlConfigured": true,
+  "serviceRoleConfigured": true,
+  "migrationFiles": [
+    "supabase/migrations/001_init.sql",
+    "supabase/migrations/002_workspace_productization.sql",
+    "supabase/migrations/003_knowledge_runtime.sql"
+  ],
+  "remoteTableCheck": [
+    {
+      "exists": false,
+      "status": 404,
+      "table": "organizations"
+    },
+    {
+      "exists": false,
+      "status": 404,
+      "table": "sites"
+    },
+    {
+      "exists": false,
+      "status": 404,
+      "table": "workpacks"
+    },
+    {
+      "exists": false,
+      "status": 404,
+      "table": "knowledge_events"
+    },
+    {
+      "exists": false,
+      "status": 404,
+      "table": "daily_entries"
+    },
+    {
+      "exists": false,
+      "status": 404,
+      "table": "knowledge_regeneration_runs"
+    }
+  ],
+  "verdict": "blocked",
+  "blocker": "Supabase project is reachable, but required tables are not present. Applying migrations requires DB password, a linked Supabase CLI session, or manual SQL execution in the Supabase SQL editor.",
+  "nextRequiredInputs": [
+    "Supabase database password or pooled DATABASE_URL",
+    "or Supabase CLI access token with project link",
+    "or approval to paste and run migration SQL in Supabase SQL editor"
+  ]
+}

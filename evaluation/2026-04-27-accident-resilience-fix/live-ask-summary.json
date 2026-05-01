@@ -1,0 +1,14 @@
+{
+  "elapsedMs": 20116,
+  "mode": "live",
+  "lawgo": "live",
+  "ai": "live",
+  "weather": "live",
+  "work24": "live",
+  "kosha": "live",
+  "accidentMode": "live",
+  "accidentCount": 3,
+  "firstAccidentTitle": "산소절단 작업 중 화재폭발",
+  "detail": "Law.go와 Gemini (gemini-2.5-flash) 응답을 결합한 라이브 모드입니다. / 법령 근거 상태: live / 기상청 단기예보 live 호출 성공 (서울, base 20260427 2000) / 고용24 사업주훈련 live 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다.",
+  "accidentDetail": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다."
+}

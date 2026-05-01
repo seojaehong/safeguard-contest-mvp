@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-04-29T00:36:24.4707581+09:00",
+  "branch": "codex/safety-evidence-foreign-services",
+  "typecheck": "passed after build regenerated .next/types",
+  "build": "passed",
+  "diffCheck": "line-ending warnings only",
+  "filesInspected": [
+    "components/SafeGuardCommandCenter.tsx",
+    "components/FieldOperationsWorkspace.tsx",
+    "components/WorkflowSharePanel.tsx",
+    "components/WorkpackEditor.tsx",
+    "app/globals.css"
+  ],
+  "p0Coverage": {
+    "uniqueStepAnchors": true,
+    "dispatchConfirm": true,
+    "workerConsent": true,
+    "controlLabels": true,
+    "mobilePrimaryCtaOrder": true,
+    "productStorageCopy": true,
+    "exportProgressiveDisclosure": true
+  },
+  "remainingManualChecks": [
+    "browser keyboard tab order",
+    "mobile viewport screenshot",
+    "multilingual PDF/JPG/HWPX font rendering",
+    "n8n provider delivery in target environment"
+  ]
+}

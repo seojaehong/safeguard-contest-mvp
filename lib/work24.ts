@@ -166,7 +166,7 @@ export async function fetchTrainingRecommendations(question: string): Promise<{
     return {
       source: "work24",
       mode: "fallback",
-      detail: "WORK24_AUTH_KEY가 없어 고용24 사업주훈련 live 호출을 수행하지 못했습니다.",
+      detail: "WORK24_AUTH_KEY가 없어 고용24 사업주훈련 연결을 확인해야 합니다.",
       recommendations: []
     };
   }
@@ -191,8 +191,8 @@ export async function fetchTrainingRecommendations(question: string): Promise<{
       source: "work24",
       mode: recommendations.length ? "live" : "fallback",
       detail: recommendations.length
-        ? `고용24 사업주훈련 live 호출 성공${area1 ? ` (지역코드 ${area1})` : ""}. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다.`
-        : "고용24 사업주훈련 live 호출은 성공했지만 추천 결과가 비어 있습니다.",
+        ? `고용24 사업주훈련 호출 성공${area1 ? ` (지역코드 ${area1})` : ""}. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다.`
+        : "고용24 사업주훈련 호출은 성공했지만 추천 결과가 비어 있습니다.",
       recommendations
     };
   } catch (error) {
@@ -200,7 +200,7 @@ export async function fetchTrainingRecommendations(question: string): Promise<{
     return {
       source: "work24",
       mode: "fallback",
-      detail: `고용24 사업주훈련 fallback: ${message}`,
+      detail: `고용24 사업주훈련 연결 점검 필요: ${message}`,
       recommendations: []
     };
   }

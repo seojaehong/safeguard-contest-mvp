@@ -1,0 +1,9 @@
+{
+  "baseUrl": "http://127.0.0.1:3023",
+  "totalRuns": 6,
+  "okCount": 6,
+  "failCount": 0,
+  "avgMs": 28667,
+  "p95Ms": 37776,
+  "generatedAt": "2026-04-27T12:53:10.483Z"
+}

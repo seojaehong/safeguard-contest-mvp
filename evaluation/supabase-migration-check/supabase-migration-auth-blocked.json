@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-05-01T01:46:08.3002631Z",
+  "linkedProjectRef": "pleyuknjnprsckssxvrh",
+  "linkedProjectName": "labor_money",
+  "poolerHostResolved": "aws-1-ap-southeast-1.pooler.supabase.com",
+  "linkStatus": "success",
+  "dbPushStatus": "blocked",
+  "blocker": "Supabase CLI can reach the shared pooler, but Postgres password authentication failed for user postgres.pleyuknjnprsckssxvrh.",
+  "directDbNote": "Dedicated/direct host uses IPv6 by default and current Windows network has no IPv6 route.",
+  "nextRequiredInputs": [
+    "Correct Supabase database password after reset",
+    "or run supabase/migrations/001_init.sql, 002_workspace_productization.sql, 003_knowledge_runtime.sql manually in Supabase SQL Editor"
+  ]
+}

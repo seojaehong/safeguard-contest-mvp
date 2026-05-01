@@ -1,5 +1,5 @@
 {
-  "name": "contest-mvp",
+  "name": "safeguard",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,12 +9,18 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit --incremental false",
     "e2e:scenarios": "node ./scripts/e2e_scenario_runner.mjs",
+    "audit:launch": "node ./scripts/launch_readiness_audit.mjs",
+    "smoke:orchestration-download": "node ./scripts/prod_orchestration_download_smoke.mjs",
+    "smoke:submission": "node ./scripts/submission_readiness_smoke.mjs",
+    "knowledge:seed": "node ./scripts/build_safety_knowledge_seed.mjs",
+    "knowledge:smoke": "node ./scripts/knowledge_runtime_smoke.mjs",
     "dryrun:api": "./scripts/run_daily_dryrun.sh",
     "dryrun:documents": "./scripts/run_daily_document_dryrun.sh",
     "publish:dryrun": "node ./scripts/publish_document_dryrun_snapshot.mjs"
   },
   "dependencies": {
     "@rhwp/core": "0.7.6",
+    "@supabase/supabase-js": "^2.105.0",
     "korean-law-mcp": "^2.1.6",
     "next": "15.5.15",
     "openai": "^4.95.0",

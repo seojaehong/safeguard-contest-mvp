@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-04-30T23:32:56.809Z",
+  "verdict": "pass",
+  "counts": {
+    "hazards": 8,
+    "officialSources": 14,
+    "legalMappings": 3,
+    "accidentCases": 5,
+    "trainingItems": 3,
+    "templates": 4,
+    "liveOpenApiResults": 7,
+    "emptyOpenApiResults": 7,
+    "failedOpenApiResults": 0
+  },
+  "checks": [
+    {
+      "name": "hazard-count",
+      "verdict": "pass",
+      "detail": "8개 위험요인"
+    },
+    {
+      "name": "official-source-count",
+      "verdict": "pass",
+      "detail": "14개 공식 출처"
+    },
+    {
+      "name": "legal-map-count",
+      "verdict": "pass",
+      "detail": "3개 법령 매핑"
+    },
+    {
+      "name": "template-count",
+      "verdict": "pass",
+      "detail": "4개 서식 매핑"
+    },
+    {
+      "name": "accident-case-count",
+      "verdict": "pass",
+      "detail": "5개 재해사례 seed"
+    },
+    {
+      "name": "source-url-preserved",
+      "verdict": "pass",
+      "detail": "모든 공식 출처 URL 보존"
+    },
+    {
+      "name": "hazard-document-mapping",
+      "verdict": "pass",
+      "detail": "모든 위험요인 문서 반영 위치 보유"
+    },
+    {
+      "name": "controls-present",
+      "verdict": "pass",
+      "detail": "모든 위험요인 통제대책 보유"
+    },
+    {
+      "name": "live-attempt-recorded",
+      "verdict": "pass",
+      "detail": "KOSHA OpenAPI live 수집 시도 기록"
+    },
+    {
+      "name": "no-secret-leak",
+      "verdict": "pass",
+      "detail": "서비스키 미저장"
+    }
+  ],
+  "artifacts": [
+    "data/safety-knowledge/manifest.json",
+    "data/safety-knowledge/hazards.json",
+    "data/safety-knowledge/legal-map.json",
+    "data/safety-knowledge/kosha-resources.json",
+    "data/safety-knowledge/accident-cases.json",
+    "data/safety-knowledge/training-map.json",
+    "data/safety-knowledge/templates.json",
+    "knowledge/SCHEMA.md",
+    "knowledge/log.md",
+    "knowledge/wiki/index.md",
+    "knowledge/wiki/hazards/*.md",
+    "knowledge/wiki/forms/*.md",
+    "evaluation/safety-knowledge-seed/safety-knowledge-seed-report.json",
+    "evaluation/safety-knowledge-seed/safety-knowledge-seed-report.md"
+  ]
+}

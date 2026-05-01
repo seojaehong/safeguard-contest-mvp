@@ -2,6 +2,12 @@ import { SearchResult } from "@/lib/types";
 import Link from "next/link";
 import type { Route } from "next";
 
+const citationGroups: Array<{ type: SearchResult["type"]; label: string }> = [
+  { type: "law", label: "법령" },
+  { type: "precedent", label: "판례" },
+  { type: "interpretation", label: "해석례" }
+];
+
 function getCitationHref(item: SearchResult): Route {
   if (item.type === "law") return `/law/${item.id}` as Route;
   if (item.type === "precedent") return `/precedent/${item.id}` as Route;
@@ -30,24 +36,44 @@ function describeRelevance(item: SearchResult, question?: string) {
   return "현재 작업 조건과 유사한 위험 판단 기준을 빠르게 확인하기 위한 근거입니다.";
 }
 
+function sourceStatusLabel(item: SearchResult) {
+  if (item.sourceSystem === "lawgo") return "법제처 인용";
+  if (item.sourceSystem === "korean-law-mcp") return "추가 근거";
+  return "기본 근거";
+}
+
 export function CitationList({ citations, question }: { citations: SearchResult[]; question?: string }) {
   return (
     <div className="card list">
       <div className="h3">근거 출처</div>
-      <div className="muted small">법령, 판례, 해석례를 묶어 현재 작업의 위험 판단과 산출물 문구를 뒷받침합니다.</div>
-      {citations.map((c) => {
-        const href = getCitationHref(c);
+      <div className="muted small">법령, 판례, 해석례를 나눠 현재 작업의 위험 판단과 산출물 문구를 뒷받침합니다. 법률 검토 최종 의견이 아니라 현장 문서 초안용 근거입니다.</div>
+      {citationGroups.map((group) => {
+        const groupItems = citations.filter((item) => item.type === group.type);
+        if (!groupItems.length) return null;
+
         return (
-          <Link key={c.id} href={href} className="list citation-item">
+          <section key={group.type} className="citation-group">
             <div className="row">
-              <span className="badge">{c.type === "law" ? "법령" : c.type === "precedent" ? "판례" : "해석례"}</span>
-              <span className="badge">{c.sourceLabel}</span>
-              {c.tags?.some((tag) => tag.includes("작업위험 매핑")) ? <span className="badge">작업위험 매핑</span> : null}
+              <span className="badge">{group.label}</span>
+              <span className="muted small">{groupItems.length}건</span>
             </div>
-            <strong>{c.title}</strong>
-            <span className="muted">{c.summary}</span>
-            <span className="small relevance-note">{describeRelevance(c, question)}</span>
-          </Link>
+            {groupItems.map((c) => {
+              const href = getCitationHref(c);
+              return (
+                <Link key={c.id} href={href} className="list citation-item" target="_blank" rel="noopener noreferrer">
+                  <div className="row">
+                    <span className="badge">{c.sourceLabel}</span>
+                    <span className="badge">{sourceStatusLabel(c)}</span>
+                    <span className="badge">새 탭</span>
+                    {c.tags?.some((tag) => tag.includes("작업위험 매핑")) ? <span className="badge">작업위험 매핑</span> : null}
+                  </div>
+                  <strong>{c.title}</strong>
+                  <span className="muted">{c.summary}</span>
+                  <span className="small relevance-note">{describeRelevance(c, question)}</span>
+                </Link>
+              );
+            })}
+          </section>
         );
       })}
     </div>

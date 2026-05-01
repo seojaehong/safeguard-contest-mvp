@@ -10,11 +10,11 @@ export default function DryrunPage() {
   return (
     <main className="container grid" style={{ paddingTop: 36, paddingBottom: 48 }}>
       <section className="hero grid" style={{ gap: 18 }}>
-        <span className="badge">SafetyGuard monitoring</span>
+        <span className="badge">SafeGuard 운영 점검</span>
         <div className="grid" style={{ gap: 12 }}>
-          <h1 className="title">문서형 드라이런 로그</h1>
+          <h1 className="title">문서 생성 점검 로그</h1>
           <p className="subtitle">
-            위험성평가, TBM 일지, 작업계획서 등 10개 문서형 산출물을 매일 드라이런해 실제 응답 생성 여부와 품질을 추적합니다.
+            위험성평가, TBM 일지, 작업계획서 등 문서형 산출물의 생성 상태와 응답 품질을 운영 관점에서 추적합니다.
           </p>
           <div className="row">
             <Link href="/" className="button secondary">홈으로</Link>
@@ -30,7 +30,7 @@ export default function DryrunPage() {
             <div className="stat"><span className="muted">평균 응답</span><strong>{snapshot.avgMs}ms</strong></div>
             <div className="stat"><span className="muted">P95</span><strong>{snapshot.p95Ms}ms</strong></div>
           </div>
-          <p className="lead">{snapshot.qualityNote}</p>
+          <p className="lead">{snapshot.qualityNote.replaceAll("드라이런", "점검")}</p>
           <p className="muted small">
             summary: <code>{snapshot.summaryPath}</code><br />
             report: <code>{snapshot.reportPath}</code>
