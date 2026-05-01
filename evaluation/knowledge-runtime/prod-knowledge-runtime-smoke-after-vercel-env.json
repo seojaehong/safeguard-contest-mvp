@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-05-01T06:18:03.7553254Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "verdict": "pass_with_notice",
+  "match": {
+    "matchCount": 2,
+    "ok": true,
+    "firstMatch": "비계·고소작업 추락"
+  },
+  "ingest": {
+    "configured": true,
+    "ok": true,
+    "message": "원본 이벤트를 검증했습니다. 저장하려면 관리자 로그인과 Supabase 설정이 필요합니다.",
+    "storageMode": "stateless",
+    "savedEventId": null
+  },
+  "regenerate": {
+    "savedRunId": null,
+    "provider": "Gemini (gemini-2.5-flash)",
+    "aiReady": true,
+    "message": "AI 재생성에 바로 투입할 수 있는 지식 번들을 생성했습니다. 저장하려면 관리자 로그인과 Supabase 설정이 필요합니다.",
+    "storageMode": "stateless",
+    "ok": true,
+    "configured": true
+  },
+  "notice": "Vercel Production env is configured and AI generation is ready. Persistent DB save still requires a Supabase user access token from logged-in UI/API calls."
+}
