@@ -2,6 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AskResponse } from "@/lib/types";
+import {
+  evaluatePublicSafetyRubric,
+  rubricCategoryLabel,
+  rubricStatusLabel
+} from "@/lib/safety-document-rubric";
 
 declare global {
   var measureTextWidth: ((font: string, text: string) => number) | undefined;
@@ -242,13 +247,21 @@ function buildLaunchSheetRows(values: Record<DocumentKey, string>) {
     { sheet: "6. 사진/증빙", keys: ["photoEvidenceDraft"] }
   ];
 
-  return sheetMap.flatMap(({ sheet, keys }) => (
+  const documentRows = sheetMap.flatMap(({ sheet, keys }) => (
     keys.flatMap((key) => {
       const meta = documentMeta.find((item) => item.key === key);
       if (!meta) return [];
       return buildRowsForDocument(meta, values).map((row) => ({ ...row, section: `${sheet} / ${row.section}` }));
     })
   ));
+  const rubricRows = evaluatePublicSafetyRubric(values).items.map((item) => ({
+    document: "제출 전 점검",
+    section: `7. 제출 전 점검 / ${rubricCategoryLabel(item.category)}`,
+    item: item.title,
+    content: `${rubricStatusLabel(item.status)} · ${item.description} · 보완: ${item.improvementAction} · 리서치: ${item.researchAction}`
+  }));
+
+  return [...documentRows, ...rubricRows];
 }
 
 function escapeCell(value: string) {
@@ -476,7 +489,14 @@ async function buildHwpxWithRhwp(body: string) {
 }
 
 function buildCombinedText(values: Record<DocumentKey, string>) {
-  return documentMeta.map((item) => `# ${item.title}\n\n${values[item.key]}`).join("\n\n---\n\n");
+  const rubricText = evaluatePublicSafetyRubric(values).items.map((item) => (
+    `- [${rubricCategoryLabel(item.category)}] ${item.title}: ${rubricStatusLabel(item.status)}\n  보완: ${item.improvementAction}\n  리서치: ${item.researchAction}`
+  )).join("\n");
+
+  return [
+    documentMeta.map((item) => `# ${item.title}\n\n${values[item.key]}`).join("\n\n---\n\n"),
+    `# 제출 전 점검\n\n${rubricText}`
+  ].join("\n\n---\n\n");
 }
 
 function parseStoredValues(raw: string | null, fallback: Record<DocumentKey, string>) {
@@ -542,6 +562,10 @@ export function WorkpackEditor({
   const selectedText = values[selected.key];
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
   const selectedRows = buildRowsForDocument(selected, values);
+  const rubricEvaluation = useMemo(() => evaluatePublicSafetyRubric(values), [values]);
+  const selectedRubricItems = useMemo(() => (
+    rubricEvaluation.items.filter((item) => item.documents.includes(selected.key))
+  ), [rubricEvaluation.items, selected.key]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -796,6 +820,27 @@ export function WorkpackEditor({
           {sheetStatus === "copied" ? <p className="muted small">표 데이터를 복사했습니다. 열린 Google Sheets의 A1 셀에 Ctrl+V로 붙여넣어 주세요.</p> : null}
           {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패해 TSV 파일을 내려받았습니다. Google Sheets에서 파일 가져오기로 업로드해 주세요.</p> : null}
           <a className="knowledge-link" href="/knowledge">LLM 위키·지식 DB 확인</a>
+          <div className="rubric-panel" aria-label="제출 전 점검">
+            <div className="compact-head">
+              <span className="eyebrow">제출 전 점검</span>
+              <strong>점검 진행</strong>
+            </div>
+            <p className="muted small">
+              공통 안전서류와 법령 기반 필수 확인을 먼저 보고, 공공기관 제출 품질 항목은 보강 대상으로 분리합니다.
+            </p>
+            <div className="rubric-meter" aria-hidden="true">
+              <span style={{ width: `${(rubricEvaluation.summary.fulfilled / rubricEvaluation.summary.total) * 100}%` }} />
+            </div>
+            <div className="rubric-stack">
+              {rubricEvaluation.items.slice(0, 6).map((item) => (
+                <div key={item.id} className={`rubric-item ${item.status}`}>
+                  <span>{rubricCategoryLabel(item.category)}</span>
+                  <strong>{item.title}</strong>
+                  <em>{rubricStatusLabel(item.status)}</em>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -840,6 +885,21 @@ export function WorkpackEditor({
             편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF·XLS·HWPX로 바로 내려받을 수 있습니다.
           </p>
         ) : null}
+        <div className="selected-rubric-strip" aria-label={`${selected.title} 제출 전 점검`}>
+          {selectedRubricItems.length ? selectedRubricItems.map((item) => (
+            <div key={item.id} className={`selected-rubric-item ${item.status}`}>
+              <span>{rubricCategoryLabel(item.category)}</span>
+              <strong>{item.title}</strong>
+              <small>{rubricStatusLabel(item.status)} · {item.status === "fulfilled" ? "현재 문서에 반영되어 있습니다." : item.improvementAction}</small>
+            </div>
+          )) : (
+            <div className="selected-rubric-item fulfilled">
+              <span>현장 운영 추천</span>
+              <strong>문서별 직접 점검 항목 없음</strong>
+              <small>전체 문서팩 점검 패널에서 공통 보강 항목을 확인하세요.</small>
+            </div>
+          )}
+        </div>
         <textarea
           ref={textareaRef}
           className="document-textarea"

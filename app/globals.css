@@ -2196,6 +2196,94 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   font-weight: 850;
 }
 
+.rubric-panel {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(33, 89, 79, 0.22);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.74);
+  padding: 12px;
+}
+
+.rubric-meter {
+  overflow: hidden;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(226, 222, 213, 0.88);
+}
+
+.rubric-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #6f4b26);
+}
+
+.rubric-stack,
+.selected-rubric-strip {
+  display: grid;
+  gap: 8px;
+}
+
+.rubric-item,
+.selected-rubric-item {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(207, 199, 185, 0.72);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.64);
+  padding: 10px 11px;
+}
+
+.rubric-item span,
+.selected-rubric-item span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.rubric-item strong,
+.selected-rubric-item strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.rubric-item em {
+  color: #6f4b26;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.rubric-item.fulfilled,
+.selected-rubric-item.fulfilled {
+  border-color: rgba(33, 89, 79, 0.28);
+  background: rgba(232, 241, 237, 0.66);
+}
+
+.rubric-item.needs-improvement,
+.selected-rubric-item.needs-improvement {
+  border-color: rgba(184, 95, 36, 0.34);
+  background: rgba(255, 240, 223, 0.54);
+}
+
+.rubric-item.needs-user-check,
+.selected-rubric-item.needs-user-check {
+  border-color: rgba(154, 61, 24, 0.32);
+  background: rgba(255, 248, 238, 0.72);
+}
+
+.selected-rubric-strip {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.selected-rubric-item small {
+  color: #526075;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .template-picker {
   display: grid;
   gap: 8px;
@@ -3358,6 +3446,10 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   .action-strip,
   .doc-card-list,
   .api-proof-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .selected-rubric-strip {
     grid-template-columns: 1fr;
   }
 

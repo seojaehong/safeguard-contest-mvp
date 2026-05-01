@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-05-01T00:00:00+09:00",
+  "purpose": "Apply public-sector safety document rubric as a two-track quality and submission readiness layer.",
+  "sourceBenchmark": [
+    "public-sector safety document checklist structure",
+    "risk assessment adequacy checklist",
+    "work plan checklist",
+    "supervision diary and safety supervision diary",
+    "serious accident response procedure",
+    "construction work plan and risk assessment procedure templates"
+  ],
+  "implementation": {
+    "rubricModule": "lib/safety-document-rubric.ts",
+    "uiSurface": "components/WorkpackEditor.tsx",
+    "exportSurface": "whole workpack TXT/XLS/CSV/Google Sheets TSV via 7. 제출 전 점검 rows",
+    "contextDoc": "CONTEXT.md",
+    "productDoc": "docs/public_safety_document_rubric.md"
+  },
+  "rubric": {
+    "tracks": ["internal-quality", "submission-check"],
+    "categories": ["required", "submission-quality", "field-operation"],
+    "statuses": ["fulfilled", "needs-improvement", "needs-user-check"],
+    "itemCount": 8
+  },
+  "validation": {
+    "typecheck": "passed: npm.cmd run typecheck",
+    "build": "passed: npm.cmd run build",
+    "contentScan": "passed: no forbidden advisory terms found in new context/rubric surfaces"
+  }
+}
