@@ -251,115 +251,156 @@ function StepDot({ status }: { status: StepStatus }) {
 }
 
 function SafeClawHomepage({ onStart }: { onStart: () => void }) {
-  const proofSources = ["기상청", "Law.go", "Work24", "KOSHA", "Gemini"];
-  const coreDocs = [
-    {
-      label: "01",
-      title: "위험성평가표",
-      body: "4M 위험요인과 감소대책을 작업 조건에 맞춰 정리합니다.",
-      meta: "KOSHA 절차 기반"
-    },
-    {
-      label: "02",
-      title: "TBM·작업 전 회의",
-      body: "작업반장이 바로 읽을 수 있는 확인 질문과 조치 기준을 만듭니다.",
-      meta: "작업 전 실행 중심"
-    },
-    {
-      label: "03",
-      title: "외국인 전송본",
-      body: "국적과 언어에 맞는 쉬운 문장으로 작업중지와 보호구 기준을 전달합니다.",
-      meta: "10개 언어 기본팩"
-    }
+  const navItems = [
+    ["시스템", "system"],
+    ["선언", "manifesto"],
+    ["실행", "execution"],
+    ["언어", "language"],
+    ["도입사례", "proof"],
+    ["작업공간", "command"]
+  ] as const;
+  const pipeline = [
+    { code: "01 · CAPTURE", title: "캡처", body: "음성·텍스트·QR로 작업 한 줄 캡처", metric: "0.3초" },
+    { code: "02 · CITE", title: "인용", body: "산안법·KOSHA·공공 API 근거 매칭", metric: "근거 연결" },
+    { code: "03 · GENERATE", title: "생성", body: "문서팩을 같은 사실관계로 동시 생성", metric: "11종" },
+    { code: "04 · BROADCAST", title: "전파", body: "작업자 언어와 채널별 메시지 분기", metric: "10개 언어" },
+    { code: "05 · SEAL", title: "봉인", body: "서명·시각·전파 이력을 기록", metric: "제출 준비" }
   ];
-  const operations = [
-    "한 줄 입력.",
-    "현재 기상 반영.",
-    "법령·해석례 매칭.",
-    "문서팩 편집.",
-    "메일·문자 전파.",
-    "이력 저장."
+  const proofSources = [
+    ["L.14991", "산업안전보건법", "법령 조항"],
+    ["KOSHA-2024", "KOSHA Guide", "공식자료"],
+    ["MOEL", "고용노동부 고시", "교육·지침"],
+    ["KMA", "기상청", "현재·예보"],
+    ["WORK24", "고용24", "후속 교육"],
+    ["AI", "Gemini", "문서 초안"]
   ];
+  const languages = [
+    ["KO", "한국어", "오늘의 안전 수칙"],
+    ["VI", "Tiếng Việt", "Quy tắc an toàn hôm nay"],
+    ["TH", "ภาษาไทย", "กฎความปลอดภัยวันนี้"],
+    ["UZ", "O'zbek", "Bugungi xavfsizlik qoidalari"],
+    ["MN", "Монгол", "Өнөөдрийн аюулгүй"],
+    ["ZH", "中文", "今日安全守则"]
+  ];
+
+  function jumpTo(id: string) {
+    const target = document.getElementById(id);
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   return (
-    <section className="safeclaw-homepage" aria-label="SafeClaw 홈페이지">
-      <section className="safeclaw-hero-section">
-        <div className="safeclaw-hero-copy">
-          <span className="sc-section-kicker">FIELD SAFETY OS</span>
-          <h1>오늘 작업을 안전 문서팩으로 끝냅니다.</h1>
-          <p>
-            현장관리자가 작업 한 줄을 입력하면 위험성평가, TBM, 안전교육,
-            외국인 공지, 현장 전파, 이력 저장까지 하나의 흐름으로 정리합니다.
-          </p>
-          <div className="safeclaw-hero-actions">
-            <button type="button" className="button" onClick={onStart}>작업공간 시작</button>
-            <Link href="/demo" className="button secondary">시연 보기</Link>
-          </div>
+    <section className="safeclaw-landing" aria-label="SafeClaw 회사 홈페이지">
+      <header className="safeclaw-landing-nav">
+        <Link href="/" className="safeclaw-os-brand" aria-label="SafeClaw OS 홈">
+          <span className="safeclaw-os-mark">SC</span>
+          <strong>safeclaw/<em>os</em></strong>
+        </Link>
+        <nav aria-label="SafeClaw 홈페이지 메뉴">
+          {navItems.map(([label, id]) => (
+            <button key={id} type="button" onClick={() => jumpTo(id)}>{label}</button>
+          ))}
+        </nav>
+        <div className="safeclaw-landing-actions">
+          <button type="button" className="safeclaw-login" onClick={onStart}>로그인</button>
+          <button type="button" className="safeclaw-contact" onClick={onStart}>도입 문의 →</button>
         </div>
-        <div className="safeclaw-hero-console" aria-label="SafeClaw 핵심 흐름">
-          <div className="console-status-line">
-            <span>LIVE WORKPACK</span>
-            <b>READY</b>
+      </header>
+
+      <section className="safeclaw-os-hero" id="system">
+        <div className="safeclaw-os-status">
+          <span><i /> 시스템 · 정상 가동</span>
+          <b>REGION · KR-CENTRAL</b>
+          <b>V2.4.0-STABLE</b>
+          <b>UTC+9 · 2026-05-01</b>
+        </div>
+        <div className="safeclaw-os-hero-body">
+          <div>
+            <span className="safeclaw-os-tag">산업안전 · 현장 운영 체제</span>
+            <h1>
+              서류는<br />
+              <mark>안전이 아니다.</mark><br />
+              실행만이 안전이다.
+            </h1>
+            <p>safeclaw는 산업 현장의 운영 체제입니다.</p>
+            <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 전파, 증빙 이력까지 연결합니다.</p>
+            <div className="safeclaw-os-cta">
+              <button type="button" onClick={onStart}>14일 무료 체험 →</button>
+              <Link href="/demo">30초 데모</Link>
+            </div>
           </div>
-          <div className="console-command">서울 성수동 외벽 도장 · 강풍 · 신규 작업자 포함</div>
-          <div className="console-grid">
-            <div><span>문서</span><b>11종</b></div>
-            <div><span>근거</span><b>법령·KOSHA</b></div>
-            <div><span>전파</span><b>메일·문자</b></div>
-            <div><span>언어</span><b>다국어</b></div>
-          </div>
+          <aside className="safeclaw-os-console" aria-label="실행 콘솔">
+            <span>safeclaw@field-os ~ %</span>
+            <b># 아래 버튼을 눌러 샘플 작업을 배포하세요</b>
+            <button type="button" onClick={onStart}>작업공간 열기</button>
+          </aside>
         </div>
       </section>
 
-      <section className="safeclaw-proof-strip" aria-label="연동 근거">
-        <span>연동 데이터</span>
-        {proofSources.map((source) => <b key={source}>{source}</b>)}
-      </section>
-
-      <section className="safeclaw-section-grid">
-        <article className="safeclaw-statement-card">
-          <span className="sc-section-kicker">PROBLEM</span>
-          <h2>안전 문서는 많고, 현장 시간은 짧습니다.</h2>
-          <p>
-            작업 전 판단, 근거 확인, TBM, 교육 기록, 전파 메시지가 흩어지면
-            실제 사고예방보다 문서 정리가 먼저가 됩니다.
-          </p>
-        </article>
-        <article className="safeclaw-statement-card strong">
-          <span className="sc-section-kicker">SAFECLAW</span>
-          <h2>한 번 입력하고, 같은 사실관계를 모든 문서에 반영합니다.</h2>
-          <p>
-            기상·법령·교육·KOSHA 근거를 조합해 문서 초안을 만들고,
-            사용자가 검토한 뒤 다운로드와 전파까지 이어갑니다.
-          </p>
-        </article>
-      </section>
-
-      <section className="safeclaw-core-section">
-        <div className="safeclaw-section-head">
-          <span className="sc-section-kicker">PRIMARY OUTPUTS</span>
-          <h2>핵심 3종을 먼저 완성합니다.</h2>
+      <section className="safeclaw-os-section" id="manifesto">
+        <div className="safeclaw-os-section-head">
+          <span>§ 01</span>
+          <b>선언</b>
         </div>
-        <div className="safeclaw-core-grid">
-          {coreDocs.map((doc) => (
-            <article key={doc.title} className="safeclaw-core-card">
-              <span>{doc.label}</span>
-              <h3>{doc.title}</h3>
-              <p>{doc.body}</p>
-              <b>{doc.meta}</b>
+        <h2>한 줄 입력에서 봉인된 영수증까지,<br /><mark>5단계 파이프라인</mark>으로.</h2>
+        <div className="safeclaw-pipeline-grid">
+          {pipeline.map((item) => (
+            <article key={item.code}>
+              <span>{item.code}</span>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+              <b>{item.metric}</b>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="safeclaw-operation-section">
-        <div>
-          <span className="sc-section-kicker">WORKFLOW</span>
-          <h2>제출용 데모가 아니라 매일 쓰는 작업 순서로 배치합니다.</h2>
+      <section className="safeclaw-os-section compact" id="execution">
+        <div className="safeclaw-os-section-head">
+          <span>§ 02</span>
+          <b>학습된 코퍼스 · 인용 가능 근거</b>
         </div>
-        <ol>
-          {operations.map((item) => <li key={item}>{item}</li>)}
-        </ol>
+        <div className="safeclaw-proof-matrix">
+          {proofSources.map(([code, title, meta]) => (
+            <article key={code}>
+              <span>{code}</span>
+              <h3>{title}</h3>
+              <p>{meta}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="safeclaw-os-section" id="language">
+        <div className="safeclaw-os-section-head">
+          <span>§ 03</span>
+          <b>언어</b>
+        </div>
+        <h2>외국인 작업자에게<br /><mark>"알아서 통역"</mark>은 끝났습니다.</h2>
+        <div className="safeclaw-language-matrix">
+          {languages.map(([code, title, sub]) => (
+            <article key={code}>
+              <span>{code}</span>
+              <h3>{title}</h3>
+              <p>{sub}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="safeclaw-os-section terminal" id="proof">
+        <div className="safeclaw-os-section-head">
+          <span>§ 04</span>
+          <b>실행</b>
+        </div>
+        <h2>작업 명령. <mark>실행.</mark></h2>
+        <div className="safeclaw-terminal">
+          <div><span /> <span /> <span /> <b>safeclaw@field-os ~ %</b><em>접속됨</em></div>
+          <pre>{`# 샘플 작업을 실제 API 조합으로 생성합니다
+질문: 서울 성수동 외벽 도장 · 이동식 비계 · 강풍 · 신규 작업자
+출력: 위험성평가표 / TBM / 안전교육 / 외국인 전송본 / 현장 전파 메시지`}</pre>
+          <button type="button" onClick={onStart}>샘플 작업 생성으로 이동 →</button>
+        </div>
       </section>
     </section>
   );
@@ -494,7 +535,9 @@ export function SafeGuardCommandCenter({
 
   return (
     <main className="command-center-shell">
-      <header className="command-topbar">
+      <SafeClawHomepage onStart={() => scrollToStep("command")} />
+
+      <header className="command-topbar workspace-command-topbar">
         <Link href="/" className="brand-lockup safeclaw-lockup" aria-label="SafeClaw 홈으로 이동">
           <span className="brand-mark">SC</span>
           <span>
@@ -529,8 +572,6 @@ export function SafeGuardCommandCenter({
           <Link href="/demo" className="topbar-v2-link">v2 시연</Link>
         </div>
       </header>
-
-      <SafeClawHomepage onStart={() => scrollToStep("command")} />
 
       <section className="command-viewport" id="command">
         <aside className="command-left-panel">
