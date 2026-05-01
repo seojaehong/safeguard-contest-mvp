@@ -8,6 +8,7 @@ const navItems = [
   ["작동 방식", "execution"],
   ["외국인 안내", "language"],
   ["근거", "proof"],
+  ["화면 16", "prototype"],
   ["작업 시작", "workspace"]
 ] as const;
 
@@ -59,6 +60,8 @@ export function SafeClawLanding() {
           {navItems.map(([label, id]) => (
             id === "workspace"
               ? <Link key={id} href="/workspace">{label}</Link>
+              : id === "prototype"
+                ? <Link key={id} href="/prototype">{label}</Link>
               : <button key={id} type="button" onClick={() => jumpTo(id)}>{label}</button>
           ))}
         </nav>

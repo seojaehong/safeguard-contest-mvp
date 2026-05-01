@@ -18,6 +18,15 @@ The landing copy was adjusted from a strong manifesto tone to a safer product ex
 - High-risk wording such as sealed receipt, stable version, and operating system claims was replaced with draft, record, connected APIs, and work history language.
 - The CTA and workspace links remain unchanged, so the functional flow is preserved.
 
+## Phase 1.2 - Sixteen-Screen Prototype Map
+
+The designer prototype is now represented inside the app as a navigable product map at `/prototype`.
+
+- Added the 16-screen rail from the prototype: landing A/B, login, home dashboard, workspace A/B, documents, evidence, workers, dispatch, mobile, TBM, archive, knowledge DB, API, and settings.
+- Added a SafeClaw HUD shell with left rail, top status bar, active screen area, and route hints.
+- Added a `화면 16` landing navigation entry that opens `/prototype`.
+- This is a structural product map, not a completed implementation of every screen. Existing working functionality remains under `/workspace`, `/knowledge`, `/dryrun`, and related routes.
+
 ## What Changed
 
 - Added a dedicated `SafeClawLanding` component based on the approved dark HUD brand direction.

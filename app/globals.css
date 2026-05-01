@@ -1165,6 +1165,248 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   padding: 0 28px;
 }
 
+.safeclaw-prototype-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(260px, 420px) minmax(0, 1fr);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    #050506;
+  background-size: 64px 64px;
+  color: #f6f5ef;
+}
+
+.safeclaw-prototype-rail {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(8, 8, 10, 0.92);
+  padding: 34px 28px;
+}
+
+.safeclaw-prototype-logo {
+  display: inline-flex;
+  color: #f6f5ef;
+  font-family: var(--font-hud);
+  font-size: 28px;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.safeclaw-prototype-rail p {
+  margin: 8px 0 28px;
+  color: rgba(246, 245, 239, 0.5);
+  font-family: var(--font-hud);
+  letter-spacing: 0.12em;
+}
+
+.safeclaw-prototype-rail section {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 22px 0;
+}
+
+.safeclaw-prototype-rail h2 {
+  margin: 0 0 12px;
+  color: rgba(246, 245, 239, 0.38);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.safeclaw-prototype-rail button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  border: 0;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: rgba(246, 245, 239, 0.74);
+  cursor: pointer;
+  padding: 14px 12px;
+  text-align: left;
+}
+
+.safeclaw-prototype-rail button span {
+  color: rgba(246, 245, 239, 0.48);
+  font-family: var(--font-hud);
+  letter-spacing: 0.1em;
+}
+
+.safeclaw-prototype-rail button strong {
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.safeclaw-prototype-rail button.active {
+  border-left-color: var(--os-yellow);
+  background: rgba(255, 212, 0, 0.08);
+  color: #fff;
+}
+
+.safeclaw-prototype-main {
+  min-width: 0;
+}
+
+.safeclaw-prototype-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 18px;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(5, 5, 6, 0.92);
+  padding: 0 34px;
+  backdrop-filter: blur(16px);
+  font-family: var(--font-hud);
+  letter-spacing: 0.08em;
+}
+
+.safeclaw-prototype-topbar span {
+  color: rgba(246, 245, 239, 0.66);
+}
+
+.safeclaw-prototype-topbar i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 10px;
+  border-radius: 99px;
+  background: #7ddc86;
+}
+
+.safeclaw-prototype-topbar b {
+  color: #7ddc86;
+}
+
+.safeclaw-prototype-topbar a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  border: 1px solid var(--os-yellow);
+  border-radius: 4px;
+  color: var(--os-yellow);
+  padding: 0 18px;
+  text-decoration: none;
+}
+
+.safeclaw-prototype-stage {
+  padding: clamp(42px, 7vw, 92px);
+}
+
+.safeclaw-prototype-title span {
+  color: var(--os-yellow);
+  font-family: var(--font-hud);
+  font-weight: 950;
+  letter-spacing: 0.18em;
+}
+
+.safeclaw-prototype-title h1 {
+  max-width: 960px;
+  margin: 22px 0 18px;
+  color: #fff;
+  font-size: clamp(48px, 6vw, 104px);
+  line-height: 0.96;
+  letter-spacing: -0.08em;
+}
+
+.safeclaw-prototype-title p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(246, 245, 239, 0.62);
+  font-size: clamp(18px, 2vw, 26px);
+  line-height: 1.55;
+}
+
+.safeclaw-prototype-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(260px, 0.7fr);
+  gap: 22px;
+  margin-top: 72px;
+}
+
+.safeclaw-prototype-card {
+  min-height: 320px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(14, 14, 18, 0.84);
+  padding: 34px;
+}
+
+.safeclaw-prototype-card.primary {
+  border-color: var(--os-yellow);
+}
+
+.safeclaw-prototype-card span {
+  color: var(--os-yellow);
+  font-family: var(--font-hud);
+  font-weight: 950;
+  letter-spacing: 0.15em;
+}
+
+.safeclaw-prototype-card h2 {
+  margin: 26px 0 18px;
+  color: #fff;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 1.1;
+}
+
+.safeclaw-prototype-card p,
+.safeclaw-prototype-card li {
+  color: rgba(246, 245, 239, 0.62);
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.safeclaw-prototype-card a,
+.safeclaw-prototype-card button {
+  display: inline-flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  border: 1px solid var(--os-yellow);
+  border-radius: 4px;
+  background: var(--os-yellow);
+  color: #050506;
+  padding: 0 22px;
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.safeclaw-prototype-card button {
+  background: transparent;
+  color: var(--os-yellow);
+}
+
+.safeclaw-prototype-metrics {
+  display: grid;
+  gap: 14px;
+}
+
+.safeclaw-prototype-metrics p {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 14px;
+}
+
+.safeclaw-prototype-metrics b {
+  color: rgba(246, 245, 239, 0.44);
+}
+
+.safeclaw-prototype-metrics strong {
+  color: var(--os-yellow);
+}
+
 .command-stepper {
   justify-content: center;
   gap: 7px;

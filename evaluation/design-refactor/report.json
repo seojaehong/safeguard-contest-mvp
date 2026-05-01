@@ -22,12 +22,20 @@
     "Redirected root query links to /workspace",
     "Updated landing link and CTA styles",
     "Renamed landing navigation labels to product-oriented Korean copy",
-    "Replaced over-strong claims with safety document workpack language"
+    "Replaced over-strong claims with safety document workpack language",
+    "Added /prototype with the 16-screen product map from the designer prototype",
+    "Linked the landing navigation to the 16-screen prototype map"
   ],
   "validation": {
     "build": "pass",
     "typecheck": "pass_after_build",
     "copyRiskScan": "pass",
+    "prototypeRouteSmoke": {
+      "route": "/prototype",
+      "expectedScreenCount": 16,
+      "missingScreens": [],
+      "hasScreen16Label": true
+    },
     "httpRootSmoke": {
       "hasLandingHero": true,
       "hasWorkspaceCopy": false
