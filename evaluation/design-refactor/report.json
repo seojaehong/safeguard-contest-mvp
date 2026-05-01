@@ -3,7 +3,7 @@
   "createdAt": "2026-05-02",
   "sourcePrototype": "C:/Users/iceam/Downloads/SafeClaw Prototype _standalone_.html",
   "status": "pass_with_notice",
-  "summary": "Landing and workspace were split so the public root behaves like a branded SafeClaw product site while the existing workpack engine remains available at /workspace. The landing copy was then toned down from manifesto language to safer product explanation language.",
+  "summary": "Landing and workspace were split so the public root behaves like a branded SafeClaw product site while the existing workpack engine remains available at /workspace. The 16-screen prototype map now shows the real functional mapping status instead of acting as a standalone showroom.",
   "routes": {
     "/": {
       "purpose": "SafeClaw landing",
@@ -24,7 +24,9 @@
     "Renamed landing navigation labels to product-oriented Korean copy",
     "Replaced over-strong claims with safety document workpack language",
     "Added /prototype with the 16-screen product map from the designer prototype",
-    "Linked the landing navigation to the 16-screen prototype map"
+    "Linked the landing navigation to the 16-screen prototype map",
+    "Mapped each prototype screen to current working routes or follow-up implementation targets",
+    "Locked the landing hero headline into intentional lines to prevent Chrome zoom orphaning"
   ],
   "validation": {
     "build": "pass",
@@ -34,7 +36,19 @@
       "route": "/prototype",
       "expectedScreenCount": 16,
       "missingScreens": [],
-      "hasScreen16Label": true
+      "hasScreen16Label": true,
+      "functionalRemap": {
+        "live": 6,
+        "partial": 5,
+        "planned": 5,
+        "hasMappedTargets": true,
+        "hasScopeList": true
+      }
+    },
+    "heroLineLock": {
+      "route": "/",
+      "status": "pass",
+      "lines": ["오늘 작업을", "안전 문서팩으로", "정리합니다."]
     },
     "httpRootSmoke": {
       "hasLandingHero": true,

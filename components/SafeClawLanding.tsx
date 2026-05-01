@@ -82,9 +82,9 @@ export function SafeClawLanding() {
           <div>
             <span className="safeclaw-os-tag">산업안전 · 현장 문서 작업공간</span>
             <h1>
-              오늘 작업을<br />
-              <mark>안전 문서팩</mark>으로<br />
-              정리합니다.
+              <span className="safeclaw-hero-line">오늘 작업을</span>
+              <span className="safeclaw-hero-line"><mark>안전 문서팩으로</mark></span>
+              <span className="safeclaw-hero-line">정리합니다.</span>
             </h1>
             <p>safeclaw는 현장관리자가 작업 전 필요한 안전 문서를 빠르게 준비하도록 돕는 웹 작업공간입니다.</p>
             <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 함께 생성합니다.</p>

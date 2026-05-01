@@ -27,6 +27,15 @@ The designer prototype is now represented inside the app as a navigable product 
 - Added a `화면 16` landing navigation entry that opens `/prototype`.
 - This is a structural product map, not a completed implementation of every screen. Existing working functionality remains under `/workspace`, `/knowledge`, `/dryrun`, and related routes.
 
+## Phase 1.3 - Functional Remap
+
+The 16-screen map now shows how each designer screen maps back to the working SafeClaw product.
+
+- Each screen is tagged as `연결됨`, `부분 연결`, or `이식 예정`.
+- Connected screens link to the current working routes such as `/workspace#command`, `/workspace#workpack`, `/workspace#risk`, `/workspace#dispatch-overview`, `/knowledge`, and `/dryrun`.
+- The prototype cards now show the mapped target and concrete functional scope instead of generic placeholder copy.
+- The landing hero headline was locked to three deliberate lines so Chrome zoom changes no longer orphan `으로` or break the hazard-highlight line.
+
 ## What Changed
 
 - Added a dedicated `SafeClawLanding` component based on the approved dark HUD brand direction.
