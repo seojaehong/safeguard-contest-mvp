@@ -3,7 +3,7 @@
   "createdAt": "2026-05-02",
   "sourcePrototype": "C:/Users/iceam/Downloads/SafeClaw Prototype _standalone_.html",
   "status": "pass_with_notice",
-  "summary": "Landing and workspace were split so the public root behaves like a branded SafeClaw product site while the existing workpack engine remains available at /workspace.",
+  "summary": "Landing and workspace were split so the public root behaves like a branded SafeClaw product site while the existing workpack engine remains available at /workspace. The landing copy was then toned down from manifesto language to safer product explanation language.",
   "routes": {
     "/": {
       "purpose": "SafeClaw landing",
@@ -20,11 +20,14 @@
     "Added SafeClawLanding component",
     "Moved command-center entry flow to /workspace",
     "Redirected root query links to /workspace",
-    "Updated landing link and CTA styles"
+    "Updated landing link and CTA styles",
+    "Renamed landing navigation labels to product-oriented Korean copy",
+    "Replaced over-strong claims with safety document workpack language"
   ],
   "validation": {
     "build": "pass",
     "typecheck": "pass_after_build",
+    "copyRiskScan": "pass",
     "httpRootSmoke": {
       "hasLandingHero": true,
       "hasWorkspaceCopy": false

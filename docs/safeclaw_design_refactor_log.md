@@ -9,6 +9,15 @@ SafeClaw now starts as a branded product site instead of opening directly into t
 - `/?q=...` and `/?scenario=...` redirect to `/workspace` with the same query, so existing scenario links continue to work.
 - The first landing CTA opens `/workspace`; the 30-second demo CTA opens `/demo`.
 
+## Phase 1.1 - Copy Tone Down
+
+The landing copy was adjusted from a strong manifesto tone to a safer product explanation tone.
+
+- Navigation labels now describe user intent: product, problem, how it works, foreign worker guidance, evidence, and start work.
+- The hero copy now describes a safety document workpack instead of using broad claims about safety itself.
+- High-risk wording such as sealed receipt, stable version, and operating system claims was replaced with draft, record, connected APIs, and work history language.
+- The CTA and workspace links remain unchanged, so the functional flow is preserved.
+
 ## What Changed
 
 - Added a dedicated `SafeClawLanding` component based on the approved dark HUD brand direction.
