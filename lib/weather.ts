@@ -4,6 +4,8 @@ type LocationConfig = {
   label: string;
   area1: string;
   areaNo: string;
+  latitude: number;
+  longitude: number;
   nx: number;
   ny: number;
 };
@@ -40,6 +42,7 @@ type KmaSignal = {
     | "기상특보"
     | "영향예보"
     | "생활기상 자외선"
+    | "생활기상 체감온도"
     | "실시간 홍반자외선";
   mode: IntegrationMode;
   summary: string;
@@ -50,6 +53,7 @@ type KmaSignal = {
   precipitationProbability?: string;
   precipitationType?: string;
   uvIndex?: string;
+  apparentTemperature?: string;
   heatRiskLevel?: "보통" | "높음" | "매우높음" | "위험";
 };
 
@@ -164,7 +168,8 @@ type WeatherSignal = {
 };
 
 const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUBLIC_DATA_API_KEY?.trim() || "";
-const kierErythemalUvEndpoint = process.env.KIER_ERYTHEMAL_UV_ENDPOINT?.trim() || "";
+const kierErythemalUvEndpoint = process.env.KIER_ERYTHEMAL_UV_ENDPOINT?.trim()
+  || "https://apis.data.go.kr/B551184/UlvryService/getUlvryPredcInfo";
 const weatherCache = new Map<string, {
   expiresAt: number;
   value: WeatherSignal;
@@ -174,14 +179,14 @@ const KMA_TIMEOUT_MS = 20_000;
 const KMA_RETRY_COUNT = 1;
 
 const locationMap: Array<{ keywords: string[]; config: LocationConfig }> = [
-  { keywords: ["성수", "강남", "서울"], config: { label: "서울", area1: "11", areaNo: "1100000000", nx: 61, ny: 125 } },
-  { keywords: ["인천", "남동"], config: { label: "인천", area1: "28", areaNo: "2800000000", nx: 55, ny: 124 } },
-  { keywords: ["안산", "경기"], config: { label: "안산", area1: "41", areaNo: "4100000000", nx: 58, ny: 121 } },
-  { keywords: ["부산", "해운대"], config: { label: "부산", area1: "26", areaNo: "2600000000", nx: 99, ny: 75 } },
-  { keywords: ["광주", "하남산단"], config: { label: "광주", area1: "29", areaNo: "2900000000", nx: 58, ny: 74 } },
-  { keywords: ["대구", "달서"], config: { label: "대구", area1: "27", areaNo: "2700000000", nx: 89, ny: 90 } },
-  { keywords: ["창원"], config: { label: "창원", area1: "48", areaNo: "4800000000", nx: 91, ny: 77 } },
-  { keywords: ["강남 복합건물"], config: { label: "서울", area1: "11", areaNo: "1100000000", nx: 61, ny: 125 } }
+  { keywords: ["성수", "강남", "서울"], config: { label: "서울", area1: "11", areaNo: "1100000000", latitude: 37.5665, longitude: 126.978, nx: 61, ny: 125 } },
+  { keywords: ["인천", "남동"], config: { label: "인천", area1: "28", areaNo: "2800000000", latitude: 37.4563, longitude: 126.7052, nx: 55, ny: 124 } },
+  { keywords: ["안산", "경기"], config: { label: "안산", area1: "41", areaNo: "4100000000", latitude: 37.3219, longitude: 126.8309, nx: 58, ny: 121 } },
+  { keywords: ["부산", "해운대"], config: { label: "부산", area1: "26", areaNo: "2600000000", latitude: 35.1796, longitude: 129.0756, nx: 99, ny: 75 } },
+  { keywords: ["광주", "하남산단"], config: { label: "광주", area1: "29", areaNo: "2900000000", latitude: 35.1595, longitude: 126.8526, nx: 58, ny: 74 } },
+  { keywords: ["대구", "달서"], config: { label: "대구", area1: "27", areaNo: "2700000000", latitude: 35.8714, longitude: 128.6014, nx: 89, ny: 90 } },
+  { keywords: ["창원"], config: { label: "창원", area1: "48", areaNo: "4800000000", latitude: 35.2279, longitude: 128.6811, nx: 91, ny: 77 } },
+  { keywords: ["강남 복합건물"], config: { label: "서울", area1: "11", areaNo: "1100000000", latitude: 37.5665, longitude: 126.978, nx: 61, ny: 125 } }
 ];
 
 function pickLocation(question: string) {
@@ -311,6 +316,11 @@ function firstIndexValue(item: LivingWeatherIndexItem) {
     "uv"
   ];
   return keys.map((key) => item[key]).find((value) => typeof value === "string" && value.trim()) || "";
+}
+
+function firstHeatIndexValue(item: LivingWeatherIndexItem) {
+  const value = firstIndexValue(item);
+  return value;
 }
 
 function valueByCategory(items: ForecastItem[], category: string, key: "obsrValue" | "fcstValue") {
@@ -503,16 +513,51 @@ async function fetchLivingUvSignal(location: LocationConfig): Promise<KmaSignal>
   }
 }
 
-async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSignal> {
-  if (!kierErythemalUvEndpoint) {
+async function fetchLivingHeatIndexSignal(location: LocationConfig): Promise<KmaSignal> {
+  try {
+    const url = new URL("https://apis.data.go.kr/1360000/LivingWthrIdxServiceV4/getSenTaIdxV4");
+    url.searchParams.set("serviceKey", serviceKey);
+    url.searchParams.set("pageNo", "1");
+    url.searchParams.set("numOfRows", "10");
+    url.searchParams.set("dataType", "JSON");
+    url.searchParams.set("areaNo", location.areaNo);
+    url.searchParams.set("time", formatLivingIndexTime());
+    url.searchParams.set("requestCode", "A48");
+
+    const text = await fetchWithTimeout(url.toString(), "생활기상 체감온도");
+    const parsed = JSON.parse(text) as LivingWeatherIndexEnvelope;
+    const resultCode = parsed.response?.header?.resultCode;
+    if (resultCode && resultCode !== "00") {
+      throw new Error(parsed.response?.header?.resultMsg || `생활기상 체감온도 resultCode ${resultCode}`);
+    }
+    const item = normalizeArray(parsed.response?.body?.items?.item)[0];
+    if (!item) {
+      throw new Error(parsed.response?.header?.resultMsg || "생활기상 체감온도 응답이 비어 있습니다.");
+    }
+
+    const apparentTemperature = firstHeatIndexValue(item);
+    const heatRiskLevel = heatRiskLevelByTemperature(apparentTemperature);
     return {
-      endpoint: "실시간 홍반자외선",
+      endpoint: "생활기상 체감온도",
+      mode: "live",
+      summary: `여름철 체감온도 ${apparentTemperature || "정보없음"}${heatRiskLevel ? `℃ (${heatRiskLevel})` : ""}`,
+      forecastTime: item.date,
+      apparentTemperature,
+      heatRiskLevel,
+      detail: `기상청 생활기상지수 체감온도 조회 성공 (${location.label}, requestCode A48, areaNo ${location.areaNo})`
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      endpoint: "생활기상 체감온도",
       mode: "fallback",
-      summary: "실시간 홍반자외선 endpoint 설정 대기",
-      detail: "KIER_ERYTHEMAL_UV_ENDPOINT가 없어 한국에너지기술연구원 실시간 홍반자외선 API는 제출서류상 확장 데이터로 분리합니다."
+      summary: "여름철 체감온도 연결 보류",
+      detail: `기상청 생활기상지수 체감온도 연결 점검 필요: ${message}`
     };
   }
+}
 
+async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSignal> {
   try {
     const url = new URL(kierErythemalUvEndpoint);
     url.searchParams.set("serviceKey", serviceKey);
@@ -529,6 +574,12 @@ async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSign
     }
     if (!url.searchParams.has("ny")) {
       url.searchParams.set("ny", String(location.ny));
+    }
+    if (!url.searchParams.has("lat")) {
+      url.searchParams.set("lat", String(location.latitude));
+    }
+    if (!url.searchParams.has("lon")) {
+      url.searchParams.set("lon", String(location.longitude));
     }
 
     const text = await fetchWithTimeout(url.toString(), "실시간 홍반자외선");
@@ -687,7 +738,7 @@ function buildWeatherActions(signals: KmaSignal[]) {
   const warning = liveSignals.find((signal) => signal.endpoint === "기상특보" && !signal.summary.includes("없음"));
   const impact = liveSignals.find((signal) => signal.endpoint === "영향예보" && /주의|경고|위험|심각/.test(signal.summary));
   const outdoorHeatLevel = liveSignals
-    .map((signal) => heatRiskLevelByTemperature(signal.temperatureC) || signal.heatRiskLevel)
+    .map((signal) => signal.heatRiskLevel || heatRiskLevelByTemperature(signal.apparentTemperature) || heatRiskLevelByTemperature(signal.temperatureC))
     .find((level): level is "높음" | "매우높음" | "위험" => Boolean(level));
   const uvSignal = liveSignals.find((signal) => {
     if (signal.endpoint !== "생활기상 자외선" && signal.endpoint !== "실시간 홍반자외선") return false;
@@ -747,7 +798,9 @@ export async function fetchWeatherSignal(question: string): Promise<WeatherSigna
         { endpoint: "단기예보", mode: "fallback", summary: "서비스 키 필요", detail: "서비스 키 필요" },
         ...(outdoorHeatContext
           ? [
-              { endpoint: "생활기상 자외선" as const, mode: "fallback" as const, summary: "서비스 키 필요", detail: "서비스 키 필요" }
+              { endpoint: "생활기상 자외선" as const, mode: "fallback" as const, summary: "서비스 키 필요", detail: "서비스 키 필요" },
+              { endpoint: "생활기상 체감온도" as const, mode: "fallback" as const, summary: "서비스 키 필요", detail: "서비스 키 필요" },
+              { endpoint: "실시간 홍반자외선" as const, mode: "fallback" as const, summary: "서비스 키 필요", detail: "서비스 키 필요" }
             ]
           : [])
       ]
@@ -776,6 +829,7 @@ export async function fetchWeatherSignal(question: string): Promise<WeatherSigna
   const outdoorSignals = outdoorHeatContext
     ? await Promise.all([
         fetchLivingUvSignal(location),
+        fetchLivingHeatIndexSignal(location),
         fetchErythemalUvSignal(location)
       ])
     : [];

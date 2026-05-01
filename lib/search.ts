@@ -127,8 +127,9 @@ function formatOutdoorHeatAppendix(weather: Awaited<ReturnType<typeof fetchWeath
   const signals = weather.signals || [];
   const uvSignals = signals.filter((signal) => signal.endpoint === "생활기상 자외선" || signal.endpoint === "실시간 홍반자외선");
   const heatSignal = signals.find((signal) => signal.endpoint === "영향예보" && /폭염|온열|더위|고온|주의|경고|위험/.test(signal.summary))
+    || signals.find((signal) => signal.endpoint === "생활기상 체감온도")
     || signals.find((signal) => {
-      const temp = Number(signal.temperatureC || "");
+      const temp = Number(signal.apparentTemperature || signal.temperatureC || "");
       return Number.isFinite(temp) && temp >= 31;
     });
   const uvLine = uvSignals.length

@@ -92,6 +92,7 @@ export type AskResponse = {
           | "기상특보"
           | "영향예보"
           | "생활기상 자외선"
+          | "생활기상 체감온도"
           | "실시간 홍반자외선";
         mode: IntegrationMode;
         summary: string;
@@ -102,6 +103,7 @@ export type AskResponse = {
         precipitationProbability?: string;
         precipitationType?: string;
         uvIndex?: string;
+        apparentTemperature?: string;
         heatRiskLevel?: "보통" | "높음" | "매우높음" | "위험";
       }>;
     };
