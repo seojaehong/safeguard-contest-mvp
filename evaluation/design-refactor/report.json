@@ -26,7 +26,8 @@
     "Added /prototype with the 16-screen product map from the designer prototype",
     "Linked the landing navigation to the 16-screen prototype map",
     "Mapped each prototype screen to current working routes or follow-up implementation targets",
-    "Locked the landing hero headline into intentional lines to prevent Chrome zoom orphaning"
+    "Locked the landing hero headline into intentional lines to prevent Chrome zoom orphaning",
+    "Aligned landing typography with the SafeClaw brand guide: Pretendard, Geist Mono, guide-like display tracking, and skewed hazard marks without true italic styling"
   ],
   "validation": {
     "build": "pass",
@@ -49,6 +50,21 @@
       "route": "/",
       "status": "pass",
       "lines": ["오늘 작업을", "안전 문서팩으로", "정리합니다."]
+    },
+    "brandGuideTypography": {
+      "status": "pass",
+      "guideSource": "C:/Users/iceam/Downloads/safeclaw Brand Guide _standalone_.html",
+      "fontLoading": ["Pretendard", "Geist Mono"],
+      "headlineRules": {
+        "fontWeight": 800,
+        "letterSpacing": "-0.045em",
+        "lineHeight": 0.98
+      },
+      "hazardMark": {
+        "fontStyle": "normal",
+        "skew": "-6deg",
+        "note": "The guide uses a skewed yellow mark, not true italic text."
+      }
     },
     "httpRootSmoke": {
       "hasLandingHero": true,

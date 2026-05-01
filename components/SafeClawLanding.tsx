@@ -106,7 +106,7 @@ export function SafeClawLanding() {
           <span>§ 01</span>
           <b>문제</b>
         </div>
-        <h2>작업 전 안전 문서와 공지가<br /><mark>한 화면에서 이어집니다.</mark></h2>
+        <h2>작업 전 문서와 공지를<br /><mark>한 화면에서 잇습니다.</mark></h2>
         <div className="safeclaw-pipeline-grid">
           {pipeline.map((item) => (
             <article key={item.code}>
@@ -140,7 +140,7 @@ export function SafeClawLanding() {
           <span>§ 03</span>
           <b>외국인 안내</b>
         </div>
-        <h2>외국인 작업자에게<br /><mark>쉬운 문장으로 다시 전달합니다.</mark></h2>
+        <h2>외국인 작업자에게<br /><mark>쉬운 문장으로 전달합니다.</mark></h2>
         <div className="safeclaw-language-matrix">
           {languages.map(([code, title, sub]) => (
             <article key={code}>
@@ -157,7 +157,7 @@ export function SafeClawLanding() {
           <span>§ 04</span>
           <b>작업 시작</b>
         </div>
-        <h2>샘플 작업으로 <mark>바로 확인하세요.</mark></h2>
+        <h2>샘플 작업으로<br /><mark>바로 확인합니다.</mark></h2>
         <div className="safeclaw-terminal">
           <div><span /> <span /> <span /> <b>safeclaw@workspace ~ %</b><em>준비됨</em></div>
           <pre>{`# 샘플 작업을 실제 API 조합으로 생성합니다
