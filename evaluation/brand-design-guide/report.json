@@ -2,8 +2,12 @@
   "generatedAt": "2026-05-01T22:45:00+09:00",
   "scope": "SafeClaw brand guide visual application",
   "sourceArtifacts": [
-    "C:/Users/iceam/Downloads/safeclaw Brand Guide _standalone_.html",
-    "C:/Users/iceam/Downloads/safeclaw (Remix).zip"
+    "C:/Users/iceam/Downloads/safeclaw Brand Guide _standalone_.html"
+  ],
+  "sourceDecision": {
+    "sourceOfTruth": "safeclaw Brand Guide _standalone_.html",
+    "ignored": ["Remix A direction", "Remix C direction"],
+    "referenceOnly": "Remix B direction was treated as a workspace-density reference only because the final brand guide supersedes it."
   ],
   "appliedRules": {
     "brandMark": "SC black square with Hazard Yellow signal",

@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-05-01T23:20:00+09:00",
+  "sourceOfTruth": "C:/Users/iceam/Downloads/safeclaw Brand Guide _standalone_.html",
+  "ignoredSources": [
+    "safeclaw Remix A direction",
+    "safeclaw Remix C direction"
+  ],
+  "referenceOnly": [
+    "safeclaw Remix B direction: used only for workspace density and not copied directly"
+  ],
+  "gapSummary": {
+    "legacySoftDemoSelectorsDetectedBeforePatch": 146,
+    "legacySoftDemoSelectorsDetectedAfterPatch": 146,
+    "mainGaps": [
+      "soft gradients still present in later CSS",
+      "large and pill radius still present in later CSS",
+      "decorative shadows still present in later CSS",
+      "V2/demo surfaces could override brand-token layer"
+    ]
+  },
+  "alignmentApplied": [
+    "removed body soft gradient",
+    "reduced root radius and shadow defaults",
+    "hardened topbar and brand mark",
+    "added homepage-style landing sections before the existing workspace",
+    "split first impression into hero, proof strip, problem-solution, primary outputs and workflow sections",
+    "added final guide layer for V2, demo, document editor, evidence, dispatch, rubric and knowledge surfaces",
+    "converted progress and active states to square Hazard Yellow signals"
+  ],
+  "validation": {
+    "typecheck": "passed: npm.cmd run typecheck",
+    "build": "passed: npm.cmd run build",
+    "routeCount": 19,
+    "homepageStructure": "passed: / now includes landing hero, proof strip, problem-solution, primary outputs, workflow and existing workspace"
+  },
+  "verdict": "pass_with_notice",
+  "notice": "This pass aligns production-critical surfaces to the final brand guide without rewriting layout. The old soft-demo declarations still exist in the file, but the final guide layer neutralizes them on the visible product surfaces. A later cleanup should delete unused legacy CSS rather than cascade over it."
+}

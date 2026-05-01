@@ -13,10 +13,10 @@
   --accent-warm: #b85f24;
   --accent-soft: #e8f1ed;
   --danger-soft: #fff0df;
-  --shadow: 0 24px 70px rgba(38, 34, 27, 0.08);
-  --radius-lg: 28px;
-  --radius-md: 18px;
-  --radius-sm: 12px;
+  --shadow: none;
+  --radius-lg: 4px;
+  --radius-md: 4px;
+  --radius-sm: 4px;
   --font-base: "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
   --font-multilingual: "Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", system-ui, sans-serif;
 }
@@ -223,10 +223,7 @@ body {
   padding: 0;
   min-height: 100vh;
   color: var(--ink);
-  background:
-    radial-gradient(circle at 10% 0%, rgba(184, 95, 36, 0.10), transparent 30%),
-    radial-gradient(circle at 92% 12%, rgba(33, 89, 79, 0.12), transparent 28%),
-    linear-gradient(180deg, #fbf8f1 0%, var(--bg) 46%, #f3efe7 100%);
+  background: var(--sc-paper);
   font-family: var(--font-base);
 }
 
@@ -259,6 +256,324 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   padding: 18px 0 48px;
 }
 
+.safeclaw-homepage {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+
+.safeclaw-hero-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(420px, 0.92fr);
+  min-height: 620px;
+  border-bottom: 1px solid var(--line);
+}
+
+.safeclaw-hero-copy {
+  display: grid;
+  align-content: center;
+  gap: 26px;
+  padding: clamp(42px, 7vw, 96px);
+  background: var(--sc-paper);
+}
+
+.sc-section-kicker {
+  width: fit-content;
+  border-left: 4px solid var(--sc-hazard-yellow);
+  padding-left: 10px;
+  color: var(--sc-steel-800);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.safeclaw-hero-copy h1 {
+  max-width: 900px;
+  margin: 0;
+  color: var(--sc-black);
+  font-size: clamp(52px, 8vw, 118px);
+  font-weight: 950;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.safeclaw-hero-copy p {
+  max-width: 740px;
+  margin: 0;
+  color: var(--sc-steel-650);
+  font-size: clamp(18px, 1.8vw, 24px);
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  line-height: 1.62;
+}
+
+.safeclaw-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.safeclaw-hero-console {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  border-left: 1px solid var(--line);
+  padding: clamp(32px, 5vw, 64px);
+  background:
+    repeating-linear-gradient(90deg, rgba(10, 10, 11, 0.035) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(0deg, rgba(10, 10, 11, 0.035) 0 1px, transparent 1px 64px),
+    #ffffff;
+}
+
+.console-status-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--line);
+  padding: 12px;
+  background: var(--sc-steel-060);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.console-status-line b {
+  color: var(--sc-ok);
+}
+
+.console-command {
+  border: 1px solid var(--sc-black);
+  border-left: 6px solid var(--sc-hazard-yellow);
+  padding: 22px;
+  background: #ffffff;
+  color: var(--sc-black);
+  font-size: clamp(22px, 3vw, 36px);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1.22;
+}
+
+.console-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.console-grid div {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  padding: 18px;
+  background: #ffffff;
+}
+
+.console-grid span {
+  color: var(--sc-steel-650);
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.console-grid b {
+  color: var(--sc-black);
+  font-size: 24px;
+  line-height: 1.16;
+}
+
+.safeclaw-proof-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1px;
+  border-bottom: 1px solid var(--line);
+  background: var(--line);
+}
+
+.safeclaw-proof-strip span,
+.safeclaw-proof-strip b {
+  min-height: 64px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 22px;
+  background: #ffffff;
+}
+
+.safeclaw-proof-strip span {
+  color: var(--sc-steel-650);
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.safeclaw-proof-strip b {
+  color: var(--sc-black);
+  font-size: 17px;
+}
+
+.safeclaw-section-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+}
+
+.safeclaw-statement-card {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  min-height: 390px;
+  padding: clamp(32px, 5vw, 70px);
+  background: #ffffff;
+}
+
+.safeclaw-statement-card + .safeclaw-statement-card {
+  border-left: 1px solid var(--line);
+}
+
+.safeclaw-statement-card.strong {
+  background: var(--sc-black);
+  color: #ffffff;
+}
+
+.safeclaw-statement-card h2,
+.safeclaw-core-section h2,
+.safeclaw-operation-section h2 {
+  margin: 0;
+  color: inherit;
+  font-size: clamp(34px, 4.5vw, 68px);
+  font-weight: 950;
+  letter-spacing: -0.055em;
+  line-height: 1;
+}
+
+.safeclaw-statement-card p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--sc-steel-650);
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.7;
+}
+
+.safeclaw-statement-card.strong p {
+  color: var(--sc-steel-300);
+}
+
+.safeclaw-core-section,
+.safeclaw-operation-section {
+  display: grid;
+  gap: 34px;
+  border-bottom: 1px solid var(--line);
+  padding: clamp(36px, 6vw, 82px);
+  background: var(--sc-paper);
+}
+
+.safeclaw-section-head {
+  display: grid;
+  gap: 18px;
+}
+
+.safeclaw-core-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.safeclaw-core-card {
+  display: grid;
+  gap: 16px;
+  min-height: 300px;
+  padding: 28px;
+  background: #ffffff;
+}
+
+.safeclaw-core-card span {
+  color: var(--sc-hazard-yellow);
+  font-family: var(--font-hud);
+  font-size: 16px;
+  font-weight: 950;
+  text-shadow: -1px 0 var(--sc-black), 0 1px var(--sc-black), 1px 0 var(--sc-black), 0 -1px var(--sc-black);
+}
+
+.safeclaw-core-card h3 {
+  margin: 0;
+  color: var(--sc-black);
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.safeclaw-core-card p {
+  margin: 0;
+  color: var(--sc-steel-650);
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.65;
+}
+
+.safeclaw-core-card b {
+  align-self: end;
+  width: fit-content;
+  border: 1px solid var(--line);
+  padding: 7px 9px;
+  background: var(--sc-steel-060);
+  color: var(--sc-black);
+  font-family: var(--font-hud);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.safeclaw-operation-section {
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+  align-items: start;
+  background: #ffffff;
+}
+
+.safeclaw-operation-section > div {
+  display: grid;
+  gap: 18px;
+}
+
+.safeclaw-operation-section ol {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: safeclaw-ops;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.safeclaw-operation-section li {
+  counter-increment: safeclaw-ops;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  min-height: 76px;
+  background: #ffffff;
+  color: var(--sc-black);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+}
+
+.safeclaw-operation-section li::before {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--sc-black);
+  color: var(--sc-hazard-yellow);
+  font-family: var(--font-hud);
+  font-size: 13px;
+  content: counter(safeclaw-ops, decimal-leading-zero);
+}
+
 .topbar {
   position: sticky;
   top: 12px;
@@ -268,11 +583,11 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   align-items: center;
   gap: 16px;
   padding: 12px 14px;
-  border: 1px solid rgba(226, 222, 213, 0.9);
-  border-radius: 999px;
-  background: rgba(255, 253, 248, 0.76);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 12px 36px rgba(39, 34, 27, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: rgba(250, 249, 245, 0.96);
+  backdrop-filter: blur(10px);
+  box-shadow: none;
 }
 
 .brand-lockup {
@@ -295,9 +610,10 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   width: 34px;
   height: 34px;
   place-items: center;
-  border-radius: 12px;
-  background: var(--ink);
-  color: #fffaf1;
+  border: 1px solid var(--sc-hazard-yellow);
+  border-radius: 0;
+  background: var(--sc-black);
+  color: var(--sc-hazard-yellow);
   font-weight: 900;
 }
 
@@ -311,7 +627,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .topnav a,
 .topnav button {
   padding: 9px 12px;
-  border-radius: 999px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
   color: #4f5967;
   font-size: 13px;
 }
@@ -3701,6 +4018,22 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
     grid-template-columns: 1fr;
   }
 
+  .safeclaw-hero-section,
+  .safeclaw-section-grid,
+  .safeclaw-operation-section {
+    grid-template-columns: 1fr;
+  }
+
+  .safeclaw-hero-console,
+  .safeclaw-statement-card + .safeclaw-statement-card {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .safeclaw-core-grid {
+    grid-template-columns: 1fr;
+  }
+
   .selected-rubric-strip {
     grid-template-columns: 1fr;
   }
@@ -3809,6 +4142,27 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
     font-size: 42px;
   }
 
+  .safeclaw-hero-copy h1 {
+    font-size: 52px;
+  }
+
+  .safeclaw-hero-copy,
+  .safeclaw-hero-console,
+  .safeclaw-statement-card,
+  .safeclaw-core-section,
+  .safeclaw-operation-section {
+    padding: 28px;
+  }
+
+  .safeclaw-proof-strip span,
+  .safeclaw-proof-strip b {
+    flex: 1 1 40%;
+  }
+
+  .console-grid {
+    grid-template-columns: 1fr;
+  }
+
   .summary-grid,
   .mini-grid,
   .two-inputs {
@@ -3896,4 +4250,119 @@ body {
   border-radius: 0 !important;
   background: var(--sc-black) !important;
   color: var(--sc-hazard-yellow) !important;
+}
+
+/* SafeClaw final guide alignment.
+   The standalone brand guide is the source of truth. Remix variants are not
+   imported directly; this layer neutralizes legacy soft-demo styling on the
+   production-critical surfaces while preserving layout and behavior. */
+.v2-nav,
+.demo-stage-panel,
+.demo-screen,
+.demo-input-card,
+.demo-result-brief div,
+.mission-rail,
+.mission-step,
+.command-console,
+.evidence-live-panel,
+.dispatch-preview-panel,
+.compact-panel,
+.reference-card,
+.share-panel,
+.today-panel,
+.output-panel,
+.workflow-panel,
+.document-workspace,
+.sheet-export-panel,
+.dispatch-panel,
+.worker-panel,
+.history-panel,
+.rubric-summary-card,
+.knowledge-card,
+.law-card {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  background: #ffffff !important;
+  border-color: var(--line) !important;
+}
+
+.v2-nav,
+.demo-stage-panel,
+.mission-rail {
+  background: rgba(250, 249, 245, 0.96) !important;
+  backdrop-filter: blur(10px);
+}
+
+.demo-progress-track,
+.inline-progress,
+.workflow-progress,
+.left-progress,
+.rubric-meter {
+  border-radius: 0 !important;
+  background: var(--sc-steel-120) !important;
+}
+
+.demo-progress-track span,
+.inline-progress span,
+.workflow-progress span,
+.left-progress span,
+.rubric-meter span {
+  border-radius: 0 !important;
+  background: var(--sc-hazard-yellow) !important;
+}
+
+.demo-stage-list li,
+.demo-mode-badges button,
+.scenario-strip button,
+.demo-screen-top span,
+.demo-screen-top b,
+.quick-chip,
+.template-preview,
+.document-textarea,
+.workflow-textarea,
+.phone-bubble,
+.dispatch-recipient-card {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+.scenario-strip button.active,
+.demo-stage-list li.active,
+.quick-chip.active,
+.mission-step.active,
+.api-proof-card.active {
+  border-color: var(--sc-black) !important;
+  background: var(--sc-steel-060) !important;
+  color: var(--sc-black) !important;
+  box-shadow: inset 4px 0 0 var(--sc-hazard-yellow) !important;
+}
+
+.template-preview.template-sheet,
+.template-preview.template-word,
+.template-preview.template-hwp,
+.command-main,
+.v2-hero,
+.hero,
+.demo-screen {
+  background-image: none !important;
+}
+
+.command-primary,
+.button:not(.secondary),
+.full-button,
+.demo-screen .button {
+  background: var(--sc-hazard-yellow) !important;
+  color: var(--sc-black) !important;
+}
+
+.topnav a,
+.topnav button,
+.v2-nav nav a,
+.demo-mode-badges button,
+.scenario-strip button,
+.quick-chip,
+.recipient-chip,
+.language-chip {
+  font-family: var(--font-hud);
+  letter-spacing: 0.04em;
 }

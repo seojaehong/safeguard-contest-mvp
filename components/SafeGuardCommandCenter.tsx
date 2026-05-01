@@ -250,6 +250,121 @@ function StepDot({ status }: { status: StepStatus }) {
   return <span className={`step-dot ${status}`} aria-hidden="true" />;
 }
 
+function SafeClawHomepage({ onStart }: { onStart: () => void }) {
+  const proofSources = ["기상청", "Law.go", "Work24", "KOSHA", "Gemini"];
+  const coreDocs = [
+    {
+      label: "01",
+      title: "위험성평가표",
+      body: "4M 위험요인과 감소대책을 작업 조건에 맞춰 정리합니다.",
+      meta: "KOSHA 절차 기반"
+    },
+    {
+      label: "02",
+      title: "TBM·작업 전 회의",
+      body: "작업반장이 바로 읽을 수 있는 확인 질문과 조치 기준을 만듭니다.",
+      meta: "작업 전 실행 중심"
+    },
+    {
+      label: "03",
+      title: "외국인 전송본",
+      body: "국적과 언어에 맞는 쉬운 문장으로 작업중지와 보호구 기준을 전달합니다.",
+      meta: "10개 언어 기본팩"
+    }
+  ];
+  const operations = [
+    "한 줄 입력.",
+    "현재 기상 반영.",
+    "법령·해석례 매칭.",
+    "문서팩 편집.",
+    "메일·문자 전파.",
+    "이력 저장."
+  ];
+
+  return (
+    <section className="safeclaw-homepage" aria-label="SafeClaw 홈페이지">
+      <section className="safeclaw-hero-section">
+        <div className="safeclaw-hero-copy">
+          <span className="sc-section-kicker">FIELD SAFETY OS</span>
+          <h1>오늘 작업을 안전 문서팩으로 끝냅니다.</h1>
+          <p>
+            현장관리자가 작업 한 줄을 입력하면 위험성평가, TBM, 안전교육,
+            외국인 공지, 현장 전파, 이력 저장까지 하나의 흐름으로 정리합니다.
+          </p>
+          <div className="safeclaw-hero-actions">
+            <button type="button" className="button" onClick={onStart}>작업공간 시작</button>
+            <Link href="/demo" className="button secondary">시연 보기</Link>
+          </div>
+        </div>
+        <div className="safeclaw-hero-console" aria-label="SafeClaw 핵심 흐름">
+          <div className="console-status-line">
+            <span>LIVE WORKPACK</span>
+            <b>READY</b>
+          </div>
+          <div className="console-command">서울 성수동 외벽 도장 · 강풍 · 신규 작업자 포함</div>
+          <div className="console-grid">
+            <div><span>문서</span><b>11종</b></div>
+            <div><span>근거</span><b>법령·KOSHA</b></div>
+            <div><span>전파</span><b>메일·문자</b></div>
+            <div><span>언어</span><b>다국어</b></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="safeclaw-proof-strip" aria-label="연동 근거">
+        <span>연동 데이터</span>
+        {proofSources.map((source) => <b key={source}>{source}</b>)}
+      </section>
+
+      <section className="safeclaw-section-grid">
+        <article className="safeclaw-statement-card">
+          <span className="sc-section-kicker">PROBLEM</span>
+          <h2>안전 문서는 많고, 현장 시간은 짧습니다.</h2>
+          <p>
+            작업 전 판단, 근거 확인, TBM, 교육 기록, 전파 메시지가 흩어지면
+            실제 사고예방보다 문서 정리가 먼저가 됩니다.
+          </p>
+        </article>
+        <article className="safeclaw-statement-card strong">
+          <span className="sc-section-kicker">SAFECLAW</span>
+          <h2>한 번 입력하고, 같은 사실관계를 모든 문서에 반영합니다.</h2>
+          <p>
+            기상·법령·교육·KOSHA 근거를 조합해 문서 초안을 만들고,
+            사용자가 검토한 뒤 다운로드와 전파까지 이어갑니다.
+          </p>
+        </article>
+      </section>
+
+      <section className="safeclaw-core-section">
+        <div className="safeclaw-section-head">
+          <span className="sc-section-kicker">PRIMARY OUTPUTS</span>
+          <h2>핵심 3종을 먼저 완성합니다.</h2>
+        </div>
+        <div className="safeclaw-core-grid">
+          {coreDocs.map((doc) => (
+            <article key={doc.title} className="safeclaw-core-card">
+              <span>{doc.label}</span>
+              <h3>{doc.title}</h3>
+              <p>{doc.body}</p>
+              <b>{doc.meta}</b>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="safeclaw-operation-section">
+        <div>
+          <span className="sc-section-kicker">WORKFLOW</span>
+          <h2>제출용 데모가 아니라 매일 쓰는 작업 순서로 배치합니다.</h2>
+        </div>
+        <ol>
+          {operations.map((item) => <li key={item}>{item}</li>)}
+        </ol>
+      </section>
+    </section>
+  );
+}
+
 export function SafeGuardCommandCenter({
   examples,
   initialScenarioId,
@@ -414,6 +529,8 @@ export function SafeGuardCommandCenter({
           <Link href="/demo" className="topbar-v2-link">v2 시연</Link>
         </div>
       </header>
+
+      <SafeClawHomepage onStart={() => scrollToStep("command")} />
 
       <section className="command-viewport" id="command">
         <aside className="command-left-panel">
