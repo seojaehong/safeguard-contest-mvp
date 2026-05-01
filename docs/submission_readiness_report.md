@@ -90,6 +90,22 @@ SAFEGUARD_DISPATCH_RECIPIENTS=<email-or-phone>
 - Solapi 발신번호가 통신사 전달 단계에서 정상 처리되는지 확인.
 - PDF/HWPX/XLS를 실제 앱에서 내려받아 사람이 한 번 연다.
 
+## ISO 45001식 문서체계 제출 기준
+
+SafeClaw는 ISO 인증을 대체하지 않는다. 제출 문구는 `ISO 45001식 안전보건 운영 문서체계에 맞춘 보조 도구`로 고정한다.
+
+이번 제출 기준에는 아래 운영 항목을 추가한다.
+
+| 항목 | 제출 기준 | 반영 위치 |
+|---|---|---|
+| 법규 요구사항 등록부 | 법령, 시행령·시행규칙, KOSHA 자료가 문서 문장과 연결된다 | 위험성평가표, 작업계획서, TBM, 안전보건교육 기록 |
+| 문서관리와 개정 이력 | 작성자, 확인자, 저장 시각, 문서번호·개정번호 영역이 보인다 | 문서팩 요약, Excel/HWPX 제출 서식 |
+| PDCA 폐쇄 루프 | Plan, Do, Check, Act 흐름이 작업 전·중·후 문서로 이어진다 | 작업공간 체크리스트, 위험성평가표, TBM, 사진/증빙, 비상대응 |
+| 감사 추적성 | 생성, 편집, 교육 확인, 발송 결과가 저장 또는 로그화된다 | 관리자 저장, 교육기록, dispatch logs |
+| 개선조치 | 미조치 위험, 담당자, 기한, 완료 확인, 재발방지 항목이 분리된다 | 위험성평가표, 비상대응 절차, 사진/증빙 |
+
+세부 매핑은 `docs/iso45001_safeclaw_matrix.md`와 `evaluation/iso45001-readiness/report.json`을 기준으로 한다.
+
 ## 현재 결론
 
 이 문서는 제출 기준을 고정하는 운영 리포트다. 최종 판정은 `evaluation/submission-readiness/submission-readiness-summary.json`의 `overall` 값을 기준으로 한다. `blocked`가 하나라도 있으면 제출 전 수정 대상으로 남긴다.

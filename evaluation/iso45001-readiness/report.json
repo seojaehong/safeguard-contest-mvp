@@ -1,0 +1,54 @@
+{
+  "generatedAt": "2026-05-01",
+  "scope": "SafeClaw ISO 45001-style safety management document-system readiness",
+  "status": "baseline_created",
+  "rubric": {
+    "totalItems": 13,
+    "categories": [
+      "required",
+      "submission-quality",
+      "field-operation",
+      "management-system"
+    ],
+    "managementSystemItems": [
+      "management-legal-register",
+      "management-document-control",
+      "management-pdca-loop",
+      "management-audit-trace",
+      "management-corrective-action"
+    ]
+  },
+  "documentCoverage": {
+    "totalDocumentTypes": 11,
+    "primaryDocuments": [
+      "riskAssessmentDraft",
+      "workPlanDraft",
+      "tbmBriefing",
+      "tbmLogDraft",
+      "safetyEducationRecordDraft"
+    ],
+    "evidenceAndDispatchDocuments": [
+      "workpackSummaryDraft",
+      "emergencyResponseDraft",
+      "photoEvidenceDraft",
+      "foreignWorkerBriefing",
+      "foreignWorkerTransmission",
+      "kakaoMessage"
+    ]
+  },
+  "artifacts": [
+    "docs/public_safety_document_rubric.md",
+    "docs/iso45001_safeclaw_matrix.md",
+    "lib/safety-document-rubric.ts"
+  ],
+  "guardrails": [
+    "Does not claim ISO certification replacement",
+    "Does not claim legal effect guarantee",
+    "Positions outputs as official-source-based drafts requiring field review"
+  ],
+  "nextActions": [
+    "Connect legal full-text cache and version changes",
+    "Connect KOSHA wiki items to document clauses",
+    "Persist document control, audit trace, and corrective action records"
+  ]
+}

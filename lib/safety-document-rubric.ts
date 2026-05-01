@@ -12,7 +12,7 @@ export type RubricDocumentKey =
   | "kakaoMessage";
 
 export type RubricTrack = "internal-quality" | "submission-check";
-export type RubricCategory = "required" | "submission-quality" | "field-operation";
+export type RubricCategory = "required" | "submission-quality" | "field-operation" | "management-system";
 export type RubricStatus = "fulfilled" | "needs-improvement" | "needs-user-check";
 
 export type RubricItem = {
@@ -131,13 +131,69 @@ export const publicSafetyDocumentRubric: RubricItem[] = [
     keywordGroups: [["쉬운 한국어", "외국인"], ["관리자 확인", "통역"], ["작업을 멈추", "보호구", "이해하지 못"]],
     improvementAction: "외국인 전송본에 작업중지, 보호구, 이해확인 문구를 보완합니다.",
     researchAction: "언어별 안전공지 검수 기준과 현장 통역 확인 절차를 추가 확인합니다."
+  },
+  {
+    id: "management-legal-register",
+    track: "internal-quality",
+    category: "management-system",
+    title: "법규 요구사항 등록부 연결",
+    description: "법령, 시행령·시행규칙, KOSHA 자료가 문서 문장과 연결되어야 합니다.",
+    documents: ["riskAssessmentDraft", "workPlanDraft", "tbmBriefing", "safetyEducationRecordDraft"],
+    keywordGroups: [["법령", "산업안전보건법", "시행규칙", "시행령"], ["KOSHA", "공식자료", "Guide"], ["근거", "확인 근거", "반영 근거"]],
+    improvementAction: "문서 하단에 법규 요구사항 등록부형 근거 목록과 반영 위치를 추가합니다.",
+    researchAction: "법제처 법령정보, KOSHA Guide, 고용노동부 지침을 요구사항 등록부로 재분류합니다."
+  },
+  {
+    id: "management-document-control",
+    track: "submission-check",
+    category: "management-system",
+    title: "문서관리와 개정 이력",
+    description: "작성자, 검토자, 승인자, 작성일, 개정번호, 저장 위치가 보여야 합니다.",
+    documents: ["workpackSummaryDraft", "riskAssessmentDraft", "workPlanDraft", "tbmLogDraft", "safetyEducationRecordDraft"],
+    keywordGroups: [["작성자", "검토자", "승인자", "확인자"], ["작성일", "일시", "생성 시각", "저장 시각"], ["개정", "버전", "문서번호", "보관 위치"]],
+    improvementAction: "문서 표지와 각 공식 서식에 문서번호, 개정번호, 작성·검토·승인란을 추가합니다.",
+    researchAction: "공공기관 안전서류 점검표와 ISO식 문서관리 요구사항을 대조합니다."
+  },
+  {
+    id: "management-pdca-loop",
+    track: "internal-quality",
+    category: "management-system",
+    title: "PDCA 폐쇄 루프",
+    description: "Plan-Do-Check-Act 흐름이 작업 전·중·후 문서와 후속조치로 이어져야 합니다.",
+    documents: ["riskAssessmentDraft", "tbmLogDraft", "photoEvidenceDraft", "emergencyResponseDraft"],
+    keywordGroups: [["사전준비", "작업계획", "위험성평가"], ["TBM", "교육", "실행"], ["점검", "사진", "증빙", "확인"], ["후속조치", "재발방지", "개선"]],
+    improvementAction: "문서팩 요약에 Plan-Do-Check-Act 상태표와 미조치 항목 후속조치란을 추가합니다.",
+    researchAction: "위험성평가, TBM, 사진증빙, 비상대응 문서를 PDCA 기준으로 재정렬합니다."
+  },
+  {
+    id: "management-audit-trace",
+    track: "submission-check",
+    category: "management-system",
+    title: "감사 추적성과 전파 로그",
+    description: "생성, 편집, 교육 확인, 발송 결과, 다운로드 이력이 운영 로그로 남아야 합니다.",
+    documents: ["workpackSummaryDraft", "tbmLogDraft", "safetyEducationRecordDraft", "kakaoMessage"],
+    keywordGroups: [["이력", "로그", "저장"], ["발송", "전파", "메일", "문자"], ["교육 확인", "이수", "확인방법"], ["다운로드", "보관", "증빙"]],
+    improvementAction: "문서팩 요약과 현장 공유 메시지에 전파 결과와 교육 확인 로그 참조란을 추가합니다.",
+    researchAction: "전파 로그, 교육 이수 로그, 다운로드 이력 저장 구조를 감사 추적성 기준으로 점검합니다."
+  },
+  {
+    id: "management-corrective-action",
+    track: "submission-check",
+    category: "management-system",
+    title: "부적합·개선조치 관리",
+    description: "미조치 위험, 담당자, 기한, 완료 확인, 재발방지 조치가 분리되어야 합니다.",
+    documents: ["riskAssessmentDraft", "emergencyResponseDraft", "photoEvidenceDraft"],
+    keywordGroups: [["미조치", "부적합", "개선"], ["담당자", "기한", "완료"], ["재발방지", "후속조치", "조치결과"]],
+    improvementAction: "미조치 위험요인과 개선조치 담당자·기한·완료 확인란을 추가합니다.",
+    researchAction: "대기업·공공기관 안전점검표의 시정조치/CAPA 항목을 공통 서식으로 추출합니다."
   }
 ];
 
 const categoryPriority: Record<RubricCategory, number> = {
   required: 0,
   "submission-quality": 1,
-  "field-operation": 2
+  "field-operation": 2,
+  "management-system": 3
 };
 
 function normalize(value: string): string {
@@ -177,6 +233,7 @@ export function evaluatePublicSafetyRubric(documents: Record<RubricDocumentKey, 
 export function rubricCategoryLabel(category: RubricCategory): string {
   if (category === "required") return "필수 확인";
   if (category === "submission-quality") return "제출 품질 보강";
+  if (category === "management-system") return "ISO 운영체계";
   return "현장 운영 추천";
 }
 

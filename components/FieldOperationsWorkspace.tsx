@@ -467,11 +467,11 @@ export function FieldOperationsWorkspace({
   );
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
-    ["API", "근거 확인", `${data.citations.length}건 · ${data.status.summary || "연결됨"}`],
-    ["DOC", "문서팩", "Excel·HWPX 우선"],
-    ["EDU", "작업자·교육", `${workerSummary.selectedCount}명 · 교육확인 ${workerSummary.educationPendingCount ? "필요" : "완료"}`],
-    ["SEND", "현장 전파", "메일·문자 중심"],
-    ["SAVE", "이력 저장", session ? "관리자 연결됨" : "다운로드 가능"]
+    ["PLAN", "계획", `${data.citations.length}건 근거 · 위험성평가·작업계획`],
+    ["DO", "실행", `TBM·교육 · ${workerSummary.selectedCount}명 대상`],
+    ["CHECK", "확인", `교육확인 ${workerSummary.educationPendingCount ? "필요" : "완료"} · 증빙 보관`],
+    ["ACT", "개선", session ? "이력 저장·후속조치" : "다운로드 후 현장 확인"],
+    ["ISO", "운영체계", "법규·문서관리·감사추적"]
   ] as const;
 
   async function postJson<TResponse>(url: string, body: unknown): Promise<TResponse> {
