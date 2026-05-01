@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-05-02",
+  "sourcePrototype": "C:/Users/iceam/Downloads/SafeClaw Prototype _standalone_.html",
+  "status": "gap_analysis_completed",
+  "prototypeScreens": {
+    "total": 16,
+    "groups": {
+      "entry": ["landing-a", "landing-b", "login"],
+      "product": ["home-dashboard", "workspace-a", "workspace-b", "docs", "evidence", "workers", "dispatch"],
+      "field": ["mobile-worker", "tbm-fullscreen"],
+      "system": ["archive", "knowledge", "api", "settings"]
+    }
+  },
+  "currentImplementation": {
+    "routesObserved": [
+      "/",
+      "/demo",
+      "/why",
+      "/preview",
+      "/trust",
+      "/roadmap",
+      "/knowledge",
+      "/search",
+      "/dryrun"
+    ],
+    "coreComponentsObserved": [
+      "SafeGuardCommandCenter",
+      "FieldOperationsWorkspace",
+      "WorkpackEditor",
+      "CitationList",
+      "WorkflowSharePanel"
+    ]
+  },
+  "primaryGap": "Current product has strong functional engine but lacks the prototype-level product shell and separated service IA.",
+  "recommendedNextStep": "Migrate the existing workspace into a new SafeClaw AppShell and split landing, workspace, docs, evidence, workers, dispatch, TBM, archive, API status, and settings routes.",
+  "doNotBreak": [
+    "/api/ask orchestration",
+    "WorkpackEditor exports",
+    "Supabase save flow",
+    "n8n dispatch flow",
+    "knowledge API routes",
+    "safety-document rubric"
+  ]
+}
