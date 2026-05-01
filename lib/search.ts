@@ -112,6 +112,77 @@ function formatSafetyKnowledgeAppendix(matches: ReturnType<typeof matchSafetyKno
   ].join("\n");
 }
 
+function hasOutdoorHeatSignal(weather: Awaited<ReturnType<typeof fetchWeatherSignal>>, question: string) {
+  const outdoorByInput = /옥외|실외|야외|외벽|지붕|도로|조경|도장|건설|비계|고소|하역|폭염|자외선|여름|한여름|온열|열사병|열탈진|열경련/.test(question);
+  const outdoorBySignal = (weather.signals || []).some((signal) => {
+    if (signal.endpoint === "생활기상 자외선" || signal.endpoint === "실시간 홍반자외선") return true;
+    if (signal.endpoint === "영향예보" && /폭염|온열|더위|고온|주의|경고|위험/.test(signal.summary)) return true;
+    const temp = Number(signal.temperatureC || "");
+    return Number.isFinite(temp) && temp >= 31;
+  });
+  return outdoorByInput || outdoorBySignal;
+}
+
+function formatOutdoorHeatAppendix(weather: Awaited<ReturnType<typeof fetchWeatherSignal>>, target: "risk" | "tbm" | "education" | "message") {
+  const signals = weather.signals || [];
+  const uvSignals = signals.filter((signal) => signal.endpoint === "생활기상 자외선" || signal.endpoint === "실시간 홍반자외선");
+  const heatSignal = signals.find((signal) => signal.endpoint === "영향예보" && /폭염|온열|더위|고온|주의|경고|위험/.test(signal.summary))
+    || signals.find((signal) => {
+      const temp = Number(signal.temperatureC || "");
+      return Number.isFinite(temp) && temp >= 31;
+    });
+  const uvLine = uvSignals.length
+    ? `- 자외선 신호: ${uvSignals.map((signal) => signal.summary).join(" / ")}`
+    : "- 자외선 신호: 옥외작업 시 차광 보호구와 그늘 휴식을 보수적으로 적용";
+  const heatLine = heatSignal
+    ? `- 폭염·고온 신호: ${heatSignal.summary}`
+    : "- 폭염·고온 신호: 한여름 옥외작업 기준으로 물·그늘·휴식 계획을 선반영";
+
+  if (target === "message") {
+    return [
+      "",
+      "[한여름 옥외작업 추가공지]",
+      "- 물을 자주 마시고, 그늘에서 쉬며, 어지러움·구토·두통이 있으면 즉시 작업을 멈추고 보고하세요.",
+      "- 오후 가장 더운 시간대에는 작업반장 지시에 따라 작업 조절 또는 대기합니다."
+    ].join("\n");
+  }
+
+  if (target === "risk") {
+    return [
+      "",
+      "[옥외작업 폭염·자외선 위험 반영]",
+      heatLine,
+      uvLine,
+      "- 유해·위험요인: 고온 노출, 직사광선, 탈수, 열탈진·열사병, 자외선 노출, 신규·고령·민감군 작업자 상태 악화",
+      "- 감소대책: 작업 전 기상청 현재/예보/생활기상 신호 확인, 가까운 그늘 휴게공간 확보, 시원한 물 비치, 14~17시 작업 조절, 동료 작업자 상호관찰",
+      "- 확인기준: 어지러움·두통·구토·근육경련 등 이상 징후자는 정해진 휴식시간과 무관하게 작업중단 및 보고",
+      "- 관련 법령 확인 대상: 산업안전보건법상 안전보건조치, 근로자 안전보건교육, 산업안전보건기준에 관한 규칙의 휴식·건강장해 예방 관련 기준"
+    ].join("\n");
+  }
+
+  if (target === "tbm") {
+    return [
+      "",
+      "[한여름 옥외작업 TBM 추가질문]",
+      heatLine,
+      uvLine,
+      "- 오늘 그늘 휴게공간, 시원한 물, 휴식 주기, 가장 더운 시간대 작업 조절 기준을 누가 확인했는가?",
+      "- 신규 투입자, 고령자, 민감군, 중작업 수행자는 동료 작업자와 짝을 지어 이상 징후를 확인하는가?",
+      "- 어지러움·두통·구토·경련이 있으면 불이익 없이 즉시 작업을 멈추고 보고한다는 내용을 전원이 이해했는가?"
+    ].join("\n");
+  }
+
+  return [
+    "",
+    "[폭염·자외선 안전교육 추가]",
+    heatLine,
+    uvLine,
+    "- 교육내용: 열사병·열탈진·열경련 증상, 물·그늘·휴식 3대 수칙, 자외선 차단 보호구, 동료 작업자 상호관찰, 응급조치와 119 신고 기준",
+    "- 확인방법: 작업자가 물 마시는 위치, 그늘 휴게공간, 작업중지 보고 절차를 직접 말하게 하고 교육기록에 확인자와 시간을 남김",
+    "- 현장 문구: 이해하지 못했거나 몸이 이상하면 작업을 시작하지 말고 관리자에게 다시 설명을 요청"
+  ].join("\n");
+}
+
 function formatLegalEvidenceAppendix(citations: AskResponse["citations"], target: "risk" | "tbm" | "education") {
   const targetLabel = target === "risk" ? "위험성평가표" : target === "tbm" ? "TBM 기록" : "안전교육 기록";
   const legalItems = citations
@@ -236,6 +307,11 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const trainingFitLines = training.recommendations.slice(0, 2).map((item) => `${item.title}: ${item.fitLabel || "조건부 후보"} - ${item.fitReason || item.reason}`);
     const accidentAppendix = formatAccidentCaseAppendix(accidentCases.cases);
     const koshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references);
+    const outdoorHeatEnabled = hasOutdoorHeatSignal(weather, question);
+    const outdoorHeatRiskAppendix = outdoorHeatEnabled ? formatOutdoorHeatAppendix(weather, "risk") : "";
+    const outdoorHeatTbmAppendix = outdoorHeatEnabled ? formatOutdoorHeatAppendix(weather, "tbm") : "";
+    const outdoorHeatEducationAppendix = outdoorHeatEnabled ? formatOutdoorHeatAppendix(weather, "education") : "";
+    const outdoorHeatMessageAppendix = outdoorHeatEnabled ? formatOutdoorHeatAppendix(weather, "message") : "";
     const safetyKnowledgeMatches = matchSafetyKnowledge(question, 4);
     const safetyKnowledgeAppendix = formatSafetyKnowledgeAppendix(safetyKnowledgeMatches, "risk");
     const safetyKnowledgeTbmAppendix = formatSafetyKnowledgeAppendix(safetyKnowledgeMatches, "tbm");
@@ -281,18 +357,18 @@ export async function runAsk(question: string): Promise<AskResponse> {
       deliverables: {
         ...response.deliverables,
         workpackSummaryDraft: `${response.deliverables.workpackSummaryDraft}\n\n[연결 상태 요약]\n- 법령 근거: ${legalEvidenceMode === "live" ? "연결됨" : "일부 근거 보류"}\n- 기상: ${weather.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- 후속 교육: ${training.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- KOSHA 자료: ${kosha.mode === "live" ? "연결됨" : "일부 근거 보류"}`,
-        riskAssessmentDraft: `${response.deliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${safetyKnowledgeAppendix}${koshaOpenApiAppendix}`,
-        workPlanDraft: `${response.deliverables.workPlanDraft}${riskLegalAppendix}${koshaImpactLines.length ? `\n\n[KOSHA 작업계획 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${safetyKnowledgeAppendix}${koshaOpenApiAppendix}`,
-        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${koshaImpactLines.length ? `\n\n[KOSHA 매뉴얼·Guide 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${tbmLegalAppendix}${tbmSeriousAccidentAppendix}${safetyKnowledgeTbmAppendix}${accidentAppendix}${koshaOpenApiAppendix}`,
+        riskAssessmentDraft: `${response.deliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${outdoorHeatRiskAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${safetyKnowledgeAppendix}${koshaOpenApiAppendix}`,
+        workPlanDraft: `${response.deliverables.workPlanDraft}${outdoorHeatRiskAppendix}${riskLegalAppendix}${koshaImpactLines.length ? `\n\n[KOSHA 작업계획 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${safetyKnowledgeAppendix}${koshaOpenApiAppendix}`,
+        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${outdoorHeatTbmAppendix}${koshaImpactLines.length ? `\n\n[KOSHA 매뉴얼·Guide 반영]\n- ${koshaImpactLines.join("\n- ")}` : ""}${tbmLegalAppendix}${tbmSeriousAccidentAppendix}${safetyKnowledgeTbmAppendix}${accidentAppendix}${koshaOpenApiAppendix}`,
         tbmLogDraft: `${response.deliverables.tbmLogDraft}${tbmLegalAppendix}${tbmSeriousAccidentAppendix}${koshaAppendix}${safetyKnowledgeTbmAppendix}${accidentAppendix}`
           .trim(),
-        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${kosha.references.length ? `\n\n[공식 교육자료 반영]\n- ${kosha.references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("안전교육일지")).slice(0, 2).map((item) => `${item.title}: ${item.summary}`).join("\n- ")}` : ""}${safetyKnowledgeEducationAppendix}${accidentAppendix}${koshaOpenApiAppendix}`,
+        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${kosha.references.length ? `\n\n[공식 교육자료 반영]\n- ${kosha.references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("안전교육일지")).slice(0, 2).map((item) => `${item.title}: ${item.summary}`).join("\n- ")}` : ""}${safetyKnowledgeEducationAppendix}${accidentAppendix}${koshaOpenApiAppendix}`,
         emergencyResponseDraft: `${response.deliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}`,
         photoEvidenceDraft: `${response.deliverables.photoEvidenceDraft}\n\n[확인 근거 첨부]\n- 법령·해석례·판례: ${citations.slice(0, 3).map((item) => item.title).join(" / ") || "현장 문서 확인 후 첨부"}\n- KOSHA 자료: ${kosha.references.slice(0, 2).map((item) => item.title).join(" / ") || "현장 작업유형 확인 후 첨부"}\n- 유사 재해사례: ${accidentCases.cases.slice(0, 2).map((item) => item.title).join(" / ") || "사례 확인 후 첨부"}`,
         foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
         foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
         foreignWorkerLanguages,
-        kakaoMessage: `${response.deliverables.kakaoMessage}\n\n[외국인 근로자 공지]\n${buildForeignWorkerTransmission(foreignWorkerInput).split("\n").slice(0, 8).join("\n")}`
+        kakaoMessage: `${response.deliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${buildForeignWorkerTransmission(foreignWorkerInput).split("\n").slice(0, 8).join("\n")}`
       },
       status: {
         ...response.status,

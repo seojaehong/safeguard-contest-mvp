@@ -85,7 +85,14 @@ export type AskResponse = {
       actions: string[];
       detail: string;
       signals?: Array<{
-        endpoint: "초단기실황" | "초단기예보" | "단기예보" | "기상특보" | "영향예보";
+        endpoint:
+          | "초단기실황"
+          | "초단기예보"
+          | "단기예보"
+          | "기상특보"
+          | "영향예보"
+          | "생활기상 자외선"
+          | "실시간 홍반자외선";
         mode: IntegrationMode;
         summary: string;
         detail: string;
@@ -94,6 +101,8 @@ export type AskResponse = {
         windSpeedMps?: string;
         precipitationProbability?: string;
         precipitationType?: string;
+        uvIndex?: string;
+        heatRiskLevel?: "보통" | "높음" | "매우높음" | "위험";
       }>;
     };
     training: {
