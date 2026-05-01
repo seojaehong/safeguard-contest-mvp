@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
   try {
     if (client && user) {
       const context = await ensureWorkspaceContext(client, user, {
-        companyName: "SafeGuard Knowledge",
+        companyName: "SafeClaw Knowledge",
         siteName: "기초 지식 DB",
         companyType: "산업안전",
         region: "전국"

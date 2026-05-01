@@ -6,7 +6,7 @@ const mockMode = process.env.LAWGO_MOCK_MODE === "force" || !oc;
 const baseUrl = "https://www.law.go.kr/DRF";
 const lawGoHeaders = {
   Accept: "application/json, application/xml, text/xml, */*",
-  "User-Agent": "SafeGuard/1.0 (+https://safeguard-contest-mvp.vercel.app; evidence-fetch)"
+  "User-Agent": "SafeClaw/1.0 (+https://safeclaw.kr; evidence-fetch)"
 };
 
 type JsonRecord = Record<string, unknown>;
@@ -259,7 +259,7 @@ function formatLawDetailBody(articleUnits: JsonRecord[]) {
     "[법령 전문]",
     articleTexts.length
       ? articleTexts.join("\n\n")
-      : "Law.go 상세 원문에서 조문 전문을 확인해 주세요. SafeGuard는 이 근거를 현장 문서 초안 작성 보조 근거로만 사용합니다."
+      : "Law.go 상세 원문에서 조문 전문을 확인해 주세요. SafeClaw는 이 근거를 현장 문서 초안 작성 보조 근거로만 사용합니다."
   ].join("\n");
 }
 

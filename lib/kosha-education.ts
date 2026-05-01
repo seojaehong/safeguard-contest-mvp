@@ -64,7 +64,7 @@ async function postKoshaEdu(endpoint: string, body: Record<string, unknown>) {
         "content-type": "application/json",
         "origin": BASE_URL,
         "referer": `${BASE_URL}/`,
-        "user-agent": "SafeGuard safety-workpack"
+        "user-agent": "SafeClaw safety-workpack"
       },
       body: JSON.stringify(body),
       signal: controller.signal,

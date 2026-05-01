@@ -10,7 +10,7 @@ export default function DryrunPage() {
   return (
     <main className="container grid" style={{ paddingTop: 36, paddingBottom: 48 }}>
       <section className="hero grid" style={{ gap: 18 }}>
-        <span className="badge">SafeGuard 운영 점검</span>
+        <span className="badge">SafeClaw 운영 점검</span>
         <div className="grid" style={{ gap: 12 }}>
           <h1 className="title">문서 생성 점검 로그</h1>
           <p className="subtitle">

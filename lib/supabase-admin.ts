@@ -398,7 +398,7 @@ export async function ensureWorkspaceContext(
   user: WorkspaceUser,
   input: { companyName?: string; siteName?: string; companyType?: string; region?: string }
 ): Promise<WorkspaceContext> {
-  const organizationName = input.companyName || "SafeGuard Pilot";
+  const organizationName = input.companyName || "SafeClaw Pilot";
   const siteName = input.siteName || "기본 현장";
 
   const { data: existingOrganization, error: organizationSelectError } = await client

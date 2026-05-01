@@ -40,7 +40,7 @@ export default async function KnowledgeDetailPage({
       <header className="v2-nav">
         <Link href="/knowledge" className="brand-lockup" aria-label="LLM 위키로 돌아가기">
           <span className="brand-mark">S</span>
-          <span><strong>SafeGuard</strong><small>LLM 위키 상세</small></span>
+          <span><strong>SafeClaw</strong><small>LLM 위키 상세</small></span>
         </Link>
         <nav>
           <Link href="/">작업공간</Link>

@@ -380,10 +380,10 @@ export function SafeGuardCommandCenter({
   return (
     <main className="command-center-shell">
       <header className="command-topbar">
-        <Link href="/" className="brand-lockup safeclaw-lockup" aria-label="SafeGuard 홈으로 이동">
+        <Link href="/" className="brand-lockup safeclaw-lockup" aria-label="SafeClaw 홈으로 이동">
           <span className="brand-mark">S</span>
           <span>
-            <strong>SafeGuard</strong>
+            <strong>SafeClaw</strong>
             <small>현장 안전 문서팩</small>
           </span>
         </Link>

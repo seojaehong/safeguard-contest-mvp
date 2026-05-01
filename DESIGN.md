@@ -1,8 +1,8 @@
-# SafeGuard DESIGN.md
+# SafeClaw DESIGN.md
 
 ## Visual Theme & Atmosphere
 
-SafeGuard should feel like a serious field operations workspace, not a contest landing page. The product combines the precision of developer tooling, the calm of document editors, and the structure of inspection checklists.
+SafeClaw should feel like a serious field operations workspace, not a contest landing page. The product combines the precision of developer tooling, the calm of document editors, and the structure of inspection checklists.
 
 Use a `field command center` metaphor:
 - The first screen is a working console for today's job, not a marketing hero.
@@ -87,7 +87,7 @@ Don't:
 
 When modifying UI, use this prompt:
 
-> Build SafeGuard as an inspection-ready industrial safety workspace. Make it feel like Vercel/Linear-level precision applied to Korean field safety documents, with Notion/Airtable-like editable document surfaces. Remove demo language. Use operational status labels and keep the workflow from job input to document pack to evidence to field dispatch.
+> Build SafeClaw as an inspection-ready industrial safety workspace. Make it feel like Vercel/Linear-level precision applied to Korean field safety documents, with Notion/Airtable-like editable document surfaces. Remove demo language. Use operational status labels and keep the workflow from job input to document pack to evidence to field dispatch.
 
 ## Imported SafeClaw Design Direction
 
@@ -102,3 +102,4 @@ The `SafeGuard Workspace _standalone_.html` and `safeclaw.zip` design exploratio
 - Keep example data as quick-start field cases shown as compact chips below the textarea, never as visible demo language.
 - Use warm institutional colors, dark ink, green verification, amber attention, and paper-like surfaces.
 - If a live provider is unavailable, preserve the user workflow with a clearly labeled operational state and a verified fallback where available.
+- Avoid emoji in product chrome. Exception: worker-facing transmission messages may use a small fixed set of safety pictograms (`⚠️`, `✋`, `🦺`, `💧`) when they improve immediate comprehension.

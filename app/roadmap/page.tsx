@@ -12,9 +12,9 @@ export default function RoadmapPage() {
   return (
     <main className="v2-shell">
       <header className="v2-nav">
-        <Link href="/" className="brand-lockup" aria-label="SafeGuard 홈">
+        <Link href="/" className="brand-lockup" aria-label="SafeClaw 홈">
           <span className="brand-mark">S</span>
-          <span><strong>SafeGuard</strong><small>실행 로드맵</small></span>
+          <span><strong>SafeClaw</strong><small>실행 로드맵</small></span>
         </Link>
         <nav>
           <Link href="/demo">데모</Link>

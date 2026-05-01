@@ -24,7 +24,7 @@ async function fetchWithTimeout(url: string): Promise<boolean> {
       redirect: "follow",
       signal: controller.signal,
       headers: {
-        "User-Agent": "SafeGuard safety-workpack official-resource-check"
+        "User-Agent": "SafeClaw safety-workpack official-resource-check"
       }
     });
     const text = await response.text().catch(() => "");

@@ -53,10 +53,10 @@ function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
   if (!language) return data.deliverables.foreignWorkerTransmission;
 
   return [
-    `[SafeGuard ${language.label} 안전공지] ${data.scenario.companyName}`,
+    `[SafeClaw ${language.label} 안전공지] ${data.scenario.companyName}`,
     `현장: ${data.scenario.siteName}`,
     `작업: ${data.scenario.workSummary}`,
-    `핵심 위험: ${data.riskSummary.topRisk}`,
+    `⚠️ 핵심 위험: ${data.riskSummary.topRisk}`,
     "",
     `${language.label}(${language.nativeLabel})`,
     ...language.lines.map((line) => `- ${line}`),
@@ -429,7 +429,7 @@ export function WorkflowSharePanel({
 
       <div className="message-preview-phone" aria-label="휴대폰 공유 메시지 미리보기">
         <div className="phone-shell">
-          <div className="phone-status">SafeGuard 현장공지</div>
+          <div className="phone-status">SafeClaw 현장공지</div>
           <div className="phone-bubble">
             {previewLines(selectedMessage).map((line, index) => (
               <p key={`${line}-${index}`}>{line}</p>

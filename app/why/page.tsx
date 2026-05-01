@@ -19,9 +19,9 @@ export default function WhyPage() {
   return (
     <main className="v2-shell">
       <header className="v2-nav">
-        <Link href="/" className="brand-lockup" aria-label="SafeGuard 홈">
+        <Link href="/" className="brand-lockup" aria-label="SafeClaw 홈">
           <span className="brand-mark">S</span>
-          <span><strong>SafeGuard</strong><small>차별성</small></span>
+          <span><strong>SafeClaw</strong><small>차별성</small></span>
         </Link>
         <nav>
           <Link href="/demo">데모</Link>
@@ -32,9 +32,9 @@ export default function WhyPage() {
       </header>
 
       <section className="v2-hero card">
-        <span className="eyebrow">왜 SafeGuard인가</span>
+        <span className="eyebrow">왜 SafeClaw인가</span>
         <h1>검색기나 템플릿이 아니라, 현장 실행 문서팩을 만드는 작업공간입니다.</h1>
-        <p>SafeGuard의 차별성은 공공데이터를 보여주는 데서 끝나지 않고, 그 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 데 있습니다.</p>
+        <p>SafeClaw의 차별성은 공공데이터를 보여주는 데서 끝나지 않고, 그 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 데 있습니다.</p>
       </section>
 
       <section className="api-pulse-showcase">
@@ -55,7 +55,7 @@ export default function WhyPage() {
         <div className="comparison-table" role="table" aria-label="대안별 기능 비교">
           <div className="comparison-head" role="row">
             <span>기준</span>
-            <span>SafeGuard</span>
+            <span>SafeClaw</span>
             <span>안전관리 SaaS</span>
             <span>한글·엑셀 양식</span>
             <span>일반 AI</span>

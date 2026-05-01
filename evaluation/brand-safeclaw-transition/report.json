@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-05-01T00:00:00+09:00",
+  "scope": "product-facing brand and foreign-worker transmission copy",
+  "brand": {
+    "from": "SafeGuard",
+    "to": "SafeClaw",
+    "changedSurfaces": [
+      "main workspace header",
+      "v2 supporting pages",
+      "LLM wiki header",
+      "document export metadata",
+      "foreign-worker transmission messages",
+      "environment example app name",
+      "README and DESIGN guidance"
+    ],
+    "unchangedInternalIdentifiers": [
+      "n8n webhook path safeguard-workpack",
+      "x-safeguard-secret header",
+      "legacy component names"
+    ]
+  },
+  "foreignWorkerTransmissionException": {
+    "policy": "No emoji in product chrome; limited safety pictograms are allowed in worker-facing transmission messages.",
+    "allowedPictograms": ["⚠️", "✋", "🦺", "💧"],
+    "appliedTo": [
+      "easy Korean foreign-worker transmission",
+      "language-specific foreign-worker transmission",
+      "phone preview message header"
+    ]
+  },
+  "validation": {
+    "typecheck": "passed: npm.cmd run typecheck",
+    "build": "passed: npm.cmd run build",
+    "userFacingSafeGuardScan": "passed for app/components/lib excluding internal webhook and legacy component identifiers"
+  }
+}

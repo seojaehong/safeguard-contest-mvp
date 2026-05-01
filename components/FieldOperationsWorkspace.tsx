@@ -609,7 +609,7 @@ export function FieldOperationsWorkspace({
 
   return (
     <section className="field-workspace" id="workpack">
-      <aside className="workspace-rail card" aria-label="SafeGuard 파일럿 체크리스트">
+      <aside className="workspace-rail card" aria-label="SafeClaw 파일럿 체크리스트">
         <div className="compact-head">
           <span className="eyebrow">운영 체크</span>
           <strong>파일럿 체크리스트</strong>

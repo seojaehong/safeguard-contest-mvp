@@ -697,13 +697,14 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
     .join("\n\n");
 
   return [
-    `[SafeGuard 외국인 근로자 안전공지] ${input.scenario.companyName}`,
+    `[SafeClaw 외국인 근로자 안전공지] ${input.scenario.companyName}`,
     `현장: ${input.scenario.siteName}`,
-    `핵심 위험: ${input.riskSummary.topRisk}`,
+    `⚠️ 핵심 위험: ${input.riskSummary.topRisk}`,
     "",
     "쉬운 한국어:",
-    "위험하면 작업을 멈추고 바로 관리자에게 말하세요.",
-    "보호구를 착용하고, 지시를 이해한 뒤 작업을 시작하세요.",
+    "✋ 위험하면 작업을 멈추고 바로 관리자에게 말하세요.",
+    "🦺 보호구를 착용하고, 지시를 이해한 뒤 작업을 시작하세요.",
+    "💧 더위·자외선 작업에서는 물, 그늘, 휴식 시간을 먼저 확인하세요.",
     "⚠️ 이해하지 못하면 작업을 시작하지 말고 관리자에게 다시 설명을 요청하세요.",
     "",
     languageDigest,
@@ -716,10 +717,10 @@ export function buildForeignWorkerLanguageMessage(input: BriefingInput, language
   const pack = getPack(language);
   const keywords = detectSafetyKeywords(input);
   return [
-    `[SafeGuard ${language.label} 안전공지] ${input.scenario.companyName}`,
+    `[SafeClaw ${language.label} 안전공지] ${input.scenario.companyName}`,
     `현장: ${input.scenario.siteName}`,
     `작업: ${input.scenario.workSummary}`,
-    `핵심 위험: ${input.riskSummary.topRisk}`,
+    `⚠️ 핵심 위험: ${input.riskSummary.topRisk}`,
     buildVisualCueLine(language, keywords),
     "",
     `${language.label}(${language.nativeLabel})`,
