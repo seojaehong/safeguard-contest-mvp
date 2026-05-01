@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-05-01T01:53:09.478Z",
+  "verdict": "pass",
+  "migrationFiles": [
+    "001_init.sql",
+    "002_workspace_productization.sql",
+    "003_knowledge_runtime.sql"
+  ],
+  "checkedTables": [
+    {
+      "table": "organizations",
+      "status": 200,
+      "ok": true,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "sites",
+      "status": 200,
+      "ok": true,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "workers",
+      "status": 200,
+      "ok": true,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "workpacks",
+      "status": 200,
+      "ok": true,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "education_records",
+      "status": 200,
+      "ok": true,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "dispatch_logs",
+      "status": 200,
+      "ok": true,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "daily_entries",
+      "status": 200,
+      "ok": true,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "knowledge_events",
+      "status": 200,
+      "ok": true,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "knowledge_regeneration_runs",
+      "status": 200,
+      "ok": true,
+      "bodyPrefix": "[]"
+    }
+  ]
+}
