@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-05-01T16:19:04.1127551+09:00",
+  "question": "multilingual safety notice smoke",
+  "askMode": "live",
+  "languageCodes": [
+    "vi",
+    "th"
+  ],
+  "containsVietnamese": true,
+  "containsThai": true,
+  "containsVisualCue": true,
+  "containsLocalizedVisualCue": true,
+  "containsChemicalIcon": true,
+  "containsStopIfUnclear": true,
+  "containsMediaSupport": true,
+  "hardcodedSecretPatternMatches": 0,
+  "validations": [
+    "npm.cmd run build",
+    "npm.cmd run typecheck",
+    "local /api/ask multilingual smoke",
+    "repository secret-pattern scan excluding env/build artifacts"
+  ]
+}

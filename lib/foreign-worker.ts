@@ -41,6 +41,22 @@ type LocalizedPack = {
   actionLabels: Partial<Record<SafetyKeyword, string>>;
 };
 
+const hazardIcons: Record<SafetyKeyword, string> = {
+  fall: "⚠️",
+  scaffold: "🧱",
+  wind: "🌬️",
+  forklift: "🚧",
+  chemical: "🧪",
+  fire: "🔥",
+  confined: "🫁",
+  electric: "⚡",
+  heat: "🌡️",
+  slip: "💧",
+  heavyLoad: "📦",
+  crane: "🏗️",
+  excavation: "⛏️"
+};
+
 const languageTemplates: LanguageTemplate[] = [
   {
     code: "vi",
@@ -281,7 +297,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         forkliftLoading: "Bốc dỡ và lấy hàng bằng xe nâng",
         hotWork: "Hàn, cắt và công việc có lửa",
         confinedInspection: "Kiểm tra phòng máy ngầm, có thể có nguy cơ không gian kín",
-        chemicalCleaning: "Vệ sinh sàn nhà xưởng bằng hóa chất",
+        chemicalCleaning: "Vệ sinh sàn nhà xưởng bằng hóa chất hoặc thuốc tẩy",
         manualHandling: "Xếp và vận chuyển thùng nặng",
         excavation: "Đào đất và kiểm tra công trình ngầm",
         general: "Công việc được quản lý hướng dẫn hôm nay"
@@ -292,7 +308,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         scaffold: "giàn giáo di động rung hoặc lật",
         wind: "gió mạnh",
         forklift: "đường xe nâng giao với lối đi bộ",
-        chemical: "tiếp xúc hóa chất",
+        chemical: "tiếp xúc hóa chất hoặc thuốc tẩy",
         fire: "nguy cơ cháy khi hàn/cắt"
       },
       actionLabels: {
@@ -300,7 +316,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         scaffold: "Khóa bánh xe, kiểm tra lan can và không di chuyển giàn giáo khi có người ở trên.",
         fall: "Mang dây an toàn và thiết bị bảo hộ, chỉ làm việc trong khu vực an toàn.",
         forklift: "Tách đường xe nâng và lối đi bộ trước khi bắt đầu.",
-        chemical: "Kiểm tra thông gió, kính bảo hộ và găng tay trước khi dùng hóa chất.",
+        chemical: "Trước khi dùng hóa chất hoặc thuốc tẩy, kiểm tra thông gió, kính bảo hộ và găng tay.",
         fire: "Dọn vật dễ cháy, bố trí người giám sát cháy và chuẩn bị bình chữa cháy."
       }
     },
@@ -342,8 +358,8 @@ function localizedPacks(): Record<string, LocalizedPack> {
       work: "งานวันนี้",
       risk: "อันตรายหลักของงานนี้",
       actions: "ก่อนเริ่มงาน",
-      ask: "หากไม่เข้าใจ ให้หยุดงานและขอให้หัวหน้างานอธิบายอีกครั้ง",
-      supervisor: "การยืนยันของหัวหน้างาน: ตรวจข้อความนี้กับล่ามหรือผู้ที่อ่านภาษานี้ได้ก่อนส่ง",
+      ask: "หากไม่เข้าใจ ให้หยุดงานและขอให้หัวหน้างานอธิบายอีกครั้งนะครับ/ค่ะ",
+      supervisor: "การยืนยันของหัวหน้างาน: ตรวจข้อความนี้กับล่ามหรือผู้ที่อ่านภาษานี้ได้ก่อนส่งนะครับ/ค่ะ",
       workLabels: {
         paintingScaffold: "งานทาสีผนังภายนอกโดยใช้นั่งร้านเคลื่อนที่",
         forkliftLoading: "งานขนถ่ายและหยิบสินค้าโดยใช้รถยก",
@@ -574,6 +590,34 @@ function getPack(language: ForeignWorkerLanguage): LocalizedPack {
   return packs[language.code] || packs.en;
 }
 
+function buildVisualCueLine(language: ForeignWorkerLanguage, keywords: SafetyKeyword[]) {
+  const icons = Array.from(new Set(keywords.map((keyword) => hazardIcons[keyword])));
+  const visual = icons.join(" ");
+
+  const localizedGuides: Record<string, string> = {
+    en: `⚠️ Warning signs: ${visual}. If you see these signs, stop first and ask the supervisor.`,
+    vi: `⚠️ Dấu hiệu nguy hiểm: ${visual}. Nếu thấy các dấu hiệu này, hãy dừng lại và hỏi quản lý.`,
+    zh: `⚠️ 危险标志：${visual}。看到这些标志时，请先停止作业并确认负责人说明。`,
+    th: `⚠️ สัญลักษณ์อันตราย: ${visual} หากเห็นสัญลักษณ์เหล่านี้ ให้หยุดก่อนและถามหัวหน้างานนะครับ/ค่ะ`,
+    uz: `⚠️ Xavf belgisi: ${visual}. Bu belgilarni ko'rsangiz, avval to'xtang va rahbardan so'rang.`,
+    mn: `⚠️ Аюулын тэмдэг: ${visual}. Эдгээр тэмдгийг харвал эхлээд зогсоож, ахлагчаас асуугаарай.`,
+    ne: `⚠️ जोखिम संकेत: ${visual}। यी संकेत देखेमा पहिले काम रोक्नुहोस् र सुपरभाइजरलाई सोध्नुहोस्।`,
+    km: `⚠️ សញ្ញាគ្រោះថ្នាក់៖ ${visual}។ បើឃើញសញ្ញាទាំងនេះ សូមឈប់មុន ហើយសួរអ្នកគ្រប់គ្រង។`,
+    id: `⚠️ Tanda bahaya: ${visual}. Jika melihat tanda ini, berhenti dulu dan tanya supervisor.`,
+    my: `⚠️ အန္တရာယ်အမှတ်အသား: ${visual}။ ဤအမှတ်အသားများတွေ့ပါက အရင်ရပ်ပြီး ကြီးကြပ်သူကို မေးပါ။`
+  };
+
+  return localizedGuides[language.code] || localizedGuides.en;
+}
+
+function buildWorkerMediaSupportLine(language: ForeignWorkerLanguage) {
+  if (!["km", "ne", "my"].includes(language.code)) {
+    return null;
+  }
+
+  return "📎 글로 이해가 어려우면 그림 표지, 짧은 안전 영상, 현장 실물 설명을 함께 확인하세요.";
+}
+
 function buildTaskSpecificLines(input: BriefingInput, language: ForeignWorkerLanguage) {
   const pack = getPack(language);
   const keywords = detectSafetyKeywords(input);
@@ -588,11 +632,13 @@ function buildTaskSpecificLines(input: BriefingInput, language: ForeignWorkerLan
   return [
     `${pack.work}: ${workLabel}`,
     `${pack.risk}: ${hazards.join(", ")}`,
+    buildVisualCueLine(language, keywords),
     `${pack.actions}: ${actions[0] || fallbackActions[0] || language.lines[0]}`,
     actions[1] || fallbackActions[1] || language.lines[1],
     actions[2] || fallbackActions[2] || language.lines[2],
-    pack.ask
-  ];
+    pack.ask,
+    buildWorkerMediaSupportLine(language)
+  ].filter((line): line is string => Boolean(line));
 }
 
 export function buildForeignWorkerLanguages(input: BriefingInput) {
@@ -618,7 +664,8 @@ function buildEasyKoreanLines(input: BriefingInput) {
     "[쉬운 문장]",
     "- 위험하면 멈춥니다.",
     "- 혼자 판단하지 말고 바로 말합니다.",
-    "- 보호구를 착용하고 작업구역 밖으로 함부로 들어가지 않습니다."
+    "- 보호구를 착용하고 작업구역 밖으로 함부로 들어가지 않습니다.",
+    "- ⚠️ 🧪 💧 같은 그림 표시를 먼저 보고, 이해하지 못하면 작업을 시작하지 않습니다."
   ];
 }
 
@@ -638,7 +685,8 @@ export function buildForeignWorkerBriefing(input: BriefingInput) {
     "",
     "[사용 전 확인]",
     "- 자동 번역 또는 기본 문구는 현장 통역자, 관리자, 해당 언어 가능자 확인 후 사용합니다.",
-    "- 작업방법, 작업중지 기준, 보호구 명칭은 현장 실물과 함께 다시 확인합니다."
+    "- 작업방법, 작업중지 기준, 보호구 명칭은 현장 실물과 함께 다시 확인합니다.",
+    "- 캄보디아어·네팔어·미얀마어 등은 글 읽기 편차를 고려해 그림 표지, 짧은 영상, 현장 실물 설명을 함께 사용합니다."
   ].join("\n\n");
 }
 
@@ -656,6 +704,7 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
     "쉬운 한국어:",
     "위험하면 작업을 멈추고 바로 관리자에게 말하세요.",
     "보호구를 착용하고, 지시를 이해한 뒤 작업을 시작하세요.",
+    "⚠️ 이해하지 못하면 작업을 시작하지 말고 관리자에게 다시 설명을 요청하세요.",
     "",
     languageDigest,
     "",
@@ -665,11 +714,13 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
 
 export function buildForeignWorkerLanguageMessage(input: BriefingInput, language: ForeignWorkerLanguage) {
   const pack = getPack(language);
+  const keywords = detectSafetyKeywords(input);
   return [
     `[SafeGuard ${language.label} 안전공지] ${input.scenario.companyName}`,
     `현장: ${input.scenario.siteName}`,
     `작업: ${input.scenario.workSummary}`,
     `핵심 위험: ${input.riskSummary.topRisk}`,
+    buildVisualCueLine(language, keywords),
     "",
     `${language.label}(${language.nativeLabel})`,
     ...language.lines.map((line) => `- ${line}`),

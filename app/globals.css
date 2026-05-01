@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&family=Noto+Sans+Khmer:wght@400;600;700;800&family=Noto+Sans+Myanmar:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;600;700;800&display=swap");
+
 :root {
   --bg: #f6f3ed;
   --paper: #fffdf8;
@@ -15,6 +17,8 @@
   --radius-lg: 28px;
   --radius-md: 18px;
   --radius-sm: 12px;
+  --font-base: "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-multilingual: "Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -29,7 +33,7 @@ body {
     radial-gradient(circle at 10% 0%, rgba(184, 95, 36, 0.10), transparent 30%),
     radial-gradient(circle at 92% 12%, rgba(33, 89, 79, 0.12), transparent 28%),
     linear-gradient(180deg, #fbf8f1 0%, var(--bg) 46%, #f3efe7 100%);
-  font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  font-family: var(--font-base);
 }
 
 a { color: inherit; text-decoration: none; }
@@ -38,6 +42,16 @@ textarea,
 input { font: inherit; }
 pre { margin: 0; white-space: pre-wrap; line-height: 1.66; font-family: inherit; letter-spacing: 0.006em; word-spacing: 0.025em; }
 ul { margin: 0; padding-left: 20px; line-height: 1.7; }
+
+.language-wall,
+.language-chip,
+.workflow-textarea,
+.document-textarea,
+.template-preview,
+.share-panel pre,
+.phone-bubble {
+  font-family: var(--font-multilingual);
+}
 
 .container,
 .product-shell {
