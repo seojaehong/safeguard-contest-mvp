@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-05-02T03:31:25.548536+00:00",
-  "elapsedMs": 19482,
+  "generatedAt": "2026-05-02T04:28:52.404291+00:00",
+  "elapsedMs": 43281,
   "sourceCount": 6,
   "itemCount": 8431,
   "successCount": 6,
   "failureCount": 0,
   "failures": [],
   "uploaded": {
-    "sources": 0,
-    "items": 0,
-    "runs": 0
+    "sources": 6,
+    "items": 8431,
+    "runs": 1
   },
-  "uploadError": "Supabase upsert failed for safety_reference_sources: 404 {\"code\":\"PGRST205\",\"details\":null,\"hint\":\"Perhaps you meant the table 'public.daily_entries'\",\"message\":\"Could not find the table 'public.safety_reference_sources' in the schema cache\"}",
+  "uploadError": null,
   "seedPath": "evaluation\\data-ingestion\\safety-reference-catalog.seed.json",
   "itemTypeCounts": {
     "sif-case": 6033,

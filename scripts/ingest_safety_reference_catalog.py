@@ -556,7 +556,7 @@ def main() -> int:
             "failure_count": report["failureCount"],
             "elapsed_ms": elapsed_ms,
             "report_path": str(report_path),
-            "status": "uploaded",
+            "status": "completed",
             "details": report,
         }
         try:
