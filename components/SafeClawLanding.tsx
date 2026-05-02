@@ -8,7 +8,7 @@ const navItems = [
   ["작동 방식", "execution"],
   ["외국인 안내", "language"],
   ["근거", "proof"],
-  ["기능 구성", "product-map"],
+  ["제품 구성", "product-map"],
   ["작업 시작", "workspace"]
 ] as const;
 
@@ -43,13 +43,13 @@ const languages = [
 ];
 
 const productModules = [
-  { code: "01", title: "작업공간", body: "오늘 작업을 입력하고 API 근거와 문서팩 생성을 시작합니다.", href: "/workspace", state: "운영" },
-  { code: "02", title: "문서", body: "위험성평가, 작업계획서, TBM, 안전교육 기록을 편집하고 출력합니다.", href: "/documents", state: "운영" },
-  { code: "03", title: "근거", body: "법령, 해석례, 판례, KOSHA 자료를 문서 문장과 연결합니다.", href: "/evidence", state: "연결" },
-  { code: "04", title: "인원·교육", body: "작업자, 국적, 언어, 교육 확인 상태를 최소 정보로 관리합니다.", href: "/workers", state: "연결" },
-  { code: "05", title: "전파", body: "메일과 문자 전송 요청, 외국인 공지, 전파 결과를 확인합니다.", href: "/dispatch", state: "운영" },
-  { code: "06", title: "기록", body: "생성한 문서팩과 전파 로그를 작업 이력으로 찾습니다.", href: "/archive", state: "정리" },
-  { code: "07", title: "지식 DB", body: "법령 전문, KOSHA 자료, API 스냅샷을 지식층으로 관리합니다.", href: "/knowledge", state: "운영" },
+  { code: "01", title: "작업공간", body: "오늘 작업을 입력하고 공공 API 근거 결합을 시작합니다.", href: "/workspace", state: "실행" },
+  { code: "02", title: "문서", body: "위험성평가, 작업계획서, TBM, 안전교육 기록을 편집하고 출력합니다.", href: "/documents", state: "실행" },
+  { code: "03", title: "근거", body: "법령, 해석례, 판례, KOSHA 자료를 문서 문장에 연결합니다.", href: "/evidence", state: "근거" },
+  { code: "04", title: "작업자", body: "언어, 교육 상태, 연락처를 현장 전파에 필요한 만큼만 관리합니다.", href: "/workers", state: "관리" },
+  { code: "05", title: "전파", body: "메일과 문자로 안전공지와 외국인 안내문을 보내고 결과를 남깁니다.", href: "/dispatch", state: "전송" },
+  { code: "06", title: "이력", body: "문서팩과 전파 로그를 현장 기록으로 다시 찾습니다.", href: "/archive", state: "기록" },
+  { code: "07", title: "지식 DB", body: "법령 전문, KOSHA 자료, API 스냅샷을 검색 가능한 근거층으로 유지합니다.", href: "/knowledge", state: "지식" },
   { code: "08", title: "API 상태", body: "기상청, Law.go, KOSHA, Work24, Gemini, n8n 연결을 점검합니다.", href: "/ops/api", state: "점검" }
 ] as const;
 
@@ -65,7 +65,7 @@ export function SafeClawLanding() {
       <header className="safeclaw-landing-nav">
         <Link href="/" className="safeclaw-os-brand" aria-label="SafeClaw 홈">
           <span className="safeclaw-os-mark">SC</span>
-          <strong>safeclaw/<em>work</em></strong>
+          <strong>safeclaw/<em>os</em></strong>
         </Link>
         <nav aria-label="SafeClaw 홈페이지 메뉴">
           {navItems.map(([label, id]) => (
@@ -75,8 +75,8 @@ export function SafeClawLanding() {
           ))}
         </nav>
         <div className="safeclaw-landing-actions">
-          <Link href="/workspace" className="safeclaw-login">작업공간</Link>
-          <Link href="/workspace" className="safeclaw-contact">도입 문의 →</Link>
+          <Link href="/workspace" className="safeclaw-login">로그인</Link>
+          <Link href="/workspace" className="safeclaw-contact">작업 시작 →</Link>
         </div>
       </header>
 
@@ -84,7 +84,7 @@ export function SafeClawLanding() {
         <div className="safeclaw-os-status">
           <span><i /> 제품 · 운영 준비</span>
           <b>REGION · KR-CENTRAL</b>
-          <b>PUBLIC API · CONNECTED</b>
+          <b>PUBLIC API · ACTIVE</b>
           <b>UPDATED · 2026-05-02</b>
         </div>
         <div className="safeclaw-os-hero-body">
@@ -93,10 +93,10 @@ export function SafeClawLanding() {
             <h1>
               <span className="safeclaw-hero-line">오늘 작업을</span>
               <span className="safeclaw-hero-line"><mark>안전 문서팩으로</mark></span>
-              <span className="safeclaw-hero-line">정리합니다.</span>
+              <span className="safeclaw-hero-line">준비합니다.</span>
             </h1>
-            <p>safeclaw는 현장관리자가 작업 전 필요한 안전 문서를 빠르게 준비하도록 돕는 웹 작업공간입니다.</p>
-            <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 함께 생성합니다.</p>
+            <p>safeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.</p>
+            <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 생성합니다.</p>
             <div className="safeclaw-os-cta">
               <Link href="/workspace" className="primary">14일 무료 체험 →</Link>
               <Link href="/demo">30초 데모</Link>
@@ -104,7 +104,7 @@ export function SafeClawLanding() {
           </div>
           <aside className="safeclaw-os-console" aria-label="실행 콘솔">
             <span>safeclaw@workspace ~ %</span>
-            <b># 버튼을 눌러 문서팩 생성 화면을 여세요.</b>
+            <b># 작업 입력 → 근거 결합 → 문서팩 생성 → 전파 기록</b>
             <Link href="/workspace">작업공간 열기</Link>
           </aside>
         </div>
@@ -115,7 +115,7 @@ export function SafeClawLanding() {
           <span>§ 01</span>
           <b>문제</b>
         </div>
-        <h2>작업 전 문서와 공지를<br /><mark>한 화면에서 잇습니다.</mark></h2>
+        <h2>작업 전 문서와 공지를<br /><mark>하나의 흐름으로 잇습니다.</mark></h2>
         <div className="safeclaw-pipeline-grid">
           {pipeline.map((item) => (
             <article key={item.code}>
@@ -183,7 +183,7 @@ export function SafeClawLanding() {
           <span>§ 05</span>
           <b>기능 구성</b>
         </div>
-        <h2>제품 화면은<br /><mark>실제 기능 탭으로 연결합니다.</mark></h2>
+        <h2>제품 화면은<br /><mark>실제 업무 탭으로 연결합니다.</mark></h2>
         <div className="safeclaw-module-map">
           {productModules.map((module) => (
             <Link key={module.href} href={module.href}>

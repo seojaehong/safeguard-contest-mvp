@@ -699,7 +699,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   --os-blue: #8be8ff;
   width: 100%;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   border-bottom: 1px solid var(--os-line);
   background:
     linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
@@ -721,9 +722,9 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   top: 0;
   z-index: 45;
   display: grid;
-  grid-template-columns: minmax(240px, auto) minmax(0, 1fr) minmax(280px, auto);
+  grid-template-columns: minmax(220px, auto) minmax(0, 1fr) minmax(260px, auto);
   align-items: center;
-  min-height: 108px;
+  min-height: 88px;
   border-bottom: 1px solid var(--os-line);
   background: rgba(7, 7, 8, 0.92);
   backdrop-filter: blur(18px);
@@ -743,7 +744,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .safeclaw-os-brand strong {
   color: var(--os-text);
   font-family: var(--font-hud);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 950;
   letter-spacing: -0.05em;
 }
@@ -771,7 +772,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .safeclaw-landing-nav nav {
   display: flex;
   justify-content: center;
-  gap: clamp(16px, 3vw, 44px);
+  gap: clamp(14px, 2.4vw, 36px);
 }
 
 .safeclaw-landing-nav nav button,
@@ -781,7 +782,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   background: transparent;
   color: rgba(246, 245, 239, 0.66);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 850;
   letter-spacing: -0.04em;
   text-decoration: none;
@@ -820,13 +821,13 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   background: var(--os-yellow);
   color: #090909;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 950;
   letter-spacing: -0.04em;
 }
 
 .safeclaw-os-hero {
-  min-height: calc(100vh - 108px);
+  min-height: calc(100svh - 88px);
   border-bottom: 1px solid var(--os-line);
 }
 
@@ -835,7 +836,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   grid-template-columns: minmax(260px, auto) repeat(3, minmax(0, 1fr));
   gap: 26px;
   align-items: center;
-  min-height: 96px;
+  min-height: 72px;
   padding: 0 28px;
   border-bottom: 1px solid var(--os-line);
   color: var(--os-muted);
@@ -861,18 +862,18 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .safeclaw-os-hero-body {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.62fr);
-  gap: clamp(32px, 7vw, 110px);
-  align-items: end;
-  min-height: calc(100vh - 204px);
-  padding: clamp(54px, 8vw, 116px) 28px 72px;
+  grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.58fr);
+  gap: clamp(28px, 5.5vw, 88px);
+  align-items: center;
+  min-height: calc(100svh - 160px);
+  padding: clamp(44px, 6vw, 84px) 28px clamp(48px, 6vw, 78px);
 }
 
 .safeclaw-os-tag {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  margin-bottom: clamp(34px, 5vw, 72px);
+  margin-bottom: clamp(28px, 4vw, 56px);
   border: 1px solid var(--os-yellow);
   padding: 12px 24px;
   color: var(--os-yellow);
@@ -894,14 +895,14 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 }
 
 .safeclaw-os-hero h1 {
-  max-width: min(1240px, calc(100vw - 56px));
-  font-size: clamp(56px, 7vw, 112px);
+  max-width: min(1160px, calc(100vw - 56px));
+  font-size: clamp(50px, 6.15vw, 102px);
 }
 
 .safeclaw-os-hero mark,
 .safeclaw-os-section mark {
   display: inline-block;
-  padding: 0 14px 0.04em;
+  padding: 0 0.16em 0.05em;
   background: var(--os-yellow);
   color: #050505;
   font-style: normal;
@@ -925,12 +926,12 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .safeclaw-os-hero p {
   max-width: 820px;
-  margin: 26px 0 0;
+  margin: 22px 0 0;
   color: rgba(246, 245, 239, 0.72);
-  font-size: clamp(21px, 2.4vw, 34px);
+  font-size: clamp(18px, 1.8vw, 26px);
   font-weight: 750;
-  letter-spacing: -0.055em;
-  line-height: 1.45;
+  letter-spacing: -0.04em;
+  line-height: 1.55;
   text-wrap: balance;
 }
 
@@ -938,19 +939,19 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  margin-top: 54px;
+  margin-top: 42px;
 }
 
 .safeclaw-os-cta button,
 .safeclaw-os-cta a {
   display: inline-flex;
-  min-height: 72px;
+  min-height: 64px;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   padding: 0 40px;
   text-decoration: none;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 950;
   letter-spacing: -0.04em;
 }
@@ -982,7 +983,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   display: grid;
   gap: 18px;
   align-self: stretch;
-  min-height: 430px;
+  min-height: 340px;
   align-content: end;
   padding: 28px;
 }
@@ -1267,7 +1268,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .safeclaw-prototype-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(260px, 420px) minmax(0, 1fr);
+  grid-template-columns: 232px minmax(0, 1fr);
+  overflow-x: hidden;
   background:
     linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
@@ -1283,14 +1285,14 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   overflow-y: auto;
   border-right: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(8, 8, 10, 0.92);
-  padding: 34px 28px;
+  padding: 28px 22px;
 }
 
 .safeclaw-prototype-logo {
   display: inline-flex;
   color: #f6f5ef;
   font-family: var(--font-hud);
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 950;
   letter-spacing: -0.04em;
   text-decoration: none;
@@ -1318,8 +1320,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .safeclaw-prototype-rail button {
   width: 100%;
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
   align-items: center;
   border: 0;
   border-left: 3px solid transparent;
@@ -1337,7 +1339,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 }
 
 .safeclaw-prototype-rail button strong {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 900;
 }
 
@@ -1355,14 +1357,14 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   position: sticky;
   top: 0;
   z-index: 3;
-  min-height: 92px;
+  min-height: 58px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
   gap: 18px;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(5, 5, 6, 0.92);
-  padding: 0 34px;
+  padding: 0 28px;
   backdrop-filter: blur(16px);
   font-family: var(--font-hud);
   letter-spacing: 0.08em;
@@ -1397,7 +1399,7 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 }
 
 .safeclaw-prototype-stage {
-  padding: clamp(42px, 7vw, 92px);
+  padding: clamp(48px, 6vw, 84px);
 }
 
 .safeclaw-prototype-notice {
@@ -1437,25 +1439,27 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 }
 
 .safeclaw-prototype-title h1 {
-  max-width: 960px;
-  margin: 22px 0 18px;
+  max-width: min(1080px, calc(100vw - 320px));
+  margin: 20px 0 18px;
   color: #fff;
-  font-size: clamp(48px, 6vw, 104px);
-  line-height: 0.96;
-  letter-spacing: -0.08em;
+  font-size: clamp(42px, 5.2vw, 84px);
+  line-height: 1.02;
+  letter-spacing: -0.06em;
+  word-break: keep-all;
+  text-wrap: balance;
 }
 
 .safeclaw-prototype-title p {
   max-width: 760px;
   margin: 0;
   color: rgba(246, 245, 239, 0.62);
-  font-size: clamp(18px, 2vw, 26px);
+  font-size: clamp(17px, 1.7vw, 22px);
   line-height: 1.55;
 }
 
 .safeclaw-prototype-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(260px, 0.7fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr) minmax(240px, 0.72fr);
   gap: 22px;
   margin-top: 72px;
 }
@@ -5491,6 +5495,11 @@ body {
   font-size: 22px;
   font-weight: 950;
   letter-spacing: -0.02em;
+}
+
+.safeclaw-module-brand em {
+  color: var(--os-yellow, #ffdc2e);
+  font-style: normal;
 }
 
 .safeclaw-module-brand span {
