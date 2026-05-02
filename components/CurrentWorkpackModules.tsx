@@ -35,6 +35,8 @@ type LaunchDocument = {
   description: string;
 };
 
+type DeliverableDocumentKey = Extract<DocumentKey, keyof AskResponse["deliverables"]>;
+
 const launchDocuments: LaunchDocument[] = [
   {
     key: "riskAssessmentDraft",
@@ -177,6 +179,27 @@ function excerpt(text: string, maxLength = 190) {
   return `${normalized.slice(0, maxLength).trim()}...`;
 }
 
+function hasDeliverableKey(key: DocumentKey): key is DeliverableDocumentKey {
+  return key !== "workPermitDraft";
+}
+
+function buildDerivedDocumentText(data: AskResponse, key: DocumentKey) {
+  if (hasDeliverableKey(key)) return data.deliverables[key];
+
+  const actions = data.riskSummary.immediateActions.slice(0, 2).join(" / ");
+  return `허가대상 작업: ${data.scenario.workSummary}. 핵심위험: ${data.riskSummary.topRisk}. 작업 전 허가조건: ${actions}`;
+}
+
+function buildDeliverablePatch(values: WorkpackDocumentValues) {
+  const patch: Partial<AskResponse["deliverables"]> = {};
+  (Object.keys(values) as DocumentKey[]).forEach((key) => {
+    if (hasDeliverableKey(key)) {
+      patch[key] = values[key];
+    }
+  });
+  return patch;
+}
+
 function countDocuments(data: AskResponse) {
   return Object.values(data.deliverables).filter((value) => typeof value === "string" && value.trim()).length;
 }
@@ -217,7 +240,7 @@ function DocumentCockpit({ data, onSelectDocument }: { data: AskResponse; onSele
             <section key={item.key}>
               <small>{item.owner}</small>
               <strong>{item.title}</strong>
-              <p>{excerpt(data.deliverables[item.key])}</p>
+              <p>{excerpt(buildDerivedDocumentText(data, item.key))}</p>
             </section>
           ))}
         </div>
@@ -258,7 +281,7 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
       ...current.data,
       deliverables: {
         ...current.data.deliverables,
-        ...values
+        ...buildDeliverablePatch(values)
       }
     };
 

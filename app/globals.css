@@ -4042,6 +4042,31 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   border-right: 0;
 }
 
+.safety-form-bridge {
+  display: grid;
+  gap: 8px;
+  padding: 18px 20px 0;
+}
+
+.safety-form-bridge h3 {
+  justify-self: start;
+  margin: 0;
+  padding: 6px 12px;
+  background: #ffe24a;
+  color: #171b22;
+  border: 1px solid #171b22;
+  font-size: 13px;
+}
+
+.safety-form-bridge td:nth-child(2) {
+  font-weight: 850;
+}
+
+.safety-form-bridge td:nth-child(3) {
+  color: #6f4b26;
+  font-weight: 800;
+}
+
 .safety-form-section-stack {
   display: grid;
   gap: 12px;
