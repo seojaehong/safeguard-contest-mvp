@@ -13,9 +13,10 @@ export default function SettingsPage() {
     <SafeClawModuleShell
       eyebrow="설정"
       title="설정."
-      description="조직, 현장, API, 전파 채널을 관리하는 화면입니다. 제출 기준에서는 필요한 설정 상태와 이동 경로를 먼저 제공합니다."
+      description="조직, 현장, API, 전파 채널 설정을 한곳에서 확인합니다. 제출 기준에서는 필요한 연결 상태와 이동 경로를 먼저 제공합니다."
       status="planned"
       mappedTo="설정 기능 확장 필요"
+      activeHref="/settings"
       actions={<Link href="/ops/api">API 상태 확인</Link>}
     >
       <section className="safeclaw-module-grid two">

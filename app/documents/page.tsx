@@ -9,9 +9,10 @@ export default function DocumentsPage() {
     <SafeClawModuleShell
       eyebrow="문서팩"
       title="문서 편집."
-      description="위험성평가표, 작업계획서, TBM, 안전보건교육 기록을 기존 문서팩 편집기와 다운로드 기능에 직접 연결했습니다. 편집 내용은 현재 작업 스냅샷에 반영됩니다."
+      description="위험성평가표, 작업계획서, TBM, 안전보건교육 기록을 한 화면에서 편집하고 PDF, XLS, HWPX 제출본으로 출력합니다."
       status="live"
       mappedTo="WorkpackEditor · PDF/XLS/HWPX"
+      activeHref="/documents"
     >
       <CurrentDocumentsModule sample={data} />
     </SafeClawModuleShell>

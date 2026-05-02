@@ -4,11 +4,12 @@ import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 export default function ProductHomePage() {
   return (
     <SafeClawModuleShell
-      eyebrow="Home Dashboard"
+      eyebrow="대시보드"
       title="오늘 작업 현황."
-      description="다현장 카드, 미완료 교육, 전파 실패, API 경보를 모아 보여줄 운영 홈입니다. 현재는 안정 작업공간으로 연결합니다."
+      description="오늘 생성할 문서팩, 교육 확인, 전파 결과, API 연결 상태를 현장 단위로 모아 보는 운영 홈입니다."
       status="planned"
       mappedTo="신규 대시보드 필요"
+      activeHref="/home"
       actions={<Link href="/workspace">오늘 작업 생성</Link>}
     >
       <section className="safeclaw-module-grid three">

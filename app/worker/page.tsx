@@ -7,11 +7,12 @@ export default function WorkerMobilePage() {
 
   return (
     <SafeClawModuleShell
-      eyebrow="Worker Mobile"
+      eyebrow="작업자 모바일"
       title="작업자 모바일."
-      description="작업자는 긴 문서가 아니라 핵심 위험, 필수조치, 이해 확인만 봅니다. 별도 모바일 화면은 신규 기능으로 분리합니다."
+      description="작업자는 긴 문서 대신 오늘의 핵심 위험, 필수조치, 이해 확인만 봅니다."
       status="planned"
       mappedTo="신규 /worker"
+      activeHref="/workers"
       actions={<Link href="/dispatch">전파 메시지 보기</Link>}
     >
       <section className="safeclaw-worker-phone">

@@ -10,9 +10,10 @@ export default function DispatchPage() {
     <SafeClawModuleShell
       eyebrow="현장 전파"
       title="현장 전파."
-      description="메일과 문자 전송은 현재 작업 문서팩이 있을 때 활성화합니다. 카카오와 밴드는 준비 중으로 잠급니다."
+      description="메일과 문자로 현장 공지와 외국인 안내문을 보내고, 채널별 접수 결과를 작업 기록으로 남깁니다."
       status="partial"
       mappedTo="현재 작업 기준 · /api/workflow/dispatch · /api/dispatch-logs"
+      activeHref="/dispatch"
       actions={<Link href="/workspace#dispatch">작업공간 전파 패널</Link>}
     >
       <CurrentDispatchModule sample={data} />

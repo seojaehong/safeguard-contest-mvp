@@ -57,10 +57,11 @@ export default async function KnowledgePage() {
   return (
     <SafeClawModuleShell
       eyebrow="지식 DB"
-      title="문서팩 생성에 쓰는 기초 지식 DB와 LLM 재생성 경로를 확인합니다."
-      description="공식자료 기반 seed 지식층과 /api/knowledge/* 런타임 연결 상태를 보여주는 운영 확인 화면입니다."
+      title="지식 DB."
+      description="법령 전문, KOSHA 자료, 재해사례, 서식 기준을 문서 보완과 근거 탐색에 쓰는 지식층으로 관리합니다."
       status="live"
       mappedTo={`${stats.items.toLocaleString("ko-KR")}개 항목 · KOSHA ${stats.technicalTotal.toLocaleString("ko-KR")}건`}
+      activeHref="/knowledge"
     >
       <section className="knowledge-status-grid">
         <article className="card">

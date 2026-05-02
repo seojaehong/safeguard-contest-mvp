@@ -7,11 +7,12 @@ export default function TbmFullscreenPage() {
 
   return (
     <SafeClawModuleShell
-      eyebrow="TBM Mode"
+      eyebrow="TBM 모드"
       title="TBM 풀스크린."
-      description="현장에서 크게 띄워 읽는 작업 전 안전점검회의 화면입니다. 현재는 문서팩 TBM 산출물을 기반으로 신규 화면을 준비합니다."
+      description="현장에서 크게 띄워 읽는 작업 전 안전점검회의 화면입니다. TBM 질문과 필수조치를 회의용으로 압축합니다."
       status="planned"
       mappedTo="tbmBriefing · tbmQuestions"
+      activeHref="/documents"
       actions={<Link href="/documents">TBM 문서 편집</Link>}
     >
       <section className="safeclaw-module-panel safeclaw-tbm-board">
