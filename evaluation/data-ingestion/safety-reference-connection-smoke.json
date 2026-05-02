@@ -1,0 +1,68 @@
+{
+  "generatedAt": "2026-05-02T00:00:00+09:00",
+  "purpose": "Verify that the migrated safety reference catalog is connected to product routes and document remediation.",
+  "localSource": {
+    "technicalSupportFolder": "C:\\Users\\iceam\\Downloads\\기술지원규정",
+    "zipFiles": 10,
+    "pdfFiles": 1040,
+    "technicalSupportRegulations": 237,
+    "technicalGuidelines": 803
+  },
+  "supabaseCatalog": {
+    "sources": 6,
+    "items": 8431,
+    "technicalTotal": 1040,
+    "technicalSupportRegulations": 237,
+    "technicalGuidelines": 803,
+    "ingestionRuns": 1,
+    "localSupabaseMatch": true
+  },
+  "connectedRoutes": [
+    "/api/safety-reference/search",
+    "/api/safety-reference/status",
+    "/api/workpack/remediate",
+    "/evidence",
+    "/knowledge",
+    "/ops/api"
+  ],
+  "productUse": {
+    "documentRemediation": "Rubric-based remediation now includes migrated safety_reference_items evidence in the generation prompt.",
+    "evidenceLibrary": "Evidence page surfaces catalog counts and links users to the knowledge DB.",
+    "knowledgeDb": "Knowledge page surfaces Supabase catalog totals, KOSHA technical support split, and sample items.",
+    "apiOperations": "API operations page surfaces catalog status next to dryrun/smoke state."
+  },
+  "localHttpSmoke": {
+    "baseUrl": "http://127.0.0.1:3210",
+    "statusRoute": {
+      "path": "/api/safety-reference/status",
+      "httpStatus": 200,
+      "ok": true,
+      "items": 8431,
+      "technicalTotal": 1040
+    },
+    "searchRoute": {
+      "path": "/api/safety-reference/search?q=지게차&limit=5",
+      "httpStatus": 200,
+      "ok": true,
+      "count": 5,
+      "firstTitle": "148 · 제조업 · 선박건조및수리업 · 강선건조또는수리업"
+    },
+    "remediationRoute": {
+      "path": "/api/workpack/remediate",
+      "httpStatus": 200,
+      "ok": true,
+      "providerLabel": "Gemini (gemini-2.5-flash)",
+      "sourceCount": 7,
+      "catalogSourceIncluded": true,
+      "firstCatalogSourceTitle": "1000 / 4. 마감공사 / 4.2 방수 작업"
+    }
+  },
+  "verification": {
+    "build": "passed",
+    "typecheck": "passed",
+    "notes": [
+      "The first local smoke exposed a missing source_url column assumption. The helper now normalizes source_url to null instead of selecting a non-existent column.",
+      "Production should be checked again after deployment via /api/safety-reference/status and one remediation request."
+    ]
+  }
+}

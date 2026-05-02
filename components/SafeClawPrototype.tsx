@@ -61,8 +61,8 @@ const statusLabel: Record<PrototypeScreen["status"], string> = {
 };
 
 const screens: PrototypeScreen[] = [
-  { group: "시작", id: "landing-a", label: "소개", num: "01", title: "오늘 작업을 안전 문서팩으로.", subtitle: "공식 근거와 현장 전파까지 한 흐름으로 보여주는 대표 진입 화면입니다.", primary: "제품 소개", status: "live", mappedTo: "/ · SafeClawLanding", scope: ["브랜드 첫 진입", "작업공간 CTA", "30초 시연 진입"], metrics: [["CTA", "작업 시작"], ["톤", "안정"]]},
-  { group: "시작", id: "landing-b", label: "시연", num: "02", title: "한 줄 입력에서 문서와 전파까지.", subtitle: "발표와 영업 상황에서 핵심 흐름을 빠르게 보여주는 시연 화면입니다.", primary: "제품 시연", status: "partial", mappedTo: "/demo · 시연 라우트", scope: ["5개 시나리오", "자동 시연", "발표 딥링크"], metrics: [["CTA", "30초 시연"], ["톤", "강함"]]},
+  { group: "시작", id: "landing-a", label: "제품", num: "01", title: "오늘 작업을 안전 문서팩으로.", subtitle: "공식 근거와 현장 전파까지 한 흐름으로 보여주는 대표 진입 화면입니다.", primary: "제품 소개", status: "live", mappedTo: "/ · SafeClawLanding", scope: ["브랜드 첫 진입", "작업공간 CTA", "30초 시연 진입"], metrics: [["CTA", "작업 시작"], ["톤", "안정"]]},
+  { group: "시작", id: "landing-b", label: "작동 방식", num: "02", title: "한 줄 입력에서 문서와 전파까지.", subtitle: "발표와 영업 상황에서 핵심 흐름을 빠르게 보여주는 시연 화면입니다.", primary: "제품 시연", status: "partial", mappedTo: "/demo · 시연 라우트", scope: ["5개 시나리오", "자동 시연", "발표 딥링크"], metrics: [["CTA", "30초 시연"], ["톤", "강함"]]},
   { group: "시작", id: "login", label: "계정", num: "03", title: "관리자 계정으로 이력을 저장합니다.", subtitle: "비회원 임시 저장과 관리자 이력 저장을 명확히 구분합니다.", primary: "이메일 OTP", status: "partial", mappedTo: "/workspace · 저장 상태 패널", scope: ["관리자 저장 안내", "workpacks 저장 API", "Auth UI 후속"], metrics: [["저장", "Supabase"], ["모드", "관리자"]]},
   { group: "작업", id: "home", label: "홈", num: "04", title: "오늘 처리할 현장을 먼저 보여줍니다.", subtitle: "다현장 상태, API 연결, 미완료 교육, 전파 실패를 한 화면에서 확인합니다.", primary: "현장 현황", status: "planned", mappedTo: "/home · 운영 대시보드 후보", scope: ["다현장 카드", "미완료 교육", "전파 실패 요약"], metrics: [["현장", "다현장"], ["알림", "운영"]]},
   { group: "작업", id: "workspace-a", label: "작업공간", num: "05", title: "오늘 작업을 입력하고 문서팩을 생성합니다.", subtitle: "현재 구현된 문서팩 생성 흐름을 SafeClaw 셸로 감싸는 기준 화면입니다.", primary: "문서 생성", status: "live", mappedTo: "/workspace#command · SafeGuardCommandCenter", scope: ["기상 선조회", "API 조합", "문서팩 생성"], metrics: [["문서", "11종"], ["API", "조합"]]},
@@ -133,10 +133,10 @@ export function SafeClawPrototype() {
   }
 
   return (
-    <main className="safeclaw-prototype-shell" aria-label="SafeClaw 제품 구조 맵">
+    <main className="safeclaw-prototype-shell" aria-label="SafeClaw 제품 화면 연결 지도">
       <aside className="safeclaw-prototype-rail">
         <Link href="/" className="safeclaw-prototype-logo" aria-label="SafeClaw 홈으로 이동">safeclaw</Link>
-        <p>PRODUCT ROUTES · SAFECLAW OS</p>
+        <p>SAFECLAW OS · ROUTES</p>
         {Object.entries(groupedScreens).map(([group, groupScreens]) => (
           <section key={group}>
             <h2>{group}</h2>
@@ -165,10 +165,10 @@ export function SafeClawPrototype() {
 
         <section className="safeclaw-prototype-stage">
           <aside className="safeclaw-prototype-notice">
-            <strong>제품맵 화면입니다.</strong>
+            <strong>제품 화면 연결 상태.</strong>
             <p>
-              이 페이지는 디자이너 시안을 그대로 렌더링하는 화면이 아니라, 16개 시안을 현재 SafeClaw 기능과 어떤 라우트로
-              연결했는지 보여주는 이식 현황판입니다. 실제 기능 화면은 아래 버튼으로 엽니다.
+              이 페이지는 SafeClaw 기능을 제품 화면 단위로 다시 배치한 연결 지도입니다. 현재 연결된 화면은 바로 열고,
+              아직 필요한 화면은 구현 범위와 대체 경로를 함께 표시합니다.
             </p>
           </aside>
 
@@ -187,7 +187,7 @@ export function SafeClawPrototype() {
                 </em>
               </div>
               <h2>{activeScreen.label}</h2>
-              <p>디자이너 프로토타입을 현재 SafeClaw 기능과 다시 연결한 화면입니다. 쇼룸이 아니라 실제 이식 기준으로 씁니다.</p>
+              <p>현재 SafeClaw 기능과 연결된 제품 화면입니다. 사용 가능한 기능은 실제 라우트로 열고, 남은 기능은 구현 범위를 표시합니다.</p>
               <p className="safeclaw-prototype-map-target">{activeScreen.mappedTo}</p>
               {routeHints[activeScreen.id] ? (
                 <Link className="safeclaw-prototype-open-link" href={routeHints[activeScreen.id] || "/workspace"}>

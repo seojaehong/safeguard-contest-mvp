@@ -7,6 +7,7 @@ import {
 } from "@/lib/safety-document-rubric";
 import { matchSafetyKnowledge } from "@/lib/safety-knowledge";
 import { generateKnowledgeText } from "@/lib/ai";
+import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -79,11 +80,32 @@ function buildFallbackText(itemTitle: string, improvementAction: string): string
   ].join("\n");
 }
 
-function buildPrompt(request: RemediationRequest) {
+function mapCatalogEvidence(items: SafetyReferenceItem[]) {
+  return items.map((item, index) => ({
+    order: index + 1,
+    title: item.title,
+    type: item.item_type,
+    category: item.category,
+    documents: item.primary_documents,
+    controls: item.controls,
+    keywords: item.keywords.slice(0, 8),
+    sourceUrl: item.source_url,
+    summary: item.summary
+  }));
+}
+
+async function buildPrompt(request: RemediationRequest) {
   const rubricItem = publicSafetyDocumentRubric.find((item) => item.id === request.rubricItemId);
   if (!rubricItem) return null;
 
   const matches = matchSafetyKnowledge(request.question, 4);
+  const catalogQuery = [
+    request.question,
+    rubricItem.title,
+    rubricItem.improvementAction,
+    rubricItem.researchAction
+  ].join(" ");
+  const catalog = await searchSafetyReferences({ query: catalogQuery, limit: 6 });
   const evidence = matches.map((match, index) => ({
     order: index + 1,
     title: match.title,
@@ -121,7 +143,9 @@ function buildPrompt(request: RemediationRequest) {
       `현재 상태 설명: ${rubricStatusLabel("needs-improvement")}`,
       `보완 방향: ${rubricItem.improvementAction}`,
       `리서치 방향: ${rubricItem.researchAction}`,
-      `사용 가능한 지식 DB 근거: ${JSON.stringify(evidence)}`
+      `내장 서식/루브릭 지식 근거: ${JSON.stringify(evidence)}`,
+      `마이그레이션된 안전 지식 DB 근거: ${JSON.stringify(mapCatalogEvidence(catalog.items))}`,
+      `안전 지식 DB 상태: ${catalog.configured ? catalog.message : "Supabase 지식 DB 미설정. 내장 지식만 사용."}`
     ].join("\n")
   };
 }
@@ -133,7 +157,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, message: parsed.message }, { status: 400 });
   }
 
-  const promptBundle = buildPrompt(parsed.request);
+  const promptBundle = await buildPrompt(parsed.request);
   if (!promptBundle) {
     return NextResponse.json({ ok: false, message: "rubric item not found" }, { status: 404 });
   }
@@ -147,7 +171,17 @@ export async function POST(request: NextRequest) {
       agency: source.agency,
       url: source.url
     }))
-  )).slice(0, 5);
+  ));
+  const catalogSources = mapCatalogEvidence(
+    (await searchSafetyReferences({
+      query: `${parsed.request.question} ${promptBundle.rubricItem.title}`,
+      limit: 4
+    })).items
+  ).map((source) => ({
+    title: source.title,
+    agency: source.type.includes("technical") ? "KOSHA 기술지원규정" : "안전 지식 DB",
+    url: source.sourceUrl || "/knowledge"
+  }));
 
   return NextResponse.json({
     ok: true,
@@ -162,6 +196,6 @@ export async function POST(request: NextRequest) {
     },
     documentKey: parsed.request.documentKey,
     text,
-    sources
+    sources: [...sources.slice(0, 4), ...catalogSources.slice(0, 3)]
   });
 }

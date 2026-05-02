@@ -1,12 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import Link from "next/link";
+import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 
 type WikiEntry = {
   title: string;
   href: string;
   excerpt: string;
 };
+
+export const dynamic = "force-dynamic";
 
 async function readText(filePath: string) {
   return await fs.readFile(filePath, "utf8").catch(() => "");
@@ -49,6 +52,7 @@ export default async function KnowledgePage() {
   const schemaMarkdown = await readText(path.join(root, "knowledge", "SCHEMA.md"));
   const hazardEntries = await readWikiEntries("hazards");
   const formEntries = await readWikiEntries("forms");
+  const stats = await getSafetyReferenceStats();
 
   return (
     <main className="v2-shell knowledge-shell">
@@ -82,6 +86,32 @@ export default async function KnowledgePage() {
           <strong>/api/knowledge/match · ingest · regenerate</strong>
           <p className="muted">현장 API 호출 결과는 원본 이벤트로 검증되고, 로그인 시 Supabase 지식 테이블에 누적됩니다.</p>
         </article>
+        <article className="card">
+          <span className="eyebrow">Supabase Catalog</span>
+          <strong>{stats.items.toLocaleString("ko-KR")}개 항목 · {stats.sources}개 출처</strong>
+          <p className="muted">{stats.message}</p>
+        </article>
+      </section>
+
+      <section className="card knowledge-index-card">
+        <div className="compact-head">
+          <span className="eyebrow">KOSHA Technical Support</span>
+          <strong>기술지원규정 폴더 연결 상태</strong>
+        </div>
+        <div className="knowledge-status-grid compact">
+          <article><span>전체</span><strong>{stats.technicalTotal.toLocaleString("ko-KR")}건</strong></article>
+          <article><span>규정</span><strong>{stats.technicalSupportRegulations.toLocaleString("ko-KR")}건</strong></article>
+          <article><span>지침</span><strong>{stats.technicalGuidelines.toLocaleString("ko-KR")}건</strong></article>
+          <article><span>적재 실행</span><strong>{stats.ingestionRuns.toLocaleString("ko-KR")}회</strong></article>
+        </div>
+        <div className="knowledge-entry-list">
+          {stats.samples.map((item) => (
+            <a key={item.id} href={item.source_url || `/api/safety-reference/search?q=${encodeURIComponent(item.title)}`}>
+              <strong>{item.title}</strong>
+              <span>{item.summary}</span>
+            </a>
+          ))}
+        </div>
       </section>
 
       <section className="card knowledge-index-card">
