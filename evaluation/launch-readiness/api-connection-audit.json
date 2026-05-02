@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-05-02T06:47:08.435Z",
+  "generatedAt": "2026-05-02T10:50:51.977Z",
   "baseUrl": "http://127.0.0.1:3021",
-  "elapsedMs": 17351,
+  "elapsedMs": 16646,
   "apiAskStatus": 200,
   "apiAskOk": true,
   "dispatchStatus": null,
@@ -39,7 +39,7 @@
         "안전보건교육",
         "사진/증빙"
       ],
-      "detail": "Law.go와 Gemini 응답을 결합한 라이브 모드입니다. / 법령 근거 상태: fallback / DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 live 예보를 호출하지 못했습니다. / WORK24_AUTH_KEY가 없어 고용24 사업주훈련 live 호출을 수행하지 못했습니다. / KOSHA·고용노동부 공식 자료 URL 4건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 후보 API를 호출하지 못했습니다."
+      "detail": "Law.go와 Gemini 응답을 결합한 라이브 모드입니다. / 법령 근거 상태: fallback / DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 live 예보를 호출하지 못했습니다. / WORK24_AUTH_KEY가 없어 고용24 사업주훈련 live 호출을 수행하지 못했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 후보 API를 호출하지 못했습니다."
     },
     {
       "name": "Gemini",
@@ -91,7 +91,7 @@
         "TBM",
         "안전보건교육"
       ],
-      "detail": "KOSHA·고용노동부 공식 자료 URL 4건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다."
+      "detail": "KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다."
     },
     {
       "name": "KOSHA 재해사례",
@@ -116,5 +116,5 @@
     }
   ],
   "userFacingStatusPolicy": "연결됨 / 일부 근거 보류 / 연결 점검 필요",
-  "rawStatusDetail": "Law.go와 Gemini 응답을 결합한 라이브 모드입니다. / 법령 근거 상태: fallback / DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 live 예보를 호출하지 못했습니다. / WORK24_AUTH_KEY가 없어 고용24 사업주훈련 live 호출을 수행하지 못했습니다. / KOSHA·고용노동부 공식 자료 URL 4건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 후보 API를 호출하지 못했습니다."
+  "rawStatusDetail": "Law.go와 Gemini 응답을 결합한 라이브 모드입니다. / 법령 근거 상태: fallback / DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 live 예보를 호출하지 못했습니다. / WORK24_AUTH_KEY가 없어 고용24 사업주훈련 live 호출을 수행하지 못했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 후보 API를 호출하지 못했습니다."
 }

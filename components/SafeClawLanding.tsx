@@ -183,7 +183,7 @@ export function SafeClawLanding() {
           <span>§ 05</span>
           <b>기능 구성</b>
         </div>
-        <h2>시안의 화면은<br /><mark>실제 기능 탭으로 연결합니다.</mark></h2>
+        <h2>제품 화면은<br /><mark>실제 기능 탭으로 연결합니다.</mark></h2>
         <div className="safeclaw-module-map">
           {productModules.map((module) => (
             <Link key={module.href} href={module.href}>

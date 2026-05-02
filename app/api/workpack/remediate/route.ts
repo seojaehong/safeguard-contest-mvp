@@ -94,6 +94,13 @@ function mapCatalogEvidence(items: SafetyReferenceItem[]) {
   }));
 }
 
+function labelCatalogAgency(itemType: string) {
+  if (itemType.includes("technical")) return "Supabase 지식 DB · KOSHA";
+  if (itemType.includes("sif")) return "Supabase 지식 DB · 재해사례";
+  if (itemType.includes("manual") || itemType.includes("training")) return "Supabase 지식 DB · 교육자료";
+  return "Supabase 지식 DB";
+}
+
 async function buildPrompt(request: RemediationRequest) {
   const rubricItem = publicSafetyDocumentRubric.find((item) => item.id === request.rubricItemId);
   if (!rubricItem) return null;
@@ -146,7 +153,8 @@ async function buildPrompt(request: RemediationRequest) {
       `내장 서식/루브릭 지식 근거: ${JSON.stringify(evidence)}`,
       `마이그레이션된 안전 지식 DB 근거: ${JSON.stringify(mapCatalogEvidence(catalog.items))}`,
       `안전 지식 DB 상태: ${catalog.configured ? catalog.message : "Supabase 지식 DB 미설정. 내장 지식만 사용."}`
-    ].join("\n")
+    ].join("\n"),
+    catalog
   };
 }
 
@@ -168,26 +176,35 @@ export async function POST(request: NextRequest) {
   const sources = promptBundle.matches.flatMap((match) => (
     match.sources.map((source) => ({
       title: source.title,
-      agency: source.agency,
-      url: source.url
+      agency: `${source.agency} · 내장 서식/루브릭`,
+      url: source.url,
+      sourceType: "seed"
     }))
   ));
-  const catalogSources = mapCatalogEvidence(
-    (await searchSafetyReferences({
-      query: `${parsed.request.question} ${promptBundle.rubricItem.title}`,
-      limit: 4
-    })).items
-  ).map((source) => ({
+  const catalogSources = mapCatalogEvidence(promptBundle.catalog.items).map((source) => ({
     title: source.title,
-    agency: source.type.includes("technical") ? "KOSHA 기술지원규정" : "안전 지식 DB",
-    url: source.sourceUrl || "/knowledge"
+    agency: labelCatalogAgency(source.type),
+    url: source.sourceUrl || `/knowledge?reference=${encodeURIComponent(source.title)}`,
+    sourceType: "catalog"
   }));
+  const catalogStatus = {
+    configured: promptBundle.catalog.configured,
+    ok: promptBundle.catalog.ok,
+    count: promptBundle.catalog.count,
+    message: promptBundle.catalog.message
+  };
+  const catalogNotice = promptBundle.catalog.ok
+    ? `Supabase 지식 DB ${promptBundle.catalog.count.toLocaleString("ko-KR")}건을 보완 근거 후보로 확인했습니다.`
+    : `Supabase 지식 DB 검색 실패 또는 미설정: ${promptBundle.catalog.message} 내장 법령·KOSHA seed 기준으로 보완했습니다.`;
 
   return NextResponse.json({
     ok: true,
     configured: generated.configured,
     providerLabel: generated.providerLabel,
-    policyNote: generated.text ? generated.policyNote : "AI 제공자 응답이 없어 규칙 기반 보완 제안을 반환했습니다.",
+    policyNote: generated.text
+      ? `${generated.policyNote} ${catalogNotice}`
+      : `AI 제공자 응답이 없어 규칙 기반 보완 제안을 반환했습니다. ${catalogNotice}`,
+    catalogStatus,
     rubricItem: {
       id: promptBundle.rubricItem.id,
       title: promptBundle.rubricItem.title,

@@ -5,6 +5,7 @@ import { createClient, type Session, type SupabaseClient } from "@supabase/supab
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
+import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
 import {
   buildDefaultWorkers,
@@ -456,7 +457,20 @@ export function FieldOperationsWorkspace({
   ), [data, editedDeliverables]);
   const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues) => {
     setEditedDeliverables(values);
-  }, []);
+    if (typeof window === "undefined") return;
+    const nextData: AskResponse = {
+      ...data,
+      deliverables: {
+        ...data.deliverables,
+        ...values
+      }
+    };
+    try {
+      window.localStorage.setItem(CURRENT_WORKPACK_STORAGE_KEY, JSON.stringify(buildStoredCurrentWorkpack(nextData)));
+    } catch (error) {
+      console.warn("safeclaw current workpack update failed", error);
+    }
+  }, [data]);
 
   const selectedWorkers = useMemo(
     () => workers.filter((worker) => selectedWorkerIds.includes(worker.id)),

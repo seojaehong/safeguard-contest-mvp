@@ -57,10 +57,17 @@ type RemediationDraft = {
   message: string;
   providerLabel: string | null;
   policyNote: string;
+  catalogStatus: {
+    configured: boolean;
+    ok: boolean;
+    count: number;
+    message: string;
+  } | null;
   sources: Array<{
     title: string;
     agency: string;
     url: string;
+    sourceType: string;
   }>;
 };
 
@@ -552,6 +559,7 @@ function readRemediationDraft(itemId: string, value: unknown): RemediationDraft 
       message: "보완 제안 응답을 읽지 못했습니다.",
       providerLabel: null,
       policyNote: "",
+      catalogStatus: null,
       sources: []
     };
   }
@@ -564,11 +572,13 @@ function readRemediationDraft(itemId: string, value: unknown): RemediationDraft 
           ? {
               title: readText(sourceRecord.title),
               agency: readText(sourceRecord.agency),
-              url: readText(sourceRecord.url)
+              url: readText(sourceRecord.url) || "/knowledge",
+              sourceType: readText(sourceRecord.sourceType) || "source"
             }
           : null;
       }).filter((source): source is RemediationDraft["sources"][number] => Boolean(source && source.title))
     : [];
+  const catalogStatusRecord = readObject(record.catalogStatus);
 
   return {
     itemId,
@@ -577,6 +587,14 @@ function readRemediationDraft(itemId: string, value: unknown): RemediationDraft 
     message: readText(record.message) || (record.ok === true ? "보완 제안을 생성했습니다." : "보완 제안을 생성하지 못했습니다."),
     providerLabel: readText(record.providerLabel) || null,
     policyNote: readText(record.policyNote),
+    catalogStatus: catalogStatusRecord
+      ? {
+          configured: catalogStatusRecord.configured === true,
+          ok: catalogStatusRecord.ok === true,
+          count: typeof catalogStatusRecord.count === "number" ? catalogStatusRecord.count : 0,
+          message: readText(catalogStatusRecord.message)
+        }
+      : null,
     sources
   };
 }
@@ -738,6 +756,7 @@ export function WorkpackEditor({
           message: "보완 제안 요청 중 오류가 발생했습니다.",
           providerLabel: null,
           policyNote: "",
+          catalogStatus: null,
           sources: []
         }
       }));
@@ -1058,10 +1077,16 @@ export function WorkpackEditor({
                       {draft.providerLabel ? `${draft.providerLabel} · ` : ""}
                       {draft.policyNote || draft.message}
                     </p>
+                    {draft.catalogStatus && !draft.catalogStatus.ok ? (
+                      <p className="export-error">
+                        지식 DB 근거는 점검 필요 상태입니다. {draft.catalogStatus.message}
+                      </p>
+                    ) : null}
                     {draft.sources.length ? (
                       <div className="remediation-sources">
                         {draft.sources.map((source) => (
                           <a key={`${item.id}-${source.title}`} href={source.url} target="_blank" rel="noreferrer">
+                            <span>{source.sourceType === "catalog" ? "지식 DB" : "기본 근거"}</span>
                             {source.agency} · {source.title}
                           </a>
                         ))}

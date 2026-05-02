@@ -93,7 +93,7 @@ export default async function KnowledgePage() {
         </div>
         <div className="knowledge-entry-list">
           {stats.samples.map((item) => (
-            <a key={item.id} href={item.source_url || `/api/safety-reference/search?q=${encodeURIComponent(item.title)}`}>
+            <a key={item.id} href={`/knowledge?reference=${encodeURIComponent(item.title)}`}>
               <strong>{item.title}</strong>
               <span>{item.summary}</span>
             </a>

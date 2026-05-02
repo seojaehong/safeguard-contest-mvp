@@ -240,7 +240,7 @@ export function WorkflowSharePanel({
           scenario: data.scenario,
           logs: payload.channelResults.map((item) => ({
             channel: item.channel || "unknown",
-            targetLabel: targetWorkers.map((worker) => worker.displayName).join(", ") || "운영 기본 수신자",
+            targetLabel: targetWorkers.map((worker) => worker.displayName).join(", ") || "직접 입력 수신자",
             targetContact: sentRecipients.join(", "),
             languageCode: selectedLanguageCode,
             provider: item.provider,
@@ -257,6 +257,15 @@ export function WorkflowSharePanel({
   }
 
   async function dispatchWorkflow() {
+    if (!dispatchRecipients.length) {
+      setResult({
+        ok: false,
+        configured: true,
+        message: "전송할 수신자를 먼저 입력해 주세요. 기본 예시 연락처는 실발송 대상에 포함하지 않습니다."
+      });
+      setIsConfirming(false);
+      return;
+    }
     setIsSending(true);
     setIsConfirming(false);
     setResult(null);
@@ -288,7 +297,7 @@ export function WorkflowSharePanel({
   }
 
   const channelLabel = selectedChannels.map((channel) => formatChannelName(channel)).join(", ");
-  const recipientLabel = dispatchRecipients.length ? `${dispatchRecipients.length}건` : "운영 기본 수신자";
+  const recipientLabel = dispatchRecipients.length ? `${dispatchRecipients.length}건` : "수신자 필요";
   const targetLabel = formatMessageTargetLabel(data, selectedMessageTarget);
 
   return (
@@ -381,7 +390,7 @@ export function WorkflowSharePanel({
         </div>
       ) : null}
       <p className="muted small">
-        선택된 근로자 연락처는 자동 포함됩니다. 메일·문자만 선택하면 위 수신자와 근로자 연락처로 실제 전송됩니다.
+        선택된 근로자 연락처가 있으면 자동 포함됩니다. 수신자가 없으면 실제 전송 버튼은 열리지 않습니다.
       </p>
 
       <label className="field-label" htmlFor="workflow-note">전달 메모</label>
@@ -397,7 +406,7 @@ export function WorkflowSharePanel({
           type="button"
           className="button"
           onClick={() => setIsConfirming(true)}
-          disabled={isSending || selectedChannels.length === 0}
+          disabled={isSending || selectedChannels.length === 0 || dispatchRecipients.length === 0}
         >
           {isSending ? "전파 요청 중" : "전송 확인"}
         </button>
@@ -413,7 +422,7 @@ export function WorkflowSharePanel({
           <div className="dispatch-confirm-grid">
             <div><span>수신</span><strong>{recipientLabel}</strong></div>
             <div><span>언어</span><strong>{targetLabel}</strong></div>
-            <div><span>대상 작업자</span><strong>{targetWorkers.length ? `${targetWorkers.length}명` : "운영 기본"}</strong></div>
+            <div><span>대상 작업자</span><strong>{targetWorkers.length ? `${targetWorkers.length}명` : "직접 입력"}</strong></div>
           </div>
           <p className="muted small">전송 후 provider 응답을 채널별로 표시하고, 관리자 로그인 상태에서는 전파 이력을 저장합니다.</p>
           <div className="command-actions">

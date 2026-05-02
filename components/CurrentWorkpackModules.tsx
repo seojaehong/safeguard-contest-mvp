@@ -12,13 +12,19 @@ import {
   buildRecipientSuggestions,
   buildWorkerDispatchTargets,
   maskPhone,
-  summarizeWorkers
+  summarizeWorkers,
+  type RecipientSuggestion,
+  type WorkerDispatchTarget
 } from "@/lib/workspace";
 
-type CurrentWorkpackState = {
+type CurrentWorkpackSnapshot = {
   data: AskResponse;
   isCurrent: boolean;
   savedAt: string | null;
+};
+
+type CurrentWorkpackState = CurrentWorkpackSnapshot & {
+  updateData: (data: AskResponse) => void;
 };
 
 type LaunchDocument = {
@@ -96,7 +102,7 @@ const launchDocuments: LaunchDocument[] = [
 ];
 
 function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
-  const [state, setState] = useState<CurrentWorkpackState>({
+  const [state, setState] = useState<CurrentWorkpackSnapshot>({
     data: sample,
     isCurrent: false,
     savedAt: null
@@ -113,7 +119,30 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
     }
   }, []);
 
-  return state;
+  const updateData = useCallback((nextData: AskResponse) => {
+    setState((current) => ({
+      ...current,
+      data: nextData,
+      isCurrent: true,
+      savedAt: new Date().toISOString()
+    }));
+  }, []);
+
+  return { ...state, updateData };
+}
+
+function isPlaceholderRecipient(value: string) {
+  const normalized = value.trim().toLowerCase();
+  const digits = normalized.replace(/[^0-9]/g, "");
+  return normalized.endsWith("@safeguard.local") || /^0100+0[0-9]$/.test(digits) || /^0100000000[0-9]$/.test(digits);
+}
+
+function filterRealRecipientSuggestions(recipients: RecipientSuggestion[]) {
+  return recipients.filter((recipient) => !isPlaceholderRecipient(recipient.value));
+}
+
+function filterRealDispatchTargets(targets: WorkerDispatchTarget[]) {
+  return targets.filter((target) => Boolean(target.phoneMasked || target.emailMasked));
 }
 
 function formatSavedAt(savedAt: string | null) {
@@ -237,6 +266,7 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
       CURRENT_WORKPACK_STORAGE_KEY,
       JSON.stringify(buildStoredCurrentWorkpack(nextData))
     );
+    current.updateData(nextData);
   }, [current.data, current.isCurrent]);
 
   function selectDocument(key: DocumentKey) {
@@ -331,6 +361,8 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
 export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
   const workers = buildDefaultWorkers(current.data);
+  const recipientSuggestions = filterRealRecipientSuggestions(buildRecipientSuggestions(workers));
+  const targetWorkers = recipientSuggestions.length ? filterRealDispatchTargets(buildWorkerDispatchTargets(workers)) : [];
 
   return (
     <>
@@ -339,8 +371,8 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
         {current.isCurrent ? (
           <WorkflowSharePanel
             data={current.data}
-            recipientSuggestions={buildRecipientSuggestions(workers)}
-            targetWorkers={buildWorkerDispatchTargets(workers)}
+            recipientSuggestions={recipientSuggestions}
+            targetWorkers={targetWorkers}
           />
         ) : (
           <article className="safeclaw-module-panel">
@@ -354,6 +386,9 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
           <span>제출 기준 채널</span>
           <h2>메일·문자 우선.</h2>
           <p>전송 전 수신자, 채널, 언어, 메시지 미리보기를 확인한 뒤 provider 결과를 채널별로 표시합니다.</p>
+          {!recipientSuggestions.length ? (
+            <p className="export-error">기본 예시 연락처는 실발송 대상에서 제외했습니다. 수신자를 직접 입력해야 전송할 수 있습니다.</p>
+          ) : null}
           <ul>
             <li>메일: 관리자·원청 보고</li>
             <li>문자: 작업자 즉시 공지</li>
@@ -374,6 +409,15 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
   return (
     <>
       <CurrentWorkpackBanner isCurrent={current.isCurrent} savedAt={current.savedAt} />
+      {!current.isCurrent ? (
+        <section className="safeclaw-module-panel">
+          <span>저장된 이력 없음</span>
+          <h2>작업 입력 후 이력이 생깁니다.</h2>
+          <p>아직 이 브라우저에 생성된 문서팩이 없습니다. 기본 예시의 숫자를 이력처럼 보여주지 않고, 실제 작업 생성 후 최신 스냅샷을 표시합니다.</p>
+          <a href="/workspace">작업 입력으로 이동</a>
+        </section>
+      ) : (
+      <>
       <section className="safeclaw-module-grid four">
         <article><span>문서팩</span><strong>{countDocuments(current.data)}종</strong></article>
         <article><span>근거</span><strong>{countEvidence(current.data)}건</strong></article>
@@ -402,6 +446,8 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
           </article>
         </div>
       </section>
+      </>
+      )}
     </>
   );
 }

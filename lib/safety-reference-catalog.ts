@@ -26,11 +26,15 @@ export type SafetyReferenceSearchResult = {
 export type SafetyReferenceStats = {
   ok: boolean;
   configured: boolean;
+  status: "ready" | "degraded" | "unconfigured";
   sources: number;
   items: number;
+  expectedTechnicalTotal: number;
   technicalTotal: number;
   technicalSupportRegulations: number;
   technicalGuidelines: number;
+  technicalSplitOk: boolean;
+  catalogSearchOk: boolean;
   ingestionRuns: number;
   itemTypes: Array<{ itemType: string; count: number }>;
   samples: SafetyReferenceItem[];
@@ -52,6 +56,7 @@ type CountSpec = {
 };
 
 const TECHNICAL_SOURCE_ID = "kosha-technical-support-regulations-2025";
+const EXPECTED_TECHNICAL_TOTAL = 1040;
 const SELECT_FIELDS = [
   "id",
   "source_id",
@@ -63,8 +68,7 @@ const SELECT_FIELDS = [
   "keywords",
   "risk_tags",
   "primary_documents",
-  "controls",
-  "source_url"
+  "controls"
 ].join(",");
 
 function getSupabaseConfig(): SupabaseConfig | null {
@@ -316,11 +320,15 @@ export async function getSafetyReferenceStats(): Promise<SafetyReferenceStats> {
     return {
       ok: false,
       configured: false,
+      status: "unconfigured",
       sources: 0,
       items: 0,
+      expectedTechnicalTotal: EXPECTED_TECHNICAL_TOTAL,
       technicalTotal: 0,
       technicalSupportRegulations: 0,
       technicalGuidelines: 0,
+      technicalSplitOk: false,
+      catalogSearchOk: false,
       ingestionRuns: 0,
       itemTypes: [],
       samples: [],
@@ -357,30 +365,45 @@ export async function getSafetyReferenceStats(): Promise<SafetyReferenceStats> {
       limit: 6
     });
     const itemTypes = await readItemTypeCounts(config);
+    const technicalSplitOk =
+      countMap.technicalTotal === EXPECTED_TECHNICAL_TOTAL &&
+      countMap.technicalSupportRegulations + countMap.technicalGuidelines === countMap.technicalTotal;
+    const catalogSearchOk = samples.ok;
+    const status: SafetyReferenceStats["status"] = technicalSplitOk && catalogSearchOk ? "ready" : "degraded";
 
     return {
-      ok: true,
+      ok: status === "ready",
       configured: true,
+      status,
       sources: countMap.sources,
       items: countMap.items,
+      expectedTechnicalTotal: EXPECTED_TECHNICAL_TOTAL,
       technicalTotal: countMap.technicalTotal,
       technicalSupportRegulations: countMap.technicalSupportRegulations,
       technicalGuidelines: countMap.technicalGuidelines,
+      technicalSplitOk,
+      catalogSearchOk,
       ingestionRuns: countMap.ingestionRuns,
       itemTypes,
       samples: samples.items,
-      message: `기술지원규정 폴더 1,040건 기준과 Supabase 기술지원규정 소스 ${countMap.technicalTotal.toLocaleString("ko-KR")}건을 연결했습니다.`
+      message: technicalSplitOk
+        ? `기술지원규정 폴더 ${EXPECTED_TECHNICAL_TOTAL.toLocaleString("ko-KR")}건 기준과 Supabase 기술지원규정 소스 ${countMap.technicalTotal.toLocaleString("ko-KR")}건을 연결했습니다.`
+        : `기술지원규정 기준 ${EXPECTED_TECHNICAL_TOTAL.toLocaleString("ko-KR")}건과 현재 연결 ${countMap.technicalTotal.toLocaleString("ko-KR")}건이 달라 점검이 필요합니다.`
     };
   } catch (error) {
     console.error("Safety reference stats failed", error);
     return {
       ok: false,
       configured: true,
+      status: "degraded",
       sources: 0,
       items: 0,
+      expectedTechnicalTotal: EXPECTED_TECHNICAL_TOTAL,
       technicalTotal: 0,
       technicalSupportRegulations: 0,
       technicalGuidelines: 0,
+      technicalSplitOk: false,
+      catalogSearchOk: false,
       ingestionRuns: 0,
       itemTypes: [],
       samples: [],
