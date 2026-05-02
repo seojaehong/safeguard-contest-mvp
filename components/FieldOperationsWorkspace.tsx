@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState, startTransition } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
-import { WorkpackEditor, type DocumentKey } from "@/components/WorkpackEditor";
+import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
 import type { AskResponse } from "@/lib/types";
 import {
   buildDefaultWorkers,
@@ -436,6 +436,7 @@ export function FieldOperationsWorkspace({
   editorFocusToken?: number;
   requestedDocumentKey?: DocumentKey;
 }) {
+  const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [workers, setWorkers] = useState<WorkerProfile[]>(() => buildDefaultWorkers(data));
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(() => buildDefaultWorkers(data).map((worker) => worker.id));
@@ -448,6 +449,14 @@ export function FieldOperationsWorkspace({
     savedAt: null,
     savedCount: 0
   });
+  const workspaceData = useMemo<AskResponse>(() => (
+    editedDeliverables
+      ? { ...data, deliverables: { ...data.deliverables, ...editedDeliverables } }
+      : data
+  ), [data, editedDeliverables]);
+  const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues) => {
+    setEditedDeliverables(values);
+  }, []);
 
   const selectedWorkers = useMemo(
     () => workers.filter((worker) => selectedWorkerIds.includes(worker.id)),
@@ -467,7 +476,7 @@ export function FieldOperationsWorkspace({
   );
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
-    ["PLAN", "계획", `${data.citations.length}건 근거 · 위험성평가·작업계획`],
+    ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
     ["DO", "실행", `TBM·교육 · ${workerSummary.selectedCount}명 대상`],
     ["CHECK", "확인", `교육확인 ${workerSummary.educationPendingCount ? "필요" : "완료"} · 증빙 보관`],
     ["ACT", "개선", session ? "이력 저장·후속조치" : "다운로드 후 현장 확인"],
@@ -515,21 +524,21 @@ export function FieldOperationsWorkspace({
 
     try {
       const workerResponse = await postJson<SaveResponse>("/api/workers", {
-        scenario: data.scenario,
+        scenario: workspaceData.scenario,
         workers
       });
       if (!workerResponse.ok) return setStorageFailure(workerResponse.message);
 
       const workpackResponse = await postJson<SaveResponse>("/api/workpacks", {
-        question: data.question,
-        scenario: data.scenario,
-        deliverables: data.deliverables,
-        evidenceSummary: buildEvidenceSummary(data),
+        question: workspaceData.question,
+        scenario: workspaceData.scenario,
+        deliverables: workspaceData.deliverables,
+        evidenceSummary: buildEvidenceSummary(workspaceData),
         workerSummary: {
           ...summarizeWorkers(selectedWorkers),
           selectedWorkers: buildWorkerDispatchTargets(selectedWorkers)
         },
-        status: data.status
+        status: workspaceData.status
       });
       if (!workpackResponse.ok || !workpackResponse.workpackId) {
         return setStorageFailure(workpackResponse.message);
@@ -539,7 +548,7 @@ export function FieldOperationsWorkspace({
         selectedWorkers.some((worker) => worker.id === record.workerId)
       ));
       const educationResponse = await postJson<SaveResponse>("/api/education-records", {
-        scenario: data.scenario,
+        scenario: workspaceData.scenario,
         workpackId: workpackResponse.workpackId,
         workerMap: workerResponse.workerMap || {},
         workers,
@@ -624,8 +633,13 @@ export function FieldOperationsWorkspace({
       </aside>
 
       <main className="workspace-canvas">
-        <WorkpackEditor data={data} focusToken={editorFocusToken} requestedDocumentKey={requestedDocumentKey} />
-        <EvidenceImpactPanel data={data} />
+        <WorkpackEditor
+          data={data}
+          focusToken={editorFocusToken}
+          requestedDocumentKey={requestedDocumentKey}
+          onDeliverablesChange={handleDeliverablesChange}
+        />
+        <EvidenceImpactPanel data={workspaceData} />
       </main>
 
       <aside className="workspace-side" id="workers">
@@ -639,7 +653,7 @@ export function FieldOperationsWorkspace({
           onAddWorker={addWorker}
         />
         <WorkflowSharePanel
-          data={data}
+          data={workspaceData}
           recipientSuggestions={recipientSuggestions}
           targetWorkers={targetWorkers}
           authToken={session?.access_token}

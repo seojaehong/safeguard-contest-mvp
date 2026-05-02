@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
-import { WorkpackEditor, type DocumentKey } from "@/components/WorkpackEditor";
-import { CURRENT_WORKPACK_STORAGE_KEY, parseStoredCurrentWorkpack } from "@/lib/current-workpack";
+import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
+import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY, parseStoredCurrentWorkpack } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
 import {
   buildDefaultWorkers,
@@ -131,11 +131,11 @@ function formatSavedAt(savedAt: string | null) {
 function CurrentWorkpackBanner({ isCurrent, savedAt }: { isCurrent: boolean; savedAt: string | null }) {
   return (
     <section className={`safeclaw-current-workpack ${isCurrent ? "live" : "sample"}`} aria-live="polite">
-      <span>{isCurrent ? "현재 작업 연결" : "샘플 작업 표시"}</span>
+      <span>{isCurrent ? "현재 작업 연결" : "기본 예시 표시"}</span>
       <strong>
         {isCurrent
           ? `작업공간에서 생성한 최신 문서팩을 사용합니다${formatSavedAt(savedAt) ? ` · ${formatSavedAt(savedAt)}` : ""}.`
-          : "아직 생성된 문서팩이 없어 제품 예시 데이터로 화면을 보여줍니다."}
+          : "아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다."}
       </strong>
       <a href="/workspace">작업공간에서 새로 생성</a>
     </section>
@@ -222,6 +222,22 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
   const [focusToken, setFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey | undefined>();
+  const updateCurrentDeliverables = useCallback((values: WorkpackDocumentValues) => {
+    if (!current.isCurrent || typeof window === "undefined") return;
+
+    const nextData: AskResponse = {
+      ...current.data,
+      deliverables: {
+        ...current.data.deliverables,
+        ...values
+      }
+    };
+
+    window.localStorage.setItem(
+      CURRENT_WORKPACK_STORAGE_KEY,
+      JSON.stringify(buildStoredCurrentWorkpack(nextData))
+    );
+  }, [current.data, current.isCurrent]);
 
   function selectDocument(key: DocumentKey) {
     setRequestedDocumentKey(key);
@@ -232,7 +248,12 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
     <>
       <CurrentWorkpackBanner isCurrent={current.isCurrent} savedAt={current.savedAt} />
       <DocumentCockpit data={current.data} onSelectDocument={selectDocument} />
-      <WorkpackEditor data={current.data} focusToken={focusToken} requestedDocumentKey={requestedDocumentKey} />
+      <WorkpackEditor
+        data={current.data}
+        focusToken={focusToken}
+        requestedDocumentKey={requestedDocumentKey}
+        onDeliverablesChange={updateCurrentDeliverables}
+      />
     </>
   );
 }
@@ -315,11 +336,20 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
     <>
       <CurrentWorkpackBanner isCurrent={current.isCurrent} savedAt={current.savedAt} />
       <section className="safeclaw-module-grid two">
-        <WorkflowSharePanel
-          data={current.data}
-          recipientSuggestions={buildRecipientSuggestions(workers)}
-          targetWorkers={buildWorkerDispatchTargets(workers)}
-        />
+        {current.isCurrent ? (
+          <WorkflowSharePanel
+            data={current.data}
+            recipientSuggestions={buildRecipientSuggestions(workers)}
+            targetWorkers={buildWorkerDispatchTargets(workers)}
+          />
+        ) : (
+          <article className="safeclaw-module-panel">
+            <span>전파 대기</span>
+            <h2>작업 입력 후 실제 전파.</h2>
+            <p>기본 예시 데이터는 메시지 형태만 확인합니다. 메일·문자 실발송은 작업공간에서 문서팩을 생성한 뒤 진행합니다.</p>
+            <a href="/workspace">작업 입력으로 이동</a>
+          </article>
+        )}
         <article className="safeclaw-module-panel">
           <span>제출 기준 채널</span>
           <h2>메일·문자 우선.</h2>

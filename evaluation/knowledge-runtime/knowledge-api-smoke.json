@@ -1,10 +1,10 @@
 {
   "verdict": "pass",
-  "generatedAt": "2026-05-01T02:49:45.262Z",
-  "elapsedMs": 7,
+  "generatedAt": "2026-05-02T06:44:42.863Z",
+  "elapsedMs": 4,
   "seedDatabase": {
     "hazards": 8,
-    "officialSources": 14,
+    "officialSources": 18,
     "legalMappings": 3,
     "templates": 4
   },

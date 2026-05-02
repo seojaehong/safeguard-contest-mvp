@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-04-29T21:45:52.287Z",
-  "elapsedMs": 48087,
-  "question": "서울 성수동 건설업 외벽 석재 마감 작업. 시스템 비계와 이동식 비계 사용, 작업자 6명, 신규 투입자 1명, 오후 강풍 예보. 추락과 자재 낙하 위험을 반영해 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
+  "generatedAt": "2026-05-02T06:46:11.942Z",
+  "elapsedMs": 57899,
+  "question": "대구 달서구 창고업 고중량 박스 적재 및 수작업 운반. 작업자 5명, 숙련자 중심, 오늘 날씨를 반영해 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 1470,
+    "elapsedMs": 1708,
     "mode": "live",
-    "summary": "단시간 맑음, 강수없음, 기온 10℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+    "summary": "단시간 구름많음, 강수없음, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 38626,
+    "elapsedMs": 52330,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -31,7 +31,7 @@
         "TBM 기상 신호",
         "작업중지 기준"
       ],
-      "evidence": "단시간 맑음, 강수없음, 기온 10℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+      "evidence": "단시간 구름많음, 강수없음, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
       "count": 5
     },
     {
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "제공해주신 현장 조건을 바탕으로 서울 성수동 건설업 외벽 석재 마감 작업에 대한 위험성평가, TBM(Toolbox Meeting), 안전보건교육 기록 초안을 작성합니다. 법정 제출 최종본이 아닌 현장 검토용 초안으로 활용하시기 바랍니다.\n\n---\n\n### **1) 핵심 판단**\n\n서울 ",
+      "evidence": "## 창고업 고중량 박스 작업 안전 조치 초안 (현장 검토용)\n\n### 1) 핵심 판단\n\n대구 달서구 창고업의 고중량 박스 적재 및 수작업 운반 작업은 작업자의 근골격계 질환, 낙하, 전도 등 다양한 위험성이 내재된 작업입니다. 산업안전보건법에 따라 사업주는 작업자의 안전과 보건을 확보",
       "count": 11
     },
     {
@@ -76,8 +76,8 @@
         "안전보건교육 기록",
         "교육 추천 카드"
       ],
-      "evidence": "고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다.",
-      "count": 2
+      "evidence": "고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다.",
+      "count": 3
     },
     {
       "source": "KOSHA 안전보건교육포털",
@@ -104,7 +104,7 @@
         "TBM 기록 항목",
         "안전보건교육 서식"
       ],
-      "evidence": "KOSHA·고용노동부 공식 자료 URL 4건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다.",
+      "evidence": "KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다.",
       "count": 5
     },
     {
@@ -119,8 +119,8 @@
         "안전보건교육",
         "TBM"
       ],
-      "evidence": "KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다.",
-      "count": 3
+      "evidence": "KOSHA 세부 OpenAPI 2건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / 건설업 작업 키워드가 없어 건설업 일별 중대재해 현황 호출을 건너뜁니다.",
+      "count": 2
     },
     {
       "source": "KOSHA 국내재해사례/첨부파일/사고사망",
@@ -140,74 +140,74 @@
   "downloads": [
     {
       "format": "TXT",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-risk-assessment.txt",
-      "bytes": 6642,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.txt",
+      "bytes": 7435,
       "ok": true
     },
     {
       "format": "JSON",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-risk-assessment.json",
-      "bytes": 7381,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.json",
+      "bytes": 7973,
       "ok": true
     },
     {
       "format": "CSV",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-risk-assessment.csv",
-      "bytes": 10435,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.csv",
+      "bytes": 11230,
       "ok": true
     },
     {
       "format": "XLS",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-risk-assessment.xls",
-      "bytes": 17096,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.xls",
+      "bytes": 18080,
       "ok": true
     },
     {
       "format": "DOC",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-risk-assessment.doc",
-      "bytes": 10765,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.doc",
+      "bytes": 11700,
       "ok": true
     },
     {
       "format": "HTML",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-risk-assessment.html",
-      "bytes": 7220,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.html",
+      "bytes": 8013,
       "ok": true
     },
     {
       "format": "HWPX",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-risk-assessment.hwpx",
-      "bytes": 10553,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.hwpx",
+      "bytes": 10857,
       "ok": true
     },
     {
       "format": "PDF",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-risk-assessment.pdf",
-      "bytes": 283513,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.pdf",
+      "bytes": 290473,
       "ok": true
     },
     {
       "format": "JPG",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-risk-assessment.jpg",
-      "bytes": 170412,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.jpg",
+      "bytes": 169772,
       "ok": true
     },
     {
       "format": "ALL_TXT",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-safeguard-workpack.txt",
-      "bytes": 60909,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.txt",
+      "bytes": 61489,
       "ok": true
     },
     {
       "format": "ALL_CSV",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-safeguard-workpack.csv",
-      "bytes": 91686,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.csv",
+      "bytes": 89556,
       "ok": true
     },
     {
       "format": "ALL_XLS",
-      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\세이프건설-safeguard-workpack.xls",
-      "bytes": 126924,
+      "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.xls",
+      "bytes": 123032,
       "ok": true
     }
   ],

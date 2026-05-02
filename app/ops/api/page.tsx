@@ -11,11 +11,11 @@ export default async function ApiOperationsPage() {
 
   return (
     <SafeClawModuleShell
-      eyebrow="API Operations"
+      eyebrow="API 상태"
       title="API 연결."
       description="기상청, Law.go, KOSHA, Work24, Gemini, n8n 연결 상태를 제출 전 운영 화면으로 확인합니다."
       status="live"
-      mappedTo="/dryrun · smoke reports"
+      mappedTo="/dryrun · smoke 리포트 · 지식 DB 상태"
       actions={<Link href="/dryrun">원문 점검 로그</Link>}
     >
       <section className="safeclaw-module-grid four">

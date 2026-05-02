@@ -63,7 +63,8 @@ const SELECT_FIELDS = [
   "keywords",
   "risk_tags",
   "primary_documents",
-  "controls"
+  "controls",
+  "source_url"
 ].join(",");
 
 function getSupabaseConfig(): SupabaseConfig | null {

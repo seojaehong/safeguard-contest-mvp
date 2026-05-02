@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import Link from "next/link";
+import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 
 type WikiEntry = {
@@ -55,26 +55,13 @@ export default async function KnowledgePage() {
   const stats = await getSafetyReferenceStats();
 
   return (
-    <main className="v2-shell knowledge-shell">
-      <header className="v2-nav">
-        <Link href="/" className="brand-lockup" aria-label="SafeClaw 홈">
-          <span className="brand-mark">S</span>
-          <span><strong>SafeClaw</strong><small>LLM 위키</small></span>
-        </Link>
-        <nav>
-          <Link href="/demo">시연</Link>
-          <Link href="/why">차별성</Link>
-          <Link href="/preview">핵심 3종</Link>
-          <Link href="/roadmap">로드맵</Link>
-        </nav>
-      </header>
-
-      <section className="v2-hero card">
-        <span className="eyebrow">Safety Knowledge Layer</span>
-        <h1>문서팩 생성에 쓰는 기초 지식 DB와 LLM 재생성 경로를 확인합니다.</h1>
-        <p>이 화면은 크롤링 원본 전체가 아니라, 공식자료 기반 seed 지식층과 `/api/knowledge/*` 런타임이 어떻게 연결되는지 보여주는 운영 확인 페이지입니다.</p>
-      </section>
-
+    <SafeClawModuleShell
+      eyebrow="지식 DB"
+      title="문서팩 생성에 쓰는 기초 지식 DB와 LLM 재생성 경로를 확인합니다."
+      description="공식자료 기반 seed 지식층과 /api/knowledge/* 런타임 연결 상태를 보여주는 운영 확인 화면입니다."
+      status="live"
+      mappedTo={`${stats.items.toLocaleString("ko-KR")}개 항목 · KOSHA ${stats.technicalTotal.toLocaleString("ko-KR")}건`}
+    >
       <section className="knowledge-status-grid">
         <article className="card">
           <span className="eyebrow">Seed Wiki</span>
@@ -160,6 +147,6 @@ export default async function KnowledgePage() {
         </div>
         <pre>{schemaMarkdown}</pre>
       </section>
-    </main>
+    </SafeClawModuleShell>
   );
 }

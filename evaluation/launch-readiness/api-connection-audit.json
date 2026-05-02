@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-28T00:53:15.475Z",
-  "baseUrl": "http://127.0.0.1:3022",
-  "elapsedMs": 26637,
+  "generatedAt": "2026-05-02T06:47:08.435Z",
+  "baseUrl": "http://127.0.0.1:3021",
+  "elapsedMs": 17351,
   "apiAskStatus": 200,
   "apiAskOk": true,
   "dispatchStatus": null,
@@ -15,14 +15,14 @@
     "weatherNote": "실내 환기 제한, 화학물질 노출과 미끄럼 위험 동시 관리"
   },
   "documents": {
-    "workpackSummaryDraft": true,
+    "workpackSummaryDraft": false,
     "riskAssessmentDraft": true,
-    "workPlanDraft": true,
+    "workPlanDraft": false,
     "tbmBriefing": true,
     "tbmLogDraft": true,
     "safetyEducationRecordDraft": true,
-    "emergencyResponseDraft": true,
-    "photoEvidenceDraft": true,
+    "emergencyResponseDraft": false,
+    "photoEvidenceDraft": false,
     "foreignWorkerBriefing": true,
     "foreignWorkerTransmission": true,
     "kakaoMessage": true
@@ -31,7 +31,7 @@
     {
       "name": "Law.go / korean-law-mcp",
       "keyPresent": true,
-      "liveStatus": "연결됨",
+      "liveStatus": "일부 근거 보류",
       "reflectedIn": [
         "위험성평가표",
         "작업계획서",
@@ -39,7 +39,7 @@
         "안전보건교육",
         "사진/증빙"
       ],
-      "detail": "Law.go와 Gemini (gemini-2.5-flash) 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 단기예보 호출 성공 (서울, base 20260428 0800) / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다."
+      "detail": "Law.go와 Gemini 응답을 결합한 라이브 모드입니다. / 법령 근거 상태: fallback / DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 live 예보를 호출하지 못했습니다. / WORK24_AUTH_KEY가 없어 고용24 사업주훈련 live 호출을 수행하지 못했습니다. / KOSHA·고용노동부 공식 자료 URL 4건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 후보 API를 호출하지 못했습니다."
     },
     {
       "name": "Gemini",
@@ -54,33 +54,33 @@
     {
       "name": "기상청",
       "keyPresent": true,
-      "liveStatus": "연결됨",
+      "liveStatus": "일부 근거 보류",
       "reflectedIn": [
         "위험성평가표",
         "작업계획서",
         "TBM"
       ],
-      "detail": "기상청 단기예보 호출 성공 (서울, base 20260428 0800)"
+      "detail": "DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 live 예보를 호출하지 못했습니다."
     },
     {
       "name": "Work24",
       "keyPresent": true,
-      "liveStatus": "연결됨",
+      "liveStatus": "일부 근거 보류",
       "reflectedIn": [
         "안전보건교육",
         "후속 교육"
       ],
-      "detail": "고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다."
+      "detail": "WORK24_AUTH_KEY가 없어 고용24 사업주훈련 live 호출을 수행하지 못했습니다."
     },
     {
       "name": "KOSHA 교육",
       "keyPresent": true,
-      "liveStatus": "연결됨",
+      "liveStatus": "연결 점검 필요",
       "reflectedIn": [
         "안전보건교육",
         "후속 교육"
       ],
-      "detail": "KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다."
+      "detail": ""
     },
     {
       "name": "KOSHA 공식자료",
@@ -91,19 +91,19 @@
         "TBM",
         "안전보건교육"
       ],
-      "detail": "KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다."
+      "detail": "KOSHA·고용노동부 공식 자료 URL 4건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다."
     },
     {
       "name": "KOSHA 재해사례",
       "keyPresent": true,
-      "liveStatus": "연결됨",
+      "liveStatus": "일부 근거 보류",
       "reflectedIn": [
         "TBM",
         "안전보건교육",
         "비상대응",
         "사진/증빙"
       ],
-      "detail": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다."
+      "detail": "DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 후보 API를 호출하지 못했습니다."
     },
     {
       "name": "n8n dispatch",
@@ -116,5 +116,5 @@
     }
   ],
   "userFacingStatusPolicy": "연결됨 / 일부 근거 보류 / 연결 점검 필요",
-  "rawStatusDetail": "Law.go와 Gemini (gemini-2.5-flash) 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 단기예보 호출 성공 (서울, base 20260428 0800) / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다."
+  "rawStatusDetail": "Law.go와 Gemini 응답을 결합한 라이브 모드입니다. / 법령 근거 상태: fallback / DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 live 예보를 호출하지 못했습니다. / WORK24_AUTH_KEY가 없어 고용24 사업주훈련 live 호출을 수행하지 못했습니다. / KOSHA·고용노동부 공식 자료 URL 4건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 후보 API를 호출하지 못했습니다."
 }

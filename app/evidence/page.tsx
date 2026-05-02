@@ -12,11 +12,11 @@ export default async function EvidencePage() {
 
   return (
     <SafeClawModuleShell
-      eyebrow="Evidence Library"
+      eyebrow="근거"
       title="근거 라이브러리."
       description="법령, 판례, 해석례, KOSHA 자료, 재해사례를 문서 문장에 연결하는 화면입니다."
       status="partial"
-      mappedTo="CitationList · law/precedent/interpretation · knowledge"
+      mappedTo="CitationList · 지식 DB · 법령/해석례/재해사례"
       actions={<Link href="/knowledge">지식 DB 열기</Link>}
     >
       <section className="safeclaw-module-grid four">

@@ -26,6 +26,8 @@ export type DocumentKey =
   | "foreignWorkerTransmission"
   | "kakaoMessage";
 
+export type WorkpackDocumentValues = Record<DocumentKey, string>;
+
 type EditableDocument = {
   key: DocumentKey;
   title: string;
@@ -582,13 +584,15 @@ function readRemediationDraft(itemId: string, value: unknown): RemediationDraft 
 export function WorkpackEditor({
   data,
   focusToken = 0,
-  requestedDocumentKey
+  requestedDocumentKey,
+  onDeliverablesChange
 }: {
   data: AskResponse;
   focusToken?: number;
   requestedDocumentKey?: DocumentKey;
+  onDeliverablesChange?: (values: WorkpackDocumentValues) => void;
 }) {
-  const initialValues = useMemo<Record<DocumentKey, string>>(
+  const initialValues = useMemo<WorkpackDocumentValues>(
     () => ({
       workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
       riskAssessmentDraft: data.deliverables.riskAssessmentDraft,
@@ -609,7 +613,7 @@ export function WorkpackEditor({
     [data.question, data.scenario.companyName, data.scenario.siteName]
   );
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
-  const [values, setValues] = useState<Record<DocumentKey, string>>(initialValues);
+  const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
@@ -633,13 +637,15 @@ export function WorkpackEditor({
   useEffect(() => {
     if (typeof window === "undefined") {
       setValues(initialValues);
+      onDeliverablesChange?.(initialValues);
       return;
     }
 
     const stored = parseStoredValues(window.localStorage.getItem(storageKey), initialValues);
     setValues(stored);
+    onDeliverablesChange?.(stored);
     setLastEditedAt(null);
-  }, [initialValues, storageKey]);
+  }, [initialValues, onDeliverablesChange, storageKey]);
 
   useEffect(() => {
     if (!focusToken) return;
@@ -654,7 +660,7 @@ export function WorkpackEditor({
     return () => window.clearTimeout(timer);
   }, [focusToken, requestedDocumentKey]);
 
-  function saveLocalDraft(nextValues: Record<DocumentKey, string>) {
+  function saveLocalDraft(nextValues: WorkpackDocumentValues) {
     if (typeof window === "undefined") return;
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(nextValues));
@@ -667,6 +673,7 @@ export function WorkpackEditor({
     setValues((current) => {
       const nextValues = { ...current, [selected.key]: value };
       saveLocalDraft(nextValues);
+      onDeliverablesChange?.(nextValues);
       return nextValues;
     });
     setLastEditedAt(new Date());
