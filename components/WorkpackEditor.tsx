@@ -50,6 +50,18 @@ type TemplatePreset = {
   previewTitle: string;
   previewBullets: string[];
 };
+type SafetyFormProfile = {
+  code: string;
+  subtitle: string;
+  primaryColumn: string;
+  actionColumn: string;
+  confirmationRows: string[];
+  approvalLabels: string[];
+};
+type SectionGroup = {
+  section: string;
+  rows: SheetRow[];
+};
 type RemediationDraft = {
   itemId: string;
   text: string;
@@ -189,23 +201,167 @@ function escapeHtml(value: string) {
     .replace(/"/g, "&quot;");
 }
 
-function buildHtml(title: string, body: string) {
+function groupRowsBySection(rows: SheetRow[]) {
+  return rows.reduce<SectionGroup[]>((groups, row) => {
+    const existing = groups.find((group) => group.section === row.section);
+    if (existing) {
+      existing.rows.push(row);
+      return groups;
+    }
+    groups.push({ section: row.section, rows: [row] });
+    return groups;
+  }, []);
+}
+
+function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
+  if (key === "riskAssessmentDraft") {
+    return {
+      code: "SC-RISK-01",
+      subtitle: "위험성평가 및 감소대책 확인서",
+      primaryColumn: "위험요인",
+      actionColumn: "감소대책 / 잔여위험",
+      confirmationRows: ["위험요인 확인", "감소대책 담당 지정", "작업 전 공유", "잔여위험 승인"],
+      approvalLabels: ["작성", "검토", "승인"]
+    };
+  }
+
+  if (key === "tbmBriefing" || key === "tbmLogDraft") {
+    return {
+      code: "SC-TBM-01",
+      subtitle: "TBM 및 작업 전 안전점검 회의록",
+      primaryColumn: "점검/논의 항목",
+      actionColumn: "전달 내용 / 조치",
+      confirmationRows: ["작업내용 공유", "위험요인 전달", "작업중지 기준 확인", "참석자 확인"],
+      approvalLabels: ["진행", "관리감독", "보관"]
+    };
+  }
+
+  if (key === "safetyEducationRecordDraft" || key === "foreignWorkerBriefing") {
+    return {
+      code: "SC-EDU-01",
+      subtitle: "안전보건교육 실시 및 이해 확인서",
+      primaryColumn: "교육 항목",
+      actionColumn: "교육 내용 / 확인 방법",
+      confirmationRows: ["교육대상 확인", "교육자료 사용", "이해도 확인", "추가교육 필요성"],
+      approvalLabels: ["교육자", "확인자", "보관"]
+    };
+  }
+
+  return {
+    code: "SC-WP-01",
+    subtitle: "SafeClaw 현장 안전문서 확인서",
+    primaryColumn: "항목",
+    actionColumn: "내용 / 조치",
+    confirmationRows: ["현장조건 확인", "담당자 확인", "작업 전 공유", "보관 위치 확인"],
+    approvalLabels: ["작성", "확인", "보관"]
+  };
+}
+
+function formCss(pageMargin = "36px") {
+  return `
+    body { margin: 0; background: #ece7dc; color: #161b22; font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; }
+    .safety-form-page { max-width: 1080px; margin: ${pageMargin} auto; background: #fffdf8; border: 2px solid #161b22; box-shadow: 8px 8px 0 rgba(22, 27, 34, 0.12); }
+    .form-head { display: grid; grid-template-columns: 1fr 240px; border-bottom: 2px solid #161b22; }
+    .form-title { padding: 20px 24px; }
+    .form-title span { display: inline-block; margin-bottom: 8px; color: #21594f; font-size: 12px; font-weight: 900; letter-spacing: 0.12em; }
+    .form-title h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
+    .form-title p { margin: 8px 0 0; color: #4c5665; font-size: 13px; }
+    .approval-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-left: 2px solid #161b22; }
+    .approval-cell { display: grid; grid-template-rows: 34px 1fr; min-height: 108px; border-left: 1px solid #161b22; text-align: center; }
+    .approval-cell:first-child { border-left: 0; }
+    .approval-cell b { display: grid; place-items: center; background: #f2ead9; border-bottom: 1px solid #161b22; font-size: 12px; }
+    .approval-cell em { display: grid; place-items: end center; padding-bottom: 12px; color: #707887; font-size: 12px; font-style: normal; }
+    .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
+    .meta-item { min-height: 58px; border-right: 1px solid #161b22; }
+    .meta-item:last-child { border-right: 0; }
+    .meta-item b { display: block; padding: 7px 10px; background: #21594f; color: #ffffff; font-size: 11px; }
+    .meta-item span { display: block; padding: 10px; font-size: 13px; line-height: 1.35; }
+    .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
+    .check-grid div { padding: 10px; border-right: 1px solid #161b22; font-size: 12px; font-weight: 800; }
+    .check-grid div:last-child { border-right: 0; }
+    .section-block { padding: 18px 22px 4px; }
+    .section-label { display: inline-flex; align-items: center; min-height: 30px; margin-bottom: 8px; padding: 5px 12px; background: #161b22; color: #fffdf8; font-size: 13px; font-weight: 900; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 16px; }
+    th, td { border: 1px solid #161b22; padding: 9px 10px; vertical-align: top; word-break: keep-all; line-height: 1.48; }
+    th { background: #f2ead9; font-size: 12px; text-align: center; }
+    td { font-size: 12px; }
+    .center { text-align: center; }
+    .check-cell { text-align: center; color: #5e6677; font-weight: 800; }
+    .signature-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 10px 22px 22px; border: 1px solid #161b22; }
+    .signature-grid div { min-height: 62px; padding: 9px 10px; border-right: 1px solid #161b22; font-size: 12px; }
+    .signature-grid div:last-child { border-right: 0; }
+    .signature-grid b { display: block; margin-bottom: 18px; }
+    .form-note { margin: 0 22px 22px; color: #596373; font-size: 12px; }
+    @media print { body { background: #ffffff; } .safety-form-page { margin: 0; box-shadow: none; max-width: none; } }
+  `;
+}
+
+function buildSafetyFormMarkup(
+  title: string,
+  rows: SheetRow[],
+  scenario: AskResponse["scenario"],
+  profile: SafetyFormProfile
+) {
+  const groups = groupRowsBySection(rows);
+  const sections = groups.map((group) => `
+    <section class="section-block">
+      <div class="section-label">${escapeHtml(group.section)}</div>
+      <table>
+        <colgroup><col style="width: 7%;" /><col style="width: 21%;" /><col style="width: 52%;" /><col style="width: 20%;" /></colgroup>
+        <thead><tr><th>No.</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인/담당</th></tr></thead>
+        <tbody>
+          ${group.rows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인<br />담당: ______</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </section>
+  `).join("");
+  const approvalCells = profile.approvalLabels.map((label) => `
+    <div class="approval-cell"><b>${escapeHtml(label)}</b><em>서명</em></div>
+  `).join("");
+  const confirmationCells = profile.confirmationRows.map((label) => `
+    <div>□ ${escapeHtml(label)}</div>
+  `).join("");
+
+  return `
+  <article class="safety-form-page">
+    <header class="form-head">
+      <div class="form-title">
+        <span>${escapeHtml(profile.code)}</span>
+        <h1>${escapeHtml(title)}</h1>
+        <p>${escapeHtml(profile.subtitle)} · SafeClaw 공식자료 기반 초안</p>
+      </div>
+      <div class="approval-grid">${approvalCells}</div>
+    </header>
+    <div class="meta-grid">
+      <div class="meta-item"><b>사업장</b><span>${escapeHtml(scenario.companyName)}</span></div>
+      <div class="meta-item"><b>현장/공정</b><span>${escapeHtml(scenario.siteName)}</span></div>
+      <div class="meta-item"><b>작업내용</b><span>${escapeHtml(scenario.workSummary)}</span></div>
+      <div class="meta-item"><b>인원/조건</b><span>${scenario.workerCount.toLocaleString("ko-KR")}명 · ${escapeHtml(scenario.weatherNote)}</span></div>
+    </div>
+    <div class="check-grid">${confirmationCells}</div>
+    ${sections}
+    <div class="signature-grid">
+      <div><b>작성자</b>성명/서명:</div>
+      <div><b>관리감독자</b>성명/서명:</div>
+      <div><b>교육/TBM 확인자</b>성명/서명:</div>
+      <div><b>보관 위치</b>문서번호/철:</div>
+    </div>
+    <p class="form-note">본 문서는 현장 확인 전 초안입니다. 작업 전 위험요인, 참석자, 작업중지 기준, 서명란을 최종 확인한 뒤 사용하세요.</p>
+  </article>`;
+}
+
+function buildHtml(title: string, rows: SheetRow[], scenario: AskResponse["scenario"], profile: SafetyFormProfile) {
   return `<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(title)}</title>
   <style>
-    body { font-family: "Noto Sans KR", "Malgun Gothic", sans-serif; color: #1d2430; margin: 40px; line-height: 1.65; }
-    h1 { font-size: 24px; margin: 0 0 18px; }
-    pre { white-space: pre-wrap; font-family: inherit; font-size: 14px; }
-    .meta { color: #657084; font-size: 12px; margin-bottom: 22px; }
+    ${formCss()}
   </style>
 </head>
 <body>
-  <h1>${escapeHtml(title)}</h1>
-  <div class="meta">Generated by SafeClaw</div>
-  <pre>${escapeHtml(body)}</pre>
+  ${buildSafetyFormMarkup(title, rows, scenario, profile)}
 </body>
 </html>`;
 }
@@ -299,7 +455,7 @@ function buildDelimited(rows: SheetRow[], delimiter: "," | "\t") {
   return [header.join(delimiter), ...body].join("\n");
 }
 
-function buildExcelHtml(title: string, rows: SheetRow[]) {
+function buildExcelHtml(title: string, rows: SheetRow[], scenario: AskResponse["scenario"], profile: SafetyFormProfile) {
   const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
     acc[row.section] = [...(acc[row.section] || []), row];
     return acc;
@@ -312,9 +468,11 @@ function buildExcelHtml(title: string, rows: SheetRow[]) {
     </tr>
   `).join("");
   const tableRows = Object.entries(grouped).map(([section, sectionRows]) => `
-    <tr class="section-row"><td colspan="4">${escapeHtml(section)}</td></tr>
-    ${sectionRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인</td></tr>`).join("")}
+    <tr class="section-row"><td colspan="5">${escapeHtml(section)}</td></tr>
+    ${sectionRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인</td><td>담당: ______</td></tr>`).join("")}
   `).join("");
+  const confirmationRows = profile.confirmationRows.map((row) => `<td>□ ${escapeHtml(row)}</td>`).join("");
+  const approvalRows = profile.approvalLabels.map((label) => `<td>${escapeHtml(label)}<br /><br />서명: ______</td>`).join("");
   return `<!doctype html>
 <html lang="ko">
 <head>
@@ -337,6 +495,8 @@ function buildExcelHtml(title: string, rows: SheetRow[]) {
     .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 14px; }
     .cover h1 { margin: 0 0 8px; font-size: 22px; }
     .cover p { margin: 0; color: #5e6677; }
+    .meta-grid td { background: #fffdf8; }
+    .meta-grid .label { background: #21594f; color: #ffffff; font-weight: 700; text-align: center; width: 16%; }
     table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: "Malgun Gothic", sans-serif; margin-bottom: 14px; }
     th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; word-break: keep-all; }
     th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
@@ -344,24 +504,33 @@ function buildExcelHtml(title: string, rows: SheetRow[]) {
     .section-row td { background: #e8f1ed; color: #1f4d43; font-weight: 700; font-size: 14px; border-top: 2px solid #1f4d43; }
     .center { text-align: center; width: 42px; }
     .check-cell { text-align: center; color: #6f4b26; width: 90px; }
+    .confirm td, .approval td { text-align: center; font-weight: 700; }
     .note { color: #5e6677; font-size: 12px; margin-top: 10px; }
   </style>
 </head>
 <body>
   <div class="cover">
     <h1>${escapeHtml(title)}</h1>
-    <p>SafeClaw 현장 문서팩 · 검토/확인/서명용 Excel 서식</p>
+    <p>${escapeHtml(profile.subtitle)} · SafeClaw 현장 문서팩 · 검토/확인/서명용 Excel 서식</p>
   </div>
+  <table class="meta-grid">
+    <tbody>
+      <tr><td class="label">사업장</td><td>${escapeHtml(scenario.companyName)}</td><td class="label">현장/공정</td><td>${escapeHtml(scenario.siteName)}</td></tr>
+      <tr><td class="label">작업내용</td><td>${escapeHtml(scenario.workSummary)}</td><td class="label">인원/조건</td><td>${scenario.workerCount.toLocaleString("ko-KR")}명 · ${escapeHtml(scenario.weatherNote)}</td></tr>
+    </tbody>
+  </table>
+  <table class="confirm"><tbody><tr>${confirmationRows}</tr></tbody></table>
   <table class="summary">
     <colgroup><col style="width: 34%;" /><col style="width: 12%;" /><col style="width: 54%;" /></colgroup>
     <thead><tr><th>섹션</th><th>항목 수</th><th>주요 항목</th></tr></thead>
     <tbody>${summaryRows}</tbody>
   </table>
   <table>
-    <colgroup><col style="width: 6%;" /><col style="width: 22%;" /><col style="width: 60%;" /><col style="width: 12%;" /></colgroup>
-    <thead><tr><th>No.</th><th>항목</th><th>내용</th><th>확인</th></tr></thead>
+    <colgroup><col style="width: 6%;" /><col style="width: 22%;" /><col style="width: 52%;" /><col style="width: 10%;" /><col style="width: 10%;" /></colgroup>
+    <thead><tr><th>No.</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인</th><th>담당</th></tr></thead>
     <tbody>${tableRows}</tbody>
   </table>
+  <table class="approval"><tbody><tr>${approvalRows}<td>보관 위치<br /><br />______</td></tr></tbody></table>
   <p class="note">본 파일은 공식자료 기반 초안입니다. 현장관리자가 작업 전 최종 확인 후 사용하세요.</p>
 </body>
 </html>`;
@@ -410,38 +579,20 @@ function buildLaunchWorkbookHtml(title: string, rows: SheetRow[]) {
 </html>`;
 }
 
-function buildWordHtml(title: string, rows: SheetRow[]) {
-  const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
-    acc[row.section] = [...(acc[row.section] || []), row];
-    return acc;
-  }, {});
-  const sections = Object.entries(grouped).map(([section, sectionRows]) => `
-    <h2>${escapeHtml(section)}</h2>
-    <table>
-      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
-      <tbody>${sectionRows.map((row) => `<tr><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td></tr>`).join("")}</tbody>
-    </table>
-  `).join("");
-
+function buildWordHtml(title: string, rows: SheetRow[], scenario: AskResponse["scenario"], profile: SafetyFormProfile) {
   return `<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <title>${escapeHtml(title)}</title>
   <style>
-    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; margin: 34px; color: #1d2430; line-height: 1.6; }
-    h1 { margin: 0 0 8px; font-size: 24px; }
-    h2 { margin: 24px 0 8px; font-size: 16px; border-left: 4px solid #21594f; padding-left: 8px; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 12px; }
-    th, td { border: 1px solid #9aa4b2; padding: 9px; vertical-align: top; font-size: 13px; }
-    th { background: #e8f1ed; }
-    .meta { color: #657084; margin-bottom: 18px; font-size: 12px; }
+    ${formCss("20px")}
+    body { background: #ffffff; }
+    .safety-form-page { box-shadow: none; }
   </style>
 </head>
 <body>
-  <h1>${escapeHtml(title)}</h1>
-  <div class="meta">SafeClaw 공식자료 기반 초안 · 현장 검토 후 사용</div>
-  ${sections}
+  ${buildSafetyFormMarkup(title, rows, scenario, profile)}
 </body>
 </html>`;
 }
@@ -599,6 +750,87 @@ function readRemediationDraft(itemId: string, value: unknown): RemediationDraft 
   };
 }
 
+function SafetyDocumentPreview({
+  title,
+  rows,
+  scenario,
+  profile
+}: {
+  title: string;
+  rows: SheetRow[];
+  scenario: AskResponse["scenario"];
+  profile: SafetyFormProfile;
+}) {
+  const groups = groupRowsBySection(rows);
+  const previewGroups = groups.slice(0, 3);
+
+  return (
+    <div className="safety-form-preview" aria-label={`${title} 서식 미리보기`}>
+      <div className="safety-form-preview-head">
+        <div>
+          <span>{profile.code}</span>
+          <strong>{title}</strong>
+          <small>{profile.subtitle}</small>
+        </div>
+        <div className="approval-preview" aria-label="결재란">
+          {profile.approvalLabels.map((label) => (
+            <div key={label}>
+              <b>{label}</b>
+              <em>서명</em>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="safety-form-meta-grid">
+        <div><b>사업장</b><span>{scenario.companyName}</span></div>
+        <div><b>현장/공정</b><span>{scenario.siteName}</span></div>
+        <div><b>작업내용</b><span>{scenario.workSummary}</span></div>
+        <div><b>인원/조건</b><span>{scenario.workerCount.toLocaleString("ko-KR")}명 · {scenario.weatherNote}</span></div>
+      </div>
+      <div className="safety-form-check-row">
+        {profile.confirmationRows.map((row) => (
+          <span key={row}>□ {row}</span>
+        ))}
+      </div>
+      <div className="safety-form-section-stack">
+        {previewGroups.map((group) => (
+          <section key={group.section}>
+            <h3>{group.section}</h3>
+            <div className="safety-form-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>{profile.primaryColumn}</th>
+                    <th>{profile.actionColumn}</th>
+                    <th>확인/담당</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {group.rows.slice(0, 4).map((row, index) => (
+                    <tr key={`${group.section}-${row.item}-${index}`}>
+                      <td>{index + 1}</td>
+                      <td>{row.item}</td>
+                      <td>{row.content}</td>
+                      <td>□ 확인<br />담당: ___</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ))}
+      </div>
+      <div className="safety-form-signatures">
+        <span>작성자 서명</span>
+        <span>관리감독자 서명</span>
+        <span>교육/TBM 확인</span>
+        <span>보관 위치</span>
+      </div>
+    </div>
+  );
+}
+
 export function WorkpackEditor({
   data,
   focusToken = 0,
@@ -647,6 +879,7 @@ export function WorkpackEditor({
   const selectedText = values[selected.key];
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
   const selectedRows = buildRowsForDocument(selected, values);
+  const selectedFormProfile = getSafetyFormProfile(selected.key);
   const rubricEvaluation = useMemo(() => evaluatePublicSafetyRubric(values), [values]);
   const selectedRubricItems = useMemo(() => (
     rubricEvaluation.items.filter((item) => item.documents.includes(selected.key))
@@ -780,7 +1013,10 @@ export function WorkpackEditor({
   }
 
   function downloadHtml() {
-    downloadBlob(new Blob([buildHtml(selected.title, selectedText)], { type: "text/html;charset=utf-8" }), `${baseName}.html`);
+    downloadBlob(
+      new Blob([buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile)], { type: "text/html;charset=utf-8" }),
+      `${baseName}.html`
+    );
   }
 
   function downloadCsv() {
@@ -789,21 +1025,28 @@ export function WorkpackEditor({
   }
 
   function downloadXls() {
-    downloadBlob(new Blob([buildExcelHtml(selected.title, selectedRows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${baseName}.xls`);
+    downloadBlob(
+      new Blob([buildExcelHtml(selected.title, selectedRows, data.scenario, selectedFormProfile)], { type: "application/vnd.ms-excel;charset=utf-8" }),
+      `${baseName}.xls`
+    );
   }
 
   function downloadDoc() {
-    downloadBlob(new Blob([buildWordHtml(selected.title, selectedRows)], { type: "application/msword;charset=utf-8" }), `${baseName}.doc`);
+    downloadBlob(
+      new Blob([buildWordHtml(selected.title, selectedRows, data.scenario, selectedFormProfile)], { type: "application/msword;charset=utf-8" }),
+      `${baseName}.doc`
+    );
   }
 
   function downloadJpg() {
     setImageStatus("idle");
+    const markup = buildSafetyFormMarkup(selected.title, selectedRows, data.scenario, selectedFormProfile);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754">
-      <rect width="100%" height="100%" fill="#fffaf1"/>
-      <foreignObject x="60" y="60" width="1120" height="1634">
-        <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Malgun Gothic', sans-serif; color:#1d2430;">
-          <h1 style="font-size:36px;margin:0 0 24px;">${escapeHtml(selected.title)}</h1>
-          <pre style="white-space:pre-wrap;font-family:inherit;font-size:22px;line-height:1.55;">${escapeHtml(selectedText)}</pre>
+      <rect width="100%" height="100%" fill="#ece7dc"/>
+      <foreignObject x="34" y="34" width="1172" height="1686">
+        <div xmlns="http://www.w3.org/1999/xhtml">
+          <style>${formCss("0")}</style>
+          ${markup}
         </div>
       </foreignObject>
     </svg>`;
@@ -907,7 +1150,7 @@ export function WorkpackEditor({
       downloadHtml();
       return;
     }
-    popup.document.write(buildHtml(selected.title, selectedText));
+    popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile));
     popup.document.close();
     popup.focus();
     popup.print();
@@ -1041,6 +1284,12 @@ export function WorkpackEditor({
             편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF·XLS·HWPX로 바로 내려받을 수 있습니다.
           </p>
         ) : null}
+        <SafetyDocumentPreview
+          title={selected.title}
+          rows={selectedRows}
+          scenario={data.scenario}
+          profile={selectedFormProfile}
+        />
         <div className="selected-rubric-strip" aria-label={`${selected.title} 제출 전 점검`}>
           {selectedRubricItems.length ? selectedRubricItems.map((item) => {
             const draft = remediationDrafts[item.id];

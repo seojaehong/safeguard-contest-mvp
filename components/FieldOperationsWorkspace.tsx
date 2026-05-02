@@ -49,8 +49,29 @@ type WorkerDraft = {
   languageLabel: string;
   isForeignWorker: boolean;
   phone: string;
+  email: string;
   consent: boolean;
 };
+
+type LanguageOption = {
+  code: string;
+  label: string;
+};
+
+const workerRoleOptions = ["작업자", "현장관리자", "작업반장", "신호수", "장비기사", "안전관리자"] as const;
+const nationalityOptions = ["대한민국", "베트남", "중국", "몽골", "태국", "필리핀", "우즈베키스탄", "캄보디아", "인도네시아", "네팔", "확인 필요"] as const;
+const languageOptions: LanguageOption[] = [
+  { code: "ko", label: "한국어" },
+  { code: "vi", label: "베트남어" },
+  { code: "zh", label: "중국어" },
+  { code: "mn", label: "몽골어" },
+  { code: "th", label: "태국어" },
+  { code: "tl", label: "타갈로그어" },
+  { code: "uz", label: "우즈베크어" },
+  { code: "km", label: "크메르어" },
+  { code: "id", label: "인도네시아어" },
+  { code: "ne", label: "네팔어" }
+];
 
 let supabaseBrowserClient: SupabaseClient | null = null;
 
@@ -74,11 +95,14 @@ function buildInitialWorkerDraft(): WorkerDraft {
     languageLabel: "한국어",
     isForeignWorker: false,
     phone: "",
+    email: "",
     consent: false
   };
 }
 
 function inferLanguageCode(nationality: string, languageLabel: string) {
+  const selected = languageOptions.find((option) => option.label === languageLabel);
+  if (selected) return selected.code;
   const combined = `${nationality} ${languageLabel}`.toLowerCase();
   if (/베트남|vietnam|tiếng/.test(combined)) return "vi";
   if (/중국|china|中文|중국어/.test(combined)) return "zh";
@@ -90,6 +114,30 @@ function inferLanguageCode(nationality: string, languageLabel: string) {
   if (/인도네시아|indonesia|bahasa/.test(combined)) return "id";
   if (/네팔|nepal/.test(combined)) return "ne";
   return "ko";
+}
+
+function languageLabelFromCode(code: string) {
+  return languageOptions.find((option) => option.code === code)?.label || "한국어";
+}
+
+function updateWorkerLanguage(worker: WorkerProfile, languageCode: string): WorkerProfile {
+  const languageLabel = languageLabelFromCode(languageCode);
+  return {
+    ...worker,
+    languageCode,
+    languageLabel,
+    trainingSummary: worker.trainingStatus === "이수"
+      ? worker.trainingSummary
+      : `${languageLabel} 안내와 작업 전 교육 확인 필요`
+  };
+}
+
+function updateWorkerNationality(worker: WorkerProfile, nationality: string): WorkerProfile {
+  return {
+    ...worker,
+    nationality,
+    isForeignWorker: nationality !== "대한민국" && nationality !== "확인 필요"
+  };
 }
 
 function buildEvidenceSummary(data: AskResponse) {
@@ -279,8 +327,61 @@ function WorkerEducationPanel({
                 <span>투입일 {worker.joinedAt || "확인 필요"}</span>
                 <span>{worker.experienceLevel}</span>
                 <span>{worker.phone ? `문자 ${maskPhone(worker.phone)}` : "연락처 필요"}</span>
+                <span>{worker.email ? "메일 가능" : "메일 필요"}</span>
               </div>
               <p className="muted small">{record?.memo || worker.trainingSummary}</p>
+              <div className="worker-edit-grid" aria-label={`${worker.displayName} 기본정보 편집`}>
+                <label>
+                  <span>역할</span>
+                  <select
+                    className="input"
+                    value={worker.role}
+                    onChange={(event) => onUpdateWorker({ ...worker, role: event.target.value })}
+                  >
+                    {workerRoleOptions.map((role) => <option key={role} value={role}>{role}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>국적</span>
+                  <select
+                    className="input"
+                    value={worker.nationality}
+                    onChange={(event) => onUpdateWorker(updateWorkerNationality(worker, event.target.value))}
+                  >
+                    {nationalityOptions.map((nationality) => <option key={nationality} value={nationality}>{nationality}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>언어</span>
+                  <select
+                    className="input"
+                    value={worker.languageCode}
+                    onChange={(event) => onUpdateWorker(updateWorkerLanguage(worker, event.target.value))}
+                  >
+                    {languageOptions.map((language) => <option key={language.code} value={language.code}>{language.label}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>휴대폰</span>
+                  <input
+                    className="input"
+                    value={worker.phone || ""}
+                    onChange={(event) => onUpdateWorker({ ...worker, phone: event.target.value.trim() || undefined })}
+                    placeholder="010-0000-0000"
+                    inputMode="tel"
+                  />
+                </label>
+                <label>
+                  <span>이메일</span>
+                  <input
+                    className="input"
+                    value={worker.email || ""}
+                    onChange={(event) => onUpdateWorker({ ...worker, email: event.target.value.trim() || undefined })}
+                    placeholder="worker@example.com"
+                    inputMode="email"
+                  />
+                </label>
+              </div>
               <div className="worker-actions" role="radiogroup" aria-label={`${worker.displayName} 교육 확인 상태`}>
                 {(["이수", "당일 교육 예정", "확인 필요"] as WorkerTrainingStatus[]).map((status) => (
                   <button
@@ -304,7 +405,14 @@ function WorkerEducationPanel({
         <strong>근로자 빠른 추가</strong>
         <input className="input" value={draft.displayName} onChange={(event) => setDraft((current) => ({ ...current, displayName: event.target.value }))} placeholder="표시명" aria-label="근로자 표시명" />
         <div className="two-inputs">
-          <input className="input" value={draft.role} onChange={(event) => setDraft((current) => ({ ...current, role: event.target.value }))} placeholder="역할" aria-label="근로자 역할" />
+          <select
+            className="input"
+            value={draft.role}
+            onChange={(event) => setDraft((current) => ({ ...current, role: event.target.value }))}
+            aria-label="근로자 역할"
+          >
+            {workerRoleOptions.map((role) => <option key={role} value={role}>{role}</option>)}
+          </select>
           <input
             className="input"
             value={draft.phone}
@@ -316,9 +424,38 @@ function WorkerEducationPanel({
           />
         </div>
         <div className="two-inputs">
-          <input className="input" value={draft.nationality} onChange={(event) => setDraft((current) => ({ ...current, nationality: event.target.value }))} placeholder="국적" aria-label="근로자 국적" />
-          <input className="input" value={draft.languageLabel} onChange={(event) => setDraft((current) => ({ ...current, languageLabel: event.target.value }))} placeholder="주 사용 언어" aria-label="근로자 주 사용 언어" />
+          <select
+            className="input"
+            value={draft.nationality}
+            onChange={(event) => setDraft((current) => ({
+              ...current,
+              nationality: event.target.value,
+              isForeignWorker: event.target.value !== "대한민국" && event.target.value !== "확인 필요"
+            }))}
+            aria-label="근로자 국적"
+          >
+            {nationalityOptions.map((nationality) => <option key={nationality} value={nationality}>{nationality}</option>)}
+          </select>
+          <select
+            className="input"
+            value={inferLanguageCode(draft.nationality, draft.languageLabel)}
+            onChange={(event) => setDraft((current) => ({
+              ...current,
+              languageLabel: languageLabelFromCode(event.target.value)
+            }))}
+            aria-label="근로자 주 사용 언어"
+          >
+            {languageOptions.map((language) => <option key={language.code} value={language.code}>{language.label}</option>)}
+          </select>
         </div>
+        <input
+          className="input"
+          value={draft.email}
+          onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))}
+          placeholder="이메일(선택)"
+          aria-label="근로자 이메일"
+          inputMode="email"
+        />
         <label className="consent-check">
           <input
             type="checkbox"
@@ -624,7 +761,8 @@ export function FieldOperationsWorkspace({
       isForeignWorker: draft.isForeignWorker || draft.nationality.trim() !== "대한민국",
       trainingStatus: "확인 필요",
       trainingSummary: "작업 전 교육이수와 TBM 이해 여부 확인 필요",
-      phone: draft.phone.trim() || undefined
+      phone: draft.phone.trim() || undefined,
+      email: draft.email.trim() || undefined
     };
     setWorkers((current) => [...current, nextWorker]);
     setSelectedWorkerIds((current) => [...current, id]);
