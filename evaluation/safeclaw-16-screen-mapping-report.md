@@ -1,10 +1,10 @@
-# SafeClaw 16 Screen Mapping Report
+# SafeClaw Product Route Mapping Report
 
 Date: 2026-05-02
 
 ## Scope
 
-This pass keeps `/workspace` as the stable workpack engine and maps the designer prototype screens to product routes. No DB migration, data mutation, or public API caller change was performed.
+This pass keeps `/workspace` as the stable workpack engine and maps the designer prototype screens to product navigation routes. No DB migration, data mutation, or public API caller change was performed.
 
 ## Route Mapping
 
@@ -39,3 +39,5 @@ This pass keeps `/workspace` as the stable workpack engine and maps the designer
 - `/workspace` remains the source of truth for real workpack generation, API orchestration, document editing, worker selection, and dispatch.
 - Planned routes are intentionally not fake-complete. Each page states the required future capability and points users back to the current usable path.
 - Prototype navigation now opens the mapped product route instead of only jumping to old workspace anchors.
+- Public navigation should use product language such as `제품`, `문제`, `작동 방식`, `외국인 안내`, `근거`, `화면 구성`, and `작업 시작`; internal labels such as A/B variants and screen-count wording should stay out of the main user journey.
+- The landing page now exposes the mapped functions as a normal `기능 구성` section with direct links to `/workspace`, `/documents`, `/evidence`, `/workers`, `/dispatch`, `/archive`, `/knowledge`, and `/ops/api`. The old prototype page remains an internal route map rather than the primary public navigation.

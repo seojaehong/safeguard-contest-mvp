@@ -1054,7 +1054,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .safeclaw-pipeline-grid,
 .safeclaw-proof-matrix,
-.safeclaw-language-matrix {
+.safeclaw-language-matrix,
+.safeclaw-module-map {
   display: grid;
   border: 1px solid var(--os-line);
   background: rgba(255, 255, 255, 0.02);
@@ -1073,9 +1074,14 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+.safeclaw-module-map {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .safeclaw-pipeline-grid article,
 .safeclaw-proof-matrix article,
-.safeclaw-language-matrix article {
+.safeclaw-language-matrix article,
+.safeclaw-module-map a {
   min-height: 220px;
   border-right: 1px solid var(--os-line);
   border-bottom: 1px solid var(--os-line);
@@ -1084,13 +1090,26 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .safeclaw-pipeline-grid article:last-child,
 .safeclaw-proof-matrix article:nth-child(3n),
-.safeclaw-language-matrix article:nth-child(6n) {
+.safeclaw-language-matrix article:nth-child(6n),
+.safeclaw-module-map a:nth-child(4n) {
   border-right: 0;
+}
+
+.safeclaw-module-map a {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.safeclaw-module-map a:hover {
+  background: rgba(255, 220, 46, 0.08);
 }
 
 .safeclaw-pipeline-grid span,
 .safeclaw-proof-matrix span,
-.safeclaw-language-matrix span {
+.safeclaw-language-matrix span,
+.safeclaw-module-map span {
   display: block;
   margin-bottom: 24px;
   color: var(--os-yellow);
@@ -1100,9 +1119,25 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   letter-spacing: 0.18em;
 }
 
+.safeclaw-module-map em {
+  position: absolute;
+  top: 26px;
+  right: 26px;
+  border: 1px solid rgba(255, 220, 46, 0.52);
+  border-radius: 999px;
+  padding: 6px 12px;
+  color: var(--os-yellow);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+}
+
 .safeclaw-pipeline-grid h3,
 .safeclaw-proof-matrix h3,
-.safeclaw-language-matrix h3 {
+.safeclaw-language-matrix h3,
+.safeclaw-module-map h3 {
   margin: 0 0 26px;
   color: var(--os-text);
   font-size: clamp(28px, 2.8vw, 42px);
@@ -1113,7 +1148,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 .safeclaw-pipeline-grid p,
 .safeclaw-proof-matrix p,
-.safeclaw-language-matrix p {
+.safeclaw-language-matrix p,
+.safeclaw-module-map p {
   margin: 0;
   color: rgba(246, 245, 239, 0.58);
   font-size: 18px;
@@ -1322,6 +1358,35 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   padding: clamp(42px, 7vw, 92px);
 }
 
+.safeclaw-prototype-notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 0 34px;
+  border: 1px solid rgba(255, 212, 0, 0.62);
+  background: rgba(255, 212, 0, 0.1);
+  padding: 18px 22px;
+}
+
+.safeclaw-prototype-notice strong {
+  color: var(--os-yellow);
+  font-family: var(--font-hud);
+  font-size: 14px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.safeclaw-prototype-notice p {
+  margin: 0;
+  color: rgba(246, 245, 239, 0.72);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
 .safeclaw-prototype-title span {
   color: var(--os-yellow);
   font-family: var(--font-hud);
@@ -1474,6 +1539,11 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   text-decoration: none;
   font-size: 17px;
   font-weight: 950;
+}
+
+.safeclaw-prototype-card a.safeclaw-prototype-open-link {
+  background: var(--os-yellow) !important;
+  color: #050506 !important;
 }
 
 .safeclaw-prototype-card button {
@@ -5224,13 +5294,15 @@ body {
 
   .safeclaw-pipeline-grid,
   .safeclaw-proof-matrix,
-  .safeclaw-language-matrix {
+  .safeclaw-language-matrix,
+  .safeclaw-module-map {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .safeclaw-pipeline-grid article:nth-child(2n),
   .safeclaw-proof-matrix article:nth-child(2n),
-  .safeclaw-language-matrix article:nth-child(2n) {
+  .safeclaw-language-matrix article:nth-child(2n),
+  .safeclaw-module-map a:nth-child(2n) {
     border-right: 0;
   }
 }
@@ -5304,13 +5376,15 @@ body {
 
   .safeclaw-pipeline-grid,
   .safeclaw-proof-matrix,
-  .safeclaw-language-matrix {
+  .safeclaw-language-matrix,
+  .safeclaw-module-map {
     grid-template-columns: 1fr;
   }
 
   .safeclaw-pipeline-grid article,
   .safeclaw-proof-matrix article,
-  .safeclaw-language-matrix article {
+  .safeclaw-language-matrix article,
+  .safeclaw-module-map a {
     border-right: 0;
   }
 
@@ -5616,5 +5690,220 @@ body {
 
   .safeclaw-module-grid article:last-child {
     border-bottom: 0;
+  }
+}
+
+/* SafeClaw product-route bridge.
+   These routes reuse the stable workspace components, but the presentation must
+   read as the SafeClaw OS shell rather than the earlier soft demo interface. */
+.safeclaw-module-shell .card,
+.safeclaw-module-shell .list,
+.safeclaw-module-shell .workpack-shell,
+.safeclaw-module-shell .workpack-sidebar,
+.safeclaw-module-shell .document-editor,
+.safeclaw-module-shell .document-workspace,
+.safeclaw-module-shell .sheet-export-panel,
+.safeclaw-module-shell .workflow-panel,
+.safeclaw-module-shell .dispatch-panel,
+.safeclaw-module-shell .dispatch-preview-panel,
+.safeclaw-module-shell .dispatch-confirm-box,
+.safeclaw-module-shell .dispatch-recipient-card,
+.safeclaw-module-shell .worker-panel,
+.safeclaw-module-shell .worker-card,
+.safeclaw-module-shell .phone-shell,
+.safeclaw-module-shell .phone-bubble,
+.safeclaw-module-shell .template-preview,
+.safeclaw-module-shell .history-panel,
+.safeclaw-module-shell .rubric-summary-card,
+.safeclaw-module-shell .knowledge-card,
+.safeclaw-module-shell .law-card,
+.safeclaw-module-shell .citation-item,
+.safeclaw-module-shell .reference-card,
+.safeclaw-module-shell .compact-panel {
+  border-radius: 4px !important;
+  border-color: rgba(246, 245, 239, 0.16) !important;
+  background: rgba(14, 14, 18, 0.78) !important;
+  box-shadow: none !important;
+  color: #f6f5ef !important;
+}
+
+.safeclaw-module-shell .workpack-shell,
+.safeclaw-module-shell .document-workspace,
+.safeclaw-module-shell .workflow-panel,
+.safeclaw-module-shell .dispatch-panel,
+.safeclaw-module-shell .worker-panel {
+  width: min(100% - 40px, 1440px);
+  margin: 28px auto 0;
+}
+
+.safeclaw-module-shell .workpack-shell {
+  border: 1px solid rgba(246, 245, 239, 0.16);
+  padding: 0;
+}
+
+.safeclaw-module-shell .h2,
+.safeclaw-module-shell .h3,
+.safeclaw-module-shell h2,
+.safeclaw-module-shell h3,
+.safeclaw-module-shell strong {
+  color: #f6f5ef !important;
+  letter-spacing: -0.03em;
+}
+
+.safeclaw-module-shell .muted,
+.safeclaw-module-shell .small,
+.safeclaw-module-shell p,
+.safeclaw-module-shell li,
+.safeclaw-module-shell label,
+.safeclaw-module-shell small {
+  color: rgba(246, 245, 239, 0.62) !important;
+}
+
+.safeclaw-module-shell .badge,
+.safeclaw-module-shell .quick-chip,
+.safeclaw-module-shell .recipient-chip,
+.safeclaw-module-shell .language-chip,
+.safeclaw-module-shell .template-tab,
+.safeclaw-module-shell .document-tab,
+.safeclaw-module-shell .workflow-channel-card,
+.safeclaw-module-shell .workflow-channel-result,
+.safeclaw-module-shell .dispatch-confirm-grid div {
+  border-radius: 4px !important;
+  border-color: rgba(246, 245, 239, 0.18) !important;
+  background: rgba(8, 9, 11, 0.7) !important;
+  color: rgba(246, 245, 239, 0.72) !important;
+  box-shadow: none !important;
+}
+
+.safeclaw-module-shell .badge,
+.safeclaw-module-shell .quick-chip,
+.safeclaw-module-shell .recipient-chip,
+.safeclaw-module-shell .language-chip,
+.safeclaw-module-shell .template-tab,
+.safeclaw-module-shell .document-tab {
+  font-family: var(--font-hud);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.safeclaw-module-shell .quick-chip.active,
+.safeclaw-module-shell .language-chip.active,
+.safeclaw-module-shell .template-tab.active,
+.safeclaw-module-shell .document-tab.active,
+.safeclaw-module-shell .workflow-channel-card.active {
+  border-color: var(--os-yellow, #ffdc2e) !important;
+  background: rgba(255, 220, 46, 0.1) !important;
+  color: #f6f5ef !important;
+  box-shadow: inset 4px 0 0 var(--os-yellow, #ffdc2e) !important;
+}
+
+.safeclaw-module-shell button,
+.safeclaw-module-shell .button,
+.safeclaw-module-shell .full-button,
+.safeclaw-module-shell a.button,
+.safeclaw-module-shell .download-button {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  font-family: var(--font-hud);
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.safeclaw-module-shell button:not(.secondary):not(.ghost):not(.document-tab):not(.template-tab),
+.safeclaw-module-shell .button:not(.secondary),
+.safeclaw-module-shell .full-button,
+.safeclaw-module-shell a.button:not(.secondary) {
+  border-color: var(--os-yellow, #ffdc2e) !important;
+  background: var(--os-yellow, #ffdc2e) !important;
+  color: #08090b !important;
+}
+
+.safeclaw-module-shell button.secondary,
+.safeclaw-module-shell .button.secondary,
+.safeclaw-module-shell button.ghost {
+  border-color: rgba(246, 245, 239, 0.2) !important;
+  background: rgba(8, 9, 11, 0.72) !important;
+  color: rgba(246, 245, 239, 0.78) !important;
+}
+
+.safeclaw-module-shell .document-textarea,
+.safeclaw-module-shell .workflow-textarea,
+.safeclaw-module-shell input,
+.safeclaw-module-shell textarea,
+.safeclaw-module-shell select {
+  border-radius: 4px !important;
+  border-color: rgba(246, 245, 239, 0.18) !important;
+  background: rgba(5, 5, 6, 0.86) !important;
+  color: #f6f5ef !important;
+  box-shadow: none !important;
+}
+
+.safeclaw-module-shell .document-textarea:focus,
+.safeclaw-module-shell .workflow-textarea:focus,
+.safeclaw-module-shell input:focus,
+.safeclaw-module-shell textarea:focus,
+.safeclaw-module-shell select:focus {
+  border-color: var(--os-yellow, #ffdc2e) !important;
+  box-shadow: 0 0 0 1px var(--os-yellow, #ffdc2e) !important;
+}
+
+.safeclaw-module-shell .template-preview.template-sheet,
+.safeclaw-module-shell .template-preview.template-word,
+.safeclaw-module-shell .template-preview.template-hwp {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px) !important;
+  background-size: 28px 28px !important;
+}
+
+.safeclaw-module-shell .template-preview span,
+.safeclaw-module-shell .document-toolbar span,
+.safeclaw-module-shell .workflow-panel span,
+.safeclaw-module-shell .dispatch-confirm-grid span {
+  color: var(--os-yellow, #ffdc2e) !important;
+  font-family: var(--font-hud);
+  letter-spacing: 0.08em;
+}
+
+.safeclaw-module-shell .workflow-result.ok {
+  border-color: rgba(125, 220, 134, 0.38) !important;
+  background: rgba(125, 220, 134, 0.1) !important;
+  color: #9df0a6 !important;
+}
+
+.safeclaw-module-shell .workflow-result.error {
+  border-color: rgba(255, 167, 38, 0.42) !important;
+  background: rgba(255, 167, 38, 0.1) !important;
+  color: #ffcc80 !important;
+}
+
+.safeclaw-module-shell .citation-group,
+.safeclaw-module-shell .workflow-channel-results,
+.safeclaw-module-shell .dispatch-confirm-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.safeclaw-module-shell .citation-item {
+  text-decoration: none !important;
+}
+
+.safeclaw-module-shell .citation-item:hover,
+.safeclaw-module-shell .dispatch-recipient-card:hover,
+.safeclaw-module-shell .workflow-channel-card:hover {
+  border-color: rgba(255, 220, 46, 0.62) !important;
+}
+
+.safeclaw-module-shell .phone-bubble {
+  border-left: 4px solid var(--os-yellow, #ffdc2e) !important;
+}
+
+.safeclaw-module-shell .row {
+  gap: 10px;
+}
+
+@media (max-width: 980px) {
+  .safeclaw-module-shell .workpack-shell {
+    grid-template-columns: 1fr;
   }
 }
