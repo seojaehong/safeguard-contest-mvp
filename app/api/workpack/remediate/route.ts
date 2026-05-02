@@ -76,7 +76,7 @@ function buildFallbackText(itemTitle: string, improvementAction: string): string
     `[보완 제안: ${itemTitle}]`,
     `- ${improvementAction}`,
     "- 현장 확인: 작업반장 또는 관리감독자가 작업 전 확인 후 서명합니다.",
-    "- 근거 확인: 법령·KOSHA·공공기관 서식 기준은 최종 제출 전 다시 확인합니다."
+    "- 반영 근거: 관련 법령·KOSHA 자료는 상세 원문이 아니라 확인 항목과 조치 기준으로만 문서에 반영합니다."
   ].join("\n");
 }
 
@@ -142,6 +142,8 @@ async function buildPrompt(request: RemediationRequest) {
       "불확실한 내용은 '현장 확인 필요'로 표시하라.",
       "출력은 바로 문서에 삽입 가능한 한국어 텍스트만 반환하라.",
       "형식은 [보완 제안: 항목명] 제목 1줄, 체크리스트 3~5줄, 확인자/근거 확인 1줄로 제한하라.",
+      "법령·KOSHA·지식 DB 원문이나 긴 요약을 붙여넣지 말라. 문서 본문에는 '반영 근거' 1줄로 실제 확인 항목만 설명하라.",
+      "근거는 사용자에게 바로 이해되는 실무 표현으로 바꿔라. 예: '보호구 착용 확인란에 반영', '작업중지 기준으로 공유'.",
       `작업 조건: ${trimForPrompt(request.question, 700)}`,
       `대상 문서: ${documentLabels[request.documentKey]}`,
       `현재 문서 일부: ${trimForPrompt(request.documentText, 1200) || "현재 문서 본문 없음"}`,
