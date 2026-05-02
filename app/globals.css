@@ -1074,8 +1074,18 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+.safeclaw-language-matrix article:nth-child(7) {
+  grid-column: 2;
+}
+
 .safeclaw-module-map {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-color: rgba(255, 212, 0, 0.34);
+  background:
+    linear-gradient(90deg, rgba(255, 212, 0, 0.12) 0 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.065) 0 1px, transparent 1px),
+    rgba(255, 255, 255, 0.018);
+  background-size: 56px 56px;
 }
 
 .safeclaw-pipeline-grid article,
@@ -1102,6 +1112,16 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   transition: background 160ms ease, border-color 160ms ease;
 }
 
+.safeclaw-module-map a::before {
+  content: "";
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  width: 7px;
+  height: 7px;
+  background: var(--os-yellow);
+}
+
 .safeclaw-module-map a:hover {
   background: rgba(255, 220, 46, 0.08);
 }
@@ -1117,6 +1137,10 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   font-size: 15px;
   font-weight: 950;
   letter-spacing: 0.18em;
+}
+
+.safeclaw-module-map span {
+  padding-left: 22px;
 }
 
 .safeclaw-module-map em {
@@ -1146,6 +1170,10 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   line-height: 1.08;
 }
 
+.safeclaw-module-map h3 {
+  max-width: 82%;
+}
+
 .safeclaw-pipeline-grid p,
 .safeclaw-proof-matrix p,
 .safeclaw-language-matrix p,
@@ -1156,6 +1184,20 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   font-weight: 750;
   letter-spacing: -0.04em;
   line-height: 1.55;
+}
+
+.safeclaw-module-map p::after {
+  content: "열기 +";
+  display: block;
+  width: fit-content;
+  margin-top: 28px;
+  border-top: 1px solid rgba(255, 212, 0, 0.55);
+  padding-top: 10px;
+  color: var(--os-yellow);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
 }
 
 .safeclaw-pipeline-grid b {
@@ -5299,6 +5341,10 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .safeclaw-language-matrix article:nth-child(7) {
+    grid-column: auto;
+  }
+
   .safeclaw-pipeline-grid article:nth-child(2n),
   .safeclaw-proof-matrix article:nth-child(2n),
   .safeclaw-language-matrix article:nth-child(2n),
@@ -5379,6 +5425,10 @@ body {
   .safeclaw-language-matrix,
   .safeclaw-module-map {
     grid-template-columns: 1fr;
+  }
+
+  .safeclaw-language-matrix article:nth-child(7) {
+    grid-column: auto;
   }
 
   .safeclaw-pipeline-grid article,

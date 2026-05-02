@@ -41,3 +41,4 @@ This pass keeps `/workspace` as the stable workpack engine and maps the designer
 - Prototype navigation now opens the mapped product route instead of only jumping to old workspace anchors.
 - Public navigation should use product language such as `제품`, `문제`, `작동 방식`, `외국인 안내`, `근거`, `화면 구성`, and `작업 시작`; internal labels such as A/B variants and screen-count wording should stay out of the main user journey.
 - The landing page now exposes the mapped functions as a normal `기능 구성` section with direct links to `/workspace`, `/documents`, `/evidence`, `/workers`, `/dispatch`, `/archive`, `/knowledge`, and `/ops/api`. The old prototype page remains an internal route map rather than the primary public navigation.
+- Handoff alignment pass: the public landing should follow the frozen conservative landing direction. The language grid uses a centered second row on desktop, and the feature route links use product-tab styling rather than the old prototype side-rail pattern.
