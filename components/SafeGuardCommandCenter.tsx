@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { FieldOperationsWorkspace } from "@/components/FieldOperationsWorkspace";
 import type { DocumentKey } from "@/components/WorkpackEditor";
+import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
 import type { FieldExample } from "@/lib/field-examples";
 
@@ -441,6 +442,18 @@ export function SafeGuardCommandCenter({
     setEditorFocusToken((current) => current + 1);
   }
 
+  function persistCurrentWorkpack(payload: AskResponse) {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(
+        CURRENT_WORKPACK_STORAGE_KEY,
+        JSON.stringify(buildStoredCurrentWorkpack(payload))
+      );
+    } catch (error) {
+      console.warn("safeclaw current workpack save failed", error);
+    }
+  }
+
   async function generateWorkpack(nextQuestion = question) {
     const trimmed = nextQuestion.trim();
     if (!trimmed) {
@@ -460,6 +473,7 @@ export function SafeGuardCommandCenter({
         throw new Error(`문서팩 생성 요청 실패: HTTP ${response.status}`);
       }
       const payload = await response.json() as AskResponse;
+      persistCurrentWorkpack(payload);
       startTransition(() => {
         setData(payload);
         setCheckedActions(payload.riskSummary.immediateActions.map(() => false));

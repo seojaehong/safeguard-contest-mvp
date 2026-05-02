@@ -1,5 +1,5 @@
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
-import { WorkpackEditor } from "@/components/WorkpackEditor";
+import { CurrentDocumentsModule } from "@/components/CurrentWorkpackModules";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 export default function DocumentsPage() {
@@ -13,7 +13,7 @@ export default function DocumentsPage() {
       status="live"
       mappedTo="WorkpackEditor · PDF/XLS/HWPX"
     >
-      <WorkpackEditor data={data} />
+      <CurrentDocumentsModule sample={data} />
     </SafeClawModuleShell>
   );
 }

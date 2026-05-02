@@ -5628,6 +5628,56 @@ body {
   margin: 28px auto 0;
 }
 
+.safeclaw-current-workpack {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  width: min(100% - 40px, 1440px);
+  margin: 28px auto 0;
+  border: 1px solid rgba(246, 245, 239, 0.16);
+  background: rgba(14, 14, 18, 0.72);
+  padding: 18px 22px;
+  color: rgba(246, 245, 239, 0.72);
+}
+
+.safeclaw-current-workpack span {
+  color: var(--os-yellow, #ffdc2e);
+  font-family: var(--font-mono, "Geist Mono", monospace);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.safeclaw-current-workpack strong {
+  color: #f6f5ef;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.safeclaw-current-workpack a {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  border: 1px solid rgba(255, 220, 46, 0.6);
+  padding: 0 14px;
+  color: var(--os-yellow, #ffdc2e);
+  font-family: var(--font-mono, "Geist Mono", monospace);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.safeclaw-current-workpack.live {
+  border-color: rgba(125, 220, 134, 0.46);
+}
+
+.safeclaw-current-workpack.sample {
+  border-color: rgba(255, 220, 46, 0.34);
+}
+
 .safeclaw-module-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -5740,6 +5790,11 @@ body {
 
   .safeclaw-module-grid article:last-child {
     border-bottom: 0;
+  }
+
+  .safeclaw-current-workpack {
+    grid-template-columns: 1fr;
+    align-items: start;
   }
 }
 
