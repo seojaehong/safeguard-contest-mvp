@@ -282,7 +282,11 @@
       "kosha-risk-assessment-program",
       "kosha-tbm-ops",
       "moel-tbm-education-credit",
-      "kosha-safety-education-guidebook"
+      "kosha-safety-education-guidebook",
+      "kosha-sif-archive",
+      "kosha-construction-process-list",
+      "kosha-machinery-list",
+      "kosha-technical-support-regulations"
     ],
     "liveEvidence": [],
     "qualityFlags": {

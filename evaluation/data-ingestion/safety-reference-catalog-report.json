@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-05-02T03:31:25.548536+00:00",
+  "elapsedMs": 19482,
+  "sourceCount": 6,
+  "itemCount": 8431,
+  "successCount": 6,
+  "failureCount": 0,
+  "failures": [],
+  "uploaded": {
+    "sources": 0,
+    "items": 0,
+    "runs": 0
+  },
+  "uploadError": "Supabase upsert failed for safety_reference_sources: 404 {\"code\":\"PGRST205\",\"details\":null,\"hint\":\"Perhaps you meant the table 'public.daily_entries'\",\"message\":\"Could not find the table 'public.safety_reference_sources' in the schema cache\"}",
+  "seedPath": "evaluation\\data-ingestion\\safety-reference-catalog.seed.json",
+  "itemTypeCounts": {
+    "sif-case": 6033,
+    "construction-process": 626,
+    "machinery": 730,
+    "risk-manual": 1,
+    "jsa-training": 1,
+    "technical-guideline": 803,
+    "technical-support-regulation": 237
+  },
+  "documentCounts": {
+    "점검결과 요약": 6623,
+    "위험성평가표": 8362,
+    "작업계획서": 7979,
+    "사진/증빙": 6143,
+    "비상대응 절차": 6143,
+    "TBM 브리핑": 2860,
+    "TBM 기록": 1121,
+    "안전보건교육 기록": 2234
+  },
+  "riskTagCounts": {
+    "추락": 2745,
+    "끼임": 558,
+    "화학": 593,
+    "전도": 906,
+    "낙하": 809,
+    "붕괴": 277,
+    "고소": 1004,
+    "화재": 323,
+    "폭발": 323,
+    "질식": 145,
+    "충돌": 279,
+    "지게차": 321,
+    "크레인": 617,
+    "굴착": 467,
+    "중독": 92,
+    "감전": 149,
+    "비계": 965,
+    "절단": 347,
+    "밀폐": 113,
+    "온열": 5,
+    "폭염": 16,
+    "자외선": 1
+  }
+}

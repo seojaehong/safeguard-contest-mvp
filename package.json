@@ -15,6 +15,7 @@
     "smoke:ui-local": "node ./scripts/local_ui_regression_smoke.mjs",
     "knowledge:seed": "node ./scripts/build_safety_knowledge_seed.mjs",
     "knowledge:smoke": "node ./scripts/knowledge_runtime_smoke.mjs",
+    "knowledge:references": "python ./scripts/ingest_safety_reference_catalog.py",
     "dryrun:api": "./scripts/run_daily_dryrun.sh",
     "dryrun:documents": "./scripts/run_daily_document_dryrun.sh",
     "publish:dryrun": "node ./scripts/publish_document_dryrun_snapshot.mjs"
