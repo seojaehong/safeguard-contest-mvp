@@ -5325,3 +5325,296 @@ body {
     margin-left: 22px;
   }
 }
+
+.safeclaw-module-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    #08090b;
+  background-size: 64px 64px;
+  color: #f6f5ef;
+  padding: 0 0 72px;
+}
+
+.safeclaw-module-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: center;
+  border-bottom: 1px solid rgba(246, 245, 239, 0.14);
+  background: rgba(8, 9, 11, 0.92);
+  backdrop-filter: blur(12px);
+  padding: 20px clamp(20px, 3vw, 48px);
+}
+
+.safeclaw-module-brand,
+.safeclaw-module-nav nav,
+.safeclaw-module-primary,
+.safeclaw-module-actions a {
+  display: inline-flex;
+  align-items: center;
+}
+
+.safeclaw-module-brand {
+  gap: 12px;
+  color: #f6f5ef;
+  text-decoration: none;
+  font-family: var(--font-hud);
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.safeclaw-module-brand span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  background: var(--os-yellow, #ffdc2e);
+  color: #08090b;
+  font-size: 13px;
+}
+
+.safeclaw-module-nav nav {
+  gap: 6px;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.safeclaw-module-nav nav a,
+.safeclaw-module-primary,
+.safeclaw-module-actions a {
+  min-height: 42px;
+  border: 1px solid rgba(246, 245, 239, 0.15);
+  padding: 0 16px;
+  color: rgba(246, 245, 239, 0.72);
+  text-decoration: none;
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.safeclaw-module-nav nav a:hover,
+.safeclaw-module-actions a:hover {
+  border-color: rgba(255, 220, 46, 0.65);
+  color: #f6f5ef;
+}
+
+.safeclaw-module-primary {
+  background: var(--os-yellow, #ffdc2e);
+  color: #08090b;
+  justify-content: center;
+}
+
+.safeclaw-module-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 28px;
+  align-items: end;
+  border-bottom: 1px solid rgba(246, 245, 239, 0.14);
+  padding: clamp(52px, 7vw, 108px) clamp(20px, 4vw, 72px);
+}
+
+.safeclaw-module-eyebrow,
+.safeclaw-module-panel > span,
+.safeclaw-module-grid article span,
+.safeclaw-archive-list span,
+.safeclaw-worker-table small,
+.safeclaw-tbm-board span {
+  color: var(--os-yellow, #ffdc2e);
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.safeclaw-module-hero h1 {
+  max-width: 920px;
+  margin: 18px 0;
+  color: #f6f5ef;
+  font-size: clamp(54px, 8vw, 118px);
+  font-weight: 950;
+  letter-spacing: -0.08em;
+  line-height: 0.94;
+}
+
+.safeclaw-module-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(246, 245, 239, 0.62);
+  font-size: clamp(19px, 2vw, 28px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.45;
+}
+
+.safeclaw-module-hero aside {
+  border: 1px solid rgba(246, 245, 239, 0.18);
+  background: rgba(16, 17, 21, 0.78);
+  padding: 28px;
+}
+
+.safeclaw-module-hero aside strong {
+  display: block;
+  margin-top: 18px;
+  color: #f6f5ef;
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+.safeclaw-module-status {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  border: 1px solid rgba(246, 245, 239, 0.2);
+  padding: 0 12px;
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.safeclaw-module-status.live {
+  border-color: rgba(125, 220, 134, 0.55);
+  color: #9df0a6;
+}
+
+.safeclaw-module-status.partial {
+  border-color: rgba(255, 220, 46, 0.65);
+  color: var(--os-yellow, #ffdc2e);
+}
+
+.safeclaw-module-status.planned {
+  color: rgba(246, 245, 239, 0.62);
+}
+
+.safeclaw-module-actions {
+  margin-top: 22px;
+}
+
+.safeclaw-module-grid,
+.safeclaw-module-panel {
+  width: min(100% - 40px, 1440px);
+  margin: 28px auto 0;
+}
+
+.safeclaw-module-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid rgba(246, 245, 239, 0.16);
+}
+
+.safeclaw-module-grid.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.safeclaw-module-grid article {
+  min-height: 150px;
+  border-right: 1px solid rgba(246, 245, 239, 0.12);
+  padding: 28px;
+  background: rgba(14, 14, 18, 0.72);
+}
+
+.safeclaw-module-grid article:last-child {
+  border-right: 0;
+}
+
+.safeclaw-module-grid article strong {
+  display: block;
+  margin-top: 24px;
+  color: #f6f5ef;
+  font-size: clamp(28px, 4vw, 54px);
+  font-weight: 950;
+  letter-spacing: -0.055em;
+}
+
+.safeclaw-module-panel {
+  border: 1px solid rgba(246, 245, 239, 0.16);
+  background: rgba(14, 14, 18, 0.72);
+  padding: clamp(24px, 3vw, 44px);
+}
+
+.safeclaw-module-panel h2 {
+  max-width: 920px;
+  margin: 16px 0 14px;
+  color: #f6f5ef;
+  font-size: clamp(32px, 4vw, 64px);
+  font-weight: 950;
+  letter-spacing: -0.06em;
+  line-height: 1.02;
+}
+
+.safeclaw-module-panel p,
+.safeclaw-archive-list p,
+.safeclaw-worker-table p,
+.safeclaw-tbm-board p {
+  color: rgba(246, 245, 239, 0.64);
+  font-size: 19px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
+.safeclaw-worker-table,
+.safeclaw-archive-list,
+.safeclaw-tbm-board {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.safeclaw-worker-table article,
+.safeclaw-archive-list article,
+.safeclaw-tbm-board article {
+  border: 1px solid rgba(246, 245, 239, 0.14);
+  background: rgba(8, 9, 11, 0.72);
+  padding: 22px;
+}
+
+.safeclaw-worker-table strong,
+.safeclaw-archive-list strong,
+.safeclaw-tbm-board strong {
+  display: block;
+  color: #f6f5ef;
+  font-size: 24px;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.safeclaw-worker-phone {
+  margin-top: 18px;
+  border-left: 4px solid var(--os-yellow, #ffdc2e);
+  padding-left: 14px;
+}
+
+.safeclaw-tbm-board {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 980px) {
+  .safeclaw-module-nav,
+  .safeclaw-module-hero,
+  .safeclaw-module-grid,
+  .safeclaw-module-grid.four,
+  .safeclaw-tbm-board {
+    grid-template-columns: 1fr;
+  }
+
+  .safeclaw-module-nav nav {
+    justify-content: flex-start;
+  }
+
+  .safeclaw-module-grid article {
+    border-right: 0;
+    border-bottom: 1px solid rgba(246, 245, 239, 0.12);
+  }
+
+  .safeclaw-module-grid article:last-child {
+    border-bottom: 0;
+  }
+}
