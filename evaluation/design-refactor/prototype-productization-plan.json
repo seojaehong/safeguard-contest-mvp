@@ -1,0 +1,74 @@
+{
+  "name": "safeclaw-prototype-productization-plan",
+  "createdAt": "2026-05-02",
+  "sourcePrototype": "C:/Users/iceam/Downloads/SafeClaw Prototype _standalone_.html",
+  "decision": "Treat the designer prototype as a product blueprint, not as sixteen separate production routes.",
+  "workspacePolicy": "Do not modify the existing /workspace engine until shell routes and component extraction are ready.",
+  "productionModel": {
+    "modules": 14,
+    "variants": 2,
+    "variantScreens": ["landing-b", "workspace-b"],
+    "primaryEngine": "/workspace"
+  },
+  "moduleStatus": {
+    "live": [
+      "public-landing",
+      "work-command-center",
+      "document-editor-inside-workspace",
+      "field-dispatch-mail-sms",
+      "knowledge-db",
+      "api-operations"
+    ],
+    "partial": [
+      "demo-campaign-landing",
+      "login-account-entry",
+      "evidence-library",
+      "workers-education",
+      "archive-history"
+    ],
+    "missing": [
+      "home-dashboard",
+      "worker-mobile-view",
+      "tbm-fullscreen-view",
+      "settings"
+    ],
+    "designVariants": [
+      "landing-b",
+      "workspace-b"
+    ]
+  },
+  "phasePlan": [
+    {
+      "phase": "A",
+      "name": "Product IA Lock",
+      "goal": "Convert /prototype from visual gallery to honest product blueprint."
+    },
+    {
+      "phase": "B",
+      "name": "Shell Routes Without Logic Migration",
+      "goal": "Add route shells for missing modules while linking back to the working /workspace engine."
+    },
+    {
+      "phase": "C",
+      "name": "Component Extraction",
+      "goal": "Extract document, evidence, worker, and dispatch panels into reusable components without changing behavior."
+    },
+    {
+      "phase": "D",
+      "name": "Missing Field Screens",
+      "goal": "Build worker mobile and TBM fullscreen views from generated workpack state."
+    },
+    {
+      "phase": "E",
+      "name": "Operations Layer",
+      "goal": "Complete archive search, API health, settings, and knowledge DB refresh workflows."
+    }
+  ],
+  "submissionGate": [
+    "Public landing exists.",
+    "Existing /workspace remains fully functional.",
+    "Prototype page explains live, partial, missing, and variant status honestly.",
+    "Missing modules have route-shell plans before component extraction starts.",
+    "Dispatch, exports, knowledge DB, and API orchestration retain smoke evidence."
+  ]
+}

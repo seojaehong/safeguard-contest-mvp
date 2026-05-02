@@ -36,6 +36,18 @@ The 16-screen map now shows how each designer screen maps back to the working Sa
 - The prototype cards now show the mapped target and concrete functional scope instead of generic placeholder copy.
 - The landing hero headline was locked to three deliberate lines so Chrome zoom changes no longer orphan `으로` or break the hazard-highlight line.
 
+## Phase 1.4 - Productization Plan
+
+The 16-screen prototype is now treated as a product blueprint instead of a finished set of independent routes.
+
+- `Landing A/B` and `Workspace A/B` are design variants, not separate production destinations.
+- The production structure is now framed as 14 product modules plus 2 variants.
+- The existing `/workspace` route remains the working engine and should not be disturbed until shell routes are ready.
+- Missing modules are explicitly tracked: home dashboard, worker mobile view, TBM fullscreen view, and settings.
+- The next implementation pass should add route shells first, then extract working workspace panels into shared components.
+- Detailed plan: `docs/safeclaw_16_screen_productization_plan.md`.
+- Machine-readable artifact: `evaluation/design-refactor/prototype-productization-plan.json`.
+
 ## What Changed
 
 - Added a dedicated `SafeClawLanding` component based on the approved dark HUD brand direction.
@@ -48,10 +60,12 @@ The 16-screen map now shows how each designer screen maps back to the working Sa
 - The full 16-screen prototype has not been fully migrated yet.
 - Workspace, document editor, evidence library, workers, dispatch, TBM mode, archive, knowledge DB, API, and settings still need the SafeClaw shell treatment.
 - The old command-center CSS remains in use inside `/workspace` until the next screen-by-screen refactor pass.
+- The prototype page still needs a UI pass so it reads as a product blueprint rather than a static gallery.
 
 ## Next Pass
 
-1. Replace the `/workspace` shell with the SafeClaw app shell.
-2. Split major operational areas into product routes: documents, evidence, workers, dispatch, TBM, archive, knowledge, API, and settings.
-3. Keep all existing working features while replacing the presentation layer.
-4. Add browser screenshot evidence for desktop and mobile after each screen migration.
+1. Add product route shells without moving business logic.
+2. Keep `/workspace` intact as the stable engine.
+3. Convert `/prototype` copy to "14 modules + 2 variants" and show live/partial/missing status.
+4. Extract document, evidence, workers, and dispatch panels only after shell routes are stable.
+5. Add browser screenshot evidence for desktop and mobile after each screen migration.
