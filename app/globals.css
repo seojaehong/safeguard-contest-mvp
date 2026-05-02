@@ -5678,6 +5678,178 @@ body {
   border-color: rgba(255, 220, 46, 0.34);
 }
 
+.safeclaw-document-cockpit {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 320px;
+  width: min(100% - 40px, 1440px);
+  margin: 28px auto 0;
+  border: 1px solid rgba(246, 245, 239, 0.16);
+  background:
+    linear-gradient(90deg, rgba(255, 220, 46, 0.08), transparent 18%),
+    rgba(14, 14, 18, 0.74);
+}
+
+.safeclaw-doc-index,
+.safeclaw-doc-primary,
+.safeclaw-doc-export {
+  min-width: 0;
+  padding: clamp(22px, 2.6vw, 34px);
+}
+
+.safeclaw-doc-index,
+.safeclaw-doc-primary {
+  border-right: 1px solid rgba(246, 245, 239, 0.12);
+}
+
+.safeclaw-doc-index > span,
+.safeclaw-doc-primary > span,
+.safeclaw-doc-export > span {
+  color: var(--os-yellow, #ffdc2e);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.safeclaw-doc-index h2,
+.safeclaw-doc-primary h2,
+.safeclaw-doc-export h2 {
+  margin: 14px 0 18px;
+  color: #f6f5ef;
+  font-size: clamp(28px, 3vw, 48px);
+  font-weight: 950;
+  letter-spacing: -0.055em;
+  line-height: 1.02;
+}
+
+.safeclaw-doc-primary > p {
+  max-width: 780px;
+  margin: 0 0 24px;
+  color: rgba(246, 245, 239, 0.64);
+  font-size: 18px;
+  font-weight: 760;
+  line-height: 1.5;
+}
+
+.safeclaw-doc-index-list,
+.safeclaw-doc-primary-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.safeclaw-doc-index-list button,
+.safeclaw-doc-primary-grid section,
+.safeclaw-doc-export dl,
+.safeclaw-doc-export a {
+  border: 1px solid rgba(246, 245, 239, 0.14);
+  background: rgba(8, 9, 11, 0.66);
+}
+
+.safeclaw-doc-index-list button {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+  padding: 16px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.safeclaw-doc-index-list button:hover,
+.safeclaw-doc-index-list button:focus-visible {
+  border-color: rgba(255, 220, 46, 0.65);
+  outline: none;
+}
+
+.safeclaw-doc-index-list small,
+.safeclaw-doc-primary-grid small,
+.safeclaw-doc-export dt {
+  color: rgba(255, 220, 46, 0.78);
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.safeclaw-doc-index-list strong,
+.safeclaw-doc-primary-grid strong {
+  color: #f6f5ef;
+  font-size: 20px;
+  font-weight: 950;
+  letter-spacing: -0.035em;
+}
+
+.safeclaw-doc-index-list em {
+  color: rgba(246, 245, 239, 0.56);
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.safeclaw-doc-primary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.safeclaw-doc-primary-grid section {
+  padding: 20px;
+}
+
+.safeclaw-doc-primary-grid p {
+  margin: 16px 0 0;
+  color: rgba(246, 245, 239, 0.62);
+  font-size: 15px;
+  font-weight: 720;
+  line-height: 1.5;
+}
+
+.safeclaw-doc-export dl {
+  display: grid;
+  gap: 0;
+  margin: 0 0 16px;
+}
+
+.safeclaw-doc-export dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid rgba(246, 245, 239, 0.12);
+  padding: 15px 16px;
+}
+
+.safeclaw-doc-export dl div:last-child {
+  border-bottom: 0;
+}
+
+.safeclaw-doc-export dd {
+  margin: 0;
+  color: #f6f5ef;
+  font-weight: 900;
+  text-align: right;
+}
+
+.safeclaw-doc-export a {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  color: #f6f5ef;
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.safeclaw-doc-export a:first-of-type {
+  background: var(--os-yellow, #ffdc2e);
+  color: #08090b;
+}
+
 .safeclaw-module-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -5773,6 +5945,7 @@ body {
 @media (max-width: 980px) {
   .safeclaw-module-nav,
   .safeclaw-module-hero,
+  .safeclaw-document-cockpit,
   .safeclaw-module-grid,
   .safeclaw-module-grid.four,
   .safeclaw-tbm-board {
@@ -5795,6 +5968,16 @@ body {
   .safeclaw-current-workpack {
     grid-template-columns: 1fr;
     align-items: start;
+  }
+
+  .safeclaw-doc-index,
+  .safeclaw-doc-primary {
+    border-right: 0;
+    border-bottom: 1px solid rgba(246, 245, 239, 0.12);
+  }
+
+  .safeclaw-doc-primary-grid {
+    grid-template-columns: 1fr;
   }
 }
 
