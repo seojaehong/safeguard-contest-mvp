@@ -1748,17 +1748,48 @@ export function WorkpackEditor({
     }
   }
 
-  function printPdf() {
+  async function printPdf() {
     const popup = window.open("", "_blank", "width=900,height=1100");
     if (!popup) {
       console.error("PDF print window was blocked");
       downloadHtml();
       return;
     }
-    popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows));
+    popup.document.write("<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\" /><title>SafeClaw PDF 준비 중</title></head><body><p>제출용 PDF 화면을 준비하고 있습니다.</p></body></html>");
     popup.document.close();
-    popup.focus();
-    popup.print();
+
+    try {
+      const response = await fetch("/api/export/pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: selected.title,
+          scenario: data.scenario,
+          rows: selectedRows,
+          documentText: selectedText,
+          riskLevel: data.riskSummary.riskLevel,
+          topRisk: data.riskSummary.topRisk
+        })
+      });
+      if (!response.ok) {
+        throw new Error(`PDF print source failed with ${response.status}`);
+      }
+      const html = await response.text();
+      popup.document.open();
+      popup.document.write(html);
+      popup.document.close();
+      popup.focus();
+      popup.print();
+    } catch (error) {
+      console.error("server PDF print source failed", error);
+      popup.document.open();
+      popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows));
+      popup.document.close();
+      popup.focus();
+      popup.print();
+    }
   }
 
   return (
@@ -1863,7 +1894,7 @@ export function WorkpackEditor({
             </p>
           </div>
           <div className="download-bar">
-            <button type="button" className="button secondary" onClick={printPdf}>PDF 저장/인쇄</button>
+            <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF 저장/인쇄</button>
             <button type="button" className="button secondary" onClick={downloadXls}>XLS</button>
             <button type="button" className="button" onClick={downloadHwpx} disabled={hwpxStatus === "building"}>
               {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX"}

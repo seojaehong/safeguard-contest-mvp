@@ -36,6 +36,106 @@ function parseDispatchLogs(value: unknown): DispatchLogDraft[] {
   });
 }
 
+export async function GET(request: NextRequest) {
+  const client = createSupabaseAdminClient();
+  if (!client) {
+    return NextResponse.json({
+      ok: true,
+      configured: false,
+      logs: [],
+      message: "Supabase 저장소 설정 후 전파 이력을 불러옵니다."
+    });
+  }
+
+  const user = await getWorkspaceUser(client, request.headers);
+  if (!user) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      logs: [],
+      message: "관리자 로그인이 필요합니다."
+    }, { status: 401 });
+  }
+
+  const limitParam = Number(request.nextUrl.searchParams.get("limit") || "30");
+  const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 100) : 30;
+
+  const { data: organizations, error: organizationError } = await client
+    .from("organizations")
+    .select("id,name")
+    .eq("owner_id", user.id);
+
+  if (organizationError) {
+    console.error("dispatch archive organization fetch failed", organizationError);
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      logs: [],
+      message: "조직 이력 조회에 실패했습니다."
+    }, { status: 500 });
+  }
+
+  const organizationIds = (organizations || []).map((organization) => organization.id);
+  if (!organizationIds.length) {
+    return NextResponse.json({
+      ok: true,
+      configured: true,
+      logs: [],
+      message: "아직 저장된 전파 이력이 없습니다."
+    });
+  }
+
+  const { data: logs, error: logError } = await client
+    .from("dispatch_logs")
+    .select("id,organization_id,site_id,workpack_id,channel,target_label,target_contact,language_code,provider,provider_status,workflow_run_id,failure_reason,created_at")
+    .in("organization_id", organizationIds)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (logError) {
+    console.error("dispatch archive fetch failed", logError);
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      logs: [],
+      message: "전파 이력 조회에 실패했습니다."
+    }, { status: 500 });
+  }
+
+  const siteIds = Array.from(new Set((logs || []).map((log) => log.site_id).filter((id): id is string => Boolean(id))));
+  const { data: sites, error: siteError } = siteIds.length
+    ? await client.from("sites").select("id,name").in("id", siteIds)
+    : { data: [], error: null };
+
+  if (siteError) {
+    console.error("dispatch archive site fetch failed", siteError);
+  }
+
+  const siteMap = new Map((sites || []).map((site) => [site.id, site.name]));
+  const organizationMap = new Map((organizations || []).map((organization) => [organization.id, organization.name]));
+
+  return NextResponse.json({
+    ok: true,
+    configured: true,
+    logs: (logs || []).map((log) => ({
+      id: log.id,
+      organizationName: log.organization_id ? organizationMap.get(log.organization_id) || "SafeClaw Pilot" : "SafeClaw Pilot",
+      siteName: log.site_id ? siteMap.get(log.site_id) || "기본 현장" : "기본 현장",
+      workpackId: log.workpack_id,
+      channel: log.channel,
+      targetLabel: log.target_label,
+      targetContact: log.target_contact,
+      languageCode: log.language_code,
+      provider: log.provider,
+      providerStatus: log.provider_status,
+      workflowRunId: log.workflow_run_id,
+      failureReason: log.failure_reason,
+      createdAt: log.created_at
+    })),
+    message: "관리자 전파 이력을 불러왔습니다."
+  });
+}
+
 export async function POST(request: NextRequest) {
   const client = createSupabaseAdminClient();
   if (!client) {

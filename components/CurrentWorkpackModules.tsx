@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { createClient, type Session } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
@@ -45,6 +46,34 @@ type LaunchDocument = {
 };
 
 type DeliverableDocumentKey = Extract<DocumentKey, keyof AskResponse["deliverables"]>;
+type ArchiveWorkpack = {
+  id: string;
+  organizationName: string;
+  siteName: string;
+  industry: string | null;
+  region: string | null;
+  question: string;
+  createdAt: string;
+  updatedAt: string;
+};
+type ArchiveDispatchLog = {
+  id: string;
+  siteName: string;
+  channel: string;
+  targetLabel: string | null;
+  languageCode: string | null;
+  provider: string | null;
+  providerStatus: string | null;
+  workflowRunId: string | null;
+  failureReason: string | null;
+  createdAt: string;
+};
+type ServerArchiveState = {
+  status: "idle" | "loading" | "ready" | "login-required" | "unconfigured" | "error";
+  message: string;
+  workpacks: ArchiveWorkpack[];
+  dispatchLogs: ArchiveDispatchLog[];
+};
 
 const launchDocuments: LaunchDocument[] = [
   {
@@ -111,6 +140,71 @@ const launchDocuments: LaunchDocument[] = [
     description: "촬영자, 확인자, 보관 위치를 남깁니다."
   }
 ];
+
+function createBrowserSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return null;
+  return createClient(url, anonKey);
+}
+
+function readArchiveWorkpacks(value: unknown): ArchiveWorkpack[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item): ArchiveWorkpack[] => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const record = item as Record<string, unknown>;
+    const id = typeof record.id === "string" ? record.id : "";
+    const siteName = typeof record.siteName === "string" ? record.siteName : "기본 현장";
+    const question = typeof record.question === "string" ? record.question : "";
+    const createdAt = typeof record.createdAt === "string" ? record.createdAt : "";
+    if (!id || !createdAt) return [];
+    return [{
+      id,
+      organizationName: typeof record.organizationName === "string" ? record.organizationName : "SafeClaw Pilot",
+      siteName,
+      industry: typeof record.industry === "string" ? record.industry : null,
+      region: typeof record.region === "string" ? record.region : null,
+      question,
+      createdAt,
+      updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : createdAt
+    }];
+  });
+}
+
+function readArchiveDispatchLogs(value: unknown): ArchiveDispatchLog[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item): ArchiveDispatchLog[] => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const record = item as Record<string, unknown>;
+    const id = typeof record.id === "string" ? record.id : "";
+    const channel = typeof record.channel === "string" ? record.channel : "";
+    const createdAt = typeof record.createdAt === "string" ? record.createdAt : "";
+    if (!id || !channel || !createdAt) return [];
+    return [{
+      id,
+      siteName: typeof record.siteName === "string" ? record.siteName : "기본 현장",
+      channel,
+      targetLabel: typeof record.targetLabel === "string" ? record.targetLabel : null,
+      languageCode: typeof record.languageCode === "string" ? record.languageCode : null,
+      provider: typeof record.provider === "string" ? record.provider : null,
+      providerStatus: typeof record.providerStatus === "string" ? record.providerStatus : null,
+      workflowRunId: typeof record.workflowRunId === "string" ? record.workflowRunId : null,
+      failureReason: typeof record.failureReason === "string" ? record.failureReason : null,
+      createdAt
+    }];
+  });
+}
+
+async function readSession(): Promise<Session | null> {
+  const client = createBrowserSupabaseClient();
+  if (!client) return null;
+  const { data, error } = await client.auth.getSession();
+  if (error) {
+    console.error("archive session read failed", error);
+    return null;
+  }
+  return data.session;
+}
 
 function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
   const [state, setState] = useState<CurrentWorkpackSnapshot>({
@@ -457,6 +551,12 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
 
 export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
+  const [serverArchive, setServerArchive] = useState<ServerArchiveState>({
+    status: "idle",
+    message: "관리자 로그인 후 서버 이력을 조회합니다.",
+    workpacks: [],
+    dispatchLogs: []
+  });
   const workers = currentRouteWorkers(current);
   const dispatchTargets = current.dispatchSnapshot?.targetWorkers.length
     ? current.dispatchSnapshot.targetWorkers
@@ -466,6 +566,76 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
   const hasDispatchSnapshot = Boolean(current.dispatchSnapshot);
   const browserArchiveLabel = current.isCurrent ? "브라우저 current snapshot" : "브라우저 snapshot 없음";
   const supabaseLoginAvailable = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+  async function loadServerArchive() {
+    if (!supabaseLoginAvailable) {
+      setServerArchive({
+        status: "unconfigured",
+        message: "Supabase URL과 anon key가 없어 서버 이력을 조회할 수 없습니다.",
+        workpacks: [],
+        dispatchLogs: []
+      });
+      return;
+    }
+
+    setServerArchive((currentState) => ({
+      ...currentState,
+      status: "loading",
+      message: "관리자 서버 이력을 불러오는 중입니다."
+    }));
+
+    const session = await readSession();
+    if (!session) {
+      setServerArchive({
+        status: "login-required",
+        message: "관리자 로그인 후 workpacks와 dispatch_logs 이력을 불러올 수 있습니다.",
+        workpacks: [],
+        dispatchLogs: []
+      });
+      return;
+    }
+
+    try {
+      const headers = { authorization: `Bearer ${session.access_token}` };
+      const [workpackResponse, dispatchResponse] = await Promise.all([
+        fetch("/api/workpacks?limit=12", { headers }),
+        fetch("/api/dispatch-logs?limit=12", { headers })
+      ]);
+      const workpackPayload = await workpackResponse.json().catch((): unknown => ({}));
+      const dispatchPayload = await dispatchResponse.json().catch((): unknown => ({}));
+      const workpackRecord = workpackPayload && typeof workpackPayload === "object" && !Array.isArray(workpackPayload)
+        ? workpackPayload as Record<string, unknown>
+        : {};
+      const dispatchRecord = dispatchPayload && typeof dispatchPayload === "object" && !Array.isArray(dispatchPayload)
+        ? dispatchPayload as Record<string, unknown>
+        : {};
+
+      if (!workpackResponse.ok || !dispatchResponse.ok) {
+        setServerArchive({
+          status: "error",
+          message: `${typeof workpackRecord.message === "string" ? workpackRecord.message : "문서팩 이력 조회 확인 필요"} / ${typeof dispatchRecord.message === "string" ? dispatchRecord.message : "전파 이력 조회 확인 필요"}`,
+          workpacks: [],
+          dispatchLogs: []
+        });
+        return;
+      }
+
+      setServerArchive({
+        status: "ready",
+        message: typeof workpackRecord.message === "string" ? workpackRecord.message : "관리자 서버 이력을 불러왔습니다.",
+        workpacks: readArchiveWorkpacks(workpackRecord.workpacks),
+        dispatchLogs: readArchiveDispatchLogs(dispatchRecord.logs)
+      });
+    } catch (error) {
+      console.error("server archive fetch failed", error);
+      setServerArchive({
+        status: "error",
+        message: "서버 이력 조회 중 오류가 발생했습니다.",
+        workpacks: [],
+        dispatchLogs: []
+      });
+    }
+  }
 
   return (
     <>
@@ -483,7 +653,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
         <article><span>로컬 상태</span><strong>{browserArchiveLabel}</strong></article>
         <article><span>작업자 snapshot</span><strong>{hasWorkerSnapshot ? `${workers.length}명` : "없음"}</strong></article>
         <article><span>Supabase 로그인</span><strong>{supabaseLoginAvailable ? "가능" : "설정 필요"}</strong></article>
-        <article><span>서버 archive</span><strong>미연결</strong></article>
+        <article><span>서버 archive</span><strong>{serverArchive.status === "ready" ? `${serverArchive.workpacks.length}건` : "조회 대기"}</strong></article>
       </section>
       <section className="safeclaw-module-panel">
         <span>최근 작업 스냅샷 · 로컬</span>
@@ -502,12 +672,50 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
           </article>
           <article>
             <strong>서버 아카이브</strong>
-            <code>Supabase read path</code>
-            <p>현재 화면은 브라우저의 최신 snapshot만 보여줍니다. 로그인된 서버 이력 목록 조회는 아직 이 라우트에 연결되지 않았습니다.</p>
+            <code>workpacks · dispatch_logs</code>
+            <p>관리자 로그인 세션이 있으면 Supabase에 저장된 문서팩과 전파 이력을 같은 화면에서 불러옵니다.</p>
           </article>
         </div>
         <p className="muted small">전파 대상 기준: {hasDispatchSnapshot ? `작업공간 전파 snapshot ${dispatchTargets.length}명` : "전파 snapshot 없음, 현재 작업자 명단에서 재계산"} · 갱신 시각: {savedLabel || "대기"}.</p>
-        <p className="export-error">이 화면의 값은 “실제 이력 저장 완료” 증명이 아닙니다. 관리자 로그인 후 작업공간 저장/API 저장 결과가 있어야 서버 이력으로 취급합니다.</p>
+        <p className="export-error">로컬 스냅샷과 서버 이력은 구분합니다. 제출 증빙은 관리자 로그인 후 저장된 서버 이력만 사용하세요.</p>
+      </section>
+      <section className="safeclaw-module-panel">
+        <div className="compact-head">
+          <div>
+            <span>관리자 서버 이력</span>
+            <h2>문서팩·전파 로그.</h2>
+          </div>
+          <button type="button" className="button secondary" onClick={loadServerArchive} disabled={serverArchive.status === "loading"}>
+            {serverArchive.status === "loading" ? "조회 중" : "서버 이력 조회"}
+          </button>
+        </div>
+        <p className={serverArchive.status === "error" || serverArchive.status === "login-required" ? "export-error" : "muted small"}>
+          {serverArchive.message}
+        </p>
+        {serverArchive.status === "ready" ? (
+          <div className="safeclaw-archive-list">
+            {serverArchive.workpacks.length ? serverArchive.workpacks.map((item) => (
+              <article key={item.id}>
+                <strong>{item.siteName}</strong>
+                <code>{new Date(item.createdAt).toLocaleString("ko-KR")}</code>
+                <p>{excerpt(item.question, 150)}</p>
+              </article>
+            )) : (
+              <article>
+                <strong>문서팩 이력 없음</strong>
+                <code>workpacks</code>
+                <p>작업공간에서 문서팩을 저장하면 이 목록에 표시됩니다.</p>
+              </article>
+            )}
+            {serverArchive.dispatchLogs.length ? serverArchive.dispatchLogs.slice(0, 6).map((log) => (
+              <article key={log.id}>
+                <strong>{log.channel} · {log.providerStatus || "상태 확인"}</strong>
+                <code>{log.workflowRunId || log.provider || "dispatch_logs"}</code>
+                <p>{log.targetLabel || "수신자"} · {log.siteName} · {new Date(log.createdAt).toLocaleString("ko-KR")}{log.failureReason ? ` · ${log.failureReason}` : ""}</p>
+              </article>
+            )) : null}
+          </div>
+        ) : null}
       </section>
       </>
       )}
