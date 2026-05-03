@@ -327,6 +327,24 @@ function buildPermitDraft(data: AskResponse) {
   ].join("\n");
 }
 
+function withSubmitReadiness(title: string, body: string, data: AskResponse) {
+  const references = data.externalData.kosha.references.map((item) => item.title).join(" / ");
+  return [
+    "[제출상태]",
+    `서식상태: 준제출형 - ${title} 제출 필수 항목을 반영한 현장 검토용입니다.`,
+    "원본 재현 한계: 발주처 지정 직인, 허가번호, 결재선, 표 병합 레이아웃은 제출 전 원본 양식으로 확인 필요",
+    "",
+    "[필수 확인 항목]",
+    `기상: ${data.externalData.weather.summary || data.scenario.weatherNote}`,
+    `위험요인: ${data.riskSummary.topRisk}`,
+    "확인/서명란: 작성자 / 관리감독자 / 안전관리자 / 현장책임자",
+    `근거 반영: ${references || "공식 근거 확인 필요"}`,
+    "증빙: 사진/영상 증빙, 참석자 서명, 개선조치 전후 기록",
+    "",
+    body
+  ].join("\n");
+}
+
 function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
   if (key === "riskAssessmentDraft") {
     return {
@@ -355,7 +373,7 @@ function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
   if (key === "workPermitDraft") {
     return {
       code: "SC-PTW-01",
-      subtitle: "위험작업 허가 및 종료 확인서",
+      subtitle: "허가서/첨부 및 위험작업 종료 확인서",
       layout: "permit",
       primaryColumn: "허가 항목",
       actionColumn: "확인 내용 / 조건",
@@ -1427,12 +1445,12 @@ export function WorkpackEditor({
   const initialValues = useMemo<WorkpackDocumentValues>(
     () => ({
       workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
-      riskAssessmentDraft: data.deliverables.riskAssessmentDraft,
-      workPlanDraft: data.deliverables.workPlanDraft,
-      workPermitDraft: buildPermitDraft(data),
-      tbmBriefing: data.deliverables.tbmBriefing,
-      tbmLogDraft: data.deliverables.tbmLogDraft,
-      safetyEducationRecordDraft: data.deliverables.safetyEducationRecordDraft,
+      riskAssessmentDraft: withSubmitReadiness("위험성평가표", data.deliverables.riskAssessmentDraft, data),
+      workPlanDraft: withSubmitReadiness("작업계획서", data.deliverables.workPlanDraft, data),
+      workPermitDraft: withSubmitReadiness("허가서/첨부 안전작업허가 확인서", buildPermitDraft(data), data),
+      tbmBriefing: withSubmitReadiness("TBM 브리핑", data.deliverables.tbmBriefing, data),
+      tbmLogDraft: withSubmitReadiness("TBM 일지", data.deliverables.tbmLogDraft, data),
+      safetyEducationRecordDraft: withSubmitReadiness("안전교육", data.deliverables.safetyEducationRecordDraft, data),
       emergencyResponseDraft: data.deliverables.emergencyResponseDraft,
       photoEvidenceDraft: data.deliverables.photoEvidenceDraft,
       foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
@@ -1839,6 +1857,9 @@ export function WorkpackEditor({
             <p className="editor-status" aria-live="polite">
               자동저장됨(이 브라우저) · 이력 저장은 관리자 로그인 후 · {selectedText.length.toLocaleString("ko-KR")}자
               {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
+            </p>
+            <p className="muted small">
+              현재 출력물은 제출 필수 항목을 반영한 준제출형입니다. 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
             </p>
           </div>
           <div className="download-bar">
