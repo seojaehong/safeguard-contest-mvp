@@ -1,24 +1,24 @@
 # SafeGuard API 조합 및 다운로드 스모크
 
-- 생성시각: 2026-05-03T11:40:03.609Z
-- 대상 URL: https://safeguard-contest-mvp.vercel.app
+- 생성시각: 2026-05-03T12:41:45.724Z
+- 대상 URL: http://127.0.0.1:3011
 - 질문: 세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.
-- 기상 선조회: live / 단시간 흐림, 강수없음, 기온 13℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선/생활기상 체감온도 반영)
+- 기상 선조회: live / 단시간 흐림, 비, 기온 13℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선/생활기상 체감온도 반영)
 - /api/ask: live / 문서 11종
 
 ## API 반영 맵
 
 | API | 호출 경로 | 상태 | 반영 위치 | 건수/신호 | 증거 |
 | --- | --- | --- | --- | ---: | --- |
-| 기상청 현재/초단기/단기/특보/영향예보 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 8 | 단시간 흐림, 강수없음, 기온 13℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선/생활기상 체감온도 반영) |
+| 기상청 현재/초단기/단기/특보/영향예보 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 8 | 단시간 흐림, 비, 기온 13℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선/생활기상 체감온도 반영) |
 | Law.go + korean-law-mcp | /api/ask 내부 searchLegalSources | live | 근거 출처<br>위험성평가표 반영 근거<br>TBM 기록 반영 근거<br>사진/증빙 확인 근거 | 6 | korean-law-mcp 비활성화 |
-| Gemini | /api/ask 내부 generateAnswer | live | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | **세이프건설 서울 성수동 근린생활시설 외벽 도장 작업 현장 검토용 초안**
+| Gemini | /api/ask 내부 generateAnswer | live | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | 세이프건설 서울 성수동 근린생활시설 외벽 도장 작업 현장 검토용 초안입니다.
 
 ---
 
 ### 1) 핵심 판단
 
-세이프건설 서울 성수동 근린생활시설 외벽 도장 작업은 이동식 비계 사용, 신규 투입 작업자, 오후 강풍 예보라는 조건으로 인해 **추락 및 지게차 동선 위험이 매우 높은 작업 |
+세이프건설의 서울 성수동 근린생활시설 외벽 도장 작업은 이동식 비계 사용, 작업자 5명(신규 투입자 1명 포함), 그리고 오후 강풍 예보라는 조건 하에 진행됩니다. 이 작업은 |
 | Work24 훈련과정 | /api/ask 내부 fetchTrainingRecommendations | live | 후속 교육<br>안전보건교육 기록<br>교육 추천 카드 | 2 | 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. |
 | KOSHA 안전보건교육포털 | /api/ask 내부 fetchKoshaEducationRecommendations | live | 후속 교육<br>안전보건교육 기록<br>KOSHA 교육 카드 | 3 | KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. |
 | KOSHA 공식자료/가이드 | /api/ask 내부 fetchKoshaReferences | live | 위험성평가 절차<br>TBM 기록 항목<br>안전보건교육 서식 | 7 | KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. |
@@ -36,8 +36,8 @@
 | DOC | ok | 10436 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-risk-assessment.doc |
 | HTML | ok | 6976 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-risk-assessment.html |
 | HWPX | ok | 10564 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-risk-assessment.hwpx |
-| PDF | ok | 291238 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-risk-assessment.pdf |
+| PDF | ok | 291239 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-risk-assessment.pdf |
 | JPG | ok | 169682 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-risk-assessment.jpg |
-| ALL_TXT | ok | 65887 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.txt |
-| ALL_CSV | ok | 94037 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.csv |
-| ALL_XLS | ok | 132213 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.xls |
+| ALL_TXT | ok | 67865 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.txt |
+| ALL_CSV | ok | 96218 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.csv |
+| ALL_XLS | ok | 134932 | evaluation\final-e2e-matrix\submission-readiness\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.xls |

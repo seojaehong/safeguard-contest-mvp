@@ -1,78 +1,29 @@
 {
-  "generatedAt": "2026-05-03T11:42:59.137Z",
-  "elapsedMs": 116577,
+  "generatedAt": "2026-05-03T12:39:06.530Z",
+  "elapsedMs": 117112,
   "mode": "mixed-live",
   "baseUrl": "http://127.0.0.1:3011",
   "casesPath": "scripts\\safeclaw_quality_matrix_cases.json",
   "total": 100,
-  "pass": 97,
-  "fail": 3,
+  "pass": 100,
+  "fail": 0,
   "live": {
     "enabled": true,
     "requested": 3,
     "executed": 3,
-    "timeoutMs": 45000
+    "timeoutMs": 70000
   },
   "matrix": {
     "baseScenarios": 20,
     "variants": 5
   },
-  "failureSamples": [
-    {
-      "id": "seoul-scaffold-paint__full-context",
-      "mode": "live",
-      "expected": {
-        "region": "서울",
-        "industry": "건설",
-        "workType": "외벽 도장"
-      },
-      "failedChecks": [
-        {
-          "name": "rubric:photoEvidenceDraft",
-          "ok": false,
-          "message": "photoEvidenceDraft missing section terms: 조치 후"
-        }
-      ]
-    },
-    {
-      "id": "seoul-scaffold-paint__minimal-input",
-      "mode": "live",
-      "expected": {
-        "region": "서울",
-        "industry": "건설",
-        "workType": "외벽 도장"
-      },
-      "failedChecks": [
-        {
-          "name": "rubric:photoEvidenceDraft",
-          "ok": false,
-          "message": "photoEvidenceDraft missing section terms: 조치 후"
-        }
-      ]
-    },
-    {
-      "id": "seoul-scaffold-paint__weather-heavy",
-      "mode": "live",
-      "expected": {
-        "region": "서울",
-        "industry": "건설",
-        "workType": "외벽 도장"
-      },
-      "failedChecks": [
-        {
-          "name": "rubric:photoEvidenceDraft",
-          "ok": false,
-          "message": "photoEvidenceDraft missing section terms: 조치 후"
-        }
-      ]
-    }
-  ],
+  "failureSamples": [],
   "byDimension": {
     "region": {
       "서울": {
         "total": 5,
-        "pass": 2,
-        "fail": 3
+        "pass": 5,
+        "fail": 0
       },
       "인천": {
         "total": 5,
@@ -148,8 +99,8 @@
     "industry": {
       "건설": {
         "total": 15,
-        "pass": 12,
-        "fail": 3
+        "pass": 15,
+        "fail": 0
       },
       "물류": {
         "total": 5,
@@ -210,8 +161,8 @@
     "workType": {
       "외벽 도장": {
         "total": 5,
-        "pass": 2,
-        "fail": 3
+        "pass": 5,
+        "fail": 0
       },
       "지게차 상하차": {
         "total": 5,
@@ -312,23 +263,23 @@
     "hazards": {
       "추락": {
         "total": 20,
-        "pass": 17,
-        "fail": 3
+        "pass": 20,
+        "fail": 0
       },
       "비계": {
         "total": 5,
-        "pass": 2,
-        "fail": 3
+        "pass": 5,
+        "fail": 0
       },
       "강풍": {
         "total": 10,
-        "pass": 7,
-        "fail": 3
+        "pass": 10,
+        "fail": 0
       },
       "지게차 동선": {
         "total": 5,
-        "pass": 2,
-        "fail": 3
+        "pass": 5,
+        "fail": 0
       },
       "지게차": {
         "total": 15,
@@ -589,8 +540,8 @@
     "workerSignals": {
       "신규": {
         "total": 35,
-        "pass": 32,
-        "fail": 3
+        "pass": 35,
+        "fail": 0
       },
       "보행자": {
         "total": 5,
@@ -681,8 +632,8 @@
     "weatherSignals": {
       "강풍": {
         "total": 10,
-        "pass": 7,
-        "fail": 3
+        "pass": 10,
+        "fail": 0
       },
       "우천": {
         "total": 5,
@@ -723,48 +674,48 @@
     "requiredDocuments": {
       "riskAssessmentDraft": {
         "total": 100,
-        "pass": 97,
-        "fail": 3
+        "pass": 100,
+        "fail": 0
       },
       "workPlanDraft": {
         "total": 90,
-        "pass": 87,
-        "fail": 3
+        "pass": 90,
+        "fail": 0
       },
       "tbmBriefing": {
         "total": 99,
-        "pass": 96,
-        "fail": 3
+        "pass": 99,
+        "fail": 0
       },
       "tbmLogDraft": {
         "total": 43,
-        "pass": 40,
-        "fail": 3
+        "pass": 43,
+        "fail": 0
       },
       "safetyEducationRecordDraft": {
         "total": 82,
-        "pass": 79,
-        "fail": 3
+        "pass": 82,
+        "fail": 0
       },
       "photoEvidenceDraft": {
         "total": 88,
-        "pass": 85,
-        "fail": 3
+        "pass": 88,
+        "fail": 0
       },
       "workpackSummaryDraft": {
         "total": 20,
-        "pass": 19,
-        "fail": 1
+        "pass": 20,
+        "fail": 0
       },
       "emergencyResponseDraft": {
         "total": 67,
-        "pass": 66,
-        "fail": 1
+        "pass": 67,
+        "fail": 0
       },
       "kakaoMessage": {
         "total": 60,
-        "pass": 58,
-        "fail": 2
+        "pass": 60,
+        "fail": 0
       },
       "foreignWorkerBriefing": {
         "total": 32,

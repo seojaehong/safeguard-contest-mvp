@@ -1,18 +1,18 @@
 {
-  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-05-03T11:40:50.192Z",
-  "elapsedMs": 45707,
+  "baseUrl": "http://127.0.0.1:3011",
+  "generatedAt": "2026-05-03T12:42:34.248Z",
+  "elapsedMs": 47700,
   "question": "한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업. 숙련 지게차 운전자 2명과 피킹 인력 6명, 우천 후 출입구 바닥 젖음, 보행 동선과 지게차 동선이 겹친다. 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 143,
+    "elapsedMs": 61,
     "mode": "live",
-    "summary": "단시간 흐림, 강수없음, 기온 12℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+    "summary": "단시간 흐림, 빗방울, 기온 12℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 42546,
+    "elapsedMs": 44711,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -31,7 +31,7 @@
         "TBM 기상 신호",
         "작업중지 기준"
       ],
-      "evidence": "단시간 흐림, 강수없음, 기온 12℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+      "evidence": "단시간 흐림, 빗방울, 기온 12℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
       "count": 5
     },
     {
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "한빛로지스 인천 남동공단 물류센터의 지게차 상하차 작업 현장 조건(숙련 지게차 운전자 2명, 피킹 인력 6명, 우천 후 출입구 바닥 젖음, 보행 동선과 지게차 동선 겹침)을 바탕으로 현장 검토용 초안을 작성합니다.\n\n---\n\n### 1) 핵심 판단\n\n한빛로지스 인천 남동공단 물류센터 지",
+      "evidence": "## 한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업 현장 검토용 초안\n\n### 1) 핵심 판단\n\n한빛로지스 인천 남동공단 물류센터의 지게차 상하차 작업은 숙련된 운전자 및 피킹 인력이 참여함에도 불구하고, 우천 후 젖은 바닥과 보행 동선 및 지게차 동선의 중첩으로 인해 **미끄러",
       "count": 11
     },
     {
@@ -141,49 +141,49 @@
     {
       "format": "TXT",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.txt",
-      "bytes": 5409,
+      "bytes": 5412,
       "ok": true
     },
     {
       "format": "JSON",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.json",
-      "bytes": 5943,
+      "bytes": 5946,
       "ok": true
     },
     {
       "format": "CSV",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.csv",
-      "bytes": 8218,
+      "bytes": 8221,
       "ok": true
     },
     {
       "format": "XLS",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.xls",
-      "bytes": 14612,
+      "bytes": 14615,
       "ok": true
     },
     {
       "format": "DOC",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.doc",
-      "bytes": 9161,
+      "bytes": 9164,
       "ok": true
     },
     {
       "format": "HTML",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.html",
-      "bytes": 5987,
+      "bytes": 5990,
       "ok": true
     },
     {
       "format": "HWPX",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.hwpx",
-      "bytes": 10032,
+      "bytes": 10036,
       "ok": true
     },
     {
       "format": "PDF",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.pdf",
-      "bytes": 279830,
+      "bytes": 280396,
       "ok": true
     },
     {
@@ -195,19 +195,19 @@
     {
       "format": "ALL_TXT",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.txt",
-      "bytes": 43131,
+      "bytes": 45218,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.csv",
-      "bytes": 62957,
+      "bytes": 65247,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.xls",
-      "bytes": 95069,
+      "bytes": 97897,
       "ok": true
     }
   ],

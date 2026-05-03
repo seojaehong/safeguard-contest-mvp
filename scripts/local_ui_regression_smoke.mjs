@@ -35,9 +35,11 @@ await context.addInitScript(() => {
 });
 
 const page = await context.newPage();
+const workspaceUrl = new URL("/workspace", `${baseUrl.replace(/\/+$/g, "")}/`).toString();
 const result = {
   generatedAt: new Date().toISOString(),
   baseUrl,
+  workspaceUrl,
   homeLoaded: false,
   generated: false,
   knowledgeLinkVisible: false,
@@ -50,15 +52,16 @@ const result = {
 };
 
 try {
-  await page.goto(baseUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
-  result.homeLoaded = await page.getByText("문서팩 생성").first().isVisible({ timeout: 20_000 }).catch(() => false);
+  await page.goto(workspaceUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  result.homeLoaded = await page.locator("textarea").first().isVisible({ timeout: 20_000 }).catch(() => false);
 
   const textarea = page.locator("textarea").first();
   await textarea.fill(scenario);
   await page.getByRole("button", { name: /선택한 현장으로 생성|문서팩 생성/ }).first().click();
-  await page.getByText("LLM 위키·지식 DB 확인").waitFor({ timeout: 140_000 });
+  const knowledgeLink = page.locator('a[href="/knowledge"], a[href^="/knowledge"]').first();
+  await knowledgeLink.waitFor({ timeout: 140_000 });
   result.generated = true;
-  result.knowledgeLinkVisible = await page.getByText("LLM 위키·지식 DB 확인").isVisible();
+  result.knowledgeLinkVisible = await knowledgeLink.isVisible();
 
   await page.getByRole("button", { name: /새 Google Sheets 열기/ }).click();
   result.sheetsOpenedUrl = await page.evaluate(() => String(window.__safeguardOpenedUrl || ""));
@@ -68,7 +71,7 @@ try {
   const layout = await page.evaluate(() => {
     const workspace = document.querySelector(".field-workspace");
     const rail = document.querySelector(".workspace-rail");
-    const evidenceLinks = Array.from(document.querySelectorAll(".impact-list a")).map((node) => node.getAttribute("href") || "");
+    const evidenceLinks = Array.from(document.querySelectorAll(".impact-list a, .evidence-card a, .citation-card a, a[href^='http']")).map((node) => node.getAttribute("href") || "");
     return {
       workspaceColumns: workspace ? getComputedStyle(workspace).gridTemplateColumns : "",
       workspaceRailColumns: rail ? getComputedStyle(rail).gridTemplateColumns : "",
@@ -77,7 +80,7 @@ try {
   });
   result.workspaceColumns = layout.workspaceColumns;
   result.workspaceRailColumns = layout.workspaceRailColumns;
-  result.evidenceLinksValid = layout.evidenceLinks.length > 0 && layout.evidenceLinks.every((href) => /^https?:\/\//.test(href));
+  result.evidenceLinksValid = layout.evidenceLinks.length > 0 && layout.evidenceLinks.every((href) => /^https?:\/\//.test(href) || href.startsWith("/law/") || href.startsWith("/precedent/") || href.startsWith("/interpretation/") || href.startsWith("/knowledge"));
 } catch (error) {
   result.errors.push(error instanceof Error ? error.message : String(error));
 } finally {

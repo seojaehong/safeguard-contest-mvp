@@ -1,15 +1,14 @@
 {
-  "generatedAt": "2026-05-03T11:41:43.553Z",
+  "generatedAt": "2026-05-03T12:43:20.025Z",
   "baseUrl": "http://127.0.0.1:3011",
+  "workspaceUrl": "http://127.0.0.1:3011/workspace",
   "homeLoaded": true,
-  "generated": false,
-  "knowledgeLinkVisible": false,
-  "sheetsOpenedUrl": "",
-  "sheetsTsvHasRows": false,
-  "workspaceColumns": "",
-  "workspaceRailColumns": "",
-  "evidenceLinksValid": false,
-  "errors": [
-    "locator.waitFor: Timeout 140000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href=\"/knowledge\"], a[href^=\"/knowledge\"]').first() to be visible\u001b[22m\n"
-  ]
+  "generated": true,
+  "knowledgeLinkVisible": true,
+  "sheetsOpenedUrl": "https://sheets.new",
+  "sheetsTsvHasRows": true,
+  "workspaceColumns": "1030.42px 391.578px",
+  "workspaceRailColumns": "271.594px 271.594px 271.609px 271.594px 271.609px",
+  "evidenceLinksValid": true,
+  "errors": []
 }

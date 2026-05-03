@@ -1,0 +1,146 @@
+{
+  "generatedAt": "2026-05-03",
+  "task": "SafeClaw 24h harness task B",
+  "ownerScope": "document/form rendering quality for WorkpackEditor and export paths",
+  "dbMutation": false,
+  "sourceReportsUsed": [
+    "evaluation/document-format/report.json",
+    "evaluation/document-format/report.md",
+    "docs/submission_form_data_entries.md"
+  ],
+  "changedCodePaths": [
+    "components/WorkpackEditor.tsx"
+  ],
+  "createdArtifacts": [
+    "docs/form_template_final_mapping.md",
+    "evaluation/final-form-rendering/report.json"
+  ],
+  "renderingStatus": {
+    "label": "paid-pilot submission structured forms",
+    "oneToOneOriginalTemplateClone": false,
+    "hwpxStatus": "structured text HWPX through @rhwp blank document export",
+    "knownLimits": [
+      "HWPX original cell merge, border, page margin, and stamp placement are not cloned",
+      "PDF output remains browser print based",
+      "site-specific permit numbering and client approval lines still require field review"
+    ]
+  },
+  "documentResults": [
+    {
+      "id": "risk-assessment",
+      "label": "위험성평가표",
+      "layout": "risk",
+      "distinctStructure": true,
+      "requiredBlocks": [
+        "사전준비",
+        "유해·위험요인 파악 및 위험성 결정",
+        "감소대책 수립·실행 및 이행확인",
+        "회의록 및 재평가 기준",
+        "공유·교육 및 조치 확인"
+      ],
+      "exportCoverage": [
+        "HTML/PDF/JPG",
+        "XLS",
+        "HWPX structured text"
+      ],
+      "status": "ready_for_pilot_review"
+    },
+    {
+      "id": "work-plan",
+      "label": "작업계획서",
+      "layout": "workPlan",
+      "distinctStructure": true,
+      "requiredBlocks": [
+        "작업개요 및 관리자 지정",
+        "세부 작업순서",
+        "장비·인원·첨부서류 확인",
+        "작업중지 기준 및 비상대응",
+        "작업계획도 및 역할 지정"
+      ],
+      "exportCoverage": [
+        "HTML/PDF/JPG",
+        "XLS",
+        "HWPX structured text"
+      ],
+      "status": "ready_for_pilot_review"
+    },
+    {
+      "id": "permit",
+      "label": "안전작업허가 확인서",
+      "layout": "permit",
+      "distinctStructure": true,
+      "requiredBlocks": [
+        "허가 기본정보",
+        "작업 전 허가조건",
+        "첨부서류 체크리스트",
+        "종료 확인"
+      ],
+      "exportCoverage": [
+        "HTML/PDF/JPG",
+        "XLS",
+        "HWPX structured text"
+      ],
+      "status": "ready_for_pilot_review"
+    },
+    {
+      "id": "tbm-log",
+      "label": "TBM 기록",
+      "layout": "tbmLog",
+      "distinctStructure": true,
+      "riskAssessmentHazardsIncluded": true,
+      "weatherSignalsIncluded": true,
+      "requiredBlocks": [
+        "위험성평가·기상 API 반영",
+        "TBM 일지 기본정보",
+        "근로자 확인 사항",
+        "금일 작업사항 및 위험요인",
+        "일일 안전교육 및 전달사항",
+        "참석자 명단",
+        "인원 집계 및 확인자",
+        "미조치 및 사진·영상 증빙"
+      ],
+      "exportCoverage": [
+        "HTML/PDF/JPG",
+        "XLS",
+        "HWPX structured text"
+      ],
+      "status": "ready_for_pilot_review"
+    },
+    {
+      "id": "safety-education",
+      "label": "안전보건교육 기록",
+      "layout": "education",
+      "distinctStructure": true,
+      "requiredBlocks": [
+        "교육 실시 개요",
+        "교육 내용 및 이해 확인",
+        "교육 참석자 확인",
+        "미이해자 및 후속 조치"
+      ],
+      "exportCoverage": [
+        "HTML/PDF/JPG",
+        "XLS",
+        "HWPX structured text"
+      ],
+      "status": "ready_for_pilot_review"
+    }
+  ],
+  "verification": {
+    "plannedCommands": [
+      "git diff --check -- components\\WorkpackEditor.tsx docs\\form_template_final_mapping.md evaluation\\final-form-rendering\\report.json",
+      "npm.cmd run typecheck"
+    ],
+    "results": [
+      {
+        "command": "git diff --check -- components\\WorkpackEditor.tsx docs\\form_template_final_mapping.md evaluation\\final-form-rendering\\report.json",
+        "status": "passed",
+        "note": "No whitespace errors reported"
+      },
+      {
+        "command": "npm.cmd run typecheck",
+        "status": "passed",
+        "note": "tsc --noEmit --incremental false completed successfully"
+      }
+    ]
+  }
+}
