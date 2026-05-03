@@ -154,6 +154,32 @@ async function fetchText(route, init = {}) {
   }
 }
 
+async function fetchBinary(route, init = {}) {
+  const startedAt = Date.now();
+  try {
+    const response = await fetch(`${baseUrl}${route}`, init);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    return {
+      ok: response.ok,
+      statusCode: response.status,
+      elapsedMs: Date.now() - startedAt,
+      contentType: response.headers.get("content-type") || "",
+      byteLength: buffer.length,
+      startsWithPdfMagic: buffer.subarray(0, 5).toString("ascii") === "%PDF-"
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      statusCode: 0,
+      elapsedMs: Date.now() - startedAt,
+      contentType: "",
+      byteLength: 0,
+      startsWithPdfMagic: false,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+
 async function runRouteChecks() {
   const htmlRoutes = ["/", "/ask", "/documents", "/dispatch", "/workspace"];
   const htmlChecks = [];
@@ -213,6 +239,42 @@ async function runRouteChecks() {
     expected: "PDF print-ready export source responds as HTML",
     status: pdfLooksPrintable ? STATUS.pass : STATUS.blocked,
     result: pdfResult
+  });
+
+  const binaryPdfResult = await fetchBinary("/api/export/pdf?format=pdf", {
+    method: "POST",
+    headers: {
+      accept: "application/pdf",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      title: "위험성평가표",
+      scenario: {
+        companyName: "SafeClaw 최종검증",
+        siteName: "성수동 현장",
+        workSummary: "외벽 도장",
+        workerCount: 5,
+        weatherNote: "강풍 예보"
+      },
+      riskLevel: "현장 확인",
+      topRisk: "비계 추락 및 강풍",
+      rows: [
+        { document: "위험성평가표", section: "작업 정보", item: "작업", content: "외벽 도장" },
+        { document: "위험성평가표", section: "위험요인", item: "추락", content: "이동식 비계 사용 전 점검" },
+        { document: "위험성평가표", section: "확인", item: "서명", content: "작업 전 확인자 서명" }
+      ]
+    })
+  });
+  apiChecks.push({
+    route: "/api/export/pdf?format=pdf",
+    expected: "binary PDF export responds with PDF bytes",
+    status: binaryPdfResult.ok
+      && binaryPdfResult.contentType.includes("application/pdf")
+      && binaryPdfResult.startsWithPdfMagic
+      && binaryPdfResult.byteLength > 1000
+      ? STATUS.pass
+      : STATUS.blocked,
+    result: binaryPdfResult
   });
 
   const dispatchLogResult = await fetchText("/api/dispatch-logs");

@@ -541,7 +541,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
           <ul>
             <li>메일: 관리자·원청 보고</li>
             <li>문자: 작업자 즉시 공지</li>
-            <li>카카오·밴드: 승인 후 연결</li>
+            <li>카카오·밴드: 이번 제출 범위에서는 보류</li>
           </ul>
         </article>
       </section>
@@ -640,21 +640,21 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
   return (
     <>
       <CurrentWorkpackBanner isCurrent={current.isCurrent} savedAt={current.savedAt} />
-      {!current.isCurrent ? (
-        <section className="safeclaw-module-panel">
-          <span>저장된 이력 없음</span>
-          <h2>작업 입력 후 이력이 생깁니다.</h2>
-          <p>아직 이 브라우저에 생성된 문서팩이 없습니다. 기본 예시의 숫자를 이력처럼 보여주지 않고, 실제 작업 생성 후 최신 스냅샷을 표시합니다.</p>
-          <a href="/workspace">작업 입력으로 이동</a>
-        </section>
-      ) : (
-      <>
       <section className="safeclaw-module-grid four">
         <article><span>로컬 상태</span><strong>{browserArchiveLabel}</strong></article>
         <article><span>작업자 snapshot</span><strong>{hasWorkerSnapshot ? `${workers.length}명` : "없음"}</strong></article>
         <article><span>Supabase 로그인</span><strong>{supabaseLoginAvailable ? "가능" : "설정 필요"}</strong></article>
         <article><span>서버 archive</span><strong>{serverArchive.status === "ready" ? `${serverArchive.workpacks.length}건` : "조회 대기"}</strong></article>
       </section>
+      {!current.isCurrent ? (
+        <section className="safeclaw-module-panel">
+          <span>저장된 이력 없음</span>
+          <h2>작업 입력 후 이력이 생깁니다.</h2>
+          <p>아직 이 브라우저에 생성된 문서팩이 없습니다. 기본 예시의 숫자를 이력처럼 보여주지 않고, 실제 작업 생성 후 최신 스냅샷을 표시합니다. 관리자 로그인 상태라면 아래에서 서버 이력은 바로 조회할 수 있습니다.</p>
+          <a href="/workspace">작업 입력으로 이동</a>
+        </section>
+      ) : (
+      <>
       <section className="safeclaw-module-panel">
         <span>최근 작업 스냅샷 · 로컬</span>
         <h2>{current.data.scenario.siteName}</h2>
@@ -679,6 +679,8 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
         <p className="muted small">전파 대상 기준: {hasDispatchSnapshot ? `작업공간 전파 snapshot ${dispatchTargets.length}명` : "전파 snapshot 없음, 현재 작업자 명단에서 재계산"} · 갱신 시각: {savedLabel || "대기"}.</p>
         <p className="export-error">로컬 스냅샷과 서버 이력은 구분합니다. 제출 증빙은 관리자 로그인 후 저장된 서버 이력만 사용하세요.</p>
       </section>
+      </>
+      )}
       <section className="safeclaw-module-panel">
         <div className="compact-head">
           <div>
@@ -717,8 +719,6 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
           </div>
         ) : null}
       </section>
-      </>
-      )}
     </>
   );
 }

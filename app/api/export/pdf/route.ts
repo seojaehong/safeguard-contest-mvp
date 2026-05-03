@@ -432,6 +432,106 @@ function buildPdfReadyHtml(title: string, scenario: PdfScenario, rows: PdfRow[],
 </html>`;
 }
 
+function utf16BeHex(value: string) {
+  const source = Buffer.from(value, "utf16le");
+  const swapped = Buffer.alloc(source.length);
+  for (let index = 0; index < source.length; index += 2) {
+    swapped[index] = source[index + 1] || 0;
+    swapped[index + 1] = source[index] || 0;
+  }
+  return swapped.toString("hex").toUpperCase();
+}
+
+function normalizePdfText(value: string) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function wrapPdfLine(value: string, maxChars: number) {
+  const normalized = normalizePdfText(value);
+  const lines: string[] = [];
+  let current = "";
+  Array.from(normalized).forEach((char) => {
+    if ((current + char).length > maxChars) {
+      if (current.trim()) lines.push(current.trim());
+      current = char;
+      return;
+    }
+    current += char;
+  });
+  if (current.trim()) lines.push(current.trim());
+  return lines.length ? lines : [""];
+}
+
+function buildPdfContentLines(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string) {
+  const generatedAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+  const lines: Array<{ text: string; size: number; gap?: number }> = [
+    { text: title, size: 18, gap: 18 },
+    { text: `SafeClaw 제출용 PDF · 생성 ${generatedAt}`, size: 9, gap: 16 },
+    { text: `사업장: ${scenario.companyName}`, size: 10 },
+    { text: `현장: ${scenario.siteName}`, size: 10 },
+    { text: `작업: ${scenario.workSummary}`, size: 10 },
+    { text: `인원/기상: ${scenario.workerCount.toLocaleString("ko-KR")}명 · ${scenario.weatherNote}`, size: 10, gap: 14 },
+    { text: `위험수준: ${riskLevel || "확인"}`, size: 12 },
+    { text: `핵심위험: ${topRisk || "현장 최종 확인 필요"}`, size: 10, gap: 16 },
+    { text: "확인 항목", size: 13, gap: 10 }
+  ];
+
+  const sourceRows = rows.length ? rows.slice(0, 18) : [{ document: title, section: "본문", item: "확인", content: "문서 본문을 현장에서 확인하세요." }];
+  sourceRows.forEach((row, index) => {
+    const prefix = `${index + 1}. [${row.section}] ${row.item}: `;
+    wrapPdfLine(`${prefix}${row.content}`, 42).slice(0, 3).forEach((line, lineIndex) => {
+      lines.push({ text: lineIndex === 0 ? line : `   ${line}`, size: 9 });
+    });
+  });
+
+  lines.push(
+    { text: "", size: 9, gap: 14 },
+    { text: "작성자: ____________________    검토: ____________________    승인: ____________________", size: 9 },
+    { text: "본 출력물은 공식자료 기반 초안입니다. 발주처 지정 양식, 현장 실측, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.", size: 8 }
+  );
+  return lines;
+}
+
+function buildBinaryPdf(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string) {
+  const commands: string[] = [];
+  let y = 790;
+  buildPdfContentLines(title, scenario, rows, riskLevel, topRisk).forEach((line) => {
+    if (line.gap) y -= line.gap;
+    if (!line.text) {
+      y -= 8;
+      return;
+    }
+    if (y < 48) return;
+    commands.push(`BT /F1 ${line.size} Tf 1 0 0 1 42 ${y} Tm <${utf16BeHex(line.text)}> Tj ET`);
+    y -= Math.max(12, line.size + 4);
+  });
+
+  const content = commands.join("\n");
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 6 0 R >>",
+    "<< /Type /Font /Subtype /Type0 /BaseFont /HYSMyeongJo-Medium /Encoding /UniKS-UCS2-H /DescendantFonts [5 0 R] >>",
+    "<< /Type /Font /Subtype /CIDFontType0 /BaseFont /HYSMyeongJo-Medium /CIDSystemInfo << /Registry (Adobe) /Ordering (Korea1) /Supplement 2 >> /FontDescriptor 7 0 R /DW 1000 >>",
+    `<< /Length ${Buffer.byteLength(content, "ascii")} >>\nstream\n${content}\nendstream`,
+    "<< /Type /FontDescriptor /FontName /HYSMyeongJo-Medium /Flags 6 /FontBBox [0 -200 1000 900] /ItalicAngle 0 /Ascent 800 /Descent -200 /CapHeight 700 /StemV 80 >>"
+  ];
+
+  let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+  const offsets = [0];
+  objects.forEach((object, index) => {
+    offsets.push(Buffer.byteLength(pdf, "binary"));
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  });
+  const xrefOffset = Buffer.byteLength(pdf, "binary");
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  offsets.slice(1).forEach((offset) => {
+    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+  });
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  return Buffer.from(pdf, "binary");
+}
+
 export async function POST(request: NextRequest) {
   const parsed = await request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
@@ -441,6 +541,21 @@ export async function POST(request: NextRequest) {
   const bodyRows = rows.length ? rows : parseBodyText(body.documentText, title);
   const riskLevel = readString(body.riskLevel, "확인");
   const topRisk = readString(body.topRisk, "");
+  const wantsBinaryPdf = request.nextUrl.searchParams.get("format") === "pdf"
+    || (request.headers.get("accept") || "").includes("application/pdf");
+
+  if (wantsBinaryPdf) {
+    const pdf = buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk);
+    const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
+    return new NextResponse(pdf, {
+      headers: {
+        "content-type": "application/pdf",
+        "content-disposition": `attachment; filename="safeclaw-document.pdf"; filename*=UTF-8''${encodeURIComponent(pdfFileName)}`,
+        "cache-control": "no-store"
+      }
+    });
+  }
+
   const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk);
   const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.html`;
   const encodedFileName = encodeURIComponent(fileName);
