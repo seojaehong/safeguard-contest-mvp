@@ -98,8 +98,8 @@ export function SafeClawLanding() {
             <p>safeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.</p>
             <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 생성합니다.</p>
             <div className="safeclaw-os-cta">
-              <Link href="/workspace" className="primary">14일 무료 체험 →</Link>
-              <Link href="/demo">30초 데모</Link>
+              <Link href="/workspace" className="primary">작업공간 열기 →</Link>
+              <Link href="/documents">문서팩 보기</Link>
             </div>
           </div>
           <aside className="safeclaw-os-console" aria-label="실행 콘솔">

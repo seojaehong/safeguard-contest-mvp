@@ -60,7 +60,7 @@ export default async function KnowledgePage() {
       title="지식 DB."
       description="법령 전문, KOSHA 자료, 재해사례, 서식 기준을 문서 보완과 근거 탐색에 쓰는 지식층으로 관리합니다."
       status="live"
-      mappedTo={`${stats.items.toLocaleString("ko-KR")}개 항목 · KOSHA ${stats.technicalTotal.toLocaleString("ko-KR")}건`}
+      mappedTo={`${stats.items.toLocaleString("ko-KR")}개 근거 항목 · KOSHA ${stats.technicalTotal.toLocaleString("ko-KR")}건`}
       activeHref="/knowledge"
     >
       <section className="knowledge-status-grid">

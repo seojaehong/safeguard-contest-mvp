@@ -18,7 +18,7 @@ export default function TrustPage() {
           <span><strong>SafeClaw</strong><small>신뢰 기준</small></span>
         </Link>
         <nav>
-          <Link href="/demo">데모</Link>
+          <Link href="/workspace">작업공간</Link>
           <Link href="/why">차별성</Link>
           <Link href="/preview">핵심 3종</Link>
           <Link href="/roadmap">로드맵</Link>

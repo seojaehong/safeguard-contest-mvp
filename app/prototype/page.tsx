@@ -1,5 +1,5 @@
-import { SafeClawPrototype } from "@/components/SafeClawPrototype";
+import { redirect } from "next/navigation";
 
 export default function PrototypePage() {
-  return <SafeClawPrototype />;
+  redirect("/workspace");
 }

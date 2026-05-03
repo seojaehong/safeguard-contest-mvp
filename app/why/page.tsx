@@ -24,7 +24,7 @@ export default function WhyPage() {
           <span><strong>SafeClaw</strong><small>차별성</small></span>
         </Link>
         <nav>
-          <Link href="/demo">데모</Link>
+          <Link href="/workspace">작업공간</Link>
           <Link href="/preview">핵심 3종</Link>
           <Link href="/trust">신뢰</Link>
           <Link href="/roadmap">로드맵</Link>
@@ -69,8 +69,8 @@ export default function WhyPage() {
       </section>
 
       <section className="v2-link-band card">
-        <strong>차별성을 30초 안에 보려면</strong>
-        <Link className="button" href="/demo?speed=fast">자동 시연 열기</Link>
+        <strong>차별성을 실제 작업 흐름에서 확인하려면</strong>
+        <Link className="button" href="/workspace">작업공간 열기</Link>
       </section>
     </main>
   );
