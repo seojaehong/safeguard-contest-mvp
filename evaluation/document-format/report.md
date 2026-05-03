@@ -1,6 +1,6 @@
 # SafeGuard document format verification
 
-- generatedAt: 2026-05-03T06:38:30.952Z
+- generatedAt: 2026-05-03T06:50:18.769Z
 - readinessLabel: 준제출형
 - oneToOneReproduction: false
 - passCount: 9

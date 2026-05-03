@@ -4,7 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
-import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY, parseStoredCurrentWorkpack } from "@/lib/current-workpack";
+import {
+  buildStoredCurrentWorkpack,
+  CURRENT_WORKPACK_STORAGE_KEY,
+  parseStoredCurrentWorkpack,
+  type CurrentDispatchSnapshot,
+  type CurrentWorkerSnapshot
+} from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
 import {
   buildDefaultWorkers,
@@ -14,13 +20,16 @@ import {
   maskPhone,
   summarizeWorkers,
   type RecipientSuggestion,
-  type WorkerDispatchTarget
+  type WorkerDispatchTarget,
+  type WorkerProfile
 } from "@/lib/workspace";
 
 type CurrentWorkpackSnapshot = {
   data: AskResponse;
   isCurrent: boolean;
   savedAt: string | null;
+  workerSnapshot?: CurrentWorkerSnapshot;
+  dispatchSnapshot?: CurrentDispatchSnapshot;
 };
 
 type CurrentWorkpackState = CurrentWorkpackSnapshot & {
@@ -116,7 +125,9 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
       setState({
         data: stored.data,
         isCurrent: true,
-        savedAt: stored.savedAt
+        savedAt: stored.savedAt,
+        workerSnapshot: stored.workerSnapshot,
+        dispatchSnapshot: stored.dispatchSnapshot
       });
     }
   }, []);
@@ -145,6 +156,18 @@ function filterRealRecipientSuggestions(recipients: RecipientSuggestion[]) {
 
 function filterRealDispatchTargets(targets: WorkerDispatchTarget[]) {
   return targets.filter((target) => Boolean(target.phoneMasked || target.emailMasked));
+}
+
+function selectedWorkerSnapshotWorkers(snapshot: CurrentWorkerSnapshot | undefined) {
+  if (!snapshot) return [];
+  if (!snapshot.selectedWorkerIds.length) return snapshot.workers;
+  const selected = snapshot.workers.filter((worker) => snapshot.selectedWorkerIds.includes(worker.id));
+  return selected.length ? selected : snapshot.workers;
+}
+
+function currentRouteWorkers(current: CurrentWorkpackState): WorkerProfile[] {
+  const snapshotWorkers = selectedWorkerSnapshotWorkers(current.workerSnapshot);
+  return snapshotWorkers.length ? snapshotWorkers : buildDefaultWorkers(current.data);
 }
 
 function formatSavedAt(savedAt: string | null) {
@@ -287,10 +310,13 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
 
     window.localStorage.setItem(
       CURRENT_WORKPACK_STORAGE_KEY,
-      JSON.stringify(buildStoredCurrentWorkpack(nextData))
+      JSON.stringify(buildStoredCurrentWorkpack(nextData, {
+        workerSnapshot: current.workerSnapshot,
+        dispatchSnapshot: current.dispatchSnapshot
+      }))
     );
     current.updateData(nextData);
-  }, [current.data, current.isCurrent]);
+  }, [current.data, current.dispatchSnapshot, current.isCurrent, current.workerSnapshot]);
 
   function selectDocument(key: DocumentKey) {
     setRequestedDocumentKey(key);
@@ -348,9 +374,10 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
 
 export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
-  const workers = buildDefaultWorkers(current.data);
+  const workers = currentRouteWorkers(current);
   const records = buildEducationRecordDrafts(workers, current.data.scenario.workSummary);
   const summary = summarizeWorkers(workers);
+  const workerSourceLabel = current.workerSnapshot ? "현재 작업공간 snapshot" : current.isCurrent ? "현재 문서팩에서 기본 추정" : "기본 예시";
 
   return (
     <>
@@ -362,8 +389,8 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
         <article><span>교육 확인</span><strong>{summary.educationPendingCount ? "필요" : "완료"}</strong></article>
       </section>
       <section className="safeclaw-module-panel">
-        <span>작업 투입 적합성 카드</span>
-        <h2>최소정보만 표시합니다.</h2>
+        <span>작업 투입 적합성 카드 · {workerSourceLabel}</span>
+        <h2>{current.workerSnapshot ? "작업공간에서 편집한 명단입니다." : "저장된 명단이 없어 기본 명단으로 표시합니다."}</h2>
         <div className="safeclaw-worker-table">
           {workers.map((worker) => {
             const record = records.find((item) => item.workerId === worker.id);
@@ -383,9 +410,14 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
 
 export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
-  const workers = buildDefaultWorkers(current.data);
-  const recipientSuggestions = filterRealRecipientSuggestions(buildRecipientSuggestions(workers));
-  const targetWorkers = recipientSuggestions.length ? filterRealDispatchTargets(buildWorkerDispatchTargets(workers)) : [];
+  const workers = currentRouteWorkers(current);
+  const recipientSuggestions = current.dispatchSnapshot?.recipientSuggestions.length
+    ? filterRealRecipientSuggestions(current.dispatchSnapshot.recipientSuggestions)
+    : filterRealRecipientSuggestions(buildRecipientSuggestions(workers));
+  const targetWorkers = current.dispatchSnapshot?.targetWorkers.length
+    ? filterRealDispatchTargets(current.dispatchSnapshot.targetWorkers)
+    : recipientSuggestions.length ? filterRealDispatchTargets(buildWorkerDispatchTargets(workers)) : [];
+  const dispatchSourceLabel = current.dispatchSnapshot ? "작업공간 전파 snapshot" : current.workerSnapshot ? "작업자 snapshot에서 재계산" : "기본 예시 기반";
 
   return (
     <>
@@ -408,7 +440,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
         <article className="safeclaw-module-panel">
           <span>제출 기준 채널</span>
           <h2>메일·문자 우선.</h2>
-          <p>전송 전 수신자, 채널, 언어, 메시지 미리보기를 확인한 뒤 provider 결과를 채널별로 표시합니다.</p>
+          <p>전송 전 수신자, 채널, 언어, 메시지 미리보기를 확인한 뒤 provider 결과를 채널별로 표시합니다. 현재 대상 기준: {dispatchSourceLabel}.</p>
           {!recipientSuggestions.length ? (
             <p className="export-error">기본 예시 연락처는 실발송 대상에서 제외했습니다. 수신자를 직접 입력해야 전송할 수 있습니다.</p>
           ) : null}
@@ -425,9 +457,15 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
 
 export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
-  const workers = buildDefaultWorkers(current.data);
-  const dispatchTargets = buildWorkerDispatchTargets(workers);
-  const savedLabel = current.isCurrent ? formatSavedAt(current.savedAt) : "샘플";
+  const workers = currentRouteWorkers(current);
+  const dispatchTargets = current.dispatchSnapshot?.targetWorkers.length
+    ? current.dispatchSnapshot.targetWorkers
+    : buildWorkerDispatchTargets(workers);
+  const savedLabel = current.isCurrent ? formatSavedAt(current.savedAt) : "";
+  const hasWorkerSnapshot = Boolean(current.workerSnapshot);
+  const hasDispatchSnapshot = Boolean(current.dispatchSnapshot);
+  const browserArchiveLabel = current.isCurrent ? "브라우저 current snapshot" : "브라우저 snapshot 없음";
+  const supabaseLoginAvailable = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   return (
     <>
@@ -442,13 +480,13 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
       ) : (
       <>
       <section className="safeclaw-module-grid four">
-        <article><span>문서팩</span><strong>{countDocuments(current.data)}종</strong></article>
-        <article><span>근거</span><strong>{countEvidence(current.data)}건</strong></article>
-        <article><span>전파 대상</span><strong>{dispatchTargets.length}명</strong></article>
-        <article><span>저장 시각</span><strong>{savedLabel || "대기"}</strong></article>
+        <article><span>로컬 상태</span><strong>{browserArchiveLabel}</strong></article>
+        <article><span>작업자 snapshot</span><strong>{hasWorkerSnapshot ? `${workers.length}명` : "없음"}</strong></article>
+        <article><span>Supabase 로그인</span><strong>{supabaseLoginAvailable ? "가능" : "설정 필요"}</strong></article>
+        <article><span>서버 archive</span><strong>미연결</strong></article>
       </section>
       <section className="safeclaw-module-panel">
-        <span>최근 작업 스냅샷</span>
+        <span>최근 작업 스냅샷 · 로컬</span>
         <h2>{current.data.scenario.siteName}</h2>
         <p>{current.data.riskSummary.topRisk}</p>
         <div className="safeclaw-archive-list">
@@ -463,11 +501,13 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
             <p>법령, KOSHA, 재해사례, 지식 DB 근거가 문서에 어떻게 반영됐는지 확인합니다.</p>
           </article>
           <article>
-            <strong>전파 로그</strong>
-            <code>/dispatch</code>
-            <p>메일·문자 요청 결과와 준비 중 채널을 구분해 확인합니다.</p>
+            <strong>서버 아카이브</strong>
+            <code>Supabase read path</code>
+            <p>현재 화면은 브라우저의 최신 snapshot만 보여줍니다. 로그인된 서버 이력 목록 조회는 아직 이 라우트에 연결되지 않았습니다.</p>
           </article>
         </div>
+        <p className="muted small">전파 대상 기준: {hasDispatchSnapshot ? `작업공간 전파 snapshot ${dispatchTargets.length}명` : "전파 snapshot 없음, 현재 작업자 명단에서 재계산"} · 갱신 시각: {savedLabel || "대기"}.</p>
+        <p className="export-error">이 화면의 값은 “실제 이력 저장 완료” 증명이 아닙니다. 관리자 로그인 후 작업공간 저장/API 저장 결과가 있어야 서버 이력으로 취급합니다.</p>
       </section>
       </>
       )}
