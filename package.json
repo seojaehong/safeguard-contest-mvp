@@ -15,6 +15,7 @@
     "smoke:quality-matrix": "node ./scripts/safeclaw_quality_matrix_runner.mjs",
     "smoke:ui-local": "node ./scripts/local_ui_regression_smoke.mjs",
     "smoke:final-e2e-matrix": "node ./scripts/final_e2e_matrix_runner.mjs",
+    "hwpx:inventory": "node ./scripts/hwpx_template_inventory.mjs",
     "knowledge:seed": "node ./scripts/build_safety_knowledge_seed.mjs",
     "knowledge:smoke": "node ./scripts/knowledge_runtime_smoke.mjs",
     "knowledge:references": "python ./scripts/ingest_safety_reference_catalog.py",
