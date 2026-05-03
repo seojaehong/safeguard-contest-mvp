@@ -1,0 +1,3868 @@
+[
+  {
+    "id": "seoul-scaffold-paint__full-context",
+    "baseId": "seoul-scaffold-paint",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 2,
+    "expected": {
+      "region": "서울",
+      "industry": "건설",
+      "workType": "외벽 도장",
+      "hazards": [
+        "추락",
+        "비계",
+        "강풍",
+        "지게차 동선"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "emergencyResponseDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "seoul-scaffold-paint__minimal-input",
+    "baseId": "seoul-scaffold-paint",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "서울",
+      "industry": "건설",
+      "workType": "외벽 도장",
+      "hazards": [
+        "추락",
+        "비계",
+        "강풍",
+        "지게차 동선"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "seoul-scaffold-paint__weather-heavy",
+    "baseId": "seoul-scaffold-paint",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "서울",
+      "industry": "건설",
+      "workType": "외벽 도장",
+      "hazards": [
+        "추락",
+        "비계",
+        "강풍",
+        "지게차 동선"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "seoul-scaffold-paint__worker-education",
+    "baseId": "seoul-scaffold-paint",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "서울",
+      "industry": "건설",
+      "workType": "외벽 도장",
+      "hazards": [
+        "추락",
+        "비계",
+        "강풍",
+        "지게차 동선"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "seoul-scaffold-paint__permit-evidence",
+    "baseId": "seoul-scaffold-paint",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "서울",
+      "industry": "건설",
+      "workType": "외벽 도장",
+      "hazards": [
+        "추락",
+        "비계",
+        "강풍",
+        "지게차 동선"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "incheon-logistics-forklift__full-context",
+    "baseId": "incheon-logistics-forklift",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "인천",
+      "industry": "물류",
+      "workType": "지게차 상하차",
+      "hazards": [
+        "지게차",
+        "충돌",
+        "미끄럼",
+        "우천"
+      ],
+      "workerSignals": [
+        "보행자",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "우천"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "incheon-logistics-forklift__minimal-input",
+    "baseId": "incheon-logistics-forklift",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "인천",
+      "industry": "물류",
+      "workType": "지게차 상하차",
+      "hazards": [
+        "지게차",
+        "충돌",
+        "미끄럼",
+        "우천"
+      ],
+      "workerSignals": [
+        "보행자",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "우천"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 14
+  },
+  {
+    "id": "incheon-logistics-forklift__weather-heavy",
+    "baseId": "incheon-logistics-forklift",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "인천",
+      "industry": "물류",
+      "workType": "지게차 상하차",
+      "hazards": [
+        "지게차",
+        "충돌",
+        "미끄럼",
+        "우천"
+      ],
+      "workerSignals": [
+        "보행자",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "우천"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "incheon-logistics-forklift__worker-education",
+    "baseId": "incheon-logistics-forklift",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "인천",
+      "industry": "물류",
+      "workType": "지게차 상하차",
+      "hazards": [
+        "지게차",
+        "충돌",
+        "미끄럼",
+        "우천"
+      ],
+      "workerSignals": [
+        "보행자",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "우천"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "incheon-logistics-forklift__permit-evidence",
+    "baseId": "incheon-logistics-forklift",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "인천",
+      "industry": "물류",
+      "workType": "지게차 상하차",
+      "hazards": [
+        "지게차",
+        "충돌",
+        "미끄럼",
+        "우천"
+      ],
+      "workerSignals": [
+        "보행자",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "우천"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "ansan-hotwork-foreign__full-context",
+    "baseId": "ansan-hotwork-foreign",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "제조",
+      "workType": "용접 절단",
+      "hazards": [
+        "화재",
+        "용접",
+        "환기",
+        "고온",
+        "가연물"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [
+        "고온"
+      ],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "중국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "workPermit",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 28
+  },
+  {
+    "id": "ansan-hotwork-foreign__minimal-input",
+    "baseId": "ansan-hotwork-foreign",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "제조",
+      "workType": "용접 절단",
+      "hazards": [
+        "화재",
+        "용접",
+        "환기",
+        "고온",
+        "가연물"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [
+        "고온"
+      ],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "중국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "workPermit",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "ansan-hotwork-foreign__weather-heavy",
+    "baseId": "ansan-hotwork-foreign",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "제조",
+      "workType": "용접 절단",
+      "hazards": [
+        "화재",
+        "용접",
+        "환기",
+        "고온",
+        "가연물"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [
+        "고온"
+      ],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "중국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "workPermit",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "ansan-hotwork-foreign__worker-education",
+    "baseId": "ansan-hotwork-foreign",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "제조",
+      "workType": "용접 절단",
+      "hazards": [
+        "화재",
+        "용접",
+        "환기",
+        "고온",
+        "가연물"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [
+        "고온"
+      ],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "중국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "workPermit",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "ansan-hotwork-foreign__permit-evidence",
+    "baseId": "ansan-hotwork-foreign",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "제조",
+      "workType": "용접 절단",
+      "hazards": [
+        "화재",
+        "용접",
+        "환기",
+        "고온",
+        "가연물"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [
+        "고온"
+      ],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "중국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "workPermit",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "busan-confined-pump__full-context",
+    "baseId": "busan-confined-pump",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "부산",
+      "industry": "시설관리",
+      "workType": "배수펌프 점검",
+      "hazards": [
+        "밀폐공간",
+        "감전",
+        "산소결핍",
+        "누수"
+      ],
+      "workerSignals": [
+        "2인1조",
+        "신규"
+      ],
+      "weatherSignals": [
+        "호우"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPermit",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 24
+  },
+  {
+    "id": "busan-confined-pump__minimal-input",
+    "baseId": "busan-confined-pump",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "부산",
+      "industry": "시설관리",
+      "workType": "배수펌프 점검",
+      "hazards": [
+        "밀폐공간",
+        "감전",
+        "산소결핍",
+        "누수"
+      ],
+      "workerSignals": [
+        "2인1조",
+        "신규"
+      ],
+      "weatherSignals": [
+        "호우"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPermit",
+        "safetyEducationRecordDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "busan-confined-pump__weather-heavy",
+    "baseId": "busan-confined-pump",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "부산",
+      "industry": "시설관리",
+      "workType": "배수펌프 점검",
+      "hazards": [
+        "밀폐공간",
+        "감전",
+        "산소결핍",
+        "누수"
+      ],
+      "workerSignals": [
+        "2인1조",
+        "신규"
+      ],
+      "weatherSignals": [
+        "호우"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPermit",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "busan-confined-pump__worker-education",
+    "baseId": "busan-confined-pump",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "부산",
+      "industry": "시설관리",
+      "workType": "배수펌프 점검",
+      "hazards": [
+        "밀폐공간",
+        "감전",
+        "산소결핍",
+        "누수"
+      ],
+      "workerSignals": [
+        "2인1조",
+        "신규"
+      ],
+      "weatherSignals": [
+        "호우"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPermit",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 24
+  },
+  {
+    "id": "busan-confined-pump__permit-evidence",
+    "baseId": "busan-confined-pump",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "부산",
+      "industry": "시설관리",
+      "workType": "배수펌프 점검",
+      "hazards": [
+        "밀폐공간",
+        "감전",
+        "산소결핍",
+        "누수"
+      ],
+      "workerSignals": [
+        "2인1조",
+        "신규"
+      ],
+      "weatherSignals": [
+        "호우"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "gwangju-chemical-cleaning__full-context",
+    "baseId": "gwangju-chemical-cleaning",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "광주",
+      "industry": "청소",
+      "workType": "화학 세척",
+      "hazards": [
+        "화학물질",
+        "세척제",
+        "미끄럼",
+        "환기"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "태국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "workPlanDraft",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 26
+  },
+  {
+    "id": "gwangju-chemical-cleaning__minimal-input",
+    "baseId": "gwangju-chemical-cleaning",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "광주",
+      "industry": "청소",
+      "workType": "화학 세척",
+      "hazards": [
+        "화학물질",
+        "세척제",
+        "미끄럼",
+        "환기"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "태국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "gwangju-chemical-cleaning__weather-heavy",
+    "baseId": "gwangju-chemical-cleaning",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "광주",
+      "industry": "청소",
+      "workType": "화학 세척",
+      "hazards": [
+        "화학물질",
+        "세척제",
+        "미끄럼",
+        "환기"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "태국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "photoEvidenceDraft",
+        "workPlanDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "gwangju-chemical-cleaning__worker-education",
+    "baseId": "gwangju-chemical-cleaning",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "광주",
+      "industry": "청소",
+      "workType": "화학 세척",
+      "hazards": [
+        "화학물질",
+        "세척제",
+        "미끄럼",
+        "환기"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "태국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "photoEvidenceDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "gwangju-chemical-cleaning__permit-evidence",
+    "baseId": "gwangju-chemical-cleaning",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "광주",
+      "industry": "청소",
+      "workType": "화학 세척",
+      "hazards": [
+        "화학물질",
+        "세척제",
+        "미끄럼",
+        "환기"
+      ],
+      "workerSignals": [
+        "외국인",
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어",
+        "태국어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "photoEvidenceDraft",
+        "workPlanDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "daegu-warehouse-heat__full-context",
+    "baseId": "daegu-warehouse-heat",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "대구",
+      "industry": "창고",
+      "workType": "중량물 적재",
+      "hazards": [
+        "중량물",
+        "근골격계",
+        "지게차",
+        "폭염"
+      ],
+      "workerSignals": [
+        "고령",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "daegu-warehouse-heat__minimal-input",
+    "baseId": "daegu-warehouse-heat",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "대구",
+      "industry": "창고",
+      "workType": "중량물 적재",
+      "hazards": [
+        "중량물",
+        "근골격계",
+        "지게차",
+        "폭염"
+      ],
+      "workerSignals": [
+        "고령",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 14
+  },
+  {
+    "id": "daegu-warehouse-heat__weather-heavy",
+    "baseId": "daegu-warehouse-heat",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "대구",
+      "industry": "창고",
+      "workType": "중량물 적재",
+      "hazards": [
+        "중량물",
+        "근골격계",
+        "지게차",
+        "폭염"
+      ],
+      "workerSignals": [
+        "고령",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "daegu-warehouse-heat__worker-education",
+    "baseId": "daegu-warehouse-heat",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "대구",
+      "industry": "창고",
+      "workType": "중량물 적재",
+      "hazards": [
+        "중량물",
+        "근골격계",
+        "지게차",
+        "폭염"
+      ],
+      "workerSignals": [
+        "고령",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "daegu-warehouse-heat__permit-evidence",
+    "baseId": "daegu-warehouse-heat",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "대구",
+      "industry": "창고",
+      "workType": "중량물 적재",
+      "hazards": [
+        "중량물",
+        "근골격계",
+        "지게차",
+        "폭염"
+      ],
+      "workerSignals": [
+        "고령",
+        "숙련"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "ulsan-tank-maintenance__full-context",
+    "baseId": "ulsan-tank-maintenance",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "울산",
+      "industry": "화학",
+      "workType": "탱크 내부 점검",
+      "hazards": [
+        "밀폐공간",
+        "유해가스",
+        "폭발",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "출입허가"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 24
+  },
+  {
+    "id": "ulsan-tank-maintenance__minimal-input",
+    "baseId": "ulsan-tank-maintenance",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "울산",
+      "industry": "화학",
+      "workType": "탱크 내부 점검",
+      "hazards": [
+        "밀폐공간",
+        "유해가스",
+        "폭발",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "출입허가"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "ulsan-tank-maintenance__weather-heavy",
+    "baseId": "ulsan-tank-maintenance",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "울산",
+      "industry": "화학",
+      "workType": "탱크 내부 점검",
+      "hazards": [
+        "밀폐공간",
+        "유해가스",
+        "폭발",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "출입허가"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "ulsan-tank-maintenance__worker-education",
+    "baseId": "ulsan-tank-maintenance",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "울산",
+      "industry": "화학",
+      "workType": "탱크 내부 점검",
+      "hazards": [
+        "밀폐공간",
+        "유해가스",
+        "폭발",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "출입허가"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "ulsan-tank-maintenance__permit-evidence",
+    "baseId": "ulsan-tank-maintenance",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "울산",
+      "industry": "화학",
+      "workType": "탱크 내부 점검",
+      "hazards": [
+        "밀폐공간",
+        "유해가스",
+        "폭발",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "출입허가"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "daejeon-lab-chemical__full-context",
+    "baseId": "daejeon-lab-chemical",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "대전",
+      "industry": "연구",
+      "workType": "시약 정리",
+      "hazards": [
+        "화학물질",
+        "MSDS",
+        "누출",
+        "혼합금지"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "daejeon-lab-chemical__minimal-input",
+    "baseId": "daejeon-lab-chemical",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "대전",
+      "industry": "연구",
+      "workType": "시약 정리",
+      "hazards": [
+        "화학물질",
+        "MSDS",
+        "누출",
+        "혼합금지"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "tbmBriefing"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 14
+  },
+  {
+    "id": "daejeon-lab-chemical__weather-heavy",
+    "baseId": "daejeon-lab-chemical",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "대전",
+      "industry": "연구",
+      "workType": "시약 정리",
+      "hazards": [
+        "화학물질",
+        "MSDS",
+        "누출",
+        "혼합금지"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "daejeon-lab-chemical__worker-education",
+    "baseId": "daejeon-lab-chemical",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "대전",
+      "industry": "연구",
+      "workType": "시약 정리",
+      "hazards": [
+        "화학물질",
+        "MSDS",
+        "누출",
+        "혼합금지"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "tbmBriefing",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "daejeon-lab-chemical__permit-evidence",
+    "baseId": "daejeon-lab-chemical",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "대전",
+      "industry": "연구",
+      "workType": "시약 정리",
+      "hazards": [
+        "화학물질",
+        "MSDS",
+        "누출",
+        "혼합금지"
+      ],
+      "workerSignals": [
+        "신규"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPlanDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "jeju-roof-solar__full-context",
+    "baseId": "jeju-roof-solar",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "제주",
+      "industry": "전기",
+      "workType": "태양광 점검",
+      "hazards": [
+        "추락",
+        "감전",
+        "강풍",
+        "고소"
+      ],
+      "workerSignals": [
+        "소수인원"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "jeju-roof-solar__minimal-input",
+    "baseId": "jeju-roof-solar",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "제주",
+      "industry": "전기",
+      "workType": "태양광 점검",
+      "hazards": [
+        "추락",
+        "감전",
+        "강풍",
+        "고소"
+      ],
+      "workerSignals": [
+        "소수인원"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "safetyEducationRecordDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "jeju-roof-solar__weather-heavy",
+    "baseId": "jeju-roof-solar",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "제주",
+      "industry": "전기",
+      "workType": "태양광 점검",
+      "hazards": [
+        "추락",
+        "감전",
+        "강풍",
+        "고소"
+      ],
+      "workerSignals": [
+        "소수인원"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "jeju-roof-solar__worker-education",
+    "baseId": "jeju-roof-solar",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "제주",
+      "industry": "전기",
+      "workType": "태양광 점검",
+      "hazards": [
+        "추락",
+        "감전",
+        "강풍",
+        "고소"
+      ],
+      "workerSignals": [
+        "소수인원"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "jeju-roof-solar__permit-evidence",
+    "baseId": "jeju-roof-solar",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "제주",
+      "industry": "전기",
+      "workType": "태양광 점검",
+      "hazards": [
+        "추락",
+        "감전",
+        "강풍",
+        "고소"
+      ],
+      "workerSignals": [
+        "소수인원"
+      ],
+      "weatherSignals": [
+        "강풍"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "sejong-excavation__full-context",
+    "baseId": "sejong-excavation",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "세종",
+      "industry": "건설",
+      "workType": "도로 굴착",
+      "hazards": [
+        "굴착",
+        "붕괴",
+        "매설물",
+        "차량충돌"
+      ],
+      "workerSignals": [
+        "신호수",
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "workPermit",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 24
+  },
+  {
+    "id": "sejong-excavation__minimal-input",
+    "baseId": "sejong-excavation",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "세종",
+      "industry": "건설",
+      "workType": "도로 굴착",
+      "hazards": [
+        "굴착",
+        "붕괴",
+        "매설물",
+        "차량충돌"
+      ],
+      "workerSignals": [
+        "신호수",
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "workPermit",
+        "safetyEducationRecordDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "sejong-excavation__weather-heavy",
+    "baseId": "sejong-excavation",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "세종",
+      "industry": "건설",
+      "workType": "도로 굴착",
+      "hazards": [
+        "굴착",
+        "붕괴",
+        "매설물",
+        "차량충돌"
+      ],
+      "workerSignals": [
+        "신호수",
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "workPermit",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "sejong-excavation__worker-education",
+    "baseId": "sejong-excavation",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "세종",
+      "industry": "건설",
+      "workType": "도로 굴착",
+      "hazards": [
+        "굴착",
+        "붕괴",
+        "매설물",
+        "차량충돌"
+      ],
+      "workerSignals": [
+        "신호수",
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "workPermit",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "sejong-excavation__permit-evidence",
+    "baseId": "sejong-excavation",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "세종",
+      "industry": "건설",
+      "workType": "도로 굴착",
+      "hazards": [
+        "굴착",
+        "붕괴",
+        "매설물",
+        "차량충돌"
+      ],
+      "workerSignals": [
+        "신호수",
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "workPermit",
+        "emergencyResponseDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "pohang-crane-lift__full-context",
+    "baseId": "pohang-crane-lift",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경북",
+      "industry": "제조",
+      "workType": "크레인 양중",
+      "hazards": [
+        "양중",
+        "낙하물",
+        "협착",
+        "크레인"
+      ],
+      "workerSignals": [
+        "신호수",
+        "작업반장"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "pohang-crane-lift__minimal-input",
+    "baseId": "pohang-crane-lift",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경북",
+      "industry": "제조",
+      "workType": "크레인 양중",
+      "hazards": [
+        "양중",
+        "낙하물",
+        "협착",
+        "크레인"
+      ],
+      "workerSignals": [
+        "신호수",
+        "작업반장"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "safetyEducationRecordDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "pohang-crane-lift__weather-heavy",
+    "baseId": "pohang-crane-lift",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경북",
+      "industry": "제조",
+      "workType": "크레인 양중",
+      "hazards": [
+        "양중",
+        "낙하물",
+        "협착",
+        "크레인"
+      ],
+      "workerSignals": [
+        "신호수",
+        "작업반장"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "pohang-crane-lift__worker-education",
+    "baseId": "pohang-crane-lift",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경북",
+      "industry": "제조",
+      "workType": "크레인 양중",
+      "hazards": [
+        "양중",
+        "낙하물",
+        "협착",
+        "크레인"
+      ],
+      "workerSignals": [
+        "신호수",
+        "작업반장"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "pohang-crane-lift__permit-evidence",
+    "baseId": "pohang-crane-lift",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경북",
+      "industry": "제조",
+      "workType": "크레인 양중",
+      "hazards": [
+        "양중",
+        "낙하물",
+        "협착",
+        "크레인"
+      ],
+      "workerSignals": [
+        "신호수",
+        "작업반장"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "cheongju-food-coldroom__full-context",
+    "baseId": "cheongju-food-coldroom",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "충북",
+      "industry": "식품",
+      "workType": "냉동창고 점검",
+      "hazards": [
+        "저온",
+        "미끄럼",
+        "지게차",
+        "반복출입"
+      ],
+      "workerSignals": [
+        "피킹인력"
+      ],
+      "weatherSignals": [
+        "한랭"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "workPlanDraft",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "cheongju-food-coldroom__minimal-input",
+    "baseId": "cheongju-food-coldroom",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "충북",
+      "industry": "식품",
+      "workType": "냉동창고 점검",
+      "hazards": [
+        "저온",
+        "미끄럼",
+        "지게차",
+        "반복출입"
+      ],
+      "workerSignals": [
+        "피킹인력"
+      ],
+      "weatherSignals": [
+        "한랭"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 12
+  },
+  {
+    "id": "cheongju-food-coldroom__weather-heavy",
+    "baseId": "cheongju-food-coldroom",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "충북",
+      "industry": "식품",
+      "workType": "냉동창고 점검",
+      "hazards": [
+        "저온",
+        "미끄럼",
+        "지게차",
+        "반복출입"
+      ],
+      "workerSignals": [
+        "피킹인력"
+      ],
+      "weatherSignals": [
+        "한랭"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workPlanDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "cheongju-food-coldroom__worker-education",
+    "baseId": "cheongju-food-coldroom",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "충북",
+      "industry": "식품",
+      "workType": "냉동창고 점검",
+      "hazards": [
+        "저온",
+        "미끄럼",
+        "지게차",
+        "반복출입"
+      ],
+      "workerSignals": [
+        "피킹인력"
+      ],
+      "weatherSignals": [
+        "한랭"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "cheongju-food-coldroom__permit-evidence",
+    "baseId": "cheongju-food-coldroom",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "충북",
+      "industry": "식품",
+      "workType": "냉동창고 점검",
+      "hazards": [
+        "저온",
+        "미끄럼",
+        "지게차",
+        "반복출입"
+      ],
+      "workerSignals": [
+        "피킹인력"
+      ],
+      "weatherSignals": [
+        "한랭"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workPlanDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "suwon-electrical-panel__full-context",
+    "baseId": "suwon-electrical-panel",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "시설관리",
+      "workType": "분전반 정비",
+      "hazards": [
+        "감전",
+        "아크",
+        "정전",
+        "야간"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "야간"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "workPermit",
+        "emergencyResponseDraft",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 24
+  },
+  {
+    "id": "suwon-electrical-panel__minimal-input",
+    "baseId": "suwon-electrical-panel",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "시설관리",
+      "workType": "분전반 정비",
+      "hazards": [
+        "감전",
+        "아크",
+        "정전",
+        "야간"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "야간"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "workPermit",
+        "emergencyResponseDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "suwon-electrical-panel__weather-heavy",
+    "baseId": "suwon-electrical-panel",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "시설관리",
+      "workType": "분전반 정비",
+      "hazards": [
+        "감전",
+        "아크",
+        "정전",
+        "야간"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "야간"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "workPermit",
+        "emergencyResponseDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "suwon-electrical-panel__worker-education",
+    "baseId": "suwon-electrical-panel",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "경기",
+      "industry": "시설관리",
+      "workType": "분전반 정비",
+      "hazards": [
+        "감전",
+        "아크",
+        "정전",
+        "야간"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "야간"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "workPermit",
+        "emergencyResponseDraft",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "suwon-electrical-panel__permit-evidence",
+    "baseId": "suwon-electrical-panel",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "시설관리",
+      "workType": "분전반 정비",
+      "hazards": [
+        "감전",
+        "아크",
+        "정전",
+        "야간"
+      ],
+      "workerSignals": [
+        "협력업체",
+        "야간"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "workPermit",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "changwon-press-maintenance__full-context",
+    "baseId": "changwon-press-maintenance",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "프레스 보전",
+      "hazards": [
+        "끼임",
+        "LOTO",
+        "예기치 않은 기동",
+        "프레스"
+      ],
+      "workerSignals": [
+        "신규",
+        "보전원"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "changwon-press-maintenance__minimal-input",
+    "baseId": "changwon-press-maintenance",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "프레스 보전",
+      "hazards": [
+        "끼임",
+        "LOTO",
+        "예기치 않은 기동",
+        "프레스"
+      ],
+      "workerSignals": [
+        "신규",
+        "보전원"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 14
+  },
+  {
+    "id": "changwon-press-maintenance__weather-heavy",
+    "baseId": "changwon-press-maintenance",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "프레스 보전",
+      "hazards": [
+        "끼임",
+        "LOTO",
+        "예기치 않은 기동",
+        "프레스"
+      ],
+      "workerSignals": [
+        "신규",
+        "보전원"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "changwon-press-maintenance__worker-education",
+    "baseId": "changwon-press-maintenance",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "프레스 보전",
+      "hazards": [
+        "끼임",
+        "LOTO",
+        "예기치 않은 기동",
+        "프레스"
+      ],
+      "workerSignals": [
+        "신규",
+        "보전원"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "changwon-press-maintenance__permit-evidence",
+    "baseId": "changwon-press-maintenance",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "프레스 보전",
+      "hazards": [
+        "끼임",
+        "LOTO",
+        "예기치 않은 기동",
+        "프레스"
+      ],
+      "workerSignals": [
+        "신규",
+        "보전원"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "yeosu-chemical-loading__full-context",
+    "baseId": "yeosu-chemical-loading",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "화학",
+      "workType": "탱크로리 상차",
+      "hazards": [
+        "누출",
+        "화재",
+        "차량충돌",
+        "화학물질"
+      ],
+      "workerSignals": [
+        "운전원",
+        "감시자"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 24
+  },
+  {
+    "id": "yeosu-chemical-loading__minimal-input",
+    "baseId": "yeosu-chemical-loading",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "화학",
+      "workType": "탱크로리 상차",
+      "hazards": [
+        "누출",
+        "화재",
+        "차량충돌",
+        "화학물질"
+      ],
+      "workerSignals": [
+        "운전원",
+        "감시자"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "yeosu-chemical-loading__weather-heavy",
+    "baseId": "yeosu-chemical-loading",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "화학",
+      "workType": "탱크로리 상차",
+      "hazards": [
+        "누출",
+        "화재",
+        "차량충돌",
+        "화학물질"
+      ],
+      "workerSignals": [
+        "운전원",
+        "감시자"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "yeosu-chemical-loading__worker-education",
+    "baseId": "yeosu-chemical-loading",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "화학",
+      "workType": "탱크로리 상차",
+      "hazards": [
+        "누출",
+        "화재",
+        "차량충돌",
+        "화학물질"
+      ],
+      "workerSignals": [
+        "운전원",
+        "감시자"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "yeosu-chemical-loading__permit-evidence",
+    "baseId": "yeosu-chemical-loading",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "화학",
+      "workType": "탱크로리 상차",
+      "hazards": [
+        "누출",
+        "화재",
+        "차량충돌",
+        "화학물질"
+      ],
+      "workerSignals": [
+        "운전원",
+        "감시자"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "gangneung-winter-roof__full-context",
+    "baseId": "gangneung-winter-roof",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "강원",
+      "industry": "시설관리",
+      "workType": "지붕 제설",
+      "hazards": [
+        "추락",
+        "결빙",
+        "한파",
+        "미끄럼"
+      ],
+      "workerSignals": [
+        "고령"
+      ],
+      "weatherSignals": [
+        "한파",
+        "결빙"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "gangneung-winter-roof__minimal-input",
+    "baseId": "gangneung-winter-roof",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "강원",
+      "industry": "시설관리",
+      "workType": "지붕 제설",
+      "hazards": [
+        "추락",
+        "결빙",
+        "한파",
+        "미끄럼"
+      ],
+      "workerSignals": [
+        "고령"
+      ],
+      "weatherSignals": [
+        "한파",
+        "결빙"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 14
+  },
+  {
+    "id": "gangneung-winter-roof__weather-heavy",
+    "baseId": "gangneung-winter-roof",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "강원",
+      "industry": "시설관리",
+      "workType": "지붕 제설",
+      "hazards": [
+        "추락",
+        "결빙",
+        "한파",
+        "미끄럼"
+      ],
+      "workerSignals": [
+        "고령"
+      ],
+      "weatherSignals": [
+        "한파",
+        "결빙"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "gangneung-winter-roof__worker-education",
+    "baseId": "gangneung-winter-roof",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "강원",
+      "industry": "시설관리",
+      "workType": "지붕 제설",
+      "hazards": [
+        "추락",
+        "결빙",
+        "한파",
+        "미끄럼"
+      ],
+      "workerSignals": [
+        "고령"
+      ],
+      "weatherSignals": [
+        "한파",
+        "결빙"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "gangneung-winter-roof__permit-evidence",
+    "baseId": "gangneung-winter-roof",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "강원",
+      "industry": "시설관리",
+      "workType": "지붕 제설",
+      "hazards": [
+        "추락",
+        "결빙",
+        "한파",
+        "미끄럼"
+      ],
+      "workerSignals": [
+        "고령"
+      ],
+      "weatherSignals": [
+        "한파",
+        "결빙"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "gimhae-foreign-assembly__full-context",
+    "baseId": "gimhae-foreign-assembly",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "컨베이어 부품 교체",
+      "hazards": [
+        "끼임",
+        "전도",
+        "컨베이어",
+        "전기"
+      ],
+      "workerSignals": [
+        "외국인"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "workpackSummaryDraft",
+        "workPlanDraft",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 26
+  },
+  {
+    "id": "gimhae-foreign-assembly__minimal-input",
+    "baseId": "gimhae-foreign-assembly",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "컨베이어 부품 교체",
+      "hazards": [
+        "끼임",
+        "전도",
+        "컨베이어",
+        "전기"
+      ],
+      "workerSignals": [
+        "외국인"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "gimhae-foreign-assembly__weather-heavy",
+    "baseId": "gimhae-foreign-assembly",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 1,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "컨베이어 부품 교체",
+      "hazards": [
+        "끼임",
+        "전도",
+        "컨베이어",
+        "전기"
+      ],
+      "workerSignals": [
+        "외국인"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "workPlanDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 20
+  },
+  {
+    "id": "gimhae-foreign-assembly__worker-education",
+    "baseId": "gimhae-foreign-assembly",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "컨베이어 부품 교체",
+      "hazards": [
+        "끼임",
+        "전도",
+        "컨베이어",
+        "전기"
+      ],
+      "workerSignals": [
+        "외국인"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "gimhae-foreign-assembly__permit-evidence",
+    "baseId": "gimhae-foreign-assembly",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경남",
+      "industry": "제조",
+      "workType": "컨베이어 부품 교체",
+      "hazards": [
+        "끼임",
+        "전도",
+        "컨베이어",
+        "전기"
+      ],
+      "workerSignals": [
+        "외국인"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [
+        "베트남어"
+      ],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "workPlanDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "paju-demolition-dust__full-context",
+    "baseId": "paju-demolition-dust",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "건설",
+      "workType": "내부 철거",
+      "hazards": [
+        "분진",
+        "낙하물",
+        "전동공구",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "paju-demolition-dust__minimal-input",
+    "baseId": "paju-demolition-dust",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "건설",
+      "workType": "내부 철거",
+      "hazards": [
+        "분진",
+        "낙하물",
+        "전동공구",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "safetyEducationRecordDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "paju-demolition-dust__weather-heavy",
+    "baseId": "paju-demolition-dust",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "건설",
+      "workType": "내부 철거",
+      "hazards": [
+        "분진",
+        "낙하물",
+        "전동공구",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "paju-demolition-dust__worker-education",
+    "baseId": "paju-demolition-dust",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "건설",
+      "workType": "내부 철거",
+      "hazards": [
+        "분진",
+        "낙하물",
+        "전동공구",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "paju-demolition-dust__permit-evidence",
+    "baseId": "paju-demolition-dust",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "건설",
+      "workType": "내부 철거",
+      "hazards": [
+        "분진",
+        "낙하물",
+        "전동공구",
+        "협력업체"
+      ],
+      "workerSignals": [
+        "협력업체"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "photoEvidenceDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "mokpo-shipyard-hotwork__full-context",
+    "baseId": "mokpo-shipyard-hotwork",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "조선",
+      "workType": "선박 내부 용접",
+      "hazards": [
+        "밀폐공간",
+        "화재",
+        "유해가스",
+        "환기"
+      ],
+      "workerSignals": [
+        "화재감시자",
+        "2인1조"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "workpackSummaryDraft",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 24
+  },
+  {
+    "id": "mokpo-shipyard-hotwork__minimal-input",
+    "baseId": "mokpo-shipyard-hotwork",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "조선",
+      "workType": "선박 내부 용접",
+      "hazards": [
+        "밀폐공간",
+        "화재",
+        "유해가스",
+        "환기"
+      ],
+      "workerSignals": [
+        "화재감시자",
+        "2인1조"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "mokpo-shipyard-hotwork__weather-heavy",
+    "baseId": "mokpo-shipyard-hotwork",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "조선",
+      "workType": "선박 내부 용접",
+      "hazards": [
+        "밀폐공간",
+        "화재",
+        "유해가스",
+        "환기"
+      ],
+      "workerSignals": [
+        "화재감시자",
+        "2인1조"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "mokpo-shipyard-hotwork__worker-education",
+    "baseId": "mokpo-shipyard-hotwork",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "조선",
+      "workType": "선박 내부 용접",
+      "hazards": [
+        "밀폐공간",
+        "화재",
+        "유해가스",
+        "환기"
+      ],
+      "workerSignals": [
+        "화재감시자",
+        "2인1조"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "safetyEducationRecordDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "mokpo-shipyard-hotwork__permit-evidence",
+    "baseId": "mokpo-shipyard-hotwork",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "전남",
+      "industry": "조선",
+      "workType": "선박 내부 용접",
+      "hazards": [
+        "밀폐공간",
+        "화재",
+        "유해가스",
+        "환기"
+      ],
+      "workerSignals": [
+        "화재감시자",
+        "2인1조"
+      ],
+      "weatherSignals": [],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "emergencyResponseDraft",
+        "workPermit",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 16
+  },
+  {
+    "id": "namyangju-landscape-heat__full-context",
+    "baseId": "namyangju-landscape-heat",
+    "variantId": "full-context",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "조경",
+      "workType": "전정 작업",
+      "hazards": [
+        "사다리",
+        "추락",
+        "벌쏘임",
+        "폭염"
+      ],
+      "workerSignals": [
+        "신규",
+        "일용직"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workpackSummaryDraft",
+        "workPlanDraft",
+        "tbmLogDraft",
+        "emergencyResponseDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 22
+  },
+  {
+    "id": "namyangju-landscape-heat__minimal-input",
+    "baseId": "namyangju-landscape-heat",
+    "variantId": "minimal-input",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "조경",
+      "workType": "전정 작업",
+      "hazards": [
+        "사다리",
+        "추락",
+        "벌쏘임",
+        "폭염"
+      ],
+      "workerSignals": [
+        "신규",
+        "일용직"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 12
+  },
+  {
+    "id": "namyangju-landscape-heat__weather-heavy",
+    "baseId": "namyangju-landscape-heat",
+    "variantId": "weather-heavy",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "조경",
+      "workType": "전정 작업",
+      "hazards": [
+        "사다리",
+        "추락",
+        "벌쏘임",
+        "폭염"
+      ],
+      "workerSignals": [
+        "신규",
+        "일용직"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workPlanDraft",
+        "tbmLogDraft",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "namyangju-landscape-heat__worker-education",
+    "baseId": "namyangju-landscape-heat",
+    "variantId": "worker-education",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "조경",
+      "workType": "전정 작업",
+      "hazards": [
+        "사다리",
+        "추락",
+        "벌쏘임",
+        "폭염"
+      ],
+      "workerSignals": [
+        "신규",
+        "일용직"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  },
+  {
+    "id": "namyangju-landscape-heat__permit-evidence",
+    "baseId": "namyangju-landscape-heat",
+    "variantId": "permit-evidence",
+    "mode": "local-deterministic",
+    "ok": true,
+    "elapsedMs": 0,
+    "expected": {
+      "region": "경기",
+      "industry": "조경",
+      "workType": "전정 작업",
+      "hazards": [
+        "사다리",
+        "추락",
+        "벌쏘임",
+        "폭염"
+      ],
+      "workerSignals": [
+        "신규",
+        "일용직"
+      ],
+      "weatherSignals": [
+        "폭염"
+      ],
+      "foreignLanguageSignals": [],
+      "requiredDocuments": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "safetyEducationRecordDraft",
+        "photoEvidenceDraft",
+        "workPlanDraft",
+        "emergencyResponseDraft",
+        "workPermit"
+      ]
+    },
+    "api": null,
+    "failedChecks": [],
+    "checkCount": 18
+  }
+]

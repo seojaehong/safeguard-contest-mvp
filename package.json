@@ -12,6 +12,7 @@
     "audit:launch": "node ./scripts/launch_readiness_audit.mjs",
     "smoke:orchestration-download": "node ./scripts/prod_orchestration_download_smoke.mjs",
     "smoke:submission": "node ./scripts/submission_readiness_smoke.mjs",
+    "smoke:quality-matrix": "node ./scripts/safeclaw_quality_matrix_runner.mjs",
     "smoke:ui-local": "node ./scripts/local_ui_regression_smoke.mjs",
     "knowledge:seed": "node ./scripts/build_safety_knowledge_seed.mjs",
     "knowledge:smoke": "node ./scripts/knowledge_runtime_smoke.mjs",
