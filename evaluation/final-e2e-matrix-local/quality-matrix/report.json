@@ -1,0 +1,754 @@
+{
+  "generatedAt": "2026-05-03T15:00:42.059Z",
+  "elapsedMs": 107634,
+  "mode": "mixed-live",
+  "baseUrl": "http://127.0.0.1:3011",
+  "casesPath": "scripts\\safeclaw_quality_matrix_cases.json",
+  "total": 100,
+  "pass": 100,
+  "fail": 0,
+  "live": {
+    "enabled": true,
+    "requested": 3,
+    "executed": 3,
+    "timeoutMs": 70000
+  },
+  "matrix": {
+    "baseScenarios": 20,
+    "variants": 5
+  },
+  "failureSamples": [],
+  "byDimension": {
+    "region": {
+      "서울": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "인천": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "경기": {
+        "total": 20,
+        "pass": 20,
+        "fail": 0
+      },
+      "부산": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "광주": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "대구": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "울산": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "대전": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "제주": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "세종": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "경북": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "충북": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "경남": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "전남": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "강원": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      }
+    },
+    "industry": {
+      "건설": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "물류": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "제조": {
+        "total": 20,
+        "pass": 20,
+        "fail": 0
+      },
+      "시설관리": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "청소": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "창고": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "화학": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "연구": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "전기": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "식품": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "조선": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "조경": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      }
+    },
+    "workType": {
+      "외벽 도장": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "지게차 상하차": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "용접 절단": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "배수펌프 점검": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "화학 세척": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "중량물 적재": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "탱크 내부 점검": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "시약 정리": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "태양광 점검": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "도로 굴착": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "크레인 양중": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "냉동창고 점검": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "분전반 정비": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "프레스 보전": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "탱크로리 상차": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "지붕 제설": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "컨베이어 부품 교체": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "내부 철거": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "선박 내부 용접": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "전정 작업": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      }
+    },
+    "hazards": {
+      "추락": {
+        "total": 20,
+        "pass": 20,
+        "fail": 0
+      },
+      "비계": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "강풍": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "지게차 동선": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "지게차": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "충돌": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "미끄럼": {
+        "total": 20,
+        "pass": 20,
+        "fail": 0
+      },
+      "우천": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "화재": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "용접": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "환기": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "고온": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "가연물": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "밀폐공간": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "감전": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "산소결핍": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "누수": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "화학물질": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "세척제": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "중량물": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "근골격계": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "폭염": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "유해가스": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "폭발": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "협력업체": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "MSDS": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "누출": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "혼합금지": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "고소": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "굴착": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "붕괴": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "매설물": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "차량충돌": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "양중": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "낙하물": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "협착": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "크레인": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "저온": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "반복출입": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "아크": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "정전": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "야간": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "끼임": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "LOTO": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "예기치 않은 기동": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "프레스": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "결빙": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "한파": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "전도": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "컨베이어": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "전기": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "분진": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "전동공구": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "사다리": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "벌쏘임": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      }
+    },
+    "workerSignals": {
+      "신규": {
+        "total": 35,
+        "pass": 35,
+        "fail": 0
+      },
+      "보행자": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "숙련": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "외국인": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "2인1조": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "고령": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "협력업체": {
+        "total": 20,
+        "pass": 20,
+        "fail": 0
+      },
+      "출입허가": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "소수인원": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "신호수": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "작업반장": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "피킹인력": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "야간": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "보전원": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "운전원": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "감시자": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "화재감시자": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "일용직": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      }
+    },
+    "weatherSignals": {
+      "강풍": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "우천": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "고온": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "호우": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "폭염": {
+        "total": 10,
+        "pass": 10,
+        "fail": 0
+      },
+      "한랭": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "한파": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "결빙": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      }
+    },
+    "requiredDocuments": {
+      "riskAssessmentDraft": {
+        "total": 100,
+        "pass": 100,
+        "fail": 0
+      },
+      "workPlanDraft": {
+        "total": 90,
+        "pass": 90,
+        "fail": 0
+      },
+      "tbmBriefing": {
+        "total": 99,
+        "pass": 99,
+        "fail": 0
+      },
+      "tbmLogDraft": {
+        "total": 43,
+        "pass": 43,
+        "fail": 0
+      },
+      "safetyEducationRecordDraft": {
+        "total": 82,
+        "pass": 82,
+        "fail": 0
+      },
+      "photoEvidenceDraft": {
+        "total": 88,
+        "pass": 88,
+        "fail": 0
+      },
+      "workpackSummaryDraft": {
+        "total": 20,
+        "pass": 20,
+        "fail": 0
+      },
+      "emergencyResponseDraft": {
+        "total": 67,
+        "pass": 67,
+        "fail": 0
+      },
+      "kakaoMessage": {
+        "total": 60,
+        "pass": 60,
+        "fail": 0
+      },
+      "foreignWorkerBriefing": {
+        "total": 32,
+        "pass": 32,
+        "fail": 0
+      },
+      "foreignWorkerTransmission": {
+        "total": 32,
+        "pass": 32,
+        "fail": 0
+      },
+      "workPermit": {
+        "total": 48,
+        "pass": 48,
+        "fail": 0
+      }
+    },
+    "foreignLanguageSignals": {
+      "베트남어": {
+        "total": 15,
+        "pass": 15,
+        "fail": 0
+      },
+      "중국어": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      },
+      "태국어": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0
+      }
+    }
+  }
+}

@@ -329,7 +329,7 @@ export function WorkflowSharePanel({
         ))}
       </div>
       <p className="channel-readiness-note">
-        현재 즉시 전송 채널은 메일·문자입니다. 카카오·밴드는 채널 승인이 끝나면 같은 전파 흐름에 연결됩니다.
+        현재 즉시 전송 채널은 메일·문자입니다. 카카오·밴드는 이번 제출 범위에서는 보류합니다.
       </p>
 
       <div className="message-target-box">

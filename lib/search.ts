@@ -99,6 +99,35 @@ function formatAccidentCaseAppendix(accidentCases: Awaited<ReturnType<typeof fet
   ].join("\n");
 }
 
+function buildPhotoEvidenceAppendix(
+  citations: AskResponse["citations"],
+  koshaReferences: Awaited<ReturnType<typeof fetchKoshaReferences>>["references"],
+  accidentCases: Awaited<ReturnType<typeof fetchAccidentCases>>["cases"]
+) {
+  return [
+    "",
+    "[사진/증빙 체계 보강]",
+    "- 작업 전 사진: 작업구역, 장비, 작업환경, 출입통제 상태를 작업 시작 전 촬영합니다.",
+    "- 조치 전 사진: 위험구역, 장비, 작업환경, 출입통제의 미조치 상태를 촬영합니다.",
+    "- 조치 후 사진: 감소대책 실행 후 방호조치, 표지, 차단, 보호구 착용 상태를 같은 각도에서 촬영합니다.",
+    "- 전후 비교: 조치 전 사진과 조치 후 사진을 같은 위험요인 번호로 묶고 촬영자, 확인자, 보관 위치를 남깁니다.",
+    "",
+    "[확인 근거 첨부]",
+    `- 법령·해석례·판례: ${citations.slice(0, 3).map((item) => item.title).join(" / ") || "현장 문서 확인 후 첨부"}`,
+    `- KOSHA 자료: ${koshaReferences.slice(0, 2).map((item) => item.title).join(" / ") || "현장 작업유형 확인 후 첨부"}`,
+    `- 유사 재해사례: ${accidentCases.slice(0, 2).map((item) => item.title).join(" / ") || "사례 확인 후 첨부"}`
+  ].join("\n");
+}
+
+function ensurePhotoEvidenceDraft(baseDraft: string, appendix: string) {
+  const requiredTerms = ["작업 전 사진", "조치 전 사진", "조치 후 사진", "보관 위치"];
+  const missingTerms = requiredTerms.filter((term) => !baseDraft.includes(term));
+  if (!missingTerms.length && baseDraft.includes("[사진/증빙 체계 보강]")) {
+    return baseDraft;
+  }
+  return `${baseDraft.trim()}${appendix}`.trim();
+}
+
 function formatKoshaOpenApiAppendix(
   references: Awaited<ReturnType<typeof fetchKoshaOpenApiEvidence>>["references"],
   target: DocumentEvidenceTarget
@@ -354,6 +383,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const educationKoshaAppendix = formatKoshaPracticalAppendix(kosha.references, "education", "반영 근거: 교육 공식자료");
     const trainingFitLines = training.recommendations.slice(0, 2).map((item) => `${item.title}: ${item.fitLabel || "조건부 후보"} - ${item.fitReason || item.reason}`);
     const accidentAppendix = formatAccidentCaseAppendix(accidentCases.cases);
+    const photoEvidenceAppendix = buildPhotoEvidenceAppendix(citations, kosha.references, accidentCases.cases);
     const riskKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "risk");
     const workPlanKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "workPlan");
     const tbmKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "tbm");
@@ -416,7 +446,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
           .trim(),
         safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`,
         emergencyResponseDraft: `${response.deliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}${emergencyKoshaOpenApiAppendix}`,
-        photoEvidenceDraft: `${response.deliverables.photoEvidenceDraft}\n\n[사진/증빙 체계 보강]\n- 조치 전 사진: 위험구역, 장비, 작업환경, 출입통제의 미조치 상태를 촬영합니다.\n- 조치 후 사진: 감소대책 실행 후 방호조치, 표지, 차단, 보호구 착용 상태를 같은 각도에서 촬영합니다.\n- 전후 비교: 조치 전 사진과 조치 후 사진을 같은 위험요인 번호로 묶고 촬영자, 확인자, 보관 위치를 남깁니다.\n\n[확인 근거 첨부]\n- 법령·해석례·판례: ${citations.slice(0, 3).map((item) => item.title).join(" / ") || "현장 문서 확인 후 첨부"}\n- KOSHA 자료: ${kosha.references.slice(0, 2).map((item) => item.title).join(" / ") || "현장 작업유형 확인 후 첨부"}\n- 유사 재해사례: ${accidentCases.cases.slice(0, 2).map((item) => item.title).join(" / ") || "사례 확인 후 첨부"}`,
+        photoEvidenceDraft: ensurePhotoEvidenceDraft(response.deliverables.photoEvidenceDraft, photoEvidenceAppendix),
         foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
         foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
         foreignWorkerLanguages,
