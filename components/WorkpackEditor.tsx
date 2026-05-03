@@ -269,6 +269,32 @@ function buildTbmBridgeRows(data: AskResponse, riskRows: SheetRow[]) {
   }));
 }
 
+function inferDisasterType(text: string, index: number) {
+  if (/추락|떨어|비계|고소|발판/.test(text)) return "추락";
+  if (/전도|넘어|미끄|우천|바닥/.test(text)) return "전도/미끄럼";
+  if (/충돌|지게차|동선|차량|운반/.test(text)) return "충돌/끼임";
+  if (/화재|용접|화기|폭발/.test(text)) return "화재/폭발";
+  if (/화학|중독|질식|밀폐|가스|노출/.test(text)) return "중독/노출";
+  return index % 2 === 0 ? "협착/충돌" : "기타 재해";
+}
+
+function inferRiskFactor4M(text: string, index: number) {
+  if (/지게차|장비|기계|비계|발판|공구|차량/.test(text)) return "Machine";
+  if (/강풍|우천|폭염|날씨|바닥|밀폐|고소|작업장소/.test(text)) return "Media";
+  if (/신규|미숙련|보호구|교육|작업자|근로자/.test(text)) return "Man";
+  if (/작업중지|통제|감독|유도자|신호수|절차/.test(text)) return "Management";
+  return ["Man", "Machine", "Media", "Management"][index % 4];
+}
+
+function inferEquipment(text: string, scenario: AskResponse["scenario"], index: number) {
+  if (/지게차|운반|하역/.test(text)) return "지게차/운반장비";
+  if (/비계|고소|발판/.test(text)) return "비계/작업발판";
+  if (/용접|화기/.test(text)) return "용접기/화기장비";
+  if (/화학|세척|약품/.test(text)) return "세척제/MSDS";
+  if (/밀폐|가스|질식/.test(text)) return "가스측정기/환기설비";
+  return index % 2 === 0 ? "작업장비/공도구" : scenario.companyType;
+}
+
 function buildPermitDraft(data: AskResponse) {
   const actionList = data.riskSummary.immediateActions.map((action, index) => `${index + 1}. ${action}`).join("\n");
   const weatherActions = data.externalData.weather.actions.slice(0, 2).map((action, index) => `${index + 1}. ${action}`).join("\n");
@@ -454,23 +480,27 @@ function buildRiskAssessmentSections(rows: SheetRow[], scenario: AskResponse["sc
       <p class="section-help">제공 서식 기준에 맞춰 단위공종, 작업장소, 사용 장비, 재해형태, 가능성·중대성·등급을 분리합니다.</p>
       <table class="risk-table">
         <colgroup>
-          <col style="width: 10%;" /><col style="width: 11%;" /><col style="width: 10%;" /><col style="width: 19%;" />
-          <col style="width: 9%;" /><col style="width: 7%;" /><col style="width: 7%;" /><col style="width: 7%;" />
-          <col style="width: 20%;" />
+          <col style="width: 8%;" /><col style="width: 10%;" /><col style="width: 10%;" /><col style="width: 8%;" />
+          <col style="width: 18%;" /><col style="width: 8%;" /><col style="width: 6%;" /><col style="width: 6%;" />
+          <col style="width: 6%;" /><col style="width: 20%;" />
         </colgroup>
-        <thead><tr><th>단위공종</th><th>작업장소</th><th>장비/도구</th><th>유해·위험요인</th><th>재해형태</th><th>가능성</th><th>중대성</th><th>등급</th><th>현재 안전조치</th></tr></thead>
+        <thead><tr><th>단위공종</th><th>작업장소</th><th>장비/도구</th><th>4M</th><th>유해·위험요인</th><th>재해형태</th><th>가능성</th><th>중대성</th><th>등급</th><th>현재 안전조치</th></tr></thead>
         <tbody>
-          ${hazardRows.map((row, index) => `<tr>
+          ${hazardRows.map((row, index) => {
+            const text = rowText(row);
+            return `<tr>
             <td>${escapeHtml(scenario.workSummary)}</td>
             <td>${escapeHtml(scenario.siteName)}</td>
-            <td>${index % 2 === 0 ? "작업장비/공도구" : "운반·통제 설비"}</td>
+            <td>${escapeHtml(inferEquipment(text, scenario, index))}</td>
+            <td class="center">${escapeHtml(inferRiskFactor4M(text, index))}</td>
             <td>${escapeHtml(compactContent(row, "작업 중 유해·위험요인"))}</td>
-            <td>${index === 0 ? "추락/전도" : index === 1 ? "충돌/끼임" : "노출/기타"}</td>
+            <td>${escapeHtml(inferDisasterType(text, index))}</td>
             <td class="center">중</td>
             <td class="center">상</td>
             <td class="center risk-level-high">상</td>
             <td>${escapeHtml(controlFor(index))}</td>
-          </tr>`).join("")}
+          </tr>`;
+          }).join("")}
         </tbody>
       </table>
     </section>
@@ -485,7 +515,18 @@ function buildRiskAssessmentSections(rows: SheetRow[], scenario: AskResponse["sc
       </table>
     </section>
     <section class="section-block">
-      <div class="section-label">4. 공유·교육 및 조치 확인</div>
+      <div class="section-label">4. 위험성평가 회의록 및 재평가 기준</div>
+      <table>
+        <colgroup><col style="width: 20%;" /><col style="width: 30%;" /><col style="width: 20%;" /><col style="width: 30%;" /></colgroup>
+        <tbody>
+          <tr><th>회의일시</th><td>____년 ____월 ____일 ____시</td><th>참석대상</th><td>관리감독자, 작업반장, 작업자 대표</td></tr>
+          <tr><th>재평가 사유</th><td>공법·장비·인원·기상 조건 변경</td><th>재평가 기준</th><td>상 등급 잔류위험 또는 작업중지 발생 시</td></tr>
+          <tr><th>주요 결정</th><td colspan="3">□ 감소대책 이행 후 작업 □ 보완 후 재평가 □ 작업중지 유지</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">5. 공유·교육 및 조치 확인</div>
       <table>
         <thead><tr><th>공유 대상</th><th>공유 방법</th><th>이해 확인</th><th>미조치/재평가 필요</th></tr></thead>
         <tbody><tr><td>투입 근로자 전원</td><td>작업 전 TBM 및 안전보건교육</td><td>구두 복창·서명</td><td>□ 없음 □ 있음: ____________________</td></tr></tbody>
@@ -526,6 +567,8 @@ function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario
           <tr><td>장비 제원표, 검사증, 운전원 자격</td><td>□</td><td>□</td><td>해당 장비 사용 시 첨부</td></tr>
           <tr><td>위험성평가표 및 TBM 참석명단</td><td>■</td><td>□</td><td>작업 전 최종본 확인</td></tr>
           <tr><td>작업계획도, 통제구역, 유도자 배치도</td><td>□</td><td>□</td><td>현장 게시 권장</td></tr>
+          <tr><td>보험·자격·이수증·사업자등록 등 기본 서류</td><td>□</td><td>□</td><td>발주자/원청 요구 시 첨부</td></tr>
+          <tr><td>MSDS, 안전인증서, 안전검사합격증</td><td>□</td><td>□</td><td>화학물질·장비 사용 시 첨부</td></tr>
         </tbody>
       </table>
     </section>
@@ -535,6 +578,17 @@ function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario
         <thead><tr><th>중지 기준</th><th>판단자</th><th>전파 방법</th><th>재개 조건</th></tr></thead>
         <tbody>
           ${stopRows.map((row) => `<tr><td>${escapeHtml(compactContent(row, scenario.weatherNote))}</td><td>관리감독자</td><td>TBM/문자/무전</td><td>위험요인 제거 후 재확인</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">5. 작업계획도 및 역할 지정</div>
+      <table>
+        <colgroup><col style="width: 18%;" /><col style="width: 32%;" /><col style="width: 18%;" /><col style="width: 32%;" /></colgroup>
+        <tbody>
+          <tr><th>작업계획도</th><td>□ 첨부 □ 현장 게시 □ 보완 필요</td><th>통제구역</th><td>□ 표시 □ 접근금지 □ 유도자 배치</td></tr>
+          <tr><th>작업지휘자</th><td>성명/연락처: ____________________</td><th>유도자/신호수</th><td>성명/연락처: ____________________</td></tr>
+          <tr><th>운전원/장비담당</th><td>자격·면허 확인: □</td><th>감시자</th><td>위험작업 해당 시 지정: □</td></tr>
         </tbody>
       </table>
     </section>
@@ -572,6 +626,8 @@ function buildPermitSections(rows: SheetRow[], scenario: AskResponse["scenario"]
           <tr><td>위험성평가표</td><td>■</td><td>□</td><td>감소대책·담당·기한 포함</td></tr>
           <tr><td>TBM 참석명단/교육기록</td><td>■</td><td>□</td><td>성명·소속·직위·서명</td></tr>
           <tr><td>장비 검사증/자격증/MSDS/작업계획도</td><td>□</td><td>□</td><td>해당 작업 시 첨부</td></tr>
+          <tr><td>보험가입증명·자격/면허·안전교육 이수증</td><td>□</td><td>□</td><td>원청 제출 요구 시 첨부</td></tr>
+          <tr><td>작업반경도·인양능력표·정비/점검 이력</td><td>□</td><td>□</td><td>장비·중량물 작업 시 첨부</td></tr>
         </tbody>
       </table>
     </section>
@@ -620,6 +676,56 @@ function buildTbmLogSections(rows: SheetRow[], scenario: AskResponse["scenario"]
   `;
 }
 
+function buildTbmBriefingSections(rows: SheetRow[], scenario: AskResponse["scenario"], data: AskResponse, riskRows: SheetRow[]) {
+  const bridgeRows = buildTbmBridgeRows(data, riskRows.length ? riskRows : rows);
+  const questionRows = findRows(rows, ["질문", "확인", "누가", "알고", "복창"], 3);
+  const weatherText = data.externalData.weather.summary || data.scenario.weatherNote;
+  return `
+    <section class="section-block">
+      <div class="section-label">1. 작업 전 브리핑 개요</div>
+      <table class="mini-table">
+        <tbody>
+          <tr><th>현장</th><td>${escapeHtml(scenario.siteName)}</td><th>작업</th><td>${escapeHtml(scenario.workSummary)}</td></tr>
+          <tr><th>위험수준</th><td>${escapeHtml(data.riskSummary.riskLevel)}</td><th>기상 신호</th><td>${escapeHtml(weatherText)}</td></tr>
+          <tr><th>진행자</th><td>작업반장 / 관리감독자</td><th>참석 대상</th><td>투입 근로자 전원</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">2. 위험성평가 기반 TBM 전달</div>
+      <table>
+        <colgroup><col style="width: 8%;" /><col style="width: 32%;" /><col style="width: 28%;" /><col style="width: 20%;" /><col style="width: 12%;" /></colgroup>
+        <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>기상/환경 반영</th><th>작업중지 기준</th><th>복창</th></tr></thead>
+        <tbody>
+          ${bridgeRows.map((row, index) => `<tr>
+            <td class="center">${index + 1}</td>
+            <td>${escapeHtml(row.risk)}</td>
+            <td>${escapeHtml(row.weather)}</td>
+            <td>${escapeHtml(row.message)}</td>
+            <td class="center">□</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">3. 확인 질문</div>
+      <table>
+        <thead><tr><th>질문</th><th>기대 답변</th><th>미이해자 조치</th></tr></thead>
+        <tbody>
+          ${questionRows.map((row) => `<tr><td>${escapeHtml(compactContent(row, "오늘 작업중지 기준을 누가 판단합니까?"))}</td><td>작업중지 기준과 보고자를 구두로 답변</td><td>작업 전 재설명 후 서명</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">4. 보호구·통제·증빙</div>
+      <table>
+        <thead><tr><th>보호구</th><th>통제구역</th><th>사진/영상 증빙</th><th>관리자 확인</th></tr></thead>
+        <tbody><tr><td>□ 착용 확인</td><td>□ 접근금지 표시 □ 유도자 배치</td><td>□ TBM 사진 □ 작업 전 점검 사진</td><td>서명: __________</td></tr></tbody>
+      </table>
+    </section>
+  `;
+}
+
 function buildTbmWeatherRiskBridge(data: AskResponse, riskRows: SheetRow[]) {
   const bridgeRows = buildTbmBridgeRows(data, riskRows);
   return `
@@ -661,7 +767,7 @@ function buildSafetyFormMarkup(
         : profile.layout === "tbmLog"
           ? `${bridgeSections}${buildTbmLogSections(rows, scenario)}`
           : profile.layout === "tbmBriefing"
-            ? `${bridgeSections}${buildGenericSections(rows, profile)}`
+            ? (data ? buildTbmBriefingSections(rows, scenario, data, riskRows) : buildGenericSections(rows, profile))
             : buildGenericSections(rows, profile);
   const approvalCells = profile.approvalLabels.map((label) => `
     <div class="approval-cell"><b>${escapeHtml(label)}</b><em>서명</em></div>
