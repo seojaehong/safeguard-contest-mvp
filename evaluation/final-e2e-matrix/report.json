@@ -1,0 +1,245 @@
+{
+  "generatedAt": "2026-05-03T11:44:03.909Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "localBaseUrl": "http://127.0.0.1:3011",
+  "elapsedMs": 629608,
+  "overall": "blocked",
+  "gates": [
+    {
+      "name": "api-status",
+      "status": "blocked",
+      "coverage": "주요 HTML route, safety-reference status, weather, PDF export source, dispatch log auth gate",
+      "routeChecks": {
+        "status": "blocked",
+        "htmlChecks": [
+          {
+            "route": "/",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 162,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPrio"
+            }
+          },
+          {
+            "route": "/ask",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 38298,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPrio"
+            }
+          },
+          {
+            "route": "/documents",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 27,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><!--qmQZ_A_K9kf87vd6lTyeg--><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"pr"
+            }
+          },
+          {
+            "route": "/dispatch",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 20,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><!--qmQZ_A_K9kf87vd6lTyeg--><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"pr"
+            }
+          },
+          {
+            "route": "/workspace",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 53,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPrio"
+            }
+          }
+        ],
+        "apiChecks": [
+          {
+            "route": "/api/safety-reference/status",
+            "expected": "reference status API responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 2194,
+              "contentType": "application/json",
+              "textPreview": "{\"ok\":true,\"configured\":true,\"status\":\"ready\",\"sources\":1063,\"items\":9920,\"expectedTechnicalTotal\":1040,\"technicalTotal\":1040,\"technicalSupportRegulations\":237,\"technicalGuidelines\":803,\"technicalSplitOk\":true,\"catalogSearchOk\":true,\"ingestionRuns\":2,\"itemTypes\":[{\"itemType\":\"sif-case\",\"count\":6033}"
+            }
+          },
+          {
+            "route": "/api/weather",
+            "expected": "weather API responds for scenario context",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 47,
+              "contentType": "application/json",
+              "textPreview": "{\"ok\":true,\"weather\":{\"source\":\"kma\",\"mode\":\"live\",\"locationLabel\":\"서울\",\"summary\":\"단시간 흐림, 강수없음, 기온 13℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선/생활기상 체감온도 반영)\",\"forecastTime\":\"20260503 2000\",\"temperatureC\":\"13\",\"windSpeedMps\":\"1\",\"actions\":[\"기상특보가 확인되어 작업 전 작업중지 기준과 옥외·고소작업 허용 여부를 관리감독자가 재판단\"],\"deta"
+            }
+          },
+          {
+            "route": "/api/export/pdf",
+            "expected": "PDF print-ready export source responds as HTML",
+            "status": "blocked",
+            "result": {
+              "ok": false,
+              "statusCode": 404,
+              "elapsedMs": 14,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><!--qmQZ_A_K9kf87vd6lTyeg--><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"pr"
+            }
+          },
+          {
+            "route": "/api/dispatch-logs",
+            "expected": "dispatch log route is protected or returns archive",
+            "status": "blocked",
+            "result": {
+              "ok": false,
+              "statusCode": 405,
+              "elapsedMs": 33,
+              "contentType": "",
+              "textPreview": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ask-generation",
+      "status": "blocked",
+      "coverage": "/api/ask live sample 및 deterministic matrix 문서 생성",
+      "reportPath": "evaluation\\final-e2e-matrix\\quality-matrix\\report.json"
+    },
+    {
+      "name": "document-rubric",
+      "status": "blocked",
+      "coverage": "위험성평가/TBM/교육/사진증빙/외국인 안내 등 문서별 필수 문구 반영",
+      "reportPath": "evaluation\\final-e2e-matrix\\quality-matrix\\report.json"
+    },
+    {
+      "name": "download-export",
+      "status": "blocked",
+      "coverage": "PDF/HWPX/XLS/ALL_XLS 다운로드 스모크 및 /api/export/pdf HTML source",
+      "reportPath": "evaluation\\final-e2e-matrix\\submission-readiness\\document-format-verification.json"
+    },
+    {
+      "name": "dispatch-logs",
+      "status": "blocked",
+      "coverage": "전파 실행 조건, dispatch workflow, dispatch log 저장 게이트",
+      "reportPath": "evaluation\\final-e2e-matrix\\submission-readiness\\prod-dispatch-smoke.json"
+    },
+    {
+      "name": "main-routes",
+      "status": "blocked",
+      "coverage": "홈 생성 플로우, Sheets TSV, 근거 링크, 주요 route 응답",
+      "reportPath": "evaluation\\final-e2e-matrix\\local-ui-regression-smoke.json"
+    }
+  ],
+  "blockers": [
+    {
+      "gate": "api-status",
+      "reason": "/api/export/pdf returned 404; /api/dispatch-logs returned 405"
+    },
+    {
+      "gate": "ask-generation",
+      "reason": "seoul-scaffold-paint__full-context: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__minimal-input: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__weather-heavy: runner:error This operation was aborted"
+    },
+    {
+      "gate": "document-rubric",
+      "reason": "seoul-scaffold-paint__full-context: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__minimal-input: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__weather-heavy: runner:error This operation was aborted"
+    },
+    {
+      "gate": "download-export",
+      "reason": "PDF/HWPX/XLS/ALL_XLS 다운로드 스모크 및 /api/export/pdf HTML source 게이트가 통과하지 못했습니다. 세부 JSON을 확인하세요."
+    },
+    {
+      "gate": "dispatch-logs",
+      "reason": "인증 토큰 또는 저장/전파 운영 의존성이 없어 제출 준비도 스크립트가 blocker로 판정했습니다."
+    },
+    {
+      "gate": "main-routes",
+      "reason": "홈 생성 플로우, Sheets TSV, 근거 링크, 주요 route 응답 게이트가 통과하지 못했습니다. 세부 JSON을 확인하세요."
+    }
+  ],
+  "notices": [],
+  "artifacts": {
+    "report": "evaluation\\final-e2e-matrix\\report.json",
+    "summary": "evaluation\\final-e2e-matrix\\summary.md",
+    "qualityMatrix": "evaluation\\final-e2e-matrix\\quality-matrix\\report.json",
+    "submissionReadiness": "evaluation\\final-e2e-matrix\\submission-readiness\\submission-readiness-summary.json",
+    "localUi": "evaluation\\final-e2e-matrix\\local-ui-regression-smoke.json"
+  },
+  "commandResults": {
+    "qualityMatrix": {
+      "name": "safeclaw-quality-matrix",
+      "command": "C:\\Program Files\\nodejs\\node.exe ./scripts/safeclaw_quality_matrix_runner.mjs",
+      "env": {
+        "SAFECLAW_MATRIX_LIVE": "1",
+        "SAFECLAW_MATRIX_LIVE_COUNT": "3",
+        "SAFECLAW_MATRIX_OUT_DIR": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-e2e-matrix\\quality-matrix"
+      },
+      "status": "blocked",
+      "exitCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "elapsedMs": 129302,
+      "stdout": "{\n  \"total\": 100,\n  \"pass\": 97,\n  \"fail\": 3,\n  \"mode\": \"mixed-live\",\n  \"liveExecuted\": 3,\n  \"outDir\": \"evaluation\\\\final-e2e-matrix\\\\quality-matrix\"\n}\n",
+      "stderr": "",
+      "error": ""
+    },
+    "submission": {
+      "name": "submission-readiness",
+      "command": "C:\\Program Files\\nodejs\\node.exe ./scripts/submission_readiness_smoke.mjs",
+      "env": {
+        "SAFEGUARD_BASE_URL": "https://safeguard-contest-mvp.vercel.app",
+        "SAFEGUARD_SUBMISSION_OUT_DIR": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-e2e-matrix\\submission-readiness",
+        "SAFEGUARD_RUN_LIVE_DISPATCH": "0"
+      },
+      "status": "blocked",
+      "exitCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "elapsedMs": 316872,
+      "stdout": "{\n  \"overall\": \"blocked\",\n  \"outDir\": \"evaluation\\\\final-e2e-matrix\\\\submission-readiness\",\n  \"gates\": [\n    {\n      \"name\": \"ask-orchestration\",\n      \"verdict\": \"pass\"\n    },\n    {\n      \"name\": \"storage\",\n      \"verdict\": \"blocked\"\n    },\n    {\n      \"name\": \"dispatch\",\n      \"verdict\": \"pass_with_notice\"\n    },\n    {\n      \"name\": \"formats\",\n      \"verdict\": \"pass\"\n    }\n  ]\n}\n",
+      "stderr": "",
+      "error": ""
+    },
+    "localUi": {
+      "name": "local-ui-regression",
+      "command": "C:\\Program Files\\nodejs\\node.exe ./scripts/local_ui_regression_smoke.mjs",
+      "env": {
+        "BASE_URL": "http://127.0.0.1:3011",
+        "OUTPUT_PATH": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-e2e-matrix\\local-ui-regression-smoke.json"
+      },
+      "status": "blocked",
+      "exitCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "elapsedMs": 142568,
+      "stdout": "",
+      "stderr": "",
+      "error": ""
+    }
+  }
+}
