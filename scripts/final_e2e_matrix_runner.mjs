@@ -289,6 +289,18 @@ async function runRouteChecks() {
     result: dispatchLogResult
   });
 
+  const workpackArchiveResult = await fetchText("/api/workpacks");
+  apiChecks.push({
+    route: "/api/workpacks",
+    expected: "workpack archive route is protected or returns archive",
+    status: workpackArchiveResult.statusCode === 401 || workpackArchiveResult.ok
+      ? STATUS.pass
+      : workpackArchiveResult.statusCode === 405
+        ? STATUS.notice
+        : STATUS.blocked,
+    result: workpackArchiveResult
+  });
+
   return {
     status: aggregateStatus([...htmlChecks, ...apiChecks]),
     htmlChecks,
@@ -443,6 +455,7 @@ function summarizeFormatStatus(submission, routeChecks) {
 function summarizeDispatchStatus(submission, routeChecks) {
   const dispatchStatus = toStatus(submission.dispatch?.verdict || "");
   const logRouteStatus = findRouteStatus(routeChecks, "/api/dispatch-logs");
+  const workpackRouteStatus = findRouteStatus(routeChecks, "/api/workpacks");
   const storageGate = Array.isArray(submission.summary?.gates)
     ? submission.summary.gates.find((item) => item.name === "storage")
     : null;
@@ -460,6 +473,7 @@ function summarizeDispatchStatus(submission, routeChecks) {
   return aggregateStatus([
     { status: dispatchStatus },
     { status: logRouteStatus },
+    { status: workpackRouteStatus },
     { status: storageStatus }
   ]);
 }
@@ -577,7 +591,7 @@ const localUi = await runLocalUiSmoke();
 debug(`local ui status=${localUi.status}`);
 
 const gates = [
-  buildGate("api-status", routeChecks.status, "주요 HTML route, safety-reference status, weather, PDF export source, dispatch log auth gate", { routeChecks }),
+  buildGate("api-status", routeChecks.status, "주요 HTML route, safety-reference status, weather, PDF export source, archive auth gates", { routeChecks }),
   buildGate("ask-generation", qualityMatrix.status, "/api/ask live sample 및 deterministic matrix 문서 생성", {
     reportPath: qualityMatrix.reportPath
   }),
@@ -587,7 +601,7 @@ const gates = [
   buildGate("download-export", summarizeFormatStatus(submission, routeChecks), "PDF/HWPX/XLS/ALL_XLS 다운로드 스모크 및 /api/export/pdf HTML source", {
     reportPath: submission.formatReportPath
   }),
-  buildGate("dispatch-logs", summarizeDispatchStatus(submission, routeChecks), "전파 실행 조건, dispatch workflow, dispatch log 저장 게이트", {
+  buildGate("dispatch-logs", summarizeDispatchStatus(submission, routeChecks), "전파 실행 조건, dispatch workflow, workpack archive, dispatch log 저장 게이트", {
     reportPath: submission.dispatchReportPath
   }),
   buildGate("main-routes", localUi.status === STATUS.pass && routeChecks.status !== STATUS.blocked ? STATUS.pass : localUi.status, "홈 생성 플로우, Sheets TSV, 근거 링크, 주요 route 응답", {
