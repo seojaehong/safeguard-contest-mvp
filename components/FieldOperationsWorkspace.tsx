@@ -5,7 +5,12 @@ import { createClient, type Session, type SupabaseClient } from "@supabase/supab
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
-import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
+import {
+  buildStoredCurrentWorkpack,
+  CURRENT_WORKPACK_STORAGE_KEY,
+  type CurrentDispatchSnapshot,
+  type CurrentWorkerSnapshot
+} from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
 import {
   buildDefaultWorkers,
@@ -592,23 +597,6 @@ export function FieldOperationsWorkspace({
       ? { ...data, deliverables: { ...data.deliverables, ...editedDeliverables } }
       : data
   ), [data, editedDeliverables]);
-  const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues) => {
-    setEditedDeliverables(values);
-    if (typeof window === "undefined") return;
-    const nextData: AskResponse = {
-      ...data,
-      deliverables: {
-        ...data.deliverables,
-        ...values
-      }
-    };
-    try {
-      window.localStorage.setItem(CURRENT_WORKPACK_STORAGE_KEY, JSON.stringify(buildStoredCurrentWorkpack(nextData)));
-    } catch (error) {
-      console.warn("safeclaw current workpack update failed", error);
-    }
-  }, [data]);
-
   const selectedWorkers = useMemo(
     () => workers.filter((worker) => selectedWorkerIds.includes(worker.id)),
     [selectedWorkerIds, workers]
@@ -625,6 +613,37 @@ export function FieldOperationsWorkspace({
     () => buildWorkerDispatchTargets(selectedWorkers),
     [selectedWorkers]
   );
+  const workerSnapshot = useMemo<CurrentWorkerSnapshot>(() => ({
+    savedAt: new Date().toISOString(),
+    source: "workspace",
+    workers,
+    selectedWorkerIds
+  }), [selectedWorkerIds, workers]);
+  const dispatchSnapshot = useMemo<CurrentDispatchSnapshot>(() => ({
+    savedAt: new Date().toISOString(),
+    source: "workspace",
+    recipientSuggestions,
+    targetWorkers
+  }), [recipientSuggestions, targetWorkers]);
+  const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues) => {
+    setEditedDeliverables(values);
+    if (typeof window === "undefined") return;
+    const nextData: AskResponse = {
+      ...data,
+      deliverables: {
+        ...data.deliverables,
+        ...values
+      }
+    };
+    try {
+      window.localStorage.setItem(
+        CURRENT_WORKPACK_STORAGE_KEY,
+        JSON.stringify(buildStoredCurrentWorkpack(nextData, { workerSnapshot, dispatchSnapshot }))
+      );
+    } catch (error) {
+      console.warn("safeclaw current workpack update failed", error);
+    }
+  }, [data, dispatchSnapshot, workerSnapshot]);
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
     ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
@@ -767,6 +786,18 @@ export function FieldOperationsWorkspace({
     setWorkers((current) => [...current, nextWorker]);
     setSelectedWorkerIds((current) => [...current, id]);
   }
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(
+        CURRENT_WORKPACK_STORAGE_KEY,
+        JSON.stringify(buildStoredCurrentWorkpack(workspaceData, { workerSnapshot, dispatchSnapshot }))
+      );
+    } catch (error) {
+      console.warn("safeclaw current workpack snapshot update failed", error);
+    }
+  }, [dispatchSnapshot, workerSnapshot, workspaceData]);
 
   return (
     <section className="field-workspace" id="workpack">
