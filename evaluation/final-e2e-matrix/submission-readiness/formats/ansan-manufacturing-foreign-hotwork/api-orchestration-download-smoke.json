@@ -1,18 +1,18 @@
 {
-  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-05-03T11:41:41.292Z",
-  "elapsedMs": 50192,
+  "baseUrl": "http://127.0.0.1:3011",
+  "generatedAt": "2026-05-03T12:43:17.181Z",
+  "elapsedMs": 42107,
   "question": "그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 외국인 근로자 2명과 신규 작업자 1명 포함, 작업자 6명, 실내 고온과 환기 불량, 가연물 인접. 화재감시자와 다국어 안전교육까지 반영해 위험성평가, TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 187,
+    "elapsedMs": 70,
     "mode": "live",
     "summary": "단시간 흐림, 강수없음, 기온 12℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 47360,
+    "elapsedMs": 39458,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "그린메탈 경기 안산 공장 화기작업 현장 검토용 초안입니다.\n\n---\n\n### 1) 핵심 판단\n\n해당 화기작업은 용접·절단 과정에서 발생하는 불꽃, 고열, 유해가스 등의 위험과 더불어, '실내 고온 및 환기 불량', '가연물 인접'이라는 매우 취약한 작업 환경을 가지고 있습니다. 또한, ",
+      "evidence": "## 그린메탈 경기 안산 공장 배관 용접·절단 화기작업 위험성평가, TBM, 안전보건교육 기록 (현장 검토용 초안)\n\n**1) 핵심 판단**\n\n그린메탈 경기 안산 공장의 실내 배관 용접·절단 화기작업은 고온, 환기 불량, 가연물 인접 등 복합적인 위험 요소를 내포하고 있습니다. 특히 외",
       "count": 11
     },
     {
@@ -183,7 +183,7 @@
     {
       "format": "PDF",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.pdf",
-      "bytes": 277983,
+      "bytes": 277985,
       "ok": true
     },
     {
@@ -195,19 +195,19 @@
     {
       "format": "ALL_TXT",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.txt",
-      "bytes": 57326,
+      "bytes": 59280,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.csv",
-      "bytes": 84011,
+      "bytes": 86112,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\final-e2e-matrix\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.xls",
-      "bytes": 120886,
+      "bytes": 123493,
       "ok": true
     }
   ],

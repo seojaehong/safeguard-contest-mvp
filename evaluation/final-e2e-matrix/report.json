@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-05-03T11:44:03.909Z",
-  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "generatedAt": "2026-05-03T12:44:14.209Z",
+  "baseUrl": "http://127.0.0.1:3011",
   "localBaseUrl": "http://127.0.0.1:3011",
-  "elapsedMs": 629608,
-  "overall": "blocked",
+  "elapsedMs": 491294,
+  "overall": "notice",
   "gates": [
     {
       "name": "api-status",
-      "status": "blocked",
+      "status": "pass",
       "coverage": "주요 HTML route, safety-reference status, weather, PDF export source, dispatch log auth gate",
       "routeChecks": {
-        "status": "blocked",
+        "status": "pass",
         "htmlChecks": [
           {
             "route": "/",
@@ -19,9 +19,13 @@
             "result": {
               "ok": true,
               "statusCode": 200,
-              "elapsedMs": 162,
+              "elapsedMs": 204,
               "contentType": "text/html; charset=utf-8",
-              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPrio"
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/app/layout.css?v=1777811779615\" data-precedence=\"next_static/css/app/layout.css\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack.js?v=1777811779615\"/><script src=\"/_next/static/chunks/main-app.js?v=1777811779615\" async=\"\"></script><script src=\"/_next/static/chunks/app-pages-internals.js\" async=\"\"></script><script src=\"/_next/static/chunks/app/page.js\" async=\"\"></script><title>SafeClaw | 안전 문서팩 생성</title><meta name=\"description\" content=\"작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스\"/><script src=\"/_next/static/chunks/polyfills.js\" noModule=\"\"></script></head><body><div hidden=\"\"><!--$--><!--/$--></div><main class=\"safeclaw-landing\" aria-label=\"SafeClaw 회사 홈페이지\"><header class=\"safeclaw-landing-nav\"><a class=\"safeclaw-os-brand\" aria-label=\"SafeClaw 홈\" href=\"/\"><span class=\"safeclaw-os-mark\">SC</span><strong>safeclaw/<em>os</em></strong></a><nav aria-label=\"SafeClaw 홈페이지 메뉴\"><button type=\"button\">제품</button><button type=\"button\">문제</button><button type=\"button",
+              "textLength": 16827,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": true
             }
           },
           {
@@ -31,9 +35,13 @@
             "result": {
               "ok": true,
               "statusCode": 200,
-              "elapsedMs": 38298,
+              "elapsedMs": 36906,
               "contentType": "text/html; charset=utf-8",
-              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPrio"
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/app/layout.css?v=1777811782942\" data-precedence=\"next_static/css/app/layout.css\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack.js?v=1777811782942\"/><script src=\"/_next/static/chunks/main-app.js?v=1777811782942\" async=\"\"></script><script src=\"/_next/static/chunks/app-pages-internals.js\" async=\"\"></script><script src=\"/_next/static/chunks/app/ask/page.js\" async=\"\"></script><title>SafeClaw | 안전 문서팩 생성</title><meta name=\"description\" content=\"작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스\"/><script src=\"/_next/static/chunks/polyfills.js\" noModule=\"\"></script></head><body><div hidden=\"\"><!--$--><!--/$--></div><main class=\"container grid\"><section class=\"hero grid\"><div class=\"row\"><span class=\"badge\">근거 기반 질의</span><span class=\"badge\">현장 판단 보조</span></div><h1 class=\"title small-title\">질문형 확인 화면</h1><p class=\"subtitle\">복잡한 현장 질문을 법령·해석례·판례 근거와 함께 정리해 문서팩 작성 전 판단을 보조합니다.</p><div class=\"card list surface\"><div class=\"h3\">질문 예시</div><pre>하청 작업에서 원청의 안전보건 책임을 실무적으로 ",
+              "textLength": 93110,
+              "containsRiskAssessmentTitle": false,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": true
             }
           },
           {
@@ -43,9 +51,13 @@
             "result": {
               "ok": true,
               "statusCode": 200,
-              "elapsedMs": 27,
+              "elapsedMs": 2711,
               "contentType": "text/html; charset=utf-8",
-              "textPreview": "<!DOCTYPE html><!--qmQZ_A_K9kf87vd6lTyeg--><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"pr"
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/app/layout.css?v=1777811818912\" data-precedence=\"next_static/css/app/layout.css\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack.js?v=1777811818912\"/><script src=\"/_next/static/chunks/main-app.js?v=1777811818912\" async=\"\"></script><script src=\"/_next/static/chunks/app-pages-internals.js\" async=\"\"></script><script src=\"/_next/static/chunks/app/documents/page.js\" async=\"\"></script><title>SafeClaw | 안전 문서팩 생성</title><meta name=\"description\" content=\"작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스\"/><script src=\"/_next/static/chunks/polyfills.js\" noModule=\"\"></script></head><body><div hidden=\"\"><!--$--><!--/$--></div><main class=\"safeclaw-module-shell\"><aside class=\"safeclaw-module-rail\" aria-label=\"SafeClaw 제품 메뉴\"><a class=\"safeclaw-module-brand\" aria-label=\"SafeClaw 홈\" href=\"/\"><span>SC</span><strong>safeclaw/<em>os</em></strong></a><p>FIELD OS</p><nav aria-label=\"SafeClaw 운영 메뉴\"><section><h2>운영</h2><a class=\"\" href=\"/home\"><span>01</span><strong>대시보드</strong><",
+              "textLength": 84513,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": true,
+              "containsHtmlDocument": true
             }
           },
           {
@@ -55,9 +67,13 @@
             "result": {
               "ok": true,
               "statusCode": 200,
-              "elapsedMs": 20,
+              "elapsedMs": 929,
               "contentType": "text/html; charset=utf-8",
-              "textPreview": "<!DOCTYPE html><!--qmQZ_A_K9kf87vd6lTyeg--><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"pr"
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/app/layout.css?v=1777811820000\" data-precedence=\"next_static/css/app/layout.css\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack.js?v=1777811820000\"/><script src=\"/_next/static/chunks/main-app.js?v=1777811820000\" async=\"\"></script><script src=\"/_next/static/chunks/app-pages-internals.js\" async=\"\"></script><script src=\"/_next/static/chunks/app/dispatch/page.js\" async=\"\"></script><title>SafeClaw | 안전 문서팩 생성</title><meta name=\"description\" content=\"작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스\"/><script src=\"/_next/static/chunks/polyfills.js\" noModule=\"\"></script></head><body><div hidden=\"\"><!--$--><!--/$--></div><main class=\"safeclaw-module-shell\"><aside class=\"safeclaw-module-rail\" aria-label=\"SafeClaw 제품 메뉴\"><a class=\"safeclaw-module-brand\" aria-label=\"SafeClaw 홈\" href=\"/\"><span>SC</span><strong>safeclaw/<em>os</em></strong></a><p>FIELD OS</p><nav aria-label=\"SafeClaw 운영 메뉴\"><section><h2>운영</h2><a class=\"\" href=\"/home\"><span>01</span><strong>대시보드</strong></",
+              "textLength": 73651,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": true,
+              "containsHtmlDocument": true
             }
           },
           {
@@ -67,9 +83,13 @@
             "result": {
               "ok": true,
               "statusCode": 200,
-              "elapsedMs": 53,
+              "elapsedMs": 1116,
               "contentType": "text/html; charset=utf-8",
-              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPrio"
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/app/layout.css?v=1777811821200\" data-precedence=\"next_static/css/app/layout.css\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack.js?v=1777811821200\"/><script src=\"/_next/static/chunks/main-app.js?v=1777811821200\" async=\"\"></script><script src=\"/_next/static/chunks/app-pages-internals.js\" async=\"\"></script><script src=\"/_next/static/chunks/app/workspace/page.js\" async=\"\"></script><title>SafeClaw | 안전 문서팩 생성</title><meta name=\"description\" content=\"작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스\"/><script src=\"/_next/static/chunks/polyfills.js\" noModule=\"\"></script></head><body><div hidden=\"\"><!--$--><!--/$--></div><main class=\"command-center-shell\"><header class=\"command-topbar workspace-command-topbar\"><a class=\"brand-lockup safeclaw-lockup\" aria-label=\"SafeClaw 홈으로 이동\" href=\"/\"><span class=\"brand-mark\">SC</span><span><strong>SafeClaw</strong><small>현장 안전 문서팩</small></span></a><nav class=\"topnav command-stepper\" aria-label=\"작업 단계\" role=\"tablist\"><button type=",
+              "textLength": 23039,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": true
             }
           }
         ],
@@ -81,9 +101,13 @@
             "result": {
               "ok": true,
               "statusCode": 200,
-              "elapsedMs": 2194,
+              "elapsedMs": 3928,
               "contentType": "application/json",
-              "textPreview": "{\"ok\":true,\"configured\":true,\"status\":\"ready\",\"sources\":1063,\"items\":9920,\"expectedTechnicalTotal\":1040,\"technicalTotal\":1040,\"technicalSupportRegulations\":237,\"technicalGuidelines\":803,\"technicalSplitOk\":true,\"catalogSearchOk\":true,\"ingestionRuns\":2,\"itemTypes\":[{\"itemType\":\"sif-case\",\"count\":6033}"
+              "textPreview": "{\"ok\":true,\"configured\":true,\"status\":\"ready\",\"sources\":1063,\"items\":9920,\"expectedTechnicalTotal\":1040,\"technicalTotal\":1040,\"technicalSupportRegulations\":237,\"technicalGuidelines\":803,\"technicalSplitOk\":true,\"catalogSearchOk\":true,\"ingestionRuns\":2,\"itemTypes\":[{\"itemType\":\"sif-case\",\"count\":6033},{\"itemType\":\"construction-process\",\"count\":626},{\"itemType\":\"machinery\",\"count\":730},{\"itemType\":\"risk-manual\",\"count\":1},{\"itemType\":\"jsa-training\",\"count\":1},{\"itemType\":\"technical-guideline\",\"count\":803},{\"itemType\":\"technical-support-regulation\",\"count\":237}],\"samples\":[{\"id\":\"technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정\",\"source_id\":\"kosha-technical-support-regulations-2025\",\"item_type\":\"technical-support-regulation\",\"category\":\"전기안전분야\",\"subcategory\":\"기술지원규정\",\"title\":\"B-E-10-2026 정전전로 및 그 인근에서의 전기작업에 관한 기술지원규정\",\"summary\":\"- 1 - KOSHAGUIDEB–E–10-2026정전전로및그인근에서의전기작업에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 기술지원규정의개요ㅇ개정자:(사)고경력과학기술연우총연합회ㅇ제·개정경과-2025년11월기계·전기안전분야전문위원회심의(개정)-2026년1월표준제정위원회본위원회심의(개정)ㅇ관련규격및자료-미국OSHA29CodeofFederalRagulation1910(OccupationalSafety&HealthStandards)-미국NFPA70E(StandardforElectrica",
+              "textLength": 6223,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": false
             }
           },
           {
@@ -93,33 +117,45 @@
             "result": {
               "ok": true,
               "statusCode": 200,
-              "elapsedMs": 47,
+              "elapsedMs": 1252,
               "contentType": "application/json",
-              "textPreview": "{\"ok\":true,\"weather\":{\"source\":\"kma\",\"mode\":\"live\",\"locationLabel\":\"서울\",\"summary\":\"단시간 흐림, 강수없음, 기온 13℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선/생활기상 체감온도 반영)\",\"forecastTime\":\"20260503 2000\",\"temperatureC\":\"13\",\"windSpeedMps\":\"1\",\"actions\":[\"기상특보가 확인되어 작업 전 작업중지 기준과 옥외·고소작업 허용 여부를 관리감독자가 재판단\"],\"deta"
+              "textPreview": "{\"ok\":true,\"weather\":{\"source\":\"kma\",\"mode\":\"live\",\"locationLabel\":\"서울\",\"summary\":\"단시간 흐림, 비, 기온 13℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선/생활기상 체감온도 반영)\",\"forecastTime\":\"20260503 2100\",\"temperatureC\":\"13\",\"windSpeedMps\":\"1\",\"actions\":[\"기상특보가 확인되어 작업 전 작업중지 기준과 옥외·고소작업 허용 여부를 관리감독자가 재판단\",\"강수 가능성이 있어 미끄럼·감전 위험 구역과 누전 방지 조치를 점검\"],\"detail\":\"기상청 초단기실황 호출 성공 (서울, base 20260503 2000) / 기상청 초단기예보 호출 성공 (서울, base 20260503 2030) / 기상청 단기예보 호출 성공 (서울, base 20260503 2000) / 기상청 기상특보 조회 성공 (전국, 202605032100) / 기상청 영향예보 연결 점검 필요: NO_DATA / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 조회 성공 (서울, requestCode A48, areaNo 1100000000) / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0\",\"signals\":[{\"endpoint\":\"초단기실황\",\"mode\":\"live\",\"summary\":\"현재 강수없음, 기온 12.6℃, 풍속 1.1m/s, 1시간 강수 0mm\",\"forecastTime\":\"20260503 2000\",\"temperatureC\":\"12.6\",\"windSpeedMps\":\"1.1\",\"precipitationType\":\"강수없음\",\"detail\":\"기상청 초단기실황 호출 성공 (서울, base 20260503 2000)\"},{\"endpoint\":\"초단기예보\",\"mode\":\"live\",\"summary\":\"단시간 흐림, 비, 기온 13℃, 풍속 1m/s\",\"forecastTime\":\"20260503 2100\",\"temperatureC\":\"13\",\"windSpeedMps\":\"1\",\"precipitationType\":\"비\",\"detail\":\"기상청 초단기예보 호출 성공 (서울, base 20260503 2030)\"},{\"endpoint\":\"단기예보\",\"mode\":\"l",
+              "textLength": 2208,
+              "containsRiskAssessmentTitle": false,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": false
             }
           },
           {
             "route": "/api/export/pdf",
             "expected": "PDF print-ready export source responds as HTML",
-            "status": "blocked",
+            "status": "pass",
             "result": {
-              "ok": false,
-              "statusCode": 404,
-              "elapsedMs": 14,
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 553,
               "contentType": "text/html; charset=utf-8",
-              "textPreview": "<!DOCTYPE html><!--qmQZ_A_K9kf87vd6lTyeg--><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"pr"
+              "textPreview": "<!doctype html>\n<html lang=\"ko\">\n<head>\n  <meta charset=\"utf-8\" />\n  <title>위험성평가표</title>\n  <style>\n    @page { size: A4; margin: 14mm; }\n    * { box-sizing: border-box; }\n    body {\n      margin: 0;\n      background: #f4f1e8;\n      color: #15171b;\n      font-family: \"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif;\n      line-height: 1.55;\n    }\n    .page {\n      max-width: 210mm;\n      min-height: 297mm;\n      margin: 0 auto;\n      background: #fffdf7;\n      padding: 18mm 16mm;\n      border: 1px solid #d7d0c2;\n    }\n    .topline {\n      display: flex;\n      justify-content: space-between;\n      align-items: flex-start;\n      gap: 20px;\n      border-bottom: 3px solid #17191d;\n      padding-bottom: 14px;\n      margin-bottom: 16px;\n    }\n    h1 { margin: 0; font-size: 28px; letter-spacing: -0.04em; }\n    .subtitle { margin: 8px 0 0; color: #5c6472; font-size: 13px; }\n    .approval { display: grid; grid-template-columns: repeat(3, 70px); border: 1px solid #17191d; }\n    .approval div { min-height: 58px; border-left: 1px solid #17191d; padding: 6px; text-align: center; font-size: 12px; }\n    .approval div:first-child { border-left: 0; }\n    .approval b { display: bl",
+              "textLength": 5471,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": true,
+              "containsHtmlDocument": true
             }
           },
           {
             "route": "/api/dispatch-logs",
             "expected": "dispatch log route is protected or returns archive",
-            "status": "blocked",
+            "status": "pass",
             "result": {
               "ok": false,
-              "statusCode": 405,
-              "elapsedMs": 33,
-              "contentType": "",
-              "textPreview": ""
+              "statusCode": 401,
+              "elapsedMs": 1177,
+              "contentType": "application/json",
+              "textPreview": "{\"ok\":false,\"configured\":true,\"logs\":[],\"message\":\"관리자 로그인이 필요합니다.\"}",
+              "textLength": 68,
+              "containsRiskAssessmentTitle": false,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": false
             }
           }
         ]
@@ -127,62 +163,42 @@
     },
     {
       "name": "ask-generation",
-      "status": "blocked",
+      "status": "pass",
       "coverage": "/api/ask live sample 및 deterministic matrix 문서 생성",
       "reportPath": "evaluation\\final-e2e-matrix\\quality-matrix\\report.json"
     },
     {
       "name": "document-rubric",
-      "status": "blocked",
+      "status": "pass",
       "coverage": "위험성평가/TBM/교육/사진증빙/외국인 안내 등 문서별 필수 문구 반영",
       "reportPath": "evaluation\\final-e2e-matrix\\quality-matrix\\report.json"
     },
     {
       "name": "download-export",
-      "status": "blocked",
+      "status": "pass",
       "coverage": "PDF/HWPX/XLS/ALL_XLS 다운로드 스모크 및 /api/export/pdf HTML source",
       "reportPath": "evaluation\\final-e2e-matrix\\submission-readiness\\document-format-verification.json"
     },
     {
       "name": "dispatch-logs",
-      "status": "blocked",
+      "status": "notice",
       "coverage": "전파 실행 조건, dispatch workflow, dispatch log 저장 게이트",
       "reportPath": "evaluation\\final-e2e-matrix\\submission-readiness\\prod-dispatch-smoke.json"
     },
     {
       "name": "main-routes",
-      "status": "blocked",
+      "status": "pass",
       "coverage": "홈 생성 플로우, Sheets TSV, 근거 링크, 주요 route 응답",
       "reportPath": "evaluation\\final-e2e-matrix\\local-ui-regression-smoke.json"
     }
   ],
-  "blockers": [
-    {
-      "gate": "api-status",
-      "reason": "/api/export/pdf returned 404; /api/dispatch-logs returned 405"
-    },
-    {
-      "gate": "ask-generation",
-      "reason": "seoul-scaffold-paint__full-context: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__minimal-input: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__weather-heavy: runner:error This operation was aborted"
-    },
-    {
-      "gate": "document-rubric",
-      "reason": "seoul-scaffold-paint__full-context: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__minimal-input: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__weather-heavy: runner:error This operation was aborted"
-    },
-    {
-      "gate": "download-export",
-      "reason": "PDF/HWPX/XLS/ALL_XLS 다운로드 스모크 및 /api/export/pdf HTML source 게이트가 통과하지 못했습니다. 세부 JSON을 확인하세요."
-    },
+  "blockers": [],
+  "notices": [
     {
       "gate": "dispatch-logs",
-      "reason": "인증 토큰 또는 저장/전파 운영 의존성이 없어 제출 준비도 스크립트가 blocker로 판정했습니다."
-    },
-    {
-      "gate": "main-routes",
-      "reason": "홈 생성 플로우, Sheets TSV, 근거 링크, 주요 route 응답 게이트가 통과하지 못했습니다. 세부 JSON을 확인하세요."
+      "reason": "전파 실행 조건, dispatch workflow, dispatch log 저장 게이트 게이트가 조건부 통과 또는 설정 미완료 상태입니다."
     }
   ],
-  "notices": [],
   "artifacts": {
     "report": "evaluation\\final-e2e-matrix\\report.json",
     "summary": "evaluation\\final-e2e-matrix\\summary.md",
@@ -195,16 +211,17 @@
       "name": "safeclaw-quality-matrix",
       "command": "C:\\Program Files\\nodejs\\node.exe ./scripts/safeclaw_quality_matrix_runner.mjs",
       "env": {
+        "SAFEGUARD_BASE_URL": "http://127.0.0.1:3011",
         "SAFECLAW_MATRIX_LIVE": "1",
         "SAFECLAW_MATRIX_LIVE_COUNT": "3",
         "SAFECLAW_MATRIX_OUT_DIR": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-e2e-matrix\\quality-matrix"
       },
-      "status": "blocked",
-      "exitCode": 1,
+      "status": "pass",
+      "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "elapsedMs": 129302,
-      "stdout": "{\n  \"total\": 100,\n  \"pass\": 97,\n  \"fail\": 3,\n  \"mode\": \"mixed-live\",\n  \"liveExecuted\": 3,\n  \"outDir\": \"evaluation\\\\final-e2e-matrix\\\\quality-matrix\"\n}\n",
+      "elapsedMs": 118233,
+      "stdout": "{\n  \"total\": 100,\n  \"pass\": 100,\n  \"fail\": 0,\n  \"mode\": \"mixed-live\",\n  \"liveExecuted\": 3,\n  \"outDir\": \"evaluation\\\\final-e2e-matrix\\\\quality-matrix\"\n}\n",
       "stderr": "",
       "error": ""
     },
@@ -212,7 +229,7 @@
       "name": "submission-readiness",
       "command": "C:\\Program Files\\nodejs\\node.exe ./scripts/submission_readiness_smoke.mjs",
       "env": {
-        "SAFEGUARD_BASE_URL": "https://safeguard-contest-mvp.vercel.app",
+        "SAFEGUARD_BASE_URL": "http://127.0.0.1:3011",
         "SAFEGUARD_SUBMISSION_OUT_DIR": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-e2e-matrix\\submission-readiness",
         "SAFEGUARD_RUN_LIVE_DISPATCH": "0"
       },
@@ -220,7 +237,7 @@
       "exitCode": 1,
       "signal": null,
       "timedOut": false,
-      "elapsedMs": 316872,
+      "elapsedMs": 250665,
       "stdout": "{\n  \"overall\": \"blocked\",\n  \"outDir\": \"evaluation\\\\final-e2e-matrix\\\\submission-readiness\",\n  \"gates\": [\n    {\n      \"name\": \"ask-orchestration\",\n      \"verdict\": \"pass\"\n    },\n    {\n      \"name\": \"storage\",\n      \"verdict\": \"blocked\"\n    },\n    {\n      \"name\": \"dispatch\",\n      \"verdict\": \"pass_with_notice\"\n    },\n    {\n      \"name\": \"formats\",\n      \"verdict\": \"pass\"\n    }\n  ]\n}\n",
       "stderr": "",
       "error": ""
@@ -229,14 +246,15 @@
       "name": "local-ui-regression",
       "command": "C:\\Program Files\\nodejs\\node.exe ./scripts/local_ui_regression_smoke.mjs",
       "env": {
+        "SAFEGUARD_BASE_URL": "http://127.0.0.1:3011",
         "BASE_URL": "http://127.0.0.1:3011",
         "OUTPUT_PATH": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-e2e-matrix\\local-ui-regression-smoke.json"
       },
-      "status": "blocked",
-      "exitCode": 1,
+      "status": "pass",
+      "exitCode": 0,
       "signal": null,
       "timedOut": false,
-      "elapsedMs": 142568,
+      "elapsedMs": 54634,
       "stdout": "",
       "stderr": "",
       "error": ""

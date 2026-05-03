@@ -382,11 +382,23 @@ function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
     };
   }
 
-  if (key === "tbmBriefing" || key === "tbmLogDraft") {
+  if (key === "tbmLogDraft") {
+    return {
+      code: "SC-TBM-01",
+      subtitle: "TBM 일지 및 작업 전 안전점검 회의록",
+      layout: "tbmLog",
+      primaryColumn: "점검/논의 항목",
+      actionColumn: "전달 내용 / 조치",
+      confirmationRows: ["보호구 확인", "건강상태 확인", "음주 여부 확인", "참석자 확인"],
+      approvalLabels: ["담당", "소장"]
+    };
+  }
+
+  if (key === "tbmBriefing") {
     return {
       code: "SC-TBM-01",
       subtitle: "TBM 및 작업 전 안전점검 회의록",
-      layout: key === "tbmLogDraft" ? "tbmLog" : "tbmBriefing",
+      layout: "tbmBriefing",
       primaryColumn: "점검/논의 항목",
       actionColumn: "전달 내용 / 조치",
       confirmationRows: ["작업내용 공유", "위험요인 전달", "작업중지 기준 확인", "참석자 확인"],
@@ -426,7 +438,7 @@ function formCss(pageMargin = "36px") {
     .form-title span { display: inline-block; margin-bottom: 8px; color: #21594f; font-size: 12px; font-weight: 900; letter-spacing: 0.12em; }
     .form-title h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
     .form-title p { margin: 8px 0 0; color: #4c5665; font-size: 13px; }
-    .approval-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-left: 2px solid #161b22; }
+    .approval-grid { display: grid; grid-template-columns: repeat(var(--approval-count, 3), 1fr); border-left: 2px solid #161b22; }
     .approval-cell { display: grid; grid-template-rows: 34px 1fr; min-height: 108px; border-left: 1px solid #161b22; text-align: center; }
     .approval-cell:first-child { border-left: 0; }
     .approval-cell b { display: grid; place-items: center; background: #f2ead9; border-bottom: 1px solid #161b22; font-size: 12px; }
@@ -458,6 +470,11 @@ function formCss(pageMargin = "36px") {
     .risk-level-high { background: #ffe3df; font-weight: 900; color: #a83224; }
     .permit-check td:nth-child(2), .permit-check td:nth-child(3) { text-align: center; font-weight: 900; }
     .attendee-table td { height: 42px; }
+    .tbm-daily-table th, .tbm-daily-table td { font-size: 11px; padding: 6px 5px; }
+    .tbm-check-list td:first-child { width: 28%; font-weight: 900; background: #f7f1e6; }
+    .tbm-two-column td { min-height: 92px; }
+    .tbm-attendance th, .tbm-attendance td { text-align: center; font-size: 10px; padding: 5px 4px; }
+    .tbm-attendance td:nth-child(3), .tbm-attendance td:nth-child(9) { text-align: left; }
     @media print { body { background: #ffffff; } .safety-form-page { margin: 0; box-shadow: none; max-width: none; } }
   `;
 }
@@ -656,39 +673,118 @@ function buildPermitSections(rows: SheetRow[], scenario: AskResponse["scenario"]
   `;
 }
 
-function buildTbmLogSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
-  const agendaRows = findRows(rows, ["위험", "조치", "확인", "보호구", "작업중지", "질문"], 5);
+function buildEducationSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
+  const educationRows = findRows(rows, ["교육", "보호구", "위험", "확인", "이해", "작업중지"], 6);
   return `
     <section class="section-block">
-      <div class="section-label">1. TBM 회의 정보</div>
+      <div class="section-label">1. 교육 실시 개요</div>
       <table class="mini-table">
         <tbody>
-          <tr><th>일시</th><td>____년 ____월 ____일 ____시</td><th>장소</th><td>${escapeHtml(scenario.siteName)}</td></tr>
-          <tr><th>작업내용</th><td>${escapeHtml(scenario.workSummary)}</td><th>진행자</th><td>작업반장 / 관리감독자</td></tr>
+          <tr><th>교육명</th><td>${escapeHtml(scenario.workSummary)} 작업 전 안전보건교육</td><th>교육일시</th><td>____년 ____월 ____일 ____시</td></tr>
+          <tr><th>교육장소</th><td>${escapeHtml(scenario.siteName)}</td><th>교육대상</th><td>투입 근로자 ${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr>
+          <tr><th>교육자</th><td>관리감독자 / 작업반장</td><th>교육방법</th><td>TBM, 현장 시연, 구두 이해 확인</td></tr>
         </tbody>
       </table>
     </section>
     <section class="section-block">
-      <div class="section-label">2. 공유 내용 및 이해 확인</div>
+      <div class="section-label">2. 교육 내용 및 이해 확인</div>
       <table>
-        <colgroup><col style="width: 8%;" /><col style="width: 26%;" /><col style="width: 42%;" /><col style="width: 12%;" /><col style="width: 12%;" /></colgroup>
-        <thead><tr><th>No.</th><th>공유 항목</th><th>전달 내용</th><th>복창/질문</th><th>확인</th></tr></thead>
+        <colgroup><col style="width: 8%;" /><col style="width: 24%;" /><col style="width: 38%;" /><col style="width: 15%;" /><col style="width: 15%;" /></colgroup>
+        <thead><tr><th>No.</th><th>교육 항목</th><th>주요 내용</th><th>확인 방법</th><th>추가교육</th></tr></thead>
         <tbody>
-          ${agendaRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td>□</td><td>□</td></tr>`).join("")}
+          ${educationRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td>□ 질문 □ 복창 □ 서명</td><td>□ 필요 □ 불필요</td></tr>`).join("")}
         </tbody>
       </table>
     </section>
     <section class="section-block">
-      <div class="section-label">3. 참석자 명단</div>
+      <div class="section-label">3. 교육 참석자 확인</div>
       <table class="attendee-table">
-        <thead><tr><th>연번</th><th>성명</th><th>소속</th><th>직위/역할</th><th>서명</th></tr></thead>
+        <thead><tr><th>No.</th><th>성명</th><th>소속</th><th>역할/직종</th><th>언어</th><th>서명</th></tr></thead>
         <tbody>
-          ${Array.from({ length: Math.max(4, Math.min(8, scenario.workerCount)) }, (_, index) => `<tr><td class="center">${index + 1}</td><td></td><td></td><td></td><td></td></tr>`).join("")}
+          ${Array.from({ length: Math.max(4, Math.min(10, scenario.workerCount)) }, (_, index) => `<tr><td class="center">${index + 1}</td><td></td><td></td><td></td><td>한국어</td><td></td></tr>`).join("")}
         </tbody>
       </table>
     </section>
     <section class="section-block">
-      <div class="section-label">4. 미조치 및 사진·영상 증빙</div>
+      <div class="section-label">4. 미이해자 및 후속 조치</div>
+      <table><thead><tr><th>대상자</th><th>미이해 내용</th><th>재교육 방법</th><th>완료 확인</th></tr></thead><tbody><tr><td></td><td></td><td></td><td>□ 완료 □ 추적</td></tr></tbody></table>
+    </section>
+  `;
+}
+
+function buildTbmLogSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
+  const agendaRows = findRows(rows, ["위험", "조치", "확인", "보호구", "작업중지", "질문"], 5);
+  const dailyRiskText = agendaRows.slice(0, 3).map((row) => compactContent(row, "금일 위험요인")).join("<br />");
+  const educationText = agendaRows.slice(0, 4).map((row, index) => `${index + 1}. ${escapeHtml(row.item)} - ${escapeHtml(row.content)}`).join("<br />");
+  const attendeeHalf = Math.max(10, Math.min(20, Math.ceil(scenario.workerCount / 2)));
+  const attendanceRows = Array.from({ length: attendeeHalf }, (_, index) => {
+    const leftNo = index + 1;
+    const rightNo = index + attendeeHalf + 1;
+    return `<tr>
+      <td>${leftNo}</td><td></td><td></td><td>□</td><td>□</td><td></td>
+      <td>${rightNo}</td><td></td><td></td><td>□</td><td>□</td><td></td>
+    </tr>`;
+  }).join("");
+  return `
+    <section class="section-block">
+      <div class="section-label">1. TBM 일지 기본정보</div>
+      <table class="mini-table tbm-daily-table">
+        <tbody>
+          <tr><th>공종</th><td>${escapeHtml(scenario.workSummary)}</td><th>일자</th><td>____년 ____월 ____일</td></tr>
+          <tr><th>현장</th><td>${escapeHtml(scenario.siteName)}</td><th>작업인원</th><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr>
+          <tr><th>진행자</th><td>작업반장 / 관리감독자</td><th>기상·조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">2. 근로자 확인 사항</div>
+      <table class="tbm-check-list">
+        <tbody>
+          <tr><td>개인 보호구 착용 상태</td><td>□ 안전모 □ 안전화 □ 각반 □ 복장 □ 턱끈 □ 작업별 보호구</td></tr>
+          <tr><td>건강상태</td><td>□ 고혈압 □ 당뇨 □ 어지러움 □ 근골격계 통증 □ 기타 질병/이상 없음</td></tr>
+          <tr><td>음주 여부</td><td>□ 이상 없음 □ 확인 필요: ____________________</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">3. 금일 작업사항 및 위험요인</div>
+      <table class="tbm-two-column">
+        <colgroup><col style="width: 50%;" /><col style="width: 50%;" /></colgroup>
+        <thead><tr><th>금일 작업사항</th><th>금일 위험요인</th></tr></thead>
+        <tbody><tr><td>${escapeHtml(scenario.workSummary)}</td><td>${dailyRiskText || "작업 전 위험요인 확인 및 공유"}</td></tr></tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">4. 일일 안전교육 및 전달사항</div>
+      <table>
+        <tbody><tr><td>${educationText || "작업 전 안전교육, 작업중지 기준, 비상연락체계를 전달하고 이해 여부를 확인합니다."}</td></tr></tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">5. 참석자 명단</div>
+      <table class="tbm-attendance">
+        <colgroup>
+          <col style="width: 5%;" /><col style="width: 9%;" /><col style="width: 14%;" /><col style="width: 6%;" /><col style="width: 6%;" /><col style="width: 10%;" />
+          <col style="width: 5%;" /><col style="width: 9%;" /><col style="width: 14%;" /><col style="width: 6%;" /><col style="width: 6%;" /><col style="width: 10%;" />
+        </colgroup>
+        <thead><tr><th>NO</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th><th>NO</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th></tr></thead>
+        <tbody>
+          ${attendanceRows}
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">6. 인원 집계 및 확인자</div>
+      <table class="tbm-daily-table">
+        <thead><tr><th>분류</th><th>인원</th><th>담당</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>근로자</td><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td><td>담당자</td><td></td></tr>
+          <tr><td>관리자</td><td></td><td>현장소장</td><td></td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">7. 미조치 및 사진·영상 증빙</div>
       <table><thead><tr><th>미조치 위험요인</th><th>후속조치</th><th>사진/영상 파일명</th><th>확인자</th></tr></thead><tbody><tr><td></td><td></td><td></td><td></td></tr></tbody></table>
     </section>
   `;
@@ -786,7 +882,9 @@ function buildSafetyFormMarkup(
           ? `${bridgeSections}${buildTbmLogSections(rows, scenario)}`
           : profile.layout === "tbmBriefing"
             ? (data ? buildTbmBriefingSections(rows, scenario, data, riskRows) : buildGenericSections(rows, profile))
-            : buildGenericSections(rows, profile);
+            : profile.layout === "education"
+              ? buildEducationSections(rows, scenario)
+              : buildGenericSections(rows, profile);
   const approvalCells = profile.approvalLabels.map((label) => `
     <div class="approval-cell"><b>${escapeHtml(label)}</b><em>서명</em></div>
   `).join("");
@@ -802,7 +900,7 @@ function buildSafetyFormMarkup(
         <h1>${escapeHtml(title)}</h1>
         <p>${escapeHtml(profile.subtitle)} · SafeClaw 공식자료 기반 초안</p>
       </div>
-      <div class="approval-grid">${approvalCells}</div>
+      <div class="approval-grid" style="--approval-count: ${profile.approvalLabels.length};">${approvalCells}</div>
     </header>
     <div class="meta-grid">
       <div class="meta-item"><b>사업장</b><span>${escapeHtml(scenario.companyName)}</span></div>
@@ -942,7 +1040,7 @@ function buildExcelHtml(
   data?: AskResponse,
   riskRows: SheetRow[] = []
 ) {
-  if (profile.layout === "risk" || profile.layout === "workPlan" || profile.layout === "permit" || profile.layout === "tbmLog" || profile.layout === "tbmBriefing") {
+  if (profile.layout === "risk" || profile.layout === "workPlan" || profile.layout === "permit" || profile.layout === "tbmLog" || profile.layout === "tbmBriefing" || profile.layout === "education") {
     return `<!doctype html>
 <html lang="ko">
 <head>
@@ -1151,10 +1249,16 @@ function buildHwpTemplateText(
         : profile.layout === "tbmLog"
           ? [
               "[서식 구조]",
-              "회의 정보 / 공유 내용 / 참석자 명단(성명·소속·직위·서명) / 미조치 및 사진·영상 증빙",
+              "담당·소장 결재 / 공종·일자 / 근로자 확인사항 / 금일 작업사항 / 금일 위험요인 / 일일 안전교육 및 전달사항 / 참석자 명단(NO·직종·성명·오전·오후·비고) / 인원 집계 / 미조치 및 사진·영상 증빙",
               ""
             ]
-          : [];
+          : profile.layout === "education"
+            ? [
+                "[서식 구조]",
+                "교육 실시 개요 / 교육 내용 및 이해 확인 / 참석자 명단(성명·소속·역할·언어·서명) / 미이해자 및 후속 조치",
+                ""
+              ]
+            : [];
 
   return [
     `${title}(초안)`,
