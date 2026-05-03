@@ -1,0 +1,891 @@
+{
+  "generatedAt": "2026-05-03T19:03:42.089461",
+  "elapsedSeconds": 60.51,
+  "scope": {
+    "repo": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp",
+    "sourceRoots": [
+      "C:\\Users\\iceam\\Downloads",
+      "C:\\Users\\iceam\\OneDrive\\_30_컨설팅\\2025\\산업안전"
+    ],
+    "dbMutation": false,
+    "codeMutation": false
+  },
+  "summary": {
+    "sourceFileCount": 10,
+    "readableSourceCount": 7,
+    "directTbmSourceCount": 8,
+    "oneDriveDirectTbmFilesFound": 0,
+    "oneDriveRelatedFormFilesFound": 2
+  },
+  "sourceFiles": [
+    {
+      "path": "C:\\Users\\iceam\\Downloads\\TBM 일지.hwpx",
+      "name": "TBM 일지.hwpx",
+      "extension": ".hwpx",
+      "exists": true,
+      "sizeBytes": 42034,
+      "lastModified": "2026-05-03T18:52:02.504864",
+      "readable": true,
+      "method": "zip+xml",
+      "notes": [],
+      "textLength": 329,
+      "keywordSnippets": [
+        "TBM 일지 담 당 - 소 장 공 종: 타설 일자:202 년 월 일 근로자 확인 사항 *개인 보호구 착용 상태(안전모,안전화,각반,복장,턱끈) *건강상태(고혈압,당요,기타질병)",
+        "강상태(고혈압,당요,기타질병) *음주 여부 금일 작업사항 금일위험 요인 일일 안전교육 및 전달사항 참석자 명단 NO 직 종 성 명 오전 오후 비 고 NO 직 종 성 명 오전 오후 비 고 1 21 2 22 3 23 4 24 5 25 6 26 7 27 8 28 9 29 10",
+        "TBM 일지 담 당 - 소 장 공 종: 타설 일자:202 년 월 일 근로자 확인 사항 *개인 보호구 착용 상태(안전모,안전화,각반,복장,턱끈) *건강상태(고혈압,당요,기타질병) *음주 여부 금일 작업사항 금일위험 요인 일일 안전교육 및 전달사항 참석",
+        "32 13 NO 분 류 인 원 담 당 비 고 14 1 근로자 15 2 장비 16 3 관리자 17 확인자 담당자 18 확인자 19 관리자 20 현장소장",
+        "류 인 원 담 당 비 고 14 1 근로자 15 2 장비 16 3 관리자 17 확인자 담당자 18 확인자 19 관리자 20 현장소장"
+      ],
+      "fieldCandidates": [
+        "건강상태",
+        "보호구",
+        "음주",
+        "일자",
+        "확인자"
+      ],
+      "xmlFileCount": 6,
+      "sectionXmlCount": 1,
+      "tables": [
+        {
+          "sourceXml": "Contents/section0.xml",
+          "rowCount": 30,
+          "maxColumnCount": 12,
+          "rowsPreview": [
+            [
+              "TBM 일지",
+              "담 당",
+              "-",
+              "소 장"
+            ],
+            [
+              "공 종:",
+              "타설",
+              "일자:202 년 월 일"
+            ],
+            [
+              "근로자 확인 사항"
+            ],
+            [
+              "*개인 보호구 착용 상태(안전모,안전화,각반,복장,턱끈)"
+            ],
+            [
+              "*건강상태(고혈압,당요,기타질병)"
+            ],
+            [
+              "*음주 여부"
+            ],
+            [
+              "금일 작업사항",
+              "금일위험 요인"
+            ],
+            [
+              "일일 안전교육 및 전달사항"
+            ],
+            [
+              "참석자 명단"
+            ],
+            [
+              "NO",
+              "직 종",
+              "성 명",
+              "오전",
+              "오후",
+              "비 고",
+              "NO",
+              "직 종",
+              "성 명",
+              "오전",
+              "오후",
+              "비 고"
+            ],
+            [
+              "1",
+              "21"
+            ],
+            [
+              "2",
+              "22"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\iceam\\Downloads\\Tool Box Meeting 회의록.hwpx",
+      "name": "Tool Box Meeting 회의록.hwpx",
+      "extension": ".hwpx",
+      "exists": true,
+      "sizeBytes": 45002,
+      "lastModified": "2026-05-03T18:52:25.736112",
+      "readable": true,
+      "method": "zip+xml",
+      "notes": [],
+      "textLength": 529,
+      "keywordSnippets": [
+        "x Meeting 회의록 (양식) T oo l B o x M e e ti n g 회의록 ( 양식) TBM 일시 20 년 월 일 : ~ : 작업날짜와 동일함 (□예, □아니오) 작 업 명 작업내용 TBM 장소 위험성평가 실시여부 예 □ 아니오 □ 잠재위험요인 대책 (※ 제거",
+        "TBM 일시 20 년 월 일 : ~ : 작업날짜와 동일함 (□예, □아니오) 작 업 명 작업내용 TBM 장소 위험성평가 실시여부 예 □ 아니오 □ 잠재위험요인 대책 (※ 제거 → 대체 → 통제 순서 고려) 중점위험 요인 선정 ※ 잠재위험요인  ~  중 중요위험 1개를",
+        "서 고려) 중점위험 요인 선정 ※ 잠재위험요인  ~  중 중요위험 1개를 선정하여 기재함 대책 TBM 리더 확인 • 소속 : • 직책: • 성명 (서명) ■ 작업 전 안전조치 확인 ※ 위 잠재위험요인(중점위험 포함) 안전조치 여부 재확인 잠재위험요소(중점위험 포함) 조",
+        "아니오□ ■ 작업 전 일일 안전점검 시행 결과 ※ 위험요인 중 조치가 되지 않은 사항, 작업자의 TBM내용 숙지 여부 중점체크 ■ 작업 후 종료 미팅(중점대책의 실효성) ■ 참석자 확인 ※ TBM에 참여하지 않은 작업자를 확인하여 미팅 참석 유도 이름 성명 이름 성명 이름",
+        "자의 TBM내용 숙지 여부 중점체크 ■ 작업 후 종료 미팅(중점대책의 실효성) ■ 참석자 확인 ※ TBM에 참여하지 않은 작업자를 확인하여 미팅 참석 유도 이름 성명 이름 성명 이름 성명",
+        "<서식 2>Tool Box Meeting 회의록 (양식) T oo l B o x M e e ti n g 회의록 ( 양식) TBM 일시 20 년 월 일 : ~ : 작업날짜와 동일함 (□예, □아니오",
+        "( 양식) TBM 일시 20 년 월 일 : ~ : 작업날짜와 동일함 (□예, □아니오) 작 업 명 작업내용 TBM 장소 위험성평가 실시여부 예 □ 아니오 □ 잠재위험요인 대책 (※ 제거 → 대체 → 통제 순서 고려) 중점위험 요인 선정 ※ 잠재위험요인  ~  중 중요위험",
+        "일함 (□예, □아니오) 작 업 명 작업내용 TBM 장소 위험성평가 실시여부 예 □ 아니오 □ 잠재위험요인 대책 (※ 제거 → 대체 → 통제 순서 고려) 중점위험 요인 선정 ※ 잠재위험요인  ~  중 중요위험 1개를 선정하여 기재함 대책 TBM 리더 확인 • 소속 : •",
+        "아니오 □ 잠재위험요인 대책 (※ 제거 → 대체 → 통제 순서 고려) 중점위험 요인 선정 ※ 잠재위험요인  ~  중 중요위험 1개를 선정하여 기재함 대책 TBM 리더 확인 • 소속 : • 직책: • 성명 (서명) ■ 작업 전 안전조치 확인 ※ 위 잠재위험요인(중점위험 포",
+        "TBM 리더 확인 • 소속 : • 직책: • 성명 (서명) ■ 작업 전 안전조치 확인 ※ 위 잠재위험요인(중점위험 포함) 안전조치 여부 재확인 잠재위험요소(중점위험 포함) 조 치 여 부 ‘아니오’인 경우 조치 내용 예□, 아니오□ 예□, 아니오□ 예□, 아니오□ ■ 작업 전"
+      ],
+      "fieldCandidates": [
+        "서명",
+        "위험요인",
+        "일시",
+        "작업내용"
+      ],
+      "xmlFileCount": 6,
+      "sectionXmlCount": 1,
+      "tables": [
+        {
+          "sourceXml": "Contents/section0.xml",
+          "rowCount": 18,
+          "maxColumnCount": 6,
+          "rowsPreview": [
+            [
+              "TBM 일시",
+              "20 년 월 일 : ~ : 작업날짜와 동일함 (□예, □아니오)"
+            ],
+            [
+              "작 업 명"
+            ],
+            [
+              "작업내용"
+            ],
+            [
+              "TBM 장소",
+              "위험성평가 실시여부",
+              "예 □ 아니오 □"
+            ],
+            [
+              "잠재위험요인",
+              "대책 (※ 제거 → 대체 → 통제 순서 고려)"
+            ],
+            [
+              "중점위험 요인",
+              "선정",
+              "※ 잠재위험요인  ~  중 중요위험 1개를 선정하여 기재함"
+            ],
+            [
+              "대책"
+            ],
+            [
+              "TBM 리더 확인",
+              "• 소속 : • 직책: • 성명 (서명)"
+            ],
+            [
+              "■ 작업 전 안전조치 확인 ※ 위 잠재위험요인(중점위험 포함) 안전조치 여부 재확인"
+            ],
+            [
+              "잠재위험요소(중점위험 포함)",
+              "조 치 여 부",
+              "‘아니오’인 경우 조치 내용"
+            ],
+            [
+              "예□, 아니오□"
+            ],
+            [
+              "예□, 아니오□"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\iceam\\Downloads\\TBM 일지.hwp",
+      "name": "TBM 일지.hwp",
+      "extension": ".hwp",
+      "exists": true,
+      "sizeBytes": 41984,
+      "lastModified": "2026-05-03T18:47:25.417051",
+      "readable": false,
+      "method": "not-parsed",
+      "notes": [
+        "바이너리 HWP는 이번 패스에서 HWPX 대체본으로 검토"
+      ],
+      "textLength": 0,
+      "keywordSnippets": [],
+      "fieldCandidates": []
+    },
+    {
+      "path": "C:\\Users\\iceam\\Downloads\\Tool Box Meeting 회의록.hwp",
+      "name": "Tool Box Meeting 회의록.hwp",
+      "extension": ".hwp",
+      "exists": true,
+      "sizeBytes": 48640,
+      "lastModified": "2026-05-03T18:47:35.242331",
+      "readable": false,
+      "method": "not-parsed",
+      "notes": [
+        "바이너리 HWP는 이번 패스에서 HWPX 대체본으로 검토"
+      ],
+      "textLength": 0,
+      "keywordSnippets": [],
+      "fieldCandidates": []
+    },
+    {
+      "path": "C:\\Users\\iceam\\Downloads\\230209 작업 전 안전점검회의 가이드(배포용).pdf",
+      "name": "230209 작업 전 안전점검회의 가이드(배포용).pdf",
+      "extension": ".pdf",
+      "exists": true,
+      "sizeBytes": 4208147,
+      "lastModified": "2026-05-03T18:47:56.456159",
+      "readable": true,
+      "method": "pdfplumber",
+      "notes": [],
+      "textLength": 36525,
+      "keywordSnippets": [
+        "자기규율 예방체계 구축 “위험성평가와 작업 전 안전점검회의(TBM)에 답이 있다” 작업 전 안전점검회의 가이드 (TBM: Tool Box Meeting) - 제조업 12개 고위험 기인물 자율점검표 포함 - 2023. 2. 안전한 일터를",
+        "계 구축 “위험성평가와 작업 전 안전점검회의(TBM)에 답이 있다” 작업 전 안전점검회의 가이드 (TBM: Tool Box Meeting) - 제조업 12개 고위험 기인물 자율점검표 포함 - 2023. 2. 안전한 일터를 위한 ｢자기규율 예방체계｣ 구축! 그 해답은 “위험성",
+        "안전한 일터를 위한 ｢자기규율 예방체계｣ 구축! 그 해답은 “위험성평가”와 “작업 전 안전점검회의(TBM: Tool Box Meeting)”에 있습니다. ‘22.11.30. 관계부처 합동으로 발표한 ｢중대재해 감축 로드맵｣의 골자는 위험성평가를 핵심 수단으로 ｢자기규율 예방",
+        "에 대한 책임을 부여하는 안전관리 방식을 의미 현장의 노사가 함께 참여하여 위험성평가를 실시하고, TBM을 통해서 위험요인과 대책을 현장에 전달하며 매일, 매일 반복해서 TBM을 하는 것이 안전한 일터 조성을 위해 가장 효과적이고 실천 가능한 방법 중 하나입니다. 위험요인을",
+        "여 위험성평가를 실시하고, TBM을 통해서 위험요인과 대책을 현장에 전달하며 매일, 매일 반복해서 TBM을 하는 것이 안전한 일터 조성을 위해 가장 효과적이고 실천 가능한 방법 중 하나입니다. 위험요인을 발굴하고 대책을 세웠으나 현장의 작업자에게 전달되지 않고 공유되지 않는",
+        "으나 현장의 작업자에게 전달되지 않고 공유되지 않는다면 산재예방 효과를 기대할 수 없을 것입니다. TBM이 효과적으로 작동하려면 관리감독자의 사전 준비가 무엇보다 중요하며, 핵심 준비사항은 해당 작업에 대한 철저한 위험성평가입니다. TBM은 작업 전에 작업자들이 함께 모여",
+        "독자의 사전 준비가 무엇보다 중요하며, 핵심 준비사항은 해당 작업에 대한 철저한 위험성평가입니다. TBM은 작업 전에 작업자들이 함께 모여 10분 내외로 작업내용과 위험요인을 재확인하고, 안전한 작업절차가 무엇인지 서로 확인하는 활동입니다. TBM에서 공유되어야 할 가장 중",
+        "분 내외로 작업내용과 위험요인을 재확인하고, 안전한 작업절차가 무엇인지 서로 확인하는 활동입니다. TBM에서 공유되어야 할 가장 중요한 내용은 해당 작업의 위험성평가 결과이며, 관리감독자는 사전에 이를 꼼꼼하게 준비하고 숙지해야 합니다. 결국, ｢자기규율 예방체계｣ 구축은",
+        "하고 숙지해야 합니다. 결국, ｢자기규율 예방체계｣ 구축은 위험성평가와 이를 현장에 전달할 수단인 TBM이라는 두 개의 축이 제대로 작동할 때 가능하다고 할 것입니다. 가이드의 구성 본 가이드는 현장에서 TBM을 통해 위험성평가 결과가 작업자, 관리자 등 종사자에게 잘 전달",
+        "라는 두 개의 축이 제대로 작동할 때 가능하다고 할 것입니다. 가이드의 구성 본 가이드는 현장에서 TBM을 통해 위험성평가 결과가 작업자, 관리자 등 종사자에게 잘 전달되고, 결국 기업의 안전 문화 수준을 향상시킬 수 있도록 효과적인 팁을 제공하기 위해 아래와 같은 구성으로"
+      ],
+      "fieldCandidates": [
+        "건강상태",
+        "관리감독자",
+        "보호구",
+        "비상",
+        "사진",
+        "서명",
+        "신규",
+        "실시자",
+        "외국인",
+        "위험요인",
+        "음주",
+        "일시",
+        "작업내용",
+        "작업반장",
+        "작업장소"
+      ],
+      "pages": 51
+    },
+    {
+      "path": "C:\\Users\\iceam\\Downloads\\11 건설현장 TBM 실천 가이드.pdf",
+      "name": "11 건설현장 TBM 실천 가이드.pdf",
+      "extension": ".pdf",
+      "exists": true,
+      "sizeBytes": 19556934,
+      "lastModified": "2026-05-03T18:49:38.927833",
+      "readable": false,
+      "method": "pdfplumber",
+      "notes": [],
+      "textLength": 0,
+      "keywordSnippets": [],
+      "fieldCandidates": [],
+      "pages": 56
+    },
+    {
+      "path": "C:\\Users\\iceam\\Downloads\\세이프건설-tbm-briefing.xls",
+      "name": "세이프건설-tbm-briefing.xls",
+      "extension": ".xls",
+      "exists": true,
+      "sizeBytes": 5217,
+      "lastModified": "2026-04-27T18:53:14.405613",
+      "readable": true,
+      "method": "decode+html-strip",
+      "notes": [],
+      "textLength": 1872,
+      "keywordSnippets": [
+        "TBM/작업 전 안전점검회의 table { border-collapse: collapse; width: 100%; font-family: \"Malgun Gothic\", sans",
+        "{ background: #e8f1ed; font-weight: 700; } 문서 섹션 항목 내용 TBM/작업 전 안전점검회의 기본정보 1 작업 전 안전점검회의(TBM) 브리핑(초안) TBM/작업 전 안전점검회의 기본정보 공식자료 기반 KOSHA TBM OPS 및 고용노동부",
+        "700; } 문서 섹션 항목 내용 TBM/작업 전 안전점검회의 기본정보 1 작업 전 안전점검회의(TBM) 브리핑(초안) TBM/작업 전 안전점검회의 기본정보 공식자료 기반 KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 TBM/작업 전 안전점검회의",
+        "항목 내용 TBM/작업 전 안전점검회의 기본정보 1 작업 전 안전점검회의(TBM) 브리핑(초안) TBM/작업 전 안전점검회의 기본정보 공식자료 기반 KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 TBM/작업 전 안전점검회의 기본정보 일시 작업 시작",
+        "안전점검회의(TBM) 브리핑(초안) TBM/작업 전 안전점검회의 기본정보 공식자료 기반 KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 TBM/작업 전 안전점검회의 기본정보 일시 작업 시작 전 TBM/작업 전 안전점검회의 기본정보 장소 서울 성수동 근",
+        "초안) TBM/작업 전 안전점검회의 기본정보 공식자료 기반 KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 TBM/작업 전 안전점검회의 기본정보 일시 작업 시작 전 TBM/작업 전 안전점검회의 기본정보 장소 서울 성수동 근린생활시설 현장 TBM/작업",
+        "의 기본정보 공식자료 기반 KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고 TBM/작업 전 안전점검회의 기본정보 일시 작업 시작 전 TBM/작업 전 안전점검회의 기본정보 장소 서울 성수동 근린생활시설 현장 TBM/작업 전 안전점검회의 기본정보 업체명",
+        "용노동부 TBM 교육시간 인정 안내 참고 TBM/작업 전 안전점검회의 기본정보 일시 작업 시작 전 TBM/작업 전 안전점검회의 기본정보 장소 서울 성수동 근린생활시설 현장 TBM/작업 전 안전점검회의 기본정보 업체명 세이프건설 TBM/작업 전 안전점검회의 기본정보 오늘 작업",
+        "정보 일시 작업 시작 전 TBM/작업 전 안전점검회의 기본정보 장소 서울 성수동 근린생활시설 현장 TBM/작업 전 안전점검회의 기본정보 업체명 세이프건설 TBM/작업 전 안전점검회의 기본정보 오늘 작업 외벽 도장 작업 TBM/작업 전 안전점검회의 기본정보 참석 대상 작업자",
+        "본정보 장소 서울 성수동 근린생활시설 현장 TBM/작업 전 안전점검회의 기본정보 업체명 세이프건설 TBM/작업 전 안전점검회의 기본정보 오늘 작업 외벽 도장 작업 TBM/작업 전 안전점검회의 기본정보 참석 대상 작업자 5명, 작업반장, 관리감독자 TBM/작업 전 안전점검회의"
+      ],
+      "fieldCandidates": [
+        "관리감독자",
+        "교육시간",
+        "보호구",
+        "사진",
+        "신규",
+        "안전대책",
+        "업체명",
+        "외국인",
+        "위험요인",
+        "일시",
+        "작업내용",
+        "작업반장",
+        "작업중지",
+        "증빙"
+      ],
+      "encoding": "utf-8-sig"
+    },
+    {
+      "path": "C:\\Users\\iceam\\Downloads\\세이프건설-tbm-log.hwpx",
+      "name": "세이프건설-tbm-log.hwpx",
+      "extension": ".hwpx",
+      "exists": true,
+      "sizeBytes": 2362,
+      "lastModified": "2026-04-27T10:12:18.521572",
+      "readable": true,
+      "method": "zip+xml",
+      "notes": [],
+      "textLength": 616,
+      "keywordSnippets": [
+        "작업 전 안전점검회의(TBM) 일지(초안) 일시: 2026-04-25 08:00 업체명: 세이프건설 작업장소: 서울 성수동 근린생활시설 현장 작업내용: 서울 성수동 근린생활시설 외벽 도장 작업. 이",
+        "비계 사용, 작업자 5명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM 초안을 만들어줘. 참석인원: 5명 실시자: 작업반장 / 관리감독자 [전달 내용] - 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 - 풍속 상승 또는 돌풍 체감",
+        "전파할 것인가? - 이동식 비계 고정상태와 보호구 착용은 누가 상호 확인했는가? [작업자 확인] TBM 내용 숙지 여부: 전원 구두 복창 및 서명 예정 [KOSHA 공식 가이드] 1. 지게차의 안전작업에 관한 기술지원규정 (지게차 작업) 2. 지게차의 안전작업계획서 작성지",
+        "작업 전 안전점검회의(TBM) 일지(초안) 일시: 2026-04-25 08:00 업체명: 세이프건설 작업장소: 서울 성수동 근린생활시설 현장 작업내용: 서울 성수동 근린생활시설 외벽 도장 작",
+        "작업 전 안전점검회의(TBM) 일지(초안) 일시: 2026-04-25 08:00 업체명: 세이프건설 작업장소: 서울 성수동 근린생활시설 현장 작업내용: 서울 성수동 근린생활시설 외벽 도장",
+        "일시: 2026-04-25 08:00 업체명: 세이프건설 작업장소: 서울 성수동 근린생활시설 현장 작업내용: 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM 초안을 만들어",
+        "- 위험구역 표시 및 통제: 확인 - 신규 투입자·외국인 근로자 대상 추가 설명: 예정 [미조치 위험요인 / 후속조치] - 강풍 시 작업중지 판단은 누가 하고, 팀원에게 어떻게 전파할 것인가? - 이동식 비계 고정상태와 보호구 착용은 누가 상호 확인했는가? [작업자 확인]",
+        ", 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM 초안을 만들어줘. 참석인원: 5명 실시자: 작업반장 / 관리감독자 [전달 내용] - 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 - 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후",
+        "보호구 착용은 누가 상호 확인했는가? [작업자 확인] TBM 내용 숙지 여부: 전원 구두 복창 및 서명 예정 [KOSHA 공식 가이드] 1. 지게차의 안전작업에 관한 기술지원규정 (지게차 작업) 2. 지게차의 안전작업계획서 작성지침 (작업계획)",
+        "돌풍 체감 시 즉시 작업중지 후 지상 대기 - 작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인 [작업 전 일일 안전점검 시행 결과] - 주요 보호구 착용 상태: 확인 - 위험구역 표시 및 통제: 확인 - 신규 투입자·외국인 근로자 대상 추가 설명: 예정 [미조치"
+      ],
+      "fieldCandidates": [
+        "관리감독자",
+        "보호구",
+        "서명",
+        "신규",
+        "실시자",
+        "업체명",
+        "외국인",
+        "위험요인",
+        "일시",
+        "작업내용",
+        "작업반장",
+        "작업장소",
+        "작업중지",
+        "참석인원"
+      ],
+      "xmlFileCount": 2,
+      "sectionXmlCount": 1
+    },
+    {
+      "path": "C:\\Users\\iceam\\OneDrive\\_30_컨설팅\\2025\\산업안전\\4.0 권고사항(절차서 및 서식)\\4.1 공사감독일지 및 안전감독일지 서식.hwpx",
+      "name": "4.1 공사감독일지 및 안전감독일지 서식.hwpx",
+      "extension": ".hwpx",
+      "exists": true,
+      "sizeBytes": 33850,
+      "lastModified": "2025-05-07T09:45:16",
+      "readable": true,
+      "method": "zip+xml",
+      "notes": [],
+      "textLength": 402,
+      "keywordSnippets": [
+        "등의 지도조언에 협조 위험성평가의 참여 및 개선조치 기타 위험성평가 결과 이행확인 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 협력 사항 안전관리자 보건관리자 의견청취 안전조치 보건조치",
+        "근로자 작업복,보호구,방호장치 점검 산업재해에 대한 보고 및 응급조치 작업장 정리정돈, 통로확보 확인감독 안전,보건관리자등의 지도조언에 협조 위험성평가의 참여 및 개선조치 기타 위험성평가 결과 이행확인 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 협력 사항 안전관",
+        "인감독 안전,보건관리자등의 지도조언에 협조 위험성평가의 참여 및 개선조치 기타 위험성평가 결과 이행확인 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 협력 사항 안전관리자 보건관리자 의견청취 안전조치 보건조치",
+        "에 협조 위험성평가의 참여 및 개선조치 기타 위험성평가 결과 이행확인 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 협력 사항 안전관리자 보건관리자 의견청취 안전조치 보건조치",
+        "에 대한 보고 및 응급조치 작업장 정리정돈, 통로확보 확인감독 안전,보건관리자등의 지도조언에 협조 위험성평가의 참여 및 개선조치 기타 위험성평가 결과 이행확인 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 협력 사항 안전관리자 보건관리자 의견청취 안전조치 보건조치",
+        "리정돈, 통로확보 확인감독 안전,보건관리자등의 지도조언에 협조 위험성평가의 참여 및 개선조치 기타 위험성평가 결과 이행확인 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 협력 사항 안전관리자 보건관리자 의견청취 안전조치 보건조치"
+      ],
+      "fieldCandidates": [
+        "관리감독자",
+        "보호구",
+        "위험요인"
+      ],
+      "xmlFileCount": 6,
+      "sectionXmlCount": 1,
+      "tables": [
+        {
+          "sourceXml": "Contents/section0.xml",
+          "rowCount": 10,
+          "maxColumnCount": 3,
+          "rowsPreview": [
+            [
+              "공 사 명"
+            ],
+            [
+              "일 시"
+            ],
+            [
+              "주요업무"
+            ],
+            [
+              "구 분",
+              "업 무 내 용",
+              "특 이 사 항"
+            ],
+            [
+              "2. 품질관리"
+            ],
+            [
+              "구 분",
+              "업 무 내 용",
+              "특 이 사 항"
+            ],
+            [
+              "3. 안전관리"
+            ],
+            [
+              "구 분",
+              "업 무 내 용",
+              "특 이 사 항"
+            ],
+            [
+              "4. 기타사항"
+            ],
+            [
+              "구 분",
+              "업 무 내 용",
+              "특 이 사 항"
+            ]
+          ]
+        },
+        {
+          "sourceXml": "Contents/section0.xml",
+          "rowCount": 13,
+          "maxColumnCount": 3,
+          "rowsPreview": [
+            [
+              "안 전 감 독 일 지 20 년 월 일 ( )요일",
+              "작성자 (관리감독자)",
+              "안전보건 관리책임자"
+            ],
+            [
+              "/",
+              "/"
+            ],
+            [
+              "안전 점검",
+              "점검내용",
+              "점검 결과 및 조치 사항"
+            ],
+            [
+              "작업장 기계기구설비 이상유무"
+            ],
+            [
+              "근로자 작업복,보호구,방호장치 점검"
+            ],
+            [
+              "산업재해에 대한 보고 및 응급조치"
+            ],
+            [
+              "작업장 정리정돈, 통로확보 확인감독"
+            ],
+            [
+              "안전,보건관리자등의 지도조언에 협조"
+            ],
+            [
+              "위험성평가의 참여 및 개선조치"
+            ],
+            [
+              "기타"
+            ],
+            [
+              "위험성평가 결과 이행확인",
+              "금일 주요 유해⦁위험요인",
+              "이행확인 결과 및 조치사항"
+            ],
+            [
+              "협력 사항",
+              "안전관리자",
+              "보건관리자"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\iceam\\OneDrive\\_30_컨설팅\\2025\\산업안전\\4.0 권고사항(절차서 및 서식)\\4.1 공사감독일지 및 안전감독일지 서식.pdf",
+      "name": "4.1 공사감독일지 및 안전감독일지 서식.pdf",
+      "extension": ".pdf",
+      "exists": true,
+      "sizeBytes": 56927,
+      "lastModified": "2025-05-13T13:10:55.665361",
+      "readable": true,
+      "method": "pdfplumber",
+      "notes": [],
+      "textLength": 405,
+      "keywordSnippets": [
+        "확인감독 안전,보건관리자등의 지도조언에 협조 위험성평가의 참여 및 개선조치 기타 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 위험성평가 결과 이행확인 안전관리자 보건관리자 협력 사항 안전조치 보건조치 의견청취",
+        "업복,보호구,방호장치 점검 산업재해에 대한 보고 및 응급조치 안전 점검 작업장 정리정돈, 통로확보 확인감독 안전,보건관리자등의 지도조언에 협조 위험성평가의 참여 및 개선조치 기타 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 위험성평가 결과 이행확인 안전관리자 보건관",
+        "전,보건관리자등의 지도조언에 협조 위험성평가의 참여 및 개선조치 기타 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 위험성평가 결과 이행확인 안전관리자 보건관리자 협력 사항 안전조치 보건조치 의견청취",
+        "의 참여 및 개선조치 기타 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 위험성평가 결과 이행확인 안전관리자 보건관리자 협력 사항 안전조치 보건조치 의견청취",
+        "고 및 응급조치 안전 점검 작업장 정리정돈, 통로확보 확인감독 안전,보건관리자등의 지도조언에 협조 위험성평가의 참여 및 개선조치 기타 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 위험성평가 결과 이행확인 안전관리자 보건관리자 협력 사항 안전조치 보건조치 의견청취",
+        "언에 협조 위험성평가의 참여 및 개선조치 기타 금일 주요 유해⦁위험요인 이행확인 결과 및 조치사항 위험성평가 결과 이행확인 안전관리자 보건관리자 협력 사항 안전조치 보건조치 의견청취"
+      ],
+      "fieldCandidates": [
+        "관리감독자",
+        "보호구",
+        "위험요인"
+      ],
+      "pages": 2
+    }
+  ],
+  "extractedTbmStructure": {
+    "commonFieldsFromReadableSources": [
+      "건강상태",
+      "관리감독자",
+      "교육시간",
+      "보호구",
+      "비상",
+      "사진",
+      "서명",
+      "신규",
+      "실시자",
+      "안전대책",
+      "업체명",
+      "외국인",
+      "위험요인",
+      "음주",
+      "일시",
+      "일자",
+      "작업내용",
+      "작업반장",
+      "작업장소",
+      "작업중지",
+      "증빙",
+      "참석인원",
+      "확인자"
+    ],
+    "requiredRenderSections": [
+      "기본정보: 회사/현장/공사/장소/일자/시작·종료시간/진행자/기상",
+      "금일 작업: 작업내용, 작업순서, 장비·자재, 관련 허가서",
+      "위험성평가 반영: 위험요인, 원인, 감소대책, 작업중지 기준, 담당자, 복창/확인",
+      "근로자 확인: 보호구, 건강상태, 음주·피로, 신규·변경·외국인 근로자 이해확인",
+      "참석자 명단: 소속, 직종, 성명, 오전/오후, 서명, 이해확인",
+      "사진·증빙: TBM 실시 사진, 작업 전 상태, 통제구역, 모바일/작업일지 기록, 보관 위치",
+      "교육시간 인정 검토: 교육구분, 시간, 내용, 대상, 확인증빙, 조건부 검토 문구",
+      "미조치/후속조치 및 최종 확인: 잔여위험, 조치담당, 기한, 확인자 서명"
+    ],
+    "signatureAndConfirmation": [
+      "참석자 서명",
+      "진행자/관리감독자 확인",
+      "현장소장 또는 확인자 서명",
+      "복창/이해확인 체크"
+    ],
+    "photoEvidence": [
+      "TBM 실시 사진",
+      "작업 전 현장 상태",
+      "보호구 착용",
+      "위험구역 통제",
+      "사진/영상 파일명",
+      "모바일 로그 또는 작업일지 보관 위치"
+    ],
+    "educationRecognitionWording": [
+      "TBM 기록은 위험성평가 결과와 교육 내용, 대상, 시간, 확인증빙이 함께 남을 때 정기교육 등 증빙 활용 가능성을 검토한다.",
+      "법정 제출 서식 대체를 단정하지 않고, 교육기록과 참석자 확인·사진·모바일 기록을 함께 보관한다."
+    ]
+  },
+  "currentSafeClawGap": [
+    {
+      "area": "source document appendices",
+      "currentEvidence": "lib/search.ts:414-415 appends weather, KOSHA, legal, serious-accident, knowledge, accident appendices directly into tbmBriefing/tbmLogDraft.",
+      "gap": "TBM 본문에 근거 블록이 길게 붙어 기록지 핵심 항목과 서명/증빙 흐름을 밀어냄.",
+      "target": "본문은 회의/일지 필드 중심, 근거는 concise basis line plus metadata/evidence panel로 분리."
+    },
+    {
+      "area": "tbm log renderer",
+      "currentEvidence": "components/WorkpackEditor.tsx:673-731 renders basic info, worker checks, tasks/risks, education text, attendance, photo/video table.",
+      "gap": "작업 시간, 업체/공사명, 위험별 조치담당/작업중지 기준, 외국인/신규자 이해확인, 서명 주체, 교육시간 인정 판단 필드가 구조화되어 있지 않음.",
+      "target": "법정교육 대체 단정 없이 교육 인정 검토 필드와 증빙 묶음을 구조화."
+    },
+    {
+      "area": "tbm briefing renderer",
+      "currentEvidence": "components/WorkpackEditor.tsx:742-780 maps site/work/risk/weather to briefing table and photo/signature checkboxes.",
+      "gap": "공식 회의록형 헤더, 참석자 서명표, 미조치 후속조치, 사진 파일명/보관위치가 한 화면의 기록 스키마로 연결되지 않음.",
+      "target": "briefing은 전달용, log/minutes는 보관용으로 documentKind를 분리하되 같은 schema에서 파생."
+    },
+    {
+      "area": "mock/plaintext drafts",
+      "currentEvidence": "lib/mock-data.ts:652-690 creates TBM record text and lib/mock-data.ts:697-731 education record text.",
+      "gap": "초안 문구는 실무적으로 유용하지만 실제 HWPX 표 필드, 서명란, 교육 인정 caveat가 렌더러와 동일 source of truth로 묶이지 않음.",
+      "target": "canonical TBM record payload -> HWPX/HTML/Excel export all derive from same data."
+    }
+  ],
+  "proposedTbmSchema": {
+    "tbmRecordId": "uuid",
+    "sourceWorkpackId": "uuid | null",
+    "documentKind": "tbm_log | tbm_briefing | toolbox_meeting_minutes",
+    "site": {
+      "companyName": "string",
+      "siteName": "string",
+      "projectName": "string | null",
+      "location": "string | null",
+      "principalContractor": "string | null",
+      "partnerCompany": "string | null"
+    },
+    "session": {
+      "date": "YYYY-MM-DD",
+      "startTime": "HH:mm",
+      "endTime": "HH:mm | null",
+      "durationMinutes": "number | null",
+      "facilitatorName": "string",
+      "facilitatorRole": "string",
+      "supervisorName": "string | null",
+      "weatherSummary": "string",
+      "workType": "string",
+      "workLocation": "string",
+      "workerCount": "number"
+    },
+    "workSummary": {
+      "todayTasks": [
+        "string"
+      ],
+      "workSequence": [
+        "string"
+      ],
+      "equipment": [
+        "string"
+      ],
+      "materials": [
+        "string"
+      ],
+      "relatedPermits": [
+        "string"
+      ]
+    },
+    "riskBriefing": [
+      {
+        "hazard": "string",
+        "riskCause": "string",
+        "controlMeasure": "string",
+        "stopWorkTrigger": "string",
+        "responsiblePerson": "string",
+        "confirmationMethod": "repeat_back | checkbox | signature | photo | mobile_log"
+      }
+    ],
+    "workerChecks": {
+      "ppe": {
+        "helmet": "boolean",
+        "safetyShoes": "boolean",
+        "harness": "boolean | null",
+        "taskSpecificPpe": [
+          "string"
+        ]
+      },
+      "health": {
+        "abnormalSymptoms": "string | null",
+        "heatColdStressCheck": "boolean | null"
+      },
+      "alcoholOrFatigue": "clear | needs_followup | not_checked",
+      "newOrChangedWorkers": [
+        {
+          "name": "string",
+          "language": "string | null",
+          "extraBriefingDone": "boolean"
+        }
+      ],
+      "foreignWorkerSupport": {
+        "languages": [
+          "string"
+        ],
+        "plainKoreanUsed": "boolean",
+        "translatedMessageProvided": "boolean"
+      }
+    },
+    "attendance": [
+      {
+        "name": "string",
+        "company": "string",
+        "trade": "string",
+        "role": "string | null",
+        "morning": "boolean",
+        "afternoon": "boolean",
+        "signature": "string | null",
+        "understandingConfirmed": "boolean"
+      }
+    ],
+    "evidence": {
+      "photos": [
+        {
+          "label": "string",
+          "fileName": "string",
+          "takenAt": "datetime | null",
+          "description": "string"
+        }
+      ],
+      "videos": [
+        {
+          "label": "string",
+          "fileName": "string",
+          "description": "string"
+        }
+      ],
+      "mobileLogRef": "string | null",
+      "attachments": [
+        {
+          "kind": "risk_assessment | permit | work_plan | other",
+          "fileName": "string"
+        }
+      ]
+    },
+    "educationRecognition": {
+      "claimAsTrainingTime": "boolean",
+      "trainingCategory": "regular | job_change | new_worker | special | none | review_required",
+      "recognitionBasis": [
+        "string"
+      ],
+      "caveat": "TBM 자체만으로 법정교육 대체를 단정하지 않고 위험성평가 결과 반영, 대상, 시간, 내용, 확인증빙을 함께 보관"
+    },
+    "signOff": {
+      "facilitatorSignature": "string | null",
+      "supervisorSignature": "string | null",
+      "siteManagerSignature": "string | null",
+      "unresolvedRisks": [
+        {
+          "risk": "string",
+          "followUp": "string",
+          "owner": "string",
+          "dueDate": "YYYY-MM-DD | null"
+        }
+      ]
+    }
+  },
+  "supabasePayloadCandidate": {
+    "table": "tbm_records",
+    "operation": "insert_candidate_only_not_executed",
+    "payload": {
+      "workpack_id": "<uuid>",
+      "document_kind": "tbm_log",
+      "site_name": "<siteName>",
+      "company_name": "<companyName>",
+      "session_date": "<YYYY-MM-DD>",
+      "start_time": "<HH:mm>",
+      "duration_minutes": 15,
+      "facilitator": {
+        "name": "<name>",
+        "role": "작업반장/관리감독자"
+      },
+      "weather_summary": "<weather API summary>",
+      "work_type": "<workType>",
+      "work_location": "<workLocation>",
+      "worker_count": "<number>",
+      "today_tasks": [
+        "<task>"
+      ],
+      "risk_briefing": [
+        {
+          "hazard": "string",
+          "riskCause": "string",
+          "controlMeasure": "string",
+          "stopWorkTrigger": "string",
+          "responsiblePerson": "string",
+          "confirmationMethod": "repeat_back | checkbox | signature | photo | mobile_log"
+        }
+      ],
+      "worker_checks": {
+        "ppe": {
+          "helmet": "boolean",
+          "safetyShoes": "boolean",
+          "harness": "boolean | null",
+          "taskSpecificPpe": [
+            "string"
+          ]
+        },
+        "health": {
+          "abnormalSymptoms": "string | null",
+          "heatColdStressCheck": "boolean | null"
+        },
+        "alcoholOrFatigue": "clear | needs_followup | not_checked",
+        "newOrChangedWorkers": [
+          {
+            "name": "string",
+            "language": "string | null",
+            "extraBriefingDone": "boolean"
+          }
+        ],
+        "foreignWorkerSupport": {
+          "languages": [
+            "string"
+          ],
+          "plainKoreanUsed": "boolean",
+          "translatedMessageProvided": "boolean"
+        }
+      },
+      "attendance": [
+        {
+          "name": "string",
+          "company": "string",
+          "trade": "string",
+          "role": "string | null",
+          "morning": "boolean",
+          "afternoon": "boolean",
+          "signature": "string | null",
+          "understandingConfirmed": "boolean"
+        }
+      ],
+      "evidence": {
+        "photos": [
+          {
+            "label": "string",
+            "fileName": "string",
+            "takenAt": "datetime | null",
+            "description": "string"
+          }
+        ],
+        "videos": [
+          {
+            "label": "string",
+            "fileName": "string",
+            "description": "string"
+          }
+        ],
+        "mobileLogRef": "string | null",
+        "attachments": [
+          {
+            "kind": "risk_assessment | permit | work_plan | other",
+            "fileName": "string"
+          }
+        ]
+      },
+      "education_recognition": {
+        "claimAsTrainingTime": "boolean",
+        "trainingCategory": "regular | job_change | new_worker | special | none | review_required",
+        "recognitionBasis": [
+          "string"
+        ],
+        "caveat": "TBM 자체만으로 법정교육 대체를 단정하지 않고 위험성평가 결과 반영, 대상, 시간, 내용, 확인증빙을 함께 보관"
+      },
+      "sign_off": {
+        "facilitatorSignature": "string | null",
+        "supervisorSignature": "string | null",
+        "siteManagerSignature": "string | null",
+        "unresolvedRisks": [
+          {
+            "risk": "string",
+            "followUp": "string",
+            "owner": "string",
+            "dueDate": "YYYY-MM-DD | null"
+          }
+        ]
+      },
+      "source_documents": [
+        "C:\\Users\\iceam\\Downloads\\TBM 일지.hwpx",
+        "C:\\Users\\iceam\\Downloads\\Tool Box Meeting 회의록.hwpx",
+        "C:\\Users\\iceam\\Downloads\\TBM 일지.hwp",
+        "C:\\Users\\iceam\\Downloads\\Tool Box Meeting 회의록.hwp",
+        "C:\\Users\\iceam\\Downloads\\230209 작업 전 안전점검회의 가이드(배포용).pdf",
+        "C:\\Users\\iceam\\Downloads\\11 건설현장 TBM 실천 가이드.pdf",
+        "C:\\Users\\iceam\\Downloads\\세이프건설-tbm-briefing.xls",
+        "C:\\Users\\iceam\\Downloads\\세이프건설-tbm-log.hwpx",
+        "C:\\Users\\iceam\\OneDrive\\_30_컨설팅\\2025\\산업안전\\4.0 권고사항(절차서 및 서식)\\4.1 공사감독일지 및 안전감독일지 서식.hwpx",
+        "C:\\Users\\iceam\\OneDrive\\_30_컨설팅\\2025\\산업안전\\4.0 권고사항(절차서 및 서식)\\4.1 공사감독일지 및 안전감독일지 서식.pdf"
+      ]
+    }
+  },
+  "sqlCandidate": "-- Candidate only. Do not run without explicit approval and migration review.\ncreate table if not exists public.tbm_records (\n  id uuid primary key default gen_random_uuid(),\n  workpack_id uuid null,\n  document_kind text not null check (document_kind in ('tbm_log', 'tbm_briefing', 'toolbox_meeting_minutes')),\n  site_name text not null,\n  company_name text null,\n  session_date date not null,\n  start_time time null,\n  duration_minutes integer null,\n  facilitator jsonb not null default '{}'::jsonb,\n  weather_summary text null,\n  work_type text null,\n  work_location text null,\n  worker_count integer null,\n  today_tasks jsonb not null default '[]'::jsonb,\n  risk_briefing jsonb not null default '[]'::jsonb,\n  worker_checks jsonb not null default '{}'::jsonb,\n  attendance jsonb not null default '[]'::jsonb,\n  evidence jsonb not null default '{}'::jsonb,\n  education_recognition jsonb not null default '{}'::jsonb,\n  sign_off jsonb not null default '{}'::jsonb,\n  source_documents jsonb not null default '[]'::jsonb,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now()\n);",
+  "implementationReadiness": {
+    "readyToImplementWithoutDb": [
+      "TBM canonical payload type 추가",
+      "tbmBriefing/tbmLog renderer가 payload를 공유하도록 리팩터",
+      "근거 원문은 evidence metadata에 유지하고 문서에는 짧은 반영 근거만 출력",
+      "HWPX/Excel/PDF export smoke case에 TBM schema fixture 추가"
+    ],
+    "requiresDecision": [
+      "교육시간 인정 문구를 어느 수준까지 법정교육 기록으로 표시할지",
+      "Supabase 신규 테이블로 둘지 workpacks JSON 필드로 둘지",
+      "참석자 서명 이미지를 저장할지 체크/텍스트만 저장할지",
+      "원청/협력사 다중 업체 참석자 모델을 필수로 할지"
+    ]
+  }
+}
