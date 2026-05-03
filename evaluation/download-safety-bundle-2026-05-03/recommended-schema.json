@@ -1,0 +1,45 @@
+{
+  "safety_reference_sources": [
+    "id",
+    "source_group",
+    "source_type",
+    "agency",
+    "title",
+    "source_path",
+    "origin_url",
+    "file_format",
+    "published_at",
+    "metadata"
+  ],
+  "safety_reference_items": [
+    "id",
+    "source_id",
+    "item_type",
+    "category",
+    "subcategory",
+    "title",
+    "summary",
+    "body",
+    "keywords",
+    "risk_tags",
+    "primary_documents",
+    "controls",
+    "payload"
+  ],
+  "safety_reference_ingestion_runs": [
+    "source_batch",
+    "source_count",
+    "item_count",
+    "success_count",
+    "failure_count",
+    "elapsed_ms",
+    "report_path",
+    "status",
+    "details"
+  ],
+  "recommended_additions": [
+    "For scanned PDF/image-heavy sources, keep OCR status in source.metadata.ocrStatus.",
+    "For form templates, keep extracted section and signature fields in item.payload.formFields.",
+    "For versioned uploads, keep sha256 in source.metadata and use it for duplicate checks before upsert."
+  ]
+}
