@@ -54,7 +54,7 @@ type RouteHint =
 const statusLabel: Record<ProductScreen["status"], string> = {
   live: "바로 사용",
   partial: "부분 연결",
-  planned: "연결 예정"
+  planned: "제품화 중"
 };
 
 const screens: ProductScreen[] = [
@@ -161,7 +161,7 @@ export function SafeClawPrototype() {
             <strong>제품 기능 연결.</strong>
             <p>
               SafeClaw 기능을 제품 화면 단위로 다시 배치했습니다. 연결된 화면은 바로 열고,
-              연결 예정 화면은 현재 가능한 대체 화면을 함께 표시합니다.
+              제품화 중인 화면은 현재 가능한 대체 화면을 함께 표시합니다.
             </p>
           </aside>
 

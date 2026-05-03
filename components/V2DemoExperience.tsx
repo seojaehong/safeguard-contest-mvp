@@ -199,8 +199,8 @@ export function V2DemoExperience({
         <Link href="/" className="brand-lockup" aria-label="SafeClaw 홈">
           <span className="brand-mark">SC</span>
           <span>
-            <strong>SafeClaw v2</strong>
-            <small>제품 시연 모드</small>
+            <strong>SafeClaw</strong>
+            <small>작업 흐름</small>
           </span>
         </Link>
         <nav>
@@ -213,12 +213,12 @@ export function V2DemoExperience({
 
       <section className="demo-hero-grid">
         <aside className="demo-stage-panel">
-          <span className="eyebrow">30초 자동 시연</span>
+          <span className="eyebrow">작업 흐름 미리보기</span>
           <h1>한 줄 입력이 현장 안전 실행팩으로 바뀌는 순간을 보여줍니다.</h1>
           <p>
-            발표용 화면입니다. 실제 제품 흐름을 짧게 압축하고, API 지연 시에는 사전 캐시 응답 사용 여부를 화면에 표시합니다.
+            실제 제품 흐름을 짧게 압축하고, API 지연 시에는 사전 캐시 응답 사용 여부를 화면에 표시합니다.
           </p>
-          <div className="demo-progress-track" aria-label={`시연 진행 ${step + 1}/${demoStages.length}`}>
+          <div className="demo-progress-track" aria-label={`작업 흐름 진행 ${step + 1}/${demoStages.length}`}>
             <span style={{ width: `${stageProgress}%` }} />
           </div>
           <ol className="demo-stage-list">

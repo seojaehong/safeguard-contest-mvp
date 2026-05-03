@@ -16,7 +16,7 @@ export default async function EvidencePage() {
       title="근거 라이브러리."
       description="법령, 해석례, 판례, KOSHA 자료, 재해사례를 문서 문장에 연결하고 어떤 항목에 반영됐는지 확인합니다."
       status="partial"
-      mappedTo="CitationList · 지식 DB · 법령/해석례/재해사례"
+      mappedTo="법령 · KOSHA · 재해사례 반영 위치"
       activeHref="/evidence"
       actions={<Link href="/knowledge">지식 DB 열기</Link>}
     >

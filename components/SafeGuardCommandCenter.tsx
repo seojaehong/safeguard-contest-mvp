@@ -313,7 +313,7 @@ function SafeClawHomepage({ onStart }: { onStart: () => void }) {
         <div className="safeclaw-os-status">
           <span><i /> 시스템 · 정상 가동</span>
           <b>REGION · KR-CENTRAL</b>
-          <b>V2.4.0-STABLE</b>
+          <b>FIELD OS · ACTIVE</b>
           <b>UTC+9 · 2026-05-01</b>
         </div>
         <div className="safeclaw-os-hero-body">
@@ -327,8 +327,8 @@ function SafeClawHomepage({ onStart }: { onStart: () => void }) {
             <p>safeclaw는 산업 현장의 운영 체제입니다.</p>
             <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 전파, 증빙 이력까지 연결합니다.</p>
             <div className="safeclaw-os-cta">
-              <button type="button" onClick={onStart}>14일 무료 체험 →</button>
-              <Link href="/demo">30초 데모</Link>
+              <button type="button" onClick={onStart}>작업 생성 시작 →</button>
+              <Link href="/documents">문서팩 확인</Link>
             </div>
           </div>
           <aside className="safeclaw-os-console" aria-label="실행 콘솔">
@@ -583,7 +583,7 @@ export function SafeGuardCommandCenter({
         <div className="topbar-status" aria-live="polite">
           <span>{statusCopy(state)}</span>
           <b>{operationalStatus(data, state)}</b>
-          <Link href="/demo" className="topbar-v2-link">v2 시연</Link>
+          <Link href="/documents" className="topbar-v2-link">문서팩</Link>
         </div>
       </header>
 

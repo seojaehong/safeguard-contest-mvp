@@ -32,7 +32,7 @@ export default function PreviewPage() {
           <span><strong>SafeClaw</strong><small>핵심 3종</small></span>
         </Link>
         <nav>
-          <Link href="/demo">데모</Link>
+          <Link href="/workspace">작업공간</Link>
           <Link href="/why">차별성</Link>
           <Link href="/trust">신뢰</Link>
           <Link href="/roadmap">로드맵</Link>
