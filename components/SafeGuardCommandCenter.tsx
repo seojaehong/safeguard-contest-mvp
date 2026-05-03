@@ -68,6 +68,7 @@ const outputItems: Array<{ title: string; key: DocumentKey }> = [
   { title: "점검결과 요약", key: "workpackSummaryDraft" },
   { title: "위험성평가표", key: "riskAssessmentDraft" },
   { title: "작업계획서", key: "workPlanDraft" },
+  { title: "허가서/첨부", key: "workPermitDraft" },
   { title: "TBM 브리핑", key: "tbmBriefing" },
   { title: "TBM 기록", key: "tbmLogDraft" },
   { title: "안전보건교육 기록", key: "safetyEducationRecordDraft" },
@@ -440,6 +441,7 @@ export function SafeGuardCommandCenter({
     setRequestedDocumentKey(key);
     scrollToStep("workpack");
     setEditorFocusToken((current) => current + 1);
+    setMessage("선택한 문서를 편집·다운로드 영역으로 열었습니다. PDF·XLS·HWPX 버튼으로 출력하세요.");
   }
 
   function persistCurrentWorkpack(payload: AskResponse) {
@@ -781,11 +783,17 @@ export function SafeGuardCommandCenter({
                 <article key={item.key} className={data ? "doc-card done" : busy && index < 2 ? "doc-card active" : "doc-card"}>
                   <span>DOC · {String(index + 1).padStart(2, "0")}</span>
                   <strong>{item.title}</strong>
-                  <p>{data ? "편집·다운로드 준비" : busy && index < 2 ? "작성 중" : "생성 대기"}</p>
+                  <p>{data ? "준제출형 편집·출력 준비" : busy && index < 2 ? "작성 중" : "생성 대기"}</p>
                   {data ? (
                     <div className="doc-card-actions">
                       <button type="button" onClick={() => focusWorkpackEditor(item.key)}>편집</button>
-                      <button type="button" onClick={() => focusWorkpackEditor(item.key)}>다운로드</button>
+                      <button
+                        type="button"
+                        onClick={() => focusWorkpackEditor(item.key)}
+                        title={`${item.title} 준제출형 내려받기`}
+                      >
+                        다운로드 영역 열기
+                      </button>
                     </div>
                   ) : null}
                 </article>
