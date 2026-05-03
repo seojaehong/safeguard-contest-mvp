@@ -264,6 +264,37 @@ function formatKoshaPracticalAppendix(
   ].join("\n");
 }
 
+function formatTbmQualityAppendix(
+  response: AskResponse,
+  weather: Awaited<ReturnType<typeof fetchWeatherSignal>>,
+  foreignWorkerLanguages: AskResponse["deliverables"]["foreignWorkerLanguages"],
+  references: Awaited<ReturnType<typeof fetchKoshaReferences>>["references"]
+) {
+  const tbmReferences = references.filter((item) => {
+    const appliesTo = item.appliesTo || item.appliedTo || [];
+    return /TBM|작업 전 안전점검|Tool Box/i.test(item.title) || appliesTo.some((value) => value.includes("TBM"));
+  });
+  const referenceTitles = tbmReferences.length
+    ? tbmReferences.slice(0, 2).map((item) => item.title).join(" / ")
+    : "고용노동부 작업 전 안전점검회의 가이드 및 TBM 일지 서식";
+  const weatherAction = weather.actions[0] || "기상 변화 시 관리감독자가 작업 가능 여부를 재판단";
+  const languageLine = foreignWorkerLanguages.length
+    ? foreignWorkerLanguages.map((item) => item.label).slice(0, 3).join(", ")
+    : "필요 시 쉬운 한국어와 현장 통역";
+
+  return [
+    "",
+    "[TBM 필수 반영 체크]",
+    `- 주요 유해·위험요인: ${response.riskSummary.topRisk}`,
+    `- 기상 API 결과: ${weather.summary} / ${weatherAction}`,
+    `- 작업중지 기준: ${response.riskSummary.immediateActions.slice(0, 2).join(" / ") || "위험 발견 즉시 작업중지 및 보고"}`,
+    `- 참석자 확인: 작업자 ${response.scenario.workerCount.toLocaleString("ko-KR")}명 대상 구두 복창·서명·보호구 확인`,
+    `- 신규·외국인·미숙련 작업자: ${languageLine}로 이해 여부 별도 확인`,
+    "- 사진·증빙 위치: 작업 전 현장, 보호구, 위험구역 통제, TBM 실시 사진을 작업일지·모바일 기록·문서팩 첨부자료에 보관",
+    `- 반영 근거: ${referenceTitles}. 원문성 근거는 evidence UI/metadata에서 확인`
+  ].join("\n");
+}
+
 function formatSeriousAccidentReferenceAppendix(target: "risk" | "tbm" | "education") {
   const common = [
     "- 내부 참고자료 반영: 중대재해처벌법 실무서 파싱 요약을 바탕으로 유해·위험요인 확인, 개선조치, 교육, 작업중지, 도급관리 축을 점검합니다.",
@@ -344,19 +375,15 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const safetyEducationOfficialAppendix = formatSafetyEducationOfficialAppendix(kosha.references);
     const riskLegalAppendix = formatLegalEvidenceAppendix(citations, "risk");
     const workPlanLegalAppendix = formatLegalEvidenceAppendix(citations, "workPlan");
-    const tbmLegalAppendix = formatLegalEvidenceAppendix(citations, "tbm");
     const educationLegalAppendix = formatLegalEvidenceAppendix(citations, "education");
     const riskSeriousAccidentAppendix = formatSeriousAccidentReferenceAppendix("risk");
-    const tbmSeriousAccidentAppendix = formatSeriousAccidentReferenceAppendix("tbm");
     const educationSeriousAccidentAppendix = formatSeriousAccidentReferenceAppendix("education");
     const workPlanKoshaAppendix = formatKoshaPracticalAppendix(kosha.references, "workPlan", "반영 근거: 작업계획 공식자료");
-    const tbmKoshaAppendix = formatKoshaPracticalAppendix(kosha.references, "tbm", "반영 근거: TBM 공식자료");
     const educationKoshaAppendix = formatKoshaPracticalAppendix(kosha.references, "education", "반영 근거: 교육 공식자료");
     const trainingFitLines = training.recommendations.slice(0, 2).map((item) => `${item.title}: ${item.fitLabel || "조건부 후보"} - ${item.fitReason || item.reason}`);
     const accidentAppendix = formatAccidentCaseAppendix(accidentCases.cases);
     const riskKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "risk");
     const workPlanKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "workPlan");
-    const tbmKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "tbm");
     const educationKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "education");
     const emergencyKoshaOpenApiAppendix = formatKoshaOpenApiAppendix(koshaOpenApi.references, "emergency");
     const outdoorHeatEnabled = hasOutdoorHeatSignal(weather, question);
@@ -366,7 +393,6 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const outdoorHeatMessageAppendix = outdoorHeatEnabled ? formatOutdoorHeatAppendix(weather, "message") : "";
     const safetyKnowledgeMatches = matchSafetyKnowledge(question, 4);
     const safetyKnowledgeAppendix = formatSafetyKnowledgeAppendix(safetyKnowledgeMatches, "risk");
-    const safetyKnowledgeTbmAppendix = formatSafetyKnowledgeAppendix(safetyKnowledgeMatches, "tbm");
     const safetyKnowledgeEducationAppendix = formatSafetyKnowledgeAppendix(safetyKnowledgeMatches, "education");
     const foreignWorkerInput = {
       question,
@@ -375,6 +401,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
     };
 
     const foreignWorkerLanguages = buildForeignWorkerLanguages(foreignWorkerInput);
+    const tbmQualityAppendix = formatTbmQualityAppendix(response, weather, foreignWorkerLanguages, kosha.references);
 
     const enriched: AskResponse = {
       ...response,
@@ -411,8 +438,8 @@ export async function runAsk(question: string): Promise<AskResponse> {
         workpackSummaryDraft: `${response.deliverables.workpackSummaryDraft}\n\n[연결 상태 요약]\n- 법령 근거: ${legalEvidenceMode === "live" ? "연결됨" : "일부 근거 보류"}\n- 기상: ${weather.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- 후속 교육: ${training.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- KOSHA 자료: ${kosha.mode === "live" ? "연결됨" : "일부 근거 보류"}`,
         riskAssessmentDraft: `${response.deliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${outdoorHeatRiskAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${safetyKnowledgeAppendix}${riskKoshaOpenApiAppendix}`,
         workPlanDraft: `${response.deliverables.workPlanDraft}${outdoorHeatRiskAppendix}${workPlanLegalAppendix}${workPlanKoshaAppendix}${safetyKnowledgeAppendix}${workPlanKoshaOpenApiAppendix}`,
-        tbmBriefing: `${response.deliverables.tbmBriefing}\n\n[기상 신호]\n- ${weather.summary}\n- ${weather.actions.join("\n- ")}${outdoorHeatTbmAppendix}${tbmKoshaAppendix}${tbmLegalAppendix}${tbmSeriousAccidentAppendix}${safetyKnowledgeTbmAppendix}${accidentAppendix}${tbmKoshaOpenApiAppendix}`,
-        tbmLogDraft: `${response.deliverables.tbmLogDraft}${tbmLegalAppendix}${tbmSeriousAccidentAppendix}${koshaAppendix}${safetyKnowledgeTbmAppendix}${accidentAppendix}`
+        tbmBriefing: `${response.deliverables.tbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}`,
+        tbmLogDraft: `${response.deliverables.tbmLogDraft}${tbmQualityAppendix}`
           .trim(),
         safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`,
         emergencyResponseDraft: `${response.deliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}${emergencyKoshaOpenApiAppendix}`,

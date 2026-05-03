@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-05-03T20:00:00+09:00",
+  "scope": {
+    "owner": "Helmholtz",
+    "focus": "MOEL official TBM guide and user-provided TBM log/HWPX/safety-form migration",
+    "dbMutation": false,
+    "sourceRootsReviewed": [
+      "C:\\Users\\iceam\\Downloads",
+      "C:\\Users\\iceam\\OneDrive\\_30_컨설팅\\2025\\산업안전"
+    ],
+    "referenceArtifact": "evaluation/tbm-reference-ingestion/tbm-reference-ingestion-report.json"
+  },
+  "officialAndUserSourceFindings": {
+    "directTbmSources": [
+      "TBM 일지.hwpx",
+      "Tool Box Meeting 회의록.hwpx",
+      "230209 작업 전 안전점검회의 가이드(배포용).pdf",
+      "세이프건설-tbm-briefing.xls",
+      "세이프건설-tbm-log.hwpx"
+    ],
+    "relatedSafetyFormSources": [
+      "4.1 공사감독일지 및 안전감독일지 서식.hwpx",
+      "4.1 공사감독일지 및 안전감독일지 서식.pdf"
+    ],
+    "extractionLimits": [
+      "11 건설현장 TBM 실천 가이드.pdf is image-based in local extraction and needs OCR for exact text.",
+      "Binary .hwp files were not parsed because same-name HWPX copies were readable."
+    ]
+  },
+  "requiredTbmItems": [
+    {
+      "id": "basic-session",
+      "label": "기본정보",
+      "requiredFields": ["TBM 일시", "작업날짜 동일 여부", "업체명", "현장명", "작업장소", "작업명", "작업내용", "진행자"]
+    },
+    {
+      "id": "risk-assessment-link",
+      "label": "위험성평가 반영",
+      "requiredFields": ["위험성평가 실시여부", "주요 유해·위험요인", "중점위험요인", "대책", "조치담당"]
+    },
+    {
+      "id": "weather-api",
+      "label": "기상 API 반영",
+      "requiredFields": ["기상 요약", "기상 악화 시 조치", "옥외·고소·장비작업 작업중지 재판단"]
+    },
+    {
+      "id": "stop-work",
+      "label": "작업중지 기준",
+      "requiredFields": ["중지 트리거", "판단자", "보고자", "재개 조건"]
+    },
+    {
+      "id": "worker-check",
+      "label": "근로자 확인",
+      "requiredFields": ["보호구", "건강상태", "음주·피로", "위험구역 통제 확인"]
+    },
+    {
+      "id": "attendance",
+      "label": "참석자 확인",
+      "requiredFields": ["소속", "직종", "성명", "오전/오후 참석", "구두 복창", "서명"]
+    },
+    {
+      "id": "new-foreign-inexperienced",
+      "label": "신규·외국인·미숙련 안내",
+      "requiredFields": ["쉬운 한국어", "통역 또는 번역 메시지", "이해 여부 별도 확인", "미이해자 재교육"]
+    },
+    {
+      "id": "evidence",
+      "label": "사진·증빙",
+      "requiredFields": ["작업 전 사진", "보호구 사진", "통제구역 사진", "TBM 실시 사진", "사진/영상 파일명", "보관 위치"]
+    },
+    {
+      "id": "education-recognition",
+      "label": "교육시간 인정 검토",
+      "requiredFields": ["교육 대상", "교육 내용", "교육 시간", "서명", "사진 또는 모바일 기록", "법정교육 대체 단정 금지"]
+    },
+    {
+      "id": "follow-up",
+      "label": "미조치·후속조치",
+      "requiredFields": ["미조치 위험요인", "후속조치", "담당자", "확인자"]
+    }
+  ],
+  "currentComparison": {
+    "tbmBriefing": {
+      "status": "improved-but-not-final",
+      "covered": ["작업내용", "위험요인", "안전대책", "참석자 확인", "사진·증빙 위치", "기상 API 요약", "신규·외국인·미숙련 안내"],
+      "missing": ["정식 참석자 서명표", "작업날짜 동일 여부", "위험성평가 실시여부 체크박스", "미조치 후속조치 표"],
+      "excessOrDuplication": ["브리핑 문서에 교육시간 인정 문구가 길게 들어가면 목적이 흐려질 수 있어 짧은 검토 문구만 유지"]
+    },
+    "tbmLogDraft": {
+      "status": "closer-to-submission-form",
+      "covered": ["업체명", "작업장소", "작업내용", "참석인원", "위험성평가 실시여부", "근로자 확인", "참석자 확인", "사진·영상 기록", "교육시간 인정 검토"],
+      "missing": ["HWPX 원본과 같은 2단 참석자 표 렌더링은 WorkpackEditor dirty change에 의존", "전자서명/첨부파일 실제 저장 연결", "현장소장 결재 이미지"],
+      "excessOrDuplication": ["긴 법령·사례 appendices는 TBM 본문에서 제거하고 evidence UI/metadata로 분리해야 함"]
+    },
+    "renderer": {
+      "status": "partial",
+      "covered": ["현재 dirty WorkpackEditor에는 TBM 일지형 표 구조 개선이 이미 포함됨"],
+      "missing": ["canonical TBM schema 타입", "HTML/HWPX/Excel/PDF 공통 payload", "증빙 첨부 저장 위치와 렌더러 연결"],
+      "blockedBy": ["components/WorkpackEditor.tsx has pre-existing dirty changes, so this pass did not stage renderer edits"]
+    }
+  },
+  "patchedItems": [
+    {
+      "file": "lib/mock-data.ts",
+      "changes": ["fallback TBM briefing and log now include risk-assessment linkage, weather, stop-work criteria, new/foreign/inexperienced worker understanding, evidence location, and education-recognition caveat"]
+    },
+    {
+      "file": "lib/search.ts",
+      "changes": ["TBM deliverables now receive a concise required-check appendix instead of long legal/KOSHA/accident raw evidence blocks in core document text"]
+    }
+  ],
+  "qualityGate": {
+    "submissionLevel": "conditionally-submittable-for-demo",
+    "paidSaaSLevel": "not-yet",
+    "blockersForPaidSaaS": [
+      "canonical TBM schema is not implemented as a shared source of truth",
+      "signature/evidence attachment persistence is not connected",
+      "image-based official construction TBM guide still needs OCR verification",
+      "renderer/export parity across HWPX, Excel, PDF is not guaranteed"
+    ]
+  }
+}
