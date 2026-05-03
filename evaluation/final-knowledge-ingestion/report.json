@@ -1,0 +1,164 @@
+{
+  "generated_at": "2026-05-03T11:13:27.734197+00:00",
+  "db_mutation_applied": true,
+  "schema_exists": true,
+  "exact_command": "python .\\scripts\\execute_safety_reference_upsert.py --payload 'evaluation\\supabase-safety-ingestion-ready-2026-05-03\\upsert-payload.json' --out-dir 'evaluation\\final-knowledge-ingestion' --chunk-size 100",
+  "payload_path": "evaluation\\supabase-safety-ingestion-ready-2026-05-03\\upsert-payload.json",
+  "before_counts": {
+    "safety_reference_sources": 6,
+    "safety_reference_items": 8431,
+    "safety_reference_ingestion_runs": 1
+  },
+  "after_counts": {
+    "safety_reference_sources": 1063,
+    "safety_reference_items": 9920,
+    "safety_reference_ingestion_runs": 2
+  },
+  "uploaded": {
+    "sources": 1062,
+    "items": 1505,
+    "runs": 1
+  },
+  "success_count": 2568,
+  "failure_count": 0,
+  "elapsed_ms": 10545,
+  "status_probe": {
+    "ok": true,
+    "source_count": 1063,
+    "item_count": 9920,
+    "ingestion_run_count": 2
+  },
+  "search_probe": {
+    "ok": true,
+    "query": "TBM",
+    "count": 5,
+    "items": [
+      {
+        "id": "downloads-12-최초-상시평가-중심의-위험성평가-실행안내서-내지-a8bb36ddf2-record-0002-item",
+        "title": "12 최초-상시평가 중심의 위험성평가 실행안내서_내지 - 정부는 지난 5월 위험성평가 절차와 방법을 대폭 개선하는 것을 내용으로 하는 위험성평가 고시를 개정하였습니다. 개정 고시에는 유해·위험요인이 수시로 변화는 사업장",
+        "item_type": "tbm",
+        "category": "TBM",
+        "keywords": [
+          "TBM",
+          "Tool Box",
+          "위험성평가",
+          "안전보건",
+          "중대재해",
+          "추락",
+          "붕괴"
+        ],
+        "primary_documents": [
+          "TBM 브리핑",
+          "TBM 기록"
+        ]
+      },
+      {
+        "id": "downloads-12-최초-상시평가-중심의-위험성평가-실행안내서-내지-a8bb36ddf2-record-0003-item",
+        "title": "12 최초-상시평가 중심의 위험성평가 실행안내서_내지 - 산업현장 위험성평가,이렇게 하세요! 위험을 알아야 대책을 마련하고 안전이 확보됩니다. 위험성평가가 실시되도록 사업주가 주도하여 총괄 관리 사업주 • 안전보건관계자",
+        "item_type": "tbm",
+        "category": "TBM",
+        "keywords": [
+          "TBM",
+          "위험성평가",
+          "안전보건"
+        ],
+        "primary_documents": [
+          "TBM 브리핑",
+          "TBM 기록"
+        ]
+      },
+      {
+        "id": "downloads-12-최초-상시평가-중심의-위험성평가-실행안내서-내지-a8bb36ddf2-record-0004-item",
+        "title": "12 최초-상시평가 중심의 위험성평가 실행안내서_내지 - 산업현장 위험성평가,이렇게 하세요! 위험을 알아야 대책을 마련하고 안전이 확보됩니다. 위험성평가가 실시되도록 사업주가 주도하여 총괄 관리 사업주 • 안전보건관계자",
+        "item_type": "tbm",
+        "category": "TBM",
+        "keywords": [
+          "TBM",
+          "위험성평가",
+          "안전보건"
+        ],
+        "primary_documents": [
+          "TBM 브리핑",
+          "TBM 기록"
+        ]
+      },
+      {
+        "id": "downloads-24-opl-24년도-건설업-안전보건관리체계-구축-컨설팅-신청-안내-0ff0e06dcf-record-0003-item",
+        "title": "24 (OPL) 24년도 건설업 안전보건관리체계 구축 컨설팅 신청 안내 - 컨설팅 회차별 본사 및 현장 주요 컨설팅 내용 ࠗ ҅(ഥର)೦౴ ղਊ 1단계 (체계\u0007구축\u0007및\u0007이행\u0007현황\u0007파악) 본사와\u0007현장을\u0007방문하여\u0007위험성평가를\u0007중심으로\u0007체계\u0007",
+        "item_type": "tbm",
+        "category": "TBM",
+        "keywords": [
+          "TBM",
+          "위험성평가",
+          "안전보건"
+        ],
+        "primary_documents": [
+          "TBM 브리핑",
+          "TBM 기록"
+        ]
+      },
+      {
+        "id": "downloads-tbm-일지-e8ccf75f31-record-0001-item",
+        "title": "TBM 일지 - TBM 일지 담 당 - 소 장 공 종: 타설 일자:202 년 월 일 근로자 확인 사항 *개인 보호구 착용 상태(안전모,안전화,각반,복장,턱끈) *건강상태(고혈압,",
+        "item_type": "tbm",
+        "category": "TBM",
+        "keywords": [
+          "TBM",
+          "안전교육",
+          "일지",
+          "장비"
+        ],
+        "primary_documents": [
+          "TBM 브리핑",
+          "TBM 기록"
+        ]
+      }
+    ]
+  },
+  "error": null,
+  "initial_before_counts": {
+    "safety_reference_sources": 6,
+    "safety_reference_items": 8431,
+    "safety_reference_ingestion_runs": 1
+  },
+  "retry_before_counts": {
+    "safety_reference_sources": 1063,
+    "safety_reference_items": 8431,
+    "safety_reference_ingestion_runs": 1
+  },
+  "net_new_counts": {
+    "safety_reference_sources": 1057,
+    "safety_reference_items": 1489,
+    "safety_reference_ingestion_runs": 1
+  },
+  "first_attempt": {
+    "db_mutation_applied": true,
+    "partial_sources_upserted": true,
+    "failure_stage": "safety_reference_items",
+    "error": "unsupported Unicode escape sequence: NUL character in extracted text",
+    "resolution": "sanitized NUL characters from JSON payload strings and reran idempotent upsert; no delete or migration applied"
+  },
+  "app_api_status_probe": {
+    "ok": true,
+    "configured": true,
+    "status": "ready",
+    "sources": 1063,
+    "items": 9920,
+    "ingestionRuns": 2,
+    "message": "기술지원규정 폴더 1,040건 기준과 Supabase 기술지원규정 소스 1,040건을 연결했습니다."
+  },
+  "app_api_search_probe": {
+    "ok": true,
+    "configured": true,
+    "query": "TBM",
+    "count": 5,
+    "message": "Supabase 안전 지식 DB에서 참고자료를 조회했습니다.",
+    "sample_ids": [
+      "construction-process-0504",
+      "construction-process-0375",
+      "sif-아카이브-건설업-01786",
+      "sif-아카이브-건설업-02071",
+      "sif-아카이브-건설업-02133"
+    ]
+  }
+}
