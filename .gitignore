@@ -12,3 +12,9 @@ evaluation/**/*.pid
 evaluation/data-ingestion/*.seed.json
 evaluation/**/serious-accident-reference.pdf
 evaluation/**/serious-accident-reference.md
+evaluation/2026-04-27-format-research/
+evaluation/2026-04-27-full-audit/
+evaluation/2026-04-27-lawgo-precedent/
+evaluation/2026-04-27-rhwp-inspect/
+evaluation/2026-04-27-template-presets/
+evaluation/pdf-export-smoke/
