@@ -9,7 +9,11 @@ export async function GET(request: NextRequest) {
       ok: true,
       configured: false,
       workpacks: [],
-      message: "Supabase 저장소 설정 후 서버 이력을 불러옵니다."
+      summary: {
+        savedWorkpackCount: 0,
+        lastGeneratedAt: null
+      },
+      message: "서버 아카이브 연결 전입니다. 운영 저장소를 연결하면 저장된 문서팩 이력이 표시됩니다."
     });
   }
 
@@ -19,7 +23,11 @@ export async function GET(request: NextRequest) {
       ok: false,
       configured: true,
       workpacks: [],
-      message: "관리자 로그인이 필요합니다."
+      summary: {
+        savedWorkpackCount: 0,
+        lastGeneratedAt: null
+      },
+      message: "관리자 세션이 확인되면 저장된 문서팩 이력을 불러옵니다."
     }, { status: 401 });
   }
 
@@ -37,7 +45,11 @@ export async function GET(request: NextRequest) {
       ok: false,
       configured: true,
       workpacks: [],
-      message: "조직 이력 조회에 실패했습니다."
+      summary: {
+        savedWorkpackCount: 0,
+        lastGeneratedAt: null
+      },
+      message: "현재 작업 이력 저장소 응답을 확인하는 중입니다. 잠시 후 다시 조회해 주세요."
     }, { status: 500 });
   }
 
@@ -47,7 +59,11 @@ export async function GET(request: NextRequest) {
       ok: true,
       configured: true,
       workpacks: [],
-      message: "아직 저장된 관리자 이력이 없습니다."
+      summary: {
+        savedWorkpackCount: 0,
+        lastGeneratedAt: null
+      },
+      message: "아직 저장된 문서팩 이력이 없습니다. 작업공간에서 문서팩을 저장하면 이곳에 표시됩니다."
     });
   }
 
@@ -64,7 +80,11 @@ export async function GET(request: NextRequest) {
       ok: false,
       configured: true,
       workpacks: [],
-      message: "문서팩 이력 조회에 실패했습니다."
+      summary: {
+        savedWorkpackCount: 0,
+        lastGeneratedAt: null
+      },
+      message: "문서팩 이력을 불러오지 못했습니다. 로컬 최근 작업은 계속 사용할 수 있습니다."
     }, { status: 500 });
   }
 
@@ -80,26 +100,37 @@ export async function GET(request: NextRequest) {
   const siteMap = new Map((sites || []).map((site) => [site.id, site]));
   const organizationMap = new Map((organizations || []).map((organization) => [organization.id, organization.name]));
 
+  const archiveWorkpacks = (workpacks || []).map((workpack) => {
+    const site = workpack.site_id ? siteMap.get(workpack.site_id) : null;
+    return {
+      id: workpack.id,
+      organizationName: organizationMap.get(workpack.organization_id) || "SafeClaw Pilot",
+      siteName: site?.name || "기본 현장",
+      industry: site?.industry || null,
+      region: site?.region || null,
+      question: workpack.question,
+      scenario: workpack.scenario,
+      workerSummary: workpack.worker_summary,
+      status: workpack.status,
+      createdAt: workpack.created_at,
+      updatedAt: workpack.updated_at,
+      lastGeneratedAt: workpack.updated_at || workpack.created_at,
+      reopenHref: "/documents",
+      editHref: "/workspace#history"
+    };
+  });
+
   return NextResponse.json({
     ok: true,
     configured: true,
-    workpacks: (workpacks || []).map((workpack) => {
-      const site = workpack.site_id ? siteMap.get(workpack.site_id) : null;
-      return {
-        id: workpack.id,
-        organizationName: organizationMap.get(workpack.organization_id) || "SafeClaw Pilot",
-        siteName: site?.name || "기본 현장",
-        industry: site?.industry || null,
-        region: site?.region || null,
-        question: workpack.question,
-        scenario: workpack.scenario,
-        workerSummary: workpack.worker_summary,
-        status: workpack.status,
-        createdAt: workpack.created_at,
-        updatedAt: workpack.updated_at
-      };
-    }),
-    message: "관리자 문서팩 이력을 불러왔습니다."
+    workpacks: archiveWorkpacks,
+    summary: {
+      savedWorkpackCount: archiveWorkpacks.length,
+      lastGeneratedAt: archiveWorkpacks[0]?.lastGeneratedAt || null
+    },
+    message: archiveWorkpacks.length
+      ? "저장된 문서팩 이력을 불러왔습니다."
+      : "아직 저장된 문서팩 이력이 없습니다. 작업공간에서 문서팩을 저장하면 이곳에 표시됩니다."
   });
 }
 
