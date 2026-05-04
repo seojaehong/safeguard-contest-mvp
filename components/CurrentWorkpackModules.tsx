@@ -18,11 +18,14 @@ import {
   buildEducationRecordDrafts,
   buildRecipientSuggestions,
   buildWorkerDispatchTargets,
+  maskEmail,
   maskPhone,
   summarizeWorkers,
   type RecipientSuggestion,
   type WorkerDispatchTarget,
-  type WorkerProfile
+  type WorkerExperienceLevel,
+  type WorkerProfile,
+  type WorkerTrainingStatus
 } from "@/lib/workspace";
 
 type CurrentWorkpackSnapshot = {
@@ -35,6 +38,8 @@ type CurrentWorkpackSnapshot = {
 
 type CurrentWorkpackState = CurrentWorkpackSnapshot & {
   updateData: (data: AskResponse) => void;
+  updateWorkerSnapshot: (workerSnapshot: CurrentWorkerSnapshot) => void;
+  updateDispatchSnapshot: (dispatchSnapshot: CurrentDispatchSnapshot | undefined) => void;
 };
 
 type LaunchDocument = {
@@ -141,6 +146,102 @@ const launchDocuments: LaunchDocument[] = [
   }
 ];
 
+const workerRoleOptions = [
+  "현장관리자",
+  "관리감독자",
+  "작업반장",
+  "작업자",
+  "신호수",
+  "지게차 운전자",
+  "화기감시자",
+  "안전관리자"
+] as const;
+
+const workerLanguageOptions = [
+  { nationality: "대한민국", languageCode: "ko", languageLabel: "한국어" },
+  { nationality: "베트남", languageCode: "vi", languageLabel: "베트남어" },
+  { nationality: "중국", languageCode: "zh", languageLabel: "중국어" },
+  { nationality: "태국", languageCode: "th", languageLabel: "태국어" },
+  { nationality: "우즈베키스탄", languageCode: "uz", languageLabel: "우즈베크어" },
+  { nationality: "몽골", languageCode: "mn", languageLabel: "몽골어" },
+  { nationality: "네팔", languageCode: "ne", languageLabel: "네팔어" },
+  { nationality: "캄보디아", languageCode: "km", languageLabel: "크메르어" },
+  { nationality: "인도네시아", languageCode: "id", languageLabel: "인도네시아어" },
+  { nationality: "미얀마", languageCode: "my", languageLabel: "미얀마어" },
+  { nationality: "필리핀", languageCode: "tl", languageLabel: "필리핀어" },
+  { nationality: "기타", languageCode: "en", languageLabel: "영어" }
+] as const;
+
+const workerTrainingStatusOptions: WorkerTrainingStatus[] = ["이수", "당일 교육 예정", "확인 필요"];
+const workerExperienceLevelOptions: WorkerExperienceLevel[] = ["숙련", "중간", "신규"];
+
+function buildWorkerId() {
+  return `worker-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function defaultWorkerDraft(): WorkerProfile {
+  return {
+    id: buildWorkerId(),
+    displayName: "",
+    role: "작업자",
+    joinedAt: new Date().toISOString().slice(0, 10),
+    experienceLevel: "중간",
+    experienceSummary: "작업 전 TBM에서 역할과 위험요인을 확인합니다.",
+    nationality: "대한민국",
+    languageCode: "ko",
+    languageLabel: "한국어",
+    isNewWorker: false,
+    isForeignWorker: false,
+    trainingStatus: "당일 교육 예정",
+    trainingSummary: "작업 전 교육 확인 필요",
+    phone: "",
+    email: ""
+  };
+}
+
+function syncWorkerLanguage(worker: WorkerProfile, languageCode: string): WorkerProfile {
+  const option = workerLanguageOptions.find((item) => item.languageCode === languageCode) || workerLanguageOptions[0];
+  return {
+    ...worker,
+    nationality: option.nationality,
+    languageCode: option.languageCode,
+    languageLabel: option.languageLabel,
+    isForeignWorker: option.languageCode !== "ko"
+  };
+}
+
+function buildWorkerSnapshot(workers: WorkerProfile[], previous?: CurrentWorkerSnapshot): CurrentWorkerSnapshot {
+  const workerIds = workers.map((worker) => worker.id);
+  const selectedWorkerIds = previous?.selectedWorkerIds.length
+    ? previous.selectedWorkerIds.filter((id) => workerIds.includes(id))
+    : workerIds;
+
+  return {
+    savedAt: new Date().toISOString(),
+    source: "workspace",
+    workers,
+    selectedWorkerIds: selectedWorkerIds.length ? selectedWorkerIds : workerIds
+  };
+}
+
+function buildDispatchSnapshot(workers: WorkerProfile[]): CurrentDispatchSnapshot | undefined {
+  const recipientSuggestions = buildRecipientSuggestions(workers);
+  const targetWorkers = buildWorkerDispatchTargets(workers);
+  if (!recipientSuggestions.length && !targetWorkers.length) return undefined;
+  return {
+    savedAt: new Date().toISOString(),
+    source: "workspace",
+    recipientSuggestions,
+    targetWorkers
+  };
+}
+
+function readResponseMessage(payload: unknown, fallback: string) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return fallback;
+  const record = payload as Record<string, unknown>;
+  return typeof record.message === "string" ? record.message : fallback;
+}
+
 function createBrowserSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -235,7 +336,45 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
     }));
   }, []);
 
-  return { ...state, updateData };
+  const updateWorkerSnapshot = useCallback((workerSnapshot: CurrentWorkerSnapshot) => {
+    setState((current) => {
+      const nextState: CurrentWorkpackSnapshot = {
+        ...current,
+        isCurrent: true,
+        savedAt: new Date().toISOString(),
+        workerSnapshot
+      };
+      window.localStorage.setItem(
+        CURRENT_WORKPACK_STORAGE_KEY,
+        JSON.stringify(buildStoredCurrentWorkpack(nextState.data, {
+          workerSnapshot,
+          dispatchSnapshot: nextState.dispatchSnapshot
+        }))
+      );
+      return nextState;
+    });
+  }, []);
+
+  const updateDispatchSnapshot = useCallback((dispatchSnapshot: CurrentDispatchSnapshot | undefined) => {
+    setState((current) => {
+      const nextState: CurrentWorkpackSnapshot = {
+        ...current,
+        isCurrent: true,
+        savedAt: new Date().toISOString(),
+        dispatchSnapshot
+      };
+      window.localStorage.setItem(
+        CURRENT_WORKPACK_STORAGE_KEY,
+        JSON.stringify(buildStoredCurrentWorkpack(nextState.data, {
+          workerSnapshot: nextState.workerSnapshot,
+          dispatchSnapshot
+        }))
+      );
+      return nextState;
+    });
+  }, []);
+
+  return { ...state, updateData, updateWorkerSnapshot, updateDispatchSnapshot };
 }
 
 function isPlaceholderRecipient(value: string) {
@@ -468,10 +607,134 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
 
 export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
-  const workers = currentRouteWorkers(current);
-  const records = buildEducationRecordDrafts(workers, current.data.scenario.workSummary);
-  const summary = summarizeWorkers(workers);
+  const [editableWorkers, setEditableWorkers] = useState<WorkerProfile[]>(() => currentRouteWorkers(current));
+  const [draft, setDraft] = useState<WorkerProfile>(() => defaultWorkerDraft());
+  const [editingWorkerId, setEditingWorkerId] = useState<string | null>(null);
+  const [contactConsent, setContactConsent] = useState(false);
+  const [workerSaveState, setWorkerSaveState] = useState<{
+    status: "local" | "saving" | "saved" | "login-required" | "error";
+    message: string;
+  }>({
+    status: "local",
+    message: "브라우저 작업공간에서 명단을 편집합니다. 관리자 로그인 후 서버 이력에 저장할 수 있습니다."
+  });
+  const records = buildEducationRecordDrafts(editableWorkers, current.data.scenario.workSummary);
+  const summary = summarizeWorkers(editableWorkers);
   const workerSourceLabel = current.workerSnapshot ? "현재 작업공간 snapshot" : current.isCurrent ? "현재 문서팩에서 기본 추정" : "기본 예시";
+
+  useEffect(() => {
+    setEditableWorkers(currentRouteWorkers(current));
+  }, [current.data, current.workerSnapshot]);
+
+  function persistWorkerSnapshot(nextWorkers: WorkerProfile[]) {
+    const workerSnapshot = buildWorkerSnapshot(nextWorkers, current.workerSnapshot);
+    const dispatchSnapshot = buildDispatchSnapshot(nextWorkers);
+    setEditableWorkers(nextWorkers);
+    current.updateWorkerSnapshot(workerSnapshot);
+    current.updateDispatchSnapshot(dispatchSnapshot);
+    setWorkerSaveState({
+      status: "local",
+      message: "작업자 명단이 이 브라우저의 현재 작업공간에 반영됐습니다. 전파 화면 수신자에도 함께 적용됩니다."
+    });
+  }
+
+  function resetDraft() {
+    setDraft(defaultWorkerDraft());
+    setEditingWorkerId(null);
+    setContactConsent(false);
+  }
+
+  function startEditWorker(worker: WorkerProfile) {
+    setDraft({ ...worker });
+    setEditingWorkerId(worker.id);
+    setContactConsent(Boolean(worker.phone || worker.email));
+  }
+
+  function saveDraftWorker() {
+    const displayName = draft.displayName.trim();
+    if (!displayName) {
+      setWorkerSaveState({
+        status: "error",
+        message: "표시명을 입력해야 명단에 반영할 수 있습니다."
+      });
+      return;
+    }
+    if ((draft.phone || draft.email) && !contactConsent) {
+      setWorkerSaveState({
+        status: "error",
+        message: "연락처를 사용하는 경우 교육 확인과 현장 전파 목적 고지가 필요합니다."
+      });
+      return;
+    }
+
+    const nextWorker: WorkerProfile = {
+      ...draft,
+      displayName,
+      phone: draft.phone?.trim() || undefined,
+      email: draft.email?.trim() || undefined,
+      isNewWorker: draft.experienceLevel === "신규" || draft.isNewWorker,
+      isForeignWorker: draft.languageCode !== "ko",
+      trainingSummary: draft.trainingSummary.trim() || "작업 전 교육 확인 필요",
+      experienceSummary: draft.experienceSummary.trim() || "작업 배치 전 역할과 위험요인을 확인합니다."
+    };
+    const nextWorkers = editingWorkerId
+      ? editableWorkers.map((worker) => worker.id === editingWorkerId ? nextWorker : worker)
+      : [...editableWorkers, { ...nextWorker, id: draft.id || buildWorkerId() }];
+
+    persistWorkerSnapshot(nextWorkers);
+    resetDraft();
+  }
+
+  async function saveWorkersToServer() {
+    if (!current.isCurrent) {
+      setWorkerSaveState({
+        status: "login-required",
+        message: "먼저 작업공간에서 문서팩을 생성해야 서버 이력에 연결할 수 있습니다."
+      });
+      return;
+    }
+    const session = await readSession();
+    if (!session) {
+      setWorkerSaveState({
+        status: "login-required",
+        message: "관리자 로그인 후 작업자 명단을 서버 이력에 저장합니다. 지금 편집 내용은 브라우저 작업공간에 유지됩니다."
+      });
+      return;
+    }
+
+    setWorkerSaveState({ status: "saving", message: "작업자 명단을 서버 이력에 저장하는 중입니다." });
+    try {
+      const response = await fetch("/api/workers", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${session.access_token}`,
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          scenario: current.data.scenario,
+          workers: editableWorkers
+        })
+      });
+      const payload: unknown = await response.json().catch((): unknown => ({}));
+      if (!response.ok) {
+        setWorkerSaveState({
+          status: "error",
+          message: readResponseMessage(payload, "작업자 명단 저장에 실패했습니다.")
+        });
+        return;
+      }
+      setWorkerSaveState({
+        status: "saved",
+        message: readResponseMessage(payload, "관리자 이력에 작업자 명단을 저장했습니다.")
+      });
+    } catch (error) {
+      console.error("worker server save failed", error);
+      setWorkerSaveState({
+        status: "error",
+        message: "작업자 명단 저장 요청 중 오류가 발생했습니다."
+      });
+    }
+  }
 
   return (
     <>
@@ -485,17 +748,136 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
       <section className="safeclaw-module-panel">
         <span>작업 투입 적합성 카드 · {workerSourceLabel}</span>
         <h2>{current.workerSnapshot ? "작업공간에서 편집한 명단입니다." : "저장된 명단이 없어 기본 명단으로 표시합니다."}</h2>
+        <p className={workerSaveState.status === "error" ? "export-error" : "muted small"}>{workerSaveState.message}</p>
         <div className="safeclaw-worker-table">
-          {workers.map((worker) => {
+          {editableWorkers.map((worker) => {
             const record = records.find((item) => item.workerId === worker.id);
             return (
               <article key={worker.id}>
                 <strong>{worker.displayName}</strong>
                 <p>{worker.role} · {worker.nationality} · {worker.languageLabel}</p>
-                <small>{worker.phone ? `문자 가능 ${maskPhone(worker.phone)}` : "연락처 필요"} · {record?.memo || worker.trainingSummary}</small>
+                <small>
+                  {worker.phone ? `문자 ${maskPhone(worker.phone)}` : "휴대폰 필요"}
+                  {worker.email ? ` · 메일 ${maskEmail(worker.email)}` : ""}
+                  {" · "}{record?.memo || worker.trainingSummary}
+                </small>
+                <div className="command-actions">
+                  <button type="button" className="button secondary" onClick={() => startEditWorker(worker)}>수정</button>
+                </div>
               </article>
             );
           })}
+        </div>
+      </section>
+      <section className="safeclaw-module-panel">
+        <span>{editingWorkerId ? "작업자 정보 수정" : "작업자 빠른 추가"}</span>
+        <h2>역할·국적·언어를 선택해서 전파 대상까지 연결합니다.</h2>
+        <div className="two-inputs">
+          <label>
+            <span className="field-label">표시명</span>
+            <input
+              className="input"
+              value={draft.displayName}
+              onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, displayName: event.target.value }))}
+              placeholder="예: 응우옌 반 안"
+            />
+          </label>
+          <label>
+            <span className="field-label">역할</span>
+            <select
+              className="input"
+              value={draft.role}
+              onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, role: event.target.value }))}
+            >
+              {workerRoleOptions.map((role) => <option key={role} value={role}>{role}</option>)}
+            </select>
+          </label>
+          <label>
+            <span className="field-label">국적·주 사용 언어</span>
+            <select
+              className="input"
+              value={draft.languageCode}
+              onChange={(event) => setDraft((currentDraft) => syncWorkerLanguage(currentDraft, event.target.value))}
+            >
+              {workerLanguageOptions.map((item) => (
+                <option key={item.languageCode} value={item.languageCode}>{item.nationality} · {item.languageLabel}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span className="field-label">숙련도</span>
+            <select
+              className="input"
+              value={draft.experienceLevel}
+              onChange={(event) => {
+                const experienceLevel = event.target.value as WorkerExperienceLevel;
+                setDraft((currentDraft) => ({
+                  ...currentDraft,
+                  experienceLevel,
+                  isNewWorker: experienceLevel === "신규"
+                }));
+              }}
+            >
+              {workerExperienceLevelOptions.map((level) => <option key={level} value={level}>{level}</option>)}
+            </select>
+          </label>
+          <label>
+            <span className="field-label">교육상태</span>
+            <select
+              className="input"
+              value={draft.trainingStatus}
+              onChange={(event) => setDraft((currentDraft) => ({
+                ...currentDraft,
+                trainingStatus: event.target.value as WorkerTrainingStatus
+              }))}
+            >
+              {workerTrainingStatusOptions.map((status) => <option key={status} value={status}>{status}</option>)}
+            </select>
+          </label>
+          <label>
+            <span className="field-label">현장 투입일</span>
+            <input
+              className="input"
+              type="date"
+              value={draft.joinedAt}
+              onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, joinedAt: event.target.value }))}
+            />
+          </label>
+          <label>
+            <span className="field-label">휴대폰</span>
+            <input
+              className="input"
+              value={draft.phone || ""}
+              onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, phone: event.target.value }))}
+              placeholder="010-0000-0000"
+            />
+          </label>
+          <label>
+            <span className="field-label">이메일</span>
+            <input
+              className="input"
+              value={draft.email || ""}
+              onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, email: event.target.value }))}
+              placeholder="name@example.com"
+            />
+          </label>
+        </div>
+        <label className="consent-check">
+          <input
+            type="checkbox"
+            checked={contactConsent}
+            onChange={(event) => setContactConsent(event.target.checked)}
+          />
+          <span>연락처·국적·언어 정보를 교육 확인과 현장 전파 목적으로만 사용합니다.</span>
+        </label>
+        <div className="command-actions">
+          <button type="button" className="button" onClick={saveDraftWorker}>
+            {editingWorkerId ? "수정 반영" : "명단에 추가"}
+          </button>
+          <button type="button" className="button secondary" onClick={resetDraft}>입력 초기화</button>
+          <button type="button" className="button secondary" onClick={saveWorkersToServer} disabled={workerSaveState.status === "saving"}>
+            {workerSaveState.status === "saving" ? "서버 저장 중" : "관리자 이력 저장"}
+          </button>
         </div>
       </section>
     </>
@@ -571,7 +953,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
     if (!supabaseLoginAvailable) {
       setServerArchive({
         status: "unconfigured",
-        message: "Supabase URL과 anon key가 없어 서버 이력을 조회할 수 없습니다.",
+        message: "관리자 이력 저장소 연결 전입니다. 지금은 이 브라우저의 최근 작업을 이어서 사용할 수 있습니다.",
         workpacks: [],
         dispatchLogs: []
       });
@@ -588,7 +970,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
     if (!session) {
       setServerArchive({
         status: "login-required",
-        message: "관리자 로그인 후 workpacks와 dispatch_logs 이력을 불러올 수 있습니다.",
+        message: "관리자 로그인 후 저장된 문서팩과 전파 이력을 불러올 수 있습니다.",
         workpacks: [],
         dispatchLogs: []
       });
@@ -642,9 +1024,9 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
       <CurrentWorkpackBanner isCurrent={current.isCurrent} savedAt={current.savedAt} />
       <section className="safeclaw-module-grid four">
         <article><span>로컬 상태</span><strong>{browserArchiveLabel}</strong></article>
-        <article><span>작업자 snapshot</span><strong>{hasWorkerSnapshot ? `${workers.length}명` : "없음"}</strong></article>
-        <article><span>Supabase 로그인</span><strong>{supabaseLoginAvailable ? "가능" : "설정 필요"}</strong></article>
-        <article><span>서버 archive</span><strong>{serverArchive.status === "ready" ? `${serverArchive.workpacks.length}건` : "조회 대기"}</strong></article>
+        <article><span>작업자 명단</span><strong>{hasWorkerSnapshot ? `${workers.length}명` : "없음"}</strong></article>
+        <article><span>관리자 저장</span><strong>{supabaseLoginAvailable ? "연결 가능" : "연결 전"}</strong></article>
+        <article><span>서버 이력</span><strong>{serverArchive.status === "ready" ? `${serverArchive.workpacks.length}건` : "조회 대기"}</strong></article>
       </section>
       {!current.isCurrent ? (
         <section className="safeclaw-module-panel">

@@ -437,7 +437,7 @@ export default function ArchivePage() {
         <article className="safeclaw-module-panel">
           <div className="compact-head">
             <div>
-              <span>Saved workpacks</span>
+              <span>저장 문서팩</span>
               <h2>저장된 문서팩.</h2>
             </div>
             <Link href="/workspace">새 문서팩 생성</Link>
@@ -450,7 +450,7 @@ export default function ArchivePage() {
         <article className="safeclaw-module-panel">
           <div className="compact-head">
             <div>
-              <span>Dispatch logs</span>
+              <span>전파 이력</span>
               <h2>전파 이력.</h2>
             </div>
             <Link href="/dispatch">전파 관리</Link>
