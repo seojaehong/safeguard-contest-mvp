@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser } from "@/lib/supabase-admin";
 import { isRecord, parseScenarioContext, parseWorkerProfiles } from "@/lib/workspace-api";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const client = createSupabaseAdminClient();
   if (!client) {

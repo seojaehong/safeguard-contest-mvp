@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-05-04T00:58:18.667Z",
+  "verdict": "pass_with_notice",
+  "scope": "paid-pilot SaaS v1 candidate",
+  "checks": [
+    {
+      "name": "quality_matrix",
+      "status": "pass",
+      "artifact": "evaluation/saas-v1/matrix-runner-report.json",
+      "detail": "20 base scenarios and 5 variants were checked in local deterministic mode."
+    },
+    {
+      "name": "document_forms",
+      "status": "pass_with_notice",
+      "artifact": "components/WorkpackEditor.tsx",
+      "detail": "Risk assessment, work plan, permit, TBM briefing, TBM log, and education records use distinct safety-form structures. HWPX is text-structured output, not original-cell reproduction."
+    },
+    {
+      "name": "archive_reuse",
+      "status": "pass_with_notice",
+      "artifact": "app/archive/page.tsx",
+      "detail": "Archive and reuse paths are present. Full behavior depends on Supabase login and deployment environment variables."
+    },
+    {
+      "name": "dispatch",
+      "status": "pass_with_notice",
+      "artifact": "components/CurrentWorkpackModules.tsx",
+      "detail": "Email and SMS are the v1 active channels. Kakao and Band remain locked until approval."
+    },
+    {
+      "name": "security_privacy",
+      "status": "notice",
+      "artifact": "docs/security_privacy_readiness.md",
+      "detail": "Minimum worker fields are defined. Production RLS must be checked in Supabase before paid pilot onboarding."
+    }
+  ],
+  "blockingIssues": [],
+  "notices": [
+    "Browser print is the v1 PDF flow.",
+    "HWPX original-cell reproduction is not claimed in v1.",
+    "Production Supabase history requires valid login and RLS policies.",
+    "Kakao and Band are not part of the v1 submission gate."
+  ]
+}

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
 import { isRecord, parseScenarioContext, readString } from "@/lib/workspace-api";
 
+export const dynamic = "force-dynamic";
+
 type DispatchLogDraft = {
   channel: string;
   targetLabel?: string;
