@@ -3900,6 +3900,98 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   box-shadow: inset 0 -5px 0 rgba(111, 75, 38, 0.14);
 }
 
+.customer-template-panel {
+  border: 1px solid rgba(207, 199, 185, 0.78);
+  border-radius: 18px;
+  background: rgba(255, 252, 246, 0.76);
+  padding: 12px 14px;
+}
+
+.customer-template-panel summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.customer-template-copy {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(207, 199, 185, 0.62);
+}
+
+.customer-template-copy strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.customer-template-copy p {
+  margin: 0;
+  color: #526075;
+  font-size: 12px;
+  font-weight: 720;
+  line-height: 1.55;
+}
+
+.customer-template-stage,
+.customer-template-field-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.customer-template-stage {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.customer-template-stage article,
+.customer-template-field-grid article {
+  border: 1px solid rgba(207, 199, 185, 0.62);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+  padding: 10px;
+}
+
+.customer-template-stage span,
+.customer-template-field-grid span {
+  display: block;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.customer-template-stage strong,
+.customer-template-field-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.customer-template-stage p,
+.customer-template-field-grid p {
+  margin: 6px 0 0;
+  color: #5f6a7b;
+  font-size: 11px;
+  font-weight: 720;
+  line-height: 1.45;
+}
+
+.customer-template-field-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+  .customer-template-stage,
+  .customer-template-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .document-editor {
   display: grid;
   gap: 16px;
@@ -6527,6 +6619,34 @@ body {
     linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px) !important;
   background-size: 28px 28px !important;
+}
+
+.safeclaw-module-shell .customer-template-panel,
+.safeclaw-module-shell .customer-template-stage article,
+.safeclaw-module-shell .customer-template-field-grid article {
+  border-radius: 4px !important;
+  border-color: rgba(246, 245, 239, 0.16) !important;
+  background: rgba(8, 9, 11, 0.72) !important;
+  box-shadow: none !important;
+}
+
+.safeclaw-module-shell .customer-template-panel summary,
+.safeclaw-module-shell .customer-template-copy strong,
+.safeclaw-module-shell .customer-template-stage strong,
+.safeclaw-module-shell .customer-template-field-grid strong {
+  color: #f6f5ef !important;
+}
+
+.safeclaw-module-shell .customer-template-stage span,
+.safeclaw-module-shell .customer-template-field-grid span {
+  color: var(--os-yellow, #ffdc2e) !important;
+  font-family: var(--font-hud);
+}
+
+.safeclaw-module-shell .customer-template-copy p,
+.safeclaw-module-shell .customer-template-stage p,
+.safeclaw-module-shell .customer-template-field-grid p {
+  color: rgba(246, 245, 239, 0.62) !important;
 }
 
 .safeclaw-module-shell .template-preview span,

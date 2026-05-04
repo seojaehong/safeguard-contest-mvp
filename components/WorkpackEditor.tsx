@@ -70,6 +70,12 @@ type TemplatePreset = {
   previewTitle: string;
   previewBullets: string[];
 };
+type CustomerTemplateField = {
+  key: string;
+  label: string;
+  mapsTo: string;
+  appliesTo: string;
+};
 type SafetyFormProfile = {
   code: string;
   subtitle: string;
@@ -128,6 +134,16 @@ const templatePresets: TemplatePreset[] = [
     previewTitle: "한글 서식 + 확인/서명란",
     previewBullets: ["공식 서식 항목명 유지", "확인자·관리감독자 서명란", "한컴오피스 제출 흐름"]
   }
+];
+
+const customerTemplateFields: CustomerTemplateField[] = [
+  { key: "siteName", label: "현장명", mapsTo: "scenario.siteName", appliesTo: "표지, 작업개요, 결재란" },
+  { key: "workName", label: "작업명", mapsTo: "scenario.workName / 정제된 작업내용", appliesTo: "작업계획서, TBM, 교육기록" },
+  { key: "riskFactors", label: "주요 유해·위험요인", mapsTo: "riskAssessmentDraft rows", appliesTo: "위험성평가표, TBM" },
+  { key: "controls", label: "감소대책", mapsTo: "risk controls / immediate actions", appliesTo: "위험성평가표, 작업허가, TBM" },
+  { key: "workers", label: "작업자·교육대상", mapsTo: "worker summary", appliesTo: "TBM 기록, 안전보건교육 기록" },
+  { key: "educationContent", label: "교육내용", mapsTo: "safetyEducationRecordDraft", appliesTo: "교육일지, 외국인 안내문" },
+  { key: "approver", label: "확인자·승인자", mapsTo: "user-entered approval line", appliesTo: "결재란, 서명란" }
 ];
 
 const documentMeta: EditableDocument[] = [
@@ -1942,6 +1958,43 @@ export function WorkpackEditor({
               ))}
             </ul>
           </div>
+          <details className="customer-template-panel">
+            <summary>사업장 서식 매핑 준비</summary>
+            <div className="customer-template-copy">
+              <strong>지금은 SafeClaw 표준 제출형으로 출력합니다.</strong>
+              <p>
+                고객사 원본 XLSX/HWPX 서식은 온보딩 때 업로드하고, 아래 공통 필드를 한 번 매핑한 뒤
+                같은 현장에서 반복 렌더링하는 흐름으로 확장합니다. 자동 덮어쓰기는 하지 않고 제출 전
+                사용자가 확인합니다.
+              </p>
+            </div>
+            <div className="customer-template-stage" aria-label="사업장 서식 적용 단계">
+              <article>
+                <span>01</span>
+                <strong>원본 서식 수집</strong>
+                <p>사업장 위험성평가표, 작업계획서, TBM, 교육일지 원본을 등록합니다.</p>
+              </article>
+              <article>
+                <span>02</span>
+                <strong>필드 매핑</strong>
+                <p>현장명, 작업명, 위험요인, 감소대책, 결재란을 SafeClaw 문서팩과 연결합니다.</p>
+              </article>
+              <article>
+                <span>03</span>
+                <strong>검수 후 반복 출력</strong>
+                <p>검수된 서식만 고객사 제출본으로 쓰고, 원본 셀 단위 복제는 별도 QA로 잠급니다.</p>
+              </article>
+            </div>
+            <div className="customer-template-field-grid" aria-label="고객사 서식 매핑 필드">
+              {customerTemplateFields.map((field) => (
+                <article key={field.key}>
+                  <span>{field.label}</span>
+                  <strong>{field.mapsTo}</strong>
+                  <p>{field.appliesTo}</p>
+                </article>
+              ))}
+            </div>
+          </details>
           <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
           <details className="advanced-downloads">
             <summary>전체 다운로드</summary>
