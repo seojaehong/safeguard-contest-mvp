@@ -331,6 +331,11 @@ export function WorkflowSharePanel({
       <p className="channel-readiness-note">
         현재 즉시 전송 채널은 메일·문자입니다. 카카오·밴드는 이번 제출 범위에서는 보류합니다.
       </p>
+      {!authToken || !workpackId ? (
+        <p className="muted small">
+          관리자 로그인과 문서팩 저장 ID가 확인되면 전송 결과가 전파 이력에 함께 저장됩니다. 없을 때도 전송 요청과 화면 결과 확인은 가능합니다.
+        </p>
+      ) : null}
 
       <div className="message-target-box">
         <div className="compact-head">
