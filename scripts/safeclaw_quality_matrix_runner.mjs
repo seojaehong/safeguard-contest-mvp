@@ -5,7 +5,7 @@ import process from "node:process";
 
 const defaultCasesPath = path.join(process.cwd(), "scripts", "safeclaw_quality_matrix_cases.json");
 const casesPath = process.env.SAFECLAW_MATRIX_CASES_PATH || defaultCasesPath;
-const outDir = path.resolve(process.env.SAFECLAW_MATRIX_OUT_DIR || path.join(process.cwd(), "evaluation", "quality-matrix"));
+const outDir = path.resolve(process.env.SAFECLAW_MATRIX_OUT_DIR || path.join(process.cwd(), "evaluation", "saas-v1"));
 const baseUrl = process.env.SAFECLAW_MATRIX_BASE_URL || process.env.SAFEGUARD_BASE_URL || "http://127.0.0.1:3000";
 const liveEnabled = process.env.SAFECLAW_MATRIX_LIVE === "1";
 const liveCount = Number.parseInt(process.env.SAFECLAW_MATRIX_LIVE_COUNT || "5", 10);
@@ -16,6 +16,7 @@ const canonicalDocuments = [
   "workpackSummaryDraft",
   "riskAssessmentDraft",
   "workPlanDraft",
+  "workPermitDraft",
   "tbmBriefing",
   "tbmLogDraft",
   "safetyEducationRecordDraft",
@@ -27,13 +28,14 @@ const canonicalDocuments = [
 ];
 
 const documentAliases = {
-  workPermit: ["workPlanDraft", "tbmBriefing", "safetyEducationRecordDraft"]
+  workPermit: ["workPermitDraft", "workPlanDraft", "tbmBriefing", "safetyEducationRecordDraft"]
 };
 
 const documentRubrics = {
   workpackSummaryDraft: ["점검결과", "업종", "현장", "작업", "위험"],
   riskAssessmentDraft: ["위험성평가", "유해", "위험요인", "감소대책", "확인"],
   workPlanDraft: ["작업계획", "작업순서", "작업인원", "작업중지", "확인"],
+  workPermitDraft: ["허가", "작업허가", "첨부서류", "보호구", "종료"],
   tbmBriefing: ["TBM", "작업", "위험요인", "안전대책", "확인"],
   tbmLogDraft: ["TBM", "기록", "참석", "확인", "후속조치"],
   safetyEducationRecordDraft: ["교육", "교육대상", "교육내용", "확인방법", "서명"],
@@ -162,6 +164,16 @@ function buildLocalPayload(testCase) {
       `주요 위험: ${hazardLine}`,
       `작업중지 기준: ${weatherLine} 또는 위험 발견 시 즉시 중지`,
       permitLine
+    ].join("\n"),
+    workPermitDraft: [
+      "위험작업 허가서(초안)",
+      `허가대상 작업: ${expected.region} ${expected.industry} ${expected.workType}`,
+      "작업허가 조건: 작업계획서, 위험성평가표, TBM 참석명단 첨부 확인",
+      `핵심위험: ${hazardLine}`,
+      `기상·환경 확인: ${weatherLine}`,
+      "보호구: 안전모, 안전화, 작업별 보호구 착용 확인",
+      "첨부서류: 장비 검사증, 자격증, MSDS, 통제구역 표시, 사진 증빙 해당 여부 확인",
+      "종료 확인: 원상복구, 잔류위험 없음, 미조치사항 및 종료 확인자 서명"
     ].join("\n"),
     tbmBriefing: [
       "TBM 작업 전 안전점검회의",
@@ -522,6 +534,7 @@ const report = {
   byDimension
 };
 
+writeJson("matrix-runner-report.json", report);
 writeJson("report.json", report);
 writeJson("details.json", details);
 

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
 import { isRecord, parseEducationRecordDrafts, parseScenarioContext, parseWorkerProfiles, readString } from "@/lib/workspace-api";
 
+export const dynamic = "force-dynamic";
+
 function readWorkerMap(value: unknown) {
   if (!isRecord(value)) return new Map<string, string>();
   return new Map(
