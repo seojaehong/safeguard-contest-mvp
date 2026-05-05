@@ -224,8 +224,10 @@ function renderPermitRows(rows: PdfRow[], scenario: PdfScenario) {
     </section>`;
 }
 
-function renderTbmRows(rows: PdfRow[], scenario: PdfScenario, topRisk: string) {
-  const risks = findByKeywords(rows, ["위험", "조치", "작업중지", "기상", "보호구", "질문"], 5);
+function renderTbmRows(rows: PdfRow[], scenario: PdfScenario, topRisk: string, riskRows: PdfRow[]) {
+  const riskSourceRows = riskRows.length ? riskRows : rows;
+  const risks = findByKeywords(riskSourceRows, ["위험", "추락", "전도", "충돌", "끼임", "화재", "중독", "노출"], 5);
+  const tbmRows = findByKeywords(rows, ["조치", "작업중지", "기상", "보호구", "질문", "복창"], 5);
   return `
     <section class="section">
       <h2>1. TBM 회의 정보</h2>
@@ -233,7 +235,7 @@ function renderTbmRows(rows: PdfRow[], scenario: PdfScenario, topRisk: string) {
     </section>
     <section class="section">
       <h2>2. 위험성평가 기반 전달사항</h2>
-      <table><thead><tr><th class="no">No.</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>TBM 전달 문구</th><th>복창</th></tr></thead><tbody>${risks.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(compactCell(row, topRisk || "핵심위험"))}</td><td>${escapeHtml(scenario.weatherNote)}</td><td>작업 전 확인하고 이해하지 못하면 작업을 시작하지 않습니다.</td><td>□</td></tr>`).join("")}</tbody></table>
+      <table><thead><tr><th class="no">No.</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th><th>복창</th></tr></thead><tbody>${risks.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(compactCell(row, topRisk || "핵심위험"))}</td><td>${escapeHtml(scenario.weatherNote)}</td><td>위험성평가표 → TBM</td><td>${escapeHtml(compactCell(tbmRows[index], "위험성평가 결과를 작업 전 공유하고 이해하지 못하면 작업을 시작하지 않습니다."))}</td><td>□</td></tr>`).join("")}</tbody></table>
     </section>
     <section class="section">
       <h2>3. 참석자 확인</h2>
@@ -262,11 +264,11 @@ function renderEducationRows(rows: PdfRow[], scenario: PdfScenario) {
     </section>`;
 }
 
-function renderStructuredRows(kind: PdfDocumentKind, scenario: PdfScenario, rows: PdfRow[], topRisk: string) {
+function renderStructuredRows(kind: PdfDocumentKind, scenario: PdfScenario, rows: PdfRow[], topRisk: string, riskRows: PdfRow[]) {
   if (kind === "risk") return renderRiskAssessmentRows(rows, scenario, topRisk);
   if (kind === "workPlan") return renderWorkPlanRows(rows, scenario);
   if (kind === "permit") return renderPermitRows(rows, scenario);
-  if (kind === "tbm") return renderTbmRows(rows, scenario, topRisk);
+  if (kind === "tbm") return renderTbmRows(rows, scenario, topRisk, riskRows);
   if (kind === "education") return renderEducationRows(rows, scenario);
   return renderRows(rows);
 }
@@ -308,9 +310,17 @@ function renderRows(rows: PdfRow[]) {
   `).join("");
 }
 
-function buildPdfReadyHtml(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string) {
+function buildPdfReadyHtml(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string, riskRows: PdfRow[]) {
   const generatedAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
   const kind = detectDocumentKind(title);
+  const kindLabels: Record<PdfDocumentKind, string> = {
+    risk: "위험성평가표: 위험요인·등급·감소대책 중심",
+    workPlan: "작업계획서: 작업순서·장비·인원·작업중지 기준 중심",
+    permit: "허가/점검: 허가조건·첨부서류·종료 확인 중심",
+    tbm: "TBM일지: 위험성평가 위험요인과 기상 신호를 작업 전 전달 중심",
+    education: "안전교육: 교육대상·이해 확인·보관 중심",
+    generic: "일반 문서: 현장 확인 항목 중심"
+  };
   return `<!doctype html>
 <html lang="ko">
 <head>
@@ -392,18 +402,38 @@ function buildPdfReadyHtml(title: string, scenario: PdfScenario, rows: PdfRow[],
       background: #fff8d8;
     }
     .empty { color: #6b7280; }
+    body.doc-risk .topline { border-bottom-color: #7a2e25; }
+    body.doc-risk h2 { border-left-color: #7a2e25; }
+    body.doc-risk th, body.doc-risk .riskbox b { background: #fff2ef; }
+    body.doc-workPlan .topline { border-bottom-color: #1f4d7a; }
+    body.doc-workPlan h2 { border-left-color: #1f4d7a; }
+    body.doc-workPlan th, body.doc-workPlan .riskbox b { background: #edf5ff; }
+    body.doc-permit .topline { border-bottom-color: #6f4b16; }
+    body.doc-permit h2 { border-left-color: #6f4b16; }
+    body.doc-permit th, body.doc-permit .riskbox b { background: #fff7df; }
+    body.doc-tbm .topline { border-bottom-color: #285f45; }
+    body.doc-tbm h2 { border-left-color: #285f45; }
+    body.doc-tbm th, body.doc-tbm .riskbox b { background: #edf8ef; }
+    .kind-note {
+      margin: 0 0 16px;
+      border: 1px solid #17191d;
+      padding: 9px 12px;
+      background: #fff8d8;
+      font-size: 12px;
+      font-weight: 700;
+    }
     @media print {
       body { background: #fff; }
       .page { border: 0; padding: 0; }
     }
   </style>
 </head>
-<body>
+<body class="doc-${kind}">
   <main class="page">
     <header class="topline">
       <div>
         <h1>${escapeHtml(title)}</h1>
-        <p class="subtitle">SafeClaw 공식자료 기반 제출용 출력 초안 · 생성 ${escapeHtml(generatedAt)}</p>
+        <p class="subtitle">SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 ${escapeHtml(generatedAt)}</p>
       </div>
       <div class="approval">
         <div><b>작성</b>서명</div>
@@ -417,18 +447,19 @@ function buildPdfReadyHtml(title: string, scenario: PdfScenario, rows: PdfRow[],
       <div><b>작업내용</b>${escapeHtml(scenario.workSummary)}</div>
       <div><b>인원/기상</b>${scenario.workerCount.toLocaleString("ko-KR")}명 · ${escapeHtml(scenario.weatherNote)}</div>
     </section>
+    <p class="kind-note">서식 구분: ${escapeHtml(kindLabels[kind])} · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다.</p>
     <section class="riskbox">
       <b>위험수준 ${escapeHtml(riskLevel || "확인")}</b>
       <span>${escapeHtml(topRisk || "핵심 위험요인을 현장에서 최종 확인하세요.")}</span>
     </section>
-    ${renderStructuredRows(kind, scenario, rows, topRisk)}
+    ${renderStructuredRows(kind, scenario, rows, topRisk, riskRows)}
     <section class="signature">
       <div><b>작성자</b><br />성명/서명:</div>
       <div><b>관리감독자</b><br />성명/서명:</div>
       <div><b>TBM·교육 확인</b><br />성명/서명:</div>
       <div><b>보관 위치</b><br />문서번호/철:</div>
     </section>
-    <p class="notice">본 출력물은 공식자료 기반 초안입니다. 발주처 지정 원본 양식, 현장 실측, 작업중지 기준, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.</p>
+    <p class="notice">본 출력물은 공식자료 기반 현장 검토용 초안입니다. 발주처 지정 원본 양식, 현장 실측, 작업중지 기준, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.</p>
   </main>
 </body>
 </html>`;
@@ -464,23 +495,31 @@ function wrapPdfLine(value: string, maxChars: number) {
   return lines.length ? lines : [""];
 }
 
-function buildPdfContentLines(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string) {
+function buildPdfContentLines(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string, riskRows: PdfRow[]) {
   const generatedAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+  const kind = detectDocumentKind(title);
   const lines: Array<{ text: string; size: number; gap?: number }> = [
     { text: title, size: 18, gap: 18 },
-    { text: `SafeClaw 제출용 PDF · 생성 ${generatedAt}`, size: 9, gap: 16 },
+    { text: `SafeClaw 현장 검토용 PDF 초안 · 생성 ${generatedAt}`, size: 9, gap: 16 },
     { text: `사업장: ${scenario.companyName}`, size: 10 },
     { text: `현장: ${scenario.siteName}`, size: 10 },
     { text: `작업: ${scenario.workSummary}`, size: 10 },
     { text: `인원/기상: ${scenario.workerCount.toLocaleString("ko-KR")}명 · ${scenario.weatherNote}`, size: 10, gap: 14 },
     { text: `위험수준: ${riskLevel || "확인"}`, size: 12 },
     { text: `핵심위험: ${topRisk || "현장 최종 확인 필요"}`, size: 10, gap: 16 },
+    { text: `서식 구분: ${kind === "risk" ? "위험성평가표" : kind === "workPlan" ? "작업계획서" : kind === "permit" ? "허가/점검" : kind === "tbm" ? "TBM일지" : "일반 문서"}`, size: 10, gap: 12 },
     { text: "확인 항목", size: 13, gap: 10 }
   ];
 
-  const sourceRows = rows.length ? rows.slice(0, 18) : [{ document: title, section: "본문", item: "확인", content: "문서 본문을 현장에서 확인하세요." }];
+  const sourceRows = kind === "tbm" && riskRows.length ? riskRows.slice(0, 8) : (rows.length ? rows.slice(0, 18) : [{ document: title, section: "본문", item: "확인", content: "문서 본문을 현장에서 확인하세요." }]);
+  if (kind === "tbm") {
+    lines.push({ text: "위험성평가표 위험요인과 오늘 기상/환경 신호를 TBM 전달사항으로 연결합니다.", size: 9 });
+    lines.push({ text: `오늘 기상/환경 신호: ${scenario.weatherNote}`, size: 9, gap: 8 });
+  }
   sourceRows.forEach((row, index) => {
-    const prefix = `${index + 1}. [${row.section}] ${row.item}: `;
+    const prefix = kind === "tbm"
+      ? `${index + 1}. [위험성평가표 → TBM] `
+      : `${index + 1}. [${row.section}] ${row.item}: `;
     wrapPdfLine(`${prefix}${row.content}`, 42).slice(0, 3).forEach((line, lineIndex) => {
       lines.push({ text: lineIndex === 0 ? line : `   ${line}`, size: 9 });
     });
@@ -489,15 +528,15 @@ function buildPdfContentLines(title: string, scenario: PdfScenario, rows: PdfRow
   lines.push(
     { text: "", size: 9, gap: 14 },
     { text: "작성자: ____________________    검토: ____________________    승인: ____________________", size: 9 },
-    { text: "본 출력물은 공식자료 기반 초안입니다. 발주처 지정 양식, 현장 실측, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.", size: 8 }
+    { text: "본 출력물은 공식자료 기반 현장 검토용 초안입니다. 발주처 지정 양식, 현장 실측, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.", size: 8 }
   );
   return lines;
 }
 
-function buildBinaryPdf(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string) {
+function buildBinaryPdf(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string, riskRows: PdfRow[]) {
   const commands: string[] = [];
   let y = 790;
-  buildPdfContentLines(title, scenario, rows, riskLevel, topRisk).forEach((line) => {
+  buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows).forEach((line) => {
     if (line.gap) y -= line.gap;
     if (!line.text) {
       y -= 8;
@@ -540,6 +579,7 @@ export async function POST(request: NextRequest) {
   const title = readString(body.title, "SafeClaw 제출 문서");
   const scenario = parseScenario(body.scenario);
   const rows = parseRows(body.rows, title);
+  const riskRows = parseRows(body.riskRows, "위험성평가표");
   const bodyRows = rows.length ? rows : parseBodyText(body.documentText, title);
   const riskLevel = readString(body.riskLevel, "확인");
   const topRisk = readString(body.topRisk, "");
@@ -547,7 +587,7 @@ export async function POST(request: NextRequest) {
     || (request.headers.get("accept") || "").includes("application/pdf");
 
   if (wantsBinaryPdf) {
-    const pdf = buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk);
+    const pdf = buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows);
     const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
     return new NextResponse(pdf, {
       headers: {
@@ -558,7 +598,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk);
+  const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk, riskRows);
   const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.html`;
   const encodedFileName = encodeURIComponent(fileName);
 
