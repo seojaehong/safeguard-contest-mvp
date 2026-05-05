@@ -1,0 +1,154 @@
+{
+  "generatedAt": "2026-05-05T09:29:50.372Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "commit": "dd75d3a",
+  "overall": "pass_with_notice",
+  "elapsedMs": 166684,
+  "gates": [
+    {
+      "name": "ask-orchestration",
+      "verdict": "pass",
+      "evidence": "11/11 documents"
+    },
+    {
+      "name": "auth-history-reuse",
+      "verdict": "pass_with_notice",
+      "evidence": "SAFEGUARD_AUTH_TOKEN이 없어 live 관리자 저장/재열기는 실행하지 않았습니다. UI는 비회원 임시 저장과 관리자 로그인 필요 상태로 방어합니다."
+    },
+    {
+      "name": "document-downloads",
+      "verdict": "pass_with_notice",
+      "evidence": "core PDF + orchestration XLS/HWPX/PDF smoke"
+    },
+    {
+      "name": "public-data-ai-map",
+      "verdict": "pass",
+      "evidence": "docs/submission-evidence-map.md"
+    },
+    {
+      "name": "ai-remediation-flow",
+      "verdict": "pass",
+      "evidence": "Gemini (gemini-2.5-flash-lite)"
+    },
+    {
+      "name": "dispatch-policy",
+      "verdict": "pass_with_notice",
+      "evidence": "email/sms active, kakao/band locked"
+    },
+    {
+      "name": "screenshots",
+      "verdict": "pass",
+      "evidence": "5 screenshots"
+    }
+  ],
+  "outputs": {
+    "authHistory": "evaluation/final-99-gate/auth-history-smoke.json",
+    "documentDownloads": "evaluation/final-99-gate/document-download-smoke.json",
+    "publicDataAiMap": "evaluation/final-99-gate/public-data-ai-map.json",
+    "prodGoldenPath": "evaluation/final-99-gate/prod-golden-path.json",
+    "decision": "evaluation/final-99-gate/decision.md",
+    "evidenceMapDoc": "docs/submission-evidence-map.md",
+    "securityPrivacyDoc": "docs/security_privacy_readiness.md",
+    "commercializationDoc": "docs/commercialization-onepager.md"
+  },
+  "notes": [
+    "카카오/밴드는 승인 전이라 제외했습니다.",
+    "HWPX는 제출형 초안으로 고지합니다.",
+    "관리자 이력 게이트는 SAFEGUARD_AUTH_TOKEN이 없으면 pass_with_notice로 남습니다."
+  ],
+  "ask": {
+    "status": 200,
+    "mode": "live",
+    "documentCount": 11,
+    "externalSignals": {
+      "lawgo": true,
+      "weather": true,
+      "work24": true,
+      "kosha": true,
+      "accidentCases": true
+    }
+  },
+  "remediation": {
+    "verdict": "pass",
+    "status": 200,
+    "configured": true,
+    "providerLabel": "Gemini (gemini-2.5-flash-lite)",
+    "catalogStatus": {
+      "configured": true,
+      "ok": true,
+      "count": 6,
+      "message": "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
+    },
+    "textPreview": "[보완 제안: 감소대책 실행 및 확인] * [ ] 1. 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 (담당: 관리감독자/작업반장) * [ ] 2. 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기 (담당: 작업반장/신호수) * [ ] 3. 지게차 운행 시에는 반드시 신호수 배치 및 지정 경로 준수 (담당: 지게차 운전자/신호수) * [ ] 4. 신규 투입 작업자는 작업 시작 전 특별 안전교육 실시 (담당: 관리감독자) 반영 근거: 감소대책별 담당자 지정 및 작업 중 실행 여부 확인 절차 추가",
+    "sourceCount": 7,
+    "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
+  },
+  "dispatch": {
+    "verdict": "pass_with_notice",
+    "officialChannels": [
+      "email",
+      "sms"
+    ],
+    "excludedChannels": [
+      "kakao",
+      "band"
+    ],
+    "policyNotice": "메일·문자만 정식 제출 채널입니다. SMS provider 실패는 API 접수/전달 실패를 분리해 notice로 기록하고, 카카오·밴드는 승인 전 제외합니다.",
+    "active": {
+      "status": 200,
+      "summary": {
+        "requested": 2,
+        "sent": 1,
+        "partial": 0,
+        "failed": 1,
+        "unconfigured": 0,
+        "skipped": 0
+      },
+      "channelResults": [
+        {
+          "channel": "email",
+          "provider": "smtp",
+          "status": "sent",
+          "message": "SMTP accepted email message"
+        },
+        {
+          "channel": "sms",
+          "provider": "solapi",
+          "status": "failed",
+          "message": "Solapi SMS dispatch returned errors",
+          "httpStatus": 400
+        }
+      ]
+    },
+    "locked": {
+      "status": 200,
+      "lockedChannels": [],
+      "message": "SafeGuard 전파 요청은 접수됐지만 선택한 채널 중 연결 설정을 확인해야 하는 채널이 있습니다."
+    }
+  },
+  "screenshots": {
+    "verdict": "pass",
+    "screenshots": [
+      {
+        "route": "/",
+        "path": "evaluation\\final-99-gate\\screenshots\\01-home.png"
+      },
+      {
+        "route": "/workspace",
+        "path": "evaluation\\final-99-gate\\screenshots\\02-workspace.png"
+      },
+      {
+        "route": "/documents",
+        "path": "evaluation\\final-99-gate\\screenshots\\03-documents.png"
+      },
+      {
+        "route": "/evidence",
+        "path": "evaluation\\final-99-gate\\screenshots\\04-evidence.png"
+      },
+      {
+        "route": "/dispatch",
+        "path": "evaluation\\final-99-gate\\screenshots\\05-dispatch.png"
+      }
+    ]
+  }
+}
