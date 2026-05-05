@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
   const fallbackText = buildFallbackText(promptBundle.rubricItem.title, promptBundle.rubricItem.improvementAction);
   const text = generated.text.trim() || fallbackText;
   const sources = promptBundle.matches.flatMap((match) => (
-    match.sources.map((source) => ({
+    match.sources.slice(0, 1).map((source) => ({
       title: source.title,
       agency: `${source.agency} · 내장 서식/루브릭`,
       url: source.url,
@@ -227,6 +227,6 @@ export async function POST(request: NextRequest) {
     },
     documentKey: parsed.request.documentKey,
     text,
-    sources: [...sources.slice(0, 4), ...catalogSources.slice(0, 3)]
+    sources: [...sources.slice(0, 3), ...catalogSources.slice(0, 2)]
   });
 }

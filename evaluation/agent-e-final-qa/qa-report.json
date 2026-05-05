@@ -1,0 +1,133 @@
+{
+  "ok": true,
+  "generatedAt": "2026-05-05T02:58:53.932Z",
+  "mode": "next-dev-turbo",
+  "checks": {
+    "worker_foreign_language_preview": {
+      "ok": true,
+      "details": {
+        "previewText": "LANGUAGE PREVIEW\n베트남어 전송 전 미리보기\nTrước khi làm việc, hãy kiểm tra khu vực nguy hiểm và thiết bị bảo hộ.\nNếu thấy nguy hiểm, gió mạnh, xe nâng hoặc hóa chất, hãy dừng công việc và báo ngay.\nHãy làm theo hướng dẫn của quản lý và xác nhận lại nếu chưa hiểu.\n\n전송 전 현장 통역 또는 해당 언어 가능자가 문구를 확인하고, 근로자가 이해했음을 교육 기록에 남깁니다."
+      }
+    },
+    "worker_contact_consent_required": {
+      "ok": true,
+      "details": {
+        "consentError": "연락처를 사용하는 경우 메일·문자 전파와 교육 확인 목적 고지가 필요합니다. 카카오·밴드는 사용하지 않습니다."
+      }
+    },
+    "worker_add_card_field_ready": {
+      "ok": true,
+      "details": {
+        "addedWorkerText": "응우옌 QA\n\n작업자 · 베트남 · 베트남어\n\n문자 010****3333 · 메일 QA***@EXAMPLE.COM · 작업 전 교육 확인 필요\n\n외국인 안내: 베트남어 미리보기 확인 후 메일·문자로만 전파\n\n수정"
+      }
+    },
+    "worker_edit_flow_returns_to_add_mode": {
+      "ok": true,
+      "details": {
+        "mode": "add button visible after edit"
+      }
+    },
+    "dispatch_only_email_sms_active": {
+      "ok": true,
+      "details": {
+        "emailPressed": "true",
+        "smsPressed": "true",
+        "kakaoDisabled": "true",
+        "bandDisabled": "true"
+      }
+    },
+    "dispatch_foreign_language_preview": {
+      "ok": true,
+      "details": {
+        "dispatchPreview": "미리보기\n외국인 근로자 전송본 · 베트남어(Tiếng Việt)\nSafeClaw 현장공지\n\n[SafeClaw 베트남어 안전공지] 세이프건설\n\n현장: 서울 성수동 근린생활시설 현장\n\n작업: 세이프건설 서울 성수동 근린생활시설 외벽 도장 작업\n\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\n\n베트남어(Tiếng Việt)\n\n- Trước khi làm việc, hãy kiểm tra khu vực nguy hiểm và thiết bị bảo hộ.\n\n- Nếu thấy nguy hiểm, gió mạnh, xe nâng hoặc hóa chất, hãy dừng công việc và báo ngay.\n\n- Hãy làm theo hướng dẫn của quản lý và xác nhận lại nếu chưa hiểu."
+      }
+    },
+    "dispatch_confirm_modal_field_copy": {
+      "ok": true,
+      "details": {
+        "confirmText": "전송 전 확인\n메일, 문자\n수신\n4건\n언어\n베트남어(Tiếng Việt)\n대상 작업자\n3명\n\n전송 후 provider 응답을 채널별로 표시하고, 관리자 로그인 상태에서는 전파 이력을 저장합니다.\n\n이 확인 단계에서 전송되는 채널은 메일, 문자뿐입니다. 카카오·밴드는 요청 본문에 포함하지 않습니다.\n\n외국인 근로자 전송본입니다. 현장 통역 또는 해당 언어 가능자가 문구와 이해 여부를 확인한 뒤 메일·문자로만 전송합니다.\n\n지금 전송\n취소"
+      }
+    },
+    "dispatch_confirm_cancel_closes": {
+      "ok": true,
+      "details": {
+        "modalCount": 0
+      }
+    },
+    "dispatch_result_table_email_sms_only": {
+      "ok": true,
+      "details": {
+        "resultText": "안전 fixture 모드로 전파 요청을 검증했습니다. 실제 provider 전송은 실행하지 않았습니다. 실행 ID: fixture-1777949941361\n\n메일\n전송 완료\nsafe-fixture · HTTP 202 · SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 메일 provider 호출 없이 fixture 접수로 기록했습니다.\n문자\n전송 완료\nsafe-fixture · HTTP 202 · SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 문자 provider 호출 없이 fixture 접수로 기록했습니다."
+      }
+    },
+    "dispatch_api_email_sms_fixture": {
+      "ok": true,
+      "details": {
+        "status": 200,
+        "body": {
+          "ok": true,
+          "configured": true,
+          "workflowRunId": "fixture-1777949942244",
+          "providerStatus": "fixture",
+          "channelResults": [
+            {
+              "channel": "email",
+              "provider": "safe-fixture",
+              "status": "sent",
+              "message": "SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 메일 provider 호출 없이 fixture 접수로 기록했습니다.",
+              "httpStatus": 202
+            },
+            {
+              "channel": "sms",
+              "provider": "safe-fixture",
+              "status": "sent",
+              "message": "SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 문자 provider 호출 없이 fixture 접수로 기록했습니다.",
+              "httpStatus": 202
+            }
+          ],
+          "summary": {
+            "requested": 2,
+            "sent": 2,
+            "partial": 0,
+            "failed": 0,
+            "unconfigured": 0,
+            "skipped": 0
+          },
+          "message": "안전 fixture 모드로 전파 요청을 검증했습니다. 실제 provider 전송은 실행하지 않았습니다."
+        }
+      }
+    },
+    "dispatch_api_kakao_band_rejected": {
+      "ok": true,
+      "details": {
+        "kakao": {
+          "status": 400,
+          "body": {
+            "ok": false,
+            "configured": true,
+            "lockedChannels": [
+              "kakao"
+            ],
+            "message": "카카오·밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자만 허용합니다."
+          }
+        },
+        "band": {
+          "status": 400,
+          "body": {
+            "ok": false,
+            "configured": true,
+            "lockedChannels": [
+              "band"
+            ],
+            "message": "카카오·밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자만 허용합니다."
+          }
+        }
+      }
+    }
+  },
+  "screenshots": {
+    "workers": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\agent-e-final-qa\\workers-qa.png",
+    "dispatch": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\agent-e-final-qa\\dispatch-qa.png"
+  },
+  "notes": []
+}

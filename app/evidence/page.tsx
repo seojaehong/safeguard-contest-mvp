@@ -31,6 +31,14 @@ export default async function EvidencePage() {
         <h2>{stats.message}</h2>
         <p>문서 보완 생성과 근거 탐색은 이 Supabase 지식 DB를 우선 조회하고, 부족한 경우 기존 법령·KOSHA 근거를 함께 사용합니다.</p>
       </section>
+      <section className="safeclaw-module-panel">
+        <span>근거 역할 기준</span>
+        <h2>직접 근거는 문서 문구, 보조 근거는 현장 판단에만 씁니다.</h2>
+        <p>
+          법령·KOSHA 기준과 내장 지식은 위험성평가표, 작업계획서, TBM 문구를 직접 보완하는 근거로 표시합니다.
+          재해사례, 기상, 교육 추천은 유사 상황 확인과 전달 방식 조정에만 쓰며 원문 목록을 문서에 붙이지 않습니다.
+        </p>
+      </section>
       <CurrentEvidenceModule sample={data} />
     </SafeClawModuleShell>
   );

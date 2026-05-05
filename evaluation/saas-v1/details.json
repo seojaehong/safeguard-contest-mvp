@@ -5,7 +5,7 @@
     "variantId": "full-context",
     "mode": "local-deterministic",
     "ok": true,
-    "elapsedMs": 1,
+    "elapsedMs": 0,
     "expected": {
       "region": "서울",
       "industry": "건설",
@@ -45,7 +45,7 @@
     "variantId": "minimal-input",
     "mode": "local-deterministic",
     "ok": true,
-    "elapsedMs": 0,
+    "elapsedMs": 1,
     "expected": {
       "region": "서울",
       "industry": "건설",
@@ -199,7 +199,7 @@
     "variantId": "full-context",
     "mode": "local-deterministic",
     "ok": true,
-    "elapsedMs": 1,
+    "elapsedMs": 0,
     "expected": {
       "region": "인천",
       "industry": "물류",
@@ -742,7 +742,7 @@
     "variantId": "worker-education",
     "mode": "local-deterministic",
     "ok": true,
-    "elapsedMs": 0,
+    "elapsedMs": 1,
     "expected": {
       "region": "부산",
       "industry": "시설관리",
@@ -866,7 +866,7 @@
     "variantId": "minimal-input",
     "mode": "local-deterministic",
     "ok": true,
-    "elapsedMs": 1,
+    "elapsedMs": 0,
     "expected": {
       "region": "광주",
       "industry": "청소",
@@ -2391,7 +2391,7 @@
     "variantId": "minimal-input",
     "mode": "local-deterministic",
     "ok": true,
-    "elapsedMs": 0,
+    "elapsedMs": 1,
     "expected": {
       "region": "경기",
       "industry": "시설관리",
@@ -2540,7 +2540,7 @@
     "variantId": "full-context",
     "mode": "local-deterministic",
     "ok": true,
-    "elapsedMs": 1,
+    "elapsedMs": 0,
     "expected": {
       "region": "경남",
       "industry": "제조",
@@ -3229,7 +3229,7 @@
     "variantId": "worker-education",
     "mode": "local-deterministic",
     "ok": true,
-    "elapsedMs": 0,
+    "elapsedMs": 1,
     "expected": {
       "region": "경남",
       "industry": "제조",
@@ -3266,7 +3266,7 @@
     "variantId": "permit-evidence",
     "mode": "local-deterministic",
     "ok": true,
-    "elapsedMs": 1,
+    "elapsedMs": 0,
     "expected": {
       "region": "경남",
       "industry": "제조",

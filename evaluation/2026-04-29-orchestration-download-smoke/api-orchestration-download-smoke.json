@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://safeguard-contest-mvp.vercel.app",
-  "generatedAt": "2026-05-02T10:51:23.055Z",
-  "elapsedMs": 47745,
+  "generatedAt": "2026-05-05T03:05:31.426Z",
+  "elapsedMs": 43759,
   "question": "대구 달서구 창고업 고중량 박스 적재 및 수작업 운반. 작업자 5명, 숙련자 중심, 오늘 날씨를 반영해 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 1431,
+    "elapsedMs": 689,
     "mode": "live",
-    "summary": "단시간 흐림, 강수없음, 기온 23℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+    "summary": "단시간 맑음, 강수없음, 기온 22℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 41499,
+    "elapsedMs": 41259,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -31,7 +31,7 @@
         "TBM 기상 신호",
         "작업중지 기준"
       ],
-      "evidence": "단시간 흐림, 강수없음, 기온 23℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+      "evidence": "단시간 맑음, 강수없음, 기온 22℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
       "count": 5
     },
     {
@@ -62,7 +62,7 @@
         "안전보건교육",
         "외국인 전송본"
       ],
-      "evidence": "## 고중량 박스 취급 작업 현장 검토 초안\n\n### 1) 핵심 판단\n\n대구 달서구 창고업의 고중량 박스 적재 및 수작업 운반 작업은 작업자 5명의 숙련도를 고려하더라도, **근골격계 질환 발생 위험이 매우 높으며, 적재물 낙하, 협착 등의 잠재적 위험을 상시 내포**하고 있습니다. 특",
+      "evidence": "## 1) 핵심 판단\n\n대구 달서구 창고업 사업장의 고중량 박스 적재 및 수작업 운반 작업은 근골격계 질환 발생 및 낙하, 협착 등의 중대재해 발생 가능성이 높은 작업으로 판단됩니다. 숙련자 중심의 작업이라 하더라도 안전수칙 미준수, 부주의, 작업 환경 변화 등으로 인한 사고 위험은 상",
       "count": 11
     },
     {
@@ -141,73 +141,73 @@
     {
       "format": "TXT",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.txt",
-      "bytes": 7540,
+      "bytes": 5260,
       "ok": true
     },
     {
       "format": "JSON",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.json",
-      "bytes": 8078,
+      "bytes": 5782,
       "ok": true
     },
     {
       "format": "CSV",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.csv",
-      "bytes": 11335,
+      "bytes": 8009,
       "ok": true
     },
     {
       "format": "XLS",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.xls",
-      "bytes": 18185,
+      "bytes": 14376,
       "ok": true
     },
     {
       "format": "DOC",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.doc",
-      "bytes": 11805,
+      "bytes": 8988,
       "ok": true
     },
     {
       "format": "HTML",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.html",
-      "bytes": 8118,
+      "bytes": 5838,
       "ok": true
     },
     {
       "format": "HWPX",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.hwpx",
-      "bytes": 10925,
+      "bytes": 9902,
       "ok": true
     },
     {
       "format": "PDF",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.pdf",
-      "bytes": 294678,
+      "bytes": 273802,
       "ok": true
     },
     {
       "format": "JPG",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-risk-assessment.jpg",
-      "bytes": 169770,
+      "bytes": 169984,
       "ok": true
     },
     {
       "format": "ALL_TXT",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.txt",
-      "bytes": 62008,
+      "bytes": 43236,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.csv",
-      "bytes": 90075,
+      "bytes": 63043,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\2026-04-29-orchestration-download-smoke\\files\\대성창고-safeguard-workpack.xls",
-      "bytes": 123551,
+      "bytes": 95273,
       "ok": true
     }
   ],
