@@ -109,7 +109,7 @@ function readArchiveWorkpacks(value: unknown): ArchiveWorkpack[] {
       updatedAt,
       lastGeneratedAt: readString(item.lastGeneratedAt, updatedAt),
       reopenHref: readString(item.reopenHref, "/documents"),
-      editHref: readString(item.editHref, "/workspace#history")
+      editHref: readString(item.editHref, "/documents")
     }];
   });
 }
@@ -202,7 +202,7 @@ function ServerWorkpackList({ workpacks }: { workpacks: ArchiveWorkpack[] }) {
     return (
       <article>
         <strong>서버 문서팩 없음</strong>
-        <code>workpacks</code>
+        <code>관리자 이력</code>
         <p>관리자 로그인 후 저장된 문서팩이 있으면 현장, 생성 시각, 다시 열기 경로가 여기에 표시됩니다. 아직 없으면 브라우저 최근 작업만 이어서 사용할 수 있습니다.</p>
         <Link href="/workspace">작업공간에서 첫 문서팩 저장</Link>
       </article>
@@ -219,7 +219,7 @@ function ServerWorkpackList({ workpacks }: { workpacks: ArchiveWorkpack[] }) {
           <p className="muted small">
             {item.organizationName}{item.region ? ` · ${item.region}` : ""}{item.industry ? ` · ${item.industry}` : ""}
           </p>
-          <a href={item.reopenHref}>문서팩 복원해서 열기</a>
+          <a href={item.reopenHref}>문서팩 열기</a>
           <a href={item.editHref}>문서 편집 화면으로 이동</a>
         </article>
       ))}
@@ -232,7 +232,7 @@ function DispatchLogList({ logs }: { logs: ArchiveDispatchLog[] }) {
     return (
       <article>
         <strong>전파 로그 대기</strong>
-        <code>dispatch_logs</code>
+        <code>전파 이력</code>
         <p>메일·문자 전송 결과가 저장되면 채널, 수신자, provider 상태, 실패 사유를 같은 이력에서 확인합니다.</p>
         <Link href="/dispatch">전파 화면으로 이동</Link>
       </article>
@@ -359,7 +359,7 @@ export default function ArchivePage() {
       status={archive.status === "ready" ? "live" : "partial"}
       mappedTo="문서팩 저장 · 최근 생성 · 발송 로그 · 다시 열기"
       activeHref="/archive"
-      actions={<Link href="/workspace#history">작업공간에서 저장</Link>}
+      actions={<Link href="/workspace">작업공간에서 저장</Link>}
     >
       <section className="safeclaw-module-grid four">
         <article><span>마지막 생성</span><strong>{formatArchiveTime(localWorkpack?.savedAt || serverLatestAt)}</strong></article>
@@ -391,10 +391,10 @@ export default function ArchivePage() {
               <Link href="/documents">문서팩 보기</Link>
             </article>
             <article>
-              <strong>작업공간에서 재생성</strong>
-              <code>/workspace#history</code>
-              <p>현장 조건을 바꿔 다시 생성하거나 저장된 작업 흐름으로 복귀합니다.</p>
-              <Link href="/workspace#history">작업공간 열기</Link>
+              <strong>작업공간에서 새 버전 생성</strong>
+              <code>작업 입력</code>
+              <p>현장 조건을 바꿔 새 문서팩을 생성하고, 생성 직후 현재 작업으로 다시 이어갑니다.</p>
+              <Link href="/workspace">작업공간 열기</Link>
             </article>
             <article>
               <strong>전파 상태</strong>
@@ -419,12 +419,12 @@ export default function ArchivePage() {
           <div className="safeclaw-archive-list">
             <article>
               <strong>저장 방식</strong>
-              <code>workpacks</code>
+              <code>문서팩 저장소</code>
               <p>문서팩 질문, 현장, 작업자 요약, 생성 상태를 서버에 보관하고 재사용 가능한 작업 단위로 표시합니다.</p>
             </article>
             <article>
               <strong>전파 증빙</strong>
-              <code>dispatch_logs</code>
+              <code>전파 로그</code>
               <p>채널별 수신자, provider 결과, 실패 사유를 문서팩 이력과 함께 조회합니다.</p>
             </article>
             <article>

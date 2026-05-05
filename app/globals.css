@@ -3995,6 +3995,9 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 .document-editor {
   display: grid;
   gap: 16px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   min-height: 720px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 252, 246, 0.96));
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
@@ -4014,12 +4017,23 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 }
 
 .safety-form-preview {
-  overflow: hidden;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
   border: 2px solid #171b22;
   border-radius: 6px;
   background: #fffdf8;
   color: #171b22;
   box-shadow: 6px 6px 0 rgba(23, 27, 34, 0.08);
+  -webkit-overflow-scrolling: touch;
+}
+
+.safety-form-preview-head,
+.safety-form-meta-grid,
+.safety-form-check-row,
+.safety-form-section-stack,
+.safety-form-signatures {
+  min-width: 760px;
 }
 
 .safety-form-preview-head {
