@@ -734,6 +734,9 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
 }
 
 function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard[] }) {
+  const visibleCards = cards.slice(0, 6);
+  const hiddenCount = cards.length - visibleCards.length;
+
   return (
     <section className="safeclaw-evidence-group">
       <div className="compact-head">
@@ -741,7 +744,7 @@ function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard
         <strong>{cards.length}건</strong>
       </div>
       <div className="safeclaw-module-list">
-        {cards.map((item) => (
+        {visibleCards.map((item) => (
           <a key={item.id} href={item.href} target={item.href.startsWith("/") ? undefined : "_blank"} rel={item.href.startsWith("/") ? undefined : "noreferrer"}>
             <div className="row">
               <span className="badge">{item.roleLabel}</span>
@@ -753,6 +756,11 @@ function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard
           </a>
         ))}
       </div>
+      {hiddenCount > 0 ? (
+        <p className="muted small">
+          추가 근거 {hiddenCount.toLocaleString("ko-KR")}건은 문서 본문에 붙이지 않고, 필요 시 지식 DB 검색에서 세부 확인합니다.
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -1192,14 +1200,15 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
             <p>전송 전 현장 통역 또는 해당 언어 가능자가 문구를 확인하고, 근로자가 이해했음을 교육 기록에 남깁니다.</p>
           ) : null}
         </div>
-        <label className="consent-check">
+        <div className="consent-check">
           <input
             type="checkbox"
+            aria-label="교육 확인 및 현장 전파 목적 개인정보 사용 동의"
             checked={contactConsent}
             onChange={(event) => setContactConsent(event.target.checked)}
           />
           <span>연락처·국적·언어 정보는 안전교육 확인과 메일·문자 현장 전파 목적으로만 사용합니다. 카카오·밴드 전파는 별도 승인 전까지 제외합니다.</span>
-        </label>
+        </div>
         <div className="command-actions">
           <button type="button" className="button" onClick={saveDraftWorker}>
             {editingWorkerId ? "수정 반영" : "명단에 추가"}

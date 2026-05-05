@@ -461,14 +461,15 @@ function WorkerEducationPanel({
           aria-label="근로자 이메일"
           inputMode="email"
         />
-        <label className="consent-check">
+        <div className="consent-check">
           <input
             type="checkbox"
+            aria-label="교육 확인 및 현장 전파 목적 개인정보 사용 동의"
             checked={draft.consent}
             onChange={(event) => setDraft((current) => ({ ...current, consent: event.target.checked }))}
           />
           <span>연락처·국적·언어 정보를 교육 확인과 현장 전파 목적으로 사용합니다.</span>
-        </label>
+        </div>
         <button type="button" className="button secondary full-button" onClick={addWorker} disabled={!draft.displayName.trim() || !draft.consent}>명단에 추가</button>
       </div>
     </article>

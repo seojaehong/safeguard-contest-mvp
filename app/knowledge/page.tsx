@@ -84,8 +84,12 @@ export default async function KnowledgePage() {
       <section className="card knowledge-index-card">
         <div className="compact-head">
           <span className="eyebrow">KOSHA Technical Support</span>
-          <strong>기술지원규정 폴더 연결 상태</strong>
+          <strong>문서 반영용 근거 샘플</strong>
         </div>
+        <p className="muted small">
+          아래 항목은 원문 목록이 아니라 보완 생성에 쓰는 역할, 짧은 요약, 문서 반영 위치만 보여줍니다.
+          전체 원문은 필요할 때만 세부 링크에서 확인합니다.
+        </p>
         <div className="knowledge-status-grid compact">
           <article><span>전체</span><strong>{stats.technicalTotal.toLocaleString("ko-KR")}건</strong></article>
           <article><span>규정</span><strong>{stats.technicalSupportRegulations.toLocaleString("ko-KR")}건</strong></article>
@@ -109,7 +113,11 @@ export default async function KnowledgePage() {
           <span className="eyebrow">Index</span>
           <strong>위키 인덱스</strong>
         </div>
-        <pre>{indexMarkdown}</pre>
+        <p className="muted small">위험요인/서식 위키의 전체 목차입니다. 화면 기본 흐름에서는 근거 카드와 반영 위치를 먼저 확인합니다.</p>
+        <details>
+          <summary>위키 목차 원문 펼치기</summary>
+          <pre>{indexMarkdown}</pre>
+        </details>
       </section>
 
       <section className="knowledge-entry-grid">
@@ -148,7 +156,13 @@ export default async function KnowledgePage() {
           <span className="eyebrow">Schema</span>
           <strong>LLM 재생성 스키마</strong>
         </div>
-        <pre>{schemaMarkdown}</pre>
+        <p className="muted small">
+          재생성 스키마는 개발/운영 확인용입니다. 현장 문서에는 roleLabel, shortSummary, documentReflectionLabel만 반영합니다.
+        </p>
+        <details>
+          <summary>스키마 원문 펼치기</summary>
+          <pre>{schemaMarkdown}</pre>
+        </details>
       </section>
     </SafeClawModuleShell>
   );
