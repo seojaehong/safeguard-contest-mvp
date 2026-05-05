@@ -1,0 +1,137 @@
+[
+  {
+    "route": "/",
+    "pageUrl": "https://www.safeclaw.kr/",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 10796
+  },
+  {
+    "route": "/workspace",
+    "pageUrl": "https://www.safeclaw.kr/workspace",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 9129
+  },
+  {
+    "route": "/documents",
+    "pageUrl": "https://www.safeclaw.kr/documents",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 21555
+  },
+  {
+    "route": "/evidence",
+    "pageUrl": "https://www.safeclaw.kr/evidence",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 8184
+  },
+  {
+    "route": "/workers",
+    "pageUrl": "https://www.safeclaw.kr/workers",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 4196
+  },
+  {
+    "route": "/dispatch",
+    "pageUrl": "https://www.safeclaw.kr/dispatch",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 4082
+  },
+  {
+    "route": "/archive",
+    "pageUrl": "https://www.safeclaw.kr/archive",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 3576
+  },
+  {
+    "route": "/knowledge",
+    "pageUrl": "https://www.safeclaw.kr/knowledge",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 16523
+  },
+  {
+    "route": "/ops/api",
+    "pageUrl": "https://www.safeclaw.kr/ops/api",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 4450
+  },
+  {
+    "route": "/settings",
+    "pageUrl": "https://www.safeclaw.kr/settings",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 3476
+  },
+  {
+    "route": "/demo",
+    "pageUrl": "https://www.safeclaw.kr/demo",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 8911
+  },
+  {
+    "route": "/why",
+    "pageUrl": "https://www.safeclaw.kr/why",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 3371
+  },
+  {
+    "route": "/preview",
+    "pageUrl": "https://www.safeclaw.kr/preview",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 2515
+  },
+  {
+    "route": "/trust",
+    "pageUrl": "https://www.safeclaw.kr/trust",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 1916
+  },
+  {
+    "route": "/roadmap",
+    "pageUrl": "https://www.safeclaw.kr/roadmap",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "console": "",
+    "hasSafeClaw": true,
+    "hasPrototypeWords": false,
+    "snapshotChars": 1985
+  }
+]

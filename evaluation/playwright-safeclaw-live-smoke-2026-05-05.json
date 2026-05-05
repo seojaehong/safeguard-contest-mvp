@@ -1,0 +1,234 @@
+{
+  "testedAt": "2026-05-05T22:15:56+09:00",
+  "baseUrl": "https://www.safeclaw.kr",
+  "verdict": "pass_with_notice",
+  "browser": "Chromium via Codex Playwright skill wrapper",
+  "goldenPath": {
+    "landingLoaded": true,
+    "workspaceLoaded": true,
+    "generatedWorkpack": true,
+    "documentCount": 11,
+    "legalMatches": 6,
+    "apiCombinationCount": 7,
+    "weatherReflected": true,
+    "fieldBrief": {
+      "site": "서울 성수동 근린생활시설 현장",
+      "industry": "건설업",
+      "workers": "5명",
+      "weather": "단시간 맑음, 강수없음, 기온 13℃, 풍속 1m/s"
+    }
+  },
+  "editorAndDownloads": {
+    "riskAssessmentTabSync": true,
+    "templatePreviewVisible": true,
+    "xlsDownloaded": true,
+    "hwpxDownloaded": true,
+    "pdfBrowserPrintFlow": "not_clicked_in_this_run",
+    "xlsMarkers": [
+      "위험성평가표",
+      "감소대책",
+      "확인"
+    ],
+    "hwpxMarkers": [
+      "위험성평가표(초안)",
+      "SafeClaw 공식자료 기반 서식",
+      "유해·위험요인",
+      "감소대책",
+      "확인/서명"
+    ]
+  },
+  "dispatchPanel": {
+    "emailActive": true,
+    "smsActive": true,
+    "kakaoLocked": true,
+    "bandLocked": true,
+    "actualSendClicked": false,
+    "reason": "중복 실발송 방지를 위해 이번 Playwright smoke에서는 발송 버튼을 누르지 않음"
+  },
+  "routeSmoke": [
+    {
+      "route": "/",
+      "pageUrl": "https://www.safeclaw.kr/",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 10796
+    },
+    {
+      "route": "/workspace",
+      "pageUrl": "https://www.safeclaw.kr/workspace",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 9129
+    },
+    {
+      "route": "/documents",
+      "pageUrl": "https://www.safeclaw.kr/documents",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 21555
+    },
+    {
+      "route": "/evidence",
+      "pageUrl": "https://www.safeclaw.kr/evidence",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 8184
+    },
+    {
+      "route": "/workers",
+      "pageUrl": "https://www.safeclaw.kr/workers",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 4196
+    },
+    {
+      "route": "/dispatch",
+      "pageUrl": "https://www.safeclaw.kr/dispatch",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 4082
+    },
+    {
+      "route": "/archive",
+      "pageUrl": "https://www.safeclaw.kr/archive",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 3576
+    },
+    {
+      "route": "/knowledge",
+      "pageUrl": "https://www.safeclaw.kr/knowledge",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 16523
+    },
+    {
+      "route": "/ops/api",
+      "pageUrl": "https://www.safeclaw.kr/ops/api",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 4450
+    },
+    {
+      "route": "/settings",
+      "pageUrl": "https://www.safeclaw.kr/settings",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 3476
+    },
+    {
+      "route": "/demo",
+      "pageUrl": "https://www.safeclaw.kr/demo",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 8911
+    },
+    {
+      "route": "/why",
+      "pageUrl": "https://www.safeclaw.kr/why",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 3371
+    },
+    {
+      "route": "/preview",
+      "pageUrl": "https://www.safeclaw.kr/preview",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 2515
+    },
+    {
+      "route": "/trust",
+      "pageUrl": "https://www.safeclaw.kr/trust",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 1916
+    },
+    {
+      "route": "/roadmap",
+      "pageUrl": "https://www.safeclaw.kr/roadmap",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "console": "",
+      "hasSafeClaw": true,
+      "hasPrototypeWords": false,
+      "snapshotChars": 1985
+    }
+  ],
+  "notices": [
+    {
+      "severity": "notice",
+      "item": "favicon",
+      "detail": "https://www.safeclaw.kr/favicon.ico 404가 콘솔에 남음"
+    },
+    {
+      "severity": "notice",
+      "item": "language-chip",
+      "detail": "베트남어 전송본 버튼은 DOM에 있으나 Playwright ref click 기준 viewport 밖으로 판정되어 클릭 자동화가 실패함. 스크롤/키보드 접근성 개선 권장"
+    },
+    {
+      "severity": "notice",
+      "item": "pdf",
+      "detail": "PDF는 브라우저 인쇄 플로우라 이번 자동 다운로드 smoke에서는 XLS/HWPX만 파일 검증함"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "output/playwright/safeclaw-live-20260505-221556/01-workspace-ready.png",
+      "exists": true,
+      "bytes": 172117
+    },
+    {
+      "path": "output/playwright/safeclaw-live-20260505-221556/02-risk-edit-panel.png",
+      "exists": true,
+      "bytes": 199987
+    },
+    {
+      "path": "output/playwright/safeclaw-live-20260505-221556/03-documents-route.png",
+      "exists": true,
+      "bytes": 83860
+    },
+    {
+      "path": "output/playwright/safeclaw-live-20260505-221556/04-evidence-route.png",
+      "exists": true,
+      "bytes": 72445
+    },
+    {
+      "path": "output/playwright/safeclaw-live-20260505-221556/download-risk-assessment.xls",
+      "exists": true,
+      "bytes": 12418
+    },
+    {
+      "path": "output/playwright/safeclaw-live-20260505-221556/download-risk-assessment.hwpx",
+      "exists": true,
+      "bytes": 10731
+    }
+  ]
+}
