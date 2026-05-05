@@ -281,7 +281,8 @@ function buildTbmBridgeRows(data: AskResponse, riskRows: SheetRow[]) {
   return riskItems.map((row, index) => ({
     risk: compactContent(row, data.riskSummary.topRisk),
     weather: weatherSignals[index % weatherSignals.length] || data.scenario.weatherNote,
-    message: "작업 전 공유 · 이해 확인 · 위험 시 즉시 작업중지"
+    source: "위험성평가표 → TBM",
+    message: "위험성평가 결과를 작업 전 공유 · 이해 확인 · 위험 시 즉시 작업중지"
   }));
 }
 
@@ -482,6 +483,20 @@ function formCss(pageMargin = "36px") {
     .form-note { margin: 0 22px 22px; color: #596373; font-size: 12px; }
     .section-help { margin: 0 0 10px; color: #596373; font-size: 12px; line-height: 1.5; }
     .mini-table th { background: #21594f; color: #fffdf8; }
+    .form-layout-risk .form-title span, .form-layout-risk .meta-item b, .form-layout-risk .mini-table th { background: #7a2e25; }
+    .form-layout-risk .section-label { background: #7a2e25; }
+    .form-layout-risk .check-grid div { background: #fff2ef; }
+    .form-layout-workPlan .form-title span, .form-layout-workPlan .meta-item b, .form-layout-workPlan .mini-table th { background: #1f4d7a; }
+    .form-layout-workPlan .section-label { background: #1f4d7a; }
+    .form-layout-workPlan .check-grid div { background: #edf5ff; }
+    .form-layout-permit .form-title span, .form-layout-permit .meta-item b, .form-layout-permit .mini-table th { background: #6f4b16; }
+    .form-layout-permit .section-label { background: #6f4b16; }
+    .form-layout-permit .check-grid div { background: #fff7df; }
+    .form-layout-tbmBriefing .form-title span, .form-layout-tbmBriefing .meta-item b, .form-layout-tbmBriefing .mini-table th,
+    .form-layout-tbmLog .form-title span, .form-layout-tbmLog .meta-item b, .form-layout-tbmLog .mini-table th { background: #285f45; }
+    .form-layout-tbmBriefing .section-label, .form-layout-tbmLog .section-label { background: #285f45; }
+    .form-layout-tbmBriefing .check-grid div, .form-layout-tbmLog .check-grid div { background: #edf8ef; }
+    .form-lineage { margin: 0; padding: 10px 22px; border-bottom: 2px solid #161b22; background: #fff8d8; color: #394150; font-size: 12px; font-weight: 800; }
     .risk-table th, .risk-table td { font-size: 11px; padding: 7px 6px; }
     .risk-level-high { background: #ffe3df; font-weight: 900; color: #a83224; }
     .permit-check td:nth-child(2), .permit-check td:nth-child(3) { text-align: center; font-weight: 900; }
@@ -824,13 +839,14 @@ function buildTbmBriefingSections(rows: SheetRow[], scenario: AskResponse["scena
     <section class="section-block">
       <div class="section-label">2. 위험성평가 기반 TBM 전달</div>
       <table>
-        <colgroup><col style="width: 8%;" /><col style="width: 32%;" /><col style="width: 28%;" /><col style="width: 20%;" /><col style="width: 12%;" /></colgroup>
-        <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>기상/환경 반영</th><th>작업중지 기준</th><th>복창</th></tr></thead>
+        <colgroup><col style="width: 7%;" /><col style="width: 28%;" /><col style="width: 24%;" /><col style="width: 16%;" /><col style="width: 17%;" /><col style="width: 8%;" /></colgroup>
+        <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>기상/환경 반영</th><th>출처 연결</th><th>작업중지 기준</th><th>복창</th></tr></thead>
         <tbody>
           ${bridgeRows.map((row, index) => `<tr>
             <td class="center">${index + 1}</td>
             <td>${escapeHtml(row.risk)}</td>
             <td>${escapeHtml(row.weather)}</td>
+            <td>${escapeHtml(row.source)}</td>
             <td>${escapeHtml(row.message)}</td>
             <td class="center">□</td>
           </tr>`).join("")}
@@ -862,13 +878,14 @@ function buildTbmWeatherRiskBridge(data: AskResponse, riskRows: SheetRow[]) {
     <section class="section-block">
       <div class="section-label">위험성평가·기상 API 반영</div>
       <table>
-        <colgroup><col style="width: 8%;" /><col style="width: 34%;" /><col style="width: 34%;" /><col style="width: 24%;" /></colgroup>
-        <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>TBM 전달 문구</th></tr></thead>
+        <colgroup><col style="width: 7%;" /><col style="width: 27%;" /><col style="width: 26%;" /><col style="width: 16%;" /><col style="width: 24%;" /></colgroup>
+        <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th></tr></thead>
         <tbody>
           ${bridgeRows.map((row, index) => `<tr>
             <td class="center">${index + 1}</td>
             <td>${escapeHtml(row.risk)}</td>
             <td>${escapeHtml(row.weather)}</td>
+            <td>${escapeHtml(row.source)}</td>
             <td>${escapeHtml(row.message)}</td>
           </tr>`).join("")}
         </tbody>
@@ -909,15 +926,16 @@ function buildSafetyFormMarkup(
   `).join("");
 
   return `
-  <article class="safety-form-page">
+  <article class="safety-form-page form-layout-${profile.layout}">
     <header class="form-head">
       <div class="form-title">
         <span>${escapeHtml(profile.code)}</span>
         <h1>${escapeHtml(title)}</h1>
-        <p>${escapeHtml(profile.subtitle)} · SafeClaw 공식자료 기반 초안</p>
+        <p>${escapeHtml(profile.subtitle)} · SafeClaw 공식자료 기반 현장 검토용 초안</p>
       </div>
       <div class="approval-grid" style="--approval-count: ${profile.approvalLabels.length};">${approvalCells}</div>
     </header>
+    <p class="form-lineage">서식 구분: ${escapeHtml(profile.subtitle)} · 원본 서식 1:1 재현이 아니라 현장 입력값과 공식자료를 정리한 검토용 출력입니다.</p>
     <div class="meta-grid">
       <div class="meta-item"><b>사업장</b><span>${escapeHtml(scenario.companyName)}</span></div>
       <div class="meta-item"><b>현장/공정</b><span>${escapeHtml(scenario.siteName)}</span></div>
@@ -932,7 +950,7 @@ function buildSafetyFormMarkup(
       <div><b>교육/TBM 확인자</b>성명/서명:</div>
       <div><b>보관 위치</b>문서번호/철:</div>
     </div>
-    <p class="form-note">본 문서는 현장 확인 전 초안입니다. 작업 전 위험요인, 참석자, 작업중지 기준, 서명란을 최종 확인한 뒤 사용하세요.</p>
+    <p class="form-note">본 문서는 현장 확인 전 초안입니다. 발주처 지정 원본 양식, 작업 전 위험요인, 참석자, 작업중지 기준, 서명란을 최종 확인한 뒤 사용하세요.</p>
   </article>`;
 }
 
@@ -1239,6 +1257,7 @@ function buildHwpTemplateText(
         ...buildTbmBridgeRows(data, riskRows).flatMap((row, index) => [
           `${index + 1}. 주요 유해·위험요인: ${row.risk}`,
           `   오늘 기상/환경 신호: ${row.weather}`,
+          `   출처 연결: ${row.source}`,
           `   TBM 전달 문구: ${row.message}`
         ]),
         ""
@@ -1495,6 +1514,7 @@ function SafetyDocumentPreview({
                   <th>No.</th>
                   <th>주요 유해·위험요인</th>
                   <th>오늘 기상/환경 신호</th>
+                  <th>출처 연결</th>
                   <th>TBM 전달 문구</th>
                 </tr>
               </thead>
@@ -1504,6 +1524,7 @@ function SafetyDocumentPreview({
                     <td>{index + 1}</td>
                     <td>{row.risk}</td>
                     <td>{row.weather}</td>
+                    <td>{row.source}</td>
                     <td>{row.message}</td>
                   </tr>
                 ))}
@@ -1888,6 +1909,7 @@ export function WorkpackEditor({
           title: selected.title,
           scenario: data.scenario,
           rows: selectedRows,
+          riskRows: riskAssessmentRows,
           documentText: selectedText,
           riskLevel: data.riskSummary.riskLevel,
           topRisk: data.riskSummary.topRisk

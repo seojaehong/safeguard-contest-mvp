@@ -80,22 +80,32 @@ const structureRules = [
   {
     id: "risk-renderer-structure",
     label: "위험성평가표 renderer",
-    required: ["renderRiskAssessmentRows", "1. 사전준비", "2. 유해·위험요인 파악 및 위험성 결정", "3. 감소대책 수립·실행", "4. 공유·교육 및 재평가"]
+    required: ["renderRiskAssessmentRows", "form-layout-risk", "doc-risk", "1. 사전준비", "2. 유해·위험요인 파악 및 위험성 결정", "3. 감소대책 수립·실행", "4. 공유·교육 및 재평가"]
   },
   {
     id: "work-plan-renderer-structure",
     label: "작업계획서 renderer",
-    required: ["renderWorkPlanRows", "1. 작업개요", "2. 세부 작업순서 및 안전대책", "3. 장비·인원·첨부서류", "4. 작업중지 및 재개 기준"]
+    required: ["renderWorkPlanRows", "form-layout-workPlan", "doc-workPlan", "1. 작업개요", "2. 세부 작업순서 및 안전대책", "3. 장비·인원·첨부서류", "4. 작업중지 및 재개 기준"]
   },
   {
     id: "permit-renderer-structure",
     label: "허가서/첨부 renderer",
-    required: ["renderPermitRows", "1. 허가 기본정보", "2. 작업 전 허가조건", "3. 첨부서류 및 종료 확인", "허가번호"]
+    required: ["renderPermitRows", "form-layout-permit", "doc-permit", "1. 허가 기본정보", "2. 작업 전 허가조건", "3. 첨부서류 및 종료 확인", "허가번호"]
   },
   {
     id: "tbm-renderer-structure",
     label: "TBM 기록 renderer",
-    required: ["renderTbmRows", "1. TBM 회의 정보", "2. 위험성평가 기반 전달사항", "3. 참석자 확인", "4. 미조치 위험 및 증빙"]
+    required: ["renderTbmRows", "form-layout-tbmLog", "doc-tbm", "1. TBM 회의 정보", "2. 위험성평가 기반 전달사항", "3. 참석자 확인", "4. 미조치 위험 및 증빙"]
+  },
+  {
+    id: "tbm-risk-weather-bridge",
+    label: "TBM risk/weather bridge",
+    required: ["riskRows", "위험성평가표 → TBM", "오늘 기상/환경 신호", "출처 연결", "위험성평가 결과를 작업 전 공유"]
+  },
+  {
+    id: "honest-export-wording",
+    label: "honest export wording",
+    required: ["현장 검토용 출력 초안", "현장 검토용 PDF 초안", "원본 서식 1:1 재현", "발주처 지정 원본 양식"]
   }
 ];
 
