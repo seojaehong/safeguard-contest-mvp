@@ -44,8 +44,8 @@ type WorkflowSharePanelProps = {
 const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
   { key: "email", label: "메일", helper: "관리자·원청 보고", enabled: true },
   { key: "sms", label: "문자", helper: "작업자 즉시 공지", enabled: true },
-  { key: "kakao", label: "카카오", helper: "준비 중 · 승인 후 알림 신청", enabled: false },
-  { key: "band", label: "밴드", helper: "준비 중 · 팀 채널 연결 대기", enabled: false }
+  { key: "kakao", label: "카카오", helper: "잠김 · 알림톡 승인 후 활성화", enabled: false },
+  { key: "band", label: "밴드", helper: "잠김 · 팀 채널 승인 후 활성화", enabled: false }
 ];
 
 function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
@@ -161,6 +161,11 @@ function formatMessageTargetLabel(data: AskResponse, selectedTarget: MessageTarg
   const languageCode = selectedTarget.replace("foreign:", "");
   const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
   return language ? `${language.label}(${language.nativeLabel})` : "외국인 근로자 전송본";
+}
+
+function formatMessagePreviewHeading(data: AskResponse, selectedTarget: MessageTarget) {
+  if (selectedTarget === "manager") return "관리자용 한국어 메시지 미리보기";
+  return `외국인 근로자 전송본 · ${formatMessageTargetLabel(data, selectedTarget)}`;
 }
 
 export function WorkflowSharePanel({
@@ -324,12 +329,12 @@ export function WorkflowSharePanel({
           >
             <strong>{channel.label}</strong>
             <span>{channel.helper}</span>
-            {!channel.enabled ? <em>준비 중</em> : null}
+            {!channel.enabled ? <em>승인 대기</em> : null}
           </button>
         ))}
       </div>
       <p className="channel-readiness-note">
-        현재 즉시 전송 채널은 메일·문자입니다. 카카오·밴드는 이번 제출 범위에서는 보류합니다.
+        현재 즉시 전송 채널은 메일·문자입니다. 카카오·밴드는 UI와 서버 API 모두 승인 대기 채널로 잠겨 있습니다.
       </p>
       {!authToken || !workpackId ? (
         <p className="muted small">
@@ -430,6 +435,11 @@ export function WorkflowSharePanel({
             <div><span>대상 작업자</span><strong>{targetWorkers.length ? `${targetWorkers.length}명` : "직접 입력"}</strong></div>
           </div>
           <p className="muted small">전송 후 provider 응답을 채널별로 표시하고, 관리자 로그인 상태에서는 전파 이력을 저장합니다.</p>
+          {selectedMessageTarget !== "manager" ? (
+            <p className="channel-readiness-note">
+              외국인 근로자 전송본입니다. 현장 통역 또는 해당 언어 가능자가 문구를 확인한 뒤 메일·문자로만 전송합니다.
+            </p>
+          ) : null}
           <div className="command-actions">
             <button type="button" className="button" onClick={dispatchWorkflow} disabled={isSending}>
               {isSending ? "전파 요청 중" : "지금 전송"}
@@ -441,7 +451,11 @@ export function WorkflowSharePanel({
         </div>
       ) : null}
 
-      <div className="message-preview-phone" aria-label="휴대폰 공유 메시지 미리보기">
+      <div className="message-preview-phone" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)}>
+        <div className="compact-head">
+          <span className="eyebrow">미리보기</span>
+          <strong>{formatMessagePreviewHeading(data, selectedMessageTarget)}</strong>
+        </div>
         <div className="phone-shell">
           <div className="phone-status">SafeClaw 현장공지</div>
           <div className="phone-bubble">

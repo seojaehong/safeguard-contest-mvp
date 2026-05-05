@@ -39,7 +39,8 @@ type WorkflowSummary = {
   skipped: number;
 };
 
-const ALLOWED_CHANNELS: WorkflowChannel[] = ["email", "sms", "kakao", "band"];
+const ACTIVE_CHANNELS: WorkflowChannel[] = ["email", "sms"];
+const LOCKED_CHANNELS: WorkflowChannel[] = ["kakao", "band"];
 const TIMEOUT_MS = 20_000;
 const RETRY_COUNT = 1;
 
@@ -80,7 +81,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function parseChannels(value: unknown): WorkflowChannel[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is WorkflowChannel => (
-    typeof item === "string" && ALLOWED_CHANNELS.includes(item as WorkflowChannel)
+    typeof item === "string" && ACTIVE_CHANNELS.includes(item as WorkflowChannel)
+  ));
+}
+
+function parseLockedChannels(value: unknown): WorkflowChannel[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is WorkflowChannel => (
+    typeof item === "string" && LOCKED_CHANNELS.includes(item as WorkflowChannel)
   ));
 }
 
@@ -112,7 +120,7 @@ function normalizeChannelResults(value: unknown, requestedChannels: WorkflowChan
     for (const item of value) {
       if (!isRecord(item)) continue;
       const channel = item.channel;
-      if (typeof channel !== "string" || !ALLOWED_CHANNELS.includes(channel as WorkflowChannel)) continue;
+      if (typeof channel !== "string" || !ACTIVE_CHANNELS.includes(channel as WorkflowChannel)) continue;
       byChannel.set(channel as WorkflowChannel, {
         channel: channel as WorkflowChannel,
         provider: typeof item.provider === "string" ? item.provider : "n8n",
@@ -215,13 +223,23 @@ export async function POST(request: NextRequest) {
   }
 
   const channels = parseChannels(body.channels);
+  const lockedChannels = parseLockedChannels(body.channels);
   const recipients = parseRecipients(body.recipients);
+
+  if (lockedChannels.length) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      lockedChannels,
+      message: "카카오·밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자만 허용합니다."
+    }, { status: 400 });
+  }
 
   if (!body.workpack || channels.length === 0) {
     return NextResponse.json({
       ok: false,
       configured: Boolean(webhookConfig.url && webhookConfig.token),
-      message: "문서팩과 전파 채널을 확인해 주세요."
+      message: "문서팩과 전파 채널을 확인해 주세요. 현재 활성 채널은 메일·문자입니다."
     }, { status: 400 });
   }
 
@@ -229,7 +247,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: false,
       configured: false,
-      message: "현장 전파 연결을 확인해야 합니다. 메일·문자·카카오·밴드 전송 설정을 점검해 주세요."
+      message: "현장 전파 연결을 확인해야 합니다. 현재 활성 채널인 메일·문자 전송 설정을 점검해 주세요."
     });
   }
 
