@@ -136,22 +136,25 @@ export async function GET(request: NextRequest) {
   const siteMap = new Map((sites || []).map((site) => [site.id, site.name]));
   const organizationMap = new Map((organizations || []).map((organization) => [organization.id, organization.name]));
 
-  const archiveLogs = (logs || []).map((log) => ({
-    id: log.id,
-    organizationName: log.organization_id ? organizationMap.get(log.organization_id) || "SafeClaw Pilot" : "SafeClaw Pilot",
-    siteName: log.site_id ? siteMap.get(log.site_id) || "기본 현장" : "기본 현장",
-    workpackId: log.workpack_id,
-    channel: log.channel,
-    targetLabel: log.target_label,
-    targetContact: log.target_contact,
-    languageCode: log.language_code,
-    provider: log.provider,
-    providerStatus: log.provider_status,
-    workflowRunId: log.workflow_run_id,
-    failureReason: log.failure_reason,
-    createdAt: log.created_at,
-    reopenHref: log.workpack_id ? "/documents" : "/dispatch"
-  }));
+  const archiveLogs = (logs || []).map((log) => {
+    const workpackId = log.workpack_id;
+    return {
+      id: log.id,
+      organizationName: log.organization_id ? organizationMap.get(log.organization_id) || "SafeClaw Pilot" : "SafeClaw Pilot",
+      siteName: log.site_id ? siteMap.get(log.site_id) || "기본 현장" : "기본 현장",
+      workpackId,
+      channel: log.channel,
+      targetLabel: log.target_label,
+      targetContact: log.target_contact,
+      languageCode: log.language_code,
+      provider: log.provider,
+      providerStatus: log.provider_status,
+      workflowRunId: log.workflow_run_id,
+      failureReason: log.failure_reason,
+      createdAt: log.created_at,
+      reopenHref: workpackId ? `/documents?workpackId=${encodeURIComponent(workpackId)}` : "/dispatch"
+    };
+  });
 
   return NextResponse.json({
     ok: true,

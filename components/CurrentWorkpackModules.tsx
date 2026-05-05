@@ -38,7 +38,7 @@ type CurrentWorkpackSnapshot = {
 
 type CurrentWorkpackState = CurrentWorkpackSnapshot & {
   reopenMessage: string | null;
-  reopenStatus: "idle" | "ready" | "blocked";
+  reopenStatus: "idle" | "loading" | "ready" | "blocked";
   updateData: (data: AskResponse) => void;
   updateWorkerSnapshot: (workerSnapshot: CurrentWorkerSnapshot) => void;
   updateDispatchSnapshot: (dispatchSnapshot: CurrentDispatchSnapshot | undefined) => void;
@@ -386,7 +386,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
     savedAt: null
   });
   const [reopenMessage, setReopenMessage] = useState<string | null>(null);
-  const [reopenStatus, setReopenStatus] = useState<"idle" | "ready" | "blocked">("idle");
+  const [reopenStatus, setReopenStatus] = useState<"idle" | "loading" | "ready" | "blocked">("idle");
 
   useEffect(() => {
     const stored = parseStoredCurrentWorkpack(window.localStorage.getItem(CURRENT_WORKPACK_STORAGE_KEY));
@@ -403,6 +403,8 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
     const workpackId = new URLSearchParams(window.location.search).get("workpackId");
     if (!workpackId) return;
     const requestedWorkpackId = workpackId;
+    setReopenStatus("loading");
+    setReopenMessage("서버 아카이브에서 저장 문서팩 상세를 확인하고 있습니다. 복원 가능한 데이터가 있으면 현재 문서 화면에 바로 반영합니다.");
 
     let cancelled = false;
     async function reopenServerWorkpack() {
@@ -410,7 +412,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
       if (!session) {
         if (!cancelled) {
           setReopenStatus("blocked");
-          setReopenMessage("관리자 로그인 세션이 없어 저장 문서팩을 다시 열 수 없습니다. 현재는 브라우저 최근 작업을 표시합니다.");
+          setReopenMessage("관리자 로그인 세션이 없어 이 서버 문서팩을 열 수 없습니다. 지금은 브라우저 최근 작업을 표시합니다. 관리자 로그인 후 아카이브에서 다시 열어 주세요.");
         }
         return;
       }
@@ -426,8 +428,8 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
           if (!cancelled) {
             setReopenStatus("blocked");
             setReopenMessage(blockers.length
-              ? `저장 문서팩 상세는 조회됐지만 복원 차단 요소가 있습니다: ${blockers.join(" / ")}`
-              : readResponseMessage(payload, "저장 문서팩을 다시 열지 못했습니다."));
+              ? `저장 문서팩 상세는 조회됐지만 문서 화면 복원에 필요한 데이터가 부족합니다: ${blockers.join(" / ")}. 브라우저 최근 작업을 대신 표시합니다.`
+              : `${readResponseMessage(payload, "저장 문서팩을 다시 열지 못했습니다.")} 브라우저 최근 작업을 대신 표시합니다.`);
           }
           return;
         }
@@ -441,13 +443,13 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
             savedAt: nextStored.savedAt
           });
           setReopenStatus("ready");
-          setReopenMessage("서버 아카이브의 저장 문서팩을 현재 작업공간으로 다시 열었습니다.");
+          setReopenMessage("서버 아카이브의 저장 문서팩을 현재 문서 화면으로 복원했습니다. 문서와 근거 요약은 현재 작업으로 저장됐고, 작업자·전파 snapshot은 저장된 항목이 있을 때만 별도 화면에서 이어집니다.");
         }
       } catch (error) {
         console.error("server workpack reopen failed", error);
         if (!cancelled) {
           setReopenStatus("blocked");
-          setReopenMessage("저장 문서팩 상세 조회 중 오류가 발생했습니다. 브라우저 최근 작업을 표시합니다.");
+          setReopenMessage("저장 문서팩 상세 조회 중 오류가 발생했습니다. 브라우저 최근 작업을 표시합니다. 아카이브에서 새로고침 후 다시 시도해 주세요.");
         }
       }
     }
@@ -793,8 +795,18 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
       {current.reopenMessage ? (
         <section className="safeclaw-module-panel" aria-live="polite">
           <span>아카이브 다시 열기</span>
-          <h2>{current.reopenStatus === "ready" ? "저장 문서팩을 열었습니다." : "저장 문서팩 복원 확인 필요"}</h2>
+          <h2>
+            {current.reopenStatus === "ready"
+              ? "저장 문서팩을 열었습니다."
+              : current.reopenStatus === "loading" ? "저장 문서팩을 확인하고 있습니다." : "저장 문서팩 복원 확인 필요"}
+          </h2>
           <p className={current.reopenStatus === "blocked" ? "export-error" : "muted small"}>{current.reopenMessage}</p>
+          {current.reopenStatus === "blocked" ? (
+            <div className="command-actions">
+              <a href="/archive" className="button secondary">아카이브로 돌아가기</a>
+              <a href="/workspace" className="button">새 작업공간에서 생성</a>
+            </div>
+          ) : null}
         </section>
       ) : null}
       <DocumentCockpit data={current.data} onSelectDocument={selectDocument} />
