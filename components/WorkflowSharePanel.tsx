@@ -5,6 +5,7 @@ import { AskResponse } from "@/lib/types";
 import type { RecipientSuggestion, WorkerDispatchTarget } from "@/lib/workspace";
 
 type Channel = "email" | "sms" | "kakao" | "band";
+type ActiveChannel = Extract<Channel, "email" | "sms">;
 type MessageTarget = "manager" | `foreign:${string}`;
 
 type DispatchResult = {
@@ -47,6 +48,7 @@ const channelOptions: Array<{ key: Channel; label: string; helper: string; enabl
   { key: "kakao", label: "카카오", helper: "잠김 · 알림톡 승인 후 활성화", enabled: false },
   { key: "band", label: "밴드", helper: "잠김 · 팀 채널 승인 후 활성화", enabled: false }
 ];
+const activeDispatchChannels: ActiveChannel[] = ["email", "sms"];
 
 function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
   const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
@@ -262,11 +264,23 @@ export function WorkflowSharePanel({
   }
 
   async function dispatchWorkflow() {
+    const activeChannels = selectedChannels.filter((channel): channel is ActiveChannel => (
+      activeDispatchChannels.includes(channel as ActiveChannel)
+    ));
     if (!dispatchRecipients.length) {
       setResult({
         ok: false,
         configured: true,
         message: "전송할 수신자를 먼저 입력해 주세요. 기본 예시 연락처는 실발송 대상에 포함하지 않습니다."
+      });
+      setIsConfirming(false);
+      return;
+    }
+    if (!activeChannels.length) {
+      setResult({
+        ok: false,
+        configured: true,
+        message: "현재 활성 전파 채널은 메일·문자뿐입니다. 카카오·밴드는 승인 대기 상태라 전송할 수 없습니다."
       });
       setIsConfirming(false);
       return;
@@ -280,7 +294,7 @@ export function WorkflowSharePanel({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          channels: selectedChannels,
+          channels: activeChannels,
           recipients: dispatchRecipients,
           operatorNote: note,
           workpack: buildBriefPayload(data, selectedMessage, selectedMessageTarget, targetWorkers)
@@ -312,7 +326,7 @@ export function WorkflowSharePanel({
         <strong>현장 전파</strong>
       </div>
       <p className="muted">
-        선택한 채널로 문서팩 요약과 현장 공유 메시지를 전송합니다. 채널별 연결 상태는 전송 결과에서 확인합니다.
+        문서팩 요약과 현장 공유 메시지는 현재 메일·문자 채널로만 전송합니다. 카카오·밴드는 화면과 서버 API 모두 승인 전까지 잠겨 있습니다.
       </p>
 
       <div className="channel-grid" aria-label="전파 채널 선택">
@@ -334,7 +348,7 @@ export function WorkflowSharePanel({
         ))}
       </div>
       <p className="channel-readiness-note">
-        현재 즉시 전송 채널은 메일·문자입니다. 카카오·밴드는 UI와 서버 API 모두 승인 대기 채널로 잠겨 있습니다.
+        활성 전송: 메일, 문자. 잠김: 카카오, 밴드. 잠긴 채널이 API 요청에 포함되면 서버가 거부합니다.
       </p>
       {!authToken || !workpackId ? (
         <p className="muted small">
@@ -348,7 +362,7 @@ export function WorkflowSharePanel({
           <strong>공유 메시지 선택</strong>
         </div>
         <p className="muted">
-          관리자용 한국어를 기본으로 보내고, 외국인 작업자가 있으면 언어별 안전공지로 바꿔 전송합니다.
+          관리자용 한국어를 기본으로 보내고, 외국인 작업자가 있으면 언어별 안전공지로 바꿔 미리 확인합니다.
         </p>
         <div className="language-picker" aria-label="공유 메시지 언어 선택">
           <button
@@ -400,7 +414,7 @@ export function WorkflowSharePanel({
         </div>
       ) : null}
       <p className="muted small">
-        선택된 근로자 연락처가 있으면 자동 포함됩니다. 수신자가 없으면 실제 전송 버튼은 열리지 않습니다.
+        선택된 근로자 연락처가 있으면 자동 포함됩니다. 휴대폰은 문자, 이메일은 메일 대상이며 수신자가 없으면 전송 버튼은 열리지 않습니다.
       </p>
 
       <label className="field-label" htmlFor="workflow-note">전달 메모</label>
@@ -435,9 +449,12 @@ export function WorkflowSharePanel({
             <div><span>대상 작업자</span><strong>{targetWorkers.length ? `${targetWorkers.length}명` : "직접 입력"}</strong></div>
           </div>
           <p className="muted small">전송 후 provider 응답을 채널별로 표시하고, 관리자 로그인 상태에서는 전파 이력을 저장합니다.</p>
+          <p className="channel-readiness-note">
+            이 확인 단계에서 전송되는 채널은 {channelLabel || "메일·문자"}뿐입니다. 카카오·밴드는 요청 본문에 포함하지 않습니다.
+          </p>
           {selectedMessageTarget !== "manager" ? (
             <p className="channel-readiness-note">
-              외국인 근로자 전송본입니다. 현장 통역 또는 해당 언어 가능자가 문구를 확인한 뒤 메일·문자로만 전송합니다.
+              외국인 근로자 전송본입니다. 현장 통역 또는 해당 언어 가능자가 문구와 이해 여부를 확인한 뒤 메일·문자로만 전송합니다.
             </p>
           ) : null}
           <div className="command-actions">

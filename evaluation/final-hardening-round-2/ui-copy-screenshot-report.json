@@ -1,0 +1,64 @@
+{
+  "generatedAt": "2026-05-05T01:10:14.757Z",
+  "baseUrl": "http://127.0.0.1:3012",
+  "viewport": {
+    "width": 1440,
+    "height": 1100
+  },
+  "forbiddenPatterns": [
+    "/prototype/i",
+    "/A\\/B/i",
+    "/16 screens/i",
+    "/sixteen screens/i",
+    "/프로토타입/i",
+    "/공모전/i",
+    "/MVP/i",
+    "/발표/i",
+    "/카카오/i",
+    "/밴드/i",
+    "/Kakao/i",
+    "/Band/i",
+    "/제품화 중/i",
+    "/Internal Server Error/i"
+  ],
+  "routesChecked": 4,
+  "pass": true,
+  "results": [
+    {
+      "route": "/",
+      "url": "http://127.0.0.1:3012/",
+      "status": 200,
+      "textSample": "SC\nsafeclaw/os\n제품\n문제\n작동 방식\n외국인 안내\n근거\n제품 구성\n작업 시작\n로그인\n작업 시작 →\n제품 · 운영 준비\nREGION · KR-CENTRAL\nPUBLIC API · ACTIVE\nUPDATED · 2026-05-02\n산업안전 · 현장 문서 작업공간\n오늘 작업을\n안전",
+      "screenshotPath": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-hardening-round-2\\landing-1440x1100.png",
+      "forbiddenMatches": [],
+      "elapsedMs": 11076
+    },
+    {
+      "route": "/workspace",
+      "url": "http://127.0.0.1:3012/workspace",
+      "status": 200,
+      "textSample": "SC\nSafeClaw\n현장 안전 문서팩\n01 · 진행 중\n작업 입력\n02 · 대기\nAPI 근거 확인\n03 · 대기\n문서팩 편집\n▣\n04 · 잠김\n작업자·교육\n▣\n05 · 잠김\n현장 전파\n▣\n06 · 잠김\n이력 저장\n작업 입력 대기\n입력 대기\n문서팩\n연결 상태\n대기\n현재 단계\n작업 입력 ",
+      "screenshotPath": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-hardening-round-2\\workspace-1440x1100.png",
+      "forbiddenMatches": [],
+      "elapsedMs": 3640
+    },
+    {
+      "route": "/settings",
+      "url": "http://127.0.0.1:3012/settings",
+      "status": 200,
+      "textSample": "SC\nsafeclaw/os\n\nFIELD OS\n\n운영\n01\n대시보드\n02\n작업공간\n03\n문서팩\n04\n근거자료\n실행\n05\n작업자 관리\n06\n공지 발송\n시스템\n07\n작업 이력\n08\n지식베이스\n09\n연결 상태\n10\n설정\n지원\n11\nTBM 회의\n12\n작업자 안내\n SITE 기본 현장\nAPI La",
+      "screenshotPath": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-hardening-round-2\\settings-1440x1100.png",
+      "forbiddenMatches": [],
+      "elapsedMs": 2567
+    },
+    {
+      "route": "/preview",
+      "url": "http://127.0.0.1:3012/preview",
+      "status": 200,
+      "textSample": "S\nSafeClaw\n핵심 3종\n작업공간\n차별성\n신뢰\n로드맵\n제품 완성도 기준\n핵심 3종은 완성품처럼, 나머지는 보조 산출물로 명확히 보여줍니다.\n\n위험성평가표, TBM, 외국인 전송본은 운영자가 바로 검토할 수 있는 핵심 산출물입니다.\n\n01\n위험성평가표\n\n4M 위험요인을 구분하고, 위",
+      "screenshotPath": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\final-hardening-round-2\\preview-1440x1100.png",
+      "forbiddenMatches": [],
+      "elapsedMs": 2107
+    }
+  ]
+}

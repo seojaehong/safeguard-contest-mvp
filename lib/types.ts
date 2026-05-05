@@ -187,6 +187,10 @@ export type AskResponse = {
         controls: string[];
         sourceTitles: string[];
         legalMappingTitles: string[];
+        evidenceRole?: "direct" | "supporting";
+        roleLabel?: string;
+        shortSummary?: string;
+        documentReflectionLabel?: string;
       }>;
     };
   };

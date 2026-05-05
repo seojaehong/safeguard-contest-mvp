@@ -95,8 +95,10 @@ export default async function KnowledgePage() {
         <div className="knowledge-entry-list">
           {stats.samples.map((item) => (
             <a key={item.id} href={`/knowledge?reference=${encodeURIComponent(item.title)}`}>
+              <small>{item.evidence_role_label || "근거 항목"}</small>
               <strong>{item.title}</strong>
-              <span>{item.summary}</span>
+              <span>{item.short_summary || item.summary}</span>
+              <span>{item.document_reflection_label || item.primary_documents.join(" · ")}</span>
             </a>
           ))}
         </div>

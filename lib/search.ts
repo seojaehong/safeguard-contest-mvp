@@ -160,9 +160,9 @@ function formatSafetyKnowledgeAppendix(matches: ReturnType<typeof matchSafetyKno
       : "교육내용과 이해도 확인 질문으로 바꿉니다.";
   return [
     "",
-    `[반영 근거: ${targetLabel}]`,
+    `[문서 반영: ${targetLabel}]`,
     ...matches.slice(0, 2).map((item) => (
-      `- ${item.title}: ${compactTitleList(item.controls)} 통제를 ${action}`
+      `- ${item.title}: ${item.shortSummary} / ${item.documentReflectionLabel}. ${action}`
     ))
   ].join("\n");
 }
@@ -459,7 +459,11 @@ export async function runAsk(question: string): Promise<AskResponse> {
             primaryDocuments: item.primaryDocuments,
             controls: item.controls,
             sourceTitles: item.sources.map((source) => source.title),
-            legalMappingTitles: item.legalMappings.map((legalItem) => legalItem.title)
+            legalMappingTitles: item.legalMappings.map((legalItem) => legalItem.title),
+            evidenceRole: item.evidenceRole,
+            roleLabel: item.roleLabel,
+            shortSummary: item.shortSummary,
+            documentReflectionLabel: item.documentReflectionLabel
           }))
         }
       },

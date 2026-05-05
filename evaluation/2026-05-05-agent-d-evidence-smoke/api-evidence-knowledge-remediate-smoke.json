@@ -1,0 +1,822 @@
+{
+  "startedAt": "2026-05-05T10:12:07.8285614+09:00",
+  "finishedAt": "2026-05-05T10:12:48.3364009+09:00",
+  "elapsedMs": 40508,
+  "baseUrl": "http://127.0.0.1:3068",
+  "note": "/api/safety-reference/status/search is not a defined route in this repo; /status and /search were smoked separately.",
+  "results": [
+    {
+      "name": "knowledge-match",
+      "method": "GET",
+      "path": "/api/knowledge/match?question=%EC%A7%80%EA%B2%8C%EC%B0%A8%20TBM%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80&limit=2",
+      "ok": true,
+      "expectedUnavailable": false,
+      "status": 200,
+      "elapsedMs": 2939,
+      "bodyPreview": "{\"ok\":true,\"source\":\"safety-knowledge-seed\",\"storageMode\":\"seed\",\"question\":\"지게차 TBM 위험성평가\",\"matches\":[{\"id\":\"risk-assessment-tbm-loop\",\"title\":\"위험성평가·TBM·교육 닫힌 루프\",\"primaryDocuments\":[\"workpackSummary\",\"riskAssessment\",\"tbmBriefing\",\"tbmLog\",\"safetyEducation\"],\"controls\":[\"위험요인 파악\",\"감소대책 수립\",\"TBM 공유\",\"교육 확인\",\"사진·증빙 보관\"],\"sources\":[{\"id\":\"kosha-risk-assessment-program\",\"agency\":\"KOSHA\",\"title\":\"KOSHA 위험성평가 사업안내\",\"sourceType\":\"official-guide\",\"url\":\"https://www.kosha.or.kr/kosha/business/rskassessment.do\",\"appliesTo\":[\"riskAssessment\",\"safetyEducation\"],\"summary\":\"유해·위험요인 파악, 위험성 결정, 감소대책 수립·실행, 공유·기록 흐름을 위험성평가 문서 구조에 반영한다.\"},{\"id\":\"kosha-tbm-ops\",\"agency\":\"KOSHA\",\"title\":\"작업 전 안전점검회의(TBM) OPS\",\"sourceType\":\"official-guide\",\"url\":\"https://edu.kosha.or.kr/headquater/support/assist/noticeboard/details?bbsEsntlNo=2913\",\"appliesTo\":[\"tbmBriefing\",\"tbmLog\",\"safetyEducation\"],\"summary\":\"작업내용, 위",
+      "parsed": {
+        "ok": true,
+        "source": "safety-knowledge-seed",
+        "storageMode": "seed",
+        "question": "지게차 TBM 위험성평가",
+        "matches": [
+          {
+            "id": "risk-assessment-tbm-loop",
+            "title": "위험성평가·TBM·교육 닫힌 루프",
+            "primaryDocuments": [
+              "workpackSummary",
+              "riskAssessment",
+              "tbmBriefing",
+              "tbmLog",
+              "safetyEducation"
+            ],
+            "controls": [
+              "위험요인 파악",
+              "감소대책 수립",
+              "TBM 공유",
+              "교육 확인",
+              "사진·증빙 보관"
+            ],
+            "sources": [
+              {
+                "id": "kosha-risk-assessment-program",
+                "agency": "KOSHA",
+                "title": "KOSHA 위험성평가 사업안내",
+                "sourceType": "official-guide",
+                "url": "https://www.kosha.or.kr/kosha/business/rskassessment.do",
+                "appliesTo": [
+                  "riskAssessment",
+                  "safetyEducation"
+                ],
+                "summary": "유해·위험요인 파악, 위험성 결정, 감소대책 수립·실행, 공유·기록 흐름을 위험성평가 문서 구조에 반영한다."
+              },
+              {
+                "id": "kosha-tbm-ops",
+                "agency": "KOSHA",
+                "title": "작업 전 안전점검회의(TBM) OPS",
+                "sourceType": "official-guide",
+                "url": "https://edu.kosha.or.kr/headquater/support/assist/noticeboard/details?bbsEsntlNo=2913",
+                "appliesTo": [
+                  "tbmBriefing",
+                  "tbmLog",
+                  "safetyEducation"
+                ],
+                "summary": "작업내용, 위험요인, 안전대책, 참석자 확인, 기록 메모 항목을 TBM 문서에 반영한다."
+              },
+              {
+                "id": "moel-tbm-education-credit",
+                "agency": "MOEL",
+                "title": "TBM 정기교육 시간 인정 안내",
+                "sourceType": "press",
+                "url": "https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=16488",
+                "appliesTo": [
+                  "tbmLog",
+                  "safetyEducation"
+                ],
+                "summary": "위험성평가 결과를 반영한 TBM을 교육 증빙으로 활용할 수 있음을 안전교육 기록에 보조 문구로 반영한다."
+              },
+              {
+                "id": "kosha-safety-education-guidebook",
+                "agency": "KOSHA",
+                "title": "산업안전보건교육 가이드북",
+                "sourceType": "official-guidebook",
+                "url": "https://oshri.kosha.or.kr/kosha/intro/gyeonggiBranch_A.do?articleNo=414441&attachNo=233889&mode=download",
+                "appliesTo": [
+                  "safetyEducation"
+                ],
+                "summary": "교육대상, 교육내용, 확인방법, 후속 교육 추천 항목을 안전보건교육 기록에 분리한다."
+              },
+              {
+                "id": "kosha-sif-archive",
+                "agency": "KOSHA",
+                "title": "산업재해 고위험요인(SIF) 아카이브",
+                "sourceType": "reference-catalog",
+                "url": "/api/safety-reference/search?q=SIF",
+                "appliesTo": [
+                  "riskAssessment",
+                  "tbmBriefing",
+                  "safetyEducation",
+                  "emergencyResponse"
+                ],
+                "summary": "제조업·건설업 고위험요인 사례를 위험성평가의 유해·위험요인, TBM 질문, 교육 확인 문구에 연결한다."
+              },
+              {
+                "id": "kosha-construction-process-list",
+                "agency": "KOSHA",
+                "title": "건설업 공종별 세부공정 목록",
+                "sourceType": "reference-catalog",
+                "url": "/api/safety-reference/search?q=공종",
+                "appliesTo": [
+                  "workPlan",
+                  "riskAssessment",
+                  "tbmBriefing"
+                ],
+                "summary": "공사종류, 공종명, 세부공정명을 작업계획서와 위험성평가의 작업 분류 기준으로 사용한다."
+              },
+              {
+                "id": "kosha-machinery-list",
+                "agency": "KOSHA",
+                "title": "업종별 기계설비 목록",
+                "sourceType": "reference-catalog",
+                "url": "/api/safety-reference/search?q=기계설비",
+                "appliesTo": [
+                  "workPlan",
+                  "riskAssessment",
+                  "tbmBriefing",
+                  "safetyEducation"
+                ],
+                "summary": "업종별 기계·설비 목록을 장비 위험요인, 정비 전 차단, 방호장치, 작업 전 점검 항목으로 연결한다."
+              },
+              {
+                "id": "kosha-technical-support-regulations",
+                "agency": "KOSHA",
+                "title": "기술지원규정 및 안전보건 기술지침",
+                "sourceType": "reference-catalog",
+                "url": "/api/safety-reference/search?q=기술지원규정",
+                "appliesTo": [
+                  "riskAssessment",
+                  "workPlan",
+                  "tbmBriefing",
+                  "safetyEducation",
+                  "emergencyResponse"
+                ],
+                "summary": "분야별 기술지원규정과 안전보건 기술지침을 문서별 확인 항목, 조치 기준, 교육·증빙 문구의 보조 근거로 사용한다."
+              }
+            ],
+            "legalMappings": [],
+            "score": 2,
+            "evidenceRole": "direct",
+            "roleLabel": "내장 지식 직접 근거",
+            "shortSummary": "위험요인 파악 · 감소대책 수립",
+            "documentReflectionLabel": "workpackSummary · riskAssessment · tbmBriefing에 위험요인 파악"
+          },
+          {
+            "id": "forklift-traffic",
+            "title": "지게차·보행자 동선 충돌",
+            "primaryDocuments": [
+              "riskAssessment",
+              "workPlan",
+              "tbmBriefing",
+              "tbmLog"
+            ],
+            "controls": [
+              "지게차 운행경로와 보행동선 분리",
+              "신호수 배치와 사각지대 확인",
+              "하역구역 접근금지 표시",
+              "운전 전 점검과 후진 경보 확인"
+            ],
+            "sources": [
+              {
+                "id": "kosha-forklift-plan",
+                "agency": "KOSHA",
+                "title": "지게차의 안전작업계획서 작성지침",
+                "sourceType": "official-guide",
+                "url": "https://oshri.kosha.or.kr/kosha/intro/northernGyeonggiBranch_A.do?articleNo=351943&attachNo=199463&mode=download",
+                "appliesTo": [
+                  "riskAssessment",
+                  "workPlan",
+                  "tbmBriefing"
+                ],
+                "summary": "지게차 작업계획, 운행경로, 신호방법, 접근금지구역 확인 항목을 보강한다."
+              },
+              {
+                "id": "kosha-domestic-accident-cases",
+                "agency": "KOSHA",
+                "title": "국내재해사례 게시판 정보 조회서비스",
+                "sourceType": "open-api",
+                "url": "https://apis.data.go.kr/B552468/disaster_api02/getdisaster_api02",
+                "appliesTo": [
+                  "riskAssessment",
+                  "tbmBriefing",
+                  "safetyEducation",
+                  "emergencyResponse"
+                ],
+                "summary": "유사 재해사례를 위험성평가와 TBM 예방 포인트에 연결한다."
+              },
+              {
+                "id": "kosha-smart-search",
+                "agency": "KOSHA",
+                "title": "안전보건법령 스마트검색",
+                "sourceType": "open-api",
+                "url": "https://apis.data.go.kr/B552468/srch/smartSearch",
+                "appliesTo": [
+                  "evidence",
+                  "riskAssessment",
+                  "tbmBriefing"
+                ],
+                "summary": "법령, KOSHA GUIDE, 안전보건 미디어 자료를 키워드로 검색해 문서 반영 근거 후보를 찾는다."
+              },
+              {
+                "id": "lawgo-industrial-safety-law",
+                "agency": "MOLEG",
+                "title": "법제처 국가법령정보 산업안전보건법",
+                "sourceType": "law",
+                "url": "https://www.law.go.kr/법령/산업안전보건법",
+                "appliesTo": [
+                  "legalEvidence",
+                  "riskAssessment",
+                  "safetyEducation"
+                ],
+                "summary": "사업주와 근로자의 안전보건 조치 의무를 문서 근거 초안에 연결한다."
+              }
+            ],
+            "legalMappings": [
+              {
+                "id": "industrial-safety-health-act-general-duty",
+                "sourceId": "lawgo-industrial-safety-law",
+                "title": "산업안전보건법 사업주·근로자 안전보건 조치",
+                "appliesTo": [
+                  "riskAssessment",
+                  "tbmBriefing",
+                  "safetyEducation"
+                ],
+                "plainLanguage": "사업주와 근로자가 산업재해 예방을 위해 지켜야 할 기준과 조치 의무를 현장 문서의 기본 근거로 쓴다.",
+                "caution": "조문 번호와 최신 시행일은 Law.go 원문에서 다시 확인한다."
+              },
+              {
+                "id": "industrial-safety-health-act-education",
+                "sourceId": "lawgo-industrial-safety-law",
+                "title": "산업안전보건법 안전보건교육",
+                "appliesTo": [
+                  "safetyEducation",
+                  "tbmLog"
+                ],
+                "plainLanguage": "작업 전 교육, 보호구, 작업중지 기준, 신규 투입자 안내를 안전보건교육 기록으로 남기는 근거 축이다.",
+                "caution": "교육 인정 여부는 작업 내용과 기록 방식에 따라 현장 검토가 필요하다."
+              }
+            ],
+            "score": 1,
+            "evidenceRole": "direct",
+            "roleLabel": "내장 지식 직접 근거",
+            "shortSummary": "지게차 운행경로와 보행동선 분리 · 신호수 배치와 사각지대 확인",
+            "documentReflectionLabel": "riskAssessment · workPlan · tbmBriefing에 지게차 운행경로와 보행동선 분리"
+          }
+        ],
+        "sourceCount": 18,
+        "legalMapCount": 3,
+        "templateCount": 4
+      }
+    },
+    {
+      "name": "workpack-remediate",
+      "method": "POST",
+      "path": "/api/workpack/remediate",
+      "ok": true,
+      "expectedUnavailable": false,
+      "status": 200,
+      "elapsedMs": 15499,
+      "bodyPreview": "{\"ok\":true,\"configured\":true,\"providerLabel\":\"Gemini (gemini-2.5-flash)\",\"policyNote\":\"Gemini 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다. Supabase 지식 DB 6건을 보완 근거 후보로 확인했습니다.\",\"catalogStatus\":{\"configured\":true,\"ok\":true,\"count\":6,\"message\":\"Supabase 안전 지식 DB에서 참고자료를 조회했습니다.\"},\"rubricItem\":{\"id\":\"required-risk-reduction\",\"title\":\"감소대책과 이행 확인\",\"category\":\"required\",\"categoryLabel\":\"필수 확인\"},\"documentKey\":\"riskAssessmentDraft\",\"text\":\"[보완 제안: 감소대책별 이행 확인]\\n*   각 감소대책별 담당자 지정 및 서명 확인\\n*   지게차 이동 동선 분리 및 보행자 안전 조치 이행 현장 확인\\n*   TBM 시 공유된 안전수칙의 현장 적용 및 기록 (현장 확인 필요: 기록 방식)\\n*   관리감독자의 최종 이행 확인 및 승인 여부\\n확인자/근거 확인: 위험성평가 감소대책의 책임 있는 이행과 현장 적용 검토\",\"sources\":[{\"title\":\"KOSHA 위험성평가 사업안내\",\"agency\":\"KOSHA · 내장 서식/루브릭\",\"url\":\"https://www.kosha.or.kr/kosha/business/rskassessment.do\",\"sourceType\":\"seed\",\"roleLabel\":\"내장 지식 직접 근거\",\"reflectionLabel\":\"workpackSummary · riskAssessment · tbmBr",
+      "parsed": {
+        "ok": true,
+        "configured": true,
+        "providerLabel": "Gemini (gemini-2.5-flash)",
+        "policyNote": "Gemini 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다. Supabase 지식 DB 6건을 보완 근거 후보로 확인했습니다.",
+        "catalogStatus": {
+          "configured": true,
+          "ok": true,
+          "count": 6,
+          "message": "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
+        },
+        "rubricItem": {
+          "id": "required-risk-reduction",
+          "title": "감소대책과 이행 확인",
+          "category": "required",
+          "categoryLabel": "필수 확인"
+        },
+        "documentKey": "riskAssessmentDraft",
+        "text": "[보완 제안: 감소대책별 이행 확인]\n*   각 감소대책별 담당자 지정 및 서명 확인\n*   지게차 이동 동선 분리 및 보행자 안전 조치 이행 현장 확인\n*   TBM 시 공유된 안전수칙의 현장 적용 및 기록 (현장 확인 필요: 기록 방식)\n*   관리감독자의 최종 이행 확인 및 승인 여부\n확인자/근거 확인: 위험성평가 감소대책의 책임 있는 이행과 현장 적용 검토",
+        "sources": [
+          {
+            "title": "KOSHA 위험성평가 사업안내",
+            "agency": "KOSHA · 내장 서식/루브릭",
+            "url": "https://www.kosha.or.kr/kosha/business/rskassessment.do",
+            "sourceType": "seed",
+            "roleLabel": "내장 지식 직접 근거",
+            "reflectionLabel": "workpackSummary · riskAssessment · tbmBriefing에 위험요인 파악"
+          },
+          {
+            "title": "작업 전 안전점검회의(TBM) OPS",
+            "agency": "KOSHA · 내장 서식/루브릭",
+            "url": "https://edu.kosha.or.kr/headquater/support/assist/noticeboard/details?bbsEsntlNo=2913",
+            "sourceType": "seed",
+            "roleLabel": "내장 지식 직접 근거",
+            "reflectionLabel": "workpackSummary · riskAssessment · tbmBriefing에 위험요인 파악"
+          },
+          {
+            "title": "TBM 정기교육 시간 인정 안내",
+            "agency": "MOEL · 내장 서식/루브릭",
+            "url": "https://www.moel.go.kr/news/enews/report/enewsView.do?news_seq=16488",
+            "sourceType": "seed",
+            "roleLabel": "내장 지식 직접 근거",
+            "reflectionLabel": "workpackSummary · riskAssessment · tbmBriefing에 위험요인 파악"
+          },
+          {
+            "title": "산업안전보건교육 가이드북",
+            "agency": "KOSHA · 내장 서식/루브릭",
+            "url": "https://oshri.kosha.or.kr/kosha/intro/gyeonggiBranch_A.do?articleNo=414441&attachNo=233889&mode=download",
+            "sourceType": "seed",
+            "roleLabel": "내장 지식 직접 근거",
+            "reflectionLabel": "workpackSummary · riskAssessment · tbmBriefing에 위험요인 파악"
+          },
+          {
+            "title": "1691 / 운수창고통신업 / 철도·항공·창고·운수관련서비스업",
+            "agency": "Supabase 지식 DB · 재해사례",
+            "url": "/knowledge?reference=1691%20%2F%20%EC%9A%B4%EC%88%98%EC%B0%BD%EA%B3%A0%ED%86%B5%EC%8B%A0%EC%97%85%20%2F%20%EC%B2%A0%EB%8F%84%C2%B7%ED%95%AD%EA%B3%B5%C2%B7%EC%B0%BD%EA%B3%A0%C2%B7%EC%9A%B4%EC%88%98%EA%B4%80%EB%A0%A8%EC%84%9C%EB%B9%84%EC%8A%A4%EC%97%85",
+            "sourceType": "catalog",
+            "roleLabel": "현장 판단 보조 근거",
+            "reflectionLabel": "점검결과 요약 · 위험성평가표 · 작업계획서에 작업발판·난간·개구부 상태 확인"
+          },
+          {
+            "title": "2240 / 기타의사업 / 도소매·음식·숙박업",
+            "agency": "Supabase 지식 DB · 재해사례",
+            "url": "/knowledge?reference=2240%20%2F%20%EA%B8%B0%ED%83%80%EC%9D%98%EC%82%AC%EC%97%85%20%2F%20%EB%8F%84%EC%86%8C%EB%A7%A4%C2%B7%EC%9D%8C%EC%8B%9D%C2%B7%EC%88%99%EB%B0%95%EC%97%85",
+            "sourceType": "catalog",
+            "roleLabel": "현장 판단 보조 근거",
+            "reflectionLabel": "점검결과 요약 · 위험성평가표 · 작업계획서에 가동부 방호덮개와 비상정지장치 확인"
+          },
+          {
+            "title": "2284 / 기타의사업 / 도소매·음식·숙박업",
+            "agency": "Supabase 지식 DB · 재해사례",
+            "url": "/knowledge?reference=2284%20%2F%20%EA%B8%B0%ED%83%80%EC%9D%98%EC%82%AC%EC%97%85%20%2F%20%EB%8F%84%EC%86%8C%EB%A7%A4%C2%B7%EC%9D%8C%EC%8B%9D%C2%B7%EC%88%99%EB%B0%95%EC%97%85",
+            "sourceType": "catalog",
+            "roleLabel": "현장 판단 보조 근거",
+            "reflectionLabel": "점검결과 요약 · 위험성평가표 · 작업계획서에 작업 전 유해·위험요인 확인"
+          }
+        ]
+      }
+    },
+    {
+      "name": "safety-reference-status",
+      "method": "GET",
+      "path": "/api/safety-reference/status",
+      "ok": true,
+      "expectedUnavailable": false,
+      "status": 200,
+      "elapsedMs": 15769,
+      "bodyPreview": "{\"ok\":true,\"configured\":true,\"status\":\"ready\",\"sources\":1063,\"items\":9920,\"expectedTechnicalTotal\":1040,\"technicalTotal\":1040,\"technicalSupportRegulations\":237,\"technicalGuidelines\":803,\"technicalSplitOk\":true,\"catalogSearchOk\":true,\"ingestionRuns\":2,\"itemTypes\":[{\"itemType\":\"sif-case\",\"count\":6033},{\"itemType\":\"construction-process\",\"count\":626},{\"itemType\":\"machinery\",\"count\":730},{\"itemType\":\"risk-manual\",\"count\":1},{\"itemType\":\"jsa-training\",\"count\":1},{\"itemType\":\"technical-guideline\",\"count\":803},{\"itemType\":\"technical-support-regulation\",\"count\":237}],\"samples\":[{\"id\":\"technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정\",\"source_id\":\"kosha-technical-support-regulations-2025\",\"item_type\":\"technical-support-regulation\",\"category\":\"전기안전분야\",\"subcategory\":\"기술지원규정\",\"title\":\"B-E-10-2026 정전전로 및 그 인근에서의 전기작업에 관한 기술지원규정\",\"summary\":\"- 1 - KOSHAGUIDEB–E–10-2026정전전로및그인근에서의전기작업",
+      "parsed": {
+        "ok": true,
+        "configured": true,
+        "status": "ready",
+        "sources": 1063,
+        "items": 9920,
+        "expectedTechnicalTotal": 1040,
+        "technicalTotal": 1040,
+        "technicalSupportRegulations": 237,
+        "technicalGuidelines": 803,
+        "technicalSplitOk": true,
+        "catalogSearchOk": true,
+        "ingestionRuns": 2,
+        "itemTypes": [
+          {
+            "itemType": "sif-case",
+            "count": 6033
+          },
+          {
+            "itemType": "construction-process",
+            "count": 626
+          },
+          {
+            "itemType": "machinery",
+            "count": 730
+          },
+          {
+            "itemType": "risk-manual",
+            "count": 1
+          },
+          {
+            "itemType": "jsa-training",
+            "count": 1
+          },
+          {
+            "itemType": "technical-guideline",
+            "count": 803
+          },
+          {
+            "itemType": "technical-support-regulation",
+            "count": 237
+          }
+        ],
+        "samples": [
+          {
+            "id": "technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
+            "source_id": "kosha-technical-support-regulations-2025",
+            "item_type": "technical-support-regulation",
+            "category": "전기안전분야",
+            "subcategory": "기술지원규정",
+            "title": "B-E-10-2026 정전전로 및 그 인근에서의 전기작업에 관한 기술지원규정",
+            "summary": "- 1 - KOSHAGUIDEB–E–10-2026정전전로및그인근에서의전기작업에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 기술지원규정의개요ㅇ개정자:(사)고경력과학기술연우총연합회ㅇ제·개정경과-2025년11월기계·전기안전분야전문위원회심의(개정)-2026년1월표준제정위원회본위원회심의(개정)ㅇ관련규격및자료-미국OSHA29CodeofFederalRagulation1910(OccupationalSafety&HealthStandards)-미국NFPA70E(StandardforElectricalSafetyintheWorkplace)-영국HealthandSafetyGuidance85ElectricityatWork:safeworkin",
+            "keywords": [
+              "KOSHA",
+              "전기안전분야"
+            ],
+            "risk_tags": [],
+            "primary_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록"
+            ],
+            "controls": [
+              "가동부 방호덮개와 비상정지장치 확인",
+              "정비 전 전원 차단 및 잠금표지"
+            ],
+            "source_url": null,
+            "evidence_role": "direct",
+            "reflected_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록"
+            ],
+            "short_summary": "가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지",
+            "evidence_role_label": "문서 문구 직접 근거",
+            "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 가동부 방호덮개와 비상정지장치 확인"
+          },
+          {
+            "id": "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
+            "source_id": "kosha-technical-support-regulations-2025",
+            "item_type": "technical-support-regulation",
+            "category": "전기안전분야",
+            "subcategory": "기술지원규정",
+            "title": "B-E-11-2026 충전전로 및 그 인근에서의 전기작업에 관한 기술지원규정",
+            "summary": "KOSHAGUIDEB–E–11-2026충전전로및그인근에서의전기작업에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 기술지원규정의개요○개정자:(사)고경력과학기술연우총연합회○제·개정경과 -2025년11월기계·전기안전분야전문위원회심의(개정)-2026년1월표준제정위원회본위원회심의(개정)○관련규격및자료-29CFR1910.269AppendixB(WorkingonExposedEnergizedParts)-29CFR1910.269AppendixE(ProtectionFromFlamesandElectricArcs)-NFPA70EChapter1(Safety-RelatedWorkPractices)-HSG85ElectricityatWork-Sa",
+            "keywords": [
+              "KOSHA",
+              "전기안전분야"
+            ],
+            "risk_tags": [],
+            "primary_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록",
+              "사진/증빙",
+              "비상대응 절차"
+            ],
+            "controls": [
+              "가동부 방호덮개와 비상정지장치 확인",
+              "정비 전 전원 차단 및 잠금표지"
+            ],
+            "source_url": null,
+            "evidence_role": "direct",
+            "reflected_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록",
+              "사진/증빙",
+              "비상대응 절차"
+            ],
+            "short_summary": "가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지",
+            "evidence_role_label": "문서 문구 직접 근거",
+            "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 가동부 방호덮개와 비상정지장치 확인"
+          },
+          {
+            "id": "technical-support-09-0004-b-e-12-2026-전기작업안전에-관한-기술지원규정",
+            "source_id": "kosha-technical-support-regulations-2025",
+            "item_type": "technical-support-regulation",
+            "category": "전기안전분야",
+            "subcategory": "기술지원규정",
+            "title": "B-E-12-2026 전기작업안전에 관한 기술지원규정",
+            "summary": "KOSHAGUIDEB–E–12-2026 전기작업안전에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 기술지원규정의개요○개정자:(사)고경력과학기술연우총연합회○제·개정경과-2025년11월기계·전기안전분야전문위원회심의(개정)-2026년1월표준제정위원회본위원회심의(개정)○관련규격및자료-미국OSHA29CodeofFederalRegulation1910(OccupationalSafety&HealthStandards)-미국NFPA70E(StandardforElectricalSafetyintheWorkplace)-영국HealthandSafetyGuidance85ElectricityatWork:Safeworkingpractices○관련법",
+            "keywords": [
+              "KOSHA",
+              "전기안전분야"
+            ],
+            "risk_tags": [],
+            "primary_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록"
+            ],
+            "controls": [
+              "가동부 방호덮개와 비상정지장치 확인",
+              "정비 전 전원 차단 및 잠금표지"
+            ],
+            "source_url": null,
+            "evidence_role": "direct",
+            "reflected_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록"
+            ],
+            "short_summary": "가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지",
+            "evidence_role_label": "문서 문구 직접 근거",
+            "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 가동부 방호덮개와 비상정지장치 확인"
+          },
+          {
+            "id": "technical-support-09-0005-b-e-13-2026-수변전설비에-관한-기술지원규정",
+            "source_id": "kosha-technical-support-regulations-2025",
+            "item_type": "technical-support-regulation",
+            "category": "전기안전분야",
+            "subcategory": "기술지원규정",
+            "title": "B-E-13-2026 수변전설비에 관한 기술지원규정",
+            "summary": "KOSHAGUIDEB–E–16-2026 수변전설비에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 기술지원규정의개요○개성자:(사)고경력과학기술연우총연합회○제·개정경과-2025년11월기계·전기안전분야전문위원회심의(개정)-2026년1월표준제정위원회본위원회심의(개정)○관련규격및자료-미국NFPA70B,StandardforElectricalEquipmentMaintenance,2023-미국NESC(NationalElectricalSafetyCode)Section12InstallationandMaintenanceofEquipment,2023 ○관련법규․규칙․고시등-산업안전보건기준에관한규칙제2편제3장(전기로인한위험방지)○기술지원규정",
+            "keywords": [
+              "KOSHA",
+              "전기안전분야"
+            ],
+            "risk_tags": [],
+            "primary_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록"
+            ],
+            "controls": [
+              "가동부 방호덮개와 비상정지장치 확인",
+              "정비 전 전원 차단 및 잠금표지",
+              "MSDS 확인 및 적정 보호구 착용",
+              "환기와 누출 대응 물품 비치"
+            ],
+            "source_url": null,
+            "evidence_role": "direct",
+            "reflected_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록"
+            ],
+            "short_summary": "가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지",
+            "evidence_role_label": "문서 문구 직접 근거",
+            "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 가동부 방호덮개와 비상정지장치 확인"
+          },
+          {
+            "id": "technical-support-02-0034-b-m-38-2026-휴대용-동력드릴의-사용안전에-관한-기술지원규정",
+            "source_id": "kosha-technical-support-regulations-2025",
+            "item_type": "technical-support-regulation",
+            "category": "기계안전분야",
+            "subcategory": "기술지원규정",
+            "title": "B-M-38-2026 휴대용 동력드릴의 사용안전에 관한 기술지원규정",
+            "summary": "KOSHAGUIDEB–M–38-2026휴대용동력드릴의사용안전에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 기술지원규정의개요 ◦작성자:한국산업안전보건공단◦개정자:한국산업안전보건공단전문기술실◦제․개정경과-1993년9월기계안전분야기준제정위원회심의-1993년10월총괄기준제정위원회심의-1995년9월기계안전분야기준제정위원회심의-1996년4월총괄기준제정위원회심의-2002년2월기계안전분야기준제정위원회심의-2002년3월총괄기준제정위원회심의-2012년4월기계분야제정위원회심의(개정)-2025년12월기계·전기안전분야전문위원회심의(개정)-2026년1월표준제정위원회본위원회심의(개정)◦관련규격및자료-미국NSC코드 ◦관련법규․규칙․고시등-산업안",
+            "keywords": [
+              "KOSHA",
+              "기계안전분야"
+            ],
+            "risk_tags": [],
+            "primary_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록"
+            ],
+            "controls": [
+              "가동부 방호덮개와 비상정지장치 확인",
+              "정비 전 전원 차단 및 잠금표지"
+            ],
+            "source_url": null,
+            "evidence_role": "direct",
+            "reflected_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록"
+            ],
+            "short_summary": "가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지",
+            "evidence_role_label": "문서 문구 직접 근거",
+            "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 가동부 방호덮개와 비상정지장치 확인"
+          },
+          {
+            "id": "technical-support-10-0012-c-c-2-2025-화학설비-정비-보수작업계획서-작성-등에-관한-기술지원규정",
+            "source_id": "kosha-technical-support-regulations-2025",
+            "item_type": "technical-support-regulation",
+            "category": "화학안전분야",
+            "subcategory": "기술지원규정",
+            "title": "C-C-2-2025 화학설비 정비·보수작업계획서 작성 등에 관한 기술지원규정",
+            "summary": "KOSHAGUIDEC–C–2-2025 화학설비정비·보수작업계획서작성및정비보수에관한기술지원규정 2025.3. 한국산업안전보건공단 기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 기술지원규정의개요○작성자:한국산업안전문화진흥원장희○제·개정경과-2024년11월화학안전분야제정위원회심의(통폐합개정)-2025년1월표준제정위원회본위원회심의(통폐합개정)○관련규격및자료-안전보건공단,화학설비정비보수작업안전보건관리매뉴얼,2013-KOSHAGUIDE「맹판설치및제거에관한기술지침」-KOSHAGUIDE「용접․용단작업시화재예방에관한기술지침」-KOSHAGUIDE「불활성기체등을이용한기밀시험방법에관한기술지침」-KOSHAGUIDE「설비보수용용접재료선정에관한기술지침」-KOSHAGUIDE「불활성가스치환에관한",
+            "keywords": [
+              "KOSHA",
+              "밀폐",
+              "화재",
+              "화학",
+              "화학안전분야"
+            ],
+            "risk_tags": [
+              "화재",
+              "화학",
+              "밀폐"
+            ],
+            "primary_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록",
+              "사진/증빙",
+              "비상대응 절차"
+            ],
+            "controls": [
+              "가동부 방호덮개와 비상정지장치 확인",
+              "정비 전 전원 차단 및 잠금표지",
+              "보행자 동선과 장비 동선 분리",
+              "신호수 배치 및 후진 경보 확인",
+              "MSDS 확인 및 적정 보호구 착용",
+              "환기와 누출 대응 물품 비치",
+              "작업 전 산소·유해가스 농도 측정",
+              "감시인 배치 및 구조장비 확보"
+            ],
+            "source_url": null,
+            "evidence_role": "direct",
+            "reflected_documents": [
+              "점검결과 요약",
+              "위험성평가표",
+              "작업계획서",
+              "TBM 브리핑",
+              "TBM 기록",
+              "안전보건교육 기록",
+              "사진/증빙",
+              "비상대응 절차"
+            ],
+            "short_summary": "가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지",
+            "evidence_role_label": "문서 문구 직접 근거",
+            "document_reflection_label": "점검결과 요약 · 위험성평가표 · 작업계획서에 가동부 방호덮개와 비상정지장치 확인"
+          }
+        ],
+        "message": "기술지원규정 폴더 1,040건 기준과 Supabase 기술지원규정 소스 1,040건을 연결했습니다."
+      }
+    },
+    {
+      "name": "safety-reference-search",
+      "method": "GET",
+      "path": "/api/safety-reference/search?q=%EC%A7%80%EA%B2%8C%EC%B0%A8%20TBM%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80&limit=3",
+      "ok": true,
+      "expectedUnavailable": false,
+      "status": 200,
+      "elapsedMs": 3885,
+      "bodyPreview": "{\"ok\":true,\"configured\":true,\"query\":\"지게차 TBM 위험성평가\",\"count\":3,\"items\":[{\"id\":\"machinery-0148\",\"source_id\":\"kosha-machinery-20210909\",\"item_type\":\"machinery\",\"category\":\"148\",\"subcategory\":\"제조업\",\"title\":\"148 · 제조업 · 선박건조및수리업 · 강선건조또는수리업\",\"summary\":\"번호: 148 업종대분류: 제조업 업종중분류: 선박건조및수리업 업종소분류: 강선건조또는수리업 기계설비명: 디젤지게차 기계설비영문명: Diesel fork lift 기계설비설명: 지게차는 내연기관을 동력으로 하는 기계로써/ 중량물을 싣거나 내리는 하역 전용의 특수 자동차이다.\",\"keywords\":[\"148\",\"제조업\",\"선박건조및수리업\",\"강선건조또는수리업\",\"디젤지게차\",\"Diesel fork lift\"],\"risk_tags\":[\"지게차\"],\"primary_documents\":[\"작업계획서\",\"위험성평가표\",\"TBM 브리핑\",\"안전보건교육 기록\"],\"controls\":[\"가동부 방호덮개와 비상정지장치 확인\",\"정비 전 전원 차단 및 잠금표지\",\"보행자 동선과 장비 동선 분리\",\"신호수 배치 및 후진 경보 확인\"],\"source_url\":null,\"evidence_role\":\"direct\",\"reflected_documents\":[\"작업계획서\",\"위험성평가표\",\"TBM 브리핑\",\"안전보건교육 기록\"],\"short_summary\":\"가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지\",\"evidence_role_label\":\"문서 문구 직접 근거\",\"document_reflection_label\":\"작업계획서 · 위험성평가표 · ",
+      "parsed": {
+        "ok": true,
+        "configured": true,
+        "query": "지게차 TBM 위험성평가",
+        "count": 3,
+        "items": [
+          {
+            "id": "machinery-0148",
+            "source_id": "kosha-machinery-20210909",
+            "item_type": "machinery",
+            "category": "148",
+            "subcategory": "제조업",
+            "title": "148 · 제조업 · 선박건조및수리업 · 강선건조또는수리업",
+            "summary": "번호: 148 업종대분류: 제조업 업종중분류: 선박건조및수리업 업종소분류: 강선건조또는수리업 기계설비명: 디젤지게차 기계설비영문명: Diesel fork lift 기계설비설명: 지게차는 내연기관을 동력으로 하는 기계로써/ 중량물을 싣거나 내리는 하역 전용의 특수 자동차이다.",
+            "keywords": [
+              "148",
+              "제조업",
+              "선박건조및수리업",
+              "강선건조또는수리업",
+              "디젤지게차",
+              "Diesel fork lift"
+            ],
+            "risk_tags": [
+              "지게차"
+            ],
+            "primary_documents": [
+              "작업계획서",
+              "위험성평가표",
+              "TBM 브리핑",
+              "안전보건교육 기록"
+            ],
+            "controls": [
+              "가동부 방호덮개와 비상정지장치 확인",
+              "정비 전 전원 차단 및 잠금표지",
+              "보행자 동선과 장비 동선 분리",
+              "신호수 배치 및 후진 경보 확인"
+            ],
+            "source_url": null,
+            "evidence_role": "direct",
+            "reflected_documents": [
+              "작업계획서",
+              "위험성평가표",
+              "TBM 브리핑",
+              "안전보건교육 기록"
+            ],
+            "short_summary": "가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지",
+            "evidence_role_label": "문서 문구 직접 근거",
+            "document_reflection_label": "작업계획서 · 위험성평가표 · TBM 브리핑에 가동부 방호덮개와 비상정지장치 확인"
+          },
+          {
+            "id": "machinery-0184",
+            "source_id": "kosha-machinery-20210909",
+            "item_type": "machinery",
+            "category": "184",
+            "subcategory": "제조업",
+            "title": "184 · 제조업 · 기계기구·금속·비금속광물제품제조업 · 자동차제조업",
+            "summary": "번호: 184 업종대분류: 제조업 업종중분류: 기계기구·금속·비금속광물제품제조업 업종소분류: 자동차제조업 기계설비명: 리치형 지게차 기계설비영문명: Reach type fork lift 기계설비설명: 입식 지게차는 앞쪽에 2단으로 신축하는 수직 마스트가 있어서/ 이에 맞물린 좌우 2개의 포크를 하물 밑에 밀어 넣고/ 들어올려 짐을 나르는 지게차 중/ 운전자가 서서 운행 및 작업을 하는 지게차이다.",
+            "keywords": [
+              "184",
+              "제조업",
+              "기계기구·금속·비금속광물제품제조업",
+              "자동차제조업",
+              "리치형 지게차",
+              "Reach type fork lift"
+            ],
+            "risk_tags": [
+              "지게차"
+            ],
+            "primary_documents": [
+              "작업계획서",
+              "위험성평가표",
+              "TBM 브리핑",
+              "안전보건교육 기록"
+            ],
+            "controls": [
+              "가동부 방호덮개와 비상정지장치 확인",
+              "정비 전 전원 차단 및 잠금표지",
+              "보행자 동선과 장비 동선 분리",
+              "신호수 배치 및 후진 경보 확인"
+            ],
+            "source_url": null,
+            "evidence_role": "direct",
+            "reflected_documents": [
+              "작업계획서",
+              "위험성평가표",
+              "TBM 브리핑",
+              "안전보건교육 기록"
+            ],
+            "short_summary": "가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지",
+            "evidence_role_label": "문서 문구 직접 근거",
+            "document_reflection_label": "작업계획서 · 위험성평가표 · TBM 브리핑에 가동부 방호덮개와 비상정지장치 확인"
+          },
+          {
+            "id": "machinery-0022",
+            "source_id": "kosha-machinery-20210909",
+            "item_type": "machinery",
+            "category": "22",
+            "subcategory": "기타의사업",
+            "title": "22 · 기타의사업 · 부동산업및임대업 · 임대업",
+            "summary": "번호: 22 업종대분류: 기타의사업 업종중분류: 부동산업및임대업 업종소분류: 임대업 기계설비명: 가스지게차 기계설비영문명: Gas fork lift 기계설비설명: 가스지게차는 화물을 실어 옮기는 데 쓰는 특수차량으로서 화물 운반 작업에서 빠질 수 없는 필수장비이다. 일반 지게차와는 달리 충전형 가스에 의해서 작동을 한다.",
+            "keywords": [
+              "22",
+              "기타의사업",
+              "부동산업및임대업",
+              "임대업",
+              "가스지게차",
+              "Gas fork lift"
+            ],
+            "risk_tags": [
+              "지게차"
+            ],
+            "primary_documents": [
+              "작업계획서",
+              "위험성평가표",
+              "TBM 브리핑",
+              "안전보건교육 기록"
+            ],
+            "controls": [
+              "가동부 방호덮개와 비상정지장치 확인",
+              "정비 전 전원 차단 및 잠금표지",
+              "보행자 동선과 장비 동선 분리",
+              "신호수 배치 및 후진 경보 확인"
+            ],
+            "source_url": null,
+            "evidence_role": "direct",
+            "reflected_documents": [
+              "작업계획서",
+              "위험성평가표",
+              "TBM 브리핑",
+              "안전보건교육 기록"
+            ],
+            "short_summary": "가동부 방호덮개와 비상정지장치 확인 · 정비 전 전원 차단 및 잠금표지",
+            "evidence_role_label": "문서 문구 직접 근거",
+            "document_reflection_label": "작업계획서 · 위험성평가표 · TBM 브리핑에 가동부 방호덮개와 비상정지장치 확인"
+          }
+        ],
+        "message": "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
+      }
+    },
+    {
+      "name": "safety-reference-status-search-nested",
+      "method": "GET",
+      "path": "/api/safety-reference/status/search?q=%EC%A7%80%EA%B2%8C%EC%B0%A8&limit=1",
+      "ok": false,
+      "expectedUnavailable": true,
+      "status": 404,
+      "elapsedMs": 2355,
+      "bodyPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/app/layout.css?v=1777943568110\" data-precedence=\"next_static/css/app/layout.css\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack.js?v=1777943568110\"/><script src=\"/_next/static/chunks/main-app.js?v=1777943568110\" async=\"\"></script><script src=\"/_next/static/chunks/app-pages-internals.js\" async=\"\"></script><meta name=\"robots\" content=\"noindex\"/><title>SafeClaw | 안전 문서팩 생성</title><meta name=\"description\" content=\"작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스\"/><script src=\"/_next/static/chunks/polyfills.js\" noModule=\"\"></script></head><body><div hidden=\"\"><!--$--><!--/$--></div><main class=\"container grid\"><section class=\"card list\"><div class=\"h2\">찾을 수 없는 문서</div>",
+      "parsed": null
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-05-05T10:41:02.2940142+09:00",
+  "route": "local /api/export/pdf",
+  "getStatus": 200,
+  "htmlStatus": 200,
+  "htmlContentType": [
+    "text/html; charset=utf-8"
+  ],
+  "htmlContainsRiskAssessment": true,
+  "pdfStatus": 200,
+  "pdfContentType": [
+    "application/pdf"
+  ],
+  "pdfByteLength": 2882,
+  "verdict": "pass",
+  "stdoutLog": "evaluation\\final-hardening-round-2\\local-dev-pdf-route.out.log",
+  "stderrLog": "evaluation\\final-hardening-round-2\\local-dev-pdf-route.err.log"
+}
