@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>위험성평가표</title>
+  <style>
+    
+    body { margin: 0; background: #ece7dc; color: #161b22; font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; }
+    .safety-form-page { max-width: 1080px; margin: 18px auto; background: #fffdf8; border: 2px solid #161b22; box-shadow: 8px 8px 0 rgba(22, 27, 34, 0.12); }
+    .form-head { display: grid; grid-template-columns: 1fr 240px; border-bottom: 2px solid #161b22; }
+    .form-title { padding: 20px 24px; }
+    .form-title span { display: inline-block; margin-bottom: 8px; color: #21594f; font-size: 12px; font-weight: 900; letter-spacing: 0.12em; }
+    .form-title h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
+    .form-title p { margin: 8px 0 0; color: #4c5665; font-size: 13px; }
+    .approval-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-left: 2px solid #161b22; }
+    .approval-cell { display: grid; grid-template-rows: 34px 1fr; min-height: 108px; border-left: 1px solid #161b22; text-align: center; }
+    .approval-cell:first-child { border-left: 0; }
+    .approval-cell b { display: grid; place-items: center; background: #f2ead9; border-bottom: 1px solid #161b22; font-size: 12px; }
+    .approval-cell em { display: grid; place-items: end center; padding-bottom: 12px; color: #707887; font-size: 12px; font-style: normal; }
+    .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
+    .meta-item { min-height: 58px; border-right: 1px solid #161b22; }
+    .meta-item:last-child { border-right: 0; }
+    .meta-item b { display: block; padding: 7px 10px; background: #21594f; color: #ffffff; font-size: 11px; }
+    .meta-item span { display: block; padding: 10px; font-size: 13px; line-height: 1.35; }
+    .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
+    .check-grid div { padding: 10px; border-right: 1px solid #161b22; font-size: 12px; font-weight: 800; }
+    .check-grid div:last-child { border-right: 0; }
+    .section-block { padding: 18px 22px 4px; }
+    .section-label { display: inline-flex; align-items: center; min-height: 30px; margin-bottom: 8px; padding: 5px 12px; background: #161b22; color: #fffdf8; font-size: 13px; font-weight: 900; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 16px; }
+    th, td { border: 1px solid #161b22; padding: 9px 10px; vertical-align: top; word-break: keep-all; line-height: 1.48; }
+    th { background: #f2ead9; font-size: 12px; text-align: center; }
+    td { font-size: 12px; }
+    .center { text-align: center; }
+    .check-cell { text-align: center; color: #5e6677; font-weight: 800; }
+    .signature-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 10px 22px 22px; border: 1px solid #161b22; }
+    .signature-grid div { min-height: 62px; padding: 9px 10px; border-right: 1px solid #161b22; font-size: 12px; }
+    .signature-grid div:last-child { border-right: 0; }
+    .signature-grid b { display: block; margin-bottom: 18px; }
+    .form-note { margin: 0 22px 22px; color: #596373; font-size: 12px; }
+    .section-help { margin: 0 0 10px; color: #596373; font-size: 12px; line-height: 1.5; }
+    .mini-table th { background: #21594f; color: #fffdf8; }
+    .risk-table th, .risk-table td { font-size: 11px; padding: 7px 6px; }
+    .risk-level-high { background: #ffe3df; font-weight: 900; color: #a83224; }
+    .permit-check td:nth-child(2), .permit-check td:nth-child(3) { text-align: center; font-weight: 900; }
+    .attendee-table td { height: 42px; }
+    @media print { body { background: #ffffff; } .safety-form-page { margin: 0; box-shadow: none; max-width: none; } }
+  
+    body { background: #ffffff; }
+    .safety-form-page { box-shadow: none; }
+  </style>
+</head>
+<body>
+  
+  <article class="safety-form-page">
+    <header class="form-head">
+      <div class="form-title">
+        <span>SC-RISK-01</span>
+        <h1>위험성평가표</h1>
+        <p>위험성평가 및 감소대책 확인서 · SafeClaw 공식자료 기반 초안</p>
+      </div>
+      <div class="approval-grid">
+    <div class="approval-cell"><b>작성</b><em>서명</em></div>
+  
+    <div class="approval-cell"><b>검토</b><em>서명</em></div>
+  
+    <div class="approval-cell"><b>승인</b><em>서명</em></div>
+  </div>
+    </header>
+    <div class="meta-grid">
+      <div class="meta-item"><b>사업장</b><span>세이프건설</span></div>
+      <div class="meta-item"><b>현장/공정</b><span>서울 성수동 근린생활시설 현장</span></div>
+      <div class="meta-item"><b>작업내용</b><span>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</span></div>
+      <div class="meta-item"><b>인원/조건</b><span>5명 · 오후 강풍 예보, 작업중지 기준 공유 필요</span></div>
+    </div>
+    <div class="check-grid">
+    <div>□ 위험요인 확인</div>
+  
+    <div>□ 감소대책 담당 지정</div>
+  
+    <div>□ 작업 전 공유</div>
+  
+    <div>□ 잔여위험 승인</div>
+  </div>
+    
+    <section class="section-block">
+      <div class="section-label">1. 사전준비</div>
+      <table class="mini-table">
+        <colgroup><col style="width: 16%;" /><col style="width: 34%;" /><col style="width: 16%;" /><col style="width: 34%;" /></colgroup>
+        <tbody>
+          <tr><th>평가대상 작업</th><td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td><th>평가방법</th><td>4M + 가능성·중대성 판단</td></tr>
+          <tr><th>작업장소</th><td>서울 성수동 근린생활시설 현장</td><th>참여자</th><td>관리감독자, 작업반장, 근로자 대표</td></tr>
+          <tr><th>작업조건</th><td>오후 강풍 예보, 작업중지 기준 공유 필요</td><th>검토자료</th><td>작업계획서, TBM, KOSHA 자료, 법령 근거</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">2. 유해·위험요인 파악 및 위험성 결정</div>
+      <p class="section-help">제공 서식 기준에 맞춰 단위공종, 작업장소, 사용 장비, 재해형태, 가능성·중대성·등급을 분리합니다.</p>
+      <table class="risk-table">
+        <colgroup>
+          <col style="width: 8%;" /><col style="width: 10%;" /><col style="width: 10%;" /><col style="width: 8%;" />
+          <col style="width: 18%;" /><col style="width: 8%;" /><col style="width: 6%;" /><col style="width: 6%;" />
+          <col style="width: 6%;" /><col style="width: 20%;" />
+        </colgroup>
+        <thead><tr><th>단위공종</th><th>작업장소</th><th>장비/도구</th><th>4M</th><th>유해·위험요인</th><th>재해형태</th><th>가능성</th><th>중대성</th><th>등급</th><th>현재 안전조치</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td>
+            <td>서울 성수동 근린생활시설 현장</td>
+            <td>작업장비/공도구</td>
+            <td class="center">Man</td>
+            <td>위험성평가표(초안)</td>
+            <td>협착/충돌</td>
+            <td class="center">중</td>
+            <td class="center">상</td>
+            <td class="center risk-level-high">상</td>
+            <td>이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td>
+          </tr><tr>
+            <td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td>
+            <td>서울 성수동 근린생활시설 현장</td>
+            <td>건설업</td>
+            <td class="center">Management</td>
+            <td>KOSHA 위험성평가 절차 및 4M 기법 참고</td>
+            <td>기타 재해</td>
+            <td class="center">중</td>
+            <td class="center">상</td>
+            <td class="center risk-level-high">상</td>
+            <td>오후 강풍 예보, 작업중지 기준 공유 필요</td>
+          </tr><tr>
+            <td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td>
+            <td>서울 성수동 근린생활시설 현장</td>
+            <td>비계/작업발판</td>
+            <td class="center">Machine</td>
+            <td>이동식 비계 승·하강 및 작업발판 이동 중 추락</td>
+            <td>추락</td>
+            <td class="center">중</td>
+            <td class="center">상</td>
+            <td class="center risk-level-high">상</td>
+            <td>작업 전 통제 여부와 노출 빈도 확인</td>
+          </tr><tr>
+            <td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td>
+            <td>서울 성수동 근린생활시설 현장</td>
+            <td>비계/작업발판</td>
+            <td class="center">Machine</td>
+            <td>이동식 비계 승·하강 및 작업발판 이동 중 추락</td>
+            <td>추락</td>
+            <td class="center">중</td>
+            <td class="center">상</td>
+            <td class="center risk-level-high">상</td>
+            <td>작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">3. 감소대책 수립·실행 및 이행확인</div>
+      <table>
+        <colgroup><col style="width: 32%;" /><col style="width: 28%;" /><col style="width: 14%;" /><col style="width: 12%;" /><col style="width: 14%;" /></colgroup>
+        <thead><tr><th>추가 감소대책</th><th>확인 근거/증빙</th><th>조치담당자</th><th>조치기한</th><th>확인자 서명</th></tr></thead>
+        <tbody>
+          <tr><td>이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td><td>TBM 공유, 사진/점검 기록, 작업 전 확인</td><td>작업반장</td><td>작업 전</td><td>________</td></tr><tr><td>오후 강풍 예보, 작업중지 기준 공유 필요</td><td>TBM 공유, 사진/점검 기록, 작업 전 확인</td><td>작업반장</td><td>작업 전</td><td>________</td></tr><tr><td>작업 전 통제 여부와 노출 빈도 확인</td><td>TBM 공유, 사진/점검 기록, 작업 전 확인</td><td>작업반장</td><td>작업 전</td><td>________</td></tr><tr><td>작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검</td><td>TBM 공유, 사진/점검 기록, 작업 전 확인</td><td>작업반장</td><td>작업 전</td><td>________</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">4. 위험성평가 회의록 및 재평가 기준</div>
+      <table>
+        <colgroup><col style="width: 20%;" /><col style="width: 30%;" /><col style="width: 20%;" /><col style="width: 30%;" /></colgroup>
+        <tbody>
+          <tr><th>회의일시</th><td>____년 ____월 ____일 ____시</td><th>참석대상</th><td>관리감독자, 작업반장, 작업자 대표</td></tr>
+          <tr><th>재평가 사유</th><td>공법·장비·인원·기상 조건 변경</td><th>재평가 기준</th><td>상 등급 잔류위험 또는 작업중지 발생 시</td></tr>
+          <tr><th>주요 결정</th><td colspan="3">□ 감소대책 이행 후 작업 □ 보완 후 재평가 □ 작업중지 유지</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section-block">
+      <div class="section-label">5. 공유·교육 및 조치 확인</div>
+      <table>
+        <thead><tr><th>공유 대상</th><th>공유 방법</th><th>이해 확인</th><th>미조치/재평가 필요</th></tr></thead>
+        <tbody><tr><td>투입 근로자 전원</td><td>작업 전 TBM 및 안전보건교육</td><td>구두 복창·서명</td><td>□ 없음 □ 있음: ____________________</td></tr></tbody>
+      </table>
+    </section>
+  
+    <div class="signature-grid">
+      <div><b>작성자</b>성명/서명:</div>
+      <div><b>관리감독자</b>성명/서명:</div>
+      <div><b>교육/TBM 확인자</b>성명/서명:</div>
+      <div><b>보관 위치</b>문서번호/철:</div>
+    </div>
+    <p class="form-note">본 문서는 현장 확인 전 초안입니다. 작업 전 위험요인, 참석자, 작업중지 기준, 서명란을 최종 확인한 뒤 사용하세요.</p>
+  </article>
+</body>
+</html>
