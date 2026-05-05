@@ -12,6 +12,8 @@ export type SafetyReferenceItem = {
   primary_documents: string[];
   controls: string[];
   source_url?: string | null;
+  evidence_role?: "direct" | "supporting";
+  reflected_documents?: string[];
 };
 
 export type SafetyReferenceSearchResult = {
@@ -106,10 +108,26 @@ function isReferenceItem(value: unknown): value is SafetyReferenceItem {
 }
 
 function normalizeReferenceItem(item: SafetyReferenceItem): SafetyReferenceItem {
+  const evidenceRole = deriveEvidenceRole(item);
   return {
     ...item,
-    source_url: item.source_url || null
+    source_url: item.source_url || null,
+    evidence_role: evidenceRole,
+    reflected_documents: item.primary_documents
   };
+}
+
+function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "source_id">): "direct" | "supporting" {
+  const directTypes = new Set([
+    "construction-process",
+    "machinery",
+    "risk-manual",
+    "technical-guideline",
+    "technical-support-regulation"
+  ]);
+  if (directTypes.has(item.item_type)) return "direct";
+  if (item.source_id.includes("law") || item.source_id.includes("regulation")) return "direct";
+  return "supporting";
 }
 
 function safeIlikeTerm(value: string): string {
@@ -222,10 +240,12 @@ export async function searchSafetyReferences(options: {
   itemType?: string;
   sourceId?: string;
   riskTag?: string;
+  evidenceRole?: "direct" | "supporting";
 }): Promise<SafetyReferenceSearchResult> {
   const config = getSupabaseConfig();
   const query = options.query.trim();
   const limit = Math.min(Math.max(options.limit || 12, 1), 50);
+  const fetchLimit = options.evidenceRole ? Math.min(limit * 3, 50) : limit;
   if (!config) {
     return {
       ok: false,
@@ -239,7 +259,7 @@ export async function searchSafetyReferences(options: {
 
   const params = new URLSearchParams();
   params.set("select", SELECT_FIELDS);
-  params.set("limit", String(limit));
+  params.set("limit", String(fetchLimit));
   params.set("order", "item_type.asc,title.asc");
   if (options.itemType) params.set("item_type", `eq.${options.itemType}`);
   if (options.sourceId) params.set("source_id", `eq.${options.sourceId}`);
@@ -262,17 +282,17 @@ export async function searchSafetyReferences(options: {
     };
   }
 
-  let items = firstPass.items;
+  let items = filterByEvidenceRole(firstPass.items, options.evidenceRole);
   if (items.length === 0 && searchTerm.includes(" ")) {
     const byId = new Map<string, SafetyReferenceItem>();
     const fallbackTerms = extractFallbackTerms(searchTerm);
     for (const term of fallbackTerms) {
       const fallbackParams = new URLSearchParams(params);
-      fallbackParams.set("limit", String(limit));
+      fallbackParams.set("limit", String(fetchLimit));
       fallbackParams.set("or", `(title.ilike.*${term}*,summary.ilike.*${term}*,body.ilike.*${term}*)`);
       const fallback = await fetchReferenceItems(config, fallbackParams);
       if (fallback.ok) {
-        fallback.items.forEach((item) => byId.set(item.id, item));
+        filterByEvidenceRole(fallback.items, options.evidenceRole).forEach((item) => byId.set(item.id, item));
       } else {
         console.error("Safety reference fallback search failed", fallback.message);
       }
@@ -285,10 +305,18 @@ export async function searchSafetyReferences(options: {
     ok: true,
     configured: true,
     query,
-    count: items.length,
-    items,
+    count: items.slice(0, limit).length,
+    items: items.slice(0, limit),
     message: "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
   };
+}
+
+function filterByEvidenceRole(
+  items: SafetyReferenceItem[],
+  evidenceRole: "direct" | "supporting" | undefined
+): SafetyReferenceItem[] {
+  if (!evidenceRole) return items;
+  return items.filter((item) => item.evidence_role === evidenceRole);
 }
 
 async function readItemTypeCounts(config: SupabaseConfig): Promise<Array<{ itemType: string; count: number }>> {
