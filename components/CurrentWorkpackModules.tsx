@@ -37,6 +37,8 @@ type CurrentWorkpackSnapshot = {
 };
 
 type CurrentWorkpackState = CurrentWorkpackSnapshot & {
+  reopenMessage: string | null;
+  reopenStatus: "idle" | "ready" | "blocked";
   updateData: (data: AskResponse) => void;
   updateWorkerSnapshot: (workerSnapshot: CurrentWorkerSnapshot) => void;
   updateDispatchSnapshot: (dispatchSnapshot: CurrentDispatchSnapshot | undefined) => void;
@@ -78,6 +80,16 @@ type ServerArchiveState = {
   message: string;
   workpacks: ArchiveWorkpack[];
   dispatchLogs: ArchiveDispatchLog[];
+};
+type EvidenceRole = "direct" | "supporting";
+type EvidenceCard = {
+  id: string;
+  title: string;
+  summary: string;
+  sourceLabel: string;
+  role: EvidenceRole;
+  reflectedDocuments: string[];
+  href: string;
 };
 
 const launchDocuments: LaunchDocument[] = [
@@ -174,6 +186,25 @@ const workerLanguageOptions = [
 
 const workerTrainingStatusOptions: WorkerTrainingStatus[] = ["이수", "당일 교육 예정", "확인 필요"];
 const workerExperienceLevelOptions: WorkerExperienceLevel[] = ["숙련", "중간", "신규"];
+const evidenceDocumentLabels: Record<string, string> = {
+  riskAssessment: "위험성평가표",
+  riskAssessmentDraft: "위험성평가표",
+  tbmBriefing: "TBM 브리핑",
+  tbmLog: "TBM 기록",
+  tbmLogDraft: "TBM 기록",
+  safetyEducation: "안전보건교육 기록",
+  safetyEducationRecordDraft: "안전보건교육 기록",
+  workPlan: "작업계획서",
+  workPlanDraft: "작업계획서",
+  emergencyResponse: "비상대응 절차",
+  emergencyResponseDraft: "비상대응 절차",
+  workpackSummary: "점검결과 요약",
+  workpackSummaryDraft: "점검결과 요약",
+  foreignWorkerBriefing: "외국인 브리핑",
+  foreignWorkerTransmission: "외국인 전송본",
+  managerTraining: "관리자 후속교육",
+  chemical: "화학물질 교육"
+};
 
 function buildWorkerId() {
   return `worker-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -210,6 +241,11 @@ function syncWorkerLanguage(worker: WorkerProfile, languageCode: string): Worker
   };
 }
 
+function syncWorkerNationality(worker: WorkerProfile, nationality: string): WorkerProfile {
+  const option = workerLanguageOptions.find((item) => item.nationality === nationality) || workerLanguageOptions[0];
+  return syncWorkerLanguage(worker, option.languageCode);
+}
+
 function buildWorkerSnapshot(workers: WorkerProfile[], previous?: CurrentWorkerSnapshot): CurrentWorkerSnapshot {
   const workerIds = workers.map((worker) => worker.id);
   const selectedWorkerIds = previous?.selectedWorkerIds.length
@@ -240,6 +276,40 @@ function readResponseMessage(payload: unknown, fallback: string) {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return fallback;
   const record = payload as Record<string, unknown>;
   return typeof record.message === "string" ? record.message : fallback;
+}
+
+function readBlockers(payload: unknown) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return [];
+  const record = payload as Record<string, unknown>;
+  return Array.isArray(record.blockers) ? record.blockers.filter((item): item is string => typeof item === "string") : [];
+}
+
+function readReopenData(payload: unknown): AskResponse | null {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null;
+  const record = payload as Record<string, unknown>;
+  if (!record.canReopen || !record.workpack || typeof record.workpack !== "object" || Array.isArray(record.workpack)) return null;
+  const workpack = record.workpack as Record<string, unknown>;
+  const reopenData = workpack.reopenData;
+  if (!reopenData || typeof reopenData !== "object" || Array.isArray(reopenData)) return null;
+  const candidate = reopenData as Record<string, unknown>;
+  if (
+    typeof candidate.question !== "string" ||
+    !candidate.scenario ||
+    typeof candidate.scenario !== "object" ||
+    Array.isArray(candidate.scenario) ||
+    !candidate.deliverables ||
+    typeof candidate.deliverables !== "object" ||
+    Array.isArray(candidate.deliverables) ||
+    !candidate.externalData ||
+    typeof candidate.externalData !== "object" ||
+    Array.isArray(candidate.externalData) ||
+    !candidate.riskSummary ||
+    typeof candidate.riskSummary !== "object" ||
+    Array.isArray(candidate.riskSummary)
+  ) {
+    return null;
+  }
+  return candidate as AskResponse;
 }
 
 function createBrowserSupabaseClient() {
@@ -313,6 +383,8 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
     isCurrent: false,
     savedAt: null
   });
+  const [reopenMessage, setReopenMessage] = useState<string | null>(null);
+  const [reopenStatus, setReopenStatus] = useState<"idle" | "ready" | "blocked">("idle");
 
   useEffect(() => {
     const stored = parseStoredCurrentWorkpack(window.localStorage.getItem(CURRENT_WORKPACK_STORAGE_KEY));
@@ -325,6 +397,62 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
         dispatchSnapshot: stored.dispatchSnapshot
       });
     }
+
+    const workpackId = new URLSearchParams(window.location.search).get("workpackId");
+    if (!workpackId) return;
+
+    let cancelled = false;
+    async function reopenServerWorkpack() {
+      const session = await readSession();
+      if (!session) {
+        if (!cancelled) {
+          setReopenStatus("blocked");
+          setReopenMessage("관리자 로그인 세션이 없어 저장 문서팩을 다시 열 수 없습니다. 현재는 브라우저 최근 작업을 표시합니다.");
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/workpacks/${encodeURIComponent(workpackId)}`, {
+          headers: { authorization: `Bearer ${session.access_token}` }
+        });
+        const payload: unknown = await response.json().catch((): unknown => ({}));
+        const reopenData = response.ok ? readReopenData(payload) : null;
+        if (!reopenData) {
+          const blockers = readBlockers(payload);
+          if (!cancelled) {
+            setReopenStatus("blocked");
+            setReopenMessage(blockers.length
+              ? `저장 문서팩 상세는 조회됐지만 복원 차단 요소가 있습니다: ${blockers.join(" / ")}`
+              : readResponseMessage(payload, "저장 문서팩을 다시 열지 못했습니다."));
+          }
+          return;
+        }
+
+        const nextStored = buildStoredCurrentWorkpack(reopenData);
+        window.localStorage.setItem(CURRENT_WORKPACK_STORAGE_KEY, JSON.stringify(nextStored));
+        if (!cancelled) {
+          setState({
+            data: reopenData,
+            isCurrent: true,
+            savedAt: nextStored.savedAt
+          });
+          setReopenStatus("ready");
+          setReopenMessage("서버 아카이브의 저장 문서팩을 현재 작업공간으로 다시 열었습니다.");
+        }
+      } catch (error) {
+        console.error("server workpack reopen failed", error);
+        if (!cancelled) {
+          setReopenStatus("blocked");
+          setReopenMessage("저장 문서팩 상세 조회 중 오류가 발생했습니다. 브라우저 최근 작업을 표시합니다.");
+        }
+      }
+    }
+
+    void reopenServerWorkpack();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const updateData = useCallback((nextData: AskResponse) => {
@@ -374,7 +502,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
     });
   }, []);
 
-  return { ...state, updateData, updateWorkerSnapshot, updateDispatchSnapshot };
+  return { ...state, reopenMessage, reopenStatus, updateData, updateWorkerSnapshot, updateDispatchSnapshot };
 }
 
 function isPlaceholderRecipient(value: string) {
@@ -468,6 +596,106 @@ function countEvidence(data: AskResponse) {
   return data.citations.length + kosha + accident + openApi + knowledge;
 }
 
+function mapDocumentLabels(values: string[], fallback: string[]): string[] {
+  const labels = values.map((value) => evidenceDocumentLabels[value] || value).filter((value) => value.trim());
+  const selected = labels.length ? labels : fallback;
+  return Array.from(new Set(selected));
+}
+
+function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+  const weatherCard: EvidenceCard = {
+    id: "weather-current",
+    title: `${data.externalData.weather.locationLabel} 기상 위험`,
+    summary: data.externalData.weather.summary,
+    sourceLabel: "기상청",
+    role: "supporting",
+    reflectedDocuments: ["위험성평가표", "작업계획서", "TBM 브리핑"],
+    href: "/weather"
+  };
+  const trainingCards: EvidenceCard[] = [
+    ...data.externalData.training.recommendations.map((item, index) => ({
+      id: `work24-training-${index}`,
+      title: item.title,
+      summary: item.fitReason || item.reason,
+      sourceLabel: item.institution,
+      role: "supporting" as const,
+      reflectedDocuments: ["안전보건교육 기록", "외국인 브리핑"],
+      href: item.url
+    })),
+    ...data.externalData.koshaEducation.recommendations.map((item, index) => ({
+      id: `kosha-education-${index}`,
+      title: item.title,
+      summary: item.fitReason || item.reason,
+      sourceLabel: item.provider,
+      role: "supporting" as const,
+      reflectedDocuments: ["안전보건교육 기록", "관리자 후속교육"],
+      href: item.url
+    }))
+  ];
+  const koshaCards = data.externalData.kosha.references.map((item, index): EvidenceCard => ({
+    id: `kosha-reference-${index}`,
+    title: item.title,
+    summary: item.impact || item.summary,
+    sourceLabel: item.agency || "KOSHA",
+    role: "direct",
+    reflectedDocuments: mapDocumentLabels(item.appliedTo || item.appliesTo || item.templateHints || [], ["위험성평가표", "TBM 브리핑"]),
+    href: item.url
+  }));
+  const openApiCards = (data.externalData.koshaOpenApi?.references || []).map((item, index): EvidenceCard => ({
+    id: `kosha-openapi-${index}`,
+    title: item.title,
+    summary: item.summary,
+    sourceLabel: item.service,
+    role: item.service === "건설업 일별 중대재해" ? "supporting" : "direct",
+    reflectedDocuments: mapDocumentLabels(item.reflectedIn, ["위험성평가표", "작업계획서"]),
+    href: item.url
+  }));
+  const accidentCards = data.externalData.accidentCases.cases.map((item, index): EvidenceCard => ({
+    id: `accident-case-${index}`,
+    title: item.title,
+    summary: item.preventionPoint,
+    sourceLabel: item.sourceType === "fatal-accident" ? "중대재해 사례" : "재해사례",
+    role: "supporting",
+    reflectedDocuments: ["위험성평가표", "TBM 브리핑", "비상대응 절차"],
+    href: item.sourceUrl || "/knowledge"
+  }));
+  const knowledgeCards = (data.externalData.safetyKnowledge?.matches || []).map((item): EvidenceCard => ({
+    id: `knowledge-${item.id}`,
+    title: item.title,
+    summary: item.controls.slice(0, 2).join(" / ") || item.sourceTitles.join(" / "),
+    sourceLabel: "안전 지식 DB",
+    role: "direct",
+    reflectedDocuments: mapDocumentLabels(item.primaryDocuments, ["위험성평가표", "TBM 브리핑"]),
+    href: "/knowledge"
+  }));
+
+  return [weatherCard, ...koshaCards, ...openApiCards, ...accidentCards, ...trainingCards, ...knowledgeCards];
+}
+
+function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard[] }) {
+  return (
+    <section className="safeclaw-evidence-group">
+      <div className="compact-head">
+        <span>{title}</span>
+        <strong>{cards.length}건</strong>
+      </div>
+      <div className="safeclaw-module-list">
+        {cards.map((item) => (
+          <a key={item.id} href={item.href} target={item.href.startsWith("/") ? undefined : "_blank"} rel={item.href.startsWith("/") ? undefined : "noreferrer"}>
+            <div className="row">
+              <span className="badge">{item.role === "direct" ? "직접 근거" : "보조 근거"}</span>
+              <span className="badge">{item.sourceLabel}</span>
+            </div>
+            <strong>{item.title}</strong>
+            <small>{item.summary}</small>
+            <small>문서 반영 위치: {item.reflectedDocuments.join(" · ")}</small>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function DocumentCockpit({ data, onSelectDocument }: { data: AskResponse; onSelectDocument: (key: DocumentKey) => void }) {
   const primaryDocuments = launchDocuments.filter((item) => item.tier === "핵심");
 
@@ -559,6 +787,13 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
   return (
     <>
       <CurrentWorkpackBanner isCurrent={current.isCurrent} savedAt={current.savedAt} />
+      {current.reopenMessage ? (
+        <section className="safeclaw-module-panel" aria-live="polite">
+          <span>아카이브 다시 열기</span>
+          <h2>{current.reopenStatus === "ready" ? "저장 문서팩을 열었습니다." : "저장 문서팩 복원 확인 필요"}</h2>
+          <p className={current.reopenStatus === "blocked" ? "export-error" : "muted small"}>{current.reopenMessage}</p>
+        </section>
+      ) : null}
       <DocumentCockpit data={current.data} onSelectDocument={selectDocument} />
       <WorkpackEditor
         data={current.data}
@@ -572,8 +807,9 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
 
 export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
-  const koshaReferences = current.data.externalData.kosha.references.slice(0, 3);
-  const accidentCases = current.data.externalData.accidentCases.cases.slice(0, 3);
+  const evidenceCards = buildEvidenceCards(current.data);
+  const directEvidence = evidenceCards.filter((item) => item.role === "direct");
+  const supportingEvidence = evidenceCards.filter((item) => item.role === "supporting");
 
   return (
     <>
@@ -581,23 +817,11 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
       <section className="safeclaw-module-grid two">
         <article className="safeclaw-module-panel">
           <span>문서 반영 근거</span>
-          <h2>KOSHA·재해사례</h2>
-          <div className="safeclaw-module-list">
-            {koshaReferences.length ? koshaReferences.map((item) => (
-              <a key={item.title} href={item.url} target="_blank" rel="noreferrer">
-                <strong>{item.title}</strong>
-                <small>{item.summary}</small>
-              </a>
-            )) : (
-              <a href="/knowledge">KOSHA 공식자료는 지식 DB와 작업공간 근거 패널에서 확인합니다.</a>
-            )}
-            {accidentCases.map((item) => (
-              <a key={item.title} href={item.sourceUrl || "/knowledge"} target="_blank" rel="noreferrer">
-                <strong>{item.title}</strong>
-                <small>{item.preventionPoint}</small>
-              </a>
-            ))}
-          </div>
+          <h2>직접 근거와 보조 근거</h2>
+          <p>법령·KOSHA 공식 기준은 문서 문구를 직접 뒷받침하고, 재해사례·기상·후속교육은 현장 판단을 보조하는 근거로 분리합니다.</p>
+          {directEvidence.length ? <EvidenceCardList title="Direct evidence" cards={directEvidence} /> : null}
+          {supportingEvidence.length ? <EvidenceCardList title="Supporting evidence" cards={supportingEvidence} /> : null}
+          {!evidenceCards.length ? <a href="/knowledge">공식자료는 지식 DB와 작업공간 근거 패널에서 확인합니다.</a> : null}
         </article>
         <CitationList citations={current.data.citations} question={current.data.question} />
       </section>
@@ -793,14 +1017,26 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
             </select>
           </label>
           <label>
-            <span className="field-label">국적·주 사용 언어</span>
+            <span className="field-label">국적</span>
+            <select
+              className="input"
+              value={draft.nationality}
+              onChange={(event) => setDraft((currentDraft) => syncWorkerNationality(currentDraft, event.target.value))}
+            >
+              {workerLanguageOptions.map((item) => (
+                <option key={item.nationality} value={item.nationality}>{item.nationality}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span className="field-label">주 사용 언어</span>
             <select
               className="input"
               value={draft.languageCode}
               onChange={(event) => setDraft((currentDraft) => syncWorkerLanguage(currentDraft, event.target.value))}
             >
               {workerLanguageOptions.map((item) => (
-                <option key={item.languageCode} value={item.languageCode}>{item.nationality} · {item.languageLabel}</option>
+                <option key={item.languageCode} value={item.languageCode}>{item.languageLabel}</option>
               ))}
             </select>
           </label>
