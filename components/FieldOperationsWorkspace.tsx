@@ -700,6 +700,7 @@ export function FieldOperationsWorkspace({
       if (!workerResponse.ok) return setStorageFailure(workerResponse.message);
 
       const workpackResponse = await postJson<SaveResponse>("/api/workpacks", {
+        data: workspaceData,
         question: workspaceData.question,
         scenario: workspaceData.scenario,
         deliverables: workspaceData.deliverables,

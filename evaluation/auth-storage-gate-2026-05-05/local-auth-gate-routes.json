@@ -1,0 +1,27 @@
+{
+  "ready": false,
+  "pid": 118360,
+  "baseUrl": "http://127.0.0.1:3025",
+  "checks": [
+    {
+      "route": "/api/workpacks",
+      "statusCode": 404,
+      "contentType": [
+        "text/html; charset=utf-8"
+      ],
+      "bodyPreview": "\n              <pre>missing required error components, refreshing...</pre>\n              <script>\n                async function check() {\n                  const res = await fetch(location.href).catch(() => ({}))\n\n                  if (res"
+    },
+    {
+      "route": "/api/dispatch-logs",
+      "statusCode": 401,
+      "contentType": [
+        "application/json"
+      ],
+      "bodyPreview": "{\"ok\":false,\"configured\":true,\"logs\":[],\"summary\":{\"dispatchLogCount\":0,\"lastDispatchedAt\":null},\"message\":\"관리자 세션이 확인되면 전파 이력을 불러옵니다.\"}"
+    }
+  ],
+  "logs": {
+    "stderr": "evaluation\\auth-storage-gate-2026-05-05\\next-dev.err.log",
+    "stdout": "evaluation\\auth-storage-gate-2026-05-05\\next-dev.out.log"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "baseUrl": "http://127.0.0.1:3026",
+  "pid": 67988,
+  "checks": [
+    {
+      "route": "/api/workpacks",
+      "attempts": [
+        {
+          "statusCode": 401,
+          "contentType": [
+            "application/json"
+          ],
+          "bodyPreview": "{\"ok\":false,\"configured\":true,\"workpacks\":[],\"summary\":{\"savedWorkpackCount\":0,\"lastGeneratedAt\":null},\"message\":\"관리자 세션이 확인되면 저장된 문서팩 이력을 불러옵니다.\"}"
+        },
+        {
+          "statusCode": 404,
+          "contentType": [
+            "text/html; charset=utf-8"
+          ],
+          "bodyPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/app/layout.css?v=1777949741228\" data-precedence=\"next_static/css/app/layout.css\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_ne"
+        },
+        {
+          "statusCode": 401,
+          "contentType": [
+            "application/json"
+          ],
+          "bodyPreview": "{\"ok\":false,\"configured\":true,\"workpacks\":[],\"summary\":{\"savedWorkpackCount\":0,\"lastGeneratedAt\":null},\"message\":\"관리자 세션이 확인되면 저장된 문서팩 이력을 불러옵니다.\"}"
+        }
+      ]
+    },
+    {
+      "route": "/api/dispatch-logs",
+      "attempts": [
+        {
+          "statusCode": 401,
+          "contentType": [
+            "application/json"
+          ],
+          "bodyPreview": "{\"ok\":false,\"configured\":true,\"logs\":[],\"summary\":{\"dispatchLogCount\":0,\"lastDispatchedAt\":null},\"message\":\"관리자 세션이 확인되면 전파 이력을 불러옵니다.\"}"
+        },
+        {
+          "statusCode": 401,
+          "contentType": [
+            "application/json"
+          ],
+          "bodyPreview": "{\"ok\":false,\"configured\":true,\"logs\":[],\"summary\":{\"dispatchLogCount\":0,\"lastDispatchedAt\":null},\"message\":\"관리자 세션이 확인되면 전파 이력을 불러옵니다.\"}"
+        },
+        {
+          "statusCode": 404,
+          "contentType": [
+            "text/html; charset=utf-8"
+          ],
+          "bodyPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/app/layout.css?v=1777949750153\" data-precedence=\"next_static/css/app/layout.css\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_ne"
+        }
+      ]
+    }
+  ],
+  "logs": {
+    "stderr": "evaluation\\auth-storage-gate-2026-05-05\\next-dev-api-only.err.log",
+    "stdout": "evaluation\\auth-storage-gate-2026-05-05\\next-dev-api-only.out.log"
+  }
+}
