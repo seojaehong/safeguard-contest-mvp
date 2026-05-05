@@ -23,16 +23,16 @@ type SafeClawModuleShellProps = {
 const moduleNav = [
   { href: "/home", code: "01", label: "대시보드", group: "운영" },
   { href: "/workspace", code: "02", label: "작업공간", group: "운영" },
-  { href: "/documents", code: "03", label: "문서팩", group: "운영" },
-  { href: "/tbm", code: "04", label: "TBM", group: "운영" },
-  { href: "/evidence", code: "05", label: "근거 라이브러리", group: "실행" },
-  { href: "/worker", code: "06", label: "모바일 안내", group: "실행" },
-  { href: "/workers", code: "07", label: "작업자·교육", group: "실행" },
-  { href: "/dispatch", code: "08", label: "현장 전파", group: "실행" },
-  { href: "/archive", code: "09", label: "이력", group: "시스템" },
-  { href: "/knowledge", code: "10", label: "지식베이스", group: "시스템" },
-  { href: "/ops/api", code: "11", label: "연결 상태", group: "시스템" },
-  { href: "/settings", code: "12", label: "운영 설정", group: "시스템" }
+  { href: "/documents", code: "03", label: "문서", group: "운영" },
+  { href: "/evidence", code: "04", label: "근거", group: "운영" },
+  { href: "/workers", code: "05", label: "작업자", group: "실행" },
+  { href: "/dispatch", code: "06", label: "전파", group: "실행" },
+  { href: "/archive", code: "07", label: "이력", group: "시스템" },
+  { href: "/knowledge", code: "08", label: "지식 DB", group: "시스템" },
+  { href: "/ops/api", code: "09", label: "API 상태", group: "시스템" },
+  { href: "/settings", code: "10", label: "설정", group: "시스템" },
+  { href: "/tbm", code: "11", label: "TBM 회의", group: "지원" },
+  { href: "/worker", code: "12", label: "작업자 안내", group: "지원" }
 ] as const;
 
 export function SafeClawModuleShell({
