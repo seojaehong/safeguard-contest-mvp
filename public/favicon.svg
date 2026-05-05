@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SafeClaw">
+  <rect width="64" height="64" fill="#0b0b0c"/>
+  <circle cx="32" cy="32" r="23" fill="#f4d83f"/>
+  <path d="M19 18l13 27 13-27h-8l-5 12-5-12h-8z" fill="#0b0b0c"/>
+  <path d="M21 44h22v6H21z" fill="#0b0b0c"/>
+</svg>

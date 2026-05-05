@@ -1,0 +1,38 @@
+{
+  "testedAt": "2026-05-05T23:50:00+09:00",
+  "target": "http://127.0.0.1:4317",
+  "verdict": "pass_with_notice",
+  "fixes": {
+    "favicon": {
+      "status": "pass",
+      "httpStatus": 200,
+      "bytes": 1118,
+      "files": [
+        "public/favicon.ico",
+        "public/favicon.svg",
+        "app/layout.tsx"
+      ],
+      "note": "The browser favicon request no longer returns 404."
+    },
+    "languagePicker": {
+      "status": "pass",
+      "clicked": "베트남어 공유 메시지 선택",
+      "preview": "외국인 근로자 전송본 · 베트남어(Tiếng Việt)",
+      "note": "The language picker is now scroll-contained and the Vietnamese chip can be selected in Playwright."
+    },
+    "pdfPrint": {
+      "status": "notice",
+      "buttonVisible": true,
+      "buttonLabel": "PDF(브라우저 인쇄)",
+      "result": "Clicking the PDF button invokes the browser print dialog; Playwright cannot complete through the native print dialog in this harness.",
+      "next": "If fully automated PDF download verification is required, add a server-side binary PDF renderer."
+    }
+  },
+  "verification": {
+    "typecheck": "pass",
+    "build": "pass",
+    "playwrightSession": "safeclaw-fix",
+    "localServerLog": "evaluation/playwright-fix-local-server.log",
+    "localServerErrorLog": "evaluation/playwright-fix-local-server.err.log"
+  }
+}

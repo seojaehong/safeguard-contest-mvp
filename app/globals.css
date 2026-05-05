@@ -4436,14 +4436,20 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 }
 
 .language-picker {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 8px;
+  max-block-size: 164px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 4px 2px 0;
+  scroll-padding-block: 10px;
 }
 
 .language-chip {
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   border: 1px solid rgba(207, 199, 185, 0.78);
   border-radius: 999px;
@@ -4454,6 +4460,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   font-weight: 850;
   letter-spacing: 0.012em;
   cursor: pointer;
+  min-width: 0;
+  scroll-margin-block: 12px;
 }
 
 .language-chip span {
