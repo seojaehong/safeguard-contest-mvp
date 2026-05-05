@@ -62,6 +62,7 @@ type ArchiveWorkpack = {
   question: string;
   createdAt: string;
   updatedAt: string;
+  reopenHref: string;
 };
 type ArchiveDispatchLog = {
   id: string;
@@ -337,7 +338,8 @@ function readArchiveWorkpacks(value: unknown): ArchiveWorkpack[] {
       region: typeof record.region === "string" ? record.region : null,
       question,
       createdAt,
-      updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : createdAt
+      updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : createdAt,
+      reopenHref: typeof record.reopenHref === "string" ? record.reopenHref : `/documents?workpackId=${encodeURIComponent(id)}`
     }];
   });
 }
@@ -400,6 +402,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
 
     const workpackId = new URLSearchParams(window.location.search).get("workpackId");
     if (!workpackId) return;
+    const requestedWorkpackId = workpackId;
 
     let cancelled = false;
     async function reopenServerWorkpack() {
@@ -413,7 +416,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
       }
 
       try {
-        const response = await fetch(`/api/workpacks/${encodeURIComponent(workpackId)}`, {
+        const response = await fetch(`/api/workpacks/${encodeURIComponent(requestedWorkpackId)}`, {
           headers: { authorization: `Bearer ${session.access_token}` }
         });
         const payload: unknown = await response.json().catch((): unknown => ({}));
@@ -1319,6 +1322,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
                 <strong>{item.siteName}</strong>
                 <code>{new Date(item.createdAt).toLocaleString("ko-KR")}</code>
                 <p>{excerpt(item.question, 150)}</p>
+                <a href={item.reopenHref}>저장 문서팩 다시 열기</a>
               </article>
             )) : (
               <article>
