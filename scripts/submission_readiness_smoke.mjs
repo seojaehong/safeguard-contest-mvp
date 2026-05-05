@@ -153,6 +153,7 @@ async function runStorageSmoke(askPayload) {
     method: "POST",
     headers: authHeaders,
     body: JSON.stringify({
+      data: askPayload,
       question: askPayload.question,
       scenario: askPayload.scenario,
       deliverables: askPayload.deliverables,

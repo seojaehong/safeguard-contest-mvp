@@ -1,0 +1,91 @@
+{
+  "task": "Supabase admin login and history storage gate audit",
+  "date": "2026-05-05",
+  "head": "f02be0ea68ebf18b5f9cccadac9dc465dce72a0f",
+  "scope": [
+    "/archive",
+    "/api/workpacks",
+    "/api/dispatch-logs",
+    "workspace storage status UI",
+    "submission readiness storage smoke"
+  ],
+  "outOfScope": [
+    "Kakao",
+    "Band",
+    "DB migrations",
+    "destructive DB mutations"
+  ],
+  "findings": [
+    {
+      "area": "runtime auth gate",
+      "status": "closed",
+      "classification": "environment value required",
+      "details": "The app runtime does not use SAFEGUARD_AUTH_TOKEN. /archive and workspace storage read the browser Supabase session and send Authorization: Bearer <session.access_token> to protected storage routes.",
+      "requiredEnvironment": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL",
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ]
+    },
+    {
+      "area": "/api/workpacks",
+      "status": "closed",
+      "classification": "environment value required",
+      "details": "GET and POST return 401 when Supabase is configured but no user access token is provided. POST stores through service role only after getWorkspaceUser validates the user token."
+    },
+    {
+      "area": "/api/dispatch-logs",
+      "status": "closed",
+      "classification": "environment value required",
+      "details": "GET and POST return 401 when Supabase is configured but no user access token is provided. Dispatch log persistence requires both authToken and a saved workpackId in the UI."
+    },
+    {
+      "area": "workspace storage payload",
+      "status": "patched",
+      "classification": "code fix required",
+      "details": "Workspace save previously posted question/scenario/deliverables/status but not the full AskResponse data. That could save history while making later workpack reopen fail because evidence_summary.externalData and riskSummary were incomplete. The UI now sends data: workspaceData."
+    },
+    {
+      "area": "submission readiness storage smoke",
+      "status": "patched",
+      "classification": "code fix required plus environment value required",
+      "details": "The smoke still needs SAFEGUARD_AUTH_TOKEN because it has no browser session. The saved workpack payload now also includes data: askPayload so token-backed smoke writes reopen-capable workpacks."
+    }
+  ],
+  "verification": {
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "passed"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "blocked",
+      "logFiles": [
+        "evaluation/auth-storage-gate-build-2026-05-05.log",
+        "evaluation/auth-storage-gate-build-clean-2026-05-05.log"
+      ],
+      "blocker": "Next build compiles successfully, then fails during page-data collection for /api/workers/route and /api/search/route. This is outside the Supabase auth/storage gate patch."
+    },
+    "localRouteSmoke": {
+      "status": "passed_with_notice",
+      "reportFiles": [
+        "evaluation/auth-storage-gate-2026-05-05/local-auth-gate-api-only.json",
+        "evaluation/auth-storage-gate-2026-05-05/local-auth-gate-routes.json"
+      ],
+      "confirmed": [
+        "/api/workpacks returned 401 JSON without Authorization",
+        "/api/dispatch-logs returned 401 JSON without Authorization"
+      ],
+      "notice": "Next dev intermittently returned 404 HTML while webpack cache writes failed under .next, but repeated API attempts confirmed the intended auth gate responses."
+    }
+  },
+  "summary": {
+    "codeFixNeeded": true,
+    "codeFixApplied": true,
+    "safeguardAuthTokenNeededForAppUi": false,
+    "safeguardAuthTokenNeededForProductionSmoke": true,
+    "dbMigration": "not run",
+    "dbMutation": "not run"
+  }
+}
