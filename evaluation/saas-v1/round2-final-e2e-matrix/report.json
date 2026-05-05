@@ -1,0 +1,311 @@
+{
+  "generatedAt": "2026-05-05T01:16:30.985Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "localBaseUrl": "http://127.0.0.1:3011",
+  "elapsedMs": 517310,
+  "overall": "blocked",
+  "gates": [
+    {
+      "name": "api-status",
+      "status": "blocked",
+      "coverage": "주요 HTML route, safety-reference status, weather, PDF export source, archive auth gates",
+      "routeChecks": {
+        "status": "blocked",
+        "htmlChecks": [
+          {
+            "route": "/",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 342,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack-c4eaa45f7db902bb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\"/><script src=\"/_next/static/chunks/4bd1b696-f785427dddbba9fb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/1255-225c21a08658fa3f.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/main-app-5eb0d9c55a395822.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/2619-3c9e02e22d10480a.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/app/page-804ee043949bfed0.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><title>SafeClaw | 안전 문서팩 생성</title><meta name=\"description\" content=\"작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스\"/><script src=\"/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_3hWDNu",
+              "textLength": 10353,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": true
+            }
+          },
+          {
+            "route": "/ask",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 30970,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack-c4eaa45f7db902bb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\"/><script src=\"/_next/static/chunks/4bd1b696-f785427dddbba9fb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/1255-225c21a08658fa3f.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/main-app-5eb0d9c55a395822.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/2619-3c9e02e22d10480a.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/app/ask/page-e3f89152bd3cfcd7.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><title>SafeClaw | 안전 문서팩 생성</title><meta name=\"description\" content=\"작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스\"/><script src=\"/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_3h",
+              "textLength": 23191,
+              "containsRiskAssessmentTitle": false,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": true
+            }
+          },
+          {
+            "route": "/documents",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 127,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><!--qmQZ_A_K9kf87vd6lTyeg--><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack-c4eaa45f7db902bb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\"/><script src=\"/_next/static/chunks/4bd1b696-f785427dddbba9fb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/1255-225c21a08658fa3f.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/main-app-5eb0d9c55a395822.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/2619-3c9e02e22d10480a.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/3162-b81a3f1a8d0371e5.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/8724-5b487a654ce62c52.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/app/documents/page-2b30f18863540124",
+              "textLength": 56987,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": true,
+              "containsHtmlDocument": true
+            }
+          },
+          {
+            "route": "/dispatch",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 183,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><!--qmQZ_A_K9kf87vd6lTyeg--><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack-c4eaa45f7db902bb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\"/><script src=\"/_next/static/chunks/4bd1b696-f785427dddbba9fb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/1255-225c21a08658fa3f.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/main-app-5eb0d9c55a395822.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/2619-3c9e02e22d10480a.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/3162-b81a3f1a8d0371e5.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/8724-5b487a654ce62c52.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/app/dispatch/page-104d5c6e63a5e82f.",
+              "textLength": 46269,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": true,
+              "containsHtmlDocument": true
+            }
+          },
+          {
+            "route": "/workspace",
+            "expected": "HTML route responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 102,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack-c4eaa45f7db902bb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\"/><script src=\"/_next/static/chunks/4bd1b696-f785427dddbba9fb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/1255-225c21a08658fa3f.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/main-app-5eb0d9c55a395822.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/44530001-92823c25123e6c31.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/2619-3c9e02e22d10480a.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/8533-e0931aa2cafb8f80.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/3162-b81a3f1a8d0371e5.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWh",
+              "textLength": 16467,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": true
+            }
+          }
+        ],
+        "apiChecks": [
+          {
+            "route": "/api/safety-reference/status",
+            "expected": "reference status API responds",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 6944,
+              "contentType": "application/json",
+              "textPreview": "{\"ok\":true,\"configured\":true,\"status\":\"ready\",\"sources\":1063,\"items\":9920,\"expectedTechnicalTotal\":1040,\"technicalTotal\":1040,\"technicalSupportRegulations\":237,\"technicalGuidelines\":803,\"technicalSplitOk\":true,\"catalogSearchOk\":true,\"ingestionRuns\":2,\"itemTypes\":[{\"itemType\":\"sif-case\",\"count\":6033},{\"itemType\":\"construction-process\",\"count\":626},{\"itemType\":\"machinery\",\"count\":730},{\"itemType\":\"risk-manual\",\"count\":1},{\"itemType\":\"jsa-training\",\"count\":1},{\"itemType\":\"technical-guideline\",\"count\":803},{\"itemType\":\"technical-support-regulation\",\"count\":237}],\"samples\":[{\"id\":\"technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정\",\"source_id\":\"kosha-technical-support-regulations-2025\",\"item_type\":\"technical-support-regulation\",\"category\":\"전기안전분야\",\"subcategory\":\"기술지원규정\",\"title\":\"B-E-10-2026 정전전로 및 그 인근에서의 전기작업에 관한 기술지원규정\",\"summary\":\"- 1 - KOSHAGUIDEB–E–10-2026정전전로및그인근에서의전기작업에관한기술지원규정 2026.1. 한국산업안전보건공단기술지원규정은산업안전보건기준에관한규칙등산업안전보건법령의요구사항을이행하는데참고하거나사업장안전·보건수준향상에필요한기술적권고규정임 기술지원규정의개요ㅇ개정자:(사)고경력과학기술연우총연합회ㅇ제·개정경과-2025년11월기계·전기안전분야전문위원회심의(개정)-2026년1월표준제정위원회본위원회심의(개정)ㅇ관련규격및자료-미국OSHA29CodeofFederalRagulation1910(OccupationalSafety&HealthStandards)-미국NFPA70E(StandardforElectrica",
+              "textLength": 6223,
+              "containsRiskAssessmentTitle": true,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": false
+            }
+          },
+          {
+            "route": "/api/weather",
+            "expected": "weather API responds for scenario context",
+            "status": "pass",
+            "result": {
+              "ok": true,
+              "statusCode": 200,
+              "elapsedMs": 40,
+              "contentType": "application/json",
+              "textPreview": "{\"ok\":true,\"weather\":{\"source\":\"kma\",\"mode\":\"live\",\"locationLabel\":\"서울\",\"summary\":\"단시간 맑음, 강수없음, 기온 17℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선/생활기상 체감온도 반영)\",\"forecastTime\":\"20260505 1000\",\"temperatureC\":\"17\",\"windSpeedMps\":\"1\",\"actions\":[\"기상특보가 확인되어 작업 전 작업중지 기준과 옥외·고소작업 허용 여부를 관리감독자가 재판단\"],\"detail\":\"기상청 초단기실황 호출 성공 (서울, base 20260505 0900) / 기상청 초단기예보 호출 성공 (서울, base 20260505 0930) / 기상청 단기예보 호출 성공 (서울, base 20260505 0800) / 기상청 기상특보 조회 성공 (전국, 202605042200) / 기상청 영향예보 연결 점검 필요: NO_DATA / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 조회 성공 (서울, requestCode A48, areaNo 1100000000) / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0 / in-memory cache\",\"signals\":[{\"endpoint\":\"초단기실황\",\"mode\":\"live\",\"summary\":\"현재 강수없음, 기온 16.1℃, 풍속 1.5m/s, 1시간 강수 0mm\",\"forecastTime\":\"20260505 0900\",\"temperatureC\":\"16.1\",\"windSpeedMps\":\"1.5\",\"precipitationType\":\"강수없음\",\"detail\":\"기상청 초단기실황 호출 성공 (서울, base 20260505 0900)\"},{\"endpoint\":\"초단기예보\",\"mode\":\"live\",\"summary\":\"단시간 맑음, 강수없음, 기온 17℃, 풍속 1m/s\",\"forecastTime\":\"20260505 1000\",\"temperatureC\":\"17\",\"windSpeedMps\":\"1\",\"precipitationType\":\"강수없음\",\"detail\":\"기상청 초단기예보 호출 성공 (서울, base 20260505 0930)\"},{\"endpoint\":\"단기예보\",\"mode\":\"live\",\"summary",
+              "textLength": 2183,
+              "containsRiskAssessmentTitle": false,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": false
+            }
+          },
+          {
+            "route": "/api/export/pdf",
+            "expected": "PDF print-ready export source responds as HTML",
+            "status": "blocked",
+            "result": {
+              "ok": false,
+              "statusCode": 404,
+              "elapsedMs": 22,
+              "contentType": "text/html; charset=utf-8",
+              "textPreview": "<!DOCTYPE html><!--qmQZ_A_K9kf87vd6lTyeg--><html lang=\"ko\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_next/static/css/65632e7a8816d280.css?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack-c4eaa45f7db902bb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\"/><script src=\"/_next/static/chunks/4bd1b696-f785427dddbba9fb.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/1255-225c21a08658fa3f.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><script src=\"/_next/static/chunks/main-app-5eb0d9c55a395822.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" async=\"\"></script><meta name=\"robots\" content=\"noindex\"/><title>SafeClaw | 안전 문서팩 생성</title><meta name=\"description\" content=\"작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스\"/><script src=\"/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_3hWDNuC8MTp6rRFArGxKmoNaWhKb\" noModule=\"\"></script></head><body><div hidden=\"\"><!--$--><!--/$--></div><main class=\"container grid\"><section class=\"card list\"><div class=\"h2\"",
+              "textLength": 5261,
+              "containsRiskAssessmentTitle": false,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": true
+            }
+          },
+          {
+            "route": "/api/export/pdf?format=pdf",
+            "expected": "binary PDF export responds with PDF bytes",
+            "status": "blocked",
+            "result": {
+              "ok": false,
+              "statusCode": 404,
+              "elapsedMs": 19,
+              "contentType": "text/html; charset=utf-8",
+              "byteLength": 5703,
+              "startsWithPdfMagic": false
+            }
+          },
+          {
+            "route": "/api/dispatch-logs",
+            "expected": "dispatch log route is protected or returns archive",
+            "status": "notice",
+            "result": {
+              "ok": false,
+              "statusCode": 405,
+              "elapsedMs": 68,
+              "contentType": "",
+              "textPreview": "",
+              "textLength": 0,
+              "containsRiskAssessmentTitle": false,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": false
+            }
+          },
+          {
+            "route": "/api/workpacks",
+            "expected": "workpack archive route is protected or returns archive",
+            "status": "notice",
+            "result": {
+              "ok": false,
+              "statusCode": 405,
+              "elapsedMs": 71,
+              "contentType": "",
+              "textPreview": "",
+              "textLength": 0,
+              "containsRiskAssessmentTitle": false,
+              "containsSignatureTerm": false,
+              "containsHtmlDocument": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ask-generation",
+      "status": "blocked",
+      "coverage": "/api/ask live sample 및 deterministic matrix 문서 생성",
+      "reportPath": "evaluation\\saas-v1\\round2-final-e2e-matrix\\quality-matrix\\report.json"
+    },
+    {
+      "name": "document-rubric",
+      "status": "blocked",
+      "coverage": "위험성평가/TBM/교육/사진증빙/외국인 안내 등 문서별 필수 문구 반영",
+      "reportPath": "evaluation\\saas-v1\\round2-final-e2e-matrix\\quality-matrix\\report.json"
+    },
+    {
+      "name": "download-export",
+      "status": "blocked",
+      "coverage": "PDF/HWPX/XLS/ALL_XLS 다운로드 스모크 및 /api/export/pdf HTML source",
+      "reportPath": "evaluation\\saas-v1\\round2-final-e2e-matrix\\submission-readiness\\document-format-verification.json"
+    },
+    {
+      "name": "dispatch-logs",
+      "status": "notice",
+      "coverage": "전파 실행 조건, dispatch workflow, workpack archive, dispatch log 저장 게이트",
+      "reportPath": "evaluation\\saas-v1\\round2-final-e2e-matrix\\submission-readiness\\prod-dispatch-smoke.json"
+    },
+    {
+      "name": "main-routes",
+      "status": "pass",
+      "coverage": "홈 생성 플로우, Sheets TSV, 근거 링크, 주요 route 응답",
+      "reportPath": "evaluation\\saas-v1\\round2-final-e2e-matrix\\local-ui-regression-smoke.json"
+    }
+  ],
+  "blockers": [
+    {
+      "gate": "api-status",
+      "reason": "/api/export/pdf returned 404; /api/export/pdf?format=pdf returned 404"
+    },
+    {
+      "gate": "ask-generation",
+      "reason": "seoul-scaffold-paint__full-context: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__minimal-input: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__weather-heavy: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후"
+    },
+    {
+      "gate": "document-rubric",
+      "reason": "seoul-scaffold-paint__full-context: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__minimal-input: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후; seoul-scaffold-paint__weather-heavy: rubric:photoEvidenceDraft photoEvidenceDraft missing section terms: 조치 후"
+    },
+    {
+      "gate": "download-export",
+      "reason": "PDF/HWPX/XLS/ALL_XLS 다운로드 스모크 및 /api/export/pdf HTML source 게이트가 통과하지 못했습니다. 세부 JSON을 확인하세요."
+    }
+  ],
+  "notices": [
+    {
+      "gate": "dispatch-logs",
+      "reason": "전파 실행 조건, dispatch workflow, workpack archive, dispatch log 저장 게이트 게이트가 조건부 통과 또는 설정 미완료 상태입니다."
+    }
+  ],
+  "artifacts": {
+    "report": "evaluation\\saas-v1\\round2-final-e2e-matrix\\report.json",
+    "summary": "evaluation\\saas-v1\\round2-final-e2e-matrix\\summary.md",
+    "qualityMatrix": "evaluation\\saas-v1\\round2-final-e2e-matrix\\quality-matrix\\report.json",
+    "submissionReadiness": "evaluation\\saas-v1\\round2-final-e2e-matrix\\submission-readiness\\submission-readiness-summary.json",
+    "localUi": "evaluation\\saas-v1\\round2-final-e2e-matrix\\local-ui-regression-smoke.json"
+  },
+  "commandResults": {
+    "qualityMatrix": {
+      "name": "safeclaw-quality-matrix",
+      "command": "C:\\Program Files\\nodejs\\node.exe ./scripts/safeclaw_quality_matrix_runner.mjs",
+      "env": {
+        "SAFEGUARD_BASE_URL": "https://safeguard-contest-mvp.vercel.app",
+        "SAFECLAW_MATRIX_LIVE": "1",
+        "SAFECLAW_MATRIX_LIVE_COUNT": "3",
+        "SAFECLAW_MATRIX_OUT_DIR": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\saas-v1\\round2-final-e2e-matrix\\quality-matrix",
+        "SAFEGUARD_RUN_LIVE_DISPATCH": "0"
+      },
+      "status": "blocked",
+      "exitCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "elapsedMs": 125253,
+      "stdout": "{\n  \"total\": 100,\n  \"pass\": 97,\n  \"fail\": 3,\n  \"mode\": \"mixed-live\",\n  \"liveExecuted\": 3,\n  \"outDir\": \"evaluation\\\\saas-v1\\\\round2-final-e2e-matrix\\\\quality-matrix\"\n}\n",
+      "stderr": "",
+      "error": ""
+    },
+    "submission": {
+      "name": "submission-readiness",
+      "command": "C:\\Program Files\\nodejs\\node.exe ./scripts/submission_readiness_smoke.mjs",
+      "env": {
+        "SAFEGUARD_BASE_URL": "https://safeguard-contest-mvp.vercel.app",
+        "SAFEGUARD_SUBMISSION_OUT_DIR": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\saas-v1\\round2-final-e2e-matrix\\submission-readiness",
+        "SAFEGUARD_RUN_LIVE_DISPATCH": "0"
+      },
+      "status": "blocked",
+      "exitCode": 1,
+      "signal": null,
+      "timedOut": false,
+      "elapsedMs": 292489,
+      "stdout": "{\n  \"overall\": \"blocked\",\n  \"outDir\": \"evaluation\\\\saas-v1\\\\round2-final-e2e-matrix\\\\submission-readiness\",\n  \"gates\": [\n    {\n      \"name\": \"ask-orchestration\",\n      \"verdict\": \"pass\"\n    },\n    {\n      \"name\": \"storage\",\n      \"verdict\": \"blocked\"\n    },\n    {\n      \"name\": \"dispatch\",\n      \"verdict\": \"pass_with_notice\"\n    },\n    {\n      \"name\": \"formats\",\n      \"verdict\": \"pass\"\n    }\n  ]\n}\n",
+      "stderr": "",
+      "error": ""
+    },
+    "localUi": {
+      "name": "local-ui-regression",
+      "command": "C:\\Program Files\\nodejs\\node.exe ./scripts/local_ui_regression_smoke.mjs",
+      "env": {
+        "SAFEGUARD_BASE_URL": "https://safeguard-contest-mvp.vercel.app",
+        "BASE_URL": "http://127.0.0.1:3011",
+        "OUTPUT_PATH": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\saas-v1\\round2-final-e2e-matrix\\local-ui-regression-smoke.json",
+        "SAFEGUARD_RUN_LIVE_DISPATCH": "0"
+      },
+      "status": "pass",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "elapsedMs": 50865,
+      "stdout": "",
+      "stderr": "",
+      "error": ""
+    }
+  }
+}
