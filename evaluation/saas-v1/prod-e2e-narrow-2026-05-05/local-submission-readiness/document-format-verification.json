@@ -1,0 +1,248 @@
+{
+  "verdict": "pass",
+  "scenarios": [
+    {
+      "id": "seoul-construction-windy",
+      "title": "서울 건설 강풍",
+      "verdict": "pass",
+      "reportPath": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\api-orchestration-download-smoke.json",
+      "missing": [],
+      "downloads": [
+        {
+          "format": "TXT",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.txt",
+          "bytes": 5874,
+          "ok": true
+        },
+        {
+          "format": "JSON",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.json",
+          "bytes": 6403,
+          "ok": true
+        },
+        {
+          "format": "CSV",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.csv",
+          "bytes": 8978,
+          "ok": true
+        },
+        {
+          "format": "XLS",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.xls",
+          "bytes": 15680,
+          "ok": true
+        },
+        {
+          "format": "DOC",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.doc",
+          "bytes": 9900,
+          "ok": true
+        },
+        {
+          "format": "HTML",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.html",
+          "bytes": 6452,
+          "ok": true
+        },
+        {
+          "format": "HWPX",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.hwpx",
+          "bytes": 10347,
+          "ok": true
+        },
+        {
+          "format": "PDF",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.pdf",
+          "bytes": 281995,
+          "ok": true
+        },
+        {
+          "format": "JPG",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.jpg",
+          "bytes": 169719,
+          "ok": true
+        },
+        {
+          "format": "ALL_TXT",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.txt",
+          "bytes": 64737,
+          "ok": true
+        },
+        {
+          "format": "ALL_CSV",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.csv",
+          "bytes": 92462,
+          "ok": true
+        },
+        {
+          "format": "ALL_XLS",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.xls",
+          "bytes": 129566,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "incheon-logistics-rain",
+      "title": "인천 물류 우천",
+      "verdict": "pass",
+      "reportPath": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\api-orchestration-download-smoke.json",
+      "missing": [],
+      "downloads": [
+        {
+          "format": "TXT",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.txt",
+          "bytes": 4923,
+          "ok": true
+        },
+        {
+          "format": "JSON",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.json",
+          "bytes": 5454,
+          "ok": true
+        },
+        {
+          "format": "CSV",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.csv",
+          "bytes": 7648,
+          "ok": true
+        },
+        {
+          "format": "XLS",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.xls",
+          "bytes": 13996,
+          "ok": true
+        },
+        {
+          "format": "DOC",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.doc",
+          "bytes": 8663,
+          "ok": true
+        },
+        {
+          "format": "HTML",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.html",
+          "bytes": 5501,
+          "ok": true
+        },
+        {
+          "format": "HWPX",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.hwpx",
+          "bytes": 9833,
+          "ok": true
+        },
+        {
+          "format": "PDF",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.pdf",
+          "bytes": 274696,
+          "ok": true
+        },
+        {
+          "format": "JPG",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.jpg",
+          "bytes": 165190,
+          "ok": true
+        },
+        {
+          "format": "ALL_TXT",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.txt",
+          "bytes": 42535,
+          "ok": true
+        },
+        {
+          "format": "ALL_CSV",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.csv",
+          "bytes": 62047,
+          "ok": true
+        },
+        {
+          "format": "ALL_XLS",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.xls",
+          "bytes": 93211,
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "ansan-manufacturing-foreign-hotwork",
+      "title": "안산 제조 화기 외국인 포함",
+      "verdict": "pass",
+      "reportPath": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\api-orchestration-download-smoke.json",
+      "missing": [],
+      "downloads": [
+        {
+          "format": "TXT",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.txt",
+          "bytes": 4914,
+          "ok": true
+        },
+        {
+          "format": "JSON",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.json",
+          "bytes": 5442,
+          "ok": true
+        },
+        {
+          "format": "CSV",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.csv",
+          "bytes": 7639,
+          "ok": true
+        },
+        {
+          "format": "XLS",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.xls",
+          "bytes": 13987,
+          "ok": true
+        },
+        {
+          "format": "DOC",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.doc",
+          "bytes": 8654,
+          "ok": true
+        },
+        {
+          "format": "HTML",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.html",
+          "bytes": 5492,
+          "ok": true
+        },
+        {
+          "format": "HWPX",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.hwpx",
+          "bytes": 9836,
+          "ok": true
+        },
+        {
+          "format": "PDF",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.pdf",
+          "bytes": 272432,
+          "ok": true
+        },
+        {
+          "format": "JPG",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.jpg",
+          "bytes": 165442,
+          "ok": true
+        },
+        {
+          "format": "ALL_TXT",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.txt",
+          "bytes": 56160,
+          "ok": true
+        },
+        {
+          "format": "ALL_CSV",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.csv",
+          "bytes": 82366,
+          "ok": true
+        },
+        {
+          "format": "ALL_XLS",
+          "file": "evaluation\\prod-e2e-narrow-2026-05-05\\local-submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.xls",
+          "bytes": 118141,
+          "ok": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "verdict": "blocked",
+  "message": "SAFEGUARD_AUTH_TOKEN이 없어 Production 저장 API를 인증 호출하지 못했습니다.",
+  "configured": false
+}

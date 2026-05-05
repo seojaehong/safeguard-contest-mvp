@@ -1,0 +1,24 @@
+{
+  "baseUrl": "http://127.0.0.1:3188",
+  "getStatus": 200,
+  "getJson": {
+    "ok": true,
+    "route": "/api/export/pdf",
+    "methods": [
+      "POST"
+    ],
+    "formats": [
+      "html",
+      "pdf"
+    ],
+    "message": "POST SafeClaw document rows to render a print-ready HTML source or binary PDF."
+  },
+  "htmlStatus": 200,
+  "htmlContentType": "text/html; charset=utf-8",
+  "htmlLength": 7581,
+  "htmlHasRisk": true,
+  "pdfStatus": 200,
+  "pdfContentType": "application/pdf",
+  "pdfLength": 3089,
+  "pdfMagic": "%PDF"
+}
