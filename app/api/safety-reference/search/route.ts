@@ -9,13 +9,18 @@ export async function GET(request: NextRequest) {
   const itemType = request.nextUrl.searchParams.get("itemType") || undefined;
   const sourceId = request.nextUrl.searchParams.get("sourceId") || undefined;
   const riskTag = request.nextUrl.searchParams.get("riskTag") || undefined;
+  const evidenceRoleParam = request.nextUrl.searchParams.get("evidenceRole");
+  const evidenceRole = evidenceRoleParam === "direct" || evidenceRoleParam === "supporting"
+    ? evidenceRoleParam
+    : undefined;
 
   const result = await searchSafetyReferences({
     query,
     limit,
     itemType,
     sourceId,
-    riskTag
+    riskTag,
+    evidenceRole
   });
 
   return NextResponse.json(result, { status: result.ok ? 200 : 503 });

@@ -8,6 +8,12 @@ const citationGroups: Array<{ type: SearchResult["type"]; label: string }> = [
   { type: "interpretation", label: "해석례" }
 ];
 
+const citationDocumentMap: Record<SearchResult["type"], string[]> = {
+  law: ["위험성평가표", "작업계획서", "안전보건교육 기록"],
+  precedent: ["위험성평가표", "비상대응 절차", "점검결과 요약"],
+  interpretation: ["작업계획서", "TBM 브리핑", "안전보건교육 기록"]
+};
+
 function getCitationHref(item: SearchResult): Route {
   if (item.type === "law") return `/law/${item.id}` as Route;
   if (item.type === "precedent") return `/precedent/${item.id}` as Route;
@@ -42,6 +48,11 @@ function sourceStatusLabel(item: SearchResult) {
   return "기본 근거";
 }
 
+function evidenceRoleLabel(item: SearchResult) {
+  if (item.type === "law") return "직접 근거";
+  return "보조 근거";
+}
+
 export function CitationList({ citations, question }: { citations: SearchResult[]; question?: string }) {
   return (
     <div className="card list">
@@ -63,12 +74,14 @@ export function CitationList({ citations, question }: { citations: SearchResult[
                 <Link key={c.id} href={href} className="list citation-item" target="_blank" rel="noopener noreferrer">
                   <div className="row">
                     <span className="badge">{c.sourceLabel}</span>
+                    <span className="badge">{evidenceRoleLabel(c)}</span>
                     <span className="badge">{sourceStatusLabel(c)}</span>
                     <span className="badge">새 탭</span>
                     {c.tags?.some((tag) => tag.includes("작업위험 매핑")) ? <span className="badge">작업위험 매핑</span> : null}
                   </div>
                   <strong>{c.title}</strong>
                   <span className="muted">{c.summary}</span>
+                  <span className="small relevance-note">문서 반영 위치: {citationDocumentMap[c.type].join(" · ")}</span>
                   <span className="small relevance-note">{describeRelevance(c, question)}</span>
                 </Link>
               );

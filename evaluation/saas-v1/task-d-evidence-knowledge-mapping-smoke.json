@@ -1,0 +1,47 @@
+{
+  "task": "task-d-evidence-knowledge-mapping-smoke",
+  "startedAt": "2026-05-05T09:33:03.3407023+09:00",
+  "finishedAt": "2026-05-05T09:33:10.8909033+09:00",
+  "elapsedMs": 7550,
+  "results": [
+    {
+      "name": "status",
+      "ok": true,
+      "statusCode": 200,
+      "elapsedMs": 5033,
+      "configured": true,
+      "status": "ready",
+      "count": 1,
+      "items": 1,
+      "firstRole": null,
+      "firstReflected": "",
+      "message": "기술지원규정 폴더 1,040건 기준과 Supabase 기술지원규정 소스 1,040건을 연결했습니다."
+    },
+    {
+      "name": "search-direct",
+      "ok": true,
+      "statusCode": 200,
+      "elapsedMs": 1496,
+      "configured": true,
+      "status": null,
+      "count": 5,
+      "items": 5,
+      "firstRole": "direct",
+      "firstReflected": "작업계획서, 위험성평가표, TBM 브리핑",
+      "message": "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
+    },
+    {
+      "name": "search-supporting",
+      "ok": true,
+      "statusCode": 200,
+      "elapsedMs": 953,
+      "configured": true,
+      "status": null,
+      "count": 4,
+      "items": 4,
+      "firstRole": "supporting",
+      "firstReflected": "위험성평가표",
+      "message": "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
+    }
+  ]
+}
