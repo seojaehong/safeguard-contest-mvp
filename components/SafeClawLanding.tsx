@@ -25,7 +25,7 @@ const proofSources = [
   ["KOSHA-2024", "KOSHA Guide", "공식자료"],
   ["MOEL", "고용노동부 고시", "교육·지침"],
   ["KMA", "기상청", "현재·예보"],
-  ["WORK24", "고용24", "후속 교육"],
+  ["WORK24", "고용24", "연계 교육"],
   ["AI", "Gemini", "문서 초안"]
 ];
 
@@ -173,7 +173,7 @@ export function SafeClawLanding() {
 - 산업안전보건법: 위험성평가와 작업중지 기준
 - KOSHA: 위험성평가 절차, TBM, 안전교육 항목
 - 기상청: 옥외작업, 강풍, 폭염, 자외선 작업조건
-- Work24: 후속 교육 추천`}</pre>
+- Work24: 연계 교육 확인`}</pre>
           <Link href="/evidence">근거 화면 열기 →</Link>
         </div>
       </section>

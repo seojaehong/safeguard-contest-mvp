@@ -5120,6 +5120,38 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   line-height: 1.45;
 }
 
+.worker-language-preview {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  border: 1px solid rgba(255, 212, 0, 0.42);
+  border-left: 4px solid var(--sc-hazard-yellow);
+  padding: 16px;
+  background: rgba(255, 212, 0, 0.08);
+  color: var(--ink);
+}
+
+.worker-language-preview strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.worker-language-preview ul {
+  margin: 0;
+  padding-left: 18px;
+  font-family: var(--font-multilingual);
+}
+
+.worker-language-preview p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
 .status-chip[role="radio"] {
   cursor: pointer;
 }

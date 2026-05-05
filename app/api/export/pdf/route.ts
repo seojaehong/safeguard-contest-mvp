@@ -19,6 +19,23 @@ type PdfScenario = {
 
 type PdfDocumentKind = "risk" | "workPlan" | "permit" | "tbm" | "education" | "generic";
 
+export async function GET() {
+  return NextResponse.json(
+    {
+      ok: true,
+      route: "/api/export/pdf",
+      methods: ["POST"],
+      formats: ["html", "pdf"],
+      message: "POST SafeClaw document rows to render a print-ready HTML source or binary PDF."
+    },
+    {
+      headers: {
+        "cache-control": "no-store"
+      }
+    }
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }

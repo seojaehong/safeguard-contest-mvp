@@ -42,7 +42,7 @@ export default function PreviewPage() {
       <section className="v2-hero card">
         <span className="eyebrow">제품 완성도 기준</span>
         <h1>핵심 3종은 완성품처럼, 나머지는 보조 산출물로 명확히 보여줍니다.</h1>
-        <p>위험성평가표, TBM, 외국인 전송본은 발표 어느 순간에 보여도 제품의 가치를 전달해야 합니다.</p>
+        <p>위험성평가표, TBM, 외국인 전송본은 운영자가 바로 검토할 수 있는 핵심 산출물입니다.</p>
       </section>
 
       <section className="preview-triad">

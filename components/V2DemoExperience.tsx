@@ -234,7 +234,7 @@ export function V2DemoExperience({
               {mode === "offline" ? "사전 캐시 응답" : "실시간 연결 우선"}
             </button>
             <button type="button" onClick={() => setPresenterNotes((current) => !current)}>
-              발표자 노트 {presenterNotes ? "닫기" : "보기"}
+              운영 메모 {presenterNotes ? "닫기" : "보기"}
             </button>
           </div>
         </aside>
@@ -339,7 +339,7 @@ export function V2DemoExperience({
             <ul>
               <li><b>기상청</b><span>{selectedScenario.weatherSignal}을 작업중지 기준과 TBM 확인 질문에 반영</span></li>
               <li><b>Law.go</b><span>위험성평가표와 안전보건교육 기록의 법령 근거 문장에 반영</span></li>
-              <li><b>Work24</b><span>{selectedScenario.hasForeignWorkers ? "외국인·신규 작업자 후속 교육 추천에 반영" : "작업자 후속 교육 후보에 반영"}</span></li>
+              <li><b>Work24</b><span>{selectedScenario.hasForeignWorkers ? "외국인·신규 작업자 연계 교육 확인에 반영" : "작업자 연계 교육 후보에 반영"}</span></li>
               <li><b>KOSHA</b><span>공식자료와 재해사례를 사진·증빙, 비상대응, TBM 기록에 반영</span></li>
             </ul>
           </section>
@@ -357,7 +357,7 @@ export function V2DemoExperience({
 
       {presenterNotes ? (
         <section className="presenter-notes card">
-          <strong>발표자 노트</strong>
+          <strong>운영 메모</strong>
           <p>Space로 다음 단계, F1~F5로 시나리오 전환, O로 사전 캐시 응답 모드를 전환합니다. API 상태 질문이 나오면 “실시간 연결 우선이며 지연 시 캐시 응답 사용 여부를 표시합니다”라고 설명합니다.</p>
         </section>
       ) : null}

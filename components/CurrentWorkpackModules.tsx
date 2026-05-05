@@ -89,7 +89,9 @@ type EvidenceCard = {
   summary: string;
   sourceLabel: string;
   role: EvidenceRole;
+  roleLabel: string;
   reflectedDocuments: string[];
+  reflectionLabel: string;
   href: string;
 };
 
@@ -245,6 +247,29 @@ function syncWorkerLanguage(worker: WorkerProfile, languageCode: string): Worker
 function syncWorkerNationality(worker: WorkerProfile, nationality: string): WorkerProfile {
   const option = workerLanguageOptions.find((item) => item.nationality === nationality) || workerLanguageOptions[0];
   return syncWorkerLanguage(worker, option.languageCode);
+}
+
+function buildDraftLanguagePreview(worker: WorkerProfile, data: AskResponse) {
+  if (worker.languageCode === "ko") {
+    return {
+      title: "한국어 교육 확인",
+      lines: [
+        `${worker.role || "작업자"}에게 작업 전 TBM과 안전교육 내용을 한국어로 확인합니다.`,
+        "연락처가 있으면 메일·문자 전파에만 사용하고, 카카오·밴드는 승인 전까지 제외합니다."
+      ]
+    };
+  }
+
+  const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === worker.languageCode);
+  return {
+    title: `${worker.languageLabel} 전송 전 미리보기`,
+    lines: language?.lines.length
+      ? language.lines.slice(0, 3)
+      : [
+        `${worker.languageLabel} 전송본을 생성한 뒤 현장 통역 또는 해당 언어 가능자가 확인합니다.`,
+        "작업, 핵심 위험, 중지 기준을 쉬운 문장으로 안내하고 이해 여부를 기록합니다."
+      ]
+  };
 }
 
 function buildWorkerSnapshot(workers: WorkerProfile[], previous?: CurrentWorkerSnapshot): CurrentWorkerSnapshot {
@@ -607,6 +632,15 @@ function mapDocumentLabels(values: string[], fallback: string[]): string[] {
   return Array.from(new Set(selected));
 }
 
+function buildReflectionLabel(documents: string[], summary: string) {
+  const documentLabel = documents.slice(0, 3).join(" · ") || "문서 보완 후보";
+  return `${documentLabel}에 ${excerpt(summary, 56)}`;
+}
+
+function normalizeEvidenceSummary(summary: string) {
+  return excerpt(summary, 110);
+}
+
 function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
   const weatherCard: EvidenceCard = {
     id: "weather-current",
@@ -614,7 +648,9 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
     summary: data.externalData.weather.summary,
     sourceLabel: "기상청",
     role: "supporting",
+    roleLabel: "현장 조건 보조 근거",
     reflectedDocuments: ["위험성평가표", "작업계획서", "TBM 브리핑"],
+    reflectionLabel: "위험성평가표 · 작업계획서 · TBM 브리핑에 작업중지/보호구 확인 기준으로 반영",
     href: "/weather"
   };
   const trainingCards: EvidenceCard[] = [
@@ -624,7 +660,9 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
       summary: item.fitReason || item.reason,
       sourceLabel: item.institution,
       role: "supporting" as const,
+      roleLabel: "교육 편성 보조 근거",
       reflectedDocuments: ["안전보건교육 기록", "외국인 브리핑"],
+      reflectionLabel: "안전보건교육 기록 · 외국인 브리핑에 교육 주제와 이해 확인으로 반영",
       href: item.url
     })),
     ...data.externalData.koshaEducation.recommendations.map((item, index) => ({
@@ -633,44 +671,62 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
       summary: item.fitReason || item.reason,
       sourceLabel: item.provider,
       role: "supporting" as const,
+      roleLabel: "후속교육 보조 근거",
       reflectedDocuments: ["안전보건교육 기록", "관리자 후속교육"],
+      reflectionLabel: "안전보건교육 기록 · 관리자 후속교육에 교육 주제와 확인 질문으로 반영",
       href: item.url
     }))
   ];
-  const koshaCards = data.externalData.kosha.references.map((item, index): EvidenceCard => ({
-    id: `kosha-reference-${index}`,
-    title: item.title,
-    summary: item.impact || item.summary,
-    sourceLabel: item.agency || "KOSHA",
-    role: "direct",
-    reflectedDocuments: mapDocumentLabels(item.appliedTo || item.appliesTo || item.templateHints || [], ["위험성평가표", "TBM 브리핑"]),
-    href: item.url
-  }));
-  const openApiCards = (data.externalData.koshaOpenApi?.references || []).map((item, index): EvidenceCard => ({
-    id: `kosha-openapi-${index}`,
-    title: item.title,
-    summary: item.summary,
-    sourceLabel: item.service,
-    role: item.service === "건설업 일별 중대재해" ? "supporting" : "direct",
-    reflectedDocuments: mapDocumentLabels(item.reflectedIn, ["위험성평가표", "작업계획서"]),
-    href: item.url
-  }));
+  const koshaCards = data.externalData.kosha.references.map((item, index): EvidenceCard => {
+    const summary = item.impact || item.summary;
+    const reflectedDocuments = mapDocumentLabels(item.appliedTo || item.appliesTo || item.templateHints || [], ["위험성평가표", "TBM 브리핑"]);
+    return {
+      id: `kosha-reference-${index}`,
+      title: item.title,
+      summary,
+      sourceLabel: item.agency || "KOSHA",
+      role: "direct",
+      roleLabel: "문서 문구 직접 근거",
+      reflectedDocuments,
+      reflectionLabel: buildReflectionLabel(reflectedDocuments, summary),
+      href: item.url
+    };
+  });
+  const openApiCards = (data.externalData.koshaOpenApi?.references || []).map((item, index): EvidenceCard => {
+    const role = item.service === "건설업 일별 중대재해" ? "supporting" : "direct";
+    const reflectedDocuments = mapDocumentLabels(item.reflectedIn, ["위험성평가표", "작업계획서"]);
+    return {
+      id: `kosha-openapi-${index}`,
+      title: item.title,
+      summary: item.summary,
+      sourceLabel: item.service,
+      role,
+      roleLabel: role === "direct" ? "공공 API 직접 근거" : "사례 기반 보조 근거",
+      reflectedDocuments,
+      reflectionLabel: buildReflectionLabel(reflectedDocuments, item.summary),
+      href: item.url
+    };
+  });
   const accidentCards = data.externalData.accidentCases.cases.map((item, index): EvidenceCard => ({
     id: `accident-case-${index}`,
     title: item.title,
     summary: item.preventionPoint,
     sourceLabel: item.sourceType === "fatal-accident" ? "중대재해 사례" : "재해사례",
     role: "supporting",
+    roleLabel: "사례 기반 보조 근거",
     reflectedDocuments: ["위험성평가표", "TBM 브리핑", "비상대응 절차"],
+    reflectionLabel: "위험성평가표 · TBM 브리핑 · 비상대응 절차에 유사사고 예방 포인트로 반영",
     href: item.sourceUrl || "/knowledge"
   }));
   const knowledgeCards = (data.externalData.safetyKnowledge?.matches || []).map((item): EvidenceCard => ({
     id: `knowledge-${item.id}`,
     title: item.title,
-    summary: item.controls.slice(0, 2).join(" / ") || item.sourceTitles.join(" / "),
+    summary: item.shortSummary || item.controls.slice(0, 2).join(" / ") || item.sourceTitles.join(" / "),
     sourceLabel: "안전 지식 DB",
-    role: "direct",
+    role: item.evidenceRole || "direct",
+    roleLabel: item.roleLabel || "내장 지식 직접 근거",
     reflectedDocuments: mapDocumentLabels(item.primaryDocuments, ["위험성평가표", "TBM 브리핑"]),
+    reflectionLabel: item.documentReflectionLabel || buildReflectionLabel(mapDocumentLabels(item.primaryDocuments, ["위험성평가표", "TBM 브리핑"]), item.controls[0] || item.title),
     href: "/knowledge"
   }));
 
@@ -688,12 +744,12 @@ function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard
         {cards.map((item) => (
           <a key={item.id} href={item.href} target={item.href.startsWith("/") ? undefined : "_blank"} rel={item.href.startsWith("/") ? undefined : "noreferrer"}>
             <div className="row">
-              <span className="badge">{item.role === "direct" ? "직접 근거" : "보조 근거"}</span>
+              <span className="badge">{item.roleLabel}</span>
               <span className="badge">{item.sourceLabel}</span>
             </div>
             <strong>{item.title}</strong>
-            <small>{item.summary}</small>
-            <small>문서 반영 위치: {item.reflectedDocuments.join(" · ")}</small>
+            <small>{normalizeEvidenceSummary(item.summary)}</small>
+            <small>반영 라벨: {item.reflectionLabel}</small>
           </a>
         ))}
       </div>
@@ -834,8 +890,8 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
           <span>문서 반영 근거</span>
           <h2>직접 근거와 보조 근거</h2>
           <p>법령·KOSHA 공식 기준은 문서 문구를 직접 뒷받침하고, 재해사례·기상·후속교육은 현장 판단을 보조하는 근거로 분리합니다.</p>
-          {directEvidence.length ? <EvidenceCardList title="Direct evidence" cards={directEvidence} /> : null}
-          {supportingEvidence.length ? <EvidenceCardList title="Supporting evidence" cards={supportingEvidence} /> : null}
+          {directEvidence.length ? <EvidenceCardList title="직접 근거" cards={directEvidence} /> : null}
+          {supportingEvidence.length ? <EvidenceCardList title="보조 근거" cards={supportingEvidence} /> : null}
           {!evidenceCards.length ? <a href="/knowledge">공식자료는 지식 DB와 작업공간 근거 패널에서 확인합니다.</a> : null}
         </article>
         <CitationList citations={current.data.citations} question={current.data.question} />
@@ -860,6 +916,7 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
   const records = buildEducationRecordDrafts(editableWorkers, current.data.scenario.workSummary);
   const summary = summarizeWorkers(editableWorkers);
   const workerSourceLabel = current.workerSnapshot ? "현재 작업공간 snapshot" : current.isCurrent ? "현재 문서팩에서 기본 추정" : "기본 예시";
+  const draftLanguagePreview = buildDraftLanguagePreview(draft, current.data);
 
   useEffect(() => {
     setEditableWorkers(currentRouteWorkers(current));
@@ -891,6 +948,8 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
 
   function saveDraftWorker() {
     const displayName = draft.displayName.trim();
+    const phone = draft.phone?.trim() || "";
+    const email = draft.email?.trim() || "";
     if (!displayName) {
       setWorkerSaveState({
         status: "error",
@@ -898,10 +957,10 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
       });
       return;
     }
-    if ((draft.phone || draft.email) && !contactConsent) {
+    if ((phone || email) && !contactConsent) {
       setWorkerSaveState({
         status: "error",
-        message: "연락처를 사용하는 경우 교육 확인과 현장 전파 목적 고지가 필요합니다."
+        message: "연락처를 사용하는 경우 메일·문자 전파와 교육 확인 목적 고지가 필요합니다. 카카오·밴드는 사용하지 않습니다."
       });
       return;
     }
@@ -909,8 +968,8 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
     const nextWorker: WorkerProfile = {
       ...draft,
       displayName,
-      phone: draft.phone?.trim() || undefined,
-      email: draft.email?.trim() || undefined,
+      phone: phone || undefined,
+      email: email || undefined,
       isNewWorker: draft.experienceLevel === "신규" || draft.isNewWorker,
       isForeignWorker: draft.languageCode !== "ko",
       trainingSummary: draft.trainingSummary.trim() || "작업 전 교육 확인 필요",
@@ -1000,6 +1059,9 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
                   {worker.email ? ` · 메일 ${maskEmail(worker.email)}` : ""}
                   {" · "}{record?.memo || worker.trainingSummary}
                 </small>
+                {worker.isForeignWorker ? (
+                  <p className="muted small">외국인 안내: {worker.languageLabel} 미리보기 확인 후 메일·문자로만 전파</p>
+                ) : null}
                 <div className="command-actions">
                   <button type="button" className="button secondary" onClick={() => startEditWorker(worker)}>수정</button>
                 </div>
@@ -1010,7 +1072,10 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
       </section>
       <section className="safeclaw-module-panel">
         <span>{editingWorkerId ? "작업자 정보 수정" : "작업자 빠른 추가"}</span>
-        <h2>역할·국적·언어를 선택해서 전파 대상까지 연결합니다.</h2>
+        <h2>{editingWorkerId ? "선택한 작업자의 연락처와 교육 상태를 바로 고칩니다." : "역할·국적·언어를 선택해서 전파 대상까지 연결합니다."}</h2>
+        <p className="muted small">
+          휴대폰은 문자, 이메일은 메일 전파에만 사용합니다. 카카오·밴드는 승인 대기 상태라 명단 저장이나 전송 대상에 포함하지 않습니다.
+        </p>
         <div className="two-inputs">
           <label>
             <span className="field-label">표시명</span>
@@ -1113,19 +1178,35 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
             />
           </label>
         </div>
+        <div className="worker-language-preview" aria-live="polite">
+          <div>
+            <span className="eyebrow">Language preview</span>
+            <strong>{draftLanguagePreview.title}</strong>
+          </div>
+          <ul>
+            {draftLanguagePreview.lines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          {draft.languageCode !== "ko" ? (
+            <p>전송 전 현장 통역 또는 해당 언어 가능자가 문구를 확인하고, 근로자가 이해했음을 교육 기록에 남깁니다.</p>
+          ) : null}
+        </div>
         <label className="consent-check">
           <input
             type="checkbox"
             checked={contactConsent}
             onChange={(event) => setContactConsent(event.target.checked)}
           />
-          <span>연락처·국적·언어 정보를 교육 확인과 현장 전파 목적으로만 사용합니다.</span>
+          <span>연락처·국적·언어 정보는 안전교육 확인과 메일·문자 현장 전파 목적으로만 사용합니다. 카카오·밴드 전파는 별도 승인 전까지 제외합니다.</span>
         </label>
         <div className="command-actions">
           <button type="button" className="button" onClick={saveDraftWorker}>
             {editingWorkerId ? "수정 반영" : "명단에 추가"}
           </button>
-          <button type="button" className="button secondary" onClick={resetDraft}>입력 초기화</button>
+          <button type="button" className="button secondary" onClick={resetDraft}>
+            {editingWorkerId ? "수정 취소" : "입력 초기화"}
+          </button>
           <button type="button" className="button secondary" onClick={saveWorkersToServer} disabled={workerSaveState.status === "saving"}>
             {workerSaveState.status === "saving" ? "서버 저장 중" : "관리자 이력 저장"}
           </button>

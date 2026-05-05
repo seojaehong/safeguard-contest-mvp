@@ -51,6 +51,10 @@ export type SafetyKnowledgeMatch = {
   sources: SafetyKnowledgeSource[];
   legalMappings: SafetyKnowledgeLegalMap[];
   score: number;
+  evidenceRole: "direct" | "supporting";
+  roleLabel: string;
+  shortSummary: string;
+  documentReflectionLabel: string;
 };
 
 export type KnowledgeRawEvent = {
@@ -83,6 +87,24 @@ const typedTemplates = templates as SafetyKnowledgeTemplate[];
 
 function normalize(value: string) {
   return value.toLowerCase().replace(/\s+/g, " ");
+}
+
+function compactText(value: string, maxLength = 96): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+function buildKnowledgeSummary(hazard: SafetyKnowledgeHazard, sources: SafetyKnowledgeSource[]): string {
+  const controls = hazard.controls.slice(0, 2).join(" · ");
+  const sourceHint = sources[0]?.summary || sources[0]?.title || hazard.title;
+  return compactText(controls || sourceHint);
+}
+
+function buildKnowledgeReflectionLabel(hazard: SafetyKnowledgeHazard): string {
+  const documents = hazard.primaryDocuments.slice(0, 3).join(" · ") || "문서 보완 후보";
+  const action = hazard.controls[0] ? compactText(hazard.controls[0], 48) : "작업 전 확인 항목";
+  return `${documents}에 ${action}`;
 }
 
 export function getSafetyKnowledgeSources() {
@@ -149,7 +171,11 @@ export function matchSafetyKnowledge(question: string, limit = 4): SafetyKnowled
         controls: hazard.controls,
         sources,
         legalMappings,
-        score
+        score,
+        evidenceRole: "direct",
+        roleLabel: "내장 지식 직접 근거",
+        shortSummary: buildKnowledgeSummary(hazard, sources),
+        documentReflectionLabel: buildKnowledgeReflectionLabel(hazard)
       };
     });
 }

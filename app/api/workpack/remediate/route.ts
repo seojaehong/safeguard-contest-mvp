@@ -86,11 +86,14 @@ function mapCatalogEvidence(items: SafetyReferenceItem[]) {
     title: item.title,
     type: item.item_type,
     category: item.category,
-    documents: item.primary_documents,
-    controls: item.controls,
-    keywords: item.keywords.slice(0, 8),
+    role: item.evidence_role,
+    roleLabel: item.evidence_role_label,
+    reflectionLabel: item.document_reflection_label,
+    documents: item.reflected_documents || item.primary_documents,
+    controls: item.controls.slice(0, 3),
+    keywords: item.keywords.slice(0, 5),
     sourceUrl: item.source_url,
-    summary: item.summary
+    summary: item.short_summary || item.summary
   }));
 }
 
@@ -117,14 +120,18 @@ async function buildPrompt(request: RemediationRequest) {
     order: index + 1,
     title: match.title,
     documents: match.primaryDocuments,
-    controls: match.controls,
-    sources: match.sources.map((source) => ({
+    role: match.evidenceRole,
+    roleLabel: match.roleLabel,
+    reflectionLabel: match.documentReflectionLabel,
+    controls: match.controls.slice(0, 3),
+    summary: match.shortSummary,
+    sources: match.sources.slice(0, 2).map((source) => ({
       agency: source.agency,
       title: source.title,
       url: source.url,
       summary: source.summary
     })),
-    legalMappings: match.legalMappings.map((mapping) => ({
+    legalMappings: match.legalMappings.slice(0, 2).map((mapping) => ({
       title: mapping.title,
       plainLanguage: mapping.plainLanguage,
       caution: mapping.caution
@@ -143,6 +150,7 @@ async function buildPrompt(request: RemediationRequest) {
       "출력은 바로 문서에 삽입 가능한 한국어 텍스트만 반환하라.",
       "형식은 [보완 제안: 항목명] 제목 1줄, 체크리스트 3~5줄, 확인자/근거 확인 1줄로 제한하라.",
       "법령·KOSHA·지식 DB 원문이나 긴 요약을 붙여넣지 말라. 문서 본문에는 '반영 근거' 1줄로 실제 확인 항목만 설명하라.",
+      "근거 목록은 citation appendix가 아니라 편집 힌트다. roleLabel, reflectionLabel, short summary만 사용하고 원문 인용은 하지 말라.",
       "근거는 사용자에게 바로 이해되는 실무 표현으로 바꿔라. 예: '보호구 착용 확인란에 반영', '작업중지 기준으로 공유'.",
       `작업 조건: ${trimForPrompt(request.question, 700)}`,
       `대상 문서: ${documentLabels[request.documentKey]}`,
@@ -180,14 +188,18 @@ export async function POST(request: NextRequest) {
       title: source.title,
       agency: `${source.agency} · 내장 서식/루브릭`,
       url: source.url,
-      sourceType: "seed"
+      sourceType: "seed",
+      roleLabel: match.roleLabel,
+      reflectionLabel: match.documentReflectionLabel
     }))
   ));
   const catalogSources = mapCatalogEvidence(promptBundle.catalog.items).map((source) => ({
     title: source.title,
     agency: labelCatalogAgency(source.type),
     url: source.sourceUrl || `/knowledge?reference=${encodeURIComponent(source.title)}`,
-    sourceType: "catalog"
+    sourceType: "catalog",
+    roleLabel: source.roleLabel || (source.role === "direct" ? "문서 문구 직접 근거" : "현장 판단 보조 근거"),
+    reflectionLabel: source.reflectionLabel || source.summary
   }));
   const catalogStatus = {
     configured: promptBundle.catalog.configured,

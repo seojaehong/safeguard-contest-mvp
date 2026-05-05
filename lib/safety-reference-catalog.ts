@@ -14,6 +14,9 @@ export type SafetyReferenceItem = {
   source_url?: string | null;
   evidence_role?: "direct" | "supporting";
   reflected_documents?: string[];
+  short_summary?: string;
+  evidence_role_label?: string;
+  document_reflection_label?: string;
 };
 
 export type SafetyReferenceSearchResult = {
@@ -109,11 +112,15 @@ function isReferenceItem(value: unknown): value is SafetyReferenceItem {
 
 function normalizeReferenceItem(item: SafetyReferenceItem): SafetyReferenceItem {
   const evidenceRole = deriveEvidenceRole(item);
+  const reflectedDocuments = item.reflected_documents?.length ? item.reflected_documents : item.primary_documents;
   return {
     ...item,
     source_url: item.source_url || null,
     evidence_role: evidenceRole,
-    reflected_documents: item.primary_documents
+    reflected_documents: reflectedDocuments,
+    short_summary: buildShortSummary(item),
+    evidence_role_label: evidenceRole === "direct" ? "문서 문구 직접 근거" : "현장 판단 보조 근거",
+    document_reflection_label: buildDocumentReflectionLabel(reflectedDocuments, item.controls)
   };
 }
 
@@ -128,6 +135,24 @@ function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "sourc
   if (directTypes.has(item.item_type)) return "direct";
   if (item.source_id.includes("law") || item.source_id.includes("regulation")) return "direct";
   return "supporting";
+}
+
+function compactText(value: string, maxLength = 96): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+function buildShortSummary(item: SafetyReferenceItem): string {
+  const controlHint = item.controls.slice(0, 2).join(" · ");
+  const base = controlHint || item.summary || item.title;
+  return compactText(base);
+}
+
+function buildDocumentReflectionLabel(documents: string[], controls: string[]): string {
+  const documentLabel = documents.slice(0, 3).join(" · ") || "문서 보완 후보";
+  const actionLabel = controls[0] ? compactText(controls[0], 48) : "확인 항목으로 반영";
+  return `${documentLabel}에 ${actionLabel}`;
 }
 
 function safeIlikeTerm(value: string): string {

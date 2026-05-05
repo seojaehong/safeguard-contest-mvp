@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "generatedAt": "2026-05-05T01:07:27.516Z",
+  "routePath": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\app\\api\\workflow\\dispatch\\route.ts",
+  "checks": {
+    "emailSmsFixture": {
+      "status": 200,
+      "body": {
+        "ok": true,
+        "configured": true,
+        "workflowRunId": "fixture-1777943247516",
+        "providerStatus": "fixture",
+        "channelResults": [
+          {
+            "channel": "email",
+            "provider": "safe-fixture",
+            "status": "sent",
+            "message": "SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 메일 provider 호출 없이 fixture 접수로 기록했습니다.",
+            "httpStatus": 202
+          },
+          {
+            "channel": "sms",
+            "provider": "safe-fixture",
+            "status": "sent",
+            "message": "SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 문자 provider 호출 없이 fixture 접수로 기록했습니다.",
+            "httpStatus": 202
+          }
+        ],
+        "summary": {
+          "requested": 2,
+          "sent": 2,
+          "partial": 0,
+          "failed": 0,
+          "unconfigured": 0,
+          "skipped": 0
+        },
+        "message": "안전 fixture 모드로 전파 요청을 검증했습니다. 실제 provider 전송은 실행하지 않았습니다."
+      }
+    },
+    "kakaoRejected": {
+      "status": 400,
+      "body": {
+        "ok": false,
+        "configured": false,
+        "lockedChannels": [
+          "kakao"
+        ],
+        "message": "카카오·밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자만 허용합니다."
+      }
+    },
+    "bandMixedRejected": {
+      "status": 400,
+      "body": {
+        "ok": false,
+        "configured": false,
+        "lockedChannels": [
+          "band"
+        ],
+        "message": "카카오·밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자만 허용합니다."
+      }
+    }
+  }
+}

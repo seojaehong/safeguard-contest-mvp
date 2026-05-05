@@ -107,6 +107,8 @@ type RemediationDraft = {
     agency: string;
     url: string;
     sourceType: string;
+    roleLabel: string;
+    reflectionLabel: string;
   }>;
 };
 
@@ -1420,7 +1422,9 @@ function readRemediationDraft(itemId: string, value: unknown): RemediationDraft 
               title: readText(sourceRecord.title),
               agency: readText(sourceRecord.agency),
               url: readText(sourceRecord.url) || "/knowledge",
-              sourceType: readText(sourceRecord.sourceType) || "source"
+              sourceType: readText(sourceRecord.sourceType) || "source",
+              roleLabel: readText(sourceRecord.roleLabel),
+              reflectionLabel: readText(sourceRecord.reflectionLabel)
             }
           : null;
       }).filter((source): source is RemediationDraft["sources"][number] => Boolean(source && source.title))
@@ -2158,8 +2162,9 @@ export function WorkpackEditor({
                       <div className="remediation-sources">
                         {draft.sources.map((source) => (
                           <a key={`${item.id}-${source.title}`} href={source.url} target="_blank" rel="noreferrer">
-                            <span>{source.sourceType === "catalog" ? "지식 DB" : "기본 근거"}</span>
+                            <span>{source.roleLabel || (source.sourceType === "catalog" ? "지식 DB" : "기본 근거")}</span>
                             {source.agency} · {source.title}
+                            {source.reflectionLabel ? <small>{source.reflectionLabel}</small> : null}
                           </a>
                         ))}
                       </div>

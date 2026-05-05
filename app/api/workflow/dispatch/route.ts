@@ -44,6 +44,10 @@ const LOCKED_CHANNELS: WorkflowChannel[] = ["kakao", "band"];
 const TIMEOUT_MS = 20_000;
 const RETRY_COUNT = 1;
 
+function isLiveDispatchEnabled() {
+  return process.env.SAFEGUARD_RUN_LIVE_DISPATCH === "1";
+}
+
 function trimSlashes(value: string) {
   return value.replace(/^\/+|\/+$/g, "");
 }
@@ -90,6 +94,15 @@ function parseLockedChannels(value: unknown): WorkflowChannel[] {
   return value.filter((item): item is WorkflowChannel => (
     typeof item === "string" && LOCKED_CHANNELS.includes(item as WorkflowChannel)
   ));
+}
+
+function parseUnsupportedChannels(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const allowed = new Set<string>([...ACTIVE_CHANNELS, ...LOCKED_CHANNELS]);
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter((item) => item && !allowed.has(item));
 }
 
 function parseRecipients(value: unknown): string[] {
@@ -159,6 +172,26 @@ function summarizeChannelResults(results: WorkflowChannelResult[]): WorkflowSumm
   });
 }
 
+function buildFixtureDispatchResponse(channels: WorkflowChannel[], recipients: string[]): WorkflowSuccessResponse {
+  return {
+    ok: true,
+    workflowRunId: `fixture-${Date.now()}`,
+    providerStatus: "fixture",
+    channelResults: channels.map((channel) => ({
+      channel,
+      provider: "safe-fixture",
+      status: "sent",
+      message: `SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 ${channel === "email" ? "메일" : "문자"} provider 호출 없이 fixture 접수로 기록했습니다.`,
+      httpStatus: 202
+    })),
+    summary: {
+      mode: "fixture",
+      recipientCount: recipients.length
+    },
+    message: "안전 fixture 모드로 전파 요청을 검증했습니다. 실제 provider 전송은 실행하지 않았습니다."
+  };
+}
+
 async function postWithTimeout(url: string, secret: string, payload: Record<string, unknown>) {
   let lastError: unknown = null;
 
@@ -224,6 +257,7 @@ export async function POST(request: NextRequest) {
 
   const channels = parseChannels(body.channels);
   const lockedChannels = parseLockedChannels(body.channels);
+  const unsupportedChannels = parseUnsupportedChannels(body.channels);
   const recipients = parseRecipients(body.recipients);
 
   if (lockedChannels.length) {
@@ -235,6 +269,15 @@ export async function POST(request: NextRequest) {
     }, { status: 400 });
   }
 
+  if (unsupportedChannels.length) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      unsupportedChannels,
+      message: "지원하지 않는 전파 채널입니다. 현재 활성 채널은 메일·문자이며 카카오·밴드는 승인 대기 상태입니다."
+    }, { status: 400 });
+  }
+
   if (!body.workpack || channels.length === 0) {
     return NextResponse.json({
       ok: false,
@@ -243,7 +286,7 @@ export async function POST(request: NextRequest) {
     }, { status: 400 });
   }
 
-  if (!webhookConfig.url || !webhookConfig.token) {
+  if (isLiveDispatchEnabled() && (!webhookConfig.url || !webhookConfig.token)) {
     return NextResponse.json({
       ok: false,
       configured: false,
@@ -261,7 +304,9 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    const workflowResponse = await postWithTimeout(webhookConfig.url, webhookConfig.token, payload);
+    const workflowResponse = isLiveDispatchEnabled()
+      ? await postWithTimeout(webhookConfig.url, webhookConfig.token, payload)
+      : buildFixtureDispatchResponse(channels, recipients);
     const channelResults = normalizeChannelResults(workflowResponse.channelResults, channels);
     const summary = summarizeChannelResults(channelResults);
     return NextResponse.json({
