@@ -20,13 +20,33 @@ function titleFromMarkdown(markdown: string, fallback: string) {
   return firstHeading?.replace(/^#\s+/, "").trim() || fallback;
 }
 
+function normalizeKnowledgeSnippet(value: string, maxLength = 180) {
+  const compact = value
+    .replace(/\r?\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (compact.length <= maxLength) return compact;
+
+  const slice = compact.slice(0, maxLength + 1);
+  const boundaries = ["니다.", "한다.", "된다.", "있다.", "한다", "다.", "요.", ". ", "; "]
+    .map((marker) => slice.lastIndexOf(marker))
+    .filter((index) => index >= 60);
+  const boundary = boundaries.length ? Math.max(...boundaries) : -1;
+  if (boundary > 0) {
+    const markerLength = slice[boundary + 1] === "." ? 2 : 1;
+    return slice.slice(0, boundary + markerLength).trim();
+  }
+
+  return `${compact.slice(0, maxLength).trim()}...`;
+}
+
 function excerptFromMarkdown(markdown: string) {
-  return markdown
+  const excerpt = markdown
     .split(/\r?\n/)
     .filter((line) => line.trim() && !line.startsWith("#") && !line.startsWith("- ["))
     .slice(0, 2)
-    .join(" ")
-    .slice(0, 180);
+    .join(" ");
+  return normalizeKnowledgeSnippet(excerpt);
 }
 
 async function readWikiEntries(relativeDir: string) {
@@ -65,17 +85,17 @@ export default async function KnowledgePage() {
     >
       <section className="knowledge-status-grid">
         <article className="card">
-          <span className="eyebrow">Seed Wiki</span>
+          <span className="eyebrow">Built-in Wiki</span>
           <strong>{hazardEntries.length}개 위험요인 · {formEntries.length}개 서식</strong>
-          <p className="muted">파일 위치: <code>knowledge/wiki</code>, 데이터 위치: <code>data/safety-knowledge</code></p>
+          <p className="muted">기본 위험요인과 서식 기준을 내장 위키로 관리하고, 현장 문서 보완 때 짧은 근거 요약만 보여줍니다.</p>
         </article>
         <article className="card">
-          <span className="eyebrow">Runtime API</span>
-          <strong>/api/knowledge/match · ingest · regenerate</strong>
+          <span className="eyebrow">Runtime Knowledge</span>
+          <strong>근거 매칭 · 원본 누적 · AI 보완</strong>
           <p className="muted">현장 API 호출 결과는 원본 이벤트로 검증되고, 로그인 시 Supabase 지식 테이블에 누적됩니다.</p>
         </article>
         <article className="card">
-          <span className="eyebrow">Supabase Catalog</span>
+          <span className="eyebrow">Knowledge Catalog</span>
           <strong>{stats.items.toLocaleString("ko-KR")}개 항목 · {stats.sources}개 출처</strong>
           <p className="muted">{stats.message}</p>
         </article>
@@ -101,7 +121,7 @@ export default async function KnowledgePage() {
             <a key={item.id} href={`/knowledge?reference=${encodeURIComponent(item.title)}`}>
               <small>{item.evidence_role_label || "근거 항목"}</small>
               <strong>{item.title}</strong>
-              <span>{item.short_summary || item.summary}</span>
+              <span>{normalizeKnowledgeSnippet(item.short_summary || item.summary, 170)}</span>
               <span>{item.document_reflection_label || item.primary_documents.join(" · ")}</span>
             </a>
           ))}
