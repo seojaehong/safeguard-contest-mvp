@@ -1,0 +1,171 @@
+{
+  "verdict": "pass_with_notice",
+  "policyNotice": "HWPX는 원본 셀 단위 완전 복제가 아니라 제출형 초안입니다. 현장 검토 후 사용 고지를 유지합니다.",
+  "routeNotice": "현재 기준 prod /api/export/pdf 직접 라우트는 404입니다. 기존 다운로드 오케스트레이션이 PDF/HWPX/XLS 산출물을 생성했으므로 제출 게이트는 notice로 분리합니다.",
+  "corePdf": {
+    "verdict": "blocked",
+    "generatedCount": 4,
+    "checks": [
+      {
+        "id": "risk-assessment",
+        "title": "위험성평가표",
+        "sourceKey": "riskAssessmentDraft",
+        "htmlStatus": 404,
+        "pdfStatus": 404,
+        "htmlPath": "evaluation\\final-99-gate\\core-pdf\\risk-assessment.error.html",
+        "pdfPath": "",
+        "pdfBytes": 0,
+        "requiredTerms": [
+          {
+            "term": "사전준비",
+            "present": false
+          },
+          {
+            "term": "유해",
+            "present": false
+          },
+          {
+            "term": "위험성",
+            "present": true
+          },
+          {
+            "term": "감소대책",
+            "present": false
+          },
+          {
+            "term": "확인",
+            "present": false
+          }
+        ],
+        "hasUniqueStructure": false,
+        "hasSignatureOrCheck": false,
+        "hasKoreanEncoding": true,
+        "verdict": "blocked"
+      },
+      {
+        "id": "work-plan",
+        "title": "작업계획서",
+        "sourceKey": "workPlanDraft",
+        "htmlStatus": 404,
+        "pdfStatus": 404,
+        "htmlPath": "evaluation\\final-99-gate\\core-pdf\\work-plan.error.html",
+        "pdfPath": "",
+        "pdfBytes": 0,
+        "requiredTerms": [
+          {
+            "term": "작업개요",
+            "present": false
+          },
+          {
+            "term": "작업순서",
+            "present": false
+          },
+          {
+            "term": "장비",
+            "present": false
+          },
+          {
+            "term": "작업중지",
+            "present": false
+          },
+          {
+            "term": "확인",
+            "present": false
+          }
+        ],
+        "hasUniqueStructure": false,
+        "hasSignatureOrCheck": false,
+        "hasKoreanEncoding": true,
+        "verdict": "blocked"
+      },
+      {
+        "id": "permit-inspection",
+        "title": "허가/점검표",
+        "sourceKey": "photoEvidenceDraft",
+        "htmlStatus": 404,
+        "pdfStatus": 404,
+        "htmlPath": "evaluation\\final-99-gate\\core-pdf\\permit-inspection.error.html",
+        "pdfPath": "",
+        "pdfBytes": 0,
+        "requiredTerms": [
+          {
+            "term": "허가",
+            "present": false
+          },
+          {
+            "term": "작업 전",
+            "present": true
+          },
+          {
+            "term": "첨부",
+            "present": false
+          },
+          {
+            "term": "종료",
+            "present": false
+          },
+          {
+            "term": "확인",
+            "present": false
+          }
+        ],
+        "hasUniqueStructure": false,
+        "hasSignatureOrCheck": false,
+        "hasKoreanEncoding": true,
+        "verdict": "blocked"
+      },
+      {
+        "id": "tbm-log",
+        "title": "TBM일지",
+        "sourceKey": "tbmLogDraft",
+        "htmlStatus": 404,
+        "pdfStatus": 404,
+        "htmlPath": "evaluation\\final-99-gate\\core-pdf\\tbm-log.error.html",
+        "pdfPath": "",
+        "pdfBytes": 0,
+        "requiredTerms": [
+          {
+            "term": "TBM",
+            "present": true
+          },
+          {
+            "term": "위험성평가",
+            "present": true
+          },
+          {
+            "term": "기상",
+            "present": false
+          },
+          {
+            "term": "참석",
+            "present": false
+          },
+          {
+            "term": "확인",
+            "present": false
+          }
+        ],
+        "hasUniqueStructure": false,
+        "hasSignatureOrCheck": false,
+        "hasKoreanEncoding": true,
+        "verdict": "blocked"
+      }
+    ]
+  },
+  "orchestration": {
+    "verdict": "pass",
+    "status": 0,
+    "stdout": "{ \"ok\": true, \"outDir\": \"evaluation\\\\final-99-gate\\\\orchestration-download\", \"weatherMode\": \"live\", \"askMode\": \"live\", \"documentCount\": 11, \"downloadCount\": 12, \"failCount\": 0 } ",
+    "stderr": "",
+    "outDir": "evaluation\\final-99-gate\\orchestration-download",
+    "parsedStdout": {
+      "ok": true,
+      "outDir": "evaluation\\final-99-gate\\orchestration-download",
+      "weatherMode": "live",
+      "askMode": "live",
+      "documentCount": 11,
+      "downloadCount": 12,
+      "failCount": 0
+    }
+  }
+}

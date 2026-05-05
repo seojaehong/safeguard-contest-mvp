@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-05-05T09:29:50.372Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "commit": "dd75d3a",
+  "overall": "pass_with_notice",
+  "elapsedMs": 166684,
+  "gates": [
+    {
+      "name": "ask-orchestration",
+      "verdict": "pass",
+      "evidence": "11/11 documents"
+    },
+    {
+      "name": "auth-history-reuse",
+      "verdict": "pass_with_notice",
+      "evidence": "SAFEGUARD_AUTH_TOKEN이 없어 live 관리자 저장/재열기는 실행하지 않았습니다. UI는 비회원 임시 저장과 관리자 로그인 필요 상태로 방어합니다."
+    },
+    {
+      "name": "document-downloads",
+      "verdict": "pass_with_notice",
+      "evidence": "core PDF + orchestration XLS/HWPX/PDF smoke"
+    },
+    {
+      "name": "public-data-ai-map",
+      "verdict": "pass",
+      "evidence": "docs/submission-evidence-map.md"
+    },
+    {
+      "name": "ai-remediation-flow",
+      "verdict": "pass",
+      "evidence": "Gemini (gemini-2.5-flash-lite)"
+    },
+    {
+      "name": "dispatch-policy",
+      "verdict": "pass_with_notice",
+      "evidence": "email/sms active, kakao/band locked"
+    },
+    {
+      "name": "screenshots",
+      "verdict": "pass",
+      "evidence": "5 screenshots"
+    }
+  ],
+  "outputs": {
+    "authHistory": "evaluation/final-99-gate/auth-history-smoke.json",
+    "documentDownloads": "evaluation/final-99-gate/document-download-smoke.json",
+    "publicDataAiMap": "evaluation/final-99-gate/public-data-ai-map.json",
+    "prodGoldenPath": "evaluation/final-99-gate/prod-golden-path.json",
+    "decision": "evaluation/final-99-gate/decision.md",
+    "evidenceMapDoc": "docs/submission-evidence-map.md",
+    "securityPrivacyDoc": "docs/security_privacy_readiness.md",
+    "commercializationDoc": "docs/commercialization-onepager.md"
+  },
+  "notes": [
+    "카카오/밴드는 승인 전이라 제외했습니다.",
+    "HWPX는 제출형 초안으로 고지합니다.",
+    "관리자 이력 게이트는 SAFEGUARD_AUTH_TOKEN이 없으면 pass_with_notice로 남습니다."
+  ]
+}

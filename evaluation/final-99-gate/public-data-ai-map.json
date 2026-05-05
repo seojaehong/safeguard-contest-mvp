@@ -1,0 +1,89 @@
+{
+  "verdict": "pass",
+  "generatedAt": "2026-05-05T09:28:36.928Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "principle": "공공데이터와 AI는 긴 원문 목록이 아니라 문서 문장, 확인 항목, 작업중지 기준에 반영된 위치로 설명합니다.",
+  "items": [
+    {
+      "id": "lawgo",
+      "label": "법제처 국가법령정보 / Law.go",
+      "documents": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM일지",
+        "안전보건교육 기록"
+      ],
+      "reflection": "사업주의 안전보건조치, 위험성평가, 교육·관리 의무를 문서의 확인 항목과 근거 문장으로 반영합니다.",
+      "liveSignal": true,
+      "status": "reflected",
+      "evidenceCount": 6
+    },
+    {
+      "id": "kosha",
+      "label": "KOSHA 공식자료·기술지침·재해사례",
+      "documents": [
+        "위험성평가표",
+        "작업계획서",
+        "TBM일지",
+        "사진/증빙"
+      ],
+      "reflection": "작업유형별 통제대책, 유사 재해 예방 포인트, 문서별 반영 근거로 연결합니다.",
+      "liveSignal": true,
+      "status": "reflected",
+      "evidenceCount": 2
+    },
+    {
+      "id": "weather",
+      "label": "기상청 현재·예보·특보",
+      "documents": [
+        "작업계획서",
+        "TBM일지",
+        "현장 공유 메시지"
+      ],
+      "reflection": "강풍·우천·폭염·자외선 등 작업중지 판단과 TBM 전달사항에 반영합니다.",
+      "liveSignal": true,
+      "status": "reflected",
+      "evidenceCount": 1
+    },
+    {
+      "id": "work24",
+      "label": "고용24 / Work24 교육 데이터",
+      "documents": [
+        "안전보건교육 기록",
+        "외국인 근로자 출력본"
+      ],
+      "reflection": "후속 교육 추천과 외국인·신규 투입자 교육 연결성을 보강합니다.",
+      "liveSignal": true,
+      "status": "reflected",
+      "evidenceCount": 1
+    },
+    {
+      "id": "gemini",
+      "label": "Gemini 기반 AI 보완 생성",
+      "documents": [
+        "문서팩 편집 전반"
+      ],
+      "reflection": "근거 선택 후 보완 제안을 만들고, 사용자가 편집한 뒤 삽입하는 흐름으로만 반영합니다.",
+      "liveSignal": true,
+      "status": "reflected",
+      "evidenceCount": 1
+    }
+  ],
+  "citationPreview": [
+    {
+      "title": "산업안전보건법"
+    },
+    {
+      "title": "산업안전보건법 시행규칙"
+    },
+    {
+      "title": "산업안전보건법 시행령"
+    },
+    {
+      "title": "건축물관리법위반·업무상과실치사·업무상과실치상·산업안전보건법위반[도급인이 산업안전보건법 제63조에 따라 부담하는 안전·보건조치의무의 내용이 문제된 사건]"
+    },
+    {
+      "title": "산업안전보건법위반·중대재해처벌등에관한법률위반(산업재해치사)[중대재해 처벌 등에 관한 법률 부칙 제1조 제1항 단서의 ‘상시 근로자가 50명 미만인 사업 또는 사업장’의 해석이 문제된 사건]"
+    }
+  ]
+}

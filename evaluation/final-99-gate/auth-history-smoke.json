@@ -1,0 +1,8 @@
+{
+  "generatedAt": "2026-05-05T09:28:36.934Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "authTokenPresent": false,
+  "verdict": "pass_with_notice",
+  "configured": false,
+  "message": "SAFEGUARD_AUTH_TOKEN이 없어 live 관리자 저장/재열기는 실행하지 않았습니다. UI는 비회원 임시 저장과 관리자 로그인 필요 상태로 방어합니다."
+}
