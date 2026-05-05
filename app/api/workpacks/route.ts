@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
+import type { AskResponse } from "@/lib/types";
 import { isRecord, parseScenarioContext, readString } from "@/lib/workspace-api";
 
 export const dynamic = "force-dynamic";
+
+function readAskResponse(value: unknown): AskResponse | null {
+  if (!isRecord(value)) return null;
+  if (
+    typeof value.question !== "string" ||
+    !isRecord(value.scenario) ||
+    !isRecord(value.deliverables) ||
+    !isRecord(value.externalData) ||
+    !isRecord(value.riskSummary) ||
+    !isRecord(value.status)
+  ) {
+    return null;
+  }
+  return value as AskResponse;
+}
 
 export async function GET(request: NextRequest) {
   const client = createSupabaseAdminClient();
@@ -104,6 +120,7 @@ export async function GET(request: NextRequest) {
 
   const archiveWorkpacks = (workpacks || []).map((workpack) => {
     const site = workpack.site_id ? siteMap.get(workpack.site_id) : null;
+    const encodedId = encodeURIComponent(workpack.id);
     return {
       id: workpack.id,
       organizationName: organizationMap.get(workpack.organization_id) || "SafeClaw Pilot",
@@ -117,7 +134,7 @@ export async function GET(request: NextRequest) {
       createdAt: workpack.created_at,
       updatedAt: workpack.updated_at,
       lastGeneratedAt: workpack.updated_at || workpack.created_at,
-      reopenHref: "/documents",
+      reopenHref: `/documents?workpackId=${encodedId}`,
       editHref: "/workspace#history"
     };
   });
@@ -149,8 +166,20 @@ export async function POST(request: NextRequest) {
 
   const parsed = await request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
-  const question = readString(body.question, "현장 작업 문서팩");
-  const scenario = isRecord(body.scenario) ? body.scenario : {};
+  const askResponse = readAskResponse(body.data);
+  const question = readString(body.question, askResponse?.question || "현장 작업 문서팩");
+  const scenario = isRecord(body.scenario) ? body.scenario : askResponse?.scenario || {};
+  const deliverables = askResponse?.deliverables || body.deliverables || {};
+  const evidenceSummary = body.evidenceSummary || (askResponse ? {
+    answer: askResponse.answer,
+    practicalPoints: askResponse.practicalPoints,
+    citations: askResponse.citations,
+    sourceMix: askResponse.sourceMix || null,
+    mode: askResponse.mode,
+    externalData: askResponse.externalData,
+    riskSummary: askResponse.riskSummary
+  } : {});
+  const status = askResponse?.status || body.status || {};
   const context = await ensureWorkspaceContext(client, user, parseScenarioContext(scenario));
 
   const { data, error } = await client
@@ -160,10 +189,10 @@ export async function POST(request: NextRequest) {
       site_id: context.siteId,
       question,
       scenario: toJson(scenario),
-      deliverables: toJson(body.deliverables || {}),
-      evidence_summary: toJson(body.evidenceSummary || {}),
+      deliverables: toJson(deliverables),
+      evidence_summary: toJson(evidenceSummary),
       worker_summary: toJson(body.workerSummary || {}),
-      status: toJson(body.status || {}),
+      status: toJson(status),
       created_by: user.id
     })
     .select("id")
