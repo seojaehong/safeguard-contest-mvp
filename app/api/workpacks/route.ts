@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
       updatedAt: workpack.updated_at,
       lastGeneratedAt: workpack.updated_at || workpack.created_at,
       reopenHref: `/documents?workpackId=${encodedId}`,
-      editHref: "/workspace#history"
+      editHref: `/documents?workpackId=${encodedId}`
     };
   });
 

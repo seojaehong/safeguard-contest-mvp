@@ -201,9 +201,9 @@ function ServerWorkpackList({ workpacks }: { workpacks: ArchiveWorkpack[] }) {
   if (!workpacks.length) {
     return (
       <article>
-        <strong>저장된 문서팩 대기</strong>
+        <strong>서버 문서팩 없음</strong>
         <code>workpacks</code>
-        <p>작업공간에서 문서팩을 저장하면 현장, 생성 시각, 다시 열기 경로가 여기에 쌓입니다.</p>
+        <p>관리자 로그인 후 저장된 문서팩이 있으면 현장, 생성 시각, 다시 열기 경로가 여기에 표시됩니다. 아직 없으면 브라우저 최근 작업만 이어서 사용할 수 있습니다.</p>
         <Link href="/workspace">작업공간에서 첫 문서팩 저장</Link>
       </article>
     );
@@ -219,8 +219,8 @@ function ServerWorkpackList({ workpacks }: { workpacks: ArchiveWorkpack[] }) {
           <p className="muted small">
             {item.organizationName}{item.region ? ` · ${item.region}` : ""}{item.industry ? ` · ${item.industry}` : ""}
           </p>
-          <a href={item.reopenHref}>다시 열기</a>
-          <a href={item.editHref}>작업공간에서 편집</a>
+          <a href={item.reopenHref}>문서팩 복원해서 열기</a>
+          <a href={item.editHref}>문서 편집 화면으로 이동</a>
         </article>
       ))}
     </>
@@ -250,8 +250,11 @@ function DispatchLogList({ logs }: { logs: ArchiveDispatchLog[] }) {
             {log.languageCode ? ` · ${log.languageCode}` : ""}
             {log.failureReason ? ` · ${log.failureReason}` : ""}
           </p>
-          <p className="muted small">{log.workflowRunId || log.provider || "전파 기록"}</p>
-          <a href={log.reopenHref}>전파 내역 다시 보기</a>
+          <p className="muted small">
+            {log.workpackId ? "연결된 문서팩을 먼저 복원합니다." : "연결된 문서팩 ID가 없어 전파 화면으로 이동합니다."}
+            {" · "}{log.workflowRunId || log.provider || "전파 기록"}
+          </p>
+          <a href={log.reopenHref}>{log.workpackId ? "연결 문서팩 열기" : "전파 내역 다시 보기"}</a>
         </article>
       ))}
     </>
@@ -352,9 +355,9 @@ export default function ArchivePage() {
     <SafeClawModuleShell
       eyebrow="이력"
       title="아카이브·작업 이력."
-      description="저장된 문서팩, 마지막 생성 시각, 현장 전파 로그를 한 곳에서 다시 열고 이어서 편집합니다."
+      description="저장된 문서팩, 마지막 생성 시각, 현장 전파 로그를 한 곳에서 확인하고 복원 가능한 항목은 문서 편집 화면으로 바로 엽니다."
       status={archive.status === "ready" ? "live" : "partial"}
-      mappedTo="Saved workpacks · Last generated · Dispatch logs · Reopen/Edit"
+      mappedTo="문서팩 저장 · 최근 생성 · 발송 로그 · 다시 열기"
       activeHref="/archive"
       actions={<Link href="/workspace#history">작업공간에서 저장</Link>}
     >
@@ -362,7 +365,7 @@ export default function ArchivePage() {
         <article><span>마지막 생성</span><strong>{formatArchiveTime(localWorkpack?.savedAt || serverLatestAt)}</strong></article>
         <article><span>저장 문서팩</span><strong>{archiveReady ? `${archive.workpacks.length}건` : "확인 대기"}</strong></article>
         <article><span>전파 로그</span><strong>{archiveReady ? `${archive.dispatchLogs.length}건` : "확인 대기"}</strong></article>
-        <article><span>작업자 snapshot</span><strong>{localWorkerCount(localWorkpack)}</strong></article>
+        <article><span>로컬 작업자 snapshot</span><strong>{localWorkerCount(localWorkpack)}</strong></article>
       </section>
 
       <section className={`safeclaw-current-workpack ${localWorkpack ? "live" : "sample"}`} aria-live="polite">
@@ -427,7 +430,7 @@ export default function ArchivePage() {
             <article>
               <strong>권한 안내</strong>
               <code>{archive.status}</code>
-              <p>관리자 세션이 없거나 저장소 연결 전이어도 개발자용 설정명 대신 운영 안내만 보여줍니다.</p>
+              <p>관리자 세션이 없거나 저장소 연결 전이면 서버 이력 대신 로컬 최근 작업과 다음 이동 경로를 명확히 안내합니다.</p>
             </article>
           </div>
         </article>

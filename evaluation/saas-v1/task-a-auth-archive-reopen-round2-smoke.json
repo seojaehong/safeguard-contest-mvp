@@ -1,0 +1,61 @@
+{
+  "task": "SafeClaw final hardening round 2 - Agent A Auth/Archive/Reopen",
+  "date": "2026-05-05",
+  "scope": [
+    "archive list",
+    "workpack reopen link",
+    "documents hydration notice",
+    "auth-gated clear fallback notice"
+  ],
+  "outOfScope": [
+    "Kakao",
+    "Band",
+    "DB migrations",
+    "destructive DB mutations"
+  ],
+  "checks": [
+    {
+      "name": "dispatch archive logs link to exact workpack reopen route when workpack_id exists",
+      "status": "passed",
+      "evidence": "app/api/dispatch-logs/route.ts now emits /documents?workpackId=<encoded-id> for linked dispatch logs and /dispatch only when no workpack_id exists."
+    },
+    {
+      "name": "workpack archive entries use one clear reopen/edit route",
+      "status": "passed",
+      "evidence": "app/api/workpacks/route.ts emits /documents?workpackId=<encoded-id> for reopenHref and editHref so the user lands on the hydration-capable documents route."
+    },
+    {
+      "name": "archive UI empty and fallback states explain local vs server history",
+      "status": "passed",
+      "evidence": "app/archive/page.tsx copy distinguishes server workpack absence, local recent work, linked dispatch workpack reopen, and dispatch-only fallback."
+    },
+    {
+      "name": "documents route reports hydration progress, success, and exact blockers",
+      "status": "passed",
+      "evidence": "components/CurrentWorkpackModules.tsx shows loading, ready, and blocked notices for workpackId reopen, including archive/workspace recovery actions on blocked states."
+    },
+    {
+      "name": "typecheck",
+      "status": "passed",
+      "command": "npm.cmd run typecheck"
+    },
+    {
+      "name": "production build",
+      "status": "blocked",
+      "command": "npm.cmd run build",
+      "logFiles": [
+        "evaluation/safeclaw-auth-archive-reopen-round2-build.log",
+        "evaluation/safeclaw-auth-archive-reopen-round2-build-rerun.log",
+        "evaluation/safeclaw-auth-archive-reopen-round2-build-clean.log"
+      ],
+      "blocker": "Next build compiles successfully, then fails during page-data/build-manifest collection with .next ENOENT and Failed to collect page data for /api/workers. This remains outside the auth/archive/reopen file scope."
+    }
+  ],
+  "summary": {
+    "changedFileCount": 5,
+    "typecheck": "passed",
+    "build": "blocked",
+    "dbMigration": "not run",
+    "dbMutation": "not run"
+  }
+}
