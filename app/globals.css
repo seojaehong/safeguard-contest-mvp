@@ -759,9 +759,9 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 2px solid var(--os-yellow);
-  border-radius: 999px;
-  background: #171717;
+  border: 1px solid var(--sc-hazard-yellow);
+  border-radius: 0;
+  background: var(--sc-black);
   color: var(--os-yellow);
   font-family: var(--font-hud);
   font-size: 10px;
@@ -5795,11 +5795,7 @@ body {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 268px minmax(0, 1fr);
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    #08090b;
-  background-size: 64px 64px;
+  background: #08090b;
   color: #f6f5ef;
   padding: 0;
 }
@@ -5916,8 +5912,9 @@ body {
   width: 36px;
   height: 36px;
   place-items: center;
-  background: var(--os-yellow, #ffdc2e);
-  color: #08090b;
+  border: 1px solid var(--sc-hazard-yellow);
+  background: var(--sc-black);
+  color: var(--sc-hazard-yellow);
   font-size: 13px;
 }
 
