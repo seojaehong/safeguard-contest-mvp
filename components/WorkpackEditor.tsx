@@ -115,10 +115,10 @@ let rhwpModulePromise: Promise<RhwpModule> | null = null;
 const templatePresets: TemplatePreset[] = [
   {
     kind: "sheet",
-    label: "Excel 시트형",
-    description: "현장 표 양식처럼 행·열로 입력하고 결재 파일에 붙이기 좋은 형태",
+    label: "XLS(HTML 호환)",
+    description: "Excel에서 열 수 있는 HTML 기반 .xls 표 양식입니다.",
     previewTitle: "표지 + 섹션 요약 + 확인 칸",
-    previewBullets: ["섹션별 행·열 구조", "No./항목/내용/확인 컬럼", "인쇄 폭 1페이지 기준"]
+    previewBullets: ["섹션별 행·열 구조", "No./항목/내용/확인 컬럼", "바이너리 XLSX가 아닌 HTML 호환 파일"]
   },
   {
     kind: "word",
@@ -129,10 +129,10 @@ const templatePresets: TemplatePreset[] = [
   },
   {
     kind: "hwp",
-    label: "HWPX 제출형",
-    description: "한글 문서에서 열기 쉬운 공식 서식 항목 중심 문서",
-    previewTitle: "한글 서식 + 확인/서명란",
-    previewBullets: ["공식 서식 항목명 유지", "확인자·관리감독자 서명란", "한컴오피스 제출 흐름"]
+    label: "HWPX(rhwp 구조화)",
+    description: "rhwp로 생성한 구조화 HWPX입니다. 원본 한글 서식 1:1 복제는 아닙니다.",
+    previewTitle: "rhwp 문서 + 확인/서명란",
+    previewBullets: ["공식 서식 항목명 유지", "확인자·관리감독자 서명란", "표 병합·결재칸은 제출 전 확인"]
   }
 ];
 
@@ -1128,7 +1128,7 @@ function buildExcelHtml(
 <body>
   <div class="cover">
     <h1>${escapeHtml(title)}</h1>
-    <p>${escapeHtml(profile.subtitle)} · SafeClaw 현장 문서팩 · 검토/확인/서명용 Excel 서식</p>
+    <p>${escapeHtml(profile.subtitle)} · SafeClaw 현장 문서팩 · 검토/확인/서명용 HTML 호환 XLS</p>
   </div>
   <table class="meta-grid">
     <tbody>
@@ -1148,7 +1148,7 @@ function buildExcelHtml(
     <tbody>${tableRows}</tbody>
   </table>
   <table class="approval"><tbody><tr>${approvalRows}<td>보관 위치<br /><br />______</td></tr></tbody></table>
-  <p class="note">본 파일은 공식자료 기반 초안입니다. 현장관리자가 작업 전 최종 확인 후 사용하세요.</p>
+  <p class="note">본 파일은 Excel에서 열 수 있는 HTML 호환 .xls 초안입니다. 현장관리자가 작업 전 최종 확인 후 사용하세요.</p>
 </body>
 </html>`;
 }
@@ -1996,6 +1996,9 @@ export function WorkpackEditor({
             </div>
           </details>
           <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
+          <p className="muted small">
+            출력 방식: PDF는 브라우저 인쇄/저장 화면, XLS는 HTML 호환 파일, HWPX는 rhwp 구조화 파일입니다.
+          </p>
           <details className="advanced-downloads">
             <summary>전체 다운로드</summary>
             <div className="advanced-download-grid">
@@ -2047,14 +2050,14 @@ export function WorkpackEditor({
               {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
             </p>
             <p className="muted small">
-              현재 출력물은 제출 필수 항목을 반영한 준제출형입니다. 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
+              현재 출력물은 제출 필수 항목을 반영한 준제출형입니다. PDF는 브라우저 인쇄/저장, XLS는 HTML 호환, HWPX는 rhwp 구조화 파일이며 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
             </p>
           </div>
           <div className="download-bar">
-            <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF 저장/인쇄</button>
-            <button type="button" className="button secondary" onClick={downloadXls}>XLS</button>
+            <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
+            <button type="button" className="button secondary" onClick={downloadXls}>XLS(HTML 호환)</button>
             <button type="button" className="button" onClick={downloadHwpx} disabled={hwpxStatus === "building"}>
-              {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX"}
+              {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX(rhwp)"}
             </button>
             <details className="advanced-downloads inline">
               <summary>베타 형식</summary>
@@ -2077,7 +2080,7 @@ export function WorkpackEditor({
         ) : null}
         {showFocusCue ? (
           <p className="editor-focus-message" aria-live="polite">
-            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF·XLS·HWPX로 바로 내려받을 수 있습니다.
+            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF(브라우저 인쇄)·XLS(HTML 호환)·HWPX(rhwp)로 출력할 수 있습니다.
           </p>
         ) : null}
         <SafetyDocumentPreview

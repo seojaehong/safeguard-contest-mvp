@@ -8,7 +8,8 @@ const repoRoot = process.cwd();
 const sourceFiles = [
   path.join(repoRoot, "components", "WorkpackEditor.tsx"),
   path.join(repoRoot, "components", "SafeGuardCommandCenter.tsx"),
-  path.join(repoRoot, "app", "page.tsx")
+  path.join(repoRoot, "app", "page.tsx"),
+  path.join(repoRoot, "app", "api", "export", "pdf", "route.ts")
 ];
 const outDir = path.join(repoRoot, "evaluation", "document-format");
 
@@ -56,22 +57,45 @@ const exportRules = [
   {
     id: "xls-export",
     label: "XLS export",
-    required: ["downloadXls", "buildExcelHtml", "application/vnd.ms-excel", "선택 서식 다운로드"]
+    required: ["downloadXls", "buildExcelHtml", "application/vnd.ms-excel", "XLS(HTML 호환)", "HTML 호환 .xls"]
   },
   {
     id: "hwpx-export",
     label: "HWPX export",
-    required: ["downloadHwpx", "buildHwpTemplateText", "application/hwp+zip", "@rhwp/core"]
+    required: ["downloadHwpx", "buildHwpTemplateText", "application/hwp+zip", "@rhwp/core", "HWPX(rhwp", "rhwp 구조화"]
   },
   {
     id: "pdf-output",
     label: "PDF output",
-    required: ["printPdf", "popup.print", "PDF 저장/인쇄", "downloadHtml"]
+    required: ["printPdf", "popup.print", "PDF(브라우저 인쇄)", "text/html; charset=utf-8", "format\") === \"pdf"]
   },
   {
     id: "download-cta",
     label: "document card CTA",
     required: ["SafeGuardCommandCenter", "focusWorkpackEditor", "다운로드 영역 열기", "준제출형 내려받기", "scrollIntoView"]
+  }
+];
+
+const structureRules = [
+  {
+    id: "risk-renderer-structure",
+    label: "위험성평가표 renderer",
+    required: ["renderRiskAssessmentRows", "1. 사전준비", "2. 유해·위험요인 파악 및 위험성 결정", "3. 감소대책 수립·실행", "4. 공유·교육 및 재평가"]
+  },
+  {
+    id: "work-plan-renderer-structure",
+    label: "작업계획서 renderer",
+    required: ["renderWorkPlanRows", "1. 작업개요", "2. 세부 작업순서 및 안전대책", "3. 장비·인원·첨부서류", "4. 작업중지 및 재개 기준"]
+  },
+  {
+    id: "permit-renderer-structure",
+    label: "허가서/첨부 renderer",
+    required: ["renderPermitRows", "1. 허가 기본정보", "2. 작업 전 허가조건", "3. 첨부서류 및 종료 확인", "허가번호"]
+  },
+  {
+    id: "tbm-renderer-structure",
+    label: "TBM 기록 renderer",
+    required: ["renderTbmRows", "1. TBM 회의 정보", "2. 위험성평가 기반 전달사항", "3. 참석자 확인", "4. 미조치 위험 및 증빙"]
   }
 ];
 
@@ -88,13 +112,15 @@ function evaluateRule(rule) {
 
 const documentResults = documentRules.map(evaluateRule);
 const exportResults = exportRules.map(evaluateRule);
-const allResults = [...documentResults, ...exportResults];
+const structureResults = structureRules.map(evaluateRule);
+const allResults = [...documentResults, ...exportResults, ...structureResults];
 const failed = allResults.filter((result) => !result.ok);
 const summary = {
   generatedAt: new Date().toISOString(),
   elapsedMs: Date.now() - startedAt,
   checkedFiles: sourceFiles.map((filePath) => path.relative(repoRoot, filePath)),
   documentCount: documentResults.length,
+  structureCheckCount: structureResults.length,
   exportCheckCount: exportResults.length,
   passCount: allResults.length - failed.length,
   failCount: failed.length,
@@ -102,14 +128,16 @@ const summary = {
   oneToOneReproduction: false,
   remainingGaps: [
     "발주처 지정 원본 갑지/을지의 직인과 허가번호 칸은 아직 1:1 재현하지 않음",
-    "HWPX는 @rhwp 기반 텍스트 삽입형으로 표 병합·결재칸의 원본 레이아웃 재현은 아님",
-    "PDF는 브라우저 print 출력 흐름이며 서버 생성 PDF 파일의 서식 검증은 아님"
+    "HWPX는 @rhwp 기반 구조화 파일이며 표 병합·결재칸의 원본 레이아웃 재현은 아님",
+    "UI PDF는 브라우저 print 출력 흐름이며 서버 binary PDF 경로는 보조 다운로드 API로만 검증함",
+    "XLS는 Excel에서 열 수 있는 HTML 호환 .xls이며 true binary XLS/XLSX가 아님"
   ]
 };
 
 const report = {
   summary,
   documentResults,
+  structureResults,
   exportResults
 };
 
@@ -134,6 +162,15 @@ const markdownLines = [
   "## Export requirements",
   "",
   ...exportResults.map((result) => [
+    `### ${result.label}`,
+    `- ok: ${result.ok}`,
+    `- required: ${result.required.join(", ")}`,
+    `- missing: ${result.missing.length ? result.missing.join(", ") : "none"}`,
+    ""
+  ].join("\n")),
+  "## Distinct renderer structures",
+  "",
+  ...structureResults.map((result) => [
     `### ${result.label}`,
     `- ok: ${result.ok}`,
     `- required: ${result.required.join(", ")}`,
