@@ -333,12 +333,110 @@ export function buildSourceMix(citations: SearchResult[]): NonNullable<AskRespon
 const defaultQuestion = "서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 오후 강풍 예보. 오늘 TBM과 위험성평가 초안을 만들어줘.";
 
 function inferWorkerCount(question: string) {
-  const workerMatch = question.match(/(\d+)\s*명/);
+  const workerMatch = question.match(/(\d+)\s*(?:인\s*)?(?:1조|명|인\b)/);
   return workerMatch ? Number(workerMatch[1]) : 5;
+}
+
+function inferCompanyName(question: string) {
+  const trimmed = question.trim();
+  const companyMatch = trimmed.match(/([가-힣A-Za-z0-9]+(?:테크인씨|테크이엔씨|엔지니어링|주식회사|건설|산업|전기|설비|이엔씨|테크|관리|로지스|메탈|창고|시설|기업|공사|㈜))/);
+  if (companyMatch) return companyMatch[1].replace(/^㈜/, "").trim();
+
+  const firstToken = trimmed.split(/\s+/)[0];
+  if (firstToken && !/(서울|인천|경기|부산|대구|광주|대전|울산|오늘|작업|현장)/.test(firstToken)) {
+    return firstToken.replace(/[,.]$/, "");
+  }
+
+  return "현장 업체";
+}
+
+function inferCustomWorkName(question: string) {
+  if (/누수|비가\s*새|천장/.test(question)) return "천장 누수 유지보수 작업";
+  if (/점검|정비|유지보수/.test(question)) return "비정형 유지보수 작업";
+  if (/화기|용접|절단/.test(question)) return "화기작업";
+  if (/지게차|상하차|운반/.test(question)) return "운반·상하차 작업";
+  return "비정형 현장 작업";
+}
+
+function buildCustomScenarioProfile(question: string): ScenarioProfile {
+  const companyName = inferCompanyName(question);
+  const isLeakMaintenance = /누수|비가\s*새|천장/.test(question);
+  const workName = inferCustomWorkName(question);
+  const companyType = isLeakMaintenance ? "시설관리·유지보수" : "현장 유지보수";
+  const siteName = `${companyName} ${isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`;
+
+  return {
+    id: "custom-maintenance",
+    companyName,
+    companyType,
+    siteName,
+    workName,
+    processName: isLeakMaintenance
+      ? "누수 부위 확인, 전기·천장재 상태 점검, 보양 후 천장 유지보수"
+      : "작업 전 현장 확인, 위험구역 통제, 비정형 유지보수 수행",
+    weatherNote: isLeakMaintenance
+      ? "실내 누수 조건, 젖은 바닥·전기설비 접촉 가능성 확인 필요"
+      : "현장 조건 미지정, 작업 전 실제 환경 확인 필요",
+    riskLevel: "상",
+    topRisk: isLeakMaintenance
+      ? "천장 누수 유지보수 중 고소작업 추락, 젖은 바닥 미끄러짐, 누전·감전, 천장재 낙하 위험"
+      : "비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
+    hazards: isLeakMaintenance
+      ? [
+          "천장 누수 부위 확인 중 사다리·작업발판에서 추락",
+          "누수로 젖은 바닥에서 미끄러짐·전도",
+          "누수 부위 조명·배선 접촉에 따른 감전 및 천장재 낙하"
+        ]
+      : [
+          "비정형 작업 절차 미확정으로 인한 작업자 오조작",
+          "작업구역 통제 미흡으로 인한 충돌·끼임",
+          "2인 1조 감시·비상연락 미흡으로 인한 구조 지연"
+        ],
+    actions: isLeakMaintenance
+      ? [
+          "작업 전 전원 차단·검전, 누수 차단, 젖은 바닥 보양과 출입통제 실시",
+          "사다리 대신 안정된 작업발판을 우선 사용하고 2인 1조 감시자를 지정",
+          "안전모·미끄럼방지 안전화·보안경·절연장갑 착용 후 천장재 낙하구역을 통제"
+        ]
+      : [
+          "작업 전 작업방법, 위험구역, 작업중지 기준을 작업반장 승인으로 확정",
+          "2인 1조 역할을 작업자와 감시자로 분리하고 비상연락 수단을 확인",
+          "작업구역 출입통제, 보호구 착용, 장비·공구 상태를 작업 전 확인"
+        ],
+    educationName: isLeakMaintenance ? "천장 누수 유지보수 작업 전 감전·추락 예방 교육" : "비정형 유지보수 작업 전 안전교육",
+    educationTargets: "작업자 2인, 작업반장, 관리감독자",
+    questions: isLeakMaintenance
+      ? [
+          "누수 부위 주변 전원 차단과 검전을 누가 확인했는가?",
+          "작업발판, 미끄럼 방지, 천장재 낙하구역 통제를 작업 전 완료했는가?",
+          "2인 1조 중 감시자는 작업 중 어떤 이상 징후를 보면 즉시 중지시킬 것인가?"
+        ]
+      : [
+          "오늘 비정형 작업의 작업방법과 작업중지 기준을 누가 승인했는가?",
+          "2인 1조의 작업자·감시자 역할과 비상연락 절차를 전원이 이해했는가?",
+          "작업구역 출입통제와 보호구 착용 상태를 작업 전 확인했는가?"
+        ],
+    educationPoints: isLeakMaintenance
+      ? [
+          "전원 차단·검전 전에는 천장 누수 부위와 전기설비에 접근하지 않기",
+          "젖은 바닥과 천장재 낙하구역은 즉시 통제하고 안정된 작업발판 사용",
+          "감시자는 작업자 자세, 발판 흔들림, 감전 의심 상황을 계속 확인"
+        ]
+      : [
+          "비정형 작업은 작업방법 확정 전 임의로 시작하지 않기",
+          "2인 1조 감시자와 비상연락 절차를 작업 전 복창",
+          "위험구역 통제와 보호구 착용 확인 후 작업 시작"
+        ],
+    keywords: []
+  };
 }
 
 function pickScenarioProfile(question: string) {
   const normalized = question.trim().toLowerCase();
+
+  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question)) {
+    return buildCustomScenarioProfile(question);
+  }
 
   const scored = fieldScenarioProfiles.map((profile) => ({
     profile,
@@ -346,10 +444,13 @@ function pickScenarioProfile(question: string) {
   }));
 
   scored.sort((a, b) => b.score - a.score);
-  return scored[0]?.score ? scored[0].profile : fieldScenarioProfiles[0];
+  return scored[0]?.score ? scored[0].profile : buildCustomScenarioProfile(question);
 }
 
 function sanitizeWorkSummary(question: string, fallback: string) {
+  if (/누수|비가\s*새|천장/.test(question)) return fallback;
+  if (/비정형|유지보수|정비|점검/.test(question) && fallback) return fallback;
+
   const normalized = (question.trim() || fallback)
     .replace(/\s+/g, " ")
     .replace(/오늘\s*/g, "")
@@ -359,7 +460,7 @@ function sanitizeWorkSummary(question: string, fallback: string) {
     .trim();
 
   const sentences = normalized.split(/(?<=[.!?。])\s+/).filter(Boolean);
-  const workSentence = sentences.find((sentence) => /작업|점검|운반|도장|상하차|용접|세척|굴착|피킹|적재/.test(sentence));
+  const workSentence = sentences.find((sentence) => /작업|점검|운반|도장|상하차|용접|세척|굴착|피킹|적재|유지보수/.test(sentence));
   return (workSentence || normalized || fallback).replace(/\.$/, "").trim();
 }
 

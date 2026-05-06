@@ -181,6 +181,41 @@ function inferLocationFromText(text: string, fallback: string) {
   return locationMatch?.[0] || fallback;
 }
 
+function inferCompanyFromText(text: string, fallback: string) {
+  const trimmed = text.trim();
+  const companyMatch = trimmed.match(/([가-힣A-Za-z0-9]+(?:테크인씨|테크이엔씨|엔지니어링|주식회사|건설|산업|전기|설비|이엔씨|테크|관리|로지스|메탈|창고|시설|기업|공사|㈜))/);
+  if (companyMatch) return companyMatch[1].replace(/^㈜/, "").trim();
+
+  const firstToken = trimmed.split(/\s+/)[0];
+  if (firstToken && !/(서울|인천|경기|부산|대구|광주|대전|울산|오늘|작업|현장)/.test(firstToken)) {
+    return firstToken.replace(/[,.]$/, "");
+  }
+
+  return fallback;
+}
+
+function inferIndustryFromText(text: string, fallback: string) {
+  if (/누수|비가\s*새|천장|유지보수|정비|점검|시설/.test(text)) return "시설관리·유지보수";
+  if (/용접|절단|제조|화기/.test(text)) return "제조업";
+  if (/지게차|상하차|피킹|창고|물류|운반/.test(text)) return "물류·창고업";
+  if (/비계|외벽|도장|건설|고소/.test(text)) return "건설업";
+  if (/세척|청소|화학|세제/.test(text)) return "서비스업";
+  return fallback;
+}
+
+function inferWorkSummaryFromText(text: string, fallback: string) {
+  const compact = text
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/(위험성평가|위험성 평가|TBM|안전보건교육|안전교육|기록|초안|문서팩|작업계획서|일지)(와|과|,|·|\s)*/g, "")
+    .replace(/(까지\s*)?(반영해|포함해|연계해|고려해)?\s*(만들어\s*줘|작성해\s*줘|생성해\s*줘|정리해\s*줘|만들어주세요|작성해주세요|생성해주세요|정리해주세요)\.?$/i, "")
+    .trim();
+
+  if (/누수|비가\s*새|천장/.test(compact)) return "천장 누수 유지보수 작업";
+  const workSentence = compact.split(/(?<=[.!?。])\s+/).find((sentence) => /작업|점검|운반|도장|상하차|용접|세척|굴착|피킹|적재|유지보수/.test(sentence));
+  return (workSentence || compact || fallback).replace(/\.$/, "").trim();
+}
+
 function inferWorkerCountFromText(text: string) {
   const countMatch = text.match(/(?:작업자|근로자|인력|참석|총)?\s*(\d+)\s*명/);
   return countMatch ? `${countMatch[1]}명` : "입력 필요";
@@ -203,12 +238,14 @@ function buildInputFieldBrief(
   weather: WeatherBrief | null,
   isWeatherLoading: boolean
 ): FieldBrief {
+  const companyName = inferCompanyFromText(question, example.companyName);
+  const siteFallback = companyName === example.companyName ? example.region : `${companyName} 작업현장`;
   const weatherSummary = weather?.summary || inferWeatherFromText(question, example.weatherSignal);
   return {
-    companyName: example.companyName,
-    siteName: weather?.locationLabel || inferLocationFromText(question, example.region),
-    industry: example.industry,
-    workSummary: example.workType,
+    companyName,
+    siteName: weather?.locationLabel || inferLocationFromText(question, siteFallback),
+    industry: inferIndustryFromText(question, example.industry),
+    workSummary: inferWorkSummaryFromText(question, example.workType),
     workerCount: inferWorkerCountFromText(question),
     weather: isWeatherLoading ? "현재 기상 확인 중" : weatherSummary,
     sourceLabel: isWeatherLoading ? "기상청 확인 중" : weather?.mode === "live" ? "현재 기상 반영" : "입력+기상 보강",
@@ -415,7 +452,7 @@ export function SafeGuardCommandCenter({
   autoGenerate
 }: SafeGuardCommandCenterProps) {
   const initialExample = examples.find((example) => example.id === initialScenarioId) || examples[0];
-  const [selectedExampleId, setSelectedExampleId] = useState(initialExample.id);
+  const [selectedExampleId, setSelectedExampleId] = useState<string | null>(initialExample.id);
   const selectedExample = useMemo(
     () => examples.find((example) => example.id === selectedExampleId) || examples[0],
     [examples, selectedExampleId]
@@ -702,7 +739,11 @@ export function SafeGuardCommandCenter({
               id="field-command-input"
               className="textarea command-console-input"
               value={question}
-              onChange={(event) => setQuestion(event.target.value)}
+              onChange={(event) => {
+                setQuestion(event.target.value);
+                setSelectedExampleId(null);
+                setData(null);
+              }}
               maxLength={inputLimit}
               placeholder="오늘 작업 내용을 한 줄로 입력하세요."
               aria-describedby="field-command-tips"
@@ -738,11 +779,11 @@ export function SafeGuardCommandCenter({
               <button
                 key={example.id}
                 type="button"
-                className={`quick-chip ${example.id === selectedExample.id ? "active" : ""}`}
+                className={`quick-chip ${example.id === selectedExampleId ? "active" : ""}`}
                 onClick={() => selectExample(example)}
-                aria-pressed={example.id === selectedExample.id}
+                aria-pressed={example.id === selectedExampleId}
               >
-                {example.id === selectedExample.id ? <span aria-hidden="true">✓</span> : null}
+                {example.id === selectedExampleId ? <span aria-hidden="true">✓</span> : null}
                 {example.label}
               </button>
             ))}

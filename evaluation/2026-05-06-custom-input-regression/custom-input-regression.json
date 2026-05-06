@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-05-06T20:04:45.7749309+09:00",
+  "input": "가온테크인씨 천장에 비가새서 유지보수 작업을 해야해 이건 비정형 작업이고 2인1조로 작업할거야",
+  "result": "pass",
+  "scenario": {
+    "companyName": "가온테크인씨",
+    "companyType": "시설관리·유지보수",
+    "siteName": "가온테크인씨 천장 누수 유지보수 현장",
+    "workSummary": "천장 누수 유지보수 작업",
+    "workerCount": 2,
+    "topRisk": "천장 누수 유지보수 중 고소작업 추락, 젖은 바닥 미끄러짐, 누전·감전, 천장재 낙하 위험",
+    "weatherNote": "우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요"
+  },
+  "checks": {
+    "no_demo_company": true,
+    "no_demo_site": true,
+    "company_extracted": true,
+    "worker_count_two": true,
+    "facility_maintenance": true,
+    "leak_work_detected": true,
+    "risk_mentions_leak": true,
+    "risk_mentions_electricity": true,
+    "risk_mentions_slip_or_wet_floor": true,
+    "tbm_mentions_two_person_watch": true,
+    "risk_mentions_power_isolation": true
+  },
+  "notes": [
+    "Custom textarea input must not inherit selected demo example values.",
+    "Gemini/live answer path is not enough; scenario and deliverables must be generated from the current input context.",
+    "HWPX renderer remains text-based submission draft and is not asserted as cell-perfect public-institution form reproduction."
+  ]
+}
