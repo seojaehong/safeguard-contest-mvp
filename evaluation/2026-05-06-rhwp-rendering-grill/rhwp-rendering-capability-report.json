@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "generatedAt": "2026-05-06T11:48:09.647Z",
+  "rhwpPackage": "@rhwp/core",
+  "outputs": {
+    "hwp": {
+      "path": "evaluation/2026-05-06-rhwp-rendering-grill/rhwp-structured-table.hwp",
+      "bytes": 13824,
+      "verify": {
+        "bytesLen": 13824,
+        "pageCountBefore": 1,
+        "pageCountAfter": 1,
+        "recovered": true
+      },
+      "tablePreviewHtml": "evaluation/2026-05-06-rhwp-rendering-grill/rhwp-table-preview.html",
+      "proves": [
+        "rhwp can create an editable HWP document from code.",
+        "rhwp can create a table control and populate Korean text inside cells.",
+        "rhwp can export the table control to HTML for preview or QA."
+      ]
+    },
+    "hwpx": {
+      "path": "evaluation/2026-05-06-rhwp-rendering-grill/rhwp-text-submit-draft.hwpx",
+      "bytes": 6844,
+      "hasKoreanText": true,
+      "hasSignatureFields": true,
+      "proves": [
+        "rhwp can export a valid HWPX package with Korean text.",
+        "The current SafeClaw-safe path should use HWPX as a structured submission draft, not a cell-perfect template clone."
+      ]
+    }
+  },
+  "limitation": {
+    "currentHwpExportStrength": "Best for showing table/cell based Hangul rendering capability.",
+    "currentHwpxExportStrength": "Best for valid Korean text HWPX draft output.",
+    "notYetClaimed": "Original public-institution HWPX cell-by-cell reproduction requires template mapping and separate compatibility QA."
+  },
+  "recommendedSafeClawUse": [
+    "Keep rhwp as the HWP/HWPX engine.",
+    "Expose HWPX as submission draft and HWP/table preview as Hangul rendering capability evidence.",
+    "Build customer-template mapping before claiming exact original-form reproduction."
+  ]
+}

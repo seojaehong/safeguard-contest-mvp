@@ -131,10 +131,10 @@ const templatePresets: TemplatePreset[] = [
   },
   {
     kind: "hwp",
-    label: "HWPX(rhwp 구조화)",
-    description: "rhwp로 생성한 구조화 HWPX입니다. 원본 한글 서식 1:1 복제는 아닙니다.",
-    previewTitle: "rhwp 문서 + 확인/서명란",
-    previewBullets: ["공식 서식 항목명 유지", "확인자·관리감독자 서명란", "표 병합·결재칸은 제출 전 확인"]
+    label: "HWPX 제출형 초안",
+    description: "rhwp로 생성한 한글 제출 보조 초안입니다. 원본 한글 서식 1:1 복제는 아닙니다.",
+    previewTitle: "rhwp 한글 문서 + 확인/서명란",
+    previewBullets: ["공식 서식 항목명 유지", "확인자·관리감독자 서명란", "원본 셀·결재칸은 제출 전 확인"]
   }
 ];
 
@@ -2023,7 +2023,7 @@ export function WorkpackEditor({
           </details>
           <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
           <p className="muted small">
-            출력 방식: PDF는 브라우저 인쇄/저장 화면, XLS는 HTML 호환 파일, HWPX는 rhwp 구조화 파일입니다.
+            출력 방식: PDF는 브라우저 인쇄/저장 화면, XLS는 HTML 호환 파일, HWPX는 rhwp 제출형 초안입니다.
           </p>
           <details className="advanced-downloads">
             <summary>전체 다운로드</summary>
@@ -2076,14 +2076,14 @@ export function WorkpackEditor({
               {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
             </p>
             <p className="muted small">
-              현재 출력물은 제출 필수 항목을 반영한 준제출형입니다. PDF는 브라우저 인쇄/저장, XLS는 HTML 호환, HWPX는 rhwp 구조화 파일이며 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
+              현재 출력물은 제출 필수 항목을 반영한 준제출형입니다. PDF는 브라우저 인쇄/저장, XLS는 HTML 호환, HWPX는 rhwp 제출형 초안이며 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
             </p>
           </div>
           <div className="download-bar">
             <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
             <button type="button" className="button secondary" onClick={downloadXls}>XLS(HTML 호환)</button>
             <button type="button" className="button" onClick={downloadHwpx} disabled={hwpxStatus === "building"}>
-              {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX(rhwp)"}
+              {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX 제출형 초안"}
             </button>
             <details className="advanced-downloads inline">
               <summary>베타 형식</summary>
@@ -2106,7 +2106,7 @@ export function WorkpackEditor({
         ) : null}
         {showFocusCue ? (
           <p className="editor-focus-message" aria-live="polite">
-            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF(브라우저 인쇄)·XLS(HTML 호환)·HWPX(rhwp)로 출력할 수 있습니다.
+            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF(브라우저 인쇄)·XLS(HTML 호환)·HWPX 제출형 초안으로 출력할 수 있습니다.
           </p>
         ) : null}
         <SafetyDocumentPreview
