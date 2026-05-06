@@ -17,6 +17,7 @@
     "smoke:final-e2e-matrix": "node ./scripts/final_e2e_matrix_runner.mjs",
     "smoke:final-99-gate": "node ./scripts/final_99_gate_runner.mjs",
     "hwpx:inventory": "node ./scripts/hwpx_template_inventory.mjs",
+    "hwpx:capability": "node ./scripts/rhwp_rendering_capability_smoke.mjs",
     "knowledge:seed": "node ./scripts/build_safety_knowledge_seed.mjs",
     "knowledge:smoke": "node ./scripts/knowledge_runtime_smoke.mjs",
     "knowledge:references": "python ./scripts/ingest_safety_reference_catalog.py",
