@@ -193,6 +193,23 @@ export type AskResponse = {
         documentReflectionLabel?: string;
       }>;
     };
+    safetyReference?: {
+      source: "safety-reference-catalog";
+      mode: "live" | "fallback" | "unconfigured";
+      query: string;
+      count: number;
+      totalItems: number;
+      message: string;
+      items: Array<{
+        id: string;
+        itemType: string;
+        title: string;
+        shortSummary?: string;
+        primaryDocuments: string[];
+        controls: string[];
+        evidenceRoleLabel?: string;
+      }>;
+    };
   };
   riskSummary: {
     title: string;

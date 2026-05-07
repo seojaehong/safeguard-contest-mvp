@@ -2,6 +2,7 @@ import { AskResponse } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
 import { buildMockAskResponse, mockSearchResults } from "./mock-data";
 import { generateAllDeliverables, type AiMode } from "./ai-deliverables";
+import { searchSafetyReferences, type SafetyReferenceItem } from "./safety-reference-catalog";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
 import { summarizeLegalSourceMix } from "./legal-sources";
 import { fetchWeatherSignal } from "./weather";
@@ -372,6 +373,18 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const koshaEducationPromise = fetchKoshaEducationRecommendations(question);
     const koshaPromise = fetchKoshaReferences(question);
     const koshaOpenApiPromise = fetchKoshaOpenApiEvidence(question);
+    // Track D: Supabase safety_reference_items (9920 rows) RAG.
+    const safetyReferencePromise = searchSafetyReferences({ query: question, limit: 8 }).catch((error) => {
+      console.error("safety reference search failed", error);
+      return {
+        ok: false,
+        configured: false,
+        query: question,
+        count: 0,
+        items: [] as SafetyReferenceItem[],
+        message: error instanceof Error ? error.message : String(error)
+      };
+    });
 
     const rawCitations = await rawCitationsPromise;
     const baseCitations = rawCitations.length ? rawCitations : await searchLegalSources("산업안전보건법");
@@ -388,14 +401,15 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         `AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다. 사유: ${message}`
       );
     });
-    const [weather, training, koshaEducation, kosha, koshaOpenApi, accidentCases, response] = await Promise.all([
+    const [weather, training, koshaEducation, kosha, koshaOpenApi, accidentCases, response, safetyReference] = await Promise.all([
       weatherPromise,
       trainingPromise,
       koshaEducationPromise,
       koshaPromise,
       koshaOpenApiPromise,
       accidentCasesPromise,
-      responsePromise
+      responsePromise,
+      safetyReferencePromise
     ]);
     const koreanLawMcpCount = citations.filter((item) => item.sourceSystem === "korean-law-mcp").length;
     const sourceMix = summarizeLegalSourceMix(citations);
@@ -444,7 +458,21 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // appendices below still apply on top of whichever body source we choose.
     const accidentLines = accidentCases.cases.slice(0, 5).map((c, i) => `${i + 1}. ${c.title} | ${c.preventionPoint}`);
     const trainingLinesCtx = training.recommendations.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
-    const koshaLinesCtx = kosha.references.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`);
+    // Track D: surface Supabase 9,920-row catalog into the AI prompt as additional ground.
+    // Combines KOSHA file refs + Supabase reference items, deduped by title.
+    const referenceLineMap = new Map<string, string>();
+    for (const r of kosha.references.slice(0, 5)) {
+      referenceLineMap.set(r.title, `${r.title} | ${r.url}`);
+    }
+    for (const r of safetyReference.items.slice(0, 8)) {
+      const tag = r.item_type ? `[${r.item_type}]` : "";
+      const docs = (r.primary_documents || []).slice(0, 3).join("·");
+      const controls = (r.controls || []).slice(0, 2).join(" / ");
+      const summary = r.short_summary || r.summary || "";
+      const line = `${tag} ${r.title} | 반영문서: ${docs || "-"} | 통제: ${controls || "-"} | ${summary}`.trim();
+      if (!referenceLineMap.has(r.title)) referenceLineMap.set(r.title, line);
+    }
+    const koshaLinesCtx = Array.from(referenceLineMap.values()).slice(0, 12).map((line, i) => `${i + 1}. ${line}`);
 
     let aiBodies: Awaited<ReturnType<typeof generateAllDeliverables>> = {};
     let aiModeAppliedDetail = "AI_MODE=template (템플릿 본문 사용)";
@@ -488,6 +516,23 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         kosha,
         koshaOpenApi,
         accidentCases,
+        safetyReference: {
+          source: "safety-reference-catalog",
+          mode: safetyReference.configured ? (safetyReference.ok ? "live" : "fallback") : "unconfigured",
+          query: safetyReference.query,
+          count: safetyReference.count,
+          totalItems: safetyReference.items.length,
+          message: safetyReference.message,
+          items: safetyReference.items.slice(0, 8).map((r) => ({
+            id: r.id,
+            itemType: r.item_type,
+            title: r.title,
+            shortSummary: r.short_summary || r.summary,
+            primaryDocuments: r.primary_documents || [],
+            controls: r.controls || [],
+            evidenceRoleLabel: r.evidence_role_label
+          }))
+        },
         safetyKnowledge: {
           source: "safety-knowledge",
           mode: "live",
@@ -528,7 +573,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / ${aiModeAppliedDetail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / ${aiModeAppliedDetail}`
       },
       sourceMix
     };
