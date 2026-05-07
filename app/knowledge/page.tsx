@@ -104,7 +104,7 @@ export default async function KnowledgePage() {
       <section className="card knowledge-index-card">
         <div className="compact-head">
           <span className="eyebrow">KOSHA Technical Support</span>
-          <strong>문서 반영용 근거 샘플</strong>
+          <strong>문서 반영용 KOSHA 기술 지원 자료</strong>
         </div>
         <p className="muted small">
           아래 항목은 원문 목록이 아니라 보완 생성에 쓰는 역할, 짧은 요약, 문서 반영 위치만 보여줍니다.
