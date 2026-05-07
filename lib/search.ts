@@ -1,6 +1,8 @@
 import { AskResponse } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
 import { buildMockAskResponse, mockSearchResults } from "./mock-data";
+import { generateAllDeliverables, type AiMode } from "./ai-deliverables";
+import { searchSafetyReferences, type SafetyReferenceItem } from "./safety-reference-catalog";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
 import { summarizeLegalSourceMix } from "./legal-sources";
 import { fetchWeatherSignal } from "./weather";
@@ -145,6 +147,58 @@ function formatKoshaOpenApiAppendix(
     `[근거 요약: ${targetLabel}]`,
     ...matched.slice(0, 2).map((item) => (
       `- ${item.service}: ${item.title} 자료를 확인해 ${getTargetAction(target)}`
+    ))
+  ].join("\n");
+}
+
+type CompressedSafetyReference = {
+  id: string;
+  title: string;
+  reflectsDocuments: string[];
+  evidenceShort: string;
+  documentSentence: string;
+};
+
+/**
+ * Compress raw Supabase safety_reference_items into a "문서 반영 문장" form.
+ * Per Hermes review: never inject the raw catalog into the AI prompt or document body —
+ * keep it short, name the reflection target, and write a sentence that the document
+ * can directly use as a control statement. Also dedupe near-identical entries.
+ */
+function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5): CompressedSafetyReference[] {
+  const seen = new Set<string>();
+  const out: CompressedSafetyReference[] = [];
+  for (const item of items) {
+    const evidenceCore = (item.controls || []).slice(0, 1).join(", ");
+    const summary = item.short_summary || item.summary || "";
+    const dedupeKey = `${(item.controls || []).join("|")}|${(item.primary_documents || []).join("|")}`;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+    const documents = (item.primary_documents || []).filter(Boolean).slice(0, 3);
+    const evidenceShort = (evidenceCore || summary).replace(/\s+/g, " ").trim().slice(0, 80);
+    const sentenceBase = summary.replace(/\s+/g, " ").trim();
+    const documentSentence = sentenceBase.endsWith(".") || sentenceBase.endsWith("다") || sentenceBase.endsWith("요")
+      ? sentenceBase
+      : `${sentenceBase}.`;
+    out.push({
+      id: item.id,
+      title: item.title,
+      reflectsDocuments: documents,
+      evidenceShort,
+      documentSentence: documentSentence.slice(0, 200)
+    });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): string {
+  if (!items.length) return "";
+  return [
+    "",
+    "[내부 안전지식 DB 반영]",
+    ...items.map((item) => (
+      `- 반영 위치: ${item.reflectsDocuments.join(" / ") || "현장 확인 필요"} / 근거: ${item.evidenceShort || item.title} / 문서 문장: ${item.documentSentence}`
     ))
   ].join("\n");
 }
@@ -352,7 +406,13 @@ function formatSeriousAccidentReferenceAppendix(target: "risk" | "tbm" | "educat
   ].join("\n");
 }
 
-export async function runAsk(question: string): Promise<AskResponse> {
+export type RunAskOptions = {
+  aiMode?: AiMode;
+};
+
+export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
+  const requestedMode: AiMode = options.aiMode || ((process.env.AI_MODE_DEFAULT as AiMode | undefined) || "template");
+  const aiMode: AiMode = ["template", "enhanced", "full"].includes(requestedMode) ? requestedMode : "template";
   try {
     const accidentCasesPromise = fetchAccidentCases(question, {
       requestTimeoutMs: 5_000,
@@ -365,6 +425,18 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const koshaEducationPromise = fetchKoshaEducationRecommendations(question);
     const koshaPromise = fetchKoshaReferences(question);
     const koshaOpenApiPromise = fetchKoshaOpenApiEvidence(question);
+    // Track D: Supabase safety_reference_items (9920 rows) RAG.
+    const safetyReferencePromise = searchSafetyReferences({ query: question, limit: 8 }).catch((error) => {
+      console.error("safety reference search failed", error);
+      return {
+        ok: false,
+        configured: false,
+        query: question,
+        count: 0,
+        items: [] as SafetyReferenceItem[],
+        message: error instanceof Error ? error.message : String(error)
+      };
+    });
 
     const rawCitations = await rawCitationsPromise;
     const baseCitations = rawCitations.length ? rawCitations : await searchLegalSources("산업안전보건법");
@@ -381,14 +453,15 @@ export async function runAsk(question: string): Promise<AskResponse> {
         `AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다. 사유: ${message}`
       );
     });
-    const [weather, training, koshaEducation, kosha, koshaOpenApi, accidentCases, response] = await Promise.all([
+    const [weather, training, koshaEducation, kosha, koshaOpenApi, accidentCases, response, safetyReference] = await Promise.all([
       weatherPromise,
       trainingPromise,
       koshaEducationPromise,
       koshaPromise,
       koshaOpenApiPromise,
       accidentCasesPromise,
-      responsePromise
+      responsePromise,
+      safetyReferencePromise
     ]);
     const koreanLawMcpCount = citations.filter((item) => item.sourceSystem === "korean-law-mcp").length;
     const sourceMix = summarizeLegalSourceMix(citations);
@@ -433,6 +506,47 @@ export async function runAsk(question: string): Promise<AskResponse> {
     const foreignWorkerLanguages = buildForeignWorkerLanguages(foreignWorkerInput);
     const tbmQualityAppendix = formatTbmQualityAppendix(response, weather, foreignWorkerLanguages, kosha.references);
 
+    // Track C: Optionally call Gemini for the document bodies. The decoration
+    // appendices below still apply on top of whichever body source we choose.
+    const accidentLines = accidentCases.cases.slice(0, 5).map((c, i) => `${i + 1}. ${c.title} | ${c.preventionPoint}`);
+    const trainingLinesCtx = training.recommendations.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
+    // Track D: 9,920-row catalog → compress top hits to a "문서 반영 문장" form
+    // before feeding the AI / appending to documents. Raw dumps were rejected per
+    // review (would balloon the AI context and turn safety drafts into evidence dumps).
+    const safetyReferenceCompressed = compressSafetyReferenceMatches(safetyReference.items, 5);
+    const safetyReferenceAppendix = formatSafetyReferenceAppendix(safetyReferenceCompressed);
+    // For the AI prompt context, give a short summary form (not the appendix verbatim).
+    const koshaLinesCtx = [
+      ...kosha.references.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`),
+      ...safetyReferenceCompressed.slice(0, 5).map((c, i) => `${kosha.references.slice(0, 5).length + i + 1}. [내부지식DB] ${c.title} | 반영: ${c.reflectsDocuments.join("·") || "-"} | ${c.documentSentence}`)
+    ].slice(0, 12);
+
+    let aiBodies: Awaited<ReturnType<typeof generateAllDeliverables>> = {};
+    let aiModeAppliedDetail = "AI_MODE=template (템플릿 본문 사용)";
+    if (aiMode === "enhanced" || aiMode === "full") {
+      try {
+        aiBodies = await generateAllDeliverables({
+          scenario: response.scenario,
+          question,
+          citations: citations.slice(0, 6),
+          weatherSummary: weather.summary,
+          trainingLines: trainingLinesCtx,
+          koshaLines: koshaLinesCtx,
+          accidentLines,
+          scope: aiMode === "full" ? "full" : "enhanced"
+        });
+        const filled = Object.keys(aiBodies);
+        aiModeAppliedDetail = `AI_MODE=${aiMode} (Gemini 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"})`;
+      } catch (error) {
+        console.error("AI deliverable generation failed; falling back to template bodies", error);
+        aiModeAppliedDetail = `AI_MODE=${aiMode} 실패 → 템플릿 fallback`;
+      }
+    }
+    const baseDeliverables = {
+      ...response.deliverables,
+      ...Object.fromEntries(Object.entries(aiBodies).filter(([, v]) => v != null))
+    };
+
     const enriched: AskResponse = {
       ...response,
       answer: [
@@ -449,6 +563,23 @@ export async function runAsk(question: string): Promise<AskResponse> {
         kosha,
         koshaOpenApi,
         accidentCases,
+        safetyReference: {
+          source: "safety-reference-catalog",
+          mode: safetyReference.configured ? (safetyReference.ok ? "live" : "fallback") : "unconfigured",
+          query: safetyReference.query,
+          count: safetyReference.count,
+          totalItems: safetyReference.items.length,
+          message: safetyReference.message,
+          items: safetyReference.items.slice(0, 8).map((r) => ({
+            id: r.id,
+            itemType: r.item_type,
+            title: r.title,
+            shortSummary: r.short_summary || r.summary,
+            primaryDocuments: r.primary_documents || [],
+            controls: r.controls || [],
+            evidenceRoleLabel: r.evidence_role_label
+          }))
+        },
         safetyKnowledge: {
           source: "safety-knowledge",
           mode: "live",
@@ -468,20 +599,20 @@ export async function runAsk(question: string): Promise<AskResponse> {
         }
       },
       deliverables: {
-        ...response.deliverables,
-        workpackSummaryDraft: `${response.deliverables.workpackSummaryDraft}\n\n[연결 상태 요약]\n- 법령 근거: ${legalEvidenceMode === "live" ? "연결됨" : "일부 근거 보류"}\n- 기상: ${weather.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- 후속 교육: ${training.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- KOSHA 자료: ${kosha.mode === "live" ? "연결됨" : "일부 근거 보류"}`,
-        riskAssessmentDraft: `${response.deliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${outdoorHeatRiskAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${safetyKnowledgeAppendix}${riskKoshaOpenApiAppendix}`,
-        workPlanDraft: `${response.deliverables.workPlanDraft}${outdoorHeatRiskAppendix}${workPlanLegalAppendix}${workPlanKoshaAppendix}${safetyKnowledgeAppendix}${workPlanKoshaOpenApiAppendix}`,
-        tbmBriefing: `${response.deliverables.tbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}`,
-        tbmLogDraft: `${response.deliverables.tbmLogDraft}${tbmQualityAppendix}`
+        ...baseDeliverables,
+        workpackSummaryDraft: `${baseDeliverables.workpackSummaryDraft}\n\n[연결 상태 요약]\n- 법령 근거: ${legalEvidenceMode === "live" ? "연결됨" : "일부 근거 보류"}\n- 기상: ${weather.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- 후속 교육: ${training.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- KOSHA 자료: ${kosha.mode === "live" ? "연결됨" : "일부 근거 보류"}`,
+        riskAssessmentDraft: `${baseDeliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${outdoorHeatRiskAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${riskKoshaOpenApiAppendix}`,
+        workPlanDraft: `${baseDeliverables.workPlanDraft}${outdoorHeatRiskAppendix}${workPlanLegalAppendix}${workPlanKoshaAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${workPlanKoshaOpenApiAppendix}`,
+        tbmBriefing: `${baseDeliverables.tbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}${safetyReferenceAppendix}`,
+        tbmLogDraft: `${baseDeliverables.tbmLogDraft}${tbmQualityAppendix}`
           .trim(),
-        safetyEducationRecordDraft: `${response.deliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`,
-        emergencyResponseDraft: `${response.deliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}${emergencyKoshaOpenApiAppendix}`,
-        photoEvidenceDraft: ensurePhotoEvidenceDraft(response.deliverables.photoEvidenceDraft, photoEvidenceAppendix),
-        foreignWorkerBriefing: buildForeignWorkerBriefing(foreignWorkerInput),
-        foreignWorkerTransmission: buildForeignWorkerTransmission(foreignWorkerInput),
+        safetyEducationRecordDraft: `${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`,
+        emergencyResponseDraft: `${baseDeliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}${emergencyKoshaOpenApiAppendix}`,
+        photoEvidenceDraft: ensurePhotoEvidenceDraft(baseDeliverables.photoEvidenceDraft, photoEvidenceAppendix),
+        foreignWorkerBriefing: aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput),
+        foreignWorkerTransmission: aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput),
         foreignWorkerLanguages,
-        kakaoMessage: `${response.deliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${buildForeignWorkerTransmission(foreignWorkerInput).split("\n").slice(0, 8).join("\n")}`
+        kakaoMessage: `${baseDeliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${(aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput)).split("\n").slice(0, 8).join("\n")}`
       },
       status: {
         ...response.status,
@@ -489,7 +620,7 @@ export async function runAsk(question: string): Promise<AskResponse> {
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / ${aiModeAppliedDetail}`
       },
       sourceMix
     };

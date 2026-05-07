@@ -6,6 +6,7 @@ import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { initSync, HwpDocument } from "@rhwp/core";
+import ExcelJS from "exceljs";
 
 const baseUrl = process.env.SAFEGUARD_BASE_URL || "https://safeguard-contest-mvp.vercel.app";
 const outDir = path.resolve(process.env.SAFEGUARD_OUT_DIR || path.join(process.cwd(), "evaluation", "2026-04-29-orchestration-download-smoke"));
@@ -246,6 +247,153 @@ function buildHwpx(body) {
   }
 }
 
+// Real .hwp binary with table grid (한컴 native).
+// rhwp's exportHwp() supports tables; exportHwpx() does NOT (silent table drop).
+function buildHwpWithTables(title, scenario, rows) {
+  globalThis.measureTextWidth = (_font, text) => text.length * 12;
+  const wasm = fs.readFileSync(path.join(process.cwd(), "node_modules", "@rhwp", "core", "rhwp_bg.wasm"));
+  initSync({ module: wasm });
+  const document = HwpDocument.createEmpty();
+  const tableInfo = [];
+  try {
+    document.createBlankDocument();
+    document.insertText(0, 0, 0, `${title}(공식자료 기반 표 양식)\nSafeClaw · 현장 검토 후 사용\n\n`);
+
+    // Meta table 4x2
+    {
+      const meta = JSON.parse(document.createTable(0, 0, 0, 2, 4));
+      if (meta.ok && typeof meta.paraIdx === "number") {
+        tableInfo.push({ kind: "meta", rows: 2, cols: 4 });
+        const data = [
+          ["사업장", scenario.companyName || "", "현장/공정", scenario.siteName || ""],
+          [
+            "작업내용",
+            scenario.workSummary || "",
+            "인원/조건",
+            `${scenario.workerCount || 0}명 · ${scenario.weatherNote || ""}`
+          ]
+        ];
+        data.forEach((row, rIdx) => {
+          row.forEach((value, cIdx) => {
+            const cellIdx = rIdx * 4 + cIdx;
+            document.insertTextInCell(0, meta.paraIdx, meta.controlIdx ?? 0, cellIdx, 0, 0, String(value));
+          });
+        });
+      }
+    }
+    document.insertText(0, 0, 0, "\n");
+
+    // Body table — derive from rows
+    const cols = ["구분", "항목", "내용", "확인"];
+    const bodyRows = rows.map((r) => [r.section || "", r.item || "", r.content || "", "□"]);
+    const allRows = [cols, ...bodyRows];
+    if (allRows.length >= 1) {
+      const body = JSON.parse(document.createTable(0, 0, 0, allRows.length, cols.length));
+      if (body.ok && typeof body.paraIdx === "number") {
+        tableInfo.push({ kind: "body", rows: allRows.length, cols: cols.length });
+        allRows.forEach((row, rIdx) => {
+          row.forEach((value, cIdx) => {
+            const cellIdx = rIdx * cols.length + cIdx;
+            document.insertTextInCell(0, body.paraIdx, body.controlIdx ?? 0, cellIdx, 0, 0, String(value));
+          });
+        });
+      }
+    }
+
+    document.insertText(
+      0,
+      0,
+      0,
+      "\n\n[확인/서명]\n작성자: ____________________\n관리감독자: ____________________\n확인일시: ______년 ____월 ____일 ____시 ____분"
+    );
+
+    const buffer = Buffer.from(document.exportHwp());
+    return { buffer, tableInfo };
+  } finally {
+    document.free();
+  }
+}
+
+// Real .xlsx OOXML via ExcelJS — opens cleanly in Excel/한셀 with no extension warning.
+async function buildXlsxWithTables(title, scenario, rows) {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "SafeClaw";
+  wb.created = new Date();
+  const sheet = wb.addWorksheet(title.slice(0, 31), {
+    pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
+  });
+  sheet.columns = [{ width: 6 }, { width: 16 }, { width: 30 }, { width: 50 }, { width: 12 }, { width: 14 }];
+  const HEADER_FILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1F4D43" } };
+  const HEADER_FONT = { name: "Malgun Gothic", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+  const BORDER = { style: "thin", color: { argb: "FF9AA4B2" } };
+  const ALL_BORDERS = { top: BORDER, left: BORDER, bottom: BORDER, right: BORDER };
+
+  let row = 1;
+  sheet.mergeCells(row, 1, row, 6);
+  sheet.getCell(row, 1).value = `${title}  ·  SafeClaw 안전 양식`;
+  sheet.getCell(row, 1).font = { name: "Malgun Gothic", size: 16, bold: true, color: { argb: "FF1F4D43" } };
+  sheet.getCell(row, 1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8F1ED" } };
+  sheet.getRow(row).height = 32;
+  row += 1;
+
+  const meta = [
+    [["사업장", scenario.companyName || ""], ["현장/공정", scenario.siteName || ""]],
+    [["작업내용", scenario.workSummary || ""], ["인원/조건", `${scenario.workerCount || 0}명 · ${scenario.weatherNote || ""}`]]
+  ];
+  for (const pair of meta) {
+    const [[lbl1, val1], [lbl2, val2]] = pair;
+    sheet.getCell(row, 1).value = lbl1;
+    sheet.mergeCells(row, 2, row, 3);
+    sheet.getCell(row, 2).value = val1;
+    sheet.getCell(row, 4).value = lbl2;
+    sheet.mergeCells(row, 5, row, 6);
+    sheet.getCell(row, 5).value = val2;
+    [1, 4].forEach((c) => {
+      sheet.getCell(row, c).fill = HEADER_FILL;
+      sheet.getCell(row, c).font = HEADER_FONT;
+      sheet.getCell(row, c).alignment = { vertical: "middle", horizontal: "center" };
+    });
+    [2, 5].forEach((c) => {
+      sheet.getCell(row, c).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    });
+    for (let c = 1; c <= 6; c += 1) sheet.getCell(row, c).border = ALL_BORDERS;
+    row += 1;
+  }
+  row += 1;
+
+  const cols = ["No.", "구분", "항목", "내용", "확인", "담당"];
+  cols.forEach((col, idx) => {
+    const cell = sheet.getCell(row, idx + 1);
+    cell.value = col;
+    cell.fill = HEADER_FILL;
+    cell.font = HEADER_FONT;
+    cell.alignment = { vertical: "middle", horizontal: "center" };
+    cell.border = ALL_BORDERS;
+  });
+  sheet.getRow(row).height = 22;
+  row += 1;
+
+  rows.forEach((r, idx) => {
+    sheet.getCell(row, 1).value = idx + 1;
+    sheet.getCell(row, 2).value = r.section || "";
+    sheet.getCell(row, 3).value = r.item || "";
+    sheet.getCell(row, 4).value = r.content || "";
+    sheet.getCell(row, 5).value = "□";
+    sheet.getCell(row, 6).value = "______";
+    [1, 5].forEach((c) => {
+      sheet.getCell(row, c).alignment = { vertical: "middle", horizontal: "center" };
+    });
+    [3, 4].forEach((c) => {
+      sheet.getCell(row, c).alignment = { vertical: "top", horizontal: "left", wrapText: true };
+    });
+    for (let c = 1; c <= 6; c += 1) sheet.getCell(row, c).border = ALL_BORDERS;
+    row += 1;
+  });
+
+  const buffer = await wb.xlsx.writeBuffer();
+  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+}
+
 function findChrome() {
   const candidates = [
     chromePath,
@@ -362,7 +510,7 @@ function buildApiMapping(weather, ask) {
   ];
 }
 
-function writeDownloads(ask, filesDir) {
+async function writeDownloads(ask, filesDir) {
   const company = sanitizeFileName(ask.scenario?.companyName || "safeguard");
   const values = Object.fromEntries(documentMeta.map(([key]) => [key, ask.deliverables?.[key] || ""]));
   const sampleMeta = documentMeta[1];
@@ -383,6 +531,15 @@ function writeDownloads(ask, filesDir) {
 
   outputs.forEach((item) => item.write());
 
+  // Real-format outputs (track A): .hwp with table grid + .xlsx OOXML
+  const hwpPath = path.join(filesDir, `${company}-${sampleMeta[2]}.hwp`);
+  const hwp = buildHwpWithTables(sampleTitle, ask.scenario, rows);
+  fs.writeFileSync(hwpPath, hwp.buffer);
+
+  const xlsxPath = path.join(filesDir, `${company}-${sampleMeta[2]}.xlsx`);
+  const xlsxBuffer = await buildXlsxWithTables(sampleTitle, ask.scenario, rows);
+  fs.writeFileSync(xlsxPath, xlsxBuffer);
+
   const pdfPath = path.join(filesDir, `${company}-${sampleMeta[2]}.pdf`);
   const jpgPath = path.join(filesDir, `${company}-${sampleMeta[2]}.jpg`);
   const userDataDir = path.join(os.tmpdir(), `safeguard-chrome-${Date.now()}`);
@@ -399,14 +556,59 @@ function writeDownloads(ask, filesDir) {
   fs.writeFileSync(allCsvPath, `\uFEFF${buildDelimited(allRows, ",")}`, "utf8");
   fs.writeFileSync(allXlsPath, buildExcelHtml("SafeGuard 문서팩", allRows), "utf8");
 
+  // Verify HWP magic + XLSX structural integrity (zip + sheet + cells).
+  const verify = await verifyRealFormats({
+    hwpPath,
+    xlsxPath,
+    sampleTitle
+  });
+
   return [
     ...outputs.map((item) => ({ format: item.format, file: path.relative(process.cwd(), item.path), bytes: sizeOf(item.path), ok: sizeOf(item.path) > 100 })),
+    { format: "HWP_TABLE", file: path.relative(process.cwd(), hwpPath), bytes: sizeOf(hwpPath), ok: sizeOf(hwpPath) > 1000 && verify.hwp.cfbf_magic, tableInfo: hwp.tableInfo, magic: verify.hwp.cfbf_magic },
+    { format: "XLSX_OOXML", file: path.relative(process.cwd(), xlsxPath), bytes: sizeOf(xlsxPath), ok: sizeOf(xlsxPath) > 1000 && verify.xlsx.has_sheet && verify.xlsx.has_title, sheetNames: verify.xlsx.sheets, headerCellOk: verify.xlsx.header_cell_ok, bodyCellOk: verify.xlsx.body_cell_ok },
     { format: "PDF", file: path.relative(process.cwd(), pdfPath), bytes: sizeOf(pdfPath), ok: sizeOf(pdfPath) > 1000 },
     { format: "JPG", file: path.relative(process.cwd(), jpgPath), bytes: sizeOf(jpgPath), ok: sizeOf(jpgPath) > 1000 },
     { format: "ALL_TXT", file: path.relative(process.cwd(), allTxtPath), bytes: sizeOf(allTxtPath), ok: sizeOf(allTxtPath) > 100 },
     { format: "ALL_CSV", file: path.relative(process.cwd(), allCsvPath), bytes: sizeOf(allCsvPath), ok: sizeOf(allCsvPath) > 100 },
     { format: "ALL_XLS", file: path.relative(process.cwd(), allXlsPath), bytes: sizeOf(allXlsPath), ok: sizeOf(allXlsPath) > 100 }
   ];
+}
+
+async function verifyRealFormats({ hwpPath, xlsxPath, sampleTitle }) {
+  const result = { hwp: { cfbf_magic: false }, xlsx: { has_sheet: false, has_title: false, sheets: [], header_cell_ok: false, body_cell_ok: false } };
+  try {
+    const hwpBytes = fs.readFileSync(hwpPath);
+    const expected = Buffer.from([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]);
+    result.hwp.cfbf_magic = hwpBytes.slice(0, 8).equals(expected);
+  } catch {
+    /* keep defaults */
+  }
+  try {
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.readFile(xlsxPath);
+    result.xlsx.sheets = wb.worksheets.map((w) => w.name);
+    result.xlsx.has_sheet = wb.worksheets.length > 0;
+    if (wb.worksheets[0]) {
+      const a1 = String(wb.worksheets[0].getCell(1, 1).value ?? "");
+      result.xlsx.has_title = a1.includes(sampleTitle.slice(0, 4));
+      // Find the body header row (No./구분/항목/내용/확인/담당)
+      for (let r = 1; r <= Math.min(20, wb.worksheets[0].actualRowCount || 20); r += 1) {
+        const c1 = String(wb.worksheets[0].getCell(r, 1).value ?? "");
+        const c2 = String(wb.worksheets[0].getCell(r, 2).value ?? "");
+        if (c1 === "No." && c2 === "구분") {
+          result.xlsx.header_cell_ok = true;
+          // Check next row has a body value
+          const bodyContent = String(wb.worksheets[0].getCell(r + 1, 4).value ?? "");
+          result.xlsx.body_cell_ok = bodyContent.length > 0;
+          break;
+        }
+      }
+    }
+  } catch {
+    /* keep defaults */
+  }
+  return result;
 }
 
 ensureDir(outDir);
@@ -430,7 +632,7 @@ if (!askResult.ok || !askResult.parsed?.deliverables) {
 }
 
 const apiMapping = buildApiMapping(weatherResult.parsed, askResult.parsed);
-const downloads = writeDownloads(askResult.parsed, filesDir);
+const downloads = await writeDownloads(askResult.parsed, filesDir);
 const failCount = downloads.filter((item) => !item.ok).length;
 const summary = {
   baseUrl,

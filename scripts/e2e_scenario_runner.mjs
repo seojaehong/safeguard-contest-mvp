@@ -33,7 +33,7 @@ try {
   pageChecks = {
     homeStatus: homeResponse.status,
     askPageStatus: askPageResponse.status,
-    ok: homeResponse.ok && askPageResponse.ok && homeHtml.includes("작업 전 문서팩") && askHtml.includes("질문형 확인 화면"),
+    ok: homeResponse.ok && askPageResponse.ok && homeHtml.includes("문서팩 생성") && askHtml.includes("질문형 확인 화면"),
   };
 } catch (error) {
   pageChecks = {
