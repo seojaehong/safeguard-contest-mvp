@@ -983,6 +983,7 @@ function buildHtml(
 // Excluded from the .xlsx / .hwp body table to keep the official form clean.
 const META_SECTION_PATTERNS = [
   /^연결 상태/,
+  /^KOSHA 기술지침\/기술지원규정 직접 인용/,
   /^내부 안전지식 DB 반영/,
   /^근거 요약/,
   /^문서 반영$/,
