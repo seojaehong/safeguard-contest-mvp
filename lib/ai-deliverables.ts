@@ -17,7 +17,11 @@ const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-flas
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "60000", 10);
 
 type GeminiResponse = {
-  candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  candidates?: Array<{
+    content?: { parts?: Array<{ text?: string }> };
+    finishReason?: string;
+  }>;
+  promptFeedback?: { blockReason?: string };
 };
 
 type Scenario = {
@@ -73,8 +77,15 @@ async function callGemini(prompt: string): Promise<string> {
         throw new Error(`Gemini ${model} HTTP ${response.status}`);
       }
       const parsed = (await response.json()) as GeminiResponse;
-      const text = parsed.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("").trim();
-      if (!text) throw new Error(`Gemini ${model} empty response`);
+      const candidate = parsed.candidates?.[0];
+      const text = candidate?.content?.parts?.map((p) => p.text || "").join("").trim();
+      if (!text) {
+        // Gemini가 텍스트 없이 finishReason만 반환하는 경우(MAX_TOKENS/SAFETY/RECITATION 등)를
+        // 그대로 throw해서 diagnostics에 어느 사유인지 노출. block 사유는 promptFeedback에 있음.
+        const finishReason = candidate?.finishReason || "unknown";
+        const blockReason = parsed.promptFeedback?.blockReason || "";
+        throw new Error(`Gemini ${model} empty response (finishReason=${finishReason}${blockReason ? ` blockReason=${blockReason}` : ""})`);
+      }
       return text;
     } catch (error) {
       lastError = error;
