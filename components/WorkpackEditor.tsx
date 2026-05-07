@@ -1611,6 +1611,8 @@ export function WorkpackEditor({
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
+  const [xlsxStatus, setXlsxStatus] = useState<"idle" | "building" | "error">("idle");
+  const [hwpStatus, setHwpStatus] = useState<"idle" | "building" | "error">("idle");
   const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
@@ -1775,10 +1777,62 @@ export function WorkpackEditor({
   }
 
   function downloadXls() {
+    // Legacy HTML-as-.xls — kept for backward compatibility but new UI prefers downloadXlsx().
     downloadBlob(
       new Blob([buildExcelHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows)], { type: "application/vnd.ms-excel;charset=utf-8" }),
       `${baseName}.xls`
     );
+  }
+
+  async function downloadXlsx() {
+    setXlsxStatus("building");
+    try {
+      const response = await fetch("/api/export/xlsx", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          mode: "single",
+          title: selected.title,
+          rows: selectedRows,
+          profile: selectedFormProfile,
+          scenario: data.scenario
+        })
+      });
+      if (!response.ok) {
+        throw new Error(`xlsx export failed (${response.status})`);
+      }
+      const blob = await response.blob();
+      downloadBlob(blob, `${baseName}.xlsx`);
+      setXlsxStatus("idle");
+    } catch (error) {
+      console.error("xlsx export failed", error);
+      setXlsxStatus("error");
+    }
+  }
+
+  async function downloadHwp() {
+    setHwpStatus("building");
+    try {
+      const response = await fetch("/api/export/hwp", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: selected.title,
+          rows: selectedRows,
+          profile: selectedFormProfile,
+          scenario: data.scenario
+        })
+      });
+      if (!response.ok) {
+        throw new Error(`hwp export failed (${response.status})`);
+      }
+      const blob = await response.blob();
+      downloadBlob(blob, `${baseName}.hwp`);
+      setHwpStatus("idle");
+    } catch (error) {
+      console.error("hwp export failed", error);
+      setHwpStatus("error");
+    }
   }
 
   function downloadDoc() {
@@ -2076,18 +2130,24 @@ export function WorkpackEditor({
               {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
             </p>
             <p className="muted small">
-              현재 출력물은 제출 필수 항목을 반영한 준제출형입니다. PDF는 브라우저 인쇄/저장, XLS는 HTML 호환, HWPX는 rhwp 제출형 초안이며 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
+              제출형 출력은 표 양식(Excel .xlsx · 한글 .hwp)을 우선 권장합니다. PDF는 브라우저 인쇄/저장, .hwpx는 텍스트 초안이며 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
             </p>
           </div>
           <div className="download-bar">
-            <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
-            <button type="button" className="button secondary" onClick={downloadXls}>XLS(HTML 호환)</button>
-            <button type="button" className="button" onClick={downloadHwpx} disabled={hwpxStatus === "building"}>
-              {hwpxStatus === "building" ? "HWPX 생성 중" : "HWPX 제출형 초안"}
+            <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
+              {xlsxStatus === "building" ? "Excel 생성 중" : "Excel 표 양식(.xlsx)"}
             </button>
+            <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
+              {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
+            </button>
+            <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
             <details className="advanced-downloads inline">
               <summary>베타 형식</summary>
               <div className="advanced-download-grid">
+                <button type="button" className="button secondary" onClick={downloadHwpx} disabled={hwpxStatus === "building"} title="rhwp 텍스트 기반 HWPX 초안 (표 미지원)">
+                  {hwpxStatus === "building" ? "HWPX 생성 중" : ".hwpx 텍스트 초안"}
+                </button>
+                <button type="button" className="button secondary" onClick={downloadXls} title="구버전 호환 HTML 기반 .xls (Excel 보안 경고 가능)">XLS(legacy)</button>
                 <button type="button" className="button secondary" onClick={downloadDoc} title="Word 또는 한글에서 열 수 있는 보고서형 문서">DOC</button>
                 <button type="button" className="button secondary" onClick={downloadText} title="메신저·메일 본문에 붙여넣기 쉬운 순수 텍스트">TXT</button>
                 <button type="button" className="button secondary" onClick={downloadJson} title="외부 시스템 연동과 자동화용 구조화 데이터">JSON</button>
@@ -2098,6 +2158,12 @@ export function WorkpackEditor({
             </details>
           </div>
         </div>
+        {xlsxStatus === "error" ? (
+          <p className="export-error">Excel(.xlsx) 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 PDF/XLS(legacy)를 사용해 주세요.</p>
+        ) : null}
+        {hwpStatus === "error" ? (
+          <p className="export-error">한글 표(.hwp) 생성 중 오류가 발생했습니다. .hwpx 텍스트 초안 또는 PDF를 사용해 주세요.</p>
+        ) : null}
         {hwpxStatus === "error" ? (
           <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
         ) : null}
