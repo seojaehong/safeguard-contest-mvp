@@ -85,7 +85,7 @@ export function SafeClawLanding() {
           <span><i /> 제품 · 운영 준비</span>
           <b>REGION · KR-CENTRAL</b>
           <b>PUBLIC API · ACTIVE</b>
-          <b>UPDATED · 2026-05-02</b>
+          <b>UPDATED · 2026-05-07</b>
         </div>
         <div className="safeclaw-os-hero-body">
           <div>
