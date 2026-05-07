@@ -320,7 +320,10 @@ export function WorkflowSharePanel({
   const targetLabel = formatMessageTargetLabel(data, selectedMessageTarget);
 
   return (
-    <article className="share-panel workflow-panel" id="dispatch">
+    // 시그니처 패턴 4/4: hazard-stripe-band — 가이드 §2.4 "1 location only" 규칙.
+    // 현장 전파 패널은 실제 발송이 일어나는 고위험 행동 구역이므로 좌측 12px
+    // 노랑/스틸 사선 띠로 시각 표시. 다른 패널엔 적용하지 않아 희소성 유지.
+    <article className="share-panel workflow-panel hazard-stripe-band" id="dispatch">
       <div className="compact-head">
         <span className="eyebrow">전파</span>
         <strong>현장 전파</strong>

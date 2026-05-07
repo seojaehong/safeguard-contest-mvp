@@ -95,7 +95,8 @@ export function SafeClawModuleShell({
           <Link href="/workspace" className="safeclaw-module-primary">작업 시작</Link>
         </header>
 
-        <section className="safeclaw-module-hero">
+        {/* 시그니처 패턴 3/4: HudCorners — 모듈 페이지마다 1개 hero 프레임에만 적용. */}
+        <section className="safeclaw-module-hero hud-corners">
           <div>
             <span className="safeclaw-module-eyebrow">{eyebrow}</span>
             <h1>{title}</h1>
