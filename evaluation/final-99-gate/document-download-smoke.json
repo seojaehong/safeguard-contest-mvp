@@ -1,28 +1,28 @@
 {
-  "verdict": "pass_with_notice",
+  "verdict": "blocked",
   "policyNotice": "HWPX는 원본 셀 단위 완전 복제가 아니라 제출형 초안입니다. 현장 검토 후 사용 고지를 유지합니다.",
-  "routeNotice": "현재 기준 prod /api/export/pdf 직접 라우트는 404입니다. 기존 다운로드 오케스트레이션이 PDF/HWPX/XLS 산출물을 생성했으므로 제출 게이트는 notice로 분리합니다.",
+  "routeNotice": "",
   "corePdf": {
-    "verdict": "blocked",
+    "verdict": "pass",
     "generatedCount": 4,
     "checks": [
       {
         "id": "risk-assessment",
         "title": "위험성평가표",
         "sourceKey": "riskAssessmentDraft",
-        "htmlStatus": 404,
-        "pdfStatus": 404,
-        "htmlPath": "evaluation\\final-99-gate\\core-pdf\\risk-assessment.error.html",
-        "pdfPath": "",
-        "pdfBytes": 0,
+        "htmlStatus": 200,
+        "pdfStatus": 200,
+        "htmlPath": "evaluation/final-99-gate/core-pdf/risk-assessment.html",
+        "pdfPath": "evaluation/final-99-gate/core-pdf/risk-assessment.pdf",
+        "pdfBytes": 6773,
         "requiredTerms": [
           {
             "term": "사전준비",
-            "present": false
+            "present": true
           },
           {
             "term": "유해",
-            "present": false
+            "present": true
           },
           {
             "term": "위험성",
@@ -30,67 +30,67 @@
           },
           {
             "term": "감소대책",
-            "present": false
+            "present": true
           },
           {
             "term": "확인",
-            "present": false
+            "present": true
           }
         ],
-        "hasUniqueStructure": false,
-        "hasSignatureOrCheck": false,
+        "hasUniqueStructure": true,
+        "hasSignatureOrCheck": true,
         "hasKoreanEncoding": true,
-        "verdict": "blocked"
+        "verdict": "pass"
       },
       {
         "id": "work-plan",
         "title": "작업계획서",
         "sourceKey": "workPlanDraft",
-        "htmlStatus": 404,
-        "pdfStatus": 404,
-        "htmlPath": "evaluation\\final-99-gate\\core-pdf\\work-plan.error.html",
-        "pdfPath": "",
-        "pdfBytes": 0,
+        "htmlStatus": 200,
+        "pdfStatus": 200,
+        "htmlPath": "evaluation/final-99-gate/core-pdf/work-plan.html",
+        "pdfPath": "evaluation/final-99-gate/core-pdf/work-plan.pdf",
+        "pdfBytes": 6629,
         "requiredTerms": [
           {
             "term": "작업개요",
-            "present": false
+            "present": true
           },
           {
             "term": "작업순서",
-            "present": false
+            "present": true
           },
           {
             "term": "장비",
-            "present": false
+            "present": true
           },
           {
             "term": "작업중지",
-            "present": false
+            "present": true
           },
           {
             "term": "확인",
-            "present": false
+            "present": true
           }
         ],
-        "hasUniqueStructure": false,
-        "hasSignatureOrCheck": false,
+        "hasUniqueStructure": true,
+        "hasSignatureOrCheck": true,
         "hasKoreanEncoding": true,
-        "verdict": "blocked"
+        "verdict": "pass"
       },
       {
         "id": "permit-inspection",
         "title": "허가/점검표",
         "sourceKey": "photoEvidenceDraft",
-        "htmlStatus": 404,
-        "pdfStatus": 404,
-        "htmlPath": "evaluation\\final-99-gate\\core-pdf\\permit-inspection.error.html",
-        "pdfPath": "",
-        "pdfBytes": 0,
+        "htmlStatus": 200,
+        "pdfStatus": 200,
+        "htmlPath": "evaluation/final-99-gate/core-pdf/permit-inspection.html",
+        "pdfPath": "evaluation/final-99-gate/core-pdf/permit-inspection.pdf",
+        "pdfBytes": 6622,
         "requiredTerms": [
           {
             "term": "허가",
-            "present": false
+            "present": true
           },
           {
             "term": "작업 전",
@@ -98,31 +98,31 @@
           },
           {
             "term": "첨부",
-            "present": false
+            "present": true
           },
           {
             "term": "종료",
-            "present": false
+            "present": true
           },
           {
             "term": "확인",
-            "present": false
+            "present": true
           }
         ],
-        "hasUniqueStructure": false,
-        "hasSignatureOrCheck": false,
+        "hasUniqueStructure": true,
+        "hasSignatureOrCheck": true,
         "hasKoreanEncoding": true,
-        "verdict": "blocked"
+        "verdict": "pass"
       },
       {
         "id": "tbm-log",
         "title": "TBM일지",
         "sourceKey": "tbmLogDraft",
-        "htmlStatus": 404,
-        "pdfStatus": 404,
-        "htmlPath": "evaluation\\final-99-gate\\core-pdf\\tbm-log.error.html",
-        "pdfPath": "",
-        "pdfBytes": 0,
+        "htmlStatus": 200,
+        "pdfStatus": 200,
+        "htmlPath": "evaluation/final-99-gate/core-pdf/tbm-log.html",
+        "pdfPath": "evaluation/final-99-gate/core-pdf/tbm-log.pdf",
+        "pdfBytes": 7106,
         "requiredTerms": [
           {
             "term": "TBM",
@@ -134,38 +134,30 @@
           },
           {
             "term": "기상",
-            "present": false
+            "present": true
           },
           {
             "term": "참석",
-            "present": false
+            "present": true
           },
           {
             "term": "확인",
-            "present": false
+            "present": true
           }
         ],
-        "hasUniqueStructure": false,
-        "hasSignatureOrCheck": false,
+        "hasUniqueStructure": true,
+        "hasSignatureOrCheck": true,
         "hasKoreanEncoding": true,
-        "verdict": "blocked"
+        "verdict": "pass"
       }
     ]
   },
   "orchestration": {
-    "verdict": "pass",
-    "status": 0,
-    "stdout": "{ \"ok\": true, \"outDir\": \"evaluation\\\\final-99-gate\\\\orchestration-download\", \"weatherMode\": \"live\", \"askMode\": \"live\", \"documentCount\": 11, \"downloadCount\": 12, \"failCount\": 0 } ",
-    "stderr": "",
-    "outDir": "evaluation\\final-99-gate\\orchestration-download",
-    "parsedStdout": {
-      "ok": true,
-      "outDir": "evaluation\\final-99-gate\\orchestration-download",
-      "weatherMode": "live",
-      "askMode": "live",
-      "documentCount": 11,
-      "downloadCount": 12,
-      "failCount": 0
-    }
+    "verdict": "blocked",
+    "status": 1,
+    "stdout": "",
+    "stderr": "file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:261 throw new Error(\"Chrome executable not found. Set CHROME_PATH to run PDF/JPG export smoke.\"); ^ Error: Chrome executable not found. Set CHROME_PATH to run PDF/JPG export smoke. at runChrome (file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:261:11) at writeDownloads (file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:389:3) at file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:433:19 at process.processTicksAndRejections (node:internal/process/task_queues:103:5) Node.js v22.22.2 ",
+    "outDir": "evaluation/final-99-gate/orchestration-download",
+    "parsedStdout": null
   }
 }

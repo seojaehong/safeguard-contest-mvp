@@ -1,9 +1,9 @@
 {
-  "baseUrl": "http://127.0.0.1:3000",
-  "totalRuns": 4,
-  "okCount": 4,
-  "failCount": 0,
-  "avgMs": 18578,
-  "p95Ms": 21117,
-  "generatedAt": "2026-04-25T06:07:48.961Z"
+  "baseUrl": "https://www.safeclaw.kr",
+  "totalRuns": 6,
+  "okCount": 0,
+  "failCount": 6,
+  "avgMs": 58768,
+  "p95Ms": 84625,
+  "generatedAt": "2026-05-07T02:52:19.742Z"
 }

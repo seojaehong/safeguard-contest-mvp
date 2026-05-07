@@ -1,248 +1,26 @@
 {
-  "verdict": "pass",
+  "verdict": "blocked",
   "scenarios": [
     {
       "id": "seoul-construction-windy",
       "title": "서울 건설 강풍",
-      "verdict": "pass",
-      "reportPath": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\api-orchestration-download-smoke.json",
-      "missing": [],
-      "downloads": [
-        {
-          "format": "TXT",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.txt",
-          "bytes": 8243,
-          "ok": true
-        },
-        {
-          "format": "JSON",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.json",
-          "bytes": 8792,
-          "ok": true
-        },
-        {
-          "format": "CSV",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.csv",
-          "bytes": 12602,
-          "ok": true
-        },
-        {
-          "format": "XLS",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.xls",
-          "bytes": 19653,
-          "ok": true
-        },
-        {
-          "format": "DOC",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.doc",
-          "bytes": 12706,
-          "ok": true
-        },
-        {
-          "format": "HTML",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.html",
-          "bytes": 8821,
-          "ok": true
-        },
-        {
-          "format": "HWPX",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.hwpx",
-          "bytes": 11230,
-          "ok": true
-        },
-        {
-          "format": "PDF",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.pdf",
-          "bytes": 297979,
-          "ok": true
-        },
-        {
-          "format": "JPG",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.jpg",
-          "bytes": 169555,
-          "ok": true
-        },
-        {
-          "format": "ALL_TXT",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.txt",
-          "bytes": 85312,
-          "ok": true
-        },
-        {
-          "format": "ALL_CSV",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.csv",
-          "bytes": 122797,
-          "ok": true
-        },
-        {
-          "format": "ALL_XLS",
-          "file": "evaluation\\submission-readiness\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.xls",
-          "bytes": 162022,
-          "ok": true
-        }
-      ]
+      "verdict": "blocked",
+      "message": "Command failed: /usr/bin/node ./scripts/prod_orchestration_download_smoke.mjs\nfile:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:261\n    throw new Error(\"Chrome executable not found. Set CHROME_PATH to run PDF/JPG export smoke.\");\n          ^\n\nError: Chrome executable not found. Set CHROME_PATH to run PDF/JPG export smoke.\n    at runChrome (file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:261:11)\n    at writeDownloads (file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:389:3)\n    at file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:433:19\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n\nNode.js v22.22.2\n",
+      "reportPath": "evaluation/submission-readiness/formats/seoul-construction-windy"
     },
     {
       "id": "incheon-logistics-rain",
       "title": "인천 물류 우천",
-      "verdict": "pass",
-      "reportPath": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\api-orchestration-download-smoke.json",
-      "missing": [],
-      "downloads": [
-        {
-          "format": "TXT",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.txt",
-          "bytes": 8124,
-          "ok": true
-        },
-        {
-          "format": "JSON",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.json",
-          "bytes": 8679,
-          "ok": true
-        },
-        {
-          "format": "CSV",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.csv",
-          "bytes": 12327,
-          "ok": true
-        },
-        {
-          "format": "XLS",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.xls",
-          "bytes": 19279,
-          "ok": true
-        },
-        {
-          "format": "DOC",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.doc",
-          "bytes": 12521,
-          "ok": true
-        },
-        {
-          "format": "HTML",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.html",
-          "bytes": 8702,
-          "ok": true
-        },
-        {
-          "format": "HWPX",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.hwpx",
-          "bytes": 11171,
-          "ok": true
-        },
-        {
-          "format": "PDF",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.pdf",
-          "bytes": 297183,
-          "ok": true
-        },
-        {
-          "format": "JPG",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.jpg",
-          "bytes": 164855,
-          "ok": true
-        },
-        {
-          "format": "ALL_TXT",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.txt",
-          "bytes": 65849,
-          "ok": true
-        },
-        {
-          "format": "ALL_CSV",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.csv",
-          "bytes": 95794,
-          "ok": true
-        },
-        {
-          "format": "ALL_XLS",
-          "file": "evaluation\\submission-readiness\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.xls",
-          "bytes": 129893,
-          "ok": true
-        }
-      ]
+      "verdict": "blocked",
+      "message": "Command failed: /usr/bin/node ./scripts/prod_orchestration_download_smoke.mjs\nfile:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:261\n    throw new Error(\"Chrome executable not found. Set CHROME_PATH to run PDF/JPG export smoke.\");\n          ^\n\nError: Chrome executable not found. Set CHROME_PATH to run PDF/JPG export smoke.\n    at runChrome (file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:261:11)\n    at writeDownloads (file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:389:3)\n    at file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:433:19\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n\nNode.js v22.22.2\n",
+      "reportPath": "evaluation/submission-readiness/formats/incheon-logistics-rain"
     },
     {
       "id": "ansan-manufacturing-foreign-hotwork",
       "title": "안산 제조 화기 외국인 포함",
-      "verdict": "pass",
-      "reportPath": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\api-orchestration-download-smoke.json",
-      "missing": [],
-      "downloads": [
-        {
-          "format": "TXT",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.txt",
-          "bytes": 7838,
-          "ok": true
-        },
-        {
-          "format": "JSON",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.json",
-          "bytes": 8390,
-          "ok": true
-        },
-        {
-          "format": "CSV",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.csv",
-          "bytes": 12041,
-          "ok": true
-        },
-        {
-          "format": "XLS",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.xls",
-          "bytes": 18993,
-          "ok": true
-        },
-        {
-          "format": "DOC",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.doc",
-          "bytes": 12235,
-          "ok": true
-        },
-        {
-          "format": "HTML",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.html",
-          "bytes": 8416,
-          "ok": true
-        },
-        {
-          "format": "HWPX",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.hwpx",
-          "bytes": 11108,
-          "ok": true
-        },
-        {
-          "format": "PDF",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.pdf",
-          "bytes": 298511,
-          "ok": true
-        },
-        {
-          "format": "JPG",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.jpg",
-          "bytes": 165155,
-          "ok": true
-        },
-        {
-          "format": "ALL_TXT",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.txt",
-          "bytes": 78380,
-          "ok": true
-        },
-        {
-          "format": "ALL_CSV",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.csv",
-          "bytes": 115184,
-          "ok": true
-        },
-        {
-          "format": "ALL_XLS",
-          "file": "evaluation\\submission-readiness\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.xls",
-          "bytes": 154050,
-          "ok": true
-        }
-      ]
+      "verdict": "blocked",
+      "message": "Command failed: /usr/bin/node ./scripts/prod_orchestration_download_smoke.mjs\nfile:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:261\n    throw new Error(\"Chrome executable not found. Set CHROME_PATH to run PDF/JPG export smoke.\");\n          ^\n\nError: Chrome executable not found. Set CHROME_PATH to run PDF/JPG export smoke.\n    at runChrome (file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:261:11)\n    at writeDownloads (file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:389:3)\n    at file:///home/ubuntu/safeclaw-repo-tmp/safeguard-contest-mvp/scripts/prod_orchestration_download_smoke.mjs:433:19\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n\nNode.js v22.22.2\n",
+      "reportPath": "evaluation/submission-readiness/formats/ansan-manufacturing-foreign-hotwork"
     }
   ]
 }

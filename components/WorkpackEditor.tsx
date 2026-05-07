@@ -979,10 +979,53 @@ function buildHtml(
 </html>`;
 }
 
+// Sections that are decoration / connection-status / RAG metadata, NOT real form rows.
+// Excluded from the .xlsx / .hwp body table to keep the official form clean.
+const META_SECTION_PATTERNS = [
+  /^연결 상태/,
+  /^내부 안전지식 DB 반영/,
+  /^근거 요약/,
+  /^문서 반영$/,
+  /^문서 반영:/,
+  /^법령 근거 요약/,
+  /^KOSHA 보강/,
+  /^추천 후속 교육/,
+  /^KOSHA 교육포털 연계/,
+  /^교육 적합성 확인/,
+  /^옥외 (폭염|위험)/,
+  /^위험성평가·기상/,
+  /^TBM 필수 반영 체크/,
+  /^외국인 근로자 (공지|안내)/,
+  /^유사 재해사례/,
+  /^기상 신호/,
+  /^서식 구조/,
+  /^서식 상태/,
+  /^서식상태$/,
+  /^안전 기초 지식/,
+  /^라이브 보강/
+];
+
+function isMetaSection(section: string) {
+  return META_SECTION_PATTERNS.some((pattern) => pattern.test(section));
+}
+
+// First-line meta keys that show up as `key: value` even outside a meta section.
+const META_KEY_PATTERNS = [
+  /^서식상태$/,
+  /^연결 상태$/,
+  /^생성일자$/,
+  /^생성시각$/
+];
+
+function isMetaKey(key: string) {
+  return META_KEY_PATTERNS.some((pattern) => pattern.test(key));
+}
+
 function parseSheetRows(title: string, body: string): SheetRow[] {
   const rows: SheetRow[] = [];
   let section = "기본정보";
   let itemNumber = 1;
+  let metaActive = false;
 
   body.split(/\r?\n/).forEach((rawLine) => {
     const line = rawLine.trim();
@@ -991,16 +1034,20 @@ function parseSheetRows(title: string, body: string): SheetRow[] {
     const sectionMatch = line.match(/^\[(.+)\]$/);
     if (sectionMatch) {
       section = sectionMatch[1];
+      metaActive = isMetaSection(section);
       itemNumber = 1;
       return;
     }
+    if (metaActive) return;
 
     const keyed = line.match(/^([^:：]+)[:：]\s*(.+)$/);
     const numbered = line.match(/^(\d+)\.\s*(.+)$/);
     const bullet = line.match(/^[-ㆍ]\s*(.+)$/);
 
     if (keyed) {
-      rows.push({ document: title, section, item: keyed[1].trim(), content: keyed[2].trim() });
+      const key = keyed[1].trim();
+      if (isMetaKey(key)) return;
+      rows.push({ document: title, section, item: key, content: keyed[2].trim() });
       return;
     }
     if (numbered) {
@@ -1010,6 +1057,13 @@ function parseSheetRows(title: string, body: string): SheetRow[] {
     if (bullet) {
       rows.push({ document: title, section, item: String(itemNumber), content: bullet[1].trim() });
       itemNumber += 1;
+      return;
+    }
+
+    // Drop full-sentence lines that look like notice/policy text (those that don't fit
+    // any [section]/key:val/numbered/bullet pattern). They were noise rows in the
+    // earlier output (e.g., "준제출형 - 작업계획서 제출 필수 항목을 반영한 현장 검토용입니다.").
+    if (/^[가-힯].{20,}[다요\.]$/.test(line)) {
       return;
     }
 
@@ -2176,8 +2230,8 @@ export function WorkpackEditor({
               {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
             </button>
             {templateKindForLayout(selectedFormProfile.layout) ? (
-              <button type="button" className="button secondary" onClick={() => void downloadOfficialTemplate()} disabled={officialTemplateStatus === "building"} title="공공기관 공식 .hwpx 양식 (회사명만 채워지고, 본문은 현장 검토 후 채워 사용)">
-                {officialTemplateStatus === "building" ? "공식양식 생성 중" : "공식양식(.hwpx)"}
+              <button type="button" className="button secondary" onClick={() => void downloadOfficialTemplate()} disabled={officialTemplateStatus === "building"} title="공공기관 공식 빈 .hwpx 양식. 표/서식 그대로 보존, 본문은 현장에서 채워 사용. (시나리오 데이터 자동 채움 기능은 v2 예정)">
+                {officialTemplateStatus === "building" ? "공식양식 생성 중" : "공식양식(빈 .hwpx)"}
               </button>
             ) : null}
             <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
