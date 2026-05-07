@@ -993,7 +993,7 @@ const META_SECTION_PATTERNS = [
   /^추천 후속 교육/,
   /^KOSHA 교육포털 연계/,
   /^교육 적합성 확인/,
-  /^옥외 (폭염|위험)/,
+  /^옥외 (폭염|위험|작업)/,
   /^위험성평가·기상/,
   /^TBM 필수 반영 체크/,
   /^외국인 근로자 (공지|안내)/,
@@ -1003,7 +1003,20 @@ const META_SECTION_PATTERNS = [
   /^서식 상태/,
   /^서식상태$/,
   /^안전 기초 지식/,
-  /^라이브 보강/
+  /^라이브 보강/,
+  // Added 2026-05-07 after 가온테크 .xlsx/.hwp 검수 — 본문 표 안에 들어가던 잡음.
+  /^공식 서식 기준 보강/,
+  /^반영 근거(:|: )/,
+  /^반영 근거$/,
+  /^중대재해 예방 관리체계 점검/,
+  /^필수 확인 항목$/,
+  /^섹션 요약$/,
+  /^본문 표$/,
+  /^제출상태/,
+  /^원본 재현 한계/,
+  /^안전보건진단 가이드/,
+  /^위험성평가 이행·점검/,
+  /^TBM 메인 가이드/
 ];
 
 function isMetaSection(section: string) {
@@ -1015,11 +1028,49 @@ const META_KEY_PATTERNS = [
   /^서식상태$/,
   /^연결 상태$/,
   /^생성일자$/,
-  /^생성시각$/
+  /^생성시각$/,
+  /^제출상태$/,
+  /^원본 재현 한계/,
+  /^반영 근거$/,
+  /^법령·해석례$/,
+  /^판례 보조$/,
+  /^내부 참고자료 반영$/,
+  /^주의$/,
+  /^위험성평가 연결$/,
+  /^TBM 연결$/,
+  /^교육 연결$/,
+  /^신호$/,  // 기상 신호 등
+  /^감소대책$/,  // META 섹션 내부의 감소대책 (실제 위험성평가표 §4와 다른 위치)
+  /^확인기준$/,
+  /^관련 법령 확인 대상$/
 ];
 
 function isMetaKey(key: string) {
   return META_KEY_PATTERNS.some((pattern) => pattern.test(key));
+}
+
+/**
+ * Robust key:value matcher — only the FIRST colon at top level (outside any
+ * unmatched parens / brackets) counts. Prevents lines like
+ * "- 위험요인 (KOSHA 지침 C-59-2022: 인용)" from being split at the inner colon.
+ */
+function matchTopLevelKeyValue(line: string): { key: string; value: string } | null {
+  let depth = 0;
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i];
+    if (ch === "(" || ch === "[" || ch === "{") depth += 1;
+    else if (ch === ")" || ch === "]" || ch === "}") depth = Math.max(0, depth - 1);
+    else if (depth === 0 && (ch === ":" || ch === "：")) {
+      const key = line.slice(0, i).trim();
+      const value = line.slice(i + 1).trim();
+      // require both sides non-empty + key isn't just punctuation
+      if (key && value && /[^\s\-·:：]/.test(key)) {
+        return { key, value };
+      }
+      return null;
+    }
+  }
+  return null;
 }
 
 function parseSheetRows(title: string, body: string): SheetRow[] {
@@ -1041,14 +1092,18 @@ function parseSheetRows(title: string, body: string): SheetRow[] {
     }
     if (metaActive) return;
 
-    const keyed = line.match(/^([^:：]+)[:：]\s*(.+)$/);
+    // Defensive: keyed pattern must NOT match colons inside parentheses
+    // (e.g., "...(KOSHA 지침 X-XX-YYYY: 인용)" should stay as one cell, not split).
+    // Approach: only consider top-level `:` — find the first `:` before any unmatched
+    // opening parenthesis. If the first `:` lives inside (), treat as plain content.
+    const keyedMatch = matchTopLevelKeyValue(line);
     const numbered = line.match(/^(\d+)\.\s*(.+)$/);
     const bullet = line.match(/^[-ㆍ]\s*(.+)$/);
 
-    if (keyed) {
-      const key = keyed[1].trim();
+    if (keyedMatch) {
+      const { key, value } = keyedMatch;
       if (isMetaKey(key)) return;
-      rows.push({ document: title, section, item: key, content: keyed[2].trim() });
+      rows.push({ document: title, section, item: key, content: value });
       return;
     }
     if (numbered) {
