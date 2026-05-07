@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>safeclaw — Logo Spec Sheet</title>
+<link rel="stylesheet" href="../tokens-b.css">
+<style>
+  body { background: var(--bone, #FAFAF7); color: #0A0A0B; padding: 64px 48px; }
+  .page { max-width: 1180px; margin: 0 auto; }
+  h1 { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 12px; color: rgba(0,0,0,0.55); font-weight: 500; }
+  .title { font-family: var(--font-sans); font-size: 56px; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 8px; line-height: 1; }
+  .lede { font-family: var(--font-kr); font-size: 16px; color: rgba(0,0,0,0.6); max-width: 640px; line-height: 1.55; }
+  .rule { height: 1px; background: rgba(0,0,0,0.1); margin: 56px 0 40px; }
+  h2 { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(0,0,0,0.5); margin: 0 0 20px; font-weight: 500; }
+  h3 { font-family: var(--font-sans); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px; }
+  p { font-family: var(--font-kr); font-size: 14px; line-height: 1.6; color: rgba(0,0,0,0.7); margin: 0 0 6px; }
+  .grid { display: grid; gap: 16px; }
+  .panel { background: #fff; border: 1px solid rgba(0,0,0,0.08); padding: 28px; }
+  .panel.dark { background: #0A0A0B; color: #FAFAF7; border-color: rgba(255,255,255,0.1); }
+  .panel.dark p { color: rgba(255,255,255,0.6); }
+  .panel.dark h3 { color: #FAFAF7; }
+  .panel-foot { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(0,0,0,0.45); margin-top: 14px; }
+  .panel.dark .panel-foot { color: rgba(255,255,255,0.45); }
+  .center { display: flex; align-items: center; justify-content: center; min-height: 220px; }
+  .swatch { display: flex; flex-direction: column; gap: 0; }
+  .swatch-color { aspect-ratio: 1.6/1; }
+  .swatch-meta { padding: 14px 16px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-top: none; }
+  .swatch-name { font-family: var(--font-sans); font-weight: 700; font-size: 14px; }
+  .swatch-hex { font-family: var(--font-mono); font-size: 11px; color: rgba(0,0,0,0.6); margin-top: 4px; letter-spacing: 0.04em; }
+  .clearspace svg { display: block; }
+  .grid-bg-light {
+    background-image:
+      linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+    background-size: 8px 8px;
+  }
+  .dont {
+    aspect-ratio: 4/3; background: #fff; border: 1px solid rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+  }
+  .dont::after {
+    content: ''; position: absolute; left: 8%; right: 8%; top: 50%; height: 2px;
+    background: #FF4D2E; transform: rotate(-12deg); opacity: 0.85;
+  }
+  .dont-label { position: absolute; bottom: 10px; left: 12px; font-family: var(--font-mono); font-size: 10px; color: #FF4D2E; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  .files { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); }
+  .file-row { background: #fff; padding: 16px 20px; }
+  .file-name { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+  .file-desc { font-family: var(--font-kr); font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>safeclaw · brand specifications</h1>
+  <div class="title">Logo Spec Sheet</div>
+  <div class="lede">디자이너 핸드오프 자료. ClawMark · Wordmark의 기하·여백·컬러·사용 금지 사항. 전달 파일은 모두 <span class="mono" style="font-family:var(--font-mono)">/brand</span> 폴더에 SVG로 포함됨.</div>
+
+  <div class="rule"></div>
+
+  <!-- ① Primary lockups -->
+  <h2>① Primary lockups</h2>
+  <div class="grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="panel center">
+      <img src="Wordmark.svg" alt="" style="width: 360px;">
+      <div class="panel-foot" style="position:absolute; bottom:14px; left:20px;">Wordmark · Light · Primary</div>
+    </div>
+    <div class="panel dark center" style="position:relative;">
+      <img src="Wordmark-Inverse.svg" alt="" style="width: 360px;">
+      <div class="panel-foot" style="position:absolute; bottom:14px; left:20px;">Wordmark · Dark</div>
+    </div>
+    <div class="panel center" style="position:relative;">
+      <img src="Wordmark-Stacked.svg" alt="" style="width: 220px;">
+      <div class="panel-foot" style="position:absolute; bottom:14px; left:20px;">Wordmark · Stacked (square placements)</div>
+    </div>
+    <div class="panel center" style="position:relative; gap: 32px;">
+      <img src="ClawMark.svg" alt="" style="width: 96px;">
+      <img src="ClawMark-Inverse.svg" alt="" style="width: 96px; background:#0A0A0B; padding: 12px;">
+      <img src="ClawMark-Mono.svg" alt="" style="width: 96px; color: #0A0A0B;">
+      <div class="panel-foot" style="position:absolute; bottom:14px; left:20px;">ClawMark · Light / Dark / Mono</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ② Construction & clear space -->
+  <h2>② Construction · clear space</h2>
+  <div class="grid" style="grid-template-columns: 1.2fr 1fr;">
+    <div class="panel">
+      <h3>Construction grid</h3>
+      <p>32×32 unit grid. 외곽 ring 14.5u (선택). 두 jaw는 좌우 대칭 quadratic curve. Center dot r=2.5u — 잡힌 초점.</p>
+      <div class="grid-bg-light" style="margin-top: 24px; padding: 24px; display: flex; justify-content: center;">
+        <svg viewBox="0 0 32 32" width="240" height="240">
+          <circle cx="16" cy="16" r="14.5" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="0.5"/>
+          <path d="M9 6 Q4 10 4 16 Q4 22 9 26 L13 22 Q10 19 10 16 Q10 13 13 10 Z" fill="#FFD400"/>
+          <path d="M23 6 Q28 10 28 16 Q28 22 23 26 L19 22 Q22 19 22 16 Q22 13 19 10 Z" fill="#FFD400"/>
+          <circle cx="16" cy="16" r="2.5" fill="#0A0A0B"/>
+          <line x1="16" y1="0" x2="16" y2="32" stroke="rgba(0,0,0,0.15)" stroke-width="0.2" stroke-dasharray="0.5 0.5"/>
+          <line x1="0" y1="16" x2="32" y2="16" stroke="rgba(0,0,0,0.15)" stroke-width="0.2" stroke-dasharray="0.5 0.5"/>
+        </svg>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Clear space</h3>
+      <p>마크 높이의 <strong>0.25×</strong>를 모든 방향 최소 여백으로 확보. 워드마크는 mark의 x-height 만큼.</p>
+      <div style="margin-top: 24px; padding: 32px; background: rgba(255,212,0,0.12); display: flex; justify-content: center;">
+        <div style="padding: 24px; background: #FAFAF7; outline: 1px dashed rgba(0,0,0,0.3);">
+          <img src="ClawMark.svg" alt="" style="width: 96px; display:block;">
+        </div>
+      </div>
+      <p style="margin-top: 14px; font-size: 11px;">노란 영역 = 침범 불가. 점선 박스 = 마크 바운딩.</p>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ③ Color system -->
+  <h2>③ Color system</h2>
+  <div class="grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="swatch">
+      <div class="swatch-color" style="background:#FFD400;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Hazard Yellow</div>
+        <div class="swatch-hex">#FFD400 · CMYK 0/15/100/0 · PMS 109 C</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#0A0A0B;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Steel Black</div>
+        <div class="swatch-hex">#0A0A0B · CMYK 70/65/65/90 · PMS Black 6 C</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#FAFAF7; outline: 1px solid rgba(0,0,0,0.06);"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Site White</div>
+        <div class="swatch-hex">#FAFAF7 · CMYK 0/0/2/2 · PMS 11-0601 TPG</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background:#00E5FF;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Signal Cyan (acc.)</div>
+        <div class="swatch-hex">#00E5FF · only for live state</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ④ Sizing -->
+  <h2>④ Sizing & minimums</h2>
+  <div class="panel" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 32px; align-items: end;">
+    <div>
+      <img src="ClawMark.svg" alt="" style="height: 16px;"><br>
+      <div class="panel-foot" style="margin-top:10px;">16px · favicon min</div>
+    </div>
+    <div>
+      <img src="ClawMark.svg" alt="" style="height: 32px;"><br>
+      <div class="panel-foot" style="margin-top:10px;">32px · app icon</div>
+    </div>
+    <div>
+      <img src="Wordmark.svg" alt="" style="height: 28px;"><br>
+      <div class="panel-foot" style="margin-top:10px;">96px wide · header min</div>
+    </div>
+    <div>
+      <img src="Wordmark.svg" alt="" style="height: 56px;"><br>
+      <div class="panel-foot" style="margin-top:10px;">200px wide · marketing default</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ⑤ Don'ts -->
+  <h2>⑤ Don'ts</h2>
+  <div class="grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="dont"><img src="ClawMark.svg" alt="" style="width: 80px; transform: rotate(18deg);"><div class="dont-label">No rotation</div></div>
+    <div class="dont" style="background: linear-gradient(135deg, #ff7eb3, #65d6ff);"><img src="ClawMark-Inverse.svg" alt="" style="width: 80px;"><div class="dont-label">No off-brand bg</div></div>
+    <div class="dont"><img src="ClawMark.svg" alt="" style="width: 80px; transform: scaleX(1.6);"><div class="dont-label">No distortion</div></div>
+    <div class="dont"><img src="ClawMark.svg" alt="" style="width: 80px; filter: drop-shadow(0 0 8px #FFD400) drop-shadow(0 0 14px #FFD400);"><div class="dont-label">No effects / glow</div></div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ⑥ Files -->
+  <h2>⑥ Files delivered</h2>
+  <div class="files">
+    <div class="file-row"><div class="file-name">ClawMark.svg</div><div class="file-desc">기본 — 라이트 배경 · 옐로우 jaws + 블랙 dot</div></div>
+    <div class="file-row"><div class="file-name">ClawMark-Inverse.svg</div><div class="file-desc">다크 배경 — dot이 본화이트</div></div>
+    <div class="file-row"><div class="file-name">ClawMark-Mono.svg</div><div class="file-desc">단색 (currentColor) — 각인·팩스</div></div>
+    <div class="file-row"><div class="file-name">Wordmark.svg</div><div class="file-desc">수평 lockup · 라이트 (default)</div></div>
+    <div class="file-row"><div class="file-name">Wordmark-Inverse.svg</div><div class="file-desc">수평 lockup · 다크</div></div>
+    <div class="file-row"><div class="file-name">Wordmark-Stacked.svg</div><div class="file-desc">정방형 surface · 사인보드 / 머치</div></div>
+  </div>
+
+  <div class="rule"></div>
+
+  <p style="font-family:var(--font-mono); font-size: 10px; letter-spacing: 0.12em; color: rgba(0,0,0,0.4); text-transform: uppercase;">© 2026 safeclaw, inc. · spec rev 0.1</p>
+
+</div>
+</body>
+</html>

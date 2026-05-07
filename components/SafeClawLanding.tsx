@@ -64,7 +64,8 @@ export function SafeClawLanding() {
     <main className="safeclaw-landing" aria-label="SafeClaw 회사 홈페이지">
       <header className="safeclaw-landing-nav">
         <Link href="/" className="safeclaw-os-brand" aria-label="SafeClaw 홈">
-          <span className="safeclaw-os-mark">SC</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/ClawMark-Inverse.svg" alt="" className="safeclaw-os-mark" width={28} height={28} />
           <strong>safeclaw/<em>os</em></strong>
         </Link>
         <nav aria-label="SafeClaw 홈페이지 메뉴">

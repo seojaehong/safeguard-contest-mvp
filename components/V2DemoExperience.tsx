@@ -197,7 +197,8 @@ export function V2DemoExperience({
     <main className="v2-shell demo-mode-shell">
       <header className="v2-nav">
         <Link href="/" className="brand-lockup" aria-label="SafeClaw 홈">
-          <span className="brand-mark">SC</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/ClawMark.svg" alt="" className="brand-mark" width={32} height={32} />
           <span>
             <strong>SafeClaw</strong>
             <small>작업 흐름</small>
