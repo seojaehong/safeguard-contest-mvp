@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-07T08:32:12.863Z",
+  "generatedAt": "2026-05-07T09:28:55.953Z",
   "replacementsRuleCount": 3,
   "items": [
     {
@@ -96,6 +96,17 @@
       "title": "장비 신호수 지정서",
       "bytes": 37238,
       "src_bytes": 61701,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "crane-workplan.hwpx",
+      "out": "crane-workplan.hwpx",
+      "title": "건설기계 작업계획서 — 크레인",
+      "bytes": 38471,
+      "src_bytes": 53352,
       "touched_files": 1,
       "total_replacements": 0,
       "injected_placeholder": true,

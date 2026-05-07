@@ -72,7 +72,8 @@ const selected = [
   { src: "4.2-serious-accident-response.hwpx",      out: "emergency-response.hwpx",   title: "중대재해 대응 절차" },
   { src: "safety-pledge.hwpx",                      out: "safety-pledge.hwpx",        title: "안전수칙 이행각서" },
   { src: "health-questionnaire.hwpx",               out: "health-questionnaire.hwpx", title: "근로자 건강문진표" },
-  { src: "signal-worker-designation.hwpx",          out: "signal-worker-designation.hwpx", title: "장비 신호수 지정서" }
+  { src: "signal-worker-designation.hwpx",          out: "signal-worker-designation.hwpx", title: "장비 신호수 지정서" },
+  { src: "crane-workplan.hwpx",                     out: "crane-workplan.hwpx",       title: "건설기계 작업계획서 — 크레인" }
 ];
 
 function applyReplacements(text) {
