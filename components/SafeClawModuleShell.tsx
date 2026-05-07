@@ -20,19 +20,24 @@ type SafeClawModuleShellProps = {
   activeHref?: string;
 };
 
+// Sidebar nav per design handoff v1.0 §10.3 — 11 items in 3 groups
+// (운영 3 / 실행 4 / 시스템 4). "작업자 안내"는 외부 모바일 뷰(/worker)이라
+// 사이드바 메뉴에서 분리 (가이드 §10.2 누락 항목 명시).
 const moduleNav = [
+  // 운영 (3) — 로그인 직후 첫 화면 + 한 줄 입력 + 문서 편집
   { href: "/home", code: "01", label: "대시보드", group: "운영" },
   { href: "/workspace", code: "02", label: "작업공간", group: "운영" },
   { href: "/documents", code: "03", label: "문서팩", group: "운영" },
-  { href: "/evidence", code: "04", label: "근거자료", group: "운영" },
-  { href: "/workers", code: "05", label: "작업자 관리", group: "실행" },
-  { href: "/dispatch", code: "06", label: "공지 발송", group: "실행" },
-  { href: "/archive", code: "07", label: "작업 이력", group: "시스템" },
-  { href: "/knowledge", code: "08", label: "지식베이스", group: "시스템" },
-  { href: "/ops/api", code: "09", label: "연결 상태", group: "시스템" },
-  { href: "/settings", code: "10", label: "설정", group: "시스템" },
-  { href: "/tbm", code: "11", label: "TBM 회의", group: "지원" },
-  { href: "/worker", code: "12", label: "작업자 안내", group: "지원" }
+  // 실행 (4) — 근거 / 작업자 / 전파 / TBM
+  { href: "/evidence", code: "04", label: "근거 라이브러리", group: "실행" },
+  { href: "/workers", code: "05", label: "작업자 · 교육", group: "실행" },
+  { href: "/dispatch", code: "06", label: "현장 전파", group: "실행" },
+  { href: "/tbm", code: "07", label: "TBM 모드", group: "실행" },
+  // 시스템 (4) — 이력 / 지식 / API / 설정
+  { href: "/archive", code: "08", label: "이력 · 아카이브", group: "시스템" },
+  { href: "/knowledge", code: "09", label: "지식 DB", group: "시스템" },
+  { href: "/ops/api", code: "10", label: "API 연결", group: "시스템" },
+  { href: "/settings", code: "11", label: "설정", group: "시스템" }
 ] as const;
 
 export function SafeClawModuleShell({
