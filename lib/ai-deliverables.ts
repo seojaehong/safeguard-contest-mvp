@@ -37,6 +37,8 @@ type GenContext = {
   trainingLines: string[];
   koshaLines: string[];
   accidentLines: string[];
+  /** Top KOSHA 기술지침/기술지원규정 references that MUST be cited in body. */
+  koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
 };
 
 async function callGemini(prompt: string): Promise<string> {
@@ -103,7 +105,8 @@ function persona() {
     "  5) 감소대책은 즉시 실행 가능한 행동 단위로 적는다.",
     "  6) 외국인 근로자·신규 투입자 이슈는 시나리오에 키워드가 있으면 별도 강조.",
     "  7) 거절 문장 금지(\"제공할 수 없습니다\"). 부족하면 '현장 확인 필요'로 표기.",
-    "  8) 모든 출력은 반드시 JSON. 마크다운 fence 금지."
+    "  8) **KOSHA 기술지침/기술지원규정이 컨텍스트에 제공되면, 위험성평가·작업계획·TBM·교육 본문 안에서 그 지침 코드(예: H-205-2018, M-123-2012, X-78-2018)와 함께 직접 인용하라.** 단순 부록이 아니라 위험요인 또는 감소대책 항목 끝에 \"(KOSHA 지침 X-XX-YYYY)\" 형태로 표시.",
+    "  9) 모든 출력은 반드시 JSON. 마크다운 fence 금지."
   ].join("\n");
 }
 
@@ -112,6 +115,17 @@ function contextBlock(ctx: GenContext) {
   const training = ctx.trainingLines.length ? ctx.trainingLines.join("\n") : "(연계 교육 후보 없음)";
   const kosha = ctx.koshaLines.length ? ctx.koshaLines.join("\n") : "(KOSHA 보강 자료 없음)";
   const accidents = ctx.accidentLines.length ? ctx.accidentLines.join("\n") : "(유사 재해사례 없음)";
+  const koshaPrimaryBlock = ctx.koshaPrimaryRefs && ctx.koshaPrimaryRefs.length
+    ? [
+        "",
+        "**[★최우선 인용 자료 — KOSHA 기술지침/기술지원규정★]**",
+        "다음 KOSHA 자료는 위험성평가표/작업계획서/TBM/교육 본문 안에 반드시 직접 인용하라.",
+        "각 위험요인 또는 감소대책 줄 끝에 \"(KOSHA 지침 H-XXX-YYYY: 짧은 인용)\" 형식으로 첨부.",
+        ...ctx.koshaPrimaryRefs.map((ref, i) => (
+          `${i + 1}. ${ref.kindLabel} — ${ref.title}\n     인용 문장: ${ref.sentence}`
+        ))
+      ].join("\n")
+    : "";
   return [
     "[질문]",
     ctx.question,
@@ -126,6 +140,7 @@ function contextBlock(ctx: GenContext) {
     "",
     "[법령·해석례·판례 근거 후보]",
     cites,
+    koshaPrimaryBlock,
     "",
     "[기상 신호]",
     ctx.weatherNote || "(추가 정보 없음)",
@@ -241,6 +256,8 @@ export type GenerateAllOptions = {
   trainingLines?: string[];
   koshaLines?: string[];
   accidentLines?: string[];
+  /** Top KOSHA 기술지침/기술지원규정 references the AI must cite in body. */
+  koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
   /**
    * Which call groups to run.
    * - "full" (default): tabular + free + foreign  → 14 deliverables AI-generated
@@ -263,7 +280,8 @@ function buildContext(opts: GenerateAllOptions): GenContext {
     weatherNote: opts.weatherSummary,
     trainingLines: opts.trainingLines || [],
     koshaLines: opts.koshaLines || [],
-    accidentLines: opts.accidentLines || []
+    accidentLines: opts.accidentLines || [],
+    koshaPrimaryRefs: opts.koshaPrimaryRefs || []
   };
 }
 
