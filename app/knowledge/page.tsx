@@ -162,6 +162,12 @@ export default async function KnowledgePage() {
             <span>위험성평가 인정 사업장 산재보험료 할인 제도. 1.34MB · PDF</span>
             <span>반영 위치: 사업주 인센티브 안내</span>
           </a>
+          <a href="/kosha-references/tbm-pre-work-safety-meeting-guide-2023.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · TBM 메인 가이드</small>
+            <strong>작업 전 안전점검회의(TBM) 가이드 (2023)</strong>
+            <span>TBM 도입·실시·기록·교육시간 인정 통합 가이드. 4.2MB · PDF</span>
+            <span>반영 위치: TBM 일지 / TBM 회의록 / 안전보건교육 작성 시 핵심 참조</span>
+          </a>
           <a href="/kosha-references/safety-health-diagnosis-guideline-full.pdf" target="_blank" rel="noopener noreferrer">
             <small>KOSHA · 가이드라인</small>
             <strong>안전보건진단 업무 가이드라인 (전문)</strong>
