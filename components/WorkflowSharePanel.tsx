@@ -402,7 +402,7 @@ export function WorkflowSharePanel({
         className="textarea workflow-textarea"
         value={recipients}
         onChange={(event) => setRecipients(event.target.value)}
-        placeholder="예: safety@example.com, 010-1234-5678"
+        placeholder="예: safety@safeclaw.kr, 010-1234-5678"
       />
       {recipientSuggestions.length ? (
         <div className="recipient-chip-list" aria-label="선택된 근로자 전파 대상">

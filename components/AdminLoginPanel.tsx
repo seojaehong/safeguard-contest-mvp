@@ -118,7 +118,7 @@ export function AdminLoginPanel() {
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="admin@example.com"
+            placeholder="admin@safeclaw.kr"
             autoComplete="email"
           />
           <button type="button" onClick={sendLoginLink} disabled={isSending || !email.trim()}>

@@ -382,7 +382,7 @@ function WorkerEducationPanel({
                     className="input"
                     value={worker.email || ""}
                     onChange={(event) => onUpdateWorker({ ...worker, email: event.target.value.trim() || undefined })}
-                    placeholder="worker@example.com"
+                    placeholder="worker@safeclaw.kr"
                     inputMode="email"
                   />
                 </label>

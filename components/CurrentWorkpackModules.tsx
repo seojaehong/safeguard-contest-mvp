@@ -1182,7 +1182,7 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
               className="input"
               value={draft.email || ""}
               onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, email: event.target.value }))}
-              placeholder="name@example.com"
+              placeholder="name@safeclaw.kr"
             />
           </label>
         </div>
