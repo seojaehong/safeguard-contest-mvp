@@ -75,7 +75,8 @@ const selected = [
   { src: "signal-worker-designation.hwpx",          out: "signal-worker-designation.hwpx", title: "장비 신호수 지정서" },
   { src: "crane-workplan.hwpx",                     out: "crane-workplan.hwpx",       title: "건설기계 작업계획서 — 크레인" },
   { src: "risk-assessment-form-standard.hwpx",      out: "risk-assessment-form-standard.hwpx",   title: "위험성평가 표준 서식 (KOSHA)" },
-  { src: "risk-assessment-consulting-dialog.hwpx",  out: "risk-assessment-consulting-dialog.hwpx", title: "위험성평가 대화형 컨설팅 양식 (KOSHA)" }
+  { src: "risk-assessment-consulting-dialog.hwpx",  out: "risk-assessment-consulting-dialog.hwpx", title: "위험성평가 대화형 컨설팅 양식 (KOSHA)" },
+  { src: "work-permit-form.hwpx",                   out: "work-permit-form.hwpx",     title: "작업허가서 양식 (KOSHA)" }
 ];
 
 function applyReplacements(text) {

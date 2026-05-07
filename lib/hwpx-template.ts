@@ -20,7 +20,8 @@ export type HwpxTemplateKind =
   | "signal-worker-designation"
   | "crane-workplan"
   | "risk-assessment-form-standard"
-  | "risk-assessment-consulting-dialog";
+  | "risk-assessment-consulting-dialog"
+  | "work-permit-form";
 
 const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "risk-assessment": "risk-assessment.hwpx",
@@ -34,7 +35,8 @@ const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "signal-worker-designation": "signal-worker-designation.hwpx",
   "crane-workplan": "crane-workplan.hwpx",
   "risk-assessment-form-standard": "risk-assessment-form-standard.hwpx",
-  "risk-assessment-consulting-dialog": "risk-assessment-consulting-dialog.hwpx"
+  "risk-assessment-consulting-dialog": "risk-assessment-consulting-dialog.hwpx",
+  "work-permit-form": "work-permit-form.hwpx"
 };
 
 export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
@@ -49,7 +51,8 @@ export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
   "signal-worker-designation": "장비 신호수 지정서",
   "crane-workplan": "건설기계 작업계획서 — 크레인",
   "risk-assessment-form-standard": "위험성평가 표준 서식 (KOSHA)",
-  "risk-assessment-consulting-dialog": "위험성평가 대화형 컨설팅 양식 (KOSHA · 지게차/추락 사례 포함)"
+  "risk-assessment-consulting-dialog": "위험성평가 대화형 컨설팅 양식 (KOSHA · 지게차/추락 사례 포함)",
+  "work-permit-form": "작업허가서 양식 (KOSHA · 5대 위험작업 통합)"
 };
 
 function templatesDir() {
