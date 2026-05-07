@@ -1,10 +1,10 @@
 # SafeClaw final-99-gate decision
 
-- Generated at: 2026-05-05T09:29:50.372Z
-- Base URL: https://safeguard-contest-mvp.vercel.app
-- Commit: dd75d3a
-- Overall: pass_with_notice
-- Elapsed: 166684ms
+- Generated at: 2026-05-07T02:38:42.600Z
+- Base URL: https://www.safeclaw.kr
+- Commit: 6b8ce93
+- Overall: blocked
+- Elapsed: 120590ms
 
 ## Gate Results
 
@@ -12,11 +12,11 @@
 |---|---:|---|
 | ask-orchestration | pass | 11/11 documents |
 | auth-history-reuse | pass_with_notice | SAFEGUARD_AUTH_TOKEN이 없어 live 관리자 저장/재열기는 실행하지 않았습니다. UI는 비회원 임시 저장과 관리자 로그인 필요 상태로 방어합니다. |
-| document-downloads | pass_with_notice | core PDF + orchestration XLS/HWPX/PDF smoke |
+| document-downloads | blocked | core PDF + orchestration XLS/HWPX/PDF smoke |
 | public-data-ai-map | pass | docs/submission-evidence-map.md |
-| ai-remediation-flow | pass | Gemini (gemini-2.5-flash-lite) |
-| dispatch-policy | pass_with_notice | email/sms active, kakao/band locked |
-| screenshots | pass | 5 screenshots |
+| ai-remediation-flow | pass | Gemini (gemini-flash-latest) |
+| dispatch-policy | pass | email/sms active, kakao/band locked |
+| screenshots | pass_with_notice | 0 screenshots |
 
 ## Closing Notes
 - 카카오/밴드는 승인 전이므로 정식 제출 게이트에서 제외했습니다.
