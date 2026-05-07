@@ -157,7 +157,27 @@ type CompressedSafetyReference = {
   reflectsDocuments: string[];
   evidenceShort: string;
   documentSentence: string;
+  kind: "kosha-support-regulation" | "kosha-guideline" | "construction-process" | "machinery" | "sif-case" | "other";
+  /** Short label for the source kind, e.g., "KOSHA 기술지침" / "KOSHA 기술지원규정" / "KOSHA 사고사례" */
+  kindLabel: string;
 };
+
+function classifySafetyReferenceKind(itemType: string | undefined): { kind: CompressedSafetyReference["kind"]; kindLabel: string } {
+  switch (itemType) {
+    case "technical-support-regulation":
+      return { kind: "kosha-support-regulation", kindLabel: "KOSHA 기술지원규정" };
+    case "technical-guideline":
+      return { kind: "kosha-guideline", kindLabel: "KOSHA 기술지침" };
+    case "construction-process":
+      return { kind: "construction-process", kindLabel: "KOSHA 작업공정" };
+    case "machinery":
+      return { kind: "machinery", kindLabel: "KOSHA 기계류" };
+    case "sif-case":
+      return { kind: "sif-case", kindLabel: "KOSHA 사고사례" };
+    default:
+      return { kind: "other", kindLabel: itemType || "내부지식DB" };
+  }
+}
 
 /**
  * Compress raw Supabase safety_reference_items into a "문서 반영 문장" form.
@@ -180,12 +200,15 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
     const documentSentence = sentenceBase.endsWith(".") || sentenceBase.endsWith("다") || sentenceBase.endsWith("요")
       ? sentenceBase
       : `${sentenceBase}.`;
+    const { kind, kindLabel } = classifySafetyReferenceKind(item.item_type);
     out.push({
       id: item.id,
       title: item.title,
       reflectsDocuments: documents,
       evidenceShort,
-      documentSentence: documentSentence.slice(0, 200)
+      documentSentence: documentSentence.slice(0, 200),
+      kind,
+      kindLabel
     });
     if (out.length >= limit) break;
   }
@@ -194,13 +217,30 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
 
 function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): string {
   if (!items.length) return "";
-  return [
-    "",
-    "[내부 안전지식 DB 반영]",
-    ...items.map((item) => (
-      `- 반영 위치: ${item.reflectsDocuments.join(" / ") || "현장 확인 필요"} / 근거: ${item.evidenceShort || item.title} / 문서 문장: ${item.documentSentence}`
-    ))
-  ].join("\n");
+  // Surface KOSHA 기술지침/기술지원규정 as a separate, prominent block above
+  // the generic 내부 안전지식 DB block.
+  const koshaPrimary = items.filter((item) => item.kind === "kosha-support-regulation" || item.kind === "kosha-guideline");
+  const others = items.filter((item) => item.kind !== "kosha-support-regulation" && item.kind !== "kosha-guideline");
+  const blocks: string[] = [];
+  if (koshaPrimary.length) {
+    blocks.push("");
+    blocks.push("[KOSHA 기술지침/기술지원규정 직접 인용]");
+    for (const item of koshaPrimary) {
+      blocks.push(
+        `- ${item.kindLabel}: ${item.title} / 반영 위치: ${item.reflectsDocuments.join(" / ") || "현장 확인 필요"} / 문서 문장: ${item.documentSentence}`
+      );
+    }
+  }
+  if (others.length) {
+    blocks.push("");
+    blocks.push("[내부 안전지식 DB 반영]");
+    for (const item of others) {
+      blocks.push(
+        `- ${item.kindLabel} / 반영 위치: ${item.reflectsDocuments.join(" / ") || "현장 확인 필요"} / 근거: ${item.evidenceShort || item.title} / 문서 문장: ${item.documentSentence}`
+      );
+    }
+  }
+  return blocks.join("\n");
 }
 
 function formatSafetyKnowledgeAppendix(matches: ReturnType<typeof matchSafetyKnowledge>, target: "risk" | "tbm" | "education") {
@@ -425,18 +465,57 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const koshaEducationPromise = fetchKoshaEducationRecommendations(question);
     const koshaPromise = fetchKoshaReferences(question);
     const koshaOpenApiPromise = fetchKoshaOpenApiEvidence(question);
-    // Track D: Supabase safety_reference_items (9920 rows) RAG.
-    const safetyReferencePromise = searchSafetyReferences({ query: question, limit: 8 }).catch((error) => {
-      console.error("safety reference search failed", error);
+    // Track D / E: Supabase safety_reference_items (9,920 rows) RAG.
+    // Boost KOSHA technical-* types ahead of generic sif-case rows so the
+    // most authoritative refs (KOSHA 기술지침 / 기술지원규정) actually show up.
+    const emptyResult = {
+      ok: false as const,
+      configured: false as const,
+      query: question,
+      count: 0,
+      items: [] as SafetyReferenceItem[],
+      message: ""
+    };
+    const safeSearch = (opts: Parameters<typeof searchSafetyReferences>[0]) =>
+      searchSafetyReferences(opts).catch((error) => {
+        console.error("safety reference search failed", error);
+        return { ...emptyResult, message: error instanceof Error ? error.message : String(error) };
+      });
+    const safetyReferencePromise = (async () => {
+      const [supportReg, guideline, general] = await Promise.all([
+        safeSearch({ query: question, limit: 3, itemType: "technical-support-regulation" }),
+        safeSearch({ query: question, limit: 3, itemType: "technical-guideline" }),
+        safeSearch({ query: question, limit: 5 })
+      ]);
+      // Merge order: support-regulation → guideline → general (deduped by id).
+      const seen = new Set<string>();
+      const merged: SafetyReferenceItem[] = [];
+      for (const bucket of [supportReg.items, guideline.items, general.items]) {
+        for (const item of bucket) {
+          if (seen.has(item.id)) continue;
+          seen.add(item.id);
+          merged.push(item);
+          if (merged.length >= 8) break;
+        }
+        if (merged.length >= 8) break;
+      }
+      const configured = supportReg.configured || guideline.configured || general.configured;
+      const messageParts = [
+        `KOSHA 기술지원규정 ${supportReg.count}건`,
+        `KOSHA 기술지침 ${guideline.count}건`,
+        `일반 카탈로그 ${general.count}건`
+      ];
       return {
-        ok: false,
-        configured: false,
+        ok: merged.length > 0 || general.ok || guideline.ok || supportReg.ok,
+        configured,
         query: question,
-        count: 0,
-        items: [] as SafetyReferenceItem[],
-        message: error instanceof Error ? error.message : String(error)
+        count: merged.length,
+        items: merged,
+        message: configured
+          ? `Supabase 안전 지식 DB 호출 완료 (${messageParts.join(", ")})`
+          : "Supabase 안전 지식 DB가 설정되지 않았습니다."
       };
-    });
+    })();
 
     const rawCitations = await rawCitationsPromise;
     const baseCitations = rawCitations.length ? rawCitations : await searchLegalSources("산업안전보건법");

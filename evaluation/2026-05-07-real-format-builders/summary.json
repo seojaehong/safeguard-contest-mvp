@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-05-07T06:15:37.649Z",
+  "xlsx": {
+    "file": "risk-assessment.xlsx",
+    "bytes": 7315,
+    "sheetCount": 1,
+    "sheetNames": [
+      "위험성평가표"
+    ],
+    "a1": "위험성평가표 · 위험성평가표",
+    "c4_header": "유해·위험요인",
+    "d5_first_body": "기상 및 작업조건 확인 (강풍 예보)",
+    "a1_contains_title": true,
+    "c4_is_risk_header": true,
+    "d5_is_first_content": true
+  },
+  "hwp": {
+    "file": "risk-assessment.hwp",
+    "bytes": 13824,
+    "cfbf_magic": true,
+    "table_info": [
+      {
+        "kind": "meta",
+        "rows": 2,
+        "cols": 4,
+        "paraIdx": 1,
+        "controlIdx": 0
+      },
+      {
+        "kind": "body",
+        "rows": 7,
+        "cols": 4,
+        "paraIdx": 1,
+        "controlIdx": 0
+      }
+    ],
+    "table_count": 2,
+    "rows_with_content": 6
+  }
+}

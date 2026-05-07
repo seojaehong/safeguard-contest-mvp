@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>위험성평가표</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f4f1e8;
+      color: #15171b;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      line-height: 1.55;
+    }
+    .page {
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #fffdf7;
+      padding: 18mm 16mm;
+      border: 1px solid #d7d0c2;
+    }
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      border-bottom: 3px solid #17191d;
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: -0.04em; }
+    .subtitle { margin: 8px 0 0; color: #5c6472; font-size: 13px; }
+    .approval { display: grid; grid-template-columns: repeat(3, 70px); border: 1px solid #17191d; }
+    .approval div { min-height: 58px; border-left: 1px solid #17191d; padding: 6px; text-align: center; font-size: 12px; }
+    .approval div:first-child { border-left: 0; }
+    .approval b { display: block; margin-bottom: 14px; }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border: 1px solid #17191d;
+      margin-bottom: 16px;
+    }
+    .meta div { padding: 10px 12px; border-right: 1px solid #17191d; border-bottom: 1px solid #17191d; }
+    .meta div:nth-child(2n) { border-right: 0; }
+    .meta div:nth-last-child(-n+2) { border-bottom: 0; }
+    .meta b { display: block; color: #4f5663; font-size: 12px; margin-bottom: 3px; }
+    .riskbox {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      border: 2px solid #17191d;
+      margin-bottom: 18px;
+    }
+    .riskbox b { padding: 12px; background: #f5de41; border-right: 2px solid #17191d; }
+    .riskbox span { padding: 12px; }
+    .section { margin-top: 18px; break-inside: avoid; }
+    h2 { margin: 0 0 8px; font-size: 18px; border-left: 5px solid #17191d; padding-left: 8px; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td { border: 1px solid #17191d; padding: 8px; vertical-align: top; font-size: 12px; word-break: keep-all; overflow-wrap: anywhere; }
+    th { background: #ebe6dc; }
+    .meta-table th { width: 18%; }
+    .meta-table td { width: 32%; }
+    .no { width: 44px; }
+    .check { width: 92px; }
+    .signature {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid #17191d;
+      margin-top: 22px;
+    }
+    .signature div { min-height: 54px; border-right: 1px solid #17191d; padding: 9px; font-size: 12px; }
+    .signature div:last-child { border-right: 0; }
+    .notice {
+      margin-top: 18px;
+      border: 2px solid #17191d;
+      padding: 10px 12px;
+      font-size: 12px;
+      background: #fff8d8;
+    }
+    .empty { color: #6b7280; }
+    body.doc-risk .topline { border-bottom-color: #7a2e25; }
+    body.doc-risk h2 { border-left-color: #7a2e25; }
+    body.doc-risk th, body.doc-risk .riskbox b { background: #fff2ef; }
+    body.doc-workPlan .topline { border-bottom-color: #1f4d7a; }
+    body.doc-workPlan h2 { border-left-color: #1f4d7a; }
+    body.doc-workPlan th, body.doc-workPlan .riskbox b { background: #edf5ff; }
+    body.doc-permit .topline { border-bottom-color: #6f4b16; }
+    body.doc-permit h2 { border-left-color: #6f4b16; }
+    body.doc-permit th, body.doc-permit .riskbox b { background: #fff7df; }
+    body.doc-tbm .topline { border-bottom-color: #285f45; }
+    body.doc-tbm h2 { border-left-color: #285f45; }
+    body.doc-tbm th, body.doc-tbm .riskbox b { background: #edf8ef; }
+    .kind-note {
+      margin: 0 0 16px;
+      border: 1px solid #17191d;
+      padding: 9px 12px;
+      background: #fff8d8;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    @media print {
+      body { background: #fff; }
+      .page { border: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body class="doc-risk">
+  <main class="page">
+    <header class="topline">
+      <div>
+        <h1>위험성평가표</h1>
+        <p class="subtitle">SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 5. 7. AM 11:37:56</p>
+      </div>
+      <div class="approval">
+        <div><b>작성</b>서명</div>
+        <div><b>검토</b>서명</div>
+        <div><b>승인</b>서명</div>
+      </div>
+    </header>
+    <section class="meta">
+      <div><b>사업장</b>세이프건설</div>
+      <div><b>현장</b>서울 성수동 근린생활시설 현장</div>
+      <div><b>작업내용</b>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</div>
+      <div><b>인원/기상</b>5명 · 오후 강풍 예보, 작업중지 기준 공유 필요</div>
+    </section>
+    <p class="kind-note">서식 구분: 위험성평가표: 위험요인·등급·감소대책 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다.</p>
+    <section class="riskbox">
+      <b>위험수준 확인</b>
+      <span>핵심 위험요인을 현장에서 최종 확인하세요.</span>
+    </section>
+    
+    <section class="section">
+      <h2>1. 사전준비</h2>
+      <table class="meta-table">
+        <tbody>
+          <tr><th>평가대상 작업</th><td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td><th>평가 장소</th><td>서울 성수동 근린생활시설 현장</td></tr>
+          <tr><th>평가 참여자</th><td>관리감독자, 작업반장, 근로자 대표</td><th>작업 조건</th><td>오후 강풍 예보, 작업중지 기준 공유 필요</td></tr>
+          <tr><th>검토 기준</th><td colspan="3">작업계획서, TBM, 안전보건교육 기록, 법령·KOSHA 근거, 현장 사진 증빙</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section">
+      <h2>2. 유해·위험요인 파악 및 위험성 결정</h2>
+      <table>
+        <thead><tr><th class="no">No.</th><th>단위작업</th><th>유해·위험요인</th><th>4M</th><th>재해형태</th><th>위험성</th><th>현재 안전조치</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td><td>위험성평가표(초안)</td><td>Man/Machine/Media/Management</td><td>추락·충돌·전도 등</td><td>상/중/하</td><td>공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td></tr><tr><td>2</td><td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td><td>공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고</td><td>Man/Machine/Media/Management</td><td>추락·충돌·전도 등</td><td>상/중/하</td><td>기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요</td></tr><tr><td>3</td><td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td><td>[2. 유해·위험요인 파악]</td><td>Man/Machine/Media/Management</td><td>추락·충돌·전도 등</td><td>상/중/하</td><td>- 확인자료: 작업계획, 기상조건, 장비·보호구 상태, 최근 TBM 기록</td></tr><tr><td>4</td><td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td><td>1. 세부작업: 이동식 비계 승·하강 및 작업발판 이동 중 추락</td><td>Man/Machine/Media/Management</td><td>추락·충돌·전도 등</td><td>상/중/하</td><td>- 판단근거: 작업 전 통제 여부와 노출 빈도 확인</td></tr><tr><td>5</td><td>세이프건설 서울 성수동 근린생활시설 외벽 도장 작업</td><td>- 유해·위험요인: 이동식 비계 승·하강 및 작업발판 이동 중 추락</td><td>Man/Machine/Media/Management</td><td>추락·충돌·전도 등</td><td>상/중/하</td><td>[4. 감소대책 수립 및 실행]</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section">
+      <h2>3. 감소대책 수립·실행</h2>
+      <table>
+        <thead><tr><th>추가 감소대책</th><th>담당자</th><th>기한</th><th>증빙</th><th>확인</th></tr></thead>
+        <tbody>
+          <tr><td>공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제</td><td>작업반장</td><td>작업 전</td><td>사진·TBM·점검표</td><td>□</td></tr><tr><td>기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요</td><td>작업반장</td><td>작업 전</td><td>사진·TBM·점검표</td><td>□</td></tr><tr><td>- 확인자료: 작업계획, 기상조건, 장비·보호구 상태, 최근 TBM 기록</td><td>작업반장</td><td>작업 전</td><td>사진·TBM·점검표</td><td>□</td></tr><tr><td>- 판단근거: 작업 전 통제 여부와 노출 빈도 확인</td><td>작업반장</td><td>작업 전</td><td>사진·TBM·점검표</td><td>□</td></tr><tr><td>[4. 감소대책 수립 및 실행]</td><td>작업반장</td><td>작업 전</td><td>사진·TBM·점검표</td><td>□</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section">
+      <h2>4. 공유·교육 및 재평가</h2>
+      <table><tbody><tr><th>공유 방법</th><td>작업 전 TBM, 안전보건교육, 문자/메일 전파</td><th>재평가 기준</th><td>작업조건·장비·기상·인원 변경 또는 잔류위험 발생 시</td></tr></tbody></table>
+    </section>
+    <section class="signature">
+      <div><b>작성자</b><br />성명/서명:</div>
+      <div><b>관리감독자</b><br />성명/서명:</div>
+      <div><b>TBM·교육 확인</b><br />성명/서명:</div>
+      <div><b>보관 위치</b><br />문서번호/철:</div>
+    </section>
+    <p class="notice">본 출력물은 공식자료 기반 현장 검토용 초안입니다. 발주처 지정 원본 양식, 현장 실측, 작업중지 기준, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.</p>
+  </main>
+</body>
+</html>

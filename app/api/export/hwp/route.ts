@@ -28,12 +28,28 @@ let wasmInitialized = false;
 
 function ensureWasm() {
   if (wasmInitialized) return;
-  // Stub for the global; rhwp uses this for canvas measurements.
-  // On server we approximate by character count.
   (globalThis as unknown as { measureTextWidth?: (font: string, text: string) => number }).measureTextWidth = (_font, text) =>
     text.length * 12;
-  const wasmPath = path.join(process.cwd(), "node_modules", "@rhwp", "core", "rhwp_bg.wasm");
-  const wasmBytes = fs.readFileSync(wasmPath);
+  // Vercel serverless does NOT bundle node_modules/@rhwp/core/rhwp_bg.wasm into
+  // the function tracing graph (4MB binary, dynamic fs.readFileSync). The same
+  // WASM is already published under public/rhwp_bg.wasm for the browser path.
+  // public/ files DO get traced into the function bundle.
+  const candidates = [
+    path.join(process.cwd(), "public", "rhwp_bg.wasm"),
+    path.join(process.cwd(), "node_modules", "@rhwp", "core", "rhwp_bg.wasm")
+  ];
+  let wasmBytes: Buffer | null = null;
+  for (const candidate of candidates) {
+    try {
+      wasmBytes = fs.readFileSync(candidate);
+      break;
+    } catch {
+      /* keep trying */
+    }
+  }
+  if (!wasmBytes) {
+    throw new Error(`rhwp WASM not found in any of: ${candidates.join(", ")}`);
+  }
   initSync({ module: wasmBytes });
   wasmInitialized = true;
 }
