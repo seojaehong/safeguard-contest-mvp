@@ -87,7 +87,9 @@ const selected = [
   { src: "moel-workplan-loader.hwpx",               out: "moel-workplan-loader.hwpx",            title: "건설기계 작업계획서 — 로더 (고용노동부)" },
   { src: "moel-workplan-roller.hwpx",               out: "moel-workplan-roller.hwpx",            title: "건설기계 작업계획서 — 롤러 (고용노동부)" },
   { src: "moel-workplan-pile-driver.hwpx",          out: "moel-workplan-pile-driver.hwpx",       title: "건설기계 작업계획서 — 항타기 (고용노동부)" },
-  { src: "moel-workplan-forklift.hwpx",             out: "moel-workplan-forklift.hwpx",          title: "건설기계 작업계획서 — 지게차 (고용노동부)" }
+  { src: "moel-workplan-forklift.hwpx",             out: "moel-workplan-forklift.hwpx",          title: "건설기계 작업계획서 — 지게차 (고용노동부)" },
+  { src: "tbm-log-forestry-sample.hwpx",            out: "tbm-log-forestry-sample.hwpx",         title: "TBM 일지 샘플 — 임업·산림 사업장" },
+  { src: "tbm-and-safety-education-writing-guide.hwpx", out: "tbm-and-safety-education-writing-guide.hwpx", title: "TBM·안전보건교육 일지 작성방법 가이드" }
 ];
 
 function applyReplacements(text) {

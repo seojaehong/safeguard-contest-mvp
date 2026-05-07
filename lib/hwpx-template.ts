@@ -31,7 +31,9 @@ export type HwpxTemplateKind =
   | "moel-workplan-loader"
   | "moel-workplan-roller"
   | "moel-workplan-pile-driver"
-  | "moel-workplan-forklift";
+  | "moel-workplan-forklift"
+  | "tbm-log-forestry-sample"
+  | "tbm-and-safety-education-writing-guide";
 
 const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "risk-assessment": "risk-assessment.hwpx",
@@ -56,7 +58,9 @@ const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "moel-workplan-loader": "moel-workplan-loader.hwpx",
   "moel-workplan-roller": "moel-workplan-roller.hwpx",
   "moel-workplan-pile-driver": "moel-workplan-pile-driver.hwpx",
-  "moel-workplan-forklift": "moel-workplan-forklift.hwpx"
+  "moel-workplan-forklift": "moel-workplan-forklift.hwpx",
+  "tbm-log-forestry-sample": "tbm-log-forestry-sample.hwpx",
+  "tbm-and-safety-education-writing-guide": "tbm-and-safety-education-writing-guide.hwpx"
 };
 
 export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
@@ -82,7 +86,9 @@ export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
   "moel-workplan-loader": "건설기계 작업계획서 — 로더 (고용노동부)",
   "moel-workplan-roller": "건설기계 작업계획서 — 롤러 (고용노동부)",
   "moel-workplan-pile-driver": "건설기계 작업계획서 — 항타기 (고용노동부)",
-  "moel-workplan-forklift": "건설기계 작업계획서 — 지게차 (고용노동부)"
+  "moel-workplan-forklift": "건설기계 작업계획서 — 지게차 (고용노동부)",
+  "tbm-log-forestry-sample": "TBM 일지 샘플 — 임업·산림 사업장",
+  "tbm-and-safety-education-writing-guide": "TBM·안전보건교육 일지 작성방법 가이드"
 };
 
 function templatesDir() {
