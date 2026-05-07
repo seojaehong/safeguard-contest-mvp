@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Internal / operational tooling — not for search indexing
+Disallow: /ops/
+Disallow: /dryrun
+
+Sitemap: https://www.safeclaw.kr/sitemap.xml

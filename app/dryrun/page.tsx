@@ -3,6 +3,11 @@ import { getLatestDryrunReport, getLatestDryrunSnapshot } from "@/lib/dryrun-sta
 
 export const dynamic = "force-dynamic";
 
+// Internal QA / dry-run log — not for search engines.
+export const metadata = {
+  robots: { index: false, follow: false }
+};
+
 export default function DryrunPage() {
   const snapshot = getLatestDryrunSnapshot();
   const report = getLatestDryrunReport();

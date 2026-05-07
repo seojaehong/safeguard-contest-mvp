@@ -5,6 +5,11 @@ import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 export const dynamic = "force-dynamic";
 
+// Internal operations dashboard — not for search engines.
+export const metadata = {
+  robots: { index: false, follow: false }
+};
+
 export default async function ApiOperationsPage() {
   const snapshot = getLatestDryrunSnapshot();
   const safetyDb = await getSafetyReferenceStats();
