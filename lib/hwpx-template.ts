@@ -17,7 +17,8 @@ export type HwpxTemplateKind =
   | "emergency-response"
   | "safety-pledge"
   | "health-questionnaire"
-  | "signal-worker-designation";
+  | "signal-worker-designation"
+  | "crane-workplan";
 
 const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "risk-assessment": "risk-assessment.hwpx",
@@ -28,7 +29,8 @@ const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "emergency-response": "emergency-response.hwpx",
   "safety-pledge": "safety-pledge.hwpx",
   "health-questionnaire": "health-questionnaire.hwpx",
-  "signal-worker-designation": "signal-worker-designation.hwpx"
+  "signal-worker-designation": "signal-worker-designation.hwpx",
+  "crane-workplan": "crane-workplan.hwpx"
 };
 
 export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
@@ -40,7 +42,8 @@ export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
   "emergency-response": "중대재해 대응 절차",
   "safety-pledge": "안전수칙 이행각서",
   "health-questionnaire": "근로자 건강문진표",
-  "signal-worker-designation": "장비 신호수 지정서"
+  "signal-worker-designation": "장비 신호수 지정서",
+  "crane-workplan": "건설기계 작업계획서 — 크레인"
 };
 
 function templatesDir() {
