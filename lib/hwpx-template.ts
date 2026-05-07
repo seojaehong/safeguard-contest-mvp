@@ -21,7 +21,17 @@ export type HwpxTemplateKind =
   | "crane-workplan"
   | "risk-assessment-form-standard"
   | "risk-assessment-consulting-dialog"
-  | "work-permit-form";
+  | "work-permit-form"
+  | "moel-workplan-excavator"
+  | "moel-workplan-truck"
+  | "moel-workplan-aerial-platform"
+  | "moel-workplan-mobile-crane"
+  | "moel-workplan-concrete-pump"
+  | "moel-workplan-concrete-mixer-truck"
+  | "moel-workplan-loader"
+  | "moel-workplan-roller"
+  | "moel-workplan-pile-driver"
+  | "moel-workplan-forklift";
 
 const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "risk-assessment": "risk-assessment.hwpx",
@@ -36,7 +46,17 @@ const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "crane-workplan": "crane-workplan.hwpx",
   "risk-assessment-form-standard": "risk-assessment-form-standard.hwpx",
   "risk-assessment-consulting-dialog": "risk-assessment-consulting-dialog.hwpx",
-  "work-permit-form": "work-permit-form.hwpx"
+  "work-permit-form": "work-permit-form.hwpx",
+  "moel-workplan-excavator": "moel-workplan-excavator.hwpx",
+  "moel-workplan-truck": "moel-workplan-truck.hwpx",
+  "moel-workplan-aerial-platform": "moel-workplan-aerial-platform.hwpx",
+  "moel-workplan-mobile-crane": "moel-workplan-mobile-crane.hwpx",
+  "moel-workplan-concrete-pump": "moel-workplan-concrete-pump.hwpx",
+  "moel-workplan-concrete-mixer-truck": "moel-workplan-concrete-mixer-truck.hwpx",
+  "moel-workplan-loader": "moel-workplan-loader.hwpx",
+  "moel-workplan-roller": "moel-workplan-roller.hwpx",
+  "moel-workplan-pile-driver": "moel-workplan-pile-driver.hwpx",
+  "moel-workplan-forklift": "moel-workplan-forklift.hwpx"
 };
 
 export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
@@ -52,7 +72,17 @@ export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
   "crane-workplan": "건설기계 작업계획서 — 크레인",
   "risk-assessment-form-standard": "위험성평가 표준 서식 (KOSHA)",
   "risk-assessment-consulting-dialog": "위험성평가 대화형 컨설팅 양식 (KOSHA · 지게차/추락 사례 포함)",
-  "work-permit-form": "작업허가서 양식 (KOSHA · 5대 위험작업 통합)"
+  "work-permit-form": "작업허가서 양식 (KOSHA · 5대 위험작업 통합)",
+  "moel-workplan-excavator": "건설기계 작업계획서 — 굴착기 (고용노동부)",
+  "moel-workplan-truck": "건설기계 작업계획서 — 트럭 (고용노동부)",
+  "moel-workplan-aerial-platform": "건설기계 작업계획서 — 고소작업대 (고용노동부)",
+  "moel-workplan-mobile-crane": "건설기계 작업계획서 — 이동식 크레인 (고용노동부)",
+  "moel-workplan-concrete-pump": "건설기계 작업계획서 — 콘크리트펌프카 (고용노동부)",
+  "moel-workplan-concrete-mixer-truck": "건설기계 작업계획서 — 콘크리트 믹서 트럭 (고용노동부)",
+  "moel-workplan-loader": "건설기계 작업계획서 — 로더 (고용노동부)",
+  "moel-workplan-roller": "건설기계 작업계획서 — 롤러 (고용노동부)",
+  "moel-workplan-pile-driver": "건설기계 작업계획서 — 항타기 (고용노동부)",
+  "moel-workplan-forklift": "건설기계 작업계획서 — 지게차 (고용노동부)"
 };
 
 function templatesDir() {

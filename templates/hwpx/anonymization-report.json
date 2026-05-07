@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-07T09:52:08.541Z",
+  "generatedAt": "2026-05-07T09:56:17.844Z",
   "replacementsRuleCount": 3,
   "items": [
     {
@@ -140,6 +140,116 @@
       "title": "작업허가서 양식 (KOSHA)",
       "bytes": 69607,
       "src_bytes": 83786,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-excavator.hwpx",
+      "out": "moel-workplan-excavator.hwpx",
+      "title": "건설기계 작업계획서 — 굴착기 (고용노동부)",
+      "bytes": 415888,
+      "src_bytes": 454198,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-truck.hwpx",
+      "out": "moel-workplan-truck.hwpx",
+      "title": "건설기계 작업계획서 — 트럭 (고용노동부)",
+      "bytes": 3724587,
+      "src_bytes": 3982430,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-aerial-platform.hwpx",
+      "out": "moel-workplan-aerial-platform.hwpx",
+      "title": "건설기계 작업계획서 — 고소작업대 (고용노동부)",
+      "bytes": 2869449,
+      "src_bytes": 3022737,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-mobile-crane.hwpx",
+      "out": "moel-workplan-mobile-crane.hwpx",
+      "title": "건설기계 작업계획서 — 이동식 크레인 (고용노동부)",
+      "bytes": 1430684,
+      "src_bytes": 1549010,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-concrete-pump.hwpx",
+      "out": "moel-workplan-concrete-pump.hwpx",
+      "title": "건설기계 작업계획서 — 콘크리트펌프카 (고용노동부)",
+      "bytes": 342844,
+      "src_bytes": 388177,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-concrete-mixer-truck.hwpx",
+      "out": "moel-workplan-concrete-mixer-truck.hwpx",
+      "title": "건설기계 작업계획서 — 콘크리트 믹서 트럭 (고용노동부)",
+      "bytes": 2657490,
+      "src_bytes": 2687258,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-loader.hwpx",
+      "out": "moel-workplan-loader.hwpx",
+      "title": "건설기계 작업계획서 — 로더 (고용노동부)",
+      "bytes": 2865851,
+      "src_bytes": 2902213,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-roller.hwpx",
+      "out": "moel-workplan-roller.hwpx",
+      "title": "건설기계 작업계획서 — 롤러 (고용노동부)",
+      "bytes": 1536632,
+      "src_bytes": 1559686,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-pile-driver.hwpx",
+      "out": "moel-workplan-pile-driver.hwpx",
+      "title": "건설기계 작업계획서 — 항타기 (고용노동부)",
+      "bytes": 742007,
+      "src_bytes": 783188,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "moel-workplan-forklift.hwpx",
+      "out": "moel-workplan-forklift.hwpx",
+      "title": "건설기계 작업계획서 — 지게차 (고용노동부)",
+      "bytes": 591741,
+      "src_bytes": 627107,
       "touched_files": 1,
       "total_replacements": 0,
       "injected_placeholder": true,
