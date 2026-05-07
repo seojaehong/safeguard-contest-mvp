@@ -332,7 +332,8 @@ function SafeClawHomepage({ onStart }: { onStart: () => void }) {
     <section className="safeclaw-landing" aria-label="SafeClaw 회사 홈페이지">
       <header className="safeclaw-landing-nav">
         <Link href="/" className="safeclaw-os-brand" aria-label="SafeClaw OS 홈">
-          <span className="safeclaw-os-mark">SC</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/ClawMark-Inverse.svg" alt="" className="safeclaw-os-mark" width={28} height={28} />
           <strong>safeclaw/<em>os</em></strong>
         </Link>
         <nav aria-label="SafeClaw 홈페이지 메뉴">
@@ -604,7 +605,8 @@ export function SafeGuardCommandCenter({
     <main className="command-center-shell">
       <header className="command-topbar workspace-command-topbar">
         <Link href="/" className="brand-lockup safeclaw-lockup" aria-label="SafeClaw 홈으로 이동">
-          <span className="brand-mark">SC</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/ClawMark.svg" alt="" className="brand-mark" width={32} height={32} />
           <span>
             <strong>SafeClaw</strong>
             <small>현장 안전 문서팩</small>

@@ -60,7 +60,8 @@ export function SafeClawModuleShell({
     <main className="safeclaw-module-shell">
       <aside className="safeclaw-module-rail" aria-label="SafeClaw 제품 메뉴">
         <Link href="/" className="safeclaw-module-brand" aria-label="SafeClaw 홈">
-          <span>SC</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/ClawMark-Inverse.svg" alt="" width={28} height={28} />
           <strong>safeclaw/<em>os</em></strong>
         </Link>
         <p>FIELD OS</p>
