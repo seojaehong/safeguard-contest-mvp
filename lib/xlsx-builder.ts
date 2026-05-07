@@ -52,13 +52,16 @@ export type XlsxBuildInput = {
 };
 
 function deriveColumns(profile: SafetyFormProfile): string[] {
+  // 사용자 검수: 한빛로지스 work-plan.xlsx의 "순번" 의미 불명. 1~21 row index는 양식 의미가 없음.
+  // 모든 layout에서 통일하여 "No." 사용 — 그리고 buildXlsxForDocument에서 섹션별로 리셋되어
+  // "이 섹션의 N번째 항목"이라는 의미를 갖게 한다.
   switch (profile.layout) {
     case "risk":
       return ["No.", "구분", profile.primaryColumn || "유해·위험요인", profile.actionColumn || "감소대책", "확인", "담당"];
     case "workPlan":
-      return ["순번", "구분", profile.primaryColumn || "작업개요", profile.actionColumn || "장비·인원", "확인", "담당"];
+      return ["No.", "구분", profile.primaryColumn || "작업개요", profile.actionColumn || "장비·인원", "확인", "담당"];
     case "permit":
-      return ["순번", "구분", profile.primaryColumn || "허가항목", profile.actionColumn || "조건/조치", "확인", "담당"];
+      return ["No.", "구분", profile.primaryColumn || "허가항목", profile.actionColumn || "조건/조치", "확인", "담당"];
     case "tbmLog":
     case "tbmBriefing":
       return ["No.", "구분", profile.primaryColumn || "항목", profile.actionColumn || "전달 문구", "확인", "담당"];
@@ -164,13 +167,14 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 12, bold: true };
   row += 1;
 
-  const summaryHeader = ["섹션", "항목 수", "주요 항목"];
-  ws.getCell(row, 1).value = summaryHeader[0];
-  ws.mergeCells(row, 2, row, 3);
-  ws.getCell(row, 2).value = summaryHeader[1];
-  ws.mergeCells(row, 4, row, 6);
-  ws.getCell(row, 4).value = summaryHeader[2];
-  [1, 2, 4].forEach((c) => {
+  // 섹션 요약 헤더: A열은 6 너비로 좁아 섹션명("옥외작업 폭염·자외선 위험 반영" 15자) 잘림.
+  // A:C 머지로 섹션명 컬럼 확보(6+16+28=50 너비), D는 항목 수, E:F는 주요 항목.
+  ws.mergeCells(row, 1, row, 3);
+  ws.getCell(row, 1).value = "섹션";
+  ws.getCell(row, 4).value = "항목 수";
+  ws.mergeCells(row, 5, row, 6);
+  ws.getCell(row, 5).value = "주요 항목";
+  [1, 4, 5].forEach((c) => {
     ws.getCell(row, c).fill = HEADER_FILL;
     ws.getCell(row, c).font = HEADER_FONT;
     ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "center" };
@@ -178,16 +182,17 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   applyBorders(ws, `A${row}:F${row}`);
   row += 1;
   for (const [section, sectionRows] of Object.entries(grouped)) {
+    ws.mergeCells(row, 1, row, 3);
     ws.getCell(row, 1).value = section;
-    ws.mergeCells(row, 2, row, 3);
-    ws.getCell(row, 2).value = sectionRows.length;
-    ws.getCell(row, 2).alignment = { vertical: "middle", horizontal: "center" };
-    ws.mergeCells(row, 4, row, 6);
-    ws.getCell(row, 4).value = sectionRows
+    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
+    ws.getCell(row, 4).value = sectionRows.length;
+    ws.getCell(row, 4).alignment = { vertical: "middle", horizontal: "center" };
+    ws.mergeCells(row, 5, row, 6);
+    ws.getCell(row, 5).value = sectionRows
       .slice(0, 3)
       .map((r) => r.item)
       .join(", ");
-    ws.getCell(row, 4).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    ws.getCell(row, 5).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
     applyBorders(ws, `A${row}:F${row}`);
     row += 1;
   }
@@ -212,7 +217,6 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   ws.getRow(row).height = 22;
   row += 1;
 
-  let no = 0;
   for (const [section, sectionRows] of Object.entries(grouped)) {
     // Section header row spanning all columns
     ws.mergeCells(row, 1, row, 6);
@@ -224,9 +228,12 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
     applyBorders(ws, `A${row}:F${row}`);
     row += 1;
 
+    // 섹션별 No. 리셋: "1. 작업개요"의 1~4, "2. 작업순서"의 1~4 처럼 섹션-로컬 번호.
+    // 이전 글로벌 1~21 방식은 사용자 검수에서 "순번 의미 불명" 지적 받음.
+    let sectionNo = 0;
     for (const r of sectionRows) {
-      no += 1;
-      ws.getCell(row, 1).value = no;
+      sectionNo += 1;
+      ws.getCell(row, 1).value = sectionNo;
       ws.getCell(row, 2).value = section;
       ws.getCell(row, 3).value = r.item;
       ws.getCell(row, 4).value = r.content;
