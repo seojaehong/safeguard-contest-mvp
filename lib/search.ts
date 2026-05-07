@@ -629,7 +629,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         aiBodies = deliverables;
         const filled = Object.keys(aiBodies);
         const groupBrief = diagnostics.groupResults
-          .map((g) => `${g.group}=${g.status === "fulfilled" ? "ok" : `fail(${(g.reason || "").slice(0, 60)})`}`)
+          .map((g) => {
+            if (g.status === "rejected") return `${g.group}=fail(${(g.reason || "").slice(0, 60)})`;
+            // fulfilled: but reason may be "json parse failed" — surface it
+            return `${g.group}=${g.reason ? `fulfilled-${(g.reason || "").slice(0, 30)}` : "ok"}`;
+          })
           .join(" ");
         aiModeAppliedDetail = `AI_MODE=${aiMode} (Gemini 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"}) [${groupBrief}]`;
       } catch (error) {
