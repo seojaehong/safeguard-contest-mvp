@@ -57,6 +57,58 @@
   --radius-sm: 4px;
   --font-base: "Pretendard", "Inter", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
   --font-hud: "Geist Mono", "JetBrains Mono", "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+
+  /* Design handoff v1.0 — semantic colors. Aliased to existing --sc-* where the
+     hex matches; new HEX values where the guide differs. Components built to
+     guide use the semantic name; legacy components keep --sc-* for now. */
+  --hazard: #FFD400;          /* same as --sc-hazard-yellow */
+  --signal: #00E5FF;          /* live / streaming — was missing entirely */
+  --siren: #FF4D2E;           /* danger / alarm — guide hex (was --sc-danger #d92d20) */
+  --good: #5BD68C;            /* normal / sealed — guide hex (was --sc-ok #067647) */
+  --warn: #FFA12E;            /* caution / pending — guide hex (was --sc-warning #ff8a00) */
+  --steel-0: #0A0A0B;         /* page deepest */
+  --steel-1: #111114;         /* card surface */
+  --steel-2: #16161B;         /* sunken / hover */
+  --steel-3: #1F1F26;         /* divider area / pill bg */
+  --paper-0: #FAFAF7;         /* light document canvas */
+  --line-d: rgba(255, 255, 255, 0.10);
+  --line-d-2: rgba(255, 255, 255, 0.16);
+
+  /* Round scale (cards default 6px). */
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 6px;     /* card default */
+  --r-lg: 10px;
+  --r-xl: 14px;
+
+  /* Type scale (Pretendard for KR, Geist Mono for telemetry). */
+  --t-display: clamp(64px, 8vw, 144px);
+  --t-hero: clamp(40px, 5vw, 80px);
+  --t-title: clamp(28px, 3vw, 44px);
+  --t-h: 18px;
+  --t-body-lg: 16px;
+  --t-body: 14px;
+  --t-caption: 12px;
+  --t-micro: 10.5px;
+}
+
+/* Global numeric tabular nums — guide rule: 모든 숫자는 tabular-nums. */
+.num,
+.tabular,
+[data-numeric],
+.kpi-number,
+.kpi-value,
+.kpi strong,
+.metric strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* HUD micro label utility — mono + uppercase + 0.16em letter-spacing. */
+.hud-label {
+  font-family: var(--font-hud);
+  font-size: var(--t-micro);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 body {
