@@ -81,7 +81,7 @@ export function SafeClawLanding() {
         </div>
       </header>
 
-      <section className="safeclaw-os-hero" id="system">
+      <section className="safeclaw-os-hero grid-bg" id="system">
         <div className="safeclaw-os-status">
           <span><i /> 제품 · 운영 준비</span>
           <b>REGION · KR-CENTRAL</b>
