@@ -1,7 +1,7 @@
 import { AskResponse } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
 import { buildMockAskResponse, mockSearchResults } from "./mock-data";
-import { generateAllDeliverables, type AiMode } from "./ai-deliverables";
+import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import { searchSafetyReferences, type SafetyReferenceItem } from "./safety-reference-catalog";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
 import { summarizeLegalSourceMix } from "./legal-sources";
@@ -613,7 +613,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     let aiModeAppliedDetail = "AI_MODE=template (템플릿 본문 사용)";
     if (aiMode === "enhanced" || aiMode === "full") {
       try {
-        aiBodies = await generateAllDeliverables({
+        // Diagnostics 변형으로 그룹별 성공/실패 사유까지 status.detail에 노출.
+        // 가온테크 검수에서 free 그룹 0/4 채움 원인을 본 적 있어 트래킹 강화.
+        const { deliverables, diagnostics } = await generateAllDeliverablesWithDiagnostics({
           scenario: response.scenario,
           question,
           citations: citations.slice(0, 6),
@@ -624,8 +626,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           koshaPrimaryRefs,
           scope: aiMode === "full" ? "full" : "enhanced"
         });
+        aiBodies = deliverables;
         const filled = Object.keys(aiBodies);
-        aiModeAppliedDetail = `AI_MODE=${aiMode} (Gemini 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"})`;
+        const groupBrief = diagnostics.groupResults
+          .map((g) => `${g.group}=${g.status === "fulfilled" ? "ok" : `fail(${(g.reason || "").slice(0, 60)})`}`)
+          .join(" ");
+        aiModeAppliedDetail = `AI_MODE=${aiMode} (Gemini 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"}) [${groupBrief}]`;
       } catch (error) {
         console.error("AI deliverable generation failed; falling back to template bodies", error);
         aiModeAppliedDetail = `AI_MODE=${aiMode} 실패 → 템플릿 fallback`;
