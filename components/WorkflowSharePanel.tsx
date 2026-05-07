@@ -5,7 +5,7 @@ import { AskResponse } from "@/lib/types";
 import type { RecipientSuggestion, WorkerDispatchTarget } from "@/lib/workspace";
 
 type Channel = "email" | "sms" | "kakao" | "band";
-type ActiveChannel = Extract<Channel, "email" | "sms">;
+type ActiveChannel = Extract<Channel, "email" | "sms" | "kakao">;
 type MessageTarget = "manager" | `foreign:${string}`;
 
 type DispatchResult = {
@@ -45,10 +45,10 @@ type WorkflowSharePanelProps = {
 const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
   { key: "email", label: "메일", helper: "관리자·원청 보고", enabled: true },
   { key: "sms", label: "문자", helper: "작업자 즉시 공지", enabled: true },
-  { key: "kakao", label: "카카오", helper: "잠김 · 알림톡 승인 후 활성화", enabled: false },
+  { key: "kakao", label: "카카오", helper: "알림톡 · 승인 템플릿 필요", enabled: true },
   { key: "band", label: "밴드", helper: "잠김 · 팀 채널 승인 후 활성화", enabled: false }
 ];
-const activeDispatchChannels: ActiveChannel[] = ["email", "sms"];
+const activeDispatchChannels: ActiveChannel[] = ["email", "sms", "kakao"];
 
 function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
   const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
@@ -280,7 +280,7 @@ export function WorkflowSharePanel({
       setResult({
         ok: false,
         configured: true,
-        message: "현재 활성 전파 채널은 메일·문자뿐입니다. 카카오·밴드는 승인 대기 상태라 전송할 수 없습니다."
+        message: "현재 활성 전파 채널은 메일·문자·카카오 알림톡입니다. 하나 이상의 채널을 선택해 주세요."
       });
       setIsConfirming(false);
       return;
@@ -326,7 +326,7 @@ export function WorkflowSharePanel({
         <strong>현장 전파</strong>
       </div>
       <p className="muted">
-        문서팩 요약과 현장 공유 메시지는 현재 메일·문자 채널로만 전송합니다. 카카오·밴드는 화면과 서버 API 모두 승인 전까지 잠겨 있습니다.
+        문서팩 요약과 현장 공유 메시지는 메일·문자와 승인된 카카오 알림톡으로 전송합니다. 카카오는 채널·템플릿 설정이 없으면 결과에 설정 필요로 남고, 밴드는 승인 전까지 잠겨 있습니다.
       </p>
 
       <div className="channel-grid" aria-label="전파 채널 선택">
@@ -348,7 +348,7 @@ export function WorkflowSharePanel({
         ))}
       </div>
       <p className="channel-readiness-note">
-        활성 전송: 메일, 문자. 잠김: 카카오, 밴드. 잠긴 채널이 API 요청에 포함되면 서버가 거부합니다.
+        활성 전송: 메일, 문자, 카카오 알림톡. 카카오는 승인 템플릿이 있어야 실발송됩니다. 잠김: 밴드.
       </p>
       {!authToken || !workpackId ? (
         <p className="muted small">
@@ -450,11 +450,11 @@ export function WorkflowSharePanel({
           </div>
           <p className="muted small">전송 후 provider 응답을 채널별로 표시하고, 관리자 로그인 상태에서는 전파 이력을 저장합니다.</p>
           <p className="channel-readiness-note">
-            이 확인 단계에서 전송되는 채널은 {channelLabel || "메일·문자"}뿐입니다. 카카오·밴드는 요청 본문에 포함하지 않습니다.
+            이 확인 단계에서 전송되는 채널은 {channelLabel || "메일·문자"}입니다. 카카오 알림톡은 승인 채널과 템플릿 설정이 없으면 채널별 결과에 설정 필요로 표시됩니다.
           </p>
           {selectedMessageTarget !== "manager" ? (
             <p className="channel-readiness-note">
-              외국인 근로자 전송본입니다. 현장 통역 또는 해당 언어 가능자가 문구와 이해 여부를 확인한 뒤 메일·문자로만 전송합니다.
+              외국인 근로자 전송본입니다. 현장 통역 또는 해당 언어 가능자가 문구와 이해 여부를 확인한 뒤 선택한 채널로 전송합니다.
             </p>
           ) : null}
           <div className="command-actions">

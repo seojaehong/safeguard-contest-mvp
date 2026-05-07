@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "configured": true,
+  "workflowRunId": "fixture-1778154212077",
+  "providerStatus": "fixture",
+  "channelResults": [
+    {
+      "channel": "kakao",
+      "provider": "safe-fixture",
+      "status": "sent",
+      "message": "SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 카카오 알림톡 provider 호출 없이 fixture 접수로 기록했습니다.",
+      "httpStatus": 202
+    }
+  ],
+  "summary": {
+    "requested": 1,
+    "sent": 1,
+    "partial": 0,
+    "failed": 0,
+    "unconfigured": 0,
+    "skipped": 0
+  },
+  "message": "안전 fixture 모드로 전파 요청을 검증했습니다. 실제 provider 전송은 실행하지 않았습니다."
+}

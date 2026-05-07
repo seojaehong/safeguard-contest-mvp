@@ -39,13 +39,31 @@ type WorkflowSummary = {
   skipped: number;
 };
 
-const ACTIVE_CHANNELS: WorkflowChannel[] = ["email", "sms"];
-const LOCKED_CHANNELS: WorkflowChannel[] = ["kakao", "band"];
+const ACTIVE_CHANNELS: WorkflowChannel[] = ["email", "sms", "kakao"];
+const LOCKED_CHANNELS: WorkflowChannel[] = ["band"];
 const TIMEOUT_MS = 20_000;
 const RETRY_COUNT = 1;
 
 function isLiveDispatchEnabled() {
   return process.env.SAFEGUARD_RUN_LIVE_DISPATCH === "1";
+}
+
+function isKakaoDispatchEnabled() {
+  return process.env.SAFEGUARD_KAKAO_ENABLED === "1" || process.env.SAFECLAW_KAKAO_ENABLED === "1";
+}
+
+function isKakaoProviderConfigured() {
+  const senderKey = process.env.SOLAPI_KAKAO_SENDER_KEY?.trim();
+  const templateId = process.env.SOLAPI_KAKAO_TEMPLATE_ID?.trim();
+  const templateCode = process.env.SOLAPI_KAKAO_TEMPLATE_CODE?.trim();
+  return isKakaoDispatchEnabled() && Boolean(senderKey || templateId || templateCode);
+}
+
+function formatChannelLabel(channel: WorkflowChannel) {
+  if (channel === "email") return "메일";
+  if (channel === "sms") return "문자";
+  if (channel === "kakao") return "카카오 알림톡";
+  return "밴드";
 }
 
 function trimSlashes(value: string) {
@@ -181,7 +199,7 @@ function buildFixtureDispatchResponse(channels: WorkflowChannel[], recipients: s
       channel,
       provider: "safe-fixture",
       status: "sent",
-      message: `SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 ${channel === "email" ? "메일" : "문자"} provider 호출 없이 fixture 접수로 기록했습니다.`,
+      message: `SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 ${formatChannelLabel(channel)} provider 호출 없이 fixture 접수로 기록했습니다.`,
       httpStatus: 202
     })),
     summary: {
@@ -190,6 +208,36 @@ function buildFixtureDispatchResponse(channels: WorkflowChannel[], recipients: s
     },
     message: "안전 fixture 모드로 전파 요청을 검증했습니다. 실제 provider 전송은 실행하지 않았습니다."
   };
+}
+
+function buildPreflightChannelResults(channels: WorkflowChannel[], webhookConfigured: boolean): WorkflowChannelResult[] {
+  return channels.flatMap((channel) => {
+    if (channel !== "kakao") return [];
+
+    if (!isKakaoDispatchEnabled()) {
+      return [{
+        channel,
+        provider: "solapi-alimtalk",
+        status: "unconfigured",
+        message: "카카오 알림톡은 채널 연동과 승인 템플릿 설정 후 활성화됩니다."
+      }];
+    }
+
+    if (!webhookConfigured && !isKakaoProviderConfigured()) {
+      return [{
+        channel,
+        provider: "solapi-alimtalk",
+        status: "unconfigured",
+        message: "카카오 알림톡 전송 설정을 확인해야 합니다. n8n relay 또는 Solapi 템플릿 설정이 필요합니다."
+      }];
+    }
+
+    return [];
+  });
+}
+
+function isPreflightBlocked(channel: WorkflowChannel, preflightResults: WorkflowChannelResult[]) {
+  return preflightResults.some((item) => item.channel === channel && item.status === "unconfigured");
 }
 
 async function postWithTimeout(url: string, secret: string, payload: Record<string, unknown>) {
@@ -265,7 +313,7 @@ export async function POST(request: NextRequest) {
       ok: false,
       configured: Boolean(webhookConfig.url && webhookConfig.token),
       lockedChannels,
-      message: "카카오·밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자만 허용합니다."
+      message: "밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자와 설정된 카카오 알림톡만 허용합니다."
     }, { status: 400 });
   }
 
@@ -274,7 +322,7 @@ export async function POST(request: NextRequest) {
       ok: false,
       configured: Boolean(webhookConfig.url && webhookConfig.token),
       unsupportedChannels,
-      message: "지원하지 않는 전파 채널입니다. 현재 활성 채널은 메일·문자이며 카카오·밴드는 승인 대기 상태입니다."
+      message: "지원하지 않는 전파 채널입니다. 현재 활성 채널은 메일·문자와 설정된 카카오 알림톡입니다."
     }, { status: 400 });
   }
 
@@ -282,22 +330,48 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: false,
       configured: Boolean(webhookConfig.url && webhookConfig.token),
-      message: "문서팩과 전파 채널을 확인해 주세요. 현재 활성 채널은 메일·문자입니다."
+      message: "문서팩과 전파 채널을 확인해 주세요. 현재 활성 채널은 메일·문자와 설정된 카카오 알림톡입니다."
     }, { status: 400 });
   }
 
+  const webhookConfigured = Boolean(webhookConfig.url && webhookConfig.token);
+  const preflightChannelResults = buildPreflightChannelResults(channels, webhookConfigured);
+  const dispatchChannels = channels.filter((channel) => !isPreflightBlocked(channel, preflightChannelResults));
+
+  if (!dispatchChannels.length) {
+    const summary = summarizeChannelResults(preflightChannelResults);
+    return NextResponse.json({
+      ok: false,
+      configured: webhookConfigured,
+      channelResults: preflightChannelResults,
+      summary,
+      message: "선택한 전파 채널 중 즉시 전송 가능한 채널이 없습니다. 카카오 알림톡 채널·템플릿 설정을 확인해 주세요."
+    });
+  }
+
   if (isLiveDispatchEnabled() && (!webhookConfig.url || !webhookConfig.token)) {
+    const channelResults = [
+      ...dispatchChannels.map((channel) => ({
+        channel,
+        provider: "n8n",
+        status: "unconfigured" as const,
+        message: `${formatChannelLabel(channel)} 전송을 위한 n8n relay 설정을 확인해야 합니다.`
+      })),
+      ...preflightChannelResults
+    ];
     return NextResponse.json({
       ok: false,
       configured: false,
-      message: "현장 전파 연결을 확인해야 합니다. 현재 활성 채널인 메일·문자 전송 설정을 점검해 주세요."
+      channelResults,
+      summary: summarizeChannelResults(channelResults),
+      message: "현장 전파 연결을 확인해야 합니다. n8n relay 또는 provider 설정을 점검해 주세요."
     });
   }
 
   const payload = {
     event: "safeguard.workpack.dispatch",
     sentAt: new Date().toISOString(),
-    channels,
+    channels: dispatchChannels,
     recipients,
     operatorNote: typeof body.operatorNote === "string" ? body.operatorNote : "",
     workpack: body.workpack
@@ -306,11 +380,14 @@ export async function POST(request: NextRequest) {
   try {
     const workflowResponse = isLiveDispatchEnabled()
       ? await postWithTimeout(webhookConfig.url, webhookConfig.token, payload)
-      : buildFixtureDispatchResponse(channels, recipients);
-    const channelResults = normalizeChannelResults(workflowResponse.channelResults, channels);
+      : buildFixtureDispatchResponse(dispatchChannels, recipients);
+    const channelResults = [
+      ...normalizeChannelResults(workflowResponse.channelResults, dispatchChannels),
+      ...preflightChannelResults
+    ];
     const summary = summarizeChannelResults(channelResults);
     return NextResponse.json({
-      ok: workflowResponse.ok ?? true,
+      ok: (workflowResponse.ok ?? true) && summary.failed === 0,
       configured: true,
       workflowRunId: workflowResponse.workflowRunId,
       providerStatus: workflowResponse.providerStatus,

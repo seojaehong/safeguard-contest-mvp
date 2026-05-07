@@ -18,9 +18,33 @@ SafeGuard should use this priority:
 
 Do not put Kakao credentials in Vercel or Git.
 
+## SafeClaw Runtime Behavior
+
+SafeClaw now treats Kakao as a selectable channel, but the server still protects
+production delivery:
+
+- If `SAFEGUARD_KAKAO_ENABLED` is not `1`, Kakao returns `unconfigured` and does
+  not block email/SMS delivery.
+- If Kakao is enabled and the n8n relay is configured, the `kakao` channel is
+  included in the dispatch payload for the Oracle workflow.
+- Band remains locked until its channel review is complete.
+- The UI always shows channel-level results, so Kakao setup issues are visible
+  as `설정 필요` instead of being hidden behind a generic failure.
+
+Recommended production values:
+
+```text
+SAFEGUARD_RUN_LIVE_DISPATCH=1
+SAFEGUARD_KAKAO_ENABLED=1
+N8N_PUBLIC_BASE=https://<server2-relay-domain>
+N8N_WEBHOOK_PATH=safeguard-workpack
+N8N_WEBHOOK_TOKEN=<same token as Oracle n8n>
+```
+
 ## Proposed Environment Slots
 
 ```text
+SAFEGUARD_KAKAO_ENABLED=1
 SOLAPI_KAKAO_SENDER_KEY=
 SOLAPI_KAKAO_TEMPLATE_ID=
 SOLAPI_KAKAO_TEMPLATE_CODE=
