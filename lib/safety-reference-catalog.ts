@@ -239,6 +239,66 @@ async function fetchReferenceItems(config: SupabaseConfig, params: URLSearchPara
   };
 }
 
+/**
+ * Track E-3: ranked search via Postgres RPC. Uses tsvector + pg_trgm
+ * with weighted scoring (KOSHA 기술지원규정 100 / 기술지침 80 / others
+ * 10–30) + ts_rank_cd × 50 + title-similarity × 20.
+ *
+ * Returns null when the RPC isn't reachable (caller falls back to ilike).
+ */
+async function fetchRankedReferences(
+  config: SupabaseConfig,
+  query: string,
+  limit: number,
+  itemType?: string
+): Promise<{ ok: boolean; status: number; message: string; items: SafetyReferenceItem[] } | null> {
+  const url = `${config.url}/rest/v1/rpc/search_safety_references_ranked`;
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        apikey: config.serviceRoleKey,
+        Authorization: `Bearer ${config.serviceRoleKey}`,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        q: query,
+        result_limit: limit,
+        item_type_filter: itemType ?? null
+      }),
+      cache: "no-store"
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      status: 0,
+      message: `RPC 호출 실패: ${error instanceof Error ? error.message : String(error)}`,
+      items: []
+    };
+  }
+  if (response.status === 404) {
+    return null; // RPC missing — caller should fall back.
+  }
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    return {
+      ok: false,
+      status: response.status,
+      message: `RPC 조회 실패: ${response.status} ${body}`,
+      items: []
+    };
+  }
+  const data = (await response.json()) as unknown;
+  const items = Array.isArray(data) ? data.filter(isReferenceItem).map(normalizeReferenceItem) : [];
+  return {
+    ok: true,
+    status: response.status,
+    message: "Supabase 안전 지식 DB ranked RPC 호출 성공.",
+    items
+  };
+}
+
 async function countRows(config: SupabaseConfig, spec: CountSpec): Promise<number> {
   const params = new URLSearchParams();
   params.set("select", "id");
@@ -280,6 +340,25 @@ export async function searchSafetyReferences(options: {
       items: [],
       message: "Supabase service role key가 없어 안전 지식 DB 검색을 실행하지 않았습니다."
     };
+  }
+
+  // Track E-3: try the ranked RPC first when no specialised filters block it.
+  // RPC handles only `query` + `itemType`. For sourceId/riskTag we still use the
+  // legacy ilike path. evidenceRole is post-filtered on returned items.
+  if (query && !options.sourceId && !options.riskTag) {
+    const ranked = await fetchRankedReferences(config, query, fetchLimit, options.itemType);
+    if (ranked && ranked.ok && ranked.items.length) {
+      const filtered = filterByEvidenceRole(ranked.items, options.evidenceRole).slice(0, limit);
+      return {
+        ok: true,
+        configured: true,
+        query,
+        count: filtered.length,
+        items: filtered,
+        message: "Supabase 안전 지식 DB ranked RPC 결과를 사용했습니다."
+      };
+    }
+    // Otherwise fall through to legacy ilike path (RPC missing or empty).
   }
 
   const params = new URLSearchParams();
