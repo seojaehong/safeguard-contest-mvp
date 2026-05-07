@@ -130,6 +130,61 @@ export default async function KnowledgePage() {
 
       <section className="card knowledge-index-card">
         <div className="compact-head">
+          <span className="eyebrow">KOSHA Reference Library</span>
+          <strong>참고 자료실 (PDF)</strong>
+        </div>
+        <p className="muted small">
+          KOSHA 공식 발간 매뉴얼·가이드라인 PDF. 출처: 안전보건공단 (공공누리 1유형, 출처표시 자유사용/재배포 가능).
+          위험성평가·안전보건진단 작성 시 본문 옆에 펼쳐 참고하세요.
+        </p>
+        <div className="knowledge-entry-list">
+          <a href="/kosha-references/risk-assessment-implementation-manual-2022.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · 매뉴얼</small>
+            <strong>위험성평가 이행·점검 매뉴얼 (2022)</strong>
+            <span>위험성평가 절차·체크리스트·이행관리 매뉴얼. 1.95MB · PDF</span>
+            <span>반영 위치: 위험성평가표 / 안전보건교육 / 사전준비</span>
+          </a>
+          <a href="/kosha-references/risk-assessment-guidebook-2022.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · 지침해설서</small>
+            <strong>2022 위험성평가 지침해설서</strong>
+            <span>위험성평가 법적 근거·실시 절차·등급 판정 해설. 4.32MB · PDF</span>
+            <span>반영 위치: 위험성평가표 본문 작성 시 핵심 참조</span>
+          </a>
+          <a href="/kosha-references/risk-assessment-easy-guide.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · 안내서</small>
+            <strong>쉽고 간편한 위험성평가 방법 안내서</strong>
+            <span>4M·체크리스트·핵심요인 기법 등 실시 방법 안내. 4.15MB · PDF</span>
+            <span>반영 위치: 신규 사업장 / 소규모 현장 위험성평가</span>
+          </a>
+          <a href="/kosha-references/work-accident-prevention-rate-leaflet.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · 리플릿</small>
+            <strong>산재예방요율제 제도 안내</strong>
+            <span>위험성평가 인정 사업장 산재보험료 할인 제도. 1.34MB · PDF</span>
+            <span>반영 위치: 사업주 인센티브 안내</span>
+          </a>
+          <a href="/kosha-references/tbm-pre-work-safety-meeting-guide-2023.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · TBM 메인 가이드</small>
+            <strong>작업 전 안전점검회의(TBM) 가이드 (2023)</strong>
+            <span>TBM 도입·실시·기록·교육시간 인정 통합 가이드. 4.2MB · PDF</span>
+            <span>반영 위치: TBM 일지 / TBM 회의록 / 안전보건교육 작성 시 핵심 참조</span>
+          </a>
+          <a href="/kosha-references/safety-health-diagnosis-guideline-full.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · 가이드라인</small>
+            <strong>안전보건진단 업무 가이드라인 (전문)</strong>
+            <span>안전보건진단 업무 표준 절차 가이드라인. 1.57MB · PDF</span>
+            <span>반영 위치: 위험성평가표 / 비상대응 / 사전점검</span>
+          </a>
+          <a href="/kosha-references/safety-health-diagnosis-sample-report.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · 샘플</small>
+            <strong>안전보건진단 샘플 보고서 (공개용)</strong>
+            <span>실제 진단 보고서 형식 샘플. 510KB · PDF</span>
+            <span>반영 위치: 진단 보고서 / 점검결과 요약</span>
+          </a>
+        </div>
+      </section>
+
+      <section className="card knowledge-index-card">
+        <div className="compact-head">
           <span className="eyebrow">Index</span>
           <strong>위키 인덱스</strong>
         </div>

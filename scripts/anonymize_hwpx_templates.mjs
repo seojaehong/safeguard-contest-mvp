@@ -72,7 +72,24 @@ const selected = [
   { src: "4.2-serious-accident-response.hwpx",      out: "emergency-response.hwpx",   title: "중대재해 대응 절차" },
   { src: "safety-pledge.hwpx",                      out: "safety-pledge.hwpx",        title: "안전수칙 이행각서" },
   { src: "health-questionnaire.hwpx",               out: "health-questionnaire.hwpx", title: "근로자 건강문진표" },
-  { src: "signal-worker-designation.hwpx",          out: "signal-worker-designation.hwpx", title: "장비 신호수 지정서" }
+  { src: "signal-worker-designation.hwpx",          out: "signal-worker-designation.hwpx", title: "장비 신호수 지정서" },
+  { src: "crane-workplan.hwpx",                     out: "crane-workplan.hwpx",       title: "건설기계 작업계획서 — 크레인" },
+  { src: "risk-assessment-form-standard.hwpx",      out: "risk-assessment-form-standard.hwpx",   title: "위험성평가 표준 서식 (KOSHA)" },
+  { src: "risk-assessment-consulting-dialog.hwpx",  out: "risk-assessment-consulting-dialog.hwpx", title: "위험성평가 대화형 컨설팅 양식 (KOSHA)" },
+  { src: "work-permit-form.hwpx",                   out: "work-permit-form.hwpx",     title: "작업허가서 양식 (KOSHA)" },
+  // 고용노동부 표준 건설기계장비 작업계획서 10종
+  { src: "moel-workplan-excavator.hwpx",            out: "moel-workplan-excavator.hwpx",         title: "건설기계 작업계획서 — 굴착기 (고용노동부)" },
+  { src: "moel-workplan-truck.hwpx",                out: "moel-workplan-truck.hwpx",             title: "건설기계 작업계획서 — 트럭 (고용노동부)" },
+  { src: "moel-workplan-aerial-platform.hwpx",      out: "moel-workplan-aerial-platform.hwpx",   title: "건설기계 작업계획서 — 고소작업대 (고용노동부)" },
+  { src: "moel-workplan-mobile-crane.hwpx",         out: "moel-workplan-mobile-crane.hwpx",      title: "건설기계 작업계획서 — 이동식 크레인 (고용노동부)" },
+  { src: "moel-workplan-concrete-pump.hwpx",        out: "moel-workplan-concrete-pump.hwpx",     title: "건설기계 작업계획서 — 콘크리트펌프카 (고용노동부)" },
+  { src: "moel-workplan-concrete-mixer-truck.hwpx", out: "moel-workplan-concrete-mixer-truck.hwpx", title: "건설기계 작업계획서 — 콘크리트 믹서 트럭 (고용노동부)" },
+  { src: "moel-workplan-loader.hwpx",               out: "moel-workplan-loader.hwpx",            title: "건설기계 작업계획서 — 로더 (고용노동부)" },
+  { src: "moel-workplan-roller.hwpx",               out: "moel-workplan-roller.hwpx",            title: "건설기계 작업계획서 — 롤러 (고용노동부)" },
+  { src: "moel-workplan-pile-driver.hwpx",          out: "moel-workplan-pile-driver.hwpx",       title: "건설기계 작업계획서 — 항타기 (고용노동부)" },
+  { src: "moel-workplan-forklift.hwpx",             out: "moel-workplan-forklift.hwpx",          title: "건설기계 작업계획서 — 지게차 (고용노동부)" },
+  { src: "tbm-log-forestry-sample.hwpx",            out: "tbm-log-forestry-sample.hwpx",         title: "TBM 일지 샘플 — 임업·산림 사업장" },
+  { src: "tbm-and-safety-education-writing-guide.hwpx", out: "tbm-and-safety-education-writing-guide.hwpx", title: "TBM·안전보건교육 일지 작성방법 가이드" }
 ];
 
 function applyReplacements(text) {
