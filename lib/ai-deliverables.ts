@@ -1,10 +1,16 @@
 // AI-generated deliverables (Track C).
 // Replaces the template-driven deliverables in mock-data.ts with Gemini output for
-// every per-document body. Uses 3 parallel calls grouped by output type to stay under
-// per-call token limits while keeping wall-clock latency at ~30-60s.
+// every per-document body.
 //
-// Each call asks for JSON only. Parsing is defensive: if Gemini returns malformed
-// JSON or omits a field, callers keep the template fallback.
+// Architecture (post-refactor 2026-05-07): 7 small parallel calls instead of 3 large
+// ones. Each tabular doc (riskAssessment / workPlan / tbm / tbmLog / education) has its
+// own Gemini call returning {key: string} with optional companion array. Free (4 short
+// docs) and Foreign (3 keys) keep their grouped calls — they fit comfortably under 32K
+// output tokens. Per-call: 1 retry on transient failure (parse fail or call error).
+//
+// Why split: 3-call design hit MAX_TOKENS truncation on tabular (5 docs × 1500-3500자
+// ≈ 22K-50K tokens output) and 60s timeout on long-context cases. Splitting makes each
+// call ≤ 5K tokens output, ≤ 30s wall, and isolates failures to the affected doc only.
 
 import type { AskResponse, SearchResult } from "@/lib/types";
 
@@ -95,6 +101,33 @@ async function callGemini(prompt: string): Promise<string> {
   throw lastError instanceof Error ? lastError : new Error("Gemini chain failed");
 }
 
+// Wraps callGemini with one retry on transient failure. If the call returns text
+// but the parser rejects it (returns null), retry once — Gemini occasionally emits
+// markdown-wrapped JSON or partial structured-output JSON. If the call itself errors
+// (HTTP, abort timeout, empty response), retry once. After 2 attempts, throw.
+async function callAndParse<T>(
+  prompt: string,
+  parser: (raw: string) => T | null,
+  label: string
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const raw = await callGemini(prompt);
+      const parsed = parser(raw);
+      if (parsed) return parsed;
+      lastError = new Error(`json parse failed (raw len=${raw.length})`);
+      const head = raw.slice(0, 200).replace(/\n/g, "\\n");
+      const tail = raw.slice(-200).replace(/\n/g, "\\n");
+      console.error(`[AI ${label}] attempt ${attempt} parse failed. head=${head} ... tail=${tail}`);
+    } catch (error) {
+      lastError = error;
+      console.error(`[AI ${label}] attempt ${attempt} call failed:`, error);
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(`AI ${label} exhausted retries`);
+}
+
 function safeParseJson<T = unknown>(raw: string): T | null {
   try {
     return JSON.parse(raw) as T;
@@ -172,32 +205,74 @@ function contextBlock(ctx: GenContext) {
   ].join("\n");
 }
 
-function tabularPrompt(ctx: GenContext) {
+// 5 tabular per-document prompts (each ≤ 1 main string, optionally + 1 small array).
+// Each fits comfortably under 5K output tokens and 30s wall, so MAX_TOKENS / abort
+// failures from the previous 5-in-1 prompt are eliminated.
+
+function riskAssessmentSinglePrompt(ctx: GenContext) {
   return [
     persona(),
     "",
-    "다음 5개의 표 양식 본문을 모두 작성하고 JSON 객체로 반환하라:",
-    "  - riskAssessmentDraft: 위험성평가표(초안). [기본정보] [1.사전준비] [2.유해·위험요인 파악] (4M 표시) [3.위험성 결정] (가능성/중대성/등급) [4.감소대책 수립 및 실행] [5.공유·교육] [6.조치 확인] 섹션 포함. 위험요인은 5~7개를 시나리오에 맞게 발굴.",
-    "  - workPlanDraft: 작업계획서(초안). 작업개요 / 세부 작업순서 / 장비·인원·첨부서류 / 작업중지 기준 / 비상대응 / 확인자 서명.",
-    "  - tbmBriefing: TBM 브리핑(초안). 일시/장소/대상/오늘 작업/위험요인/안전대책/작업중지 기준/참석자 확인/사진증빙 위치/교육시간 인정 검토/확인질문.",
-    "  - tbmLogDraft: TBM 일지(초안). 결재/공종/일자/근로자 확인사항/금일 작업/금일 위험요인/일일 안전교육/참석자명단/인원집계/미조치 및 사진증빙.",
-    "  - safetyEducationRecordDraft: 안전보건교육 기록(초안). 교육명/구분/일시/장소/대상/실시자/확인자/교육내용(법령조항 명시)/이해확인방법/TBM 연계/후속 교육 추천.",
-    "추가로 같은 JSON 객체에 다음 보조 배열도 함께 채워라:",
-    "  - safetyEducationPoints: 강조사항 5개 짧은 문장 배열.",
-    "  - tbmQuestions: TBM 마무리 확인질문 5개 배열.",
+    "위험성평가표(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
+    "[기본정보] [1.사전준비] [2.유해·위험요인 파악] (4M 표시) [3.위험성 결정] (가능성/중대성/등급) [4.감소대책 수립 및 실행] [5.공유·교육] [6.조치 확인] 섹션 포함.",
+    "위험요인은 5~7개를 시나리오에 맞게 발굴. 길이 1500~3500자 권장. 줄바꿈 포함 일반 텍스트.",
     "",
-    "각 본문은 줄바꿈(\\n)을 포함한 일반 텍스트(섹션 헤더는 [제목] 형태). 길이 1500~3500자 권장.",
+    "응답 JSON 스키마: { \"riskAssessmentDraft\": \"string\" }",
     "",
-    "응답 JSON 스키마:",
-    `{
-  "riskAssessmentDraft": "string",
-  "workPlanDraft": "string",
-  "tbmBriefing": "string",
-  "tbmLogDraft": "string",
-  "safetyEducationRecordDraft": "string",
-  "safetyEducationPoints": ["string", "string", "string", "string", "string"],
-  "tbmQuestions": ["string", "string", "string", "string", "string"]
-}`,
+    contextBlock(ctx)
+  ].join("\n");
+}
+
+function workPlanSinglePrompt(ctx: GenContext) {
+  return [
+    persona(),
+    "",
+    "작업계획서(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
+    "작업개요 / 세부 작업순서 / 장비·인원·첨부서류 / 작업중지 기준 / 비상대응 / 확인자 서명 섹션 포함.",
+    "길이 1500~3500자 권장. 줄바꿈 포함 일반 텍스트.",
+    "",
+    "응답 JSON 스키마: { \"workPlanDraft\": \"string\" }",
+    "",
+    contextBlock(ctx)
+  ].join("\n");
+}
+
+function tbmBriefingSinglePrompt(ctx: GenContext) {
+  return [
+    persona(),
+    "",
+    "TBM 브리핑 초안 + 마무리 확인질문 5개를 작성하고 다음 JSON 형식으로만 반환하라.",
+    "tbmBriefing: 일시/장소/대상/오늘 작업/위험요인/안전대책/작업중지 기준/참석자 확인/사진증빙 위치/교육시간 인정 검토. 길이 1500~3500자.",
+    "tbmQuestions: 작업 시작 직전 작업자에게 던지는 5개 짧은 확인질문 배열.",
+    "",
+    "응답 JSON 스키마: { \"tbmBriefing\": \"string\", \"tbmQuestions\": [\"string\",\"string\",\"string\",\"string\",\"string\"] }",
+    "",
+    contextBlock(ctx)
+  ].join("\n");
+}
+
+function tbmLogSinglePrompt(ctx: GenContext) {
+  return [
+    persona(),
+    "",
+    "TBM 일지(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
+    "결재/공종/일자/근로자 확인사항/금일 작업/금일 위험요인/일일 안전교육/참석자명단/인원집계/미조치 및 사진증빙 섹션 포함. 길이 1500~3500자.",
+    "",
+    "응답 JSON 스키마: { \"tbmLogDraft\": \"string\" }",
+    "",
+    contextBlock(ctx)
+  ].join("\n");
+}
+
+function safetyEducationSinglePrompt(ctx: GenContext) {
+  return [
+    persona(),
+    "",
+    "안전보건교육 기록 초안 + 강조사항 5개를 작성하고 다음 JSON 형식으로만 반환하라.",
+    "safetyEducationRecordDraft: 교육명/구분/일시/장소/대상/실시자/확인자/교육내용(법령조항 명시)/이해확인방법/TBM 연계/후속 교육 추천. 길이 1500~3500자.",
+    "safetyEducationPoints: 작업자에게 강조할 핵심 메시지 5개 짧은 문장 배열.",
+    "",
+    "응답 JSON 스키마: { \"safetyEducationRecordDraft\": \"string\", \"safetyEducationPoints\": [\"string\",\"string\",\"string\",\"string\",\"string\"] }",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -301,79 +376,118 @@ function buildContext(opts: GenerateAllOptions): GenContext {
   };
 }
 
+// Per-call parsers. Each validates the expected shape (length floors, array types)
+// and returns null when the validation fails — that triggers callAndParse's retry.
+
+// All parsers return Partial<AiDeliverables> so they share a single signature in
+// TABULAR_SPECS (TypeScript's contextual narrowing on Pick<> union doesn't widen).
+function parseRiskAssessment(raw: string): Partial<AiDeliverables> | null {
+  const j = safeParseJson<AiDeliverables>(raw);
+  const v = j?.riskAssessmentDraft;
+  return typeof v === "string" && v.length > 100 ? { riskAssessmentDraft: v } : null;
+}
+function parseWorkPlan(raw: string): Partial<AiDeliverables> | null {
+  const j = safeParseJson<AiDeliverables>(raw);
+  const v = j?.workPlanDraft;
+  return typeof v === "string" && v.length > 100 ? { workPlanDraft: v } : null;
+}
+function parseTbmBriefing(raw: string): Partial<AiDeliverables> | null {
+  const j = safeParseJson<AiDeliverables>(raw);
+  const briefing = j?.tbmBriefing;
+  if (typeof briefing !== "string" || briefing.length <= 100) return null;
+  const out: Partial<AiDeliverables> = { tbmBriefing: briefing };
+  if (Array.isArray(j?.tbmQuestions)) {
+    out.tbmQuestions = j.tbmQuestions.filter((s) => typeof s === "string");
+  }
+  return out;
+}
+function parseTbmLog(raw: string): Partial<AiDeliverables> | null {
+  const j = safeParseJson<AiDeliverables>(raw);
+  const v = j?.tbmLogDraft;
+  return typeof v === "string" && v.length > 100 ? { tbmLogDraft: v } : null;
+}
+function parseSafetyEducation(raw: string): Partial<AiDeliverables> | null {
+  const j = safeParseJson<AiDeliverables>(raw);
+  const record = j?.safetyEducationRecordDraft;
+  if (typeof record !== "string" || record.length <= 100) return null;
+  const out: Partial<AiDeliverables> = {
+    safetyEducationRecordDraft: record
+  };
+  if (Array.isArray(j?.safetyEducationPoints)) {
+    out.safetyEducationPoints = j.safetyEducationPoints.filter((s) => typeof s === "string");
+  }
+  return out;
+}
+function parseFree(raw: string): Partial<AiDeliverables> | null {
+  const j = safeParseJson<AiDeliverables>(raw);
+  if (!j) return null;
+  const required: Array<keyof AiDeliverables> = ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft", "kakaoMessage"];
+  // Free 그룹은 4개 모두 짧은 문서. 1-2개만 살아남는 부분 응답을 retry로 잡아내려고
+  // 4개 모두 length>100인 경우에만 success로 인정.
+  const valid = required.every((k) => typeof j[k] === "string" && (j[k] as string).length > 100);
+  if (!valid) return null;
+  return {
+    workpackSummaryDraft: j.workpackSummaryDraft as string,
+    emergencyResponseDraft: j.emergencyResponseDraft as string,
+    photoEvidenceDraft: j.photoEvidenceDraft as string,
+    kakaoMessage: j.kakaoMessage as string
+  };
+}
+function parseForeign(raw: string): Partial<AiDeliverables> | null {
+  const j = safeParseJson<AiDeliverables>(raw);
+  const briefing = j?.foreignWorkerBriefing;
+  const transmission = j?.foreignWorkerTransmission;
+  if (typeof briefing !== "string" || briefing.length <= 200) return null;
+  if (typeof transmission !== "string" || transmission.length <= 200) return null;
+  const out: Partial<AiDeliverables> = {
+    foreignWorkerBriefing: briefing,
+    foreignWorkerTransmission: transmission
+  };
+  if (Array.isArray(j?.foreignWorkerLanguages)) {
+    out.foreignWorkerLanguages = j.foreignWorkerLanguages.filter((s) => typeof s === "string");
+  }
+  return out;
+}
+
+// Specs for the 7 parallel calls. Order in the array doesn't matter; Promise.allSettled
+// reports per-spec status independently.
+const TABULAR_SPECS = [
+  { name: "riskAssessment", buildPrompt: riskAssessmentSinglePrompt, parse: parseRiskAssessment },
+  { name: "workPlan", buildPrompt: workPlanSinglePrompt, parse: parseWorkPlan },
+  { name: "tbmBriefing", buildPrompt: tbmBriefingSinglePrompt, parse: parseTbmBriefing },
+  { name: "tbmLog", buildPrompt: tbmLogSinglePrompt, parse: parseTbmLog },
+  { name: "safetyEducation", buildPrompt: safetyEducationSinglePrompt, parse: parseSafetyEducation }
+] as const;
+
 export async function generateAllDeliverables(opts: GenerateAllOptions): Promise<AiDeliverables> {
   if (!geminiApiKey) return {};
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
 
-  const tabularPromise = callGemini(tabularPrompt(ctx));
-  const freePromise = scope === "full" ? callGemini(freeFormPrompt(ctx)) : Promise.reject(new Error("skipped (enhanced scope)"));
-  const foreignPromise = scope === "full" ? callGemini(foreignWorkerPrompt(ctx)) : Promise.reject(new Error("skipped (enhanced scope)"));
+  // 7-way parallel: 5 tabular per-doc + 1 free + 1 foreign (free/foreign skipped on enhanced).
+  const tabularPromises = TABULAR_SPECS.map((spec) =>
+    callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name)
+  );
+  const freePromise = scope === "full"
+    ? callAndParse(freeFormPrompt(ctx), parseFree, "free")
+    : Promise.reject(new Error("skipped (enhanced scope)"));
+  const foreignPromise = scope === "full"
+    ? callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign")
+    : Promise.reject(new Error("skipped (enhanced scope)"));
 
-  const [tabularRaw, freeRaw, foreignRaw] = await Promise.allSettled([
-    tabularPromise,
-    freePromise,
-    foreignPromise
-  ]);
+  const settled = await Promise.allSettled([...tabularPromises, freePromise, foreignPromise]);
 
   const out: AiDeliverables = {};
-
-  if (tabularRaw.status === "fulfilled") {
-    const parsed = safeParseJson<AiDeliverables>(tabularRaw.value);
-    if (parsed) {
-      for (const k of [
-        "riskAssessmentDraft",
-        "workPlanDraft",
-        "tbmBriefing",
-        "tbmLogDraft",
-        "safetyEducationRecordDraft"
-      ] as const) {
-        const v = parsed[k];
-        if (typeof v === "string" && v.length > 100) out[k] = v;
-      }
-      if (Array.isArray(parsed.safetyEducationPoints)) {
-        out.safetyEducationPoints = parsed.safetyEducationPoints.filter((s) => typeof s === "string");
-      }
-      if (Array.isArray(parsed.tbmQuestions)) {
-        out.tbmQuestions = parsed.tbmQuestions.filter((s) => typeof s === "string");
-      }
-    }
+  for (const s of settled) {
+    if (s.status === "fulfilled") Object.assign(out, s.value);
   }
-
-  if (freeRaw.status === "fulfilled") {
-    const parsed = safeParseJson<AiDeliverables>(freeRaw.value);
-    if (parsed) {
-      for (const k of [
-        "workpackSummaryDraft",
-        "emergencyResponseDraft",
-        "photoEvidenceDraft",
-        "kakaoMessage"
-      ] as const) {
-        const v = parsed[k];
-        if (typeof v === "string" && v.length > 100) out[k] = v;
-      }
-    }
-  }
-
-  if (foreignRaw.status === "fulfilled") {
-    const parsed = safeParseJson<AiDeliverables>(foreignRaw.value);
-    if (parsed) {
-      for (const k of ["foreignWorkerBriefing", "foreignWorkerTransmission"] as const) {
-        const v = parsed[k];
-        if (typeof v === "string" && v.length > 200) out[k] = v;
-      }
-      if (Array.isArray(parsed.foreignWorkerLanguages)) {
-        out.foreignWorkerLanguages = parsed.foreignWorkerLanguages.filter((s) => typeof s === "string");
-      }
-    }
-  }
-
   return out;
 }
 
 export type AiDeliverablesDiagnostics = {
   geminiAvailable: boolean;
-  groupResults: Array<{ group: "tabular" | "free" | "foreign"; status: "fulfilled" | "rejected"; reason?: string }>;
+  // group: per-doc name (riskAssessment / workPlan / tbmBriefing / tbmLog / safetyEducation / free / foreign).
+  groupResults: Array<{ group: string; status: "fulfilled" | "rejected"; reason?: string }>;
   filledKeys: string[];
 };
 
@@ -388,38 +502,43 @@ export async function generateAllDeliverablesWithDiagnostics(
   }
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
-  const [tabularRaw, freeRaw, foreignRaw] = await Promise.allSettled([
-    callGemini(tabularPrompt(ctx)),
-    scope === "full" ? callGemini(freeFormPrompt(ctx)) : Promise.reject(new Error("skipped (enhanced)")),
-    scope === "full" ? callGemini(foreignWorkerPrompt(ctx)) : Promise.reject(new Error("skipped (enhanced)"))
-  ]);
+
+  const allSpecs: Array<{ name: string; promise: Promise<Partial<AiDeliverables>> }> = [
+    ...TABULAR_SPECS.map((spec) => ({
+      name: spec.name,
+      promise: callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name) as Promise<Partial<AiDeliverables>>
+    })),
+    {
+      name: "free",
+      promise: scope === "full"
+        ? (callAndParse(freeFormPrompt(ctx), parseFree, "free") as Promise<Partial<AiDeliverables>>)
+        : Promise.reject(new Error("skipped (enhanced)"))
+    },
+    {
+      name: "foreign",
+      promise: scope === "full"
+        ? (callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign") as Promise<Partial<AiDeliverables>>)
+        : Promise.reject(new Error("skipped (enhanced)"))
+    }
+  ];
+
+  const settled = await Promise.allSettled(allSpecs.map((s) => s.promise));
   const out: AiDeliverables = {};
   const groupResults: AiDeliverablesDiagnostics["groupResults"] = [];
 
-  for (const [name, raw] of [
-    ["tabular", tabularRaw],
-    ["free", freeRaw],
-    ["foreign", foreignRaw]
-  ] as const) {
-    if (raw.status === "fulfilled") {
-      const parsed = safeParseJson<AiDeliverables>(raw.value);
-      if (!parsed) {
-        // 디버깅: parse 실패 시 raw 응답의 시작/끝 일부를 로그로 남겨 패턴 분석.
-        // 32K 토큰 초과 truncation이면 끝이 잘려 있고, 마크다운 fence 감싸기면 시작에 ```가 보임.
-        const head = raw.value.slice(0, 200).replace(/\n/g, "\\n");
-        const tail = raw.value.slice(-200).replace(/\n/g, "\\n");
-        console.error(`[AI ${name}] safeParseJson failed. head=${head} ... tail=${tail}`);
-      }
-      groupResults.push({ group: name, status: "fulfilled", reason: parsed ? undefined : "json parse failed" });
-      if (parsed) Object.assign(out, parsed);
+  settled.forEach((s, i) => {
+    const name = allSpecs[i].name;
+    if (s.status === "fulfilled") {
+      groupResults.push({ group: name, status: "fulfilled" });
+      Object.assign(out, s.value);
     } else {
       groupResults.push({
         group: name,
         status: "rejected",
-        reason: raw.reason instanceof Error ? raw.reason.message : String(raw.reason)
+        reason: s.reason instanceof Error ? s.reason.message : String(s.reason)
       });
     }
-  }
+  });
 
   return {
     deliverables: out,
