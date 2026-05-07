@@ -403,6 +403,13 @@ export async function generateAllDeliverablesWithDiagnostics(
   ] as const) {
     if (raw.status === "fulfilled") {
       const parsed = safeParseJson<AiDeliverables>(raw.value);
+      if (!parsed) {
+        // 디버깅: parse 실패 시 raw 응답의 시작/끝 일부를 로그로 남겨 패턴 분석.
+        // 32K 토큰 초과 truncation이면 끝이 잘려 있고, 마크다운 fence 감싸기면 시작에 ```가 보임.
+        const head = raw.value.slice(0, 200).replace(/\n/g, "\\n");
+        const tail = raw.value.slice(-200).replace(/\n/g, "\\n");
+        console.error(`[AI ${name}] safeParseJson failed. head=${head} ... tail=${tail}`);
+      }
       groupResults.push({ group: name, status: "fulfilled", reason: parsed ? undefined : "json parse failed" });
       if (parsed) Object.assign(out, parsed);
     } else {
