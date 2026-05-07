@@ -6778,3 +6778,183 @@ body {
     border-bottom: 0;
   }
 }
+
+.safeclaw-login-page {
+  min-height: 100vh;
+  background:
+    linear-gradient(rgba(246, 245, 239, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(246, 245, 239, 0.035) 1px, transparent 1px),
+    #08090b;
+  background-size: 96px 96px;
+  color: var(--os-text, #f6f5ef);
+}
+
+.safeclaw-login-topbar {
+  display: flex;
+  min-height: 92px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid rgba(246, 245, 239, 0.13);
+  padding: 0 clamp(24px, 4vw, 64px);
+}
+
+.safeclaw-login-topbar nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.safeclaw-login-topbar nav a {
+  color: rgba(246, 245, 239, 0.62);
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.safeclaw-login-topbar nav a:hover {
+  color: var(--os-yellow, #ffdc2e);
+}
+
+.safeclaw-login-panel {
+  display: grid;
+  width: min(920px, calc(100% - 40px));
+  gap: 22px;
+  margin: clamp(56px, 10vh, 120px) auto;
+  border: 1px solid rgba(246, 245, 239, 0.18);
+  border-radius: 4px;
+  background: rgba(14, 15, 19, 0.88);
+  padding: clamp(28px, 5vw, 64px);
+}
+
+.safeclaw-login-panel h1 {
+  max-width: 780px;
+  margin: 0;
+  color: var(--os-text, #f6f5ef);
+  font-size: clamp(46px, 7vw, 92px);
+  font-weight: 950;
+  letter-spacing: -0.06em;
+  line-height: 0.96;
+}
+
+.safeclaw-login-panel p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(246, 245, 239, 0.68);
+  font-size: clamp(17px, 2vw, 22px);
+  font-weight: 800;
+  line-height: 1.62;
+}
+
+.safeclaw-login-form,
+.safeclaw-login-session {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid rgba(246, 245, 239, 0.14);
+  padding-top: 26px;
+}
+
+.safeclaw-login-form label {
+  color: var(--os-yellow, #ffdc2e);
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.safeclaw-login-form input {
+  min-height: 60px;
+  border: 1px solid rgba(246, 245, 239, 0.22);
+  border-radius: 4px;
+  background: #0b0c10;
+  color: var(--os-text, #f6f5ef);
+  padding: 0 18px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.safeclaw-login-form input:focus {
+  border-color: var(--os-yellow, #ffdc2e);
+  outline: 2px solid rgba(255, 220, 46, 0.18);
+  outline-offset: 0;
+}
+
+.safeclaw-login-form button,
+.safeclaw-login-actions a,
+.safeclaw-login-actions button {
+  display: inline-flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(246, 245, 239, 0.2);
+  border-radius: 4px;
+  background: rgba(8, 9, 11, 0.72);
+  color: rgba(246, 245, 239, 0.78);
+  padding: 0 18px;
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.safeclaw-login-form button,
+.safeclaw-login-actions a.primary {
+  border-color: var(--os-yellow, #ffdc2e);
+  background: var(--os-yellow, #ffdc2e);
+  color: #08090b;
+}
+
+.safeclaw-login-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.safeclaw-login-session dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid rgba(246, 245, 239, 0.16);
+  border-radius: 4px;
+  background: rgba(246, 245, 239, 0.1);
+}
+
+.safeclaw-login-session dl div {
+  display: grid;
+  gap: 8px;
+  background: #0b0c10;
+  padding: 18px;
+}
+
+.safeclaw-login-session dt {
+  color: rgba(246, 245, 239, 0.5);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.safeclaw-login-session dd {
+  margin: 0;
+  color: var(--os-text, #f6f5ef);
+  font-size: 18px;
+  font-weight: 950;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .safeclaw-login-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-block: 18px;
+  }
+
+  .safeclaw-login-session dl {
+    grid-template-columns: 1fr;
+  }
+}

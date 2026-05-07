@@ -37,6 +37,7 @@ type ProductScreen = {
 
 type RouteHint =
   | "/"
+  | "/login"
   | "/home"
   | "/workspace"
   | "/workspace#command"
@@ -59,7 +60,7 @@ const statusLabel: Record<ProductScreen["status"], string> = {
 
 const screens: ProductScreen[] = [
   { group: "진입", id: "landing", label: "제품", num: "01", title: "오늘 작업을 안전 문서팩으로 준비합니다.", subtitle: "공식 근거와 현장 전파까지 한 흐름으로 보여주는 대표 진입 화면입니다.", primary: "제품 소개", status: "live", mappedTo: "/ · 제품 소개", scope: ["브랜드 첫 진입", "작업 시작", "제품 흐름 안내"], metrics: [["CTA", "작업 시작"], ["톤", "운영"]]},
-  { group: "진입", id: "login", label: "계정", num: "02", title: "관리자 계정으로 이력을 저장합니다.", subtitle: "임시 작업과 관리자 저장 이력을 구분합니다.", primary: "이메일 OTP", status: "partial", mappedTo: "/workspace · 저장 상태", scope: ["관리자 저장 안내", "작업 이력 저장", "계정 상태 확인"], metrics: [["저장", "Supabase"], ["모드", "관리자"]]},
+  { group: "진입", id: "login", label: "계정", num: "02", title: "관리자 계정으로 이력을 저장합니다.", subtitle: "임시 작업과 관리자 저장 이력을 구분합니다.", primary: "이메일 OTP", status: "live", mappedTo: "/login · 관리자 계정", scope: ["관리자 저장 안내", "작업 이력 저장", "계정 상태 확인"], metrics: [["저장", "Supabase"], ["모드", "관리자"]]},
   { group: "운영", id: "home", label: "대시보드", num: "03", title: "오늘 처리할 현장을 먼저 보여줍니다.", subtitle: "다현장 상태, API 연결, 미완료 교육, 전파 실패를 한 화면에서 확인합니다.", primary: "현장 현황", status: "planned", mappedTo: "/home · 운영 홈", scope: ["다현장 카드", "미완료 교육", "전파 실패 요약"], metrics: [["현장", "다현장"], ["알림", "운영"]]},
   { group: "운영", id: "workspace", label: "작업공간", num: "04", title: "오늘 작업을 입력하고 문서팩을 생성합니다.", subtitle: "현재 문서팩 생성 흐름을 SafeClaw 셸로 감싼 핵심 업무 화면입니다.", primary: "문서 생성", status: "live", mappedTo: "/workspace#command · 작업 입력", scope: ["기상 선조회", "API 조합", "문서팩 생성"], metrics: [["문서", "다중 서식"], ["API", "조합"]]},
   { group: "운영", id: "docs", label: "문서", num: "05", title: "문서별 편집과 보완 제안을 나란히 둡니다.", subtitle: "위험성평가, 작업계획서, TBM, 안전교육 기록을 제출 서식 기준으로 편집합니다.", primary: "문서 편집", status: "live", mappedTo: "/documents · 문서 편집", scope: ["문서별 탭", "보완 문구 생성", "XLS/HWPX/PDF 출력"], metrics: [["출력", "XLS/HWPX/PDF"], ["보완", "삽입"]]},
@@ -76,7 +77,7 @@ const screens: ProductScreen[] = [
 
 const routeHints: Partial<Record<ScreenId, RouteHint>> = {
   landing: "/",
-  login: "/workspace",
+  login: "/login",
   home: "/home",
   workspace: "/workspace#command",
   docs: "/documents",

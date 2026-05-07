@@ -75,7 +75,7 @@ export function SafeClawLanding() {
           ))}
         </nav>
         <div className="safeclaw-landing-actions">
-          <Link href="/workspace" className="safeclaw-login">로그인</Link>
+          <Link href="/login" className="safeclaw-login">로그인</Link>
           <Link href="/workspace" className="safeclaw-contact">작업 시작 →</Link>
         </div>
       </header>

@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-05-07T00:00:00+09:00",
+  "scope": "admin-login-discoverability",
+  "decision": "implemented",
+  "findings": [
+    {
+      "id": "login-route",
+      "status": "fixed",
+      "detail": "Admin login existed inside /workspace only. Added /login as a dedicated entry point."
+    },
+    {
+      "id": "landing-link",
+      "status": "fixed",
+      "detail": "Landing and prototype login links now point to /login instead of hiding login inside /workspace."
+    },
+    {
+      "id": "headless-token",
+      "status": "documented-helper",
+      "detail": "Added auth:token helper for smoke tests that need SAFEGUARD_AUTH_TOKEN from a Supabase password user."
+    }
+  ],
+  "manualSmoke": [
+    "GET /login should render an admin email OTP form when NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are configured.",
+    "GET /login should render configuration guidance when public Supabase env values are missing.",
+    "npm.cmd run auth:token requires SAFEGUARD_AUTH_EMAIL and SAFEGUARD_AUTH_PASSWORD and prints a Supabase access token for smoke only."
+  ]
+}
