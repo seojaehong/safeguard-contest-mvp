@@ -144,6 +144,24 @@ export default async function KnowledgePage() {
             <span>위험성평가 절차·체크리스트·이행관리 매뉴얼. 1.95MB · PDF</span>
             <span>반영 위치: 위험성평가표 / 안전보건교육 / 사전준비</span>
           </a>
+          <a href="/kosha-references/risk-assessment-guidebook-2022.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · 지침해설서</small>
+            <strong>2022 위험성평가 지침해설서</strong>
+            <span>위험성평가 법적 근거·실시 절차·등급 판정 해설. 4.32MB · PDF</span>
+            <span>반영 위치: 위험성평가표 본문 작성 시 핵심 참조</span>
+          </a>
+          <a href="/kosha-references/risk-assessment-easy-guide.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · 안내서</small>
+            <strong>쉽고 간편한 위험성평가 방법 안내서</strong>
+            <span>4M·체크리스트·핵심요인 기법 등 실시 방법 안내. 4.15MB · PDF</span>
+            <span>반영 위치: 신규 사업장 / 소규모 현장 위험성평가</span>
+          </a>
+          <a href="/kosha-references/work-accident-prevention-rate-leaflet.pdf" target="_blank" rel="noopener noreferrer">
+            <small>KOSHA · 리플릿</small>
+            <strong>산재예방요율제 제도 안내</strong>
+            <span>위험성평가 인정 사업장 산재보험료 할인 제도. 1.34MB · PDF</span>
+            <span>반영 위치: 사업주 인센티브 안내</span>
+          </a>
           <a href="/kosha-references/safety-health-diagnosis-guideline-full.pdf" target="_blank" rel="noopener noreferrer">
             <small>KOSHA · 가이드라인</small>
             <strong>안전보건진단 업무 가이드라인 (전문)</strong>
