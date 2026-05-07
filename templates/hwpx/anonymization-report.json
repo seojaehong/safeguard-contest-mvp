@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-07T09:28:55.953Z",
+  "generatedAt": "2026-05-07T09:41:05.508Z",
   "replacementsRuleCount": 3,
   "items": [
     {
@@ -107,6 +107,28 @@
       "title": "건설기계 작업계획서 — 크레인",
       "bytes": 38471,
       "src_bytes": 53352,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "risk-assessment-form-standard.hwpx",
+      "out": "risk-assessment-form-standard.hwpx",
+      "title": "위험성평가 표준 서식 (KOSHA)",
+      "bytes": 96600,
+      "src_bytes": 131270,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "risk-assessment-consulting-dialog.hwpx",
+      "out": "risk-assessment-consulting-dialog.hwpx",
+      "title": "위험성평가 대화형 컨설팅 양식 (KOSHA)",
+      "bytes": 1820623,
+      "src_bytes": 1847079,
       "touched_files": 1,
       "total_replacements": 0,
       "injected_placeholder": true,

@@ -18,7 +18,9 @@ export type HwpxTemplateKind =
   | "safety-pledge"
   | "health-questionnaire"
   | "signal-worker-designation"
-  | "crane-workplan";
+  | "crane-workplan"
+  | "risk-assessment-form-standard"
+  | "risk-assessment-consulting-dialog";
 
 const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "risk-assessment": "risk-assessment.hwpx",
@@ -30,7 +32,9 @@ const TEMPLATE_FILES: Record<HwpxTemplateKind, string> = {
   "safety-pledge": "safety-pledge.hwpx",
   "health-questionnaire": "health-questionnaire.hwpx",
   "signal-worker-designation": "signal-worker-designation.hwpx",
-  "crane-workplan": "crane-workplan.hwpx"
+  "crane-workplan": "crane-workplan.hwpx",
+  "risk-assessment-form-standard": "risk-assessment-form-standard.hwpx",
+  "risk-assessment-consulting-dialog": "risk-assessment-consulting-dialog.hwpx"
 };
 
 export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
@@ -43,7 +47,9 @@ export const TEMPLATE_LABELS: Record<HwpxTemplateKind, string> = {
   "safety-pledge": "안전수칙 이행각서",
   "health-questionnaire": "근로자 건강문진표",
   "signal-worker-designation": "장비 신호수 지정서",
-  "crane-workplan": "건설기계 작업계획서 — 크레인"
+  "crane-workplan": "건설기계 작업계획서 — 크레인",
+  "risk-assessment-form-standard": "위험성평가 표준 서식 (KOSHA)",
+  "risk-assessment-consulting-dialog": "위험성평가 대화형 컨설팅 양식 (KOSHA · 지게차/추락 사례 포함)"
 };
 
 function templatesDir() {
