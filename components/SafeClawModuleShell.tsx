@@ -88,7 +88,10 @@ export function SafeClawModuleShell({
         <header className="safeclaw-module-nav">
           <span><i /> SITE 기본 현장</span>
           <span>API <b>Law.go</b> · <b>KOSHA</b> · 기상청</span>
-          <span className={`safeclaw-module-status ${status}`}>{statusLabel[status]}</span>
+          <span className={`safeclaw-module-status ${status}`}>
+            {status === "live" ? <i className="sc-blink sc-blink--good" aria-hidden="true" /> : null}
+            {statusLabel[status]}
+          </span>
           <Link href="/workspace" className="safeclaw-module-primary">작업 시작</Link>
         </header>
 
