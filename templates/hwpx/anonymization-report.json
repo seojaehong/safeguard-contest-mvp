@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-07T09:41:05.508Z",
+  "generatedAt": "2026-05-07T09:52:08.541Z",
   "replacementsRuleCount": 3,
   "items": [
     {
@@ -129,6 +129,17 @@
       "title": "위험성평가 대화형 컨설팅 양식 (KOSHA)",
       "bytes": 1820623,
       "src_bytes": 1847079,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "work-permit-form.hwpx",
+      "out": "work-permit-form.hwpx",
+      "title": "작업허가서 양식 (KOSHA)",
+      "bytes": 69607,
+      "src_bytes": 83786,
       "touched_files": 1,
       "total_replacements": 0,
       "injected_placeholder": true,
