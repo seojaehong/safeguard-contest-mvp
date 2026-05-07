@@ -262,7 +262,19 @@ function formatSafetyKnowledgeAppendix(matches: ReturnType<typeof matchSafetyKno
 }
 
 function hasOutdoorHeatSignal(weather: Awaited<ReturnType<typeof fetchWeatherSignal>>, question: string) {
-  const outdoorByInput = /옥외|실외|야외|외벽|지붕|도로|조경|도장|건설|비계|고소|하역|폭염|자외선|여름|한여름|온열|열사병|열탈진|열경련/.test(question);
+  // 명시적 실내 마커가 있으면 옥외 폭염 부록을 붙이지 않는다.
+  // 한빛로지스 검수에서 "인천 남동공단 물류센터 ... 실내 작업"인데 '하역' 키워드 때문에
+  // 옥외 폭염 섹션이 부록으로 들어가던 버그 차단. 'indoor' fast-path가 outdoor 휴리스틱을 누른다.
+  const indoorByInput = /실내|옥내|물류센터|창고\s|클린룸|반도체|데이터센터|기계실|지하실|밀폐공간|반응기 내부/.test(question);
+  if (indoorByInput) {
+    // 기상 신호가 폭염 경보 수준이어도 실내라면 옥외 폭염 섹션은 부적합.
+    // 단, 31°C 이상 + 실내 + 환기 부재 같은 조합은 별도(열중증)이지만 그건 outdoor 부록 아님.
+    return false;
+  }
+  // '하역'은 항만 하역(옥외) ↔ 물류센터 하역(실내) 양쪽이라 모호. 위에서 indoor 마커 없음을
+  // 확인했으니 여기 도달했다면 outdoor 가능성이 더 큼. 다만 키워드만으로 단정하지 않고
+  // 명시적 옥외 마커(외벽/지붕/조경/도장/건설/비계/고소/도로 등)만 신뢰.
+  const outdoorByInput = /옥외|실외|야외|외벽|지붕|도로|조경|도장|건설|비계|고소|폭염|자외선|여름|한여름|온열|열사병|열탈진|열경련/.test(question);
   const outdoorBySignal = (weather.signals || []).some((signal) => {
     if (signal.endpoint === "생활기상 자외선" || signal.endpoint === "실시간 홍반자외선") return true;
     if (signal.endpoint === "영향예보" && /폭염|온열|더위|고온|주의|경고|위험/.test(signal.summary)) return true;
