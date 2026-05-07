@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-07T09:56:17.844Z",
+  "generatedAt": "2026-05-07T10:42:00.504Z",
   "replacementsRuleCount": 3,
   "items": [
     {
@@ -250,6 +250,28 @@
       "title": "건설기계 작업계획서 — 지게차 (고용노동부)",
       "bytes": 591741,
       "src_bytes": 627107,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "tbm-log-forestry-sample.hwpx",
+      "out": "tbm-log-forestry-sample.hwpx",
+      "title": "TBM 일지 샘플 — 임업·산림 사업장",
+      "bytes": 99532,
+      "src_bytes": 113368,
+      "touched_files": 1,
+      "total_replacements": 0,
+      "injected_placeholder": true,
+      "status": "ok"
+    },
+    {
+      "src": "tbm-and-safety-education-writing-guide.hwpx",
+      "out": "tbm-and-safety-education-writing-guide.hwpx",
+      "title": "TBM·안전보건교육 일지 작성방법 가이드",
+      "bytes": 72477,
+      "src_bytes": 80132,
       "touched_files": 1,
       "total_replacements": 0,
       "injected_placeholder": true,
