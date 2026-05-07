@@ -12,7 +12,7 @@
 // ≈ 22K-50K tokens output) and 60s timeout on long-context cases. Splitting makes each
 // call ≤ 5K tokens output, ≤ 30s wall, and isolates failures to the affected doc only.
 
-import type { AskResponse, SearchResult } from "@/lib/types";
+import type { AskResponse, SearchResult, WorkPlanStructured } from "@/lib/types";
 
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
@@ -223,15 +223,46 @@ function riskAssessmentSinglePrompt(ctx: GenContext) {
   ].join("\n");
 }
 
-function workPlanSinglePrompt(ctx: GenContext) {
+// 작업계획서는 schema-first. AI가 산문 1500-3500자를 만들면 row parser에서 손실되어
+// 셀에 안 맞는 행이 생기거나 텍스트가 한 셀에 다 박히는 문제가 있어, 표준 표 양식의
+// 셀 단위 객체로 직접 반환하게 한다. parseSheetRows를 거치지 않고 xlsx-builder가
+// 정해진 행/열 레이아웃에 그대로 채운다.
+function workPlanStructuredPrompt(ctx: GenContext) {
   return [
     persona(),
     "",
-    "작업계획서(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
-    "작업개요 / 세부 작업순서 / 장비·인원·첨부서류 / 작업중지 기준 / 비상대응 / 확인자 서명 섹션 포함.",
-    "길이 1500~3500자 권장. 줄바꿈 포함 일반 텍스트.",
+    "한국 산업안전 표준 작업계획서의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
+    "산문/장문 금지. 각 필드는 셀에 들어갈 짧은 문구(80자 이내) 단위로 작성. 위험요인·감소대책은 시나리오 특화. KOSHA 자료가 있으면 safetyMeasure 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식으로 1줄 포함.",
     "",
-    "응답 JSON 스키마: { \"workPlanDraft\": \"string\" }",
+    "응답 JSON 스키마:",
+    `{
+  "workPlanStructured": {
+    "workOverview": {
+      "workName": "string (작업명, 30자 이내)",
+      "description": "string (작업내용 1~2문장, 120자 이내)",
+      "workerCount": 0,
+      "location": "string (작업장소, 50자 이내)",
+      "condition": "string (기상/현장 조건 1줄, 80자 이내)",
+      "equipment": ["string", "string"]
+    },
+    "workSteps": [
+      { "stepNo": 1, "action": "string (작업 단계, 60자 이내)", "equipment": "string (해당 장비, 30자 이내)", "safetyMeasure": "string (단계별 안전조치, 80자 이내. KOSHA 인용 가능)", "owner": "string (담당자/직책, 30자 이내)" }
+    ],
+    "stopCriteria": ["string (작업중지 기준 1줄, 60자 이내)"],
+    "emergencyResponse": {
+      "contacts": [{ "role": "string (직책, 30자 이내)", "phone": "string (전화번호 또는 형식)" }],
+      "evacRoute": "string (대피경로 1줄)",
+      "firstAid": "string (응급조치 요약 1줄)"
+    },
+    "approvers": {
+      "author": "string (작성자 직책)",
+      "reviewer": "string (검토자 직책)",
+      "approver": "string (승인자 직책)"
+    }
+  }
+}`,
+    "",
+    "필수 조건: workSteps 4-7개. stopCriteria 3-5개. contacts 3-4개. 모든 string은 \\n 없이 한 줄.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -324,6 +355,8 @@ export type AiDeliverables = Partial<{
   workpackSummaryDraft: string;
   riskAssessmentDraft: string;
   workPlanDraft: string;
+  /** schema-first 작업계획서 셀 단위 구조. xlsx 직접 렌더 경로용. */
+  workPlanStructured: WorkPlanStructured;
   tbmBriefing: string;
   tbmLogDraft: string;
   safetyEducationRecordDraft: string;
@@ -386,10 +419,18 @@ function parseRiskAssessment(raw: string): Partial<AiDeliverables> | null {
   const v = j?.riskAssessmentDraft;
   return typeof v === "string" && v.length > 100 ? { riskAssessmentDraft: v } : null;
 }
-function parseWorkPlan(raw: string): Partial<AiDeliverables> | null {
-  const j = safeParseJson<AiDeliverables>(raw);
-  const v = j?.workPlanDraft;
-  return typeof v === "string" && v.length > 100 ? { workPlanDraft: v } : null;
+function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
+  // schema-first: workPlanStructured 객체를 셀 단위로 검증.
+  // 누락 필드가 있거나 array가 비어있으면 null로 retry 트리거.
+  const j = safeParseJson<{ workPlanStructured?: AiDeliverables["workPlanStructured"] }>(raw);
+  const s = j?.workPlanStructured;
+  if (!s || typeof s !== "object") return null;
+  if (!s.workOverview || typeof s.workOverview.workName !== "string") return null;
+  if (!Array.isArray(s.workSteps) || s.workSteps.length < 3) return null;
+  if (!Array.isArray(s.stopCriteria) || s.stopCriteria.length < 2) return null;
+  if (!s.emergencyResponse || !Array.isArray(s.emergencyResponse.contacts)) return null;
+  if (!s.approvers) return null;
+  return { workPlanStructured: s };
 }
 function parseTbmBriefing(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
@@ -453,7 +494,9 @@ function parseForeign(raw: string): Partial<AiDeliverables> | null {
 // reports per-spec status independently.
 const TABULAR_SPECS = [
   { name: "riskAssessment", buildPrompt: riskAssessmentSinglePrompt, parse: parseRiskAssessment },
-  { name: "workPlan", buildPrompt: workPlanSinglePrompt, parse: parseWorkPlan },
+  // workPlan은 산문이 아닌 셀 단위 구조(workPlanStructured)로 직접 반환.
+  // xlsx-builder가 parseSheetRows 우회하고 표 양식에 직접 매핑.
+  { name: "workPlanStructured", buildPrompt: workPlanStructuredPrompt, parse: parseWorkPlanStructured },
   { name: "tbmBriefing", buildPrompt: tbmBriefingSinglePrompt, parse: parseTbmBriefing },
   { name: "tbmLog", buildPrompt: tbmLogSinglePrompt, parse: parseTbmLog },
   { name: "safetyEducation", buildPrompt: safetyEducationSinglePrompt, parse: parseSafetyEducation }

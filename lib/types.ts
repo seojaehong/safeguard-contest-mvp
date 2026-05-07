@@ -22,6 +22,41 @@ export type ForeignWorkerLanguage = {
   lines: string[];
 };
 
+/**
+ * 작업계획서(work plan) — 한국 산업안전 표준 양식의 셀 단위 구조.
+ * AI가 산문 대신 이 객체를 반환하면 xlsx-builder가 parseSheetRows를 우회하고
+ * 정해진 행/열 레이아웃에 셀 값을 직접 채운다. "AI 리포트"가 아닌 "표 셀 채우기"
+ * 패러다임으로의 전환 (Hermes 의견 기반).
+ */
+export type WorkPlanStructured = {
+  workOverview: {
+    workName: string;          // 작업명
+    description: string;       // 작업내용 (1~2 문장)
+    workerCount: number;       // 작업인원
+    location: string;          // 작업장소
+    condition: string;         // 기상/현장 조건 1줄
+    equipment: string[];       // 사용 장비 목록
+  };
+  workSteps: Array<{
+    stepNo: number;            // 1, 2, 3...
+    action: string;            // 작업 단계 내용
+    equipment: string;         // 해당 단계 사용 장비
+    safetyMeasure: string;     // 단계별 안전조치
+    owner: string;             // 담당자/직책
+  }>;
+  stopCriteria: string[];      // 작업중지 기준 (3-5개)
+  emergencyResponse: {
+    contacts: Array<{ role: string; phone: string }>;  // 비상연락망
+    evacRoute: string;         // 대피경로
+    firstAid: string;          // 응급조치 요약
+  };
+  approvers: {
+    author: string;            // 작성자 (직책)
+    reviewer: string;          // 검토자
+    approver: string;          // 승인자
+  };
+};
+
 export type SearchResult = {
   id: string;
   type: SourceType;
@@ -221,6 +256,12 @@ export type AskResponse = {
     workpackSummaryDraft: string;
     riskAssessmentDraft: string;
     workPlanDraft: string;
+    /**
+     * Structured 작업계획서. AI가 산문(workPlanDraft) 대신 표 양식의 셀 단위 데이터를
+     * 직접 반환하도록 했을 때 채워진다. 존재하면 xlsx/pdf 렌더러는 산문 파싱
+     * (parseSheetRows)을 우회하고 이 객체로 직접 표를 그린다.
+     */
+    workPlanStructured?: WorkPlanStructured;
     tbmBriefing: string;
     tbmLogDraft: string;
     safetyEducationRecordDraft: string;

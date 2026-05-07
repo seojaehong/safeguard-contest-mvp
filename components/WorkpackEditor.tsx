@@ -1898,16 +1898,27 @@ export function WorkpackEditor({
   async function downloadXlsx() {
     setXlsxStatus("building");
     try {
+      // schema-first 작업계획서: AI가 셀 단위 객체(workPlanStructured)를 반환했으면
+      // 산문 → row parser → table 경로 우회. parseSheetRows 손실 없음.
+      const useStructured =
+        selected.key === "workPlanDraft" && (data.deliverables as { workPlanStructured?: unknown })?.workPlanStructured;
+      const requestBody = useStructured
+        ? {
+            mode: "workPlanStructured",
+            scenario: data.scenario,
+            structured: (data.deliverables as { workPlanStructured?: unknown }).workPlanStructured
+          }
+        : {
+            mode: "single",
+            title: selected.title,
+            rows: selectedRows,
+            profile: selectedFormProfile,
+            scenario: data.scenario
+          };
       const response = await fetch("/api/export/xlsx", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          mode: "single",
-          title: selected.title,
-          rows: selectedRows,
-          profile: selectedFormProfile,
-          scenario: data.scenario
-        })
+        body: JSON.stringify(requestBody)
       });
       if (!response.ok) {
         throw new Error(`xlsx export failed (${response.status})`);
