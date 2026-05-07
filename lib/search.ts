@@ -687,21 +687,44 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           }))
         }
       },
+      // When AI body is present for a deliverable, the AI was already given the
+      // citations + KOSHA refs in the prompt and instructed to weave them into
+      // the body. Stacking the legacy decoration appendices on top duplicates
+      // the same evidence as a 5-section policy noise block at the bottom of
+      // the form (가온테크 검수에서 발견된 문제). For each deliverable, append
+      // legacy appendices ONLY when we fell back to template body.
       deliverables: {
         ...baseDeliverables,
-        workpackSummaryDraft: `${baseDeliverables.workpackSummaryDraft}\n\n[연결 상태 요약]\n- 법령 근거: ${legalEvidenceMode === "live" ? "연결됨" : "일부 근거 보류"}\n- 기상: ${weather.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- 후속 교육: ${training.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- KOSHA 자료: ${kosha.mode === "live" ? "연결됨" : "일부 근거 보류"}`,
-        riskAssessmentDraft: `${baseDeliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${outdoorHeatRiskAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${riskKoshaOpenApiAppendix}`,
-        workPlanDraft: `${baseDeliverables.workPlanDraft}${outdoorHeatRiskAppendix}${workPlanLegalAppendix}${workPlanKoshaAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${workPlanKoshaOpenApiAppendix}`,
-        tbmBriefing: `${baseDeliverables.tbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}${safetyReferenceAppendix}`,
-        tbmLogDraft: `${baseDeliverables.tbmLogDraft}${tbmQualityAppendix}`
-          .trim(),
-        safetyEducationRecordDraft: `${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`,
-        emergencyResponseDraft: `${baseDeliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}${emergencyKoshaOpenApiAppendix}`,
-        photoEvidenceDraft: ensurePhotoEvidenceDraft(baseDeliverables.photoEvidenceDraft, photoEvidenceAppendix),
+        workpackSummaryDraft: aiBodies.workpackSummaryDraft
+          ? aiBodies.workpackSummaryDraft
+          : `${baseDeliverables.workpackSummaryDraft}\n\n[연결 상태 요약]\n- 법령 근거: ${legalEvidenceMode === "live" ? "연결됨" : "일부 근거 보류"}\n- 기상: ${weather.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- 후속 교육: ${training.mode === "live" ? "연결됨" : "일부 근거 보류"}\n- KOSHA 자료: ${kosha.mode === "live" ? "연결됨" : "일부 근거 보류"}`,
+        riskAssessmentDraft: aiBodies.riskAssessmentDraft
+          ? aiBodies.riskAssessmentDraft
+          : `${baseDeliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${outdoorHeatRiskAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${riskKoshaOpenApiAppendix}`,
+        workPlanDraft: aiBodies.workPlanDraft
+          ? aiBodies.workPlanDraft
+          : `${baseDeliverables.workPlanDraft}${outdoorHeatRiskAppendix}${workPlanLegalAppendix}${workPlanKoshaAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${workPlanKoshaOpenApiAppendix}`,
+        tbmBriefing: aiBodies.tbmBriefing
+          ? aiBodies.tbmBriefing
+          : `${baseDeliverables.tbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}${safetyReferenceAppendix}`,
+        tbmLogDraft: aiBodies.tbmLogDraft
+          ? aiBodies.tbmLogDraft
+          : `${baseDeliverables.tbmLogDraft}${tbmQualityAppendix}`.trim(),
+        safetyEducationRecordDraft: aiBodies.safetyEducationRecordDraft
+          ? aiBodies.safetyEducationRecordDraft
+          : `${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`,
+        emergencyResponseDraft: aiBodies.emergencyResponseDraft
+          ? aiBodies.emergencyResponseDraft
+          : `${baseDeliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}${emergencyKoshaOpenApiAppendix}`,
+        photoEvidenceDraft: aiBodies.photoEvidenceDraft
+          ? aiBodies.photoEvidenceDraft
+          : ensurePhotoEvidenceDraft(baseDeliverables.photoEvidenceDraft, photoEvidenceAppendix),
         foreignWorkerBriefing: aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput),
         foreignWorkerTransmission: aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput),
         foreignWorkerLanguages,
-        kakaoMessage: `${baseDeliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${(aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput)).split("\n").slice(0, 8).join("\n")}`
+        kakaoMessage: aiBodies.kakaoMessage
+          ? aiBodies.kakaoMessage
+          : `${baseDeliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${(aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput)).split("\n").slice(0, 8).join("\n")}`
       },
       status: {
         ...response.status,
