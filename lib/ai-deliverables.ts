@@ -57,7 +57,12 @@ async function callGemini(prompt: string): Promise<string> {
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.4,
-            maxOutputTokens: 8192,
+            // Tabular prompt asks for 5 deliverables (1,500-3,500자 각) +
+            // arrays — 한국어 1.5-2 tokens/char × ~17,500자 ≈ 28K tokens.
+            // 8,192에서 잘려 invalid JSON → safeParseJson null → empty
+            // AiDeliverables → 모든 tabular deliverable이 template fallback.
+            // Gemini 2.5 Flash 한도 65,536 내에서 32,768로 증액.
+            maxOutputTokens: 32768,
             responseMimeType: "application/json"
           }
         }),
