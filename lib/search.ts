@@ -594,10 +594,19 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // review (would balloon the AI context and turn safety drafts into evidence dumps).
     const safetyReferenceCompressed = compressSafetyReferenceMatches(safetyReference.items, 5);
     const safetyReferenceAppendix = formatSafetyReferenceAppendix(safetyReferenceCompressed);
+    // KOSHA 기술지침/기술지원규정 are flagged for mandatory in-body citation by the AI.
+    const koshaPrimaryRefs = safetyReferenceCompressed
+      .filter((c) => c.kind === "kosha-support-regulation" || c.kind === "kosha-guideline")
+      .slice(0, 4)
+      .map((c) => ({
+        kindLabel: c.kindLabel,
+        title: c.title,
+        sentence: c.documentSentence
+      }));
     // For the AI prompt context, give a short summary form (not the appendix verbatim).
     const koshaLinesCtx = [
       ...kosha.references.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`),
-      ...safetyReferenceCompressed.slice(0, 5).map((c, i) => `${kosha.references.slice(0, 5).length + i + 1}. [내부지식DB] ${c.title} | 반영: ${c.reflectsDocuments.join("·") || "-"} | ${c.documentSentence}`)
+      ...safetyReferenceCompressed.slice(0, 5).map((c, i) => `${kosha.references.slice(0, 5).length + i + 1}. [${c.kindLabel}] ${c.title} | 반영: ${c.reflectsDocuments.join("·") || "-"} | ${c.documentSentence}`)
     ].slice(0, 12);
 
     let aiBodies: Awaited<ReturnType<typeof generateAllDeliverables>> = {};
@@ -612,6 +621,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           trainingLines: trainingLinesCtx,
           koshaLines: koshaLinesCtx,
           accidentLines,
+          koshaPrimaryRefs,
           scope: aiMode === "full" ? "full" : "enhanced"
         });
         const filled = Object.keys(aiBodies);
