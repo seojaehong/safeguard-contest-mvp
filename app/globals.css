@@ -7060,3 +7060,108 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* =================================================================
+ * Design handoff v1.0 §2.4 — Signature patterns
+ *
+ * Use sparingly. HudCorners = 1-2 per page; hazard-stripe = 1 location;
+ * grid-bg = hero/dashboard canvas only.
+ * ================================================================= */
+
+/* Pattern 1 — HUD Corners. Hazard yellow 1px ticks at the 4 corners.
+   Wrap a card or panel with .hud-corners (or <HudCorners />) to apply.
+   Implementation: pseudo-elements at each corner. */
+.hud-corners {
+  position: relative;
+}
+.hud-corners::before,
+.hud-corners::after,
+.hud-corners > .hud-tl,
+.hud-corners > .hud-tr,
+.hud-corners > .hud-bl,
+.hud-corners > .hud-br {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--hazard);
+  pointer-events: none;
+}
+.hud-corners::before {
+  top: 0; left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+.hud-corners::after {
+  bottom: 0; right: 0;
+  border-left: none;
+  border-top: none;
+}
+.hud-corners > .hud-tr {
+  top: 0; right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+.hud-corners > .hud-bl {
+  bottom: 0; left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+/* Pattern 2 — Hazard diagonal stripe. Yellow + steel tape used for
+   high-risk markings or page top/bottom bands.
+   Use as a 12px band on the left edge of a card, or full-width band. */
+.hazard-stripe {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--hazard) 0,
+    var(--hazard) 12px,
+    var(--steel-1, #111114) 12px,
+    var(--steel-1, #111114) 24px
+  );
+}
+.hazard-stripe-band {
+  position: relative;
+  padding-left: 16px;
+}
+.hazard-stripe-band::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 12px;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--hazard) 0,
+    var(--hazard) 8px,
+    var(--steel-1, #111114) 8px,
+    var(--steel-1, #111114) 16px
+  );
+}
+
+/* Pattern 3 — Grid background. 56px hairline grid for hero / dashboard
+   canvases. Hairline color uses the existing line-d alpha. */
+.grid-bg {
+  background-image:
+    linear-gradient(to right, var(--line-d, rgba(255,255,255,0.08)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-d, rgba(255,255,255,0.08)) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: -1px -1px;
+}
+
+/* Pattern 4 — Live blink dot. 6px circle in semantic color, blinks 1.2s.
+   Apply to <span class="sc-blink"> next to a "LIVE" / "STREAMING" label. */
+@keyframes sc-blink-keyframes {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.18; }
+}
+.sc-blink {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--signal, #00E5FF);
+  animation: sc-blink-keyframes 1.2s steps(1) infinite;
+}
+.sc-blink--good { background: var(--good); }
+.sc-blink--warn { background: var(--warn); }
+.sc-blink--siren { background: var(--siren); }
