@@ -467,6 +467,20 @@ export function SafeGuardCommandCenter({
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [editorFocusToken, setEditorFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("workpackSummaryDraft");
+  const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
+    if (typeof window === "undefined") return "template";
+    const stored = window.localStorage.getItem("safeclaw.aiMode");
+    if (stored === "template" || stored === "enhanced" || stored === "full") return stored;
+    return "template";
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem("safeclaw.aiMode", aiMode);
+    } catch {
+      /* ignore quota */
+    }
+  }, [aiMode]);
 
   function scrollToStep(anchor: StepAnchor) {
     const target = document.getElementById(anchor);
@@ -506,7 +520,7 @@ export function SafeGuardCommandCenter({
       const response = await fetch("/api/ask", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ question: trimmed })
+        body: JSON.stringify({ question: trimmed, aiMode })
       });
       if (!response.ok) {
         throw new Error(`문서팩 생성 요청 실패: HTTP ${response.status}`);
@@ -751,6 +765,51 @@ export function SafeGuardCommandCenter({
             <p className="input-helper" id="field-command-tips">
               작성 팁: 지역, 업종, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부, 핵심 위험을 포함하면 정확도가 올라갑니다.
             </p>
+            <fieldset className="ai-mode-toggle" aria-label="AI 강도 선택">
+              <legend>AI 본문 생성 강도</legend>
+              <label className={`ai-mode-option ${aiMode === "template" ? "selected" : ""}`}>
+                <input
+                  type="radio"
+                  name="ai-mode"
+                  value="template"
+                  checked={aiMode === "template"}
+                  onChange={() => setAiMode("template")}
+                  disabled={busy}
+                />
+                <span>
+                  <strong>템플릿 (기본)</strong>
+                  <small>응답 5–15초 · 무료 · 검증된 본문</small>
+                </span>
+              </label>
+              <label className={`ai-mode-option ${aiMode === "enhanced" ? "selected" : ""}`}>
+                <input
+                  type="radio"
+                  name="ai-mode"
+                  value="enhanced"
+                  checked={aiMode === "enhanced"}
+                  onChange={() => setAiMode("enhanced")}
+                  disabled={busy}
+                />
+                <span>
+                  <strong>강화 (Gemini 표 5종)</strong>
+                  <small>응답 +5–15초 · 위험성평가/TBM 본문 시나리오 맞춤 생성</small>
+                </span>
+              </label>
+              <label className={`ai-mode-option ${aiMode === "full" ? "selected" : ""}`}>
+                <input
+                  type="radio"
+                  name="ai-mode"
+                  value="full"
+                  checked={aiMode === "full"}
+                  onChange={() => setAiMode("full")}
+                  disabled={busy}
+                />
+                <span>
+                  <strong>풀 AI (14개 본문)</strong>
+                  <small>응답 +30–60초 · 외국인 안내문 5개 언어까지 모두 AI 생성</small>
+                </span>
+              </label>
+            </fieldset>
             <div className="command-actions">
               <button type="submit" className="button command-primary" disabled={busy} aria-busy={busy}>
                 {busy ? <span className="button-spinner" aria-hidden="true" /> : null}

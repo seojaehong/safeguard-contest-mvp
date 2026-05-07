@@ -2176,7 +2176,7 @@ export function WorkpackEditor({
               {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
             </button>
             {templateKindForLayout(selectedFormProfile.layout) ? (
-              <button type="button" className="button secondary" onClick={() => void downloadOfficialTemplate()} disabled={officialTemplateStatus === "building"} title="공공기관 공식 .hwpx 양식 (회사명 자동 채움)">
+              <button type="button" className="button secondary" onClick={() => void downloadOfficialTemplate()} disabled={officialTemplateStatus === "building"} title="공공기관 공식 .hwpx 양식 (회사명만 채워지고, 본문은 현장 검토 후 채워 사용)">
                 {officialTemplateStatus === "building" ? "공식양식 생성 중" : "공식양식(.hwpx)"}
               </button>
             ) : null}
