@@ -57,6 +57,58 @@ export type WorkPlanStructured = {
   };
 };
 
+/**
+ * TBM 브리핑 — 한국 산업안전 표준 양식의 셀 단위 구조.
+ * workPlanStructured와 같은 schema-first 패턴.
+ */
+export type TbmBriefingStructured = {
+  meta: {
+    dateTime: string;          // 일시 (ISO 또는 자연어 1줄)
+    location: string;          // 장소
+    target: string;            // 대상 (예: "전 작업자 8명")
+    attendees: string;         // 참석자 확인 방식 (예: "출석부 서명 + 사진 촬영")
+  };
+  todayWork: {
+    name: string;              // 오늘 작업명
+    location: string;          // 작업 위치 (현장 내 세부 지점)
+    time: string;              // 작업 시간 (예: "09:00 - 17:00")
+    equipment: string[];       // 사용 장비 목록
+  };
+  hazards: Array<{
+    category: "Man" | "Machine" | "Media" | "Management";  // 4M 분류
+    description: string;       // 위험요인 (60자 이내)
+  }>;
+  measures: Array<{
+    hazardRef: number;         // hazards 배열의 인덱스 (1부터)
+    action: string;            // 안전대책 (80자 이내, KOSHA 인용 가능)
+    owner: string;             // 담당자
+  }>;
+  stopCriteria: string[];      // 작업중지 기준 (3-5개)
+  confirmTopics: string[];     // 마무리 확인질문 (5개)
+  photoEvidenceLocation: string;  // 사진증빙 보관 위치/방법
+};
+
+/**
+ * 안전보건교육 기록 — 한국 산업안전 표준 양식.
+ */
+export type EducationRecordStructured = {
+  educationName: string;       // 교육명
+  type: "정기교육" | "특별교육" | "외국인교육" | "신규자교육" | "관리감독자교육" | "기타";
+  dateTime: string;            // 일시
+  location: string;            // 장소
+  target: string;              // 교육대상
+  instructor: string;          // 실시자
+  confirmer: string;           // 확인자
+  curriculum: Array<{
+    topic: string;             // 교육 주제
+    lawCitation: string;       // 법령 조항 (예: "산업안전보건법 제29조")
+    keyPoints: string[];       // 핵심 내용 3-5개 짧은 문장
+  }>;
+  understandingCheck: string;  // 이해확인방법 (1-2 문장)
+  tbmLink: string;             // TBM 연계 (이번 TBM에서 어떻게 강조)
+  followupRecommendation: string; // 후속 교육 추천 (1-2 문장)
+};
+
 export type SearchResult = {
   id: string;
   type: SourceType;
@@ -263,8 +315,12 @@ export type AskResponse = {
      */
     workPlanStructured?: WorkPlanStructured;
     tbmBriefing: string;
+    /** TBM 브리핑 schema-first 구조. workPlanStructured와 동일 패턴. */
+    tbmBriefingStructured?: TbmBriefingStructured;
     tbmLogDraft: string;
     safetyEducationRecordDraft: string;
+    /** 안전보건교육 기록 schema-first 구조. */
+    educationRecordStructured?: EducationRecordStructured;
     emergencyResponseDraft: string;
     photoEvidenceDraft: string;
     foreignWorkerBriefing: string;
