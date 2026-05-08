@@ -1929,7 +1929,8 @@ export function WorkpackEditor({
             title: selected.title,
             rows: selectedRows,
             profile: selectedFormProfile,
-            scenario: data.scenario
+            scenario: data.scenario,
+            riskAssessmentRows: data.structured?.riskAssessmentRows
           };
       const response = await fetch("/api/export/xlsx", {
         method: "POST",
@@ -1958,7 +1959,8 @@ export function WorkpackEditor({
           title: selected.title,
           rows: selectedRows,
           profile: selectedFormProfile,
-          scenario: data.scenario
+          scenario: data.scenario,
+          riskAssessmentRows: data.structured?.riskAssessmentRows
         })
       });
       if (!response.ok) {
