@@ -18,14 +18,18 @@ export const ACCIDENT_TYPE_VALUES = [
   "other"
 ] as const;
 export const RISK_LEVEL_VALUES = ["low", "medium", "high"] as const;
+export const VERIFICATION_STATUS_VALUES = ["planned", "done", "needsReview"] as const;
 
 export type FourM = (typeof FOUR_M_VALUES)[number];
 export type AccidentType = (typeof ACCIDENT_TYPE_VALUES)[number];
 export type RiskLevel = (typeof RISK_LEVEL_VALUES)[number];
+export type VerificationStatus = (typeof VERIFICATION_STATUS_VALUES)[number];
 
 export type RiskAssessmentRow = {
+  location: string;
   process: string;
   task: string;
+  equipment: string;
   hazard: string;
   fourM: FourM;
   accidentType: AccidentType;
@@ -37,6 +41,9 @@ export type RiskAssessmentRow = {
   owner: string;
   due: string;
   verification: string;
+  verificationStatus: VerificationStatus;
+  verificationDate: string;
+  verificationChecker: string;
   whyLikelihood: string;
   whySeverity: string;
   evidenceRefs: string[];
@@ -79,8 +86,10 @@ export type FormSchemaRegistryEntry = {
 };
 
 const REQUIRED_FIELDS: readonly (keyof RiskAssessmentRow)[] = [
+  "location",
   "process",
   "task",
+  "equipment",
   "hazard",
   "fourM",
   "accidentType",
@@ -92,6 +101,9 @@ const REQUIRED_FIELDS: readonly (keyof RiskAssessmentRow)[] = [
   "owner",
   "due",
   "verification",
+  "verificationStatus",
+  "verificationDate",
+  "verificationChecker",
   "whyLikelihood",
   "whySeverity",
   "evidenceRefs"
@@ -106,8 +118,10 @@ export const riskAssessmentSchemaRegistryEntry: FormSchemaRegistryEntry = {
     required: REQUIRED_FIELDS,
     additionalProperties: false,
     properties: {
+      location: { type: "string" },
       process: { type: "string" },
       task: { type: "string" },
+      equipment: { type: "string" },
       hazard: { type: "string" },
       fourM: { type: "string", enum: FOUR_M_VALUES },
       accidentType: { type: "string", enum: ACCIDENT_TYPE_VALUES },
@@ -119,6 +133,9 @@ export const riskAssessmentSchemaRegistryEntry: FormSchemaRegistryEntry = {
       owner: { type: "string" },
       due: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$|^현장 확인$" },
       verification: { type: "string" },
+      verificationStatus: { type: "string", enum: VERIFICATION_STATUS_VALUES },
+      verificationDate: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$|^현장 확인$" },
+      verificationChecker: { type: "string" },
       whyLikelihood: { type: "string" },
       whySeverity: { type: "string" },
       evidenceRefs: { type: "array", items: { type: "string" }, minItems: 1 }
@@ -175,14 +192,18 @@ function parseRiskAssessmentRow(value: unknown, rowIndex: number): { row: RiskAs
   }
 
   const stringFields = [
+    "location",
     "process",
     "task",
+    "equipment",
     "hazard",
     "currentControls",
     "additionalControls",
     "owner",
     "due",
     "verification",
+    "verificationDate",
+    "verificationChecker",
     "whyLikelihood",
     "whySeverity"
   ] as const;
@@ -207,6 +228,9 @@ function parseRiskAssessmentRow(value: unknown, rowIndex: number): { row: RiskAs
   if (!isEnumValue(value.riskLevel, RISK_LEVEL_VALUES)) {
     issues.push({ rowIndex, field: "riskLevel", message: `must be one of ${RISK_LEVEL_VALUES.join(", ")}` });
   }
+  if (!isEnumValue(value.verificationStatus, VERIFICATION_STATUS_VALUES)) {
+    issues.push({ rowIndex, field: "verificationStatus", message: `must be one of ${VERIFICATION_STATUS_VALUES.join(", ")}` });
+  }
 
   const evidenceRefs = parseEvidenceRefs(value.evidenceRefs);
   if (!evidenceRefs) {
@@ -214,6 +238,9 @@ function parseRiskAssessmentRow(value: unknown, rowIndex: number): { row: RiskAs
   }
   if (isNonEmptyString(value.due) && !/^\d{4}-\d{2}-\d{2}$|^현장 확인$/.test(value.due.trim())) {
     issues.push({ rowIndex, field: "due", message: "must be YYYY-MM-DD or 현장 확인" });
+  }
+  if (isNonEmptyString(value.verificationDate) && !/^\d{4}-\d{2}-\d{2}$|^현장 확인$/.test(value.verificationDate.trim())) {
+    issues.push({ rowIndex, field: "verificationDate", message: "must be YYYY-MM-DD or 현장 확인" });
   }
 
   if (
@@ -233,8 +260,10 @@ function parseRiskAssessmentRow(value: unknown, rowIndex: number): { row: RiskAs
 
   return {
     row: {
+      location: String(value.location).trim(),
       process: String(value.process).trim(),
       task: String(value.task).trim(),
+      equipment: String(value.equipment).trim(),
       hazard: String(value.hazard).trim(),
       fourM: value.fourM as FourM,
       accidentType: value.accidentType as AccidentType,
@@ -246,6 +275,9 @@ function parseRiskAssessmentRow(value: unknown, rowIndex: number): { row: RiskAs
       owner: String(value.owner).trim(),
       due: String(value.due).trim(),
       verification: String(value.verification).trim(),
+      verificationStatus: value.verificationStatus as VerificationStatus,
+      verificationDate: String(value.verificationDate).trim(),
+      verificationChecker: String(value.verificationChecker).trim(),
       whyLikelihood: String(value.whyLikelihood).trim(),
       whySeverity: String(value.whySeverity).trim(),
       evidenceRefs

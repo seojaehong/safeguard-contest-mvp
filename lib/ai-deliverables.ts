@@ -395,11 +395,13 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
     "필수 규칙:",
     "  - rows는 현장 시나리오에 맞는 5~7개 위험성평가 행이다.",
     "  - 모든 행은 필수 필드를 빠짐없이 채운다.",
+    "  - location은 작업장소, equipment는 장비·도구, verificationStatus/verificationDate/verificationChecker는 조치 확인 칸에 그대로 들어간다.",
     `  - fourM enum: ${FOUR_M_VALUES.join(", ")}`,
     `  - accidentType enum: ${ACCIDENT_TYPE_VALUES.join(", ")}`,
     "  - likelihood와 severity는 1~5 정수다.",
     `  - riskLevel enum: ${RISK_LEVEL_VALUES.join(", ")}. likelihood×severity 기준으로 1~4는 low, 5~9는 medium, 10 이상은 high.`,
     "  - due는 YYYY-MM-DD 또는 \"현장 확인\"만 허용한다.",
+    "  - verificationDate는 YYYY-MM-DD 또는 \"현장 확인\"만 허용하고, verificationStatus는 planned/done/needsReview 중 하나다.",
     "  - evidenceRefs는 법령, KOSHA, 재해사례, 지식 DB 후보 중 해당 행을 뒷받침하는 짧은 근거 문자열 배열이다.",
     "  - whyLikelihood와 whySeverity는 수치 판단 근거를 각각 한 문장으로 적는다.",
     "",
@@ -407,7 +409,7 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
     JSON.stringify(rowSchema, null, 2),
     "",
     "응답 예시 형태:",
-    `{"rows":[{"process":"string","task":"string","hazard":"string","fourM":"Man","accidentType":"fall","currentControls":"string","likelihood":3,"severity":4,"riskLevel":"high","additionalControls":"string","owner":"string","due":"현장 확인","verification":"string","whyLikelihood":"string","whySeverity":"string","evidenceRefs":["string"]}]}`,
+    `{"rows":[{"location":"string","process":"string","task":"string","equipment":"string","hazard":"string","fourM":"Man","accidentType":"fall","currentControls":"string","likelihood":3,"severity":4,"riskLevel":"high","additionalControls":"string","owner":"string","due":"현장 확인","verification":"string","verificationStatus":"planned","verificationDate":"현장 확인","verificationChecker":"string","whyLikelihood":"string","whySeverity":"string","evidenceRefs":["string"]}]}`,
     "",
     contextBlock(ctx)
   ].join("\n");

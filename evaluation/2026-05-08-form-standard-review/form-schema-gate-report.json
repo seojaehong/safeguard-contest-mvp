@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-08T05:58:34.725Z",
+  "generatedAt": "2026-05-08T07:56:35.177Z",
   "elapsedMs": 12,
   "fixturesPath": "scripts\\safeclaw_form_schema_gate_fixtures.json",
   "minimumHazardRows": 3,
@@ -54,6 +54,120 @@
       "finding": "existing review already marks SaaS/submission-form standard as blocked"
     }
   },
+  "columnContract": {
+    "expectedHeaders": [
+      "작업장소",
+      "공정",
+      "세부작업",
+      "장비·도구",
+      "유해·위험요인",
+      "4M",
+      "재해유형",
+      "현재 안전조치",
+      "가능성",
+      "중대성",
+      "위험성",
+      "감소대책",
+      "담당자",
+      "조치기한",
+      "확인상태",
+      "확인일",
+      "확인자",
+      "근거"
+    ],
+    "fields": [
+      {
+        "field": "location",
+        "header": "작업장소",
+        "required": true
+      },
+      {
+        "field": "process",
+        "header": "공정",
+        "required": true
+      },
+      {
+        "field": "task",
+        "header": "세부작업",
+        "required": true
+      },
+      {
+        "field": "equipment",
+        "header": "장비·도구",
+        "required": true
+      },
+      {
+        "field": "hazard",
+        "header": "유해·위험요인",
+        "required": true
+      },
+      {
+        "field": "fourM",
+        "header": "4M",
+        "required": true
+      },
+      {
+        "field": "accidentType",
+        "header": "재해유형",
+        "required": true
+      },
+      {
+        "field": "currentControls",
+        "header": "현재 안전조치",
+        "required": true
+      },
+      {
+        "field": "likelihood",
+        "header": "가능성",
+        "required": true
+      },
+      {
+        "field": "severity",
+        "header": "중대성",
+        "required": true
+      },
+      {
+        "field": "riskLevel",
+        "header": "위험성",
+        "required": true
+      },
+      {
+        "field": "additionalControls",
+        "header": "감소대책",
+        "required": true
+      },
+      {
+        "field": "owner",
+        "header": "담당자",
+        "required": true
+      },
+      {
+        "field": "due",
+        "header": "조치기한",
+        "required": true
+      },
+      {
+        "field": "verificationStatus",
+        "header": "확인상태",
+        "required": true
+      },
+      {
+        "field": "verificationDate",
+        "header": "확인일",
+        "required": true
+      },
+      {
+        "field": "verificationChecker",
+        "header": "확인자",
+        "required": true
+      },
+      {
+        "field": "evidenceRefs",
+        "header": "근거",
+        "required": true
+      }
+    ]
+  },
   "cases": [
     {
       "id": "gaontech-leak-maintenance-two-person",
@@ -70,6 +184,182 @@
         "Media",
         "Management"
       ],
+      "columnContract": {
+        "expectedHeaders": [
+          "작업장소",
+          "공정",
+          "세부작업",
+          "장비·도구",
+          "유해·위험요인",
+          "4M",
+          "재해유형",
+          "현재 안전조치",
+          "가능성",
+          "중대성",
+          "위험성",
+          "감소대책",
+          "담당자",
+          "조치기한",
+          "확인상태",
+          "확인일",
+          "확인자",
+          "근거"
+        ],
+        "fieldCoverage": [
+          {
+            "field": "location",
+            "header": "작업장소",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "process",
+            "header": "공정",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "task",
+            "header": "세부작업",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "equipment",
+            "header": "장비·도구",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "hazard",
+            "header": "유해·위험요인",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "fourM",
+            "header": "4M",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "accidentType",
+            "header": "재해유형",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "currentControls",
+            "header": "현재 안전조치",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "likelihood",
+            "header": "가능성",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "severity",
+            "header": "중대성",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "riskLevel",
+            "header": "위험성",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "additionalControls",
+            "header": "감소대책",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "owner",
+            "header": "담당자",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "due",
+            "header": "조치기한",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "verificationStatus",
+            "header": "확인상태",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "verificationDate",
+            "header": "확인일",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "verificationChecker",
+            "header": "확인자",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "evidenceRefs",
+            "header": "근거",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          }
+        ],
+        "missingRequiredFields": [],
+        "verdict": "pass"
+      },
+      "tbmSchema": {
+        "verdict": "pass",
+        "minimumLinks": 3,
+        "linkCount": 3,
+        "issues": []
+      },
       "blockerCount": 0,
       "noticeCount": 0,
       "issues": []
@@ -89,6 +379,182 @@
         "Media",
         "Management"
       ],
+      "columnContract": {
+        "expectedHeaders": [
+          "작업장소",
+          "공정",
+          "세부작업",
+          "장비·도구",
+          "유해·위험요인",
+          "4M",
+          "재해유형",
+          "현재 안전조치",
+          "가능성",
+          "중대성",
+          "위험성",
+          "감소대책",
+          "담당자",
+          "조치기한",
+          "확인상태",
+          "확인일",
+          "확인자",
+          "근거"
+        ],
+        "fieldCoverage": [
+          {
+            "field": "location",
+            "header": "작업장소",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "process",
+            "header": "공정",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "task",
+            "header": "세부작업",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "equipment",
+            "header": "장비·도구",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "hazard",
+            "header": "유해·위험요인",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "fourM",
+            "header": "4M",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "accidentType",
+            "header": "재해유형",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "currentControls",
+            "header": "현재 안전조치",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "likelihood",
+            "header": "가능성",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "severity",
+            "header": "중대성",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "riskLevel",
+            "header": "위험성",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "additionalControls",
+            "header": "감소대책",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "owner",
+            "header": "담당자",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "due",
+            "header": "조치기한",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "verificationStatus",
+            "header": "확인상태",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "verificationDate",
+            "header": "확인일",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "verificationChecker",
+            "header": "확인자",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          },
+          {
+            "field": "evidenceRefs",
+            "header": "근거",
+            "required": true,
+            "coveredRows": 4,
+            "totalRows": 4,
+            "ok": true
+          }
+        ],
+        "missingRequiredFields": [],
+        "verdict": "pass"
+      },
+      "tbmSchema": {
+        "verdict": "pass",
+        "minimumLinks": 3,
+        "linkCount": 3,
+        "issues": []
+      },
       "blockerCount": 0,
       "noticeCount": 0,
       "issues": []
@@ -103,9 +569,206 @@
       "rowCount": 0,
       "inputRowCount": 1,
       "fourMCoverage": [],
-      "blockerCount": 10,
+      "columnContract": {
+        "expectedHeaders": [
+          "작업장소",
+          "공정",
+          "세부작업",
+          "장비·도구",
+          "유해·위험요인",
+          "4M",
+          "재해유형",
+          "현재 안전조치",
+          "가능성",
+          "중대성",
+          "위험성",
+          "감소대책",
+          "담당자",
+          "조치기한",
+          "확인상태",
+          "확인일",
+          "확인자",
+          "근거"
+        ],
+        "fieldCoverage": [
+          {
+            "field": "location",
+            "header": "작업장소",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "process",
+            "header": "공정",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "task",
+            "header": "세부작업",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "equipment",
+            "header": "장비·도구",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "hazard",
+            "header": "유해·위험요인",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "fourM",
+            "header": "4M",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "accidentType",
+            "header": "재해유형",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "currentControls",
+            "header": "현재 안전조치",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "likelihood",
+            "header": "가능성",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "severity",
+            "header": "중대성",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "riskLevel",
+            "header": "위험성",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "additionalControls",
+            "header": "감소대책",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "owner",
+            "header": "담당자",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "due",
+            "header": "조치기한",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "verificationStatus",
+            "header": "확인상태",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "verificationDate",
+            "header": "확인일",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "verificationChecker",
+            "header": "확인자",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          },
+          {
+            "field": "evidenceRefs",
+            "header": "근거",
+            "required": true,
+            "coveredRows": 0,
+            "totalRows": 0,
+            "ok": true
+          }
+        ],
+        "missingRequiredFields": [],
+        "verdict": "pass"
+      },
+      "tbmSchema": {
+        "verdict": "blocked",
+        "minimumLinks": 0,
+        "linkCount": 0,
+        "issues": [
+          {
+            "id": "tbm-schema:missing",
+            "severity": "blocker",
+            "field": "tbmRiskLinks",
+            "message": "TBM schema v0.5 requires tbmRiskLinks array"
+          }
+        ]
+      },
+      "blockerCount": 16,
       "noticeCount": 0,
       "issues": [
+        {
+          "id": "schema:0:location",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "location",
+          "message": "must be a non-empty string"
+        },
+        {
+          "id": "schema:0:equipment",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "equipment",
+          "message": "must be a non-empty string"
+        },
         {
           "id": "schema:0:owner",
           "severity": "blocker",
@@ -118,6 +781,13 @@
           "severity": "blocker",
           "rowIndex": 0,
           "field": "verification",
+          "message": "must be a non-empty string"
+        },
+        {
+          "id": "schema:0:verificationChecker",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "verificationChecker",
           "message": "must be a non-empty string"
         },
         {
@@ -135,6 +805,13 @@
           "message": "must be a non-empty string"
         },
         {
+          "id": "schema:0:verificationStatus",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "verificationStatus",
+          "message": "must be one of planned, done, needsReview"
+        },
+        {
           "id": "schema:0:evidenceRefs",
           "severity": "blocker",
           "rowIndex": 0,
@@ -146,6 +823,13 @@
           "severity": "blocker",
           "rowIndex": 0,
           "field": "due",
+          "message": "must be YYYY-MM-DD or 현장 확인"
+        },
+        {
+          "id": "schema:0:verificationDate",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "verificationDate",
           "message": "must be YYYY-MM-DD or 현장 확인"
         },
         {
@@ -173,6 +857,12 @@
           "severity": "blocker",
           "field": "weather",
           "message": "weather or site-condition evidence must be linked in both risk rows and TBM text"
+        },
+        {
+          "id": "tbm-schema:missing",
+          "severity": "blocker",
+          "field": "tbmRiskLinks",
+          "message": "TBM schema v0.5 requires tbmRiskLinks array"
         }
       ]
     }
