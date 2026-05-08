@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  buildRiskAssessmentText,
+  parseStructuredRiskAssessmentRows,
+  type StructuredRiskAssessmentRow
+} from "@/lib/risk-assessment-renderer";
 
 export const dynamic = "force-dynamic";
 
@@ -130,6 +135,29 @@ function parseBodyText(value: unknown, documentTitle: string): PdfRow[] {
   return rows;
 }
 
+function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAssessmentRow[] {
+  const candidates = [
+    body.structuredRiskRows,
+    body.riskAssessmentRows,
+    body.structuredRows,
+    body.canonicalRows
+  ];
+  for (const candidate of candidates) {
+    const rows = parseStructuredRiskAssessmentRows(candidate);
+    if (rows.length) return rows;
+  }
+  return [];
+}
+
+function structuredRiskRowsToPdfRows(rows: StructuredRiskAssessmentRow[], documentTitle: string): PdfRow[] {
+  return rows.map((row) => ({
+    document: documentTitle,
+    section: row.section || "위험성평가",
+    item: row.hazard,
+    content: buildRiskAssessmentText(row)
+  }));
+}
+
 function groupRows(rows: PdfRow[]) {
   const groups = new Map<string, PdfRow[]>();
   rows.forEach((row) => {
@@ -199,6 +227,39 @@ function renderRiskAssessmentRows(rows: PdfRow[], scenario: PdfScenario, topRisk
     <section class="section">
       <h2>4. 공유·교육 및 재평가</h2>
       <table><tbody><tr><th>공유 방법</th><td>작업 전 TBM, 안전보건교육, 문자/메일 전파</td><th>재평가 기준</th><td>작업조건·장비·기상·인원 변경 또는 잔류위험 발생 시</td></tr></tbody></table>
+    </section>`;
+}
+
+function renderCanonicalRiskAssessmentRows(rows: StructuredRiskAssessmentRow[], scenario: PdfScenario) {
+  return `
+    <section class="section">
+      <h2>1. 평가 기본정보</h2>
+      <table class="meta-table">
+        <tbody>
+          <tr><th>평가대상 작업</th><td>${escapeHtml(scenario.workSummary)}</td><th>평가 장소</th><td>${escapeHtml(scenario.siteName)}</td></tr>
+          <tr><th>평가 참여자</th><td>관리감독자, 작업반장, 근로자 대표</td><th>작업 조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="section">
+      <h2>2. 유해·위험요인 파악 및 감소대책</h2>
+      <table>
+        <thead>
+          <tr><th class="no">No.</th><th>세부작업</th><th>유해·위험요인</th><th>현재 안전보건조치</th><th>위험성</th><th>감소대책</th><th>담당/기한</th><th>확인</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map((row, index) => `<tr><td>${escapeHtml(row.id || String(index + 1))}</td><td>${escapeHtml(row.unitTask)}</td><td>${escapeHtml(row.hazard)}</td><td>${escapeHtml(row.currentControls || "현장 확인")}</td><td>${escapeHtml(row.riskLevel || "확인")}</td><td>${escapeHtml(row.additionalControls)}</td><td>${escapeHtml(`${row.owner || "작업반장"} / ${row.dueDate || "작업 전"}`)}</td><td>${escapeHtml(row.status || "□")}</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </section>
+    <section class="section">
+      <h2>3. 공유·재평가 및 증빙</h2>
+      <table>
+        <thead><tr><th>대상</th><th>공유 방법</th><th>증빙</th><th>재평가 기준</th></tr></thead>
+        <tbody>
+          ${rows.map((row) => `<tr><td>${escapeHtml(row.unitTask)}</td><td>작업 전 TBM 및 서명 확인</td><td>${escapeHtml(row.evidence || "사진·TBM·점검표")}</td><td>작업조건·장비·기상·인원 변경 시</td></tr>`).join("")}
+        </tbody>
+      </table>
     </section>`;
 }
 
@@ -281,7 +342,15 @@ function renderEducationRows(rows: PdfRow[], scenario: PdfScenario) {
     </section>`;
 }
 
-function renderStructuredRows(kind: PdfDocumentKind, scenario: PdfScenario, rows: PdfRow[], topRisk: string, riskRows: PdfRow[]) {
+function renderStructuredRows(
+  kind: PdfDocumentKind,
+  scenario: PdfScenario,
+  rows: PdfRow[],
+  topRisk: string,
+  riskRows: PdfRow[],
+  structuredRiskRows: StructuredRiskAssessmentRow[]
+) {
+  if (kind === "risk" && structuredRiskRows.length) return renderCanonicalRiskAssessmentRows(structuredRiskRows, scenario);
   if (kind === "risk") return renderRiskAssessmentRows(rows, scenario, topRisk);
   if (kind === "workPlan") return renderWorkPlanRows(rows, scenario);
   if (kind === "permit") return renderPermitRows(rows, scenario);
@@ -327,7 +396,15 @@ function renderRows(rows: PdfRow[]) {
   `).join("");
 }
 
-function buildPdfReadyHtml(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string, riskRows: PdfRow[]) {
+function buildPdfReadyHtml(
+  title: string,
+  scenario: PdfScenario,
+  rows: PdfRow[],
+  riskLevel: string,
+  topRisk: string,
+  riskRows: PdfRow[],
+  structuredRiskRows: StructuredRiskAssessmentRow[]
+) {
   const generatedAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
   const kind = detectDocumentKind(title);
   const kindLabels: Record<PdfDocumentKind, string> = {
@@ -469,7 +546,7 @@ function buildPdfReadyHtml(title: string, scenario: PdfScenario, rows: PdfRow[],
       <b>위험수준 ${escapeHtml(riskLevel || "확인")}</b>
       <span>${escapeHtml(topRisk || "핵심 위험요인을 현장에서 최종 확인하세요.")}</span>
     </section>
-    ${renderStructuredRows(kind, scenario, rows, topRisk, riskRows)}
+    ${renderStructuredRows(kind, scenario, rows, topRisk, riskRows, structuredRiskRows)}
     <section class="signature">
       <div><b>작성자</b><br />성명/서명:</div>
       <div><b>관리감독자</b><br />성명/서명:</div>
@@ -512,7 +589,15 @@ function wrapPdfLine(value: string, maxChars: number) {
   return lines.length ? lines : [""];
 }
 
-function buildPdfContentLines(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string, riskRows: PdfRow[]) {
+function buildPdfContentLines(
+  title: string,
+  scenario: PdfScenario,
+  rows: PdfRow[],
+  riskLevel: string,
+  topRisk: string,
+  riskRows: PdfRow[],
+  structuredRiskRows: StructuredRiskAssessmentRow[]
+) {
   const generatedAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
   const kind = detectDocumentKind(title);
   const lines: Array<{ text: string; size: number; gap?: number }> = [
@@ -528,7 +613,12 @@ function buildPdfContentLines(title: string, scenario: PdfScenario, rows: PdfRow
     { text: "확인 항목", size: 13, gap: 10 }
   ];
 
-  const sourceRows = kind === "tbm" && riskRows.length ? riskRows.slice(0, 8) : (rows.length ? rows.slice(0, 18) : [{ document: title, section: "본문", item: "확인", content: "문서 본문을 현장에서 확인하세요." }]);
+  const canonicalRiskRows = kind === "risk" && structuredRiskRows.length
+    ? structuredRiskRowsToPdfRows(structuredRiskRows, title)
+    : [];
+  const sourceRows = canonicalRiskRows.length
+    ? canonicalRiskRows.slice(0, 18)
+    : kind === "tbm" && riskRows.length ? riskRows.slice(0, 8) : (rows.length ? rows.slice(0, 18) : [{ document: title, section: "본문", item: "확인", content: "문서 본문을 현장에서 확인하세요." }]);
   if (kind === "tbm") {
     lines.push({ text: "위험성평가표 위험요인과 오늘 기상/환경 신호를 TBM 전달사항으로 연결합니다.", size: 9 });
     lines.push({ text: `오늘 기상/환경 신호: ${scenario.weatherNote}`, size: 9, gap: 8 });
@@ -550,10 +640,18 @@ function buildPdfContentLines(title: string, scenario: PdfScenario, rows: PdfRow
   return lines;
 }
 
-function buildBinaryPdf(title: string, scenario: PdfScenario, rows: PdfRow[], riskLevel: string, topRisk: string, riskRows: PdfRow[]) {
+function buildBinaryPdf(
+  title: string,
+  scenario: PdfScenario,
+  rows: PdfRow[],
+  riskLevel: string,
+  topRisk: string,
+  riskRows: PdfRow[],
+  structuredRiskRows: StructuredRiskAssessmentRow[]
+) {
   const commands: string[] = [];
   let y = 790;
-  buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows).forEach((line) => {
+  buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows, structuredRiskRows).forEach((line) => {
     if (line.gap) y -= line.gap;
     if (!line.text) {
       y -= 8;
@@ -597,6 +695,7 @@ export async function POST(request: NextRequest) {
   const scenario = parseScenario(body.scenario);
   const rows = parseRows(body.rows, title);
   const riskRows = parseRows(body.riskRows, "위험성평가표");
+  const structuredRiskRows = parseRiskRowsFromBody(body);
   const bodyRows = rows.length ? rows : parseBodyText(body.documentText, title);
   const riskLevel = readString(body.riskLevel, "확인");
   const topRisk = readString(body.topRisk, "");
@@ -604,7 +703,7 @@ export async function POST(request: NextRequest) {
     || (request.headers.get("accept") || "").includes("application/pdf");
 
   if (wantsBinaryPdf) {
-    const pdf = buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows);
+    const pdf = buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
     const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
     return new NextResponse(pdf, {
       headers: {
@@ -615,7 +714,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk, riskRows);
+  const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
   const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.html`;
   const encodedFileName = encodeURIComponent(fileName);
 

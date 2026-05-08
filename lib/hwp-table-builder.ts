@@ -3,6 +3,10 @@
 // So this module produces the .hwp binary which 한컴 opens natively with table grids.
 
 import type { AskResponse } from "@/lib/types";
+import {
+  resolveRiskAssessmentRows,
+  type StructuredRiskAssessmentRow
+} from "@/lib/risk-assessment-renderer";
 
 type SheetRow = {
   document: string;
@@ -83,6 +87,7 @@ export type HwpBuildInput = {
   rows: SheetRow[];
   profile: SafetyFormProfile;
   scenario: AskResponse["scenario"];
+  structuredRiskRows?: StructuredRiskAssessmentRow[];
 };
 
 /**
@@ -95,7 +100,7 @@ export type HwpBuildInput = {
  * Returns a Blob suitable for download as `${name}.hwp` (한컴 opens natively with table grid).
  */
 export async function buildHwpWithTables(input: HwpBuildInput): Promise<Blob> {
-  const { title, rows, profile, scenario } = input;
+  const { title, rows, profile, scenario, structuredRiskRows } = input;
   const { HwpDocument } = await loadRhwp();
   const document = HwpDocument.createEmpty();
   try {
@@ -134,16 +139,28 @@ export async function buildHwpWithTables(input: HwpBuildInput): Promise<Blob> {
     document.insertText(0, 0, 0, "\n");
 
     // 3) Main body table — derive columns per layout
-    const cols = deriveColumnsForLayout(profile, rows);
+    const riskRows = profile.layout === "risk" && structuredRiskRows?.length
+      ? resolveRiskAssessmentRows({ structuredRows: structuredRiskRows, fallbackRows: rows })
+      : [];
+    const cols = riskRows.length
+      ? ["세부작업", "유해·위험요인", "현재조치", "위험성", "감소대책", "담당/기한"]
+      : deriveColumnsForLayout(profile, rows);
     const colCount = cols.length;
-    // Each row: [section, item, content, ✓ checkbox]
-    // For wider layouts we just keep these 4 columns to maximize predictability.
-    const bodyRows: string[][] = rows.map((r, idx) => [
-      r.section || String(idx + 1),
-      r.item || "",
-      r.content || "",
-      "□"
-    ]);
+    const bodyRows: string[][] = riskRows.length
+      ? riskRows.map((riskRow) => [
+        riskRow.unitTask,
+        riskRow.hazard,
+        riskRow.currentControls || "현장 확인",
+        riskRow.riskLevel || "확인",
+        riskRow.additionalControls,
+        `${riskRow.owner || "작업반장"} / ${riskRow.dueDate || "작업 전"}`
+      ])
+      : rows.map((r, idx) => [
+        r.section || String(idx + 1),
+        r.item || "",
+        r.content || "",
+        "□"
+      ]);
     const allRows: string[][] = [cols, ...bodyRows];
     if (allRows.length >= 1 && colCount >= 1) {
       const tableJson = parseJsonResult(document.createTable(0, 0, 0, allRows.length, colCount));

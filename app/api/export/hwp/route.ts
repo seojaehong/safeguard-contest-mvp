@@ -3,6 +3,11 @@ import fs from "node:fs";
 import path from "node:path";
 // Use the WASM init for server runtime. exportHwp() supports tables; exportHwpx() does NOT.
 import { initSync, HwpDocument } from "@rhwp/core";
+import {
+  parseStructuredRiskAssessmentRows,
+  resolveRiskAssessmentRows,
+  type StructuredRiskAssessmentRow
+} from "@/lib/risk-assessment-renderer";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -108,6 +113,20 @@ function parseProfile(value: unknown): SafetyFormProfile {
   };
 }
 
+function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAssessmentRow[] {
+  const candidates = [
+    body.structuredRiskRows,
+    body.riskAssessmentRows,
+    body.structuredRows,
+    body.canonicalRows
+  ];
+  for (const candidate of candidates) {
+    const rows = parseStructuredRiskAssessmentRows(candidate);
+    if (rows.length) return rows;
+  }
+  return [];
+}
+
 function parseScenario(value: unknown) {
   const r = isRecord(value) ? value : {};
   return {
@@ -140,7 +159,8 @@ function deriveColumns(profile: SafetyFormProfile): string[] {
 
 function parseJsonResult(raw: string) {
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw) as unknown;
+    return isRecord(parsed) ? parsed : {};
   } catch {
     return {};
   }
@@ -151,9 +171,10 @@ function buildHwpBuffer(args: {
   rows: SheetRow[];
   profile: SafetyFormProfile;
   scenario: ReturnType<typeof parseScenario>;
+  structuredRiskRows?: StructuredRiskAssessmentRow[];
 }): Buffer {
   ensureWasm();
-  const { title, rows, profile, scenario } = args;
+  const { title, rows, profile, scenario, structuredRiskRows } = args;
   const document = HwpDocument.createEmpty();
   try {
     document.createBlankDocument();
@@ -184,14 +205,28 @@ function buildHwpBuffer(args: {
     document.insertText(0, 0, 0, "\n");
 
     // Body table
-    const cols = deriveColumns(profile);
+    const riskRows = profile.layout === "risk" && structuredRiskRows?.length
+      ? resolveRiskAssessmentRows({ structuredRows: structuredRiskRows, fallbackRows: rows })
+      : [];
+    const cols = riskRows.length
+      ? ["세부작업", "유해·위험요인", "현재조치", "위험성", "감소대책", "담당/기한"]
+      : deriveColumns(profile);
     const colCount = cols.length;
-    const bodyRows: string[][] = rows.map((r, idx) => [
-      r.section || String(idx + 1),
-      r.item || "",
-      r.content || "",
-      "□"
-    ]);
+    const bodyRows: string[][] = riskRows.length
+      ? riskRows.map((riskRow) => [
+        riskRow.unitTask,
+        riskRow.hazard,
+        riskRow.currentControls || "현장 확인",
+        riskRow.riskLevel || "확인",
+        riskRow.additionalControls,
+        `${riskRow.owner || "작업반장"} / ${riskRow.dueDate || "작업 전"}`
+      ])
+      : rows.map((r, idx) => [
+        r.section || String(idx + 1),
+        r.item || "",
+        r.content || "",
+        "□"
+      ]);
     const allRows = [cols, ...bodyRows];
     if (allRows.length >= 1 && colCount >= 1) {
       const tbl = parseJsonResult(document.createTable(0, 0, 0, allRows.length, colCount));
@@ -246,9 +281,10 @@ export async function POST(request: NextRequest) {
   const rows = parseRows(body.rows, title);
   const profile = parseProfile(body.profile);
   const scenario = parseScenario(body.scenario);
+  const structuredRiskRows = parseRiskRowsFromBody(body);
 
   try {
-    const buffer = buildHwpBuffer({ title, rows, profile, scenario });
+    const buffer = buildHwpBuffer({ title, rows, profile, scenario, structuredRiskRows });
     const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.hwp`;
     return new NextResponse(new Uint8Array(buffer), {
       headers: {

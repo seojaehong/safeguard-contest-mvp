@@ -2,7 +2,11 @@
 // Produces OOXML binary that opens cleanly in Excel/한셀 with no extension warning.
 
 import ExcelJS from "exceljs";
-import type { AskResponse, EducationRecordStructured, TbmBriefingStructured, WorkPlanStructured } from "@/lib/types";
+import type { AskResponse } from "@/lib/types";
+import {
+  resolveRiskAssessmentRows,
+  type StructuredRiskAssessmentRow
+} from "@/lib/risk-assessment-renderer";
 
 type SheetRow = {
   document: string;
@@ -49,19 +53,99 @@ export type XlsxBuildInput = {
   rows: SheetRow[];
   profile: SafetyFormProfile;
   scenario: AskResponse["scenario"];
+  structuredRiskRows?: StructuredRiskAssessmentRow[];
 };
 
+function applyRiskAssessmentColumns(ws: ExcelJS.Worksheet) {
+  ws.columns = [
+    { width: 6 },
+    { width: 18 },
+    { width: 26 },
+    { width: 28 },
+    { width: 10 },
+    { width: 10 },
+    { width: 10 },
+    { width: 34 },
+    { width: 14 },
+    { width: 14 },
+    { width: 12 }
+  ];
+}
+
+function writeOfficialLikeRiskAssessmentTable(
+  ws: ExcelJS.Worksheet,
+  startRow: number,
+  rows: StructuredRiskAssessmentRow[]
+): number {
+  let row = startRow;
+  ws.mergeCells(row, 1, row, 11);
+  ws.getCell(row, 1).value = "위험성평가표";
+  ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 12, bold: true };
+  row += 1;
+
+  const headers = [
+    "No.",
+    "세부작업",
+    "유해·위험요인",
+    "현재 안전보건조치",
+    "가능성",
+    "중대성",
+    "위험성",
+    "감소대책",
+    "담당",
+    "완료예정",
+    "조치확인"
+  ];
+  headers.forEach((header, index) => {
+    const cell = ws.getCell(row, index + 1);
+    cell.value = header;
+    cell.fill = HEADER_FILL;
+    cell.font = HEADER_FONT;
+    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+  });
+  applyBorders(ws, `A${row}:K${row}`);
+  ws.getRow(row).height = 26;
+  row += 1;
+
+  rows.forEach((riskRow, index) => {
+    const values = [
+      riskRow.id || String(index + 1),
+      riskRow.unitTask,
+      riskRow.hazard,
+      riskRow.currentControls || "현장 확인",
+      riskRow.likelihood || "확인",
+      riskRow.severity || "확인",
+      riskRow.riskLevel || "확인",
+      riskRow.additionalControls,
+      riskRow.owner || "작업반장",
+      riskRow.dueDate || "작업 전",
+      riskRow.status || "□"
+    ];
+    values.forEach((value, columnIndex) => {
+      const cell = ws.getCell(row, columnIndex + 1);
+      cell.value = value;
+      cell.alignment = {
+        vertical: columnIndex === 2 || columnIndex === 3 || columnIndex === 7 ? "top" : "middle",
+        horizontal: columnIndex === 0 || (columnIndex >= 4 && columnIndex <= 6) || columnIndex === 10 ? "center" : "left",
+        wrapText: true
+      };
+    });
+    applyBorders(ws, `A${row}:K${row}`);
+    ws.getRow(row).height = 42;
+    row += 1;
+  });
+
+  return row;
+}
+
 function deriveColumns(profile: SafetyFormProfile): string[] {
-  // 사용자 검수: 한빛로지스 work-plan.xlsx의 "순번" 의미 불명. 1~21 row index는 양식 의미가 없음.
-  // 모든 layout에서 통일하여 "No." 사용 — 그리고 buildXlsxForDocument에서 섹션별로 리셋되어
-  // "이 섹션의 N번째 항목"이라는 의미를 갖게 한다.
   switch (profile.layout) {
     case "risk":
       return ["No.", "구분", profile.primaryColumn || "유해·위험요인", profile.actionColumn || "감소대책", "확인", "담당"];
     case "workPlan":
-      return ["No.", "구분", profile.primaryColumn || "작업개요", profile.actionColumn || "장비·인원", "확인", "담당"];
+      return ["순번", "구분", profile.primaryColumn || "작업개요", profile.actionColumn || "장비·인원", "확인", "담당"];
     case "permit":
-      return ["No.", "구분", profile.primaryColumn || "허가항목", profile.actionColumn || "조건/조치", "확인", "담당"];
+      return ["순번", "구분", profile.primaryColumn || "허가항목", profile.actionColumn || "조건/조치", "확인", "담당"];
     case "tbmLog":
     case "tbmBriefing":
       return ["No.", "구분", profile.primaryColumn || "항목", profile.actionColumn || "전달 문구", "확인", "담당"];
@@ -85,7 +169,7 @@ function deriveColumns(profile: SafetyFormProfile): string[] {
  * Returns a Buffer suitable for `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`.
  */
 export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffer> {
-  const { title, rows, profile, scenario } = input;
+  const { title, rows, profile, scenario, structuredRiskRows } = input;
   const wb = new ExcelJS.Workbook();
   wb.creator = "SafeClaw";
   wb.created = new Date();
@@ -94,27 +178,34 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
     pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
   });
 
-  // Column widths
-  ws.columns = [
-    { width: 6 },
-    { width: 16 },
-    { width: 28 },
-    { width: 50 },
-    { width: 10 },
-    { width: 14 }
-  ];
+  const isStructuredRiskSheet = profile.layout === "risk" && Boolean(structuredRiskRows?.length);
+  if (isStructuredRiskSheet) {
+    applyRiskAssessmentColumns(ws);
+  } else {
+    ws.columns = [
+      { width: 6 },
+      { width: 16 },
+      { width: 28 },
+      { width: 50 },
+      { width: 10 },
+      { width: 14 }
+    ];
+  }
 
   let row = 1;
 
   // 1) Cover
-  ws.mergeCells(row, 1, row, 6);
+  const lastColumn = isStructuredRiskSheet ? 11 : 6;
+  const lastColumnLetter = isStructuredRiskSheet ? "K" : "F";
+
+  ws.mergeCells(row, 1, row, lastColumn);
   const coverCell = ws.getCell(row, 1);
   coverCell.value = `${title}  ·  ${profile.subtitle}`;
   coverCell.font = { name: "Malgun Gothic", size: 16, bold: true, color: { argb: "FF1F4D43" } };
   coverCell.fill = COVER_FILL;
   coverCell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
   ws.getRow(row).height = 32;
-  applyBorders(ws, `A${row}:F${row}`);
+  applyBorders(ws, `A${row}:${lastColumnLetter}${row}`);
   row += 1;
 
   // 2) Meta grid (2 rows x 4 col-pairs)
@@ -128,7 +219,7 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
     ws.mergeCells(row, 2, row, 3);
     ws.getCell(row, 2).value = val1;
     ws.getCell(row, 4).value = lbl2;
-    ws.mergeCells(row, 5, row, 6);
+    ws.mergeCells(row, 5, row, lastColumn);
     ws.getCell(row, 5).value = val2;
     [1, 4].forEach((c) => {
       const cell = ws.getCell(row, c);
@@ -139,7 +230,7 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
     [2, 5].forEach((c) => {
       ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
     });
-    applyBorders(ws, `A${row}:F${row}`);
+    applyBorders(ws, `A${row}:${lastColumnLetter}${row}`);
     row += 1;
   }
 
@@ -157,6 +248,22 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
 
   row += 1; // spacer
 
+  if (isStructuredRiskSheet) {
+    row += 1;
+    const riskRows = resolveRiskAssessmentRows({ structuredRows: structuredRiskRows, fallbackRows: rows });
+    row = writeOfficialLikeRiskAssessmentTable(ws, row, riskRows);
+    row += 1;
+    ws.mergeCells(row, 1, row, lastColumn);
+    const note = ws.getCell(row, 1);
+    note.value =
+      "본 파일은 structured rows를 표준 위험성평가표에 매핑한 OOXML(.xlsx) 초안입니다. 발주처 지정 원본 양식과 평가척도는 현장 기준에 맞게 최종 확인하세요.";
+    note.font = { name: "Malgun Gothic", size: 10, italic: true, color: { argb: "FF5E6677" } };
+    note.alignment = { vertical: "middle", horizontal: "left", indent: 1, wrapText: true };
+    ws.pageSetup.printArea = `A1:${lastColumnLetter}${row}`;
+    const buffer = await wb.xlsx.writeBuffer();
+    return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+  }
+
   // 4) Section summary
   const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, r) => {
     acc[r.section] = [...(acc[r.section] || []), r];
@@ -167,14 +274,13 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 12, bold: true };
   row += 1;
 
-  // 섹션 요약 헤더: A열은 6 너비로 좁아 섹션명("옥외작업 폭염·자외선 위험 반영" 15자) 잘림.
-  // A:C 머지로 섹션명 컬럼 확보(6+16+28=50 너비), D는 항목 수, E:F는 주요 항목.
-  ws.mergeCells(row, 1, row, 3);
-  ws.getCell(row, 1).value = "섹션";
-  ws.getCell(row, 4).value = "항목 수";
-  ws.mergeCells(row, 5, row, 6);
-  ws.getCell(row, 5).value = "주요 항목";
-  [1, 4, 5].forEach((c) => {
+  const summaryHeader = ["섹션", "항목 수", "주요 항목"];
+  ws.getCell(row, 1).value = summaryHeader[0];
+  ws.mergeCells(row, 2, row, 3);
+  ws.getCell(row, 2).value = summaryHeader[1];
+  ws.mergeCells(row, 4, row, 6);
+  ws.getCell(row, 4).value = summaryHeader[2];
+  [1, 2, 4].forEach((c) => {
     ws.getCell(row, c).fill = HEADER_FILL;
     ws.getCell(row, c).font = HEADER_FONT;
     ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "center" };
@@ -182,17 +288,16 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   applyBorders(ws, `A${row}:F${row}`);
   row += 1;
   for (const [section, sectionRows] of Object.entries(grouped)) {
-    ws.mergeCells(row, 1, row, 3);
     ws.getCell(row, 1).value = section;
-    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    ws.getCell(row, 4).value = sectionRows.length;
-    ws.getCell(row, 4).alignment = { vertical: "middle", horizontal: "center" };
-    ws.mergeCells(row, 5, row, 6);
-    ws.getCell(row, 5).value = sectionRows
+    ws.mergeCells(row, 2, row, 3);
+    ws.getCell(row, 2).value = sectionRows.length;
+    ws.getCell(row, 2).alignment = { vertical: "middle", horizontal: "center" };
+    ws.mergeCells(row, 4, row, 6);
+    ws.getCell(row, 4).value = sectionRows
       .slice(0, 3)
       .map((r) => r.item)
       .join(", ");
-    ws.getCell(row, 5).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    ws.getCell(row, 4).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
     applyBorders(ws, `A${row}:F${row}`);
     row += 1;
   }
@@ -217,6 +322,7 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   ws.getRow(row).height = 22;
   row += 1;
 
+  let no = 0;
   for (const [section, sectionRows] of Object.entries(grouped)) {
     // Section header row spanning all columns
     ws.mergeCells(row, 1, row, 6);
@@ -228,12 +334,9 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
     applyBorders(ws, `A${row}:F${row}`);
     row += 1;
 
-    // 섹션별 No. 리셋: "1. 작업개요"의 1~4, "2. 작업순서"의 1~4 처럼 섹션-로컬 번호.
-    // 이전 글로벌 1~21 방식은 사용자 검수에서 "순번 의미 불명" 지적 받음.
-    let sectionNo = 0;
     for (const r of sectionRows) {
-      sectionNo += 1;
-      ws.getCell(row, 1).value = sectionNo;
+      no += 1;
+      ws.getCell(row, 1).value = no;
       ws.getCell(row, 2).value = section;
       ws.getCell(row, 3).value = r.item;
       ws.getCell(row, 4).value = r.content;
@@ -286,7 +389,7 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
  */
 export async function buildWorkpackXlsx(
   scenario: AskResponse["scenario"],
-  documents: Array<{ title: string; rows: SheetRow[]; profile: SafetyFormProfile }>
+  documents: Array<{ title: string; rows: SheetRow[]; profile: SafetyFormProfile; structuredRiskRows?: StructuredRiskAssessmentRow[] }>
 ): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
   wb.creator = "SafeClaw";
@@ -322,14 +425,25 @@ export async function buildWorkpackXlsx(
     const ws = wb.addWorksheet(sheetName, {
       pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
     });
-    ws.columns = [{ width: 6 }, { width: 16 }, { width: 28 }, { width: 50 }, { width: 10 }, { width: 14 }];
+    const isStructuredRiskSheet = doc.profile.layout === "risk" && Boolean(doc.structuredRiskRows?.length);
+    if (isStructuredRiskSheet) {
+      applyRiskAssessmentColumns(ws);
+    } else {
+      ws.columns = [{ width: 6 }, { width: 16 }, { width: 28 }, { width: 50 }, { width: 10 }, { width: 14 }];
+    }
 
     let row = 1;
-    ws.mergeCells(row, 1, row, 6);
+    ws.mergeCells(row, 1, row, isStructuredRiskSheet ? 11 : 6);
     ws.getCell(row, 1).value = doc.title;
     ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 14, bold: true, color: { argb: "FF1F4D43" } };
     ws.getRow(row).height = 26;
     row += 1;
+
+    if (isStructuredRiskSheet) {
+      const riskRows = resolveRiskAssessmentRows({ structuredRows: doc.structuredRiskRows, fallbackRows: doc.rows });
+      writeOfficialLikeRiskAssessmentTable(ws, row, riskRows);
+      continue;
+    }
 
     const cols = deriveColumns(doc.profile);
     cols.forEach((col, idx) => {
@@ -372,667 +486,6 @@ export async function buildWorkpackXlsx(
     }
   }
 
-  const buffer = await wb.xlsx.writeBuffer();
-  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
-}
-
-/**
- * Schema-first 작업계획서 .xlsx 빌더.
- *
- * 기존 buildXlsxForDocument 경로는 AI가 만든 산문(workPlanDraft)을 parseSheetRows로 잘라
- * SheetRow[]로 변환 후 표에 박는 lossy 파이프라인. 행이 잘리거나 한 셀에 다 들어가는
- * 문제가 발생.
- *
- * 이 함수는 AiDeliverables.workPlanStructured를 받아 산문 파싱을 거치지 않고 한국 표준
- * 작업계획서 양식 5섹션(작업개요/작업순서/작업중지 기준/비상대응/확인란)에 셀 단위로
- * 직접 매핑한다. AI는 산문 작성자가 아닌 셀 채우기 보조자로만 동작.
- */
-export async function buildWorkPlanStructuredXlsx(
-  scenario: AskResponse["scenario"],
-  structured: WorkPlanStructured
-): Promise<Buffer> {
-  const wb = new ExcelJS.Workbook();
-  wb.creator = "SafeClaw";
-  wb.created = new Date();
-
-  const ws = wb.addWorksheet("작업계획서", {
-    pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
-  });
-
-  ws.columns = [
-    { width: 6 },   // No.
-    { width: 18 },  // 구분
-    { width: 36 },  // 항목
-    { width: 50 },  // 내용
-    { width: 12 },  // 확인
-    { width: 14 }   // 담당
-  ];
-
-  let row = 1;
-
-  // 1) Cover
-  ws.mergeCells(row, 1, row, 6);
-  const coverCell = ws.getCell(row, 1);
-  coverCell.value = "작업계획서 (구조화 양식)";
-  coverCell.font = { name: "Malgun Gothic", size: 16, bold: true, color: { argb: "FF1F4D43" } };
-  coverCell.fill = COVER_FILL;
-  coverCell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  ws.getRow(row).height = 32;
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  // 2) Meta grid (사업장/현장 · 작업/인원)
-  const metaRows = [
-    [["사업장", scenario.companyName || ""], ["현장/공정", scenario.siteName || ""]],
-    [["작업내용", structured.workOverview.description || scenario.workSummary || ""],
-     ["인원/조건", `${structured.workOverview.workerCount || scenario.workerCount || 0}명 · ${structured.workOverview.condition || scenario.weatherNote || ""}`]]
-  ];
-  for (const pair of metaRows) {
-    const [[lbl1, val1], [lbl2, val2]] = pair;
-    ws.getCell(row, 1).value = lbl1;
-    ws.mergeCells(row, 2, row, 3);
-    ws.getCell(row, 2).value = val1;
-    ws.getCell(row, 4).value = lbl2;
-    ws.mergeCells(row, 5, row, 6);
-    ws.getCell(row, 5).value = val2;
-    [1, 4].forEach((c) => {
-      const cell = ws.getCell(row, c);
-      cell.fill = META_LABEL_FILL;
-      cell.font = META_LABEL_FONT;
-      cell.alignment = { vertical: "middle", horizontal: "center" };
-    });
-    [2, 5].forEach((c) => {
-      ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
-    });
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  }
-
-  row += 1;
-
-  // 3) 1. 작업개요
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "1. 작업개요";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  const overviewRows: Array<[string, string]> = [
-    ["작업명", structured.workOverview.workName],
-    ["작업장소", structured.workOverview.location],
-    ["사용 장비", (structured.workOverview.equipment || []).join(", ")]
-  ];
-  for (const [label, value] of overviewRows) {
-    ws.mergeCells(row, 1, row, 2);
-    ws.getCell(row, 1).value = label;
-    ws.getCell(row, 1).fill = META_LABEL_FILL;
-    ws.getCell(row, 1).font = META_LABEL_FONT;
-    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center" };
-    ws.mergeCells(row, 3, row, 6);
-    ws.getCell(row, 3).value = value;
-    ws.getCell(row, 3).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  }
-
-  row += 1;
-
-  // 4) 2. 작업순서
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "2. 작업순서";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  const stepHeaders = ["No.", "작업단계", "사용장비", "안전조치", "담당자", "확인"];
-  stepHeaders.forEach((h, i) => {
-    const cell = ws.getCell(row, i + 1);
-    cell.value = h;
-    cell.fill = HEADER_FILL;
-    cell.font = HEADER_FONT;
-    cell.alignment = { vertical: "middle", horizontal: "center" };
-  });
-  applyBorders(ws, `A${row}:F${row}`);
-  ws.getRow(row).height = 22;
-  row += 1;
-
-  for (const step of structured.workSteps) {
-    ws.getCell(row, 1).value = step.stepNo;
-    ws.getCell(row, 2).value = step.action;
-    ws.getCell(row, 3).value = step.equipment;
-    ws.getCell(row, 4).value = step.safetyMeasure;
-    ws.getCell(row, 5).value = step.owner;
-    ws.getCell(row, 6).value = "□";
-    [1, 6].forEach((c) => {
-      ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "center" };
-    });
-    [2, 3, 4, 5].forEach((c) => {
-      ws.getCell(row, c).alignment = { vertical: "top", horizontal: "left", wrapText: true };
-    });
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  }
-
-  row += 1;
-
-  // 5) 3. 작업중지 기준
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "3. 작업중지 기준";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  structured.stopCriteria.forEach((criterion, i) => {
-    ws.getCell(row, 1).value = i + 1;
-    ws.mergeCells(row, 2, row, 5);
-    ws.getCell(row, 2).value = criterion;
-    ws.getCell(row, 6).value = "□";
-    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center" };
-    ws.getCell(row, 2).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    ws.getCell(row, 6).alignment = { vertical: "middle", horizontal: "center" };
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  });
-
-  row += 1;
-
-  // 6) 4. 비상대응
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "4. 비상대응";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  for (const [label, value] of [
-    ["대피경로", structured.emergencyResponse.evacRoute],
-    ["응급조치", structured.emergencyResponse.firstAid]
-  ] as const) {
-    ws.mergeCells(row, 1, row, 2);
-    ws.getCell(row, 1).value = label;
-    ws.getCell(row, 1).fill = META_LABEL_FILL;
-    ws.getCell(row, 1).font = META_LABEL_FONT;
-    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center" };
-    ws.mergeCells(row, 3, row, 6);
-    ws.getCell(row, 3).value = value;
-    ws.getCell(row, 3).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  }
-
-  // 비상연락망 table
-  ws.mergeCells(row, 1, row, 2);
-  ws.getCell(row, 1).value = "비상연락망";
-  ws.getCell(row, 1).fill = META_LABEL_FILL;
-  ws.getCell(row, 1).font = META_LABEL_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center" };
-  ws.mergeCells(row, 3, row, 4);
-  ws.getCell(row, 3).value = "직책";
-  ws.getCell(row, 3).fill = HEADER_FILL;
-  ws.getCell(row, 3).font = HEADER_FONT;
-  ws.getCell(row, 3).alignment = { vertical: "middle", horizontal: "center" };
-  ws.mergeCells(row, 5, row, 6);
-  ws.getCell(row, 5).value = "연락처";
-  ws.getCell(row, 5).fill = HEADER_FILL;
-  ws.getCell(row, 5).font = HEADER_FONT;
-  ws.getCell(row, 5).alignment = { vertical: "middle", horizontal: "center" };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-  for (const contact of structured.emergencyResponse.contacts) {
-    ws.mergeCells(row, 1, row, 2);
-    ws.getCell(row, 1).value = "";
-    ws.mergeCells(row, 3, row, 4);
-    ws.getCell(row, 3).value = contact.role;
-    ws.getCell(row, 3).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-    ws.mergeCells(row, 5, row, 6);
-    ws.getCell(row, 5).value = contact.phone;
-    ws.getCell(row, 5).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  }
-
-  row += 1;
-
-  // 7) 5. 확인란
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "5. 확인란";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  ws.mergeCells(row, 1, row, 2);
-  ws.getCell(row, 1).value = `작성: ${structured.approvers.author}\n서명: ______`;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-  ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 10, bold: true };
-  ws.mergeCells(row, 3, row, 4);
-  ws.getCell(row, 3).value = `검토: ${structured.approvers.reviewer}\n서명: ______`;
-  ws.getCell(row, 3).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-  ws.getCell(row, 3).font = { name: "Malgun Gothic", size: 10, bold: true };
-  ws.mergeCells(row, 5, row, 6);
-  ws.getCell(row, 5).value = `승인: ${structured.approvers.approver}\n서명: ______`;
-  ws.getCell(row, 5).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-  ws.getCell(row, 5).font = { name: "Malgun Gothic", size: 10, bold: true };
-  applyBorders(ws, `A${row}:F${row}`);
-  ws.getRow(row).height = 50;
-  row += 1;
-
-  ws.pageSetup.printArea = `A1:F${row}`;
-  const buffer = await wb.xlsx.writeBuffer();
-  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
-}
-
-/**
- * Schema-first TBM 브리핑 .xlsx 빌더.
- *
- * AI가 산문(tbmBriefing) 대신 셀 단위 객체(tbmBriefingStructured)를 반환했을 때 사용.
- * 표 양식: 메타 / 오늘작업 / 위험요인+안전대책(4M) / 작업중지 기준 / 마무리 확인 / 사진증빙 / 서명란.
- */
-export async function buildTbmBriefingStructuredXlsx(
-  scenario: AskResponse["scenario"],
-  structured: TbmBriefingStructured
-): Promise<Buffer> {
-  const wb = new ExcelJS.Workbook();
-  wb.creator = "SafeClaw";
-  wb.created = new Date();
-
-  const ws = wb.addWorksheet("TBM 브리핑", {
-    pageSetup: { paperSize: 9, orientation: "portrait", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
-  });
-
-  ws.columns = [
-    { width: 6 },   // No.
-    { width: 14 },  // 4M
-    { width: 50 },  // 위험요인 / action
-    { width: 24 },  // 담당자
-    { width: 12 },  // 확인1
-    { width: 12 }   // 확인2
-  ];
-
-  let row = 1;
-
-  // 1) Cover
-  ws.mergeCells(row, 1, row, 6);
-  const cover = ws.getCell(row, 1);
-  cover.value = "TBM 브리핑 (구조화 양식)";
-  cover.font = { name: "Malgun Gothic", size: 16, bold: true, color: { argb: "FF1F4D43" } };
-  cover.fill = COVER_FILL;
-  cover.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  ws.getRow(row).height = 32;
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  // 2) Meta grid
-  const metaRows: Array<Array<[string, string]>> = [
-    [["사업장", scenario.companyName || ""], ["현장/공정", scenario.siteName || ""]],
-    [["일시", structured.meta.dateTime || ""], ["장소", structured.meta.location || ""]],
-    [["대상", structured.meta.target || ""], ["참석자 확인", structured.meta.attendees || ""]]
-  ];
-  for (const pair of metaRows) {
-    const [[lbl1, val1], [lbl2, val2]] = pair;
-    ws.getCell(row, 1).value = lbl1;
-    ws.mergeCells(row, 2, row, 3);
-    ws.getCell(row, 2).value = val1;
-    ws.getCell(row, 4).value = lbl2;
-    ws.mergeCells(row, 5, row, 6);
-    ws.getCell(row, 5).value = val2;
-    [1, 4].forEach((c) => {
-      const cell = ws.getCell(row, c);
-      cell.fill = META_LABEL_FILL;
-      cell.font = META_LABEL_FONT;
-      cell.alignment = { vertical: "middle", horizontal: "center" };
-    });
-    [2, 5].forEach((c) => {
-      ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    });
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  }
-
-  row += 1;
-
-  // 3) 오늘 작업
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "1. 오늘 작업";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  const todayRows: Array<[string, string]> = [
-    ["작업명", structured.todayWork.name || ""],
-    ["작업위치", structured.todayWork.location || ""],
-    ["작업시간", structured.todayWork.time || ""],
-    ["사용 장비", (structured.todayWork.equipment || []).join(", ")]
-  ];
-  for (const [label, value] of todayRows) {
-    ws.mergeCells(row, 1, row, 2);
-    ws.getCell(row, 1).value = label;
-    ws.getCell(row, 1).fill = META_LABEL_FILL;
-    ws.getCell(row, 1).font = META_LABEL_FONT;
-    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center" };
-    ws.mergeCells(row, 3, row, 6);
-    ws.getCell(row, 3).value = value;
-    ws.getCell(row, 3).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  }
-
-  row += 1;
-
-  // 4) 위험요인 + 안전대책 (4M)
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "2. 위험요인 및 안전대책 (4M)";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  const hazardHeaders = ["No.", "4M", "위험요인", "안전대책 / 담당", "확인", "비고"];
-  hazardHeaders.forEach((h, i) => {
-    const cell = ws.getCell(row, i + 1);
-    cell.value = h;
-    cell.fill = HEADER_FILL;
-    cell.font = HEADER_FONT;
-    cell.alignment = { vertical: "middle", horizontal: "center" };
-  });
-  applyBorders(ws, `A${row}:F${row}`);
-  ws.getRow(row).height = 22;
-  row += 1;
-
-  const hazards = structured.hazards || [];
-  const measures = structured.measures || [];
-  hazards.forEach((haz, i) => {
-    const idx = i + 1;
-    const matched = measures.filter((m) => m.hazardRef === idx);
-    const actionText = matched.length
-      ? matched.map((m) => `• ${m.action}${m.owner ? ` (담당: ${m.owner})` : ""}`).join("\n")
-      : "—";
-    ws.getCell(row, 1).value = idx;
-    ws.getCell(row, 2).value = haz.category || "";
-    ws.getCell(row, 3).value = haz.description || "";
-    ws.getCell(row, 4).value = actionText;
-    ws.getCell(row, 5).value = "□";
-    ws.getCell(row, 6).value = "";
-    [1, 2, 5].forEach((c) => {
-      ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "center" };
-    });
-    [3, 4, 6].forEach((c) => {
-      ws.getCell(row, c).alignment = { vertical: "top", horizontal: "left", wrapText: true };
-    });
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  });
-
-  // hazardRef가 없는 측정 잔여(orphan) 표시
-  const orphanMeasures = measures.filter((m) => m.hazardRef < 1 || m.hazardRef > hazards.length);
-  if (orphanMeasures.length) {
-    for (const m of orphanMeasures) {
-      ws.getCell(row, 1).value = "+";
-      ws.getCell(row, 2).value = "추가";
-      ws.mergeCells(row, 3, row, 4);
-      ws.getCell(row, 3).value = `${m.action}${m.owner ? ` (담당: ${m.owner})` : ""}`;
-      ws.getCell(row, 5).value = "□";
-      ws.getCell(row, 6).value = "";
-      [1, 2, 5].forEach((c) => {
-        ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "center" };
-      });
-      ws.getCell(row, 3).alignment = { vertical: "top", horizontal: "left", wrapText: true };
-      applyBorders(ws, `A${row}:F${row}`);
-      row += 1;
-    }
-  }
-
-  row += 1;
-
-  // 5) 작업중지 기준
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "3. 작업중지 기준";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  (structured.stopCriteria || []).forEach((criterion, i) => {
-    ws.getCell(row, 1).value = i + 1;
-    ws.mergeCells(row, 2, row, 5);
-    ws.getCell(row, 2).value = criterion;
-    ws.getCell(row, 6).value = "□";
-    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center" };
-    ws.getCell(row, 2).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    ws.getCell(row, 6).alignment = { vertical: "middle", horizontal: "center" };
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  });
-
-  row += 1;
-
-  // 6) 마무리 확인질문
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "4. 마무리 확인질문";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  (structured.confirmTopics || []).forEach((topic, i) => {
-    ws.getCell(row, 1).value = `Q${i + 1}`;
-    ws.mergeCells(row, 2, row, 5);
-    ws.getCell(row, 2).value = topic;
-    ws.getCell(row, 6).value = "□";
-    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center" };
-    ws.getCell(row, 2).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    ws.getCell(row, 6).alignment = { vertical: "middle", horizontal: "center" };
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  });
-
-  row += 1;
-
-  // 7) 사진증빙
-  ws.mergeCells(row, 1, row, 2);
-  ws.getCell(row, 1).value = "사진증빙 위치";
-  ws.getCell(row, 1).fill = META_LABEL_FILL;
-  ws.getCell(row, 1).font = META_LABEL_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center" };
-  ws.mergeCells(row, 3, row, 6);
-  ws.getCell(row, 3).value = structured.photoEvidenceLocation || "";
-  ws.getCell(row, 3).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 2;
-
-  // 8) 서명란
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "5. 서명란";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  ws.mergeCells(row, 1, row, 3);
-  ws.getCell(row, 1).value = "브리핑 실시자\n서명: ______";
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-  ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 10, bold: true };
-  ws.mergeCells(row, 4, row, 6);
-  ws.getCell(row, 4).value = "참석자 대표\n서명: ______";
-  ws.getCell(row, 4).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-  ws.getCell(row, 4).font = { name: "Malgun Gothic", size: 10, bold: true };
-  applyBorders(ws, `A${row}:F${row}`);
-  ws.getRow(row).height = 50;
-  row += 1;
-
-  ws.pageSetup.printArea = `A1:F${row}`;
-  const buffer = await wb.xlsx.writeBuffer();
-  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
-}
-
-/**
- * Schema-first 안전보건교육 기록 .xlsx 빌더.
- *
- * AI가 산문(safetyEducationRecordDraft) 대신 셀 단위 객체(educationRecordStructured)를
- * 반환했을 때 사용. 표 양식: 메타 / 교과과정(주제·법령·핵심내용) / 이해확인 / TBM 연계 / 후속교육 / 서명란.
- */
-export async function buildEducationRecordStructuredXlsx(
-  scenario: AskResponse["scenario"],
-  structured: EducationRecordStructured
-): Promise<Buffer> {
-  const wb = new ExcelJS.Workbook();
-  wb.creator = "SafeClaw";
-  wb.created = new Date();
-
-  const ws = wb.addWorksheet("안전보건교육 기록", {
-    pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
-  });
-
-  ws.columns = [
-    { width: 6 },   // No.
-    { width: 28 },  // 주제
-    { width: 24 },  // 법령
-    { width: 50 },  // 핵심내용
-    { width: 12 },  // 시간
-    { width: 12 }   // 확인
-  ];
-
-  let row = 1;
-
-  // 1) Cover
-  ws.mergeCells(row, 1, row, 6);
-  const cover = ws.getCell(row, 1);
-  cover.value = "안전보건교육 기록 (구조화 양식)";
-  cover.font = { name: "Malgun Gothic", size: 16, bold: true, color: { argb: "FF1F4D43" } };
-  cover.fill = COVER_FILL;
-  cover.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  ws.getRow(row).height = 32;
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  // 2) Meta grid
-  const metaRows: Array<Array<[string, string]>> = [
-    [["사업장", scenario.companyName || ""], ["현장/공정", scenario.siteName || ""]],
-    [["교육명", structured.educationName || ""], ["유형", structured.type || ""]],
-    [["일시", structured.dateTime || ""], ["장소", structured.location || ""]],
-    [["대상", structured.target || ""], ["실시자", structured.instructor || ""]],
-    [["확인자", structured.confirmer || ""], ["TBM 연계", structured.tbmLink || ""]]
-  ];
-  for (const pair of metaRows) {
-    const [[lbl1, val1], [lbl2, val2]] = pair;
-    ws.getCell(row, 1).value = lbl1;
-    ws.mergeCells(row, 2, row, 3);
-    ws.getCell(row, 2).value = val1;
-    ws.getCell(row, 4).value = lbl2;
-    ws.mergeCells(row, 5, row, 6);
-    ws.getCell(row, 5).value = val2;
-    [1, 4].forEach((c) => {
-      const cell = ws.getCell(row, c);
-      cell.fill = META_LABEL_FILL;
-      cell.font = META_LABEL_FONT;
-      cell.alignment = { vertical: "middle", horizontal: "center" };
-    });
-    [2, 5].forEach((c) => {
-      ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    });
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  }
-
-  row += 1;
-
-  // 3) 교과과정
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "1. 교과과정";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  const curriculumHeaders = ["No.", "교육 주제", "법령 조항", "핵심 내용", "시간", "이해도"];
-  curriculumHeaders.forEach((h, i) => {
-    const cell = ws.getCell(row, i + 1);
-    cell.value = h;
-    cell.fill = HEADER_FILL;
-    cell.font = HEADER_FONT;
-    cell.alignment = { vertical: "middle", horizontal: "center" };
-  });
-  applyBorders(ws, `A${row}:F${row}`);
-  ws.getRow(row).height = 22;
-  row += 1;
-
-  (structured.curriculum || []).forEach((item, i) => {
-    const keyPointsText = (item.keyPoints || []).map((p) => `• ${p}`).join("\n");
-    ws.getCell(row, 1).value = i + 1;
-    ws.getCell(row, 2).value = item.topic || "";
-    ws.getCell(row, 3).value = item.lawCitation || "";
-    ws.getCell(row, 4).value = keyPointsText;
-    ws.getCell(row, 5).value = "";
-    ws.getCell(row, 6).value = "□";
-    [1, 5, 6].forEach((c) => {
-      ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "center" };
-    });
-    [2, 3, 4].forEach((c) => {
-      ws.getCell(row, c).alignment = { vertical: "top", horizontal: "left", wrapText: true };
-    });
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  });
-
-  row += 1;
-
-  // 4) 이해확인 / 후속교육
-  const tailRows: Array<[string, string]> = [
-    ["이해확인 방법", structured.understandingCheck || ""],
-    ["후속 교육 추천", structured.followupRecommendation || ""]
-  ];
-  for (const [label, value] of tailRows) {
-    ws.mergeCells(row, 1, row, 2);
-    ws.getCell(row, 1).value = label;
-    ws.getCell(row, 1).fill = META_LABEL_FILL;
-    ws.getCell(row, 1).font = META_LABEL_FONT;
-    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center" };
-    ws.mergeCells(row, 3, row, 6);
-    ws.getCell(row, 3).value = value;
-    ws.getCell(row, 3).alignment = { vertical: "middle", horizontal: "left", wrapText: true, indent: 1 };
-    applyBorders(ws, `A${row}:F${row}`);
-    row += 1;
-  }
-
-  row += 1;
-
-  // 5) 서명란
-  ws.mergeCells(row, 1, row, 6);
-  ws.getCell(row, 1).value = "2. 서명란";
-  ws.getCell(row, 1).fill = SECTION_FILL;
-  ws.getCell(row, 1).font = SECTION_FONT;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1 };
-  applyBorders(ws, `A${row}:F${row}`);
-  row += 1;
-
-  ws.mergeCells(row, 1, row, 3);
-  ws.getCell(row, 1).value = `실시자: ${structured.instructor || ""}\n서명: ______`;
-  ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-  ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 10, bold: true };
-  ws.mergeCells(row, 4, row, 6);
-  ws.getCell(row, 4).value = `확인자: ${structured.confirmer || ""}\n서명: ______`;
-  ws.getCell(row, 4).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-  ws.getCell(row, 4).font = { name: "Malgun Gothic", size: 10, bold: true };
-  applyBorders(ws, `A${row}:F${row}`);
-  ws.getRow(row).height = 50;
-  row += 1;
-
-  ws.pageSetup.printArea = `A1:F${row}`;
   const buffer = await wb.xlsx.writeBuffer();
   return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
 }
