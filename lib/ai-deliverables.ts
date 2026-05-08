@@ -12,7 +12,7 @@
 // ≈ 22K-50K tokens output) and 60s timeout on long-context cases. Splitting makes each
 // call ≤ 5K tokens output, ≤ 30s wall, and isolates failures to the affected doc only.
 
-import type { AskResponse, SearchResult, WorkPlanStructured } from "@/lib/types";
+import type { AskResponse, SearchResult, WorkPlanStructured, TbmBriefingStructured, EducationRecordStructured } from "@/lib/types";
 
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
@@ -268,15 +268,43 @@ function workPlanStructuredPrompt(ctx: GenContext) {
   ].join("\n");
 }
 
-function tbmBriefingSinglePrompt(ctx: GenContext) {
+// TBM 브리핑 schema-first. workPlan과 동일하게 산문 대신 셀 객체 직접 반환.
+function tbmBriefingStructuredPrompt(ctx: GenContext) {
   return [
     persona(),
     "",
-    "TBM 브리핑 초안 + 마무리 확인질문 5개를 작성하고 다음 JSON 형식으로만 반환하라.",
-    "tbmBriefing: 일시/장소/대상/오늘 작업/위험요인/안전대책/작업중지 기준/참석자 확인/사진증빙 위치/교육시간 인정 검토. 길이 1500~3500자.",
-    "tbmQuestions: 작업 시작 직전 작업자에게 던지는 5개 짧은 확인질문 배열.",
+    "한국 산업안전 표준 TBM 브리핑의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
+    "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazards/measures는 시나리오 특화 4M 분류. KOSHA 자료가 있으면 measures.action 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
     "",
-    "응답 JSON 스키마: { \"tbmBriefing\": \"string\", \"tbmQuestions\": [\"string\",\"string\",\"string\",\"string\",\"string\"] }",
+    "응답 JSON 스키마:",
+    `{
+  "tbmBriefingStructured": {
+    "meta": {
+      "dateTime": "string (일시 1줄)",
+      "location": "string (장소)",
+      "target": "string (대상, 예: 전 작업자 8명)",
+      "attendees": "string (참석자 확인 방식)"
+    },
+    "todayWork": {
+      "name": "string (작업명)",
+      "location": "string (작업 위치)",
+      "time": "string (작업 시간, 예: 09:00-17:00)",
+      "equipment": ["string"]
+    },
+    "hazards": [
+      { "category": "Man|Machine|Media|Management", "description": "string (위험요인, 60자 이내)" }
+    ],
+    "measures": [
+      { "hazardRef": 1, "action": "string (안전대책, 80자 이내. KOSHA 인용 가능)", "owner": "string" }
+    ],
+    "stopCriteria": ["string (작업중지 기준 1줄)"],
+    "confirmTopics": ["string (마무리 확인질문)"],
+    "photoEvidenceLocation": "string (사진증빙 위치/방식)"
+  },
+  "tbmQuestions": ["string","string","string","string","string"]
+}`,
+    "",
+    "필수: hazards 4-6개 / measures 4-6개 / stopCriteria 3-5개 / confirmTopics 5개 / tbmQuestions 5개. measures.hazardRef는 hazards 인덱스(1부터). 모든 string은 \\n 없이 한 줄.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -290,6 +318,44 @@ function tbmLogSinglePrompt(ctx: GenContext) {
     "결재/공종/일자/근로자 확인사항/금일 작업/금일 위험요인/일일 안전교육/참석자명단/인원집계/미조치 및 사진증빙 섹션 포함. 길이 1500~3500자.",
     "",
     "응답 JSON 스키마: { \"tbmLogDraft\": \"string\" }",
+    "",
+    contextBlock(ctx)
+  ].join("\n");
+}
+
+// 안전보건교육 기록 schema-first.
+function educationRecordStructuredPrompt(ctx: GenContext) {
+  return [
+    persona(),
+    "",
+    "한국 산업안전 표준 안전보건교육 기록의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
+    "산문/장문 금지. curriculum 각 항목의 lawCitation은 산업안전보건법/시행규칙/시행령 조항 명시. KOSHA 자료가 있으면 keyPoints 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
+    "",
+    "응답 JSON 스키마:",
+    `{
+  "educationRecordStructured": {
+    "educationName": "string (교육명, 50자 이내)",
+    "type": "정기교육|특별교육|외국인교육|신규자교육|관리감독자교육|기타",
+    "dateTime": "string",
+    "location": "string",
+    "target": "string (교육대상)",
+    "instructor": "string (실시자)",
+    "confirmer": "string (확인자)",
+    "curriculum": [
+      {
+        "topic": "string (교육 주제, 60자 이내)",
+        "lawCitation": "string (예: 산업안전보건법 제29조)",
+        "keyPoints": ["string (핵심 내용 1줄)", "string", "string"]
+      }
+    ],
+    "understandingCheck": "string (이해확인방법 1-2 문장)",
+    "tbmLink": "string (TBM 연계 강조 포인트)",
+    "followupRecommendation": "string (후속 교육 추천 1-2 문장)"
+  },
+  "safetyEducationPoints": ["string","string","string","string","string"]
+}`,
+    "",
+    "필수: curriculum 3-5개 항목 / keyPoints 각 3-5개 / safetyEducationPoints 5개. 모든 string은 \\n 없이 한 줄.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -357,6 +423,10 @@ export type AiDeliverables = Partial<{
   workPlanDraft: string;
   /** schema-first 작업계획서 셀 단위 구조. xlsx 직접 렌더 경로용. */
   workPlanStructured: WorkPlanStructured;
+  /** TBM 브리핑 schema-first 구조. xlsx 직접 렌더 경로용. */
+  tbmBriefingStructured: TbmBriefingStructured;
+  /** 안전보건교육 기록 schema-first 구조. xlsx 직접 렌더 경로용. */
+  educationRecordStructured: EducationRecordStructured;
   tbmBriefing: string;
   tbmLogDraft: string;
   safetyEducationRecordDraft: string;
@@ -432,13 +502,20 @@ function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
   if (!s.approvers) return null;
   return { workPlanStructured: s };
 }
-function parseTbmBriefing(raw: string): Partial<AiDeliverables> | null {
-  const j = safeParseJson<AiDeliverables>(raw);
-  const briefing = j?.tbmBriefing;
-  if (typeof briefing !== "string" || briefing.length <= 100) return null;
-  const out: Partial<AiDeliverables> = { tbmBriefing: briefing };
+function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null {
+  // schema-first TBM. workPlan과 동일 패턴: meta/todayWork/hazards/measures 필수.
+  const j = safeParseJson<{ tbmBriefingStructured?: TbmBriefingStructured; tbmQuestions?: string[] }>(raw);
+  const s = j?.tbmBriefingStructured;
+  if (!s || typeof s !== "object") return null;
+  if (!s.meta || typeof s.meta.dateTime !== "string") return null;
+  if (!s.todayWork || typeof s.todayWork.name !== "string") return null;
+  if (!Array.isArray(s.hazards) || s.hazards.length < 2) return null;
+  if (!Array.isArray(s.measures) || s.measures.length < 2) return null;
+  if (!Array.isArray(s.stopCriteria) || s.stopCriteria.length < 2) return null;
+  if (!Array.isArray(s.confirmTopics) || s.confirmTopics.length < 3) return null;
+  const out: Partial<AiDeliverables> = { tbmBriefingStructured: s };
   if (Array.isArray(j?.tbmQuestions)) {
-    out.tbmQuestions = j.tbmQuestions.filter((s) => typeof s === "string");
+    out.tbmQuestions = j.tbmQuestions.filter((str) => typeof str === "string");
   }
   return out;
 }
@@ -447,15 +524,16 @@ function parseTbmLog(raw: string): Partial<AiDeliverables> | null {
   const v = j?.tbmLogDraft;
   return typeof v === "string" && v.length > 100 ? { tbmLogDraft: v } : null;
 }
-function parseSafetyEducation(raw: string): Partial<AiDeliverables> | null {
-  const j = safeParseJson<AiDeliverables>(raw);
-  const record = j?.safetyEducationRecordDraft;
-  if (typeof record !== "string" || record.length <= 100) return null;
-  const out: Partial<AiDeliverables> = {
-    safetyEducationRecordDraft: record
-  };
+function parseEducationRecordStructured(raw: string): Partial<AiDeliverables> | null {
+  const j = safeParseJson<{ educationRecordStructured?: EducationRecordStructured; safetyEducationPoints?: string[] }>(raw);
+  const s = j?.educationRecordStructured;
+  if (!s || typeof s !== "object") return null;
+  if (typeof s.educationName !== "string" || s.educationName.length === 0) return null;
+  if (!Array.isArray(s.curriculum) || s.curriculum.length < 2) return null;
+  if (typeof s.understandingCheck !== "string") return null;
+  const out: Partial<AiDeliverables> = { educationRecordStructured: s };
   if (Array.isArray(j?.safetyEducationPoints)) {
-    out.safetyEducationPoints = j.safetyEducationPoints.filter((s) => typeof s === "string");
+    out.safetyEducationPoints = j.safetyEducationPoints.filter((str) => typeof str === "string");
   }
   return out;
 }
@@ -497,9 +575,11 @@ const TABULAR_SPECS = [
   // workPlan은 산문이 아닌 셀 단위 구조(workPlanStructured)로 직접 반환.
   // xlsx-builder가 parseSheetRows 우회하고 표 양식에 직접 매핑.
   { name: "workPlanStructured", buildPrompt: workPlanStructuredPrompt, parse: parseWorkPlanStructured },
-  { name: "tbmBriefing", buildPrompt: tbmBriefingSinglePrompt, parse: parseTbmBriefing },
+  // TBM 브리핑도 schema-first. tbmBriefingStructured + tbmQuestions 반환.
+  { name: "tbmBriefingStructured", buildPrompt: tbmBriefingStructuredPrompt, parse: parseTbmBriefingStructured },
   { name: "tbmLog", buildPrompt: tbmLogSinglePrompt, parse: parseTbmLog },
-  { name: "safetyEducation", buildPrompt: safetyEducationSinglePrompt, parse: parseSafetyEducation }
+  // 안전보건교육 기록도 schema-first. educationRecordStructured + safetyEducationPoints.
+  { name: "educationRecordStructured", buildPrompt: educationRecordStructuredPrompt, parse: parseEducationRecordStructured }
 ] as const;
 
 export async function generateAllDeliverables(opts: GenerateAllOptions): Promise<AiDeliverables> {
