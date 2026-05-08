@@ -1,3 +1,5 @@
+import type { RiskAssessmentRow, RiskAssessmentValidationIssue } from "./risk-assessment-schema";
+
 export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
 export type IntegrationMode = "mock" | "live" | "fallback";
@@ -329,6 +331,14 @@ export type AskResponse = {
     safetyEducationPoints: string[];
     tbmQuestions: string[];
     kakaoMessage: string;
+  };
+  structured?: {
+    riskAssessmentRows: RiskAssessmentRow[];
+    riskAssessmentValidation: {
+      ok: boolean;
+      issueCount: number;
+      issues: RiskAssessmentValidationIssue[];
+    };
   };
   status: {
     lawgo: IntegrationMode;

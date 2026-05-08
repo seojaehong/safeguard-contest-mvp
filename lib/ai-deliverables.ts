@@ -13,6 +13,15 @@
 // call ≤ 5K tokens output, ≤ 30s wall, and isolates failures to the affected doc only.
 
 import type { AskResponse, SearchResult, WorkPlanStructured, TbmBriefingStructured, EducationRecordStructured } from "@/lib/types";
+import {
+  ACCIDENT_TYPE_VALUES,
+  FORM_SCHEMA_REGISTRY,
+  FOUR_M_VALUES,
+  RISK_LEVEL_VALUES,
+  validateRiskAssessmentRows,
+  type RiskAssessmentRow,
+  type RiskAssessmentValidationIssue
+} from "@/lib/risk-assessment-schema";
 
 const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
@@ -375,6 +384,35 @@ function safetyEducationSinglePrompt(ctx: GenContext) {
   ].join("\n");
 }
 
+function structuredRiskRowsPrompt(ctx: GenContext) {
+  const rowSchema = FORM_SCHEMA_REGISTRY.riskAssessment.rowSchema;
+  return [
+    persona(),
+    "",
+    "위험성평가표 렌더러가 바로 사용할 수 있는 JSON rows만 반환하라.",
+    "산문, 마크다운, 설명, 코드 fence 금지. 최상위 객체는 반드시 {\"rows\":[...]} 형태.",
+    "",
+    "필수 규칙:",
+    "  - rows는 현장 시나리오에 맞는 5~7개 위험성평가 행이다.",
+    "  - 모든 행은 필수 필드를 빠짐없이 채운다.",
+    `  - fourM enum: ${FOUR_M_VALUES.join(", ")}`,
+    `  - accidentType enum: ${ACCIDENT_TYPE_VALUES.join(", ")}`,
+    "  - likelihood와 severity는 1~5 정수다.",
+    `  - riskLevel enum: ${RISK_LEVEL_VALUES.join(", ")}. likelihood×severity 기준으로 1~4는 low, 5~9는 medium, 10 이상은 high.`,
+    "  - due는 YYYY-MM-DD 또는 \"현장 확인\"만 허용한다.",
+    "  - evidenceRefs는 법령, KOSHA, 재해사례, 지식 DB 후보 중 해당 행을 뒷받침하는 짧은 근거 문자열 배열이다.",
+    "  - whyLikelihood와 whySeverity는 수치 판단 근거를 각각 한 문장으로 적는다.",
+    "",
+    "행 JSON schema:",
+    JSON.stringify(rowSchema, null, 2),
+    "",
+    "응답 예시 형태:",
+    `{"rows":[{"process":"string","task":"string","hazard":"string","fourM":"Man","accidentType":"fall","currentControls":"string","likelihood":3,"severity":4,"riskLevel":"high","additionalControls":"string","owner":"string","due":"현장 확인","verification":"string","whyLikelihood":"string","whySeverity":"string","evidenceRefs":["string"]}]}`,
+    "",
+    contextBlock(ctx)
+  ].join("\n");
+}
+
 function freeFormPrompt(ctx: GenContext) {
   return [
     persona(),
@@ -438,6 +476,8 @@ export type AiDeliverables = Partial<{
   safetyEducationPoints: string[];
   tbmQuestions: string[];
   kakaoMessage: string;
+  structuredRiskRows: RiskAssessmentRow[];
+  structuredRiskRowsValidationIssues: RiskAssessmentValidationIssue[];
 }>;
 
 export type AiMode = "template" | "enhanced" | "full";
@@ -537,6 +577,14 @@ function parseEducationRecordStructured(raw: string): Partial<AiDeliverables> | 
   }
   return out;
 }
+function parseStructuredRiskRows(raw: string): Partial<AiDeliverables> | null {
+  const parsed = safeParseJson<unknown>(raw);
+  const validation = validateRiskAssessmentRows(parsed);
+  if (!validation.rows.length) return null;
+  const out: Partial<AiDeliverables> = { structuredRiskRows: validation.rows };
+  if (validation.issues.length) out.structuredRiskRowsValidationIssues = validation.issues;
+  return out;
+}
 function parseFree(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   if (!j) return null;
@@ -591,6 +639,11 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
   const tabularPromises = TABULAR_SPECS.map((spec) =>
     callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name)
   );
+  const structuredRiskRowsPromise = callAndParse(
+    structuredRiskRowsPrompt(ctx),
+    parseStructuredRiskRows,
+    "structuredRiskRows"
+  );
   const freePromise = scope === "full"
     ? callAndParse(freeFormPrompt(ctx), parseFree, "free")
     : Promise.reject(new Error("skipped (enhanced scope)"));
@@ -598,7 +651,12 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
     ? callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign")
     : Promise.reject(new Error("skipped (enhanced scope)"));
 
-  const settled = await Promise.allSettled([...tabularPromises, freePromise, foreignPromise]);
+  const settled = await Promise.allSettled([
+    ...tabularPromises,
+    structuredRiskRowsPromise,
+    freePromise,
+    foreignPromise
+  ]);
 
   const out: AiDeliverables = {};
   for (const s of settled) {
@@ -631,6 +689,14 @@ export async function generateAllDeliverablesWithDiagnostics(
       name: spec.name,
       promise: callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name) as Promise<Partial<AiDeliverables>>
     })),
+    {
+      name: "structuredRiskRows",
+      promise: callAndParse(
+        structuredRiskRowsPrompt(ctx),
+        parseStructuredRiskRows,
+        "structuredRiskRows"
+      ) as Promise<Partial<AiDeliverables>>
+    },
     {
       name: "free",
       promise: scope === "full"

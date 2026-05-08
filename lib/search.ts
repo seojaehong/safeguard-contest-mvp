@@ -655,8 +655,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     }
     const baseDeliverables = {
       ...response.deliverables,
-      ...Object.fromEntries(Object.entries(aiBodies).filter(([, v]) => v != null))
+      ...Object.fromEntries(Object.entries(aiBodies).filter(([key, v]) => (
+        v != null && key !== "structuredRiskRows" && key !== "structuredRiskRowsValidationIssues"
+      )))
     };
+    const structuredRiskRows = aiBodies.structuredRiskRows || [];
+    const structuredRiskIssues = aiBodies.structuredRiskRowsValidationIssues || [];
 
     const enriched: AskResponse = {
       ...response,
@@ -753,13 +757,21 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           ? aiBodies.kakaoMessage
           : `${baseDeliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${(aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput)).split("\n").slice(0, 8).join("\n")}`
       },
+      structured: {
+        riskAssessmentRows: structuredRiskRows,
+        riskAssessmentValidation: {
+          ok: structuredRiskRows.length > 0 && structuredRiskIssues.length === 0,
+          issueCount: structuredRiskIssues.length,
+          issues: structuredRiskIssues
+        }
+      },
       status: {
         ...response.status,
         lawgo: legalEvidenceMode,
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / ${aiModeAppliedDetail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / structured 위험성평가 rows ${structuredRiskRows.length}건, 검증 이슈 ${structuredRiskIssues.length}건 / ${aiModeAppliedDetail}`
       },
       sourceMix
     };
