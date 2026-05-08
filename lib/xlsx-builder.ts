@@ -34,6 +34,38 @@ const SECTION_FONT = { name: "Malgun Gothic", size: 11, bold: true, color: { arg
 const COVER_FILL = { type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: "FFE8F1ED" } };
 const BORDER_THIN = { style: "thin" as const, color: { argb: "FF9AA4B2" } };
 const ALL_BORDERS = { top: BORDER_THIN, left: BORDER_THIN, bottom: BORDER_THIN, right: BORDER_THIN };
+const RISK_ASSESSMENT_COLUMNS = [
+  { header: "No.", width: 6 },
+  { header: "작업장소", width: 20 },
+  { header: "공정", width: 16 },
+  { header: "세부작업", width: 24 },
+  { header: "장비·도구", width: 20 },
+  { header: "유해·위험요인", width: 30 },
+  { header: "4M", width: 14 },
+  { header: "재해유형", width: 16 },
+  { header: "현재 안전조치", width: 30 },
+  { header: "가능성", width: 10 },
+  { header: "중대성", width: 10 },
+  { header: "위험성", width: 12 },
+  { header: "감소대책", width: 36 },
+  { header: "담당자", width: 14 },
+  { header: "조치기한", width: 14 },
+  { header: "확인상태", width: 14 },
+  { header: "확인일", width: 14 },
+  { header: "확인자", width: 14 },
+  { header: "근거", width: 28 }
+] as const;
+
+function columnLetter(column: number): string {
+  let value = column;
+  let result = "";
+  while (value > 0) {
+    const remainder = (value - 1) % 26;
+    result = String.fromCharCode(65 + remainder) + result;
+    value = Math.floor((value - 1) / 26);
+  }
+  return result;
+}
 
 function applyBorders(ws: ExcelJS.Worksheet, range: string) {
   ws.getCell(range); // ensure exists
@@ -56,54 +88,8 @@ export type XlsxBuildInput = {
   structuredRiskRows?: StructuredRiskAssessmentRow[];
 };
 
-// KOSHA-aligned 19 columns: No. + 18 contract columns from PR #28 form-schema-gate.
-// Order matches scripts/safeclaw_form_schema_gate.mjs riskAssessmentColumnContract.
-const RISK_TABLE_HEADERS = [
-  "No.",
-  "작업장소",
-  "공정",
-  "세부작업",
-  "장비·도구",
-  "유해·위험요인",
-  "4M",
-  "재해유형",
-  "현재 안전조치",
-  "가능성",
-  "중대성",
-  "위험성",
-  "감소대책",
-  "담당자",
-  "조치기한",
-  "확인상태",
-  "확인일",
-  "확인자",
-  "근거"
-] as const;
-const RISK_TABLE_LAST_COL = RISK_TABLE_HEADERS.length; // 19
-const RISK_TABLE_LAST_COL_LETTER = "S"; // 19th column
-
 function applyRiskAssessmentColumns(ws: ExcelJS.Worksheet) {
-  ws.columns = [
-    { width: 5 },   // No.
-    { width: 16 },  // 작업장소
-    { width: 14 },  // 공정
-    { width: 18 },  // 세부작업
-    { width: 14 },  // 장비·도구
-    { width: 26 },  // 유해·위험요인
-    { width: 8 },   // 4M
-    { width: 12 },  // 재해유형
-    { width: 22 },  // 현재 안전조치
-    { width: 7 },   // 가능성
-    { width: 7 },   // 중대성
-    { width: 9 },   // 위험성
-    { width: 26 },  // 감소대책
-    { width: 12 },  // 담당자
-    { width: 12 },  // 조치기한
-    { width: 10 },  // 확인상태
-    { width: 12 },  // 확인일
-    { width: 12 },  // 확인자
-    { width: 22 }   // 근거
-  ];
+  ws.columns = RISK_ASSESSMENT_COLUMNS.map((column) => ({ width: column.width }));
 }
 
 function writeOfficialLikeRiskAssessmentTable(
@@ -112,20 +98,22 @@ function writeOfficialLikeRiskAssessmentTable(
   rows: StructuredRiskAssessmentRow[]
 ): number {
   let row = startRow;
-  ws.mergeCells(row, 1, row, RISK_TABLE_LAST_COL);
+  const lastColumn = RISK_ASSESSMENT_COLUMNS.length;
+  const lastColumnLetter = columnLetter(lastColumn);
+  ws.mergeCells(row, 1, row, lastColumn);
   ws.getCell(row, 1).value = "위험성평가표";
   ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 12, bold: true };
   row += 1;
 
-  RISK_TABLE_HEADERS.forEach((header, index) => {
+  RISK_ASSESSMENT_COLUMNS.forEach((column, index) => {
     const cell = ws.getCell(row, index + 1);
-    cell.value = header;
+    cell.value = column.header;
     cell.fill = HEADER_FILL;
     cell.font = HEADER_FONT;
     cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
   });
-  applyBorders(ws, `A${row}:${RISK_TABLE_LAST_COL_LETTER}${row}`);
-  ws.getRow(row).height = 28;
+  applyBorders(ws, `A${row}:${lastColumnLetter}${row}`);
+  ws.getRow(row).height = 26;
   row += 1;
 
   // Index reference for alignment rules (0-based column index = headers index)
@@ -135,27 +123,27 @@ function writeOfficialLikeRiskAssessmentTable(
   rows.forEach((riskRow, index) => {
     const evidenceText = riskRow.evidenceRefsList && riskRow.evidenceRefsList.length
       ? riskRow.evidenceRefsList.join("\n")
-      : (riskRow.evidence || "");
+      : (riskRow.evidence || riskRow.evidenceRefs?.join(", ") || "근거 확인");
     const values = [
-      riskRow.id || String(index + 1),                                  // 1 No.
-      riskRow.location || "",                                           // 2 작업장소
-      riskRow.process || riskRow.section || "",                         // 3 공정
-      riskRow.unitTask,                                                 // 4 세부작업
-      riskRow.equipment || "",                                          // 5 장비·도구
-      riskRow.hazard,                                                   // 6 유해·위험요인
-      riskRow.fourM || "",                                              // 7 4M
-      riskRow.accidentType || "",                                       // 8 재해유형
-      riskRow.currentControls || "현장 확인",                            // 9 현재 안전조치
-      riskRow.likelihood || "확인",                                     // 10 가능성
-      riskRow.severity || "확인",                                       // 11 중대성
-      riskRow.riskLevel || "확인",                                      // 12 위험성
-      riskRow.additionalControls,                                       // 13 감소대책
-      riskRow.owner || "작업반장",                                       // 14 담당자
-      riskRow.dueDate || "작업 전",                                      // 15 조치기한
-      riskRow.verificationStatus || riskRow.status || "□",              // 16 확인상태
-      riskRow.verificationDate || "",                                   // 17 확인일
-      riskRow.verificationChecker || "",                                // 18 확인자
-      evidenceText                                                      // 19 근거
+      riskRow.id || String(index + 1),
+      riskRow.location || "현장 확인",
+      riskRow.process || riskRow.section || "위험성평가",
+      riskRow.unitTask,
+      riskRow.equipment || "장비·도구 확인",
+      riskRow.hazard,
+      riskRow.fourM || "Management",
+      riskRow.accidentType || "other",
+      riskRow.currentControls || "현장 확인",
+      riskRow.likelihood || "확인",
+      riskRow.severity || "확인",
+      riskRow.riskLevel || "확인",
+      riskRow.additionalControls,
+      riskRow.owner || "작업반장",
+      riskRow.dueDate || riskRow.due || "작업 전",
+      riskRow.verificationStatus || riskRow.status || "planned",
+      riskRow.verificationDate || "현장 확인",
+      riskRow.verificationChecker || "관리감독자",
+      evidenceText
     ];
     values.forEach((value, columnIndex) => {
       const cell = ws.getCell(row, columnIndex + 1);
@@ -166,7 +154,7 @@ function writeOfficialLikeRiskAssessmentTable(
         wrapText: true
       };
     });
-    applyBorders(ws, `A${row}:${RISK_TABLE_LAST_COL_LETTER}${row}`);
+    applyBorders(ws, `A${row}:${lastColumnLetter}${row}`);
     ws.getRow(row).height = 48;
     row += 1;
   });
@@ -231,8 +219,8 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   let row = 1;
 
   // 1) Cover
-  const lastColumn = isStructuredRiskSheet ? RISK_TABLE_LAST_COL : 6;
-  const lastColumnLetter = isStructuredRiskSheet ? RISK_TABLE_LAST_COL_LETTER : "F";
+  const lastColumn = isStructuredRiskSheet ? RISK_ASSESSMENT_COLUMNS.length : 6;
+  const lastColumnLetter = columnLetter(lastColumn);
 
   ws.mergeCells(row, 1, row, lastColumn);
   const coverCell = ws.getCell(row, 1);
@@ -469,7 +457,7 @@ export async function buildWorkpackXlsx(
     }
 
     let row = 1;
-    ws.mergeCells(row, 1, row, isStructuredRiskSheet ? RISK_TABLE_LAST_COL : 6);
+    ws.mergeCells(row, 1, row, isStructuredRiskSheet ? RISK_ASSESSMENT_COLUMNS.length : 6);
     ws.getCell(row, 1).value = doc.title;
     ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 14, bold: true, color: { argb: "FF1F4D43" } };
     ws.getRow(row).height = 26;

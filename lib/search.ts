@@ -1,4 +1,4 @@
-import { AskResponse } from "./types";
+import { AskResponse, type TbmRiskLink } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
 import { buildMockAskResponse, mockSearchResults } from "./mock-data";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
@@ -13,6 +13,7 @@ import { fetchAccidentCases } from "./accident-cases";
 import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
 import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission } from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
+import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow } from "./risk-assessment-schema";
 
 export async function runSearch(query: string) {
   return searchLegalSources(query);
@@ -26,6 +27,192 @@ function inferLegalEvidenceMode(sourceMix: ReturnType<typeof summarizeLegalSourc
     return "fallback";
   }
   return "mock";
+}
+
+function riskLevelFrom(likelihood: number, severity: number): RiskAssessmentRow["riskLevel"] {
+  const score = likelihood * severity;
+  if (score >= 10) return "high";
+  if (score >= 5) return "medium";
+  return "low";
+}
+
+function inferFourM(text: string): FourM {
+  if (/비계|지게차|장비|기계|차량|전기|용접|공구|호스|배관|펌프|밸브/.test(text)) return "Machine";
+  if (/강풍|우천|폭염|자외선|누수|천장|바닥|밀폐|환기|화학|가스|분진/.test(text)) return "Media";
+  if (/신규|외국인|고령|2인|작업자|숙련|피로|보호구/.test(text)) return "Man";
+  return "Management";
+}
+
+function inferAccidentType(text: string): AccidentType {
+  if (/추락|고소|비계|개구부|사다리/.test(text)) return "fall";
+  if (/미끄|우천|바닥|전도/.test(text)) return "slip";
+  if (/지게차|차량|동선|충돌|교통/.test(text)) return "traffic";
+  if (/끼임|협착|말림/.test(text)) return "caughtIn";
+  if (/화학|세정|유해|누출|가스|분진/.test(text)) return "chemicalExposure";
+  if (/폭염|온열|열사병|자외선/.test(text)) return "heatIllness";
+  if (/화기|용접|화재|폭발/.test(text)) return "fireExplosion";
+  if (/밀폐|산소|질식/.test(text)) return "asphyxiation";
+  if (/감전|전기/.test(text)) return "electricShock";
+  if (/붕괴|전도|전복/.test(text)) return "collapse";
+  return "other";
+}
+
+function buildRiskRow(params: {
+  location: string;
+  process: string;
+  task: string;
+  equipment: string;
+  hazard: string;
+  currentControls: string;
+  likelihood: number;
+  severity: number;
+  additionalControls: string;
+  owner: string;
+  due: string;
+  verification: string;
+  verificationChecker: string;
+  evidenceRefs: string[];
+}): RiskAssessmentRow {
+  const hazardContext = `${params.task} ${params.equipment} ${params.hazard}`;
+  return {
+    location: params.location,
+    process: params.process,
+    task: params.task,
+    equipment: params.equipment,
+    hazard: params.hazard,
+    fourM: inferFourM(hazardContext),
+    accidentType: inferAccidentType(hazardContext),
+    currentControls: params.currentControls,
+    likelihood: params.likelihood,
+    severity: params.severity,
+    riskLevel: riskLevelFrom(params.likelihood, params.severity),
+    additionalControls: params.additionalControls,
+    owner: params.owner,
+    due: params.due,
+    verification: params.verification,
+    verificationStatus: "planned",
+    verificationDate: params.due,
+    verificationChecker: params.verificationChecker,
+    whyLikelihood: `${params.location}의 작업 조건과 ${params.equipment} 사용 상태를 고려해 발생 가능성을 ${params.likelihood}로 산정했습니다.`,
+    whySeverity: `${params.hazard} 발생 시 작업중지, 부상 또는 중대재해로 이어질 수 있어 중대성을 ${params.severity}로 산정했습니다.`,
+    evidenceRefs: params.evidenceRefs
+  };
+}
+
+function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: string): RiskAssessmentRow[] {
+  const scenario = response.scenario;
+  const topRisk = response.riskSummary.topRisk || "작업 조건 변화로 인한 현장 안전 위험";
+  const actions = response.riskSummary.immediateActions.length
+    ? response.riskSummary.immediateActions
+    : ["작업 전 현장 점검", "작업중지 기준 공유", "관리감독자 확인"];
+  const workText = `${scenario.workSummary} ${topRisk}`;
+  const weatherText = weatherSummary || scenario.weatherNote || "기상청 현재·예보 신호 확인";
+  const location = scenario.siteName || "현장 작업구역";
+  const process = response.riskSummary.title || scenario.companyType || "현장 작업";
+  const due = "현장 확인";
+
+  return [
+    buildRiskRow({
+      location,
+      process,
+      task: scenario.workSummary,
+      equipment: /비계/.test(workText) ? "이동식 비계, 작업발판, 보호구" : /지게차/.test(workText) ? "지게차, 팔레트, 하역구역 표지" : "작업 장비·공구·보호구",
+      hazard: topRisk,
+      currentControls: "작업 전 장비 상태, 작업구역, 보호구 착용 상태를 확인합니다.",
+      likelihood: 4,
+      severity: 5,
+      additionalControls: actions[0] || "작업 전 핵심 위험요인과 통제대책을 TBM에서 공유합니다.",
+      owner: "작업반장",
+      due,
+      verification: "작업 시작 전 현장 점검과 TBM 구두 복창으로 확인",
+      verificationChecker: "관리감독자",
+      evidenceRefs: ["산업안전보건법", "KOSHA 위험성평가", "문서팩 입력 조건"]
+    }),
+    buildRiskRow({
+      location,
+      process,
+      task: "작업환경 및 기상 조건 확인",
+      equipment: "기상청 현재·예보, 작업중지 기준표",
+      hazard: `${weatherText}에 따른 작업환경 변화 위험`,
+      currentControls: "기상 변화와 작업장 바닥·시야·풍속 상태를 작업 전 확인합니다.",
+      likelihood: /강풍|우천|폭염|위험|높음/.test(weatherText) ? 4 : 3,
+      severity: /강풍|폭염|위험/.test(weatherText) ? 4 : 3,
+      additionalControls: actions[1] || "기상 악화 또는 위험 징후 체감 시 즉시 작업을 중지하고 대기합니다.",
+      owner: "관리감독자",
+      due,
+      verification: "기상청 신호와 현장 체감 조건을 함께 확인해 작업 지속 여부 결정",
+      verificationChecker: "현장소장",
+      evidenceRefs: ["기상청 현재·예보", "KOSHA 위험성평가", "작업중지 기준"]
+    }),
+    buildRiskRow({
+      location,
+      process,
+      task: "장비·도구 안전점검",
+      equipment: /누수|천장/.test(workText) ? "사다리, 전동공구, 누수 점검 장비" : "작업 장비, 공구, 방호장치",
+      hazard: "장비·도구 상태 불량 또는 방호조치 미흡으로 인한 사고 위험",
+      currentControls: "사용 전 외관, 고정상태, 전원·잠금·방호장치 상태를 점검합니다.",
+      likelihood: 3,
+      severity: 4,
+      additionalControls: "이상 발견 시 해당 장비 사용을 중지하고 대체 장비 또는 보수 후 작업합니다.",
+      owner: "장비 담당자",
+      due,
+      verification: "장비별 점검 체크와 사진 증빙으로 확인",
+      verificationChecker: "작업반장",
+      evidenceRefs: ["KOSHA 안전작업 지침", "장비 점검표", "사진·증빙 기록"]
+    }),
+    buildRiskRow({
+      location,
+      process,
+      task: "작업자 배치 및 의사소통",
+      equipment: "보호구, 무전·휴대전화, 다국어 안내문",
+      hazard: "신규·외국인·소수 인원 작업에서 지시 미이해 또는 단독작업으로 인한 위험",
+      currentControls: "작업 전 역할, 연락체계, 보호구 착용, 이해 여부를 확인합니다.",
+      likelihood: /신규|외국인|2인|소수/.test(workText) ? 4 : 3,
+      severity: 3,
+      additionalControls: "핵심 위험 문구를 쉬운 한국어와 필요 언어로 공유하고 이해하지 못하면 작업을 시작하지 않습니다.",
+      owner: "작업반장",
+      due,
+      verification: "TBM 참석자 확인, 구두 복창, 서명 또는 전송 로그로 확인",
+      verificationChecker: "관리감독자",
+      evidenceRefs: ["안전보건교육 기록", "외국인 근로자 안내문", "TBM 기록"]
+    }),
+    buildRiskRow({
+      location,
+      process,
+      task: "관리체계 및 조치 확인",
+      equipment: "위험성평가표, TBM일지, 사진·증빙 기록",
+      hazard: "위험성평가 결과가 TBM·교육·현장 전파로 이어지지 않아 조치가 누락될 위험",
+      currentControls: "위험성평가 결과와 즉시조치 항목을 문서팩과 TBM에 함께 반영합니다.",
+      likelihood: 2,
+      severity: 3,
+      additionalControls: actions[2] || "조치 담당자, 확인자, 확인시각을 남기고 미조치 항목은 후속조치로 분리합니다.",
+      owner: "현장소장",
+      due,
+      verification: "문서팩 저장, 전파 로그, 사진 증빙, 확인자 서명으로 추적",
+      verificationChecker: "안전관리 담당자",
+      evidenceRefs: ["산업안전보건법", "KOSHA TBM OPS", "전파·이력 로그"]
+    })
+  ];
+}
+
+function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: string): TbmRiskLink[] {
+  return rows.slice(0, 6).map((row, index) => {
+    const owner = row.owner || "작업반장";
+    const checker = row.verificationChecker || "관리감독자";
+    const verificationStatus = row.verificationStatus || "planned";
+    const verificationDate = row.verificationDate || "작업 전";
+    const control = row.additionalControls || row.currentControls || "작업 전 안전조치를 확인합니다.";
+    return {
+      riskRowIndex: index,
+      hazard: row.hazard,
+      control,
+      weatherSignal: weatherSummary || "기상청 현재·예보 신호 확인",
+      confirmQuestion: `${row.hazard} 위험에 대해 ${control} 조치를 이해하고 작업 전 확인했습니까?`,
+      owner,
+      verification: `${checker}가 ${verificationDate} 기준 ${verificationStatus} 상태로 확인하고 TBM 기록에 남깁니다.`,
+      evidenceRefs: row.evidenceRefs || []
+    };
+  });
 }
 
 type DocumentEvidenceTarget = "risk" | "workPlan" | "tbm" | "education" | "emergency";
@@ -659,8 +846,23 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         v != null && key !== "structuredRiskRows" && key !== "structuredRiskRowsValidationIssues"
       )))
     };
-    const structuredRiskRows = aiBodies.structuredRiskRows || [];
-    const structuredRiskIssues = aiBodies.structuredRiskRowsValidationIssues || [];
+    const generatedStructuredRiskRows = aiBodies.structuredRiskRows || [];
+    const fallbackStructuredRiskRows = generatedStructuredRiskRows.length
+      ? []
+      : buildFallbackRiskAssessmentRows(response, weather.summary);
+    const structuredRiskRows = generatedStructuredRiskRows.length
+      ? generatedStructuredRiskRows
+      : fallbackStructuredRiskRows;
+    const fallbackValidation = generatedStructuredRiskRows.length
+      ? null
+      : validateRiskAssessmentRows(structuredRiskRows);
+    const structuredRiskIssues = generatedStructuredRiskRows.length
+      ? (aiBodies.structuredRiskRowsValidationIssues || [])
+      : (fallbackValidation?.issues || []);
+    const structuredRiskSourceDetail = generatedStructuredRiskRows.length
+      ? "structured rows=AI"
+      : "structured rows=deterministic fallback";
+    const tbmRiskLinks = buildTbmRiskLinks(structuredRiskRows, weather.summary);
 
     const enriched: AskResponse = {
       ...response,
@@ -759,6 +961,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       },
       structured: {
         riskAssessmentRows: structuredRiskRows,
+        tbmRiskLinks,
         riskAssessmentValidation: {
           ok: structuredRiskRows.length > 0 && structuredRiskIssues.length === 0,
           issueCount: structuredRiskIssues.length,
@@ -771,7 +974,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / structured 위험성평가 rows ${structuredRiskRows.length}건, 검증 이슈 ${structuredRiskIssues.length}건 / ${aiModeAppliedDetail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / structured 위험성평가 rows ${structuredRiskRows.length}건, 검증 이슈 ${structuredRiskIssues.length}건 (${structuredRiskSourceDetail}) / TBM-risk 연결 ${tbmRiskLinks.length}건 / ${aiModeAppliedDetail}`
       },
       sourceMix
     };

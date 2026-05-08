@@ -31,7 +31,7 @@ export async function GET() {
       route: "/api/export/pdf",
       methods: ["POST"],
       formats: ["html", "pdf"],
-      message: "POST SafeClaw document rows to render a print-ready HTML source or binary PDF."
+      message: "POST SafeClaw document rows to render binary PDF by default. Use ?format=html for print-ready HTML source."
     },
     {
       headers: {
@@ -136,11 +136,18 @@ function parseBodyText(value: unknown, documentTitle: string): PdfRow[] {
 }
 
 function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAssessmentRow[] {
+  const structured = isRecord(body.structured) ? body.structured : {};
+  const response = isRecord(body.response) ? body.response : {};
+  const responseStructured = isRecord(response.structured) ? response.structured : {};
   const candidates = [
     body.structuredRiskRows,
     body.riskAssessmentRows,
     body.structuredRows,
-    body.canonicalRows
+    body.canonicalRows,
+    structured.riskAssessmentRows,
+    structured.structuredRiskRows,
+    responseStructured.riskAssessmentRows,
+    responseStructured.structuredRiskRows
   ];
   for (const candidate of candidates) {
     const rows = parseStructuredRiskAssessmentRows(candidate);
@@ -699,8 +706,9 @@ export async function POST(request: NextRequest) {
   const bodyRows = rows.length ? rows : parseBodyText(body.documentText, title);
   const riskLevel = readString(body.riskLevel, "확인");
   const topRisk = readString(body.topRisk, "");
-  const wantsBinaryPdf = request.nextUrl.searchParams.get("format") === "pdf"
-    || (request.headers.get("accept") || "").includes("application/pdf");
+  const requestedFormat = request.nextUrl.searchParams.get("format");
+  const wantsHtml = requestedFormat === "html";
+  const wantsBinaryPdf = !wantsHtml;
 
   if (wantsBinaryPdf) {
     const pdf = buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);

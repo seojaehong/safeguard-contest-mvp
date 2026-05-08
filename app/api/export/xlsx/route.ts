@@ -80,11 +80,18 @@ function parseProfile(value: unknown) {
 }
 
 function parseRiskRowsFromBody(body: Record<string, unknown>) {
+  const structured = isRecord(body.structured) ? body.structured : {};
+  const response = isRecord(body.response) ? body.response : {};
+  const responseStructured = isRecord(response.structured) ? response.structured : {};
   const candidates = [
     body.structuredRiskRows,
     body.riskAssessmentRows,
     body.structuredRows,
-    body.canonicalRows
+    body.canonicalRows,
+    structured.riskAssessmentRows,
+    structured.structuredRiskRows,
+    responseStructured.riskAssessmentRows,
+    responseStructured.structuredRiskRows
   ];
   for (const candidate of candidates) {
     const rows = parseStructuredRiskAssessmentRows(candidate);

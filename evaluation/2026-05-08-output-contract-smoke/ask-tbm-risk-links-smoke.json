@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-05-08T09:34:09.5425430Z",
+  "baseUrl": "http://127.0.0.1:3110",
+  "aiMode": "template",
+  "question": "가온테크 천장 누수 유지보수 비정형 2인1조",
+  "riskRows": 5,
+  "tbmRiskLinks": 5,
+  "validationOk": true,
+  "issueCount": 0,
+  "statusDetail": "Law.go와 Gemini (gemini-2.5-flash) 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260508 1700) / 기상청 초단기예보 호출 성공 (서울, base 20260508 1730) / 기상청 단기예보 호출 성공 (서울, base 20260508 1700) / 기상청 기상특보 조회 성공 (전국, 202605081600) / 기상청 영향예보 연결 점검 필요: NO_DATA / 고용24 사업주훈련 호출 성공. 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 2건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / 건설업 작업 키워드가 없어 건설업 일별 중대재해 현황 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 2건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=deterministic fallback) / TBM-risk 연결 5건 / AI_MODE=template (템플릿 본문 사용)",
+  "firstHazard": "천장 누수 유지보수 중 고소작업 추락, 젖은 바닥 미끄러짐, 누전·감전, 천장재 낙하 위험",
+  "firstTbmQuestion": "천장 누수 유지보수 중 고소작업 추락, 젖은 바닥 미끄러짐, 누전·감전, 천장재 낙하 위험 위험에 대해 작업 전 전원 차단·검전, 누수 차단, 젖은 바닥 보양과 출입통제 실시 조치를 이해하고 작업 전 확인했습니까?",
+  "pass": true
+}

@@ -111,6 +111,17 @@ export type EducationRecordStructured = {
   followupRecommendation: string; // 후속 교육 추천 (1-2 문장)
 };
 
+export type TbmRiskLink = {
+  riskRowIndex: number;
+  hazard: string;
+  control: string;
+  weatherSignal: string;
+  confirmQuestion: string;
+  owner: string;
+  verification: string;
+  evidenceRefs: string[];
+};
+
 export type SearchResult = {
   id: string;
   type: SourceType;
@@ -334,6 +345,7 @@ export type AskResponse = {
   };
   structured?: {
     riskAssessmentRows: RiskAssessmentRow[];
+    tbmRiskLinks?: TbmRiskLink[];
     riskAssessmentValidation: {
       ok: boolean;
       issueCount: number;
