@@ -335,7 +335,11 @@ function SafeClawHomepage({ onStart }: { onStart: () => void }) {
     ["TH", "ภาษาไทย", "กฎความปลอดภัยวันนี้"],
     ["UZ", "O'zbek", "Bugungi xavfsizlik qoidalari"],
     ["MN", "Монгол", "Өнөөдрийн аюулгүй"],
-    ["ZH", "中文", "今日安全守则"]
+    ["ZH", "中文", "今日安全守则"],
+    ["KM", "ភាសាខ្មែរ", "ច្បាប់សុវត្ថិភាពថ្ងៃនេះ"],
+    ["NE", "नेपाली", "आजको सुरक्षा नियम"],
+    ["ID", "Bahasa", "Aturan keselamatan"],
+    ["MY", "မြန်မာ", "ယနေ့ဘေးကင်းရေး"]
   ];
 
   function jumpTo(id: string) {
