@@ -1,3 +1,11 @@
+import {
+  FOUR_M_VALUES,
+  validateRiskAssessmentRows,
+  type FourM,
+  type RiskAssessmentRow,
+  type RiskLevel
+} from "./risk-assessment-schema";
+
 export type RubricDocumentKey =
   | "workpackSummaryDraft"
   | "riskAssessmentDraft"
@@ -242,3 +250,229 @@ export function rubricStatusLabel(status: RubricStatus): string {
   if (status === "needs-improvement") return "보완 필요";
   return "사용자 확인 필요";
 }
+
+export type SafetyFormVerdict = "blocked" | "pass_with_notice" | "pass";
+export type SafetyFormIssueSeverity = "blocker" | "notice";
+
+export type RiskAssessmentCompletenessIssue = {
+  id: string;
+  severity: SafetyFormIssueSeverity;
+  rowIndex?: number;
+  field?: keyof RiskAssessmentRow | "row" | "tbm" | "weather" | "fourM";
+  message: string;
+};
+
+export type RiskAssessmentCompletenessInput = {
+  rows: unknown;
+  tbmBriefing?: string;
+  tbmLog?: string;
+  weatherSummary?: string;
+  weatherNote?: string;
+  minimumHazardRows?: number;
+};
+
+export type RiskAssessmentCompletenessReport = {
+  verdict: SafetyFormVerdict;
+  ok: boolean;
+  rows: RiskAssessmentRow[];
+  summary: {
+    rowCount: number;
+    minimumHazardRows: number;
+    fourMCoverage: FourM[];
+    blockerCount: number;
+    noticeCount: number;
+  };
+  issues: RiskAssessmentCompletenessIssue[];
+};
+
+const weatherLinkTerms = [
+  "기상",
+  "날씨",
+  "강풍",
+  "풍속",
+  "우천",
+  "비",
+  "젖",
+  "누수",
+  "호우",
+  "폭염",
+  "고온",
+  "한파",
+  "결빙",
+  "실내",
+  "환기",
+  "습기"
+];
+
+function expectedRiskLevel(likelihood: number, severity: number): RiskLevel {
+  const value = likelihood * severity;
+  if (value >= 10) return "high";
+  if (value >= 5) return "medium";
+  return "low";
+}
+
+function normalizeFormText(value: string): string {
+  return value.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function hasDistinctControls(row: RiskAssessmentRow): boolean {
+  return normalizeFormText(row.currentControls) !== normalizeFormText(row.additionalControls);
+}
+
+function rowSearchText(row: RiskAssessmentRow): string {
+  return [
+    row.process,
+    row.task,
+    row.hazard,
+    row.currentControls,
+    row.additionalControls,
+    row.verification,
+    row.whyLikelihood,
+    row.whySeverity,
+    ...row.evidenceRefs
+  ].join(" ");
+}
+
+function includesAnyTerm(text: string, terms: readonly string[]): boolean {
+  const normalized = normalizeFormText(text);
+  return terms.some((term) => normalized.includes(normalizeFormText(term)));
+}
+
+function firstMeaningfulToken(value: string): string {
+  return value
+    .split(/[\s,./·()\-]+/)
+    .map((item) => item.trim())
+    .find((item) => item.length >= 2) || "";
+}
+
+function isHazardLinkedToTbm(row: RiskAssessmentRow, tbmText: string): boolean {
+  const normalizedTbm = normalizeFormText(tbmText);
+  const hazard = normalizeFormText(row.hazard);
+  const task = normalizeFormText(row.task);
+  const token = firstMeaningfulToken(row.hazard);
+  return Boolean(
+    (hazard && normalizedTbm.includes(hazard))
+    || (task && normalizedTbm.includes(task))
+    || (token && normalizedTbm.includes(normalizeFormText(token)))
+  );
+}
+
+function resolveVerdict(issues: RiskAssessmentCompletenessIssue[]): SafetyFormVerdict {
+  if (issues.some((issue) => issue.severity === "blocker")) return "blocked";
+  if (issues.some((issue) => issue.severity === "notice")) return "pass_with_notice";
+  return "pass";
+}
+
+export function evaluateRiskAssessmentRowCompleteness(
+  input: RiskAssessmentCompletenessInput
+): RiskAssessmentCompletenessReport {
+  const minimumHazardRows = input.minimumHazardRows ?? 3;
+  const schemaValidation = validateRiskAssessmentRows(input.rows);
+  const rows = schemaValidation.rows;
+  const issues: RiskAssessmentCompletenessIssue[] = schemaValidation.issues.map((issue) => ({
+    id: `schema:${issue.rowIndex}:${String(issue.field)}`,
+    severity: "blocker",
+    rowIndex: issue.rowIndex,
+    field: issue.field,
+    message: issue.message
+  }));
+
+  if (rows.length < minimumHazardRows) {
+    issues.push({
+      id: "hazard-row-count",
+      severity: "blocker",
+      field: "row",
+      message: `risk assessment requires at least ${minimumHazardRows} complete hazard rows`
+    });
+  }
+
+  rows.forEach((row, index) => {
+    const expected = expectedRiskLevel(row.likelihood, row.severity);
+    if (row.riskLevel !== expected) {
+      issues.push({
+        id: `risk-level-consistency:${index}`,
+        severity: "blocker",
+        rowIndex: index,
+        field: "riskLevel",
+        message: `riskLevel must be ${expected} for likelihood ${row.likelihood} and severity ${row.severity}`
+      });
+    }
+    if (!hasDistinctControls(row)) {
+      issues.push({
+        id: `controls-split:${index}`,
+        severity: "blocker",
+        rowIndex: index,
+        field: "additionalControls",
+        message: "currentControls and additionalControls must be split into distinct actions"
+      });
+    }
+  });
+
+  const fourMCoverage = FOUR_M_VALUES.filter((value) => rows.some((row) => row.fourM === value));
+  if (rows.length && fourMCoverage.length < Math.min(2, rows.length)) {
+    issues.push({
+      id: "four-m-coverage",
+      severity: "notice",
+      field: "fourM",
+      message: "4M mapping is present but too narrow for a multi-row assessment"
+    });
+  }
+
+  const tbmText = [input.tbmBriefing || "", input.tbmLog || ""].join("\n");
+  if (!normalizeFormText(tbmText)) {
+    issues.push({
+      id: "tbm-linkage-missing",
+      severity: "blocker",
+      field: "tbm",
+      message: "TBM briefing/log text is required to prove risk-to-TBM linkage"
+    });
+  } else {
+    const linkedRows = rows.filter((row) => isHazardLinkedToTbm(row, tbmText));
+    const minimumLinkedRows = Math.min(rows.length, minimumHazardRows);
+    if (linkedRows.length < minimumLinkedRows) {
+      issues.push({
+        id: "tbm-risk-row-linkage",
+        severity: "blocker",
+        field: "tbm",
+        message: `TBM must reference at least ${minimumLinkedRows} risk rows`
+      });
+    }
+  }
+
+  const weatherText = [input.weatherSummary || "", input.weatherNote || ""].join(" ");
+  if (normalizeFormText(weatherText)) {
+    const rowWeatherLinked = rows.some((row) => includesAnyTerm(rowSearchText(row), weatherLinkTerms));
+    const tbmWeatherLinked = includesAnyTerm(tbmText, weatherLinkTerms);
+    if (!rowWeatherLinked || !tbmWeatherLinked) {
+      issues.push({
+        id: "weather-linkage",
+        severity: "blocker",
+        field: "weather",
+        message: "weather or site-condition evidence must be linked in both risk rows and TBM text"
+      });
+    }
+  } else {
+    issues.push({
+      id: "weather-context-not-provided",
+      severity: "notice",
+      field: "weather",
+      message: "weatherSummary/weatherNote was not supplied, so weather linkage could not be proven"
+    });
+  }
+
+  const verdict = resolveVerdict(issues);
+  return {
+    verdict,
+    ok: verdict === "pass",
+    rows,
+    summary: {
+      rowCount: rows.length,
+      minimumHazardRows,
+      fourMCoverage,
+      blockerCount: issues.filter((issue) => issue.severity === "blocker").length,
+      noticeCount: issues.filter((issue) => issue.severity === "notice").length
+    },
+    issues
+  };
+}
+

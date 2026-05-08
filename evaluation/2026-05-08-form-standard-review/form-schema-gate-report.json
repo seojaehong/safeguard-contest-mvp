@@ -1,0 +1,185 @@
+{
+  "generatedAt": "2026-05-08T04:23:36.820Z",
+  "elapsedMs": 5,
+  "fixturesPath": "scripts\\safeclaw_form_schema_gate_fixtures.json",
+  "minimumHazardRows": 3,
+  "caseCount": 3,
+  "expectationPass": 3,
+  "goldenCount": 2,
+  "goldenPass": 2,
+  "overall": "pass_with_notice",
+  "currentSmoke": {
+    "qualityMatrix": {
+      "generatedAt": "2026-05-03T11:37:51.683Z",
+      "mode": "local-deterministic",
+      "total": 100,
+      "pass": 100,
+      "fail": 0,
+      "evidence": "keyword/document reflection matrix; row completeness is not checked"
+    },
+    "submissionSmoke": {
+      "generatedAt": "2026-05-07T02:43:26.765Z",
+      "baseUrl": "https://www.safeclaw.kr",
+      "overall": "blocked",
+      "gates": [
+        {
+          "name": "ask-orchestration",
+          "verdict": "pass"
+        },
+        {
+          "name": "storage",
+          "verdict": "blocked"
+        },
+        {
+          "name": "dispatch",
+          "verdict": "pass_with_notice"
+        },
+        {
+          "name": "formats",
+          "verdict": "blocked"
+        }
+      ],
+      "evidence": "ask orchestration passed, but storage/auth or local Chrome format gate can block"
+    },
+    "downloadSmoke": {
+      "generatedAt": "2026-05-05T09:32:48.980Z",
+      "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+      "ok": true,
+      "downloadCount": 12,
+      "failCount": 0,
+      "evidence": "download files were generated, but previous gate did not prove structured row completeness"
+    },
+    "formStandardReview": {
+      "path": "evaluation\\2026-05-08-form-standard-review\\form-standard-review.md",
+      "finding": "existing review already marks SaaS/submission-form standard as blocked"
+    }
+  },
+  "cases": [
+    {
+      "id": "gaontech-leak-maintenance-two-person",
+      "title": "가온테크인씨 천장 누수 유지보수 2인1조",
+      "question": "가온테크인씨 천장 비가 새서 유지보수, 2인1조",
+      "expectedVerdict": "pass",
+      "verdict": "pass",
+      "expectationMet": true,
+      "rowCount": 4,
+      "inputRowCount": 4,
+      "fourMCoverage": [
+        "Man",
+        "Machine",
+        "Media",
+        "Management"
+      ],
+      "blockerCount": 0,
+      "noticeCount": 0,
+      "issues": []
+    },
+    {
+      "id": "safe-construction-exterior-paint-windy",
+      "title": "세이프건설 외벽도장 강풍",
+      "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보.",
+      "expectedVerdict": "pass",
+      "verdict": "pass",
+      "expectationMet": true,
+      "rowCount": 4,
+      "inputRowCount": 4,
+      "fourMCoverage": [
+        "Man",
+        "Machine",
+        "Media",
+        "Management"
+      ],
+      "blockerCount": 0,
+      "noticeCount": 0,
+      "issues": []
+    },
+    {
+      "id": "keyword-only-regression-negative",
+      "title": "키워드만 있는 위험성평가 회귀 방지",
+      "question": "위험성평가 TBM 확인 서명 키워드는 있지만 row가 불완전한 예시",
+      "expectedVerdict": "blocked",
+      "verdict": "blocked",
+      "expectationMet": true,
+      "rowCount": 0,
+      "inputRowCount": 1,
+      "fourMCoverage": [],
+      "blockerCount": 10,
+      "noticeCount": 0,
+      "issues": [
+        {
+          "id": "schema:0:owner",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "owner",
+          "message": "must be a non-empty string"
+        },
+        {
+          "id": "schema:0:verification",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "verification",
+          "message": "must be a non-empty string"
+        },
+        {
+          "id": "schema:0:whyLikelihood",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "whyLikelihood",
+          "message": "must be a non-empty string"
+        },
+        {
+          "id": "schema:0:whySeverity",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "whySeverity",
+          "message": "must be a non-empty string"
+        },
+        {
+          "id": "schema:0:evidenceRefs",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "evidenceRefs",
+          "message": "must include at least one non-empty string"
+        },
+        {
+          "id": "schema:0:due",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "due",
+          "message": "must be YYYY-MM-DD or 현장 확인"
+        },
+        {
+          "id": "risk-level-consistency:0",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "riskLevel",
+          "message": "must match likelihood and severity as high"
+        },
+        {
+          "id": "controls-split:0",
+          "severity": "blocker",
+          "rowIndex": 0,
+          "field": "additionalControls",
+          "message": "currentControls and additionalControls must be split into distinct actions"
+        },
+        {
+          "id": "hazard-row-count",
+          "severity": "blocker",
+          "field": "row",
+          "message": "risk assessment requires at least 3 complete hazard rows"
+        },
+        {
+          "id": "weather-linkage",
+          "severity": "blocker",
+          "field": "weather",
+          "message": "weather or site-condition evidence must be linked in both risk rows and TBM text"
+        }
+      ]
+    }
+  ],
+  "decision": {
+    "currentBaselineVerdict": "blocked",
+    "newRowGateVerdict": "pass_with_notice",
+    "recommendedDecision": "pass_with_notice"
+  }
+}

@@ -14,6 +14,7 @@
     "smoke:submission": "node ./scripts/submission_readiness_smoke.mjs",
     "auth:token": "node ./scripts/issue_supabase_auth_token.mjs",
     "smoke:quality-matrix": "node ./scripts/safeclaw_quality_matrix_runner.mjs",
+    "smoke:form-schema-gate": "node ./scripts/safeclaw_form_schema_gate.mjs",
     "smoke:ui-local": "node ./scripts/local_ui_regression_smoke.mjs",
     "smoke:final-e2e-matrix": "node ./scripts/final_e2e_matrix_runner.mjs",
     "smoke:final-99-gate": "node ./scripts/final_99_gate_runner.mjs",
