@@ -1898,15 +1898,31 @@ export function WorkpackEditor({
   async function downloadXlsx() {
     setXlsxStatus("building");
     try {
-      // schema-first 작업계획서: AI가 셀 단위 객체(workPlanStructured)를 반환했으면
-      // 산문 → row parser → table 경로 우회. parseSheetRows 손실 없음.
-      const useStructured =
-        selected.key === "workPlanDraft" && (data.deliverables as { workPlanStructured?: unknown })?.workPlanStructured;
-      const requestBody = useStructured
+      // schema-first 경로: AI가 셀 단위 객체를 반환했으면 산문 → row parser → table 경로 우회.
+      // parseSheetRows 손실 없이 표 양식에 직접 매핑.
+      const dl = data.deliverables as {
+        workPlanStructured?: unknown;
+        tbmBriefingStructured?: unknown;
+        educationRecordStructured?: unknown;
+      };
+      type StructuredMode = "workPlanStructured" | "tbmBriefingStructured" | "educationRecordStructured";
+      let structuredMode: StructuredMode | null = null;
+      let structuredPayload: unknown = null;
+      if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
+        structuredMode = "workPlanStructured";
+        structuredPayload = dl.workPlanStructured;
+      } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
+        structuredMode = "tbmBriefingStructured";
+        structuredPayload = dl.tbmBriefingStructured;
+      } else if (selected.key === "safetyEducationRecordDraft" && dl?.educationRecordStructured) {
+        structuredMode = "educationRecordStructured";
+        structuredPayload = dl.educationRecordStructured;
+      }
+      const requestBody = structuredMode
         ? {
-            mode: "workPlanStructured",
+            mode: structuredMode,
             scenario: data.scenario,
-            structured: (data.deliverables as { workPlanStructured?: unknown }).workPlanStructured
+            structured: structuredPayload
           }
         : {
             mode: "single",

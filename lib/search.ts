@@ -729,6 +729,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         // schema-first: AI가 셀 단위 구조로 직접 반환했으면 통과. xlsx-builder가 이걸로
         // parseSheetRows 우회하고 표 양식에 매핑.
         ...(aiBodies.workPlanStructured ? { workPlanStructured: aiBodies.workPlanStructured } : {}),
+        ...(aiBodies.tbmBriefingStructured ? { tbmBriefingStructured: aiBodies.tbmBriefingStructured } : {}),
+        ...(aiBodies.educationRecordStructured ? { educationRecordStructured: aiBodies.educationRecordStructured } : {}),
         tbmBriefing: aiBodies.tbmBriefing
           ? aiBodies.tbmBriefing
           : `${baseDeliverables.tbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}${safetyReferenceAppendix}`,
