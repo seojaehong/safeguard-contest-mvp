@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildXlsxForDocument, buildWorkpackXlsx } from "@/lib/xlsx-builder";
+import {
+  buildEducationRecordStructuredXlsx,
+  buildTbmBriefingStructuredXlsx,
+  buildWorkpackXlsx,
+  buildWorkPlanStructuredXlsx,
+  buildXlsxForDocument
+} from "@/lib/xlsx-builder";
 import { parseStructuredRiskAssessmentRows } from "@/lib/risk-assessment-renderer";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +36,17 @@ function sanitizeFileName(value: string) {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .slice(0, 80) || "safeclaw-document";
+}
+
+function xlsxResponse(buffer: Buffer, fileNameBase: string, fallbackName: string) {
+  const fileName = `${sanitizeFileName(fileNameBase)}.xlsx`;
+  return new NextResponse(new Uint8Array(buffer), {
+    headers: {
+      "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "content-disposition": `attachment; filename="${fallbackName}.xlsx"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+      "cache-control": "no-store"
+    }
+  });
 }
 
 function parseScenario(value: unknown) {
@@ -106,7 +123,7 @@ export async function GET() {
       ok: true,
       route: "/api/export/xlsx",
       methods: ["POST"],
-      modes: ["single", "workpack"],
+      modes: ["single", "workpack", "workPlanStructured", "tbmBriefingStructured", "educationRecordStructured"],
       message: "POST a single document spec or a workpack array. Returns OOXML .xlsx binary.",
       schema: {
         single: {
@@ -120,6 +137,11 @@ export async function GET() {
           mode: "workpack",
           scenario: "AskScenario",
           documents: "[{ title, rows, profile }]"
+        },
+        structured: {
+          mode: "workPlanStructured | tbmBriefingStructured | educationRecordStructured",
+          scenario: "AskScenario",
+          structured: "Record<string, unknown>"
         }
       }
     },
@@ -134,6 +156,28 @@ export async function POST(request: NextRequest) {
   const scenario = parseScenario(body.scenario);
 
   try {
+    if (mode === "workPlanStructured" || mode === "tbmBriefingStructured" || mode === "educationRecordStructured") {
+      if (!isRecord(body.structured)) {
+        return NextResponse.json(
+          { ok: false, error: "structured must be a non-array object for structured xlsx export" },
+          { status: 400, headers: { "cache-control": "no-store" } }
+        );
+      }
+
+      if (mode === "workPlanStructured") {
+        const buffer = await buildWorkPlanStructuredXlsx(scenario, body.structured);
+        return xlsxResponse(buffer, `${scenario.companyName}-작업계획서`, "safeclaw-work-plan");
+      }
+
+      if (mode === "tbmBriefingStructured") {
+        const buffer = await buildTbmBriefingStructuredXlsx(scenario, body.structured);
+        return xlsxResponse(buffer, `${scenario.companyName}-TBM-브리핑`, "safeclaw-tbm-briefing");
+      }
+
+      const buffer = await buildEducationRecordStructuredXlsx(scenario, body.structured);
+      return xlsxResponse(buffer, `${scenario.companyName}-안전보건교육-기록`, "safeclaw-education-record");
+    }
+
     if (mode === "workpack") {
       const docs = Array.isArray(body.documents) ? body.documents : [];
       const documents = docs
@@ -155,14 +199,7 @@ export async function POST(request: NextRequest) {
           structuredRiskRows: ReturnType<typeof parseRiskRowsFromBody>;
         } => Boolean(d));
       const buffer = await buildWorkpackXlsx(scenario, documents);
-      const fileName = `${sanitizeFileName(`${scenario.companyName}-safeclaw-workpack`)}.xlsx`;
-      return new NextResponse(new Uint8Array(buffer), {
-        headers: {
-          "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          "content-disposition": `attachment; filename="safeclaw-workpack.xlsx"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
-          "cache-control": "no-store"
-        }
-      });
+      return xlsxResponse(buffer, `${scenario.companyName}-safeclaw-workpack`, "safeclaw-workpack");
     }
 
     const title = readString(body.title, "SafeClaw 안전 문서");
@@ -170,14 +207,7 @@ export async function POST(request: NextRequest) {
     const profile = parseProfile(body.profile);
     const structuredRiskRows = parseRiskRowsFromBody(body);
     const buffer = await buildXlsxForDocument({ title, rows, profile, scenario, structuredRiskRows });
-    const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.xlsx`;
-    return new NextResponse(new Uint8Array(buffer), {
-      headers: {
-        "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "content-disposition": `attachment; filename="safeclaw-document.xlsx"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
-        "cache-control": "no-store"
-      }
-    });
+    return xlsxResponse(buffer, `${scenario.companyName}-${title}`, "safeclaw-document");
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "xlsx build failed" },

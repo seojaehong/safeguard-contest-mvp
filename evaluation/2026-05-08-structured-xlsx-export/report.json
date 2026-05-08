@@ -1,0 +1,54 @@
+{
+  "generatedAt": "2026-05-08T23:41:11.8972498+09:00",
+  "route": "/api/export/xlsx",
+  "devServerPort": 32991,
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "ok": false,
+    "note": "Failed on lib/ai-deliverables.ts strict errors outside allowed task scope."
+  },
+  "downloads": [
+    {
+      "mode": "workPlanStructured",
+      "status": 200,
+      "file": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\2026-05-08-structured-xlsx-export\\work-plan-structured.xlsx",
+      "expected": [
+        "작업계획서",
+        "작업단계",
+        "작업중지 기준"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "mode": "tbmBriefingStructured",
+      "status": 200,
+      "file": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\2026-05-08-structured-xlsx-export\\tbm-briefing-structured.xlsx",
+      "expected": [
+        "TBM",
+        "위험요인",
+        "확인질문"
+      ],
+      "missing": [],
+      "ok": true
+    },
+    {
+      "mode": "educationRecordStructured",
+      "status": 200,
+      "file": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\2026-05-08-structured-xlsx-export\\education-record-structured.xlsx",
+      "expected": [
+        "안전보건교육",
+        "교육유형",
+        "핵심내용",
+        "이해확인"
+      ],
+      "missing": [],
+      "ok": true
+    }
+  ],
+  "missingStructuredStatus": 400,
+  "logs": {
+    "stdout": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\2026-05-08-structured-xlsx-export\\next-dev-32991.stdout.log",
+    "stderr": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\2026-05-08-structured-xlsx-export\\next-dev-32991.stderr.log"
+  }
+}

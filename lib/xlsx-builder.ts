@@ -2,7 +2,7 @@
 // Produces OOXML binary that opens cleanly in Excel/한셀 with no extension warning.
 
 import ExcelJS from "exceljs";
-import type { AskResponse } from "@/lib/types";
+import type { AskResponse, EducationRecordStructured, TbmBriefingStructured, WorkPlanStructured } from "@/lib/types";
 import {
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
@@ -55,6 +55,34 @@ const RISK_ASSESSMENT_COLUMNS = [
   { header: "확인자", width: 14 },
   { header: "근거", width: 28 }
 ] as const;
+
+type Scenario = AskResponse["scenario"];
+type StructuredRecord = Record<string, unknown>;
+
+const STRUCTURED_DOC_COLUMNS = [
+  { width: 8 },
+  { width: 18 },
+  { width: 32 },
+  { width: 46 },
+  { width: 18 },
+  { width: 18 }
+];
+
+function isRecord(value: unknown): value is StructuredRecord {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function readString(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function readNumber(value: unknown, fallback = 0): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function readStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0) : [];
+}
 
 function columnLetter(column: number): string {
   let value = column;
@@ -178,6 +206,418 @@ function deriveColumns(profile: SafetyFormProfile): string[] {
     default:
       return ["No.", "구분", "항목", "내용", "확인", "담당"];
   }
+}
+
+function addStructuredTitle(ws: ExcelJS.Worksheet, row: number, title: string, scenario: Scenario): number {
+  ws.mergeCells(row, 1, row, 6);
+  const titleCell = ws.getCell(row, 1);
+  titleCell.value = title;
+  titleCell.font = { name: "Malgun Gothic", size: 18, bold: true, color: { argb: "FF1F4D43" } };
+  titleCell.fill = COVER_FILL;
+  titleCell.alignment = { vertical: "middle", horizontal: "center" };
+  ws.getRow(row).height = 34;
+  applyBorders(ws, `A${row}:F${row}`);
+  row += 1;
+
+  const metaRows: Array<[[string, string], [string, string]]> = [
+    [["사업장", scenario.companyName || "SafeClaw 현장"], ["현장", scenario.siteName || "현장 확인"]],
+    [["작업내용", scenario.workSummary || "작업내용 확인"], ["인원/조건", `${scenario.workerCount ?? 0}명 · ${scenario.weatherNote || ""}`]]
+  ];
+
+  metaRows.forEach((pair) => {
+    ws.getCell(row, 1).value = pair[0][0];
+    ws.mergeCells(row, 2, row, 3);
+    ws.getCell(row, 2).value = pair[0][1];
+    ws.getCell(row, 4).value = pair[1][0];
+    ws.mergeCells(row, 5, row, 6);
+    ws.getCell(row, 5).value = pair[1][1];
+    [1, 4].forEach((column) => {
+      const cell = ws.getCell(row, column);
+      cell.fill = META_LABEL_FILL;
+      cell.font = META_LABEL_FONT;
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+    });
+    [2, 5].forEach((column) => {
+      ws.getCell(row, column).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    });
+    applyBorders(ws, `A${row}:F${row}`);
+    row += 1;
+  });
+
+  return row + 1;
+}
+
+function addSectionHeader(ws: ExcelJS.Worksheet, row: number, label: string): number {
+  ws.mergeCells(row, 1, row, 6);
+  const cell = ws.getCell(row, 1);
+  cell.value = label;
+  cell.fill = SECTION_FILL;
+  cell.font = SECTION_FONT;
+  cell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
+  applyBorders(ws, `A${row}:F${row}`);
+  return row + 1;
+}
+
+function addTableHeader(ws: ExcelJS.Worksheet, row: number, headers: string[]): number {
+  headers.forEach((header, index) => {
+    const cell = ws.getCell(row, index + 1);
+    cell.value = header;
+    cell.fill = HEADER_FILL;
+    cell.font = HEADER_FONT;
+    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+  });
+  applyBorders(ws, `A${row}:F${row}`);
+  ws.getRow(row).height = 24;
+  return row + 1;
+}
+
+function setRowValues(ws: ExcelJS.Worksheet, row: number, values: string[]): number {
+  values.forEach((value, index) => {
+    const cell = ws.getCell(row, index + 1);
+    cell.value = value;
+    cell.alignment = {
+      vertical: index === 3 ? "top" : "middle",
+      horizontal: index === 0 || index === 4 || index === 5 ? "center" : "left",
+      wrapText: true
+    };
+  });
+  applyBorders(ws, `A${row}:F${row}`);
+  ws.getRow(row).height = 36;
+  return row + 1;
+}
+
+function addKeyValueRows(ws: ExcelJS.Worksheet, row: number, rows: Array<[string, string]>): number {
+  rows.forEach(([label, value]) => {
+    ws.getCell(row, 1).value = label;
+    ws.getCell(row, 1).fill = META_LABEL_FILL;
+    ws.getCell(row, 1).font = META_LABEL_FONT;
+    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+    ws.mergeCells(row, 2, row, 6);
+    ws.getCell(row, 2).value = value;
+    ws.getCell(row, 2).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    applyBorders(ws, `A${row}:F${row}`);
+    row += 1;
+  });
+  return row;
+}
+
+function addApprovalRows(ws: ExcelJS.Worksheet, row: number, labels: string[]): number {
+  row = addSectionHeader(ws, row, "확인 및 결재");
+  labels.slice(0, 3).forEach((label, index) => {
+    const startColumn = index * 2 + 1;
+    ws.mergeCells(row, startColumn, row, startColumn + 1);
+    const cell = ws.getCell(row, startColumn);
+    cell.value = `${label}\n서명: ______`;
+    cell.font = { name: "Malgun Gothic", size: 10, bold: true };
+    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+  });
+  applyBorders(ws, `A${row}:F${row}`);
+  ws.getRow(row).height = 50;
+  return row + 1;
+}
+
+function addWorkbookNote(ws: ExcelJS.Worksheet, row: number, note: string): void {
+  ws.mergeCells(row, 1, row, 6);
+  const cell = ws.getCell(row, 1);
+  cell.value = note;
+  cell.font = { name: "Malgun Gothic", size: 10, italic: true, color: { argb: "FF5E6677" } };
+  cell.alignment = { vertical: "middle", horizontal: "left", indent: 1, wrapText: true };
+  applyBorders(ws, `A${row}:F${row}`);
+  ws.pageSetup.printArea = `A1:F${row}`;
+}
+
+function createStructuredWorkbook(sheetName: string): { wb: ExcelJS.Workbook; ws: ExcelJS.Worksheet } {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "SafeClaw";
+  wb.created = new Date();
+  const ws = wb.addWorksheet(sheetName.slice(0, 31), {
+    pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
+  });
+  ws.columns = STRUCTURED_DOC_COLUMNS;
+  return { wb, ws };
+}
+
+function parseWorkPlanStructured(value: StructuredRecord): WorkPlanStructured {
+  const overview = isRecord(value.workOverview) ? value.workOverview : {};
+  const emergency = isRecord(value.emergencyResponse) ? value.emergencyResponse : {};
+  const approvers = isRecord(value.approvers) ? value.approvers : {};
+  const steps = Array.isArray(value.workSteps) ? value.workSteps : [];
+  const contacts = Array.isArray(emergency.contacts) ? emergency.contacts : [];
+  return {
+    workOverview: {
+      workName: readString(overview.workName, "작업명 확인"),
+      description: readString(overview.description, "작업내용 확인"),
+      workerCount: readNumber(overview.workerCount, 0),
+      location: readString(overview.location, "작업장소 확인"),
+      condition: readString(overview.condition, "작업조건 확인"),
+      equipment: readStringArray(overview.equipment)
+    },
+    workSteps: steps.flatMap((item, index): WorkPlanStructured["workSteps"] => {
+      if (!isRecord(item)) return [];
+      return [{
+        stepNo: readNumber(item.stepNo, index + 1),
+        action: readString(item.action, "작업단계 확인"),
+        equipment: readString(item.equipment, "장비 확인"),
+        safetyMeasure: readString(item.safetyMeasure, "안전조치 확인"),
+        owner: readString(item.owner, "담당자 확인")
+      }];
+    }),
+    stopCriteria: readStringArray(value.stopCriteria),
+    emergencyResponse: {
+      contacts: contacts.flatMap((item): WorkPlanStructured["emergencyResponse"]["contacts"] => {
+        if (!isRecord(item)) return [];
+        return [{ role: readString(item.role, "역할 확인"), phone: readString(item.phone, "연락처 확인") }];
+      }),
+      evacRoute: readString(emergency.evacRoute, "대피경로 확인"),
+      firstAid: readString(emergency.firstAid, "응급조치 확인")
+    },
+    approvers: {
+      author: readString(approvers.author, "작성자"),
+      reviewer: readString(approvers.reviewer, "검토자"),
+      approver: readString(approvers.approver, "승인자")
+    }
+  };
+}
+
+function parseTbmBriefingStructured(value: StructuredRecord): TbmBriefingStructured {
+  const meta = isRecord(value.meta) ? value.meta : {};
+  const todayWork = isRecord(value.todayWork) ? value.todayWork : {};
+  const hazards = Array.isArray(value.hazards) ? value.hazards : [];
+  const measures = Array.isArray(value.measures) ? value.measures : [];
+  return {
+    meta: {
+      dateTime: readString(meta.dateTime, "일시 확인"),
+      location: readString(meta.location, "장소 확인"),
+      target: readString(meta.target, "대상 확인"),
+      attendees: readString(meta.attendees, "참석자 확인")
+    },
+    todayWork: {
+      name: readString(todayWork.name, "작업명 확인"),
+      location: readString(todayWork.location, "작업 위치 확인"),
+      time: readString(todayWork.time, "작업 시간 확인"),
+      equipment: readStringArray(todayWork.equipment)
+    },
+    hazards: hazards.flatMap((item): TbmBriefingStructured["hazards"] => {
+      if (!isRecord(item)) return [];
+      const category = readString(item.category, "Management");
+      const safeCategory: TbmBriefingStructured["hazards"][number]["category"] =
+        category === "Man" || category === "Machine" || category === "Media" || category === "Management"
+          ? category
+          : "Management";
+      return [{ category: safeCategory, description: readString(item.description, "위험요인 확인") }];
+    }),
+    measures: measures.flatMap((item): TbmBriefingStructured["measures"] => {
+      if (!isRecord(item)) return [];
+      return [{
+        hazardRef: readNumber(item.hazardRef, 0),
+        action: readString(item.action, "안전대책 확인"),
+        owner: readString(item.owner, "담당자 확인")
+      }];
+    }),
+    stopCriteria: readStringArray(value.stopCriteria),
+    confirmTopics: readStringArray(value.confirmTopics),
+    photoEvidenceLocation: readString(value.photoEvidenceLocation, "사진증빙 위치 확인")
+  };
+}
+
+function parseEducationRecordStructured(value: StructuredRecord): EducationRecordStructured {
+  const curriculum = Array.isArray(value.curriculum) ? value.curriculum : [];
+  const type = readString(value.type, "기타");
+  const safeType: EducationRecordStructured["type"] =
+    type === "정기교육" || type === "특별교육" || type === "외국인교육" || type === "신규자교육" || type === "관리감독자교육"
+      ? type
+      : "기타";
+  return {
+    educationName: readString(value.educationName, "안전보건교육"),
+    type: safeType,
+    dateTime: readString(value.dateTime, "일시 확인"),
+    location: readString(value.location, "장소 확인"),
+    target: readString(value.target, "교육대상 확인"),
+    instructor: readString(value.instructor, "실시자 확인"),
+    confirmer: readString(value.confirmer, "확인자 확인"),
+    curriculum: curriculum.flatMap((item): EducationRecordStructured["curriculum"] => {
+      if (!isRecord(item)) return [];
+      return [{
+        topic: readString(item.topic, "교육 주제 확인"),
+        lawCitation: readString(item.lawCitation, "법령 조항 확인"),
+        keyPoints: readStringArray(item.keyPoints)
+      }];
+    }),
+    understandingCheck: readString(value.understandingCheck, "이해확인 방법 확인"),
+    tbmLink: readString(value.tbmLink, "TBM 연계 확인"),
+    followupRecommendation: readString(value.followupRecommendation, "후속 교육 확인")
+  };
+}
+
+export async function buildWorkPlanStructuredXlsx(
+  scenario: Scenario,
+  structured: StructuredRecord
+): Promise<Buffer> {
+  const data = parseWorkPlanStructured(structured);
+  const { wb, ws } = createStructuredWorkbook("작업계획서");
+  let row = addStructuredTitle(ws, 1, "작업계획서", scenario);
+
+  row = addSectionHeader(ws, row, "작업개요");
+  row = addKeyValueRows(ws, row, [
+    ["작업명", data.workOverview.workName],
+    ["작업내용", data.workOverview.description],
+    ["작업장소", data.workOverview.location],
+    ["작업인원", `${data.workOverview.workerCount || scenario.workerCount || 0}명`],
+    ["작업조건", data.workOverview.condition],
+    ["사용장비", data.workOverview.equipment.join(", ") || "장비 확인"]
+  ]);
+
+  row += 1;
+  row = addSectionHeader(ws, row, "작업단계 및 안전조치");
+  row = addTableHeader(ws, row, ["순번", "작업단계", "사용장비", "안전조치", "담당", "확인"]);
+  data.workSteps.forEach((step) => {
+    row = setRowValues(ws, row, [
+      String(step.stepNo),
+      step.action,
+      step.equipment,
+      step.safetyMeasure,
+      step.owner,
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "작업중지 기준");
+  row = addTableHeader(ws, row, ["No.", "구분", "작업중지 기준", "조치", "담당", "확인"]);
+  data.stopCriteria.forEach((criterion, index) => {
+    row = setRowValues(ws, row, [String(index + 1), "중지기준", criterion, "작업중지 후 관리감독자 보고", "작업반장", "□ 확인"]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "비상대응");
+  row = addTableHeader(ws, row, ["No.", "역할", "연락처", "대응내용", "담당", "확인"]);
+  data.emergencyResponse.contacts.forEach((contact, index) => {
+    row = setRowValues(ws, row, [String(index + 1), contact.role, contact.phone, "비상상황 즉시 연락", contact.role, "□ 확인"]);
+  });
+  row = addKeyValueRows(ws, row, [
+    ["대피경로", data.emergencyResponse.evacRoute],
+    ["응급조치", data.emergencyResponse.firstAid]
+  ]);
+
+  row += 1;
+  row = addApprovalRows(ws, row, [data.approvers.author, data.approvers.reviewer, data.approvers.approver]);
+  addWorkbookNote(ws, row, "본 작업계획서는 structured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 현장 확인 후 결재 및 서명하세요.");
+
+  const buffer = await wb.xlsx.writeBuffer();
+  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+}
+
+export async function buildTbmBriefingStructuredXlsx(
+  scenario: Scenario,
+  structured: StructuredRecord
+): Promise<Buffer> {
+  const data = parseTbmBriefingStructured(structured);
+  const { wb, ws } = createStructuredWorkbook("TBM 브리핑");
+  let row = addStructuredTitle(ws, 1, "TBM 브리핑", scenario);
+
+  row = addSectionHeader(ws, row, "TBM 기본정보");
+  row = addKeyValueRows(ws, row, [
+    ["일시", data.meta.dateTime],
+    ["장소", data.meta.location],
+    ["대상", data.meta.target],
+    ["참석자 확인", data.meta.attendees],
+    ["오늘 작업", data.todayWork.name],
+    ["작업 위치", data.todayWork.location],
+    ["작업 시간", data.todayWork.time],
+    ["사용 장비", data.todayWork.equipment.join(", ") || "장비 확인"]
+  ]);
+
+  row += 1;
+  row = addSectionHeader(ws, row, "위험요인");
+  row = addTableHeader(ws, row, ["No.", "4M", "위험요인", "전달문구", "담당", "확인"]);
+  data.hazards.forEach((hazard, index) => {
+    row = setRowValues(ws, row, [String(index + 1), hazard.category, hazard.description, "작업 전 전원 공유", "TBM 리더", "□ 확인"]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "안전대책");
+  row = addTableHeader(ws, row, ["No.", "연계위험", "조치내용", "실행기준", "담당", "확인"]);
+  data.measures.forEach((measure, index) => {
+    row = setRowValues(ws, row, [String(index + 1), `위험 ${measure.hazardRef}`, measure.action, "작업 전 확인", measure.owner, "□ 확인"]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "작업중지 기준");
+  row = addTableHeader(ws, row, ["No.", "구분", "작업중지 기준", "조치", "담당", "확인"]);
+  data.stopCriteria.forEach((criterion, index) => {
+    row = setRowValues(ws, row, [String(index + 1), "중지기준", criterion, "중지·격리·보고", "관리감독자", "□ 확인"]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "확인질문");
+  row = addTableHeader(ws, row, ["No.", "구분", "확인질문", "응답기준", "담당", "확인"]);
+  data.confirmTopics.forEach((topic, index) => {
+    row = setRowValues(ws, row, [String(index + 1), "확인질문", topic, "작업자 구두 복창", "TBM 리더", "□ 확인"]);
+  });
+  row = addKeyValueRows(ws, row, [["사진증빙", data.photoEvidenceLocation]]);
+
+  row += 1;
+  row = addApprovalRows(ws, row, ["TBM 리더", "관리감독자", "참석자 대표"]);
+  addWorkbookNote(ws, row, "본 TBM 브리핑은 structured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 브리핑 후 참석자 확인과 사진증빙을 보관하세요.");
+
+  const buffer = await wb.xlsx.writeBuffer();
+  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+}
+
+export async function buildEducationRecordStructuredXlsx(
+  scenario: Scenario,
+  structured: StructuredRecord
+): Promise<Buffer> {
+  const data = parseEducationRecordStructured(structured);
+  const { wb, ws } = createStructuredWorkbook("안전보건교육");
+  let row = addStructuredTitle(ws, 1, "안전보건교육 기록", scenario);
+
+  row = addSectionHeader(ws, row, "교육 기본정보");
+  row = addKeyValueRows(ws, row, [
+    ["교육명", data.educationName],
+    ["교육유형", data.type],
+    ["일시", data.dateTime],
+    ["장소", data.location],
+    ["교육대상", data.target],
+    ["실시자", data.instructor],
+    ["확인자", data.confirmer]
+  ]);
+
+  row += 1;
+  row = addSectionHeader(ws, row, "교육내용");
+  row = addTableHeader(ws, row, ["No.", "교육유형", "주제", "핵심내용", "법령근거", "확인"]);
+  data.curriculum.forEach((item, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      data.type,
+      item.topic,
+      item.keyPoints.join("\n") || "핵심내용 확인",
+      item.lawCitation,
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "이해확인 및 후속조치");
+  row = addKeyValueRows(ws, row, [
+    ["이해확인", data.understandingCheck],
+    ["TBM 연계", data.tbmLink],
+    ["후속 교육", data.followupRecommendation]
+  ]);
+
+  row += 1;
+  row = addSectionHeader(ws, row, "참석자 확인");
+  row = addTableHeader(ws, row, ["No.", "성명", "소속/직책", "이해확인", "서명", "비고"]);
+  ["1", "2", "3", "4", "5"].forEach((no) => {
+    row = setRowValues(ws, row, [no, "", "", "□ 이해함", "서명: ______", ""]);
+  });
+
+  row += 1;
+  row = addApprovalRows(ws, row, [data.instructor, data.confirmer, "보관담당"]);
+  addWorkbookNote(ws, row, "본 안전보건교육 기록은 structured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 교육 후 참석자 서명과 이해확인을 남기세요.");
+
+  const buffer = await wb.xlsx.writeBuffer();
+  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
 }
 
 /**
