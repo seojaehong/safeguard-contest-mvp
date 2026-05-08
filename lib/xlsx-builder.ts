@@ -56,19 +56,53 @@ export type XlsxBuildInput = {
   structuredRiskRows?: StructuredRiskAssessmentRow[];
 };
 
+// KOSHA-aligned 19 columns: No. + 18 contract columns from PR #28 form-schema-gate.
+// Order matches scripts/safeclaw_form_schema_gate.mjs riskAssessmentColumnContract.
+const RISK_TABLE_HEADERS = [
+  "No.",
+  "작업장소",
+  "공정",
+  "세부작업",
+  "장비·도구",
+  "유해·위험요인",
+  "4M",
+  "재해유형",
+  "현재 안전조치",
+  "가능성",
+  "중대성",
+  "위험성",
+  "감소대책",
+  "담당자",
+  "조치기한",
+  "확인상태",
+  "확인일",
+  "확인자",
+  "근거"
+] as const;
+const RISK_TABLE_LAST_COL = RISK_TABLE_HEADERS.length; // 19
+const RISK_TABLE_LAST_COL_LETTER = "S"; // 19th column
+
 function applyRiskAssessmentColumns(ws: ExcelJS.Worksheet) {
   ws.columns = [
-    { width: 6 },
-    { width: 18 },
-    { width: 26 },
-    { width: 28 },
-    { width: 10 },
-    { width: 10 },
-    { width: 10 },
-    { width: 34 },
-    { width: 14 },
-    { width: 14 },
-    { width: 12 }
+    { width: 5 },   // No.
+    { width: 16 },  // 작업장소
+    { width: 14 },  // 공정
+    { width: 18 },  // 세부작업
+    { width: 14 },  // 장비·도구
+    { width: 26 },  // 유해·위험요인
+    { width: 8 },   // 4M
+    { width: 12 },  // 재해유형
+    { width: 22 },  // 현재 안전조치
+    { width: 7 },   // 가능성
+    { width: 7 },   // 중대성
+    { width: 9 },   // 위험성
+    { width: 26 },  // 감소대책
+    { width: 12 },  // 담당자
+    { width: 12 },  // 조치기한
+    { width: 10 },  // 확인상태
+    { width: 12 },  // 확인일
+    { width: 12 },  // 확인자
+    { width: 22 }   // 근거
   ];
 }
 
@@ -78,60 +112,62 @@ function writeOfficialLikeRiskAssessmentTable(
   rows: StructuredRiskAssessmentRow[]
 ): number {
   let row = startRow;
-  ws.mergeCells(row, 1, row, 11);
+  ws.mergeCells(row, 1, row, RISK_TABLE_LAST_COL);
   ws.getCell(row, 1).value = "위험성평가표";
   ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 12, bold: true };
   row += 1;
 
-  const headers = [
-    "No.",
-    "세부작업",
-    "유해·위험요인",
-    "현재 안전보건조치",
-    "가능성",
-    "중대성",
-    "위험성",
-    "감소대책",
-    "담당",
-    "완료예정",
-    "조치확인"
-  ];
-  headers.forEach((header, index) => {
+  RISK_TABLE_HEADERS.forEach((header, index) => {
     const cell = ws.getCell(row, index + 1);
     cell.value = header;
     cell.fill = HEADER_FILL;
     cell.font = HEADER_FONT;
     cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
   });
-  applyBorders(ws, `A${row}:K${row}`);
-  ws.getRow(row).height = 26;
+  applyBorders(ws, `A${row}:${RISK_TABLE_LAST_COL_LETTER}${row}`);
+  ws.getRow(row).height = 28;
   row += 1;
 
+  // Index reference for alignment rules (0-based column index = headers index)
+  const wrapColumns = new Set([5, 8, 12, 18]); // hazard, currentControls, additionalControls, 근거
+  const centerColumns = new Set([0, 6, 9, 10, 11, 15, 16]); // No./4M/L/S/RL/확인상태/확인일
+
   rows.forEach((riskRow, index) => {
+    const evidenceText = riskRow.evidenceRefsList && riskRow.evidenceRefsList.length
+      ? riskRow.evidenceRefsList.join("\n")
+      : (riskRow.evidence || "");
     const values = [
-      riskRow.id || String(index + 1),
-      riskRow.unitTask,
-      riskRow.hazard,
-      riskRow.currentControls || "현장 확인",
-      riskRow.likelihood || "확인",
-      riskRow.severity || "확인",
-      riskRow.riskLevel || "확인",
-      riskRow.additionalControls,
-      riskRow.owner || "작업반장",
-      riskRow.dueDate || "작업 전",
-      riskRow.status || "□"
+      riskRow.id || String(index + 1),                                  // 1 No.
+      riskRow.location || "",                                           // 2 작업장소
+      riskRow.process || riskRow.section || "",                         // 3 공정
+      riskRow.unitTask,                                                 // 4 세부작업
+      riskRow.equipment || "",                                          // 5 장비·도구
+      riskRow.hazard,                                                   // 6 유해·위험요인
+      riskRow.fourM || "",                                              // 7 4M
+      riskRow.accidentType || "",                                       // 8 재해유형
+      riskRow.currentControls || "현장 확인",                            // 9 현재 안전조치
+      riskRow.likelihood || "확인",                                     // 10 가능성
+      riskRow.severity || "확인",                                       // 11 중대성
+      riskRow.riskLevel || "확인",                                      // 12 위험성
+      riskRow.additionalControls,                                       // 13 감소대책
+      riskRow.owner || "작업반장",                                       // 14 담당자
+      riskRow.dueDate || "작업 전",                                      // 15 조치기한
+      riskRow.verificationStatus || riskRow.status || "□",              // 16 확인상태
+      riskRow.verificationDate || "",                                   // 17 확인일
+      riskRow.verificationChecker || "",                                // 18 확인자
+      evidenceText                                                      // 19 근거
     ];
     values.forEach((value, columnIndex) => {
       const cell = ws.getCell(row, columnIndex + 1);
       cell.value = value;
       cell.alignment = {
-        vertical: columnIndex === 2 || columnIndex === 3 || columnIndex === 7 ? "top" : "middle",
-        horizontal: columnIndex === 0 || (columnIndex >= 4 && columnIndex <= 6) || columnIndex === 10 ? "center" : "left",
+        vertical: wrapColumns.has(columnIndex) ? "top" : "middle",
+        horizontal: centerColumns.has(columnIndex) ? "center" : "left",
         wrapText: true
       };
     });
-    applyBorders(ws, `A${row}:K${row}`);
-    ws.getRow(row).height = 42;
+    applyBorders(ws, `A${row}:${RISK_TABLE_LAST_COL_LETTER}${row}`);
+    ws.getRow(row).height = 48;
     row += 1;
   });
 
@@ -195,8 +231,8 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   let row = 1;
 
   // 1) Cover
-  const lastColumn = isStructuredRiskSheet ? 11 : 6;
-  const lastColumnLetter = isStructuredRiskSheet ? "K" : "F";
+  const lastColumn = isStructuredRiskSheet ? RISK_TABLE_LAST_COL : 6;
+  const lastColumnLetter = isStructuredRiskSheet ? RISK_TABLE_LAST_COL_LETTER : "F";
 
   ws.mergeCells(row, 1, row, lastColumn);
   const coverCell = ws.getCell(row, 1);
@@ -433,7 +469,7 @@ export async function buildWorkpackXlsx(
     }
 
     let row = 1;
-    ws.mergeCells(row, 1, row, isStructuredRiskSheet ? 11 : 6);
+    ws.mergeCells(row, 1, row, isStructuredRiskSheet ? RISK_TABLE_LAST_COL : 6);
     ws.getCell(row, 1).value = doc.title;
     ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 14, bold: true, color: { argb: "FF1F4D43" } };
     ws.getRow(row).height = 26;
