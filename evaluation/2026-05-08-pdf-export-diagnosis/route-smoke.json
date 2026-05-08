@@ -1,0 +1,8 @@
+{
+  "pdf_status": 200,
+  "pdf_content_type": "application/pdf",
+  "pdf_prefix": "%PDF-1.4",
+  "html_status": 200,
+  "html_content_type": "text/html; charset=utf-8",
+  "html_prefix": "<!doctype html>"
+}
