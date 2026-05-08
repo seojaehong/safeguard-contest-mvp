@@ -1,0 +1,268 @@
+{
+  "checkedAt": "2026-05-08T11:09:33.698Z",
+  "target": "http://127.0.0.1:3210",
+  "assertions": [
+    "language matrix renders exactly 10 cells",
+    "desktop language matrix renders as 5 columns x 2 rows",
+    "multilingual labels are present in the DOM"
+  ],
+  "results": [
+    {
+      "viewportName": "desktop-1440",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "url": "http://127.0.0.1:3210/",
+      "screenshot": "desktop-1440-language-grid.png",
+      "itemCount": 10,
+      "gridTemplateColumns": "276.391px 276.406px 276.391px 276.406px 276.391px",
+      "rects": [
+        {
+          "code": "",
+          "title": "한국어",
+          "label": ":한국어",
+          "x": 29,
+          "y": 276,
+          "width": 276,
+          "height": 229
+        },
+        {
+          "code": "",
+          "title": "Tiếng Việt",
+          "label": ":Tiếng Việt",
+          "x": 305,
+          "y": 276,
+          "width": 276,
+          "height": 229
+        },
+        {
+          "code": "",
+          "title": "ภาษาไทย",
+          "label": ":ภาษาไทย",
+          "x": 582,
+          "y": 276,
+          "width": 276,
+          "height": 229
+        },
+        {
+          "code": "",
+          "title": "O'zbek",
+          "label": ":O'zbek",
+          "x": 858,
+          "y": 276,
+          "width": 276,
+          "height": 229
+        },
+        {
+          "code": "",
+          "title": "Монгол",
+          "label": ":Монгол",
+          "x": 1135,
+          "y": 276,
+          "width": 276,
+          "height": 229
+        },
+        {
+          "code": "",
+          "title": "中文",
+          "label": ":中文",
+          "x": 29,
+          "y": 505,
+          "width": 276,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "ភាសាខ្មែរ",
+          "label": ":ភាសាខ្មែរ",
+          "x": 305,
+          "y": 505,
+          "width": 276,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "नेपाली",
+          "label": ":नेपाली",
+          "x": 582,
+          "y": 505,
+          "width": 276,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "Bahasa",
+          "label": ":Bahasa",
+          "x": 858,
+          "y": 505,
+          "width": 276,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "မြန်မာ",
+          "label": ":မြန်မာ",
+          "x": 1135,
+          "y": 505,
+          "width": 276,
+          "height": 220
+        }
+      ],
+      "rows": [
+        {
+          "y": 276,
+          "count": 5,
+          "labels": [
+            ":한국어",
+            ":Tiếng Việt",
+            ":ภาษาไทย",
+            ":O'zbek",
+            ":Монгол"
+          ]
+        },
+        {
+          "y": 505,
+          "count": 5,
+          "labels": [
+            ":中文",
+            ":ភាសាខ្មែរ",
+            ":नेपाली",
+            ":Bahasa",
+            ":မြန်မာ"
+          ]
+        }
+      ],
+      "pass": true
+    },
+    {
+      "viewportName": "wide-1920",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "url": "http://127.0.0.1:3210/",
+      "screenshot": "wide-1920-language-grid.png",
+      "itemCount": 10,
+      "gridTemplateColumns": "372.391px 372.406px 372.391px 372.406px 372.391px",
+      "rects": [
+        {
+          "code": "",
+          "title": "한국어",
+          "label": ":한국어",
+          "x": 29,
+          "y": 320,
+          "width": 372,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "Tiếng Việt",
+          "label": ":Tiếng Việt",
+          "x": 401,
+          "y": 320,
+          "width": 372,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "ภาษาไทย",
+          "label": ":ภาษาไทย",
+          "x": 774,
+          "y": 320,
+          "width": 372,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "O'zbek",
+          "label": ":O'zbek",
+          "x": 1146,
+          "y": 320,
+          "width": 372,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "Монгол",
+          "label": ":Монгол",
+          "x": 1519,
+          "y": 320,
+          "width": 372,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "中文",
+          "label": ":中文",
+          "x": 29,
+          "y": 540,
+          "width": 372,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "ភាសាខ្មែរ",
+          "label": ":ភាសាខ្មែរ",
+          "x": 401,
+          "y": 540,
+          "width": 372,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "नेपाली",
+          "label": ":नेपाली",
+          "x": 774,
+          "y": 540,
+          "width": 372,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "Bahasa",
+          "label": ":Bahasa",
+          "x": 1146,
+          "y": 540,
+          "width": 372,
+          "height": 220
+        },
+        {
+          "code": "",
+          "title": "မြန်မာ",
+          "label": ":မြန်မာ",
+          "x": 1519,
+          "y": 540,
+          "width": 372,
+          "height": 220
+        }
+      ],
+      "rows": [
+        {
+          "y": 320,
+          "count": 5,
+          "labels": [
+            ":한국어",
+            ":Tiếng Việt",
+            ":ภาษาไทย",
+            ":O'zbek",
+            ":Монгол"
+          ]
+        },
+        {
+          "y": 540,
+          "count": 5,
+          "labels": [
+            ":中文",
+            ":ភាសាខ្មែរ",
+            ":नेपाली",
+            ":Bahasa",
+            ":မြန်မာ"
+          ]
+        }
+      ],
+      "pass": true
+    }
+  ],
+  "pass": true
+}

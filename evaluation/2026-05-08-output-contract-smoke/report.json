@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-05-08T10:46:33.677Z",
+  "baseUrl": "http://127.0.0.1:3110",
+  "xlsx": {
+    "ok": true,
+    "httpStatus": 200,
+    "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "filePath": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\2026-05-08-output-contract-smoke\\files\\risk-assessment-contract.xlsx",
+    "bytes": 8291,
+    "sheetName": "위험성평가표",
+    "expectedHeaderCount": 18,
+    "missingHeaders": []
+  },
+  "pdf": {
+    "ok": true,
+    "httpStatus": 200,
+    "contentType": "application/pdf",
+    "filePath": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\2026-05-08-output-contract-smoke\\files\\risk-assessment-contract.pdf",
+    "bytes": 3416,
+    "magic": "%PDF-",
+    "looksLikeHtml": false
+  },
+  "sourceContracts": {
+    "tbmRiskLinksGenerated": true,
+    "tbmRiskLinksExposed": true,
+    "xlsxUsesKoshasHeaders": true
+  },
+  "elapsedMs": 165,
+  "overall": "pass"
+}

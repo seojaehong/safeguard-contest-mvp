@@ -2132,7 +2132,7 @@ export function WorkpackEditor({
     popup.document.close();
 
     try {
-      const response = await fetch("/api/export/pdf", {
+      const response = await fetch("/api/export/pdf?format=html", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -2149,6 +2149,10 @@ export function WorkpackEditor({
       });
       if (!response.ok) {
         throw new Error(`PDF print source failed with ${response.status}`);
+      }
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("text/html")) {
+        throw new Error(`PDF print source returned unexpected content type: ${contentType || "unknown"}`);
       }
       const html = await response.text();
       popup.document.open();

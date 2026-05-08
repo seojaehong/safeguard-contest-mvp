@@ -12,7 +12,7 @@
 // ≈ 22K-50K tokens output) and 60s timeout on long-context cases. Splitting makes each
 // call ≤ 5K tokens output, ≤ 30s wall, and isolates failures to the affected doc only.
 
-import type { AskResponse, SearchResult, WorkPlanStructured, TbmBriefingStructured, EducationRecordStructured } from "@/lib/types";
+import type { AskResponse, SearchResult, WorkPlanStructured, TbmBriefingStructured, EducationRecordStructured, TbmRiskLink } from "@/lib/types";
 import {
   ACCIDENT_TYPE_VALUES,
   FORM_SCHEMA_REGISTRY,
@@ -415,6 +415,55 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
   ].join("\n");
 }
 
+function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
+  const compactRows = rows.slice(0, 7).map((row, index) => ({
+    riskRowIndex: index,
+    hazard: row.hazard,
+    currentControls: row.currentControls,
+    additionalControls: row.additionalControls,
+    owner: row.owner,
+    verification: row.verification,
+    verificationChecker: row.verificationChecker,
+    evidenceRefs: row.evidenceRefs
+  }));
+  return [
+    persona(),
+    "",
+    "위험성평가 rows를 TBM에서 바로 확인할 수 있는 연결 질문 JSON으로 변환하라.",
+    "산문, 마크다운, 설명, 코드 fence 금지. 최상위 객체는 반드시 {\"tbmRiskLinks\":[...]} 형태.",
+    "",
+    "필수 규칙:",
+    "  - tbmRiskLinks는 입력 risk rows 중 TBM에서 공유해야 할 핵심 행 3~6개를 고른다.",
+    "  - riskRowIndex는 아래 입력 배열의 0부터 시작하는 인덱스다. 없는 행을 참조하지 않는다.",
+    "  - hazard는 연결된 risk row의 hazard 표현을 그대로 재사용한다.",
+    "  - control은 해당 row의 additionalControls 또는 currentControls를 TBM 행동 문장으로 짧게 바꾼다.",
+    "  - weatherSignal은 기상 신호와 현장 조건을 연결한 1줄 문장이다.",
+    "  - confirmQuestion은 작업자가 예/아니오로 답할 수 있는 확인 질문이다.",
+    "  - owner, verification, evidenceRefs를 반드시 채운다.",
+    "",
+    "응답 JSON 스키마:",
+    `{
+  "tbmRiskLinks": [
+    {
+      "riskRowIndex": 0,
+      "hazard": "string",
+      "control": "string",
+      "weatherSignal": "string",
+      "confirmQuestion": "string",
+      "owner": "string",
+      "verification": "string",
+      "evidenceRefs": ["string"]
+    }
+  ]
+}`,
+    "",
+    "[입력 risk rows]",
+    JSON.stringify(compactRows, null, 2),
+    "",
+    contextBlock(ctx)
+  ].join("\n");
+}
+
 function freeFormPrompt(ctx: GenContext) {
   return [
     persona(),
@@ -480,6 +529,7 @@ export type AiDeliverables = Partial<{
   kakaoMessage: string;
   structuredRiskRows: RiskAssessmentRow[];
   structuredRiskRowsValidationIssues: RiskAssessmentValidationIssue[];
+  tbmRiskLinks: TbmRiskLink[];
 }>;
 
 export type AiMode = "template" | "enhanced" | "full";
@@ -587,6 +637,67 @@ function parseStructuredRiskRows(raw: string): Partial<AiDeliverables> | null {
   if (validation.issues.length) out.structuredRiskRowsValidationIssues = validation.issues;
   return out;
 }
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function stringOrFallback(value: unknown, fallback: string): string {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : fallback;
+}
+
+function parseTbmRiskLinks(raw: string, rows: RiskAssessmentRow[]): Partial<AiDeliverables> | null {
+  const parsed = safeParseJson<unknown>(raw);
+  const linksValue = isRecord(parsed) ? parsed.tbmRiskLinks : Array.isArray(parsed) ? parsed : null;
+  if (!Array.isArray(linksValue)) return null;
+
+  const links: TbmRiskLink[] = [];
+  const seenIndexes = new Set<number>();
+  for (const value of linksValue) {
+    if (!isRecord(value)) continue;
+    const riskRowIndexValue = value.riskRowIndex;
+    if (typeof riskRowIndexValue !== "number" || !Number.isInteger(riskRowIndexValue)) continue;
+    const riskRowIndex = riskRowIndexValue;
+    const row = rows[riskRowIndex];
+    if (!row || seenIndexes.has(riskRowIndex)) continue;
+
+    const control = stringOrFallback(value.control, row.additionalControls || row.currentControls || "작업 전 안전조치를 확인합니다.");
+    const owner = stringOrFallback(value.owner, row.owner || "작업반장");
+    const verification = stringOrFallback(value.verification, row.verification || "TBM 기록과 현장 확인으로 검증합니다.");
+    const evidenceRefsValue = value.evidenceRefs;
+    const evidenceRefs = Array.isArray(evidenceRefsValue)
+      ? evidenceRefsValue.filter((ref): ref is string => typeof ref === "string" && ref.trim().length > 0).map((ref) => ref.trim())
+      : row.evidenceRefs || [];
+
+    links.push({
+      riskRowIndex,
+      hazard: row.hazard,
+      control,
+      weatherSignal: stringOrFallback(value.weatherSignal, "기상청 현재·예보 신호와 현장 체감 조건을 함께 확인합니다."),
+      confirmQuestion: stringOrFallback(value.confirmQuestion, `${row.hazard} 위험에 대해 ${control} 조치를 이해하고 작업 전 확인했습니까?`),
+      owner,
+      verification,
+      evidenceRefs
+    });
+    seenIndexes.add(riskRowIndex);
+  }
+
+  return links.length ? { tbmRiskLinks: links.slice(0, 6) } : null;
+}
+
+async function generateTbmRiskLinks(ctx: GenContext, rows: RiskAssessmentRow[]): Promise<Partial<AiDeliverables>> {
+  if (!rows.length) return { tbmRiskLinks: [] };
+  try {
+    return await callAndParse(
+      tbmRiskLinksPrompt(ctx, rows),
+      (raw) => parseTbmRiskLinks(raw, rows),
+      "tbmRiskLinks"
+    );
+  } catch (error) {
+    console.error("[AI tbmRiskLinks] falling back to []", error);
+    return { tbmRiskLinks: [] };
+  }
+}
 function parseFree(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   if (!j) return null;
@@ -664,6 +775,7 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
   for (const s of settled) {
     if (s.status === "fulfilled") Object.assign(out, s.value);
   }
+  Object.assign(out, await generateTbmRiskLinks(ctx, out.structuredRiskRows || []));
   return out;
 }
 
@@ -729,6 +841,14 @@ export async function generateAllDeliverablesWithDiagnostics(
         reason: s.reason instanceof Error ? s.reason.message : String(s.reason)
       });
     }
+  });
+
+  const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || []);
+  Object.assign(out, tbmRiskLinksResult);
+  groupResults.push({
+    group: "tbmRiskLinks",
+    status: (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0 ? "fulfilled" : "rejected",
+    reason: (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0 ? undefined : "empty or skipped"
   });
 
   return {
