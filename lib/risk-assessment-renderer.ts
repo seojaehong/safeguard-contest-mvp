@@ -12,6 +12,19 @@ export type StructuredRiskAssessmentRow = {
   dueDate?: string;
   status?: string;
   evidence?: string;
+  // PR #28 schema fields preserved additively for KOSHA-aligned renderers.
+  // All optional so legacy callers (sheet-row fallbacks) keep working.
+  location?: string;
+  process?: string;
+  equipment?: string;
+  fourM?: string;
+  accidentType?: string;
+  verificationStatus?: string;
+  verificationDate?: string;
+  verificationChecker?: string;
+  whyLikelihood?: string;
+  whySeverity?: string;
+  evidenceRefsList?: string[];
 };
 
 type SheetRow = {
@@ -38,7 +51,7 @@ export function parseStructuredRiskAssessmentRows(value: unknown): StructuredRis
   if (!Array.isArray(value)) return [];
   return value.flatMap((item): StructuredRiskAssessmentRow[] => {
     if (!isRecord(item)) return [];
-    const process = readString(item, ["process", "section", "category", "phase"]);
+    const processName = readString(item, ["process", "section", "category", "phase"]);
     const unitTask = readString(item, ["unitTask", "task", "activity", "work", "workStep", "process"]);
     const hazard = readString(item, ["hazard", "hazardFactor", "riskFactor", "danger", "유해위험요인"]);
     const additionalControls = readString(item, [
@@ -53,9 +66,13 @@ export function parseStructuredRiskAssessmentRows(value: unknown): StructuredRis
     ]);
     if (!unitTask && !hazard && !additionalControls) return [];
 
+    const evidenceRefsList = Array.isArray(item.evidenceRefs)
+      ? item.evidenceRefs.filter((ref): ref is string => typeof ref === "string")
+      : [];
+
     return [{
       id: readString(item, ["id", "no"]),
-      section: process || "위험성평가",
+      section: processName || "위험성평가",
       unitTask: unitTask || "세부작업 확인",
       hazard: hazard || "유해·위험요인 확인",
       currentControls: readString(item, ["currentControls", "currentControl", "existingControls", "safetyMeasures", "현재조치"]),
@@ -66,8 +83,19 @@ export function parseStructuredRiskAssessmentRows(value: unknown): StructuredRis
       owner: readString(item, ["owner", "assignee", "personInCharge", "담당자"], "작업반장"),
       dueDate: readString(item, ["dueDate", "due", "deadline", "targetDate", "기한"], "작업 전"),
       status: readString(item, ["status", "completionStatus", "verification", "확인"], "□"),
-      evidence: readString(item, ["evidence", "proof", "attachment", "증빙"])
-        || (Array.isArray(item.evidenceRefs) ? item.evidenceRefs.filter((ref): ref is string => typeof ref === "string").join(", ") : "")
+      evidence: readString(item, ["evidence", "proof", "attachment", "증빙"]) || evidenceRefsList.join(", "),
+      // KOSHA 18-column fields (additive, optional)
+      location: readString(item, ["location", "workLocation", "작업장소"]),
+      process: processName,
+      equipment: readString(item, ["equipment", "tool", "tools", "장비", "장비도구"]),
+      fourM: readString(item, ["fourM", "fourMCategory", "4M"]),
+      accidentType: readString(item, ["accidentType", "재해유형"]),
+      verificationStatus: readString(item, ["verificationStatus", "확인상태"]),
+      verificationDate: readString(item, ["verificationDate", "확인일"]),
+      verificationChecker: readString(item, ["verificationChecker", "확인자"]),
+      whyLikelihood: readString(item, ["whyLikelihood"]),
+      whySeverity: readString(item, ["whySeverity"]),
+      evidenceRefsList
     }];
   });
 }
