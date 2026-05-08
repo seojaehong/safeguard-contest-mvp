@@ -333,8 +333,23 @@ export function buildSourceMix(citations: SearchResult[]): NonNullable<AskRespon
 const defaultQuestion = "서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 오후 강풍 예보. 오늘 TBM과 위험성평가 초안을 만들어줘.";
 
 function inferWorkerCount(question: string) {
-  const workerMatch = question.match(/(\d+)\s*(?:인\s*)?(?:1조|명|인\b)/);
-  return workerMatch ? Number(workerMatch[1]) : 5;
+  const compact = question.replace(/\s+/g, " ");
+  const totalPatterns = [
+    /(?:총\s*작업자|전체\s*작업자|작업자\s*총|총\s*작업인원|작업인원\s*총|투입\s*인원|전체\s*인원|참석\s*대상)\s*(\d+)\s*명/g,
+    /(?:작업자|작업인원|인력|참석)\s*(\d+)\s*명/g
+  ];
+  const subgroupHints = /(외국인|신규|고령|숙련|운전자|피킹|감시자|관리자)\s*$/;
+
+  for (const pattern of totalPatterns) {
+    for (const match of compact.matchAll(pattern)) {
+      const before = compact.slice(Math.max(0, (match.index || 0) - 12), match.index || 0);
+      if (subgroupHints.test(before)) continue;
+      return Number(match[1]);
+    }
+  }
+
+  const allCounts = [...compact.matchAll(/(\d+)\s*명/g)].map((match) => Number(match[1]));
+  return allCounts.length ? Math.max(...allCounts) : 5;
 }
 
 function inferCompanyName(question: string) {
@@ -356,6 +371,21 @@ function inferCustomWorkName(question: string) {
   if (/화기|용접|절단/.test(question)) return "화기작업";
   if (/지게차|상하차|운반/.test(question)) return "운반·상하차 작업";
   return "비정형 현장 작업";
+}
+
+function inferSiteName(question: string, fallback: string) {
+  const siteRules: Array<[RegExp, string]> = [
+    [/서울\s*성수동|성수동/, "서울 성수동 근린생활시설 현장"],
+    [/인천\s*남동공단|남동공단/, "인천 남동공단 물류센터"],
+    [/경기\s*안산|안산/, "경기 안산 제조공장"],
+    [/부산\s*해운대|해운대/, "부산 해운대 시설관리 현장"],
+    [/광주\s*하남산단|하남산단/, "광주 하남산단 청소 현장"],
+    [/대구\s*달서구|달서구/, "대구 달서구 창고 현장"]
+  ];
+
+  const matchedRule = siteRules.find(([pattern]) => pattern.test(question));
+  if (matchedRule) return matchedRule[1];
+  return fallback;
 }
 
 function buildCustomScenarioProfile(question: string): ScenarioProfile {
@@ -479,12 +509,13 @@ function inferScenario(question: string) {
   const normalized = question.trim() || defaultQuestion;
   const workerCount = inferWorkerCount(normalized);
   const profile = pickScenarioProfile(normalized);
+  const inferredCompanyName = inferCompanyName(normalized);
   const workSummary = sanitizeWorkSummary(normalized, profile.workName);
 
   return {
-    companyName: profile.companyName,
+    companyName: inferredCompanyName === "현장 업체" ? profile.companyName : inferredCompanyName,
     companyType: profile.companyType,
-    siteName: profile.siteName,
+    siteName: inferSiteName(normalized, profile.siteName),
     workSummary,
     workerCount,
     weatherNote: normalized.includes("강풍")

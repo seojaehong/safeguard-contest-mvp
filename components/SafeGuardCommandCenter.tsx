@@ -217,8 +217,24 @@ function inferWorkSummaryFromText(text: string, fallback: string) {
 }
 
 function inferWorkerCountFromText(text: string) {
-  const countMatch = text.match(/(?:작업자|근로자|인력|참석|총)?\s*(\d+)\s*명/);
-  return countMatch ? `${countMatch[1]}명` : "입력 필요";
+  const compact = text.replace(/\s+/g, " ");
+  const totalPatterns = [
+    /(?:총\s*작업자|전체\s*작업자|작업자\s*총|총\s*작업인원|작업인원\s*총|투입\s*인원|전체\s*인원|참석\s*대상)\s*(\d+)\s*명/g,
+    /(?:작업자|작업인원|인력|참석)\s*(\d+)\s*명/g
+  ];
+  const subgroupHints = /(외국인|신규|고령|숙련|운전자|피킹|감시자|관리자)\s*$/;
+
+  for (const pattern of totalPatterns) {
+    for (const match of compact.matchAll(pattern)) {
+      const before = compact.slice(Math.max(0, (match.index || 0) - 12), match.index || 0);
+      if (subgroupHints.test(before)) continue;
+      return `${match[1]}명`;
+    }
+  }
+
+  const allCounts = [...compact.matchAll(/(\d+)\s*명/g)].map((match) => Number(match[1]));
+  if (allCounts.length) return `${Math.max(...allCounts)}명`;
+  return "입력 필요";
 }
 
 function inferWeatherFromText(text: string, fallback: string) {
@@ -469,10 +485,10 @@ export function SafeGuardCommandCenter({
   const [editorFocusToken, setEditorFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
-    if (typeof window === "undefined") return "template";
+    if (typeof window === "undefined") return "enhanced";
     const stored = window.localStorage.getItem("safeclaw.aiMode");
-    if (stored === "template" || stored === "enhanced" || stored === "full") return stored;
-    return "template";
+    if (stored === "enhanced" || stored === "full") return stored;
+    return "enhanced";
   });
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -779,7 +795,7 @@ export function SafeGuardCommandCenter({
                   disabled={busy}
                 />
                 <span>
-                  <strong>템플릿 (기본)</strong>
+                  <strong>템플릿 (빠른 생성)</strong>
                   <small>응답 5–15초 · 무료 · 검증된 본문</small>
                 </span>
               </label>
@@ -793,7 +809,7 @@ export function SafeGuardCommandCenter({
                   disabled={busy}
                 />
                 <span>
-                  <strong>강화 (Gemini 표 5종)</strong>
+                  <strong>강화 (기본)</strong>
                   <small>응답 +5–15초 · 위험성평가/TBM 본문 시나리오 맞춤 생성</small>
                 </span>
               </label>
