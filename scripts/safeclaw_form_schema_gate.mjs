@@ -24,9 +24,12 @@ const accidentTypeValues = [
   "other"
 ];
 const riskLevelValues = ["low", "medium", "high"];
+const verificationStatusValues = ["planned", "done", "needsReview"];
 const requiredFields = [
+  "location",
   "process",
   "task",
+  "equipment",
   "hazard",
   "fourM",
   "accidentType",
@@ -38,19 +41,26 @@ const requiredFields = [
   "owner",
   "due",
   "verification",
+  "verificationStatus",
+  "verificationDate",
+  "verificationChecker",
   "whyLikelihood",
   "whySeverity",
   "evidenceRefs"
 ];
 const stringFields = [
+  "location",
   "process",
   "task",
+  "equipment",
   "hazard",
   "currentControls",
   "additionalControls",
   "owner",
   "due",
   "verification",
+  "verificationDate",
+  "verificationChecker",
   "whyLikelihood",
   "whySeverity"
 ];
@@ -71,6 +81,26 @@ const weatherLinkTerms = [
   "실내",
   "환기",
   "습기"
+];
+const riskAssessmentColumnContract = [
+  { field: "location", header: "작업장소", required: true },
+  { field: "process", header: "공정", required: true },
+  { field: "task", header: "세부작업", required: true },
+  { field: "equipment", header: "장비·도구", required: true },
+  { field: "hazard", header: "유해·위험요인", required: true },
+  { field: "fourM", header: "4M", required: true },
+  { field: "accidentType", header: "재해유형", required: true },
+  { field: "currentControls", header: "현재 안전조치", required: true },
+  { field: "likelihood", header: "가능성", required: true },
+  { field: "severity", header: "중대성", required: true },
+  { field: "riskLevel", header: "위험성", required: true },
+  { field: "additionalControls", header: "감소대책", required: true },
+  { field: "owner", header: "담당자", required: true },
+  { field: "due", header: "조치기한", required: true },
+  { field: "verificationStatus", header: "확인상태", required: true },
+  { field: "verificationDate", header: "확인일", required: true },
+  { field: "verificationChecker", header: "확인자", required: true },
+  { field: "evidenceRefs", header: "근거", required: true }
 ];
 
 function ensureDir(dir) {
@@ -152,6 +182,9 @@ function parseRows(value) {
     if (!riskLevelValues.includes(row.riskLevel)) {
       issues.push({ id: `schema:${index}:riskLevel`, severity: "blocker", rowIndex: index, field: "riskLevel", message: `must be one of ${riskLevelValues.join(", ")}` });
     }
+    if (!verificationStatusValues.includes(row.verificationStatus)) {
+      issues.push({ id: `schema:${index}:verificationStatus`, severity: "blocker", rowIndex: index, field: "verificationStatus", message: `must be one of ${verificationStatusValues.join(", ")}` });
+    }
     const evidenceRefs = Array.isArray(row.evidenceRefs)
       ? row.evidenceRefs.filter((item) => isNonEmptyString(item)).map((item) => item.trim())
       : [];
@@ -160,6 +193,9 @@ function parseRows(value) {
     }
     if (isNonEmptyString(row.due) && !/^\d{4}-\d{2}-\d{2}$|^현장 확인$/.test(row.due.trim())) {
       issues.push({ id: `schema:${index}:due`, severity: "blocker", rowIndex: index, field: "due", message: "must be YYYY-MM-DD or 현장 확인" });
+    }
+    if (isNonEmptyString(row.verificationDate) && !/^\d{4}-\d{2}-\d{2}$|^현장 확인$/.test(row.verificationDate.trim())) {
+      issues.push({ id: `schema:${index}:verificationDate`, severity: "blocker", rowIndex: index, field: "verificationDate", message: "must be YYYY-MM-DD or 현장 확인" });
     }
     if (isRiskScale(row.likelihood) && isRiskScale(row.severity) && riskLevelValues.includes(row.riskLevel)) {
       const expected = expectedRiskLevel(row.likelihood, row.severity);
@@ -174,8 +210,10 @@ function parseRows(value) {
     const rowIssueCount = issues.filter((issue) => issue.rowIndex === index).length;
     if (rowIssueCount === 0) {
       rows.push({
+        location: row.location.trim(),
         process: row.process.trim(),
         task: row.task.trim(),
+        equipment: row.equipment.trim(),
         hazard: row.hazard.trim(),
         fourM: row.fourM,
         accidentType: row.accidentType,
@@ -187,6 +225,9 @@ function parseRows(value) {
         owner: row.owner.trim(),
         due: row.due.trim(),
         verification: row.verification.trim(),
+        verificationStatus: row.verificationStatus,
+        verificationDate: row.verificationDate.trim(),
+        verificationChecker: row.verificationChecker.trim(),
         whyLikelihood: row.whyLikelihood.trim(),
         whySeverity: row.whySeverity.trim(),
         evidenceRefs
@@ -198,6 +239,36 @@ function parseRows(value) {
     issues.push({ id: "schema:-1:row", severity: "blocker", rowIndex: -1, field: "row", message: "risk assessment rows array is missing or empty" });
   }
   return { rows, issues, inputRowCount: inputRows.length };
+}
+
+function evaluateColumnContract(rows) {
+  const missingRequiredFields = [];
+  const fieldCoverage = riskAssessmentColumnContract.map((column) => {
+    const coveredRows = rows.filter((row) => {
+      const value = row[column.field];
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === "number") return Number.isFinite(value);
+      return isNonEmptyString(value);
+    }).length;
+    if (column.required && coveredRows !== rows.length) {
+      missingRequiredFields.push(column.field);
+    }
+    return {
+      field: column.field,
+      header: column.header,
+      required: column.required,
+      coveredRows,
+      totalRows: rows.length,
+      ok: coveredRows === rows.length
+    };
+  });
+
+  return {
+    expectedHeaders: riskAssessmentColumnContract.map((column) => column.header),
+    fieldCoverage,
+    missingRequiredFields: [...new Set(missingRequiredFields)],
+    verdict: missingRequiredFields.length ? "blocked" : "pass"
+  };
 }
 
 function firstMeaningfulToken(value) {
@@ -214,8 +285,10 @@ function includesAny(text, terms) {
 
 function rowSearchText(row) {
   return [
+    row.location,
     row.process,
     row.task,
+    row.equipment,
     row.hazard,
     row.currentControls,
     row.additionalControls,
@@ -224,6 +297,50 @@ function rowSearchText(row) {
     row.whySeverity,
     ...row.evidenceRefs
   ].join(" ");
+}
+
+function validateTbmRiskLinks(testCase, rows) {
+  const issues = [];
+  const links = Array.isArray(testCase.tbmRiskLinks) ? testCase.tbmRiskLinks : [];
+  const minimumLinks = Math.min(rows.length, Number.isInteger(testCase.minimumTbmRiskLinks) ? testCase.minimumTbmRiskLinks : 3);
+
+  if (!links.length) {
+    issues.push({ id: "tbm-schema:missing", severity: "blocker", field: "tbmRiskLinks", message: "TBM schema v0.5 requires tbmRiskLinks array" });
+    return { verdict: "blocked", minimumLinks, linkCount: 0, issues };
+  }
+
+  links.forEach((link, index) => {
+    if (!isRecord(link)) {
+      issues.push({ id: `tbm-schema:${index}:row`, severity: "blocker", field: "tbmRiskLinks", message: "tbmRiskLink must be an object" });
+      return;
+    }
+    const requiredLinkFields = ["riskRowIndex", "hazard", "control", "weatherSignal", "confirmQuestion", "owner", "verification", "evidenceRefs"];
+    for (const field of requiredLinkFields) {
+      const value = link[field];
+      const ok = Array.isArray(value) ? value.some((item) => isNonEmptyString(item)) : (field === "riskRowIndex" ? Number.isInteger(value) : isNonEmptyString(value));
+      if (!ok) {
+        issues.push({ id: `tbm-schema:${index}:${field}`, severity: "blocker", field: "tbmRiskLinks", message: `${field} is required` });
+      }
+    }
+    if (Number.isInteger(link.riskRowIndex) && (link.riskRowIndex < 0 || link.riskRowIndex >= rows.length)) {
+      issues.push({ id: `tbm-schema:${index}:riskRowIndex`, severity: "blocker", field: "tbmRiskLinks", message: "riskRowIndex must point to a risk assessment row" });
+    }
+    const linkedRow = Number.isInteger(link.riskRowIndex) ? rows[link.riskRowIndex] : null;
+    if (linkedRow && isNonEmptyString(link.hazard) && !normalize(link.hazard).includes(normalize(firstMeaningfulToken(linkedRow.hazard)))) {
+      issues.push({ id: `tbm-schema:${index}:hazard-link`, severity: "notice", field: "tbmRiskLinks", message: "linked TBM hazard should reuse the risk row hazard language" });
+    }
+  });
+
+  if (links.length < minimumLinks) {
+    issues.push({ id: "tbm-schema:link-count", severity: "blocker", field: "tbmRiskLinks", message: `TBM schema v0.5 requires at least ${minimumLinks} linked risk rows` });
+  }
+
+  return {
+    verdict: issues.some((issue) => issue.severity === "blocker") ? "blocked" : (issues.length ? "pass_with_notice" : "pass"),
+    minimumLinks,
+    linkCount: links.length,
+    issues
+  };
 }
 
 function isHazardLinkedToTbm(row, tbmText) {
@@ -279,6 +396,14 @@ function evaluateCase(testCase, minimumHazardRows) {
     issues.push({ id: "weather-context-not-provided", severity: "notice", field: "weather", message: "weatherSummary/weatherNote was not supplied, so weather linkage could not be proven" });
   }
 
+  const columnContract = evaluateColumnContract(rows);
+  if (columnContract.verdict === "blocked") {
+    issues.push({ id: "column-contract", severity: "blocker", field: "row", message: `risk assessment output is missing required form columns: ${columnContract.missingRequiredFields.join(", ")}` });
+  }
+
+  const tbmSchema = validateTbmRiskLinks(testCase, rows);
+  issues.push(...tbmSchema.issues);
+
   const verdict = verdictFromIssues(issues);
   return {
     id: testCase.id,
@@ -290,6 +415,8 @@ function evaluateCase(testCase, minimumHazardRows) {
     rowCount: rows.length,
     inputRowCount: parsed.inputRowCount,
     fourMCoverage,
+    columnContract,
+    tbmSchema,
     blockerCount: issues.filter((issue) => issue.severity === "blocker").length,
     noticeCount: issues.filter((issue) => issue.severity === "notice").length,
     issues
@@ -359,6 +486,20 @@ function buildMarkdown(report) {
     "| --- | --- | ---: | --- | ---: |",
     ...report.cases.map((item) => `| ${item.id} | ${item.verdict} | ${item.rowCount} | ${item.fourMCoverage.join(", ") || "-"} | ${item.issues.length} |`),
     "",
+    "## Added Verification Gates",
+    "",
+    "- Risk assessment column contract now requires workplace location, equipment/tools, verification status, verification date, and checker fields.",
+    "- TBM schema v0.5 now requires linked risk-row references instead of accepting generic TBM prose.",
+    "- The gate still treats HWPX/PDF/XLS binary visual fidelity as a separate format smoke; this script proves the structured form contract before rendering.",
+    "",
+    "## Risk Assessment Column Contract",
+    "",
+    `- Expected headers: ${report.columnContract.expectedHeaders.join(" / ")}`,
+    "",
+    "## TBM Schema v0.5 Contract",
+    "",
+    "- Each golden case must provide `tbmRiskLinks[]` with riskRowIndex, hazard, control, weatherSignal, confirmQuestion, owner, verification, and evidenceRefs.",
+    "",
     "## Defects This Validator Catches",
     "",
     "- Missing or empty structured hazard rows, even when free-text keywords are present.",
@@ -367,6 +508,8 @@ function buildMarkdown(report) {
     "- currentControls and additionalControls collapsed into the same generic text.",
     "- TBM text that does not reference the risk rows.",
     "- Weather or site-condition evidence that is not connected to both risk rows and TBM.",
+    "- TBM records that mention safety generally but do not reference structured risk rows.",
+    "- Render inputs that cannot fill public-institution style columns such as 작업장소, 장비·도구, 확인상태, 확인일, 확인자.",
     "",
     "## Decision Evidence",
     "",
@@ -407,6 +550,10 @@ const report = {
   goldenPass,
   overall,
   currentSmoke,
+  columnContract: {
+    expectedHeaders: riskAssessmentColumnContract.map((column) => column.header),
+    fields: riskAssessmentColumnContract
+  },
   cases: results,
   decision: {
     currentBaselineVerdict: currentSmoke.submissionSmoke?.overall || "pass_with_notice",

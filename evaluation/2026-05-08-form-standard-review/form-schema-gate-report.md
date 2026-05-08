@@ -1,6 +1,6 @@
 # SafeClaw Form Schema Gate
 
-Generated: 2026-05-08T04:23:36.820Z
+Generated: 2026-05-08T08:03:34.488Z
 
 ## Current Smoke Baseline
 
@@ -20,7 +20,21 @@ Generated: 2026-05-08T04:23:36.820Z
 | --- | --- | ---: | --- | ---: |
 | gaontech-leak-maintenance-two-person | pass | 4 | Man, Machine, Media, Management | 0 |
 | safe-construction-exterior-paint-windy | pass | 4 | Man, Machine, Media, Management | 0 |
-| keyword-only-regression-negative | blocked | 0 | - | 10 |
+| keyword-only-regression-negative | blocked | 0 | - | 16 |
+
+## Added Verification Gates
+
+- Risk assessment column contract now requires workplace location, equipment/tools, verification status, verification date, and checker fields.
+- TBM schema v0.5 now requires linked risk-row references instead of accepting generic TBM prose.
+- The gate still treats HWPX/PDF/XLS binary visual fidelity as a separate format smoke; this script proves the structured form contract before rendering.
+
+## Risk Assessment Column Contract
+
+- Expected headers: 작업장소 / 공정 / 세부작업 / 장비·도구 / 유해·위험요인 / 4M / 재해유형 / 현재 안전조치 / 가능성 / 중대성 / 위험성 / 감소대책 / 담당자 / 조치기한 / 확인상태 / 확인일 / 확인자 / 근거
+
+## TBM Schema v0.5 Contract
+
+- Each golden case must provide `tbmRiskLinks[]` with riskRowIndex, hazard, control, weatherSignal, confirmQuestion, owner, verification, and evidenceRefs.
 
 ## Defects This Validator Catches
 
@@ -30,6 +44,8 @@ Generated: 2026-05-08T04:23:36.820Z
 - currentControls and additionalControls collapsed into the same generic text.
 - TBM text that does not reference the risk rows.
 - Weather or site-condition evidence that is not connected to both risk rows and TBM.
+- TBM records that mention safety generally but do not reference structured risk rows.
+- Render inputs that cannot fill public-institution style columns such as 작업장소, 장비·도구, 확인상태, 확인일, 확인자.
 
 ## Decision Evidence
 
