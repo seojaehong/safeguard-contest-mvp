@@ -862,7 +862,13 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const structuredRiskSourceDetail = generatedStructuredRiskRows.length
       ? "structured rows=AI"
       : "structured rows=deterministic fallback";
-    const tbmRiskLinks = buildTbmRiskLinks(structuredRiskRows, weather.summary);
+    const generatedTbmRiskLinks = aiBodies.tbmRiskLinks || [];
+    const tbmRiskLinks = generatedTbmRiskLinks.length
+      ? generatedTbmRiskLinks
+      : buildTbmRiskLinks(structuredRiskRows, weather.summary);
+    const tbmRiskSourceDetail = generatedTbmRiskLinks.length
+      ? "TBM-risk links=AI"
+      : "TBM-risk links=deterministic fallback";
 
     const enriched: AskResponse = {
       ...response,
@@ -974,7 +980,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / structured 위험성평가 rows ${structuredRiskRows.length}건, 검증 이슈 ${structuredRiskIssues.length}건 (${structuredRiskSourceDetail}) / TBM-risk 연결 ${tbmRiskLinks.length}건 / ${aiModeAppliedDetail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / structured 위험성평가 rows ${structuredRiskRows.length}건, 검증 이슈 ${structuredRiskIssues.length}건 (${structuredRiskSourceDetail}) / TBM-risk 연결 ${tbmRiskLinks.length}건 (${tbmRiskSourceDetail}) / ${aiModeAppliedDetail}`
       },
       sourceMix
     };

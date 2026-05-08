@@ -1,0 +1,32 @@
+{
+  "task": "tbm-risk-links-generation",
+  "date": "2026-05-08",
+  "changedFiles": [
+    "lib/ai-deliverables.ts",
+    "lib/search.ts"
+  ],
+  "implementation": {
+    "geminiStructuredOutput": true,
+    "fallback": "AI tbmRiskLinks generation falls back to [] inside ai-deliverables; /api/ask preserves existing deterministic links when AI links are unavailable.",
+    "xlsxExportTouched": false
+  },
+  "validation": [
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    },
+    {
+      "command": "npm.cmd run smoke:form-schema-gate",
+      "status": "pass_with_notice",
+      "caseCount": 3,
+      "expectationPass": 3,
+      "goldenPass": 2,
+      "goldenCount": 2,
+      "outDir": "evaluation/2026-05-08-form-standard-review"
+    }
+  ],
+  "notes": [
+    "TbmRiskLink and AskResponse.structured.tbmRiskLinks already existed in lib/types.ts, so lib/types.ts was not modified.",
+    "The form schema gate writes to evaluation/2026-05-08-form-standard-review; those pre-existing dirty artifacts were not staged."
+  ]
+}
