@@ -242,6 +242,8 @@ function workPlanStructuredPrompt(ctx: GenContext) {
     "",
     "한국 산업안전 표준 작업계획서의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. 각 필드는 셀에 들어갈 짧은 문구(80자 이내) 단위로 작성. 위험요인·감소대책은 시나리오 특화. KOSHA 자료가 있으면 safetyMeasure 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식으로 1줄 포함.",
+    "렌더링 결과가 반드시 구분되는 7개 의미 섹션을 채워야 한다: 작업개요, 사용장비, 작업단계, 안전조치, 작업중지 기준, 비상대응, 결재/확인.",
+    "generic 6-column 표 본문처럼 섹션/항목/내용만 나열하지 말고, 아래 스키마의 장비·단계·조치·중지·비상·결재 필드를 각각 실질 값으로 채워라.",
     "",
     "응답 JSON 스키마:",
     `{
@@ -271,7 +273,7 @@ function workPlanStructuredPrompt(ctx: GenContext) {
   }
 }`,
     "",
-    "필수 조건: workSteps 4-7개. stopCriteria 3-5개. contacts 3-4개. 모든 string은 \\n 없이 한 줄.",
+    "필수 조건: equipment 2-5개. workSteps 4-7개. stopCriteria 3-5개. contacts 3-4개. approvers 3개 모두 작성. 모든 string은 \\n 없이 한 줄.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -394,6 +396,10 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
     "",
     "필수 규칙:",
     "  - rows는 현장 시나리오에 맞는 5~7개 위험성평가 행이다.",
+    "  - 작업장소 → 공정 → 세부작업 → 유해·위험요인 순서로 작업 흐름을 분해한다. 단일 문장을 그대로 반복하지 말고, 실제 현장에서 분리되는 작업 단계로 나눈다.",
+    "  - 가능한 한 2개 이상 공정과 5개 이상 세부작업을 포함한다. 단, 사용자가 정말 단일작업만 입력한 경우에도 세부작업은 준비/작업/정리/확인 단계로 분리한다.",
+    "  - 1행에는 하나의 유해·위험요인만 적는다. 복수 위험이 있으면 같은 작업장소·공정·세부작업을 반복하더라도 별도 행으로 분리한다.",
+    "  - 같은 공정·세부작업을 반복할 때는 hazard, accidentType, currentControls, additionalControls가 서로 달라야 한다.",
     "  - 모든 행은 필수 필드를 빠짐없이 채운다.",
     "  - location은 작업장소, equipment는 장비·도구, verificationStatus/verificationDate/verificationChecker는 조치 확인 칸에 그대로 들어간다.",
     `  - fourM enum: ${FOUR_M_VALUES.join(", ")}`,
@@ -581,17 +587,44 @@ function parseRiskAssessment(raw: string): Partial<AiDeliverables> | null {
   const v = j?.riskAssessmentDraft;
   return typeof v === "string" && v.length > 100 ? { riskAssessmentDraft: v } : null;
 }
+
+function hasNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function hasStringArray(value: unknown, minLength: number): value is string[] {
+  return Array.isArray(value) && value.filter(hasNonEmptyString).length >= minLength;
+}
+
 function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
   // schema-first: workPlanStructured 객체를 셀 단위로 검증.
   // 누락 필드가 있거나 array가 비어있으면 null로 retry 트리거.
   const j = safeParseJson<{ workPlanStructured?: AiDeliverables["workPlanStructured"] }>(raw);
   const s = j?.workPlanStructured;
   if (!s || typeof s !== "object") return null;
-  if (!s.workOverview || typeof s.workOverview.workName !== "string") return null;
-  if (!Array.isArray(s.workSteps) || s.workSteps.length < 3) return null;
-  if (!Array.isArray(s.stopCriteria) || s.stopCriteria.length < 2) return null;
-  if (!s.emergencyResponse || !Array.isArray(s.emergencyResponse.contacts)) return null;
+  if (!s.workOverview || !hasNonEmptyString(s.workOverview.workName)) return null;
+  if (!hasNonEmptyString(s.workOverview.description)) return null;
+  if (!hasNonEmptyString(s.workOverview.location)) return null;
+  if (!hasNonEmptyString(s.workOverview.condition)) return null;
+  if (!hasStringArray(s.workOverview.equipment, 2)) return null;
+  if (!Array.isArray(s.workSteps) || s.workSteps.length < 4) return null;
+  const hasValidSteps = s.workSteps.every((step) =>
+    Number.isFinite(step.stepNo) &&
+    hasNonEmptyString(step.action) &&
+    hasNonEmptyString(step.equipment) &&
+    hasNonEmptyString(step.safetyMeasure) &&
+    hasNonEmptyString(step.owner)
+  );
+  if (!hasValidSteps) return null;
+  if (!hasStringArray(s.stopCriteria, 3)) return null;
+  if (!s.emergencyResponse || !Array.isArray(s.emergencyResponse.contacts) || s.emergencyResponse.contacts.length < 3) return null;
+  if (!hasNonEmptyString(s.emergencyResponse.evacRoute) || !hasNonEmptyString(s.emergencyResponse.firstAid)) return null;
+  const hasValidContacts = s.emergencyResponse.contacts.every((contact) =>
+    hasNonEmptyString(contact.role) && hasNonEmptyString(contact.phone)
+  );
+  if (!hasValidContacts) return null;
   if (!s.approvers) return null;
+  if (!hasNonEmptyString(s.approvers.author) || !hasNonEmptyString(s.approvers.reviewer) || !hasNonEmptyString(s.approvers.approver)) return null;
   return { workPlanStructured: s };
 }
 function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null {
@@ -685,6 +718,92 @@ function parseTbmRiskLinks(raw: string, rows: RiskAssessmentRow[]): Partial<AiDe
   return links.length ? { tbmRiskLinks: links.slice(0, 6) } : null;
 }
 
+type TbmBriefingStructuredWithLinks = TbmBriefingStructured & {
+  tbmRiskLinks?: TbmRiskLink[];
+};
+
+function appendUnique(values: string[], additions: string[], limit: number): string[] {
+  const seen = new Set(values.map((value) => value.trim()));
+  const merged = [...values];
+  for (const addition of additions) {
+    const trimmed = addition.trim();
+    if (!trimmed || seen.has(trimmed)) continue;
+    merged.push(trimmed);
+    seen.add(trimmed);
+    if (merged.length >= limit) break;
+  }
+  return merged;
+}
+
+function enrichTbmBriefingStructuredWithRiskLinks(
+  structured: TbmBriefingStructured,
+  links: TbmRiskLink[],
+  weatherNote: string | undefined
+): TbmBriefingStructuredWithLinks {
+  if (!links.length) return structured;
+
+  const hazards = [...structured.hazards];
+  const hazardIndexByDescription = new Map<string, number>();
+  hazards.forEach((hazard, index) => hazardIndexByDescription.set(hazard.description.trim(), index + 1));
+
+  const measures = [...structured.measures];
+  for (const link of links.slice(0, 6)) {
+    const hazardText = link.hazard.trim();
+    let hazardRef = hazardIndexByDescription.get(hazardText);
+    if (!hazardRef) {
+      hazardRef = hazards.length + 1;
+      hazards.push({ category: "Management", description: hazardText });
+      hazardIndexByDescription.set(hazardText, hazardRef);
+    }
+    const hasMeasure = measures.some((measure) => measure.hazardRef === hazardRef && measure.action.trim() === link.control.trim());
+    if (!hasMeasure) {
+      measures.push({ hazardRef, action: link.control, owner: link.owner });
+    }
+  }
+
+  const weatherSignals = appendUnique(
+    [],
+    links.map((link) => link.weatherSignal),
+    3
+  );
+  const weatherStopCriteria = [
+    ...(weatherNote?.trim() ? [`기상/API 신호 변화 시 작업중지 여부를 재판단: ${weatherNote.trim()}`] : []),
+    ...weatherSignals.map((signal) => `기상/API 신호 확인 후 위험 증가 시 작업중지: ${signal}`)
+  ];
+  const stopCriteria = appendUnique(structured.stopCriteria, weatherStopCriteria, 7);
+  const confirmTopics = appendUnique(structured.confirmTopics, links.map((link) => link.confirmQuestion), 8);
+  const evidenceRefs = appendUnique([], links.flatMap((link) => link.evidenceRefs), 6);
+  const linkedEvidence = evidenceRefs.length
+    ? `${structured.photoEvidenceLocation} / 위험성평가 연결 증빙: ${evidenceRefs.join(", ")}`
+    : structured.photoEvidenceLocation;
+
+  return {
+    ...structured,
+    hazards: hazards.slice(0, 8),
+    measures: measures.slice(0, 8),
+    stopCriteria,
+    confirmTopics,
+    photoEvidenceLocation: linkedEvidence,
+    tbmRiskLinks: links.slice(0, 6)
+  };
+}
+
+function mergeTbmRiskLinksIntoDeliverables(
+  out: AiDeliverables,
+  tbmRiskLinksResult: Partial<AiDeliverables>,
+  weatherNote: string | undefined
+) {
+  Object.assign(out, tbmRiskLinksResult);
+  const links = tbmRiskLinksResult.tbmRiskLinks || [];
+  if (out.tbmBriefingStructured && links.length) {
+    out.tbmBriefingStructured = enrichTbmBriefingStructuredWithRiskLinks(
+      out.tbmBriefingStructured,
+      links,
+      weatherNote
+    );
+  }
+}
+
 async function generateTbmRiskLinks(ctx: GenContext, rows: RiskAssessmentRow[]): Promise<Partial<AiDeliverables>> {
   if (!rows.length) return { tbmRiskLinks: [] };
   try {
@@ -775,7 +894,11 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
   for (const s of settled) {
     if (s.status === "fulfilled") Object.assign(out, s.value);
   }
-  Object.assign(out, await generateTbmRiskLinks(ctx, out.structuredRiskRows || []));
+  mergeTbmRiskLinksIntoDeliverables(
+    out,
+    await generateTbmRiskLinks(ctx, out.structuredRiskRows || []),
+    ctx.weatherNote
+  );
   return out;
 }
 
@@ -844,7 +967,7 @@ export async function generateAllDeliverablesWithDiagnostics(
   });
 
   const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || []);
-  Object.assign(out, tbmRiskLinksResult);
+  mergeTbmRiskLinksIntoDeliverables(out, tbmRiskLinksResult, ctx.weatherNote);
   groupResults.push({
     group: "tbmRiskLinks",
     status: (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0 ? "fulfilled" : "rejected",

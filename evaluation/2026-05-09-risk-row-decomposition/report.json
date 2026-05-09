@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-05-09T14:18:15.3250295Z",
+  "result": "pass",
+  "scope": "risk assessment row decomposition prompt and fallback",
+  "changes": [
+    "Prompt now requires location-process-task-hazard decomposition instead of flat risk list.",
+    "Prompt requires one hazard per row and separate rows for multiple hazards.",
+    "Fallback risk rows now use distinct process labels across main work, environment, equipment, worker communication, and management records."
+  ],
+  "verification": {
+    "typecheck": "pass",
+    "smokeFormSchemaGate": "pass_with_notice",
+    "goldenPass": "2/2",
+    "expectationPass": "3/3"
+  },
+  "files": [
+    "lib/ai-deliverables.ts",
+    "lib/search.ts"
+  ]
+}

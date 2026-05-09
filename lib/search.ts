@@ -1,4 +1,4 @@
-import { AskResponse, type TbmRiskLink } from "./types";
+import { AskResponse, type TbmBriefingStructured, type TbmRiskLink } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
 import { buildMockAskResponse, mockSearchResults } from "./mock-data";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
@@ -108,14 +108,14 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
   const workText = `${scenario.workSummary} ${topRisk}`;
   const weatherText = weatherSummary || scenario.weatherNote || "기상청 현재·예보 신호 확인";
   const location = scenario.siteName || "현장 작업구역";
-  const process = response.riskSummary.title || scenario.companyType || "현장 작업";
+  const primaryProcess = response.riskSummary.title || scenario.companyType || "현장 작업";
   const due = "현장 확인";
 
   return [
     buildRiskRow({
       location,
-      process,
-      task: scenario.workSummary,
+      process: primaryProcess,
+      task: scenario.workSummary || "주요 작업 수행",
       equipment: /비계/.test(workText) ? "이동식 비계, 작업발판, 보호구" : /지게차/.test(workText) ? "지게차, 팔레트, 하역구역 표지" : "작업 장비·공구·보호구",
       hazard: topRisk,
       currentControls: "작업 전 장비 상태, 작업구역, 보호구 착용 상태를 확인합니다.",
@@ -130,7 +130,7 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
     }),
     buildRiskRow({
       location,
-      process,
+      process: "작업환경 관리",
       task: "작업환경 및 기상 조건 확인",
       equipment: "기상청 현재·예보, 작업중지 기준표",
       hazard: `${weatherText}에 따른 작업환경 변화 위험`,
@@ -146,7 +146,7 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
     }),
     buildRiskRow({
       location,
-      process,
+      process: "장비·도구 점검",
       task: "장비·도구 안전점검",
       equipment: /누수|천장/.test(workText) ? "사다리, 전동공구, 누수 점검 장비" : "작업 장비, 공구, 방호장치",
       hazard: "장비·도구 상태 불량 또는 방호조치 미흡으로 인한 사고 위험",
@@ -162,7 +162,7 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
     }),
     buildRiskRow({
       location,
-      process,
+      process: "작업자 배치·의사소통",
       task: "작업자 배치 및 의사소통",
       equipment: "보호구, 무전·휴대전화, 다국어 안내문",
       hazard: "신규·외국인·소수 인원 작업에서 지시 미이해 또는 단독작업으로 인한 위험",
@@ -178,7 +178,7 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
     }),
     buildRiskRow({
       location,
-      process,
+      process: "관리체계·기록",
       task: "관리체계 및 조치 확인",
       equipment: "위험성평가표, TBM일지, 사진·증빙 기록",
       hazard: "위험성평가 결과가 TBM·교육·현장 전파로 이어지지 않아 조치가 누락될 위험",
@@ -213,6 +213,17 @@ function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: string): T
       evidenceRefs: row.evidenceRefs || []
     };
   });
+}
+
+function withTbmRiskLinksForExport(
+  structured: TbmBriefingStructured,
+  links: TbmRiskLink[]
+): TbmBriefingStructured & { tbmRiskLinks?: TbmRiskLink[] } {
+  if (!links.length) return structured;
+  return {
+    ...structured,
+    tbmRiskLinks: links
+  };
 }
 
 type DocumentEvidenceTarget = "risk" | "workPlan" | "tbm" | "education" | "emergency";
@@ -941,7 +952,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         // schema-first: AI가 셀 단위 구조로 직접 반환했으면 통과. xlsx-builder가 이걸로
         // parseSheetRows 우회하고 표 양식에 매핑.
         ...(aiBodies.workPlanStructured ? { workPlanStructured: aiBodies.workPlanStructured } : {}),
-        ...(aiBodies.tbmBriefingStructured ? { tbmBriefingStructured: aiBodies.tbmBriefingStructured } : {}),
+        ...(aiBodies.tbmBriefingStructured ? { tbmBriefingStructured: withTbmRiskLinksForExport(aiBodies.tbmBriefingStructured, tbmRiskLinks) } : {}),
         ...(aiBodies.educationRecordStructured ? { educationRecordStructured: aiBodies.educationRecordStructured } : {}),
         tbmBriefing: aiBodies.tbmBriefing
           ? aiBodies.tbmBriefing

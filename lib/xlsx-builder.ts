@@ -2,7 +2,7 @@
 // Produces OOXML binary that opens cleanly in Excel/한셀 with no extension warning.
 
 import ExcelJS from "exceljs";
-import type { AskResponse, EducationRecordStructured, TbmBriefingStructured, WorkPlanStructured } from "@/lib/types";
+import type { AskResponse, EducationRecordStructured, TbmBriefingStructured, TbmRiskLink, WorkPlanStructured } from "@/lib/types";
 import {
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
@@ -58,6 +58,9 @@ const RISK_ASSESSMENT_COLUMNS = [
 
 type Scenario = AskResponse["scenario"];
 type StructuredRecord = Record<string, unknown>;
+type ParsedTbmBriefingStructured = TbmBriefingStructured & {
+  tbmRiskLinks: TbmRiskLink[];
+};
 
 const STRUCTURED_DOC_COLUMNS = [
   { width: 8 },
@@ -82,6 +85,29 @@ function readNumber(value: unknown, fallback = 0): number {
 
 function readStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0) : [];
+}
+
+function readTbmRiskLinks(value: unknown): TbmRiskLink[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item): TbmRiskLink[] => {
+    if (!isRecord(item)) return [];
+    const riskRowIndex = readNumber(item.riskRowIndex, -1);
+    const hazard = readString(item.hazard);
+    const control = readString(item.control);
+    const weatherSignal = readString(item.weatherSignal);
+    const confirmQuestion = readString(item.confirmQuestion);
+    if (riskRowIndex < 0 || !hazard || !control || !confirmQuestion) return [];
+    return [{
+      riskRowIndex,
+      hazard,
+      control,
+      weatherSignal: weatherSignal || "기상/API 신호 현장 확인",
+      confirmQuestion,
+      owner: readString(item.owner, "작업반장"),
+      verification: readString(item.verification, "TBM 기록과 현장 확인으로 검증"),
+      evidenceRefs: readStringArray(item.evidenceRefs)
+    }];
+  });
 }
 
 function columnLetter(column: number): string {
@@ -326,7 +352,7 @@ function addKeyValueRows(ws: ExcelJS.Worksheet, row: number, rows: Array<[string
 }
 
 function addApprovalRows(ws: ExcelJS.Worksheet, row: number, labels: string[]): number {
-  row = addSectionHeader(ws, row, "확인 및 결재");
+  row = addSectionHeader(ws, row, "결재/확인");
   labels.slice(0, 3).forEach((label, index) => {
     const startColumn = index * 2 + 1;
     ws.mergeCells(row, startColumn, row, startColumn + 1);
@@ -348,6 +374,63 @@ function addWorkbookNote(ws: ExcelJS.Worksheet, row: number, note: string): void
   cell.alignment = { vertical: "middle", horizontal: "left", indent: 1, wrapText: true };
   applyBorders(ws, `A${row}:F${row}`);
   ws.pageSetup.printArea = `A1:F${row}`;
+}
+
+function addWorkpackMetaRows(ws: ExcelJS.Worksheet, row: number, scenario: Scenario): number {
+  const metaRows: Array<[[string, string], [string, string]]> = [
+    [["사업장", scenario.companyName || "SafeClaw 현장"], ["현장/공정", scenario.siteName || "현장 확인"]],
+    [["작업내용", scenario.workSummary || "작업내용 확인"], ["인원/조건", `${scenario.workerCount ?? 0}명 · ${scenario.weatherNote || ""}`]]
+  ];
+
+  metaRows.forEach((pair) => {
+    ws.getCell(row, 1).value = pair[0][0];
+    ws.mergeCells(row, 2, row, 3);
+    ws.getCell(row, 2).value = pair[0][1];
+    ws.getCell(row, 4).value = pair[1][0];
+    ws.mergeCells(row, 5, row, 6);
+    ws.getCell(row, 5).value = pair[1][1];
+    [1, 4].forEach((column) => {
+      const cell = ws.getCell(row, column);
+      cell.fill = META_LABEL_FILL;
+      cell.font = META_LABEL_FONT;
+      cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+    });
+    [2, 5].forEach((column) => {
+      ws.getCell(row, column).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+    });
+    applyBorders(ws, `A${row}:F${row}`);
+    ws.getRow(row).height = estimateWrappedRowHeight([pair[0][1], pair[1][1]], { base: 24, max: 58, charsPerLine: 36 });
+    row += 1;
+  });
+
+  return row;
+}
+
+function addWorkpackConfirmationRows(ws: ExcelJS.Worksheet, row: number, labels: string[]): number {
+  if (!labels.length) return row;
+  labels.slice(0, 6).forEach((label, index) => {
+    const cell = ws.getCell(row, index + 1);
+    cell.value = `□ ${label}`;
+    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+  });
+  applyBorders(ws, `A${row}:F${row}`);
+  ws.getRow(row).height = 28;
+  return row + 1;
+}
+
+function addWorkpackApprovalRows(ws: ExcelJS.Worksheet, row: number, labels: string[]): number {
+  if (!labels.length) return row;
+  labels.slice(0, 5).forEach((label, index) => {
+    const cell = ws.getCell(row, index + 1);
+    cell.value = `${label}\n\n서명: ______`;
+    cell.font = { name: "Malgun Gothic", size: 10, bold: true };
+    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+  });
+  ws.getCell(row, 6).value = "보관 위치\n\n______";
+  ws.getCell(row, 6).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+  applyBorders(ws, `A${row}:F${row}`);
+  ws.getRow(row).height = 50;
+  return row + 1;
 }
 
 function createStructuredWorkbook(sheetName: string): { wb: ExcelJS.Workbook; ws: ExcelJS.Worksheet } {
@@ -412,7 +495,7 @@ function parseWorkPlanStructured(value: StructuredRecord): WorkPlanStructured {
   };
 }
 
-function parseTbmBriefingStructured(value: StructuredRecord): TbmBriefingStructured {
+function parseTbmBriefingStructured(value: StructuredRecord): ParsedTbmBriefingStructured {
   const meta = isRecord(value.meta) ? value.meta : {};
   const todayWork = isRecord(value.todayWork) ? value.todayWork : {};
   const hazards = Array.isArray(value.hazards) ? value.hazards : [];
@@ -449,7 +532,8 @@ function parseTbmBriefingStructured(value: StructuredRecord): TbmBriefingStructu
     }),
     stopCriteria: readStringArray(value.stopCriteria),
     confirmTopics: readStringArray(value.confirmTopics),
-    photoEvidenceLocation: readString(value.photoEvidenceLocation, "사진증빙 위치 확인")
+    photoEvidenceLocation: readString(value.photoEvidenceLocation, "사진증빙 위치 확인"),
+    tbmRiskLinks: readTbmRiskLinks(value.tbmRiskLinks)
   };
 }
 
@@ -496,13 +580,41 @@ export async function buildWorkPlanStructuredXlsx(
     ["작업내용", data.workOverview.description],
     ["작업장소", data.workOverview.location],
     ["작업인원", `${data.workOverview.workerCount || scenario.workerCount || 0}명`],
-    ["작업조건", data.workOverview.condition],
-    ["사용장비", data.workOverview.equipment.join(", ") || "장비 확인"]
+    ["작업조건", data.workOverview.condition]
   ]);
 
   row += 1;
-  row = addSectionHeader(ws, row, "작업단계 및 안전조치");
-  row = addTableHeader(ws, row, ["순번", "작업단계", "사용장비", "안전조치", "담당", "확인"]);
+  row = addSectionHeader(ws, row, "사용장비");
+  row = addTableHeader(ws, row, ["No.", "장비·도구", "사용 목적", "점검 기준", "담당", "확인"]);
+  const equipmentItems = data.workOverview.equipment.length ? data.workOverview.equipment : ["장비 확인"];
+  equipmentItems.forEach((equipment, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      equipment,
+      "작업계획서 해당 단계 투입",
+      "작업 전 외관·작동·보호장치 확인",
+      "작업반장",
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "작업단계");
+  row = addTableHeader(ws, row, ["순번", "작업단계", "주요 작업내용", "사용장비", "담당", "확인"]);
+  data.workSteps.forEach((step) => {
+    row = setRowValues(ws, row, [
+      String(step.stepNo),
+      step.action,
+      "작업순서에 따라 수행",
+      step.equipment,
+      step.owner,
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "안전조치");
+  row = addTableHeader(ws, row, ["No.", "대상단계", "관리대상", "안전조치", "담당", "확인"]);
   data.workSteps.forEach((step) => {
     row = setRowValues(ws, row, [
       String(step.stepNo),
@@ -574,6 +686,30 @@ export async function buildTbmBriefingStructuredXlsx(
     row = setRowValues(ws, row, [String(index + 1), `위험 ${measure.hazardRef}`, measure.action, "작업 전 확인", measure.owner, "□ 확인"]);
   });
 
+  if (data.tbmRiskLinks.length) {
+    row += 1;
+    row = addSectionHeader(ws, row, "위험성평가·기상 API 반영");
+    row = addTableHeader(ws, row, ["No.", "위험성평가 행", "유해·위험요인", "TBM 조치", "기상/API 신호", "확인질문"]);
+    data.tbmRiskLinks.forEach((link, index) => {
+      row = setRowValues(ws, row, [
+        String(index + 1),
+        `Row ${link.riskRowIndex + 1}`,
+        link.hazard,
+        link.control,
+        link.weatherSignal,
+        link.confirmQuestion
+      ]);
+      row = setRowValues(ws, row, [
+        "",
+        "증빙·검증",
+        link.evidenceRefs.join(", ") || "사진·TBM 기록",
+        link.verification,
+        link.owner,
+        "□ 확인"
+      ]);
+    });
+  }
+
   row += 1;
   row = addSectionHeader(ws, row, "작업중지 기준");
   row = addTableHeader(ws, row, ["No.", "구분", "작업중지 기준", "조치", "담당", "확인"]);
@@ -641,7 +777,8 @@ export async function buildEducationRecordStructuredXlsx(
   row += 1;
   row = addSectionHeader(ws, row, "참석자 확인");
   row = addTableHeader(ws, row, ["No.", "성명", "소속/직책", "이해확인", "서명", "비고"]);
-  ["1", "2", "3", "4", "5"].forEach((no) => {
+  const attendeeRowCount = clampNumber(Math.ceil(scenario.workerCount || 0), 5, 20);
+  Array.from({ length: attendeeRowCount }, (_, index) => String(index + 1)).forEach((no) => {
     row = setRowValues(ws, row, [no, "", "", "□ 이해함", "서명: ______", ""]);
   });
 
@@ -942,6 +1079,9 @@ export async function buildWorkpackXlsx(
     ws.mergeCells(row, 1, row, isStructuredRiskSheet ? RISK_ASSESSMENT_COLUMNS.length : 6);
     ws.getCell(row, 1).value = doc.title;
     ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 14, bold: true, color: { argb: "FF1F4D43" } };
+    ws.getCell(row, 1).fill = COVER_FILL;
+    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1, wrapText: true };
+    applyBorders(ws, `A${row}:${isStructuredRiskSheet ? columnLetter(RISK_ASSESSMENT_COLUMNS.length) : "F"}${row}`);
     ws.getRow(row).height = 26;
     row += 1;
 
@@ -950,6 +1090,10 @@ export async function buildWorkpackXlsx(
       writeOfficialLikeRiskAssessmentTable(ws, row, riskRows);
       continue;
     }
+
+    row = addWorkpackMetaRows(ws, row, scenario);
+    row = addWorkpackConfirmationRows(ws, row, doc.profile.confirmationRows);
+    row += 1;
 
     const cols = deriveColumns(doc.profile);
     cols.forEach((col, idx) => {
@@ -990,6 +1134,15 @@ export async function buildWorkpackXlsx(
         row += 1;
       }
     }
+
+    row += 1;
+    row = addWorkpackApprovalRows(ws, row, doc.profile.approvalLabels);
+    ws.mergeCells(row, 1, row, 6);
+    ws.getCell(row, 1).value = "본 시트는 문서팩용 OOXML(.xlsx) 양식입니다. 현장 확인 후 확인란과 서명란을 채워 보관하세요.";
+    ws.getCell(row, 1).font = { name: "Malgun Gothic", size: 10, italic: true, color: { argb: "FF5E6677" } };
+    ws.getCell(row, 1).alignment = { vertical: "middle", horizontal: "left", indent: 1, wrapText: true };
+    applyBorders(ws, `A${row}:F${row}`);
+    ws.pageSetup.printArea = `A1:F${row}`;
   }
 
   const buffer = await wb.xlsx.writeBuffer();

@@ -1,0 +1,50 @@
+{
+  "date": "2026-05-09",
+  "scope": [
+    "lib/ai-deliverables.ts educationRecordStructuredPrompt/parseEducationRecordStructured",
+    "lib/xlsx-builder.ts buildEducationRecordStructuredXlsx and generic workpack builder behavior",
+    "app/api/export/xlsx/route.ts reviewed only"
+  ],
+  "forms": [
+    {
+      "form": "safetyEducationRecord",
+      "status": "schema-first",
+      "evidence": "AI prompt returns educationRecordStructured, parser validates an object, and XLSX builder maps structured fields directly.",
+      "changed": true
+    },
+    {
+      "form": "permitInspection",
+      "status": "generic",
+      "evidence": "Permit draft is text parsed into rows and exported via layout=permit without a dedicated structured schema.",
+      "changed": true
+    },
+    {
+      "form": "emergencyResponse",
+      "status": "prose-only-source-generic-export",
+      "evidence": "Free-form AI prompt returns emergencyResponseDraft as a string; XLSX export uses generic rows.",
+      "changed": true
+    },
+    {
+      "form": "photoEvidenceAndOther",
+      "status": "prose-only-or-generic",
+      "evidence": "Drafts are strings parsed into rows and exported through generic/profile layouts.",
+      "changed": true
+    }
+  ],
+  "changedFilesOwnedInThisTask": [
+    "lib/xlsx-builder.ts",
+    "evaluation/2026-05-09-form-audit-education-permit/form-audit-report.md",
+    "evaluation/2026-05-09-form-audit-education-permit/report.json"
+  ],
+  "tests": [
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "passed"
+    }
+  ],
+  "remainingGaps": [
+    "Permit and inspection forms still need a dedicated structured type, prompt, parser, route mode, and XLSX builder.",
+    "Emergency response still needs a structured schema for stop triggers, response steps, contacts, evacuation, first aid, preservation, and recurrence prevention.",
+    "Parallel changes appeared in lib/xlsx-builder.ts near workPlan code and should be reviewed before staging a combined commit."
+  ]
+}

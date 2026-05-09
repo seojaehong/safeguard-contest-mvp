@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-05-09T14:24:59.132Z",
+  "scope": "workPlanStructuredPrompt / parseWorkPlanStructured / buildWorkPlanStructuredXlsx",
+  "xlsxPath": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp\\evaluation\\2026-05-09-form-audit-workplan\\workplan-structured-smoke.xlsx",
+  "requiredSections": [
+    "작업개요",
+    "사용장비",
+    "작업단계",
+    "안전조치",
+    "작업중지 기준",
+    "비상대응",
+    "결재/확인"
+  ],
+  "missingSections": [],
+  "genericSixColumnOutputDetected": false,
+  "sheetCount": 1,
+  "rowCount": 48,
+  "status": "pass"
+}
