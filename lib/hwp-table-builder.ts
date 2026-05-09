@@ -63,6 +63,24 @@ function parseJsonResult(raw: string): { ok?: boolean; paraIdx?: number; control
   }
 }
 
+function wrapForHwpCell(value: string, maxChars = 22): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxChars) return normalized;
+  const chunks: string[] = [];
+  let current = "";
+  for (const token of normalized.split(" ")) {
+    const next = current ? `${current} ${token}` : token;
+    if (next.length > maxChars && current) {
+      chunks.push(current);
+      current = token;
+    } else {
+      current = next;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks.join("\n");
+}
+
 function deriveColumnsForLayout(profile: SafetyFormProfile, _rows: SheetRow[]): string[] {
   switch (profile.layout) {
     case "risk":
@@ -129,7 +147,7 @@ export async function buildHwpWithTables(input: HwpBuildInput): Promise<Blob> {
         meta.forEach((row, rIdx) => {
           row.forEach((value, cIdx) => {
             const cellIdx = rIdx * cols + cIdx;
-            document.insertTextInCell(0, paraIdx, controlIdx, cellIdx, 0, 0, String(value));
+            document.insertTextInCell(0, paraIdx, controlIdx, cellIdx, 0, 0, wrapForHwpCell(String(value), 24));
           });
         });
       }
@@ -171,7 +189,8 @@ export async function buildHwpWithTables(input: HwpBuildInput): Promise<Blob> {
           for (let cIdx = 0; cIdx < colCount; cIdx += 1) {
             const value = row[cIdx] ?? "";
             const cellIdx = rIdx * colCount + cIdx;
-            document.insertTextInCell(0, paraIdx, controlIdx, cellIdx, 0, 0, String(value));
+            const maxChars = rIdx === 0 ? 12 : colCount >= 6 ? 18 : 24;
+            document.insertTextInCell(0, paraIdx, controlIdx, cellIdx, 0, 0, wrapForHwpCell(String(value), maxChars));
           }
         });
       }

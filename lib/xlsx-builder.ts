@@ -61,11 +61,11 @@ type StructuredRecord = Record<string, unknown>;
 
 const STRUCTURED_DOC_COLUMNS = [
   { width: 8 },
-  { width: 18 },
-  { width: 32 },
-  { width: 46 },
-  { width: 18 },
-  { width: 18 }
+  { width: 20 },
+  { width: 34 },
+  { width: 54 },
+  { width: 16 },
+  { width: 14 }
 ];
 
 function isRecord(value: unknown): value is StructuredRecord {
@@ -118,6 +118,26 @@ export type XlsxBuildInput = {
 
 function applyRiskAssessmentColumns(ws: ExcelJS.Worksheet) {
   ws.columns = RISK_ASSESSMENT_COLUMNS.map((column) => ({ width: column.width }));
+}
+
+function clampNumber(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function estimateWrappedRowHeight(
+  values: readonly unknown[],
+  options?: { base?: number; max?: number; charsPerLine?: number }
+): number {
+  const base = options?.base ?? 30;
+  const max = options?.max ?? 86;
+  const charsPerLine = options?.charsPerLine ?? 34;
+  const estimatedLines = values.reduce<number>((currentMax, value) => {
+    const text = String(value ?? "");
+    const explicitLines = text.split(/\r?\n/).length;
+    const wrappedLines = Math.ceil(text.length / charsPerLine);
+    return Math.max(currentMax, explicitLines, wrappedLines);
+  }, 1);
+  return clampNumber(base + (estimatedLines - 1) * 14, base, max);
 }
 
 function writeOfficialLikeRiskAssessmentTable(
@@ -183,7 +203,10 @@ function writeOfficialLikeRiskAssessmentTable(
       };
     });
     applyBorders(ws, `A${row}:${lastColumnLetter}${row}`);
-    ws.getRow(row).height = 48;
+    ws.getRow(row).height = estimateWrappedRowHeight(
+      [riskRow.hazard, riskRow.currentControls, riskRow.additionalControls, evidenceText],
+      { base: 46, max: 118, charsPerLine: 30 }
+    );
     row += 1;
   });
 
@@ -282,7 +305,7 @@ function setRowValues(ws: ExcelJS.Worksheet, row: number, values: string[]): num
     };
   });
   applyBorders(ws, `A${row}:F${row}`);
-  ws.getRow(row).height = 36;
+  ws.getRow(row).height = estimateWrappedRowHeight(values, { base: 34, max: 92, charsPerLine: 28 });
   return row + 1;
 }
 
@@ -296,6 +319,7 @@ function addKeyValueRows(ws: ExcelJS.Worksheet, row: number, rows: Array<[string
     ws.getCell(row, 2).value = value;
     ws.getCell(row, 2).alignment = { vertical: "middle", horizontal: "left", wrapText: true };
     applyBorders(ws, `A${row}:F${row}`);
+    ws.getRow(row).height = estimateWrappedRowHeight([label, value], { base: 26, max: 72, charsPerLine: 54 });
     row += 1;
   });
   return row;
@@ -334,6 +358,15 @@ function createStructuredWorkbook(sheetName: string): { wb: ExcelJS.Workbook; ws
     pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
   });
   ws.columns = STRUCTURED_DOC_COLUMNS;
+  ws.views = [{ state: "frozen", ySplit: 1 }];
+  ws.pageSetup.margins = {
+    left: 0.25,
+    right: 0.25,
+    top: 0.35,
+    bottom: 0.35,
+    header: 0.15,
+    footer: 0.15
+  };
   return { wb, ws };
 }
 
@@ -645,6 +678,15 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   const isStructuredRiskSheet = profile.layout === "risk" && Boolean(structuredRiskRows?.length);
   if (isStructuredRiskSheet) {
     applyRiskAssessmentColumns(ws);
+    ws.views = [{ state: "frozen", ySplit: 5 }];
+    ws.pageSetup.margins = {
+      left: 0.2,
+      right: 0.2,
+      top: 0.35,
+      bottom: 0.35,
+      header: 0.15,
+      footer: 0.15
+    };
   } else {
     ws.columns = [
       { width: 6 },

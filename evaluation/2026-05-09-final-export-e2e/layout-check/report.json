@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-05-09T13:30:00.000Z",
+  "scope": "xlsx row height and hwp cell wrapping layout check",
+  "result": "pass",
+  "checks": {
+    "typecheck": "pass",
+    "xlsxRiskExport": {
+      "status": 200,
+      "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "file": "evaluation/2026-05-09-final-export-e2e/layout-check/layout-risk.xlsx"
+    },
+    "hwpRiskExport": {
+      "status": 200,
+      "contentType": "application/x-hwp",
+      "oleMagic": "d0cf11e0a1b11ae1",
+      "file": "evaluation/2026-05-09-final-export-e2e/layout-check/layout-risk.hwp"
+    }
+  },
+  "notes": [
+    "Excel row heights now scale by content length for risk and structured tables.",
+    "Structured Excel sheets use wider content columns, frozen title row, tighter print margins.",
+    "HWP table cells now receive explicit line breaks to reduce overflow in Hancom." 
+  ]
+}
