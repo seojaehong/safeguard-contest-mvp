@@ -6,7 +6,9 @@
     "evaluation/final-99-gate/decision.md"
   ],
   "primaryEvidence": {
-    "structuredExportSmoke": "evaluation/2026-05-09-pr29-rebase-smoke/summary.md",
+    "structuredExportSmoke": "evaluation/final-90-gate/structured-export/smoke-report.json",
+    "deterministicGateDecision": "evaluation/final-90-gate/decision.md",
+    "deterministicGateReport": "evaluation/final-90-gate/report.json",
     "submissionReadiness": "docs/submission_readiness_report.md",
     "commercializationOnepager": "docs/commercialization-onepager.md"
   },

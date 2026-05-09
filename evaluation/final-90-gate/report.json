@@ -1,0 +1,102 @@
+{
+  "generatedAt": "2026-05-09T03:08:00.000+09:00",
+  "gate": "final-90-gate",
+  "scope": "local deterministic evidence only; no auth token, no production secret, no DB mutation",
+  "currentCommit": "b2c1c4e",
+  "overall": "pass_with_notice",
+  "previousBlockedGate": {
+    "path": "evaluation/final-99-gate/report.json",
+    "generatedAt": "2026-05-07T02:38:42.600Z",
+    "commit": "6b8ce93",
+    "overall": "blocked",
+    "whyStale": [
+      "It predates the structured output contract fixes and PR #29 export evidence.",
+      "It marked document-downloads as blocked before the latest XLSX/HWP/PDF route-level structured export smoke.",
+      "It included auth-history live verification as pass_with_notice because no SAFEGUARD_AUTH_TOKEN was available; this final-90 gate intentionally avoids auth-token dependent checks."
+    ]
+  },
+  "commands": [
+    {
+      "command": "npm.cmd run typecheck",
+      "verdict": "pass",
+      "evidence": "TypeScript strict check completed with exit code 0."
+    },
+    {
+      "command": "npm.cmd run build",
+      "verdict": "pass",
+      "evidence": "Next.js production build completed with exit code 0 and generated 22 static pages."
+    },
+    {
+      "command": "npm.cmd run smoke:form-schema-gate",
+      "verdict": "pass_with_notice",
+      "evidence": "caseCount=3, expectationPass=3, goldenPass=2, goldenCount=2, output=evaluation/2026-05-08-form-standard-review"
+    },
+    {
+      "command": "node ./scripts/safeclaw_d6_structured_export_smoke.mjs",
+      "verdict": "pass",
+      "evidence": "Executed against local dev server http://127.0.0.1:32994 with SAFECLAW_D6_QA_OUT_DIR=evaluation/final-90-gate/structured-export."
+    }
+  ],
+  "structuredExport": {
+    "report": "evaluation/final-90-gate/structured-export/smoke-report.json",
+    "overall": "pass",
+    "elapsedMs": 5126,
+    "checks": {
+      "riskAssessmentXlsx": {
+        "verdict": "pass",
+        "file": "evaluation/final-90-gate/structured-export/files/riskAssessment-kosha-headers.xlsx",
+        "bytes": 8683,
+        "missingHeaders": []
+      },
+      "workPlanStructuredXlsx": {
+        "verdict": "pass",
+        "file": "evaluation/final-90-gate/structured-export/files/workPlanStructured.xlsx",
+        "bytes": 8735,
+        "missingText": []
+      },
+      "tbmBriefingStructuredXlsx": {
+        "verdict": "pass",
+        "file": "evaluation/final-90-gate/structured-export/files/tbmBriefingStructured.xlsx",
+        "bytes": 8969,
+        "missingText": []
+      },
+      "educationRecordStructuredXlsx": {
+        "verdict": "pass",
+        "file": "evaluation/final-90-gate/structured-export/files/educationRecordStructured.xlsx",
+        "bytes": 8776,
+        "missingText": []
+      },
+      "hwpSignature": {
+        "verdict": "pass",
+        "file": "evaluation/final-90-gate/structured-export/files/riskAssessment-signature.hwp",
+        "bytes": 14336,
+        "magic": "D0CF11E0A1B11AE1"
+      },
+      "pdfBehavior": {
+        "verdict": "pass",
+        "file": "evaluation/final-90-gate/structured-export/files/riskAssessment-honest.pdf",
+        "bytes": 4141,
+        "contentType": "application/pdf",
+        "magic": "%PDF-",
+        "looksLikeHtml": false
+      },
+      "tbmRiskLinks": {
+        "verdict": "pass",
+        "typeExposed": true,
+        "aiPromptPresent": true,
+        "searchResponseMentionsLinks": true,
+        "schemaGateValidatesLinks": true
+      }
+    }
+  },
+  "notCoveredByThisGate": [
+    "Live Supabase administrator login, storage, archive reopen, and dispatch log reuse.",
+    "Production secret-dependent n8n provider delivery.",
+    "HWPX original public-institution cell-by-cell reproduction.",
+    "Full browser UI visual regression."
+  ],
+  "submissionUse": {
+    "recommended": true,
+    "wording": "Use this as the deterministic final evidence bundle for structured document/export readiness. Keep production auth and provider checks in a separate live smoke report."
+  }
+}
