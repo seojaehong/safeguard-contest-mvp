@@ -18,3 +18,18 @@ evaluation/2026-04-27-lawgo-precedent/
 evaluation/2026-04-27-rhwp-inspect/
 evaluation/2026-04-27-template-presets/
 evaluation/pdf-export-smoke/
+
+# evaluation: 과거 smoke/QA 산출물 (final-90-gate 기준 파일만 유지)
+# 아래 패턴은 이미 트래킹된 파일에는 영향 없음 (git rm --cached 필요시 별도 처리)
+evaluation/supabase-safety-ingestion-ready-2026-05-03/
+evaluation/saas-v1/
+evaluation/final-e2e-matrix/
+evaluation/final-e2e-matrix-local/
+evaluation/final-hardening-round-2/
+evaluation/final-hardening-round-3/
+evaluation/design-refactor/
+evaluation/2026-04-29-orchestration-download-smoke/
+evaluation/2026-04-30-*/
+evaluation/2026-04-27-*/
+evaluation/2026-04-26-*/
+evaluation/2026-04-25-*/
