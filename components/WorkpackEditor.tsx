@@ -131,10 +131,10 @@ const templatePresets: TemplatePreset[] = [
   },
   {
     kind: "hwp",
-    label: "HWPX 제출형 초안",
-    description: "rhwp로 생성한 한글 제출 보조 초안입니다. 원본 한글 서식 1:1 복제는 아닙니다.",
-    previewTitle: "rhwp 한글 문서 + 확인/서명란",
-    previewBullets: ["공식 서식 항목명 유지", "확인자·관리감독자 서명란", "원본 셀·결재칸은 제출 전 확인"]
+    label: "한글 표 양식(.hwp)",
+    description: "한컴에서 바로 열 수 있는 자동채움 표 문서입니다. HWPX 원본 셀 복제보다 .hwp 표 양식을 우선 제공합니다.",
+    previewTitle: "자동채움 한글 표 + 확인/서명란",
+    previewBullets: ["문서별 표 구조", "확인자·관리감독자 서명란", "원본 HWPX 양식은 별도 빈 서식으로 제공"]
   }
 ];
 
@@ -2255,7 +2255,7 @@ export function WorkpackEditor({
           </details>
           <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
           <p className="muted small">
-            출력 방식: PDF는 브라우저 인쇄/저장 화면, XLS는 HTML 호환 파일, HWPX는 rhwp 제출형 초안입니다.
+            출력 방식: 전체·개별 제출 메인은 Excel .xlsx입니다. 한컴용 자동채움은 .hwp 표 양식으로 제공하고, .hwpx는 원본 빈 양식 또는 텍스트 초안으로만 구분합니다.
           </p>
           <details className="advanced-downloads">
             <summary>전체 다운로드</summary>
@@ -2308,19 +2308,19 @@ export function WorkpackEditor({
               {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
             </p>
             <p className="muted small">
-              제출형 출력은 표 양식(Excel .xlsx · 한글 .hwp)을 우선 권장합니다. PDF는 브라우저 인쇄/저장, .hwpx는 텍스트 초안이며 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
+              제출형 출력은 전체 Excel .xlsx를 기본으로 권장합니다. 한컴 사용자는 자동채움 .hwp 표 양식을 사용하고, .hwpx는 원본 빈 양식 또는 텍스트 초안이므로 제출 전 현장 서식 기준으로 확인해 주세요.
             </p>
           </div>
           <div className="download-bar">
-            <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
-              {xlsxStatus === "building" ? "Excel 생성 중" : "Excel 표 양식(.xlsx)"}
+              <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
+              {xlsxStatus === "building" ? "Excel 생성 중" : "메인 Excel(.xlsx)"}
             </button>
             <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
-              {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
+              {hwpStatus === "building" ? "한글 표 생성 중" : "한글 자동채움(.hwp)"}
             </button>
             {templateKindForLayout(selectedFormProfile.layout) ? (
               <button type="button" className="button secondary" onClick={() => void downloadOfficialTemplate()} disabled={officialTemplateStatus === "building"} title="공공기관 공식 빈 .hwpx 양식. 표/서식 그대로 보존, 본문은 현장에서 채워 사용. (시나리오 데이터 자동 채움 기능은 v2 예정)">
-                {officialTemplateStatus === "building" ? "공식양식 생성 중" : "공식양식(빈 .hwpx)"}
+                {officialTemplateStatus === "building" ? "빈 양식 생성 중" : "원본 빈 양식(.hwpx)"}
               </button>
             ) : null}
             <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
@@ -2348,7 +2348,7 @@ export function WorkpackEditor({
           <p className="export-error">한글 표(.hwp) 생성 중 오류가 발생했습니다. .hwpx 텍스트 초안 또는 PDF를 사용해 주세요.</p>
         ) : null}
         {officialTemplateStatus === "error" ? (
-          <p className="export-error">공식양식(.hwpx) 생성 중 오류가 발생했습니다. 한글 표(.hwp) 또는 PDF를 사용해 주세요.</p>
+          <p className="export-error">원본 빈 양식(.hwpx) 생성 중 오류가 발생했습니다. 한글 자동채움(.hwp) 또는 PDF를 사용해 주세요.</p>
         ) : null}
         {hwpxStatus === "error" ? (
           <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
@@ -2358,7 +2358,7 @@ export function WorkpackEditor({
         ) : null}
         {showFocusCue ? (
           <p className="editor-focus-message" aria-live="polite">
-            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF(브라우저 인쇄)·XLS(HTML 호환)·HWPX 제출형 초안으로 출력할 수 있습니다.
+            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, 메인 Excel(.xlsx)·한글 자동채움(.hwp)·PDF(브라우저 인쇄)로 출력할 수 있습니다.
           </p>
         ) : null}
         <SafetyDocumentPreview
