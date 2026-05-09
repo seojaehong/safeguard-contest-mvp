@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
 type ModuleStatus = "live" | "partial" | "planned";
 
 const statusLabel: Record<ModuleStatus, string> = {
-  live: "바로 사용",
-  partial: "연결 확인",
-  planned: "설정 필요"
+  live: "실사용 가능",
+  partial: "부분 연결",
+  planned: "준비 중"
 };
 
 type SafeClawModuleShellProps = {
@@ -18,6 +18,7 @@ type SafeClawModuleShellProps = {
   children: ReactNode;
   actions?: ReactNode;
   activeHref?: string;
+  contextLabel?: string;
 };
 
 // Sidebar nav per design handoff v1.0 §10.3 — 11 items in 3 groups
@@ -48,7 +49,8 @@ export function SafeClawModuleShell({
   mappedTo,
   children,
   actions,
-  activeHref
+  activeHref,
+  contextLabel
 }: SafeClawModuleShellProps) {
   const groupedNav = moduleNav.reduce<Record<string, typeof moduleNav[number][]>>((acc, item) => {
     acc[item.group] = acc[item.group] || [];
@@ -86,8 +88,8 @@ export function SafeClawModuleShell({
 
       <section className="safeclaw-module-main">
         <header className="safeclaw-module-nav">
-          <span><i /> SITE 기본 현장</span>
-          <span>API <b>Law.go</b> · <b>KOSHA</b> · 기상청</span>
+          <span><i /> 현장 기본값</span>
+          <span>근거 연결 <b>Law.go</b> · <b>KOSHA</b> · 기상청</span>
           <span className={`safeclaw-module-status ${status}`}>
             {status === "live" ? <i className="sc-blink sc-blink--good" aria-hidden="true" /> : null}
             {statusLabel[status]}
@@ -99,6 +101,7 @@ export function SafeClawModuleShell({
         <section className="safeclaw-module-hero hud-corners">
           <div>
             <span className="safeclaw-module-eyebrow">{eyebrow}</span>
+            {contextLabel ? <span className="safeclaw-context-badge">{contextLabel}</span> : null}
             <h1>{title}</h1>
             <p>{description}</p>
           </div>

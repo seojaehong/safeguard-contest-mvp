@@ -576,13 +576,13 @@ function formatSavedAt(savedAt: string | null) {
 function CurrentWorkpackBanner({ isCurrent, savedAt }: { isCurrent: boolean; savedAt: string | null }) {
   return (
     <section className={`safeclaw-current-workpack ${isCurrent ? "live" : "sample"}`} aria-live="polite">
-      <span>{isCurrent ? "현재 작업 연결" : "기본 예시 표시"}</span>
+      <span>{isCurrent ? "현재 작업 연결" : "대표 작업 기준"}</span>
       <strong>
         {isCurrent
           ? `작업공간에서 생성한 최신 문서팩을 사용합니다${formatSavedAt(savedAt) ? ` · ${formatSavedAt(savedAt)}` : ""}.`
-          : "아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다."}
+          : "아직 연결된 최신 문서팩이 없어 대표 작업 기준으로 화면 흐름을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다."}
       </strong>
-      <a href="/workspace">작업공간에서 새로 생성</a>
+      <a href="/workspace">오늘 작업으로 생성</a>
     </section>
   );
 }
@@ -923,7 +923,7 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
   });
   const records = buildEducationRecordDrafts(editableWorkers, current.data.scenario.workSummary);
   const summary = summarizeWorkers(editableWorkers);
-  const workerSourceLabel = current.workerSnapshot ? "현재 작업공간 snapshot" : current.isCurrent ? "현재 문서팩에서 기본 추정" : "기본 예시";
+  const workerSourceLabel = current.workerSnapshot ? "현재 작업공간 snapshot" : current.isCurrent ? "현재 문서팩에서 기본 추정" : "대표 작업 기준";
   const draftLanguagePreview = buildDraftLanguagePreview(draft, current.data);
 
   useEffect(() => {
@@ -1234,7 +1234,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
   const targetWorkers = current.dispatchSnapshot?.targetWorkers.length
     ? filterRealDispatchTargets(current.dispatchSnapshot.targetWorkers)
     : recipientSuggestions.length ? filterRealDispatchTargets(buildWorkerDispatchTargets(workers)) : [];
-  const dispatchSourceLabel = current.dispatchSnapshot ? "작업공간 전파 snapshot" : current.workerSnapshot ? "작업자 snapshot에서 재계산" : "기본 예시 기반";
+  const dispatchSourceLabel = current.dispatchSnapshot ? "작업공간 전파 snapshot" : current.workerSnapshot ? "작업자 snapshot에서 재계산" : "대표 작업 기준";
 
   return (
     <>
@@ -1250,7 +1250,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
           <article className="safeclaw-module-panel">
             <span>전파 대기</span>
             <h2>작업 입력 후 실제 전파.</h2>
-            <p>기본 예시 데이터는 메시지 형태만 확인합니다. 메일·문자 실발송은 작업공간에서 문서팩을 생성한 뒤 진행합니다.</p>
+            <p>대표 작업 기준 데이터는 메시지 형태만 확인합니다. 메일·문자 실발송은 작업공간에서 문서팩을 생성한 뒤 진행합니다.</p>
             <a href="/workspace">작업 입력으로 이동</a>
           </article>
         )}
@@ -1259,7 +1259,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
           <h2>메일·문자 우선.</h2>
           <p>전송 전 수신자, 채널, 언어, 메시지 미리보기를 확인한 뒤 provider 결과를 채널별로 표시합니다. 현재 대상 기준: {dispatchSourceLabel}.</p>
           {!recipientSuggestions.length ? (
-            <p className="export-error">기본 예시 연락처는 실발송 대상에서 제외했습니다. 수신자를 직접 입력해야 전송할 수 있습니다.</p>
+            <p className="export-error">대표 작업 연락처는 실발송 대상에서 제외했습니다. 수신자를 직접 입력해야 전송할 수 있습니다.</p>
           ) : null}
           <ul>
             <li>메일: 관리자·원청 보고</li>
@@ -1373,7 +1373,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
         <section className="safeclaw-module-panel">
           <span>저장된 이력 없음</span>
           <h2>작업 입력 후 이력이 생깁니다.</h2>
-          <p>아직 이 브라우저에 생성된 문서팩이 없습니다. 기본 예시의 숫자를 이력처럼 보여주지 않고, 실제 작업 생성 후 최신 스냅샷을 표시합니다. 관리자 로그인 상태라면 아래에서 서버 이력은 바로 조회할 수 있습니다.</p>
+          <p>아직 이 브라우저에 생성된 문서팩이 없습니다. 대표 작업 기준의 숫자를 실제 이력처럼 보여주지 않고, 실제 작업 생성 후 최신 스냅샷을 표시합니다. 관리자 로그인 상태라면 아래에서 서버 이력은 바로 조회할 수 있습니다.</p>
           <a href="/workspace">작업 입력으로 이동</a>
         </section>
       ) : (
