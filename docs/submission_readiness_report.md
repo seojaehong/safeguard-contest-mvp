@@ -1,5 +1,20 @@
 # SafeGuard 제출 기준점 운영화 리포트
 
+최신 제출 기준 갱신: 2026-05-09
+
+## 2026-05-09 제출 기준 문서 고정
+
+최종 제출 패키지의 기준 문서는 아래로 고정합니다.
+
+- 최종 판정: `evaluation/final-90-gate/decision.md`
+- 기계 판정: `evaluation/final-90-gate/decision.json`
+- 최신 구조화 출력 검증: `evaluation/2026-05-09-pr29-rebase-smoke/summary.md`
+- 제출 패키지 목록: `docs/submission_final_packet.md`
+
+`evaluation/final-99-gate/decision.md`와 그 안의 `blocked` 판정은 PR #29 이전 상태를 남긴 과거 감사 로그입니다. 제출 기준 판정으로 사용하지 않습니다.
+
+현재 제출 기준 상태는 `pass_with_notice`입니다. 위험성평가표, 작업계획서, TBM, 교육일지의 구조화 XLSX 출력은 최신 smoke에서 확인됐고, HWP/PDF는 제출형 초안과 보조 출력으로 고지합니다.
+
 ## 제출 기준
 
 이번 제출 기준은 `Vercel Production에서 실제 운영 흐름이 닫히는 상태`다. 닫아야 할 축은 `관리자 계정/이력 저장`, `메일·문자 전파 및 로그`, `PDF/HWPX/XLS 제출 서식 검수` 세 가지로 고정한다.
@@ -108,7 +123,9 @@ SafeClaw는 ISO 인증을 대체하지 않는다. 제출 문구는 `ISO 45001식
 
 ## 현재 결론
 
-이 문서는 제출 기준을 고정하는 운영 리포트다. 최종 판정은 `evaluation/submission-readiness/submission-readiness-summary.json`의 `overall` 값을 기준으로 한다. `blocked`가 하나라도 있으면 제출 전 수정 대상으로 남긴다.
+이 문서는 제출 기준을 고정하는 운영 리포트다. 최종 판정은 `evaluation/final-90-gate/decision.md`의 값을 기준으로 한다.
+
+아래 2026-04-30, 2026-05-01 스모크 결과는 감사 추적용 이력이다. 과거 `blocked` 판정은 결함 추적에는 보관하지만, PR #29 이후 구조화 출력 검증을 대체하지 않는다. 최신 제출 기준은 위험성평가표, 작업계획서, TBM, 교육일지의 구조화 XLSX와 HWP/PDF 보조 출력 기준이다.
 
 ## 2026-04-30 제출 스모크 결과
 

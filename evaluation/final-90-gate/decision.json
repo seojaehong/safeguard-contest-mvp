@@ -1,0 +1,66 @@
+{
+  "generatedAt": "2026-05-09",
+  "authoritativeForSubmission": true,
+  "overall": "pass_with_notice",
+  "supersedes": [
+    "evaluation/final-99-gate/decision.md"
+  ],
+  "primaryEvidence": {
+    "structuredExportSmoke": "evaluation/2026-05-09-pr29-rebase-smoke/summary.md",
+    "submissionReadiness": "docs/submission_readiness_report.md",
+    "commercializationOnepager": "docs/commercialization-onepager.md"
+  },
+  "gates": [
+    {
+      "name": "ask-orchestration",
+      "status": "pass",
+      "note": "Structured risk rows and document-pack data are generated."
+    },
+    {
+      "name": "structured-xlsx-exports",
+      "status": "pass",
+      "note": "Risk assessment, work plan, TBM, and education record structured XLSX exports passed latest smoke evidence."
+    },
+    {
+      "name": "hwp-export",
+      "status": "pass_with_notice",
+      "note": "HWP signature and table output are verified. Original public-institution cell-perfect HWPX replication is not claimed."
+    },
+    {
+      "name": "pdf-export",
+      "status": "pass_with_notice",
+      "note": "PDF binary response is verified. Browser download flow should be replayed once before final submission."
+    },
+    {
+      "name": "auth-history-reuse",
+      "status": "pass_with_notice",
+      "note": "Production token storage pass exists. Final account replay is recommended before submission."
+    },
+    {
+      "name": "dispatch-policy",
+      "status": "pass_with_notice",
+      "note": "Email and SMS are official submission channels. Kakao and Band are excluded until approval."
+    },
+    {
+      "name": "public-data-ai-evidence",
+      "status": "pass",
+      "note": "Law, KOSHA, weather, incident, and internal safety knowledge evidence are mapped to document generation and remediation."
+    }
+  ],
+  "historicalArtifactsNotAuthoritative": [
+    "evaluation/final-99-gate/decision.md",
+    "older blocked submission-readiness smoke files"
+  ],
+  "submissionPolicy": {
+    "documentClaim": "Official-data-based draft for field review",
+    "channels": [
+      "email",
+      "sms"
+    ],
+    "excludedChannels": [
+      "kakao",
+      "band"
+    ],
+    "aiFlow": "evidence selection -> AI suggestion -> user edit -> insert"
+  }
+}

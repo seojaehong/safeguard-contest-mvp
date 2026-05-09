@@ -1,5 +1,7 @@
 # SafeClaw final-99-gate decision
 
+> 보관용 과거 감사 로그입니다. PR #29 이전 상태의 판정이므로 제출 기준으로 사용하지 않습니다. 최신 제출 기준은 `evaluation/final-90-gate/decision.md`입니다.
+
 - Generated at: 2026-05-07T02:38:42.600Z
 - Base URL: https://www.safeclaw.kr
 - Commit: 6b8ce93
