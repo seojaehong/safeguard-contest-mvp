@@ -2,7 +2,14 @@
 // Produces OOXML binary that opens cleanly in Excel/한셀 with no extension warning.
 
 import ExcelJS from "exceljs";
-import type { AskResponse, EducationRecordStructured, TbmBriefingStructured, TbmRiskLink, WorkPlanStructured } from "@/lib/types";
+import type {
+  AskResponse,
+  EducationRecordStructured,
+  PermitInspectionStructured,
+  TbmBriefingStructured,
+  TbmRiskLink,
+  WorkPlanStructured
+} from "@/lib/types";
 import {
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
@@ -566,6 +573,110 @@ function parseEducationRecordStructured(value: StructuredRecord): EducationRecor
   };
 }
 
+function readPermitType(value: unknown): PermitInspectionStructured["basicInfo"]["permitType"] {
+  const text = readString(value, "일반 위험작업");
+  const allowed: Array<PermitInspectionStructured["basicInfo"]["permitType"]> = [
+    "고소작업",
+    "화기작업",
+    "밀폐공간",
+    "전기작업",
+    "중장비작업",
+    "화학물질",
+    "일반 위험작업"
+  ];
+  return allowed.includes(text as PermitInspectionStructured["basicInfo"]["permitType"])
+    ? text as PermitInspectionStructured["basicInfo"]["permitType"]
+    : "일반 위험작업";
+}
+
+function readPermitConditionCategory(value: unknown): PermitInspectionStructured["conditions"][number]["category"] {
+  const text = readString(value, "작업구역");
+  const allowed: Array<PermitInspectionStructured["conditions"][number]["category"]> = [
+    "작업구역",
+    "격리·차단",
+    "화재·폭발",
+    "질식·가스",
+    "추락·낙하",
+    "장비·동선",
+    "보호구",
+    "기상·환경",
+    "교육·TBM"
+  ];
+  return allowed.includes(text as PermitInspectionStructured["conditions"][number]["category"])
+    ? text as PermitInspectionStructured["conditions"][number]["category"]
+    : "작업구역";
+}
+
+function readPermitConditionStatus(value: unknown): PermitInspectionStructured["conditions"][number]["status"] {
+  const text = readString(value, "확인 전");
+  return text === "적합" || text === "보완 필요" || text === "해당 없음" ? text : "확인 전";
+}
+
+function readAttachmentStatus(value: unknown): PermitInspectionStructured["attachments"][number]["status"] {
+  const text = readString(value, "보완 필요");
+  return text === "첨부" || text === "해당 없음" ? text : "보완 필요";
+}
+
+function readCompletionStatus(value: unknown): PermitInspectionStructured["completionChecks"][number]["status"] {
+  const text = readString(value, "확인 전");
+  return text === "완료" || text === "보완 필요" ? text : "확인 전";
+}
+
+function parsePermitInspectionStructured(value: StructuredRecord): PermitInspectionStructured {
+  const basicInfo = isRecord(value.basicInfo) ? value.basicInfo : {};
+  const conditions = Array.isArray(value.conditions) ? value.conditions : [];
+  const attachments = Array.isArray(value.attachments) ? value.attachments : [];
+  const completionChecks = Array.isArray(value.completionChecks) ? value.completionChecks : [];
+  const approvers = isRecord(value.approvers) ? value.approvers : {};
+
+  return {
+    basicInfo: {
+      permitNo: readString(basicInfo.permitNo, "현장 발급"),
+      permitType: readPermitType(basicInfo.permitType),
+      workName: readString(basicInfo.workName, "작업명 확인"),
+      location: readString(basicInfo.location, "작업장소 확인"),
+      workDate: readString(basicInfo.workDate, "작업일 확인"),
+      workerCount: readNumber(basicInfo.workerCount, 0),
+      requester: readString(basicInfo.requester, "작업반장"),
+      approver: readString(basicInfo.approver, "관리감독자")
+    },
+    conditions: conditions.flatMap((item): PermitInspectionStructured["conditions"] => {
+      if (!isRecord(item)) return [];
+      return [{
+        category: readPermitConditionCategory(item.category),
+        requirement: readString(item.requirement, "허가조건 확인"),
+        action: readString(item.action, "작업 전 조치 확인"),
+        owner: readString(item.owner, "작업반장"),
+        status: readPermitConditionStatus(item.status)
+      }];
+    }),
+    attachments: attachments.flatMap((item): PermitInspectionStructured["attachments"] => {
+      if (!isRecord(item)) return [];
+      return [{
+        name: readString(item.name, "첨부서류"),
+        required: typeof item.required === "boolean" ? item.required : true,
+        status: readAttachmentStatus(item.status),
+        note: readString(item.note, "현장 확인")
+      }];
+    }),
+    completionChecks: completionChecks.flatMap((item): PermitInspectionStructured["completionChecks"] => {
+      if (!isRecord(item)) return [];
+      return [{
+        item: readString(item.item, "종료 확인 항목"),
+        method: readString(item.method, "현장 확인"),
+        owner: readString(item.owner, "종료 확인자"),
+        status: readCompletionStatus(item.status)
+      }];
+    }),
+    approvers: {
+      requester: readString(approvers.requester, "신청자"),
+      safetyManager: readString(approvers.safetyManager, "안전관리자"),
+      siteManager: readString(approvers.siteManager, "현장소장"),
+      completionChecker: readString(approvers.completionChecker, "종료 확인자")
+    }
+  };
+}
+
 export async function buildWorkPlanStructuredXlsx(
   scenario: Scenario,
   structured: StructuredRecord
@@ -647,6 +758,96 @@ export async function buildWorkPlanStructuredXlsx(
   row += 1;
   row = addApprovalRows(ws, row, [data.approvers.author, data.approvers.reviewer, data.approvers.approver]);
   addWorkbookNote(ws, row, "본 작업계획서는 structured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 현장 확인 후 결재 및 서명하세요.");
+
+  const buffer = await wb.xlsx.writeBuffer();
+  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+}
+
+export async function buildPermitInspectionStructuredXlsx(
+  scenario: Scenario,
+  structured: StructuredRecord
+): Promise<Buffer> {
+  const data = parsePermitInspectionStructured(structured);
+  const { wb, ws } = createStructuredWorkbook("작업허가 확인");
+  let row = addStructuredTitle(ws, 1, "안전작업허가 확인서", scenario);
+
+  row = addSectionHeader(ws, row, "허가 기본정보");
+  row = addKeyValueRows(ws, row, [
+    ["허가번호", data.basicInfo.permitNo],
+    ["허가구분", data.basicInfo.permitType],
+    ["작업명", data.basicInfo.workName],
+    ["작업장소", data.basicInfo.location],
+    ["작업일", data.basicInfo.workDate],
+    ["작업인원", `${data.basicInfo.workerCount || scenario.workerCount || 0}명`],
+    ["신청/허가", `${data.basicInfo.requester} / ${data.basicInfo.approver}`]
+  ]);
+
+  row += 1;
+  row = addSectionHeader(ws, row, "작업 전 허가조건");
+  row = addTableHeader(ws, row, ["No.", "구분", "허가조건", "조치내용", "담당", "상태"]);
+  const conditions = data.conditions.length ? data.conditions : [{
+    category: "작업구역" as const,
+    requirement: "작업 전 허가조건 확인",
+    action: "위험성평가와 작업계획서 첨부 후 현장 확인",
+    owner: "작업반장",
+    status: "확인 전" as const
+  }];
+  conditions.forEach((condition, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      condition.category,
+      condition.requirement,
+      condition.action,
+      condition.owner,
+      `□ ${condition.status}`
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "첨부서류 및 사전 확인");
+  row = addTableHeader(ws, row, ["No.", "첨부서류", "필수", "상태", "비고", "확인"]);
+  const attachments = data.attachments.length ? data.attachments : [
+    { name: "작업계획서", required: true, status: "보완 필요" as const, note: "작업순서·장비·인원 확인" },
+    { name: "위험성평가표", required: true, status: "보완 필요" as const, note: "감소대책·잔여위험 확인" },
+    { name: "TBM 참석명단", required: true, status: "보완 필요" as const, note: "작업 전 공유 확인" }
+  ];
+  attachments.forEach((attachment, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      attachment.name,
+      attachment.required ? "필수" : "조건부",
+      `□ ${attachment.status}`,
+      attachment.note,
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "작업 종료 확인");
+  row = addTableHeader(ws, row, ["No.", "종료 항목", "확인방법", "담당", "상태", "서명"]);
+  const completionChecks = data.completionChecks.length ? data.completionChecks : [
+    { item: "원상복구", method: "작업구역 정리와 잔류위험 확인", owner: "작업반장", status: "확인 전" as const },
+    { item: "미조치사항", method: "미조치 위험요인 기록 및 후속 담당 지정", owner: "관리감독자", status: "확인 전" as const }
+  ];
+  completionChecks.forEach((check, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      check.item,
+      check.method,
+      check.owner,
+      `□ ${check.status}`,
+      "서명: ______"
+    ]);
+  });
+
+  row += 1;
+  row = addApprovalRows(ws, row, [
+    data.approvers.requester,
+    data.approvers.safetyManager,
+    data.approvers.siteManager
+  ]);
+  row = setRowValues(ws, row, ["종료확인", data.approvers.completionChecker, "작업종료 후 잔류위험 확인", "현장보존/사진증빙", "보관담당", "□ 확인"]);
+  addWorkbookNote(ws, row, "본 안전작업허가 확인서는 structured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 발주처 지정 허가번호·직인·결재선은 제출 전 원본 양식으로 확인하세요.");
 
   const buffer = await wb.xlsx.writeBuffer();
   return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);

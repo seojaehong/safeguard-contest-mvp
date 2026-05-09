@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-05-10T00:00:00+09:00",
+  "scope": "permitInspectionStructured deterministic payload and xlsx route wiring",
+  "result": "pass",
+  "changes": [
+    "Added PermitInspectionStructured type for safety work permit and inspection confirmation.",
+    "Added /api/export/xlsx permitInspectionStructured mode.",
+    "Added buildPermitInspectionStructuredXlsx with basic info, permit conditions, attachments, completion checks, and approval rows.",
+    "Connected WorkpackEditor workPermitDraft XLSX download to structured permit payload generated from scenario, risk rows, weather actions, and immediate actions."
+  ],
+  "verification": {
+    "typecheck": "pass",
+    "smokeFormSchemaGate": "pass_with_notice"
+  },
+  "remainingGaps": [
+    "Permit structured payload is deterministic from current workpack context, not an independent Gemini response.",
+    "HWP permit export still uses the existing permit layout path rather than the new structured permit builder."
+  ]
+}

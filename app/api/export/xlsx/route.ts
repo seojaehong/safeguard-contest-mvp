@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   buildEducationRecordStructuredXlsx,
+  buildPermitInspectionStructuredXlsx,
   buildTbmBriefingStructuredXlsx,
   buildWorkpackXlsx,
   buildWorkPlanStructuredXlsx,
@@ -123,7 +124,7 @@ export async function GET() {
       ok: true,
       route: "/api/export/xlsx",
       methods: ["POST"],
-      modes: ["single", "workpack", "workPlanStructured", "tbmBriefingStructured", "educationRecordStructured"],
+      modes: ["single", "workpack", "workPlanStructured", "permitInspectionStructured", "tbmBriefingStructured", "educationRecordStructured"],
       message: "POST a single document spec or a workpack array. Returns OOXML .xlsx binary.",
       schema: {
         single: {
@@ -139,7 +140,7 @@ export async function GET() {
           documents: "[{ title, rows, profile }]"
         },
         structured: {
-          mode: "workPlanStructured | tbmBriefingStructured | educationRecordStructured",
+          mode: "workPlanStructured | permitInspectionStructured | tbmBriefingStructured | educationRecordStructured",
           scenario: "AskScenario",
           structured: "Record<string, unknown>"
         }
@@ -156,7 +157,7 @@ export async function POST(request: NextRequest) {
   const scenario = parseScenario(body.scenario);
 
   try {
-    if (mode === "workPlanStructured" || mode === "tbmBriefingStructured" || mode === "educationRecordStructured") {
+    if (mode === "workPlanStructured" || mode === "permitInspectionStructured" || mode === "tbmBriefingStructured" || mode === "educationRecordStructured") {
       if (!isRecord(body.structured)) {
         return NextResponse.json(
           { ok: false, error: "structured must be a non-array object for structured xlsx export" },
@@ -167,6 +168,11 @@ export async function POST(request: NextRequest) {
       if (mode === "workPlanStructured") {
         const buffer = await buildWorkPlanStructuredXlsx(scenario, body.structured);
         return xlsxResponse(buffer, `${scenario.companyName}-작업계획서`, "safeclaw-work-plan");
+      }
+
+      if (mode === "permitInspectionStructured") {
+        const buffer = await buildPermitInspectionStructuredXlsx(scenario, body.structured);
+        return xlsxResponse(buffer, `${scenario.companyName}-안전작업허가-확인서`, "safeclaw-work-permit");
       }
 
       if (mode === "tbmBriefingStructured") {

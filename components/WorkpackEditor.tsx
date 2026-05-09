@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AskResponse } from "@/lib/types";
+import { AskResponse, type PermitInspectionStructured } from "@/lib/types";
 import {
   evaluatePublicSafetyRubric,
   rubricCategoryLabel,
@@ -344,6 +344,100 @@ function buildPermitDraft(data: AskResponse) {
     "미조치사항 및 후속조치:",
     "종료 확인자:"
   ].join("\n");
+}
+
+function inferPermitType(data: AskResponse): PermitInspectionStructured["basicInfo"]["permitType"] {
+  const text = `${data.question} ${data.scenario.workSummary} ${data.riskSummary.topRisk}`;
+  if (/비계|고소|추락|지붕|외벽/.test(text)) return "고소작업";
+  if (/용접|화기|절단|불꽃/.test(text)) return "화기작업";
+  if (/밀폐|질식|산소|탱크|맨홀/.test(text)) return "밀폐공간";
+  if (/전기|정전|감전|분전반/.test(text)) return "전기작업";
+  if (/지게차|크레인|굴삭|중장비|하역/.test(text)) return "중장비작업";
+  if (/화학|약품|MSDS|세척|누출/.test(text)) return "화학물질";
+  return "일반 위험작업";
+}
+
+function buildPermitInspectionStructured(data: AskResponse): PermitInspectionStructured {
+  const permitType = inferPermitType(data);
+  const today = new Date().toLocaleDateString("ko-KR");
+  const riskRows = data.structured?.riskAssessmentRows || [];
+  const topRows = riskRows.slice(0, 4);
+  const weatherActions = data.externalData.weather.actions.slice(0, 2);
+  const immediateActions = data.riskSummary.immediateActions.slice(0, 3);
+
+  const conditions: PermitInspectionStructured["conditions"] = [
+    {
+      category: "작업구역",
+      requirement: "작업구역 출입통제와 작업반경 표시",
+      action: immediateActions[0] || "작업 전 위험구역을 표시하고 관계자 외 접근을 제한",
+      owner: "작업반장",
+      status: "확인 전"
+    },
+    {
+      category: permitType === "화기작업" ? "화재·폭발" : permitType === "밀폐공간" ? "질식·가스" : permitType === "고소작업" ? "추락·낙하" : "장비·동선",
+      requirement: `${permitType} 핵심 위험 사전 통제`,
+      action: immediateActions[1] || data.riskSummary.topRisk,
+      owner: "관리감독자",
+      status: "확인 전"
+    },
+    {
+      category: "기상·환경",
+      requirement: "기상/API 신호와 현장 체감 조건 확인",
+      action: weatherActions.join(" / ") || data.scenario.weatherNote || "기상·현장 조건 확인 후 작업 여부 결정",
+      owner: "안전관리자",
+      status: "확인 전"
+    },
+    {
+      category: "교육·TBM",
+      requirement: "위험성평가 결과와 작업중지 기준 TBM 공유",
+      action: immediateActions[2] || "작업 전 TBM에서 위험요인과 중지기준을 전원 확인",
+      owner: "TBM 리더",
+      status: "확인 전"
+    }
+  ];
+
+  topRows.forEach((row) => {
+    conditions.push({
+      category: row.fourM === "Machine" ? "장비·동선" : row.fourM === "Media" ? "기상·환경" : row.fourM === "Man" ? "보호구" : "교육·TBM",
+      requirement: row.hazard,
+      action: row.additionalControls,
+      owner: row.owner || "담당자 지정",
+      status: "확인 전"
+    });
+  });
+
+  return {
+    basicInfo: {
+      permitNo: "현장 발급",
+      permitType,
+      workName: data.scenario.workSummary || "작업명 확인",
+      location: data.scenario.siteName || "작업장소 확인",
+      workDate: today,
+      workerCount: data.scenario.workerCount,
+      requester: "작업반장",
+      approver: "관리감독자"
+    },
+    conditions,
+    attachments: [
+      { name: "작업계획서", required: true, status: "첨부", note: "작업순서·장비·인원·중지기준 확인" },
+      { name: "위험성평가표", required: true, status: riskRows.length ? "첨부" : "보완 필요", note: "유해·위험요인과 감소대책 확인" },
+      { name: "TBM 참석명단", required: true, status: "보완 필요", note: "작업 전 공유 후 참석자 서명" },
+      { name: "장비 제원/검사증/운전원 자격", required: /중장비|지게차|크레인|장비/.test(`${data.question} ${data.scenario.workSummary}`), status: "보완 필요", note: "해당 장비 사용 시 첨부" },
+      { name: "MSDS/화기·밀폐·고소작업 별도 확인", required: permitType !== "일반 위험작업", status: "보완 필요", note: `${permitType} 조건 확인` },
+      { name: "사진/작업계획도/통제구역 표시", required: true, status: "보완 필요", note: "작업 전·후 증빙 보관" }
+    ],
+    completionChecks: [
+      { item: "작업구역 원상복구", method: "통제선·잔재물·공도구 회수 사진 확인", owner: "작업반장", status: "확인 전" },
+      { item: "잔류위험 확인", method: "미조치 위험요인 여부를 관리감독자가 확인", owner: "관리감독자", status: "확인 전" },
+      { item: "교육·TBM 기록 보관", method: "참석자 서명과 사진증빙 보관 위치 기록", owner: "안전관리자", status: "확인 전" }
+    ],
+    approvers: {
+      requester: "작업반장",
+      safetyManager: "안전관리자",
+      siteManager: "현장소장",
+      completionChecker: "종료 확인자"
+    }
+  };
 }
 
 function withSubmitReadiness(title: string, body: string, data: AskResponse) {
@@ -1902,15 +1996,19 @@ export function WorkpackEditor({
       // parseSheetRows 손실 없이 표 양식에 직접 매핑.
       const dl = data.deliverables as {
         workPlanStructured?: unknown;
+        permitInspectionStructured?: unknown;
         tbmBriefingStructured?: unknown;
         educationRecordStructured?: unknown;
       };
-      type StructuredMode = "workPlanStructured" | "tbmBriefingStructured" | "educationRecordStructured";
+      type StructuredMode = "workPlanStructured" | "permitInspectionStructured" | "tbmBriefingStructured" | "educationRecordStructured";
       let structuredMode: StructuredMode | null = null;
       let structuredPayload: unknown = null;
       if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
         structuredMode = "workPlanStructured";
         structuredPayload = dl.workPlanStructured;
+      } else if (selected.key === "workPermitDraft") {
+        structuredMode = "permitInspectionStructured";
+        structuredPayload = dl?.permitInspectionStructured || buildPermitInspectionStructured(data);
       } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
         structuredMode = "tbmBriefingStructured";
         structuredPayload = dl.tbmBriefingStructured;
