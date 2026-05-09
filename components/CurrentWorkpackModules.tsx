@@ -888,7 +888,8 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
   const evidenceCards = buildEvidenceCards(current.data);
   const directEvidence = evidenceCards.filter((item) => item.role === "direct");
-  const supportingEvidence = evidenceCards.filter((item) => item.role === "supporting");
+  const educationEvidence = evidenceCards.filter((item) => item.id.startsWith("work24-training-") || item.id.startsWith("kosha-education-"));
+  const supportingEvidence = evidenceCards.filter((item) => item.role === "supporting" && !educationEvidence.some((education) => education.id === item.id));
 
   return (
     <>
@@ -899,6 +900,7 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
           <h2>직접 근거와 보조 근거</h2>
           <p>법령·KOSHA 공식 기준은 문서 문구를 직접 뒷받침하고, 재해사례·기상·후속교육은 현장 판단을 보조하는 근거로 분리합니다.</p>
           {directEvidence.length ? <EvidenceCardList title="직접 근거" cards={directEvidence} /> : null}
+          {educationEvidence.length ? <EvidenceCardList title="교육 연계 근거" cards={educationEvidence} /> : null}
           {supportingEvidence.length ? <EvidenceCardList title="보조 근거" cards={supportingEvidence} /> : null}
           {!evidenceCards.length ? <a href="/knowledge">공식자료는 지식 DB와 작업공간 근거 패널에서 확인합니다.</a> : null}
         </article>
