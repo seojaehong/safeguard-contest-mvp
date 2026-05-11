@@ -91,6 +91,58 @@ export type TbmBriefingStructured = {
 };
 
 /**
+ * TBM 일지 (사후 기록) — 한국 산업안전 표준 양식.
+ * tbmBriefingStructured(사전 안내)와 분리. log는 실제 진행 기록 + 결재 + 미조치.
+ */
+export type TbmLogStructured = {
+  meta: {
+    dateTime: string;            // 일시
+    location: string;            // 장소
+    workType: string;            // 공종 (예: "철근콘크리트 작업", "배관 점검")
+    instructor: string;          // 진행자/책임자
+  };
+  attendance: {
+    expected: number;            // 예정 인원
+    actual: number;              // 실제 참석
+    attendees: string[];         // 참석자명단 (이름 또는 사번)
+    absenceReason: string;       // 결석/지각 사유 (없으면 "없음")
+    confirmationMethod: string;  // 출석 확인 방식 (예: "출석부 서명")
+  };
+  todayWork: {
+    name: string;                // 오늘 작업명
+    location: string;            // 작업 위치 (현장 내 세부 지점)
+    time: string;                // 작업 시간
+    equipment: string[];         // 사용 장비
+  };
+  workerConfirmations: string[]; // 근로자 확인사항 (체크리스트, 5개 권장)
+  hazardsDiscussed: Array<{      // 금일 다룬 위험요인
+    category: "Man" | "Machine" | "Media" | "Management";  // 4M
+    description: string;         // 위험요인 (60자 이내)
+    relatedRiskRowIndex?: number;// 위험성평가 row 참조 (cross-reference, 선택)
+  }>;
+  safetyEducation: {             // 일일 안전교육 (실제 진행)
+    topic: string;               // 교육 주제
+    keyPoints: string[];         // 핵심 내용 3-5개
+    materials: string;           // 사용 자료/근거 (예: "KOSHA Guide C-12-2024")
+  };
+  unaddressedItems: Array<{      // 미조치 항목
+    item: string;
+    plannedAction: string;
+    owner: string;
+    dueDate: string;             // YYYY-MM-DD 또는 "현장 확인"
+  }>;
+  photoEvidence: {               // 사진증빙
+    captureLocations: string[];  // 촬영 위치 (예: ["1층 작업장 동측", "장비실"])
+    storagePath: string;         // 보관 위치/방법
+  };
+  signatures: {                  // 결재
+    author: string;
+    reviewer: string;
+    approver: string;
+  };
+};
+
+/**
  * 안전보건교육 기록 — 한국 산업안전 표준 양식.
  */
 export type EducationRecordStructured = {
@@ -374,6 +426,8 @@ export type AskResponse = {
     /** TBM 브리핑 schema-first 구조. workPlanStructured와 동일 패턴. */
     tbmBriefingStructured?: TbmBriefingStructured;
     tbmLogDraft: string;
+    /** TBM 일지 schema-first 구조. workPlan/tbmBriefing와 동일 패턴, 사후 기록 + 결재 + 미조치 추가. */
+    tbmLogStructured?: TbmLogStructured;
     safetyEducationRecordDraft: string;
     /** 안전보건교육 기록 schema-first 구조. */
     educationRecordStructured?: EducationRecordStructured;
