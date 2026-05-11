@@ -1723,7 +1723,6 @@ export function WorkpackEditor({
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [xlsxStatus, setXlsxStatus] = useState<"idle" | "building" | "error">("idle");
   const [hwpStatus, setHwpStatus] = useState<"idle" | "building" | "error">("idle");
-  const [officialTemplateStatus, setOfficialTemplateStatus] = useState<"idle" | "building" | "error">("idle");
   const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
@@ -1975,39 +1974,6 @@ export function WorkpackEditor({
     }
   }
 
-  // Maps the current document's safety-form layout to an official HWPX template kind.
-  function templateKindForLayout(layout: SafetyFormProfile["layout"]): string | null {
-    switch (layout) {
-      case "risk": return "risk-assessment";
-      case "workPlan": return "work-plan";
-      case "permit": return "permit-inspection";
-      case "tbmLog": return "tbm-log";
-      case "tbmBriefing": return "tbm-meeting-record";
-      default: return null;
-    }
-  }
-
-  async function downloadOfficialTemplate() {
-    const kind = templateKindForLayout(selectedFormProfile.layout);
-    if (!kind) {
-      setOfficialTemplateStatus("error");
-      return;
-    }
-    setOfficialTemplateStatus("building");
-    try {
-      const params = new URLSearchParams({ kind, companyName: data.scenario.companyName || "" });
-      const response = await fetch(`/api/export/hwpx-template?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error(`template export failed (${response.status})`);
-      }
-      const blob = await response.blob();
-      downloadBlob(blob, `${baseName}-공식양식.hwpx`);
-      setOfficialTemplateStatus("idle");
-    } catch (error) {
-      console.error("official template export failed", error);
-      setOfficialTemplateStatus("error");
-    }
-  }
 
   function downloadDoc() {
     downloadBlob(
@@ -2318,11 +2284,6 @@ export function WorkpackEditor({
             <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
               {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
             </button>
-            {templateKindForLayout(selectedFormProfile.layout) ? (
-              <button type="button" className="button secondary" onClick={() => void downloadOfficialTemplate()} disabled={officialTemplateStatus === "building"} title="공공기관 공식 빈 .hwpx 양식. 표/서식 그대로 보존, 본문은 현장에서 채워 사용. (시나리오 데이터 자동 채움 기능은 v2 예정)">
-                {officialTemplateStatus === "building" ? "공식양식 생성 중" : "공식양식(빈 .hwpx)"}
-              </button>
-            ) : null}
             <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
             <details className="advanced-downloads inline">
               <summary>베타 형식</summary>
@@ -2346,9 +2307,6 @@ export function WorkpackEditor({
         ) : null}
         {hwpStatus === "error" ? (
           <p className="export-error">한글 표(.hwp) 생성 중 오류가 발생했습니다. .hwpx 텍스트 초안 또는 PDF를 사용해 주세요.</p>
-        ) : null}
-        {officialTemplateStatus === "error" ? (
-          <p className="export-error">공식양식(.hwpx) 생성 중 오류가 발생했습니다. 한글 표(.hwp) 또는 PDF를 사용해 주세요.</p>
         ) : null}
         {hwpxStatus === "error" ? (
           <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>

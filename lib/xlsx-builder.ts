@@ -720,7 +720,7 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
     ws.mergeCells(row, 1, row, lastColumn);
     const note = ws.getCell(row, 1);
     note.value =
-      "본 파일은 structured rows를 표준 위험성평가표에 매핑한 OOXML(.xlsx) 초안입니다. 발주처 지정 원본 양식과 평가척도는 현장 기준에 맞게 최종 확인하세요.";
+      "위험성평가표 — 작업장 환경에 맞게 평가척도(가능성·중대성)를 조정한 후 서명·확인란을 작성해 사용하세요.";
     note.font = { name: "Malgun Gothic", size: 10, italic: true, color: { argb: "FF5E6677" } };
     note.alignment = { vertical: "middle", horizontal: "left", indent: 1, wrapText: true };
     ws.pageSetup.printArea = `A1:${lastColumnLetter}${row}`;
@@ -837,7 +837,7 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   ws.mergeCells(row, 1, row, 6);
   const note = ws.getCell(row, 1);
   note.value =
-    "본 파일은 ExcelJS 기반 OOXML(.xlsx) 정식 양식입니다. 현장 검토 후 서명·확인 칸을 채워 사용하세요.";
+    "안전 문서 — 서명·확인란을 작성한 후 현장에 비치하거나 제출하세요.";
   note.font = { name: "Malgun Gothic", size: 10, italic: true, color: { argb: "FF5E6677" } };
   note.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
 
