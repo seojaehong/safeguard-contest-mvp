@@ -2012,9 +2012,10 @@ export function WorkpackEditor({
         workPlanStructured?: unknown;
         permitInspectionStructured?: unknown;
         tbmBriefingStructured?: unknown;
+        tbmLogStructured?: unknown;
         educationRecordStructured?: unknown;
       };
-      type StructuredMode = "workPlanStructured" | "permitInspectionStructured" | "tbmBriefingStructured" | "educationRecordStructured";
+      type StructuredMode = "workPlanStructured" | "permitInspectionStructured" | "tbmBriefingStructured" | "tbmLogStructured" | "educationRecordStructured";
       let structuredMode: StructuredMode | null = null;
       let structuredPayload: unknown = null;
       if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
@@ -2026,6 +2027,9 @@ export function WorkpackEditor({
       } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
         structuredMode = "tbmBriefingStructured";
         structuredPayload = dl.tbmBriefingStructured;
+      } else if (selected.key === "tbmLogDraft" && dl?.tbmLogStructured) {
+        structuredMode = "tbmLogStructured";
+        structuredPayload = dl.tbmLogStructured;
       } else if (selected.key === "safetyEducationRecordDraft" && dl?.educationRecordStructured) {
         structuredMode = "educationRecordStructured";
         structuredPayload = dl.educationRecordStructured;

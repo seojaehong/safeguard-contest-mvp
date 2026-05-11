@@ -12,7 +12,15 @@
 // ≈ 22K-50K tokens output) and 60s timeout on long-context cases. Splitting makes each
 // call ≤ 5K tokens output, ≤ 30s wall, and isolates failures to the affected doc only.
 
-import type { AskResponse, SearchResult, WorkPlanStructured, TbmBriefingStructured, EducationRecordStructured, TbmRiskLink } from "@/lib/types";
+import type {
+  AskResponse,
+  SearchResult,
+  WorkPlanStructured,
+  TbmBriefingStructured,
+  TbmLogStructured,
+  EducationRecordStructured,
+  TbmRiskLink
+} from "@/lib/types";
 import {
   ACCIDENT_TYPE_VALUES,
   FORM_SCHEMA_REGISTRY,
@@ -575,6 +583,8 @@ export type AiDeliverables = Partial<{
   workPlanStructured: WorkPlanStructured;
   /** TBM 브리핑 schema-first 구조. xlsx 직접 렌더 경로용. */
   tbmBriefingStructured: TbmBriefingStructured;
+  /** TBM 일지 schema-first 구조. xlsx 직접 렌더 경로용. */
+  tbmLogStructured: TbmLogStructured;
   /** 안전보건교육 기록 schema-first 구조. xlsx 직접 렌더 경로용. */
   educationRecordStructured: EducationRecordStructured;
   tbmBriefing: string;
@@ -815,6 +825,8 @@ const TABULAR_SPECS = [
   { name: "workPlanStructured", buildPrompt: workPlanStructuredPrompt, parse: parseWorkPlanStructured },
   // TBM 브리핑도 schema-first. tbmBriefingStructured + tbmQuestions 반환.
   { name: "tbmBriefingStructured", buildPrompt: tbmBriefingStructuredPrompt, parse: parseTbmBriefingStructured },
+  // TBM 일지도 schema-first 구조를 별도 생성하되, 기존 tbmLogDraft 산문 경로는 유지.
+  { name: "tbmLogStructured", buildPrompt: tbmLogStructuredPrompt, parse: parseTbmLogStructured },
   { name: "tbmLog", buildPrompt: tbmLogSinglePrompt, parse: parseTbmLog },
   // 안전보건교육 기록도 schema-first. educationRecordStructured + safetyEducationPoints.
   { name: "educationRecordStructured", buildPrompt: educationRecordStructuredPrompt, parse: parseEducationRecordStructured }

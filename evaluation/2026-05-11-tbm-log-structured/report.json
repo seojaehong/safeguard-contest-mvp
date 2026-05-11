@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "mode": "tbmLogStructured",
+  "endpoint": "http://127.0.0.1:3117/api/export/xlsx",
+  "sampleXlsx": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp-tbm-log-work\\evaluation\\2026-05-11-tbm-log-structured\\tbm-log-structured-sample.xlsx",
+  "validationMethod": "POST /api/export/xlsx, unzip generated XLSX, inspect xl/sharedStrings.xml before temp cleanup",
+  "keywordChecks": {
+    "기본정보": true,
+    "사진증빙": true,
+    "결재": true,
+    "위험요인": true,
+    "TBM 일지": true,
+    "미조치": true,
+    "안전교육": true,
+    "출석": true
+  },
+  "missingKeywords": [],
+  "xlsxBytes": 10210,
+  "elapsedSeconds": 1.39,
+  "serverStdoutLog": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp-tbm-log-work\\evaluation\\2026-05-11-tbm-log-structured\\next-start.stdout.log",
+  "serverStderrLog": "C:\\Users\\iceam\\OneDrive\\5.산업안전\\문서\\Playground\\safeguard-contest-mvp-tbm-log-work\\evaluation\\2026-05-11-tbm-log-structured\\next-start.stderr.log"
+}
