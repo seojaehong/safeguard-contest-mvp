@@ -3,6 +3,7 @@ import {
   buildEducationRecordStructuredXlsx,
   buildPermitInspectionStructuredXlsx,
   buildTbmBriefingStructuredXlsx,
+  buildTbmLogStructuredXlsx,
   buildWorkpackXlsx,
   buildWorkPlanStructuredXlsx,
   buildXlsxForDocument
@@ -124,7 +125,7 @@ export async function GET() {
       ok: true,
       route: "/api/export/xlsx",
       methods: ["POST"],
-      modes: ["single", "workpack", "workPlanStructured", "permitInspectionStructured", "tbmBriefingStructured", "educationRecordStructured"],
+      modes: ["single", "workpack", "workPlanStructured", "permitInspectionStructured", "tbmBriefingStructured", "tbmLogStructured", "educationRecordStructured"],
       message: "POST a single document spec or a workpack array. Returns OOXML .xlsx binary.",
       schema: {
         single: {
@@ -140,7 +141,7 @@ export async function GET() {
           documents: "[{ title, rows, profile }]"
         },
         structured: {
-          mode: "workPlanStructured | permitInspectionStructured | tbmBriefingStructured | educationRecordStructured",
+          mode: "workPlanStructured | permitInspectionStructured | tbmBriefingStructured | tbmLogStructured | educationRecordStructured",
           scenario: "AskScenario",
           structured: "Record<string, unknown>"
         }
@@ -157,7 +158,7 @@ export async function POST(request: NextRequest) {
   const scenario = parseScenario(body.scenario);
 
   try {
-    if (mode === "workPlanStructured" || mode === "permitInspectionStructured" || mode === "tbmBriefingStructured" || mode === "educationRecordStructured") {
+    if (mode === "workPlanStructured" || mode === "permitInspectionStructured" || mode === "tbmBriefingStructured" || mode === "tbmLogStructured" || mode === "educationRecordStructured") {
       if (!isRecord(body.structured)) {
         return NextResponse.json(
           { ok: false, error: "structured must be a non-array object for structured xlsx export" },
@@ -178,6 +179,11 @@ export async function POST(request: NextRequest) {
       if (mode === "tbmBriefingStructured") {
         const buffer = await buildTbmBriefingStructuredXlsx(scenario, body.structured);
         return xlsxResponse(buffer, `${scenario.companyName}-TBM-브리핑`, "safeclaw-tbm-briefing");
+      }
+
+      if (mode === "tbmLogStructured") {
+        const buffer = await buildTbmLogStructuredXlsx(scenario, body.structured);
+        return xlsxResponse(buffer, `${scenario.companyName}-TBM-일지`, "safeclaw-tbm-log");
       }
 
       const buffer = await buildEducationRecordStructuredXlsx(scenario, body.structured);

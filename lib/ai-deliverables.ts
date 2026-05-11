@@ -12,7 +12,15 @@
 // ≈ 22K-50K tokens output) and 60s timeout on long-context cases. Splitting makes each
 // call ≤ 5K tokens output, ≤ 30s wall, and isolates failures to the affected doc only.
 
-import type { AskResponse, SearchResult, WorkPlanStructured, TbmBriefingStructured, EducationRecordStructured, TbmRiskLink } from "@/lib/types";
+import type {
+  AskResponse,
+  SearchResult,
+  WorkPlanStructured,
+  TbmBriefingStructured,
+  TbmLogStructured,
+  EducationRecordStructured,
+  TbmRiskLink
+} from "@/lib/types";
 import {
   ACCIDENT_TYPE_VALUES,
   FORM_SCHEMA_REGISTRY,
@@ -319,6 +327,67 @@ function tbmBriefingStructuredPrompt(ctx: GenContext) {
   ].join("\n");
 }
 
+// Schema-first TBM 일지 (사후 기록). tbmBriefing(사전)과 분리된 export.
+function tbmLogStructuredPrompt(ctx: GenContext) {
+  return [
+    persona(),
+    "",
+    "한국 산업안전 표준 TBM 일지(사후 기록)의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
+    "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazardsDiscussed/safetyEducation은 실제 진행한 내용 기준. unaddressedItems는 미조치 항목(없으면 빈 배열).",
+    "tbmBriefing(사전)이 다룬 내용을 실제로 진행했다는 사후 기록 관점으로 작성. 시나리오 위험성평가 hazard와 표현이 일치하면 hazardsDiscussed[].relatedRiskRowIndex(0-based)로 연결.",
+    "",
+    "응답 JSON 스키마:",
+    `{
+  "tbmLogStructured": {
+    "meta": {
+      "dateTime": "string (일시 1줄)",
+      "location": "string (장소)",
+      "workType": "string (공종, 예: 배관 점검)",
+      "instructor": "string (진행자/책임자)"
+    },
+    "attendance": {
+      "expected": 0,
+      "actual": 0,
+      "attendees": ["string (이름 또는 사번)"],
+      "absenceReason": "string (없으면 \\"없음\\")",
+      "confirmationMethod": "string (예: 출석부 서명)"
+    },
+    "todayWork": {
+      "name": "string (작업명)",
+      "location": "string (작업 위치)",
+      "time": "string (작업 시간)",
+      "equipment": ["string"]
+    },
+    "workerConfirmations": ["string (근로자 확인사항 1줄)"],
+    "hazardsDiscussed": [
+      { "category": "Man|Machine|Media|Management", "description": "string (60자 이내)", "relatedRiskRowIndex": 0 }
+    ],
+    "safetyEducation": {
+      "topic": "string (교육 주제)",
+      "keyPoints": ["string (핵심 1줄)"],
+      "materials": "string (사용 자료/근거, 예: KOSHA Guide C-12-2024)"
+    },
+    "unaddressedItems": [
+      { "item": "string", "plannedAction": "string", "owner": "string", "dueDate": "YYYY-MM-DD 또는 현장 확인" }
+    ],
+    "photoEvidence": {
+      "captureLocations": ["string (촬영 위치)"],
+      "storagePath": "string (보관 위치/방법)"
+    },
+    "signatures": {
+      "author": "string",
+      "reviewer": "string",
+      "approver": "string"
+    }
+  }
+}`,
+    "",
+    "필수: workerConfirmations 5개 / hazardsDiscussed 3-5개 / safetyEducation.keyPoints 3-5개 / unaddressedItems 0-3개 / photoEvidence.captureLocations 1-3개. relatedRiskRowIndex는 시나리오 위험성평가 rows 인덱스(0부터, 매핑 가능한 경우만 포함, 없으면 필드 omit). 모든 string은 \\n 없이 한 줄.",
+    "",
+    contextBlock(ctx)
+  ].join("\n");
+}
+
 function tbmLogSinglePrompt(ctx: GenContext) {
   return [
     persona(),
@@ -514,6 +583,8 @@ export type AiDeliverables = Partial<{
   workPlanStructured: WorkPlanStructured;
   /** TBM 브리핑 schema-first 구조. xlsx 직접 렌더 경로용. */
   tbmBriefingStructured: TbmBriefingStructured;
+  /** TBM 일지 schema-first 구조. xlsx 직접 렌더 경로용. */
+  tbmLogStructured: TbmLogStructured;
   /** 안전보건교육 기록 schema-first 구조. xlsx 직접 렌더 경로용. */
   educationRecordStructured: EducationRecordStructured;
   tbmBriefing: string;
@@ -615,6 +686,22 @@ function parseTbmLog(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   const v = j?.tbmLogDraft;
   return typeof v === "string" && v.length > 100 ? { tbmLogDraft: v } : null;
+}
+function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | null {
+  const j = safeParseJson<{ tbmLogStructured?: TbmLogStructured }>(raw);
+  const s = j?.tbmLogStructured;
+  if (!s || typeof s !== "object") return null;
+  if (!s.meta || typeof s.meta.dateTime !== "string") return null;
+  if (!s.attendance || typeof s.attendance.confirmationMethod !== "string") return null;
+  if (!s.todayWork || typeof s.todayWork.name !== "string") return null;
+  if (!Array.isArray(s.workerConfirmations) || s.workerConfirmations.length < 3) return null;
+  if (!Array.isArray(s.hazardsDiscussed) || s.hazardsDiscussed.length < 2) return null;
+  if (!s.safetyEducation || typeof s.safetyEducation.topic !== "string") return null;
+  if (!Array.isArray(s.safetyEducation.keyPoints) || s.safetyEducation.keyPoints.length < 2) return null;
+  if (!Array.isArray(s.unaddressedItems)) return null; // 빈 배열 허용
+  if (!s.photoEvidence || !Array.isArray(s.photoEvidence.captureLocations)) return null;
+  if (!s.signatures || typeof s.signatures.author !== "string") return null;
+  return { tbmLogStructured: s };
 }
 function parseEducationRecordStructured(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<{ educationRecordStructured?: EducationRecordStructured; safetyEducationPoints?: string[] }>(raw);
@@ -738,6 +825,8 @@ const TABULAR_SPECS = [
   { name: "workPlanStructured", buildPrompt: workPlanStructuredPrompt, parse: parseWorkPlanStructured },
   // TBM 브리핑도 schema-first. tbmBriefingStructured + tbmQuestions 반환.
   { name: "tbmBriefingStructured", buildPrompt: tbmBriefingStructuredPrompt, parse: parseTbmBriefingStructured },
+  // TBM 일지도 schema-first 구조를 별도 생성하되, 기존 tbmLogDraft 산문 경로는 유지.
+  { name: "tbmLogStructured", buildPrompt: tbmLogStructuredPrompt, parse: parseTbmLogStructured },
   { name: "tbmLog", buildPrompt: tbmLogSinglePrompt, parse: parseTbmLog },
   // 안전보건교육 기록도 schema-first. educationRecordStructured + safetyEducationPoints.
   { name: "educationRecordStructured", buildPrompt: educationRecordStructuredPrompt, parse: parseEducationRecordStructured }

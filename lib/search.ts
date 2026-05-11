@@ -942,6 +942,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         // parseSheetRows 우회하고 표 양식에 매핑.
         ...(aiBodies.workPlanStructured ? { workPlanStructured: aiBodies.workPlanStructured } : {}),
         ...(aiBodies.tbmBriefingStructured ? { tbmBriefingStructured: aiBodies.tbmBriefingStructured } : {}),
+        ...(aiBodies.tbmLogStructured ? { tbmLogStructured: aiBodies.tbmLogStructured } : {}),
         ...(aiBodies.educationRecordStructured ? { educationRecordStructured: aiBodies.educationRecordStructured } : {}),
         tbmBriefing: aiBodies.tbmBriefing
           ? aiBodies.tbmBriefing

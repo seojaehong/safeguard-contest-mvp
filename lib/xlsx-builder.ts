@@ -2,7 +2,7 @@
 // Produces OOXML binary that opens cleanly in Excel/한셀 with no extension warning.
 
 import ExcelJS from "exceljs";
-import type { AskResponse, EducationRecordStructured, PermitInspectionStructured, TbmBriefingStructured, WorkPlanStructured } from "@/lib/types";
+import type { AskResponse, EducationRecordStructured, PermitInspectionStructured, TbmBriefingStructured, TbmLogStructured, WorkPlanStructured } from "@/lib/types";
 import {
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
@@ -420,6 +420,78 @@ function parseTbmBriefingStructured(value: StructuredRecord): TbmBriefingStructu
   };
 }
 
+function readFourMCategory(value: unknown): "Man" | "Machine" | "Media" | "Management" {
+  const category = readString(value, "Management");
+  return category === "Man" || category === "Machine" || category === "Media" || category === "Management"
+    ? category
+    : "Management";
+}
+
+function parseTbmLogStructured(value: StructuredRecord): TbmLogStructured {
+  const meta = isRecord(value.meta) ? value.meta : {};
+  const attendance = isRecord(value.attendance) ? value.attendance : {};
+  const todayWork = isRecord(value.todayWork) ? value.todayWork : {};
+  const hazards = Array.isArray(value.hazardsDiscussed) ? value.hazardsDiscussed : [];
+  const safetyEducation = isRecord(value.safetyEducation) ? value.safetyEducation : {};
+  const unaddressedItems = Array.isArray(value.unaddressedItems) ? value.unaddressedItems : [];
+  const photoEvidence = isRecord(value.photoEvidence) ? value.photoEvidence : {};
+  const signatures = isRecord(value.signatures) ? value.signatures : {};
+  return {
+    meta: {
+      dateTime: readString(meta.dateTime, "일시 확인"),
+      location: readString(meta.location, "장소 확인"),
+      workType: readString(meta.workType, "공종 확인"),
+      instructor: readString(meta.instructor, "진행자 확인")
+    },
+    attendance: {
+      expected: readNumber(attendance.expected, 0),
+      actual: readNumber(attendance.actual, 0),
+      attendees: readStringArray(attendance.attendees),
+      absenceReason: readString(attendance.absenceReason, "없음"),
+      confirmationMethod: readString(attendance.confirmationMethod, "출석부 서명")
+    },
+    todayWork: {
+      name: readString(todayWork.name, "작업명 확인"),
+      location: readString(todayWork.location, "작업 위치 확인"),
+      time: readString(todayWork.time, "작업 시간 확인"),
+      equipment: readStringArray(todayWork.equipment)
+    },
+    workerConfirmations: readStringArray(value.workerConfirmations),
+    hazardsDiscussed: hazards.flatMap((item): TbmLogStructured["hazardsDiscussed"] => {
+      if (!isRecord(item)) return [];
+      const relatedRiskRowIndex = readNumber(item.relatedRiskRowIndex, -1);
+      return [{
+        category: readFourMCategory(item.category),
+        description: readString(item.description, "위험요인 확인"),
+        ...(relatedRiskRowIndex >= 0 ? { relatedRiskRowIndex } : {})
+      }];
+    }),
+    safetyEducation: {
+      topic: readString(safetyEducation.topic, "안전교육 주제 확인"),
+      keyPoints: readStringArray(safetyEducation.keyPoints),
+      materials: readString(safetyEducation.materials, "교육자료 확인")
+    },
+    unaddressedItems: unaddressedItems.flatMap((item): TbmLogStructured["unaddressedItems"] => {
+      if (!isRecord(item)) return [];
+      return [{
+        item: readString(item.item, "미조치 항목 확인"),
+        plannedAction: readString(item.plannedAction, "조치계획 확인"),
+        owner: readString(item.owner, "담당자 확인"),
+        dueDate: readString(item.dueDate, "기한 확인")
+      }];
+    }),
+    photoEvidence: {
+      captureLocations: readStringArray(photoEvidence.captureLocations),
+      storagePath: readString(photoEvidence.storagePath, "사진증빙 보관 위치 확인")
+    },
+    signatures: {
+      author: readString(signatures.author, "작성자"),
+      reviewer: readString(signatures.reviewer, "검토자"),
+      approver: readString(signatures.approver, "승인자")
+    }
+  };
+}
+
 function parseEducationRecordStructured(value: StructuredRecord): EducationRecordStructured {
   const curriculum = Array.isArray(value.curriculum) ? value.curriculum : [];
   const type = readString(value.type, "기타");
@@ -757,6 +829,165 @@ export async function buildTbmBriefingStructuredXlsx(
   row += 1;
   row = addApprovalRows(ws, row, ["TBM 리더", "관리감독자", "참석자 대표"]);
   addWorkbookNote(ws, row, "본 TBM 브리핑은 structured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 브리핑 후 참석자 확인과 사진증빙을 보관하세요.");
+
+  const buffer = await wb.xlsx.writeBuffer();
+  return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+}
+
+export async function buildTbmLogStructuredXlsx(
+  scenario: Scenario,
+  structured: StructuredRecord
+): Promise<Buffer> {
+  const data = parseTbmLogStructured(structured);
+  const { wb, ws } = createStructuredWorkbook("TBM 일지");
+  let row = addStructuredTitle(ws, 1, "TBM 일지", scenario);
+
+  row = addSectionHeader(ws, row, "기본정보");
+  row = addKeyValueRows(ws, row, [
+    ["일시", data.meta.dateTime],
+    ["장소", data.meta.location],
+    ["공종", data.meta.workType],
+    ["진행자", data.meta.instructor],
+    ["현장명", scenario.siteName || "현장명 확인"],
+    ["작업요약", scenario.workSummary || "작업내용 확인"]
+  ]);
+
+  row += 1;
+  row = addSectionHeader(ws, row, "출석");
+  row = addKeyValueRows(ws, row, [
+    ["예정 인원", `${data.attendance.expected || scenario.workerCount || 0}명`],
+    ["실제 참석", `${data.attendance.actual || data.attendance.attendees.length || 0}명`],
+    ["결석/지각", data.attendance.absenceReason],
+    ["확인 방식", data.attendance.confirmationMethod]
+  ]);
+
+  row += 1;
+  row = addSectionHeader(ws, row, "참석자명단");
+  row = addTableHeader(ws, row, ["No.", "참석자", "확인방법", "서명", "비고", "확인"]);
+  const attendeeRows = data.attendance.attendees.length ? data.attendance.attendees : ["참석자 확인"];
+  attendeeRows.forEach((attendee, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      attendee,
+      data.attendance.confirmationMethod,
+      "서명: ______",
+      "",
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "오늘 작업");
+  row = addKeyValueRows(ws, row, [
+    ["작업명", data.todayWork.name],
+    ["작업 위치", data.todayWork.location],
+    ["작업 시간", data.todayWork.time],
+    ["사용 장비", data.todayWork.equipment.join(", ") || "장비 확인"]
+  ]);
+
+  row += 1;
+  row = addSectionHeader(ws, row, "근로자 확인사항");
+  row = addTableHeader(ws, row, ["No.", "구분", "확인사항", "확인방법", "담당", "확인"]);
+  const confirmationRows = data.workerConfirmations.length ? data.workerConfirmations : ["작업 전 위험요인과 안전조치를 확인"];
+  confirmationRows.forEach((confirmation, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      "근로자 확인",
+      confirmation,
+      "구두 복창 및 서명",
+      data.meta.instructor,
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "금일 위험요인");
+  row = addTableHeader(ws, row, ["No.", "4M", "위험요인", "relatedRiskRowIndex", "조치/공유", "확인"]);
+  const hazardRows = data.hazardsDiscussed.length
+    ? data.hazardsDiscussed
+    : [{ category: "Management" as const, description: "위험요인 확인", relatedRiskRowIndex: undefined }];
+  hazardRows.forEach((hazard, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      hazard.category,
+      hazard.description,
+      typeof hazard.relatedRiskRowIndex === "number" ? String(hazard.relatedRiskRowIndex) : "미연계",
+      "작업 전 공유 및 현장 확인",
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "안전교육");
+  row = addKeyValueRows(ws, row, [
+    ["교육 주제", data.safetyEducation.topic],
+    ["교육 자료", data.safetyEducation.materials]
+  ]);
+  row = addTableHeader(ws, row, ["No.", "구분", "핵심내용", "전달방법", "담당", "확인"]);
+  const educationRows = data.safetyEducation.keyPoints.length ? data.safetyEducation.keyPoints : ["안전교육 핵심내용 확인"];
+  educationRows.forEach((point, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      "안전교육",
+      point,
+      "TBM 중 구두 전달",
+      data.meta.instructor,
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "미조치");
+  row = addTableHeader(ws, row, ["No.", "미조치 항목", "조치계획", "담당", "기한", "확인"]);
+  if (data.unaddressedItems.length) {
+    data.unaddressedItems.forEach((item, index) => {
+      row = setRowValues(ws, row, [
+        String(index + 1),
+        item.item,
+        item.plannedAction,
+        item.owner,
+        item.dueDate,
+        "□ 확인"
+      ]);
+    });
+  } else {
+    row = setRowValues(ws, row, ["1", "미조치 없음", "현장 종료 전 재확인", data.meta.instructor, "당일", "□ 확인"]);
+  }
+
+  row += 1;
+  row = addSectionHeader(ws, row, "사진증빙");
+  row = addTableHeader(ws, row, ["No.", "촬영 위치", "촬영 대상", "보관 위치", "담당", "확인"]);
+  const photoRows = data.photoEvidence.captureLocations.length ? data.photoEvidence.captureLocations : ["촬영 위치 확인"];
+  photoRows.forEach((location, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      location,
+      "TBM 진행 및 현장 안전조치",
+      data.photoEvidence.storagePath,
+      data.meta.instructor,
+      "□ 확인"
+    ]);
+  });
+
+  row += 1;
+  row = addSectionHeader(ws, row, "결재/확인");
+  [
+    ["작성", data.signatures.author],
+    ["검토", data.signatures.reviewer],
+    ["승인", data.signatures.approver]
+  ].forEach(([label, name], index) => {
+    const startColumn = index * 2 + 1;
+    ws.mergeCells(row, startColumn, row, startColumn + 1);
+    const cell = ws.getCell(row, startColumn);
+    cell.value = `${label}: ${name}\n서명: ______`;
+    cell.font = { name: "Malgun Gothic", size: 10, bold: true };
+    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+  });
+  applyBorders(ws, `A${row}:F${row}`);
+  ws.getRow(row).height = 50;
+  row += 1;
+
+  addWorkbookNote(ws, row, "본 TBM 일지는 tbmLogStructured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 참석자 서명, 미조치 후속조치, 사진증빙을 함께 보관하세요.");
 
   const buffer = await wb.xlsx.writeBuffer();
   return Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
