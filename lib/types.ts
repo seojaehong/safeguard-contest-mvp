@@ -111,6 +111,47 @@ export type EducationRecordStructured = {
   followupRecommendation: string; // 후속 교육 추천 (1-2 문장)
 };
 
+/**
+ * 안전작업허가 확인서 — 위험작업 허가/첨부/종료 확인을 셀 단위로 채우는 구조.
+ */
+export type PermitInspectionStructured = {
+  basicInfo: {
+    permitNo: string;
+    permitType: "고소작업" | "화기작업" | "밀폐공간" | "전기작업" | "중장비작업" | "화학물질" | "일반 위험작업";
+    workName: string;
+    location: string;
+    workDate: string;
+    workerCount: number;
+    requester: string;
+    approver: string;
+  };
+  conditions: Array<{
+    category: "작업구역" | "격리·차단" | "화재·폭발" | "질식·가스" | "추락·낙하" | "장비·동선" | "보호구" | "기상·환경" | "교육·TBM";
+    requirement: string;
+    action: string;
+    owner: string;
+    status: "확인 전" | "적합" | "보완 필요" | "해당 없음";
+  }>;
+  attachments: Array<{
+    name: string;
+    required: boolean;
+    status: "첨부" | "보완 필요" | "해당 없음";
+    note: string;
+  }>;
+  completionChecks: Array<{
+    item: string;
+    method: string;
+    owner: string;
+    status: "확인 전" | "완료" | "보완 필요";
+  }>;
+  approvers: {
+    requester: string;
+    safetyManager: string;
+    siteManager: string;
+    completionChecker: string;
+  };
+};
+
 export type TbmRiskLink = {
   riskRowIndex: number;
   hazard: string;
@@ -327,6 +368,8 @@ export type AskResponse = {
      * (parseSheetRows)을 우회하고 이 객체로 직접 표를 그린다.
      */
     workPlanStructured?: WorkPlanStructured;
+    /** 안전작업허가 확인서 schema-first 구조. */
+    permitInspectionStructured?: PermitInspectionStructured;
     tbmBriefing: string;
     /** TBM 브리핑 schema-first 구조. workPlanStructured와 동일 패턴. */
     tbmBriefingStructured?: TbmBriefingStructured;

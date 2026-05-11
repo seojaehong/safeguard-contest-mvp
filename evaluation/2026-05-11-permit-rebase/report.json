@@ -1,0 +1,63 @@
+{
+  "task": "PR-B permitInspectionStructured rebase cleanup",
+  "strategy": "permit-only extraction from origin/codex/structured-risk-post-merge-verification onto origin/master",
+  "base": "origin/master",
+  "sourceBranch": "origin/codex/structured-risk-post-merge-verification",
+  "preservedPr33Removal": true,
+  "forbiddenSymbolsAbsent": [
+    "downloadOfficialTemplate",
+    "officialTemplateStatus",
+    "templateKindForLayout"
+  ],
+  "changedFiles": [
+    "app/api/export/xlsx/route.ts",
+    "components/WorkpackEditor.tsx",
+    "lib/types.ts",
+    "lib/xlsx-builder.ts",
+    "evaluation/2026-05-11-permit-rebase/report.json"
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd run typecheck",
+      "elapsedSeconds": 9,
+      "status": "passed"
+    },
+    {
+      "status": "passed",
+      "elapsedSeconds": 2,
+      "goldenPass": 2,
+      "expectationPass": 3,
+      "caseCount": 3,
+      "overall": "pass_with_notice",
+      "command": "npm.cmd run smoke:form-schema-gate",
+      "goldenCount": 2
+    },
+    {
+      "requiredStringCount": 6,
+      "elapsedSeconds": 19,
+      "command": "permit xlsx route smoke + sharedStrings check",
+      "logPath": "evaluation/2026-05-11-permit-rebase/next-dev.log",
+      "status": "passed",
+      "missingStringCount": 0,
+      "temporaryXlsxRemovedAfterVerification": true
+    },
+    {
+      "command": "npm.cmd run build",
+      "elapsedSeconds": 54,
+      "status": "passed"
+    }
+  ],
+  "permitSharedStrings": [
+    "안전작업허가 확인서",
+    "허가 기본정보",
+    "작업 전 허가조건",
+    "첨부서류",
+    "작업 종료 확인",
+    "결재"
+  ],
+  "itemCount": 4,
+  "successCount": 4,
+  "failureCount": 0,
+  "elapsedSeconds": 84,
+  "generatedAt": "2026-05-11T21:04:15+09:00"
+}
