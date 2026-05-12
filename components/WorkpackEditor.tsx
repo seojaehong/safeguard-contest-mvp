@@ -386,38 +386,53 @@ function buildPermitInspectionStructured(data: AskResponse): PermitInspectionStr
       requirement: "작업구역 출입통제와 작업반경 표시",
       action: immediateActions[0] || "작업 전 위험구역을 표시하고 관계자 외 접근을 제한",
       owner: "작업반장",
-      status: "확인 전"
+      status: "확인 전",
+      relatedRiskRowIndex: riskRows.length ? 0 : undefined,
+      evidenceRefs: riskRows[0]?.evidenceRefs || ["위험성평가표"],
+      verification: riskRows[0]?.verification || "작업 전 통제구역 사진과 TBM 복창으로 확인"
     },
     {
       category: primaryConditionCategory(permitType),
       requirement: `${permitType} 핵심 위험 사전 통제`,
       action: immediateActions[1] || data.riskSummary.topRisk,
       owner: "관리감독자",
-      status: "확인 전"
+      status: "확인 전",
+      relatedRiskRowIndex: riskRows.length ? Math.min(1, riskRows.length - 1) : undefined,
+      evidenceRefs: riskRows[Math.min(1, Math.max(0, riskRows.length - 1))]?.evidenceRefs || ["위험성평가표"],
+      verification: riskRows[Math.min(1, Math.max(0, riskRows.length - 1))]?.verification || "관리감독자가 핵심 위험 조치 이행을 확인"
     },
     {
       category: "기상·환경",
       requirement: "기상/API 신호와 현장 체감 조건 확인",
       action: weatherActions.join(" / ") || data.scenario.weatherNote || "기상·현장 조건 확인 후 작업 여부 결정",
       owner: "안전관리자",
-      status: "확인 전"
+      status: "확인 전",
+      relatedRiskRowIndex: riskRows.length ? Math.min(1, riskRows.length - 1) : undefined,
+      evidenceRefs: riskRows[Math.min(1, Math.max(0, riskRows.length - 1))]?.evidenceRefs || ["기상청 현재·예보", "위험성평가표"],
+      verification: "기상 신호와 현장 체감 조건을 함께 확인"
     },
     {
       category: "교육·TBM",
       requirement: "위험성평가 결과와 작업중지 기준 TBM 공유",
       action: immediateActions[2] || "작업 전 TBM에서 위험요인과 중지기준을 전원 확인",
       owner: "TBM 리더",
-      status: "확인 전"
+      status: "확인 전",
+      relatedRiskRowIndex: riskRows.length ? Math.min(2, riskRows.length - 1) : undefined,
+      evidenceRefs: riskRows[Math.min(2, Math.max(0, riskRows.length - 1))]?.evidenceRefs || ["TBM 기록", "위험성평가표"],
+      verification: "TBM 참석자 서명과 구두 복창으로 확인"
     }
   ];
 
-  topRows.forEach((row) => {
+  topRows.forEach((row, index) => {
     conditions.push({
       category: conditionCategoryFromRisk(row),
       requirement: row.hazard,
       action: row.additionalControls,
       owner: row.owner || "담당자 지정",
-      status: "확인 전"
+      status: "확인 전",
+      relatedRiskRowIndex: index,
+      evidenceRefs: row.evidenceRefs,
+      verification: row.verification
     });
   });
 

@@ -343,6 +343,70 @@ function validateTbmRiskLinks(testCase, rows) {
   };
 }
 
+function normalizeIndexList(value) {
+  if (Array.isArray(value)) {
+    return value.filter((item) => Number.isInteger(item));
+  }
+  return Number.isInteger(value) ? [value] : [];
+}
+
+function validateRiskIndexRefs(refs, rows, field, idPrefix) {
+  const issues = [];
+  if (!refs.length) {
+    issues.push({ id: `${idPrefix}:missing`, severity: "notice", field, message: `${field} should include at least one risk-row reference` });
+    return issues;
+  }
+
+  refs.forEach((ref) => {
+    if (ref < 0 || ref >= rows.length) {
+      issues.push({ id: `${idPrefix}:invalid:${ref}`, severity: "blocker", field, message: `${field} reference ${ref} is outside risk assessment row range` });
+    }
+  });
+  return issues;
+}
+
+function validateCrossReferences(testCase, rows) {
+  const issues = [];
+  const workPlan = isRecord(testCase.workPlanStructured) ? testCase.workPlanStructured : null;
+  const permit = isRecord(testCase.permitInspectionStructured) ? testCase.permitInspectionStructured : null;
+  const workSteps = workPlan && Array.isArray(workPlan.workSteps) ? workPlan.workSteps : [];
+  const conditions = permit && Array.isArray(permit.conditions) ? permit.conditions : [];
+
+  if (!workSteps.length && !conditions.length) {
+    return {
+      verdict: "pass",
+      workStepCount: 0,
+      permitConditionCount: 0,
+      linkedWorkStepCount: 0,
+      linkedPermitConditionCount: 0,
+      issues
+    };
+  }
+
+  let linkedWorkStepCount = 0;
+  workSteps.forEach((step, index) => {
+    const refs = isRecord(step) ? normalizeIndexList(step.relatedRiskRowIndex) : [];
+    if (refs.length) linkedWorkStepCount += 1;
+    issues.push(...validateRiskIndexRefs(refs, rows, "workPlanStructured.workSteps.relatedRiskRowIndex", `cross-reference:workPlan:${index}`));
+  });
+
+  let linkedPermitConditionCount = 0;
+  conditions.forEach((condition, index) => {
+    const refs = isRecord(condition) ? normalizeIndexList(condition.relatedRiskRowIndex) : [];
+    if (refs.length) linkedPermitConditionCount += 1;
+    issues.push(...validateRiskIndexRefs(refs, rows, "permitInspectionStructured.conditions.relatedRiskRowIndex", `cross-reference:permit:${index}`));
+  });
+
+  return {
+    verdict: verdictFromIssues(issues),
+    workStepCount: workSteps.length,
+    permitConditionCount: conditions.length,
+    linkedWorkStepCount,
+    linkedPermitConditionCount,
+    issues
+  };
+}
+
 function isHazardLinkedToTbm(row, tbmText) {
   const normalizedTbm = normalize(tbmText);
   const hazard = normalize(row.hazard);
@@ -403,6 +467,8 @@ function evaluateCase(testCase, minimumHazardRows) {
 
   const tbmSchema = validateTbmRiskLinks(testCase, rows);
   issues.push(...tbmSchema.issues);
+  const crossReference = validateCrossReferences(testCase, rows);
+  issues.push(...crossReference.issues);
 
   const verdict = verdictFromIssues(issues);
   return {
@@ -417,6 +483,7 @@ function evaluateCase(testCase, minimumHazardRows) {
     fourMCoverage,
     columnContract,
     tbmSchema,
+    crossReference,
     blockerCount: issues.filter((issue) => issue.severity === "blocker").length,
     noticeCount: issues.filter((issue) => issue.severity === "notice").length,
     issues
@@ -490,6 +557,7 @@ function buildMarkdown(report) {
     "",
     "- Risk assessment column contract now requires workplace location, equipment/tools, verification status, verification date, and checker fields.",
     "- TBM schema v0.5 now requires linked risk-row references instead of accepting generic TBM prose.",
+    "- PR-C cross-reference checks now validate work-plan step and permit-condition risk row indexes; out-of-range indexes are blockers.",
     "- The gate still treats HWPX/PDF/XLS binary visual fidelity as a separate format smoke; this script proves the structured form contract before rendering.",
     "",
     "## Risk Assessment Column Contract",
@@ -500,6 +568,11 @@ function buildMarkdown(report) {
     "",
     "- Each golden case must provide `tbmRiskLinks[]` with riskRowIndex, hazard, control, weatherSignal, confirmQuestion, owner, verification, and evidenceRefs.",
     "",
+    "## PR-C Cross-Reference Contract",
+    "",
+    "- `workPlanStructured.workSteps[].relatedRiskRowIndex[]` and `permitInspectionStructured.conditions[].relatedRiskRowIndex` must point to existing risk assessment rows when those structured payloads are present.",
+    "- Older fixtures without structured work-plan/permit payloads are ignored so legacy fixture coverage does not block unrelated schema gates.",
+    "",
     "## Defects This Validator Catches",
     "",
     "- Missing or empty structured hazard rows, even when free-text keywords are present.",
@@ -509,6 +582,7 @@ function buildMarkdown(report) {
     "- TBM text that does not reference the risk rows.",
     "- Weather or site-condition evidence that is not connected to both risk rows and TBM.",
     "- TBM records that mention safety generally but do not reference structured risk rows.",
+    "- Work-plan or permit references that point outside the risk assessment row range.",
     "- Render inputs that cannot fill public-institution style columns such as 작업장소, 장비·도구, 확인상태, 확인일, 확인자.",
     "",
     "## Decision Evidence",

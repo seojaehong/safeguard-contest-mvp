@@ -1,0 +1,48 @@
+{
+  "generatedAt": "2026-05-12T00:00:00+09:00",
+  "task": "PR-C cross-reference risk row links minimum implementation",
+  "branch": "codex/cross-reference-risk-row-links",
+  "summary": {
+    "implemented": true,
+    "riskRowReferencePolicy": "workPlanStructured.workSteps and permitInspectionStructured.conditions receive deterministic risk-row links; missing LLM links fall back to the top matched or highest-risk row.",
+    "additiveOnly": true
+  },
+  "changedAreas": [
+    "types",
+    "deterministic post-process",
+    "work plan and permit xlsx rendering",
+    "form schema gate cross-reference validation",
+    "client-side permit fallback"
+  ],
+  "validation": {
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    },
+    "formSchemaGate": {
+      "command": "npm.cmd run smoke:form-schema-gate",
+      "status": "pass_with_notice",
+      "caseCount": 3,
+      "expectationPass": 3,
+      "goldenPass": 2,
+      "goldenCount": 2,
+      "reportPath": "evaluation/2026-05-08-form-standard-review/form-schema-gate-report.json"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "pass"
+    },
+    "xlsxStringSmoke": {
+      "command": "node -e \"...check lib/xlsx-builder.ts for risk reference labels...\"",
+      "status": "pass",
+      "contains": [
+        "위험성평가#",
+        "연결 위험"
+      ]
+    }
+  },
+  "notes": [
+    "npm.cmd install was run to restore missing local npm bin shims before npm.cmd run typecheck; package.json and package-lock.json were not modified.",
+    "Existing untracked evaluation artifacts from other work were left untouched."
+  ]
+}

@@ -84,6 +84,22 @@ function readStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0) : [];
 }
 
+function readNumberArray(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is number => Number.isInteger(item) && item >= 0);
+}
+
+function formatRiskRowRefs(indexes: number[]): string {
+  return indexes.length
+    ? indexes.map((index) => `위험성평가#${index + 1}`).join(", ")
+    : "연결 위험 확인";
+}
+
+function formatRiskRowRef(index: number | undefined): string {
+  if (typeof index !== "number" || !Number.isInteger(index) || index < 0) return "연결 위험 확인";
+  return `위험성평가#${index + 1}`;
+}
+
 function columnLetter(column: number): string {
   let value = column;
   let result = "";
@@ -359,7 +375,10 @@ function parseWorkPlanStructured(value: StructuredRecord): WorkPlanStructured {
         action: readString(item.action, "작업단계 확인"),
         equipment: readString(item.equipment, "장비 확인"),
         safetyMeasure: readString(item.safetyMeasure, "안전조치 확인"),
-        owner: readString(item.owner, "담당자 확인")
+        owner: readString(item.owner, "담당자 확인"),
+        relatedRiskRowIndex: readNumberArray(item.relatedRiskRowIndex),
+        evidenceRefs: readStringArray(item.evidenceRefs),
+        verification: readString(item.verification, "")
       }];
     }),
     stopCriteria: readStringArray(value.stopCriteria),
@@ -595,7 +614,10 @@ function parsePermitInspectionStructured(value: StructuredRecord): PermitInspect
         requirement: readString(item.requirement, "허가조건 확인"),
         action: readString(item.action, "작업 전 조치 확인"),
         owner: readString(item.owner, "작업반장"),
-        status: readPermitConditionStatus(item.status)
+        status: readPermitConditionStatus(item.status),
+        relatedRiskRowIndex: readNumber(item.relatedRiskRowIndex, -1) >= 0 ? readNumber(item.relatedRiskRowIndex, -1) : undefined,
+        evidenceRefs: readStringArray(item.evidenceRefs),
+        verification: readString(item.verification, "")
       }];
     }),
     attachments: attachments.flatMap((item): PermitInspectionStructured["attachments"] => {
@@ -645,7 +667,7 @@ export async function buildWorkPlanStructuredXlsx(
 
   row += 1;
   row = addSectionHeader(ws, row, "작업단계 및 안전조치");
-  row = addTableHeader(ws, row, ["순번", "작업단계", "사용장비", "안전조치", "담당", "확인"]);
+  row = addTableHeader(ws, row, ["순번", "작업단계", "사용장비", "안전조치", "담당", "위험성평가#"]);
   data.workSteps.forEach((step) => {
     row = setRowValues(ws, row, [
       String(step.stepNo),
@@ -653,7 +675,7 @@ export async function buildWorkPlanStructuredXlsx(
       step.equipment,
       step.safetyMeasure,
       step.owner,
-      "□ 확인"
+      formatRiskRowRefs(step.relatedRiskRowIndex || [])
     ]);
   });
 
@@ -704,7 +726,7 @@ export async function buildPermitInspectionStructuredXlsx(
 
   row += 1;
   row = addSectionHeader(ws, row, "작업 전 허가조건");
-  row = addTableHeader(ws, row, ["No.", "구분", "허가조건", "조치내용", "담당", "상태"]);
+  row = addTableHeader(ws, row, ["No.", "구분", "허가조건", "조치내용", "담당", "연결 위험"]);
   const conditions = data.conditions.length ? data.conditions : [{
     category: "작업구역" as const,
     requirement: "작업 전 허가조건 확인",
@@ -717,9 +739,9 @@ export async function buildPermitInspectionStructuredXlsx(
       String(index + 1),
       condition.category,
       condition.requirement,
-      condition.action,
+      `${condition.action}\n상태: ${condition.status}`,
       condition.owner,
-      `□ ${condition.status}`
+      formatRiskRowRef(condition.relatedRiskRowIndex)
     ]);
   });
 

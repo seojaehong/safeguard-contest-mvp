@@ -1,4 +1,4 @@
-import { AskResponse, type TbmRiskLink } from "./types";
+import { AskResponse, type PermitInspectionStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
 import { buildMockAskResponse, mockSearchResults } from "./mock-data";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
@@ -213,6 +213,119 @@ function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: string): T
       evidenceRefs: row.evidenceRefs || []
     };
   });
+}
+
+function tokenizeForRiskLink(value: string): string[] {
+  return [...new Set(
+    value
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}\s]/gu, " ")
+      .split(/\s+/)
+      .map((token) => token.trim())
+      .filter((token) => token.length >= 2)
+  )];
+}
+
+function riskRowLinkText(row: RiskAssessmentRow): string {
+  return [
+    row.location,
+    row.process,
+    row.task,
+    row.equipment,
+    row.hazard,
+    row.fourM,
+    row.accidentType,
+    row.currentControls,
+    row.additionalControls,
+    row.verification,
+    ...row.evidenceRefs
+  ].join(" ");
+}
+
+function scoreRiskRowLink(targetText: string, row: RiskAssessmentRow): number {
+  const targetTokens = tokenizeForRiskLink(targetText);
+  const rowTokens = new Set(tokenizeForRiskLink(riskRowLinkText(row)));
+  const overlap = targetTokens.filter((token) => rowTokens.has(token)).length;
+  const hazardBonus = tokenizeForRiskLink(row.hazard).some((token) => targetText.toLowerCase().includes(token)) ? 4 : 0;
+  const controlBonus = tokenizeForRiskLink(row.additionalControls).some((token) => targetText.toLowerCase().includes(token)) ? 2 : 0;
+  const fourMBonus = row.fourM && targetText.includes(row.fourM) ? 1 : 0;
+  const accidentBonus = row.accidentType && targetText.includes(row.accidentType) ? 1 : 0;
+  return overlap + hazardBonus + controlBonus + fourMBonus + accidentBonus;
+}
+
+function fallbackRiskRowIndex(rows: RiskAssessmentRow[]): number {
+  const highIndex = rows.findIndex((row) => row.riskLevel === "high");
+  return highIndex >= 0 ? highIndex : 0;
+}
+
+function pickRiskRowIndexes(targetText: string, rows: RiskAssessmentRow[], limit: number): number[] {
+  if (!rows.length) return [];
+  const fallbackIndex = fallbackRiskRowIndex(rows);
+  const ranked = rows
+    .map((row, index) => ({ index, score: scoreRiskRowLink(targetText, row) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .filter((item) => item.score > 0)
+    .slice(0, limit)
+    .map((item) => item.index);
+  return ranked.length ? ranked : [fallbackIndex];
+}
+
+function buildRiskRowVerification(row: RiskAssessmentRow): string {
+  const checker = row.verificationChecker || "관리감독자";
+  const date = row.verificationDate || row.due || "작업 전";
+  return row.verification || `${checker}가 ${date} 기준 위험성평가 조치 이행을 확인`;
+}
+
+function linkWorkPlanToRiskRows(
+  workPlan: WorkPlanStructured | undefined,
+  rows: RiskAssessmentRow[]
+): WorkPlanStructured | undefined {
+  if (!workPlan || !rows.length) return workPlan;
+
+  return {
+    ...workPlan,
+    workSteps: workPlan.workSteps.map((step, index) => {
+      const existingIndexes = Array.isArray(step.relatedRiskRowIndex)
+        ? step.relatedRiskRowIndex.filter((value) => Number.isInteger(value) && value >= 0 && value < rows.length)
+        : [];
+      const relatedRiskRowIndex = existingIndexes.length
+        ? existingIndexes
+        : pickRiskRowIndexes(`${step.action} ${step.equipment} ${step.safetyMeasure} ${step.owner}`, rows, 2);
+      const primaryRow = rows[relatedRiskRowIndex[0] ?? fallbackRiskRowIndex(rows)];
+      return {
+        ...step,
+        stepNo: step.stepNo || index + 1,
+        relatedRiskRowIndex,
+        evidenceRefs: step.evidenceRefs?.length ? step.evidenceRefs : primaryRow.evidenceRefs,
+        verification: step.verification || buildRiskRowVerification(primaryRow)
+      };
+    })
+  };
+}
+
+function linkPermitToRiskRows(
+  permit: PermitInspectionStructured | undefined,
+  rows: RiskAssessmentRow[]
+): PermitInspectionStructured | undefined {
+  if (!permit || !rows.length) return permit;
+
+  return {
+    ...permit,
+    conditions: permit.conditions.map((condition) => {
+      const candidateIndex = condition.relatedRiskRowIndex;
+      const existingIndex = typeof candidateIndex === "number" && Number.isInteger(candidateIndex) && candidateIndex >= 0 && candidateIndex < rows.length
+        ? candidateIndex
+        : undefined;
+      const relatedRiskRowIndex = existingIndex ?? pickRiskRowIndexes(`${condition.category} ${condition.requirement} ${condition.action} ${condition.owner}`, rows, 1)[0] ?? fallbackRiskRowIndex(rows);
+      const linkedRow = rows[relatedRiskRowIndex];
+      return {
+        ...condition,
+        relatedRiskRowIndex,
+        evidenceRefs: condition.evidenceRefs?.length ? condition.evidenceRefs : linkedRow.evidenceRefs,
+        verification: condition.verification || buildRiskRowVerification(linkedRow)
+      };
+    })
+  };
 }
 
 type DocumentEvidenceTarget = "risk" | "workPlan" | "tbm" | "education" | "emergency";
@@ -869,6 +982,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const tbmRiskSourceDetail = generatedTbmRiskLinks.length
       ? "TBM-risk links=AI"
       : "TBM-risk links=deterministic fallback";
+    const linkedWorkPlanStructured = linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows);
+    const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
 
     const enriched: AskResponse = {
       ...response,
@@ -940,7 +1055,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           : `${baseDeliverables.workPlanDraft}${outdoorHeatRiskAppendix}${workPlanLegalAppendix}${workPlanKoshaAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${workPlanKoshaOpenApiAppendix}`,
         // schema-first: AI가 셀 단위 구조로 직접 반환했으면 통과. xlsx-builder가 이걸로
         // parseSheetRows 우회하고 표 양식에 매핑.
-        ...(aiBodies.workPlanStructured ? { workPlanStructured: aiBodies.workPlanStructured } : {}),
+        ...(linkedWorkPlanStructured ? { workPlanStructured: linkedWorkPlanStructured } : {}),
+        ...(linkedPermitInspectionStructured ? { permitInspectionStructured: linkedPermitInspectionStructured } : {}),
         ...(aiBodies.tbmBriefingStructured ? { tbmBriefingStructured: aiBodies.tbmBriefingStructured } : {}),
         ...(aiBodies.tbmLogStructured ? { tbmLogStructured: aiBodies.tbmLogStructured } : {}),
         ...(aiBodies.educationRecordStructured ? { educationRecordStructured: aiBodies.educationRecordStructured } : {}),

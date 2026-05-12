@@ -1,6 +1,6 @@
 # SafeClaw Form Schema Gate
 
-Generated: 2026-05-08T14:46:43.769Z
+Generated: 2026-05-12T00:55:14.397Z
 
 ## Current Smoke Baseline
 
@@ -26,6 +26,7 @@ Generated: 2026-05-08T14:46:43.769Z
 
 - Risk assessment column contract now requires workplace location, equipment/tools, verification status, verification date, and checker fields.
 - TBM schema v0.5 now requires linked risk-row references instead of accepting generic TBM prose.
+- PR-C cross-reference checks now validate work-plan step and permit-condition risk row indexes; out-of-range indexes are blockers.
 - The gate still treats HWPX/PDF/XLS binary visual fidelity as a separate format smoke; this script proves the structured form contract before rendering.
 
 ## Risk Assessment Column Contract
@@ -36,6 +37,11 @@ Generated: 2026-05-08T14:46:43.769Z
 
 - Each golden case must provide `tbmRiskLinks[]` with riskRowIndex, hazard, control, weatherSignal, confirmQuestion, owner, verification, and evidenceRefs.
 
+## PR-C Cross-Reference Contract
+
+- `workPlanStructured.workSteps[].relatedRiskRowIndex[]` and `permitInspectionStructured.conditions[].relatedRiskRowIndex` must point to existing risk assessment rows when those structured payloads are present.
+- Older fixtures without structured work-plan/permit payloads are ignored so legacy fixture coverage does not block unrelated schema gates.
+
 ## Defects This Validator Catches
 
 - Missing or empty structured hazard rows, even when free-text keywords are present.
@@ -45,6 +51,7 @@ Generated: 2026-05-08T14:46:43.769Z
 - TBM text that does not reference the risk rows.
 - Weather or site-condition evidence that is not connected to both risk rows and TBM.
 - TBM records that mention safety generally but do not reference structured risk rows.
+- Work-plan or permit references that point outside the risk assessment row range.
 - Render inputs that cannot fill public-institution style columns such as 작업장소, 장비·도구, 확인상태, 확인일, 확인자.
 
 ## Decision Evidence

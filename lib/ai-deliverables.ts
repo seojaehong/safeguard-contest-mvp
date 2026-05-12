@@ -19,6 +19,7 @@ import type {
   TbmBriefingStructured,
   TbmLogStructured,
   EducationRecordStructured,
+  PermitInspectionStructured,
   TbmRiskLink
 } from "@/lib/types";
 import {
@@ -263,7 +264,7 @@ function workPlanStructuredPrompt(ctx: GenContext) {
       "equipment": ["string", "string"]
     },
     "workSteps": [
-      { "stepNo": 1, "action": "string (작업 단계, 60자 이내)", "equipment": "string (해당 장비, 30자 이내)", "safetyMeasure": "string (단계별 안전조치, 80자 이내. KOSHA 인용 가능)", "owner": "string (담당자/직책, 30자 이내)" }
+      { "stepNo": 1, "action": "string (작업 단계, 60자 이내)", "equipment": "string (해당 장비, 30자 이내)", "safetyMeasure": "string (단계별 안전조치, 80자 이내. KOSHA 인용 가능)", "owner": "string (담당자/직책, 30자 이내)", "relatedRiskRowIndex": [0], "evidenceRefs": ["string"], "verification": "string (확인 방법 1줄)" }
     ],
     "stopCriteria": ["string (작업중지 기준 1줄, 60자 이내)"],
     "emergencyResponse": {
@@ -279,7 +280,7 @@ function workPlanStructuredPrompt(ctx: GenContext) {
   }
 }`,
     "",
-    "필수 조건: workSteps 4-7개. stopCriteria 3-5개. contacts 3-4개. 모든 string은 \\n 없이 한 줄.",
+    "필수 조건: workSteps 4-7개. 각 workStep은 위험성평가 row 0-based index를 relatedRiskRowIndex에 1개 이상 넣고, evidenceRefs와 verification을 채운다. stopCriteria 3-5개. contacts 3-4개. 모든 string은 \\n 없이 한 줄.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -587,6 +588,8 @@ export type AiDeliverables = Partial<{
   tbmLogStructured: TbmLogStructured;
   /** 안전보건교육 기록 schema-first 구조. xlsx 직접 렌더 경로용. */
   educationRecordStructured: EducationRecordStructured;
+  /** 안전작업허가 확인서 schema-first 구조. xlsx 직접 렌더 경로용. */
+  permitInspectionStructured: PermitInspectionStructured;
   tbmBriefing: string;
   tbmLogDraft: string;
   safetyEducationRecordDraft: string;
