@@ -42,6 +42,90 @@
           "evidenceRefs": ["산업안전보건 기준 전기위험", "검전 기록"]
         }
       ],
+      "workPlanStructured": {
+        "workOverview": {
+          "workName": "천장 누수 유지보수",
+          "description": "2인1조로 누수 부위 접근, 보양, 전기설비 차단 확인 후 보수",
+          "location": "가온테크인씨 천장 누수 구역",
+          "condition": "실내 누수 조건",
+          "workerCount": 2,
+          "equipment": ["이동식 작업발판", "흡수포", "검전기"]
+        },
+        "workSteps": [
+          {
+            "stepNo": 1,
+            "action": "누수 구역 접근 전 작업발판 설치",
+            "equipment": "이동식 작업발판",
+            "safetyMeasure": "발판 흔들림과 보호구 착용을 확인",
+            "owner": "작업반장",
+            "relatedRiskRowIndex": [0],
+            "evidenceRefs": ["KOSHA TBM 가이드"],
+            "verification": "작업 전 발판 사진과 TBM 복창"
+          },
+          {
+            "stepNo": 2,
+            "action": "젖은 바닥 보양 및 우회 동선 확보",
+            "equipment": "흡수포, 미끄럼방지 매트",
+            "safetyMeasure": "젖은 바닥 통제선과 우회 동선을 표시",
+            "owner": "감시자",
+            "relatedRiskRowIndex": [1],
+            "evidenceRefs": ["현장 누수 조건"],
+            "verification": "보양 후 사진과 통제 확인표"
+          },
+          {
+            "stepNo": 3,
+            "action": "조명·배선 주변 전원 차단 확인",
+            "equipment": "검전기, 절연장갑",
+            "safetyMeasure": "검전 전 전기설비 접촉 금지",
+            "owner": "관리감독자",
+            "relatedRiskRowIndex": [2],
+            "evidenceRefs": ["산업안전보건 기준 전기위험"],
+            "verification": "검전 사진과 차단 확인 서명"
+          }
+        ],
+        "stopCriteria": ["전원 차단 미확인", "작업발판 흔들림", "젖은 바닥 통제 미완료"],
+        "emergencyResponse": {
+          "contacts": [{ "role": "관리감독자", "name": "현장 책임자", "phone": "010-0000-0000" }],
+          "evacRoute": "작업구역 외부 통제선 밖으로 대피",
+          "firstAid": "감전 의심 시 즉시 작업중지 및 응급 신고"
+        },
+        "approvers": { "author": "작성자", "reviewer": "검토자", "approver": "승인자" }
+      },
+      "permitInspectionStructured": {
+        "meta": {
+          "permitType": "전기·고소작업 허가",
+          "site": "가온테크인씨",
+          "location": "천장 누수 구역",
+          "date": "2026-05-08",
+          "time": "작업 전",
+          "workers": 2
+        },
+        "conditions": [
+          {
+            "category": "작업구역",
+            "requirement": "작업발판과 통제구역 확인",
+            "action": "발판 설치 상태와 접근금지 표지를 확인",
+            "owner": "작업반장",
+            "status": "확인 전",
+            "relatedRiskRowIndex": 0,
+            "evidenceRefs": ["KOSHA TBM 가이드"],
+            "verification": "작업 전 발판 사진 확인"
+          },
+          {
+            "category": "전기",
+            "requirement": "누수 부위 전원 차단·검전",
+            "action": "차단·잠금표시 후 검전 완료 전 접촉 금지",
+            "owner": "관리감독자",
+            "status": "확인 전",
+            "relatedRiskRowIndex": 2,
+            "evidenceRefs": ["산업안전보건 기준 전기위험"],
+            "verification": "검전 사진과 차단 확인 서명"
+          }
+        ],
+        "attachments": [{ "name": "작업 전 사진", "required": true, "status": "미첨부" }],
+        "closeout": { "required": true, "method": "작업 종료 후 통제 해제 전 사진 확인" },
+        "signatures": { "requester": "작업반장", "safetyManager": "관리감독자", "approver": "현장소장" }
+      },
       "rows": [
         {
           "location": "가온테크인씨 천장 누수 구역",
@@ -177,6 +261,110 @@
           "evidenceRefs": ["지게차 동선 관리 기준", "현장 사진증빙"]
         }
       ],
+      "workPlanStructured": {
+        "workOverview": {
+          "workName": "외벽 도장 작업",
+          "description": "이동식 비계 설치, 외벽 도장, 하부 동선 통제, 신규 작업자 교육",
+          "location": "서울 성수동 근린생활시설 외벽",
+          "condition": "오후 강풍 예보",
+          "workerCount": 5,
+          "equipment": ["이동식 비계", "안전대", "지게차", "차단봉"]
+        },
+        "workSteps": [
+          {
+            "stepNo": 1,
+            "action": "이동식 비계 설치 및 승강 전 점검",
+            "equipment": "이동식 비계, 안전대",
+            "safetyMeasure": "비계 바퀴 잠금, 발판 고정, 난간 상태를 확인",
+            "owner": "작업반장",
+            "relatedRiskRowIndex": [0],
+            "evidenceRefs": ["KOSHA 이동식 비계 안전자료"],
+            "verification": "비계 점검표와 TBM 서명"
+          },
+          {
+            "stepNo": 2,
+            "action": "강풍 예보 조건에서 도장 작업 여부 판단",
+            "equipment": "풍속 확인 캡처, 공구함",
+            "safetyMeasure": "돌풍 체감 시 작업중지 후 공구·자재를 지상으로 내림",
+            "owner": "관리감독자",
+            "relatedRiskRowIndex": [1],
+            "evidenceRefs": ["기상청 강풍 예보"],
+            "verification": "기상 확인 캡처와 작업중지 판단 기록"
+          },
+          {
+            "stepNo": 3,
+            "action": "하부 자재 이동 및 지게차 동선 분리",
+            "equipment": "지게차, 차단봉, 신호봉",
+            "safetyMeasure": "보행 동선과 지게차 동선을 물리적으로 분리",
+            "owner": "신호수",
+            "relatedRiskRowIndex": [2],
+            "evidenceRefs": ["지게차 동선 관리 기준"],
+            "verification": "동선 분리 사진과 신호수 배치 확인"
+          },
+          {
+            "stepNo": 4,
+            "action": "신규 작업자 보호구와 작업중지 기준 교육",
+            "equipment": "TBM 일지, 보호구",
+            "safetyMeasure": "작업중지 기준을 구두 복창하고 서명",
+            "owner": "관리감독자",
+            "relatedRiskRowIndex": [3],
+            "evidenceRefs": ["안전보건교육 기록"],
+            "verification": "신규 작업자 교육 서명과 복창 확인"
+          }
+        ],
+        "stopCriteria": ["강풍 또는 돌풍 체감", "비계 고정 미확인", "지게차 동선 분리 미완료"],
+        "emergencyResponse": {
+          "contacts": [{ "role": "관리감독자", "name": "현장 책임자", "phone": "010-0000-0000" }],
+          "evacRoute": "외벽 하부 통제구역 밖 지상 대기 장소",
+          "firstAid": "추락·충돌 발생 시 119 신고 및 현장보존"
+        },
+        "approvers": { "author": "작성자", "reviewer": "검토자", "approver": "승인자" }
+      },
+      "permitInspectionStructured": {
+        "meta": {
+          "permitType": "고소·강풍 작업 허가",
+          "site": "세이프건설",
+          "location": "서울 성수동 근린생활시설 외벽",
+          "date": "2026-05-08",
+          "time": "작업 전",
+          "workers": 5
+        },
+        "conditions": [
+          {
+            "category": "고소작업",
+            "requirement": "이동식 비계 고정 및 보호구 확인",
+            "action": "바퀴 잠금, 난간, 발판, 안전대 착용 확인",
+            "owner": "작업반장",
+            "status": "확인 전",
+            "relatedRiskRowIndex": 0,
+            "evidenceRefs": ["KOSHA 이동식 비계 안전자료"],
+            "verification": "비계 점검표와 TBM 서명"
+          },
+          {
+            "category": "기상·환경",
+            "requirement": "강풍 작업중지 기준 확인",
+            "action": "오후 강풍 예보와 현장 체감 풍속을 함께 확인",
+            "owner": "관리감독자",
+            "status": "확인 전",
+            "relatedRiskRowIndex": 1,
+            "evidenceRefs": ["기상청 강풍 예보"],
+            "verification": "기상 확인 캡처와 작업중지 판단 기록"
+          },
+          {
+            "category": "차량동선",
+            "requirement": "지게차 동선과 보행동선 분리",
+            "action": "차단봉과 신호수로 하부 작업반경 접근금지 표시",
+            "owner": "신호수",
+            "status": "확인 전",
+            "relatedRiskRowIndex": 2,
+            "evidenceRefs": ["지게차 동선 관리 기준"],
+            "verification": "동선 분리 사진과 신호수 배치 확인"
+          }
+        ],
+        "attachments": [{ "name": "비계 점검 사진", "required": true, "status": "미첨부" }],
+        "closeout": { "required": true, "method": "작업 종료 후 비계·자재 정리와 하부 통제 해제 확인" },
+        "signatures": { "requester": "작업반장", "safetyManager": "관리감독자", "approver": "현장소장" }
+      },
       "rows": [
         {
           "location": "서울 성수동 근린생활시설 외벽",

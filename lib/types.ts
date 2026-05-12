@@ -45,6 +45,9 @@ export type WorkPlanStructured = {
     equipment: string;         // 해당 단계 사용 장비
     safetyMeasure: string;     // 단계별 안전조치
     owner: string;             // 담당자/직책
+    relatedRiskRowIndex?: number[]; // 위험성평가 row 참조 (cross-reference, 선택)
+    evidenceRefs?: string[];    // 연결 근거/증빙 참조
+    verification?: string;      // 확인 방법
   }>;
   stopCriteria: string[];      // 작업중지 기준 (3-5개)
   emergencyResponse: {
@@ -183,6 +186,9 @@ export type PermitInspectionStructured = {
     action: string;
     owner: string;
     status: "확인 전" | "적합" | "보완 필요" | "해당 없음";
+    relatedRiskRowIndex?: number; // 위험성평가 row 참조 (cross-reference, 선택)
+    evidenceRefs?: string[];    // 연결 근거/증빙 참조
+    verification?: string;      // 확인 방법
   }>;
   attachments: Array<{
     name: string;

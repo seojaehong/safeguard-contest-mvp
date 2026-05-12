@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-08T14:46:43.769Z",
-  "elapsedMs": 9,
+  "generatedAt": "2026-05-12T00:55:14.397Z",
+  "elapsedMs": 11,
   "fixturesPath": "scripts\\safeclaw_form_schema_gate_fixtures.json",
   "minimumHazardRows": 3,
   "caseCount": 3,
@@ -360,6 +360,14 @@
         "linkCount": 3,
         "issues": []
       },
+      "crossReference": {
+        "verdict": "pass",
+        "workStepCount": 3,
+        "permitConditionCount": 2,
+        "linkedWorkStepCount": 3,
+        "linkedPermitConditionCount": 2,
+        "issues": []
+      },
       "blockerCount": 0,
       "noticeCount": 0,
       "issues": []
@@ -553,6 +561,14 @@
         "verdict": "pass",
         "minimumLinks": 3,
         "linkCount": 3,
+        "issues": []
+      },
+      "crossReference": {
+        "verdict": "pass",
+        "workStepCount": 4,
+        "permitConditionCount": 3,
+        "linkedWorkStepCount": 4,
+        "linkedPermitConditionCount": 3,
         "issues": []
       },
       "blockerCount": 0,
@@ -751,6 +767,14 @@
             "message": "TBM schema v0.5 requires tbmRiskLinks array"
           }
         ]
+      },
+      "crossReference": {
+        "verdict": "pass",
+        "workStepCount": 0,
+        "permitConditionCount": 0,
+        "linkedWorkStepCount": 0,
+        "linkedPermitConditionCount": 0,
+        "issues": []
       },
       "blockerCount": 16,
       "noticeCount": 0,
