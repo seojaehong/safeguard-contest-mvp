@@ -11,10 +11,17 @@ type Work24Course = {
   reason: string;
   fitLabel: "현장 적합" | "대상 적합" | "조건부 후보";
   fitReason: string;
+  metadata?: Work24CourseMetadata;
   rank: number;
 };
 
 type PublicWork24Course = Omit<Work24Course, "rank">;
+
+type Work24CourseMetadata = {
+  usedFields: string[];
+  sourceFields: Record<string, string>;
+  filters: Record<string, string>;
+};
 
 const authKey = process.env.WORK24_AUTH_KEY?.trim() || "";
 
@@ -42,7 +49,11 @@ function extractTag(xml: string, tag: string) {
   return match?.[1]?.replace(/<!\[CDATA\[|\]\]>/g, "").trim() || "";
 }
 
-function parseCourses(xml: string) {
+function compactSourceFields(fields: Record<string, string>) {
+  return Object.fromEntries(Object.entries(fields).filter(([, value]) => value.trim())) as Record<string, string>;
+}
+
+function parseCourses(xml: string, filters: Record<string, string>) {
   return Array.from(xml.matchAll(/<scn_list>([\s\S]*?)<\/scn_list>/g)).map((match) => {
     const content = match[1];
     const title = extractTag(content, "title");
@@ -69,6 +80,22 @@ function parseCourses(xml: string) {
       reason,
       fitLabel: "조건부 후보" as const,
       fitReason: "현장 상황과 교육명 매칭 전 원천 과정입니다.",
+      metadata: {
+        usedFields: ["과정명", "훈련기관명", "훈련시작일", "훈련종료일", "훈련지역", "직종/NCS분류", "훈련비", "수강대상", "과정상태"],
+        sourceFields: compactSourceFields({
+          "과정명": title,
+          "훈련기관명": institution,
+          "훈련시작일": startDate,
+          "훈련종료일": endDate,
+          "훈련지역": filters.srchTraArea1 ? `area1:${filters.srchTraArea1}` : "",
+          "직종/NCS분류": filters.srchNcs1 ? `srchNcs1:${filters.srchNcs1}` : "",
+          "훈련비": cost,
+          "수강대상": target,
+          "과정상태": "현재 조회 기간 내 모집/운영 후보",
+          "자료 링크 URL": url
+        }),
+        filters
+      },
       rank: 50
     };
   }).filter((item) => item.title && item.url);
@@ -174,12 +201,14 @@ export async function fetchTrainingRecommendations(question: string): Promise<{
   const area1 = pickArea1(question);
 
   try {
+    const foreignFilters = { srchNcs1: "23", srchTraProcessNm: "외국인", ...(area1 ? { srchTraArea1: area1 } : {}) };
+    const safetyFilters = { srchNcs1: "23", srchTraProcessNm: "안전", ...(area1 ? { srchTraArea1: area1 } : {}) };
     const [foreignXml, safetyXml] = await Promise.all([
-      fetchCourseXml({ srchNcs1: "23", srchTraProcessNm: "외국인", ...(area1 ? { srchTraArea1: area1 } : {}) }),
-      fetchCourseXml({ srchNcs1: "23", srchTraProcessNm: "안전", ...(area1 ? { srchTraArea1: area1 } : {}) })
+      fetchCourseXml(foreignFilters),
+      fetchCourseXml(safetyFilters)
     ]);
 
-    const merged = [...parseCourses(foreignXml), ...parseCourses(safetyXml)]
+    const merged = [...parseCourses(foreignXml, foreignFilters), ...parseCourses(safetyXml, safetyFilters)]
       .map((item) => scoreCourseFit(question, item))
       .sort((a, b) => a.rank - b.rank);
     const unique = merged
