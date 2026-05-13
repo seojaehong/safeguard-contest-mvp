@@ -14,6 +14,7 @@ import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
 import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission } from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
 import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow } from "./risk-assessment-schema";
+import { buildPublicDataUsage } from "./public-data-usage";
 
 export async function runSearch(query: string) {
   return searchLegalSources(query);
@@ -869,6 +870,53 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const tbmRiskSourceDetail = generatedTbmRiskLinks.length
       ? "TBM-risk links=AI"
       : "TBM-risk links=deterministic fallback";
+    const externalData = {
+      weather,
+      training,
+      koshaEducation,
+      kosha,
+      koshaOpenApi,
+      accidentCases,
+      safetyReference: {
+        source: "safety-reference-catalog" as const,
+        mode: safetyReference.configured ? (safetyReference.ok ? "live" as const : "fallback" as const) : "unconfigured" as const,
+        query: safetyReference.query,
+        count: safetyReference.count,
+        totalItems: safetyReference.items.length,
+        message: safetyReference.message,
+        items: safetyReference.items.slice(0, 8).map((r) => ({
+          id: r.id,
+          itemType: r.item_type,
+          title: r.title,
+          shortSummary: r.short_summary || r.summary,
+          primaryDocuments: r.primary_documents || [],
+          controls: r.controls || [],
+          evidenceRoleLabel: r.evidence_role_label
+        }))
+      },
+      safetyKnowledge: {
+        source: "safety-knowledge" as const,
+        mode: "live" as const,
+        detail: `기초 지식 DB ${safetyKnowledgeMatches.length}건을 문서팩 반영 후보로 매칭했습니다.`,
+        matches: safetyKnowledgeMatches.map((item) => ({
+          id: item.id,
+          title: item.title,
+          primaryDocuments: item.primaryDocuments,
+          controls: item.controls,
+          sourceTitles: item.sources.map((source) => source.title),
+          legalMappingTitles: item.legalMappings.map((legalItem) => legalItem.title),
+          evidenceRole: item.evidenceRole,
+          roleLabel: item.roleLabel,
+          shortSummary: item.shortSummary,
+          documentReflectionLabel: item.documentReflectionLabel
+        }))
+      }
+    } satisfies Omit<AskResponse["externalData"], "publicDataUsage">;
+    const publicDataUsage = buildPublicDataUsage({
+      question,
+      citations,
+      externalData
+    });
 
     const enriched: AskResponse = {
       ...response,
@@ -880,46 +928,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         accidentCases.cases.length ? `[유사 재해사례] ${accidentCases.cases[0].title}: ${accidentCases.cases[0].preventionPoint}` : ""
       ].filter(Boolean).join("\n\n"),
       externalData: {
-        weather,
-        training,
-        koshaEducation,
-        kosha,
-        koshaOpenApi,
-        accidentCases,
-        safetyReference: {
-          source: "safety-reference-catalog",
-          mode: safetyReference.configured ? (safetyReference.ok ? "live" : "fallback") : "unconfigured",
-          query: safetyReference.query,
-          count: safetyReference.count,
-          totalItems: safetyReference.items.length,
-          message: safetyReference.message,
-          items: safetyReference.items.slice(0, 8).map((r) => ({
-            id: r.id,
-            itemType: r.item_type,
-            title: r.title,
-            shortSummary: r.short_summary || r.summary,
-            primaryDocuments: r.primary_documents || [],
-            controls: r.controls || [],
-            evidenceRoleLabel: r.evidence_role_label
-          }))
-        },
-        safetyKnowledge: {
-          source: "safety-knowledge",
-          mode: "live",
-          detail: `기초 지식 DB ${safetyKnowledgeMatches.length}건을 문서팩 반영 후보로 매칭했습니다.`,
-          matches: safetyKnowledgeMatches.map((item) => ({
-            id: item.id,
-            title: item.title,
-            primaryDocuments: item.primaryDocuments,
-            controls: item.controls,
-            sourceTitles: item.sources.map((source) => source.title),
-            legalMappingTitles: item.legalMappings.map((legalItem) => legalItem.title),
-            evidenceRole: item.evidenceRole,
-            roleLabel: item.roleLabel,
-            shortSummary: item.shortSummary,
-            documentReflectionLabel: item.documentReflectionLabel
-          }))
-        }
+        ...externalData,
+        publicDataUsage
       },
       // When AI body is present for a deliverable, the AI was already given the
       // citations + KOSHA refs in the prompt and instructed to weave them into

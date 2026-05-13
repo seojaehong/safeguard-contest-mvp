@@ -4,6 +4,33 @@ export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
 export type IntegrationMode = "mock" | "live" | "fallback";
 
+export type SourceMetadataValue = string | number | boolean | string[];
+
+export type SourceMetadata = Record<string, SourceMetadataValue>;
+
+export type PublicDataUsagePosition =
+  | "query/filter"
+  | "parsed fields"
+  | "document evidence"
+  | "generated sections";
+
+export type PublicDataUsageEntry = {
+  dataset: string;
+  source: string;
+  mode: IntegrationMode | "unconfigured";
+  queryOrFilters: string[];
+  parsedFields: string[];
+  documentEvidence: string[];
+  generatedSections: string[];
+  usageSummary: string;
+  positions: PublicDataUsagePosition[];
+};
+
+export type PublicDataUsage = {
+  summary: string;
+  entries: PublicDataUsageEntry[];
+};
+
 export type AccidentCase = {
   title: string;
   industry?: string;
@@ -173,6 +200,9 @@ export type SearchResult = {
   sourceSystem?: SourceSystem;
   sourceUrl?: string;
   tags?: string[];
+  sourceFields?: Record<string, string>;
+  filters?: Record<string, string>;
+  metadata?: SourceMetadata;
 };
 
 export type DetailRecord = {
@@ -187,6 +217,9 @@ export type DetailRecord = {
   sourceSystem?: SourceSystem;
   sourceUrl?: string;
   tags?: string[];
+  sourceFields?: Record<string, string>;
+  filters?: Record<string, string>;
+  metadata?: SourceMetadata;
 };
 
 export type AskResponse = {
@@ -246,7 +279,13 @@ export type AskResponse = {
         uvIndex?: string;
         apparentTemperature?: string;
         heatRiskLevel?: "보통" | "높음" | "매우높음" | "위험";
+        sourceFields?: Record<string, string>;
+        filters?: Record<string, string>;
+        metadata?: SourceMetadata;
       }>;
+      sourceFields?: Record<string, string>;
+      filters?: Record<string, string>;
+      metadata?: SourceMetadata;
     };
     training: {
       source: "work24";
@@ -263,6 +302,11 @@ export type AskResponse = {
         reason: string;
         fitLabel?: "현장 적합" | "대상 적합" | "조건부 후보";
         fitReason?: string;
+        metadata?: {
+          usedFields: string[];
+          sourceFields: Record<string, string>;
+          filters: Record<string, string>;
+        };
       }>;
     };
     koshaEducation: {
@@ -315,6 +359,11 @@ export type AskResponse = {
         summary: string;
         url: string;
         reflectedIn: string[];
+        metadata?: {
+          usedFields: string[];
+          sourceFields: Record<string, string>;
+          filters: Record<string, string>;
+        };
       }>;
     };
     safetyKnowledge?: {
@@ -351,6 +400,7 @@ export type AskResponse = {
         evidenceRoleLabel?: string;
       }>;
     };
+    publicDataUsage?: PublicDataUsage;
   };
   riskSummary: {
     title: string;

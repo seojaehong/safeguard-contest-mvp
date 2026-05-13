@@ -1,4 +1,4 @@
-import { IntegrationMode } from "./types";
+import { IntegrationMode, SourceMetadata } from "./types";
 
 type LocationConfig = {
   label: string;
@@ -55,6 +55,9 @@ type KmaSignal = {
   uvIndex?: string;
   apparentTemperature?: string;
   heatRiskLevel?: "보통" | "높음" | "매우높음" | "위험";
+  sourceFields?: Record<string, string>;
+  filters?: Record<string, string>;
+  metadata?: SourceMetadata;
 };
 
 type WeatherWarningItem = {
@@ -206,6 +209,9 @@ type WeatherSignal = {
   actions: string[];
   detail: string;
   signals: KmaSignal[];
+  sourceFields?: Record<string, string>;
+  filters?: Record<string, string>;
+  metadata?: SourceMetadata;
 };
 
 const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUBLIC_DATA_API_KEY?.trim() || "";
@@ -376,6 +382,70 @@ function valueByCategory(items: ForecastItem[], category: string, key: "obsrValu
   return items.find((item) => item.category === category)?.[key] || "";
 }
 
+function compactSourceFields(fields: Record<string, string | undefined>) {
+  return Object.fromEntries(
+    Object.entries(fields)
+      .filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim().length > 0)
+  );
+}
+
+function forecastSourceFields(items: ForecastItem[], categories: string[], valueKey: "obsrValue" | "fcstValue") {
+  const first = items[0];
+  const values = categories
+    .map((category) => {
+      const value = valueByCategory(items, category, valueKey);
+      return value ? `${category}:${value}` : "";
+    })
+    .filter(Boolean)
+    .join(", ");
+
+  return compactSourceFields({
+    baseDate: first?.baseDate,
+    baseTime: first?.baseTime,
+    category: categories.join(","),
+    fcstDate: first?.fcstDate,
+    fcstTime: first?.fcstTime,
+    fcstValue: valueKey === "fcstValue" ? values : undefined,
+    obsrValue: valueKey === "obsrValue" ? values : undefined
+  });
+}
+
+function locationFilters(location: LocationConfig) {
+  return {
+    locationLabel: location.label,
+    area1: location.area1,
+    areaNo: location.areaNo,
+    nx: String(location.nx),
+    ny: String(location.ny),
+    latitude: String(location.latitude),
+    longitude: String(location.longitude)
+  };
+}
+
+function buildWeatherMetadata(location: LocationConfig, signals: KmaSignal[]): SourceMetadata {
+  const liveEndpoints = signals.filter((signal) => signal.mode === "live").map((signal) => signal.endpoint);
+  const sourceFieldNames = Array.from(new Set(signals.flatMap((signal) => Object.keys(signal.sourceFields || {}))));
+  const livingWeatherEndpoints = signals
+    .filter((signal) => signal.endpoint === "생활기상 자외선" || signal.endpoint === "생활기상 체감온도" || signal.endpoint === "실시간 홍반자외선")
+    .map((signal) => signal.endpoint);
+
+  return {
+    agency: "기상청",
+    dataNames: [
+      "기상청_단기예보 조회서비스",
+      "기상청_기상특보 조회서비스",
+      "기상청_생활기상지수 조회서비스",
+      "한국에너지기술연구원_실시간 홍반자외선"
+    ],
+    locationLabel: location.label,
+    liveEndpoints,
+    sourceFieldNames,
+    livingWeatherUtilization: livingWeatherEndpoints.length
+      ? `${livingWeatherEndpoints.join(", ")} fields are attached to weather.signals and weather.actions.`
+      : "Living weather fields are fetched when the question contains outdoor, heat, or UV context."
+  };
+}
+
 async function fetchWithTimeout(url: string, label: string) {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= KMA_RETRY_COUNT; attempt += 1) {
@@ -461,6 +531,27 @@ async function fetchWarningSignal(location: LocationConfig): Promise<KmaSignal> 
         ? `최근 특보 확인: ${picked.title || picked.stnNm || "특보 정보"}`
         : "최근 발표 특보 없음",
       forecastTime: picked?.tmFc,
+      sourceFields: compactSourceFields({
+        발표시각: picked?.tmFc,
+        특보구역: picked?.stnNm,
+        특보종류: picked?.wrn,
+        특보수준: picked?.lvl,
+        특보명령: picked?.cmd,
+        stnId: picked?.stnId,
+        title: picked?.title
+      }),
+      filters: {
+        ...locationFilters(location),
+        endpoint: "getWthrWrnList",
+        stnId: "108",
+        fromTmFc: yyyymmddOffset(-1),
+        toTmFc: yyyymmddOffset(1)
+      },
+      metadata: {
+        agency: "기상청",
+        dataName: "기상청_기상특보 조회서비스",
+        sourceFieldNames: ["발표시각", "특보구역", "특보종류", "특보수준", "발효시각/해제시각 후보", "wrn", "lvl", "cmd"]
+      },
       detail: picked
         ? `기상청 기상특보 조회 성공 (${picked.stnNm || "전국"}, ${picked.tmFc || "발표시각 미표기"})`
         : `기상청 기상특보 조회 성공 (${location.label}, 최근 특보 없음)`
@@ -505,6 +596,23 @@ async function fetchImpactForecastSignal(location: LocationConfig): Promise<KmaS
         ? `영향예보 ${picked.clsfc || "분야"} ${picked.value || "정보"} (${picked.regName || location.label})`
         : "폭염·한파 영향예보 발표 없음",
       forecastTime: picked?.tmEf,
+      sourceFields: compactSourceFields({
+        regId: picked?.regId,
+        regName: picked?.regName,
+        tmEf: picked?.tmEf,
+        clsfc: picked?.clsfc,
+        value: picked?.value
+      }),
+      filters: {
+        ...locationFilters(location),
+        endpoint: "getHWImpactValue",
+        tm: yyyymmddOffset(0)
+      },
+      metadata: {
+        agency: "기상청",
+        dataName: "기상청_영향예보 조회서비스",
+        utilization: "폭염·한파 영향예보는 weather.actions의 휴식·음수·보온·냉방 점검 문구로 연결됩니다."
+      },
       detail: picked
         ? `기상청 영향예보 조회 성공 (${picked.regName || location.label}, ${picked.clsfc || "분야 미표기"})`
         : `기상청 영향예보 조회 성공 (${location.label}, 발표 자료 없음)`
@@ -549,6 +657,35 @@ async function fetchLivingUvSignal(location: LocationConfig): Promise<KmaSignal>
       summary: `자외선지수 ${uvIndex || "정보없음"}${risk ? ` (${risk})` : ""}`,
       forecastTime: item.date,
       uvIndex,
+      sourceFields: compactSourceFields({
+        areaNo: item.areaNo,
+        date: item.date,
+        today: item.today,
+        tomorrow: item.tomorrow,
+        theDayAfterTomorrow: item.theDayAfterTomorrow,
+        h0: item.h0,
+        h3: item.h3,
+        h6: item.h6,
+        h9: item.h9,
+        h12: item.h12,
+        h15: item.h15,
+        h18: item.h18,
+        h21: item.h21,
+        value: item.value,
+        idx: item.idx,
+        uv: item.uv
+      }),
+      filters: {
+        ...locationFilters(location),
+        endpoint: "getUVIdxV4",
+        time: formatLivingIndexTime()
+      },
+      metadata: {
+        agency: "기상청",
+        dataName: "기상청_생활기상지수 조회서비스",
+        utilizedField: "uvIndex",
+        utilization: "자외선 위험이 높으면 weather.actions에 차광 보호구, 그늘 휴식, 피부 이상 징후 확인이 추가됩니다."
+      },
       detail: `기상청 생활기상지수 자외선 조회 성공 (${location.label}, areaNo ${location.areaNo})`
     };
   } catch (error) {
@@ -593,6 +730,35 @@ async function fetchLivingHeatIndexSignal(location: LocationConfig): Promise<Kma
       forecastTime: item.date,
       apparentTemperature,
       heatRiskLevel,
+      sourceFields: compactSourceFields({
+        areaNo: item.areaNo,
+        date: item.date,
+        today: item.today,
+        tomorrow: item.tomorrow,
+        theDayAfterTomorrow: item.theDayAfterTomorrow,
+        h0: item.h0,
+        h3: item.h3,
+        h6: item.h6,
+        h9: item.h9,
+        h12: item.h12,
+        h15: item.h15,
+        h18: item.h18,
+        h21: item.h21,
+        value: item.value,
+        idx: item.idx
+      }),
+      filters: {
+        ...locationFilters(location),
+        endpoint: "getSenTaIdxV4",
+        requestCode: "A48",
+        time: formatLivingIndexTime()
+      },
+      metadata: {
+        agency: "기상청",
+        dataName: "기상청_생활기상지수 조회서비스",
+        utilizedField: "apparentTemperature",
+        utilization: "체감온도 위험이 높으면 weather.actions에 물·그늘·휴식과 작업시간 조절 기준이 추가됩니다."
+      },
       detail: `기상청 생활기상지수 체감온도 조회 성공 (${location.label}, requestCode A48, areaNo ${location.areaNo})`
     };
   } catch (error) {
@@ -659,6 +825,29 @@ async function fetchErythemalUvSignal(location: LocationConfig): Promise<KmaSign
       summary: `홍반자외선 ${uvIndex || "확인됨"}${risk ? ` (${risk})` : ""}`,
       forecastTime: item ? `${item.yr || ""}${item.mm || ""}${item.day || ""} ${item.hm || ""}`.trim() : `${date} ${time}`,
       uvIndex,
+      sourceFields: compactSourceFields({
+        euv_predc_idx: item.euv_predc_idx,
+        yr: item.yr,
+        mm: item.mm,
+        day: item.day,
+        hm: item.hm,
+        lat: item.lat,
+        lot: item.lot,
+        stdg_cd: item.stdg_cd,
+        stdg_addr: item.stdg_addr
+      }),
+      filters: {
+        ...locationFilters(location),
+        endpoint: kierErythemalUvEndpoint,
+        date,
+        time
+      },
+      metadata: {
+        agency: "한국에너지기술연구원",
+        dataName: "실시간 홍반자외선",
+        utilizedField: "uvIndex",
+        utilization: "홍반자외선 위험이 높으면 자외선 노출 보호조치가 weather.actions와 교육기록 근거로 연결됩니다."
+      },
       detail: `한국에너지기술연구원 실시간 홍반자외선 조회 성공 (${location.label}, lat ${location.latitude}, lot ${location.longitude})`
     };
   } catch (error) {
@@ -695,6 +884,22 @@ async function fetchUltraNowSignal(location: LocationConfig): Promise<KmaSignal>
       temperatureC: temperature,
       windSpeedMps: windSpeed,
       precipitationType: precipitationLabel(precipitationType),
+      sourceFields: {
+        ...forecastSourceFields(items, ["T1H", "WSD", "PTY", "RN1"], "obsrValue"),
+        nx: String(location.nx),
+        ny: String(location.ny)
+      },
+      filters: {
+        ...locationFilters(location),
+        endpoint: "getUltraSrtNcst",
+        baseDate,
+        baseTime
+      },
+      metadata: {
+        agency: "기상청",
+        dataName: "기상청_단기예보 조회서비스",
+        categoryLabels: ["기온", "풍속", "강수형태", "1시간 강수량"]
+      },
       detail: `기상청 초단기실황 호출 성공 (${location.label}, base ${baseDate} ${baseTime})`
     };
   } catch (error) {
@@ -734,6 +939,22 @@ async function fetchUltraForecastSignal(location: LocationConfig): Promise<KmaSi
       temperatureC: temperature,
       windSpeedMps: windSpeed,
       precipitationType: precipitationLabel(precipitationType),
+      sourceFields: {
+        ...forecastSourceFields(current, ["T1H", "WSD", "PTY", "SKY"], "fcstValue"),
+        nx: String(location.nx),
+        ny: String(location.ny)
+      },
+      filters: {
+        ...locationFilters(location),
+        endpoint: "getUltraSrtFcst",
+        baseDate,
+        baseTime
+      },
+      metadata: {
+        agency: "기상청",
+        dataName: "기상청_단기예보 조회서비스",
+        categoryLabels: ["기온", "풍속", "강수형태", "하늘상태"]
+      },
       detail: `기상청 초단기예보 호출 성공 (${location.label}, base ${baseDate} ${baseTime})`
     };
   } catch (error) {
@@ -775,6 +996,22 @@ async function fetchVillageForecastSignal(location: LocationConfig): Promise<Kma
       windSpeedMps: windSpeed,
       precipitationProbability,
       precipitationType: precipitationLabel(precipitationType),
+      sourceFields: {
+        ...forecastSourceFields(current, ["TMP", "WSD", "POP", "PTY", "SKY"], "fcstValue"),
+        nx: String(location.nx),
+        ny: String(location.ny)
+      },
+      filters: {
+        ...locationFilters(location),
+        endpoint: "getVilageFcst",
+        baseDate,
+        baseTime
+      },
+      metadata: {
+        agency: "기상청",
+        dataName: "기상청_단기예보 조회서비스",
+        categoryLabels: ["기온", "강수형태", "강수확률", "풍속", "하늘상태"]
+      },
       detail: `기상청 단기예보 호출 성공 (${location.label}, base ${baseDate} ${baseTime})`
     };
   } catch (error) {
@@ -853,6 +1090,12 @@ export async function fetchWeatherSignal(question: string): Promise<WeatherSigna
       summary: "기상청 서비스 키가 없어 현장 기상 주의 문구를 보수적으로 적용합니다.",
       actions: ["작업 전 기상 변화에 따른 작업중지 기준을 공유"],
       detail: "DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 기상청 예보 연결을 확인해야 합니다.",
+      filters: locationFilters(location),
+      metadata: {
+        agency: "기상청",
+        dataNames: ["기상청_단기예보 조회서비스", "기상청_기상특보 조회서비스"],
+        sourceFieldNames: ["baseDate", "baseTime", "nx", "ny", "category", "fcstDate", "fcstTime", "fcstValue", "발표시각", "특보구역", "특보종류", "특보수준", "발효시각", "해제시각"]
+      },
       signals: [
         { endpoint: "초단기실황", mode: "fallback", summary: "서비스 키 필요", detail: "서비스 키 필요" },
         { endpoint: "초단기예보", mode: "fallback", summary: "서비스 키 필요", detail: "서비스 키 필요" },
@@ -911,7 +1154,15 @@ export async function fetchWeatherSignal(question: string): Promise<WeatherSigna
     precipitationProbability: preferred?.precipitationProbability,
     actions: buildWeatherActions(signals),
     detail: signals.map((signal) => signal.detail).join(" / "),
-    signals
+    signals,
+    sourceFields: compactSourceFields({
+      forecastTime: preferred?.forecastTime,
+      temperatureC: preferred?.temperatureC,
+      windSpeedMps: preferred?.windSpeedMps,
+      precipitationProbability: preferred?.precipitationProbability
+    }),
+    filters: locationFilters(location),
+    metadata: buildWeatherMetadata(location, signals)
   };
   weatherCache.set(cacheKey, {
     expiresAt: Date.now() + 10 * 60_000,

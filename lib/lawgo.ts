@@ -1,5 +1,5 @@
 import { mockDetails, mockSearchResults } from "./mock-data";
-import { DetailRecord, SearchResult } from "./types";
+import { DetailRecord, SearchResult, SourceMetadata } from "./types";
 
 const oc = process.env.LAWGO_OC?.trim() || process.env.LAW_OC?.trim() || "";
 const mockMode = process.env.LAWGO_MOCK_MODE === "force" || !oc;
@@ -177,6 +177,13 @@ function compact(parts: Array<string | undefined>) {
   return parts.map((part) => (part || "").trim()).filter(Boolean);
 }
 
+function compactSourceFields(fields: Record<string, string | undefined>) {
+  return Object.fromEntries(
+    Object.entries(fields)
+      .filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].trim().length > 0)
+  );
+}
+
 function normalizeLawText(text: string) {
   return stripHtml(text)
     .replace(/\u00a0/g, " ")
@@ -188,6 +195,34 @@ function normalizeLawText(text: string) {
 
 function lawSourceUrl(lawSerial: string) {
   return lawSerial ? `https://www.law.go.kr/lsInfoP.do?lsiSeq=${encodeURIComponent(lawSerial)}` : "https://www.law.go.kr/";
+}
+
+function buildLawGoMetadata(extra: SourceMetadata = {}): SourceMetadata {
+  return {
+    agency: "법제처",
+    dataName: "법제처 국가법령정보 공유서비스",
+    sourceFieldNames: ["법령명", "법령ID", "MST", "시행일자", "공포일자", "소관부처", "조문번호", "조문제목", "조문내용", "별표", "개정이력"],
+    ...extra
+  };
+}
+
+function buildLawSearchFilters(target: string, query?: string) {
+  return compactSourceFields({
+    endpoint: "lawSearch.do",
+    target,
+    query,
+    type: "XML"
+  });
+}
+
+function buildLawDetailFilters(target: string, raw: string) {
+  return compactSourceFields({
+    endpoint: "lawService.do",
+    target,
+    type: "JSON",
+    MST: target === "law" ? raw : undefined,
+    ID: target !== "law" ? raw : undefined
+  });
 }
 
 function removeDuplicateArticleHeading(text: string, heading: string, articleTitle: string) {
@@ -263,6 +298,24 @@ function formatLawDetailBody(articleUnits: JsonRecord[]) {
   ].join("\n");
 }
 
+function summarizeArticleFields(articleUnits: JsonRecord[]) {
+  const articleNumbers = articleUnits
+    .map((article) => readString(article, "조문번호") || readString(article, "조문키"))
+    .filter(Boolean)
+    .slice(0, 20);
+  const articleTitles = articleUnits
+    .map((article) => readString(article, "조문제목"))
+    .filter(Boolean)
+    .slice(0, 20);
+  const articleContentCount = articleUnits.filter((article) => readString(article, "조문내용")).length;
+
+  return {
+    articleNumbers,
+    articleTitles,
+    articleContentCount
+  };
+}
+
 function buildLawFallbackDetail(id: string, raw: string): DetailRecord {
   return {
     id,
@@ -277,7 +330,13 @@ function buildLawFallbackDetail(id: string, raw: string): DetailRecord {
     ],
     sourceLabel: "Law.go 법령",
     sourceSystem: "lawgo",
-    sourceUrl: lawSourceUrl(raw)
+    sourceUrl: lawSourceUrl(raw),
+    sourceFields: compactSourceFields({ MST: raw }),
+    filters: buildLawDetailFilters("law", raw),
+    metadata: buildLawGoMetadata({
+      fallback: true,
+      utilization: "법령 상세 원문 파싱 실패 시에도 원문 링크와 MST를 downstream evidence metadata로 유지합니다."
+    })
   };
 }
 
@@ -329,7 +388,19 @@ function buildCachedIndustrialSafetyLawDetail(id: string, raw: string): DetailRe
     ],
     sourceLabel: "Law.go 법령",
     sourceSystem: "lawgo",
-    sourceUrl: lawSourceUrl(raw)
+    sourceUrl: lawSourceUrl(raw),
+    sourceFields: compactSourceFields({
+      법령명: "산업안전보건법",
+      MST: raw,
+      시행일자: "20251001",
+      소관부처: "고용노동부"
+    }),
+    filters: buildLawDetailFilters("law", raw),
+    metadata: buildLawGoMetadata({
+      fallback: true,
+      articleNumbers: ["5", "6", "8"],
+      utilization: "기초 조문 스냅샷은 상세 호출 실패 시 화면 공백 방지용이며 live Law.go 상세가 성공하면 대체됩니다."
+    })
   };
 }
 
@@ -337,13 +408,14 @@ function buildLawDetailFallback(id: string, raw: string): DetailRecord {
   return buildCachedIndustrialSafetyLawDetail(id, raw) || buildLawFallbackDetail(id, raw);
 }
 
-function parseLawResults(xml: string): SearchResult[] {
+function parseLawResults(xml: string, query?: string): SearchResult[] {
   return Array.from(xml.matchAll(/<law\b[^>]*>([\s\S]*?)<\/law>/g)).slice(0, 4).map((match) => {
     const content = match[1];
     const mst = extractTag(content, "법령일련번호");
     const title = extractTag(content, "법령명한글") || extractTag(content, "법령명");
     const lawType = extractTag(content, "법령구분명");
     const promDate = extractTag(content, "공포일자");
+    const effectiveDate = extractTag(content, "시행일자");
     const department = extractTag(content, "소관부처명");
     const lawId = extractTag(content, "법령ID");
 
@@ -356,12 +428,26 @@ function parseLawResults(xml: string): SearchResult[] {
       sourceLabel: "Law.go 법령",
       sourceSystem: "lawgo" as const,
       sourceUrl: mst ? lawSourceUrl(mst) : lawId ? `https://www.law.go.kr/법령/${encodeURIComponent(title)}` : "https://www.law.go.kr/",
-      tags: compact([lawType, department, "Law.go"])
+      tags: compact([lawType, department, "Law.go"]),
+      sourceFields: compactSourceFields({
+        법령명: title,
+        법령ID: lawId,
+        MST: mst,
+        시행일자: effectiveDate,
+        공포일자: promDate,
+        소관부처: department,
+        법령구분명: lawType
+      }),
+      filters: buildLawSearchFilters("law", query),
+      metadata: buildLawGoMetadata({
+        searchTarget: "law",
+        hasDetailEndpoint: Boolean(mst)
+      })
     };
   }).filter((item) => item.title);
 }
 
-function parsePrecResults(xml: string): SearchResult[] {
+function parsePrecResults(xml: string, query?: string): SearchResult[] {
   return Array.from(xml.matchAll(/<prec\b[^>]*>([\s\S]*?)<\/prec>/g)).slice(0, 3).map((match) => {
     const content = match[1];
     const id = extractTag(content, "판례일련번호");
@@ -380,12 +466,27 @@ function parsePrecResults(xml: string): SearchResult[] {
       sourceLabel: "Law.go 판례",
       sourceSystem: "lawgo" as const,
       sourceUrl: detailPath ? `https://www.law.go.kr${detailPath}` : "https://www.law.go.kr/",
-      tags: compact([court, "Law.go"])
+      tags: compact([court, "Law.go"]),
+      sourceFields: compactSourceFields({
+        판례일련번호: id,
+        사건명: title,
+        법원명: court,
+        사건번호: caseNumber,
+        선고일자: decisionDate,
+        판례상세링크: detailPath
+      }),
+      filters: buildLawSearchFilters("prec", query),
+      metadata: {
+        agency: "법제처",
+        dataName: "법제처 국가법령정보 공유서비스",
+        searchTarget: "prec",
+        sourceFieldNames: ["판례일련번호", "사건명", "법원명", "사건번호", "선고일자", "판례상세링크"]
+      }
     };
   }).filter((item) => item.title);
 }
 
-function parseExpcResults(xml: string): SearchResult[] {
+function parseExpcResults(xml: string, query?: string): SearchResult[] {
   return Array.from(xml.matchAll(/<expc\b[^>]*>([\s\S]*?)<\/expc>/g)).slice(0, 3).map((match) => {
     const content = match[1];
     const id = extractTag(content, "법령해석례일련번호");
@@ -404,7 +505,22 @@ function parseExpcResults(xml: string): SearchResult[] {
       sourceLabel: "Law.go 해석례",
       sourceSystem: "lawgo" as const,
       sourceUrl: detailPath ? `https://www.law.go.kr${detailPath}` : "https://www.law.go.kr/",
-      tags: compact([agency, questionAgency, "Law.go"])
+      tags: compact([agency, questionAgency, "Law.go"]),
+      sourceFields: compactSourceFields({
+        법령해석례일련번호: id,
+        안건명: title,
+        회신기관명: agency,
+        질의기관명: questionAgency,
+        회신일자: responseDate,
+        법령해석례상세링크: detailPath
+      }),
+      filters: buildLawSearchFilters("expc", query),
+      metadata: {
+        agency: "법제처",
+        dataName: "법제처 국가법령정보 공유서비스",
+        searchTarget: "expc",
+        sourceFieldNames: ["법령해석례일련번호", "안건명", "회신기관명", "질의기관명", "회신일자", "법령해석례상세링크"]
+      }
     };
   }).filter((item) => item.title);
 }
@@ -459,9 +575,9 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
 
   for (const candidate of candidates) {
     const [laws, precedents, interpretations] = await Promise.all([
-      fetchLawGo("lawSearch.do", { target: "law", query: candidate }).then(parseLawResults).catch(() => []),
-      fetchLawGo("lawSearch.do", { target: "prec", query: candidate }).then(parsePrecResults).catch(() => []),
-      fetchLawGo("lawSearch.do", { target: "expc", query: candidate }).then(parseExpcResults).catch(() => [])
+      fetchLawGo("lawSearch.do", { target: "law", query: candidate }).then((xml) => parseLawResults(xml, candidate)).catch(() => []),
+      fetchLawGo("lawSearch.do", { target: "prec", query: candidate }).then((xml) => parsePrecResults(xml, candidate)).catch(() => []),
+      fetchLawGo("lawSearch.do", { target: "expc", query: candidate }).then((xml) => parseExpcResults(xml, candidate)).catch(() => [])
     ]);
 
     const merged = dedupe([...laws, ...interpretations, ...precedents]).slice(0, 10);
@@ -489,7 +605,7 @@ export async function searchLawGoPrecedents(query: string, limit = 4): Promise<S
   const collected: SearchResult[] = [];
   for (const candidate of buildPrecedentQueries(query)) {
     const precedents = await fetchLawGo("lawSearch.do", { target: "prec", query: candidate })
-      .then(parsePrecResults)
+      .then((xml) => parsePrecResults(xml, candidate))
       .catch(() => []);
 
     collected.push(...precedents.map((item) => ({
@@ -558,6 +674,14 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
     const lawKind = readContent(basic.법종구분);
     const promNo = readString(basic, "공포번호");
     const effectiveDate = readString(basic, "시행일자");
+    const lawId = readString(basic, "법령ID");
+    const promDate = readString(basic, "공포일자");
+    const annexRecords = readArrayRecords(readValue(readRecord(law, "별표"), "별표단위"));
+    const revisionRecords = [
+      ...readArrayRecords(readValue(readRecord(law, "개정문"), "개정문단위")),
+      ...readArrayRecords(readValue(readRecord(law, "제개정이유"), "제개정이유단위"))
+    ];
+    const articleSummary = summarizeArticleFields(articles);
     return {
       id,
       type: "law",
@@ -573,7 +697,31 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
       ]),
       sourceLabel: "Law.go 법령",
       sourceSystem: "lawgo",
-      sourceUrl: lawSourceUrl(parsed.raw)
+      sourceUrl: lawSourceUrl(parsed.raw),
+      sourceFields: compactSourceFields({
+        법령명: lawName,
+        법령ID: lawId,
+        MST: parsed.raw,
+        시행일자: effectiveDate,
+        공포일자: promDate,
+        공포번호: promNo,
+        소관부처: department,
+        조문번호: articleSummary.articleNumbers.join(", "),
+        조문제목: articleSummary.articleTitles.join(", "),
+        조문내용: articleSummary.articleContentCount ? `${articleSummary.articleContentCount}개 조문내용 파싱` : undefined,
+        별표: annexRecords.length ? `${annexRecords.length}개 별표 파싱` : undefined,
+        개정이력: revisionRecords.length ? `${revisionRecords.length}개 개정 관련 단위 파싱` : undefined
+      }),
+      filters: buildLawDetailFilters("law", parsed.raw),
+      metadata: buildLawGoMetadata({
+        articleCount: articles.length,
+        articleContentCount: articleSummary.articleContentCount,
+        articleNumbers: articleSummary.articleNumbers,
+        articleTitles: articleSummary.articleTitles,
+        annexCount: annexRecords.length,
+        revisionRecordCount: revisionRecords.length,
+        utilization: "상세 법령 메타데이터는 위험성평가, TBM, 교육 기록의 법령 근거 citation/detail downstream에서 사용할 수 있습니다."
+      })
     };
   }
 
@@ -596,7 +744,20 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
       ]),
       sourceLabel: "Law.go 판례",
       sourceSystem: "lawgo",
-      sourceUrl: "https://www.law.go.kr/"
+      sourceUrl: "https://www.law.go.kr/",
+      sourceFields: compactSourceFields({
+        판례일련번호: parsed.raw,
+        사건명: title,
+        법원명: court,
+        사건번호: caseNumber,
+        선고일자: decisionDate
+      }),
+      filters: buildLawDetailFilters("prec", parsed.raw),
+      metadata: {
+        agency: "법제처",
+        dataName: "법제처 국가법령정보 공유서비스",
+        sourceFieldNames: ["판례일련번호", "사건명", "법원명", "사건번호", "선고일자", "판례내용", "판결요지"]
+      }
     };
   }
 
@@ -621,6 +782,19 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
     ]),
     sourceLabel: "Law.go 해석례",
     sourceSystem: "lawgo",
-    sourceUrl: "https://www.law.go.kr/"
+    sourceUrl: "https://www.law.go.kr/",
+    sourceFields: compactSourceFields({
+      법령해석례일련번호: parsed.raw,
+      안건명: title,
+      해석기관명: agency,
+      질의기관명: questionAgency,
+      회신일자: responseDate
+    }),
+    filters: buildLawDetailFilters("expc", parsed.raw),
+    metadata: {
+      agency: "법제처",
+      dataName: "법제처 국가법령정보 공유서비스",
+      sourceFieldNames: ["법령해석례일련번호", "안건명", "해석기관명", "질의기관명", "회신일자", "질의요지", "회답", "이유"]
+    }
   };
 }
