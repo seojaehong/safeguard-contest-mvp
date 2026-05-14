@@ -28,6 +28,25 @@ const REQUEST_TIMEOUT_MS = 8_000;
 const KOSHA_SMART_SEARCH_URL = "http://apis.data.go.kr/B552468/srch/smartSearch";
 const KOSHA_MEDIA_URL = "https://apis.data.go.kr/B552468/selectMediaList01/getselectMediaList01";
 const KOSHA_CONSTRUCTION_DAILY_URL = "https://apis.data.go.kr/B552468/constDsstr01/getconstDsstr01";
+const KOSHA_MSDS_BASE_URL = "https://apis.data.go.kr/B552468/msdschem";
+const MSDS_DETAIL_SECTIONS = [
+  { code: "01", label: "1. 화학제품과 회사에 관한 정보" },
+  { code: "02", label: "2. 유해성·위험성" },
+  { code: "03", label: "3. 구성성분의 명칭 및 함유량" },
+  { code: "04", label: "4. 응급조치요령" },
+  { code: "05", label: "5. 폭발·화재시 대처방법" },
+  { code: "06", label: "6. 누출사고시 대처방법" },
+  { code: "07", label: "7. 취급 및 저장방법" },
+  { code: "08", label: "8. 노출방지 및 개인보호구" },
+  { code: "09", label: "9. 물리화학적 특성" },
+  { code: "10", label: "10. 안정성 및 반응성" },
+  { code: "11", label: "11. 독성에 관한 정보" },
+  { code: "12", label: "12. 환경에 미치는 영향" },
+  { code: "13", label: "13. 폐기시 주의사항" },
+  { code: "14", label: "14. 운송에 필요한 정보" },
+  { code: "15", label: "15. 법적 규제현황" },
+  { code: "16", label: "16. 그 밖의 참고사항" }
+] as const;
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -37,6 +56,16 @@ function readString(record: JsonRecord, keys: string[]) {
   for (const key of keys) {
     const value = record[key];
     if (typeof value === "string" && value.trim()) return value.trim();
+    if (typeof value === "number") return String(value);
+  }
+  return "";
+}
+
+function firstFilledRecordValue(record: JsonRecord, blockedKeys: string[]) {
+  const blocked = new Set(blockedKeys.map((key) => key.toLowerCase()));
+  for (const [key, value] of Object.entries(record)) {
+    if (blocked.has(key.toLowerCase())) continue;
+    if (typeof value === "string" && value.trim()) return stripMarkup(value).slice(0, 220);
     if (typeof value === "number") return String(value);
   }
   return "";
@@ -143,6 +172,68 @@ function kstDateOffset(days: number) {
 function pickChemicalKeyword(question: string) {
   const candidates = ["톨루엔", "아세톤", "메탄올", "에탄올", "염산", "수산화나트륨", "세척제", "페인트", "신나"];
   return candidates.find((keyword) => question.includes(keyword)) || "";
+}
+
+function msdsIdentifierFields(record: JsonRecord, chemical: string) {
+  const identifiers = compactSourceFields({
+    chemId: readString(record, ["chemId", "chemID", "chem_id", "msdsId", "msds_id"]),
+    chemNo: readString(record, ["chemNo", "chemCd", "chemCode", "chem_code", "msdsNo", "msdsSeq"]),
+    casNo: readString(record, ["casNo", "cas", "casRN", "CASNO"]),
+    chemNm: readString(record, ["chemNm", "chemName", "chemKorNm", "name"]) || chemical,
+    searchWrd: chemical
+  });
+  return identifiers;
+}
+
+function summarizeMsdsDetailRecord(record: JsonRecord) {
+  const title =
+    readString(record, ["title", "itemNm", "chemNm", "prodNm", "항목", "구분"]) ||
+    firstFilledRecordValue(record, ["pageNo", "numOfRows", "totalCount"]);
+  const content =
+    readString(record, ["content", "contents", "cn", "detail", "summary", "value", "data", "내용", "정보"]) ||
+    firstFilledRecordValue(record, ["title", "itemNm", "chemNm", "prodNm", "항목", "구분", "pageNo", "numOfRows", "totalCount"]);
+
+  return stripMarkup([title, content].filter(Boolean).join(" - ")).slice(0, 260);
+}
+
+async function fetchMsdsDetailSections(record: JsonRecord, chemical: string) {
+  const identifiers = msdsIdentifierFields(record, chemical);
+  const sourceFields: Record<string, string> = {};
+  const detailEndpoints: string[] = [];
+  const failures: string[] = [];
+
+  for (const section of MSDS_DETAIL_SECTIONS) {
+    const url = new URL(`${KOSHA_MSDS_BASE_URL}/getChemDetail${section.code}`);
+    url.searchParams.set("serviceKey", serviceKey);
+    url.searchParams.set("pageNo", "1");
+    url.searchParams.set("numOfRows", "3");
+    url.searchParams.set("type", "json");
+    Object.entries(identifiers).forEach(([key, value]) => {
+      if (value) url.searchParams.set(key, value);
+    });
+
+    try {
+      const parsed = parseJsonRecordsWithBody(await fetchText(url.toString()));
+      if (!parsed.records.length) {
+        failures.push(`${section.code}:${parsed.detail}`);
+        continue;
+      }
+      const summary = parsed.records.map(summarizeMsdsDetailRecord).filter(Boolean).slice(0, 2).join(" / ");
+      if (summary) {
+        sourceFields[section.label] = summary;
+        detailEndpoints.push(`/getChemDetail${section.code}`);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      failures.push(`${section.code}:${message.slice(0, 80)}`);
+    }
+  }
+
+  return {
+    sourceFields: compactSourceFields(sourceFields),
+    detailEndpoints,
+    failures
+  };
 }
 
 async function fetchText(url: string) {
@@ -352,18 +443,28 @@ async function fetchMsds(question: string): Promise<KoshaOpenApiFetchResult> {
       const text = await fetchText(url.toString());
       const records = parseXmlItems(text);
       if (records.length) {
-        return records.slice(0, 2).map((record) => {
+        const references: KoshaOpenApiReference[] = [];
+        for (const [index, record] of records.slice(0, 2).entries()) {
           const title = readString(record, ["chemNm", "chemName", "chemKorNm", "name"]) || `MSDS: ${chemical}`;
           const productName = readString(record, ["prodNm", "productNm", "itemNm", "제품명"]);
+          // Detailed MSDS has 16 endpoints. To keep /api/ask responsive, call all sections
+          // for the best candidate and keep the second candidate as list evidence only.
+          const detailSections = index === 0 ? await fetchMsdsDetailSections(record, chemical) : { sourceFields: {}, detailEndpoints: [], failures: [] };
 
-          return {
+          references.push({
             title,
             service: "MSDS" as const,
-            summary: "KOSHA 물질안전보건자료 목록에서 화학물질 정보를 확인했습니다.",
+            summary: detailSections.detailEndpoints.length
+              ? `KOSHA MSDS 목록과 상세 ${detailSections.detailEndpoints.length}개 항목을 확인했습니다.`
+              : "KOSHA 물질안전보건자료 목록에서 화학물질 정보를 확인했습니다.",
             url: "https://apis.data.go.kr/B552468/msdschem/getChemList",
             reflectedIn: ["위험성평가표", "안전보건교육 기록", "비상대응 절차"],
             metadata: {
-              usedFields: ["화학물질명", "제품명", "유해성·위험성", "구성성분", "응급조치요령", "폭발·화재시 대처방법", "누출사고시 대처방법", "취급 및 저장방법", "노출방지 및 개인보호구", "법적 규제현황"],
+              usedFields: [
+                "화학물질명",
+                "제품명",
+                ...MSDS_DETAIL_SECTIONS.map((section) => section.label)
+              ],
               sourceFields: compactSourceFields({
                 "화학물질명": title,
                 "제품명": productName,
@@ -374,12 +475,20 @@ async function fetchMsds(question: string): Promise<KoshaOpenApiFetchResult> {
                 "누출사고시 대처방법": readString(record, ["leakResponse", "accidentalRelease", "누출사고시대처방법"]),
                 "취급 및 저장방법": readString(record, ["handlingStorage", "handlingAndStorage", "취급및저장방법"]),
                 "노출방지 및 개인보호구": readString(record, ["ppe", "exposureControls", "personalProtection", "노출방지및개인보호구"]),
-                "법적 규제현황": readString(record, ["regulation", "legalRegulation", "법적규제현황"])
+                "법적 규제현황": readString(record, ["regulation", "legalRegulation", "법적규제현황"]),
+                ...detailSections.sourceFields,
+                "MSDS 상세 호출": detailSections.detailEndpoints.join(", "),
+                "MSDS 상세 미응답": detailSections.failures.slice(0, 4).join(" | ")
               }),
-              filters
+              filters: {
+                ...filters,
+                detailEndpoints: detailSections.detailEndpoints.join(", ") || "not-returned",
+                detailSectionCount: String(detailSections.detailEndpoints.length)
+              }
             }
-          };
-        });
+          });
+        }
+        return references;
       }
       details.push(`${param}: 응답 항목 없음`);
     } catch (error) {

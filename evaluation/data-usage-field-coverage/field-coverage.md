@@ -23,10 +23,10 @@
 | KOSHA 국내재해사례 | partial | `lib/accident-cases.ts`, `lib/search.ts` | 유사 재해사례 후보와 예방 포인트 보조 반영 |
 | KOSHA 사고사망/건설업 일별 중대재해 | partial | `lib/accident-cases.ts`, `lib/kosha-openapi.ts` | 사고사망 게시판과 건설업 일별 중대재해를 분리 설명 |
 | KOSHA 안전보건법령 스마트검색 | pass | `lib/kosha-openapi.ts`, `lib/search.ts` | 검색결과 제목·분류·요약·링크 확인 가능 |
-| KOSHA MSDS | partial | `lib/kosha-openapi.ts`, `lib/search.ts` | 화학 키워드 조건부 후보, 응답에 있는 필드만 보존 |
+| KOSHA MSDS | pass_with_notice | `lib/kosha-openapi.ts`, `lib/search.ts` | 목록 후보 + 대표 후보의 getChemDetail01~16 상세 호출 결과를 보존. API 미응답 항목은 미응답 사유로 분리 |
 | 기상청 단기예보 | pass | `lib/weather.ts`, `lib/search.ts` | 기상 신호와 작업중지·TBM 문구에 직접 연결 |
-| 기상청 기상특보 | partial | `lib/weather.ts`, `lib/search.ts` | 발효·해제시각은 not-yet-used로 낮춤 |
-| 법제처 국가법령정보 | partial | `lib/lawgo.ts`, `lib/search.ts` | 별표·개정이력은 not-yet-used로 분리 |
+| 기상청 기상특보 | pass_with_notice | `lib/weather.ts`, `lib/search.ts` | 발표·발효·해제시각 후보를 sourceFields로 보존. 해제시각 미제공 특보는 빈 필드로 유지 |
+| 법제처 국가법령정보 | pass_with_notice | `lib/lawgo.ts`, `lib/search.ts` | 조문 전문과 함께 별표/서식·개정이력 요약을 상세 metadata/sourceFields로 보존 |
 
 ## New Metadata Exposed By Other Workers
 
@@ -151,8 +151,8 @@
 | 특보구역 | parsed-output, document-context, UI/evidence | `stnNm` 지역 필터와 summary |
 | 특보종류 | parsed-output, document-context, UI/evidence | `wrn`을 sourceFields로 보존 |
 | 특보수준 | parsed-output, document-context, UI/evidence | `lvl`을 sourceFields로 보존 |
-| 발효시각 | not-yet-used | 현재 직접 파싱 필드 없음 |
-| 해제시각 | not-yet-used | 현재 직접 파싱 필드 없음 |
+| 발효시각 | parsed-output, UI/evidence | `tmEf` 우선, 없으면 `tmFc`를 대체 발효시각 후보로 sourceFields에 보존 |
+| 해제시각 | parsed-output, UI/evidence | `tmEnd`, `tmEd`, `endTm`, `releaseTime` 후보를 sourceFields에 보존. 응답이 없으면 빈 값으로 유지 |
 | 특보명령 | parsed-output, UI/evidence | `cmd`를 sourceFields로 보존 |
 
 ### 법제처 국가법령정보
@@ -170,8 +170,8 @@
 | 조문번호 | parsed-output, document-context | 상세 조문 heading 구성 |
 | 조문제목 | parsed-output, document-context | 상세 조문 heading 구성 |
 | 조문내용 | parsed-output, document-context | 법령 상세 body와 문서 근거 |
-| 별표 | not-yet-used | 현재 상세 파서에서 별표 분기 확인 안 됨 |
-| 개정이력 | not-yet-used | 현재 상세 파서에서 개정이력 분기 확인 안 됨 |
+| 별표 | parsed-output, UI/evidence | 상세 응답의 `별표/별표단위`를 읽어 개수와 `별표목록` 요약을 보존 |
+| 개정이력 | parsed-output, UI/evidence | 상세 응답의 `개정문/제개정이유` 단위를 읽어 개수와 `개정이력요약`을 보존 |
 
 ## Submission Guardrails
 

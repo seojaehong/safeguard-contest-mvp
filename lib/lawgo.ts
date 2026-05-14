@@ -316,6 +316,39 @@ function summarizeArticleFields(articleUnits: JsonRecord[]) {
   };
 }
 
+function readFirstString(record: JsonRecord, keys: string[]) {
+  for (const key of keys) {
+    const value = readString(record, key);
+    if (value.trim()) return normalizeLawText(value);
+  }
+  return "";
+}
+
+function summarizeLawAnnexRecords(records: JsonRecord[]) {
+  return records
+    .map((record, index) => {
+      const title = readFirstString(record, ["별표제목", "별표명", "서식명", "별표서식명", "제목", "명칭"]);
+      const number = readFirstString(record, ["별표번호", "별표가지번호", "서식번호", "번호"]);
+      const fileName = readFirstString(record, ["별표PDF파일명", "별표HWP파일명", "파일명"]);
+      const label = compact([number ? `번호 ${number}` : undefined, title || `별표/서식 ${index + 1}`, fileName ? `파일 ${fileName}` : undefined]).join(" · ");
+      return label.slice(0, 180);
+    })
+    .filter(Boolean)
+    .slice(0, 8);
+}
+
+function summarizeLawRevisionRecords(records: JsonRecord[]) {
+  return records
+    .map((record, index) => {
+      const reason = readFirstString(record, ["제개정이유내용", "개정이유", "이유", "개정문내용", "내용"]);
+      const date = readFirstString(record, ["공포일자", "시행일자", "개정일자"]);
+      const title = readFirstString(record, ["제목", "개정문제목", "제개정이유제목"]);
+      return compact([date, title || `개정 관련 단위 ${index + 1}`, reason]).join(" · ").slice(0, 220);
+    })
+    .filter(Boolean)
+    .slice(0, 8);
+}
+
 function buildLawFallbackDetail(id: string, raw: string): DetailRecord {
   return {
     id,
@@ -682,6 +715,8 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
       ...readArrayRecords(readValue(readRecord(law, "제개정이유"), "제개정이유단위"))
     ];
     const articleSummary = summarizeArticleFields(articles);
+    const annexSummaries = summarizeLawAnnexRecords(annexRecords);
+    const revisionSummaries = summarizeLawRevisionRecords(revisionRecords);
     return {
       id,
       type: "law",
@@ -692,6 +727,8 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
       points: compact([
         department ? `소관부처 ${department}` : undefined,
         effectiveDate ? `시행일 ${effectiveDate}` : undefined,
+        annexSummaries.length ? `별표·서식 확인: ${annexSummaries.slice(0, 2).join(" / ")}` : undefined,
+        revisionSummaries.length ? `개정이력 확인: ${revisionSummaries.slice(0, 2).join(" / ")}` : undefined,
         "위험성평가·TBM·안전보건교육 기록의 반영 근거로 사용",
         "법률 검토 최종 의견이 아니라 현장 문서 초안 작성 보조 근거"
       ]),
@@ -710,7 +747,9 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
         조문제목: articleSummary.articleTitles.join(", "),
         조문내용: articleSummary.articleContentCount ? `${articleSummary.articleContentCount}개 조문내용 파싱` : undefined,
         별표: annexRecords.length ? `${annexRecords.length}개 별표 파싱` : undefined,
-        개정이력: revisionRecords.length ? `${revisionRecords.length}개 개정 관련 단위 파싱` : undefined
+        별표목록: annexSummaries.join(" | "),
+        개정이력: revisionRecords.length ? `${revisionRecords.length}개 개정 관련 단위 파싱` : undefined,
+        개정이력요약: revisionSummaries.join(" | ")
       }),
       filters: buildLawDetailFilters("law", parsed.raw),
       metadata: buildLawGoMetadata({
@@ -719,7 +758,9 @@ export async function getDetail(id: string): Promise<DetailRecord | null> {
         articleNumbers: articleSummary.articleNumbers,
         articleTitles: articleSummary.articleTitles,
         annexCount: annexRecords.length,
+        annexSummaries,
         revisionRecordCount: revisionRecords.length,
+        revisionSummaries,
         utilization: "상세 법령 메타데이터는 위험성평가, TBM, 교육 기록의 법령 근거 citation/detail downstream에서 사용할 수 있습니다."
       })
     };

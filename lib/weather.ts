@@ -63,6 +63,11 @@ type KmaSignal = {
 type WeatherWarningItem = {
   title?: string;
   tmFc?: string;
+  tmEf?: string;
+  tmEnd?: string;
+  tmEd?: string;
+  endTm?: string;
+  releaseTime?: string;
   stnId?: string;
   stnNm?: string;
   wrn?: string;
@@ -523,6 +528,8 @@ async function fetchWarningSignal(location: LocationConfig): Promise<KmaSignal> 
       return !item.stnNm || haystack.includes(location.label) || haystack.includes("전국");
     });
     const picked = relevant[0] || items[0];
+    const effectiveTime = picked?.tmEf || picked?.tmFc;
+    const releaseTime = picked?.tmEnd || picked?.tmEd || picked?.endTm || picked?.releaseTime;
 
     return {
       endpoint: "기상특보",
@@ -533,6 +540,8 @@ async function fetchWarningSignal(location: LocationConfig): Promise<KmaSignal> 
       forecastTime: picked?.tmFc,
       sourceFields: compactSourceFields({
         발표시각: picked?.tmFc,
+        발효시각: effectiveTime,
+        해제시각: releaseTime,
         특보구역: picked?.stnNm,
         특보종류: picked?.wrn,
         특보수준: picked?.lvl,
@@ -550,7 +559,7 @@ async function fetchWarningSignal(location: LocationConfig): Promise<KmaSignal> 
       metadata: {
         agency: "기상청",
         dataName: "기상청_기상특보 조회서비스",
-        sourceFieldNames: ["발표시각", "특보구역", "특보종류", "특보수준", "발효시각/해제시각 후보", "wrn", "lvl", "cmd"]
+        sourceFieldNames: ["발표시각", "발효시각", "해제시각", "특보구역", "특보종류", "특보수준", "wrn", "lvl", "cmd"]
       },
       detail: picked
         ? `기상청 기상특보 조회 성공 (${picked.stnNm || "전국"}, ${picked.tmFc || "발표시각 미표기"})`
