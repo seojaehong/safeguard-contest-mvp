@@ -24,7 +24,7 @@ type FetchOptions = {
 const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY?.trim() || process.env.PUBLIC_DATA_API_KEY?.trim() || "";
 const proxyUrl = process.env.KOSHA_ACCIDENT_PROXY_URL?.trim() || "";
 const proxyToken = process.env.KOSHA_ACCIDENT_PROXY_TOKEN?.trim() || "";
-const REQUEST_TIMEOUT_MS = 20_000;
+const REQUEST_TIMEOUT_MS = 5_000;
 const RETRY_COUNT = 1;
 const FALLBACK_SOURCE_URL = "https://www.kosha.or.kr/kosha/data/industrialAccidentStatus.do";
 

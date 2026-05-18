@@ -7,7 +7,7 @@ type VerifiedOfficialResource = OfficialSafetyResource & {
   verified?: boolean;
 };
 
-const REQUEST_TIMEOUT_MS = 20_000;
+const REQUEST_TIMEOUT_MS = 5_000;
 const RETRY_COUNT = 1;
 
 async function wait(ms: number) {

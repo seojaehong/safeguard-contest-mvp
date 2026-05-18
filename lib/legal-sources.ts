@@ -3,7 +3,7 @@ import { getKoreanLawMcpDetail, getKoreanLawMcpStatus, isKoreanLawMcpId, searchK
 import { mockSearchResults } from "./mock-data";
 import { DetailRecord, SearchResult } from "./types";
 
-const SEARCH_TIMEOUT_MS = 20_000;
+const SEARCH_TIMEOUT_MS = 5_000;
 const RETRY_DELAY_MS = 400;
 
 async function wait(ms: number) {

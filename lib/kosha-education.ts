@@ -33,7 +33,7 @@ type KoshaEduApiResponse = {
 
 const BASE_URL = "https://edu.kosha.or.kr";
 const API_BASE = `${BASE_URL}/api/portal24/bizG/p/GETEA02001`;
-const TIMEOUT_MS = 20_000;
+const TIMEOUT_MS = 5_000;
 
 function hasAny(value: string, keywords: string[]) {
   return keywords.some((keyword) => value.includes(keyword));
