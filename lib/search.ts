@@ -765,13 +765,46 @@ export type RunAskOptions = {
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
   const requestedMode: AiMode = options.aiMode || ((process.env.AI_MODE_DEFAULT as AiMode | undefined) || "template");
   const aiMode: AiMode = ["template", "enhanced", "full"].includes(requestedMode) ? requestedMode : "template";
+
+  // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
+  if (aiMode === "template") {
+    return buildMockAskResponse(
+      question,
+      mockSearchResults.slice(0, 4),
+      "mock",
+      "AI_MODE=template (템플릿 본문 사용, 외부 호출 없음)"
+    );
+  }
+
   try {
     const accidentCasesPromise = fetchAccidentCases(question, {
       requestTimeoutMs: 5_000,
       retryCount: 0,
       budgetLabel: "KOSHA accident case enrichment budget"
     });
+
+    // Fix 3: chain rawCitations → enhance → generateAnswer as chained promises
+    // so they run in parallel with the other external fetches below.
     const rawCitationsPromise = searchLegalSources(question);
+    const citationsPromise = rawCitationsPromise.then(async (raw) => {
+      const base = raw.length ? raw : await searchLegalSources("산업안전보건법");
+      return enhanceLegalEvidenceMappings(question, base).catch((error) => {
+        console.error("AI legal evidence mapping failed; using original legal evidence order", error);
+        return base;
+      });
+    });
+    const responsePromise = citationsPromise.then((citations) =>
+      generateAnswer(question, citations.slice(0, 6)).catch((error) => {
+        const message = error instanceof Error ? error.message : String(error);
+        return buildMockAskResponse(
+          question,
+          citations.slice(0, 6),
+          "fallback",
+          `AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다. 사유: ${message}`
+        );
+      })
+    );
+
     const weatherPromise = fetchWeatherSignal(question);
     const trainingPromise = fetchTrainingRecommendations(question);
     const koshaEducationPromise = fetchKoshaEducationRecommendations(question);
@@ -829,31 +862,70 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       };
     })();
 
-    const rawCitations = await rawCitationsPromise;
-    const baseCitations = rawCitations.length ? rawCitations : await searchLegalSources("산업안전보건법");
-    const citations = await enhanceLegalEvidenceMappings(question, baseCitations).catch((error) => {
-      console.error("AI legal evidence mapping failed; using original legal evidence order", error);
-      return baseCitations;
-    });
-    const responsePromise = generateAnswer(question, citations.slice(0, 6)).catch((error) => {
-      const message = error instanceof Error ? error.message : String(error);
-      return buildMockAskResponse(
-        question,
-        citations.slice(0, 6),
-        "fallback",
-        `AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다. 사유: ${message}`
-      );
-    });
-    const [weather, training, koshaEducation, kosha, koshaOpenApi, accidentCases, response, safetyReference] = await Promise.all([
-      weatherPromise,
-      trainingPromise,
-      koshaEducationPromise,
-      koshaPromise,
-      koshaOpenApiPromise,
-      accidentCasesPromise,
-      responsePromise,
-      safetyReferencePromise
+    // Fix 2: Promise.allSettled — one hanging branch no longer blocks the whole batch.
+    // Fix 3 completes: citationsPromise + responsePromise are now in the same batch.
+    const weatherFallback: Awaited<ReturnType<typeof fetchWeatherSignal>> = {
+      source: "kma",
+      mode: "fallback",
+      locationLabel: "알 수 없음",
+      summary: "기상 정보를 가져오지 못했습니다.",
+      actions: [],
+      detail: "기상청 API 호출 실패",
+      signals: []
+    };
+    const trainingFallback: Awaited<ReturnType<typeof fetchTrainingRecommendations>> = {
+      source: "work24",
+      mode: "fallback",
+      detail: "고용24 교육 정보를 가져오지 못했습니다.",
+      recommendations: []
+    };
+    const koshaEducationFallback: Awaited<ReturnType<typeof fetchKoshaEducationRecommendations>> = {
+      source: "kosha-edu",
+      mode: "fallback",
+      detail: "KOSHA 교육포털 정보를 가져오지 못했습니다.",
+      recommendations: []
+    };
+    const koshaFallback: Awaited<ReturnType<typeof fetchKoshaReferences>> = {
+      source: "kosha",
+      mode: "fallback",
+      detail: "KOSHA 공식자료 확인에 실패했습니다.",
+      references: []
+    };
+    const koshaOpenApiFallback: Awaited<ReturnType<typeof fetchKoshaOpenApiEvidence>> = {
+      source: "kosha-openapi",
+      mode: "fallback",
+      detail: "KOSHA OpenAPI 호출에 실패했습니다.",
+      references: []
+    };
+    const accidentCasesFallback: Awaited<ReturnType<typeof fetchAccidentCases>> = {
+      source: "kosha-accident",
+      mode: "fallback",
+      detail: "KOSHA 사고사례 호출에 실패했습니다.",
+      cases: []
+    };
+    const safetyReferenceFallback = { ...emptyResult, message: "Supabase 안전 지식 DB 호출 실패" };
+
+    const allResults = await Promise.allSettled([
+      weatherPromise,         // 0
+      trainingPromise,        // 1
+      koshaEducationPromise,  // 2
+      koshaPromise,           // 3
+      koshaOpenApiPromise,    // 4
+      accidentCasesPromise,   // 5
+      responsePromise,        // 6
+      safetyReferencePromise, // 7
+      citationsPromise        // 8
     ]);
+
+    const weather = allResults[0].status === "fulfilled" ? allResults[0].value : (console.warn("weatherPromise failed", (allResults[0] as PromiseRejectedResult).reason), weatherFallback);
+    const training = allResults[1].status === "fulfilled" ? allResults[1].value : (console.warn("trainingPromise failed", (allResults[1] as PromiseRejectedResult).reason), trainingFallback);
+    const koshaEducation = allResults[2].status === "fulfilled" ? allResults[2].value : (console.warn("koshaEducationPromise failed", (allResults[2] as PromiseRejectedResult).reason), koshaEducationFallback);
+    const kosha = allResults[3].status === "fulfilled" ? allResults[3].value : (console.warn("koshaPromise failed", (allResults[3] as PromiseRejectedResult).reason), koshaFallback);
+    const koshaOpenApi = allResults[4].status === "fulfilled" ? allResults[4].value : (console.warn("koshaOpenApiPromise failed", (allResults[4] as PromiseRejectedResult).reason), koshaOpenApiFallback);
+    const accidentCases = allResults[5].status === "fulfilled" ? allResults[5].value : (console.warn("accidentCasesPromise failed", (allResults[5] as PromiseRejectedResult).reason), accidentCasesFallback);
+    const response = allResults[6].status === "fulfilled" ? allResults[6].value : (console.warn("responsePromise failed", (allResults[6] as PromiseRejectedResult).reason), buildMockAskResponse(question, mockSearchResults.slice(0, 4), "fallback", "AI 응답 생성 실패"));
+    const safetyReference = allResults[7].status === "fulfilled" ? allResults[7].value : (console.warn("safetyReferencePromise failed", (allResults[7] as PromiseRejectedResult).reason), safetyReferenceFallback);
+    const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (console.warn("citationsPromise failed", (allResults[8] as PromiseRejectedResult).reason), mockSearchResults.slice(0, 4));
     const koreanLawMcpCount = citations.filter((item) => item.sourceSystem === "korean-law-mcp").length;
     const sourceMix = summarizeLegalSourceMix(citations);
     const legalEvidenceMode = inferLegalEvidenceMode(sourceMix);

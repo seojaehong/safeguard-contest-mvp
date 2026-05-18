@@ -216,7 +216,7 @@ const weatherCache = new Map<string, {
   value: WeatherSignal;
 }>();
 
-const KMA_TIMEOUT_MS = 20_000;
+const KMA_TIMEOUT_MS = 5_000;
 const KMA_RETRY_COUNT = 1;
 
 const locationMap: Array<{ keywords: string[]; config: LocationConfig }> = [
