@@ -3,6 +3,7 @@ import { runAsk } from "@/lib/search";
 import type { AiMode } from "@/lib/ai-deliverables";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300; // 5min — Pro plan max; 7-way parallel Vertex calls need headroom
 
 const ALLOWED_MODES: AiMode[] = ["template", "enhanced", "full"];
 
