@@ -40,7 +40,7 @@ const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-
   .filter(Boolean);
 // Per-call timeout for ai-deliverables parallel calls (7-way parallel).
 // Shorter than ai.ts because these are isolated per-doc calls.
-const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_DELIVERABLES_TIMEOUT_MS || process.env.GEMINI_TIMEOUT_MS || "8000", 10);
+const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_DELIVERABLES_TIMEOUT_MS || process.env.GEMINI_TIMEOUT_MS || "25000", 10);
 
 function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);

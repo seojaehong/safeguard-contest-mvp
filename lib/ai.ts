@@ -10,8 +10,8 @@ const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-
   .split(",")
   .map((model) => model.trim())
   .filter(Boolean);
-const RESPONSE_TIMEOUT_MS = 20_000;
-const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "8000", 10);
+const RESPONSE_TIMEOUT_MS = 10_000;
+const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "25000", 10);
 const RETRY_DELAY_MS = 500;
 
 function isVertexConfigured(): boolean {
@@ -69,23 +69,23 @@ async function generateWithOpenAI(prompt: string) {
         RESPONSE_TIMEOUT_MS,
         "OpenAI response"
       ),
-    2,
+    1,
     "OpenAI response"
   );
 
   return {
     answer: response.output_text || "답변을 생성하지 못했습니다.",
     providerLabel: "OpenAI",
-    policyNote: "OpenAI 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
+    policyNote: `OpenAI 응답은 timeout ${RESPONSE_TIMEOUT_MS}ms, retry 없음, 실패 시 graceful fallback 정책을 따릅니다.`
   };
 }
 
 async function generateWithGeminiModel(prompt: string, model: string) {
   // generateWithVertex handles its own timeout internally (Promise.race).
-  // We keep one retry here for transient network/empty-response errors.
+  // 1 attempt only — retry doubles wall time, which defeats the timeout budget.
   const answer = await withRetry(
     () => generateWithVertex(model, prompt, { timeoutMs: GEMINI_TIMEOUT_MS }),
-    2,
+    1,
     `Vertex AI response (${model})`
   );
 

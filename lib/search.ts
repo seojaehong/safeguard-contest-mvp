@@ -783,22 +783,28 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       budgetLabel: "KOSHA accident case enrichment budget"
     });
 
-    // Fix 3: chain rawCitations → enhance → generateAnswer as chained promises
-    // so they run in parallel with the other external fetches below.
+    // Fix 5: decouple enhance and generateAnswer — both branch off rawCitations in parallel.
+    // enhanceLegalEvidenceMappings is a quality add-on (AI reorders citations); it no longer
+    // gates generateAnswer. generateAnswer starts as soon as raw citations arrive.
+    // citationsPromise resolves to enhanced citations when available (best-effort).
     const rawCitationsPromise = searchLegalSources(question);
-    const citationsPromise = rawCitationsPromise.then(async (raw) => {
-      const base = raw.length ? raw : await searchLegalSources("산업안전보건법");
-      return enhanceLegalEvidenceMappings(question, base).catch((error) => {
+    const rawCitationsBasePromise = rawCitationsPromise.then(async (raw) =>
+      raw.length ? raw : searchLegalSources("산업안전보건법")
+    );
+    // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.
+    const citationsPromise = rawCitationsBasePromise.then((base) =>
+      enhanceLegalEvidenceMappings(question, base).catch((error) => {
         console.error("AI legal evidence mapping failed; using original legal evidence order", error);
         return base;
-      });
-    });
-    const responsePromise = citationsPromise.then((citations) =>
-      generateAnswer(question, citations.slice(0, 6)).catch((error) => {
+      })
+    );
+    // generateAnswer uses raw citations directly — no longer waits for enhance.
+    const responsePromise = rawCitationsBasePromise.then((rawBase) =>
+      generateAnswer(question, rawBase.slice(0, 6)).catch((error) => {
         const message = error instanceof Error ? error.message : String(error);
         return buildMockAskResponse(
           question,
-          citations.slice(0, 6),
+          rawBase.slice(0, 6),
           "fallback",
           `AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다. 사유: ${message}`
         );
