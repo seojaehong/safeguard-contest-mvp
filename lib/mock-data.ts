@@ -505,7 +505,7 @@ function format4mLine(hazard: string) {
   return `   - 4M 체크: ${checks.map(([label, status]) => `${label}:${status === "중점" ? "■" : "□"}`).join(" ")} / 중점 확인: ${checks.filter(([, status]) => status === "중점").map(([label]) => label).join(", ") || "현장 확인"}`;
 }
 
-function inferScenario(question: string) {
+export function inferScenario(question: string) {
   const normalized = question.trim() || defaultQuestion;
   const workerCount = inferWorkerCount(normalized);
   const profile = pickScenarioProfile(normalized);

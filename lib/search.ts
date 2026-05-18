@@ -1,6 +1,6 @@
 import { AskResponse, type PermitInspectionStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
-import { buildMockAskResponse, mockSearchResults } from "./mock-data";
+import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import { searchSafetyReferences, type SafetyReferenceItem } from "./safety-reference-catalog";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
@@ -869,20 +869,29 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     })();
 
     // Fix 6: Start deliverables generation as a Promise BEFORE awaiting allSettled.
-    // It chains off the individual source Promises so it runs in parallel with
-    // weather/training/kosha fetches — not sequentially after them.
+    // Scenario is derived synchronously from the question (inferScenario is pure).
+    // We chain off rawCitationsBasePromise/weather/training/kosha/accident so the
+    // deliverables Vertex calls start as soon as those resolve (~2-5s), running
+    // fully in parallel with responsePromise's Vertex call.
+    const earlyScenario = inferScenario(question);
+    const earlyScenarioParsed = {
+      companyName: earlyScenario.companyName,
+      companyType: earlyScenario.companyType,
+      siteName: earlyScenario.siteName,
+      workSummary: earlyScenario.workSummary,
+      workerCount: earlyScenario.workerCount,
+      weatherNote: earlyScenario.weatherNote
+    };
     const deliverablesPromise: Promise<{ deliverables: Awaited<ReturnType<typeof generateAllDeliverables>>; diagnostics: Awaited<ReturnType<typeof generateAllDeliverablesWithDiagnostics>>["diagnostics"] } | null> =
       (aiMode === "enhanced" || aiMode === "full")
         ? Promise.all([
-            responsePromise.catch(() => null),
             rawCitationsBasePromise.catch(() => [] as Awaited<ReturnType<typeof searchLegalSources>>),
             weatherPromise.catch(() => null),
             trainingPromise.catch(() => null),
             koshaPromise.catch(() => null),
             accidentCasesPromise.catch(() => null),
             safetyReferencePromise.catch(() => null),
-          ]).then(([resp, rawBase, wthr, trng, ksha, acc, safeRef]) => {
-            if (!resp) return null;
+          ]).then(([rawBase, wthr, trng, ksha, acc, safeRef]) => {
             const safeRefItems = safeRef?.items ?? [];
             const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
             const koshaPrimaryRefsEarly = compressed
@@ -896,7 +905,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             const trainingLinesEarly = (trng?.recommendations ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
             const accidentLinesEarly = (acc?.cases ?? []).slice(0, 5).map((c, i) => `${i + 1}. ${c.title} | ${c.preventionPoint}`);
             return generateAllDeliverablesWithDiagnostics({
-              scenario: resp.scenario,
+              scenario: earlyScenarioParsed,
               question,
               citations: rawBase.slice(0, 6),
               weatherSummary: wthr?.summary,
