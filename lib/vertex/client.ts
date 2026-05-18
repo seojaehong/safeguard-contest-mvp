@@ -18,11 +18,12 @@ function getVertexClient(): VertexAI {
   const credentials = JSON.parse(jsonStr) as Record<string, unknown>;
   cached = new VertexAI({
     project: process.env.GCP_PROJECT_ID ?? "",
-    location: process.env.GCP_REGION ?? "asia-northeast3",
+    location: process.env.GCP_REGION ?? "us-central1",
     googleAuthOptions: { credentials },
   });
   return cached;
 }
+
 
 export type GenerateWithVertexOptions = {
   generationConfig?: GenerationConfig;
