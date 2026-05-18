@@ -868,6 +868,53 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       };
     })();
 
+    // Fix 6: Start deliverables generation as a Promise BEFORE awaiting allSettled.
+    // It chains off the individual source Promises so it runs in parallel with
+    // weather/training/kosha fetches — not sequentially after them.
+    const deliverablesPromise: Promise<{ deliverables: Awaited<ReturnType<typeof generateAllDeliverables>>; diagnostics: Awaited<ReturnType<typeof generateAllDeliverablesWithDiagnostics>>["diagnostics"] } | null> =
+      (aiMode === "enhanced" || aiMode === "full")
+        ? Promise.all([
+            responsePromise.catch(() => null),
+            rawCitationsBasePromise.catch(() => [] as Awaited<ReturnType<typeof searchLegalSources>>),
+            weatherPromise.catch(() => null),
+            trainingPromise.catch(() => null),
+            koshaPromise.catch(() => null),
+            accidentCasesPromise.catch(() => null),
+            safetyReferencePromise.catch(() => null),
+          ]).then(([resp, rawBase, wthr, trng, ksha, acc, safeRef]) => {
+            if (!resp) return null;
+            const safeRefItems = safeRef?.items ?? [];
+            const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
+            const koshaPrimaryRefsEarly = compressed
+              .filter((c) => c.kind === "kosha-support-regulation" || c.kind === "kosha-guideline")
+              .slice(0, 4)
+              .map((c) => ({ kindLabel: c.kindLabel, title: c.title, sentence: c.documentSentence }));
+            const koshaLinesEarly = [
+              ...(ksha?.references ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`),
+              ...compressed.slice(0, 5).map((c, i) => `${Math.min(5, (ksha?.references ?? []).length) + i + 1}. [${c.kindLabel}] ${c.title} | 반영: ${c.reflectsDocuments.join("·") || "-"} | ${c.documentSentence}`)
+            ].slice(0, 12);
+            const trainingLinesEarly = (trng?.recommendations ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
+            const accidentLinesEarly = (acc?.cases ?? []).slice(0, 5).map((c, i) => `${i + 1}. ${c.title} | ${c.preventionPoint}`);
+            return generateAllDeliverablesWithDiagnostics({
+              scenario: resp.scenario,
+              question,
+              citations: rawBase.slice(0, 6),
+              weatherSummary: wthr?.summary,
+              trainingLines: trainingLinesEarly,
+              koshaLines: koshaLinesEarly,
+              accidentLines: accidentLinesEarly,
+              koshaPrimaryRefs: koshaPrimaryRefsEarly,
+              scope: aiMode === "full" ? "full" : "enhanced"
+            }).catch((error) => {
+              console.error("AI deliverable generation failed (parallel path); falling back to template bodies", error);
+              return null;
+            });
+          }).catch((error) => {
+            console.error("deliverablesPromise setup failed", error);
+            return null;
+          })
+        : Promise.resolve(null);
+
     // Fix 2: Promise.allSettled — one hanging branch no longer blocks the whole batch.
     // Fix 3 completes: citationsPromise + responsePromise are now in the same batch.
     const weatherFallback: Awaited<ReturnType<typeof fetchWeatherSignal>> = {
@@ -920,7 +967,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       accidentCasesPromise,   // 5
       responsePromise,        // 6
       safetyReferencePromise, // 7
-      citationsPromise        // 8
+      citationsPromise,       // 8
+      deliverablesPromise     // 9 — runs in parallel with the above
     ]);
 
     const weather = allResults[0].status === "fulfilled" ? allResults[0].value : (console.warn("weatherPromise failed", (allResults[0] as PromiseRejectedResult).reason), weatherFallback);
@@ -932,6 +980,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const response = allResults[6].status === "fulfilled" ? allResults[6].value : (console.warn("responsePromise failed", (allResults[6] as PromiseRejectedResult).reason), buildMockAskResponse(question, mockSearchResults.slice(0, 4), "fallback", "AI 응답 생성 실패"));
     const safetyReference = allResults[7].status === "fulfilled" ? allResults[7].value : (console.warn("safetyReferencePromise failed", (allResults[7] as PromiseRejectedResult).reason), safetyReferenceFallback);
     const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (console.warn("citationsPromise failed", (allResults[8] as PromiseRejectedResult).reason), mockSearchResults.slice(0, 4));
+    const deliverablesResult = allResults[9].status === "fulfilled" ? allResults[9].value : (console.warn("deliverablesPromise failed", (allResults[9] as PromiseRejectedResult).reason), null);
     const koreanLawMcpCount = citations.filter((item) => item.sourceSystem === "korean-law-mcp").length;
     const sourceMix = summarizeLegalSourceMix(citations);
     const legalEvidenceMode = inferLegalEvidenceMode(sourceMix);
@@ -999,35 +1048,22 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       ...safetyReferenceCompressed.slice(0, 5).map((c, i) => `${kosha.references.slice(0, 5).length + i + 1}. [${c.kindLabel}] ${c.title} | 반영: ${c.reflectsDocuments.join("·") || "-"} | ${c.documentSentence}`)
     ].slice(0, 12);
 
+    // Fix 6 continued: consume deliverables from the parallel Promise (allResults[9]).
     let aiBodies: Awaited<ReturnType<typeof generateAllDeliverables>> = {};
     let aiModeAppliedDetail = "AI_MODE=template (템플릿 본문 사용)";
     if (aiMode === "enhanced" || aiMode === "full") {
-      try {
-        // Diagnostics 변형으로 그룹별 성공/실패 사유까지 status.detail에 노출.
-        // 가온테크 검수에서 free 그룹 0/4 채움 원인을 본 적 있어 트래킹 강화.
-        const { deliverables, diagnostics } = await generateAllDeliverablesWithDiagnostics({
-          scenario: response.scenario,
-          question,
-          citations: citations.slice(0, 6),
-          weatherSummary: weather.summary,
-          trainingLines: trainingLinesCtx,
-          koshaLines: koshaLinesCtx,
-          accidentLines,
-          koshaPrimaryRefs,
-          scope: aiMode === "full" ? "full" : "enhanced"
-        });
+      if (deliverablesResult) {
+        const { deliverables, diagnostics } = deliverablesResult;
         aiBodies = deliverables;
         const filled = Object.keys(aiBodies);
         const groupBrief = diagnostics.groupResults
           .map((g) => {
             if (g.status === "rejected") return `${g.group}=fail(${(g.reason || "").slice(0, 60)})`;
-            // fulfilled: but reason may be "json parse failed" — surface it
             return `${g.group}=${g.reason ? `fulfilled-${(g.reason || "").slice(0, 30)}` : "ok"}`;
           })
           .join(" ");
         aiModeAppliedDetail = `AI_MODE=${aiMode} (Gemini 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"}) [${groupBrief}]`;
-      } catch (error) {
-        console.error("AI deliverable generation failed; falling back to template bodies", error);
+      } else {
         aiModeAppliedDetail = `AI_MODE=${aiMode} 실패 → 템플릿 fallback`;
       }
     }
