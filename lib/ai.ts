@@ -106,6 +106,8 @@ async function generateWithGemini(prompt: string) {
     } catch (error) {
       lastError = error;
       console.error(`Gemini model failed: ${model}`, error);
+      // Skip fallback models on timeout — they are unlikely to respond faster.
+      if (error instanceof Error && /timeout/i.test(error.message)) break;
     }
   }
 

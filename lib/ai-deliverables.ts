@@ -90,6 +90,9 @@ async function callGemini(prompt: string): Promise<string> {
     } catch (error) {
       lastError = error;
       console.error(`Vertex AI deliverables (${model}) failed`, error);
+      // Don't try the next model if we already hit the timeout budget.
+      // The fallback model is unlikely to fare better in the same window.
+      if (isTimeoutError(error)) break;
     }
   }
   throw lastError instanceof Error ? lastError : new Error("Vertex AI chain failed");
