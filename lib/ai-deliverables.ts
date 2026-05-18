@@ -75,15 +75,14 @@ async function callGemini(prompt: string): Promise<string> {
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error(`Vertex AI timeout after ${GEMINI_TIMEOUT_MS}ms (${model})`)), GEMINI_TIMEOUT_MS)
       );
-      // Tabular prompt asks for 5 deliverables (1,500-3,500자 각) +
-      // arrays — 한국어 1.5-2 tokens/char × ~17,500자 ≈ 28K tokens.
-      // 8,192에서 잘려 invalid JSON → safeParseJson null → empty
-      // AiDeliverables → 모든 tabular deliverable이 template fallback.
-      // Gemini 2.5 Flash 한도 65,536 내에서 32,768로 증액.
+      // Each call targets a single document (1,500-3,500자).
+      // 한국어 1.5-2 tokens/char × 3,500자 ≈ 5-7K tokens per call.
+      // 8,192 gives 20-40% headroom without hitting Vertex per-call limits.
+      // (Old 32,768 was sized for the 5-in-1 prompt that caused timeouts.)
       const text = await Promise.race([
         generateWithVertex(model, prompt, {
           temperature: 0.4,
-          maxOutputTokens: 32768,
+          maxOutputTokens: 8192,
           responseMimeType: "application/json",
         }),
         timeoutPromise,

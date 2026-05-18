@@ -13,6 +13,7 @@ import {
 import { generateKnowledgeText } from "@/lib/ai";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120; // 2min — single Vertex call with 1 retry
 
 function readRawEvents(value: unknown) {
   if (!Array.isArray(value)) {

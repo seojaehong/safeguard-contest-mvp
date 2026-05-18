@@ -10,6 +10,7 @@ import { generateKnowledgeText } from "@/lib/ai";
 import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120; // 2min — single Vertex call with 1 retry
 
 const documentLabels: Record<RubricDocumentKey, string> = {
   workpackSummaryDraft: "점검결과 요약",
