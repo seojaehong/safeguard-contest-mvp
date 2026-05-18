@@ -1,12 +1,12 @@
 import OpenAI from "openai";
 import { AskResponse, SearchResult } from "./types";
 import { buildMockAskResponse } from "./mock-data";
+import { generateWithVertex } from "./vertex/client";
 
 const openAiApiKey = process.env.OPENAI_API_KEY?.trim();
-const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const openAiModel = process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini";
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
-const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-flash-latest,gemini-2.5-flash-lite")
+const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-flash-lite")
   .split(",")
   .map((model) => model.trim())
   .filter(Boolean);
@@ -14,15 +14,9 @@ const RESPONSE_TIMEOUT_MS = 20_000;
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "45000", 10);
 const RETRY_DELAY_MS = 500;
 
-type GeminiGenerateContentResponse = {
-  candidates?: Array<{
-    content?: {
-      parts?: Array<{
-        text?: string;
-      }>;
-    };
-  }>;
-};
+function isVertexConfigured(): boolean {
+  return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
+}
 
 async function wait(ms: number) {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -87,51 +81,21 @@ async function generateWithOpenAI(prompt: string) {
 }
 
 async function generateWithGeminiModel(prompt: string, model: string) {
-  if (!geminiApiKey) {
-    throw new Error("GEMINI_API_KEY is not set");
-  }
-
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
-
-  const response = await withRetry(
-    async () =>
+  const answer = await withRetry(
+    () =>
       withTimeout(
-        fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [{ text: prompt }]
-              }
-            ]
-          })
-        }),
+        generateWithVertex(model, prompt),
         GEMINI_TIMEOUT_MS,
-        "Gemini response"
+        `Vertex AI response (${model})`
       ),
     2,
-    "Gemini response"
+    `Vertex AI response (${model})`
   );
-
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => "");
-    throw new Error(`Gemini API error ${response.status}: ${errorText || "empty response"}`);
-  }
-
-  const parsed = (await response.json()) as GeminiGenerateContentResponse;
-  const answer = parsed.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim();
-
-  if (!answer) {
-    throw new Error("Gemini response did not include answer text");
-  }
 
   return {
     answer,
-    providerLabel: `Gemini (${model})`,
-    policyNote: "Gemini 응답은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
+    providerLabel: `Gemini via Vertex (${model})`,
+    policyNote: "Vertex AI 응답은 timeout 45초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
   };
 }
 
@@ -259,13 +223,13 @@ function buildCitationMappingPrompt(question: string, citations: SearchResult[])
 }
 
 export async function enhanceLegalEvidenceMappings(question: string, citations: SearchResult[]): Promise<SearchResult[]> {
-  if (!citations.length || (!geminiApiKey && !openAiApiKey)) return citations;
+  if (!citations.length || (!isVertexConfigured() && !openAiApiKey)) return citations;
 
   const prompt = buildCitationMappingPrompt(question, citations);
-  const response = geminiApiKey
+  const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
-        console.error("Gemini legal evidence mapping failed; falling back to OpenAI", error);
+        console.error("Vertex AI legal evidence mapping failed; falling back to OpenAI", error);
         return generateWithOpenAI(prompt);
       })
     : await generateWithOpenAI(prompt);
@@ -292,7 +256,7 @@ export async function enhanceLegalEvidenceMappings(question: string, citations: 
 }
 
 export async function generateAnswer(question: string, citations: SearchResult[]): Promise<AskResponse> {
-  if (!geminiApiKey && !openAiApiKey) {
+  if (!isVertexConfigured() && !openAiApiKey) {
     return buildMockAskResponse(
       question,
       citations,
@@ -303,10 +267,10 @@ export async function generateAnswer(question: string, citations: SearchResult[]
 
   const prompt = buildPrompt(question, citations);
 
-  const response = geminiApiKey
+  const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
-        console.error("Gemini model chain failed; falling back to OpenAI", error);
+        console.error("Vertex AI model chain failed; falling back to OpenAI", error);
         return generateWithOpenAI(prompt);
       })
     : await generateWithOpenAI(prompt);
@@ -330,7 +294,7 @@ export async function generateAnswer(question: string, citations: SearchResult[]
 }
 
 export async function generateKnowledgeText(prompt: string) {
-  if (!geminiApiKey && !openAiApiKey) {
+  if (!isVertexConfigured() && !openAiApiKey) {
     return {
       configured: false,
       text: "",
@@ -339,10 +303,10 @@ export async function generateKnowledgeText(prompt: string) {
     };
   }
 
-  const response = geminiApiKey
+  const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
-        console.error("Gemini knowledge generation failed; falling back to OpenAI", error);
+        console.error("Vertex AI knowledge generation failed; falling back to OpenAI", error);
         return generateWithOpenAI(prompt);
       })
     : await generateWithOpenAI(prompt);

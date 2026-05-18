@@ -31,22 +31,18 @@ import {
   type RiskAssessmentRow,
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
+import { generateWithVertex } from "@/lib/vertex/client";
 
-const geminiApiKey = process.env.GEMINI_API_KEY?.trim();
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
-const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-flash-latest,gemini-2.5-flash-lite")
+const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-flash-lite")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "60000", 10);
 
-type GeminiResponse = {
-  candidates?: Array<{
-    content?: { parts?: Array<{ text?: string }> };
-    finishReason?: string;
-  }>;
-  promptFeedback?: { blockReason?: string };
-};
+function isVertexConfigured(): boolean {
+  return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
+}
 
 type Scenario = {
   companyName: string;
@@ -70,53 +66,35 @@ type GenContext = {
 };
 
 async function callGemini(prompt: string): Promise<string> {
-  if (!geminiApiKey) throw new Error("GEMINI_API_KEY missing");
+  if (!isVertexConfigured()) throw new Error("Vertex AI not configured (GOOGLE_APPLICATION_CREDENTIALS_JSON / GCP_PROJECT_ID missing)");
   const models = [...new Set([geminiModel, ...geminiFallbackModels])];
   let lastError: unknown;
+
   for (const model of models) {
     try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.4,
-            // Tabular prompt asks for 5 deliverables (1,500-3,500자 각) +
-            // arrays — 한국어 1.5-2 tokens/char × ~17,500자 ≈ 28K tokens.
-            // 8,192에서 잘려 invalid JSON → safeParseJson null → empty
-            // AiDeliverables → 모든 tabular deliverable이 template fallback.
-            // Gemini 2.5 Flash 한도 65,536 내에서 32,768로 증액.
-            maxOutputTokens: 32768,
-            responseMimeType: "application/json"
-          }
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`Vertex AI timeout after ${GEMINI_TIMEOUT_MS}ms (${model})`)), GEMINI_TIMEOUT_MS)
+      );
+      // Tabular prompt asks for 5 deliverables (1,500-3,500자 각) +
+      // arrays — 한국어 1.5-2 tokens/char × ~17,500자 ≈ 28K tokens.
+      // 8,192에서 잘려 invalid JSON → safeParseJson null → empty
+      // AiDeliverables → 모든 tabular deliverable이 template fallback.
+      // Gemini 2.5 Flash 한도 65,536 내에서 32,768로 증액.
+      const text = await Promise.race([
+        generateWithVertex(model, prompt, {
+          temperature: 0.4,
+          maxOutputTokens: 32768,
+          responseMimeType: "application/json",
         }),
-        signal: controller.signal
-      });
-      clearTimeout(timer);
-      if (!response.ok) {
-        throw new Error(`Gemini ${model} HTTP ${response.status}`);
-      }
-      const parsed = (await response.json()) as GeminiResponse;
-      const candidate = parsed.candidates?.[0];
-      const text = candidate?.content?.parts?.map((p) => p.text || "").join("").trim();
-      if (!text) {
-        // Gemini가 텍스트 없이 finishReason만 반환하는 경우(MAX_TOKENS/SAFETY/RECITATION 등)를
-        // 그대로 throw해서 diagnostics에 어느 사유인지 노출. block 사유는 promptFeedback에 있음.
-        const finishReason = candidate?.finishReason || "unknown";
-        const blockReason = parsed.promptFeedback?.blockReason || "";
-        throw new Error(`Gemini ${model} empty response (finishReason=${finishReason}${blockReason ? ` blockReason=${blockReason}` : ""})`);
-      }
+        timeoutPromise,
+      ]);
       return text;
     } catch (error) {
       lastError = error;
-      console.error(`Gemini deliverables (${model}) failed`, error);
+      console.error(`Vertex AI deliverables (${model}) failed`, error);
     }
   }
-  throw lastError instanceof Error ? lastError : new Error("Gemini chain failed");
+  throw lastError instanceof Error ? lastError : new Error("Vertex AI chain failed");
 }
 
 // Wraps callGemini with one retry on transient failure. If the call returns text
@@ -836,7 +814,7 @@ const TABULAR_SPECS = [
 ] as const;
 
 export async function generateAllDeliverables(opts: GenerateAllOptions): Promise<AiDeliverables> {
-  if (!geminiApiKey) return {};
+  if (!isVertexConfigured()) return {};
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
 
@@ -881,7 +859,7 @@ export type AiDeliverablesDiagnostics = {
 export async function generateAllDeliverablesWithDiagnostics(
   opts: GenerateAllOptions
 ): Promise<{ deliverables: AiDeliverables; diagnostics: AiDeliverablesDiagnostics }> {
-  if (!geminiApiKey) {
+  if (!isVertexConfigured()) {
     return {
       deliverables: {},
       diagnostics: { geminiAvailable: false, groupResults: [], filledKeys: [] }
