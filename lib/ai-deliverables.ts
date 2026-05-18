@@ -38,7 +38,9 @@ const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
-const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "60000", 10);
+// Per-call timeout for ai-deliverables parallel calls (7-way parallel).
+// Shorter than ai.ts because these are isolated per-doc calls.
+const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_DELIVERABLES_TIMEOUT_MS || process.env.GEMINI_TIMEOUT_MS || "8000", 10);
 
 function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
@@ -72,21 +74,18 @@ async function callGemini(prompt: string): Promise<string> {
 
   for (const model of models) {
     try {
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Vertex AI timeout after ${GEMINI_TIMEOUT_MS}ms (${model})`)), GEMINI_TIMEOUT_MS)
-      );
+      // generateWithVertex handles timeout internally via Promise.race.
       // Each call targets a single document (1,500-3,500자).
       // 한국어 1.5-2 tokens/char × 3,500자 ≈ 5-7K tokens per call.
       // 8,192 gives 20-40% headroom without hitting Vertex per-call limits.
-      // (Old 32,768 was sized for the 5-in-1 prompt that caused timeouts.)
-      const text = await Promise.race([
-        generateWithVertex(model, prompt, {
+      const text = await generateWithVertex(model, prompt, {
+        generationConfig: {
           temperature: 0.4,
           maxOutputTokens: 8192,
           responseMimeType: "application/json",
-        }),
-        timeoutPromise,
-      ]);
+        },
+        timeoutMs: GEMINI_TIMEOUT_MS,
+      });
       return text;
     } catch (error) {
       lastError = error;
@@ -96,10 +95,17 @@ async function callGemini(prompt: string): Promise<string> {
   throw lastError instanceof Error ? lastError : new Error("Vertex AI chain failed");
 }
 
-// Wraps callGemini with one retry on transient failure. If the call returns text
-// but the parser rejects it (returns null), retry once — Gemini occasionally emits
-// markdown-wrapped JSON or partial structured-output JSON. If the call itself errors
-// (HTTP, abort timeout, empty response), retry once. After 2 attempts, throw.
+// Wraps callGemini with one retry on transient failure.
+// Retry policy:
+//   - Parse failure (null): always retry once — Gemini occasionally emits
+//     markdown-wrapped JSON or partial structured-output JSON.
+//   - Call error: only retry on non-timeout errors (HTTP 5xx, empty response).
+//     Timeout errors skip retry to avoid doubling wall time.
+// After 2 attempts (or 1 on timeout), throw.
+function isTimeoutError(error: unknown): boolean {
+  return error instanceof Error && /timeout/i.test(error.message);
+}
+
 async function callAndParse<T>(
   prompt: string,
   parser: (raw: string) => T | null,
@@ -118,6 +124,8 @@ async function callAndParse<T>(
     } catch (error) {
       lastError = error;
       console.error(`[AI ${label}] attempt ${attempt} call failed:`, error);
+      // Don't waste time retrying if we already hit the timeout budget.
+      if (isTimeoutError(error)) break;
     }
   }
   throw lastError instanceof Error ? lastError : new Error(`AI ${label} exhausted retries`);

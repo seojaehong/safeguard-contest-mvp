@@ -11,7 +11,7 @@ const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-
   .map((model) => model.trim())
   .filter(Boolean);
 const RESPONSE_TIMEOUT_MS = 20_000;
-const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "45000", 10);
+const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "8000", 10);
 const RETRY_DELAY_MS = 500;
 
 function isVertexConfigured(): boolean {
@@ -81,13 +81,10 @@ async function generateWithOpenAI(prompt: string) {
 }
 
 async function generateWithGeminiModel(prompt: string, model: string) {
+  // generateWithVertex handles its own timeout internally (Promise.race).
+  // We keep one retry here for transient network/empty-response errors.
   const answer = await withRetry(
-    () =>
-      withTimeout(
-        generateWithVertex(model, prompt),
-        GEMINI_TIMEOUT_MS,
-        `Vertex AI response (${model})`
-      ),
+    () => generateWithVertex(model, prompt, { timeoutMs: GEMINI_TIMEOUT_MS }),
     2,
     `Vertex AI response (${model})`
   );
@@ -95,7 +92,7 @@ async function generateWithGeminiModel(prompt: string, model: string) {
   return {
     answer,
     providerLabel: `Gemini via Vertex (${model})`,
-    policyNote: "Vertex AI 응답은 timeout 45초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
+    policyNote: `Vertex AI 응답은 timeout ${GEMINI_TIMEOUT_MS}ms, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다.`
   };
 }
 

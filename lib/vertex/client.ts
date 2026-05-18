@@ -24,26 +24,45 @@ function getVertexClient(): VertexAI {
   return cached;
 }
 
+export type GenerateWithVertexOptions = {
+  generationConfig?: GenerationConfig;
+  /**
+   * Hard wall-clock timeout in milliseconds.
+   * Vertex SDK does not support AbortSignal, so we use Promise.race.
+   * The underlying HTTP request is not cancelled (no TCP abort), but the
+   * caller unblocks and throws after timeoutMs. Default: 10_000.
+   */
+  timeoutMs?: number;
+};
+
 /**
  * Generate text from a single user prompt using Vertex AI.
- * Throws on empty/blocked response; caller is responsible for retry/fallback.
+ * Throws on empty/blocked response or timeout; caller is responsible for retry/fallback.
  *
- * @param model  Vertex model name (e.g. "gemini-2.5-flash")
- * @param prompt User prompt text
- * @param generationConfig  Optional generation config (temperature, maxOutputTokens, responseMimeType, …)
+ * @param model   Vertex model name (e.g. "gemini-2.5-flash")
+ * @param prompt  User prompt text
+ * @param options Optional generation config and per-call timeout
  */
 export async function generateWithVertex(
   model: string,
   prompt: string,
-  generationConfig?: GenerationConfig
+  options: GenerateWithVertexOptions = {}
 ): Promise<string> {
+  const { generationConfig, timeoutMs = 10_000 } = options;
+
   const vertex = getVertexClient();
   const genModel = vertex.getGenerativeModel({ model });
 
-  const result = await genModel.generateContent({
+  const callPromise = genModel.generateContent({
     contents: [{ role: "user", parts: [{ text: prompt }] }],
     ...(generationConfig ? { generationConfig } : {}),
   });
+
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`Vertex AI timeout after ${timeoutMs}ms (model=${model})`)), timeoutMs)
+  );
+
+  const result = await Promise.race([callPromise, timeoutPromise]);
 
   const candidate = result.response.candidates?.[0];
   const text = candidate?.content?.parts?.map((p) => p.text ?? "").join("").trim() ?? "";
