@@ -25,6 +25,11 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // www → apex redirect: eliminate 829ms redirect chain by making
+      // safeclaw.kr the canonical and redirecting www → root permanently.
+      // Note: Vercel domain primary should also be set to safeclaw.kr in the dashboard.
+      { source: "/:path*", destination: "https://safeclaw.kr/:path*", permanent: true, has: [{ type: "host", value: "www.safeclaw.kr" }] },
+
       // Design handoff v1.0 §10.4 routing alignment.
       // Guide names → existing implementation routes. permanent: true issues
       // 308 (preserves method); the dynamic /docs/:id is non-permanent because
@@ -33,6 +38,31 @@ const nextConfig = {
       { source: "/system/settings", destination: "/settings", permanent: true },
       { source: "/docs", destination: "/documents", permanent: true },
       { source: "/docs/:id", destination: "/documents", permanent: false }
+    ];
+  },
+  async headers() {
+    return [
+      {
+        // Static assets — long-lived cache
+        source: "/brand/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        // WASM + PDF references
+        source: "/:path*.wasm",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        // KOSHA PDFs
+        source: "/kosha-references/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400" }
+        ]
+      }
     ];
   }
 };
