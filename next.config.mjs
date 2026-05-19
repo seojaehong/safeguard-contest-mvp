@@ -25,10 +25,9 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // www → apex redirect: eliminate 829ms redirect chain by making
-      // safeclaw.kr the canonical and redirecting www → root permanently.
-      // Note: Vercel domain primary should also be set to safeclaw.kr in the dashboard.
-      { source: "/:path*", destination: "https://safeclaw.kr/:path*", permanent: true, has: [{ type: "host", value: "www.safeclaw.kr" }] },
+      // 8-L의 www→apex redirect 제거: Vercel 대시보드가 apex→www를 강제해서
+      // 무한 redirect loop 발생 (apex 307→www, www 308→apex). 도메인 primary
+      // 변경은 Vercel 대시보드에서 수동 처리 필요 (사용자 액션).
 
       // Design handoff v1.0 §10.4 routing alignment.
       // Guide names → existing implementation routes. permanent: true issues
