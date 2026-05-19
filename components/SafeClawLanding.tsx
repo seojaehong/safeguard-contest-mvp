@@ -1,6 +1,5 @@
-"use client";
-
 import Link from "next/link";
+import { JumpButton } from "./JumpButton";
 
 const navItems = [
   ["제품", "system"],
@@ -11,6 +10,8 @@ const navItems = [
   ["제품 구성", "product-map"],
   ["작업 시작", "workspace"]
 ] as const;
+
+// SafeClawLanding is a Server Component — JumpButton is the only interactive part
 
 const pipeline = [
   { code: "01 · INPUT", title: "입력", body: "오늘 작업 내용을 한 줄로 정리합니다.", metric: "작업" },
@@ -53,12 +54,6 @@ const productModules = [
   { code: "08", title: "API 상태", body: "기상청, Law.go, KOSHA, Work24, Gemini, n8n 연결을 점검합니다.", href: "/ops/api", state: "점검" }
 ] as const;
 
-function jumpTo(id: string) {
-  const target = document.getElementById(id);
-  if (!target) return;
-  target.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
 export function SafeClawLanding() {
   return (
     <main className="safeclaw-landing" aria-label="SafeClaw 회사 홈페이지">
@@ -72,7 +67,7 @@ export function SafeClawLanding() {
           {navItems.map(([label, id]) => (
             id === "workspace"
               ? <Link key={id} href="/workspace">{label}</Link>
-              : <button key={id} type="button" onClick={() => jumpTo(id)}>{label}</button>
+              : <JumpButton key={id} id={id}>{label}</JumpButton>
           ))}
         </nav>
         <div className="safeclaw-landing-actions">
