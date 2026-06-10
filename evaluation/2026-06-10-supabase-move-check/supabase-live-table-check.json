@@ -1,0 +1,162 @@
+{
+  "generatedAt": "2026-06-10T05:06:27.003Z",
+  "supabase": {
+    "urlConfigured": true,
+    "projectRef": "pleyuknjnprsckssxvrh",
+    "anonKey": {
+      "configured": true,
+      "length": 208,
+      "preview": "eyJhbG...hx08"
+    },
+    "serviceRoleKey": {
+      "configured": true,
+      "length": 219,
+      "preview": "eyJhbG...2DeI"
+    }
+  },
+  "verdict": "pass_with_notice",
+  "requiredMissing": [],
+  "optionalMissing": [],
+  "appAuthModel": {
+    "usesSupabaseAuthGetUser": true,
+    "usesAdminUsersTableInCurrentCode": false,
+    "note": "Current app API routes call getWorkspaceUser(), which validates the Bearer token through Supabase Auth. No current app/lib/scripts/supabase source reference to admin_users was found."
+  },
+  "tableChecks": [
+    {
+      "table": "organizations",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 4,
+      "elapsedMs": 988,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "sites",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 6,
+      "elapsedMs": 291,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "workers",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 5,
+      "elapsedMs": 261,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "workpacks",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 5,
+      "elapsedMs": 261,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "education_records",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 4,
+      "elapsedMs": 236,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "dispatch_logs",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 6,
+      "elapsedMs": 110,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "daily_entries",
+      "exists": true,
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 104,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "knowledge_events",
+      "exists": true,
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 95,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "knowledge_regeneration_runs",
+      "exists": true,
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 103,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "safety_reference_sources",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 1063,
+      "elapsedMs": 114,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "safety_reference_items",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 9920,
+      "elapsedMs": 515,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "safety_reference_ingestion_runs",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 2,
+      "elapsedMs": 96,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "documents",
+      "exists": true,
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 90,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "query_logs",
+      "exists": true,
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 117,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "admin_users",
+      "exists": true,
+      "ok": true,
+      "status": 206,
+      "count": 1,
+      "elapsedMs": 84,
+      "bodyPrefix": "[]"
+    }
+  ]
+}
