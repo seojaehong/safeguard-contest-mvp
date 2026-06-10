@@ -15,7 +15,9 @@
     "adminUsers": "1 row, admin-codex@winners.local, publisher"
   },
   "checked": {
-    "localRuntimeStillUsesOldProjectRef": true,
+    "localRuntimeStillUsesOldProjectRef": false,
+    "localEnvCutoverVerified": true,
+    "localEnvCutoverEvidence": "evaluation/2026-06-10-local-env-cutover-check/local-env-cutover-check.json",
     "appUsesAdminUsersTable": false,
     "appUsesSupabaseAuthGetUser": true,
     "vercelProductionEnvVerified": true,
@@ -31,13 +33,10 @@
     "observationWindowComplete": false
   },
   "blockers": [
-    "Current Codex-machine local Supabase ref is still pleyuknjnprsckssxvrh, previously mapped to labor_money.",
     "Post-cutover authenticated smoke has not been run against yellow-envelope-law from this workflow.",
     "24-hour Production observation window is not complete."
   ],
   "requiredBeforeDrop": [
-    "Update Codex-machine local .env.local to yellow-envelope-law Supabase URL and keys.",
-    "Confirm active project ref is mewqgevgdgghhatqtuos and no longer pleyuknjnprsckssxvrh.",
     "Run authenticated save, reopen, archive, dispatch log, and safety reference catalog smoke checks.",
     "Monitor Production for 24 hours after smoke passes.",
     "Keep labor_money available during a rollback window before final deletion."

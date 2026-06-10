@@ -1,0 +1,145 @@
+{
+  "generatedAt": "2026-06-10T06:43:34.574Z",
+  "verdict": "pass",
+  "expectedRef": "mewqgevgdgghhatqtuos",
+  "oldRef": "pleyuknjnprsckssxvrh",
+  "refs": {
+    "NEXT_PUBLIC_SUPABASE_URL": "mewqgevgdgghhatqtuos",
+    "SUPABASE_URL": "mewqgevgdgghhatqtuos",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "mewqgevgdgghhatqtuos",
+    "SUPABASE_SERVICE_ROLE_KEY": "mewqgevgdgghhatqtuos"
+  },
+  "oldRefPresent": false,
+  "secrets": {
+    "anonKey": {
+      "configured": true,
+      "length": 208
+    },
+    "serviceRoleKey": {
+      "configured": true,
+      "length": 219
+    }
+  },
+  "tableChecks": [
+    {
+      "table": "organizations",
+      "ok": true,
+      "status": 206,
+      "count": 4,
+      "elapsedMs": 258,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "sites",
+      "ok": true,
+      "status": 206,
+      "count": 6,
+      "elapsedMs": 126,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "workers",
+      "ok": true,
+      "status": 206,
+      "count": 5,
+      "elapsedMs": 101,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "workpacks",
+      "ok": true,
+      "status": 206,
+      "count": 5,
+      "elapsedMs": 101,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "education_records",
+      "ok": true,
+      "status": 206,
+      "count": 4,
+      "elapsedMs": 96,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "dispatch_logs",
+      "ok": true,
+      "status": 206,
+      "count": 6,
+      "elapsedMs": 96,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "daily_entries",
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 97,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "knowledge_events",
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 96,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "knowledge_regeneration_runs",
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 90,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "safety_reference_sources",
+      "ok": true,
+      "status": 206,
+      "count": 1063,
+      "elapsedMs": 115,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "safety_reference_items",
+      "ok": true,
+      "status": 206,
+      "count": 9920,
+      "elapsedMs": 315,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "safety_reference_ingestion_runs",
+      "ok": true,
+      "status": 206,
+      "count": 2,
+      "elapsedMs": 91,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "documents",
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 91,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "query_logs",
+      "ok": true,
+      "status": 200,
+      "count": 0,
+      "elapsedMs": 90,
+      "bodyPrefix": "[]"
+    },
+    {
+      "table": "admin_users",
+      "ok": true,
+      "status": 206,
+      "count": 1,
+      "elapsedMs": 103,
+      "bodyPrefix": "[]"
+    }
+  ]
+}
