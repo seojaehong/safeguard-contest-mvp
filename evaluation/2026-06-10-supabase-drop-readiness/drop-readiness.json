@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-06-10",
+  "target": "SafeClaw Supabase migration from labor_money to yellow-envelope-law",
+  "verdict": "blocked",
+  "canDropExistingSupabase": false,
+  "knownOldProject": {
+    "name": "labor_money",
+    "projectRef": "pleyuknjnprsckssxvrh",
+    "evidence": "evaluation/supabase-migration-check/supabase-migration-auth-blocked.json"
+  },
+  "reportedNewProject": {
+    "name": "yellow-envelope-law",
+    "dataParity": "15/15 tables, 11020 rows",
+    "adminUsers": "1 row, admin-codex@winners.local, publisher"
+  },
+  "checked": {
+    "localRuntimeStillUsesOldProjectRef": true,
+    "appUsesAdminUsersTable": false,
+    "appUsesSupabaseAuthGetUser": true,
+    "vercelProductionEnvVerified": false
+  },
+  "blockers": [
+    "Current local Supabase ref is still pleyuknjnprsckssxvrh, previously mapped to labor_money.",
+    "Vercel Production and Preview env values could not be verified because local Vercel credentials are unavailable.",
+    "Post-cutover authenticated smoke has not been run against yellow-envelope-law."
+  ],
+  "requiredBeforeDrop": [
+    "Update local .env.local to yellow-envelope-law Supabase URL and keys.",
+    "Update Vercel Production and Preview Supabase env values.",
+    "Redeploy after env cutover.",
+    "Confirm active project ref is no longer pleyuknjnprsckssxvrh.",
+    "Run authenticated save, reopen, archive, dispatch log, and safety reference catalog smoke checks.",
+    "Keep labor_money available during a rollback window before final deletion."
+  ]
+}
