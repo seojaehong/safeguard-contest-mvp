@@ -2,55 +2,50 @@
 
 - generatedAt: 2026-06-10
 - target: SafeClaw Supabase migration from `labor_money` to `yellow-envelope-law`
-- verdict: blocked
+- verdict: blocked_after_vercel_cutover
 
 ## Conclusion
 
 Do not drop the existing `labor_money` Supabase project yet.
 
-The data-level clone is reported as complete, including `admin_users`, but the runtime cutover is not fully proven from this workspace. The local app environment still resolves to project ref `pleyuknjnprsckssxvrh`, which prior evidence in this repo identifies as `labor_money`.
+The data-level clone is reported as complete, including `admin_users`, and server1 verified that Vercel Production Supabase env values now point to `yellow-envelope-law` (`mewqgevgdgghhatqtuos`). The remaining blockers are local Codex-machine env cleanup and an authenticated end-to-end smoke.
 
 ## Evidence Checked
 
 | Area | Result | Note |
 | --- | --- | --- |
 | Data parity | pass | User-provided final check says 15/15 tables and 11,020 rows match. |
-| Current local Supabase ref | blocked | Current local live check points to `pleyuknjnprsckssxvrh`. |
+| Current local Supabase ref | blocked | Codex-machine local live check still points to `pleyuknjnprsckssxvrh`; server1 repo has no `.env.local`, so this is a Codex local cleanup issue. |
 | Historical project mapping | blocked | `evaluation/supabase-migration-check/supabase-migration-auth-blocked.json` maps `pleyuknjnprsckssxvrh` to `labor_money`. |
 | App code dependency on `admin_users` | pass | Current app routes use Supabase Auth `auth.getUser(token)`, not an `admin_users` query. |
 | `admin_users` availability | pass | Latest user verification says `yellow-envelope-law` now has 1 publisher row. |
-| Vercel Production env | unverified | `vercel env ls` and `vercel env pull` failed because no local Vercel credentials/token were available. |
+| Vercel Production env | pass | Server1 decoded JWT payloads and confirmed all 4 Supabase env values point to `mewqgevgdgghhatqtuos` (`yellow-envelope-law`). |
+| Vercel Preview env | not required | Preview did not have Supabase URL keys originally; Production is the contest runtime. |
 
 ## Why Drop Is Blocked
 
-The old Supabase can be dropped only after every runtime points to `yellow-envelope-law`.
+The old Supabase can be dropped only after every active runtime points to `yellow-envelope-law` and a live authenticated smoke passes.
 
-Right now, this workspace has direct evidence that at least the local runtime still points to the old project ref:
+Right now, Vercel Production is verified as cut over, but this Codex machine still has local evidence pointing to the old project ref:
 
 - old ref: `pleyuknjnprsckssxvrh`
 - old project name from prior repo evidence: `labor_money`
 
-If `labor_money` is dropped before `.env.local`, Vercel Production, Preview, and any automation secrets are repointed, the app may lose archive, workpack, worker, education record, dispatch log, and safety reference DB access.
+If `labor_money` is dropped before local env cleanup and authenticated smoke, local admin workflows may fail and rollback proof will be weaker.
 
 ## Required Gates Before Drop
 
 1. Update local `.env.local` Supabase values to the `yellow-envelope-law` project.
-2. Update Vercel Production and Preview env values:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - any auth smoke variables that depend on the old project
-3. Redeploy Vercel after env update.
-4. Run the live table check again and confirm the active project ref is the new `yellow-envelope-law` ref, not `pleyuknjnprsckssxvrh`.
-5. Run an authenticated smoke against the deployed app:
+2. Run the live table check again and confirm the active project ref is `mewqgevgdgghhatqtuos`, not `pleyuknjnprsckssxvrh`.
+3. Run an authenticated smoke against the deployed app:
    - save workpack
    - reopen workpack
    - list archive
    - save dispatch logs
    - search safety reference catalog
-6. Keep `labor_money` read-only or paused for a short rollback window before final deletion.
+4. Monitor Production for 24 hours.
+5. Keep `labor_money` read-only or paused during that rollback window before final deletion.
 
 ## Safe Current Decision
 
-`yellow-envelope-law` appears data-complete, but `labor_money` should not be dropped yet because runtime cutover is not proven. The next safe step is env cutover and post-deploy smoke, not deletion.
+`yellow-envelope-law` appears data-complete and Vercel Production is reported as fully cut over. `labor_money` should still not be dropped until this Codex machine env is cleaned up, an authenticated smoke passes, and the 24-hour observation window is complete.

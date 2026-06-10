@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-06-10",
   "target": "SafeClaw Supabase migration from labor_money to yellow-envelope-law",
-  "verdict": "blocked",
+  "verdict": "blocked_after_vercel_cutover",
   "canDropExistingSupabase": false,
   "knownOldProject": {
     "name": "labor_money",
@@ -10,6 +10,7 @@
   },
   "reportedNewProject": {
     "name": "yellow-envelope-law",
+    "projectRef": "mewqgevgdgghhatqtuos",
     "dataParity": "15/15 tables, 11020 rows",
     "adminUsers": "1 row, admin-codex@winners.local, publisher"
   },
@@ -17,19 +18,28 @@
     "localRuntimeStillUsesOldProjectRef": true,
     "appUsesAdminUsersTable": false,
     "appUsesSupabaseAuthGetUser": true,
-    "vercelProductionEnvVerified": false
+    "vercelProductionEnvVerified": true,
+    "vercelProductionKeysVerified": [
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "SUPABASE_URL",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "SUPABASE_SERVICE_ROLE_KEY"
+    ],
+    "vercelPreviewSupabaseEnvRequired": false,
+    "server1RepoHasLocalEnv": false,
+    "authenticatedSmokePassed": false,
+    "observationWindowComplete": false
   },
   "blockers": [
-    "Current local Supabase ref is still pleyuknjnprsckssxvrh, previously mapped to labor_money.",
-    "Vercel Production and Preview env values could not be verified because local Vercel credentials are unavailable.",
-    "Post-cutover authenticated smoke has not been run against yellow-envelope-law."
+    "Current Codex-machine local Supabase ref is still pleyuknjnprsckssxvrh, previously mapped to labor_money.",
+    "Post-cutover authenticated smoke has not been run against yellow-envelope-law from this workflow.",
+    "24-hour Production observation window is not complete."
   ],
   "requiredBeforeDrop": [
-    "Update local .env.local to yellow-envelope-law Supabase URL and keys.",
-    "Update Vercel Production and Preview Supabase env values.",
-    "Redeploy after env cutover.",
-    "Confirm active project ref is no longer pleyuknjnprsckssxvrh.",
+    "Update Codex-machine local .env.local to yellow-envelope-law Supabase URL and keys.",
+    "Confirm active project ref is mewqgevgdgghhatqtuos and no longer pleyuknjnprsckssxvrh.",
     "Run authenticated save, reopen, archive, dispatch log, and safety reference catalog smoke checks.",
+    "Monitor Production for 24 hours after smoke passes.",
     "Keep labor_money available during a rollback window before final deletion."
   ]
 }
