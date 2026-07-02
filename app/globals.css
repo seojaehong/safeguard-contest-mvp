@@ -5168,6 +5168,91 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   to { background-position: 200% 0; }
 }
 
+/* AI 작업 콘솔 (Task D-2b) — monospace stage log for /api/ask/stream events. */
+.agent-console {
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(226, 222, 213, 0.88);
+  border-radius: 16px;
+  background: rgba(20, 22, 20, 0.94);
+  padding: 10px 12px 12px;
+}
+
+.agent-console.agent-console-active {
+  border-color: var(--sc-hazard-yellow, #ffd400);
+}
+
+.agent-console-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-hud, "Geist Mono", monospace);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #d9d5c9;
+}
+
+.agent-console-live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sc-hazard-yellow, #ffd400);
+  animation: agentConsolePulse 1.1s ease-in-out infinite;
+}
+
+@keyframes agentConsolePulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+.agent-console-body {
+  display: grid;
+  gap: 3px;
+  max-height: 168px;
+  overflow-y: auto;
+}
+
+.agent-console-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--font-hud, "Geist Mono", monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b9c4bd;
+}
+
+.agent-console-icon {
+  flex: none;
+  width: 14px;
+  text-align: center;
+}
+
+.agent-console-label {
+  flex: 1;
+}
+
+.agent-console-detail {
+  color: #8a8f86;
+  font-size: 11px;
+}
+
+.agent-console-line-active .agent-console-icon {
+  color: var(--sc-hazard-yellow, #ffd400);
+}
+
+.agent-console-line-ok .agent-console-icon,
+.agent-console-line-ok .agent-console-label {
+  color: #7fd9a8;
+}
+
+.agent-console-line-fail .agent-console-icon,
+.agent-console-line-fail .agent-console-label {
+  color: #ff8a8a;
+}
+
 .doc-card-actions {
   display: flex;
   gap: 8px;
