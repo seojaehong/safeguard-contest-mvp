@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { AskResponse, SearchResult } from "./types";
 import { buildMockAskResponse } from "./mock-data";
 import { generateWithVertex } from "./vertex/client";
+import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
 
 const openAiApiKey = process.env.OPENAI_API_KEY?.trim();
 const openAiModel = process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini";
@@ -10,7 +11,9 @@ const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-
   .split(",")
   .map((model) => model.trim())
   .filter(Boolean);
-const RESPONSE_TIMEOUT_MS = 10_000;
+// OpenAI free-text answer budget. 10s proved too short in prod
+// (2026-07-02 smoke: "OpenAI response timeout after 10000ms" -> fallback).
+const RESPONSE_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_TIMEOUT_MS, 20_000);
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "25000", 10);
 const RETRY_DELAY_MS = 500;
 

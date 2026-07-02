@@ -31,7 +31,7 @@ import {
   type RiskAssessmentRow,
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
-import { planModelAttempts, resolveDeliverablesTimeoutMs } from "@/lib/ai-deliverables-policy";
+import { planModelAttempts, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
 import { generateWithVertex } from "@/lib/vertex/client";
 
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
@@ -69,21 +69,21 @@ type GenContext = {
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
 };
 
-async function callGemini(prompt: string): Promise<string> {
+async function callGemini(prompt: string, budget: DocBudget): Promise<string> {
   if (!isVertexConfigured()) throw new Error("Vertex AI not configured (GOOGLE_APPLICATION_CREDENTIALS_JSON / GCP_PROJECT_ID missing)");
-  const attempts = planModelAttempts(geminiModel, geminiFallbackModels, GEMINI_TIMEOUT_MS);
+  const attempts = planModelAttempts(geminiModel, geminiFallbackModels, budget.timeoutMs, budget.fallbackTimeoutCapMs);
   let lastError: unknown;
 
   for (const { model, timeoutMs } of attempts) {
     try {
       // generateWithVertex handles timeout internally via Promise.race.
-      // Each call targets a single document (1,500-3,500자).
-      // 한국어 1.5-2 tokens/char × 3,500자 ≈ 5-7K tokens per call.
-      // 8,192 gives 20-40% headroom without hitting Vertex per-call limits.
+      // Standard docs (1,500-3,500자): 8,192 output tokens.
+      // Heavy docs (foreign 5-language pack, up to 17,000자): 16,384 tokens
+      // and doubled wall clock — see resolveDocBudget.
       const text = await generateWithVertex(model, prompt, {
         generationConfig: {
           temperature: 0.4,
-          maxOutputTokens: 8192,
+          maxOutputTokens: budget.maxOutputTokens,
           responseMimeType: "application/json",
         },
         timeoutMs,
@@ -115,10 +115,11 @@ async function callAndParse<T>(
   parser: (raw: string) => T | null,
   label: string
 ): Promise<T> {
+  const budget = resolveDocBudget(label, GEMINI_TIMEOUT_MS);
   let lastError: unknown;
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      const raw = await callGemini(prompt);
+      const raw = await callGemini(prompt, budget);
       const parsed = parser(raw);
       if (parsed) return parsed;
       lastError = new Error(`json parse failed (raw len=${raw.length})`);

@@ -9,6 +9,16 @@
 
 export const DEFAULT_DELIVERABLES_TIMEOUT_MS = 45000;
 export const FALLBACK_MODEL_TIMEOUT_CAP_MS = 15000;
+// Heavy docs (foreign: 5-language, 11,500-17,000 chars demanded) need both a
+// longer wall clock and a larger fallback window — 15s is provably too short
+// (2026-07-02 prod smoke: foreign failed at the fallback cap after US-001).
+export const HEAVY_DOC_FALLBACK_TIMEOUT_CAP_MS = 30000;
+
+export function resolvePositiveIntEnv(rawEnvValue: string | undefined, fallback: number): number {
+  const parsed = Number.parseInt(rawEnvValue ?? "", 10);
+  if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  return fallback;
+}
 
 /**
  * Resolves the per-call timeout for deliverables generation.
@@ -16,9 +26,33 @@ export const FALLBACK_MODEL_TIMEOUT_CAP_MS = 15000;
  * intentionally NOT inherited (it is tuned for the ai.ts answer path).
  */
 export function resolveDeliverablesTimeoutMs(rawEnvValue: string | undefined): number {
-  const parsed = Number.parseInt(rawEnvValue ?? "", 10);
-  if (Number.isFinite(parsed) && parsed > 0) return parsed;
-  return DEFAULT_DELIVERABLES_TIMEOUT_MS;
+  return resolvePositiveIntEnv(rawEnvValue, DEFAULT_DELIVERABLES_TIMEOUT_MS);
+}
+
+export type DocBudget = {
+  timeoutMs: number;
+  maxOutputTokens: number;
+  fallbackTimeoutCapMs: number;
+};
+
+/**
+ * Per-document generation budget. The foreign-worker pack demands multi-language
+ * output far beyond the standard docs, so it gets 2x wall clock and 16K output
+ * tokens; everything else keeps the standard budget.
+ */
+export function resolveDocBudget(docName: string, baseTimeoutMs: number): DocBudget {
+  if (docName === "foreign") {
+    return {
+      timeoutMs: baseTimeoutMs * 2,
+      maxOutputTokens: 16384,
+      fallbackTimeoutCapMs: HEAVY_DOC_FALLBACK_TIMEOUT_CAP_MS
+    };
+  }
+  return {
+    timeoutMs: baseTimeoutMs,
+    maxOutputTokens: 8192,
+    fallbackTimeoutCapMs: FALLBACK_MODEL_TIMEOUT_CAP_MS
+  };
 }
 
 export type ModelAttempt = {
@@ -34,11 +68,12 @@ export type ModelAttempt = {
 export function planModelAttempts(
   primaryModel: string,
   fallbackModels: string[],
-  primaryTimeoutMs: number
+  primaryTimeoutMs: number,
+  fallbackTimeoutCapMs: number = FALLBACK_MODEL_TIMEOUT_CAP_MS
 ): ModelAttempt[] {
   const models = [...new Set([primaryModel, ...fallbackModels])];
   return models.map((model, index) => ({
     model,
-    timeoutMs: index === 0 ? primaryTimeoutMs : Math.min(FALLBACK_MODEL_TIMEOUT_CAP_MS, primaryTimeoutMs)
+    timeoutMs: index === 0 ? primaryTimeoutMs : Math.min(fallbackTimeoutCapMs, primaryTimeoutMs)
   }));
 }
