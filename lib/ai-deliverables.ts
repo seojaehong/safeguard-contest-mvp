@@ -31,7 +31,7 @@ import {
   type RiskAssessmentRow,
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
-import { planModelAttempts, planPostAnthropicAttempts, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
+import { planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
 import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
@@ -81,18 +81,19 @@ type GenContext = {
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
 };
 
-async function callGemini(prompt: string, budget: DocBudget): Promise<string> {
+async function callGemini(prompt: string, budget: DocBudget, label: string): Promise<string> {
   // Optional demo/pilot route: Claude first, Vertex chain as the runtime fallback.
   let anthropicFailed = false;
   if (providerDecision.provider === "anthropic" && providerDecision.model) {
+    const anthropicModel = resolveAnthropicModelForDoc(label, providerDecision.model);
     try {
-      return await generateWithAnthropic(providerDecision.model, prompt, {
+      return await generateWithAnthropic(anthropicModel, prompt, {
         maxOutputTokens: budget.maxOutputTokens,
         timeoutMs: budget.timeoutMs,
       });
     } catch (error) {
       anthropicFailed = true;
-      log.error(`Anthropic deliverables (${providerDecision.model}) failed; falling back to Vertex`, error);
+      log.error(`Anthropic deliverables (${anthropicModel}) failed; falling back to Vertex`, error);
     }
   }
   if (!isVertexConfigured()) throw new Error("Vertex AI not configured (GOOGLE_APPLICATION_CREDENTIALS_JSON / GCP_PROJECT_ID missing)");
@@ -148,7 +149,7 @@ async function callAndParse<T>(
   let lastError: unknown;
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     try {
-      const raw = await callGemini(prompt, budget);
+      const raw = await callGemini(prompt, budget, label);
       const parsed = parser(raw);
       if (parsed) return parsed;
       lastError = new Error(`json parse failed (raw len=${raw.length})`);

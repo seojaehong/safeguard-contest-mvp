@@ -71,6 +71,20 @@ export type ModelAttempt = {
  * fallback model with the capped budget. Keeps the worst-case per-doc chain
  * at budget + cap (e.g. 45s + 15s) instead of budget + 45s + 15s.
  */
+/**
+ * Per-doc Anthropic model routing: heavy grouped/multilingual docs (free, foreign)
+ * produce 6-16K output tokens, which Sonnet/Opus cannot finish inside the doc
+ * budget — route those to the fast Haiku tier; everything else keeps the
+ * configured model. (2026-07-02 prod: Sonnet 5 completed all 7 structured docs
+ * in-budget but timed out on free/foreign.)
+ */
+export const FAST_ANTHROPIC_MODEL = "claude-haiku-4-5";
+const HEAVY_OUTPUT_DOCS = new Set(["foreign", "free"]);
+
+export function resolveAnthropicModelForDoc(docName: string, configuredModel: string): string {
+  return HEAVY_OUTPUT_DOCS.has(docName) ? FAST_ANTHROPIC_MODEL : configuredModel;
+}
+
 export function planPostAnthropicAttempts(fallbackModels: string[], budget: DocBudget): ModelAttempt[] {
   const model = fallbackModels[0]?.trim() || "gemini-2.5-flash-lite";
   return [{ model, timeoutMs: budget.fallbackTimeoutCapMs }];
