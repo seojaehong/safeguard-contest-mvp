@@ -34,6 +34,7 @@ import {
 import { formatWorkDate, isHeavyOutputDoc, planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
 import { ACCIDENT_REPORT_TEMPLATE, OFFICIAL_CONTACTS, sanitizeContacts } from "@/lib/safety-contacts";
 import { gateCitations } from "@/lib/law-citation-gate";
+import { clampOneBased, clampRiskRefs } from "@/lib/risk-ref-gate";
 import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
@@ -311,6 +312,7 @@ function workPlanStructuredPrompt(ctx: GenContext) {
 }`,
     "",
     "필수 조건: workSteps 4-7개. 각 workStep은 위험성평가 row 0-based index를 relatedRiskRowIndex에 1개 이상 넣고, evidenceRefs와 verification을 채운다. stopCriteria 3-5개. contacts 3-4개. 모든 string은 \\n 없이 한 줄.",
+    "relatedRiskRowIndex 규칙: 0-based 정수만 사용(1번째 위험성평가 행 = 0). 이 프롬프트가 참조하는 위험성평가 행 목록은 아래 컨텍스트에 포함되어 있다 — 그 배열 범위를 벗어나는 index는 절대 넣지 말 것. 의미가 실제로 연결되는 행만 참조.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -352,7 +354,7 @@ function tbmBriefingStructuredPrompt(ctx: GenContext) {
   "tbmQuestions": ["string","string","string","string","string"]
 }`,
     "",
-    "필수: hazards 4-6개 / measures 4-6개 / stopCriteria 3-5개 / confirmTopics 5개 / tbmQuestions 5개. measures.hazardRef는 hazards 인덱스(1부터). 모든 string은 \\n 없이 한 줄.",
+    "필수: hazards 4-6개 / measures 4-6개 / stopCriteria 3-5개 / confirmTopics 5개 / tbmQuestions 5개. measures.hazardRef는 hazards 배열 인덱스(1부터, 0이나 hazards.length 초과 금지). 모든 string은 \\n 없이 한 줄.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -366,6 +368,7 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
     "한국 산업안전 표준 TBM 일지(사후 기록)의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazardsDiscussed/safetyEducation은 실제 진행한 내용 기준. unaddressedItems는 미조치 항목(없으면 빈 배열).",
     "tbmBriefing(사전)이 다룬 내용을 실제로 진행했다는 사후 기록 관점으로 작성. 시나리오 위험성평가 hazard와 표현이 일치하면 hazardsDiscussed[].relatedRiskRowIndex(0-based)로 연결.",
+    "relatedRiskRowIndex 규칙: 0-based 정수 1개만 사용(1번째 위험성평가 행 = 0). 아래 컨텍스트에 포함된 위험성평가 행 배열 범위를 벗어나는 index는 절대 넣지 말 것. 매핑 가능한 경우만 포함, 없으면 필드 자체를 생략.",
     "",
     "응답 JSON 스키마:",
     `{
@@ -702,7 +705,7 @@ function parseRiskAssessment(raw: string): Partial<AiDeliverables> | null {
   const v = j?.riskAssessmentDraft;
   return typeof v === "string" && v.length > 100 ? { riskAssessmentDraft: gateCitations(v) } : null;
 }
-function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
+export function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
   // schema-first: workPlanStructured 객체를 셀 단위로 검증.
   // 누락 필드가 있거나 array가 비어있으면 null로 retry 트리거.
   const j = safeParseJson<{ workPlanStructured?: AiDeliverables["workPlanStructured"] }>(raw);
@@ -715,7 +718,7 @@ function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
   if (!s.approvers) return null;
   return { workPlanStructured: s };
 }
-function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null {
+export function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null {
   // schema-first TBM. workPlan과 동일 패턴: meta/todayWork/hazards/measures 필수.
   const j = safeParseJson<{ tbmBriefingStructured?: TbmBriefingStructured; tbmQuestions?: string[] }>(raw);
   const s = j?.tbmBriefingStructured;
@@ -726,7 +729,14 @@ function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null
   if (!Array.isArray(s.measures) || s.measures.length < 2) return null;
   if (!Array.isArray(s.stopCriteria) || s.stopCriteria.length < 2) return null;
   if (!Array.isArray(s.confirmTopics) || s.confirmTopics.length < 3) return null;
-  const out: Partial<AiDeliverables> = { tbmBriefingStructured: s };
+  // hazardRef is 1-based and references s.hazards (same object, count known here) —
+  // clamp out-of-range/invalid refs to 1 rather than dropping the measure, since
+  // measures.length has already been floor-validated above.
+  const clampedMeasures = s.measures.map((m) => ({
+    ...m,
+    hazardRef: clampOneBased(m.hazardRef, s.hazards.length) ?? 1
+  }));
+  const out: Partial<AiDeliverables> = { tbmBriefingStructured: { ...s, measures: clampedMeasures } };
   if (Array.isArray(j?.tbmQuestions)) {
     out.tbmQuestions = j.tbmQuestions.filter((str) => typeof str === "string");
   }
@@ -737,7 +747,7 @@ function parseTbmLog(raw: string): Partial<AiDeliverables> | null {
   const v = j?.tbmLogDraft;
   return typeof v === "string" && v.length > 100 ? { tbmLogDraft: gateCitations(v) } : null;
 }
-function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | null {
+export function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<{ tbmLogStructured?: TbmLogStructured }>(raw);
   const s = j?.tbmLogStructured;
   if (!s || typeof s !== "object") return null;
@@ -875,6 +885,41 @@ export function parseForeign(raw: string): Partial<AiDeliverables> | null {
   return out;
 }
 
+// workPlanStructured.workSteps[].relatedRiskRowIndex and
+// tbmLogStructured.hazardsDiscussed[].relatedRiskRowIndex both reference
+// structuredRiskRows — a *separate* parallel AI call (see TABULAR_SPECS /
+// structuredRiskRowsPromise below). The row count isn't known at parse time,
+// only once every call in the 7-way parallel batch has settled. Clamp here,
+// at the merge point, using the row count that actually made it into `out`.
+export function applyRiskRowClamp(out: AiDeliverables): AiDeliverables {
+  const maxIndexExclusive = (out.structuredRiskRows || []).length;
+
+  if (out.workPlanStructured) {
+    out.workPlanStructured = {
+      ...out.workPlanStructured,
+      workSteps: out.workPlanStructured.workSteps.map((step) => ({
+        ...step,
+        relatedRiskRowIndex: step.relatedRiskRowIndex
+          ? clampRiskRefs(step.relatedRiskRowIndex, maxIndexExclusive)
+          : step.relatedRiskRowIndex
+      }))
+    };
+  }
+
+  if (out.tbmLogStructured) {
+    out.tbmLogStructured = {
+      ...out.tbmLogStructured,
+      hazardsDiscussed: out.tbmLogStructured.hazardsDiscussed.map((h) => {
+        if (h.relatedRiskRowIndex === undefined) return h;
+        const clamped = clampRiskRefs([h.relatedRiskRowIndex], maxIndexExclusive);
+        return { ...h, relatedRiskRowIndex: clamped.length ? clamped[0] : undefined };
+      })
+    };
+  }
+
+  return out;
+}
+
 // Specs for the 7 parallel calls. Order in the array doesn't matter; Promise.allSettled
 // reports per-spec status independently.
 const TABULAR_SPECS = [
@@ -923,6 +968,7 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
   for (const s of settled) {
     if (s.status === "fulfilled") Object.assign(out, s.value);
   }
+  applyRiskRowClamp(out);
   Object.assign(out, await generateTbmRiskLinks(ctx, out.structuredRiskRows || []));
   return out;
 }
@@ -991,6 +1037,7 @@ export async function generateAllDeliverablesWithDiagnostics(
     }
   });
 
+  applyRiskRowClamp(out);
   const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || []);
   Object.assign(out, tbmRiskLinksResult);
   groupResults.push({
