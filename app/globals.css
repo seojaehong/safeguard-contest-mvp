@@ -6809,6 +6809,30 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.safeclaw-module-grid.nine {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.safeclaw-module-grid.nine article {
+  min-height: 120px;
+  padding: 20px;
+}
+
+.safeclaw-module-grid.nine article strong {
+  font-size: clamp(20px, 2.4vw, 30px);
+}
+
+.safeclaw-module-grid article.zero {
+  opacity: 0.55;
+}
+
+.safeclaw-module-grid article.zero strong {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
 .safeclaw-module-grid article {
   min-height: 150px;
   border-right: 1px solid rgba(246, 245, 239, 0.12);
@@ -6920,6 +6944,7 @@ body {
   .safeclaw-module-grid,
   .safeclaw-module-grid.four,
   .safeclaw-module-grid.two,
+  .safeclaw-module-grid.nine,
   .safeclaw-tbm-board {
     grid-template-columns: 1fr;
   }
