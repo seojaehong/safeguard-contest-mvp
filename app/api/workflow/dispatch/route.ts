@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
+import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
 
 export const dynamic = "force-dynamic";
 
@@ -45,12 +46,6 @@ type WorkflowSummary = {
 
 const ACTIVE_CHANNELS: WorkflowChannel[] = ["email", "sms", "kakao"];
 const LOCKED_CHANNELS: WorkflowChannel[] = ["band"];
-const TIMEOUT_MS = 20_000;
-const RETRY_COUNT = 1;
-
-function isLiveDispatchEnabled() {
-  return process.env.SAFEGUARD_RUN_LIVE_DISPATCH === "1";
-}
 
 function isKakaoDispatchEnabled() {
   return process.env.SAFEGUARD_KAKAO_ENABLED === "1" || process.env.SAFECLAW_KAKAO_ENABLED === "1";
@@ -68,36 +63,6 @@ function formatChannelLabel(channel: WorkflowChannel) {
   if (channel === "sms") return "문자";
   if (channel === "kakao") return "카카오 알림톡";
   return "밴드";
-}
-
-function trimSlashes(value: string) {
-  return value.replace(/^\/+|\/+$/g, "");
-}
-
-function resolveWebhookConfig() {
-  const explicitUrl = process.env.N8N_WEBHOOK_URL?.trim();
-  const publicBase = process.env.N8N_PUBLIC_BASE?.trim();
-  const internalBase = process.env.N8N_INTERNAL_BASE?.trim();
-  const path = process.env.N8N_WEBHOOK_PATH?.trim();
-  const token = (process.env.N8N_WEBHOOK_TOKEN || process.env.N8N_WEBHOOK_SECRET || "").trim();
-  const isHosted = Boolean(process.env.VERCEL || process.env.VERCEL_URL);
-
-  if (explicitUrl && token) {
-    return { url: explicitUrl, token };
-  }
-
-  const base = isHosted ? publicBase : internalBase || publicBase;
-  if (base && path && token) {
-    return {
-      url: `${base.replace(/\/+$/g, "")}/webhook/${trimSlashes(path)}`,
-      token
-    };
-  }
-
-  return {
-    url: "",
-    token: token || ""
-  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -244,53 +209,6 @@ function isPreflightBlocked(channel: WorkflowChannel, preflightResults: Workflow
   return preflightResults.some((item) => item.channel === channel && item.status === "unconfigured");
 }
 
-async function postWithTimeout(url: string, secret: string, payload: Record<string, unknown>) {
-  let lastError: unknown = null;
-
-  for (let attempt = 0; attempt <= RETRY_COUNT; attempt += 1) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-safeguard-secret": secret
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-      clearTimeout(timeout);
-
-      const text = await response.text();
-      if (!response.ok) {
-        throw new Error(`n8n webhook returned ${response.status}: ${text.slice(0, 300)}`);
-      }
-
-      if (!text) {
-        return { ok: true, message: "n8n 웹훅이 전파 요청을 접수했습니다." } satisfies WorkflowSuccessResponse;
-      }
-
-      try {
-        const parsed = JSON.parse(text) as unknown;
-        if (isRecord(parsed)) {
-          return parsed as WorkflowSuccessResponse;
-        }
-      } catch (error) {
-        console.warn("n8n webhook returned non-JSON response", error);
-      }
-
-      return { ok: true, message: text.slice(0, 300) } satisfies WorkflowSuccessResponse;
-    } catch (error) {
-      clearTimeout(timeout);
-      lastError = error;
-      console.warn(`n8n webhook attempt ${attempt + 1} failed`, error);
-    }
-  }
-
-  throw lastError instanceof Error ? lastError : new Error("n8n webhook request failed");
-}
-
 export async function POST(request: NextRequest) {
   const limited = enforceRateLimit(request, limiter);
   if (limited) return limited;
@@ -385,7 +303,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const workflowResponse = isLiveDispatchEnabled()
-      ? await postWithTimeout(webhookConfig.url, webhookConfig.token, payload)
+      ? await postWebhookWithTimeout(webhookConfig.url, webhookConfig.token, payload)
       : buildFixtureDispatchResponse(dispatchChannels, recipients);
     const channelResults = [
       ...normalizeChannelResults(workflowResponse.channelResults, dispatchChannels),
