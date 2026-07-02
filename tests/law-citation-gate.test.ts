@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gateCitations, VERIFIED_ARTICLES } from "@/lib/law-citation-gate";
 import { ACCIDENT_REPORT_TEMPLATE } from "@/lib/safety-contacts";
+import { parseEducationRecordStructured } from "@/lib/ai-deliverables";
 
 describe("VERIFIED_ARTICLES", () => {
   it("contains the whitelisted 산업안전보건법 article numbers", () => {
@@ -84,5 +85,33 @@ describe("gateCitations — 별표 references", () => {
 describe("gateCitations — regression: ACCIDENT_REPORT_TEMPLATE passes through unchanged", () => {
   it("does not alter the fixed accident-report template's whitelisted citations", () => {
     expect(gateCitations(ACCIDENT_REPORT_TEMPLATE)).toBe(ACCIDENT_REPORT_TEMPLATE);
+  });
+});
+
+describe("parseEducationRecordStructured — gates curriculum[].lawCitation", () => {
+  const raw = JSON.stringify({
+    educationRecordStructured: {
+      educationName: "정기 안전보건교육",
+      type: "정기교육",
+      dateTime: "2026-07-02 09:00",
+      location: "현장 사무실",
+      target: "전 근로자",
+      instructor: "안전관리자",
+      confirmer: "현장소장",
+      curriculum: [
+        { topic: "위험성평가", lawCitation: "시행규칙 제35조", keyPoints: ["a", "b", "c"] },
+        { topic: "안전보건교육", lawCitation: "산업안전보건법 제29조", keyPoints: ["a", "b", "c"] }
+      ],
+      understandingCheck: "질의응답으로 확인한다.",
+      tbmLink: "TBM에서 재강조",
+      followupRecommendation: "다음 달 재교육"
+    }
+  });
+
+  it("strips an unverified lawCitation and preserves a verified one", () => {
+    const out = parseEducationRecordStructured(raw);
+    const curriculum = out?.educationRecordStructured?.curriculum;
+    expect(curriculum?.[0]?.lawCitation).toBe("산업안전보건법령");
+    expect(curriculum?.[1]?.lawCitation).toBe("산업안전보건법 제29조");
   });
 });

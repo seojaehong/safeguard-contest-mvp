@@ -753,14 +753,21 @@ function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | null {
   if (!s.signatures || typeof s.signatures.author !== "string") return null;
   return { tbmLogStructured: s };
 }
-function parseEducationRecordStructured(raw: string): Partial<AiDeliverables> | null {
+export function parseEducationRecordStructured(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<{ educationRecordStructured?: EducationRecordStructured; safetyEducationPoints?: string[] }>(raw);
   const s = j?.educationRecordStructured;
   if (!s || typeof s !== "object") return null;
   if (typeof s.educationName !== "string" || s.educationName.length === 0) return null;
   if (!Array.isArray(s.curriculum) || s.curriculum.length < 2) return null;
   if (typeof s.understandingCheck !== "string") return null;
-  const out: Partial<AiDeliverables> = { educationRecordStructured: s };
+  // curriculum[].lawCitation is model-authored free text (e.g. "산업안전보건법 제29조")
+  // and is exactly the hallucination surface the citation gate exists for — gate it
+  // here too, not just the prose draft fields.
+  const gatedCurriculum = s.curriculum.map((item) => ({
+    ...item,
+    lawCitation: typeof item.lawCitation === "string" ? gateCitations(item.lawCitation) : item.lawCitation
+  }));
+  const out: Partial<AiDeliverables> = { educationRecordStructured: { ...s, curriculum: gatedCurriculum } };
   if (Array.isArray(j?.safetyEducationPoints)) {
     out.safetyEducationPoints = j.safetyEducationPoints.filter((str) => typeof str === "string");
   }
