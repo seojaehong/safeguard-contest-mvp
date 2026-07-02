@@ -24,8 +24,10 @@ const FINAL: AgentConsoleLine = { id: "final", label: "문서팩 준비 완료 �
 // One extra frame reveals the final summary; HOLD frames keep the full view
 // before the loop restarts.
 const TOTAL = SEQUENCE.length + 1;
-const HOLD = 3;
-const STEP_MS = 1400;
+const HOLD = 2;
+// Per line, so each Korean line is readable as it appears (target persona:
+// 40-50대 현장소장). Matches the brief's "3~4초 간격 라인 등장".
+const STEP_MS = 3000;
 
 function framesFor(count: number): AgentConsoleLine[] {
   const complete = count > SEQUENCE.length;
