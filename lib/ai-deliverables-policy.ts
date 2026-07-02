@@ -91,6 +91,11 @@ export type ModelAttempt = {
 export const FAST_ANTHROPIC_MODEL = "claude-haiku-4-5";
 const HEAVY_OUTPUT_DOCS = new Set(["foreign", "free"]);
 
+/** Heavy grouped/multilingual docs: 90-135s per attempt — never parse-retry these. */
+export function isHeavyOutputDoc(docName: string): boolean {
+  return HEAVY_OUTPUT_DOCS.has(docName);
+}
+
 export function resolveAnthropicModelForDoc(docName: string, configuredModel: string): string {
   return HEAVY_OUTPUT_DOCS.has(docName) ? FAST_ANTHROPIC_MODEL : configuredModel;
 }

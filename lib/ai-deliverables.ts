@@ -31,7 +31,7 @@ import {
   type RiskAssessmentRow,
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
-import { planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
+import { isHeavyOutputDoc, planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
 import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
@@ -146,8 +146,11 @@ async function callAndParse<T>(
   label: string
 ): Promise<T> {
   const budget = resolveDocBudget(label, GEMINI_TIMEOUT_MS);
+  // Heavy docs run 90-135s per attempt — a parse-retry would blow the request
+  // past Vercel's 300s ceiling, so they get a single attempt.
+  const maxAttempts = isHeavyOutputDoc(label) ? 1 : 2;
   let lastError: unknown;
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       const raw = await callGemini(prompt, budget, label);
       const parsed = parser(raw);
@@ -581,6 +584,7 @@ function foreignWorkerPrompt(ctx: GenContext) {
     persona(),
     "",
     "외국인 근로자용 안내문 2종을 작성하고 JSON 객체로 반환하라.",
+    "반드시 세 키(foreignWorkerBriefing, foreignWorkerTransmission, foreignWorkerLanguages)를 모두 포함한 하나의 JSON 객체만 출력하라. JSON 앞뒤에 코드펜스·설명·후기 등 어떤 텍스트도 붙이지 마라.",
     "  - foreignWorkerBriefing: 한국어 + 영어 + 베트남어 3가지 버전을 한 본문 안에 [한국어] [English] [Tiếng Việt] 헤더로 연속 작성. 각 버전은 위험요인 / 즉시 조치 / 작업중지 기준 / 보호구 / 비상연락 항목 포함. 한 헤더당 800~1500자, 전체 4500~7000자.",
     "  - foreignWorkerTransmission: 단톡방·문자에 그대로 붙여넣을 전송용 안내문. 한국어 + 영어 + 베트남어 + 태국어 + 우즈베크어 5개 언어 짧은 버전(각 800~1500자, 전체 7000~10000자). 각 언어 블록 시작에 [언어명] 헤더.",
     "  - foreignWorkerLanguages: 본 본문에서 사용한 언어 코드 배열 예: [\"ko\",\"en\",\"vi\",\"th\",\"uz\"]. ISO 639-1 코드.",
@@ -823,16 +827,18 @@ function parseFree(raw: string): Partial<AiDeliverables> | null {
     kakaoMessage: j.kakaoMessage as string
   };
 }
-function parseForeign(raw: string): Partial<AiDeliverables> | null {
+export function parseForeign(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   const briefing = j?.foreignWorkerBriefing;
   const transmission = j?.foreignWorkerTransmission;
+  // Lenient: a usable briefing alone is worth keeping — models under output-token
+  // pressure (Haiku on the 5-language pack) sometimes drop the transmission key.
+  // The merger keeps the template transmission when this field is absent.
   if (typeof briefing !== "string" || briefing.length <= 200) return null;
-  if (typeof transmission !== "string" || transmission.length <= 200) return null;
-  const out: Partial<AiDeliverables> = {
-    foreignWorkerBriefing: briefing,
-    foreignWorkerTransmission: transmission
-  };
+  const out: Partial<AiDeliverables> = { foreignWorkerBriefing: briefing };
+  if (typeof transmission === "string" && transmission.length > 200) {
+    out.foreignWorkerTransmission = transmission;
+  }
   if (Array.isArray(j?.foreignWorkerLanguages)) {
     out.foreignWorkerLanguages = j.foreignWorkerLanguages.filter((s) => typeof s === "string");
   }
