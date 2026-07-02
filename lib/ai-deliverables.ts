@@ -33,6 +33,7 @@ import {
 } from "@/lib/risk-assessment-schema";
 import { formatWorkDate, isHeavyOutputDoc, planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
 import { ACCIDENT_REPORT_TEMPLATE, OFFICIAL_CONTACTS, sanitizeContacts } from "@/lib/safety-contacts";
+import { gateCitations } from "@/lib/law-citation-gate";
 import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
@@ -699,7 +700,7 @@ function buildContext(opts: GenerateAllOptions): GenContext {
 function parseRiskAssessment(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   const v = j?.riskAssessmentDraft;
-  return typeof v === "string" && v.length > 100 ? { riskAssessmentDraft: v } : null;
+  return typeof v === "string" && v.length > 100 ? { riskAssessmentDraft: gateCitations(v) } : null;
 }
 function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
   // schema-first: workPlanStructured 객체를 셀 단위로 검증.
@@ -734,7 +735,7 @@ function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null
 function parseTbmLog(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   const v = j?.tbmLogDraft;
-  return typeof v === "string" && v.length > 100 ? { tbmLogDraft: v } : null;
+  return typeof v === "string" && v.length > 100 ? { tbmLogDraft: gateCitations(v) } : null;
 }
 function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<{ tbmLogStructured?: TbmLogStructured }>(raw);
@@ -843,8 +844,8 @@ export function parseFree(raw: string): Partial<AiDeliverables> | null {
   const valid = required.every((k) => typeof j[k] === "string" && (j[k] as string).length > 100);
   if (!valid) return null;
   return {
-    workpackSummaryDraft: j.workpackSummaryDraft as string,
-    emergencyResponseDraft: sanitizeContacts(j.emergencyResponseDraft as string),
+    workpackSummaryDraft: gateCitations(j.workpackSummaryDraft as string),
+    emergencyResponseDraft: gateCitations(sanitizeContacts(j.emergencyResponseDraft as string)),
     photoEvidenceDraft: j.photoEvidenceDraft as string,
     kakaoMessage: j.kakaoMessage as string
   };
