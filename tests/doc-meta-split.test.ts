@@ -156,4 +156,35 @@ describe("splitDocumentMeta", () => {
 
     expect(result.body).toBe(base);
   });
+
+  // formatSafetyReferenceAppendix (lib/search.ts) emits "[내부 안전지식 DB 반영]" as
+  // the structural sibling of "[KOSHA 기술지침/기술지원규정 직접 인용]" — same
+  // 반영 위치/근거/문서 문장 evidence-log shape, same function, same call sites
+  // (workPlanDraft, tbmBriefing, safetyEducationRecordDraft). It must be
+  // classified as meta too, or it leaks into the printed body whenever it is
+  // the only meta-eligible block appended (tbmBriefing) and gets silently
+  // swept along as an unlabeled tail whenever a citation appendix precedes it
+  // (workPlanDraft) — same bug class this module exists to fix.
+  it("splits off a [내부 안전지식 DB 반영] block", () => {
+    const text = [
+      "TBM 브리핑 본문",
+      "",
+      "[내부 안전지식 DB 반영]",
+      "- 유해요인 / 반영 위치: TBM 기록 / 근거: 내부 안전지식 DB / 문서 문장: 작업 전 그늘·물·휴식을 확인합니다."
+    ].join("\n");
+    const result = splitDocumentMeta(text);
+    expect(result.body).toBe("TBM 브리핑 본문");
+    expect(result.meta).toContain("[내부 안전지식 DB 반영]");
+  });
+
+  it("strips a tbmBriefing-shaped appendix chain when [내부 안전지식 DB 반영] is the only meta-eligible block", () => {
+    const base = "TBM 브리핑\n오늘 작업: 배관 점검\n참석자: 8명";
+    const safetyReferenceAppendix = "\n\n[내부 안전지식 DB 반영]\n- 유해요인 / 반영 위치: TBM 기록 / 근거: 내부 안전지식 DB / 문서 문장: 작업 전 그늘·물·휴식을 확인합니다.";
+    const composed = `${base}${safetyReferenceAppendix}`;
+
+    const result = splitDocumentMeta(composed);
+
+    expect(result.body).toBe(base);
+    expect(result.body).not.toContain("내부 안전지식 DB 반영");
+  });
 });

@@ -1,5 +1,6 @@
 // Separates internal pipeline evidence/reference logs ("[반영 근거]", "[문서 반영]",
-// "[KOSHA ... 직접 인용]", "[공식 서식 기준 보강]", "[근거 요약]" 등) from the
+// "[KOSHA ... 직접 인용]", "[공식 서식 기준 보강]", "[근거 요약]",
+// "[내부 안전지식 DB 반영]" 등) from the
 // field-facing body of a generated document.
 //
 // Background (2026-07-02 prod evidence): workPlanDraft / tbmBriefing /
@@ -34,7 +35,8 @@ const META_HEADER_PREFIXES = [
   "[반영 근거",
   "[문서 반영",
   "[공식 서식 기준 보강",
-  "[근거 요약"
+  "[근거 요약",
+  "[내부 안전지식 DB 반영"
 ] as const;
 
 const META_HEADER_SUBSTRINGS = ["직접 인용"] as const;
