@@ -1,5 +1,6 @@
 import { AskResponse, DetailRecord, SearchResult } from "./types";
 import { selectFallbackAccidentCases } from "./accident-cases";
+import { buildEvidenceLabels } from "./smsa-mapping";
 import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
 
 type ScenarioProfile = {
@@ -1055,6 +1056,18 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
         "TBM 및 당일 안전교육 내용 확인 후 작업 시작 바랍니다."
       ].join("\n")
     },
+    evidenceLabels: buildEvidenceLabels([
+      "riskAssessmentDraft",
+      "workPlanDraft",
+      "tbmBriefing",
+      "tbmLogDraft",
+      "safetyEducationRecordDraft",
+      "emergencyResponseDraft",
+      "photoEvidenceDraft",
+      "foreignWorkerBriefing",
+      "foreignWorkerTransmission",
+      "kakaoMessage"
+    ]),
     status: {
       lawgo: mode === "live" ? "live" : mode === "fallback" ? "fallback" : "mock",
       ai: mode === "live" ? "live" : mode === "fallback" ? "fallback" : "mock",

@@ -15,6 +15,7 @@ import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWo
 import { matchSafetyKnowledge } from "./safety-knowledge";
 import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow } from "./risk-assessment-schema";
 import { splitDocumentMeta } from "./doc-meta-split";
+import { buildEvidenceLabels } from "./smsa-mapping";
 import { createLogger } from "@/lib/logger";
 import { attachProgressListeners, type OnAskProgress } from "./ask-progress";
 
@@ -1268,6 +1269,22 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           issues: structuredRiskIssues
         }
       },
+      // 중대재해처벌법 시행령 제4조 증빙 매핑 라벨 (SafeClaw 2 Phase 0 프리뷰).
+      // 산문 문서 필드 + 존재하는 schema-first 구조 필드를 모두 키로 넘겨
+      // buildEvidenceLabels가 매핑된 것만 골라 채운다.
+      evidenceLabels: buildEvidenceLabels([
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage",
+        ...(structuredRiskRows.length ? ["structuredRiskRows"] : [])
+      ]),
       status: {
         ...response.status,
         lawgo: legalEvidenceMode,

@@ -1,4 +1,5 @@
 import type { RiskAssessmentRow, RiskAssessmentValidationIssue } from "./risk-assessment-schema";
+import type { SmsaEvidenceLabel } from "./smsa-mapping";
 
 export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
@@ -455,6 +456,13 @@ export type AskResponse = {
       issues: RiskAssessmentValidationIssue[];
     };
   };
+  /**
+   * 중대재해처벌법 시행령 제4조 증빙 매핑 라벨. deliverables의 문서 필드 키(예:
+   * "riskAssessmentDraft")로 index되며, 시행령 조항과 대응되지 않는 문서(예:
+   * workpackSummaryDraft, workPermitDraft)는 키 자체가 생략된다. SafeClaw 2
+   * Phase 0 프리뷰 — lib/smsa-mapping.ts 참고.
+   */
+  evidenceLabels?: Record<string, SmsaEvidenceLabel>;
   status: {
     lawgo: IntegrationMode;
     ai: IntegrationMode;
