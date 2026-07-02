@@ -14,6 +14,9 @@ import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
 import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission } from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
 import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow } from "./risk-assessment-schema";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("search");
 
 export async function runSearch(query: string) {
   return searchLegalSources(query);
@@ -794,7 +797,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.
     const citationsPromise = rawCitationsBasePromise.then((base) =>
       enhanceLegalEvidenceMappings(question, base).catch((error) => {
-        console.error("AI legal evidence mapping failed; using original legal evidence order", error);
+        log.error("AI legal evidence mapping failed; using original legal evidence order", error);
         return base;
       })
     );
@@ -829,7 +832,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     };
     const safeSearch = (opts: Parameters<typeof searchSafetyReferences>[0]) =>
       searchSafetyReferences(opts).catch((error) => {
-        console.error("safety reference search failed", error);
+        log.error("safety reference search failed", error);
         return { ...emptyResult, message: error instanceof Error ? error.message : String(error) };
       });
     const safetyReferencePromise = (async () => {
@@ -915,11 +918,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
               scope: aiMode === "full" ? "full" : "enhanced"
             }).catch((error) => {
-              console.error("AI deliverable generation failed (parallel path); falling back to template bodies", error);
+              log.error("AI deliverable generation failed (parallel path); falling back to template bodies", error);
               return null;
             });
           }).catch((error) => {
-            console.error("deliverablesPromise setup failed", error);
+            log.error("deliverablesPromise setup failed", error);
             return null;
           })
         : Promise.resolve(null);
@@ -980,16 +983,16 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       deliverablesPromise     // 9 — runs in parallel with the above
     ]);
 
-    const weather = allResults[0].status === "fulfilled" ? allResults[0].value : (console.warn("weatherPromise failed", (allResults[0] as PromiseRejectedResult).reason), weatherFallback);
-    const training = allResults[1].status === "fulfilled" ? allResults[1].value : (console.warn("trainingPromise failed", (allResults[1] as PromiseRejectedResult).reason), trainingFallback);
-    const koshaEducation = allResults[2].status === "fulfilled" ? allResults[2].value : (console.warn("koshaEducationPromise failed", (allResults[2] as PromiseRejectedResult).reason), koshaEducationFallback);
-    const kosha = allResults[3].status === "fulfilled" ? allResults[3].value : (console.warn("koshaPromise failed", (allResults[3] as PromiseRejectedResult).reason), koshaFallback);
-    const koshaOpenApi = allResults[4].status === "fulfilled" ? allResults[4].value : (console.warn("koshaOpenApiPromise failed", (allResults[4] as PromiseRejectedResult).reason), koshaOpenApiFallback);
-    const accidentCases = allResults[5].status === "fulfilled" ? allResults[5].value : (console.warn("accidentCasesPromise failed", (allResults[5] as PromiseRejectedResult).reason), accidentCasesFallback);
-    const response = allResults[6].status === "fulfilled" ? allResults[6].value : (console.warn("responsePromise failed", (allResults[6] as PromiseRejectedResult).reason), buildMockAskResponse(question, mockSearchResults.slice(0, 4), "fallback", "AI 응답 생성 실패"));
-    const safetyReference = allResults[7].status === "fulfilled" ? allResults[7].value : (console.warn("safetyReferencePromise failed", (allResults[7] as PromiseRejectedResult).reason), safetyReferenceFallback);
-    const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (console.warn("citationsPromise failed", (allResults[8] as PromiseRejectedResult).reason), mockSearchResults.slice(0, 4));
-    const deliverablesResult = allResults[9].status === "fulfilled" ? allResults[9].value : (console.warn("deliverablesPromise failed", (allResults[9] as PromiseRejectedResult).reason), null);
+    const weather = allResults[0].status === "fulfilled" ? allResults[0].value : (log.warn("weatherPromise failed", (allResults[0] as PromiseRejectedResult).reason), weatherFallback);
+    const training = allResults[1].status === "fulfilled" ? allResults[1].value : (log.warn("trainingPromise failed", (allResults[1] as PromiseRejectedResult).reason), trainingFallback);
+    const koshaEducation = allResults[2].status === "fulfilled" ? allResults[2].value : (log.warn("koshaEducationPromise failed", (allResults[2] as PromiseRejectedResult).reason), koshaEducationFallback);
+    const kosha = allResults[3].status === "fulfilled" ? allResults[3].value : (log.warn("koshaPromise failed", (allResults[3] as PromiseRejectedResult).reason), koshaFallback);
+    const koshaOpenApi = allResults[4].status === "fulfilled" ? allResults[4].value : (log.warn("koshaOpenApiPromise failed", (allResults[4] as PromiseRejectedResult).reason), koshaOpenApiFallback);
+    const accidentCases = allResults[5].status === "fulfilled" ? allResults[5].value : (log.warn("accidentCasesPromise failed", (allResults[5] as PromiseRejectedResult).reason), accidentCasesFallback);
+    const response = allResults[6].status === "fulfilled" ? allResults[6].value : (log.warn("responsePromise failed", (allResults[6] as PromiseRejectedResult).reason), buildMockAskResponse(question, mockSearchResults.slice(0, 4), "fallback", "AI 응답 생성 실패"));
+    const safetyReference = allResults[7].status === "fulfilled" ? allResults[7].value : (log.warn("safetyReferencePromise failed", (allResults[7] as PromiseRejectedResult).reason), safetyReferenceFallback);
+    const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (log.warn("citationsPromise failed", (allResults[8] as PromiseRejectedResult).reason), mockSearchResults.slice(0, 4));
+    const deliverablesResult = allResults[9].status === "fulfilled" ? allResults[9].value : (log.warn("deliverablesPromise failed", (allResults[9] as PromiseRejectedResult).reason), null);
     const koreanLawMcpCount = citations.filter((item) => item.sourceSystem === "korean-law-mcp").length;
     const sourceMix = summarizeLegalSourceMix(citations);
     const legalEvidenceMode = inferLegalEvidenceMode(sourceMix);
