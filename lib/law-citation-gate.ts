@@ -83,15 +83,41 @@ const WINDOW_SIZE = 40;
 const ARTICLE_RE = /제(\d+)조(?:의(\d+))?/g;
 const ANNEX_ITEM_RE = /별표\s*(\d+)\s*제\s*\d+\s*호/g;
 
+// "제121/133/134조" — slash-separated article enumeration. Expanded to
+// "제121조, 제133조, 제134조" before the main gate pass runs, so each article
+// number is checked (and, if unverified, removed) individually instead of the
+// whole slash run silently passing through as one unmatched token.
+const SLASH_ARTICLE_LIST_RE = /제((?:\d+(?:의\d+)?\/)+\d+(?:의\d+)?)조/g;
+
+function expandSlashArticleLists(text: string): string {
+  return text.replace(SLASH_ARTICLE_LIST_RE, (_whole, list: string) =>
+    list
+      .split("/")
+      .map((n) => `제${n}조`)
+      .join(", ")
+  );
+}
+
+// Gap between two consecutive "제N조" citations that consists only of list
+// enumeration punctuation/words (콤마, 가운뎃점, "및", "부터", "까지", "~"/"-"
+// range dashes, and whitespace). When a gap matches this, the law-name context
+// resolved for the preceding citation is carried forward to the next one, so a
+// law-name window match on the first item of a list ("시행규칙 제121조, 제133조,
+// 제134조") applies to every item in the list, not just the first.
+const LIST_CONNECTOR_RE = /^(?:[\s,·~-]|및|부터|까지)*$/;
+
 // "별표N 제M호" citations can't be verified against any whitelist here, so the
 // item-number half is always dropped, leaving just "별표N".
 function sanitizeAnnexReferences(text: string): string {
   return text.replace(ANNEX_ITEM_RE, (_whole, annexNumber: string) => `별표${annexNumber}`);
 }
 
-function sanitizeArticleReferences(text: string): string {
+function sanitizeArticleReferences(rawText: string): string {
+  const text = expandSlashArticleLists(rawText);
   let result = "";
   let cursor = 0;
+  let prevMatchEnd: number | null = null;
+  let activeCategory: LawCategory | null = null;
   ARTICLE_RE.lastIndex = 0;
   let match: RegExpExecArray | null;
   while ((match = ARTICLE_RE.exec(text)) !== null) {
@@ -101,8 +127,25 @@ function sanitizeArticleReferences(text: string): string {
     const window = text.slice(windowStart, matchStart);
     const lawPhrase = findLawPhrase(window);
 
-    if (!lawPhrase) {
-      // Law name undetermined in the 40-char lookback — preserve as-is.
+    // A list-connector-only gap ("제121조, 제133조" / "제171조부터 제179조까지")
+    // carries the previously resolved law-name category forward, so a law
+    // name that only appears once before a nested-article list still applies
+    // to every item in it.
+    const gapIsListConnector =
+      prevMatchEnd !== null && LIST_CONNECTOR_RE.test(text.slice(prevMatchEnd, matchStart));
+    const propagatedCategory = gapIsListConnector ? activeCategory : null;
+    const category = lawPhrase?.category ?? propagatedCategory;
+
+    if (lawPhrase) {
+      activeCategory = lawPhrase.category;
+    } else if (!gapIsListConnector) {
+      activeCategory = null;
+    }
+    prevMatchEnd = matchEnd;
+
+    if (!category) {
+      // Law name undetermined in the 40-char lookback (and no list context to
+      // inherit one from) — preserve as-is.
       result += text.slice(cursor, matchEnd);
       cursor = matchEnd;
       continue;
@@ -112,14 +155,24 @@ function sanitizeArticleReferences(text: string): string {
     const ui = match[2];
     const articleKey = ui ? `${jo}의${ui}` : jo;
 
-    if (VERIFIED_ARTICLES[lawPhrase.category].has(articleKey)) {
+    if (VERIFIED_ARTICLES[category].has(articleKey)) {
       result += text.slice(cursor, matchEnd);
       cursor = matchEnd;
       continue;
     }
 
-    const phraseAbsoluteStart = windowStart + lawPhrase.phraseStart;
-    result += text.slice(cursor, phraseAbsoluteStart);
+    if (lawPhrase) {
+      const phraseAbsoluteStart = windowStart + lawPhrase.phraseStart;
+      result += text.slice(cursor, phraseAbsoluteStart);
+      result += GENERIC_LAW_TERM;
+      cursor = matchEnd;
+      continue;
+    }
+
+    // Unverified via a propagated (list-inherited) category: there is no
+    // local law-name text to collapse, so only the article citation itself
+    // is replaced.
+    result += text.slice(cursor, matchStart);
     result += GENERIC_LAW_TERM;
     cursor = matchEnd;
   }

@@ -44,6 +44,32 @@ describe("gateCitations — hallucinated combinations removed", () => {
   }
 });
 
+describe("gateCitations — nested/list article citations (Finding 1)", () => {
+  it("expands and strips all three unverified 시행규칙 slash-listed articles (제121/133/134조)", () => {
+    const input = "시행규칙 제121/133/134조를 확인한다.";
+    const out = gateCitations(input);
+    expect(out).not.toContain("121");
+    expect(out).not.toContain("133");
+    expect(out).not.toContain("134");
+    expect(out).not.toContain("121/133/134");
+    expect(out).toContain("산업안전보건법령");
+  });
+
+  it("strips all three unverified 시행규칙 comma-listed articles (제121조, 제133조, 제134조)", () => {
+    const input = "시행규칙 제121조, 제133조, 제134조를 확인한다.";
+    const out = gateCitations(input);
+    expect(out).not.toContain("제121조");
+    expect(out).not.toContain("제133조");
+    expect(out).not.toContain("제134조");
+    expect(out).toContain("산업안전보건법령");
+  });
+
+  it("preserves a verified comma-listed combination (기준규칙 제171조, 제172조)", () => {
+    const input = "기준규칙 제171조, 제172조를 준수한다.";
+    expect(gateCitations(input)).toBe(input);
+  });
+});
+
 describe("gateCitations — verified combinations preserved", () => {
   it("preserves 법 제38조", () => {
     const input = "법 제38조에 따라 위험성평가를 실시한다.";

@@ -865,9 +865,9 @@ export function parseForeign(raw: string): Partial<AiDeliverables> | null {
   // pressure (Haiku on the 5-language pack) sometimes drop the transmission key.
   // The merger keeps the template transmission when this field is absent.
   if (typeof briefing !== "string" || briefing.length <= 200) return null;
-  const out: Partial<AiDeliverables> = { foreignWorkerBriefing: sanitizeContacts(briefing) };
+  const out: Partial<AiDeliverables> = { foreignWorkerBriefing: gateCitations(sanitizeContacts(briefing)) };
   if (typeof transmission === "string" && transmission.length > 200) {
-    out.foreignWorkerTransmission = sanitizeContacts(transmission);
+    out.foreignWorkerTransmission = gateCitations(sanitizeContacts(transmission));
   }
   if (Array.isArray(j?.foreignWorkerLanguages)) {
     out.foreignWorkerLanguages = j.foreignWorkerLanguages.filter((s) => typeof s === "string");

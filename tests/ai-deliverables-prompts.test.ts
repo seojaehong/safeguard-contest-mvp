@@ -85,4 +85,35 @@ describe("post-processing: contact sanitization on parsed output", () => {
     expect(out!.foreignWorkerBriefing).not.toContain("031-555-7788");
     expect(out!.foreignWorkerTransmission).not.toContain("031-555-8000");
   });
+
+  it("parseForeign gates a hallucinated article citation out of foreignWorkerBriefing and foreignWorkerTransmission (Finding 2)", () => {
+    const raw = JSON.stringify({
+      foreignWorkerBriefing: `${LONG} 시행규칙 제30조에 따라 외국인 근로자 특별교육을 실시한다.`,
+      foreignWorkerTransmission: `${LONG} 시행규칙 제30조에 따라 통지한다.`
+    });
+    const out = parseForeign(raw);
+    expect(out).not.toBeNull();
+    expect(out!.foreignWorkerBriefing).not.toContain("제30조");
+    expect(out!.foreignWorkerTransmission).not.toContain("제30조");
+    expect(out!.foreignWorkerBriefing).toContain("산업안전보건법령");
+  });
+
+  it("parseForeign leaves multilingual (English/Vietnamese) briefing text unmodified — no false-positive gating", () => {
+    const english =
+      "In case of emergency, immediately contact the site safety manager and evacuate to the designated assembly point. " +
+      "Do not operate machinery you have not been trained on. " +
+      LONG;
+    const vietnamese =
+      "Trong trường hợp khẩn cấp, hãy liên hệ ngay với quản lý an toàn công trường và sơ tán đến điểm tập kết đã chỉ định. " +
+      "Không vận hành máy móc mà bạn chưa được đào tạo. " +
+      LONG;
+    const raw = JSON.stringify({
+      foreignWorkerBriefing: english,
+      foreignWorkerTransmission: vietnamese
+    });
+    const out = parseForeign(raw);
+    expect(out).not.toBeNull();
+    expect(out!.foreignWorkerBriefing).toBe(english);
+    expect(out!.foreignWorkerTransmission).toBe(vietnamese);
+  });
 });
