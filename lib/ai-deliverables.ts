@@ -174,17 +174,41 @@ async function callAndParse<T>(
   throw lastError instanceof Error ? lastError : new Error(`AI ${label} exhausted retries`);
 }
 
-function safeParseJson<T = unknown>(raw: string): T | null {
+export function safeParseJson<T = unknown>(raw: string): T | null {
   try {
     return JSON.parse(raw) as T;
   } catch {
-    const m = raw.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-    if (!m) return null;
+    // Fall through to fence/brace extraction below.
+  }
+
+  // Models sometimes wrap the JSON in a ```json fence and append chatter after
+  // the closing fence (prod evidence: [AI tbmLog] parse failed cases). Prefer the
+  // fenced block's contents when present, since it's the model's explicit
+  // delimiter and avoids swallowing trailing prose into the brace match.
+  const fenceMatch = raw.match(/```(?:json)?\s*\n?([\s\S]*?)```/i);
+  if (fenceMatch) {
     try {
-      return JSON.parse(m[0]) as T;
+      return JSON.parse(fenceMatch[1].trim()) as T;
     } catch {
-      return null;
+      // Fall through to brace extraction on the fenced contents, then raw.
     }
+    const fenced = fenceMatch[1];
+    const fencedBraceMatch = fenced.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (fencedBraceMatch) {
+      try {
+        return JSON.parse(fencedBraceMatch[0]) as T;
+      } catch {
+        // Fall through.
+      }
+    }
+  }
+
+  const m = raw.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+  if (!m) return null;
+  try {
+    return JSON.parse(m[0]) as T;
+  } catch {
+    return null;
   }
 }
 
