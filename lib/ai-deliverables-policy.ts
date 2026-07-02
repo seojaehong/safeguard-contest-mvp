@@ -65,6 +65,17 @@ export type ModelAttempt = {
  * each fallback model gets one attempt capped at FALLBACK_MODEL_TIMEOUT_CAP_MS
  * (never more than the primary budget). Duplicate models are collapsed.
  */
+/**
+ * Vertex fallback chain when the Anthropic provider already consumed the
+ * primary budget: skip the slow flash primary and go straight to the fast
+ * fallback model with the capped budget. Keeps the worst-case per-doc chain
+ * at budget + cap (e.g. 45s + 15s) instead of budget + 45s + 15s.
+ */
+export function planPostAnthropicAttempts(fallbackModels: string[], budget: DocBudget): ModelAttempt[] {
+  const model = fallbackModels[0]?.trim() || "gemini-2.5-flash-lite";
+  return [{ model, timeoutMs: budget.fallbackTimeoutCapMs }];
+}
+
 export function planModelAttempts(
   primaryModel: string,
   fallbackModels: string[],

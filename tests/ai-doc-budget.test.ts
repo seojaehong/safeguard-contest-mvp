@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   planModelAttempts,
+  planPostAnthropicAttempts,
   resolveDocBudget,
   resolvePositiveIntEnv,
   DEFAULT_DELIVERABLES_TIMEOUT_MS,
@@ -39,6 +40,26 @@ describe("resolveDocBudget", () => {
   test("foreign doubling respects a custom base timeout", () => {
     const budget = resolveDocBudget("foreign", DEFAULT_DELIVERABLES_TIMEOUT_MS);
     expect(budget.timeoutMs).toBe(DEFAULT_DELIVERABLES_TIMEOUT_MS * 2);
+  });
+});
+
+describe("planPostAnthropicAttempts", () => {
+  test("goes straight to the fast fallback model with the capped budget", () => {
+    const attempts = planPostAnthropicAttempts(["gemini-2.5-flash-lite"], {
+      timeoutMs: 45_000,
+      maxOutputTokens: 8192,
+      fallbackTimeoutCapMs: 15_000,
+    });
+    expect(attempts).toEqual([{ model: "gemini-2.5-flash-lite", timeoutMs: 15_000 }]);
+  });
+
+  test("defaults to gemini-2.5-flash-lite when no fallback models configured", () => {
+    const attempts = planPostAnthropicAttempts([], {
+      timeoutMs: 90_000,
+      maxOutputTokens: 16_384,
+      fallbackTimeoutCapMs: 30_000,
+    });
+    expect(attempts).toEqual([{ model: "gemini-2.5-flash-lite", timeoutMs: 30_000 }]);
   });
 });
 
