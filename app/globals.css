@@ -3345,6 +3345,23 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   background: rgba(232, 241, 237, 0.68);
 }
 
+/* 중대재해처벌법 시행령 제4조 증빙 매핑 배지 (SafeClaw 2 Phase 0 프리뷰) */
+.doc-card-evidence-badge {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--sc-black, var(--ink));
+  border-radius: 999px;
+  padding: 2px 9px;
+  background: var(--sc-hazard-yellow, #ffd400);
+  color: var(--sc-black, var(--ink));
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
 .dispatch-preview-panel {
   grid-template-columns: minmax(160px, 0.32fr) minmax(0, 1fr);
   align-items: center;

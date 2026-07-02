@@ -10,6 +10,7 @@ import { fetchAskStream } from "@/lib/ask-stream-client";
 import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
 import type { AskResponse } from "@/lib/types";
 import type { FieldExample } from "@/lib/field-examples";
+import { formatEvidenceBadge } from "@/lib/smsa-mapping";
 
 type SafeGuardCommandCenterProps = {
   examples: FieldExample[];
@@ -874,8 +875,8 @@ export function SafeGuardCommandCenter({
                   disabled={busy}
                 />
                 <span>
-                  <strong>풀 AI (14개 본문)</strong>
-                  <small>응답 +30–60초 · 외국인 안내문 5개 언어까지 모두 AI 생성</small>
+                  <strong>풀 AI (전체 문서 생성)</strong>
+                  <small>응답 +30–60초 · 문서 12종 + 외국인 안내문 5개 언어 모두 AI 생성</small>
                 </span>
               </label>
             </fieldset>
@@ -949,11 +950,21 @@ export function SafeGuardCommandCenter({
               <strong>{currentDocProgress}/{totalDocumentCount}</strong>
             </div>
             <div className="doc-card-list">
-              {outputItems.map((item, index) => (
+              {outputItems.map((item, index) => {
+                const evidenceLabel = data?.evidenceLabels?.[item.key];
+                return (
                 <article key={item.key} className={data ? "doc-card done" : busy && index < 2 ? "doc-card active" : "doc-card"}>
                   <span>DOC · {String(index + 1).padStart(2, "0")}</span>
                   <strong>{item.title}</strong>
                   <p>{data ? "준제출형 편집·출력 준비" : busy && index < 2 ? "작성 중" : "생성 대기"}</p>
+                  {evidenceLabel ? (
+                    <span
+                      className="doc-card-evidence-badge"
+                      title={`${evidenceLabel.article} — ${evidenceLabel.purpose}${evidenceLabel.related ? ` (병기: ${evidenceLabel.related})` : ""}`}
+                    >
+                      {formatEvidenceBadge(evidenceLabel.article)}
+                    </span>
+                  ) : null}
                   {data ? (
                     <div className="doc-card-actions">
                       <button type="button" onClick={() => focusWorkpackEditor(item.key)}>편집</button>
@@ -967,7 +978,8 @@ export function SafeGuardCommandCenter({
                     </div>
                   ) : null}
                 </article>
-              ))}
+                );
+              })}
             </div>
           </section>
 
