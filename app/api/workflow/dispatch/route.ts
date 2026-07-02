@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createRateLimiter } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/api-guard";
 
 export const dynamic = "force-dynamic";
+
+const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
 
 type WorkflowChannel = "email" | "sms" | "kakao" | "band";
 
@@ -288,6 +292,8 @@ async function postWithTimeout(url: string, secret: string, payload: Record<stri
 }
 
 export async function POST(request: NextRequest) {
+  const limited = enforceRateLimit(request, limiter);
+  if (limited) return limited;
   const webhookConfig = resolveWebhookConfig();
 
   let body: WorkflowRequest;
