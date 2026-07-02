@@ -14,6 +14,7 @@ import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
 import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission } from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
 import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow } from "./risk-assessment-schema";
+import { splitDocumentMeta } from "./doc-meta-split";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("search");
@@ -761,6 +762,20 @@ function formatSeriousAccidentReferenceAppendix(target: "risk" | "tbm" | "educat
   ].join("\n");
 }
 
+/**
+ * workPlanDraft / tbmBriefing / safetyEducationRecordDraft have no free-text AI
+ * producer (only *Structured schema-first prompts exist — see ai-deliverables.ts
+ * TABULAR_SPECS), so `aiBodies.*` is always empty for these three fields and the
+ * template + appendix-chain branch below always runs. Prod evidence (2026-07-02)
+ * showed the appended evidence-log blocks ("[반영 근거]", "[문서 반영]",
+ * "[KOSHA ... 직접 인용]", "[공식 서식 기준 보강]", "[근거 요약]") leaking into the
+ * printed document — in the worst cases roughly half the document was meta.
+ * Strip them here, right before the text becomes the printed document body.
+ */
+function stripPipelineMeta(text: string): string {
+  return splitDocumentMeta(text).body;
+}
+
 export type RunAskOptions = {
   aiMode?: AiMode;
 };
@@ -1178,7 +1193,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           : `${baseDeliverables.riskAssessmentDraft}${riskAssessmentOfficialAppendix}${outdoorHeatRiskAppendix}${riskLegalAppendix}${riskSeriousAccidentAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${riskKoshaOpenApiAppendix}`,
         workPlanDraft: aiBodies.workPlanDraft
           ? aiBodies.workPlanDraft
-          : `${baseDeliverables.workPlanDraft}${outdoorHeatRiskAppendix}${workPlanLegalAppendix}${workPlanKoshaAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${workPlanKoshaOpenApiAppendix}`,
+          : stripPipelineMeta(`${baseDeliverables.workPlanDraft}${outdoorHeatRiskAppendix}${workPlanLegalAppendix}${workPlanKoshaAppendix}${safetyKnowledgeAppendix}${safetyReferenceAppendix}${workPlanKoshaOpenApiAppendix}`),
         // schema-first: AI가 셀 단위 구조로 직접 반환했으면 통과. xlsx-builder가 이걸로
         // parseSheetRows 우회하고 표 양식에 매핑.
         ...(linkedWorkPlanStructured ? { workPlanStructured: linkedWorkPlanStructured } : {}),
@@ -1188,13 +1203,13 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         ...(aiBodies.educationRecordStructured ? { educationRecordStructured: aiBodies.educationRecordStructured } : {}),
         tbmBriefing: aiBodies.tbmBriefing
           ? aiBodies.tbmBriefing
-          : `${baseDeliverables.tbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}${safetyReferenceAppendix}`,
+          : stripPipelineMeta(`${baseDeliverables.tbmBriefing}${tbmQualityAppendix}${outdoorHeatTbmAppendix}${safetyReferenceAppendix}`),
         tbmLogDraft: aiBodies.tbmLogDraft
           ? aiBodies.tbmLogDraft
           : `${baseDeliverables.tbmLogDraft}${tbmQualityAppendix}`.trim(),
         safetyEducationRecordDraft: aiBodies.safetyEducationRecordDraft
           ? aiBodies.safetyEducationRecordDraft
-          : `${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`,
+          : stripPipelineMeta(`${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`),
         emergencyResponseDraft: aiBodies.emergencyResponseDraft
           ? aiBodies.emergencyResponseDraft
           : `${baseDeliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}${emergencyKoshaOpenApiAppendix}`,
