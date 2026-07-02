@@ -1,0 +1,84 @@
+name: Weekly Prod Smoke
+
+on:
+  schedule:
+    # 매주 일요일 22:00 UTC = 월요일 07:00 KST
+    - cron: "0 22 * * 0"
+  workflow_dispatch:
+
+jobs:
+  prod-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write request body (UTF-8)
+        run: |
+          cat > request.json <<'EOF'
+          {"question":"안산 제조공장 용접 및 지게차 상하차 작업, 외국인 근로자 3명 포함 작업자 6명","aiMode":"full"}
+          EOF
+
+      - name: Call /api/ask
+        run: |
+          http_code=$(curl -sS -o response.json -w "%{http_code}" \
+            --max-time 280 \
+            -X POST "https://www.safeclaw.kr/api/ask" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -A "Mozilla/5.0 Chrome/126" \
+            --data-binary @request.json || true)
+          : "${http_code:=000}"
+          echo "HTTP_CODE=${http_code}" >> "$GITHUB_ENV"
+          echo "HTTP status: ${http_code}"
+          cat response.json || true
+
+      - name: Evaluate /api/ask response
+        run: |
+          node -e '
+          const fs = require("fs");
+
+          const httpCode = process.env.HTTP_CODE || "0";
+          let body = {};
+          try {
+            body = JSON.parse(fs.readFileSync("response.json", "utf8"));
+          } catch (e) {
+            console.error("Failed to parse response.json as JSON:", e.message);
+          }
+
+          const status = body.status || {};
+          const requiredLive = ["lawgo", "ai", "weather", "work24", "kosha"];
+
+          const checks = [];
+          checks.push({ name: "http_status", ok: httpCode === "200", detail: httpCode });
+          checks.push({ name: "status.summary", ok: status.summary === "연결됨", detail: String(status.summary) });
+          const detailHasFail = typeof status.detail === "string" && status.detail.includes("=fail(");
+          checks.push({ name: "status.detail no =fail(", ok: !detailHasFail, detail: String(status.detail) });
+
+          for (const key of requiredLive) {
+            checks.push({ name: `status.${key}`, ok: status[key] === "live", detail: String(status[key]) });
+          }
+
+          console.log("");
+          console.log("check                        | result | detail");
+          console.log("------------------------------|--------|-------");
+          for (const c of checks) {
+            const name = c.name.padEnd(29, " ");
+            const result = (c.ok ? "PASS" : "FAIL").padEnd(6, " ");
+            console.log(`${name} | ${result} | ${c.detail}`);
+          }
+          console.log("");
+
+          const failed = checks.filter((c) => !c.ok);
+          if (failed.length > 0) {
+            console.error(`${failed.length} check(s) failed.`);
+            process.exit(1);
+          }
+          console.log("All checks passed.");
+          '
+
+      - name: Deploy sanity — HSTS header check
+        run: |
+          set -e
+          headers=$(curl -sSI --max-time 60 "https://www.safeclaw.kr/")
+          echo "$headers"
+          echo "$headers" | grep -qi '^strict-transport-security:' || {
+            echo "Missing strict-transport-security header on https://www.safeclaw.kr/"
+            exit 1
+          }
