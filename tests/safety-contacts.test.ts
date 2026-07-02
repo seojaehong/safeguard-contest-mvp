@@ -66,4 +66,11 @@ describe("sanitizeContacts", () => {
     const input = "현장소장: 010-____-____ / 안전관리자: 010-1234-5678";
     expect(sanitizeContacts(input)).toBe(input);
   });
+
+  it("does not swallow a preceding completed sentence when replacing", () => {
+    const input = "즉시 작업을 중지한다. 안전보건공단 안산지사 031-555-7788";
+    const out = sanitizeContacts(input);
+    expect(out).toContain("즉시 작업을 중지한다.");
+    expect(out).not.toContain("031-555-7788");
+  });
 });

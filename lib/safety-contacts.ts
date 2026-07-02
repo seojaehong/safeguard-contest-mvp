@@ -35,8 +35,12 @@ const PHONE_ALTERNATION = "0(?!10)\\d{1,2}-\\d{3,4}-\\d{4}|1[0-9]{3}-\\d{4}";
 // of 1-5 space-separated words, directly followed by a phone number in one of the formats
 // above (optionally wrapped in parentheses). Only "기관명 인접 + 전화번호" matches are
 // touched, per spec — a bare phone number with no adjacent institution text is left alone.
+// Note: "." is deliberately excluded from the word-char class so a sentence-final
+// period acts as a boundary — otherwise the institution-name run can reach backward
+// across a completed sentence and swallow unrelated safety instructions into the
+// placeholder (e.g. "즉시 작업을 중지한다. 안전보건공단 안산지사 031-555-7788").
 const CONTACT_PATTERN = new RegExp(
-  `[가-힣A-Za-z()·.]+(?:[ \\t]+[가-힣A-Za-z()·.]+){0,4}[ \\t]*\\(?(?:${PHONE_ALTERNATION})\\)?`,
+  `[가-힣A-Za-z()·]+(?:[ \\t]+[가-힣A-Za-z()·]+){0,4}[ \\t]*\\(?(?:${PHONE_ALTERNATION})\\)?`,
   "g"
 );
 
