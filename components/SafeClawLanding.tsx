@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { JumpButton } from "./JumpButton";
+import { HeroConsoleReplay } from "./HeroConsoleReplay";
 
 const navItems = [
   ["제품", "system"],
@@ -60,7 +61,7 @@ export function SafeClawLanding() {
       <header className="safeclaw-landing-nav">
         <Link href="/" className="safeclaw-os-brand" aria-label="SafeClaw 홈">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/ClawMark-Inverse.svg" alt="" className="safeclaw-os-mark" width={28} height={28} />
+          <img src="/brand/ClawMark.svg" alt="" className="safeclaw-os-mark" width={28} height={28} />
           <strong>safeclaw/<em>os</em></strong>
         </Link>
         <nav aria-label="SafeClaw 홈페이지 메뉴">
@@ -93,16 +94,13 @@ export function SafeClawLanding() {
             </h1>
             <p>safeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.</p>
             <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 생성합니다.</p>
+            <p className="safeclaw-hero-position">채용하지 않은 안전관리자 — 한 명 몫의 문서 업무를 대신합니다.</p>
             <div className="safeclaw-os-cta">
               <Link href="/workspace" className="primary">작업공간 열기 →</Link>
               <Link href="/documents">문서팩 보기</Link>
             </div>
           </div>
-          <aside className="safeclaw-os-console" aria-label="실행 콘솔">
-            <span>safeclaw@workspace ~ %</span>
-            <b># 작업 입력 → 근거 결합 → 문서팩 생성 → 전파 기록</b>
-            <Link href="/workspace">작업공간 열기</Link>
-          </aside>
+          <HeroConsoleReplay />
         </div>
       </section>
 
@@ -206,6 +204,23 @@ export function SafeClawLanding() {
           <Link href="/workspace?scenario=seoul-construction-windy">샘플 작업 생성으로 이동 →</Link>
         </div>
       </section>
+
+      <footer className="safeclaw-landing-footer">
+        <div className="safeclaw-footer-brand">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/ClawMark-Inverse.svg" alt="" width={26} height={26} />
+          <strong>safeclaw/<em>os</em></strong>
+          <p>현장관리자를 위한 산업안전 문서 작업공간 · 공공 API 근거 결합</p>
+        </div>
+        <nav aria-label="푸터 메뉴">
+          <Link href="/workspace">작업공간</Link>
+          <Link href="/documents">문서</Link>
+          <Link href="/evidence">근거</Link>
+          <Link href="/ops/api">API 상태</Link>
+          <Link href="/login">로그인</Link>
+        </nav>
+        <p className="safeclaw-footer-note">© {new Date().getFullYear()} safeclaw · 안전 문서는 사람의 검토를 전제로 합니다.</p>
+      </footer>
     </main>
   );
 }
