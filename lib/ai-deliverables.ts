@@ -32,6 +32,7 @@ import {
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
 import { formatWorkDate, isHeavyOutputDoc, planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
+import { ACCIDENT_REPORT_TEMPLATE, OFFICIAL_CONTACTS, sanitizeContacts } from "@/lib/safety-contacts";
 import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
@@ -562,7 +563,18 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
   ].join("\n");
 }
 
-function freeFormPrompt(ctx: GenContext) {
+// Whitelist reminder injected into every prompt that can produce emergency-contact
+// text. Prevents the model from inventing institutions/phone numbers or a fake
+// accident-report procedure (2026-07-02 prod: "한국산재보험공단(1644-0644)",
+// "법무부 출입국 관리소 재해자 신고(KOICA 협력)" — see lib/safety-contacts.ts).
+function emergencyContactRules() {
+  return [
+    `비상연락처는 다음 공식 번호만 사용: 119, 근로복지공단 ${OFFICIAL_CONTACTS.workersCompensationService}, 안전보건공단 ${OFFICIAL_CONTACTS.koshaSafetyAgency}, 고용노동부 ${OFFICIAL_CONTACTS.moelCounseling}. 그 외 기관 전화번호를 지어내지 마라(지역 지사 번호 포함).`,
+    `산재 보고 절차는 다음 문구를 그대로 사용: ${ACCIDENT_REPORT_TEMPLATE}`
+  ].join("\n");
+}
+
+export function freeFormPrompt(ctx: GenContext) {
   return [
     persona(),
     "",
@@ -571,6 +583,8 @@ function freeFormPrompt(ctx: GenContext) {
     "  - emergencyResponseDraft: 비상대응 절차(초안). 1.사고 징후 및 즉시 중지 / 2.초기조치 / 3.보고체계 / 4.현장보존 및 재발방지. 1200~1800자.",
     "  - photoEvidenceDraft: 사진/증빙 기록(초안). 작업 전 / 조치 전·후 / TBM·교육 증빙 / 확인자. 800~1200자.",
     "  - kakaoMessage: 현장 공유 메시지. 카톡 단톡방에 바로 붙여넣을 수 있게 이모지 일부 사용 가능. 400~700자.",
+    "",
+    emergencyContactRules(),
     "",
     "응답 JSON 스키마:",
     `{
@@ -584,7 +598,7 @@ function freeFormPrompt(ctx: GenContext) {
   ].join("\n");
 }
 
-function foreignWorkerPrompt(ctx: GenContext) {
+export function foreignWorkerPrompt(ctx: GenContext) {
   return [
     persona(),
     "",
@@ -593,6 +607,8 @@ function foreignWorkerPrompt(ctx: GenContext) {
     "  - foreignWorkerBriefing: 한국어 + 영어 + 베트남어 3가지 버전을 한 본문 안에 [한국어] [English] [Tiếng Việt] 헤더로 연속 작성. 각 버전은 위험요인 / 즉시 조치 / 작업중지 기준 / 보호구 / 비상연락 항목 포함. 한 헤더당 800~1500자, 전체 4500~7000자.",
     "  - foreignWorkerTransmission: 단톡방·문자에 그대로 붙여넣을 전송용 안내문. 한국어 + 영어 + 베트남어 + 태국어 + 우즈베크어 5개 언어 짧은 버전(각 800~1500자, 전체 7000~10000자). 각 언어 블록 시작에 [언어명] 헤더.",
     "  - foreignWorkerLanguages: 본 본문에서 사용한 언어 코드 배열 예: [\"ko\",\"en\",\"vi\",\"th\",\"uz\"]. ISO 639-1 코드.",
+    "",
+    emergencyContactRules(),
     "",
     "응답 JSON 스키마:",
     `{
@@ -818,7 +834,7 @@ async function generateTbmRiskLinks(ctx: GenContext, rows: RiskAssessmentRow[]):
     return { tbmRiskLinks: [] };
   }
 }
-function parseFree(raw: string): Partial<AiDeliverables> | null {
+export function parseFree(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   if (!j) return null;
   const required: Array<keyof AiDeliverables> = ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft", "kakaoMessage"];
@@ -828,7 +844,7 @@ function parseFree(raw: string): Partial<AiDeliverables> | null {
   if (!valid) return null;
   return {
     workpackSummaryDraft: j.workpackSummaryDraft as string,
-    emergencyResponseDraft: j.emergencyResponseDraft as string,
+    emergencyResponseDraft: sanitizeContacts(j.emergencyResponseDraft as string),
     photoEvidenceDraft: j.photoEvidenceDraft as string,
     kakaoMessage: j.kakaoMessage as string
   };
@@ -841,9 +857,9 @@ export function parseForeign(raw: string): Partial<AiDeliverables> | null {
   // pressure (Haiku on the 5-language pack) sometimes drop the transmission key.
   // The merger keeps the template transmission when this field is absent.
   if (typeof briefing !== "string" || briefing.length <= 200) return null;
-  const out: Partial<AiDeliverables> = { foreignWorkerBriefing: briefing };
+  const out: Partial<AiDeliverables> = { foreignWorkerBriefing: sanitizeContacts(briefing) };
   if (typeof transmission === "string" && transmission.length > 200) {
-    out.foreignWorkerTransmission = transmission;
+    out.foreignWorkerTransmission = sanitizeContacts(transmission);
   }
   if (Array.isArray(j?.foreignWorkerLanguages)) {
     out.foreignWorkerLanguages = j.foreignWorkerLanguages.filter((s) => typeof s === "string");
