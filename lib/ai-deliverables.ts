@@ -39,6 +39,7 @@ import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
 import { createLogger } from "@/lib/logger";
+import { safeEmit, type OnAskProgress } from "@/lib/ask-progress";
 
 const log = createLogger("ai-deliverables");
 
@@ -698,6 +699,8 @@ export type GenerateAllOptions = {
    * - "enhanced": tabular only → 5 표 양식 deliverables only (others remain template)
    */
   scope?: "full" | "enhanced";
+  /** Task D-2a: per-doc progress callback for the SSE console. Defaults to no-op. */
+  onProgress?: OnAskProgress;
 };
 
 function buildContext(opts: GenerateAllOptions): GenContext {
@@ -1016,6 +1019,7 @@ export async function generateAllDeliverablesWithDiagnostics(
   }
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
+  const onProgress = opts.onProgress;
 
   const allSpecs: Array<{ name: string; promise: Promise<Partial<AiDeliverables>> }> = [
     ...TABULAR_SPECS.map((spec) => ({
@@ -1053,23 +1057,27 @@ export async function generateAllDeliverablesWithDiagnostics(
     if (s.status === "fulfilled") {
       groupResults.push({ group: name, status: "fulfilled" });
       Object.assign(out, s.value);
+      safeEmit(onProgress, { kind: "doc", name, status: "ok" });
     } else {
       groupResults.push({
         group: name,
         status: "rejected",
         reason: s.reason instanceof Error ? s.reason.message : String(s.reason)
       });
+      safeEmit(onProgress, { kind: "doc", name, status: "fail" });
     }
   });
 
   applyRiskRowClamp(out);
   const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || []);
   Object.assign(out, tbmRiskLinksResult);
+  const tbmRiskLinksOk = (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
   groupResults.push({
     group: "tbmRiskLinks",
-    status: (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0 ? "fulfilled" : "rejected",
-    reason: (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0 ? undefined : "empty or skipped"
+    status: tbmRiskLinksOk ? "fulfilled" : "rejected",
+    reason: tbmRiskLinksOk ? undefined : "empty or skipped"
   });
+  safeEmit(onProgress, { kind: "doc", name: "tbmRiskLinks", status: tbmRiskLinksOk ? "ok" : "fail" });
 
   return {
     deliverables: out,
