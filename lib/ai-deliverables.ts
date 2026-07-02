@@ -31,7 +31,7 @@ import {
   type RiskAssessmentRow,
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
-import { isHeavyOutputDoc, planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
+import { formatWorkDate, isHeavyOutputDoc, planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
 import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
@@ -79,6 +79,8 @@ type GenContext = {
   accidentLines: string[];
   /** Top KOSHA 기술지침/기술지원규정 references that MUST be cited in body. */
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
+  /** KST (Asia/Seoul) calendar date of this generation run — YYYY-MM-DD. */
+  workDate: string;
 };
 
 async function callGemini(prompt: string, budget: DocBudget, label: string): Promise<string> {
@@ -183,7 +185,7 @@ function safeParseJson<T = unknown>(raw: string): T | null {
   }
 }
 
-function persona() {
+export function persona() {
   return [
     "당신은 한국 산업안전기사 자격을 갖춘 5년 차 현장 안전관리자다.",
     "사용자의 작업 시나리오를 받아 위험성평가·작업계획·TBM·안전보건교육·비상대응 등 산업안전 문서팩 본문을 작성한다.",
@@ -196,11 +198,13 @@ function persona() {
     "  6) 외국인 근로자·신규 투입자 이슈는 시나리오에 키워드가 있으면 별도 강조.",
     "  7) 거절 문장 금지(\"제공할 수 없습니다\"). 부족하면 '현장 확인 필요'로 표기.",
     "  8) **KOSHA 기술지침/기술지원규정이 컨텍스트에 제공되면, 위험성평가·작업계획·TBM·교육 본문 안에서 그 지침 코드(예: H-205-2018, M-123-2012, X-78-2018)와 함께 직접 인용하라.** 단순 부록이 아니라 위험요인 또는 감소대책 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형태로 표시. 괄호 안에는 콜론(:) 사용 금지 — 대시(—) 또는 슬래시(/)만 사용. 줄바꿈도 금지. 한 줄에 모두 들어가야 한다.",
-    "  9) 모든 출력은 반드시 JSON. 마크다운 fence 금지."
+    "  9) 모든 출력은 반드시 JSON. 마크다운 fence 금지.",
+    "  10) 날짜·연도는 [현장 시나리오]의 작업일자만 사용한다. 다른 날짜를 만들지 마라.",
+    "  11) 사람 이름·회사 정식명칭·주소는 시나리오에 없으면 '____' 또는 '현장 확인 필요'로 표기한다. 예시 이름(김철수, 김安全 등)을 지어내지 마라."
   ].join("\n");
 }
 
-function contextBlock(ctx: GenContext) {
+export function contextBlock(ctx: GenContext) {
   const cites = ctx.citationLines.length ? ctx.citationLines.join("\n") : "(법령 후보 없음)";
   const training = ctx.trainingLines.length ? ctx.trainingLines.join("\n") : "(연계 교육 후보 없음)";
   const kosha = ctx.koshaLines.length ? ctx.koshaLines.join("\n") : "(KOSHA 보강 자료 없음)";
@@ -221,6 +225,7 @@ function contextBlock(ctx: GenContext) {
     ctx.question,
     "",
     "[현장 시나리오]",
+    `작업일자: ${ctx.workDate}`,
     `회사: ${ctx.scenario.companyName}`,
     `업종: ${ctx.scenario.companyType || "-"}`,
     `현장: ${ctx.scenario.siteName}`,
@@ -665,7 +670,8 @@ function buildContext(opts: GenerateAllOptions): GenContext {
     trainingLines: opts.trainingLines || [],
     koshaLines: opts.koshaLines || [],
     accidentLines: opts.accidentLines || [],
-    koshaPrimaryRefs: opts.koshaPrimaryRefs || []
+    koshaPrimaryRefs: opts.koshaPrimaryRefs || [],
+    workDate: formatWorkDate(new Date())
   };
 }
 
