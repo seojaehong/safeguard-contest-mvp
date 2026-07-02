@@ -2,8 +2,17 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.safeclaw.kr"),
   title: "SafeClaw | 안전 문서팩 생성",
   description: "작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스",
+  openGraph: {
+    title: "SafeClaw | 안전 문서팩 생성",
+    description: "작업 전 현장 설명을 위험성평가, TBM, 안전교육일지, 현장 공유 메시지로 정리하는 안전 문서팩 서비스",
+    url: "https://www.safeclaw.kr",
+    siteName: "SafeClaw",
+    locale: "ko_KR",
+    type: "website"
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "16x16" },

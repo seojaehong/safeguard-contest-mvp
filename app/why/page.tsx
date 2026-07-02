@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "왜 SafeClaw인가 | SafeClaw",
+  description: "기존 안전 문서 작성 방식과 비교해 SafeClaw가 현장 안전 문서 업무를 어떻게 줄여주는지 설명합니다."
+};
 
 const comparisonRows = [
   ["한 줄 입력에서 문서팩 생성", "지원", "부분 지원", "직접 작성", "프롬프트 의존"],

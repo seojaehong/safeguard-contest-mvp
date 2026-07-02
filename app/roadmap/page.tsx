@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "로드맵 | SafeClaw",
+  description: "SafeClaw가 안전 문서팩 서비스에서 산업안전 SaaS로 성장하는 단계별 로드맵입니다."
+};
 
 const roadmap = [
   ["1단계", "제품 셸", "작업공간, 문서팩, 근거, 전파, 이력 화면을 실제 업무 메뉴로 정리합니다."],
