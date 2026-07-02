@@ -16,6 +16,7 @@ import { matchSafetyKnowledge } from "./safety-knowledge";
 import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow } from "./risk-assessment-schema";
 import { splitDocumentMeta } from "./doc-meta-split";
 import { createLogger } from "@/lib/logger";
+import { attachProgressListeners, type OnAskProgress } from "./ask-progress";
 
 const log = createLogger("search");
 
@@ -778,9 +779,12 @@ function stripPipelineMeta(text: string): string {
 
 export type RunAskOptions = {
   aiMode?: AiMode;
+  /** Task D-2a: SSE progress callback for the AI console. Defaults to no-op. */
+  onProgress?: OnAskProgress;
 };
 
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
+  const onProgress = options.onProgress;
   const requestedMode: AiMode = options.aiMode || ((process.env.AI_MODE_DEFAULT as AiMode | undefined) || "template");
   const aiMode: AiMode = ["template", "enhanced", "full"].includes(requestedMode) ? requestedMode : "template";
 
@@ -931,7 +935,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               koshaLines: koshaLinesEarly,
               accidentLines: accidentLinesEarly,
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
-              scope: aiMode === "full" ? "full" : "enhanced"
+              scope: aiMode === "full" ? "full" : "enhanced",
+              onProgress
             }).catch((error) => {
               log.error("AI deliverable generation failed (parallel path); falling back to template bodies", error);
               return null;
@@ -984,6 +989,24 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       cases: []
     };
     const safetyReferenceFallback = { ...emptyResult, message: "Supabase 안전 지식 DB 호출 실패" };
+
+    // Task D-2a: side-listener attachment only — does not alter allSettled's inputs or
+    // timing. Each promise below is passed through to Promise.allSettled unchanged.
+    attachProgressListeners(
+      [
+        { stage: "weather", promise: weatherPromise },
+        { stage: "training", promise: trainingPromise },
+        { stage: "koshaEducation", promise: koshaEducationPromise },
+        { stage: "kosha", promise: koshaPromise },
+        { stage: "koshaOpenApi", promise: koshaOpenApiPromise },
+        { stage: "accidentCases", promise: accidentCasesPromise },
+        { stage: "response", promise: responsePromise },
+        { stage: "safetyReference", promise: safetyReferencePromise },
+        { stage: "citations", promise: citationsPromise },
+        { stage: "deliverables", promise: deliverablesPromise }
+      ],
+      onProgress
+    );
 
     const allResults = await Promise.allSettled([
       weatherPromise,         // 0

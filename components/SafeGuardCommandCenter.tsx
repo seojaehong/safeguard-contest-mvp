@@ -4,7 +4,10 @@ import { FormEvent, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { FieldOperationsWorkspace } from "@/components/FieldOperationsWorkspace";
 import type { DocumentKey } from "@/components/WorkpackEditor";
+import { AgentConsole } from "@/components/AgentConsole";
 import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
+import { fetchAskStream } from "@/lib/ask-stream-client";
+import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
 import type { AskResponse } from "@/lib/types";
 import type { FieldExample } from "@/lib/field-examples";
 
@@ -488,6 +491,7 @@ export function SafeGuardCommandCenter({
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [editorFocusToken, setEditorFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("workpackSummaryDraft");
+  const [consoleLines, setConsoleLines] = useState<AgentConsoleLine[]>([]);
   const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
     if (typeof window === "undefined") return "enhanced";
     const stored = window.localStorage.getItem("safeclaw.aiMode");
@@ -528,6 +532,28 @@ export function SafeGuardCommandCenter({
     }
   }
 
+  async function fetchViaLegacyEndpoint(trimmed: string): Promise<AskResponse> {
+    const response = await fetch("/api/ask", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ question: trimmed, aiMode })
+    });
+    if (!response.ok) {
+      throw new Error(`문서팩 생성 요청 실패: HTTP ${response.status}`);
+    }
+    return (await response.json()) as AskResponse;
+  }
+
+  function applyGeneratedPayload(payload: AskResponse) {
+    persistCurrentWorkpack(payload);
+    startTransition(() => {
+      setData(payload);
+      setCheckedActions(payload.riskSummary.immediateActions.map(() => false));
+      setState("ready");
+      setMessage("문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요.");
+    });
+  }
+
   async function generateWorkpack(nextQuestion = question) {
     const trimmed = nextQuestion.trim();
     if (!trimmed) {
@@ -537,27 +563,48 @@ export function SafeGuardCommandCenter({
 
     setState("generating");
     setMessage("법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.");
-    try {
-      const response = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ question: trimmed, aiMode })
-      });
-      if (!response.ok) {
-        throw new Error(`문서팩 생성 요청 실패: HTTP ${response.status}`);
+    setConsoleLines([]);
+
+    // template mode: D-2a's stream only carries the final payload for template
+    // scope, so keep it on the plain /api/ask path — simpler, no console needed.
+    if (aiMode === "template") {
+      try {
+        const payload = await fetchViaLegacyEndpoint(trimmed);
+        applyGeneratedPayload(payload);
+      } catch (error) {
+        console.error("workpack generation failed", error);
+        setState("error");
+        setMessage("문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
       }
-      const payload = await response.json() as AskResponse;
-      persistCurrentWorkpack(payload);
-      startTransition(() => {
-        setData(payload);
-        setCheckedActions(payload.riskSummary.immediateActions.map(() => false));
-        setState("ready");
-        setMessage("문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요.");
-      });
-    } catch (error) {
-      console.error("workpack generation failed", error);
-      setState("error");
-      setMessage("문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
+    try {
+      const payload = (await fetchAskStream({ question: trimmed, aiMode }, (event) => {
+        setConsoleLines((current) => nextConsoleLines(current, event));
+      })) as AskResponse;
+      applyGeneratedPayload(payload);
+    } catch (streamError) {
+      // Stream fetch failed (non-200, network error, or ended without a final
+      // event) — fall back to the existing non-streaming path. Existing
+      // behavior/state contract must be preserved 100% on fallback.
+      console.warn("AI 작업 콘솔 스트림 생성 실패 — 기존 경로로 재시도합니다.", streamError);
+      setConsoleLines((current) => [
+        ...current,
+        {
+          id: `fallback-${Date.now()}`,
+          label: "실시간 스트림 연결 실패 — 기본 경로로 재시도",
+          status: "fail"
+        }
+      ]);
+      try {
+        const payload = await fetchViaLegacyEndpoint(trimmed);
+        applyGeneratedPayload(payload);
+      } catch (error) {
+        console.error("workpack generation failed", error);
+        setState("error");
+        setMessage("문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
+      }
     }
   }
 
@@ -893,6 +940,7 @@ export function SafeGuardCommandCenter({
             <div className={`inline-progress ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${currentDocProgress}/${totalDocumentCount}`}>
               <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
             </div>
+            <AgentConsole lines={consoleLines} active={busy} />
           </section>
 
           <section className="output-card-grid" id="workpack">
