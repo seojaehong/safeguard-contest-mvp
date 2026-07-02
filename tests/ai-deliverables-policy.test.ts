@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_DELIVERABLES_TIMEOUT_MS,
   FALLBACK_MODEL_TIMEOUT_CAP_MS,
+  formatWorkDate,
   planModelAttempts,
   resolveDeliverablesTimeoutMs
 } from "@/lib/ai-deliverables-policy";
@@ -52,5 +53,21 @@ describe("planModelAttempts", () => {
     expect(planModelAttempts("gemini-2.5-flash", [], 45000)).toEqual([
       { model: "gemini-2.5-flash", timeoutMs: 45000 }
     ]);
+  });
+});
+
+describe("formatWorkDate", () => {
+  it("formats a UTC instant as its KST (Asia/Seoul, UTC+9) calendar date", () => {
+    // 2026-07-02T16:00:00Z + 9h = 2026-07-03T01:00 KST → next day in KST.
+    expect(formatWorkDate(new Date("2026-07-02T16:00:00Z"))).toBe("2026-07-03");
+  });
+
+  it("keeps the same calendar date when KST does not roll over", () => {
+    // 2026-07-02T10:00:00Z + 9h = 2026-07-02T19:00 KST → same day.
+    expect(formatWorkDate(new Date("2026-07-02T10:00:00Z"))).toBe("2026-07-02");
+  });
+
+  it("zero-pads single-digit months and days", () => {
+    expect(formatWorkDate(new Date("2026-01-05T00:00:00Z"))).toBe("2026-01-05");
   });
 });

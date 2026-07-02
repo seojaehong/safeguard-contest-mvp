@@ -65,6 +65,23 @@ export function resolveDocBudget(docName: string, baseTimeoutMs: number): DocBud
   };
 }
 
+/**
+ * Formats a Date as a KST (Asia/Seoul) calendar date "YYYY-MM-DD".
+ *
+ * Background (2026-07-02 prod smoke): photoEvidence/tbmLog hallucinated
+ * dates ("2026.03.15", "2025년") unrelated to the actual generation date.
+ * The generation entrypoint now injects a single authoritative work date
+ * into GenContext so the model has no reason to invent one.
+ */
+export function formatWorkDate(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
+}
+
 export type ModelAttempt = {
   model: string;
   timeoutMs: number;

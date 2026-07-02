@@ -31,7 +31,10 @@ import {
   type RiskAssessmentRow,
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
-import { isHeavyOutputDoc, planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
+import { formatWorkDate, isHeavyOutputDoc, planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
+import { ACCIDENT_REPORT_TEMPLATE, OFFICIAL_CONTACTS, sanitizeContacts } from "@/lib/safety-contacts";
+import { gateCitations } from "@/lib/law-citation-gate";
+import { clampOneBased, clampRiskRefs } from "@/lib/risk-ref-gate";
 import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
@@ -79,6 +82,8 @@ type GenContext = {
   accidentLines: string[];
   /** Top KOSHA 기술지침/기술지원규정 references that MUST be cited in body. */
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
+  /** KST (Asia/Seoul) calendar date of this generation run — YYYY-MM-DD. */
+  workDate: string;
 };
 
 async function callGemini(prompt: string, budget: DocBudget, label: string): Promise<string> {
@@ -169,21 +174,45 @@ async function callAndParse<T>(
   throw lastError instanceof Error ? lastError : new Error(`AI ${label} exhausted retries`);
 }
 
-function safeParseJson<T = unknown>(raw: string): T | null {
+export function safeParseJson<T = unknown>(raw: string): T | null {
   try {
     return JSON.parse(raw) as T;
   } catch {
-    const m = raw.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-    if (!m) return null;
+    // Fall through to fence/brace extraction below.
+  }
+
+  // Models sometimes wrap the JSON in a ```json fence and append chatter after
+  // the closing fence (prod evidence: [AI tbmLog] parse failed cases). Prefer the
+  // fenced block's contents when present, since it's the model's explicit
+  // delimiter and avoids swallowing trailing prose into the brace match.
+  const fenceMatch = raw.match(/```(?:json)?\s*\n?([\s\S]*?)```/i);
+  if (fenceMatch) {
     try {
-      return JSON.parse(m[0]) as T;
+      return JSON.parse(fenceMatch[1].trim()) as T;
     } catch {
-      return null;
+      // Fall through to brace extraction on the fenced contents, then raw.
     }
+    const fenced = fenceMatch[1];
+    const fencedBraceMatch = fenced.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (fencedBraceMatch) {
+      try {
+        return JSON.parse(fencedBraceMatch[0]) as T;
+      } catch {
+        // Fall through.
+      }
+    }
+  }
+
+  const m = raw.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+  if (!m) return null;
+  try {
+    return JSON.parse(m[0]) as T;
+  } catch {
+    return null;
   }
 }
 
-function persona() {
+export function persona() {
   return [
     "당신은 한국 산업안전기사 자격을 갖춘 5년 차 현장 안전관리자다.",
     "사용자의 작업 시나리오를 받아 위험성평가·작업계획·TBM·안전보건교육·비상대응 등 산업안전 문서팩 본문을 작성한다.",
@@ -196,11 +225,13 @@ function persona() {
     "  6) 외국인 근로자·신규 투입자 이슈는 시나리오에 키워드가 있으면 별도 강조.",
     "  7) 거절 문장 금지(\"제공할 수 없습니다\"). 부족하면 '현장 확인 필요'로 표기.",
     "  8) **KOSHA 기술지침/기술지원규정이 컨텍스트에 제공되면, 위험성평가·작업계획·TBM·교육 본문 안에서 그 지침 코드(예: H-205-2018, M-123-2012, X-78-2018)와 함께 직접 인용하라.** 단순 부록이 아니라 위험요인 또는 감소대책 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형태로 표시. 괄호 안에는 콜론(:) 사용 금지 — 대시(—) 또는 슬래시(/)만 사용. 줄바꿈도 금지. 한 줄에 모두 들어가야 한다.",
-    "  9) 모든 출력은 반드시 JSON. 마크다운 fence 금지."
+    "  9) 모든 출력은 반드시 JSON. 마크다운 fence 금지.",
+    "  10) 날짜·연도는 [현장 시나리오]의 작업일자만 사용한다. 다른 날짜를 만들지 마라.",
+    "  11) 사람 이름·회사 정식명칭·주소는 시나리오에 없으면 '____' 또는 '현장 확인 필요'로 표기한다. 예시 이름(김철수, 김安全 등)을 지어내지 마라."
   ].join("\n");
 }
 
-function contextBlock(ctx: GenContext) {
+export function contextBlock(ctx: GenContext) {
   const cites = ctx.citationLines.length ? ctx.citationLines.join("\n") : "(법령 후보 없음)";
   const training = ctx.trainingLines.length ? ctx.trainingLines.join("\n") : "(연계 교육 후보 없음)";
   const kosha = ctx.koshaLines.length ? ctx.koshaLines.join("\n") : "(KOSHA 보강 자료 없음)";
@@ -221,6 +252,7 @@ function contextBlock(ctx: GenContext) {
     ctx.question,
     "",
     "[현장 시나리오]",
+    `작업일자: ${ctx.workDate}`,
     `회사: ${ctx.scenario.companyName}`,
     `업종: ${ctx.scenario.companyType || "-"}`,
     `현장: ${ctx.scenario.siteName}`,
@@ -304,6 +336,7 @@ function workPlanStructuredPrompt(ctx: GenContext) {
 }`,
     "",
     "필수 조건: workSteps 4-7개. 각 workStep은 위험성평가 row 0-based index를 relatedRiskRowIndex에 1개 이상 넣고, evidenceRefs와 verification을 채운다. stopCriteria 3-5개. contacts 3-4개. 모든 string은 \\n 없이 한 줄.",
+    "relatedRiskRowIndex 규칙: 0-based 정수만 사용(1번째 위험성평가 행 = 0). 위험성평가표는 이 요청과 별도 호출로 생성되므로 정확한 행 개수를 알 수 없다 — 위험요인 발굴 순서상 상위 5~7개 안에 들 만큼 확실히 관련된 행만, workStep당 1~2개로 최소화해서 넣어라. 큰 숫자를 추측해서 넣지 말 것.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -345,7 +378,7 @@ function tbmBriefingStructuredPrompt(ctx: GenContext) {
   "tbmQuestions": ["string","string","string","string","string"]
 }`,
     "",
-    "필수: hazards 4-6개 / measures 4-6개 / stopCriteria 3-5개 / confirmTopics 5개 / tbmQuestions 5개. measures.hazardRef는 hazards 인덱스(1부터). 모든 string은 \\n 없이 한 줄.",
+    "필수: hazards 4-6개 / measures 4-6개 / stopCriteria 3-5개 / confirmTopics 5개 / tbmQuestions 5개. measures.hazardRef는 hazards 배열 인덱스(1부터, 0이나 hazards.length 초과 금지). 모든 string은 \\n 없이 한 줄.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -359,6 +392,7 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
     "한국 산업안전 표준 TBM 일지(사후 기록)의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazardsDiscussed/safetyEducation은 실제 진행한 내용 기준. unaddressedItems는 미조치 항목(없으면 빈 배열).",
     "tbmBriefing(사전)이 다룬 내용을 실제로 진행했다는 사후 기록 관점으로 작성. 시나리오 위험성평가 hazard와 표현이 일치하면 hazardsDiscussed[].relatedRiskRowIndex(0-based)로 연결.",
+    "relatedRiskRowIndex 규칙: 0-based 정수 1개만 사용(1번째 위험성평가 행 = 0). 위험성평가표는 이 요청과 별도 호출로 생성되므로 정확한 행 개수를 알 수 없다 — 큰 숫자를 추측해서 넣지 말고, 표현이 명확히 일치하는 경우만 낮은 index로 매핑. 확신 없으면 필드 자체를 생략.",
     "",
     "응답 JSON 스키마:",
     `{
@@ -557,7 +591,18 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
   ].join("\n");
 }
 
-function freeFormPrompt(ctx: GenContext) {
+// Whitelist reminder injected into every prompt that can produce emergency-contact
+// text. Prevents the model from inventing institutions/phone numbers or a fake
+// accident-report procedure (2026-07-02 prod: "한국산재보험공단(1644-0644)",
+// "법무부 출입국 관리소 재해자 신고(KOICA 협력)" — see lib/safety-contacts.ts).
+function emergencyContactRules() {
+  return [
+    `비상연락처는 다음 공식 번호만 사용: 119, 근로복지공단 ${OFFICIAL_CONTACTS.workersCompensationService}, 안전보건공단 ${OFFICIAL_CONTACTS.koshaSafetyAgency}, 고용노동부 ${OFFICIAL_CONTACTS.moelCounseling}. 그 외 기관 전화번호를 지어내지 마라(지역 지사 번호 포함).`,
+    `산재 보고 절차는 다음 문구를 그대로 사용: ${ACCIDENT_REPORT_TEMPLATE}`
+  ].join("\n");
+}
+
+export function freeFormPrompt(ctx: GenContext) {
   return [
     persona(),
     "",
@@ -566,6 +611,8 @@ function freeFormPrompt(ctx: GenContext) {
     "  - emergencyResponseDraft: 비상대응 절차(초안). 1.사고 징후 및 즉시 중지 / 2.초기조치 / 3.보고체계 / 4.현장보존 및 재발방지. 1200~1800자.",
     "  - photoEvidenceDraft: 사진/증빙 기록(초안). 작업 전 / 조치 전·후 / TBM·교육 증빙 / 확인자. 800~1200자.",
     "  - kakaoMessage: 현장 공유 메시지. 카톡 단톡방에 바로 붙여넣을 수 있게 이모지 일부 사용 가능. 400~700자.",
+    "",
+    emergencyContactRules(),
     "",
     "응답 JSON 스키마:",
     `{
@@ -579,15 +626,18 @@ function freeFormPrompt(ctx: GenContext) {
   ].join("\n");
 }
 
-function foreignWorkerPrompt(ctx: GenContext) {
+export function foreignWorkerPrompt(ctx: GenContext) {
   return [
     persona(),
     "",
     "외국인 근로자용 안내문 2종을 작성하고 JSON 객체로 반환하라.",
     "반드시 세 키(foreignWorkerBriefing, foreignWorkerTransmission, foreignWorkerLanguages)를 모두 포함한 하나의 JSON 객체만 출력하라. JSON 앞뒤에 코드펜스·설명·후기 등 어떤 텍스트도 붙이지 마라.",
-    "  - foreignWorkerBriefing: 한국어 + 영어 + 베트남어 3가지 버전을 한 본문 안에 [한국어] [English] [Tiếng Việt] 헤더로 연속 작성. 각 버전은 위험요인 / 즉시 조치 / 작업중지 기준 / 보호구 / 비상연락 항목 포함. 한 헤더당 800~1500자, 전체 4500~7000자.",
-    "  - foreignWorkerTransmission: 단톡방·문자에 그대로 붙여넣을 전송용 안내문. 한국어 + 영어 + 베트남어 + 태국어 + 우즈베크어 5개 언어 짧은 버전(각 800~1500자, 전체 7000~10000자). 각 언어 블록 시작에 [언어명] 헤더.",
+    "  - foreignWorkerBriefing: 한국어 + 영어 + 베트남어 3가지 버전을 한 본문 안에 [한국어] [English] [Tiếng Việt] 헤더로 연속 작성. 각 버전은 위험요인 / 즉시 조치 / 작업중지 기준 / 보호구 / 비상연락 항목 포함. 길이 기준: 한국어 800~1500자, 영어·베트남어는 한국어와 동등한 내용(글자수 무관 — 언어 특성상 글자수가 달라도 됨). foreignWorkerBriefing 전체 12,000자 이내.",
+    "  - foreignWorkerTransmission: 단톡방·문자에 그대로 붙여넣을 전송용 안내문. 한국어 + 영어 + 베트남어 + 태국어 + 우즈베크어 5개 언어 짧은 버전, 각 언어 블록 시작에 [한국어]/[English]/[Tiếng Việt]/[ภาษาไทย]/[O'zbekcha] 헤더. 길이 기준: 한국어 800~1500자, 나머지 4개 언어는 한국어와 동등한 내용(글자수 무관). foreignWorkerTransmission 전체 12,000자 이내.",
     "  - foreignWorkerLanguages: 본 본문에서 사용한 언어 코드 배열 예: [\"ko\",\"en\",\"vi\",\"th\",\"uz\"]. ISO 639-1 코드.",
+    "  - 금지 지시: 지게차 포크·팔레트 위에 근로자를 태우거나 그 위에서 작업하도록 허용/권장하는 안내를 쓰지 마라(산업안전보건기준에 관한 규칙 제86조 등 탑승 제한 위반). 고소 작업이 필요한 경우의 대안으로 고소작업대(차량탑재형 리프트 등) 사용을 안내하라.",
+    "",
+    emergencyContactRules(),
     "",
     "응답 JSON 스키마:",
     `{
@@ -665,7 +715,8 @@ function buildContext(opts: GenerateAllOptions): GenContext {
     trainingLines: opts.trainingLines || [],
     koshaLines: opts.koshaLines || [],
     accidentLines: opts.accidentLines || [],
-    koshaPrimaryRefs: opts.koshaPrimaryRefs || []
+    koshaPrimaryRefs: opts.koshaPrimaryRefs || [],
+    workDate: formatWorkDate(new Date())
   };
 }
 
@@ -677,9 +728,9 @@ function buildContext(opts: GenerateAllOptions): GenContext {
 function parseRiskAssessment(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   const v = j?.riskAssessmentDraft;
-  return typeof v === "string" && v.length > 100 ? { riskAssessmentDraft: v } : null;
+  return typeof v === "string" && v.length > 100 ? { riskAssessmentDraft: gateCitations(v) } : null;
 }
-function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
+export function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
   // schema-first: workPlanStructured 객체를 셀 단위로 검증.
   // 누락 필드가 있거나 array가 비어있으면 null로 retry 트리거.
   const j = safeParseJson<{ workPlanStructured?: AiDeliverables["workPlanStructured"] }>(raw);
@@ -692,7 +743,7 @@ function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | null {
   if (!s.approvers) return null;
   return { workPlanStructured: s };
 }
-function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null {
+export function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null {
   // schema-first TBM. workPlan과 동일 패턴: meta/todayWork/hazards/measures 필수.
   const j = safeParseJson<{ tbmBriefingStructured?: TbmBriefingStructured; tbmQuestions?: string[] }>(raw);
   const s = j?.tbmBriefingStructured;
@@ -703,7 +754,14 @@ function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null
   if (!Array.isArray(s.measures) || s.measures.length < 2) return null;
   if (!Array.isArray(s.stopCriteria) || s.stopCriteria.length < 2) return null;
   if (!Array.isArray(s.confirmTopics) || s.confirmTopics.length < 3) return null;
-  const out: Partial<AiDeliverables> = { tbmBriefingStructured: s };
+  // hazardRef is 1-based and references s.hazards (same object, count known here) —
+  // clamp out-of-range/invalid refs to 1 rather than dropping the measure, since
+  // measures.length has already been floor-validated above.
+  const clampedMeasures = s.measures.map((m) => ({
+    ...m,
+    hazardRef: clampOneBased(m.hazardRef, s.hazards.length) ?? 1
+  }));
+  const out: Partial<AiDeliverables> = { tbmBriefingStructured: { ...s, measures: clampedMeasures } };
   if (Array.isArray(j?.tbmQuestions)) {
     out.tbmQuestions = j.tbmQuestions.filter((str) => typeof str === "string");
   }
@@ -712,9 +770,9 @@ function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables> | null
 function parseTbmLog(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   const v = j?.tbmLogDraft;
-  return typeof v === "string" && v.length > 100 ? { tbmLogDraft: v } : null;
+  return typeof v === "string" && v.length > 100 ? { tbmLogDraft: gateCitations(v) } : null;
 }
-function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | null {
+export function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<{ tbmLogStructured?: TbmLogStructured }>(raw);
   const s = j?.tbmLogStructured;
   if (!s || typeof s !== "object") return null;
@@ -730,14 +788,21 @@ function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | null {
   if (!s.signatures || typeof s.signatures.author !== "string") return null;
   return { tbmLogStructured: s };
 }
-function parseEducationRecordStructured(raw: string): Partial<AiDeliverables> | null {
+export function parseEducationRecordStructured(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<{ educationRecordStructured?: EducationRecordStructured; safetyEducationPoints?: string[] }>(raw);
   const s = j?.educationRecordStructured;
   if (!s || typeof s !== "object") return null;
   if (typeof s.educationName !== "string" || s.educationName.length === 0) return null;
   if (!Array.isArray(s.curriculum) || s.curriculum.length < 2) return null;
   if (typeof s.understandingCheck !== "string") return null;
-  const out: Partial<AiDeliverables> = { educationRecordStructured: s };
+  // curriculum[].lawCitation is model-authored free text (e.g. "산업안전보건법 제29조")
+  // and is exactly the hallucination surface the citation gate exists for — gate it
+  // here too, not just the prose draft fields.
+  const gatedCurriculum = s.curriculum.map((item) => ({
+    ...item,
+    lawCitation: typeof item.lawCitation === "string" ? gateCitations(item.lawCitation) : item.lawCitation
+  }));
+  const out: Partial<AiDeliverables> = { educationRecordStructured: { ...s, curriculum: gatedCurriculum } };
   if (Array.isArray(j?.safetyEducationPoints)) {
     out.safetyEducationPoints = j.safetyEducationPoints.filter((str) => typeof str === "string");
   }
@@ -812,7 +877,7 @@ async function generateTbmRiskLinks(ctx: GenContext, rows: RiskAssessmentRow[]):
     return { tbmRiskLinks: [] };
   }
 }
-function parseFree(raw: string): Partial<AiDeliverables> | null {
+export function parseFree(raw: string): Partial<AiDeliverables> | null {
   const j = safeParseJson<AiDeliverables>(raw);
   if (!j) return null;
   const required: Array<keyof AiDeliverables> = ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft", "kakaoMessage"];
@@ -821,8 +886,8 @@ function parseFree(raw: string): Partial<AiDeliverables> | null {
   const valid = required.every((k) => typeof j[k] === "string" && (j[k] as string).length > 100);
   if (!valid) return null;
   return {
-    workpackSummaryDraft: j.workpackSummaryDraft as string,
-    emergencyResponseDraft: j.emergencyResponseDraft as string,
+    workpackSummaryDraft: gateCitations(j.workpackSummaryDraft as string),
+    emergencyResponseDraft: gateCitations(sanitizeContacts(j.emergencyResponseDraft as string)),
     photoEvidenceDraft: j.photoEvidenceDraft as string,
     kakaoMessage: j.kakaoMessage as string
   };
@@ -835,13 +900,48 @@ export function parseForeign(raw: string): Partial<AiDeliverables> | null {
   // pressure (Haiku on the 5-language pack) sometimes drop the transmission key.
   // The merger keeps the template transmission when this field is absent.
   if (typeof briefing !== "string" || briefing.length <= 200) return null;
-  const out: Partial<AiDeliverables> = { foreignWorkerBriefing: briefing };
+  const out: Partial<AiDeliverables> = { foreignWorkerBriefing: gateCitations(sanitizeContacts(briefing)) };
   if (typeof transmission === "string" && transmission.length > 200) {
-    out.foreignWorkerTransmission = transmission;
+    out.foreignWorkerTransmission = gateCitations(sanitizeContacts(transmission));
   }
   if (Array.isArray(j?.foreignWorkerLanguages)) {
     out.foreignWorkerLanguages = j.foreignWorkerLanguages.filter((s) => typeof s === "string");
   }
+  return out;
+}
+
+// workPlanStructured.workSteps[].relatedRiskRowIndex and
+// tbmLogStructured.hazardsDiscussed[].relatedRiskRowIndex both reference
+// structuredRiskRows — a *separate* parallel AI call (see TABULAR_SPECS /
+// structuredRiskRowsPromise below). The row count isn't known at parse time,
+// only once every call in the 7-way parallel batch has settled. Clamp here,
+// at the merge point, using the row count that actually made it into `out`.
+export function applyRiskRowClamp(out: AiDeliverables): AiDeliverables {
+  const maxIndexExclusive = (out.structuredRiskRows || []).length;
+
+  if (out.workPlanStructured) {
+    out.workPlanStructured = {
+      ...out.workPlanStructured,
+      workSteps: out.workPlanStructured.workSteps.map((step) => ({
+        ...step,
+        relatedRiskRowIndex: step.relatedRiskRowIndex
+          ? clampRiskRefs(step.relatedRiskRowIndex, maxIndexExclusive)
+          : step.relatedRiskRowIndex
+      }))
+    };
+  }
+
+  if (out.tbmLogStructured) {
+    out.tbmLogStructured = {
+      ...out.tbmLogStructured,
+      hazardsDiscussed: out.tbmLogStructured.hazardsDiscussed.map((h) => {
+        if (h.relatedRiskRowIndex === undefined) return h;
+        const clamped = clampRiskRefs([h.relatedRiskRowIndex], maxIndexExclusive);
+        return { ...h, relatedRiskRowIndex: clamped.length ? clamped[0] : undefined };
+      })
+    };
+  }
+
   return out;
 }
 
@@ -893,6 +993,7 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
   for (const s of settled) {
     if (s.status === "fulfilled") Object.assign(out, s.value);
   }
+  applyRiskRowClamp(out);
   Object.assign(out, await generateTbmRiskLinks(ctx, out.structuredRiskRows || []));
   return out;
 }
@@ -961,6 +1062,7 @@ export async function generateAllDeliverablesWithDiagnostics(
     }
   });
 
+  applyRiskRowClamp(out);
   const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || []);
   Object.assign(out, tbmRiskLinksResult);
   groupResults.push({

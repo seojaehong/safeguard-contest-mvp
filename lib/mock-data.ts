@@ -352,13 +352,23 @@ function inferWorkerCount(question: string) {
   return allCounts.length ? Math.max(...allCounts) : 5;
 }
 
+// Place-name tokens that appear as region/site prefixes in this app's own
+// scenario data (see fieldScenarioProfiles siteNames and inferSiteName rules
+// below), plus the top-level administrative regions. A bare mention of one
+// of these must never be mistaken for a company name.
+const knownLocationTokens =
+  /^(서울|인천|경기|부산|대구|광주|대전|울산|세종|성수동|성수|남동공단|안산|해운대|하남산단|달서구)/;
+
 function inferCompanyName(question: string) {
   const trimmed = question.trim();
   const companyMatch = trimmed.match(/([가-힣A-Za-z0-9]+(?:테크인씨|테크이엔씨|엔지니어링|주식회사|건설|산업|전기|설비|이엔씨|테크|관리|로지스|메탈|창고|시설|기업|공사|㈜))/);
   if (companyMatch) return companyMatch[1].replace(/^㈜/, "").trim();
 
   const firstToken = trimmed.split(/\s+/)[0];
-  if (firstToken && !/(서울|인천|경기|부산|대구|광주|대전|울산|오늘|작업|현장)/.test(firstToken)) {
+  const looksLikeBarePlaceName =
+    firstToken &&
+    (knownLocationTokens.test(firstToken) || /(서울|인천|경기|부산|대구|광주|대전|울산|오늘|작업|현장)/.test(firstToken));
+  if (firstToken && !looksLikeBarePlaceName) {
     return firstToken.replace(/[,.]$/, "");
   }
 
@@ -461,12 +471,40 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
   };
 }
 
+// Explicit industry-site nouns (제조공장/공장/제조업, 건설현장/공사장,
+// 물류센터/물류창고/창고) must outrank generic work-action verbs
+// (상하차/피킹/하역 etc.) when picking a scenario profile — otherwise a
+// question like "안산 제조공장 ... 지게차 상하차 작업" gets misread as
+// logistics because the action verbs coincidentally score higher on
+// keyword overlap than the actual named site type.
+// Note: bare "공장" is deliberately excluded here — the cleaning-chemical
+// profile's own site is "하남산단 공장 세척 구역", so a bare "공장" match
+// would misroute cleaning-chemical questions into manufacturing. Likewise
+// "물류창고" is left to the bare "창고" rule below so it resolves to
+// warehouse-heat (창고업), matching that profile's own siteName, rather
+// than being captured by the logistics rule.
+const explicitIndustryNounRules: Array<[RegExp, string]> = [
+  [/제조공장|제조업/, "manufacturing-hotwork"],
+  [/건설현장|공사장/, "construction-painting"],
+  [/물류센터/, "logistics-forklift"],
+  [/창고/, "warehouse-heat"]
+];
+
+function pickExplicitIndustryProfile(question: string) {
+  const matchedRule = explicitIndustryNounRules.find(([pattern]) => pattern.test(question));
+  if (!matchedRule) return null;
+  return fieldScenarioProfiles.find((profile) => profile.id === matchedRule[1]) || null;
+}
+
 function pickScenarioProfile(question: string) {
   const normalized = question.trim().toLowerCase();
 
   if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question)) {
     return buildCustomScenarioProfile(question);
   }
+
+  const explicitProfile = pickExplicitIndustryProfile(question);
+  if (explicitProfile) return explicitProfile;
 
   const scored = fieldScenarioProfiles.map((profile) => ({
     profile,
