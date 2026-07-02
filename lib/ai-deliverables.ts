@@ -312,7 +312,7 @@ function workPlanStructuredPrompt(ctx: GenContext) {
 }`,
     "",
     "필수 조건: workSteps 4-7개. 각 workStep은 위험성평가 row 0-based index를 relatedRiskRowIndex에 1개 이상 넣고, evidenceRefs와 verification을 채운다. stopCriteria 3-5개. contacts 3-4개. 모든 string은 \\n 없이 한 줄.",
-    "relatedRiskRowIndex 규칙: 0-based 정수만 사용(1번째 위험성평가 행 = 0). 이 프롬프트가 참조하는 위험성평가 행 목록은 아래 컨텍스트에 포함되어 있다 — 그 배열 범위를 벗어나는 index는 절대 넣지 말 것. 의미가 실제로 연결되는 행만 참조.",
+    "relatedRiskRowIndex 규칙: 0-based 정수만 사용(1번째 위험성평가 행 = 0). 위험성평가표는 이 요청과 별도 호출로 생성되므로 정확한 행 개수를 알 수 없다 — 위험요인 발굴 순서상 상위 5~7개 안에 들 만큼 확실히 관련된 행만, workStep당 1~2개로 최소화해서 넣어라. 큰 숫자를 추측해서 넣지 말 것.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -368,7 +368,7 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
     "한국 산업안전 표준 TBM 일지(사후 기록)의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazardsDiscussed/safetyEducation은 실제 진행한 내용 기준. unaddressedItems는 미조치 항목(없으면 빈 배열).",
     "tbmBriefing(사전)이 다룬 내용을 실제로 진행했다는 사후 기록 관점으로 작성. 시나리오 위험성평가 hazard와 표현이 일치하면 hazardsDiscussed[].relatedRiskRowIndex(0-based)로 연결.",
-    "relatedRiskRowIndex 규칙: 0-based 정수 1개만 사용(1번째 위험성평가 행 = 0). 아래 컨텍스트에 포함된 위험성평가 행 배열 범위를 벗어나는 index는 절대 넣지 말 것. 매핑 가능한 경우만 포함, 없으면 필드 자체를 생략.",
+    "relatedRiskRowIndex 규칙: 0-based 정수 1개만 사용(1번째 위험성평가 행 = 0). 위험성평가표는 이 요청과 별도 호출로 생성되므로 정확한 행 개수를 알 수 없다 — 큰 숫자를 추측해서 넣지 말고, 표현이 명확히 일치하는 경우만 낮은 index로 매핑. 확신 없으면 필드 자체를 생략.",
     "",
     "응답 JSON 스키마:",
     `{
