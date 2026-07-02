@@ -31,6 +31,7 @@ import {
   type RiskAssessmentRow,
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
+import { planModelAttempts, resolveDeliverablesTimeoutMs } from "@/lib/ai-deliverables-policy";
 import { generateWithVertex } from "@/lib/vertex/client";
 
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
@@ -39,8 +40,9 @@ const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-
   .map((s) => s.trim())
   .filter(Boolean);
 // Per-call timeout for ai-deliverables parallel calls (7-way parallel).
-// Shorter than ai.ts because these are isolated per-doc calls.
-const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_DELIVERABLES_TIMEOUT_MS || process.env.GEMINI_TIMEOUT_MS || "25000", 10);
+// Deliverables need 30-45s of JSON generation per doc, so this does NOT inherit
+// GEMINI_TIMEOUT_MS (tuned for the shorter ai.ts answer path).
+const GEMINI_TIMEOUT_MS = resolveDeliverablesTimeoutMs(process.env.GEMINI_DELIVERABLES_TIMEOUT_MS);
 
 function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
@@ -69,10 +71,10 @@ type GenContext = {
 
 async function callGemini(prompt: string): Promise<string> {
   if (!isVertexConfigured()) throw new Error("Vertex AI not configured (GOOGLE_APPLICATION_CREDENTIALS_JSON / GCP_PROJECT_ID missing)");
-  const models = [...new Set([geminiModel, ...geminiFallbackModels])];
+  const attempts = planModelAttempts(geminiModel, geminiFallbackModels, GEMINI_TIMEOUT_MS);
   let lastError: unknown;
 
-  for (const model of models) {
+  for (const { model, timeoutMs } of attempts) {
     try {
       // generateWithVertex handles timeout internally via Promise.race.
       // Each call targets a single document (1,500-3,500자).
@@ -84,15 +86,14 @@ async function callGemini(prompt: string): Promise<string> {
           maxOutputTokens: 8192,
           responseMimeType: "application/json",
         },
-        timeoutMs: GEMINI_TIMEOUT_MS,
+        timeoutMs,
       });
       return text;
     } catch (error) {
       lastError = error;
       console.error(`Vertex AI deliverables (${model}) failed`, error);
-      // Don't try the next model if we already hit the timeout budget.
-      // The fallback model is unlikely to fare better in the same window.
-      if (isTimeoutError(error)) break;
+      // A timeout on the primary no longer aborts the chain: the fallback
+      // model still gets one short capped attempt (see planModelAttempts).
     }
   }
   throw lastError instanceof Error ? lastError : new Error("Vertex AI chain failed");
