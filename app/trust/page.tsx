@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "신뢰와 근거 | SafeClaw",
+  description: "SafeClaw가 생성하는 문서의 법령·기상·교육 근거 연결과 데이터 처리 원칙을 소개합니다."
+};
 
 const trustItems = [
   ["인터뷰 인사이트", "실제 현장 담당자 인터뷰에서 확인한 반복 문서 작성, 외국인 교육, 제출 부담을 익명화해 정리합니다."],

@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runAsk } from "@/lib/search";
 import type { AiMode } from "@/lib/ai-deliverables";
+import { createRateLimiter } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/api-guard";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5min — Pro plan max; 7-way parallel Vertex calls need headroom
 
 const ALLOWED_MODES: AiMode[] = ["template", "enhanced", "full"];
+const limiter = createRateLimiter({ limit: 10, windowMs: 60_000 });
 
 export async function POST(request: NextRequest) {
+  const limited = enforceRateLimit(request, limiter);
+  if (limited) return limited;
   const body = await request.json().catch(() => ({}));
   const question = typeof body.question === "string" ? body.question : "산업안전 실무 질문";
   const requestedMode = typeof body.aiMode === "string" ? (body.aiMode as AiMode) : undefined;

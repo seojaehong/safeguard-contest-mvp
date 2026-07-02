@@ -18,3 +18,11 @@ evaluation/2026-04-27-lawgo-precedent/
 evaluation/2026-04-27-rhwp-inspect/
 evaluation/2026-04-27-template-presets/
 evaluation/pdf-export-smoke/
+
+# ralph 자율 루프 운영 파일 (커밋 금지)
+ralph.sh
+ralph-prompt.md
+prd.json
+progress.txt
+.last-branch
+.bkit/

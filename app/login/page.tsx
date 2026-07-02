@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { AdminLoginPanel } from "@/components/AdminLoginPanel";
+
+export const metadata: Metadata = {
+  title: "관리자 로그인 | SafeClaw",
+  description: "SafeClaw 관리자 콘솔 로그인 페이지입니다."
+};
 
 export default function LoginPage() {
   return (

@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { SafeGuardCommandCenter } from "@/components/SafeGuardCommandCenter";
 import { defaultFieldExample, fieldExamples } from "@/lib/field-examples";
+
+export const metadata: Metadata = {
+  title: "작업공간 | SafeClaw",
+  description: "현장 설명 한 줄로 위험성평가, 작업계획, TBM, 안전교육일지까지 안전 문서팩을 생성하는 작업공간입니다."
+};
 
 export default async function WorkspacePage({ searchParams }: { searchParams: Promise<{ q?: string; scenario?: string }> }) {
   const params = await searchParams;
