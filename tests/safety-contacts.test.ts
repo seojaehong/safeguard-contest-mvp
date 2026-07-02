@@ -62,6 +62,20 @@ describe("sanitizeContacts", () => {
     expect(placeholderCount).toBe(3);
   });
 
+  it("replaces a fabricated number in parenthesized-area-code format", () => {
+    const input = "긴급 시 안전보건공단 안산지사 (031) 555-7788 로 연락하십시오.";
+    const out = sanitizeContacts(input);
+    expect(out).not.toContain("(031) 555-7788");
+    expect(out).toContain("(관할 기관 연락처 — 현장 확인 필요)");
+  });
+
+  it("replaces a fabricated number in dot-separated format", () => {
+    const input = "긴급 시 안전보건공단 안산지사 031.555.7788 로 연락하십시오.";
+    const out = sanitizeContacts(input);
+    expect(out).not.toContain("031.555.7788");
+    expect(out).toContain("(관할 기관 연락처 — 현장 확인 필요)");
+  });
+
   it("leaves 010 personal-number blank placeholders untouched", () => {
     const input = "현장소장: 010-____-____ / 안전관리자: 010-1234-5678";
     expect(sanitizeContacts(input)).toBe(input);

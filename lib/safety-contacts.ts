@@ -27,9 +27,15 @@ export const ACCIDENT_REPORT_TEMPLATE =
 const CONTACT_PLACEHOLDER = "(관할 기관 연락처 — 현장 확인 필요)";
 
 // Matches landline / institution-hotline formats: 0XX-XXX(X)-XXXX or 15XX-XXXX / 16XX-XXXX.
+// Also covers "(0XX) XXX(X)-XXXX" (parenthesized area code + space) and "0XX.XXX(X).XXXX"
+// (dot separators), since both leaked through sanitizeContacts undetected (2026-07-02
+// prod smoke fast-follow).
 // 010 personal numbers are explicitly excluded (negative lookahead) — those follow the
 // existing blank-placeholder convention ("010-____-____") and must not be touched here.
-const PHONE_ALTERNATION = "0(?!10)\\d{1,2}-\\d{3,4}-\\d{4}|1[0-9]{3}-\\d{4}";
+const PHONE_ALTERNATION =
+  "\\(0(?!10)\\d{1,2}\\)[ \\t]\\d{3,4}-\\d{4}" +
+  "|0(?!10)\\d{1,2}[.-]\\d{3,4}[.-]\\d{4}" +
+  "|1[0-9]{3}-\\d{4}";
 
 // An institution-name run (Korean/English letters, dots, middle-dot, parens — no digits)
 // of 1-5 space-separated words, directly followed by a phone number in one of the formats
