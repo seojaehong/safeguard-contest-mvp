@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
+import { documentKeysFromDeliverables } from "@/lib/evidence-file";
 import type { AskResponse } from "@/lib/types";
 import { isRecord, parseScenarioContext, readString } from "@/lib/workspace-api";
 
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
 
   const { data: workpacks, error: workpackError } = await client
     .from("workpacks")
-    .select("id,organization_id,site_id,question,scenario,worker_summary,status,created_at,updated_at")
+    .select("id,organization_id,site_id,question,scenario,deliverables,worker_summary,status,created_at,updated_at")
     .in("organization_id", organizationIds)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -129,6 +130,7 @@ export async function GET(request: NextRequest) {
       region: site?.region || null,
       question: workpack.question,
       scenario: workpack.scenario,
+      documentKeys: documentKeysFromDeliverables(workpack.deliverables),
       workerSummary: workpack.worker_summary,
       status: workpack.status,
       createdAt: workpack.created_at,

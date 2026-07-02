@@ -402,6 +402,12 @@ export default function ArchivePage() {
               <p>{localRisk}</p>
               <Link href="/dispatch">전파 화면으로 이동</Link>
             </article>
+            <article>
+              <strong>경영책임자 방어 파일</strong>
+              <code>중처법 시행령 제4조</code>
+              <p>저장된 문서팩을 시행령 제4조 항목별 증빙으로 자동 정리한 화면입니다.</p>
+              <Link href="/evidence-file">증빙 파일철 열기</Link>
+            </article>
           </div>
         </article>
 

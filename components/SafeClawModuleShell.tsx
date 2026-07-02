@@ -20,9 +20,10 @@ type SafeClawModuleShellProps = {
   activeHref?: string;
 };
 
-// Sidebar nav per design handoff v1.0 §10.3 — 11 items in 3 groups
-// (운영 3 / 실행 4 / 시스템 4). "작업자 안내"는 외부 모바일 뷰(/worker)이라
-// 사이드바 메뉴에서 분리 (가이드 §10.2 누락 항목 명시).
+// Sidebar nav per design handoff v1.0 §10.3 — originally 11 items in 3 groups
+// (운영 3 / 실행 4 / 시스템 4); SafeClaw 2 기둥 3(경영책임자 방어 파일)에서
+// "이력 · 아카이브" 옆에 12번째 항목을 추가했다. "작업자 안내"는 외부 모바일
+// 뷰(/worker)이라 사이드바 메뉴에서 분리 (가이드 §10.2 누락 항목 명시).
 const moduleNav = [
   // 운영 (3) — 로그인 직후 첫 화면 + 한 줄 입력 + 문서 편집
   { href: "/home", code: "01", label: "대시보드", group: "운영" },
@@ -33,11 +34,12 @@ const moduleNav = [
   { href: "/workers", code: "05", label: "작업자 · 교육", group: "실행" },
   { href: "/dispatch", code: "06", label: "현장 전파", group: "실행" },
   { href: "/tbm", code: "07", label: "TBM 모드", group: "실행" },
-  // 시스템 (4) — 이력 / 지식 / API / 설정
+  // 시스템 (5) — 이력 / 방어 파일 / 지식 / API / 설정
   { href: "/archive", code: "08", label: "이력 · 아카이브", group: "시스템" },
-  { href: "/knowledge", code: "09", label: "지식 DB", group: "시스템" },
-  { href: "/ops/api", code: "10", label: "API 연결", group: "시스템" },
-  { href: "/settings", code: "11", label: "설정", group: "시스템" }
+  { href: "/evidence-file", code: "09", label: "경영책임자 방어 파일", group: "시스템" },
+  { href: "/knowledge", code: "10", label: "지식 DB", group: "시스템" },
+  { href: "/ops/api", code: "11", label: "API 연결", group: "시스템" },
+  { href: "/settings", code: "12", label: "설정", group: "시스템" }
 ] as const;
 
 export function SafeClawModuleShell({
