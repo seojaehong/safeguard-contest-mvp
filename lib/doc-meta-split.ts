@@ -22,20 +22,28 @@ export type DocumentMetaSplit = {
 
 // Prefixes are matched against a trimmed, standalone "[...]" line. Kept as
 // prefixes (not exact strings) because several appendix builders parameterize
-// the header, e.g. "[반영 근거: 작업계획서]", "[근거 요약: 유사 재해사례]",
-// "[KOSHA 기술지침/기술지원규정 직접 인용]".
+// the header, e.g. "[반영 근거: 작업계획서]", "[근거 요약: 유사 재해사례]".
+//
+// Note: "[KOSHA" is intentionally NOT a bare prefix here — lib/search.ts also
+// builds a substantive, non-meta "[KOSHA 교육포털 연계]" appendix (a
+// recommended-course list, not an evidence log), which must NOT be swept
+// away. Only the citation-style "...직접 인용" phrasing (e.g.
+// "[KOSHA 기술지침/기술지원규정 직접 인용]") marks a block as a meta
+// evidence-log; see META_HEADER_SUBSTRINGS below.
 const META_HEADER_PREFIXES = [
   "[반영 근거",
   "[문서 반영",
-  "[KOSHA",
   "[공식 서식 기준 보강",
   "[근거 요약"
 ] as const;
 
+const META_HEADER_SUBSTRINGS = ["직접 인용"] as const;
+
 function isMetaHeaderLine(line: string): boolean {
   const trimmed = line.trim();
   if (!trimmed.startsWith("[") || !trimmed.endsWith("]")) return false;
-  return META_HEADER_PREFIXES.some((prefix) => trimmed.startsWith(prefix));
+  if (META_HEADER_PREFIXES.some((prefix) => trimmed.startsWith(prefix))) return true;
+  return META_HEADER_SUBSTRINGS.some((substring) => trimmed.includes(substring));
 }
 
 /**

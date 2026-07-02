@@ -123,15 +123,29 @@ describe("splitDocumentMeta", () => {
     expect(result.body).not.toContain("반영 근거");
   });
 
-  it("strips a safetyEducationRecordDraft-shaped appendix chain, including a [교육 적합성 확인] block that follows the first meta header", () => {
+  it("strips a safetyEducationRecordDraft-shaped appendix chain, keeping the [교육 적합성 확인] block that precedes the meta appendices (real lib/search.ts order)", () => {
     const base = "안전교육 기록\n교육명: 밀폐공간 작업 안전교육\n교육대상: 전 작업자";
-    const educationLegalAppendix = "\n\n[반영 근거: 안전교육 기록]\n- 법령·해석례: 산업안전보건법 기준을 교육내용, 이해도 확인, 반복 교육 문구에 연결합니다.";
+    // lib/search.ts intentionally orders substantive appendices before the
+    // evidence-citation ones for this exact reason — cut-to-end must not eat
+    // the KOSHA-교육포털 recommendation list or the fit-check block.
+    const koshaEducationAppendix = "\n\n[KOSHA 교육포털 연계]\n1. 밀폐공간 안전보건교육 / KOSHA / 전 작업자 / 적합";
     const educationFitBlock = "\n\n[교육 적합성 확인]\n- 신규 투입자 확인 필요";
-    const composed = `${base}${educationLegalAppendix}${educationFitBlock}`;
+    const educationLegalAppendix = "\n\n[반영 근거: 안전교육 기록]\n- 법령·해석례: 산업안전보건법 기준을 교육내용, 이해도 확인, 반복 교육 문구에 연결합니다.";
+    const composed = `${base}${koshaEducationAppendix}${educationFitBlock}${educationLegalAppendix}`;
 
     const result = splitDocumentMeta(composed);
 
-    expect(result.body).toBe(base);
+    expect(result.body).toContain(base);
+    expect(result.body).toContain("[KOSHA 교육포털 연계]");
+    expect(result.body).toContain("[교육 적합성 확인]");
+    expect(result.body).not.toContain("반영 근거");
+  });
+
+  it("does not treat a substantive '[KOSHA 교육포털 연계]' course-list header as meta (false-positive guard)", () => {
+    const text = "안전교육 기록 본문\n\n[KOSHA 교육포털 연계]\n1. 밀폐공간 안전보건교육 / KOSHA / 전 작업자 / 적합";
+    const result = splitDocumentMeta(text);
+    expect(result.body).toBe(text);
+    expect(result.meta).toBe("");
   });
 
   it("leaves a document unchanged when the appendix chain contributes nothing (no KOSHA/legal matches)", () => {

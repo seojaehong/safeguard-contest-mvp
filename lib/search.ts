@@ -1207,9 +1207,15 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         tbmLogDraft: aiBodies.tbmLogDraft
           ? aiBodies.tbmLogDraft
           : `${baseDeliverables.tbmLogDraft}${tbmQualityAppendix}`.trim(),
+        // Substantive appendices (official-form guidance, heat-education content,
+        // serious-accident checklist, recommended follow-up training, fit-check)
+        // are concatenated BEFORE the evidence-citation appendices on purpose:
+        // stripPipelineMeta() cuts from the FIRST meta header to the end of the
+        // string, so anything meta-tagged must trail everything the field crew
+        // actually needs to read.
         safetyEducationRecordDraft: aiBodies.safetyEducationRecordDraft
           ? aiBodies.safetyEducationRecordDraft
-          : stripPipelineMeta(`${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationLegalAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`),
+          : stripPipelineMeta(`${baseDeliverables.safetyEducationRecordDraft}${safetyEducationOfficialAppendix}${outdoorHeatEducationAppendix}${educationSeriousAccidentAppendix}${trainingAppendix}${koshaEducationAppendix}${trainingFitLines.length ? `\n\n[교육 적합성 확인]\n- ${trainingFitLines.join("\n- ")}` : ""}${educationLegalAppendix}${educationKoshaAppendix}${safetyKnowledgeEducationAppendix}${safetyReferenceAppendix}${accidentAppendix}${educationKoshaOpenApiAppendix}`),
         emergencyResponseDraft: aiBodies.emergencyResponseDraft
           ? aiBodies.emergencyResponseDraft
           : `${baseDeliverables.emergencyResponseDraft}${educationSeriousAccidentAppendix}${accidentAppendix}${emergencyKoshaOpenApiAppendix}`,
