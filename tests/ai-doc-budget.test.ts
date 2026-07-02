@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   planModelAttempts,
   planPostAnthropicAttempts,
+  resolveAnthropicModelForDoc,
   resolveDocBudget,
   resolvePositiveIntEnv,
   DEFAULT_DELIVERABLES_TIMEOUT_MS,
@@ -75,5 +76,17 @@ describe("planModelAttempts with a custom fallback cap", () => {
   test("omitting the cap keeps the default fallback cap", () => {
     const attempts = planModelAttempts("gemini-2.5-flash", ["gemini-2.5-flash-lite"], 45_000);
     expect(attempts[1].timeoutMs).toBe(FALLBACK_MODEL_TIMEOUT_CAP_MS);
+  });
+});
+
+describe("resolveAnthropicModelForDoc", () => {
+  test("heavy docs (foreign, free) route to the fast haiku model", () => {
+    expect(resolveAnthropicModelForDoc("foreign", "claude-sonnet-5")).toBe("claude-haiku-4-5");
+    expect(resolveAnthropicModelForDoc("free", "claude-opus-4-8")).toBe("claude-haiku-4-5");
+  });
+
+  test("standard docs keep the configured model", () => {
+    expect(resolveAnthropicModelForDoc("riskAssessment", "claude-sonnet-5")).toBe("claude-sonnet-5");
+    expect(resolveAnthropicModelForDoc("tbmLog", "claude-haiku-4-5")).toBe("claude-haiku-4-5");
   });
 });
