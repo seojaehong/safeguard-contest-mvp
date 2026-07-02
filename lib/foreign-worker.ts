@@ -610,12 +610,18 @@ function buildVisualCueLine(language: ForeignWorkerLanguage, keywords: SafetyKey
   return localizedGuides[language.code] || localizedGuides.en;
 }
 
-function buildWorkerMediaSupportLine(language: ForeignWorkerLanguage) {
-  if (!["km", "ne", "my"].includes(language.code)) {
-    return null;
-  }
+// Localized (not Korean) — this line renders inside a specific worker's
+// language block, so it must be readable by that worker rather than by a
+// Korean-speaking supervisor. (Previously hardcoded to Korean text, which
+// leaked an untranslated line into every km/ne/my block.)
+const workerMediaSupportLines: Record<string, string> = {
+  km: "📎 បើអានពិបាក សូមមើលរូបភាព វីដេអូខ្លីៗ ឬសុំអ្នកគ្រប់គ្រងបង្ហាញផ្ទាល់។",
+  ne: "📎 पढ्न गाह्रो भएमा तस्बिर, छोटो सुरक्षा भिडियो र प्रत्यक्ष प्रदर्शन हेर्नुहोस्।",
+  my: "📎 စာဖတ်ရခက်ပါက ပုံ၊ တိုတောင်းသော ဗီဒီယို သို့မဟုတ် ကြီးကြပ်သူ၏ လက်တွေ့ ရှင်းပြချက်ကို ကြည့်ပါ။"
+};
 
-  return "📎 글로 이해가 어려우면 그림 표지, 짧은 안전 영상, 현장 실물 설명을 함께 확인하세요.";
+function buildWorkerMediaSupportLine(language: ForeignWorkerLanguage) {
+  return workerMediaSupportLines[language.code] || null;
 }
 
 function buildTaskSpecificLines(input: BriefingInput, language: ForeignWorkerLanguage) {
@@ -627,15 +633,21 @@ function buildTaskSpecificLines(input: BriefingInput, language: ForeignWorkerLan
     .map((keyword) => pack.actionLabels[keyword])
     .filter((line): line is string => Boolean(line))
     .slice(0, 3);
-  const fallbackActions = input.riskSummary.immediateActions.slice(0, 3);
+  // Note: previously fell back to input.riskSummary.immediateActions (raw
+  // Korean scenario text) when a language pack had no actionLabels entry for
+  // a detected keyword (e.g. heavyLoad/crane/excavation/confined/electric/
+  // heat/slip are only localized for a subset of languages). That leaked
+  // untranslated Korean sentences into non-Korean language blocks (prod
+  // evidence, 2026-07). Fall back to the language template's own localized
+  // generic safety lines instead — never to unlocalized Korean text.
 
   return [
     `${pack.work}: ${workLabel}`,
     `${pack.risk}: ${hazards.join(", ")}`,
     buildVisualCueLine(language, keywords),
-    `${pack.actions}: ${actions[0] || fallbackActions[0] || language.lines[0]}`,
-    actions[1] || fallbackActions[1] || language.lines[1],
-    actions[2] || fallbackActions[2] || language.lines[2],
+    `${pack.actions}: ${actions[0] || language.lines[0]}`,
+    actions[1] || language.lines[1],
+    actions[2] || language.lines[2],
     pack.ask,
     buildWorkerMediaSupportLine(language)
   ].filter((line): line is string => Boolean(line));
@@ -732,4 +744,36 @@ export function buildForeignWorkerLanguageMessage(input: BriefingInput, language
 
 export function getDefaultForeignWorkerLanguages(question: string) {
   return pickLanguages(question);
+}
+
+/**
+ * Reconciles a claimed language list against what actually appears in the
+ * generated body text.
+ *
+ * Background (prod evidence, 2026-07): the static phrase pack always claimed
+ * up to 10 rich ForeignWorkerLanguage objects, while the actual briefing/
+ * transmission body (whether AI-written or template-built) only ever
+ * contained 3-5 language sections. Consumers (TBM appendix language hints,
+ * workspace primary-language summary) rendered language metadata that had
+ * nothing to do with what a worker would actually read in the document.
+ *
+ * This scans the combined body text for each claimed language's native
+ * label (e.g. "Tiếng Việt") or Korean label (e.g. "베트남어") and keeps only
+ * the languages that are demonstrably present, in their original claimed
+ * order. If detection finds nothing at all (unexpected header format, empty
+ * text, etc.) it fails safe and returns the original claimed array rather
+ * than stripping everything.
+ */
+export function reconcileLanguages(
+  briefingText: string,
+  transmissionText: string,
+  claimed: ForeignWorkerLanguage[]
+): ForeignWorkerLanguage[] {
+  const combined = `${briefingText}\n${transmissionText}`.toLocaleLowerCase();
+  const present = claimed.filter((language) => {
+    const nativeLabel = language.nativeLabel?.toLocaleLowerCase();
+    const label = language.label?.toLocaleLowerCase();
+    return (nativeLabel && combined.includes(nativeLabel)) || (label && combined.includes(label));
+  });
+  return present.length ? present : claimed;
 }

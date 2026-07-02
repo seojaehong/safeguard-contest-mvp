@@ -11,7 +11,7 @@ import { fetchKoshaEducationRecommendations } from "./kosha-education";
 import { fetchKoshaReferences } from "./kosha";
 import { fetchAccidentCases } from "./accident-cases";
 import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
-import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission } from "./foreign-worker";
+import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission, reconcileLanguages } from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
 import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow } from "./risk-assessment-schema";
 import { splitDocumentMeta } from "./doc-meta-split";
@@ -1125,6 +1125,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       : "TBM-risk links=deterministic fallback";
     const linkedWorkPlanStructured = linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows);
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
+    const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
+    const foreignWorkerTransmissionText = aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput);
 
     const enriched: AskResponse = {
       ...response,
@@ -1222,12 +1224,17 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         photoEvidenceDraft: aiBodies.photoEvidenceDraft
           ? aiBodies.photoEvidenceDraft
           : ensurePhotoEvidenceDraft(baseDeliverables.photoEvidenceDraft, photoEvidenceAppendix),
-        foreignWorkerBriefing: aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput),
-        foreignWorkerTransmission: aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput),
-        foreignWorkerLanguages,
+        foreignWorkerBriefing: foreignWorkerBriefingText,
+        foreignWorkerTransmission: foreignWorkerTransmissionText,
+        // Reconciled against the actual body text — the static pack (or the
+        // AI's own foreignWorkerLanguages claim, which we discard) can claim
+        // up to 10 rich language objects while the body only ever contains
+        // 3-5 language sections. Prod evidence, 2026-07: a 10-language claim
+        // rendered next to a 3-language briefing / 5-language transmission.
+        foreignWorkerLanguages: reconcileLanguages(foreignWorkerBriefingText, foreignWorkerTransmissionText, foreignWorkerLanguages),
         kakaoMessage: aiBodies.kakaoMessage
           ? aiBodies.kakaoMessage
-          : `${baseDeliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${(aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput)).split("\n").slice(0, 8).join("\n")}`
+          : `${baseDeliverables.kakaoMessage}${outdoorHeatMessageAppendix}\n\n[외국인 근로자 공지]\n${foreignWorkerTransmissionText.split("\n").slice(0, 8).join("\n")}`
       },
       structured: {
         riskAssessmentRows: structuredRiskRows,

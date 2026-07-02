@@ -60,6 +60,32 @@ describe("emergency contact whitelist injection", () => {
   });
 });
 
+describe("foreignWorkerPrompt length spec consistency (Finding: 헤더당 800~1500 x 3 vs 전체 4500~7000 was mathematically impossible)", () => {
+  const prompt = foreignWorkerPrompt(baseCtx);
+
+  it("does not contain the old self-contradictory per-header x total spec", () => {
+    expect(prompt).not.toMatch(/4500~7000/);
+    expect(prompt).not.toMatch(/7000~10000/);
+  });
+
+  it("gives a single non-contradictory overall length ceiling instead of per-header x count math", () => {
+    expect(prompt).toMatch(/12,?000자 이내/);
+  });
+
+  it("still pins the Korean section to 800~1500자 and frees the other languages from a character-count requirement", () => {
+    expect(prompt).toMatch(/한국어 800~1500자/);
+    expect(prompt).toMatch(/글자수 무관/);
+  });
+});
+
+describe("foreignWorkerPrompt forklift/pallet worker-mount prohibition (Finding: prompt suggested mounting a worker on a forklift pallet)", () => {
+  it("forbids advice that allows a worker to ride or work from a forklift fork/pallet, and offers the lawful alternative", () => {
+    const prompt = foreignWorkerPrompt(baseCtx);
+    expect(prompt).toMatch(/지게차 포크.*팔레트.*탑승/);
+    expect(prompt).toMatch(/고소작업대/);
+  });
+});
+
 describe("post-processing: contact sanitization on parsed output", () => {
   const LONG = "가".repeat(300);
 
