@@ -3,6 +3,9 @@ import { AskResponse, SearchResult } from "./types";
 import { buildMockAskResponse } from "./mock-data";
 import { generateWithVertex } from "./vertex/client";
 import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("ai");
 
 const openAiApiKey = process.env.OPENAI_API_KEY?.trim();
 const openAiModel = process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini";
@@ -108,7 +111,7 @@ async function generateWithGemini(prompt: string) {
       return await generateWithGeminiModel(prompt, model);
     } catch (error) {
       lastError = error;
-      console.error(`Gemini model failed: ${model}`, error);
+      log.error(`Gemini model failed: ${model}`, error);
       // Skip fallback models on timeout — they are unlikely to respond faster.
       if (error instanceof Error && /timeout/i.test(error.message)) break;
     }
@@ -195,7 +198,7 @@ function parseCitationMappings(text: string): CitationMapping[] {
       })
       .filter((item): item is CitationMapping => Boolean(item));
   } catch (error) {
-    console.error("Failed to parse Gemini citation mapping JSON", error);
+    log.error("Failed to parse Gemini citation mapping JSON", error);
     return [];
   }
 }
@@ -231,7 +234,7 @@ export async function enhanceLegalEvidenceMappings(question: string, citations: 
   const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
-        console.error("Vertex AI legal evidence mapping failed; falling back to OpenAI", error);
+        log.error("Vertex AI legal evidence mapping failed; falling back to OpenAI", error);
         return generateWithOpenAI(prompt);
       })
     : await generateWithOpenAI(prompt);
@@ -272,7 +275,7 @@ export async function generateAnswer(question: string, citations: SearchResult[]
   const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
-        console.error("Vertex AI model chain failed; falling back to OpenAI", error);
+        log.error("Vertex AI model chain failed; falling back to OpenAI", error);
         return generateWithOpenAI(prompt);
       })
     : await generateWithOpenAI(prompt);
@@ -308,7 +311,7 @@ export async function generateKnowledgeText(prompt: string) {
   const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
-        console.error("Vertex AI knowledge generation failed; falling back to OpenAI", error);
+        log.error("Vertex AI knowledge generation failed; falling back to OpenAI", error);
         return generateWithOpenAI(prompt);
       })
     : await generateWithOpenAI(prompt);

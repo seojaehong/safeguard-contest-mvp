@@ -32,7 +32,19 @@ import {
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
 import { planModelAttempts, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
+import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
+import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("ai-deliverables");
+
+const providerDecision = resolveDeliverablesProvider({
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+  providerFlag: process.env.AI_DELIVERABLES_PROVIDER,
+  modelOverride: process.env.ANTHROPIC_MODEL,
+});
+if (providerDecision.reason) log.warn(providerDecision.reason);
 
 const geminiModel = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
 const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-flash-lite")
@@ -70,6 +82,17 @@ type GenContext = {
 };
 
 async function callGemini(prompt: string, budget: DocBudget): Promise<string> {
+  // Optional demo/pilot route: Claude first, Vertex chain as the runtime fallback.
+  if (providerDecision.provider === "anthropic" && providerDecision.model) {
+    try {
+      return await generateWithAnthropic(providerDecision.model, prompt, {
+        maxOutputTokens: budget.maxOutputTokens,
+        timeoutMs: budget.timeoutMs,
+      });
+    } catch (error) {
+      log.error(`Anthropic deliverables (${providerDecision.model}) failed; falling back to Vertex`, error);
+    }
+  }
   if (!isVertexConfigured()) throw new Error("Vertex AI not configured (GOOGLE_APPLICATION_CREDENTIALS_JSON / GCP_PROJECT_ID missing)");
   const attempts = planModelAttempts(geminiModel, geminiFallbackModels, budget.timeoutMs, budget.fallbackTimeoutCapMs);
   let lastError: unknown;
@@ -91,7 +114,7 @@ async function callGemini(prompt: string, budget: DocBudget): Promise<string> {
       return text;
     } catch (error) {
       lastError = error;
-      console.error(`Vertex AI deliverables (${model}) failed`, error);
+      log.error(`Vertex AI deliverables (${model}) failed`, error);
       // A timeout on the primary no longer aborts the chain: the fallback
       // model still gets one short capped attempt (see planModelAttempts).
     }
@@ -125,10 +148,10 @@ async function callAndParse<T>(
       lastError = new Error(`json parse failed (raw len=${raw.length})`);
       const head = raw.slice(0, 200).replace(/\n/g, "\\n");
       const tail = raw.slice(-200).replace(/\n/g, "\\n");
-      console.error(`[AI ${label}] attempt ${attempt} parse failed. head=${head} ... tail=${tail}`);
+      log.error(`[AI ${label}] attempt ${attempt} parse failed. head=${head} ... tail=${tail}`);
     } catch (error) {
       lastError = error;
-      console.error(`[AI ${label}] attempt ${attempt} call failed:`, error);
+      log.error(`[AI ${label}] attempt ${attempt} call failed:`, error);
       // Don't waste time retrying if we already hit the timeout budget.
       if (isTimeoutError(error)) break;
     }
@@ -774,7 +797,7 @@ async function generateTbmRiskLinks(ctx: GenContext, rows: RiskAssessmentRow[]):
       "tbmRiskLinks"
     );
   } catch (error) {
-    console.error("[AI tbmRiskLinks] falling back to []", error);
+    log.error("[AI tbmRiskLinks] falling back to []", error);
     return { tbmRiskLinks: [] };
   }
 }
