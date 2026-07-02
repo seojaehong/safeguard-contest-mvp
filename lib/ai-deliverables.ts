@@ -31,7 +31,7 @@ import {
   type RiskAssessmentRow,
   type RiskAssessmentValidationIssue
 } from "@/lib/risk-assessment-schema";
-import { planModelAttempts, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
+import { planModelAttempts, planPostAnthropicAttempts, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
 import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
@@ -83,6 +83,7 @@ type GenContext = {
 
 async function callGemini(prompt: string, budget: DocBudget): Promise<string> {
   // Optional demo/pilot route: Claude first, Vertex chain as the runtime fallback.
+  let anthropicFailed = false;
   if (providerDecision.provider === "anthropic" && providerDecision.model) {
     try {
       return await generateWithAnthropic(providerDecision.model, prompt, {
@@ -90,11 +91,16 @@ async function callGemini(prompt: string, budget: DocBudget): Promise<string> {
         timeoutMs: budget.timeoutMs,
       });
     } catch (error) {
+      anthropicFailed = true;
       log.error(`Anthropic deliverables (${providerDecision.model}) failed; falling back to Vertex`, error);
     }
   }
   if (!isVertexConfigured()) throw new Error("Vertex AI not configured (GOOGLE_APPLICATION_CREDENTIALS_JSON / GCP_PROJECT_ID missing)");
-  const attempts = planModelAttempts(geminiModel, geminiFallbackModels, budget.timeoutMs, budget.fallbackTimeoutCapMs);
+  // After an Anthropic timeout the primary budget is spent — go straight to the
+  // fast fallback model so the per-doc chain stays within budget + cap.
+  const attempts = anthropicFailed
+    ? planPostAnthropicAttempts(geminiFallbackModels, budget)
+    : planModelAttempts(geminiModel, geminiFallbackModels, budget.timeoutMs, budget.fallbackTimeoutCapMs);
   let lastError: unknown;
 
   for (const { model, timeoutMs } of attempts) {
