@@ -41,7 +41,17 @@ export type DocBudget = {
  * tokens; everything else keeps the standard budget.
  */
 export function resolveDocBudget(docName: string, baseTimeoutMs: number): DocBudget {
+  // foreign: ko+en+vi+th+uz pack ≈ 15-20K output tokens → 3x wall clock.
+  // free: 4 grouped docs ≈ 8-10K output tokens → 2x wall clock.
+  // (2026-07-02 prod: both timed out on every provider at 2x/1x budgets.)
   if (docName === "foreign") {
+    return {
+      timeoutMs: baseTimeoutMs * 3,
+      maxOutputTokens: 16384,
+      fallbackTimeoutCapMs: HEAVY_DOC_FALLBACK_TIMEOUT_CAP_MS
+    };
+  }
+  if (docName === "free") {
     return {
       timeoutMs: baseTimeoutMs * 2,
       maxOutputTokens: 16384,

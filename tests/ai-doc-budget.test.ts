@@ -31,16 +31,23 @@ describe("resolveDocBudget", () => {
     expect(budget.fallbackTimeoutCapMs).toBe(FALLBACK_MODEL_TIMEOUT_CAP_MS);
   });
 
-  test("foreign doc gets a doubled timeout, 16384 output tokens and a larger fallback cap", () => {
+  test("foreign doc gets a tripled timeout, 16384 output tokens and a larger fallback cap", () => {
     const budget = resolveDocBudget("foreign", 45_000);
+    expect(budget.timeoutMs).toBe(135_000);
+    expect(budget.maxOutputTokens).toBe(16_384);
+    expect(budget.fallbackTimeoutCapMs).toBe(HEAVY_DOC_FALLBACK_TIMEOUT_CAP_MS);
+  });
+
+  test("free grouped pack gets a doubled timeout and 16384 output tokens", () => {
+    const budget = resolveDocBudget("free", 45_000);
     expect(budget.timeoutMs).toBe(90_000);
     expect(budget.maxOutputTokens).toBe(16_384);
     expect(budget.fallbackTimeoutCapMs).toBe(HEAVY_DOC_FALLBACK_TIMEOUT_CAP_MS);
   });
 
-  test("foreign doubling respects a custom base timeout", () => {
+  test("foreign tripling respects a custom base timeout", () => {
     const budget = resolveDocBudget("foreign", DEFAULT_DELIVERABLES_TIMEOUT_MS);
-    expect(budget.timeoutMs).toBe(DEFAULT_DELIVERABLES_TIMEOUT_MS * 2);
+    expect(budget.timeoutMs).toBe(DEFAULT_DELIVERABLES_TIMEOUT_MS * 3);
   });
 });
 
