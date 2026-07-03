@@ -35,6 +35,39 @@ claude mcp add --transport http safeclaw \
 - OAuth는 다음 단계이며 v0 스코프는 정적 Bearer 토큰이다.
 - rate limit은 서버리스 웜 인스턴스 단위 소프트 가드(분산 쿼터 아님).
 
+### 테넌트 스코프 토큰 (DB, `mcp_tokens`)
+
+env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거시 토큰이다. Tier 1
+파일럿에서는 고객사별 토큰이 자기 사이트에만 귀속되어야 하므로, 사이트/조직에 바인딩된
+토큰을 Supabase `mcp_tokens`(마이그레이션 `007_mcp_tokens.sql`)에 둔다.
+
+- 인증 해석은 [`lib/mcp-auth.ts`](../lib/mcp-auth.ts) `resolveMcpAuth`가 담당한다:
+  Bearer → `sha256` hex → `mcp_tokens` 조회(`disabled=false`) → `{siteId, orgId, scopes}`
+  컨텍스트. **평문 토큰은 저장·로그하지 않는다**(DB엔 해시만, 컨텍스트/로그엔 토큰 없음).
+- **DB 우선, env 폴백**: DB에서 매칭되지 않으면 env 레거시 토큰으로 폴백한다(기존 운영자
+  토큰 무중단). Supabase 서비스 롤 미설정 시엔 env만으로 동작한다(회귀 없음).
+- 활성화 조건도 확장됐다: env 토큰이 있거나 **Supabase 서비스 롤이 설정**되면 MCP 계층이
+  켜진다(DB 전용 운영 시에도 `501`이 아니라 정상 동작).
+- 컨텍스트는 도구 핸들러의 `extra.authInfo.extra`로 전달된다. `generate_safety_docpack`은
+  `siteId`가 있으면 결과 workpack을 해당 사이트로 귀속 저장하고, 성패와 무관하게
+  `attribution`(`{siteId, orgId, workpackId, saved}`) 메타를 응답에 기록한다. 나머지 도구는
+  현재 컨텍스트 로깅만 하며 향후 확장점 주석을 달아 두었다.
+- `last_used_at`은 fire-and-forget으로 갱신한다(응답 경로를 막지 않는다).
+
+#### 토큰 발급
+
+서비스 롤 키가 필요하다(`mcp_tokens`는 RLS로 `service_role` 전용). 평문 토큰은 발급 시
+stdout에 **한 번만** 출력되며 복구 불가다.
+
+```bash
+# .env.local의 SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY를 사용한다.
+node scripts/issue-mcp-token.mjs "부평 파일럿 - 안전관리자" "부평공장"   # 사이트 귀속
+node scripts/issue-mcp-token.mjs "운영자 전체신뢰"                        # 사이트 미귀속
+# npm 스크립트로도 동일: npm run token:mcp -- "<label>" ["<site name>"]
+```
+
+출력된 평문 토큰을 그대로 `Authorization: Bearer <token>`으로 쓰면 된다(접속 방법 동일).
+
 ### 프로덕션 활성화 (필수)
 
 **Vercel 환경변수 `SAFECLAW_MCP_TOKENS`가 설정되기 전까지 prod는 501을 반환한다.**
