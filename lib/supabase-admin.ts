@@ -295,6 +295,39 @@ export type WorkspaceDatabase = {
         };
         Relationships: [];
       };
+      mcp_tokens: {
+        Row: {
+          id: string;
+          token_hash: string;
+          label: string | null;
+          site_id: string | null;
+          org_id: string | null;
+          scopes: Json;
+          disabled: boolean;
+          last_used_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          token_hash: string;
+          label?: string | null;
+          site_id?: string | null;
+          org_id?: string | null;
+          scopes?: Json;
+          disabled?: boolean;
+          last_used_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          label?: string | null;
+          site_id?: string | null;
+          org_id?: string | null;
+          scopes?: Json;
+          disabled?: boolean;
+          last_used_at?: string | null;
+        };
+        Relationships: [];
+      };
       knowledge_regeneration_runs: {
         Row: {
           id: string;

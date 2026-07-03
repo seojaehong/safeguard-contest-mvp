@@ -21,6 +21,15 @@ import { runAsk } from "@/lib/search";
 import { fetchWeatherSignal } from "@/lib/weather";
 import { fetchAccidentCases } from "@/lib/accident-cases";
 import { createRateLimiter } from "@/lib/rate-limit";
+import { createLogger } from "@/lib/logger";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin";
+import { saveMcpDocpackWorkpack } from "@/lib/workpack-store";
+import {
+  asAuthContext,
+  isMcpEnabled,
+  resolveMcpAuth,
+  type McpAuthContext,
+} from "@/lib/mcp-auth";
 import {
   buildAccidentCasesResult,
   buildDocpackResult,
@@ -35,15 +44,30 @@ import {
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // docpack full 생성 ~150초
 
-function parseTokens(): Set<string> {
-  const raw = process.env.SAFECLAW_MCP_TOKENS?.trim();
-  if (!raw) return new Set();
-  return new Set(
-    raw
-      .split(",")
-      .map((token) => token.trim())
-      .filter(Boolean)
-  );
+const log = createLogger("mcp-route");
+
+// MCP 도구 핸들러의 두 번째 인자(extra: RequestHandlerExtra)에서 인증 컨텍스트를 꺼낸다.
+// mcp-handler의 withMcpAuth가 verifyToken 반환 AuthInfo를 req.auth로 보관하고, 이를
+// transport가 extra.authInfo로 전달한다. 우리는 AuthInfo.extra에 McpAuthContext를 실어 보냈다.
+function readAuthContext(extra: unknown): McpAuthContext | null {
+  const authInfo = (extra as { authInfo?: { extra?: unknown } } | undefined)?.authInfo;
+  return asAuthContext(authInfo?.extra);
+}
+
+// 평문 토큰(AuthInfo.token)은 절대 로그하지 않는다 — 컨텍스트 요약만 남긴다.
+function logToolContext(tool: string, ctx: McpAuthContext | null): void {
+  if (!ctx) {
+    log.debug("tool call (no auth context)", { tool });
+    return;
+  }
+  log.debug("tool call", {
+    tool,
+    source: ctx.source,
+    siteId: ctx.siteId,
+    orgId: ctx.orgId,
+    scopes: ctx.scopes,
+    tokenId: ctx.tokenId,
+  });
 }
 
 function registerTools(server: McpServer): void {
@@ -65,10 +89,36 @@ function registerTools(server: McpServer): void {
           .describe("각 문서 전체 본문 포함 여부 (기본 false — 프리뷰만)"),
       },
     },
-    async ({ question, mode, includeFull }) => {
+    async ({ question, mode, includeFull }, extra) => {
       try {
+        const authContext = readAuthContext(extra);
+        logToolContext("generate_safety_docpack", authContext);
+
         const response = await runAsk(question, { aiMode: mode ?? "full" });
-        return toToolResult(buildDocpackResult(response, includeFull ?? false));
+        const result = buildDocpackResult(response, includeFull ?? false) as Record<string, unknown>;
+
+        // 테넌트 귀속: 토큰에 siteId가 있으면 결과 workpack을 해당 사이트로 저장 시도하고,
+        // 저장 성패와 무관하게 site_id/org_id를 결과 meta에 기록한다(스펙 ① 폴백).
+        if (authContext?.siteId) {
+          const client = createSupabaseAdminClient();
+          if (client) {
+            const attribution = await saveMcpDocpackWorkpack(
+              client,
+              { siteId: authContext.siteId, orgId: authContext.orgId },
+              response
+            );
+            result.attribution = attribution;
+          } else {
+            result.attribution = {
+              siteId: authContext.siteId,
+              orgId: authContext.orgId,
+              workpackId: null,
+              saved: false,
+            };
+          }
+        }
+
+        return toToolResult(result);
       } catch (error) {
         return toToolError(error);
       }
@@ -85,8 +135,10 @@ function registerTools(server: McpServer): void {
         region: z.string().describe("현장 지역명 (예: 서울, 인천, 안산, 부산, 광주, 대구, 창원)"),
       },
     },
-    async ({ region }) => {
+    async ({ region }, extra) => {
       try {
+        // 향후 확장점: authContext.siteId로 사이트 기본 지역 프리필/조회 로깅 등에 활용.
+        logToolContext("get_weather_signals", readAuthContext(extra));
         const signal = await fetchWeatherSignal(region);
         return toToolResult(buildWeatherResult(region, signal));
       } catch (error) {
@@ -105,8 +157,10 @@ function registerTools(server: McpServer): void {
         text: z.string().describe("검증할 안전 문서 초안 텍스트"),
       },
     },
-    async ({ text }) => {
+    async ({ text }, extra) => {
       try {
+        // 향후 확장점: authContext로 사이트별 인용 화이트리스트 확장 가능.
+        logToolContext("validate_safety_citations", readAuthContext(extra));
         return toToolResult(validateCitations(text));
       } catch (error) {
         return toToolError(error);
@@ -124,8 +178,10 @@ function registerTools(server: McpServer): void {
         text: z.string().describe("정화할 초안 텍스트 (비상대응/사고보고 절차 등)"),
       },
     },
-    async ({ text }) => {
+    async ({ text }, extra) => {
       try {
+        // 향후 확장점: authContext로 사이트별 비상 연락처 세트 주입 가능.
+        logToolContext("sanitize_emergency_contacts", readAuthContext(extra));
         return toToolResult(buildSanitizeContactsResult(text));
       } catch (error) {
         return toToolError(error);
@@ -143,8 +199,10 @@ function registerTools(server: McpServer): void {
         keyword: z.string().describe("검색 키워드 (예: 비계 추락, 밀폐공간 질식, 지게차 충돌)"),
       },
     },
-    async ({ keyword }) => {
+    async ({ keyword }, extra) => {
       try {
+        // 향후 확장점: authContext.siteId로 사이트 업종별 재해사례 가중치 부여 가능.
+        logToolContext("search_accident_cases", readAuthContext(extra));
         const result = await fetchAccidentCases(keyword);
         return toToolResult(buildAccidentCasesResult(keyword, result));
       } catch (error) {
@@ -166,8 +224,10 @@ function registerTools(server: McpServer): void {
           .describe("문서 타입 키 (예: riskAssessment, tbmBriefing, workPlan). 생략 시 전체 매핑."),
       },
     },
-    async ({ docType }) => {
+    async ({ docType }, extra) => {
       try {
+        // 향후 확장점: authContext로 조직별 증빙 파일철 구성 로깅 가능.
+        logToolContext("get_evidence_mapping", readAuthContext(extra));
         return toToolResult(buildEvidenceMappingResult(docType));
       } catch (error) {
         return toToolError(error);
@@ -182,11 +242,19 @@ const baseHandler = createMcpHandler(
   { basePath: "/api/mcp", maxDuration: 300, verboseLogs: false }
 );
 
+// Bearer → {siteId, orgId, scopes} 컨텍스트. DB(mcp_tokens) 우선, env 레거시 폴백.
+// 컨텍스트를 AuthInfo.extra에 실어 보내면 transport가 도구 핸들러의 extra.authInfo로 전달한다.
 const verifyToken = async (_req: Request, bearerToken?: string): Promise<AuthInfo | undefined> => {
   if (!bearerToken) return undefined;
-  const tokens = parseTokens();
-  if (!tokens.has(bearerToken)) return undefined;
-  return { token: bearerToken, clientId: "safeclaw-mcp", scopes: [] };
+  const context = await resolveMcpAuth(bearerToken);
+  if (!context) return undefined;
+  return {
+    token: bearerToken,
+    clientId: context.source === "db" ? `safeclaw-mcp:${context.tokenId}` : "safeclaw-mcp",
+    scopes: context.scopes,
+    // McpAuthContext — 평문 토큰은 포함하지 않는다. AuthInfo.extra는 Record<string, unknown>.
+    extra: context as unknown as Record<string, unknown>,
+  };
 };
 
 const authHandler = withMcpAuth(baseHandler, verifyToken, { required: true });
@@ -195,21 +263,22 @@ const authHandler = withMcpAuth(baseHandler, verifyToken, { required: true });
 const limiter = createRateLimiter({ limit: 20, windowMs: 60_000 });
 
 async function handler(request: Request): Promise<Response> {
-  const tokens = parseTokens();
-  if (tokens.size === 0) {
+  // 활성화 조건: env 레거시 토큰이 있거나 Supabase 서비스 롤(DB 토큰)이 설정된 경우.
+  if (!isMcpEnabled()) {
     return new Response(JSON.stringify({ error: "MCP not enabled" }), {
       status: 501,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  // POST(JSON-RPC 메시지)만 토큰당 rate limit. GET(SSE)/DELETE(세션 종료)는 제외.
+  // POST(JSON-RPC 메시지)만 rate limit. GET(SSE)/DELETE(세션 종료)는 제외.
+  // 키는 raw bearer(휘발성 인메모리, DB/로그 미저장). DB·env 토큰 모두 커버한다.
   if (request.method === "POST") {
     const bearer = request.headers
       .get("authorization")
       ?.replace(/^Bearer\s+/i, "")
       .trim();
-    if (bearer && tokens.has(bearer)) {
+    if (bearer) {
       const result = limiter.check(bearer);
       if (!result.allowed) {
         const retryAfter = String(result.retryAfterSeconds ?? 60);

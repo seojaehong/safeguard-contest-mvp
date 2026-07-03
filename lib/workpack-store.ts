@@ -16,6 +16,80 @@ export type SaveWorkpackResult = {
   message: string;
 };
 
+export type McpDocpackAttribution = {
+  siteId: string | null;
+  orgId: string | null;
+  workpackId: string | null;
+  saved: boolean;
+};
+
+/**
+ * MCP 토큰 컨텍스트(siteId/orgId)로 docpack 결과를 해당 사이트에 귀속시킨다.
+ * 세션 사용자가 없는 토큰 컨텍스트이므로 created_by는 null이고, 서비스 롤로 직접 insert한다
+ * (mcp_tokens와 마찬가지로 RLS를 우회). organization_id는 NOT NULL이라 siteId로 조회해 채운다.
+ * 어떤 이유로든 저장이 무리면(사이트 미지정/조직 조회 실패/insert 실패) saved=false로 degrade —
+ * 호출부는 meta의 site_id 기록으로 폴백한다. saveAskResponseAsWorkpack(이메일 경로)은 건드리지 않는다.
+ */
+export async function saveMcpDocpackWorkpack(
+  client: SupabaseClient<WorkspaceDatabase>,
+  context: { siteId: string | null; orgId: string | null },
+  response: AskResponse
+): Promise<McpDocpackAttribution> {
+  const base: McpDocpackAttribution = {
+    siteId: context.siteId,
+    orgId: context.orgId,
+    workpackId: null,
+    saved: false,
+  };
+
+  if (!context.siteId) return base;
+
+  let organizationId = context.orgId;
+  try {
+    if (!organizationId) {
+      const { data: site, error: siteError } = await client
+        .from("sites")
+        .select("organization_id")
+        .eq("id", context.siteId)
+        .maybeSingle();
+      if (siteError || !site) return base;
+      organizationId = site.organization_id;
+    }
+
+    const evidenceSummary = {
+      answer: response.answer,
+      practicalPoints: response.practicalPoints,
+      citations: response.citations,
+      sourceMix: response.sourceMix || null,
+      mode: response.mode,
+      externalData: response.externalData,
+      riskSummary: response.riskSummary,
+    };
+
+    const { data, error } = await client
+      .from("workpacks")
+      .insert({
+        organization_id: organizationId,
+        site_id: context.siteId,
+        question: response.question,
+        scenario: toJson(response.scenario),
+        deliverables: toJson(response.deliverables),
+        evidence_summary: toJson(evidenceSummary),
+        worker_summary: toJson({}),
+        status: toJson(response.status),
+        created_by: null,
+      })
+      .select("id")
+      .single();
+
+    if (error || !data) return { ...base, orgId: organizationId };
+    return { siteId: context.siteId, orgId: organizationId, workpackId: data.id, saved: true };
+  } catch (error) {
+    console.error("mcp docpack workpack save failed", error);
+    return { ...base, orgId: organizationId };
+  }
+}
+
 const MAX_USER_LOOKUP_PAGES = 10;
 const USERS_PER_PAGE = 200;
 

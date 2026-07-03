@@ -13,6 +13,7 @@
     "smoke:orchestration-download": "node ./scripts/prod_orchestration_download_smoke.mjs",
     "smoke:submission": "node ./scripts/submission_readiness_smoke.mjs",
     "auth:token": "node ./scripts/issue_supabase_auth_token.mjs",
+    "token:mcp": "node ./scripts/issue-mcp-token.mjs",
     "smoke:quality-matrix": "node ./scripts/safeclaw_quality_matrix_runner.mjs",
     "smoke:form-schema-gate": "node ./scripts/safeclaw_form_schema_gate.mjs",
     "smoke:output-contract": "node ./scripts/output_contract_smoke.mjs",
