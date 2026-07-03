@@ -117,13 +117,14 @@ describe("buildSystemPrompt", () => {
 });
 
 describe("CLAW_TOOLS", () => {
-  it("exposes all seven safeclaw tools with object schemas", () => {
+  it("exposes all eight safeclaw tools with object schemas", () => {
     const names = CLAW_TOOLS.map((tool) => tool.name).sort();
     expect(names).toEqual(
       [
         "generate_safety_docpack",
         "get_evidence_mapping",
         "get_weather_signals",
+        "qa_review_docpack",
         "query_safety_knowledge",
         "sanitize_emergency_contacts",
         "search_accident_cases",

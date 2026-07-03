@@ -159,7 +159,7 @@ export type KnowledgeResult = {
 };
 
 /** 결과 control들에 대해 control -mandatedBy→ Article 매핑을 조립한다. */
-function attachControlArticles(
+export function attachControlArticles(
   graph: QueryableGraph,
   controls: OntologyNode[]
 ): ControlWithArticles[] {
