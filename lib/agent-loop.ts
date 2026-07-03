@@ -92,6 +92,7 @@ const BASE_SYSTEM_PROMPT = `당신은 "클로(Claw)", 이 사업장의 상주 AI
 - 법조문이 필요한 질문(특정 작업의 규정·근거 조문)은 먼저 query_safety_knowledge로 검증된 조문을 조회하고, 조회 결과의 구체 조번호(예: 기준규칙 제619조)를 근거로 답합니다. 이 도구에서 근거를 찾지 못했을 때만 일반 지식으로 답하되 반드시 validate_safety_citations로 검증합니다.
 - 법 조문(예: 제38조)을 답변에 인용할 때는, 최종 답변을 쓰기 전에 먼저 validate_safety_citations 도구로 그 문장을 검증하는 단계를 거칩니다. 검증에서 제거된(확인되지 않은) 조문은 최종 답변에서도 빼고 "산업안전보건법령" 같은 일반 표현으로 대체합니다. 검증하지 않은 조문 번호를 최종 답변에 그대로 쓰지 않습니다.
 - 비상 연락처·기관 전화번호를 답에 넣기 전에는 sanitize_emergency_contacts로 정화합니다.
+- 문서 초안을 만들었거나 사용자가 문서 검토를 요청하면 qa_review_docpack으로 누락을 확인합니다.
 - 중간 과정(도구 호출 사이)의 설명은 짧게 하고, 조문 번호는 최종 답변에만 씁니다.
 - 모든 문서·답변은 초안이며 현장 확인이 필요함을 고지합니다.
 - 존댓말로, 현장소장이 바로 이해할 쉬운 말로, 간결하게 답합니다.`;
@@ -204,6 +205,19 @@ export const CLAW_TOOLS: Anthropic.Tool[] = [
       required: ["query"],
     },
   },
+  {
+    name: "qa_review_docpack",
+    description:
+      "생성된 안전 문서(위험성평가·TBM 등) 본문을 작업유형의 법정 필수 조치 목록과 대조해 누락을 검출한다. 문서 초안을 만들었거나 사용자가 문서 검토를 요청하면 호출해 전파·저장 전 자기 검수한다.",
+    input_schema: {
+      type: "object",
+      properties: {
+        task: { type: "string", description: "작업유형 라벨 (예: 용접, 밀폐공간 작업)" },
+        document_text: { type: "string", description: "검수할 안전 문서 본문 (최대 20000자)" },
+      },
+      required: ["task", "document_text"],
+    },
+  },
 ];
 
 // ── 도구 라벨 (한글 콘솔 표기) ───────────────────────────────────────────
@@ -215,6 +229,7 @@ const TOOL_ACTION_LABELS: Record<string, string> = {
   generate_safety_docpack: "안전 문서팩 생성",
   get_evidence_mapping: "중처법 증빙 매핑 조회",
   query_safety_knowledge: "검증된 안전 지식 조회",
+  qa_review_docpack: "문서 QA 검수",
 };
 
 /** 도구 이벤트의 한글 라벨을 상태에 맞게 만든다("... 중"/"... 완료"/"... 실패"). */

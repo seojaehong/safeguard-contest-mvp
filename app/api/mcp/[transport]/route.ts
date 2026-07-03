@@ -25,6 +25,7 @@ import { createLogger } from "@/lib/logger";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { saveMcpDocpackWorkpack } from "@/lib/workpack-store";
 import { querySafetyKnowledge } from "@/lib/ontology/knowledge-tool";
+import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import {
   asAuthContext,
   isMcpEnabled,
@@ -251,6 +252,30 @@ function registerTools(server: McpServer): void {
         // 향후 확장점: authContext.siteId로 사이트 업종별 조회 로깅 가능.
         logToolContext("query_safety_knowledge", readAuthContext(extra));
         return toToolResult(await querySafetyKnowledge(query));
+      } catch (error) {
+        return toToolError(error);
+      }
+    }
+  );
+
+  server.registerTool(
+    "qa_review_docpack",
+    {
+      title: "안전 문서 QA 검수",
+      description:
+        "생성된 안전 문서(위험성평가·TBM 등) 본문을 작업유형의 법정 필수 조치 목록과 대조해 누락을 검출할 때 호출. 문서 전파·증빙 저장 전 자기 검수용.",
+      inputSchema: {
+        task: z.string().describe("작업유형 라벨 (예: 용접, 밀폐공간 작업)"),
+        document_text: z
+          .string()
+          .describe("검수할 안전 문서 본문 (최대 20000자 — 초과분은 잘라내고 검수)"),
+      },
+    },
+    async ({ task, document_text }, extra) => {
+      try {
+        // 향후 확장점: authContext.siteId로 사이트별 검수 로깅 가능.
+        logToolContext("qa_review_docpack", readAuthContext(extra));
+        return toToolResult(await reviewDocpack(task, document_text));
       } catch (error) {
         return toToolError(error);
       }

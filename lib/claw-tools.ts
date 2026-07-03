@@ -16,6 +16,7 @@ import {
   type WeatherSignalLike,
 } from "./mcp-tools";
 import { querySafetyKnowledge } from "./ontology/knowledge-tool";
+import { reviewDocpack } from "./ontology/qa-review-tool";
 
 function asString(input: unknown, key: string): string {
   const value = (input as Record<string, unknown> | null)?.[key];
@@ -63,6 +64,9 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
     }
     case "query_safety_knowledge": {
       return querySafetyKnowledge(asString(input, "query"));
+    }
+    case "qa_review_docpack": {
+      return reviewDocpack(asString(input, "task"), asString(input, "document_text"));
     }
     default:
       throw new Error(`알 수 없는 도구: ${name}`);
