@@ -1,10 +1,12 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { BriefingSettingsCard } from "@/components/BriefingSettingsCard";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 const settings = [
   ["조직·현장", "회사와 현장 정보를 작업공간 기본값으로 관리"],
   ["발송 채널", "메일·문자 연결 상태와 발송 기본값 관리"],
+  ["내 AI 연결", "OpenClaw, Codex, Claude에 SafeClaw 도구 연결"],
   ["API 연결", "운영 점검 화면에서 공공 API와 전파 채널 상태 확인"],
   ["권한", "관리자 로그인 기준으로 접근 범위 관리"]
 ] as const;
@@ -18,7 +20,7 @@ export default function SettingsPage() {
       status="planned"
       mappedTo="조직 · 현장 · 발송 채널"
       activeHref="/settings"
-      actions={<Link href="/ops/api">API 상태 확인</Link>}
+      actions={<Link href={"/settings/ai-connect" as Route}>내 AI 연결</Link>}
     >
       <section className="safeclaw-module-grid two">
         {settings.map(([title, body]) => (
