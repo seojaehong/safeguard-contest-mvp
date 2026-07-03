@@ -1,0 +1,19 @@
+{
+  "name": "safeclaw",
+  "version": "0.1.0",
+  "description": "SafeClaw CLI — bash형 에이전트·cron·자동화가 SafeClaw MCP 도구를 커맨드라인으로 호출하는 만능 어댑터",
+  "type": "module",
+  "bin": {
+    "safeclaw": "./safeclaw.mjs"
+  },
+  "main": "./lib.mjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "safeclaw.mjs",
+    "lib.mjs",
+    "README.md"
+  ],
+  "license": "UNLICENSED"
+}
