@@ -8,6 +8,7 @@ import {
   buildEvidenceMappingResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
+  isSupportedWeatherRegion,
   toToolError,
   toToolResult,
   validateCitations,
@@ -138,6 +139,62 @@ describe("buildWeatherResult", () => {
     expect(result.summary).toBe("맑음");
     expect(result.actions).toEqual(["작업 전 기상 확인"]);
     expect(result.signals[0].endpoint).toBe("초단기실황");
+  });
+
+  it("marks fallbackRegion=false and echoes requested/resolved region for a supported region", () => {
+    const result = buildWeatherResult("부산 해운대 현장", {
+      source: "kma",
+      mode: "live",
+      locationLabel: "부산",
+      summary: "맑음",
+      actions: [],
+      detail: "상세",
+      signals: [],
+    });
+    expect(result.requestedRegion).toBe("부산 해운대 현장");
+    expect(result.resolvedRegion).toBe("부산");
+    expect(result.fallbackRegion).toBe(false);
+  });
+
+  it("marks fallbackRegion=true when an unsupported region falls back to the default (서울)", () => {
+    const result = buildWeatherResult("제주", {
+      source: "kma",
+      mode: "live",
+      locationLabel: "서울",
+      summary: "맑음",
+      actions: [],
+      detail: "상세",
+      signals: [],
+    });
+    expect(result.requestedRegion).toBe("제주");
+    expect(result.resolvedRegion).toBe("서울");
+    expect(result.fallbackRegion).toBe(true);
+  });
+
+  it("treats an explicit 서울 request as a genuine match, not a fallback", () => {
+    const result = buildWeatherResult("서울", {
+      source: "kma",
+      mode: "live",
+      locationLabel: "서울",
+      summary: "맑음",
+      actions: [],
+      detail: "상세",
+      signals: [],
+    });
+    expect(result.fallbackRegion).toBe(false);
+  });
+});
+
+describe("isSupportedWeatherRegion", () => {
+  it("returns true for supported region keywords", () => {
+    expect(isSupportedWeatherRegion("인천 남동공단")).toBe(true);
+    expect(isSupportedWeatherRegion("안산")).toBe(true);
+    expect(isSupportedWeatherRegion("창원")).toBe(true);
+  });
+
+  it("returns false for unsupported region names", () => {
+    expect(isSupportedWeatherRegion("제주")).toBe(false);
+    expect(isSupportedWeatherRegion("전주")).toBe(false);
   });
 });
 

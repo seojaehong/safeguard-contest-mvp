@@ -193,12 +193,43 @@ export type WeatherResult = {
   precipitationProbability?: string;
   actions: string[];
   signals: Array<{ endpoint: string; mode: string; summary: string }>;
+  requestedRegion: string;
+  resolvedRegion: string;
+  fallbackRegion: boolean;
 };
+
+// lib/weather.ts의 pickLocation()이 실제로 매칭하는 지역 키워드를 여기서 그대로
+// 복제한다(pickLocation 자체는 export되지 않고, weather.ts는 이 작업 범위에서
+// 수정 금지). 요청 지역명이 아래 키워드 중 어느 것과도 매칭되지 않으면
+// pickLocation은 기본값(서울)으로 폴백한다 — 이 판정을 wrapper에서 재현한다.
+// 지원 지역: 서울/인천/안산/부산/광주/대구/창원.
+const SUPPORTED_WEATHER_REGIONS: Array<{ label: string; keywords: string[] }> = [
+  { label: "서울", keywords: ["성수", "강남", "서울", "강남 복합건물"] },
+  { label: "인천", keywords: ["인천", "남동"] },
+  { label: "안산", keywords: ["안산", "경기"] },
+  { label: "부산", keywords: ["부산", "해운대"] },
+  { label: "광주", keywords: ["광주", "하남산단"] },
+  { label: "대구", keywords: ["대구", "달서"] },
+  { label: "창원", keywords: ["창원"] },
+];
+
+/**
+ * 요청 지역명이 지원 지역 키워드 중 하나라도 매칭되는지 판정한다.
+ * 매칭되지 않으면 lib/weather.ts의 pickLocation()이 기본값(서울)으로 폴백한다.
+ */
+export function isSupportedWeatherRegion(region: string): boolean {
+  const normalized = region.toLowerCase();
+  return SUPPORTED_WEATHER_REGIONS.some((entry) =>
+    entry.keywords.some((keyword) => normalized.includes(keyword.toLowerCase()))
+  );
+}
 
 /** fetchWeatherSignal 결과를 실황·특보 요약 도구 응답으로 정형화한다. */
 export function buildWeatherResult(region: string, signal: WeatherSignalLike): WeatherResult {
+  const resolvedRegion = signal.locationLabel || region;
+  const fallbackRegion = !isSupportedWeatherRegion(region);
   return {
-    region: signal.locationLabel || region,
+    region: resolvedRegion,
     mode: signal.mode,
     summary: signal.summary,
     temperatureC: signal.temperatureC,
@@ -210,6 +241,9 @@ export function buildWeatherResult(region: string, signal: WeatherSignalLike): W
       mode: s.mode,
       summary: s.summary,
     })),
+    requestedRegion: region,
+    resolvedRegion,
+    fallbackRegion,
   };
 }
 

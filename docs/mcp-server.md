@@ -86,4 +86,13 @@ curl -s -X POST http://localhost:3000/api/mcp/mcp -H ... \
   --data-binary @payload.json
 ```
 
+## A2A Agent Card
+
+`app/.well-known/agent.json/route.ts`가 `GET /.well-known/agent.json`에서 [A2A(Agent2Agent)
+Agent Card](https://a2a-protocol.org)를 정적 JSON으로 서빙한다. 국내 최초로 A2A-ready 안전
+에이전트를 선언하는 디스커버리 문서이지만, 내용은 이 문서에 있는 MCP 도구 계층(위 5개
+`skills`)만 서술한다 — capabilities는 보수적으로(`streaming: false` 등) 선언하고,
+description에 "MCP 도구 계층은 공개되어 있으나 A2A task 엔드포인트는 아직 없고 로드맵
+단계"라는 점을 명시해, 실제로 없는 기능을 있는 것처럼 보이지 않게 한다.
+
 로컬 dev에서 활성화하려면 `SAFECLAW_MCP_TOKENS=<token> npm run dev`로 기동한다.
