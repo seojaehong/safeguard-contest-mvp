@@ -80,9 +80,9 @@ function registerTools(server: McpServer): void {
     {
       title: "현장 기상 신호 조회",
       description:
-        "현장 지역명으로 기상청 실황·특보를 조회해 폭염·강풍·강수 등 작업 안전에 영향을 주는 기상 신호와 대응 조치를 요약한다. 안전관리자 에이전트가 옥외·고소 작업의 작업중지 기준이나 TBM 기상 공유 문구를 판단할 때 호출한다.",
+        "현장 지역명으로 기상청 실황·특보를 조회해 폭염·강풍·강수 등 작업 안전에 영향을 주는 기상 신호와 대응 조치를 요약한다. 안전관리자 에이전트가 옥외·고소 작업의 작업중지 기준이나 TBM 기상 공유 문구를 판단할 때 호출한다. 지원 지역: 서울/인천/안산/부산/광주/대구/창원 — 미지원 지역명은 서울 기준으로 응답하며 응답에 fallbackRegion으로 표시된다(requestedRegion·resolvedRegion 필드도 함께 반환).",
       inputSchema: {
-        region: z.string().describe("현장 지역명 (예: 서울, 인천, 안산, 부산)"),
+        region: z.string().describe("현장 지역명 (예: 서울, 인천, 안산, 부산, 광주, 대구, 창원)"),
       },
     },
     async ({ region }) => {
