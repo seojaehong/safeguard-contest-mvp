@@ -15,6 +15,7 @@ import {
   validateCitations,
   type WeatherSignalLike,
 } from "./mcp-tools";
+import { querySafetyKnowledge } from "./ontology/knowledge-tool";
 
 function asString(input: unknown, key: string): string {
   const value = (input as Record<string, unknown> | null)?.[key];
@@ -59,6 +60,9 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
     case "get_evidence_mapping": {
       const docType = (input as Record<string, unknown> | null)?.docType;
       return buildEvidenceMappingResult(typeof docType === "string" ? docType : undefined);
+    }
+    case "query_safety_knowledge": {
+      return querySafetyKnowledge(asString(input, "query"));
     }
     default:
       throw new Error(`알 수 없는 도구: ${name}`);

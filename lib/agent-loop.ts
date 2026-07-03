@@ -89,6 +89,7 @@ const BASE_SYSTEM_PROMPT = `당신은 "클로(Claw)", 이 사업장의 상주 AI
 
 원칙:
 - 사실 근거는 반드시 도구로 확인합니다. 오늘·내일 날씨/기상 위험은 get_weather_signals, 유사 재해사례는 search_accident_cases, 문서팩 초안이 필요하면 generate_safety_docpack을 호출합니다.
+- 법조문이 필요한 질문(특정 작업의 규정·근거 조문)은 먼저 query_safety_knowledge로 검증된 조문을 조회하고, 조회 결과의 구체 조번호(예: 기준규칙 제619조)를 근거로 답합니다. 이 도구에서 근거를 찾지 못했을 때만 일반 지식으로 답하되 반드시 validate_safety_citations로 검증합니다.
 - 법 조문(예: 제38조)을 답변에 인용할 때는, 최종 답변을 쓰기 전에 먼저 validate_safety_citations 도구로 그 문장을 검증하는 단계를 거칩니다. 검증에서 제거된(확인되지 않은) 조문은 최종 답변에서도 빼고 "산업안전보건법령" 같은 일반 표현으로 대체합니다. 검증하지 않은 조문 번호를 최종 답변에 그대로 쓰지 않습니다.
 - 비상 연락처·기관 전화번호를 답에 넣기 전에는 sanitize_emergency_contacts로 정화합니다.
 - 중간 과정(도구 호출 사이)의 설명은 짧게 하고, 조문 번호는 최종 답변에만 씁니다.
@@ -191,6 +192,18 @@ export const CLAW_TOOLS: Anthropic.Tool[] = [
       },
     },
   },
+  {
+    name: "query_safety_knowledge",
+    description:
+      "작업유형(용접·밀폐공간 등)이나 위험요인으로, 법제처 검증된 위험요인→안전조치→법조문→중처법 의무 연결을 조회할 때 호출. 조문 인용 전 이 도구로 근거를 확보하라.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "작업유형 또는 위험요인 라벨 (예: 밀폐공간, 용접, 산소결핍 질식)" },
+      },
+      required: ["query"],
+    },
+  },
 ];
 
 // ── 도구 라벨 (한글 콘솔 표기) ───────────────────────────────────────────
@@ -201,6 +214,7 @@ const TOOL_ACTION_LABELS: Record<string, string> = {
   sanitize_emergency_contacts: "비상 연락처 정화",
   generate_safety_docpack: "안전 문서팩 생성",
   get_evidence_mapping: "중처법 증빙 매핑 조회",
+  query_safety_knowledge: "검증된 안전 지식 조회",
 };
 
 /** 도구 이벤트의 한글 라벨을 상태에 맞게 만든다("... 중"/"... 완료"/"... 실패"). */

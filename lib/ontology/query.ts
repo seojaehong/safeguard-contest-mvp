@@ -118,3 +118,130 @@ export function queryByTask(graph: QueryableGraph, taskLabel: string): TaskQuery
     duties: sorted(duties)
   };
 }
+
+// ── Hazard 폴백 + 통합 지식 조회 (Phase C: query_safety_knowledge 도구용) ──────
+
+/** Hazard 라벨 퍼지 매칭: matchTaskNodes와 동일 규칙, kind만 Hazard. */
+export function matchHazardNodes(graph: QueryableGraph, hazardLabel: string): OntologyNode[] {
+  const query = normalizeLabel(hazardLabel);
+  if (!query) return [];
+  return graph.nodes.filter((node) => {
+    if (node.kind !== "Hazard") return false;
+    const label = normalizeLabel(node.label);
+    return label.includes(query) || query.includes(label);
+  });
+}
+
+/** published Task 라벨 목록(정렬) — "미등록 작업유형" 안내에 쓴다. */
+export function listTaskLabels(graph: QueryableGraph): string[] {
+  return graph.nodes
+    .filter((n) => n.kind === "Task")
+    .map((n) => n.label)
+    .sort((a, b) => a.localeCompare(b, "ko"));
+}
+
+/** 안전조치 1건과 그 근거 법조문(control -mandatedBy→ Article) 묶음. */
+export type ControlWithArticles = {
+  control: OntologyNode;
+  articles: OntologyNode[];
+};
+
+export type KnowledgeResult = {
+  /** task 라벨로 매칭했는지, hazard 라벨 폴백으로 매칭했는지. */
+  matchedBy: "task" | "hazard";
+  task: OntologyNode | null;
+  hazards: OntologyNode[];
+  controls: ControlWithArticles[];
+  articles: OntologyNode[];
+  accidents: OntologyNode[];
+  documents: OntologyNode[];
+  duties: OntologyNode[];
+};
+
+/** 결과 control들에 대해 control -mandatedBy→ Article 매핑을 조립한다. */
+function attachControlArticles(
+  graph: QueryableGraph,
+  controls: OntologyNode[]
+): ControlWithArticles[] {
+  const nodeById = new Map(graph.nodes.map((node) => [node.node_id, node]));
+  const bySrc = indexBySrc(graph.edges);
+  return controls.map((control) => {
+    const articles = new Map<string, OntologyNode>();
+    collect(bySrc, nodeById, [control.node_id], "mandatedBy", articles);
+    return { control, articles: sorted(articles) };
+  });
+}
+
+/** hazard 노드들로부터 2홉 확장 (task 폴백 경로). */
+function expandFromHazards(graph: QueryableGraph, hazardNodes: OntologyNode[]): KnowledgeResult {
+  const nodeById = new Map(graph.nodes.map((node) => [node.node_id, node]));
+  const bySrc = indexBySrc(graph.edges);
+  const hazardIds = hazardNodes.map((h) => h.node_id);
+
+  const controls = new Map<string, OntologyNode>();
+  const articles = new Map<string, OntologyNode>();
+  const accidents = new Map<string, OntologyNode>();
+  const documents = new Map<string, OntologyNode>();
+  const duties = new Map<string, OntologyNode>();
+
+  collect(bySrc, nodeById, hazardIds, "mitigatedBy", controls);
+  collect(bySrc, nodeById, hazardIds, "evidencedBy", accidents);
+  collect(bySrc, nodeById, controls.keys(), "mandatedBy", articles);
+  collect(bySrc, nodeById, controls.keys(), "documentedIn", documents);
+  collect(bySrc, nodeById, documents.keys(), "fulfillsDuty", duties);
+  collect(bySrc, nodeById, articles.keys(), "fulfillsDuty", duties);
+
+  // 이 위험요인을 수반하는 Task를 역방향으로 찾아 대표 task로 제시(없으면 null).
+  const hazardIdSet = new Set(hazardIds);
+  const relatedTasks = graph.nodes.filter(
+    (n) =>
+      n.kind === "Task" &&
+      graph.edges.some(
+        (e) => e.rel === "entailsHazard" && e.src === n.node_id && hazardIdSet.has(e.dst)
+      )
+  );
+  const task =
+    relatedTasks.length === 0
+      ? null
+      : [...relatedTasks].sort(
+          (a, b) => a.label.length - b.label.length || a.node_id.localeCompare(b.node_id, "ko")
+        )[0];
+
+  const hazards = [...hazardNodes].sort((a, b) => a.node_id.localeCompare(b.node_id, "ko"));
+
+  return {
+    matchedBy: "hazard",
+    task,
+    hazards,
+    controls: attachControlArticles(graph, sorted(controls)),
+    articles: sorted(articles),
+    accidents: sorted(accidents),
+    documents: sorted(documents),
+    duties: sorted(duties)
+  };
+}
+
+/**
+ * 작업유형 또는 위험요인 라벨로 온톨로지를 통합 조회한다.
+ * 1) Task 라벨 매칭(queryByTask 재사용) → 성공 시 matchedBy:"task".
+ * 2) 실패 시 Hazard 라벨 매칭 폴백 → matchedBy:"hazard".
+ * 어느 쪽도 매칭 없으면 null.
+ */
+export function queryKnowledge(graph: QueryableGraph, query: string): KnowledgeResult | null {
+  const byTask = queryByTask(graph, query);
+  if (byTask) {
+    return {
+      matchedBy: "task",
+      task: byTask.task,
+      hazards: byTask.hazards,
+      controls: attachControlArticles(graph, byTask.controls),
+      articles: byTask.articles,
+      accidents: byTask.accidents,
+      documents: byTask.documents,
+      duties: byTask.duties
+    };
+  }
+  const hazardNodes = matchHazardNodes(graph, query);
+  if (hazardNodes.length === 0) return null;
+  return expandFromHazards(graph, hazardNodes);
+}

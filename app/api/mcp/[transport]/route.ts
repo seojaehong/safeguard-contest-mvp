@@ -24,6 +24,7 @@ import { createRateLimiter } from "@/lib/rate-limit";
 import { createLogger } from "@/lib/logger";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { saveMcpDocpackWorkpack } from "@/lib/workpack-store";
+import { querySafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import {
   asAuthContext,
   isMcpEnabled,
@@ -229,6 +230,27 @@ function registerTools(server: McpServer): void {
         // 향후 확장점: authContext로 조직별 증빙 파일철 구성 로깅 가능.
         logToolContext("get_evidence_mapping", readAuthContext(extra));
         return toToolResult(buildEvidenceMappingResult(docType));
+      } catch (error) {
+        return toToolError(error);
+      }
+    }
+  );
+
+  server.registerTool(
+    "query_safety_knowledge",
+    {
+      title: "검증된 안전 지식 그래프 조회",
+      description:
+        "작업유형(용접·밀폐공간 등)이나 위험요인으로, 법제처 검증된 위험요인→안전조치→법조문→중처법 의무 연결을 조회할 때 호출. 조문 인용 전 이 도구로 근거를 확보하라.",
+      inputSchema: {
+        query: z.string().describe("작업유형 또는 위험요인 라벨 (예: 밀폐공간, 용접, 산소결핍 질식)"),
+      },
+    },
+    async ({ query }, extra) => {
+      try {
+        // 향후 확장점: authContext.siteId로 사이트 업종별 조회 로깅 가능.
+        logToolContext("query_safety_knowledge", readAuthContext(extra));
+        return toToolResult(await querySafetyKnowledge(query));
       } catch (error) {
         return toToolError(error);
       }
