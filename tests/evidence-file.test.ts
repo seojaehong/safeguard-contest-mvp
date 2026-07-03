@@ -60,18 +60,21 @@ describe("groupEvidenceByArticle", () => {
     }
   });
 
-  it("attributes a multi-호 label (제3호·제5호) to both grid items", () => {
+  it("groups 교육 기록 under its 산안법 주근거 section without inflating the 시행령 제4조 grid", () => {
+    // 법적 보수화(2026-07 감사): 교육 기록 주근거는 산안법 제29조. 시행령 제4조
+    // 그리드에는 더 이상 1차 증빙으로 집계되지 않는다(중처법은 related 병기만).
     const result = groupEvidenceByArticle([
       workpack({ documentKeys: ["safetyEducationRecordDraft"] })
     ]);
 
-    const grid3 = result.gridItems.find((item) => item.article.endsWith("제3호"));
-    const grid5 = result.gridItems.find((item) => item.article.endsWith("제5호"));
-    expect(grid3?.count).toBe(1);
-    expect(grid5?.count).toBe(1);
+    for (const item of result.gridItems) {
+      expect(item.count).toBe(0);
+    }
 
     expect(result.sections).toHaveLength(1);
-    expect(result.sections[0].article).toBe("중대재해처벌법 시행령 제4조 제3호·제5호");
+    expect(result.sections[0].article).toBe("산업안전보건법 제29조");
+    expect(result.sections[0].related).toBe("중대재해처벌법 시행령 제4조 제3호 이행 보조");
+    expect(result.sections[0].count).toBe(1);
   });
 
   it("sorts documents within a section by createdAt descending and picks the latest date for the section/grid", () => {

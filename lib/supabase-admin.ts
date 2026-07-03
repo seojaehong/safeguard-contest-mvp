@@ -12,9 +12,9 @@ export type WorkspaceDatabase = {
         Relationships: [];
       };
       sites: {
-        Row: { id: string; organization_id: string; name: string; industry: string | null; region: string | null; created_at: string; updated_at: string };
-        Insert: { id?: string; organization_id: string; name: string; industry?: string | null; region?: string | null; created_at?: string; updated_at?: string };
-        Update: { name?: string; industry?: string | null; region?: string | null; updated_at?: string };
+        Row: { id: string; organization_id: string; name: string; industry: string | null; region: string | null; briefing_enabled: boolean; briefing_question: string | null; briefing_email: string | null; created_at: string; updated_at: string };
+        Insert: { id?: string; organization_id: string; name: string; industry?: string | null; region?: string | null; briefing_enabled?: boolean; briefing_question?: string | null; briefing_email?: string | null; created_at?: string; updated_at?: string };
+        Update: { name?: string; industry?: string | null; region?: string | null; briefing_enabled?: boolean; briefing_question?: string | null; briefing_email?: string | null; updated_at?: string };
         Relationships: [];
       };
       workers: {

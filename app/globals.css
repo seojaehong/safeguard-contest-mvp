@@ -7534,3 +7534,69 @@ body {
 .sc-blink--good { background: var(--good); }
 .sc-blink--warn { background: var(--warn); }
 .sc-blink--siren { background: var(--siren); }
+
+/* 아침 브리핑 설정 카드 (/settings) — 로그인 폼과 동일한 다크 입력 스타일 재사용. */
+.briefing-settings-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.briefing-settings-form label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--os-yellow, #ffdc2e);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.briefing-settings-form input[type="email"],
+.briefing-settings-form textarea {
+  border: 1px solid rgba(246, 245, 239, 0.22);
+  border-radius: 4px;
+  background: #0b0c10;
+  color: var(--os-text, #f6f5ef);
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.briefing-settings-form input[type="email"]:focus,
+.briefing-settings-form textarea:focus {
+  border-color: var(--os-yellow, #ffdc2e);
+  outline: 2px solid rgba(255, 220, 46, 0.18);
+  outline-offset: 0;
+}
+
+.briefing-settings-form input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--os-yellow, #ffdc2e);
+}
+
+.briefing-settings-form button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--os-yellow, #ffdc2e);
+  border-radius: 4px;
+  background: var(--os-yellow, #ffdc2e);
+  color: #08090b;
+  padding: 0 18px;
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.briefing-settings-form button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

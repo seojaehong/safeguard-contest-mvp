@@ -8,33 +8,39 @@
 // 1:N) 라벨 조회만 담당한다.
 
 export type SmsaEvidenceLabel = {
-  /** 예: "중대재해처벌법 시행령 제4조 제3호" */
+  /** 주근거. 예: "중대재해처벌법 시행령 제4조 제3호" 또는 "산업안전보건법 제29조" */
   article: string;
   /** 짧은 한글 설명 (증빙 목적) */
   purpose: string;
-  /** 병기되는 산업안전보건법 등 근거 (선택) */
+  /** 병기되는 근거 (선택) — 산업안전보건법 조문, 실무 관행 등 */
   related?: string;
 };
 
 const ARTICLE_4_3 = "중대재해처벌법 시행령 제4조 제3호";
 const ARTICLE_4_8 = "중대재해처벌법 시행령 제4조 제8호";
-const ARTICLE_4_3_5 = "중대재해처벌법 시행령 제4조 제3호·제5호";
 
 const RISK_ASSESSMENT_LABEL: SmsaEvidenceLabel = {
   article: ARTICLE_4_3,
   purpose: "유해·위험요인 확인·개선 절차 이행 증빙"
 };
 
+// 2026-07 법령 감사 반영: TBM·외국인 브리핑·현장 사진·전파 메시지는 시행령 제4조
+// 문언에 명시된 항목이 아니므로 "이행 증빙"이 아니라 "이행 보조 증빙"으로만
+// 라벨링한다 — 1차 증빙(위험성평가·작업계획서·비상대응)과 정황 증빙을 어휘로
+// 구분해 감독관·노무사 대응 시 과잉 주장으로 읽히지 않게 한다.
 const TBM_LABEL: SmsaEvidenceLabel = {
   article: ARTICLE_4_3,
-  purpose: "유해·위험요인 확인·개선 절차 현장 전파 증빙",
+  purpose: "유해·위험요인 확인·개선 절차 이행 보조 증빙(현장 전파)",
   related: "산업안전보건법 제29조"
 };
 
+// 안전보건교육 기록의 주근거는 산업안전보건법 제29조(안전보건교육 의무)다.
+// 시행령 제4조의 9개 호 어디에도 안전보건교육이 명시 항목으로 없으므로(감사 결과),
+// 종전 "제4조 제3호·제5호" 주근거 라벨을 내리고 중처법은 제3호 이행 보조로만 병기한다.
 const EDUCATION_LABEL: SmsaEvidenceLabel = {
-  article: ARTICLE_4_3_5,
-  purpose: "안전보건교육 실시 보조 증빙",
-  related: "산업안전보건법 제29조"
+  article: "산업안전보건법 제29조",
+  purpose: "안전보건교육 실시 증빙",
+  related: "중대재해처벌법 시행령 제4조 제3호 이행 보조"
 };
 
 const EMERGENCY_RESPONSE_LABEL: SmsaEvidenceLabel = {
@@ -50,18 +56,20 @@ const WORK_PLAN_LABEL: SmsaEvidenceLabel = {
 
 const PHOTO_EVIDENCE_LABEL: SmsaEvidenceLabel = {
   article: ARTICLE_4_3,
-  purpose: "유해·위험요인 확인·개선 절차 이행 증빙(현장 사진)"
+  purpose: "유해·위험요인 확인·개선 절차 이행 보조 증빙(현장 사진)",
+  related: "작업 전 안전점검 관행"
 };
 
 const FOREIGN_WORKER_LABEL: SmsaEvidenceLabel = {
   article: ARTICLE_4_3,
-  purpose: "유해·위험요인 확인·개선 절차 외국인 근로자 전달 증빙",
+  purpose: "유해·위험요인 확인·개선 절차 외국인 근로자 전달 이행 보조 증빙",
   related: "산업안전보건법 제29조"
 };
 
 const DISPATCH_LABEL: SmsaEvidenceLabel = {
   article: ARTICLE_4_3,
-  purpose: "개선사항 현장 전파 증빙"
+  purpose: "개선사항 현장 전파 이행 보조 증빙",
+  related: "작업 전 안전점검 관행"
 };
 
 /**
@@ -106,12 +114,18 @@ export function getEvidenceLabel(docType: string): SmsaEvidenceLabel | null {
 }
 
 /**
- * 워크스페이스 문서 카드에 표시할 짧은 배지 텍스트를 만든다.
+ * 워크스페이스 문서 카드에 표시할 짧은 배지 텍스트를 만든다. 배지는 주근거만
+ * 표시하고 병기 근거(related)는 카드 상세/툴팁에서 보여준다.
  * 예: "중대재해처벌법 시행령 제4조 제3호" → "중처법 §4-3호 증빙"
+ *     "산업안전보건법 제29조" → "산안법 §29조 증빙"
  * 다중 호(예: "제4조 제3호·제5호")는 첫 호만 배지에 반영한다(카드는 절제된
  * 요약 표시가 목적이며, 전체 근거는 카드 상세/툴팁에서 확인).
  */
 export function formatEvidenceBadge(article: string): string {
+  if (article.startsWith("산업안전보건법")) {
+    const kosha = /제(\d+)조/.exec(article);
+    if (kosha) return `산안법 §${kosha[1]}조 증빙`;
+  }
   const match = /제(\d+)조\s*제(\d+)호/.exec(article);
   if (!match) return "중처법 증빙";
   const [, jo, ho] = match;
