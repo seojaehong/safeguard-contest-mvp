@@ -157,9 +157,14 @@ export function groupEvidenceByArticle(workpacks: readonly EvidenceFileWorkpack[
 
   const sections = Array.from(sectionMap.values()).sort((a, b) => {
     if (b.count !== a.count) return b.count - a.count;
-    const aFirst = Math.min(...parseHoNumbers(a.article));
-    const bFirst = Math.min(...parseHoNumbers(b.article));
-    return aFirst - bFirst;
+    // 호 번호가 없는 주근거(예: "산업안전보건법 제29조" — 교육 기록)는 시행령
+    // 제4조 섹션들 뒤로 보낸다. Math.min(빈 배열) = Infinity → NaN 비교 방지.
+    const aHos = parseHoNumbers(a.article);
+    const bHos = parseHoNumbers(b.article);
+    const aFirst = aHos.length ? Math.min(...aHos) : Number.MAX_SAFE_INTEGER;
+    const bFirst = bHos.length ? Math.min(...bHos) : Number.MAX_SAFE_INTEGER;
+    if (aFirst !== bFirst) return aFirst - bFirst;
+    return a.article.localeCompare(b.article, "ko");
   });
 
   const gridItems: EvidenceFileGridItem[] = SMSA_ARTICLE_4_ITEMS.map((item) => {

@@ -1,14 +1,22 @@
 // 아침 자동 브리핑 — "시키지 않아도 출근하는 안전관리자" (SafeClaw 2 기둥 4).
 //
 // Vercel cron이 매일 06:00 KST(21:00 UTC, vercel.json)에 이 라우트를 호출한다.
-// env BRIEFING_SITES에 등록된 사업장마다: 1) runAsk로 문서팩 생성 2) Supabase workpacks에
-// 저장(저장되면 /evidence-file 방어 파일에 자동 축적됨) 3) n8n email 채널로 요약 발송.
+// 대상 사이트는 DB 우선(sites.briefing_enabled=true, 고객 셀프서브) → env BRIEFING_SITES
+// 폴백(하위호환) 순서로 결정한다. 사이트마다: 1) runAsk로 문서팩 생성 2) Supabase
+// workpacks에 저장(저장되면 /evidence-file 방어 파일에 자동 축적됨) 3) n8n이 이미
+// 처리하는 "safeguard.workpack.dispatch" 계약(email 채널)으로 요약 발송.
 // 각 단계는 독립적으로 실패해도 다음 사이트 처리를 막지 않는다 — 무인 실행이 전제이므로.
 
 import { NextRequest, NextResponse } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { runAsk } from "@/lib/search";
-import { buildBriefingEmail, parseBriefingSites } from "@/lib/briefing";
-import { createSupabaseAdminClient } from "@/lib/supabase-admin";
+import {
+  buildBriefingDispatchWorkpack,
+  buildBriefingOperatorNote,
+  resolveBriefingSites,
+  type BriefingSiteRow
+} from "@/lib/briefing";
+import { createSupabaseAdminClient, type WorkspaceDatabase } from "@/lib/supabase-admin";
 import { saveAskResponseAsWorkpack } from "@/lib/workpack-store";
 import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
 import { createLogger } from "@/lib/logger";
@@ -35,7 +43,34 @@ function isAuthorized(request: NextRequest): boolean {
   return header === `Bearer ${secret}`;
 }
 
-async function sendBriefingEmail(subject: string, body: string, recipient: string): Promise<{ sent: boolean; message: string }> {
+/**
+ * briefing_enabled=true 사이트를 서비스롤로 조회한다. 조회 실패(예: 마이그레이션
+ * 미적용, 네트워크 오류) 시 null을 반환해 env 폴백을 살린다.
+ */
+async function fetchBriefingSiteRows(
+  client: SupabaseClient<WorkspaceDatabase> | null
+): Promise<BriefingSiteRow[] | null> {
+  if (!client) return null;
+
+  const { data, error } = await client
+    .from("sites")
+    .select("name,briefing_question,briefing_email")
+    .eq("briefing_enabled", true)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    log.warn("briefing site query failed — falling back to env BRIEFING_SITES", { message: error.message });
+    return null;
+  }
+
+  return data;
+}
+
+async function sendBriefingEmail(
+  operatorNote: string,
+  workpack: Record<string, unknown>,
+  recipient: string
+): Promise<{ sent: boolean; message: string }> {
   const webhookConfig = resolveWebhookConfig();
   if (!webhookConfig.url || !webhookConfig.token) {
     return { sent: false, message: "email: skipped (n8n webhook not configured)" };
@@ -45,13 +80,15 @@ async function sendBriefingEmail(subject: string, body: string, recipient: strin
     return { sent: false, message: "email: skipped (SAFEGUARD_RUN_LIVE_DISPATCH not enabled)" };
   }
 
+  // n8n이 이미 처리하는 수동 전파와 동일한 계약(event/channels/recipients/operatorNote/
+  // workpack — app/api/workflow/dispatch/route.ts payload 참조). n8n 워크플로우 무수정.
   const payload = {
-    event: "safeguard.briefing.dispatch",
+    event: "safeguard.workpack.dispatch",
     sentAt: new Date().toISOString(),
     channels: ["email"] as const,
     recipients: [recipient],
-    operatorNote: "SafeClaw 아침 자동 브리핑",
-    workpack: { subject, body }
+    operatorNote,
+    workpack
   };
 
   try {
@@ -71,13 +108,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ ok: false, message: "인증되지 않은 요청입니다." }, { status: 401 });
   }
 
-  const { sites, error } = parseBriefingSites(process.env.BRIEFING_SITES);
-  if (sites.length === 0) {
-    log.info("briefing run: no sites configured", { error });
-    return NextResponse.json({ ok: true, message: "no sites", results: [] });
+  const supabaseClient = createSupabaseAdminClient();
+  const dbRows = await fetchBriefingSiteRows(supabaseClient);
+  const { sites, source, truncated, error } = resolveBriefingSites(dbRows, process.env.BRIEFING_SITES);
+
+  if (truncated) {
+    log.warn("briefing sites exceeded cap — extra sites skipped this run", { source, cap: sites.length });
   }
 
-  const supabaseClient = createSupabaseAdminClient();
+  if (sites.length === 0) {
+    log.info("briefing run: no sites configured", { source, error });
+    return NextResponse.json({ ok: true, message: "no sites", source, results: [] });
+  }
+
   const results: SiteResult[] = [];
 
   for (const site of sites) {
@@ -102,8 +145,9 @@ export async function GET(request: NextRequest) {
         message += "save: skipped (Supabase not configured) ";
       }
 
-      const email = buildBriefingEmail(response, site.name, workpackId);
-      const emailResult = await sendBriefingEmail(email.subject, email.body, site.email);
+      const operatorNote = buildBriefingOperatorNote(site.name, weatherSummary);
+      const workpack = buildBriefingDispatchWorkpack(response, site.name, workpackId);
+      const emailResult = await sendBriefingEmail(operatorNote, workpack, site.email);
       emailed = emailResult.sent;
       message += emailResult.message;
     } catch (siteError) {
@@ -121,7 +165,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  log.info("briefing run complete", { siteCount: results.length });
+  log.info("briefing run complete", { siteCount: results.length, source });
 
-  return NextResponse.json({ ok: true, generatedAt: new Date().toISOString(), results });
+  return NextResponse.json({ ok: true, generatedAt: new Date().toISOString(), source, results });
 }

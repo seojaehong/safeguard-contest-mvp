@@ -1,8 +1,9 @@
 // 아침 자동 브리핑 — "시키지 않아도 출근하는 안전관리자" (SafeClaw 2 기둥 4).
 //
 // Vercel cron이 매일 06:00 KST에 app/api/briefing/run을 호출한다. 이 파일은 그 라우트가
-// 쓰는 순수 로직만 모아둔다: env로 받은 대상 사이트 목록 파싱, 생성된 AskResponse로부터
-// 이메일 제목/본문을 만드는 것. Supabase/네트워크 의존성 없음 — vitest로 바로 검증 가능.
+// 쓰는 순수 로직만 모아둔다: 대상 사이트 목록 결정(DB 우선 → env 폴백), 생성된
+// AskResponse로부터 이메일 제목/본문·n8n 전파 payload를 만드는 것.
+// Supabase/네트워크 의존성 없음 — vitest로 바로 검증 가능.
 
 import type { AskResponse } from "@/lib/types";
 
@@ -64,6 +65,68 @@ export function parseBriefingSites(raw: string | undefined | null): ParseBriefin
   }
 
   return { sites };
+}
+
+/** cron 1회 실행에서 처리할 최대 사이트 수 — Vercel maxDuration(300s) 타임아웃 보호. */
+export const MAX_BRIEFING_SITES = 10;
+
+/** sites 테이블에서 조회한 브리핑 설정 row (briefing_enabled=true 필터 후). */
+export type BriefingSiteRow = {
+  name: string | null;
+  briefing_question: string | null;
+  briefing_email: string | null;
+};
+
+/**
+ * DB에서 조회한 briefing_enabled 사이트 row들을 BriefingSite로 정규화한다.
+ * name/question/email(유효 이메일) 중 하나라도 비면 그 row만 제외한다 — env
+ * parseBriefingSites와 동일한 관용 규칙.
+ */
+export function sitesFromBriefingRows(rows: readonly BriefingSiteRow[]): BriefingSite[] {
+  return rows.flatMap((row): BriefingSite[] => {
+    const { name, briefing_question: question, briefing_email: email } = row;
+    if (!isNonEmptyString(name) || !isNonEmptyString(question) || !isValidEmail(email)) return [];
+    return [{ name: name.trim(), question: question.trim(), email: email.trim() }];
+  });
+}
+
+export type ResolveBriefingSitesResult = {
+  sites: BriefingSite[];
+  /** 어떤 소스가 채택됐는지 — 로그/응답 진단용. */
+  source: "db" | "env" | "none";
+  /** MAX_BRIEFING_SITES 상한으로 잘렸으면 true (라우트에서 경고 로그). */
+  truncated: boolean;
+  error?: string;
+};
+
+/**
+ * 브리핑 대상 사이트 결정 로직: DB 우선, env 폴백.
+ * - dbRows가 null(조회 실패/Supabase 미설정)이거나 유효 row 0건이면 env BRIEFING_SITES로
+ *   폴백한다(하위호환).
+ * - 어느 소스든 MAX_BRIEFING_SITES 상한을 적용하고 truncated로 알린다.
+ */
+export function resolveBriefingSites(
+  dbRows: readonly BriefingSiteRow[] | null,
+  envRaw: string | undefined | null
+): ResolveBriefingSitesResult {
+  if (dbRows) {
+    const dbSites = sitesFromBriefingRows(dbRows);
+    if (dbSites.length > 0) {
+      return {
+        sites: dbSites.slice(0, MAX_BRIEFING_SITES),
+        source: "db",
+        truncated: dbSites.length > MAX_BRIEFING_SITES
+      };
+    }
+  }
+
+  const parsed = parseBriefingSites(envRaw);
+  return {
+    sites: parsed.sites.slice(0, MAX_BRIEFING_SITES),
+    source: parsed.sites.length > 0 ? "env" : "none",
+    truncated: parsed.sites.length > MAX_BRIEFING_SITES,
+    error: parsed.error
+  };
 }
 
 export type BriefingEmail = {
@@ -129,4 +192,68 @@ export function buildBriefingEmail(response: AskResponse, siteName: string, work
   ].join("\n");
 
   return { subject, body };
+}
+
+/**
+ * n8n "safeguard.workpack.dispatch" 계약의 operatorNote를 만든다.
+ * 형식: "[아침 자동 브리핑] {사이트명} — {기상 요약 1줄}".
+ * 기상 요약이 여러 줄이면 첫 줄만 쓴다.
+ */
+export function buildBriefingOperatorNote(siteName: string, weatherSummary: string | undefined | null): string {
+  const weather = firstNonEmpty(weatherSummary, "기상 신호 확인 전");
+  const firstLine = weather.split("\n")[0].trim();
+  return `[아침 자동 브리핑] ${siteName} — ${firstLine}`;
+}
+
+/**
+ * n8n이 이미 처리하는 "safeguard.workpack.dispatch" 계약의 workpack 필드를 만든다.
+ * components/WorkflowSharePanel.tsx buildBriefPayload(수동 현장 전파의 검증된 payload)와
+ * 같은 shape를 유지해 n8n 워크플로우 무수정으로 재사용한다. message에는 브리핑 이메일
+ * 본문을 넣는다(관리자 대상 한국어 브리핑).
+ */
+export function buildBriefingDispatchWorkpack(
+  response: AskResponse,
+  siteName: string,
+  workpackId?: string | null
+): Record<string, unknown> {
+  const email = buildBriefingEmail(response, siteName, workpackId);
+
+  return {
+    companyName: response.scenario.companyName,
+    siteName,
+    workSummary: response.scenario.workSummary,
+    riskLevel: response.riskSummary.riskLevel,
+    topRisk: response.riskSummary.topRisk,
+    immediateActions: response.riskSummary.immediateActions,
+    message: email.body,
+    messageTarget: "manager",
+    messageLanguage: {
+      code: "ko",
+      label: "한국어",
+      nativeLabel: "한국어"
+    },
+    documents: {
+      workpackSummaryDraft: response.deliverables.workpackSummaryDraft,
+      riskAssessmentDraft: response.deliverables.riskAssessmentDraft,
+      workPlanDraft: response.deliverables.workPlanDraft,
+      tbmBriefing: response.deliverables.tbmBriefing,
+      tbmLogDraft: response.deliverables.tbmLogDraft,
+      safetyEducationRecordDraft: response.deliverables.safetyEducationRecordDraft,
+      emergencyResponseDraft: response.deliverables.emergencyResponseDraft,
+      photoEvidenceDraft: response.deliverables.photoEvidenceDraft,
+      foreignWorkerBriefing: response.deliverables.foreignWorkerBriefing,
+      foreignWorkerTransmission: response.deliverables.foreignWorkerTransmission,
+      foreignWorkerLanguages: response.deliverables.foreignWorkerLanguages
+    },
+    evidence: {
+      citations: response.citations.slice(0, 5),
+      weather: response.externalData.weather,
+      training: response.externalData.training.recommendations.slice(0, 3),
+      koshaEducation: response.externalData.koshaEducation.recommendations.slice(0, 3),
+      kosha: response.externalData.kosha.references.slice(0, 3),
+      accidentCases: response.externalData.accidentCases.cases.slice(0, 3)
+    },
+    targetWorkers: [],
+    status: response.status
+  };
 }

@@ -26,12 +26,18 @@ const knownDocTypes = [
   "dispatch"
 ];
 
+const educationDocTypes = ["safetyEducationRecord", "educationRecordStructured"];
+
 describe("getEvidenceLabel", () => {
-  it("returns a 중대재해처벌법 시행령 제4조 label for every known document type", () => {
+  it("returns a legal-basis label for every known document type (교육 기록만 산안법 주근거)", () => {
     for (const docType of knownDocTypes) {
       const label = getEvidenceLabel(docType);
       expect(label).not.toBeNull();
-      expect(label?.article).toMatch(/^중대재해처벌법 시행령 제4조/);
+      if (educationDocTypes.includes(docType)) {
+        expect(label?.article).toBe("산업안전보건법 제29조");
+      } else {
+        expect(label?.article).toMatch(/^중대재해처벌법 시행령 제4조/);
+      }
       expect(label?.purpose.length).toBeGreaterThan(0);
     }
   });
@@ -47,17 +53,35 @@ describe("getEvidenceLabel", () => {
     expect(getEvidenceLabel("structuredRiskRows")?.article).toBe("중대재해처벌법 시행령 제4조 제3호");
   });
 
-  it("attaches 산업안전보건법 제29조 as related for all TBM variants", () => {
+  it("labels all TBM variants as 이행 보조 증빙 with 산업안전보건법 제29조 병기", () => {
     for (const docType of ["tbmBriefing", "tbmLog", "tbmBriefingStructured", "tbmLogStructured"]) {
-      expect(getEvidenceLabel(docType)?.related).toBe("산업안전보건법 제29조");
+      const label = getEvidenceLabel(docType);
+      expect(label?.related).toBe("산업안전보건법 제29조");
+      expect(label?.purpose).toContain("이행 보조 증빙");
     }
   });
 
-  it("maps safetyEducationRecord/educationRecordStructured to 제4조 제3호·제5호 with 산안법 제29조", () => {
-    for (const docType of ["safetyEducationRecord", "educationRecordStructured"]) {
+  it("maps 교육 기록 to 산안법 제29조 주근거 with 중처법 제3호 이행 보조 병기 (5호 제거)", () => {
+    for (const docType of educationDocTypes) {
       const label = getEvidenceLabel(docType);
-      expect(label?.article).toBe("중대재해처벌법 시행령 제4조 제3호·제5호");
-      expect(label?.related).toBe("산업안전보건법 제29조");
+      expect(label?.article).toBe("산업안전보건법 제29조");
+      expect(label?.related).toBe("중대재해처벌법 시행령 제4조 제3호 이행 보조");
+      expect(label?.article).not.toContain("제5호");
+      expect(label?.related).not.toContain("제5호");
+    }
+  });
+
+  it("labels 현장사진·외국인·전파 문서를 이행 보조 증빙 표현 + 병기 근거로 라벨링한다", () => {
+    for (const docType of ["photoEvidence", "foreignWorkerBriefing", "foreignWorkerTransmission", "kakaoMessage", "dispatch"]) {
+      const label = getEvidenceLabel(docType);
+      expect(label?.purpose).toContain("이행 보조 증빙");
+      expect(label?.related).toBeDefined();
+    }
+  });
+
+  it("keeps 위험성평가·작업계획서·비상대응 as 1차 이행 증빙 (보조 강등 없음)", () => {
+    for (const docType of ["riskAssessment", "structuredRiskRows", "workPlan", "workPlanStructured", "emergencyResponse"]) {
+      expect(getEvidenceLabel(docType)?.purpose).not.toContain("보조");
     }
   });
 
@@ -93,6 +117,10 @@ describe("formatEvidenceBadge", () => {
 
   it("formats a multi-호 article using only the first 호", () => {
     expect(formatEvidenceBadge("중대재해처벌법 시행령 제4조 제3호·제5호")).toBe("중처법 §4-3호 증빙");
+  });
+
+  it("formats a 산업안전보건법 주근거 article into a 산안법 badge", () => {
+    expect(formatEvidenceBadge("산업안전보건법 제29조")).toBe("산안법 §29조 증빙");
   });
 
   it("falls back gracefully for unrecognized article text", () => {

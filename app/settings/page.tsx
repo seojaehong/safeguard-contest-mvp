@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BriefingSettingsCard } from "@/components/BriefingSettingsCard";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 const settings = [
@@ -26,6 +27,7 @@ export default function SettingsPage() {
             <strong>{body}</strong>
           </article>
         ))}
+        <BriefingSettingsCard />
       </section>
     </SafeClawModuleShell>
   );
