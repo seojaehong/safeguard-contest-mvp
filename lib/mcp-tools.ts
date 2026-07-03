@@ -10,6 +10,8 @@ import type { AccidentCase } from "./types";
 import { gateCitations } from "./law-citation-gate";
 import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
 import { getEvidenceLabel, SMSA_ARTICLE_MAP, type SmsaEvidenceLabel } from "./smsa-mapping";
+import type { KnowledgeResult } from "./ontology/query";
+import type { OntologyNode } from "./ontology/schema";
 
 /** MCP 도구가 반환하는 CallToolResult의 최소 형태 (SDK 타입과 호환). */
 export type McpToolResult = {
@@ -319,5 +321,87 @@ export function buildEvidenceMappingResult(docType?: string): EvidenceMappingRes
     mapped: true,
     allMappings: { ...SMSA_ARTICLE_MAP },
     note: "문서 타입 → 중대재해처벌법 시행령 제4조 증빙 라벨 전체 매핑입니다.",
+  };
+}
+
+// ── query_safety_knowledge ────────────────────────────────────────────────
+
+/** 안전 지식 그래프 조회 결과의 출처 표기(고정 문자열). */
+export const ONTOLOGY_PROVENANCE = "법제처 검증 시드 v1";
+
+export type KnowledgeArticleView = {
+  label: string;
+  articleNo?: string;
+  law?: string;
+};
+
+export type KnowledgeControlView = {
+  control: string;
+  articles: string[];
+};
+
+/** duties가 단독 충족이 아니라 이행 증빙의 일부임을 명시하는 고정 문구. */
+export const DUTIES_NOTE =
+  "각 의무는 해당 문서·조문이 이행 증빙의 일부(단독 충족 아님)라는 의미이며, 중처법 의무의 완전한 이행은 안전보건관리체계 전반의 구축·이행으로 판단합니다.";
+
+export type SafetyKnowledgeFound = {
+  found: true;
+  matchedBy: "task" | "hazard";
+  task: string | null;
+  hazards: string[];
+  controls: KnowledgeControlView[];
+  articles: KnowledgeArticleView[];
+  accidents: string[];
+  duties: string[];
+  dutiesNote: string;
+  provenance: string;
+};
+
+export type SafetyKnowledgeNotFound = {
+  found: false;
+  message: string;
+  registeredTasks: string[];
+};
+
+export type SafetyKnowledgeResult = SafetyKnowledgeFound | SafetyKnowledgeNotFound;
+
+function articleView(node: OntologyNode): KnowledgeArticleView {
+  const meta = node.meta as Record<string, unknown>;
+  const articleNo = typeof meta.article_no === "string" ? meta.article_no : undefined;
+  const law = typeof meta.law === "string" ? meta.law : undefined;
+  return { label: node.label, articleNo, law };
+}
+
+/**
+ * queryKnowledge 결과를 query_safety_knowledge 도구 페이로드로 정형화한다.
+ * - 매칭 성공: task/hazards/controls(각 조문 병기)/articles(조번호+제목)/accidents/duties + provenance.
+ * - 매칭 실패(result=null): "미등록 작업유형" 안내 + 등록된 Task 라벨 목록.
+ */
+export function buildSafetyKnowledgeResult(
+  query: string,
+  result: KnowledgeResult | null,
+  registeredTasks: string[]
+): SafetyKnowledgeResult {
+  if (!result) {
+    return {
+      found: false,
+      message: `'${query}'은(는) 등록된 작업유형·위험요인이 아닙니다. 아래 등록된 작업유형 중 하나로 다시 조회하거나, 검증된 조문 없이 답할 때는 validate_safety_citations로 자체 검증하세요.`,
+      registeredTasks,
+    };
+  }
+  return {
+    found: true,
+    matchedBy: result.matchedBy,
+    task: result.task?.label ?? null,
+    hazards: result.hazards.map((h) => h.label),
+    controls: result.controls.map((c) => ({
+      control: c.control.label,
+      articles: c.articles.map((a) => a.label),
+    })),
+    articles: result.articles.map(articleView),
+    accidents: result.accidents.map((a) => a.label),
+    duties: result.duties.map((d) => d.label),
+    dutiesNote: DUTIES_NOTE,
+    provenance: ONTOLOGY_PROVENANCE,
   };
 }

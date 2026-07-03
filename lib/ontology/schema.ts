@@ -38,7 +38,7 @@ export const REL_KO: Readonly<Record<EdgeRel, string>> = {
   mandatedBy: "법조문 근거",
   evidencedBy: "재해사례 입증",
   documentedIn: "문서화",
-  fulfillsDuty: "중처법 의무 이행",
+  fulfillsDuty: "중처법 의무 이행 증빙(부분)",
   relatedTo: "관련"
 };
 

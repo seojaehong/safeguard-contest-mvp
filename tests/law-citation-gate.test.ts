@@ -25,6 +25,64 @@ describe("VERIFIED_ARTICLES", () => {
   });
 });
 
+describe("VERIFIED_ARTICLES — 2026-07-03 온톨로지 시드 44개 확장분 (기준규칙)", () => {
+  it("밀폐공간 대역(619~625 + 619의2)을 포함한다", () => {
+    for (let n = 619; n <= 625; n++) expect(VERIFIED_ARTICLES["기준규칙"].has(String(n))).toBe(true);
+    expect(VERIFIED_ARTICLES["기준규칙"].has("619의2")).toBe(true);
+  });
+  it("고소·비계·크레인·전기·하역·도장 대표 조문을 포함한다", () => {
+    for (const n of ["13", "42", "60", "134", "187", "232", "301", "385", "393", "422", "451"]) {
+      expect(VERIFIED_ARTICLES["기준규칙"].has(n)).toBe(true);
+    }
+  });
+  it("시드 Article 노드가 아닌 md 후보(제54조·제132조)는 추가하지 않는다 (감수 교정)", () => {
+    expect(VERIFIED_ARTICLES["기준규칙"].has("54")).toBe(false);
+    expect(VERIFIED_ARTICLES["기준규칙"].has("132")).toBe(false);
+  });
+});
+
+describe("gateCitations — 신규 화이트리스트 조문 통과 (query→validate 핸드오프)", () => {
+  it("preserves 기준규칙 제619조 (밀폐공간 — 클로 답변 실 문구)", () => {
+    const input = "기준규칙 제619조에 따라 밀폐공간 작업 프로그램을 수립·시행합니다.";
+    expect(gateCitations(input)).toBe(input);
+  });
+
+  it("preserves 안전보건규칙 제42조 (고소작업 추락방지)", () => {
+    const input = "안전보건규칙 제42조에 따라 추락방지 조치를 합니다.";
+    expect(gateCitations(input)).toBe(input);
+  });
+
+  it("preserves 기준규칙 제619조의2 (제N조의M form)", () => {
+    const input = "기준규칙 제619조의2에 따라 산소 및 유해가스 농도를 측정한다.";
+    expect(gateCitations(input)).toBe(input);
+  });
+
+  it("preserves 기준규칙 제134조 (신규 추가 — 기준규칙 카테고리)", () => {
+    const input = "기준규칙 제134조에 따라 방호장치를 조정한다.";
+    expect(gateCitations(input)).toBe(input);
+  });
+});
+
+describe("gateCitations — 비등재 조문은 여전히 차단", () => {
+  it("strips 기준규칙 제700조 (46개 밖 — 여전히 미등재)", () => {
+    const out = gateCitations("기준규칙 제700조를 확인한다.");
+    expect(out).not.toContain("제700조");
+    expect(out).toContain("산업안전보건법령");
+  });
+
+  it("still strips 시행규칙 제134조 (카테고리 분리 — 시행규칙에는 추가하지 않음)", () => {
+    const out = gateCitations("시행규칙 제134조를 확인한다.");
+    expect(out).not.toContain("제134조");
+    expect(out).toContain("산업안전보건법령");
+  });
+
+  it("strips 기준규칙 제54조 (시드 Article 노드 아님 — 감수 교정으로 미추가)", () => {
+    const out = gateCitations("기준규칙 제54조를 확인한다.");
+    expect(out).not.toContain("제54조");
+    expect(out).toContain("산업안전보건법령");
+  });
+});
+
 describe("gateCitations — hallucinated combinations removed", () => {
   const cases = [
     ["시행규칙 제35조(위험성평가)에 따라 실시한다.", "35"],
