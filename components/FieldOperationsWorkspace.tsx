@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
+import { ClawChat } from "@/components/ClawChat";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
 import {
@@ -828,6 +829,7 @@ export function FieldOperationsWorkspace({
       </main>
 
       <aside className="workspace-side" id="workers">
+        <ClawChat authToken={session?.access_token} />
         <AdminAccessPanel session={session} storageSnapshot={storageSnapshot} onSessionChange={setSession} />
         <WorkerEducationPanel
           workers={workers}

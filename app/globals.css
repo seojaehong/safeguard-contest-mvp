@@ -5536,6 +5536,102 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   color: #ff8a8a;
 }
 
+/* 클로(Claw) AI 안전관리자 채팅 — D-2 콘솔 세계관 재사용 */
+.claw-chat {
+  display: grid;
+  gap: 12px;
+}
+
+.claw-chat-scroll {
+  display: grid;
+  gap: 12px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.claw-chat-empty {
+  display: grid;
+  gap: 10px;
+  color: var(--muted, #6b6f68);
+  font-size: 14px;
+}
+
+.claw-suggestions {
+  display: grid;
+  gap: 6px;
+}
+
+.claw-suggestion {
+  text-align: left;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  padding: 9px 12px;
+  background: rgba(0, 0, 0, 0.02);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.claw-suggestion:hover:not(:disabled) {
+  border-color: var(--sc-hazard-yellow, #ffd400);
+}
+
+.claw-bubble {
+  margin: 0;
+  border-radius: 14px;
+  padding: 10px 13px;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.claw-bubble-user {
+  justify-self: end;
+  max-width: 88%;
+  background: #141614;
+  color: #f3f1e9;
+}
+
+.claw-bubble-claw {
+  background: rgba(255, 212, 0, 0.1);
+  border: 1px solid rgba(255, 212, 0, 0.35);
+  color: var(--ink, #1a1c1a);
+}
+
+.claw-answer {
+  display: grid;
+  gap: 8px;
+}
+
+.claw-thinking,
+.claw-guest-note,
+.claw-disclaimer {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted, #6b6f68);
+}
+
+.claw-error {
+  margin: 0;
+  font-size: 13px;
+  color: #b23c3c;
+}
+
+.claw-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.claw-input-row .input {
+  flex: 1;
+}
+
+.claw-disclaimer {
+  border-top: 1px solid var(--line, rgba(0, 0, 0, 0.08));
+  padding-top: 8px;
+}
+
 .doc-card-actions {
   display: flex;
   gap: 8px;
