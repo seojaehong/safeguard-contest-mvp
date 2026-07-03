@@ -340,6 +340,10 @@ export type KnowledgeControlView = {
   articles: string[];
 };
 
+/** duties가 단독 충족이 아니라 이행 증빙의 일부임을 명시하는 고정 문구. */
+export const DUTIES_NOTE =
+  "각 의무는 해당 문서·조문이 이행 증빙의 일부(단독 충족 아님)라는 의미이며, 중처법 의무의 완전한 이행은 안전보건관리체계 전반의 구축·이행으로 판단합니다.";
+
 export type SafetyKnowledgeFound = {
   found: true;
   matchedBy: "task" | "hazard";
@@ -349,6 +353,7 @@ export type SafetyKnowledgeFound = {
   articles: KnowledgeArticleView[];
   accidents: string[];
   duties: string[];
+  dutiesNote: string;
   provenance: string;
 };
 
@@ -396,6 +401,7 @@ export function buildSafetyKnowledgeResult(
     articles: result.articles.map(articleView),
     accidents: result.accidents.map((a) => a.label),
     duties: result.duties.map((d) => d.label),
+    dutiesNote: DUTIES_NOTE,
     provenance: ONTOLOGY_PROVENANCE,
   };
 }

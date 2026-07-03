@@ -64,6 +64,8 @@ describe("buildSafetyKnowledgeResult — 도구 페이로드 정형화", () => {
     expect(a619!.label).toContain("제619조");
     // controls: 각 안전조치에 조문 라벨 배열
     expect(payload.controls.some((c) => c.articles.length > 0)).toBe(true);
+    // duties는 단독 충족이 아니라 이행 증빙 일부임을 명시
+    expect(payload.dutiesNote).toContain("단독 충족 아님");
   });
 
   test("매칭 실패(result=null): 미등록 안내 + 등록된 Task 목록", () => {
