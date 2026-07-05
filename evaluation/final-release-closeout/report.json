@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-07-05T11:15:12.210Z",
+  "elapsedMs": 85054,
+  "verdict": "blocked",
+  "steps": [
+    {
+      "name": "targeted-token-auth-tests",
+      "command": "npm.cmd test -- tests/auth-callback.test.ts tests/mcp-token-service.test.ts",
+      "exitCode": 0,
+      "signal": null,
+      "spawnError": null,
+      "elapsedMs": 2537,
+      "verdict": "pass",
+      "logPath": "evaluation/final-release-closeout/01-targeted-token-auth-tests.log"
+    },
+    {
+      "name": "typecheck",
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "signal": null,
+      "spawnError": null,
+      "elapsedMs": 16792,
+      "verdict": "pass",
+      "logPath": "evaluation/final-release-closeout/02-typecheck.log"
+    },
+    {
+      "name": "strict-release-scale-audit",
+      "command": "npm.cmd run audit:release-scale:strict",
+      "exitCode": 1,
+      "signal": null,
+      "spawnError": null,
+      "elapsedMs": 2492,
+      "verdict": "blocked",
+      "logPath": "evaluation/final-release-closeout/03-strict-release-scale-audit.log"
+    },
+    {
+      "name": "build",
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "signal": null,
+      "spawnError": null,
+      "elapsedMs": 63226,
+      "verdict": "pass",
+      "logPath": "evaluation/final-release-closeout/04-build.log"
+    }
+  ]
+}

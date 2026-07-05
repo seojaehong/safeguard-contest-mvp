@@ -84,6 +84,18 @@ Expected proof after completion:
 Run the final verification set:
 
 ```powershell
+npm.cmd run release:closeout
+```
+
+The closeout writes machine-readable and human-readable evidence under:
+
+```text
+evaluation/final-release-closeout/
+```
+
+For manual debugging, the equivalent command sequence is:
+
+```powershell
 npm.cmd test -- tests/auth-callback.test.ts tests/mcp-token-service.test.ts
 npm.cmd run typecheck
 npm.cmd run audit:release-scale:strict
