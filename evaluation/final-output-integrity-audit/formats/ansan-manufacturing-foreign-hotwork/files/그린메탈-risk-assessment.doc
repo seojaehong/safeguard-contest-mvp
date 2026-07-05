@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>위험성평가표</title>
+  <style>
+    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; margin: 34px; color: #1d2430; line-height: 1.6; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    h2 { margin: 24px 0 8px; font-size: 16px; border-left: 4px solid #21594f; padding-left: 8px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 12px; }
+    th, td { border: 1px solid #9aa4b2; padding: 9px; vertical-align: top; font-size: 13px; }
+    th { background: #e8f1ed; }
+    .meta { color: #657084; margin-bottom: 18px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>위험성평가표</h1>
+  <div class="meta">SafeGuard 공식자료 기반 초안 · 현장 검토 후 사용</div>
+  
+    <h2>기본정보</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>1</td><td>위험성평가표(초안)</td></tr><tr><td>공식자료 기반</td><td>KOSHA 위험성평가 절차 및 4M 기법 참고</td></tr><tr><td>업체명</td><td>그린메탈</td></tr><tr><td>업종</td><td>제조업</td></tr><tr><td>작업명</td><td>용접·절단 화기작업</td></tr><tr><td>공정/세부작업</td><td>금속 절단, 아크 용접, 가연물 통제, 화재감시</td></tr><tr><td>작업장소</td><td>경기 안산 제조공장</td></tr><tr><td>작업인원</td><td>6명</td></tr><tr><td>기상 및 작업조건</td><td>고온 작업조건, 온열질환 예방과 휴식 기준 공유 필요</td></tr></tbody>
+    </table>
+  
+    <h2>1. 사전준비</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>- 평가대상 작업</td><td>용접·절단 화기작업</td></tr><tr><td>- 참여자</td><td>현장소장, 관리감독자, 작업반장, 해당 작업자</td></tr><tr><td>- 확인자료</td><td>작업계획, 기상조건, 장비·보호구 상태, 최근 TBM 기록</td></tr></tbody>
+    </table>
+  
+    <h2>2. 유해·위험요인 파악</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>1. 세부작업</td><td>용접 비산불꽃에 의한 화재</td></tr><tr><td>- 유해·위험요인</td><td>용접 비산불꽃에 의한 화재</td></tr><tr><td>- 4M 체크</td><td>Man:□ Machine:■ Media:■ Management:■ / 중점 확인: Machine, Media, Management</td></tr><tr><td>2. 세부작업</td><td>절단 작업 중 화상 및 보호구 미착용</td></tr><tr><td>- 유해·위험요인</td><td>절단 작업 중 화상 및 보호구 미착용</td></tr><tr><td>- 4M 체크</td><td>Man:■ Machine:□ Media:□ Management:□ / 중점 확인: Man</td></tr><tr><td>3. 세부작업</td><td>용접 흄 체류로 인한 호흡기 노출</td></tr><tr><td>- 유해·위험요인</td><td>용접 흄 체류로 인한 호흡기 노출</td></tr><tr><td>- 4M 체크</td><td>Man:□ Machine:■ Media:■ Management:□ / 중점 확인: Machine, Media</td></tr></tbody>
+    </table>
+  
+    <h2>3. 위험성 결정</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>1</td><td>용접 비산불꽃에 의한 화재</td></tr><tr><td>- 현재 위험성</td><td>상</td></tr><tr><td>- 판단근거</td><td>사고 발생 가능성과 중대성을 함께 고려</td></tr><tr><td>2</td><td>절단 작업 중 화상 및 보호구 미착용</td></tr><tr><td>- 현재 위험성</td><td>상</td></tr><tr><td>- 판단근거</td><td>작업 전 통제 여부와 노출 빈도 확인</td></tr><tr><td>3</td><td>용접 흄 체류로 인한 호흡기 노출</td></tr><tr><td>- 현재 위험성</td><td>중</td></tr><tr><td>- 판단근거</td><td>관리감독 및 작업자 숙지 여부 확인</td></tr></tbody>
+    </table>
+  
+    <h2>4. 감소대책 수립 및 실행</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>1</td><td>화기작업 전 가연물 제거와 소화기 배치, 화재감시자 지정</td></tr><tr><td>- 실행시점</td><td>작업 시작 전</td></tr><tr><td>- 담당</td><td>관리감독자 / 작업반장</td></tr><tr><td>- 잔여 위험성</td><td>중</td></tr><tr><td>2</td><td>용접면·방염장갑·보안경 등 보호구 착용 상태 확인</td></tr><tr><td>- 실행시점</td><td>작업 시작 전 및 작업 중 수시</td></tr><tr><td>- 담당</td><td>작업반장 / 신호수</td></tr><tr><td>- 잔여 위험성</td><td>중</td></tr><tr><td>3</td><td>국소배기와 환기설비를 가동하고 밀폐구역 작업을 제한</td></tr><tr><td>- 실행시점</td><td>TBM 직후</td></tr><tr><td>- 담당</td><td>전 작업자</td></tr><tr><td>- 잔여 위험성</td><td>하</td></tr></tbody>
+    </table>
+  
+    <h2>5. 공유·교육</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>1</td><td>위험성평가 결과는 TBM에서 구두 설명하고, 작업자 이해 여부를 확인합니다.</td></tr><tr><td>2</td><td>신규 투입자와 외국인 근로자는 쉬운 문장 또는 다국어 보조 설명을 추가합니다.</td></tr></tbody>
+    </table>
+  
+    <h2>6. 조치 확인</h2>
+    <table>
+      <thead><tr><th style="width: 24%;">항목</th><th>내용</th></tr></thead>
+      <tbody><tr><td>위험성평가 실시자</td><td>현장소장 / 관리감독자</td></tr><tr><td>근로자 참여 확인</td><td>작업 전 TBM에서 공유 및 복창 확인</td></tr><tr><td>조치 완료 예정일</td><td>작업 시작 전 즉시</td></tr><tr><td>미조치 항목 처리</td><td>작업 보류 또는 책임자 승인 후 재평가</td></tr></tbody>
+    </table>
+  
+</body>
+</html>

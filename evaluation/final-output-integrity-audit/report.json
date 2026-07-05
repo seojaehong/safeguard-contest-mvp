@@ -1,0 +1,901 @@
+{
+  "generatedAt": "2026-07-05T13:15:47.462Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "elapsedMs": 47871,
+  "verdict": "pass",
+  "askSummary": {
+    "verdict": "pass",
+    "totalCount": 3,
+    "passCount": 3,
+    "blockedCount": 0
+  },
+  "formatSummary": {
+    "verdict": "pass",
+    "totalCount": 3,
+    "passCount": 3,
+    "blockedCount": 0
+  },
+  "askAudits": [
+    {
+      "id": "seoul-construction-windy",
+      "title": "서울 건설 강풍",
+      "status": 200,
+      "elapsedMs": 1016,
+      "payloadPath": "evaluation/final-output-integrity-audit/ask-payloads/seoul-construction-windy.json",
+      "mode": "mock",
+      "sourceMix": {
+        "total": 4,
+        "counts": {
+          "mock": 4
+        },
+        "koreanLawMcp": {
+          "enabled": false,
+          "configured": false,
+          "keySource": "none",
+          "summary": "korean-law-mcp 비활성화"
+        }
+      },
+      "summary": {
+        "verdict": "pass",
+        "totalCount": 11,
+        "passCount": 11,
+        "blockedCount": 0
+      },
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "verdict": "pass",
+          "charCount": 651,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "verdict": "pass",
+          "charCount": 1509,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "verdict": "pass",
+          "charCount": 1026,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM/작업 전 안전점검회의",
+          "verdict": "pass",
+          "charCount": 1208,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "verdict": "pass",
+          "charCount": 1165,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "verdict": "pass",
+          "charCount": 1038,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "verdict": "pass",
+          "charCount": 847,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진/증빙",
+          "verdict": "pass",
+          "charCount": 738,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "verdict": "pass",
+          "charCount": 7031,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 근로자 전송본",
+          "verdict": "pass",
+          "charCount": 10022,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "verdict": "pass",
+          "charCount": 358,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        }
+      ]
+    },
+    {
+      "id": "incheon-logistics-rain",
+      "title": "인천 물류 우천",
+      "status": 200,
+      "elapsedMs": 342,
+      "payloadPath": "evaluation/final-output-integrity-audit/ask-payloads/incheon-logistics-rain.json",
+      "mode": "mock",
+      "sourceMix": {
+        "total": 4,
+        "counts": {
+          "mock": 4
+        },
+        "koreanLawMcp": {
+          "enabled": false,
+          "configured": false,
+          "keySource": "none",
+          "summary": "korean-law-mcp 비활성화"
+        }
+      },
+      "summary": {
+        "verdict": "pass",
+        "totalCount": 11,
+        "passCount": 11,
+        "blockedCount": 0
+      },
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "verdict": "pass",
+          "charCount": 580,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "verdict": "pass",
+          "charCount": 1444,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "verdict": "pass",
+          "charCount": 907,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM/작업 전 안전점검회의",
+          "verdict": "pass",
+          "charCount": 1185,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "verdict": "pass",
+          "charCount": 1138,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "verdict": "pass",
+          "charCount": 1005,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "verdict": "pass",
+          "charCount": 774,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진/증빙",
+          "verdict": "pass",
+          "charCount": 656,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "verdict": "pass",
+          "charCount": 3366,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 근로자 전송본",
+          "verdict": "pass",
+          "charCount": 4630,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "verdict": "pass",
+          "charCount": 280,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        }
+      ]
+    },
+    {
+      "id": "ansan-manufacturing-foreign-hotwork",
+      "title": "안산 제조 화기 외국인 포함",
+      "status": 200,
+      "elapsedMs": 292,
+      "payloadPath": "evaluation/final-output-integrity-audit/ask-payloads/ansan-manufacturing-foreign-hotwork.json",
+      "mode": "mock",
+      "sourceMix": {
+        "total": 4,
+        "counts": {
+          "mock": 4
+        },
+        "koreanLawMcp": {
+          "enabled": false,
+          "configured": false,
+          "keySource": "none",
+          "summary": "korean-law-mcp 비활성화"
+        }
+      },
+      "summary": {
+        "verdict": "pass",
+        "totalCount": 11,
+        "passCount": 11,
+        "blockedCount": 0
+      },
+      "documents": [
+        {
+          "key": "workpackSummaryDraft",
+          "title": "점검결과 요약",
+          "verdict": "pass",
+          "charCount": 668,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "riskAssessmentDraft",
+          "title": "위험성평가표",
+          "verdict": "pass",
+          "charCount": 1438,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "workPlanDraft",
+          "title": "작업계획서",
+          "verdict": "pass",
+          "charCount": 1001,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "tbmBriefing",
+          "title": "TBM/작업 전 안전점검회의",
+          "verdict": "pass",
+          "charCount": 1163,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "tbmLogDraft",
+          "title": "TBM 기록",
+          "verdict": "pass",
+          "charCount": 1118,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "safetyEducationRecordDraft",
+          "title": "안전보건교육 기록",
+          "verdict": "pass",
+          "charCount": 970,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "emergencyResponseDraft",
+          "title": "비상대응 절차",
+          "verdict": "pass",
+          "charCount": 870,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "photoEvidenceDraft",
+          "title": "사진/증빙",
+          "verdict": "pass",
+          "charCount": 735,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "foreignWorkerBriefing",
+          "title": "외국인 근로자 출력본",
+          "verdict": "pass",
+          "charCount": 6716,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "foreignWorkerTransmission",
+          "title": "외국인 근로자 전송본",
+          "verdict": "pass",
+          "charCount": 10252,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        },
+        {
+          "key": "kakaoMessage",
+          "title": "현장 공유 메시지",
+          "verdict": "pass",
+          "charCount": 369,
+          "placeholderCount": 0,
+          "missingRequiredTerms": [],
+          "missingScenarioTerms": [],
+          "issues": []
+        }
+      ]
+    }
+  ],
+  "formatAudits": [
+    {
+      "id": "seoul-construction-windy",
+      "title": "서울 건설 강풍",
+      "exitCode": 0,
+      "logPath": "evaluation/final-output-integrity-audit/formats/seoul-construction-windy/download-smoke.log",
+      "reportPath": "evaluation/final-output-integrity-audit/formats/seoul-construction-windy/api-orchestration-download-smoke.json",
+      "weather": {
+        "status": 200,
+        "elapsedMs": 5614,
+        "mode": "live",
+        "summary": "단시간 흐림, 비, 기온 25℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)",
+        "signalCount": 8
+      },
+      "ask": {
+        "status": 200,
+        "elapsedMs": 53,
+        "mode": "mock",
+        "statusSummary": "연결 점검 필요",
+        "documentCount": 11
+      },
+      "summary": {
+        "verdict": "pass",
+        "totalCount": 14,
+        "passCount": 14,
+        "blockedCount": 0
+      },
+      "files": [
+        {
+          "format": "TXT",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.txt",
+          "bytes": 3041,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "JSON",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.json",
+          "bytes": 3548,
+          "contentMode": "json",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "CSV",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.csv",
+          "bytes": 5241,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "XLS",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.xls",
+          "bytes": 12021,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "DOC",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.doc",
+          "bytes": 5946,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "HTML",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.html",
+          "bytes": 3619,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "HWPX",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.hwpx",
+          "bytes": 8805,
+          "contentMode": "hwpx-xml",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "HWP_TABLE",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.hwp",
+          "bytes": 15872,
+          "contentMode": "binary-hwp",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "XLSX_OOXML",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.xlsx",
+          "bytes": 9824,
+          "contentMode": "xlsx-cells",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "PDF",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.pdf",
+          "bytes": 225981,
+          "contentMode": "binary-pdf",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "JPG",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.jpg",
+          "bytes": 149749,
+          "contentMode": "binary-image",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "ALL_TXT",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.txt",
+          "bytes": 53738,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "ALL_CSV",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.csv",
+          "bytes": 78430,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "ALL_XLS",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.xls",
+          "bytes": 127092,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        }
+      ]
+    },
+    {
+      "id": "incheon-logistics-rain",
+      "title": "인천 물류 우천",
+      "exitCode": 0,
+      "logPath": "evaluation/final-output-integrity-audit/formats/incheon-logistics-rain/download-smoke.log",
+      "reportPath": "evaluation/final-output-integrity-audit/formats/incheon-logistics-rain/api-orchestration-download-smoke.json",
+      "weather": {
+        "status": 200,
+        "elapsedMs": 958,
+        "mode": "live",
+        "summary": "단시간 흐림, 강수없음, 기온 25℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보 반영)",
+        "signalCount": 5
+      },
+      "ask": {
+        "status": 200,
+        "elapsedMs": 164,
+        "mode": "mock",
+        "statusSummary": "연결 점검 필요",
+        "documentCount": 11
+      },
+      "summary": {
+        "verdict": "pass",
+        "totalCount": 14,
+        "passCount": 14,
+        "blockedCount": 0
+      },
+      "files": [
+        {
+          "format": "TXT",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.txt",
+          "bytes": 2921,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "JSON",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.json",
+          "bytes": 3437,
+          "contentMode": "json",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "CSV",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.csv",
+          "bytes": 5121,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "XLS",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.xls",
+          "bytes": 11901,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "DOC",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.doc",
+          "bytes": 5826,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "HTML",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.html",
+          "bytes": 3499,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "HWPX",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.hwpx",
+          "bytes": 8792,
+          "contentMode": "hwpx-xml",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "HWP_TABLE",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.hwp",
+          "bytes": 15872,
+          "contentMode": "binary-hwp",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "XLSX_OOXML",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.xlsx",
+          "bytes": 9806,
+          "contentMode": "xlsx-cells",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "PDF",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.pdf",
+          "bytes": 230369,
+          "contentMode": "binary-pdf",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "JPG",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.jpg",
+          "bytes": 145096,
+          "contentMode": "binary-image",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "ALL_TXT",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.txt",
+          "bytes": 33270,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "ALL_CSV",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.csv",
+          "bytes": 50558,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "ALL_XLS",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\incheon-logistics-rain\\files\\한빛로지스-safeguard-workpack.xls",
+          "bytes": 89649,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        }
+      ]
+    },
+    {
+      "id": "ansan-manufacturing-foreign-hotwork",
+      "title": "안산 제조 화기 외국인 포함",
+      "exitCode": 0,
+      "logPath": "evaluation/final-output-integrity-audit/formats/ansan-manufacturing-foreign-hotwork/download-smoke.log",
+      "reportPath": "evaluation/final-output-integrity-audit/formats/ansan-manufacturing-foreign-hotwork/api-orchestration-download-smoke.json",
+      "weather": {
+        "status": 200,
+        "elapsedMs": 2443,
+        "mode": "live",
+        "summary": "단시간 흐림, 강수없음, 기온 24℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보 반영)",
+        "signalCount": 5
+      },
+      "ask": {
+        "status": 200,
+        "elapsedMs": 128,
+        "mode": "mock",
+        "statusSummary": "연결 점검 필요",
+        "documentCount": 11
+      },
+      "summary": {
+        "verdict": "pass",
+        "totalCount": 14,
+        "passCount": 14,
+        "blockedCount": 0
+      },
+      "files": [
+        {
+          "format": "TXT",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.txt",
+          "bytes": 2908,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "JSON",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.json",
+          "bytes": 3408,
+          "contentMode": "json",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "CSV",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.csv",
+          "bytes": 5108,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "XLS",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.xls",
+          "bytes": 11888,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "DOC",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.doc",
+          "bytes": 5813,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "HTML",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.html",
+          "bytes": 3486,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "HWPX",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.hwpx",
+          "bytes": 8785,
+          "contentMode": "hwpx-xml",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "HWP_TABLE",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.hwp",
+          "bytes": 15872,
+          "contentMode": "binary-hwp",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "XLSX_OOXML",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.xlsx",
+          "bytes": 9825,
+          "contentMode": "xlsx-cells",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "PDF",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.pdf",
+          "bytes": 232710,
+          "contentMode": "binary-pdf",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "JPG",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.jpg",
+          "bytes": 144825,
+          "contentMode": "binary-image",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "ALL_TXT",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.txt",
+          "bytes": 52953,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "ALL_CSV",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.csv",
+          "bytes": 78244,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        },
+        {
+          "format": "ALL_XLS",
+          "file": "evaluation\\final-output-integrity-audit\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.xls",
+          "bytes": 127782,
+          "contentMode": "text",
+          "generatorOk": true,
+          "verdict": "pass",
+          "issues": []
+        }
+      ]
+    }
+  ]
+}
