@@ -56,12 +56,19 @@ evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql
 
 The candidate intentionally lives under `evaluation/`, not `supabase/migrations/`, because DB schema changes require explicit approval before application.
 
+After applying it, run the read-only verification query and confirm all required index names are returned:
+
+```text
+evaluation/final-release-scale-audit/mcp-token-query-indexes-verify.sql
+```
+
 Operator action after approval:
 
 1. Apply the SQL in a production-safe path outside an explicit transaction because it uses `CREATE INDEX CONCURRENTLY`.
-2. Record the applied SQL and timestamp in the deployment notes.
-3. Add the approved migration or DB evidence to the repo so the strict audit can prove it.
-4. Run:
+2. Run the verification query above and save the returned rows with the deployment notes.
+3. Record the applied SQL and timestamp in the deployment notes.
+4. Add the approved migration or DB evidence to the repo so the strict audit can prove it.
+5. Run:
 
 ```powershell
 npm.cmd run audit:release-scale:strict

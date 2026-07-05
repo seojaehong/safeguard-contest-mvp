@@ -8,6 +8,7 @@ const rootDir = process.cwd();
 const baseUrl = process.env.SAFECLAW_RELEASE_BASE_URL || "https://www.safeclaw.kr";
 const outDir = path.resolve(process.env.SAFECLAW_RELEASE_AUDIT_OUT_DIR || path.join(rootDir, "evaluation", "final-release-scale-audit"));
 const tokenIndexApprovalCandidate = "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql";
+const tokenIndexVerificationQuery = "evaluation/final-release-scale-audit/mcp-token-query-indexes-verify.sql";
 const strictMode = process.argv.includes("--strict") || process.env.SAFECLAW_RELEASE_STRICT === "1";
 const supabaseAuthUrl =
   process.env.SAFECLAW_SUPABASE_AUTH_URL ||
@@ -271,6 +272,8 @@ async function runExternalReleaseGates() {
       approvalRequired: true,
       approvalCandidate: tokenIndexApprovalCandidate,
       approvalCandidateExists: fs.existsSync(path.join(rootDir, tokenIndexApprovalCandidate)),
+      verificationQuery: tokenIndexVerificationQuery,
+      verificationQueryExists: fs.existsSync(path.join(rootDir, tokenIndexVerificationQuery)),
       operatorAction: "After approval, add indexes for mcp_tokens(org_id, created_at desc) and mcp_tokens(site_id, created_at desc).",
     }),
   ];
@@ -320,6 +323,7 @@ ${releaseGateRows}
 - Supabase Auth dashboard Kakao Provider must be enabled before Kakao login is release-ready.
 - Supabase Auth dashboard Site URL/Redirect URL must allow ${payload.baseUrl}/auth/callback.
 - DB index migration for 10,000-user operation still requires explicit approval before application. Candidate SQL: ${payload.tokenIndexApprovalCandidate}
+- After applying DB indexes, run the read-only verification query: ${payload.tokenIndexVerificationQuery}
 `;
 }
 
@@ -344,6 +348,7 @@ async function main() {
     verdict: releaseVerdict,
     exitVerdict,
     tokenIndexApprovalCandidate,
+    tokenIndexVerificationQuery,
     gates,
     releaseGates,
   };
@@ -360,6 +365,8 @@ async function main() {
     blockedAutomated: gates.filter((item) => item.verdict === "blocked").map((item) => item.name),
     blockedRelease: releaseGates.filter((item) => item.verdict === "blocked").map((item) => item.name),
     outDir,
+    tokenIndexApprovalCandidate,
+    tokenIndexVerificationQuery,
   }, null, 2));
   if (payload.exitVerdict !== "pass") process.exitCode = 1;
 }
