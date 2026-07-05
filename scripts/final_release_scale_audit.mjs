@@ -7,6 +7,13 @@ const startedAt = Date.now();
 const rootDir = process.cwd();
 const baseUrl = process.env.SAFECLAW_RELEASE_BASE_URL || "https://www.safeclaw.kr";
 const outDir = path.resolve(process.env.SAFECLAW_RELEASE_AUDIT_OUT_DIR || path.join(rootDir, "evaluation", "final-release-scale-audit"));
+const strictMode = process.argv.includes("--strict") || process.env.SAFECLAW_RELEASE_STRICT === "1";
+const supabaseAuthUrl =
+  process.env.SAFECLAW_SUPABASE_AUTH_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  readLocalEnv("NEXT_PUBLIC_SUPABASE_URL") ||
+  readLocalEnv("SUPABASE_URL") ||
+  "https://mewqgevgdgghhatqtuos.supabase.co";
 
 const existingFlowQuestion = "그린메탈 경기 안산 제조공장 옥외 용접 작업. 작업자 6명, 외국인 근로자 2명, 신규 작업자 1명, 우천 후 바닥 젖음과 화재감시자 필요. 오늘 위험성평가, TBM, 안전보건교육 기록을 만들어줘.";
 
@@ -44,20 +51,45 @@ function gate(name, ok, details) {
   return { name, verdict: ok ? "pass" : "blocked", details };
 }
 
+function releaseGate(name, ok, details) {
+  return { name, verdict: ok ? "pass" : "blocked", details };
+}
+
 function overallVerdict(gates) {
   return gates.some((item) => item.verdict === "blocked") ? "blocked" : "pass";
 }
 
-async function fetchText(route, init) {
+function readLocalEnv(key) {
+  const filePath = path.join(rootDir, ".env.local");
+  if (!fs.existsSync(filePath)) return "";
+  const lines = fs.readFileSync(filePath, "utf8").split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const separator = trimmed.indexOf("=");
+    if (separator < 0) continue;
+    const name = trimmed.slice(0, separator).trim();
+    if (name !== key) continue;
+    return trimmed.slice(separator + 1).trim().replace(/^['"]|['"]$/g, "");
+  }
+  return "";
+}
+
+async function fetchAbsolute(urlValue, init) {
   const started = Date.now();
-  const response = await fetch(`${baseUrl}${route}`, init);
+  const response = await fetch(urlValue, init);
   const text = await response.text();
   return {
     ok: response.ok,
     status: response.status,
     elapsedMs: Date.now() - started,
+    headers: Object.fromEntries(response.headers.entries()),
     text,
   };
+}
+
+async function fetchText(route, init) {
+  return await fetchAbsolute(`${baseUrl}${route}`, init);
 }
 
 async function fetchJson(route, init) {
@@ -155,8 +187,65 @@ function runScaleContractChecks() {
   ];
 }
 
+async function runExternalReleaseGates() {
+  const redirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent("/settings/ai-connect")}`;
+  const authorizeUrl = `${supabaseAuthUrl.replace(/\/$/, "")}/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(redirectTo)}`;
+  let kakaoAuth = null;
+  try {
+    kakaoAuth = await fetchAbsolute(authorizeUrl, {
+      redirect: "manual",
+      headers: { "user-agent": "Mozilla/5.0 Chrome/126" },
+    });
+  } catch (error) {
+    kakaoAuth = {
+      status: 0,
+      elapsedMs: 0,
+      headers: {},
+      text: error instanceof Error ? error.message : String(error),
+    };
+  }
+
+  const kakaoLocation = kakaoAuth.headers.location || "";
+  const kakaoProviderEnabled =
+    [301, 302, 303, 307, 308].includes(kakaoAuth.status) &&
+    (kakaoLocation.includes("kakao") || kakaoLocation.includes("kauth"));
+  const kakaoDisabled = kakaoAuth.text.includes("Unsupported provider") || kakaoAuth.text.includes("provider is not enabled");
+
+  const migrationDir = path.join(rootDir, "supabase", "migrations");
+  const migrationText = fs.existsSync(migrationDir)
+    ? fs.readdirSync(migrationDir)
+      .filter((fileName) => fileName.endsWith(".sql"))
+      .map((fileName) => fs.readFileSync(path.join(migrationDir, fileName), "utf8"))
+      .join("\n")
+    : "";
+  const hasOrgIndex = migrationText.includes("mcp_tokens(org_id") || migrationText.includes("mcp_tokens (org_id");
+  const hasSiteIndex = migrationText.includes("mcp_tokens(site_id") || migrationText.includes("mcp_tokens (site_id");
+
+  return [
+    releaseGate("supabase-kakao-provider-enabled", kakaoProviderEnabled, {
+      status: kakaoAuth.status,
+      elapsedMs: kakaoAuth.elapsedMs,
+      supabaseOrigin: new URL(supabaseAuthUrl).origin,
+      disabledReason: kakaoDisabled ? "Supabase returned Unsupported provider: provider is not enabled" : null,
+      redirectTo,
+      locationPreview: kakaoLocation.slice(0, 160),
+      responsePreview: kakaoAuth.text.slice(0, 240),
+      operatorAction: "Enable Kakao in Supabase Auth Providers and configure the production callback URL.",
+    }),
+    releaseGate("mcp-token-query-indexes-approved", hasOrgIndex && hasSiteIndex, {
+      hasOrgCreatedIndex: hasOrgIndex,
+      hasSiteCreatedIndex: hasSiteIndex,
+      approvalRequired: true,
+      operatorAction: "After approval, add indexes for mcp_tokens(org_id, created_at desc) and mcp_tokens(site_id, created_at desc).",
+    }),
+  ];
+}
+
 function renderReport(payload) {
   const gateRows = payload.gates
+    .map((item) => `| ${item.name} | ${item.verdict} | ${JSON.stringify(item.details).replace(/\|/g, "\\|").slice(0, 220)} |`)
+    .join("\n");
+  const releaseGateRows = payload.releaseGates
     .map((item) => `| ${item.name} | ${item.verdict} | ${JSON.stringify(item.details).replace(/\|/g, "\\|").slice(0, 220)} |`)
     .join("\n");
 
@@ -167,23 +256,34 @@ Generated: ${payload.generatedAt}
 
 Base URL: ${payload.baseUrl}
 
-Verdict: **${payload.verdict}**
+Automated Verdict: **${payload.automatedVerdict}**
+
+Release Verdict: **${payload.releaseVerdict}**
+
+Strict Mode: **${payload.strictMode ? "on" : "off"}**
 
 ## Coverage
 
 - Existing web workflow: production /api/ask document generation.
 - AI connection workflow: production AI connection page, token API auth guard, MCP auth guard.
-- Scale contract: tenant-scoped hashed tokens, bounded cursor pagination, active-token cap, magic-link return path, operator docs.
+- Scale contract: tenant-scoped hashed tokens, bounded cursor pagination, active-token cap, email/OAuth callback return path, operator docs.
 
-## Gates
+## Automated Gates
 
 | Gate | Verdict | Details |
 |------|---------|---------|
 ${gateRows}
 
-## Remaining Manual Gates
+## Release Gates
 
-- Supabase Auth dashboard Site URL/Redirect URL must be confirmed in production.
+| Gate | Verdict | Details |
+|------|---------|---------|
+${releaseGateRows}
+
+## Remaining Operator Actions
+
+- Supabase Auth dashboard Kakao Provider must be enabled before Kakao login is release-ready.
+- Supabase Auth dashboard Site URL/Redirect URL must allow ${payload.baseUrl}/auth/callback.
 - DB index migration for 10,000-user operation still requires explicit approval before application.
 `;
 }
@@ -195,22 +295,33 @@ async function main() {
     ...(await runAiConnectionSurface()),
     ...runScaleContractChecks(),
   ];
+  const releaseGates = await runExternalReleaseGates();
+  const automatedVerdict = overallVerdict(gates);
+  const releaseVerdict = overallVerdict([...gates, ...releaseGates]);
   const payload = {
     generatedAt: new Date().toISOString(),
     elapsedMs: Date.now() - startedAt,
     baseUrl,
-    verdict: overallVerdict(gates),
+    strictMode,
+    automatedVerdict,
+    releaseVerdict,
+    verdict: automatedVerdict,
     gates,
+    releaseGates,
   };
   writeJson("final-release-scale-audit.json", payload);
   writeMarkdown("final-release-scale-audit.md", renderReport(payload));
   console.log(JSON.stringify({
-    verdict: payload.verdict,
-    gateCount: gates.length,
-    blocked: gates.filter((item) => item.verdict === "blocked").map((item) => item.name),
+    automatedVerdict: payload.automatedVerdict,
+    releaseVerdict: payload.releaseVerdict,
+    strictMode: payload.strictMode,
+    automatedGateCount: gates.length,
+    releaseGateCount: releaseGates.length,
+    blockedAutomated: gates.filter((item) => item.verdict === "blocked").map((item) => item.name),
+    blockedRelease: releaseGates.filter((item) => item.verdict === "blocked").map((item) => item.name),
     outDir,
   }, null, 2));
-  if (payload.verdict !== "pass") process.exitCode = 1;
+  if (payload.automatedVerdict !== "pass" || (strictMode && payload.releaseVerdict !== "pass")) process.exitCode = 1;
 }
 
 await main();

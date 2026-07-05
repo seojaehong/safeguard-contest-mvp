@@ -13,6 +13,9 @@ Final release readiness for both tracks:
 - OpenClaw + OpenAI OAuth was previously verified against production MCP with 8 tools and an Ansan outdoor welding TBM live turn.
 - Magic-link callback handling now uses `/auth/callback?next=...` so AI connection login can return to `/settings/ai-connect`.
 - Login now preserves the existing email magic-link flow while adding social OAuth callbacks such as Kakao through the same `/auth/callback?next=...` return path.
+- The release audit now separates automated code/product gates from operator release gates:
+  - `automatedVerdict` proves the current code path and production smoke coverage.
+  - `releaseVerdict` remains blocked until external operator gates such as Supabase Kakao Provider enablement and approved token-query indexes are satisfied.
 - MCP token listing is bounded and cursor-based:
   - Default list limit: 25.
   - Public max list limit: 50.
@@ -40,6 +43,7 @@ The issuance cap prevents a single site from creating unbounded active credentia
 - Supabase Auth dashboard must use production callback settings:
   - Site URL: `https://www.safeclaw.kr`
   - Redirect URL: `https://www.safeclaw.kr/auth/callback` or `https://www.safeclaw.kr/**`
+- Supabase Auth dashboard must enable Kakao Provider before Kakao login is release-ready.
 - Before 10,000-user operation, add approved DB indexes for token management queries:
   - `mcp_tokens(org_id, created_at desc)`
   - `mcp_tokens(site_id, created_at desc)`
@@ -50,4 +54,6 @@ The DB index work is intentionally not applied in this pass because schema chang
 
 - `npm.cmd test -- tests/mcp-token-service.test.ts`
 - `npm.cmd run typecheck`
+- `npm.cmd run audit:release-scale`
+- `npm.cmd run audit:release-scale:strict` (expected to fail until external release gates are satisfied)
 - `npm.cmd run build`

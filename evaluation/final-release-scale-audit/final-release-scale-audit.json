@@ -1,7 +1,10 @@
 {
-  "generatedAt": "2026-07-05T10:18:50.902Z",
-  "elapsedMs": 719,
+  "generatedAt": "2026-07-05T10:29:32.258Z",
+  "elapsedMs": 1046,
   "baseUrl": "https://www.safeclaw.kr",
+  "strictMode": false,
+  "automatedVerdict": "pass",
+  "releaseVerdict": "blocked",
   "verdict": "pass",
   "gates": [
     {
@@ -9,7 +12,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 496,
+        "elapsedMs": 351,
         "missingDeliverables": [],
         "deliverableCount": 11,
         "scenario": {
@@ -28,7 +31,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 79
+        "elapsedMs": 94
       }
     },
     {
@@ -89,6 +92,32 @@
       "verdict": "pass",
       "details": {
         "evidence": "docs/mcp-server.md documents cursor paging, active cap, and index approval gate"
+      }
+    }
+  ],
+  "releaseGates": [
+    {
+      "name": "supabase-kakao-provider-enabled",
+      "verdict": "blocked",
+      "details": {
+        "status": 400,
+        "elapsedMs": 108,
+        "supabaseOrigin": "https://mewqgevgdgghhatqtuos.supabase.co",
+        "disabledReason": "Supabase returned Unsupported provider: provider is not enabled",
+        "redirectTo": "https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect",
+        "locationPreview": "",
+        "responsePreview": "{\"code\":400,\"error_code\":\"validation_failed\",\"msg\":\"Unsupported provider: provider is not enabled\"}",
+        "operatorAction": "Enable Kakao in Supabase Auth Providers and configure the production callback URL."
+      }
+    },
+    {
+      "name": "mcp-token-query-indexes-approved",
+      "verdict": "blocked",
+      "details": {
+        "hasOrgCreatedIndex": false,
+        "hasSiteCreatedIndex": false,
+        "approvalRequired": true,
+        "operatorAction": "After approval, add indexes for mcp_tokens(org_id, created_at desc) and mcp_tokens(site_id, created_at desc)."
       }
     }
   ]

@@ -32,7 +32,9 @@ claude mcp add --transport http safeclaw \
 | 토큰당 20회/분 초과 (POST) | `429` (`Retry-After` 헤더) |
 
 - `SAFECLAW_MCP_TOKENS`는 콤마 구분 다중 토큰(`token-a,token-b`)을 지원한다.
-- OAuth는 다음 단계이며 v0 스코프는 정적 Bearer 토큰이다.
+- MCP 접근 토큰은 v0에서 정적 Bearer 토큰이다. 사용자 로그인은 Supabase Auth의 이메일
+  매직링크와 소셜 OAuth(예: Kakao)를 사용할 수 있지만, SafeClaw가 외부 AI 대신 OpenAI OAuth를
+  중계하지는 않는다.
 - rate limit은 서버리스 웜 인스턴스 단위 소프트 가드(분산 쿼터 아님).
 
 ### 테넌트 스코프 토큰 (DB, `mcp_tokens`)
@@ -85,9 +87,31 @@ node scripts/issue-mcp-token.mjs "운영자 전체신뢰"                       
 
 ### 프로덕션 활성화 (필수)
 
-**Vercel 환경변수 `SAFECLAW_MCP_TOKENS`가 설정되기 전까지 prod는 501을 반환한다.**
-Vercel 프로젝트 설정 → Environment Variables에 `SAFECLAW_MCP_TOKENS`를 추가한 뒤
-재배포해야 MCP 계층이 활성화된다.
+프로덕션 MCP 계층은 다음 중 하나가 설정되면 활성화된다.
+
+- 권장: Supabase `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`로 DB 기반 `mcp_tokens` 인증 사용
+- 레거시/운영자 폴백: Vercel 환경변수 `SAFECLAW_MCP_TOKENS`
+
+둘 다 없으면 prod는 `501 Not Implemented`를 반환한다. 고객용 AI 연결은 DB 기반 토큰을
+사용해야 조직/현장 스코프, 해시 저장, 비활성화, 목록 페이지네이션, 활성 토큰 제한을 모두
+적용할 수 있다.
+
+### 사용자 로그인과 OAuth Provider
+
+`/settings/ai-connect`의 토큰 발급은 관리자 로그인이 필요하다. `/login?next=/settings/ai-connect`
+화면은 기존 이메일 매직링크 가입/로그인을 유지하면서 Kakao 같은 소셜 OAuth 버튼을 추가로
+제공한다. 두 경로 모두 `/auth/callback?next=...`로 돌아오고, 콜백은 Supabase hash 세션과
+OAuth `code` 교환을 모두 처리한다.
+
+운영 전 Supabase Auth 대시보드에서 다음을 확인한다.
+
+- Site URL: `https://www.safeclaw.kr`
+- Redirect URL: `https://www.safeclaw.kr/auth/callback` 또는 `https://www.safeclaw.kr/**`
+- Kakao Provider: enabled, client id/secret configured
+
+`npm.cmd run audit:release-scale`은 자동 코드/프로덕션 스모크와 함께 이 외부 Provider 상태를
+보고서에 기록한다. `npm.cmd run audit:release-scale:strict`는 Kakao Provider 미활성화나 1만
+사용자 전 DB 인덱스 미적용 같은 출시 차단 게이트까지 실패 코드로 처리한다.
 
 ## 도구 8종
 
