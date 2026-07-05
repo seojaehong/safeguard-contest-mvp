@@ -330,6 +330,7 @@ async function main() {
   const releaseGates = await runExternalReleaseGates();
   const automatedVerdict = overallVerdict(gates);
   const releaseVerdict = overallVerdict([...gates, ...releaseGates]);
+  const exitVerdict = strictMode ? releaseVerdict : automatedVerdict;
   const payload = {
     generatedAt: new Date().toISOString(),
     elapsedMs: Date.now() - startedAt,
@@ -337,7 +338,8 @@ async function main() {
     strictMode,
     automatedVerdict,
     releaseVerdict,
-    verdict: automatedVerdict,
+    verdict: releaseVerdict,
+    exitVerdict,
     tokenIndexApprovalCandidate,
     gates,
     releaseGates,
@@ -345,8 +347,10 @@ async function main() {
   writeJson("final-release-scale-audit.json", payload);
   writeMarkdown("final-release-scale-audit.md", renderReport(payload));
   console.log(JSON.stringify({
+    verdict: payload.verdict,
     automatedVerdict: payload.automatedVerdict,
     releaseVerdict: payload.releaseVerdict,
+    exitVerdict: payload.exitVerdict,
     strictMode: payload.strictMode,
     automatedGateCount: gates.length,
     releaseGateCount: releaseGates.length,
@@ -354,7 +358,7 @@ async function main() {
     blockedRelease: releaseGates.filter((item) => item.verdict === "blocked").map((item) => item.name),
     outDir,
   }, null, 2));
-  if (payload.automatedVerdict !== "pass" || (strictMode && payload.releaseVerdict !== "pass")) process.exitCode = 1;
+  if (payload.exitVerdict !== "pass") process.exitCode = 1;
 }
 
 await main();
