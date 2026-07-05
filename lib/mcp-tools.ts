@@ -7,6 +7,7 @@
 
 import type { AskResponse } from "./types";
 import type { AccidentCase } from "./types";
+import type { QaReviewResult } from "./ontology/qa-review";
 import { gateCitations } from "./law-citation-gate";
 import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
 import { getEvidenceLabel, SMSA_ARTICLE_MAP, type SmsaEvidenceLabel } from "./smsa-mapping";
@@ -70,6 +71,15 @@ export type DocpackResult = {
   fullDocumentsNote: string;
 };
 
+export type ReviewedDocpackResult = {
+  engine: "safeclaw-runAsk";
+  qualityPipeline: ["generate_safety_docpack", "qa_review_docpack"];
+  reviewTask: string;
+  docpack: DocpackResult;
+  qa: QaReviewResult;
+  openClawUsageNote: string;
+};
+
 /**
  * runAsk 결과를 문서팩 도구 응답으로 정형화한다.
  * - includeFull=false(기본): 각 문서는 앞 500자 프리뷰 + 총길이 메타만.
@@ -106,6 +116,27 @@ export function buildDocpackResult(response: AskResponse, includeFull = false): 
     result.evidenceLabels = response.evidenceLabels;
   }
   return result;
+}
+
+/**
+ * OpenClaw/Codex 같은 외부 에이전트가 두 도구를 안정적으로 직접 엮지 못하는 경우를
+ * 위해, SafeClaw 문서 엔진(runAsk) 결과와 QA 검수 결과를 하나의 MCP 페이로드로 묶는다.
+ */
+export function buildReviewedDocpackResult(
+  response: AskResponse,
+  qa: QaReviewResult,
+  reviewTask: string,
+  includeFull = false
+): ReviewedDocpackResult {
+  return {
+    engine: "safeclaw-runAsk",
+    qualityPipeline: ["generate_safety_docpack", "qa_review_docpack"],
+    reviewTask,
+    docpack: buildDocpackResult(response, includeFull),
+    qa,
+    openClawUsageNote:
+      "이 응답은 SafeClaw 문서 엔진(/api/ask runAsk) 산출물을 QA 검수 계층으로 다시 확인한 결과입니다. OpenClaw는 이 페이로드를 최종 답변의 근거로 사용하세요.",
+  };
 }
 
 // ── validate_safety_citations ─────────────────────────────────────────────
