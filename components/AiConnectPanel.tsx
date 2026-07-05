@@ -240,7 +240,7 @@ export function AiConnectPanel() {
         <span>로그인 필요</span>
         <h2>관리자 로그인 후 연결 토큰을 발급할 수 있습니다.</h2>
         <p>SafeClaw 도구 연결은 현장 문서와 증빙 파일철에 접근할 수 있으므로 로그인한 관리자에게만 열립니다.</p>
-        <Link href="/login" className="button">관리자 로그인</Link>
+        <Link href="/login?next=/settings/ai-connect" className="button">관리자 로그인</Link>
       </section>
     );
   }

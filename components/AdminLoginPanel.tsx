@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import { resolveSafeNextPath } from "@/lib/auth-callback";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -22,8 +23,12 @@ export function AdminLoginPanel() {
   const [session, setSession] = useState<Session | null>(null);
   const [message, setMessage] = useState("관리자 로그인 후 문서팩, 작업자, 교육, 전파 이력을 저장합니다.");
   const [isSending, setIsSending] = useState(false);
+  const [nextPath, setNextPath] = useState("/workspace");
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setNextPath(resolveSafeNextPath(params.get("next")));
+
     if (!client) return;
 
     client.auth.getSession()
@@ -48,7 +53,7 @@ export function AdminLoginPanel() {
       const { error } = await client.auth.signInWithOtp({
         email: email.trim(),
         options: {
-          emailRedirectTo: `${window.location.origin}/workspace`
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
         }
       });
       if (error) throw error;
