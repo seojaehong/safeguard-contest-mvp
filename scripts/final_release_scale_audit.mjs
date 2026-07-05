@@ -56,6 +56,12 @@ function sourceText(relativePath) {
   return fs.readFileSync(path.join(rootDir, relativePath), "utf8");
 }
 
+function readNumericConst(source, name) {
+  const pattern = new RegExp(`(?:export\\s+)?const\\s+${name}\\s*=\\s*(\\d+)\\s*;`);
+  const match = source.match(pattern);
+  return match ? Number.parseInt(match[1], 10) : null;
+}
+
 function stripSqlComments(sql) {
   return sql
     .replace(/--.*$/gm, " ")
@@ -204,6 +210,15 @@ function runScaleContractChecks() {
   const aiPanel = sourceText("components/AiConnectPanel.tsx");
   const authCallback = sourceText("components/AuthCallbackClient.tsx");
   const docs = sourceText("docs/mcp-server.md");
+  const maxListLimit = readNumericConst(tokenService, "MAX_MCP_TOKEN_LIST_LIMIT");
+  const maxActiveTokensPerSite = readNumericConst(tokenService, "MAX_ACTIVE_MCP_TOKENS_PER_SITE");
+  const scaleMatchesCode =
+    maxListLimit === scaleRequestBounds.tokenListRequestedLimitMax &&
+    maxActiveTokensPerSite === scaleRequestBounds.activeTokensPerSiteMax &&
+    tokenRoute.includes("const fetchLimit = limit + 1") &&
+    tokenRoute.includes(".range(0, fetchLimit - 1)") &&
+    tokenRoute.includes("const pageRows = ownedRows.slice(0, limit)") &&
+    tokenRoute.includes("pageRows.map((token) => token.site_id)");
 
   return [
     gate("tenant-scoped-token-insert", tokenService.includes("token_hash: hashToken") && tokenService.includes("site_id: input.siteId") && tokenService.includes("org_id: input.orgId"), {
@@ -220,6 +235,12 @@ function runScaleContractChecks() {
     }),
     gate("active-token-cap", tokenService.includes("MAX_ACTIVE_MCP_TOKENS_PER_SITE = 50") && tokenRoute.includes("canIssueMoreMcpTokens") && tokenRoute.includes("status: 409"), {
       evidence: "site-level active token cap enforced before issuing plaintext token",
+    }),
+    gate("scale-envelope-matches-code-bounds", scaleMatchesCode, {
+      maxListLimit,
+      maxActiveTokensPerSite,
+      requestBounds: scaleRequestBounds,
+      evidence: "scale envelope row bounds are derived from the token list limit, +1 cursor fetch, pageRows slice, and active-token cap",
     }),
     gate("explicit-user-scale-envelope", scaleTargetUserCounts.includes(10000) && scaleRequestBounds.tokenListFetchRowsMax === scaleRequestBounds.tokenListRequestedLimitMax + 1 && scaleRequestBounds.siteNameLookupRowsMax === scaleRequestBounds.tokenListRequestedLimitMax, {
       targets: scaleTargetUserCounts,

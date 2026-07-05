@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-05T11:20:04.488Z",
-  "elapsedMs": 1411,
+  "generatedAt": "2026-07-05T11:25:00.147Z",
+  "elapsedMs": 1364,
   "baseUrl": "https://www.safeclaw.kr",
   "strictMode": true,
   "automatedVerdict": "pass",
@@ -61,7 +61,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 473,
+        "elapsedMs": 549,
         "missingDeliverables": [],
         "deliverableCount": 11,
         "scenario": {
@@ -80,7 +80,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 188
+        "elapsedMs": 184
       }
     },
     {
@@ -137,6 +137,21 @@
       }
     },
     {
+      "name": "scale-envelope-matches-code-bounds",
+      "verdict": "pass",
+      "details": {
+        "maxListLimit": 50,
+        "maxActiveTokensPerSite": 50,
+        "requestBounds": {
+          "tokenListRequestedLimitMax": 50,
+          "tokenListFetchRowsMax": 51,
+          "siteNameLookupRowsMax": 50,
+          "activeTokensPerSiteMax": 50
+        },
+        "evidence": "scale envelope row bounds are derived from the token list limit, +1 cursor fetch, pageRows slice, and active-token cap"
+      }
+    },
+    {
       "name": "explicit-user-scale-envelope",
       "verdict": "pass",
       "details": {
@@ -177,7 +192,7 @@
       "verdict": "blocked",
       "details": {
         "status": 400,
-        "elapsedMs": 110,
+        "elapsedMs": 120,
         "supabaseOrigin": "https://mewqgevgdgghhatqtuos.supabase.co",
         "disabledReason": "Supabase returned Unsupported provider: provider is not enabled",
         "redirectTo": "https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect",
