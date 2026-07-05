@@ -1,0 +1,10 @@
+[plugins] plugins.allow is empty; discovered non-bundled plugins may auto-load: codex (C:\Users\iceam\.openclaw-safeclaw\npm\projects\openclaw-codex-8902d781d4\node_modules\@openclaw\codex\dist\index.js). To trust them explicitly, set plugins.allow in openclaw.json (e.g. "plugins": { "allow": ["codex"] }). Run 'openclaw plugins list --enabled --verbose' or 'openclaw plugins inspect codex' to confirm plugin ids.
+[plugins] plugins.allow is empty; discovered non-bundled plugins may auto-load: codex (C:\Users\iceam\.openclaw-safeclaw\npm\projects\openclaw-codex-8902d781d4\node_modules\@openclaw\codex\dist\index.js). To trust them explicitly, set plugins.allow in openclaw.json (e.g. "plugins": { "allow": ["codex"] }). Run 'openclaw plugins list --enabled --verbose' or 'openclaw plugins inspect codex' to confirm plugin ids.
+[agent/embedded] failed to read mirrored session history for codex harness hooks
+[agent/embedded] codex app-server one-shot cleanup retired shared client
+호출 완료했습니다.
+
+SafeClaw가 일반 건설 현장 기준으로 문서팩 프리뷰를 생성했습니다. 포함된 문서는 위험성평가, 작업계획서, TBM 브리핑/기록, 안전보건교육 기록, 비상대응 절차, 사진증빙 목록, 외국인 근로자 안내문, 카카오 공지문 등입니다.
+
+다만 QA 검수는 `reviewable: false`였습니다. 이유는 `일반 건설 작업`이 등록된 검수 작업유형이 아니기 때문입니다. 등록된 유형은 `고소작업`, `도장(스프레이)`, `밀폐공간 작업`, `비계 조립·해체`, `용접`, `전기 작업`, `지게차 상하차`, `크레인 양중`, `하역·운반`, `화기 작업`입니다.
+[agent] run fadf99d0-bb82-47ff-b148-c02d585e496e ended with stopReason=stop

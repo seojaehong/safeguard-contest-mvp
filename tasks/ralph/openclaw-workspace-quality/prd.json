@@ -45,8 +45,8 @@
       "id": "C3",
       "title": "Verify OpenClaw and web generation tracks",
       "priority": 3,
-      "status": "todo",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "OpenClaw MCP configuration can see the reviewed docpack tool after reload/probe.",
         "/api/ask full track remains verified by existing tests or a focused smoke.",

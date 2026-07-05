@@ -15,3 +15,9 @@
 - Verified: npm.cmd test -- tests/mcp-tools.test.ts tests/agent-loop.test.ts (38 passed); npm.cmd run typecheck (passed).
 - Learned: OpenClaw can call MCP but may choose or sequence tools unreliably; a one-call reviewed docpack tool is the safer product contract.
 - Next: C3 reload/probe OpenClaw and verify both OpenClaw and /api/ask tracks.
+
+## 2026-07-05 C3
+- Changed: added evaluation/openclaw-workspace-quality-probe report and raw evidence files.
+- Verified: Vercel commit status success; OpenClaw MCP probe shows 4 filtered tools including generate_reviewed_safety_docpack; direct MCP call returned engine=safeclaw-runAsk, reviewTask=용접, qaReviewable=true; prod /api/ask full returned mode=live with 19 deliverables.
+- Learned: OpenClaw agent narration can still be lossy, so direct MCP evidence is the authoritative proof for the server contract.
+- Next: final regression test/build and push evidence.

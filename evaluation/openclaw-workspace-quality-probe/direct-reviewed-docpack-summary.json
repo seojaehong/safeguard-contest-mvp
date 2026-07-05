@@ -1,0 +1,18 @@
+{
+  "status": 200,
+  "engine": "safeclaw-runAsk",
+  "qualityPipeline": [
+    "generate_safety_docpack",
+    "qa_review_docpack"
+  ],
+  "reviewTask": "용접",
+  "docpackMode": "mock",
+  "documentCount": 11,
+  "qaReviewable": true,
+  "qaVerdict": "미흡",
+  "missingControls": [
+    "가연성물질 별도 보관·격리",
+    "용접방화포·불티비산방지덮개 설치",
+    "차광보안면·방열복 착용"
+  ]
+}

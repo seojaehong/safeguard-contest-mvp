@@ -1,0 +1,8 @@
+[plugins] plugins.allow is empty; discovered non-bundled plugins may auto-load: codex (C:\Users\iceam\.openclaw-safeclaw\npm\projects\openclaw-codex-8902d781d4\node_modules\@openclaw\codex\dist\index.js). To trust them explicitly, set plugins.allow in openclaw.json (e.g. "plugins": { "allow": ["codex"] }). Run 'openclaw plugins list --enabled --verbose' or 'openclaw plugins inspect codex' to confirm plugin ids.
+[plugins] plugins.allow is empty; discovered non-bundled plugins may auto-load: codex (C:\Users\iceam\.openclaw-safeclaw\npm\projects\openclaw-codex-8902d781d4\node_modules\@openclaw\codex\dist\index.js). To trust them explicitly, set plugins.allow in openclaw.json (e.g. "plugins": { "allow": ["codex"] }). Run 'openclaw plugins list --enabled --verbose' or 'openclaw plugins inspect codex' to confirm plugin ids.
+[agent/embedded] failed to read mirrored session history for codex harness hooks
+[agent/embedded] codex app-server one-shot cleanup retired shared client
+호출 결과, SafeClaw 문서 엔진은 일반 비정형 유지보수 작업 기준으로 문서팩 프리뷰를 생성했습니다. 포함 문서는 작업팩 요약, 위험성평가, 작업계획서, TBM 브리핑/일지, 안전교육 기록, 비상대응, 사진증빙, 외국인 근로자 안내문, 카카오 공지문입니다.
+
+다만 QA 검수는 완료되지 않았습니다. `일반 작업`이 등록된 검수 작업유형이 아니어서 `reviewable: false`로 반환됐고, 사용 가능한 작업유형은 고소작업, 밀폐공간 작업, 비계 조립·해체, 용접, 전기 작업, 지게차 상하차, 크레인 양중, 하역·운반, 화기 작업 등입니다.
+[agent] run 7a9a67a6-3477-46bb-ae38-fc2010aefce3 ended with stopReason=stop
