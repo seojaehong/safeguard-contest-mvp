@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createClient } from "@supabase/supabase-js";
 
 import { hashToken } from "@/lib/mcp-auth";
 import {
@@ -135,6 +136,28 @@ describe("MCP token list query filters", () => {
       id: orgId,
     })).toBe(`created_at.lt.2026-07-05T10:00:00.000Z,and(created_at.eq.2026-07-05T10:00:00.000Z,id.lt.${orgId})`);
     expect(buildMcpTokenCursorFilter(null)).toBeNull();
+  });
+
+  it("keeps owner and cursor filters as separate PostgREST or parameters", () => {
+    const client = createClient("https://example.supabase.co", "anon-key");
+    const ownerFilter = buildMcpTokenOwnerFilter({ organizationIds: [orgId], siteIds: [siteId] });
+    const cursorFilter = buildMcpTokenCursorFilter({
+      createdAt: "2026-07-05T10:00:00.000Z",
+      id: orgId,
+    });
+    if (!ownerFilter || !cursorFilter) throw new Error("expected test filters");
+
+    const query = client
+      .from("mcp_tokens")
+      .select("id")
+      .or(ownerFilter)
+      .or(cursorFilter);
+    const queryUrl = (query as unknown as { url: URL }).url;
+
+    expect(queryUrl.searchParams.getAll("or")).toEqual([
+      `(${ownerFilter})`,
+      `(${cursorFilter})`,
+    ]);
   });
 });
 

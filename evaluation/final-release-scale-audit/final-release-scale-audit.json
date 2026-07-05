@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-05T10:48:05.813Z",
-  "elapsedMs": 2400,
+  "generatedAt": "2026-07-05T10:51:51.724Z",
+  "elapsedMs": 2512,
   "baseUrl": "https://www.safeclaw.kr",
   "strictMode": false,
   "automatedVerdict": "pass",
@@ -14,7 +14,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 883,
+        "elapsedMs": 955,
         "missingDeliverables": [],
         "deliverableCount": 11,
         "scenario": {
@@ -33,7 +33,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 482
+        "elapsedMs": 612
       }
     },
     {
@@ -103,7 +103,7 @@
       "verdict": "blocked",
       "details": {
         "status": 400,
-        "elapsedMs": 111,
+        "elapsedMs": 119,
         "supabaseOrigin": "https://mewqgevgdgghhatqtuos.supabase.co",
         "disabledReason": "Supabase returned Unsupported provider: provider is not enabled",
         "redirectTo": "https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect",
