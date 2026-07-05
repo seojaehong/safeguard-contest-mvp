@@ -130,8 +130,8 @@ function buildExcelHtml(title, rows) {
     </tr>
   `).join("");
   const tableRows = Object.entries(grouped).map(([section, sectionRows]) => `
-    <tr class="section-row"><td colspan="4">${escapeHtml(section)}</td></tr>
-    ${sectionRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인</td></tr>`).join("")}
+    <tr class="section-row"><td colspan="5">${escapeHtml(section)}</td></tr>
+    ${sectionRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인</td><td class="check-cell">______</td></tr>`).join("")}
   `).join("");
   return `<!doctype html>
 <html lang="ko">
@@ -164,8 +164,8 @@ function buildExcelHtml(title, rows) {
     <tbody>${summaryRows}</tbody>
   </table>
   <table>
-    <colgroup><col style="width: 6%;" /><col style="width: 22%;" /><col style="width: 60%;" /><col style="width: 12%;" /></colgroup>
-    <thead><tr><th>No.</th><th>항목</th><th>내용</th><th>확인</th></tr></thead>
+    <colgroup><col style="width: 6%;" /><col style="width: 20%;" /><col style="width: 54%;" /><col style="width: 10%;" /><col style="width: 10%;" /></colgroup>
+    <thead><tr><th>No.</th><th>항목</th><th>내용</th><th>확인상태</th><th>담당자</th></tr></thead>
     <tbody>${tableRows}</tbody>
   </table>
   <p class="note">본 파일은 공식자료 기반 초안입니다. 현장관리자가 작업 전 최종 확인 후 사용하세요.</p>
@@ -322,7 +322,7 @@ async function buildXlsxWithTables(title, scenario, rows) {
   const sheet = wb.addWorksheet(title.slice(0, 31), {
     pageSetup: { paperSize: 9, orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
   });
-  sheet.columns = [{ width: 6 }, { width: 16 }, { width: 30 }, { width: 50 }, { width: 12 }, { width: 14 }];
+  sheet.columns = [{ width: 6 }, { width: 16 }, { width: 30 }, { width: 50 }, { width: 14 }, { width: 14 }];
   const HEADER_FILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1F4D43" } };
   const HEADER_FONT = { name: "Malgun Gothic", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
   const BORDER = { style: "thin", color: { argb: "FF9AA4B2" } };
@@ -361,7 +361,7 @@ async function buildXlsxWithTables(title, scenario, rows) {
   }
   row += 1;
 
-  const cols = ["No.", "구분", "항목", "내용", "확인", "담당"];
+  const cols = ["No.", "구분", "항목", "내용", "확인상태", "담당자"];
   cols.forEach((col, idx) => {
     const cell = sheet.getCell(row, idx + 1);
     cell.value = col;

@@ -384,6 +384,16 @@ function inferCustomWorkName(question: string) {
   return "비정형 현장 작업";
 }
 
+function inferSpecialContext(question: string): string[] {
+  const notes: string[] = [];
+  if (/외국인/.test(question)) notes.push("외국인 근로자 포함 — 쉬운 한국어와 다국어 안내로 이해 여부를 확인");
+  if (/신규/.test(question)) notes.push("신규 작업자 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인");
+  if (/화재감시자/.test(question)) notes.push("화재감시자 지정 — 화기작업 중 불티 비산과 가연물 상태를 상시 확인");
+  if (/우천|젖음|비|강수/.test(question)) notes.push("우천·젖은 바닥 조건 — 미끄럼과 보행/장비 동선 분리 확인");
+  if (/강풍|돌풍/.test(question)) notes.push("강풍 조건 — 작업중지 기준과 대피 위치를 작업 전 공유");
+  return notes;
+}
+
 function inferSiteName(question: string, fallback: string) {
   const siteRules: Array<[RegExp, string]> = [
     [/서울\s*성수동|성수동/, "서울 성수동 근린생활시설 현장"],
@@ -562,8 +572,9 @@ export function inferScenario(question: string) {
       : /우천|젖음|비|강수/.test(normalized)
         ? "우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요"
         : /고온|폭염|온열/.test(normalized)
-          ? "고온 작업조건, 온열질환 예방과 휴식 기준 공유 필요"
-          : profile.weatherNote,
+        ? "고온 작업조건, 온열질환 예방과 휴식 기준 공유 필요"
+        : profile.weatherNote,
+    specialContext: inferSpecialContext(normalized),
     profile
   };
 }
@@ -581,6 +592,7 @@ function buildWorkpackSummaryDraft(scenario: ReturnType<typeof inferScenario>) {
     `작업명: ${profile.workName}`,
     `작업인원: ${scenario.workerCount}명`,
     `작업조건: ${scenario.weatherNote}`,
+    ...(scenario.specialContext.length ? ["", "[특수 대상/조건]", ...scenario.specialContext.map((item) => `- ${item}`)] : []),
     "",
     "[핵심 판단]",
     `- 위험수준: ${profile.riskLevel}`,
@@ -690,9 +702,11 @@ function buildOfficialStyleWorkPlan(scenario: ReturnType<typeof inferScenario>) 
     `- 작업인원: ${scenario.workerCount}명`,
     `- 작업조건: ${scenario.weatherNote}`,
     "",
-    "[2. 작업순서]",
+    "[2. 작업순서 및 안전조치]",
     "- 작업 전 작업구역 설정, 보호구 확인, 장비 상태 점검",
     `- 주요 작업 수행: ${profile.processName}`,
+    `- 단계별 안전조치: ${profile.actions.join(" / ")}`,
+    ...scenario.specialContext.map((item) => `- 특수 조건 안전조치: ${item}`),
     "- 작업 중 위험구역 출입통제와 작업중지 기준 수시 확인",
     "- 작업 종료 후 정리정돈, 잔여 위험요인 확인, 사진/기록 보관",
     "",
@@ -772,8 +786,11 @@ function buildEmergencyResponseDraft(scenario: ReturnType<typeof inferScenario>)
     "비상대응 절차(초안)",
     "중대재해·산업재해 발생 대비 현장 초기대응 기록",
     "",
+    `업체명: ${scenario.companyName}`,
     `현장명: ${scenario.siteName}`,
     `작업명: ${profile.workName}`,
+    `작업조건: ${scenario.weatherNote}`,
+    ...(scenario.specialContext.length ? [`특수 대상/조건: ${scenario.specialContext.join(" / ")}`] : []),
     "적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체",
     "",
     "[1. 사고 징후 및 즉시 중지]",
@@ -804,8 +821,11 @@ function buildPhotoEvidenceDraft(scenario: ReturnType<typeof inferScenario>) {
     "사진/증빙 기록(초안)",
     "현장 점검 및 제출 대응용 첨부 슬롯",
     "",
+    `업체명: ${scenario.companyName}`,
     `현장명: ${scenario.siteName}`,
     `작업명: ${profile.workName}`,
+    `작업조건: ${scenario.weatherNote}`,
+    ...(scenario.specialContext.length ? [`특수 대상/조건: ${scenario.specialContext.join(" / ")}`] : []),
     "",
     "[1. 작업 전 사진]",
     "- 작업구역 전경:",
@@ -1051,6 +1071,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
         `[오늘 작업 안전공지] ${scenario.companyName}`,
         `현장: ${scenario.siteName}`,
         `작업: ${profile.workName}`,
+        ...(scenario.specialContext.length ? [`특수 대상/조건: ${scenario.specialContext.join(" / ")}`] : []),
         `핵심위험: ${profile.topRisk}`,
         `필수조치: ${profile.actions[0]} / ${profile.actions[1]} / ${profile.actions[2]}`,
         "TBM 및 당일 안전교육 내용 확인 후 작업 시작 바랍니다."

@@ -1,19 +1,19 @@
 # SafeClaw Final Release Closeout
 
-Generated: 2026-07-05T12:53:16.925Z
+Generated: 2026-07-05T13:12:11.893Z
 
 Verdict: **pass**
 
-Elapsed: 63036 ms
+Elapsed: 96964 ms
 
 ## Steps
 
 | Step | Verdict | Exit Code | Elapsed Ms | Log |
 |------|---------|-----------|------------|-----|
-| targeted-token-auth-tests | pass | 0 | 1865 | evaluation/final-release-closeout/01-targeted-token-auth-tests.log |
-| typecheck | pass | 0 | 11863 | evaluation/final-release-closeout/02-typecheck.log |
-| strict-release-scale-audit | pass | 0 | 1039 | evaluation/final-release-closeout/03-strict-release-scale-audit.log |
-| build | pass | 0 | 48263 | evaluation/final-release-closeout/04-build.log |
+| targeted-token-auth-tests | pass | 0 | 2807 | evaluation/final-release-closeout/01-targeted-token-auth-tests.log |
+| typecheck | pass | 0 | 19229 | evaluation/final-release-closeout/02-typecheck.log |
+| strict-release-scale-audit | pass | 0 | 1063 | evaluation/final-release-closeout/03-strict-release-scale-audit.log |
+| build | pass | 0 | 73859 | evaluation/final-release-closeout/04-build.log |
 
 ## Interpretation
 

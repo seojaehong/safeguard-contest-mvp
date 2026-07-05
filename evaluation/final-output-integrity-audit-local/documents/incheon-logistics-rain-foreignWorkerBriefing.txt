@@ -1,0 +1,97 @@
+외국인 근로자용 쉬운 한국어 브리핑
+
+현장: 인천 남동공단 물류센터
+
+오늘 작업: 한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업
+
+작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요
+
+우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.
+
+가장 큰 위험: 지게차 동선과 보행 동선이 겹치면서 충돌하거나 적재물이 낙하할 위험
+
+
+
+[작업 전 꼭 확인]
+
+1. 지게차 전용 동선과 보행 동선을 바닥표시와 차단봉으로 분리
+
+2. 상하차 구간 진입 전 신호수 배치와 후진 경보 확인
+
+3. 고중량 적재물 하역 전 작업반경을 비우고 낙하위험 구역을 통제
+
+
+
+[쉬운 문장]
+
+- 위험하면 멈춥니다.
+
+- 혼자 판단하지 말고 바로 말합니다.
+
+- 보호구를 착용하고 작업구역 밖으로 함부로 들어가지 않습니다.
+
+- ⚠️ 🧪 💧 같은 그림 표시를 먼저 보고, 이해하지 못하면 작업을 시작하지 않습니다.
+
+
+
+[다국어 기본팩]
+
+[베트남어 / Tiếng Việt]
+- 국내 체류외국인과 제조·건설 현장 근로자 커뮤니케이션에서 우선도가 높은 언어
+- Công việc hôm nay: Bốc dỡ và lấy hàng bằng xe nâng
+- Nguy cơ chính của công việc này: đường xe nâng giao với lối đi bộ, slip hazard, heavy-load handling
+- ⚠️ Dấu hiệu nguy hiểm: 🚧 💧 📦. Nếu thấy các dấu hiệu này, hãy dừng lại và hỏi quản lý.
+- Trước khi bắt đầu: Tách đường xe nâng và lối đi bộ trước khi bắt đầu.
+- Nếu thấy nguy hiểm, gió mạnh, xe nâng hoặc hóa chất, hãy dừng công việc và báo ngay.
+- Hãy làm theo hướng dẫn của quản lý và xác nhận lại nếu chưa hiểu.
+- Nếu chưa hiểu, hãy dừng lại và yêu cầu quản lý giải thích lại.
+
+[중국어 / 中文]
+- 중국 국적 및 중국어권 작업자 안내에 필요한 기본 언어
+- 今天的作业: 叉车装卸和拣货作业
+- 本作业的主要危险: 叉车路线与人员通道交叉, slip hazard, heavy-load handling
+- ⚠️ 危险标志：🚧 💧 📦。看到这些标志时，请先停止作业并确认负责人说明。
+- 开始前: 作业前分离叉车路线和人员通道。
+- 发现强风、叉车、坠落或化学品危险时，请立即停止作业并报告。
+- 如未完全理解，请向现场负责人再次确认。
+- 如果没有理解，请停止作业并请现场负责人再次说明。
+
+[태국어 / ภาษาไทย]
+- 고용허가제 및 현장 근로자 커뮤니케이션에서 반복적으로 필요한 언어
+- งานวันนี้: งานขนถ่ายและหยิบสินค้าโดยใช้รถยก
+- อันตรายหลักของงานนี้: เส้นทางรถยกตัดกับทางเดินคน, slip hazard, heavy-load handling
+- ⚠️ สัญลักษณ์อันตราย: 🚧 💧 📦 หากเห็นสัญลักษณ์เหล่านี้ ให้หยุดก่อนและถามหัวหน้างานนะครับ/ค่ะ
+- ก่อนเริ่มงาน: แยกเส้นทางรถยกและทางเดินคนก่อนเริ่มงาน
+- หากพบลมแรง รถยก สารเคมี หรือความเสี่ยงตกจากที่สูง ให้หยุดงานและแจ้งหัวหน้างานทันที
+- หากไม่เข้าใจ ให้ขอให้หัวหน้างานอธิบายซ้ำ
+- หากไม่เข้าใจ ให้หยุดงานและขอให้หัวหน้างานอธิบายอีกครั้งนะครับ/ค่ะ
+
+[우즈베크어 / O'zbekcha]
+- 우즈베키스탄 출신 근로자와 중앙아시아권 작업자 안내에 유용한 언어
+- Bugungi ish: Yuk ko'targich bilan yuklash, tushirish va terish
+- Bu ishdagi asosiy xavflar: yuk ko'targich yo'li va piyoda yo'li kesishishi, slip hazard, heavy-load handling
+- ⚠️ Xavf belgisi: 🚧 💧 📦. Bu belgilarni ko'rsangiz, avval to'xtang va rahbardan so'rang.
+- Ish boshlashdan oldin: Ish boshlanishidan oldin yuk ko'targich yo'li va piyoda yo'lini ajrating.
+- Kuchli shamol, yuk ko'targich, kimyoviy modda yoki yiqilish xavfi bo'lsa, ishni to'xtating va darhol xabar bering.
+- Tushunmagan bo'lsangiz, rahbardan yana tushuntirishni so'rang.
+- Tushunmagan bo'lsangiz, ishni to'xtating va rahbardan yana tushuntirishni so'rang.
+
+[몽골어 / Монгол хэл]
+- 몽골 국적 체류자와 건설·서비스 현장 신규 투입자 안내에 필요한 언어
+- Өнөөдрийн ажил: Сэрээт ачигчаар ачих, буулгах ажил
+- Энэ ажлын гол аюул: сэрээт ачигч ба явган хүний зам огтлолцох, slip hazard, heavy-load handling
+- ⚠️ Аюулын тэмдэг: 🚧 💧 📦. Эдгээр тэмдгийг харвал эхлээд зогсоож, ахлагчаас асуугаарай.
+- Ажил эхлэхийн өмнө: Ажил эхлэхээс өмнө ачигчийн зам ба явган хүний замыг тусгаарлана.
+- Хүчтэй салхи, сэрээт ачигч, химийн бодис эсвэл унах эрсдэл байвал ажлыг зогсоож шууд мэдэгдэнэ үү.
+- Ойлгоогүй бол ахлагчаас дахин тайлбарлуулах хэрэгтэй.
+- Ойлгоогүй бол ажлаа зогсоож, ахлагчаас дахин тайлбар хүсээрэй.
+
+
+
+[사용 전 확인]
+
+- 자동 번역 또는 기본 문구는 현장 통역자, 관리자, 해당 언어 가능자 확인 후 사용합니다.
+
+- 작업방법, 작업중지 기준, 보호구 명칭은 현장 실물과 함께 다시 확인합니다.
+
+- 캄보디아어·네팔어·미얀마어 등은 글 읽기 편차를 고려해 그림 표지, 짧은 영상, 현장 실물 설명을 함께 사용합니다.

@@ -653,6 +653,20 @@ function buildTaskSpecificLines(input: BriefingInput, language: ForeignWorkerLan
   ].filter((line): line is string => Boolean(line));
 }
 
+function buildKoreanContextLines(input: BriefingInput): string[] {
+  const lines = [`작업조건: ${input.scenario.weatherNote}`];
+  if (/우천|젖음|비|강수/.test(input.question)) {
+    lines.push("우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.");
+  }
+  if (/화재감시자/.test(input.question)) {
+    lines.push("화재감시자: 용접·절단 중 불티 비산, 가연물, 소화기 위치를 계속 확인하세요.");
+  }
+  if (/외국인/.test(input.question)) {
+    lines.push("외국인 근로자: 쉬운 한국어와 다국어 안내로 이해 여부를 확인하세요.");
+  }
+  return lines;
+}
+
 export function buildForeignWorkerLanguages(input: BriefingInput) {
   return pickLanguages(input.question).map((language) => ({
     ...language,
@@ -666,6 +680,7 @@ function buildEasyKoreanLines(input: BriefingInput) {
     "외국인 근로자용 쉬운 한국어 브리핑",
     `현장: ${input.scenario.siteName}`,
     `오늘 작업: ${input.scenario.workSummary}`,
+    ...buildKoreanContextLines(input),
     `가장 큰 위험: ${input.riskSummary.topRisk}`,
     "",
     "[작업 전 꼭 확인]",
@@ -711,6 +726,7 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
   return [
     `[SafeClaw 외국인 근로자 안전공지] ${input.scenario.companyName}`,
     `현장: ${input.scenario.siteName}`,
+    ...buildKoreanContextLines(input),
     `⚠️ 핵심 위험: ${input.riskSummary.topRisk}`,
     "",
     "쉬운 한국어:",
@@ -732,6 +748,7 @@ export function buildForeignWorkerLanguageMessage(input: BriefingInput, language
     `[SafeClaw ${language.label} 안전공지] ${input.scenario.companyName}`,
     `현장: ${input.scenario.siteName}`,
     `작업: ${input.scenario.workSummary}`,
+    ...buildKoreanContextLines(input),
     `⚠️ 핵심 위험: ${input.riskSummary.topRisk}`,
     buildVisualCueLine(language, keywords),
     "",

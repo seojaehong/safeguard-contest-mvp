@@ -1,0 +1,246 @@
+{
+  "baseUrl": "http://127.0.0.1:3022",
+  "generatedAt": "2026-07-05T13:07:31.568Z",
+  "elapsedMs": 12460,
+  "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
+  "weather": {
+    "status": 200,
+    "elapsedMs": 6599,
+    "mode": "live",
+    "summary": "단시간 흐림, 비, 기온 25℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)",
+    "signalCount": 8
+  },
+  "ask": {
+    "status": 200,
+    "elapsedMs": 47,
+    "mode": "mock",
+    "statusSummary": "연결 점검 필요",
+    "documentCount": 11
+  },
+  "apiMapping": [
+    {
+      "source": "기상청 현재/초단기/단기/특보/영향예보",
+      "callPath": [
+        "/api/weather 선조회",
+        "/api/ask 내부 fetchWeatherSignal"
+      ],
+      "mode": "mock",
+      "reflectedIn": [
+        "현장 브리프 날씨",
+        "위험성평가표 작업조건",
+        "TBM 기상 신호",
+        "작업중지 기준"
+      ],
+      "evidence": "오후 강풍 예보, 작업중지 기준 공유 필요",
+      "count": 0
+    },
+    {
+      "source": "Law.go + korean-law-mcp",
+      "callPath": [
+        "/api/ask 내부 searchLegalSources"
+      ],
+      "mode": "mock",
+      "reflectedIn": [
+        "근거 출처",
+        "위험성평가표 반영 근거",
+        "TBM 기록 반영 근거",
+        "사진/증빙 확인 근거"
+      ],
+      "evidence": "korean-law-mcp 비활성화",
+      "count": 4
+    },
+    {
+      "source": "Gemini",
+      "callPath": [
+        "/api/ask 내부 generateAnswer"
+      ],
+      "mode": "mock",
+      "reflectedIn": [
+        "점검결과 요약",
+        "위험성평가표",
+        "TBM",
+        "안전보건교육",
+        "외국인 전송본"
+      ],
+      "evidence": "세이프건설 서울 성수동 근린생활시설 현장의 주요 위험은 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험입니다.\n\n건설업 현장 기준으로 위험 요약, 위험성평가 초안, TBM 브리핑, TBM 일지, 안전교육 기록을 한 번에 생성하는 흐름을 제공합니다.\n\n실무에서",
+      "count": 11
+    },
+    {
+      "source": "Work24 훈련과정",
+      "callPath": [
+        "/api/ask 내부 fetchTrainingRecommendations"
+      ],
+      "mode": "mock",
+      "reflectedIn": [
+        "후속 교육",
+        "안전보건교육 기록",
+        "교육 추천 카드"
+      ],
+      "evidence": "현장 예시 기반 교육 연계 문구",
+      "count": 0
+    },
+    {
+      "source": "KOSHA 안전보건교육포털",
+      "callPath": [
+        "/api/ask 내부 fetchKoshaEducationRecommendations"
+      ],
+      "mode": "fallback",
+      "reflectedIn": [
+        "후속 교육",
+        "안전보건교육 기록",
+        "KOSHA 교육 카드"
+      ],
+      "evidence": "대표 시나리오 기반 KOSHA 교육포털 연계 문구",
+      "count": 1
+    },
+    {
+      "source": "KOSHA 공식자료/가이드",
+      "callPath": [
+        "/api/ask 내부 fetchKoshaReferences"
+      ],
+      "mode": "fallback",
+      "reflectedIn": [
+        "위험성평가 절차",
+        "TBM 기록 항목",
+        "안전보건교육 서식"
+      ],
+      "evidence": "대표 시나리오 기반 KOSHA 가이드 보강 문구",
+      "count": 0
+    },
+    {
+      "source": "KOSHA 스마트검색/자료링크/MSDS/건설업 일별 중대재해",
+      "callPath": [
+        "/api/ask 내부 fetchKoshaOpenApiEvidence"
+      ],
+      "mode": "unknown",
+      "reflectedIn": [
+        "문서 반영 근거",
+        "위험성평가표",
+        "안전보건교육",
+        "TBM"
+      ],
+      "evidence": "",
+      "count": 0
+    },
+    {
+      "source": "KOSHA 국내재해사례/첨부파일/사고사망",
+      "callPath": [
+        "/api/ask 내부 fetchAccidentCases"
+      ],
+      "mode": "fallback",
+      "reflectedIn": [
+        "유사 재해사례",
+        "TBM 예방 포인트",
+        "교육 사례"
+      ],
+      "evidence": "대표 시나리오 기반 유사 재해사례 보강 문구",
+      "count": 3
+    }
+  ],
+  "downloads": [
+    {
+      "format": "TXT",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.txt",
+      "bytes": 3041,
+      "ok": true
+    },
+    {
+      "format": "JSON",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.json",
+      "bytes": 3548,
+      "ok": true
+    },
+    {
+      "format": "CSV",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.csv",
+      "bytes": 5241,
+      "ok": true
+    },
+    {
+      "format": "XLS",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.xls",
+      "bytes": 12021,
+      "ok": true
+    },
+    {
+      "format": "DOC",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.doc",
+      "bytes": 5946,
+      "ok": true
+    },
+    {
+      "format": "HTML",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.html",
+      "bytes": 3619,
+      "ok": true
+    },
+    {
+      "format": "HWPX",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.hwpx",
+      "bytes": 8805,
+      "ok": true
+    },
+    {
+      "format": "HWP_TABLE",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.hwp",
+      "bytes": 15872,
+      "ok": true,
+      "tableInfo": [
+        {
+          "kind": "meta",
+          "rows": 2,
+          "cols": 4
+        },
+        {
+          "kind": "body",
+          "rows": 49,
+          "cols": 4
+        }
+      ],
+      "magic": true
+    },
+    {
+      "format": "XLSX_OOXML",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.xlsx",
+      "bytes": 9824,
+      "ok": true,
+      "sheetNames": [
+        "위험성평가표"
+      ],
+      "headerCellOk": true,
+      "bodyCellOk": true
+    },
+    {
+      "format": "PDF",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.pdf",
+      "bytes": 225350,
+      "ok": true
+    },
+    {
+      "format": "JPG",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.jpg",
+      "bytes": 149749,
+      "ok": true
+    },
+    {
+      "format": "ALL_TXT",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.txt",
+      "bytes": 53738,
+      "ok": true
+    },
+    {
+      "format": "ALL_CSV",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.csv",
+      "bytes": 78430,
+      "ok": true
+    },
+    {
+      "format": "ALL_XLS",
+      "file": "evaluation\\final-output-integrity-audit-local\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.xls",
+      "bytes": 127092,
+      "ok": true
+    }
+  ],
+  "ok": true,
+  "failCount": 0
+}
