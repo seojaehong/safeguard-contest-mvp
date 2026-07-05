@@ -9,6 +9,7 @@ import {
 import {
   buildMcpTokenInsert,
   buildMcpTokenLabel,
+  canIssueMoreMcpTokens,
   createPlaintextMcpToken,
   encodeMcpTokenListCursor,
   isTokenOwnedByScope,
@@ -191,6 +192,22 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (siteError) throw siteError;
+
+    const { count: activeTokenCount, error: countError } = await client
+      .from("mcp_tokens")
+      .select("id", { count: "exact", head: true })
+      .eq("site_id", context.siteId)
+      .eq("disabled", false);
+
+    if (countError) throw countError;
+    if (!canIssueMoreMcpTokens(activeTokenCount || 0)) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        token: null,
+        message: "이 현장의 활성 연결 토큰이 너무 많습니다. 사용하지 않는 토큰을 끈 뒤 다시 발급해 주세요.",
+      }, { status: 409 });
+    }
 
     const plaintextToken = createPlaintextMcpToken();
     const label = buildMcpTokenLabel(site.name, requestedLabel);

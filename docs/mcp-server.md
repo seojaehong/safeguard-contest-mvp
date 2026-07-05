@@ -68,6 +68,8 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
 사용자 이상 운영 전에는 `mcp_tokens(org_id, created_at desc)`와
 `mcp_tokens(site_id, created_at desc)` 계열 조회 인덱스를 별도 마이그레이션으로 추가하는 것을
 권장한다(DB 스키마 변경이므로 적용 전 승인 필요).
+토큰 발급은 현장별 활성 토큰 50개를 넘으면 409로 막고, 사용하지 않는 토큰을 끈 뒤 다시
+발급하도록 안내한다. 비활성 토큰은 감사 이력으로 남고 인증에는 사용되지 않는다.
 
 서비스 롤 키가 필요하다(`mcp_tokens`는 RLS로 `service_role` 전용). 평문 토큰은 발급 시
 stdout에 **한 번만** 출력되며 복구 불가다.

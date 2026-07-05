@@ -17,6 +17,10 @@ Final release readiness for both tracks:
   - Public max list limit: 50.
   - `nextCursor` enables older-token pagination without offset pagination.
   - Tokens remain organization/site scoped and plaintext tokens are never stored.
+- MCP token issuance has a site-level active-token cap:
+  - Up to 50 active tokens per site.
+  - Additional issuance returns 409 until an unused token is disabled.
+  - Disabled tokens remain as audit history and do not authenticate.
 
 ## Scaling Position
 
@@ -28,6 +32,7 @@ This is no longer a single-account AI PoC. The current product path supports man
 - Client setup: per-user/per-site token issuance from `/settings/ai-connect`.
 
 The API returns only bounded pages of token summaries, so a user or organization with many issued AI connections does not force unbounded UI reads.
+The issuance cap prevents a single site from creating unbounded active credentials while still allowing multiple external AI clients per site.
 
 ## Remaining Release Gates
 
@@ -45,4 +50,3 @@ The DB index work is intentionally not applied in this pass because schema chang
 - `npm.cmd test -- tests/mcp-token-service.test.ts`
 - `npm.cmd run typecheck`
 - `npm.cmd run build`
-

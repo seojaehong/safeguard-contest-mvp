@@ -8,6 +8,7 @@ import {
   buildMcpTokenLabel,
   buildOpenClawInstallCommand,
   buildOpenClawProbeCommand,
+  canIssueMoreMcpTokens,
   createPlaintextMcpToken,
   encodeMcpTokenListCursor,
   isTokenOwnedByScope,
@@ -87,13 +88,13 @@ describe("MCP token list cursors", () => {
   it("round-trips an opaque cursor from a token row", () => {
     const cursor = encodeMcpTokenListCursor({
       created_at: "2026-07-05T10:00:00.000Z",
-      id: "token-1",
+      id: "11111111-1111-4111-8111-111111111111",
     });
 
     expect(cursor).toBeTruthy();
     expect(parseMcpTokenListCursor(cursor)).toEqual({
       createdAt: "2026-07-05T10:00:00.000Z",
-      id: "token-1",
+      id: "11111111-1111-4111-8111-111111111111",
     });
   });
 
@@ -101,7 +102,20 @@ describe("MCP token list cursors", () => {
     expect(parseMcpTokenListCursor(null)).toBeNull();
     expect(parseMcpTokenListCursor("not-base64-json")).toBeNull();
     expect(parseMcpTokenListCursor(Buffer.from(JSON.stringify({ createdAt: "bad", id: "t" })).toString("base64url"))).toBeNull();
+    expect(parseMcpTokenListCursor(Buffer.from(JSON.stringify({ createdAt: "2026-07-05T10:00:00.000Z", id: "token-1" })).toString("base64url"))).toBeNull();
     expect(encodeMcpTokenListCursor({ created_at: null, id: "token-1" })).toBeNull();
+  });
+});
+
+describe("canIssueMoreMcpTokens", () => {
+  it("allows issuance below the active-token cap", () => {
+    expect(canIssueMoreMcpTokens(0)).toBe(true);
+    expect(canIssueMoreMcpTokens(49)).toBe(true);
+  });
+
+  it("blocks issuance at or above the active-token cap", () => {
+    expect(canIssueMoreMcpTokens(50)).toBe(false);
+    expect(canIssueMoreMcpTokens(500)).toBe(false);
   });
 });
 

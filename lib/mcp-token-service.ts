@@ -6,6 +6,10 @@ import type { Json } from "@/lib/supabase-admin";
 export const DEFAULT_MCP_SCOPES = ["tools:*"] as const;
 export const DEFAULT_MCP_TOKEN_LIST_LIMIT = 25;
 export const MAX_MCP_TOKEN_LIST_LIMIT = 50;
+export const MAX_ACTIVE_MCP_TOKENS_PER_SITE = 50;
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ISO_TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 export type McpTokenOwnerScope = {
   organizationIds: string[];
@@ -65,6 +69,10 @@ export function resolveMcpTokenListLimit(rawLimit: string | null | undefined): n
   return Math.min(parsed, MAX_MCP_TOKEN_LIST_LIMIT);
 }
 
+export function canIssueMoreMcpTokens(activeTokenCount: number): boolean {
+  return activeTokenCount < MAX_ACTIVE_MCP_TOKENS_PER_SITE;
+}
+
 export function encodeMcpTokenListCursor(row: McpTokenListCursorRow): string | null {
   if (!row.created_at || !row.id) return null;
   return Buffer
@@ -79,8 +87,8 @@ export function parseMcpTokenListCursor(rawCursor: string | null | undefined): M
     const parsed = JSON.parse(decoded) as unknown;
     if (!parsed || typeof parsed !== "object") return null;
     const candidate = parsed as Partial<McpTokenListCursor>;
-    if (typeof candidate.createdAt !== "string" || Number.isNaN(Date.parse(candidate.createdAt))) return null;
-    if (typeof candidate.id !== "string" || !candidate.id || candidate.id.length > 128) return null;
+    if (typeof candidate.createdAt !== "string" || !ISO_TIMESTAMP_PATTERN.test(candidate.createdAt) || Number.isNaN(Date.parse(candidate.createdAt))) return null;
+    if (typeof candidate.id !== "string" || !UUID_PATTERN.test(candidate.id)) return null;
     return { createdAt: candidate.createdAt, id: candidate.id };
   } catch {
     return null;
