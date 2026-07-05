@@ -7,6 +7,7 @@ import {
   buildAccidentCasesResult,
   buildDocpackResult,
   buildReviewedDocpackResult,
+  resolveReviewTaskLabel,
   buildEvidenceMappingResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
@@ -114,6 +115,21 @@ describe("buildReviewedDocpackResult", () => {
     });
     expect(result.openClawUsageNote).toContain("SafeClaw 문서 엔진");
     expect(result.openClawUsageNote).toContain("QA");
+  });
+});
+
+describe("resolveReviewTaskLabel", () => {
+  it("corrects a vague model-supplied task from the work question", () => {
+    expect(
+      resolveReviewTaskLabel(
+        "일반 작업",
+        "안산 공장 옥외 배관 용접·절단 화기작업. 화재감시자 필요."
+      )
+    ).toBe("용접");
+  });
+
+  it("keeps a registered task label when the model supplied one", () => {
+    expect(resolveReviewTaskLabel("화기 작업", "용접·절단 작업")).toBe("화기 작업");
   });
 });
 

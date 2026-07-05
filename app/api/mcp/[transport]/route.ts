@@ -39,6 +39,7 @@ import {
   buildReviewedDocpackResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
+  resolveReviewTaskLabel,
   toToolError,
   toToolResult,
   validateCitations,
@@ -100,6 +101,7 @@ function registerTools(server: McpServer): void {
         const authContext = readAuthContext(extra);
         logToolContext("generate_reviewed_safety_docpack", authContext);
 
+        const reviewTask = resolveReviewTaskLabel(task, question);
         const response = await runAsk(question, { aiMode: mode ?? "full" });
         const qaSource =
           response.deliverables.riskAssessmentDraft ||
@@ -107,8 +109,8 @@ function registerTools(server: McpServer): void {
           response.deliverables.workPlanDraft ||
           response.deliverables.safetyEducationRecordDraft ||
           "";
-        const qa = await reviewDocpack(task, qaSource);
-        const result = buildReviewedDocpackResult(response, qa, task, includeFull ?? false) as Record<string, unknown>;
+        const qa = await reviewDocpack(reviewTask, qaSource);
+        const result = buildReviewedDocpackResult(response, qa, reviewTask, includeFull ?? false) as Record<string, unknown>;
 
         if (authContext?.siteId) {
           const client = createSupabaseAdminClient();

@@ -80,6 +80,47 @@ export type ReviewedDocpackResult = {
   openClawUsageNote: string;
 };
 
+const REGISTERED_QA_TASK_LABELS = [
+  "고소작업",
+  "도장(스프레이)",
+  "밀폐공간 작업",
+  "비계 조립·해체",
+  "용접",
+  "전기 작업",
+  "지게차 상하차",
+  "크레인 양중",
+  "하역·운반",
+  "화기 작업",
+] as const;
+
+const QA_TASK_INFERENCE: Array<{ label: (typeof REGISTERED_QA_TASK_LABELS)[number]; keywords: string[] }> = [
+  { label: "용접", keywords: ["용접", "절단", "불티", "용접흄"] },
+  { label: "화기 작업", keywords: ["화기", "가연물", "화재감시"] },
+  { label: "밀폐공간 작업", keywords: ["밀폐", "산소결핍", "질식"] },
+  { label: "비계 조립·해체", keywords: ["비계"] },
+  { label: "고소작업", keywords: ["고소", "추락", "외벽"] },
+  { label: "전기 작업", keywords: ["전기", "감전", "활선"] },
+  { label: "지게차 상하차", keywords: ["지게차"] },
+  { label: "크레인 양중", keywords: ["크레인", "양중"] },
+  { label: "하역·운반", keywords: ["하역", "운반"] },
+  { label: "도장(스프레이)", keywords: ["도장", "스프레이"] },
+];
+
+/**
+ * 외부 에이전트가 task를 "일반 작업"처럼 흐리게 넘겨도 질문 본문의 등록 작업유형으로 보정한다.
+ * 명시적으로 등록 라벨을 넘긴 경우에는 사용자의 선택을 존중한다.
+ */
+export function resolveReviewTaskLabel(task: string, question: string): string {
+  const trimmed = task.trim();
+  if (REGISTERED_QA_TASK_LABELS.some((label) => label === trimmed)) return trimmed;
+
+  const haystack = `${trimmed} ${question}`.normalize("NFC").toLowerCase();
+  const match = QA_TASK_INFERENCE.find((entry) =>
+    entry.keywords.some((keyword) => haystack.includes(keyword.toLowerCase()))
+  );
+  return match?.label ?? trimmed;
+}
+
 /**
  * runAsk 결과를 문서팩 도구 응답으로 정형화한다.
  * - includeFull=false(기본): 각 문서는 앞 500자 프리뷰 + 총길이 메타만.

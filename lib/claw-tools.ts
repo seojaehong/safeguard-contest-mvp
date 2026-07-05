@@ -13,6 +13,7 @@ import {
   buildReviewedDocpackResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
+  resolveReviewTaskLabel,
   validateCitations,
   type WeatherSignalLike,
 } from "./mcp-tools";
@@ -71,7 +72,7 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
     }
     case "generate_reviewed_safety_docpack": {
       const question = asString(input, "question");
-      const task = asString(input, "task");
+      const task = resolveReviewTaskLabel(asString(input, "task"), question);
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
       const response = await runAsk(question, { aiMode: mode });
