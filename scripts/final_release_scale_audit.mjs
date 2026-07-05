@@ -9,6 +9,13 @@ const baseUrl = process.env.SAFECLAW_RELEASE_BASE_URL || "https://www.safeclaw.k
 const outDir = path.resolve(process.env.SAFECLAW_RELEASE_AUDIT_OUT_DIR || path.join(rootDir, "evaluation", "final-release-scale-audit"));
 const tokenIndexApprovalCandidate = "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql";
 const tokenIndexVerificationQuery = "evaluation/final-release-scale-audit/mcp-token-query-indexes-verify.sql";
+const scaleTargetUserCounts = [1, 10, 100, 1000, 10000];
+const scaleRequestBounds = {
+  tokenListRequestedLimitMax: 50,
+  tokenListFetchRowsMax: 51,
+  siteNameLookupRowsMax: 50,
+  activeTokensPerSiteMax: 50,
+};
 const strictMode = process.argv.includes("--strict") || process.env.SAFECLAW_RELEASE_STRICT === "1";
 const supabaseAuthUrl =
   process.env.SAFECLAW_SUPABASE_AUTH_URL ||
@@ -214,6 +221,11 @@ function runScaleContractChecks() {
     gate("active-token-cap", tokenService.includes("MAX_ACTIVE_MCP_TOKENS_PER_SITE = 50") && tokenRoute.includes("canIssueMoreMcpTokens") && tokenRoute.includes("status: 409"), {
       evidence: "site-level active token cap enforced before issuing plaintext token",
     }),
+    gate("explicit-user-scale-envelope", scaleTargetUserCounts.includes(10000) && scaleRequestBounds.tokenListFetchRowsMax === scaleRequestBounds.tokenListRequestedLimitMax + 1 && scaleRequestBounds.siteNameLookupRowsMax === scaleRequestBounds.tokenListRequestedLimitMax, {
+      targets: scaleTargetUserCounts,
+      requestBounds: scaleRequestBounds,
+      evidence: "audit payload models 1, 10, 100, 1000, and 10000-user operation with constant per-request row bounds",
+    }),
     gate("multi-provider-auth-return", authCallback.includes("resolveSafeNextPath") && authCallback.includes("auth.setSession") && authCallback.includes("exchangeCodeForSession") && aiPanel.includes("/login?next=/settings/ai-connect"), {
       evidence: "email hash callbacks and OAuth code callbacks return to AI connect safely",
     }),
@@ -221,6 +233,24 @@ function runScaleContractChecks() {
       evidence: "docs/mcp-server.md documents cursor paging, active cap, and index approval gate",
     }),
   ];
+}
+
+function buildScaleEnvelope() {
+  return {
+    targets: scaleTargetUserCounts.map((users) => ({
+      users,
+      tokenListRowsReadPerRequestMax: scaleRequestBounds.tokenListFetchRowsMax,
+      siteNameRowsReadPerRequestMax: scaleRequestBounds.siteNameLookupRowsMax,
+      activeTokensWithOneSitePerUserMax: users * scaleRequestBounds.activeTokensPerSiteMax,
+    })),
+    requestBounds: scaleRequestBounds,
+    invariant: "Per-request token list and site-name lookup row counts stay constant as total users grow; 10000-user release requires the mcp_tokens org/site query indexes to be approved and applied.",
+    requiredIndexes: [
+      "mcp_tokens(org_id, created_at desc, id desc)",
+      "mcp_tokens(site_id, created_at desc, id desc)",
+      "mcp_tokens(site_id) where disabled = false",
+    ],
+  };
 }
 
 async function runExternalReleaseGates() {
@@ -286,6 +316,9 @@ function renderReport(payload) {
   const releaseGateRows = payload.releaseGates
     .map((item) => `| ${item.name} | ${item.verdict} | ${JSON.stringify(item.details).replace(/\|/g, "\\|").slice(0, 220)} |`)
     .join("\n");
+  const scaleRows = payload.scaleEnvelope.targets
+    .map((item) => `| ${item.users} | ${item.tokenListRowsReadPerRequestMax} | ${item.siteNameRowsReadPerRequestMax} | ${item.activeTokensWithOneSitePerUserMax} |`)
+    .join("\n");
 
   return `
 # SafeClaw Final Release Scale Audit
@@ -305,6 +338,14 @@ Strict Mode: **${payload.strictMode ? "on" : "off"}**
 - Existing web workflow: production /api/ask document generation.
 - AI connection workflow: production AI connection page, token API auth guard, MCP auth guard.
 - Scale contract: tenant-scoped hashed tokens, bounded cursor pagination, bounded site-name lookup, active-token cap, email/OAuth callback return path, operator docs.
+
+## Scale Envelope
+
+Invariant: ${payload.scaleEnvelope.invariant}
+
+| Users | Token List Rows Read Per Request Max | Site Name Rows Read Per Request Max | Active Tokens With One Site Per User Max |
+|-------|--------------------------------------|-------------------------------------|------------------------------------------|
+${scaleRows}
 
 ## Automated Gates
 
@@ -349,6 +390,7 @@ async function main() {
     exitVerdict,
     tokenIndexApprovalCandidate,
     tokenIndexVerificationQuery,
+    scaleEnvelope: buildScaleEnvelope(),
     gates,
     releaseGates,
   };

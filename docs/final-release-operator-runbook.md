@@ -47,6 +47,7 @@ The AI connection flow is already tenant scoped:
 - Token list reads are bounded and cursor-based.
 - Token list site names are loaded only for the current page rows, not every site owned by the user.
 - Active tokens are capped per site.
+- The release audit records the explicit user scale envelope for `1`, `10`, `100`, `1000`, and `10000` users. The per-request token list and site-name lookup bounds stay constant; the DB index gate is what unlocks the largest target safely.
 
 Before 10,000-user operation, approve and apply the index candidate:
 

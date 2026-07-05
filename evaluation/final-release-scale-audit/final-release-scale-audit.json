@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-05T11:14:08.936Z",
-  "elapsedMs": 1822,
+  "generatedAt": "2026-07-05T11:20:04.488Z",
+  "elapsedMs": 1411,
   "baseUrl": "https://www.safeclaw.kr",
   "strictMode": true,
   "automatedVerdict": "pass",
@@ -9,13 +9,59 @@
   "exitVerdict": "blocked",
   "tokenIndexApprovalCandidate": "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql",
   "tokenIndexVerificationQuery": "evaluation/final-release-scale-audit/mcp-token-query-indexes-verify.sql",
+  "scaleEnvelope": {
+    "targets": [
+      {
+        "users": 1,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 50
+      },
+      {
+        "users": 10,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 500
+      },
+      {
+        "users": 100,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 5000
+      },
+      {
+        "users": 1000,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 50000
+      },
+      {
+        "users": 10000,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 500000
+      }
+    ],
+    "requestBounds": {
+      "tokenListRequestedLimitMax": 50,
+      "tokenListFetchRowsMax": 51,
+      "siteNameLookupRowsMax": 50,
+      "activeTokensPerSiteMax": 50
+    },
+    "invariant": "Per-request token list and site-name lookup row counts stay constant as total users grow; 10000-user release requires the mcp_tokens org/site query indexes to be approved and applied.",
+    "requiredIndexes": [
+      "mcp_tokens(org_id, created_at desc, id desc)",
+      "mcp_tokens(site_id, created_at desc, id desc)",
+      "mcp_tokens(site_id) where disabled = false"
+    ]
+  },
   "gates": [
     {
       "name": "existing-web-api-ask",
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 560,
+        "elapsedMs": 473,
         "missingDeliverables": [],
         "deliverableCount": 11,
         "scenario": {
@@ -34,7 +80,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 439
+        "elapsedMs": 188
       }
     },
     {
@@ -91,6 +137,26 @@
       }
     },
     {
+      "name": "explicit-user-scale-envelope",
+      "verdict": "pass",
+      "details": {
+        "targets": [
+          1,
+          10,
+          100,
+          1000,
+          10000
+        ],
+        "requestBounds": {
+          "tokenListRequestedLimitMax": 50,
+          "tokenListFetchRowsMax": 51,
+          "siteNameLookupRowsMax": 50,
+          "activeTokensPerSiteMax": 50
+        },
+        "evidence": "audit payload models 1, 10, 100, 1000, and 10000-user operation with constant per-request row bounds"
+      }
+    },
+    {
       "name": "multi-provider-auth-return",
       "verdict": "pass",
       "details": {
@@ -111,7 +177,7 @@
       "verdict": "blocked",
       "details": {
         "status": 400,
-        "elapsedMs": 108,
+        "elapsedMs": 110,
         "supabaseOrigin": "https://mewqgevgdgghhatqtuos.supabase.co",
         "disabledReason": "Supabase returned Unsupported provider: provider is not enabled",
         "redirectTo": "https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect",

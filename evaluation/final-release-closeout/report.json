@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-05T11:15:12.210Z",
-  "elapsedMs": 85054,
+  "generatedAt": "2026-07-05T11:20:56.183Z",
+  "elapsedMs": 77317,
   "verdict": "blocked",
   "steps": [
     {
@@ -9,7 +9,7 @@
       "exitCode": 0,
       "signal": null,
       "spawnError": null,
-      "elapsedMs": 2537,
+      "elapsedMs": 4438,
       "verdict": "pass",
       "logPath": "evaluation/final-release-closeout/01-targeted-token-auth-tests.log"
     },
@@ -19,7 +19,7 @@
       "exitCode": 0,
       "signal": null,
       "spawnError": null,
-      "elapsedMs": 16792,
+      "elapsedMs": 18763,
       "verdict": "pass",
       "logPath": "evaluation/final-release-closeout/02-typecheck.log"
     },
@@ -29,7 +29,7 @@
       "exitCode": 1,
       "signal": null,
       "spawnError": null,
-      "elapsedMs": 2492,
+      "elapsedMs": 2476,
       "verdict": "blocked",
       "logPath": "evaluation/final-release-closeout/03-strict-release-scale-audit.log"
     },
@@ -39,7 +39,7 @@
       "exitCode": 0,
       "signal": null,
       "spawnError": null,
-      "elapsedMs": 63226,
+      "elapsedMs": 51631,
       "verdict": "pass",
       "logPath": "evaluation/final-release-closeout/04-build.log"
     }
