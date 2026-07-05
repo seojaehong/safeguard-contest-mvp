@@ -7,8 +7,10 @@ import {
   type WorkspaceUser,
 } from "@/lib/supabase-admin";
 import {
+  buildMcpTokenCursorFilter,
   buildMcpTokenInsert,
   buildMcpTokenLabel,
+  buildMcpTokenOwnerFilter,
   canIssueMoreMcpTokens,
   createPlaintextMcpToken,
   encodeMcpTokenListCursor,
@@ -98,20 +100,33 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    const ownerFilter = buildMcpTokenOwnerFilter(scope);
+    if (!ownerFilter) {
+      console.error("mcp token list owner scope did not contain valid UUID identifiers", {
+        organizationCount: scope.organizationIds.length,
+        siteCount: scope.siteIds.length,
+      });
+      return NextResponse.json({
+        ok: true,
+        configured: true,
+        tokens: [],
+        limit,
+        hasMore: false,
+        nextCursor: null,
+        message: "아직 연결 토큰이 없습니다.",
+      });
+    }
+
     let query = client
       .from("mcp_tokens")
       .select("id,label,site_id,org_id,scopes,disabled,last_used_at,created_at")
-      .or([
-        scope.organizationIds.length ? `org_id.in.(${scope.organizationIds.join(",")})` : "",
-        scope.siteIds.length ? `site_id.in.(${scope.siteIds.join(",")})` : "",
-      ].filter(Boolean).join(","))
+      .or(ownerFilter)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       .range(0, fetchLimit - 1);
 
-    if (cursor) {
-      query = query.or(`created_at.lt.${cursor.createdAt},and(created_at.eq.${cursor.createdAt},id.lt.${cursor.id})`);
-    }
+    const cursorFilter = buildMcpTokenCursorFilter(cursor);
+    if (cursorFilter) query = query.or(cursorFilter);
 
     const { data, error } = await query;
 

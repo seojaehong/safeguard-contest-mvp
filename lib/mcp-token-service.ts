@@ -95,6 +95,21 @@ export function parseMcpTokenListCursor(rawCursor: string | null | undefined): M
   }
 }
 
+export function buildMcpTokenOwnerFilter(scope: McpTokenOwnerScope): string | null {
+  const organizationIds = scope.organizationIds.filter((id) => UUID_PATTERN.test(id));
+  const siteIds = scope.siteIds.filter((id) => UUID_PATTERN.test(id));
+  const filters = [
+    organizationIds.length ? `org_id.in.(${organizationIds.join(",")})` : "",
+    siteIds.length ? `site_id.in.(${siteIds.join(",")})` : "",
+  ].filter(Boolean);
+  return filters.length ? filters.join(",") : null;
+}
+
+export function buildMcpTokenCursorFilter(cursor: McpTokenListCursor | null): string | null {
+  if (!cursor) return null;
+  return `created_at.lt.${cursor.createdAt},and(created_at.eq.${cursor.createdAt},id.lt.${cursor.id})`;
+}
+
 export function isTokenOwnedByScope(
   token: McpTokenOwnershipCandidate,
   scope: McpTokenOwnerScope

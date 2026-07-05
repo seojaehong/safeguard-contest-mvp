@@ -4,8 +4,10 @@ import { hashToken } from "@/lib/mcp-auth";
 import {
   DEFAULT_MCP_SCOPES,
   MCP_ENDPOINT_URL,
+  buildMcpTokenCursorFilter,
   buildMcpTokenInsert,
   buildMcpTokenLabel,
+  buildMcpTokenOwnerFilter,
   buildOpenClawInstallCommand,
   buildOpenClawProbeCommand,
   canIssueMoreMcpTokens,
@@ -104,6 +106,35 @@ describe("MCP token list cursors", () => {
     expect(parseMcpTokenListCursor(Buffer.from(JSON.stringify({ createdAt: "bad", id: "t" })).toString("base64url"))).toBeNull();
     expect(parseMcpTokenListCursor(Buffer.from(JSON.stringify({ createdAt: "2026-07-05T10:00:00.000Z", id: "token-1" })).toString("base64url"))).toBeNull();
     expect(encodeMcpTokenListCursor({ created_at: null, id: "token-1" })).toBeNull();
+  });
+});
+
+describe("MCP token list query filters", () => {
+  const orgId = "11111111-1111-4111-8111-111111111111";
+  const siteId = "22222222-2222-4222-8222-222222222222";
+
+  it("builds a bounded owner filter from valid UUID scope identifiers", () => {
+    expect(buildMcpTokenOwnerFilter({ organizationIds: [orgId], siteIds: [siteId] })).toBe(
+      `org_id.in.(${orgId}),site_id.in.(${siteId})`
+    );
+    expect(buildMcpTokenOwnerFilter({ organizationIds: [orgId], siteIds: [] })).toBe(`org_id.in.(${orgId})`);
+    expect(buildMcpTokenOwnerFilter({ organizationIds: [], siteIds: [siteId] })).toBe(`site_id.in.(${siteId})`);
+  });
+
+  it("drops malformed owner ids before composing a PostgREST filter", () => {
+    expect(buildMcpTokenOwnerFilter({
+      organizationIds: [orgId, "org-1"],
+      siteIds: ["site-1", siteId],
+    })).toBe(`org_id.in.(${orgId}),site_id.in.(${siteId})`);
+    expect(buildMcpTokenOwnerFilter({ organizationIds: ["org-1"], siteIds: ["site-1"] })).toBeNull();
+  });
+
+  it("builds the keyset cursor filter used after the owner filter", () => {
+    expect(buildMcpTokenCursorFilter({
+      createdAt: "2026-07-05T10:00:00.000Z",
+      id: orgId,
+    })).toBe(`created_at.lt.2026-07-05T10:00:00.000Z,and(created_at.eq.2026-07-05T10:00:00.000Z,id.lt.${orgId})`);
+    expect(buildMcpTokenCursorFilter(null)).toBeNull();
   });
 });
 
