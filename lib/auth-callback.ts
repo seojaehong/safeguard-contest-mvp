@@ -25,3 +25,8 @@ export function resolveSafeNextPath(nextPath: string | null | undefined, fallbac
   if (nextPath.includes("\\") || nextPath.includes("\n") || nextPath.includes("\r")) return fallback;
   return nextPath;
 }
+
+export function buildAuthCallbackUrl(origin: string, nextPath: string | null | undefined): string {
+  const safeNextPath = resolveSafeNextPath(nextPath);
+  return `${origin}/auth/callback?next=${encodeURIComponent(safeNextPath)}`;
+}

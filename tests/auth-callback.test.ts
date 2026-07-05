@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseAuthHashSession, resolveSafeNextPath } from "@/lib/auth-callback";
+import { buildAuthCallbackUrl, parseAuthHashSession, resolveSafeNextPath } from "@/lib/auth-callback";
 
 describe("parseAuthHashSession", () => {
   it("extracts access and refresh tokens from a Supabase magic-link hash", () => {
@@ -39,5 +39,19 @@ describe("resolveSafeNextPath", () => {
     expect(resolveSafeNextPath("//evil.example")).toBe("/workspace");
     expect(resolveSafeNextPath("/workspace\r\nSet-Cookie: bad")).toBe("/workspace");
     expect(resolveSafeNextPath(undefined)).toBe("/workspace");
+  });
+});
+
+describe("buildAuthCallbackUrl", () => {
+  it("builds the shared callback URL for email and OAuth login", () => {
+    expect(buildAuthCallbackUrl("https://www.safeclaw.kr", "/settings/ai-connect")).toBe(
+      "https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect"
+    );
+  });
+
+  it("falls back to workspace for unsafe next values", () => {
+    expect(buildAuthCallbackUrl("https://www.safeclaw.kr", "https://evil.example")).toBe(
+      "https://www.safeclaw.kr/auth/callback?next=%2Fworkspace"
+    );
   });
 });

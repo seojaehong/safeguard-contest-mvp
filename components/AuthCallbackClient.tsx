@@ -21,15 +21,9 @@ export function AuthCallbackClient() {
   const [nextPath, setNextPath] = useState("/workspace");
 
   useEffect(() => {
-    const safeNextPath = resolveSafeNextPath(new URLSearchParams(window.location.search).get("next"));
+    const params = new URLSearchParams(window.location.search);
+    const safeNextPath = resolveSafeNextPath(params.get("next"));
     setNextPath(safeNextPath);
-
-    const parsed = parseAuthHashSession(window.location.hash);
-    if (!parsed) {
-      setMessage("로그인 링크가 만료되었거나 세션 정보가 없습니다. 다시 로그인 링크를 받아 주세요.");
-      return;
-    }
-    const sessionTokens = parsed;
 
     const client = getBrowserSupabaseClient();
     if (!client) {
@@ -37,24 +31,51 @@ export function AuthCallbackClient() {
       setMessage("로그인 설정이 필요합니다. Supabase 브라우저 설정을 확인해 주세요.");
       return;
     }
+    const supabase = client;
 
-    async function persistSession(supabase: SupabaseClient) {
+    async function finishAndRedirect() {
+      window.history.replaceState(null, "", `/auth/callback?next=${encodeURIComponent(safeNextPath)}`);
+      window.location.replace(safeNextPath);
+    }
+
+    async function persistHashSession(sessionTokens: NonNullable<ReturnType<typeof parseAuthHashSession>>) {
       try {
         const { error } = await supabase.auth.setSession({
           access_token: sessionTokens.accessToken,
           refresh_token: sessionTokens.refreshToken
         });
         if (error) throw error;
-
-        window.history.replaceState(null, "", `/auth/callback?next=${encodeURIComponent(safeNextPath)}`);
-        window.location.replace(safeNextPath);
+        await finishAndRedirect();
       } catch (error) {
         console.error("auth callback session persistence failed", error);
         setMessage("로그인 세션 저장에 실패했습니다. 새 로그인 링크를 다시 받아 주세요.");
       }
     }
 
-    void persistSession(client);
+    async function persistOAuthSession(code: string) {
+      try {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) throw error;
+        await finishAndRedirect();
+      } catch (error) {
+        console.error("auth callback oauth exchange failed", error);
+        setMessage("소셜 로그인 처리에 실패했습니다. 새 로그인 링크를 다시 받아 주세요.");
+      }
+    }
+
+    const parsed = parseAuthHashSession(window.location.hash);
+    if (parsed) {
+      void persistHashSession(parsed);
+      return;
+    }
+
+    const code = params.get("code");
+    if (code) {
+      void persistOAuthSession(code);
+      return;
+    }
+
+    setMessage("로그인 링크가 만료되었거나 세션 정보가 없습니다. 다시 로그인 링크를 받아 주세요.");
   }, []);
 
   return (

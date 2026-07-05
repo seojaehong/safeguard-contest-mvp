@@ -12,6 +12,7 @@ Final release readiness for both tracks:
 - Existing production flow was previously smoke-tested with `/settings/ai-connect`, unauthenticated token/MCP guards, and `/api/ask` document generation.
 - OpenClaw + OpenAI OAuth was previously verified against production MCP with 8 tools and an Ansan outdoor welding TBM live turn.
 - Magic-link callback handling now uses `/auth/callback?next=...` so AI connection login can return to `/settings/ai-connect`.
+- Login now preserves the existing email magic-link flow while adding social OAuth callbacks such as Kakao through the same `/auth/callback?next=...` return path.
 - MCP token listing is bounded and cursor-based:
   - Default list limit: 25.
   - Public max list limit: 50.

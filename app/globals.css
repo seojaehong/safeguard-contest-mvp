@@ -7475,6 +7475,36 @@ body {
   color: #08090b;
 }
 
+.safeclaw-login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(246, 245, 239, 0.46);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.safeclaw-login-divider::before,
+.safeclaw-login-divider::after {
+  height: 1px;
+  flex: 1;
+  background: rgba(246, 245, 239, 0.14);
+  content: "";
+}
+
+.safeclaw-login-social {
+  display: grid;
+  gap: 10px;
+}
+
+.safeclaw-login-social button.kakao {
+  border-color: #fee500;
+  background: #fee500;
+  color: #191600;
+}
+
 .safeclaw-login-actions {
   display: flex;
   flex-wrap: wrap;
