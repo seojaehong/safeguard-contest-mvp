@@ -56,6 +56,11 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
 
 #### 토큰 발급
 
+웹에서는 관리자 로그인 후 **설정 → 내 AI 연결**(`/settings/ai-connect`)에서 발급한다.
+화면에서 발급된 평문 토큰은 한 번만 표시되며, 이후에는 기존 토큰을 다시 볼 수 없고
+새로 발급하거나 비활성화만 할 수 있다. OpenClaw/Codex, Claude Desktop, 직접 MCP 호출용
+설치 명령도 같은 화면에서 복사한다.
+
 서비스 롤 키가 필요하다(`mcp_tokens`는 RLS로 `service_role` 전용). 평문 토큰은 발급 시
 stdout에 **한 번만** 출력되며 복구 불가다.
 
@@ -74,7 +79,7 @@ node scripts/issue-mcp-token.mjs "운영자 전체신뢰"                       
 Vercel 프로젝트 설정 → Environment Variables에 `SAFECLAW_MCP_TOKENS`를 추가한 뒤
 재배포해야 MCP 계층이 활성화된다.
 
-## 도구 6종
+## 도구 8종
 
 | 도구 | 입력 | 반환 요약 |
 |------|------|-----------|
@@ -84,6 +89,8 @@ Vercel 프로젝트 설정 → Environment Variables에 `SAFECLAW_MCP_TOKENS`를
 | `sanitize_emergency_contacts` | `text` | `lib/safety-contacts.ts` 정화. 허위 기관+번호를 플레이스홀더로 치환 + 공식 연락처 목록 반환 |
 | `search_accident_cases` | `keyword` | `lib/accident-cases.ts` KOSHA 유사 재해사례 요약 |
 | `get_evidence_mapping` | `docType?` | `lib/smsa-mapping.ts` 중대재해처벌법 시행령 제4조 증빙 매핑(지정 시 단건, 생략 시 전체) |
+| `query_safety_knowledge` | `query`(작업유형 또는 위험요인) | `lib/ontology/knowledge-tool.ts` 안전 온톨로지(published) 조회 — 위험요인→안전조치→법조문→중처법 의무 연결. 조문 인용 전 근거 확보용 |
+| `qa_review_docpack` | `task`, `document_text`(≤20000자) | `lib/ontology/qa-review.ts` 2층 검수 — 문서 본문을 작업유형의 법정 필수 조치와 대조해 누락 검출. `{covered, missing(근거 조문 병기), coverageRate, verdict}` |
 
 각 도구 description은 **"현장 안전관리자 에이전트가 언제 호출해야 하는지"**를 서술형으로
 기술한다(MCP 클라이언트의 도구 선택률 최적화).
