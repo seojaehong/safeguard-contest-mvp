@@ -17,6 +17,16 @@ export type McpTokenOwnershipCandidate = {
   site_id: string | null;
 };
 
+export type McpTokenListCursor = {
+  createdAt: string;
+  id: string;
+};
+
+export type McpTokenListCursorRow = {
+  created_at: string | null;
+  id: string;
+};
+
 export function createPlaintextMcpToken(): string {
   return `sclaw_${randomBytes(32).toString("base64url")}`;
 }
@@ -53,6 +63,28 @@ export function resolveMcpTokenListLimit(rawLimit: string | null | undefined): n
   const parsed = Number.parseInt(rawLimit || "", 10);
   if (!Number.isFinite(parsed) || parsed <= 0) return DEFAULT_MCP_TOKEN_LIST_LIMIT;
   return Math.min(parsed, MAX_MCP_TOKEN_LIST_LIMIT);
+}
+
+export function encodeMcpTokenListCursor(row: McpTokenListCursorRow): string | null {
+  if (!row.created_at || !row.id) return null;
+  return Buffer
+    .from(JSON.stringify({ createdAt: row.created_at, id: row.id }), "utf8")
+    .toString("base64url");
+}
+
+export function parseMcpTokenListCursor(rawCursor: string | null | undefined): McpTokenListCursor | null {
+  if (!rawCursor) return null;
+  try {
+    const decoded = Buffer.from(rawCursor, "base64url").toString("utf8");
+    const parsed = JSON.parse(decoded) as unknown;
+    if (!parsed || typeof parsed !== "object") return null;
+    const candidate = parsed as Partial<McpTokenListCursor>;
+    if (typeof candidate.createdAt !== "string" || Number.isNaN(Date.parse(candidate.createdAt))) return null;
+    if (typeof candidate.id !== "string" || !candidate.id || candidate.id.length > 128) return null;
+    return { createdAt: candidate.createdAt, id: candidate.id };
+  } catch {
+    return null;
+  }
 }
 
 export function isTokenOwnedByScope(

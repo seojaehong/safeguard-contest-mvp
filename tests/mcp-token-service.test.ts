@@ -9,7 +9,9 @@ import {
   buildOpenClawInstallCommand,
   buildOpenClawProbeCommand,
   createPlaintextMcpToken,
+  encodeMcpTokenListCursor,
   isTokenOwnedByScope,
+  parseMcpTokenListCursor,
   resolveMcpTokenListLimit,
 } from "@/lib/mcp-token-service";
 
@@ -78,6 +80,28 @@ describe("resolveMcpTokenListLimit", () => {
     expect(resolveMcpTokenListLimit("10")).toBe(10);
     expect(resolveMcpTokenListLimit("50")).toBe(50);
     expect(resolveMcpTokenListLimit("5000")).toBe(50);
+  });
+});
+
+describe("MCP token list cursors", () => {
+  it("round-trips an opaque cursor from a token row", () => {
+    const cursor = encodeMcpTokenListCursor({
+      created_at: "2026-07-05T10:00:00.000Z",
+      id: "token-1",
+    });
+
+    expect(cursor).toBeTruthy();
+    expect(parseMcpTokenListCursor(cursor)).toEqual({
+      createdAt: "2026-07-05T10:00:00.000Z",
+      id: "token-1",
+    });
+  });
+
+  it("rejects malformed cursors", () => {
+    expect(parseMcpTokenListCursor(null)).toBeNull();
+    expect(parseMcpTokenListCursor("not-base64-json")).toBeNull();
+    expect(parseMcpTokenListCursor(Buffer.from(JSON.stringify({ createdAt: "bad", id: "t" })).toString("base64url"))).toBeNull();
+    expect(encodeMcpTokenListCursor({ created_at: null, id: "token-1" })).toBeNull();
   });
 });
 

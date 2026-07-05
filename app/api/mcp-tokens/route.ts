@@ -10,7 +10,9 @@ import {
   buildMcpTokenInsert,
   buildMcpTokenLabel,
   createPlaintextMcpToken,
+  encodeMcpTokenListCursor,
   isTokenOwnedByScope,
+  parseMcpTokenListCursor,
   resolveMcpTokenListLimit,
   type McpTokenOwnerScope,
 } from "@/lib/mcp-token-service";
@@ -53,6 +55,7 @@ async function loadOwnerScope(
 
 export async function GET(request: NextRequest) {
   const limit = resolveMcpTokenListLimit(request.nextUrl.searchParams.get("limit"));
+  const cursor = parseMcpTokenListCursor(request.nextUrl.searchParams.get("cursor"));
   const fetchLimit = limit + 1;
   const client = createSupabaseAdminClient();
   if (!client) {
@@ -62,6 +65,7 @@ export async function GET(request: NextRequest) {
       tokens: [],
       limit,
       hasMore: false,
+      nextCursor: null,
       message: "Supabase 저장소가 아직 설정되지 않았습니다.",
     });
   }
@@ -74,6 +78,7 @@ export async function GET(request: NextRequest) {
       tokens: [],
       limit,
       hasMore: false,
+      nextCursor: null,
       message: "관리자 로그인이 필요합니다.",
     }, { status: 401 });
   }
@@ -87,11 +92,12 @@ export async function GET(request: NextRequest) {
         tokens: [],
         limit,
         hasMore: false,
+        nextCursor: null,
         message: "아직 연결 토큰이 없습니다. 기본 현장을 만든 뒤 발급할 수 있습니다.",
       });
     }
 
-    const { data, error } = await client
+    let query = client
       .from("mcp_tokens")
       .select("id,label,site_id,org_id,scopes,disabled,last_used_at,created_at")
       .or([
@@ -99,15 +105,25 @@ export async function GET(request: NextRequest) {
         scope.siteIds.length ? `site_id.in.(${scope.siteIds.join(",")})` : "",
       ].filter(Boolean).join(","))
       .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
       .range(0, fetchLimit - 1);
+
+    if (cursor) {
+      query = query.or(`created_at.lt.${cursor.createdAt},and(created_at.eq.${cursor.createdAt},id.lt.${cursor.id})`);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 
     const siteNameById = new Map(scope.sites.map((site) => [site.id, site.name]));
     const ownedRows = (data || [])
       .filter((token) => isTokenOwnedByScope(token, scope))
-      .slice(0, limit);
-    const tokens = ownedRows
+    const pageRows = ownedRows.slice(0, limit);
+    const nextCursor = ownedRows.length > limit && pageRows.length
+      ? encodeMcpTokenListCursor(pageRows[pageRows.length - 1])
+      : null;
+    const tokens = pageRows
       .map((token) => ({
         id: token.id,
         label: token.label || "내 AI 연결",
@@ -123,7 +139,8 @@ export async function GET(request: NextRequest) {
       configured: true,
       tokens,
       limit,
-      hasMore: (data || []).length > limit,
+      hasMore: Boolean(nextCursor),
+      nextCursor,
       message: tokens.length ? "연결 토큰 목록을 불러왔습니다." : "아직 연결 토큰이 없습니다.",
     });
   } catch (error) {
@@ -134,6 +151,7 @@ export async function GET(request: NextRequest) {
       tokens: [],
       limit,
       hasMore: false,
+      nextCursor: null,
       message: "연결 토큰 목록을 불러오지 못했습니다.",
     }, { status: 500 });
   }

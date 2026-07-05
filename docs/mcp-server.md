@@ -62,10 +62,12 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
 설치 명령도 같은 화면에서 복사한다.
 
 웹 발급 토큰은 로그인 사용자의 `organizations`/`sites` 소유 범위에 귀속된다. 목록 API는
-사용자 소유 범위 안에서 최근 토큰만 기본 25개(최대 50개) 반환해, 한 사용자가 많은 연결을
-만들어도 화면 응답 경로가 무제한 행 조회에 묶이지 않는다. 1만 사용자 이상 운영 전에는
-`mcp_tokens(org_id, created_at desc)`와 `mcp_tokens(site_id, created_at desc)` 계열 조회
-인덱스를 별도 마이그레이션으로 추가하는 것을 권장한다(DB 스키마 변경이므로 적용 전 승인 필요).
+사용자 소유 범위 안에서 최근 토큰만 기본 25개(최대 50개) 반환하고, `nextCursor`가 있으면
+`GET /api/mcp-tokens?cursor=<nextCursor>`로 이전 토큰을 이어서 조회한다. 한 사용자가 많은
+연결을 만들어도 화면 응답 경로가 무제한 행 조회나 offset pagination에 묶이지 않는다. 1만
+사용자 이상 운영 전에는 `mcp_tokens(org_id, created_at desc)`와
+`mcp_tokens(site_id, created_at desc)` 계열 조회 인덱스를 별도 마이그레이션으로 추가하는 것을
+권장한다(DB 스키마 변경이므로 적용 전 승인 필요).
 
 서비스 롤 키가 필요하다(`mcp_tokens`는 RLS로 `service_role` 전용). 평문 토큰은 발급 시
 stdout에 **한 번만** 출력되며 복구 불가다.

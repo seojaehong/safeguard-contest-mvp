@@ -37,6 +37,7 @@ type TokenListResponse = {
   tokens: McpTokenSummary[];
   limit?: number;
   hasMore?: boolean;
+  nextCursor?: string | null;
   message?: string;
 };
 
@@ -105,6 +106,7 @@ export function AiConnectPanel() {
   const [testing, setTesting] = useState(false);
   const [tokenListLimit, setTokenListLimit] = useState(25);
   const [tokenListHasMore, setTokenListHasMore] = useState(false);
+  const [nextTokenCursor, setNextTokenCursor] = useState<string | null>(null);
 
   useEffect(() => {
     if (!client) {
@@ -124,16 +126,19 @@ export function AiConnectPanel() {
     return () => listener.subscription.unsubscribe();
   }, [client]);
 
-  const loadTokens = useCallback(async (accessToken: string) => {
+  const loadTokens = useCallback(async (accessToken: string, cursor?: string, append = false) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/mcp-tokens", {
+      const params = new URLSearchParams();
+      if (cursor) params.set("cursor", cursor);
+      const response = await fetch(`/api/mcp-tokens${params.size ? `?${params.toString()}` : ""}`, {
         headers: { authorization: `Bearer ${accessToken}` },
       });
       const payload = await response.json() as TokenListResponse;
-      setTokens(payload.tokens || []);
+      setTokens((current) => append ? [...current, ...(payload.tokens || [])] : payload.tokens || []);
       setTokenListLimit(payload.limit || 25);
       setTokenListHasMore(Boolean(payload.hasMore));
+      setNextTokenCursor(payload.nextCursor || null);
       if (!payload.ok && payload.message) setMessage(payload.message);
     } catch (error) {
       console.warn("ai connect token load failed", error);
@@ -338,6 +343,16 @@ export function AiConnectPanel() {
           )}
         </div>
         {tokenListHasMore ? <p className="muted">표시되지 않은 이전 토큰이 더 있습니다.</p> : null}
+        {tokenListHasMore && nextTokenCursor && session?.access_token ? (
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => void loadTokens(session.access_token, nextTokenCursor, true)}
+            disabled={isLoading}
+          >
+            {isLoading ? "불러오는 중" : "이전 토큰 더 보기"}
+          </button>
+        ) : null}
       </section>
     </div>
   );
