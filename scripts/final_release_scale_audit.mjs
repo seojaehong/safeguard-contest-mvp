@@ -48,6 +48,37 @@ function sourceText(relativePath) {
   return fs.readFileSync(path.join(rootDir, relativePath), "utf8");
 }
 
+function stripSqlComments(sql) {
+  return sql
+    .replace(/--.*$/gm, " ")
+    .replace(/\/\*[\s\S]*?\*\//g, " ");
+}
+
+function normalizeSql(sql) {
+  return stripSqlComments(sql).replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function loadMigrationSqlFiles() {
+  const migrationDir = path.join(rootDir, "supabase", "migrations");
+  if (!fs.existsSync(migrationDir)) return [];
+  return fs.readdirSync(migrationDir)
+    .filter((fileName) => fileName.endsWith(".sql"))
+    .map((fileName) => ({
+      fileName,
+      relativePath: path.join("supabase", "migrations", fileName).replace(/\\/g, "/"),
+      sql: normalizeSql(fs.readFileSync(path.join(migrationDir, fileName), "utf8")),
+    }));
+}
+
+function hasMcpTokenCreatedIndex(sql, scopeColumn) {
+  const escapedScope = scopeColumn.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(
+    `create\\s+(?:unique\\s+)?index\\s+(?:concurrently\\s+)?(?:if\\s+not\\s+exists\\s+)?[a-z0-9_]+\\s+on\\s+(?:public\\.)?mcp_tokens\\s*\\([^)]*${escapedScope}\\s*,\\s*created_at\\s+desc\\s*,\\s*id\\s+desc`,
+    "i"
+  );
+  return pattern.test(sql);
+}
+
 function gate(name, ok, details) {
   return { name, verdict: ok ? "pass" : "blocked", details };
 }
@@ -212,15 +243,11 @@ async function runExternalReleaseGates() {
     (kakaoLocation.includes("kakao") || kakaoLocation.includes("kauth"));
   const kakaoDisabled = kakaoAuth.text.includes("Unsupported provider") || kakaoAuth.text.includes("provider is not enabled");
 
-  const migrationDir = path.join(rootDir, "supabase", "migrations");
-  const migrationText = fs.existsSync(migrationDir)
-    ? fs.readdirSync(migrationDir)
-      .filter((fileName) => fileName.endsWith(".sql"))
-      .map((fileName) => fs.readFileSync(path.join(migrationDir, fileName), "utf8"))
-      .join("\n")
-    : "";
-  const hasOrgIndex = migrationText.includes("mcp_tokens(org_id") || migrationText.includes("mcp_tokens (org_id");
-  const hasSiteIndex = migrationText.includes("mcp_tokens(site_id") || migrationText.includes("mcp_tokens (site_id");
+  const migrationFiles = loadMigrationSqlFiles();
+  const orgIndexFiles = migrationFiles.filter((file) => hasMcpTokenCreatedIndex(file.sql, "org_id")).map((file) => file.relativePath);
+  const siteIndexFiles = migrationFiles.filter((file) => hasMcpTokenCreatedIndex(file.sql, "site_id")).map((file) => file.relativePath);
+  const hasOrgIndex = orgIndexFiles.length > 0;
+  const hasSiteIndex = siteIndexFiles.length > 0;
 
   return [
     releaseGate("supabase-kakao-provider-enabled", kakaoProviderEnabled, {
@@ -236,6 +263,8 @@ async function runExternalReleaseGates() {
     releaseGate("mcp-token-query-indexes-approved", hasOrgIndex && hasSiteIndex, {
       hasOrgCreatedIndex: hasOrgIndex,
       hasSiteCreatedIndex: hasSiteIndex,
+      orgIndexEvidenceFiles: orgIndexFiles,
+      siteIndexEvidenceFiles: siteIndexFiles,
       approvalRequired: true,
       approvalCandidate: tokenIndexApprovalCandidate,
       approvalCandidateExists: fs.existsSync(path.join(rootDir, tokenIndexApprovalCandidate)),
