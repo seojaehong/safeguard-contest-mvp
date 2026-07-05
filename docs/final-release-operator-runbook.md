@@ -45,6 +45,7 @@ The AI connection flow is already tenant scoped:
 - Users authenticate with Supabase Auth.
 - Tokens are hashed, scoped to `org_id` and `site_id`, and never re-displayed as plaintext.
 - Token list reads are bounded and cursor-based.
+- Token list site names are loaded only for the current page rows, not every site owned by the user.
 - Active tokens are capped per site.
 
 Before 10,000-user operation, approve and apply the index candidate:
@@ -83,4 +84,3 @@ npm.cmd run build
 ```
 
 Only mark the release complete when strict mode passes and production login/token/MCP smoke evidence is refreshed.
-

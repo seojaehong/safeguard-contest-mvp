@@ -207,6 +207,9 @@ function runScaleContractChecks() {
     gate("cursor-pagination-contract", tokenService.includes("parseMcpTokenListCursor") && tokenService.includes("UUID_PATTERN") && tokenRoute.includes("nextCursor") && aiPanel.includes("이전 토큰 더 보기"), {
       evidence: "opaque cursor helpers, API nextCursor, and UI load-more present",
     }),
+    gate("bounded-site-name-lookup", tokenRoute.includes("loadSiteNamesForTokens") && tokenRoute.includes(".in(\"id\", uniqueSiteIds)") && tokenRoute.includes("pageRows.map((token) => token.site_id)") && !tokenRoute.includes("scope.sites"), {
+      evidence: "token route loads site names only for current page token rows",
+    }),
     gate("active-token-cap", tokenService.includes("MAX_ACTIVE_MCP_TOKENS_PER_SITE = 50") && tokenRoute.includes("canIssueMoreMcpTokens") && tokenRoute.includes("status: 409"), {
       evidence: "site-level active token cap enforced before issuing plaintext token",
     }),
@@ -298,7 +301,7 @@ Strict Mode: **${payload.strictMode ? "on" : "off"}**
 
 - Existing web workflow: production /api/ask document generation.
 - AI connection workflow: production AI connection page, token API auth guard, MCP auth guard.
-- Scale contract: tenant-scoped hashed tokens, bounded cursor pagination, active-token cap, email/OAuth callback return path, operator docs.
+- Scale contract: tenant-scoped hashed tokens, bounded cursor pagination, bounded site-name lookup, active-token cap, email/OAuth callback return path, operator docs.
 
 ## Automated Gates
 
