@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-05T11:25:00.147Z",
-  "elapsedMs": 1364,
+  "generatedAt": "2026-07-05T12:39:01.070Z",
+  "elapsedMs": 1106,
   "baseUrl": "https://www.safeclaw.kr",
   "strictMode": true,
   "automatedVerdict": "pass",
@@ -61,7 +61,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 549,
+        "elapsedMs": 397,
         "missingDeliverables": [],
         "deliverableCount": 11,
         "scenario": {
@@ -80,7 +80,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 184
+        "elapsedMs": 72
       }
     },
     {
@@ -189,15 +189,15 @@
   "releaseGates": [
     {
       "name": "supabase-kakao-provider-enabled",
-      "verdict": "blocked",
+      "verdict": "pass",
       "details": {
-        "status": 400,
-        "elapsedMs": 120,
+        "status": 302,
+        "elapsedMs": 128,
         "supabaseOrigin": "https://mewqgevgdgghhatqtuos.supabase.co",
-        "disabledReason": "Supabase returned Unsupported provider: provider is not enabled",
+        "disabledReason": null,
         "redirectTo": "https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect",
-        "locationPreview": "",
-        "responsePreview": "{\"code\":400,\"error_code\":\"validation_failed\",\"msg\":\"Unsupported provider: provider is not enabled\"}",
+        "locationPreview": "https://kauth.kakao.com/oauth/authorize?client_id=[redacted]&redirect_to=https%3A%2F%2Fwww.safeclaw.kr%2Fauth%2Fcallback%3Fnext%3D%252Fsettings%252Fai-connect&r",
+        "responsePreview": "<a href=\"https://kauth.kakao.com/oauth/authorize?client_id=[redacted]&amp;redirect_to=https%3A%2F%2Fwww.safeclaw.kr%2Fauth%2Fcallback%3Fnext%3D%252Fsettings%252Fai-connect&amp;redirect_uri=https%3A%2F%2Fmewqgevgdgghhatqtuos.supabase.co%2Fau",
         "operatorAction": "Enable Kakao in Supabase Auth Providers and configure the production callback URL."
       }
     },

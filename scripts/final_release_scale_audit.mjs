@@ -62,6 +62,12 @@ function readNumericConst(source, name) {
   return match ? Number.parseInt(match[1], 10) : null;
 }
 
+function redactOAuthPreview(value) {
+  return String(value || "")
+    .replace(/(client_id=)[^&"'\s]+/gi, "$1[redacted]")
+    .replace(/(client_secret=)[^&"'\s]+/gi, "$1[redacted]");
+}
+
 function stripSqlComments(sql) {
   return sql
     .replace(/--.*$/gm, " ")
@@ -311,8 +317,8 @@ async function runExternalReleaseGates() {
       supabaseOrigin: new URL(supabaseAuthUrl).origin,
       disabledReason: kakaoDisabled ? "Supabase returned Unsupported provider: provider is not enabled" : null,
       redirectTo,
-      locationPreview: kakaoLocation.slice(0, 160),
-      responsePreview: kakaoAuth.text.slice(0, 240),
+      locationPreview: redactOAuthPreview(kakaoLocation).slice(0, 160),
+      responsePreview: redactOAuthPreview(kakaoAuth.text).slice(0, 240),
       operatorAction: "Enable Kakao in Supabase Auth Providers and configure the production callback URL.",
     }),
     releaseGate("mcp-token-query-indexes-approved", hasOrgIndex && hasSiteIndex, {
