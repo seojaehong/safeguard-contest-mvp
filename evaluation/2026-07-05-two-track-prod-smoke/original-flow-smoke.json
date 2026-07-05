@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-07-05T17:53:25.6839667+09:00",
+  "baseUrl": "https://www.safeclaw.kr",
+  "elapsedSeconds": 0.89,
+  "okCount": 4,
+  "failCount": 0,
+  "checks": [
+    {
+      "name": "settings-ai-connect-page",
+      "ok": true,
+      "details": {
+        "status": 200,
+        "hasTitle": true,
+        "hasLoginGate": false
+      }
+    },
+    {
+      "name": "mcp-tokens-unauthenticated",
+      "ok": true,
+      "details": {
+        "status": 401
+      }
+    },
+    {
+      "name": "mcp-tools-list-no-token",
+      "ok": true,
+      "details": {
+        "status": 401
+      }
+    },
+    {
+      "name": "api-ask-original-flow",
+      "ok": true,
+      "details": {
+        "status": 200,
+        "companyName": "그린메탈",
+        "siteName": "경기 안산 제조공장",
+        "workSummary": "안산 제조공장 옥외 용접 작업 전 문서를 만들어줘",
+        "deliverableCount": 14,
+        "hasTbm": true,
+        "hasRiskAssessment": true,
+        "tbmPreview": "작업 전 안전점검회의(TBM) 브리핑(초안)\n공식자료 기반: KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고\n\n일시: 작업 시작 전\n장소: 경기 안산 제조공장\n업체명: 그린메탈\n오늘 작업: 용접·절단 화기작업\n참석 대상: 작업자 5명, 작업반장, 관리감독자\n\n[1. 작업내용]\n- 안산 제조공장 옥외 용접 작업 전 문서를 만들어줘\n- 기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요\n- 위험성"
+      }
+    }
+  ]
+}
