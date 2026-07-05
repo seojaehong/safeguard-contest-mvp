@@ -35,6 +35,8 @@ type TokenListResponse = {
   ok: boolean;
   configured: boolean;
   tokens: McpTokenSummary[];
+  limit?: number;
+  hasMore?: boolean;
   message?: string;
 };
 
@@ -101,6 +103,8 @@ export function AiConnectPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [isIssuing, setIsIssuing] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [tokenListLimit, setTokenListLimit] = useState(25);
+  const [tokenListHasMore, setTokenListHasMore] = useState(false);
 
   useEffect(() => {
     if (!client) {
@@ -128,6 +132,8 @@ export function AiConnectPanel() {
       });
       const payload = await response.json() as TokenListResponse;
       setTokens(payload.tokens || []);
+      setTokenListLimit(payload.limit || 25);
+      setTokenListHasMore(Boolean(payload.hasMore));
       if (!payload.ok && payload.message) setMessage(payload.message);
     } catch (error) {
       console.warn("ai connect token load failed", error);
@@ -161,7 +167,7 @@ export function AiConnectPanel() {
       const payload = await response.json() as TokenIssueResponse;
       if (payload.ok && payload.plaintextToken && payload.token) {
         setOneTimeToken(payload.plaintextToken);
-        setTokens((current) => [payload.token as McpTokenSummary, ...current]);
+        setTokens((current) => [payload.token as McpTokenSummary, ...current].slice(0, tokenListLimit));
       }
       setMessage(payload.message || (payload.ok ? "연결 토큰을 발급했습니다." : "토큰 발급에 실패했습니다."));
     } catch (error) {
@@ -307,6 +313,9 @@ export function AiConnectPanel() {
       <section className="safeclaw-module-panel ai-connect-token-list">
         <span>발급 이력</span>
         <h2>현재 현장에 연결된 토큰</h2>
+        <p className="muted">
+          최근 {tokenListLimit}개까지 표시합니다. 오래된 토큰은 API에서 계속 보호되며 필요 시 폐기 정책으로 관리합니다.
+        </p>
         <div className="ai-connect-token-items">
           {tokens.length ? tokens.map((token) => (
             <article key={token.id}>
@@ -328,6 +337,7 @@ export function AiConnectPanel() {
             <p className="muted">아직 발급된 연결 토큰이 없습니다.</p>
           )}
         </div>
+        {tokenListHasMore ? <p className="muted">표시되지 않은 이전 토큰이 더 있습니다.</p> : null}
       </section>
     </div>
   );

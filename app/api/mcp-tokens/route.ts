@@ -11,6 +11,7 @@ import {
   buildMcpTokenLabel,
   createPlaintextMcpToken,
   isTokenOwnedByScope,
+  resolveMcpTokenListLimit,
   type McpTokenOwnerScope,
 } from "@/lib/mcp-token-service";
 import { isRecord } from "@/lib/workspace-api";
@@ -51,12 +52,16 @@ async function loadOwnerScope(
 }
 
 export async function GET(request: NextRequest) {
+  const limit = resolveMcpTokenListLimit(request.nextUrl.searchParams.get("limit"));
+  const fetchLimit = limit + 1;
   const client = createSupabaseAdminClient();
   if (!client) {
     return NextResponse.json({
       ok: false,
       configured: false,
       tokens: [],
+      limit,
+      hasMore: false,
       message: "Supabase 저장소가 아직 설정되지 않았습니다.",
     });
   }
@@ -67,6 +72,8 @@ export async function GET(request: NextRequest) {
       ok: false,
       configured: true,
       tokens: [],
+      limit,
+      hasMore: false,
       message: "관리자 로그인이 필요합니다.",
     }, { status: 401 });
   }
@@ -78,6 +85,8 @@ export async function GET(request: NextRequest) {
         ok: true,
         configured: true,
         tokens: [],
+        limit,
+        hasMore: false,
         message: "아직 연결 토큰이 없습니다. 기본 현장을 만든 뒤 발급할 수 있습니다.",
       });
     }
@@ -89,13 +98,16 @@ export async function GET(request: NextRequest) {
         scope.organizationIds.length ? `org_id.in.(${scope.organizationIds.join(",")})` : "",
         scope.siteIds.length ? `site_id.in.(${scope.siteIds.join(",")})` : "",
       ].filter(Boolean).join(","))
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(0, fetchLimit - 1);
 
     if (error) throw error;
 
     const siteNameById = new Map(scope.sites.map((site) => [site.id, site.name]));
-    const tokens = (data || [])
+    const ownedRows = (data || [])
       .filter((token) => isTokenOwnedByScope(token, scope))
+      .slice(0, limit);
+    const tokens = ownedRows
       .map((token) => ({
         id: token.id,
         label: token.label || "내 AI 연결",
@@ -110,6 +122,8 @@ export async function GET(request: NextRequest) {
       ok: true,
       configured: true,
       tokens,
+      limit,
+      hasMore: (data || []).length > limit,
       message: tokens.length ? "연결 토큰 목록을 불러왔습니다." : "아직 연결 토큰이 없습니다.",
     });
   } catch (error) {
@@ -118,6 +132,8 @@ export async function GET(request: NextRequest) {
       ok: false,
       configured: true,
       tokens: [],
+      limit,
+      hasMore: false,
       message: "연결 토큰 목록을 불러오지 못했습니다.",
     }, { status: 500 });
   }

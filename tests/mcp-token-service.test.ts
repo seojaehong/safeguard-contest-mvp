@@ -10,6 +10,7 @@ import {
   buildOpenClawProbeCommand,
   createPlaintextMcpToken,
   isTokenOwnedByScope,
+  resolveMcpTokenListLimit,
 } from "@/lib/mcp-token-service";
 
 describe("createPlaintextMcpToken", () => {
@@ -62,6 +63,21 @@ describe("isTokenOwnedByScope", () => {
   it("rejects unbound or foreign tokens", () => {
     expect(isTokenOwnedByScope({ org_id: null, site_id: null }, scope)).toBe(false);
     expect(isTokenOwnedByScope({ org_id: "org-2", site_id: "site-2" }, scope)).toBe(false);
+  });
+});
+
+describe("resolveMcpTokenListLimit", () => {
+  it("defaults to a bounded recent-token list", () => {
+    expect(resolveMcpTokenListLimit(null)).toBe(25);
+    expect(resolveMcpTokenListLimit("")).toBe(25);
+    expect(resolveMcpTokenListLimit("abc")).toBe(25);
+    expect(resolveMcpTokenListLimit("-10")).toBe(25);
+  });
+
+  it("uses valid positive limits up to the public maximum", () => {
+    expect(resolveMcpTokenListLimit("10")).toBe(10);
+    expect(resolveMcpTokenListLimit("50")).toBe(50);
+    expect(resolveMcpTokenListLimit("5000")).toBe(50);
   });
 });
 

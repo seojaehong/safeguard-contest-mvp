@@ -4,6 +4,8 @@ import { MCP_ENDPOINT_URL, buildOpenClawInstallCommand, buildOpenClawProbeComman
 import type { Json } from "@/lib/supabase-admin";
 
 export const DEFAULT_MCP_SCOPES = ["tools:*"] as const;
+export const DEFAULT_MCP_TOKEN_LIST_LIMIT = 25;
+export const MAX_MCP_TOKEN_LIST_LIMIT = 50;
 
 export type McpTokenOwnerScope = {
   organizationIds: string[];
@@ -45,6 +47,12 @@ export function buildMcpTokenInsert(input: {
     org_id: input.orgId,
     scopes: [...DEFAULT_MCP_SCOPES] as Json,
   };
+}
+
+export function resolveMcpTokenListLimit(rawLimit: string | null | undefined): number {
+  const parsed = Number.parseInt(rawLimit || "", 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return DEFAULT_MCP_TOKEN_LIST_LIMIT;
+  return Math.min(parsed, MAX_MCP_TOKEN_LIST_LIMIT);
 }
 
 export function isTokenOwnedByScope(
