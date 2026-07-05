@@ -1,18 +1,19 @@
 {
-  "generatedAt": "2026-07-05T10:32:20.913Z",
-  "elapsedMs": 2092,
+  "generatedAt": "2026-07-05T10:37:33.701Z",
+  "elapsedMs": 1231,
   "baseUrl": "https://www.safeclaw.kr",
   "strictMode": false,
   "automatedVerdict": "pass",
   "releaseVerdict": "blocked",
   "verdict": "pass",
+  "tokenIndexApprovalCandidate": "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql",
   "gates": [
     {
       "name": "existing-web-api-ask",
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 797,
+        "elapsedMs": 407,
         "missingDeliverables": [],
         "deliverableCount": 11,
         "scenario": {
@@ -31,7 +32,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 309
+        "elapsedMs": 185
       }
     },
     {
@@ -101,7 +102,7 @@
       "verdict": "blocked",
       "details": {
         "status": 400,
-        "elapsedMs": 120,
+        "elapsedMs": 116,
         "supabaseOrigin": "https://mewqgevgdgghhatqtuos.supabase.co",
         "disabledReason": "Supabase returned Unsupported provider: provider is not enabled",
         "redirectTo": "https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect",
@@ -117,6 +118,8 @@
         "hasOrgCreatedIndex": false,
         "hasSiteCreatedIndex": false,
         "approvalRequired": true,
+        "approvalCandidate": "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql",
+        "approvalCandidateExists": true,
         "operatorAction": "After approval, add indexes for mcp_tokens(org_id, created_at desc) and mcp_tokens(site_id, created_at desc)."
       }
     }

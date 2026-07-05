@@ -113,6 +113,10 @@ OAuth `code` 교환을 모두 처리한다.
 보고서에 기록한다. `npm.cmd run audit:release-scale:strict`는 Kakao Provider 미활성화나 1만
 사용자 전 DB 인덱스 미적용 같은 출시 차단 게이트까지 실패 코드로 처리한다.
 
+최종 운영 체크리스트는 [`docs/final-release-operator-runbook.md`](./final-release-operator-runbook.md)에
+둔다. 1만 사용자 전 인덱스 SQL은 승인 전 적용하지 않고
+`evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql`에 후보로만 보관한다.
+
 ## 도구 8종
 
 | 도구 | 입력 | 반환 요약 |

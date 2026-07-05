@@ -7,6 +7,7 @@ const startedAt = Date.now();
 const rootDir = process.cwd();
 const baseUrl = process.env.SAFECLAW_RELEASE_BASE_URL || "https://www.safeclaw.kr";
 const outDir = path.resolve(process.env.SAFECLAW_RELEASE_AUDIT_OUT_DIR || path.join(rootDir, "evaluation", "final-release-scale-audit"));
+const tokenIndexApprovalCandidate = "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql";
 const strictMode = process.argv.includes("--strict") || process.env.SAFECLAW_RELEASE_STRICT === "1";
 const supabaseAuthUrl =
   process.env.SAFECLAW_SUPABASE_AUTH_URL ||
@@ -236,6 +237,8 @@ async function runExternalReleaseGates() {
       hasOrgCreatedIndex: hasOrgIndex,
       hasSiteCreatedIndex: hasSiteIndex,
       approvalRequired: true,
+      approvalCandidate: tokenIndexApprovalCandidate,
+      approvalCandidateExists: fs.existsSync(path.join(rootDir, tokenIndexApprovalCandidate)),
       operatorAction: "After approval, add indexes for mcp_tokens(org_id, created_at desc) and mcp_tokens(site_id, created_at desc).",
     }),
   ];
@@ -284,7 +287,7 @@ ${releaseGateRows}
 
 - Supabase Auth dashboard Kakao Provider must be enabled before Kakao login is release-ready.
 - Supabase Auth dashboard Site URL/Redirect URL must allow ${payload.baseUrl}/auth/callback.
-- DB index migration for 10,000-user operation still requires explicit approval before application.
+- DB index migration for 10,000-user operation still requires explicit approval before application. Candidate SQL: ${payload.tokenIndexApprovalCandidate}
 `;
 }
 
@@ -306,6 +309,7 @@ async function main() {
     automatedVerdict,
     releaseVerdict,
     verdict: automatedVerdict,
+    tokenIndexApprovalCandidate,
     gates,
     releaseGates,
   };
