@@ -30,7 +30,7 @@ type OrganizationSummary = { id: string; name: string };
 async function loadOwnerScope(
   client: SupabaseClient<WorkspaceDatabase>,
   user: WorkspaceUser
-): Promise<McpTokenOwnerScope & { organizations: OrganizationSummary[]; sites: SiteSummary[] }> {
+): Promise<McpTokenOwnerScope & { organizations: OrganizationSummary[] }> {
   const { data: organizations, error: organizationError } = await client
     .from("organizations")
     .select("id,name")
@@ -39,21 +39,30 @@ async function loadOwnerScope(
   if (organizationError) throw organizationError;
 
   const organizationIds = (organizations || []).map((organization) => organization.id);
-  const { data: sites, error: siteError } = organizationIds.length
-    ? await client
-      .from("sites")
-      .select("id,name,organization_id")
-      .in("organization_id", organizationIds)
-    : { data: [], error: null };
-
-  if (siteError) throw siteError;
 
   return {
     organizations: organizations || [],
-    sites: sites || [],
     organizationIds,
-    siteIds: (sites || []).map((site) => site.id),
+    siteIds: [],
   };
+}
+
+async function loadSiteNamesForTokens(
+  client: SupabaseClient<WorkspaceDatabase>,
+  siteIds: string[],
+  organizationIds: string[]
+): Promise<Map<string, string>> {
+  const uniqueSiteIds = Array.from(new Set(siteIds)).filter(Boolean);
+  if (!uniqueSiteIds.length || !organizationIds.length) return new Map();
+
+  const { data: sites, error } = await client
+    .from("sites")
+    .select("id,name,organization_id")
+    .in("id", uniqueSiteIds)
+    .in("organization_id", organizationIds);
+
+  if (error) throw error;
+  return new Map((sites || []).map((site: SiteSummary) => [site.id, site.name]));
 }
 
 export async function GET(request: NextRequest) {
@@ -88,7 +97,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const scope = await loadOwnerScope(client, user);
-    if (!scope.organizationIds.length && !scope.siteIds.length) {
+    if (!scope.organizationIds.length) {
       return NextResponse.json({
         ok: true,
         configured: true,
@@ -132,10 +141,14 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    const siteNameById = new Map(scope.sites.map((site) => [site.id, site.name]));
     const ownedRows = (data || [])
       .filter((token) => isTokenOwnedByScope(token, scope))
     const pageRows = ownedRows.slice(0, limit);
+    const siteNameById = await loadSiteNamesForTokens(
+      client,
+      pageRows.map((token) => token.site_id).filter((id): id is string => Boolean(id)),
+      scope.organizationIds,
+    );
     const nextCursor = ownedRows.length > limit && pageRows.length
       ? encodeMcpTokenListCursor(pageRows[pageRows.length - 1])
       : null;

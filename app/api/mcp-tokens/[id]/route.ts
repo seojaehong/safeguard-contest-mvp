@@ -22,18 +22,27 @@ async function loadOwnerScope(
   if (organizationError) throw organizationError;
   const organizationIds = (organizations || []).map((organization) => organization.id);
 
-  const { data: sites, error: siteError } = organizationIds.length
-    ? await client
-      .from("sites")
-      .select("id")
-      .in("organization_id", organizationIds)
-    : { data: [], error: null };
-
-  if (siteError) throw siteError;
   return {
     organizationIds,
-    siteIds: (sites || []).map((site) => site.id),
+    siteIds: [],
   };
+}
+
+async function isSiteOwnedByScope(
+  client: SupabaseClient<WorkspaceDatabase>,
+  siteId: string | null,
+  scope: McpTokenOwnerScope
+): Promise<boolean> {
+  if (!siteId || !scope.organizationIds.length) return false;
+  const { data, error } = await client
+    .from("sites")
+    .select("id")
+    .eq("id", siteId)
+    .in("organization_id", scope.organizationIds)
+    .maybeSingle();
+
+  if (error) throw error;
+  return Boolean(data);
 }
 
 async function disableToken(request: NextRequest, id: string) {
@@ -64,7 +73,9 @@ async function disableToken(request: NextRequest, id: string) {
       .maybeSingle();
 
     if (selectError) throw selectError;
-    if (!token || !isTokenOwnedByScope(token, scope)) {
+    const ownedByOrg = token ? isTokenOwnedByScope(token, scope) : false;
+    const ownedBySite = token ? await isSiteOwnedByScope(client, token.site_id, scope) : false;
+    if (!token || (!ownedByOrg && !ownedBySite)) {
       return NextResponse.json({
         ok: false,
         configured: true,
