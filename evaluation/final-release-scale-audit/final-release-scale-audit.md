@@ -1,12 +1,12 @@
 # SafeClaw Final Release Scale Audit
 
-Generated: 2026-07-05T12:39:01.070Z
+Generated: 2026-07-05T12:52:28.609Z
 
 Base URL: https://www.safeclaw.kr
 
 Automated Verdict: **pass**
 
-Release Verdict: **blocked**
+Release Verdict: **pass**
 
 Strict Mode: **on**
 
@@ -32,8 +32,8 @@ Invariant: Per-request token list and site-name lookup row counts stay constant 
 
 | Gate | Verdict | Details |
 |------|---------|---------|
-| existing-web-api-ask | pass | {"status":200,"elapsedMs":397,"missingDeliverables":[],"deliverableCount":11,"scenario":{"companyName":"그린메탈","companyType":"제조업","siteName":"경기 안산 제조공장","workSummary":"그린메탈 경기 안산 제조공장 옥외 용접 작업","workerCount":6,"weatherN |
-| ai-connect-page | pass | {"status":200,"elapsedMs":72} |
+| existing-web-api-ask | pass | {"status":200,"elapsedMs":202,"missingDeliverables":[],"deliverableCount":11,"scenario":{"companyName":"그린메탈","companyType":"제조업","siteName":"경기 안산 제조공장","workSummary":"그린메탈 경기 안산 제조공장 옥외 용접 작업","workerCount":6,"weatherN |
+| ai-connect-page | pass | {"status":200,"elapsedMs":54} |
 | ai-token-api-auth-guard | pass | {"status":401,"limit":50,"nextCursor":null,"message":"관리자 로그인이 필요합니다."} |
 | mcp-no-token-auth-guard | pass | {"status":401,"rawPreview":"{\"error\":\"invalid_token\",\"error_description\":\"No authorization provided\"}"} |
 | tenant-scoped-token-insert | pass | {"evidence":"lib/mcp-token-service.ts stores only hash + site/org scope"} |
@@ -50,12 +50,9 @@ Invariant: Per-request token list and site-name lookup row counts stay constant 
 
 | Gate | Verdict | Details |
 |------|---------|---------|
-| supabase-kakao-provider-enabled | pass | {"status":302,"elapsedMs":128,"supabaseOrigin":"https://mewqgevgdgghhatqtuos.supabase.co","disabledReason":null,"redirectTo":"https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect","locationPreview":"https: |
-| mcp-token-query-indexes-approved | blocked | {"hasOrgCreatedIndex":false,"hasSiteCreatedIndex":false,"orgIndexEvidenceFiles":[],"siteIndexEvidenceFiles":[],"approvalRequired":true,"approvalCandidate":"evaluation/final-release-scale-audit/mcp-token-query-indexes-app |
+| supabase-kakao-provider-enabled | pass | {"status":302,"elapsedMs":106,"supabaseOrigin":"https://mewqgevgdgghhatqtuos.supabase.co","disabledReason":null,"redirectTo":"https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect","locationPreview":"https: |
+| mcp-token-query-indexes-approved | pass | {"hasOrgCreatedIndex":true,"hasSiteCreatedIndex":true,"orgIndexEvidenceFiles":["supabase/migrations/009_mcp_token_query_indexes.sql"],"siteIndexEvidenceFiles":["supabase/migrations/009_mcp_token_query_indexes.sql"],"appr |
 
 ## Remaining Operator Actions
 
-- Supabase Auth dashboard Kakao Provider must be enabled before Kakao login is release-ready.
-- Supabase Auth dashboard Site URL/Redirect URL must allow https://www.safeclaw.kr/auth/callback.
-- DB index migration for 10,000-user operation still requires explicit approval before application. Candidate SQL: evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql
-- After applying DB indexes, run the read-only verification query: evaluation/final-release-scale-audit/mcp-token-query-indexes-verify.sql
+- None. Strict release gates are passing.

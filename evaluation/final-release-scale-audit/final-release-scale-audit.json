@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-07-05T12:39:01.070Z",
-  "elapsedMs": 1106,
+  "generatedAt": "2026-07-05T12:52:28.609Z",
+  "elapsedMs": 479,
   "baseUrl": "https://www.safeclaw.kr",
   "strictMode": true,
   "automatedVerdict": "pass",
-  "releaseVerdict": "blocked",
-  "verdict": "blocked",
-  "exitVerdict": "blocked",
+  "releaseVerdict": "pass",
+  "verdict": "pass",
+  "exitVerdict": "pass",
   "tokenIndexApprovalCandidate": "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql",
   "tokenIndexVerificationQuery": "evaluation/final-release-scale-audit/mcp-token-query-indexes-verify.sql",
   "scaleEnvelope": {
@@ -61,7 +61,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 397,
+        "elapsedMs": 202,
         "missingDeliverables": [],
         "deliverableCount": 11,
         "scenario": {
@@ -80,7 +80,7 @@
       "verdict": "pass",
       "details": {
         "status": 200,
-        "elapsedMs": 72
+        "elapsedMs": 54
       }
     },
     {
@@ -192,7 +192,7 @@
       "verdict": "pass",
       "details": {
         "status": 302,
-        "elapsedMs": 128,
+        "elapsedMs": 106,
         "supabaseOrigin": "https://mewqgevgdgghhatqtuos.supabase.co",
         "disabledReason": null,
         "redirectTo": "https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect",
@@ -203,12 +203,16 @@
     },
     {
       "name": "mcp-token-query-indexes-approved",
-      "verdict": "blocked",
+      "verdict": "pass",
       "details": {
-        "hasOrgCreatedIndex": false,
-        "hasSiteCreatedIndex": false,
-        "orgIndexEvidenceFiles": [],
-        "siteIndexEvidenceFiles": [],
+        "hasOrgCreatedIndex": true,
+        "hasSiteCreatedIndex": true,
+        "orgIndexEvidenceFiles": [
+          "supabase/migrations/009_mcp_token_query_indexes.sql"
+        ],
+        "siteIndexEvidenceFiles": [
+          "supabase/migrations/009_mcp_token_query_indexes.sql"
+        ],
         "approvalRequired": true,
         "approvalCandidate": "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql",
         "approvalCandidateExists": true,

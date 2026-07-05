@@ -346,6 +346,12 @@ function renderReport(payload) {
   const scaleRows = payload.scaleEnvelope.targets
     .map((item) => `| ${item.users} | ${item.tokenListRowsReadPerRequestMax} | ${item.siteNameRowsReadPerRequestMax} | ${item.activeTokensWithOneSitePerUserMax} |`)
     .join("\n");
+  const remainingActions = payload.releaseVerdict === "pass"
+    ? "- None. Strict release gates are passing."
+    : `- Supabase Auth dashboard Kakao Provider must be enabled before Kakao login is release-ready.
+- Supabase Auth dashboard Site URL/Redirect URL must allow ${payload.baseUrl}/auth/callback.
+- DB index migration for 10,000-user operation still requires explicit approval before application. Candidate SQL: ${payload.tokenIndexApprovalCandidate}
+- After applying DB indexes, run the read-only verification query: ${payload.tokenIndexVerificationQuery}`;
 
   return `
 # SafeClaw Final Release Scale Audit
@@ -388,10 +394,7 @@ ${releaseGateRows}
 
 ## Remaining Operator Actions
 
-- Supabase Auth dashboard Kakao Provider must be enabled before Kakao login is release-ready.
-- Supabase Auth dashboard Site URL/Redirect URL must allow ${payload.baseUrl}/auth/callback.
-- DB index migration for 10,000-user operation still requires explicit approval before application. Candidate SQL: ${payload.tokenIndexApprovalCandidate}
-- After applying DB indexes, run the read-only verification query: ${payload.tokenIndexVerificationQuery}
+${remainingActions}
 `;
 }
 

@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-05T11:26:00.329Z",
-  "elapsedMs": 79657,
-  "verdict": "blocked",
+  "generatedAt": "2026-07-05T12:53:16.925Z",
+  "elapsedMs": 63036,
+  "verdict": "pass",
   "steps": [
     {
       "name": "targeted-token-auth-tests",
@@ -9,7 +9,7 @@
       "exitCode": 0,
       "signal": null,
       "spawnError": null,
-      "elapsedMs": 2722,
+      "elapsedMs": 1865,
       "verdict": "pass",
       "logPath": "evaluation/final-release-closeout/01-targeted-token-auth-tests.log"
     },
@@ -19,18 +19,18 @@
       "exitCode": 0,
       "signal": null,
       "spawnError": null,
-      "elapsedMs": 14207,
+      "elapsedMs": 11863,
       "verdict": "pass",
       "logPath": "evaluation/final-release-closeout/02-typecheck.log"
     },
     {
       "name": "strict-release-scale-audit",
       "command": "npm.cmd run audit:release-scale:strict",
-      "exitCode": 1,
+      "exitCode": 0,
       "signal": null,
       "spawnError": null,
-      "elapsedMs": 2600,
-      "verdict": "blocked",
+      "elapsedMs": 1039,
+      "verdict": "pass",
       "logPath": "evaluation/final-release-closeout/03-strict-release-scale-audit.log"
     },
     {
@@ -39,7 +39,7 @@
       "exitCode": 0,
       "signal": null,
       "spawnError": null,
-      "elapsedMs": 60120,
+      "elapsedMs": 48263,
       "verdict": "pass",
       "logPath": "evaluation/final-release-closeout/04-build.log"
     }
