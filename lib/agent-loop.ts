@@ -88,11 +88,11 @@ export function capHistory(
 const BASE_SYSTEM_PROMPT = `당신은 "클로(Claw)", 이 사업장의 상주 AI 안전관리자입니다. 산업안전보건법·중대재해처벌법 실무 관점으로 현장소장의 안전 질문에 답합니다.
 
 원칙:
-- 사실 근거는 반드시 도구로 확인합니다. 오늘·내일 날씨/기상 위험은 get_weather_signals, 유사 재해사례는 search_accident_cases, 문서팩 초안이 필요하면 generate_safety_docpack을 호출합니다.
+- 사실 근거는 반드시 도구로 확인합니다. 오늘·내일 날씨/기상 위험은 get_weather_signals, 유사 재해사례는 search_accident_cases, 문서팩 초안과 검수가 함께 필요하면 generate_reviewed_safety_docpack을 호출합니다.
 - 법조문이 필요한 질문(특정 작업의 규정·근거 조문)은 먼저 query_safety_knowledge로 검증된 조문을 조회하고, 조회 결과의 구체 조번호(예: 기준규칙 제619조)를 근거로 답합니다. 이 도구에서 근거를 찾지 못했을 때만 일반 지식으로 답하되 반드시 validate_safety_citations로 검증합니다.
 - 법 조문(예: 제38조)을 답변에 인용할 때는, 최종 답변을 쓰기 전에 먼저 validate_safety_citations 도구로 그 문장을 검증하는 단계를 거칩니다. 검증에서 제거된(확인되지 않은) 조문은 최종 답변에서도 빼고 "산업안전보건법령" 같은 일반 표현으로 대체합니다. 검증하지 않은 조문 번호를 최종 답변에 그대로 쓰지 않습니다.
 - 비상 연락처·기관 전화번호를 답에 넣기 전에는 sanitize_emergency_contacts로 정화합니다.
-- 문서 초안을 만들었거나 사용자가 문서 검토를 요청하면 qa_review_docpack으로 누락을 확인합니다.
+- 이미 생성된 문서 본문만 따로 검토할 때는 qa_review_docpack으로 누락을 확인합니다.
 - 중간 과정(도구 호출 사이)의 설명은 짧게 하고, 조문 번호는 최종 답변에만 씁니다.
 - 모든 문서·답변은 초안이며 현장 확인이 필요함을 고지합니다.
 - 존댓말로, 현장소장이 바로 이해할 쉬운 말로, 간결하게 답합니다.`;
@@ -116,6 +116,28 @@ export function buildSystemPrompt(profile?: ClawSiteProfile | null): string {
 
 // ── 도구 정의 (Anthropic tools 스키마) ───────────────────────────────────
 export const CLAW_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "generate_reviewed_safety_docpack",
+    description:
+      "오늘 작업 설명과 작업유형 라벨을 받아 SafeClaw 문서 엔진으로 위험성평가·작업계획서·TBM·교육기록 등 문서팩을 생성하고, 같은 응답에서 온톨로지 QA 검수까지 수행한다. OpenClaw/Codex 같은 외부 에이전트가 SafeClaw 작업공간 품질의 결과물을 한 번에 받아야 할 때 이 도구를 우선 호출한다.",
+    input_schema: {
+      type: "object",
+      properties: {
+        question: { type: "string", description: "현장 작업 상황 설명" },
+        task: {
+          type: "string",
+          description: "QA 검수용 작업유형 라벨 (예: 용접, 화기 작업, 밀폐공간 작업, 비계 조립·해체)",
+        },
+        mode: {
+          type: "string",
+          enum: ["template", "enhanced", "full"],
+          description: "생성 깊이 (기본 enhanced, 외부 연결 검증은 full)",
+        },
+        includeFull: { type: "boolean", description: "각 문서 전체 본문 포함 여부(기본 false, 프리뷰만)" },
+      },
+      required: ["question", "task"],
+    },
+  },
   {
     name: "get_weather_signals",
     description:
@@ -227,6 +249,7 @@ const TOOL_ACTION_LABELS: Record<string, string> = {
   validate_safety_citations: "법령 인용 검증",
   sanitize_emergency_contacts: "비상 연락처 정화",
   generate_safety_docpack: "안전 문서팩 생성",
+  generate_reviewed_safety_docpack: "검수 포함 안전 문서팩 생성",
   get_evidence_mapping: "중처법 증빙 매핑 조회",
   query_safety_knowledge: "검증된 안전 지식 조회",
   qa_review_docpack: "문서 QA 검수",

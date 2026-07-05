@@ -10,6 +10,7 @@ import {
   buildAccidentCasesResult,
   buildDocpackResult,
   buildEvidenceMappingResult,
+  buildReviewedDocpackResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
   validateCitations,
@@ -24,6 +25,25 @@ function asString(input: unknown, key: string): string {
     throw new Error(`도구 입력 '${key}'가 필요합니다.`);
   }
   return value.trim();
+}
+
+function asAiMode(input: unknown, fallback: AiMode): AiMode {
+  const value = (input as Record<string, unknown> | null)?.mode;
+  return value === "full" || value === "template" || value === "enhanced" ? value : fallback;
+}
+
+function asIncludeFull(input: unknown): boolean {
+  return (input as Record<string, unknown> | null)?.includeFull === true;
+}
+
+function selectQaDocumentText(response: Awaited<ReturnType<typeof runAsk>>): string {
+  const candidates = [
+    response.deliverables.riskAssessmentDraft,
+    response.deliverables.tbmBriefing,
+    response.deliverables.workPlanDraft,
+    response.deliverables.safetyEducationRecordDraft,
+  ];
+  return candidates.find((value) => typeof value === "string" && value.trim().length > 0) ?? "";
 }
 
 /**
@@ -49,12 +69,19 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
     case "sanitize_emergency_contacts": {
       return buildSanitizeContactsResult(asString(input, "text"));
     }
+    case "generate_reviewed_safety_docpack": {
+      const question = asString(input, "question");
+      const task = asString(input, "task");
+      const mode = asAiMode(input, "enhanced");
+      const includeFull = asIncludeFull(input);
+      const response = await runAsk(question, { aiMode: mode });
+      const qa = await reviewDocpack(task, selectQaDocumentText(response));
+      return buildReviewedDocpackResult(response, qa, task, includeFull);
+    }
     case "generate_safety_docpack": {
       const question = asString(input, "question");
-      const record = (input as Record<string, unknown> | null) ?? {};
-      const requested = typeof record.mode === "string" ? (record.mode as AiMode) : undefined;
-      const mode: AiMode = requested === "full" || requested === "template" ? requested : "enhanced";
-      const includeFull = record.includeFull === true;
+      const mode = asAiMode(input, "enhanced");
+      const includeFull = asIncludeFull(input);
       const response = await runAsk(question, { aiMode: mode });
       return buildDocpackResult(response, includeFull);
     }

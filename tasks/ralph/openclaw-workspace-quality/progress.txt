@@ -1,0 +1,17 @@
+## 2026-07-05 start
+- Changed: created Ralph run folder for OpenClaw workspace-quality MCP work.
+- Verified: current MCP already has generate_safety_docpack and qa_review_docpack, but OpenClaw runtime did not reliably sequence them.
+- Learned: tool filtering reduced safeclaw probe to 3 tools, yet the agent still stopped after acknowledgement or called QA without the intended generated docpack.
+- Next: C1 TDD for a reviewed docpack payload.
+
+## 2026-07-05 C1
+- Changed: added buildReviewedDocpackResult and a focused MCP tools unit test.
+- Verified: npm.cmd test -- tests/mcp-tools.test.ts (20 passed).
+- Learned: composite payload should state both the SafeClaw /api/ask engine and the QA review layer so OpenClaw has one authoritative result to cite.
+- Next: C2 register generate_reviewed_safety_docpack.
+
+## 2026-07-05 C2
+- Changed: registered generate_reviewed_safety_docpack in the MCP route and the internal Claw tool list/executor, and documented it as a 9th MCP tool.
+- Verified: npm.cmd test -- tests/mcp-tools.test.ts tests/agent-loop.test.ts (38 passed); npm.cmd run typecheck (passed).
+- Learned: OpenClaw can call MCP but may choose or sequence tools unreliably; a one-call reviewed docpack tool is the safer product contract.
+- Next: C3 reload/probe OpenClaw and verify both OpenClaw and /api/ask tracks.

@@ -1,0 +1,60 @@
+{
+  "feature": "OpenClaw workspace-quality MCP docpack",
+  "branchName": "feat/openclaw-workspace-quality-mcp",
+  "qualityChecks": [
+    "npm.cmd test -- tests/mcp-tools.test.ts",
+    "npm.cmd test -- tests/agent-loop.test.ts",
+    "npm.cmd run typecheck"
+  ],
+  "userStories": [
+    {
+      "id": "C1",
+      "title": "Expose a reviewed docpack MCP payload",
+      "priority": 1,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "A pure MCP result builder combines generate_safety_docpack output with qa_review_docpack output.",
+        "The result explicitly states that it used the SafeClaw /api/ask workpack engine and QA review layer.",
+        "npm.cmd test -- tests/mcp-tools.test.ts"
+      ],
+      "files": [
+        "lib/mcp-tools.ts",
+        "tests/mcp-tools.test.ts"
+      ]
+    },
+    {
+      "id": "C2",
+      "title": "Register one-call reviewed docpack MCP tool",
+      "priority": 2,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "MCP exposes generate_reviewed_safety_docpack so OpenClaw can request SafeClaw-quality documents without manually sequencing two tools.",
+        "The existing Claw/OpenClaw tool list test accounts for the new tool.",
+        "npm.cmd test -- tests/agent-loop.test.ts"
+      ],
+      "files": [
+        "app/api/mcp/[transport]/route.ts",
+        "lib/agent-loop.ts",
+        "tests/agent-loop.test.ts",
+        "docs/mcp-server.md"
+      ]
+    },
+    {
+      "id": "C3",
+      "title": "Verify OpenClaw and web generation tracks",
+      "priority": 3,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "OpenClaw MCP configuration can see the reviewed docpack tool after reload/probe.",
+        "/api/ask full track remains verified by existing tests or a focused smoke.",
+        "An evaluation report records both tracks and any OpenClaw runtime caveats."
+      ],
+      "files": [
+        "evaluation/openclaw-workspace-quality-probe/report.md"
+      ]
+    }
+  ]
+}

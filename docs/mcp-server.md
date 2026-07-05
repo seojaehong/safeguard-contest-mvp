@@ -117,10 +117,11 @@ OAuth `code` 교환을 모두 처리한다.
 둔다. 1만 사용자 전 인덱스 SQL은 승인 전 적용하지 않고
 `evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql`에 후보로만 보관한다.
 
-## 도구 8종
+## 도구 9종
 
 | 도구 | 입력 | 반환 요약 |
 |------|------|-----------|
+| `generate_reviewed_safety_docpack` | `question`, `task`, `mode?`(template\|enhanced\|full, 기본 full), `includeFull?` | `runAsk`로 SafeClaw 문서팩을 생성하고, 생성 본문을 `qa_review_docpack` 계층으로 즉시 검수한 복합 결과. OpenClaw/Codex가 SafeClaw 작업공간 품질 산출물을 한 번에 받아야 할 때 우선 사용 |
 | `generate_safety_docpack` | `question`, `mode?`(template\|enhanced\|full, 기본 full), `includeFull?` | `lib/search.ts` runAsk 호출. `summary`·`scenario`·`evidenceLabels`(있으면)·문서별 프리뷰(앞 500자+총길이). `includeFull=true` 시 전체 본문 |
 | `get_weather_signals` | `region` | `lib/weather.ts` 기상청 실황·특보 요약 + 작업 대응 조치 |
 | `validate_safety_citations` | `text` | `lib/law-citation-gate.ts` 게이트. `{ gatedText, removedCitations[] }` — 미검증(환각) 조문 인용 제거·치환 |
@@ -139,7 +140,7 @@ OAuth `code` 교환을 모두 처리한다.
 "고객의 에이전트가 SafeClaw 도구 계층 위에서 안전관리자로 일한다"는 SafeClaw 2의 핵심
 차별화를 실물로 만든 것이 v0다. `validate_safety_citations`·`sanitize_emergency_contacts`는
 에이전트가 스스로 쓴 초안을 제출 전에 **법령·연락처 신뢰 계층으로 자체 검증**하게 하는
-v2 서사의 중심 도구이며, `generate_safety_docpack`·`get_evidence_mapping`은 생성된 문서를
+v2 서사의 중심 도구이며, `generate_reviewed_safety_docpack`·`generate_safety_docpack`·`get_evidence_mapping`은 생성된 문서를
 중처법 시행령 제4조 증빙 파일철로 연결한다. 동일 인터페이스가 외부 에이전트(Claude Code
 등)에도 그대로 열려 있다.
 

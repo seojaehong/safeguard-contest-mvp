@@ -117,10 +117,11 @@ describe("buildSystemPrompt", () => {
 });
 
 describe("CLAW_TOOLS", () => {
-  it("exposes all eight safeclaw tools with object schemas", () => {
+  it("exposes the reviewed docpack tool with the existing safeclaw tools", () => {
     const names = CLAW_TOOLS.map((tool) => tool.name).sort();
     expect(names).toEqual(
       [
+        "generate_reviewed_safety_docpack",
         "generate_safety_docpack",
         "get_evidence_mapping",
         "get_weather_signals",
@@ -134,6 +135,7 @@ describe("CLAW_TOOLS", () => {
     for (const tool of CLAW_TOOLS) {
       expect(tool.input_schema.type).toBe("object");
     }
+    expect(toolLabel("generate_reviewed_safety_docpack", "start")).toBe("검수 포함 안전 문서팩 생성 중");
   });
 });
 

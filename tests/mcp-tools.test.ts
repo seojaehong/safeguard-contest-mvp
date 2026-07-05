@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { AskResponse } from "@/lib/types";
+import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import { OFFICIAL_CONTACTS } from "@/lib/safety-contacts";
 import {
   buildAccidentCasesResult,
@@ -89,7 +90,7 @@ describe("buildDocpackResult", () => {
 
 describe("buildReviewedDocpackResult", () => {
   it("combines the SafeClaw workpack engine result with QA review evidence", () => {
-    const qaReview = {
+    const qaReview: QaReviewFound = {
       reviewable: true,
       task: "용접",
       covered: { hazards: ["화재"], controls: ["화재감시자 배치"], articles: ["산업안전보건기준에 관한 규칙 제241조"] },
@@ -97,12 +98,14 @@ describe("buildReviewedDocpackResult", () => {
       coverageRate: 1,
       verdict: "통과",
       advisory: "검수 고지",
-    } as const;
+    };
 
     const result = buildReviewedDocpackResult(makeAskResponse(), qaReview, "용접");
 
     expect(result.engine).toBe("safeclaw-runAsk");
     expect(result.qualityPipeline).toEqual(["generate_safety_docpack", "qa_review_docpack"]);
+    expect(result.qa.reviewable).toBe(true);
+    if (!result.qa.reviewable) throw new Error("expected reviewable QA result");
     expect(result.qa.task).toBe("용접");
     expect(result.qa.verdict).toBe("통과");
     expect(result.docpack.documents.riskAssessmentDraft).toMatchObject({

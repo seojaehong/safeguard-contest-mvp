@@ -36,6 +36,7 @@ import {
   buildAccidentCasesResult,
   buildDocpackResult,
   buildEvidenceMappingResult,
+  buildReviewedDocpackResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
   toToolError,
@@ -73,6 +74,68 @@ function logToolContext(tool: string, ctx: McpAuthContext | null): void {
 }
 
 function registerTools(server: McpServer): void {
+  server.registerTool(
+    "generate_reviewed_safety_docpack",
+    {
+      title: "검수 포함 안전 문서팩 생성",
+      description:
+        "사업장의 오늘 작업을 설명하면 SafeClaw 문서 엔진(/api/ask runAsk)으로 위험성평가·작업계획서·TBM·교육기록 등 문서팩을 생성하고, 같은 호출에서 온톨로지 QA 검수까지 수행한다. OpenClaw/Codex 같은 외부 AI가 SafeClaw 작업공간 품질의 산출물을 한 번에 받아야 할 때 generate_safety_docpack과 qa_review_docpack을 따로 엮지 말고 이 도구를 우선 호출한다.",
+      inputSchema: {
+        question: z.string().describe("현장 작업 상황 설명"),
+        task: z
+          .string()
+          .describe("QA 검수용 작업유형 라벨 (예: 용접, 화기 작업, 밀폐공간 작업, 비계 조립·해체)"),
+        mode: z
+          .enum(["template", "enhanced", "full"])
+          .optional()
+          .describe("생성 깊이 (기본 full — 외부 데이터·AI 반영)"),
+        includeFull: z
+          .boolean()
+          .optional()
+          .describe("각 문서 전체 본문 포함 여부 (기본 false — 프리뷰만)"),
+      },
+    },
+    async ({ question, task, mode, includeFull }, extra) => {
+      try {
+        const authContext = readAuthContext(extra);
+        logToolContext("generate_reviewed_safety_docpack", authContext);
+
+        const response = await runAsk(question, { aiMode: mode ?? "full" });
+        const qaSource =
+          response.deliverables.riskAssessmentDraft ||
+          response.deliverables.tbmBriefing ||
+          response.deliverables.workPlanDraft ||
+          response.deliverables.safetyEducationRecordDraft ||
+          "";
+        const qa = await reviewDocpack(task, qaSource);
+        const result = buildReviewedDocpackResult(response, qa, task, includeFull ?? false) as Record<string, unknown>;
+
+        if (authContext?.siteId) {
+          const client = createSupabaseAdminClient();
+          if (client) {
+            const attribution = await saveMcpDocpackWorkpack(
+              client,
+              { siteId: authContext.siteId, orgId: authContext.orgId },
+              response
+            );
+            result.attribution = attribution;
+          } else {
+            result.attribution = {
+              siteId: authContext.siteId,
+              orgId: authContext.orgId,
+              workpackId: null,
+              saved: false,
+            };
+          }
+        }
+
+        return toToolResult(result);
+      } catch (error) {
+        return toToolError(error);
+      }
+    }
+  );
+
   server.registerTool(
     "generate_safety_docpack",
     {
