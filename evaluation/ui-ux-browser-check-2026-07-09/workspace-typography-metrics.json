@@ -1,0 +1,23 @@
+{
+  "day": {
+    "h1Text": "오늘 작업은 무엇인가요?",
+    "h1FontFamily": "Pretendard, \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "h1FontSize": "58px",
+    "h1FontWeight": "860",
+    "h1LineHeight": "64.96px",
+    "paragraphFontWeight": "520",
+    "horizontalOverflow": false,
+    "scrollWidth": 1440,
+    "viewportWidth": 1440
+  },
+  "night": {
+    "h1Text": "오늘 작업은 무엇인가요?",
+    "h1FontFamily": "Pretendard, \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "h1FontSize": "58px",
+    "h1FontWeight": "860",
+    "h1LineHeight": "64.96px",
+    "horizontalOverflow": false,
+    "scrollWidth": 1440,
+    "viewportWidth": 1440
+  }
+}
