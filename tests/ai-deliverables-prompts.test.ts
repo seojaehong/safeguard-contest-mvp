@@ -29,6 +29,11 @@ describe("persona", () => {
     expect(persona()).toMatch(/현장 확인 필요/);
     expect(persona()).toMatch(/김철수/);
   });
+
+  it("keeps hazard discovery inside the DB harness evidence packet", () => {
+    expect(persona()).toContain("위험요인은 DB 하네스·근거 후보 안에서 구체화");
+    expect(persona()).toContain("근거 밖 새 위험요인은 만들지 말고");
+  });
 });
 
 describe("contextBlock", () => {

@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-07-09T01:33:45+09:00",
+  "scope": "DB harness naturalization prompt contract",
+  "decision": "Document generation persona no longer asks the model to invent new hazards. It now tells the model to refine hazards only inside DB harness and evidence candidates, and to mark missing evidence as field confirmation required.",
+  "changedFiles": [
+    "lib/ai-deliverables.ts",
+    "tests/ai-deliverables-prompts.test.ts"
+  ],
+  "contract": {
+    "llmRole": "naturalize_only",
+    "fallbackChainAllowed": false,
+    "hazardDiscovery": "inside_db_harness_and_evidence_candidates",
+    "outOfPacketHazards": "field_confirmation_required"
+  },
+  "verification": {
+    "tests": "npm.cmd test -- tests\\ai-deliverables-prompts.test.ts tests\\commercial-harness.test.ts tests\\quality-contract.test.ts",
+    "testResult": "3 files passed, 25 tests passed",
+    "typecheck": "npm.cmd run typecheck",
+    "build": "npm.cmd run build",
+    "result": "passed",
+    "note": "Parallel typecheck/build can race on .next/types. Build passed, and a standalone typecheck after build passed."
+  }
+}
