@@ -1,0 +1,93 @@
+{
+  "date": "2026-07-08",
+  "axis": "workspace_typography_and_menu_density",
+  "changeSummary": [
+    "Workspace headline now uses a sturdier Korean-first stack with fixed desktop/mobile sizes.",
+    "Sidebar/menu rows use wider rhythm and taller touch targets.",
+    "Input helper, chips, and textarea line-height were relaxed without changing product flow."
+  ],
+  "screenshots": {
+    "dayDesktop": "evaluation/backend-harness-gate-2026-07-08/design-polish/day-desktop.png",
+    "nightDesktop": "evaluation/backend-harness-gate-2026-07-08/design-polish/night-desktop.png",
+    "dayMobile": "evaluation/backend-harness-gate-2026-07-08/design-polish/day-mobile.png",
+    "nightMobile": "evaluation/backend-harness-gate-2026-07-08/design-polish/night-mobile.png"
+  },
+  "evidence": [
+    {
+      "name": "day-desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "headingFontSize": "56px",
+      "headingFontWeight": "800",
+      "headingLineHeight": "64.96px",
+      "navButtonHeights": [
+        50,
+        50,
+        50
+      ],
+      "horizontalOverflow": false,
+      "topbarBottom": 80,
+      "inputBottom": 580
+    },
+    {
+      "name": "night-desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "headingFontSize": "56px",
+      "headingFontWeight": "800",
+      "headingLineHeight": "64.96px",
+      "navButtonHeights": [
+        50,
+        50,
+        50
+      ],
+      "horizontalOverflow": false,
+      "topbarBottom": 80,
+      "inputBottom": 558
+    },
+    {
+      "name": "day-mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "headingFontSize": "34px",
+      "headingFontWeight": "800",
+      "headingLineHeight": "41.48px",
+      "navButtonHeights": [
+        48,
+        48,
+        48
+      ],
+      "horizontalOverflow": false,
+      "topbarBottom": 114,
+      "inputBottom": 716
+    },
+    {
+      "name": "night-mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "headingFontSize": "34px",
+      "headingFontWeight": "800",
+      "headingLineHeight": "41.48px",
+      "navButtonHeights": [
+        48,
+        48,
+        48
+      ],
+      "horizontalOverflow": false,
+      "topbarBottom": 114,
+      "inputBottom": 661
+    }
+  ],
+  "verification": {
+    "layoutRegression": "npm.cmd test -- tests/workspace-layout-regression.test.ts",
+    "layoutRegressionPassed": true
+  }
+}

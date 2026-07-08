@@ -88,7 +88,20 @@
     "nightScrolledScreenshot": "evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-desktop-night-scrolled.png",
     "visualCheck": "evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-visual-check.json",
     "horizontalOverflow": false,
-    "stickyTopbarOverlap": false
+    "stickyTopbarOverlap": false,
+    "typographyPolish": {
+      "artifact": "evaluation/backend-harness-gate-2026-07-08/design-polish/workspace-typography-polish-report.json",
+      "screenshots": {
+        "dayDesktop": "evaluation/backend-harness-gate-2026-07-08/design-polish/day-desktop.png",
+        "nightDesktop": "evaluation/backend-harness-gate-2026-07-08/design-polish/night-desktop.png",
+        "dayMobile": "evaluation/backend-harness-gate-2026-07-08/design-polish/day-mobile.png",
+        "nightMobile": "evaluation/backend-harness-gate-2026-07-08/design-polish/night-mobile.png"
+      },
+      "headlineFontWeightDesktop": 800,
+      "desktopNavButtonHeight": 50,
+      "mobileHorizontalOverflow": false,
+      "latestLayoutRegressionPassed": true
+    }
   },
   "verification": {
     "tests": {
@@ -153,6 +166,22 @@
       "command": "npm.cmd test -- tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-token-service.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts tests/workspace-layout-regression.test.ts",
       "filesPassed": 9,
       "testsPassed": 90
+    },
+    "latestWorkspaceTypographyPolish": {
+      "tests": {
+        "command": "npm.cmd test -- tests/workspace-layout-regression.test.ts tests/openclaw-chat.test.ts tests/claw-chat-route.test.ts",
+        "filesPassed": 3,
+        "testsPassed": 6
+      },
+      "typecheck": {
+        "command": "npm.cmd run typecheck",
+        "passed": true,
+        "note": "Initial parallel run raced .next/types generation; rerun after build passed."
+      },
+      "build": {
+        "command": "npm.cmd run build",
+        "passed": true
+      }
     }
   },
   "functionalOutputComparison": {
