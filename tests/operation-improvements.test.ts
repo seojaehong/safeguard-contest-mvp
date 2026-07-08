@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { buildHazardPhotoCandidates, buildPhotoAnalysisCandidate } from "@/lib/operation-improvements";
+import {
+  buildAcceptedHazardPhotoAppendix,
+  buildHazardPhotoCandidateKey,
+  buildHazardPhotoCandidates,
+  buildPhotoAnalysisCandidate
+} from "@/lib/operation-improvements";
 
 describe("operation improvement photo analysis candidate", () => {
   it("returns an empty candidate until both before and after photos are attached", () => {
@@ -57,5 +62,48 @@ describe("hazard photo candidates", () => {
         detail: "작업면, 보호구, 출입통제, 장비 배치 여부를 후보로 검토합니다."
       }
     ]);
+  });
+
+  it("builds a stable key for user accepted photo candidates", () => {
+    const key = buildHazardPhotoCandidateKey({
+      source: "vision",
+      label: "추락·낙하 위험",
+      detail: "개구부 주변 통제가 부족합니다.",
+      sourcePhotoNames: [" Workface.JPG "]
+    });
+
+    expect(key).toBe("vision::추락·낙하 위험::개구부 주변 통제가 부족합니다.::workface.jpg");
+  });
+
+  it("adds only accepted photo hazards to the generation appendix", () => {
+    const accepted = {
+      source: "vision" as const,
+      label: "추락·낙하 위험",
+      detail: "개구부 주변 통제가 부족합니다.",
+      severity: "high" as const,
+      evidence: "사진의 개구부와 통제선 미확인",
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+      sourcePhotoNames: ["workface.jpg"]
+    };
+    const ignored = {
+      source: "vision" as const,
+      label: "차량·장비 동선",
+      detail: "사진상 장비 접근로가 명확하지 않습니다.",
+      severity: "review" as const,
+      sourcePhotoNames: ["workface.jpg"]
+    };
+
+    const appendix = buildAcceptedHazardPhotoAppendix({
+      candidates: [accepted, ignored],
+      acceptedCandidateKeys: [buildHazardPhotoCandidateKey(accepted)],
+      summary: "외벽 작업면 사진입니다.",
+      ocrText: "추락주의"
+    });
+
+    expect(appendix).toContain("[사용자 추가 사진 위험요인 후보]");
+    expect(appendix).toContain("추락·낙하 위험(high)");
+    expect(appendix).toContain("위험성평가표");
+    expect(appendix).toContain("추락주의");
+    expect(appendix).not.toContain("차량·장비 동선");
   });
 });

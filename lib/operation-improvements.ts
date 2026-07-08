@@ -13,6 +13,14 @@ export type PhotoAnalysisCandidateInput = {
 export type HazardPhotoCandidate = {
   label: string;
   detail: string;
+  severity?: "high" | "medium" | "low" | "review";
+  evidence?: string;
+  reflectedDocuments?: readonly string[];
+  sourcePhotoNames?: readonly string[];
+};
+
+export type HazardPhotoGenerationCandidate = HazardPhotoCandidate & {
+  source?: "vision" | "local";
 };
 
 export function buildPhotoAnalysisCandidate(input: PhotoAnalysisCandidateInput): string {
@@ -57,4 +65,48 @@ export function buildHazardPhotoCandidates(question: string, photoName?: string 
           detail: "작업면, 보호구, 출입통제, 장비 배치 여부를 후보로 검토합니다."
         }
       ];
+}
+
+function normalizeCandidatePart(value: string | undefined): string {
+  return (value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+export function buildHazardPhotoCandidateKey(candidate: HazardPhotoGenerationCandidate): string {
+  return [
+    normalizeCandidatePart(candidate.source || "local"),
+    normalizeCandidatePart(candidate.label),
+    normalizeCandidatePart(candidate.detail),
+    (candidate.sourcePhotoNames || []).map(normalizeCandidatePart).join("|")
+  ].join("::");
+}
+
+export function buildAcceptedHazardPhotoAppendix(input: {
+  candidates: readonly HazardPhotoGenerationCandidate[];
+  acceptedCandidateKeys: readonly string[];
+  summary?: string;
+  ocrText?: string;
+}): string {
+  const acceptedKeySet = new Set(input.acceptedCandidateKeys);
+  const accepted = input.candidates
+    .filter((candidate) => acceptedKeySet.has(buildHazardPhotoCandidateKey(candidate)))
+    .slice(0, 8);
+  if (!accepted.length) return "";
+
+  const lines = [
+    "[사용자 추가 사진 위험요인 후보]",
+    ...accepted.map((candidate) => {
+      const severity = candidate.severity || "review";
+      const documents = candidate.reflectedDocuments?.length
+        ? ` / 반영: ${candidate.reflectedDocuments.join(", ")}`
+        : "";
+      const evidence = candidate.evidence ? ` / 근거: ${candidate.evidence}` : "";
+      return `- ${candidate.label}(${severity}): ${candidate.detail}${documents}${evidence}`;
+    })
+  ];
+  if (input.summary?.trim()) lines.push(`사진 요약: ${input.summary.trim()}`);
+  if (input.ocrText?.trim()) lines.push(`사진 OCR: ${input.ocrText.trim()}`);
+  return lines.join("\n");
 }

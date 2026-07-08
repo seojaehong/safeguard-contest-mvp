@@ -72,6 +72,13 @@ Generated: 2026-07-09
 - 사진을 첨부할 때마다 조용히 분석하고, 사용자는 후보별로 `추가`, `무시`, `자세히`를 선택한다.
 - 장기적으로 PDF/HWPX/Excel/도면도 같은 첨부 메뉴를 사용한다.
 
+2026-07-09 추가 구현:
+
+- 입력 화면의 별도 사진 분석 카드/드롭존을 제거하고 `+ 사진` composer tray로 흡수했다.
+- 사진은 최대 10장까지 첨부되며, 첨부 직후 `/api/input-photos/hazard-analysis`가 자동 호출된다.
+- 분석 후보는 `추가`/`무시`로 나뉘며, 사용자가 `추가`한 후보만 문서 생성 payload에 반영된다.
+- 후보를 추가해도 textarea 본문은 오염되지 않고, 생성 직전 하네스 입력에 별도 appendix로 붙는다.
+
 ## Ontology And Learning Corpus
 
 검증 대상:
@@ -105,6 +112,10 @@ Generated: 2026-07-09
 - `evaluation/ui-ux-browser-check-2026-07-09/workspace-visual-metrics.json`
 - `evaluation/ui-ux-browser-check-2026-07-09/workspace-night-input.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/workspace-day-mobile.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-plus-day.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-photo-candidates-day.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-mobile-day.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-attachment-metrics.json`
 
 핵심 권고:
 
@@ -118,6 +129,9 @@ Generated: 2026-07-09
 
 - desktop `/workspace?theme=night`: topbar position `relative`, side nav/heading overlap 없음
 - mobile `/workspace?theme=day`: horizontal overflow 없음
+- composer before photo: `+사진` tray 있음, 사진 패널 없음, horizontal overflow 없음
+- composer after photo: `1/10장 첨부`, 후보 2개, `1개 반영`, textarea에 `사진 후보` 문자열 없음
+- composer mobile: viewport 390px, scrollWidth 390px, horizontal overflow 없음
 
 ## Tests Run
 
@@ -131,6 +145,8 @@ Generated: 2026-07-09
   - 4 files, 14 tests passed
 - `npm.cmd test -- tests/workspace-layout-regression.test.ts`
   - 1 file, 1 test passed
+- `npm.cmd test -- tests/operation-improvements.test.ts tests/photo-vision-analysis.test.ts`
+  - 2 files, 18 tests passed
 - `npm.cmd run typecheck`
   - passed
 - `npm.cmd run build`
@@ -140,5 +156,4 @@ Generated: 2026-07-09
 
 1. DB schema/migration and bulk embedding upload still require explicit approval.
 2. Vector search should be enabled only after uploaded row count equals 6,032 and RPC smoke passes.
-3. Workspace `+ 첨부` composer UI is approved as a design direction but not yet implemented in code.
-4. Full page taxonomy/menu reduction needs implementation approval before code changes.
+3. Full page taxonomy/menu reduction needs implementation approval before code changes.

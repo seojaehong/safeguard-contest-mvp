@@ -12,6 +12,8 @@ import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/
 import type { FieldExample } from "@/lib/field-examples";
 import { formatEvidenceBadge } from "@/lib/smsa-mapping";
 import {
+  buildAcceptedHazardPhotoAppendix,
+  buildHazardPhotoCandidateKey,
   buildHazardPhotoCandidates,
   buildPhotoAnalysisCandidate as buildPhotoAnalysisCandidateText
 } from "@/lib/operation-improvements";
@@ -859,6 +861,8 @@ export function SafeGuardCommandCenter({
     candidates: [],
     message: ""
   });
+  const [acceptedInputHazardCandidateKeys, setAcceptedInputHazardCandidateKeys] = useState<string[]>([]);
+  const [dismissedInputHazardCandidateKeys, setDismissedInputHazardCandidateKeys] = useState<string[]>([]);
   const inputHazardPhotosRef = useRef<LocalPhoto[]>([]);
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
   const [improvementSaveState, setImprovementSaveState] = useState<ImprovementSaveState>("idle");
@@ -951,38 +955,43 @@ export function SafeGuardCommandCenter({
       candidates: [],
       message
     });
+    setAcceptedInputHazardCandidateKeys([]);
+    setDismissedInputHazardCandidateKeys([]);
   }
 
   function attachInputHazardPhotos(fileList: FileList | null) {
     const incoming = Array.from(fileList || []);
     if (!incoming.length) return;
+    const currentPhotos = inputHazardPhotosRef.current;
+    const remaining = Math.max(0, MAX_INPUT_HAZARD_PHOTOS - currentPhotos.length);
     const nextPhotos = incoming.slice(0, MAX_INPUT_HAZARD_PHOTOS).map((file) => ({
       name: file.name,
       url: URL.createObjectURL(file),
       file
     }));
-
-    setInputHazardPhotos((current) => {
-      const remaining = Math.max(0, MAX_INPUT_HAZARD_PHOTOS - current.length);
-      const accepted = nextPhotos.slice(0, remaining);
-      nextPhotos.slice(remaining).forEach((photo) => URL.revokeObjectURL(photo.url));
-      if (!accepted.length) {
-        setMessage(`현장 사진은 최대 ${MAX_INPUT_HAZARD_PHOTOS}장까지 첨부할 수 있습니다.`);
-        return current;
-      }
-      return [...current, ...accepted];
-    });
-    resetInputHazardAnalysis("사진을 첨부했습니다. 분석 버튼을 누르면 외부 vision API로 위험요인 후보를 도출합니다.");
-    setMessage(`현장 사진을 첨부했습니다. 최대 ${MAX_INPUT_HAZARD_PHOTOS}장까지 분석할 수 있습니다.`);
+    const accepted = nextPhotos.slice(0, remaining);
+    nextPhotos.slice(remaining).forEach((photo) => URL.revokeObjectURL(photo.url));
+    if (!accepted.length) {
+      setMessage(`현장 사진은 최대 ${MAX_INPUT_HAZARD_PHOTOS}장까지 첨부할 수 있습니다.`);
+      return;
+    }
+    const nextAllPhotos = [...currentPhotos, ...accepted];
+    inputHazardPhotosRef.current = nextAllPhotos;
+    setInputHazardPhotos(nextAllPhotos);
+    resetInputHazardAnalysis("사진을 첨부했습니다. 위험요인 후보를 자동 분석합니다.");
+    setMessage(`현장 사진 ${nextAllPhotos.length}장을 첨부했습니다. 위험요인을 자동 분석합니다.`);
+    void analyzeInputHazardPhotos(nextAllPhotos);
   }
 
   function removeInputHazardPhoto(index: number) {
-    setInputHazardPhotos((current) => {
-      const target = current[index];
-      if (target) URL.revokeObjectURL(target.url);
-      return current.filter((_, itemIndex) => itemIndex !== index);
-    });
-    resetInputHazardAnalysis("사진 구성이 바뀌었습니다. 다시 분석해 주세요.");
+    const currentPhotos = inputHazardPhotosRef.current;
+    const target = currentPhotos[index];
+    if (target) URL.revokeObjectURL(target.url);
+    const nextPhotos = currentPhotos.filter((_, itemIndex) => itemIndex !== index);
+    inputHazardPhotosRef.current = nextPhotos;
+    setInputHazardPhotos(nextPhotos);
+    resetInputHazardAnalysis(nextPhotos.length ? "사진 구성이 바뀌었습니다. 위험요인을 다시 분석합니다." : "");
+    if (nextPhotos.length) void analyzeInputHazardPhotos(nextPhotos);
   }
 
   function inputPhotoHazardCandidates(): InputHazardCandidate[] {
@@ -997,15 +1006,18 @@ export function SafeGuardCommandCenter({
     }));
   }
 
-  async function analyzeInputHazardPhotos() {
-    if (!inputHazardPhotos.length) {
+  async function analyzeInputHazardPhotos(photosOverride?: LocalPhoto[]) {
+    const photos = photosOverride || inputHazardPhotosRef.current;
+    if (!photos.length) {
       setMessage("분석할 현장 사진을 먼저 첨부해 주세요.");
       return;
     }
+    setAcceptedInputHazardCandidateKeys([]);
+    setDismissedInputHazardCandidateKeys([]);
     setInputHazardPhotoAnalysis((current) => ({ ...current, status: "analyzing", message: "현장 사진을 vision API로 분석 중입니다." }));
     const form = new FormData();
     form.set("question", question);
-    inputHazardPhotos.forEach((photo) => form.append("photos", photo.file, photo.name));
+    photos.forEach((photo) => form.append("photos", photo.file, photo.name));
     try {
       const response = await fetch("/api/input-photos/hazard-analysis", {
         method: "POST",
@@ -1073,29 +1085,28 @@ export function SafeGuardCommandCenter({
     }
   }
 
-  function applyInputPhotoCandidate(label: string, detail: string) {
-    const addition = `${label}: ${detail}`;
-    if (question.includes(addition)) return;
-    setQuestion((current) => `${current.trim()}\n사진 후보 - ${addition}`.trim());
-    setMessage("사진 위험요인 후보를 입력에 반영했습니다. 최종 문서 생성 전 현장 확인이 필요합니다.");
+  function acceptInputPhotoCandidate(candidate: InputHazardCandidate) {
+    const key = buildHazardPhotoCandidateKey(candidate);
+    setAcceptedInputHazardCandidateKeys((current) => current.includes(key) ? current : [...current, key]);
+    setDismissedInputHazardCandidateKeys((current) => current.filter((item) => item !== key));
+    setMessage("사진 위험요인 후보를 문서 생성에 반영하도록 추가했습니다.");
+  }
+
+  function dismissInputPhotoCandidate(candidate: InputHazardCandidate) {
+    const key = buildHazardPhotoCandidateKey(candidate);
+    setAcceptedInputHazardCandidateKeys((current) => current.filter((item) => item !== key));
+    setDismissedInputHazardCandidateKeys((current) => current.includes(key) ? current : [...current, key]);
+    setMessage("사진 위험요인 후보를 이번 문서 생성에서 제외했습니다.");
   }
 
   function buildGenerationQuestionWithPhotoAnalysis(baseQuestion: string) {
-    const candidates = inputHazardPhotoAnalysis.candidates.slice(0, 8);
-    if (!candidates.length) return baseQuestion;
-    const lines = [
-      baseQuestion.trim(),
-      "",
-      "[현장 사진 vision 위험요인 후보]",
-      ...candidates.map((candidate) => {
-        const documents = candidate.reflectedDocuments?.length ? ` / 반영: ${candidate.reflectedDocuments.join(", ")}` : "";
-        const evidence = candidate.evidence ? ` / 근거: ${candidate.evidence}` : "";
-        return `- ${candidate.label}(${candidate.severity || "review"}): ${candidate.detail}${documents}${evidence}`;
-      })
-    ];
-    if (inputHazardPhotoAnalysis.summary) lines.push(`요약: ${inputHazardPhotoAnalysis.summary}`);
-    if (inputHazardPhotoAnalysis.ocrText) lines.push(`OCR: ${inputHazardPhotoAnalysis.ocrText}`);
-    return lines.join("\n").trim();
+    const appendix = buildAcceptedHazardPhotoAppendix({
+      candidates: inputPhotoHazardCandidates(),
+      acceptedCandidateKeys: acceptedInputHazardCandidateKeys,
+      summary: inputHazardPhotoAnalysis.summary,
+      ocrText: inputHazardPhotoAnalysis.ocrText
+    });
+    return [baseQuestion.trim(), appendix].filter(Boolean).join("\n\n").trim();
   }
 
   function buildPhotoAnalysisCandidate() {
@@ -1445,6 +1456,12 @@ export function SafeGuardCommandCenter({
   const supportingDocumentItems = outputItems.filter((item) => !primaryDocumentKeys.has(item.key));
   const photoAnalysisCandidate = buildPhotoAnalysisCandidate();
   const inputPhotoCandidates = inputPhotoHazardCandidates();
+  const visibleInputPhotoCandidates = inputPhotoCandidates.filter((candidate) =>
+    !dismissedInputHazardCandidateKeys.includes(buildHazardPhotoCandidateKey(candidate))
+  );
+  const acceptedInputPhotoCandidateCount = inputPhotoCandidates.filter((candidate) =>
+    acceptedInputHazardCandidateKeys.includes(buildHazardPhotoCandidateKey(candidate))
+  ).length;
   const currentWorkflowStep = workflowSteps.find((step) => step.key === workspacePage) ?? workflowSteps[0];
   const themeShellClass = activeWorkspaceTheme === "day"
     ? "workspace-theme-day workspace-theme-field"
@@ -1574,22 +1591,10 @@ export function SafeGuardCommandCenter({
               aria-describedby="field-command-tips"
             />
             <p className="input-helper" id="field-command-tips">
-              작성 팁: 지역, 업종, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부, 핵심 위험을 포함하면 정확도가 올라갑니다.
+              작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 첨부하세요.
             </p>
-            <div className="field-brief-chip-row" aria-label="자동 인식 현장 요약">
-              <span>{fieldBrief.siteName}</span>
-              <span>{fieldBrief.industry}</span>
-              <span>{weatherBrief.summary}</span>
-              <span>{fieldBrief.workerCount}</span>
-              <span>{fieldBrief.foreignWorkerSignal}</span>
-            </div>
-            <section className="input-photo-hazard-panel" aria-label="현장 사진 위험요인 후보">
-              <div className="input-photo-copy">
-                <span>Photo risk input</span>
-                <strong>현장 사진으로 위험요인 후보 찾기</strong>
-                <p>최대 {MAX_INPUT_HAZARD_PHOTOS}장의 사진을 vision API로 분석해 추락, 차량동선, 정리정돈 같은 후보를 먼저 띄웁니다.</p>
-              </div>
-              <label className={inputHazardPhotos.length ? "input-photo-dropzone has-photo" : "input-photo-dropzone"}>
+            <div className="input-composer-tray" aria-label="현장 입력 첨부">
+              <label className="composer-attach-button" aria-label="현장 사진 첨부">
                 <input
                   type="file"
                   accept="image/*"
@@ -1600,19 +1605,37 @@ export function SafeGuardCommandCenter({
                   }}
                   disabled={busy}
                 />
-                {inputHazardPhotos.length ? (
-                  <>
-                    <strong>{inputHazardPhotos.length}/{MAX_INPUT_HAZARD_PHOTOS}장 첨부</strong>
-                    <span>추가 사진 선택</span>
-                  </>
-                ) : (
-                  <>
-                    <strong>사진 첨부</strong>
-                    <span>작업면, 장비, 통로, 보호구 상태</span>
-                  </>
-                )}
+                <span aria-hidden="true">+</span>
+                <b>사진</b>
               </label>
+              <div className="composer-attachment-status">
+                <strong>{inputHazardPhotos.length ? `${inputHazardPhotos.length}/${MAX_INPUT_HAZARD_PHOTOS}장 첨부` : "사진·파일 첨부"}</strong>
+                <small>
+                  {inputHazardPhotoAnalysis.status === "analyzing"
+                    ? "사진에서 위험요인과 OCR 신호를 찾고 있습니다."
+                    : inputHazardPhotoAnalysis.message || "첨부하면 위험요인 후보를 자동 분석합니다."}
+                </small>
+              </div>
               {inputHazardPhotos.length ? (
+                <button
+                  type="button"
+                  className="composer-reanalyze-button"
+                  onClick={() => void analyzeInputHazardPhotos()}
+                  disabled={busy || inputHazardPhotoAnalysis.status === "analyzing"}
+                >
+                  다시 분석
+                </button>
+              ) : null}
+            </div>
+            <div className="field-brief-chip-row" aria-label="자동 인식 현장 요약">
+              <span>{fieldBrief.siteName}</span>
+              <span>{fieldBrief.industry}</span>
+              <span>{weatherBrief.summary}</span>
+              <span>{fieldBrief.workerCount}</span>
+              <span>{fieldBrief.foreignWorkerSignal}</span>
+            </div>
+            {inputHazardPhotos.length ? (
+              <section className="input-photo-hazard-panel" aria-label="현장 사진 위험요인 후보">
                 <div className="input-photo-preview-grid" aria-label="첨부된 현장 사진">
                   {inputHazardPhotos.map((photo, index) => (
                     <article key={`${photo.name}-${photo.url}`}>
@@ -1625,19 +1648,6 @@ export function SafeGuardCommandCenter({
                     </article>
                   ))}
                 </div>
-              ) : null}
-              <div className="input-photo-analysis-actions">
-                <button
-                  type="button"
-                  onClick={() => void analyzeInputHazardPhotos()}
-                  disabled={!inputHazardPhotos.length || busy || inputHazardPhotoAnalysis.status === "analyzing"}
-                >
-                  {inputHazardPhotoAnalysis.status === "analyzing" ? "사진 분석 중..." : "사진 위험요인 분석"}
-                </button>
-                <small>
-                  {inputHazardPhotoAnalysis.message || (inputHazardPhotos.length ? "분석 전에는 로컬 후보만 표시됩니다." : "사진을 첨부하면 분석할 수 있습니다.")}
-                </small>
-              </div>
               {inputHazardPhotoAnalysis.summary || inputHazardPhotoAnalysis.ocrText || inputHazardPhotoAnalysis.siteSignals.length ? (
                 <article className="input-photo-analysis-summary">
                   <span>{inputHazardPhotoAnalysis.status === "analyzed" ? "Vision result" : "Vision status"}</span>
@@ -1647,23 +1657,38 @@ export function SafeGuardCommandCenter({
                 </article>
               ) : null}
               <div className="input-photo-candidates">
-                {inputPhotoCandidates.length ? (
-                  inputPhotoCandidates.map((candidate) => (
-                    <button
-                      key={`${candidate.source}-${candidate.label}`}
-                      type="button"
-                      onClick={() => applyInputPhotoCandidate(candidate.label, candidate.detail)}
-                    >
-                      <strong>{candidate.label}{candidate.severity ? ` · ${candidate.severity}` : ""}</strong>
-                      <span>{candidate.detail}</span>
-                      {candidate.evidence ? <small>{candidate.evidence}</small> : null}
-                    </button>
-                  ))
+                <div className="input-photo-candidates-head">
+                  <span>사진 위험요인 후보</span>
+                  <strong>{acceptedInputPhotoCandidateCount}개 반영</strong>
+                </div>
+                {visibleInputPhotoCandidates.length ? (
+                  visibleInputPhotoCandidates.map((candidate) => {
+                    const candidateKey = buildHazardPhotoCandidateKey(candidate);
+                    const accepted = acceptedInputHazardCandidateKeys.includes(candidateKey);
+                    return (
+                      <article key={candidateKey} className={accepted ? "accepted" : ""}>
+                        <div>
+                          <strong>{candidate.label}{candidate.severity ? ` · ${candidate.severity}` : ""}</strong>
+                          <span>{candidate.detail}</span>
+                          {candidate.evidence ? <small>{candidate.evidence}</small> : null}
+                        </div>
+                        <div className="input-photo-candidate-actions">
+                          <button type="button" onClick={() => acceptInputPhotoCandidate(candidate)}>
+                            {accepted ? "추가됨" : "추가"}
+                          </button>
+                          <button type="button" onClick={() => dismissInputPhotoCandidate(candidate)}>
+                            무시
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  })
                 ) : (
-                  <p>사진을 분석하면 위험성평가서와 TBM에 반영할 검토 후보가 이곳에 표시됩니다.</p>
+                  <p>{inputHazardPhotoAnalysis.status === "analyzing" ? "사진을 분석하는 중입니다." : "후보가 없으면 현장 확인 후 직접 입력만으로 생성할 수 있습니다."}</p>
                 )}
               </div>
-            </section>
+              </section>
+            ) : null}
             <div className="evidence-readiness-rail" aria-label="근거 준비 레일">
               {readinessRail.map((item) => (
                 <article key={item.key} className={`evidence-readiness-card ${readinessClass(item.tone)}`}>
