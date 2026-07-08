@@ -95,6 +95,12 @@ function readStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
+function readOptionalPayloadString(value: unknown, key: string): string | undefined {
+  if (!isRecord(value)) return undefined;
+  const text = value[key];
+  return typeof text === "string" && text.trim() ? compactText(text, 120) : undefined;
+}
+
 function normalizeImprovementSourceType(value: string | null): HarnessImprovement["sourceType"] {
   if (value === "manual" || value === "photo_analysis" || value === "operator_note") return value;
   return "operator_note";
@@ -201,7 +207,7 @@ async function loadHarnessImprovementMemory(
   try {
     const { data, error } = await client
       .from("workpack_improvements")
-      .select("id,task_label,hazard_label,improvement_text,reflected_documents,source_type,created_at")
+      .select("id,task_label,hazard_label,improvement_text,reflected_documents,source_type,analysis_payload,created_at")
       .eq("site_id", authContext.siteId)
       .order("created_at", { ascending: false })
       .limit(12);
@@ -218,6 +224,8 @@ async function loadHarnessImprovementMemory(
       improvementText: row.improvement_text,
       reflectedDocuments: readStringArray(row.reflected_documents),
       sourceType: normalizeImprovementSourceType(row.source_type),
+      visionSummary: readOptionalPayloadString(row.analysis_payload, "summary"),
+      ocrText: readOptionalPayloadString(row.analysis_payload, "ocrText"),
     }));
   } catch (error) {
     log.warn("harness improvement memory load failed", error);

@@ -3,7 +3,12 @@ import { describe, expect, it } from "vitest";
 import { buildDbHarnessPacket, buildHarnessPromptContext, hasDocumentCoverage } from "@/lib/db-harness";
 import { buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
-import { buildWorkpackLearningJsonl, buildWorkpackLearningMarkdown } from "@/lib/workpack-learning-export";
+import {
+  buildWorkpackLearningFile,
+  buildWorkpackLearningJsonl,
+  buildWorkpackLearningMarkdown,
+  normalizeWorkpackLearningFormat
+} from "@/lib/workpack-learning-export";
 
 function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
   return {
@@ -64,16 +69,20 @@ describe("DB harness packet", () => {
         hazardLabel: "추락",
         improvementText: "작업발판 난간 보강",
         reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
-        sourceType: "photo_analysis"
+        sourceType: "photo_analysis",
+        visionSummary: "난간이 보강된 것으로 보입니다.",
+        ocrText: "추락주의"
       }]
     });
+    const promptContext = buildHarnessPromptContext(packet);
 
     expect(packet.mode).toBe("db_harness_first");
     expect(packet.sifCases).toHaveLength(1);
     expect(packet.generationContract.llmRole).toBe("naturalize_only");
     expect(packet.generationContract.fallbackChainAllowed).toBe(false);
     expect(hasDocumentCoverage(packet, "TBM 기록")).toBe(true);
-    expect(buildHarnessPromptContext(packet)).toContain("DB harness가 고정한 근거");
+    expect(promptContext).toContain("DB harness가 고정한 근거");
+    expect(promptContext).toContain("ocr: 추락주의");
   });
 
   it("marks missing SIF as review-required", () => {
@@ -101,17 +110,27 @@ describe("workpack learning export", () => {
         hazardLabel: "추락",
         improvementText: "난간 보강",
         reflectedDocuments: ["위험성평가표"],
-        sourceType: "manual" as const
+        sourceType: "photo_analysis" as const,
+        visionSummary: "난간 보강이 확인됩니다.",
+        ocrText: "추락주의"
       }],
       confirmations: [{ displayName: "Nguyen", languageCode: "vi", readAt: "2026-07-08T09:20:00.000Z" }]
     };
 
     const markdown = buildWorkpackLearningMarkdown(input);
     const jsonl = buildWorkpackLearningJsonl(input);
+    const file = buildWorkpackLearningFile(input, "jsonl");
 
     expect(markdown).toContain("# 성수동 외벽 도장");
     expect(markdown).toContain("난간 보강");
+    expect(markdown).toContain("ocr: 추락주의");
     expect(jsonl.split("\n")).toHaveLength(4);
     expect(jsonl).toContain("\"eventType\":\"improvement\"");
+    expect(jsonl).toContain("\"ocrText\":\"추락주의\"");
+    expect(file.fileName).toBe("성수동-외벽-도장-learning.jsonl");
+    expect(file.contentType).toContain("application/x-ndjson");
+    expect(file.content.endsWith("\n")).toBe(true);
+    expect(normalizeWorkpackLearningFormat("jsonl")).toBe("jsonl");
+    expect(normalizeWorkpackLearningFormat("bad")).toBe("markdown");
   });
 });
