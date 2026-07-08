@@ -9,6 +9,7 @@ import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/
 import { fetchAskStream } from "@/lib/ask-stream-client";
 import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
 import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/types";
+import type { HarnessImprovement, HarnessMemoryInput } from "@/lib/db-harness";
 import type { FieldExample } from "@/lib/field-examples";
 import { formatEvidenceBadge } from "@/lib/smsa-mapping";
 import {
@@ -1109,6 +1110,26 @@ export function SafeGuardCommandCenter({
     return [baseQuestion.trim(), appendix].filter(Boolean).join("\n\n").trim();
   }
 
+  function buildGenerationHarnessMemory(): HarnessMemoryInput {
+    const improvements: HarnessImprovement[] = operationImprovements.slice(0, 8).map((item) => ({
+      id: item.remoteImprovementId || item.id,
+      taskLabel: item.workSummary,
+      hazardLabel: item.hazardLabel,
+      improvementText: item.improvementText,
+      reflectedDocuments: item.reflectedDocuments,
+      sourceType: item.sourceType || "manual",
+      visionStatus: item.visionStatus,
+      analysisMode: item.analysisMode,
+      photoPairAttached: item.photoPairAttached ?? Boolean(item.beforePhotoName && item.afterPhotoName),
+      visionUserLabel: item.visionUserLabel,
+      visionSummary: item.visionSummary || item.photoAnalysisSummary,
+      detectedHazards: item.detectedHazards,
+      observedImprovement: item.observedImprovement,
+      ocrText: item.ocrText
+    }));
+    return { improvements, workpackMemory: [] };
+  }
+
   function buildPhotoAnalysisCandidate() {
     return buildPhotoAnalysisCandidateText({
       beforePhoto,
@@ -1301,11 +1322,11 @@ export function SafeGuardCommandCenter({
       : `오늘 작업 개선사항을 로컬 후보로 보관했습니다. ${saveMessage}`);
   }
 
-  async function fetchViaLegacyEndpoint(trimmed: string): Promise<AskResponse> {
+  async function fetchViaLegacyEndpoint(trimmed: string, harnessMemory: HarnessMemoryInput): Promise<AskResponse> {
     const response = await fetch("/api/ask", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ question: trimmed, aiMode })
+      body: JSON.stringify({ question: trimmed, aiMode, harnessMemory })
     });
     if (!response.ok) {
       throw new Error(`문서팩 생성 요청 실패: HTTP ${response.status}`);
@@ -1335,12 +1356,13 @@ export function SafeGuardCommandCenter({
     setWorkspacePage(nextWorkspacePageAfterGenerate());
     setMessage("법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.");
     setConsoleLines([]);
+    const harnessMemory = buildGenerationHarnessMemory();
 
     // template mode: D-2a's stream only carries the final payload for template
     // scope, so keep it on the plain /api/ask path — simpler, no console needed.
     if (aiMode === "template") {
       try {
-        const payload = await fetchViaLegacyEndpoint(trimmed);
+        const payload = await fetchViaLegacyEndpoint(trimmed, harnessMemory);
         applyGeneratedPayload(payload);
       } catch (error) {
         console.error("workpack generation failed", error);
@@ -1352,7 +1374,7 @@ export function SafeGuardCommandCenter({
     }
 
     try {
-      const payload = (await fetchAskStream({ question: trimmed, aiMode }, (event) => {
+      const payload = (await fetchAskStream({ question: trimmed, aiMode, harnessMemory }, (event) => {
         setConsoleLines((current) => nextConsoleLines(current, event));
       })) as AskResponse;
       applyGeneratedPayload(payload);
@@ -1370,7 +1392,7 @@ export function SafeGuardCommandCenter({
         }
       ]);
       try {
-        const payload = await fetchViaLegacyEndpoint(trimmed);
+        const payload = await fetchViaLegacyEndpoint(trimmed, harnessMemory);
         applyGeneratedPayload(payload);
       } catch (error) {
         console.error("workpack generation failed", error);

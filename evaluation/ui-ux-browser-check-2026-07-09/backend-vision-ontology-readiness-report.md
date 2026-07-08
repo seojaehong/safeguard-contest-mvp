@@ -119,6 +119,14 @@ Generated: 2026-07-09
 - 파일에는 작업, 위험요인, 조치, 개선, 근거, 확인 이력이 함께 기록된다.
 - 사진 Before/After 개선 후보가 있으면 `visionStatus`, OCR, 반영 문서, 사진 첨부 여부가 함께 남는다.
 
+2026-07-09 하네스 생성 경로 보강:
+
+- 워크스페이스에서 저장한 로컬/DB 개선사항 후보를 `/api/ask`와 `/api/ask/stream` 요청의 `harnessMemory`로 함께 보낸다.
+- 서버는 `parseHarnessMemoryInput`으로 이 값을 엄격히 정규화한 뒤 `runAsk`에 전달한다.
+- `runAsk`는 safety reference DB 검색 결과와 작업 개선 이력을 같은 `DbHarnessPacket`에 넣고, `buildHarnessPromptContext`를 통해 AI 문서 생성 프롬프트에 제공한다.
+- 최종 `AskResponse.dbHarness.packet.improvementMemory`와 `summary.improvementMemory`에도 같은 값이 남아 품질 패널과 운영 코퍼스가 같은 하네스 계약을 본다.
+- 즉 사진/개선 후보는 단순 textarea 부록만이 아니라 DB 기반 하네스 계약의 일부로 문서 생성 전에 고정된다.
+
 판단:
 
 - 현재 요구에는 Habermas machine 또는 LangGraph 구현이 필수는 아니다.
@@ -174,6 +182,8 @@ Generated: 2026-07-09
   - 4 files, 14 tests passed
 - `npm.cmd test -- tests/operation-memory-visualization.test.ts tests/ontology-operation-memory.test.ts tests/commercial-harness.test.ts`
   - 3 files, 12 tests passed
+- `npm.cmd test -- tests/commercial-harness.test.ts tests/ai-deliverables-prompts.test.ts tests/quality-contract.test.ts`
+  - 3 files, 26 tests passed
 - `npm.cmd test -- tests/workspace-layout-regression.test.ts`
   - 1 file, 1 test passed
 - `npm.cmd test -- tests/operation-improvements.test.ts tests/photo-vision-analysis.test.ts`

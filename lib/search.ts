@@ -26,7 +26,7 @@ import { buildEvidenceLabels } from "./smsa-mapping";
 import { createLogger } from "@/lib/logger";
 import { attachProgressListeners, type OnAskProgress } from "./ask-progress";
 import { resolveRunAskMode } from "./run-ask-mode";
-import { buildDbHarnessPacket, buildHarnessPromptContext } from "./db-harness";
+import { buildDbHarnessPacket, buildHarnessPromptContext, type HarnessMemoryInput } from "./db-harness";
 
 const log = createLogger("search");
 
@@ -789,12 +789,17 @@ function stripPipelineMeta(text: string): string {
 
 export type RunAskOptions = {
   aiMode?: AiMode;
+  harnessMemory?: HarnessMemoryInput;
   /** Task D-2a: SSE progress callback for the AI console. Defaults to no-op. */
   onProgress?: OnAskProgress;
 };
 
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
   const onProgress = options.onProgress;
+  const harnessMemory = {
+    improvements: options.harnessMemory?.improvements || [],
+    workpackMemory: options.harnessMemory?.workpackMemory || []
+  };
   const aiMode = resolveRunAskMode({
     requestedMode: options.aiMode,
     envDefault: process.env.AI_MODE_DEFAULT
@@ -955,7 +960,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             const safeRefItems = safeRef?.items ?? [];
             const dbHarnessPacket = buildDbHarnessPacket({
               question,
-              references: safeRefItems
+              references: safeRefItems,
+              improvements: harnessMemory.improvements,
+              workpackMemory: harnessMemory.workpackMemory
             });
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
@@ -1197,6 +1204,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const dbHarnessPacket = buildDbHarnessPacket({
       question,
       references: safetyReference.items,
+      improvements: harnessMemory.improvements,
+      workpackMemory: harnessMemory.workpackMemory,
       ontologyMissing: structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`)
     });
     const dbHarnessPromptContext = buildHarnessPromptContext(dbHarnessPacket);

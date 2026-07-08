@@ -5,10 +5,12 @@
 
 import { parseSseChunk } from "@/lib/sse-client";
 import type { AskProgressEvent } from "@/lib/ask-progress";
+import type { HarnessMemoryInput } from "@/lib/db-harness";
 
 export type AskStreamRequest = {
   question: string;
   aiMode?: string;
+  harnessMemory?: HarnessMemoryInput;
 };
 
 /**

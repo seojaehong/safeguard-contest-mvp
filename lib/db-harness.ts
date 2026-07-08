@@ -48,6 +48,11 @@ export type DbHarnessPacket = {
   };
 };
 
+export type HarnessMemoryInput = {
+  improvements?: HarnessImprovement[];
+  workpackMemory?: HarnessWorkpackMemory[];
+};
+
 const REQUIRED_DOCUMENTS = ["위험성평가표", "TBM 브리핑", "TBM 기록"];
 
 function includesDocument(item: SafetyReferenceItem, document: string) {
@@ -105,6 +110,90 @@ export function buildDbHarnessPacket(input: {
       missingEvidence
     }
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function readStringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0).map((item) => item.trim())
+    : [];
+}
+
+function normalizeSourceType(value: unknown): HarnessImprovement["sourceType"] {
+  if (value === "photo_analysis" || value === "operator_note" || value === "manual") return value;
+  return "manual";
+}
+
+function normalizeVisionStatus(value: unknown): HarnessImprovement["visionStatus"] | undefined {
+  if (value === "analyzed" || value === "unconfigured" || value === "failed") return value;
+  return undefined;
+}
+
+function normalizeAnalysisMode(value: unknown): HarnessImprovement["analysisMode"] | undefined {
+  if (value === "vision_ocr" || value === "photo_pair_unanalyzed" || value === "manual_text") return value;
+  return undefined;
+}
+
+function parseHarnessImprovement(value: unknown): HarnessImprovement | null {
+  if (!isRecord(value)) return null;
+  const id = readString(value.id);
+  const taskLabel = readString(value.taskLabel);
+  const hazardLabel = readString(value.hazardLabel);
+  const improvementText = readString(value.improvementText);
+  if (!id || !taskLabel || !hazardLabel || !improvementText) return null;
+  return {
+    id,
+    taskLabel,
+    hazardLabel,
+    improvementText,
+    reflectedDocuments: readStringArray(value.reflectedDocuments).slice(0, 8),
+    sourceType: normalizeSourceType(value.sourceType),
+    visionStatus: normalizeVisionStatus(value.visionStatus),
+    analysisMode: normalizeAnalysisMode(value.analysisMode),
+    photoPairAttached: typeof value.photoPairAttached === "boolean" ? value.photoPairAttached : undefined,
+    visionUserLabel: readString(value.visionUserLabel) || undefined,
+    visionProvider: readString(value.visionProvider) || undefined,
+    visionModel: readString(value.visionModel) || undefined,
+    visionSummary: readString(value.visionSummary) || undefined,
+    detectedHazards: readStringArray(value.detectedHazards).slice(0, 10),
+    observedImprovement: readString(value.observedImprovement) || undefined,
+    ocrText: readString(value.ocrText) || undefined,
+    visionErrorMessage: readString(value.visionErrorMessage) || undefined
+  };
+}
+
+function parseHarnessWorkpackMemory(value: unknown): HarnessWorkpackMemory | null {
+  if (!isRecord(value)) return null;
+  const id = readString(value.id);
+  const question = readString(value.question);
+  const generatedAt = readString(value.generatedAt);
+  const statusLabel = readString(value.statusLabel);
+  if (!id || !question || !generatedAt || !statusLabel) return null;
+  return {
+    id,
+    question,
+    generatedAt,
+    reflectedDocuments: readStringArray(value.reflectedDocuments).slice(0, 12),
+    statusLabel
+  };
+}
+
+export function parseHarnessMemoryInput(value: unknown): Required<HarnessMemoryInput> {
+  if (!isRecord(value)) return { improvements: [], workpackMemory: [] };
+  const improvements = Array.isArray(value.improvements)
+    ? value.improvements.map(parseHarnessImprovement).filter((item): item is HarnessImprovement => item !== null).slice(0, 12)
+    : [];
+  const workpackMemory = Array.isArray(value.workpackMemory)
+    ? value.workpackMemory.map(parseHarnessWorkpackMemory).filter((item): item is HarnessWorkpackMemory => item !== null).slice(0, 8)
+    : [];
+  return { improvements, workpackMemory };
 }
 
 export function buildHarnessPromptContext(packet: DbHarnessPacket) {

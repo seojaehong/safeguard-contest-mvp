@@ -5,6 +5,7 @@ import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
 import { formatSseEvent, type AskProgressEvent } from "@/lib/ask-progress";
 import { createLogger } from "@/lib/logger";
+import { parseHarnessMemoryInput } from "@/lib/db-harness";
 
 // Task D-2a: streaming twin of /api/ask (app/api/ask/route.ts is untouched — demo
 // stability). Same request body, but responds with an SSE stream of stage/doc progress
@@ -16,14 +17,20 @@ const log = createLogger("api/ask/stream");
 const ALLOWED_MODES: AiMode[] = ["template", "enhanced", "full"];
 const limiter = createRateLimiter({ limit: 10, windowMs: 60_000 });
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 export async function POST(request: NextRequest) {
   const limited = enforceRateLimit(request, limiter);
   if (limited) return limited;
 
-  const body = await request.json().catch(() => ({}));
-  const question = typeof body.question === "string" ? body.question : "산업안전 실무 질문";
-  const requestedMode = typeof body.aiMode === "string" ? (body.aiMode as AiMode) : undefined;
+  const body: unknown = await request.json().catch(() => ({}));
+  const record = isRecord(body) ? body : {};
+  const question = typeof record.question === "string" ? record.question : "산업안전 실무 질문";
+  const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
   const aiMode = requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined;
+  const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -37,7 +44,7 @@ export async function POST(request: NextRequest) {
         }
       };
       try {
-        const payload = await runAsk(question, { aiMode, onProgress: emit });
+        const payload = await runAsk(question, { aiMode, harnessMemory, onProgress: emit });
         emit({ kind: "final", payload });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
