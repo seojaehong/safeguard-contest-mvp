@@ -1,0 +1,192 @@
+{
+  "generatedAt": "2026-07-08T14:29:27.452Z",
+  "target": "https://www.safeclaw.kr",
+  "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
+  "search": {
+    "status": 200,
+    "ok": true,
+    "count": 8,
+    "configured": true,
+    "message": "Supabase 안전 지식 DB에서 참고자료를 조회했습니다.",
+    "items": [
+      {
+        "id": "sif-아카이브-건설업-01039",
+        "itemType": "sif-case",
+        "title": "1038 / 4. 마감공사 / 4.2 방수 작업",
+        "evidenceRole": "현장 판단 보조 근거",
+        "sourceKind": "고위험요인 사례",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "사진/증빙",
+          "비상대응 절차"
+        ],
+        "controls": [
+          "작업발판·난간·개구부 상태 확인",
+          "안전대 체결 및 작업반경 출입통제",
+          "가동부 방호덮개와 비상정지장치 확인",
+          "정비 전 전원 차단 및 잠금표지"
+        ]
+      },
+      {
+        "id": "sif-아카이브-건설업-01063",
+        "itemType": "sif-case",
+        "title": "1062 / 4. 마감공사 / 4.3 석재 및 타일 작업",
+        "evidenceRole": "현장 판단 보조 근거",
+        "sourceKind": "고위험요인 사례",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "사진/증빙",
+          "비상대응 절차"
+        ],
+        "controls": [
+          "가동부 방호덮개와 비상정지장치 확인",
+          "정비 전 전원 차단 및 잠금표지",
+          "보행자 동선과 장비 동선 분리",
+          "신호수 배치 및 후진 경보 확인"
+        ]
+      },
+      {
+        "id": "sif-아카이브-건설업-01123",
+        "itemType": "sif-case",
+        "title": "1122 / 4. 마감공사 / 4.4 도장작업",
+        "evidenceRole": "현장 판단 보조 근거",
+        "sourceKind": "고위험요인 사례",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "사진/증빙",
+          "비상대응 절차"
+        ],
+        "controls": [
+          "작업발판·난간·개구부 상태 확인",
+          "안전대 체결 및 작업반경 출입통제"
+        ]
+      },
+      {
+        "id": "sif-아카이브-건설업-01612",
+        "itemType": "sif-case",
+        "title": "1611 / 4. 마감공사 / 4.8 판넬 등 외부마감 작업",
+        "evidenceRole": "현장 판단 보조 근거",
+        "sourceKind": "고위험요인 사례",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "사진/증빙",
+          "비상대응 절차"
+        ],
+        "controls": [
+          "작업발판·난간·개구부 상태 확인",
+          "안전대 체결 및 작업반경 출입통제",
+          "가동부 방호덮개와 비상정지장치 확인",
+          "정비 전 전원 차단 및 잠금표지",
+          "보행자 동선과 장비 동선 분리",
+          "신호수 배치 및 후진 경보 확인"
+        ]
+      },
+      {
+        "id": "sif-아카이브-건설업-01675",
+        "itemType": "sif-case",
+        "title": "1674 / 4. 마감공사 / 4.8 판넬 등 외부마감 작업",
+        "evidenceRole": "현장 판단 보조 근거",
+        "sourceKind": "고위험요인 사례",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "사진/증빙",
+          "비상대응 절차"
+        ],
+        "controls": [
+          "작업발판·난간·개구부 상태 확인",
+          "안전대 체결 및 작업반경 출입통제"
+        ]
+      },
+      {
+        "id": "sif-아카이브-건설업-02162",
+        "itemType": "sif-case",
+        "title": "2161 / 5. 전기·기계 설비공사 / 5.2 기계설비 작업",
+        "evidenceRole": "현장 판단 보조 근거",
+        "sourceKind": "고위험요인 사례",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "사진/증빙",
+          "비상대응 절차"
+        ],
+        "controls": [
+          "작업발판·난간·개구부 상태 확인",
+          "안전대 체결 및 작업반경 출입통제",
+          "가동부 방호덮개와 비상정지장치 확인",
+          "정비 전 전원 차단 및 잠금표지"
+        ]
+      },
+      {
+        "id": "sif-아카이브-건설업-02575",
+        "itemType": "sif-case",
+        "title": "2574 / 11. 기타 토목공사 / 11.4 맨홀 및 관부설작업",
+        "evidenceRole": "현장 판단 보조 근거",
+        "sourceKind": "고위험요인 사례",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "TBM 브리핑",
+          "TBM 기록",
+          "안전보건교육 기록",
+          "사진/증빙",
+          "비상대응 절차"
+        ],
+        "controls": [
+          "작업 전 유해·위험요인 확인",
+          "관리감독자 확인 후 작업 시작"
+        ]
+      },
+      {
+        "id": "sif-아카이브-건설업-00329",
+        "itemType": "sif-case",
+        "title": "328 / 2. 철근콘크리트 공사 / 2.1 거푸집 작업",
+        "evidenceRole": "현장 판단 보조 근거",
+        "sourceKind": "고위험요인 사례",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "사진/증빙",
+          "비상대응 절차"
+        ],
+        "controls": [
+          "작업발판·난간·개구부 상태 확인",
+          "안전대 체결 및 작업반경 출입통제"
+        ]
+      }
+    ]
+  },
+  "ask": {
+    "status": 200,
+    "ok": true,
+    "mode": "mock",
+    "safetyReference": {
+      "items": []
+    },
+    "resultSignals": {
+      "riskIncludesSafetyReferenceAppendix": false,
+      "tbmIncludesSafetyReferenceAppendix": false,
+      "riskIncludesKoshaOrSifTerms": true,
+      "tbmIncludesKoshaOrSifTerms": true
+    },
+    "deliverableLengths": {
+      "riskAssessmentDraft": 1509,
+      "tbmBriefing": 1208,
+      "tbmLogDraft": 1165,
+      "safetyEducationRecordDraft": 1038
+    },
+    "statusDetail": "AI_MODE=template (템플릿 본문 사용, 외부 호출 없음)"
+  }
+}

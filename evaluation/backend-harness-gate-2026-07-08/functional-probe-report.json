@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-07-08T14:27:42.740Z",
+  "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
+  "search": {
+    "status": 503,
+    "ok": false,
+    "count": 0,
+    "configured": true,
+    "mode": null,
+    "items": []
+  },
+  "ask": {
+    "status": 200,
+    "ok": true,
+    "mode": "mock",
+    "safetyReference": {
+      "items": []
+    },
+    "resultSignals": {
+      "riskIncludesSafetyReferenceAppendix": false,
+      "tbmIncludesSafetyReferenceAppendix": false,
+      "riskIncludesKoshaOrSifTerms": true,
+      "tbmIncludesKoshaOrSifTerms": true
+    },
+    "deliverableLengths": {
+      "riskAssessmentDraft": 1509,
+      "tbmBriefing": 1208,
+      "tbmLogDraft": 1165,
+      "safetyEducationRecordDraft": 1038
+    },
+    "statusDetail": "AI_MODE=template (템플릿 본문 사용, 외부 호출 없음)"
+  },
+  "interpretation": {
+    "runtimeEmbeddingRetrieval": false,
+    "reason": "Current runtime /api/ask uses searchSafetyReferences REST/tag/text search and appends/compresses matched safety_reference_items. SIF embedding corpus/upload is approval-gated and not yet connected to vector retrieval."
+  }
+}

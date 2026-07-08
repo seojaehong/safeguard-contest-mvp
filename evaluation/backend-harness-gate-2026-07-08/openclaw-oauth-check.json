@@ -1,0 +1,16 @@
+{
+  "generatedAt": "2026-07-08T14:33:23.0867764Z",
+  "profile": "safeclaw",
+  "cliPresent": true,
+  "modelsStatusExitCode": 0,
+  "mcpProbeExitCode": 0,
+  "oauthUsable": true,
+  "defaultModel": "openai/gpt-5.5",
+  "configuredModelsMentioned": [
+    "google/gemini-2.5-pro",
+    "openai/gpt-5.5"
+  ],
+  "mcpToolCount": 4,
+  "versionWarning": true,
+  "redactionNote": "Raw OpenClaw auth output intentionally omitted because provider credentials and account identifiers may appear."
+}

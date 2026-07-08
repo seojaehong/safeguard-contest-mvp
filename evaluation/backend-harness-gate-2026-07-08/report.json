@@ -24,8 +24,18 @@
   },
   "learningExport": {
     "route": "app/api/workpacks/[id]/learning-export/route.ts",
-    "formats": ["markdown", "jsonl"],
-    "includes": ["workpack", "reference", "improvement", "ack", "visionSummary", "ocrText"],
+    "formats": [
+      "markdown",
+      "jsonl"
+    ],
+    "includes": [
+      "workpack",
+      "reference",
+      "improvement",
+      "ack",
+      "visionSummary",
+      "ocrText"
+    ],
     "workspaceDownloadUi": true
   },
   "workspaceDesign": {
@@ -34,14 +44,16 @@
     "direction": "linear_structure_field_day_readability",
     "desktopScreenshot": "evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-desktop-day.png",
     "mobileScreenshot": "evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-mobile-day.png",
+    "nightScrolledScreenshot": "evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-desktop-night-scrolled.png",
     "visualCheck": "evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-visual-check.json",
-    "horizontalOverflow": false
+    "horizontalOverflow": false,
+    "stickyTopbarOverlap": false
   },
   "verification": {
     "tests": {
-      "command": "npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/commercial-migration.test.ts tests/mcp-tools.test.ts",
-      "filesPassed": 5,
-      "testsPassed": 38
+      "command": "npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/commercial-migration.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts",
+      "filesPassed": 7,
+      "testsPassed": 55
     },
     "typecheck": {
       "command": "npm.cmd run typecheck",
@@ -54,7 +66,58 @@
     "browserVisual": {
       "command": "Playwright screenshot check on http://localhost:3107/workspace",
       "passed": true,
-      "screenshots": 3
-    }
+      "screenshots": 4
+    },
+    "layoutRegression": {
+      "command": "npm.cmd test -- tests/workspace-layout-regression.test.ts",
+      "passed": true
+    },
+    "latestCommands": [
+      "npm.cmd test -- tests/workspace-layout-regression.test.ts",
+      "npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/commercial-migration.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts",
+      "npm.cmd run typecheck",
+      "npm.cmd run build"
+    ]
+  },
+  "functionalOutputComparison": {
+    "artifact": "evaluation/backend-harness-gate-2026-07-08/live-output-comparison.json",
+    "target": "https://www.safeclaw.kr/api/ask",
+    "templateMode": "mock",
+    "enhancedMode": "live",
+    "outputChanged": true,
+    "dbHarnessChangedRuntimeContext": true,
+    "enhancedSafetyReferenceCount": 8,
+    "runtimeEmbeddingRetrieval": false,
+    "documentLengthDeltas": {
+      "riskAssessmentDraft": 1158,
+      "tbmBriefing": 799,
+      "tbmLogDraft": 1639,
+      "safetyEducationRecordDraft": 1194
+    },
+    "note": "Enhanced mode changes actual output through Supabase/KOSHA/SIF retrieval and DB harness context, but runtime vector embedding retrieval is not connected yet."
+  },
+  "localEnvironmentProbe": {
+    "artifact": "evaluation/backend-harness-gate-2026-07-08/functional-probe-report.json",
+    "worktreeEnvExists": false,
+    "localSafetyReferenceSearch": "503/401 with current local credential",
+    "localAskMode": "mock/template",
+    "note": "Local DB quality cannot be proven until Supabase credentials match deployed environment."
+  },
+  "modelSwitchCheck": {
+    "artifact": "evaluation/backend-harness-gate-2026-07-08/model-switch-check.json",
+    "defaultAnthropicModel": "claude-sonnet-5",
+    "opusOverride": "ANTHROPIC_MODEL=claude-opus-4-8",
+    "structuredDeliverablesOverrideSupported": true,
+    "currentEnvCanSmokeOpus": false,
+    "clawChatUsesSameOverride": false,
+    "note": "Structured deliverables can be pointed at Opus if Anthropic provider env is configured; Claw chat needs separate model routing cleanup."
+  },
+  "openClawOauth": {
+    "artifact": "evaluation/backend-harness-gate-2026-07-08/openclaw-oauth-check.json",
+    "profile": "safeclaw",
+    "cliPresent": true,
+    "oauthUsable": true,
+    "mcpToolCount": 4,
+    "versionWarning": true
   }
 }
