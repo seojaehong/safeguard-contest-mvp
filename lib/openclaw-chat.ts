@@ -14,10 +14,28 @@ export type OpenClawChatConfig = {
   timeoutMs: number;
 };
 
+export type OpenClawOAuthStatus = {
+  ok: boolean;
+  provider: "openai";
+  authProvider: "openai/oauth";
+  model: string;
+  checkedAt: string;
+  message: string;
+};
+
 export const DEFAULT_OPENCLAW_CHAT_MODEL = "openai/gpt-5.5";
 export const DEFAULT_OPENCLAW_CHAT_TIMEOUT_MS = 240_000;
+const OAUTH_STATUS_TIMEOUT_MS = 30_000;
+const OAUTH_STATUS_CACHE_MS = 60_000;
 
 type EnvLike = Record<string, string | undefined>;
+type JsonRecord = Record<string, unknown>;
+
+let oauthStatusCache: {
+  key: string;
+  expiresAt: number;
+  status: OpenClawOAuthStatus;
+} | null = null;
 
 function positiveInt(value: string | undefined, fallback: number): number {
   const parsed = Number.parseInt(value ?? "", 10);
@@ -45,7 +63,13 @@ export function resolveOpenClawSpawn(config: OpenClawChatConfig, prompt: string)
   command: string;
   args: string[];
 } {
-  const args = buildOpenClawChatArgs(config, prompt);
+  return resolveOpenClawCommand(config, buildOpenClawChatArgs(config, prompt));
+}
+
+function resolveOpenClawCommand(config: OpenClawChatConfig, args: string[]): {
+  command: string;
+  args: string[];
+} {
   const defaultWindowsMjs = process.env.APPDATA
     ? path.join(process.env.APPDATA, "npm", "node_modules", "openclaw", "openclaw.mjs")
     : null;
@@ -58,6 +82,10 @@ export function resolveOpenClawSpawn(config: OpenClawChatConfig, prompt: string)
     return { command: process.execPath, args: [defaultWindowsMjs, ...args] };
   }
   return { command: config.bin, args };
+}
+
+export function buildOpenClawStatusArgs(config: OpenClawChatConfig): string[] {
+  return ["--profile", config.profile, "models", "status", "--json"];
 }
 
 export function buildOpenClawChatArgs(config: OpenClawChatConfig, prompt: string): string[] {
@@ -98,6 +126,156 @@ export function buildOpenClawChatPrompt(input: {
     "[사용자 요청]",
     input.message
   ].filter((line) => line !== "").join("\n");
+}
+
+function asRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as JsonRecord : null;
+}
+
+function asArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function asString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function asNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function extractJsonObject(text: string): JsonRecord | null {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try {
+    return asRecord(JSON.parse(text.slice(start, end + 1)));
+  } catch {
+    return null;
+  }
+}
+
+function hasOpenAiOauthProfile(auth: JsonRecord | null): boolean {
+  const oauth = asRecord(auth?.oauth);
+  const providers = asArray(oauth?.providers);
+  return providers.some((providerValue) => {
+    const provider = asRecord(providerValue);
+    if (asString(provider?.provider) !== "openai") return false;
+    if (asString(provider?.status) !== "ok") return false;
+    return asArray(provider?.effectiveProfiles).some((profileValue) => {
+      const profile = asRecord(profileValue);
+      return asString(profile?.provider) === "openai"
+        && asString(profile?.type) === "oauth"
+        && asString(profile?.status) === "ok";
+    });
+  });
+}
+
+function hasOnlyOpenAiOauthProfile(auth: JsonRecord | null): boolean {
+  const providers = asArray(auth?.providers);
+  const openAi = providers
+    .map((providerValue) => asRecord(providerValue))
+    .find((provider) => asString(provider?.provider) === "openai");
+  const profiles = asRecord(openAi?.profiles);
+  return asNumber(profiles?.oauth) > 0 && asNumber(profiles?.apiKey) === 0;
+}
+
+function hasUsableOpenAiRuntime(auth: JsonRecord | null): boolean {
+  return asArray(auth?.runtimeAuthRoutes).some((routeValue) => {
+    const route = asRecord(routeValue);
+    return asString(route?.provider) === "openai" && asString(route?.status) === "usable";
+  });
+}
+
+export function parseOpenClawOAuthStatusOutput(
+  output: string,
+  config: Pick<OpenClawChatConfig, "model" | "requiredAuthProvider">
+): OpenClawOAuthStatus {
+  const status = extractJsonObject(output);
+  if (!status) {
+    throw new Error("OpenClaw OAuth status check did not return JSON.");
+  }
+
+  const resolvedDefault = asString(status.resolvedDefault) || asString(status.defaultModel);
+  const auth = asRecord(status.auth);
+  const openAiModel = config.model.toLowerCase().startsWith("openai/");
+  const oauthProfileOk = hasOpenAiOauthProfile(auth);
+  const oauthOnlyProfileOk = hasOnlyOpenAiOauthProfile(auth);
+  const runtimeOk = hasUsableOpenAiRuntime(auth);
+  if (!openAiModel || !oauthProfileOk || !oauthOnlyProfileOk || !runtimeOk) {
+    throw new Error(
+      [
+        "OpenClaw safeclaw profile is not ready for OpenAI OAuth chat.",
+        `model=${config.model}`,
+        `resolvedDefault=${resolvedDefault || "unknown"}`,
+        `requiredAuthProvider=${config.requiredAuthProvider}`,
+      ].join(" ")
+    );
+  }
+
+  return {
+    ok: true,
+    provider: "openai",
+    authProvider: "openai/oauth",
+    model: config.model,
+    checkedAt: new Date().toISOString(),
+    message: "OpenClaw OpenAI OAuth profile is usable.",
+  };
+}
+
+export async function assertOpenClawOpenAiOAuth(config: OpenClawChatConfig): Promise<OpenClawOAuthStatus> {
+  const key = `${config.bin}|${config.profile}|${config.agent}|${config.model}|${config.requiredAuthProvider}`;
+  const now = Date.now();
+  if (oauthStatusCache && oauthStatusCache.key === key && oauthStatusCache.expiresAt > now) {
+    return oauthStatusCache.status;
+  }
+
+  const status = await new Promise<OpenClawOAuthStatus>((resolve, reject) => {
+    const command = resolveOpenClawCommand(config, buildOpenClawStatusArgs(config));
+    const child = spawn(command.command, command.args, {
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      child.kill();
+      reject(new Error(`OpenClaw OAuth status check timed out after ${OAUTH_STATUS_TIMEOUT_MS}ms`));
+    }, OAUTH_STATUS_TIMEOUT_MS);
+
+    child.stdout.on("data", (chunk: Buffer) => {
+      stdout += chunk.toString();
+    });
+    child.stderr.on("data", (chunk: Buffer) => {
+      stderr += chunk.toString();
+    });
+    child.on("error", (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      reject(error);
+    });
+    child.on("close", (code, signal) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      if (code !== 0) {
+        reject(new Error(`OpenClaw OAuth status check failed (code=${code ?? "null"}, signal=${signal ?? "none"})`));
+        return;
+      }
+      try {
+        resolve(parseOpenClawOAuthStatusOutput(`${stdout}\n${stderr}`, config));
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+
+  oauthStatusCache = { key, expiresAt: now + OAUTH_STATUS_CACHE_MS, status };
+  return status;
 }
 
 export async function runOpenClawChat(input: {

@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ClawChatEvent } from "@/lib/agent-loop";
 
+const openClawCalls: string[] = [];
+
 type OpenClawChatRunInput = {
   emit: (event: ClawChatEvent) => void;
 };
@@ -11,7 +13,19 @@ vi.mock("@/lib/openclaw-chat", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/openclaw-chat")>();
   return {
     ...actual,
+    assertOpenClawOpenAiOAuth: vi.fn(async () => {
+      openClawCalls.push("oauth-status");
+      return {
+        ok: true,
+        provider: "openai",
+        authProvider: "openai/oauth",
+        model: "openai/gpt-5.5",
+        checkedAt: "2026-07-09T00:00:00.000Z",
+        message: "mock oauth ok",
+      };
+    }),
     runOpenClawChat: vi.fn(async (input: OpenClawChatRunInput) => {
+      openClawCalls.push("agent-run");
       input.emit({ kind: "text-delta", text: "OpenClaw route OK" });
     }),
   };
@@ -20,6 +34,7 @@ vi.mock("@/lib/openclaw-chat", async (importOriginal) => {
 const originalClawChatProvider = process.env.CLAW_CHAT_PROVIDER;
 
 afterEach(() => {
+  openClawCalls.length = 0;
   if (originalClawChatProvider === undefined) {
     delete process.env.CLAW_CHAT_PROVIDER;
   } else {
@@ -45,8 +60,11 @@ describe("/api/agent/chat OpenClaw OAuth route", () => {
 
     expect(response.status).toBe(200);
     expect(body).toContain("openclaw_oauth_agent");
-    expect(body).toContain("OpenClaw OpenAI OAuth 연결 중");
+    expect(body).toContain("OpenClaw OpenAI OAuth 상태 확인 중");
+    expect(body).toContain("OpenClaw OpenAI OAuth 상태 확인 완료");
+    expect(body).toContain("OpenClaw 에이전트 실행 중");
     expect(body).toContain("OpenClaw route OK");
     expect(body).toContain("\"kind\":\"final\"");
+    expect(openClawCalls).toEqual(["oauth-status", "agent-run"]);
   });
 });
