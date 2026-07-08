@@ -21,10 +21,38 @@ export type OntologyHoverCard = {
   }>;
 };
 
+export type OntologyMapNode = {
+  id: string;
+  kind: OntologyNode["kind"];
+  label: string;
+  x: number;
+  y: number;
+  size: number;
+  degree: number;
+};
+
+export type OntologyMapEdge = {
+  id: string;
+  rel: string;
+  sourceId: string;
+  targetId: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
+
 export type OntologyVisualizationModel = {
   list: OntologyListItem[];
   hoverCards: OntologyHoverCard[];
+  map: {
+    nodes: OntologyMapNode[];
+    edges: OntologyMapEdge[];
+  };
 };
+
+const MAX_MAP_NODES = 32;
+const MAX_MAP_EDGES = 72;
 
 function kindLabel(kind: OntologyNode["kind"]) {
   if (kind === "Task") return "작업";
@@ -34,6 +62,20 @@ function kindLabel(kind: OntologyNode["kind"]) {
   if (kind === "Accident") return "사례";
   if (kind === "Document") return "문서";
   return "의무";
+}
+
+function kindRadius(kind: OntologyNode["kind"]) {
+  if (kind === "Task") return 12;
+  if (kind === "Hazard") return 25;
+  if (kind === "Control") return 33;
+  if (kind === "Article") return 39;
+  if (kind === "Document") return 42;
+  if (kind === "Accident") return 36;
+  return 29;
+}
+
+function clampCoordinate(value: number) {
+  return Math.min(Math.max(Math.round(value * 10) / 10, 7), 93);
 }
 
 export function buildOntologyVisualizationModel(graph: OntologyGraph): OntologyVisualizationModel {
@@ -54,6 +96,11 @@ export function buildOntologyVisualizationModel(graph: OntologyGraph): OntologyV
     incomingCount: incoming.get(node.node_id)?.length || 0
   }));
 
+  const degreeById = new Map<string, number>();
+  for (const item of list) {
+    degreeById.set(item.id, item.incomingCount + item.outgoingCount);
+  }
+
   const hoverCards = graph.nodes.map((node) => ({
     id: node.node_id,
     title: node.label,
@@ -69,5 +116,52 @@ export function buildOntologyVisualizationModel(graph: OntologyGraph): OntologyV
     })
   }));
 
-  return { list, hoverCards };
+  const mapNodes = [...graph.nodes]
+    .sort((a, b) => {
+      const degreeDelta = (degreeById.get(b.node_id) || 0) - (degreeById.get(a.node_id) || 0);
+      if (degreeDelta !== 0) return degreeDelta;
+      return a.label.localeCompare(b.label, "ko");
+    })
+    .slice(0, MAX_MAP_NODES)
+    .map((node, index, nodes): OntologyMapNode => {
+      const degree = degreeById.get(node.node_id) || 0;
+      const angle = ((index / Math.max(nodes.length, 1)) * Math.PI * 2) - Math.PI / 2;
+      const radius = kindRadius(node.kind) + (index % 3) * 2.8;
+      return {
+        id: node.node_id,
+        kind: node.kind,
+        label: node.label,
+        x: clampCoordinate(50 + Math.cos(angle) * radius),
+        y: clampCoordinate(50 + Math.sin(angle) * radius * 0.72),
+        size: Math.min(10.5, 4.4 + Math.sqrt(degree + 1) * 1.3),
+        degree
+      };
+    });
+  const mapNodeById = new Map(mapNodes.map((node) => [node.id, node]));
+  const mapEdges = graph.edges
+    .flatMap((edge): OntologyMapEdge[] => {
+      const source = mapNodeById.get(edge.src);
+      const target = mapNodeById.get(edge.dst);
+      if (!source || !target) return [];
+      return [{
+        id: `${edge.src}|${edge.rel}|${edge.dst}`,
+        rel: edge.rel,
+        sourceId: edge.src,
+        targetId: edge.dst,
+        x1: source.x,
+        y1: source.y,
+        x2: target.x,
+        y2: target.y
+      }];
+    })
+    .slice(0, MAX_MAP_EDGES);
+
+  return {
+    list,
+    hoverCards,
+    map: {
+      nodes: mapNodes,
+      edges: mapEdges
+    }
+  };
 }

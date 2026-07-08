@@ -40,6 +40,10 @@
   "ontology": {
     "listView": true,
     "hoverCards": true,
+    "obsidianMapView": true,
+    "mapModel": "published graph deterministic top-degree layout",
+    "visualizationFile": "lib/ontology/visualization.ts",
+    "page": "app/ontology/page.tsx",
     "langGraphRequiredNow": false,
     "habermasMachineRequiredNow": false
   },
@@ -100,9 +104,15 @@
       "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts",
       "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/workspace-layout-regression.test.ts",
       "npm.cmd test -- tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/photo-vision-analysis.test.ts tests/commercial-harness.test.ts",
+      "npm.cmd test -- tests/ontology-visualization.test.ts tests/ontology-graph-store.test.ts tests/ontology-query.test.ts tests/ontology-knowledge-tool.test.ts",
       "npm.cmd run typecheck",
       "npm.cmd run build"
     ],
+    "ontologyVisualizationTests": {
+      "command": "npm.cmd test -- tests/ontology-visualization.test.ts tests/ontology-graph-store.test.ts tests/ontology-query.test.ts tests/ontology-knowledge-tool.test.ts",
+      "filesPassed": 4,
+      "testsPassed": 21
+    },
     "visionWorkspaceWireTests": {
       "command": "npm.cmd test -- tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/photo-vision-analysis.test.ts tests/commercial-harness.test.ts",
       "filesPassed": 4,
