@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-07-08T16:11:04.062Z",
+  "scope": "vision_ocr_learning_memory_export_contract",
+  "status": "implemented_no_schema_change",
+  "flow": [
+    "workspace Before/After photos",
+    "POST /api/workpacks/:id/improvements multipart",
+    "analyzeImprovementPhotos via OpenAI Responses API when OPENAI_API_KEY is configured",
+    "workpack_improvements.analysis_payload",
+    "GET /api/workpacks/:id/learning-export?format=markdown|jsonl",
+    "MD/JSONL daily work memory export"
+  ],
+  "preservedFields": [
+    "visionStatus",
+    "visionProvider",
+    "visionModel",
+    "visionSummary",
+    "detectedHazards",
+    "observedImprovement",
+    "ocrText",
+    "visionErrorMessage"
+  ],
+  "memoryPolicy": {
+    "ocrTextMaxChars": 4000,
+    "observedImprovementMaxChars": 4000,
+    "detectedHazardMaxChars": 200,
+    "uiSummaryClippingRemovedFromLearningExport": true,
+    "noDbSchemaChange": true
+  },
+  "files": {
+    "improvementRoute": "app/api/workpacks/[id]/improvements/route.ts",
+    "learningExportRoute": "app/api/workpacks/[id]/learning-export/route.ts",
+    "learningExportBuilder": "lib/workpack-learning-export.ts",
+    "harnessType": "lib/db-harness.ts",
+    "test": "tests/commercial-harness.test.ts"
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/reporting-downloads.test.ts",
+      "filesPassed": 5,
+      "testsPassed": 21
+    }
+  },
+  "notes": [
+    "Learning export now preserves long OCR/observed-improvement text instead of clipping to UI summary length.",
+    "Vision status/model/provider/error state are included so unconfigured or failed analysis remains auditable.",
+    "DB harness prompt context now includes visionStatus for photo-analysis improvement memory."
+  ]
+}

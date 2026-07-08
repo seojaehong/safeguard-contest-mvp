@@ -30,6 +30,55 @@ export type WorkpackLearningFile = {
   content: string;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readStringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function preservePayloadText(value: string, maxLength = 4000) {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+function readOptionalPayloadString(value: unknown, key: string, maxLength = 4000): string | undefined {
+  if (!isRecord(value)) return undefined;
+  const text = value[key];
+  return typeof text === "string" && text.trim() ? preservePayloadText(text, maxLength) : undefined;
+}
+
+function readOptionalPayloadStringArray(value: unknown, key: string): string[] | undefined {
+  if (!isRecord(value)) return undefined;
+  const items = readStringArray(value[key]).map((item) => preservePayloadText(item, 200));
+  return items.length ? items : undefined;
+}
+
+function readVisionStatus(value: unknown): HarnessImprovement["visionStatus"] | undefined {
+  if (!isRecord(value)) return undefined;
+  const status = value.status;
+  if (status === "analyzed" || status === "unconfigured" || status === "failed") return status;
+  return undefined;
+}
+
+export function normalizeLearningVisionPayload(value: unknown): Pick<
+  HarnessImprovement,
+  "visionStatus" | "visionProvider" | "visionModel" | "visionSummary" | "detectedHazards" | "observedImprovement" | "ocrText" | "visionErrorMessage"
+> {
+  return {
+    visionStatus: readVisionStatus(value),
+    visionProvider: readOptionalPayloadString(value, "provider", 80),
+    visionModel: readOptionalPayloadString(value, "model", 120),
+    visionSummary: readOptionalPayloadString(value, "summary"),
+    detectedHazards: readOptionalPayloadStringArray(value, "detectedHazards"),
+    observedImprovement: readOptionalPayloadString(value, "observedImprovement"),
+    ocrText: readOptionalPayloadString(value, "ocrText"),
+    visionErrorMessage: readOptionalPayloadString(value, "errorMessage", 1000)
+  };
+}
+
 function jsonLine(event: LearningJsonlEvent) {
   return JSON.stringify(event);
 }
@@ -73,10 +122,14 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       improvementText: improvement.improvementText,
       reflectedDocuments: improvement.reflectedDocuments,
       sourceType: improvement.sourceType,
+      visionStatus: improvement.visionStatus,
+      visionProvider: improvement.visionProvider,
+      visionModel: improvement.visionModel,
       visionSummary: improvement.visionSummary,
       detectedHazards: improvement.detectedHazards,
       observedImprovement: improvement.observedImprovement,
-      ocrText: improvement.ocrText
+      ocrText: improvement.ocrText,
+      visionErrorMessage: improvement.visionErrorMessage
     })),
     ...input.confirmations.map((confirmation) => event(input, "ack", {
       displayName: confirmation.displayName,
@@ -112,10 +165,13 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     lines.push(`- ${improvement.hazardLabel}: ${improvement.improvementText}`);
     lines.push(`  - reflected: ${improvement.reflectedDocuments.join(", ") || "없음"}`);
     lines.push(`  - source: ${improvement.sourceType}`);
+    if (improvement.visionStatus) lines.push(`  - visionStatus: ${improvement.visionStatus}`);
+    if (improvement.visionModel) lines.push(`  - visionModel: ${improvement.visionModel}`);
     if (improvement.visionSummary) lines.push(`  - vision: ${improvement.visionSummary}`);
     if (improvement.detectedHazards?.length) lines.push(`  - detectedHazards: ${improvement.detectedHazards.join(", ")}`);
     if (improvement.observedImprovement) lines.push(`  - observedImprovement: ${improvement.observedImprovement}`);
     if (improvement.ocrText) lines.push(`  - ocr: ${improvement.ocrText}`);
+    if (improvement.visionErrorMessage) lines.push(`  - visionError: ${improvement.visionErrorMessage}`);
   }
 
   lines.push("", "## 확인 이력", "");
