@@ -26,3 +26,4 @@ prd.json
 progress.txt
 .last-branch
 .bkit/
+.worktrees/
