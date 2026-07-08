@@ -6,7 +6,7 @@ import {
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
 import { isRecord, readString } from "@/lib/workspace-api";
-import { analyzeImprovementPhotos } from "@/lib/photo-vision-analysis";
+import { analyzeImprovementPhotos, buildImprovementAnalysisPayload } from "@/lib/photo-vision-analysis";
 import { buildImprovementDraft, buildImprovementPhotoPath } from "@/lib/workpack-commercial";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
 
@@ -249,6 +249,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
     reflectedDocuments: vision.reflectedDocuments.length ? vision.reflectedDocuments : reflectedDocuments,
     createdBy: user.id
   });
+  const analysisPayload = buildImprovementAnalysisPayload({
+    vision,
+    candidateText: draft.improvement_text,
+    reflectedDocuments: draft.reflected_documents,
+    hasBeforePhoto: Boolean(body.beforePhoto),
+    hasAfterPhoto: Boolean(body.afterPhoto)
+  });
 
   const insert: WorkspaceDatabase["public"]["Tables"]["workpack_improvements"]["Insert"] = {
     organization_id: draft.organization_id,
@@ -261,18 +268,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     review_status: draft.review_status,
     source_type: draft.source_type,
     photo_summary: toJson(draft.photo_summary),
-    analysis_payload: toJson({
-      status: vision.status,
-      provider: vision.provider,
-      model: vision.model,
-      candidateText: draft.improvement_text,
-      summary: vision.summary,
-      detectedHazards: vision.detectedHazards,
-      observedImprovement: vision.observedImprovement,
-      ocrText: vision.ocrText,
-      reflectedDocuments: draft.reflected_documents,
-      errorMessage: vision.errorMessage || null
-    }),
+    analysis_payload: toJson(analysisPayload),
     created_by: draft.created_by
   };
 
@@ -349,10 +345,16 @@ export async function POST(request: NextRequest, context: RouteContext) {
       detectedHazards: vision.detectedHazards,
       ocrText: vision.ocrText,
       reflectedDocuments: draft.reflected_documents,
-      errorMessage: vision.errorMessage || undefined
+      errorMessage: vision.errorMessage || undefined,
+      photoPairAttached: analysisPayload.photoPairAttached,
+      analysisMode: analysisPayload.analysisMode,
+      userLabel: analysisPayload.userLabel,
+      exportable: analysisPayload.exportable
     },
-    message: draft.source_type === "photo_analysis"
-      ? "Before/After 사진 기반 개선사항 후보를 저장했습니다."
-      : "개선사항 후보를 저장했습니다."
+    message: analysisPayload.analysisMode === "vision_ocr"
+      ? "Before/After 사진 기반 vision/OCR 개선사항 후보를 저장했습니다."
+      : analysisPayload.analysisMode === "photo_pair_unanalyzed"
+        ? `${analysisPayload.userLabel}. 사진 후보는 저장했고 분석 결과는 보류 상태로 export에 남깁니다.`
+        : "개선사항 후보를 저장했습니다."
   });
 }

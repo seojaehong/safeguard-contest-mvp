@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildImprovementAnalysisPayload,
   buildImprovementVisionPrompt,
   parseImprovementVisionOutput
 } from "@/lib/photo-vision-analysis";
@@ -38,5 +39,56 @@ describe("photo vision analysis contract", () => {
 
     expect(parsed.status).toBe("failed");
     expect(parsed.errorMessage).toBeTruthy();
+  });
+
+  it("labels analyzed before/after payloads as vision OCR export memory", () => {
+    const vision = parseImprovementVisionOutput(JSON.stringify({
+      summary: "after 사진에서 난간과 통제선이 보입니다.",
+      detectedHazards: ["추락", "하부 통제 미흡"],
+      observedImprovement: "작업발판 외측 난간 보강",
+      ocrText: "작업중 출입금지",
+      reflectedDocuments: ["위험성평가표", "TBM 기록"]
+    }), { model: "gpt-4.1-mini" });
+
+    const payload = buildImprovementAnalysisPayload({
+      vision,
+      candidateText: "작업발판 외측 난간 보강",
+      reflectedDocuments: ["위험성평가표", "TBM 기록"],
+      hasBeforePhoto: true,
+      hasAfterPhoto: true
+    });
+
+    expect(payload).toMatchObject({
+      status: "analyzed",
+      analysisMode: "vision_ocr",
+      photoPairAttached: true,
+      userLabel: "vision/OCR 분석 완료",
+      exportable: true
+    });
+  });
+
+  it("keeps photo pairs exportable even when vision is unconfigured", () => {
+    const payload = buildImprovementAnalysisPayload({
+      vision: {
+        status: "unconfigured",
+        provider: "openai",
+        model: "gpt-4.1-mini",
+        summary: "",
+        detectedHazards: [],
+        observedImprovement: "",
+        ocrText: "",
+        reflectedDocuments: ["위험성평가표"],
+        errorMessage: "OPENAI_API_KEY가 없어 vision/OCR 분석을 건너뜁니다."
+      },
+      candidateText: "Before/After 사진 비교 후보",
+      reflectedDocuments: ["위험성평가표"],
+      hasBeforePhoto: true,
+      hasAfterPhoto: true
+    });
+
+    expect(payload.analysisMode).toBe("photo_pair_unanalyzed");
+    expect(payload.photoPairAttached).toBe(true);
+    expect(payload.userLabel).toBe("사진쌍 저장 · vision/OCR 보류");
+    expect(payload.errorMessage).toContain("OPENAI_API_KEY");
   });
 });

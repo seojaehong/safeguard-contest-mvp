@@ -173,6 +173,9 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
         improvementId: improvement.id,
         sourceType: improvement.sourceType,
         visionStatus: improvement.visionStatus || null,
+        analysisMode: improvement.analysisMode || null,
+        photoPairAttached: improvement.photoPairAttached ?? null,
+        visionLabel: improvement.visionUserLabel || null,
         visionModel: improvement.visionModel || null
       }
     });

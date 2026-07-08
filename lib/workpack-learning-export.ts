@@ -64,12 +64,28 @@ function readVisionStatus(value: unknown): HarnessImprovement["visionStatus"] | 
   return undefined;
 }
 
+function readAnalysisMode(value: unknown): HarnessImprovement["analysisMode"] | undefined {
+  if (!isRecord(value)) return undefined;
+  const mode = value.analysisMode;
+  if (mode === "vision_ocr" || mode === "photo_pair_unanalyzed" || mode === "manual_text") return mode;
+  return undefined;
+}
+
+function readOptionalPayloadBoolean(value: unknown, key: string): boolean | undefined {
+  if (!isRecord(value)) return undefined;
+  const item = value[key];
+  return typeof item === "boolean" ? item : undefined;
+}
+
 export function normalizeLearningVisionPayload(value: unknown): Pick<
   HarnessImprovement,
-  "visionStatus" | "visionProvider" | "visionModel" | "visionSummary" | "detectedHazards" | "observedImprovement" | "ocrText" | "visionErrorMessage"
+  "visionStatus" | "analysisMode" | "photoPairAttached" | "visionUserLabel" | "visionProvider" | "visionModel" | "visionSummary" | "detectedHazards" | "observedImprovement" | "ocrText" | "visionErrorMessage"
 > {
   return {
     visionStatus: readVisionStatus(value),
+    analysisMode: readAnalysisMode(value),
+    photoPairAttached: readOptionalPayloadBoolean(value, "photoPairAttached"),
+    visionUserLabel: readOptionalPayloadString(value, "userLabel", 200),
     visionProvider: readOptionalPayloadString(value, "provider", 80),
     visionModel: readOptionalPayloadString(value, "model", 120),
     visionSummary: readOptionalPayloadString(value, "summary"),
@@ -140,6 +156,9 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       reflectedDocuments: improvement.reflectedDocuments,
       sourceType: improvement.sourceType,
       visionStatus: improvement.visionStatus,
+      analysisMode: improvement.analysisMode,
+      photoPairAttached: improvement.photoPairAttached,
+      visionUserLabel: improvement.visionUserLabel,
       visionProvider: improvement.visionProvider,
       visionModel: improvement.visionModel,
       visionSummary: improvement.visionSummary,
@@ -204,6 +223,9 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     lines.push(`  - reflected: ${improvement.reflectedDocuments.join(", ") || "없음"}`);
     lines.push(`  - source: ${improvement.sourceType}`);
     if (improvement.visionStatus) lines.push(`  - visionStatus: ${improvement.visionStatus}`);
+    if (improvement.analysisMode) lines.push(`  - analysisMode: ${improvement.analysisMode}`);
+    if (typeof improvement.photoPairAttached === "boolean") lines.push(`  - photoPairAttached: ${improvement.photoPairAttached ? "yes" : "no"}`);
+    if (improvement.visionUserLabel) lines.push(`  - visionLabel: ${improvement.visionUserLabel}`);
     if (improvement.visionModel) lines.push(`  - visionModel: ${improvement.visionModel}`);
     if (improvement.visionSummary) lines.push(`  - vision: ${improvement.visionSummary}`);
     if (improvement.detectedHazards?.length) lines.push(`  - detectedHazards: ${improvement.detectedHazards.join(", ")}`);

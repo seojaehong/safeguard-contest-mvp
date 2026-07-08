@@ -15,6 +15,10 @@ export type OperationImprovement = {
   sourceType?: "manual" | "photo_analysis";
   workpackId?: string;
   remoteImprovementId?: string;
+  visionStatus?: "analyzed" | "unconfigured" | "failed";
+  analysisMode?: "vision_ocr" | "photo_pair_unanalyzed" | "manual_text";
+  photoPairAttached?: boolean;
+  visionUserLabel?: string;
   visionSummary?: string;
   detectedHazards?: string[];
   observedImprovement?: string;
@@ -53,6 +57,10 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
         (item.sourceType === "manual" || item.sourceType === "photo_analysis" || typeof item.sourceType === "undefined") &&
         (typeof item.workpackId === "string" || typeof item.workpackId === "undefined") &&
         (typeof item.remoteImprovementId === "string" || typeof item.remoteImprovementId === "undefined") &&
+        (item.visionStatus === "analyzed" || item.visionStatus === "unconfigured" || item.visionStatus === "failed" || typeof item.visionStatus === "undefined") &&
+        (item.analysisMode === "vision_ocr" || item.analysisMode === "photo_pair_unanalyzed" || item.analysisMode === "manual_text" || typeof item.analysisMode === "undefined") &&
+        (typeof item.photoPairAttached === "boolean" || typeof item.photoPairAttached === "undefined") &&
+        (typeof item.visionUserLabel === "string" || typeof item.visionUserLabel === "undefined") &&
         (typeof item.visionSummary === "string" || typeof item.visionSummary === "undefined") &&
         (isStringArray(item.detectedHazards) || typeof item.detectedHazards === "undefined") &&
         (typeof item.observedImprovement === "string" || typeof item.observedImprovement === "undefined") &&

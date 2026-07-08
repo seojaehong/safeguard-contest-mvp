@@ -115,7 +115,11 @@ type ImprovementApiResult = {
   improvementId: string | null;
   sourceType?: "manual" | "photo_analysis";
   vision?: {
-    status?: string;
+    status?: "analyzed" | "unconfigured" | "failed";
+    analysisMode?: "vision_ocr" | "photo_pair_unanalyzed" | "manual_text";
+    photoPairAttached?: boolean;
+    userLabel?: string;
+    exportable?: boolean;
     provider?: string;
     model?: string;
     summary?: string;
@@ -612,6 +616,14 @@ function formatImprovementTime(value: string) {
   }).format(date);
 }
 
+function formatVisionStatus(status?: OperationImprovement["visionStatus"], label?: string) {
+  if (label) return label;
+  if (status === "analyzed") return "vision/OCR 분석 완료";
+  if (status === "failed") return "사진쌍 저장 · vision/OCR 실패";
+  if (status === "unconfigured") return "사진쌍 저장 · vision/OCR 보류";
+  return "사진 분석 없음";
+}
+
 function StepDot({ status }: { status: StepStatus }) {
   if (status === "done") {
     return (
@@ -1032,6 +1044,10 @@ export function SafeGuardCommandCenter({
     let remoteImprovementId: string | undefined;
     let workpackId: string | undefined;
     let sourceType: OperationImprovement["sourceType"] = beforePhoto && afterPhoto ? "photo_analysis" : "manual";
+    let visionStatus: OperationImprovement["visionStatus"];
+    let analysisMode: OperationImprovement["analysisMode"];
+    let photoPairAttached: boolean | undefined;
+    let visionUserLabel: string | undefined;
     let visionSummary: string | undefined;
     let detectedHazards: string[] | undefined;
     let observedImprovement: string | undefined;
@@ -1050,6 +1066,10 @@ export function SafeGuardCommandCenter({
           storageMode = "db";
           remoteImprovementId = improvementSave.improvementId;
           sourceType = improvementSave.sourceType || sourceType;
+          visionStatus = improvementSave.vision?.status;
+          analysisMode = improvementSave.vision?.analysisMode;
+          photoPairAttached = improvementSave.vision?.photoPairAttached;
+          visionUserLabel = improvementSave.vision?.userLabel;
           visionSummary = improvementSave.vision?.summary || improvementSave.vision?.observedImprovement;
           detectedHazards = improvementSave.vision?.detectedHazards;
           observedImprovement = improvementSave.vision?.observedImprovement;
@@ -1076,6 +1096,10 @@ export function SafeGuardCommandCenter({
       sourceType,
       workpackId,
       remoteImprovementId,
+      visionStatus,
+      analysisMode,
+      photoPairAttached,
+      visionUserLabel,
       visionSummary,
       detectedHazards,
       observedImprovement,
@@ -1092,7 +1116,7 @@ export function SafeGuardCommandCenter({
     persistOperationImprovements(nextItems);
     setImprovementSaveState(storageMode === "db" ? "saved" : "local");
     setMessage(storageMode === "db"
-      ? "Before/After 개선사항을 DB 후보로 저장했습니다. vision/OCR 결과는 학습 export에 포함됩니다."
+      ? saveMessage
       : `오늘 작업 개선사항을 로컬 후보로 보관했습니다. ${saveMessage}`);
   }
 
@@ -1737,7 +1761,7 @@ export function SafeGuardCommandCenter({
                           ? "DB 연결 준비"
                           : "로컬 후보"}
                   </strong>
-                  <small>{savedWorkpackId ? "vision/OCR 결과는 export에 포함" : "로그인·DB 미연결 시 로컬 후보로 보관"}</small>
+                  <small>{savedWorkpackId ? "사진쌍과 vision/OCR 상태를 export에 포함" : "로그인·DB 미연결 시 로컬 후보로 보관"}</small>
                 </aside>
               </div>
               <div className="operation-capture-layout">
@@ -1813,6 +1837,9 @@ export function SafeGuardCommandCenter({
                       <p>{item.improvementText}</p>
                       {item.beforePhotoName || item.afterPhotoName ? (
                         <small>사진: {item.beforePhotoName || "Before 미첨부"} → {item.afterPhotoName || "After 미첨부"}</small>
+                      ) : null}
+                      {item.visionStatus || item.visionUserLabel ? (
+                        <small>vision/OCR: {formatVisionStatus(item.visionStatus, item.visionUserLabel)}</small>
                       ) : null}
                       {item.photoAnalysisSummary ? <small>{item.photoAnalysisSummary}</small> : null}
                       {item.detectedHazards?.length ? <small>위험요인: {item.detectedHazards.join(" · ")}</small> : null}
