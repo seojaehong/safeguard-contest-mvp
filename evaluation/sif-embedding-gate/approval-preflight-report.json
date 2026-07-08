@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-08T16:30:48.914Z",
+  "generatedAt": "2026-07-08T23:44:31.356Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
   "ok": true,
   "approvalHeld": true,
@@ -95,6 +95,15 @@
         "table": "safety_reference_embeddings",
         "publicSelect": false
       }
+    },
+    {
+      "id": "vector_feature_flag_stays_off_until_upload_verified",
+      "passed": true,
+      "evidence": {
+        "vectorFeatureFlagEnabled": false,
+        "uploadedCount": 0,
+        "corpusCount": 6032
+      }
     }
   ],
   "failedCheckIds": [],
@@ -107,6 +116,7 @@
     "requireExecutionEnv": false,
     "envFailure": false
   },
+  "envFilesLoaded": [],
   "executionReadyAfterApproval": false,
   "nextApprovalDecisions": [
     "Apply 010_commercial_operations.sql as-is or split an embedding-only migration.",

@@ -58,6 +58,8 @@ Generated: 2026-07-09
 - `--env-file`로 별도 env 파일을 지정해 실행 준비 상태를 검증할 수 있다.
 - `scripts/sif_embedding_runtime_probe.mjs`가 운영 DB를 read-only로 확인해 table/RPC 적용 여부와 uploaded row count를 검증한다.
 - SIF-only migration proposal을 별도 산출물로 분리해, 공유/확인이력/개선사항 migration과 독립적으로 승인할 수 있게 했다.
+- 승인 게이트에 `vector_feature_flag_stays_off_until_upload_verified` 체크를 추가했다. 업로드 row count 검증 전 `SAFETY_REFERENCE_VECTOR_SEARCH=1`이면 preflight가 실패한다.
+- 2026-07-09 재실행한 `approval-preflight-report.json` 기준 corpus 6,032건, batch 61개, embedded/uploaded 0건, failedCheckIds 없음이다.
 
 ## Vision/OCR Route
 
@@ -177,6 +179,8 @@ Generated: 2026-07-09
   - 5 files, 21 tests passed
 - `npm.cmd test -- tests/sif-embedding-preflight.test.ts tests/sif-embedding-gate-status.test.ts`
   - 2 files, 5 tests passed
+- `npm.cmd test -- tests/sif-embedding-preflight.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-runtime-probe.test.ts`
+  - 3 files, 7 tests passed
 - `npm.cmd test -- tests/photo-vision-analysis.test.ts`
   - 1 file, 11 tests passed
 - `npm.cmd test -- tests/operation-memory-visualization.test.ts tests/ontology-operation-memory.test.ts tests/reporting-downloads.test.ts tests/workspace-pages.test.ts`

@@ -66,8 +66,7 @@ describe("SIF embedding approval preflight", () => {
     writeFileSync(envPath, [
       "OPENAI_API_KEY=sk-test-key-for-preflight",
       "SUPABASE_URL=https://example.supabase.co",
-      "SUPABASE_SERVICE_ROLE_KEY=service-role-placeholder",
-      "SAFETY_REFERENCE_VECTOR_SEARCH=1"
+      "SUPABASE_SERVICE_ROLE_KEY=service-role-placeholder"
     ].join("\n"), "utf8");
 
     const stdout = execFileSync(process.execPath, [
@@ -101,9 +100,58 @@ describe("SIF embedding approval preflight", () => {
     expect(env.openaiApiKeyPresent).toBe(true);
     expect(env.supabaseUrlPresent).toBe(true);
     expect(env.supabaseServiceRolePresent).toBe(true);
-    expect(env.vectorFeatureFlagEnabled).toBe(true);
+    expect(env.vectorFeatureFlagEnabled).toBe(false);
     expect(env.executionEnvReady).toBe(true);
     expect(env.requireExecutionEnv).toBe(true);
+  });
+
+  it("blocks vector retrieval enablement before upload count is verified", () => {
+    const outDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-preflight-vector-"));
+    const outPath = join(outDir, "approval-preflight-report.json");
+    const envPath = join(outDir, ".env.local");
+    writeFileSync(envPath, [
+      "OPENAI_API_KEY=sk-test-key-for-preflight",
+      "SUPABASE_URL=https://example.supabase.co",
+      "SUPABASE_SERVICE_ROLE_KEY=service-role-placeholder",
+      "SAFETY_REFERENCE_VECTOR_SEARCH=1"
+    ].join("\n"), "utf8");
+
+    let stdout = "";
+    try {
+      execFileSync(process.execPath, [
+        "scripts/sif_embedding_approval_preflight.mjs",
+        "--no-env-file",
+        "--env-file",
+        envPath,
+        "--require-execution-env",
+        "--output",
+        outPath
+      ], {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          OPENAI_API_KEY: "",
+          SUPABASE_SERVICE_ROLE_KEY: "",
+          SUPABASE_URL: "",
+          NEXT_PUBLIC_SUPABASE_URL: "",
+          SAFETY_REFERENCE_VECTOR_SEARCH: ""
+        }
+      });
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "stdout" in error) {
+        stdout = String((error as { stdout: unknown }).stdout);
+      } else {
+        throw error;
+      }
+    }
+
+    const result = asRecord(JSON.parse(stdout));
+    const failedCheckIds = asStringArray(result.failedCheckIds);
+    expect(result.ok).toBe(false);
+    expect(failedCheckIds).toContain("vector_feature_flag_stays_off_until_upload_verified");
+    expect(result.dbMutationPerformed).toBe(false);
+    expect(result.uploaded).toBe(false);
   });
 
   it("keeps the embedding cost approval guard in the corpus script", () => {
