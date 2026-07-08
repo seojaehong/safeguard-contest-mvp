@@ -3,21 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildOpenClawChatArgs,
   buildOpenClawChatPrompt,
-  resolveClawChatProvider,
   resolveOpenClawChatConfig,
   resolveOpenClawSpawn
 } from "@/lib/openclaw-chat";
 
 describe("OpenClaw chat routing", () => {
-  it("defaults Claw chat to the OpenClaw OAuth provider", () => {
-    expect(resolveClawChatProvider({})).toBe("openclaw");
-    expect(resolveClawChatProvider({ CLAW_CHAT_PROVIDER: "openclaw" })).toBe("openclaw");
-  });
-
-  it("keeps Anthropic only as an explicit legacy override", () => {
-    expect(resolveClawChatProvider({ CLAW_CHAT_PROVIDER: "anthropic" })).toBe("anthropic");
-  });
-
   it("builds a safeclaw local agent command that uses the profile OAuth runtime", () => {
     const config = resolveOpenClawChatConfig({});
     expect(config).toMatchObject({
@@ -36,6 +26,25 @@ describe("OpenClaw chat routing", () => {
       "--local",
       "-m",
       "성수동 외벽 도장 작업"
+    ]);
+  });
+
+  it("ignores legacy chat provider flags and keeps the OpenClaw OAuth runtime", () => {
+    const config = resolveOpenClawChatConfig({
+      CLAW_CHAT_PROVIDER: "anthropic",
+      OPENCLAW_PROFILE: "safeclaw",
+      OPENCLAW_AGENT: "main"
+    });
+
+    expect(buildOpenClawChatArgs(config, "테스트")).toEqual([
+      "--profile",
+      "safeclaw",
+      "agent",
+      "--agent",
+      "main",
+      "--local",
+      "-m",
+      "테스트"
     ]);
   });
 

@@ -25,7 +25,6 @@ import {
 } from "@/lib/agent-loop";
 import {
   buildOpenClawChatPrompt,
-  resolveClawChatProvider,
   resolveOpenClawChatConfig,
   runOpenClawChat
 } from "@/lib/openclaw-chat";
@@ -90,10 +89,6 @@ function jsonError(message: string, status: number): Response {
 }
 
 export async function POST(request: NextRequest) {
-  if (resolveClawChatProvider(process.env) !== "openclaw") {
-    return jsonError("클로 채팅은 OpenClaw OpenAI OAuth 경로를 기본으로 사용합니다. CLAW_CHAT_PROVIDER를 openclaw로 설정해 주세요.", 501);
-  }
-
   const limited = enforceRateLimit(request, limiter);
   if (limited) return limited;
 

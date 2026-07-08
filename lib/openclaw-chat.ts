@@ -4,8 +4,6 @@ import path from "node:path";
 
 import type { ClawChatEvent, ClawHistoryMessage } from "./agent-loop";
 
-export type ClawChatProvider = "openclaw" | "anthropic";
-
 export type OpenClawChatConfig = {
   bin: string;
   profile: string;
@@ -17,11 +15,6 @@ export type OpenClawChatConfig = {
 export const DEFAULT_OPENCLAW_CHAT_TIMEOUT_MS = 240_000;
 
 type EnvLike = Record<string, string | undefined>;
-
-export function resolveClawChatProvider(env: EnvLike): ClawChatProvider {
-  const provider = env.CLAW_CHAT_PROVIDER?.trim().toLowerCase();
-  return provider === "anthropic" ? "anthropic" : "openclaw";
-}
 
 function positiveInt(value: string | undefined, fallback: number): number {
   const parsed = Number.parseInt(value ?? "", 10);
