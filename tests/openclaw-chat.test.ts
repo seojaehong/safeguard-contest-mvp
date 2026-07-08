@@ -14,6 +14,8 @@ describe("OpenClaw chat routing", () => {
       bin: "openclaw",
       profile: "safeclaw",
       agent: "main",
+      model: "openai/gpt-5.5",
+      requiredAuthProvider: "openai/oauth",
       local: true
     });
 
@@ -24,6 +26,8 @@ describe("OpenClaw chat routing", () => {
       "--agent",
       "main",
       "--local",
+      "--model",
+      "openai/gpt-5.5",
       "-m",
       "성수동 외벽 도장 작업"
     ]);
@@ -32,10 +36,14 @@ describe("OpenClaw chat routing", () => {
   it("ignores legacy chat provider flags and keeps the OpenClaw OAuth runtime", () => {
     const config = resolveOpenClawChatConfig({
       CLAW_CHAT_PROVIDER: "anthropic",
+      ANTHROPIC_API_KEY: "anthropic-placeholder",
+      ANTHROPIC_MODEL: "claude-sonnet-5",
       OPENCLAW_PROFILE: "safeclaw",
       OPENCLAW_AGENT: "main"
     });
 
+    expect(config.requiredAuthProvider).toBe("openai/oauth");
+    expect(config.model).toBe("openai/gpt-5.5");
     expect(buildOpenClawChatArgs(config, "테스트")).toEqual([
       "--profile",
       "safeclaw",
@@ -43,9 +51,20 @@ describe("OpenClaw chat routing", () => {
       "--agent",
       "main",
       "--local",
+      "--model",
+      "openai/gpt-5.5",
       "-m",
       "테스트"
     ]);
+  });
+
+  it("rejects non-OpenAI model overrides for the Claw chat route", () => {
+    expect(resolveOpenClawChatConfig({ OPENCLAW_MODEL: "anthropic/claude-opus-4.8" }).model).toBe(
+      "openai/gpt-5.5"
+    );
+    expect(resolveOpenClawChatConfig({ OPENCLAW_CHAT_MODEL: "openai/gpt-5.5-thinking" }).model).toBe(
+      "openai/gpt-5.5-thinking"
+    );
   });
 
   it("resolves the Windows npm shim to node plus openclaw.mjs when available", () => {
@@ -70,6 +89,7 @@ describe("OpenClaw chat routing", () => {
     });
 
     expect(prompt).toContain("run_safeclaw_harness_agent");
+    expect(prompt).toContain("OpenAI OAuth");
     expect(prompt).toContain("DB harness packet 밖의 근거를 만들지 마세요");
     expect(prompt).toContain("오늘 작업 위험을 봐줘");
   });
