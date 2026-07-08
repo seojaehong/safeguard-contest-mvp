@@ -7,9 +7,10 @@ import type { HarnessImprovement } from "@/lib/db-harness";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog";
 import {
   buildWorkpackLearningFile,
+  normalizeLearningVisionPayload,
   normalizeWorkpackLearningFormat
 } from "@/lib/workpack-learning-export";
-import { isRecord, readString } from "@/lib/workspace-api";
+import { readString } from "@/lib/workspace-api";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
 
 export const dynamic = "force-dynamic";
@@ -26,24 +27,6 @@ type ReadConfirmation = {
 
 function readStringArray(value: unknown) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
-}
-
-function compactText(value: string, maxLength = 120) {
-  const normalized = value.replace(/\s+/g, " ").trim();
-  if (normalized.length <= maxLength) return normalized;
-  return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
-}
-
-function readOptionalPayloadString(value: unknown, key: string): string | undefined {
-  if (!isRecord(value)) return undefined;
-  const text = value[key];
-  return typeof text === "string" && text.trim() ? compactText(text) : undefined;
-}
-
-function readOptionalPayloadStringArray(value: unknown, key: string): string[] | undefined {
-  if (!isRecord(value)) return undefined;
-  const items = readStringArray(value[key]).map((item) => compactText(item, 80));
-  return items.length ? items : undefined;
 }
 
 function normalizeImprovementSourceType(value: string | null): HarnessImprovement["sourceType"] {
@@ -74,10 +57,7 @@ async function loadImprovementMemory(
       improvementText: row.improvement_text,
       reflectedDocuments: readStringArray(row.reflected_documents),
       sourceType: normalizeImprovementSourceType(row.source_type),
-      visionSummary: readOptionalPayloadString(row.analysis_payload, "summary"),
-      detectedHazards: readOptionalPayloadStringArray(row.analysis_payload, "detectedHazards"),
-      observedImprovement: readOptionalPayloadString(row.analysis_payload, "observedImprovement"),
-      ocrText: readOptionalPayloadString(row.analysis_payload, "ocrText")
+      ...normalizeLearningVisionPayload(row.analysis_payload)
     }));
   } catch (error) {
     console.warn("learning export improvement memory load failed", error);

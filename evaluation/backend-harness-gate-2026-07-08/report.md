@@ -52,8 +52,14 @@ SIF vector gate 산출물:
 - 보강: 사용자-facing `/workspace` 개선 캡처 패널이 문서팩 DB 저장 후 `/api/workpacks/:id/improvements` multipart API로 Before/After 사진과 메모를 전달
 - 보강: 최근 개선사항 카드에 사진 기반 위험요인, 관찰 개선, OCR을 표시
 - 보강: 로그인/DB/migration 미연결 시 기존 localStorage 후보로 fallback해 현장 메모를 버리지 않음
+- 보강: learning export가 `visionStatus`, `visionProvider`, `visionModel`, `visionErrorMessage`를 보존해 분석됨/키 없음/실패 상태를 MD/JSONL에 남김
+- 보강: learning export에서 OCR/관찰 결과를 120자 UI 요약 길이로 자르지 않고 최대 4,000자까지 보존
 - 산출물: `evaluation/backend-harness-gate-2026-07-08/vision-ocr-memory-contract-report.json`
+- 산출물: `evaluation/backend-harness-gate-2026-07-08/vision-ocr-learning-export-contract-report.json`
 - 검증: `npm.cmd test -- tests/photo-vision-analysis.test.ts tests/commercial-harness.test.ts tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/reporting-downloads.test.ts` → 5 files / 20 tests passed
+- 최신 검증: `npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/reporting-downloads.test.ts` → 5 files / 21 tests passed
+- 최신 검증: `npm.cmd run build` → passed
+- 최신 검증: `npm.cmd run typecheck` → passed
 - 주의: 이번 검증에서 실제 DB write나 사진 업로드는 실행하지 않았다.
 
 ### 온톨로지
@@ -78,7 +84,7 @@ GET /api/workpacks/:id/learning-export?format=jsonl
 - 작업팩 id, 생성시각, 입력문
 - safety reference / SIF / KOSHA 근거
 - 개선사항 후보, 반영 문서, source type
-- vision summary, OCR text
+- vision status/model/provider/error, vision summary, detected hazards, observed improvement, OCR text
 - 작업자 열람 확인 이력
 
 이 export는 제품 안에서 “학습”이라는 표현 대신 “현장 개선 이력 메모리”, “운영 지식 베이스 갱신 후보”로 취급한다.

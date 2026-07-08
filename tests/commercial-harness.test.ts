@@ -7,6 +7,7 @@ import {
   buildWorkpackLearningFile,
   buildWorkpackLearningJsonl,
   buildWorkpackLearningMarkdown,
+  normalizeLearningVisionPayload,
   normalizeWorkpackLearningFormat
 } from "@/lib/workpack-learning-export";
 
@@ -91,6 +92,7 @@ describe("DB harness packet", () => {
         improvementText: "작업발판 난간 보강",
         reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
         sourceType: "photo_analysis",
+        visionStatus: "analyzed",
         visionSummary: "난간이 보강된 것으로 보입니다.",
         detectedHazards: ["추락", "하부 통제 미흡"],
         observedImprovement: "작업발판 외측 난간 보강",
@@ -105,6 +107,7 @@ describe("DB harness packet", () => {
     expect(packet.generationContract.fallbackChainAllowed).toBe(false);
     expect(hasDocumentCoverage(packet, "TBM 기록")).toBe(true);
     expect(promptContext).toContain("DB harness가 고정한 근거");
+    expect(promptContext).toContain("visionStatus: analyzed");
     expect(promptContext).toContain("detected: 추락, 하부 통제 미흡");
     expect(promptContext).toContain("observed: 작업발판 외측 난간 보강");
     expect(promptContext).toContain("ocr: 추락주의");
@@ -136,6 +139,9 @@ describe("workpack learning export", () => {
         improvementText: "난간 보강",
         reflectedDocuments: ["위험성평가표"],
         sourceType: "photo_analysis" as const,
+        visionStatus: "analyzed" as const,
+        visionProvider: "openai",
+        visionModel: "gpt-4.1-mini",
         visionSummary: "난간 보강이 확인됩니다.",
         detectedHazards: ["추락"],
         observedImprovement: "난간 보강 후 작업구역 통제가 보입니다.",
@@ -150,11 +156,15 @@ describe("workpack learning export", () => {
 
     expect(markdown).toContain("# 성수동 외벽 도장");
     expect(markdown).toContain("난간 보강");
+    expect(markdown).toContain("visionStatus: analyzed");
+    expect(markdown).toContain("visionModel: gpt-4.1-mini");
     expect(markdown).toContain("detectedHazards: 추락");
     expect(markdown).toContain("observedImprovement: 난간 보강 후 작업구역 통제가 보입니다.");
     expect(markdown).toContain("ocr: 추락주의");
     expect(jsonl.split("\n")).toHaveLength(4);
     expect(jsonl).toContain("\"eventType\":\"improvement\"");
+    expect(jsonl).toContain("\"visionStatus\":\"analyzed\"");
+    expect(jsonl).toContain("\"visionModel\":\"gpt-4.1-mini\"");
     expect(jsonl).toContain("\"detectedHazards\":[\"추락\"]");
     expect(jsonl).toContain("\"observedImprovement\":\"난간 보강 후 작업구역 통제가 보입니다.\"");
     expect(jsonl).toContain("\"ocrText\":\"추락주의\"");
@@ -163,5 +173,28 @@ describe("workpack learning export", () => {
     expect(file.content.endsWith("\n")).toBe(true);
     expect(normalizeWorkpackLearningFormat("jsonl")).toBe("jsonl");
     expect(normalizeWorkpackLearningFormat("bad")).toBe("markdown");
+  });
+
+  it("preserves long vision/OCR payloads for memory export instead of clipping to UI summary length", () => {
+    const longOcr = `작업중 출입금지 ${"비계 하부 통제 표지 ".repeat(20)}`.trim();
+    const observedImprovement = `난간 설치와 하부 통제선 보강 확인. ${"작업발판 단부 보강 ".repeat(12)}`.trim();
+    const normalized = normalizeLearningVisionPayload({
+      status: "analyzed",
+      provider: "openai",
+      model: "gpt-4.1-mini",
+      summary: "개선 후 난간과 통제선이 보입니다.",
+      detectedHazards: ["추락", "하부 통제 미흡"],
+      observedImprovement,
+      ocrText: longOcr,
+      errorMessage: ""
+    });
+
+    expect(normalized.visionStatus).toBe("analyzed");
+    expect(normalized.visionProvider).toBe("openai");
+    expect(normalized.visionModel).toBe("gpt-4.1-mini");
+    expect(normalized.detectedHazards).toEqual(["추락", "하부 통제 미흡"]);
+    expect(normalized.observedImprovement).toBe(observedImprovement);
+    expect(normalized.ocrText).toBe(longOcr);
+    expect(normalized.ocrText?.length).toBeGreaterThan(120);
   });
 });

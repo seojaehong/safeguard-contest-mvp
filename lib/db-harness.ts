@@ -7,10 +7,14 @@ export type HarnessImprovement = {
   improvementText: string;
   reflectedDocuments: string[];
   sourceType: "manual" | "photo_analysis" | "operator_note";
+  visionStatus?: "analyzed" | "unconfigured" | "failed";
+  visionProvider?: string;
+  visionModel?: string;
   visionSummary?: string;
   detectedHazards?: string[];
   observedImprovement?: string;
   ocrText?: string;
+  visionErrorMessage?: string;
 };
 
 export type HarnessWorkpackMemory = {
@@ -106,6 +110,7 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
     ...packet.directEvidence.map((item) => `공식자료: ${item.title} -> ${item.primary_documents.join(", ")}`),
     ...packet.improvementMemory.map((item) => [
       `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
+      item.visionStatus ? `visionStatus: ${item.visionStatus}` : "",
       item.visionSummary ? `vision: ${item.visionSummary}` : "",
       item.detectedHazards?.length ? `detected: ${item.detectedHazards.join(", ")}` : "",
       item.observedImprovement ? `observed: ${item.observedImprovement}` : "",

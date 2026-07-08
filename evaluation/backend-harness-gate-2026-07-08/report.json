@@ -63,7 +63,15 @@
     "learningExportIncludesOcr": true,
     "learningExportIncludesDetectedHazards": true,
     "learningExportIncludesObservedImprovement": true,
-    "contractArtifact": "evaluation/backend-harness-gate-2026-07-08/vision-ocr-memory-contract-report.json"
+    "contractArtifact": "evaluation/backend-harness-gate-2026-07-08/vision-ocr-memory-contract-report.json",
+    "learningMemoryExportContract": {
+      "artifact": "evaluation/backend-harness-gate-2026-07-08/vision-ocr-learning-export-contract-report.json",
+      "preservesVisionStatus": true,
+      "preservesProviderModelAndError": true,
+      "preservesLongOcrText": true,
+      "uiSummaryClippingRemovedFromLearningExport": true,
+      "dbSchemaChanged": false
+    }
   },
   "ontology": {
     "listView": true,
@@ -219,6 +227,26 @@
         "command": "npm.cmd run typecheck",
         "passed": true,
         "note": "Parallel run raced .next/types generation; sequential rerun after build passed."
+      }
+    },
+    "latestVisionOcrLearningExportTests": {
+      "command": "npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/reporting-downloads.test.ts",
+      "filesPassed": 5,
+      "testsPassed": 21
+    },
+    "latestVisionOcrLearningExportVerification": {
+      "tests": {
+        "command": "npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/reporting-downloads.test.ts",
+        "filesPassed": 5,
+        "testsPassed": 21
+      },
+      "build": {
+        "command": "npm.cmd run build",
+        "passed": true
+      },
+      "typecheck": {
+        "command": "npm.cmd run typecheck",
+        "passed": true
       }
     }
   },
