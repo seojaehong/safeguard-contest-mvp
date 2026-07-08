@@ -72,6 +72,30 @@ describe("photo vision analysis contract", () => {
     expect(parsed.siteSignals).toEqual(["외벽", "비계", "통로"]);
   });
 
+  it("accepts fenced hazard JSON returned by vision models", () => {
+    const parsed = parseHazardPhotoVisionOutput(`\`\`\`json
+{
+  "summary": "사진에서 개구부와 추락주의 문구가 확인됩니다.",
+  "candidates": [
+    {
+      "label": "개구부 주변 추락 위험",
+      "detail": "개구부 주변 임시 난간과 통제선 상태를 확인해야 합니다.",
+      "severity": "high",
+      "evidence": "사진의 OPEN EDGE 표기와 추락주의 문구",
+      "reflectedDocuments": ["위험성평가표", "TBM 브리핑"],
+      "sourcePhotoNames": ["hazard-photo-smoke.png"]
+    }
+  ],
+  "ocrText": "FALL HAZARD / 추락주의",
+  "siteSignals": ["개구부", "추락주의"]
+}
+\`\`\``, { model: "gpt-4.1-mini", photoNames: ["hazard-photo-smoke.png"] });
+
+    expect(parsed.status).toBe("analyzed");
+    expect(parsed.candidates[0]?.label).toBe("개구부 주변 추락 위험");
+    expect(parsed.ocrText).toContain("추락주의");
+  });
+
   it("falls back to review severity and file names for incomplete hazard candidates", () => {
     const parsed = parseHazardPhotoVisionOutput(JSON.stringify({
       summary: "보완 확인 필요",
@@ -113,6 +137,22 @@ describe("photo vision analysis contract", () => {
     expect(parsed.observedImprovement).toContain("난간");
     expect(parsed.ocrText).toBe("추락주의");
     expect(parsed.reflectedDocuments).toEqual(["위험성평가표"]);
+  });
+
+  it("accepts fenced before/after improvement JSON", () => {
+    const parsed = parseImprovementVisionOutput(`\`\`\`json
+{
+  "summary": "after 사진에서 통제선이 추가된 것으로 보입니다.",
+  "detectedHazards": ["출입통제 미흡"],
+  "observedImprovement": "작업구역 통제선 설치",
+  "ocrText": "출입금지",
+  "reflectedDocuments": ["TBM 기록"]
+}
+\`\`\``, { model: "gpt-4.1-mini" });
+
+    expect(parsed.status).toBe("analyzed");
+    expect(parsed.observedImprovement).toContain("통제선");
+    expect(parsed.reflectedDocuments).toEqual(["TBM 기록"]);
   });
 
   it("returns failed status for non-JSON model output", () => {

@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-07-08T22:05:28.299Z",
+  "metrics": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "documentScrollHeight": 1360,
+    "bodyScrollHeight": 1360,
+    "scrollY": 0,
+    "topbar": {
+      "top": 20,
+      "bottom": 80.140625,
+      "height": 60.140625,
+      "position": "relative"
+    },
+    "sideNav": {
+      "top": 93.140625,
+      "bottom": 1078.28125,
+      "height": 985.140625
+    },
+    "layout": {
+      "top": 92.140625,
+      "bottom": 1296.140625,
+      "height": 1204
+    },
+    "main": {
+      "top": 93.140625,
+      "bottom": 1295.140625,
+      "height": 1202
+    },
+    "heading": {
+      "top": 248.140625,
+      "bottom": 313.09375,
+      "fontFamily": "\"Noto Sans KR\", Pretendard, \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "fontWeight": "800",
+      "lineHeight": "64.96px",
+      "letterSpacing": "normal"
+    },
+    "textarea": null,
+    "overlaps": {
+      "topbarSideNav": false,
+      "topbarHeading": false,
+      "sideNavMain": false
+    }
+  },
+  "mobile": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "scrollWidth": 390,
+    "clientWidth": 390,
+    "hasHorizontalOverflow": false
+  }
+}

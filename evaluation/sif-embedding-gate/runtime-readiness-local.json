@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-07-08T22:01:50.187Z",
+  "scope": "sif_embedding_next_approval_gate_preflight",
+  "ok": true,
+  "approvalHeld": true,
+  "dbMutationPerformed": false,
+  "embeddingGenerated": false,
+  "uploaded": false,
+  "commandHeldUntilApproval": "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload",
+  "reportPath": "evaluation\\sif-embedding-gate\\report.json",
+  "manifestPath": "evaluation\\sif-embedding-gate\\sif-embedding-batch-manifest.json",
+  "corpusPath": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
+  "migrationPath": "supabase/migrations/010_commercial_operations.sql",
+  "scriptPath": "scripts/prepare_sif_embedding_corpus.mjs",
+  "corpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+  "corpusCount": 6032,
+  "batchCount": 61,
+  "batchSize": 100,
+  "embeddingModel": "text-embedding-3-small",
+  "embeddingDimensions": 1536,
+  "checks": [
+    {
+      "id": "sif_source_count",
+      "passed": true,
+      "evidence": {
+        "itemCount": 6033,
+        "skippedCount": 1,
+        "corpusCount": 6032
+      }
+    },
+    {
+      "id": "manifest_matches_report",
+      "passed": true,
+      "evidence": {
+        "manifestRecordCount": 6032,
+        "reportCorpusCount": 6032,
+        "manifestBatchCount": 61,
+        "reportBatchCount": 61,
+        "manifestCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+        "reportCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e"
+      }
+    },
+    {
+      "id": "corpus_jsonl_matches_report",
+      "passed": true,
+      "evidence": {
+        "corpusLineCount": 6032,
+        "reportCorpusCount": 6032
+      }
+    },
+    {
+      "id": "corpus_quality_gate",
+      "passed": true,
+      "evidence": {
+        "emptyEmbeddingTextCount": 0,
+        "missingControlsCount": 0,
+        "missingPrimaryDocumentsCount": 0,
+        "duplicateContentHashCount": 0
+      }
+    },
+    {
+      "id": "no_embedding_generated_yet",
+      "passed": true,
+      "evidence": {
+        "embeddedCount": 0,
+        "uploadedCount": 0,
+        "vectorsPath": null
+      }
+    },
+    {
+      "id": "embedding_requires_explicit_cost_approval_flag",
+      "passed": true,
+      "evidence": {
+        "scriptPath": "scripts/prepare_sif_embedding_corpus.mjs"
+      }
+    },
+    {
+      "id": "upload_requires_explicit_approval_flag",
+      "passed": true,
+      "evidence": {
+        "scriptPath": "scripts/prepare_sif_embedding_corpus.mjs"
+      }
+    },
+    {
+      "id": "migration_contains_embedding_table_rpc_index",
+      "passed": true,
+      "evidence": {
+        "migrationPath": "supabase/migrations/010_commercial_operations.sql"
+      }
+    },
+    {
+      "id": "migration_keeps_embeddings_server_side",
+      "passed": true,
+      "evidence": {
+        "table": "safety_reference_embeddings",
+        "publicSelect": false
+      }
+    }
+  ],
+  "failedCheckIds": [],
+  "env": {
+    "openaiApiKeyPresent": true,
+    "supabaseUrlPresent": true,
+    "supabaseServiceRolePresent": true,
+    "vectorFeatureFlagEnabled": false,
+    "executionEnvReady": true,
+    "requireExecutionEnv": true,
+    "envFailure": false
+  },
+  "envFilesLoaded": [
+    ".env.local"
+  ],
+  "executionReadyAfterApproval": true,
+  "nextApprovalDecisions": [
+    "Apply 010_commercial_operations.sql as-is or split an embedding-only migration.",
+    "Confirm OPENAI_API_KEY and Supabase service role are available in the execution environment.",
+    "Run embedding generation only with --embed --approved-embedding.",
+    "Run embedding upload only with --embed --approved-embedding --upload --approved-upload.",
+    "Verify uploaded row count equals 6032 before enabling SAFETY_REFERENCE_VECTOR_SEARCH=1.",
+    "Enable runtime vector retrieval after RPC smoke test passes."
+  ]
+}

@@ -114,12 +114,24 @@ function extractResponseText(value: unknown) {
     .trim();
 }
 
+function normalizeJsonPayload(value: string) {
+  const trimmed = value.trim();
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  if (fenced?.[1]) return fenced[1].trim();
+  const firstBrace = trimmed.indexOf("{");
+  const lastBrace = trimmed.lastIndexOf("}");
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    return trimmed.slice(firstBrace, lastBrace + 1).trim();
+  }
+  return trimmed;
+}
+
 export function parseImprovementVisionOutput(value: string, fallback: {
   model: string;
   provider?: "openai";
 }): ImprovementVisionAnalysis {
   try {
-    const parsed = JSON.parse(value) as unknown;
+    const parsed = JSON.parse(normalizeJsonPayload(value)) as unknown;
     if (!isRecord(parsed)) throw new Error("Vision output is not an object");
     return {
       status: "analyzed",
@@ -152,7 +164,7 @@ export function parseHazardPhotoVisionOutput(value: string, fallback: {
   photoNames: string[];
 }): HazardPhotoVisionAnalysis {
   try {
-    const parsed = JSON.parse(value) as unknown;
+    const parsed = JSON.parse(normalizeJsonPayload(value)) as unknown;
     if (!isRecord(parsed)) throw new Error("Hazard photo vision output is not an object");
     const rawCandidates = Array.isArray(parsed.candidates) ? parsed.candidates : [];
     const candidates = rawCandidates.flatMap((item): HazardPhotoVisionCandidate[] => {
