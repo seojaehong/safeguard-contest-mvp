@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MAX_HAZARD_PHOTO_FILES,
   buildImprovementAnalysisPayload,
   buildImprovementVisionPrompt,
+  buildHazardPhotoVisionPrompt,
+  parseHazardPhotoVisionOutput,
   parseImprovementVisionOutput
 } from "@/lib/photo-vision-analysis";
 
@@ -17,6 +20,84 @@ describe("photo vision analysis contract", () => {
     expect(prompt).toContain("Before/After 사진");
     expect(prompt).toContain("단정적 법적 판단");
     expect(prompt).toContain("summary, detectedHazards, observedImprovement, ocrText, reflectedDocuments");
+  });
+
+  it("builds a constrained multi-photo hazard prompt", () => {
+    const prompt = buildHazardPhotoVisionPrompt({
+      question: "성수동 외벽 도장, 작업자 5명, 오후 강풍",
+      photoNames: ["workface.jpg", "scaffold.jpg"]
+    });
+
+    expect(MAX_HAZARD_PHOTO_FILES).toBe(10);
+    expect(prompt).toContain("현장 사진들을 서로 비교");
+    expect(prompt).toContain("사진 파일명(2장): workface.jpg, scaffold.jpg");
+    expect(prompt).toContain("후보는 최대 8개");
+    expect(prompt).toContain("severity는 high, medium, low, review");
+  });
+
+  it("parses multi-photo hazard JSON into document candidates", () => {
+    const parsed = parseHazardPhotoVisionOutput(JSON.stringify({
+      summary: "작업발판 외측과 통로 적치물이 보입니다.",
+      candidates: [
+        {
+          label: "작업발판 외측 추락 위험",
+          detail: "외벽 도장 작업면 가장자리의 난간 상태를 현장 확인해야 합니다.",
+          severity: "high",
+          evidence: "scaffold.jpg에서 작업면 가장자리가 노출되어 보임",
+          reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+          sourcePhotoNames: ["scaffold.jpg"]
+        },
+        {
+          label: "통로 정리정돈 미흡",
+          detail: "자재가 보행 동선 근처에 있어 이동 중 걸림 위험을 확인해야 합니다.",
+          severity: "medium",
+          evidence: "workface.jpg의 통로 적치물",
+          reflectedDocuments: ["TBM 기록"],
+          sourcePhotoNames: ["workface.jpg"]
+        }
+      ],
+      ocrText: "추락주의",
+      siteSignals: ["외벽", "비계", "통로"]
+    }), { model: "gpt-4.1-mini", photoNames: ["workface.jpg", "scaffold.jpg"] });
+
+    expect(parsed.status).toBe("analyzed");
+    expect(parsed.photoCount).toBe(2);
+    expect(parsed.candidates).toHaveLength(2);
+    expect(parsed.candidates[0]).toMatchObject({
+      label: "작업발판 외측 추락 위험",
+      severity: "high",
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+      sourcePhotoNames: ["scaffold.jpg"]
+    });
+    expect(parsed.siteSignals).toEqual(["외벽", "비계", "통로"]);
+  });
+
+  it("falls back to review severity and file names for incomplete hazard candidates", () => {
+    const parsed = parseHazardPhotoVisionOutput(JSON.stringify({
+      summary: "보완 확인 필요",
+      candidates: [
+        {
+          label: "보호구 착용 확인",
+          detail: "작업자 보호구 상태를 현장에서 확인해야 합니다.",
+          severity: "certain"
+        }
+      ]
+    }), { model: "gpt-4.1-mini", photoNames: ["worker.jpg"] });
+
+    expect(parsed.status).toBe("analyzed");
+    expect(parsed.candidates[0]?.severity).toBe("review");
+    expect(parsed.candidates[0]?.sourcePhotoNames).toEqual(["worker.jpg"]);
+  });
+
+  it("returns failed status for non-JSON hazard model output", () => {
+    const parsed = parseHazardPhotoVisionOutput("not-json", {
+      model: "gpt-4.1-mini",
+      photoNames: ["workface.jpg"]
+    });
+
+    expect(parsed.status).toBe("failed");
+    expect(parsed.photoCount).toBe(1);
+    expect(parsed.errorMessage).toBeTruthy();
   });
 
   it("parses JSON vision output into a reviewable analysis payload", () => {
