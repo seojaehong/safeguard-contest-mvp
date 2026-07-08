@@ -1,0 +1,53 @@
+[
+  {
+    "name": "workspace-desktop-day",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\backend-harness-gate-2026-07-08\\screenshots\\workspace-desktop-day.png",
+    "metrics": {
+      "themeClass": "command-center-shell workspace-theme-day workspace-theme-field",
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "inputTop": 468,
+      "inputBottom": 632,
+      "h1Top": 315,
+      "h1Bottom": 378,
+      "navRight": 304,
+      "mainLeft": 320,
+      "mainRight": 1400,
+      "viewportHeight": 1000
+    }
+  },
+  {
+    "name": "workspace-mobile-day",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\backend-harness-gate-2026-07-08\\screenshots\\workspace-mobile-day.png",
+    "metrics": {
+      "themeClass": "command-center-shell workspace-theme-day workspace-theme-field",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "inputTop": 512,
+      "inputBottom": 676,
+      "h1Top": 342,
+      "h1Bottom": 422,
+      "navRight": 378,
+      "mainLeft": 12,
+      "mainRight": 378,
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "workspace-desktop-night",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\backend-harness-gate-2026-07-08\\screenshots\\workspace-desktop-night.png",
+    "metrics": {
+      "themeClass": "command-center-shell workspace-theme-night",
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "inputTop": 456,
+      "inputBottom": 608,
+      "h1Top": 319,
+      "h1Bottom": 366,
+      "navRight": 323,
+      "mainLeft": 323,
+      "mainRight": 1359,
+      "viewportHeight": 1000
+    }
+  }
+]

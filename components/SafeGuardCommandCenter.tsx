@@ -754,7 +754,7 @@ export function SafeGuardCommandCenter({
   initialScenarioId,
   initialQuestion,
   autoGenerate,
-  workspaceTheme = "night"
+  workspaceTheme = "day"
 }: SafeGuardCommandCenterProps) {
   const initialExample = examples.find((example) => example.id === initialScenarioId) || examples[0];
   const [selectedExampleId, setSelectedExampleId] = useState<string | null>(initialExample.id);
