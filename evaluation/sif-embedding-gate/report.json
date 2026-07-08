@@ -1,6 +1,6 @@
 {
-  "startedAt": "2026-07-08T08:25:41.015Z",
-  "completedAt": "2026-07-08T08:25:50.940Z",
+  "startedAt": "2026-07-08T15:41:11.155Z",
+  "completedAt": "2026-07-08T15:41:18.459Z",
   "source": "safety_reference_items:item_type=sif-case",
   "itemCount": 6033,
   "skippedCount": 1,
@@ -27,6 +27,10 @@
     "duplicateContentHashSamples": []
   },
   "embeddingModel": "text-embedding-3-small",
+  "embeddingDimensions": 1536,
+  "batchSize": 100,
+  "batchCount": 61,
+  "corpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
   "embeddedCount": 0,
   "uploadedCount": 0,
   "uploadError": null,
@@ -38,5 +42,7 @@
   },
   "mode": "corpus-only",
   "jsonlPath": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
-  "mdPath": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.md"
+  "mdPath": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.md",
+  "manifestPath": "evaluation\\sif-embedding-gate\\sif-embedding-batch-manifest.json",
+  "vectorsPath": null
 }

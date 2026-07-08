@@ -21,7 +21,10 @@ SIF 임베딩은 완료된 단계가 아니라 승인 게이트에 들어온 상
 
 - 완료: `safety_reference_items.item_type = "sif-case"` 조회 및 코퍼스 생성
 - 완료: `evaluation/sif-embedding-gate/report.json` 기준 SIF 6,033건 중 header 1건 제외, corpus 6,032건
+- 완료: `evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json` 생성
+- 완료: 100건 단위 61개 batch로 embedding/upload 전 승인 manifest 고정
 - 완료: `scripts/prepare_sif_embedding_corpus.mjs`의 `--upload --approved-upload` 가드
+- 완료: `scripts/prepare_sif_embedding_corpus.mjs`의 `--batch-size` 기반 OpenAI embedding / Supabase upsert batch 처리
 - 완료: `010_commercial_operations.sql` 초안에 `match_safety_reference_embeddings` RPC 계약과 HNSW cosine index 추가
 - 완료: `searchSafetyReferences()`에 feature-flag 기반 vector+ranked hybrid retrieval 경계 추가
 - 기본값: `SAFETY_REFERENCE_VECTOR_SEARCH=1`이 없으면 vector 검색은 호출하지 않고 기존 ranked RPC / REST 검색으로 fallback
@@ -33,6 +36,9 @@ SIF vector gate 산출물:
 - 코드: `lib/safety-reference-catalog.ts`
 - SQL 초안: `supabase/migrations/010_commercial_operations.sql`
 - 테스트: `tests/safety-reference-hybrid.test.ts`
+- Batch manifest: `evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json`
+- Verification: `evaluation/sif-embedding-gate/batch-manifest-verification.json`
+- Corpus hash: `2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e`
 - 적용 조건: `OPENAI_API_KEY`, `safety_reference_embeddings` 업로드, `match_safety_reference_embeddings` RPC 적용
 - 주의: 이번 작업에서 DB schema 적용, embedding 생성, embedding 업로드는 실행하지 않았다.
 

@@ -6,6 +6,8 @@ import process from "node:process";
 const DEFAULT_OUTPUT_DIR = "evaluation/sif-embedding-gate";
 const DEFAULT_MODEL = "text-embedding-3-small";
 const PAGE_SIZE = 500;
+const DEFAULT_BATCH_SIZE = 100;
+const EMBEDDING_DIMENSIONS = 1536;
 
 function readEnvFile(filePath) {
   if (!fs.existsSync(filePath)) return;
@@ -22,6 +24,7 @@ function parseArgs(argv) {
     outputDir: DEFAULT_OUTPUT_DIR,
     limit: 0,
     model: DEFAULT_MODEL,
+    batchSize: DEFAULT_BATCH_SIZE,
     embed: false,
     upload: false,
     approvedUpload: false
@@ -32,11 +35,12 @@ function parseArgs(argv) {
     if (arg === "--output-dir") options.outputDir = argv[index += 1] || DEFAULT_OUTPUT_DIR;
     else if (arg === "--limit") options.limit = Number(argv[index += 1] || "0");
     else if (arg === "--model") options.model = argv[index += 1] || DEFAULT_MODEL;
+    else if (arg === "--batch-size") options.batchSize = Number(argv[index += 1] || String(DEFAULT_BATCH_SIZE));
     else if (arg === "--embed") options.embed = true;
     else if (arg === "--upload") options.upload = true;
     else if (arg === "--approved-upload") options.approvedUpload = true;
     else if (arg === "--help") {
-      console.log("Usage: node scripts/prepare_sif_embedding_corpus.mjs [--output-dir DIR] [--limit N] [--embed] [--upload --approved-upload] [--model MODEL]");
+      console.log("Usage: node scripts/prepare_sif_embedding_corpus.mjs [--output-dir DIR] [--limit N] [--batch-size N] [--embed] [--upload --approved-upload] [--model MODEL]");
       process.exit(0);
     }
   }
@@ -109,6 +113,11 @@ function contentHash(text) {
   return crypto.createHash("sha256").update(text, "utf8").digest("hex");
 }
 
+function resolveBatchSize(value) {
+  if (!Number.isFinite(value) || value <= 0) return DEFAULT_BATCH_SIZE;
+  return Math.max(1, Math.trunc(value));
+}
+
 function toCorpusRecord(item) {
   const embeddingText = buildEmbeddingText(item);
   return {
@@ -165,6 +174,39 @@ function textLengthStats(records) {
   };
 }
 
+function buildBatchManifest(records, options) {
+  const batchSize = resolveBatchSize(options.batchSize);
+  const batches = [];
+  for (let startIndex = 0; startIndex < records.length; startIndex += batchSize) {
+    const batch = records.slice(startIndex, startIndex + batchSize);
+    batches.push({
+      batchId: `sif-embed-${String(batches.length + 1).padStart(4, "0")}`,
+      startIndex,
+      endIndexExclusive: startIndex + batch.length,
+      recordCount: batch.length,
+      referenceItemIds: batch.map((record) => record.referenceItemId),
+      contentHash: contentHash(batch.map((record) => record.contentHash).join("\n"))
+    });
+  }
+  return {
+    generatedAt: options.generatedAt,
+    source: "safety_reference_items:item_type=sif-case",
+    embeddingModel: options.model,
+    embeddingDimensions: EMBEDDING_DIMENSIONS,
+    recordCount: records.length,
+    batchSize,
+    batchCount: batches.length,
+    corpusHash: contentHash(records.map((record) => `${record.referenceItemId}:${record.contentHash}`).join("\n")),
+    batches,
+    approvalGate: {
+      dbMutationPerformed: false,
+      requiresMigrationApproval: true,
+      requiresEmbeddingCostApproval: true,
+      requiresApprovedUploadFlag: true
+    }
+  };
+}
+
 function buildValidationReport(items, skippedItems, records) {
   const duplicates = duplicateContentHashes(records);
   const missingControls = records.filter((record) => record.controls.length === 0);
@@ -182,57 +224,76 @@ function buildValidationReport(items, skippedItems, records) {
   };
 }
 
-async function embedRecords(records, model) {
+async function embedRecords(records, model, batchSize) {
   const { default: OpenAI } = await import("openai");
   const client = new OpenAI();
   const output = [];
-  for (const record of records) {
+  const resolvedBatchSize = resolveBatchSize(batchSize);
+  for (let startIndex = 0; startIndex < records.length; startIndex += resolvedBatchSize) {
+    const batch = records.slice(startIndex, startIndex + resolvedBatchSize);
     const response = await client.embeddings.create({
       model,
-      input: record.embeddingText
+      input: batch.map((record) => record.embeddingText)
     });
-    const embedding = response.data[0]?.embedding;
-    if (!embedding) throw new Error(`embedding missing for ${record.referenceItemId}`);
-    output.push({ ...record, embedding });
+    const rows = Array.isArray(response.data) ? response.data : [];
+    if (rows.length !== batch.length) {
+      throw new Error(`embedding batch size mismatch at ${startIndex}: expected ${batch.length}, got ${rows.length}`);
+    }
+    for (let index = 0; index < batch.length; index += 1) {
+      const embedding = rows[index]?.embedding;
+      const record = batch[index];
+      if (!embedding) throw new Error(`embedding missing for ${record.referenceItemId}`);
+      if (embedding.length !== EMBEDDING_DIMENSIONS) {
+        throw new Error(`embedding dimension mismatch for ${record.referenceItemId}: expected ${EMBEDDING_DIMENSIONS}, got ${embedding.length}`);
+      }
+      output.push({ ...record, embedding });
+    }
   }
   return output;
 }
 
-async function upsertEmbeddings(config, embedded, model) {
+async function upsertEmbeddings(config, embedded, model, batchSize) {
   if (!embedded.length) return 0;
-  const rows = embedded.map((record) => ({
-    reference_item_id: record.referenceItemId,
-    embedding: record.embedding,
-    embedding_model: model,
-    metadata: {
-      contentHash: record.contentHash,
-      itemType: record.itemType,
-      title: record.title
-    }
-  }));
+  const resolvedBatchSize = resolveBatchSize(batchSize);
+  let uploaded = 0;
+  for (let startIndex = 0; startIndex < embedded.length; startIndex += resolvedBatchSize) {
+    const rows = embedded.slice(startIndex, startIndex + resolvedBatchSize).map((record) => ({
+      reference_item_id: record.referenceItemId,
+      embedding: record.embedding,
+      embedding_model: model,
+      metadata: {
+        contentHash: record.contentHash,
+        itemType: record.itemType,
+        title: record.title
+      }
+    }));
 
-  const response = await fetch(`${config.url}/rest/v1/safety_reference_embeddings?on_conflict=reference_item_id,embedding_model`, {
-    method: "POST",
-    headers: {
-      apikey: config.key,
-      Authorization: `Bearer ${config.key}`,
-      "content-type": "application/json",
-      Prefer: "resolution=merge-duplicates,return=minimal"
-    },
-    body: JSON.stringify(rows)
-  });
-  if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`safety_reference_embeddings upsert failed: ${response.status} ${body}`);
+    const response = await fetch(`${config.url}/rest/v1/safety_reference_embeddings?on_conflict=reference_item_id,embedding_model`, {
+      method: "POST",
+      headers: {
+        apikey: config.key,
+        Authorization: `Bearer ${config.key}`,
+        "content-type": "application/json",
+        Prefer: "resolution=merge-duplicates,return=minimal"
+      },
+      body: JSON.stringify(rows)
+    });
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(`safety_reference_embeddings upsert failed: ${response.status} ${body}`);
+    }
+    uploaded += rows.length;
   }
-  return rows.length;
+  return uploaded;
 }
 
-function writeArtifacts(outputDir, records, report) {
+function writeArtifacts(outputDir, records, report, manifest, embedded) {
   fs.mkdirSync(outputDir, { recursive: true });
   const jsonlPath = path.join(outputDir, "sif-embedding-corpus.jsonl");
   const mdPath = path.join(outputDir, "sif-embedding-corpus.md");
   const reportPath = path.join(outputDir, "report.json");
+  const manifestPath = path.join(outputDir, "sif-embedding-batch-manifest.json");
+  const vectorsPath = embedded?.length ? path.join(outputDir, "sif-embedding-vectors.jsonl") : null;
   fs.writeFileSync(jsonlPath, `${records.map((record) => JSON.stringify(record)).join("\n")}\n`, "utf8");
   fs.writeFileSync(mdPath, [
     "# SIF Embedding Corpus",
@@ -249,8 +310,12 @@ function writeArtifacts(outputDir, records, report) {
       ""
     ])
   ].join("\n"), "utf8");
-  fs.writeFileSync(reportPath, JSON.stringify({ ...report, jsonlPath, mdPath }, null, 2), "utf8");
-  return { jsonlPath, mdPath, reportPath };
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), "utf8");
+  if (vectorsPath && embedded) {
+    fs.writeFileSync(vectorsPath, `${embedded.map((record) => JSON.stringify(record)).join("\n")}\n`, "utf8");
+  }
+  fs.writeFileSync(reportPath, JSON.stringify({ ...report, jsonlPath, mdPath, manifestPath, vectorsPath }, null, 2), "utf8");
+  return { jsonlPath, mdPath, reportPath, manifestPath, vectorsPath };
 }
 
 async function main() {
@@ -262,19 +327,26 @@ async function main() {
   const skippedItems = items.filter((item) => !isEmbeddableSifItem(item));
   const records = items.filter(isEmbeddableSifItem).map(toCorpusRecord);
   const validation = buildValidationReport(items, skippedItems, records);
+  const batchSize = resolveBatchSize(options.batchSize);
+  const manifest = buildBatchManifest(records, {
+    batchSize,
+    generatedAt: startedAt,
+    model: options.model
+  });
 
   let embeddedCount = 0;
   let uploadedCount = 0;
   let uploadError = null;
+  let embedded = [];
   if (options.upload && !options.approvedUpload) {
     uploadError = "--upload requires explicit --approved-upload after DB migration approval";
   }
   if (options.embed || options.upload) {
     try {
       if (!uploadError) {
-        const embedded = await embedRecords(records, options.model);
+        embedded = await embedRecords(records, options.model, batchSize);
         embeddedCount = embedded.length;
-        if (options.upload) uploadedCount = await upsertEmbeddings(config, embedded, options.model);
+        if (options.upload) uploadedCount = await upsertEmbeddings(config, embedded, options.model, batchSize);
       }
     } catch (error) {
       uploadError = error instanceof Error ? error.message : String(error);
@@ -291,6 +363,10 @@ async function main() {
     corpusCount: records.length,
     validation,
     embeddingModel: options.model,
+    embeddingDimensions: EMBEDDING_DIMENSIONS,
+    batchSize,
+    batchCount: manifest.batchCount,
+    corpusHash: manifest.corpusHash,
     embeddedCount,
     uploadedCount,
     uploadError,
@@ -302,7 +378,7 @@ async function main() {
     },
     mode: options.upload ? "embed-and-upload" : options.embed ? "embed-only" : "corpus-only"
   };
-  const artifacts = writeArtifacts(options.outputDir, records, report);
+  const artifacts = writeArtifacts(options.outputDir, records, report, manifest, embedded);
   console.log(JSON.stringify({ ok: !uploadError, ...report, ...artifacts }, null, 2));
 }
 

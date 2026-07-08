@@ -27,6 +27,7 @@ npm.cmd run knowledge:sif-embedding-corpus
 - `evaluation/sif-embedding-gate/report.json`
 - `evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl`
 - `evaluation/sif-embedding-gate/sif-embedding-corpus.md`
+- `evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json`
 
 핵심 수치:
 
@@ -37,13 +38,29 @@ npm.cmd run knowledge:sif-embedding-corpus
 - missingPrimaryDocumentsCount: 0
 - emptyEmbeddingTextCount: 0
 - duplicateContentHashCount: 0
+- embeddingModel: `text-embedding-3-small`
+- embeddingDimensions: 1,536
+- batchSize: 100
+- batchCount: 61
+- corpusHash: `2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e`
+
+## Batch Manifest
+
+`sif-embedding-batch-manifest.json`은 실제 embedding 생성/업로드 전 승인자가 확인할 고정 manifest다.
+
+- 전체 6,032개 코퍼스를 100개 단위 61개 batch로 나눴다.
+- 각 batch는 `batchId`, index 범위, reference item id 목록, batch content hash를 가진다.
+- manifest 자체의 `approvalGate.dbMutationPerformed`는 `false`다.
+- 따라서 현재 단계는 DB 변경이 아니라 “무엇을 임베딩할지 고정한 승인 대기 상태”다.
 
 ## Upload Safety Gate
 
-`scripts/prepare_sif_embedding_corpus.mjs`는 이제 `--upload`만으로 DB mutation을 실행하지 않는다. 실제 업로드에는 아래 둘이 모두 필요하다.
+`scripts/prepare_sif_embedding_corpus.mjs`는 `--upload`만으로 DB mutation을 실행하지 않는다. 실제 업로드에는 아래 둘이 모두 필요하다.
 
 - DB migration 승인 및 적용
 - `--upload --approved-upload`
+
+또한 `--batch-size`로 OpenAI embedding 생성과 Supabase upsert를 batch 단위로 나눠 실행한다. 기본값은 100이다.
 
 검증 명령:
 
