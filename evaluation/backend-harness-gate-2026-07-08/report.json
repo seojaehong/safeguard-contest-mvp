@@ -25,7 +25,17 @@
   "learningExport": {
     "route": "app/api/workpacks/[id]/learning-export/route.ts",
     "formats": ["markdown", "jsonl"],
-    "includes": ["workpack", "reference", "improvement", "ack", "visionSummary", "ocrText"]
+    "includes": ["workpack", "reference", "improvement", "ack", "visionSummary", "ocrText"],
+    "workspaceDownloadUi": true
+  },
+  "workspaceDesign": {
+    "defaultTheme": "day",
+    "nightThemeAvailableByQuery": true,
+    "direction": "linear_structure_field_day_readability",
+    "desktopScreenshot": "evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-desktop-day.png",
+    "mobileScreenshot": "evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-mobile-day.png",
+    "visualCheck": "evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-visual-check.json",
+    "horizontalOverflow": false
   },
   "verification": {
     "tests": {
@@ -36,6 +46,15 @@
     "typecheck": {
       "command": "npm.cmd run typecheck",
       "passed": true
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "passed": true
+    },
+    "browserVisual": {
+      "command": "Playwright screenshot check on http://localhost:3107/workspace",
+      "passed": true,
+      "screenshots": 3
     }
   }
 }

@@ -11511,6 +11511,302 @@ body:has(.safeclaw-landing) :is(
   line-height: 1.84;
 }
 
+/* SafeClaw middle path: Linear structure with field-grade daylight readability. */
+.command-center-shell.workspace-theme-day {
+  --workspace-canvas: #fafafb;
+  --workspace-surface-1: #ffffff;
+  --workspace-surface-2: #f5f6f8;
+  --workspace-surface-3: #eef1f4;
+  --workspace-ink: #17191d;
+  --workspace-muted: #4f5661;
+  --workspace-subtle: #7a818c;
+  --workspace-rule: #e1e5eb;
+  --workspace-rule-strong: #cfd6df;
+  background: #fafafb;
+  color: var(--workspace-ink);
+}
+
+.command-center-shell.workspace-theme-day > .command-topbar,
+.command-center-shell.workspace-theme-day > .command-viewport {
+  width: min(1360px, calc(100% - 32px));
+}
+
+.command-center-shell.workspace-theme-day .command-topbar {
+  border-color: rgba(207, 214, 223, 0.94) !important;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(18px) saturate(1.12);
+  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.045) !important;
+}
+
+.command-center-shell.workspace-theme-day .workspace-theme-toggle {
+  gap: 4px;
+  border-color: #dce2ea;
+  border-radius: 10px;
+  background: #edf1f5;
+  padding: 3px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-theme-toggle button {
+  min-width: 58px;
+  border-radius: 7px;
+  color: #5b6470;
+}
+
+.command-center-shell.workspace-theme-day .workspace-theme-toggle button.active {
+  background: #ffffff;
+  color: #15171b;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.075);
+}
+
+.command-center-shell.workspace-theme-day .linear-workspace-layout {
+  grid-template-columns: 264px minmax(0, 1fr);
+  gap: 16px;
+  border: 0;
+  background: transparent;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-nav {
+  gap: 16px;
+  border: 1px solid #e1e5eb;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 14px;
+  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.045);
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group {
+  gap: 10px;
+  border: 1px solid #e5e9ef;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px;
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group > span {
+  color: #7b8491;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group button,
+.command-center-shell.workspace-theme-day .workspace-source-status p {
+  min-height: 48px;
+  gap: 10px;
+  border-color: transparent;
+  border-radius: 9px;
+  padding: 10px 11px;
+  color: #3b424d;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group button:hover:not(:disabled) {
+  background: #f5f6f8;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group button.active {
+  border-color: #d7dce5;
+  background: #f0f2f6;
+  color: #14161a;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group button span,
+.command-center-shell.workspace-theme-day .workspace-source-status b {
+  font-size: 13px;
+  font-weight: 620;
+  line-height: 1.5;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group button small,
+.command-center-shell.workspace-theme-day .workspace-source-status small {
+  color: #6e7682;
+  line-height: 1.55;
+}
+
+.command-center-shell.workspace-theme-day .workspace-current-brief {
+  border: 1px solid #e5e9ef;
+}
+
+.command-center-shell.workspace-theme-day .linear-workspace-layout .command-main {
+  border: 1px solid #e1e5eb !important;
+  border-radius: 14px;
+  background: #ffffff !important;
+  box-shadow: 0 14px 36px rgba(17, 24, 39, 0.045);
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: clamp(32px, 5vw, 68px);
+}
+
+.command-center-shell.workspace-theme-day .command-copy {
+  width: min(800px, 100%);
+}
+
+.command-center-shell.workspace-theme-day .command-copy .eyebrow {
+  color: #6d7480;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.command-center-shell.workspace-theme-day .command-copy h1 {
+  max-width: 680px;
+  color: #111318;
+  font-family: "Noto Sans KR", "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1.12;
+}
+
+.command-center-shell.workspace-theme-day .command-copy p {
+  color: #525a66;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.command-center-shell.workspace-theme-day .command-console {
+  width: min(820px, 100%);
+}
+
+.command-center-shell.workspace-theme-day .command-console-input {
+  min-height: 164px;
+  border-color: #dce2ea;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #17191d;
+  font-size: 17px;
+  line-height: 1.72;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.command-center-shell.workspace-theme-day .command-console-input:focus {
+  border-color: #c9b12b;
+  box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.22);
+}
+
+.command-center-shell.workspace-theme-day .input-helper {
+  color: #59616d;
+  line-height: 1.85;
+}
+
+.command-center-shell.workspace-theme-day .field-brief-chip-row {
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.command-center-shell.workspace-theme-day .field-brief-chip-row span {
+  min-height: 34px;
+  border-color: #dfe4eb;
+  border-radius: 999px;
+  background: #f5f6f8 !important;
+  color: #414955;
+  padding: 7px 13px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.command-center-shell.workspace-theme-day .input-photo-copy,
+.command-center-shell.workspace-theme-day .input-photo-candidates,
+.command-center-shell.workspace-theme-day .input-photo-dropzone,
+.command-center-shell.workspace-theme-day .evidence-readiness-card,
+.command-center-shell.workspace-theme-day .advanced-settings[open],
+.command-center-shell.workspace-theme-day .quick-scenario-chips[open] {
+  border-color: #e1e5eb !important;
+  border-radius: 12px;
+  background: #ffffff !important;
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day .evidence-readiness-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  width: min(820px, 100%);
+  border: 0 !important;
+}
+
+.command-center-shell.workspace-theme-day .evidence-readiness-card {
+  border-right: 1px solid #e1e5eb;
+  min-height: 70px;
+  padding: 12px;
+}
+
+.command-center-shell.workspace-theme-day .evidence-readiness-card span {
+  color: #707987;
+}
+
+.command-center-shell.workspace-theme-day .evidence-readiness-card strong {
+  color: #17191d;
+}
+
+.command-center-shell.workspace-theme-day .command-primary {
+  border-color: #f5c518 !important;
+  border-radius: 9px !important;
+  background: #f5c518 !important;
+  color: #17191d !important;
+  font-weight: 650;
+}
+
+.command-center-shell.workspace-theme-day .command-primary:hover {
+  border-color: #e0b30f !important;
+  background: #e0b30f !important;
+}
+
+.command-center-shell.workspace-theme-day :is(.document-workbench, .dispatch-preview-panel, .operation-ontology-panel, .share-panel.workflow-panel) {
+  border-color: #e1e5eb !important;
+  border-radius: 14px;
+  background: #ffffff !important;
+  box-shadow: 0 14px 36px rgba(17, 24, 39, 0.045);
+}
+
+.command-center-shell.workspace-theme-day :is(.document-review-status-strip article, .document-viewer-list button, .document-preview-pane, .document-evidence-panel, .document-evidence-panel article, .share-session-grid section, .before-after-photo-grid label, .operation-improvement-list article, .supporting-doc-cards, .workspace-panel.card) {
+  border-color: #e1e5eb !important;
+  border-radius: 12px;
+  background: #ffffff !important;
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day .document-workbench .document-preview-pane pre {
+  border-color: #e3e7ee;
+  border-radius: 10px;
+  background: #fbfcfe;
+  color: #20242b;
+  font-family: "Noto Sans KR", "Pretendard", var(--font-multilingual);
+  font-size: 13px;
+  line-height: 1.92;
+}
+
+.command-center-shell.workspace-theme-day .share-panel.workflow-panel,
+.command-center-shell.workspace-theme-day .dispatch-preview-panel,
+.command-center-shell.workspace-theme-day .operation-ontology-panel {
+  --share-canvas: #fafafb;
+  --share-surface: #ffffff;
+  --share-surface-2: #f5f6f8;
+  --share-surface-3: #eef1f4;
+  --share-line: #e1e5eb;
+  --share-line-strong: #cfd6df;
+  --share-ink: #17191d;
+  --share-muted: #525a66;
+  --share-soft: #303742;
+  --share-primary: #f5c518;
+}
+
+.command-center-shell .learning-export-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.command-center-shell .learning-export-actions .button {
+  min-width: 0;
+  width: 100%;
+}
+
 @media (max-width: 720px) {
   .command-center-shell .evidence-readiness-rail,
   .command-center-shell.workspace-theme-day .evidence-readiness-rail {
@@ -11530,6 +11826,75 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell.workspace-theme-day .workspace-input-page {
     padding: 26px;
+  }
+}
+
+@media (max-width: 900px) {
+  .command-center-shell.workspace-theme-day .linear-workspace-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-nav {
+    min-height: auto;
+    border-radius: 14px;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-group:first-child {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-group:first-child > span {
+    grid-column: 1 / -1;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-current-brief,
+  .command-center-shell.workspace-theme-day .workspace-source-status,
+  .command-center-shell.workspace-theme-day .workspace-recent-list {
+    display: none;
+  }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .command-main {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .command-center-shell.workspace-theme-day > .command-topbar,
+  .command-center-shell.workspace-theme-day > .command-viewport {
+    width: min(100% - 24px, 1360px);
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-nav,
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .command-main {
+    box-shadow: none;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-group:first-child button {
+    min-height: 44px;
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 10px;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-group:first-child button small {
+    display: none;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page {
+    padding: 24px 18px 34px;
+  }
+
+  .command-center-shell.workspace-theme-day .command-copy h1 {
+    font-size: 34px;
+    line-height: 1.18;
+  }
+
+  .command-center-shell.workspace-theme-day .input-photo-hazard-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .command-center-shell .learning-export-actions {
+    grid-template-columns: 1fr;
   }
 }
 

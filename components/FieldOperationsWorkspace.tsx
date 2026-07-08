@@ -46,6 +46,8 @@ type WorkspaceSaveSnapshot = {
   savedCount: number;
 };
 
+type LearningExportFormat = "markdown" | "jsonl";
+
 type WorkerDraft = {
   displayName: string;
   role: string;
@@ -78,6 +80,19 @@ const languageOptions: LanguageOption[] = [
   { code: "id", label: "인도네시아어" },
   { code: "ne", label: "네팔어" }
 ];
+
+function readDownloadFileName(disposition: string | null, fallback: string): string {
+  if (!disposition) return fallback;
+  const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded);
+    } catch (error) {
+      console.warn("learning export filename decode failed", error);
+    }
+  }
+  return disposition.match(/filename="?([^";]+)"?/i)?.[1] || fallback;
+}
 
 let supabaseBrowserClient: SupabaseClient | null = null;
 
@@ -541,6 +556,8 @@ function WorkpackHistoryPanel({
   onSaveWorkspace: () => Promise<WorkspaceSaveSnapshot>;
 }) {
   const [isSaving, setIsSaving] = useState(false);
+  const [downloadingFormat, setDownloadingFormat] = useState<LearningExportFormat | null>(null);
+  const [downloadMessage, setDownloadMessage] = useState("");
 
   async function saveWorkspace() {
     setIsSaving(true);
@@ -550,6 +567,49 @@ function WorkpackHistoryPanel({
       console.error("workspace save failed", error);
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function downloadLearningExport(format: LearningExportFormat) {
+    if (!session || !storageSnapshot.workpackId) {
+      setDownloadMessage("관리자 로그인 후 작업공간을 저장하면 현장 개선 메모리를 내려받을 수 있습니다.");
+      return;
+    }
+
+    setDownloadingFormat(format);
+    setDownloadMessage("");
+    try {
+      const response = await fetch(`/api/workpacks/${encodeURIComponent(storageSnapshot.workpackId)}/learning-export?format=${format}`, {
+        headers: { authorization: `Bearer ${session.access_token}` }
+      });
+      if (!response.ok) {
+        const payload: unknown = await response.json().catch((): unknown => null);
+        const message = typeof payload === "object" && payload !== null && "message" in payload && typeof payload.message === "string"
+          ? payload.message
+          : "현장 개선 메모리 다운로드에 실패했습니다.";
+        throw new Error(message);
+      }
+
+      const blob = await response.blob();
+      const extension = format === "markdown" ? "md" : "jsonl";
+      const fileName = readDownloadFileName(
+        response.headers.get("content-disposition"),
+        `safeclaw-${storageSnapshot.workpackId}-learning.${extension}`
+      );
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = fileName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setDownloadMessage(format === "markdown" ? "Markdown 개선 메모리를 내려받았습니다." : "JSONL 운영 메모리를 내려받았습니다.");
+    } catch (error) {
+      console.error("learning export download failed", error);
+      setDownloadMessage(error instanceof Error ? error.message : "현장 개선 메모리 다운로드 중 오류가 발생했습니다.");
+    } finally {
+      setDownloadingFormat(null);
     }
   }
 
@@ -568,6 +628,28 @@ function WorkpackHistoryPanel({
       <button type="button" className="button full-button" onClick={saveWorkspace} disabled={isSaving}>
         {isSaving ? "저장 중" : session ? "작업공간 저장" : "관리자 로그인 후 저장"}
       </button>
+      <div className="learning-export-actions" aria-label="현장 개선 메모리 다운로드">
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => downloadLearningExport("markdown")}
+          disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
+        >
+          {downloadingFormat === "markdown" ? "내려받는 중" : "개선 메모리 MD"}
+        </button>
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => downloadLearningExport("jsonl")}
+          disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
+        >
+          {downloadingFormat === "jsonl" ? "내려받는 중" : "운영 JSONL"}
+        </button>
+      </div>
+      <p className="muted small">
+        저장된 작업팩만 다운로드됩니다. 개선사항, 근거, 열람 확인 이력을 기간 리포트와 지식 베이스 갱신 후보로 재사용합니다.
+      </p>
+      {downloadMessage ? <p className="muted small">{downloadMessage}</p> : null}
     </article>
   );
 }

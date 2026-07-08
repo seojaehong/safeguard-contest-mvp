@@ -11,7 +11,7 @@ export default async function WorkspacePage({ searchParams }: { searchParams: Pr
   const params = await searchParams;
   const selectedExample = fieldExamples.find((example) => example.id === params.scenario) || defaultFieldExample;
   const q = params.q || selectedExample.question;
-  const workspaceTheme = params.theme === "field" || params.theme === "day" || params.theme === "light" ? "day" : "night";
+  const workspaceTheme = params.theme === "night" || params.theme === "dark" ? "night" : "day";
 
   return (
     <SafeGuardCommandCenter

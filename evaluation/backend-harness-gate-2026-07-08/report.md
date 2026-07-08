@@ -12,6 +12,8 @@ SIF 임베딩은 완료된 단계가 아니라 승인 게이트에 들어온 상
 - MD/JSONL export가 `workpack`, `reference`, `improvement`, `ack` 이벤트를 보존
 - Before/After vision 분석 결과 중 `summary`, `ocrText`를 하네스 프롬프트와 export에 포함
 - 작업팩 operation context에 실제 `created_at`을 포함해 “언제 한 작업인지”를 export에 반영
+- `/workspace` 기본 테마를 Day로 전환하고, Linear식 구조와 현장용 화이트 가독성 사이의 중간안을 적용
+- 관리자 저장 후 `개선 메모리 MD`, `운영 JSONL` 다운로드 버튼을 이력 카드에 노출
 
 ## 현재 상태 판정
 
@@ -58,6 +60,22 @@ GET /api/workpacks/:id/learning-export?format=jsonl
 
 이 export는 제품 안에서 “학습”이라는 표현 대신 “현장 개선 이력 메모리”, “운영 지식 베이스 갱신 후보”로 취급한다.
 
+### UI / UX 중간안
+
+- 기본 `/workspace`는 화이트 Day 테마로 진입한다.
+- `?theme=night`는 리니어 다크 감성 확인용 보조 테마로 남겼다.
+- 사이드 메뉴는 얇은 선만 있는 영역이 아니라 카드형 그룹으로 묶어, 메뉴 간격과 가시성을 개선했다.
+- 입력 칩은 연한 블루/회색 텍스트를 줄이고, 화이트 화면에서 읽히는 진회색 계열로 정리했다.
+- 문서/공유/개선 표면은 같은 워크스페이스 토큰을 따라 “작업 문서”처럼 보이도록 맞췄다.
+- 모바일에서는 사이드바와 본문을 1열로 접어 가로 스크롤 없이 입력 화면을 확인한다.
+
+브라우저 검수 산출물:
+
+- `evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-desktop-day.png`
+- `evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-mobile-day.png`
+- `evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-desktop-night.png`
+- `evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-visual-check.json`
+
 ## 다음 승인 게이트
 
 승인 전 실행 금지:
@@ -79,6 +97,7 @@ npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload
 ```powershell
 npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/commercial-migration.test.ts tests/mcp-tools.test.ts
 npm.cmd run typecheck
+npm.cmd run build
 ```
 
 결과:
@@ -86,3 +105,5 @@ npm.cmd run typecheck
 - 5 test files passed
 - 38 tests passed
 - typecheck passed
+- build passed
+- Playwright visual check passed: desktop/mobile Day, desktop Night, no horizontal overflow
