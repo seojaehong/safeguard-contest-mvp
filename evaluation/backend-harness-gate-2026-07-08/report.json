@@ -73,11 +73,22 @@
       "passed": true
     },
     "latestCommands": [
-      "npm.cmd test -- tests/workspace-layout-regression.test.ts",
-      "npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/commercial-migration.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts",
+      "npm.cmd test -- tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts",
+      "npm.cmd test -- tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-token-service.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts",
+      "local /api/agent/chat smoke on http://127.0.0.1:3111",
       "npm.cmd run typecheck",
       "npm.cmd run build"
-    ]
+    ],
+    "openClawDefaultModeTests": {
+      "command": "npm.cmd test -- tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-token-service.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts",
+      "filesPassed": 8,
+      "testsPassed": 88
+    },
+    "finalFocusedTests": {
+      "command": "npm.cmd test -- tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-token-service.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts tests/workspace-layout-regression.test.ts",
+      "filesPassed": 9,
+      "testsPassed": 90
+    }
   },
   "functionalOutputComparison": {
     "artifact": "evaluation/backend-harness-gate-2026-07-08/live-output-comparison.json",
@@ -110,7 +121,7 @@
     "structuredDeliverablesOverrideSupported": true,
     "currentEnvCanSmokeOpus": false,
     "clawChatUsesSameOverride": false,
-    "note": "Structured deliverables can be pointed at Opus if Anthropic provider env is configured; Claw chat needs separate model routing cleanup."
+    "note": "Structured deliverables can be pointed at Opus if Anthropic provider env is configured; Claw chat now defaults to OpenClaw safeclaw profile with OpenAI OAuth instead of Anthropic SDK."
   },
   "openClawOauth": {
     "artifact": "evaluation/backend-harness-gate-2026-07-08/openclaw-oauth-check.json",
@@ -119,5 +130,42 @@
     "oauthUsable": true,
     "mcpToolCount": 4,
     "versionWarning": true
+  },
+  "clawChatRoute": {
+    "provider": "openclaw",
+    "profile": "safeclaw",
+    "agent": "main",
+    "localOauthRuntime": true,
+    "route": "app/api/agent/chat",
+    "helper": "lib/openclaw-chat.ts",
+    "defaultCommandShape": "openclaw --profile safeclaw agent --agent main --local -m <prompt>",
+    "harnessPriority": "Prompt injects run_safeclaw_harness_agent first and forbids evidence outside the DB harness packet.",
+    "vercelCaveat": "Vercel functions cannot read the user local OpenClaw OAuth profile unless OpenClaw runtime/Gateway is installed and authenticated in that environment.",
+    "localRouteSmoke": {
+      "artifact": "evaluation/backend-harness-gate-2026-07-08/local-openclaw-chat-route-smoke.json",
+      "target": "http://127.0.0.1:3111/api/agent/chat",
+      "status": 200,
+      "openClawToolStart": true,
+      "openClawToolOk": true,
+      "hasFinal": true,
+      "hasError": false,
+      "textPreview": "OpenClaw OAuth route OK"
+    }
+  },
+  "defaultGenerationMode": {
+    "previousDefault": "template",
+    "currentDefault": "enhanced",
+    "explicitTemplateStillAvailable": true,
+    "invalidModeFallback": "enhanced",
+    "helper": "lib/run-ask-mode.ts",
+    "tests": "tests/run-ask-mode.test.ts"
+  },
+  "vercelEnvCheck": {
+    "localProjectLinkFound": true,
+    "cliCredentialAvailable": false,
+    "envListCommand": "vercel env ls",
+    "envListResult": "No existing credentials found",
+    "anthropicKeyAloneSufficientForClawChat": false,
+    "note": "ANTHROPIC_API_KEY in Vercel can support Claude deliverables only when AI_DELIVERABLES_PROVIDER and ANTHROPIC_MODEL are set; Claw chat defaults to OpenClaw/OpenAI OAuth instead."
   }
 }

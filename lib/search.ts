@@ -20,6 +20,7 @@ import { splitDocumentMeta } from "./doc-meta-split";
 import { buildEvidenceLabels } from "./smsa-mapping";
 import { createLogger } from "@/lib/logger";
 import { attachProgressListeners, type OnAskProgress } from "./ask-progress";
+import { resolveRunAskMode } from "./run-ask-mode";
 
 const log = createLogger("search");
 
@@ -788,8 +789,10 @@ export type RunAskOptions = {
 
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
   const onProgress = options.onProgress;
-  const requestedMode: AiMode = options.aiMode || ((process.env.AI_MODE_DEFAULT as AiMode | undefined) || "template");
-  const aiMode: AiMode = ["template", "enhanced", "full"].includes(requestedMode) ? requestedMode : "template";
+  const aiMode = resolveRunAskMode({
+    requestedMode: options.aiMode,
+    envDefault: process.env.AI_MODE_DEFAULT
+  });
 
   // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
   if (aiMode === "template") {

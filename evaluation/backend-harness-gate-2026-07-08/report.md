@@ -105,7 +105,8 @@ GET /api/workpacks/:id/learning-export?format=jsonl
 - 기본 Anthropic 모델은 `claude-sonnet-5`다.
 - `foreign`, `free`처럼 긴 산출물은 예산상 `claude-haiku-4-5`로 라우팅된다. 따라서 Opus 전환 효과는 위험성평가/TBM/교육기록 같은 핵심 structured 문서에서 먼저 비교해야 한다.
 - 현재 확인된 로컬 env에는 `ANTHROPIC_API_KEY`, `AI_DELIVERABLES_PROVIDER`, `ANTHROPIC_MODEL`이 없어 실제 Opus 호출 smoke는 수행하지 않았다.
-- Claw chat route는 `ANTHROPIC_MODEL` 오버라이드가 아니라 `CLAW_MODEL`이 `DEFAULT_ANTHROPIC_MODEL`을 재사용한다. 문서 생성과 채팅 모델을 같은 방식으로 전환하려면 별도 정리가 필요하다.
+- Claw chat route는 이제 Anthropic SDK 필수 경로가 아니라 OpenClaw `safeclaw` profile을 우선 호출한다. 이 경로는 로컬/시연 runtime의 OpenAI OAuth 세션을 사용한다.
+- Anthropic/Opus 설정은 구조화 문서 생성 품질 비교용 옵션으로 남고, 제품 안의 “클로 채팅” 기본 경로와는 분리된다.
 
 시연 전 권장 smoke:
 
@@ -115,7 +116,14 @@ $env:ANTHROPIC_MODEL='claude-opus-4-8'
 npm.cmd test -- tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts
 ```
 
-실제 API 품질 비교는 Anthropic key가 있는 환경에서 동일 입력 1회만 수행한다. 지연시간과 provider 지원 여부가 먼저 확인되어야 한다.
+실제 API 품질 비교는 Anthropic key가 있는 환경에서 동일 입력 1회만 수행한다. 지연시간과 provider 지원 여부가 먼저 확인되어야 한다. 단, 이 비교는 Claw chat이 아니라 문서 생성 provider 비교다.
+
+Vercel env 확인:
+
+- 메인 repo에는 Vercel project link가 있다.
+- 현재 로컬 Vercel CLI 세션에는 credential이 없어 `vercel env ls`는 `No existing credentials found`로 실패했다.
+- Vercel dashboard에 `ANTHROPIC_API_KEY`가 이미 있어도, 구조화 문서 생성을 Claude/Opus로 돌리려면 `AI_DELIVERABLES_PROVIDER=claude`와 `ANTHROPIC_MODEL=claude-opus-4-8` 설정이 추가로 필요하다.
+- 제품 내 Claw chat route는 이 Anthropic 설정을 쓰지 않고 OpenClaw/OpenAI OAuth를 기본으로 사용한다.
 
 ## OpenClaw OAuth 확인
 
@@ -136,6 +144,24 @@ openclaw --profile safeclaw mcp probe safeclaw
 - OpenAI OAuth는 usable 상태다.
 - `safeclaw` MCP probe는 4 tools를 반환했다.
 - 단, config는 2026.6.11로 작성됐고 현재 command는 2026.6.5로 실행되어 version warning이 있다. 시연 전에는 PATH/Gateway version을 맞추는 것이 좋다.
+
+Claw chat route 변경:
+
+- `app/api/agent/chat` 기본 provider는 `openclaw`다.
+- 기본 실행은 `openclaw --profile safeclaw agent --agent main --local -m <prompt>` 형태다. Windows Node runtime에서는 npm shim을 shell로 호출하지 않고 `node <openclaw.mjs>`로 안전하게 우회한다.
+- prompt에는 `run_safeclaw_harness_agent` 우선 호출과 DB harness packet 밖 근거 생성 금지 원칙을 주입한다.
+- Vercel 서버에서 이 경로를 쓰려면 OpenClaw runtime/Gateway가 해당 서버 환경에도 있어야 한다. 로컬 사용자 OAuth profile은 Vercel 함수가 자동으로 읽을 수 없다.
+- 로컬 route smoke: `evaluation/backend-harness-gate-2026-07-08/local-openclaw-chat-route-smoke.json`
+  - 대상: `http://127.0.0.1:3111/api/agent/chat`
+  - 결과: HTTP 200, OpenClaw OAuth start/ok 이벤트, `final` 이벤트, error 없음
+  - 응답 preview: `OpenClaw OAuth route OK`
+
+## 기본 생성 모드 변경
+
+- `runAsk()`의 모드 생략 기본값을 `template`에서 `enhanced`로 바꿨다.
+- 명시적으로 `template`을 보내는 테스트/데모 경로는 계속 유지한다.
+- 잘못된 mode 값이 들어오면 `template`이 아니라 `enhanced`로 떨어진다.
+- 목적: 워크스페이스 버튼뿐 아니라 `/api/ask`, `/api/ask/stream`, `/ask` 등 서버 호출자가 mode를 생략해도 DB/KOSHA/SIF 하네스 경로가 기본이 되게 한다.
 
 ### UI / UX 중간안
 
@@ -180,6 +206,7 @@ npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload
 
 ```powershell
 npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/commercial-migration.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts
+npm.cmd test -- tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-token-service.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts
 npm.cmd test -- tests/workspace-layout-regression.test.ts
 npm.cmd run typecheck
 npm.cmd run build
@@ -189,6 +216,10 @@ npm.cmd run build
 
 - commercial/model test files: 7 passed
 - commercial/model tests: 55 passed
+- OpenClaw/default-mode related test files: 8 passed
+- OpenClaw/default-mode related tests: 88 passed
+- final focused test files: 9 passed
+- final focused tests: 90 passed
 - layout regression test file: 1 passed
 - layout regression tests: 1 passed
 - workspace layout regression test passed

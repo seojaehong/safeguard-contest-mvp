@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-07-08T14:52:41.030Z",
+  "target": "http://127.0.0.1:3111/api/agent/chat",
+  "status": 200,
+  "ok": true,
+  "elapsedMs": 20074,
+  "eventCount": 4,
+  "eventKinds": [
+    "tool",
+    "text-delta",
+    "tool",
+    "final"
+  ],
+  "toolEvents": [
+    {
+      "kind": "tool",
+      "name": "openclaw_oauth_agent",
+      "status": "start",
+      "label": "OpenClaw OpenAI OAuth 연결 중"
+    },
+    {
+      "kind": "tool",
+      "name": "openclaw_oauth_agent",
+      "status": "ok",
+      "label": "OpenClaw OpenAI OAuth 연결 완료"
+    }
+  ],
+  "errorEvents": [],
+  "textPreview": "OpenClaw OAuth route OK\n",
+  "hasFinal": true,
+  "hasError": false
+}
