@@ -8,7 +8,7 @@ import { AgentConsole } from "@/components/AgentConsole";
 import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import { fetchAskStream } from "@/lib/ask-stream-client";
 import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
-import type { AskResponse } from "@/lib/types";
+import type { AskResponse, QualityContractStatus } from "@/lib/types";
 import type { FieldExample } from "@/lib/field-examples";
 import { formatEvidenceBadge } from "@/lib/smsa-mapping";
 
@@ -289,6 +289,24 @@ function buildApiFieldBrief(data: AskResponse, fallbackExample: FieldExample): F
 function statusRowState(active: boolean, warning = false) {
   if (warning) return "warn";
   return active ? "live" : "pending";
+}
+
+function qualityStatusCopy(status: QualityContractStatus) {
+  if (status === "ready") return "준비됨";
+  if (status === "blocked") return "차단";
+  if (status === "degraded") return "보강 필요";
+  return "확인 중";
+}
+
+function qualityOverallLabel(data: AskResponse | null) {
+  if (!data?.qualityContract) return "생성 후 확인";
+  return qualityStatusCopy(data.qualityContract.overall);
+}
+
+function qualityProofClass(status: QualityContractStatus) {
+  if (status === "ready") return "api-proof live";
+  if (status === "blocked" || status === "degraded") return "api-proof warn";
+  return "api-proof";
 }
 
 function StepDot({ status }: { status: StepStatus }) {
@@ -736,6 +754,10 @@ export function SafeGuardCommandCenter({
                 <span>API 조합</span>
                 <b>{apiStackLabel(data, liveWeather)}</b>
               </div>
+              <div className={`status-row ${statusRowState(data?.qualityContract?.overall === "ready", Boolean(data?.qualityContract && data.qualityContract.overall !== "ready"))}`}>
+                <span>통합 계약</span>
+                <b>{qualityOverallLabel(data)}</b>
+              </div>
             </div>
             <div className="left-progress" aria-hidden="true">
               <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
@@ -938,6 +960,17 @@ export function SafeGuardCommandCenter({
                 </div>
               ))}
             </div>
+            {data?.qualityContract ? (
+              <div className="api-proof-grid" aria-label="문서팩 통합 품질 계약">
+                {data.qualityContract.items.map((item) => (
+                  <div key={item.key} className={qualityProofClass(item.status)}>
+                    <strong>{item.label}</strong>
+                    <span>{qualityStatusCopy(item.status)}</span>
+                    <small>{item.detail}</small>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <div className={`inline-progress ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${currentDocProgress}/${totalDocumentCount}`}>
               <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
             </div>

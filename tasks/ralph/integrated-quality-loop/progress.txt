@@ -1,0 +1,16 @@
+# Ralph Progress Log
+Started: 2026-07-08
+
+## Objective
+- Combine UI/UX, harness engineering, DB consistency, non-fallback behavior, and ontology into one developed SafeClaw workpack loop.
+- Work in small verified stories and commit only passing slices.
+
+## Current notes
+- Previous Ralph work hardened prod full generation, but the web workpack path still does not expose a single contract proving whether the generated workpack is live, evidence-mapped, ontology-ready, structured, and persistence-ready.
+- MCP already has a stronger reviewed-docpack path; the web workspace needs to catch up without pretending fallback/template output is the final integrated product.
+
+## 2026-07-08 C1 Pass
+- Added `qualityContract` to `AskResponse` and attached it to mock and live `/api/ask` response paths.
+- The contract surfaces fallback visibility, ontology matching, evidence label coverage, structured document readiness, and DB save readiness.
+- Workspace UI now renders the same contract in the connection status and evidence panels.
+- Verification passed: `npm.cmd test -- tests/quality-contract.test.ts`, `npm.cmd run typecheck`, `npm.cmd run build`.

@@ -1,6 +1,7 @@
 import { AskResponse, type PermitInspectionStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
+import { attachQualityContract } from "./quality-contract";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import { searchSafetyReferences, type SafetyReferenceItem } from "./safety-reference-catalog";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
@@ -1296,17 +1297,15 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       sourceMix
     };
 
-    if (!koreanLawMcpCount) {
-      return enriched;
-    }
-
-    return {
+    const withMcpDetail: AskResponse = !koreanLawMcpCount ? enriched : {
       ...enriched,
       status: {
         ...enriched.status,
         detail: `${enriched.status.detail} / korean-law-mcp 근거 ${koreanLawMcpCount}건 보강`
       }
     };
+
+    return attachQualityContract(withMcpDetail);
   } catch (error) {
     const message = error instanceof Error ? error.message : "알 수 없는 오류";
     return buildMockAskResponse(

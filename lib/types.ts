@@ -5,6 +5,48 @@ export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
 export type IntegrationMode = "mock" | "live" | "fallback";
 
+export type QualityContractStatus = "ready" | "degraded" | "blocked" | "pending";
+
+export type QualityContractItem = {
+  key: string;
+  label: string;
+  status: QualityContractStatus;
+  detail: string;
+};
+
+export type QualityContract = {
+  overall: Exclude<QualityContractStatus, "pending">;
+  summary: string;
+  generatedAt: string;
+  items: QualityContractItem[];
+  fallback: {
+    hasFallback: boolean;
+    modes: Record<string, string>;
+  };
+  ontology: {
+    status: QualityContractStatus;
+    matchCount: number;
+    detail: string;
+  };
+  evidence: {
+    status: QualityContractStatus;
+    mappedCount: number;
+    requiredCount: number;
+    detail: string;
+  };
+  structured: {
+    status: QualityContractStatus;
+    readyCount: number;
+    requiredCount: number;
+    detail: string;
+  };
+  persistence: {
+    status: QualityContractStatus;
+    requiresLogin: boolean;
+    detail: string;
+  };
+};
+
 export type AccidentCase = {
   title: string;
   industry?: string;
@@ -463,6 +505,7 @@ export type AskResponse = {
    * Phase 0 프리뷰 — lib/smsa-mapping.ts 참고.
    */
   evidenceLabels?: Record<string, SmsaEvidenceLabel>;
+  qualityContract?: QualityContract;
   status: {
     lawgo: IntegrationMode;
     ai: IntegrationMode;

@@ -2,6 +2,7 @@ import { AskResponse, DetailRecord, SearchResult } from "./types";
 import { selectFallbackAccidentCases } from "./accident-cases";
 import { buildEvidenceLabels } from "./smsa-mapping";
 import { buildForeignWorkerBriefing, buildForeignWorkerTransmission, getDefaultForeignWorkerLanguages } from "./foreign-worker";
+import { attachQualityContract } from "./quality-contract";
 
 type ScenarioProfile = {
   id: string;
@@ -983,7 +984,7 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
     riskSummary
   };
 
-  return {
+  const response: AskResponse = {
     question: question.trim() || defaultQuestion,
     answer: [
       `${scenario.companyName} ${scenario.siteName}의 주요 위험은 ${profile.topRisk}입니다.`,
@@ -1100,4 +1101,6 @@ export function buildMockAskResponse(question: string, citations: SearchResult[]
       policyNote: "실 API 호출은 timeout 20초, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다."
     }
   };
+
+  return attachQualityContract(response);
 }

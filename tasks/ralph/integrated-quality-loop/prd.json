@@ -1,0 +1,84 @@
+{
+  "feature": "integrated-quality-loop",
+  "branchName": "master",
+  "qualityChecks": [
+    "npm.cmd test -- tests/quality-contract.test.ts",
+    "npm.cmd run typecheck",
+    "npm.cmd run build"
+  ],
+  "userStories": [
+    {
+      "id": "C1",
+      "title": "Expose a unified quality contract on every workpack response",
+      "priority": 1,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "AskResponse includes a qualityContract that combines fallback visibility, ontology QA readiness, evidence mapping coverage, structured document readiness, and DB persistence readiness.",
+        "The contract is built by a side-effect-free helper with focused unit tests.",
+        "Workspace UI renders the contract so the user can see whether the workpack is still template/fallback or ready for the integrated loop."
+      ],
+      "files": [
+        "lib/quality-contract.ts",
+        "lib/types.ts",
+        "lib/search.ts",
+        "lib/mock-data.ts",
+        "components/SafeGuardCommandCenter.tsx",
+        "tests/quality-contract.test.ts"
+      ]
+    },
+    {
+      "id": "C2",
+      "title": "Wire ontology QA into the web workpack path, not only MCP",
+      "priority": 2,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Full/enhanced /api/ask workpacks run ontology QA against the selected task label.",
+        "The UI shows missing controls and review verdict as pre-submission checks.",
+        "Tests prove vague task labels are resolved consistently with the MCP path."
+      ],
+      "files": [
+        "lib/search.ts",
+        "lib/mcp-tools.ts",
+        "lib/ontology/qa-review-tool.ts",
+        "components/SafeGuardCommandCenter.tsx"
+      ]
+    },
+    {
+      "id": "C3",
+      "title": "Add DB consistency gates for workpack persistence",
+      "priority": 3,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Workpack save paths record qualityContract and reject silent loss of required evidence fields.",
+        "Supabase type definitions and migrations are consistent with persisted JSON shape.",
+        "Evaluation report documents DB readiness without mutating existing production data."
+      ],
+      "files": [
+        "lib/workpack-store.ts",
+        "app/api/workpacks/route.ts",
+        "lib/supabase-admin.ts",
+        "supabase/migrations"
+      ]
+    },
+    {
+      "id": "C4",
+      "title": "Replace fallback-first demo defaults with explicit live-readiness UX",
+      "priority": 4,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Template/mock modes are clearly labeled as demo paths, while full mode shows live-readiness blockers.",
+        "No screen implies legal completion when API or ontology evidence is missing.",
+        "Browser verification confirms the quality panel is visible and non-overlapping on desktop and mobile."
+      ],
+      "files": [
+        "components/SafeGuardCommandCenter.tsx",
+        "app/globals.css",
+        "evaluation"
+      ]
+    }
+  ]
+}
