@@ -58,6 +58,57 @@ type ActionResponse = {
   message?: string;
 };
 
+type SifEmbeddingGateStatusResponse = {
+  ok: boolean;
+  stage: "ready-for-approval" | "degraded";
+  message: string;
+  generatedAt: string;
+  approvalHeld: boolean;
+  dbMutationPerformed: boolean;
+  embeddingGenerated: boolean;
+  uploaded: boolean;
+  commandHeldUntilApproval: string;
+  corpus: {
+    itemCount: number;
+    skippedCount: number;
+    corpusCount: number;
+    batchSize: number;
+    batchCount: number;
+    corpusHash: string;
+    embeddingModel: string;
+    embeddingDimensions: number;
+    embeddedCount: number;
+    uploadedCount: number;
+  };
+  validation: {
+    emptyEmbeddingTextCount: number;
+    missingControlsCount: number;
+    missingPrimaryDocumentsCount: number;
+    duplicateContentHashCount: number;
+  };
+  approvalRequirements: {
+    requiresDbMigrationApproval: boolean;
+    requiresEmbeddingCostApproval: boolean;
+    requiresApprovedUploadFlag: boolean;
+  };
+  runtime: {
+    openaiApiKeyPresent: boolean;
+    supabaseUrlPresent: boolean;
+    supabaseServiceRolePresent: boolean;
+    vectorFeatureFlagEnabled: boolean;
+    executionReadyAfterApproval: boolean;
+  };
+  failedCheckIds: string[];
+  nextApprovalDecisions: string[];
+  artifacts: {
+    reportPath: string;
+    manifestPath: string;
+    corpusPath: string;
+    migrationPath: string;
+    scriptPath: string;
+  };
+};
+
 const tabs: { id: AiConnectTab; label: string; body: string }[] = [
   {
     id: "harness",
@@ -124,6 +175,8 @@ export function AiConnectPanel() {
   const [tokenListLimit, setTokenListLimit] = useState(25);
   const [tokenListHasMore, setTokenListHasMore] = useState(false);
   const [nextTokenCursor, setNextTokenCursor] = useState<string | null>(null);
+  const [sifGate, setSifGate] = useState<SifEmbeddingGateStatusResponse | null>(null);
+  const [sifGateMessage, setSifGateMessage] = useState("");
 
   useEffect(() => {
     if (!client) {
@@ -168,6 +221,19 @@ export function AiConnectPanel() {
   useEffect(() => {
     if (session?.access_token) void loadTokens(session.access_token);
   }, [session?.access_token, loadTokens]);
+
+  useEffect(() => {
+    fetch("/api/sif-embedding-gate/status")
+      .then(async (response) => {
+        const payload = await response.json() as SifEmbeddingGateStatusResponse;
+        setSifGate(payload);
+        if (!response.ok) setSifGateMessage(payload.message || "SIF 임베딩 승인 게이트 상태를 확인해야 합니다.");
+      })
+      .catch((error: unknown) => {
+        console.warn("sif embedding gate status load failed", error);
+        setSifGateMessage("SIF 임베딩 승인 게이트 상태를 불러오지 못했습니다.");
+      });
+  }, []);
 
   const commandText = useMemo(() => (
     oneTimeToken ? commandForTab(activeTab, oneTimeToken) : ""
@@ -331,6 +397,77 @@ export function AiConnectPanel() {
           </div>
         ) : null}
         {message ? <p className="muted">{message}</p> : null}
+      </section>
+
+      <section className="safeclaw-module-panel ai-connect-sif-gate">
+        <div className="ai-connect-section-head">
+          <div>
+            <span>SIF Embedding Gate</span>
+            <h2>SIF 코퍼스는 준비됐고, 임베딩은 승인 전 보류합니다.</h2>
+          </div>
+          <strong className={sifGate?.ok ? "ready" : "hold"}>
+            {sifGate ? (sifGate.ok ? "승인 대기" : "점검 필요") : "확인 중"}
+          </strong>
+        </div>
+        <p>
+          {sifGate?.message || sifGateMessage || "SIF 코퍼스, 배치 manifest, 승인 플래그 상태를 확인하고 있습니다."}
+        </p>
+        {sifGate ? (
+          <>
+            <dl className="ai-connect-sif-metrics">
+              <div>
+                <dt>SIF 원본</dt>
+                <dd>{sifGate.corpus.itemCount.toLocaleString("ko-KR")}건</dd>
+              </div>
+              <div>
+                <dt>임베딩 후보</dt>
+                <dd>{sifGate.corpus.corpusCount.toLocaleString("ko-KR")}건</dd>
+              </div>
+              <div>
+                <dt>배치</dt>
+                <dd>{sifGate.corpus.batchCount.toLocaleString("ko-KR")}개</dd>
+              </div>
+              <div>
+                <dt>생성/업로드</dt>
+                <dd>{sifGate.corpus.embeddedCount.toLocaleString("ko-KR")} / {sifGate.corpus.uploadedCount.toLocaleString("ko-KR")}건</dd>
+              </div>
+            </dl>
+            <div className="ai-connect-sif-state-grid">
+              <article>
+                <strong>품질 게이트</strong>
+                <p>
+                  빈 텍스트 {sifGate.validation.emptyEmbeddingTextCount}건 · 관리대책 누락 {sifGate.validation.missingControlsCount}건 · 중복 해시 {sifGate.validation.duplicateContentHashCount}건
+                </p>
+              </article>
+              <article>
+                <strong>승인 조건</strong>
+                <p>
+                  DB migration 승인 · embedding 비용 승인 · upload 승인 플래그가 모두 필요합니다.
+                </p>
+              </article>
+              <article>
+                <strong>런타임 실행 준비</strong>
+                <p>
+                  {sifGate.runtime.executionReadyAfterApproval
+                    ? "승인 후 실행 환경이 준비되어 있습니다."
+                    : "승인 후 실행 전 OpenAI key와 Supabase service role 상태를 다시 확인해야 합니다."}
+                </p>
+              </article>
+              <article>
+                <strong>Vector 검색</strong>
+                <p>{sifGate.runtime.vectorFeatureFlagEnabled ? "feature flag 켜짐" : "feature flag 꺼짐 · 승인 전 기본값"}</p>
+              </article>
+            </div>
+            <div className="ai-connect-sif-command">
+              <div>
+                <strong>승인 후 실행 명령</strong>
+                <span>{sifGate.corpus.embeddingModel} · {sifGate.corpus.embeddingDimensions}d</span>
+              </div>
+              <pre>{sifGate.commandHeldUntilApproval}</pre>
+            </div>
+            <p className="muted">근거 파일: {sifGate.artifacts.reportPath} · {sifGate.artifacts.manifestPath}</p>
+          </>
+        ) : null}
       </section>
 
       <section className="safeclaw-module-panel ai-connect-token-list">
