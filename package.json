@@ -31,6 +31,7 @@
     "knowledge:references": "python ./scripts/ingest_safety_reference_catalog.py",
     "knowledge:sif-embedding-corpus": "node ./scripts/prepare_sif_embedding_corpus.mjs",
     "knowledge:sif-embedding-preflight": "node ./scripts/sif_embedding_approval_preflight.mjs",
+    "knowledge:sif-embedding-runtime-probe": "node ./scripts/sif_embedding_runtime_probe.mjs",
     "dryrun:api": "./scripts/run_daily_dryrun.sh",
     "dryrun:documents": "./scripts/run_daily_document_dryrun.sh",
     "publish:dryrun": "node ./scripts/publish_document_dryrun_snapshot.mjs",

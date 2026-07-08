@@ -1,0 +1,50 @@
+{
+  "startedAt": "2026-07-08T22:25:08.414Z",
+  "completedAt": "2026-07-08T22:25:13.555Z",
+  "source": "safety_reference_items:item_type=sif-case",
+  "itemCount": 4,
+  "skippedCount": 1,
+  "skippedIds": [
+    "sif-아카이브-건설업-00001"
+  ],
+  "corpusCount": 3,
+  "validation": {
+    "skipReasons": {
+      "spreadsheet_header": 1
+    },
+    "itemTypes": {
+      "sif-case": 4
+    },
+    "textLength": {
+      "min": 792,
+      "max": 928,
+      "average": 872
+    },
+    "missingControlsCount": 0,
+    "missingPrimaryDocumentsCount": 0,
+    "emptyEmbeddingTextCount": 0,
+    "duplicateContentHashCount": 0,
+    "duplicateContentHashSamples": []
+  },
+  "embeddingModel": "text-embedding-3-small",
+  "embeddingDimensions": 1536,
+  "batchSize": 100,
+  "batchCount": 1,
+  "corpusHash": "2fa69e852c140bf6e33585af99dd0de727b8e755929be4b885b3a63e23b2a243",
+  "embeddedCount": 3,
+  "uploadedCount": 0,
+  "uploadError": null,
+  "approvalGate": {
+    "embeddingApprovedFlag": true,
+    "uploadApprovedFlag": false,
+    "embeddingRequiresCostApproval": true,
+    "uploadRequiresMigrationApproval": true,
+    "uploadRequiresApprovedUploadFlag": true,
+    "corpusReady": true
+  },
+  "mode": "embed-only",
+  "jsonlPath": "evaluation\\sif-embedding-canary-2026-07-09\\sif-embedding-corpus.jsonl",
+  "mdPath": "evaluation\\sif-embedding-canary-2026-07-09\\sif-embedding-corpus.md",
+  "manifestPath": "evaluation\\sif-embedding-canary-2026-07-09\\sif-embedding-batch-manifest.json",
+  "vectorsPath": "evaluation\\sif-embedding-canary-2026-07-09\\sif-embedding-vectors.jsonl"
+}
