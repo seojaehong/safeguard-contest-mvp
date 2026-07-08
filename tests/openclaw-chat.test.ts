@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildOpenClawChatArgs,
   buildOpenClawChatPrompt,
+  buildOpenClawStatusArgs,
+  parseOpenClawOAuthStatusOutput,
   resolveOpenClawChatConfig,
   resolveOpenClawSpawn
 } from "@/lib/openclaw-chat";
@@ -31,6 +33,7 @@ describe("OpenClaw chat routing", () => {
       "-m",
       "성수동 외벽 도장 작업"
     ]);
+    expect(buildOpenClawStatusArgs(config)).toEqual(["--profile", "safeclaw", "models", "status", "--json"]);
   });
 
   it("ignores legacy chat provider flags and keeps the OpenClaw OAuth runtime", () => {
@@ -92,5 +95,81 @@ describe("OpenClaw chat routing", () => {
     expect(prompt).toContain("OpenAI OAuth");
     expect(prompt).toContain("DB harness packet 밖의 근거를 만들지 마세요");
     expect(prompt).toContain("오늘 작업 위험을 봐줘");
+  });
+
+  it("accepts OpenClaw status output only when OpenAI OAuth is usable", () => {
+    const config = resolveOpenClawChatConfig({});
+    const status = parseOpenClawOAuthStatusOutput(
+      [
+        "Your OpenClaw config was written by another version.",
+        JSON.stringify({
+          defaultModel: "openai/gpt-5.5",
+          resolvedDefault: "openai/gpt-5.5",
+          auth: {
+            providers: [
+              {
+                provider: "openai",
+                profiles: { count: 1, oauth: 1, token: 0, apiKey: 0 },
+              },
+            ],
+            runtimeAuthRoutes: [
+              { provider: "openai", runtime: "codex", authProvider: "openai", status: "usable" },
+            ],
+            oauth: {
+              providers: [
+                {
+                  provider: "openai",
+                  status: "ok",
+                  effectiveProfiles: [
+                    { provider: "openai", type: "oauth", status: "ok", source: "store" },
+                  ],
+                },
+              ],
+            },
+          },
+        }),
+      ].join("\n"),
+      config
+    );
+
+    expect(status).toMatchObject({
+      ok: true,
+      provider: "openai",
+      authProvider: "openai/oauth",
+      model: "openai/gpt-5.5",
+    });
+  });
+
+  it("rejects OpenAI API-key-only status for the Claw chat route", () => {
+    const config = resolveOpenClawChatConfig({});
+    expect(() => parseOpenClawOAuthStatusOutput(
+      JSON.stringify({
+        defaultModel: "openai/gpt-5.5",
+        resolvedDefault: "openai/gpt-5.5",
+        auth: {
+          providers: [
+            {
+              provider: "openai",
+              profiles: { count: 1, oauth: 0, token: 0, apiKey: 1 },
+            },
+          ],
+          runtimeAuthRoutes: [
+            { provider: "openai", runtime: "codex", authProvider: "openai", status: "usable" },
+          ],
+          oauth: {
+            providers: [
+              {
+                provider: "openai",
+                status: "static",
+                effectiveProfiles: [
+                  { provider: "openai", type: "api_key", status: "static", source: "env" },
+                ],
+              },
+            ],
+          },
+        },
+      }),
+      config
+    )).toThrow("OpenClaw safeclaw profile is not ready for OpenAI OAuth chat");
   });
 });

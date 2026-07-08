@@ -24,6 +24,7 @@ import {
   type ClawSiteProfile,
 } from "@/lib/agent-loop";
 import {
+  assertOpenClawOpenAiOAuth,
   buildOpenClawChatPrompt,
   resolveOpenClawChatConfig,
   runOpenClawChat
@@ -123,7 +124,20 @@ export async function POST(request: NextRequest) {
           kind: "tool",
           name: "openclaw_oauth_agent",
           status: "start",
-          label: "OpenClaw OpenAI OAuth 연결 중"
+          label: "OpenClaw OpenAI OAuth 상태 확인 중"
+        });
+        await assertOpenClawOpenAiOAuth(openClawConfig);
+        emit({
+          kind: "tool",
+          name: "openclaw_oauth_agent",
+          status: "ok",
+          label: "OpenClaw OpenAI OAuth 상태 확인 완료"
+        });
+        emit({
+          kind: "tool",
+          name: "openclaw_oauth_agent",
+          status: "start",
+          label: "OpenClaw 에이전트 실행 중"
         });
         await runOpenClawChat({
           config: openClawConfig,
@@ -134,7 +148,7 @@ export async function POST(request: NextRequest) {
           kind: "tool",
           name: "openclaw_oauth_agent",
           status: "ok",
-          label: "OpenClaw OpenAI OAuth 연결 완료"
+          label: "OpenClaw 에이전트 실행 완료"
         });
         emit({ kind: "final" });
       } catch (error) {
