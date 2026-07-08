@@ -88,6 +88,8 @@ export type WorkspaceDatabase = {
           scenario: Json;
           deliverables: Json;
           evidence_summary: Json;
+          quality_contract: Json;
+          ontology_qa: Json;
           worker_summary: Json;
           status: Json;
           created_by: string | null;
@@ -102,6 +104,8 @@ export type WorkspaceDatabase = {
           scenario?: Json;
           deliverables?: Json;
           evidence_summary?: Json;
+          quality_contract?: Json;
+          ontology_qa?: Json;
           worker_summary?: Json;
           status?: Json;
           created_by?: string | null;
@@ -113,6 +117,8 @@ export type WorkspaceDatabase = {
           scenario?: Json;
           deliverables?: Json;
           evidence_summary?: Json;
+          quality_contract?: Json;
+          ontology_qa?: Json;
           worker_summary?: Json;
           status?: Json;
           updated_at?: string;
@@ -196,6 +202,196 @@ export type WorkspaceDatabase = {
           provider_status?: string | null;
           failure_reason?: string | null;
           payload?: Json;
+        };
+        Relationships: [];
+      };
+      workpack_share_sessions: {
+        Row: {
+          id: string;
+          organization_id: string;
+          site_id: string | null;
+          workpack_id: string;
+          share_scope: string;
+          recipients_snapshot: Json;
+          access_policy: Json;
+          status: string;
+          expires_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          site_id?: string | null;
+          workpack_id: string;
+          share_scope?: string;
+          recipients_snapshot?: Json;
+          access_policy?: Json;
+          status?: string;
+          expires_at?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          share_scope?: string;
+          recipients_snapshot?: Json;
+          access_policy?: Json;
+          status?: string;
+          expires_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      workpack_read_confirmations: {
+        Row: {
+          id: string;
+          organization_id: string;
+          site_id: string | null;
+          workpack_id: string;
+          share_session_id: string | null;
+          worker_id: string | null;
+          worker_display_name: string;
+          worker_snapshot: Json;
+          language_code: string;
+          confirmation_method: string;
+          read_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          site_id?: string | null;
+          workpack_id: string;
+          share_session_id?: string | null;
+          worker_id?: string | null;
+          worker_display_name: string;
+          worker_snapshot?: Json;
+          language_code?: string;
+          confirmation_method?: string;
+          read_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          worker_snapshot?: Json;
+          language_code?: string;
+          confirmation_method?: string;
+          read_at?: string;
+        };
+        Relationships: [];
+      };
+      workpack_improvements: {
+        Row: {
+          id: string;
+          organization_id: string;
+          site_id: string | null;
+          workpack_id: string;
+          task_label: string;
+          hazard_label: string;
+          improvement_text: string;
+          reflected_documents: string[];
+          review_status: string;
+          source_type: string;
+          photo_summary: Json;
+          analysis_payload: Json;
+          created_by: string | null;
+          approved_by: string | null;
+          approved_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          site_id?: string | null;
+          workpack_id: string;
+          task_label: string;
+          hazard_label: string;
+          improvement_text: string;
+          reflected_documents?: string[];
+          review_status?: string;
+          source_type?: string;
+          photo_summary?: Json;
+          analysis_payload?: Json;
+          created_by?: string | null;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          task_label?: string;
+          hazard_label?: string;
+          improvement_text?: string;
+          reflected_documents?: string[];
+          review_status?: string;
+          source_type?: string;
+          photo_summary?: Json;
+          analysis_payload?: Json;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      workpack_improvement_photos: {
+        Row: {
+          id: string;
+          organization_id: string;
+          site_id: string | null;
+          workpack_id: string;
+          improvement_id: string;
+          photo_role: string;
+          storage_bucket: string;
+          storage_path: string;
+          original_filename: string;
+          content_type: string | null;
+          analysis_payload: Json;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          site_id?: string | null;
+          workpack_id: string;
+          improvement_id: string;
+          photo_role: string;
+          storage_bucket?: string;
+          storage_path: string;
+          original_filename: string;
+          content_type?: string | null;
+          analysis_payload?: Json;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          storage_path?: string;
+          original_filename?: string;
+          content_type?: string | null;
+          analysis_payload?: Json;
+        };
+        Relationships: [];
+      };
+      safety_reference_embeddings: {
+        Row: {
+          id: string;
+          reference_item_id: string;
+          embedding: string | null;
+          embedding_model: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          reference_item_id: string;
+          embedding?: string | null;
+          embedding_model: string;
+          created_at?: string;
+        };
+        Update: {
+          embedding?: string | null;
+          embedding_model?: string;
         };
         Relationships: [];
       };
