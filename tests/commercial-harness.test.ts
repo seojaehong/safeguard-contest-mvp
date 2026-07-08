@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildDbHarnessPacket, buildHarnessPromptContext, hasDocumentCoverage } from "@/lib/db-harness";
-import { buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
+import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
   buildWorkpackLearningFile,
@@ -55,6 +55,27 @@ describe("SIF embedding corpus", () => {
 
     expect(isEmbeddableSifReferenceItem(header)).toBe(false);
     expect(buildSifEmbeddingCorpus([header])).toEqual([]);
+  });
+
+  it("builds an approval-gated deterministic batch manifest before embedding upload", () => {
+    const corpus = buildSifEmbeddingCorpus([
+      reference({ id: "sif-1" }),
+      reference({ id: "sif-2", title: "지게차 동선 충돌 사례" }),
+      reference({ id: "sif-3", title: "작업발판 단부 추락 사례" })
+    ]);
+    const manifest = buildSifEmbeddingBatchManifest(corpus, {
+      embeddingModel: "text-embedding-3-small",
+      batchSize: 2,
+      generatedAt: "2026-07-09T00:00:00.000Z"
+    });
+
+    expect(manifest.recordCount).toBe(3);
+    expect(manifest.batchCount).toBe(2);
+    expect(manifest.batches.map((batch) => batch.recordCount)).toEqual([2, 1]);
+    expect(manifest.corpusHash).toHaveLength(64);
+    expect(manifest.batches[0].referenceItemIds).toEqual(["sif-1", "sif-2"]);
+    expect(manifest.approvalGate.dbMutationPerformed).toBe(false);
+    expect(manifest.approvalGate.requiresApprovedUploadFlag).toBe(true);
   });
 });
 

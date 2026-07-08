@@ -13,7 +13,34 @@ export type SifEmbeddingCorpusRecord = {
   contentHash: string;
 };
 
+export type SifEmbeddingBatchManifest = {
+  generatedAt: string;
+  source: "safety_reference_items:item_type=sif-case";
+  embeddingModel: string;
+  embeddingDimensions: 1536;
+  recordCount: number;
+  batchSize: number;
+  batchCount: number;
+  corpusHash: string;
+  batches: Array<{
+    batchId: string;
+    startIndex: number;
+    endIndexExclusive: number;
+    recordCount: number;
+    referenceItemIds: string[];
+    contentHash: string;
+  }>;
+  approvalGate: {
+    dbMutationPerformed: false;
+    requiresMigrationApproval: true;
+    requiresEmbeddingCostApproval: true;
+    requiresApprovedUploadFlag: true;
+  };
+};
+
 const MAX_EMBEDDING_TEXT_LENGTH = 6_000;
+const DEFAULT_BATCH_SIZE = 100;
+const EMBEDDING_DIMENSIONS = 1536;
 
 function compactText(value: string) {
   return value.replace(/\s+/g, " ").trim();
@@ -25,6 +52,11 @@ function uniqueStrings(values: string[]) {
 
 function hashText(value: string) {
   return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function resolveBatchSize(batchSize: number | undefined) {
+  if (!batchSize || !Number.isFinite(batchSize) || batchSize <= 0) return DEFAULT_BATCH_SIZE;
+  return Math.max(1, Math.trunc(batchSize));
 }
 
 export function isSifReferenceItem(item: Pick<SafetyReferenceItem, "item_type">): item is SafetyReferenceItem {
@@ -106,4 +138,43 @@ export function toSifEmbeddingMarkdown(records: SifEmbeddingCorpusRecord[]) {
   }
 
   return `${lines.join("\n")}\n`;
+}
+
+export function buildSifEmbeddingBatchManifest(
+  records: SifEmbeddingCorpusRecord[],
+  options: { embeddingModel: string; batchSize?: number; generatedAt?: string }
+): SifEmbeddingBatchManifest {
+  const batchSize = resolveBatchSize(options.batchSize);
+  const generatedAt = options.generatedAt || new Date().toISOString();
+  const batches: SifEmbeddingBatchManifest["batches"] = [];
+
+  for (let startIndex = 0; startIndex < records.length; startIndex += batchSize) {
+    const batch = records.slice(startIndex, startIndex + batchSize);
+    batches.push({
+      batchId: `sif-embed-${String(batches.length + 1).padStart(4, "0")}`,
+      startIndex,
+      endIndexExclusive: startIndex + batch.length,
+      recordCount: batch.length,
+      referenceItemIds: batch.map((record) => record.referenceItemId),
+      contentHash: hashText(batch.map((record) => record.contentHash).join("\n"))
+    });
+  }
+
+  return {
+    generatedAt,
+    source: "safety_reference_items:item_type=sif-case",
+    embeddingModel: options.embeddingModel,
+    embeddingDimensions: EMBEDDING_DIMENSIONS,
+    recordCount: records.length,
+    batchSize,
+    batchCount: batches.length,
+    corpusHash: hashText(records.map((record) => `${record.referenceItemId}:${record.contentHash}`).join("\n")),
+    batches,
+    approvalGate: {
+      dbMutationPerformed: false,
+      requiresMigrationApproval: true,
+      requiresEmbeddingCostApproval: true,
+      requiresApprovedUploadFlag: true
+    }
+  };
 }
