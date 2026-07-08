@@ -93,6 +93,9 @@ describe("DB harness packet", () => {
         reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
         sourceType: "photo_analysis",
         visionStatus: "analyzed",
+        analysisMode: "vision_ocr",
+        photoPairAttached: true,
+        visionUserLabel: "vision/OCR 분석 완료",
         visionSummary: "난간이 보강된 것으로 보입니다.",
         detectedHazards: ["추락", "하부 통제 미흡"],
         observedImprovement: "작업발판 외측 난간 보강",
@@ -108,6 +111,9 @@ describe("DB harness packet", () => {
     expect(hasDocumentCoverage(packet, "TBM 기록")).toBe(true);
     expect(promptContext).toContain("DB harness가 고정한 근거");
     expect(promptContext).toContain("visionStatus: analyzed");
+    expect(promptContext).toContain("analysisMode: vision_ocr");
+    expect(promptContext).toContain("photoPair: before/after attached");
+    expect(promptContext).toContain("visionLabel: vision/OCR 분석 완료");
     expect(promptContext).toContain("detected: 추락, 하부 통제 미흡");
     expect(promptContext).toContain("observed: 작업발판 외측 난간 보강");
     expect(promptContext).toContain("ocr: 추락주의");
@@ -140,6 +146,9 @@ describe("workpack learning export", () => {
         reflectedDocuments: ["위험성평가표"],
         sourceType: "photo_analysis" as const,
         visionStatus: "analyzed" as const,
+        analysisMode: "vision_ocr" as const,
+        photoPairAttached: true,
+        visionUserLabel: "vision/OCR 분석 완료",
         visionProvider: "openai",
         visionModel: "gpt-4.1-mini",
         visionSummary: "난간 보강이 확인됩니다.",
@@ -161,6 +170,9 @@ describe("workpack learning export", () => {
     expect(markdown).toContain("- acks: 1");
     expect(markdown).toContain("난간 보강");
     expect(markdown).toContain("visionStatus: analyzed");
+    expect(markdown).toContain("analysisMode: vision_ocr");
+    expect(markdown).toContain("photoPairAttached: yes");
+    expect(markdown).toContain("visionLabel: vision/OCR 분석 완료");
     expect(markdown).toContain("visionModel: gpt-4.1-mini");
     expect(markdown).toContain("detectedHazards: 추락");
     expect(markdown).toContain("observedImprovement: 난간 보강 후 작업구역 통제가 보입니다.");
@@ -172,6 +184,9 @@ describe("workpack learning export", () => {
     expect(jsonl).toContain("\"relation\":\"hasImprovement\"");
     expect(jsonl).toContain("\"eventType\":\"improvement\"");
     expect(jsonl).toContain("\"visionStatus\":\"analyzed\"");
+    expect(jsonl).toContain("\"analysisMode\":\"vision_ocr\"");
+    expect(jsonl).toContain("\"photoPairAttached\":true");
+    expect(jsonl).toContain("\"visionUserLabel\":\"vision/OCR 분석 완료\"");
     expect(jsonl).toContain("\"visionModel\":\"gpt-4.1-mini\"");
     expect(jsonl).toContain("\"detectedHazards\":[\"추락\"]");
     expect(jsonl).toContain("\"observedImprovement\":\"난간 보강 후 작업구역 통제가 보입니다.\"");
@@ -188,6 +203,9 @@ describe("workpack learning export", () => {
     const observedImprovement = `난간 설치와 하부 통제선 보강 확인. ${"작업발판 단부 보강 ".repeat(12)}`.trim();
     const normalized = normalizeLearningVisionPayload({
       status: "analyzed",
+      analysisMode: "vision_ocr",
+      photoPairAttached: true,
+      userLabel: "vision/OCR 분석 완료",
       provider: "openai",
       model: "gpt-4.1-mini",
       summary: "개선 후 난간과 통제선이 보입니다.",
@@ -198,6 +216,9 @@ describe("workpack learning export", () => {
     });
 
     expect(normalized.visionStatus).toBe("analyzed");
+    expect(normalized.analysisMode).toBe("vision_ocr");
+    expect(normalized.photoPairAttached).toBe(true);
+    expect(normalized.visionUserLabel).toBe("vision/OCR 분석 완료");
     expect(normalized.visionProvider).toBe("openai");
     expect(normalized.visionModel).toBe("gpt-4.1-mini");
     expect(normalized.detectedHazards).toEqual(["추락", "하부 통제 미흡"]);

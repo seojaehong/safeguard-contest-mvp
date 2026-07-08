@@ -15,6 +15,25 @@ export type ImprovementVisionAnalysis = {
   errorMessage?: string;
 };
 
+export type ImprovementAnalysisMode = "vision_ocr" | "photo_pair_unanalyzed" | "manual_text";
+
+export type ImprovementAnalysisPayload = {
+  status: ImprovementVisionAnalysis["status"];
+  provider: ImprovementVisionAnalysis["provider"];
+  model: string;
+  candidateText: string;
+  summary: string;
+  detectedHazards: string[];
+  observedImprovement: string;
+  ocrText: string;
+  reflectedDocuments: string[];
+  errorMessage: string | null;
+  photoPairAttached: boolean;
+  analysisMode: ImprovementAnalysisMode;
+  userLabel: string;
+  exportable: boolean;
+};
+
 type ResponsesApiContent = {
   type: string;
   text?: string;
@@ -113,6 +132,56 @@ export function buildImprovementVisionPrompt(input: {
     `반영 후보 문서: ${input.reflectedDocuments.join(", ")}`,
     "필드: summary, detectedHazards, observedImprovement, ocrText, reflectedDocuments"
   ].join("\n");
+}
+
+function resolveAnalysisMode(input: {
+  visionStatus: ImprovementVisionAnalysis["status"];
+  hasBeforePhoto: boolean;
+  hasAfterPhoto: boolean;
+}): ImprovementAnalysisMode {
+  const photoPairAttached = input.hasBeforePhoto && input.hasAfterPhoto;
+  if (photoPairAttached && input.visionStatus === "analyzed") return "vision_ocr";
+  if (photoPairAttached) return "photo_pair_unanalyzed";
+  return "manual_text";
+}
+
+function analysisUserLabel(mode: ImprovementAnalysisMode, status: ImprovementVisionAnalysis["status"]) {
+  if (mode === "vision_ocr") return "vision/OCR 분석 완료";
+  if (mode === "manual_text") return "수기 개선사항";
+  if (status === "failed") return "사진쌍 저장 · vision/OCR 실패";
+  return "사진쌍 저장 · vision/OCR 보류";
+}
+
+export function buildImprovementAnalysisPayload(input: {
+  vision: ImprovementVisionAnalysis;
+  candidateText: string;
+  reflectedDocuments: string[];
+  hasBeforePhoto: boolean;
+  hasAfterPhoto: boolean;
+}): ImprovementAnalysisPayload {
+  const photoPairAttached = input.hasBeforePhoto && input.hasAfterPhoto;
+  const analysisMode = resolveAnalysisMode({
+    visionStatus: input.vision.status,
+    hasBeforePhoto: input.hasBeforePhoto,
+    hasAfterPhoto: input.hasAfterPhoto
+  });
+
+  return {
+    status: input.vision.status,
+    provider: input.vision.provider,
+    model: input.vision.model,
+    candidateText: input.candidateText,
+    summary: input.vision.summary,
+    detectedHazards: input.vision.detectedHazards,
+    observedImprovement: input.vision.observedImprovement,
+    ocrText: input.vision.ocrText,
+    reflectedDocuments: input.reflectedDocuments,
+    errorMessage: input.vision.errorMessage || null,
+    photoPairAttached,
+    analysisMode,
+    userLabel: analysisUserLabel(analysisMode, input.vision.status),
+    exportable: true
+  };
 }
 
 async function fileToDataUrl(file: File) {

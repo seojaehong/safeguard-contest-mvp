@@ -8,6 +8,9 @@ export type HarnessImprovement = {
   reflectedDocuments: string[];
   sourceType: "manual" | "photo_analysis" | "operator_note";
   visionStatus?: "analyzed" | "unconfigured" | "failed";
+  analysisMode?: "vision_ocr" | "photo_pair_unanalyzed" | "manual_text";
+  photoPairAttached?: boolean;
+  visionUserLabel?: string;
   visionProvider?: string;
   visionModel?: string;
   visionSummary?: string;
@@ -111,6 +114,9 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
     ...packet.improvementMemory.map((item) => [
       `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
       item.visionStatus ? `visionStatus: ${item.visionStatus}` : "",
+      item.analysisMode ? `analysisMode: ${item.analysisMode}` : "",
+      item.photoPairAttached ? "photoPair: before/after attached" : "",
+      item.visionUserLabel ? `visionLabel: ${item.visionUserLabel}` : "",
       item.visionSummary ? `vision: ${item.visionSummary}` : "",
       item.detectedHazards?.length ? `detected: ${item.detectedHazards.join(", ")}` : "",
       item.observedImprovement ? `observed: ${item.observedImprovement}` : "",

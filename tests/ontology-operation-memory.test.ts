@@ -31,6 +31,9 @@ const photoImprovement: HarnessImprovement = {
   reflectedDocuments: ["TBM 기록"],
   sourceType: "photo_analysis",
   visionStatus: "analyzed",
+  analysisMode: "vision_ocr",
+  photoPairAttached: true,
+  visionUserLabel: "vision/OCR 분석 완료",
   visionModel: "gpt-4.1-mini",
   visionSummary: "before 사진에서 난간 누락, after 사진에서 보강 완료 확인",
   detectedHazards: ["추락", "낙하물"],
@@ -81,6 +84,9 @@ describe("buildOperationMemoryGraph", () => {
     expect(graph.nodes.find((node) => node.kind === "Improvement")?.meta).toMatchObject({
       sourceType: "photo_analysis",
       visionStatus: "analyzed",
+      analysisMode: "vision_ocr",
+      photoPairAttached: true,
+      visionLabel: "vision/OCR 분석 완료",
       visionModel: "gpt-4.1-mini"
     });
   });
