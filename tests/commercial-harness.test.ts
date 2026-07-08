@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildDbHarnessPacket, buildHarnessPromptContext, hasDocumentCoverage } from "@/lib/db-harness";
+import { buildDbHarnessPacket, buildHarnessPromptContext, hasDocumentCoverage, parseHarnessMemoryInput } from "@/lib/db-harness";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
@@ -127,6 +127,56 @@ describe("DB harness packet", () => {
 
     expect(packet.ontologyChecklist.status).toBe("review_required");
     expect(packet.ontologyChecklist.missing).toContain("SIF 유사사례");
+  });
+
+  it("accepts client-supplied operation improvement memory for the generation harness", () => {
+    const harnessMemory = parseHarnessMemoryInput({
+      improvements: [{
+        id: "local-improvement-1",
+        taskLabel: "성수동 외벽 도장",
+        hazardLabel: "추락",
+        improvementText: "오전 작업 전 이동식 비계 난간을 보강함",
+        reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+        sourceType: "photo_analysis",
+        visionStatus: "analyzed",
+        analysisMode: "vision_ocr",
+        photoPairAttached: true,
+        visionSummary: "After 사진에서 난간 보강이 확인됩니다.",
+        detectedHazards: ["추락"],
+        observedImprovement: "비계 단부 난간 보강",
+        ocrText: "작업중 출입금지"
+      }, {
+        id: "",
+        taskLabel: "invalid",
+        hazardLabel: "invalid",
+        improvementText: "invalid",
+        reflectedDocuments: [],
+        sourceType: "manual"
+      }],
+      workpackMemory: [{
+        id: "wp-1",
+        question: "지난주 성수동 외벽 도장",
+        generatedAt: "2026-07-08T00:00:00.000Z",
+        reflectedDocuments: ["위험성평가표"],
+        statusLabel: "문서팩 준비됨"
+      }]
+    });
+    const packet = buildDbHarnessPacket({
+      question: "성수동 외벽 도장 작업",
+      references: [reference()],
+      improvements: harnessMemory.improvements,
+      workpackMemory: harnessMemory.workpackMemory
+    });
+    const promptContext = buildHarnessPromptContext(packet);
+
+    expect(harnessMemory.improvements).toHaveLength(1);
+    expect(harnessMemory.workpackMemory).toHaveLength(1);
+    expect(packet.improvementMemory).toHaveLength(1);
+    expect(packet.workpackMemory).toHaveLength(1);
+    expect(packet.generationContract.missingEvidence).toEqual([]);
+    expect(promptContext).toContain("개선이력: 추락 -> 오전 작업 전 이동식 비계 난간을 보강함");
+    expect(promptContext).toContain("visionStatus: analyzed");
+    expect(promptContext).toContain("작업이력: 2026-07-08T00:00:00.000Z · 지난주 성수동 외벽 도장 · 문서팩 준비됨");
   });
 });
 

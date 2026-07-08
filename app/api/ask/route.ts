@@ -3,6 +3,7 @@ import { runAsk } from "@/lib/search";
 import type { AiMode } from "@/lib/ai-deliverables";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
+import { parseHarnessMemoryInput } from "@/lib/db-harness";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5min — Pro plan max; 7-way parallel Vertex calls need headroom
@@ -10,13 +11,19 @@ export const maxDuration = 300; // 5min — Pro plan max; 7-way parallel Vertex 
 const ALLOWED_MODES: AiMode[] = ["template", "enhanced", "full"];
 const limiter = createRateLimiter({ limit: 10, windowMs: 60_000 });
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 export async function POST(request: NextRequest) {
   const limited = enforceRateLimit(request, limiter);
   if (limited) return limited;
-  const body = await request.json().catch(() => ({}));
-  const question = typeof body.question === "string" ? body.question : "산업안전 실무 질문";
-  const requestedMode = typeof body.aiMode === "string" ? (body.aiMode as AiMode) : undefined;
+  const body: unknown = await request.json().catch(() => ({}));
+  const record = isRecord(body) ? body : {};
+  const question = typeof record.question === "string" ? record.question : "산업안전 실무 질문";
+  const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
   const aiMode = requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined;
-  const result = await runAsk(question, { aiMode });
+  const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
+  const result = await runAsk(question, { aiMode, harnessMemory });
   return NextResponse.json(result);
 }
