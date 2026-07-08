@@ -6,6 +6,7 @@ const DEFAULT_OUTPUT = "evaluation/sif-embedding-gate/approval-preflight-report.
 const DEFAULT_GATE_DIR = "evaluation/sif-embedding-gate";
 const DEFAULT_MIGRATION = "supabase/migrations/010_commercial_operations.sql";
 const DEFAULT_SCRIPT = "scripts/prepare_sif_embedding_corpus.mjs";
+const DEFAULT_ENV_FILES = [".env.local"];
 
 function parseArgs(argv) {
   const options = {
@@ -13,7 +14,8 @@ function parseArgs(argv) {
     migrationPath: DEFAULT_MIGRATION,
     scriptPath: DEFAULT_SCRIPT,
     output: DEFAULT_OUTPUT,
-    requireExecutionEnv: false
+    requireExecutionEnv: false,
+    envFiles: [...DEFAULT_ENV_FILES]
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -22,14 +24,29 @@ function parseArgs(argv) {
     else if (arg === "--migration") options.migrationPath = argv[index += 1] || DEFAULT_MIGRATION;
     else if (arg === "--script") options.scriptPath = argv[index += 1] || DEFAULT_SCRIPT;
     else if (arg === "--output") options.output = argv[index += 1] || DEFAULT_OUTPUT;
+    else if (arg === "--env-file") options.envFiles.push(argv[index += 1] || ".env.local");
+    else if (arg === "--no-env-file") options.envFiles = [];
     else if (arg === "--require-execution-env") options.requireExecutionEnv = true;
     else if (arg === "--help") {
-      console.log("Usage: node scripts/sif_embedding_approval_preflight.mjs [--gate-dir DIR] [--migration FILE] [--script FILE] [--output FILE] [--require-execution-env]");
+      console.log("Usage: node scripts/sif_embedding_approval_preflight.mjs [--gate-dir DIR] [--migration FILE] [--script FILE] [--output FILE] [--env-file FILE] [--no-env-file] [--require-execution-env]");
       process.exit(0);
     }
   }
 
   return options;
+}
+
+function readEnvFile(filePath) {
+  if (!filePath || !fileExists(filePath)) return false;
+  for (const line of fs.readFileSync(filePath, "utf8").split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#") || !trimmed.includes("=")) continue;
+    const [key, ...rest] = trimmed.split("=");
+    const name = key.trim();
+    if (!name || process.env[name]) continue;
+    process.env[name] = rest.join("=").trim().replace(/^['"]|['"]$/g, "");
+  }
+  return true;
 }
 
 function readJson(filePath) {
@@ -145,6 +162,7 @@ function summarizeEnv(requireExecutionEnv) {
 
 function main() {
   const options = parseArgs(process.argv.slice(2));
+  const envFilesLoaded = Array.from(new Set(options.envFiles)).filter(readEnvFile);
   const reportPath = path.join(options.gateDir, "report.json");
   const manifestPath = path.join(options.gateDir, "sif-embedding-batch-manifest.json");
   const corpusPath = path.join(options.gateDir, "sif-embedding-corpus.jsonl");
@@ -200,6 +218,7 @@ function main() {
     checks,
     failedCheckIds: failedChecks.map((check) => check.id),
     env,
+    envFilesLoaded,
     executionReadyAfterApproval,
     nextApprovalDecisions: [
       "Apply 010_commercial_operations.sql as-is or split an embedding-only migration.",

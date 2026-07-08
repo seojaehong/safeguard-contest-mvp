@@ -1,0 +1,1 @@
+{"ok":false,"configured":true,"analysis":{"status":"failed","provider":"openai","model":"gpt-4.1-mini","summary":"","candidates":[],"ocrText":"","siteSignals":[],"photoCount":1,"errorMessage":"Unexpected token '`', \"```json\n{\n\"... is not valid JSON"},"message":"Unexpected token '`', \"```json\n{\n\"... is not valid JSON"}

@@ -60,8 +60,12 @@ describe("workspace layout regression", () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 720 } });
     await page.goto(`${baseUrl}/workspace?theme=night`, { waitUntil: "networkidle" });
+    await page.waitForFunction(() => {
+      const scroller = document.scrollingElement;
+      return Boolean(scroller && scroller.scrollHeight > window.innerHeight + 160);
+    });
     await page.evaluate(() => window.scrollTo(0, 260));
-    await page.waitForTimeout(100);
+    await page.waitForFunction(() => window.scrollY >= 120);
 
     const metrics = await page.evaluate(() => {
       const topbar = document.querySelector(".command-topbar");
@@ -70,9 +74,11 @@ describe("workspace layout regression", () => {
       const topbarRect = topbar?.getBoundingClientRect();
       const sideNavRect = sideNav?.getBoundingClientRect();
       const headingRect = heading?.getBoundingClientRect();
+      const topbarStyle = topbar ? getComputedStyle(topbar) : null;
       return {
         scrollY: Math.round(window.scrollY),
         topbarBottom: topbarRect ? Math.round(topbarRect.bottom) : null,
+        topbarPosition: topbarStyle?.position || null,
         sideNavTop: sideNavRect ? Math.round(sideNavRect.top) : null,
         headingTop: headingRect ? Math.round(headingRect.top) : null
       };
@@ -82,6 +88,7 @@ describe("workspace layout regression", () => {
     expect(metrics.topbarBottom).not.toBeNull();
     expect(metrics.sideNavTop).not.toBeNull();
     expect(metrics.headingTop).not.toBeNull();
+    expect(metrics.topbarPosition).toBe("relative");
     expect(metrics.topbarBottom).toBeLessThanOrEqual(0);
   }, 90_000);
 });

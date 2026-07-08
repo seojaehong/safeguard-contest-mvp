@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -25,6 +25,7 @@ describe("SIF embedding approval preflight", () => {
 
     const stdout = execFileSync(process.execPath, [
       "scripts/sif_embedding_approval_preflight.mjs",
+      "--no-env-file",
       "--output",
       outPath
     ], {
@@ -56,6 +57,53 @@ describe("SIF embedding approval preflight", () => {
     const env = asRecord(saved.env);
     expect(env.executionEnvReady).toBe(false);
     expect(env.requireExecutionEnv).toBe(false);
+  });
+
+  it("loads an explicit env file for execution-readiness checks without changing the approval hold", () => {
+    const outDir = mkdtempSync(join(tmpdir(), "safeclaw-sif-preflight-env-"));
+    const outPath = join(outDir, "approval-preflight-report.json");
+    const envPath = join(outDir, ".env.local");
+    writeFileSync(envPath, [
+      "OPENAI_API_KEY=sk-test-key-for-preflight",
+      "SUPABASE_URL=https://example.supabase.co",
+      "SUPABASE_SERVICE_ROLE_KEY=service-role-placeholder",
+      "SAFETY_REFERENCE_VECTOR_SEARCH=1"
+    ].join("\n"), "utf8");
+
+    const stdout = execFileSync(process.execPath, [
+      "scripts/sif_embedding_approval_preflight.mjs",
+      "--no-env-file",
+      "--env-file",
+      envPath,
+      "--require-execution-env",
+      "--output",
+      outPath
+    ], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        OPENAI_API_KEY: "",
+        SUPABASE_SERVICE_ROLE_KEY: "",
+        SUPABASE_URL: "",
+        NEXT_PUBLIC_SUPABASE_URL: "",
+        SAFETY_REFERENCE_VECTOR_SEARCH: ""
+      }
+    });
+
+    const result = asRecord(JSON.parse(stdout));
+    const env = asRecord(result.env);
+    expect(result.ok).toBe(true);
+    expect(result.approvalHeld).toBe(true);
+    expect(result.dbMutationPerformed).toBe(false);
+    expect(result.embeddingGenerated).toBe(false);
+    expect(result.uploaded).toBe(false);
+    expect(env.openaiApiKeyPresent).toBe(true);
+    expect(env.supabaseUrlPresent).toBe(true);
+    expect(env.supabaseServiceRolePresent).toBe(true);
+    expect(env.vectorFeatureFlagEnabled).toBe(true);
+    expect(env.executionEnvReady).toBe(true);
+    expect(env.requireExecutionEnv).toBe(true);
   });
 
   it("keeps the embedding cost approval guard in the corpus script", () => {
