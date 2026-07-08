@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { FieldOperationsWorkspace } from "@/components/FieldOperationsWorkspace";
 import type { DocumentKey } from "@/components/WorkpackEditor";
@@ -100,6 +100,25 @@ type LocalPhoto = {
   file: File;
 };
 
+type InputHazardCandidate = {
+  label: string;
+  detail: string;
+  severity?: "high" | "medium" | "low" | "review";
+  evidence?: string;
+  reflectedDocuments?: string[];
+  sourcePhotoNames?: string[];
+  source: "vision" | "local";
+};
+
+type InputHazardPhotoAnalysis = {
+  status: "idle" | "analyzing" | "analyzed" | "unconfigured" | "failed";
+  summary: string;
+  ocrText: string;
+  siteSignals: string[];
+  candidates: InputHazardCandidate[];
+  message: string;
+};
+
 type ImprovementSaveState = "idle" | "saving" | "saved" | "local";
 
 type WorkpackSaveResult = {
@@ -131,6 +150,8 @@ type ImprovementApiResult = {
   };
   message: string;
 };
+
+const MAX_INPUT_HAZARD_PHOTOS = 10;
 
 const workflowSteps: WorkflowStep[] = [
   { id: "01", key: "input", label: "입력", caption: "현장 상황" },
@@ -829,7 +850,16 @@ export function SafeGuardCommandCenter({
   const [operationImprovements, setOperationImprovements] = useState<OperationImprovement[]>(() => parseStoredImprovements());
   const [beforePhoto, setBeforePhoto] = useState<LocalPhoto | null>(null);
   const [afterPhoto, setAfterPhoto] = useState<LocalPhoto | null>(null);
-  const [inputHazardPhoto, setInputHazardPhoto] = useState<LocalPhoto | null>(null);
+  const [inputHazardPhotos, setInputHazardPhotos] = useState<LocalPhoto[]>([]);
+  const [inputHazardPhotoAnalysis, setInputHazardPhotoAnalysis] = useState<InputHazardPhotoAnalysis>({
+    status: "idle",
+    summary: "",
+    ocrText: "",
+    siteSignals: [],
+    candidates: [],
+    message: ""
+  });
+  const inputHazardPhotosRef = useRef<LocalPhoto[]>([]);
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
   const [improvementSaveState, setImprovementSaveState] = useState<ImprovementSaveState>("idle");
   const [activeWorkspaceTheme, setActiveWorkspaceTheme] = useState<WorkspaceTheme>(workspaceTheme);
@@ -856,9 +886,13 @@ export function SafeGuardCommandCenter({
     if (afterPhoto) URL.revokeObjectURL(afterPhoto.url);
   }, [afterPhoto]);
 
+  useEffect(() => {
+    inputHazardPhotosRef.current = inputHazardPhotos;
+  }, [inputHazardPhotos]);
+
   useEffect(() => () => {
-    if (inputHazardPhoto) URL.revokeObjectURL(inputHazardPhoto.url);
-  }, [inputHazardPhoto]);
+    inputHazardPhotosRef.current.forEach((photo) => URL.revokeObjectURL(photo.url));
+  }, []);
 
   function moveToWorkspacePage(targetPage: WorkspacePage) {
     const gate = canOpenWorkspacePage({
@@ -908,17 +942,135 @@ export function SafeGuardCommandCenter({
     }
   }
 
-  function attachInputHazardPhoto(fileList: FileList | null) {
-    const file = fileList?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    if (inputHazardPhoto) URL.revokeObjectURL(inputHazardPhoto.url);
-    setInputHazardPhoto({ name: file.name, url, file });
-    setMessage("사진 기반 위험요인 후보를 준비했습니다. 후보는 생성 전 관리자가 확인해야 합니다.");
+  function resetInputHazardAnalysis(message = "") {
+    setInputHazardPhotoAnalysis({
+      status: "idle",
+      summary: "",
+      ocrText: "",
+      siteSignals: [],
+      candidates: [],
+      message
+    });
   }
 
-  function inputPhotoHazardCandidates() {
-    return buildHazardPhotoCandidates(question, inputHazardPhoto?.name);
+  function attachInputHazardPhotos(fileList: FileList | null) {
+    const incoming = Array.from(fileList || []);
+    if (!incoming.length) return;
+    const nextPhotos = incoming.slice(0, MAX_INPUT_HAZARD_PHOTOS).map((file) => ({
+      name: file.name,
+      url: URL.createObjectURL(file),
+      file
+    }));
+
+    setInputHazardPhotos((current) => {
+      const remaining = Math.max(0, MAX_INPUT_HAZARD_PHOTOS - current.length);
+      const accepted = nextPhotos.slice(0, remaining);
+      nextPhotos.slice(remaining).forEach((photo) => URL.revokeObjectURL(photo.url));
+      if (!accepted.length) {
+        setMessage(`현장 사진은 최대 ${MAX_INPUT_HAZARD_PHOTOS}장까지 첨부할 수 있습니다.`);
+        return current;
+      }
+      return [...current, ...accepted];
+    });
+    resetInputHazardAnalysis("사진을 첨부했습니다. 분석 버튼을 누르면 외부 vision API로 위험요인 후보를 도출합니다.");
+    setMessage(`현장 사진을 첨부했습니다. 최대 ${MAX_INPUT_HAZARD_PHOTOS}장까지 분석할 수 있습니다.`);
+  }
+
+  function removeInputHazardPhoto(index: number) {
+    setInputHazardPhotos((current) => {
+      const target = current[index];
+      if (target) URL.revokeObjectURL(target.url);
+      return current.filter((_, itemIndex) => itemIndex !== index);
+    });
+    resetInputHazardAnalysis("사진 구성이 바뀌었습니다. 다시 분석해 주세요.");
+  }
+
+  function inputPhotoHazardCandidates(): InputHazardCandidate[] {
+    if (inputHazardPhotoAnalysis.candidates.length) return inputHazardPhotoAnalysis.candidates;
+    const photoNameHints = inputHazardPhotos.map((photo) => photo.name).join(" ");
+    return buildHazardPhotoCandidates(question, photoNameHints).map((candidate) => ({
+      ...candidate,
+      severity: "review",
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+      sourcePhotoNames: inputHazardPhotos.map((photo) => photo.name),
+      source: "local"
+    }));
+  }
+
+  async function analyzeInputHazardPhotos() {
+    if (!inputHazardPhotos.length) {
+      setMessage("분석할 현장 사진을 먼저 첨부해 주세요.");
+      return;
+    }
+    setInputHazardPhotoAnalysis((current) => ({ ...current, status: "analyzing", message: "현장 사진을 vision API로 분석 중입니다." }));
+    const form = new FormData();
+    form.set("question", question);
+    inputHazardPhotos.forEach((photo) => form.append("photos", photo.file, photo.name));
+    try {
+      const response = await fetch("/api/input-photos/hazard-analysis", {
+        method: "POST",
+        body: form
+      });
+      const parsed = (await response.json().catch((): unknown => ({}))) as unknown;
+      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+        throw new Error(`사진 분석 응답이 올바르지 않습니다: HTTP ${response.status}`);
+      }
+      const record = parsed as Record<string, unknown>;
+      const analysis = typeof record.analysis === "object" && record.analysis !== null && !Array.isArray(record.analysis)
+        ? record.analysis as Record<string, unknown>
+        : {};
+      const rawCandidates = Array.isArray(analysis.candidates) ? analysis.candidates : [];
+      const candidates = rawCandidates.flatMap((item): InputHazardCandidate[] => {
+        if (typeof item !== "object" || item === null || Array.isArray(item)) return [];
+        const candidate = item as Record<string, unknown>;
+        const label = typeof candidate.label === "string" ? candidate.label.trim() : "";
+        const detail = typeof candidate.detail === "string" ? candidate.detail.trim() : "";
+        if (!label || !detail) return [];
+        const reflectedDocuments = Array.isArray(candidate.reflectedDocuments)
+          ? candidate.reflectedDocuments.filter((value): value is string => typeof value === "string")
+          : [];
+        const sourcePhotoNames = Array.isArray(candidate.sourcePhotoNames)
+          ? candidate.sourcePhotoNames.filter((value): value is string => typeof value === "string")
+          : [];
+        const severity = candidate.severity === "high" || candidate.severity === "medium" || candidate.severity === "low" || candidate.severity === "review"
+          ? candidate.severity
+          : "review";
+        return [{
+          label,
+          detail,
+          severity,
+          evidence: typeof candidate.evidence === "string" ? candidate.evidence : "",
+          reflectedDocuments,
+          sourcePhotoNames,
+          source: "vision"
+        }];
+      });
+      const status: InputHazardPhotoAnalysis["status"] = analysis.status === "analyzed" || analysis.status === "unconfigured" || analysis.status === "failed"
+        ? analysis.status
+        : response.ok ? "analyzed" : "failed";
+      setInputHazardPhotoAnalysis({
+        status,
+        summary: typeof analysis.summary === "string" ? analysis.summary : "",
+        ocrText: typeof analysis.ocrText === "string" ? analysis.ocrText : "",
+        siteSignals: Array.isArray(analysis.siteSignals) ? analysis.siteSignals.filter((value): value is string => typeof value === "string") : [],
+        candidates,
+        message: typeof record.message === "string" ? record.message : "현장 사진 분석 결과를 확인했습니다."
+      });
+      setMessage(candidates.length
+        ? "현장 사진에서 위험요인 후보를 도출했습니다. 필요한 후보를 입력에 반영하세요."
+        : typeof record.message === "string" ? record.message : "사진 분석 결과 후보가 부족합니다. 현장 확인 후 직접 입력해 주세요.");
+    } catch (error) {
+      console.error("input hazard photo analysis failed", error);
+      setInputHazardPhotoAnalysis({
+        status: "failed",
+        summary: "",
+        ocrText: "",
+        siteSignals: [],
+        candidates: [],
+        message: error instanceof Error ? error.message : "현장 사진 분석에 실패했습니다."
+      });
+      setMessage("현장 사진 분석에 실패했습니다. 사진 후보 없이도 문서 생성은 계속할 수 있습니다.");
+    }
   }
 
   function applyInputPhotoCandidate(label: string, detail: string) {
@@ -926,6 +1078,24 @@ export function SafeGuardCommandCenter({
     if (question.includes(addition)) return;
     setQuestion((current) => `${current.trim()}\n사진 후보 - ${addition}`.trim());
     setMessage("사진 위험요인 후보를 입력에 반영했습니다. 최종 문서 생성 전 현장 확인이 필요합니다.");
+  }
+
+  function buildGenerationQuestionWithPhotoAnalysis(baseQuestion: string) {
+    const candidates = inputHazardPhotoAnalysis.candidates.slice(0, 8);
+    if (!candidates.length) return baseQuestion;
+    const lines = [
+      baseQuestion.trim(),
+      "",
+      "[현장 사진 vision 위험요인 후보]",
+      ...candidates.map((candidate) => {
+        const documents = candidate.reflectedDocuments?.length ? ` / 반영: ${candidate.reflectedDocuments.join(", ")}` : "";
+        const evidence = candidate.evidence ? ` / 근거: ${candidate.evidence}` : "";
+        return `- ${candidate.label}(${candidate.severity || "review"}): ${candidate.detail}${documents}${evidence}`;
+      })
+    ];
+    if (inputHazardPhotoAnalysis.summary) lines.push(`요약: ${inputHazardPhotoAnalysis.summary}`);
+    if (inputHazardPhotoAnalysis.ocrText) lines.push(`OCR: ${inputHazardPhotoAnalysis.ocrText}`);
+    return lines.join("\n").trim();
   }
 
   function buildPhotoAnalysisCandidate() {
@@ -1144,7 +1314,7 @@ export function SafeGuardCommandCenter({
   }
 
   async function generateWorkpack(nextQuestion = question) {
-    const trimmed = nextQuestion.trim();
+    const trimmed = buildGenerationQuestionWithPhotoAnalysis(nextQuestion).trim();
     if (!trimmed) {
       setMessage("현장 상황을 입력해 주세요.");
       return;
@@ -1417,20 +1587,23 @@ export function SafeGuardCommandCenter({
               <div className="input-photo-copy">
                 <span>Photo risk input</span>
                 <strong>현장 사진으로 위험요인 후보 찾기</strong>
-                <p>사진은 확정 판단이 아니라 추락, 차량동선, 정리정돈 같은 후보를 먼저 띄우는 보조 입력입니다.</p>
+                <p>최대 {MAX_INPUT_HAZARD_PHOTOS}장의 사진을 vision API로 분석해 추락, 차량동선, 정리정돈 같은 후보를 먼저 띄웁니다.</p>
               </div>
-              <label className={inputHazardPhoto ? "input-photo-dropzone has-photo" : "input-photo-dropzone"}>
+              <label className={inputHazardPhotos.length ? "input-photo-dropzone has-photo" : "input-photo-dropzone"}>
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(event) => attachInputHazardPhoto(event.currentTarget.files)}
+                  multiple
+                  onChange={(event) => {
+                    attachInputHazardPhotos(event.currentTarget.files);
+                    event.currentTarget.value = "";
+                  }}
                   disabled={busy}
                 />
-                {inputHazardPhoto ? (
+                {inputHazardPhotos.length ? (
                   <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={inputHazardPhoto.url} alt="" />
-                    <span>{inputHazardPhoto.name}</span>
+                    <strong>{inputHazardPhotos.length}/{MAX_INPUT_HAZARD_PHOTOS}장 첨부</strong>
+                    <span>추가 사진 선택</span>
                   </>
                 ) : (
                   <>
@@ -1439,20 +1612,55 @@ export function SafeGuardCommandCenter({
                   </>
                 )}
               </label>
+              {inputHazardPhotos.length ? (
+                <div className="input-photo-preview-grid" aria-label="첨부된 현장 사진">
+                  {inputHazardPhotos.map((photo, index) => (
+                    <article key={`${photo.name}-${photo.url}`}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={photo.url} alt="" />
+                      <span>{photo.name}</span>
+                      <button type="button" onClick={() => removeInputHazardPhoto(index)} disabled={busy || inputHazardPhotoAnalysis.status === "analyzing"}>
+                        제거
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+              <div className="input-photo-analysis-actions">
+                <button
+                  type="button"
+                  onClick={() => void analyzeInputHazardPhotos()}
+                  disabled={!inputHazardPhotos.length || busy || inputHazardPhotoAnalysis.status === "analyzing"}
+                >
+                  {inputHazardPhotoAnalysis.status === "analyzing" ? "사진 분석 중..." : "사진 위험요인 분석"}
+                </button>
+                <small>
+                  {inputHazardPhotoAnalysis.message || (inputHazardPhotos.length ? "분석 전에는 로컬 후보만 표시됩니다." : "사진을 첨부하면 분석할 수 있습니다.")}
+                </small>
+              </div>
+              {inputHazardPhotoAnalysis.summary || inputHazardPhotoAnalysis.ocrText || inputHazardPhotoAnalysis.siteSignals.length ? (
+                <article className="input-photo-analysis-summary">
+                  <span>{inputHazardPhotoAnalysis.status === "analyzed" ? "Vision result" : "Vision status"}</span>
+                  {inputHazardPhotoAnalysis.summary ? <p>{inputHazardPhotoAnalysis.summary}</p> : null}
+                  {inputHazardPhotoAnalysis.siteSignals.length ? <small>신호: {inputHazardPhotoAnalysis.siteSignals.join(" · ")}</small> : null}
+                  {inputHazardPhotoAnalysis.ocrText ? <small>OCR: {inputHazardPhotoAnalysis.ocrText}</small> : null}
+                </article>
+              ) : null}
               <div className="input-photo-candidates">
                 {inputPhotoCandidates.length ? (
                   inputPhotoCandidates.map((candidate) => (
                     <button
-                      key={candidate.label}
+                      key={`${candidate.source}-${candidate.label}`}
                       type="button"
                       onClick={() => applyInputPhotoCandidate(candidate.label, candidate.detail)}
                     >
-                      <strong>{candidate.label}</strong>
+                      <strong>{candidate.label}{candidate.severity ? ` · ${candidate.severity}` : ""}</strong>
                       <span>{candidate.detail}</span>
+                      {candidate.evidence ? <small>{candidate.evidence}</small> : null}
                     </button>
                   ))
                 ) : (
-                  <p>사진을 첨부하면 위험성평가서에 반영할 검토 후보가 이곳에 표시됩니다.</p>
+                  <p>사진을 분석하면 위험성평가서와 TBM에 반영할 검토 후보가 이곳에 표시됩니다.</p>
                 )}
               </div>
             </section>

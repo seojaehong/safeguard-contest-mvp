@@ -52,6 +52,30 @@ type ResponsesApiResponse = {
 
 const DEFAULT_MODEL = "gpt-4.1-mini";
 const VISION_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_VISION_TIMEOUT_MS, 20_000);
+export const MAX_HAZARD_PHOTO_FILES = 10;
+
+export type HazardPhotoSeverity = "high" | "medium" | "low" | "review";
+
+export type HazardPhotoVisionCandidate = {
+  label: string;
+  detail: string;
+  severity: HazardPhotoSeverity;
+  evidence: string;
+  reflectedDocuments: string[];
+  sourcePhotoNames: string[];
+};
+
+export type HazardPhotoVisionAnalysis = {
+  status: "analyzed" | "unconfigured" | "failed";
+  provider: "openai";
+  model: string;
+  summary: string;
+  candidates: HazardPhotoVisionCandidate[];
+  ocrText: string;
+  siteSignals: string[];
+  photoCount: number;
+  errorMessage?: string;
+};
 
 function configuredApiKey() {
   return process.env.OPENAI_API_KEY?.trim() || "";
@@ -64,6 +88,11 @@ function configuredModel() {
 function normalizeStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean);
+}
+
+function normalizeSeverity(value: unknown): HazardPhotoSeverity {
+  if (value === "high" || value === "medium" || value === "low" || value === "review") return value;
+  return "review";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -117,6 +146,55 @@ export function parseImprovementVisionOutput(value: string, fallback: {
   }
 }
 
+export function parseHazardPhotoVisionOutput(value: string, fallback: {
+  model: string;
+  provider?: "openai";
+  photoNames: string[];
+}): HazardPhotoVisionAnalysis {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!isRecord(parsed)) throw new Error("Hazard photo vision output is not an object");
+    const rawCandidates = Array.isArray(parsed.candidates) ? parsed.candidates : [];
+    const candidates = rawCandidates.flatMap((item): HazardPhotoVisionCandidate[] => {
+      if (!isRecord(item)) return [];
+      const label = readText(item.label);
+      const detail = readText(item.detail);
+      if (!label || !detail) return [];
+      const sourcePhotoNames = normalizeStringArray(item.sourcePhotoNames);
+      return [{
+        label,
+        detail,
+        severity: normalizeSeverity(item.severity),
+        evidence: readText(item.evidence),
+        reflectedDocuments: normalizeStringArray(item.reflectedDocuments),
+        sourcePhotoNames: sourcePhotoNames.length ? sourcePhotoNames : fallback.photoNames
+      }];
+    });
+    return {
+      status: "analyzed",
+      provider: fallback.provider || "openai",
+      model: fallback.model,
+      summary: readText(parsed.summary),
+      candidates,
+      ocrText: readText(parsed.ocrText),
+      siteSignals: normalizeStringArray(parsed.siteSignals),
+      photoCount: fallback.photoNames.length
+    };
+  } catch (error) {
+    return {
+      status: "failed",
+      provider: fallback.provider || "openai",
+      model: fallback.model,
+      summary: "",
+      candidates: [],
+      ocrText: "",
+      siteSignals: [],
+      photoCount: fallback.photoNames.length,
+      errorMessage: error instanceof Error ? error.message : "Hazard photo vision output parse failed"
+    };
+  }
+}
+
 export function buildImprovementVisionPrompt(input: {
   taskLabel: string;
   hazardLabel: string;
@@ -131,6 +209,24 @@ export function buildImprovementVisionPrompt(input: {
     `핵심 위험: ${input.hazardLabel}`,
     `반영 후보 문서: ${input.reflectedDocuments.join(", ")}`,
     "필드: summary, detectedHazards, observedImprovement, ocrText, reflectedDocuments"
+  ].join("\n");
+}
+
+export function buildHazardPhotoVisionPrompt(input: {
+  question: string;
+  photoNames: string[];
+}) {
+  return [
+    "당신은 건설·시설관리 현장 사진 위험요인 검토 보조자입니다.",
+    "업로드된 현장 사진들을 서로 비교해 위험성평가와 TBM에 반영할 후보를 도출합니다.",
+    "사진에서 보이는 것과 OCR 가능한 문구만 근거로 삼고, 확정 판단·법적 판단·안전 보장 표현은 금지합니다.",
+    "응답은 JSON 객체만 반환합니다.",
+    `현장 입력: ${input.question}`,
+    `사진 파일명(${input.photoNames.length}장): ${input.photoNames.join(", ")}`,
+    "후보는 최대 8개로 제한합니다.",
+    "severity는 high, medium, low, review 중 하나만 사용합니다.",
+    "reflectedDocuments에는 위험성평가표, TBM 브리핑, TBM 기록, 사진/증빙 중 관련 문서만 넣습니다.",
+    "필드: summary, candidates[{label, detail, severity, evidence, reflectedDocuments, sourcePhotoNames}], ocrText, siteSignals"
   ].join("\n");
 }
 
@@ -190,22 +286,19 @@ async function fileToDataUrl(file: File) {
   return `data:${contentType};base64,${buffer.toString("base64")}`;
 }
 
-async function postOpenAiVision(input: {
+async function postOpenAiVisionImages(input: {
   apiKey: string;
   model: string;
   prompt: string;
-  beforePhoto: File;
-  afterPhoto: File;
+  photos: File[];
 }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), VISION_TIMEOUT_MS);
   try {
-    const beforeUrl = await fileToDataUrl(input.beforePhoto);
-    const afterUrl = await fileToDataUrl(input.afterPhoto);
+    const imageUrls = await Promise.all(input.photos.map((photo) => fileToDataUrl(photo)));
     const content: ResponsesApiContent[] = [
       { type: "input_text", text: input.prompt },
-      { type: "input_image", image_url: beforeUrl },
-      { type: "input_image", image_url: afterUrl }
+      ...imageUrls.map((imageUrl) => ({ type: "input_image", image_url: imageUrl }))
     ];
 
     const response = await fetch("https://api.openai.com/v1/responses", {
@@ -231,6 +324,85 @@ async function postOpenAiVision(input: {
     return extractResponseText(data);
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+async function postOpenAiVision(input: {
+  apiKey: string;
+  model: string;
+  prompt: string;
+  beforePhoto: File;
+  afterPhoto: File;
+}) {
+  return postOpenAiVisionImages({
+    apiKey: input.apiKey,
+    model: input.model,
+    prompt: input.prompt,
+    photos: [input.beforePhoto, input.afterPhoto]
+  });
+}
+
+export async function analyzeHazardPhotos(input: {
+  question: string;
+  photos: File[];
+}): Promise<HazardPhotoVisionAnalysis> {
+  const model = configuredModel();
+  const apiKey = configuredApiKey();
+  const photos = input.photos.slice(0, MAX_HAZARD_PHOTO_FILES);
+  const photoNames = photos.map((photo) => photo.name);
+
+  if (!photos.length) {
+    return {
+      status: "unconfigured",
+      provider: "openai",
+      model,
+      summary: "",
+      candidates: [],
+      ocrText: "",
+      siteSignals: [],
+      photoCount: 0,
+      errorMessage: "현장 사진을 1장 이상 첨부해야 vision 위험요인 분석을 실행합니다."
+    };
+  }
+
+  if (!apiKey) {
+    return {
+      status: "unconfigured",
+      provider: "openai",
+      model,
+      summary: "",
+      candidates: [],
+      ocrText: "",
+      siteSignals: [],
+      photoCount: photos.length,
+      errorMessage: "OPENAI_API_KEY가 없어 현장 사진 vision 분석을 건너뜁니다."
+    };
+  }
+
+  try {
+    const prompt = buildHazardPhotoVisionPrompt({ question: input.question, photoNames });
+    const text = await postOpenAiVisionImages({
+      apiKey,
+      model,
+      prompt,
+      photos
+    });
+    const parsed = parseHazardPhotoVisionOutput(text, { model, photoNames });
+    if (parsed.status === "failed") log.warn("Hazard photo vision output parse failed", parsed.errorMessage);
+    return parsed;
+  } catch (error) {
+    log.error("Hazard photo vision analysis failed", error);
+    return {
+      status: "failed",
+      provider: "openai",
+      model,
+      summary: "",
+      candidates: [],
+      ocrText: "",
+      siteSignals: [],
+      photoCount: photos.length,
+      errorMessage: error instanceof Error ? error.message : "Hazard photo vision analysis failed"
+    };
   }
 }
 
