@@ -9315,11 +9315,11 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .command-topbar {
-  position: sticky;
-  top: 10px;
+  position: relative;
+  top: auto;
   z-index: 30;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(120px, 1fr) auto auto;
   align-items: center;
   gap: 24px;
   border: 1px solid var(--workspace-rule) !important;

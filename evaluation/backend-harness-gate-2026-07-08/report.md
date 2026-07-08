@@ -60,6 +60,83 @@ GET /api/workpacks/:id/learning-export?format=jsonl
 
 이 export는 제품 안에서 “학습”이라는 표현 대신 “현장 개선 이력 메모리”, “운영 지식 베이스 갱신 후보”로 취급한다.
 
+## 기능 테스트: 결과값 변화
+
+같은 입력값으로 배포 버전 `https://www.safeclaw.kr/api/ask`를 직접 비교했다.
+
+입력:
+
+```text
+세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.
+```
+
+산출물:
+
+- `evaluation/backend-harness-gate-2026-07-08/live-output-comparison.json`
+- `evaluation/backend-harness-gate-2026-07-08/live-functional-probe-report.json`
+- `evaluation/backend-harness-gate-2026-07-08/live-enhanced-functional-probe-report.json`
+- `evaluation/backend-harness-gate-2026-07-08/functional-probe-report.json`
+
+판정:
+
+- 실제 결과값은 달라졌다. `template`과 `enhanced`의 주요 문서 4종은 모두 hash가 달라졌고, 위험성평가표는 1,158자, TBM 브리핑은 799자, TBM 기록은 1,639자, 안전보건교육 기록은 1,194자 늘었다.
+- `template`은 `mode: mock`, `AI_MODE=template`, 안전지식 DB 근거 0건이다.
+- `enhanced`는 `mode: live`, `safetyReference.mode: live`, Supabase 안전 지식 DB 8건을 runtime context에 넣었다.
+- `enhanced` 근거 예시는 `D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정`, `B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정`, `G-67-2011 건물 외벽 청소 작업에 관한 기술지침`, SIF 마감공사 사례다.
+- 다만 현재 변화는 “임베딩/vector retrieval” 결과가 아니다. 현재 runtime은 Supabase/KOSHA/SIF 텍스트·태그 검색과 하네스 컨텍스트 주입으로 바뀐 것이다.
+- 문서 본문에는 KOSHA 코드와 작업중지·비계·안전대 문구가 더 강하게 반영되지만, `내부 안전지식 DB 반영` appendix 문자열은 이번 라이브 응답에서 별도 섹션으로 노출되지 않았다. 즉 UX에는 “근거/품질 패널”로 보여주는 편이 더 적합하다.
+- 로컬 worktree는 `.env.local`이 없고, 메인 repo `.env.local` 기준 Supabase key가 현재 API와 맞지 않아 `/api/safety-reference/search`가 503/401로 떨어졌다. 로컬에서 DB 반영 품질을 재현하려면 배포와 같은 Supabase credential 동기화가 먼저 필요하다.
+
+시연 멘트 기준:
+
+```text
+현재 1차는 임베딩 검색이 아니라 DB 하네스 검색 단계입니다. 같은 입력에서도 template은 고정 문서, enhanced는 KOSHA/SIF/Supabase 근거 8건을 먼저 고정한 뒤 문서화해 결과가 실제로 달라집니다. 임베딩은 2차 승인 게이트로 분리돼 있습니다.
+```
+
+## 모델 전환 테스트
+
+산출물:
+
+- `evaluation/backend-harness-gate-2026-07-08/model-switch-check.json`
+
+판정:
+
+- 구조화 문서 생성 경로는 `AI_DELIVERABLES_PROVIDER=claude` 또는 `anthropic`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-opus-4-8` 조합을 받도록 열려 있다.
+- 기본 Anthropic 모델은 `claude-sonnet-5`다.
+- `foreign`, `free`처럼 긴 산출물은 예산상 `claude-haiku-4-5`로 라우팅된다. 따라서 Opus 전환 효과는 위험성평가/TBM/교육기록 같은 핵심 structured 문서에서 먼저 비교해야 한다.
+- 현재 확인된 로컬 env에는 `ANTHROPIC_API_KEY`, `AI_DELIVERABLES_PROVIDER`, `ANTHROPIC_MODEL`이 없어 실제 Opus 호출 smoke는 수행하지 않았다.
+- Claw chat route는 `ANTHROPIC_MODEL` 오버라이드가 아니라 `CLAW_MODEL`이 `DEFAULT_ANTHROPIC_MODEL`을 재사용한다. 문서 생성과 채팅 모델을 같은 방식으로 전환하려면 별도 정리가 필요하다.
+
+시연 전 권장 smoke:
+
+```powershell
+$env:AI_DELIVERABLES_PROVIDER='claude'
+$env:ANTHROPIC_MODEL='claude-opus-4-8'
+npm.cmd test -- tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts
+```
+
+실제 API 품질 비교는 Anthropic key가 있는 환경에서 동일 입력 1회만 수행한다. 지연시간과 provider 지원 여부가 먼저 확인되어야 한다.
+
+## OpenClaw OAuth 확인
+
+산출물:
+
+- `evaluation/backend-harness-gate-2026-07-08/openclaw-oauth-check.json`
+
+확인 명령:
+
+```powershell
+openclaw --profile safeclaw models status
+openclaw --profile safeclaw mcp probe safeclaw
+```
+
+판정:
+
+- `safeclaw` profile에서 OpenClaw CLI가 동작한다.
+- OpenAI OAuth는 usable 상태다.
+- `safeclaw` MCP probe는 4 tools를 반환했다.
+- 단, config는 2026.6.11로 작성됐고 현재 command는 2026.6.5로 실행되어 version warning이 있다. 시연 전에는 PATH/Gateway version을 맞추는 것이 좋다.
+
 ### UI / UX 중간안
 
 - 기본 `/workspace`는 화이트 Day 테마로 진입한다.
@@ -74,7 +151,14 @@ GET /api/workpacks/:id/learning-export?format=jsonl
 - `evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-desktop-day.png`
 - `evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-mobile-day.png`
 - `evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-desktop-night.png`
+- `evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-desktop-night-scrolled.png`
 - `evaluation/backend-harness-gate-2026-07-08/screenshots/workspace-visual-check.json`
+
+회귀 수정:
+
+- Night 테마에서 상단 workbench topbar가 sticky 상태로 본문과 사이드 메뉴를 덮던 문제를 제거했다.
+- `tests/workspace-layout-regression.test.ts`를 추가해 `/workspace?theme=night` 스크롤 후 topbar가 viewport 밖으로 올라가 메뉴와 본문을 가리지 않는지 검증한다.
+- 스크롤 캡처 기준 topbar는 `top -222 / bottom -162`로 화면 밖에 위치한다.
 
 ## 다음 승인 게이트
 
@@ -95,15 +179,19 @@ npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload
 ## 검증
 
 ```powershell
-npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/commercial-migration.test.ts tests/mcp-tools.test.ts
+npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/commercial-migration.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts
+npm.cmd test -- tests/workspace-layout-regression.test.ts
 npm.cmd run typecheck
 npm.cmd run build
 ```
 
 결과:
 
-- 5 test files passed
-- 38 tests passed
+- commercial/model test files: 7 passed
+- commercial/model tests: 55 passed
+- layout regression test file: 1 passed
+- layout regression tests: 1 passed
+- workspace layout regression test passed
 - typecheck passed
 - build passed
 - Playwright visual check passed: desktop/mobile Day, desktop Night, no horizontal overflow
