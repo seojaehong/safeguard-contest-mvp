@@ -21,10 +21,12 @@
     "reason": "현재 확인된 로컬 env에는 ANTHROPIC_API_KEY/AI_DELIVERABLES_PROVIDER/ANTHROPIC_MODEL 설정이 없어 실제 Opus 호출 smoke는 수행하지 않았다."
   },
   "clawChat": {
-    "usesAnthropic": true,
-    "modelSource": "CLAW_MODEL re-exported from DEFAULT_ANTHROPIC_MODEL",
+    "provider": "openclaw",
+    "profile": "safeclaw",
+    "agent": "main",
+    "usesOpenAiOauthViaOpenClaw": true,
     "anthropicModelOverrideApplies": false,
-    "implication": "문서 생성은 Opus override 가능하나 Claw chat은 별도 코드/환경 정리 없이는 기본 모델 계열로 남는다."
+    "implication": "Claw chat now uses the OpenClaw safeclaw profile and its OpenAI OAuth runtime by default. Anthropic/Opus remains a structured deliverables provider option, not the Claw chat default."
   },
   "qualityExpectation": {
     "likelyDifference": "위험성평가/TBM 같은 structured docs에서는 더 긴 추론과 문장 품질 차이가 날 수 있다.",
