@@ -155,13 +155,21 @@ describe("workpack learning export", () => {
     const file = buildWorkpackLearningFile(input, "jsonl");
 
     expect(markdown).toContain("# 성수동 외벽 도장");
+    expect(markdown).toContain("## 운영 그래프");
+    expect(markdown).toContain("- hazards: 1");
+    expect(markdown).toContain("- improvements: 1");
+    expect(markdown).toContain("- acks: 1");
     expect(markdown).toContain("난간 보강");
     expect(markdown).toContain("visionStatus: analyzed");
     expect(markdown).toContain("visionModel: gpt-4.1-mini");
     expect(markdown).toContain("detectedHazards: 추락");
     expect(markdown).toContain("observedImprovement: 난간 보강 후 작업구역 통제가 보입니다.");
     expect(markdown).toContain("ocr: 추락주의");
-    expect(jsonl.split("\n")).toHaveLength(4);
+    expect(jsonl.split("\n")).toHaveLength(5);
+    expect(jsonl).toContain("\"eventType\":\"operation_graph\"");
+    expect(jsonl).toContain("\"kind\":\"Workpack\"");
+    expect(jsonl).toContain("\"kind\":\"Improvement\"");
+    expect(jsonl).toContain("\"relation\":\"hasImprovement\"");
     expect(jsonl).toContain("\"eventType\":\"improvement\"");
     expect(jsonl).toContain("\"visionStatus\":\"analyzed\"");
     expect(jsonl).toContain("\"visionModel\":\"gpt-4.1-mini\"");
