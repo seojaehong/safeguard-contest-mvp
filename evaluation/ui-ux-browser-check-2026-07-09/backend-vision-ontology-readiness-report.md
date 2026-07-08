@@ -148,6 +148,9 @@ Generated: 2026-07-09
 - `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-photo-candidates-day.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-mobile-day.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-attachment-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/workspace-typography-day.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/workspace-typography-night.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/workspace-typography-metrics.json`
 - `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-desktop.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-hover.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-mobile.png`
@@ -168,6 +171,7 @@ Generated: 2026-07-09
 - composer before photo: `+사진` tray 있음, 사진 패널 없음, horizontal overflow 없음
 - composer after photo: `1/10장 첨부`, 후보 2개, `1개 반영`, textarea에 `사진 후보` 문자열 없음
 - composer mobile: viewport 390px, scrollWidth 390px, horizontal overflow 없음
+- workspace typography: day/night H1 `Pretendard`, 58px, weight 860, horizontal overflow 없음
 - ontology desktop: 작업 이력 미리보기 노출, memory map node 7개, edge 7개, list row 7개, hover card 7개
 - ontology export actions: `최근 후보 다시 읽기`, `MD 저장`, `JSONL 저장`
 - ontology published graph: graph node 32개, list row 166개
