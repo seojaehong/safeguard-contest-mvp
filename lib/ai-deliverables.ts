@@ -83,6 +83,8 @@ type GenContext = {
   accidentLines: string[];
   /** Top KOSHA 기술지침/기술지원규정 references that MUST be cited in body. */
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
+  /** DB harness packet contract: LLM may naturalize fixed evidence only. */
+  dbHarnessContext?: string;
   /** KST (Asia/Seoul) calendar date of this generation run — YYYY-MM-DD. */
   workDate: string;
 };
@@ -237,6 +239,7 @@ export function contextBlock(ctx: GenContext) {
   const training = ctx.trainingLines.length ? ctx.trainingLines.join("\n") : "(연계 교육 후보 없음)";
   const kosha = ctx.koshaLines.length ? ctx.koshaLines.join("\n") : "(KOSHA 보강 자료 없음)";
   const accidents = ctx.accidentLines.length ? ctx.accidentLines.join("\n") : "(유사 재해사례 없음)";
+  const dbHarness = ctx.dbHarnessContext?.trim() || "(DB 하네스 패킷 없음)";
   const koshaPrimaryBlock = ctx.koshaPrimaryRefs && ctx.koshaPrimaryRefs.length
     ? [
         "",
@@ -260,6 +263,9 @@ export function contextBlock(ctx: GenContext) {
     `작업 요약: ${ctx.scenario.workSummary}`,
     `작업 인원: ${ctx.scenario.workerCount}명`,
     `기상/조건: ${ctx.scenario.weatherNote}`,
+    "",
+    "[DB 하네스 계약]",
+    dbHarness,
     "",
     "[법령·해석례·판례 근거 후보]",
     cites,
@@ -693,6 +699,8 @@ export type GenerateAllOptions = {
   accidentLines?: string[];
   /** Top KOSHA 기술지침/기술지원규정 references the AI must cite in body. */
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
+  /** DB harness packet prompt context. When present, generation must stay inside this evidence packet. */
+  dbHarnessContext?: string;
   /**
    * Which call groups to run.
    * - "full" (default): tabular + free + foreign  → 14 deliverables AI-generated
@@ -719,6 +727,7 @@ function buildContext(opts: GenerateAllOptions): GenContext {
     koshaLines: opts.koshaLines || [],
     accidentLines: opts.accidentLines || [],
     koshaPrimaryRefs: opts.koshaPrimaryRefs || [],
+    dbHarnessContext: opts.dbHarnessContext,
     workDate: formatWorkDate(new Date())
   };
 }

@@ -1,6 +1,7 @@
 import type { RiskAssessmentRow, RiskAssessmentValidationIssue } from "./risk-assessment-schema";
 import type { SmsaEvidenceLabel } from "./smsa-mapping";
 import type { QaReviewResult } from "./ontology/qa-review";
+import type { DbHarnessPacket } from "./db-harness";
 
 export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
@@ -47,6 +48,17 @@ export type QualityContract = {
   persistence: {
     status: QualityContractStatus;
     requiresLogin: boolean;
+    detail: string;
+  };
+  dbHarness: {
+    status: QualityContractStatus;
+    mode?: DbHarnessPacket["mode"];
+    llmRole?: DbHarnessPacket["generationContract"]["llmRole"];
+    fallbackChainAllowed?: DbHarnessPacket["generationContract"]["fallbackChainAllowed"];
+    directEvidenceCount: number;
+    sifCaseCount: number;
+    supportingEvidenceCount: number;
+    missingEvidence: string[];
     detail: string;
   };
 };
@@ -526,6 +538,22 @@ export type AskResponse = {
     result: QaReviewResult;
     sourceDocumentKeys: string[];
     detail: string;
+  };
+  dbHarness?: {
+    packet: DbHarnessPacket;
+    promptContext: string;
+    summary: {
+      mode: DbHarnessPacket["mode"];
+      llmRole: DbHarnessPacket["generationContract"]["llmRole"];
+      fallbackChainAllowed: DbHarnessPacket["generationContract"]["fallbackChainAllowed"];
+      directEvidence: number;
+      sifCases: number;
+      supportingEvidence: number;
+      improvementMemory: number;
+      workpackMemory: number;
+      missingEvidence: string[];
+      ontologyStatus: DbHarnessPacket["ontologyChecklist"]["status"];
+    };
   };
   qualityContract?: QualityContract;
   status: {

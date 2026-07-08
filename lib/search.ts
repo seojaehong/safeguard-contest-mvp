@@ -26,6 +26,7 @@ import { buildEvidenceLabels } from "./smsa-mapping";
 import { createLogger } from "@/lib/logger";
 import { attachProgressListeners, type OnAskProgress } from "./ask-progress";
 import { resolveRunAskMode } from "./run-ask-mode";
+import { buildDbHarnessPacket, buildHarnessPromptContext } from "./db-harness";
 
 const log = createLogger("search");
 
@@ -952,6 +953,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             safetyReferencePromise.catch(() => null),
           ]).then(([rawBase, wthr, trng, ksha, acc, safeRef]) => {
             const safeRefItems = safeRef?.items ?? [];
+            const dbHarnessPacket = buildDbHarnessPacket({
+              question,
+              references: safeRefItems
+            });
+            const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
             const koshaPrimaryRefsEarly = compressed
               .filter((c) => c.kind === "kosha-support-regulation" || c.kind === "kosha-guideline")
@@ -972,6 +978,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               koshaLines: koshaLinesEarly,
               accidentLines: accidentLinesEarly,
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
+              dbHarnessContext,
               scope: aiMode === "full" ? "full" : "enhanced",
               onProgress
             }).catch((error) => {
@@ -1187,6 +1194,24 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
     const foreignWorkerTransmissionText = aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput);
+    const dbHarnessPacket = buildDbHarnessPacket({
+      question,
+      references: safetyReference.items,
+      ontologyMissing: structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`)
+    });
+    const dbHarnessPromptContext = buildHarnessPromptContext(dbHarnessPacket);
+    const dbHarnessSummary: NonNullable<AskResponse["dbHarness"]>["summary"] = {
+      mode: dbHarnessPacket.mode,
+      llmRole: dbHarnessPacket.generationContract.llmRole,
+      fallbackChainAllowed: dbHarnessPacket.generationContract.fallbackChainAllowed,
+      directEvidence: dbHarnessPacket.directEvidence.length,
+      sifCases: dbHarnessPacket.sifCases.length,
+      supportingEvidence: dbHarnessPacket.supportingEvidence.length,
+      improvementMemory: dbHarnessPacket.improvementMemory.length,
+      workpackMemory: dbHarnessPacket.workpackMemory.length,
+      missingEvidence: dbHarnessPacket.generationContract.missingEvidence,
+      ontologyStatus: dbHarnessPacket.ontologyChecklist.status
+    };
 
     const enriched: AskResponse = {
       ...response,
@@ -1325,6 +1350,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         "kakaoMessage",
         ...(structuredRiskRows.length ? ["structuredRiskRows"] : [])
       ]),
+      dbHarness: {
+        packet: dbHarnessPacket,
+        promptContext: dbHarnessPromptContext,
+        summary: dbHarnessSummary
+      },
       status: {
         ...response.status,
         lawgo: legalEvidenceMode,

@@ -213,6 +213,21 @@
     "helper": "lib/run-ask-mode.ts",
     "tests": "tests/run-ask-mode.test.ts"
   },
+  "dbHarnessGenerationContract": {
+    "artifact": "evaluation/backend-harness-gate-2026-07-08/db-harness-web-generation-contract-report.json",
+    "webAskResponseExposesHarness": true,
+    "aiPromptReceivesHarnessContext": true,
+    "qualityContractIncludesHarness": true,
+    "mode": "db_harness_first",
+    "llmRole": "naturalize_only",
+    "fallbackChainAllowed": false,
+    "requiredDocuments": [
+      "위험성평가표",
+      "TBM 브리핑",
+      "TBM 기록"
+    ],
+    "tests": "npm.cmd test -- tests/quality-contract.test.ts tests/ai-deliverables-prompts.test.ts tests/commercial-harness.test.ts tests/run-ask-mode.test.ts"
+  },
   "vercelEnvCheck": {
     "localProjectLinkFound": true,
     "cliCredentialAvailable": false,
