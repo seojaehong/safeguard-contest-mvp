@@ -53,6 +53,7 @@ describe("web workpack ontology QA", () => {
 
     expect(response.ontologyQa).toBeUndefined();
     expect(reviewed.ontologyQa?.reviewTask).toBe("용접");
-    expect(reviewed.ontologyQa?.detail).toContain("온톨로지 QA");
+    expect(reviewed.ontologyQa?.detail).toContain("안전조치 검수");
+    expect(reviewed.ontologyQa?.detail).not.toContain("riskAssessmentDraft");
   });
 });

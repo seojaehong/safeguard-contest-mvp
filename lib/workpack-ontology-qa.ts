@@ -15,6 +15,15 @@ export const ONTOLOGY_QA_DOCUMENT_KEYS = [
   "emergencyResponseDraft"
 ] as const;
 
+const USER_DOCUMENT_LABELS: Record<(typeof ONTOLOGY_QA_DOCUMENT_KEYS)[number], string> = {
+  riskAssessmentDraft: "위험성평가표",
+  workPlanDraft: "작업계획서",
+  tbmBriefing: "TBM 브리핑",
+  tbmLogDraft: "TBM 기록",
+  safetyEducationRecordDraft: "안전보건교육 기록",
+  emergencyResponseDraft: "비상대응 절차"
+};
+
 export type OntologyQaSource = {
   text: string;
   documentKeys: string[];
@@ -39,6 +48,9 @@ export function attachOntologyQaResult(
   result: QaReviewResult,
   sourceDocumentKeys: string[]
 ): AskResponse {
+  const sourceDocumentLabels = sourceDocumentKeys
+    .map((key) => USER_DOCUMENT_LABELS[key as keyof typeof USER_DOCUMENT_LABELS])
+    .filter(Boolean);
   return {
     ...response,
     ontologyQa: {
@@ -46,7 +58,7 @@ export function attachOntologyQaResult(
       result,
       sourceDocumentKeys,
       detail: result.reviewable
-        ? `온톨로지 QA ${result.verdict}: ${sourceDocumentKeys.join(", ")} 문서를 검수했습니다.`
+        ? `안전조치 검수 ${result.verdict}: ${sourceDocumentLabels.join(", ")} 문서를 확인했습니다.`
         : result.message
     }
   };
@@ -68,7 +80,7 @@ export async function attachWebOntologyQa(response: AskResponse, question: strin
     return attachOntologyQaResult(
       response,
       reviewTask,
-      qaErrorResult("온톨로지 QA에 사용할 문서 본문이 없어 검수를 수행하지 못했습니다."),
+      qaErrorResult("안전조치 검수에 사용할 문서 본문이 없어 확인을 보류했습니다."),
       source.documentKeys
     );
   }
@@ -82,7 +94,7 @@ export async function attachWebOntologyQa(response: AskResponse, question: strin
     return attachOntologyQaResult(
       response,
       reviewTask,
-      qaErrorResult(`온톨로지 QA 실행 실패: ${message}`),
+      qaErrorResult(`안전조치 검수를 완료하지 못했습니다: ${message}`),
       source.documentKeys
     );
   }

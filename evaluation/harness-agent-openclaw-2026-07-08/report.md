@@ -21,6 +21,8 @@ OpenClaw/Codex가 일반 문서 생성 도구를 바로 호출하지 않도록 `
 - OpenClaw OAuth 로그인, 모델 상태 확인, MCP 연결, 하네스 시연 명령을 한 번에 제공
 - SIF embedding corpus 생성 스크립트 dry-run 검증
 - Before/After 개선 사진 분석은 개선사항 API에 optional vision adapter로 연결
+- `/ontology`에 published graph 리스트와 hover card 탐색 화면 추가
+- `/workspace` 첫인상 H1 폰트 굵기와 크기 체계 보강
 
 ## DB 활용 방식
 
@@ -30,19 +32,20 @@ OpenClaw/Codex가 일반 문서 생성 도구를 바로 호출하지 않도록 `
 - `workpacks`: 같은 현장의 최근 작업 이력 로드
 - `workpack_improvements`: 2차 migration 적용 후 개선 이력 로드. 미적용 DB에서는 실패를 로그로 남기고 빈 이력으로 degrade
 
-## SIF 코퍼스 Dry-Run
+## SIF 코퍼스 Gate
 
 명령:
 
 ```powershell
-npm.cmd run knowledge:sif-embedding-corpus -- --limit 25
+npm.cmd run knowledge:sif-embedding-corpus
 ```
 
 결과:
 
-- 입력 SIF 후보: 25건
+- 입력 SIF 후보: 6,033건
 - 스프레드시트 헤더 제외: 1건 (`sif-아카이브-건설업-00001`)
-- 코퍼스 생성: 24건
+- 코퍼스 생성: 6,032건
+- 빈 텍스트/관리대책 누락/문서반영 누락/중복 해시: 0건
 - 실제 embedding/upload: 실행하지 않음
 
 산출물:
@@ -50,6 +53,7 @@ npm.cmd run knowledge:sif-embedding-corpus -- --limit 25
 - `evaluation/sif-embedding-gate/report.json`
 - `evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl`
 - `evaluation/sif-embedding-gate/sif-embedding-corpus.md`
+- `evaluation/sif-embedding-gate/next-approval-gate.md`
 
 ## 검증
 
@@ -66,5 +70,5 @@ npm.cmd run typecheck
 ## 남은 승인 게이트
 
 - `010_commercial_operations.sql` migration 적용은 별도 승인 필요
-- SIF embedding 실제 업로드는 migration 적용과 API key 확인 후 별도 승인 필요
+- SIF embedding 실제 업로드는 migration 적용, API key 확인, `--approved-upload` 명시 후 별도 승인 필요
 - OpenClaw live OAuth/profile 검증은 사용자 로컬 device-code 승인 후 실행 가능

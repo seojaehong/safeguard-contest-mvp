@@ -5,62 +5,78 @@ Date: 2026-07-08
 ## Scope
 
 - Target route: `/workspace`
-- Implementation target: 3-step workbench (`입력 -> 문서 -> 공유`) with risk assessment/TBM focus.
-- Visual target: extreme-simple white editorial workbench variation based on the Cohere-style reference document.
+- Primary design target: Day/Night selectable commercial workbench.
+- Night target: Linear-like dark app shell.
+- Day target: light field-operations cards with the same structure for outdoor/mobile readability.
+- Product structure: `입력 -> 문서 -> 공유`, with risk assessment/TBM focus, cited evidence rail, and improvement loop.
 - DB principle: no schema migration in Phase 1.
 
 ## Implemented Changes
 
-- Replaced the visible 6-step workspace flow with 3 steps: `입력`, `문서`, `공유`.
-- Removed the workspace sidebar and moved field context into compact input chips.
-- Added a `근거 준비 레일` under the input: high-risk cases, KOSHA references, ontology graph, work history, weather.
-- Added staged generation feedback: weather, law, SIF/KOSHA DB, ontology QA, document generation.
-- Focused the document view on `위험성평가표`, `TBM 브리핑`, `TBM 기록`.
-- Collapsed remaining documents behind `+ 9개 문서 더 보기`.
-- Added a document-level evidence/quality panel for direct evidence, supporting evidence, quality contract, and ontology QA.
-- Expanded sharing into scope, permissions, confirmation status, persistence ledger, and improvement loop.
-- Added Before/After photo attachment UI for today's improvements. Phase 1 stores the generated candidate and file names locally; actual vision-model analysis and file persistence remain Phase 2.
-- Added manual language switching and acknowledgement state to the worker mobile view.
-- Simplified the first screen into one large question, one textarea, one primary action, and a thin evidence-readiness rail.
-- Replaced the long-scroll workspace with page-state rendering: `input`, `document`, and `share`.
-- Removed first-screen DOM rendering for document, share, and empty-workspace sections.
-- Moved generation feedback into the document page loading state.
+- Kept `/workspace` as a page-state workbench rather than a long scroll page.
+- Reframed the shell as a Linear-style app surface: near-black canvas, left navigation, compact topbar, hairline borders, restrained lavender accent, subtle glass only on shell surfaces.
+- Added in-page Day/Night theme selection. Existing `/workspace?theme=field`, `/workspace?theme=day`, and `/workspace?theme=light` open the Day mode for compatibility.
+- Updated the Day mode after designer feedback: white background, rounded grouped cards, black titles, deep-gray body copy, wider menu spacing, no empty closed option boxes.
+- Increased typography breathing room: letter spacing stays `0`, line-height and textarea/pre spacing were opened to reduce the cramped feeling.
+- Added optional front-loaded field-photo hazard input. It creates `위험요인 후보`, not confirmed risk findings, and only appends candidates after user action.
+- Replaced the document page with a single workbench: left core document list, center document preview, right cited evidence rail.
+- Kept first document exposure to `위험성평가표`, `TBM 브리핑`, `TBM 기록`; the remaining documents stay behind `+ 9개 문서 더 보기`.
+- Moved generation logs into a collapsible `작업 이력` block.
+- Removed user-facing debug copy such as camelCase document keys, `fallback`, and `온톨로지 QA`.
+- Reworked sharing as a product completion loop: permission, role, acknowledgment, evidence, and improvement capture.
+- Removed phone mockup and hazard stripe UI from the new share workflow.
+- Added Before/After improvement capture for the day's work. Phase 1 stores local candidates and file names; actual image persistence and full vision analysis remain Phase 2.
+- Clarified KRAS direction as `KRAS 입력 준비 내보내기`: structured export/checklist for manual KRAS entry, not KRAS scraping, unofficial API use, or automatic submission.
 
 ## Browser Evidence
 
-- Desktop viewport: `workspace-desktop-v5-simple-viewport.png`
-- Desktop full page: `workspace-desktop-v5-simple.png`
-- Mobile viewport: `workspace-mobile-v5-simple-viewport.png`
-- Mobile full page: `workspace-mobile-v5-simple.png`
-- Before/After photo flow: `workspace-photo-analysis-v5-simple.png`
-- Page-state desktop initial: `workspace-input-page-v7.png`
-- Page-state desktop document transition: `workspace-document-page-v7.png`
-- Page-state mobile initial: `workspace-input-page-mobile-v7.png`
+- Night input: `workspace-night-input-v12.png`
+- Day input: `workspace-day-input-v12.png`
+- Day mobile input: `workspace-day-mobile-v12.png`
+- Day document completed: `workspace-day-document-ready-v9b.png`
+- Day share/improvement workflow: `workspace-day-share-v9b.png`
+- Machine summaries:
+  - `workspace-day-night-v12-summary.json`
+  - `workspace-day-share-v9b-summary.json`
 
 ## Browser Probe Results
 
-- Desktop `/workspace`: 3 step buttons, no visible sidebar, 5 evidence rail items, `+ 9개 문서 더 보기`, no horizontal overflow.
-- Desktop layout: white canvas, centered workbench region, H1 `오늘 작업은 무엇인가요?`, primary CTA `안전 문서 생성`.
-- Mobile `/workspace`: CSS-width mobile breakpoint verified with 3 grid step buttons, hidden topbar status, no horizontal overflow.
-- Before/After photo test: 2 image inputs accepted test image files, 2 previews rendered, image-analysis candidate panel appeared.
-- Worker `/worker`: 6 language buttons rendered, manual language switch copy visible, acknowledgement button visible.
-- Page-state desktop initial probe: input page 1, document page 0, share page 0, evidence panel 0, output grid 0, dispatch panel 0, empty workspace 0, no horizontal overflow.
-- Page-state desktop after submit probe: input page 0, document page 1, share page 0, evidence panel 1, output grid 1, dispatch panel 0, empty workspace 0, active step `문서`.
-- Page-state mobile initial probe: input page 1, document page 0, share page 0, evidence panel 0, output grid 0, dispatch panel 0, empty workspace 0, no horizontal overflow; evidence readiness rail renders as a two-column grid.
+- Desktop `/workspace`: no horizontal overflow, no phone mockup, no hazard stripe, no raw camelCase, no `fallback`/`산문` user-facing copy.
+- Desktop Day/Night selection: theme toggle rendered, closed `고급 설정` and `예시 불러오기` have no empty bordered container.
+- Desktop `/workspace?theme=day`: light field card mode applied, no horizontal overflow.
+- Mobile `/workspace?theme=day`: viewport width 390px, no horizontal overflow, evidence cards stack to one column.
+- Input photo hazard panel rendered in desktop and mobile. It is framed as candidate discovery, not automatic risk determination.
+- Document completion check: `12/12`, `문서팩을 준비했습니다`, placeholder removed, evidence rail rendered, document preview contains real risk assessment text.
+- Share check: share workflow title rendered, confirmation/evidence/improvement capture visible, no phone mockup or hazard stripe.
+- A stale dev-server manifest error appeared once immediately after `next build`; restarting the dev server cleared it. The final strict document-ready probe had zero console errors.
+
+## Verification Commands
+
+- `npm.cmd test -- tests/operation-improvements.test.ts tests/agent-console-copy.test.ts tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/workspace-pages.test.ts`
+  - 5 files passed, 27 tests passed.
+- `npm.cmd run typecheck`
+  - passed.
+- `npm.cmd run build`
+  - passed.
 
 ## Acceptance Checks
 
-- `/workspace` first screen should expose one main action: field situation input and generation.
-- Step indicator should show only three steps.
-- Twelve document cards should not dominate the first document view.
-- Mobile layout should avoid horizontal overflow.
-- Sharing should read as a product completion loop: scope, recipients, confirmation, persistence, improvement candidates.
-- Today's improvement capture should allow Before/After photos and return a reviewable improvement candidate.
-- First load should not render document, share, or empty-workspace sections below the input page.
-- Submitting generation should move users to the document page, where loading and evidence matching are shown.
+- First screen exposes one main job: enter field situation and generate safety documents.
+- Step model is three states only: input, document, share.
+- The 12-document output no longer dominates the document view.
+- Document view supports cited-source review beside the selected document.
+- Mobile and desktop avoid horizontal overflow.
+- Sharing reads as a product ending: permission, recipient/role, acknowledgment, persistence, and improvement capture.
+- Narrative + photo input can surface hazard candidates before generation without claiming automatic judgment.
+- The day's improvement capture supports Before/After photos as Phase 1 candidates.
 
-## Remaining Phase 2 Work
+## Added Phase 2 Planning Item
 
-- Persist share sessions and read confirmations after DB approval.
-- Persist Before/After improvement photos and run real image analysis.
-- Promote reviewed improvements into `workpack_improvements` and, after review, the published operational ontology.
+The new reporting/download request is additive, not a direction change. It should be added as a second module:
+
+- Workbench remains the authoring surface.
+- Reports becomes the period/filter/export surface.
+- Every export should render from one canonical JSON snapshot to avoid PDF/HWPX/XLSX drift.
+- KRAS should stay as manual input preparation: `KRAS 입력 준비 내보내기`, not automatic submission.
+- SIF/KOSHA/workpack history should improve retrieval and QA through the evidence harness, not be described as product-level model fine-tuning.
+- See `reporting-downloads-phase2.md` for the proposed IA, classification axes, export formats, and implementation split.

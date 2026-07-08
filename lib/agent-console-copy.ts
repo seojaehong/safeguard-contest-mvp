@@ -6,7 +6,7 @@
 
 import type { AskProgressEvent } from "@/lib/ask-progress";
 
-export type AgentConsoleLineStatus = "pending" | "active" | "ok" | "fail";
+export type AgentConsoleLineStatus = "pending" | "active" | "ok" | "warn" | "fail";
 
 export type AgentConsoleLine = {
   id: string;
@@ -46,6 +46,8 @@ const DOC_COPY: Record<string, string> = {
   foreign: "외국인 근로자 안내문 작성"
 };
 
+const NON_BLOCKING_DOCS = new Set(["free", "foreign"]);
+
 /** Unknown stage ids are shown verbatim rather than dropped (design brief: 누락 금지). */
 export function stagePersonaCopy(stage: string): string {
   return STAGE_COPY[stage] ?? stage;
@@ -62,6 +64,29 @@ function extractStatusSummary(payload: unknown): string | undefined {
   if (!status || typeof status !== "object") return undefined;
   const summary = (status as Record<string, unknown>).summary;
   return typeof summary === "string" ? summary : undefined;
+}
+
+function extractDeliverables(payload: unknown): Record<string, unknown> {
+  if (!payload || typeof payload !== "object") return {};
+  const deliverables = (payload as Record<string, unknown>).deliverables;
+  return deliverables && typeof deliverables === "object" ? deliverables as Record<string, unknown> : {};
+}
+
+function hasText(deliverables: Record<string, unknown>, key: string): boolean {
+  const value = deliverables[key];
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function docWasRecoveredByFinalPayload(line: AgentConsoleLine, deliverables: Record<string, unknown>): boolean {
+  if (line.id === "doc:free") {
+    return ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft", "kakaoMessage"].every((key) =>
+      hasText(deliverables, key)
+    );
+  }
+  if (line.id === "doc:foreign") {
+    return ["foreignWorkerBriefing", "foreignWorkerTransmission"].every((key) => hasText(deliverables, key));
+  }
+  return false;
 }
 
 /**
@@ -83,17 +108,34 @@ export function nextConsoleLines(
   }
   if (event.kind === "doc") {
     const id = `doc:${event.name}`;
-    const line: AgentConsoleLine = { id, label: docPersonaCopy(event.name), status: event.status };
+    const status: AgentConsoleLineStatus =
+      event.status === "fail" && NON_BLOCKING_DOCS.has(event.name) ? "warn" : event.status;
+    const detail =
+      status === "warn" ? "핵심 3종 문서는 준비됐고, 보조 산출물은 기본 템플릿으로 보완됩니다." : undefined;
+    const line: AgentConsoleLine = { id, label: docPersonaCopy(event.name), status, detail };
     return upsertLine(current, line);
   }
   if (event.kind === "error") {
     return [...current, { id: `error:${current.length}`, label: "오류 발생", status: "fail", detail: event.message }];
   }
   if (event.kind === "final") {
-    const failCount = current.filter((line) => line.status === "fail").length;
+    const deliverables = extractDeliverables(event.payload);
+    const normalized = current.map((line) => {
+      if (line.status !== "warn" || !docWasRecoveredByFinalPayload(line, deliverables)) return line;
+      return {
+        ...line,
+        status: "ok" as const,
+        detail: "기본 템플릿으로 보완되어 최종 문서팩에 포함됐습니다."
+      };
+    });
+    const failCount = normalized.filter((line) => line.status === "fail").length;
+    const warnCount = normalized.filter((line) => line.status === "warn").length;
     const summary = extractStatusSummary(event.payload);
-    const label = `문서팩 준비 완료 — 특이사항 ${failCount}건${summary ? ` (${summary})` : ""}`;
-    return [...current, { id: "final", label, status: "ok" }];
+    const issueCopy = failCount
+      ? `검토 필요 ${failCount + warnCount}건`
+      : `보완 알림 ${warnCount}건`;
+    const label = `문서팩 준비 완료 — ${issueCopy}${summary ? ` (${summary})` : ""}`;
+    return [...normalized, { id: "final", label, status: "ok" }];
   }
   return current;
 }

@@ -6088,6 +6088,11 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   color: #7fd9a8;
 }
 
+.agent-console-line-warn .agent-console-icon,
+.agent-console-line-warn .agent-console-label {
+  color: #f5c518;
+}
+
 .agent-console-line-fail .agent-console-icon,
 .agent-console-line-fail .agent-console-label {
   color: #ff8a8a;
@@ -6636,51 +6641,53 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 
 /* Final SafeClaw brand cascade guard. Keep this at the end so later legacy
    demo styles cannot reintroduce soft gradients or rounded-card defaults. */
-body {
+body:has(.safeclaw-landing) {
   background: var(--sc-paper) !important;
 }
 
-.command-main,
-.document-editor,
-.status-board,
-.field-brief-card,
-.output-stack,
-.empty-workspace {
+body:has(.safeclaw-landing) :is(
+  .command-main,
+  .document-editor,
+  .status-board,
+  .field-brief-card,
+  .output-stack,
+  .empty-workspace
+) {
   background: #ffffff !important;
   border-radius: 4px !important;
   box-shadow: none !important;
 }
 
-.command-topbar,
-.topbar {
+body:has(.safeclaw-landing) :is(.command-topbar, .topbar) {
   border-radius: 0 !important;
   box-shadow: none !important;
 }
 
-.card,
-.left-panel-card,
-.workpack-sidebar,
-.command-panel,
-.today-panel,
-.output-panel,
-.product-section .card,
-.reference-grid .card,
-.scenario-chip,
-.template-card,
-.doc-tab,
-.doc-card,
-.selected-rubric-item,
-.rubric-item,
-.remediation-draft,
-.workflow-channel-card,
-.worker-card,
-.phone-shell {
+body:has(.safeclaw-landing) :is(
+  .card,
+  .left-panel-card,
+  .workpack-sidebar,
+  .command-panel,
+  .today-panel,
+  .output-panel,
+  .product-section .card,
+  .reference-grid .card,
+  .scenario-chip,
+  .template-card,
+  .doc-tab,
+  .doc-card,
+  .selected-rubric-item,
+  .rubric-item,
+  .remediation-draft,
+  .workflow-channel-card,
+  .worker-card,
+  .phone-shell
+) {
   border-radius: 4px !important;
   box-shadow: none !important;
 }
 
-.button,
-.full-button {
+body:has(.safeclaw-landing) :is(.button, .full-button) {
   border: 1px solid var(--sc-black) !important;
   border-radius: 4px !important;
   background: var(--sc-hazard-yellow) !important;
@@ -6689,23 +6696,24 @@ body {
   transform: none !important;
 }
 
-.button.secondary,
-.topnav a,
-.topnav button,
-.doc-card-actions button,
-.recipient-chip,
-.language-chip,
-.status-pill,
-.topbar-v2-link,
-.recent-list button,
-.demo-mode-badges button,
-.scenario-strip button {
+body:has(.safeclaw-landing) :is(
+  .button.secondary,
+  .topnav a,
+  .topnav button,
+  .doc-card-actions button,
+  .recipient-chip,
+  .language-chip,
+  .status-pill,
+  .topbar-v2-link,
+  .recent-list button,
+  .demo-mode-badges button,
+  .scenario-strip button
+) {
   border-radius: 4px !important;
   box-shadow: none !important;
 }
 
-.brand-mark,
-.safeclaw-lockup .brand-mark {
+body:has(.safeclaw-landing) :is(.brand-mark, .safeclaw-lockup .brand-mark) {
   border-radius: 0 !important;
   background: var(--sc-black) !important;
   color: var(--sc-hazard-yellow) !important;
@@ -6715,113 +6723,110 @@ body {
    The standalone brand guide is the source of truth. Remix variants are not
    imported directly; this layer neutralizes legacy soft-demo styling on the
    production-critical surfaces while preserving layout and behavior. */
-.v2-nav,
-.demo-stage-panel,
-.demo-screen,
-.demo-input-card,
-.demo-result-brief div,
-.mission-rail,
-.mission-step,
-.command-console,
-.evidence-live-panel,
-.dispatch-preview-panel,
-.compact-panel,
-.reference-card,
-.share-panel,
-.today-panel,
-.output-panel,
-.workflow-panel,
-.document-workspace,
-.sheet-export-panel,
-.dispatch-panel,
-.worker-panel,
-.history-panel,
-.rubric-summary-card,
-.knowledge-card,
-.law-card {
+body:has(.safeclaw-landing) :is(
+  .v2-nav,
+  .demo-stage-panel,
+  .demo-screen,
+  .demo-input-card,
+  .demo-result-brief div,
+  .mission-rail,
+  .mission-step,
+  .command-console,
+  .evidence-live-panel,
+  .dispatch-preview-panel,
+  .compact-panel,
+  .reference-card,
+  .share-panel,
+  .today-panel,
+  .output-panel,
+  .workflow-panel,
+  .document-workspace,
+  .sheet-export-panel,
+  .dispatch-panel,
+  .worker-panel,
+  .history-panel,
+  .rubric-summary-card,
+  .knowledge-card,
+  .law-card
+) {
   border-radius: 4px !important;
   box-shadow: none !important;
   background: #ffffff !important;
   border-color: var(--line) !important;
 }
 
-.v2-nav,
-.demo-stage-panel,
-.mission-rail {
+body:has(.safeclaw-landing) :is(.v2-nav, .demo-stage-panel, .mission-rail) {
   background: rgba(250, 249, 245, 0.96) !important;
   backdrop-filter: blur(10px);
 }
 
-.demo-progress-track,
-.inline-progress,
-.workflow-progress,
-.left-progress,
-.rubric-meter {
+body:has(.safeclaw-landing) :is(.demo-progress-track, .inline-progress, .workflow-progress, .left-progress, .rubric-meter) {
   border-radius: 0 !important;
   background: var(--sc-steel-120) !important;
 }
 
-.demo-progress-track span,
-.inline-progress span,
-.workflow-progress span,
-.left-progress span,
-.rubric-meter span {
+body:has(.safeclaw-landing) :is(.demo-progress-track span, .inline-progress span, .workflow-progress span, .left-progress span, .rubric-meter span) {
   border-radius: 0 !important;
   background: var(--sc-hazard-yellow) !important;
 }
 
-.demo-stage-list li,
-.demo-mode-badges button,
-.scenario-strip button,
-.demo-screen-top span,
-.demo-screen-top b,
-.quick-chip,
-.template-preview,
-.document-textarea,
-.workflow-textarea,
-.phone-bubble,
-.dispatch-recipient-card {
+body:has(.safeclaw-landing) :is(
+  .demo-stage-list li,
+  .demo-mode-badges button,
+  .scenario-strip button,
+  .demo-screen-top span,
+  .demo-screen-top b,
+  .quick-chip,
+  .template-preview,
+  .document-textarea,
+  .workflow-textarea,
+  .phone-bubble,
+  .dispatch-recipient-card
+) {
   border-radius: 4px !important;
   box-shadow: none !important;
 }
 
-.scenario-strip button.active,
-.demo-stage-list li.active,
-.quick-chip.active,
-.mission-step.active,
-.api-proof-card.active {
+body:has(.safeclaw-landing) :is(
+  .scenario-strip button.active,
+  .demo-stage-list li.active,
+  .quick-chip.active,
+  .mission-step.active,
+  .api-proof-card.active
+) {
   border-color: var(--sc-black) !important;
   background: var(--sc-steel-060) !important;
   color: var(--sc-black) !important;
   box-shadow: inset 4px 0 0 var(--sc-hazard-yellow) !important;
 }
 
-.template-preview.template-sheet,
-.template-preview.template-word,
-.template-preview.template-hwp,
-.command-main,
-.v2-hero,
-.hero,
-.demo-screen {
+body:has(.safeclaw-landing) :is(
+  .template-preview.template-sheet,
+  .template-preview.template-word,
+  .template-preview.template-hwp,
+  .command-main,
+  .v2-hero,
+  .hero,
+  .demo-screen
+) {
   background-image: none !important;
 }
 
-.command-primary,
-.button:not(.secondary),
-.full-button,
-.demo-screen .button {
+body:has(.safeclaw-landing) :is(.command-primary, .button:not(.secondary), .full-button, .demo-screen .button) {
   background: var(--sc-hazard-yellow) !important;
   color: var(--sc-black) !important;
 }
 
-.topnav a,
-.topnav button,
-.v2-nav nav a,
-.demo-mode-badges button,
-.scenario-strip button,
-.quick-chip,
-.recipient-chip,
-.language-chip {
+body:has(.safeclaw-landing) :is(
+  .topnav a,
+  .topnav button,
+  .v2-nav nav a,
+  .demo-mode-badges button,
+  .scenario-strip button,
+  .quick-chip,
+  .recipient-chip,
+  .language-chip
+) {
   font-family: var(--font-hud);
   letter-spacing: 0.04em;
 }
@@ -8520,6 +8525,172 @@ body {
   }
 }
 
+/* 운영 온톨로지 (/ontology) — 리스트 + hover card 중심의 탐색 표면. */
+.ontology-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.ontology-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.55fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.ontology-list-column {
+  display: grid;
+  gap: 14px;
+}
+
+.ontology-node-list {
+  display: grid;
+  gap: 1px;
+  border: 1px solid rgba(246, 245, 239, 0.12);
+  background: rgba(246, 245, 239, 0.08);
+}
+
+.ontology-node-row {
+  position: relative;
+  display: grid;
+  min-height: 68px;
+  background: rgba(10, 10, 10, 0.82);
+  padding: 14px 16px;
+}
+
+.ontology-node-row > div {
+  display: grid;
+  gap: 5px;
+}
+
+.ontology-node-row span,
+.ontology-map-column > span,
+.ontology-kind-list span,
+.ontology-hover-card > span {
+  color: rgba(246, 245, 239, 0.54);
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ontology-node-row strong {
+  color: var(--os-panel-text);
+  font-size: 16px;
+  font-weight: 820;
+  line-height: 1.35;
+}
+
+.ontology-node-row small {
+  color: rgba(246, 245, 239, 0.48);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ontology-hover-card {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  right: 18px;
+  width: min(360px, 72vw);
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(255, 220, 46, 0.35);
+  background: rgba(18, 18, 16, 0.98);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  padding: 16px;
+  transform: translateY(4px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.ontology-node-row:hover .ontology-hover-card,
+.ontology-node-row:focus-within .ontology-hover-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ontology-hover-card strong {
+  color: var(--os-panel-text);
+  font-size: 18px;
+  font-weight: 880;
+}
+
+.ontology-hover-card p {
+  margin: 0;
+  color: rgba(246, 245, 239, 0.68);
+  font-size: 13px;
+  font-weight: 720;
+  line-height: 1.5;
+}
+
+.ontology-hover-card ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ontology-hover-card li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid rgba(246, 245, 239, 0.1);
+  padding-top: 7px;
+}
+
+.ontology-hover-card li b {
+  color: var(--os-yellow);
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.ontology-hover-card li span {
+  max-width: 220px;
+  color: var(--os-panel-text);
+  font-family: var(--font-base);
+  font-size: 13px;
+  font-weight: 760;
+  letter-spacing: 0;
+  text-align: right;
+  text-transform: none;
+}
+
+.ontology-kind-list {
+  display: grid;
+  gap: 1px;
+  margin-top: 18px;
+  border: 1px solid rgba(246, 245, 239, 0.12);
+}
+
+.ontology-kind-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 11px 12px;
+}
+
+.ontology-kind-list strong {
+  color: var(--os-panel-text);
+  font-family: var(--font-hud);
+  font-size: 14px;
+  font-weight: 950;
+}
+
+@media (max-width: 900px) {
+  .ontology-summary-grid,
+  .ontology-workbench {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Workspace extreme-simple variation, inspired by a white editorial enterprise AI canvas.
    Keep the product loop intact; reduce the first decision to one input and one action. */
 .command-center-shell {
@@ -8696,10 +8867,11 @@ body {
   max-width: 860px;
   margin: 14px auto 16px;
   color: var(--workspace-ink);
-  font-size: clamp(48px, 8vw, 96px);
-  font-weight: 430;
-  line-height: 1;
+  font-size: 72px;
+  font-weight: 760;
+  line-height: 1.08;
   letter-spacing: 0;
+  text-wrap: balance;
 }
 
 .command-center-shell .command-copy p {
@@ -8948,7 +9120,8 @@ body {
   }
 
   .command-center-shell .command-copy h1 {
-    font-size: clamp(44px, 14vw, 58px);
+    font-size: 44px;
+    line-height: 1.12;
   }
 
   .command-center-shell .command-copy p {
@@ -8976,5 +9149,1834 @@ body {
 
   .command-center-shell .evidence-readiness-card:nth-last-child(-n + 2) {
     border-bottom: 0;
+  }
+}
+
+/* Linear-inspired commercial workbench pass.
+   Dark canvas + surface ladder are scoped to /workspace only so safety modules
+   and public pages keep their existing identity. */
+.command-center-shell {
+  --workspace-canvas: #010102;
+  --workspace-surface-1: #0f1011;
+  --workspace-surface-2: #141516;
+  --workspace-surface-3: #18191a;
+  --workspace-ink: #f7f8f8;
+  --workspace-muted: #8a8f98;
+  --workspace-subtle: #62666d;
+  --workspace-rule: #23252a;
+  --workspace-rule-strong: #34343a;
+  --workspace-accent: #6c6ff7;
+  --workspace-accent-hover: #8b8dfc;
+  --workspace-success: #27a644;
+  min-height: 100vh;
+  background: var(--workspace-canvas);
+  color: var(--workspace-ink);
+  padding-top: 12px;
+  letter-spacing: 0;
+  word-break: keep-all;
+}
+
+.command-center-shell :is(p, small, span, b, strong, button, label, textarea, summary, article) {
+  letter-spacing: 0;
+}
+
+.command-center-shell > .command-topbar,
+.command-center-shell > .command-viewport {
+  width: min(1280px, calc(100% - 32px));
+}
+
+.command-center-shell .command-topbar {
+  top: 8px;
+  border-color: var(--workspace-rule) !important;
+  background: rgba(15, 16, 17, 0.86) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(16px);
+}
+
+.command-center-shell .safeclaw-lockup .brand-mark {
+  background: var(--workspace-accent);
+  border-radius: 6px;
+  filter: hue-rotate(220deg) saturate(1.55) brightness(1.08);
+}
+
+.command-center-shell .brand-lockup strong,
+.command-center-shell .topbar-status b,
+.command-center-shell .step-copy strong {
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .brand-lockup small,
+.command-center-shell .topbar-status span,
+.command-center-shell .step-copy small,
+.command-center-shell .command-copy .eyebrow,
+.command-center-shell .command-copy p,
+.command-center-shell .console-head span,
+.command-center-shell .input-helper {
+  color: var(--workspace-muted);
+}
+
+.command-center-shell .command-stepper button {
+  border-radius: 8px !important;
+  color: var(--workspace-muted);
+}
+
+.command-center-shell .command-stepper button.active {
+  border-color: var(--workspace-rule-strong) !important;
+  background: var(--workspace-surface-2) !important;
+}
+
+.command-center-shell .command-stepper button.active .step-copy strong,
+.command-center-shell .command-stepper button.active .step-copy small {
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .step-dot {
+  border-color: var(--workspace-rule-strong);
+  background: var(--workspace-surface-1);
+  color: var(--workspace-muted);
+}
+
+.command-center-shell .step-dot.active {
+  border-color: var(--workspace-accent);
+  background: var(--workspace-accent);
+}
+
+.command-center-shell .step-dot.done {
+  border-color: rgba(39, 166, 68, 0.36) !important;
+  background: rgba(39, 166, 68, 0.16) !important;
+  color: #8df0a6;
+}
+
+.command-center-shell .topbar-status {
+  border-left-color: var(--workspace-rule);
+}
+
+.command-center-shell .workspace-top-title {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.command-center-shell .workspace-top-title span {
+  color: var(--workspace-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.command-center-shell .workspace-top-title strong {
+  color: var(--workspace-ink);
+  font-size: 14px;
+  font-weight: 560;
+  line-height: 1.35;
+}
+
+.command-center-shell .workspace-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 3px;
+}
+
+.command-center-shell .workspace-theme-toggle button {
+  min-width: 54px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--workspace-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 560;
+  line-height: 1.3;
+  padding: 6px 10px;
+}
+
+.command-center-shell .workspace-theme-toggle button.active {
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .linear-workspace-layout {
+  display: grid;
+  grid-template-columns: 242px minmax(0, 1fr);
+  gap: 0;
+  min-height: calc(100vh - 92px);
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-1);
+  overflow: hidden;
+}
+
+.command-center-shell .workspace-side-nav {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  min-height: calc(100vh - 92px);
+  border-right: 1px solid var(--workspace-rule);
+  background: linear-gradient(180deg, rgba(15, 16, 17, 0.98), rgba(10, 11, 12, 0.98));
+  padding: 16px 12px;
+}
+
+.command-center-shell .workspace-side-group {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+
+.command-center-shell .workspace-side-group > span {
+  color: var(--workspace-subtle);
+  font-size: 11px;
+  font-weight: 560;
+  line-height: 1.45;
+  padding: 0 8px;
+}
+
+.command-center-shell .workspace-side-group button,
+.command-center-shell .workspace-source-status p {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--workspace-muted);
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.command-center-shell .workspace-side-group button {
+  cursor: pointer;
+}
+
+.command-center-shell .workspace-side-group button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.command-center-shell .workspace-side-group button.active {
+  border-color: rgba(108, 111, 247, 0.3);
+  background: rgba(108, 111, 247, 0.12);
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .workspace-side-group button span,
+.command-center-shell .workspace-source-status b {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 520;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-center-shell .workspace-side-group button small,
+.command-center-shell .workspace-source-status small {
+  color: var(--workspace-subtle);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.command-center-shell .workspace-current-brief {
+  border-top: 1px solid var(--workspace-rule);
+  border-bottom: 1px solid var(--workspace-rule);
+  padding: 16px 10px;
+}
+
+.command-center-shell .workspace-current-brief strong {
+  color: var(--workspace-ink);
+  font-size: 13px;
+  font-weight: 560;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.command-center-shell .workspace-current-brief small {
+  color: var(--workspace-subtle);
+  font-size: 12px;
+}
+
+.command-center-shell .workspace-recent-list button {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.command-center-shell .linear-workspace-layout .command-main {
+  min-height: calc(100vh - 92px);
+  border: 0 !important;
+  background:
+    linear-gradient(180deg, rgba(20, 21, 22, 0.72), rgba(1, 1, 2, 0.18) 42%),
+    var(--workspace-canvas) !important;
+  padding: 48px clamp(24px, 4vw, 56px) 56px;
+}
+
+.command-center-shell .linear-workspace-layout .workspace-step-page {
+  width: 100%;
+  max-width: 980px;
+  margin: 0;
+}
+
+.command-center-shell .linear-workspace-layout .workspace-input-page {
+  align-content: start;
+  min-height: auto;
+  padding-top: clamp(28px, 7vh, 76px);
+}
+
+.command-center-shell .command-main {
+  min-height: calc(100vh - 104px);
+  background: var(--workspace-canvas) !important;
+  padding-top: 52px;
+}
+
+.command-center-shell .workspace-input-page {
+  min-height: calc(100vh - 190px);
+}
+
+.command-center-shell .command-copy {
+  width: min(760px, 100%);
+  text-align: left;
+}
+
+.command-center-shell .command-copy h1 {
+  max-width: 620px;
+  margin: 10px 0 12px;
+  color: var(--workspace-ink);
+  font-size: 40px;
+  font-weight: 620;
+  line-height: 1.18;
+  letter-spacing: 0;
+}
+
+.command-center-shell .command-copy p {
+  max-width: 560px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.command-center-shell .command-console {
+  width: min(760px, 100%);
+  margin-top: 22px;
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.command-center-shell .command-console label {
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .console-head,
+.command-center-shell .input-helper,
+.command-center-shell .command-actions {
+  background: transparent !important;
+}
+
+.command-center-shell .command-console-input {
+  min-height: 152px;
+  border-color: var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.command-center-shell .command-console-input::placeholder {
+  color: var(--workspace-subtle);
+}
+
+.command-center-shell .command-console-input:focus {
+  border-color: var(--workspace-accent);
+  box-shadow: 0 0 0 2px rgba(108, 111, 247, 0.42);
+}
+
+.command-center-shell .field-brief-chip-row {
+  gap: 12px;
+  justify-content: flex-start;
+  margin-top: 18px;
+}
+
+.command-center-shell .field-brief-chip-row span,
+.command-center-shell .advanced-settings,
+.command-center-shell .quick-scenario-chips {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-surface-1) !important;
+  color: var(--workspace-muted);
+}
+
+.command-center-shell .field-brief-chip-row span {
+  min-height: 38px;
+  border-radius: 999px;
+  padding: 8px 16px;
+  color: #a4aab4;
+  font-size: 14px;
+  font-weight: 540;
+}
+
+.command-center-shell .input-helper {
+  margin-top: 14px;
+  color: #9aa1ad;
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+.command-center-shell .input-photo-hazard-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(180px, 0.46fr);
+  gap: 12px;
+  width: min(760px, 100%);
+  margin-top: 18px;
+}
+
+.command-center-shell .input-photo-copy,
+.command-center-shell .input-photo-candidates,
+.command-center-shell .input-photo-dropzone {
+  border: 1px solid var(--workspace-rule);
+  border-radius: 12px;
+  background: var(--workspace-surface-1);
+}
+
+.command-center-shell .input-photo-copy {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.command-center-shell .input-photo-copy span {
+  color: var(--workspace-subtle);
+  font-size: 11px;
+  font-weight: 640;
+  text-transform: uppercase;
+}
+
+.command-center-shell .input-photo-copy strong {
+  color: var(--workspace-ink);
+  font-size: 15px;
+  font-weight: 620;
+}
+
+.command-center-shell .input-photo-copy p {
+  margin: 0;
+  color: var(--workspace-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.command-center-shell .input-photo-dropzone {
+  display: grid;
+  place-items: center;
+  min-height: 124px;
+  color: var(--workspace-muted);
+  cursor: pointer;
+  overflow: hidden;
+  padding: 14px;
+  text-align: center;
+}
+
+.command-center-shell .input-photo-dropzone input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.command-center-shell .input-photo-dropzone strong {
+  color: var(--workspace-ink);
+  font-size: 14px;
+  font-weight: 620;
+}
+
+.command-center-shell .input-photo-dropzone span {
+  color: var(--workspace-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.command-center-shell .input-photo-dropzone.has-photo {
+  grid-template-rows: minmax(84px, 1fr) auto;
+  gap: 8px;
+  padding: 8px;
+}
+
+.command-center-shell .input-photo-dropzone img {
+  width: 100%;
+  height: 108px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.command-center-shell .input-photo-candidates {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.command-center-shell .input-photo-candidates p {
+  margin: 0;
+  color: var(--workspace-muted);
+  font-size: 13px;
+}
+
+.command-center-shell .input-photo-candidates button {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 10px;
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+  cursor: pointer;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.command-center-shell .input-photo-candidates button strong {
+  color: var(--workspace-ink);
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.command-center-shell .input-photo-candidates button span {
+  color: var(--workspace-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.command-center-shell .evidence-readiness-rail {
+  width: min(760px, 100%);
+  justify-content: flex-start;
+  border-color: var(--workspace-rule);
+  background: transparent !important;
+}
+
+.command-center-shell .evidence-readiness-card {
+  border-right-color: var(--workspace-rule);
+}
+
+.command-center-shell .evidence-readiness-card strong {
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .command-actions {
+  justify-content: flex-start;
+}
+
+.command-center-shell .command-primary {
+  min-height: 42px;
+  border-color: var(--workspace-accent) !important;
+  border-radius: 8px !important;
+  background: var(--workspace-accent) !important;
+  color: #ffffff !important;
+}
+
+.command-center-shell .command-primary:hover {
+  border-color: var(--workspace-accent-hover) !important;
+  background: var(--workspace-accent-hover) !important;
+}
+
+.command-center-shell .button.secondary {
+  color: var(--workspace-muted) !important;
+}
+
+.command-center-shell .ai-mode-toggle,
+.command-center-shell .ai-mode-option {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .ai-mode-option.selected {
+  border-color: var(--workspace-accent);
+  background: rgba(108, 111, 247, 0.12);
+}
+
+.command-center-shell .ai-mode-option strong {
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .ai-mode-option small,
+.command-center-shell .advanced-settings summary,
+.command-center-shell .quick-scenario-chips summary {
+  color: var(--workspace-muted);
+}
+
+.command-center-shell .advanced-settings summary::after,
+.command-center-shell .quick-scenario-chips summary::after {
+  color: var(--workspace-accent);
+}
+
+.command-center-shell .advanced-settings,
+.command-center-shell .quick-scenario-chips {
+  width: min(760px, 100%);
+  margin: 12px 0 0;
+}
+
+.command-center-shell .advanced-settings:not([open]),
+.command-center-shell .quick-scenario-chips:not([open]) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.command-center-shell .advanced-settings:not([open]) summary,
+.command-center-shell .quick-scenario-chips:not([open]) summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #a4aab4;
+  padding: 0;
+  text-decoration: underline;
+  text-decoration-color: rgba(164, 170, 180, 0.45);
+  text-underline-offset: 5px;
+}
+
+.command-center-shell .advanced-settings:not([open]) summary::after,
+.command-center-shell .quick-scenario-chips:not([open]) summary::after {
+  float: none;
+  color: #a4aab4;
+}
+
+.command-center-shell .advanced-settings[open],
+.command-center-shell .quick-scenario-chips[open] {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 12px;
+  background: var(--workspace-surface-1) !important;
+  padding: 14px;
+}
+
+.command-center-shell .evidence-readiness-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  border: 0 !important;
+}
+
+.command-center-shell .evidence-readiness-card {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 12px;
+  background: var(--workspace-surface-1) !important;
+  padding: 12px;
+}
+
+.command-center-shell .evidence-live-panel,
+.command-center-shell .output-card-grid,
+.command-center-shell .dispatch-preview-panel,
+.command-center-shell .operation-ontology-panel {
+  border-color: var(--workspace-rule) !important;
+  background: var(--workspace-surface-1) !important;
+  color: var(--workspace-ink);
+  box-shadow: none;
+}
+
+.command-center-shell .evidence-live-panel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.command-center-shell .compact-head strong,
+.command-center-shell .document-viewer-list strong,
+.command-center-shell .document-preview-head strong,
+.command-center-shell .document-evidence-panel article strong,
+.command-center-shell .api-proof strong,
+.command-center-shell .generation-stage-rail strong,
+.command-center-shell .share-session-grid strong,
+.command-center-shell .operation-ontology-panel strong {
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .evidence-live-panel p,
+.command-center-shell .api-proof small,
+.command-center-shell .generation-stage-rail small,
+.command-center-shell .document-viewer-list small,
+.command-center-shell .document-evidence-panel article small,
+.command-center-shell .share-session-grid p,
+.command-center-shell .operation-ontology-panel p {
+  color: var(--workspace-muted);
+  line-height: 1.55;
+}
+
+.command-center-shell :is(.api-proof, .generation-stage-rail article, .document-evidence-panel article, .document-viewer-list button) {
+  line-height: 1.45;
+}
+
+.command-center-shell .api-proof,
+.command-center-shell .generation-stage-rail article,
+.command-center-shell .document-evidence-panel article,
+.command-center-shell .document-viewer-list button,
+.command-center-shell .document-preview-pane,
+.command-center-shell .document-evidence-panel,
+.command-center-shell .share-session-grid section,
+.command-center-shell .before-after-photo-grid label,
+.command-center-shell .photo-analysis-candidate,
+.command-center-shell .operation-improvement-list article,
+.command-center-shell .supporting-doc-cards {
+  border-color: var(--workspace-rule) !important;
+  border-radius: 8px;
+  background: var(--workspace-surface-2) !important;
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .api-proof.live,
+.command-center-shell .generation-stage-rail article.ready,
+.command-center-shell .document-evidence-panel article.ready {
+  border-color: rgba(39, 166, 68, 0.36) !important;
+  background: rgba(39, 166, 68, 0.08) !important;
+}
+
+.command-center-shell .api-proof.warn,
+.command-center-shell .generation-stage-rail article.warn,
+.command-center-shell .document-evidence-panel article.warn {
+  border-color: rgba(130, 143, 255, 0.32) !important;
+  background: rgba(94, 106, 210, 0.12) !important;
+}
+
+.command-center-shell .api-proof span,
+.command-center-shell .generation-stage-rail span,
+.command-center-shell .document-evidence-panel article span,
+.command-center-shell .document-viewer-list span,
+.command-center-shell .document-preview-head span {
+  color: var(--workspace-muted);
+}
+
+.command-center-shell .inline-progress {
+  height: 4px;
+  background: var(--workspace-rule) !important;
+}
+
+.command-center-shell .inline-progress span {
+  background: var(--workspace-accent) !important;
+}
+
+.command-center-shell .document-viewer-shell {
+  grid-template-columns: minmax(220px, 0.25fr) minmax(0, 1fr);
+}
+
+.command-center-shell .document-preview-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.32fr);
+}
+
+.command-center-shell .document-viewer-list button:hover {
+  border-color: var(--workspace-rule-strong);
+  background: var(--workspace-surface-3);
+}
+
+.command-center-shell .document-viewer-list button.selected {
+  border-color: var(--workspace-accent);
+  background: var(--workspace-surface-3);
+  box-shadow: inset 3px 0 0 var(--workspace-accent);
+}
+
+.command-center-shell .document-preview-pane pre {
+  border-color: var(--workspace-rule);
+  background: #090a0b;
+  color: var(--workspace-ink);
+  line-height: 1.75;
+}
+
+.command-center-shell .document-evidence-panel {
+  position: sticky;
+  top: 86px;
+}
+
+.command-center-shell .doc-card-actions button {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .agent-console {
+  border-color: var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-2);
+  padding: 0;
+}
+
+.command-center-shell .agent-console.agent-console-active {
+  border-color: rgba(94, 106, 210, 0.72);
+}
+
+.command-center-shell .agent-console-head {
+  cursor: pointer;
+  list-style: none;
+  padding: 10px 12px;
+  color: var(--workspace-muted);
+  font-family: var(--font-base);
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.command-center-shell .agent-console-head::-webkit-details-marker {
+  display: none;
+}
+
+.command-center-shell .agent-console-head small {
+  margin-left: auto;
+  color: var(--workspace-subtle);
+  font-size: 12px;
+}
+
+.command-center-shell .agent-console-live {
+  background: var(--workspace-accent);
+}
+
+.command-center-shell .agent-console-body {
+  border-top: 1px solid var(--workspace-rule);
+  padding: 10px 12px 12px;
+}
+
+.command-center-shell .agent-console-line {
+  color: var(--workspace-muted);
+  font-family: var(--font-mono, "Geist Mono", monospace);
+}
+
+.command-center-shell .agent-console-detail {
+  color: var(--workspace-subtle);
+}
+
+.command-center-shell .agent-console-line-warn .agent-console-icon,
+.command-center-shell .agent-console-line-warn .agent-console-label {
+  color: #c8cdfc;
+}
+
+@media (max-width: 900px) {
+  .command-center-shell .document-viewer-shell,
+  .command-center-shell .document-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .command-center-shell .document-evidence-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .command-center-shell {
+    width: 100%;
+  }
+
+  .command-center-shell > .command-topbar,
+  .command-center-shell > .command-viewport {
+    width: min(100% - 20px, 1280px);
+  }
+
+  .command-center-shell .command-main {
+    padding-top: 32px;
+  }
+
+  .command-center-shell .workspace-step-page {
+    width: min(100%, calc(100% - 8px));
+  }
+
+  .command-center-shell .command-copy h1 {
+    font-size: 32px;
+    line-height: 1.18;
+  }
+
+  .command-center-shell .command-copy,
+  .command-center-shell .command-console,
+  .command-center-shell .evidence-readiness-rail {
+    width: 100%;
+  }
+
+  .command-center-shell .evidence-readiness-rail {
+    grid-template-columns: 1fr;
+  }
+
+  .command-center-shell .evidence-readiness-card {
+    justify-content: flex-start;
+    border-bottom-color: var(--workspace-rule);
+  }
+}
+
+@media (max-width: 900px) {
+  .command-center-shell .linear-workspace-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .command-center-shell .workspace-side-nav {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--workspace-rule);
+  }
+
+  .command-center-shell .workspace-side-group:first-child {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .command-center-shell .workspace-side-group:first-child > span {
+    grid-column: 1 / -1;
+  }
+
+  .command-center-shell .workspace-current-brief,
+  .command-center-shell .workspace-source-status,
+  .command-center-shell .workspace-recent-list {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .command-center-shell .workspace-top-title {
+    display: none;
+  }
+
+  .command-center-shell .linear-workspace-layout .command-main {
+    padding: 28px 16px 40px;
+  }
+
+  .command-center-shell .workspace-side-nav {
+    padding: 10px;
+  }
+
+  .command-center-shell .workspace-side-group:first-child button {
+    min-height: 40px;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .command-center-shell .workspace-side-group:first-child button small {
+    display: none;
+  }
+}
+
+/* SafeClaw commercial workbench refinement: document citations, share workflow,
+   typography breathing room, subtle glass, and the light field A/B theme. */
+.command-center-shell {
+  font-kerning: normal;
+  text-rendering: geometricPrecision;
+}
+
+.command-center-shell :is(p, li, small, span, button, label, textarea, input, summary, pre) {
+  letter-spacing: 0;
+}
+
+.command-center-shell :is(p, small, li) {
+  line-height: 1.65;
+}
+
+.command-center-shell :is(button, input, textarea, summary) {
+  line-height: 1.45;
+}
+
+.command-center-shell .command-topbar,
+.command-center-shell .workspace-side-nav,
+.command-center-shell .command-main,
+.command-center-shell .document-workbench,
+.command-center-shell .dispatch-preview-panel,
+.command-center-shell .operation-ontology-panel,
+.share-panel.workflow-panel {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.command-center-shell .document-workbench {
+  display: grid;
+  gap: 14px;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--workspace-surface-1) 92%, transparent) !important;
+  padding: 16px;
+}
+
+.command-center-shell .document-workbench-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid var(--workspace-rule);
+  padding-bottom: 14px;
+}
+
+.command-center-shell .document-workbench-head > div:first-child {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.command-center-shell .document-workbench-head strong {
+  color: var(--workspace-ink);
+  font-size: 24px;
+  font-weight: 620;
+  line-height: 1.25;
+}
+
+.command-center-shell .document-workbench-head small {
+  max-width: 740px;
+  color: var(--workspace-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.command-center-shell .document-progress-summary {
+  display: grid;
+  gap: 4px;
+  min-width: 126px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-2);
+  padding: 9px 11px;
+  text-align: right;
+}
+
+.command-center-shell .document-progress-summary span {
+  color: var(--workspace-ink);
+  font-size: 19px;
+  font-weight: 640;
+  line-height: 1.15;
+}
+
+.command-center-shell .document-progress-summary b {
+  color: var(--workspace-muted);
+  font-size: 11px;
+  font-weight: 560;
+  line-height: 1.35;
+}
+
+.command-center-shell .document-review-status-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.command-center-shell .document-review-status-strip article {
+  display: grid;
+  gap: 4px;
+  min-height: 54px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-2);
+  padding: 9px 10px;
+}
+
+.command-center-shell .document-review-status-strip span,
+.command-center-shell .document-evidence-panel article em {
+  color: var(--workspace-subtle);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 560;
+}
+
+.command-center-shell .document-review-status-strip strong {
+  color: var(--workspace-muted);
+  font-size: 12px;
+  font-weight: 620;
+}
+
+.command-center-shell .document-review-status-strip article.ready strong {
+  color: #8df0a6;
+}
+
+.command-center-shell .document-review-status-strip article.warn strong {
+  color: #c8cdfc;
+}
+
+.command-center-shell .document-review-meter {
+  margin-top: -2px;
+}
+
+.command-center-shell .document-workbench .document-viewer-shell {
+  display: grid;
+  grid-template-columns: minmax(194px, 0.24fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.command-center-shell .document-workbench .document-preview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.34fr);
+  gap: 10px;
+}
+
+.command-center-shell .document-workbench .document-viewer-list,
+.command-center-shell .document-workbench .document-preview-pane,
+.command-center-shell .document-workbench .document-evidence-panel {
+  min-height: 0;
+}
+
+.command-center-shell .document-workbench .document-viewer-list {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.command-center-shell .document-workbench .document-viewer-list button {
+  min-height: 86px;
+  padding: 12px;
+}
+
+.command-center-shell .document-workbench .document-viewer-list button strong {
+  white-space: normal;
+  line-height: 1.45;
+}
+
+.command-center-shell .document-workbench .document-preview-pane {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 8px;
+  background: var(--workspace-surface-2) !important;
+  padding: 14px;
+}
+
+.command-center-shell .document-workbench .document-preview-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--workspace-rule);
+  padding-bottom: 10px;
+}
+
+.command-center-shell .document-workbench .document-preview-pane pre {
+  min-height: 520px;
+  max-height: 62vh;
+  overflow: auto;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: #090a0b;
+  color: var(--workspace-ink);
+  padding: 18px;
+  font-family: var(--font-multilingual);
+  font-size: 13px;
+  line-height: 1.82;
+  white-space: pre-wrap;
+}
+
+.command-center-shell .document-workbench .document-evidence-panel {
+  position: sticky;
+  top: 86px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 8px;
+  background: var(--workspace-surface-2) !important;
+  padding: 12px;
+}
+
+.command-center-shell .document-workbench .document-evidence-panel article {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 8px;
+  background: var(--workspace-surface-1) !important;
+  padding: 11px;
+}
+
+.command-center-shell .document-workbench .document-evidence-panel article strong {
+  line-height: 1.45;
+}
+
+.command-center-shell .document-workbench .document-evidence-panel article small {
+  line-height: 1.65;
+}
+
+.command-center-shell .document-workbench .document-evidence-panel article a {
+  width: fit-content;
+  color: var(--workspace-accent-hover);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.command-center-shell .document-work-history {
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-2);
+}
+
+.command-center-shell .document-work-history summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  list-style: none;
+  padding: 11px 12px;
+  color: var(--workspace-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.command-center-shell .document-work-history summary::-webkit-details-marker {
+  display: none;
+}
+
+.command-center-shell .document-work-history summary strong {
+  color: var(--workspace-ink);
+  font-size: 12px;
+}
+
+.command-center-shell .document-work-history-body {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--workspace-rule);
+  padding: 12px;
+}
+
+.command-center-shell .document-work-history-body p {
+  margin: 0;
+  color: var(--workspace-muted);
+  font-size: 12px;
+}
+
+.share-panel.workflow-panel,
+.command-center-shell .dispatch-preview-panel,
+.command-center-shell .operation-ontology-panel {
+  --share-canvas: #010102;
+  --share-surface: #0f1011;
+  --share-surface-2: #141516;
+  --share-surface-3: #18191a;
+  --share-line: #23252a;
+  --share-line-strong: #34343a;
+  --share-ink: #f7f8f8;
+  --share-muted: #8a8f98;
+  --share-soft: #d0d6e0;
+  --share-primary: #5e6ad2;
+  --share-success: #27a644;
+  --share-warn: #d69d48;
+  color: var(--share-ink);
+  letter-spacing: 0;
+}
+
+.share-panel.workflow-panel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--share-line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--share-canvas) 86%, var(--share-surface));
+  padding: 16px;
+}
+
+.share-workflow-header,
+.share-workbench-title,
+.operation-capture-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.share-workflow-header > div:first-child,
+.share-workbench-title,
+.operation-capture-head > div {
+  display: grid;
+  gap: 7px;
+}
+
+.share-workflow-header strong,
+.share-workbench-title strong,
+.operation-capture-head strong {
+  color: var(--share-ink);
+  font-size: 20px;
+  font-weight: 640;
+  line-height: 1.28;
+}
+
+.share-workflow-header p,
+.share-workbench-title p,
+.operation-capture-head p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--share-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.share-status-pill,
+.operation-capture-head aside {
+  flex: 0 0 auto;
+  min-width: 170px;
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--share-line);
+  border-radius: 8px;
+  background: var(--share-surface);
+  padding: 10px 12px;
+}
+
+.share-permission-grid,
+.acknowledgment-ledger,
+.operation-evidence-summary {
+  display: grid;
+  gap: 8px;
+}
+
+.share-permission-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.acknowledgment-ledger,
+.operation-evidence-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.share-form-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 10px;
+}
+
+.share-form-card,
+.share-permission-grid section,
+.acknowledgment-ledger article,
+.operation-evidence-summary article,
+.message-preview-panel,
+.message-source-detail,
+.command-center-shell .share-session-grid section,
+.command-center-shell .operation-improvement-list article {
+  border: 1px solid var(--share-line) !important;
+  border-radius: 8px;
+  background: var(--share-surface) !important;
+  color: var(--share-ink);
+  box-shadow: none;
+}
+
+.share-form-card,
+.share-permission-grid section,
+.acknowledgment-ledger article,
+.operation-evidence-summary article,
+.message-preview-panel {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.share-recipient-card {
+  grid-column: 1 / -1;
+}
+
+.share-form-card-head,
+.recipient-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.share-panel.workflow-panel :is(.channel-card, .language-chip, .recipient-chip) {
+  border-color: var(--share-line) !important;
+  border-radius: 8px !important;
+  background: var(--share-surface-2) !important;
+  color: var(--share-ink) !important;
+  letter-spacing: 0;
+}
+
+.share-panel.workflow-panel .channel-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.share-panel.workflow-panel .channel-card {
+  min-height: 70px;
+  padding: 10px;
+}
+
+.share-panel.workflow-panel :is(.channel-card.active, .language-chip.active) {
+  border-color: rgba(94, 106, 210, 0.72) !important;
+  background: rgba(94, 106, 210, 0.16) !important;
+}
+
+.share-panel.workflow-panel :is(.workflow-textarea, .input),
+.command-center-shell .operation-capture-form textarea {
+  width: 100%;
+  border: 1px solid var(--share-line);
+  border-radius: 8px;
+  background: var(--share-surface-2);
+  color: var(--share-ink);
+  line-height: 1.6;
+}
+
+.share-panel.workflow-panel :is(.workflow-textarea, .input):focus,
+.command-center-shell .operation-capture-form textarea:focus {
+  border-color: var(--share-primary);
+  outline: 2px solid rgba(94, 106, 210, 0.26);
+}
+
+.share-inline-note,
+.channel-readiness-note {
+  margin: 0;
+  color: var(--share-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.message-preview-lines {
+  display: grid;
+  gap: 5px;
+  max-height: 190px;
+  overflow: auto;
+  border-top: 1px solid var(--share-line);
+  padding-top: 10px;
+}
+
+.message-preview-lines p {
+  margin: 0;
+  color: var(--share-soft);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.message-source-detail {
+  padding: 0;
+}
+
+.message-source-detail summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 11px 12px;
+  color: var(--share-soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.message-source-detail summary::-webkit-details-marker {
+  display: none;
+}
+
+.share-panel.workflow-panel pre {
+  max-height: 240px;
+  overflow: auto;
+  border: 0;
+  border-top: 1px solid var(--share-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--share-soft);
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.share-panel.workflow-panel .command-actions,
+.command-center-shell .operation-ontology-actions {
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.share-panel.workflow-panel .button,
+.command-center-shell .operation-ontology-panel .button {
+  min-height: 38px;
+  border-color: var(--share-primary) !important;
+  border-radius: 8px !important;
+  background: var(--share-primary) !important;
+  color: #ffffff !important;
+  padding: 8px 13px;
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.share-panel.workflow-panel .button.secondary,
+.command-center-shell .operation-ontology-panel .button.secondary {
+  border: 1px solid var(--share-line) !important;
+  background: var(--share-surface-2) !important;
+  color: var(--share-ink) !important;
+}
+
+.command-center-shell .dispatch-preview-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
+  gap: 14px;
+  border: 1px solid var(--share-line) !important;
+  border-radius: 10px;
+  background: var(--share-canvas) !important;
+  padding: 16px;
+}
+
+.command-center-shell .share-workbench-title {
+  border: 1px solid var(--share-line);
+  border-radius: 8px;
+  background: var(--share-surface);
+  padding: 12px;
+}
+
+.command-center-shell .share-session-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.command-center-shell .share-session-grid section {
+  padding: 12px;
+}
+
+.command-center-shell .operation-ontology-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 14px;
+  margin-top: 0;
+  border: 1px solid var(--share-line) !important;
+  border-radius: 10px;
+  background: var(--share-surface) !important;
+  padding: 16px;
+}
+
+.operation-capture-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(320px, 0.94fr);
+  gap: 12px;
+}
+
+.operation-capture-form {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.command-center-shell .before-after-photo-grid {
+  gap: 8px;
+}
+
+.command-center-shell .before-after-photo-grid label {
+  min-height: 260px;
+  align-content: start;
+  border: 1px dashed var(--share-line-strong) !important;
+  border-radius: 10px;
+  background: var(--share-surface-2) !important;
+  color: var(--share-ink);
+  padding: 12px;
+}
+
+.command-center-shell .before-after-photo-grid label.has-photo {
+  border-style: solid !important;
+  background: var(--share-surface-3) !important;
+}
+
+.command-center-shell .before-after-photo-grid label em {
+  display: grid;
+  place-items: center;
+  min-height: 128px;
+  border: 1px solid var(--share-line);
+  border-radius: 8px;
+  background: var(--share-surface);
+  color: var(--share-muted);
+  font-size: 13px;
+  font-style: normal;
+}
+
+.command-center-shell .before-after-photo-grid img {
+  aspect-ratio: 16 / 10;
+  border-color: var(--share-line);
+  border-radius: 8px;
+}
+
+.command-center-shell .photo-analysis-candidate {
+  border-color: rgba(94, 106, 210, 0.46) !important;
+  background: rgba(94, 106, 210, 0.12) !important;
+  padding: 10px;
+}
+
+.command-center-shell .operation-improvement-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.command-center-shell.workspace-theme-field {
+  --workspace-canvas: #fafafb;
+  --workspace-surface-1: #ffffff;
+  --workspace-surface-2: #f4f5f7;
+  --workspace-surface-3: #ecedf0;
+  --workspace-ink: #1a1b1e;
+  --workspace-muted: #5c6169;
+  --workspace-subtle: #8a8f98;
+  --workspace-rule: #e6e8eb;
+  --workspace-rule-strong: #d0d3d9;
+  --workspace-accent: #f5c518;
+  --workspace-accent-hover: #e0b30f;
+  --workspace-success: #16a34a;
+  --share-canvas: #fafafb;
+  --share-surface: #ffffff;
+  --share-surface-2: #f4f5f7;
+  --share-surface-3: #ecedf0;
+  --share-line: #e6e8eb;
+  --share-line-strong: #d0d3d9;
+  --share-ink: #1a1b1e;
+  --share-muted: #5c6169;
+  --share-soft: #1a1b1e;
+  --share-primary: #f5c518;
+  --share-warn: #f59e0b;
+  background: var(--workspace-canvas);
+}
+
+.command-center-shell.workspace-theme-field :is(.share-panel.workflow-panel, .dispatch-preview-panel, .operation-ontology-panel) {
+  --share-canvas: #fafafb;
+  --share-surface: #ffffff;
+  --share-surface-2: #f4f5f7;
+  --share-surface-3: #ecedf0;
+  --share-line: #e6e8eb;
+  --share-line-strong: #d0d3d9;
+  --share-ink: #1a1b1e;
+  --share-muted: #5c6169;
+  --share-soft: #1a1b1e;
+  --share-primary: #f5c518;
+  --share-warn: #f59e0b;
+}
+
+.command-center-shell.workspace-theme-field .command-topbar {
+  background: rgba(255, 255, 255, 0.86) !important;
+  backdrop-filter: blur(14px) saturate(1.06);
+}
+
+.command-center-shell.workspace-theme-field .workspace-side-nav {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 245, 247, 0.98));
+}
+
+.command-center-shell.workspace-theme-field .linear-workspace-layout .command-main {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(250, 250, 251, 0.3) 42%),
+    var(--workspace-canvas) !important;
+}
+
+.command-center-shell.workspace-theme-field .safeclaw-lockup .brand-mark {
+  background: transparent !important;
+  filter: none !important;
+}
+
+.command-center-shell:not(.workspace-theme-field) .safeclaw-lockup .brand-mark {
+  background: transparent !important;
+  filter: hue-rotate(176deg) saturate(0.92) brightness(0.96) !important;
+}
+
+.command-center-shell.workspace-theme-field .command-primary,
+.command-center-shell.workspace-theme-field .share-panel.workflow-panel .button,
+.command-center-shell.workspace-theme-field .operation-ontology-panel .button {
+  color: var(--workspace-ink) !important;
+}
+
+.command-center-shell.workspace-theme-field .document-workbench .document-preview-pane pre {
+  background: #ffffff;
+  color: var(--workspace-ink);
+}
+
+.command-center-shell.workspace-theme-field :is(.document-workbench, .dispatch-preview-panel, .operation-ontology-panel, .share-panel.workflow-panel) {
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day {
+  font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(245, 197, 24, 0.08), transparent 28%),
+    #f3f6fb;
+}
+
+.command-center-shell.workspace-theme-day > .command-topbar,
+.command-center-shell.workspace-theme-day > .command-viewport {
+  width: min(1320px, calc(100% - 28px));
+}
+
+.command-center-shell.workspace-theme-day .command-topbar {
+  border: 1px solid rgba(218, 224, 234, 0.86) !important;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 12px 36px rgba(22, 34, 51, 0.06) !important;
+}
+
+.command-center-shell.workspace-theme-day .workspace-theme-toggle {
+  background: #f1f4f8;
+}
+
+.command-center-shell.workspace-theme-day .workspace-theme-toggle button.active {
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(22, 34, 51, 0.08);
+}
+
+.command-center-shell.workspace-theme-day .linear-workspace-layout {
+  gap: 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-nav {
+  gap: 12px;
+  border-right: 0;
+  border-radius: 18px;
+  background: transparent;
+  padding: 0;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group {
+  border: 1px solid #e5eaf1;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 30px rgba(22, 34, 51, 0.05);
+  padding: 12px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group > span {
+  color: #6b7280;
+  padding: 0 2px 4px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-current-brief {
+  border: 1px solid #e5eaf1;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group button,
+.command-center-shell.workspace-theme-day .workspace-source-status p {
+  border-radius: 12px;
+  color: #374151;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group button.active {
+  border-color: rgba(245, 197, 24, 0.48);
+  background: rgba(245, 197, 24, 0.12);
+  color: #111827;
+}
+
+.command-center-shell.workspace-theme-day .linear-workspace-layout .command-main {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page {
+  border: 1px solid #e5eaf1;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94)),
+    #ffffff;
+  box-shadow: 0 18px 44px rgba(22, 34, 51, 0.06);
+  padding: clamp(30px, 5vw, 72px);
+}
+
+.command-center-shell.workspace-theme-day .command-copy h1,
+.command-center-shell.workspace-theme-day .compact-head strong,
+.command-center-shell.workspace-theme-day .document-workbench-head strong,
+.command-center-shell.workspace-theme-day .share-workbench-title strong,
+.command-center-shell.workspace-theme-day .operation-capture-head strong,
+.command-center-shell.workspace-theme-day .share-workflow-header strong {
+  color: #111827;
+}
+
+.command-center-shell.workspace-theme-day .command-copy p,
+.command-center-shell.workspace-theme-day .input-helper,
+.command-center-shell.workspace-theme-day :is(.share-workbench-title p, .operation-capture-head p, .share-workflow-header p),
+.command-center-shell.workspace-theme-day :is(.document-workbench-head small, .document-evidence-panel article small, .share-session-grid p) {
+  color: #4b5563;
+}
+
+.command-center-shell.workspace-theme-day .command-console-input,
+.command-center-shell.workspace-theme-day :is(.evidence-readiness-card, .api-proof, .generation-stage-rail article, .document-evidence-panel article, .document-viewer-list button, .document-preview-pane, .document-evidence-panel, .share-session-grid section, .before-after-photo-grid label, .photo-analysis-candidate, .operation-improvement-list article, .supporting-doc-cards),
+.command-center-shell.workspace-theme-day :is(.document-workbench, .dispatch-preview-panel, .operation-ontology-panel, .share-panel.workflow-panel) {
+  border: 1px solid #e5eaf1 !important;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow: 0 12px 32px rgba(22, 34, 51, 0.05);
+}
+
+.command-center-shell.workspace-theme-day .evidence-readiness-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  border: 0 !important;
+}
+
+.command-center-shell.workspace-theme-day .evidence-readiness-card {
+  border-right: 1px solid #e5eaf1;
+  padding: 12px;
+}
+
+.command-center-shell.workspace-theme-day .document-review-status-strip article,
+.command-center-shell.workspace-theme-day .share-permission-grid article,
+.command-center-shell.workspace-theme-day .share-form-card,
+.command-center-shell.workspace-theme-day .acknowledgment-ledger,
+.command-center-shell.workspace-theme-day .message-preview-panel,
+.command-center-shell.workspace-theme-day .operation-evidence-summary article {
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.command-center-shell.workspace-theme-day .document-workbench .document-preview-pane pre {
+  background: #fbfcfe;
+  color: #1f2937;
+  line-height: 1.84;
+}
+
+@media (max-width: 720px) {
+  .command-center-shell .evidence-readiness-rail,
+  .command-center-shell.workspace-theme-day .evidence-readiness-rail {
+    grid-template-columns: 1fr;
+  }
+
+  .command-center-shell .evidence-readiness-card,
+  .command-center-shell.workspace-theme-day .evidence-readiness-card {
+    min-height: 0;
+    padding: 13px 16px;
+  }
+
+  .command-center-shell .evidence-readiness-card span,
+  .command-center-shell .evidence-readiness-card strong {
+    white-space: normal;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page {
+    padding: 26px;
+  }
+}
+
+@media (max-width: 980px) {
+  .command-center-shell .document-review-status-strip,
+  .share-form-shell,
+  .share-permission-grid,
+  .acknowledgment-ledger,
+  .operation-evidence-summary,
+  .command-center-shell .dispatch-preview-panel,
+  .operation-capture-layout,
+  .command-center-shell .operation-improvement-list {
+    grid-template-columns: 1fr;
+  }
+
+  .share-workflow-header,
+  .share-workbench-title,
+  .operation-capture-head,
+  .command-center-shell .document-workbench-head {
+    display: grid;
+  }
+
+  .share-status-pill,
+  .operation-capture-head aside,
+  .command-center-shell .document-progress-summary {
+    min-width: 0;
+    text-align: left;
+  }
+}
+
+@media (max-width: 900px) {
+  .command-center-shell .document-workbench .document-viewer-shell,
+  .command-center-shell .document-workbench .document-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .command-center-shell .document-workbench .document-evidence-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .command-center-shell .document-workbench {
+    padding: 12px;
+  }
+
+  .command-center-shell .document-workbench .document-preview-pane pre {
+    min-height: 360px;
+    max-height: 58vh;
+    font-size: 12px;
+    line-height: 1.78;
+    padding: 14px;
+  }
+
+  .share-panel.workflow-panel .channel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -169,3 +169,185 @@
 - contentHash: `9f99a60c6a23ab8ec839212f6edba458eeb812842cb0bf140f2b9288d1def79f`
 - riskTags: 굴착
 - controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 25 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00026`
+- contentHash: `eedb8626256c774f84f23d376fd224d097b015d6cc00658126b1c5870880b65d`
+- riskTags: 전도, 굴착, 붕괴
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 26 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00027`
+- contentHash: `83803728981fa2ed20c37ac6e173dc1279e86f6f9b14f50f640edb4fa5638731`
+- riskTags: 추락, 충돌, 굴착
+- controls: 작업발판·난간·개구부 상태 확인 / 안전대 체결 및 작업반경 출입통제 / 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 27 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00028`
+- contentHash: `046b1fab2400fdc1123290e4a6053671465f06ca9ecb76695410c51ed609f977`
+- riskTags: 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 28 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00029`
+- contentHash: `6ef3e1f142c100d51baad82e7253f9f0b8957ee19b0d4504c7e08977aeabfa42`
+- riskTags: 추락, 굴착
+- controls: 작업발판·난간·개구부 상태 확인 / 안전대 체결 및 작업반경 출입통제 / 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 29 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00030`
+- contentHash: `3d94e61fbb3b7cff57118357cb1b825b7f4b2d4062d1d8702210a57e6687d0e7`
+- riskTags: 추락, 전도, 굴착
+- controls: 작업발판·난간·개구부 상태 확인 / 안전대 체결 및 작업반경 출입통제 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 30 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00031`
+- contentHash: `b82e54842f1e3a2b7865b6d0466cbe4b25c1b404d8105885b0bbf32e63c59ca0`
+- riskTags: 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 31 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00032`
+- contentHash: `f0c29044c3aca85921b9871e9c7ae645fbe3adb0114a7c3f49cebaed9abac9e2`
+- riskTags: 끼임, 굴착, 붕괴
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지
+
+## 32 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00033`
+- contentHash: `251ff06220d6cb45c95c774efc308d776fdfef4e64d9765989b239a5a4192bb6`
+- riskTags: 끼임, 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 33 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00034`
+- contentHash: `8cb6c14d94b8d3806713ac86186044c48c0da978ba5c9262ad415000d5eb273f`
+- riskTags: 충돌, 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 34 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00035`
+- contentHash: `6dd98679ad9966e860ad078cbcafee19f5e335a9477e859ee20b25f0189d3726`
+- riskTags: 끼임, 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 35 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00036`
+- contentHash: `2335fe0b0ed0ed260a212dea8426c7ad0c0add190e27a29d7f560614c09593c2`
+- riskTags: 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 36 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00037`
+- contentHash: `ee30503c087820dec5ad3871f29c836f831e0687d2dfef5cab053c88f19c3ccd`
+- riskTags: 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 37 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00038`
+- contentHash: `bf8b392c23aa2ea774ce518f329b2109bbe6cd8243479f2ec17341738a775cdb`
+- riskTags: 충돌, 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 38 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00039`
+- contentHash: `44a299204270c05c04bec84c7dbaacdbd80abd2d8f6ffb76bfede63951f5512b`
+- riskTags: 충돌, 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 39 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00040`
+- contentHash: `d45743df66bd0465382041b24de82da42ae83313030efcae7f9eb54d58418e9d`
+- riskTags: 끼임, 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 40 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00041`
+- contentHash: `3bd2924a370e519d49811e20ec0e1a95b74ea1b661a4dd5f825bb46c58027342`
+- riskTags: 끼임, 충돌, 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 41 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00042`
+- contentHash: `7d39b59e23fbd316328f833b33aa7cb448a654e3b743b0fee7f04404f2036130`
+- riskTags: 끼임, 충돌, 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 42 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00043`
+- contentHash: `03c71248cba3c0256bf853c81aebc2747665355f4e1a1561e1c22a8bd9cfb400`
+- riskTags: 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 43 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00044`
+- contentHash: `c08ae82d2bc40dcb3e6c0d80fe467f13198c8441caca646e166153f2b07b2dcf`
+- riskTags: 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 44 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00045`
+- contentHash: `110e052681595c1b90c0b2ab783ad47f46ce0ef19be08bd0843de5132d3cd067`
+- riskTags: 전도, 굴착
+- controls: 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 45 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00046`
+- contentHash: `614f882be34c842fde165ddb34d368f67dc152915e6459101cccf1b6a167f8d0`
+- riskTags: 충돌, 굴착
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 46 / 1. 토공사 / 1.1 굴착 작업
+
+- referenceItemId: `sif-아카이브-건설업-00047`
+- contentHash: `501060612654b9f93d9d8f80db1427c81266b24bc263274fa642c133b3260b8c`
+- riskTags: 전도, 굴착
+- controls: 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 47 / 1. 토공사 / 1.2 흙막이 지보공 작업
+
+- referenceItemId: `sif-아카이브-건설업-00048`
+- contentHash: `2c933840511f98f5c4459f96b5d884bb3cd21cac477b80f8bf40e981d7c6c7af`
+- riskTags: 굴착, 낙하
+- controls: 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 48 / 1. 토공사 / 1.2 흙막이 지보공 작업
+
+- referenceItemId: `sif-아카이브-건설업-00049`
+- contentHash: `4a17aeaee7f8602b5fbd376f4998d9f5ca13bd75e46d6bb149dc46cd499a90e4`
+- riskTags: 굴착, 낙하
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 49 / 1. 토공사 / 1.2 흙막이 지보공 작업
+
+- referenceItemId: `sif-아카이브-건설업-00050`
+- contentHash: `3805e8562228376bf2ff4c3cd5b8ebd3793685c30caa1ce5a1e85cc6e32f59c6`
+- riskTags: 끼임, 크레인
+- controls: 가동부 방호덮개와 비상정지장치 확인 / 정비 전 전원 차단 및 잠금표지 / 보행자 동선과 장비 동선 분리 / 신호수 배치 및 후진 경보 확인
+
+## 50 / 1. 토공사 / 1.2 흙막이 지보공 작업
+
+- referenceItemId: `sif-아카이브-건설업-00051`
+- contentHash: `8338399fb58c8c7ab66a1c7c22c454951dc377dc610c1069fc9571394f2d798b`
+- riskTags: 크레인, 낙하
+- controls: 작업 전 유해·위험요인 확인 / 관리감독자 확인 후 작업 시작

@@ -53,6 +53,17 @@ describe("nextConsoleLines", () => {
     expect(lines).toEqual([{ id: "doc:riskAssessment", label: "위험성평가표 작성", status: "ok" }]);
   });
 
+  test("non-blocking enhanced docs are shown as warnings before final payload recovery", () => {
+    const lines = nextConsoleLines([], { kind: "doc", name: "foreign", status: "fail" });
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({
+      id: "doc:foreign",
+      label: "외국인 근로자 안내문 작성",
+      status: "warn"
+    });
+    expect(lines[0].detail).toContain("핵심 3종 문서");
+  });
+
   test("error events append a standalone failed line with the message as detail", () => {
     const lines = nextConsoleLines([], { kind: "error", message: "boom" });
     expect(lines).toHaveLength(1);
@@ -68,12 +79,37 @@ describe("nextConsoleLines", () => {
       payload: { status: { summary: "정상" } }
     });
     expect(lines).toHaveLength(2);
-    expect(lines[1].label).toBe("문서팩 준비 완료 — 특이사항 1건 (정상)");
+    expect(lines[1].label).toBe("문서팩 준비 완료 — 검토 필요 1건 (정상)");
     expect(lines[1].status).toBe("ok");
   });
 
   test("final event tolerates a payload without a status.summary field", () => {
     const lines = nextConsoleLines([], { kind: "final", payload: {} });
-    expect(lines[0].label).toBe("문서팩 준비 완료 — 특이사항 0건");
+    expect(lines[0].label).toBe("문서팩 준비 완료 — 보완 알림 0건");
+  });
+
+  test("final event upgrades recovered fallback docs to ok when deliverables exist", () => {
+    const withFallbackWarnings: AgentConsoleLine[] = [
+      { id: "doc:free", label: "본문 상세 작성", status: "warn" },
+      { id: "doc:foreign", label: "외국인 근로자 안내문 작성", status: "warn" }
+    ];
+    const lines = nextConsoleLines(withFallbackWarnings, {
+      kind: "final",
+      payload: {
+        status: { summary: "정상" },
+        deliverables: {
+          workpackSummaryDraft: "요약",
+          emergencyResponseDraft: "비상대응",
+          photoEvidenceDraft: "사진",
+          kakaoMessage: "전파",
+          foreignWorkerBriefing: "안내",
+          foreignWorkerTransmission: "전송"
+        }
+      }
+    });
+    expect(lines).toHaveLength(3);
+    expect(lines[0]).toMatchObject({ id: "doc:free", status: "ok" });
+    expect(lines[1]).toMatchObject({ id: "doc:foreign", status: "ok" });
+    expect(lines[2].label).toBe("문서팩 준비 완료 — 보완 알림 0건 (정상)");
   });
 });

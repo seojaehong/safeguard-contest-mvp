@@ -54,7 +54,7 @@ function modeItem(response: AskResponse): QualityContractItem {
       key: "fallback",
       label: "실시간 근거",
       status: "ready",
-      detail: "주요 생성·근거 경로가 live 모드입니다."
+      detail: "주요 근거 조회가 실시간으로 연결됐습니다."
     };
   }
 
@@ -63,7 +63,7 @@ function modeItem(response: AskResponse): QualityContractItem {
     key: "fallback",
     label: "실시간 근거",
     status: onlyDemo ? "blocked" : "degraded",
-    detail: `${fallbackEntries.map(([key, mode]) => `${key}:${mode}`).join(", ")} 경로가 live가 아닙니다.`
+    detail: `${fallbackEntries.length}개 근거 경로는 보조 자료 기준으로 표시됩니다. 전파 전 원문 확인을 권장합니다.`
   };
 }
 
@@ -76,19 +76,19 @@ function ontologyItem(response: AskResponse): QualityContractItem {
       qa.verdict === "통과" ? "ready" : qa.verdict === "보완 권장" ? "degraded" : "blocked";
     return {
       key: "ontology",
-      label: "온톨로지 QA",
+      label: "안전조치 검수",
       status,
       detail:
         status === "ready"
-          ? `${response.ontologyQa?.reviewTask ?? qa.task} 검수 통과: 필수 안전조치가 문서팩에 반영됐습니다.`
-          : `${response.ontologyQa?.reviewTask ?? qa.task} 검수 ${qa.verdict}: 누락 조치 ${missingControlCount}건을 보완해야 합니다.`
+          ? `${response.ontologyQa?.reviewTask ?? qa.task} 작업의 필수 안전조치가 문서팩에 반영됐습니다.`
+          : `${response.ontologyQa?.reviewTask ?? qa.task} 작업에서 보완할 안전조치 ${missingControlCount}건이 남아 있습니다.`
     };
   }
 
   if (qa && !qa.reviewable) {
     return {
       key: "ontology",
-      label: "온톨로지 QA",
+      label: "안전조치 검수",
       status: "degraded",
       detail: qa.message
     };
@@ -97,17 +97,17 @@ function ontologyItem(response: AskResponse): QualityContractItem {
   if (matches.length > 0) {
     return {
       key: "ontology",
-      label: "온톨로지 매칭",
+      label: "작업 이력 매칭",
       status: "ready",
-      detail: `작업·위험·조치 온톨로지 ${matches.length}건이 문서팩 후보로 연결됐습니다.`
+      detail: `유사 작업·위험·조치 후보 ${matches.length}건이 문서팩에 연결됐습니다.`
     };
   }
 
   return {
     key: "ontology",
-    label: "온톨로지 매칭",
+    label: "작업 이력 매칭",
     status: "degraded",
-    detail: "작업·위험·조치 온톨로지 매칭이 없어 QA 검수 우선순위를 보강해야 합니다."
+    detail: "유사 작업 이력이 아직 부족해 전파 전 안전조치 확인이 필요합니다."
   };
 }
 
@@ -141,7 +141,7 @@ function structuredItem(response: AskResponse): QualityContractItem {
   if (readyCount === REQUIRED_STRUCTURED_KEYS.length) {
     return {
       key: "structured",
-      label: "하네스 구조화",
+      label: "문서 구조 검수",
       status: "ready",
       detail: `필수 구조화 산출물 ${readyCount}/${REQUIRED_STRUCTURED_KEYS.length}종이 준비됐습니다.`
     };
@@ -149,9 +149,9 @@ function structuredItem(response: AskResponse): QualityContractItem {
 
   return {
     key: "structured",
-    label: "하네스 구조화",
+    label: "문서 구조 검수",
     status: readyCount === 0 ? "blocked" : "degraded",
-    detail: `필수 구조화 산출물 ${readyCount}/${REQUIRED_STRUCTURED_KEYS.length}종만 준비됐습니다. 산문 fallback을 확인하세요.`
+    detail: `필수 구조화 산출물 ${readyCount}/${REQUIRED_STRUCTURED_KEYS.length}종이 준비됐습니다. 나머지는 기본 문서 형식으로 보완됐습니다.`
   };
 }
 

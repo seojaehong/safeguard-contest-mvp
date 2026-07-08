@@ -1,24 +1,24 @@
 {
-  "startedAt": "2026-07-08T08:25:41.015Z",
-  "completedAt": "2026-07-08T08:25:50.940Z",
+  "startedAt": "2026-07-08T08:26:12.980Z",
+  "completedAt": "2026-07-08T08:26:16.312Z",
   "source": "safety_reference_items:item_type=sif-case",
-  "itemCount": 6033,
+  "itemCount": 2,
   "skippedCount": 1,
   "skippedIds": [
     "sif-아카이브-건설업-00001"
   ],
-  "corpusCount": 6032,
+  "corpusCount": 1,
   "validation": {
     "skipReasons": {
       "spreadsheet_header": 1
     },
     "itemTypes": {
-      "sif-case": 6033
+      "sif-case": 2
     },
     "textLength": {
-      "min": 634,
-      "max": 1339,
-      "average": 885
+      "min": 895,
+      "max": 895,
+      "average": 895
     },
     "missingControlsCount": 0,
     "missingPrimaryDocumentsCount": 0,
@@ -29,14 +29,14 @@
   "embeddingModel": "text-embedding-3-small",
   "embeddedCount": 0,
   "uploadedCount": 0,
-  "uploadError": null,
+  "uploadError": "--upload requires explicit --approved-upload after DB migration approval",
   "approvalGate": {
     "uploadApprovedFlag": false,
     "uploadRequiresMigrationApproval": true,
     "uploadRequiresApprovedUploadFlag": true,
     "corpusReady": true
   },
-  "mode": "corpus-only",
-  "jsonlPath": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
-  "mdPath": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.md"
+  "mode": "embed-and-upload",
+  "jsonlPath": "evaluation\\sif-embedding-upload-guard\\sif-embedding-corpus.jsonl",
+  "mdPath": "evaluation\\sif-embedding-upload-guard\\sif-embedding-corpus.md"
 }

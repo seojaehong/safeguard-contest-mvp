@@ -1,0 +1,16 @@
+{
+  "createdAt": "2026-07-08T12:41:17.739Z",
+  "route": "/workspace?theme=day",
+  "hasTwelveOfTwelve": false,
+  "hasReadyMessage": false,
+  "hasInternalFallback": false,
+  "hasRawCamelCase": false,
+  "hasOldOntologyQa": false,
+  "hasHorizontalOverflow": false,
+  "hasSharePage": true,
+  "hasShareWorkflow": false,
+  "hasImprovementCapture": true,
+  "hasPhoneOrHazardStripe": false,
+  "shellClass": "command-center-shell workspace-theme-day workspace-theme-field",
+  "consoleErrors": []
+}

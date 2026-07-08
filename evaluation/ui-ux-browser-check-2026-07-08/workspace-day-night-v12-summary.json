@@ -1,0 +1,23 @@
+{
+  "createdAt": "2026-07-08T12:50:53.791Z",
+  "desktop": {
+    "width": 1440,
+    "viewport": 1440,
+    "shellClass": "command-center-shell workspace-theme-day workspace-theme-field",
+    "photoPanel": true,
+    "photoCandidates": 0,
+    "advancedBorder": "0px",
+    "quickBorder": "0px",
+    "hasPhotoRiskCopy": true,
+    "hasHorizontalOverflow": false
+  },
+  "mobile": {
+    "width": 390,
+    "viewport": 390,
+    "shellClass": "command-center-shell workspace-theme-day workspace-theme-field",
+    "photoPanel": true,
+    "evidenceColumns": "256px",
+    "horizontalOverflow": false
+  },
+  "consoleErrors": []
+}

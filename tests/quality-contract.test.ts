@@ -201,6 +201,8 @@ describe("qualityContract", () => {
     expect(response.qualityContract?.evidence.mappedCount).toBe(response.qualityContract?.evidence.requiredCount);
     expect(response.qualityContract?.ontology.status).toBe("degraded");
     expect(response.qualityContract?.structured.status).toBe("blocked");
+    expect(response.qualityContract?.structured.detail).not.toContain("fallback");
+    expect(response.qualityContract?.items.map((item) => item.label)).toContain("문서 구조 검수");
   });
 
   it("marks live ontology, evidence, structured, and persistence readiness as ready", () => {

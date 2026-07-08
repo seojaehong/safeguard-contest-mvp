@@ -58,7 +58,7 @@ function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
     `[SafeClaw ${language.label} 안전공지] ${data.scenario.companyName}`,
     `현장: ${data.scenario.siteName}`,
     `작업: ${data.scenario.workSummary}`,
-    `⚠️ 핵심 위험: ${data.riskSummary.topRisk}`,
+    `핵심 위험: ${data.riskSummary.topRisk}`,
     "",
     `${language.label}(${language.nativeLabel})`,
     ...language.lines.map((line) => `- ${line}`),
@@ -271,7 +271,7 @@ export function WorkflowSharePanel({
       setResult({
         ok: false,
         configured: true,
-        message: "전송할 수신자를 먼저 입력해 주세요. 기본 예시 연락처는 실발송 대상에 포함하지 않습니다."
+        message: "전송할 수신자를 먼저 입력해 주세요. 선택된 작업자 연락처가 있으면 자동 포함됩니다."
       });
       setIsConfirming(false);
       return;
@@ -322,128 +322,190 @@ export function WorkflowSharePanel({
   const workerDisplayLabel = targetWorkers.length
     ? targetWorkers.map((worker) => worker.displayName).slice(0, 3).join(", ")
     : "관리자 입력 수신자";
+  const activeChannelLabel = channelLabel || "채널 미선택";
+  const previewItems = previewLines(selectedMessage);
+  const acknowledgmentStatus = result?.ok
+    ? "전파 요청 기록됨"
+    : targetWorkers.length
+      ? "열람 확인 대기"
+      : "수신자 지정 대기";
 
   return (
-    // 시그니처 패턴 4/4: hazard-stripe-band — 가이드 §2.4 "1 location only" 규칙.
-    // 현장 전파 패널은 실제 발송이 일어나는 고위험 행동 구역이므로 좌측 12px
-    // 노랑/스틸 사선 띠로 시각 표시. 다른 패널엔 적용하지 않아 희소성 유지.
-    <article className="share-panel workflow-panel hazard-stripe-band" id="dispatch">
-      <div className="compact-head">
-        <span className="eyebrow">전파</span>
-        <strong>현장 전파</strong>
-      </div>
-      <p className="muted">
-        문서팩 요약과 현장 공유 메시지는 메일·문자와 승인된 카카오 알림톡으로 전송합니다. 카카오는 채널·템플릿 설정이 없으면 결과에 설정 필요로 남고, 밴드는 승인 전까지 잠겨 있습니다.
-      </p>
+    <article className="share-panel workflow-panel" id="dispatch">
+      <header className="share-workflow-header">
+        <div>
+          <span className="eyebrow">Share workflow</span>
+          <strong>권한 있는 공유 세션</strong>
+          <p>문서팩, 다국어 안내, 확인 상태, 저장 증빙을 한 번에 검토한 뒤 전송합니다.</p>
+        </div>
+        <div className="share-status-pill" aria-label="공유 워크플로 상태">
+          <span>{storageReady ? "workpack linked" : "local review"}</span>
+          <strong>{acknowledgmentStatus}</strong>
+        </div>
+      </header>
 
-      <div className="share-scope-banner" aria-label="공유 범위와 확인 이력">
+      <div className="share-permission-grid" aria-label="공유 권한과 상태 요약">
         <section>
-          <span>공유 범위</span>
-          <strong>초대된 사람만 열람 가능</strong>
-          <p>관리자가 선택한 작업자 snapshot과 표시명 기준으로 열람·확인을 남깁니다. 공개 링크 익명 확인은 기본으로 열지 않습니다.</p>
+          <span>Permission</span>
+          <strong>초대된 사람만 열람</strong>
+          <p>관리자 편집, 작업자 열람 기준으로 공개 링크 없이 운영합니다.</p>
         </section>
         <section>
-          <span>확인 이력</span>
-          <strong>{targetWorkers.length ? `${targetWorkers.length}명 확인 대상` : "대상 선택 대기"}</strong>
-          <p>{workerDisplayLabel} 기준으로 확인 상태를 TBM·교육 확인 후보에 연결합니다.</p>
+          <span>Recipients</span>
+          <strong>{recipientLabel}</strong>
+          <p>{workerDisplayLabel} 기준으로 수신자와 표시명을 확인합니다.</p>
+        </section>
+        <section>
+          <span>Language</span>
+          <strong>{targetLabel}</strong>
+          <p>외국인 근로자 전송본은 현장 통역 또는 해당 언어 가능자 확인 후 보냅니다.</p>
+        </section>
+        <section>
+          <span>Acknowledgment</span>
+          <strong>{acknowledgmentStatus}</strong>
+          <p>열람·확인 기록은 TBM·교육 확인 후보로 보관합니다.</p>
         </section>
       </div>
 
-      <div className="channel-grid" aria-label="전파 채널 선택">
-        {channelOptions.map((channel) => (
-          <button
-            key={channel.key}
-            type="button"
-            className={`channel-card ${selectedChannels.includes(channel.key) ? "active" : ""} ${channel.enabled ? "" : "disabled"}`}
-            onClick={() => toggleChannel(channel.key)}
-            disabled={!channel.enabled}
-            aria-disabled={!channel.enabled}
-            aria-pressed={selectedChannels.includes(channel.key)}
-            aria-label={`${channel.label} 채널 ${selectedChannels.includes(channel.key) ? "선택됨" : "선택"}`}
-          >
-            <strong>{channel.label}</strong>
-            <span>{channel.helper}</span>
-            {!channel.enabled ? <em>승인 대기</em> : null}
-          </button>
-        ))}
+      <div className="share-form-shell">
+        <section className="share-form-card" aria-labelledby="workflow-channel-heading">
+          <div className="share-form-card-head">
+            <span>01</span>
+            <strong id="workflow-channel-heading">채널</strong>
+          </div>
+          <div className="channel-grid" aria-label="전파 채널 선택">
+            {channelOptions.map((channel) => (
+              <button
+                key={channel.key}
+                type="button"
+                className={`channel-card ${selectedChannels.includes(channel.key) ? "active" : ""} ${channel.enabled ? "" : "disabled"}`}
+                onClick={() => toggleChannel(channel.key)}
+                disabled={!channel.enabled}
+                aria-disabled={!channel.enabled}
+                aria-pressed={selectedChannels.includes(channel.key)}
+                aria-label={`${channel.label} 채널 ${selectedChannels.includes(channel.key) ? "선택됨" : "선택"}`}
+              >
+                <strong>{channel.label}</strong>
+                <span>{channel.helper}</span>
+                {!channel.enabled ? <em>승인 대기</em> : null}
+              </button>
+            ))}
+          </div>
+          <p className="channel-readiness-note">
+            카카오 알림톡은 승인 채널과 템플릿 설정이 없으면 채널별 결과에 설정 필요로 표시됩니다.
+          </p>
+        </section>
+
+        <section className="share-form-card" aria-labelledby="workflow-language-heading">
+          <div className="share-form-card-head">
+            <span>02</span>
+            <strong id="workflow-language-heading">언어</strong>
+          </div>
+          <div className="language-picker" aria-label="공유 메시지 언어 선택">
+            <button
+              type="button"
+              className={`language-chip ${selectedMessageTarget === "manager" ? "active" : ""}`}
+              onClick={() => setSelectedMessageTarget("manager")}
+              aria-pressed={selectedMessageTarget === "manager"}
+            >
+              관리자용 한국어
+            </button>
+            {data.deliverables.foreignWorkerLanguages.map((language) => {
+              const key = `foreign:${language.code}` as const;
+              return (
+                <button
+                  key={language.code}
+                  type="button"
+                  className={`language-chip ${selectedMessageTarget === key ? "active" : ""}`}
+                  onClick={() => setSelectedMessageTarget(key)}
+                  title={language.rationale}
+                  aria-pressed={selectedMessageTarget === key}
+                  aria-label={`${language.label} 공유 메시지 선택`}
+                >
+                  {language.label}
+                  <span>{language.nativeLabel}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="share-form-card share-recipient-card" aria-labelledby="workflow-recipient-heading">
+          <div className="recipient-section-head">
+            <span className="share-form-step">03</span>
+            <label className="field-label" id="workflow-recipient-heading" htmlFor="workflow-recipients">수신자</label>
+            <span>{recipientLabel}</span>
+          </div>
+          <textarea
+            id="workflow-recipients"
+            className="textarea workflow-textarea"
+            value={recipients}
+            onChange={(event) => setRecipients(event.target.value)}
+            placeholder="예: safety@safeclaw.kr, 010-1234-5678"
+          />
+          {recipientSuggestions.length ? (
+            <div className="recipient-chip-list" aria-label="선택된 근로자 전파 대상">
+              {recipientSuggestions.map((recipient) => (
+                <span key={`${recipient.channel}-${recipient.value}`} className="recipient-chip">
+                  {recipient.label} · {recipient.languageLabel}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <p className="muted small">
+            선택된 작업자 연락처가 있으면 자동 포함됩니다. 연락 방식은 메일·문자·알림톡 채널 결과에서 따로 확인합니다.
+          </p>
+        </section>
+
+        <section className="share-form-card" aria-labelledby="workflow-note-heading">
+          <div className="share-form-card-head">
+            <span>04</span>
+            <strong id="workflow-note-heading">전달 메모</strong>
+          </div>
+          <input
+            id="workflow-note"
+            className="input"
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+          />
+        </section>
       </div>
-      <p className="channel-readiness-note">
-        활성 전송: 메일, 문자, 카카오 알림톡. 카카오는 승인 템플릿이 있어야 실발송됩니다. 잠김: 밴드.
-      </p>
+
       {!authToken || !workpackId ? (
-        <p className="muted small">
-          관리자 로그인과 문서팩 저장 ID가 확인되면 전송 결과가 전파 이력에 함께 저장됩니다. 없을 때도 전송 요청과 화면 결과 확인은 가능합니다.
+        <p className="share-inline-note">
+          관리자 로그인과 문서팩 저장 ID가 확인되면 전송 결과가 전파 이력에 함께 저장됩니다.
         </p>
       ) : null}
 
-      <div className="message-target-box">
-        <div className="compact-head">
-          <span className="eyebrow">Message</span>
-          <strong>공유 메시지 선택</strong>
-        </div>
-        <p className="muted">
-          관리자용 한국어를 기본으로 보내고, 외국인 작업자가 있으면 언어별 안전공지로 바꿔 미리 확인합니다.
-        </p>
-        <div className="language-picker" aria-label="공유 메시지 언어 선택">
-          <button
-            type="button"
-            className={`language-chip ${selectedMessageTarget === "manager" ? "active" : ""}`}
-            onClick={() => setSelectedMessageTarget("manager")}
-            aria-pressed={selectedMessageTarget === "manager"}
-          >
-            관리자용 한국어
-          </button>
-          {data.deliverables.foreignWorkerLanguages.map((language) => {
-            const key = `foreign:${language.code}` as const;
-            return (
-              <button
-                key={language.code}
-                type="button"
-                className={`language-chip ${selectedMessageTarget === key ? "active" : ""}`}
-                onClick={() => setSelectedMessageTarget(key)}
-                title={language.rationale}
-                aria-pressed={selectedMessageTarget === key}
-                aria-label={`${language.label} 공유 메시지 선택`}
-              >
-                {language.label}
-                <span>{language.nativeLabel}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <section className="acknowledgment-ledger" aria-label="확인 상태와 저장 증빙">
+        <article>
+          <span>확인 대상</span>
+          <strong>{targetWorkers.length ? `${targetWorkers.length}명` : "직접 입력"}</strong>
+          <small>작업자 표시명 기준</small>
+        </article>
+        <article>
+          <span>현재 상태</span>
+          <strong>{acknowledgmentStatus}</strong>
+          <small>열람 확인은 전파 결과와 분리해 검토</small>
+        </article>
+        <article className={storageReady ? "ready" : "warn"}>
+          <span>저장 증빙</span>
+          <strong>{storageReady ? "workpack 연결" : "저장 ID 대기"}</strong>
+          <small>{storageReady ? "dispatch_logs와 연결 가능" : "화면 결과 먼저 확인 가능"}</small>
+        </article>
+      </section>
 
-      <div className="recipient-section-head">
-        <label className="field-label" htmlFor="workflow-recipients">수신자 추가/관리</label>
-        <span>{recipientLabel}</span>
-      </div>
-      <textarea
-        id="workflow-recipients"
-        className="textarea workflow-textarea"
-        value={recipients}
-        onChange={(event) => setRecipients(event.target.value)}
-        placeholder="예: safety@safeclaw.kr, 010-1234-5678"
-      />
-      {recipientSuggestions.length ? (
-        <div className="recipient-chip-list" aria-label="선택된 근로자 전파 대상">
-          {recipientSuggestions.map((recipient) => (
-            <span key={`${recipient.channel}-${recipient.value}`} className="recipient-chip">
-              {recipient.label} · {recipient.languageLabel}
-            </span>
+      <section className="message-preview-panel" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)}>
+        <div className="compact-head">
+          <span className="eyebrow">Preview</span>
+          <strong>{formatMessagePreviewHeading(data, selectedMessageTarget)}</strong>
+        </div>
+        <div className="message-preview-lines">
+          {previewItems.map((line, index) => (
+            <p key={`${line}-${index}`}>{line}</p>
           ))}
         </div>
-      ) : null}
-      <p className="muted small">
-        선택된 근로자 연락처가 있으면 자동 포함됩니다. 휴대폰은 문자, 이메일은 메일 대상이며 수신자가 없으면 전송 버튼은 열리지 않습니다.
-      </p>
-
-      <label className="field-label" htmlFor="workflow-note">전달 메모</label>
-      <input
-        id="workflow-note"
-        className="input"
-        value={note}
-        onChange={(event) => setNote(event.target.value)}
-      />
+      </section>
 
       <div className="command-actions">
         <button
@@ -461,7 +523,7 @@ export function WorkflowSharePanel({
         <div className="dispatch-confirm-panel" role="dialog" aria-modal="false" aria-label="현장 전파 전 확인">
           <div className="compact-head">
             <span className="eyebrow">전송 전 확인</span>
-            <strong>{channelLabel || "채널 미선택"}</strong>
+            <strong>{activeChannelLabel}</strong>
           </div>
           <div className="dispatch-confirm-grid">
             <div><span>수신</span><strong>{recipientLabel}</strong></div>
@@ -478,7 +540,7 @@ export function WorkflowSharePanel({
             <article className="pending">
               <span>교육 확인</span>
               <strong>education_records 후보</strong>
-              <small>확인 버튼 기록은 승인 후 공유 세션 DB와 연결합니다.</small>
+              <small>확인 버튼 기록은 승인 후 공유 세션 이력과 연결합니다.</small>
             </article>
             <article className="ready">
               <span>전파 로그</span>
@@ -487,7 +549,7 @@ export function WorkflowSharePanel({
             </article>
           </div>
           <p className="channel-readiness-note">
-            이 확인 단계에서 전송되는 채널은 {channelLabel || "메일·문자"}입니다. 카카오 알림톡은 승인 채널과 템플릿 설정이 없으면 채널별 결과에 설정 필요로 표시됩니다.
+            이 확인 단계에서 전송되는 채널은 {activeChannelLabel}입니다. 카카오 알림톡은 승인 채널과 템플릿 설정이 없으면 채널별 결과에 설정 필요로 표시됩니다.
           </p>
           {selectedMessageTarget !== "manager" ? (
             <p className="channel-readiness-note">
@@ -504,21 +566,6 @@ export function WorkflowSharePanel({
           </div>
         </div>
       ) : null}
-
-      <div className="message-preview-phone" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)}>
-        <div className="compact-head">
-          <span className="eyebrow">미리보기</span>
-          <strong>{formatMessagePreviewHeading(data, selectedMessageTarget)}</strong>
-        </div>
-        <div className="phone-shell">
-          <div className="phone-status">SafeClaw 현장공지</div>
-          <div className="phone-bubble">
-            {previewLines(selectedMessage).map((line, index) => (
-              <p key={`${line}-${index}`}>{line}</p>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {result ? (
         <div className={result.ok ? "workflow-result ok" : "workflow-result error"}>
@@ -543,7 +590,10 @@ export function WorkflowSharePanel({
         </div>
       ) : null}
 
-      <pre aria-label="선택한 공유 메시지 원문">{selectedMessage}</pre>
+      <details className="message-source-detail">
+        <summary>전체 메시지 원문</summary>
+        <pre aria-label="선택한 공유 메시지 원문">{selectedMessage}</pre>
+      </details>
     </article>
   );
 }

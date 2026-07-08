@@ -23,7 +23,8 @@ function parseArgs(argv) {
     limit: 0,
     model: DEFAULT_MODEL,
     embed: false,
-    upload: false
+    upload: false,
+    approvedUpload: false
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -33,8 +34,9 @@ function parseArgs(argv) {
     else if (arg === "--model") options.model = argv[index += 1] || DEFAULT_MODEL;
     else if (arg === "--embed") options.embed = true;
     else if (arg === "--upload") options.upload = true;
+    else if (arg === "--approved-upload") options.approvedUpload = true;
     else if (arg === "--help") {
-      console.log("Usage: node scripts/prepare_sif_embedding_corpus.mjs [--output-dir DIR] [--limit N] [--embed] [--upload] [--model MODEL]");
+      console.log("Usage: node scripts/prepare_sif_embedding_corpus.mjs [--output-dir DIR] [--limit N] [--embed] [--upload --approved-upload] [--model MODEL]");
       process.exit(0);
     }
   }
@@ -123,11 +125,61 @@ function toCorpusRecord(item) {
 }
 
 function isEmbeddableSifItem(item) {
+  return skipReason(item) === null;
+}
+
+function skipReason(item) {
   const title = compact(item.title);
   const body = compact(item.body || item.summary || "");
-  if (item.item_type !== "sif-case") return false;
-  if (title === "공종 / 작업명") return false;
-  return body.includes("재해개요") || body.includes("위험성 감소대책");
+  if (item.item_type !== "sif-case") return "wrong_item_type";
+  if (title === "공종 / 작업명") return "spreadsheet_header";
+  if (!body.includes("재해개요") && !body.includes("위험성 감소대책")) return "missing_sif_narrative";
+  return null;
+}
+
+function countBy(values) {
+  const counts = new Map();
+  for (const value of values) counts.set(value, (counts.get(value) || 0) + 1);
+  return Object.fromEntries(Array.from(counts.entries()).sort(([a], [b]) => String(a).localeCompare(String(b))));
+}
+
+function duplicateContentHashes(records) {
+  const byHash = new Map();
+  for (const record of records) {
+    const rows = byHash.get(record.contentHash) || [];
+    rows.push(record.referenceItemId);
+    byHash.set(record.contentHash, rows);
+  }
+  return Array.from(byHash.entries())
+    .filter(([, ids]) => ids.length > 1)
+    .map(([contentHash, referenceItemIds]) => ({ contentHash, referenceItemIds }));
+}
+
+function textLengthStats(records) {
+  if (!records.length) return { min: 0, max: 0, average: 0 };
+  const lengths = records.map((record) => record.embeddingText.length);
+  return {
+    min: Math.min(...lengths),
+    max: Math.max(...lengths),
+    average: Math.round(lengths.reduce((sum, length) => sum + length, 0) / lengths.length)
+  };
+}
+
+function buildValidationReport(items, skippedItems, records) {
+  const duplicates = duplicateContentHashes(records);
+  const missingControls = records.filter((record) => record.controls.length === 0);
+  const missingPrimaryDocuments = records.filter((record) => record.primaryDocuments.length === 0);
+  const emptyEmbeddingText = records.filter((record) => !record.embeddingText.trim());
+  return {
+    skipReasons: countBy(skippedItems.map((item) => skipReason(item) || "none")),
+    itemTypes: countBy(items.map((item) => item.item_type || "unknown")),
+    textLength: textLengthStats(records),
+    missingControlsCount: missingControls.length,
+    missingPrimaryDocumentsCount: missingPrimaryDocuments.length,
+    emptyEmbeddingTextCount: emptyEmbeddingText.length,
+    duplicateContentHashCount: duplicates.length,
+    duplicateContentHashSamples: duplicates.slice(0, 10)
+  };
 }
 
 async function embedRecords(records, model) {
@@ -209,15 +261,21 @@ async function main() {
   const items = await fetchSifItems(config, options.limit);
   const skippedItems = items.filter((item) => !isEmbeddableSifItem(item));
   const records = items.filter(isEmbeddableSifItem).map(toCorpusRecord);
+  const validation = buildValidationReport(items, skippedItems, records);
 
   let embeddedCount = 0;
   let uploadedCount = 0;
   let uploadError = null;
+  if (options.upload && !options.approvedUpload) {
+    uploadError = "--upload requires explicit --approved-upload after DB migration approval";
+  }
   if (options.embed || options.upload) {
     try {
-      const embedded = await embedRecords(records, options.model);
-      embeddedCount = embedded.length;
-      if (options.upload) uploadedCount = await upsertEmbeddings(config, embedded, options.model);
+      if (!uploadError) {
+        const embedded = await embedRecords(records, options.model);
+        embeddedCount = embedded.length;
+        if (options.upload) uploadedCount = await upsertEmbeddings(config, embedded, options.model);
+      }
     } catch (error) {
       uploadError = error instanceof Error ? error.message : String(error);
     }
@@ -231,10 +289,17 @@ async function main() {
     skippedCount: skippedItems.length,
     skippedIds: skippedItems.map((item) => item.id).slice(0, 50),
     corpusCount: records.length,
+    validation,
     embeddingModel: options.model,
     embeddedCount,
     uploadedCount,
     uploadError,
+    approvalGate: {
+      uploadApprovedFlag: options.approvedUpload,
+      uploadRequiresMigrationApproval: true,
+      uploadRequiresApprovedUploadFlag: true,
+      corpusReady: records.length > 0 && validation.emptyEmbeddingTextCount === 0
+    },
     mode: options.upload ? "embed-and-upload" : options.embed ? "embed-only" : "corpus-only"
   };
   const artifacts = writeArtifacts(options.outputDir, records, report);
