@@ -17,6 +17,8 @@ import {
 import {
   buildReportCsv,
   buildReportJson,
+  buildReportLearningJsonl,
+  buildReportLearningMarkdown,
   buildReportMarkdown,
   buildReportSnapshot,
   type ReportGroup,
@@ -154,6 +156,28 @@ function DownloadActions({ snapshot }: { snapshot: ReportSnapshot }) {
         )}
       >
         원본 JSON
+      </button>
+      <button
+        type="button"
+        className="button secondary"
+        onClick={() => downloadTextFile(
+          `${snapshot.fileBaseName}-corpus.md`,
+          buildReportLearningMarkdown(snapshot),
+          "text/markdown;charset=utf-8"
+        )}
+      >
+        운영 코퍼스 MD
+      </button>
+      <button
+        type="button"
+        className="button secondary"
+        onClick={() => downloadTextFile(
+          `${snapshot.fileBaseName}-corpus.jsonl`,
+          buildReportLearningJsonl(snapshot),
+          "application/x-ndjson;charset=utf-8"
+        )}
+      >
+        운영 코퍼스 JSONL
       </button>
     </div>
   );
