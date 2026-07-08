@@ -30,7 +30,10 @@
   "visionOcr": {
     "serverAdapter": "lib/photo-vision-analysis.ts",
     "apiRoute": "app/api/workpacks/[id]/improvements/route.ts",
-    "workspaceUiWiredToApi": false,
+    "workspaceUiWiredToApi": true,
+    "workspaceFlow": "save workpack -> POST multipart before/after photos -> store improvement candidate -> local fallback",
+    "apiResponseExposesVisionSummary": true,
+    "dbWriteExecutedInThisRun": false,
     "harnessMemoryIncludesOcr": true,
     "learningExportIncludesOcr": true
   },
@@ -96,9 +99,15 @@
       "local /api/agent/chat smoke on http://127.0.0.1:3111",
       "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts",
       "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/workspace-layout-regression.test.ts",
+      "npm.cmd test -- tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/photo-vision-analysis.test.ts tests/commercial-harness.test.ts",
       "npm.cmd run typecheck",
       "npm.cmd run build"
     ],
+    "visionWorkspaceWireTests": {
+      "command": "npm.cmd test -- tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/photo-vision-analysis.test.ts tests/commercial-harness.test.ts",
+      "filesPassed": 4,
+      "testsPassed": 15
+    },
     "sifVectorGateTests": {
       "command": "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts",
       "filesPassed": 2,

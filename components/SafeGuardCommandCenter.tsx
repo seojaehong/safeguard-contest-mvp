@@ -94,6 +94,38 @@ type DocumentSourceRailItem = {
   href?: string;
 };
 
+type LocalPhoto = {
+  name: string;
+  url: string;
+  file: File;
+};
+
+type ImprovementSaveState = "idle" | "saving" | "saved" | "local";
+
+type WorkpackSaveResult = {
+  ok: boolean;
+  configured?: boolean;
+  workpackId: string | null;
+  message: string;
+};
+
+type ImprovementApiResult = {
+  ok: boolean;
+  configured?: boolean;
+  improvementId: string | null;
+  sourceType?: "manual" | "photo_analysis";
+  vision?: {
+    status?: string;
+    provider?: string;
+    model?: string;
+    summary?: string;
+    observedImprovement?: string;
+    detectedHazards?: string[];
+    ocrText?: string;
+  };
+  message: string;
+};
+
 const workflowSteps: WorkflowStep[] = [
   { id: "01", key: "input", label: "입력", caption: "현장 상황" },
   { id: "02", key: "document", label: "문서", caption: "결과 검토" },
@@ -257,6 +289,12 @@ function inferWorkerCountFromText(text: string) {
   const allCounts = [...compact.matchAll(/(\d+)\s*명/g)].map((match) => Number(match[1]));
   if (allCounts.length) return `${Math.max(...allCounts)}명`;
   return "입력 필요";
+}
+
+function readApiMessage(value: unknown, fallback: string) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return fallback;
+  const message = (value as Record<string, unknown>).message;
+  return typeof message === "string" && message.trim() ? message : fallback;
 }
 
 function inferWeatherFromText(text: string, fallback: string) {
@@ -775,9 +813,11 @@ export function SafeGuardCommandCenter({
   const [consoleLines, setConsoleLines] = useState<AgentConsoleLine[]>([]);
   const [improvementText, setImprovementText] = useState("");
   const [operationImprovements, setOperationImprovements] = useState<OperationImprovement[]>(() => parseStoredImprovements());
-  const [beforePhoto, setBeforePhoto] = useState<{ name: string; url: string } | null>(null);
-  const [afterPhoto, setAfterPhoto] = useState<{ name: string; url: string } | null>(null);
-  const [inputHazardPhoto, setInputHazardPhoto] = useState<{ name: string; url: string } | null>(null);
+  const [beforePhoto, setBeforePhoto] = useState<LocalPhoto | null>(null);
+  const [afterPhoto, setAfterPhoto] = useState<LocalPhoto | null>(null);
+  const [inputHazardPhoto, setInputHazardPhoto] = useState<LocalPhoto | null>(null);
+  const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
+  const [improvementSaveState, setImprovementSaveState] = useState<ImprovementSaveState>("idle");
   const [activeWorkspaceTheme, setActiveWorkspaceTheme] = useState<WorkspaceTheme>(workspaceTheme);
   const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
     if (typeof window === "undefined") return "enhanced";
@@ -844,7 +884,7 @@ export function SafeGuardCommandCenter({
     const file = fileList?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
-    const nextPhoto = { name: file.name, url };
+    const nextPhoto = { name: file.name, url, file };
     if (kind === "before") {
       if (beforePhoto) URL.revokeObjectURL(beforePhoto.url);
       setBeforePhoto(nextPhoto);
@@ -859,7 +899,7 @@ export function SafeGuardCommandCenter({
     if (!file) return;
     const url = URL.createObjectURL(file);
     if (inputHazardPhoto) URL.revokeObjectURL(inputHazardPhoto.url);
-    setInputHazardPhoto({ name: file.name, url });
+    setInputHazardPhoto({ name: file.name, url, file });
     setMessage("사진 기반 위험요인 후보를 준비했습니다. 후보는 생성 전 관리자가 확인해야 합니다.");
   }
 
@@ -884,15 +924,139 @@ export function SafeGuardCommandCenter({
     });
   }
 
-  function saveOperationImprovement() {
+  async function ensureSavedWorkpackId(): Promise<WorkpackSaveResult> {
+    if (savedWorkpackId) {
+      return { ok: true, configured: true, workpackId: savedWorkpackId, message: "이미 저장된 문서팩을 사용합니다." };
+    }
+    if (!data) {
+      return { ok: false, configured: false, workpackId: null, message: "문서팩 생성 후 DB 개선사항 저장을 사용할 수 있습니다." };
+    }
+
+    const response = await fetch("/api/workpacks", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        data,
+        question: data.question,
+        scenario: data.scenario,
+        deliverables: data.deliverables,
+        status: data.status
+      })
+    });
+    const parsed = (await response.json().catch((): unknown => ({}))) as unknown;
+    if (!response.ok || typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      return {
+        ok: false,
+        configured: response.status !== 503,
+        workpackId: null,
+        message: readApiMessage(parsed, `문서팩 저장 요청 실패: HTTP ${response.status}`)
+      };
+    }
+
+    const record = parsed as Record<string, unknown>;
+    const workpackId = typeof record.workpackId === "string" ? record.workpackId : null;
+    const ok = record.ok === true && Boolean(workpackId);
+    if (ok && workpackId) {
+      setSavedWorkpackId(workpackId);
+    }
+    return {
+      ok,
+      configured: typeof record.configured === "boolean" ? record.configured : undefined,
+      workpackId,
+      message: readApiMessage(record, ok ? "문서팩을 저장했습니다." : "문서팩 저장에 실패했습니다.")
+    };
+  }
+
+  async function saveImprovementToApi(input: {
+    workpackId: string;
+    text: string;
+  }): Promise<ImprovementApiResult> {
+    const form = new FormData();
+    form.set("taskLabel", fieldBrief.workSummary);
+    form.set("hazardLabel", data?.riskSummary.topRisk || "현장 개선사항");
+    form.set("improvementText", input.text);
+    form.set("reflectedDocuments", ["위험성평가표", "TBM 브리핑", "TBM 기록"].join(","));
+    if (beforePhoto) form.set("beforePhoto", beforePhoto.file, beforePhoto.name);
+    if (afterPhoto) form.set("afterPhoto", afterPhoto.file, afterPhoto.name);
+
+    const response = await fetch(`/api/workpacks/${encodeURIComponent(input.workpackId)}/improvements`, {
+      method: "POST",
+      body: form
+    });
+    const parsed = (await response.json().catch((): unknown => ({}))) as unknown;
+    if (!response.ok || typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      return {
+        ok: false,
+        configured: response.status !== 503,
+        improvementId: null,
+        message: readApiMessage(parsed, `개선사항 저장 요청 실패: HTTP ${response.status}`)
+      };
+    }
+
+    const record = parsed as Record<string, unknown>;
+    const improvementId = typeof record.improvementId === "string" ? record.improvementId : null;
+    const vision = typeof record.vision === "object" && record.vision !== null && !Array.isArray(record.vision)
+      ? record.vision as ImprovementApiResult["vision"]
+      : undefined;
+    return {
+      ok: record.ok === true && Boolean(improvementId),
+      configured: typeof record.configured === "boolean" ? record.configured : undefined,
+      improvementId,
+      sourceType: record.sourceType === "photo_analysis" ? "photo_analysis" : "manual",
+      vision,
+      message: readApiMessage(record, "개선사항 저장 결과를 확인했습니다.")
+    };
+  }
+
+  function persistOperationImprovements(items: OperationImprovement[]) {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(OPERATION_IMPROVEMENTS_STORAGE_KEY, JSON.stringify(items));
+    } catch (error) {
+      console.warn("safeclaw improvements save failed", error);
+    }
+  }
+
+  async function saveOperationImprovement() {
     const photoCandidate = buildPhotoAnalysisCandidate();
     const text = improvementText.trim() || photoCandidate;
     if (!text) {
       setMessage("오늘 작업 개선사항을 입력하거나 Before/After 사진을 첨부해 주세요.");
       return;
     }
+    setImprovementSaveState("saving");
+
+    let storageMode: OperationImprovement["storageMode"] = "local";
+    let remoteImprovementId: string | undefined;
+    let workpackId: string | undefined;
+    let sourceType: OperationImprovement["sourceType"] = beforePhoto && afterPhoto ? "photo_analysis" : "manual";
+    let visionSummary: string | undefined;
+    let ocrText: string | undefined;
+    let saveMessage = "로컬 후보로 보관했습니다.";
+
+    try {
+      const workpackSave = await ensureSavedWorkpackId();
+      if (!workpackSave.ok || !workpackSave.workpackId) {
+        saveMessage = workpackSave.message;
+      } else {
+        workpackId = workpackSave.workpackId;
+        const improvementSave = await saveImprovementToApi({ workpackId: workpackSave.workpackId, text });
+        saveMessage = improvementSave.message;
+        if (improvementSave.ok && improvementSave.improvementId) {
+          storageMode = "db";
+          remoteImprovementId = improvementSave.improvementId;
+          sourceType = improvementSave.sourceType || sourceType;
+          visionSummary = improvementSave.vision?.summary || improvementSave.vision?.observedImprovement;
+          ocrText = improvementSave.vision?.ocrText;
+        }
+      }
+    } catch (error) {
+      console.warn("safeclaw improvement API save failed", error);
+      saveMessage = error instanceof Error ? error.message : "DB 저장 연결이 보류되어 로컬 후보로 보관합니다.";
+    }
+
     const nextItem: OperationImprovement = {
-      id: `improvement-${Date.now()}`,
+      id: remoteImprovementId || `improvement-${Date.now()}`,
       createdAt: new Date().toISOString(),
       siteName: fieldBrief.siteName,
       workSummary: fieldBrief.workSummary,
@@ -901,7 +1065,14 @@ export function SafeGuardCommandCenter({
       reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
       beforePhotoName: beforePhoto?.name,
       afterPhotoName: afterPhoto?.name,
-      photoAnalysisSummary: photoCandidate || undefined
+      photoAnalysisSummary: visionSummary || photoCandidate || undefined,
+      storageMode,
+      sourceType,
+      workpackId,
+      remoteImprovementId,
+      visionSummary,
+      ocrText,
+      saveMessage
     };
     const nextItems = [nextItem, ...operationImprovements].slice(0, 10);
     setOperationImprovements(nextItems);
@@ -910,14 +1081,11 @@ export function SafeGuardCommandCenter({
     if (afterPhoto) URL.revokeObjectURL(afterPhoto.url);
     setBeforePhoto(null);
     setAfterPhoto(null);
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.setItem(OPERATION_IMPROVEMENTS_STORAGE_KEY, JSON.stringify(nextItems));
-      } catch (error) {
-        console.warn("safeclaw improvements save failed", error);
-      }
-    }
-    setMessage("오늘 작업 개선사항을 운영 온톨로지 후보로 보관했습니다. DB 승격은 승인 후 진행합니다.");
+    persistOperationImprovements(nextItems);
+    setImprovementSaveState(storageMode === "db" ? "saved" : "local");
+    setMessage(storageMode === "db"
+      ? "Before/After 개선사항을 DB 후보로 저장했습니다. vision/OCR 결과는 학습 export에 포함됩니다."
+      : `오늘 작업 개선사항을 로컬 후보로 보관했습니다. ${saveMessage}`);
   }
 
   async function fetchViaLegacyEndpoint(trimmed: string): Promise<AskResponse> {
@@ -935,6 +1103,8 @@ export function SafeGuardCommandCenter({
   function applyGeneratedPayload(payload: AskResponse) {
     persistCurrentWorkpack(payload);
     setData(payload);
+    setSavedWorkpackId(null);
+    setImprovementSaveState("idle");
     setCheckedActions(payload.riskSummary.immediateActions.map(() => false));
     setState("ready");
     setWorkspacePage("document");
@@ -1007,6 +1177,8 @@ export function SafeGuardCommandCenter({
     setSelectedExampleId(example.id);
     setQuestion(example.question);
     setData(null);
+    setSavedWorkpackId(null);
+    setImprovementSaveState("idle");
     setLiveWeather(null);
     setState("idle");
     setWorkspacePage("input");
@@ -1548,8 +1720,16 @@ export function SafeGuardCommandCenter({
                 </div>
                 <aside aria-label="개선 캡처 저장 상태">
                   <span>저장 방식</span>
-                  <strong>로컬 후보</strong>
-                  <small>DB 승격은 별도 승인 후 진행</small>
+                  <strong>
+                    {improvementSaveState === "saving"
+                      ? "저장 중"
+                      : savedWorkpackId
+                        ? "DB 후보"
+                        : data
+                          ? "DB 연결 준비"
+                          : "로컬 후보"}
+                  </strong>
+                  <small>{savedWorkpackId ? "vision/OCR 결과는 export에 포함" : "로그인·DB 미연결 시 로컬 후보로 보관"}</small>
                 </aside>
               </div>
               <div className="operation-capture-layout">
@@ -1588,7 +1768,7 @@ export function SafeGuardCommandCenter({
                     <article className="photo-analysis-candidate">
                       <span>사진 비교 후보</span>
                       <p>{photoAnalysisCandidate}</p>
-                      <small>원본 파일 저장과 비전 모델 분석은 별도 승인 후 연결합니다.</small>
+                      <small>{data ? "저장 시 Before/After 파일을 서버 vision/OCR 분석으로 전달합니다." : "문서팩 생성 후 DB 저장과 함께 분석합니다."}</small>
                     </article>
                   ) : null}
                   <div className="operation-evidence-summary" aria-label="개선사항 반영 후보">
@@ -1604,10 +1784,15 @@ export function SafeGuardCommandCenter({
                     </article>
                   </div>
                   <div className="operation-ontology-actions">
-                    <button type="button" className="button" onClick={saveOperationImprovement}>
-                      개선사항 보관
+                    <button
+                      type="button"
+                      className="button"
+                      onClick={() => void saveOperationImprovement()}
+                      disabled={improvementSaveState === "saving"}
+                    >
+                      {improvementSaveState === "saving" ? "보관 중..." : "개선사항 보관"}
                     </button>
-                    <small>1차는 로컬 보관, DB 승격은 승인 후 진행합니다.</small>
+                    <small>DB 저장이 가능하면 workpack 개선 이력으로, 아니면 로컬 후보로 남깁니다.</small>
                   </div>
                 </div>
               </div>
@@ -1622,6 +1807,8 @@ export function SafeGuardCommandCenter({
                         <small>사진: {item.beforePhotoName || "Before 미첨부"} → {item.afterPhotoName || "After 미첨부"}</small>
                       ) : null}
                       {item.photoAnalysisSummary ? <small>{item.photoAnalysisSummary}</small> : null}
+                      {item.ocrText ? <small>OCR: {item.ocrText}</small> : null}
+                      {item.storageMode ? <small>{item.storageMode === "db" ? "DB 후보 저장됨" : "로컬 후보"}{item.saveMessage ? ` · ${item.saveMessage}` : ""}</small> : null}
                       <small>{item.reflectedDocuments.join(" · ")} 후보</small>
                     </article>
                   ))}

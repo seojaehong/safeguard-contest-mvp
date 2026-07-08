@@ -11,6 +11,13 @@ export type OperationImprovement = {
   beforePhotoName?: string;
   afterPhotoName?: string;
   photoAnalysisSummary?: string;
+  storageMode?: "local" | "db";
+  sourceType?: "manual" | "photo_analysis";
+  workpackId?: string;
+  remoteImprovementId?: string;
+  visionSummary?: string;
+  ocrText?: string;
+  saveMessage?: string;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -39,7 +46,14 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
         isStringArray(item.reflectedDocuments) &&
         (typeof item.beforePhotoName === "string" || typeof item.beforePhotoName === "undefined") &&
         (typeof item.afterPhotoName === "string" || typeof item.afterPhotoName === "undefined") &&
-        (typeof item.photoAnalysisSummary === "string" || typeof item.photoAnalysisSummary === "undefined")
+        (typeof item.photoAnalysisSummary === "string" || typeof item.photoAnalysisSummary === "undefined") &&
+        (item.storageMode === "local" || item.storageMode === "db" || typeof item.storageMode === "undefined") &&
+        (item.sourceType === "manual" || item.sourceType === "photo_analysis" || typeof item.sourceType === "undefined") &&
+        (typeof item.workpackId === "string" || typeof item.workpackId === "undefined") &&
+        (typeof item.remoteImprovementId === "string" || typeof item.remoteImprovementId === "undefined") &&
+        (typeof item.visionSummary === "string" || typeof item.visionSummary === "undefined") &&
+        (typeof item.ocrText === "string" || typeof item.ocrText === "undefined") &&
+        (typeof item.saveMessage === "string" || typeof item.saveMessage === "undefined")
       );
     });
   } catch (error) {
