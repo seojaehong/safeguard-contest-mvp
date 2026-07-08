@@ -7,6 +7,7 @@ import {
   buildAccidentCasesResult,
   buildDocpackResult,
   buildReviewedDocpackResult,
+  buildHarnessAgentResult,
   resolveReviewTaskLabel,
   buildEvidenceMappingResult,
   buildSanitizeContactsResult,
@@ -115,6 +116,45 @@ describe("buildReviewedDocpackResult", () => {
     });
     expect(result.openClawUsageNote).toContain("SafeClaw 문서 엔진");
     expect(result.openClawUsageNote).toContain("QA");
+  });
+});
+
+describe("buildHarnessAgentResult", () => {
+  it("separates the DB harness agent from general document generation", () => {
+    const result = buildHarnessAgentResult({
+      question: "성수동 외벽 도장 작업",
+      references: [{
+        id: "sif-1",
+        source_id: "kosha-sif",
+        item_type: "sif-case",
+        category: "건설",
+        subcategory: null,
+        title: "외벽 도장 중 추락",
+        summary: "재해개요: 외벽 도장 중 추락",
+        body: "재해개요: 외벽 도장 중 추락. 위험성 감소대책: 난간 보강.",
+        keywords: ["외벽", "도장"],
+        risk_tags: ["추락"],
+        primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+        controls: ["난간 보강"],
+        evidence_role: "supporting",
+      }],
+      workpackMemory: [{
+        id: "wp-1",
+        question: "지난 외벽 도장 작업",
+        generatedAt: "2026-07-01T09:00:00.000Z",
+        reflectedDocuments: ["위험성평가표"],
+        statusLabel: "저장된 작업팩",
+      }],
+      referenceSearch: [],
+      auth: { source: "db", siteId: "site-1", orgId: "org-1", tokenBound: true },
+    });
+
+    expect(result.agentKind).toBe("safeclaw_harness_engineering_agent");
+    expect(result.qualityPipeline).toContain("build_db_harness_packet");
+    expect(result.packet.generationContract.llmRole).toBe("naturalize_only");
+    expect(result.packet.generationContract.fallbackChainAllowed).toBe(false);
+    expect(result.promptContext).toContain("작업이력");
+    expect(result.openClawUsageNote).toContain("OpenClaw");
   });
 });
 

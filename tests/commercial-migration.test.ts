@@ -14,6 +14,7 @@ describe("commercial operations migration draft", () => {
     expect(migration).toContain("create table if not exists workpack_improvements");
     expect(migration).toContain("create table if not exists workpack_improvement_photos");
     expect(migration).toContain("create table if not exists safety_reference_embeddings");
+    expect(migration).toContain("metadata jsonb not null default '{}'::jsonb");
     expect(migration).toContain("check (share_scope in ('invited','organization'))");
     expect(migration).not.toContain("public_link");
   });

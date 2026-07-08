@@ -90,6 +90,7 @@ create table if not exists safety_reference_embeddings (
   reference_item_id text not null references safety_reference_items(id) on delete cascade,
   embedding vector(1536),
   embedding_model text not null,
+  metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   unique (reference_item_id, embedding_model)
 );

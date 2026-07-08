@@ -7,12 +7,19 @@
 
 import type { AskResponse } from "./types";
 import type { AccidentCase } from "./types";
+import {
+  buildDbHarnessPacket,
+  buildHarnessPromptContext,
+  type HarnessImprovement,
+  type HarnessWorkpackMemory,
+} from "./db-harness";
 import type { QaReviewResult } from "./ontology/qa-review";
 import { gateCitations } from "./law-citation-gate";
 import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
 import { getEvidenceLabel, SMSA_ARTICLE_MAP, type SmsaEvidenceLabel } from "./smsa-mapping";
 import type { KnowledgeResult } from "./ontology/query";
 import type { OntologyNode } from "./ontology/schema";
+import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "./safety-reference-catalog";
 
 /** MCP 도구가 반환하는 CallToolResult의 최소 형태 (SDK 타입과 호환). */
 export type McpToolResult = {
@@ -177,6 +184,90 @@ export function buildReviewedDocpackResult(
     qa,
     openClawUsageNote:
       "이 응답은 SafeClaw 문서 엔진(/api/ask runAsk) 산출물을 QA 검수 계층으로 다시 확인한 결과입니다. OpenClaw는 이 페이로드를 최종 답변의 근거로 사용하세요.",
+  };
+}
+
+// ── run_safeclaw_harness_agent ────────────────────────────────────────────
+
+export type HarnessAgentSearchSummary = Pick<
+  SafetyReferenceSearchResult,
+  "ok" | "configured" | "query" | "count" | "message"
+> & {
+  source: "direct_evidence" | "sif_cases" | "supporting_evidence";
+};
+
+export type HarnessAgentAuthSummary = {
+  source: "db" | "env" | "none";
+  siteId: string | null;
+  orgId: string | null;
+  tokenBound: boolean;
+};
+
+export type HarnessAgentResult = {
+  agentKind: "safeclaw_harness_engineering_agent";
+  engine: "safeclaw-db-harness";
+  qualityPipeline: [
+    "search_safety_reference_items",
+    "load_workpack_memory",
+    "load_improvement_memory",
+    "build_db_harness_packet"
+  ];
+  packet: ReturnType<typeof buildDbHarnessPacket>;
+  promptContext: string;
+  referenceSearch: HarnessAgentSearchSummary[];
+  auth: HarnessAgentAuthSummary;
+  openClawUsageNote: string;
+};
+
+export function summarizeHarnessSearch(
+  source: HarnessAgentSearchSummary["source"],
+  result: SafetyReferenceSearchResult
+): HarnessAgentSearchSummary {
+  return {
+    source,
+    ok: result.ok,
+    configured: result.configured,
+    query: result.query,
+    count: result.count,
+    message: result.message,
+  };
+}
+
+export function buildHarnessAgentResult(input: {
+  question: string;
+  references: SafetyReferenceItem[];
+  improvements?: HarnessImprovement[];
+  workpackMemory?: HarnessWorkpackMemory[];
+  referenceSearch: HarnessAgentSearchSummary[];
+  auth?: HarnessAgentAuthSummary;
+}): HarnessAgentResult {
+  const packet = buildDbHarnessPacket({
+    question: input.question,
+    references: input.references,
+    improvements: input.improvements,
+    workpackMemory: input.workpackMemory,
+  });
+
+  return {
+    agentKind: "safeclaw_harness_engineering_agent",
+    engine: "safeclaw-db-harness",
+    qualityPipeline: [
+      "search_safety_reference_items",
+      "load_workpack_memory",
+      "load_improvement_memory",
+      "build_db_harness_packet",
+    ],
+    packet,
+    promptContext: buildHarnessPromptContext(packet),
+    referenceSearch: input.referenceSearch,
+    auth: input.auth || {
+      source: "none",
+      siteId: null,
+      orgId: null,
+      tokenBound: false,
+    },
+    openClawUsageNote:
+      "OpenClaw는 이 도구 결과를 먼저 읽고, packet.generationContract의 naturalize_only 계약을 지켜 문장화·검토만 수행하세요. 근거 없는 위험요인, 개선 이력, 확인 이력은 새로 만들지 않습니다.",
   };
 }
 

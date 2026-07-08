@@ -6,6 +6,7 @@ import {
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
 import { isRecord, readString } from "@/lib/workspace-api";
+import { analyzeImprovementPhotos } from "@/lib/photo-vision-analysis";
 import { buildImprovementDraft, buildImprovementPhotoPath } from "@/lib/workpack-commercial";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
 
@@ -226,16 +227,26 @@ export async function POST(request: NextRequest, context: RouteContext) {
   }
 
   const body = await readImprovementRequest(request);
+  const reflectedDocuments = body.reflectedDocuments.length
+    ? body.reflectedDocuments
+    : ["위험성평가표", "TBM 브리핑", "TBM 기록"];
+  const vision = await analyzeImprovementPhotos({
+    taskLabel: body.taskLabel || owned.context.question,
+    hazardLabel: body.hazardLabel,
+    reflectedDocuments,
+    beforePhoto: body.beforePhoto,
+    afterPhoto: body.afterPhoto
+  });
   const draft = buildImprovementDraft({
     organizationId: owned.context.organizationId,
     siteId: owned.context.siteId,
     workpackId: owned.context.workpackId,
     taskLabel: body.taskLabel || owned.context.question,
     hazardLabel: body.hazardLabel,
-    improvementText: body.improvementText,
+    improvementText: body.improvementText || vision.observedImprovement,
     beforePhotoName: body.beforePhoto?.name || null,
     afterPhotoName: body.afterPhoto?.name || null,
-    reflectedDocuments: body.reflectedDocuments,
+    reflectedDocuments: vision.reflectedDocuments.length ? vision.reflectedDocuments : reflectedDocuments,
     createdBy: user.id
   });
 
@@ -251,8 +262,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
     source_type: draft.source_type,
     photo_summary: toJson(draft.photo_summary),
     analysis_payload: toJson({
-      status: draft.source_type === "photo_analysis" ? "queued_for_vision_review" : "manual",
-      candidateText: draft.improvement_text
+      status: vision.status,
+      provider: vision.provider,
+      model: vision.model,
+      candidateText: draft.improvement_text,
+      summary: vision.summary,
+      detectedHazards: vision.detectedHazards,
+      observedImprovement: vision.observedImprovement,
+      ocrText: vision.ocrText,
+      errorMessage: vision.errorMessage || null
     }),
     created_by: draft.created_by
   };

@@ -380,6 +380,7 @@ export type WorkspaceDatabase = {
           reference_item_id: string;
           embedding: string | null;
           embedding_model: string;
+          metadata: Json;
           created_at: string;
         };
         Insert: {
@@ -387,11 +388,13 @@ export type WorkspaceDatabase = {
           reference_item_id: string;
           embedding?: string | null;
           embedding_model: string;
+          metadata?: Json;
           created_at?: string;
         };
         Update: {
           embedding?: string | null;
           embedding_model?: string;
+          metadata?: Json;
         };
         Relationships: [];
       };

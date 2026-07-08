@@ -10,15 +10,19 @@ import {
   buildAccidentCasesResult,
   buildDocpackResult,
   buildEvidenceMappingResult,
+  buildHarnessAgentResult,
   buildReviewedDocpackResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
   resolveReviewTaskLabel,
+  summarizeHarnessSearch,
   validateCitations,
   type WeatherSignalLike,
 } from "./mcp-tools";
 import { querySafetyKnowledge } from "./ontology/knowledge-tool";
 import { reviewDocpack } from "./ontology/qa-review-tool";
+import { searchSafetyReferences, type SafetyReferenceItem } from "./safety-reference-catalog";
+import { isEmbeddableSifReferenceItem } from "./sif-embedding-corpus";
 
 function asString(input: unknown, key: string): string {
   const value = (input as Record<string, unknown> | null)?.[key];
@@ -47,6 +51,12 @@ function selectQaDocumentText(response: Awaited<ReturnType<typeof runAsk>>): str
   return candidates.find((value) => typeof value === "string" && value.trim().length > 0) ?? "";
 }
 
+function uniqueReferences(items: SafetyReferenceItem[]): SafetyReferenceItem[] {
+  const byId = new Map<string, SafetyReferenceItem>();
+  for (const item of items) byId.set(item.id, item);
+  return Array.from(byId.values());
+}
+
 /**
  * 도구 이름+입력으로 결과 페이로드를 반환한다. MCP 라우트(app/api/mcp)의 registerTools와
  * 동일한 코어를 쓰되, generate_safety_docpack 기본 모드만 채팅 맥락에 맞춰 enhanced로 둔다
@@ -54,6 +64,27 @@ function selectQaDocumentText(response: Awaited<ReturnType<typeof runAsk>>): str
  */
 export async function executeClawTool(name: string, input: unknown): Promise<unknown> {
   switch (name) {
+    case "run_safeclaw_harness_agent": {
+      const question = asString(input, "question");
+      const [direct, sif, supporting] = await Promise.all([
+        searchSafetyReferences({ query: question, limit: 6, evidenceRole: "direct" }),
+        searchSafetyReferences({ query: question, limit: 6, itemType: "sif-case" }),
+        searchSafetyReferences({ query: question, limit: 6, evidenceRole: "supporting" }),
+      ]);
+      return buildHarnessAgentResult({
+        question,
+        references: uniqueReferences([
+          ...direct.items,
+          ...sif.items.filter(isEmbeddableSifReferenceItem),
+          ...supporting.items,
+        ]),
+        referenceSearch: [
+          summarizeHarnessSearch("direct_evidence", direct),
+          summarizeHarnessSearch("sif_cases", sif),
+          summarizeHarnessSearch("supporting_evidence", supporting),
+        ],
+      });
+    }
     case "get_weather_signals": {
       const region = asString(input, "region");
       const signal = await fetchWeatherSignal(region);

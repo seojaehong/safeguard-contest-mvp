@@ -5,7 +5,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import {
   MCP_ENDPOINT_URL,
+  buildOpenClawHarnessAgentCommand,
   buildOpenClawInstallCommand,
+  buildOpenClawModelStatusCommand,
+  buildOpenClawOauthLoginCommand,
   buildOpenClawProbeCommand,
 } from "@/lib/mcp-connect";
 
@@ -19,7 +22,7 @@ function getBrowserSupabaseClient() {
   return browserClient;
 }
 
-type AiConnectTab = "openclaw" | "claude" | "api";
+type AiConnectTab = "harness" | "openclaw" | "claude" | "api";
 
 type McpTokenSummary = {
   id: string;
@@ -57,6 +60,11 @@ type ActionResponse = {
 
 const tabs: { id: AiConnectTab; label: string; body: string }[] = [
   {
+    id: "harness",
+    label: "Harness Agent",
+    body: "내 OpenAI OAuth로 OpenClaw를 쓰되 SafeClaw DB 근거 패킷만 먼저 호출합니다.",
+  },
+  {
     id: "openclaw",
     label: "OpenClaw/Codex",
     body: "상주 AI 안전관리자에 SafeClaw 도구를 연결합니다.",
@@ -84,6 +92,15 @@ function formatDate(value: string | null) {
 }
 
 function commandForTab(tab: AiConnectTab, token: string) {
+  if (tab === "harness") {
+    return [
+      buildOpenClawOauthLoginCommand(),
+      buildOpenClawModelStatusCommand(),
+      buildOpenClawInstallCommand(token),
+      buildOpenClawProbeCommand(),
+      buildOpenClawHarnessAgentCommand(),
+    ].join("\n");
+  }
   if (tab === "openclaw") {
     return `${buildOpenClawInstallCommand(token)}\n${buildOpenClawProbeCommand()}`;
   }
@@ -98,7 +115,7 @@ export function AiConnectPanel() {
   const [session, setSession] = useState<Session | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [tokens, setTokens] = useState<McpTokenSummary[]>([]);
-  const [activeTab, setActiveTab] = useState<AiConnectTab>("openclaw");
+  const [activeTab, setActiveTab] = useState<AiConnectTab>("harness");
   const [oneTimeToken, setOneTimeToken] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -167,7 +184,7 @@ export function AiConnectPanel() {
           authorization: `Bearer ${session.access_token}`,
           "content-type": "application/json",
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(activeTab === "harness" ? { label: "SafeClaw Harness Agent" } : {}),
       });
       const payload = await response.json() as TokenIssueResponse;
       if (payload.ok && payload.plaintextToken && payload.token) {
@@ -273,11 +290,12 @@ export function AiConnectPanel() {
       </section>
 
       <section className="safeclaw-module-panel ai-connect-command">
-        <span>연결 토큰</span>
-        <h2>내 AI에 SafeClaw 도구를 붙입니다.</h2>
+        <span>{activeTab === "harness" ? "Harness Agent" : "연결 토큰"}</span>
+        <h2>{activeTab === "harness" ? "내 OAuth + SafeClaw 하네스를 분리해 붙입니다." : "내 AI에 SafeClaw 도구를 붙입니다."}</h2>
         <p>
-          토큰은 발급 직후 한 번만 표시됩니다. 화면을 떠난 뒤에는 기존 토큰을 다시 볼 수 없고,
-          새로 발급하거나 기존 토큰을 끌 수 있습니다.
+          {activeTab === "harness"
+            ? "OpenClaw의 모델 사용은 내 OpenAI OAuth 프로필이 담당하고, SafeClaw 데이터 접근은 이 MCP 토큰이 담당합니다. 시연 중에는 run_safeclaw_harness_agent 도구가 DB 근거를 먼저 고정합니다."
+            : "토큰은 발급 직후 한 번만 표시됩니다. 화면을 떠난 뒤에는 기존 토큰을 다시 볼 수 없고, 새로 발급하거나 기존 토큰을 끌 수 있습니다."}
         </p>
         <div className="ai-connect-actions">
           <button type="button" onClick={issueToken} disabled={isIssuing}>

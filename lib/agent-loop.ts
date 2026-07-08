@@ -88,6 +88,7 @@ export function capHistory(
 const BASE_SYSTEM_PROMPT = `당신은 "클로(Claw)", 이 사업장의 상주 AI 안전관리자입니다. 산업안전보건법·중대재해처벌법 실무 관점으로 현장소장의 안전 질문에 답합니다.
 
 원칙:
+- 하네스 기반 검토, DB 근거 고정, OpenClaw 시연용 검증을 요청받으면 run_safeclaw_harness_agent를 먼저 호출합니다. 이 도구가 반환한 근거·개선 이력·작업 이력을 벗어나 새 위험요인이나 이력을 만들지 않습니다.
 - 사실 근거는 반드시 도구로 확인합니다. 오늘·내일 날씨/기상 위험은 get_weather_signals, 유사 재해사례는 search_accident_cases, 문서팩 초안과 검수가 함께 필요하면 generate_reviewed_safety_docpack을 호출합니다.
 - 법조문이 필요한 질문(특정 작업의 규정·근거 조문)은 먼저 query_safety_knowledge로 검증된 조문을 조회하고, 조회 결과의 구체 조번호(예: 기준규칙 제619조)를 근거로 답합니다. 이 도구에서 근거를 찾지 못했을 때만 일반 지식으로 답하되 반드시 validate_safety_citations로 검증합니다.
 - 법 조문(예: 제38조)을 답변에 인용할 때는, 최종 답변을 쓰기 전에 먼저 validate_safety_citations 도구로 그 문장을 검증하는 단계를 거칩니다. 검증에서 제거된(확인되지 않은) 조문은 최종 답변에서도 빼고 "산업안전보건법령" 같은 일반 표현으로 대체합니다. 검증하지 않은 조문 번호를 최종 답변에 그대로 쓰지 않습니다.
@@ -116,6 +117,18 @@ export function buildSystemPrompt(profile?: ClawSiteProfile | null): string {
 
 // ── 도구 정의 (Anthropic tools 스키마) ───────────────────────────────────
 export const CLAW_TOOLS: Anthropic.Tool[] = [
+  {
+    name: "run_safeclaw_harness_agent",
+    description:
+      "SafeClaw DB harness engineering 전용 도구. 오늘 작업을 입력하면 안전 참고자료 DB, SIF 사례, 유사 작업 이력, 개선 이력을 먼저 고정한 패킷을 반환한다. OpenClaw/Codex 시연에서 일반 생성 체인보다 이 도구를 우선 호출하고, LLM은 반환된 근거를 문장화만 한다.",
+    input_schema: {
+      type: "object",
+      properties: {
+        question: { type: "string", description: "현장 작업 상황 설명" },
+      },
+      required: ["question"],
+    },
+  },
   {
     name: "generate_reviewed_safety_docpack",
     description:
@@ -244,6 +257,7 @@ export const CLAW_TOOLS: Anthropic.Tool[] = [
 
 // ── 도구 라벨 (한글 콘솔 표기) ───────────────────────────────────────────
 const TOOL_ACTION_LABELS: Record<string, string> = {
+  run_safeclaw_harness_agent: "DB 하네스 근거 고정",
   get_weather_signals: "기상청 실황 확인",
   search_accident_cases: "재해사례 검색",
   validate_safety_citations: "법령 인용 검증",

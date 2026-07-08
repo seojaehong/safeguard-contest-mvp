@@ -1,0 +1,18 @@
+{
+  "startedAt": "2026-07-08T08:18:23.027Z",
+  "completedAt": "2026-07-08T08:18:24.357Z",
+  "source": "safety_reference_items:item_type=sif-case",
+  "itemCount": 25,
+  "skippedCount": 1,
+  "skippedIds": [
+    "sif-아카이브-건설업-00001"
+  ],
+  "corpusCount": 24,
+  "embeddingModel": "text-embedding-3-small",
+  "embeddedCount": 0,
+  "uploadedCount": 0,
+  "uploadError": null,
+  "mode": "corpus-only",
+  "jsonlPath": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
+  "mdPath": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.md"
+}

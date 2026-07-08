@@ -9,7 +9,10 @@ import {
   buildMcpTokenInsert,
   buildMcpTokenLabel,
   buildMcpTokenOwnerFilter,
+  buildOpenClawHarnessAgentCommand,
   buildOpenClawInstallCommand,
+  buildOpenClawModelStatusCommand,
+  buildOpenClawOauthLoginCommand,
   buildOpenClawProbeCommand,
   canIssueMoreMcpTokens,
   createPlaintextMcpToken,
@@ -179,6 +182,9 @@ describe("OpenClaw command helpers", () => {
     expect(buildOpenClawInstallCommand("sclaw_token")).toContain("Authorization=Bearer sclaw_token");
     expect(buildOpenClawInstallCommand("sclaw_token")).toContain(MCP_ENDPOINT_URL);
     expect(buildOpenClawProbeCommand()).toBe("openclaw --profile safeclaw mcp probe safeclaw");
+    expect(buildOpenClawOauthLoginCommand()).toContain("models auth login --provider openai");
+    expect(buildOpenClawModelStatusCommand()).toBe("openclaw --profile safeclaw models status");
+    expect(buildOpenClawHarnessAgentCommand()).toContain("run_safeclaw_harness_agent");
   });
 });
 

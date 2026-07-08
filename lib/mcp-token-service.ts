@@ -1,6 +1,13 @@
 import { randomBytes } from "node:crypto";
 import { hashToken } from "@/lib/mcp-auth";
-import { MCP_ENDPOINT_URL, buildOpenClawInstallCommand, buildOpenClawProbeCommand } from "@/lib/mcp-connect";
+import {
+  MCP_ENDPOINT_URL,
+  buildOpenClawHarnessAgentCommand,
+  buildOpenClawInstallCommand,
+  buildOpenClawModelStatusCommand,
+  buildOpenClawOauthLoginCommand,
+  buildOpenClawProbeCommand,
+} from "@/lib/mcp-connect";
 import type { Json } from "@/lib/supabase-admin";
 
 export const DEFAULT_MCP_SCOPES = ["tools:*"] as const;
@@ -119,4 +126,11 @@ export function isTokenOwnedByScope(
   return false;
 }
 
-export { MCP_ENDPOINT_URL, buildOpenClawInstallCommand, buildOpenClawProbeCommand };
+export {
+  MCP_ENDPOINT_URL,
+  buildOpenClawHarnessAgentCommand,
+  buildOpenClawInstallCommand,
+  buildOpenClawModelStatusCommand,
+  buildOpenClawOauthLoginCommand,
+  buildOpenClawProbeCommand,
+};

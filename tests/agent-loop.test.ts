@@ -127,6 +127,7 @@ describe("CLAW_TOOLS", () => {
         "get_weather_signals",
         "qa_review_docpack",
         "query_safety_knowledge",
+        "run_safeclaw_harness_agent",
         "sanitize_emergency_contacts",
         "search_accident_cases",
         "validate_safety_citations",
@@ -135,6 +136,7 @@ describe("CLAW_TOOLS", () => {
     for (const tool of CLAW_TOOLS) {
       expect(tool.input_schema.type).toBe("object");
     }
+    expect(toolLabel("run_safeclaw_harness_agent", "start")).toBe("DB 하네스 근거 고정 중");
     expect(toolLabel("generate_reviewed_safety_docpack", "start")).toBe("검수 포함 안전 문서팩 생성 중");
   });
 });
