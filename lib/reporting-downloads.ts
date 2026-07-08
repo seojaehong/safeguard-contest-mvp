@@ -70,6 +70,14 @@ export type ReportSnapshot = {
   notes: string[];
 };
 
+export type ReportLearningEvent = {
+  eventType: "period_summary" | "workpack" | "risk_row" | "improvement" | "classification_group";
+  generatedAt: string;
+  period: ReportPeriod;
+  siteName: string;
+  payload: Record<string, unknown>;
+};
+
 const PERIOD_LABELS: Record<ReportPeriod, string> = {
   daily: "오늘 작업 리포트",
   weekly: "주간 리포트",
@@ -418,4 +426,161 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
 
 export function buildReportJson(snapshot: ReportSnapshot) {
   return JSON.stringify(snapshot, null, 2);
+}
+
+function buildLearningEvents(snapshot: ReportSnapshot): ReportLearningEvent[] {
+  const base = {
+    generatedAt: snapshot.generatedAt,
+    period: snapshot.period,
+    siteName: snapshot.scenario.siteName
+  };
+  return [
+    {
+      ...base,
+      eventType: "period_summary",
+      payload: {
+        title: snapshot.title,
+        companyName: snapshot.scenario.companyName,
+        workSummary: snapshot.scenario.workSummary,
+        workerCount: snapshot.scenario.workerCount,
+        weatherNote: snapshot.scenario.weatherNote,
+        summary: snapshot.summary
+      }
+    },
+    {
+      ...base,
+      eventType: "workpack",
+      payload: {
+        companyName: snapshot.scenario.companyName,
+        siteName: snapshot.scenario.siteName,
+        workSummary: snapshot.scenario.workSummary,
+        workerCount: snapshot.scenario.workerCount,
+        evidenceRefs: uniqueStrings(snapshot.riskRows.flatMap((row) => row.evidenceRefs))
+      }
+    },
+    ...snapshot.riskRows.map((row) => ({
+      ...base,
+      eventType: "risk_row" as const,
+      payload: {
+        index: row.index,
+        process: row.process,
+        task: row.task,
+        hazard: row.hazard,
+        riskLevel: row.riskLevel,
+        riskLevelLabel: row.riskLevelLabel,
+        asIs: row.currentControls,
+        toBe: row.additionalControls,
+        owner: row.owner,
+        due: row.due,
+        verification: row.verification,
+        evidenceRefs: row.evidenceRefs
+      }
+    })),
+    ...snapshot.improvements.map((item) => ({
+      ...base,
+      eventType: "improvement" as const,
+      payload: {
+        improvementId: item.id,
+        createdAt: item.createdAt,
+        workSummary: item.workSummary,
+        hazardLabel: item.hazardLabel,
+        asIs: item.asIs,
+        toBe: item.toBe,
+        reflectedDocuments: item.reflectedDocuments,
+        sourceLabel: item.sourceLabel,
+        photoNames: item.photoNames
+      }
+    })),
+    ...([
+      ["process", snapshot.groups.byProcess],
+      ["task", snapshot.groups.byTask],
+      ["risk_level", snapshot.groups.byRiskLevel],
+      ["document", snapshot.groups.byDocument]
+    ] as const).flatMap(([groupType, groups]) => groups.map((group) => ({
+      ...base,
+      eventType: "classification_group" as const,
+      payload: {
+        groupType,
+        label: group.label,
+        count: group.count,
+        highRiskCount: group.highRiskCount,
+        improvementCount: group.improvementCount
+      }
+    })))
+  ];
+}
+
+export function buildReportLearningJsonl(snapshot: ReportSnapshot) {
+  return `${buildLearningEvents(snapshot).map((event) => JSON.stringify(event)).join("\n")}\n`;
+}
+
+export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
+  const lines = [
+    `# ${snapshot.title} 운영 코퍼스`,
+    "",
+    `- generatedAt: ${formatDate(snapshot.generatedAt)}`,
+    `- period: ${snapshot.period}`,
+    `- siteName: ${snapshot.scenario.siteName}`,
+    `- workSummary: ${snapshot.scenario.workSummary}`,
+    "",
+    "## 재사용 목적",
+    "",
+    "- 다음 위험성평가와 TBM 생성 시 과거 작업, 위험요인, 개선사항, 근거 반영 위치를 다시 조회하기 위한 운영 이벤트입니다.",
+    "- 모델 파인튜닝 산출물이 아니라, DB 하네스가 먼저 고정할 수 있는 재생성 가능한 코퍼스입니다.",
+    "",
+    "## 기간 요약",
+    "",
+    `- 위험성평가 행: ${snapshot.summary.riskRows}건`,
+    `- 고위험 행: ${snapshot.summary.highRiskRows}건`,
+    `- 개선사항: ${snapshot.summary.improvements}건`,
+    `- Before/After 사진 개선: ${snapshot.summary.photoImprovements}건`,
+    "",
+    "## 위험 이벤트",
+    ""
+  ];
+
+  snapshot.riskRows.forEach((row) => {
+    lines.push(`### ${row.process} / ${row.task}`);
+    lines.push(`- hazard: ${row.hazard}`);
+    lines.push(`- riskLevel: ${row.riskLevelLabel}`);
+    lines.push(`- asIs: ${row.currentControls}`);
+    lines.push(`- toBe: ${row.additionalControls}`);
+    lines.push(`- evidenceRefs: ${row.evidenceRefs.join(", ") || "현장 확인"}`);
+    lines.push("");
+  });
+
+  lines.push("## 개선 이벤트", "");
+  if (snapshot.improvements.length) {
+    snapshot.improvements.forEach((item) => {
+      lines.push(`### ${formatDate(item.createdAt)} / ${item.hazardLabel}`);
+      lines.push(`- source: ${item.sourceLabel}`);
+      lines.push(`- asIs: ${item.asIs}`);
+      lines.push(`- toBe: ${item.toBe}`);
+      lines.push(`- reflectedDocuments: ${item.reflectedDocuments.join(", ") || "확인 필요"}`);
+      if (item.photoNames.length) lines.push(`- photos: ${item.photoNames.join(", ")}`);
+      lines.push("");
+    });
+  } else {
+    lines.push("- 선택한 기간에 저장된 개선 이벤트가 없습니다.", "");
+  }
+
+  lines.push("## 분류 인덱스", "");
+  for (const [title, groups] of [
+    ["공정별", snapshot.groups.byProcess],
+    ["작업별", snapshot.groups.byTask],
+    ["위험등급별", snapshot.groups.byRiskLevel],
+    ["문서반영별", snapshot.groups.byDocument]
+  ] as const) {
+    lines.push(`### ${title}`);
+    if (groups.length) {
+      groups.forEach((group) => {
+        lines.push(`- ${group.label}: risk=${group.count}, high=${group.highRiskCount}, improvement=${group.improvementCount}`);
+      });
+    } else {
+      lines.push("- 해당 항목 없음");
+    }
+    lines.push("");
+  }
+
+  return lines.join("\n");
 }

@@ -4,6 +4,8 @@ import { buildStoredCurrentWorkpack } from "@/lib/current-workpack";
 import { parseOperationImprovements } from "@/lib/operation-improvement-history";
 import {
   buildReportCsv,
+  buildReportLearningJsonl,
+  buildReportLearningMarkdown,
   buildReportMarkdown,
   buildReportSnapshot
 } from "@/lib/reporting-downloads";
@@ -137,6 +139,47 @@ describe("reporting downloads", () => {
     expect(csv).toContain("위험성평가");
     expect(csv).toContain("개선사항");
     expect(csv).toContain("난간 보강");
+  });
+
+  it("exports a period learning corpus as JSONL events", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements,
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const events = buildReportLearningJsonl(snapshot)
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as { eventType: string; payload: Record<string, unknown> });
+
+    expect(events.map((event) => event.eventType)).toContain("period_summary");
+    expect(events.map((event) => event.eventType)).toContain("risk_row");
+    expect(events.map((event) => event.eventType)).toContain("improvement");
+    expect(events.map((event) => event.eventType)).toContain("classification_group");
+    expect(events.find((event) => event.eventType === "improvement")?.payload).toMatchObject({
+      hazardLabel: "추락 위험",
+      sourceLabel: "Before/After 사진"
+    });
+    expect(events.some((event) => event.eventType === "classification_group" && event.payload.groupType === "risk_level")).toBe(true);
+  });
+
+  it("exports a readable operation corpus markdown without fine-tuning claims", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements,
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const markdown = buildReportLearningMarkdown(snapshot);
+
+    expect(markdown).toContain("운영 코퍼스");
+    expect(markdown).toContain("재생성 가능한 코퍼스");
+    expect(markdown).toContain("## 개선 이벤트");
+    expect(markdown).toContain("Before/After 사진");
+    expect(markdown).toContain("## 분류 인덱스");
+    expect(markdown).not.toContain("파인튜닝 완료");
+    expect(markdown).not.toContain("학습 완료");
   });
 
   it("parses local improvement history defensively", () => {
