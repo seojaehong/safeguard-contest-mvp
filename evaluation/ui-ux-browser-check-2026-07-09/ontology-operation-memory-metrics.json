@@ -1,0 +1,28 @@
+{
+  "metrics": {
+    "operationMemoryPreview": true,
+    "memoryMapNodes": 7,
+    "memoryMapEdges": 7,
+    "memoryListRows": 7,
+    "operationHoverCards": 7,
+    "exportButtons": [
+      "최근 후보 다시 읽기",
+      "MD 저장",
+      "JSONL 저장"
+    ],
+    "ontologyGraphNodes": 32,
+    "ontologyListRows": 166,
+    "horizontalOverflow": false,
+    "title": "작업 이력 그래프."
+  },
+  "mobile": {
+    "horizontalOverflow": false,
+    "viewportWidth": 390,
+    "scrollWidth": 390,
+    "exportButtons": [
+      "최근 후보 다시 읽기",
+      "MD 저장",
+      "JSONL 저장"
+    ]
+  }
+}

@@ -9370,7 +9370,15 @@ body:has(.safeclaw-landing) :is(
   line-height: 1.7;
 }
 
-.operation-memory-copy button {
+.operation-memory-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.operation-memory-copy button,
+.operation-memory-actions button {
   border: 1px solid rgba(246, 245, 239, 0.14);
   background: rgba(255, 255, 255, 0.05);
   color: var(--os-panel-text);
@@ -9379,6 +9387,18 @@ body:has(.safeclaw-landing) :is(
   font-weight: 900;
   letter-spacing: 0.04em;
   padding: 9px 12px;
+}
+
+.operation-memory-actions button:nth-child(n + 2) {
+  border-color: rgba(255, 220, 46, 0.24);
+  background: rgba(255, 220, 46, 0.08);
+}
+
+.operation-memory-message {
+  margin: -4px 0 0;
+  color: rgba(255, 220, 46, 0.78);
+  font-size: 12px;
+  font-weight: 760;
 }
 
 .operation-memory-grid {
