@@ -260,3 +260,23 @@ npm.cmd run build
 - typecheck passed
 - build passed
 - Playwright visual check passed: desktop/mobile Day, desktop Night, no horizontal overflow
+
+## 워크스페이스 폰트 / 메뉴 밀도 보정
+
+- 첫 화면 헤드라인 `오늘 작업은 무엇인가요?`는 한글 우선 폰트 스택과 더 단단한 weight로 보정했다.
+- 데스크톱 헤드라인은 고정 56px / weight 800 / line-height 1.16으로 맞췄고, viewport width 기반 폰트 스케일링은 추가하지 않았다.
+- 사이드 메뉴 버튼은 데스크톱 기준 50px 높이와 넓은 gap으로 조정해 메뉴와 메뉴 사이가 덜 붙어 보이게 했다.
+- 입력 도움말, 자동 인식 칩, textarea의 행간도 소폭 넓혀 장문 입력 시 답답함을 줄였다.
+- 브라우저 산출물:
+  - `evaluation/backend-harness-gate-2026-07-08/design-polish/day-desktop.png`
+  - `evaluation/backend-harness-gate-2026-07-08/design-polish/night-desktop.png`
+  - `evaluation/backend-harness-gate-2026-07-08/design-polish/day-mobile.png`
+  - `evaluation/backend-harness-gate-2026-07-08/design-polish/night-mobile.png`
+  - `evaluation/backend-harness-gate-2026-07-08/design-polish/workspace-typography-polish-report.json`
+
+검증:
+
+- `npm.cmd test -- tests/workspace-layout-regression.test.ts` → 1 file / 1 test passed
+- `npm.cmd test -- tests/workspace-layout-regression.test.ts tests/openclaw-chat.test.ts tests/claw-chat-route.test.ts` → 3 files / 6 tests passed
+- `npm.cmd run build` → passed
+- `npm.cmd run typecheck` → passed

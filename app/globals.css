@@ -12200,6 +12200,108 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+/* Workspace final polish: sturdier first impression and calmer menu density. */
+.command-center-shell {
+  font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.command-center-shell .command-copy h1,
+.command-center-shell.workspace-theme-day .command-copy h1 {
+  max-width: 780px;
+  font-family: "Noto Sans KR", "Pretendard", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: 0px;
+  line-height: 1.16;
+  word-break: keep-all;
+}
+
+.command-center-shell .command-copy p,
+.command-center-shell.workspace-theme-day .command-copy p {
+  font-size: 17px;
+  font-weight: 460;
+  letter-spacing: 0px;
+  line-height: 1.78;
+}
+
+.command-center-shell .workspace-side-nav,
+.command-center-shell.workspace-theme-day .workspace-side-nav {
+  gap: 18px;
+}
+
+.command-center-shell .workspace-side-group,
+.command-center-shell.workspace-theme-day .workspace-side-group {
+  gap: 12px;
+}
+
+.command-center-shell .workspace-side-group button,
+.command-center-shell .workspace-source-status p,
+.command-center-shell.workspace-theme-day .workspace-side-group button,
+.command-center-shell.workspace-theme-day .workspace-source-status p {
+  min-height: 50px;
+  gap: 12px;
+  padding: 11px 12px;
+}
+
+.command-center-shell .workspace-side-group button span,
+.command-center-shell .workspace-source-status b,
+.command-center-shell.workspace-theme-day .workspace-side-group button span,
+.command-center-shell.workspace-theme-day .workspace-source-status b {
+  font-size: 14px;
+  font-weight: 620;
+  line-height: 1.55;
+}
+
+.command-center-shell .workspace-side-group button small,
+.command-center-shell .workspace-source-status small,
+.command-center-shell.workspace-theme-day .workspace-side-group button small,
+.command-center-shell.workspace-theme-day .workspace-source-status small {
+  line-height: 1.55;
+}
+
+.command-center-shell .field-brief-chip-row {
+  gap: 12px;
+}
+
+.command-center-shell .field-brief-chip-row span {
+  min-height: 36px;
+  padding-inline: 14px;
+}
+
+.command-center-shell .command-console-input {
+  line-height: 1.78;
+}
+
+@media (max-width: 900px) {
+  .command-center-shell .command-copy h1 {
+    font-size: 46px;
+    line-height: 1.18;
+  }
+
+  .command-center-shell .workspace-side-group:first-child {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 720px) {
+  .command-center-shell .command-copy h1,
+  .command-center-shell.workspace-theme-day .command-copy h1 {
+    font-size: 34px;
+    line-height: 1.22;
+  }
+
+  .command-center-shell .command-copy p {
+    font-size: 15px;
+    line-height: 1.72;
+  }
+
+  .command-center-shell .workspace-side-group:first-child button,
+  .command-center-shell.workspace-theme-day .workspace-side-group:first-child button {
+    min-height: 48px;
+    padding: 11px 10px;
+  }
+}
+
 /* Product canonical design: module document surfaces follow the /workspace visual system. */
 .safeclaw-module-shell.module-variant-document {
   --workspace-canvas: #010102;
