@@ -10885,12 +10885,103 @@ body:has(.safeclaw-landing) :is(
   line-height: 1.85;
 }
 
+.command-center-shell .input-composer-tray {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(760px, 100%);
+  margin-top: 12px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 12px;
+  background: var(--workspace-surface-1);
+  padding: 8px;
+}
+
+.command-center-shell .composer-attach-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 10px;
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+  cursor: pointer;
+  padding: 7px 11px;
+  white-space: nowrap;
+}
+
+.command-center-shell .composer-attach-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.command-center-shell .composer-attach-button span {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--workspace-accent);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 620;
+  line-height: 1;
+}
+
+.command-center-shell .composer-attach-button b {
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.command-center-shell .composer-attachment-status {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.command-center-shell .composer-attachment-status strong {
+  color: var(--workspace-ink);
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.command-center-shell .composer-attachment-status small {
+  overflow: hidden;
+  color: var(--workspace-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-center-shell .composer-reanalyze-button {
+  margin-left: auto;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--workspace-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 620;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
+.command-center-shell .composer-reanalyze-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .command-center-shell .input-photo-hazard-panel {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(180px, 0.46fr);
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 10px;
   width: min(760px, 100%);
-  margin-top: 18px;
+  margin-top: 12px;
 }
 
 .command-center-shell .input-photo-copy,
@@ -11108,6 +11199,79 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-muted);
   font-size: 12px;
   line-height: 1.55;
+}
+
+.command-center-shell .input-photo-candidates-head,
+.command-center-shell .input-photo-candidates article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 10px;
+}
+
+.command-center-shell .input-photo-candidates-head span,
+.command-center-shell .input-photo-candidates-head strong {
+  color: var(--workspace-muted);
+  font-size: 12px;
+  font-weight: 620;
+}
+
+.command-center-shell .input-photo-candidates article {
+  border: 1px solid var(--workspace-rule);
+  border-radius: 10px;
+  background: var(--workspace-surface-2);
+  padding: 10px 12px;
+}
+
+.command-center-shell .input-photo-candidates article.accepted {
+  border-color: rgba(39, 166, 68, 0.48);
+  box-shadow: inset 3px 0 0 var(--workspace-success);
+}
+
+.command-center-shell .input-photo-candidates article div:first-child {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.command-center-shell .input-photo-candidates article strong {
+  color: var(--workspace-ink);
+  font-size: 13px;
+  font-weight: 620;
+}
+
+.command-center-shell .input-photo-candidates article span,
+.command-center-shell .input-photo-candidates article small {
+  color: var(--workspace-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.command-center-shell .input-photo-candidate-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.command-center-shell .input-photo-candidate-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--workspace-ink);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 620;
+  padding: 6px 9px;
+  white-space: nowrap;
+}
+
+.command-center-shell .input-photo-candidate-actions button:first-child {
+  border-color: var(--workspace-accent);
+  background: var(--workspace-accent);
+  color: #ffffff;
 }
 
 .command-center-shell .evidence-readiness-rail {
@@ -12566,6 +12730,9 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell.workspace-theme-day .input-photo-copy,
+.command-center-shell.workspace-theme-day .input-composer-tray,
+.command-center-shell.workspace-theme-day .composer-attach-button,
+.command-center-shell.workspace-theme-day .composer-reanalyze-button,
 .command-center-shell.workspace-theme-day .input-photo-candidates,
 .command-center-shell.workspace-theme-day .input-photo-preview-grid article,
 .command-center-shell.workspace-theme-day .input-photo-analysis-actions,
@@ -12578,6 +12745,26 @@ body:has(.safeclaw-landing) :is(
   border-radius: 12px;
   background: #ffffff !important;
   box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day .input-composer-tray {
+  background: #ffffff !important;
+}
+
+.command-center-shell.workspace-theme-day .composer-attach-button,
+.command-center-shell.workspace-theme-day .input-photo-candidates article {
+  background: #f7f8fa !important;
+}
+
+.command-center-shell.workspace-theme-day .composer-attach-button span,
+.command-center-shell.workspace-theme-day .input-photo-candidate-actions button:first-child {
+  background: #17191d;
+  color: #ffffff;
+}
+
+.command-center-shell.workspace-theme-day .input-photo-candidates article.accepted {
+  border-color: rgba(22, 163, 74, 0.34) !important;
+  box-shadow: inset 3px 0 0 #16a34a;
 }
 
 .command-center-shell.workspace-theme-day .evidence-readiness-rail {
@@ -12749,6 +12936,23 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell.workspace-theme-day .input-photo-hazard-panel {
     grid-template-columns: 1fr;
+  }
+
+  .command-center-shell .input-composer-tray {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .command-center-shell .composer-attachment-status {
+    flex: 1 1 180px;
+  }
+
+  .command-center-shell .composer-attachment-status small {
+    white-space: normal;
+  }
+
+  .command-center-shell .composer-reanalyze-button {
+    margin-left: 0;
   }
 
   .command-center-shell .input-photo-analysis-actions {

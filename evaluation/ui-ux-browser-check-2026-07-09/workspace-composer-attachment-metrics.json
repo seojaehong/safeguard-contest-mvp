@@ -1,0 +1,23 @@
+{
+  "before": {
+    "tray": true,
+    "attachLabel": "+사진",
+    "photoPanel": false,
+    "horizontalOverflow": false
+  },
+  "after": {
+    "photoPanel": true,
+    "photoCountText": "1/10장 첨부",
+    "acceptedText": "1개 반영",
+    "candidateCount": 2,
+    "acceptedCount": 1,
+    "textareaContainsPhotoCandidate": false,
+    "horizontalOverflow": false
+  },
+  "mobile": {
+    "horizontalOverflow": false,
+    "trayTop": 822,
+    "viewportWidth": 390,
+    "scrollWidth": 390
+  }
+}
