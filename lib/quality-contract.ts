@@ -155,6 +155,43 @@ function structuredItem(response: AskResponse): QualityContractItem {
   };
 }
 
+function dbHarnessItem(response: AskResponse): QualityContractItem {
+  const harness = response.dbHarness;
+  if (!harness) {
+    return {
+      key: "dbHarness",
+      label: "DB 하네스 계약",
+      status: "blocked",
+      detail: "DB가 근거를 먼저 고정한 생성 계약이 응답에 없습니다."
+    };
+  }
+
+  const contract = harness.packet.generationContract;
+  const contractReady =
+    harness.packet.mode === "db_harness_first" &&
+    contract.llmRole === "naturalize_only" &&
+    contract.fallbackChainAllowed === false;
+  if (!contractReady) {
+    return {
+      key: "dbHarness",
+      label: "DB 하네스 계약",
+      status: "blocked",
+      detail: "생성 계약이 DB 우선·문장화 전용 원칙과 맞지 않습니다."
+    };
+  }
+
+  const hasEvidence = harness.summary.directEvidence + harness.summary.sifCases + harness.summary.supportingEvidence > 0;
+  const missingCount = harness.summary.missingEvidence.length;
+  return {
+    key: "dbHarness",
+    label: "DB 하네스 계약",
+    status: hasEvidence && missingCount === 0 ? "ready" : hasEvidence ? "degraded" : "blocked",
+    detail: hasEvidence
+      ? `DB 근거 ${harness.summary.directEvidence + harness.summary.sifCases + harness.summary.supportingEvidence}건을 고정했고, LLM 역할은 문장화 전용입니다.`
+      : "고정된 DB 근거가 없어 전파 전 근거 매칭이 필요합니다."
+  };
+}
+
 function persistenceItem(response: AskResponse): QualityContractItem {
   const hasWorkpackBody = Boolean(response.deliverables.workpackSummaryDraft && response.deliverables.riskAssessmentDraft);
   const hasEvidenceSummary = Boolean(response.evidenceLabels && Object.keys(response.evidenceLabels).length > 0);
@@ -181,6 +218,7 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
     ontologyItem(response),
     evidenceItem(response),
     structuredItem(response),
+    dbHarnessItem(response),
     persistenceItem(response)
   ];
   const modes = integrationModes(response);
@@ -188,6 +226,7 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
   const ontology = items.find((item) => item.key === "ontology") ?? ontologyItem(response);
   const evidence = items.find((item) => item.key === "evidence") ?? evidenceItem(response);
   const structured = items.find((item) => item.key === "structured") ?? structuredItem(response);
+  const dbHarness = items.find((item) => item.key === "dbHarness") ?? dbHarnessItem(response);
   const persistence = items.find((item) => item.key === "persistence") ?? persistenceItem(response);
   const readyCount = countReady(items);
 
@@ -227,6 +266,17 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
       }).length,
       requiredCount: REQUIRED_STRUCTURED_KEYS.length,
       detail: structured.detail
+    },
+    dbHarness: {
+      status: dbHarness.status,
+      mode: response.dbHarness?.packet.mode,
+      llmRole: response.dbHarness?.packet.generationContract.llmRole,
+      fallbackChainAllowed: response.dbHarness?.packet.generationContract.fallbackChainAllowed,
+      directEvidenceCount: response.dbHarness?.summary.directEvidence ?? 0,
+      sifCaseCount: response.dbHarness?.summary.sifCases ?? 0,
+      supportingEvidenceCount: response.dbHarness?.summary.supportingEvidence ?? 0,
+      missingEvidence: response.dbHarness?.summary.missingEvidence ?? [],
+      detail: dbHarness.detail
     },
     persistence: {
       status: persistence.status,

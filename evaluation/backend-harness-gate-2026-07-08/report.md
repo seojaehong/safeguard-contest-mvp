@@ -180,6 +180,14 @@ Claw chat route 변경:
 - 잘못된 mode 값이 들어오면 `template`이 아니라 `enhanced`로 떨어진다.
 - 목적: 워크스페이스 버튼뿐 아니라 `/api/ask`, `/api/ask/stream`, `/ask` 등 서버 호출자가 mode를 생략해도 DB/KOSHA/SIF 하네스 경로가 기본이 되게 한다.
 
+## DB 하네스 생성 계약
+
+- 웹 `runAsk()` 응답에도 `dbHarness.packet`, `dbHarness.promptContext`, `dbHarness.summary`를 추가했다.
+- `enhanced/full` 문서 생성 프롬프트에는 `[DB 하네스 계약]` 섹션이 들어가며, LLM 역할을 `naturalize_only`로 고정한다.
+- 품질 계약에는 `DB 하네스 계약` 항목을 추가했다. 템플릿 모드는 blocked, DB 근거가 고정된 live/enhanced 응답은 ready/degraded로 판정한다.
+- 산출물: `evaluation/backend-harness-gate-2026-07-08/db-harness-web-generation-contract-report.json`
+- 검증: `npm.cmd test -- tests/quality-contract.test.ts tests/ai-deliverables-prompts.test.ts tests/commercial-harness.test.ts tests/run-ask-mode.test.ts` → 4 files / 26 tests passed
+
 ### UI / UX 중간안
 
 - 기본 `/workspace`는 화이트 Day 테마로 진입한다.

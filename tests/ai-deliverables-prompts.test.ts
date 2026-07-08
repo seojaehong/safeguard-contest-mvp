@@ -36,6 +36,16 @@ describe("contextBlock", () => {
     const block = contextBlock(baseCtx);
     expect(block).toMatch(/작업일자: 2026-07-02/);
   });
+
+  it("includes the DB harness contract when provided", () => {
+    const block = contextBlock({
+      ...baseCtx,
+      dbHarnessContext: "역할: LLM은 DB harness가 고정한 근거를 문장화만 한다."
+    });
+
+    expect(block).toContain("[DB 하네스 계약]");
+    expect(block).toContain("문장화만 한다");
+  });
 });
 
 describe("emergency contact whitelist injection", () => {
