@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OperationMemoryPreview } from "@/components/OperationMemoryPreview";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { assembleGraph, loadGraph } from "@/lib/ontology/graph-store";
 import { SEED_EDGES, SEED_NODES, SEED_STATS } from "@/lib/ontology/seed/core-triples";
@@ -118,6 +119,8 @@ export default async function OntologyPage() {
               </article>
             </div>
           </section>
+
+          <OperationMemoryPreview />
 
           <section className="ontology-graph-shell safeclaw-module-panel" aria-label="옵시디언형 온톨로지 그래프">
             <div className="compact-head">
