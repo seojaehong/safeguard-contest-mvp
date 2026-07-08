@@ -15,7 +15,19 @@
     "embeddingGenerated": false,
     "uploaded": false,
     "runtimeVectorRetrieval": "approval_gated_feature_flag",
-    "sourceReport": "evaluation/sif-embedding-gate/report.json"
+    "sourceReport": "evaluation/sif-embedding-gate/report.json",
+    "nextPreflight": {
+      "artifact": "evaluation/sif-embedding-gate/approval-preflight-report.json",
+      "command": "npm.cmd run knowledge:sif-embedding-preflight",
+      "ok": true,
+      "dbMutationPerformed": false,
+      "embeddingGenerated": false,
+      "uploaded": false,
+      "failedCheckCount": 0,
+      "executionReadyAfterApproval": false,
+      "missingExecutionPrerequisite": "OPENAI_API_KEY in current execution environment",
+      "heldCommand": "npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload"
+    }
   },
   "sifVectorRetrieval": {
     "state": "code_ready_approval_gated",
@@ -181,6 +193,32 @@
       "build": {
         "command": "npm.cmd run build",
         "passed": true
+      }
+    },
+    "sifEmbeddingPreflightTests": {
+      "command": "npm.cmd test -- tests/sif-embedding-preflight.test.ts tests/commercial-harness.test.ts tests/commercial-migration.test.ts tests/safety-reference-hybrid.test.ts",
+      "filesPassed": 4,
+      "testsPassed": 14
+    },
+    "latestSifEmbeddingApprovalPreflight": {
+      "preflight": {
+        "command": "npm.cmd run knowledge:sif-embedding-preflight",
+        "artifact": "evaluation/sif-embedding-gate/approval-preflight-report.json",
+        "ok": true
+      },
+      "tests": {
+        "command": "npm.cmd test -- tests/sif-embedding-preflight.test.ts tests/commercial-harness.test.ts tests/commercial-migration.test.ts tests/safety-reference-hybrid.test.ts",
+        "filesPassed": 4,
+        "testsPassed": 14
+      },
+      "build": {
+        "command": "npm.cmd run build",
+        "passed": true
+      },
+      "typecheck": {
+        "command": "npm.cmd run typecheck",
+        "passed": true,
+        "note": "Parallel run raced .next/types generation; sequential rerun after build passed."
       }
     }
   },

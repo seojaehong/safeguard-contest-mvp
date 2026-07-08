@@ -73,6 +73,46 @@ npm.cmd run knowledge:sif-embedding-corpus -- --limit 2 --upload --output-dir ev
 - uploadedCount: 0
 - uploadError: `--upload requires explicit --approved-upload after DB migration approval`
 
+## Next Gate Preflight
+
+생성 시각: 2026-07-09 01:03 KST
+
+명령:
+
+```powershell
+npm.cmd run knowledge:sif-embedding-preflight
+```
+
+산출물:
+
+- `evaluation/sif-embedding-gate/approval-preflight-report.json`
+
+판정:
+
+- corpus/manifest/report 일치: 통과
+- JSONL line count와 corpusCount 일치: 통과
+- 빈 embedding text, 관리대책 누락, 문서반영 누락, 중복 contentHash: 0건
+- 업로드 승인 플래그 가드: 통과
+- `010_commercial_operations.sql`의 `safety_reference_embeddings`, HNSW index, `match_safety_reference_embeddings` RPC 계약: 통과
+- RLS: `safety_reference_embeddings` public select는 `using (false)`로 차단
+- DB mutation: 미실행
+- OpenAI embedding 생성: 미실행
+- Supabase upload: 미실행
+
+현재 실행 환경:
+
+- Supabase URL/service role: 있음
+- `OPENAI_API_KEY`: 없음
+- `SAFETY_REFERENCE_VECTOR_SEARCH=1`: 꺼짐
+- 따라서 승인 후 실제 embedding 생성/업로드 전에는 OpenAI key가 들어간 실행 환경이 필요하다.
+
+다음 승인 결정:
+
+- `010_commercial_operations.sql` 전체 적용 또는 embedding-only migration 분리
+- 실행 환경의 `OPENAI_API_KEY` 확인
+- 승인 후에만 `--embed --upload --approved-upload` 실행
+- 업로드 row count가 6,032인지 검증한 뒤 `SAFETY_REFERENCE_VECTOR_SEARCH=1` 활성화
+
 ## Vision/OCR 연결 상태
 
 Before/After 개선 사진은 `app/api/workpacks/[id]/improvements/route.ts`에서 `analyzeImprovementPhotos`를 호출한다.
