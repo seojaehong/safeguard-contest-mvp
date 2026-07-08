@@ -1,0 +1,42 @@
+{
+  "date": "2026-07-08",
+  "status": "code_ready_approval_gated",
+  "dbMutationPerformed": false,
+  "runtimeDefault": "disabled",
+  "featureFlag": "SAFETY_REFERENCE_VECTOR_SEARCH=1",
+  "queryEmbedding": {
+    "provider": "openai",
+    "modelDefault": "text-embedding-3-small",
+    "dimensions": 1536,
+    "requiresEnv": "OPENAI_API_KEY",
+    "timeoutMs": 20000,
+    "retryCount": 1
+  },
+  "supabaseContract": {
+    "migrationDraft": "supabase/migrations/010_commercial_operations.sql",
+    "table": "safety_reference_embeddings",
+    "rpc": "match_safety_reference_embeddings",
+    "index": "idx_safety_reference_embeddings_vector_cosine",
+    "maxRpcResults": 20
+  },
+  "runtimeBehavior": {
+    "enabledPath": "query embedding -> match_safety_reference_embeddings -> merge with ranked RPC",
+    "fallbackPath": "ranked RPC -> REST ilike",
+    "resultModeWhenEnabled": "hybrid-vector-rpc",
+    "resultModeWhenDisabled": "ranked-rpc or rest-ilike",
+    "dedupeKey": "safety_reference_items.id"
+  },
+  "approvalRequiredBeforeActivation": [
+    "Apply or split 010_commercial_operations.sql",
+    "Generate embeddings from approved SIF/KOSHA corpus",
+    "Upload embeddings with --approved-upload",
+    "Set OPENAI_API_KEY in the server runtime",
+    "Set SAFETY_REFERENCE_VECTOR_SEARCH=1 after DB verification"
+  ],
+  "verification": {
+    "unitTests": "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts",
+    "focusedRegression": "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/workspace-layout-regression.test.ts",
+    "typecheck": "npm.cmd run typecheck",
+    "build": "npm.cmd run build"
+  }
+}

@@ -6,8 +6,26 @@
     "corpusReady": true,
     "embeddingGenerated": false,
     "uploaded": false,
-    "runtimeVectorRetrieval": false,
+    "runtimeVectorRetrieval": "approval_gated_feature_flag",
     "sourceReport": "evaluation/sif-embedding-gate/report.json"
+  },
+  "sifVectorRetrieval": {
+    "state": "code_ready_approval_gated",
+    "defaultRuntime": "disabled",
+    "featureFlag": "SAFETY_REFERENCE_VECTOR_SEARCH=1",
+    "embeddingModelDefault": "text-embedding-3-small",
+    "dimensions": 1536,
+    "requires": [
+      "010_commercial_operations.sql approval and application",
+      "safety_reference_embeddings populated by approved upload",
+      "OPENAI_API_KEY for query embeddings",
+      "match_safety_reference_embeddings RPC available"
+    ],
+    "fallback": "ranked RPC then REST ilike search",
+    "code": "lib/safety-reference-catalog.ts",
+    "migration": "supabase/migrations/010_commercial_operations.sql",
+    "test": "tests/safety-reference-hybrid.test.ts",
+    "dbMutationPerformed": false
   },
   "visionOcr": {
     "serverAdapter": "lib/photo-vision-analysis.ts",
@@ -76,9 +94,21 @@
       "npm.cmd test -- tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts",
       "npm.cmd test -- tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-token-service.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts",
       "local /api/agent/chat smoke on http://127.0.0.1:3111",
+      "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts",
+      "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/workspace-layout-regression.test.ts",
       "npm.cmd run typecheck",
       "npm.cmd run build"
     ],
+    "sifVectorGateTests": {
+      "command": "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts",
+      "filesPassed": 2,
+      "testsPassed": 7
+    },
+    "latestFocusedTests": {
+      "command": "npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/mcp-tools.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/workspace-layout-regression.test.ts",
+      "filesPassed": 11,
+      "testsPassed": 70
+    },
     "openClawDefaultModeTests": {
       "command": "npm.cmd test -- tests/run-ask-mode.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-token-service.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/ai-provider-policy.test.ts tests/ai-doc-budget.test.ts",
       "filesPassed": 8,

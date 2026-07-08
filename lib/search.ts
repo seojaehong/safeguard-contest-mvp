@@ -4,7 +4,12 @@ import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-d
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
-import { searchSafetyReferences, type SafetyReferenceItem } from "./safety-reference-catalog";
+import {
+  searchSafetyReferences,
+  type SafetyReferenceItem,
+  type SafetyReferenceRetrievalMode,
+  type SafetyReferenceSearchResult
+} from "./safety-reference-catalog";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
 import { summarizeLegalSourceMix } from "./legal-sources";
 import { fetchWeatherSignal } from "./weather";
@@ -847,12 +852,22 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // Track D / E: Supabase safety_reference_items (9,920 rows) RAG.
     // Boost KOSHA technical-* types ahead of generic sif-case rows so the
     // most authoritative refs (KOSHA 기술지침 / 기술지원규정) actually show up.
-    const emptyResult = {
+    const emptyResult: SafetyReferenceSearchResult = {
       ok: false as const,
       configured: false as const,
       query: question,
       count: 0,
       items: [] as SafetyReferenceItem[],
+      retrievalMode: "unconfigured",
+      vectorSearch: {
+        enabled: false,
+        attempted: false,
+        ok: false,
+        reason: "disabled",
+        count: 0,
+        model: "text-embedding-3-small",
+        message: "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+      },
       message: ""
     };
     const safeSearch = (opts: Parameters<typeof searchSafetyReferences>[0]) =>
@@ -884,12 +899,28 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         `KOSHA 기술지침 ${guideline.count}건`,
         `일반 카탈로그 ${general.count}건`
       ];
+      const buckets = [supportReg, guideline, general];
+      const retrievalMode: SafetyReferenceRetrievalMode = buckets.some((bucket) => bucket.retrievalMode === "hybrid-vector-rpc")
+        ? "hybrid-vector-rpc"
+        : buckets.some((bucket) => bucket.retrievalMode === "ranked-rpc")
+          ? "ranked-rpc"
+          : buckets.some((bucket) => bucket.retrievalMode === "rest-ilike")
+            ? "rest-ilike"
+            : "unconfigured";
+      const vectorSearch =
+        buckets.find((bucket) => bucket.vectorSearch.ok)?.vectorSearch ||
+        buckets.find((bucket) => bucket.vectorSearch.attempted)?.vectorSearch ||
+        general.vectorSearch ||
+        guideline.vectorSearch ||
+        supportReg.vectorSearch;
       return {
         ok: merged.length > 0 || general.ok || guideline.ok || supportReg.ok,
         configured,
         query: question,
         count: merged.length,
         items: merged,
+        retrievalMode,
+        vectorSearch,
         message: configured
           ? `Supabase 안전 지식 DB 호출 완료 (${messageParts.join(", ")})`
           : "Supabase 안전 지식 DB가 설정되지 않았습니다."
@@ -1179,6 +1210,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           query: safetyReference.query,
           count: safetyReference.count,
           totalItems: safetyReference.items.length,
+          retrievalMode: safetyReference.retrievalMode,
+          vectorSearch: safetyReference.vectorSearch,
           message: safetyReference.message,
           items: safetyReference.items.slice(0, 8).map((r) => ({
             id: r.id,
