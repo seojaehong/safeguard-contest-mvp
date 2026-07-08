@@ -41,9 +41,17 @@
     "workspaceUiWiredToApi": true,
     "workspaceFlow": "save workpack -> POST multipart before/after photos -> store improvement candidate -> local fallback",
     "apiResponseExposesVisionSummary": true,
+    "apiResponseExposesDetectedHazards": true,
+    "apiResponseExposesObservedImprovement": true,
+    "apiResponseExposesReflectedDocuments": true,
     "dbWriteExecutedInThisRun": false,
     "harnessMemoryIncludesOcr": true,
-    "learningExportIncludesOcr": true
+    "harnessMemoryIncludesDetectedHazards": true,
+    "harnessMemoryIncludesObservedImprovement": true,
+    "learningExportIncludesOcr": true,
+    "learningExportIncludesDetectedHazards": true,
+    "learningExportIncludesObservedImprovement": true,
+    "contractArtifact": "evaluation/backend-harness-gate-2026-07-08/vision-ocr-memory-contract-report.json"
   },
   "ontology": {
     "listView": true,

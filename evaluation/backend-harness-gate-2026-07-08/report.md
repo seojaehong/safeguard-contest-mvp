@@ -48,9 +48,12 @@ SIF vector gate 산출물:
 - 모델 어댑터 존재: `lib/photo-vision-analysis.ts`
 - 동작: Before/After 파일이 모두 있고 `OPENAI_API_KEY`가 있으면 OpenAI Responses API에 이미지 2장을 전달
 - 결과 저장 위치: `workpack_improvements.analysis_payload`
-- 보강: 하네스 메모리와 learning export가 `analysis_payload.summary`, `analysis_payload.ocrText`를 회수
+- 보강: 하네스 메모리와 learning export가 `summary`, `detectedHazards`, `observedImprovement`, `ocrText`, `reflectedDocuments`를 회수
 - 보강: 사용자-facing `/workspace` 개선 캡처 패널이 문서팩 DB 저장 후 `/api/workpacks/:id/improvements` multipart API로 Before/After 사진과 메모를 전달
+- 보강: 최근 개선사항 카드에 사진 기반 위험요인, 관찰 개선, OCR을 표시
 - 보강: 로그인/DB/migration 미연결 시 기존 localStorage 후보로 fallback해 현장 메모를 버리지 않음
+- 산출물: `evaluation/backend-harness-gate-2026-07-08/vision-ocr-memory-contract-report.json`
+- 검증: `npm.cmd test -- tests/photo-vision-analysis.test.ts tests/commercial-harness.test.ts tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/reporting-downloads.test.ts` → 5 files / 20 tests passed
 - 주의: 이번 검증에서 실제 DB write나 사진 업로드는 실행하지 않았다.
 
 ### 온톨로지

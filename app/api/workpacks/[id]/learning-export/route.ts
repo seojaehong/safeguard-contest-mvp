@@ -40,6 +40,12 @@ function readOptionalPayloadString(value: unknown, key: string): string | undefi
   return typeof text === "string" && text.trim() ? compactText(text) : undefined;
 }
 
+function readOptionalPayloadStringArray(value: unknown, key: string): string[] | undefined {
+  if (!isRecord(value)) return undefined;
+  const items = readStringArray(value[key]).map((item) => compactText(item, 80));
+  return items.length ? items : undefined;
+}
+
 function normalizeImprovementSourceType(value: string | null): HarnessImprovement["sourceType"] {
   if (value === "manual" || value === "photo_analysis" || value === "operator_note") return value;
   return "operator_note";
@@ -69,6 +75,8 @@ async function loadImprovementMemory(
       reflectedDocuments: readStringArray(row.reflected_documents),
       sourceType: normalizeImprovementSourceType(row.source_type),
       visionSummary: readOptionalPayloadString(row.analysis_payload, "summary"),
+      detectedHazards: readOptionalPayloadStringArray(row.analysis_payload, "detectedHazards"),
+      observedImprovement: readOptionalPayloadString(row.analysis_payload, "observedImprovement"),
       ocrText: readOptionalPayloadString(row.analysis_payload, "ocrText")
     }));
   } catch (error) {

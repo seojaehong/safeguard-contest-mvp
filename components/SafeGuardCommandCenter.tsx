@@ -122,6 +122,8 @@ type ImprovementApiResult = {
     observedImprovement?: string;
     detectedHazards?: string[];
     ocrText?: string;
+    reflectedDocuments?: string[];
+    errorMessage?: string;
   };
   message: string;
 };
@@ -1031,6 +1033,8 @@ export function SafeGuardCommandCenter({
     let workpackId: string | undefined;
     let sourceType: OperationImprovement["sourceType"] = beforePhoto && afterPhoto ? "photo_analysis" : "manual";
     let visionSummary: string | undefined;
+    let detectedHazards: string[] | undefined;
+    let observedImprovement: string | undefined;
     let ocrText: string | undefined;
     let saveMessage = "로컬 후보로 보관했습니다.";
 
@@ -1047,6 +1051,8 @@ export function SafeGuardCommandCenter({
           remoteImprovementId = improvementSave.improvementId;
           sourceType = improvementSave.sourceType || sourceType;
           visionSummary = improvementSave.vision?.summary || improvementSave.vision?.observedImprovement;
+          detectedHazards = improvementSave.vision?.detectedHazards;
+          observedImprovement = improvementSave.vision?.observedImprovement;
           ocrText = improvementSave.vision?.ocrText;
         }
       }
@@ -1071,6 +1077,8 @@ export function SafeGuardCommandCenter({
       workpackId,
       remoteImprovementId,
       visionSummary,
+      detectedHazards,
+      observedImprovement,
       ocrText,
       saveMessage
     };
@@ -1807,6 +1815,8 @@ export function SafeGuardCommandCenter({
                         <small>사진: {item.beforePhotoName || "Before 미첨부"} → {item.afterPhotoName || "After 미첨부"}</small>
                       ) : null}
                       {item.photoAnalysisSummary ? <small>{item.photoAnalysisSummary}</small> : null}
+                      {item.detectedHazards?.length ? <small>위험요인: {item.detectedHazards.join(" · ")}</small> : null}
+                      {item.observedImprovement ? <small>관찰 개선: {item.observedImprovement}</small> : null}
                       {item.ocrText ? <small>OCR: {item.ocrText}</small> : null}
                       {item.storageMode ? <small>{item.storageMode === "db" ? "DB 후보 저장됨" : "로컬 후보"}{item.saveMessage ? ` · ${item.saveMessage}` : ""}</small> : null}
                       <small>{item.reflectedDocuments.join(" · ")} 후보</small>

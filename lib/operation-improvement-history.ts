@@ -16,6 +16,8 @@ export type OperationImprovement = {
   workpackId?: string;
   remoteImprovementId?: string;
   visionSummary?: string;
+  detectedHazards?: string[];
+  observedImprovement?: string;
   ocrText?: string;
   saveMessage?: string;
 };
@@ -52,6 +54,8 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
         (typeof item.workpackId === "string" || typeof item.workpackId === "undefined") &&
         (typeof item.remoteImprovementId === "string" || typeof item.remoteImprovementId === "undefined") &&
         (typeof item.visionSummary === "string" || typeof item.visionSummary === "undefined") &&
+        (isStringArray(item.detectedHazards) || typeof item.detectedHazards === "undefined") &&
+        (typeof item.observedImprovement === "string" || typeof item.observedImprovement === "undefined") &&
         (typeof item.ocrText === "string" || typeof item.ocrText === "undefined") &&
         (typeof item.saveMessage === "string" || typeof item.saveMessage === "undefined")
       );
