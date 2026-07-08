@@ -17,6 +17,8 @@ export type SafetyReferenceItem = {
   short_summary?: string;
   evidence_role_label?: string;
   document_reflection_label?: string;
+  source_kind_label?: string;
+  operation_signal_label?: string;
 };
 
 export type SafetyReferenceSearchResult = {
@@ -120,7 +122,9 @@ function normalizeReferenceItem(item: SafetyReferenceItem): SafetyReferenceItem 
     reflected_documents: reflectedDocuments,
     short_summary: buildShortSummary(item),
     evidence_role_label: evidenceRole === "direct" ? "문서 문구 직접 근거" : "현장 판단 보조 근거",
-    document_reflection_label: buildDocumentReflectionLabel(reflectedDocuments, item.controls)
+    document_reflection_label: buildDocumentReflectionLabel(reflectedDocuments, item.controls),
+    source_kind_label: buildSourceKindLabel(item.item_type),
+    operation_signal_label: buildOperationSignalLabel(item.item_type, item.controls)
   };
 }
 
@@ -153,6 +157,25 @@ function buildDocumentReflectionLabel(documents: string[], controls: string[]): 
   const documentLabel = documents.slice(0, 3).join(" · ") || "문서 보완 후보";
   const actionLabel = controls[0] ? compactText(controls[0], 48) : "확인 항목으로 반영";
   return `${documentLabel}에 ${actionLabel}`;
+}
+
+function buildSourceKindLabel(itemType: string): string {
+  if (itemType === "sif-case") return "고위험요인 사례";
+  if (itemType === "technical-guideline" || itemType === "technical-support-regulation") return "KOSHA 공식자료";
+  if (itemType === "tbm") return "TBM 반영 기준";
+  if (itemType === "risk_assessment") return "위험성평가 기준";
+  if (itemType === "work_plan") return "작업계획 기준";
+  if (itemType === "construction-process") return "공정 분류 기준";
+  if (itemType === "machinery") return "장비 위험 기준";
+  return "안전 참고자료";
+}
+
+function buildOperationSignalLabel(itemType: string, controls: string[]): string {
+  const control = controls[0] ? compactText(controls[0], 42) : "현장 확인 항목";
+  if (itemType === "sif-case") return `유사사례에서 ${control} 후보`;
+  if (itemType === "tbm") return `TBM에서 ${control} 확인`;
+  if (itemType === "risk_assessment") return `위험성평가에 ${control} 반영`;
+  return `문서와 TBM에 ${control} 반영`;
 }
 
 function safeIlikeTerm(value: string): string {

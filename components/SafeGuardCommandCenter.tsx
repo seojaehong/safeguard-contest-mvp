@@ -8,7 +8,7 @@ import { AgentConsole } from "@/components/AgentConsole";
 import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import { fetchAskStream } from "@/lib/ask-stream-client";
 import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
-import type { AskResponse, QualityContractStatus } from "@/lib/types";
+import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/types";
 import type { FieldExample } from "@/lib/field-examples";
 import { formatEvidenceBadge } from "@/lib/smsa-mapping";
 
@@ -22,14 +22,14 @@ type SafeGuardCommandCenterProps = {
 type GenerationState = "idle" | "generating" | "ready" | "error";
 
 type WorkflowStep = {
-  key: "input" | "risk" | "pack" | "workers" | "dispatch" | "history";
+  key: "input" | "pack" | "share";
   id: string;
   label: string;
   caption: string;
 };
 
 type StepStatus = "done" | "active" | "pending" | "locked";
-type StepAnchor = "command" | "risk" | "workpack" | "workers" | "dispatch" | "history";
+type StepAnchor = "command" | "workpack" | "dispatch-overview";
 
 type FieldBrief = {
   companyName: string;
@@ -42,6 +42,19 @@ type FieldBrief = {
   foreignWorkerSignal: string;
 };
 
+type OperationImprovement = {
+  id: string;
+  createdAt: string;
+  siteName: string;
+  workSummary: string;
+  hazardLabel: string;
+  improvementText: string;
+  reflectedDocuments: string[];
+  beforePhotoName?: string;
+  afterPhotoName?: string;
+  photoAnalysisSummary?: string;
+};
+
 type WeatherBrief = AskResponse["externalData"]["weather"];
 
 type WeatherBriefResponse = {
@@ -50,22 +63,32 @@ type WeatherBriefResponse = {
   message?: string;
 };
 
+type ReadinessTone = "ready" | "pending" | "warn";
+
+type ReadinessRailItem = {
+  key: string;
+  label: string;
+  status: string;
+  detail: string;
+  tone: ReadinessTone;
+};
+
+type GenerationStage = {
+  label: string;
+  detail: string;
+  tone: ReadinessTone;
+};
+
 const workflowSteps: WorkflowStep[] = [
-  { id: "01", key: "input", label: "작업 입력", caption: "현장·작업·조건" },
-  { id: "02", key: "risk", label: "API 근거 확인", caption: "법령·기상·교육" },
-  { id: "03", key: "pack", label: "문서팩 편집", caption: "Excel · HWPX" },
-  { id: "04", key: "workers", label: "작업자·교육", caption: "언어·이수" },
-  { id: "05", key: "dispatch", label: "현장 전파", caption: "메일 · 문자" },
-  { id: "06", key: "history", label: "이력 저장", caption: "문서·교육·전파" }
+  { id: "01", key: "input", label: "입력", caption: "현장 상황" },
+  { id: "02", key: "pack", label: "문서", caption: "결과 검토" },
+  { id: "03", key: "share", label: "공유", caption: "열람·확인" }
 ];
 
 const stepAnchors: Record<WorkflowStep["key"], StepAnchor> = {
   input: "command",
-  risk: "risk",
   pack: "workpack",
-  workers: "workers",
-  dispatch: "dispatch",
-  history: "history"
+  share: "dispatch-overview"
 };
 
 const outputItems: Array<{ title: string; key: DocumentKey }> = [
@@ -84,6 +107,13 @@ const outputItems: Array<{ title: string; key: DocumentKey }> = [
 ];
 
 const totalDocumentCount = outputItems.length;
+const primaryDocumentKeys = new Set<DocumentKey>([
+  "riskAssessmentDraft",
+  "tbmBriefing",
+  "tbmLogDraft"
+]);
+const focusDocumentItems = outputItems.filter((item) => primaryDocumentKeys.has(item.key));
+const IMPROVEMENT_STORAGE_KEY = "safeclaw.operationImprovements.v1";
 
 function statusCopy(state: GenerationState) {
   if (state === "generating") return "문서 생성 중";
@@ -100,23 +130,23 @@ function stepStatusCopy(status: StepStatus) {
 }
 
 function activeStep(state: GenerationState): WorkflowStep["key"] {
-  if (state === "generating") return "risk";
+  if (state === "generating") return "input";
   if (state === "ready") return "pack";
-  if (state === "error") return "risk";
+  if (state === "error") return "input";
   return "input";
 }
 
 function stepStatuses(state: GenerationState): Record<WorkflowStep["key"], StepStatus> {
   if (state === "generating") {
-    return { input: "done", risk: "active", pack: "pending", workers: "locked", dispatch: "locked", history: "locked" };
+    return { input: "active", pack: "pending", share: "locked" };
   }
   if (state === "ready") {
-    return { input: "done", risk: "done", pack: "active", workers: "pending", dispatch: "pending", history: "pending" };
+    return { input: "done", pack: "active", share: "pending" };
   }
   if (state === "error") {
-    return { input: "done", risk: "active", pack: "pending", workers: "locked", dispatch: "locked", history: "locked" };
+    return { input: "active", pack: "pending", share: "locked" };
   }
-  return { input: "active", risk: "pending", pack: "pending", workers: "locked", dispatch: "locked", history: "locked" };
+  return { input: "active", pack: "pending", share: "locked" };
 }
 
 function lawCount(data: AskResponse | null, state: GenerationState) {
@@ -142,20 +172,6 @@ function operationalStatus(data: AskResponse | null, state: GenerationState) {
   if (state === "error") return "연결 점검 필요";
   if (data) return data.status.summary || "근거 연결됨";
   return "입력 대기";
-}
-
-function weatherStatusLabel(data: AskResponse | null, weather: WeatherBrief | null, loading: boolean) {
-  const currentWeather = data?.externalData.weather || weather;
-  if (loading) return "확인 중";
-  if (currentWeather?.mode === "live") return "현재 반영";
-  if (currentWeather) return "보강 필요";
-  return "대기";
-}
-
-function apiStackLabel(data: AskResponse | null, weather: WeatherBrief | null) {
-  if (data) return "7개 조합";
-  if (weather?.mode === "live") return "기상 선조회";
-  return "생성 시 조합";
 }
 
 function compactWeatherBrief(weather: string) {
@@ -286,11 +302,6 @@ function buildApiFieldBrief(data: AskResponse, fallbackExample: FieldExample): F
   };
 }
 
-function statusRowState(active: boolean, warning = false) {
-  if (warning) return "warn";
-  return active ? "live" : "pending";
-}
-
 function qualityStatusCopy(status: QualityContractStatus) {
   if (status === "ready") return "준비됨";
   if (status === "blocked") return "차단";
@@ -298,15 +309,224 @@ function qualityStatusCopy(status: QualityContractStatus) {
   return "확인 중";
 }
 
-function qualityOverallLabel(data: AskResponse | null) {
-  if (!data?.qualityContract) return "생성 후 확인";
-  return qualityStatusCopy(data.qualityContract.overall);
-}
-
 function qualityProofClass(status: QualityContractStatus) {
   if (status === "ready") return "api-proof live";
   if (status === "blocked" || status === "degraded") return "api-proof warn";
   return "api-proof";
+}
+
+function readinessClass(tone: ReadinessTone) {
+  if (tone === "ready") return "ready";
+  if (tone === "warn") return "warn";
+  return "pending";
+}
+
+function modeTone(mode: IntegrationMode | "unconfigured" | undefined): ReadinessTone {
+  if (mode === "live") return "ready";
+  if (mode === "fallback" || mode === "mock" || mode === "unconfigured") return "warn";
+  return "pending";
+}
+
+function modeCopy(mode: IntegrationMode | "unconfigured" | undefined) {
+  if (mode === "live") return "매칭됨";
+  if (mode === "fallback") return "보조 근거";
+  if (mode === "mock") return "예시 기준";
+  if (mode === "unconfigured") return "연결 대기";
+  return "조회 예정";
+}
+
+function buildReadinessRail(
+  data: AskResponse | null,
+  state: GenerationState,
+  liveWeather: WeatherBrief | null,
+  isWeatherLoading: boolean
+): ReadinessRailItem[] {
+  const referenceCount = data?.externalData.safetyReference?.count || 0;
+  const knowledgeCount = data?.externalData.safetyKnowledge?.matches.length || 0;
+  const koshaCount = data?.externalData.kosha.references.length || 0;
+  const ontologyReviewable = data?.ontologyQa?.result.reviewable;
+  const generated = Boolean(data);
+  const generating = state === "generating";
+  const weatherMode = data?.externalData.weather.mode || liveWeather?.mode;
+
+  return [
+    {
+      key: "sif",
+      label: "고위험요인 사례",
+      status: referenceCount ? `${referenceCount}건 반영` : generating ? "조회 중" : "조회 예정",
+      detail: referenceCount
+        ? "SIF·공정·장비 자료를 위험성평가/TBM 후보로 압축했습니다."
+        : "입력 작업과 유사한 SIF 사례와 작업별 참고자료를 찾습니다.",
+      tone: referenceCount ? "ready" : generating ? "pending" : "pending"
+    },
+    {
+      key: "kosha",
+      label: "KOSHA 공식자료",
+      status: koshaCount ? `${koshaCount}건 연결` : generated ? modeCopy(data?.externalData.kosha.mode) : "조회 예정",
+      detail: koshaCount
+        ? "기술지침·교육자료가 문서 근거와 교육 항목에 연결됩니다."
+        : "공식자료와 교육 추천을 문서 하단 근거로 붙입니다.",
+      tone: koshaCount ? "ready" : modeTone(data?.externalData.kosha.mode)
+    },
+    {
+      key: "ontology",
+      label: "위험요인-조치 그래프",
+      status: ontologyReviewable
+        ? data?.ontologyQa?.result.verdict || "검수됨"
+        : generated ? "검수 보류" : "생성 후 검수",
+      detail: ontologyReviewable
+        ? "작업유형, 위험요인, 감소대책, 조문 경로를 문서 본문과 대조했습니다."
+        : "published 온톨로지만 사용해 누락 조치를 확인합니다.",
+      tone: ontologyReviewable
+        ? data?.ontologyQa?.result.verdict === "통과" ? "ready" : "warn"
+        : generated ? "warn" : "pending"
+    },
+    {
+      key: "history",
+      label: "현장 이력",
+      status: generated ? "저장 준비" : "생성 후 연결",
+      detail: "오늘 작업과 개선사항은 workpack 이력에 남겨 다음 유사 작업/TBM의 후보가 됩니다.",
+      tone: generated ? "ready" : "pending"
+    },
+    {
+      key: "weather",
+      label: "기상·조건",
+      status: isWeatherLoading ? "확인 중" : modeCopy(weatherMode),
+      detail: liveWeather || data ? "입력 지역의 기상 조건을 현장 브리프와 TBM에 반영합니다." : "입력 중 현재 기상 신호를 먼저 확인합니다.",
+      tone: isWeatherLoading ? "pending" : modeTone(weatherMode)
+    }
+  ];
+}
+
+function buildGenerationStages(data: AskResponse | null, state: GenerationState): GenerationStage[] {
+  const generating = state === "generating";
+  const generated = Boolean(data);
+  return [
+    {
+      label: "기상 확인",
+      detail: generated ? "현장 조건 반영" : "지역·날씨 신호 확인",
+      tone: generated ? "ready" : generating ? "pending" : "pending"
+    },
+    {
+      label: "법령 매칭",
+      detail: generated ? "문서 근거 연결" : "산안법·중처법 근거 탐색",
+      tone: generated ? "ready" : generating ? "pending" : "pending"
+    },
+    {
+      label: "SIF/KOSHA DB",
+      detail: generated ? "유사사례 압축" : "고위험 사례와 기술자료 조회",
+      tone: generated ? "ready" : generating ? "pending" : "pending"
+    },
+    {
+      label: "온톨로지 QA",
+      detail: generated ? "누락 조치 대조" : "작업유형 그래프 준비",
+      tone: generated ? "ready" : generating ? "pending" : "pending"
+    },
+    {
+      label: "문서 생성",
+      detail: generated ? "위험성평가/TBM 준비" : "핵심 문서 작성",
+      tone: generated ? "ready" : generating ? "pending" : "pending"
+    }
+  ];
+}
+
+function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): Array<{ label: string; value: string; detail: string; tone: ReadinessTone }> {
+  if (!data) {
+    return [
+      { label: "직접 근거", value: "생성 후 표시", detail: "법령·KOSHA·문서 반영 위치를 확인합니다.", tone: "pending" },
+      { label: "보조 근거", value: "생성 후 표시", detail: "SIF 사례와 현장 조건을 함께 확인합니다.", tone: "pending" }
+    ];
+  }
+
+  const documentTitle = outputItems.find((item) => item.key === key)?.title || "선택 문서";
+  const evidenceLabel = data.evidenceLabels?.[key];
+  const referenceItems = data.externalData.safetyReference?.items || [];
+  const directReference = referenceItems.find((item) => item.evidenceRoleLabel?.includes("직접"))
+    || referenceItems.find((item) => item.primaryDocuments.includes(documentTitle))
+    || referenceItems[0];
+  const supportReference = referenceItems.find((item) => item.evidenceRoleLabel?.includes("보조"))
+    || data.externalData.safetyKnowledge?.matches[0];
+  const supportDetail = supportReference
+    ? "documentReflectionLabel" in supportReference
+      ? supportReference.documentReflectionLabel
+      : "operationSignalLabel" in supportReference
+        ? supportReference.operationSignalLabel
+        : undefined
+    : undefined;
+  const qa = data.ontologyQa?.result;
+  const missingControls = qa?.reviewable ? qa.missing.controls : [];
+
+  return [
+    {
+      label: "직접 근거",
+      value: evidenceLabel ? formatEvidenceBadge(evidenceLabel.article) : directReference ? "공식자료 반영" : "근거 확인",
+      detail: directReference?.operationSignalLabel || directReference?.shortSummary || evidenceLabel?.purpose || "법령·KOSHA 근거를 문서 하단에 연결합니다.",
+      tone: evidenceLabel || directReference ? "ready" : "warn"
+    },
+    {
+      label: "보조 근거",
+      value: supportReference ? "SIF/지식 DB 연결" : "보조 근거 없음",
+      detail: supportReference?.shortSummary || supportDetail || "유사사례와 현장 조건은 현장 확인 후 참고합니다.",
+      tone: supportReference ? "ready" : "pending"
+    },
+    {
+      label: "품질 계약",
+      value: data.qualityContract ? qualityStatusCopy(data.qualityContract.overall) : "확인 중",
+      detail: data.qualityContract?.items.find((item) => item.status !== "ready")?.detail || "인용·구조·저장 준비 상태를 함께 확인합니다.",
+      tone: data.qualityContract?.overall === "ready" ? "ready" : data.qualityContract ? "warn" : "pending"
+    },
+    {
+      label: "온톨로지 QA",
+      value: qa?.reviewable ? qa.verdict : "검수 보류",
+      detail: qa?.reviewable
+        ? missingControls.length
+          ? missingControls.slice(0, 2).map((item) => item.control).join(" · ")
+          : "필수 안전조치가 문서 본문에 반영됐습니다."
+        : "published 작업유형 그래프와 매칭되면 누락 조치를 표시합니다.",
+      tone: qa?.reviewable ? missingControls.length ? "warn" : "ready" : "pending"
+    }
+  ];
+}
+
+function parseStoredImprovements(): OperationImprovement[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(IMPROVEMENT_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is OperationImprovement => {
+      if (typeof item !== "object" || item === null || Array.isArray(item)) return false;
+      const record = item as Partial<OperationImprovement>;
+      return (
+        typeof record.id === "string" &&
+        typeof record.createdAt === "string" &&
+        typeof record.siteName === "string" &&
+        typeof record.workSummary === "string" &&
+        typeof record.hazardLabel === "string" &&
+        typeof record.improvementText === "string" &&
+        Array.isArray(record.reflectedDocuments) &&
+        record.reflectedDocuments.every((value) => typeof value === "string") &&
+        (typeof record.beforePhotoName === "string" || typeof record.beforePhotoName === "undefined") &&
+        (typeof record.afterPhotoName === "string" || typeof record.afterPhotoName === "undefined") &&
+        (typeof record.photoAnalysisSummary === "string" || typeof record.photoAnalysisSummary === "undefined")
+      );
+    });
+  } catch (error) {
+    console.warn("safeclaw improvements parse failed", error);
+    return [];
+  }
+}
+
+function formatImprovementTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "방금";
+  return new Intl.DateTimeFormat("ko-KR", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
 }
 
 function StepDot({ status }: { status: StepStatus }) {
@@ -337,11 +557,9 @@ function SafeClawHomepage({ onStart }: { onStart: () => void }) {
     ["작업공간", "command"]
   ] as const;
   const pipeline = [
-    { code: "01 · CAPTURE", title: "캡처", body: "음성·텍스트·QR로 작업 한 줄 캡처", metric: "0.3초" },
-    { code: "02 · CITE", title: "인용", body: "산안법·KOSHA·공공 API 근거 매칭", metric: "근거 연결" },
-    { code: "03 · GENERATE", title: "생성", body: "문서팩을 같은 사실관계로 동시 생성", metric: "11종" },
-    { code: "04 · BROADCAST", title: "전파", body: "작업자 언어와 채널별 메시지 분기", metric: "10개 언어" },
-    { code: "05 · SEAL", title: "봉인", body: "서명·시각·전파 이력을 기록", metric: "제출 준비" }
+    { code: "01 · INPUT", title: "입력", body: "오늘 작업 한 줄에서 현장 브리프와 근거 후보를 준비", metric: "현장 상황" },
+    { code: "02 · DOCS", title: "문서", body: "위험성평가와 TBM을 중심으로 공식 근거와 누락 조치를 대조", metric: "위험성평가/TBM" },
+    { code: "03 · SHARE", title: "공유", body: "작업자 열람, 언어 전환, 확인 이력, 개선사항 후보를 남김", metric: "열람·확인" }
   ];
   const proofSources = [
     ["L.14991", "산업안전보건법", "법령 조항"],
@@ -424,7 +642,7 @@ function SafeClawHomepage({ onStart }: { onStart: () => void }) {
           <span>§ 01</span>
           <b>선언</b>
         </div>
-        <h2>한 줄 입력에서 봉인된 영수증까지,<br /><mark>5단계 파이프라인</mark>으로.</h2>
+        <h2>한 줄 입력에서 확인 이력까지,<br /><mark>3단계 워크벤치</mark>로.</h2>
         <div className="safeclaw-pipeline-grid">
           {pipeline.map((item) => (
             <article key={item.code}>
@@ -509,8 +727,12 @@ export function SafeGuardCommandCenter({
   const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [editorFocusToken, setEditorFocusToken] = useState(0);
-  const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("workpackSummaryDraft");
+  const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("riskAssessmentDraft");
   const [consoleLines, setConsoleLines] = useState<AgentConsoleLine[]>([]);
+  const [improvementText, setImprovementText] = useState("");
+  const [operationImprovements, setOperationImprovements] = useState<OperationImprovement[]>(() => parseStoredImprovements());
+  const [beforePhoto, setBeforePhoto] = useState<{ name: string; url: string } | null>(null);
+  const [afterPhoto, setAfterPhoto] = useState<{ name: string; url: string } | null>(null);
   const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
     if (typeof window === "undefined") return "enhanced";
     const stored = window.localStorage.getItem("safeclaw.aiMode");
@@ -525,6 +747,14 @@ export function SafeGuardCommandCenter({
       /* ignore quota */
     }
   }, [aiMode]);
+
+  useEffect(() => () => {
+    if (beforePhoto) URL.revokeObjectURL(beforePhoto.url);
+  }, [beforePhoto]);
+
+  useEffect(() => () => {
+    if (afterPhoto) URL.revokeObjectURL(afterPhoto.url);
+  }, [afterPhoto]);
 
   function scrollToStep(anchor: StepAnchor) {
     const target = document.getElementById(anchor);
@@ -549,6 +779,61 @@ export function SafeGuardCommandCenter({
     } catch (error) {
       console.warn("safeclaw current workpack save failed", error);
     }
+  }
+
+  function attachImprovementPhoto(kind: "before" | "after", fileList: FileList | null) {
+    const file = fileList?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const nextPhoto = { name: file.name, url };
+    if (kind === "before") {
+      if (beforePhoto) URL.revokeObjectURL(beforePhoto.url);
+      setBeforePhoto(nextPhoto);
+    } else {
+      if (afterPhoto) URL.revokeObjectURL(afterPhoto.url);
+      setAfterPhoto(nextPhoto);
+    }
+  }
+
+  function buildPhotoAnalysisCandidate() {
+    if (!beforePhoto || !afterPhoto) return "";
+    return `Before/After 사진 비교 후보: ${fieldBrief.workSummary}에서 ${data?.riskSummary.topRisk || "핵심 위험"} 관련 개선 조치가 확인되어 위험성평가와 TBM 재확인 항목으로 반영합니다.`;
+  }
+
+  function saveOperationImprovement() {
+    const photoCandidate = buildPhotoAnalysisCandidate();
+    const text = improvementText.trim() || photoCandidate;
+    if (!text) {
+      setMessage("오늘 작업 개선사항을 입력하거나 Before/After 사진을 첨부해 주세요.");
+      return;
+    }
+    const nextItem: OperationImprovement = {
+      id: `improvement-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      siteName: fieldBrief.siteName,
+      workSummary: fieldBrief.workSummary,
+      hazardLabel: data?.riskSummary.topRisk || "현장 개선사항",
+      improvementText: text,
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      beforePhotoName: beforePhoto?.name,
+      afterPhotoName: afterPhoto?.name,
+      photoAnalysisSummary: photoCandidate || undefined
+    };
+    const nextItems = [nextItem, ...operationImprovements].slice(0, 10);
+    setOperationImprovements(nextItems);
+    setImprovementText("");
+    if (beforePhoto) URL.revokeObjectURL(beforePhoto.url);
+    if (afterPhoto) URL.revokeObjectURL(afterPhoto.url);
+    setBeforePhoto(null);
+    setAfterPhoto(null);
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem(IMPROVEMENT_STORAGE_KEY, JSON.stringify(nextItems));
+      } catch (error) {
+        console.warn("safeclaw improvements save failed", error);
+      }
+    }
+    setMessage("오늘 작업 개선사항을 운영 온톨로지 후보로 보관했습니다. DB 승격은 승인 후 진행합니다.");
   }
 
   async function fetchViaLegacyEndpoint(trimmed: string): Promise<AskResponse> {
@@ -686,6 +971,13 @@ export function SafeGuardCommandCenter({
   const inputLimit = 600;
   const inputWarning = question.length > Math.floor(inputLimit * 0.9);
   const weatherBrief = compactWeatherBrief(fieldBrief.weather);
+  const selectedOutputItem = outputItems.find((item) => item.key === requestedDocumentKey) ?? focusDocumentItems[0];
+  const selectedDocumentBody = data ? (data.deliverables as Record<string, unknown>)[selectedOutputItem.key] : "";
+  const readinessRail = buildReadinessRail(data, state, liveWeather, isWeatherLoading);
+  const generationStages = buildGenerationStages(data, state);
+  const documentEvidence = selectedDocumentEvidence(data, selectedOutputItem.key);
+  const supportingDocumentItems = outputItems.filter((item) => !primaryDocumentKeys.has(item.key));
+  const photoAnalysisCandidate = buildPhotoAnalysisCandidate();
 
   return (
     <main className="command-center-shell">
@@ -698,12 +990,10 @@ export function SafeGuardCommandCenter({
             <small>현장 안전 문서팩</small>
           </span>
         </Link>
-        <nav className="topnav command-stepper" aria-label="작업 단계" role="tablist">
+        <nav className="topnav command-stepper" aria-label="작업 단계">
           {workflowSteps.map((step) => (
             <button
               type="button"
-              role="tab"
-              aria-selected={step.key === currentStep}
               aria-current={step.key === currentStep ? "step" : undefined}
               aria-controls={stepAnchors[step.key]}
               className={step.key === currentStep ? "active" : ""}
@@ -727,113 +1017,11 @@ export function SafeGuardCommandCenter({
       </header>
 
       <section className="command-viewport" id="command">
-        <aside className="command-left-panel">
-          <section className="left-panel-card live-status-widget">
-            <div className="left-widget-head">
-              <span>연결 상태</span>
-              <b>{state === "idle" ? "대기" : state === "generating" ? "확인 중" : state === "ready" ? "완료" : "점검"}</b>
-            </div>
-            <div className="status-row-list">
-              <div className={`status-row ${statusRowState(state !== "idle")}`}>
-                <span>현재 단계</span>
-                <b>{statusCopy(state)}</b>
-              </div>
-              <div className={`status-row ${statusRowState(Boolean(data?.externalData.weather.mode === "live" || liveWeather?.mode === "live"), isWeatherLoading)}`}>
-                <span>기상청 현재</span>
-                <b>{weatherStatusLabel(data, liveWeather, isWeatherLoading)}</b>
-              </div>
-              <div className={`status-row ${statusRowState(currentLawCount > 0)}`}>
-                <span>법령 매칭</span>
-                <b>{currentLawCount}건</b>
-              </div>
-              <div className={`status-row ${statusRowState(currentDocProgress > 0)}`}>
-                <span>문서 작성</span>
-                <b>{currentDocProgress}/{totalDocumentCount}</b>
-              </div>
-              <div className={`status-row ${statusRowState(Boolean(data || liveWeather?.mode === "live"))}`}>
-                <span>API 조합</span>
-                <b>{apiStackLabel(data, liveWeather)}</b>
-              </div>
-              <div className={`status-row ${statusRowState(data?.qualityContract?.overall === "ready", Boolean(data?.qualityContract && data.qualityContract.overall !== "ready"))}`}>
-                <span>통합 계약</span>
-                <b>{qualityOverallLabel(data)}</b>
-              </div>
-            </div>
-            <div className="left-progress" aria-hidden="true">
-              <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
-            </div>
-          </section>
-
-          <section className="left-panel-card field-brief-mini">
-            <div className="left-widget-head">
-              <span>현장 브리프</span>
-              <b>{fieldBrief.sourceLabel}</b>
-            </div>
-            <div className="brief-mini-grid">
-              <div>
-                <span>현장</span>
-                <b>{fieldBrief.siteName}</b>
-              </div>
-              <div>
-                <span>업종</span>
-                <b>{fieldBrief.industry}</b>
-              </div>
-              <div>
-                <span>작업</span>
-                <b className="brief-clamp" title={fieldBrief.workSummary}>{fieldBrief.workSummary}</b>
-              </div>
-              <div>
-                <span>날씨</span>
-                <b className="amber">{weatherBrief.summary}</b>
-                {weatherBrief.detail ? (
-                  <details className="brief-meta">
-                    <summary>출처</summary>
-                    <small>{weatherBrief.detail}</small>
-                  </details>
-                ) : null}
-              </div>
-              <div>
-                <span>인원</span>
-                <b>{fieldBrief.workerCount}</b>
-              </div>
-              <div>
-                <span>언어</span>
-                <b>{fieldBrief.foreignWorkerSignal}</b>
-              </div>
-            </div>
-            <div className="site-tag-grid">
-              <span>{selectedExample.skillMix}</span>
-              <span>{fieldBrief.companyName}</span>
-            </div>
-          </section>
-
-          <section className="left-panel-card">
-            <div className="left-widget-head">
-              <span>최근 문서팩</span>
-              <b>{data ? "현재 작업" : "대기"}</b>
-            </div>
-            <div className="recent-list">
-              {data ? (
-                <button type="button" onClick={() => scrollToStep("workpack")}>
-                  <i aria-hidden="true" />
-                  <span>
-                    <strong>{data.scenario.workSummary}</strong>
-                    <small>방금 생성 · 근거 {data.citations.length}건 · 문서 {totalDocumentCount}/{totalDocumentCount}</small>
-                  </span>
-                </button>
-              ) : <p className="muted small">최근 문서팩이 없습니다. 첫 문서팩을 생성하면 여기에 표시됩니다.</p>}
-            </div>
-          </section>
-        </aside>
-
         <section className="command-main card command-main-studio">
           <div className="command-copy">
-            <span className="eyebrow">현장 문서 작업공간</span>
-            <h1>오늘 작업을 한 줄로, 실행 가능한 안전 문서팩으로.</h1>
-            <p>
-              현장 조건을 입력하면 위험성평가, 작업계획, TBM, 안전교육, 외국인 안내문,
-              현장 전파 메시지와 이력 저장까지 하나의 작업공간에서 처리합니다.
-            </p>
+            <span className="eyebrow">SafeClaw Workbench</span>
+            <h1>오늘 작업은 무엇인가요?</h1>
+            <p>한 줄만 입력하세요. 위험성평가, TBM, 공유 확인은 뒤에서 이어집니다.</p>
           </div>
 
           <form className="command-console" onSubmit={submit}>
@@ -857,55 +1045,74 @@ export function SafeGuardCommandCenter({
             <p className="input-helper" id="field-command-tips">
               작성 팁: 지역, 업종, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부, 핵심 위험을 포함하면 정확도가 올라갑니다.
             </p>
-            <fieldset className="ai-mode-toggle" aria-label="AI 강도 선택">
-              <legend>AI 본문 생성 강도</legend>
-              <label className={`ai-mode-option ${aiMode === "template" ? "selected" : ""}`}>
-                <input
-                  type="radio"
-                  name="ai-mode"
-                  value="template"
-                  checked={aiMode === "template"}
-                  onChange={() => setAiMode("template")}
-                  disabled={busy}
-                />
-                <span>
-                  <strong>템플릿 (빠른 생성)</strong>
-                  <small>응답 5–15초 · 무료 · 검증된 본문</small>
-                </span>
-              </label>
-              <label className={`ai-mode-option ${aiMode === "enhanced" ? "selected" : ""}`}>
-                <input
-                  type="radio"
-                  name="ai-mode"
-                  value="enhanced"
-                  checked={aiMode === "enhanced"}
-                  onChange={() => setAiMode("enhanced")}
-                  disabled={busy}
-                />
-                <span>
-                  <strong>강화 (기본)</strong>
-                  <small>응답 +5–15초 · 위험성평가/TBM 본문 시나리오 맞춤 생성</small>
-                </span>
-              </label>
-              <label className={`ai-mode-option ${aiMode === "full" ? "selected" : ""}`}>
-                <input
-                  type="radio"
-                  name="ai-mode"
-                  value="full"
-                  checked={aiMode === "full"}
-                  onChange={() => setAiMode("full")}
-                  disabled={busy}
-                />
-                <span>
-                  <strong>풀 AI (전체 문서 생성)</strong>
-                  <small>응답 +30–60초 · 문서 12종 + 외국인 안내문 5개 언어 모두 AI 생성</small>
-                </span>
-              </label>
-            </fieldset>
+            <div className="field-brief-chip-row" aria-label="자동 인식 현장 요약">
+              <span>{fieldBrief.siteName}</span>
+              <span>{fieldBrief.industry}</span>
+              <span>{weatherBrief.summary}</span>
+              <span>{fieldBrief.workerCount}</span>
+              <span>{fieldBrief.foreignWorkerSignal}</span>
+            </div>
+            <div className="evidence-readiness-rail" aria-label="근거 준비 레일">
+              {readinessRail.map((item) => (
+                <article key={item.key} className={`evidence-readiness-card ${readinessClass(item.tone)}`}>
+                  <span>{item.label}</span>
+                  <strong>{item.status}</strong>
+                  <small>{item.detail}</small>
+                </article>
+              ))}
+            </div>
+            <details className="advanced-settings">
+              <summary>고급 설정</summary>
+              <fieldset className="ai-mode-toggle" aria-label="AI 강도 선택">
+                <legend>AI 본문 생성 강도</legend>
+                <label className={`ai-mode-option ${aiMode === "template" ? "selected" : ""}`}>
+                  <input
+                    type="radio"
+                    name="ai-mode"
+                    value="template"
+                    checked={aiMode === "template"}
+                    onChange={() => setAiMode("template")}
+                    disabled={busy}
+                  />
+                  <span>
+                    <strong>템플릿 (빠른 생성)</strong>
+                    <small>응답 5–15초 · 무료 · 검증된 본문</small>
+                  </span>
+                </label>
+                <label className={`ai-mode-option ${aiMode === "enhanced" ? "selected" : ""}`}>
+                  <input
+                    type="radio"
+                    name="ai-mode"
+                    value="enhanced"
+                    checked={aiMode === "enhanced"}
+                    onChange={() => setAiMode("enhanced")}
+                    disabled={busy}
+                  />
+                  <span>
+                    <strong>강화 (기본)</strong>
+                    <small>응답 +5–15초 · 위험성평가/TBM 본문 시나리오 맞춤 생성</small>
+                  </span>
+                </label>
+                <label className={`ai-mode-option ${aiMode === "full" ? "selected" : ""}`}>
+                  <input
+                    type="radio"
+                    name="ai-mode"
+                    value="full"
+                    checked={aiMode === "full"}
+                    onChange={() => setAiMode("full")}
+                    disabled={busy}
+                  />
+                  <span>
+                    <strong>풀 AI (전체 문서 생성)</strong>
+                    <small>응답 +30–60초 · 문서 12종 + 외국인 안내문 5개 언어 모두 AI 생성</small>
+                  </span>
+                </label>
+              </fieldset>
+            </details>
             <div className="command-actions">
               <button type="submit" className="button command-primary" disabled={busy} aria-busy={busy}>
                 {busy ? <span className="button-spinner" aria-hidden="true" /> : null}
-                {busy ? "법령 매칭 중" : "선택한 현장으로 생성"}
+                {busy ? "근거 확인 중" : "안전 문서 생성"}
               </button>
               <button
                 type="button"
@@ -924,26 +1131,46 @@ export function SafeGuardCommandCenter({
             </div>
           </form>
 
-          <div className="quick-scenario-chips" aria-label="현장 예시">
-            <span>예시 불러오기 →</span>
-            {examples.map((example) => (
-              <button
-                key={example.id}
-                type="button"
-                className={`quick-chip ${example.id === selectedExampleId ? "active" : ""}`}
-                onClick={() => selectExample(example)}
-                aria-pressed={example.id === selectedExampleId}
-              >
-                {example.id === selectedExampleId ? <span aria-hidden="true">✓</span> : null}
-                {example.label}
-              </button>
-            ))}
-          </div>
+          <details className="quick-scenario-chips" aria-label="현장 예시">
+            <summary>예시 불러오기</summary>
+            <div className="quick-scenario-chip-list">
+              {examples.map((example) => (
+                <button
+                  key={example.id}
+                  type="button"
+                  className={`quick-chip ${example.id === selectedExampleId ? "active" : ""}`}
+                  onClick={() => selectExample(example)}
+                  aria-pressed={example.id === selectedExampleId}
+                >
+                  {example.id === selectedExampleId ? <span aria-hidden="true">✓</span> : null}
+                  {example.label}
+                </button>
+              ))}
+            </div>
+          </details>
 
           <section className="evidence-live-panel" id="risk">
             <div className="compact-head">
               <span className="eyebrow">근거 매칭</span>
               <strong>{currentLawCount ? `${currentLawCount}건 연결` : "생성 후 연결"}</strong>
+            </div>
+            {busy ? (
+              <div className="generation-focus" role="status" aria-live="polite">
+                <span className="button-spinner" aria-hidden="true" />
+                <div>
+                  <strong>문서팩 생성 중</strong>
+                  <small>기상, 법령, SIF/KOSHA DB, 온톨로지 QA를 순서대로 확인하고 있습니다.</small>
+                </div>
+              </div>
+            ) : null}
+            <div className="generation-stage-rail" aria-label="생성 진행 단계">
+              {generationStages.map((stage) => (
+                <article key={stage.label} className={readinessClass(stage.tone)}>
+                  <span>{stage.label}</span>
+                  <strong>{stage.tone === "ready" ? "완료" : state === "generating" ? "진행" : "대기"}</strong>
+                  <small>{stage.detail}</small>
+                </article>
+              ))}
             </div>
             <p>{message || "기상청은 현재 지역 조건을 먼저 확인하고, 생성 시 법령·해석례·판례·KOSHA·교육·재해사례·AI를 조합합니다."}</p>
             <div className="api-proof-grid" aria-label="API 조합 반영 위치">
@@ -971,6 +1198,26 @@ export function SafeGuardCommandCenter({
                 ))}
               </div>
             ) : null}
+            {data?.ontologyQa ? (
+              <div className="api-proof-grid" aria-label="온톨로지 QA 검수 결과">
+                <div className={data.ontologyQa.result.reviewable && data.ontologyQa.result.verdict === "통과" ? "api-proof live" : "api-proof warn"}>
+                  <strong>온톨로지 검수</strong>
+                  <span>{data.ontologyQa.result.reviewable ? data.ontologyQa.result.verdict : "검수 보류"}</span>
+                  <small>{data.ontologyQa.detail}</small>
+                </div>
+                {data.ontologyQa.result.reviewable ? (
+                  <div className={data.ontologyQa.result.missing.controls.length ? "api-proof warn" : "api-proof live"}>
+                    <strong>누락 조치</strong>
+                    <span>{data.ontologyQa.result.missing.controls.length ? "보완 필요" : "없음"}</span>
+                    <small>
+                      {data.ontologyQa.result.missing.controls.length
+                        ? data.ontologyQa.result.missing.controls.slice(0, 3).map((item) => item.control).join(" · ")
+                        : "작업유형 필수 안전조치가 문서팩에 반영됐습니다."}
+                    </small>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             <div className={`inline-progress ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${currentDocProgress}/${totalDocumentCount}`}>
               <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
             </div>
@@ -979,49 +1226,203 @@ export function SafeGuardCommandCenter({
 
           <section className="output-card-grid" id="workpack">
             <div className="compact-head">
-              <span className="eyebrow">생성 문서</span>
+              <span className="eyebrow">문서팩</span>
               <strong>{currentDocProgress}/{totalDocumentCount}</strong>
             </div>
-            <div className="doc-card-list">
-              {outputItems.map((item, index) => {
-                const evidenceLabel = data?.evidenceLabels?.[item.key];
-                return (
-                <article key={item.key} className={data ? "doc-card done" : busy && index < 2 ? "doc-card active" : "doc-card"}>
-                  <span>DOC · {String(index + 1).padStart(2, "0")}</span>
-                  <strong>{item.title}</strong>
-                  <p>{data ? "준제출형 편집·출력 준비" : busy && index < 2 ? "작성 중" : "생성 대기"}</p>
-                  {evidenceLabel ? (
+            <div className="document-viewer-shell">
+              <div className="document-viewer-list" aria-label="문서 목록">
+                {focusDocumentItems.map((item, index) => {
+                  const evidenceLabel = data?.evidenceLabels?.[item.key];
+                  const primary = primaryDocumentKeys.has(item.key);
+                  const selected = item.key === selectedOutputItem.key;
+                  return (
+                    <button
+                      type="button"
+                      key={item.key}
+                      className={`${selected ? "selected" : ""} ${primary ? "primary" : "secondary"}`}
+                      onClick={() => setRequestedDocumentKey(item.key)}
+                      aria-pressed={selected}
+                    >
+                      <span>핵심 · {String(index + 1).padStart(2, "0")}</span>
+                      <strong>{item.title}</strong>
+                      <small>{evidenceLabel ? formatEvidenceBadge(evidenceLabel.article) : primary ? "핵심 문서" : "보조 문서"}</small>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="document-preview-grid">
+                <article className="document-preview-pane">
+                  <div className="document-preview-head">
+                    <div>
+                      <span>{data ? "생성 결과" : "생성 대기"}</span>
+                      <strong>{selectedOutputItem.title}</strong>
+                    </div>
+                    {data ? (
+                      <div className="doc-card-actions">
+                        <button type="button" onClick={() => focusWorkpackEditor(selectedOutputItem.key)}>편집</button>
+                        <button
+                          type="button"
+                          onClick={() => focusWorkpackEditor(selectedOutputItem.key)}
+                          title={`${selectedOutputItem.title} 준제출형 내려받기`}
+                        >
+                          다운로드 영역 열기
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                  {data?.evidenceLabels?.[selectedOutputItem.key] ? (
                     <span
                       className="doc-card-evidence-badge"
-                      title={`${evidenceLabel.article} — ${evidenceLabel.purpose}${evidenceLabel.related ? ` (병기: ${evidenceLabel.related})` : ""}`}
+                      title={`${data.evidenceLabels[selectedOutputItem.key].article} — ${data.evidenceLabels[selectedOutputItem.key].purpose}${data.evidenceLabels[selectedOutputItem.key].related ? ` (병기: ${data.evidenceLabels[selectedOutputItem.key].related})` : ""}`}
                     >
-                      {formatEvidenceBadge(evidenceLabel.article)}
+                      {formatEvidenceBadge(data.evidenceLabels[selectedOutputItem.key].article)}
                     </span>
                   ) : null}
-                  {data ? (
-                    <div className="doc-card-actions">
-                      <button type="button" onClick={() => focusWorkpackEditor(item.key)}>편집</button>
-                      <button
-                        type="button"
-                        onClick={() => focusWorkpackEditor(item.key)}
-                        title={`${item.title} 준제출형 내려받기`}
-                      >
-                        다운로드 영역 열기
-                      </button>
-                    </div>
-                  ) : null}
+                  <pre>
+                    {typeof selectedDocumentBody === "string" && selectedDocumentBody
+                      ? selectedDocumentBody.slice(0, 1200)
+                      : "현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다."}
+                  </pre>
+                  <button
+                    type="button"
+                    className="button command-primary document-next-button"
+                    disabled={!data}
+                    onClick={() => scrollToStep("dispatch-overview")}
+                  >
+                    다음: 공유
+                  </button>
                 </article>
-                );
-              })}
+                <aside className="document-evidence-panel" aria-label="선택 문서 근거와 품질">
+                  <div className="compact-head">
+                    <span className="eyebrow">근거/품질</span>
+                    <strong>{selectedOutputItem.title}</strong>
+                  </div>
+                  {documentEvidence.map((item) => (
+                    <article key={item.label} className={readinessClass(item.tone)}>
+                      <span>{item.label}</span>
+                      <strong>{item.value}</strong>
+                      <small>{item.detail}</small>
+                    </article>
+                  ))}
+                </aside>
+              </div>
             </div>
+            <details className="supporting-doc-cards">
+              <summary>+ {supportingDocumentItems.length}개 문서 더 보기</summary>
+              <div className="supporting-doc-list" aria-label="보조 문서 목록">
+                {supportingDocumentItems.map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => focusWorkpackEditor(item.key)}
+                    disabled={!data}
+                  >
+                    <strong>{item.title}</strong>
+                    <span>{data ? "편집·다운로드 영역에서 열기" : "핵심 문서 생성 후 확인"}</span>
+                  </button>
+                ))}
+              </div>
+            </details>
           </section>
 
           <section className="dispatch-preview-panel" id="dispatch-overview">
             <div>
-              <span className="eyebrow">현장 전파</span>
-              <strong>현장 전파 준비</strong>
+              <span className="eyebrow">공유/열람</span>
+              <strong>팀·그룹 열람 준비</strong>
             </div>
-            <p>문서팩 생성 후 작업자 언어와 채널을 선택해 메일·문자 전송을 요청합니다.</p>
+            <div className="share-session-grid">
+              <section>
+                <span>공유 범위</span>
+                <strong>{fieldBrief.companyName} 현장팀</strong>
+                <p>초대된 관리자와 작업자 snapshot 기준으로만 열람합니다. 공개 링크 익명 확인은 기본으로 열지 않습니다.</p>
+                <small>초대된 사람만 열람 가능</small>
+              </section>
+              <section>
+                <span>대상/권한</span>
+                <strong>관리자 편집 · 작업자 열람</strong>
+                <p>작업자는 자동 언어 보기와 수동 언어 전환을 함께 사용합니다.</p>
+                <small>작업자 표시명 기준 확인</small>
+              </section>
+              <section>
+                <span>확인 현황</span>
+                <strong>{data ? "확인 버튼 준비" : "문서 생성 후 활성화"}</strong>
+                <p>열람 전용 화면의 확인 기록을 TBM·교육 확인 후보로 연결합니다.</p>
+                <small>확정 표현 없이 서버 이력으로 보관</small>
+              </section>
+              <section>
+                <span>저장될 이력</span>
+                <strong>workpack · 교육 · 전파</strong>
+                <p>문서팩, 교육 확인, provider 전송 로그를 분리해서 남깁니다. 확인 세션 DB는 승인 후 확장합니다.</p>
+                <small>메일·문자는 보조 채널</small>
+              </section>
+            </div>
+            <section className="operation-ontology-panel" aria-label="그날 작업 개선사항">
+              <div>
+                <span>운영 온톨로지 후보</span>
+                <strong>오늘 작업 개선사항</strong>
+                <p>
+                  같은 작업을 다시 입력했을 때 “지난번에는 무엇을 개선했는가”가 위험성평가와 TBM 후보로 돌아오도록 보관합니다.
+                </p>
+              </div>
+              <label htmlFor="operation-improvement-input">개선사항 메모</label>
+              <div className="before-after-photo-grid" aria-label="Before After 사진 첨부">
+                {[
+                  { key: "before" as const, label: "Before", photo: beforePhoto },
+                  { key: "after" as const, label: "After", photo: afterPhoto }
+                ].map((item) => (
+                  <label key={item.key} className={item.photo ? "has-photo" : ""}>
+                    <span>{item.label} 사진</span>
+                    {item.photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.photo.url} alt={`${item.label} 개선 사진 미리보기`} />
+                    ) : (
+                      <strong>사진 첨부</strong>
+                    )}
+                    <small>{item.photo?.name || "개선 전후 상태를 각각 1장씩 첨부"}</small>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => attachImprovementPhoto(item.key, event.currentTarget.files)}
+                    />
+                  </label>
+                ))}
+              </div>
+              {photoAnalysisCandidate ? (
+                <article className="photo-analysis-candidate">
+                  <span>이미지 분석 후보</span>
+                  <p>{photoAnalysisCandidate}</p>
+                  <small>1차는 사진 비교 후보 문구로 보관하고, 실제 비전 모델 분석과 원본 파일 저장은 2차 승인 후 연결합니다.</small>
+                </article>
+              ) : null}
+              <textarea
+                id="operation-improvement-input"
+                value={improvementText}
+                onChange={(event) => setImprovementText(event.target.value)}
+                placeholder="예: 강풍 예보 시 이동식 비계 상부 작업 전 난간·아웃트리거 재점검을 TBM 질문에 추가"
+              />
+              <div className="operation-ontology-actions">
+                <button type="button" className="button secondary" onClick={saveOperationImprovement}>
+                  개선사항 보관
+                </button>
+                <small>1차는 로컬 보관, 2차 승인 후 workpack_improvements로 승격합니다.</small>
+              </div>
+              {operationImprovements.length ? (
+                <div className="operation-improvement-list" aria-label="최근 개선사항 후보">
+                  {operationImprovements.slice(0, 3).map((item) => (
+                    <article key={item.id}>
+                      <span>{formatImprovementTime(item.createdAt)} · {item.siteName}</span>
+                      <strong>{item.hazardLabel}</strong>
+                      <p>{item.improvementText}</p>
+                      {item.beforePhotoName || item.afterPhotoName ? (
+                        <small>사진: {item.beforePhotoName || "Before 미첨부"} → {item.afterPhotoName || "After 미첨부"}</small>
+                      ) : null}
+                      {item.photoAnalysisSummary ? <small>{item.photoAnalysisSummary}</small> : null}
+                      <small>{item.reflectedDocuments.join(" · ")} 후보</small>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
+            </section>
           </section>
         </section>
       </section>

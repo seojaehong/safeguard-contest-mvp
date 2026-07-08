@@ -14,3 +14,20 @@ Started: 2026-07-08
 - The contract surfaces fallback visibility, ontology matching, evidence label coverage, structured document readiness, and DB save readiness.
 - Workspace UI now renders the same contract in the connection status and evidence panels.
 - Verification passed: `npm.cmd test -- tests/quality-contract.test.ts`, `npm.cmd run typecheck`, `npm.cmd run build`.
+
+## 2026-07-08 C2 Pass
+- Added web workpack ontology QA for enhanced/full `/api/ask` responses using the same task-label correction path as the MCP reviewed-docpack tool.
+- `qualityContract` now reflects QA verdict and missing controls, and the workspace renders ontology verdict/missing-control pre-submission checks.
+- Applied Phase 1 UI/UX simplification: fewer left-status rows, collapsed scenario examples, lower hero type scale, primary/secondary document card hierarchy, and clean font loading without React dev overlay.
+- Browser evidence saved under `evaluation/ui-ux-browser-check-2026-07-08/`.
+- Verification passed: `npm.cmd test -- tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts`, `npm.cmd run typecheck`.
+
+## 2026-07-08 C3 Pass
+- Implemented the 3-step workbench surface: input, document, share.
+- Added input evidence-readiness rail, staged generation feedback, focused risk/TBM document viewer, document-level evidence/quality panel, and collapsed supporting documents.
+- Expanded share UX with sharing scope, permissions, confirmation status, persistence ledger, and operational ontology candidates.
+- Added Before/After photo attachment UI for today's improvement candidates; real image analysis and file persistence stay behind Phase 2 DB approval.
+- Added worker mobile manual language switching and acknowledgement state.
+- Shifted the first workspace screen to an extreme-simple white workbench variation based on the Cohere-style reference: one question, one textarea, one primary action, and a thin evidence rail.
+- Browser evidence saved under `evaluation/ui-ux-browser-check-2026-07-08/`.
+- Verification passed: `npm.cmd run typecheck`, `npm.cmd test -- tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts`, `npm.cmd run build`.

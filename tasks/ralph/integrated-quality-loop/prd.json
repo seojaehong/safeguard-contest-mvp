@@ -3,6 +3,7 @@
   "branchName": "master",
   "qualityChecks": [
     "npm.cmd test -- tests/quality-contract.test.ts",
+    "npm.cmd test -- tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts",
     "npm.cmd run typecheck",
     "npm.cmd run build"
   ],
@@ -31,8 +32,8 @@
       "id": "C2",
       "title": "Wire ontology QA into the web workpack path, not only MCP",
       "priority": 2,
-      "status": "todo",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Full/enhanced /api/ask workpacks run ontology QA against the selected task label.",
         "The UI shows missing controls and review verdict as pre-submission checks.",
@@ -42,7 +43,9 @@
         "lib/search.ts",
         "lib/mcp-tools.ts",
         "lib/ontology/qa-review-tool.ts",
-        "components/SafeGuardCommandCenter.tsx"
+        "lib/workpack-ontology-qa.ts",
+        "components/SafeGuardCommandCenter.tsx",
+        "tests/workpack-ontology-qa.test.ts"
       ]
     },
     {

@@ -1,5 +1,6 @@
 import type { RiskAssessmentRow, RiskAssessmentValidationIssue } from "./risk-assessment-schema";
 import type { SmsaEvidenceLabel } from "./smsa-mapping";
+import type { QaReviewResult } from "./ontology/qa-review";
 
 export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
@@ -26,6 +27,9 @@ export type QualityContract = {
   ontology: {
     status: QualityContractStatus;
     matchCount: number;
+    reviewTask?: string;
+    verdict?: string;
+    missingControlCount?: number;
     detail: string;
   };
   evidence: {
@@ -450,6 +454,8 @@ export type AskResponse = {
         primaryDocuments: string[];
         controls: string[];
         evidenceRoleLabel?: string;
+        sourceKindLabel?: string;
+        operationSignalLabel?: string;
       }>;
     };
   };
@@ -505,6 +511,12 @@ export type AskResponse = {
    * Phase 0 프리뷰 — lib/smsa-mapping.ts 참고.
    */
   evidenceLabels?: Record<string, SmsaEvidenceLabel>;
+  ontologyQa?: {
+    reviewTask: string;
+    result: QaReviewResult;
+    sourceDocumentKeys: string[];
+    detail: string;
+  };
   qualityContract?: QualityContract;
   status: {
     lawgo: IntegrationMode;

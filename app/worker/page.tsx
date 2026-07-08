@@ -1,9 +1,29 @@
+"use client";
+
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 export default function WorkerMobilePage() {
-  const data = buildSampleWorkpack();
+  const data = useMemo(() => buildSampleWorkpack(), []);
+  const languageOptions = useMemo(() => ([
+    {
+      code: "ko",
+      label: "한국어",
+      nativeLabel: "한국어",
+      lines: data.riskSummary.immediateActions
+    },
+    ...data.deliverables.foreignWorkerLanguages.map((language) => ({
+      code: language.code,
+      label: language.label,
+      nativeLabel: language.nativeLabel,
+      lines: language.lines
+    }))
+  ]), [data]);
+  const [selectedLanguageCode, setSelectedLanguageCode] = useState(languageOptions[0]?.code || "ko");
+  const [acknowledged, setAcknowledged] = useState(false);
+  const selectedLanguage = languageOptions.find((language) => language.code === selectedLanguageCode) || languageOptions[0];
 
   return (
     <SafeClawModuleShell
@@ -17,13 +37,35 @@ export default function WorkerMobilePage() {
     >
       <section className="safeclaw-worker-phone">
         <article>
-          <span>오늘 작업 안전공지</span>
+          <span>오늘 작업 안전공지 · 열람 전용</span>
           <h2>{data.scenario.siteName}</h2>
           <strong>{data.riskSummary.topRisk}</strong>
+          <div className="worker-language-switcher" aria-label="안전공지 언어 선택">
+            {languageOptions.slice(0, 6).map((language) => (
+              <button
+                key={language.code}
+                type="button"
+                className={language.code === selectedLanguage.code ? "active" : ""}
+                onClick={() => setSelectedLanguageCode(language.code)}
+                aria-pressed={language.code === selectedLanguage.code}
+              >
+                <b>{language.label}</b>
+                <small>{language.nativeLabel}</small>
+              </button>
+            ))}
+          </div>
+          <p className="worker-language-note">
+            접속 환경의 언어를 우선 적용하되, 현장에서는 작업자가 직접 언어를 바꿀 수 있습니다.
+          </p>
           <ul>
-            {data.riskSummary.immediateActions.map((item) => <li key={item}>{item}</li>)}
+            {selectedLanguage.lines.slice(0, 4).map((item) => <li key={item}>{item}</li>)}
           </ul>
-          <button type="button">이해했습니다</button>
+          <button type="button" onClick={() => setAcknowledged(true)} disabled={acknowledged}>
+            {acknowledged ? "확인함 · 관리자 화면에 기록 예정" : "확인했습니다"}
+          </button>
+          <p className="worker-ack-note">
+            이 확인은 작업자 표시명 기준으로 저장되며, 제출 전 현장 확인이 필요합니다.
+          </p>
         </article>
       </section>
     </SafeClawModuleShell>

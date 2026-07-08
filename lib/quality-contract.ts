@@ -69,6 +69,31 @@ function modeItem(response: AskResponse): QualityContractItem {
 
 function ontologyItem(response: AskResponse): QualityContractItem {
   const matches = response.externalData.safetyKnowledge?.matches ?? [];
+  const qa = response.ontologyQa?.result;
+  if (qa?.reviewable) {
+    const missingControlCount = qa.missing.controls.length;
+    const status: QualityContractStatus =
+      qa.verdict === "통과" ? "ready" : qa.verdict === "보완 권장" ? "degraded" : "blocked";
+    return {
+      key: "ontology",
+      label: "온톨로지 QA",
+      status,
+      detail:
+        status === "ready"
+          ? `${response.ontologyQa?.reviewTask ?? qa.task} 검수 통과: 필수 안전조치가 문서팩에 반영됐습니다.`
+          : `${response.ontologyQa?.reviewTask ?? qa.task} 검수 ${qa.verdict}: 누락 조치 ${missingControlCount}건을 보완해야 합니다.`
+    };
+  }
+
+  if (qa && !qa.reviewable) {
+    return {
+      key: "ontology",
+      label: "온톨로지 QA",
+      status: "degraded",
+      detail: qa.message
+    };
+  }
+
   if (matches.length > 0) {
     return {
       key: "ontology",
@@ -181,6 +206,9 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
     ontology: {
       status: ontology.status,
       matchCount: response.externalData.safetyKnowledge?.matches.length ?? 0,
+      reviewTask: response.ontologyQa?.reviewTask,
+      verdict: response.ontologyQa?.result.reviewable ? response.ontologyQa.result.verdict : undefined,
+      missingControlCount: response.ontologyQa?.result.reviewable ? response.ontologyQa.result.missing.controls.length : undefined,
       detail: ontology.detail
     },
     evidence: {

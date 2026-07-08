@@ -318,6 +318,10 @@ export function WorkflowSharePanel({
   const channelLabel = selectedChannels.map((channel) => formatChannelName(channel)).join(", ");
   const recipientLabel = dispatchRecipients.length ? `${dispatchRecipients.length}건` : "수신자 필요";
   const targetLabel = formatMessageTargetLabel(data, selectedMessageTarget);
+  const storageReady = Boolean(authToken && workpackId);
+  const workerDisplayLabel = targetWorkers.length
+    ? targetWorkers.map((worker) => worker.displayName).slice(0, 3).join(", ")
+    : "관리자 입력 수신자";
 
   return (
     // 시그니처 패턴 4/4: hazard-stripe-band — 가이드 §2.4 "1 location only" 규칙.
@@ -331,6 +335,19 @@ export function WorkflowSharePanel({
       <p className="muted">
         문서팩 요약과 현장 공유 메시지는 메일·문자와 승인된 카카오 알림톡으로 전송합니다. 카카오는 채널·템플릿 설정이 없으면 결과에 설정 필요로 남고, 밴드는 승인 전까지 잠겨 있습니다.
       </p>
+
+      <div className="share-scope-banner" aria-label="공유 범위와 확인 이력">
+        <section>
+          <span>공유 범위</span>
+          <strong>초대된 사람만 열람 가능</strong>
+          <p>관리자가 선택한 작업자 snapshot과 표시명 기준으로 열람·확인을 남깁니다. 공개 링크 익명 확인은 기본으로 열지 않습니다.</p>
+        </section>
+        <section>
+          <span>확인 이력</span>
+          <strong>{targetWorkers.length ? `${targetWorkers.length}명 확인 대상` : "대상 선택 대기"}</strong>
+          <p>{workerDisplayLabel} 기준으로 확인 상태를 TBM·교육 확인 후보에 연결합니다.</p>
+        </section>
+      </div>
 
       <div className="channel-grid" aria-label="전파 채널 선택">
         {channelOptions.map((channel) => (
@@ -452,6 +469,23 @@ export function WorkflowSharePanel({
             <div><span>대상 작업자</span><strong>{targetWorkers.length ? `${targetWorkers.length}명` : "직접 입력"}</strong></div>
           </div>
           <p className="muted small">전송 후 provider 응답을 채널별로 표시하고, 관리자 로그인 상태에서는 전파 이력을 저장합니다.</p>
+          <div className="dispatch-evidence-ledger" aria-label="전송 후 저장될 이력">
+            <article className={storageReady ? "ready" : "warn"}>
+              <span>문서팩 저장</span>
+              <strong>{storageReady ? "서버 workpack 연결" : "저장 ID 확인 필요"}</strong>
+              <small>{storageReady ? "전파 로그가 현재 문서팩에 연결됩니다." : "로그인과 문서팩 저장 후 서버 이력에 연결됩니다."}</small>
+            </article>
+            <article className="pending">
+              <span>교육 확인</span>
+              <strong>education_records 후보</strong>
+              <small>확인 버튼 기록은 승인 후 공유 세션 DB와 연결합니다.</small>
+            </article>
+            <article className="ready">
+              <span>전파 로그</span>
+              <strong>dispatch_logs</strong>
+              <small>provider 응답, 실패 사유, 실행 ID를 전송 로그로 분리 저장합니다.</small>
+            </article>
+          </div>
           <p className="channel-readiness-note">
             이 확인 단계에서 전송되는 채널은 {channelLabel || "메일·문자"}입니다. 카카오 알림톡은 승인 채널과 템플릿 설정이 없으면 채널별 결과에 설정 필요로 표시됩니다.
           </p>

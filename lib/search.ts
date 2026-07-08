@@ -2,6 +2,7 @@ import { AskResponse, type PermitInspectionStructured, type TbmRiskLink, type Wo
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { attachQualityContract } from "./quality-contract";
+import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import { searchSafetyReferences, type SafetyReferenceItem } from "./safety-reference-catalog";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
@@ -1183,7 +1184,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             shortSummary: r.short_summary || r.summary,
             primaryDocuments: r.primary_documents || [],
             controls: r.controls || [],
-            evidenceRoleLabel: r.evidence_role_label
+            evidenceRoleLabel: r.evidence_role_label,
+            sourceKindLabel: r.source_kind_label,
+            operationSignalLabel: r.operation_signal_label
           }))
         },
         safetyKnowledge: {
@@ -1305,7 +1308,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       }
     };
 
-    return attachQualityContract(withMcpDetail);
+    const withOntologyQa = await attachWebOntologyQa(withMcpDetail, question);
+    return attachQualityContract(withOntologyQa);
   } catch (error) {
     const message = error instanceof Error ? error.message : "알 수 없는 오류";
     return buildMockAskResponse(
