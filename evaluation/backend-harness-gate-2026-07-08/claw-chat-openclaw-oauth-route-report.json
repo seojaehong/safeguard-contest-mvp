@@ -1,0 +1,37 @@
+{
+  "date": "2026-07-09",
+  "scope": "claw_chat_route_openclaw_oauth_lock",
+  "status": "verified",
+  "route": "app/api/agent/chat/route.ts",
+  "helper": "lib/openclaw-chat.ts",
+  "decision": {
+    "clawChatProviderSwitchRemoved": true,
+    "legacyAnthropicProviderFlagIgnored": true,
+    "openClawProfileDefault": "safeclaw",
+    "openClawAgentDefault": "main",
+    "localOauthRuntimeDefault": true,
+    "commandShape": "openclaw --profile safeclaw agent --agent main --local -m <prompt>"
+  },
+  "nonGoals": {
+    "dbSchemaChanged": false,
+    "oauthTokenReadOrWritten": false,
+    "openClawLiveProcessStartedByTest": false,
+    "anthropicDeliverablesProviderChanged": false
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests/openclaw-chat.test.ts tests/claw-chat-route.test.ts tests/agent-loop.test.ts",
+      "filesPassed": 3,
+      "testsPassed": 23
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "passed": true
+    },
+    "routeContract": "When CLAW_CHAT_PROVIDER=anthropic remains in the environment, /api/agent/chat still streams through the OpenClaw OAuth route instead of returning the old provider guard."
+  }
+}

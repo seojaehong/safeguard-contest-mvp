@@ -161,10 +161,13 @@ openclaw --profile safeclaw mcp probe safeclaw
 
 Claw chat route 변경:
 
-- `app/api/agent/chat` 기본 provider는 `openclaw`다.
+- `app/api/agent/chat`는 OpenClaw OpenAI OAuth 경로로 고정했다.
+- `CLAW_CHAT_PROVIDER=anthropic` 같은 예전 플래그가 환경에 남아 있어도 라우트가 501로 막히지 않고 OpenClaw route를 탄다.
 - 기본 실행은 `openclaw --profile safeclaw agent --agent main --local -m <prompt>` 형태다. Windows Node runtime에서는 npm shim을 shell로 호출하지 않고 `node <openclaw.mjs>`로 안전하게 우회한다.
 - prompt에는 `run_safeclaw_harness_agent` 우선 호출과 DB harness packet 밖 근거 생성 금지 원칙을 주입한다.
 - Vercel 서버에서 이 경로를 쓰려면 OpenClaw runtime/Gateway가 해당 서버 환경에도 있어야 한다. 로컬 사용자 OAuth profile은 Vercel 함수가 자동으로 읽을 수 없다.
+- provider lock 산출물: `evaluation/backend-harness-gate-2026-07-08/claw-chat-openclaw-oauth-route-report.json`
+- route contract 테스트: `npm.cmd test -- tests/openclaw-chat.test.ts tests/claw-chat-route.test.ts tests/agent-loop.test.ts` → 3 files / 23 tests passed
 - 로컬 route smoke: `evaluation/backend-harness-gate-2026-07-08/local-openclaw-chat-route-smoke.json`
   - 대상: `http://127.0.0.1:3111/api/agent/chat`
   - 결과: HTTP 200, OpenClaw OAuth start/ok 이벤트, `final` 이벤트, error 없음

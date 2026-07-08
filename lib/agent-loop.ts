@@ -1,10 +1,8 @@
-// 클로(Claw) AI 안전관리자 채팅 v0의 에이전트 루프.
+// 클로(Claw) AI 안전관리자 채팅 v0의 공통 프롬프트·도구 정의.
 //
-// app/api/agent/chat/route.ts가 인증·전송(SSE)만 담당하고, 여기서는 Anthropic
-// Messages API 도구 반복 루프를 돈다. 순수부(시스템 프롬프트 조립·히스토리 캡·
-// 도구 결과 포맷·반복 종료 판정·입력 정화·도구 라벨)는 외부 호출 없이 순수 함수로
-// 두어 vitest로 검증한다. 실제 스트리밍/도구 실행은 runAgentLoop이 주입받은
-// executeTool·emit·client로 수행한다(도구 실행부는 lib/claw-tools.ts에 분리).
+// app/api/agent/chat/route.ts는 OpenClaw safeclaw profile을 호출해 OpenAI OAuth
+// 런타임을 탄다. 이 파일의 Anthropic tool-loop는 이전 내장 루프와 테스트 호환을
+// 위해 남겨둔 순수부이며, 라우트의 기본 실행 경로가 아니다.
 
 import type Anthropic from "@anthropic-ai/sdk";
 
