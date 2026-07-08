@@ -188,8 +188,19 @@ function main() {
   const vectorsPath = report.vectorsPath && fileExists(report.vectorsPath) ? report.vectorsPath : null;
   const migrationSql = fs.readFileSync(options.migrationPath, "utf8");
   const scriptSource = fs.readFileSync(options.scriptPath, "utf8");
-  const checks = findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql, scriptSource);
   const env = summarizeEnv(options.requireExecutionEnv);
+  const checks = [
+    ...findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql, scriptSource),
+    {
+      id: "vector_feature_flag_stays_off_until_upload_verified",
+      passed: !env.vectorFeatureFlagEnabled || report.uploadedCount === report.corpusCount,
+      evidence: {
+        vectorFeatureFlagEnabled: env.vectorFeatureFlagEnabled,
+        uploadedCount: report.uploadedCount,
+        corpusCount: report.corpusCount
+      }
+    }
+  ];
   const failedChecks = checks.filter((check) => !check.passed);
   const approvalHeld = true;
   const executionReadyAfterApproval = env.executionEnvReady;
