@@ -270,6 +270,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       detectedHazards: vision.detectedHazards,
       observedImprovement: vision.observedImprovement,
       ocrText: vision.ocrText,
+      reflectedDocuments: draft.reflected_documents,
       errorMessage: vision.errorMessage || null
     }),
     created_by: draft.created_by
@@ -346,7 +347,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       summary: vision.summary,
       observedImprovement: vision.observedImprovement,
       detectedHazards: vision.detectedHazards,
-      ocrText: vision.ocrText
+      ocrText: vision.ocrText,
+      reflectedDocuments: draft.reflected_documents,
+      errorMessage: vision.errorMessage || undefined
     },
     message: draft.source_type === "photo_analysis"
       ? "Before/After 사진 기반 개선사항 후보를 저장했습니다."

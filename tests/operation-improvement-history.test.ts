@@ -20,6 +20,8 @@ describe("parseOperationImprovements", () => {
       workpackId: "wp-1",
       remoteImprovementId: "improvement-1",
       visionSummary: "개선 후 난간이 설치되었습니다.",
+      detectedHazards: ["추락", "출입통제"],
+      observedImprovement: "난간 설치와 출입금지 표지가 확인됩니다.",
       ocrText: "작업중 출입금지",
       saveMessage: "Before/After 사진 기반 개선사항 후보를 저장했습니다."
     }]));
@@ -31,6 +33,8 @@ describe("parseOperationImprovements", () => {
       workpackId: "wp-1",
       remoteImprovementId: "improvement-1",
       visionSummary: "개선 후 난간이 설치되었습니다.",
+      detectedHazards: ["추락", "출입통제"],
+      observedImprovement: "난간 설치와 출입금지 표지가 확인됩니다.",
       ocrText: "작업중 출입금지"
     });
   });

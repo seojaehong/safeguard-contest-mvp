@@ -74,6 +74,8 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       reflectedDocuments: improvement.reflectedDocuments,
       sourceType: improvement.sourceType,
       visionSummary: improvement.visionSummary,
+      detectedHazards: improvement.detectedHazards,
+      observedImprovement: improvement.observedImprovement,
       ocrText: improvement.ocrText
     })),
     ...input.confirmations.map((confirmation) => event(input, "ack", {
@@ -111,6 +113,8 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     lines.push(`  - reflected: ${improvement.reflectedDocuments.join(", ") || "없음"}`);
     lines.push(`  - source: ${improvement.sourceType}`);
     if (improvement.visionSummary) lines.push(`  - vision: ${improvement.visionSummary}`);
+    if (improvement.detectedHazards?.length) lines.push(`  - detectedHazards: ${improvement.detectedHazards.join(", ")}`);
+    if (improvement.observedImprovement) lines.push(`  - observedImprovement: ${improvement.observedImprovement}`);
     if (improvement.ocrText) lines.push(`  - ocr: ${improvement.ocrText}`);
   }
 

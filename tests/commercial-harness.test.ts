@@ -92,6 +92,8 @@ describe("DB harness packet", () => {
         reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
         sourceType: "photo_analysis",
         visionSummary: "난간이 보강된 것으로 보입니다.",
+        detectedHazards: ["추락", "하부 통제 미흡"],
+        observedImprovement: "작업발판 외측 난간 보강",
         ocrText: "추락주의"
       }]
     });
@@ -103,6 +105,8 @@ describe("DB harness packet", () => {
     expect(packet.generationContract.fallbackChainAllowed).toBe(false);
     expect(hasDocumentCoverage(packet, "TBM 기록")).toBe(true);
     expect(promptContext).toContain("DB harness가 고정한 근거");
+    expect(promptContext).toContain("detected: 추락, 하부 통제 미흡");
+    expect(promptContext).toContain("observed: 작업발판 외측 난간 보강");
     expect(promptContext).toContain("ocr: 추락주의");
   });
 
@@ -133,6 +137,8 @@ describe("workpack learning export", () => {
         reflectedDocuments: ["위험성평가표"],
         sourceType: "photo_analysis" as const,
         visionSummary: "난간 보강이 확인됩니다.",
+        detectedHazards: ["추락"],
+        observedImprovement: "난간 보강 후 작업구역 통제가 보입니다.",
         ocrText: "추락주의"
       }],
       confirmations: [{ displayName: "Nguyen", languageCode: "vi", readAt: "2026-07-08T09:20:00.000Z" }]
@@ -144,9 +150,13 @@ describe("workpack learning export", () => {
 
     expect(markdown).toContain("# 성수동 외벽 도장");
     expect(markdown).toContain("난간 보강");
+    expect(markdown).toContain("detectedHazards: 추락");
+    expect(markdown).toContain("observedImprovement: 난간 보강 후 작업구역 통제가 보입니다.");
     expect(markdown).toContain("ocr: 추락주의");
     expect(jsonl.split("\n")).toHaveLength(4);
     expect(jsonl).toContain("\"eventType\":\"improvement\"");
+    expect(jsonl).toContain("\"detectedHazards\":[\"추락\"]");
+    expect(jsonl).toContain("\"observedImprovement\":\"난간 보강 후 작업구역 통제가 보입니다.\"");
     expect(jsonl).toContain("\"ocrText\":\"추락주의\"");
     expect(file.fileName).toBe("성수동-외벽-도장-learning.jsonl");
     expect(file.contentType).toContain("application/x-ndjson");
