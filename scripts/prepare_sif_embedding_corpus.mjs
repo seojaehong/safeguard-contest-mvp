@@ -27,6 +27,7 @@ function parseArgs(argv) {
     batchSize: DEFAULT_BATCH_SIZE,
     embed: false,
     upload: false,
+    approvedEmbedding: false,
     approvedUpload: false
   };
 
@@ -38,9 +39,10 @@ function parseArgs(argv) {
     else if (arg === "--batch-size") options.batchSize = Number(argv[index += 1] || String(DEFAULT_BATCH_SIZE));
     else if (arg === "--embed") options.embed = true;
     else if (arg === "--upload") options.upload = true;
+    else if (arg === "--approved-embedding") options.approvedEmbedding = true;
     else if (arg === "--approved-upload") options.approvedUpload = true;
     else if (arg === "--help") {
-      console.log("Usage: node scripts/prepare_sif_embedding_corpus.mjs [--output-dir DIR] [--limit N] [--batch-size N] [--embed] [--upload --approved-upload] [--model MODEL]");
+      console.log("Usage: node scripts/prepare_sif_embedding_corpus.mjs [--output-dir DIR] [--limit N] [--batch-size N] [--embed --approved-embedding] [--upload --approved-upload] [--model MODEL]");
       process.exit(0);
     }
   }
@@ -338,9 +340,14 @@ async function main() {
   let uploadedCount = 0;
   let uploadError = null;
   let embedded = [];
-  if (options.upload && !options.approvedUpload) {
-    uploadError = "--upload requires explicit --approved-upload after DB migration approval";
+  const approvalErrors = [];
+  if ((options.embed || options.upload) && !options.approvedEmbedding) {
+    approvalErrors.push("--embed requires explicit --approved-embedding after embedding cost approval");
   }
+  if (options.upload && !options.approvedUpload) {
+    approvalErrors.push("--upload requires explicit --approved-upload after DB migration approval");
+  }
+  if (approvalErrors.length) uploadError = approvalErrors.join("; ");
   if (options.embed || options.upload) {
     try {
       if (!uploadError) {
@@ -371,7 +378,9 @@ async function main() {
     uploadedCount,
     uploadError,
     approvalGate: {
+      embeddingApprovedFlag: options.approvedEmbedding,
       uploadApprovedFlag: options.approvedUpload,
+      embeddingRequiresCostApproval: true,
       uploadRequiresMigrationApproval: true,
       uploadRequiresApprovedUploadFlag: true,
       corpusReady: records.length > 0 && validation.emptyEmbeddingTextCount === 0
