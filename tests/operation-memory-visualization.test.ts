@@ -4,6 +4,7 @@ import type { HarnessImprovement } from "@/lib/db-harness";
 import { buildOperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import { buildOperationMemoryVisualizationModel } from "@/lib/ontology/operation-memory-visualization";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import { buildWorkpackLearningFile } from "@/lib/workpack-learning-export";
 
 function reference(): SafetyReferenceItem {
   return {
@@ -102,5 +103,29 @@ describe("buildOperationMemoryVisualizationModel", () => {
     expect(model.list.length).toBeGreaterThan(24);
     expect(model.map.nodes.length).toBeLessThanOrEqual(24);
     expect(model.map.edges.length).toBeLessThanOrEqual(48);
+  });
+
+  it("exports the same operation memory surface as Markdown and JSONL files", () => {
+    const input = {
+      workpackId: "wp-visual-1",
+      question: "성수동 외벽 도장 작업",
+      generatedAt: "2026-07-09T00:00:00.000Z",
+      taskLabel: "성수동 외벽 도장",
+      references: [reference()],
+      improvements: [improvement()],
+      confirmations: [{ displayName: "Nguyen", languageCode: "vi", readAt: "2026-07-09T09:20:00.000Z" }]
+    };
+
+    const markdown = buildWorkpackLearningFile(input, "markdown");
+    const jsonl = buildWorkpackLearningFile(input, "jsonl");
+
+    expect(markdown.fileName).toBe("성수동-외벽-도장-learning.md");
+    expect(markdown.content).toContain("## 운영 그래프");
+    expect(markdown.content).toContain("visionStatus: analyzed");
+    expect(markdown.content).toContain("ocr: 작업중 출입금지");
+    expect(jsonl.fileName).toBe("성수동-외벽-도장-learning.jsonl");
+    expect(jsonl.content).toContain("\"eventType\":\"operation_graph\"");
+    expect(jsonl.content).toContain("\"eventType\":\"improvement\"");
+    expect(jsonl.content).toContain("\"photoPairAttached\":true");
   });
 });

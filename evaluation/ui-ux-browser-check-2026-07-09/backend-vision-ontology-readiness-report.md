@@ -108,8 +108,16 @@ Generated: 2026-07-09
 - 리스트 기반 온톨로지
 - Obsidian식 map node/edge 좌표 모델
 - hover card model
+- `/ontology` 작업 이력 미리보기의 `MD 저장`, `JSONL 저장` 로컬 내보내기
 - 기간별 운영 코퍼스 MD/JSONL
 - 이벤트 타입: `period_summary`, `workpack`, `risk_row`, `improvement`, `classification_group`
+
+2026-07-09 추가 구현:
+
+- `/ontology`에서 샘플 또는 로컬 개선 후보를 Obsidian식 작업 이력 그래프와 리스트로 동시에 확인한다.
+- 같은 작업 이력 표면을 Markdown/JSONL로 바로 내려받아 재생성 가능한 운영 코퍼스로 보존한다.
+- 파일에는 작업, 위험요인, 조치, 개선, 근거, 확인 이력이 함께 기록된다.
+- 사진 Before/After 개선 후보가 있으면 `visionStatus`, OCR, 반영 문서, 사진 첨부 여부가 함께 남는다.
 
 판단:
 
@@ -129,6 +137,10 @@ Generated: 2026-07-09
 - `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-photo-candidates-day.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-mobile-day.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/workspace-composer-attachment-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-desktop.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-hover.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-mobile.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-metrics.json`
 
 핵심 권고:
 
@@ -145,6 +157,10 @@ Generated: 2026-07-09
 - composer before photo: `+사진` tray 있음, 사진 패널 없음, horizontal overflow 없음
 - composer after photo: `1/10장 첨부`, 후보 2개, `1개 반영`, textarea에 `사진 후보` 문자열 없음
 - composer mobile: viewport 390px, scrollWidth 390px, horizontal overflow 없음
+- ontology desktop: 작업 이력 미리보기 노출, memory map node 7개, edge 7개, list row 7개, hover card 7개
+- ontology export actions: `최근 후보 다시 읽기`, `MD 저장`, `JSONL 저장`
+- ontology published graph: graph node 32개, list row 166개
+- ontology mobile: viewport 390px, scrollWidth 390px, horizontal overflow 없음
 
 ## Tests Run
 
@@ -156,6 +172,8 @@ Generated: 2026-07-09
   - 1 file, 11 tests passed
 - `npm.cmd test -- tests/operation-memory-visualization.test.ts tests/ontology-operation-memory.test.ts tests/reporting-downloads.test.ts tests/workspace-pages.test.ts`
   - 4 files, 14 tests passed
+- `npm.cmd test -- tests/operation-memory-visualization.test.ts tests/ontology-operation-memory.test.ts tests/commercial-harness.test.ts`
+  - 3 files, 12 tests passed
 - `npm.cmd test -- tests/workspace-layout-regression.test.ts`
   - 1 file, 1 test passed
 - `npm.cmd test -- tests/operation-improvements.test.ts tests/photo-vision-analysis.test.ts`

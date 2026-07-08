@@ -13,6 +13,11 @@ import {
 } from "@/lib/ontology/operation-memory-visualization";
 import type { HarnessImprovement } from "@/lib/db-harness";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import {
+  buildWorkpackLearningFile,
+  type WorkpackLearningFormat,
+  type WorkpackLearningInput
+} from "@/lib/workpack-learning-export";
 
 function loadStoredImprovements() {
   if (typeof window === "undefined") return [];
@@ -74,8 +79,21 @@ const sampleImprovement: HarnessImprovement = {
   ocrText: "작업중 출입금지"
 };
 
+function downloadTextFile(fileName: string, contentType: string, content: string) {
+  const blob = new Blob([content], { type: contentType });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
 export function OperationMemoryPreview() {
   const [improvements, setImprovements] = useState<OperationImprovement[]>([]);
+  const [downloadMessage, setDownloadMessage] = useState("");
 
   useEffect(() => {
     setImprovements(loadStoredImprovements());
@@ -92,35 +110,56 @@ export function OperationMemoryPreview() {
     const localItems = improvements.slice(0, 5);
     const hasLocal = localItems.length > 0;
     const first = localItems[0];
+    const workpack = hasLocal
+      ? {
+        id: first.workpackId || "local-operation-memory",
+        question: first.workSummary,
+        generatedAt: first.createdAt,
+        taskLabel: first.workSummary
+      }
+      : {
+        id: "sample-operation-memory",
+        question: "성수동 외벽 도장 작업",
+        generatedAt: "2026-07-09T00:00:00.000Z",
+        taskLabel: "성수동 외벽 도장"
+      };
+    const references = hasLocal ? [] : [sampleReference()];
+    const harnessImprovements = hasLocal ? localItems.map(toHarnessImprovement) : [sampleImprovement];
+    const confirmations = hasLocal ? [] : [
+      { displayName: "Nguyen", languageCode: "vi", readAt: "2026-07-09T09:20:00.000Z" }
+    ];
     const graph = buildOperationMemoryGraph({
-      workpack: hasLocal
-        ? {
-          id: first.workpackId || "local-operation-memory",
-          question: first.workSummary,
-          generatedAt: first.createdAt,
-          taskLabel: first.workSummary
-        }
-        : {
-          id: "sample-operation-memory",
-          question: "성수동 외벽 도장 작업",
-          generatedAt: "2026-07-09T00:00:00.000Z",
-          taskLabel: "성수동 외벽 도장"
-        },
-      references: hasLocal ? [] : [sampleReference()],
-      improvements: hasLocal ? localItems.map(toHarnessImprovement) : [sampleImprovement],
-      confirmations: hasLocal ? [] : [
-        { displayName: "Nguyen", languageCode: "vi", readAt: "2026-07-09T09:20:00.000Z" }
-      ]
+      workpack,
+      references,
+      improvements: harnessImprovements,
+      confirmations
     });
+
+    const learningInput: WorkpackLearningInput = {
+      workpackId: workpack.id,
+      generatedAt: workpack.generatedAt,
+      question: workpack.question,
+      taskLabel: workpack.taskLabel,
+      references,
+      improvements: harnessImprovements,
+      confirmations
+    };
 
     return {
       mode: hasLocal ? "local" as const : "sample" as const,
       graph,
-      model: buildOperationMemoryVisualizationModel(graph)
+      model: buildOperationMemoryVisualizationModel(graph),
+      learningInput
     };
   }, [improvements]);
 
   const hoverCardsById = new Map(preview.model.hoverCards.map((card) => [card.id, card]));
+
+  function downloadLearningMemory(format: WorkpackLearningFormat) {
+    const file = buildWorkpackLearningFile(preview.learningInput, format);
+    downloadTextFile(file.fileName, file.contentType, file.content);
+    setDownloadMessage(format === "jsonl" ? "운영 메모리 JSONL을 내려받았습니다." : "작업 개선 메모리 Markdown을 내려받았습니다.");
+  }
 
   return (
     <section className="safeclaw-module-panel operation-memory-preview" aria-label="작업 이력 온톨로지 미리보기">
@@ -134,10 +173,19 @@ export function OperationMemoryPreview() {
             ? "워크스페이스에서 보관한 최근 개선사항을 작업 이력 그래프로 재구성했습니다."
             : "아직 로컬 개선 후보가 없어 Before/After 개선 루프 샘플을 보여줍니다."}
         </p>
-        <button type="button" onClick={() => setImprovements(loadStoredImprovements())}>
-          최근 후보 다시 읽기
-        </button>
+        <div className="operation-memory-actions" aria-label="작업 이력 메모리 파일">
+          <button type="button" onClick={() => setImprovements(loadStoredImprovements())}>
+            최근 후보 다시 읽기
+          </button>
+          <button type="button" onClick={() => downloadLearningMemory("markdown")}>
+            MD 저장
+          </button>
+          <button type="button" onClick={() => downloadLearningMemory("jsonl")}>
+            JSONL 저장
+          </button>
+        </div>
       </div>
+      {downloadMessage ? <p className="operation-memory-message" role="status">{downloadMessage}</p> : null}
 
       <div className="operation-memory-grid">
         <div className="operation-memory-board" aria-label="Workpack operation memory map">
