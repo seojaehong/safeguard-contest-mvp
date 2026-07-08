@@ -1,0 +1,54 @@
+{
+  "date": "2026-07-09",
+  "status": "workspace_ui_wired_to_api_with_local_fallback",
+  "dbWriteExecutedInThisRun": false,
+  "workspaceUi": {
+    "file": "components/SafeGuardCommandCenter.tsx",
+    "flow": [
+      "Attach Before and After photos in the share/improvement step",
+      "Save current workpack through POST /api/workpacks when needed",
+      "POST multipart FormData to /api/workpacks/:id/improvements",
+      "Persist a local fallback candidate if auth, Supabase, migration, or upload is unavailable"
+    ],
+    "localHistoryFields": [
+      "storageMode",
+      "sourceType",
+      "workpackId",
+      "remoteImprovementId",
+      "visionSummary",
+      "ocrText",
+      "saveMessage"
+    ]
+  },
+  "serverApi": {
+    "route": "app/api/workpacks/[id]/improvements/route.ts",
+    "visionAdapter": "lib/photo-vision-analysis.ts",
+    "storageBucket": "safeclaw-improvement-photos",
+    "responseAdds": [
+      "sourceType",
+      "vision.status",
+      "vision.provider",
+      "vision.model",
+      "vision.summary",
+      "vision.observedImprovement",
+      "vision.detectedHazards",
+      "vision.ocrText"
+    ]
+  },
+  "learningLoop": {
+    "exportRoute": "app/api/workpacks/[id]/learning-export/route.ts",
+    "exportFormats": [
+      "markdown",
+      "jsonl"
+    ],
+    "includedEvidence": [
+      "improvement",
+      "visionSummary",
+      "ocrText"
+    ]
+  },
+  "verification": {
+    "focusedTests": "npm.cmd test -- tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/photo-vision-analysis.test.ts tests/commercial-harness.test.ts",
+    "typecheck": "npm.cmd run typecheck"
+  }
+}

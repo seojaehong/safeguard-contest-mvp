@@ -338,6 +338,16 @@ export async function POST(request: NextRequest, context: RouteContext) {
     ok: true,
     configured: true,
     improvementId: data.id,
+    sourceType: draft.source_type,
+    vision: {
+      status: vision.status,
+      provider: vision.provider,
+      model: vision.model,
+      summary: vision.summary,
+      observedImprovement: vision.observedImprovement,
+      detectedHazards: vision.detectedHazards,
+      ocrText: vision.ocrText
+    },
     message: draft.source_type === "photo_analysis"
       ? "Before/After 사진 기반 개선사항 후보를 저장했습니다."
       : "개선사항 후보를 저장했습니다."
