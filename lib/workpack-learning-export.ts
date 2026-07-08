@@ -22,6 +22,14 @@ export type LearningJsonlEvent = {
   payload: Record<string, unknown>;
 };
 
+export type WorkpackLearningFormat = "markdown" | "jsonl";
+
+export type WorkpackLearningFile = {
+  fileName: string;
+  contentType: string;
+  content: string;
+};
+
 function jsonLine(event: LearningJsonlEvent) {
   return JSON.stringify(event);
 }
@@ -33,6 +41,15 @@ function event(input: WorkpackLearningInput, eventType: LearningJsonlEvent["even
     generatedAt: input.generatedAt,
     payload
   };
+}
+
+function slugSegment(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9가-힣._-]+/g, "")
+    .replace(/^-+|-+$/g, "") || "safeclaw";
 }
 
 export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
@@ -55,7 +72,9 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       hazardLabel: improvement.hazardLabel,
       improvementText: improvement.improvementText,
       reflectedDocuments: improvement.reflectedDocuments,
-      sourceType: improvement.sourceType
+      sourceType: improvement.sourceType,
+      visionSummary: improvement.visionSummary,
+      ocrText: improvement.ocrText
     })),
     ...input.confirmations.map((confirmation) => event(input, "ack", {
       displayName: confirmation.displayName,
@@ -91,6 +110,8 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     lines.push(`- ${improvement.hazardLabel}: ${improvement.improvementText}`);
     lines.push(`  - reflected: ${improvement.reflectedDocuments.join(", ") || "없음"}`);
     lines.push(`  - source: ${improvement.sourceType}`);
+    if (improvement.visionSummary) lines.push(`  - vision: ${improvement.visionSummary}`);
+    if (improvement.ocrText) lines.push(`  - ocr: ${improvement.ocrText}`);
   }
 
   lines.push("", "## 확인 이력", "");
@@ -99,4 +120,25 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
   }
 
   return `${lines.join("\n")}\n`;
+}
+
+export function normalizeWorkpackLearningFormat(value: string | null): WorkpackLearningFormat {
+  return value === "jsonl" ? "jsonl" : "markdown";
+}
+
+export function buildWorkpackLearningFile(input: WorkpackLearningInput, format: WorkpackLearningFormat): WorkpackLearningFile {
+  const baseName = `${slugSegment(input.taskLabel)}-learning`;
+  if (format === "jsonl") {
+    return {
+      fileName: `${baseName}.jsonl`,
+      contentType: "application/x-ndjson; charset=utf-8",
+      content: `${buildWorkpackLearningJsonl(input)}\n`
+    };
+  }
+
+  return {
+    fileName: `${baseName}.md`,
+    contentType: "text/markdown; charset=utf-8",
+    content: buildWorkpackLearningMarkdown(input)
+  };
 }

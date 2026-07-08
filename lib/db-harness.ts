@@ -7,6 +7,8 @@ export type HarnessImprovement = {
   improvementText: string;
   reflectedDocuments: string[];
   sourceType: "manual" | "photo_analysis" | "operator_note";
+  visionSummary?: string;
+  ocrText?: string;
 };
 
 export type HarnessWorkpackMemory = {
@@ -100,7 +102,11 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
   const evidenceLines = [
     ...packet.sifCases.map((item) => `SIF: ${item.title} -> ${item.controls.slice(0, 2).join(" / ")}`),
     ...packet.directEvidence.map((item) => `공식자료: ${item.title} -> ${item.primary_documents.join(", ")}`),
-    ...packet.improvementMemory.map((item) => `개선이력: ${item.hazardLabel} -> ${item.improvementText}`),
+    ...packet.improvementMemory.map((item) => [
+      `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
+      item.visionSummary ? `vision: ${item.visionSummary}` : "",
+      item.ocrText ? `ocr: ${item.ocrText}` : ""
+    ].filter(Boolean).join(" | ")),
     ...packet.workpackMemory.map((item) => `작업이력: ${item.generatedAt} · ${item.question} · ${item.statusLabel}`)
   ];
 

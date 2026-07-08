@@ -6,6 +6,7 @@ export type WorkpackOperationContext = {
   siteId: string | null;
   workpackId: string;
   question: string;
+  generatedAt: string;
 };
 
 export type WorkpackOperationContextResult = {
@@ -47,7 +48,7 @@ export async function loadOwnedWorkpackOperationContext(
 
   const { data: workpack, error: workpackError } = await client
     .from("workpacks")
-    .select("id,organization_id,site_id,question")
+    .select("id,organization_id,site_id,question,created_at")
     .eq("id", workpackId)
     .in("organization_id", organizationIds)
     .maybeSingle();
@@ -75,7 +76,8 @@ export async function loadOwnedWorkpackOperationContext(
       organizationId: workpack.organization_id,
       siteId: workpack.site_id,
       workpackId: workpack.id,
-      question: workpack.question
+      question: workpack.question,
+      generatedAt: workpack.created_at
     }
   };
 }

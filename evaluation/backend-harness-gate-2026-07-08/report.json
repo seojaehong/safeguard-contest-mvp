@@ -1,0 +1,41 @@
+{
+  "date": "2026-07-08",
+  "status": "phase1_no_schema_change_complete",
+  "sifEmbedding": {
+    "state": "approval_gate",
+    "corpusReady": true,
+    "embeddingGenerated": false,
+    "uploaded": false,
+    "runtimeVectorRetrieval": false,
+    "sourceReport": "evaluation/sif-embedding-gate/report.json"
+  },
+  "visionOcr": {
+    "serverAdapter": "lib/photo-vision-analysis.ts",
+    "apiRoute": "app/api/workpacks/[id]/improvements/route.ts",
+    "workspaceUiWiredToApi": false,
+    "harnessMemoryIncludesOcr": true,
+    "learningExportIncludesOcr": true
+  },
+  "ontology": {
+    "listView": true,
+    "hoverCards": true,
+    "langGraphRequiredNow": false,
+    "habermasMachineRequiredNow": false
+  },
+  "learningExport": {
+    "route": "app/api/workpacks/[id]/learning-export/route.ts",
+    "formats": ["markdown", "jsonl"],
+    "includes": ["workpack", "reference", "improvement", "ack", "visionSummary", "ocrText"]
+  },
+  "verification": {
+    "tests": {
+      "command": "npm.cmd test -- tests/commercial-harness.test.ts tests/photo-vision-analysis.test.ts tests/workpack-commercial.test.ts tests/commercial-migration.test.ts tests/mcp-tools.test.ts",
+      "filesPassed": 5,
+      "testsPassed": 38
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    }
+  }
+}
