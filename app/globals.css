@@ -9147,6 +9147,70 @@ body:has(.safeclaw-landing) :is(
   align-items: start;
 }
 
+.ontology-operation-loop {
+  display: grid;
+  gap: 16px;
+}
+
+.ontology-operation-loop p {
+  max-width: 940px;
+  margin: 0;
+  color: rgba(246, 245, 239, 0.68);
+  font-size: 14px;
+  font-weight: 690;
+  line-height: 1.72;
+}
+
+.ontology-operation-loop code {
+  display: inline-block;
+  border: 1px solid rgba(246, 245, 239, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--os-panel-text);
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 850;
+  padding: 1px 6px;
+}
+
+.ontology-operation-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ontology-operation-flow article {
+  display: grid;
+  min-height: 118px;
+  align-content: start;
+  gap: 8px;
+  border: 1px solid rgba(246, 245, 239, 0.12);
+  background: rgba(255, 255, 255, 0.045);
+  padding: 14px;
+}
+
+.ontology-operation-flow span {
+  color: var(--os-yellow);
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ontology-operation-flow strong {
+  color: var(--os-panel-text);
+  font-size: 16px;
+  font-weight: 860;
+  line-height: 1.35;
+}
+
+.ontology-operation-flow small {
+  color: rgba(246, 245, 239, 0.56);
+  font-size: 12px;
+  font-weight: 710;
+  line-height: 1.55;
+}
+
 .ontology-graph-shell {
   display: grid;
   gap: 14px;
@@ -9519,7 +9583,8 @@ body:has(.safeclaw-landing) :is(
 
 @media (max-width: 900px) {
   .ontology-summary-grid,
-  .ontology-workbench {
+  .ontology-workbench,
+  .ontology-operation-flow {
     grid-template-columns: 1fr;
   }
 

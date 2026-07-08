@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-07-09T01:23:20+09:00",
+  "scope": "Operation memory graph for SafeClaw ontology",
+  "decision": "Published ontology remains the static evidence graph. Workpack operation memory is now a separate DTO/API graph that connects Workpack, Evidence, Hazard, Control, Improvement, and Ack without a schema migration.",
+  "implementation": {
+    "pureBuilder": "lib/ontology/operation-memory.ts",
+    "workpackApi": "/api/workpacks/[id]/operation-graph",
+    "ontologyPageSurface": "/ontology Operation Memory panel",
+    "schemaMigration": false,
+    "dbMutation": false
+  },
+  "graphContract": {
+    "nodes": ["Workpack", "Evidence", "Hazard", "Control", "Improvement", "Ack"],
+    "relations": ["usesEvidence", "mentionsHazard", "mitigatedBy", "hasImprovement", "addressesHazard", "confirmedBy"],
+    "photoImprovementSupport": true,
+    "visionOcrPayloadPreserved": true,
+    "readConfirmationSupport": true
+  },
+  "browserChecks": {
+    "desktop": {
+      "url": "http://localhost:3021/ontology",
+      "screenshot": "evaluation/backend-harness-gate-2026-07-08/screenshots/ontology-operation-memory-desktop.png",
+      "checks": {
+        "title": true,
+        "operationMemory": true,
+        "operationApi": true,
+        "obsidian": true,
+        "list": true,
+        "hover": true,
+        "noHorizontalOverflow": true
+      }
+    },
+    "mobile": {
+      "url": "http://localhost:3021/ontology",
+      "screenshot": "evaluation/backend-harness-gate-2026-07-08/screenshots/ontology-operation-memory-mobile.png",
+      "checks": {
+        "title": true,
+        "operationMemory": true,
+        "operationApi": true,
+        "obsidian": true,
+        "list": true,
+        "hover": true,
+        "noHorizontalOverflow": true
+      }
+    }
+  },
+  "verification": {
+    "tests": "npm.cmd test -- tests\\ontology-operation-memory.test.ts tests\\ontology-visualization.test.ts tests\\ontology-graph-store.test.ts tests\\ontology-query.test.ts tests\\ontology-knowledge-tool.test.ts",
+    "testResult": "5 files passed, 23 tests passed",
+    "typecheck": "npm.cmd run typecheck",
+    "build": "npm.cmd run build",
+    "result": "passed"
+  }
+}

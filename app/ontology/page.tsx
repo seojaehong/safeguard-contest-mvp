@@ -84,6 +84,41 @@ export default async function OntologyPage() {
             ) : null}
           </section>
 
+          <section className="safeclaw-module-panel ontology-operation-loop" aria-label="작업팩 운영 이력 그래프 계약">
+            <div className="compact-head">
+              <span className="eyebrow">Operation Memory</span>
+              <strong>작업팩별 개선 루프</strong>
+            </div>
+            <p>
+              published 지식 그래프는 고정 근거이고, 작업팩 그래프는 오늘 작업에서 실제로 사용한 근거,
+              사진 분석 개선사항, 열람 확인 이력을 묶습니다. 저장된 작업팩은
+              <code>/api/workpacks/[id]/operation-graph</code>에서 Workpack → Hazard → Control/Improvement → Evidence/Ack
+              구조로 내려받습니다.
+            </p>
+            <div className="ontology-operation-flow">
+              <article>
+                <span>Workpack</span>
+                <strong>오늘 작업</strong>
+                <small>질문 · 생성일 · 현장 맥락</small>
+              </article>
+              <article>
+                <span>Evidence</span>
+                <strong>SIF/KOSHA 근거</strong>
+                <small>문서에 반영된 직접/보조 근거</small>
+              </article>
+              <article>
+                <span>Improvement</span>
+                <strong>사진/메모 개선</strong>
+                <small>before-after 분석과 반영 문서</small>
+              </article>
+              <article>
+                <span>Ack</span>
+                <strong>열람 확인</strong>
+                <small>작업자 표시명 · 언어 · 확인 시각</small>
+              </article>
+            </div>
+          </section>
+
           <section className="ontology-graph-shell safeclaw-module-panel" aria-label="옵시디언형 온톨로지 그래프">
             <div className="compact-head">
               <span className="eyebrow">Graph Ontology</span>
