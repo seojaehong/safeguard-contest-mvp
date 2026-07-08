@@ -97,6 +97,12 @@ function findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql
       evidence: { embeddedCount: report.embeddedCount, uploadedCount: report.uploadedCount, vectorsPath }
     },
     {
+      id: "embedding_requires_explicit_cost_approval_flag",
+      passed: scriptSource.includes("--embed requires explicit --approved-embedding after embedding cost approval")
+        && scriptSource.includes("options.approvedEmbedding"),
+      evidence: { scriptPath: DEFAULT_SCRIPT }
+    },
+    {
       id: "upload_requires_explicit_approval_flag",
       passed: scriptSource.includes("--upload requires explicit --approved-upload after DB migration approval")
         && scriptSource.includes("options.upload && !options.approvedUpload"),
@@ -179,7 +185,7 @@ function main() {
     dbMutationPerformed: false,
     embeddingGenerated: false,
     uploaded: false,
-    commandHeldUntilApproval: "npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload",
+    commandHeldUntilApproval: "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload",
     reportPath,
     manifestPath,
     corpusPath,
@@ -198,7 +204,8 @@ function main() {
     nextApprovalDecisions: [
       "Apply 010_commercial_operations.sql as-is or split an embedding-only migration.",
       "Confirm OPENAI_API_KEY and Supabase service role are available in the execution environment.",
-      "Run embedding upload only with --embed --upload --approved-upload.",
+      "Run embedding generation only with --embed --approved-embedding.",
+      "Run embedding upload only with --embed --approved-embedding --upload --approved-upload.",
       "Verify uploaded row count equals 6032 before enabling SAFETY_REFERENCE_VECTOR_SEARCH=1.",
       "Enable runtime vector retrieval after RPC smoke test passes."
     ]

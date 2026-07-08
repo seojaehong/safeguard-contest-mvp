@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-08T16:30:48.914Z",
+  "generatedAt": "2026-07-08T16:31:00.582Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
-  "ok": true,
+  "ok": false,
   "approvalHeld": true,
   "dbMutationPerformed": false,
   "embeddingGenerated": false,
@@ -104,8 +104,8 @@
     "supabaseServiceRolePresent": true,
     "vectorFeatureFlagEnabled": false,
     "executionEnvReady": false,
-    "requireExecutionEnv": false,
-    "envFailure": false
+    "requireExecutionEnv": true,
+    "envFailure": true
   },
   "executionReadyAfterApproval": false,
   "nextApprovalDecisions": [

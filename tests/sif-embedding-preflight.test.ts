@@ -48,11 +48,21 @@ describe("SIF embedding approval preflight", () => {
     expect(saved.uploaded).toBe(false);
     expect(saved.corpusCount).toBe(6032);
     expect(saved.batchCount).toBe(61);
-    expect(saved.commandHeldUntilApproval).toBe("npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload");
+    expect(saved.commandHeldUntilApproval).toBe("npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload");
     expect(asStringArray(saved.failedCheckIds)).toEqual([]);
+    const checks = (saved.checks as Array<Record<string, unknown>>);
+    expect(checks.some((check) => check.id === "embedding_requires_explicit_cost_approval_flag" && check.passed === true)).toBe(true);
 
     const env = asRecord(saved.env);
     expect(env.executionEnvReady).toBe(false);
     expect(env.requireExecutionEnv).toBe(false);
+  });
+
+  it("keeps the embedding cost approval guard in the corpus script", () => {
+    const source = readFileSync("scripts/prepare_sif_embedding_corpus.mjs", "utf8");
+
+    expect(source).toContain("--approved-embedding");
+    expect(source).toContain("--embed requires explicit --approved-embedding after embedding cost approval");
+    expect(source).toContain("embeddingApprovedFlag");
   });
 });
