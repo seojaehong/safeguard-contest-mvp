@@ -50,7 +50,8 @@ SIF vector gate 산출물:
 ### 온톨로지
 
 - 현재 `/ontology`는 published graph를 list + hover card로 보여준다.
-- LangGraph/Habermas Machine 구현은 이번 게이트의 필수 조건이 아니다.
+- 보강: `/ontology`에 published graph 기반 Obsidian식 노드-엣지 맵을 추가했다. 연결도가 높은 노드를 deterministic layout으로 먼저 배치하고, 노드 hover/focus 시 관계 카드가 열린다.
+- LangGraph/Habermas Machine 구현은 이번 게이트의 필수 조건이 아니다. 지금은 agent orchestration보다 검수된 published graph를 사용자가 읽고 탐색하는 표면이 우선이다.
 - 지금 병목은 agent orchestration보다 DB 근거 고정, 개선 이력 회수, 승인된 지식 승격이다.
 - 다음 UI 후보는 Obsidian식 hover card + 리스트 기반 탐색을 유지하면서 작업팩 하네스 패킷과 연결하는 것이다.
 
