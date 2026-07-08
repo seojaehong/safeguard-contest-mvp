@@ -1,0 +1,51 @@
+{
+  "desktop": {
+    "title": "개선 리포트.",
+    "workdocTitle": "서울 성수동 근린생활시설… · 주간",
+    "hasWorkdoc": true,
+    "hasRail": true,
+    "hasOldMetricGrid": false,
+    "hasDownload": true,
+    "hasAsIsToBe": true,
+    "hasPhotoImprovement": true,
+    "hasKrasCopy": false,
+    "hasInternalId": false,
+    "hasEnglishRail": false,
+    "horizontalOverflow": false,
+    "primaryBg": "rgb(108, 111, 247)",
+    "activeNavBg": "rgb(20, 21, 22)",
+    "tableLabels": [
+      "작업",
+      "위험",
+      "현재",
+      "개선",
+      "근거"
+    ]
+  },
+  "mobile": {
+    "title": "개선 리포트.",
+    "workdocTitle": "서울 성수동 근린생활시설… · 주간",
+    "hasWorkdoc": true,
+    "hasRail": true,
+    "hasOldMetricGrid": false,
+    "hasDownload": true,
+    "hasAsIsToBe": true,
+    "hasPhotoImprovement": true,
+    "hasKrasCopy": false,
+    "hasInternalId": false,
+    "hasEnglishRail": false,
+    "horizontalOverflow": false,
+    "primaryBg": "rgb(108, 111, 247)",
+    "activeNavBg": "rgb(20, 21, 22)",
+    "tableLabels": [
+      "작업",
+      "위험",
+      "현재",
+      "개선",
+      "근거"
+    ]
+  },
+  "download": {
+    "suggestedFilename": "서울-성수동-근린생활시설-현장-weekly-safety-report.md"
+  }
+}

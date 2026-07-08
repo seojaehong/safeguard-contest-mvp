@@ -16,6 +16,11 @@ import {
   buildPhotoAnalysisCandidate as buildPhotoAnalysisCandidateText
 } from "@/lib/operation-improvements";
 import {
+  OPERATION_IMPROVEMENTS_STORAGE_KEY,
+  parseOperationImprovements,
+  type OperationImprovement
+} from "@/lib/operation-improvement-history";
+import {
   buildWorkspaceStepStatuses,
   canOpenWorkspacePage,
   nextWorkspacePageAfterGenerationError,
@@ -54,19 +59,6 @@ type FieldBrief = {
   weather: string;
   sourceLabel: string;
   foreignWorkerSignal: string;
-};
-
-type OperationImprovement = {
-  id: string;
-  createdAt: string;
-  siteName: string;
-  workSummary: string;
-  hazardLabel: string;
-  improvementText: string;
-  reflectedDocuments: string[];
-  beforePhotoName?: string;
-  afterPhotoName?: string;
-  photoAnalysisSummary?: string;
 };
 
 type WeatherBrief = AskResponse["externalData"]["weather"];
@@ -130,8 +122,6 @@ const primaryDocumentKeys = new Set<DocumentKey>([
   "tbmLogDraft"
 ]);
 const focusDocumentItems = outputItems.filter((item) => primaryDocumentKeys.has(item.key));
-const IMPROVEMENT_STORAGE_KEY = "safeclaw.operationImprovements.v1";
-
 function statusCopy(state: GenerationState) {
   if (state === "generating") return "문서 생성 중";
   if (state === "ready") return "문서팩 준비됨";
@@ -568,32 +558,7 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
 
 function parseStoredImprovements(): OperationImprovement[] {
   if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(IMPROVEMENT_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is OperationImprovement => {
-      if (typeof item !== "object" || item === null || Array.isArray(item)) return false;
-      const record = item as Partial<OperationImprovement>;
-      return (
-        typeof record.id === "string" &&
-        typeof record.createdAt === "string" &&
-        typeof record.siteName === "string" &&
-        typeof record.workSummary === "string" &&
-        typeof record.hazardLabel === "string" &&
-        typeof record.improvementText === "string" &&
-        Array.isArray(record.reflectedDocuments) &&
-        record.reflectedDocuments.every((value) => typeof value === "string") &&
-        (typeof record.beforePhotoName === "string" || typeof record.beforePhotoName === "undefined") &&
-        (typeof record.afterPhotoName === "string" || typeof record.afterPhotoName === "undefined") &&
-        (typeof record.photoAnalysisSummary === "string" || typeof record.photoAnalysisSummary === "undefined")
-      );
-    });
-  } catch (error) {
-    console.warn("safeclaw improvements parse failed", error);
-    return [];
-  }
+  return parseOperationImprovements(window.localStorage.getItem(OPERATION_IMPROVEMENTS_STORAGE_KEY));
 }
 
 function formatImprovementTime(value: string) {
@@ -947,7 +912,7 @@ export function SafeGuardCommandCenter({
     setAfterPhoto(null);
     if (typeof window !== "undefined") {
       try {
-        window.localStorage.setItem(IMPROVEMENT_STORAGE_KEY, JSON.stringify(nextItems));
+        window.localStorage.setItem(OPERATION_IMPROVEMENTS_STORAGE_KEY, JSON.stringify(nextItems));
       } catch (error) {
         console.warn("safeclaw improvements save failed", error);
       }
