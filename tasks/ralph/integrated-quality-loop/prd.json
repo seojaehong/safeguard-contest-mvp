@@ -3,6 +3,9 @@
   "branchName": "master",
   "qualityChecks": [
     "npm.cmd test -- tests/quality-contract.test.ts",
+    "npm.cmd test -- tests/operation-improvements.test.ts",
+    "npm.cmd test -- tests/workspace-pages.test.ts",
+    "npm.cmd test -- tests/workpack-store.test.ts",
     "npm.cmd test -- tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts",
     "npm.cmd run typecheck",
     "npm.cmd run build"
@@ -50,26 +53,75 @@
     },
     {
       "id": "C3",
-      "title": "Add DB consistency gates for workpack persistence",
+      "title": "Refocus workspace into a 3-step workbench with improvement memory",
       "priority": 3,
-      "status": "todo",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
-        "Workpack save paths record qualityContract and reject silent loss of required evidence fields.",
-        "Supabase type definitions and migrations are consistent with persisted JSON shape.",
+        "Workspace shows only the 3-step user flow: input, document, share.",
+        "The first screen is an extreme-simple white workbench with one question, one textarea, one primary action, and a thin evidence rail.",
+        "Document view focuses on risk assessment and TBM, with supporting documents collapsed behind +9 more.",
+        "Share view exposes scope, permissions, acknowledgement state, persistence ledger, and today's improvement candidates.",
+        "Before/After photos produce a reviewable improvement candidate with focused unit coverage."
+      ],
+      "files": [
+        "components/SafeGuardCommandCenter.tsx",
+        "components/WorkflowSharePanel.tsx",
+        "app/globals.css",
+        "app/worker/page.tsx",
+        "lib/operation-improvements.ts",
+        "tests/operation-improvements.test.ts",
+        "evaluation/ui-ux-browser-check-2026-07-08"
+      ]
+    },
+    {
+      "id": "C4",
+      "title": "Add DB consistency gates for workpack persistence",
+      "priority": 4,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Workpack save paths record qualityContract, ontologyQa, evidenceLabels, and structured metadata inside existing JSONB columns.",
+        "Reopen paths restore qualityContract, ontologyQa, evidenceLabels, and structured metadata without schema changes.",
+        "MCP token context rejects site/org attribution mismatch before inserting a workpack.",
         "Evaluation report documents DB readiness without mutating existing production data."
       ],
       "files": [
         "lib/workpack-store.ts",
         "app/api/workpacks/route.ts",
-        "lib/supabase-admin.ts",
-        "supabase/migrations"
+        "app/api/workpacks/[id]/route.ts",
+        "tests/workpack-store.test.ts",
+        "evaluation/ui-ux-browser-check-2026-07-08/db-readiness-review.md"
       ]
     },
     {
-      "id": "C4",
+      "id": "C5",
+      "title": "Separate workspace into page-state navigation",
+      "priority": 5,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Workspace first load renders only the input page and does not render document, share, or empty-workspace sections below it.",
+        "Clicking generation moves the user into the document page where loading, evidence matching, and document preview live.",
+        "The 3-step rail acts as page-state navigation, not anchor scrolling; document/share are locked before a workpack exists.",
+        "Browser verification confirms desktop and mobile first load have no horizontal overflow and no first-screen document/share DOM.",
+        "Mobile evidence readiness rail does not require page-level horizontal scroll."
+      ],
+      "files": [
+        "components/SafeGuardCommandCenter.tsx",
+        "app/globals.css",
+        "lib/workspace-pages.ts",
+        "tests/workspace-pages.test.ts",
+        "evaluation/ui-ux-browser-check-2026-07-08/report.md",
+        "evaluation/ui-ux-browser-check-2026-07-08/workspace-input-page-v7.png",
+        "evaluation/ui-ux-browser-check-2026-07-08/workspace-document-page-v7.png",
+        "evaluation/ui-ux-browser-check-2026-07-08/workspace-input-page-mobile-v7.png"
+      ]
+    },
+    {
+      "id": "C6",
       "title": "Replace fallback-first demo defaults with explicit live-readiness UX",
-      "priority": 4,
+      "priority": 6,
       "status": "todo",
       "passes": false,
       "acceptance": [

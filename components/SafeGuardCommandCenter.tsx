@@ -11,6 +11,15 @@ import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-cop
 import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/types";
 import type { FieldExample } from "@/lib/field-examples";
 import { formatEvidenceBadge } from "@/lib/smsa-mapping";
+import { buildPhotoAnalysisCandidate as buildPhotoAnalysisCandidateText } from "@/lib/operation-improvements";
+import {
+  buildWorkspaceStepStatuses,
+  canOpenWorkspacePage,
+  nextWorkspacePageAfterGenerationError,
+  nextWorkspacePageAfterGenerate,
+  type WorkspacePage,
+  type WorkspaceStepStatus
+} from "@/lib/workspace-pages";
 
 type SafeGuardCommandCenterProps = {
   examples: FieldExample[];
@@ -22,14 +31,13 @@ type SafeGuardCommandCenterProps = {
 type GenerationState = "idle" | "generating" | "ready" | "error";
 
 type WorkflowStep = {
-  key: "input" | "pack" | "share";
+  key: WorkspacePage;
   id: string;
   label: string;
   caption: string;
 };
 
-type StepStatus = "done" | "active" | "pending" | "locked";
-type StepAnchor = "command" | "workpack" | "dispatch-overview";
+type StepStatus = WorkspaceStepStatus;
 
 type FieldBrief = {
   companyName: string;
@@ -81,15 +89,9 @@ type GenerationStage = {
 
 const workflowSteps: WorkflowStep[] = [
   { id: "01", key: "input", label: "입력", caption: "현장 상황" },
-  { id: "02", key: "pack", label: "문서", caption: "결과 검토" },
+  { id: "02", key: "document", label: "문서", caption: "결과 검토" },
   { id: "03", key: "share", label: "공유", caption: "열람·확인" }
 ];
-
-const stepAnchors: Record<WorkflowStep["key"], StepAnchor> = {
-  input: "command",
-  pack: "workpack",
-  share: "dispatch-overview"
-};
 
 const outputItems: Array<{ title: string; key: DocumentKey }> = [
   { title: "점검결과 요약", key: "workpackSummaryDraft" },
@@ -127,26 +129,6 @@ function stepStatusCopy(status: StepStatus) {
   if (status === "active") return "진행 중";
   if (status === "locked") return "잠김";
   return "대기";
-}
-
-function activeStep(state: GenerationState): WorkflowStep["key"] {
-  if (state === "generating") return "input";
-  if (state === "ready") return "pack";
-  if (state === "error") return "input";
-  return "input";
-}
-
-function stepStatuses(state: GenerationState): Record<WorkflowStep["key"], StepStatus> {
-  if (state === "generating") {
-    return { input: "active", pack: "pending", share: "locked" };
-  }
-  if (state === "ready") {
-    return { input: "done", pack: "active", share: "pending" };
-  }
-  if (state === "error") {
-    return { input: "active", pack: "pending", share: "locked" };
-  }
-  return { input: "active", pack: "pending", share: "locked" };
 }
 
 function lawCount(data: AskResponse | null, state: GenerationState) {
@@ -726,6 +708,7 @@ export function SafeGuardCommandCenter({
   const [checkedActions, setCheckedActions] = useState<boolean[]>([]);
   const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
+  const [workspacePage, setWorkspacePage] = useState<WorkspacePage>("input");
   const [editorFocusToken, setEditorFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("riskAssessmentDraft");
   const [consoleLines, setConsoleLines] = useState<AgentConsoleLine[]>([]);
@@ -756,15 +739,24 @@ export function SafeGuardCommandCenter({
     if (afterPhoto) URL.revokeObjectURL(afterPhoto.url);
   }, [afterPhoto]);
 
-  function scrollToStep(anchor: StepAnchor) {
-    const target = document.getElementById(anchor);
-    if (!target) return;
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  function moveToWorkspacePage(targetPage: WorkspacePage) {
+    const gate = canOpenWorkspacePage({
+      targetPage,
+      hasWorkpack: Boolean(data),
+      isGenerating: state === "generating"
+    });
+    if (!gate.allowed) {
+      setMessage(gate.reason || "문서 생성 후 열 수 있습니다.");
+      return;
+    }
+    setWorkspacePage(targetPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function focusWorkpackEditor(key: DocumentKey) {
     setRequestedDocumentKey(key);
-    scrollToStep("workpack");
+    setWorkspacePage("document");
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setEditorFocusToken((current) => current + 1);
     setMessage("선택한 문서를 편집·다운로드 영역으로 열었습니다. PDF·XLS·HWPX 버튼으로 출력하세요.");
   }
@@ -796,8 +788,13 @@ export function SafeGuardCommandCenter({
   }
 
   function buildPhotoAnalysisCandidate() {
-    if (!beforePhoto || !afterPhoto) return "";
-    return `Before/After 사진 비교 후보: ${fieldBrief.workSummary}에서 ${data?.riskSummary.topRisk || "핵심 위험"} 관련 개선 조치가 확인되어 위험성평가와 TBM 재확인 항목으로 반영합니다.`;
+    return buildPhotoAnalysisCandidateText({
+      beforePhoto,
+      afterPhoto,
+      workSummary: fieldBrief.workSummary,
+      topRisk: data?.riskSummary.topRisk,
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"]
+    });
   }
 
   function saveOperationImprovement() {
@@ -854,6 +851,7 @@ export function SafeGuardCommandCenter({
       setData(payload);
       setCheckedActions(payload.riskSummary.immediateActions.map(() => false));
       setState("ready");
+      setWorkspacePage("document");
       setMessage("문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요.");
     });
   }
@@ -866,6 +864,7 @@ export function SafeGuardCommandCenter({
     }
 
     setState("generating");
+    setWorkspacePage(nextWorkspacePageAfterGenerate());
     setMessage("법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.");
     setConsoleLines([]);
 
@@ -878,6 +877,7 @@ export function SafeGuardCommandCenter({
       } catch (error) {
         console.error("workpack generation failed", error);
         setState("error");
+        setWorkspacePage(nextWorkspacePageAfterGenerationError());
         setMessage("문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
       }
       return;
@@ -907,6 +907,7 @@ export function SafeGuardCommandCenter({
       } catch (error) {
         console.error("workpack generation failed", error);
         setState("error");
+        setWorkspacePage(nextWorkspacePageAfterGenerationError());
         setMessage("문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
       }
     }
@@ -923,6 +924,7 @@ export function SafeGuardCommandCenter({
     setData(null);
     setLiveWeather(null);
     setState("idle");
+    setWorkspacePage("input");
     setMessage(`${example.label} 현장 예시를 불러왔습니다. 필요하면 작업 조건을 수정한 뒤 생성하세요.`);
   }
 
@@ -963,8 +965,13 @@ export function SafeGuardCommandCenter({
   }, []);
 
   const busy = state === "generating" || isPending;
-  const currentStep = activeStep(state);
-  const statuses = stepStatuses(state);
+  const hasWorkpack = Boolean(data);
+  const currentStep = workspacePage;
+  const statuses = buildWorkspaceStepStatuses({
+    currentPage: workspacePage,
+    hasWorkpack,
+    isGenerating: state === "generating"
+  });
   const fieldBrief = data ? buildApiFieldBrief(data, selectedExample) : buildInputFieldBrief(question, selectedExample, liveWeather, isWeatherLoading);
   const currentLawCount = lawCount(data, state);
   const currentDocProgress = docProgress(data, state);
@@ -991,23 +998,31 @@ export function SafeGuardCommandCenter({
           </span>
         </Link>
         <nav className="topnav command-stepper" aria-label="작업 단계">
-          {workflowSteps.map((step) => (
-            <button
-              type="button"
-              aria-current={step.key === currentStep ? "step" : undefined}
-              aria-controls={stepAnchors[step.key]}
-              className={step.key === currentStep ? "active" : ""}
-              key={step.key}
-              onClick={() => scrollToStep(stepAnchors[step.key])}
-              title={step.caption}
-            >
-              <StepDot status={statuses[step.key]} />
-              <span className="step-copy">
-                <small>{step.id} · {stepStatusCopy(statuses[step.key])}</small>
-                <strong>{step.label}</strong>
-              </span>
-            </button>
-          ))}
+          {workflowSteps.map((step) => {
+            const gate = canOpenWorkspacePage({
+              targetPage: step.key,
+              hasWorkpack,
+              isGenerating: state === "generating"
+            });
+            return (
+              <button
+                type="button"
+                aria-current={step.key === currentStep ? "step" : undefined}
+                aria-controls={`workspace-${step.key}-page`}
+                className={step.key === currentStep ? "active" : ""}
+                disabled={!gate.allowed}
+                key={step.key}
+                onClick={() => moveToWorkspacePage(step.key)}
+                title={gate.allowed ? step.caption : gate.reason}
+              >
+                <StepDot status={statuses[step.key]} />
+                <span className="step-copy">
+                  <small>{step.id} · {stepStatusCopy(statuses[step.key])}</small>
+                  <strong>{step.label}</strong>
+                </span>
+              </button>
+            );
+          })}
         </nav>
         <div className="topbar-status" aria-live="polite">
           <span>{statusCopy(state)}</span>
@@ -1017,7 +1032,9 @@ export function SafeGuardCommandCenter({
       </header>
 
       <section className="command-viewport" id="command">
-        <section className="command-main card command-main-studio">
+        <section className={`command-main card command-main-studio workspace-${workspacePage}-page`}>
+          {workspacePage === "input" ? (
+            <section className="workspace-step-page workspace-input-page" id="workspace-input-page">
           <div className="command-copy">
             <span className="eyebrow">SafeClaw Workbench</span>
             <h1>오늘 작업은 무엇인가요?</h1>
@@ -1037,6 +1054,8 @@ export function SafeGuardCommandCenter({
                 setQuestion(event.target.value);
                 setSelectedExampleId(null);
                 setData(null);
+                setState("idle");
+                setWorkspacePage("input");
               }}
               maxLength={inputLimit}
               placeholder="오늘 작업 내용을 한 줄로 입력하세요."
@@ -1124,6 +1143,7 @@ export function SafeGuardCommandCenter({
                   setQuestion(selectedExample.question);
                   setData(null);
                   setState("idle");
+                  setWorkspacePage("input");
                 }}
               >
                 예시로 되돌리기
@@ -1148,7 +1168,11 @@ export function SafeGuardCommandCenter({
               ))}
             </div>
           </details>
+            </section>
+          ) : null}
 
+          {workspacePage === "document" ? (
+            <section className="workspace-step-page workspace-document-page" id="workspace-document-page">
           <section className="evidence-live-panel" id="risk">
             <div className="compact-head">
               <span className="eyebrow">근거 매칭</span>
@@ -1287,7 +1311,7 @@ export function SafeGuardCommandCenter({
                     type="button"
                     className="button command-primary document-next-button"
                     disabled={!data}
-                    onClick={() => scrollToStep("dispatch-overview")}
+                    onClick={() => moveToWorkspacePage("share")}
                   >
                     다음: 공유
                   </button>
@@ -1324,7 +1348,11 @@ export function SafeGuardCommandCenter({
               </div>
             </details>
           </section>
+            </section>
+          ) : null}
 
+          {workspacePage === "share" ? (
+            <section className="workspace-step-page workspace-share-page" id="workspace-share-page">
           <section className="dispatch-preview-panel" id="dispatch-overview">
             <div>
               <span className="eyebrow">공유/열람</span>
@@ -1424,10 +1452,12 @@ export function SafeGuardCommandCenter({
               ) : null}
             </section>
           </section>
+            </section>
+          ) : null}
         </section>
       </section>
 
-      {data ? (
+      {workspacePage === "document" && data ? (
         <>
           <section className="result-ribbon" aria-label="생성 결과 요약">
             <article>
@@ -1466,26 +1496,7 @@ export function SafeGuardCommandCenter({
             requestedDocumentKey={requestedDocumentKey}
           />
         </>
-      ) : (
-        <section className="empty-workspace card" id="workpack">
-          <div>
-            <span className="eyebrow">작업공간 준비</span>
-            <h2>생성 버튼을 누르면 작업공간이 열립니다.</h2>
-            <p>
-              첫 화면은 즉시 열리고, 라이브 근거 확인은 문서팩 생성 시점에 실행됩니다.
-              현장관리자는 생성된 문서를 바로 수정하고 파일로 내보낼 수 있습니다.
-            </p>
-          </div>
-          <div className="empty-preview-grid">
-            {["문서 편집", "근거 매핑", "현장 전파"].map((item) => (
-              <article key={item}>
-                <strong>{item}</strong>
-                <span>생성 후 활성화</span>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
+      ) : null}
     </main>
   );
 }

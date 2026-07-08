@@ -25,6 +25,9 @@ Read-only probe confirmed:
 - No schema migration.
 - `safety_reference_items` is surfaced through user-language labels: high-risk cases, KOSHA official references, TBM/risk-assessment criteria.
 - `qualityContract` and `ontologyQa` appear in the document evidence panel.
+- `workpacks.evidence_summary` now preserves `qualityContract`, `ontologyQa`, `evidenceLabels`, and `structured` for reopen without adding columns.
+- `app/api/workpacks/[id]` now rebuilds reopen data through the shared `buildReopenData` helper instead of route-local partial reconstruction.
+- MCP token workpack persistence now checks the token org against the selected site's org before insert; mismatches degrade to `saved:false`.
 - `workpacks`, `education_records`, and `dispatch_logs` remain separate persistence concepts in the share panel.
 - Today's improvements are represented as local operational ontology candidates with task, hazard, improvement text, reflected documents, and optional Before/After photo file names.
 

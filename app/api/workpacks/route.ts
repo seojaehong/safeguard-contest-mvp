@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
+import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser } from "@/lib/supabase-admin";
 import { documentKeysFromDeliverables } from "@/lib/evidence-file";
 import type { AskResponse } from "@/lib/types";
 import { isRecord, parseScenarioContext, readString } from "@/lib/workspace-api";
+import { buildSelectedWorkpackEvidenceSummary, buildWorkpackInsertPayload } from "@/lib/workpack-store";
 
 export const dynamic = "force-dynamic";
 
@@ -172,31 +173,26 @@ export async function POST(request: NextRequest) {
   const question = readString(body.question, askResponse?.question || "현장 작업 문서팩");
   const scenario = isRecord(body.scenario) ? body.scenario : askResponse?.scenario || {};
   const deliverables = askResponse?.deliverables || body.deliverables || {};
-  const evidenceSummary = body.evidenceSummary || (askResponse ? {
-    answer: askResponse.answer,
-    practicalPoints: askResponse.practicalPoints,
-    citations: askResponse.citations,
-    sourceMix: askResponse.sourceMix || null,
-    mode: askResponse.mode,
-    externalData: askResponse.externalData,
-    riskSummary: askResponse.riskSummary
-  } : {});
+  const evidenceSummary = buildSelectedWorkpackEvidenceSummary({
+    askResponse,
+    providedEvidenceSummary: body.evidenceSummary
+  });
   const status = askResponse?.status || body.status || {};
   const context = await ensureWorkspaceContext(client, user, parseScenarioContext(scenario));
 
   const { data, error } = await client
     .from("workpacks")
-    .insert({
-      organization_id: context.organizationId,
-      site_id: context.siteId,
+    .insert(buildWorkpackInsertPayload({
+      organizationId: context.organizationId,
+      siteId: context.siteId,
       question,
-      scenario: toJson(scenario),
-      deliverables: toJson(deliverables),
-      evidence_summary: toJson(evidenceSummary),
-      worker_summary: toJson(body.workerSummary || {}),
-      status: toJson(status),
-      created_by: user.id
-    })
+      scenario,
+      deliverables,
+      evidenceSummary,
+      workerSummary: body.workerSummary || {},
+      status,
+      createdBy: user.id
+    }))
     .select("id")
     .single();
 

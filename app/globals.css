@@ -8581,6 +8581,11 @@ body {
   padding: 5px 10px;
 }
 
+.command-center-shell .command-stepper button:disabled {
+  cursor: not-allowed;
+  opacity: 0.44;
+}
+
 .command-center-shell .command-stepper button.active {
   border-color: var(--workspace-ink) !important;
   background: var(--workspace-ink) !important;
@@ -8653,6 +8658,23 @@ body {
   border-radius: 0 !important;
   background: var(--workspace-canvas) !important;
   padding: clamp(44px, 7vw, 92px) 0 72px;
+}
+
+.command-center-shell .workspace-step-page {
+  width: min(1180px, calc(100% - clamp(28px, 7vw, 96px)));
+  margin: 0 auto;
+}
+
+.command-center-shell .workspace-input-page {
+  display: grid;
+  min-height: calc(100vh - 220px);
+  align-content: center;
+}
+
+.command-center-shell .workspace-document-page,
+.command-center-shell .workspace-share-page {
+  display: grid;
+  gap: 22px;
 }
 
 .command-center-shell .command-copy {
@@ -8940,11 +8962,19 @@ body {
   }
 
   .command-center-shell .evidence-readiness-rail {
-    justify-content: flex-start;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
   }
 
   .command-center-shell .evidence-readiness-card {
-    flex: 0 0 auto;
+    min-width: 0;
+    justify-content: center;
+    border-right: 0;
+    border-bottom: 1px solid var(--workspace-rule);
+  }
+
+  .command-center-shell .evidence-readiness-card:nth-last-child(-n + 2) {
+    border-bottom: 0;
   }
 }

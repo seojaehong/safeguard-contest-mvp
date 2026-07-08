@@ -18,6 +18,7 @@ Used as product direction, not as visual cloning:
 ## Consensus
 
 - SafeClaw should feel like a workbench, not a wizard.
+- The workspace should not be a long-scroll dashboard. It should render as page-state screens: input first, document after generation, share after review.
 - The primary product proof is not the number of generated documents.
 - The proof is the loop: field input -> official evidence -> risk/TBM documents -> team read confirmation -> improvement memory.
 - DB facts should appear as small repeated evidence signals, not row-count dashboards.
@@ -27,6 +28,8 @@ Used as product direction, not as visual cloning:
 ## Implementation Translation
 
 - Input stage gets a `근거 준비 레일`.
+- First load renders only the input page; document/share panels are not pre-rendered below the fold.
+- Generation feedback belongs inside the document page loading state, not on the input page.
 - Document stage gets a right-side evidence/quality panel.
 - Share stage gets scope, permission, confirmation, and persistence panels.
 - Today's improvements support Before/After photos and become operational ontology candidates.

@@ -31,3 +31,31 @@ Started: 2026-07-08
 - Shifted the first workspace screen to an extreme-simple white workbench variation based on the Cohere-style reference: one question, one textarea, one primary action, and a thin evidence rail.
 - Browser evidence saved under `evaluation/ui-ux-browser-check-2026-07-08/`.
 - Verification passed: `npm.cmd run typecheck`, `npm.cmd test -- tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts`, `npm.cmd run build`.
+
+## 2026-07-08 C3 TDD Addendum
+- Corrected `prd.json`: C3 now matches the implemented 3-step workbench and improvement-memory story; DB consistency moved to C4 and live-readiness UX moved to C5.
+- RED: `npm.cmd test -- tests/operation-improvements.test.ts` first failed because `@/lib/operation-improvements` did not exist, then failed with a targeted assertion (`expected '' to contain 'Before/After 사진 비교 후보'`) while the helper was still a stub.
+- GREEN: added `lib/operation-improvements.ts` and wired `components/SafeGuardCommandCenter.tsx` to use the tested helper for Before/After photo improvement candidates.
+- Verified: `npm.cmd test -- tests/operation-improvements.test.ts`, `npm.cmd test -- tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts`, `npm.cmd run typecheck`.
+- Next: C4 DB consistency gates should stay schema-change-free until explicit migration approval.
+
+## 2026-07-08 C4 Pass
+- Added schema-change-free workpack persistence helpers in `lib/workpack-store.ts`.
+- RED: `npm.cmd test -- tests/workpack-store.test.ts` failed because `buildWorkpackEvidenceSummary` was missing and MCP site/org mismatch still inserted a row.
+- GREEN: `buildWorkpackEvidenceSummary` now preserves `qualityContract`, `ontologyQa`, `evidenceLabels`, and `structured`; `buildReopenData` restores them; MCP token site/org mismatch returns `saved:false` before `workpacks.insert`.
+- Replaced duplicate evidence-summary/reopen assembly in `app/api/workpacks/route.ts` and `app/api/workpacks/[id]/route.ts` with the shared helpers.
+- Review fix: subagent review caught that `body.evidenceSummary` could still override the full `AskResponse` evidence contract in `app/api/workpacks`; added RED coverage and `buildSelectedWorkpackEvidenceSummary` so full AskResponse metadata wins.
+- Verified: `npm.cmd test -- tests/workpack-store.test.ts`, `npm.cmd test -- tests/workpack-store.test.ts tests/operation-improvements.test.ts tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts`, `npm.cmd run typecheck`.
+- Next: C5 live-readiness UX can stay UI/browser-only; DB migrations remain approval-required Phase 2.
+
+## 2026-07-08 C5 Page-State Pass
+- Reframed the workspace from a long-scroll surface into page-state rendering: `input`, `document`, `share`.
+- RED: `npm.cmd test -- tests/workspace-pages.test.ts` failed because `@/lib/workspace-pages` did not exist.
+- GREEN: added `lib/workspace-pages.ts` and wired `components/SafeGuardCommandCenter.tsx` to use page-state navigation instead of anchor scrolling.
+- First load now renders only `#workspace-input-page`; document, share, evidence, output, dispatch, and empty-workspace sections are absent from the initial DOM.
+- Generation submits move into `#workspace-document-page`, where loading/evidence matching and the focused 위험성평가/TBM document view live.
+- Mobile evidence readiness rail now renders as a two-column grid instead of an internal horizontal rail.
+- Review fix: subagent review found that generation failure could leave users on a document page without a workpack; added RED coverage and returned failure state to the input page for retry.
+- Browser evidence saved: `workspace-input-page-v7.png`, `workspace-document-page-v7.png`, `workspace-input-page-mobile-v7.png`.
+- Verified: `npm.cmd test -- tests/workspace-pages.test.ts`, `npm.cmd test -- tests/workspace-pages.test.ts tests/workpack-store.test.ts tests/operation-improvements.test.ts tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts`, `npm.cmd run build`, `npm.cmd run typecheck`, Playwright desktop/mobile `/workspace` probes.
+- Next: C6 live-readiness UX remains the next UI-only story; DB migrations remain approval-required Phase 2.

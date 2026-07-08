@@ -22,6 +22,9 @@ Date: 2026-07-08
 - Added Before/After photo attachment UI for today's improvements. Phase 1 stores the generated candidate and file names locally; actual vision-model analysis and file persistence remain Phase 2.
 - Added manual language switching and acknowledgement state to the worker mobile view.
 - Simplified the first screen into one large question, one textarea, one primary action, and a thin evidence-readiness rail.
+- Replaced the long-scroll workspace with page-state rendering: `input`, `document`, and `share`.
+- Removed first-screen DOM rendering for document, share, and empty-workspace sections.
+- Moved generation feedback into the document page loading state.
 
 ## Browser Evidence
 
@@ -30,6 +33,9 @@ Date: 2026-07-08
 - Mobile viewport: `workspace-mobile-v5-simple-viewport.png`
 - Mobile full page: `workspace-mobile-v5-simple.png`
 - Before/After photo flow: `workspace-photo-analysis-v5-simple.png`
+- Page-state desktop initial: `workspace-input-page-v7.png`
+- Page-state desktop document transition: `workspace-document-page-v7.png`
+- Page-state mobile initial: `workspace-input-page-mobile-v7.png`
 
 ## Browser Probe Results
 
@@ -38,6 +44,9 @@ Date: 2026-07-08
 - Mobile `/workspace`: CSS-width mobile breakpoint verified with 3 grid step buttons, hidden topbar status, no horizontal overflow.
 - Before/After photo test: 2 image inputs accepted test image files, 2 previews rendered, image-analysis candidate panel appeared.
 - Worker `/worker`: 6 language buttons rendered, manual language switch copy visible, acknowledgement button visible.
+- Page-state desktop initial probe: input page 1, document page 0, share page 0, evidence panel 0, output grid 0, dispatch panel 0, empty workspace 0, no horizontal overflow.
+- Page-state desktop after submit probe: input page 0, document page 1, share page 0, evidence panel 1, output grid 1, dispatch panel 0, empty workspace 0, active step `문서`.
+- Page-state mobile initial probe: input page 1, document page 0, share page 0, evidence panel 0, output grid 0, dispatch panel 0, empty workspace 0, no horizontal overflow; evidence readiness rail renders as a two-column grid.
 
 ## Acceptance Checks
 
@@ -47,6 +56,8 @@ Date: 2026-07-08
 - Mobile layout should avoid horizontal overflow.
 - Sharing should read as a product completion loop: scope, recipients, confirmation, persistence, improvement candidates.
 - Today's improvement capture should allow Before/After photos and return a reviewable improvement candidate.
+- First load should not render document, share, or empty-workspace sections below the input page.
+- Submitting generation should move users to the document page, where loading and evidence matching are shown.
 
 ## Remaining Phase 2 Work
 

@@ -1,77 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
-import type { AskResponse } from "@/lib/types";
+import { buildReopenData } from "@/lib/workpack-store";
 
 export const dynamic = "force-dynamic";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function readString(value: unknown, fallback = "") {
-  return typeof value === "string" ? value : fallback;
-}
-
-function readStringArray(value: unknown) {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
-}
-
-function readJsonObject(value: unknown): Record<string, unknown> | null {
-  return isRecord(value) ? value : null;
-}
-
-function buildReopenData(input: {
-  question: string;
-  scenario: unknown;
-  deliverables: unknown;
-  evidenceSummary: unknown;
-  status: unknown;
-}): { data: AskResponse | null; blockers: string[] } {
-  const blockers: string[] = [];
-  const scenario = readJsonObject(input.scenario);
-  const deliverables = readJsonObject(input.deliverables);
-  const evidenceSummary = readJsonObject(input.evidenceSummary);
-  const evidence = evidenceSummary || {};
-  const status = readJsonObject(input.status);
-  const externalData = readJsonObject(evidence.externalData);
-  const riskSummary = readJsonObject(evidence.riskSummary);
-
-  if (!scenario) blockers.push("workpacks.scenario JSON이 AskResponse.scenario 형태가 아닙니다.");
-  if (!deliverables) blockers.push("workpacks.deliverables JSON이 문서팩 산출물 형태가 아닙니다.");
-  if (!externalData) blockers.push("workpacks.evidence_summary.externalData가 없어 근거 패널을 복원할 수 없습니다.");
-  if (!riskSummary) blockers.push("workpacks.evidence_summary.riskSummary이 없어 위험 요약을 복원할 수 없습니다.");
-  if (!status) blockers.push("workpacks.status JSON이 저장되지 않았습니다.");
-
-  if (blockers.length || !scenario || !deliverables || !externalData || !riskSummary || !status) {
-    return { data: null, blockers };
-  }
-
-  const answer = readString(evidence.answer, "저장된 문서팩 상세입니다. 원문 답변은 이전 저장 형식에 없을 수 있습니다.");
-  const mode = evidence.mode === "live" || evidence.mode === "fallback" || evidence.mode === "mock"
-    ? evidence.mode
-    : "fallback";
-
-  return {
-    data: {
-      question: input.question,
-      answer,
-      practicalPoints: readStringArray(evidence.practicalPoints),
-      citations: Array.isArray(evidence.citations) ? evidence.citations as AskResponse["citations"] : [],
-      sourceMix: isRecord(evidence.sourceMix) ? evidence.sourceMix as AskResponse["sourceMix"] : undefined,
-      mode,
-      scenario: scenario as AskResponse["scenario"],
-      externalData: externalData as AskResponse["externalData"],
-      riskSummary: riskSummary as AskResponse["riskSummary"],
-      deliverables: deliverables as AskResponse["deliverables"],
-      status: status as AskResponse["status"]
-    },
-    blockers: []
-  };
-}
 
 export async function GET(request: NextRequest, context: RouteContext) {
   const client = createSupabaseAdminClient();

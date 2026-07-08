@@ -10,6 +10,8 @@ import {
 } from "@/lib/supabase-admin";
 import type { AskResponse } from "@/lib/types";
 
+type WorkpackInsert = WorkspaceDatabase["public"]["Tables"]["workpacks"]["Insert"];
+
 export type SaveWorkpackResult = {
   ok: boolean;
   workpackId: string | null;
@@ -22,6 +24,144 @@ export type McpDocpackAttribution = {
   workpackId: string | null;
   saved: boolean;
 };
+
+export type WorkpackEvidenceSummary = {
+  answer: string;
+  practicalPoints: string[];
+  citations: AskResponse["citations"];
+  sourceMix: AskResponse["sourceMix"] | null;
+  mode: AskResponse["mode"];
+  externalData: AskResponse["externalData"];
+  riskSummary: AskResponse["riskSummary"];
+  qualityContract?: AskResponse["qualityContract"];
+  ontologyQa?: AskResponse["ontologyQa"];
+  evidenceLabels?: AskResponse["evidenceLabels"];
+  structured?: AskResponse["structured"];
+};
+
+export type ReopenWorkpackInput = {
+  question: string;
+  scenario: unknown;
+  deliverables: unknown;
+  evidenceSummary: unknown;
+  status: unknown;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(value: unknown, fallback = "") {
+  return typeof value === "string" ? value : fallback;
+}
+
+function readStringArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function readJsonObject(value: unknown): Record<string, unknown> | null {
+  return isRecord(value) ? value : null;
+}
+
+export function buildWorkpackEvidenceSummary(response: AskResponse): WorkpackEvidenceSummary {
+  return {
+    answer: response.answer,
+    practicalPoints: response.practicalPoints,
+    citations: response.citations,
+    sourceMix: response.sourceMix || null,
+    mode: response.mode,
+    externalData: response.externalData,
+    riskSummary: response.riskSummary,
+    qualityContract: response.qualityContract,
+    ontologyQa: response.ontologyQa,
+    evidenceLabels: response.evidenceLabels,
+    structured: response.structured
+  };
+}
+
+export function buildSelectedWorkpackEvidenceSummary(input: {
+  askResponse?: AskResponse | null;
+  providedEvidenceSummary?: unknown;
+}): WorkpackEvidenceSummary | Record<string, unknown> {
+  if (input.askResponse) {
+    return buildWorkpackEvidenceSummary(input.askResponse);
+  }
+  return isRecord(input.providedEvidenceSummary) ? input.providedEvidenceSummary : {};
+}
+
+export function buildWorkpackInsertPayload(input: {
+  organizationId: string;
+  siteId: string | null;
+  question: string;
+  scenario: unknown;
+  deliverables: unknown;
+  evidenceSummary: unknown;
+  workerSummary?: unknown;
+  status: unknown;
+  createdBy: string | null;
+}): WorkpackInsert {
+  return {
+    organization_id: input.organizationId,
+    site_id: input.siteId,
+    question: input.question,
+    scenario: toJson(input.scenario),
+    deliverables: toJson(input.deliverables),
+    evidence_summary: toJson(input.evidenceSummary),
+    worker_summary: toJson(input.workerSummary || {}),
+    status: toJson(input.status),
+    created_by: input.createdBy
+  };
+}
+
+export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse | null; blockers: string[] } {
+  const blockers: string[] = [];
+  const scenario = readJsonObject(input.scenario);
+  const deliverables = readJsonObject(input.deliverables);
+  const evidenceSummary = readJsonObject(input.evidenceSummary);
+  const evidence = evidenceSummary || {};
+  const status = readJsonObject(input.status);
+  const externalData = readJsonObject(evidence.externalData);
+  const riskSummary = readJsonObject(evidence.riskSummary);
+
+  if (!scenario) blockers.push("workpacks.scenario JSON이 AskResponse.scenario 형태가 아닙니다.");
+  if (!deliverables) blockers.push("workpacks.deliverables JSON이 문서팩 산출물 형태가 아닙니다.");
+  if (!externalData) blockers.push("workpacks.evidence_summary.externalData가 없어 근거 패널을 복원할 수 없습니다.");
+  if (!riskSummary) blockers.push("workpacks.evidence_summary.riskSummary이 없어 위험 요약을 복원할 수 없습니다.");
+  if (!status) blockers.push("workpacks.status JSON이 저장되지 않았습니다.");
+
+  if (blockers.length || !scenario || !deliverables || !externalData || !riskSummary || !status) {
+    return { data: null, blockers };
+  }
+
+  const mode = evidence.mode === "live" || evidence.mode === "fallback" || evidence.mode === "mock"
+    ? evidence.mode
+    : "fallback";
+  const qualityContract = readJsonObject(evidence.qualityContract);
+  const ontologyQa = readJsonObject(evidence.ontologyQa);
+  const evidenceLabels = readJsonObject(evidence.evidenceLabels);
+  const structured = readJsonObject(evidence.structured);
+
+  return {
+    data: {
+      question: input.question,
+      answer: readString(evidence.answer, "저장된 문서팩 상세입니다. 원문 답변은 이전 저장 형식에 없을 수 있습니다."),
+      practicalPoints: readStringArray(evidence.practicalPoints),
+      citations: Array.isArray(evidence.citations) ? evidence.citations as AskResponse["citations"] : [],
+      sourceMix: isRecord(evidence.sourceMix) ? evidence.sourceMix as AskResponse["sourceMix"] : undefined,
+      mode,
+      scenario: scenario as AskResponse["scenario"],
+      externalData: externalData as AskResponse["externalData"],
+      riskSummary: riskSummary as AskResponse["riskSummary"],
+      deliverables: deliverables as AskResponse["deliverables"],
+      structured: structured ? structured as AskResponse["structured"] : undefined,
+      evidenceLabels: evidenceLabels ? evidenceLabels as AskResponse["evidenceLabels"] : undefined,
+      ontologyQa: ontologyQa ? ontologyQa as AskResponse["ontologyQa"] : undefined,
+      qualityContract: qualityContract ? qualityContract as AskResponse["qualityContract"] : undefined,
+      status: status as AskResponse["status"]
+    },
+    blockers: []
+  };
+}
 
 /**
  * MCP 토큰 컨텍스트(siteId/orgId)로 docpack 결과를 해당 사이트에 귀속시킨다.
@@ -46,39 +186,37 @@ export async function saveMcpDocpackWorkpack(
 
   let organizationId = context.orgId;
   try {
-    if (!organizationId) {
-      const { data: site, error: siteError } = await client
-        .from("sites")
-        .select("organization_id")
-        .eq("id", context.siteId)
-        .maybeSingle();
-      if (siteError || !site) return base;
-      organizationId = site.organization_id;
+    const { data: site, error: siteError } = await client
+      .from("sites")
+      .select("organization_id")
+      .eq("id", context.siteId)
+      .maybeSingle();
+    if (siteError || !site) return base;
+
+    if (organizationId && organizationId !== site.organization_id) {
+      console.warn("mcp docpack workpack save skipped: site/org mismatch", {
+        siteId: context.siteId,
+        tokenOrgId: organizationId,
+        siteOrgId: site.organization_id
+      });
+      return { ...base, orgId: organizationId };
     }
 
-    const evidenceSummary = {
-      answer: response.answer,
-      practicalPoints: response.practicalPoints,
-      citations: response.citations,
-      sourceMix: response.sourceMix || null,
-      mode: response.mode,
-      externalData: response.externalData,
-      riskSummary: response.riskSummary,
-    };
+    organizationId = site.organization_id;
+    const evidenceSummary = buildWorkpackEvidenceSummary(response);
 
     const { data, error } = await client
       .from("workpacks")
-      .insert({
-        organization_id: organizationId,
-        site_id: context.siteId,
+      .insert(buildWorkpackInsertPayload({
+        organizationId,
+        siteId: context.siteId,
         question: response.question,
-        scenario: toJson(response.scenario),
-        deliverables: toJson(response.deliverables),
-        evidence_summary: toJson(evidenceSummary),
-        worker_summary: toJson({}),
-        status: toJson(response.status),
-        created_by: null,
-      })
+        scenario: response.scenario,
+        deliverables: response.deliverables,
+        evidenceSummary,
+        status: response.status,
+        createdBy: null
+      }))
       .select("id")
       .single();
 
@@ -146,29 +284,20 @@ export async function saveAskResponseAsWorkpack(
     companyName: siteName
   });
 
-  const evidenceSummary = {
-    answer: response.answer,
-    practicalPoints: response.practicalPoints,
-    citations: response.citations,
-    sourceMix: response.sourceMix || null,
-    mode: response.mode,
-    externalData: response.externalData,
-    riskSummary: response.riskSummary
-  };
+  const evidenceSummary = buildWorkpackEvidenceSummary(response);
 
   const { data, error } = await client
     .from("workpacks")
-    .insert({
-      organization_id: context.organizationId,
-      site_id: context.siteId,
+    .insert(buildWorkpackInsertPayload({
+      organizationId: context.organizationId,
+      siteId: context.siteId,
       question: response.question,
-      scenario: toJson(response.scenario),
-      deliverables: toJson(response.deliverables),
-      evidence_summary: toJson(evidenceSummary),
-      worker_summary: toJson({}),
-      status: toJson(response.status),
-      created_by: userId
-    })
+      scenario: response.scenario,
+      deliverables: response.deliverables,
+      evidenceSummary,
+      status: response.status,
+      createdBy: userId
+    }))
     .select("id")
     .single();
 
