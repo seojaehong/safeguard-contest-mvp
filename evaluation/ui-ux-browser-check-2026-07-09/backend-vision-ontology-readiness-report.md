@@ -126,6 +126,7 @@ Generated: 2026-07-09
 - `runAsk`는 safety reference DB 검색 결과와 작업 개선 이력을 같은 `DbHarnessPacket`에 넣고, `buildHarnessPromptContext`를 통해 AI 문서 생성 프롬프트에 제공한다.
 - 최종 `AskResponse.dbHarness.packet.improvementMemory`와 `summary.improvementMemory`에도 같은 값이 남아 품질 패널과 운영 코퍼스가 같은 하네스 계약을 본다.
 - 즉 사진/개선 후보는 단순 textarea 부록만이 아니라 DB 기반 하네스 계약의 일부로 문서 생성 전에 고정된다.
+- 문서 화면 인용 근거 패널에는 `하네스 메모리` 항목이 노출되어, 개선 이력/과거 작업 이력이 해당 문서 생성에 반영됐는지 확인할 수 있다.
 
 판단:
 

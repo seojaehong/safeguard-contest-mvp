@@ -559,6 +559,14 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
     : undefined;
   const qa = data.ontologyQa?.result;
   const missingControls = qa?.reviewable ? qa.missing.controls : [];
+  const harnessSummary = data.dbHarness?.summary;
+  const harnessPacket = data.dbHarness?.packet;
+  const documentImprovement = harnessPacket?.improvementMemory.find((item) =>
+    documentMatchesTitle(item.reflectedDocuments, documentTitle)
+  ) || harnessPacket?.improvementMemory[0];
+  const documentWorkpackMemory = harnessPacket?.workpackMemory.find((item) =>
+    documentMatchesTitle(item.reflectedDocuments, documentTitle)
+  ) || harnessPacket?.workpackMemory[0];
   const items: DocumentSourceRailItem[] = [];
 
   if (evidenceLabel || directReference || lawCitation) {
@@ -596,6 +604,23 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
       meta: koshaReference.agency || "KOSHA",
       tone: koshaReference.verified === false ? "warn" : "ready",
       href: koshaReference.url
+    });
+  }
+
+  if (harnessSummary && harnessPacket) {
+    const memoryCount = harnessSummary.improvementMemory + harnessSummary.workpackMemory;
+    items.push({
+      label: "하네스 메모리",
+      value: memoryCount
+        ? `개선 ${harnessSummary.improvementMemory} · 작업 ${harnessSummary.workpackMemory}`
+        : "DB 우선 생성",
+      detail: documentImprovement
+        ? `${documentImprovement.hazardLabel}: ${documentImprovement.improvementText}`
+        : documentWorkpackMemory
+          ? `${documentWorkpackMemory.generatedAt} · ${documentWorkpackMemory.question}`
+          : "DB 근거를 먼저 고정하고 LLM은 문장화만 합니다.",
+      meta: harnessSummary.fallbackChainAllowed === false ? "naturalize_only" : "계약 확인",
+      tone: harnessSummary.fallbackChainAllowed === false ? "ready" : "warn"
     });
   }
 
