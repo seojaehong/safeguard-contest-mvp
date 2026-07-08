@@ -445,6 +445,16 @@ export type AskResponse = {
       query: string;
       count: number;
       totalItems: number;
+      retrievalMode?: "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
+      vectorSearch?: {
+        enabled: boolean;
+        attempted: boolean;
+        ok: boolean;
+        reason: string;
+        count: number;
+        model: string;
+        message: string;
+      };
       message: string;
       items: Array<{
         id: string;

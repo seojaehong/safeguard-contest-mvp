@@ -102,6 +102,55 @@ create index if not exists idx_workpack_improvements_workpack on workpack_improv
 create index if not exists idx_workpack_improvements_review_status on workpack_improvements(review_status);
 create index if not exists idx_workpack_improvement_photos_improvement on workpack_improvement_photos(improvement_id);
 create index if not exists idx_safety_reference_embeddings_reference on safety_reference_embeddings(reference_item_id);
+create index if not exists idx_safety_reference_embeddings_vector_cosine
+  on safety_reference_embeddings using hnsw (embedding vector_cosine_ops)
+  where embedding is not null;
+
+create or replace function match_safety_reference_embeddings(
+  query_embedding vector(1536),
+  match_count integer default 8,
+  item_type_filter text default null
+)
+returns table (
+  id text,
+  source_id text,
+  item_type text,
+  category text,
+  subcategory text,
+  title text,
+  summary text,
+  keywords text[],
+  risk_tags text[],
+  primary_documents text[],
+  controls text[],
+  vector_similarity double precision
+)
+language sql
+stable
+as $$
+  select
+    i.id,
+    i.source_id,
+    i.item_type,
+    i.category,
+    i.subcategory,
+    i.title,
+    i.summary,
+    i.keywords,
+    i.risk_tags,
+    i.primary_documents,
+    i.controls,
+    1 - (e.embedding <=> query_embedding) as vector_similarity
+  from safety_reference_embeddings e
+  join safety_reference_items i on i.id = e.reference_item_id
+  where e.embedding is not null
+    and (item_type_filter is null or i.item_type = item_type_filter)
+  order by e.embedding <=> query_embedding
+  limit least(greatest(match_count, 1), 20);
+$$;
+
+comment on function match_safety_reference_embeddings(vector, integer, text)
+  is 'Draft approval-gated vector retrieval RPC for SIF/KOSHA safety reference candidates. Called only by server-side harness code with service role credentials.';
 
 alter table workpack_share_sessions enable row level security;
 alter table workpack_read_confirmations enable row level security;

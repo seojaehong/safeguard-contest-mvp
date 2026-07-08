@@ -25,4 +25,14 @@ describe("commercial operations migration draft", () => {
     expect(migration).toContain("improvement_id uuid not null references workpack_improvements(id) on delete cascade");
     expect(migration).toContain("unique (improvement_id, photo_role)");
   });
+
+  it("adds an approval-gated vector retrieval contract for safety references", () => {
+    expect(migration).toContain("create extension if not exists vector");
+    expect(migration).toContain("embedding vector(1536)");
+    expect(migration).toContain("idx_safety_reference_embeddings_vector_cosine");
+    expect(migration).toContain("using hnsw (embedding vector_cosine_ops)");
+    expect(migration).toContain("create or replace function match_safety_reference_embeddings");
+    expect(migration).toContain("limit least(greatest(match_count, 1), 20)");
+    expect(migration).toContain("using (false)");
+  });
 });

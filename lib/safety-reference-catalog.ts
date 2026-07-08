@@ -19,6 +19,27 @@ export type SafetyReferenceItem = {
   document_reflection_label?: string;
   source_kind_label?: string;
   operation_signal_label?: string;
+  retrieval_source?: "rest" | "ranked" | "vector" | "hybrid";
+  vector_similarity?: number;
+};
+
+export type SafetyReferenceRetrievalMode = "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
+
+export type SafetyReferenceVectorStatus = {
+  enabled: boolean;
+  attempted: boolean;
+  ok: boolean;
+  reason:
+    | "disabled"
+    | "missing-openai-key"
+    | "embedding-failed"
+    | "rpc-missing"
+    | "rpc-failed"
+    | "no-results"
+    | "ready";
+  count: number;
+  model: string;
+  message: string;
 };
 
 export type SafetyReferenceSearchResult = {
@@ -27,6 +48,8 @@ export type SafetyReferenceSearchResult = {
   query: string;
   count: number;
   items: SafetyReferenceItem[];
+  retrievalMode: SafetyReferenceRetrievalMode;
+  vectorSearch: SafetyReferenceVectorStatus;
   message: string;
 };
 
@@ -53,6 +76,19 @@ type SupabaseConfig = {
   serviceRoleKey: string;
 };
 
+type SafetyReferenceVectorRuntime = {
+  enabled: boolean;
+  apiKey: string | null;
+  model: string;
+  dimensions: number;
+  status: SafetyReferenceVectorStatus;
+};
+
+type VectorFetchResult = {
+  status: SafetyReferenceVectorStatus;
+  items: SafetyReferenceItem[];
+};
+
 type CountSpec = {
   label: keyof Pick<
     SafetyReferenceStats,
@@ -64,6 +100,9 @@ type CountSpec = {
 
 const TECHNICAL_SOURCE_ID = "kosha-technical-support-regulations-2025";
 const EXPECTED_TECHNICAL_TOTAL = 1040;
+const DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small";
+const DEFAULT_EMBEDDING_DIMENSIONS = 1536;
+const VECTOR_SEARCH_TIMEOUT_MS = 20_000;
 const SELECT_FIELDS = [
   "id",
   "source_id",
@@ -88,8 +127,77 @@ function getSupabaseConfig(): SupabaseConfig | null {
   };
 }
 
+export function resolveSafetyReferenceVectorSearchState(
+  env: Record<string, string | undefined> = process.env
+): SafetyReferenceVectorRuntime {
+  const model = env.SAFETY_REFERENCE_EMBEDDING_MODEL || env.OPENAI_EMBEDDING_MODEL || DEFAULT_EMBEDDING_MODEL;
+  const dimensions = readEmbeddingDimensions(env.SAFETY_REFERENCE_EMBEDDING_DIMENSIONS);
+  if (env.SAFETY_REFERENCE_VECTOR_SEARCH !== "1") {
+    return {
+      enabled: false,
+      apiKey: null,
+      model,
+      dimensions,
+      status: {
+        enabled: false,
+        attempted: false,
+        ok: false,
+        reason: "disabled",
+        count: 0,
+        model,
+        message: "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+      }
+    };
+  }
+
+  const apiKey = env.OPENAI_API_KEY || null;
+  if (!apiKey) {
+    return {
+      enabled: false,
+      apiKey: null,
+      model,
+      dimensions,
+      status: {
+        enabled: true,
+        attempted: false,
+        ok: false,
+        reason: "missing-openai-key",
+        count: 0,
+        model,
+        message: "SIF 임베딩 검색이 켜져 있지만 OPENAI_API_KEY가 없어 text/ranked 검색으로 대체합니다."
+      }
+    };
+  }
+
+  return {
+    enabled: true,
+    apiKey,
+    model,
+    dimensions,
+    status: {
+      enabled: true,
+      attempted: false,
+      ok: false,
+      reason: "no-results",
+      count: 0,
+      model,
+      message: "SIF 임베딩 검색이 준비되었습니다."
+    }
+  };
+}
+
+function readEmbeddingDimensions(value: string | undefined): number {
+  const parsed = Number(value || DEFAULT_EMBEDDING_DIMENSIONS);
+  if (!Number.isFinite(parsed)) return DEFAULT_EMBEDDING_DIMENSIONS;
+  return Math.min(Math.max(Math.trunc(parsed), 256), 3072);
+}
+
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isNumberArray(value: unknown): value is number[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "number" && Number.isFinite(item));
 }
 
 function isReferenceItem(value: unknown): value is SafetyReferenceItem {
@@ -222,6 +330,45 @@ function parseContentRange(value: string | null): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function withRetrievalSource(
+  item: SafetyReferenceItem,
+  retrievalSource: NonNullable<SafetyReferenceItem["retrieval_source"]>,
+  vectorSimilarity?: number
+): SafetyReferenceItem {
+  return {
+    ...item,
+    retrieval_source: retrievalSource,
+    vector_similarity: vectorSimilarity
+  };
+}
+
+export function mergeSafetyReferenceHybridResults(input: {
+  vectorItems: SafetyReferenceItem[];
+  rankedItems: SafetyReferenceItem[];
+  limit: number;
+  evidenceRole?: "direct" | "supporting";
+}): SafetyReferenceItem[] {
+  const byId = new Map<string, SafetyReferenceItem>();
+  const add = (item: SafetyReferenceItem, source: NonNullable<SafetyReferenceItem["retrieval_source"]>) => {
+    const normalized = withRetrievalSource(item, source, item.vector_similarity);
+    const existing = byId.get(item.id);
+    if (!existing) {
+      byId.set(item.id, normalized);
+      return;
+    }
+    byId.set(item.id, {
+      ...existing,
+      ...normalized,
+      retrieval_source: "hybrid",
+      vector_similarity: existing.vector_similarity ?? normalized.vector_similarity
+    });
+  };
+
+  filterByEvidenceRole(input.vectorItems, input.evidenceRole).forEach((item) => add(item, "vector"));
+  filterByEvidenceRole(input.rankedItems, input.evidenceRole).forEach((item) => add(item, "ranked"));
+  return Array.from(byId.values()).slice(0, input.limit);
+}
+
 function buildRestUrl(config: SupabaseConfig, table: string, params: URLSearchParams): string {
   return `${config.url}/rest/v1/${table}?${params.toString()}`;
 }
@@ -322,6 +469,194 @@ async function fetchRankedReferences(
   };
 }
 
+function readVectorSimilarity(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function normalizeVectorReferenceRow(value: unknown): SafetyReferenceItem | null {
+  if (!isReferenceItem(value)) return null;
+  const record = value as Record<string, unknown>;
+  return withRetrievalSource(
+    normalizeReferenceItem(value),
+    "vector",
+    readVectorSimilarity(record.vector_similarity)
+  );
+}
+
+async function fetchQueryEmbedding(
+  query: string,
+  runtime: SafetyReferenceVectorRuntime
+): Promise<{ ok: true; embedding: number[] } | { ok: false; message: string }> {
+  if (!runtime.apiKey) {
+    return { ok: false, message: "OPENAI_API_KEY가 없어 query embedding을 생성하지 않았습니다." };
+  }
+
+  const input = compactText(query, 1000);
+  const payload: Record<string, unknown> = {
+    model: runtime.model,
+    input,
+    dimensions: runtime.dimensions
+  };
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), VECTOR_SEARCH_TIMEOUT_MS);
+    try {
+      const response = await fetch("https://api.openai.com/v1/embeddings", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${runtime.apiKey}`,
+          "content-type": "application/json"
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+        cache: "no-store"
+      });
+      const text = await response.text();
+      if (!response.ok) {
+        if (attempt === 0) continue;
+        return { ok: false, message: `OpenAI embedding 생성 실패: ${response.status} ${text}` };
+      }
+      const parsed = JSON.parse(text) as unknown;
+      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+        return { ok: false, message: "OpenAI embedding 응답 형식이 올바르지 않습니다." };
+      }
+      const record = parsed as Record<string, unknown>;
+      const data = record.data;
+      if (!Array.isArray(data) || data.length === 0) {
+        return { ok: false, message: "OpenAI embedding 응답에 data가 없습니다." };
+      }
+      const first = data[0];
+      if (typeof first !== "object" || first === null || Array.isArray(first)) {
+        return { ok: false, message: "OpenAI embedding data 형식이 올바르지 않습니다." };
+      }
+      const embedding = (first as Record<string, unknown>).embedding;
+      if (!isNumberArray(embedding) || embedding.length !== runtime.dimensions) {
+        return { ok: false, message: `OpenAI embedding 차원이 ${runtime.dimensions}이 아닙니다.` };
+      }
+      return { ok: true, embedding };
+    } catch (error) {
+      if (attempt === 0) continue;
+      return {
+        ok: false,
+        message: `OpenAI embedding 호출 실패: ${error instanceof Error ? error.message : String(error)}`
+      };
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  return { ok: false, message: "OpenAI embedding 생성에 실패했습니다." };
+}
+
+async function fetchVectorReferences(
+  config: SupabaseConfig,
+  query: string,
+  limit: number,
+  itemType: string | undefined,
+  runtime: SafetyReferenceVectorRuntime
+): Promise<VectorFetchResult> {
+  if (!runtime.enabled) {
+    return { status: runtime.status, items: [] };
+  }
+
+  const embedding = await fetchQueryEmbedding(query, runtime);
+  if (!embedding.ok) {
+    console.error("Safety reference vector embedding failed", embedding.message);
+    return {
+      status: {
+        ...runtime.status,
+        attempted: true,
+        ok: false,
+        reason: "embedding-failed",
+        count: 0,
+        message: embedding.message
+      },
+      items: []
+    };
+  }
+
+  const url = `${config.url}/rest/v1/rpc/match_safety_reference_embeddings`;
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        apikey: config.serviceRoleKey,
+        Authorization: `Bearer ${config.serviceRoleKey}`,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        query_embedding: embedding.embedding,
+        match_count: limit,
+        item_type_filter: itemType ?? null
+      }),
+      cache: "no-store"
+    });
+  } catch (error) {
+    const message = `SIF 임베딩 RPC 호출 실패: ${error instanceof Error ? error.message : String(error)}`;
+    console.error(message);
+    return {
+      status: {
+        ...runtime.status,
+        attempted: true,
+        ok: false,
+        reason: "rpc-failed",
+        count: 0,
+        message
+      },
+      items: []
+    };
+  }
+
+  if (response.status === 404) {
+    return {
+      status: {
+        ...runtime.status,
+        attempted: true,
+        ok: false,
+        reason: "rpc-missing",
+        count: 0,
+        message: "match_safety_reference_embeddings RPC가 없어 ranked/text 검색으로 대체합니다."
+      },
+      items: []
+    };
+  }
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    return {
+      status: {
+        ...runtime.status,
+        attempted: true,
+        ok: false,
+        reason: "rpc-failed",
+        count: 0,
+        message: `SIF 임베딩 RPC 조회 실패: ${response.status} ${body}`
+      },
+      items: []
+    };
+  }
+
+  const data = (await response.json()) as unknown;
+  const items = Array.isArray(data)
+    ? data.map(normalizeVectorReferenceRow).filter((item): item is SafetyReferenceItem => item !== null)
+    : [];
+  return {
+    status: {
+      ...runtime.status,
+      attempted: true,
+      ok: items.length > 0,
+      reason: items.length > 0 ? "ready" : "no-results",
+      count: items.length,
+      message: items.length > 0
+        ? "SIF 임베딩 RPC 결과를 ranked/text 근거와 함께 사용했습니다."
+        : "SIF 임베딩 RPC 결과가 없어 ranked/text 검색으로 대체합니다."
+    },
+    items
+  };
+}
+
 async function countRows(config: SupabaseConfig, spec: CountSpec): Promise<number> {
   const params = new URLSearchParams();
   params.set("select", "id");
@@ -354,6 +689,8 @@ export async function searchSafetyReferences(options: {
   const query = options.query.trim();
   const limit = Math.min(Math.max(options.limit || 12, 1), 50);
   const fetchLimit = options.evidenceRole ? Math.min(limit * 3, 50) : limit;
+  const vectorRuntime = resolveSafetyReferenceVectorSearchState();
+  let vectorSearch = vectorRuntime.status;
   if (!config) {
     return {
       ok: false,
@@ -361,6 +698,8 @@ export async function searchSafetyReferences(options: {
       query,
       count: 0,
       items: [],
+      retrievalMode: "unconfigured",
+      vectorSearch,
       message: "Supabase service role key가 없어 안전 지식 DB 검색을 실행하지 않았습니다."
     };
   }
@@ -369,16 +708,27 @@ export async function searchSafetyReferences(options: {
   // RPC handles only `query` + `itemType`. For sourceId/riskTag we still use the
   // legacy ilike path. evidenceRole is post-filtered on returned items.
   if (query && !options.sourceId && !options.riskTag) {
+    const vector = await fetchVectorReferences(config, query, fetchLimit, options.itemType, vectorRuntime);
+    vectorSearch = vector.status;
     const ranked = await fetchRankedReferences(config, query, fetchLimit, options.itemType);
-    if (ranked && ranked.ok && ranked.items.length) {
-      const filtered = filterByEvidenceRole(ranked.items, options.evidenceRole).slice(0, limit);
+    if ((ranked && ranked.ok && ranked.items.length) || vector.items.length) {
+      const filtered = mergeSafetyReferenceHybridResults({
+        vectorItems: vector.items,
+        rankedItems: ranked?.ok ? ranked.items : [],
+        limit,
+        evidenceRole: options.evidenceRole
+      });
       return {
         ok: true,
         configured: true,
         query,
         count: filtered.length,
         items: filtered,
-        message: "Supabase 안전 지식 DB ranked RPC 결과를 사용했습니다."
+        retrievalMode: vector.items.length > 0 ? "hybrid-vector-rpc" : "ranked-rpc",
+        vectorSearch,
+        message: vector.items.length > 0
+          ? "Supabase 안전 지식 DB vector+ranked 하이브리드 결과를 사용했습니다."
+          : "Supabase 안전 지식 DB ranked RPC 결과를 사용했습니다."
       };
     }
     // Otherwise fall through to legacy ilike path (RPC missing or empty).
@@ -405,11 +755,16 @@ export async function searchSafetyReferences(options: {
       query,
       count: 0,
       items: [],
+      retrievalMode: "rest-ilike",
+      vectorSearch,
       message: firstPass.message
     };
   }
 
-  let items = filterByEvidenceRole(firstPass.items, options.evidenceRole);
+  let items = filterByEvidenceRole(
+    firstPass.items.map((item) => withRetrievalSource(item, "rest")),
+    options.evidenceRole
+  );
   if (items.length === 0 && searchTerm.includes(" ")) {
     const byId = new Map<string, SafetyReferenceItem>();
     const fallbackTerms = extractFallbackTerms(searchTerm);
@@ -419,7 +774,10 @@ export async function searchSafetyReferences(options: {
       fallbackParams.set("or", `(title.ilike.*${term}*,summary.ilike.*${term}*,body.ilike.*${term}*)`);
       const fallback = await fetchReferenceItems(config, fallbackParams);
       if (fallback.ok) {
-        filterByEvidenceRole(fallback.items, options.evidenceRole).forEach((item) => byId.set(item.id, item));
+        filterByEvidenceRole(
+          fallback.items.map((item) => withRetrievalSource(item, "rest")),
+          options.evidenceRole
+        ).forEach((item) => byId.set(item.id, item));
       } else {
         console.error("Safety reference fallback search failed", fallback.message);
       }
@@ -434,6 +792,8 @@ export async function searchSafetyReferences(options: {
     query,
     count: items.slice(0, limit).length,
     items: items.slice(0, limit),
+    retrievalMode: "rest-ilike",
+    vectorSearch,
     message: "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
   };
 }
