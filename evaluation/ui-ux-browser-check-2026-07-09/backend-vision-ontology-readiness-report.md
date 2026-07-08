@@ -8,6 +8,8 @@ Generated: 2026-07-09
 
 - SIF 임베딩은 아직 DB 업로드까지 끝난 상태가 아니다.
 - 6,032건 SIF 임베딩 코퍼스와 61개 배치 manifest는 준비되어 있고, 실제 임베딩 생성/DB 업로드는 승인 플래그 없이는 실행되지 않도록 막혀 있다.
+- 3건 canary embedding은 실제 OpenAI `text-embedding-3-small`로 성공했다.
+- 운영 DB에는 아직 `safety_reference_embeddings` table과 `match_safety_reference_embeddings` RPC가 없어 migration 승인이 먼저 필요하다.
 - 로컬/Vercel `OPENAI_API_KEY` 설정 후 vision route는 실제 OpenAI vision 호출까지 성공했다.
 - 모델이 JSON을 ```json 코드펜스로 감싸 반환해도 파서가 실패하지 않도록 보강했다.
 - 온톨로지는 LangGraph 같은 실행 프레임워크 없이도 현재 요구한 리스트 + Obsidian식 map + hover card + MD/JSONL 운영 코퍼스 형태로 구현되어 있다.
@@ -21,6 +23,11 @@ Generated: 2026-07-09
 - `evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl`
 - `evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json`
 - `evaluation/sif-embedding-gate/runtime-readiness-local.json`
+- `evaluation/sif-embedding-gate/runtime-db-probe.json`
+- `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql`
+- `evaluation/sif-embedding-gate/next-approval-gate-runtime-2026-07-09.md`
+- `evaluation/sif-embedding-canary-2026-07-09/report.json`
+- `evaluation/sif-embedding-canary-2026-07-09/sif-embedding-vectors.jsonl`
 
 현재 수치:
 
@@ -32,6 +39,10 @@ Generated: 2026-07-09
 - embedding dimensions: 1,536
 - embedded count: 0
 - uploaded count: 0
+- canary embedded count: 3
+- runtime DB probe: `migration-required`
+- `safety_reference_embeddings`: table missing on target DB
+- `match_safety_reference_embeddings`: RPC missing on target DB
 
 승인 전 보류 상태:
 
@@ -45,6 +56,8 @@ Generated: 2026-07-09
 - `scripts/sif_embedding_approval_preflight.mjs`가 기본적으로 `.env.local`을 읽어 현재 실행환경 준비 상태를 반영한다.
 - 테스트에서는 `--no-env-file`을 사용해 비밀 파일에 영향받지 않는 고정 게이트 검증을 유지한다.
 - `--env-file`로 별도 env 파일을 지정해 실행 준비 상태를 검증할 수 있다.
+- `scripts/sif_embedding_runtime_probe.mjs`가 운영 DB를 read-only로 확인해 table/RPC 적용 여부와 uploaded row count를 검증한다.
+- SIF-only migration proposal을 별도 산출물로 분리해, 공유/확인이력/개선사항 migration과 독립적으로 승인할 수 있게 했다.
 
 ## Vision/OCR Route
 
