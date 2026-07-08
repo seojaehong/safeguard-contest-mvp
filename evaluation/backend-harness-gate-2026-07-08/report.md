@@ -236,6 +236,22 @@ npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload
 - `searchSafetyReferences()`의 embedding-first 또는 hybrid retrieval 전략
 - OpenAI key / Supabase service role / migration 적용 순서
 
+## SIF 임베딩 다음 게이트 Preflight
+
+- 추가 명령: `npm.cmd run knowledge:sif-embedding-preflight`
+- 산출물: `evaluation/sif-embedding-gate/approval-preflight-report.json`
+- 판정: corpus/manifest/report/JSONL/SQL/RLS/upload guard 모두 통과
+- DB mutation, OpenAI embedding 생성, Supabase upload는 계속 미실행
+- 현재 실행 환경에는 Supabase URL/service role은 있으나 `OPENAI_API_KEY`가 없어, 승인 후 embedding 생성 전 실행 환경 정렬이 필요하다.
+- 승인 후에도 바로 vector runtime을 켜지 않고, 업로드 row count 6,032 검증과 RPC smoke test 이후 `SAFETY_REFERENCE_VECTOR_SEARCH=1`을 켠다.
+
+검증:
+
+- `npm.cmd run knowledge:sif-embedding-preflight` → ok
+- `npm.cmd test -- tests/sif-embedding-preflight.test.ts tests/commercial-harness.test.ts tests/commercial-migration.test.ts tests/safety-reference-hybrid.test.ts` → 4 files / 14 tests passed
+- `npm.cmd run build` → passed
+- `npm.cmd run typecheck` → passed
+
 ## 검증
 
 ```powershell
