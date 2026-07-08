@@ -1,4 +1,5 @@
 import type { HarnessImprovement } from "@/lib/db-harness";
+import { buildOperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
 export type WorkpackLearningInput = {
@@ -16,7 +17,7 @@ export type WorkpackLearningInput = {
 };
 
 export type LearningJsonlEvent = {
-  eventType: "workpack" | "reference" | "improvement" | "ack";
+  eventType: "workpack" | "operation_graph" | "reference" | "improvement" | "ack";
   workpackId: string;
   generatedAt: string;
   payload: Record<string, unknown>;
@@ -102,10 +103,26 @@ function slugSegment(value: string) {
 }
 
 export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
+  const graph = buildOperationMemoryGraph({
+    workpack: {
+      id: input.workpackId,
+      question: input.question,
+      generatedAt: input.generatedAt,
+      taskLabel: input.taskLabel
+    },
+    references: input.references,
+    improvements: input.improvements,
+    confirmations: input.confirmations
+  });
   const events: LearningJsonlEvent[] = [
     event(input, "workpack", {
       question: input.question,
       taskLabel: input.taskLabel
+    }),
+    event(input, "operation_graph", {
+      summary: graph.summary,
+      nodes: graph.nodes,
+      edges: graph.edges
     }),
     ...input.references.map((reference) => event(input, "reference", {
       referenceItemId: reference.id,
@@ -142,12 +159,33 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
 }
 
 export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
+  const graph = buildOperationMemoryGraph({
+    workpack: {
+      id: input.workpackId,
+      question: input.question,
+      generatedAt: input.generatedAt,
+      taskLabel: input.taskLabel
+    },
+    references: input.references,
+    improvements: input.improvements,
+    confirmations: input.confirmations
+  });
   const lines = [
     `# ${input.taskLabel}`,
     "",
     `- workpackId: \`${input.workpackId}\``,
     `- generatedAt: ${input.generatedAt}`,
     `- question: ${input.question}`,
+    "",
+    "## 운영 그래프",
+    "",
+    `- nodes: ${graph.nodes.length}`,
+    `- edges: ${graph.edges.length}`,
+    `- hazards: ${graph.summary.hazardCount}`,
+    `- controls: ${graph.summary.controlCount}`,
+    `- improvements: ${graph.summary.improvementCount}`,
+    `- acks: ${graph.summary.ackCount}`,
+    `- reflectedDocuments: ${graph.summary.reflectedDocumentCount}`,
     "",
     "## 근거",
     ""
