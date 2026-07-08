@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-07-09T01:18:30+09:00",
+  "scope": "/api/agent/chat Claw chat routing",
+  "decision": "Claw chat is pinned to OpenClaw safeclaw profile with an OpenAI model and an OpenAI OAuth provider contract.",
+  "runtimeContract": {
+    "route": "/api/agent/chat",
+    "openClawProfile": "safeclaw",
+    "openClawAgent": "main",
+    "requiredAuthProvider": "openai/oauth",
+    "defaultModel": "openai/gpt-5.5",
+    "nonOpenAiModelOverridesRejected": true,
+    "legacyAnthropicProviderFlagIgnored": true,
+    "anthropicEnvironmentKeyIgnoredByRoute": true
+  },
+  "localProfileProbe": {
+    "command": "openclaw --profile safeclaw models status",
+    "defaultModel": "openai/gpt-5.5",
+    "openAiOauthUsable": true,
+    "accountDetailsRedacted": true,
+    "secretValuesRecorded": false,
+    "versionSkewObserved": "Config was written by 2026.6.11 while command binary reported 2026.6.5; routing still reported OpenAI OAuth usable."
+  },
+  "verification": {
+    "tests": [
+      "npm.cmd test -- tests\\openclaw-chat.test.ts tests\\claw-chat-route.test.ts"
+    ],
+    "typecheck": "npm.cmd run typecheck",
+    "build": "npm.cmd run build",
+    "result": "passed"
+  },
+  "notes": [
+    "Vercel ANTHROPIC_API_KEY can remain for other generation paths, but /api/agent/chat does not consume it.",
+    "If the OpenClaw profile auth drifts, confirm with: openclaw --profile safeclaw models auth list."
+  ]
+}

@@ -8,10 +8,13 @@ export type OpenClawChatConfig = {
   bin: string;
   profile: string;
   agent: string;
+  model: string;
+  requiredAuthProvider: "openai/oauth";
   local: boolean;
   timeoutMs: number;
 };
 
+export const DEFAULT_OPENCLAW_CHAT_MODEL = "openai/gpt-5.5";
 export const DEFAULT_OPENCLAW_CHAT_TIMEOUT_MS = 240_000;
 
 type EnvLike = Record<string, string | undefined>;
@@ -21,11 +24,18 @@ function positiveInt(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function openAiModel(value: string | undefined): string {
+  const trimmed = value?.trim();
+  return trimmed?.toLowerCase().startsWith("openai/") ? trimmed : DEFAULT_OPENCLAW_CHAT_MODEL;
+}
+
 export function resolveOpenClawChatConfig(env: EnvLike): OpenClawChatConfig {
   return {
     bin: env.OPENCLAW_BIN?.trim() || "openclaw",
     profile: env.OPENCLAW_PROFILE?.trim() || "safeclaw",
     agent: env.OPENCLAW_AGENT?.trim() || "main",
+    model: openAiModel(env.OPENCLAW_CHAT_MODEL || env.OPENCLAW_MODEL),
+    requiredAuthProvider: "openai/oauth",
     local: env.OPENCLAW_LOCAL?.trim() !== "0",
     timeoutMs: positiveInt(env.OPENCLAW_CHAT_TIMEOUT_MS, DEFAULT_OPENCLAW_CHAT_TIMEOUT_MS)
   };
@@ -58,6 +68,8 @@ export function buildOpenClawChatArgs(config: OpenClawChatConfig, prompt: string
     "--agent",
     config.agent,
     ...(config.local ? ["--local"] : []),
+    "--model",
+    config.model,
     "-m",
     prompt
   ];
@@ -73,6 +85,7 @@ export function buildOpenClawChatPrompt(input: {
   ));
   return [
     "[SafeClaw 내장 Claw chat request]",
+    "이 라우트는 OpenClaw safeclaw profile의 OpenAI OAuth 런타임에서 실행됩니다.",
     "아래 시스템 원칙을 따르되, SafeClaw MCP 도구가 필요하면 먼저 호출하세요.",
     "특히 오늘 작업 검토는 run_safeclaw_harness_agent를 우선 호출하고, DB harness packet 밖의 근거를 만들지 마세요.",
     "",
