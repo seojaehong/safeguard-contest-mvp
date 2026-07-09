@@ -1,6 +1,7 @@
 # SIF Embedding / Harness Approval Gate
 
 생성 시각: 2026-07-08 17:27 KST
+최신 재검증: 2026-07-09 12:28 KST
 
 ## 판정
 
@@ -10,7 +11,8 @@ SIF 임베딩 과정은 “지나간 것”이 아니라 **업로드 전 승인 
 - 완료: 스프레드시트 헤더 1건 제외
 - 완료: 임베딩 코퍼스 6,032건 생성
 - 완료: 빈 embedding text, 관리대책 누락, 문서반영 누락, 중복 contentHash 검출 0건
-- 미실행: OpenAI embedding 생성
+- 미실행: 전체 6,032건 OpenAI embedding 생성
+- 확인: canary 3건 OpenAI embedding 생성 성공
 - 미실행: `safety_reference_embeddings` DB 업로드
 - 미실행: migration 적용
 
@@ -75,12 +77,12 @@ npm.cmd run knowledge:sif-embedding-corpus -- --limit 2 --upload --output-dir ev
 
 ## Next Gate Preflight
 
-생성 시각: 2026-07-09 01:03 KST
+생성 시각: 2026-07-09 12:28 KST
 
 명령:
 
 ```powershell
-npm.cmd run knowledge:sif-embedding-preflight
+npm.cmd run knowledge:sif-embedding-preflight -- --require-execution-env --output evaluation/sif-embedding-gate/approval-preflight-report.json
 ```
 
 산출물:
@@ -102,15 +104,36 @@ npm.cmd run knowledge:sif-embedding-preflight
 현재 실행 환경:
 
 - Supabase URL/service role: 있음
-- `OPENAI_API_KEY`: 없음
+- `OPENAI_API_KEY`: 있음
 - `SAFETY_REFERENCE_VECTOR_SEARCH=1`: 꺼짐
-- 따라서 승인 후 실제 embedding 생성/업로드 전에는 OpenAI key가 들어간 실행 환경이 필요하다.
+- 따라서 승인 후 실제 embedding 생성/업로드를 실행할 수 있는 로컬 환경은 준비되어 있다.
+
+## Runtime DB Probe
+
+생성 시각: 2026-07-09 12:28 KST
+
+명령:
+
+```powershell
+npm.cmd run knowledge:sif-embedding-runtime-probe -- --output evaluation/sif-embedding-gate/runtime-db-probe.json
+```
+
+판정:
+
+- `safety_reference_items`: 조회 성공, SIF 6,033건
+- `safety_reference_embeddings`: 404, table 없음
+- `match_safety_reference_embeddings`: 404, RPC 없음
+- status: `migration-required`
+- DB mutation: 미실행
+
+따라서 지금 승인할 대상은 임베딩 생성/업로드가 아니라 **SIF-only DB migration**이다.
 
 다음 승인 결정:
 
 - `010_commercial_operations.sql` 전체 적용 또는 embedding-only migration 분리
-- 실행 환경의 `OPENAI_API_KEY` 확인
-- 승인 후에만 `--embed --upload --approved-upload` 실행
+- 실행 환경의 `OPENAI_API_KEY`와 Supabase service role 유지
+- 승인 후에만 `--embed --approved-embedding` 실행
+- DB migration과 row count 검증 후에만 `--upload --approved-upload` 실행
 - 업로드 row count가 6,032인지 검증한 뒤 `SAFETY_REFERENCE_VECTOR_SEARCH=1` 활성화
 
 ## Vision/OCR 연결 상태
