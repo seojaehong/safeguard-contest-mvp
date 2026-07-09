@@ -406,7 +406,10 @@ describe("runAsk DB harness mode", () => {
     expect(rows.some((row) => row.evidenceRefs?.includes("외벽 도장 중 이동식 비계 추락 사례"))).toBe(true);
     expect(rows.every((row) => !/^[A-Z]-[A-Z]-\d{1,4}-\d{4}/.test(row.hazard))).toBe(true);
     expect(rows.every((row) => !/기술지원규정|기술지침/.test(row.hazard))).toBe(true);
-    expect(rows.some((row) => row.hazard.includes("유해·위험요인 미확인"))).toBe(true);
+    const genericHazardRow = rows.find((row) => row.hazard.includes("유해·위험요인 미확인"));
+    expect(genericHazardRow).toBeDefined();
+    expect(genericHazardRow?.hazard).not.toContain("관련 위험");
+    expect(rows.every((row) => !/위험.*관련 위험/.test(row.hazard))).toBe(true);
   });
 
   it("keeps template mode inside the DB harness contract without generic LLM fallback prose", async () => {
