@@ -121,6 +121,21 @@ describe("DB harness packet", () => {
     expect(packet.generationContract.fallbackChainAllowed).toBe(false);
     expect(packet.generationContract.genericProseSubstitutionAllowed).toBe(false);
     expect(packet.generationContract.missingEvidencePolicy).toBe("surface_review_required");
+    expect(packet.retrievalContract).toMatchObject({
+      source: "safety_reference_items",
+      mode: "rest-ilike",
+      vector: {
+        enabled: false,
+        attempted: false,
+        ready: false,
+        reason: "disabled"
+      },
+      sourceCounts: {
+        directEvidence: 0,
+        sifCases: 1,
+        supportingEvidence: 1
+      }
+    });
     expect(packet.generationContract.documentCoverage).toEqual([
       { document: "위험성평가표", covered: true, evidenceTypes: ["sifCase", "supportingEvidence", "improvementMemory"] },
       { document: "TBM 브리핑", covered: true, evidenceTypes: ["sifCase", "supportingEvidence", "improvementMemory"] },
@@ -129,6 +144,8 @@ describe("DB harness packet", () => {
     expect(hasDocumentCoverage(packet, "TBM 기록")).toBe(true);
     expect(promptContext).toContain("DB harness가 고정한 근거");
     expect(promptContext).toContain("근거 권위: safety_reference_items");
+    expect(promptContext).toContain("검색 경로: rest-ilike / vector=disabled");
+    expect(promptContext).toContain("검색 출처: direct 0, SIF 1, supporting 1");
     expect(promptContext).toContain("제공자 재시도");
     expect(promptContext).toContain("문장화 실패 복구에만 허용");
     expect(promptContext).toContain("산문으로 메우지 않는다");
@@ -139,6 +156,53 @@ describe("DB harness packet", () => {
     expect(promptContext).toContain("detected: 추락, 하부 통제 미흡");
     expect(promptContext).toContain("observed: 작업발판 외측 난간 보강");
     expect(promptContext).toContain("ocr: 추락주의");
+  });
+
+  it("carries vector retrieval status into the DB harness packet after approval", () => {
+    const packet = buildDbHarnessPacket({
+      question: "성수동 외벽 도장 작업",
+      references: [
+        reference({ retrieval_source: "hybrid", vector_similarity: 0.82 }),
+        reference({
+          id: "guide-1",
+          item_type: "technical-guideline",
+          evidence_role: "direct",
+          retrieval_source: "ranked",
+          title: "KOSHA 외벽 도장 지침"
+        })
+      ],
+      retrieval: {
+        mode: "hybrid-vector-rpc",
+        vectorSearch: {
+          enabled: true,
+          attempted: true,
+          ok: true,
+          reason: "ready",
+          count: 1,
+          model: "text-embedding-3-small",
+          message: "SIF 임베딩 RPC 결과를 ranked/text 근거와 함께 사용했습니다."
+        },
+        message: "vector+ranked 하이브리드"
+      }
+    });
+    const promptContext = buildHarnessPromptContext(packet);
+
+    expect(packet.retrievalContract.mode).toBe("hybrid-vector-rpc");
+    expect(packet.retrievalContract.vector).toMatchObject({
+      enabled: true,
+      attempted: true,
+      ready: true,
+      reason: "ready"
+    });
+    expect(packet.retrievalContract.sourceCounts).toMatchObject({
+      directEvidence: 1,
+      sifCases: 1,
+      supportingEvidence: 1,
+      hybrid: 1,
+      ranked: 1
+    });
+    expect(promptContext).toContain("검색 경로: hybrid-vector-rpc / vector=ready");
+    expect(promptContext).toContain("hybrid 1, vector 0, ranked 1");
   });
 
   it("marks missing SIF as review-required", () => {

@@ -153,8 +153,53 @@ describe("buildHarnessAgentResult", () => {
     expect(result.qualityPipeline).toContain("build_db_harness_packet");
     expect(result.packet.generationContract.llmRole).toBe("naturalize_only");
     expect(result.packet.generationContract.fallbackChainAllowed).toBe(false);
+    expect(result.packet.retrievalContract.mode).toBe("unconfigured");
     expect(result.promptContext).toContain("작업이력");
     expect(result.openClawUsageNote).toContain("OpenClaw");
+  });
+
+  it("keeps search retrieval mode and vector status in the harness agent payload", () => {
+    const result = buildHarnessAgentResult({
+      question: "성수동 외벽 도장 작업",
+      references: [{
+        id: "sif-1",
+        source_id: "kosha-sif",
+        item_type: "sif-case",
+        category: "건설",
+        subcategory: null,
+        title: "외벽 도장 중 추락",
+        summary: "재해개요: 외벽 도장 중 추락",
+        keywords: ["외벽", "도장"],
+        risk_tags: ["추락"],
+        primary_documents: ["위험성평가표", "TBM 브리핑"],
+        controls: ["난간 보강"],
+        evidence_role: "supporting",
+        retrieval_source: "hybrid",
+      }],
+      referenceSearch: [{
+        source: "sif_cases",
+        ok: true,
+        configured: true,
+        query: "성수동 외벽 도장 작업",
+        count: 1,
+        retrievalMode: "hybrid-vector-rpc",
+        vectorSearch: {
+          enabled: true,
+          attempted: true,
+          ok: true,
+          reason: "ready",
+          count: 1,
+          model: "text-embedding-3-small",
+          message: "SIF 임베딩 RPC 결과를 사용했습니다.",
+        },
+        message: "vector+ranked",
+      }],
+    });
+
+    expect(result.packet.retrievalContract.mode).toBe("hybrid-vector-rpc");
+    expect(result.packet.retrievalContract.vector.ready).toBe(true);
+    expect(result.packet.retrievalContract.sourceCounts.hybrid).toBe(1);
+    expect(result.promptContext).toContain("검색 경로: hybrid-vector-rpc / vector=ready");
   });
 });
 

@@ -1,4 +1,8 @@
-import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import type {
+  SafetyReferenceItem,
+  SafetyReferenceRetrievalMode,
+  SafetyReferenceVectorStatus
+} from "@/lib/safety-reference-catalog";
 
 export type HarnessImprovement = {
   id: string;
@@ -38,6 +42,28 @@ export type DbHarnessDocumentCoverage = {
   evidenceTypes: Array<"directEvidence" | "sifCase" | "supportingEvidence" | "improvementMemory">;
 };
 
+export type DbHarnessRetrievalContract = {
+  source: "safety_reference_items";
+  mode: SafetyReferenceRetrievalMode;
+  vector: {
+    enabled: boolean;
+    attempted: boolean;
+    ready: boolean;
+    reason: SafetyReferenceVectorStatus["reason"];
+    message: string;
+  };
+  sourceCounts: {
+    directEvidence: number;
+    sifCases: number;
+    supportingEvidence: number;
+    rest: number;
+    ranked: number;
+    vector: number;
+    hybrid: number;
+  };
+  message: string;
+};
+
 export type DbHarnessPacket = {
   mode: "db_harness_first";
   question: string;
@@ -46,6 +72,7 @@ export type DbHarnessPacket = {
   supportingEvidence: SafetyReferenceItem[];
   improvementMemory: HarnessImprovement[];
   workpackMemory: HarnessWorkpackMemory[];
+  retrievalContract: DbHarnessRetrievalContract;
   ontologyChecklist: {
     status: "ready" | "review_required";
     missing: string[];
@@ -67,6 +94,12 @@ export type DbHarnessPacket = {
 export type HarnessMemoryInput = {
   improvements?: HarnessImprovement[];
   workpackMemory?: HarnessWorkpackMemory[];
+};
+
+export type DbHarnessRetrievalInput = {
+  mode?: SafetyReferenceRetrievalMode;
+  vectorSearch?: SafetyReferenceVectorStatus;
+  message?: string;
 };
 
 const REQUIRED_DOCUMENTS = ["위험성평가표", "TBM 브리핑", "TBM 기록"];
@@ -107,18 +140,89 @@ function buildDocumentCoverage(input: {
   });
 }
 
+function defaultVectorStatus(): SafetyReferenceVectorStatus {
+  return {
+    enabled: false,
+    attempted: false,
+    ok: false,
+    reason: "disabled",
+    count: 0,
+    model: "text-embedding-3-small",
+    message: "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+  };
+}
+
+function countRetrievalSources(items: SafetyReferenceItem[]) {
+  return {
+    rest: items.filter((item) => item.retrieval_source === "rest").length,
+    ranked: items.filter((item) => item.retrieval_source === "ranked").length,
+    vector: items.filter((item) => item.retrieval_source === "vector").length,
+    hybrid: items.filter((item) => item.retrieval_source === "hybrid").length
+  };
+}
+
+function inferRetrievalMode(input: {
+  references: SafetyReferenceItem[];
+  retrieval?: DbHarnessRetrievalInput;
+}): SafetyReferenceRetrievalMode {
+  if (input.retrieval?.mode) return input.retrieval.mode;
+  if (input.references.some((item) => item.retrieval_source === "vector" || item.retrieval_source === "hybrid")) {
+    return "hybrid-vector-rpc";
+  }
+  if (input.references.some((item) => item.retrieval_source === "ranked")) return "ranked-rpc";
+  if (input.references.length) return "rest-ilike";
+  return "unconfigured";
+}
+
+function buildRetrievalContract(input: {
+  references: SafetyReferenceItem[];
+  directEvidence: SafetyReferenceItem[];
+  sifCases: SafetyReferenceItem[];
+  supportingEvidence: SafetyReferenceItem[];
+  retrieval?: DbHarnessRetrievalInput;
+}): DbHarnessRetrievalContract {
+  const vectorSearch = input.retrieval?.vectorSearch || defaultVectorStatus();
+  const sourceCounts = countRetrievalSources(input.references);
+  return {
+    source: "safety_reference_items",
+    mode: inferRetrievalMode({ references: input.references, retrieval: input.retrieval }),
+    vector: {
+      enabled: vectorSearch.enabled,
+      attempted: vectorSearch.attempted,
+      ready: vectorSearch.ok,
+      reason: vectorSearch.reason,
+      message: vectorSearch.message
+    },
+    sourceCounts: {
+      directEvidence: input.directEvidence.length,
+      sifCases: input.sifCases.length,
+      supportingEvidence: input.supportingEvidence.length,
+      ...sourceCounts
+    },
+    message: input.retrieval?.message || vectorSearch.message
+  };
+}
+
 export function buildDbHarnessPacket(input: {
   question: string;
   references: SafetyReferenceItem[];
   improvements?: HarnessImprovement[];
   workpackMemory?: HarnessWorkpackMemory[];
   ontologyMissing?: string[];
+  retrieval?: DbHarnessRetrievalInput;
 }): DbHarnessPacket {
   const improvements = input.improvements || [];
   const workpackMemory = input.workpackMemory || [];
   const directEvidence = input.references.filter((item) => item.evidence_role === "direct");
   const sifCases = input.references.filter((item) => item.item_type === "sif-case");
   const supportingEvidence = input.references.filter((item) => item.evidence_role !== "direct");
+  const retrievalContract = buildRetrievalContract({
+    references: input.references,
+    directEvidence,
+    sifCases,
+    supportingEvidence,
+    retrieval: input.retrieval
+  });
   const availableDocuments = uniqueDocuments(input.references, improvements);
   const documentCoverage = buildDocumentCoverage({ directEvidence, sifCases, supportingEvidence, improvements });
   const missingEvidence = REQUIRED_DOCUMENTS.filter((document) =>
@@ -138,6 +242,7 @@ export function buildDbHarnessPacket(input: {
     supportingEvidence,
     improvementMemory: improvements,
     workpackMemory,
+    retrievalContract,
     ontologyChecklist: {
       status: missing.length ? "review_required" : "ready",
       missing
@@ -274,6 +379,8 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
   return [
     "역할: LLM은 DB harness가 고정한 근거를 문장화만 한다.",
     "근거 권위: safety_reference_items, SIF 사례, 작업 개선 이력 DB 하네스가 원천이다.",
+    `검색 경로: ${packet.retrievalContract.mode} / vector=${packet.retrievalContract.vector.ready ? "ready" : packet.retrievalContract.vector.reason}`,
+    `검색 출처: direct ${packet.retrievalContract.sourceCounts.directEvidence}, SIF ${packet.retrievalContract.sourceCounts.sifCases}, supporting ${packet.retrievalContract.sourceCounts.supportingEvidence}, hybrid ${packet.retrievalContract.sourceCounts.hybrid}, vector ${packet.retrievalContract.sourceCounts.vector}, ranked ${packet.retrievalContract.sourceCounts.ranked}, rest ${packet.retrievalContract.sourceCounts.rest}`,
     "제공자 재시도: 모델/제공자 재시도는 문장화 실패 복구에만 허용하며 새 근거·새 위험요인을 추가할 수 없다.",
     "누락 정책: 근거가 없으면 보강 필요로 표시하고 산문으로 메우지 않는다.",
     "금지: 근거 없는 위험요인, 문서 반영 위치, 확인 이력을 새로 만들지 않는다.",

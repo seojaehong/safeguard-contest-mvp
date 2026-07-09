@@ -19,7 +19,12 @@ import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
 import { getEvidenceLabel, SMSA_ARTICLE_MAP, type SmsaEvidenceLabel } from "./smsa-mapping";
 import type { KnowledgeResult } from "./ontology/query";
 import type { OntologyNode } from "./ontology/schema";
-import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "./safety-reference-catalog";
+import type {
+  SafetyReferenceItem,
+  SafetyReferenceRetrievalMode,
+  SafetyReferenceSearchResult,
+  SafetyReferenceVectorStatus
+} from "./safety-reference-catalog";
 
 /** MCP 도구가 반환하는 CallToolResult의 최소 형태 (SDK 타입과 호환). */
 export type McpToolResult = {
@@ -191,7 +196,7 @@ export function buildReviewedDocpackResult(
 
 export type HarnessAgentSearchSummary = Pick<
   SafetyReferenceSearchResult,
-  "ok" | "configured" | "query" | "count" | "message"
+  "ok" | "configured" | "query" | "count" | "retrievalMode" | "vectorSearch" | "message"
 > & {
   source: "direct_evidence" | "sif_cases" | "supporting_evidence";
 };
@@ -229,8 +234,24 @@ export function summarizeHarnessSearch(
     configured: result.configured,
     query: result.query,
     count: result.count,
+    retrievalMode: result.retrievalMode,
+    vectorSearch: result.vectorSearch,
     message: result.message,
   };
+}
+
+function combineHarnessRetrievalMode(searches: HarnessAgentSearchSummary[]): SafetyReferenceRetrievalMode {
+  if (searches.some((item) => item.retrievalMode === "hybrid-vector-rpc")) return "hybrid-vector-rpc";
+  if (searches.some((item) => item.retrievalMode === "ranked-rpc")) return "ranked-rpc";
+  if (searches.some((item) => item.retrievalMode === "rest-ilike")) return "rest-ilike";
+  return "unconfigured";
+}
+
+function combineHarnessVectorStatus(searches: HarnessAgentSearchSummary[]): SafetyReferenceVectorStatus | undefined {
+  return searches.find((item) => item.vectorSearch.ok)?.vectorSearch ||
+    searches.find((item) => item.vectorSearch.attempted)?.vectorSearch ||
+    searches.find((item) => item.vectorSearch.enabled)?.vectorSearch ||
+    searches[0]?.vectorSearch;
 }
 
 export function buildHarnessAgentResult(input: {
@@ -246,6 +267,11 @@ export function buildHarnessAgentResult(input: {
     references: input.references,
     improvements: input.improvements,
     workpackMemory: input.workpackMemory,
+    retrieval: {
+      mode: combineHarnessRetrievalMode(input.referenceSearch),
+      vectorSearch: combineHarnessVectorStatus(input.referenceSearch),
+      message: input.referenceSearch.map((item) => `${item.source}: ${item.message}`).join(" / ")
+    }
   });
 
   return {
