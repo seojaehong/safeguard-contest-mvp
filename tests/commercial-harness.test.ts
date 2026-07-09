@@ -10,7 +10,7 @@ import {
   parseHarnessMemoryInput
 } from "@/lib/db-harness";
 import { buildMockAskResponse } from "@/lib/mock-data";
-import { attachDbHarnessFallback, runAsk } from "@/lib/search";
+import { attachDbHarnessFallback, normalizeSafetyTermTypos, runAsk } from "@/lib/search";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
@@ -20,6 +20,16 @@ import {
   normalizeLearningVisionPayload,
   normalizeWorkpackLearningFormat
 } from "@/lib/workpack-learning-export";
+
+describe("safety term normalization", () => {
+  it("blocks observed forklift typos before generated documents reach the UI", () => {
+    const text = "지게브 동선과 비계 설치 위치를 구분하고, 지게브 후진 시 신호수를 배치한다.";
+
+    expect(normalizeSafetyTermTypos(text)).toBe(
+      "지게차 동선과 비계 설치 위치를 구분하고, 지게차 후진 시 신호수를 배치한다."
+    );
+  });
+});
 
 function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
   return {
