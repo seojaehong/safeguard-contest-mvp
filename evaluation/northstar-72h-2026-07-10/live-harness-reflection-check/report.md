@@ -123,3 +123,47 @@ The remaining product issue after the first deployment was that `documentReflect
 ## Final Deployment Requirement
 
 The label fix changes runtime server code. It must be committed, pushed, deployed, and then checked again against `https://www.safeclaw.kr/api/ask`.
+
+## Final Production Evidence
+
+Source artifacts:
+
+- `postdeploy-final-api-ask-harness-summary.json`
+- `postdeploy-final-api-ask-harness-full.json`
+
+Deployment:
+
+- commit: `cfa4b8e`
+- production deployment: `https://safeguard-contest-ald1p8aus-seojaehongs-projects.vercel.app`
+- alias: `https://www.safeclaw.kr`
+
+Result:
+
+- HTTP status: 200
+- mode: `live`
+- generationMode: `enhanced`
+- quality: `ready`
+- DB harness quality: `ready`
+- ontology QA: `통과`
+- DB harness mode: `db_harness_first`
+- LLM role: `naturalize_only`
+- evidence authority: `db_harness`
+- retrieval mode: `rest-ilike`
+- vector search: `disabled`
+- direct evidence: 7
+- SIF cases: 3
+- supporting evidence: 3
+- improvement memory: 1
+- similar workpack memory: 1
+- missing evidence: none
+- document coverage: risk assessment, TBM briefing, and TBM log all covered by direct evidence, SIF case, supporting evidence, and improvement memory
+- risk rows: 6
+- TBM risk links: 6
+- Before/After improvement reflected in risk assessment: yes
+- Before/After improvement reflected in TBM briefing: yes
+- Before/After improvement reflected in TBM log: yes
+- basement pump/confined-space scenario detected: yes
+- ceiling-leak template bleed: no
+- internal document keys in user-facing answer/deliverables: no
+
+Remaining product-quality note: several retrieved direct evidence rows are still broad KOSHA support-regulation matches rather than highly specific pump/confined-space-only rows. The core harness loop now works, but the next quality lift should rerank evidence so 밀폐공간/LOTO/배수펌프-specific SIF and standards appear ahead of generic safety support regulations.
