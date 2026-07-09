@@ -50,6 +50,19 @@ Local probe after patch:
 - Viewport height: `319`
 - Result: input action bar remains visible with margin.
 
+## Postdeploy Verification
+
+Production probe after deployment:
+
+- URL: `https://www.safeclaw.kr/workspace?theme=day&v=3af5c2f`
+- Viewport: `1024 x 319`, `deviceScaleFactor=2`
+- Screenshot: `evaluation/northstar-72h-2026-07-10/workspace-ultrashort-zoom-overlap/postdeploy-workspace-fixed-css1024x319-dsf2.png`
+- Topbar: `4-46`
+- Textarea: `103-197`
+- Composer: `211-257`
+- Viewport height: `319`
+- Result: production page no longer clips the input action bar.
+
 ## Regression Tests
 
 Added:
