@@ -177,7 +177,15 @@ export function OperationMemoryPreview() {
   function downloadLearningMemory(format: WorkpackLearningFormat) {
     const file = buildWorkpackLearningFile(preview.learningInput, format);
     downloadTextFile(file.fileName, file.contentType, file.content);
-    setDownloadMessage(format === "jsonl" ? "운영 메모리 JSONL을 내려받았습니다." : "작업 개선 메모리 Markdown을 내려받았습니다.");
+    if (format === "jsonl") {
+      setDownloadMessage("운영 메모리 JSONL을 내려받았습니다.");
+      return;
+    }
+    if (format === "obsidian") {
+      setDownloadMessage("Obsidian용 작업 그래프 Markdown을 내려받았습니다.");
+      return;
+    }
+    setDownloadMessage("작업 개선 메모리 Markdown을 내려받았습니다.");
   }
 
   return (
@@ -191,7 +199,7 @@ export function OperationMemoryPreview() {
           {preview.mode === "local"
             ? "워크스페이스에서 보관한 최근 개선사항을 관리자 검토용 작업 이력 그래프로 재구성했습니다."
             : "아직 로컬 개선 후보가 없어 Before/After 개선 루프 샘플을 보여줍니다."}
-          {" "}MD/JSONL은 다음 위험성평가와 TBM 생성에서 DB 하네스가 먼저 조회할 후보입니다.
+          {" "}MD/JSONL/Obsidian 노트는 다음 위험성평가와 TBM 생성에서 DB 하네스가 먼저 조회할 후보입니다.
         </p>
         <div className="operation-memory-actions" aria-label="작업 이력 메모리 파일">
           <button type="button" onClick={() => setImprovements(loadStoredImprovements())}>
@@ -202,6 +210,9 @@ export function OperationMemoryPreview() {
           </button>
           <button type="button" onClick={() => downloadLearningMemory("jsonl")}>
             하네스 JSONL
+          </button>
+          <button type="button" onClick={() => downloadLearningMemory("obsidian")}>
+            Obsidian MD
           </button>
         </div>
       </div>

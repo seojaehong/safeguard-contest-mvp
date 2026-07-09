@@ -128,6 +128,7 @@ describe("buildOperationMemoryVisualizationModel", () => {
 
     const markdown = buildWorkpackLearningFile(input, "markdown");
     const jsonl = buildWorkpackLearningFile(input, "jsonl");
+    const obsidian = buildWorkpackLearningFile(input, "obsidian");
 
     expect(markdown.fileName).toBe("성수동-외벽-도장-learning.md");
     expect(markdown.content).toContain("## 운영 메모리 계약");
@@ -144,5 +145,14 @@ describe("buildOperationMemoryVisualizationModel", () => {
     expect(jsonl.content).toContain("\"eventType\":\"operation_graph\"");
     expect(jsonl.content).toContain("\"eventType\":\"improvement\"");
     expect(jsonl.content).toContain("\"photoPairAttached\":true");
+    expect(obsidian.fileName).toBe("성수동-외벽-도장-learning-obsidian.md");
+    expect(obsidian.content).toContain("safeclaw_memory_scope: operation_memory_export");
+    expect(obsidian.content).toContain("runtime_authority: false");
+    expect(obsidian.content).toContain("model_fine_tuning: false");
+    expect(obsidian.content).toContain("[[Workpack/성수동 외벽 도장]]");
+    expect(obsidian.content).toContain("[[Hazard/추락]]");
+    expect(obsidian.content).toContain("[[Evidence/외벽 도장 중 이동식 비계 추락 사례]]");
+    expect(obsidian.content).toContain("--hasImprovement-->");
+    expect(obsidian.content).toContain("## 승격 전 체크");
   });
 });

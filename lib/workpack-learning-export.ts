@@ -33,7 +33,7 @@ export type LearningJsonlEvent = {
   payload: Record<string, unknown>;
 };
 
-export type WorkpackLearningFormat = "markdown" | "jsonl";
+export type WorkpackLearningFormat = "markdown" | "jsonl" | "obsidian";
 
 export type WorkpackLearningFile = {
   fileName: string;
@@ -157,6 +157,30 @@ function slugSegment(value: string) {
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9가-힣._-]+/g, "")
     .replace(/^-+|-+$/g, "") || "safeclaw";
+}
+
+function frontmatterString(value: string) {
+  return JSON.stringify(value);
+}
+
+function obsidianSegment(value: string, fallback: string) {
+  const normalized = value
+    .replace(/[\[\]#^|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 96);
+  return normalized || fallback;
+}
+
+function obsidianLink(kind: string, label: string) {
+  return `[[${kind}/${obsidianSegment(label, kind)}]]`;
+}
+
+function metadataLines(meta: Record<string, string | number | boolean | null>, indent = "  ") {
+  return Object.entries(meta).flatMap(([key, value]) => {
+    if (value === null || typeof value === "undefined" || value === "") return [];
+    return [`${indent}- ${key}: ${String(value)}`];
+  });
 }
 
 export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
@@ -316,8 +340,120 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
   return `${lines.join("\n")}\n`;
 }
 
+export function buildWorkpackObsidianMarkdown(input: WorkpackLearningInput) {
+  const graph = buildOperationMemoryGraph({
+    workpack: {
+      id: input.workpackId,
+      question: input.question,
+      generatedAt: input.generatedAt,
+      taskLabel: input.taskLabel
+    },
+    references: input.references,
+    improvements: input.improvements,
+    confirmations: input.confirmations
+  });
+  const nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
+  const workpackLink = obsidianLink("Workpack", input.taskLabel);
+  const lines = [
+    "---",
+    `safeclaw_memory_scope: ${WORKPACK_LEARNING_GOVERNANCE.memoryScope}`,
+    `authority: ${WORKPACK_LEARNING_GOVERNANCE.authority}`,
+    `promotion_status: ${WORKPACK_LEARNING_GOVERNANCE.promotionStatus}`,
+    `runtime_authority: ${WORKPACK_LEARNING_GOVERNANCE.runtimeAuthority}`,
+    `model_fine_tuning: ${WORKPACK_LEARNING_GOVERNANCE.modelFineTuning}`,
+    `workpack_id: ${frontmatterString(input.workpackId)}`,
+    `generated_at: ${frontmatterString(input.generatedAt)}`,
+    `task_label: ${frontmatterString(input.taskLabel)}`,
+    "---",
+    "",
+    `# ${input.taskLabel}`,
+    "",
+    `작업 노트: ${workpackLink}`,
+    "",
+    "> 이 문서는 SafeClaw 운영자가 검토할 작업 이력 그래프 후보입니다. 승인 전 항목은 사용자 근거처럼 노출하지 않습니다.",
+    "",
+    "## 작업 컨텍스트",
+    "",
+    `- workpack: ${workpackLink}`,
+    `- question: ${input.question}`,
+    `- generatedAt: ${input.generatedAt}`,
+    `- authority: ${WORKPACK_LEARNING_GOVERNANCE.authority}`,
+    `- promotionStatus: ${WORKPACK_LEARNING_GOVERNANCE.promotionStatus}`,
+    `- runtimeAuthority: ${WORKPACK_LEARNING_GOVERNANCE.runtimeAuthority ? "yes" : "no"}`,
+    `- modelFineTuning: ${WORKPACK_LEARNING_GOVERNANCE.modelFineTuning ? "yes" : "no"}`,
+    "",
+    "## 관계 지도",
+    ""
+  ];
+
+  for (const edge of graph.edges) {
+    const source = nodeById.get(edge.sourceId);
+    const target = nodeById.get(edge.targetId);
+    if (!source || !target) continue;
+    lines.push(`- ${obsidianLink(source.kind, source.label)} --${edge.relation}--> ${obsidianLink(target.kind, target.label)} (${edge.label})`);
+  }
+
+  lines.push("", "## 노드 인덱스", "");
+  for (const node of graph.nodes) {
+    lines.push(`### ${obsidianLink(node.kind, node.label)}`);
+    lines.push(`- kind: ${node.kind}`);
+    if (node.detail) lines.push(`- detail: ${node.detail}`);
+    const meta = metadataLines(node.meta);
+    if (meta.length) {
+      lines.push("- meta:");
+      lines.push(...meta);
+    }
+    lines.push("");
+  }
+
+  lines.push("## 근거 후보", "");
+  for (const reference of input.references) {
+    lines.push(`- ${obsidianLink("Evidence", reference.title)}`);
+    lines.push(`  - retrieval: ${referenceRetrievalLabel(reference)}`);
+    lines.push(`  - sourceId: ${reference.source_id}`);
+    lines.push(`  - type: ${reference.item_type}`);
+    lines.push(`  - hazards: ${reference.risk_tags.map((tag) => obsidianLink("Hazard", tag)).join(", ") || "없음"}`);
+    lines.push(`  - controls: ${reference.controls.map((control) => obsidianLink("Control", control)).join(", ") || "없음"}`);
+    lines.push(`  - documents: ${reference.primary_documents.join(", ") || "없음"}`);
+    if (reference.reflected_documents?.length) lines.push(`  - reflected: ${reference.reflected_documents.join(", ")}`);
+    if (reference.source_url) lines.push(`  - sourceUrl: ${reference.source_url}`);
+  }
+
+  lines.push("", "## 개선 후보", "");
+  for (const improvement of input.improvements) {
+    lines.push(`- ${obsidianLink("Improvement", improvement.improvementText)}`);
+    lines.push(`  - hazard: ${obsidianLink("Hazard", improvement.hazardLabel)}`);
+    lines.push(`  - reflected: ${improvement.reflectedDocuments.join(", ") || "없음"}`);
+    lines.push(`  - source: ${improvement.sourceType}`);
+    if (improvement.visionStatus) lines.push(`  - visionStatus: ${improvement.visionStatus}`);
+    if (improvement.analysisMode) lines.push(`  - analysisMode: ${improvement.analysisMode}`);
+    if (typeof improvement.photoPairAttached === "boolean") lines.push(`  - photoPairAttached: ${improvement.photoPairAttached ? "yes" : "no"}`);
+    if (improvement.visionSummary) lines.push(`  - vision: ${improvement.visionSummary}`);
+    if (improvement.detectedHazards?.length) lines.push(`  - detectedHazards: ${improvement.detectedHazards.map((tag) => obsidianLink("Hazard", tag)).join(", ")}`);
+    if (improvement.observedImprovement) lines.push(`  - observedImprovement: ${improvement.observedImprovement}`);
+    if (improvement.ocrText) lines.push(`  - ocr: ${improvement.ocrText}`);
+    if (improvement.sourcePhotoNames?.length) lines.push(`  - sourcePhotos: ${improvement.sourcePhotoNames.join(", ")}`);
+    if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${improvement.visionEvidence}`);
+  }
+
+  lines.push("", "## 확인 후보", "");
+  for (const confirmation of input.confirmations) {
+    lines.push(`- ${obsidianLink("Ack", confirmation.displayName)}`);
+    lines.push(`  - language: ${confirmation.languageCode}`);
+    lines.push(`  - readAt: ${confirmation.readAt}`);
+  }
+
+  lines.push("", "## 승격 전 체크", "");
+  for (const guardrail of WORKPACK_LEARNING_GOVERNANCE.guardrails) {
+    lines.push(`- ${guardrail}`);
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
 export function normalizeWorkpackLearningFormat(value: string | null): WorkpackLearningFormat {
-  return value === "jsonl" ? "jsonl" : "markdown";
+  if (value === "jsonl" || value === "obsidian") return value;
+  return "markdown";
 }
 
 export function buildWorkpackLearningFile(input: WorkpackLearningInput, format: WorkpackLearningFormat): WorkpackLearningFile {
@@ -327,6 +463,13 @@ export function buildWorkpackLearningFile(input: WorkpackLearningInput, format: 
       fileName: `${baseName}.jsonl`,
       contentType: "application/x-ndjson; charset=utf-8",
       content: `${buildWorkpackLearningJsonl(input)}\n`
+    };
+  }
+  if (format === "obsidian") {
+    return {
+      fileName: `${baseName}-obsidian.md`,
+      contentType: "text/markdown; charset=utf-8",
+      content: buildWorkpackObsidianMarkdown(input)
     };
   }
 

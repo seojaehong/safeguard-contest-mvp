@@ -46,7 +46,7 @@ type WorkspaceSaveSnapshot = {
   savedCount: number;
 };
 
-type LearningExportFormat = "markdown" | "jsonl";
+type LearningExportFormat = "markdown" | "jsonl" | "obsidian";
 
 type WorkerDraft = {
   displayName: string;
@@ -591,7 +591,7 @@ function WorkpackHistoryPanel({
       }
 
       const blob = await response.blob();
-      const extension = format === "markdown" ? "md" : "jsonl";
+      const extension = format === "jsonl" ? "jsonl" : "md";
       const fileName = readDownloadFileName(
         response.headers.get("content-disposition"),
         `safeclaw-${storageSnapshot.workpackId}-learning.${extension}`
@@ -604,7 +604,13 @@ function WorkpackHistoryPanel({
       anchor.click();
       anchor.remove();
       URL.revokeObjectURL(url);
-      setDownloadMessage(format === "markdown" ? "Markdown 개선 메모리를 내려받았습니다." : "JSONL 운영 메모리를 내려받았습니다.");
+      if (format === "jsonl") {
+        setDownloadMessage("JSONL 운영 메모리를 내려받았습니다.");
+      } else if (format === "obsidian") {
+        setDownloadMessage("Obsidian용 작업 그래프 Markdown을 내려받았습니다.");
+      } else {
+        setDownloadMessage("Markdown 개선 메모리를 내려받았습니다.");
+      }
     } catch (error) {
       console.error("learning export download failed", error);
       setDownloadMessage(error instanceof Error ? error.message : "현장 개선 메모리 다운로드 중 오류가 발생했습니다.");
@@ -644,6 +650,14 @@ function WorkpackHistoryPanel({
           disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
         >
           {downloadingFormat === "jsonl" ? "내려받는 중" : "하네스 JSONL"}
+        </button>
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => downloadLearningExport("obsidian")}
+          disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
+        >
+          {downloadingFormat === "obsidian" ? "내려받는 중" : "Obsidian MD"}
         </button>
       </div>
       <p className="muted small">
