@@ -1,6 +1,6 @@
 export type WorkspacePage = "input" | "document" | "share";
 
-export type WorkspaceStepStatus = "done" | "active" | "pending" | "locked";
+export type WorkspaceStepStatus = "done" | "active" | "pending" | "locked" | "blocked";
 
 type PageGateInput = {
   targetPage: WorkspacePage;
@@ -12,6 +12,7 @@ type StepStatusInput = {
   currentPage: WorkspacePage;
   hasWorkpack: boolean;
   isGenerating: boolean;
+  canShare?: boolean;
 };
 
 export function nextWorkspacePageAfterGenerate(): WorkspacePage {
@@ -40,11 +41,15 @@ export function canOpenWorkspacePage(input: PageGateInput): { allowed: boolean; 
 
 export function buildWorkspaceStepStatuses(input: StepStatusInput): Record<WorkspacePage, WorkspaceStepStatus> {
   const hasDocumentStage = input.hasWorkpack || input.isGenerating;
+  const canShare = input.canShare ?? input.hasWorkpack;
+  const shareStatus: WorkspaceStepStatus = input.hasWorkpack
+    ? canShare ? "pending" : "blocked"
+    : "locked";
 
   if (input.currentPage === "share" && input.hasWorkpack) {
     return {
       input: "done",
-      document: "done",
+      document: canShare ? "done" : "blocked",
       share: "active"
     };
   }
@@ -53,13 +58,13 @@ export function buildWorkspaceStepStatuses(input: StepStatusInput): Record<Works
     return {
       input: "done",
       document: "active",
-      share: input.hasWorkpack ? "pending" : "locked"
+      share: shareStatus
     };
   }
 
   return {
     input: "active",
     document: hasDocumentStage ? "pending" : "locked",
-    share: input.hasWorkpack ? "pending" : "locked"
+    share: shareStatus
   };
 }

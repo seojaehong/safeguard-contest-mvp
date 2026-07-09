@@ -201,6 +201,7 @@ function statusCopy(state: GenerationState, readiness?: WorkpackReadiness | null
 function stepStatusCopy(status: StepStatus) {
   if (status === "done") return "완료";
   if (status === "active") return "진행 중";
+  if (status === "blocked") return "보완 필요";
   if (status === "locked") return "잠김";
   return "대기";
 }
@@ -209,13 +210,17 @@ function workspaceStepStatusCopy(
   page: WorkspacePage,
   status: StepStatus,
   state: GenerationState,
-  hasWorkpack: boolean
+  hasWorkpack: boolean,
+  readiness?: WorkpackReadiness | null
 ) {
+  if (status === "blocked" && readiness && !readiness.canShare) {
+    return page === "share" ? "전송 잠금" : "검수 필요";
+  }
   if (page === "document" && status === "active" && hasWorkpack && state === "ready") {
-    return "준비됨";
+    return readiness && !readiness.canShare ? "검수 필요" : "준비됨";
   }
   if (page === "share" && status === "active" && hasWorkpack && state === "ready") {
-    return "확인 중";
+    return readiness && !readiness.canShare ? "보완 확인" : "확인 중";
   }
   return stepStatusCopy(status);
 }
@@ -724,6 +729,13 @@ function StepDot({ status }: { status: StepStatus }) {
     return (
       <span className="step-dot done" aria-hidden="true">
         ✓
+      </span>
+    );
+  }
+  if (status === "blocked") {
+    return (
+      <span className="step-dot blocked" aria-hidden="true">
+        !
       </span>
     );
   }
@@ -1550,10 +1562,12 @@ export function SafeGuardCommandCenter({
   const busy = state === "generating";
   const hasWorkpack = Boolean(data);
   const currentStep = workspacePage;
+  const workpackReadiness = data ? assessWorkpackReadiness(data) : null;
   const statuses = buildWorkspaceStepStatuses({
     currentPage: workspacePage,
     hasWorkpack,
-    isGenerating: state === "generating"
+    isGenerating: state === "generating",
+    canShare: workpackReadiness?.canShare
   });
   const fieldBrief = data ? buildApiFieldBrief(data, selectedExample) : buildInputFieldBrief(question, selectedExample, liveWeather, isWeatherLoading);
   const currentLawCount = lawCount(data, state);
@@ -1565,7 +1579,6 @@ export function SafeGuardCommandCenter({
   const selectedDocumentBody = data ? (data.deliverables as Record<string, unknown>)[selectedOutputItem.key] : "";
   const readinessRail = buildReadinessRail(data, state, liveWeather, isWeatherLoading);
   const generationStages = buildGenerationStages(data, state);
-  const workpackReadiness = data ? assessWorkpackReadiness(data) : null;
   const hasReviewWarnings = workpackReadiness ? !workpackReadiness.canShare : workpackHasReviewWarnings(data);
   const documentEvidence = selectedDocumentEvidence(data, selectedOutputItem.key);
   const supportingDocumentItems = outputItems.filter((item) => !primaryDocumentKeys.has(item.key));
@@ -1642,7 +1655,7 @@ export function SafeGuardCommandCenter({
                 >
                   <StepDot status={statuses[step.key]} />
                   <span>{step.label}</span>
-                  <small>{workspaceStepStatusCopy(step.key, statuses[step.key], state, hasWorkpack)}</small>
+                  <small>{workspaceStepStatusCopy(step.key, statuses[step.key], state, hasWorkpack, workpackReadiness)}</small>
                 </button>
               );
             })}
