@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { chromium, type Browser } from "playwright";
+import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 const port = 3227;
@@ -531,6 +532,81 @@ describe("workspace layout regression", () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const sample = buildSampleWorkpack();
+    const packet = buildDbHarnessPacket({
+      question: sample.question,
+      references: [
+        {
+          id: "ref-risk-guardrail",
+          source_id: "kosha-demo",
+          item_type: "technical-guideline",
+          category: "추락",
+          subcategory: "비계",
+          title: "이동식 비계 추락 예방 지침",
+          summary: "외벽 도장 작업 전 난간, 작업발판, 아웃트리거 상태를 확인합니다.",
+          keywords: ["외벽도장", "비계", "추락"],
+          risk_tags: ["fall"],
+          primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+          controls: ["난간·작업발판·아웃트리거 확인", "강풍 시 상부 작업 중지"],
+          evidence_role: "direct",
+          retrieval_source: "ranked"
+        },
+        {
+          id: "sif-fall-01",
+          source_id: "sif-demo",
+          item_type: "sif-case",
+          category: "SIF",
+          subcategory: "추락",
+          title: "외벽 도장 중 이동식 비계 추락 사례",
+          summary: "작업발판 가장자리 방호 미흡 상태에서 추락한 유사 사례입니다.",
+          keywords: ["외벽도장", "추락", "비계"],
+          risk_tags: ["fall"],
+          primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+          controls: ["작업 전 방호조치 사진 확인", "TBM에서 작업중지 기준 복창"],
+          evidence_role: "supporting",
+          retrieval_source: "ranked"
+        }
+      ],
+      improvements: [{
+        id: "imp-guardrail-photo",
+        taskLabel: "성수동 외벽 도장",
+        hazardLabel: "작업발판 외측 추락 위험",
+        improvementText: "Before/After 사진으로 난간 보강 완료를 확인",
+        reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+        sourceType: "photo_analysis",
+        visionStatus: "analyzed",
+        photoPairAttached: true
+      }],
+      workpackMemory: [{
+        id: "wp-prev-guardrail",
+        question: "지난 외벽 도장 작업에서 난간 보강 후 TBM 질문을 추가",
+        generatedAt: "2026-07-02",
+        reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+        statusLabel: "개선 반영"
+      }]
+    });
+    sample.dbHarness = {
+      packet,
+      promptContext: buildHarnessPromptContext(packet),
+      summary: {
+        mode: packet.mode,
+        llmRole: packet.generationContract.llmRole,
+        llmOutputScope: packet.generationContract.llmOutputScope,
+        evidenceAuthority: packet.generationContract.evidenceAuthority,
+        providerRetryScope: packet.generationContract.providerRetryScope,
+        fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+        genericProseSubstitutionAllowed: packet.generationContract.genericProseSubstitutionAllowed,
+        missingEvidencePolicy: packet.generationContract.missingEvidencePolicy,
+        directEvidence: packet.directEvidence.length,
+        sifCases: packet.sifCases.length,
+        supportingEvidence: packet.supportingEvidence.length,
+        improvementMemory: packet.improvementMemory.length,
+        workpackMemory: packet.workpackMemory.length,
+        missingEvidence: packet.generationContract.missingEvidence,
+        documentCoverage: packet.generationContract.documentCoverage,
+        retrievalContract: packet.retrievalContract,
+        ontologyStatus: packet.ontologyChecklist.status
+      }
+    };
     await page.addInitScript(() => {
       window.localStorage.setItem("safeclaw.aiMode", "template");
     });
@@ -552,6 +628,16 @@ describe("workspace layout regression", () => {
     await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await page.locator(".doc-card-actions button", { hasText: "편집" }).waitFor({ state: "visible" });
+    await page.waitForFunction(() => document.querySelector(".document-harness-loop")?.textContent?.includes("근거 고정"));
+    const harnessLoop = page.locator(".document-harness-loop");
+    await harnessLoop.waitFor({ state: "visible" });
+    const harnessLoopText = await harnessLoop.textContent();
+    expect(harnessLoopText).toContain("하네스·온톨로지 루프");
+    expect(harnessLoopText).toContain("DB 하네스");
+    expect(harnessLoopText).toContain("근거 고정");
+    expect(harnessLoopText).toContain("온톨로지 QA");
+    expect(harnessLoopText).toContain("개선 루프");
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
 
