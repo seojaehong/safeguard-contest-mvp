@@ -543,6 +543,100 @@ function buildGenerationStages(data: AskResponse | null, state: GenerationState)
   ];
 }
 
+function buildDocumentHarnessLoop(
+  data: AskResponse | null,
+  readiness: WorkpackReadiness | null
+): ReadinessRailItem[] {
+  if (!data) {
+    return [
+      {
+        key: "harness",
+        label: "DB 하네스",
+        status: "생성 후 고정",
+        detail: "SIF/KOSHA/현장 이력 근거를 먼저 고정한 뒤 문서화합니다.",
+        tone: "pending"
+      },
+      {
+        key: "ontology",
+        label: "온톨로지 QA",
+        status: "검수 대기",
+        detail: "작업유형, 위험요인, 감소대책 누락을 문서 본문과 대조합니다.",
+        tone: "pending"
+      },
+      {
+        key: "memory",
+        label: "개선 루프",
+        status: "후보 대기",
+        detail: "오늘 개선사항과 과거 작업이 다음 위험성평가/TBM 후보가 됩니다.",
+        tone: "pending"
+      },
+      {
+        key: "share",
+        label: "공유 readiness",
+        status: "문서 생성 후",
+        detail: "공유 전 근거, 검수, 확인 이력 저장 조건을 확인합니다.",
+        tone: "pending"
+      }
+    ];
+  }
+
+  const harnessSurface = data.dbHarness ? buildDbHarnessSurfaceContract(data.dbHarness.packet) : null;
+  const qa = data.ontologyQa?.result;
+  const missingControls = qa?.reviewable ? qa.missing.controls.length : 0;
+  const improvementMemory = data.dbHarness?.summary.improvementMemory ?? 0;
+  const workpackMemory = data.dbHarness?.summary.workpackMemory ?? 0;
+  const firstImprovement = data.dbHarness?.packet.improvementMemory[0];
+  const firstWorkpack = data.dbHarness?.packet.workpackMemory[0];
+  const qualityStatus = data.qualityContract ? qualityStatusCopy(data.qualityContract.overall) : "검수 대기";
+
+  return [
+    {
+      key: "harness",
+      label: "DB 하네스",
+      status: harnessSurface
+        ? harnessSurface.status === "locked" ? "근거 고정" : "검토 필요"
+        : "응답 없음",
+      detail: harnessSurface
+        ? `${harnessSurface.headline} · ${harnessSurface.detail}`
+        : "응답에 DB 하네스 계약이 없어 근거 고정 상태를 확인해야 합니다.",
+      tone: harnessSurface?.status === "locked" ? "ready" : "warn"
+    },
+    {
+      key: "ontology",
+      label: "온톨로지 QA",
+      status: qa?.reviewable
+        ? missingControls ? "보완 반영 확인" : qa.verdict
+        : data.qualityContract?.ontology.status ? qualityStatusCopy(data.qualityContract.ontology.status) : "검수 보류",
+      detail: qa?.reviewable
+        ? missingControls
+          ? `${missingControls}개 안전조치를 문서 보강 섹션과 대조합니다.`
+          : "필수 안전조치가 문서팩에 반영됐습니다."
+        : data.qualityContract?.ontology.detail || "승인된 작업유형 기준과 문서를 대조합니다.",
+      tone: qa?.reviewable ? missingControls ? "warn" : "ready" : data.qualityContract?.ontology.status === "ready" ? "ready" : "warn"
+    },
+    {
+      key: "memory",
+      label: "개선 루프",
+      status: improvementMemory || workpackMemory
+        ? `개선 ${improvementMemory} · 작업 ${workpackMemory}`
+        : "후보 없음",
+      detail: firstImprovement
+        ? `${firstImprovement.hazardLabel}: ${firstImprovement.improvementText}`
+        : firstWorkpack
+          ? `${firstWorkpack.generatedAt} 유사 작업을 다시 확인합니다.`
+          : "Before/After 사진이나 현장 메모를 저장하면 다음 작업에 되돌아옵니다.",
+      tone: improvementMemory || workpackMemory ? "ready" : "pending"
+    },
+    {
+      key: "share",
+      label: "공유 readiness",
+      status: readiness?.canShare ? "공유 준비" : qualityStatus,
+      detail: readiness?.summary || data.qualityContract?.summary || "공유 전 검수 상태를 확인합니다.",
+      tone: readiness?.canShare ? "ready" : "warn"
+    }
+  ];
+}
+
 function documentMatchesTitle(documentNames: string[] | undefined, documentTitle: string): boolean {
   if (!documentNames?.length) return false;
   const normalizedTitle = documentTitle.replace(/표$/, "");
@@ -1580,6 +1674,7 @@ export function SafeGuardCommandCenter({
   const readinessRail = buildReadinessRail(data, state, liveWeather, isWeatherLoading);
   const generationStages = buildGenerationStages(data, state);
   const hasReviewWarnings = workpackReadiness ? !workpackReadiness.canShare : workpackHasReviewWarnings(data);
+  const documentHarnessLoop = buildDocumentHarnessLoop(data, workpackReadiness);
   const documentEvidence = selectedDocumentEvidence(data, selectedOutputItem.key);
   const supportingDocumentItems = outputItems.filter((item) => !primaryDocumentKeys.has(item.key));
   const photoAnalysisCandidate = buildPhotoAnalysisCandidate();
@@ -1957,6 +2052,21 @@ export function SafeGuardCommandCenter({
                 <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
               </div>
             </details>
+            <section className="document-harness-loop" aria-label="하네스 온톨로지 개선 루프">
+              <div className="document-harness-loop-head">
+                <span>하네스·온톨로지 루프</span>
+                <strong>{data ? "오늘 문서 반영 상태" : "생성 후 확인"}</strong>
+              </div>
+              <div className="document-harness-loop-grid">
+                {documentHarnessLoop.map((item) => (
+                  <article key={item.key} className={readinessClass(item.tone)}>
+                    <span>{item.label}</span>
+                    <strong>{item.status}</strong>
+                    <small>{item.detail}</small>
+                  </article>
+                ))}
+              </div>
+            </section>
             <div className="document-viewer-shell">
               <div className="document-viewer-list" aria-label="문서 목록">
                 {focusDocumentItems.map((item, index) => {

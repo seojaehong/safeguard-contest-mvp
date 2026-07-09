@@ -12501,6 +12501,80 @@ body:has(.safeclaw-landing) :is(
   margin-top: -2px;
 }
 
+.command-center-shell .document-harness-loop {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--workspace-surface-1) 92%, transparent);
+  padding: 12px;
+}
+
+.command-center-shell .document-harness-loop-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.command-center-shell .document-harness-loop-head span {
+  color: var(--workspace-subtle);
+  font-size: 11px;
+  font-weight: 640;
+  letter-spacing: 0;
+}
+
+.command-center-shell .document-harness-loop-head strong {
+  color: var(--workspace-ink);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.command-center-shell .document-harness-loop-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.command-center-shell .document-harness-loop-grid article {
+  display: grid;
+  gap: 5px;
+  min-height: 96px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 10px;
+  background: var(--workspace-surface-2);
+  padding: 10px 12px;
+}
+
+.command-center-shell .document-harness-loop-grid article.ready {
+  border-color: color-mix(in srgb, var(--workspace-success) 36%, var(--workspace-rule));
+}
+
+.command-center-shell .document-harness-loop-grid article.warn {
+  border-color: rgba(245, 158, 11, 0.32);
+}
+
+.command-center-shell .document-harness-loop-grid span {
+  color: var(--workspace-subtle);
+  font-size: 11px;
+  font-weight: 640;
+  line-height: 1.35;
+}
+
+.command-center-shell .document-harness-loop-grid strong {
+  color: var(--workspace-ink);
+  font-size: 13px;
+  font-weight: 660;
+  line-height: 1.35;
+}
+
+.command-center-shell .document-harness-loop-grid small {
+  color: var(--workspace-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .command-center-shell .document-workbench .document-viewer-shell {
   display: grid;
   grid-template-columns: minmax(194px, 0.24fr) minmax(0, 1fr);
@@ -13842,6 +13916,7 @@ body:has(.safeclaw-landing) :is(
 
 @media (max-width: 980px) {
   .command-center-shell .document-review-status-strip,
+  .command-center-shell .document-harness-loop-grid,
   .share-form-shell,
   .share-permission-grid,
   .acknowledgment-ledger,
