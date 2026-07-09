@@ -108,3 +108,21 @@ enhanced AI doc events 목표:
 - `structuredRiskRows`
 
 이렇게 하면 enhanced 모드는 "하네스가 고정한 위험 row + TBM 구조화"에 집중하고, 사용자에게 내부 prose draft 실패를 노출하지 않는다.
+
+## 최종 라이브 결과
+
+배포 커밋: `aea1911`
+
+- 전체 응답: 62.0초
+- `generationMode`: `enhanced`
+- doc events: `tbmBriefingStructured`, `tbmLogStructured`, `structuredRiskRows`
+- doc failures: 없음
+- stage failures: 없음
+- `qualityContract.overall`: `ready`
+- 구조화 검수: `3/3 ready`
+- DB 하네스: `ready`
+- 온톨로지 QA: `ready`, `통과`
+- 최종 `structured.tbmRiskLinks`: 5건 유지
+- raw fallback/camelCase/오탈자 `지게브` 노출: 없음
+
+판정: enhanced 경로는 이제 12종 문서 생성기가 아니라, DB 하네스가 고정한 근거와 개선 이력을 기반으로 위험성평가 row와 TBM 구조를 우선 생산하는 workbench 경로로 동작한다. 남은 속도 병목은 60초 전후의 핵심 구조화 생성 구간이며, 다음 최적화는 `structuredRiskRows`와 TBM 구조 생성의 prompt 통합 또는 deterministic row-first 생성 확장으로 진행한다.
