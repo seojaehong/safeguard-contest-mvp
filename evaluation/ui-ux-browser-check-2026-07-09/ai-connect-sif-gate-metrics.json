@@ -1,0 +1,21 @@
+{
+  "path": "/settings/ai-connect",
+  "hasSifGate": true,
+  "hasVectorGuard": true,
+  "vectorGuardClass": "ai-connect-sif-vector-guard locked",
+  "vectorGuardText": "Vector 검색 잠금업로드 0 / 6,032건임베딩 생성과 DB 업로드가 승인 전 보류되어 있으므로 vector 검색은 꺼진 상태를 유지합니다.",
+  "approvalSteps": [
+    "승인 전1. DB migration 승인010 migration 또는 embedding-only migration을 승인 후 적용합니다.",
+    "승인 전2. 임베딩 생성 승인비용이 발생하는 단계라 --approved-embedding flag 없이는 실행하지 않습니다.",
+    "대기3. 업로드와 row count 검증업로드 후 코퍼스 수량과 DB row count가 같아야 합니다.",
+    "승인 전4. Vector 검색 flag임베딩 생성과 DB 업로드가 승인 전 보류되어 있으므로 vector 검색은 꺼진 상태를 유지합니다."
+  ],
+  "preflightSummary": "Preflight 자동 점검 통과",
+  "horizontalOverflow": false,
+  "scrollWidth": 1440,
+  "innerWidth": 1440,
+  "apiStatus": 200,
+  "apiOk": true,
+  "apiVectorStatus": "locked",
+  "apiFailedCheckCount": 0
+}

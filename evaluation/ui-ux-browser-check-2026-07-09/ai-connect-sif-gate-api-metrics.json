@@ -1,0 +1,27 @@
+{
+  "httpStatus": 200,
+  "ok": true,
+  "stage": "ready-for-approval",
+  "vectorStatus": "locked",
+  "vectorMessage": "임베딩 생성과 DB 업로드가 승인 전 보류되어 있으므로 vector 검색은 꺼진 상태를 유지합니다.",
+  "approvalSteps": [
+    {
+      "id": "migration",
+      "status": "waiting"
+    },
+    {
+      "id": "embedding",
+      "status": "waiting"
+    },
+    {
+      "id": "upload",
+      "status": "blocked"
+    },
+    {
+      "id": "vector",
+      "status": "waiting"
+    }
+  ],
+  "preflightChecks": 10,
+  "failedCheckIds": []
+}

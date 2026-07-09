@@ -155,6 +155,15 @@ Generated: 2026-07-09
 - `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-hover.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-mobile.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-sif-gate.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-sif-gate-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-sif-gate-api-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-login-gate-debug.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-login-gate-debug.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-workspace-style.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-workspace-style-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-workspace-style-mobile.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-workspace-style-mobile-metrics.json`
 
 핵심 권고:
 
@@ -176,9 +185,19 @@ Generated: 2026-07-09
 - ontology export actions: `최근 후보 다시 읽기`, `MD 저장`, `JSONL 저장`
 - ontology published graph: graph node 32개, list row 166개
 - ontology mobile: viewport 390px, scrollWidth 390px, horizontal overflow 없음
+- ai-connect SIF gate: dummy public Supabase env와 fake local session으로 UI 렌더만 검수, 비밀값/DB 권한 사용 없음
+- ai-connect SIF gate UI: `Vector 검색 잠금`, 업로드 `0 / 6,032건`, 승인 순서 4단계, `Preflight 자동 점검 통과`, horizontal overflow 없음
+- ai-connect SIF status API: HTTP 200, `ok: true`, `vectorGuard.status: locked`, failed check 0건
+- 로컬 worktree 기본 `.env.local`에는 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`가 없어 로그인 후 패널 검수는 dummy public env로 별도 수행함
+- ai-connect workspace style: 공통 `SafeClawModuleShell` 기본 variant를 workspace/document 계열로 전환, rail subtitle을 `현장 안전 문서팩`으로 변경
+- ai-connect workspace style desktop: 탭 background `rgba(108, 111, 247, 0.12)`, yellow tab fill 없음, vector guard 노출, horizontal overflow 없음
+- ai-connect workspace style mobile: viewport 390px, 탭 1열(`390px`), horizontal overflow 없음
+- 남은 디자인 과제: 모바일 공통 module rail은 여전히 메뉴가 먼저 길게 노출되므로, 다음 IA 패스에서 1급 메뉴 축소/접힘 처리 필요
 
 ## Tests Run
 
+- `npm.cmd test -- tests/sif-embedding-gate-status.test.ts tests/sif-embedding-preflight.test.ts`
+  - 2 files, 6 tests passed
 - `npm.cmd test -- tests/sif-embedding-gate-status.test.ts tests/sif-embedding-preflight.test.ts tests/photo-vision-analysis.test.ts tests/operation-memory-visualization.test.ts tests/reporting-downloads.test.ts`
   - 5 files, 21 tests passed
 - `npm.cmd test -- tests/sif-embedding-preflight.test.ts tests/sif-embedding-gate-status.test.ts`
@@ -200,7 +219,7 @@ Generated: 2026-07-09
 - `npm.cmd run typecheck`
   - passed
 - `npm.cmd run build`
-  - passed, Next.js generated 27 static pages and compiled `/api/input-photos/hazard-analysis`
+  - passed, Next.js generated 27 static pages and compiled `/api/input-photos/hazard-analysis`, `/api/sif-embedding-gate/status`
 
 ## Remaining Approval Gates
 

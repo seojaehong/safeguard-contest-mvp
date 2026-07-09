@@ -41,6 +41,27 @@ export type SifEmbeddingGateStatus = {
     vectorFeatureFlagEnabled: boolean;
     executionReadyAfterApproval: boolean;
   };
+  vectorGuard: {
+    status: "locked" | "blocked" | "ready" | "active";
+    label: string;
+    message: string;
+    flagEnabled: boolean;
+    uploadVerified: boolean;
+    uploadedCount: number;
+    requiredUploadCount: number;
+  };
+  preflightChecks: {
+    id: string;
+    label: string;
+    passed: boolean;
+    evidenceSummary: string;
+  }[];
+  approvalSteps: {
+    id: string;
+    label: string;
+    status: "waiting" | "blocked" | "ready" | "done";
+    detail: string;
+  }[];
   failedCheckIds: string[];
   nextApprovalDecisions: string[];
   artifacts: {
@@ -78,8 +99,128 @@ function readStringArray(record: Record<string, unknown>, key: string) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
+function readRecordArray(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return Array.isArray(value) ? value.map(asRecord) : [];
+}
+
 function hasEnv(env: Record<string, string | undefined>, key: string) {
   return Boolean(env[key]?.trim());
+}
+
+function checkLabelFor(id: string) {
+  const labels: Record<string, string> = {
+    sif_source_count: "SIF 원본과 코퍼스 수량 확인",
+    manifest_matches_report: "배치 manifest와 보고서 일치",
+    corpus_jsonl_matches_report: "JSONL 코퍼스 라인 수 확인",
+    corpus_quality_gate: "빈 텍스트/관리대책/중복 품질 게이트",
+    no_embedding_generated_yet: "승인 전 임베딩 미생성",
+    embedding_requires_explicit_cost_approval_flag: "임베딩 비용 승인 플래그 필요",
+    upload_requires_explicit_approval_flag: "업로드 승인 플래그 필요",
+    migration_contains_embedding_table_rpc_index: "migration에 table/RPC/index 포함",
+    migration_keeps_embeddings_server_side: "임베딩은 서버 측에서만 조회",
+    vector_feature_flag_stays_off_until_upload_verified: "업로드 검증 전 vector flag 잠금"
+  };
+  return labels[id] || id;
+}
+
+function summarizeEvidence(evidence: Record<string, unknown>) {
+  const pairs = Object.entries(evidence)
+    .filter(([, value]) => typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value === null)
+    .slice(0, 3)
+    .map(([key, value]) => `${key}: ${String(value)}`);
+  return pairs.length ? pairs.join(" · ") : "근거 파일에서 확인됨";
+}
+
+function buildVectorGuard(
+  vectorFeatureFlagEnabled: boolean,
+  uploadedCount: number,
+  corpusCount: number
+): SifEmbeddingGateStatus["vectorGuard"] {
+  const uploadVerified = corpusCount > 0 && uploadedCount === corpusCount;
+  if (vectorFeatureFlagEnabled && !uploadVerified) {
+    return {
+      status: "blocked",
+      label: "Vector 검색 차단",
+      message: "업로드 수량 검증 전 SAFETY_REFERENCE_VECTOR_SEARCH=1이 감지됐습니다. flag를 끄고 row count/RPC smoke test 후 다시 켜야 합니다.",
+      flagEnabled: true,
+      uploadVerified,
+      uploadedCount,
+      requiredUploadCount: corpusCount
+    };
+  }
+  if (vectorFeatureFlagEnabled && uploadVerified) {
+    return {
+      status: "active",
+      label: "Vector 검색 활성",
+      message: "업로드 수량이 코퍼스와 일치해 runtime vector 검색을 사용할 수 있는 상태입니다.",
+      flagEnabled: true,
+      uploadVerified,
+      uploadedCount,
+      requiredUploadCount: corpusCount
+    };
+  }
+  if (uploadVerified) {
+    return {
+      status: "ready",
+      label: "Vector 검색 활성 대기",
+      message: "업로드 검증이 끝났습니다. RPC smoke test 후 feature flag를 켤 수 있습니다.",
+      flagEnabled: false,
+      uploadVerified,
+      uploadedCount,
+      requiredUploadCount: corpusCount
+    };
+  }
+  return {
+    status: "locked",
+    label: "Vector 검색 잠금",
+    message: "임베딩 생성과 DB 업로드가 승인 전 보류되어 있으므로 vector 검색은 꺼진 상태를 유지합니다.",
+    flagEnabled: false,
+    uploadVerified,
+    uploadedCount,
+    requiredUploadCount: corpusCount
+  };
+}
+
+function buildApprovalSteps(
+  runtimeReady: boolean,
+  vectorGuard: SifEmbeddingGateStatus["vectorGuard"]
+): SifEmbeddingGateStatus["approvalSteps"] {
+  const migrationStatus = runtimeReady ? "waiting" : "blocked";
+  const uploadStatus = vectorGuard.uploadVerified ? "done" : "blocked";
+  const vectorStatus = vectorGuard.status === "active"
+    ? "done"
+    : vectorGuard.status === "ready"
+      ? "ready"
+      : vectorGuard.status === "blocked"
+        ? "blocked"
+        : "waiting";
+  return [
+    {
+      id: "migration",
+      label: "1. DB migration 승인",
+      status: migrationStatus,
+      detail: runtimeReady ? "010 migration 또는 embedding-only migration을 승인 후 적용합니다." : "실행 환경 key를 확인한 뒤 migration 승인을 진행합니다."
+    },
+    {
+      id: "embedding",
+      label: "2. 임베딩 생성 승인",
+      status: "waiting",
+      detail: "비용이 발생하는 단계라 --approved-embedding flag 없이는 실행하지 않습니다."
+    },
+    {
+      id: "upload",
+      label: "3. 업로드와 row count 검증",
+      status: uploadStatus,
+      detail: vectorGuard.uploadVerified ? "업로드 수량이 코퍼스와 일치합니다." : "업로드 후 코퍼스 수량과 DB row count가 같아야 합니다."
+    },
+    {
+      id: "vector",
+      label: "4. Vector 검색 flag",
+      status: vectorStatus,
+      detail: vectorGuard.message
+    }
+  ];
 }
 
 export function getSifEmbeddingGateStatus(
@@ -107,13 +248,27 @@ export function getSifEmbeddingGateStatus(
   const supabaseUrlPresent = hasEnv(env, "SUPABASE_URL") || hasEnv(env, "NEXT_PUBLIC_SUPABASE_URL");
   const supabaseServiceRolePresent = hasEnv(env, "SUPABASE_SERVICE_ROLE_KEY");
   const vectorFeatureFlagEnabled = env.SAFETY_REFERENCE_VECTOR_SEARCH === "1";
+  const vectorGuard = buildVectorGuard(vectorFeatureFlagEnabled, uploadedCount, readNumber(report, "corpusCount"));
+  const runtimeExecutionReadyAfterApproval = openaiApiKeyPresent && supabaseUrlPresent && supabaseServiceRolePresent;
+  const preflightChecks = readRecordArray(preflight, "checks").map((check) => {
+    const id = readString(check, "id", "unknown_check");
+    return {
+      id,
+      label: checkLabelFor(id),
+      passed: readBoolean(check, "passed"),
+      evidenceSummary: summarizeEvidence(asRecord(check.evidence))
+    };
+  });
+  const overallOk = ok && vectorGuard.status !== "blocked";
 
   return {
-    ok,
-    stage: ok ? "ready-for-approval" : "degraded",
-    message: ok
+    ok: overallOk,
+    stage: overallOk ? "ready-for-approval" : "degraded",
+    message: overallOk
       ? "SIF 코퍼스와 배치 manifest는 준비됐고, 임베딩 생성과 DB 업로드는 승인 전 보류 상태입니다."
-      : "SIF 임베딩 승인 게이트 점검이 필요합니다.",
+      : vectorGuard.status === "blocked"
+        ? vectorGuard.message
+        : "SIF 임베딩 승인 게이트 점검이 필요합니다.",
     generatedAt: readString(preflight, "generatedAt", readString(report, "completedAt")),
     approvalHeld,
     dbMutationPerformed,
@@ -152,8 +307,11 @@ export function getSifEmbeddingGateStatus(
       supabaseUrlPresent,
       supabaseServiceRolePresent,
       vectorFeatureFlagEnabled,
-      executionReadyAfterApproval: openaiApiKeyPresent && supabaseUrlPresent && supabaseServiceRolePresent
+      executionReadyAfterApproval: runtimeExecutionReadyAfterApproval
     },
+    vectorGuard,
+    preflightChecks,
+    approvalSteps: buildApprovalSteps(runtimeExecutionReadyAfterApproval, vectorGuard),
     failedCheckIds,
     nextApprovalDecisions: readStringArray(preflight, "nextApprovalDecisions"),
     artifacts: {
