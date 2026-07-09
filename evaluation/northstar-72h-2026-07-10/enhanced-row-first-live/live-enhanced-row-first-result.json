@@ -1,0 +1,145 @@
+{
+  "checkedAt": "2026-07-09T19:40:48.117Z",
+  "url": "https://www.safeclaw.kr/api/ask/stream",
+  "deployedCommit": "750fd6c",
+  "quality": {
+    "httpStatus": 200,
+    "elapsedMs": 59444,
+    "finalPresent": true,
+    "generationMode": "enhanced",
+    "docEventNames": [
+      "structuredRiskRows"
+    ],
+    "hasOnlyStructuredRiskRowsDocEvent": true,
+    "docFailures": [],
+    "stageFailures": [],
+    "qualityOverall": "ready",
+    "structuredStatus": "ready",
+    "structuredReadyCount": 3,
+    "structuredRequiredCount": 3,
+    "dbHarnessStatus": "ready",
+    "ontologyStatus": "ready",
+    "ontologyVerdict": "통과",
+    "structuredTbmRiskLinksCount": 5,
+    "hasTbmBriefingStructured": true,
+    "hasTbmLogStructured": true,
+    "tbmBriefingHazardCount": 5,
+    "tbmLogHazardCount": 5,
+    "statusDetailHasDeterministicTbm": true,
+    "hasPhotoImprovement": true,
+    "hasKosha": true,
+    "hasRawFallback": false,
+    "hasJigebe": false,
+    "bodyLength": 733,
+    "previewStart": "1) 하네스 판단\n- 직접 근거: D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정 / B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정 / B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정\n- SIF 유사사례: 1122 / 4. 마감공사 / 4.4 도장작업 / 1611 / 4. 마감공사 / 4.8 판넬 등 외부마감 작업\n- 작업·개선 이력: 작업발판 외측 추락 위험: Before 사진의 난간 누락 구간을 보강하고 After 사진에서 출입통제선을 확인 / 2026-07-09T09:10:00+09:00: 개선 반영됨\n\n2) 오늘 문서에 먼저 반영할 조치\n- 작업발판·난간·개구부 상태 확인\n- 안전대 체결 및 작업반경 출입통제\n- 가동부 방호덮개와 비상정지장치 확인\n- 정비 전 전원 차단 및 잠금표지\n- 보행자 동선과 장비 동선 분리\n- 신호수 배치 및 후진 경보 확인\n\n3) 보강 필요\n- 필수 3종 문서에 반영할 근거가 준비됐습니다.\n\n[기상 신호] 단시간 흐림, 빗방울, 기온 24℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)\n\n[교육 연계] [스킬업] 산업안전기사 필기 1편 (현장 적합)\n\n[KOSHA 보강] KOSHA 위험성평가 사업안내 (공식 링크 확인)\n\n[유사 재해사례] 시스템 비계 해체 작업 중 추락: 작업 전 위험요인 공유, 보호구 착용, 작업중지 기준 확인을 예방 포인트로 적용합니다."
+  },
+  "stageEvents": [
+    {
+      "t": 864,
+      "stage": "weather",
+      "status": "start"
+    },
+    {
+      "t": 864,
+      "stage": "training",
+      "status": "start"
+    },
+    {
+      "t": 864,
+      "stage": "koshaEducation",
+      "status": "start"
+    },
+    {
+      "t": 864,
+      "stage": "kosha",
+      "status": "start"
+    },
+    {
+      "t": 864,
+      "stage": "koshaOpenApi",
+      "status": "start"
+    },
+    {
+      "t": 864,
+      "stage": "accidentCases",
+      "status": "start"
+    },
+    {
+      "t": 864,
+      "stage": "response",
+      "status": "start"
+    },
+    {
+      "t": 864,
+      "stage": "safetyReference",
+      "status": "start"
+    },
+    {
+      "t": 864,
+      "stage": "citations",
+      "status": "start"
+    },
+    {
+      "t": 864,
+      "stage": "deliverables",
+      "status": "start"
+    },
+    {
+      "t": 1074,
+      "stage": "training",
+      "status": "ok"
+    },
+    {
+      "t": 1126,
+      "stage": "koshaEducation",
+      "status": "ok"
+    },
+    {
+      "t": 1457,
+      "stage": "kosha",
+      "status": "ok"
+    },
+    {
+      "t": 1735,
+      "stage": "koshaOpenApi",
+      "status": "ok"
+    },
+    {
+      "t": 1806,
+      "stage": "weather",
+      "status": "ok"
+    },
+    {
+      "t": 1929,
+      "stage": "accidentCases",
+      "status": "ok"
+    },
+    {
+      "t": 2360,
+      "stage": "safetyReference",
+      "status": "ok"
+    },
+    {
+      "t": 15991,
+      "stage": "response",
+      "status": "ok"
+    },
+    {
+      "t": 21337,
+      "stage": "citations",
+      "status": "ok"
+    },
+    {
+      "t": 59185,
+      "stage": "deliverables",
+      "status": "ok"
+    }
+  ],
+  "docEvents": [
+    {
+      "t": 59176,
+      "name": "structuredRiskRows",
+      "status": "ok"
+    }
+  ]
+}
