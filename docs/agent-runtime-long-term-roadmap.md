@@ -39,6 +39,8 @@ Hermes/FastAPI as the core is deferred for these reasons:
 - Add tenant learning contract tests.
 - Keep photo/OCR hazard candidates as reviewable inputs, not automatic facts.
 - Export operation memory as MD/JSONL for reviewable corpus building.
+- Treat Knowledge Engine updates as `Knowledge Promotion Candidate` records, not automatic corpus updates.
+- Keep Operator Wiki Export as a review surface generated from DB/ontology state.
 
 ### Phase 2: Async Workbench Backend
 
@@ -47,12 +49,15 @@ Hermes/FastAPI as the core is deferred for these reasons:
 - Separate generation, review, dispatch, and confirmation logs.
 - Add cross-tenant leakage tests.
 - Add promotion queue from tenant operation memory to public reference corpus.
+- Add review UI for knowledge promotion candidates: compare proposed Markdown/JSONL updates, approve, reject, or request evidence.
+- Add audit trail for who approved a public reference corpus update and which source records supported it.
 
 ### Phase 3: Agent Runtime Worker PoC
 
 - Run Hermes or another runtime in a separate branch/service.
 - The runtime may call SafeClaw MCP tools.
 - The runtime must not write directly to SafeClaw DB.
+- The runtime may propose Operator Wiki Export diffs or Knowledge Promotion Candidates.
 - The runtime must not move `lib/claw-tools.ts` or domain tool ownership out of SafeClaw.
 - The runtime must pass MCP parity, secret-boundary, license, and tenant-scope tests.
 
@@ -67,10 +72,36 @@ Only after Phase 3 passes, decide whether Hermes/OpenClaw-style workers should b
 
 Replacing the SafeClaw core remains a separate decision and is not part of the active implementation plan.
 
+## Knowledge Engine Track
+
+The Knowledge Engine direction is adopted only when it is interpreted as a governed corpus and operation-memory system, not as an automatic self-modifying runtime.
+
+### Adopt Now
+
+- Keep the explicit ontology graph for Task, Hazard, Control, Article, Accident, Document, and Duty relationships.
+- Use the Evidence Harness as the fact boundary before any LLM rewrites content.
+- Keep operation memory exports in Markdown/JSONL so workpack history, improvements, photo/OCR findings, evidence, and read confirmations can be reviewed.
+- Use SIF/KOSHA embeddings only after the existing approval gates for migration, upload, runtime flag, cost, and tenant scope.
+
+### Defer
+
+- Generate per-node Markdown wiki pages as Operator Wiki Export after the DB-backed ontology and promotion queue are stable.
+- Add Hermes-style trajectory evaluation as a separate worker PoC after async job state, idempotency, and tenant isolation are proven.
+- Let an agent propose corpus diffs only after review UI and audit trail exist.
+
+### Reject From Active Plan
+
+- Replacing SafeClaw core with Hermes/FastAPI.
+- Letting JSONL trajectories automatically mutate ontology, wiki pages, prompts, or skills.
+- Treating anonymization alone as permission to promote tenant work history into the public corpus.
+- Treating Markdown Wiki as the production source of truth.
+- Product claims that imply actual model training when SafeClaw is doing retrieval, embedding, evidence selection, and document rewriting.
+
 ## Review Gates
 
 - DB migration approval
 - embedding generation/upload approval
+- public corpus promotion approval
 - license and redistribution review
 - secret handling review
 - tenant isolation test evidence
@@ -86,6 +117,8 @@ Use:
 - `테넌트 작업 이력 메모리`
 - `작업 이력 그래프`
 - `승인된 개선사항 반영`
+- `지식 승격 후보`
+- `운영자 위키 내보내기`
 
 Avoid in user-facing product copy:
 
@@ -93,4 +126,3 @@ Avoid in user-facing product copy:
 - `파인튜닝`
 - `모델 학습`
 - `자동 LLM Wiki 승격`
-
