@@ -49,10 +49,14 @@ describe("SIF embedding approval preflight", () => {
     expect(saved.uploaded).toBe(false);
     expect(saved.corpusCount).toBe(6032);
     expect(saved.batchCount).toBe(61);
+    expect(saved.migrationPath).toBe("evaluation/sif-embedding-gate/sif-embedding-only-migration.sql");
     expect(saved.commandHeldUntilApproval).toBe("npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload");
     expect(asStringArray(saved.failedCheckIds)).toEqual([]);
     const checks = (saved.checks as Array<Record<string, unknown>>);
     expect(checks.some((check) => check.id === "embedding_requires_explicit_cost_approval_flag" && check.passed === true)).toBe(true);
+    const migrationCheck = checks.find((check) => check.id === "migration_scope_is_sif_embedding_only");
+    expect(migrationCheck?.passed).toBe(true);
+    expect(asRecord(migrationCheck?.evidence).sifOnly).toBe(true);
 
     const env = asRecord(saved.env);
     expect(env.executionEnvReady).toBe(false);
