@@ -48,6 +48,34 @@ describe("workspace page navigation", () => {
     });
   });
 
+  it("marks share as blocked instead of pending when readiness gates fail", () => {
+    expect(
+      buildWorkspaceStepStatuses({
+        currentPage: "document",
+        hasWorkpack: true,
+        isGenerating: false,
+        canShare: false
+      })
+    ).toEqual({
+      input: "done",
+      document: "active",
+      share: "blocked"
+    });
+
+    expect(
+      buildWorkspaceStepStatuses({
+        currentPage: "share",
+        hasWorkpack: true,
+        isGenerating: false,
+        canShare: false
+      })
+    ).toEqual({
+      input: "done",
+      document: "blocked",
+      share: "active"
+    });
+  });
+
   it("returns users to input after generation fails so they can revise or retry", () => {
     expect(nextWorkspacePageAfterGenerationError()).toBe("input");
   });
