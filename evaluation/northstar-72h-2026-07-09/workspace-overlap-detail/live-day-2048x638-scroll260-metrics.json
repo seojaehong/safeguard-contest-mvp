@@ -1,0 +1,56 @@
+{
+  ".command-topbar": {
+    "top": 8,
+    "bottom": 125,
+    "left": 364,
+    "right": 1684,
+    "height": 117,
+    "position": "sticky",
+    "zIndex": "30"
+  },
+  ".workspace-side-nav": {
+    "top": -111,
+    "bottom": 774,
+    "left": 364,
+    "right": 606,
+    "height": 885,
+    "position": "static",
+    "zIndex": "auto"
+  },
+  ".linear-workspace-layout .command-main": {
+    "top": -111,
+    "bottom": 1110,
+    "left": 620,
+    "right": 1684,
+    "height": 1221,
+    "position": "relative",
+    "zIndex": "auto"
+  },
+  ".workspace-input-page": {
+    "top": -111,
+    "bottom": 1110,
+    "left": 620,
+    "right": 1684,
+    "height": 1221,
+    "position": "relative",
+    "zIndex": "auto"
+  },
+  ".command-copy h1": {
+    "top": 63,
+    "bottom": 110,
+    "left": 772,
+    "right": 1392,
+    "height": 47,
+    "position": "static",
+    "zIndex": "auto"
+  },
+  ".command-console-input": {
+    "top": 200,
+    "bottom": 352,
+    "left": 772,
+    "right": 1532,
+    "height": 152,
+    "position": "static",
+    "zIndex": "auto"
+  }
+}
