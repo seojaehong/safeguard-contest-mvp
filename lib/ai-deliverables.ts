@@ -985,7 +985,7 @@ export function listAiDeliverableGroupsForScope(scope: "full" | "enhanced" = "fu
     .map((spec) => spec.name);
   return scope === "full"
     ? [...tabularNames, "structuredRiskRows", "free", "foreign", "tbmRiskLinks"]
-    : [...tabularNames, "structuredRiskRows", "tbmRiskLinks"];
+    : [...tabularNames, "structuredRiskRows"];
 }
 
 function tabularSpecsForScope(scope: "full" | "enhanced") {
@@ -1021,7 +1021,9 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
     if (s.status === "fulfilled") Object.assign(out, s.value);
   }
   applyRiskRowClamp(out);
-  Object.assign(out, await generateTbmRiskLinks(ctx, out.structuredRiskRows || []));
+  if (scope === "full") {
+    Object.assign(out, await generateTbmRiskLinks(ctx, out.structuredRiskRows || []));
+  }
   return out;
 }
 
@@ -1093,15 +1095,17 @@ export async function generateAllDeliverablesWithDiagnostics(
   });
 
   applyRiskRowClamp(out);
-  const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || []);
-  Object.assign(out, tbmRiskLinksResult);
-  const tbmRiskLinksOk = (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
-  groupResults.push({
-    group: "tbmRiskLinks",
-    status: tbmRiskLinksOk ? "fulfilled" : "rejected",
-    reason: tbmRiskLinksOk ? undefined : "empty or skipped"
-  });
-  safeEmit(onProgress, { kind: "doc", name: "tbmRiskLinks", status: tbmRiskLinksOk ? "ok" : "fail" });
+  if (scope === "full") {
+    const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || []);
+    Object.assign(out, tbmRiskLinksResult);
+    const tbmRiskLinksOk = (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
+    groupResults.push({
+      group: "tbmRiskLinks",
+      status: tbmRiskLinksOk ? "fulfilled" : "rejected",
+      reason: tbmRiskLinksOk ? undefined : "empty or skipped"
+    });
+    safeEmit(onProgress, { kind: "doc", name: "tbmRiskLinks", status: tbmRiskLinksOk ? "ok" : "fail" });
+  }
 
   return {
     deliverables: out,
