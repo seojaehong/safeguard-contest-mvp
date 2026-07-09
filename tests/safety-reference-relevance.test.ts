@@ -42,10 +42,10 @@ describe("safety reference relevance guard", () => {
       category: "제조업",
       subcategory: "프레스",
       title: "프레스 위험방지에 관한 기술지원규정",
-      summary: "프레스 방호장치와 양수조작식 안전장치를 확인한다.",
-      keywords: ["프레스", "방호장치"],
+      summary: "프레스 방호장치, 가동부, 정비 전 전원 차단과 잠금표지를 확인한다.",
+      keywords: ["프레스", "방호장치", "전원차단", "잠금표지"],
       risk_tags: ["협착"],
-      controls: ["방호덮개 설치", "비상정지장치 확인"]
+      controls: ["방호덮개 설치", "정비 전 전원 차단 및 잠금표지", "비상정지장치 확인"]
     });
 
     expect(scoreSafetyReferenceQueryMatch(query, confinedSpace)).toBeGreaterThan(scoreSafetyReferenceQueryMatch(query, crane));

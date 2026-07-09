@@ -335,6 +335,30 @@ const QUERY_TERM_ALIASES: Record<string, string[]> = {
   "지게차": ["지게차", "동선", "충돌", "하역"]
 };
 
+const STRONG_RELEVANCE_ALIASES = new Set([
+  "밀폐",
+  "산소",
+  "환기",
+  "질식",
+  "유해가스",
+  "펌프",
+  "배수",
+  "기계실",
+  "누수",
+  "누전",
+  "감전",
+  "젖은",
+  "미끄러짐",
+  "전도",
+  "추락",
+  "비계",
+  "작업발판",
+  "지게차"
+]);
+
+const CONFINED_OR_PUMP_QUERY_TERMS = ["밀폐공간", "산소농도", "환기", "배수펌프", "기계실", "누수"];
+const CONFINED_OR_PUMP_INCOMPATIBLE_TERMS = ["프레스", "크레인", "영상표시단말기", "VDT", "운송용 차량"];
+
 function normalizeMatchText(value: string): string {
   return value.toLowerCase().replace(/\s+/g, " ");
 }
@@ -362,9 +386,36 @@ function expandedQueryTerms(query: string): string[] {
   return Array.from(terms).filter((term) => term.length >= 2);
 }
 
+function includesAnyTerm(text: string, terms: string[]): boolean {
+  return terms.some((term) => text.includes(normalizeMatchText(term)));
+}
+
+function hasStrongQueryMatch(query: string, item: SafetyReferenceItem): boolean {
+  const baseTerms = extractFallbackTerms(query);
+  if (!baseTerms.length) return true;
+  const text = referenceMatchText(item);
+  if (includesAnyTerm(text, baseTerms)) return true;
+  return baseTerms.some((term) =>
+    (QUERY_TERM_ALIASES[term] || []).some((alias) =>
+      STRONG_RELEVANCE_ALIASES.has(alias) && text.includes(normalizeMatchText(alias))
+    )
+  );
+}
+
+function isIncompatibleReferenceForQuery(query: string, item: SafetyReferenceItem): boolean {
+  const queryText = normalizeMatchText(query);
+  const text = referenceMatchText(item);
+  const confinedOrPumpQuery = CONFINED_OR_PUMP_QUERY_TERMS.some((term) => queryText.includes(normalizeMatchText(term)));
+  if (!confinedOrPumpQuery) return false;
+  return CONFINED_OR_PUMP_INCOMPATIBLE_TERMS.some((term) =>
+    !queryText.includes(normalizeMatchText(term)) && text.includes(normalizeMatchText(term))
+  );
+}
+
 export function scoreSafetyReferenceQueryMatch(query: string, item: SafetyReferenceItem): number {
   const baseTerms = extractFallbackTerms(query);
   if (!baseTerms.length) return 1;
+  if (isIncompatibleReferenceForQuery(query, item)) return 0;
   const text = referenceMatchText(item);
   const title = normalizeMatchText(item.title);
   let score = 0;
@@ -380,7 +431,7 @@ export function scoreSafetyReferenceQueryMatch(query: string, item: SafetyRefere
     }
   }
 
-  return score;
+  return hasStrongQueryMatch(query, item) ? score : Math.min(score, 1);
 }
 
 export function filterAndRankSafetyReferencesByQuery(
