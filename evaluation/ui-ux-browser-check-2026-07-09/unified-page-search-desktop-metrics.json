@@ -1,0 +1,21 @@
+{
+  "path": "/search",
+  "viewport": {
+    "width": 1440,
+    "height": 1100
+  },
+  "title": "SafeClaw | 안전 문서팩 생성",
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "horizontalOverflow": false,
+  "hasModuleShell": true,
+  "hasLegacyShell": false,
+  "hasInternalDiagnostics": false,
+  "h1FontSize": "52px",
+  "h1LetterSpacing": "normal",
+  "primaryCount": 6,
+  "secondaryCount": 3,
+  "activePrimary": [
+    "04근거DB · 온톨로지"
+  ]
+}

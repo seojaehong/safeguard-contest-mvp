@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 export const metadata: Metadata = {
   title: "신뢰와 근거 | SafeClaw",
@@ -17,36 +18,25 @@ const interviewQuestions = ["가장 오래 걸리는 안전 문서 업무", "외
 
 export default function TrustPage() {
   return (
-    <main className="v2-shell">
-      <header className="v2-nav">
-        <Link href="/" className="brand-lockup" aria-label="SafeClaw 홈">
-          <span className="brand-mark">S</span>
-          <span><strong>SafeClaw</strong><small>신뢰 기준</small></span>
-        </Link>
-        <nav>
-          <Link href="/workspace">작업공간</Link>
-          <Link href="/why">차별성</Link>
-          <Link href="/preview">핵심 3종</Link>
-          <Link href="/roadmap">로드맵</Link>
-        </nav>
-      </header>
-
-      <section className="v2-hero card">
-        <span className="eyebrow">검증과 고지</span>
-        <h1>제품에서 확인 가능한 증거와 검증 예정 항목을 분리합니다.</h1>
-        <p>신뢰 페이지는 과장된 장식이 아니라, 인터뷰·근거·동의·면책을 관리하는 공개 기준입니다.</p>
-      </section>
-
-      <section className="trust-grid">
+    <SafeClawModuleShell
+      eyebrow="신뢰 기준"
+      title="검증과 고지."
+      description="제품에서 확인 가능한 증거와 검증 예정 항목을 분리하고, 인터뷰·근거·동의·면책 기준을 관리합니다."
+      status="partial"
+      mappedTo="근거 · 동의 · 면책 · 인터뷰"
+      activeHref="/trust"
+      actions={<Link href="/evidence">근거 확인</Link>}
+    >
+      <section className="safeclaw-module-grid two trust-grid">
         {trustItems.map(([title, body]) => (
-          <article key={title} className="card">
+          <article key={title}>
             <strong>{title}</strong>
             <p>{body}</p>
           </article>
         ))}
       </section>
 
-      <section className="card interview-card">
+      <section className="safeclaw-module-panel interview-card">
         <div className="compact-head">
           <span className="eyebrow">인터뷰 스크립트</span>
           <strong>검증할 질문</strong>
@@ -57,6 +47,6 @@ export default function TrustPage() {
           ))}
         </div>
       </section>
-    </main>
+    </SafeClawModuleShell>
   );
 }

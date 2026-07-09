@@ -1,0 +1,21 @@
+{
+  "path": "/roadmap",
+  "viewport": {
+    "width": 1440,
+    "height": 1100
+  },
+  "title": "로드맵 | SafeClaw",
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "horizontalOverflow": false,
+  "hasModuleShell": true,
+  "hasLegacyShell": false,
+  "hasInternalDiagnostics": false,
+  "h1FontSize": "52px",
+  "h1LetterSpacing": "normal",
+  "primaryCount": 6,
+  "secondaryCount": 1,
+  "activePrimary": [
+    "01작업공간입력 · 생성"
+  ]
+}
