@@ -572,6 +572,10 @@ export function AiConnectPanel() {
               {sifGate.nextApprovalGate.command ? (
                 <pre>{sifGate.nextApprovalGate.command}</pre>
               ) : null}
+              <div className="ai-connect-sif-packet-actions">
+                <Link href="/api/sif-embedding-gate/approval-packet">승인 패킷 열기</Link>
+                <Link href="/api/sif-embedding-gate/approval-packet?format=json">JSON 보기</Link>
+              </div>
             </div>
             <div className="ai-connect-sif-approval-packet">
               <div>

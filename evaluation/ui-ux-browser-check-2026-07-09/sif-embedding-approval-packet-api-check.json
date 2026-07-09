@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-07-09T11:00:46.7542772Z",
+  "markdownStatus": 200,
+  "jsonStatus": 200,
+  "contentType": [
+    "text/markdown; charset=utf-8"
+  ],
+  "gateId": "apply-sif-only-migration",
+  "dbMutationPerformed": false,
+  "embeddingGenerated": false,
+  "uploaded": false,
+  "currentState": "코퍼스 준비 · 임베딩 미실행",
+  "maxInputPhotos": 10,
+  "visionEndpoint": "/api/input-photos/hazard-analysis",
+  "markdownContainsHeldCommand": true,
+  "markdownContainsVisionPath": true
+}
