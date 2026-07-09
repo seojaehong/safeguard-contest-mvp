@@ -47,6 +47,28 @@ describe("buildGenerationProgressState", () => {
     expect(state.detail).toBe("TBM 브리핑 작성 확인됨");
   });
 
+  it("moves the visible count when early stream lines are active but not terminal yet", () => {
+    const consoleLines: AgentConsoleLine[] = Array.from({ length: 10 }, (_, index) => ({
+      id: index < 5 ? `stage:${index}` : `doc:${index}`,
+      label: `초기 검토 ${index}`,
+      status: "active" as const
+    }));
+
+    const state = buildGenerationProgressState({
+      hasData: false,
+      state: "generating",
+      consoleLines,
+      totalDocumentCount,
+      citationCount: 0
+    });
+
+    expect(state.count).toBeGreaterThan(3);
+    expect(state.count).toBeLessThan(totalDocumentCount);
+    expect(state.primary).toBe("6/12");
+    expect(state.secondary).toBe("실시간 검토 10건 · 진행 10건");
+    expect(state.detail).toBe("초기 검토 9 진행 중");
+  });
+
   it("caps in-flight progress below completion until a final payload is applied", () => {
     const consoleLines: AgentConsoleLine[] = Array.from({ length: 24 }, (_, index) => ({
       id: index < 12 ? `stage:${index}` : `doc:${index}`,

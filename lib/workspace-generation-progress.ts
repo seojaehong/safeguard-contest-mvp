@@ -56,7 +56,8 @@ export function buildGenerationProgressState(input: {
   const terminalStages = input.consoleLines.filter((line) => isStageLine(line) && isTerminal(line)).length;
   const terminalDocs = input.consoleLines.filter((line) => isDocLine(line) && isTerminal(line)).length;
   const activeCount = input.consoleLines.filter((line) => line.status === "active").length;
-  const count = Math.min(total - 1, Math.max(3, 3 + Math.floor(terminalStages / 2) + terminalDocs));
+  const activeBump = activeCount ? Math.max(1, Math.ceil(activeCount / 4)) : 0;
+  const count = Math.min(total - 1, Math.max(3, 3 + activeBump + Math.floor(terminalStages / 2) + terminalDocs));
   const latest = latestUsefulLine(input.consoleLines);
   const detail = latest
     ? `${latest.label}${latest.status === "active" ? " 진행 중" : " 확인됨"}`
