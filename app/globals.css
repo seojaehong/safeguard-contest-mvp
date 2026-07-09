@@ -15812,6 +15812,170 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+@media (min-width: 901px) and (max-height: 340px) {
+  .command-center-shell,
+  .command-center-shell.workspace-theme-day {
+    padding-top: 4px;
+  }
+
+  .command-center-shell > .command-topbar,
+  .command-center-shell .command-topbar,
+  .command-center-shell .workspace-command-topbar {
+    min-height: 0;
+    margin-bottom: 6px;
+    padding: 6px 10px;
+  }
+
+  .command-center-shell.workspace-theme-day > .command-topbar,
+  .command-center-shell.workspace-theme-day > .command-viewport {
+    width: min(100% - 16px, 1360px);
+  }
+
+  .command-center-shell .brand-lockup,
+  .command-center-shell.workspace-theme-day .brand-lockup {
+    gap: 8px;
+  }
+
+  .command-center-shell .brand-lockup .brand-mark,
+  .command-center-shell.workspace-theme-day .brand-lockup .brand-mark {
+    width: 24px;
+    height: 24px;
+  }
+
+  .command-center-shell .brand-lockup strong,
+  .command-center-shell.workspace-theme-day .brand-lockup strong {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .command-center-shell .brand-lockup small,
+  .command-center-shell .workspace-top-title span,
+  .command-center-shell .topbar-status span,
+  .command-center-shell.workspace-theme-day .brand-lockup small,
+  .command-center-shell.workspace-theme-day .workspace-top-title span,
+  .command-center-shell.workspace-theme-day .topbar-status span {
+    display: none;
+  }
+
+  .command-center-shell .workspace-theme-toggle,
+  .command-center-shell.workspace-theme-day .workspace-theme-toggle {
+    padding: 2px;
+  }
+
+  .command-center-shell .workspace-theme-toggle button,
+  .command-center-shell.workspace-theme-day .workspace-theme-toggle button {
+    min-width: 46px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .command-center-shell .workspace-side-nav,
+  .command-center-shell.workspace-theme-day .workspace-side-nav {
+    max-height: calc(100vh - 66px);
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .command-center-shell .workspace-side-group,
+  .command-center-shell.workspace-theme-day .workspace-side-group {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .command-center-shell .workspace-side-group button,
+  .command-center-shell .workspace-source-status p,
+  .command-center-shell.workspace-theme-day .workspace-side-group button,
+  .command-center-shell.workspace-theme-day .workspace-source-status p {
+    min-height: 40px;
+    gap: 8px;
+    padding: 7px 8px;
+  }
+
+  .command-center-shell .workspace-side-group button span,
+  .command-center-shell .workspace-source-status b,
+  .command-center-shell.workspace-theme-day .workspace-side-group button span,
+  .command-center-shell.workspace-theme-day .workspace-source-status b {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .command-center-shell .workspace-side-group button small,
+  .command-center-shell .workspace-source-status small,
+  .command-center-shell.workspace-theme-day .workspace-side-group button small,
+  .command-center-shell.workspace-theme-day .workspace-source-status small {
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .command-center-shell .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    gap: 8px;
+    padding: 10px clamp(16px, 2.5vw, 24px) 12px !important;
+  }
+
+  .command-center-shell .workspace-input-page .command-copy,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy {
+    display: none;
+  }
+
+  .command-center-shell .workspace-input-page .command-console,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console {
+    width: min(640px, 100%);
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .command-center-shell .workspace-input-page .console-head {
+    padding: 0;
+  }
+
+  .command-center-shell .workspace-input-page .command-console label,
+  .command-center-shell .workspace-input-page .console-head span {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .command-center-shell .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input {
+    min-height: 94px;
+    padding: 11px 12px;
+    font-size: 13px;
+    line-height: 1.58;
+  }
+
+  .command-center-shell .workspace-input-page .input-composer-tray,
+  .command-center-shell.workspace-theme-day .workspace-input-page .input-composer-tray {
+    width: min(640px, 100%);
+    min-height: 42px;
+    margin-top: 8px;
+    padding: 5px;
+  }
+
+  .command-center-shell .composer-attach-button,
+  .command-center-shell.workspace-theme-day .composer-attach-button {
+    min-height: 32px;
+    padding: 5px 8px;
+  }
+
+  .command-center-shell .composer-attach-button span,
+  .command-center-shell.workspace-theme-day .composer-attach-button span {
+    width: 16px;
+    height: 16px;
+    font-size: 13px;
+  }
+
+  .command-center-shell .composer-submit-button,
+  .command-center-shell.workspace-theme-day .composer-submit-button {
+    min-height: 32px;
+    padding: 6px 10px !important;
+  }
+}
+
 /* Workspace generated-edit bridge: WorkpackEditor is also mounted after
    generation inside /workspace. Keep that edit surface in the same daylight
    workbench system as the main document route. */
