@@ -31,7 +31,7 @@ const GUEST_MESSAGE_LIMIT = 10;
 
 function statusIcon(status: ToolLine["status"]): string {
   if (status === "ok") return "✓";
-  if (status === "fail") return "✗";
+  if (status === "fail") return "!";
   return "▸";
 }
 

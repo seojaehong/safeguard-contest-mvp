@@ -58,16 +58,16 @@ describe("nextConsoleLines", () => {
     expect(lines).toHaveLength(1);
     expect(lines[0]).toMatchObject({
       id: "doc:foreign",
-      label: "외국인 근로자 안내문 작성",
+      label: "다국어 안내문 정리",
       status: "warn"
     });
     expect(lines[0].detail).toContain("핵심 3종 문서");
   });
 
-  test("error events append a standalone failed line with the message as detail", () => {
+  test("error events append a standalone review line with the message as detail", () => {
     const lines = nextConsoleLines([], { kind: "error", message: "boom" });
     expect(lines).toHaveLength(1);
-    expect(lines[0]).toMatchObject({ status: "fail", detail: "boom" });
+    expect(lines[0]).toMatchObject({ status: "warn", label: "생성 경로 검토 필요", detail: "boom" });
   });
 
   test("final event appends a summary line counting prior failures and echoing status.summary", () => {
@@ -90,8 +90,8 @@ describe("nextConsoleLines", () => {
 
   test("final event upgrades recovered fallback docs to ok when deliverables exist", () => {
     const withFallbackWarnings: AgentConsoleLine[] = [
-      { id: "doc:free", label: "본문 상세 작성", status: "warn" },
-      { id: "doc:foreign", label: "외국인 근로자 안내문 작성", status: "warn" }
+      { id: "doc:free", label: "보조 문서 정리", status: "warn" },
+      { id: "doc:foreign", label: "다국어 안내문 정리", status: "warn" }
     ];
     const lines = nextConsoleLines(withFallbackWarnings, {
       kind: "final",
