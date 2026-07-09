@@ -64,6 +64,15 @@ describe("buildOntologyVisualizationModel", () => {
     expect(model.map.nodes.map((item) => item.id)).toContain("Task_paint");
     expect(model.map.edges.map((item) => item.id)).toContain("Task_paint|entailsHazard|Hazard_fall");
     expect(model.map.nodes.every((item) => item.x >= 7 && item.x <= 93 && item.y >= 7 && item.y <= 93)).toBe(true);
+    expect(model.focusNodeId).toBe(model.map.nodes[0]?.id);
+    expect(model.stats).toMatchObject({
+      totalNodes: 5,
+      totalEdges: graph.edges.length,
+      visibleNodes: 5,
+      visibleEdges: graph.edges.length,
+      hiddenNodes: 0,
+      hiddenEdges: 0
+    });
   });
 
   it("bounds the visual map without removing the full list ontology", () => {
@@ -78,5 +87,13 @@ describe("buildOntologyVisualizationModel", () => {
     expect(model.list).toHaveLength(42);
     expect(model.map.nodes).toHaveLength(32);
     expect(model.map.edges.length).toBeLessThanOrEqual(72);
+    expect(model.stats).toMatchObject({
+      totalNodes: 42,
+      totalEdges: 41,
+      visibleNodes: 32,
+      hiddenNodes: 10
+    });
+    expect(model.stats.visibleEdges).toBe(model.map.edges.length);
+    expect(model.stats.hiddenEdges).toBeGreaterThan(0);
   });
 });

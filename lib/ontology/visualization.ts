@@ -49,6 +49,15 @@ export type OntologyMapEdge = {
 export type OntologyVisualizationModel = {
   list: OntologyListItem[];
   hoverCards: OntologyHoverCard[];
+  focusNodeId: string | null;
+  stats: {
+    totalNodes: number;
+    totalEdges: number;
+    visibleNodes: number;
+    visibleEdges: number;
+    hiddenNodes: number;
+    hiddenEdges: number;
+  };
   map: {
     nodes: OntologyMapNode[];
     edges: OntologyMapEdge[];
@@ -182,6 +191,15 @@ export function buildOntologyVisualizationModel(graph: OntologyGraph): OntologyV
   return {
     list,
     hoverCards,
+    focusNodeId: mapNodes[0]?.id || null,
+    stats: {
+      totalNodes: graph.nodes.length,
+      totalEdges: graph.edges.length,
+      visibleNodes: mapNodes.length,
+      visibleEdges: mapEdges.length,
+      hiddenNodes: Math.max(graph.nodes.length - mapNodes.length, 0),
+      hiddenEdges: Math.max(graph.edges.length - mapEdges.length, 0)
+    },
     map: {
       nodes: mapNodes,
       edges: mapEdges

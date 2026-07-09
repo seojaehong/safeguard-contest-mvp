@@ -1,0 +1,12 @@
+{
+  "url": "http://localhost:3027/ontology",
+  "statsText": "맵 노드 32/166\n맵 관계 27/169\n리스트 보존 134개",
+  "listCount": 166,
+  "pointCount": 32,
+  "mapBox": {
+    "x": 339,
+    "y": 1918.28125,
+    "width": 1030,
+    "height": 560
+  }
+}
