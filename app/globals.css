@@ -9390,6 +9390,121 @@ body:has(.safeclaw-landing) :is(
   border-color: rgba(34, 197, 94, 0.44);
 }
 
+.ai-connect-sif-operator-gate {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  border: 1px solid rgba(246, 245, 239, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 16px;
+}
+
+.ai-connect-sif-operator-gate > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ai-connect-sif-operator-gate span {
+  color: rgba(255, 220, 46, 0.78);
+  font-family: var(--font-hud);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ai-connect-sif-operator-gate strong {
+  color: var(--os-text, #f6f5ef);
+  font-size: 0.95rem;
+}
+
+.ai-connect-sif-operator-gate p,
+.ai-connect-sif-operator-gate small,
+.ai-connect-sif-operator-gate li,
+.ai-connect-sif-operator-gate dd {
+  margin: 0;
+  color: rgba(246, 245, 239, 0.76);
+  font-size: 0.82rem;
+  line-height: 1.58;
+}
+
+.ai-connect-sif-operator-gate dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.ai-connect-sif-operator-gate dl div,
+.ai-connect-sif-operator-columns section {
+  border: 1px solid rgba(246, 245, 239, 0.1);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 10px;
+}
+
+.ai-connect-sif-operator-gate dt {
+  color: rgba(246, 245, 239, 0.48);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ai-connect-sif-operator-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ai-connect-sif-operator-columns ul,
+.ai-connect-sif-operator-checklist {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-connect-sif-operator-checklist li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  border: 1px solid rgba(246, 245, 239, 0.1);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.14);
+  padding: 10px;
+}
+
+.ai-connect-sif-operator-checklist li > span {
+  border: 1px solid rgba(246, 245, 239, 0.12);
+  border-radius: 999px;
+  color: rgba(246, 245, 239, 0.7);
+  font-size: 0.66rem;
+  font-weight: 860;
+  line-height: 1;
+  padding: 5px 7px;
+}
+
+.ai-connect-sif-operator-checklist li.done > span {
+  border-color: rgba(34, 197, 94, 0.38);
+  color: rgba(74, 222, 128, 0.92);
+}
+
+.ai-connect-sif-operator-checklist li.required > span {
+  border-color: rgba(245, 158, 11, 0.38);
+  color: rgba(251, 191, 36, 0.92);
+}
+
+.ai-connect-sif-operator-checklist li.blocked > span {
+  border-color: rgba(220, 38, 38, 0.42);
+  color: rgba(248, 113, 113, 0.92);
+}
+
 .ai-connect-sif-approval-packet {
   display: grid;
   gap: 12px;
@@ -9657,6 +9772,8 @@ body:has(.safeclaw-landing) :is(
   .ai-connect-vision-flow,
   .ai-connect-sif-artifact-grid,
   .ai-connect-sif-lock-grid,
+  .ai-connect-sif-operator-gate dl,
+  .ai-connect-sif-operator-columns,
   .ai-connect-token-items article {
     grid-template-columns: 1fr;
   }
@@ -14248,6 +14365,9 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-fingerprint,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-artifact-grid article,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-lock-grid article,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate dl div,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-columns section,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-checklist li,
 .safeclaw-module-shell.module-variant-document .ai-connect-token-items article {
   border: 1px solid var(--workspace-rule) !important;
   border-radius: 8px;
@@ -14262,6 +14382,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-command strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate strong,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight strong,
@@ -14279,6 +14400,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate small,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate p,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate small,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate li,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate dd,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate dt,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet span,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-fingerprint p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet li,
@@ -14294,6 +14420,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps li,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight li {
@@ -14328,6 +14455,18 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate.done {
   border-color: rgba(39, 166, 68, 0.38) !important;
   background: rgba(39, 166, 68, 0.1) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate {
+  border-color: var(--workspace-rule-strong) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate span {
+  color: var(--workspace-accent) !important;
+  font-family: inherit;
+  font-weight: 560;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-command pre,

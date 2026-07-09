@@ -25,6 +25,15 @@ describe("SIF embedding approval packet", () => {
       uploadedCount: 0,
       dbMutationPerformed: false
     });
+    expect(packet.operatorGate).toMatchObject({
+      status: "approval-request-open",
+      gateId: "apply-sif-only-migration",
+      migrationArtifact: {
+        path: "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
+        exists: true
+      }
+    });
+    expect(packet.operatorGate.forbiddenBeforeApproval).toContain("전체 SIF 임베딩 생성");
     expect(packet.fileName).toBe("safeclaw-sif-embedding-approval-apply-sif-only-migration.md");
     expect(packet.approvalFingerprint).toHaveLength(64);
     expect(packet.artifactIntegrity).toHaveLength(4);
@@ -36,6 +45,11 @@ describe("SIF embedding approval packet", () => {
     expect(packet.markdown).toContain("Embedding corpus: 6,032");
     expect(packet.markdown).toContain("Model fine-tuning performed: no");
     expect(packet.markdown).toContain("DB mutation performed: no");
+    expect(packet.markdown).toContain("## Operator Gate Runbook");
+    expect(packet.markdown).toContain("Approval question: SIF-only migration SQL");
+    expect(packet.markdown).toContain("Forbidden before approval:");
+    expect(packet.markdown).toContain("전체 SIF 임베딩 생성");
+    expect(packet.markdown).toContain("Non-approval fallback:");
     expect(packet.markdown).toContain("## Canary Embedding Evidence");
     expect(packet.markdown).toContain("Canary 임베딩 완료 · 업로드 전");
     expect(packet.markdown).toContain("Embedded count: 3");

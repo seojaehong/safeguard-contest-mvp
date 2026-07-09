@@ -13,6 +13,7 @@ export type SifEmbeddingApprovalPacket = {
   embeddingGenerated: boolean;
   uploaded: boolean;
   canary: SifEmbeddingGateStatus["canary"];
+  operatorGate: SifEmbeddingGateStatus["operatorGate"];
   requiredArtifacts: SifEmbeddingGateStatus["approvalPacket"]["requiredArtifacts"];
   approvalFingerprint: string;
   artifactIntegrity: SifEmbeddingGateStatus["approvalPacket"]["artifactIntegrity"];
@@ -65,6 +66,12 @@ function preflightLines(status: SifEmbeddingGateStatus) {
   ));
 }
 
+function operatorChecklistLines(status: SifEmbeddingGateStatus) {
+  return status.operatorGate.checklist.map((item) => (
+    `- ${item.status}: ${item.label} (${item.evidence})`
+  ));
+}
+
 export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus): SifEmbeddingApprovalPacket {
   const generatedAt = new Date().toISOString();
   const relatedHarness = {
@@ -91,6 +98,35 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     `- DB upload verified: ${boolText(status.learningLifecycle.dbUploadVerified)}`,
     `- Vector search usable: ${boolText(status.learningLifecycle.vectorSearchUsable)}`,
     `- Model fine-tuning performed: ${boolText(status.learningLifecycle.modelFineTuningPerformed)}`,
+    "",
+    "## Operator Gate Runbook",
+    "",
+    `- Status: ${status.operatorGate.status}`,
+    `- Approval question: ${status.operatorGate.approvalQuestion}`,
+    `- Migration artifact: \`${status.operatorGate.migrationArtifact.path}\``,
+    `- Migration sha256: ${status.operatorGate.migrationArtifact.sha256 || "not-recorded"}`,
+    "",
+    "Evidence:",
+    "",
+    ...status.operatorGate.evidenceSummary.map((item) => `- ${item}`),
+    "",
+    "Allowed before approval:",
+    "",
+    ...status.operatorGate.allowedBeforeApproval.map((item) => `- ${item}`),
+    "",
+    "Forbidden before approval:",
+    "",
+    ...status.operatorGate.forbiddenBeforeApproval.map((item) => `- ${item}`),
+    "",
+    "Checklist:",
+    "",
+    ...operatorChecklistLines(status),
+    "",
+    "After approval:",
+    "",
+    ...status.operatorGate.postApprovalSequence.map((item, index) => `${index + 1}. ${item}`),
+    "",
+    `Non-approval fallback: ${status.operatorGate.nonApprovalFallback}`,
     "",
     "## Canary Embedding Evidence",
     "",
@@ -171,6 +207,7 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     embeddingGenerated: status.embeddingGenerated,
     uploaded: status.uploaded,
     canary: status.canary,
+    operatorGate: status.operatorGate,
     requiredArtifacts: status.approvalPacket.requiredArtifacts,
     approvalFingerprint: status.approvalPacket.approvalFingerprint,
     artifactIntegrity: status.approvalPacket.artifactIntegrity,
