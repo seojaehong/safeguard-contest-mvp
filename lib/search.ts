@@ -1171,7 +1171,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           .join(" ");
         aiModeAppliedDetail = `AI_MODE=${aiMode} (Gemini 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"}) [${groupBrief}]`;
       } else {
-        aiModeAppliedDetail = `AI_MODE=${aiMode} 실패 → 템플릿 fallback`;
+        aiModeAppliedDetail = `AI_MODE=${aiMode} 문서 생성기 미응답 → 하네스 템플릿 보강`;
       }
     }
     const baseDeliverables = {
@@ -1227,8 +1227,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       missingEvidence: dbHarnessPacket.generationContract.missingEvidence,
       ontologyStatus: dbHarnessPacket.ontologyChecklist.status
     };
-    const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket, response.answer);
-    const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket, response.practicalPoints);
+    const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket);
+    const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket);
 
     const enriched: AskResponse = {
       ...response,

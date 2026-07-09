@@ -209,8 +209,8 @@ describe("DB harness packet", () => {
         detectedHazards: ["추락"]
       }]
     });
-    const answer = buildDbHarnessAnswer(packet, "일반 AI 답변");
-    const points = buildDbHarnessPracticalPoints(packet, ["일반 체크포인트"]);
+    const answer = buildDbHarnessAnswer(packet);
+    const points = buildDbHarnessPracticalPoints(packet);
 
     expect(answer).toContain("1) 하네스 판단");
     expect(answer).toContain("직접 근거: KOSHA 외벽 도장 추락 예방 지침");
@@ -220,6 +220,23 @@ describe("DB harness packet", () => {
     expect(answer).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
     expect(points[0]).toContain("문서 반영 전 확인");
     expect(points).toContain("위험성평가표에 같은 위험요인·조치·확인자를 연결");
+  });
+
+  it("does not fall back to generic LLM prose when the DB harness has no evidence", () => {
+    const packet = buildDbHarnessPacket({
+      question: "성수동 외벽 도장 작업",
+      references: []
+    });
+    const answer = buildDbHarnessAnswer(packet);
+    const points = buildDbHarnessPracticalPoints(packet);
+
+    expect(packet.generationContract.fallbackChainAllowed).toBe(false);
+    expect(answer).toContain("DB 하네스가 사용할 직접 근거");
+    expect(answer).toContain("보강 필요");
+    expect(answer).not.toContain("일반 AI 답변");
+    expect(answer).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
+    expect(points).toContain("위험성평가표 근거 보강 후 전파");
+    expect(points).not.toContain("일반 체크포인트");
   });
 });
 

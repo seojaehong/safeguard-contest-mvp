@@ -10,6 +10,7 @@ Sources:
 - `evaluation/ui-ux-browser-check-2026-07-09/knowledge-engine-design-review.md`
 - `evaluation/ui-ux-browser-check-2026-07-09/backend-vision-ontology-readiness-report.md`
 - `evaluation/ui-ux-browser-check-2026-07-09/page-taxonomy-and-density-audit.md`
+- `C:\Users\iceam\Downloads\SafeClaw 온톨로지 기반 LLM Wiki_ Human-in-the-loop 운영 계획.md`
 - Subagent reviews: Agent Architecture, Knowledge Engine, Product/DB Harness execution
 
 ## Final Position
@@ -39,6 +40,7 @@ OpenClaw, Codex, Hermes, or future agent runtimes may call SafeClaw tools, propo
 | SIF/KOSHA embeddings | Adopt with gate | Embeddings can improve retrieval quality, but only after migration/upload/runtime approval. | Keep corpus/preflight/runtime probe ready. Do not upload or enable vector search before approval. |
 | OpenClaw/OAuth operator surface | Adopt | This is useful for demonstrations and operator workflows. | Expose in `/settings/ai-connect`, `/ops/api`, `/knowledge`, and similar operator surfaces only. Do not expose to worker read-only screens. |
 | Workspace design direction | Adopt | Linear/Dieter Rams direction is appropriate when translated into a quiet safety workbench. | Keep workspace as design baseline: compact, typographically stronger, fewer simultaneous decisions, Day/Night supported. |
+| HITL knowledge promotion gate | Adopt | Draft knowledge should not reach runtime until a reviewer approves it and graph validation passes. | Use draft -> operator review -> validation -> DB upsert for future promotion work. Keep runtime reads on published graph only. |
 
 ## Defer
 
@@ -47,6 +49,7 @@ OpenClaw, Codex, Hermes, or future agent runtimes may call SafeClaw tools, propo
 | Hermes or similar worker PoC | Directionally valid, but not active-plan core work. It adds runtime, deployment, secret, and tenant-boundary risks. | MCP parity, no direct DB writes, tenant isolation tests, license/security review, rollback plan. |
 | Async document job layer | Needed for production scale, but it likely needs DB migration and operational design. | User-approved migration, job table design, idempotency key, retry state, terminal status, workpack linkage. |
 | Per-node Markdown wiki | Useful as an operator export, not as runtime truth. | Stable DB ontology, promotion queue, diff review UI, audit trail. |
+| Graph-as-Markdown wiki | Useful as an Operator Wiki Export, but not as the publication authority. | Generate it from DB/published ontology or approved candidates after promotion workflow exists. |
 | Knowledge promotion diff queue | The concept is right, but the approval UI and operations process are not complete yet. | Reviewer workflow, source evidence, approve/reject actions, rollback reference, audit fields. |
 | Durable DB storage for before/after photos and reports | The feature is correct, but schema/storage/RLS decisions require approval. | `workpack_improvements`, `report_snapshots`, `export_jobs`, storage policy, retention, share/read-confirmation rules. |
 | Full site-wide design unification | Direction is correct, but "all pages complete" is too broad for this immediate slice. | Six top-level app menu groups, hidden legacy routes, density cuts, shared shell cleanup, browser screenshots per route. |
@@ -61,10 +64,12 @@ OpenClaw, Codex, Hermes, or future agent runtimes may call SafeClaw tools, propo
 | Move SafeClaw domain tools into a Python/Hermes registry | It breaks the current MCP/tool ownership, tests, token scoping, and attribution flow. | Keep composite tools server-side in SafeClaw. External runtimes call them. |
 | Automatic JSONL-driven ontology/wiki/prompt/skill mutation | It bypasses review, tenant boundaries, and provenance controls in a safety domain. | Generate Knowledge Promotion Candidates and require human approval before corpus updates. |
 | Markdown wiki as production source of truth | Markdown is review/export surface, not runtime authority. | Runtime facts come from DB, MCP tools, and Evidence Harness packets. |
+| Published wiki merge as the main DB sync path | It makes Markdown the authority and reverses the current DB/MCP/Evidence Harness boundary. | Approve a Knowledge Promotion Candidate, validate graph provenance, upsert DB, then export Markdown/JSONL for review. |
 | Anonymization-only promotion of tenant history to public corpus | Anonymization is not enough to make private work history public knowledge. | Use explicit promotion review with source evidence, reviewer, timestamp, and rollback reference. |
 | Product claims implying actual model training | Current implementation is retrieval, embedding, evidence selection, and document rewriting, not model training. | Use "근거 하네스", "공식자료 기반 안전지식 베이스", "테넌트 작업 이력 메모리", and "승인된 개선사항 반영". |
 | OpenClaw/OAuth on worker-facing screens | Worker screens should stay focused on reading, language, and confirmation. | Keep OpenClaw/OAuth in operator settings only. |
 | Safety certainty claims | SafeClaw helps prepare and review documents, but it cannot claim guaranteed legal compliance or guaranteed safety. | Use reviewable wording: "제출 전 점검", "보완 필요", "현장 확인 필요". |
+| Zero-risk or perfect-governance language | Published-only gates reduce exposure risk but do not eliminate source, review, or field-context errors. | Say "미검토 항목 노출을 줄인다", "승인 이력과 근거 기록을 남긴다", and "원문/현장 확인이 필요하다". |
 
 ## Immediate Priority
 
