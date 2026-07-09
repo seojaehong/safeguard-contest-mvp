@@ -275,6 +275,19 @@ function compactContent(row: SheetRow | undefined, fallback: string) {
   return row.content || row.item || fallback;
 }
 
+function previewRowItem(row: SheetRow, fallback: string) {
+  const item = row.item.trim();
+  if (item && !/^\d+[-\s]*$/.test(item)) return item;
+
+  const content = compactContent(row, fallback).replace(/\s+/g, " ").trim();
+  const firstClause = content
+    .split(/[.。]/)[0]
+    .split(/[,(（]/)[0]
+    .trim();
+  const label = firstClause || content || item || fallback;
+  return label.length > 34 ? `${label.slice(0, 34)}...` : label;
+}
+
 function buildTbmBridgeRows(data: AskResponse, riskRows: SheetRow[]) {
   const riskItems = findRows(riskRows, ["위험", "추락", "전도", "충돌", "끼임", "화재", "중독", "노출"], 4);
   const weatherSignals = data.externalData.weather.actions.length
@@ -1708,10 +1721,10 @@ function SafetyDocumentPreview({
     ? { primary: "유해·위험요인", action: "재해형태 / 감소대책", confirm: "등급 / 담당" }
     : profile.layout === "workPlan"
       ? { primary: "작업순서/대상", action: "작업방법 / 안전관리대책", confirm: "확인자" }
-      : profile.layout === "permit"
+    : profile.layout === "permit"
         ? { primary: "허가 항목", action: "허가조건 / 첨부서류", confirm: "적합/보완" }
         : profile.layout === "tbmBriefing" || profile.layout === "tbmLog"
-          ? { primary: "공유 항목", action: "전달 내용 / 작업중지 기준", confirm: "복창/서명" }
+          ? { primary: "전달 항목", action: "전달 내용 / 작업중지 기준", confirm: "복창/서명" }
           : { primary: profile.primaryColumn, action: profile.actionColumn, confirm: "확인/담당" };
 
   return (
@@ -1789,7 +1802,7 @@ function SafetyDocumentPreview({
                   {group.rows.slice(0, 4).map((row, index) => (
                     <tr key={`${group.section}-${row.item}-${index}`}>
                       <td>{index + 1}</td>
-                      <td>{row.item}</td>
+                      <td>{previewRowItem(row, tableLabels.primary)}</td>
                       <td>{row.content}</td>
                       <td>□ 확인<br />담당: ___</td>
                     </tr>
@@ -2451,13 +2464,12 @@ export function WorkpackEditor({
             편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF(브라우저 인쇄)·XLS(HTML 호환)·HWPX 제출형 초안으로 출력할 수 있습니다.
           </p>
         ) : null}
-        <SafetyDocumentPreview
-          title={selected.title}
-          rows={selectedRows}
-          scenario={data.scenario}
-          profile={selectedFormProfile}
-          data={data}
-          riskRows={riskAssessmentRows}
+        <textarea
+          ref={textareaRef}
+          className="document-textarea"
+          value={selectedText}
+          onChange={(event) => updateValue(event.target.value)}
+          aria-label={`${selected.title} 편집`}
         />
         <div className="selected-rubric-strip" aria-label={`${selected.title} 제출 전 점검`}>
           {selectedRubricItems.length ? selectedRubricItems.map((item) => {
@@ -2544,13 +2556,18 @@ export function WorkpackEditor({
             </div>
           )}
         </div>
-        <textarea
-          ref={textareaRef}
-          className="document-textarea"
-          value={selectedText}
-          onChange={(event) => updateValue(event.target.value)}
-          aria-label={`${selected.title} 편집`}
-        />
+        <details className="submission-preview-panel">
+          <summary>제출 양식 미리보기</summary>
+          <p className="muted small">다운로드와 출력용 표 서식입니다. 화면 편집은 위 문서 본문에서 먼저 처리하세요.</p>
+          <SafetyDocumentPreview
+            title={selected.title}
+            rows={selectedRows}
+            scenario={data.scenario}
+            profile={selectedFormProfile}
+            data={data}
+            riskRows={riskAssessmentRows}
+          />
+        </details>
       </div>
     </section>
   );

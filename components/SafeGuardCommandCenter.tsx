@@ -34,6 +34,7 @@ import {
   type WorkspacePage,
   type WorkspaceStepStatus
 } from "@/lib/workspace-pages";
+import { assessWorkpackReadiness, type WorkpackReadiness } from "@/lib/workpack-readiness";
 
 type SafeGuardCommandCenterProps = {
   examples: FieldExample[];
@@ -189,8 +190,9 @@ const primaryDocumentKeys = new Set<DocumentKey>([
   "tbmLogDraft"
 ]);
 const focusDocumentItems = outputItems.filter((item) => primaryDocumentKeys.has(item.key));
-function statusCopy(state: GenerationState) {
+function statusCopy(state: GenerationState, readiness?: WorkpackReadiness | null) {
   if (state === "generating") return "문서 생성 중";
+  if (state === "ready" && readiness && !readiness.canShare) return "공유 전 보완";
   if (state === "ready") return "문서팩 준비됨";
   if (state === "error") return "연결 점검 필요";
   return "작업 입력 대기";
@@ -237,8 +239,9 @@ function elapsedLabel(state: GenerationState) {
   return "대기";
 }
 
-function operationalStatus(data: AskResponse | null, state: GenerationState) {
+function operationalStatus(data: AskResponse | null, state: GenerationState, readiness?: WorkpackReadiness | null) {
   if (state === "error") return "연결 점검 필요";
+  if (data && readiness && !readiness.canShare) return readiness.reasons[0] || readiness.summary;
   if (data) return data.status.summary || "근거 연결됨";
   return "입력 대기";
 }
@@ -396,6 +399,13 @@ function readinessClass(tone: ReadinessTone) {
   return "pending";
 }
 
+function stageStatusCopy(tone: ReadinessTone, state: GenerationState) {
+  if (tone === "ready") return "완료";
+  if (tone === "warn") return "검수 필요";
+  if (state === "generating") return "진행";
+  return "대기";
+}
+
 function modeTone(mode: IntegrationMode | "unconfigured" | undefined): ReadinessTone {
   if (mode === "live") return "ready";
   if (mode === "fallback" || mode === "mock" || mode === "unconfigured") return "warn";
@@ -408,6 +418,15 @@ function modeCopy(mode: IntegrationMode | "unconfigured" | undefined) {
   if (mode === "mock") return "예시 기준";
   if (mode === "unconfigured") return "연결 대기";
   return "조회 예정";
+}
+
+function workpackHasReviewWarnings(data: AskResponse | null) {
+  if (!data) return false;
+  const qa = data.ontologyQa?.result;
+  const missingControls = qa?.reviewable ? qa.missing.controls.length : 0;
+  const qualityBlocked = data.qualityContract ? data.qualityContract.overall !== "ready" : false;
+  const harnessMissing = Boolean(data.dbHarness?.summary.missingEvidence.length);
+  return missingControls > 0 || qualityBlocked || harnessMissing;
 }
 
 function buildReadinessRail(
@@ -476,6 +495,12 @@ function buildReadinessRail(
 function buildGenerationStages(data: AskResponse | null, state: GenerationState): GenerationStage[] {
   const generating = state === "generating";
   const generated = Boolean(data);
+  const qa = data?.ontologyQa?.result;
+  const missingControls = qa?.reviewable ? qa.missing.controls.length : 0;
+  const qualityReady = data?.qualityContract?.overall === "ready";
+  const harnessReady = data?.dbHarness
+    ? data.dbHarness.summary.missingEvidence.length === 0
+    : generated;
   return [
     {
       label: "기상 확인",
@@ -494,13 +519,21 @@ function buildGenerationStages(data: AskResponse | null, state: GenerationState)
     },
     {
       label: "안전조치 검수",
-      detail: generated ? "누락 조치 대조" : "작업유형 그래프 준비",
-      tone: generated ? "ready" : generating ? "pending" : "pending"
+      detail: generated
+        ? missingControls
+          ? `누락 조치 ${missingControls}건 확인 필요`
+          : qualityReady ? "누락 조치 대조 완료" : "품질 보강 항목 확인 필요"
+        : "작업유형 그래프 준비",
+      tone: generated
+        ? missingControls || !qualityReady ? "warn" : "ready"
+        : generating ? "pending" : "pending"
     },
     {
       label: "문서 생성",
-      detail: generated ? "위험성평가/TBM 준비" : "핵심 문서 작성",
-      tone: generated ? "ready" : generating ? "pending" : "pending"
+      detail: generated
+        ? harnessReady ? "위험성평가/TBM 준비" : "근거 보강 후 전파 권장"
+        : "핵심 문서 작성",
+      tone: generated ? harnessReady ? "ready" : "warn" : generating ? "pending" : "pending"
     }
   ];
 }
@@ -1532,6 +1565,8 @@ export function SafeGuardCommandCenter({
   const selectedDocumentBody = data ? (data.deliverables as Record<string, unknown>)[selectedOutputItem.key] : "";
   const readinessRail = buildReadinessRail(data, state, liveWeather, isWeatherLoading);
   const generationStages = buildGenerationStages(data, state);
+  const workpackReadiness = data ? assessWorkpackReadiness(data) : null;
+  const hasReviewWarnings = workpackReadiness ? !workpackReadiness.canShare : workpackHasReviewWarnings(data);
   const documentEvidence = selectedDocumentEvidence(data, selectedOutputItem.key);
   const supportingDocumentItems = outputItems.filter((item) => !primaryDocumentKeys.has(item.key));
   const photoAnalysisCandidate = buildPhotoAnalysisCandidate();
@@ -1581,8 +1616,8 @@ export function SafeGuardCommandCenter({
           </button>
         </div>
         <div className="topbar-status" aria-live="polite">
-          <span>{statusCopy(state)}</span>
-          <b>{operationalStatus(data, state)}</b>
+          <span>{statusCopy(state, workpackReadiness)}</span>
+          <b>{operationalStatus(data, state, workpackReadiness)}</b>
           <Link href="/documents" className="topbar-v2-link">문서팩</Link>
         </div>
       </header>
@@ -1892,16 +1927,16 @@ export function SafeGuardCommandCenter({
                 </div>
               </div>
             ) : null}
-            <details className="document-check-details" open={busy}>
+            <details className="document-check-details" open={busy || hasReviewWarnings}>
               <summary>
                 <span>제출 전 점검 흐름</span>
-                <strong>{busy ? "진행 중" : data ? "완료" : "생성 후 확인"}</strong>
+                <strong>{busy ? "진행 중" : data ? hasReviewWarnings ? "검수 필요" : "완료" : "생성 후 확인"}</strong>
               </summary>
               <div className="document-review-status-strip" aria-label="문서 검수 상태">
                 {generationStages.map((stage) => (
                   <article key={stage.label} className={readinessClass(stage.tone)}>
                     <span>{stage.label}</span>
-                    <strong>{stage.tone === "ready" ? "완료" : state === "generating" ? "진행" : "대기"}</strong>
+                    <strong>{stageStatusCopy(stage.tone, state)}</strong>
                   </article>
                 ))}
               </div>
@@ -2034,6 +2069,17 @@ export function SafeGuardCommandCenter({
               <strong>권한·확인·증빙 워크플로</strong>
               <p>공유 범위, 작업자 권한, 확인 상태, 저장될 근거를 전송 전에 같은 화면에서 검토합니다.</p>
             </div>
+            {workpackReadiness && !workpackReadiness.canShare ? (
+              <section className="share-readiness-warning" aria-label="공유 전 보완 항목">
+                <span>공유 전 보완</span>
+                <strong>{workpackReadiness.summary}</strong>
+                <ul>
+                  {workpackReadiness.reasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
             <div className="share-session-grid">
               <section>
                 <span>Permission</span>
@@ -2049,9 +2095,9 @@ export function SafeGuardCommandCenter({
               </section>
               <section>
                 <span>Acknowledgment</span>
-                <strong>{data ? "확인 버튼 준비" : "문서 생성 후 활성화"}</strong>
-                <p>열람 전용 화면의 확인 기록을 TBM·교육 확인 후보로 연결합니다.</p>
-                <small>판정 문구 없이 이력으로 보관</small>
+                <strong>{workpackReadiness && !workpackReadiness.canShare ? "공유 전 보완 필요" : data ? "확인 버튼 준비" : "문서 생성 후 활성화"}</strong>
+                <p>{workpackReadiness && !workpackReadiness.canShare ? "검수·근거·결재 상태를 정리한 뒤 확인 세션을 엽니다." : "열람 전용 화면의 확인 기록을 TBM·교육 확인 후보로 연결합니다."}</p>
+                <small>{workpackReadiness && !workpackReadiness.canShare ? "일반 전송 잠금" : "판정 문구 없이 이력으로 보관"}</small>
               </section>
               <section>
                 <span>Evidence</span>
@@ -2192,7 +2238,7 @@ export function SafeGuardCommandCenter({
             <article>
               <span>연결 상태</span>
               <strong>{data.status.summary}</strong>
-              <small className="muted">{statusDetailCopy(state)}</small>
+              <small className="muted">{workpackReadiness && !workpackReadiness.canShare ? workpackReadiness.summary : statusDetailCopy(state)}</small>
             </article>
           </section>
           <section className="action-strip">
@@ -2215,6 +2261,7 @@ export function SafeGuardCommandCenter({
             data={data}
             editorFocusToken={editorFocusToken}
             requestedDocumentKey={requestedDocumentKey}
+            readiness={workpackReadiness || undefined}
           />
         </>
       ) : null}

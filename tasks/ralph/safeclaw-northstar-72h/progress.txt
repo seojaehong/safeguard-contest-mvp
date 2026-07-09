@@ -1,0 +1,11 @@
+## 2026-07-09 Northstar reset
+- Changed: created Ralph run folder for the 72h commercial-product push.
+- Verified: pending.
+- Learned: the work is not a UI hotfix; the product must make DB/SIF/Vision/Ontology/Learning visibly change workpack output and sharing readiness.
+- Next: N1 separate generated vs share-ready state with a failing test first.
+
+## 2026-07-09 N1-N2
+- Changed: added `lib/workpack-readiness.ts`, wired readiness into workspace topbar and share panel, strengthened DB harness reflection into risk assessment/TBM/photo evidence deliverables, moved edit flow toward textarea-first workspace surface.
+- Verified: `npm.cmd test -- tests\workpack-readiness.test.ts tests\commercial-harness.test.ts tests\quality-contract.test.ts tests\operation-improvements.test.ts tests\photo-vision-analysis.test.ts`; `npm.cmd run typecheck`; `npm.cmd run build`; local browser probe for `/workspace`.
+- Learned: SIF embedding corpus/approval gate is prepared, but Supabase vector table/RPC/upload are still approval-gated and not executed.
+- Next: N3 SIF embedding migration approval packet, then N4 deterministic photo hazard rows and N5 workpack operation graph explorer.

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AskResponse } from "@/lib/types";
+import type { WorkpackReadiness } from "@/lib/workpack-readiness";
 import type { RecipientSuggestion, WorkerDispatchTarget } from "@/lib/workspace";
 
 type Channel = "email" | "sms" | "kakao" | "band";
@@ -40,6 +41,7 @@ type WorkflowSharePanelProps = {
   authToken?: string;
   workpackId?: string | null;
   ensureWorkpackSaved?: () => Promise<string | null>;
+  readiness?: WorkpackReadiness;
 };
 
 const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
@@ -176,7 +178,8 @@ export function WorkflowSharePanel({
   targetWorkers = [],
   authToken,
   workpackId,
-  ensureWorkpackSaved
+  ensureWorkpackSaved,
+  readiness
 }: WorkflowSharePanelProps) {
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(["email", "sms"]);
   const [selectedMessageTarget, setSelectedMessageTarget] = useState<MessageTarget>("manager");
@@ -329,6 +332,8 @@ export function WorkflowSharePanel({
     : targetWorkers.length
       ? "열람 확인 대기"
       : "수신자 지정 대기";
+  const shareBlocked = Boolean(readiness && !readiness.canShare);
+  const shareDisabledReason = readiness?.reasons.join(" · ") || "";
 
   return (
     <article className="share-panel workflow-panel" id="dispatch">
@@ -340,7 +345,7 @@ export function WorkflowSharePanel({
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태">
           <span>{storageReady ? "workpack linked" : "local review"}</span>
-          <strong>{acknowledgmentStatus}</strong>
+          <strong>{shareBlocked ? readiness?.summary : acknowledgmentStatus}</strong>
         </div>
       </header>
 
@@ -362,8 +367,8 @@ export function WorkflowSharePanel({
         </section>
         <section>
           <span>Acknowledgment</span>
-          <strong>{acknowledgmentStatus}</strong>
-          <p>열람·확인 기록은 TBM·교육 확인 후보로 보관합니다.</p>
+          <strong>{shareBlocked ? "공유 전 보완" : acknowledgmentStatus}</strong>
+          <p>{shareBlocked ? "검수·근거·결재 상태를 먼저 정리한 뒤 전파합니다." : "열람·확인 기록은 TBM·교육 확인 후보로 보관합니다."}</p>
         </section>
       </div>
 
@@ -477,6 +482,12 @@ export function WorkflowSharePanel({
         </p>
       ) : null}
 
+      {shareBlocked ? (
+        <p className="share-inline-note warn">
+          {shareDisabledReason}
+        </p>
+      ) : null}
+
       <section className="acknowledgment-ledger" aria-label="확인 상태와 저장 증빙">
         <article>
           <span>확인 대상</span>
@@ -485,8 +496,8 @@ export function WorkflowSharePanel({
         </article>
         <article>
           <span>현재 상태</span>
-          <strong>{acknowledgmentStatus}</strong>
-          <small>열람 확인은 전파 결과와 분리해 검토</small>
+          <strong>{shareBlocked ? readiness?.summary : acknowledgmentStatus}</strong>
+          <small>{shareBlocked ? "검수 통과 전에는 일반 전송을 잠급니다." : "열람 확인은 전파 결과와 분리해 검토"}</small>
         </article>
         <article className={storageReady ? "ready" : "warn"}>
           <span>저장 증빙</span>
@@ -512,9 +523,9 @@ export function WorkflowSharePanel({
           type="button"
           className="button"
           onClick={() => setIsConfirming(true)}
-          disabled={isSending || selectedChannels.length === 0 || dispatchRecipients.length === 0}
+          disabled={shareBlocked || isSending || selectedChannels.length === 0 || dispatchRecipients.length === 0}
         >
-          {isSending ? "전파 요청 중" : "전송 확인"}
+          {isSending ? "전파 요청 중" : shareBlocked ? "공유 전 보완 필요" : "전송 확인"}
         </button>
         <button type="button" className="button secondary" onClick={copyMessage}>메시지 복사</button>
       </div>
@@ -551,13 +562,18 @@ export function WorkflowSharePanel({
           <p className="channel-readiness-note">
             이 확인 단계에서 전송되는 채널은 {activeChannelLabel}입니다. 카카오 알림톡은 승인 채널과 템플릿 설정이 없으면 채널별 결과에 설정 필요로 표시됩니다.
           </p>
+          {shareBlocked ? (
+            <p className="channel-readiness-note">
+              공유 전 보완 항목: {shareDisabledReason}
+            </p>
+          ) : null}
           {selectedMessageTarget !== "manager" ? (
             <p className="channel-readiness-note">
               외국인 근로자 전송본입니다. 현장 통역 또는 해당 언어 가능자가 문구와 이해 여부를 확인한 뒤 선택한 채널로 전송합니다.
             </p>
           ) : null}
           <div className="command-actions">
-            <button type="button" className="button" onClick={dispatchWorkflow} disabled={isSending}>
+            <button type="button" className="button" onClick={dispatchWorkflow} disabled={shareBlocked || isSending}>
               {isSending ? "전파 요청 중" : "지금 전송"}
             </button>
             <button type="button" className="button secondary" onClick={() => setIsConfirming(false)} disabled={isSending}>

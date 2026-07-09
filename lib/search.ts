@@ -31,6 +31,7 @@ import {
   buildDbHarnessPacket,
   buildDbHarnessPracticalPoints,
   buildHarnessPromptContext,
+  type DbHarnessPacket,
   type HarnessMemoryInput
 } from "./db-harness";
 
@@ -822,7 +823,99 @@ function summarizeDbHarnessPacket(packet: ReturnType<typeof buildDbHarnessPacket
   };
 }
 
-function attachTemplateHarness(response: AskResponse, input: {
+function appendUniqueSection(text: string, heading: string, lines: string[]) {
+  const body = text.trim();
+  if (!lines.length || body.includes(heading)) return text;
+  return `${body}\n\n${heading}\n${lines.map((line) => `- ${line}`).join("\n")}`.trim();
+}
+
+function buildDbHarnessReflectionLines(packet: DbHarnessPacket) {
+  const improvementLines = packet.improvementMemory.slice(0, 3).map((item) => {
+    const photoLabel = item.sourceType === "photo_analysis"
+      ? item.photoPairAttached
+        ? "전후 사진 분석"
+        : "사진 분석"
+      : "개선 이력";
+    const visionSummary = [
+      item.visionUserLabel,
+      item.visionSummary || item.observedImprovement,
+      item.detectedHazards?.length ? `위험요인 ${item.detectedHazards.slice(0, 3).join(", ")}` : "",
+      item.ocrText ? `OCR ${item.ocrText}` : "",
+      item.visionEvidence
+    ].filter(Boolean).join(" / ");
+    return `${item.taskLabel} / ${item.hazardLabel}: ${item.improvementText}${visionSummary ? ` (${photoLabel}: ${visionSummary})` : ` (${photoLabel})`}`;
+  });
+  const workpackLines = packet.workpackMemory.slice(0, 2).map((item) =>
+    `${item.generatedAt} 유사 작업: ${item.question} / 상태 ${item.statusLabel}`
+  );
+  const missingLines = packet.generationContract.missingEvidence.slice(0, 3).map((item) =>
+    `공유 전 보완: ${item}`
+  );
+  return {
+    improvementLines,
+    workpackLines,
+    missingLines,
+    coreLines: [...improvementLines, ...workpackLines, ...missingLines]
+  };
+}
+
+function reflectDbHarnessInDeliverables(response: AskResponse, packet: DbHarnessPacket): AskResponse {
+  const { improvementLines, workpackLines, missingLines, coreLines } = buildDbHarnessReflectionLines(packet);
+  if (!coreLines.length) return response;
+
+  const riskLines = [
+    ...improvementLines.map((line) => `위험성평가 반영: ${line}`),
+    ...workpackLines.map((line) => `유사 작업 이력: ${line}`),
+    ...missingLines
+  ];
+  const tbmLines = [
+    ...improvementLines.map((line) => `TBM 전달 항목: ${line}`),
+    ...workpackLines.map((line) => `이전 작업 재확인: ${line}`),
+    ...missingLines
+  ];
+  const photoLines = [
+    ...packet.improvementMemory.slice(0, 5).map((item) => {
+      const attached = item.photoPairAttached ? "Before/After 사진 첨부" : "사진 또는 메모 기반";
+      const detected = item.detectedHazards?.length ? ` / 감지 위험: ${item.detectedHazards.slice(0, 3).join(", ")}` : "";
+      const observed = item.observedImprovement ? ` / 확인 개선: ${item.observedImprovement}` : "";
+      const sourcePhotos = item.sourcePhotoNames?.length ? ` / 사진: ${item.sourcePhotoNames.slice(0, 5).join(", ")}` : "";
+      const ocr = item.ocrText ? ` / OCR: ${item.ocrText}` : "";
+      const siteSignals = item.siteSignals?.length ? ` / 현장 신호: ${item.siteSignals.slice(0, 4).join(", ")}` : "";
+      const evidence = item.visionEvidence ? ` / 분석 근거: ${item.visionEvidence}` : "";
+      return `${attached}: ${item.taskLabel} - ${item.improvementText}${sourcePhotos}${detected}${observed}${ocr}${siteSignals}${evidence}`;
+    }),
+    ...missingLines
+  ];
+
+  return {
+    ...response,
+    deliverables: {
+      ...response.deliverables,
+      riskAssessmentDraft: appendUniqueSection(
+        response.deliverables.riskAssessmentDraft,
+        "[DB 하네스 반영 - 위험성평가]",
+        riskLines
+      ),
+      tbmBriefing: appendUniqueSection(
+        response.deliverables.tbmBriefing,
+        "[DB 하네스 반영 - TBM]",
+        tbmLines
+      ),
+      tbmLogDraft: appendUniqueSection(
+        response.deliverables.tbmLogDraft,
+        "[DB 하네스 반영 - 확인 기록]",
+        tbmLines
+      ),
+      photoEvidenceDraft: appendUniqueSection(
+        response.deliverables.photoEvidenceDraft,
+        "[사진·개선사항 반영]",
+        photoLines.length ? photoLines : coreLines
+      )
+    }
+  };
+}
+
+export function attachDbHarnessFallback(response: AskResponse, input: {
   question: string;
   harnessMemory: Required<HarnessMemoryInput>;
 }): AskResponse {
@@ -833,8 +926,9 @@ function attachTemplateHarness(response: AskResponse, input: {
     workpackMemory: input.harnessMemory.workpackMemory
   });
   const promptContext = buildHarnessPromptContext(packet);
+  const reflectedResponse = reflectDbHarnessInDeliverables(response, packet);
   return attachQualityContract({
-    ...response,
+    ...reflectedResponse,
     answer: buildDbHarnessAnswer(packet),
     practicalPoints: buildDbHarnessPracticalPoints(packet),
     dbHarness: {
@@ -844,7 +938,7 @@ function attachTemplateHarness(response: AskResponse, input: {
     },
     status: {
       ...response.status,
-      detail: `${response.status.detail} / DB 하네스 템플릿 계약: ${packet.ontologyChecklist.status}`
+      detail: `${response.status.detail} / DB 하네스 계약: ${packet.ontologyChecklist.status}`
     }
   });
 }
@@ -862,7 +956,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 
   // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
   if (aiMode === "template") {
-    return attachTemplateHarness(
+    return attachDbHarnessFallback(
       buildMockAskResponse(
         question,
         mockSearchResults.slice(0, 4),
@@ -1437,11 +1531,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       sourceMix
     };
 
-    const withMcpDetail: AskResponse = !koreanLawMcpCount ? enriched : {
-      ...enriched,
+    const reflectedEnriched = reflectDbHarnessInDeliverables(enriched, dbHarnessPacket);
+    const withMcpDetail: AskResponse = !koreanLawMcpCount ? reflectedEnriched : {
+      ...reflectedEnriched,
       status: {
-        ...enriched.status,
-        detail: `${enriched.status.detail} / korean-law-mcp 근거 ${koreanLawMcpCount}건 보강`
+        ...reflectedEnriched.status,
+        detail: `${reflectedEnriched.status.detail} / korean-law-mcp 근거 ${koreanLawMcpCount}건 보강`
       }
     };
 
@@ -1449,11 +1544,14 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     return attachQualityContract(withOntologyQa);
   } catch (error) {
     const message = error instanceof Error ? error.message : "알 수 없는 오류";
-    return buildMockAskResponse(
-      question,
-      mockSearchResults.slice(0, 4),
-      "fallback",
-      `일부 외부 연결을 확인하지 못해 규정 기반 문서팩으로 전환했습니다. 사유: ${message}`
+    return attachDbHarnessFallback(
+      buildMockAskResponse(
+        question,
+        mockSearchResults.slice(0, 4),
+        "fallback",
+        `일부 외부 연결을 확인하지 못해 규정 기반 문서팩으로 전환했습니다. 사유: ${message}`
+      ),
+      { question, harnessMemory }
     );
   }
 }
