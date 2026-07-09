@@ -321,7 +321,7 @@ function deriveSafetyReferenceHazard(item: SafetyReferenceItem): string {
   if (riskTag && subject) return `${riskTag} 위험: ${subject}`;
   if (riskTag) return `${riskTag} 위험: 현장 조치 미확인`;
   const prefix = [category, subcategory].filter(Boolean).join("·");
-  if (prefix && subject) return `${prefix} 관련 위험: ${subject}`;
+  if (prefix && subject && FIELD_RISK_KEYWORD_PATTERN.test(prefix)) return `${prefix} 관련 위험: ${subject}`;
   if (subject) return `${subject} 관련 위험`;
   return "DB 하네스 근거 기반 위험요인";
 }
