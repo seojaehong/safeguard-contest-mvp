@@ -377,6 +377,16 @@ describe("runAsk DB harness mode", () => {
         controls: ["작업 전 방호조치 사진 확인", "TBM에서 작업중지 기준 복창"],
         evidence_role: "supporting",
         retrieval_source: "hybrid"
+      }),
+      reference({
+        id: "generic-kosha-1",
+        item_type: "technical-guideline",
+        category: "산업안전일반분야",
+        subcategory: "기술지침",
+        title: "G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+        controls: ["작업 전 유해·위험요인 확인", "관리감독자 확인 후 작업 시작"],
+        evidence_role: "supporting",
+        retrieval_source: "rest"
       })
     ], "오후 강풍 예보");
 
@@ -395,6 +405,8 @@ describe("runAsk DB harness mode", () => {
     ]));
     expect(rows.some((row) => row.evidenceRefs?.includes("외벽 도장 중 이동식 비계 추락 사례"))).toBe(true);
     expect(rows.every((row) => !/^[A-Z]-[A-Z]-\d{1,4}-\d{4}/.test(row.hazard))).toBe(true);
+    expect(rows.every((row) => !/기술지원규정|기술지침/.test(row.hazard))).toBe(true);
+    expect(rows.some((row) => row.hazard.includes("유해·위험요인 미확인"))).toBe(true);
   });
 
   it("keeps template mode inside the DB harness contract without generic LLM fallback prose", async () => {
