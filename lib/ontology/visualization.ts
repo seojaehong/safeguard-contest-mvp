@@ -13,9 +13,13 @@ export type OntologyHoverCard = {
   id: string;
   title: string;
   subtitle: string;
+  excerpt: string | null;
   evidenceCount: number;
   related: Array<{
     rel: string;
+    direction: "outgoing" | "incoming";
+    sourceId: string;
+    sourceLabel: string;
     targetId: string;
     targetLabel: string;
   }>;
@@ -101,20 +105,39 @@ export function buildOntologyVisualizationModel(graph: OntologyGraph): OntologyV
     degreeById.set(item.id, item.incomingCount + item.outgoingCount);
   }
 
-  const hoverCards = graph.nodes.map((node) => ({
-    id: node.node_id,
-    title: node.label,
-    subtitle: kindLabel(node.kind),
-    evidenceCount: node.cited_uids.length,
-    related: (outgoing.get(node.node_id) || []).map((edge) => {
+  const hoverCards = graph.nodes.map((node) => {
+    const outgoingRelated = (outgoing.get(node.node_id) || []).map((edge) => {
       const target = nodeMap.get(edge.dst);
       return {
         rel: edge.rel,
+        direction: "outgoing" as const,
+        sourceId: edge.src,
+        sourceLabel: node.label,
         targetId: edge.dst,
         targetLabel: target?.label || edge.dst
       };
-    })
-  }));
+    });
+    const incomingRelated = (incoming.get(node.node_id) || []).map((edge) => {
+      const source = nodeMap.get(edge.src);
+      return {
+        rel: edge.rel,
+        direction: "incoming" as const,
+        sourceId: edge.src,
+        sourceLabel: source?.label || edge.src,
+        targetId: edge.dst,
+        targetLabel: node.label
+      };
+    });
+
+    return {
+      id: node.node_id,
+      title: node.label,
+      subtitle: kindLabel(node.kind),
+      excerpt: node.text_excerpt,
+      evidenceCount: node.cited_uids.length,
+      related: [...outgoingRelated, ...incomingRelated]
+    };
+  });
 
   const mapNodes = [...graph.nodes]
     .sort((a, b) => {
