@@ -1,0 +1,44 @@
+[
+  {
+    "name": "postdeploy-day-1170x365-dpr175",
+    "pass": true,
+    "copyDisplay": "none",
+    "sourceStatusDisplay": "none",
+    "textareaBottom": 233,
+    "composerTop": 251,
+    "submitBottom": 299,
+    "viewportHeight": 365,
+    "scrollWidth": 1170,
+    "innerWidth": 1170,
+    "warnCount": 0,
+    "errorCount": 0
+  },
+  {
+    "name": "postdeploy-day-1024x319-dpr2",
+    "pass": true,
+    "copyDisplay": "none",
+    "sourceStatusDisplay": "none",
+    "textareaBottom": 197,
+    "composerTop": 211,
+    "submitBottom": 251,
+    "viewportHeight": 319,
+    "scrollWidth": 1024,
+    "innerWidth": 1024,
+    "warnCount": 0,
+    "errorCount": 0
+  },
+  {
+    "name": "postdeploy-mobile-390x844-dpr3",
+    "pass": true,
+    "copyDisplay": "block",
+    "sourceStatusDisplay": "none",
+    "textareaBottom": 596,
+    "composerTop": 668,
+    "submitBottom": 788,
+    "viewportHeight": 844,
+    "scrollWidth": 390,
+    "innerWidth": 390,
+    "warnCount": 0,
+    "errorCount": 0
+  }
+]
