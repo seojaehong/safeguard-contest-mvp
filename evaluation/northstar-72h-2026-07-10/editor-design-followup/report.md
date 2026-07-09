@@ -2,6 +2,8 @@
 
 Date: 2026-07-10 KST
 Branch: `feature/backend-harness-gate`
+Code commit: `09778df`
+Postdeploy evidence commit: `0e45a7b`
 
 ## Issue
 
@@ -56,6 +58,11 @@ After:
 - `documents-editor-preview-open-after.png`
 - `documents-editor-preview-after-metrics.json`
 
+Production:
+
+- `postdeploy-documents-editor-preview-open.png`
+- `postdeploy-documents-editor-preview-metrics.json`
+
 After metrics:
 
 - `scrollWidth` equals `viewportWidth` at 1440px.
@@ -65,6 +72,17 @@ After metrics:
 - section title radius is `8px`.
 - table header background is `rgb(244, 245, 246)`.
 - console warning/error count is zero.
+
+Postdeploy checks:
+
+- page loaded: true
+- horizontal scroll: none
+- preview visible: true
+- preview surface: white
+- table wrapper: rounded
+- section title: neutral chip
+- table header: neutral
+- console warning/error count: zero
 
 ## Current Read
 
