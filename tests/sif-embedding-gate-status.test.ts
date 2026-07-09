@@ -75,6 +75,7 @@ describe("SIF embedding gate status", () => {
       scope: "sif_embedding_next_approval_gate",
       decisionCount: 6
     });
+    expect(status.approvalPacket.approvalFingerprint).toHaveLength(64);
     expect(status.approvalPacket.decisions[0]).toContain("SIF-only embedding migration");
     expect(status.approvalPacket.requiredArtifacts.map((artifact) => artifact.path)).toEqual([
       "evaluation\\sif-embedding-gate\\report.json",
@@ -82,6 +83,13 @@ describe("SIF embedding gate status", () => {
       "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
       "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
     ]);
+    expect(status.approvalPacket.artifactIntegrity).toHaveLength(4);
+    expect(status.approvalPacket.artifactIntegrity.every((artifact) => artifact.exists)).toBe(true);
+    expect(status.approvalPacket.artifactIntegrity.find((artifact) => artifact.label === "SIF corpus JSONL")).toMatchObject({
+      contentHash: status.corpus.corpusHash,
+      recordCount: 6032
+    });
+    expect(status.approvalPacket.artifactIntegrity.find((artifact) => artifact.label === "SIF-only migration")?.sha256).toHaveLength(64);
     expect(status.approvalPacket.safetyLocks.every((lock) => lock.locked)).toBe(true);
     expect(status.approvalSteps.map((step) => step.id)).toEqual(["migration", "embedding", "upload", "vector"]);
     expect(status.approvalSteps[0]).toMatchObject({

@@ -13,6 +13,8 @@ export type SifEmbeddingApprovalPacket = {
   embeddingGenerated: boolean;
   uploaded: boolean;
   requiredArtifacts: SifEmbeddingGateStatus["approvalPacket"]["requiredArtifacts"];
+  approvalFingerprint: string;
+  artifactIntegrity: SifEmbeddingGateStatus["approvalPacket"]["artifactIntegrity"];
   relatedHarness: {
     visionEndpoint: "/api/input-photos/hazard-analysis";
     improvementEndpointPattern: "/api/workpacks/[id]/improvements";
@@ -36,6 +38,18 @@ function artifactLines(status: SifEmbeddingGateStatus) {
   return status.approvalPacket.requiredArtifacts.map((artifact) => (
     `- ${artifact.label}: \`${artifact.path}\` (${artifact.role})`
   ));
+}
+
+function integrityLines(status: SifEmbeddingGateStatus) {
+  return status.approvalPacket.artifactIntegrity.map((artifact) => {
+    const hash = artifact.sha256
+      ? `sha256=${artifact.sha256}`
+      : artifact.contentHash
+        ? `contentHash=${artifact.contentHash}`
+        : "hash=not-recorded";
+    const recordCount = typeof artifact.recordCount === "number" ? `, records=${artifact.recordCount.toLocaleString("ko-KR")}` : "";
+    return `- ${artifact.label}: ${artifact.exists ? "present" : "missing"}, bytes=${artifact.byteSize.toLocaleString("ko-KR")}, ${hash}${recordCount}`;
+  });
 }
 
 function safetyLockLines(status: SifEmbeddingGateStatus) {
@@ -86,6 +100,7 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     `- Embedding model: ${status.corpus.embeddingModel}`,
     `- Embedding dimensions: ${status.corpus.embeddingDimensions.toLocaleString("ko-KR")}`,
     `- Corpus hash: ${status.corpus.corpusHash}`,
+    `- Approval fingerprint: ${status.approvalPacket.approvalFingerprint}`,
     "",
     "## Required Decision",
     "",
@@ -94,6 +109,10 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "## Required Artifacts",
     "",
     ...artifactLines(status),
+    "",
+    "## Artifact Integrity",
+    "",
+    ...integrityLines(status),
     "",
     "## Safety Locks",
     "",
@@ -140,6 +159,8 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     embeddingGenerated: status.embeddingGenerated,
     uploaded: status.uploaded,
     requiredArtifacts: status.approvalPacket.requiredArtifacts,
+    approvalFingerprint: status.approvalPacket.approvalFingerprint,
+    artifactIntegrity: status.approvalPacket.artifactIntegrity,
     relatedHarness,
     markdown: lines.join("\n")
   };

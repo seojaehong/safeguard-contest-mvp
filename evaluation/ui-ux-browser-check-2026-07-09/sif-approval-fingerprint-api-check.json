@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-07-09T11:26:25.897Z",
+  "statusHttp": 200,
+  "packetHttp": 200,
+  "gateId": "apply-sif-only-migration",
+  "approvalFingerprint": "4105b8cdc6e5f75b4c31b7f9b59682aa6beda36dc1b04c932d64be76a696eb1a",
+  "packetFingerprint": "4105b8cdc6e5f75b4c31b7f9b59682aa6beda36dc1b04c932d64be76a696eb1a",
+  "artifactIntegrity": [
+    {
+      "label": "Preflight report",
+      "exists": true,
+      "byteSize": 1391,
+      "hasSha256": true,
+      "hasContentHash": false,
+      "recordCount": null
+    },
+    {
+      "label": "Batch manifest",
+      "exists": true,
+      "byteSize": 289309,
+      "hasSha256": true,
+      "hasContentHash": true,
+      "recordCount": 6032
+    },
+    {
+      "label": "SIF corpus JSONL",
+      "exists": true,
+      "byteSize": 15940736,
+      "hasSha256": false,
+      "hasContentHash": true,
+      "recordCount": 6032
+    },
+    {
+      "label": "SIF-only migration",
+      "exists": true,
+      "byteSize": 2664,
+      "hasSha256": true,
+      "hasContentHash": false,
+      "recordCount": null
+    }
+  ],
+  "markdownFieldsPresent": true
+}
