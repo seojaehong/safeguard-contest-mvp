@@ -14054,3 +14054,40 @@ body:has(.safeclaw-landing) :is(
     min-height: auto;
   }
 }
+
+/* Workspace first-screen typography: keep the Linear-like restraint, but give
+   the Korean headline and composer copy enough weight for a field product. */
+.command-center-shell .workspace-input-page .command-copy h1,
+.command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
+  font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 44px;
+  font-weight: 820;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.command-center-shell .workspace-input-page .command-copy p,
+.command-center-shell.workspace-theme-day .workspace-input-page .command-copy p {
+  font-weight: 560;
+  line-height: 1.68;
+}
+
+.command-center-shell .workspace-input-page .command-console-input,
+.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input {
+  font-weight: 560;
+  line-height: 1.78;
+}
+
+.command-center-shell .workspace-input-page :is(.input-photo-candidates article strong, .input-photo-analysis-summary p),
+.command-center-shell.workspace-theme-day .workspace-input-page :is(.input-photo-candidates article strong, .input-photo-analysis-summary p) {
+  font-weight: 680;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .command-center-shell .workspace-input-page .command-copy h1,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
+    font-size: 36px;
+    line-height: 1.16;
+  }
+}

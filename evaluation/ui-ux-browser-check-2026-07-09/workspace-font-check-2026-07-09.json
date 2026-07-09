@@ -1,0 +1,60 @@
+{
+  "generatedAt": "2026-07-09T03:38:28.217Z",
+  "url": "http://localhost:3017/workspace",
+  "scope": "workspace_first_screen_typography_check",
+  "waitForText": "오늘 작업은 무엇인가요?",
+  "results": [
+    {
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "title": "오늘 작업은 무엇인가요?",
+      "h1": {
+        "fontFamily": "Pretendard, \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "fontSize": "44px",
+        "fontWeight": "820",
+        "lineHeight": "49.28px",
+        "letterSpacing": "normal"
+      },
+      "textarea": {
+        "fontSize": "17px",
+        "fontWeight": "560",
+        "lineHeight": "30.26px",
+        "letterSpacing": "normal"
+      },
+      "horizontalOverflow": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440
+    },
+    {
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "title": "오늘 작업은 무엇인가요?",
+      "h1": {
+        "fontFamily": "Pretendard, \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "fontSize": "36px",
+        "fontWeight": "820",
+        "lineHeight": "41.76px",
+        "letterSpacing": "normal"
+      },
+      "textarea": {
+        "fontSize": "17px",
+        "fontWeight": "560",
+        "lineHeight": "30.26px",
+        "letterSpacing": "normal"
+      },
+      "horizontalOverflow": false,
+      "scrollWidth": 390,
+      "clientWidth": 390
+    }
+  ],
+  "screenshots": [
+    "evaluation/ui-ux-browser-check-2026-07-09/workspace-font-check-desktop.png",
+    "evaluation/ui-ux-browser-check-2026-07-09/workspace-font-check-mobile.png"
+  ]
+}
