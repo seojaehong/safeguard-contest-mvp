@@ -974,7 +974,6 @@ const TABULAR_SPECS = [
 ] as const;
 
 const ENHANCED_CORE_SPEC_NAMES = new Set([
-  "riskAssessment",
   "tbmBriefingStructured",
   "tbmLogStructured"
 ]);

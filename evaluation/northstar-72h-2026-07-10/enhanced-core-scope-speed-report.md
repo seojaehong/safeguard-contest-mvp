@@ -81,3 +81,30 @@ enhanced 모드에서는 `tbmRiskLinks`를 별도 AI 호출로 생성하지 않�
 - `tbmLogStructured`
 
 `workPlanStructured`는 full 모드의 필수 구조화 산출물로 유지한다. 이렇게 해야 사용자가 일부러 줄인 enhanced 경로를 "미흡"으로 오해하지 않고, 실제 공유 준비 상태가 UI와 맞게 표시된다.
+
+## 배포 후 2차 결과
+
+배포 커밋: `d383115`
+
+- 전체 응답: 63.8초
+- `generationMode`: `enhanced`
+- `qualityContract.overall`: `ready`
+- 구조화 검수: `3/3 ready`
+- DB 하네스: `ready`
+- 온톨로지 QA: `ready`, `통과`
+- 최종 `structured.tbmRiskLinks`: 6건 유지
+- `tbmRiskLinks` doc event: 없음
+
+남은 문제는 `riskAssessment` prose draft AI 호출이 실패 이벤트로 노출된다는 점이다. 최종 문서와 품질 계약은 하네스/구조화 row 기준으로 ready지만, 진행 콘솔에 빨간 실패가 보이면 사용자는 생성 실패로 오해할 수 있다.
+
+## 후속 수정 2
+
+enhanced 모드의 AI 호출 범위에서 `riskAssessment` prose draft를 제거한다. 위험성평가표는 `structuredRiskRows`와 하네스 기반 deterministic 문서 렌더로 구성한다.
+
+enhanced AI doc events 목표:
+
+- `tbmBriefingStructured`
+- `tbmLogStructured`
+- `structuredRiskRows`
+
+이렇게 하면 enhanced 모드는 "하네스가 고정한 위험 row + TBM 구조화"에 집중하고, 사용자에게 내부 prose draft 실패를 노출하지 않는다.
