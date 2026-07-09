@@ -51,6 +51,23 @@ Result:
 - 1 test file passed.
 - 12 layout regression tests passed.
 
+## Post-Deploy Verification
+
+- Deployment URL: `https://safeguard-contest-ao6weeoui-seojaehongs-projects.vercel.app`
+- Alias: `https://www.safeclaw.kr`
+- Loaded bundle marker: `dpl_E5hZtuTXvqJqWfpRPLzUct5Vwg3h`
+- Screenshots:
+  - `evaluation/ui-overlap-2026-07-10/postdeploy-wide-short-2048x632.png`
+  - `evaluation/ui-overlap-2026-07-10/postdeploy-zoom-like-1024x430.png`
+- Metrics: `evaluation/ui-overlap-2026-07-10/postdeploy-layout-metrics.json`
+
+Post-deploy measured result:
+
+- Horizontal overflow: none on checked viewports.
+- Topbar/text/textarea overlap: none on checked viewports.
+- Sidebar/main overlap: none on checked viewports.
+- Textarea/composer overlap: none on checked viewports.
+
 ## Remaining Note
 
 If a browser still shows the old full-width screenshot, the first thing to check is whether it is serving an older deployment/CSS cache. The committed guard still protects the current bundle from re-entering that state on the tested viewport classes.
