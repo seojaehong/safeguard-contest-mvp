@@ -75,13 +75,21 @@ describe("buildOperationMemoryVisualizationModel", () => {
       "addressesHazard",
       "confirmedBy"
     ]));
+    expect(model.focusNodeId).toBe("workpack:wp-visual-1");
+    expect(model.stats).toMatchObject({
+      totalNodes: graph.nodes.length,
+      totalEdges: graph.edges.length,
+      hiddenNodes: 0,
+      hiddenEdges: 0
+    });
     expect(improvementCard?.metaRows).toEqual(expect.arrayContaining([
-      { label: "analysisMode", value: "vision_ocr" },
-      { label: "photoPairAttached", value: "true" },
-      { label: "visionLabel", value: "vision/OCR 분석 완료" }
+      { key: "analysisMode", label: "분석 방식", value: "vision_ocr" },
+      { key: "photoPairAttached", label: "비포/애프터", value: "예" },
+      { key: "visionLabel", label: "이미지 분석", value: "vision/OCR 분석 완료" }
     ]));
     expect(improvementCard?.related).toEqual(expect.arrayContaining([
-      expect.objectContaining({ rel: "addressesHazard" })
+      expect.objectContaining({ rel: "addressesHazard", direction: "outgoing" }),
+      expect.objectContaining({ rel: "hasImprovement", direction: "incoming" })
     ]));
   });
 
@@ -103,6 +111,7 @@ describe("buildOperationMemoryVisualizationModel", () => {
     expect(model.list.length).toBeGreaterThan(24);
     expect(model.map.nodes.length).toBeLessThanOrEqual(24);
     expect(model.map.edges.length).toBeLessThanOrEqual(48);
+    expect(model.stats.hiddenNodes).toBeGreaterThan(0);
   });
 
   it("exports the same operation memory surface as Markdown and JSONL files", () => {

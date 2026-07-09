@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type KeyboardEvent, useEffect, useMemo, useState } from "react";
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
   parseOperationImprovements,
@@ -94,6 +94,7 @@ function downloadTextFile(fileName: string, contentType: string, content: string
 export function OperationMemoryPreview() {
   const [improvements, setImprovements] = useState<OperationImprovement[]>([]);
   const [downloadMessage, setDownloadMessage] = useState("");
+  const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     setImprovements(loadStoredImprovements());
@@ -154,6 +155,24 @@ export function OperationMemoryPreview() {
   }, [improvements]);
 
   const hoverCardsById = new Map(preview.model.hoverCards.map((card) => [card.id, card]));
+  const activeCard = activeNodeId ? hoverCardsById.get(activeNodeId) : undefined;
+
+  useEffect(() => {
+    setActiveNodeId((current) => {
+      if (current && hoverCardsById.has(current)) return current;
+      return preview.model.focusNodeId;
+    });
+  }, [preview.model.focusNodeId, preview.model.hoverCards]);
+
+  function selectNode(nodeId: string) {
+    setActiveNodeId(nodeId);
+  }
+
+  function selectNodeWithKey(event: KeyboardEvent<HTMLElement>, nodeId: string) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    selectNode(nodeId);
+  }
 
   function downloadLearningMemory(format: WorkpackLearningFormat) {
     const file = buildWorkpackLearningFile(preview.learningInput, format);
@@ -189,6 +208,10 @@ export function OperationMemoryPreview() {
 
       <div className="operation-memory-grid">
         <div className="operation-memory-board" aria-label="Workpack operation memory map">
+          <div className="operation-memory-stats" aria-label="작업 이력 그래프 통계">
+            <span>노드 {preview.model.stats.visibleNodes}/{preview.model.stats.totalNodes}</span>
+            <span>관계 {preview.model.stats.visibleEdges}/{preview.model.stats.totalEdges}</span>
+          </div>
           <svg viewBox="0 0 100 100" role="img" aria-label="작업팩, 위험, 개선, 근거, 확인 연결 지도">
             {preview.model.map.edges.map((edge) => (
               <line
@@ -206,81 +229,83 @@ export function OperationMemoryPreview() {
                 cx={node.x}
                 cy={node.y}
                 r={node.size}
-                className={`operation-memory-svg-node kind-${node.kind}`}
+                className={`operation-memory-svg-node kind-${node.kind}${node.id === activeNodeId ? " is-active" : ""}`}
               />
             ))}
           </svg>
           <div className="operation-memory-node-layer">
             {preview.model.map.nodes.map((node) => {
-              const card = hoverCardsById.get(node.id);
+              const isActive = node.id === activeNodeId;
               return (
                 <article
                   key={node.id}
-                  className={`operation-memory-point kind-${node.kind}`}
+                  className={`operation-memory-point kind-${node.kind}${isActive ? " is-active" : ""}`}
                   style={{ left: `${node.x}%`, top: `${node.y}%` }}
+                  role="button"
                   tabIndex={0}
+                  aria-pressed={isActive}
+                  onClick={() => selectNode(node.id)}
+                  onMouseEnter={() => selectNode(node.id)}
+                  onFocus={() => selectNode(node.id)}
+                  onKeyDown={(event) => selectNodeWithKey(event, node.id)}
                 >
                   <span>{node.kind}</span>
                   <strong>{node.label}</strong>
                   <small>{node.degree} links</small>
-                  {card ? (
-                    <aside className="operation-memory-popover" role="note">
-                      <span>{card.subtitle}</span>
-                      <strong>{card.title}</strong>
-                      {card.detail ? <p>{card.detail}</p> : null}
-                      {card.metaRows.length ? (
-                        <dl>
-                          {card.metaRows.slice(0, 4).map((row) => (
-                            <div key={`${card.id}-${row.label}`}>
-                              <dt>{row.label}</dt>
-                              <dd>{row.value}</dd>
-                            </div>
-                          ))}
-                        </dl>
-                      ) : null}
-                      <ul>
-                        {card.related.slice(0, 4).map((related) => (
-                          <li key={`${card.id}-${related.rel}-${related.targetId}`}>
-                            <b>{operationRelationLabel(related.rel)}</b>
-                            <span>{related.targetLabel}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </aside>
-                  ) : null}
                 </article>
               );
             })}
           </div>
         </div>
 
-        <div className="operation-memory-list" aria-label="작업 이력 노드 리스트">
-          {preview.model.list.map((item) => {
-            const card = hoverCardsById.get(item.id);
-            return (
-              <article key={item.id}>
-                <div>
+        <div className="operation-memory-side">
+          <aside className="operation-memory-detail" aria-live="polite" aria-label="선택한 작업 이력 상세">
+            {activeCard ? (
+              <>
+                <span>{activeCard.subtitle}</span>
+                <strong>{activeCard.title}</strong>
+                {activeCard.detail ? <p>{activeCard.detail}</p> : null}
+                {activeCard.metaRows.length ? (
+                  <dl>
+                    {activeCard.metaRows.slice(0, 5).map((row) => (
+                      <div key={`${activeCard.id}-${row.key}`}>
+                        <dt>{row.label}</dt>
+                        <dd>{row.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+                <ul>
+                  {activeCard.related.slice(0, 6).map((related) => (
+                    <li key={`${activeCard.id}-detail-${related.direction}-${related.rel}-${related.nodeId}`}>
+                      <b>{operationRelationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
+                      <span>{related.nodeLabel}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p>그래프나 리스트에서 노드를 선택하면 연결 관계를 확인할 수 있습니다.</p>
+            )}
+          </aside>
+
+          <div className="operation-memory-list" aria-label="작업 이력 노드 리스트">
+            {preview.model.list.map((item) => {
+              const isActive = item.id === activeNodeId;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`operation-memory-list-item${isActive ? " is-active" : ""}`}
+                  onClick={() => selectNode(item.id)}
+                >
                   <span>{item.kind}</span>
                   <strong>{item.label}</strong>
                   <small>out {item.outgoingCount} · in {item.incomingCount}</small>
-                </div>
-                {card ? (
-                  <aside className="operation-memory-inline-card" role="note">
-                    <span>{card.subtitle}</span>
-                    {card.detail ? <p>{card.detail}</p> : null}
-                    <ul>
-                      {card.related.slice(0, 3).map((related) => (
-                        <li key={`${card.id}-list-${related.rel}-${related.targetId}`}>
-                          <b>{operationRelationLabel(related.rel)}</b>
-                          <span>{related.targetLabel}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </aside>
-                ) : null}
-              </article>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

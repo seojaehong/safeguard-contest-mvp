@@ -3,8 +3,9 @@
     "operationMemoryPreview": true,
     "memoryMapNodes": 7,
     "memoryMapEdges": 7,
-    "memoryListRows": 7,
-    "operationHoverCards": 7,
+    "memoryListItems": 7,
+    "activeDetailPanel": true,
+    "operationFloatingPopovers": 0,
     "exportButtons": [
       "최근 후보 다시 읽기",
       "MD 저장",
@@ -12,6 +13,11 @@
     ],
     "ontologyGraphNodes": 32,
     "ontologyListRows": 166,
+    "ontologyListClientHeight": 638,
+    "ontologyListScrollHeight": 11632,
+    "ontologyListScrollLimited": true,
+    "memoryListClientHeight": 230,
+    "memoryListScrollHeight": 634,
     "horizontalOverflow": false,
     "title": "작업 이력 그래프."
   },
@@ -19,6 +25,9 @@
     "horizontalOverflow": false,
     "viewportWidth": 390,
     "scrollWidth": 390,
+    "ontologyListClientHeight": 518,
+    "ontologyListScrollHeight": 11632,
+    "ontologyListScrollLimited": true,
     "exportButtons": [
       "최근 후보 다시 읽기",
       "MD 저장",
