@@ -116,6 +116,11 @@ describe("DB harness packet", () => {
     expect(packet.sifCases).toHaveLength(1);
     expect(packet.generationContract.llmRole).toBe("naturalize_only");
     expect(packet.generationContract.fallbackChainAllowed).toBe(false);
+    expect(packet.generationContract.documentCoverage).toEqual([
+      { document: "위험성평가표", covered: true, evidenceTypes: ["sifCase", "supportingEvidence", "improvementMemory"] },
+      { document: "TBM 브리핑", covered: true, evidenceTypes: ["sifCase", "supportingEvidence", "improvementMemory"] },
+      { document: "TBM 기록", covered: true, evidenceTypes: ["sifCase", "supportingEvidence"] }
+    ]);
     expect(hasDocumentCoverage(packet, "TBM 기록")).toBe(true);
     expect(promptContext).toContain("DB harness가 고정한 근거");
     expect(promptContext).toContain("visionStatus: analyzed");
@@ -182,6 +187,7 @@ describe("DB harness packet", () => {
     expect(packet.improvementMemory).toHaveLength(1);
     expect(packet.workpackMemory).toHaveLength(1);
     expect(packet.generationContract.missingEvidence).toEqual([]);
+    expect(packet.generationContract.documentCoverage.every((item) => item.covered)).toBe(true);
     expect(promptContext).toContain("개선이력: 추락 -> 오전 작업 전 이동식 비계 난간을 보강함");
     expect(promptContext).toContain("visionStatus: analyzed");
     expect(promptContext).toContain("작업이력: 2026-07-08T00:00:00.000Z · 지난주 성수동 외벽 도장 · 문서팩 준비됨");
@@ -232,6 +238,7 @@ describe("DB harness packet", () => {
     const points = buildDbHarnessPracticalPoints(packet);
 
     expect(packet.generationContract.fallbackChainAllowed).toBe(false);
+    expect(packet.generationContract.documentCoverage.every((item) => item.covered)).toBe(false);
     expect(answer).toContain("DB 하네스가 사용할 직접 근거");
     expect(answer).toContain("보강 필요");
     expect(answer).not.toContain("일반 AI 답변");
@@ -264,6 +271,7 @@ describe("runAsk DB harness mode", () => {
     expect(response.dbHarness?.packet.mode).toBe("db_harness_first");
     expect(response.dbHarness?.summary.llmRole).toBe("naturalize_only");
     expect(response.dbHarness?.summary.fallbackChainAllowed).toBe(false);
+    expect(response.dbHarness?.summary.documentCoverage.some((item) => item.document === "위험성평가표" && item.covered)).toBe(true);
     expect(response.dbHarness?.summary.improvementMemory).toBe(1);
     expect(response.answer).toContain("하네스 판단");
     expect(response.answer).toContain("작업 전 난간 보강 사진 확인");

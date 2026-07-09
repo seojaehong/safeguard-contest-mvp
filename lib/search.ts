@@ -811,6 +811,7 @@ function summarizeDbHarnessPacket(packet: ReturnType<typeof buildDbHarnessPacket
     improvementMemory: packet.improvementMemory.length,
     workpackMemory: packet.workpackMemory.length,
     missingEvidence: packet.generationContract.missingEvidence,
+    documentCoverage: packet.generationContract.documentCoverage,
     ontologyStatus: packet.ontologyChecklist.status
   };
 }

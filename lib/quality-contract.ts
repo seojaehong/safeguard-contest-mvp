@@ -182,12 +182,14 @@ function dbHarnessItem(response: AskResponse): QualityContractItem {
 
   const hasEvidence = harness.summary.directEvidence + harness.summary.sifCases + harness.summary.supportingEvidence > 0;
   const missingCount = harness.summary.missingEvidence.length;
+  const coveredDocuments = harness.summary.documentCoverage.filter((item) => item.covered).length;
+  const requiredDocuments = harness.summary.documentCoverage.length;
   return {
     key: "dbHarness",
     label: "DB 하네스 계약",
-    status: hasEvidence && missingCount === 0 ? "ready" : hasEvidence ? "degraded" : "blocked",
+    status: hasEvidence && missingCount === 0 && coveredDocuments === requiredDocuments ? "ready" : hasEvidence ? "degraded" : "blocked",
     detail: hasEvidence
-      ? `DB 근거 ${harness.summary.directEvidence + harness.summary.sifCases + harness.summary.supportingEvidence}건을 고정했고, LLM 역할은 문장화 전용입니다.`
+      ? `DB 근거 ${harness.summary.directEvidence + harness.summary.sifCases + harness.summary.supportingEvidence}건을 고정했고, 필수 문서 ${coveredDocuments}/${requiredDocuments}종을 하네스가 커버했습니다.`
       : "고정된 DB 근거가 없어 전파 전 근거 매칭이 필요합니다."
   };
 }
@@ -276,6 +278,7 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
       sifCaseCount: response.dbHarness?.summary.sifCases ?? 0,
       supportingEvidenceCount: response.dbHarness?.summary.supportingEvidence ?? 0,
       missingEvidence: response.dbHarness?.summary.missingEvidence ?? [],
+      documentCoverage: response.dbHarness?.summary.documentCoverage ?? [],
       detail: dbHarness.detail
     },
     persistence: {

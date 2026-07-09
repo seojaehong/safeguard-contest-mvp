@@ -567,6 +567,9 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
   const documentWorkpackMemory = harnessPacket?.workpackMemory.find((item) =>
     documentMatchesTitle(item.reflectedDocuments, documentTitle)
   ) || harnessPacket?.workpackMemory[0];
+  const documentCoverage = harnessSummary?.documentCoverage.find((item) =>
+    documentMatchesTitle([item.document], documentTitle)
+  );
   const items: DocumentSourceRailItem[] = [];
 
   if (evidenceLabel || directReference || lawCitation) {
@@ -618,9 +621,13 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
         ? `${documentImprovement.hazardLabel}: ${documentImprovement.improvementText}`
         : documentWorkpackMemory
           ? `${documentWorkpackMemory.generatedAt} · ${documentWorkpackMemory.question}`
-          : "DB 근거를 먼저 고정하고 LLM은 문장화만 합니다.",
-      meta: harnessSummary.fallbackChainAllowed === false ? "DB 근거 우선" : "계약 확인",
-      tone: harnessSummary.fallbackChainAllowed === false ? "ready" : "warn"
+          : documentCoverage?.covered
+            ? `${documentCoverage.document} 하네스 근거가 연결됐습니다.`
+            : "DB 근거를 먼저 고정하고 LLM은 문장화만 합니다.",
+      meta: documentCoverage?.covered
+        ? `문서 커버됨 · ${documentCoverage.evidenceTypes.join("/")}`
+        : harnessSummary.fallbackChainAllowed === false ? "DB 근거 우선" : "계약 확인",
+      tone: harnessSummary.fallbackChainAllowed === false && documentCoverage?.covered !== false ? "ready" : "warn"
     });
   }
 
