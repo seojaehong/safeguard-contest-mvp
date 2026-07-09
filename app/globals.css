@@ -9391,6 +9391,29 @@ body:has(.safeclaw-landing) :is(
   line-height: 1.55;
 }
 
+.ai-connect-sif-fingerprint {
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(246, 245, 239, 0.1);
+  border-radius: 8px;
+  background: rgba(246, 245, 239, 0.04);
+  padding: 10px;
+}
+
+.ai-connect-sif-fingerprint code {
+  color: rgba(255, 220, 46, 0.86);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.ai-connect-sif-fingerprint p {
+  margin: 0;
+  color: rgba(246, 245, 239, 0.66);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
 .ai-connect-sif-artifact-grid,
 .ai-connect-sif-lock-grid {
   display: grid;
@@ -14183,6 +14206,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-meta div,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-metrics div,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-state-grid article,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-fingerprint,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-artifact-grid article,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-lock-grid article,
 .safeclaw-module-shell.module-variant-document .ai-connect-token-items article {
@@ -14215,6 +14239,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate small,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet span,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-fingerprint p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet li,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-artifact-grid p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-lock-grid p,
@@ -14267,6 +14292,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-command pre,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate pre,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate code,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-fingerprint code,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-artifact-grid code,
 .safeclaw-module-shell.module-variant-document .ai-connect-command-box pre,
 .safeclaw-module-shell.module-variant-document .ai-connect-secret textarea {

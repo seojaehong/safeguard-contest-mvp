@@ -19,6 +19,9 @@ describe("SIF embedding approval packet", () => {
     expect(packet.embeddingGenerated).toBe(false);
     expect(packet.uploaded).toBe(false);
     expect(packet.fileName).toBe("safeclaw-sif-embedding-approval-apply-sif-only-migration.md");
+    expect(packet.approvalFingerprint).toHaveLength(64);
+    expect(packet.artifactIntegrity).toHaveLength(4);
+    expect(packet.artifactIntegrity.find((artifact) => artifact.label === "SIF-only migration")?.sha256).toHaveLength(64);
     expect(packet.requiredArtifacts.map((artifact) => artifact.path)).toContain(
       "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
     );
@@ -26,6 +29,9 @@ describe("SIF embedding approval packet", () => {
     expect(packet.markdown).toContain("Embedding corpus: 6,032");
     expect(packet.markdown).toContain("Model fine-tuning performed: no");
     expect(packet.markdown).toContain("DB mutation performed: no");
+    expect(packet.markdown).toContain("Approval fingerprint:");
+    expect(packet.markdown).toContain("## Artifact Integrity");
+    expect(packet.markdown).toContain("SIF-only migration: present");
     expect(packet.markdown).toContain("Do not run before the required approval gate passes.");
     expect(packet.markdown).toContain("npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload");
   });

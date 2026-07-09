@@ -165,6 +165,7 @@ type SifEmbeddingGateStatusResponse = {
   approvalPacket: {
     scope: "sif_embedding_next_approval_gate";
     decisionCount: number;
+    approvalFingerprint: string;
     decisions: string[];
     requiredArtifacts: {
       label: string;
@@ -175,6 +176,16 @@ type SifEmbeddingGateStatusResponse = {
       label: string;
       locked: boolean;
       detail: string;
+    }[];
+    artifactIntegrity: {
+      label: string;
+      path: string;
+      exists: boolean;
+      byteSize: number;
+      sha256?: string;
+      contentHash?: string;
+      recordCount?: number;
+      role: string;
     }[];
   };
   failedCheckIds: string[];
@@ -582,6 +593,11 @@ export function AiConnectPanel() {
                 <strong>승인 패킷</strong>
                 <span>{sifGate.approvalPacket.decisionCount}개 결정 · {sifGate.approvalPacket.requiredArtifacts.length}개 산출물</span>
               </div>
+              <div className="ai-connect-sif-fingerprint">
+                <span>승인 지문</span>
+                <code>{sifGate.approvalPacket.approvalFingerprint}</code>
+                <p>corpus hash, SIF-only migration SQL hash, 모델/차원/수량을 묶어 승인 대상 파일을 고정합니다.</p>
+              </div>
               <ol>
                 {sifGate.approvalPacket.decisions.map((decision, index) => (
                   <li key={`${decision}-${index}`}>{decision}</li>
@@ -593,6 +609,18 @@ export function AiConnectPanel() {
                     <strong>{artifact.label}</strong>
                     <code>{artifact.path}</code>
                     <p>{artifact.role}</p>
+                  </article>
+                ))}
+              </div>
+              <div className="ai-connect-sif-artifact-grid" aria-label="SIF 산출물 무결성">
+                {sifGate.approvalPacket.artifactIntegrity.map((artifact) => (
+                  <article key={`${artifact.label}-${artifact.path}`}>
+                    <strong>{artifact.label}</strong>
+                    <code>{artifact.sha256 || artifact.contentHash || "hash not recorded"}</code>
+                    <p>
+                      {artifact.exists ? "파일 확인" : "파일 누락"} · {artifact.byteSize.toLocaleString("ko-KR")} bytes
+                      {typeof artifact.recordCount === "number" ? ` · ${artifact.recordCount.toLocaleString("ko-KR")} records` : ""}
+                    </p>
                   </article>
                 ))}
               </div>

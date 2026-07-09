@@ -1,6 +1,11 @@
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+
 import reportJson from "@/evaluation/sif-embedding-gate/report.json";
 import preflightJson from "@/evaluation/sif-embedding-gate/approval-preflight-report.json";
 import runtimeProbeJson from "@/evaluation/sif-embedding-gate/runtime-db-probe.json";
+import manifestJson from "@/evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json";
 
 export type SifEmbeddingGateStatus = {
   ok: boolean;
@@ -109,6 +114,7 @@ export type SifEmbeddingGateStatus = {
   approvalPacket: {
     scope: "sif_embedding_next_approval_gate";
     decisionCount: number;
+    approvalFingerprint: string;
     decisions: string[];
     requiredArtifacts: {
       label: string;
@@ -119,6 +125,16 @@ export type SifEmbeddingGateStatus = {
       label: string;
       locked: boolean;
       detail: string;
+    }[];
+    artifactIntegrity: {
+      label: string;
+      path: string;
+      exists: boolean;
+      byteSize: number;
+      sha256?: string;
+      contentHash?: string;
+      recordCount?: number;
+      role: string;
     }[];
   };
   failedCheckIds: string[];
@@ -190,6 +206,65 @@ function summarizeEvidence(evidence: Record<string, unknown>) {
     .slice(0, 3)
     .map(([key, value]) => `${key}: ${String(value)}`);
   return pairs.length ? pairs.join(" · ") : "근거 파일에서 확인됨";
+}
+
+function sha256(value: string) {
+  return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function resolveProjectPath(relativePath: string) {
+  return join(process.cwd(), relativePath.replace(/\\/g, "/"));
+}
+
+function readFileIntegrity(input: {
+  label: string;
+  path: string;
+  role: string;
+  sha256Enabled?: boolean;
+  contentHash?: string;
+  recordCount?: number;
+}): SifEmbeddingGateStatus["approvalPacket"]["artifactIntegrity"][number] {
+  const absolutePath = resolveProjectPath(input.path);
+  if (!existsSync(absolutePath)) {
+    return {
+      label: input.label,
+      path: input.path,
+      exists: false,
+      byteSize: 0,
+      contentHash: input.contentHash,
+      recordCount: input.recordCount,
+      role: input.role
+    };
+  }
+
+  const stat = statSync(absolutePath);
+  const content = input.sha256Enabled ? readFileSync(absolutePath, "utf8") : undefined;
+  return {
+    label: input.label,
+    path: input.path,
+    exists: true,
+    byteSize: stat.size,
+    sha256: content ? sha256(content) : undefined,
+    contentHash: input.contentHash,
+    recordCount: input.recordCount,
+    role: input.role
+  };
+}
+
+function buildApprovalFingerprint(input: {
+  corpusHash: string;
+  corpusCount: number;
+  embeddingModel: string;
+  embeddingDimensions: number;
+  migrationSha256?: string;
+}) {
+  return sha256(JSON.stringify({
+    corpusHash: input.corpusHash,
+    corpusCount: input.corpusCount,
+    embeddingModel: input.embeddingModel,
+    embeddingDimensions: input.embeddingDimensions,
+    migrationSha256: input.migrationSha256 || "migration-hash-unavailable"
+  }));
 }
 
 function buildVectorGuard(
@@ -525,33 +600,70 @@ function buildApprovalPacket(input: {
   embeddingGenerated: boolean;
   uploaded: boolean;
   vectorGuard: SifEmbeddingGateStatus["vectorGuard"];
+  corpusHash: string;
+  corpusCount: number;
+  embeddingModel: string;
+  embeddingDimensions: number;
 }): SifEmbeddingGateStatus["approvalPacket"] {
+  const manifest = asRecord(manifestJson);
+  const requiredArtifacts = [
+    {
+      label: "Preflight report",
+      path: input.artifacts.reportPath,
+      role: "코퍼스 수량, 품질 게이트, 승인 보류 상태를 확인합니다."
+    },
+    {
+      label: "Batch manifest",
+      path: input.artifacts.manifestPath,
+      role: "임베딩 배치 수량과 corpus hash를 고정합니다."
+    },
+    {
+      label: "SIF corpus JSONL",
+      path: input.artifacts.corpusPath,
+      role: "임베딩 입력 원문과 SIF 레코드 매핑을 검토합니다."
+    },
+    {
+      label: "SIF-only migration",
+      path: input.artifacts.migrationPath,
+      role: "운영 DB에 필요한 table, RPC, index 범위만 승인합니다."
+    }
+  ];
+  const artifactIntegrity = [
+    readFileIntegrity({
+      ...requiredArtifacts[0],
+      sha256Enabled: true
+    }),
+    readFileIntegrity({
+      ...requiredArtifacts[1],
+      sha256Enabled: true,
+      contentHash: readString(manifest, "corpusHash", input.corpusHash),
+      recordCount: readNumber(manifest, "recordCount", input.corpusCount)
+    }),
+    readFileIntegrity({
+      ...requiredArtifacts[2],
+      sha256Enabled: false,
+      contentHash: input.corpusHash,
+      recordCount: input.corpusCount
+    }),
+    readFileIntegrity({
+      ...requiredArtifacts[3],
+      sha256Enabled: true
+    })
+  ];
+  const migrationSha256 = artifactIntegrity.find((artifact) => artifact.label === "SIF-only migration")?.sha256;
+
   return {
     scope: "sif_embedding_next_approval_gate",
     decisionCount: input.decisions.length,
+    approvalFingerprint: buildApprovalFingerprint({
+      corpusHash: input.corpusHash,
+      corpusCount: input.corpusCount,
+      embeddingModel: input.embeddingModel,
+      embeddingDimensions: input.embeddingDimensions,
+      migrationSha256
+    }),
     decisions: input.decisions,
-    requiredArtifacts: [
-      {
-        label: "Preflight report",
-        path: input.artifacts.reportPath,
-        role: "코퍼스 수량, 품질 게이트, 승인 보류 상태를 확인합니다."
-      },
-      {
-        label: "Batch manifest",
-        path: input.artifacts.manifestPath,
-        role: "임베딩 배치 수량과 corpus hash를 고정합니다."
-      },
-      {
-        label: "SIF corpus JSONL",
-        path: input.artifacts.corpusPath,
-        role: "임베딩 입력 원문과 SIF 레코드 매핑을 검토합니다."
-      },
-      {
-        label: "SIF-only migration",
-        path: input.artifacts.migrationPath,
-        role: "운영 DB에 필요한 table, RPC, index 범위만 승인합니다."
-      }
-    ],
+    requiredArtifacts,
     safetyLocks: [
       {
         label: "승인 전 실행 보류",
@@ -578,7 +690,8 @@ function buildApprovalPacket(input: {
         locked: input.vectorGuard.status !== "active",
         detail: input.vectorGuard.message
       }
-    ]
+    ],
+    artifactIntegrity
   };
 }
 
@@ -728,7 +841,11 @@ export function getSifEmbeddingGateStatus(
       dbMutationPerformed,
       embeddingGenerated,
       uploaded,
-      vectorGuard
+      vectorGuard,
+      corpusHash: readString(report, "corpusHash"),
+      corpusCount: readNumber(report, "corpusCount"),
+      embeddingModel: readString(report, "embeddingModel", "text-embedding-3-small"),
+      embeddingDimensions: readNumber(report, "embeddingDimensions", 1536)
     }),
     nextApprovalDecisions,
     artifacts
