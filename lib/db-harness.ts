@@ -248,7 +248,7 @@ function controlCandidates(packet: DbHarnessPacket) {
   ], 6);
 }
 
-export function buildDbHarnessAnswer(packet: DbHarnessPacket, fallbackAnswer = "") {
+export function buildDbHarnessAnswer(packet: DbHarnessPacket) {
   const directTitles = evidenceTitles(packet.directEvidence, 3);
   const sifTitles = evidenceTitles(packet.sifCases, 3);
   const controls = controlCandidates(packet);
@@ -259,7 +259,16 @@ export function buildDbHarnessAnswer(packet: DbHarnessPacket, fallbackAnswer = "
   ], 4);
 
   if (!directTitles.length && !sifTitles.length && !controls.length) {
-    return fallbackAnswer.trim() || "DB 하네스가 사용할 근거를 찾지 못했습니다. 공식 근거와 현장 조건을 확인한 뒤 문서팩에 반영하세요.";
+    return [
+      "1) 하네스 판단",
+      "- DB 하네스가 사용할 직접 근거, SIF 사례, 개선 이력을 아직 찾지 못했습니다.",
+      "",
+      "2) 오늘 문서에 먼저 반영할 조치",
+      "- 위험성평가표, TBM 브리핑, TBM 기록에 같은 위험요인과 확인조치를 연결하세요.",
+      "",
+      "3) 보강 필요",
+      "- 공식자료, SIF 유사사례, 현장 개선 이력을 확인한 뒤 문서팩에 반영하세요."
+    ].join("\n");
   }
 
   return [
@@ -282,12 +291,11 @@ export function buildDbHarnessAnswer(packet: DbHarnessPacket, fallbackAnswer = "
   ].join("\n");
 }
 
-export function buildDbHarnessPracticalPoints(packet: DbHarnessPacket, fallbackPoints: string[] = []) {
+export function buildDbHarnessPracticalPoints(packet: DbHarnessPacket) {
   const points = [
     ...controlCandidates(packet).map((control) => `문서 반영 전 확인: ${control}`),
     ...packet.generationContract.requiredDocuments.map((document) => `${document}에 같은 위험요인·조치·확인자를 연결`),
-    ...packet.generationContract.missingEvidence.map((document) => `${document} 근거 보강 후 전파`),
-    ...fallbackPoints
+    ...packet.generationContract.missingEvidence.map((document) => `${document} 근거 보강 후 전파`)
   ];
 
   return uniqueNonEmpty(points, 8);

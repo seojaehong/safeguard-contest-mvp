@@ -49,6 +49,7 @@ Hermes/FastAPI as the core is deferred for these reasons:
 - Separate generation, review, dispatch, and confirmation logs.
 - Add cross-tenant leakage tests.
 - Add promotion queue from tenant operation memory to public reference corpus.
+- Add a HITL knowledge promotion flow: draft candidate -> operator review -> graph validation -> approved DB upsert.
 - Add review UI for knowledge promotion candidates: compare proposed Markdown/JSONL updates, approve, reject, or request evidence.
 - Add audit trail for who approved a public reference corpus update and which source records supported it.
 
@@ -86,6 +87,7 @@ The Knowledge Engine direction is adopted only when it is interpreted as a gover
 ### Defer
 
 - Generate per-node Markdown wiki pages as Operator Wiki Export after the DB-backed ontology and promotion queue are stable.
+- Keep Graph-as-Markdown as an export/review surface only; do not make Markdown the publication authority for runtime facts.
 - Add Hermes-style trajectory evaluation as a separate worker PoC after async job state, idempotency, and tenant isolation are proven.
 - Let an agent propose corpus diffs only after review UI and audit trail exist.
 
