@@ -23,6 +23,11 @@ The day workspace could still look crowded or clipped on presentation-style scre
   - `local-fixed-day-1024x319-dpr2.png`
   - `local-fixed-day-2048x638.png`
   - `local-fixed-mobile-compact-390x844-dpr3.png`
+- Postdeploy check on `www.safeclaw.kr`:
+  - `postdeploy-day-1170x365-dpr175.png`
+  - `postdeploy-day-1024x319-dpr2.png`
+  - `postdeploy-mobile-390x844-dpr3.png`
+  - `postdeploy-summary.json`
 - Metrics:
   - `local-fixed-summary.json`
   - `local-fixed-mobile-compact-390x844-dpr3-metrics.json`
@@ -35,6 +40,10 @@ The day workspace could still look crowded or clipped on presentation-style scre
   - Result: passed
 - `npm.cmd run build`
   - Result: passed
+- Production deployment:
+  - Commit: `c6819c2`
+  - Alias: `https://www.safeclaw.kr`
+  - Postdeploy summary: all checked viewports passed, console error/warn count 0
 
 ## Notes
 
