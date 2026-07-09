@@ -3,7 +3,12 @@
 import { useMemo, useState } from "react";
 import { AskResponse } from "@/lib/types";
 import type { WorkpackReadiness } from "@/lib/workpack-readiness";
-import type { RecipientSuggestion, WorkerDispatchTarget } from "@/lib/workspace";
+import {
+  buildDisplayTargetWorkers,
+  formatDisplayTargetCount,
+  type RecipientSuggestion,
+  type WorkerDispatchTarget
+} from "@/lib/workspace";
 
 type Channel = "email" | "sms" | "kakao" | "band";
 type ActiveChannel = Extract<Channel, "email" | "sms" | "kakao">;
@@ -237,6 +242,7 @@ export function WorkflowSharePanel({
     const selectedLanguageCode = selectedMessageTarget.startsWith("foreign:")
       ? selectedMessageTarget.replace("foreign:", "")
       : "ko";
+    const logTargets = buildDisplayTargetWorkers(data, targetWorkers);
 
     try {
       await fetch("/api/dispatch-logs", {
@@ -250,7 +256,7 @@ export function WorkflowSharePanel({
           scenario: data.scenario,
           logs: payload.channelResults.map((item) => ({
             channel: item.channel || "unknown",
-            targetLabel: targetWorkers.map((worker) => worker.displayName).join(", ") || "직접 입력 수신자",
+            targetLabel: logTargets.map((worker) => worker.displayName).join(", ") || "직접 입력 수신자",
             targetContact: sentRecipients.join(", "),
             languageCode: selectedLanguageCode,
             provider: item.provider,
@@ -300,7 +306,7 @@ export function WorkflowSharePanel({
           channels: activeChannels,
           recipients: dispatchRecipients,
           operatorNote: note,
-          workpack: buildBriefPayload(data, selectedMessage, selectedMessageTarget, targetWorkers)
+          workpack: buildBriefPayload(data, selectedMessage, selectedMessageTarget, buildDisplayTargetWorkers(data, targetWorkers))
         })
       });
       const payload = await response.json() as DispatchResult;
@@ -322,16 +328,22 @@ export function WorkflowSharePanel({
   const recipientLabel = dispatchRecipients.length ? `${dispatchRecipients.length}건` : "수신자 필요";
   const targetLabel = formatMessageTargetLabel(data, selectedMessageTarget);
   const storageReady = Boolean(authToken && workpackId);
-  const workerDisplayLabel = targetWorkers.length
-    ? targetWorkers.map((worker) => worker.displayName).slice(0, 3).join(", ")
+  const displayTargetWorkers = buildDisplayTargetWorkers(data, targetWorkers);
+  const targetCountLabel = formatDisplayTargetCount(data, targetWorkers);
+  const storageLabel = storageReady ? "workpack 연결" : "저장 전 후보";
+  const storageDetail = storageReady
+    ? "dispatch_logs와 연결 가능"
+    : "문서팩 저장 시 workpack·전파 로그·열람 확인 후보로 연결";
+  const workerDisplayLabel = displayTargetWorkers.length
+    ? displayTargetWorkers.map((worker) => worker.displayName).slice(0, 3).join(", ")
     : "관리자 입력 수신자";
   const activeChannelLabel = channelLabel || "채널 미선택";
   const previewItems = previewLines(selectedMessage);
   const acknowledgmentStatus = result?.ok
     ? "전파 요청 기록됨"
-    : targetWorkers.length
+    : storageReady
       ? "열람 확인 대기"
-      : "수신자 지정 대기";
+      : "저장 전 확인 후보";
   const shareBlocked = Boolean(readiness && !readiness.canShare);
   const shareDisabledReason = readiness?.reasons.join(" · ") || "";
 
@@ -344,7 +356,7 @@ export function WorkflowSharePanel({
           <p>문서팩, 다국어 안내, 확인 상태, 저장 증빙을 한 번에 검토한 뒤 전송합니다.</p>
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태">
-          <span>{storageReady ? "workpack linked" : "local review"}</span>
+          <span>{storageReady ? "workpack linked" : "draft session"}</span>
           <strong>{shareBlocked ? readiness?.summary : acknowledgmentStatus}</strong>
         </div>
       </header>
@@ -357,8 +369,8 @@ export function WorkflowSharePanel({
         </section>
         <section>
           <span>Recipients</span>
-          <strong>{recipientLabel}</strong>
-          <p>{workerDisplayLabel} 기준으로 수신자와 표시명을 확인합니다.</p>
+          <strong>{recipientLabel} · {targetCountLabel}</strong>
+          <p>{workerDisplayLabel} 기준으로 수신자, 표시명, 언어를 확인합니다.</p>
         </section>
         <section>
           <span>Language</span>
@@ -478,7 +490,7 @@ export function WorkflowSharePanel({
 
       {!authToken || !workpackId ? (
         <p className="share-inline-note">
-          관리자 로그인과 문서팩 저장 ID가 확인되면 전송 결과가 전파 이력에 함께 저장됩니다.
+          지금 화면은 공유 초안입니다. 관리자 로그인과 문서팩 저장이 끝나면 전송 결과와 열람 확인 후보가 서버 이력에 연결됩니다.
         </p>
       ) : null}
 
@@ -491,8 +503,8 @@ export function WorkflowSharePanel({
       <section className="acknowledgment-ledger" aria-label="확인 상태와 저장 증빙">
         <article>
           <span>확인 대상</span>
-          <strong>{targetWorkers.length ? `${targetWorkers.length}명` : "직접 입력"}</strong>
-          <small>작업자 표시명 기준</small>
+          <strong>{targetCountLabel}</strong>
+          <small>{workerDisplayLabel} · 작업자 표시명 기준</small>
         </article>
         <article>
           <span>현재 상태</span>
@@ -501,8 +513,8 @@ export function WorkflowSharePanel({
         </article>
         <article className={storageReady ? "ready" : "warn"}>
           <span>저장 증빙</span>
-          <strong>{storageReady ? "workpack 연결" : "저장 ID 대기"}</strong>
-          <small>{storageReady ? "dispatch_logs와 연결 가능" : "화면 결과 먼저 확인 가능"}</small>
+          <strong>{storageLabel}</strong>
+          <small>{storageDetail}</small>
         </article>
       </section>
 
@@ -539,13 +551,13 @@ export function WorkflowSharePanel({
           <div className="dispatch-confirm-grid">
             <div><span>수신</span><strong>{recipientLabel}</strong></div>
             <div><span>언어</span><strong>{targetLabel}</strong></div>
-            <div><span>대상 작업자</span><strong>{targetWorkers.length ? `${targetWorkers.length}명` : "직접 입력"}</strong></div>
+            <div><span>대상 작업자</span><strong>{targetCountLabel}</strong></div>
           </div>
           <p className="muted small">전송 후 provider 응답을 채널별로 표시하고, 관리자 로그인 상태에서는 전파 이력을 저장합니다.</p>
           <div className="dispatch-evidence-ledger" aria-label="전송 후 저장될 이력">
             <article className={storageReady ? "ready" : "warn"}>
               <span>문서팩 저장</span>
-              <strong>{storageReady ? "서버 workpack 연결" : "저장 ID 확인 필요"}</strong>
+              <strong>{storageReady ? "서버 workpack 연결" : "저장 전 후보"}</strong>
               <small>{storageReady ? "전파 로그가 현재 문서팩에 연결됩니다." : "로그인과 문서팩 저장 후 서버 이력에 연결됩니다."}</small>
             </article>
             <article className="pending">
