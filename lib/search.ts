@@ -311,7 +311,7 @@ export function buildSafetyReferenceRiskRows(
       severity: item.item_type === "sif-case" ? 5 : /추락|질식|폭발|감전|화재|붕괴|끼임/.test(hazard) ? 5 : 4,
       additionalControls: additionalControl,
       owner: "작업반장",
-      due: "작업 전",
+      due: "현장 확인",
       verification: "DB 하네스 근거와 현장 사진·TBM 확인으로 조치 반영 여부를 확인",
       verificationChecker: "관리감독자",
       evidenceRefs
