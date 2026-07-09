@@ -65,8 +65,8 @@
       "id": "N4",
       "title": "Turn photo Vision/OCR candidates into deterministic safety rows",
       "priority": 4,
-      "status": "todo",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Accepted input photo candidates create deterministic hazard/control seed rows before LLM prose.",
         "Before/After improvement photos are exportable to md/jsonl learning files.",

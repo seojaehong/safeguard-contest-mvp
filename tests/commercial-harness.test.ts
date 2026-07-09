@@ -378,6 +378,58 @@ describe("runAsk DB harness mode", () => {
     expect(response.qualityContract?.dbHarness.status).toBe("blocked");
   });
 
+  it("turns accepted photo hazard memory into deterministic risk rows and TBM links", async () => {
+    const response = await runAsk("성수동 외벽 도장 작업, 이동식 비계 사용", {
+      aiMode: "template",
+      harnessMemory: {
+        improvements: [{
+          id: "input-photo-hazard-1",
+          taskLabel: "성수동 외벽 도장 작업",
+          hazardLabel: "작업발판 외측 추락 위험",
+          improvementText: "사진 위험요인 확인 및 조치 후보: 작업면 가장자리 난간 상태를 현장 확인",
+          reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+          sourceType: "photo_analysis",
+          visionStatus: "analyzed",
+          analysisMode: "vision_ocr",
+          photoPairAttached: false,
+          visionUserLabel: "vision/OCR 사진 분석",
+          visionSummary: "작업발판 외측이 노출되어 보입니다.",
+          detectedHazards: ["작업발판 외측 추락 위험", "severity:high"],
+          observedImprovement: "난간·끝막이판 설치 여부 확인",
+          ocrText: "추락주의",
+          sourcePhotoNames: ["scaffold-before.jpg", "scaffold-after.jpg"],
+          photoCount: 2,
+          siteSignals: ["비계", "외벽", "단부"],
+          visionEvidence: "scaffold-before.jpg에서 작업면 단부가 노출되어 보임"
+        }]
+      }
+    });
+
+    const photoRow = response.structured?.riskAssessmentRows.find((row) =>
+      row.hazard.includes("작업발판 외측 추락 위험")
+    );
+    expect(photoRow).toMatchObject({
+      task: "성수동 외벽 도장 작업",
+      hazard: "작업발판 외측 추락 위험",
+      riskLevel: "high",
+      verificationStatus: "planned",
+      verificationChecker: "관리감독자"
+    });
+    expect(photoRow?.currentControls).toContain("사진 위험요인 확인");
+    expect(photoRow?.additionalControls).toContain("난간·끝막이판 설치 여부 확인");
+    expect(photoRow?.evidenceRefs).toEqual(expect.arrayContaining([
+      "사진: scaffold-before.jpg, scaffold-after.jpg",
+      "OCR: 추락주의",
+      "vision/OCR 사진 분석"
+    ]));
+
+    const photoLink = response.structured?.tbmRiskLinks?.find((link) =>
+      link.hazard.includes("작업발판 외측 추락 위험")
+    );
+    expect(photoLink?.confirmQuestion).toContain("작업발판 외측 추락 위험");
+    expect(photoLink?.evidenceRefs).toContain("vision/OCR 사진 분석");
+  });
+
   it("wraps provider fallback output with the DB harness contract before returning it", () => {
     const question = "성수동 외벽 도장 작업";
     const response = attachDbHarnessFallback(
