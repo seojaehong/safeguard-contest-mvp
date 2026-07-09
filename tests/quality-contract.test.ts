@@ -223,6 +223,7 @@ function makeLiveStructuredResponse(): AskResponse {
         workpackMemory: packet.workpackMemory.length,
         missingEvidence: packet.generationContract.missingEvidence,
         documentCoverage: packet.generationContract.documentCoverage,
+        retrievalContract: packet.retrievalContract,
         ontologyStatus: packet.ontologyChecklist.status
       }
     },
@@ -268,6 +269,7 @@ describe("qualityContract", () => {
     expect(contract.dbHarness.fallbackChainAllowed).toBe(false);
     expect(contract.dbHarness.genericProseSubstitutionAllowed).toBe(false);
     expect(contract.dbHarness.missingEvidencePolicy).toBe("surface_review_required");
+    expect(contract.dbHarness.retrievalContract?.source).toBe("safety_reference_items");
     expect(contract.dbHarness.documentCoverage.every((item) => item.covered)).toBe(true);
     expect(contract.persistence.status).toBe("ready");
   });

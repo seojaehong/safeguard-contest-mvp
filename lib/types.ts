@@ -63,6 +63,7 @@ export type QualityContract = {
     directEvidenceCount: number;
     sifCaseCount: number;
     supportingEvidenceCount: number;
+    retrievalContract?: DbHarnessPacket["retrievalContract"];
     missingEvidence: string[];
     documentCoverage: DbHarnessPacket["generationContract"]["documentCoverage"];
     detail: string;
@@ -564,6 +565,7 @@ export type AskResponse = {
       workpackMemory: number;
       missingEvidence: string[];
       documentCoverage: DbHarnessPacket["generationContract"]["documentCoverage"];
+      retrievalContract: DbHarnessPacket["retrievalContract"];
       ontologyStatus: DbHarnessPacket["ontologyChecklist"]["status"];
     };
   };

@@ -287,6 +287,7 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
       directEvidenceCount: response.dbHarness?.summary.directEvidence ?? 0,
       sifCaseCount: response.dbHarness?.summary.sifCases ?? 0,
       supportingEvidenceCount: response.dbHarness?.summary.supportingEvidence ?? 0,
+      retrievalContract: response.dbHarness?.summary.retrievalContract,
       missingEvidence: response.dbHarness?.summary.missingEvidence ?? [],
       documentCoverage: response.dbHarness?.summary.documentCoverage ?? [],
       detail: dbHarness.detail

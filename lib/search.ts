@@ -817,6 +817,7 @@ function summarizeDbHarnessPacket(packet: ReturnType<typeof buildDbHarnessPacket
     workpackMemory: packet.workpackMemory.length,
     missingEvidence: packet.generationContract.missingEvidence,
     documentCoverage: packet.generationContract.documentCoverage,
+    retrievalContract: packet.retrievalContract,
     ontologyStatus: packet.ontologyChecklist.status
   };
 }
@@ -1019,7 +1020,14 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               question,
               references: safeRefItems,
               improvements: harnessMemory.improvements,
-              workpackMemory: harnessMemory.workpackMemory
+              workpackMemory: harnessMemory.workpackMemory,
+              retrieval: safeRef
+                ? {
+                    mode: safeRef.retrievalMode,
+                    vectorSearch: safeRef.vectorSearch,
+                    message: safeRef.message
+                  }
+                : undefined
             });
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
@@ -1263,7 +1271,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       references: safetyReference.items,
       improvements: harnessMemory.improvements,
       workpackMemory: harnessMemory.workpackMemory,
-      ontologyMissing: structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`)
+      ontologyMissing: structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`),
+      retrieval: {
+        mode: safetyReference.retrievalMode,
+        vectorSearch: safetyReference.vectorSearch,
+        message: safetyReference.message
+      }
     });
     const dbHarnessPromptContext = buildHarnessPromptContext(dbHarnessPacket);
     const dbHarnessSummary = summarizeDbHarnessPacket(dbHarnessPacket);
