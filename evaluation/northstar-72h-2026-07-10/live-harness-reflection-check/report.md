@@ -1,0 +1,84 @@
+# Live Harness Reflection Check
+
+Date: 2026-07-10 KST
+
+## Scenario
+
+Production `/api/ask` was checked with an enhanced-mode field scenario:
+
+`부산 해운대 시설관리 현장 지하 기계실 배수펌프 점검, 작업자 4명, 밀폐공간 진입 전 환기와 산소농도 측정, 배수펌프 전원 차단 및 LOTO, 누수 바닥 미끄럼 위험, 감시인 배치 필요. 지난번 누수부 임시 배수로 설치 개선사항을 오늘 위험성평가와 TBM에 반영해줘.`
+
+Harness memory included one previous improvement:
+
+- 누수부 임시 배수로 설치
+- 미끄럼 방지 매트 보강
+- 위험성평가표, TBM 브리핑, TBM 기록 반영 대상
+
+## Pre-Fix Production Evidence
+
+Source artifacts:
+
+- `prod-api-ask-harness-summary.json`
+- `prod-api-ask-harness-full.json`
+
+Result:
+
+- mode: `live`
+- generationMode: `enhanced`
+- quality: `ready`
+- ontology QA: `통과`
+- DB harness mode: `db_harness_first`
+- LLM role: `naturalize_only`
+- evidence authority: `db_harness`
+- retrieval mode: `rest-ilike`
+- direct evidence: 8
+- SIF cases: 0
+- supporting evidence: 0
+- improvement memory: 1
+- risk rows: 5
+- TBM risk links: 5
+- improvement reflected in risk assessment: yes
+- improvement reflected in TBM briefing: yes
+- improvement reflected in TBM log: yes
+- internal debug terms in user-facing status: no
+
+## Findings
+
+The good part: the improvement loop is real. The previous drainage improvement entered the harness memory and was reflected in the generated risk assessment, TBM briefing, and TBM log.
+
+The blocking product issue: the answer said `SIF 유사사례` still needed reinforcement, but `qualityContract.overall` was `ready`. That meant the UI could present a ready workpack even when the DB harness still had a required evidence gap.
+
+The second product issue: the scenario inference treated a basement pump/confined-space inspection as a generic `천장 누수 유지보수 작업`, causing some structured risk rows to feel off-target.
+
+The third issue: `/api/safety-reference/search?itemType=sif-case` returned relevant SIF rows for pump/confined-space queries, but `/api/ask` did not call the SIF-specific bucket. The ask path merged technical support regulations, technical guidelines, and general catalog search only.
+
+## Fix
+
+1. `/api/ask` safety reference merge now includes a dedicated `itemType=sif-case` search bucket.
+2. DB harness summary now surfaces `ontologyChecklist.missing`, so missing SIF is visible to quality/readiness surfaces.
+3. Quality contract now refuses `ready` when the harness ontology status is not ready.
+4. Scenario inference now has a dedicated basement pump/confined-space profile:
+   - `지하 기계실 배수펌프 점검`
+   - 밀폐공간 환기 and oxygen/gas measurement
+   - pump power isolation and LOTO
+   - leakage floor slip controls
+   - external attendant/communication/rescue readiness
+
+## Verification
+
+```powershell
+npm.cmd test -- tests\pump-confined-scenario.test.ts tests\quality-contract.test.ts tests\commercial-harness.test.ts tests\workpack-readiness.test.ts
+npm.cmd run build
+npm.cmd run typecheck
+```
+
+Result:
+
+- 4 focused test files passed.
+- 25 focused tests passed.
+- Production build passed.
+- Typecheck passed.
+
+## Deployment Requirement
+
+This fix changes runtime server code. It must be committed, pushed, deployed, and then checked again against `https://www.safeclaw.kr/api/ask`.

@@ -202,13 +202,16 @@ function dbHarnessItem(response: AskResponse): QualityContractItem {
   const missingCount = harness.summary.missingEvidence.length;
   const coveredDocuments = harness.summary.documentCoverage.filter((item) => item.covered).length;
   const requiredDocuments = harness.summary.documentCoverage.length;
+  const ontologyReady = harness.summary.ontologyStatus === "ready";
   return {
     key: "dbHarness",
     label: "DB 하네스 계약",
-    status: hasEvidence && missingCount === 0 && coveredDocuments === requiredDocuments ? "ready" : hasEvidence ? "degraded" : "blocked",
-    detail: hasEvidence
+    status: hasEvidence && missingCount === 0 && coveredDocuments === requiredDocuments && ontologyReady ? "ready" : hasEvidence ? "degraded" : "blocked",
+    detail: hasEvidence && missingCount === 0 && ontologyReady
       ? `DB 근거 ${harness.summary.directEvidence + harness.summary.sifCases + harness.summary.supportingEvidence}건을 고정했고, 필수 문서 ${coveredDocuments}/${requiredDocuments}종을 하네스가 커버했습니다.`
-      : "고정된 DB 근거가 없어 전파 전 근거 매칭이 필요합니다."
+      : hasEvidence
+        ? `DB 근거는 고정됐지만 ${harness.summary.missingEvidence.slice(0, 3).join(", ") || "하네스 보완 항목"} 확인이 남았습니다.`
+        : "고정된 DB 근거가 없어 전파 전 근거 매칭이 필요합니다."
   };
 }
 

@@ -1276,7 +1276,7 @@ function summarizeDbHarnessPacket(packet: ReturnType<typeof buildDbHarnessPacket
     supportingEvidence: packet.supportingEvidence.length,
     improvementMemory: packet.improvementMemory.length,
     workpackMemory: packet.workpackMemory.length,
-    missingEvidence: packet.generationContract.missingEvidence,
+    missingEvidence: packet.ontologyChecklist.missing,
     documentCoverage: packet.generationContract.documentCoverage,
     retrievalContract: packet.retrievalContract,
     ontologyStatus: packet.ontologyChecklist.status
@@ -1314,7 +1314,7 @@ function buildDbHarnessReflectionLines(packet: DbHarnessPacket) {
   const workpackLines = packet.workpackMemory.slice(0, 2).map((item) =>
     `${item.generatedAt} 유사 작업: ${item.question} / 상태 ${item.statusLabel}`
   );
-  const missingLines = packet.generationContract.missingEvidence.slice(0, 3).map((item) =>
+  const missingLines = packet.ontologyChecklist.missing.slice(0, 3).map((item) =>
     `공유 전 보완: ${item}`
   );
   return {
@@ -1528,30 +1528,32 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         return { ...emptyResult, message: error instanceof Error ? error.message : String(error) };
       });
     const safetyReferencePromise = (async () => {
-      const [supportReg, guideline, general] = await Promise.all([
+      const [supportReg, guideline, sif, general] = await Promise.all([
         safeSearch({ query: question, limit: 3, itemType: "technical-support-regulation" }),
         safeSearch({ query: question, limit: 3, itemType: "technical-guideline" }),
+        safeSearch({ query: question, limit: 3, itemType: "sif-case" }),
         safeSearch({ query: question, limit: 5 })
       ]);
-      // Merge order: support-regulation → guideline → general (deduped by id).
+      // Merge order: support-regulation → guideline → SIF → general (deduped by id).
       const seen = new Set<string>();
       const merged: SafetyReferenceItem[] = [];
-      for (const bucket of [supportReg.items, guideline.items, general.items]) {
+      for (const bucket of [supportReg.items, guideline.items, sif.items, general.items]) {
         for (const item of bucket) {
           if (seen.has(item.id)) continue;
           seen.add(item.id);
           merged.push(item);
-          if (merged.length >= 8) break;
+          if (merged.length >= 10) break;
         }
-        if (merged.length >= 8) break;
+        if (merged.length >= 10) break;
       }
-      const configured = supportReg.configured || guideline.configured || general.configured;
+      const configured = supportReg.configured || guideline.configured || sif.configured || general.configured;
       const messageParts = [
         `KOSHA 기술지원규정 ${supportReg.count}건`,
         `KOSHA 기술지침 ${guideline.count}건`,
+        `SIF 유사사례 ${sif.count}건`,
         `일반 카탈로그 ${general.count}건`
       ];
-      const buckets = [supportReg, guideline, general];
+      const buckets = [supportReg, guideline, sif, general];
       const retrievalMode: SafetyReferenceRetrievalMode = buckets.some((bucket) => bucket.retrievalMode === "hybrid-vector-rpc")
         ? "hybrid-vector-rpc"
         : buckets.some((bucket) => bucket.retrievalMode === "ranked-rpc")

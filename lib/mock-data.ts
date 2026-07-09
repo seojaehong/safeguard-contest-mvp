@@ -378,6 +378,9 @@ function inferCompanyName(question: string) {
 }
 
 function inferCustomWorkName(question: string) {
+  if (/배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question)) {
+    return "지하 기계실 배수펌프 점검";
+  }
   if (/누수|비가\s*새|천장/.test(question)) return "천장 누수 유지보수 작업";
   if (/점검|정비|유지보수/.test(question)) return "비정형 유지보수 작업";
   if (/화기|용접|절단/.test(question)) return "화기작업";
@@ -412,10 +415,15 @@ function inferSiteName(question: string, fallback: string) {
 
 function buildCustomScenarioProfile(question: string): ScenarioProfile {
   const companyName = inferCompanyName(question);
+  const isPumpConfinedSpace = /배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question);
   const isLeakMaintenance = /누수|비가\s*새|천장/.test(question);
   const workName = inferCustomWorkName(question);
-  const companyType = isLeakMaintenance ? "시설관리·유지보수" : "현장 유지보수";
-  const siteName = `${companyName} ${isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`;
+  const companyType = isPumpConfinedSpace
+    ? "시설관리·기계설비 점검"
+    : isLeakMaintenance
+      ? "시설관리·유지보수"
+      : "현장 유지보수";
+  const siteName = `${companyName} ${isPumpConfinedSpace ? "지하 기계실 배수펌프 점검 현장" : isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`;
 
   return {
     id: "custom-maintenance",
@@ -423,17 +431,29 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
     companyType,
     siteName,
     workName,
-    processName: isLeakMaintenance
+    processName: isPumpConfinedSpace
+      ? "밀폐공간 진입 전 환기·산소농도 측정, 배수펌프 전원 차단·LOTO, 누수 바닥 보양 후 점검"
+      : isLeakMaintenance
       ? "누수 부위 확인, 전기·천장재 상태 점검, 보양 후 천장 유지보수"
       : "작업 전 현장 확인, 위험구역 통제, 비정형 유지보수 수행",
-    weatherNote: isLeakMaintenance
+    weatherNote: isPumpConfinedSpace
+      ? "지하 기계실 밀폐공간 조건, 산소·유해가스 농도와 환기 상태 확인 필요"
+      : isLeakMaintenance
       ? "실내 누수 조건, 젖은 바닥·전기설비 접촉 가능성 확인 필요"
       : "현장 조건 미지정, 작업 전 실제 환경 확인 필요",
     riskLevel: "상",
-    topRisk: isLeakMaintenance
+    topRisk: isPumpConfinedSpace
+      ? "지하 기계실 배수펌프 점검 중 산소결핍·유해가스 노출, 불시기동 끼임, 누수 바닥 미끄러짐 위험"
+      : isLeakMaintenance
       ? "천장 누수 유지보수 중 고소작업 추락, 젖은 바닥 미끄러짐, 누전·감전, 천장재 낙하 위험"
       : "비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
-    hazards: isLeakMaintenance
+    hazards: isPumpConfinedSpace
+      ? [
+          "밀폐공간 진입 전 환기·산소농도 측정 미흡으로 인한 질식",
+          "배수펌프 전원 차단·LOTO 미흡으로 인한 불시기동 끼임·감전",
+          "누수 바닥과 배수 불량으로 인한 미끄러짐·전도"
+        ]
+      : isLeakMaintenance
       ? [
           "천장 누수 부위 확인 중 사다리·작업발판에서 추락",
           "누수로 젖은 바닥에서 미끄러짐·전도",
@@ -444,7 +464,13 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "작업구역 통제 미흡으로 인한 충돌·끼임",
           "2인 1조 감시·비상연락 미흡으로 인한 구조 지연"
         ],
-    actions: isLeakMaintenance
+    actions: isPumpConfinedSpace
+      ? [
+          "진입 전 강제환기 후 산소·유해가스 농도를 측정하고 감시인을 외부에 배치",
+          "배수펌프 전원을 차단·검전하고 잠금표지(LOTO)를 부착한 뒤 점검 착수",
+          "누수부 임시 배수로와 미끄럼 방지 매트 상태를 확인하고 젖은 구역을 출입통제"
+        ]
+      : isLeakMaintenance
       ? [
           "작업 전 전원 차단·검전, 누수 차단, 젖은 바닥 보양과 출입통제 실시",
           "사다리 대신 안정된 작업발판을 우선 사용하고 2인 1조 감시자를 지정",
@@ -455,9 +481,17 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "2인 1조 역할을 작업자와 감시자로 분리하고 비상연락 수단을 확인",
           "작업구역 출입통제, 보호구 착용, 장비·공구 상태를 작업 전 확인"
         ],
-    educationName: isLeakMaintenance ? "천장 누수 유지보수 작업 전 감전·추락 예방 교육" : "비정형 유지보수 작업 전 안전교육",
+    educationName: isPumpConfinedSpace
+      ? "지하 기계실 배수펌프 점검 전 밀폐공간·LOTO 안전교육"
+      : isLeakMaintenance ? "천장 누수 유지보수 작업 전 감전·추락 예방 교육" : "비정형 유지보수 작업 전 안전교육",
     educationTargets: "작업자 2인, 작업반장, 관리감독자",
-    questions: isLeakMaintenance
+    questions: isPumpConfinedSpace
+      ? [
+          "진입 전 환기와 산소·유해가스 농도 측정값을 누가 확인했는가?",
+          "배수펌프 전원 차단·검전·잠금표지(LOTO)를 작업 전 완료했는가?",
+          "외부 감시인, 연락수단, 구조장비 위치를 전원이 알고 있는가?"
+        ]
+      : isLeakMaintenance
       ? [
           "누수 부위 주변 전원 차단과 검전을 누가 확인했는가?",
           "작업발판, 미끄럼 방지, 천장재 낙하구역 통제를 작업 전 완료했는가?",
@@ -468,7 +502,13 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "2인 1조의 작업자·감시자 역할과 비상연락 절차를 전원이 이해했는가?",
           "작업구역 출입통제와 보호구 착용 상태를 작업 전 확인했는가?"
         ],
-    educationPoints: isLeakMaintenance
+    educationPoints: isPumpConfinedSpace
+      ? [
+          "밀폐공간 진입 전 환기와 산소·유해가스 농도 측정값 확인",
+          "배수펌프 전원 차단·검전·잠금표지(LOTO) 완료 전 설비 접근 금지",
+          "외부 감시인은 작업자 상태, 연락두절, 가스 경보, 미끄럼 위험을 계속 확인"
+        ]
+      : isLeakMaintenance
       ? [
           "전원 차단·검전 전에는 천장 누수 부위와 전기설비에 접근하지 않기",
           "젖은 바닥과 천장재 낙하구역은 즉시 통제하고 안정된 작업발판 사용",
