@@ -1,0 +1,260 @@
+[
+  {
+    "name": "day-desktop",
+    "url": "https://www.safeclaw.kr/workspace?theme=day",
+    "status": 200,
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\live-workspace-check\\live-day-desktop.png",
+    "metrics": {
+      "title": "작업공간 | SafeClaw",
+      "hasWorkspace": true,
+      "hasDayClass": true,
+      "hasNightClass": false,
+      "bodySample": "SafeClaw\n현장 안전 문서팩\n현장 상황\n입력\nDay\nNight\n작업 입력 대기\n입력 대기\n작업공간\n입력\n진행 중\n▣\n문서\n잠김\n▣\n공유\n잠김\n현재 작업\n세이프건설 서울 성수동 근린생활시설 외벽 도장 작업\n서울 · 5명\n근거 준비\n\n고위험요인 사례\n조회 예정\n\nKOSHA 공식자료\n조회 예정\n\n위험요인-조치 그래프\n생성 후 검수\n\n최근 예시\n서울 건설 · 강풍 · 신규 혼재\n서울 성수동\n인천 물류 · 우천 · 숙련자 중심\n인천 남동공단\n안산 제조 · 화기 · 외국인 포함\n경기 안산\n부산 시설 · 밀폐공간 · 2인 작업\n부산 해운대\n현장 작업 입력\n오늘 작업은 무엇인가요?\n\n지역, 작업, 인원, 주요 위험만 적어도 됩니다.\n\n현장 상황 입력\n120/600자\n\n작성 팁: 지역, 업종, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부, 핵심 위험을 포함하면 정확도가 올라갑니다.\n\n서울\n시설관리·유지보수\n단시간 흐림, 빗방울, 기온 23℃, 풍속 1m/s\n5명\n국내 인력 중심\nPH",
+      "topbar": {
+        "top": 12,
+        "right": 1460,
+        "bottom": 129,
+        "left": 140,
+        "width": 1320,
+        "height": 117,
+        "position": "sticky",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "viewport": {
+        "top": 149,
+        "right": 1460,
+        "bottom": 1370,
+        "left": 140,
+        "width": 1320,
+        "height": 1221,
+        "position": "static",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "sideNav": {
+        "top": 149,
+        "right": 382,
+        "bottom": 1034,
+        "left": 140,
+        "width": 242,
+        "height": 885,
+        "position": "static",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "main": {
+        "top": 149,
+        "right": 1460,
+        "bottom": 1370,
+        "left": 396,
+        "width": 1064,
+        "height": 1221,
+        "position": "relative",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "heading": {
+        "top": 323,
+        "right": 1168,
+        "bottom": 370,
+        "left": 548,
+        "width": 620,
+        "height": 47,
+        "position": "static",
+        "lineHeight": "47.2px",
+        "fontSize": "40px",
+        "fontWeight": "620"
+      },
+      "textarea": {
+        "top": 460,
+        "right": 1308,
+        "bottom": 612,
+        "left": 548,
+        "width": 760,
+        "height": 152,
+        "position": "static",
+        "lineHeight": "28.9px",
+        "fontSize": "17px",
+        "fontWeight": "400"
+      }
+    },
+    "errors": []
+  },
+  {
+    "name": "night-desktop",
+    "url": "https://www.safeclaw.kr/workspace?theme=night",
+    "status": 200,
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\live-workspace-check\\live-night-desktop.png",
+    "metrics": {
+      "title": "작업공간 | SafeClaw",
+      "hasWorkspace": true,
+      "hasDayClass": false,
+      "hasNightClass": true,
+      "bodySample": "SafeClaw\n현장 안전 문서팩\n현장 상황\n입력\nDay\nNight\n작업 입력 대기\n입력 대기\n작업공간\n입력\n진행 중\n▣\n문서\n잠김\n▣\n공유\n잠김\n현재 작업\n세이프건설 서울 성수동 근린생활시설 외벽 도장 작업\n서울 · 5명\n근거 준비\n\n고위험요인 사례\n조회 예정\n\nKOSHA 공식자료\n조회 예정\n\n위험요인-조치 그래프\n생성 후 검수\n\n최근 예시\n서울 건설 · 강풍 · 신규 혼재\n서울 성수동\n인천 물류 · 우천 · 숙련자 중심\n인천 남동공단\n안산 제조 · 화기 · 외국인 포함\n경기 안산\n부산 시설 · 밀폐공간 · 2인 작업\n부산 해운대\n현장 작업 입력\n오늘 작업은 무엇인가요?\n\n지역, 작업, 인원, 주요 위험만 적어도 됩니다.\n\n현장 상황 입력\n120/600자\n\n작성 팁: 지역, 업종, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부, 핵심 위험을 포함하면 정확도가 올라갑니다.\n\n서울\n시설관리·유지보수\n단시간 흐림, 빗방울, 기온 23℃, 풍속 1m/s\n5명\n국내 인력 중심\nPH",
+      "topbar": {
+        "top": 12,
+        "right": 1440,
+        "bottom": 129,
+        "left": 160,
+        "width": 1280,
+        "height": 117,
+        "position": "sticky",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "viewport": {
+        "top": 149,
+        "right": 1440,
+        "bottom": 1253,
+        "left": 160,
+        "width": 1280,
+        "height": 1104,
+        "position": "static",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "sideNav": {
+        "top": 150,
+        "right": 403,
+        "bottom": 1005,
+        "left": 161,
+        "width": 242,
+        "height": 855,
+        "position": "static",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "main": {
+        "top": 150,
+        "right": 1439,
+        "bottom": 1252,
+        "left": 403,
+        "width": 1036,
+        "height": 1102,
+        "position": "relative",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "heading": {
+        "top": 294,
+        "right": 1161,
+        "bottom": 341,
+        "left": 541,
+        "width": 620,
+        "height": 47,
+        "position": "static",
+        "lineHeight": "47.2px",
+        "fontSize": "40px",
+        "fontWeight": "620"
+      },
+      "textarea": {
+        "top": 430,
+        "right": 1301,
+        "bottom": 582,
+        "left": 541,
+        "width": 760,
+        "height": 152,
+        "position": "static",
+        "lineHeight": "28.9px",
+        "fontSize": "17px",
+        "fontWeight": "400"
+      }
+    },
+    "errors": []
+  },
+  {
+    "name": "day-mobile",
+    "url": "https://www.safeclaw.kr/workspace?theme=day",
+    "status": 200,
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\live-workspace-check\\live-day-mobile.png",
+    "metrics": {
+      "title": "작업공간 | SafeClaw",
+      "hasWorkspace": true,
+      "hasDayClass": true,
+      "hasNightClass": false,
+      "bodySample": "SafeClaw\nDay\nNight\n작업공간\n입력\n▣\n문서\n▣\n공유\n현장 작업 입력\n오늘 작업은 무엇인가요?\n\n지역, 작업, 인원, 주요 위험만 적어도 됩니다.\n\n현장 상황 입력\n120/600자\n\n작성 팁: 지역, 업종, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부, 핵심 위험을 포함하면 정확도가 올라갑니다.\n\n서울\n시설관리·유지보수\n단시간 흐림, 빗방울, 기온 23℃, 풍속 1m/s\n5명\n국내 인력 중심\nPHOTO RISK INPUT\n현장 사진으로 위험요인 후보 찾기\n\n사진은 확정 판단이 아니라 추락, 차량동선, 정리정돈 같은 후보를 먼저 띄우는 보조 입력입니다.\n\n사진 첨부\n작업면, 장비, 통로, 보호구 상태\n\n사진을 첨부하면 위험성평가서에 반영할 검토 후보가 이곳에 표시됩니다.\n\n고위험요인 사례\n조회 예정\nKOSHA 공식자료\n조회 예정\n위험요인-조치 그래프\n생성 후 검수\n현장 이력\n생성 후 연결\n기상·조건\n매칭됨\n고급 설정\n안전 문서 생성\n예시로 되돌리기\n예시 불러오기",
+      "topbar": {
+        "top": 12,
+        "right": 376,
+        "bottom": 106,
+        "left": 14,
+        "width": 362,
+        "height": 94,
+        "position": "sticky",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "viewport": {
+        "top": 126,
+        "right": 376,
+        "bottom": 2302,
+        "left": 14,
+        "width": 362,
+        "height": 2176,
+        "position": "static",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "sideNav": {
+        "top": 126,
+        "right": 376,
+        "bottom": 222,
+        "left": 14,
+        "width": 362,
+        "height": 96,
+        "position": "static",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "main": {
+        "top": 236,
+        "right": 376,
+        "bottom": 2302,
+        "left": 14,
+        "width": 362,
+        "height": 2066,
+        "position": "relative",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "fontWeight": "400"
+      },
+      "heading": {
+        "top": 318,
+        "right": 323,
+        "bottom": 393,
+        "left": 67,
+        "width": 256,
+        "height": 76,
+        "position": "static",
+        "lineHeight": "37.76px",
+        "fontSize": "32px",
+        "fontWeight": "620"
+      },
+      "textarea": {
+        "top": 509,
+        "right": 323,
+        "bottom": 661,
+        "left": 67,
+        "width": 256,
+        "height": 152,
+        "position": "static",
+        "lineHeight": "28.9px",
+        "fontSize": "17px",
+        "fontWeight": "400"
+      }
+    },
+    "errors": []
+  }
+]

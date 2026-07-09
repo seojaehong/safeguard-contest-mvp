@@ -92,6 +92,45 @@ describe("workspace layout regression", () => {
     expect(metrics.topbarBottom).toBeLessThanOrEqual(0);
   }, 90_000);
 
+  it("lets the day topbar scroll away on wide short presentation screens", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 2048, height: 638 } });
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.waitForFunction(() => {
+      const scroller = document.scrollingElement;
+      return Boolean(scroller && scroller.scrollHeight > window.innerHeight + 160);
+    });
+    await page.evaluate(() => window.scrollTo(0, 260));
+    await page.waitForFunction(() => window.scrollY >= 120);
+
+    const metrics = await page.evaluate(() => {
+      const topbar = document.querySelector(".command-topbar");
+      const heading = document.querySelector(".workspace-input-page .command-copy h1");
+      const textarea = document.querySelector(".workspace-input-page .command-console-input");
+      const topbarRect = topbar?.getBoundingClientRect();
+      const headingRect = heading?.getBoundingClientRect();
+      const textareaRect = textarea?.getBoundingClientRect();
+      const topbarStyle = topbar ? getComputedStyle(topbar) : null;
+      return {
+        scrollY: Math.round(window.scrollY),
+        topbarBottom: topbarRect ? Math.round(topbarRect.bottom) : null,
+        topbarPosition: topbarStyle?.position || null,
+        headingTop: headingRect ? Math.round(headingRect.top) : null,
+        headingBottom: headingRect ? Math.round(headingRect.bottom) : null,
+        textareaTop: textareaRect ? Math.round(textareaRect.top) : null
+      };
+    });
+
+    expect(metrics.scrollY).toBeGreaterThanOrEqual(120);
+    expect(metrics.topbarBottom).not.toBeNull();
+    expect(metrics.headingTop).not.toBeNull();
+    expect(metrics.headingBottom).not.toBeNull();
+    expect(metrics.textareaTop).not.toBeNull();
+    expect(metrics.topbarPosition).toBe("relative");
+    expect(metrics.topbarBottom).toBeLessThanOrEqual(0);
+    expect(metrics.headingBottom).toBeLessThanOrEqual(metrics.textareaTop! - 16);
+  }, 90_000);
+
   it("keeps the workspace first impression typography solid and readable", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 720 } });

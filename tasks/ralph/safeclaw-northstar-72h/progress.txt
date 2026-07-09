@@ -21,3 +21,9 @@
 - Verified: red `npm.cmd test -- tests\workspace-layout-regression.test.ts` failed on first-screen line-height; green rerun passed 3 tests after CSS guard and line-height fix.
 - Learned: the workspace CSS has several historical visual passes, so final shell geometry must be guarded until the stylesheet is consolidated.
 - Next: continue route-by-route design harmonization after the N4/N5 product proof work.
+
+## 2026-07-09 wide-short Day scroll overlap
+- Changed: widened the workspace topbar guard to all `.command-center-shell .command-topbar` nodes and added a Day + `2048x638` scrolled regression test.
+- Verified: live production reproduced the overlap with sticky topbar over the headline; local HEAD scrolls the topbar away. `npm.cmd test -- tests\workspace-layout-regression.test.ts` passed 4 tests.
+- Learned: the user screenshot matched a presentation-like wide/short viewport after scroll, not only the first-load desktop layout.
+- Next: deploy/merge path must be resolved before using `www.safeclaw.kr/workspace` as the demo surface.
