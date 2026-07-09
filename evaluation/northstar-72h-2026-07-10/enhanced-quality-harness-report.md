@@ -40,6 +40,24 @@ Added a final safety-term normalization gate before enriched generated documents
 
 This is deliberately a narrow correction, not a broad rewrite layer. It preserves the generated document while preventing a known high-visibility typo from reaching the product surface.
 
+## Post-deploy Verification
+
+After deploying the normalization gate to `www.safeclaw.kr`, the same enhanced workflow was run again.
+
+- Route: `/api/ask/stream`
+- HTTP status: 200
+- Elapsed: 87.7 seconds
+- Document progress: `12/12`, `6건 근거`
+- `previewStartsWithMemory=true`
+- `hasSafetyReferenceInPreview=true`
+- `hasPhotoImprovement=true`
+- `hasVisionEvidence=true`
+- `bodyHasTypoJigebe=false`
+- `previewHasForklift=true`
+- `bodyHasNoRawFallback=true`
+
+The post-deploy result confirms that the generated document still carries the DB/KOSHA/improvement loop and that the observed `지게브` typo is removed before the UI surface.
+
 ## Evidence
 
 - `evaluation/northstar-72h-2026-07-10/enhanced-quality-probes/live-enhanced-workspace-result.png`
