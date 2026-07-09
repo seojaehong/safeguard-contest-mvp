@@ -10,6 +10,7 @@ Live `/api/ask/stream` does emit a final event, and the workspace UI applies tha
 
 - Added `buildGenerationProgressState` so the document step progress is derived from live stream console events while generation is in flight.
 - The progress summary now changes from fixed `3/12` to in-flight copy such as `7/12 · 실시간 검토 10건 · 진행 2건`.
+- Early active stream lines also move the visible count, so the UI does not keep the first number at `3/12` while external generation is already working.
 - The generation focus message now shows the latest meaningful stream activity, e.g. `AI 본문 초안 생성 확인됨`.
 - Completion still requires the final generated payload; in-flight progress is capped below `12/12` until data is actually applied.
 
@@ -25,7 +26,7 @@ Live `/api/ask/stream` does emit a final event, and the workspace UI applies tha
 - Direct live stream probe: final event arrived with `dbHarness` present.
 - Live UI probe: `ok=true`, edit button visible, ready message visible, progress `12/12`.
 - Local in-flight probe after 5 seconds: `progress="7/12실시간 검토 10건 · 진행 2건"`.
-- `npm.cmd test -- tests\workspace-generation-progress.test.ts tests\agent-console-copy.test.ts tests\sse-client.test.ts` -> 23 passed.
+- `npm.cmd test -- tests\workspace-generation-progress.test.ts tests\agent-console-copy.test.ts tests\sse-client.test.ts` -> 24 passed.
 
 ## Remaining Risk
 
