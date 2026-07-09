@@ -274,6 +274,26 @@ describe("qualityContract", () => {
     expect(contract.persistence.status).toBe("ready");
   });
 
+  it("does not mark the DB harness ready when required SIF evidence is missing", () => {
+    const response = makeLiveStructuredResponse();
+    response.dbHarness = {
+      ...response.dbHarness!,
+      summary: {
+        ...response.dbHarness!.summary,
+        sifCases: 0,
+        missingEvidence: ["SIF 유사사례"],
+        ontologyStatus: "review_required"
+      }
+    };
+
+    const contract = buildQualityContract(response, "2026-07-08T00:00:00.000Z");
+
+    expect(contract.overall).toBe("degraded");
+    expect(contract.dbHarness.status).toBe("degraded");
+    expect(contract.dbHarness.missingEvidence).toContain("SIF 유사사례");
+    expect(contract.dbHarness.detail).toContain("SIF 유사사례");
+  });
+
   it("uses the core 3-structure contract for enhanced generation", () => {
     const response = makeLiveStructuredResponse();
     const deliverables = { ...response.deliverables };
