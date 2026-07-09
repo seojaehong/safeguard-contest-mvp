@@ -52,6 +52,18 @@ describe("SIF embedding gate status", () => {
     });
     expect(status.readinessVerdict.answer).toContain("6,032건은 준비");
     expect(status.readinessVerdict.answer).toContain("임베딩 생성과 DB 업로드는 아직 실행되지 않았습니다");
+    expect(status.learningLifecycle).toMatchObject({
+      productTerm: "retrieval_embedding_index",
+      label: "코퍼스 준비 · 임베딩 전",
+      modelFineTuningPerformed: false,
+      corpusPrepared: true,
+      fullEmbeddingGenerated: false,
+      dbUploadVerified: false,
+      vectorSearchUsable: false,
+      nextGateId: "apply-sif-only-migration",
+      nextGateLabel: "SIF-only DB migration 승인"
+    });
+    expect(status.learningLifecycle.answer).toContain("모델 파인튜닝도 전체 임베딩 생성도 아직 실행하지 않았습니다");
     expect(status.nextApprovalGate).toMatchObject({
       id: "apply-sif-only-migration",
       label: "SIF-only DB migration 승인",
@@ -114,6 +126,11 @@ describe("SIF embedding gate status", () => {
     expect(readyRuntime.nextApprovalGate).toMatchObject({
       id: "disable-vector-flag",
       status: "blocked"
+    });
+    expect(readyRuntime.learningLifecycle).toMatchObject({
+      label: "코퍼스 준비 · 임베딩 전",
+      vectorSearchUsable: false,
+      nextGateId: "disable-vector-flag"
     });
     expect(readyRuntime.approvalPacket.safetyLocks.find((lock) => lock.label === "Vector 검색 잠금")?.locked).toBe(true);
     expect(readyRuntime.message).toContain("SAFETY_REFERENCE_VECTOR_SEARCH=1");
