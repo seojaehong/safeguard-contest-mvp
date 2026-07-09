@@ -6,11 +6,42 @@ import {
   buildImprovementAnalysisPayload,
   buildImprovementVisionPrompt,
   buildHazardPhotoVisionPrompt,
+  getPhotoVisionReadiness,
   parseHazardPhotoVisionOutput,
   parseImprovementVisionOutput
 } from "@/lib/photo-vision-analysis";
 
 describe("photo vision analysis contract", () => {
+  it("reports readiness and the accepted-only harness flow for input photos", () => {
+    const unconfigured = getPhotoVisionReadiness({
+      OPENAI_API_KEY: "",
+      OPENAI_VISION_MODEL: "gpt-4.1-mini"
+    });
+    const ready = getPhotoVisionReadiness({
+      OPENAI_API_KEY: "sk-test",
+      OPENAI_VISION_MODEL: "gpt-4.1-mini"
+    });
+
+    expect(unconfigured).toMatchObject({
+      ok: false,
+      status: "unconfigured",
+      maxInputPhotos: 10,
+      acceptedOnly: true,
+      beforeAfterSupported: true,
+      ocrSupported: true,
+      hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis",
+      improvementEndpointPattern: "/api/workpacks/[id]/improvements"
+    });
+    expect(unconfigured.message).toContain("OPENAI_API_KEY");
+    expect(unconfigured.exportTargets).toEqual(expect.arrayContaining(["작업 이력 MD", "하네스 JSONL"]));
+    expect(unconfigured.flow.map((item) => item.step)).toEqual(["attach", "analyze", "accept", "export"]);
+    expect(ready).toMatchObject({
+      ok: true,
+      status: "ready",
+      model: "gpt-4.1-mini"
+    });
+  });
+
   it("builds a constrained safety improvement prompt", () => {
     const prompt = buildImprovementVisionPrompt({
       taskLabel: "성수동 외벽 도장",

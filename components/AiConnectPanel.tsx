@@ -199,6 +199,29 @@ type SifEmbeddingGateStatusResponse = {
   };
 };
 
+type PhotoVisionReadinessResponse = {
+  ok: boolean;
+  status: "ready" | "unconfigured";
+  provider: "openai";
+  model: string;
+  apiKeyPresent: boolean;
+  timeoutMs: number;
+  maxInputPhotos: number;
+  hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis";
+  hazardAnalysisMethod: "POST multipart/form-data";
+  improvementEndpointPattern: "/api/workpacks/[id]/improvements";
+  acceptedOnly: true;
+  beforeAfterSupported: true;
+  ocrSupported: true;
+  exportTargets: string[];
+  flow: {
+    step: string;
+    label: string;
+    detail: string;
+  }[];
+  message: string;
+};
+
 const tabs: { id: AiConnectTab; label: string; body: string }[] = [
   {
     id: "harness",
@@ -267,6 +290,8 @@ export function AiConnectPanel() {
   const [nextTokenCursor, setNextTokenCursor] = useState<string | null>(null);
   const [sifGate, setSifGate] = useState<SifEmbeddingGateStatusResponse | null>(null);
   const [sifGateMessage, setSifGateMessage] = useState("");
+  const [photoVision, setPhotoVision] = useState<PhotoVisionReadinessResponse | null>(null);
+  const [photoVisionMessage, setPhotoVisionMessage] = useState("");
 
   useEffect(() => {
     if (!client) {
@@ -322,6 +347,19 @@ export function AiConnectPanel() {
       .catch((error: unknown) => {
         console.warn("sif embedding gate status load failed", error);
         setSifGateMessage("SIF 임베딩 승인 게이트 상태를 불러오지 못했습니다.");
+      });
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/input-photos/hazard-analysis")
+      .then(async (response) => {
+        const payload = await response.json() as PhotoVisionReadinessResponse;
+        setPhotoVision(payload);
+        if (!response.ok) setPhotoVisionMessage(payload.message || "사진 Vision/OCR 준비 상태를 확인해야 합니다.");
+      })
+      .catch((error: unknown) => {
+        console.warn("photo vision readiness load failed", error);
+        setPhotoVisionMessage("사진 Vision/OCR 준비 상태를 불러오지 못했습니다.");
       });
   }, []);
 
@@ -670,6 +708,63 @@ export function AiConnectPanel() {
               Runtime DB probe: {sifGate.runtimeDbProbe.status} · table {sifGate.runtimeDbProbe.tableReady ? "ready" : "missing"} · RPC {sifGate.runtimeDbProbe.rpcReady ? "ready" : "missing"}
             </p>
             <p className="muted">근거 파일: {sifGate.artifacts.reportPath} · {sifGate.artifacts.manifestPath}</p>
+          </>
+        ) : null}
+      </section>
+
+      <section className="safeclaw-module-panel ai-connect-vision-gate">
+        <div className="ai-connect-section-head">
+          <div>
+            <span>Vision/OCR Harness</span>
+            <h2>사진은 후보로 분석하고, 사용자가 채택한 것만 기억합니다.</h2>
+          </div>
+          <strong className={photoVision?.ok ? "ready" : "hold"}>
+            {photoVision ? (photoVision.ok ? "분석 준비" : "키 확인") : "확인 중"}
+          </strong>
+        </div>
+        <p>
+          {photoVision?.message || photoVisionMessage || "현장 사진 분석 설정과 하네스 연결 상태를 확인하고 있습니다."}
+        </p>
+        {photoVision ? (
+          <>
+            <dl className="ai-connect-sif-metrics">
+              <div>
+                <dt>첨부 한도</dt>
+                <dd>{photoVision.maxInputPhotos.toLocaleString("ko-KR")}장</dd>
+              </div>
+              <div>
+                <dt>모델</dt>
+                <dd>{photoVision.model}</dd>
+              </div>
+              <div>
+                <dt>OCR</dt>
+                <dd>{photoVision.ocrSupported ? "지원" : "미지원"}</dd>
+              </div>
+              <div>
+                <dt>저장 기준</dt>
+                <dd>{photoVision.acceptedOnly ? "채택 후보만" : "전체 후보"}</dd>
+              </div>
+            </dl>
+            <div className="ai-connect-vision-flow" aria-label="사진 Vision/OCR 하네스 흐름">
+              {photoVision.flow.map((item) => (
+                <article key={item.step}>
+                  <span>{item.step}</span>
+                  <strong>{item.label}</strong>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
+            </div>
+            <div className="ai-connect-sif-command">
+              <div>
+                <strong>사진 분석 endpoint</strong>
+                <span>{photoVision.hazardAnalysisMethod}</span>
+              </div>
+              <pre>{photoVision.hazardAnalysisEndpoint}</pre>
+            </div>
+            <p className="muted">
+              Before/After 개선 사진은 {photoVision.improvementEndpointPattern}에서 vision/OCR payload로 저장되고,
+              {photoVision.exportTargets.join(" · ")}에 보존됩니다.
+            </p>
           </>
         ) : null}
       </section>

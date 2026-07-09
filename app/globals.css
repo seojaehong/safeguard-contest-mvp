@@ -9212,6 +9212,43 @@ body:has(.safeclaw-landing) :is(
   line-height: 1.55;
 }
 
+.ai-connect-vision-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ai-connect-vision-flow article {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  border: 1px solid rgba(246, 245, 239, 0.12);
+  border-radius: 10px;
+  background: rgba(246, 245, 239, 0.04);
+  padding: 14px;
+}
+
+.ai-connect-vision-flow span {
+  color: rgba(255, 220, 46, 0.8);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ai-connect-vision-flow strong {
+  color: var(--os-text, #f6f5ef);
+  font-size: 0.92rem;
+}
+
+.ai-connect-vision-flow p {
+  margin: 0;
+  color: rgba(246, 245, 239, 0.66);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 .ai-connect-sif-vector-guard {
   display: grid;
   gap: 8px;
@@ -9617,6 +9654,7 @@ body:has(.safeclaw-landing) :is(
   .ai-connect-section-head,
   .ai-connect-sif-metrics,
   .ai-connect-sif-state-grid,
+  .ai-connect-vision-flow,
   .ai-connect-sif-artifact-grid,
   .ai-connect-sif-lock-grid,
   .ai-connect-token-items article {
@@ -14206,6 +14244,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-meta div,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-metrics div,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-state-grid article,
+.safeclaw-module-shell.module-variant-document .ai-connect-vision-flow article,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-fingerprint,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-artifact-grid article,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-lock-grid article,
@@ -14219,6 +14258,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-meta dd,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-metrics dd,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-state-grid strong,
+.safeclaw-module-shell.module-variant-document .ai-connect-vision-flow strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-command strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate strong,
@@ -14235,6 +14275,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-metrics dt,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-command span,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-state-grid p,
+.safeclaw-module-shell.module-variant-document .ai-connect-vision-flow p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate small,
@@ -14304,6 +14345,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps li > span,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight li > span,
+.safeclaw-module-shell.module-variant-document .ai-connect-vision-flow span,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard span,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate span,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-lock-grid span {
