@@ -30,3 +30,25 @@ The reported white-theme overlap was not reproduced on the latest deployed CSS a
 ## Follow-Up
 
 Separate from this layout fix, live generation stream verification still needs a focused pass. The stream endpoint returned HTTP 200, but the UI probe previously remained in `3/12` generating state when using the enhanced stream path. That should be treated as the next P1 after this compact-layout patch.
+
+## Second Pass: 150% Zoom-Like Day Screen
+
+The follow-up screenshot matched a 150% browser-zoom equivalent more closely than a normal 2048x638 CSS viewport. In that condition, the previous compact rule compressed the textarea down to roughly 84px and kept secondary sidebar/helper content visible. It did not always produce a DOM collision, but it could read as clipped or overlapping because the primary input text had too little vertical space.
+
+Additional fix:
+
+- At desktop heights of 430px or less, hide the input subtitle, helper copy, and secondary sidebar groups.
+- Keep the textarea at 118px minimum for 430px-high zoom-like screens.
+- Add a stricter 380px-high rule that keeps the textarea at 108px minimum while preserving the composer submit action inside the viewport.
+- Update regression tests so compact screens prioritize input legibility instead of squeezing every support label into the first viewport.
+
+Additional evidence:
+
+- `evaluation/northstar-72h-2026-07-10/layout-probes/local-day-zoom150-overlap-fixed.png`
+- `evaluation/northstar-72h-2026-07-10/layout-probes/local-day-zoom150-overlap-fixed.json`
+- `evaluation/northstar-72h-2026-07-10/layout-probes/local-day-1170x365-overlap-fixed.png`
+- `evaluation/northstar-72h-2026-07-10/layout-probes/local-day-1170x365-overlap-fixed.json`
+
+Additional verification:
+
+- `npm.cmd test -- tests\workspace-layout-regression.test.ts -t "zoom-like compact|high-zoom short|composer submit action"` -> 3 passed

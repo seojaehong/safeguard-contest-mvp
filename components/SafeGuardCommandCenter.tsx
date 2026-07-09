@@ -34,6 +34,7 @@ import {
   type WorkspacePage,
   type WorkspaceStepStatus
 } from "@/lib/workspace-pages";
+import { buildGenerationProgressState } from "@/lib/workspace-generation-progress";
 import { assessWorkpackReadiness, type WorkpackReadiness } from "@/lib/workpack-readiness";
 
 type SafeGuardCommandCenterProps = {
@@ -227,12 +228,6 @@ function workspaceStepStatusCopy(
 
 function lawCount(data: AskResponse | null, state: GenerationState) {
   if (data) return data.citations.length;
-  if (state === "generating") return 3;
-  return 0;
-}
-
-function docProgress(data: AskResponse | null, state: GenerationState) {
-  if (data) return totalDocumentCount;
   if (state === "generating") return 3;
   return 0;
 }
@@ -1665,7 +1660,14 @@ export function SafeGuardCommandCenter({
   });
   const fieldBrief = data ? buildApiFieldBrief(data, selectedExample) : buildInputFieldBrief(question, selectedExample, liveWeather, isWeatherLoading);
   const currentLawCount = lawCount(data, state);
-  const currentDocProgress = docProgress(data, state);
+  const generationProgress = buildGenerationProgressState({
+    hasData: Boolean(data),
+    state,
+    consoleLines,
+    totalDocumentCount,
+    citationCount: data?.citations.length ?? currentLawCount
+  });
+  const currentDocProgress = generationProgress.count;
   const inputLimit = 600;
   const inputWarning = question.length > Math.floor(inputLimit * 0.9);
   const weatherBrief = compactWeatherBrief(fieldBrief.weather);
@@ -2021,9 +2023,9 @@ export function SafeGuardCommandCenter({
                 <strong>{selectedOutputItem.title}</strong>
                 <small>{message || "선택 문서의 본문, 인용 근거, 원문 확인 상태를 함께 검토합니다."}</small>
               </div>
-              <div className="document-progress-summary" aria-label={`문서팩 진행 ${currentDocProgress}/${totalDocumentCount}`}>
-                <span>{currentDocProgress}/{totalDocumentCount}</span>
-                <b>{currentLawCount ? `${currentLawCount}건 근거` : "근거 준비"}</b>
+              <div className="document-progress-summary" aria-label={`문서팩 진행 ${generationProgress.primary}`}>
+                <span>{generationProgress.primary}</span>
+                <b>{generationProgress.secondary}</b>
               </div>
             </div>
             {busy ? (
@@ -2031,7 +2033,7 @@ export function SafeGuardCommandCenter({
                 <span className="button-spinner" aria-hidden="true" />
                 <div>
                   <strong>문서팩 생성 중</strong>
-                  <small>기상, 법령, SIF/KOSHA DB, 안전조치 검수를 순서대로 확인하고 있습니다.</small>
+                  <small>{generationProgress.detail}</small>
                 </div>
               </div>
             ) : null}
@@ -2048,7 +2050,7 @@ export function SafeGuardCommandCenter({
                   </article>
                 ))}
               </div>
-              <div className={`inline-progress document-review-meter ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${currentDocProgress}/${totalDocumentCount}`}>
+              <div className={`inline-progress document-review-meter ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${generationProgress.primary}`}>
                 <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
               </div>
             </details>

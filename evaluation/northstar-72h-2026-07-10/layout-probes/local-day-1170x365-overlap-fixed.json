@@ -1,0 +1,87 @@
+{
+  "viewport": {
+    "width": 1170,
+    "height": 365
+  },
+  "scroll": {
+    "documentWidth": 1170,
+    "documentHeight": 559
+  },
+  "sideNav": {
+    "top": 94,
+    "bottom": 352,
+    "left": 16,
+    "right": 268,
+    "width": 252,
+    "height": 258,
+    "display": "grid",
+    "lineHeight": "normal",
+    "fontSize": "16px"
+  },
+  "currentBrief": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0,
+    "width": 0,
+    "height": 0,
+    "display": "none",
+    "lineHeight": "normal",
+    "fontSize": "16px"
+  },
+  "main": {
+    "top": 94,
+    "bottom": 495,
+    "left": 280,
+    "right": 1154,
+    "width": 874,
+    "height": 401,
+    "display": "grid",
+    "lineHeight": "normal",
+    "fontSize": "16px"
+  },
+  "heading": {
+    "top": 105,
+    "bottom": 140,
+    "left": 407,
+    "right": 1027,
+    "width": 620,
+    "height": 35,
+    "display": "block",
+    "lineHeight": "34.56px",
+    "fontSize": "32px"
+  },
+  "textarea": {
+    "top": 175,
+    "bottom": 283,
+    "left": 377,
+    "right": 1057,
+    "width": 680,
+    "height": 108,
+    "display": "block",
+    "lineHeight": "22.68px",
+    "fontSize": "14px"
+  },
+  "helper": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0,
+    "width": 0,
+    "height": 0,
+    "display": "none",
+    "lineHeight": "18px",
+    "fontSize": "12px"
+  },
+  "composer": {
+    "top": 301,
+    "bottom": 355,
+    "left": 377,
+    "right": 1057,
+    "width": 680,
+    "height": 54,
+    "display": "flex",
+    "lineHeight": "normal",
+    "fontSize": "16px"
+  }
+}

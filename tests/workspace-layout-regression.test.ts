@@ -498,7 +498,10 @@ describe("workspace layout regression", () => {
           right: Math.round(rect.right),
           width: Math.round(rect.width),
           height: Math.round(rect.height),
+          display: style.display,
           overflowY: style.overflowY,
+          lineHeight: Number.parseFloat(style.lineHeight),
+          fontSize: Number.parseFloat(style.fontSize),
           scrollTop: element instanceof HTMLTextAreaElement ? element.scrollTop : 0,
           clientHeight: element instanceof HTMLTextAreaElement ? element.clientHeight : Math.round(rect.height),
           scrollHeight: element instanceof HTMLTextAreaElement ? element.scrollHeight : Math.round(rect.height)
@@ -512,6 +515,8 @@ describe("workspace layout regression", () => {
       const heading = readRect(".workspace-input-page .command-copy h1");
       const textarea = readRect("#field-command-input");
       const helper = readRect("#field-command-tips");
+      const composer = readRect(".input-composer-tray");
+      const currentBrief = readRect(".workspace-current-brief");
 
       return {
         viewportWidth: window.innerWidth,
@@ -523,7 +528,9 @@ describe("workspace layout regression", () => {
         main,
         heading,
         textarea,
-        helper
+        helper,
+        composer,
+        currentBrief
       };
     });
 
@@ -533,10 +540,14 @@ describe("workspace layout regression", () => {
     expect(metrics.sideNav.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
     expect(metrics.sideNav.overflowY).toBe("auto");
     expect(metrics.heading.bottom).toBeLessThanOrEqual(metrics.textarea.top - 16);
-    expect(metrics.textarea.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 12);
+    expect(metrics.textarea.height).toBeGreaterThanOrEqual(118);
+    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.6);
+    expect(metrics.textarea.bottom).toBeLessThanOrEqual(metrics.composer.top - 14);
     expect(metrics.textarea.scrollTop).toBe(0);
     expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 36);
-    expect(metrics.helper.top).toBeGreaterThanOrEqual(metrics.textarea.bottom + 8);
+    expect(metrics.helper.display).toBe("none");
+    expect(metrics.currentBrief.display).toBe("none");
+    expect(metrics.composer.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 8);
   }, 90_000);
 
   it("keeps high-zoom short day screens from clipping the composer", async () => {
@@ -561,6 +572,7 @@ describe("workspace layout regression", () => {
           right: Math.round(rect.right),
           width: Math.round(rect.width),
           height: Math.round(rect.height),
+          display: style.display,
           lineHeight: Number.parseFloat(style.lineHeight),
           fontSize: Number.parseFloat(style.fontSize),
           scrollTop: element instanceof HTMLTextAreaElement ? element.scrollTop : 0,
@@ -576,6 +588,8 @@ describe("workspace layout regression", () => {
       const heading = readRect(".workspace-input-page .command-copy h1");
       const textarea = readRect("#field-command-input");
       const helper = readRect("#field-command-tips");
+      const composer = readRect(".input-composer-tray");
+      const currentBrief = readRect(".workspace-current-brief");
 
       return {
         viewportWidth: window.innerWidth,
@@ -587,7 +601,9 @@ describe("workspace layout regression", () => {
         main,
         heading,
         textarea,
-        helper
+        helper,
+        composer,
+        currentBrief
       };
     });
 
@@ -596,11 +612,14 @@ describe("workspace layout regression", () => {
     expect(metrics.sideNav.right).toBeLessThanOrEqual(metrics.main.left - 8);
     expect(metrics.heading.bottom).toBeLessThanOrEqual(metrics.textarea.top - 14);
     expect(metrics.textarea.top).toBeGreaterThan(metrics.heading.bottom);
-    expect(metrics.textarea.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 8);
-    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.55);
+    expect(metrics.textarea.height).toBeGreaterThanOrEqual(108);
+    expect(metrics.textarea.bottom).toBeLessThanOrEqual(metrics.composer.top - 10);
+    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.6);
     expect(metrics.textarea.scrollTop).toBe(0);
     expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 44);
-    expect(metrics.helper.top).toBeGreaterThanOrEqual(metrics.textarea.bottom + 6);
+    expect(metrics.helper.display).toBe("none");
+    expect(metrics.currentBrief.display).toBe("none");
+    expect(metrics.composer.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 6);
   }, 90_000);
 
   it("keeps the generated document edit flow inside the workspace design system", async () => {

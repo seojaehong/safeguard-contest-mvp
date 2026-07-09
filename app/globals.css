@@ -15709,8 +15709,8 @@ body:has(.safeclaw-landing) :is(
 @media (min-width: 901px) and (max-height: 430px) {
   .command-center-shell .linear-workspace-layout .workspace-step-page.workspace-input-page,
   .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page {
-    gap: 10px;
-    padding: 14px clamp(24px, 3vw, 36px) 18px !important;
+    gap: 8px;
+    padding: 12px clamp(22px, 3vw, 34px) 14px !important;
   }
 
   .command-center-shell .workspace-input-page .command-copy .eyebrow,
@@ -15718,25 +15718,29 @@ body:has(.safeclaw-landing) :is(
     display: none;
   }
 
+  .command-center-shell .workspace-input-page .command-copy,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy {
+    width: min(680px, 100%);
+  }
+
   .command-center-shell .workspace-input-page .command-copy h1,
   .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
     max-width: 620px;
-    margin: 0 auto 6px;
-    font-size: clamp(34px, 3.4vw, 42px);
+    margin: 0 auto 4px;
+    font-size: clamp(30px, 3vw, 36px);
     line-height: 1.08;
   }
 
   .command-center-shell .workspace-input-page .command-copy p,
   .command-center-shell.workspace-theme-day .workspace-input-page .command-copy p {
-    font-size: 13px;
-    line-height: 1.42;
+    display: none;
   }
 
   .command-center-shell .workspace-input-page .command-console,
   .command-center-shell.workspace-theme-day .workspace-input-page .command-console {
     width: min(680px, 100%);
-    gap: 8px;
-    margin-top: 6px;
+    gap: 6px;
+    margin-top: 4px;
   }
 
   .command-center-shell .workspace-input-page .console-head {
@@ -15751,17 +15755,60 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .workspace-input-page .command-console-input,
   .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input {
-    min-height: 84px;
-    padding: 8px 14px;
-    font-size: 14px;
-    line-height: 1.56;
+    min-height: 118px;
+    padding: 14px 16px;
+    font-size: 15px;
+    line-height: 1.62;
   }
 
   .command-center-shell .workspace-input-page .input-helper,
   .command-center-shell.workspace-theme-day .workspace-input-page .input-helper {
-    margin-top: 0;
-    font-size: 11px;
-    line-height: 1.35;
+    display: none;
+  }
+
+  .command-center-shell .workspace-input-page .input-composer-tray,
+  .command-center-shell.workspace-theme-day .workspace-input-page .input-composer-tray {
+    min-height: 52px;
+    padding: 6px;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-current-brief,
+  .command-center-shell.workspace-theme-day .workspace-source-status,
+  .command-center-shell.workspace-theme-day .workspace-recent-list {
+    display: none;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 380px) {
+  .command-center-shell > .command-topbar,
+  .command-center-shell .command-topbar,
+  .command-center-shell .workspace-command-topbar {
+    margin-bottom: 6px;
+  }
+
+  .command-center-shell .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    gap: 7px;
+    padding: 10px clamp(20px, 2.5vw, 30px) 12px !important;
+  }
+
+  .command-center-shell .workspace-input-page .command-copy h1,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
+    font-size: clamp(28px, 2.8vw, 32px);
+  }
+
+  .command-center-shell .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input {
+    min-height: 108px;
+    padding: 12px 15px;
+    font-size: 14px;
+    line-height: 1.62;
+  }
+
+  .command-center-shell .workspace-input-page .input-composer-tray,
+  .command-center-shell.workspace-theme-day .workspace-input-page .input-composer-tray {
+    min-height: 46px;
+    padding: 5px;
   }
 }
 
