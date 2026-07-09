@@ -51,6 +51,19 @@ Observed:
 - `helper.top`: 440, still visible in first fold
 - `topbar.bottom`: 72, `viewport.top`: 104
 
+Production after deployment:
+
+- Artifact: `prod-after-day-1440x460-filled.png`
+- Metrics: `prod-after-day-1440x460-filled-metrics.json`
+
+Observed:
+
+- `scrollY`: 0
+- `inputPageCount`: 1
+- `mainHasLegacyPageClass`: false
+- `textarea.bottom`: 416, inside viewport height 460
+- `helper.top`: 440, still visible in first fold
+
 ## Verification
 
 ```powershell

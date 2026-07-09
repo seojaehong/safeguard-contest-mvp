@@ -120,6 +120,47 @@ Implemented final-only validation for structured risk rows:
 
 Added a regression test that a row with stale AI risk level mismatch becomes `high` and has no final validation issues after normalization.
 
+## Third Fix: Reference Relevance Guard
+
+Post-deploy verification showed another product-quality issue: the quality contract passed, but the DB harness could still lock unrelated direct evidence such as press, crane, or VDT guidance when common control terms like `전원 차단` overlapped.
+
+Implemented a lexical relevance guard for `safety_reference_items` retrieval:
+
+1. Expand the task query into operation-specific aliases.
+2. Require at least one strong task match such as 밀폐, 산소, 환기, 펌프, 기계실, 누수, 감전, 추락, 비계, or 지게차.
+3. Suppress incompatible evidence families for confined-space/pump work, including 프레스, 크레인, 영상표시단말기, VDT, and 운송용 차량.
+4. Keep the guard internal; no score or probability is shown to users.
+
+## Final Production Check
+
+Source: `postdeploy-final-summary.json`
+
+Deployment:
+
+- `https://safeguard-contest-in0tlitks-seojaehongs-projects.vercel.app`
+- Alias: `https://www.safeclaw.kr`
+
+Result:
+
+- Mode: `live`
+- Quality: `ready`
+- DB harness: `ready`
+- Structured validation: `ready`
+- `riskLevel: must match...`: not present
+- Irrelevant direct evidence title check:
+  - 프레스: absent
+  - 크레인: absent
+  - VDT/영상표시단말기: absent
+- Direct evidence count: 8
+- Required document coverage:
+  - 위험성평가표: covered
+  - TBM 브리핑: covered
+  - TBM 기록: covered
+
+Remaining product note:
+
+The current production retrieval is still `rest-ilike` because SIF/vector embedding search remains disabled until approval. The relevance guard removes obvious off-domain evidence, but tighter semantic matching for near-domain cases should move to the approved SIF embedding/RPC plan.
+
 ## Verification
 
 ```powershell
@@ -139,6 +180,20 @@ npm.cmd run build
 Result:
 
 - 5 focused test files, 31 tests passed.
+- Typecheck passed.
+- Production build passed.
+
+Additional verification after the relevance guard:
+
+```powershell
+npm.cmd test -- tests\safety-reference-relevance.test.ts tests\workspace-layout-regression.test.ts tests\risk-row-normalization.test.ts tests\quality-contract.test.ts tests\workpack-ontology-qa.test.ts tests\commercial-harness.test.ts
+npm.cmd run typecheck
+npm.cmd run build
+```
+
+Result:
+
+- 6 focused test files, 33 tests passed.
 - Typecheck passed.
 - Production build passed.
 
