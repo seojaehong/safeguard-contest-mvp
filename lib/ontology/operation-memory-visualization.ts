@@ -74,8 +74,8 @@ export type OperationMemoryVisualizationModel = {
   };
 };
 
-const MAX_OPERATION_MAP_NODES = 24;
-const MAX_OPERATION_MAP_EDGES = 48;
+const MAX_OPERATION_MAP_NODES = 18;
+const MAX_OPERATION_MAP_EDGES = 36;
 
 export function operationKindLabel(kind: OperationMemoryNodeKind) {
   if (kind === "Workpack") return "작업팩";
@@ -87,6 +87,7 @@ export function operationKindLabel(kind: OperationMemoryNodeKind) {
 }
 
 export function operationRelationLabel(value: OperationMemoryEdge["relation"]) {
+  if (value === "similarWorkpack") return "유사 작업";
   if (value === "usesEvidence") return "근거";
   if (value === "mentionsHazard") return "위험";
   if (value === "mitigatedBy") return "조치";

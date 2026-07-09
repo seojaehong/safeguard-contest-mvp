@@ -27,3 +27,9 @@
 - Verified: live production reproduced the overlap with sticky topbar over the headline; local HEAD scrolls the topbar away. `npm.cmd test -- tests\workspace-layout-regression.test.ts` passed 4 tests.
 - Learned: the user screenshot matched a presentation-like wide/short viewport after scroll, not only the first-load desktop layout.
 - Next: deploy/merge path must be resolved before using `www.safeclaw.kr/workspace` as the demo surface.
+
+## 2026-07-09 N5 workspace operation ontology
+- Changed: added `lib/workspace-operation-graph.ts`, extended operation memory with similar past workpack relationships, refactored the graph UI into `OperationMemoryGraphViewer`, and rendered the operation graph inside `/workspace` after the evidence panel.
+- Verified: `npm.cmd test -- tests\workspace-operation-graph.test.ts tests\operation-memory-visualization.test.ts tests\workspace-layout-regression.test.ts`; browser desktop/mobile captures in `evaluation/northstar-72h-2026-07-09/ontology-browser-check`.
+- Learned: the first graph was correct but too dense, so workspace graph nodes now stay compact until active/hovered and the mobile list uses bounded internal scroll.
+- Next: N3 SIF embedding approval packet remains approval-gated; N6 route-by-route design harmonization remains open.

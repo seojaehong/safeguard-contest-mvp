@@ -1,0 +1,95 @@
+{
+  "errors": [],
+  "results": [
+    {
+      "name": "workspace-ontology-day-desktop",
+      "width": 1440,
+      "height": 900,
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\ontology-browser-check\\workspace-ontology-day-desktop.png",
+      "panelScreenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\ontology-browser-check\\workspace-ontology-day-desktop-panel.png",
+      "metrics": {
+        "title": "작업공간 | SafeClaw",
+        "hasPanel": true,
+        "panelText": "Operation Ontology작업 이력 그래프오늘 문서팩이 사용한 DB 하네스 근거, 유사 과거 작업, 위험요인, 감소대책, 사진 개선사항, 열람 확인을 한 화면에서 연결합니다. 공유 후 작업자가 확인하면 Ack 노드가 채워집니다.저장 전에는 현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 임시 구성합니다.노드 18/30관계 33/64확인 0Workpack세이프건설 서울 성수동 근린생활시설 외벽 도장 작업8 linksControl가동부 방호덮개와 비상정지장치 확인8 linksControl정비 전 전원 차단 및 잠금표지8 linksHazard전도6 linksHazard추락6 linksHazard폭발6 linksHazard화재6 linksHazard밀폐5 linksHazard비계5 linksHazard지게차5 linksHazard충돌5 linksHazardKOSHA5 linksEvidence1062 / 4. 마감공사 / 4.3 석재 및 타일 작업4 linksHazard산업안전일반분야4 linksEvidenceB-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정4 linksEvidenceB-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정4 linksControl감시인 배치 및 구조장비 확보3 linksControl관리감독자 확인 후 작업 시작3 links작업팩세이프건설 서울 성수동 근린생활시설 외벽 도장 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM을 만들어줘.생성 시각2026-07-09T14:08:09.579Z원본 IDcurrent-세이프건설 서울 성수동 근린생활시설 외벽 도장 작업근거 · 나감1038 / 4. 마감공사 / 4.2 방수 작업근거 · 나감1062 / 4. 마감공사 / 4.3 석재 및 타일 작업근거 · 나감B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 ",
+        "stats": [
+          "노드 18/30",
+          "관계 33/64",
+          "확인 0"
+        ],
+        "listItems": [
+          "Workpack세이프건설 서울 성수동 근린생활시설 외벽 도장 작업out 8 · in 0",
+          "Hazard전도out 4 · in 2",
+          "Hazard추락out 4 · in 2",
+          "Hazard폭발out 4 · in 2",
+          "Hazard화재out 4 · in 2",
+          "Hazard밀폐out 4 · in 1",
+          "Hazard비계out 4 · in 1",
+          "Hazard지게차out 4 · in 1"
+        ],
+        "expandedPoints": [
+          "Workpack세이프건설 서울 성수동 근린생활시설 외벽 도장 작업8 links"
+        ],
+        "rect": {
+          "top": -121,
+          "left": 20,
+          "width": 990,
+          "height": 1142
+        },
+        "list": {
+          "height": 360,
+          "scrollHeight": 2915,
+          "overflowY": "auto"
+        },
+        "board": {
+          "height": 896
+        },
+        "horizontalOverflow": false
+      }
+    },
+    {
+      "name": "workspace-ontology-day-mobile",
+      "width": 390,
+      "height": 844,
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\ontology-browser-check\\workspace-ontology-day-mobile.png",
+      "panelScreenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\ontology-browser-check\\workspace-ontology-day-mobile-panel.png",
+      "metrics": {
+        "title": "작업공간 | SafeClaw",
+        "hasPanel": true,
+        "panelText": "Operation Ontology작업 이력 그래프오늘 문서팩이 사용한 DB 하네스 근거, 유사 과거 작업, 위험요인, 감소대책, 사진 개선사항, 열람 확인을 한 화면에서 연결합니다. 공유 후 작업자가 확인하면 Ack 노드가 채워집니다.저장 전에는 현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 임시 구성합니다.노드 18/30관계 33/64확인 0Workpack세이프건설 서울 성수동 근린생활시설 외벽 도장 작업8 linksControl가동부 방호덮개와 비상정지장치 확인8 linksControl정비 전 전원 차단 및 잠금표지8 linksHazard전도6 linksHazard추락6 linksHazard폭발6 linksHazard화재6 linksHazard밀폐5 linksHazard비계5 linksHazard지게차5 linksHazard충돌5 linksHazardKOSHA5 linksEvidence1062 / 4. 마감공사 / 4.3 석재 및 타일 작업4 linksHazard산업안전일반분야4 linksEvidenceB-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정4 linksEvidenceB-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정4 linksControl감시인 배치 및 구조장비 확보3 linksControl관리감독자 확인 후 작업 시작3 links작업팩세이프건설 서울 성수동 근린생활시설 외벽 도장 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM을 만들어줘.생성 시각2026-07-09T14:08:18.327Z원본 IDcurrent-세이프건설 서울 성수동 근린생활시설 외벽 도장 작업근거 · 나감1038 / 4. 마감공사 / 4.2 방수 작업근거 · 나감1062 / 4. 마감공사 / 4.3 석재 및 타일 작업근거 · 나감B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 ",
+        "stats": [
+          "노드 18/30",
+          "관계 33/64",
+          "확인 0"
+        ],
+        "listItems": [
+          "Workpack세이프건설 서울 성수동 근린생활시설 외벽 도장 작업out 8 · in 0",
+          "Hazard전도out 4 · in 2",
+          "Hazard추락out 4 · in 2",
+          "Hazard폭발out 4 · in 2",
+          "Hazard화재out 4 · in 2",
+          "Hazard밀폐out 4 · in 1",
+          "Hazard비계out 4 · in 1",
+          "Hazard지게차out 4 · in 1"
+        ],
+        "expandedPoints": [
+          "Workpack세이프건설 서울 성수동 근린생활시설 외벽 도장 작업8 links"
+        ],
+        "rect": {
+          "top": -428,
+          "left": 20,
+          "width": 350,
+          "height": 1700
+        },
+        "list": {
+          "height": 420,
+          "scrollHeight": 2953,
+          "overflowY": "auto"
+        },
+        "board": {
+          "height": 360
+        },
+        "horizontalOverflow": false
+      }
+    }
+  ]
+}

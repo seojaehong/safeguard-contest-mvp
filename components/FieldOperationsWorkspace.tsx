@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, startTransition } from "reac
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { ClawChat } from "@/components/ClawChat";
+import { OperationMemoryGraphViewer } from "@/components/OperationMemoryPreview";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
 import {
@@ -13,7 +14,9 @@ import {
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
+import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import type { WorkpackReadiness } from "@/lib/workpack-readiness";
+import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
 import {
   buildDefaultWorkers,
   buildEducationRecordDrafts,
@@ -48,6 +51,19 @@ type WorkspaceSaveSnapshot = {
 };
 
 type LearningExportFormat = "markdown" | "jsonl" | "obsidian";
+
+type OperationGraphResponse = {
+  ok: boolean;
+  configured: boolean;
+  graph?: OperationMemoryGraph;
+  source?: {
+    referenceCount: number;
+    improvementCount: number;
+    confirmationCount: number;
+    retrievalMode: string;
+  } | "unconfigured";
+  message?: string;
+};
 
 type WorkerDraft = {
   displayName: string;
@@ -669,6 +685,87 @@ function WorkpackHistoryPanel({
   );
 }
 
+function WorkspaceOperationGraphPanel({
+  data,
+  session,
+  storageSnapshot
+}: {
+  data: AskResponse;
+  session: Session | null;
+  storageSnapshot: WorkspaceSaveSnapshot;
+}) {
+  const [generatedAt] = useState(() => new Date().toISOString());
+  const [serverGraph, setServerGraph] = useState<OperationMemoryGraph | null>(null);
+  const [graphMessage, setGraphMessage] = useState("");
+  const authToken = session?.access_token || "";
+  const workpackId = storageSnapshot.workpackId;
+  const localGraph = useMemo(
+    () => buildWorkspaceOperationMemoryGraph(data, {
+      workpackId,
+      generatedAt
+    }),
+    [data, generatedAt, workpackId]
+  );
+
+  useEffect(() => {
+    if (!authToken || !workpackId) {
+      setServerGraph(null);
+      setGraphMessage("저장 전에는 현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 임시 구성합니다.");
+      return;
+    }
+
+    let cancelled = false;
+    fetch(`/api/workpacks/${encodeURIComponent(workpackId)}/operation-graph`, {
+      headers: { authorization: `Bearer ${authToken}` }
+    }).then(async (response) => {
+      const payload = await response.json().catch((): OperationGraphResponse => ({
+        ok: false,
+        configured: false,
+        message: "작업 이력 그래프 응답을 읽지 못했습니다."
+      })) as OperationGraphResponse;
+      if (!response.ok || !payload.ok || !payload.graph) {
+        throw new Error(payload.message || "저장된 작업 이력 그래프를 불러오지 못했습니다.");
+      }
+      if (cancelled) return;
+      setServerGraph(payload.graph);
+      setGraphMessage(typeof payload.source === "object"
+        ? "저장된 작업팩, 개선사항, 열람 확인 이력을 Supabase에서 다시 구성했습니다."
+        : "현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 구성했습니다."
+      );
+    }).catch((error: unknown) => {
+      if (cancelled) return;
+      console.warn("workspace operation graph load failed", error);
+      setServerGraph(null);
+      setGraphMessage("저장 그래프 조회가 불안정해 현재 생성 결과 기준으로 표시합니다.");
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authToken, workpackId]);
+
+  const graph = serverGraph || localGraph;
+  const ackMessage = graph.summary.ackCount
+    ? `열람 확인 ${graph.summary.ackCount}건이 Ack 노드로 연결됐습니다.`
+    : "공유 후 작업자가 확인하면 Ack 노드가 채워집니다.";
+
+  return (
+    <OperationMemoryGraphViewer
+      graph={graph}
+      eyebrow="Operation Ontology"
+      title="작업 이력 그래프"
+      className="workspace-operation-memory"
+      description={(
+        <>
+          오늘 문서팩이 사용한 DB 하네스 근거, 유사 과거 작업, 위험요인, 감소대책, 사진 개선사항, 열람 확인을 한 화면에서 연결합니다.{" "}
+          {ackMessage}
+        </>
+      )}
+      statusMessage={graphMessage}
+    />
+  );
+}
+
 export function FieldOperationsWorkspace({
   data,
   editorFocusToken = 0,
@@ -925,6 +1022,11 @@ export function FieldOperationsWorkspace({
           onDeliverablesChange={handleDeliverablesChange}
         />
         <EvidenceImpactPanel data={workspaceData} />
+        <WorkspaceOperationGraphPanel
+          data={workspaceData}
+          session={session}
+          storageSnapshot={storageSnapshot}
+        />
       </main>
 
       <aside className="workspace-side" id="workers">
