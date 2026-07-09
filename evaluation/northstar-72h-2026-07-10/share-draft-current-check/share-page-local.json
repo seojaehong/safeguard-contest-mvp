@@ -1,0 +1,30 @@
+{
+  "metrics": {
+    "url": "http://127.0.0.1:3027/workspace?theme=day",
+    "hasSharePage": true,
+    "hasDraftCandidateCopy": true,
+    "hasWorkerSnapshotCopy": true,
+    "hasOldStorageIdWaiting": false,
+    "hasShareBeforeRemediation": true,
+    "scrollWidth": 1440,
+    "viewportWidth": 1440,
+    "noHorizontalScroll": true,
+    "shareGrid": {
+      "top": 233,
+      "bottom": 1054,
+      "left": 394,
+      "right": 617,
+      "width": 223,
+      "height": 821
+    },
+    "sharePanel": {
+      "top": 62,
+      "bottom": 1628,
+      "left": 377,
+      "right": 1343,
+      "width": 966,
+      "height": 1566
+    }
+  },
+  "consoleMessages": []
+}

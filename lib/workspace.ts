@@ -183,6 +183,35 @@ export function buildWorkerDispatchTargets(workers: WorkerProfile[]): WorkerDisp
   }));
 }
 
+export function buildDisplayTargetWorkers(data: AskResponse, targetWorkers: WorkerDispatchTarget[]) {
+  if (targetWorkers.length) return targetWorkers;
+
+  const workerCount = Math.max(1, data.scenario.workerCount || 1);
+  return [
+    {
+      displayName: "현장관리자",
+      role: "관리자",
+      nationality: "대한민국",
+      languageCode: "ko",
+      languageLabel: "한국어",
+      trainingStatus: "확인 필요" as const
+    },
+    {
+      displayName: `작업자 그룹 ${workerCount}명`,
+      role: "작업자",
+      nationality: "현장 확인",
+      languageCode: "ko",
+      languageLabel: "한국어",
+      trainingStatus: "확인 필요" as const
+    }
+  ];
+}
+
+export function formatDisplayTargetCount(data: AskResponse, targetWorkers: WorkerDispatchTarget[]) {
+  if (targetWorkers.length) return `${targetWorkers.length}명`;
+  return `${Math.max(1, data.scenario.workerCount || 1)}명 기준`;
+}
+
 export function summarizeWorkers(workers: WorkerProfile[]) {
   const selectedCount = workers.length;
   const foreignCount = workers.filter((worker) => worker.isForeignWorker).length;

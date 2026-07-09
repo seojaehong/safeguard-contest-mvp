@@ -1687,6 +1687,19 @@ export function SafeGuardCommandCenter({
   const acceptedInputPhotoCandidateCount = inputPhotoCandidates.filter((candidate) =>
     acceptedInputHazardCandidateKeys.includes(buildHazardPhotoCandidateKey(candidate))
   ).length;
+  const shareTargetSnapshotLabel = data
+    ? `${fieldBrief.workerCount} 작업자 + 관리자`
+    : "문서 생성 후 작업자 snapshot";
+  const shareStorageLabel = savedWorkpackId
+    ? "DB 이력 연결"
+    : data
+      ? "저장 전 후보"
+      : "생성 후 후보";
+  const shareAckLabel = workpackReadiness && !workpackReadiness.canShare
+    ? "공유 전 보완 필요"
+    : data
+      ? "확인 세션 후보 준비"
+      : "문서 생성 후 활성화";
   const currentWorkflowStep = workflowSteps.find((step) => step.key === workspacePage) ?? workflowSteps[0];
   const themeShellClass = activeWorkspaceTheme === "day"
     ? "workspace-theme-day workspace-theme-field"
@@ -2214,21 +2227,21 @@ export function SafeGuardCommandCenter({
               </section>
               <section>
                 <span>Role</span>
-                <strong>관리자 편집 · 작업자 열람</strong>
-                <p>작업자는 자동 언어 보기와 수동 언어 전환을 함께 사용합니다.</p>
-                <small>작업자 표시명 기준 확인</small>
+                <strong>{shareTargetSnapshotLabel}</strong>
+                <p>관리자는 편집, 작업자는 열람 전용으로 보고 자동 언어 보기와 수동 언어 전환을 함께 사용합니다.</p>
+                <small>작업자 표시명 snapshot 기준</small>
               </section>
               <section>
                 <span>Acknowledgment</span>
-                <strong>{workpackReadiness && !workpackReadiness.canShare ? "공유 전 보완 필요" : data ? "확인 버튼 준비" : "문서 생성 후 활성화"}</strong>
+                <strong>{shareAckLabel}</strong>
                 <p>{workpackReadiness && !workpackReadiness.canShare ? "검수·근거·결재 상태를 정리한 뒤 확인 세션을 엽니다." : "열람 전용 화면의 확인 기록을 TBM·교육 확인 후보로 연결합니다."}</p>
                 <small>{workpackReadiness && !workpackReadiness.canShare ? "일반 전송 잠금" : "판정 문구 없이 이력으로 보관"}</small>
               </section>
               <section>
                 <span>Evidence</span>
-                <strong>workpack · 교육 · 전파</strong>
-                <p>문서팩, 교육 확인, provider 전송 로그를 분리해서 남깁니다. 확인 세션 저장은 승인 후 확장합니다.</p>
-                <small>메일·문자는 보조 채널</small>
+                <strong>{shareStorageLabel}</strong>
+                <p>문서팩, 교육 확인 후보, provider 전송 로그를 분리해서 남깁니다. DB 저장 전에는 화면 초안으로 먼저 검토합니다.</p>
+                <small>workpack · education · dispatch 분리</small>
               </section>
             </div>
             <section className="operation-ontology-panel" aria-label="그날 작업 개선사항">
