@@ -14,8 +14,13 @@ function relationLabel(value: string) {
   if (value === "documentedIn") return "문서";
   if (value === "evidencedBy") return "사례";
   if (value === "fulfillsDuty") return "의무";
+  if (value === "basedOnArticle") return "조문 근거";
   if (value === "relatedTo") return "관련";
   return value;
+}
+
+function relatedLabel(related: { direction?: "outgoing" | "incoming"; sourceLabel: string; targetLabel: string }) {
+  return related.direction === "incoming" ? related.sourceLabel : related.targetLabel;
 }
 
 function isPublishedSeedRow(value: unknown) {
@@ -173,12 +178,13 @@ export default async function OntologyPage() {
                         <aside className="ontology-graph-popover" role="note">
                           <span>{card.subtitle}</span>
                           <strong>{card.title}</strong>
+                          {card.excerpt ? <small>{card.excerpt}</small> : null}
                           <p>근거 {card.evidenceCount}개 · 연결 {card.related.length}개</p>
                           <ul>
                             {card.related.slice(0, 4).map((related) => (
-                              <li key={`${card.id}-map-${related.rel}-${related.targetId}`}>
-                                <b>{relationLabel(related.rel)}</b>
-                                <span>{related.targetLabel}</span>
+                              <li key={`${card.id}-map-${related.direction}-${related.rel}-${related.sourceId}-${related.targetId}`}>
+                                <b>{relationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
+                                <span>{relatedLabel(related)}</span>
                               </li>
                             ))}
                           </ul>
@@ -216,12 +222,13 @@ export default async function OntologyPage() {
                         <aside className="ontology-hover-card" role="note">
                           <span>{card.subtitle}</span>
                           <strong>{card.title}</strong>
+                          {card.excerpt ? <small>{card.excerpt}</small> : null}
                           <p>근거 {card.evidenceCount}개 · 연결 {card.related.length}개</p>
                           <ul>
                             {card.related.slice(0, 5).map((related) => (
-                              <li key={`${card.id}-${related.rel}-${related.targetId}`}>
-                                <b>{relationLabel(related.rel)}</b>
-                                <span>{related.targetLabel}</span>
+                              <li key={`${card.id}-${related.direction}-${related.rel}-${related.sourceId}-${related.targetId}`}>
+                                <b>{relationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
+                                <span>{relatedLabel(related)}</span>
                               </li>
                             ))}
                           </ul>

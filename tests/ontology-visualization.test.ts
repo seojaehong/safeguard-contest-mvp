@@ -10,7 +10,7 @@ function node(nodeId: string, kind: string, label = nodeId) {
     node_id: nodeId,
     kind,
     label,
-    text_excerpt: null,
+    text_excerpt: `${label} excerpt`,
     cited_uids: [MANUAL],
     meta: {},
     review_state: "published"
@@ -43,9 +43,24 @@ describe("buildOntologyVisualizationModel", () => {
 
     expect(model.list).toHaveLength(5);
     expect(model.hoverCards.find((card) => card.id === "Task_paint")?.related).toEqual(expect.arrayContaining([
-      expect.objectContaining({ rel: "entailsHazard", targetId: "Hazard_fall" }),
-      expect.objectContaining({ rel: "documentedIn", targetId: "Document_tbm" })
+      expect.objectContaining({ rel: "entailsHazard", direction: "outgoing", targetId: "Hazard_fall" }),
+      expect.objectContaining({ rel: "documentedIn", direction: "outgoing", targetId: "Document_tbm" })
     ]));
+    expect(model.hoverCards.find((card) => card.id === "Hazard_fall")?.related).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        rel: "entailsHazard",
+        direction: "incoming",
+        sourceId: "Task_paint",
+        sourceLabel: "외벽 도장"
+      }),
+      expect.objectContaining({
+        rel: "mitigatedBy",
+        direction: "outgoing",
+        targetId: "Control_guardrail",
+        targetLabel: "난간 보강"
+      })
+    ]));
+    expect(model.hoverCards.find((card) => card.id === "Hazard_fall")?.excerpt).toBe("추락 excerpt");
     expect(model.map.nodes.map((item) => item.id)).toContain("Task_paint");
     expect(model.map.edges.map((item) => item.id)).toContain("Task_paint|entailsHazard|Hazard_fall");
     expect(model.map.nodes.every((item) => item.x >= 7 && item.x <= 93 && item.y >= 7 && item.y <= 93)).toBe(true);
