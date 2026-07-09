@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-07-09T22:57:56.277372+00:00",
+  "verdict": "pass",
+  "issue_count": 0,
+  "issues": [],
+  "summary": {
+    "archive_members": 71,
+    "parsed_sources": 69,
+    "risk_standard_models": 69,
+    "risk_standard_rows": 3101
+  }
+}

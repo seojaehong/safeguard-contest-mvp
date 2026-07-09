@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-07-09T22:57:48.353748+00:00",
+  "archive_path": "C:\\Users\\iceam\\Downloads\\한국가스공사_KOGAS 위험성평가 표준모델_20240909.zip",
+  "root_source_id": "kogas-risk-standard-models-20240909",
+  "member_count": 71,
+  "success_count": 69,
+  "failure_count": 2,
+  "sheet_count": 180,
+  "row_count": 3101,
+  "elapsed_ms": 5312,
+  "artifacts": [
+    "db-migration-agent-handoff.md",
+    "mapping-proposal.json",
+    "normalized-risk-standard-rows.json",
+    "qa.md",
+    "report.json",
+    "safety-reference-upsert-preview.json",
+    "source-profile.json"
+  ],
+  "skipped_reasons": {
+    "unsupported-hwp": 1,
+    "nested-zip-offline-review-required": 1
+  },
+  "self_check": {
+    "generated_at": "2026-07-09T22:57:54.612383+00:00",
+    "verdict": "pass",
+    "issue_count": 0,
+    "issues": [],
+    "summary": {
+      "archive_members": 71,
+      "parsed_sources": 69,
+      "risk_standard_models": 69,
+      "risk_standard_rows": 3101
+    }
+  }
+}
