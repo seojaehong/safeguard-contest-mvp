@@ -2,10 +2,8 @@ import { describe, expect, it } from "vitest";
 import { listAiDeliverableGroupsForScope } from "@/lib/ai-deliverables";
 
 describe("AI deliverable group scope", () => {
-  it("keeps enhanced generation focused on core risk and TBM workbench documents", () => {
-    expect(listAiDeliverableGroupsForScope("enhanced")).toEqual([
-      "structuredRiskRows"
-    ]);
+  it("keeps enhanced generation out of AI document calls", () => {
+    expect(listAiDeliverableGroupsForScope("enhanced")).toEqual([]);
   });
 
   it("keeps non-core document groups out of enhanced generation", () => {
@@ -17,6 +15,7 @@ describe("AI deliverable group scope", () => {
         "tbmLogStructured",
         "educationRecordStructured",
         "tbmLog",
+        "structuredRiskRows",
         "free",
         "foreign",
         "tbmRiskLinks"

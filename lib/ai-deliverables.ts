@@ -981,7 +981,7 @@ export function listAiDeliverableGroupsForScope(scope: "full" | "enhanced" = "fu
     .map((spec) => spec.name);
   return scope === "full"
     ? [...tabularNames, "structuredRiskRows", "free", "foreign", "tbmRiskLinks"]
-    : [...tabularNames, "structuredRiskRows"];
+    : tabularNames;
 }
 
 function tabularSpecsForScope(scope: "full" | "enhanced") {
@@ -993,23 +993,25 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
 
-  // Full: broad pack. Enhanced: core 3-step workbench docs only; non-core docs use deterministic templates.
+  // Full: broad pack. Enhanced: no AI doc groups; the DB harness builds rows deterministically.
   const tabularPromises = tabularSpecsForScope(scope).map((spec) =>
     callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name)
   );
-  const structuredRiskRowsPromise = callAndParse(
-    structuredRiskRowsPrompt(ctx),
-    parseStructuredRiskRows,
-    "structuredRiskRows"
-  );
+  const structuredRiskRowsPromise = scope === "full"
+    ? callAndParse(
+        structuredRiskRowsPrompt(ctx),
+        parseStructuredRiskRows,
+        "structuredRiskRows"
+      )
+    : null;
   const activePromises = scope === "full"
     ? [
         ...tabularPromises,
         structuredRiskRowsPromise,
         callAndParse(freeFormPrompt(ctx), parseFree, "free"),
         callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign")
-      ]
-    : [...tabularPromises, structuredRiskRowsPromise];
+      ].filter((promise): promise is Promise<Partial<AiDeliverables>> => Boolean(promise))
+    : tabularPromises;
   const settled = await Promise.allSettled(activePromises);
 
   const out: AiDeliverables = {};
@@ -1047,18 +1049,18 @@ export async function generateAllDeliverablesWithDiagnostics(
     ...tabularSpecsForScope(scope).map((spec) => ({
       name: spec.name,
       promise: callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name) as Promise<Partial<AiDeliverables>>
-    })),
-    {
-      name: "structuredRiskRows",
-      promise: callAndParse(
-        structuredRiskRowsPrompt(ctx),
-        parseStructuredRiskRows,
-        "structuredRiskRows"
-      ) as Promise<Partial<AiDeliverables>>
-    }
+    }))
   ];
   if (scope === "full") {
     allSpecs.push(
+      {
+        name: "structuredRiskRows",
+        promise: callAndParse(
+          structuredRiskRowsPrompt(ctx),
+          parseStructuredRiskRows,
+          "structuredRiskRows"
+        ) as Promise<Partial<AiDeliverables>>
+      },
       {
         name: "free",
         promise: callAndParse(freeFormPrompt(ctx), parseFree, "free") as Promise<Partial<AiDeliverables>>

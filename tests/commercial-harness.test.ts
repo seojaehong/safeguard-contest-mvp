@@ -391,6 +391,42 @@ describe("runAsk DB harness mode", () => {
     expect(response.qualityContract?.dbHarness.status).toBe("blocked");
   });
 
+  it("keeps enhanced mode row-first without waiting for AI document bodies", async () => {
+    const response = await runAsk("성수동 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 오후 강풍 예보", {
+      aiMode: "enhanced",
+      harnessMemory: {
+        improvements: [{
+          id: "imp-enhanced-row-1",
+          taskLabel: "성수동 외벽 도장 작업",
+          hazardLabel: "작업발판 외측 추락 위험",
+          improvementText: "사진 위험요인 확인 및 조치 후보: 작업면 가장자리 난간 상태를 현장 확인",
+          reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+          sourceType: "photo_analysis",
+          visionStatus: "analyzed",
+          analysisMode: "vision_ocr",
+          photoPairAttached: false,
+          detectedHazards: ["작업발판 외측 추락 위험", "severity:high"],
+          observedImprovement: "난간·끝막이판 설치 여부 확인",
+          sourcePhotoNames: ["before.jpg"],
+          siteSignals: ["비계", "외벽", "단부"],
+          visionEvidence: "before.jpg에서 작업면 단부가 노출되어 보임"
+        }]
+      }
+    });
+
+    expect(response.generationMode).toBe("enhanced");
+    expect(response.status.detail).toContain("AI_MODE=enhanced (DB 하네스 row-first");
+    expect(response.status.detail).toContain("structured rows=deterministic fallback");
+    expect(response.status.detail).toContain("TBM structured=deterministic from risk rows");
+    expect(response.status.detail).not.toContain("문서 생성기 미응답");
+    expect(response.status.detail).not.toContain("Gemini 본문");
+    expect(response.structured?.riskAssessmentRows.length).toBeGreaterThanOrEqual(5);
+    expect(response.structured?.riskAssessmentRows.some((row) => row.hazard.includes("작업발판 외측 추락 위험"))).toBe(true);
+    expect(response.structured?.tbmRiskLinks?.some((link) => link.hazard.includes("작업발판 외측 추락 위험"))).toBe(true);
+    expect(response.deliverables.tbmBriefingStructured?.hazards.length).toBeGreaterThan(0);
+    expect(response.deliverables.tbmLogStructured?.hazardsDiscussed.length).toBeGreaterThan(0);
+  }, 20_000);
+
   it("turns accepted photo hazard memory into deterministic risk rows and TBM links", async () => {
     const response = await runAsk("성수동 외벽 도장 작업, 이동식 비계 사용", {
       aiMode: "template",
