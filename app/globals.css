@@ -14961,6 +14961,26 @@ body:has(.safeclaw-landing) :is(
     min-height: calc(100vh - 116px);
     padding: 0 !important;
   }
+
+  .command-center-shell .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    min-height: 0;
+    align-content: start;
+    gap: 16px;
+    padding: 26px clamp(28px, 4vw, 48px) 30px !important;
+  }
+
+  .command-center-shell .workspace-input-page .command-copy h1,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
+    margin: 0 auto 10px;
+    font-size: clamp(38px, 4.4vw, 52px);
+    line-height: 1.12;
+  }
+
+  .command-center-shell .workspace-input-page .command-console,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console {
+    margin-top: 14px;
+  }
 }
 
 @media (min-width: 901px) and (max-height: 560px) {
@@ -15633,6 +15653,119 @@ body:has(.safeclaw-landing) :is(
     margin-top: 0;
     font-size: 11px;
     line-height: 1.35;
+  }
+}
+
+/* Workspace generated-edit bridge: WorkpackEditor is also mounted after
+   generation inside /workspace. Keep that edit surface in the same daylight
+   workbench system as the main document route. */
+.command-center-shell.workspace-theme-day .field-workspace .workpack-shell {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 16px;
+  width: 100%;
+  margin: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--workspace-ink) !important;
+  padding: 0 !important;
+  overflow: visible;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace .workpack-sidebar,
+.command-center-shell.workspace-theme-day .field-workspace .document-editor {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 10px !important;
+  background: var(--workspace-surface-1) !important;
+  color: var(--workspace-ink) !important;
+  box-shadow: none !important;
+  padding: 20px;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace .document-editor {
+  align-content: start;
+  gap: 16px;
+  min-height: 0;
+  overflow: visible;
+  transform: none;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace .document-editor.editor-focus-cue {
+  border-color: var(--workspace-rule-strong) !important;
+  box-shadow: 0 0 0 3px rgba(108, 111, 247, 0.12) !important;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace :is(.workpack-sidebar, .document-editor) :is(.h2, .h3, h2, h3, strong) {
+  color: var(--workspace-ink) !important;
+  font-family: inherit !important;
+  letter-spacing: 0 !important;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace :is(.workpack-sidebar, .document-editor) :is(.muted, .small, p, li, label, small),
+.command-center-shell.workspace-theme-day .field-workspace .editor-status {
+  color: var(--workspace-muted) !important;
+  font-family: inherit !important;
+  line-height: 1.65;
+  letter-spacing: 0 !important;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace :is(.doc-tab, .template-card),
+.command-center-shell.workspace-theme-day .field-workspace :is(.template-preview, .customer-template-panel, .rubric-panel, .rubric-item, .selected-rubric-item, .submission-preview-panel, .remediation-draft, .remediation-sources a) {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 9px !important;
+  background: var(--workspace-surface-2) !important;
+  color: var(--workspace-ink) !important;
+  box-shadow: none !important;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace .doc-tab {
+  min-height: auto;
+  padding: 12px;
+  text-align: left;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace .doc-tab.active {
+  border-color: var(--workspace-rule-strong) !important;
+  background: var(--workspace-surface-3) !important;
+  box-shadow: inset 3px 0 0 var(--workspace-accent) !important;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace .document-textarea,
+.command-center-shell.workspace-theme-day .field-workspace .remediation-textarea {
+  width: 100%;
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: var(--workspace-ink) !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+  font-size: 15px;
+  line-height: 1.72;
+  padding: 18px 20px;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace .document-textarea {
+  min-height: 460px;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace :is(.document-textarea, .remediation-textarea):focus {
+  border-color: var(--workspace-accent) !important;
+  box-shadow: 0 0 0 3px rgba(108, 111, 247, 0.18) !important;
+  outline: none;
+}
+
+.command-center-shell.workspace-theme-day .field-workspace .editor-focus-message {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 9px !important;
+  background: var(--workspace-surface-2) !important;
+  color: var(--workspace-muted) !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 1180px) {
+  .command-center-shell.workspace-theme-day .field-workspace .workpack-shell {
+    grid-template-columns: 1fr;
   }
 }
 
