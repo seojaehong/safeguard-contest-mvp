@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 const triad = [
   {
@@ -25,29 +26,18 @@ const secondaryDocs = ["점검결과 요약", "작업계획서", "TBM 기록", "
 
 export default function PreviewPage() {
   return (
-    <main className="v2-shell">
-      <header className="v2-nav">
-        <Link href="/" className="brand-lockup" aria-label="SafeClaw 홈">
-          <span className="brand-mark">S</span>
-          <span><strong>SafeClaw</strong><small>핵심 3종</small></span>
-        </Link>
-        <nav>
-          <Link href="/workspace">작업공간</Link>
-          <Link href="/why">차별성</Link>
-          <Link href="/trust">신뢰</Link>
-          <Link href="/roadmap">로드맵</Link>
-        </nav>
-      </header>
-
-      <section className="v2-hero card">
-        <span className="eyebrow">제품 완성도 기준</span>
-        <h1>핵심 3종은 완성품처럼, 나머지는 보조 산출물로 명확히 보여줍니다.</h1>
-        <p>위험성평가표, TBM, 외국인 전송본은 운영자가 바로 검토할 수 있는 핵심 산출물입니다.</p>
-      </section>
-
-      <section className="preview-triad">
+    <SafeClawModuleShell
+      eyebrow="핵심 산출물"
+      title="핵심 3종."
+      description="위험성평가표, TBM, 외국인 전송본은 운영자가 바로 검토할 수 있는 핵심 산출물입니다."
+      status="live"
+      mappedTo="위험성평가 · TBM · 현장 전파"
+      activeHref="/preview"
+      actions={<Link href="/documents">문서 보기</Link>}
+    >
+      <section className="safeclaw-module-grid three preview-triad">
         {triad.map((item) => (
-          <article key={item.title} className="card preview-hero-card">
+          <article key={item.title} className="preview-hero-card">
             <span>{item.label}</span>
             <h2>{item.title}</h2>
             <p>{item.body}</p>
@@ -58,7 +48,7 @@ export default function PreviewPage() {
         ))}
       </section>
 
-      <section className="card secondary-docs-card">
+      <section className="safeclaw-module-panel secondary-docs-card">
         <div className="compact-head">
           <span className="eyebrow">보조 산출물</span>
           <strong>접어서 제공하는 8종</strong>
@@ -67,6 +57,6 @@ export default function PreviewPage() {
           {secondaryDocs.map((doc) => <span key={doc}>{doc}</span>)}
         </div>
       </section>
-    </main>
+    </SafeClawModuleShell>
   );
 }

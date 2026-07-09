@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { AnswerPanel } from "@/components/AnswerPanel";
 import { CitationList } from "@/components/CitationList";
+import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { runAsk } from "@/lib/search";
 
 export const metadata: Metadata = {
@@ -14,25 +16,24 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
   const data = await runAsk(q);
 
   return (
-    <main className="container grid">
-      <section className="hero grid">
-        <div className="row">
-          <span className="badge">근거 기반 질의</span>
-          <span className="badge">현장 판단 보조</span>
-        </div>
-        <h1 className="title small-title">질문형 확인 화면</h1>
-        <p className="subtitle">
-          복잡한 현장 질문을 법령·해석례·판례 근거와 함께 정리해 문서팩 작성 전 판단을 보조합니다.
-        </p>
-        <div className="card list surface">
-          <div className="h3">질문 예시</div>
-          <pre>{q}</pre>
-        </div>
+    <SafeClawModuleShell
+      eyebrow="근거 질의"
+      title="질문형 확인."
+      description="법령·해석례·판례 근거를 먼저 고정하고, 문서팩 작성 전 현장 판단을 보조합니다."
+      status="partial"
+      mappedTo="근거 검색 · 답변 · 인용 자료"
+      activeHref="/ask"
+      actions={<Link href="/search">근거 검색</Link>}
+    >
+      <section className="safeclaw-module-panel">
+        <span>현재 질문</span>
+        <h2>문서 작성 전에 판단할 쟁점입니다.</h2>
+        <pre>{q}</pre>
       </section>
-      <div className="two">
+      <section className="safeclaw-module-grid two">
         <AnswerPanel data={data} />
         <CitationList citations={data.citations} question={q} />
-      </div>
-    </main>
+      </section>
+    </SafeClawModuleShell>
   );
 }

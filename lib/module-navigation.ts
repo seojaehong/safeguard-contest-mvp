@@ -8,6 +8,7 @@ export type ModulePrimaryNavItem = {
   code: string;
   label: string;
   hint: string;
+  aliases?: string[];
   children: ModuleNavChild[];
 };
 
@@ -17,6 +18,7 @@ export const modulePrimaryNav = [
     code: "01",
     label: "작업공간",
     hint: "입력 · 생성",
+    aliases: ["/why", "/preview", "/trust", "/roadmap"],
     children: [{ href: "/home", label: "대시보드" }]
   },
   {
@@ -43,6 +45,7 @@ export const modulePrimaryNav = [
     code: "04",
     label: "근거",
     hint: "DB · 온톨로지",
+    aliases: ["/ask", "/search"],
     children: [
       { href: "/knowledge", label: "지식 DB" },
       { href: "/ontology", label: "온톨로지" },
@@ -61,19 +64,25 @@ export const modulePrimaryNav = [
     code: "06",
     label: "설정",
     hint: "AI · 현장",
+    aliases: ["/dryrun"],
     children: [{ href: "/settings/ai-connect", label: "내 AI 연결" }]
   }
 ] satisfies ModulePrimaryNavItem[];
 
+function isActiveModuleRoute(item: ModulePrimaryNavItem, activeHref?: string) {
+  if (!activeHref) return false;
+  return item.href === activeHref
+    || item.aliases?.includes(activeHref)
+    || item.children.some((child) => child.href === activeHref);
+}
+
 export function getModuleNavModel(activeHref?: string) {
-  const activeSection = modulePrimaryNav.find((item) => (
-    item.href === activeHref || item.children.some((child) => child.href === activeHref)
-  )) ?? modulePrimaryNav[0];
+  const activeSection = modulePrimaryNav.find((item) => isActiveModuleRoute(item, activeHref)) ?? modulePrimaryNav[0];
 
   return {
     primaryItems: modulePrimaryNav.map((item) => ({
       ...item,
-      isActive: item.href === activeHref || item.children.some((child) => child.href === activeHref)
+      isActive: isActiveModuleRoute(item, activeHref)
     })),
     activeSection,
     secondaryItems: activeSection.children.map((child, index) => ({

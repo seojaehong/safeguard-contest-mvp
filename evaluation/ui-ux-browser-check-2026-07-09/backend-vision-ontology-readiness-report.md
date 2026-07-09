@@ -170,13 +170,26 @@ Generated: 2026-07-09
 - `evaluation/ui-ux-browser-check-2026-07-09/module-nav-ai-connect-mobile-metrics.json`
 - `evaluation/ui-ux-browser-check-2026-07-09/module-nav-ontology-desktop.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/module-nav-ontology-desktop-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-ask-desktop.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-ask-desktop-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-search-desktop.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-search-desktop-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-preview-mobile.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-preview-mobile-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-trust-mobile.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-trust-mobile-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-roadmap-desktop.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-roadmap-desktop-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-knowledge-detail-desktop.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/unified-page-knowledge-detail-desktop-metrics.json`
 
 핵심 권고:
 
 - 앱 내부 1급 메뉴는 6개로 축소: 작업공간, 문서, 리포트, 근거, 이력, 설정
 - `/workers`, `/dispatch`, `/tbm`은 1급 메뉴가 아니라 작업공간/문서 하위 흐름으로 흡수
 - `/knowledge`, `/ontology`, `/ops/api`, `/settings/ai-connect`는 근거/설정 하위로 이동
-- `/demo`, `/prototype`, `/preview`, `/ask`, `/search`는 기본 메뉴에서 숨김
+- `/ask`, `/search`, `/preview`, `/trust`, `/roadmap`, `/knowledge/[section]/[slug]`는 공통 `SafeClawModuleShell`로 흡수
+- 사용자 본문에는 `fallback`, `OPENAI_API_KEY`, `AI_MODE`, `timeout`, provider retry 같은 내부 운영 문구를 노출하지 않음
 - 워크스페이스 첫 화면도 사진 분석 카드, 근거 레일, 예시 목록, 고급 설정을 더 접는다.
 
 브라우저 메트릭:
@@ -202,7 +215,11 @@ Generated: 2026-07-09
 - module shell navigation desktop `/settings/ai-connect`: primary 6개, secondary 1개, active primary `설정`, horizontal overflow 없음
 - module shell navigation mobile `/settings/ai-connect`: viewport 390px, scrollWidth 390px, primary 2열(`177px 177px`), secondary 1열(`358px`), horizontal overflow 없음
 - module shell navigation desktop `/ontology`: primary 6개, secondary 3개, active primary `근거`, active secondary `온톨로지`, horizontal overflow 없음
-- 남은 디자인 과제: 각 개별 페이지의 본문 정보량은 워크스페이스 문서형 패턴으로 계속 덜어내야 함
+- unified module pages `/ask`, `/search`, `/preview`, `/trust`, `/roadmap`, `/knowledge/forms/risk-assessment`: 공통 module shell 사용, legacy `v2-shell`/`hero grid` 없음
+- unified module pages: desktop/mobile 모두 horizontal overflow 없음
+- unified module pages: `/ask` visible body에서 내부 진단 문구 없음
+- unified module pages: H1 font size desktop 52px, mobile 34px, letter-spacing `normal`
+- 남은 디자인 과제: 각 개별 페이지 본문 컴포넌트의 과도한 표/카드 밀도는 계속 워크스페이스 문서형 패턴으로 덜어내야 함
 
 ## Tests Run
 
@@ -216,6 +233,8 @@ Generated: 2026-07-09
   - 3 files, 7 tests passed
 - `npm.cmd test -- tests/module-shell-navigation.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-preflight.test.ts`
   - 3 files, 9 tests passed
+- `npm.cmd test -- tests/answer-panel-display.test.ts tests/module-shell-navigation.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-preflight.test.ts`
+  - 4 files, 13 tests passed
 - `npm.cmd test -- tests/photo-vision-analysis.test.ts`
   - 1 file, 11 tests passed
 - `npm.cmd test -- tests/operation-memory-visualization.test.ts tests/ontology-operation-memory.test.ts tests/reporting-downloads.test.ts tests/workspace-pages.test.ts`

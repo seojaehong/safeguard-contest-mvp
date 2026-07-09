@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 const allowedSections = new Set(["hazards", "forms"]);
 
@@ -36,22 +37,18 @@ export default async function KnowledgeDetailPage({
   if (!markdown) notFound();
 
   return (
-    <main className="v2-shell knowledge-shell">
-      <header className="v2-nav">
-        <Link href="/knowledge" className="brand-lockup" aria-label="LLM 위키로 돌아가기">
-          <span className="brand-mark">S</span>
-          <span><strong>SafeClaw</strong><small>LLM 위키 상세</small></span>
-        </Link>
-        <nav>
-          <Link href="/">작업공간</Link>
-          <Link href="/knowledge">위키</Link>
-          <Link href="/why">차별성</Link>
-        </nav>
-      </header>
-
-      <article className="card knowledge-detail-card">
+    <SafeClawModuleShell
+      eyebrow="지식 DB 상세"
+      title="공식자료 기반 안전지식."
+      description="SIF/KOSHA/작업 이력에서 검토한 지식 항목을 문서 반영 전 확인합니다."
+      status="partial"
+      mappedTo="지식 DB · 근거 확인 · 문서 반영 후보"
+      activeHref="/knowledge"
+      actions={<Link href="/knowledge">목록으로</Link>}
+    >
+      <article className="safeclaw-module-panel knowledge-detail-card">
         {renderMarkdown(markdown)}
       </article>
-    </main>
+    </SafeClawModuleShell>
   );
 }
