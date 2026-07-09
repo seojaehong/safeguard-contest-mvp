@@ -98,6 +98,27 @@ type SifEmbeddingGateStatusResponse = {
     vectorFeatureFlagEnabled: boolean;
     executionReadyAfterApproval: boolean;
   };
+  vectorGuard: {
+    status: "locked" | "blocked" | "ready" | "active";
+    label: string;
+    message: string;
+    flagEnabled: boolean;
+    uploadVerified: boolean;
+    uploadedCount: number;
+    requiredUploadCount: number;
+  };
+  preflightChecks: {
+    id: string;
+    label: string;
+    passed: boolean;
+    evidenceSummary: string;
+  }[];
+  approvalSteps: {
+    id: string;
+    label: string;
+    status: "waiting" | "blocked" | "ready" | "done";
+    detail: string;
+  }[];
   failedCheckIds: string[];
   nextApprovalDecisions: string[];
   artifacts: {
@@ -455,9 +476,29 @@ export function AiConnectPanel() {
               </article>
               <article>
                 <strong>Vector 검색</strong>
-                <p>{sifGate.runtime.vectorFeatureFlagEnabled ? "feature flag 켜짐" : "feature flag 꺼짐 · 승인 전 기본값"}</p>
+                <p>{sifGate.vectorGuard.label} · {sifGate.runtime.vectorFeatureFlagEnabled ? "feature flag 켜짐" : "feature flag 꺼짐"}</p>
               </article>
             </div>
+            <div className={`ai-connect-sif-vector-guard ${sifGate.vectorGuard.status}`}>
+              <div>
+                <strong>{sifGate.vectorGuard.label}</strong>
+                <span>
+                  업로드 {sifGate.vectorGuard.uploadedCount.toLocaleString("ko-KR")} / {sifGate.vectorGuard.requiredUploadCount.toLocaleString("ko-KR")}건
+                </span>
+              </div>
+              <p>{sifGate.vectorGuard.message}</p>
+            </div>
+            <ol className="ai-connect-sif-approval-steps" aria-label="SIF 임베딩 승인 순서">
+              {sifGate.approvalSteps.map((step) => (
+                <li key={step.id} className={step.status}>
+                  <span>{step.status === "done" ? "완료" : step.status === "ready" ? "가능" : step.status === "blocked" ? "대기" : "승인 전"}</span>
+                  <div>
+                    <strong>{step.label}</strong>
+                    <p>{step.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
             <div className="ai-connect-sif-command">
               <div>
                 <strong>승인 후 실행 명령</strong>
@@ -465,6 +506,20 @@ export function AiConnectPanel() {
               </div>
               <pre>{sifGate.commandHeldUntilApproval}</pre>
             </div>
+            <details className="ai-connect-sif-preflight">
+              <summary>Preflight 자동 점검 {sifGate.failedCheckIds.length ? "확인 필요" : "통과"}</summary>
+              <ul>
+                {sifGate.preflightChecks.map((check) => (
+                  <li key={check.id} className={check.passed ? "passed" : "failed"}>
+                    <span>{check.passed ? "통과" : "확인"}</span>
+                    <div>
+                      <strong>{check.label}</strong>
+                      <p>{check.evidenceSummary}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </details>
             <p className="muted">근거 파일: {sifGate.artifacts.reportPath} · {sifGate.artifacts.manifestPath}</p>
           </>
         ) : null}

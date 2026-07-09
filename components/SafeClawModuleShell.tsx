@@ -55,7 +55,7 @@ export function SafeClawModuleShell({
   children,
   actions,
   activeHref,
-  variant = "default"
+  variant = "document"
 }: SafeClawModuleShellProps) {
   const groupedNav = moduleNav.reduce<Record<string, typeof moduleNav[number][]>>((acc, item) => {
     acc[item.group] = acc[item.group] || [];
@@ -71,7 +71,7 @@ export function SafeClawModuleShell({
           <img src="/brand/ClawMark-Inverse.svg" alt="" width={28} height={28} />
           <strong>safeclaw/<em>os</em></strong>
         </Link>
-        <p>FIELD OS</p>
+        <p>현장 안전 문서팩</p>
         <nav aria-label="SafeClaw 운영 메뉴">
           {Object.entries(groupedNav).map(([group, items]) => (
             <section key={group}>

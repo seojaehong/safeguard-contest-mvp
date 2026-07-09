@@ -9176,6 +9176,124 @@ body:has(.safeclaw-landing) :is(
   line-height: 1.55;
 }
 
+.ai-connect-sif-vector-guard {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  border: 1px solid rgba(246, 245, 239, 0.16);
+  border-radius: 10px;
+  background: rgba(11, 12, 16, 0.72);
+  padding: 16px;
+}
+
+.ai-connect-sif-vector-guard > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ai-connect-sif-vector-guard strong {
+  color: var(--os-text, #f6f5ef);
+  font-size: 0.95rem;
+}
+
+.ai-connect-sif-vector-guard span {
+  border-radius: 999px;
+  background: rgba(246, 245, 239, 0.08);
+  color: rgba(246, 245, 239, 0.72);
+  padding: 6px 9px;
+  font-size: 0.72rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.ai-connect-sif-vector-guard p {
+  margin: 0;
+  color: rgba(246, 245, 239, 0.76);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.ai-connect-sif-vector-guard.locked {
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.ai-connect-sif-vector-guard.blocked {
+  border-color: rgba(220, 38, 38, 0.55);
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.16), rgba(11, 12, 16, 0.78));
+}
+
+.ai-connect-sif-vector-guard.ready {
+  border-color: rgba(245, 158, 11, 0.44);
+}
+
+.ai-connect-sif-vector-guard.active {
+  border-color: rgba(34, 197, 94, 0.44);
+}
+
+.ai-connect-sif-approval-steps {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ai-connect-sif-approval-steps li,
+.ai-connect-sif-preflight li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  border: 1px solid rgba(246, 245, 239, 0.12);
+  border-radius: 8px;
+  background: rgba(11, 12, 16, 0.46);
+  padding: 12px;
+}
+
+.ai-connect-sif-approval-steps li > span,
+.ai-connect-sif-preflight li > span {
+  border-radius: 999px;
+  background: rgba(246, 245, 239, 0.08);
+  color: rgba(246, 245, 239, 0.72);
+  padding: 5px 8px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.ai-connect-sif-approval-steps li.done > span,
+.ai-connect-sif-preflight li.passed > span {
+  background: rgba(34, 197, 94, 0.16);
+  color: #bbf7d0;
+}
+
+.ai-connect-sif-approval-steps li.ready > span {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fde68a;
+}
+
+.ai-connect-sif-approval-steps li.blocked > span,
+.ai-connect-sif-preflight li.failed > span {
+  background: rgba(220, 38, 38, 0.16);
+  color: #fecaca;
+}
+
+.ai-connect-sif-approval-steps strong,
+.ai-connect-sif-preflight strong {
+  color: var(--os-text, #f6f5ef);
+  font-size: 0.85rem;
+}
+
+.ai-connect-sif-approval-steps p,
+.ai-connect-sif-preflight p {
+  margin: 5px 0 0;
+  color: rgba(246, 245, 239, 0.7);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 .ai-connect-sif-command {
   display: grid;
   gap: 10px;
@@ -9206,6 +9324,25 @@ body:has(.safeclaw-landing) :is(
   line-height: 1.6;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+}
+
+.ai-connect-sif-preflight {
+  margin-top: 14px;
+}
+
+.ai-connect-sif-preflight summary {
+  cursor: pointer;
+  color: rgba(246, 245, 239, 0.82);
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.ai-connect-sif-preflight ul {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
 .ai-connect-token-items {
@@ -13143,7 +13280,7 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
-/* Product canonical design: module document surfaces follow the /workspace visual system. */
+/* Product canonical design: module surfaces follow the /workspace visual system. */
 .safeclaw-module-shell.module-variant-document {
   --workspace-canvas: #010102;
   --workspace-surface-1: #0f1011;
@@ -13478,6 +13615,232 @@ body:has(.safeclaw-landing) :is(
   font-weight: 420 !important;
 }
 
+/* Workspace design normalization for internal module pages. */
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-grid article {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 8px;
+  background: var(--workspace-surface-1) !important;
+  box-shadow: none !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel {
+  width: min(100% - 40px, 1120px);
+  padding: clamp(24px, 3.2vw, 44px);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel > span,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-grid article span {
+  color: var(--workspace-accent) !important;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 560;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel h2,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-grid article strong {
+  color: var(--workspace-ink) !important;
+  font-family: inherit;
+  font-weight: 620;
+  letter-spacing: -0.035em;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel h2 {
+  font-size: clamp(28px, 3vw, 48px);
+  line-height: 1.08;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel p,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-grid article p {
+  color: var(--workspace-muted) !important;
+  font-size: 15px;
+  font-weight: 420;
+  line-height: 1.72;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-workspace {
+  gap: 16px;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button {
+  min-height: 96px;
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 8px !important;
+  background: var(--workspace-surface-1) !important;
+  color: var(--workspace-muted) !important;
+  padding: 16px;
+  box-shadow: none !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button.active {
+  border-color: rgba(108, 111, 247, 0.5) !important;
+  background: rgba(108, 111, 247, 0.12) !important;
+  color: var(--workspace-ink) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button strong {
+  color: inherit !important;
+  font-size: 14px;
+  font-weight: 560;
+  letter-spacing: 0;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button span {
+  color: var(--workspace-muted) !important;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button:not(.secondary):not(.ghost):not(.document-tab):not(.template-tab) {
+  border-color: var(--workspace-rule) !important;
+  background: var(--workspace-surface-1) !important;
+  color: var(--workspace-muted) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button.active:not(.secondary):not(.ghost):not(.document-tab):not(.template-tab) {
+  border-color: rgba(108, 111, 247, 0.5) !important;
+  background: rgba(108, 111, 247, 0.12) !important;
+  color: var(--workspace-ink) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-section-head span,
+.safeclaw-module-shell.module-variant-document .ai-connect-meta dt,
+.safeclaw-module-shell.module-variant-document .ai-connect-secret label,
+.safeclaw-module-shell.module-variant-document .ai-connect-command-box strong {
+  color: var(--workspace-accent) !important;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 560;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-section-head > strong,
+.safeclaw-module-shell.module-variant-document .ai-connect-token-items article > span {
+  border: 1px solid var(--workspace-rule);
+  border-radius: 999px;
+  background: var(--workspace-surface-2);
+  color: var(--workspace-muted);
+  font-weight: 560;
+  letter-spacing: 0;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-section-head > strong.ready,
+.safeclaw-module-shell.module-variant-document .ai-connect-token-items article > span.on {
+  border-color: rgba(39, 166, 68, 0.38);
+  background: rgba(39, 166, 68, 0.1);
+  color: #8df0a6;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-section-head > strong.hold {
+  border-color: rgba(108, 111, 247, 0.38);
+  background: rgba(108, 111, 247, 0.12);
+  color: #c8cdfc;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-meta div,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-metrics div,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-state-grid article,
+.safeclaw-module-shell.module-variant-document .ai-connect-token-items article {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 8px;
+  background: var(--workspace-surface-2) !important;
+  box-shadow: none !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-meta dd,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-metrics dd,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-state-grid strong,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-command strong,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard strong,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps strong,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight strong,
+.safeclaw-module-shell.module-variant-document .ai-connect-token-items article strong {
+  color: var(--workspace-ink) !important;
+  font-family: inherit;
+  font-weight: 560;
+  letter-spacing: 0;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-metrics dt,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-command span,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-state-grid p,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard p,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps p,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight p,
+.safeclaw-module-shell.module-variant-document .ai-connect-token-items article p {
+  color: var(--workspace-muted) !important;
+  font-family: inherit;
+  letter-spacing: 0;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps li,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight li {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 8px;
+  background: var(--workspace-surface-2) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard.locked {
+  border-color: var(--workspace-rule-strong) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard.blocked {
+  border-color: rgba(220, 38, 38, 0.5) !important;
+  background: rgba(220, 38, 38, 0.1) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard.ready {
+  border-color: rgba(108, 111, 247, 0.48) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-command pre,
+.safeclaw-module-shell.module-variant-document .ai-connect-command-box pre,
+.safeclaw-module-shell.module-variant-document .ai-connect-secret textarea {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 8px;
+  background: #090a0b !important;
+  color: var(--workspace-ink) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps li > span,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight li > span,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard span {
+  border: 1px solid var(--workspace-rule);
+  background: var(--workspace-surface-1);
+  color: var(--workspace-muted);
+  font-weight: 560;
+  letter-spacing: 0;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps li.done > span,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight li.passed > span {
+  border-color: rgba(39, 166, 68, 0.38);
+  background: rgba(39, 166, 68, 0.1);
+  color: #8df0a6;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps li.ready > span {
+  border-color: rgba(108, 111, 247, 0.38);
+  background: rgba(108, 111, 247, 0.12);
+  color: #c8cdfc;
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps li.blocked > span,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight li.failed > span {
+  border-color: rgba(220, 38, 38, 0.42);
+  background: rgba(220, 38, 38, 0.12);
+  color: #fca5a5;
+}
+
 @media (max-width: 980px) {
   .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-shell {
     width: min(100% - 24px, 1280px);
@@ -13495,5 +13858,21 @@ body:has(.safeclaw-landing) :is(
     color: var(--workspace-subtle);
     font-size: 12px;
     font-weight: 520;
+  }
+}
+
+@media (max-width: 980px) {
+  .safeclaw-module-shell.module-variant-document .ai-connect-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .safeclaw-module-shell.module-variant-document .ai-connect-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .safeclaw-module-shell.module-variant-document .ai-connect-tabs button {
+    min-height: auto;
   }
 }

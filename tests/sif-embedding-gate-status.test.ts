@@ -32,6 +32,15 @@ describe("SIF embedding gate status", () => {
       missingPrimaryDocumentsCount: 0,
       duplicateContentHashCount: 0
     });
+    expect(status.vectorGuard).toMatchObject({
+      status: "locked",
+      flagEnabled: false,
+      uploadVerified: false,
+      uploadedCount: 0,
+      requiredUploadCount: 6032
+    });
+    expect(status.approvalSteps.map((step) => step.id)).toEqual(["migration", "embedding", "upload", "vector"]);
+    expect(status.preflightChecks.some((check) => check.id === "vector_feature_flag_stays_off_until_upload_verified" && check.passed)).toBe(true);
     expect(status.failedCheckIds).toEqual([]);
     expect(status.commandHeldUntilApproval).toBe("npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload");
   });
@@ -52,8 +61,14 @@ describe("SIF embedding gate status", () => {
 
     expect(missingOpenAi.ok).toBe(true);
     expect(missingOpenAi.runtime.executionReadyAfterApproval).toBe(false);
-    expect(readyRuntime.ok).toBe(true);
+    expect(readyRuntime.ok).toBe(false);
     expect(readyRuntime.runtime.executionReadyAfterApproval).toBe(true);
     expect(readyRuntime.runtime.vectorFeatureFlagEnabled).toBe(true);
+    expect(readyRuntime.vectorGuard).toMatchObject({
+      status: "blocked",
+      flagEnabled: true,
+      uploadVerified: false
+    });
+    expect(readyRuntime.message).toContain("SAFETY_REFERENCE_VECTOR_SEARCH=1");
   });
 });
