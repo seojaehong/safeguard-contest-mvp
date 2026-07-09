@@ -637,6 +637,8 @@ describe("workspace layout regression", () => {
           width: Math.round(rect.width),
           height: Math.round(rect.height),
           display: style.display,
+          paddingTop: Number.parseFloat(style.paddingTop),
+          paddingBottom: Number.parseFloat(style.paddingBottom),
           lineHeight: Number.parseFloat(style.lineHeight),
           fontSize: Number.parseFloat(style.fontSize),
           scrollTop: element instanceof HTMLTextAreaElement ? element.scrollTop : 0,
@@ -685,7 +687,9 @@ describe("workspace layout regression", () => {
     expect(metrics.textarea.top).toBeGreaterThan(metrics.heading.bottom);
     expect(metrics.textarea.height).toBeGreaterThanOrEqual(108);
     expect(metrics.textarea.bottom).toBeLessThanOrEqual(metrics.composer.top - 10);
-    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.6);
+    expect(metrics.textarea.paddingTop).toBeGreaterThanOrEqual(12);
+    expect(metrics.textarea.paddingBottom).toBeGreaterThanOrEqual(12);
+    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
     expect(metrics.textarea.scrollTop).toBe(0);
     expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 44);
     expect(metrics.helper.display).toBe("none");
@@ -719,6 +723,8 @@ describe("workspace layout regression", () => {
           height: Math.round(rect.height),
           display: style.display,
           overflowY: style.overflowY,
+          paddingTop: Number.parseFloat(style.paddingTop),
+          paddingBottom: Number.parseFloat(style.paddingBottom),
           lineHeight: Number.parseFloat(style.lineHeight),
           fontSize: Number.parseFloat(style.fontSize),
           scrollTop: element instanceof HTMLTextAreaElement ? element.scrollTop : 0,
@@ -758,8 +764,10 @@ describe("workspace layout regression", () => {
     expect(metrics.sideNav.overflowY).toBe("auto");
     expect(metrics.copy.display).toBe("none");
     expect(metrics.textarea.top).toBeGreaterThanOrEqual(metrics.viewport.top + 8);
-    expect(metrics.textarea.height).toBeGreaterThanOrEqual(94);
-    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.55);
+    expect(metrics.textarea.height).toBeGreaterThanOrEqual(104);
+    expect(metrics.textarea.paddingTop).toBeGreaterThanOrEqual(14);
+    expect(metrics.textarea.paddingBottom).toBeGreaterThanOrEqual(14);
+    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
     expect(metrics.textarea.scrollTop).toBe(0);
     expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 42);
     expect(metrics.helper.display).toBe("none");
