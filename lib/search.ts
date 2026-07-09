@@ -24,7 +24,7 @@ import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAss
 import { splitDocumentMeta } from "./doc-meta-split";
 import { buildEvidenceLabels } from "./smsa-mapping";
 import { createLogger } from "@/lib/logger";
-import { attachProgressListeners, type OnAskProgress } from "./ask-progress";
+import { attachProgressListeners, safeEmit, type OnAskProgress } from "./ask-progress";
 import { resolveRunAskMode } from "./run-ask-mode";
 import {
   buildDbHarnessAnswer,
@@ -1406,11 +1406,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       };
     })();
 
-    // Fix 6: Start deliverables generation as a Promise BEFORE awaiting allSettled.
+    // Fix 6: Start full-mode deliverables generation as a Promise BEFORE awaiting allSettled.
     // Scenario is derived synchronously from the question (inferScenario is pure).
     // We chain off rawCitationsBasePromise/weather/training/kosha/accident so the
-    // deliverables Vertex calls start as soon as those resolve (~2-5s), running
-    // fully in parallel with responsePromise's Vertex call.
+    // full-mode Vertex calls start as soon as those resolve (~2-5s), running
+    // fully in parallel with responsePromise's Vertex call. Enhanced mode is
+    // row-first: DB/SIF/KOSHA/photo harness rows are assembled deterministically.
     const earlyScenario = inferScenario(question);
     const earlyScenarioParsed = {
       companyName: earlyScenario.companyName,
@@ -1421,7 +1422,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       weatherNote: earlyScenario.weatherNote
     };
     const deliverablesPromise: Promise<{ deliverables: Awaited<ReturnType<typeof generateAllDeliverables>>; diagnostics: Awaited<ReturnType<typeof generateAllDeliverablesWithDiagnostics>>["diagnostics"] } | null> =
-      (aiMode === "enhanced" || aiMode === "full")
+      aiMode === "full"
         ? Promise.all([
             rawCitationsBasePromise.catch(() => [] as Awaited<ReturnType<typeof searchLegalSources>>),
             weatherPromise.catch(() => null),
@@ -1466,7 +1467,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               accidentLines: accidentLinesEarly,
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
               dbHarnessContext,
-              scope: aiMode === "full" ? "full" : "enhanced",
+              scope: "full",
               onProgress
             }).catch((error) => {
               log.error("AI deliverable generation failed (parallel path); falling back to template bodies", error);
@@ -1633,7 +1634,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     let aiBodies: Awaited<ReturnType<typeof generateAllDeliverables>> = {};
     let aiModeAppliedDetail = "AI_MODE=template (템플릿 본문 사용)";
     if (aiMode === "enhanced" || aiMode === "full") {
-      if (deliverablesResult) {
+      if (aiMode === "enhanced") {
+        aiModeAppliedDetail = "AI_MODE=enhanced (DB 하네스 row-first: 위험성평가 row 확정, TBM 구조 deterministic 조립)";
+      } else if (deliverablesResult) {
         const { deliverables, diagnostics } = deliverablesResult;
         aiBodies = deliverables;
         const filled = Object.keys(aiBodies);
@@ -1667,6 +1670,13 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const acceptedPhotoSeedRiskRows = structuredRiskRows.slice(baseStructuredRiskRows.length);
     const structuredValidation = validateRiskAssessmentRows(structuredRiskRows);
     const structuredRiskIssues = structuredValidation.issues;
+    if (aiMode === "enhanced") {
+      safeEmit(onProgress, {
+        kind: "doc",
+        name: "structuredRiskRows",
+        status: structuredRiskRows.length && !structuredRiskIssues.length ? "ok" : "fail"
+      });
+    }
     const structuredRiskSourceDetail = generatedStructuredRiskRows.length
       ? `structured rows=AI${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`
       : `structured rows=deterministic fallback${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`;
