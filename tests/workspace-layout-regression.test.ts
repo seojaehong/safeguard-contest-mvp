@@ -336,6 +336,10 @@ describe("workspace layout regression", () => {
 
     expect(metrics.topbar.position).toBe("relative");
     expect(metrics.topbar.height).toBeLessThanOrEqual(72);
+    expect(metrics.topbar.left).toBeGreaterThanOrEqual(320);
+    expect(metrics.topbar.right).toBeLessThanOrEqual(1728);
+    expect(metrics.viewport.left).toBe(metrics.topbar.left);
+    expect(metrics.viewport.right).toBe(metrics.topbar.right);
     expect(metrics.topbar.bottom).toBeLessThanOrEqual(metrics.viewport.top - 8);
     expect(metrics.sideNav.top).toBe(metrics.viewport.top);
     expect(metrics.sideNav.bottom).toBeLessThanOrEqual(638);
