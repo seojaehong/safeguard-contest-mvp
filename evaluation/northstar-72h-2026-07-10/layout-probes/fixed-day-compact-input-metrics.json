@@ -1,0 +1,191 @@
+[
+  {
+    "label": "2048x638",
+    "metrics": {
+      "viewport": {
+        "width": 2048,
+        "height": 638,
+        "scrollWidth": 2048
+      },
+      "textarea": {
+        "selector": "#field-command-input",
+        "top": 307,
+        "bottom": 471,
+        "left": 705,
+        "right": 1525,
+        "width": 820,
+        "height": 164,
+        "display": "block",
+        "scrollTop": 0,
+        "scrollHeight": 162,
+        "clientHeight": 162
+      },
+      "composer": {
+        "selector": ".input-composer-tray",
+        "top": 551,
+        "bottom": 611,
+        "left": 705,
+        "right": 1465,
+        "width": 760,
+        "height": 60,
+        "display": "flex"
+      },
+      "submit": {
+        "selector": ".composer-submit-button",
+        "top": 560,
+        "bottom": 602,
+        "left": 1280,
+        "right": 1456,
+        "width": 176,
+        "height": 42,
+        "display": "flex"
+      },
+      "fieldChips": {
+        "selector": ".field-brief-chip-row",
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "evidenceRail": {
+        "selector": ".evidence-readiness-rail",
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0,
+        "display": "none"
+      }
+    }
+  },
+  {
+    "label": "zoom125",
+    "metrics": {
+      "viewport": {
+        "width": 1638,
+        "height": 510,
+        "scrollWidth": 1638
+      },
+      "textarea": {
+        "selector": "#field-command-input",
+        "top": 265,
+        "bottom": 383,
+        "left": 554,
+        "right": 1234,
+        "width": 680,
+        "height": 118,
+        "display": "block",
+        "scrollTop": 0,
+        "scrollHeight": 116,
+        "clientHeight": 116
+      },
+      "composer": {
+        "selector": ".input-composer-tray",
+        "top": 437,
+        "bottom": 497,
+        "left": 554,
+        "right": 1234,
+        "width": 680,
+        "height": 60,
+        "display": "flex"
+      },
+      "submit": {
+        "selector": ".composer-submit-button",
+        "top": 446,
+        "bottom": 488,
+        "left": 1049,
+        "right": 1225,
+        "width": 176,
+        "height": 42,
+        "display": "flex"
+      },
+      "fieldChips": {
+        "selector": ".field-brief-chip-row",
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "evidenceRail": {
+        "selector": ".evidence-readiness-rail",
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0,
+        "display": "none"
+      }
+    }
+  },
+  {
+    "label": "zoom150",
+    "metrics": {
+      "viewport": {
+        "width": 1365,
+        "height": 425,
+        "scrollWidth": 1365
+      },
+      "textarea": {
+        "selector": "#field-command-input",
+        "top": 219,
+        "bottom": 303,
+        "left": 431,
+        "right": 1111,
+        "width": 680,
+        "height": 84,
+        "display": "block",
+        "scrollTop": 0,
+        "scrollHeight": 82,
+        "clientHeight": 82
+      },
+      "composer": {
+        "selector": ".input-composer-tray",
+        "top": 346,
+        "bottom": 406,
+        "left": 431,
+        "right": 1111,
+        "width": 680,
+        "height": 60,
+        "display": "flex"
+      },
+      "submit": {
+        "selector": ".composer-submit-button",
+        "top": 355,
+        "bottom": 397,
+        "left": 926,
+        "right": 1102,
+        "width": 176,
+        "height": 42,
+        "display": "flex"
+      },
+      "fieldChips": {
+        "selector": ".field-brief-chip-row",
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "evidenceRail": {
+        "selector": ".evidence-readiness-rail",
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0,
+        "display": "none"
+      }
+    }
+  }
+]

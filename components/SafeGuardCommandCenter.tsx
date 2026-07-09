@@ -1849,6 +1849,10 @@ export function SafeGuardCommandCenter({
                   다시 분석
                 </button>
               ) : null}
+              <button type="submit" className="button command-primary composer-submit-button" disabled={busy} aria-busy={busy}>
+                {busy ? <span className="button-spinner" aria-hidden="true" /> : null}
+                {busy ? "근거 확인 중" : "안전 문서 생성"}
+              </button>
             </div>
             <div className="field-brief-chip-row" aria-label="자동 인식 현장 요약">
               <span>{fieldBrief.siteName}</span>
@@ -1970,10 +1974,6 @@ export function SafeGuardCommandCenter({
               </fieldset>
             </details>
             <div className="command-actions">
-              <button type="submit" className="button command-primary" disabled={busy} aria-busy={busy}>
-                {busy ? <span className="button-spinner" aria-hidden="true" /> : null}
-                {busy ? "근거 확인 중" : "안전 문서 생성"}
-              </button>
               <button
                 type="button"
                 className="button secondary"
