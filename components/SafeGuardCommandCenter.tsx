@@ -22,6 +22,7 @@ import {
 } from "@/lib/operation-improvements";
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
+  operationImprovementToHarnessImprovement,
   parseOperationImprovements,
   type OperationImprovement
 } from "@/lib/operation-improvement-history";
@@ -150,6 +151,10 @@ type ImprovementApiResult = {
     observedImprovement?: string;
     detectedHazards?: string[];
     ocrText?: string;
+    sourcePhotoNames?: string[];
+    photoCount?: number;
+    siteSignals?: string[];
+    visionEvidence?: string;
     reflectedDocuments?: string[];
     errorMessage?: string;
   };
@@ -1155,24 +1160,7 @@ export function SafeGuardCommandCenter({
       siteSignals: inputHazardPhotoAnalysis.siteSignals,
       photoCount: inputHazardPhotos.length
     });
-    const storedImprovements: HarnessImprovement[] = operationImprovements.slice(0, 8).map((item) => ({
-      id: item.remoteImprovementId || item.id,
-      taskLabel: item.workSummary,
-      hazardLabel: item.hazardLabel,
-      improvementText: item.improvementText,
-      reflectedDocuments: item.reflectedDocuments,
-      sourceType: item.sourceType || "manual",
-      visionStatus: item.visionStatus,
-      analysisMode: item.analysisMode,
-      photoPairAttached: item.photoPairAttached ?? Boolean(item.beforePhotoName && item.afterPhotoName),
-      visionUserLabel: item.visionUserLabel,
-      visionSummary: item.visionSummary || item.photoAnalysisSummary,
-      detectedHazards: item.detectedHazards,
-      observedImprovement: item.observedImprovement,
-      ocrText: item.ocrText,
-      sourcePhotoNames: [item.beforePhotoName || "", item.afterPhotoName || ""].filter(Boolean),
-      photoCount: [item.beforePhotoName, item.afterPhotoName].filter(Boolean).length || undefined
-    }));
+    const storedImprovements: HarnessImprovement[] = operationImprovements.slice(0, 8).map(operationImprovementToHarnessImprovement);
     const improvements = [...acceptedPhotoImprovements, ...storedImprovements].slice(0, 12);
     return { improvements, workpackMemory: [] };
   }
@@ -1297,10 +1285,17 @@ export function SafeGuardCommandCenter({
     let analysisMode: OperationImprovement["analysisMode"];
     let photoPairAttached: boolean | undefined;
     let visionUserLabel: string | undefined;
+    let visionProvider: string | undefined;
+    let visionModel: string | undefined;
     let visionSummary: string | undefined;
     let detectedHazards: string[] | undefined;
     let observedImprovement: string | undefined;
     let ocrText: string | undefined;
+    let sourcePhotoNames = [beforePhoto?.name || "", afterPhoto?.name || ""].filter(Boolean);
+    let photoCount: number | undefined = sourcePhotoNames.length || undefined;
+    let siteSignals: string[] | undefined;
+    let visionEvidence: string | undefined;
+    let visionErrorMessage: string | undefined;
     let saveMessage = "로컬 후보로 보관했습니다.";
 
     try {
@@ -1319,10 +1314,19 @@ export function SafeGuardCommandCenter({
           analysisMode = improvementSave.vision?.analysisMode;
           photoPairAttached = improvementSave.vision?.photoPairAttached;
           visionUserLabel = improvementSave.vision?.userLabel;
+          visionProvider = improvementSave.vision?.provider;
+          visionModel = improvementSave.vision?.model;
           visionSummary = improvementSave.vision?.summary || improvementSave.vision?.observedImprovement;
           detectedHazards = improvementSave.vision?.detectedHazards;
           observedImprovement = improvementSave.vision?.observedImprovement;
           ocrText = improvementSave.vision?.ocrText;
+          sourcePhotoNames = improvementSave.vision?.sourcePhotoNames?.length
+            ? improvementSave.vision.sourcePhotoNames
+            : sourcePhotoNames;
+          photoCount = improvementSave.vision?.photoCount || photoCount;
+          siteSignals = improvementSave.vision?.siteSignals;
+          visionEvidence = improvementSave.vision?.visionEvidence;
+          visionErrorMessage = improvementSave.vision?.errorMessage;
         }
       }
     } catch (error) {
@@ -1349,10 +1353,17 @@ export function SafeGuardCommandCenter({
       analysisMode,
       photoPairAttached,
       visionUserLabel,
+      visionProvider,
+      visionModel,
       visionSummary,
       detectedHazards,
       observedImprovement,
       ocrText,
+      sourcePhotoNames,
+      photoCount,
+      siteSignals,
+      visionEvidence,
+      visionErrorMessage,
       saveMessage
     };
     const nextItems = [nextItem, ...operationImprovements].slice(0, 10);
@@ -2132,6 +2143,7 @@ export function SafeGuardCommandCenter({
                     >
                       {improvementSaveState === "saving" ? "보관 중..." : "개선사항 보관"}
                     </button>
+                    <Link href="/reports" className="button secondary">기간 리포트 보기</Link>
                     <small>DB 저장이 가능하면 workpack 개선 이력으로, 아니면 로컬 후보로 남깁니다.</small>
                   </div>
                 </div>

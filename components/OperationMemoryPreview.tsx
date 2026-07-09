@@ -3,6 +3,7 @@
 import { type KeyboardEvent, useEffect, useMemo, useState } from "react";
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
+  operationImprovementToHarnessImprovement,
   parseOperationImprovements,
   type OperationImprovement
 } from "@/lib/operation-improvement-history";
@@ -22,25 +23,6 @@ import {
 function loadStoredImprovements() {
   if (typeof window === "undefined") return [];
   return parseOperationImprovements(window.localStorage.getItem(OPERATION_IMPROVEMENTS_STORAGE_KEY));
-}
-
-function toHarnessImprovement(item: OperationImprovement): HarnessImprovement {
-  return {
-    id: item.remoteImprovementId || item.id,
-    taskLabel: item.workSummary,
-    hazardLabel: item.hazardLabel,
-    improvementText: item.improvementText,
-    reflectedDocuments: item.reflectedDocuments,
-    sourceType: item.sourceType || "manual",
-    visionStatus: item.visionStatus,
-    analysisMode: item.analysisMode,
-    photoPairAttached: item.photoPairAttached,
-    visionUserLabel: item.visionUserLabel,
-    visionSummary: item.visionSummary || item.photoAnalysisSummary,
-    detectedHazards: item.detectedHazards,
-    observedImprovement: item.observedImprovement,
-    ocrText: item.ocrText
-  };
 }
 
 function sampleReference(): SafetyReferenceItem {
@@ -125,7 +107,7 @@ export function OperationMemoryPreview() {
         taskLabel: "성수동 외벽 도장"
       };
     const references = hasLocal ? [] : [sampleReference()];
-    const harnessImprovements = hasLocal ? localItems.map(toHarnessImprovement) : [sampleImprovement];
+    const harnessImprovements = hasLocal ? localItems.map(operationImprovementToHarnessImprovement) : [sampleImprovement];
     const confirmations = hasLocal ? [] : [
       { displayName: "Nguyen", languageCode: "vi", readAt: "2026-07-09T09:20:00.000Z" }
     ];

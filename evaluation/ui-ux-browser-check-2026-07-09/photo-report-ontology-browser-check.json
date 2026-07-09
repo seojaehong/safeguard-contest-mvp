@@ -1,0 +1,133 @@
+{
+  "generatedAt": "2026-07-09T12:34:28.419Z",
+  "baseUrl": "http://127.0.0.1:3064",
+  "checks": [
+    {
+      "route": "/workspace?theme=day",
+      "name": "workspace-day-photo-report-entry",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "screenshot": "evaluation/ui-ux-browser-check-2026-07-09/workspace-day-photo-report-entry.png",
+      "expectations": [
+        {
+          "text": "사진 첨부 최대 10장",
+          "present": true
+        },
+        {
+          "text": "안전 문서 생성",
+          "present": true
+        },
+        {
+          "text": "고위험요인 사례",
+          "present": true
+        },
+        {
+          "text": "KOSHA 공식자료",
+          "present": true
+        }
+      ],
+      "pass": true,
+      "bodySnippet": "SafeClaw\n현장 안전 문서팩\n현장 상황\n입력\nDay\nNight\n작업 입력 대기\n입력 대기\n작업공간\n입력\n진행 중\n▣\n문서\n잠김\n▣\n공유\n잠김\n현재 작업\n세이프건설 서울 성수동 근린생활시설 외벽 도장 작업\n서울 · 5명\n근거 준비\n\n고위험요인 사례\n조회 예정\n\nKOSHA 공식자료\n조회 예정\n\n위험요인-조치 그래프\n생성 후 검수\n\n최근 예시\n서울 건설 · 강풍 · 신규 혼재\n서울 성수동\n인천 물류 · 우천 · 숙련자 중심\n인천 남동공단\n안산 제조 · 화기 · 외국인 포함\n경기 안산\n부산 시설 · 밀폐공간 · 2인 작업\n부산 해운대\n현장 작업 입력\n오늘 작업은 무엇인가요?\n\n지역, 작업, 인원, 주요 위험만 적어도 됩니다.\n\n현장 상황 입력\n120/600자\n\n작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 최대 10장 첨부하세요.\n\n+\n사진\n사진 첨부 최대 10장\n첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다.\n서울\n시설관리·유지보수\n강풍\n5명\n국내 인력 중심\n고위험요인 사례\n조회 예정\nKOSHA 공식자료\n조회 예정\n위험요인-조치 그래프\n생성 후 검수\n현장 이력\n생성 후 연결\n기상·조건\n조회 예정\n고급 설정\n안전 문서 생성\n예시로 되돌리기\n예시 불러오기"
+    },
+    {
+      "route": "/reports",
+      "name": "reports-desktop-period-downloads",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "screenshot": "evaluation/ui-ux-browser-check-2026-07-09/reports-desktop-period-downloads.png",
+      "expectations": [
+        {
+          "text": "개선사항 포함 MD",
+          "present": true
+        },
+        {
+          "text": "공정별",
+          "present": true
+        },
+        {
+          "text": "작업별",
+          "present": true
+        },
+        {
+          "text": "위험등급별",
+          "present": true
+        },
+        {
+          "text": "하네스 JSONL",
+          "present": true
+        }
+      ],
+      "pass": true,
+      "bodySnippet": "safeclaw/os\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n SITE 기본 현장\nAPI Law.go · KOSHA · 기상청\n연결 확인\n작업 시작\n리포트\n개선 리포트.\n\n위험성평가, TBM, 개선사항을 현재 작업팩 기준으로 짧게 정리합니다.\n\n업무 범위\n기간 리포트 · 다운로드\n작업공간에서 개선 추가\n샘플 리포트\n샘플 데이터로 다운로드 흐름을 보여줍니다.\n다시 불러오기\n리포트\n서울 성수동 근린생활시설… · 주간\n\n위험성평가와 개선사항을 한 문서에서 검토합니다. 외부 제출은 하지 않습니다.\n\n현장\n서울 성수동 근린생활시설 현장\n\n작업\n세이프건설 서울 성수동 근린…\n\n기간\n주간\n\n생성\n07. 09. 오후 09:34\n\n01\n작업 기준\n\n회사\n세이프건설\n\n현장\n서울 성수동 근린생활시설 현장\n\n작업\n세이프건설 서울 성수동 근린생활시설 외벽 도장 작업\n\n인원\n5명\n\n기상/조건\n오후 강풍 예보, 작업중지 기준 공유 필요\n\n02\n위험 As-Is/To-Be\n작업\n위험\n현재\n개선\n근거\n세이프건설 서울 성수동 근린생활…\n건설업 · 상\n강풍 상황에서 이동식 비계가 흔들리며 작업…\n현재 조치 현장 확인\n작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 · 풍속 상승 또는…\n위험성평가 · TBM\n03\n개선사항 후보\n개선사항 후보 없음\n주간 리포트\n\n다음\n작업공간에서 사진이나 메모를 저장하면 표시됩니다.\n\n개선사항 저장하기\n04\n리포트 메모\n\n이 리포트는 현재 브라우저의 최신 작업팩과 저장된 개선사항 후보를 기준으로 생성됩니다.\n\nBefore/After 사진 개선사항은 관리자가 확인한 뒤 공식 이력으로 승격하는 흐름을 전제로 합니다.\n\n구조화 위험성평가 행이 없어서 핵심 위험 요약으로 대체했습니다.\n\n선택한 기간에 저장된 개선사항 후보가 없습니다.\n\n기간\n오늘\n당일\n주간\n이번 주\n월간\n이번 달\n다운로드\n\n개선사항 포함 문서와 다음 생성용 운영 메모리를 분리해 내려받습니다.\n\n개선사항 포함 MD\n공정·작업 분류 CSV\n관리자 원본 JSON\n\n아래 파일은 승인 전 지식 후보입니다. 사용자 근거처럼 바로 노출하지 않습니다.\n\n다음 생성용 MD\n하네스 JSONL\n요약\n\n1\n평가 행\n\n1\n고위험\n\n0\n개선사항\n\n0\n사진 개선\n\n근거\n위험성평가\nTBM\n분류\n공정별\n\n건설업\n위험 1 ·"
+    },
+    {
+      "route": "/reports",
+      "name": "reports-mobile-period-downloads",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "screenshot": "evaluation/ui-ux-browser-check-2026-07-09/reports-mobile-period-downloads.png",
+      "expectations": [
+        {
+          "text": "개선사항 포함 MD",
+          "present": true
+        },
+        {
+          "text": "주간",
+          "present": true
+        },
+        {
+          "text": "공정별",
+          "present": true
+        },
+        {
+          "text": "하네스 JSONL",
+          "present": true
+        }
+      ],
+      "pass": true,
+      "bodySnippet": "safeclaw/os\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n02\n문서\n03\n리포트\n04\n근거\n05\n이력\n06\n설정\n SITE 기본 현장\nAPI Law.go · KOSHA · 기상청\n연결 확인\n작업 시작\n리포트\n개선 리포트.\n\n위험성평가, TBM, 개선사항을 현재 작업팩 기준으로 짧게 정리합니다.\n\n업무 범위\n기간 리포트 · 다운로드\n작업공간에서 개선 추가\n샘플 리포트\n샘플 데이터로 다운로드 흐름을 보여줍니다.\n다시 불러오기\n리포트\n서울 성수동 근린생활시설… · 주간\n\n위험성평가와 개선사항을 한 문서에서 검토합니다. 외부 제출은 하지 않습니다.\n\n현장\n서울 성수동 근린생활시설 현장\n\n작업\n세이프건설 서울 성수동 근린…\n\n기간\n주간\n\n생성\n07. 09. 오후 09:34\n\n01\n작업 기준\n\n회사\n세이프건설\n\n현장\n서울 성수동 근린생활시설 현장\n\n작업\n세이프건설 서울 성수동 근린생활시설 외벽 도장 작업\n\n인원\n5명\n\n기상/조건\n오후 강풍 예보, 작업중지 기준 공유 필요\n\n02\n위험 As-Is/To-Be\n세이프건설 서울 성수동 근린생활…\n건설업 · 상\n강풍 상황에서 이동식 비계가 흔들리며 작업…\n현재 조치 현장 확인\n작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 · 풍속 상승 또는…\n위험성평가 · TBM\n03\n개선사항 후보\n개선사항 후보 없음\n주간 리포트\n\n다음\n작업공간에서 사진이나 메모를 저장하면 표시됩니다.\n\n개선사항 저장하기\n04\n리포트 메모\n\n이 리포트는 현재 브라우저의 최신 작업팩과 저장된 개선사항 후보를 기준으로 생성됩니다.\n\nBefore/After 사진 개선사항은 관리자가 확인한 뒤 공식 이력으로 승격하는 흐름을 전제로 합니다.\n\n구조화 위험성평가 행이 없어서 핵심 위험 요약으로 대체했습니다.\n\n선택한 기간에 저장된 개선사항 후보가 없습니다.\n\n기간\n오늘\n당일\n주간\n이번 주\n월간\n이번 달\n다운로드\n\n개선사항 포함 문서와 다음 생성용 운영 메모리를 분리해 내려받습니다.\n\n개선사항 포함 MD\n공정·작업 분류 CSV\n관리자 원본 JSON\n\n아래 파일은 승인 전 지식 후보입니다. 사용자 근거처럼 바로 노출하지 않습니다.\n\n다음 생성용 MD\n하네스 JSONL\n요약\n\n1\n평가 행\n\n1\n고위험\n\n0\n개선사항\n\n0\n사진 개선\n\n근거\n위험성평가\nTBM\n분류\n공정별\n\n건설업\n위험 1 · 개선 0\n\n작업별\n\n세이프건설 서울 성수동 근린…\n위험 1 · 개선 0\n\n위험등급별\n\n상\n위험 1 · 개선 0\n\n문서반영별"
+    },
+    {
+      "route": "/ontology",
+      "name": "ontology-operation-memory-export",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "screenshot": "evaluation/ui-ux-browser-check-2026-07-09/ontology-operation-memory-export.png",
+      "expectations": [
+        {
+          "text": "오늘 작업 메모리 맵",
+          "present": true
+        },
+        {
+          "text": "작업 이력 MD",
+          "present": true
+        },
+        {
+          "text": "하네스 JSONL",
+          "present": true
+        },
+        {
+          "text": "Obsidian MD",
+          "present": true
+        }
+      ],
+      "pass": true,
+      "bodySnippet": "safeclaw/os\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n근거 관련\n01\n지식 DB\n02\n온톨로지\n03\nAPI 연결\n SITE 기본 현장\nAPI Law.go · KOSHA · 기상청\n바로 사용\n작업 시작\n운영 온톨로지\n작업 이력 그래프.\n\n작업, 위험요인, 조치, 법령, 문서 반영 위치를 리스트와 hover card로 확인합니다.\n\n업무 범위\n166개 노드 · 169개 관계\nGraph JSON\nNodes\n166개\n\nTask, Hazard, Control, Article, Document를 published 범위에서만 표시합니다.\n\nEdges\n169개\n\n관계가 끊긴 edge와 출처 없는 항목은 조립 단계에서 제외됩니다.\n\nGate\n0개 제외\n\n근거 없는 draft/uncited 항목은 사용자 근거처럼 노출하지 않습니다.\n\nOPERATION MEMORY\n작업팩별 개선 루프\n\npublished 지식 그래프는 고정 근거이고, 작업팩 그래프는 오늘 작업에서 실제로 사용한 근거, 사진 분석 개선사항, 열람 확인 이력을 묶습니다. 저장된 작업팩은/api/workpacks/[id]/operation-graph에서 Workpack → Hazard → Control/Improvement → Evidence/Ack 구조로 내려받습니다.\n\nWORKPACK\n오늘 작업\n질문 · 생성일 · 현장 맥락\nEVIDENCE\nSIF/KOSHA 근거\n문서에 반영된 직접/보조 근거\nIMPROVEMENT\n사진/메모 개선\nbefore-after 분석과 반영 문서\nACK\n열람 확인\n작업자 표시명 · 언어 · 확인 시각\nOPERATION GRAPH\n오늘 작업 메모리 맵\n\n아직 로컬 개선 후보가 없어 Before/After 개선 루프 샘플을 보여줍니다. MD/JSONL/Obsidian 노트는 다음 위험성평가와 TBM 생성에서 DB 하네스가 먼저 조회할 후보입니다.\n\n최근 후보 다시 읽기\n작업 이력 MD\n하네스 JSONL\nObsidian MD\n노드 7/7\n관계 7/7\nWORKPACK\n성수동 외벽 도장\n3 links\nHAZARD\n추락\n4 links\nEVIDENCE\n외벽 도장 중 작업발판 단부 추락 사례\n2 links\nIMPROVEMENT\nBefore 사진의 난간 누락 구간을 보강하고 After 사진에서"
+    }
+  ],
+  "consoleMessages": [],
+  "pass": true,
+  "scope": [
+    "workspace input photo attachment surface",
+    "reports period download surface",
+    "operation memory ontology export surface"
+  ]
+}
