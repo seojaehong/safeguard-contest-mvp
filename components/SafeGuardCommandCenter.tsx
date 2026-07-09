@@ -1676,7 +1676,7 @@ export function SafeGuardCommandCenter({
             ))}
           </div>
         </aside>
-        <section className={`command-main card command-main-studio workspace-${workspacePage}-page`}>
+        <section className={`command-main card command-main-studio workspace-view-${workspacePage}`}>
           {workspacePage === "input" ? (
             <section className="workspace-step-page workspace-input-page" id="workspace-input-page">
           <div className="command-copy">
