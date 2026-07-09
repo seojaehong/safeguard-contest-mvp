@@ -130,6 +130,17 @@ Generated: 2026-07-09
 - 즉 사진/개선 후보는 단순 textarea 부록만이 아니라 DB 기반 하네스 계약의 일부로 문서 생성 전에 고정된다.
 - 문서 화면 인용 근거 패널에는 `하네스 메모리` 항목이 노출되어, 개선 이력/과거 작업 이력이 해당 문서 생성에 반영됐는지 확인할 수 있다.
 
+2026-07-09 보이는 판단문 보강:
+
+- `/ask`와 문서 생성 응답의 최상단 `answer`는 이제 일반 LLM 산문이 아니라 `DbHarnessPacket`에서 만든 하네스 판단 요약으로 시작한다.
+- 직접 근거, SIF/사고 사례, 개선 이력, 누락 항목이 먼저 고정되고, LLM 문장은 보조 산문으로만 뒤에 붙는다.
+- `practicalPoints`도 하네스 기준으로 재구성해, 사용자가 위험성평가/TBM/공유 전파에 무엇을 반영해야 하는지 먼저 보게 했다.
+- 내부 용어인 `fallback`, `OPENAI_API_KEY`, provider retry, timeout, 확률/점수 표현은 사용자 본문에 드러내지 않는 기존 표시 정책을 유지한다.
+- 검증 명령:
+  - `npm.cmd test -- tests\commercial-harness.test.ts tests\answer-panel-display.test.ts tests\quality-contract.test.ts`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run build`
+
 판단:
 
 - 현재 요구에는 Habermas machine 또는 LangGraph 구현이 필수는 아니다.

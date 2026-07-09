@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { buildDbHarnessPacket, buildHarnessPromptContext, hasDocumentCoverage, parseHarnessMemoryInput } from "@/lib/db-harness";
+import {
+  buildDbHarnessAnswer,
+  buildDbHarnessPacket,
+  buildDbHarnessPracticalPoints,
+  buildHarnessPromptContext,
+  hasDocumentCoverage,
+  parseHarnessMemoryInput
+} from "@/lib/db-harness";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
@@ -177,6 +184,42 @@ describe("DB harness packet", () => {
     expect(promptContext).toContain("개선이력: 추락 -> 오전 작업 전 이동식 비계 난간을 보강함");
     expect(promptContext).toContain("visionStatus: analyzed");
     expect(promptContext).toContain("작업이력: 2026-07-08T00:00:00.000Z · 지난주 성수동 외벽 도장 · 문서팩 준비됨");
+  });
+
+  it("builds the visible judgment summary from the DB harness packet before generic answer text", () => {
+    const packet = buildDbHarnessPacket({
+      question: "성수동 외벽 도장 작업",
+      references: [
+        reference(),
+        reference({
+          id: "guide-1",
+          item_type: "technical-guideline",
+          evidence_role: "direct",
+          title: "KOSHA 외벽 도장 추락 예방 지침",
+          controls: ["작업발판 사전 점검", "하부 출입 통제"]
+        })
+      ],
+      improvements: [{
+        id: "imp-1",
+        taskLabel: "성수동 외벽 도장",
+        hazardLabel: "추락",
+        improvementText: "작업 전 난간 보강 사진 확인",
+        reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+        sourceType: "photo_analysis",
+        detectedHazards: ["추락"]
+      }]
+    });
+    const answer = buildDbHarnessAnswer(packet, "일반 AI 답변");
+    const points = buildDbHarnessPracticalPoints(packet, ["일반 체크포인트"]);
+
+    expect(answer).toContain("1) 하네스 판단");
+    expect(answer).toContain("직접 근거: KOSHA 외벽 도장 추락 예방 지침");
+    expect(answer).toContain("SIF 유사사례: 외벽 도장 중 추락 사례");
+    expect(answer).toContain("작업 전 난간 보강 사진 확인");
+    expect(answer).not.toContain("일반 AI 답변");
+    expect(answer).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
+    expect(points[0]).toContain("문서 반영 전 확인");
+    expect(points).toContain("위험성평가표에 같은 위험요인·조치·확인자를 연결");
   });
 });
 
