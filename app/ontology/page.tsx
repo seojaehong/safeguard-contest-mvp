@@ -134,7 +134,8 @@ export default async function OntologyPage() {
             </div>
             <p>
               published 노드 중 연결도가 높은 항목을 먼저 배치합니다. 노드에 마우스를 올리면 관련 위험요인,
-              조치, 법령, 문서 관계가 hover card로 표시됩니다.
+              조치, 법령, 문서 관계가 hover card로 표시됩니다. 맵은 복잡도를 낮추기 위해 일부만 배치하고,
+              왼쪽 리스트는 전체 노드를 보존합니다.
             </p>
             <div className="ontology-graph-board">
               <svg viewBox="0 0 100 100" role="img" aria-label="작업, 위험요인, 조치, 법령, 문서 연결 지도">
@@ -195,6 +196,13 @@ export default async function OntologyPage() {
                 })}
               </div>
             </div>
+            <div className="ontology-graph-stats" aria-label="온톨로지 그래프 표시 범위">
+              <span>맵 노드 {model.stats.visibleNodes.toLocaleString("ko-KR")}/{model.stats.totalNodes.toLocaleString("ko-KR")}</span>
+              <span>맵 관계 {model.stats.visibleEdges.toLocaleString("ko-KR")}/{model.stats.totalEdges.toLocaleString("ko-KR")}</span>
+              {model.stats.hiddenNodes > 0 ? (
+                <span>리스트 보존 {model.stats.hiddenNodes.toLocaleString("ko-KR")}개</span>
+              ) : null}
+            </div>
             <div className="ontology-graph-legend" aria-label="그래프 범례">
               {["Task", "Hazard", "Control", "Article", "Document", "Accident"].map((kind) => (
                 <span key={kind} className={`kind-${kind}`}>{kind}</span>
@@ -246,6 +254,7 @@ export default async function OntologyPage() {
               <p>
                 왼쪽 노드에 마우스를 올리면 연결된 위험요인, 조치, 법령, 문서 관계가 카드로 떠오릅니다.
                 작업공간에서는 이 모델을 오늘 작업 하네스 패킷과 연결해 “지난 개선이 오늘 TBM에 다시 반영되는지”를 보여줍니다.
+                그래프에 보이지 않는 노드도 리스트와 API 응답에는 남아 있어 근거 추적이 끊기지 않습니다.
               </p>
               <div className="ontology-kind-list">
                 {Object.entries(graph.counts.nodes_by_kind).map(([kind, count]) => (
