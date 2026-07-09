@@ -372,6 +372,9 @@ describe("runAsk DB harness mode", () => {
     expect(response.deliverables.riskAssessmentDraft).toContain("작업 전 난간 보강 사진 확인");
     expect(response.deliverables.tbmBriefing).toContain("작업 전 난간 보강 사진 확인");
     expect(response.deliverables.tbmLogDraft).toContain("작업 전 난간 보강 사진 확인");
+    expect(response.deliverables.riskAssessmentDraft.indexOf("[오늘 개선·이력 반영 - 위험성평가]")).toBeLessThan(120);
+    expect(response.deliverables.tbmBriefing.indexOf("[오늘 개선·이력 반영 - TBM]")).toBeLessThan(120);
+    expect(response.deliverables.tbmLogDraft.indexOf("[오늘 개선·이력 반영 - 확인 기록]")).toBeLessThan(120);
     expect(response.deliverables.photoEvidenceDraft).toContain("Before/After 사진 첨부");
     expect(response.answer).not.toMatch(/fallback|OPENAI_API_KEY|timeout/i);
     expect(response.practicalPoints).toContain("문서 반영 전 확인: 작업 전 난간 보강 사진 확인");
@@ -477,6 +480,9 @@ describe("runAsk DB harness mode", () => {
     expect(response.deliverables.riskAssessmentDraft).toContain("비계 난간 보강 전후 사진을 TBM에 반영");
     expect(response.deliverables.tbmBriefing).toContain("비계 난간 보강 전후 사진을 TBM에 반영");
     expect(response.deliverables.tbmLogDraft).toContain("비계 난간 보강 전후 사진을 TBM에 반영");
+    expect(response.deliverables.riskAssessmentDraft.indexOf("[오늘 개선·이력 반영 - 위험성평가]")).toBeLessThan(120);
+    expect(response.deliverables.tbmBriefing.indexOf("[오늘 개선·이력 반영 - TBM]")).toBeLessThan(120);
+    expect(response.deliverables.tbmLogDraft.indexOf("[오늘 개선·이력 반영 - 확인 기록]")).toBeLessThan(120);
     expect(response.deliverables.photoEvidenceDraft).toContain("Before/After 사진 첨부");
     expect(response.deliverables.photoEvidenceDraft).toContain("before.jpg, after.jpg");
     expect(response.deliverables.photoEvidenceDraft).toContain("추락주의");

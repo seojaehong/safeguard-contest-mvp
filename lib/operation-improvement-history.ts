@@ -52,6 +52,10 @@ function readPositiveNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : undefined;
 }
 
+function readString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function uniqueStrings(values: readonly string[]) {
   return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)));
 }
@@ -101,11 +105,13 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
 
     return parsed.flatMap((item): OperationImprovement[] => {
       if (!isRecord(item)) return [];
+      const workSummary = readString(item.workSummary) || readString(item.taskLabel);
+      const siteName = readString(item.siteName) || readString(item.siteLabel) || workSummary;
       const valid = (
         typeof item.id === "string" &&
         typeof item.createdAt === "string" &&
-        typeof item.siteName === "string" &&
-        typeof item.workSummary === "string" &&
+        Boolean(siteName) &&
+        Boolean(workSummary) &&
         typeof item.hazardLabel === "string" &&
         typeof item.improvementText === "string" &&
         isStringArray(item.reflectedDocuments) &&
@@ -139,8 +145,8 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
       return [{
         id: typeof item.id === "string" ? item.id : "",
         createdAt: typeof item.createdAt === "string" ? item.createdAt : "",
-        siteName: typeof item.siteName === "string" ? item.siteName : "",
-        workSummary: typeof item.workSummary === "string" ? item.workSummary : "",
+        siteName,
+        workSummary,
         hazardLabel: typeof item.hazardLabel === "string" ? item.hazardLabel : "",
         improvementText: typeof item.improvementText === "string" ? item.improvementText : "",
         reflectedDocuments,

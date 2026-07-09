@@ -47,6 +47,39 @@ describe("parseOperationImprovements", () => {
     });
   });
 
+  it("accepts harness-shaped task labels so local photo analysis can feed the next generation", () => {
+    const parsed = parseOperationImprovements(JSON.stringify([{
+      id: "local-before-after-1",
+      createdAt: "2026-07-10T00:00:00.000Z",
+      taskLabel: "성수동 외벽 도장",
+      hazardLabel: "작업발판 외측 추락 위험",
+      improvementText: "Before 사진의 난간 누락 구간을 보강하고 After 사진에서 출입통제선을 확인",
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      sourceType: "photo_analysis",
+      visionStatus: "analyzed",
+      analysisMode: "vision_ocr",
+      photoPairAttached: true,
+      visionUserLabel: "vision/OCR 분석 완료",
+      visionSummary: "난간 보강과 하부 출입통제선이 After 사진에서 확인됩니다.",
+      detectedHazards: ["작업발판 외측 추락 위험", "하부 낙하물 위험"],
+      observedImprovement: "난간 보강 및 통제선 설치",
+      ocrText: "추락주의",
+      sourcePhotoNames: ["before-rail-gap.jpg", "after-guardrail.jpg"],
+      photoCount: 2,
+      siteSignals: ["외벽", "이동식 비계", "단부"],
+      visionEvidence: "after-guardrail.jpg에서 중간난간과 출입통제선이 식별됨"
+    }]));
+
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0]).toMatchObject({
+      siteName: "성수동 외벽 도장",
+      workSummary: "성수동 외벽 도장",
+      hazardLabel: "작업발판 외측 추락 위험",
+      photoPairAttached: true,
+      sourcePhotoNames: ["before-rail-gap.jpg", "after-guardrail.jpg"]
+    });
+  });
+
   it("rejects malformed remote metadata instead of keeping ambiguous local history", () => {
     const parsed = parseOperationImprovements(JSON.stringify([{
       id: "improvement-1",
