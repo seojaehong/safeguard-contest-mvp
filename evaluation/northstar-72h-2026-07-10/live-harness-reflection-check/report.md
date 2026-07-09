@@ -75,10 +75,51 @@ npm.cmd run typecheck
 Result:
 
 - 4 focused test files passed.
-- 25 focused tests passed.
+- 26 focused tests passed after the document-label regression test was added.
 - Production build passed.
 - Typecheck passed.
 
-## Deployment Requirement
+## Post-Deploy Production Evidence
 
-This fix changes runtime server code. It must be committed, pushed, deployed, and then checked again against `https://www.safeclaw.kr/api/ask`.
+Source artifacts:
+
+- `postdeploy-api-ask-harness-summary.json`
+- `postdeploy-api-ask-harness-full.json`
+
+Result:
+
+- mode: `live`
+- generationMode: `enhanced`
+- quality: `ready`
+- ontology QA: `통과`
+- DB harness mode: `db_harness_first`
+- LLM role: `naturalize_only`
+- evidence authority: `db_harness`
+- retrieval mode: `rest-ilike`
+- vector search: `disabled`
+- direct evidence: 7
+- SIF cases: 3
+- supporting evidence: 3
+- improvement memory: 1
+- similar workpack memory: 1
+- missing evidence: none
+- document coverage: risk assessment, TBM briefing, and TBM log all covered by direct evidence, SIF case, supporting evidence, and improvement memory
+- risk rows: 5
+- TBM risk links: 5
+- improvement reflected in risk assessment: yes
+- improvement reflected in TBM briefing: yes
+- improvement reflected in TBM log: yes
+- basement pump/confined-space scenario detected: yes
+- ceiling-leak template bleed: no
+
+The remaining product issue after the first deployment was that `documentReflectionLabel` still exposed internal document keys such as `riskAssessment`, `tbmBriefing`, and `safetyEducation` inside user-facing appendices. The safety knowledge data can keep those stable internal keys, but generated documents must render them as Korean document labels only.
+
+## Follow-Up Fix
+
+1. Added a user-facing document key label map in `lib/safety-knowledge.ts`.
+2. Converted safety knowledge reflection labels from internal keys to Korean document labels before they are appended to generated documents.
+3. Added a regression test to ensure `riskAssessment`, `tbmBriefing`, `safetyEducation`, and `workpackSummary` do not leak into safety knowledge reflection labels.
+
+## Final Deployment Requirement
+
+The label fix changes runtime server code. It must be committed, pushed, deployed, and then checked again against `https://www.safeclaw.kr/api/ask`.

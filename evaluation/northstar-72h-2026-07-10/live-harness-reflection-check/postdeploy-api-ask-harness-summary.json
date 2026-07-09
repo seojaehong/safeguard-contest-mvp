@@ -1,0 +1,187 @@
+{
+  "checkedAt": "2026-07-10T08:11:56",
+  "elapsedMs": 16536,
+  "deployment": "https://safeguard-contest-50wzwym7g-seojaehongs-projects.vercel.app",
+  "alias": "https://www.safeclaw.kr",
+  "mode": "live",
+  "generationMode": "enhanced",
+  "qualityOverall": "ready",
+  "dbHarnessQualityStatus": "ready",
+  "dbHarnessQualityMissing": [],
+  "ontologyVerdict": "통과",
+  "dbHarnessMode": "db_harness_first",
+  "dbHarnessLlmRole": "naturalize_only",
+  "evidenceAuthority": "db_harness",
+  "retrievalMode": "rest-ilike",
+  "vectorReady": false,
+  "vectorReason": "disabled",
+  "directEvidence": 7,
+  "sifCases": 3,
+  "supportingEvidence": 3,
+  "improvementMemory": 1,
+  "workpackMemory": 1,
+  "missingEvidence": [],
+  "documentCoverage": [
+    {
+      "document": "위험성평가표",
+      "covered": true,
+      "evidenceTypes": [
+        "directEvidence",
+        "sifCase",
+        "supportingEvidence",
+        "improvementMemory"
+      ]
+    },
+    {
+      "document": "TBM 브리핑",
+      "covered": true,
+      "evidenceTypes": [
+        "directEvidence",
+        "sifCase",
+        "supportingEvidence",
+        "improvementMemory"
+      ]
+    },
+    {
+      "document": "TBM 기록",
+      "covered": true,
+      "evidenceTypes": [
+        "directEvidence",
+        "sifCase",
+        "supportingEvidence",
+        "improvementMemory"
+      ]
+    }
+  ],
+  "riskRowCount": 5,
+  "tbmRiskLinkCount": 5,
+  "riskRows": [
+    {
+      "task": "지하 기계실 배수펌프 점검",
+      "hazard": "화재 위험: MSDS 확인 및 적정 보호구 착용 미이행",
+      "currentControls": "MSDS 확인 및 적정 보호구 착용",
+      "additionalControls": "환기와 누출 대응 물품 비치",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "A-G-15-2026 중소규모 사업장 비상조치계획 작성에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "task": "지하 기계실 배수펌프 점검",
+      "hazard": "유해·위험요인 미확인",
+      "currentControls": "작업 전 유해·위험요인 확인",
+      "additionalControls": "관리감독자 확인 후 작업 시작",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "E-G-5-2025 직무스트레스로 인한 건강장해 예방을 위한 업종별, 직종별 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "task": "지하 기계실 배수펌프 점검",
+      "hazard": "보행자 동선과 장비 동선 분리 미확인 관련 위험",
+      "currentControls": "보행자 동선과 장비 동선 분리",
+      "additionalControls": "신호수 배치 및 후진 경보 확인",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "A-G-17-2026 인력운반작업에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "task": "지하 기계실 배수펌프 점검",
+      "hazard": "가동부 방호덮개와 비상정지장치 미확인 관련 위험",
+      "currentControls": "가동부 방호덮개와 비상정지장치 확인",
+      "additionalControls": "정비 전 전원 차단 및 잠금표지",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "장비 위험 기준",
+        "297 · 기타의사업 · 시설관리및사업지원서비스업 · 위생및유사서비스업",
+        "검색: rest"
+      ]
+    },
+    {
+      "task": "지하 기계실 배수펌프 점검",
+      "hazard": "지하 기계실 배수펌프 점검 중 산소결핍·유해가스 노출, 불시기동 끼임, 누수 바닥 미끄러짐 위험",
+      "currentControls": "작업 전 장비 상태, 작업구역, 보호구 착용 상태를 확인합니다.",
+      "additionalControls": "진입 전 강제환기 후 산소·유해가스 농도를 측정하고 감시인을 외부에 배치",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "산업안전보건법",
+        "KOSHA 위험성평가",
+        "문서팩 입력 조건"
+      ]
+    }
+  ],
+  "tbmLinks": [
+    {
+      "hazard": "화재 위험: MSDS 확인 및 적정 보호구 착용 미이행",
+      "control": "환기와 누출 대응 물품 비치",
+      "confirmQuestion": "화재 위험: MSDS 확인 및 적정 보호구 착용 미이행에 대해 환기와 누출 대응 물품 비치 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "A-G-15-2026 중소규모 사업장 비상조치계획 작성에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "유해·위험요인 미확인",
+      "control": "관리감독자 확인 후 작업 시작",
+      "confirmQuestion": "유해·위험요인 미확인에 대해 관리감독자 확인 후 작업 시작 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "E-G-5-2025 직무스트레스로 인한 건강장해 예방을 위한 업종별, 직종별 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "보행자 동선과 장비 동선 분리 미확인 관련 위험",
+      "control": "신호수 배치 및 후진 경보 확인",
+      "confirmQuestion": "보행자 동선과 장비 동선 분리 미확인 관련 위험에 대해 신호수 배치 및 후진 경보 확인 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "A-G-17-2026 인력운반작업에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "가동부 방호덮개와 비상정지장치 미확인 관련 위험",
+      "control": "정비 전 전원 차단 및 잠금표지",
+      "confirmQuestion": "가동부 방호덮개와 비상정지장치 미확인 관련 위험에 대해 정비 전 전원 차단 및 잠금표지 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "장비 위험 기준",
+        "297 · 기타의사업 · 시설관리및사업지원서비스업 · 위생및유사서비스업",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "지하 기계실 배수펌프 점검 중 산소결핍·유해가스 노출, 불시기동 끼임, 누수 바닥 미끄러짐 위험",
+      "control": "진입 전 강제환기 후 산소·유해가스 농도를 측정하고 감시인을 외부에 배치",
+      "confirmQuestion": "지하 기계실 배수펌프 점검 중 산소결핍·유해가스 노출, 불시기동 끼임, 누수 바닥 미끄러짐 위험에 대해 진입 전 강제환기 후 산소·유해가스 농도를 측정하고 감시인을 외부에 배치 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "산업안전보건법",
+        "KOSHA 위험성평가",
+        "문서팩 입력 조건"
+      ]
+    }
+  ],
+  "answerPreview": "1) 하네스 판단\n- 직접 근거: A-G-15-2026 중소규모 사업장 비상조치계획 작성에 관한 기술지원규정 / E-G-5-2025 직무스트레스로 인한 건강장해 예방을 위한 업종별, 직종별 기술지원규정 / A-G-17-2026 인력운반작업에 관한 기술지원규정\n- SIF 유사사례: 1919 / 기타의사업 / 시설관리및사업지원서비스업 / 1920 / 기타의사업 / 시설관리및사업지원서비스업 / 1921 / 기타의사업 / 시설관리및사업지원서비스업\n- 작업·개선 이력: 누수 바닥 미끄럼 및 배수 불량: 지난 작업에서 누수부 임시 배수로를 설치하고 미끄럼 방지 매트를 보강함 / 2026-07-02T09:00:00.000Z: 개선 재확인 필요\n\n2) 오늘 문서에 먼저 반영할 조치\n- 가동부 방호덮개와 비상정지장치 확인\n- 정비 전 전원 차단 및 잠금표지\n- 작업발판·난간·개구부 상태 확인\n- 안전대 체결 및 작업반경 출입통제\n- MSDS 확인 및 적정 보호구 착용\n- 환기와 누출 대응 물품 비치\n\n3) 보강 필요\n- 필수 3종 문서에 반영할 근거가 준비됐습니다.\n\n[기상 신호] 단시간 구름많음, 강수없음, 기온 27℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보 반영)\n\n[교육 연계] [스킬업] 산업안전기사 필기 1편 (현장 적합)\n\n[KOSHA 보강] KOSHA 위험성평가 사업안내 (공식 링크 확인)\n\n[유사 재해사례] 엘리베이터 수리 작업 중 끼임: 작업 전 위험요인 공유, 보호구 착용, 작업중지 기준 확인을 예방 포인트로 적용합니다.",
+  "riskDraftHasImprovement": true,
+  "tbmHasImprovement": true,
+  "tbmLogHasImprovement": true,
+  "containsCeilingLeakTemplate": false,
+  "containsPumpScenario": true,
+  "internalTermsPresent": true
+}
