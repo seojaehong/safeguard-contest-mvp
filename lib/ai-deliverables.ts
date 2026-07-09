@@ -973,10 +973,7 @@ const TABULAR_SPECS = [
   { name: "educationRecordStructured", buildPrompt: educationRecordStructuredPrompt, parse: parseEducationRecordStructured }
 ] as const;
 
-const ENHANCED_CORE_SPEC_NAMES = new Set([
-  "tbmBriefingStructured",
-  "tbmLogStructured"
-]);
+const ENHANCED_CORE_SPEC_NAMES = new Set<string>();
 
 export function listAiDeliverableGroupsForScope(scope: "full" | "enhanced" = "full"): string[] {
   const tabularNames = TABULAR_SPECS

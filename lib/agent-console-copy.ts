@@ -28,14 +28,14 @@ const STAGE_COPY: Record<string, string> = {
   accidentCases: "유사 재해사례 검색",
   response: "핵심 판단·즉시 조치 작성",
   safetyReference: "내부 안전지식 대조",
-  deliverables: "AI 본문 초안 생성"
+  deliverables: "구조화 산출물 조립"
 };
 
 // Doc names come from TABULAR_SPECS / generateAllDeliverablesWithDiagnostics in
 // lib/ai-deliverables.ts.
 const DOC_COPY: Record<string, string> = {
   riskAssessment: "위험성평가표 작성",
-  structuredRiskRows: "위험성평가표 작성",
+  structuredRiskRows: "위험요인-조치 row 확정",
   workPlanStructured: "작업계획서 작성",
   tbmBriefingStructured: "TBM 브리핑 작성",
   tbmLogStructured: "TBM 기록 작성",

@@ -28,8 +28,7 @@ describe("buildGenerationProgressState", () => {
       { id: "stage:training", label: "고용24 연계 교육과정 조회", status: "ok" },
       { id: "stage:kosha", label: "KOSHA 공식자료·재해사례 대조", status: "ok" },
       { id: "stage:accidentCases", label: "유사 재해사례 검색", status: "ok" },
-      { id: "doc:riskAssessment", label: "위험성평가표 작성", status: "ok" },
-      { id: "doc:tbmBriefingStructured", label: "TBM 브리핑 작성", status: "ok" }
+      { id: "doc:structuredRiskRows", label: "위험요인-조치 row 확정", status: "ok" }
     ];
 
     const state = buildGenerationProgressState({
@@ -43,8 +42,8 @@ describe("buildGenerationProgressState", () => {
     expect(state.count).toBeGreaterThan(3);
     expect(state.count).toBeLessThan(totalDocumentCount);
     expect(state.primary).not.toBe("3/12");
-    expect(state.secondary).toContain("실시간 검토 6건");
-    expect(state.detail).toBe("TBM 브리핑 작성 확인됨");
+    expect(state.secondary).toContain("실시간 검토 5건");
+    expect(state.detail).toBe("위험요인-조치 row 확정 확인됨");
   });
 
   it("moves the visible count when early stream lines are active but not terminal yet", () => {

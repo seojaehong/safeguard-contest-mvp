@@ -1,4 +1,4 @@
-import { AskResponse, type PermitInspectionStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
+import { AskResponse, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { attachQualityContract } from "./quality-contract";
@@ -306,6 +306,171 @@ function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: string): T
       evidenceRefs: row.evidenceRefs || []
     };
   });
+}
+
+type TbmHazardCategory = TbmBriefingStructured["hazards"][number]["category"];
+
+function compactTbmText(value: string | undefined, fallback: string, maxLength: number): string {
+  const text = (value || fallback).replace(/\s+/g, " ").trim() || fallback;
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
+}
+
+function uniqueNonEmpty(values: string[]): string[] {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function tbmCategory(row: RiskAssessmentRow): TbmHazardCategory {
+  return row.fourM;
+}
+
+function equipmentFromScenarioRows(scenario: AskResponse["scenario"], rows: RiskAssessmentRow[]): string[] {
+  const fromRows = rows.flatMap((row) => row.equipment.split(/[,/·]/).map((part) => part.trim()));
+  const values = uniqueNonEmpty(fromRows);
+  if (values.length) return values.slice(0, 5);
+  return uniqueNonEmpty([scenario.workSummary, "보호구", "작업구역 표지"]).slice(0, 5);
+}
+
+function tbmRows(rows: RiskAssessmentRow[]): RiskAssessmentRow[] {
+  return rows.length ? rows.slice(0, 5) : [];
+}
+
+function fillTbmList(values: string[], fallbacks: string[], count: number): string[] {
+  const filled = uniqueNonEmpty([...values, ...fallbacks]).slice(0, count);
+  return filled.length >= count ? filled : [...filled, ...fallbacks].slice(0, count);
+}
+
+export function buildTbmBriefingStructuredFromRiskRows(
+  scenario: AskResponse["scenario"],
+  rows: RiskAssessmentRow[],
+  weatherSummary: string
+): TbmBriefingStructured {
+  const selectedRows = tbmRows(rows);
+  const hazards = selectedRows.map((row) => ({
+    category: tbmCategory(row),
+    description: compactTbmText(row.hazard, "작업 전 위험요인 확인", 60)
+  }));
+  const safeHazards = hazards.length ? hazards : [
+    { category: "Management" as const, description: "작업 전 위험요인 확인" }
+  ];
+  const measures = selectedRows.map((row, index) => ({
+    hazardRef: Math.min(index + 1, safeHazards.length),
+    action: compactTbmText(row.additionalControls || row.currentControls, "작업 전 안전조치 확인", 80),
+    owner: compactTbmText(row.owner, "작업반장", 30)
+  }));
+  const stopCriteria = fillTbmList(
+    [
+      weatherSummary ? `기상 신호 이상 시 작업중지: ${compactTbmText(weatherSummary, "", 46)}` : "",
+      ...selectedRows
+        .filter((row) => row.riskLevel === "high")
+        .map((row) => `${compactTbmText(row.hazard, "고위험", 32)} 조치 전 작업 금지`)
+    ],
+    ["보호구 미착용 시 작업 금지", "통제구역 이탈 시 작업 중지", "관리감독자 확인 전 작업 재개 금지"],
+    5
+  );
+  const confirmTopics = fillTbmList(
+    selectedRows.map((row) => `${compactTbmText(row.hazard, "위험요인", 34)} 조치를 확인했습니까?`),
+    ["작업중지 기준을 이해했습니까?", "비상연락과 대피경로를 확인했습니까?", "사진 증빙 위치를 확인했습니까?", "작업자 동선을 확인했습니까?", "보호구 착용을 확인했습니까?"],
+    5
+  );
+
+  return {
+    meta: {
+      dateTime: "작업 전 TBM",
+      location: scenario.siteName,
+      target: `전 작업자 ${scenario.workerCount}명`,
+      attendees: "현장 서명 또는 열람 확인 버튼"
+    },
+    todayWork: {
+      name: scenario.workSummary,
+      location: scenario.siteName,
+      time: "작업 전",
+      equipment: equipmentFromScenarioRows(scenario, selectedRows)
+    },
+    hazards: safeHazards,
+    measures: measures.length ? measures : [{
+      hazardRef: 1,
+      action: "작업 전 안전조치 확인",
+      owner: "작업반장"
+    }],
+    stopCriteria,
+    confirmTopics,
+    photoEvidenceLocation: "작업 전·중·후 사진을 문서팩 사진 증빙에 첨부"
+  };
+}
+
+export function buildTbmLogStructuredFromRiskRows(
+  scenario: AskResponse["scenario"],
+  rows: RiskAssessmentRow[],
+  weatherSummary: string
+): TbmLogStructured {
+  const selectedRows = tbmRows(rows);
+  const workerCount = Math.max(1, scenario.workerCount || 1);
+  const confirmations = fillTbmList(
+    selectedRows.map((row) => `${compactTbmText(row.hazard, "위험요인", 34)} 조치 확인`),
+    ["작업중지 기준 공유", "보호구 착용 확인", "비상연락망 확인", "사진 증빙 위치 공유", "작업자 동선 확인"],
+    5
+  );
+  const keyPoints = fillTbmList(
+    [
+      ...selectedRows.map((row) => compactTbmText(row.additionalControls || row.currentControls, "작업 전 안전조치 확인", 70)),
+      weatherSummary ? `기상 신호 확인: ${compactTbmText(weatherSummary, "기상 확인", 46)}` : ""
+    ],
+    ["위험성평가 결과를 TBM에서 재확인", "현장 변경사항은 즉시 작업반장에게 보고", "작업중지 기준 발생 시 즉시 대피"],
+    5
+  );
+  const unaddressedItems = selectedRows
+    .filter((row) => row.verificationStatus === "needsReview")
+    .slice(0, 3)
+    .map((row) => ({
+      item: compactTbmText(row.hazard, "보완 필요 위험요인", 50),
+      plannedAction: compactTbmText(row.additionalControls || row.verification, "관리감독자 확인 후 작업 재개", 70),
+      owner: compactTbmText(row.owner, "작업반장", 30),
+      dueDate: row.due || "현장 확인"
+    }));
+
+  return {
+    meta: {
+      dateTime: "작업 당일 TBM 기록",
+      location: scenario.siteName,
+      workType: scenario.workSummary,
+      instructor: "작업반장"
+    },
+    attendance: {
+      expected: workerCount,
+      actual: workerCount,
+      attendees: Array.from({ length: Math.min(workerCount, 12) }, (_, index) => `작업자 ${index + 1}`),
+      absenceReason: "없음",
+      confirmationMethod: "현장 서명 또는 열람 확인 버튼"
+    },
+    todayWork: {
+      name: scenario.workSummary,
+      location: scenario.siteName,
+      time: "작업 전·중",
+      equipment: equipmentFromScenarioRows(scenario, selectedRows)
+    },
+    workerConfirmations: confirmations,
+    hazardsDiscussed: (selectedRows.length ? selectedRows : []).slice(0, 5).map((row, index) => ({
+      category: tbmCategory(row),
+      description: compactTbmText(row.hazard, "작업 전 위험요인 확인", 60),
+      relatedRiskRowIndex: index
+    })),
+    safetyEducation: {
+      topic: `${scenario.workSummary} 작업 전 위험성평가 공유`,
+      keyPoints,
+      materials: uniqueNonEmpty(selectedRows.flatMap((row) => row.evidenceRefs)).slice(0, 4).join(" / ") || "위험성평가표, KOSHA 자료, 현장 사진"
+    },
+    unaddressedItems,
+    photoEvidence: {
+      captureLocations: uniqueNonEmpty([scenario.siteName, scenario.workSummary]).slice(0, 3),
+      storagePath: "SafeClaw 문서팩 사진 증빙"
+    },
+    signatures: {
+      author: "작성자",
+      reviewer: "검토자",
+      approver: "승인자"
+    }
+  };
 }
 
 function tokenizeForRiskLink(value: string): string[] {
@@ -1517,6 +1682,17 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const tbmRiskSourceDetail = generatedTbmRiskLinks.length
       ? `TBM-risk links=AI${photoSeedTbmRiskLinks.length ? ` + photo seed links ${photoSeedTbmRiskLinks.length}` : ""}`
       : "TBM-risk links=deterministic fallback";
+    const deterministicTbmBriefingStructured = aiMode === "enhanced" && structuredRiskRows.length
+      ? buildTbmBriefingStructuredFromRiskRows(response.scenario, structuredRiskRows, weather.summary)
+      : null;
+    const deterministicTbmLogStructured = aiMode === "enhanced" && structuredRiskRows.length
+      ? buildTbmLogStructuredFromRiskRows(response.scenario, structuredRiskRows, weather.summary)
+      : null;
+    const tbmStructuredSourceDetail = aiBodies.tbmBriefingStructured || aiBodies.tbmLogStructured
+      ? "TBM structured=AI"
+      : deterministicTbmBriefingStructured && deterministicTbmLogStructured
+        ? "TBM structured=deterministic from risk rows"
+        : "TBM structured=template";
     const linkedWorkPlanStructured = linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows);
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
@@ -1616,8 +1792,16 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         // parseSheetRows 우회하고 표 양식에 매핑.
         ...(linkedWorkPlanStructured ? { workPlanStructured: linkedWorkPlanStructured } : {}),
         ...(linkedPermitInspectionStructured ? { permitInspectionStructured: linkedPermitInspectionStructured } : {}),
-        ...(aiBodies.tbmBriefingStructured ? { tbmBriefingStructured: aiBodies.tbmBriefingStructured } : {}),
-        ...(aiBodies.tbmLogStructured ? { tbmLogStructured: aiBodies.tbmLogStructured } : {}),
+        ...(aiBodies.tbmBriefingStructured
+          ? { tbmBriefingStructured: aiBodies.tbmBriefingStructured }
+          : deterministicTbmBriefingStructured
+            ? { tbmBriefingStructured: deterministicTbmBriefingStructured }
+            : {}),
+        ...(aiBodies.tbmLogStructured
+          ? { tbmLogStructured: aiBodies.tbmLogStructured }
+          : deterministicTbmLogStructured
+            ? { tbmLogStructured: deterministicTbmLogStructured }
+            : {}),
         ...(aiBodies.educationRecordStructured ? { educationRecordStructured: aiBodies.educationRecordStructured } : {}),
         tbmBriefing: aiBodies.tbmBriefing
           ? aiBodies.tbmBriefing
@@ -1688,7 +1872,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         weather: weather.mode,
         work24: training.mode,
         kosha: kosha.mode,
-        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / structured 위험성평가 rows ${structuredRiskRows.length}건, 검증 이슈 ${structuredRiskIssues.length}건 (${structuredRiskSourceDetail}) / TBM-risk 연결 ${tbmRiskLinks.length}건 (${tbmRiskSourceDetail}) / ${aiModeAppliedDetail}`
+        detail: `${response.status.detail} / 법령 근거 상태: ${legalEvidenceMode} / ${weather.detail} / ${training.detail} / ${koshaEducation.detail} / ${kosha.detail} / ${koshaOpenApi.detail} / ${accidentCases.detail} / 지식 DB 매칭 ${safetyKnowledgeMatches.length}건 / Supabase 카탈로그 매칭 ${safetyReference.count}건 (configured=${safetyReference.configured}) / structured 위험성평가 rows ${structuredRiskRows.length}건, 검증 이슈 ${structuredRiskIssues.length}건 (${structuredRiskSourceDetail}) / TBM-risk 연결 ${tbmRiskLinks.length}건 (${tbmRiskSourceDetail}) / ${tbmStructuredSourceDetail} / ${aiModeAppliedDetail}`
       },
       sourceMix
     };

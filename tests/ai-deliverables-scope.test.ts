@@ -4,8 +4,6 @@ import { listAiDeliverableGroupsForScope } from "@/lib/ai-deliverables";
 describe("AI deliverable group scope", () => {
   it("keeps enhanced generation focused on core risk and TBM workbench documents", () => {
     expect(listAiDeliverableGroupsForScope("enhanced")).toEqual([
-      "tbmBriefingStructured",
-      "tbmLogStructured",
       "structuredRiskRows"
     ]);
   });
@@ -15,6 +13,8 @@ describe("AI deliverable group scope", () => {
       expect.arrayContaining([
         "workPlanStructured",
         "riskAssessment",
+        "tbmBriefingStructured",
+        "tbmLogStructured",
         "educationRecordStructured",
         "tbmLog",
         "free",
