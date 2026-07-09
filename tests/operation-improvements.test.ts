@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MAX_INPUT_HAZARD_PHOTO_FILES,
   buildAcceptedHazardPhotoAppendix,
   buildAcceptedHazardPhotoHarnessImprovements,
   buildHazardPhotoCandidateKey,
@@ -38,6 +39,10 @@ describe("operation improvement photo analysis candidate", () => {
 });
 
 describe("hazard photo candidates", () => {
+  it("keeps the input photo cap aligned with the vision API route", () => {
+    expect(MAX_INPUT_HAZARD_PHOTO_FILES).toBe(10);
+  });
+
   it("does not create candidates until a photo is attached", () => {
     expect(buildHazardPhotoCandidates("성수동 외벽 도장 작업", null)).toEqual([]);
   });
