@@ -22,6 +22,13 @@ The reported screenshot showed the Day theme topbar and left rail visually crowd
   - Result: passed.
 - `npm.cmd run build`
   - Result: passed.
+- Production deploy:
+  - Deployment: `https://safeguard-contest-nag9155k2-seojaehongs-projects.vercel.app`
+  - Alias: `https://www.safeclaw.kr`
+- Postdeploy `www.safeclaw.kr` checks:
+  - Default Day `2048x638`: topbar in flow, side rail separated, input text not clipped.
+  - Day `1170x365`: compact presentation viewport passed.
+  - Night `2048x638`: topbar in flow, side rail separated, input text not clipped.
 
 ## Evidence Files
 
@@ -30,6 +37,10 @@ The reported screenshot showed the Day theme topbar and left rail visually crowd
 - `day-2048x638-filled.png`
 - `day-2048x638-cdp-scale150.png`
 - `day-900x300-filled.png`
+- `postdeploy-www-metrics.json`
+- `postdeploy-www-default-2048x638-filled.png`
+- `postdeploy-www-day-1170x365-filled.png`
+- `postdeploy-www-night-2048x638-filled.png`
 
 ## Remaining Risk
 
