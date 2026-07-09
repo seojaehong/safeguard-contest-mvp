@@ -39,6 +39,10 @@ npm.cmd run build
 - Typecheck: passed
 - Harness/report regression tests: passed
 - Production build: passed
+- Browser `/reports` check: passed
+  - Download labels found: `개선사항 포함 MD`, `공정·작업 분류 CSV`, `관리자 원본 JSON`, `다음 생성용 MD`, `하네스 JSONL`
+  - Horizontal overflow: false
+  - Screenshot: `evaluation/ui-ux-browser-check-2026-07-09/reports-operation-memory-export.png`
 
 ## Notes
 
