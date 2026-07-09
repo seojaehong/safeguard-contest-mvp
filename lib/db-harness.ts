@@ -230,3 +230,65 @@ export function hasDocumentCoverage(packet: DbHarnessPacket, document: string) {
     packet.sifCases.some((item) => includesDocument(item, document)) ||
     packet.improvementMemory.some((item) => item.reflectedDocuments.includes(document));
 }
+
+function uniqueNonEmpty(values: string[], limit: number) {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))].slice(0, limit);
+}
+
+function evidenceTitles(items: SafetyReferenceItem[], limit: number) {
+  return uniqueNonEmpty(items.map((item) => item.title), limit);
+}
+
+function controlCandidates(packet: DbHarnessPacket) {
+  return uniqueNonEmpty([
+    ...packet.sifCases.flatMap((item) => item.controls),
+    ...packet.directEvidence.flatMap((item) => item.controls),
+    ...packet.improvementMemory.map((item) => item.improvementText),
+    ...packet.improvementMemory.flatMap((item) => item.detectedHazards || [])
+  ], 6);
+}
+
+export function buildDbHarnessAnswer(packet: DbHarnessPacket, fallbackAnswer = "") {
+  const directTitles = evidenceTitles(packet.directEvidence, 3);
+  const sifTitles = evidenceTitles(packet.sifCases, 3);
+  const controls = controlCandidates(packet);
+  const missing = uniqueNonEmpty(packet.ontologyChecklist.missing, 5);
+  const memoryLines = uniqueNonEmpty([
+    ...packet.improvementMemory.map((item) => `${item.hazardLabel}: ${item.improvementText}`),
+    ...packet.workpackMemory.map((item) => `${item.generatedAt}: ${item.statusLabel}`)
+  ], 4);
+
+  if (!directTitles.length && !sifTitles.length && !controls.length) {
+    return fallbackAnswer.trim() || "DB 하네스가 사용할 근거를 찾지 못했습니다. 공식 근거와 현장 조건을 확인한 뒤 문서팩에 반영하세요.";
+  }
+
+  return [
+    "1) 하네스 판단",
+    [
+      directTitles.length ? `- 직접 근거: ${directTitles.join(" / ")}` : "",
+      sifTitles.length ? `- SIF 유사사례: ${sifTitles.join(" / ")}` : "",
+      memoryLines.length ? `- 작업·개선 이력: ${memoryLines.join(" / ")}` : ""
+    ].filter(Boolean).join("\n"),
+    "",
+    "2) 오늘 문서에 먼저 반영할 조치",
+    controls.length
+      ? controls.map((control) => `- ${control}`).join("\n")
+      : "- 위험성평가표, TBM 브리핑, TBM 기록에 같은 위험요인과 확인조치를 연결하세요.",
+    "",
+    "3) 보강 필요",
+    missing.length
+      ? missing.map((item) => `- ${item}`).join("\n")
+      : "- 필수 3종 문서에 반영할 근거가 준비됐습니다."
+  ].join("\n");
+}
+
+export function buildDbHarnessPracticalPoints(packet: DbHarnessPacket, fallbackPoints: string[] = []) {
+  const points = [
+    ...controlCandidates(packet).map((control) => `문서 반영 전 확인: ${control}`),
+    ...packet.generationContract.requiredDocuments.map((document) => `${document}에 같은 위험요인·조치·확인자를 연결`),
+    ...packet.generationContract.missingEvidence.map((document) => `${document} 근거 보강 후 전파`),
+    ...fallbackPoints
+  ];
+
+  return uniqueNonEmpty(points, 8);
+}

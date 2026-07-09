@@ -26,7 +26,13 @@ import { buildEvidenceLabels } from "./smsa-mapping";
 import { createLogger } from "@/lib/logger";
 import { attachProgressListeners, type OnAskProgress } from "./ask-progress";
 import { resolveRunAskMode } from "./run-ask-mode";
-import { buildDbHarnessPacket, buildHarnessPromptContext, type HarnessMemoryInput } from "./db-harness";
+import {
+  buildDbHarnessAnswer,
+  buildDbHarnessPacket,
+  buildDbHarnessPracticalPoints,
+  buildHarnessPromptContext,
+  type HarnessMemoryInput
+} from "./db-harness";
 
 const log = createLogger("search");
 
@@ -1221,16 +1227,19 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       missingEvidence: dbHarnessPacket.generationContract.missingEvidence,
       ontologyStatus: dbHarnessPacket.ontologyChecklist.status
     };
+    const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket, response.answer);
+    const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket, response.practicalPoints);
 
     const enriched: AskResponse = {
       ...response,
       answer: [
-        response.answer,
+        dbHarnessAnswer,
         `[기상 신호] ${weather.summary}`,
         training.recommendations.length ? `[교육 연계] ${training.recommendations[0].title} (${training.recommendations[0].fitLabel || "조건부 후보"})` : "",
         kosha.references.length ? `[KOSHA 보강] ${kosha.references[0].title} (${kosha.references[0].verified ? "공식 링크 확인" : "사전 매핑"})` : "",
         accidentCases.cases.length ? `[유사 재해사례] ${accidentCases.cases[0].title}: ${accidentCases.cases[0].preventionPoint}` : ""
       ].filter(Boolean).join("\n\n"),
+      practicalPoints: dbHarnessPracticalPoints,
       externalData: {
         weather,
         training,
