@@ -14061,33 +14061,34 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
   font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 44px;
-  font-weight: 820;
-  line-height: 1.12;
+  font-weight: 900;
+  line-height: 1.14;
   letter-spacing: 0;
+  text-rendering: geometricPrecision;
 }
 
 .command-center-shell .workspace-input-page .command-copy p,
 .command-center-shell.workspace-theme-day .workspace-input-page .command-copy p {
-  font-weight: 560;
-  line-height: 1.68;
+  font-weight: 620;
+  line-height: 1.74;
 }
 
 .command-center-shell .workspace-input-page .command-console-input,
 .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input {
-  font-weight: 560;
-  line-height: 1.78;
+  font-weight: 600;
+  line-height: 1.82;
 }
 
 .command-center-shell .workspace-input-page :is(.input-photo-candidates article strong, .input-photo-analysis-summary p),
 .command-center-shell.workspace-theme-day .workspace-input-page :is(.input-photo-candidates article strong, .input-photo-analysis-summary p) {
-  font-weight: 680;
-  line-height: 1.5;
+  font-weight: 720;
+  line-height: 1.56;
 }
 
 @media (max-width: 720px) {
   .command-center-shell .workspace-input-page .command-copy h1,
   .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
     font-size: 36px;
-    line-height: 1.16;
+    line-height: 1.18;
   }
 }
