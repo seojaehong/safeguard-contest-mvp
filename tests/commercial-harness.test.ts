@@ -396,6 +396,7 @@ describe("workpack learning export", () => {
     const markdown = buildWorkpackLearningMarkdown(input);
     const jsonl = buildWorkpackLearningJsonl(input);
     const file = buildWorkpackLearningFile(input, "jsonl");
+    const obsidianFile = buildWorkpackLearningFile(input, "obsidian");
 
     expect(markdown).toContain("# 성수동 외벽 도장");
     expect(markdown).toContain("## 운영 메모리 계약");
@@ -445,7 +446,14 @@ describe("workpack learning export", () => {
     expect(file.fileName).toBe("성수동-외벽-도장-learning.jsonl");
     expect(file.contentType).toContain("application/x-ndjson");
     expect(file.content.endsWith("\n")).toBe(true);
+    expect(obsidianFile.fileName).toBe("성수동-외벽-도장-learning-obsidian.md");
+    expect(obsidianFile.content).toContain("safeclaw_memory_scope: operation_memory_export");
+    expect(obsidianFile.content).toContain("[[Workpack/성수동 외벽 도장]]");
+    expect(obsidianFile.content).toContain("[[Hazard/추락]]");
+    expect(obsidianFile.content).toContain("[[Improvement/난간 보강]]");
+    expect(obsidianFile.content).toContain("--hasImprovement-->");
     expect(normalizeWorkpackLearningFormat("jsonl")).toBe("jsonl");
+    expect(normalizeWorkpackLearningFormat("obsidian")).toBe("obsidian");
     expect(normalizeWorkpackLearningFormat("bad")).toBe("markdown");
   });
 
