@@ -78,12 +78,83 @@ export type HazardPhotoVisionAnalysis = {
   errorMessage?: string;
 };
 
-function configuredApiKey() {
-  return process.env.OPENAI_API_KEY?.trim() || "";
+export type PhotoVisionReadiness = {
+  ok: boolean;
+  status: "ready" | "unconfigured";
+  provider: "openai";
+  model: string;
+  apiKeyPresent: boolean;
+  timeoutMs: number;
+  maxInputPhotos: number;
+  hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis";
+  hazardAnalysisMethod: "POST multipart/form-data";
+  improvementEndpointPattern: "/api/workpacks/[id]/improvements";
+  acceptedOnly: true;
+  beforeAfterSupported: true;
+  ocrSupported: true;
+  exportTargets: string[];
+  flow: Array<{
+    step: string;
+    label: string;
+    detail: string;
+  }>;
+  message: string;
+};
+
+function configuredApiKey(env: Record<string, string | undefined> = process.env) {
+  return env.OPENAI_API_KEY?.trim() || "";
 }
 
-function configuredModel() {
-  return process.env.OPENAI_VISION_MODEL?.trim() || process.env.OPENAI_MODEL?.trim() || DEFAULT_MODEL;
+function configuredModel(env: Record<string, string | undefined> = process.env) {
+  return env.OPENAI_VISION_MODEL?.trim() || env.OPENAI_MODEL?.trim() || DEFAULT_MODEL;
+}
+
+export function getPhotoVisionReadiness(
+  env: Record<string, string | undefined> = process.env
+): PhotoVisionReadiness {
+  const apiKeyPresent = Boolean(configuredApiKey(env));
+  const model = configuredModel(env);
+  return {
+    ok: apiKeyPresent,
+    status: apiKeyPresent ? "ready" : "unconfigured",
+    provider: "openai",
+    model,
+    apiKeyPresent,
+    timeoutMs: VISION_TIMEOUT_MS,
+    maxInputPhotos: MAX_HAZARD_PHOTO_FILES,
+    hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis",
+    hazardAnalysisMethod: "POST multipart/form-data",
+    improvementEndpointPattern: "/api/workpacks/[id]/improvements",
+    acceptedOnly: true,
+    beforeAfterSupported: true,
+    ocrSupported: true,
+    exportTargets: ["위험성평가표", "TBM 브리핑", "TBM 기록", "사진/증빙", "작업 이력 MD", "하네스 JSONL"],
+    flow: [
+      {
+        step: "attach",
+        label: "현장 사진 첨부",
+        detail: `입력 화면의 + 첨부에서 최대 ${MAX_HAZARD_PHOTO_FILES}장까지 받습니다.`
+      },
+      {
+        step: "analyze",
+        label: "Vision/OCR 후보 도출",
+        detail: "OpenAI Responses API가 사진 위험요인 후보, OCR 문구, 현장 신호를 구조화합니다."
+      },
+      {
+        step: "accept",
+        label: "사용자 채택",
+        detail: "사진 분석 결과는 후보이며, 사용자가 추가한 항목만 하네스 개선 메모리에 들어갑니다."
+      },
+      {
+        step: "export",
+        label: "운영 메모리 보존",
+        detail: "채택된 후보와 Before/After 개선사항은 MD/JSONL export와 다음 DB 하네스 입력에 보존됩니다."
+      }
+    ],
+    message: apiKeyPresent
+      ? "Vision/OCR 사진 분석 실행 환경이 준비되어 있습니다."
+      : "OPENAI_API_KEY가 없어 사진은 첨부/저장되지만 Vision/OCR 분석은 보류됩니다."
+  };
 }
 
 function normalizeStringArray(value: unknown): string[] {

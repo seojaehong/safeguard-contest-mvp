@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { enforceRateLimit } from "@/lib/api-guard";
-import { analyzeHazardPhotos, MAX_HAZARD_PHOTO_FILES } from "@/lib/photo-vision-analysis";
+import { analyzeHazardPhotos, getPhotoVisionReadiness, MAX_HAZARD_PHOTO_FILES } from "@/lib/photo-vision-analysis";
 import { createRateLimiter } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +20,10 @@ function readQuestion(form: FormData) {
 
 function readPhotos(form: FormData) {
   return form.getAll("photos").filter(isFileValue);
+}
+
+export async function GET() {
+  return NextResponse.json(getPhotoVisionReadiness());
 }
 
 export async function POST(request: NextRequest) {
