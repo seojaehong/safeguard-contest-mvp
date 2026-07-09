@@ -14714,8 +14714,10 @@ body:has(.safeclaw-landing) :is(
   isolation: isolate;
 }
 
-.command-center-shell > .command-topbar {
+.command-center-shell > .command-topbar,
+.command-center-shell .command-topbar {
   position: relative !important;
+  top: auto !important;
   z-index: 2;
   margin-bottom: 12px;
 }
