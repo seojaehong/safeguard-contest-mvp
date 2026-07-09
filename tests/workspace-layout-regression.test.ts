@@ -91,4 +91,45 @@ describe("workspace layout regression", () => {
     expect(metrics.topbarPosition).toBe("relative");
     expect(metrics.topbarBottom).toBeLessThanOrEqual(0);
   }, 90_000);
+
+  it("keeps the workspace first impression typography solid and readable", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 720 } });
+    await page.goto(`${baseUrl}/workspace?theme=night`, { waitUntil: "networkidle" });
+
+    const metrics = await page.evaluate(() => {
+      const heading = document.querySelector(".workspace-input-page .command-copy h1");
+      const description = document.querySelector(".workspace-input-page .command-copy p");
+      const input = document.querySelector(".workspace-input-page .command-console-input");
+      const sideNav = document.querySelector(".workspace-side-nav");
+      const sideButton = document.querySelector(".workspace-side-group button");
+      if (!heading || !description || !input || !sideNav || !sideButton) {
+        throw new Error("Workspace typography targets were not found");
+      }
+      const headingStyle = getComputedStyle(heading);
+      const descriptionStyle = getComputedStyle(description);
+      const inputStyle = getComputedStyle(input);
+      const sideNavStyle = getComputedStyle(sideNav);
+      const sideButtonRect = sideButton.getBoundingClientRect();
+      return {
+        headingWeight: Number.parseFloat(headingStyle.fontWeight),
+        headingLineHeight: Number.parseFloat(headingStyle.lineHeight),
+        headingFontSize: Number.parseFloat(headingStyle.fontSize),
+        headingLetterSpacing: headingStyle.letterSpacing,
+        descriptionWeight: Number.parseFloat(descriptionStyle.fontWeight),
+        inputLineHeight: Number.parseFloat(inputStyle.lineHeight),
+        inputFontSize: Number.parseFloat(inputStyle.fontSize),
+        sideGap: Number.parseFloat(sideNavStyle.gap),
+        sideButtonHeight: Math.round(sideButtonRect.height)
+      };
+    });
+
+    expect(metrics.headingWeight).toBeGreaterThanOrEqual(880);
+    expect(metrics.headingLineHeight / metrics.headingFontSize).toBeGreaterThanOrEqual(1.1);
+    expect(["0px", "normal"]).toContain(metrics.headingLetterSpacing);
+    expect(metrics.descriptionWeight).toBeGreaterThanOrEqual(600);
+    expect(metrics.inputLineHeight / metrics.inputFontSize).toBeGreaterThanOrEqual(1.75);
+    expect(metrics.sideGap).toBeGreaterThanOrEqual(18);
+    expect(metrics.sideButtonHeight).toBeGreaterThanOrEqual(48);
+  }, 90_000);
 });
