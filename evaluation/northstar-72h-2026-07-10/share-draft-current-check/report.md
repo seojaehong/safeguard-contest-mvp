@@ -28,6 +28,11 @@ Browser checks on local production build:
 - Desktop `1440x900`: `share-page-desktop-final.png`, `share-page-desktop-final.json`
 - Mobile `390x844`: `share-page-mobile-final.png`, `share-page-mobile-final.json`
 
+Postdeploy checks on `https://www.safeclaw.kr/workspace?theme=day`:
+
+- Desktop `1440x900`: `share-page-prod-desktop-final.png`, `share-page-prod-desktop-final.json`
+- Mobile `390x844`: `share-page-prod-mobile-final.png`, `share-page-prod-mobile-final.json`
+
 Final browser metrics:
 
 - Desktop share card widths: 344px each.
@@ -36,10 +41,10 @@ Final browser metrics:
 - Draft candidate copy: present.
 - Worker snapshot copy: present.
 - Horizontal scroll: none on desktop and mobile.
+- Production metrics match local metrics for the share draft surface.
 
 ## Related SIF Check
 
 The linked SIF source usage review is in:
 
 `evaluation/northstar-72h-2026-07-10/sif-source-usage-check/report.md`
-

@@ -1,0 +1,27 @@
+{
+  "name": "share-page-prod-desktop-final",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "mobile": false,
+  "metrics": {
+    "hasSharePage": true,
+    "hasDraftCandidateCopy": true,
+    "hasWorkerSnapshotCopy": true,
+    "hasOldStorageIdWaiting": false,
+    "scrollWidth": 1440,
+    "viewportWidth": 1440,
+    "noHorizontalScroll": true,
+    "sectionWidths": [
+      344,
+      344,
+      344,
+      344
+    ],
+    "widthThreshold": 220,
+    "gridTemplateColumns": "343.734px 343.734px",
+    "sectionsComfortable": true
+  },
+  "consoleMessages": []
+}

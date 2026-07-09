@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-07-09T22:27:30.109Z",
+  "results": [
+    {
+      "name": "share-page-prod-desktop-final",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mobile": false,
+      "metrics": {
+        "hasSharePage": true,
+        "hasDraftCandidateCopy": true,
+        "hasWorkerSnapshotCopy": true,
+        "hasOldStorageIdWaiting": false,
+        "scrollWidth": 1440,
+        "viewportWidth": 1440,
+        "noHorizontalScroll": true,
+        "sectionWidths": [
+          344,
+          344,
+          344,
+          344
+        ],
+        "widthThreshold": 220,
+        "gridTemplateColumns": "343.734px 343.734px",
+        "sectionsComfortable": true
+      },
+      "consoleMessages": []
+    },
+    {
+      "name": "share-page-prod-mobile-final",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mobile": true,
+      "metrics": {
+        "hasSharePage": true,
+        "hasDraftCandidateCopy": true,
+        "hasWorkerSnapshotCopy": true,
+        "hasOldStorageIdWaiting": false,
+        "scrollWidth": 390,
+        "viewportWidth": 390,
+        "noHorizontalScroll": true,
+        "sectionWidths": [
+          298,
+          298,
+          298,
+          298
+        ],
+        "widthThreshold": 280,
+        "gridTemplateColumns": "298px",
+        "sectionsComfortable": true
+      },
+      "consoleMessages": []
+    }
+  ]
+}
