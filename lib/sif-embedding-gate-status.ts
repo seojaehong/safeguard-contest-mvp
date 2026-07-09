@@ -6,6 +6,18 @@ import reportJson from "@/evaluation/sif-embedding-gate/report.json";
 import preflightJson from "@/evaluation/sif-embedding-gate/approval-preflight-report.json";
 import runtimeProbeJson from "@/evaluation/sif-embedding-gate/runtime-db-probe.json";
 import manifestJson from "@/evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json";
+import canaryReportJson from "@/evaluation/sif-embedding-canary-2026-07-09/report.json";
+
+export type SifEmbeddingArtifactIntegrity = {
+  label: string;
+  path: string;
+  exists: boolean;
+  byteSize: number;
+  sha256?: string;
+  contentHash?: string;
+  recordCount?: number;
+  role: string;
+};
 
 export type SifEmbeddingGateStatus = {
   ok: boolean;
@@ -46,6 +58,22 @@ export type SifEmbeddingGateStatus = {
     supabaseServiceRolePresent: boolean;
     vectorFeatureFlagEnabled: boolean;
     executionReadyAfterApproval: boolean;
+  };
+  canary: {
+    performed: boolean;
+    label: string;
+    answer: string;
+    reportPath: string;
+    vectorsPath: string | null;
+    corpusCount: number;
+    embeddedCount: number;
+    uploadedCount: number;
+    mode: string;
+    embeddingModel: string;
+    embeddingDimensions: number;
+    corpusHash: string;
+    dbMutationPerformed: boolean;
+    artifactIntegrity: SifEmbeddingArtifactIntegrity[];
   };
   learningLifecycle: {
     productTerm: "retrieval_embedding_index";
@@ -126,16 +154,7 @@ export type SifEmbeddingGateStatus = {
       locked: boolean;
       detail: string;
     }[];
-    artifactIntegrity: {
-      label: string;
-      path: string;
-      exists: boolean;
-      byteSize: number;
-      sha256?: string;
-      contentHash?: string;
-      recordCount?: number;
-      role: string;
-    }[];
+    artifactIntegrity: SifEmbeddingArtifactIntegrity[];
   };
   failedCheckIds: string[];
   nextApprovalDecisions: string[];
@@ -216,6 +235,11 @@ function resolveProjectPath(relativePath: string) {
   return join(process.cwd(), relativePath.replace(/\\/g, "/"));
 }
 
+const CANARY_REPORT_PATH = "evaluation/sif-embedding-canary-2026-07-09/report.json";
+const CANARY_MANIFEST_PATH = "evaluation/sif-embedding-canary-2026-07-09/sif-embedding-batch-manifest.json";
+const CANARY_CORPUS_PATH = "evaluation/sif-embedding-canary-2026-07-09/sif-embedding-corpus.jsonl";
+const CANARY_VECTORS_PATH = "evaluation/sif-embedding-canary-2026-07-09/sif-embedding-vectors.jsonl";
+
 function readFileIntegrity(input: {
   label: string;
   path: string;
@@ -223,7 +247,7 @@ function readFileIntegrity(input: {
   sha256Enabled?: boolean;
   contentHash?: string;
   recordCount?: number;
-}): SifEmbeddingGateStatus["approvalPacket"]["artifactIntegrity"][number] {
+}): SifEmbeddingArtifactIntegrity {
   const absolutePath = resolveProjectPath(input.path);
   if (!existsSync(absolutePath)) {
     return {
@@ -375,6 +399,65 @@ function buildRuntimeDbProbeStatus(): SifEmbeddingGateStatus["runtimeDbProbe"] {
     tableReady: readBoolean(table, "ok"),
     rpcReady: readBoolean(rpc, "ok"),
     checkedAt: readString(probe, "generatedAt")
+  };
+}
+
+function buildCanaryStatus(): SifEmbeddingGateStatus["canary"] {
+  const report = asRecord(canaryReportJson);
+  const corpusCount = readNumber(report, "corpusCount");
+  const embeddedCount = readNumber(report, "embeddedCount");
+  const uploadedCount = readNumber(report, "uploadedCount");
+  const vectorsPath = readString(report, "vectorsPath", CANARY_VECTORS_PATH);
+  const performed = embeddedCount > 0 && Boolean(vectorsPath);
+  const corpusHash = readString(report, "corpusHash");
+  const embeddingModel = readString(report, "embeddingModel", "text-embedding-3-small");
+  const embeddingDimensions = readNumber(report, "embeddingDimensions", 1536);
+  return {
+    performed,
+    label: performed ? "Canary 임베딩 완료 · 업로드 전" : "Canary 임베딩 미실행",
+    answer: performed
+      ? `${embeddedCount.toLocaleString("ko-KR")}건 canary 임베딩 벡터를 생성해 모델·차원·텍스트 품질을 확인했고, DB 업로드는 수행하지 않았습니다.`
+      : "승인 전 canary 임베딩 검증 산출물이 없습니다.",
+    reportPath: CANARY_REPORT_PATH,
+    vectorsPath: performed ? vectorsPath : null,
+    corpusCount,
+    embeddedCount,
+    uploadedCount,
+    mode: readString(report, "mode", "not-run"),
+    embeddingModel,
+    embeddingDimensions,
+    corpusHash,
+    dbMutationPerformed: uploadedCount > 0,
+    artifactIntegrity: [
+      readFileIntegrity({
+        label: "Canary report",
+        path: CANARY_REPORT_PATH,
+        role: "소량 임베딩 실행 결과와 DB 업로드 보류 상태를 확인합니다.",
+        sha256Enabled: true
+      }),
+      readFileIntegrity({
+        label: "Canary manifest",
+        path: CANARY_MANIFEST_PATH,
+        role: "canary 배치 수량과 corpus hash를 확인합니다.",
+        sha256Enabled: true,
+        contentHash: corpusHash,
+        recordCount: corpusCount
+      }),
+      readFileIntegrity({
+        label: "Canary corpus",
+        path: CANARY_CORPUS_PATH,
+        role: "canary 임베딩 입력 텍스트를 검토합니다.",
+        contentHash: corpusHash,
+        recordCount: corpusCount
+      }),
+      readFileIntegrity({
+        label: "Canary vectors",
+        path: vectorsPath || CANARY_VECTORS_PATH,
+        role: "승인 전 소량 벡터 생성이 정상 동작했는지 확인합니다.",
+        sha256Enabled: true,
+        recordCount: embeddedCount
+      })
+    ]
   };
 }
 
@@ -723,6 +806,7 @@ export function getSifEmbeddingGateStatus(
   const vectorGuard = buildVectorGuard(vectorFeatureFlagEnabled, uploadedCount, readNumber(report, "corpusCount"));
   const runtimeExecutionReadyAfterApproval = openaiApiKeyPresent && supabaseUrlPresent && supabaseServiceRolePresent;
   const runtimeDbProbe = buildRuntimeDbProbeStatus();
+  const canary = buildCanaryStatus();
   const artifacts = {
     reportPath: readString(preflight, "reportPath", "evaluation/sif-embedding-gate/report.json"),
     manifestPath: readString(preflight, "manifestPath", "evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json"),
@@ -812,6 +896,7 @@ export function getSifEmbeddingGateStatus(
       vectorFeatureFlagEnabled,
       executionReadyAfterApproval: runtimeExecutionReadyAfterApproval
     },
+    canary,
     learningLifecycle,
     readinessVerdict: buildReadinessVerdict({
       runtimeReady: runtimeExecutionReadyAfterApproval,

@@ -98,6 +98,31 @@ type SifEmbeddingGateStatusResponse = {
     vectorFeatureFlagEnabled: boolean;
     executionReadyAfterApproval: boolean;
   };
+  canary: {
+    performed: boolean;
+    label: string;
+    answer: string;
+    reportPath: string;
+    vectorsPath: string | null;
+    corpusCount: number;
+    embeddedCount: number;
+    uploadedCount: number;
+    mode: string;
+    embeddingModel: string;
+    embeddingDimensions: number;
+    corpusHash: string;
+    dbMutationPerformed: boolean;
+    artifactIntegrity: {
+      label: string;
+      path: string;
+      exists: boolean;
+      byteSize: number;
+      sha256?: string;
+      contentHash?: string;
+      recordCount?: number;
+      role: string;
+    }[];
+  };
   learningLifecycle: {
     productTerm: "retrieval_embedding_index";
     label: string;
@@ -592,6 +617,13 @@ export function AiConnectPanel() {
                 <p>{sifGate.learningLifecycle.answer}</p>
                 <small>
                   {sifGate.learningLifecycle.label} · 파인튜닝 {sifGate.learningLifecycle.modelFineTuningPerformed ? "실행" : "미실행"}
+                </small>
+              </article>
+              <article>
+                <strong>Canary 임베딩</strong>
+                <p>{sifGate.canary.answer}</p>
+                <small>
+                  {sifGate.canary.embeddedCount.toLocaleString("ko-KR")} / {sifGate.canary.corpusCount.toLocaleString("ko-KR")}건 · DB 업로드 {sifGate.canary.dbMutationPerformed ? "있음" : "없음"}
                 </small>
               </article>
               <article>

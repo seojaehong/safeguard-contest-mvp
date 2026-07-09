@@ -12,6 +12,7 @@ export type SifEmbeddingApprovalPacket = {
   dbMutationPerformed: boolean;
   embeddingGenerated: boolean;
   uploaded: boolean;
+  canary: SifEmbeddingGateStatus["canary"];
   requiredArtifacts: SifEmbeddingGateStatus["approvalPacket"]["requiredArtifacts"];
   approvalFingerprint: string;
   artifactIntegrity: SifEmbeddingGateStatus["approvalPacket"]["artifactIntegrity"];
@@ -91,6 +92,17 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     `- Vector search usable: ${boolText(status.learningLifecycle.vectorSearchUsable)}`,
     `- Model fine-tuning performed: ${boolText(status.learningLifecycle.modelFineTuningPerformed)}`,
     "",
+    "## Canary Embedding Evidence",
+    "",
+    `- Status: ${status.canary.label}`,
+    `- Answer: ${status.canary.answer}`,
+    `- Corpus count: ${status.canary.corpusCount.toLocaleString("ko-KR")}`,
+    `- Embedded count: ${status.canary.embeddedCount.toLocaleString("ko-KR")}`,
+    `- Uploaded count: ${status.canary.uploadedCount.toLocaleString("ko-KR")}`,
+    `- Mode: ${status.canary.mode}`,
+    `- Report: \`${status.canary.reportPath}\``,
+    `- Vectors: ${status.canary.vectorsPath ? `\`${status.canary.vectorsPath}\`` : "none"}`,
+    "",
     "## Corpus",
     "",
     `- SIF source items: ${status.corpus.itemCount.toLocaleString("ko-KR")}`,
@@ -158,6 +170,7 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     dbMutationPerformed: status.dbMutationPerformed,
     embeddingGenerated: status.embeddingGenerated,
     uploaded: status.uploaded,
+    canary: status.canary,
     requiredArtifacts: status.approvalPacket.requiredArtifacts,
     approvalFingerprint: status.approvalPacket.approvalFingerprint,
     artifactIntegrity: status.approvalPacket.artifactIntegrity,
