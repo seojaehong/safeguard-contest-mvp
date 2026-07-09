@@ -1,7 +1,7 @@
 # SIF Embedding Next Approval Gate Runtime Check
 
 Generated: 2026-07-09
-Rechecked: 2026-07-09 12:28 KST
+Rechecked: 2026-07-09 18:03 KST
 
 ## 결론
 
@@ -27,7 +27,7 @@ SIF 코퍼스 준비는 완료됐다. 실제 운영 DB 임베딩 검색은 아�
 3. 문서 생성 전에 DB harness가 유사 SIF/KOSHA 근거를 먼저 고정한다.
 4. LLM은 고정된 근거를 문장화한다.
 
-현재 1번은 완료, 2번은 canary 성공, 운영 DB 업로드는 승인 전이다. 2026-07-09 12:28 KST 재검증 기준 실행환경은 준비됐지만, 운영 DB의 table/RPC가 아직 없으므로 migration 승인이 먼저다.
+현재 1번은 완료, 2번은 canary 성공, 운영 DB 업로드는 승인 전이다. 2026-07-09 18:03 KST 재검증 기준 실행환경은 준비됐지만, 운영 DB의 table/RPC가 아직 없으므로 migration 승인이 먼저다.
 
 ## Evidence
 
@@ -120,6 +120,9 @@ Facts:
 - executionReadyAfterApproval: true
 - embeddingGenerated: false
 - uploaded: false
+- migrationPath: `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql`
+- failedCheckIds: none
+- SIF-only scope check: passed
 
 ## SIF-only Migration Proposal
 

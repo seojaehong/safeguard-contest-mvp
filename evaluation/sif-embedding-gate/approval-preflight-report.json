@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-09T03:28:17.876Z",
+  "generatedAt": "2026-07-09T09:03:29.664Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
   "ok": true,
   "approvalHeld": true,
@@ -10,7 +10,7 @@
   "reportPath": "evaluation\\sif-embedding-gate\\report.json",
   "manifestPath": "evaluation\\sif-embedding-gate\\sif-embedding-batch-manifest.json",
   "corpusPath": "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
-  "migrationPath": "supabase/migrations/010_commercial_operations.sql",
+  "migrationPath": "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
   "scriptPath": "scripts/prepare_sif_embedding_corpus.mjs",
   "corpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
   "corpusCount": 6032,
@@ -85,7 +85,7 @@
       "id": "migration_contains_embedding_table_rpc_index",
       "passed": true,
       "evidence": {
-        "migrationPath": "supabase/migrations/010_commercial_operations.sql"
+        "migrationPath": "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
       }
     },
     {
@@ -94,6 +94,14 @@
       "evidence": {
         "table": "safety_reference_embeddings",
         "publicSelect": false
+      }
+    },
+    {
+      "id": "migration_scope_is_sif_embedding_only",
+      "passed": true,
+      "evidence": {
+        "migrationPath": "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
+        "sifOnly": true
       }
     },
     {
@@ -121,7 +129,7 @@
   ],
   "executionReadyAfterApproval": true,
   "nextApprovalDecisions": [
-    "Apply 010_commercial_operations.sql as-is or split an embedding-only migration.",
+    "Approve and apply the SIF-only embedding migration, or explicitly choose the broader 010_commercial_operations.sql gate.",
     "Confirm OPENAI_API_KEY and Supabase service role are available in the execution environment.",
     "Run embedding generation only with --embed --approved-embedding.",
     "Run embedding upload only with --embed --approved-embedding --upload --approved-upload.",

@@ -4,7 +4,7 @@ import process from "node:process";
 
 const DEFAULT_OUTPUT = "evaluation/sif-embedding-gate/approval-preflight-report.json";
 const DEFAULT_GATE_DIR = "evaluation/sif-embedding-gate";
-const DEFAULT_MIGRATION = "supabase/migrations/010_commercial_operations.sql";
+const DEFAULT_MIGRATION = "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql";
 const DEFAULT_SCRIPT = "scripts/prepare_sif_embedding_corpus.mjs";
 const DEFAULT_ENV_FILES = [".env.local"];
 
@@ -68,7 +68,8 @@ function boolEnv(name) {
   return Boolean(process.env[name]?.trim());
 }
 
-function findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql, scriptSource) {
+function findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql, scriptSource, migrationPath, scriptPath) {
+  const lowerMigrationSql = migrationSql.toLowerCase();
   return [
     {
       id: "sif_source_count",
@@ -117,13 +118,13 @@ function findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql
       id: "embedding_requires_explicit_cost_approval_flag",
       passed: scriptSource.includes("--embed requires explicit --approved-embedding after embedding cost approval")
         && scriptSource.includes("options.approvedEmbedding"),
-      evidence: { scriptPath: DEFAULT_SCRIPT }
+      evidence: { scriptPath }
     },
     {
       id: "upload_requires_explicit_approval_flag",
       passed: scriptSource.includes("--upload requires explicit --approved-upload after DB migration approval")
         && scriptSource.includes("options.upload && !options.approvedUpload"),
-      evidence: { scriptPath: DEFAULT_SCRIPT }
+      evidence: { scriptPath }
     },
     {
       id: "migration_contains_embedding_table_rpc_index",
@@ -132,7 +133,7 @@ function findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql
         && migrationSql.includes("idx_safety_reference_embeddings_vector_cosine")
         && migrationSql.includes("using hnsw (embedding vector_cosine_ops)")
         && migrationSql.includes("create or replace function match_safety_reference_embeddings"),
-      evidence: { migrationPath: DEFAULT_MIGRATION }
+      evidence: { migrationPath }
     },
     {
       id: "migration_keeps_embeddings_server_side",
@@ -140,6 +141,20 @@ function findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql
         && migrationSql.includes("on safety_reference_embeddings for select")
         && migrationSql.includes("using (false)"),
       evidence: { table: "safety_reference_embeddings", publicSelect: false }
+    },
+    {
+      id: "migration_scope_is_sif_embedding_only",
+      passed: migrationPath.includes("sif-embedding-only")
+        ? !lowerMigrationSql.includes("workpack_share_sessions")
+          && !lowerMigrationSql.includes("workpack_read_confirmations")
+          && !lowerMigrationSql.includes("workpack_improvements")
+          && !lowerMigrationSql.includes("report_snapshots")
+          && !lowerMigrationSql.includes("export_jobs")
+        : true,
+      evidence: {
+        migrationPath,
+        sifOnly: migrationPath.includes("sif-embedding-only")
+      }
     }
   ];
 }
@@ -190,7 +205,7 @@ function main() {
   const scriptSource = fs.readFileSync(options.scriptPath, "utf8");
   const env = summarizeEnv(options.requireExecutionEnv);
   const checks = [
-    ...findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql, scriptSource),
+    ...findChecks(report, manifest, corpusLineCount, vectorsPath, migrationSql, scriptSource, options.migrationPath, options.scriptPath),
     {
       id: "vector_feature_flag_stays_off_until_upload_verified",
       passed: !env.vectorFeatureFlagEnabled || report.uploadedCount === report.corpusCount,
@@ -232,7 +247,7 @@ function main() {
     envFilesLoaded,
     executionReadyAfterApproval,
     nextApprovalDecisions: [
-      "Apply 010_commercial_operations.sql as-is or split an embedding-only migration.",
+      "Approve and apply the SIF-only embedding migration, or explicitly choose the broader 010_commercial_operations.sql gate.",
       "Confirm OPENAI_API_KEY and Supabase service role are available in the execution environment.",
       "Run embedding generation only with --embed --approved-embedding.",
       "Run embedding upload only with --embed --approved-embedding --upload --approved-upload.",

@@ -1,7 +1,7 @@
 # SIF Embedding / Harness Approval Gate
 
 생성 시각: 2026-07-08 17:27 KST
-최신 재검증: 2026-07-09 12:28 KST
+최신 재검증: 2026-07-09 18:03 KST
 
 ## 판정
 
@@ -95,8 +95,9 @@ npm.cmd run knowledge:sif-embedding-preflight -- --require-execution-env --outpu
 - JSONL line count와 corpusCount 일치: 통과
 - 빈 embedding text, 관리대책 누락, 문서반영 누락, 중복 contentHash: 0건
 - 업로드 승인 플래그 가드: 통과
-- `010_commercial_operations.sql`의 `safety_reference_embeddings`, HNSW index, `match_safety_reference_embeddings` RPC 계약: 통과
+- `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql`의 `safety_reference_embeddings`, HNSW index, `match_safety_reference_embeddings` RPC 계약: 통과
 - RLS: `safety_reference_embeddings` public select는 `using (false)`로 차단
+- migration scope: SIF embedding table/RPC/index만 포함, share session/read confirmation/improvement/report/export job schema 제외
 - DB mutation: 미실행
 - OpenAI embedding 생성: 미실행
 - Supabase upload: 미실행
@@ -110,7 +111,7 @@ npm.cmd run knowledge:sif-embedding-preflight -- --require-execution-env --outpu
 
 ## Runtime DB Probe
 
-생성 시각: 2026-07-09 12:28 KST
+생성 시각: 2026-07-09 18:03 KST
 
 명령:
 
@@ -130,7 +131,8 @@ npm.cmd run knowledge:sif-embedding-runtime-probe -- --output evaluation/sif-emb
 
 다음 승인 결정:
 
-- `010_commercial_operations.sql` 전체 적용 또는 embedding-only migration 분리
+- `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql` 승인 및 적용
+- 또는 명시적으로 더 넓은 `010_commercial_operations.sql` 적용을 선택
 - 실행 환경의 `OPENAI_API_KEY`와 Supabase service role 유지
 - 승인 후에만 `--embed --approved-embedding` 실행
 - DB migration과 row count 검증 후에만 `--upload --approved-upload` 실행
