@@ -234,6 +234,106 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
   ];
 }
 
+function compactRiskCell(value: string | null | undefined, maxLength = 96): string {
+  const normalized = (value || "").replace(/\s+/g, " ").trim();
+  if (!normalized) return "";
+  return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}…` : normalized;
+}
+
+function includesRiskAssessmentDocument(item: SafetyReferenceItem): boolean {
+  const documents = [...(item.primary_documents || []), ...(item.reflected_documents || [])];
+  return documents.length === 0 || documents.some((document) =>
+    /위험성평가|TBM|티비엠|안전보건교육|작업계획/.test(document)
+  );
+}
+
+function deriveSafetyReferenceHazard(item: SafetyReferenceItem): string {
+  const category = compactRiskCell(item.category, 28);
+  const subcategory = compactRiskCell(item.subcategory, 28);
+  const title = compactRiskCell(item.title, 72);
+  const riskTag = compactRiskCell(item.risk_tags?.[0], 28);
+  if (riskTag && title) return `${riskTag} 위험: ${title}`;
+  if (riskTag) return `${riskTag} 관련 위험`;
+  const prefix = [category, subcategory].filter(Boolean).join("·");
+  if (prefix && title) return `${prefix} 관련 위험: ${title}`;
+  if (title) return `${title} 관련 위험`;
+  return "DB 하네스 근거 기반 위험요인";
+}
+
+export function buildSafetyReferenceRiskRows(
+  response: AskResponse,
+  references: readonly SafetyReferenceItem[],
+  weatherSummary: string
+): RiskAssessmentRow[] {
+  const scenario = response.scenario;
+  const location = scenario.siteName || "현장 작업구역";
+  const process = response.riskSummary.title || scenario.companyType || "현장 작업";
+  const topCandidates = references
+    .filter(includesRiskAssessmentDocument)
+    .filter((item) => item.title || item.summary || item.controls.length)
+    .sort((a, b) => {
+      const roleA = a.evidence_role === "direct" ? 0 : 1;
+      const roleB = b.evidence_role === "direct" ? 0 : 1;
+      const sourceA = a.retrieval_source === "hybrid" || a.retrieval_source === "vector" ? 0 : a.retrieval_source === "ranked" ? 1 : 2;
+      const sourceB = b.retrieval_source === "hybrid" || b.retrieval_source === "vector" ? 0 : b.retrieval_source === "ranked" ? 1 : 2;
+      return roleA - roleB || sourceA - sourceB;
+    });
+  const seen = new Set<string>();
+  const rows: RiskAssessmentRow[] = [];
+
+  for (const item of topCandidates) {
+    const control = compactRiskCell(item.controls?.[0], 120) ||
+      compactRiskCell(item.short_summary || item.summary, 120) ||
+      "해당 근거의 필수 확인 항목을 작업 전 점검합니다.";
+    const additionalControl = compactRiskCell(item.controls?.[1], 120) ||
+      compactRiskCell(item.document_reflection_label, 120) ||
+      control;
+    const hazard = deriveSafetyReferenceHazard(item);
+    const dedupeKey = `${hazard}|${control}`;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+    const evidenceRefs = [
+      item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
+      item.source_kind_label || item.item_type || "safety_reference_items",
+      item.title,
+      item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
+      item.source_url || ""
+    ].filter(Boolean);
+
+    rows.push(buildRiskRow({
+      location,
+      process,
+      task: scenario.workSummary || compactRiskCell(item.title, 48) || "현장 작업",
+      equipment: compactRiskCell([item.category, item.subcategory].filter(Boolean).join(", "), 80) || "작업 장비·공구·보호구",
+      hazard,
+      currentControls: control,
+      likelihood: item.item_type === "sif-case" ? 4 : item.evidence_role === "direct" ? 3 : 2,
+      severity: item.item_type === "sif-case" ? 5 : /추락|질식|폭발|감전|화재|붕괴|끼임/.test(hazard) ? 5 : 4,
+      additionalControls: additionalControl,
+      owner: "작업반장",
+      due: "작업 전",
+      verification: "DB 하네스 근거와 현장 사진·TBM 확인으로 조치 반영 여부를 확인",
+      verificationChecker: "관리감독자",
+      evidenceRefs
+    }));
+
+    if (rows.length >= 4) break;
+  }
+
+  if (!rows.length) return [];
+  const baselineRows = buildFallbackRiskAssessmentRows(response, weatherSummary);
+  const rowKeys = new Set(rows.map((row) => `${row.hazard}|${row.currentControls}`));
+  for (const row of baselineRows) {
+    const key = `${row.hazard}|${row.currentControls}`;
+    if (!rowKeys.has(key)) {
+      rows.push(row);
+      rowKeys.add(key);
+    }
+    if (rows.length >= 5) break;
+  }
+  return rows;
+}
+
 function photoSeverityFromImprovement(item: HarnessImprovement): "high" | "medium" | "low" | "review" {
   const severityTag = item.detectedHazards?.find((hazard) => /^severity:/.test(hazard))?.replace("severity:", "");
   if (severityTag === "high" || severityTag === "medium" || severityTag === "low") return severityTag;
@@ -1660,9 +1760,14 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const generatedStructuredRiskValidation = normalizeAndValidateRiskAssessmentRows(aiBodies.structuredRiskRows || []);
     const generatedStructuredRiskRows = generatedStructuredRiskValidation.rows;
     const photoSeedRiskRows = buildPhotoHazardRiskRows(response, harnessMemory.improvements);
+    const harnessStructuredRiskRows = generatedStructuredRiskRows.length
+      ? []
+      : buildSafetyReferenceRiskRows(response, safetyReference.items, weather.summary);
     const fallbackStructuredRiskRows = generatedStructuredRiskRows.length
       ? []
-      : buildFallbackRiskAssessmentRows(response, weather.summary);
+      : harnessStructuredRiskRows.length
+        ? harnessStructuredRiskRows
+        : buildFallbackRiskAssessmentRows(response, weather.summary);
     const baseStructuredRiskRows = generatedStructuredRiskRows.length
       ? generatedStructuredRiskRows
       : fallbackStructuredRiskRows;
@@ -1679,7 +1784,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     }
     const structuredRiskSourceDetail = generatedStructuredRiskRows.length
       ? `structured rows=AI${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`
-      : `structured rows=deterministic fallback${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`;
+      : `structured rows=${harnessStructuredRiskRows.length ? "DB harness deterministic" : "deterministic baseline"}${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`;
     const generatedTbmRiskLinks = aiBodies.tbmRiskLinks || [];
     const photoSeedRiskStartIndex = baseStructuredRiskRows.length;
     const photoSeedTbmRiskLinks = acceptedPhotoSeedRiskRows.length
@@ -1691,7 +1796,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       : buildTbmRiskLinks(structuredRiskRows, weather.summary);
     const tbmRiskSourceDetail = generatedTbmRiskLinks.length
       ? `TBM-risk links=AI${photoSeedTbmRiskLinks.length ? ` + photo seed links ${photoSeedTbmRiskLinks.length}` : ""}`
-      : "TBM-risk links=deterministic fallback";
+      : `TBM-risk links=${harnessStructuredRiskRows.length ? "DB harness deterministic" : "deterministic baseline"}`;
     const deterministicTbmBriefingStructured = aiMode === "enhanced" && structuredRiskRows.length
       ? buildTbmBriefingStructuredFromRiskRows(response.scenario, structuredRiskRows, weather.summary)
       : null;

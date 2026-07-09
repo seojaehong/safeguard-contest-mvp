@@ -9,8 +9,8 @@ import {
   hasDocumentCoverage,
   parseHarnessMemoryInput
 } from "@/lib/db-harness";
-import { buildMockAskResponse } from "@/lib/mock-data";
-import { attachDbHarnessFallback, normalizeSafetyTermTypos, runAsk } from "@/lib/search";
+import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { attachDbHarnessFallback, buildSafetyReferenceRiskRows, normalizeSafetyTermTypos, runAsk } from "@/lib/search";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
@@ -348,6 +348,49 @@ describe("DB harness packet", () => {
 });
 
 describe("runAsk DB harness mode", () => {
+  it("turns safety reference matches into deterministic risk rows before generic baseline rows", () => {
+    const response = buildMockAskResponse(
+      "성수동 외벽 도장 작업, 이동식 비계 사용, 오후 강풍 예보",
+      mockSearchResults,
+      "mock",
+      "테스트"
+    );
+    const rows = buildSafetyReferenceRiskRows(response, [
+      reference({
+        id: "kosha-direct-1",
+        item_type: "technical-guideline",
+        category: "추락",
+        subcategory: "이동식 비계",
+        title: "이동식 비계 작업발판·난간 점검 지침",
+        summary: "외벽 도장 작업 전 난간, 작업발판, 아웃트리거 상태를 확인합니다.",
+        controls: ["작업발판·난간·아웃트리거 사전 점검", "강풍 시 상부 작업 중지"],
+        evidence_role: "direct",
+        retrieval_source: "ranked"
+      }),
+      reference({
+        id: "sif-support-1",
+        item_type: "sif-case",
+        category: "SIF",
+        subcategory: "추락",
+        title: "외벽 도장 중 이동식 비계 추락 사례",
+        controls: ["작업 전 방호조치 사진 확인", "TBM에서 작업중지 기준 복창"],
+        evidence_role: "supporting",
+        retrieval_source: "hybrid"
+      })
+    ], "오후 강풍 예보");
+
+    expect(rows.length).toBeGreaterThanOrEqual(5);
+    expect(rows[0].hazard).toContain("이동식 비계 작업발판·난간 점검 지침");
+    expect(rows[0].currentControls).toContain("작업발판·난간·아웃트리거 사전 점검");
+    expect(rows[0].additionalControls).toContain("강풍 시 상부 작업 중지");
+    expect(rows[0].evidenceRefs).toEqual(expect.arrayContaining([
+      "DB 하네스 직접근거",
+      "이동식 비계 작업발판·난간 점검 지침",
+      "검색: ranked"
+    ]));
+    expect(rows.some((row) => row.hazard.includes("외벽 도장 중 이동식 비계 추락 사례"))).toBe(true);
+  });
+
   it("keeps template mode inside the DB harness contract without generic LLM fallback prose", async () => {
     const response = await runAsk("성수동 외벽 도장 작업", {
       aiMode: "template",
@@ -416,7 +459,7 @@ describe("runAsk DB harness mode", () => {
 
     expect(response.generationMode).toBe("enhanced");
     expect(response.status.detail).toContain("AI_MODE=enhanced (DB 하네스 row-first");
-    expect(response.status.detail).toContain("structured rows=deterministic fallback");
+    expect(response.status.detail).toMatch(/structured rows=(DB harness deterministic|deterministic baseline)/);
     expect(response.status.detail).toContain("TBM structured=deterministic from risk rows");
     expect(response.status.detail).not.toContain("문서 생성기 미응답");
     expect(response.status.detail).not.toContain("Gemini 본문");
