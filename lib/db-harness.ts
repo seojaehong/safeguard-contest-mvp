@@ -28,6 +28,12 @@ export type HarnessWorkpackMemory = {
   statusLabel: string;
 };
 
+export type DbHarnessDocumentCoverage = {
+  document: string;
+  covered: boolean;
+  evidenceTypes: Array<"directEvidence" | "sifCase" | "supportingEvidence" | "improvementMemory">;
+};
+
 export type DbHarnessPacket = {
   mode: "db_harness_first";
   question: string;
@@ -45,6 +51,7 @@ export type DbHarnessPacket = {
     fallbackChainAllowed: false;
     requiredDocuments: string[];
     missingEvidence: string[];
+    documentCoverage: DbHarnessDocumentCoverage[];
   };
 };
 
@@ -71,6 +78,26 @@ function uniqueDocuments(items: SafetyReferenceItem[], improvements: HarnessImpr
   return documents;
 }
 
+function buildDocumentCoverage(input: {
+  directEvidence: SafetyReferenceItem[];
+  sifCases: SafetyReferenceItem[];
+  supportingEvidence: SafetyReferenceItem[];
+  improvements: HarnessImprovement[];
+}): DbHarnessDocumentCoverage[] {
+  return REQUIRED_DOCUMENTS.map((document) => {
+    const evidenceTypes: DbHarnessDocumentCoverage["evidenceTypes"] = [];
+    if (input.directEvidence.some((item) => includesDocument(item, document))) evidenceTypes.push("directEvidence");
+    if (input.sifCases.some((item) => includesDocument(item, document))) evidenceTypes.push("sifCase");
+    if (input.supportingEvidence.some((item) => includesDocument(item, document))) evidenceTypes.push("supportingEvidence");
+    if (input.improvements.some((item) => item.reflectedDocuments.includes(document))) evidenceTypes.push("improvementMemory");
+    return {
+      document,
+      covered: evidenceTypes.length > 0,
+      evidenceTypes
+    };
+  });
+}
+
 export function buildDbHarnessPacket(input: {
   question: string;
   references: SafetyReferenceItem[];
@@ -84,7 +111,10 @@ export function buildDbHarnessPacket(input: {
   const sifCases = input.references.filter((item) => item.item_type === "sif-case");
   const supportingEvidence = input.references.filter((item) => item.evidence_role !== "direct");
   const availableDocuments = uniqueDocuments(input.references, improvements);
-  const missingEvidence = REQUIRED_DOCUMENTS.filter((document) => !availableDocuments.has(document));
+  const documentCoverage = buildDocumentCoverage({ directEvidence, sifCases, supportingEvidence, improvements });
+  const missingEvidence = REQUIRED_DOCUMENTS.filter((document) =>
+    !availableDocuments.has(document) || !documentCoverage.find((item) => item.document === document)?.covered
+  );
   const missing = [
     ...(input.ontologyMissing || []),
     ...(sifCases.length ? [] : ["SIF 유사사례"]),
@@ -107,7 +137,8 @@ export function buildDbHarnessPacket(input: {
       llmRole: "naturalize_only",
       fallbackChainAllowed: false,
       requiredDocuments: REQUIRED_DOCUMENTS,
-      missingEvidence
+      missingEvidence,
+      documentCoverage
     }
   };
 }

@@ -59,6 +59,7 @@ export type QualityContract = {
     sifCaseCount: number;
     supportingEvidenceCount: number;
     missingEvidence: string[];
+    documentCoverage: DbHarnessPacket["generationContract"]["documentCoverage"];
     detail: string;
   };
 };
@@ -552,6 +553,7 @@ export type AskResponse = {
       improvementMemory: number;
       workpackMemory: number;
       missingEvidence: string[];
+      documentCoverage: DbHarnessPacket["generationContract"]["documentCoverage"];
       ontologyStatus: DbHarnessPacket["ontologyChecklist"]["status"];
     };
   };

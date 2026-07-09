@@ -217,6 +217,7 @@ function makeLiveStructuredResponse(): AskResponse {
         improvementMemory: packet.improvementMemory.length,
         workpackMemory: packet.workpackMemory.length,
         missingEvidence: packet.generationContract.missingEvidence,
+        documentCoverage: packet.generationContract.documentCoverage,
         ontologyStatus: packet.ontologyChecklist.status
       }
     },
@@ -257,6 +258,7 @@ describe("qualityContract", () => {
     expect(contract.dbHarness.status).toBe("ready");
     expect(contract.dbHarness.llmRole).toBe("naturalize_only");
     expect(contract.dbHarness.fallbackChainAllowed).toBe(false);
+    expect(contract.dbHarness.documentCoverage.every((item) => item.covered)).toBe(true);
     expect(contract.persistence.status).toBe("ready");
   });
 
