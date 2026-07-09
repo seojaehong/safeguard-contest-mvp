@@ -635,7 +635,7 @@ function WorkpackHistoryPanel({
           onClick={() => downloadLearningExport("markdown")}
           disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
         >
-          {downloadingFormat === "markdown" ? "내려받는 중" : "개선 메모리 MD"}
+          {downloadingFormat === "markdown" ? "내려받는 중" : "작업 이력 MD"}
         </button>
         <button
           type="button"
@@ -643,11 +643,11 @@ function WorkpackHistoryPanel({
           onClick={() => downloadLearningExport("jsonl")}
           disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
         >
-          {downloadingFormat === "jsonl" ? "내려받는 중" : "운영 JSONL"}
+          {downloadingFormat === "jsonl" ? "내려받는 중" : "하네스 JSONL"}
         </button>
       </div>
       <p className="muted small">
-        저장된 작업팩만 다운로드됩니다. 개선사항, 근거, 열람 확인 이력을 관리자 검토용 운영 메모리 후보로 보관합니다.
+        저장된 작업팩만 다운로드됩니다. 개선사항, 근거 검색 출처, 열람 확인 이력을 관리자 검토용 운영 메모리 후보로 보관합니다.
       </p>
       {downloadMessage ? <p className="muted small">{downloadMessage}</p> : null}
     </article>

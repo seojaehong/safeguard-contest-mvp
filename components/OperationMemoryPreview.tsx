@@ -191,16 +191,17 @@ export function OperationMemoryPreview() {
           {preview.mode === "local"
             ? "워크스페이스에서 보관한 최근 개선사항을 관리자 검토용 작업 이력 그래프로 재구성했습니다."
             : "아직 로컬 개선 후보가 없어 Before/After 개선 루프 샘플을 보여줍니다."}
+          {" "}MD/JSONL은 다음 위험성평가와 TBM 생성에서 DB 하네스가 먼저 조회할 후보입니다.
         </p>
         <div className="operation-memory-actions" aria-label="작업 이력 메모리 파일">
           <button type="button" onClick={() => setImprovements(loadStoredImprovements())}>
             최근 후보 다시 읽기
           </button>
           <button type="button" onClick={() => downloadLearningMemory("markdown")}>
-            MD 저장
+            작업 이력 MD
           </button>
           <button type="button" onClick={() => downloadLearningMemory("jsonl")}>
-            JSONL 저장
+            하네스 JSONL
           </button>
         </div>
       </div>

@@ -142,6 +142,14 @@ function event(input: WorkpackLearningInput, eventType: LearningJsonlEvent["even
   };
 }
 
+function referenceRetrievalLabel(reference: SafetyReferenceItem) {
+  if (reference.retrieval_source === "hybrid") return "hybrid-vector-rpc";
+  if (reference.retrieval_source === "vector") return "vector-rpc";
+  if (reference.retrieval_source === "ranked") return "ranked-rpc";
+  if (reference.retrieval_source === "rest") return "rest-ilike";
+  return "not-recorded";
+}
+
 function slugSegment(value: string) {
   return value
     .trim()
@@ -178,11 +186,18 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
     }),
     ...input.references.map((reference) => event(input, "reference", {
       referenceItemId: reference.id,
+      sourceId: reference.source_id,
       itemType: reference.item_type,
       title: reference.title,
+      summary: reference.short_summary || reference.summary,
       riskTags: reference.risk_tags,
       controls: reference.controls,
-      primaryDocuments: reference.primary_documents
+      primaryDocuments: reference.primary_documents,
+      reflectedDocuments: reference.reflected_documents,
+      evidenceRole: reference.evidence_role,
+      sourceUrl: reference.source_url,
+      retrievalSource: reference.retrieval_source || "not-recorded",
+      retrievalMode: referenceRetrievalLabel(reference)
     })),
     ...input.improvements.map((improvement) => event(input, "improvement", {
       improvementId: improvement.id,
@@ -262,9 +277,14 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
 
   for (const reference of input.references) {
     lines.push(`- ${reference.title}`);
+    lines.push(`  - sourceId: ${reference.source_id}`);
     lines.push(`  - type: ${reference.item_type}`);
+    lines.push(`  - retrieval: ${referenceRetrievalLabel(reference)}`);
+    if (reference.evidence_role) lines.push(`  - role: ${reference.evidence_role}`);
     lines.push(`  - documents: ${reference.primary_documents.join(", ") || "없음"}`);
+    if (reference.reflected_documents?.length) lines.push(`  - reflected: ${reference.reflected_documents.join(", ")}`);
     lines.push(`  - controls: ${reference.controls.join(" / ") || "없음"}`);
+    if (reference.source_url) lines.push(`  - sourceUrl: ${reference.source_url}`);
   }
 
   lines.push("", "## 개선사항", "");

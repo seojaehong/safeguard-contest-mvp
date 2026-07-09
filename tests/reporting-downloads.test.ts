@@ -154,12 +154,18 @@ describe("reporting downloads", () => {
       .map((line) => JSON.parse(line) as { eventType: string; payload: Record<string, unknown> });
 
     expect(events.map((event) => event.eventType)).toContain("period_summary");
+    expect(events.map((event) => event.eventType)).toContain("governance");
     expect(events.map((event) => event.eventType)).toContain("risk_row");
     expect(events.map((event) => event.eventType)).toContain("improvement");
     expect(events.map((event) => event.eventType)).toContain("classification_group");
     expect(events.find((event) => event.eventType === "improvement")?.payload).toMatchObject({
       hazardLabel: "추락 위험",
       sourceLabel: "Before/After 사진"
+    });
+    expect(events.find((event) => event.eventType === "governance")?.payload).toMatchObject({
+      authority: "operator_review_corpus",
+      runtimeAuthority: false,
+      modelFineTuning: false
     });
     expect(events.some((event) => event.eventType === "classification_group" && event.payload.groupType === "risk_level")).toBe(true);
   });
@@ -174,6 +180,8 @@ describe("reporting downloads", () => {
     const markdown = buildReportLearningMarkdown(snapshot);
 
     expect(markdown).toContain("운영 코퍼스");
+    expect(markdown).toContain("## 운영 메모리 계약");
+    expect(markdown).toContain("authority: operator_review_corpus");
     expect(markdown).toContain("재생성 가능한 코퍼스");
     expect(markdown).toContain("## 개선 이벤트");
     expect(markdown).toContain("Before/After 사진");

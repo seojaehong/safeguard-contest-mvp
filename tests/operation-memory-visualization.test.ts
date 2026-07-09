@@ -20,7 +20,8 @@ function reference(): SafetyReferenceItem {
     primary_documents: ["위험성평가표", "TBM 브리핑"],
     controls: ["작업발판 난간 보강", "강풍 시 작업중지 기준 공유"],
     evidence_role: "direct",
-    reflected_documents: ["TBM 기록"]
+    reflected_documents: ["TBM 기록"],
+    retrieval_source: "hybrid"
   };
 }
 
@@ -131,12 +132,15 @@ describe("buildOperationMemoryVisualizationModel", () => {
     expect(markdown.fileName).toBe("성수동-외벽-도장-learning.md");
     expect(markdown.content).toContain("## 운영 메모리 계약");
     expect(markdown.content).toContain("authority: operator_review_corpus");
+    expect(markdown.content).toContain("retrieval: hybrid-vector-rpc");
     expect(markdown.content).toContain("## 운영 그래프");
     expect(markdown.content).toContain("visionStatus: analyzed");
     expect(markdown.content).toContain("ocr: 작업중 출입금지");
     expect(jsonl.fileName).toBe("성수동-외벽-도장-learning.jsonl");
     expect(jsonl.content).toContain("\"eventType\":\"governance\"");
     expect(jsonl.content).toContain("\"authority\":\"operator_review_corpus\"");
+    expect(jsonl.content).toContain("\"retrievalSource\":\"hybrid\"");
+    expect(jsonl.content).toContain("\"retrievalMode\":\"hybrid-vector-rpc\"");
     expect(jsonl.content).toContain("\"eventType\":\"operation_graph\"");
     expect(jsonl.content).toContain("\"eventType\":\"improvement\"");
     expect(jsonl.content).toContain("\"photoPairAttached\":true");
