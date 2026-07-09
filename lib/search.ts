@@ -800,6 +800,48 @@ export type RunAskOptions = {
   onProgress?: OnAskProgress;
 };
 
+function summarizeDbHarnessPacket(packet: ReturnType<typeof buildDbHarnessPacket>): NonNullable<AskResponse["dbHarness"]>["summary"] {
+  return {
+    mode: packet.mode,
+    llmRole: packet.generationContract.llmRole,
+    fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+    directEvidence: packet.directEvidence.length,
+    sifCases: packet.sifCases.length,
+    supportingEvidence: packet.supportingEvidence.length,
+    improvementMemory: packet.improvementMemory.length,
+    workpackMemory: packet.workpackMemory.length,
+    missingEvidence: packet.generationContract.missingEvidence,
+    ontologyStatus: packet.ontologyChecklist.status
+  };
+}
+
+function attachTemplateHarness(response: AskResponse, input: {
+  question: string;
+  harnessMemory: Required<HarnessMemoryInput>;
+}): AskResponse {
+  const packet = buildDbHarnessPacket({
+    question: input.question,
+    references: [],
+    improvements: input.harnessMemory.improvements,
+    workpackMemory: input.harnessMemory.workpackMemory
+  });
+  const promptContext = buildHarnessPromptContext(packet);
+  return attachQualityContract({
+    ...response,
+    answer: buildDbHarnessAnswer(packet),
+    practicalPoints: buildDbHarnessPracticalPoints(packet),
+    dbHarness: {
+      packet,
+      promptContext,
+      summary: summarizeDbHarnessPacket(packet)
+    },
+    status: {
+      ...response.status,
+      detail: `${response.status.detail} / DB 하네스 템플릿 계약: ${packet.ontologyChecklist.status}`
+    }
+  });
+}
+
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
   const onProgress = options.onProgress;
   const harnessMemory = {
@@ -813,11 +855,14 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 
   // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
   if (aiMode === "template") {
-    return buildMockAskResponse(
-      question,
-      mockSearchResults.slice(0, 4),
-      "mock",
-      "AI_MODE=template (템플릿 본문 사용, 외부 호출 없음)"
+    return attachTemplateHarness(
+      buildMockAskResponse(
+        question,
+        mockSearchResults.slice(0, 4),
+        "mock",
+        "AI_MODE=template (외부 호출 없음, DB 하네스 템플릿 계약 적용)"
+      ),
+      { question, harnessMemory }
     );
   }
 
@@ -1215,18 +1260,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       ontologyMissing: structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`)
     });
     const dbHarnessPromptContext = buildHarnessPromptContext(dbHarnessPacket);
-    const dbHarnessSummary: NonNullable<AskResponse["dbHarness"]>["summary"] = {
-      mode: dbHarnessPacket.mode,
-      llmRole: dbHarnessPacket.generationContract.llmRole,
-      fallbackChainAllowed: dbHarnessPacket.generationContract.fallbackChainAllowed,
-      directEvidence: dbHarnessPacket.directEvidence.length,
-      sifCases: dbHarnessPacket.sifCases.length,
-      supportingEvidence: dbHarnessPacket.supportingEvidence.length,
-      improvementMemory: dbHarnessPacket.improvementMemory.length,
-      workpackMemory: dbHarnessPacket.workpackMemory.length,
-      missingEvidence: dbHarnessPacket.generationContract.missingEvidence,
-      ontologyStatus: dbHarnessPacket.ontologyChecklist.status
-    };
+    const dbHarnessSummary = summarizeDbHarnessPacket(dbHarnessPacket);
     const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket);
     const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket);
 

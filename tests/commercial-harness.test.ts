@@ -8,6 +8,7 @@ import {
   hasDocumentCoverage,
   parseHarnessMemoryInput
 } from "@/lib/db-harness";
+import { runAsk } from "@/lib/search";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
@@ -237,6 +238,38 @@ describe("DB harness packet", () => {
     expect(answer).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
     expect(points).toContain("위험성평가표 근거 보강 후 전파");
     expect(points).not.toContain("일반 체크포인트");
+  });
+});
+
+describe("runAsk DB harness mode", () => {
+  it("keeps template mode inside the DB harness contract without generic LLM fallback prose", async () => {
+    const response = await runAsk("성수동 외벽 도장 작업", {
+      aiMode: "template",
+      harnessMemory: {
+        improvements: [{
+          id: "imp-template-1",
+          taskLabel: "성수동 외벽 도장",
+          hazardLabel: "추락",
+          improvementText: "작업 전 난간 보강 사진 확인",
+          reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+          sourceType: "photo_analysis",
+          visionStatus: "analyzed",
+          analysisMode: "vision_ocr",
+          photoPairAttached: true
+        }]
+      }
+    });
+
+    expect(response.mode).toBe("mock");
+    expect(response.dbHarness?.packet.mode).toBe("db_harness_first");
+    expect(response.dbHarness?.summary.llmRole).toBe("naturalize_only");
+    expect(response.dbHarness?.summary.fallbackChainAllowed).toBe(false);
+    expect(response.dbHarness?.summary.improvementMemory).toBe(1);
+    expect(response.answer).toContain("하네스 판단");
+    expect(response.answer).toContain("작업 전 난간 보강 사진 확인");
+    expect(response.answer).not.toMatch(/fallback|OPENAI_API_KEY|timeout/i);
+    expect(response.practicalPoints).toContain("문서 반영 전 확인: 작업 전 난간 보강 사진 확인");
+    expect(response.qualityContract?.dbHarness.status).toBe("blocked");
   });
 });
 
