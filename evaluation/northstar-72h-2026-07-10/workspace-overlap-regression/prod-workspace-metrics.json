@@ -1,0 +1,2322 @@
+[
+  {
+    "viewport": {
+      "name": "wide-short",
+      "width": 2048,
+      "height": 860
+    },
+    "metrics": {
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 2048,
+        "height": 860,
+        "scrollWidth": 2048,
+        "bodyHeight": 1231,
+        "scrollY": 0
+      },
+      "shell": {
+        "selector": ".command-center-shell",
+        "top": 0,
+        "bottom": 1230.84375,
+        "left": 0,
+        "right": 2048,
+        "width": 2048,
+        "height": 1230.84375,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "visible",
+        "background": "rgb(250, 250, 251)",
+        "color": "rgb(23, 25, 29)",
+        "display": "grid",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "paddingTop": "12px",
+        "paddingBottom": "64px"
+      },
+      "topbar": null,
+      "sidebar": null,
+      "main": null,
+      "inputPanel": null,
+      "textarea": {
+        "selector": "textarea",
+        "top": 392.875,
+        "bottom": 556.875,
+        "left": 705,
+        "right": 1525,
+        "width": 820,
+        "height": 164,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "auto",
+        "background": "rgba(255, 255, 255, 0.94)",
+        "color": "rgb(23, 25, 29)",
+        "display": "block",
+        "lineHeight": "30.94px",
+        "fontSize": "17px",
+        "paddingTop": "22px",
+        "paddingBottom": "22px"
+      },
+      "themeToggle": {
+        "selector": ".workspace-theme-toggle",
+        "top": 24.265625,
+        "bottom": 59.859375,
+        "left": 1407,
+        "right": 1535,
+        "width": 128,
+        "height": 35.59375,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "visible",
+        "background": "rgb(237, 241, 245)",
+        "color": "rgb(23, 25, 29)",
+        "display": "flex",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "paddingTop": "3px",
+        "paddingBottom": "3px"
+      },
+      "detectedOverlaps": [
+        {
+          "area": 81791.25,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "HEADER",
+            "cls": "command-topbar workspace-command-topbar",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩",
+            "top": 12,
+            "bottom": 72.140625,
+            "left": 344,
+            "right": 1704,
+            "width": 1360,
+            "height": 60.140625
+          }
+        },
+        {
+          "area": 4802.739013671875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "A",
+            "cls": "brand-lockup safeclaw-lockup",
+            "text": "SafeClaw현장 안전 문서팩",
+            "top": 23,
+            "bottom": 61.140625,
+            "left": 357,
+            "right": 482.921875,
+            "width": 125.921875,
+            "height": 38.140625
+          }
+        },
+        {
+          "area": 2743.145263671875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "SafeClaw현장 안전 문서팩",
+            "top": 23,
+            "bottom": 61.140625,
+            "left": 399,
+            "right": 470.921875,
+            "width": 71.921875,
+            "height": 38.140625
+          }
+        },
+        {
+          "area": 1366.515625,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "STRONG",
+            "cls": "",
+            "text": "SafeClaw",
+            "top": 23,
+            "bottom": 42,
+            "left": 399,
+            "right": 470.921875,
+            "width": 71.921875,
+            "height": 19
+          }
+        },
+        {
+          "area": 1304.707763671875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SMALL",
+            "cls": "",
+            "text": "현장 안전 문서팩",
+            "top": 43,
+            "bottom": 61.140625,
+            "left": 399,
+            "right": 470.921875,
+            "width": 71.921875,
+            "height": 18.140625
+          }
+        },
+        {
+          "area": 31306.104248046875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-top-title",
+            "text": "현장 상황입력",
+            "top": 24.203125,
+            "bottom": 59.9375,
+            "left": 506.921875,
+            "right": 1383,
+            "width": 876.078125,
+            "height": 35.734375
+          }
+        },
+        {
+          "area": 13004.28466796875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "현장 상황",
+            "top": 24.203125,
+            "bottom": 39.046875,
+            "left": 506.921875,
+            "right": 1383,
+            "width": 876.078125,
+            "height": 14.84375
+          }
+        },
+        {
+          "area": 16549.663330078125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "STRONG",
+            "cls": "",
+            "text": "입력",
+            "top": 41.046875,
+            "bottom": 59.9375,
+            "left": 506.921875,
+            "right": 1383,
+            "width": 876.078125,
+            "height": 18.890625
+          }
+        },
+        {
+          "area": 4556,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-theme-toggle",
+            "text": "DayNight",
+            "top": 24.265625,
+            "bottom": 59.859375,
+            "left": 1407,
+            "right": 1535,
+            "width": 128,
+            "height": 35.59375
+          }
+        },
+        {
+          "area": 1600.4375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "active",
+            "text": "Day",
+            "top": 28.265625,
+            "bottom": 55.859375,
+            "left": 1411,
+            "right": 1469,
+            "width": 58,
+            "height": 27.59375
+          }
+        },
+        {
+          "area": 1600.4375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "",
+            "text": "Night",
+            "top": 28.265625,
+            "bottom": 55.859375,
+            "left": 1473,
+            "right": 1531,
+            "width": 58,
+            "height": 27.59375
+          }
+        },
+        {
+          "area": 4356,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "topbar-status",
+            "text": "작업 입력 대기입력 대기문서팩",
+            "top": 25.5625,
+            "bottom": 58.5625,
+            "left": 1559,
+            "right": 1691,
+            "width": 132,
+            "height": 33
+          }
+        },
+        {
+          "area": 1445276.25,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SECTION",
+            "cls": "command-viewport linear-workspace-layout",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 · 5명근거 준비고위험요인 사례조회 예정KO",
+            "top": 104.140625,
+            "bottom": 1166.84375,
+            "left": 344,
+            "right": 1704,
+            "width": 1360,
+            "height": 1062.703125
+          }
+        },
+        {
+          "area": 278029.125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "ASIDE",
+            "cls": "workspace-side-nav",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 · 5명근거 준비고위험요인 사례조회 예정KO",
+            "top": 104.140625,
+            "bottom": 1157.28125,
+            "left": 344,
+            "right": 608,
+            "width": 264,
+            "height": 1053.140625
+          }
+        },
+        {
+          "area": 53337.375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-side-group",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김",
+            "top": 119.140625,
+            "bottom": 347.078125,
+            "left": 359,
+            "right": 593,
+            "width": 234,
+            "height": 227.9375
+          }
+        },
+        {
+          "area": 3315,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "작업공간",
+            "top": 132.140625,
+            "bottom": 148.078125,
+            "left": 372,
+            "right": 580,
+            "width": 208,
+            "height": 15.9375
+          }
+        },
+        {
+          "area": 10400,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "active",
+            "text": "입력진행 중",
+            "top": 160.078125,
+            "bottom": 210.078125,
+            "left": 372,
+            "right": 580,
+            "width": 208,
+            "height": 50
+          }
+        },
+        {
+          "area": 2401.212890625,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "입력",
+            "top": 174.234375,
+            "bottom": 195.921875,
+            "left": 413,
+            "right": 523.71875,
+            "width": 110.71875,
+            "height": 21.6875
+          }
+        },
+        {
+          "area": 10400,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "",
+            "text": "▣문서잠김",
+            "top": 222.078125,
+            "bottom": 272.078125,
+            "left": 372,
+            "right": 580,
+            "width": 208,
+            "height": 50
+          }
+        },
+        {
+          "area": 2667.2236328125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 2048,
+            "width": 2048,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "문서",
+            "top": 236.234375,
+            "bottom": 257.921875,
+            "left": 413,
+            "right": 535.984375,
+            "width": 122.984375,
+            "height": 21.6875
+          }
+        }
+      ]
+    }
+  },
+  {
+    "viewport": {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    "metrics": {
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "bodyHeight": 1231,
+        "scrollY": 0
+      },
+      "shell": {
+        "selector": ".command-center-shell",
+        "top": 0,
+        "bottom": 1230.84375,
+        "left": 0,
+        "right": 1440,
+        "width": 1440,
+        "height": 1230.84375,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "visible",
+        "background": "rgb(250, 250, 251)",
+        "color": "rgb(23, 25, 29)",
+        "display": "grid",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "paddingTop": "12px",
+        "paddingBottom": "64px"
+      },
+      "topbar": null,
+      "sidebar": null,
+      "main": null,
+      "inputPanel": null,
+      "textarea": {
+        "selector": "textarea",
+        "top": 392.875,
+        "bottom": 556.875,
+        "left": 401,
+        "right": 1221,
+        "width": 820,
+        "height": 164,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "auto",
+        "background": "rgba(255, 255, 255, 0.94)",
+        "color": "rgb(23, 25, 29)",
+        "display": "block",
+        "lineHeight": "30.94px",
+        "fontSize": "17px",
+        "paddingTop": "22px",
+        "paddingBottom": "22px"
+      },
+      "themeToggle": {
+        "selector": ".workspace-theme-toggle",
+        "top": 24.265625,
+        "bottom": 59.859375,
+        "left": 1103,
+        "right": 1231,
+        "width": 128,
+        "height": 35.59375,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "visible",
+        "background": "rgb(237, 241, 245)",
+        "color": "rgb(23, 25, 29)",
+        "display": "flex",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "paddingTop": "3px",
+        "paddingBottom": "3px"
+      },
+      "detectedOverlaps": [
+        {
+          "area": 81791.25,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "HEADER",
+            "cls": "command-topbar workspace-command-topbar",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩",
+            "top": 12,
+            "bottom": 72.140625,
+            "left": 40,
+            "right": 1400,
+            "width": 1360,
+            "height": 60.140625
+          }
+        },
+        {
+          "area": 4802.739013671875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "A",
+            "cls": "brand-lockup safeclaw-lockup",
+            "text": "SafeClaw현장 안전 문서팩",
+            "top": 23,
+            "bottom": 61.140625,
+            "left": 53,
+            "right": 178.921875,
+            "width": 125.921875,
+            "height": 38.140625
+          }
+        },
+        {
+          "area": 2743.145263671875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "SafeClaw현장 안전 문서팩",
+            "top": 23,
+            "bottom": 61.140625,
+            "left": 95,
+            "right": 166.921875,
+            "width": 71.921875,
+            "height": 38.140625
+          }
+        },
+        {
+          "area": 1366.515625,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "STRONG",
+            "cls": "",
+            "text": "SafeClaw",
+            "top": 23,
+            "bottom": 42,
+            "left": 95,
+            "right": 166.921875,
+            "width": 71.921875,
+            "height": 19
+          }
+        },
+        {
+          "area": 1304.707763671875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SMALL",
+            "cls": "",
+            "text": "현장 안전 문서팩",
+            "top": 43,
+            "bottom": 61.140625,
+            "left": 95,
+            "right": 166.921875,
+            "width": 71.921875,
+            "height": 18.140625
+          }
+        },
+        {
+          "area": 31306.104248046875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-top-title",
+            "text": "현장 상황입력",
+            "top": 24.203125,
+            "bottom": 59.9375,
+            "left": 202.921875,
+            "right": 1079,
+            "width": 876.078125,
+            "height": 35.734375
+          }
+        },
+        {
+          "area": 13004.28466796875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "현장 상황",
+            "top": 24.203125,
+            "bottom": 39.046875,
+            "left": 202.921875,
+            "right": 1079,
+            "width": 876.078125,
+            "height": 14.84375
+          }
+        },
+        {
+          "area": 16549.663330078125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "STRONG",
+            "cls": "",
+            "text": "입력",
+            "top": 41.046875,
+            "bottom": 59.9375,
+            "left": 202.921875,
+            "right": 1079,
+            "width": 876.078125,
+            "height": 18.890625
+          }
+        },
+        {
+          "area": 4556,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-theme-toggle",
+            "text": "DayNight",
+            "top": 24.265625,
+            "bottom": 59.859375,
+            "left": 1103,
+            "right": 1231,
+            "width": 128,
+            "height": 35.59375
+          }
+        },
+        {
+          "area": 1600.4375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "active",
+            "text": "Day",
+            "top": 28.265625,
+            "bottom": 55.859375,
+            "left": 1107,
+            "right": 1165,
+            "width": 58,
+            "height": 27.59375
+          }
+        },
+        {
+          "area": 1600.4375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "",
+            "text": "Night",
+            "top": 28.265625,
+            "bottom": 55.859375,
+            "left": 1169,
+            "right": 1227,
+            "width": 58,
+            "height": 27.59375
+          }
+        },
+        {
+          "area": 4356,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "topbar-status",
+            "text": "작업 입력 대기입력 대기문서팩",
+            "top": 25.5625,
+            "bottom": 58.5625,
+            "left": 1255,
+            "right": 1387,
+            "width": 132,
+            "height": 33
+          }
+        },
+        {
+          "area": 1445276.25,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SECTION",
+            "cls": "command-viewport linear-workspace-layout",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 · 5명근거 준비고위험요인 사례조회 예정KO",
+            "top": 104.140625,
+            "bottom": 1166.84375,
+            "left": 40,
+            "right": 1400,
+            "width": 1360,
+            "height": 1062.703125
+          }
+        },
+        {
+          "area": 278029.125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "ASIDE",
+            "cls": "workspace-side-nav",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 · 5명근거 준비고위험요인 사례조회 예정KO",
+            "top": 104.140625,
+            "bottom": 1157.28125,
+            "left": 40,
+            "right": 304,
+            "width": 264,
+            "height": 1053.140625
+          }
+        },
+        {
+          "area": 53337.375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-side-group",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김",
+            "top": 119.140625,
+            "bottom": 347.078125,
+            "left": 55,
+            "right": 289,
+            "width": 234,
+            "height": 227.9375
+          }
+        },
+        {
+          "area": 3315,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "작업공간",
+            "top": 132.140625,
+            "bottom": 148.078125,
+            "left": 68,
+            "right": 276,
+            "width": 208,
+            "height": 15.9375
+          }
+        },
+        {
+          "area": 10400,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "active",
+            "text": "입력진행 중",
+            "top": 160.078125,
+            "bottom": 210.078125,
+            "left": 68,
+            "right": 276,
+            "width": 208,
+            "height": 50
+          }
+        },
+        {
+          "area": 2401.212890625,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "입력",
+            "top": 174.234375,
+            "bottom": 195.921875,
+            "left": 109,
+            "right": 219.71875,
+            "width": 110.71875,
+            "height": 21.6875
+          }
+        },
+        {
+          "area": 10400,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "",
+            "text": "▣문서잠김",
+            "top": 222.078125,
+            "bottom": 272.078125,
+            "left": 68,
+            "right": 276,
+            "width": 208,
+            "height": 50
+          }
+        },
+        {
+          "area": 2667.2236328125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1440,
+            "width": 1440,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "문서",
+            "top": 236.234375,
+            "bottom": 257.921875,
+            "left": 109,
+            "right": 231.984375,
+            "width": 122.984375,
+            "height": 21.6875
+          }
+        }
+      ]
+    }
+  },
+  {
+    "viewport": {
+      "name": "laptop-short",
+      "width": 1366,
+      "height": 768
+    },
+    "metrics": {
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 1366,
+        "height": 768,
+        "scrollWidth": 1366,
+        "bodyHeight": 1231,
+        "scrollY": 0
+      },
+      "shell": {
+        "selector": ".command-center-shell",
+        "top": 0,
+        "bottom": 1230.84375,
+        "left": 0,
+        "right": 1366,
+        "width": 1366,
+        "height": 1230.84375,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "visible",
+        "background": "rgb(250, 250, 251)",
+        "color": "rgb(23, 25, 29)",
+        "display": "grid",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "paddingTop": "12px",
+        "paddingBottom": "64px"
+      },
+      "topbar": null,
+      "sidebar": null,
+      "main": null,
+      "inputPanel": null,
+      "textarea": {
+        "selector": "textarea",
+        "top": 392.875,
+        "bottom": 556.875,
+        "left": 377,
+        "right": 1197,
+        "width": 820,
+        "height": 164,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "auto",
+        "background": "rgba(255, 255, 255, 0.94)",
+        "color": "rgb(23, 25, 29)",
+        "display": "block",
+        "lineHeight": "30.94px",
+        "fontSize": "17px",
+        "paddingTop": "22px",
+        "paddingBottom": "22px"
+      },
+      "themeToggle": {
+        "selector": ".workspace-theme-toggle",
+        "top": 24.265625,
+        "bottom": 59.859375,
+        "left": 1053,
+        "right": 1181,
+        "width": 128,
+        "height": 35.59375,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "visible",
+        "background": "rgb(237, 241, 245)",
+        "color": "rgb(23, 25, 29)",
+        "display": "flex",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "paddingTop": "3px",
+        "paddingBottom": "3px"
+      },
+      "detectedOverlaps": [
+        {
+          "area": 80227.59375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "HEADER",
+            "cls": "command-topbar workspace-command-topbar",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩",
+            "top": 12,
+            "bottom": 72.140625,
+            "left": 16,
+            "right": 1350,
+            "width": 1334,
+            "height": 60.140625
+          }
+        },
+        {
+          "area": 4802.739013671875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "A",
+            "cls": "brand-lockup safeclaw-lockup",
+            "text": "SafeClaw현장 안전 문서팩",
+            "top": 23,
+            "bottom": 61.140625,
+            "left": 29,
+            "right": 154.921875,
+            "width": 125.921875,
+            "height": 38.140625
+          }
+        },
+        {
+          "area": 2743.145263671875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "SafeClaw현장 안전 문서팩",
+            "top": 23,
+            "bottom": 61.140625,
+            "left": 71,
+            "right": 142.921875,
+            "width": 71.921875,
+            "height": 38.140625
+          }
+        },
+        {
+          "area": 1366.515625,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "STRONG",
+            "cls": "",
+            "text": "SafeClaw",
+            "top": 23,
+            "bottom": 42,
+            "left": 71,
+            "right": 142.921875,
+            "width": 71.921875,
+            "height": 19
+          }
+        },
+        {
+          "area": 1304.707763671875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SMALL",
+            "cls": "",
+            "text": "현장 안전 문서팩",
+            "top": 43,
+            "bottom": 61.140625,
+            "left": 71,
+            "right": 142.921875,
+            "width": 71.921875,
+            "height": 18.140625
+          }
+        },
+        {
+          "area": 30377.010498046875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-top-title",
+            "text": "현장 상황입력",
+            "top": 24.203125,
+            "bottom": 59.9375,
+            "left": 178.921875,
+            "right": 1029,
+            "width": 850.078125,
+            "height": 35.734375
+          }
+        },
+        {
+          "area": 12618.34716796875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "현장 상황",
+            "top": 24.203125,
+            "bottom": 39.046875,
+            "left": 178.921875,
+            "right": 1029,
+            "width": 850.078125,
+            "height": 14.84375
+          }
+        },
+        {
+          "area": 16058.507080078125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "STRONG",
+            "cls": "",
+            "text": "입력",
+            "top": 41.046875,
+            "bottom": 59.9375,
+            "left": 178.921875,
+            "right": 1029,
+            "width": 850.078125,
+            "height": 18.890625
+          }
+        },
+        {
+          "area": 4556,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-theme-toggle",
+            "text": "DayNight",
+            "top": 24.265625,
+            "bottom": 59.859375,
+            "left": 1053,
+            "right": 1181,
+            "width": 128,
+            "height": 35.59375
+          }
+        },
+        {
+          "area": 1600.4375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "active",
+            "text": "Day",
+            "top": 28.265625,
+            "bottom": 55.859375,
+            "left": 1057,
+            "right": 1115,
+            "width": 58,
+            "height": 27.59375
+          }
+        },
+        {
+          "area": 1600.4375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "",
+            "text": "Night",
+            "top": 28.265625,
+            "bottom": 55.859375,
+            "left": 1119,
+            "right": 1177,
+            "width": 58,
+            "height": 27.59375
+          }
+        },
+        {
+          "area": 4356,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "topbar-status",
+            "text": "작업 입력 대기입력 대기문서팩",
+            "top": 25.5625,
+            "bottom": 58.5625,
+            "left": 1205,
+            "right": 1337,
+            "width": 132,
+            "height": 33
+          }
+        },
+        {
+          "area": 1417645.96875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SECTION",
+            "cls": "command-viewport linear-workspace-layout",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 · 5명근거 준비고위험요인 사례조회 예정KO",
+            "top": 104.140625,
+            "bottom": 1166.84375,
+            "left": 16,
+            "right": 1350,
+            "width": 1334,
+            "height": 1062.703125
+          }
+        },
+        {
+          "area": 278029.125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "ASIDE",
+            "cls": "workspace-side-nav",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 · 5명근거 준비고위험요인 사례조회 예정KO",
+            "top": 104.140625,
+            "bottom": 1157.28125,
+            "left": 16,
+            "right": 280,
+            "width": 264,
+            "height": 1053.140625
+          }
+        },
+        {
+          "area": 53337.375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-side-group",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김",
+            "top": 119.140625,
+            "bottom": 347.078125,
+            "left": 31,
+            "right": 265,
+            "width": 234,
+            "height": 227.9375
+          }
+        },
+        {
+          "area": 3315,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "작업공간",
+            "top": 132.140625,
+            "bottom": 148.078125,
+            "left": 44,
+            "right": 252,
+            "width": 208,
+            "height": 15.9375
+          }
+        },
+        {
+          "area": 10400,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "active",
+            "text": "입력진행 중",
+            "top": 160.078125,
+            "bottom": 210.078125,
+            "left": 44,
+            "right": 252,
+            "width": 208,
+            "height": 50
+          }
+        },
+        {
+          "area": 2401.212890625,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "입력",
+            "top": 174.234375,
+            "bottom": 195.921875,
+            "left": 85,
+            "right": 195.71875,
+            "width": 110.71875,
+            "height": 21.6875
+          }
+        },
+        {
+          "area": 10400,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "",
+            "text": "▣문서잠김",
+            "top": 222.078125,
+            "bottom": 272.078125,
+            "left": 44,
+            "right": 252,
+            "width": 208,
+            "height": 50
+          }
+        },
+        {
+          "area": 2667.2236328125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1230.84375,
+            "left": 0,
+            "right": 1366,
+            "width": 1366,
+            "height": 1230.84375
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "문서",
+            "top": 236.234375,
+            "bottom": 257.921875,
+            "left": 85,
+            "right": 207.984375,
+            "width": 122.984375,
+            "height": 21.6875
+          }
+        }
+      ]
+    }
+  },
+  {
+    "viewport": {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    "metrics": {
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "scrollWidth": 390,
+        "bodyHeight": 1572,
+        "scrollY": 0
+      },
+      "shell": {
+        "selector": ".command-center-shell",
+        "top": 0,
+        "bottom": 1571.6875,
+        "left": 0,
+        "right": 390,
+        "width": 390,
+        "height": 1571.6875,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "visible",
+        "background": "rgb(250, 250, 251)",
+        "color": "rgb(23, 25, 29)",
+        "display": "grid",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "paddingTop": "12px",
+        "paddingBottom": "64px"
+      },
+      "topbar": null,
+      "sidebar": null,
+      "main": null,
+      "inputPanel": null,
+      "textarea": {
+        "selector": "textarea",
+        "top": 533.046875,
+        "bottom": 697.046875,
+        "left": 31,
+        "right": 359,
+        "width": 328,
+        "height": 164,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "auto",
+        "background": "rgba(255, 255, 255, 0.94)",
+        "color": "rgb(23, 25, 29)",
+        "display": "block",
+        "lineHeight": "30.94px",
+        "fontSize": "17px",
+        "paddingTop": "18px",
+        "paddingBottom": "18px"
+      },
+      "themeToggle": {
+        "selector": ".workspace-theme-toggle",
+        "top": 59,
+        "bottom": 94.59375,
+        "left": 25,
+        "right": 365,
+        "width": 340,
+        "height": 35.59375,
+        "position": "static",
+        "zIndex": "auto",
+        "overflow": "visible",
+        "background": "rgb(237, 241, 245)",
+        "color": "rgb(23, 25, 29)",
+        "display": "flex",
+        "lineHeight": "normal",
+        "fontSize": "16px",
+        "paddingTop": "3px",
+        "paddingBottom": "3px"
+      },
+      "detectedOverlaps": [
+        {
+          "area": 34255.3125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "HEADER",
+            "cls": "command-topbar workspace-command-topbar",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩",
+            "top": 12,
+            "bottom": 105.59375,
+            "left": 12,
+            "right": 378,
+            "width": 366,
+            "height": 93.59375
+          }
+        },
+        {
+          "area": 8840,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "A",
+            "cls": "brand-lockup safeclaw-lockup",
+            "text": "SafeClaw현장 안전 문서팩",
+            "top": 23,
+            "bottom": 49,
+            "left": 25,
+            "right": 365,
+            "width": 340,
+            "height": 26
+          }
+        },
+        {
+          "area": 1358.203125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "SafeClaw현장 안전 문서팩",
+            "top": 26.5,
+            "bottom": 45.5,
+            "left": 61,
+            "right": 132.484375,
+            "width": 71.484375,
+            "height": 19
+          }
+        },
+        {
+          "area": 1358.203125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "STRONG",
+            "cls": "",
+            "text": "SafeClaw",
+            "top": 26.5,
+            "bottom": 45.5,
+            "left": 61,
+            "right": 132.484375,
+            "width": 71.484375,
+            "height": 19
+          }
+        },
+        {
+          "area": 12101.875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-theme-toggle",
+            "text": "DayNight",
+            "top": 59,
+            "bottom": 94.59375,
+            "left": 25,
+            "right": 365,
+            "width": 340,
+            "height": 35.59375
+          }
+        },
+        {
+          "area": 1600.4375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "active",
+            "text": "Day",
+            "top": 63,
+            "bottom": 90.59375,
+            "left": 29,
+            "right": 87,
+            "width": 58,
+            "height": 27.59375
+          }
+        },
+        {
+          "area": 1600.4375,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "",
+            "text": "Night",
+            "top": 63,
+            "bottom": 90.59375,
+            "left": 91,
+            "right": 149,
+            "width": 58,
+            "height": 27.59375
+          }
+        },
+        {
+          "area": 501454.3125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "SECTION",
+            "cls": "command-viewport linear-workspace-layout",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 · 5명근거 준비고위험요인 사례조회 예정KO",
+            "top": 137.59375,
+            "bottom": 1507.6875,
+            "left": 12,
+            "right": 378,
+            "width": 366,
+            "height": 1370.09375
+          }
+        },
+        {
+          "area": 47557.125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "ASIDE",
+            "cls": "workspace-side-nav",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 · 5명근거 준비고위험요인 사례조회 예정KO",
+            "top": 137.59375,
+            "bottom": 267.53125,
+            "left": 12,
+            "right": 378,
+            "width": 366,
+            "height": 129.9375
+          }
+        },
+        {
+          "area": 33579,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "workspace-side-group",
+            "text": "작업공간입력진행 중▣문서잠김▣공유잠김",
+            "top": 152.59375,
+            "bottom": 252.53125,
+            "left": 27,
+            "right": 363,
+            "width": 336,
+            "height": 99.9375
+          }
+        },
+        {
+          "area": 4940.3759765625,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "SPAN",
+            "cls": "",
+            "text": "작업공간",
+            "top": 165.59375,
+            "bottom": 181.53125,
+            "left": 40,
+            "right": 349.984375,
+            "width": 309.984375,
+            "height": 15.9375
+          }
+        },
+        {
+          "area": 4639.5,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "active",
+            "text": "입력진행 중",
+            "top": 191.53125,
+            "bottom": 239.53125,
+            "left": 40,
+            "right": 136.65625,
+            "width": 96.65625,
+            "height": 48
+          }
+        },
+        {
+          "area": 4640.25,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "",
+            "text": "▣문서잠김",
+            "top": 191.53125,
+            "bottom": 239.53125,
+            "left": 146.65625,
+            "right": 243.328125,
+            "width": 96.671875,
+            "height": 48
+          }
+        },
+        {
+          "area": 4639.5,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "BUTTON",
+            "cls": "",
+            "text": "▣공유잠김",
+            "top": 191.53125,
+            "bottom": 239.53125,
+            "left": 253.328125,
+            "right": 349.984375,
+            "width": 96.65625,
+            "height": 48
+          }
+        },
+        {
+          "area": 449505.1875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "SECTION",
+            "cls": "command-main card command-main-studio workspace-view-input",
+            "text": "현장 작업 입력오늘 작업은 무엇인가요?지역, 작업, 인원, 주요 위험만 적어도 됩니다.현장 상황 입력120/600자세이프건설 서울 성수동 근린생",
+            "top": 279.53125,
+            "bottom": 1507.6875,
+            "left": 12,
+            "right": 378,
+            "width": 366,
+            "height": 1228.15625
+          }
+        },
+        {
+          "area": 446320.875,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "SECTION",
+            "cls": "workspace-step-page workspace-input-page",
+            "text": "현장 작업 입력오늘 작업은 무엇인가요?지역, 작업, 인원, 주요 위험만 적어도 됩니다.현장 상황 입력120/600자세이프건설 서울 성수동 근린생",
+            "top": 280.53125,
+            "bottom": 1506.6875,
+            "left": 13,
+            "right": 377,
+            "width": 364,
+            "height": 1226.15625
+          }
+        },
+        {
+          "area": 51009.125,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "DIV",
+            "cls": "command-copy",
+            "text": "현장 작업 입력오늘 작업은 무엇인가요?지역, 작업, 인원, 주요 위험만 적어도 됩니다.",
+            "top": 304.53125,
+            "bottom": 460.046875,
+            "left": 31,
+            "right": 359,
+            "width": 328,
+            "height": 155.515625
+          }
+        },
+        {
+          "area": 27859.5,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "H1",
+            "cls": "",
+            "text": "오늘 작업은 무엇인가요?",
+            "top": 333.53125,
+            "bottom": 418.46875,
+            "left": 31,
+            "right": 359,
+            "width": 328,
+            "height": 84.9375
+          }
+        },
+        {
+          "area": 9701.625,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "P",
+            "cls": "",
+            "text": "지역, 작업, 인원, 주요 위험만 적어도 됩니다.",
+            "top": 430.46875,
+            "bottom": 460.046875,
+            "left": 31,
+            "right": 359,
+            "width": 328,
+            "height": 29.578125
+          }
+        },
+        {
+          "area": 299874,
+          "a": {
+            "tag": "MAIN",
+            "cls": "command-center-shell workspace-theme-day workspace-theme-field",
+            "text": "SafeClaw현장 안전 문서팩현장 상황입력DayNight작업 입력 대기입력 대기문서팩작업공간입력진행 중▣문서잠김▣공유잠김현재 작업세이프건설 서",
+            "top": 0,
+            "bottom": 1571.6875,
+            "left": 0,
+            "right": 390,
+            "width": 390,
+            "height": 1571.6875
+          },
+          "b": {
+            "tag": "FORM",
+            "cls": "command-console",
+            "text": "현장 상황 입력120/600자세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강",
+            "top": 504.046875,
+            "bottom": 1418.296875,
+            "left": 31,
+            "right": 359,
+            "width": 328,
+            "height": 914.25
+          }
+        }
+      ]
+    }
+  }
+]
