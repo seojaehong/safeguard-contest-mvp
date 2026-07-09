@@ -307,6 +307,11 @@ describe("workpack learning export", () => {
     const file = buildWorkpackLearningFile(input, "jsonl");
 
     expect(markdown).toContain("# 성수동 외벽 도장");
+    expect(markdown).toContain("## 운영 메모리 계약");
+    expect(markdown).toContain("promotionStatus: draft_candidate");
+    expect(markdown).toContain("runtimeAuthority: no");
+    expect(markdown).toContain("modelFineTuning: no");
+    expect(markdown).toContain("모델 파인튜닝 산출물이 아닙니다.");
     expect(markdown).toContain("## 운영 그래프");
     expect(markdown).toContain("- hazards: 1");
     expect(markdown).toContain("- improvements: 1");
@@ -320,7 +325,11 @@ describe("workpack learning export", () => {
     expect(markdown).toContain("detectedHazards: 추락");
     expect(markdown).toContain("observedImprovement: 난간 보강 후 작업구역 통제가 보입니다.");
     expect(markdown).toContain("ocr: 추락주의");
-    expect(jsonl.split("\n")).toHaveLength(5);
+    expect(jsonl.split("\n")).toHaveLength(6);
+    expect(jsonl).toContain("\"eventType\":\"governance\"");
+    expect(jsonl).toContain("\"promotionStatus\":\"draft_candidate\"");
+    expect(jsonl).toContain("\"runtimeAuthority\":false");
+    expect(jsonl).toContain("\"modelFineTuning\":false");
     expect(jsonl).toContain("\"eventType\":\"operation_graph\"");
     expect(jsonl).toContain("\"kind\":\"Workpack\"");
     expect(jsonl).toContain("\"kind\":\"Improvement\"");

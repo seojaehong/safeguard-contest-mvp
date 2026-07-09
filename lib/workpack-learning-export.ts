@@ -16,8 +16,18 @@ export type WorkpackLearningInput = {
   }>;
 };
 
+export type WorkpackLearningGovernance = {
+  memoryScope: "operation_memory_export";
+  authority: "operator_review_corpus";
+  promotionStatus: "draft_candidate";
+  runtimeAuthority: false;
+  modelFineTuning: false;
+  nextUse: string[];
+  guardrails: string[];
+};
+
 export type LearningJsonlEvent = {
-  eventType: "workpack" | "operation_graph" | "reference" | "improvement" | "ack";
+  eventType: "workpack" | "governance" | "operation_graph" | "reference" | "improvement" | "ack";
   workpackId: string;
   generatedAt: string;
   payload: Record<string, unknown>;
@@ -29,6 +39,23 @@ export type WorkpackLearningFile = {
   fileName: string;
   contentType: string;
   content: string;
+};
+
+export const WORKPACK_LEARNING_GOVERNANCE: WorkpackLearningGovernance = {
+  memoryScope: "operation_memory_export",
+  authority: "operator_review_corpus",
+  promotionStatus: "draft_candidate",
+  runtimeAuthority: false,
+  modelFineTuning: false,
+  nextUse: [
+    "관리자 검토 후 DB 하네스 메모리 또는 published ontology 후보로 승격합니다.",
+    "다음 위험성평가와 TBM 생성 시 승인된 개선사항만 근거로 고정합니다."
+  ],
+  guardrails: [
+    "이 파일은 모델 파인튜닝 산출물이 아닙니다.",
+    "검토 전 항목은 사용자 근거처럼 노출하지 않습니다.",
+    "LLM은 승인된 근거와 개선사항을 문장화하는 역할로 제한합니다."
+  ]
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -135,6 +162,9 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       question: input.question,
       taskLabel: input.taskLabel
     }),
+    event(input, "governance", {
+      ...WORKPACK_LEARNING_GOVERNANCE
+    }),
     event(input, "operation_graph", {
       summary: graph.summary,
       nodes: graph.nodes,
@@ -195,6 +225,16 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     `- workpackId: \`${input.workpackId}\``,
     `- generatedAt: ${input.generatedAt}`,
     `- question: ${input.question}`,
+    "",
+    "## 운영 메모리 계약",
+    "",
+    `- scope: ${WORKPACK_LEARNING_GOVERNANCE.memoryScope}`,
+    `- authority: ${WORKPACK_LEARNING_GOVERNANCE.authority}`,
+    `- promotionStatus: ${WORKPACK_LEARNING_GOVERNANCE.promotionStatus}`,
+    `- runtimeAuthority: ${WORKPACK_LEARNING_GOVERNANCE.runtimeAuthority ? "yes" : "no"}`,
+    `- modelFineTuning: ${WORKPACK_LEARNING_GOVERNANCE.modelFineTuning ? "yes" : "no"}`,
+    `- nextUse: ${WORKPACK_LEARNING_GOVERNANCE.nextUse.join(" / ")}`,
+    `- guardrails: ${WORKPACK_LEARNING_GOVERNANCE.guardrails.join(" / ")}`,
     "",
     "## 운영 그래프",
     "",
