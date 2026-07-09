@@ -46,3 +46,26 @@
 - `deliverables.tbmBriefingStructured`와 `deliverables.tbmLogStructured`가 최종 payload에 존재하는지
 - `structured.tbmRiskLinks`가 유지되는지
 - 사진 개선 이력과 SIF/KOSHA 근거가 answer에 계속 반영되는지
+
+## 라이브 검증 결과
+
+배포 커밋: `750fd6c`
+프로덕션 alias: `https://www.safeclaw.kr`
+
+- 전체 응답: 59.4초
+- `generationMode`: `enhanced`
+- doc events: `structuredRiskRows`
+- doc failures: 없음
+- stage failures: 없음
+- `qualityContract.overall`: `ready`
+- 구조화 검수: `3/3 ready`
+- DB 하네스: `ready`
+- 온톨로지 QA: `ready`, `통과`
+- 최종 `structured.tbmRiskLinks`: 5건 유지
+- `deliverables.tbmBriefingStructured`: 존재, hazard 5건
+- `deliverables.tbmLogStructured`: 존재, hazard 5건
+- `status.detail`: `TBM structured=deterministic from risk rows` 포함
+- 사진 개선 이력, SIF/KOSHA 근거: answer에 반영됨
+- raw fallback/camelCase/오탈자 `지게브`: 노출 없음
+
+판정: enhanced는 이제 AI가 3종 문서를 각각 쓰는 경로가 아니라, 위험성평가 row를 확정한 뒤 DB 하네스 기반으로 TBM 브리핑/기록을 조립하는 row-first 경로로 동작한다. 62.0초에서 59.4초로 개선 폭은 크지 않지만, 다음 병목이 `structuredRiskRows` 단일 AI 호출임을 확정했다. 다음 라운드는 `structuredRiskRows` 자체를 DB/SIF/KOSHA 후보 row + LLM 보정 또는 deterministic row builder로 더 줄이는 방향이 맞다.
