@@ -120,10 +120,14 @@ describe("buildOperationMemoryVisualizationModel", () => {
     const jsonl = buildWorkpackLearningFile(input, "jsonl");
 
     expect(markdown.fileName).toBe("성수동-외벽-도장-learning.md");
+    expect(markdown.content).toContain("## 운영 메모리 계약");
+    expect(markdown.content).toContain("authority: operator_review_corpus");
     expect(markdown.content).toContain("## 운영 그래프");
     expect(markdown.content).toContain("visionStatus: analyzed");
     expect(markdown.content).toContain("ocr: 작업중 출입금지");
     expect(jsonl.fileName).toBe("성수동-외벽-도장-learning.jsonl");
+    expect(jsonl.content).toContain("\"eventType\":\"governance\"");
+    expect(jsonl.content).toContain("\"authority\":\"operator_review_corpus\"");
     expect(jsonl.content).toContain("\"eventType\":\"operation_graph\"");
     expect(jsonl.content).toContain("\"eventType\":\"improvement\"");
     expect(jsonl.content).toContain("\"photoPairAttached\":true");

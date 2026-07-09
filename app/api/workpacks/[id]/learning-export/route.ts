@@ -8,7 +8,8 @@ import { searchSafetyReferences } from "@/lib/safety-reference-catalog";
 import {
   buildWorkpackLearningFile,
   normalizeLearningVisionPayload,
-  normalizeWorkpackLearningFormat
+  normalizeWorkpackLearningFormat,
+  WORKPACK_LEARNING_GOVERNANCE
 } from "@/lib/workpack-learning-export";
 import { readString } from "@/lib/workspace-api";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
@@ -133,7 +134,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
       "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
       "x-safeclaw-reference-count": String(references.count),
       "x-safeclaw-improvement-count": String(improvements.length),
-      "x-safeclaw-confirmation-count": String(confirmations.length)
+      "x-safeclaw-confirmation-count": String(confirmations.length),
+      "x-safeclaw-memory-authority": WORKPACK_LEARNING_GOVERNANCE.authority,
+      "x-safeclaw-promotion-status": WORKPACK_LEARNING_GOVERNANCE.promotionStatus,
+      "x-safeclaw-runtime-authority": String(WORKPACK_LEARNING_GOVERNANCE.runtimeAuthority)
     }
   });
 }

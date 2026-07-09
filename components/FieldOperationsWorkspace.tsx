@@ -647,7 +647,7 @@ function WorkpackHistoryPanel({
         </button>
       </div>
       <p className="muted small">
-        저장된 작업팩만 다운로드됩니다. 개선사항, 근거, 열람 확인 이력을 기간 리포트와 지식 베이스 갱신 후보로 재사용합니다.
+        저장된 작업팩만 다운로드됩니다. 개선사항, 근거, 열람 확인 이력을 관리자 검토용 운영 메모리 후보로 보관합니다.
       </p>
       {downloadMessage ? <p className="muted small">{downloadMessage}</p> : null}
     </article>
