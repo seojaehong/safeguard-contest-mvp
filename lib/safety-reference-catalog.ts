@@ -292,6 +292,8 @@ function safeIlikeTerm(value: string): string {
 
 function extractFallbackTerms(value: string): string[] {
   const stopwords = new Set([
+    "부산",
+    "해운대",
     "서울",
     "성수동",
     "작업",
@@ -315,6 +317,85 @@ function extractFallbackTerms(value: string): string[] {
       .map((term) => term.trim())
       .filter((term) => term.length >= 2 && !stopwords.has(term))
   )).slice(0, 8);
+}
+
+const QUERY_TERM_ALIASES: Record<string, string[]> = {
+  "밀폐공간": ["밀폐", "산소", "환기", "질식", "유해가스", "감시인"],
+  "산소농도": ["산소", "농도", "환기", "질식", "가스"],
+  "유해가스": ["가스", "환기", "질식", "농도"],
+  "환기": ["환기", "배기", "송풍"],
+  "감시인": ["감시", "연락", "구조", "대피"],
+  "배수펌프": ["펌프", "배수", "기계실", "전원", "잠금", "LOTO"],
+  "기계실": ["기계실", "펌프", "전기", "배수"],
+  "누수": ["누수", "누전", "감전", "젖은", "미끄러짐", "전도"],
+  "감전": ["감전", "절연", "전기", "누전"],
+  "전원": ["전원", "잠금", "LOTO", "정비"],
+  "잠금표지": ["잠금", "표지", "LOTO", "전원차단"],
+  "추락": ["추락", "비계", "사다리", "작업발판", "고소"],
+  "지게차": ["지게차", "동선", "충돌", "하역"]
+};
+
+function normalizeMatchText(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, " ");
+}
+
+function referenceMatchText(item: SafetyReferenceItem): string {
+  return normalizeMatchText([
+    item.title,
+    item.summary,
+    item.category || "",
+    item.subcategory || "",
+    ...item.keywords,
+    ...item.risk_tags,
+    ...item.controls,
+    ...item.primary_documents
+  ].join(" "));
+}
+
+function expandedQueryTerms(query: string): string[] {
+  const baseTerms = extractFallbackTerms(query);
+  const terms = new Set<string>(baseTerms);
+  for (const term of baseTerms) {
+    const aliases = QUERY_TERM_ALIASES[term] || [];
+    aliases.forEach((alias) => terms.add(alias));
+  }
+  return Array.from(terms).filter((term) => term.length >= 2);
+}
+
+export function scoreSafetyReferenceQueryMatch(query: string, item: SafetyReferenceItem): number {
+  const baseTerms = extractFallbackTerms(query);
+  if (!baseTerms.length) return 1;
+  const text = referenceMatchText(item);
+  const title = normalizeMatchText(item.title);
+  let score = 0;
+
+  for (const term of baseTerms) {
+    const normalizedTerm = normalizeMatchText(term);
+    if (title.includes(normalizedTerm)) score += 5;
+    if (text.includes(normalizedTerm)) score += 3;
+    for (const alias of QUERY_TERM_ALIASES[term] || []) {
+      const normalizedAlias = normalizeMatchText(alias);
+      if (title.includes(normalizedAlias)) score += 3;
+      if (text.includes(normalizedAlias)) score += 2;
+    }
+  }
+
+  return score;
+}
+
+export function filterAndRankSafetyReferencesByQuery(
+  query: string,
+  items: SafetyReferenceItem[],
+  limit: number
+): SafetyReferenceItem[] {
+  const terms = expandedQueryTerms(query);
+  if (!terms.length) return items.slice(0, limit);
+  return items
+    .map((item, index) => ({ item, index, score: scoreSafetyReferenceQueryMatch(query, item) }))
+    .filter(({ score }) => score >= 2)
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map(({ item }) => item)
+    .slice(0, limit);
 }
 
 export function readSafetyReferenceLimit(value: string | null): number {
@@ -712,12 +793,13 @@ export async function searchSafetyReferences(options: {
     vectorSearch = vector.status;
     const ranked = await fetchRankedReferences(config, query, fetchLimit, options.itemType);
     if ((ranked && ranked.ok && ranked.items.length) || vector.items.length) {
-      const filtered = mergeSafetyReferenceHybridResults({
+      const merged = mergeSafetyReferenceHybridResults({
         vectorItems: vector.items,
         rankedItems: ranked?.ok ? ranked.items : [],
         limit,
         evidenceRole: options.evidenceRole
       });
+      const filtered = filterAndRankSafetyReferencesByQuery(query, merged, limit);
       return {
         ok: true,
         configured: true,
@@ -783,8 +865,9 @@ export async function searchSafetyReferences(options: {
       }
       if (byId.size >= limit) break;
     }
-    items = Array.from(byId.values()).slice(0, limit);
+    items = Array.from(byId.values());
   }
+  items = filterAndRankSafetyReferencesByQuery(query, items, limit);
 
   return {
     ok: true,
