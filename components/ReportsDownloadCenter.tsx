@@ -124,6 +124,9 @@ function GroupList({ title, groups }: { title: string; groups: ReportGroup[] }) 
 function DownloadActions({ snapshot }: { snapshot: ReportSnapshot }) {
   return (
     <div className="safeclaw-download-actions" aria-label="리포트 다운로드">
+      <p className="safeclaw-download-note">
+        개선사항 포함 문서와 다음 생성용 운영 메모리를 분리해 내려받습니다.
+      </p>
       <button
         type="button"
         className="button"
@@ -133,7 +136,7 @@ function DownloadActions({ snapshot }: { snapshot: ReportSnapshot }) {
           "text/markdown;charset=utf-8"
         )}
       >
-        개선 리포트 MD
+        개선사항 포함 MD
       </button>
       <button
         type="button"
@@ -144,7 +147,7 @@ function DownloadActions({ snapshot }: { snapshot: ReportSnapshot }) {
           "text/csv;charset=utf-8"
         )}
       >
-        분류 CSV
+        공정·작업 분류 CSV
       </button>
       <button
         type="button"
@@ -155,8 +158,11 @@ function DownloadActions({ snapshot }: { snapshot: ReportSnapshot }) {
           "application/json;charset=utf-8"
         )}
       >
-        원본 JSON
+        관리자 원본 JSON
       </button>
+      <p className="safeclaw-download-note">
+        아래 파일은 승인 전 지식 후보입니다. 사용자 근거처럼 바로 노출하지 않습니다.
+      </p>
       <button
         type="button"
         className="button secondary"
@@ -166,7 +172,7 @@ function DownloadActions({ snapshot }: { snapshot: ReportSnapshot }) {
           "text/markdown;charset=utf-8"
         )}
       >
-        운영 코퍼스 MD
+        다음 생성용 MD
       </button>
       <button
         type="button"
@@ -177,7 +183,7 @@ function DownloadActions({ snapshot }: { snapshot: ReportSnapshot }) {
           "application/x-ndjson;charset=utf-8"
         )}
       >
-        운영 코퍼스 JSONL
+        하네스 JSONL
       </button>
     </div>
   );

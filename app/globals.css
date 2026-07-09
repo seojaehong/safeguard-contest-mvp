@@ -7471,6 +7471,13 @@ body:has(.safeclaw-landing) :is(
   display: grid;
 }
 
+.safeclaw-download-note {
+  margin: 0;
+  color: rgba(246, 245, 239, 0.58);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 .safeclaw-workdoc-rail .safeclaw-report-groups {
   grid-template-columns: 1fr;
   gap: 10px;
@@ -14035,6 +14042,12 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-muted) !important;
   font-size: 12px !important;
   font-weight: 420 !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-download-note {
+  color: var(--workspace-muted) !important;
+  font-size: 12px;
+  line-height: 1.55;
 }
 
 /* Workspace design normalization for internal module pages. */

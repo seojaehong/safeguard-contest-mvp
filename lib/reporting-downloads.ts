@@ -71,7 +71,7 @@ export type ReportSnapshot = {
 };
 
 export type ReportLearningEvent = {
-  eventType: "period_summary" | "workpack" | "risk_row" | "improvement" | "classification_group";
+  eventType: "governance" | "period_summary" | "workpack" | "risk_row" | "improvement" | "classification_group";
   generatedAt: string;
   period: ReportPeriod;
   siteName: string;
@@ -89,6 +89,23 @@ const RISK_LEVEL_LABELS: Record<RiskLevel, string> = {
   medium: "중",
   low: "하"
 };
+
+const REPORT_LEARNING_GOVERNANCE = {
+  memoryScope: "period_operation_memory_export",
+  authority: "operator_review_corpus",
+  promotionStatus: "draft_candidate",
+  runtimeAuthority: false,
+  modelFineTuning: false,
+  nextUse: [
+    "관리자 검토 후 다음 위험성평가와 TBM 생성 시 과거 개선사항으로 조회합니다.",
+    "Before/After 사진 개선은 승인된 항목만 공식 운영 이력으로 승격합니다."
+  ],
+  guardrails: [
+    "이 파일은 모델 파인튜닝 산출물이 아닙니다.",
+    "검토 전 항목은 사용자 근거처럼 노출하지 않습니다.",
+    "DB 하네스가 먼저 근거와 개선사항을 고정하고 LLM은 문장화에만 사용합니다."
+  ]
+} as const;
 
 function startOfPeriod(period: ReportPeriod, now: Date) {
   const start = new Date(now);
@@ -437,6 +454,11 @@ function buildLearningEvents(snapshot: ReportSnapshot): ReportLearningEvent[] {
   return [
     {
       ...base,
+      eventType: "governance",
+      payload: REPORT_LEARNING_GOVERNANCE
+    },
+    {
+      ...base,
       eventType: "period_summary",
       payload: {
         title: snapshot.title,
@@ -522,6 +544,16 @@ export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
     `- period: ${snapshot.period}`,
     `- siteName: ${snapshot.scenario.siteName}`,
     `- workSummary: ${snapshot.scenario.workSummary}`,
+    "",
+    "## 운영 메모리 계약",
+    "",
+    `- scope: ${REPORT_LEARNING_GOVERNANCE.memoryScope}`,
+    `- authority: ${REPORT_LEARNING_GOVERNANCE.authority}`,
+    `- promotionStatus: ${REPORT_LEARNING_GOVERNANCE.promotionStatus}`,
+    `- runtimeAuthority: ${REPORT_LEARNING_GOVERNANCE.runtimeAuthority ? "yes" : "no"}`,
+    `- modelFineTuning: ${REPORT_LEARNING_GOVERNANCE.modelFineTuning ? "yes" : "no"}`,
+    `- nextUse: ${REPORT_LEARNING_GOVERNANCE.nextUse.join(" / ")}`,
+    `- guardrails: ${REPORT_LEARNING_GOVERNANCE.guardrails.join(" / ")}`,
     "",
     "## 재사용 목적",
     "",
