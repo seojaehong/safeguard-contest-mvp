@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "statusOk": true,
+  "nextApprovalGate": "apply-sif-only-migration",
+  "canaryPerformed": true,
+  "canaryEmbeddedCount": 3,
+  "canaryUploadedCount": 0,
+  "fullCorpusCount": 6032,
+  "fullEmbeddedCount": 0,
+  "fullUploadedCount": 0,
+  "modelFineTuningPerformed": false,
+  "approvalPacketCanaryEmbeddedCount": 3,
+  "approvalPacketMarkdownExpected": "Canary Embedding Evidence"
+}

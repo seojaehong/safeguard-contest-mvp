@@ -18,6 +18,13 @@ describe("SIF embedding approval packet", () => {
     expect(packet.dbMutationPerformed).toBe(false);
     expect(packet.embeddingGenerated).toBe(false);
     expect(packet.uploaded).toBe(false);
+    expect(packet.canary).toMatchObject({
+      performed: true,
+      corpusCount: 3,
+      embeddedCount: 3,
+      uploadedCount: 0,
+      dbMutationPerformed: false
+    });
     expect(packet.fileName).toBe("safeclaw-sif-embedding-approval-apply-sif-only-migration.md");
     expect(packet.approvalFingerprint).toHaveLength(64);
     expect(packet.artifactIntegrity).toHaveLength(4);
@@ -29,6 +36,10 @@ describe("SIF embedding approval packet", () => {
     expect(packet.markdown).toContain("Embedding corpus: 6,032");
     expect(packet.markdown).toContain("Model fine-tuning performed: no");
     expect(packet.markdown).toContain("DB mutation performed: no");
+    expect(packet.markdown).toContain("## Canary Embedding Evidence");
+    expect(packet.markdown).toContain("Canary 임베딩 완료 · 업로드 전");
+    expect(packet.markdown).toContain("Embedded count: 3");
+    expect(packet.markdown).toContain("Uploaded count: 0");
     expect(packet.markdown).toContain("Approval fingerprint:");
     expect(packet.markdown).toContain("## Artifact Integrity");
     expect(packet.markdown).toContain("SIF-only migration: present");

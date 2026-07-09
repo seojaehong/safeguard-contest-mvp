@@ -44,6 +44,21 @@ describe("SIF embedding gate status", () => {
       tableReady: false,
       rpcReady: false
     });
+    expect(status.canary).toMatchObject({
+      performed: true,
+      label: "Canary 임베딩 완료 · 업로드 전",
+      corpusCount: 3,
+      embeddedCount: 3,
+      uploadedCount: 0,
+      mode: "embed-only",
+      embeddingModel: "text-embedding-3-small",
+      embeddingDimensions: 1536,
+      dbMutationPerformed: false
+    });
+    expect(status.canary.answer).toContain("3건 canary 임베딩 벡터");
+    expect(status.canary.vectorsPath).toBe("evaluation\\sif-embedding-canary-2026-07-09\\sif-embedding-vectors.jsonl");
+    expect(status.canary.artifactIntegrity).toHaveLength(4);
+    expect(status.canary.artifactIntegrity.every((artifact) => artifact.exists)).toBe(true);
     expect(status.readinessVerdict).toMatchObject({
       state: "corpus-ready-migration-required",
       label: "코퍼스 준비 · 임베딩 미실행",
