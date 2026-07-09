@@ -9168,6 +9168,30 @@ body:has(.safeclaw-landing) :is(
   gap: 8px;
 }
 
+.ai-connect-sif-verdict {
+  grid-column: 1 / -1;
+  border-color: rgba(121, 121, 255, 0.32) !important;
+  background:
+    linear-gradient(135deg, rgba(121, 121, 255, 0.12), transparent 42%),
+    rgba(11, 12, 16, 0.76) !important;
+}
+
+.ai-connect-sif-verdict > span,
+.ai-connect-sif-verdict > small {
+  color: rgba(246, 245, 239, 0.58);
+  font-family: var(--font-hud);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ai-connect-sif-verdict > small {
+  color: rgba(246, 245, 239, 0.68);
+  line-height: 1.5;
+  text-transform: none;
+}
+
 .ai-connect-sif-state-grid strong,
 .ai-connect-sif-command strong {
   color: var(--os-text, #f6f5ef);

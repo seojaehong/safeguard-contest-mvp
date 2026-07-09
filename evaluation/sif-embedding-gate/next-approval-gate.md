@@ -1,20 +1,22 @@
 # SIF Embedding / Harness Approval Gate
 
 생성 시각: 2026-07-08 17:27 KST
-최신 재검증: 2026-07-09 18:03 KST
+최신 재검증: 2026-07-09 19:23 KST
 
 ## 판정
 
 SIF 임베딩 과정은 “지나간 것”이 아니라 **업로드 전 승인 게이트에 진입한 상태**다.
+
+현재 결론: **코퍼스 준비 · 임베딩 미실행**.
 
 - 완료: `safety_reference_items`의 SIF 6,033건 전수 조회
 - 완료: 스프레드시트 헤더 1건 제외
 - 완료: 임베딩 코퍼스 6,032건 생성
 - 완료: 빈 embedding text, 관리대책 누락, 문서반영 누락, 중복 contentHash 검출 0건
 - 미실행: 전체 6,032건 OpenAI embedding 생성
-- 확인: canary 3건 OpenAI embedding 생성 성공
 - 미실행: `safety_reference_embeddings` DB 업로드
-- 미실행: migration 적용
+- 미실행: SIF-only migration 적용
+- 다음 승인 대상: `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql`
 
 ## 현재 증거
 
@@ -77,7 +79,7 @@ npm.cmd run knowledge:sif-embedding-corpus -- --limit 2 --upload --output-dir ev
 
 ## Next Gate Preflight
 
-생성 시각: 2026-07-09 12:28 KST
+생성 시각: 2026-07-09 19:23 KST
 
 명령:
 
@@ -108,10 +110,11 @@ npm.cmd run knowledge:sif-embedding-preflight -- --require-execution-env --outpu
 - `OPENAI_API_KEY`: 있음
 - `SAFETY_REFERENCE_VECTOR_SEARCH=1`: 꺼짐
 - 따라서 승인 후 실제 embedding 생성/업로드를 실행할 수 있는 로컬 환경은 준비되어 있다.
+- 그러나 승인 전 command 실행은 보류한다.
 
 ## Runtime DB Probe
 
-생성 시각: 2026-07-09 18:03 KST
+생성 시각: 2026-07-09 19:23 KST
 
 명령:
 
@@ -178,7 +181,7 @@ Before/After 개선 사진은 `app/api/workpacks/[id]/improvements/route.ts`에�
 승인 전에는 실행하지 않는다.
 
 ```powershell
-npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload
+npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload
 ```
 
 이 명령은 migration 적용, `OPENAI_API_KEY`, Supabase service role 설정이 모두 확인된 뒤에만 실행한다.

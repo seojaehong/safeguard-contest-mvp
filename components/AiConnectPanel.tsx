@@ -98,6 +98,21 @@ type SifEmbeddingGateStatusResponse = {
     vectorFeatureFlagEnabled: boolean;
     executionReadyAfterApproval: boolean;
   };
+  readinessVerdict: {
+    state:
+      | "corpus-ready-migration-required"
+      | "runtime-env-required"
+      | "embedding-awaits-approval"
+      | "upload-awaits-approval"
+      | "vector-activation-ready"
+      | "vector-active"
+      | "blocked";
+    label: string;
+    answer: string;
+    nextAction: string;
+    embeddingAlreadyRun: boolean;
+    dbUploadAlreadyRun: boolean;
+  };
   vectorGuard: {
     status: "locked" | "blocked" | "ready" | "active";
     label: string;
@@ -485,6 +500,12 @@ export function AiConnectPanel() {
               </div>
             </dl>
             <div className="ai-connect-sif-state-grid">
+              <article className={`ai-connect-sif-verdict ${sifGate.readinessVerdict.state}`}>
+                <span>현재 결론</span>
+                <strong>{sifGate.readinessVerdict.label}</strong>
+                <p>{sifGate.readinessVerdict.answer}</p>
+                <small>{sifGate.readinessVerdict.nextAction}</small>
+              </article>
               <article>
                 <strong>품질 게이트</strong>
                 <p>
