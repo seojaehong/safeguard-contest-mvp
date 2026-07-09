@@ -164,6 +164,12 @@ Generated: 2026-07-09
 - `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-workspace-style-metrics.json`
 - `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-workspace-style-mobile.png`
 - `evaluation/ui-ux-browser-check-2026-07-09/ai-connect-workspace-style-mobile-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/module-nav-ai-connect-desktop.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/module-nav-ai-connect-desktop-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/module-nav-ai-connect-mobile.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/module-nav-ai-connect-mobile-metrics.json`
+- `evaluation/ui-ux-browser-check-2026-07-09/module-nav-ontology-desktop.png`
+- `evaluation/ui-ux-browser-check-2026-07-09/module-nav-ontology-desktop-metrics.json`
 
 핵심 권고:
 
@@ -192,7 +198,11 @@ Generated: 2026-07-09
 - ai-connect workspace style: 공통 `SafeClawModuleShell` 기본 variant를 workspace/document 계열로 전환, rail subtitle을 `현장 안전 문서팩`으로 변경
 - ai-connect workspace style desktop: 탭 background `rgba(108, 111, 247, 0.12)`, yellow tab fill 없음, vector guard 노출, horizontal overflow 없음
 - ai-connect workspace style mobile: viewport 390px, 탭 1열(`390px`), horizontal overflow 없음
-- 남은 디자인 과제: 모바일 공통 module rail은 여전히 메뉴가 먼저 길게 노출되므로, 다음 IA 패스에서 1급 메뉴 축소/접힘 처리 필요
+- module shell navigation: 공통 앱 내부 1급 메뉴를 15개 노출에서 6개(`작업공간`, `문서`, `리포트`, `근거`, `이력`, `설정`)로 축소
+- module shell navigation desktop `/settings/ai-connect`: primary 6개, secondary 1개, active primary `설정`, horizontal overflow 없음
+- module shell navigation mobile `/settings/ai-connect`: viewport 390px, scrollWidth 390px, primary 2열(`177px 177px`), secondary 1열(`358px`), horizontal overflow 없음
+- module shell navigation desktop `/ontology`: primary 6개, secondary 3개, active primary `근거`, active secondary `온톨로지`, horizontal overflow 없음
+- 남은 디자인 과제: 각 개별 페이지의 본문 정보량은 워크스페이스 문서형 패턴으로 계속 덜어내야 함
 
 ## Tests Run
 
@@ -204,6 +214,8 @@ Generated: 2026-07-09
   - 2 files, 5 tests passed
 - `npm.cmd test -- tests/sif-embedding-preflight.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-runtime-probe.test.ts`
   - 3 files, 7 tests passed
+- `npm.cmd test -- tests/module-shell-navigation.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-preflight.test.ts`
+  - 3 files, 9 tests passed
 - `npm.cmd test -- tests/photo-vision-analysis.test.ts`
   - 1 file, 11 tests passed
 - `npm.cmd test -- tests/operation-memory-visualization.test.ts tests/ontology-operation-memory.test.ts tests/reporting-downloads.test.ts tests/workspace-pages.test.ts`
@@ -225,4 +237,4 @@ Generated: 2026-07-09
 
 1. DB schema/migration and bulk embedding upload still require explicit approval.
 2. Vector search should be enabled only after uploaded row count equals 6,032 and RPC smoke passes.
-3. Full page taxonomy/menu reduction needs implementation approval before code changes.
+3. Full page body density reduction can continue without schema changes, but migration, published ontology promotion, and bulk DB writes still require approval.
