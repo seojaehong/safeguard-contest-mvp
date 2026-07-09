@@ -5,6 +5,7 @@ import { join } from "node:path";
 import reportJson from "@/evaluation/sif-embedding-gate/report.json";
 import preflightJson from "@/evaluation/sif-embedding-gate/approval-preflight-report.json";
 import runtimeProbeJson from "@/evaluation/sif-embedding-gate/runtime-db-probe.json";
+import postMigrationVerifyJson from "@/evaluation/sif-embedding-gate/post-migration-verify.json";
 import manifestJson from "@/evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json";
 import canaryReportJson from "@/evaluation/sif-embedding-canary-2026-07-09/report.json";
 
@@ -57,6 +58,20 @@ export type SifEmbeddingOperatorGate = {
   postApprovalSequence: string[];
   heldCommands: string[];
   nonApprovalFallback: string;
+};
+
+export type SifEmbeddingPostMigrationVerification = {
+  reportPath: string;
+  ok: boolean;
+  status: string;
+  expectedCorpusCount: number;
+  uploadedCount: number;
+  tableReady: boolean;
+  rpcReady: boolean;
+  vectorFeatureFlagEnabled: boolean;
+  failedCheckIds: string[];
+  nextAction: string;
+  dbMutationPerformed: boolean;
 };
 
 export type SifEmbeddingGateStatus = {
@@ -180,6 +195,7 @@ export type SifEmbeddingGateStatus = {
     command?: string;
   };
   operatorGate: SifEmbeddingOperatorGate;
+  postMigrationVerification: SifEmbeddingPostMigrationVerification;
   approvalPacket: {
     scope: "sif_embedding_next_approval_gate";
     decisionCount: number;
@@ -280,6 +296,7 @@ const CANARY_REPORT_PATH = "evaluation/sif-embedding-canary-2026-07-09/report.js
 const CANARY_MANIFEST_PATH = "evaluation/sif-embedding-canary-2026-07-09/sif-embedding-batch-manifest.json";
 const CANARY_CORPUS_PATH = "evaluation/sif-embedding-canary-2026-07-09/sif-embedding-corpus.jsonl";
 const CANARY_VECTORS_PATH = "evaluation/sif-embedding-canary-2026-07-09/sif-embedding-vectors.jsonl";
+const POST_MIGRATION_VERIFY_PATH = "evaluation/sif-embedding-gate/post-migration-verify.json";
 
 function readFileIntegrity(input: {
   label: string;
@@ -502,6 +519,26 @@ function buildCanaryStatus(): SifEmbeddingGateStatus["canary"] {
   };
 }
 
+function buildPostMigrationVerification(): SifEmbeddingPostMigrationVerification {
+  const report = asRecord(postMigrationVerifyJson);
+  const embeddings = asRecord(report.safetyReferenceEmbeddings);
+  const matchRpc = asRecord(report.matchRpc);
+  const featureFlag = asRecord(report.featureFlag);
+  return {
+    reportPath: POST_MIGRATION_VERIFY_PATH,
+    ok: readBoolean(report, "ok"),
+    status: readString(report, "status", "not-run"),
+    expectedCorpusCount: readNumber(report, "expectedCorpusCount"),
+    uploadedCount: readNumber(embeddings, "count"),
+    tableReady: readBoolean(embeddings, "ok"),
+    rpcReady: readBoolean(matchRpc, "ok"),
+    vectorFeatureFlagEnabled: readBoolean(featureFlag, "vectorSearchEnabled"),
+    failedCheckIds: readStringArray(report, "failedCheckIds"),
+    nextAction: readString(report, "nextAction", "post-migration verifier를 다시 실행해야 합니다."),
+    dbMutationPerformed: readBoolean(report, "dbMutationPerformed")
+  };
+}
+
 function buildNextApprovalGate(input: {
   runtimeReady: boolean;
   vectorGuard: SifEmbeddingGateStatus["vectorGuard"];
@@ -721,6 +758,7 @@ function buildOperatorGate(input: {
   approvalPacket: SifEmbeddingGateStatus["approvalPacket"];
   runtimeDbProbe: SifEmbeddingGateStatus["runtimeDbProbe"];
   canary: SifEmbeddingGateStatus["canary"];
+  postMigrationVerification: SifEmbeddingPostMigrationVerification;
   corpusCount: number;
   embeddedCount: number;
   uploadedCount: number;
@@ -750,6 +788,7 @@ function buildOperatorGate(input: {
       `전체 SIF 코퍼스 ${input.corpusCount.toLocaleString("ko-KR")}건은 고정됐고 전체 임베딩 생성은 ${input.embeddedCount.toLocaleString("ko-KR")}건입니다.`,
       `Canary는 ${input.canary.embeddedCount.toLocaleString("ko-KR")}건 embed-only로 확인했고 DB 업로드는 ${input.canary.uploadedCount.toLocaleString("ko-KR")}건입니다.`,
       `Runtime DB probe는 ${input.runtimeDbProbe.status}이며 table ${input.runtimeDbProbe.tableReady ? "ready" : "missing"}, RPC ${input.runtimeDbProbe.rpcReady ? "ready" : "missing"}입니다.`,
+      `Post-migration verifier는 ${input.postMigrationVerification.status}이며 업로드 ${input.postMigrationVerification.uploadedCount.toLocaleString("ko-KR")} / ${input.postMigrationVerification.expectedCorpusCount.toLocaleString("ko-KR")}건을 보고합니다.`,
       `승인 지문 ${input.approvalPacket.approvalFingerprint}로 corpus hash, 모델/차원, migration SQL을 고정합니다.`
     ],
     migrationArtifact: {
@@ -799,6 +838,12 @@ function buildOperatorGate(input: {
         label: "전체 임베딩/업로드 승인 전 보류",
         status: input.embeddedCount === 0 && input.uploadedCount === 0 ? "done" : "blocked",
         evidence: `전체 임베딩 ${input.embeddedCount.toLocaleString("ko-KR")}건, 업로드 ${input.uploadedCount.toLocaleString("ko-KR")}건`
+      },
+      {
+        id: "post-migration-verifier",
+        label: "Post-migration verifier 준비",
+        status: input.postMigrationVerification.dbMutationPerformed ? "blocked" : "done",
+        evidence: `${input.postMigrationVerification.reportPath} · 현재 ${input.postMigrationVerification.status}`
       }
     ],
     postApprovalSequence: [
@@ -806,11 +851,13 @@ function buildOperatorGate(input: {
       "runtime probe로 table/RPC readiness를 다시 확인합니다.",
       "--embed --approved-embedding으로 전체 임베딩 생성을 승인 실행합니다.",
       "--upload --approved-upload으로 DB upsert 후 row count를 검증합니다.",
+      "post-migration verifier로 row count, metadata sample, RPC smoke를 검증합니다.",
       "RPC smoke test 통과 후에만 SAFETY_REFERENCE_VECTOR_SEARCH=1을 켭니다."
     ],
     heldCommands: [
       input.commandHeldUntilApproval,
-      "npm.cmd run knowledge:sif-embedding-runtime-probe -- --output evaluation/sif-embedding-gate/runtime-db-probe.json"
+      "npm.cmd run knowledge:sif-embedding-runtime-probe -- --output evaluation/sif-embedding-gate/runtime-db-probe.json",
+      "npm.cmd run knowledge:sif-embedding-post-migration-verify -- --output evaluation/sif-embedding-gate/post-migration-verify.json"
     ],
     nonApprovalFallback: "승인이 없으면 기존 safety_reference_items 기반 REST/ranked 검색 경로를 유지하고 vector retrieval은 계속 꺼둡니다."
   };
@@ -948,6 +995,7 @@ export function getSifEmbeddingGateStatus(
   const runtimeExecutionReadyAfterApproval = openaiApiKeyPresent && supabaseUrlPresent && supabaseServiceRolePresent;
   const runtimeDbProbe = buildRuntimeDbProbeStatus();
   const canary = buildCanaryStatus();
+  const postMigrationVerification = buildPostMigrationVerification();
   const artifacts = {
     reportPath: readString(preflight, "reportPath", "evaluation/sif-embedding-gate/report.json"),
     manifestPath: readString(preflight, "manifestPath", "evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json"),
@@ -1007,6 +1055,7 @@ export function getSifEmbeddingGateStatus(
     approvalPacket,
     runtimeDbProbe,
     canary,
+    postMigrationVerification,
     corpusCount: readNumber(report, "corpusCount"),
     embeddedCount,
     uploadedCount,
@@ -1080,6 +1129,7 @@ export function getSifEmbeddingGateStatus(
     runtimeDbProbe,
     nextApprovalGate,
     operatorGate,
+    postMigrationVerification,
     failedCheckIds,
     approvalPacket,
     nextApprovalDecisions,

@@ -217,6 +217,19 @@ type SifEmbeddingGateStatusResponse = {
     heldCommands: string[];
     nonApprovalFallback: string;
   };
+  postMigrationVerification: {
+    reportPath: string;
+    ok: boolean;
+    status: string;
+    expectedCorpusCount: number;
+    uploadedCount: number;
+    tableReady: boolean;
+    rpcReady: boolean;
+    vectorFeatureFlagEnabled: boolean;
+    failedCheckIds: string[];
+    nextAction: string;
+    dbMutationPerformed: boolean;
+  };
   approvalPacket: {
     scope: "sif_embedding_next_approval_gate";
     decisionCount: number;
@@ -708,6 +721,12 @@ export function AiConnectPanel() {
                 <div>
                   <dt>Gate</dt>
                   <dd>{sifGate.operatorGate.gateId}</dd>
+                </div>
+                <div>
+                  <dt>Verifier</dt>
+                  <dd>
+                    {sifGate.postMigrationVerification.status} · {sifGate.postMigrationVerification.uploadedCount.toLocaleString("ko-KR")} / {sifGate.postMigrationVerification.expectedCorpusCount.toLocaleString("ko-KR")}건
+                  </dd>
                 </div>
               </dl>
               <div className="ai-connect-sif-operator-columns">

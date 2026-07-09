@@ -105,6 +105,7 @@ describe("SIF embedding gate status", () => {
     expect(status.operatorGate.migrationArtifact.sha256).toHaveLength(64);
     expect(status.operatorGate.evidenceSummary.join("\n")).toContain("전체 SIF 코퍼스 6,032건");
     expect(status.operatorGate.evidenceSummary.join("\n")).toContain("Canary는 3건 embed-only");
+    expect(status.operatorGate.evidenceSummary.join("\n")).toContain("Post-migration verifier는 migration-required");
     expect(status.operatorGate.allowedBeforeApproval).toContain("승인 패킷과 migration SQL diff 검토");
     expect(status.operatorGate.forbiddenBeforeApproval).toEqual([
       "운영 DB migration 적용",
@@ -112,8 +113,27 @@ describe("SIF embedding gate status", () => {
       "safety_reference_embeddings 업로드",
       "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화"
     ]);
-    expect(status.operatorGate.checklist.map((item) => item.status)).toEqual(["done", "done", "required", "done"]);
+    expect(status.operatorGate.checklist.map((item) => item.status)).toEqual(["done", "done", "required", "done", "done"]);
+    expect(status.operatorGate.checklist.find((item) => item.id === "post-migration-verifier")?.evidence).toContain("post-migration-verify.json");
     expect(status.operatorGate.heldCommands).toContain(status.commandHeldUntilApproval);
+    expect(status.operatorGate.heldCommands).toContain("npm.cmd run knowledge:sif-embedding-post-migration-verify -- --output evaluation/sif-embedding-gate/post-migration-verify.json");
+    expect(status.postMigrationVerification).toMatchObject({
+      reportPath: "evaluation/sif-embedding-gate/post-migration-verify.json",
+      ok: false,
+      status: "migration-required",
+      expectedCorpusCount: 6032,
+      uploadedCount: 0,
+      tableReady: false,
+      rpcReady: false,
+      vectorFeatureFlagEnabled: false,
+      dbMutationPerformed: false
+    });
+    expect(status.postMigrationVerification.failedCheckIds).toEqual([
+      "embedding_table_ready",
+      "uploaded_row_count_matches_corpus",
+      "match_rpc_ready",
+      "embedding_samples_have_metadata"
+    ]);
     expect(status.approvalPacket).toMatchObject({
       scope: "sif_embedding_next_approval_gate",
       decisionCount: 6

@@ -1,0 +1,103 @@
+{
+  "generatedAt": "2026-07-09T12:15:39.054Z",
+  "scope": "sif_embedding_post_migration_verify",
+  "dbMutationPerformed": false,
+  "configured": true,
+  "configReason": "configured",
+  "envFilesLoaded": [
+    ".env.local"
+  ],
+  "model": "text-embedding-3-small",
+  "dimensions": 1536,
+  "expectedCorpusCount": 6032,
+  "fixedCorpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+  "status": "migration-required",
+  "ok": false,
+  "checks": [
+    {
+      "id": "sif_source_count_still_matches",
+      "passed": true,
+      "evidence": {
+        "expected": 6033,
+        "actual": 6033
+      }
+    },
+    {
+      "id": "embedding_table_ready",
+      "passed": false,
+      "evidence": {
+        "status": 404,
+        "count": 0
+      }
+    },
+    {
+      "id": "uploaded_row_count_matches_corpus",
+      "passed": false,
+      "evidence": {
+        "expected": 6032,
+        "actual": 0
+      }
+    },
+    {
+      "id": "match_rpc_ready",
+      "passed": false,
+      "evidence": {
+        "status": 404,
+        "rowCount": 0
+      }
+    },
+    {
+      "id": "embedding_samples_have_metadata",
+      "passed": false,
+      "evidence": {
+        "sampleCount": 0
+      }
+    },
+    {
+      "id": "vector_feature_flag_allowed",
+      "passed": true,
+      "evidence": {
+        "vectorFeatureFlagEnabled": false,
+        "uploadedCount": 0,
+        "rpcOk": false
+      }
+    }
+  ],
+  "failedCheckIds": [
+    "embedding_table_ready",
+    "uploaded_row_count_matches_corpus",
+    "match_rpc_ready",
+    "embedding_samples_have_metadata"
+  ],
+  "safetyReferenceItems": {
+    "ok": true,
+    "status": 206,
+    "count": 6033,
+    "error": null
+  },
+  "safetyReferenceEmbeddings": {
+    "ok": false,
+    "status": 404,
+    "count": null,
+    "error": "{\"code\":\"PGRST205\",\"details\":null,\"hint\":\"Perhaps you meant the table 'public.safety_reference_items'\",\"message\":\"Could not find the table 'public.safety_reference_embeddings' in the schema cache\"}"
+  },
+  "embeddingSamples": {
+    "ok": false,
+    "status": 404,
+    "rows": [],
+    "error": "{\"code\":\"PGRST205\",\"details\":null,\"hint\":\"Perhaps you meant the table 'public.safety_reference_items'\",\"message\":\"Could not find the table 'public.safety_reference_embeddings' in the schema cache\"}"
+  },
+  "matchRpc": {
+    "ok": false,
+    "status": 404,
+    "rowCount": 0,
+    "sampleTitles": [],
+    "model": "text-embedding-3-small",
+    "error": "{\"code\":\"PGRST202\",\"details\":\"Searched for the function public.match_safety_reference_embeddings with parameters item_type_filter, match_count, query_embedding or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.\",\"hint\":\"Perhaps you meant to call the function public.search_safety_references_ranked\",\"message\":\"Could not find the function public.match_safety_reference_embeddings(item_type_filter, match_count, query_embedding) in the schema cache\"}"
+  },
+  "featureFlag": {
+    "vectorSearchEnabled": false,
+    "requireVectorFlag": false
+  },
+  "nextAction": "Apply the approved SIF-only migration before upload verification."
+}
