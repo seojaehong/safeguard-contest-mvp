@@ -52,4 +52,33 @@ The commercial harness test confirms an enhanced `runAsk` response includes:
 
 ## Post-Deploy Verification
 
-Pending.
+Deployment:
+
+- Deployment URL: `https://safeguard-contest-9ztowsf63-seojaehongs-projects.vercel.app`
+- Alias: `https://www.safeclaw.kr`
+- Verified endpoint: `https://www.safeclaw.kr/api/ask/stream?verify=f67db32`
+
+Evidence:
+
+- `evaluation/northstar-72h-2026-07-10/enhanced-row-first-no-ai-docs/postdeploy-stream-result.json`
+- `evaluation/northstar-72h-2026-07-10/enhanced-row-first-no-ai-docs/postdeploy-stream-raw.txt`
+
+Post-deploy result:
+
+- HTTP status: `200`
+- Elapsed: `20821ms`
+- `generationMode`: `enhanced`
+- `mode`: `live`
+- doc events: `structuredRiskRows=ok`
+- stage failures: none
+- doc failures: none
+- structured risk rows: `6`
+- TBM-risk links: `6`
+- TBM briefing hazards: `5`
+- TBM log hazards discussed: `5`
+- accepted photo hazard row present: yes
+- quality contract overall: `ready`
+- DB harness status: `ready`
+- ontology status: `ready`
+- status detail contains `AI_MODE=enhanced (DB 하네스 row-first`
+- status detail does not contain `문서 생성기 미응답` or `Gemini 본문`
