@@ -1,0 +1,128 @@
+{
+  "workspaceMetrics": {
+    "scrollWidth": 1024,
+    "viewport": {
+      "width": 1024,
+      "height": 430
+    },
+    "topbar": {
+      "top": 8,
+      "bottom": 68.140625,
+      "left": 16,
+      "right": 1008,
+      "width": 992,
+      "height": 60.140625
+    },
+    "viewportRect": {
+      "top": 96.140625,
+      "bottom": 907.03125,
+      "left": 16,
+      "right": 1008,
+      "width": 992,
+      "height": 810.890625
+    },
+    "heading": {
+      "top": 140.140625,
+      "bottom": 187.453125,
+      "left": 321.953125,
+      "right": 961.953125,
+      "width": 640,
+      "height": 47.3125
+    },
+    "textarea": {
+      "top": 261.953125,
+      "bottom": 379.953125,
+      "left": 321.953125,
+      "right": 966.046875,
+      "width": 644.09375,
+      "height": 118
+    },
+    "helper": {
+      "top": 395.953125,
+      "bottom": 413.953125,
+      "left": 321.953125,
+      "right": 966.046875,
+      "width": 644.09375,
+      "height": 18
+    }
+  },
+  "documentMetrics": {
+    "scrollWidth": 1440,
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "shell": {
+      "top": -149.890625,
+      "bottom": 2813.609375,
+      "left": 276,
+      "right": 1416,
+      "width": 1140,
+      "height": 2963.5,
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(23, 25, 29)",
+      "display": "grid",
+      "borderRadius": "0px"
+    },
+    "sidebar": {
+      "top": -149.890625,
+      "bottom": 2813.609375,
+      "left": 276,
+      "right": 576,
+      "width": 300,
+      "height": 2963.5,
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(23, 25, 29)",
+      "display": "grid",
+      "borderRadius": "10px"
+    },
+    "editor": {
+      "top": -149.890625,
+      "bottom": 2813.609375,
+      "left": 592,
+      "right": 1416,
+      "width": 824,
+      "height": 2963.5,
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(23, 25, 29)",
+      "display": "grid",
+      "borderRadius": "10px"
+    },
+    "textarea": {
+      "top": 136.5625,
+      "bottom": 596.5625,
+      "left": 613,
+      "right": 1395,
+      "width": 782,
+      "height": 460,
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(23, 25, 29)",
+      "display": "block",
+      "borderRadius": "10px"
+    },
+    "activeTab": {
+      "top": 12.6875,
+      "bottom": 98.375,
+      "left": 297,
+      "right": 555,
+      "width": 258,
+      "height": 85.6875,
+      "background": "rgb(245, 246, 248)",
+      "color": "rgb(23, 25, 29)",
+      "display": "grid",
+      "borderRadius": "9px"
+    },
+    "preview": {
+      "top": 964.5,
+      "bottom": 2019.65625,
+      "left": 628,
+      "right": 1380,
+      "width": 752,
+      "height": 1055.15625,
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(23, 25, 29)",
+      "display": "block",
+      "borderRadius": "9px"
+    }
+  }
+}

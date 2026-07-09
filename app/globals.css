@@ -15448,3 +15448,324 @@ body:has(.safeclaw-landing) :is(
     grid-template-columns: 1fr;
   }
 }
+
+/* Final guard: short/zoomed presentation screens must keep the first composer
+   legible instead of letting the header, copy, and input visually crowd. */
+@media (min-width: 901px) and (max-height: 560px),
+  (min-width: 901px) and (max-width: 1200px) and (max-height: 640px) {
+  .command-center-shell {
+    padding-top: 8px;
+  }
+
+  .command-center-shell > .command-topbar,
+  .command-center-shell .command-topbar,
+  .command-center-shell .workspace-command-topbar {
+    margin-bottom: 8px;
+  }
+
+  .command-center-shell.workspace-theme-day > .command-topbar,
+  .command-center-shell.workspace-theme-day > .command-viewport {
+    width: min(100% - 32px, 1360px);
+  }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout {
+    grid-template-columns: 252px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .command-center-shell .workspace-side-nav,
+  .command-center-shell.workspace-theme-day .workspace-side-nav {
+    max-height: calc(100vh - 104px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .command-center-shell .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    gap: 12px;
+    padding: 18px clamp(24px, 4vw, 42px) 24px !important;
+  }
+
+  .command-center-shell .workspace-input-page .command-copy,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy {
+    width: min(680px, 100%);
+  }
+
+  .command-center-shell .workspace-input-page .command-copy h1,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
+    max-width: 640px;
+    margin: 6px 0 8px;
+    font-size: clamp(34px, 4.2vw, 46px);
+    line-height: 1.1;
+  }
+
+  .command-center-shell .workspace-input-page .command-copy p,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .command-center-shell .workspace-input-page .command-console,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console {
+    width: min(680px, 100%);
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .command-center-shell .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input {
+    min-height: 118px;
+    padding: 14px 16px;
+    font-size: 15px;
+    line-height: 1.68;
+  }
+
+  .command-center-shell .workspace-input-page .input-helper,
+  .command-center-shell.workspace-theme-day .workspace-input-page .input-helper {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .command-center-shell .workspace-input-page .input-composer-tray,
+  .command-center-shell.workspace-theme-day .workspace-input-page .input-composer-tray {
+    min-height: 46px;
+  }
+
+  .command-center-shell .workspace-input-page .field-brief-chip-row,
+  .command-center-shell.workspace-theme-day .workspace-input-page .field-brief-chip-row {
+    gap: 7px;
+    margin-top: 8px;
+  }
+
+  .command-center-shell .workspace-input-page .field-brief-chip-row span,
+  .command-center-shell.workspace-theme-day .workspace-input-page .field-brief-chip-row span {
+    min-height: 28px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  .command-center-shell .workspace-input-page .evidence-readiness-rail,
+  .command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    width: min(680px, 100%);
+  }
+
+  .command-center-shell .workspace-input-page .evidence-readiness-card,
+  .command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-card {
+    min-height: 52px;
+    padding: 8px 10px;
+  }
+}
+
+/* Documents editor bridge: WorkpackEditor is reused inside the daylight module
+   shell, so it needs an explicit override after the old dark OS bridge. */
+.safeclaw-module-shell.module-variant-document .workpack-shell {
+  display: grid;
+  grid-template-columns: minmax(230px, 300px) minmax(0, 1fr);
+  gap: 16px;
+  width: min(100% - 48px, 1180px);
+  margin: 28px auto 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--workspace-ink) !important;
+  padding: 0 !important;
+  overflow: visible;
+}
+
+.safeclaw-module-shell.module-variant-document .workpack-sidebar,
+.safeclaw-module-shell.module-variant-document .document-editor {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 10px !important;
+  background: var(--workspace-surface-1) !important;
+  color: var(--workspace-ink) !important;
+  box-shadow: none !important;
+  padding: 20px;
+}
+
+.safeclaw-module-shell.module-variant-document .document-editor {
+  align-content: start;
+  gap: 16px;
+  min-height: 0;
+  overflow: visible;
+}
+
+.safeclaw-module-shell.module-variant-document .workpack-sidebar :is(.h2, .h3, h2, h3, strong),
+.safeclaw-module-shell.module-variant-document .document-editor :is(.h2, .h3, h2, h3, strong),
+.safeclaw-module-shell.module-variant-document .submission-preview-panel summary {
+  color: var(--workspace-ink) !important;
+  font-family: inherit !important;
+  letter-spacing: 0 !important;
+}
+
+.safeclaw-module-shell.module-variant-document .workpack-sidebar :is(.muted, .small, p, li, label, small),
+.safeclaw-module-shell.module-variant-document .document-editor :is(.muted, .small, p, li, label, small),
+.safeclaw-module-shell.module-variant-document .editor-status {
+  color: var(--workspace-muted) !important;
+  font-family: inherit !important;
+  line-height: 1.65;
+  letter-spacing: 0 !important;
+}
+
+.safeclaw-module-shell.module-variant-document .workpack-sidebar :is(.eyebrow, .template-preview span, .document-toolbar span, .rubric-item span, .selected-rubric-item span) {
+  color: var(--workspace-accent) !important;
+  font-family: inherit !important;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0 !important;
+  text-transform: none;
+}
+
+.safeclaw-module-shell.module-variant-document .doc-tab-list,
+.safeclaw-module-shell.module-variant-document .sheet-export-panel,
+.safeclaw-module-shell.module-variant-document .rubric-stack,
+.safeclaw-module-shell.module-variant-document .selected-rubric-strip {
+  gap: 10px;
+}
+
+.safeclaw-module-shell.module-variant-document :is(.sheet-export-panel, .template-picker, .advanced-downloads, .advanced-download-grid, .customer-template-stage, .customer-template-field-grid, .download-bar, .remediation-actions) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--workspace-ink) !important;
+  box-shadow: none !important;
+}
+
+.safeclaw-module-shell.module-variant-document :is(.doc-tab, .template-card),
+.safeclaw-module-shell.module-variant-document :is(.doc-tab, .template-card):not(.secondary):not(.ghost):not(.document-tab):not(.template-tab),
+.safeclaw-module-shell.module-variant-document :is(.template-preview, .customer-template-panel, .customer-template-stage article, .customer-template-field-grid article, .sheets-action-box, .rubric-panel, .rubric-item, .selected-rubric-item, .submission-preview-panel, .remediation-draft, .remediation-sources a) {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 9px !important;
+  background: var(--workspace-surface-2) !important;
+  color: var(--workspace-ink) !important;
+  box-shadow: none !important;
+}
+
+.safeclaw-module-shell.module-variant-document .doc-tab,
+.safeclaw-module-shell.module-variant-document .template-card {
+  min-height: auto;
+  padding: 12px;
+  text-align: left;
+}
+
+.safeclaw-module-shell.module-variant-document .doc-tab.active,
+.safeclaw-module-shell.module-variant-document .template-card.active {
+  border-color: var(--workspace-rule-strong) !important;
+  background: var(--workspace-surface-3) !important;
+  box-shadow: inset 3px 0 0 var(--workspace-accent) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .doc-tab span,
+.safeclaw-module-shell.module-variant-document .template-card span,
+.safeclaw-module-shell.module-variant-document .template-preview li,
+.safeclaw-module-shell.module-variant-document .rubric-item em,
+.safeclaw-module-shell.module-variant-document .selected-rubric-item small {
+  color: var(--workspace-muted) !important;
+  font-family: inherit !important;
+  letter-spacing: 0 !important;
+}
+
+.safeclaw-module-shell.module-variant-document .document-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+  gap: 18px;
+  align-items: start;
+}
+
+.safeclaw-module-shell.module-variant-document .download-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.safeclaw-module-shell.module-variant-document .download-bar .button,
+.safeclaw-module-shell.module-variant-document .sheet-export-panel > .button,
+.safeclaw-module-shell.module-variant-document .advanced-download-grid .button,
+.safeclaw-module-shell.module-variant-document .remediation-actions .button {
+  border-radius: 8px !important;
+  font-family: inherit !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+}
+
+.safeclaw-module-shell.module-variant-document .document-textarea,
+.safeclaw-module-shell.module-variant-document .remediation-textarea {
+  width: 100%;
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: var(--workspace-ink) !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+  font-size: 15px;
+  line-height: 1.72;
+  padding: 18px 20px;
+}
+
+.safeclaw-module-shell.module-variant-document .document-textarea {
+  min-height: 460px;
+}
+
+.safeclaw-module-shell.module-variant-document .document-textarea:focus,
+.safeclaw-module-shell.module-variant-document .remediation-textarea:focus {
+  border-color: var(--workspace-accent) !important;
+  box-shadow: 0 0 0 3px rgba(108, 111, 247, 0.18) !important;
+  outline: none;
+}
+
+.safeclaw-module-shell.module-variant-document .selected-rubric-strip {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.safeclaw-module-shell.module-variant-document .selected-rubric-item.fulfilled,
+.safeclaw-module-shell.module-variant-document .rubric-item.fulfilled {
+  border-color: rgba(22, 163, 74, 0.28) !important;
+  background: rgba(22, 163, 74, 0.08) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .selected-rubric-item.needs-improvement,
+.safeclaw-module-shell.module-variant-document .rubric-item.needs-improvement,
+.safeclaw-module-shell.module-variant-document .selected-rubric-item.needs-user-check,
+.safeclaw-module-shell.module-variant-document .rubric-item.needs-user-check {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  background: rgba(245, 158, 11, 0.08) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .submission-preview-panel {
+  overflow: hidden;
+}
+
+.safeclaw-module-shell.module-variant-document .submission-preview-panel .safety-form-preview,
+.safeclaw-module-shell.module-variant-document .submission-preview-panel .safety-form-page {
+  background: #ffffff !important;
+  color: #17191d !important;
+}
+
+.safeclaw-module-shell.module-variant-document .submission-preview-panel .safety-form-preview {
+  border-color: var(--workspace-rule) !important;
+  border-radius: 9px !important;
+}
+
+.safeclaw-module-shell.module-variant-document .submission-preview-panel :is(th, td, p, span, b, h1, h2, h3, small, div) {
+  color: inherit;
+}
+
+@media (max-width: 980px) {
+  .safeclaw-module-shell.module-variant-document .workpack-shell,
+  .safeclaw-module-shell.module-variant-document .document-toolbar,
+  .safeclaw-module-shell.module-variant-document .selected-rubric-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .safeclaw-module-shell.module-variant-document .workpack-shell {
+    width: min(100% - 24px, 1180px);
+  }
+
+  .safeclaw-module-shell.module-variant-document .download-bar {
+    justify-content: flex-start;
+  }
+}
