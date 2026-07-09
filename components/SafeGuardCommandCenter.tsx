@@ -1043,7 +1043,7 @@ export function SafeGuardCommandCenter({
   const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
     if (typeof window === "undefined") return "enhanced";
     const stored = window.localStorage.getItem("safeclaw.aiMode");
-    if (stored === "enhanced" || stored === "full") return stored;
+    if (stored === "template" || stored === "enhanced" || stored === "full") return stored;
     return "enhanced";
   });
   useEffect(() => {

@@ -900,6 +900,12 @@ function appendUniqueSection(text: string, heading: string, lines: string[]) {
   return `${body}\n\n${heading}\n${lines.map((line) => `- ${line}`).join("\n")}`.trim();
 }
 
+function prependUniqueSection(text: string, heading: string, lines: string[]) {
+  const body = text.trim();
+  if (!lines.length || body.includes(heading)) return text;
+  return `${heading}\n${lines.map((line) => `- ${line}`).join("\n")}\n\n${body}`.trim();
+}
+
 function buildDbHarnessReflectionLines(packet: DbHarnessPacket) {
   const improvementLines = packet.improvementMemory.slice(0, 3).map((item) => {
     const photoLabel = item.sourceType === "photo_analysis"
@@ -962,19 +968,19 @@ function reflectDbHarnessInDeliverables(response: AskResponse, packet: DbHarness
     ...response,
     deliverables: {
       ...response.deliverables,
-      riskAssessmentDraft: appendUniqueSection(
+      riskAssessmentDraft: prependUniqueSection(
         response.deliverables.riskAssessmentDraft,
-        "[DB 하네스 반영 - 위험성평가]",
+        "[오늘 개선·이력 반영 - 위험성평가]",
         riskLines
       ),
-      tbmBriefing: appendUniqueSection(
+      tbmBriefing: prependUniqueSection(
         response.deliverables.tbmBriefing,
-        "[DB 하네스 반영 - TBM]",
+        "[오늘 개선·이력 반영 - TBM]",
         tbmLines
       ),
-      tbmLogDraft: appendUniqueSection(
+      tbmLogDraft: prependUniqueSection(
         response.deliverables.tbmLogDraft,
-        "[DB 하네스 반영 - 확인 기록]",
+        "[오늘 개선·이력 반영 - 확인 기록]",
         tbmLines
       ),
       photoEvidenceDraft: appendUniqueSection(
