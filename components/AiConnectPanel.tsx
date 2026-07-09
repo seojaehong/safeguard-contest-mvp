@@ -135,6 +135,21 @@ type SifEmbeddingGateStatusResponse = {
     artifactPath?: string;
     command?: string;
   };
+  approvalPacket: {
+    scope: "sif_embedding_next_approval_gate";
+    decisionCount: number;
+    decisions: string[];
+    requiredArtifacts: {
+      label: string;
+      path: string;
+      role: string;
+    }[];
+    safetyLocks: {
+      label: string;
+      locked: boolean;
+      detail: string;
+    }[];
+  };
   failedCheckIds: string[];
   nextApprovalDecisions: string[];
   artifacts: {
@@ -517,6 +532,35 @@ export function AiConnectPanel() {
               {sifGate.nextApprovalGate.command ? (
                 <pre>{sifGate.nextApprovalGate.command}</pre>
               ) : null}
+            </div>
+            <div className="ai-connect-sif-approval-packet">
+              <div>
+                <strong>승인 패킷</strong>
+                <span>{sifGate.approvalPacket.decisionCount}개 결정 · {sifGate.approvalPacket.requiredArtifacts.length}개 산출물</span>
+              </div>
+              <ol>
+                {sifGate.approvalPacket.decisions.map((decision, index) => (
+                  <li key={`${decision}-${index}`}>{decision}</li>
+                ))}
+              </ol>
+              <div className="ai-connect-sif-artifact-grid" aria-label="SIF 승인 산출물">
+                {sifGate.approvalPacket.requiredArtifacts.map((artifact) => (
+                  <article key={artifact.path}>
+                    <strong>{artifact.label}</strong>
+                    <code>{artifact.path}</code>
+                    <p>{artifact.role}</p>
+                  </article>
+                ))}
+              </div>
+              <div className="ai-connect-sif-lock-grid" aria-label="SIF 승인 안전 잠금">
+                {sifGate.approvalPacket.safetyLocks.map((lock) => (
+                  <article key={lock.label} className={lock.locked ? "locked" : "open"}>
+                    <span>{lock.locked ? "잠금" : "확인 필요"}</span>
+                    <strong>{lock.label}</strong>
+                    <p>{lock.detail}</p>
+                  </article>
+                ))}
+              </div>
             </div>
             <ol className="ai-connect-sif-approval-steps" aria-label="SIF 임베딩 승인 순서">
               {sifGate.approvalSteps.map((step) => (

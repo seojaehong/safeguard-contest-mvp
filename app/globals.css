@@ -9298,6 +9298,85 @@ body:has(.safeclaw-landing) :is(
   border-color: rgba(34, 197, 94, 0.44);
 }
 
+.ai-connect-sif-approval-packet {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  border: 1px solid rgba(246, 245, 239, 0.12);
+  border-radius: 10px;
+  background: rgba(11, 12, 16, 0.46);
+  padding: 16px;
+}
+
+.ai-connect-sif-approval-packet > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ai-connect-sif-approval-packet strong {
+  color: var(--os-text, #f6f5ef);
+  font-size: 0.9rem;
+}
+
+.ai-connect-sif-approval-packet span {
+  color: rgba(246, 245, 239, 0.62);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.ai-connect-sif-approval-packet ol {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(246, 245, 239, 0.78);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.ai-connect-sif-artifact-grid,
+.ai-connect-sif-lock-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ai-connect-sif-artifact-grid article,
+.ai-connect-sif-lock-grid article {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  border: 1px solid rgba(246, 245, 239, 0.1);
+  border-radius: 8px;
+  background: rgba(246, 245, 239, 0.04);
+  padding: 10px;
+}
+
+.ai-connect-sif-artifact-grid code {
+  color: rgba(255, 220, 46, 0.86);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.ai-connect-sif-artifact-grid p,
+.ai-connect-sif-lock-grid p {
+  margin: 0;
+  color: rgba(246, 245, 239, 0.66);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.ai-connect-sif-lock-grid article.locked span {
+  color: #bbf7d0;
+}
+
+.ai-connect-sif-lock-grid article.open span {
+  color: #fecaca;
+}
+
 .ai-connect-sif-approval-steps {
   display: grid;
   gap: 8px;
@@ -9460,6 +9539,8 @@ body:has(.safeclaw-landing) :is(
   .ai-connect-section-head,
   .ai-connect-sif-metrics,
   .ai-connect-sif-state-grid,
+  .ai-connect-sif-artifact-grid,
+  .ai-connect-sif-lock-grid,
   .ai-connect-token-items article {
     grid-template-columns: 1fr;
   }
@@ -13929,6 +14010,8 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-meta div,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-metrics div,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-state-grid article,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-artifact-grid article,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-lock-grid article,
 .safeclaw-module-shell.module-variant-document .ai-connect-token-items article {
   border: 1px solid var(--workspace-rule) !important;
   border-radius: 8px;
@@ -13942,6 +14025,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-command strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate strong,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight strong,
 .safeclaw-module-shell.module-variant-document .ai-connect-token-items article strong {
@@ -13957,6 +14041,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate small,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet span,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet li,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-artifact-grid p,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-lock-grid p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps p,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight p,
 .safeclaw-module-shell.module-variant-document .ai-connect-token-items article p {
@@ -13967,6 +14055,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-packet,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps li,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight li {
   border: 1px solid var(--workspace-rule) !important;
@@ -14005,6 +14094,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-command pre,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate pre,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate code,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-artifact-grid code,
 .safeclaw-module-shell.module-variant-document .ai-connect-command-box pre,
 .safeclaw-module-shell.module-variant-document .ai-connect-secret textarea {
   border: 1px solid var(--workspace-rule) !important;
@@ -14016,7 +14106,8 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-approval-steps li > span,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-preflight li > span,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard span,
-.safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate span {
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate span,
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-lock-grid span {
   border: 1px solid var(--workspace-rule);
   background: var(--workspace-surface-1);
   color: var(--workspace-muted);

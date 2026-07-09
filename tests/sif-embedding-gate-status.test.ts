@@ -51,6 +51,18 @@ describe("SIF embedding gate status", () => {
       artifactPath: "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
     });
     expect(status.nextApprovalGate.detail).toContain("업로드 전 migration 승인");
+    expect(status.approvalPacket).toMatchObject({
+      scope: "sif_embedding_next_approval_gate",
+      decisionCount: 6
+    });
+    expect(status.approvalPacket.decisions[0]).toContain("SIF-only embedding migration");
+    expect(status.approvalPacket.requiredArtifacts.map((artifact) => artifact.path)).toEqual([
+      "evaluation\\sif-embedding-gate\\report.json",
+      "evaluation\\sif-embedding-gate\\sif-embedding-batch-manifest.json",
+      "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
+      "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
+    ]);
+    expect(status.approvalPacket.safetyLocks.every((lock) => lock.locked)).toBe(true);
     expect(status.approvalSteps.map((step) => step.id)).toEqual(["migration", "embedding", "upload", "vector"]);
     expect(status.approvalSteps[0]).toMatchObject({
       id: "migration",
@@ -90,6 +102,7 @@ describe("SIF embedding gate status", () => {
       id: "disable-vector-flag",
       status: "blocked"
     });
+    expect(readyRuntime.approvalPacket.safetyLocks.find((lock) => lock.label === "Vector 검색 잠금")?.locked).toBe(true);
     expect(readyRuntime.message).toContain("SAFETY_REFERENCE_VECTOR_SEARCH=1");
   });
 });
