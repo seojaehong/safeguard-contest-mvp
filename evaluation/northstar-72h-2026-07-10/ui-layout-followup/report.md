@@ -56,6 +56,25 @@ Date: 2026-07-10 KST
 - `npm.cmd run build`
   - Result: passed
 
+## Postdeploy Verification
+
+- Deployed URL: `https://safeguard-contest-mhvd5pp48-seojaehongs-projects.vercel.app`
+- Alias: `https://www.safeclaw.kr`
+- Captures:
+  - `evaluation/northstar-72h-2026-07-10/ui-layout-followup/prod-after-workspace-1024x430.png`
+  - `evaluation/northstar-72h-2026-07-10/ui-layout-followup/prod-after-documents-editor.png`
+  - `evaluation/northstar-72h-2026-07-10/ui-layout-followup/prod-after-documents-preview-open.png`
+- Metrics:
+  - `evaluation/northstar-72h-2026-07-10/ui-layout-followup/postdeploy-verification.json`
+- Checks:
+  - Workspace horizontal overflow: pass
+  - Workspace topbar/content separation: pass
+  - Workspace composer overlap: pass
+  - Documents horizontal overflow: pass
+  - Documents editor light workbench style: pass
+  - Documents sheet export dark panel cleared: pass
+  - Documents preview contained inside editor: pass
+
 ## Remaining Product Note
 
 The `/documents` page is now visually aligned with the workbench system, but it still contains a lot of editing/export capability on one long surface. For a commercial-grade release, the next simplification pass should consider moving secondary export formats and template mapping into a secondary drawer or settings panel.
