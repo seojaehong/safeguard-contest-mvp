@@ -1,0 +1,42 @@
+[
+  {
+    "name": "local-fixed-day-1170x365-dpr175",
+    "overlapPass": true,
+    "copyDisplay": "none",
+    "sourceStatusDisplay": "none",
+    "composerBottom": 305,
+    "viewportHeight": 365,
+    "scrollWidth": 1170,
+    "innerWidth": 1170
+  },
+  {
+    "name": "local-fixed-day-1024x319-dpr2",
+    "overlapPass": true,
+    "copyDisplay": "none",
+    "sourceStatusDisplay": "none",
+    "composerBottom": 257,
+    "viewportHeight": 319,
+    "scrollWidth": 1024,
+    "innerWidth": 1024
+  },
+  {
+    "name": "local-fixed-day-2048x638",
+    "overlapPass": true,
+    "copyDisplay": "block",
+    "sourceStatusDisplay": "grid",
+    "composerBottom": 600,
+    "viewportHeight": 638,
+    "scrollWidth": 2048,
+    "innerWidth": 2048
+  },
+  {
+    "name": "local-fixed-mobile-390x844-dpr3",
+    "overlapPass": false,
+    "copyDisplay": "block",
+    "sourceStatusDisplay": "none",
+    "composerBottom": 925,
+    "viewportHeight": 844,
+    "scrollWidth": 390,
+    "innerWidth": 390
+  }
+]

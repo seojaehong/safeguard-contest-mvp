@@ -649,11 +649,14 @@ describe("workspace layout regression", () => {
       const viewport = readRect(".command-viewport");
       const sideNav = readRect(".workspace-side-nav");
       const main = readRect(".linear-workspace-layout .command-main");
+      const copy = readRect(".workspace-input-page .command-copy");
       const heading = readRect(".workspace-input-page .command-copy h1");
       const textarea = readRect("#field-command-input");
       const helper = readRect("#field-command-tips");
       const composer = readRect(".input-composer-tray");
       const currentBrief = readRect(".workspace-current-brief");
+      const sourceStatus = readRect(".workspace-source-status");
+      const recentList = readRect(".workspace-recent-list");
 
       return {
         viewportWidth: window.innerWidth,
@@ -663,17 +666,21 @@ describe("workspace layout regression", () => {
         viewport,
         sideNav,
         main,
+        copy,
         heading,
         textarea,
         helper,
         composer,
-        currentBrief
+        currentBrief,
+        sourceStatus,
+        recentList
       };
     });
 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth);
     expect(metrics.topbar.bottom).toBeLessThanOrEqual(metrics.viewport.top - 8);
     expect(metrics.sideNav.right).toBeLessThanOrEqual(metrics.main.left - 8);
+    expect(metrics.copy.display).toBe("none");
     expect(metrics.heading.bottom).toBeLessThanOrEqual(metrics.textarea.top - 14);
     expect(metrics.textarea.top).toBeGreaterThan(metrics.heading.bottom);
     expect(metrics.textarea.height).toBeGreaterThanOrEqual(108);
@@ -683,6 +690,8 @@ describe("workspace layout regression", () => {
     expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 44);
     expect(metrics.helper.display).toBe("none");
     expect(metrics.currentBrief.display).toBe("none");
+    expect(metrics.sourceStatus.display).toBe("none");
+    expect(metrics.recentList.display).toBe("none");
     expect(metrics.composer.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 6);
   }, 90_000);
 
@@ -756,6 +765,64 @@ describe("workspace layout regression", () => {
     expect(metrics.helper.display).toBe("none");
     expect(metrics.textarea.bottom).toBeLessThanOrEqual(metrics.composer.top - 8);
     expect(metrics.composer.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 6);
+  }, 90_000);
+
+  it("keeps the mobile day composer action inside the first viewport", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 });
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.fill(
+      "#field-command-input",
+      "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보, 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘."
+    );
+
+    const metrics = await page.evaluate(() => {
+      function readRect(selector: string) {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing layout target: ${selector}`);
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return {
+          top: Math.round(rect.top),
+          bottom: Math.round(rect.bottom),
+          left: Math.round(rect.left),
+          right: Math.round(rect.right),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          display: style.display,
+          lineHeight: Number.parseFloat(style.lineHeight),
+          fontSize: Number.parseFloat(style.fontSize),
+          scrollTop: element instanceof HTMLTextAreaElement ? element.scrollTop : 0,
+          clientHeight: element instanceof HTMLTextAreaElement ? element.clientHeight : Math.round(rect.height),
+          scrollHeight: element instanceof HTMLTextAreaElement ? element.scrollHeight : Math.round(rect.height)
+        };
+      }
+
+      return {
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        scrollWidth: document.documentElement.scrollWidth,
+        sideNav: readRect(".workspace-side-nav"),
+        main: readRect(".linear-workspace-layout .command-main"),
+        heading: readRect(".workspace-input-page .command-copy h1"),
+        description: readRect(".workspace-input-page .command-copy p"),
+        textarea: readRect("#field-command-input"),
+        helper: readRect("#field-command-tips"),
+        composer: readRect(".input-composer-tray"),
+        submit: readRect(".composer-submit-button")
+      };
+    });
+
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth);
+    expect(metrics.sideNav.bottom).toBeLessThanOrEqual(metrics.main.top - 8);
+    expect(metrics.description.display).toBe("none");
+    expect(metrics.heading.fontSize).toBeLessThanOrEqual(34);
+    expect(metrics.textarea.top).toBeGreaterThanOrEqual(metrics.heading.bottom + 28);
+    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.65);
+    expect(metrics.textarea.scrollTop).toBe(0);
+    expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 36);
+    expect(metrics.helper.bottom).toBeLessThanOrEqual(metrics.composer.top - 12);
+    expect(metrics.submit.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 48);
   }, 90_000);
 
   it("keeps the generated document edit flow inside the workspace design system", async () => {
