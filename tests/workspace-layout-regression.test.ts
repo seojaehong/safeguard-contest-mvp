@@ -62,18 +62,22 @@ describe("workspace layout regression", () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 720 } });
     await page.goto(`${baseUrl}/workspace?theme=night`, { waitUntil: "networkidle" });
-    await page.waitForFunction(() => {
+    const canScroll = await page.evaluate(() => {
       const scroller = document.scrollingElement;
       return Boolean(scroller && scroller.scrollHeight > window.innerHeight + 160);
     });
-    await page.evaluate(() => window.scrollTo(0, 260));
-    await page.waitForFunction(() => window.scrollY >= 120);
+    if (canScroll) {
+      await page.evaluate(() => window.scrollTo(0, 260));
+      await page.waitForFunction(() => window.scrollY >= 120);
+    }
 
     const metrics = await page.evaluate(() => {
       const topbar = document.querySelector(".command-topbar");
+      const viewport = document.querySelector(".command-viewport");
       const sideNav = document.querySelector(".workspace-side-nav");
       const heading = document.querySelector(".command-copy h1");
       const topbarRect = topbar?.getBoundingClientRect();
+      const viewportRect = viewport?.getBoundingClientRect();
       const sideNavRect = sideNav?.getBoundingClientRect();
       const headingRect = heading?.getBoundingClientRect();
       const topbarStyle = topbar ? getComputedStyle(topbar) : null;
@@ -81,35 +85,43 @@ describe("workspace layout regression", () => {
         scrollY: Math.round(window.scrollY),
         topbarBottom: topbarRect ? Math.round(topbarRect.bottom) : null,
         topbarPosition: topbarStyle?.position || null,
+        viewportTop: viewportRect ? Math.round(viewportRect.top) : null,
         sideNavTop: sideNavRect ? Math.round(sideNavRect.top) : null,
         headingTop: headingRect ? Math.round(headingRect.top) : null
       };
     });
 
-    expect(metrics.scrollY).toBeGreaterThanOrEqual(120);
+    if (canScroll) expect(metrics.scrollY).toBeGreaterThanOrEqual(120);
+    else expect(metrics.scrollY).toBeLessThanOrEqual(4);
     expect(metrics.topbarBottom).not.toBeNull();
+    expect(metrics.viewportTop).not.toBeNull();
     expect(metrics.sideNavTop).not.toBeNull();
     expect(metrics.headingTop).not.toBeNull();
     expect(metrics.topbarPosition).toBe("relative");
-    expect(metrics.topbarBottom).toBeLessThanOrEqual(0);
+    if (canScroll) expect(metrics.topbarBottom).toBeLessThanOrEqual(0);
+    else expect(metrics.topbarBottom).toBeLessThanOrEqual(metrics.viewportTop! - 8);
   }, 90_000);
 
   it("lets the day topbar scroll away on wide short presentation screens", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 2048, height: 638 } });
     await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
-    await page.waitForFunction(() => {
+    const canScroll = await page.evaluate(() => {
       const scroller = document.scrollingElement;
       return Boolean(scroller && scroller.scrollHeight > window.innerHeight + 160);
     });
-    await page.evaluate(() => window.scrollTo(0, 260));
-    await page.waitForFunction(() => window.scrollY >= 120);
+    if (canScroll) {
+      await page.evaluate(() => window.scrollTo(0, 260));
+      await page.waitForFunction(() => window.scrollY >= 120);
+    }
 
     const metrics = await page.evaluate(() => {
       const topbar = document.querySelector(".command-topbar");
+      const viewport = document.querySelector(".command-viewport");
       const heading = document.querySelector(".workspace-input-page .command-copy h1");
       const textarea = document.querySelector(".workspace-input-page .command-console-input");
       const topbarRect = topbar?.getBoundingClientRect();
+      const viewportRect = viewport?.getBoundingClientRect();
       const headingRect = heading?.getBoundingClientRect();
       const textareaRect = textarea?.getBoundingClientRect();
       const topbarStyle = topbar ? getComputedStyle(topbar) : null;
@@ -117,19 +129,23 @@ describe("workspace layout regression", () => {
         scrollY: Math.round(window.scrollY),
         topbarBottom: topbarRect ? Math.round(topbarRect.bottom) : null,
         topbarPosition: topbarStyle?.position || null,
+        viewportTop: viewportRect ? Math.round(viewportRect.top) : null,
         headingTop: headingRect ? Math.round(headingRect.top) : null,
         headingBottom: headingRect ? Math.round(headingRect.bottom) : null,
         textareaTop: textareaRect ? Math.round(textareaRect.top) : null
       };
     });
 
-    expect(metrics.scrollY).toBeGreaterThanOrEqual(120);
+    if (canScroll) expect(metrics.scrollY).toBeGreaterThanOrEqual(120);
+    else expect(metrics.scrollY).toBeLessThanOrEqual(4);
     expect(metrics.topbarBottom).not.toBeNull();
+    expect(metrics.viewportTop).not.toBeNull();
     expect(metrics.headingTop).not.toBeNull();
     expect(metrics.headingBottom).not.toBeNull();
     expect(metrics.textareaTop).not.toBeNull();
     expect(metrics.topbarPosition).toBe("relative");
-    expect(metrics.topbarBottom).toBeLessThanOrEqual(0);
+    if (canScroll) expect(metrics.topbarBottom).toBeLessThanOrEqual(0);
+    else expect(metrics.topbarBottom).toBeLessThanOrEqual(metrics.viewportTop! - 8);
     expect(metrics.headingBottom).toBeLessThanOrEqual(metrics.textareaTop! - 16);
   }, 90_000);
 
@@ -333,6 +349,65 @@ describe("workspace layout regression", () => {
     expect(metrics.textarea.clientHeight).toBeGreaterThanOrEqual(150);
     expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 24);
     expect(metrics.helper.top).toBeGreaterThanOrEqual(metrics.textarea.bottom + 16);
+  }, 90_000);
+
+  it("keeps the day composer submit action visible on scaled presentation screens", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const scenarios = [
+      { width: 1638, height: 510 },
+      { width: 1365, height: 425 }
+    ];
+
+    for (const viewport of scenarios) {
+      const page = await browser.newPage({ viewport });
+      await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+      await page.fill(
+        "#field-command-input",
+        "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보, 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘."
+      );
+
+      const metrics = await page.evaluate(() => {
+        function readRect(selector: string) {
+          const element = document.querySelector(selector);
+          if (!element) throw new Error(`Missing layout target: ${selector}`);
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return {
+            top: Math.round(rect.top),
+            bottom: Math.round(rect.bottom),
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+            width: Math.round(rect.width),
+            height: Math.round(rect.height),
+            display: style.display,
+            scrollTop: element instanceof HTMLTextAreaElement ? element.scrollTop : 0,
+            clientHeight: element instanceof HTMLTextAreaElement ? element.clientHeight : Math.round(rect.height),
+            scrollHeight: element instanceof HTMLTextAreaElement ? element.scrollHeight : Math.round(rect.height)
+          };
+        }
+
+        return {
+          viewportHeight: window.innerHeight,
+          viewportWidth: window.innerWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+          textarea: readRect("#field-command-input"),
+          composer: readRect(".input-composer-tray"),
+          submit: readRect(".composer-submit-button"),
+          fieldChips: readRect(".field-brief-chip-row"),
+          evidenceRail: readRect(".evidence-readiness-rail")
+        };
+      });
+
+      expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth);
+      expect(metrics.textarea.scrollTop).toBe(0);
+      expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 36);
+      expect(metrics.composer.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 8);
+      expect(metrics.submit.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 8);
+      expect(metrics.submit.left).toBeGreaterThan(metrics.textarea.left);
+      expect(metrics.fieldChips.display).toBe("none");
+      expect(metrics.evidenceRail.display).toBe("none");
+      await page.close();
+    }
   }, 90_000);
 
   it("keeps filled day input stable on zoom-sized short presentation screens", async () => {
