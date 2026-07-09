@@ -865,6 +865,57 @@ function stripPipelineMeta(text: string): string {
   return splitDocumentMeta(text).body;
 }
 
+const SAFETY_TERM_TYPO_REPLACEMENTS: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\b지게브\b/g, "지게차"],
+  [/지게브(?=\s*동선)/g, "지게차"],
+  [/지게브(?=\s*후진|\s*선회|\s*작업|\s*운행|\s*충돌|\s*협착|\s*상하차)/g, "지게차"]
+];
+
+const TEXT_DELIVERABLE_KEYS = [
+  "workpackSummaryDraft",
+  "riskAssessmentDraft",
+  "workPlanDraft",
+  "tbmBriefing",
+  "tbmLogDraft",
+  "safetyEducationRecordDraft",
+  "emergencyResponseDraft",
+  "photoEvidenceDraft",
+  "foreignWorkerBriefing",
+  "foreignWorkerTransmission",
+  "kakaoMessage"
+] as const;
+
+export function normalizeSafetyTermTypos(text: string): string {
+  return SAFETY_TERM_TYPO_REPLACEMENTS.reduce(
+    (current, [pattern, replacement]) => current.replace(pattern, replacement),
+    text
+  );
+}
+
+function normalizeStringArray(values: readonly string[]): string[] {
+  return values.map(normalizeSafetyTermTypos);
+}
+
+function normalizeAskResponseText(response: AskResponse): AskResponse {
+  const deliverables = { ...response.deliverables };
+  for (const key of TEXT_DELIVERABLE_KEYS) {
+    deliverables[key] = normalizeSafetyTermTypos(deliverables[key]);
+  }
+
+  return {
+    ...response,
+    answer: normalizeSafetyTermTypos(response.answer),
+    practicalPoints: normalizeStringArray(response.practicalPoints),
+    riskSummary: {
+      ...response.riskSummary,
+      title: normalizeSafetyTermTypos(response.riskSummary.title),
+      topRisk: normalizeSafetyTermTypos(response.riskSummary.topRisk),
+      immediateActions: normalizeStringArray(response.riskSummary.immediateActions)
+    },
+    deliverables
+  };
+}
+
 export type RunAskOptions = {
   aiMode?: AiMode;
   harnessMemory?: HarnessMemoryInput;
@@ -1641,7 +1692,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       sourceMix
     };
 
-    const reflectedEnriched = reflectDbHarnessInDeliverables(enriched, dbHarnessPacket);
+    const reflectedEnriched = normalizeAskResponseText(reflectDbHarnessInDeliverables(enriched, dbHarnessPacket));
     const withMcpDetail: AskResponse = !koreanLawMcpCount ? reflectedEnriched : {
       ...reflectedEnriched,
       status: {
