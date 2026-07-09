@@ -19,6 +19,46 @@ export type SifEmbeddingArtifactIntegrity = {
   role: string;
 };
 
+type SifNextApprovalGateId =
+  | "apply-sif-only-migration"
+  | "prepare-runtime-env"
+  | "approve-embedding-generation"
+  | "approve-upload"
+  | "enable-vector-search"
+  | "disable-vector-flag"
+  | "complete";
+
+export type SifEmbeddingOperatorGate = {
+  status: "approval-request-open" | "blocked" | "ready-to-execute" | "complete";
+  gateId: SifNextApprovalGateId;
+  title: string;
+  approvalQuestion: string;
+  evidenceSummary: string[];
+  migrationArtifact: {
+    path: string;
+    exists: boolean;
+    sha256: string | null;
+  };
+  canaryEvidence: {
+    performed: boolean;
+    embeddedCount: number;
+    uploadedCount: number;
+    mode: string;
+    vectorsPath: string | null;
+  };
+  allowedBeforeApproval: string[];
+  forbiddenBeforeApproval: string[];
+  checklist: {
+    id: string;
+    label: string;
+    status: "done" | "required" | "blocked";
+    evidence: string;
+  }[];
+  postApprovalSequence: string[];
+  heldCommands: string[];
+  nonApprovalFallback: string;
+};
+
 export type SifEmbeddingGateStatus = {
   ok: boolean;
   stage: "ready-for-approval" | "degraded";
@@ -131,7 +171,7 @@ export type SifEmbeddingGateStatus = {
     checkedAt: string;
   };
   nextApprovalGate: {
-    id: "apply-sif-only-migration" | "prepare-runtime-env" | "approve-embedding-generation" | "approve-upload" | "enable-vector-search" | "disable-vector-flag" | "complete";
+    id: SifNextApprovalGateId;
     label: string;
     status: "waiting" | "blocked" | "ready" | "done";
     detail: string;
@@ -139,6 +179,7 @@ export type SifEmbeddingGateStatus = {
     artifactPath?: string;
     command?: string;
   };
+  operatorGate: SifEmbeddingOperatorGate;
   approvalPacket: {
     scope: "sif_embedding_next_approval_gate";
     decisionCount: number;
@@ -675,6 +716,106 @@ function buildLearningLifecycle(input: {
   };
 }
 
+function buildOperatorGate(input: {
+  nextApprovalGate: SifEmbeddingGateStatus["nextApprovalGate"];
+  approvalPacket: SifEmbeddingGateStatus["approvalPacket"];
+  runtimeDbProbe: SifEmbeddingGateStatus["runtimeDbProbe"];
+  canary: SifEmbeddingGateStatus["canary"];
+  corpusCount: number;
+  embeddedCount: number;
+  uploadedCount: number;
+  commandHeldUntilApproval: string;
+}): SifEmbeddingOperatorGate {
+  const migrationArtifact = input.approvalPacket.artifactIntegrity.find((artifact) => artifact.label === "SIF-only migration");
+  const status: SifEmbeddingOperatorGate["status"] =
+    input.nextApprovalGate.status === "blocked"
+      ? "blocked"
+      : input.nextApprovalGate.status === "done"
+        ? "complete"
+        : input.nextApprovalGate.status === "ready"
+          ? "ready-to-execute"
+          : "approval-request-open";
+  const migrationReady = input.runtimeDbProbe.tableReady && input.runtimeDbProbe.rpcReady;
+
+  return {
+    status,
+    gateId: input.nextApprovalGate.id,
+    title: status === "approval-request-open"
+      ? "다음 승인 게이트가 열려 있습니다."
+      : input.nextApprovalGate.label,
+    approvalQuestion: input.nextApprovalGate.id === "apply-sif-only-migration"
+      ? "SIF-only migration SQL을 운영 DB에 적용해도 되는지 승인해야 합니다."
+      : input.nextApprovalGate.action,
+    evidenceSummary: [
+      `전체 SIF 코퍼스 ${input.corpusCount.toLocaleString("ko-KR")}건은 고정됐고 전체 임베딩 생성은 ${input.embeddedCount.toLocaleString("ko-KR")}건입니다.`,
+      `Canary는 ${input.canary.embeddedCount.toLocaleString("ko-KR")}건 embed-only로 확인했고 DB 업로드는 ${input.canary.uploadedCount.toLocaleString("ko-KR")}건입니다.`,
+      `Runtime DB probe는 ${input.runtimeDbProbe.status}이며 table ${input.runtimeDbProbe.tableReady ? "ready" : "missing"}, RPC ${input.runtimeDbProbe.rpcReady ? "ready" : "missing"}입니다.`,
+      `승인 지문 ${input.approvalPacket.approvalFingerprint}로 corpus hash, 모델/차원, migration SQL을 고정합니다.`
+    ],
+    migrationArtifact: {
+      path: migrationArtifact?.path || input.nextApprovalGate.artifactPath || "",
+      exists: Boolean(migrationArtifact?.exists),
+      sha256: migrationArtifact?.sha256 || null
+    },
+    canaryEvidence: {
+      performed: input.canary.performed,
+      embeddedCount: input.canary.embeddedCount,
+      uploadedCount: input.canary.uploadedCount,
+      mode: input.canary.mode,
+      vectorsPath: input.canary.vectorsPath
+    },
+    allowedBeforeApproval: [
+      "승인 패킷과 migration SQL diff 검토",
+      "runtime DB probe 재실행",
+      "코퍼스/manifest/hash 재검증"
+    ],
+    forbiddenBeforeApproval: [
+      "운영 DB migration 적용",
+      "전체 SIF 임베딩 생성",
+      "safety_reference_embeddings 업로드",
+      "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화"
+    ],
+    checklist: [
+      {
+        id: "preflight",
+        label: "Preflight 통과",
+        status: input.approvalPacket.safetyLocks.every((lock) => lock.locked) ? "done" : "required",
+        evidence: "승인 전 DB 변경, 전체 임베딩 생성, 업로드가 모두 보류 상태입니다."
+      },
+      {
+        id: "canary",
+        label: "Canary embed-only 확인",
+        status: input.canary.performed && !input.canary.dbMutationPerformed ? "done" : "required",
+        evidence: input.canary.answer
+      },
+      {
+        id: "migration-runtime",
+        label: "운영 DB migration 필요성 확인",
+        status: migrationReady ? "done" : "required",
+        evidence: input.runtimeDbProbe.message
+      },
+      {
+        id: "full-embedding",
+        label: "전체 임베딩/업로드 승인 전 보류",
+        status: input.embeddedCount === 0 && input.uploadedCount === 0 ? "done" : "blocked",
+        evidence: `전체 임베딩 ${input.embeddedCount.toLocaleString("ko-KR")}건, 업로드 ${input.uploadedCount.toLocaleString("ko-KR")}건`
+      }
+    ],
+    postApprovalSequence: [
+      "승인된 SIF-only migration을 운영 DB에 적용합니다.",
+      "runtime probe로 table/RPC readiness를 다시 확인합니다.",
+      "--embed --approved-embedding으로 전체 임베딩 생성을 승인 실행합니다.",
+      "--upload --approved-upload으로 DB upsert 후 row count를 검증합니다.",
+      "RPC smoke test 통과 후에만 SAFETY_REFERENCE_VECTOR_SEARCH=1을 켭니다."
+    ],
+    heldCommands: [
+      input.commandHeldUntilApproval,
+      "npm.cmd run knowledge:sif-embedding-runtime-probe -- --output evaluation/sif-embedding-gate/runtime-db-probe.json"
+    ],
+    nonApprovalFallback: "승인이 없으면 기존 safety_reference_items 기반 REST/ranked 검색 경로를 유지하고 vector retrieval은 계속 꺼둡니다."
+  };
+}
+
 function buildApprovalPacket(input: {
   decisions: string[];
   artifacts: SifEmbeddingGateStatus["artifacts"];
@@ -814,6 +955,11 @@ export function getSifEmbeddingGateStatus(
     migrationPath: readString(preflight, "migrationPath", "supabase/migrations/010_commercial_operations.sql"),
     scriptPath: readString(preflight, "scriptPath", "scripts/prepare_sif_embedding_corpus.mjs")
   };
+  const commandHeldUntilApproval = readString(
+    preflight,
+    "commandHeldUntilApproval",
+    "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload"
+  );
   const nextApprovalDecisions = readStringArray(preflight, "nextApprovalDecisions");
   const preflightChecks = readRecordArray(preflight, "checks").map((check) => {
     const id = readString(check, "id", "unknown_check");
@@ -833,11 +979,7 @@ export function getSifEmbeddingGateStatus(
     embeddedCount,
     uploadedCount,
     corpusCount: readNumber(report, "corpusCount"),
-    commandHeldUntilApproval: readString(
-      preflight,
-      "commandHeldUntilApproval",
-      "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload"
-    )
+    commandHeldUntilApproval
   });
   const learningLifecycle = buildLearningLifecycle({
     corpusReady,
@@ -846,6 +988,29 @@ export function getSifEmbeddingGateStatus(
     corpusCount: readNumber(report, "corpusCount"),
     vectorGuard,
     nextApprovalGate
+  });
+  const approvalPacket = buildApprovalPacket({
+    decisions: nextApprovalDecisions,
+    artifacts,
+    approvalHeld,
+    dbMutationPerformed,
+    embeddingGenerated,
+    uploaded,
+    vectorGuard,
+    corpusHash: readString(report, "corpusHash"),
+    corpusCount: readNumber(report, "corpusCount"),
+    embeddingModel: readString(report, "embeddingModel", "text-embedding-3-small"),
+    embeddingDimensions: readNumber(report, "embeddingDimensions", 1536)
+  });
+  const operatorGate = buildOperatorGate({
+    nextApprovalGate,
+    approvalPacket,
+    runtimeDbProbe,
+    canary,
+    corpusCount: readNumber(report, "corpusCount"),
+    embeddedCount,
+    uploadedCount,
+    commandHeldUntilApproval
   });
 
   return {
@@ -861,11 +1026,7 @@ export function getSifEmbeddingGateStatus(
     dbMutationPerformed,
     embeddingGenerated,
     uploaded,
-    commandHeldUntilApproval: readString(
-      preflight,
-      "commandHeldUntilApproval",
-      "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload"
-    ),
+    commandHeldUntilApproval,
     corpus: {
       itemCount: readNumber(report, "itemCount"),
       skippedCount: readNumber(report, "skippedCount"),
@@ -918,20 +1079,9 @@ export function getSifEmbeddingGateStatus(
     ),
     runtimeDbProbe,
     nextApprovalGate,
+    operatorGate,
     failedCheckIds,
-    approvalPacket: buildApprovalPacket({
-      decisions: nextApprovalDecisions,
-      artifacts,
-      approvalHeld,
-      dbMutationPerformed,
-      embeddingGenerated,
-      uploaded,
-      vectorGuard,
-      corpusHash: readString(report, "corpusHash"),
-      corpusCount: readNumber(report, "corpusCount"),
-      embeddingModel: readString(report, "embeddingModel", "text-embedding-3-small"),
-      embeddingDimensions: readNumber(report, "embeddingDimensions", 1536)
-    }),
+    approvalPacket,
     nextApprovalDecisions,
     artifacts
   };

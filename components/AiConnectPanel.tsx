@@ -187,6 +187,36 @@ type SifEmbeddingGateStatusResponse = {
     artifactPath?: string;
     command?: string;
   };
+  operatorGate: {
+    status: "approval-request-open" | "blocked" | "ready-to-execute" | "complete";
+    gateId: "apply-sif-only-migration" | "prepare-runtime-env" | "approve-embedding-generation" | "approve-upload" | "enable-vector-search" | "disable-vector-flag" | "complete";
+    title: string;
+    approvalQuestion: string;
+    evidenceSummary: string[];
+    migrationArtifact: {
+      path: string;
+      exists: boolean;
+      sha256: string | null;
+    };
+    canaryEvidence: {
+      performed: boolean;
+      embeddedCount: number;
+      uploadedCount: number;
+      mode: string;
+      vectorsPath: string | null;
+    };
+    allowedBeforeApproval: string[];
+    forbiddenBeforeApproval: string[];
+    checklist: {
+      id: string;
+      label: string;
+      status: "done" | "required" | "blocked";
+      evidence: string;
+    }[];
+    postApprovalSequence: string[];
+    heldCommands: string[];
+    nonApprovalFallback: string;
+  };
   approvalPacket: {
     scope: "sif_embedding_next_approval_gate";
     decisionCount: number;
@@ -657,6 +687,55 @@ export function AiConnectPanel() {
                 <Link href="/api/sif-embedding-gate/approval-packet">승인 패킷 열기</Link>
                 <Link href="/api/sif-embedding-gate/approval-packet?format=json">JSON 보기</Link>
               </div>
+            </div>
+            <div className={`ai-connect-sif-operator-gate ${sifGate.operatorGate.status}`}>
+              <div>
+                <span>Operator gate</span>
+                <strong>{sifGate.operatorGate.title}</strong>
+              </div>
+              <p>{sifGate.operatorGate.approvalQuestion}</p>
+              <dl>
+                <div>
+                  <dt>Migration</dt>
+                  <dd>{sifGate.operatorGate.migrationArtifact.exists ? "파일 확인" : "파일 확인 필요"}</dd>
+                </div>
+                <div>
+                  <dt>Canary</dt>
+                  <dd>
+                    {sifGate.operatorGate.canaryEvidence.embeddedCount.toLocaleString("ko-KR")}건 · 업로드 {sifGate.operatorGate.canaryEvidence.uploadedCount.toLocaleString("ko-KR")}건
+                  </dd>
+                </div>
+                <div>
+                  <dt>Gate</dt>
+                  <dd>{sifGate.operatorGate.gateId}</dd>
+                </div>
+              </dl>
+              <div className="ai-connect-sif-operator-columns">
+                <section>
+                  <span>승인 전 가능</span>
+                  <ul>
+                    {sifGate.operatorGate.allowedBeforeApproval.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </section>
+                <section>
+                  <span>승인 전 금지</span>
+                  <ul>
+                    {sifGate.operatorGate.forbiddenBeforeApproval.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </section>
+              </div>
+              <ol className="ai-connect-sif-operator-checklist">
+                {sifGate.operatorGate.checklist.map((item) => (
+                  <li key={item.id} className={item.status}>
+                    <span>{item.status === "done" ? "완료" : item.status === "blocked" ? "차단" : "필요"}</span>
+                    <div>
+                      <strong>{item.label}</strong>
+                      <p>{item.evidence}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <small>{sifGate.operatorGate.nonApprovalFallback}</small>
             </div>
             <div className="ai-connect-sif-approval-packet">
               <div>

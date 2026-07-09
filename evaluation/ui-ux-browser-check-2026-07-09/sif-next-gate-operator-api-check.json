@@ -1,0 +1,31 @@
+{
+  "ok": true,
+  "checkedAt": "2026-07-09T12:07:17.1048827Z",
+  "statusOk": true,
+  "nextApprovalGate": "apply-sif-only-migration",
+  "operatorGateStatus": "approval-request-open",
+  "operatorApprovalQuestion": "SIF-only migration SQL을 운영 DB에 적용해도 되는지 승인해야 합니다.",
+  "migrationArtifactExists": true,
+  "migrationArtifactSha256": "b45ee34862aed599e0ad7ac6454e4f957382f87b4b47807dc52e97d588d30334",
+  "forbiddenBeforeApproval": [
+    "운영 DB migration 적용",
+    "전체 SIF 임베딩 생성",
+    "safety_reference_embeddings 업로드",
+    "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화"
+  ],
+  "canaryEmbeddedCount": 3,
+  "canaryUploadedCount": 0,
+  "fullCorpusCount": 6032,
+  "fullEmbeddedCount": 0,
+  "fullUploadedCount": 0,
+  "runtimeDbProbe": "migration-required",
+  "packetGateId": "apply-sif-only-migration",
+  "packetOperatorGateStatus": "approval-request-open",
+  "packetMarkdownHasRunbook": true,
+  "photoVisionOk": true,
+  "photoVisionStatus": "ready",
+  "photoVisionMaxInputPhotos": 10,
+  "photoVisionEndpoint": "/api/input-photos/hazard-analysis",
+  "photoVisionImprovementEndpoint": "/api/workpacks/[id]/improvements",
+  "photoVisionAcceptedOnly": true
+}

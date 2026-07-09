@@ -86,6 +86,34 @@ describe("SIF embedding gate status", () => {
       artifactPath: "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
     });
     expect(status.nextApprovalGate.detail).toContain("업로드 전 migration 승인");
+    expect(status.operatorGate).toMatchObject({
+      status: "approval-request-open",
+      gateId: "apply-sif-only-migration",
+      title: "다음 승인 게이트가 열려 있습니다.",
+      migrationArtifact: {
+        path: "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
+        exists: true
+      },
+      canaryEvidence: {
+        performed: true,
+        embeddedCount: 3,
+        uploadedCount: 0,
+        mode: "embed-only"
+      }
+    });
+    expect(status.operatorGate.approvalQuestion).toContain("SIF-only migration SQL");
+    expect(status.operatorGate.migrationArtifact.sha256).toHaveLength(64);
+    expect(status.operatorGate.evidenceSummary.join("\n")).toContain("전체 SIF 코퍼스 6,032건");
+    expect(status.operatorGate.evidenceSummary.join("\n")).toContain("Canary는 3건 embed-only");
+    expect(status.operatorGate.allowedBeforeApproval).toContain("승인 패킷과 migration SQL diff 검토");
+    expect(status.operatorGate.forbiddenBeforeApproval).toEqual([
+      "운영 DB migration 적용",
+      "전체 SIF 임베딩 생성",
+      "safety_reference_embeddings 업로드",
+      "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화"
+    ]);
+    expect(status.operatorGate.checklist.map((item) => item.status)).toEqual(["done", "done", "required", "done"]);
+    expect(status.operatorGate.heldCommands).toContain(status.commandHeldUntilApproval);
     expect(status.approvalPacket).toMatchObject({
       scope: "sif_embedding_next_approval_gate",
       decisionCount: 6
@@ -150,6 +178,11 @@ describe("SIF embedding gate status", () => {
       id: "disable-vector-flag",
       status: "blocked"
     });
+    expect(readyRuntime.operatorGate).toMatchObject({
+      status: "blocked",
+      gateId: "disable-vector-flag"
+    });
+    expect(readyRuntime.operatorGate.forbiddenBeforeApproval).toContain("SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화");
     expect(readyRuntime.learningLifecycle).toMatchObject({
       label: "코퍼스 준비 · 임베딩 전",
       vectorSearchUsable: false,
