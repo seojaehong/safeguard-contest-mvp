@@ -703,8 +703,8 @@ export type GenerateAllOptions = {
   dbHarnessContext?: string;
   /**
    * Which call groups to run.
-   * - "full" (default): tabular + free + foreign  → 14 deliverables AI-generated
-   * - "enhanced": tabular only → 5 표 양식 deliverables only (others remain template)
+   * - "full" (default): all tabular + free + foreign -> broad document pack AI generation
+   * - "enhanced": core risk/TBM groups only -> non-core documents remain deterministic
    */
   scope?: "full" | "enhanced";
   /** Task D-2a: per-doc progress callback for the SSE console. Defaults to no-op. */
@@ -973,13 +973,32 @@ const TABULAR_SPECS = [
   { name: "educationRecordStructured", buildPrompt: educationRecordStructuredPrompt, parse: parseEducationRecordStructured }
 ] as const;
 
+const ENHANCED_CORE_SPEC_NAMES = new Set([
+  "riskAssessment",
+  "tbmBriefingStructured",
+  "tbmLogStructured"
+]);
+
+export function listAiDeliverableGroupsForScope(scope: "full" | "enhanced" = "full"): string[] {
+  const tabularNames = TABULAR_SPECS
+    .filter((spec) => scope === "full" || ENHANCED_CORE_SPEC_NAMES.has(spec.name))
+    .map((spec) => spec.name);
+  return scope === "full"
+    ? [...tabularNames, "structuredRiskRows", "free", "foreign", "tbmRiskLinks"]
+    : [...tabularNames, "structuredRiskRows", "tbmRiskLinks"];
+}
+
+function tabularSpecsForScope(scope: "full" | "enhanced") {
+  return TABULAR_SPECS.filter((spec) => scope === "full" || ENHANCED_CORE_SPEC_NAMES.has(spec.name));
+}
+
 export async function generateAllDeliverables(opts: GenerateAllOptions): Promise<AiDeliverables> {
   if (!isVertexConfigured()) return {};
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
 
-  // 7-way parallel: 5 tabular per-doc + 1 free + 1 foreign (free/foreign skipped on enhanced).
-  const tabularPromises = TABULAR_SPECS.map((spec) =>
+  // Full: broad pack. Enhanced: core 3-step workbench docs only; non-core docs use deterministic templates.
+  const tabularPromises = tabularSpecsForScope(scope).map((spec) =>
     callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name)
   );
   const structuredRiskRowsPromise = callAndParse(
@@ -987,19 +1006,15 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
     parseStructuredRiskRows,
     "structuredRiskRows"
   );
-  const freePromise = scope === "full"
-    ? callAndParse(freeFormPrompt(ctx), parseFree, "free")
-    : Promise.reject(new Error("skipped (enhanced scope)"));
-  const foreignPromise = scope === "full"
-    ? callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign")
-    : Promise.reject(new Error("skipped (enhanced scope)"));
-
-  const settled = await Promise.allSettled([
-    ...tabularPromises,
-    structuredRiskRowsPromise,
-    freePromise,
-    foreignPromise
-  ]);
+  const activePromises = scope === "full"
+    ? [
+        ...tabularPromises,
+        structuredRiskRowsPromise,
+        callAndParse(freeFormPrompt(ctx), parseFree, "free"),
+        callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign")
+      ]
+    : [...tabularPromises, structuredRiskRowsPromise];
+  const settled = await Promise.allSettled(activePromises);
 
   const out: AiDeliverables = {};
   for (const s of settled) {
@@ -1031,7 +1046,7 @@ export async function generateAllDeliverablesWithDiagnostics(
   const onProgress = opts.onProgress;
 
   const allSpecs: Array<{ name: string; promise: Promise<Partial<AiDeliverables>> }> = [
-    ...TABULAR_SPECS.map((spec) => ({
+    ...tabularSpecsForScope(scope).map((spec) => ({
       name: spec.name,
       promise: callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name) as Promise<Partial<AiDeliverables>>
     })),
@@ -1042,20 +1057,20 @@ export async function generateAllDeliverablesWithDiagnostics(
         parseStructuredRiskRows,
         "structuredRiskRows"
       ) as Promise<Partial<AiDeliverables>>
-    },
-    {
-      name: "free",
-      promise: scope === "full"
-        ? (callAndParse(freeFormPrompt(ctx), parseFree, "free") as Promise<Partial<AiDeliverables>>)
-        : Promise.reject(new Error("skipped (enhanced)"))
-    },
-    {
-      name: "foreign",
-      promise: scope === "full"
-        ? (callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign") as Promise<Partial<AiDeliverables>>)
-        : Promise.reject(new Error("skipped (enhanced)"))
     }
   ];
+  if (scope === "full") {
+    allSpecs.push(
+      {
+        name: "free",
+        promise: callAndParse(freeFormPrompt(ctx), parseFree, "free") as Promise<Partial<AiDeliverables>>
+      },
+      {
+        name: "foreign",
+        promise: callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign") as Promise<Partial<AiDeliverables>>
+      }
+    );
+  }
 
   const settled = await Promise.allSettled(allSpecs.map((s) => s.promise));
   const out: AiDeliverables = {};
