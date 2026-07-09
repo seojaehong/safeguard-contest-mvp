@@ -34,6 +34,13 @@ describe("SIF embedding approval packet", () => {
       }
     });
     expect(packet.operatorGate.forbiddenBeforeApproval).toContain("전체 SIF 임베딩 생성");
+    expect(packet.postMigrationVerification).toMatchObject({
+      status: "migration-required",
+      uploadedCount: 0,
+      expectedCorpusCount: 6032,
+      tableReady: false,
+      rpcReady: false
+    });
     expect(packet.fileName).toBe("safeclaw-sif-embedding-approval-apply-sif-only-migration.md");
     expect(packet.approvalFingerprint).toHaveLength(64);
     expect(packet.artifactIntegrity).toHaveLength(4);
@@ -50,6 +57,9 @@ describe("SIF embedding approval packet", () => {
     expect(packet.markdown).toContain("Forbidden before approval:");
     expect(packet.markdown).toContain("전체 SIF 임베딩 생성");
     expect(packet.markdown).toContain("Non-approval fallback:");
+    expect(packet.markdown).toContain("## Post-Migration Verification");
+    expect(packet.markdown).toContain("Status: migration-required");
+    expect(packet.markdown).toContain("Uploaded rows: 0 / 6,032");
     expect(packet.markdown).toContain("## Canary Embedding Evidence");
     expect(packet.markdown).toContain("Canary 임베딩 완료 · 업로드 전");
     expect(packet.markdown).toContain("Embedded count: 3");

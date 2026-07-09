@@ -14,6 +14,7 @@ export type SifEmbeddingApprovalPacket = {
   uploaded: boolean;
   canary: SifEmbeddingGateStatus["canary"];
   operatorGate: SifEmbeddingGateStatus["operatorGate"];
+  postMigrationVerification: SifEmbeddingGateStatus["postMigrationVerification"];
   requiredArtifacts: SifEmbeddingGateStatus["approvalPacket"]["requiredArtifacts"];
   approvalFingerprint: string;
   artifactIntegrity: SifEmbeddingGateStatus["approvalPacket"]["artifactIntegrity"];
@@ -128,6 +129,18 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "",
     `Non-approval fallback: ${status.operatorGate.nonApprovalFallback}`,
     "",
+    "## Post-Migration Verification",
+    "",
+    `- Report: \`${status.postMigrationVerification.reportPath}\``,
+    `- Status: ${status.postMigrationVerification.status}`,
+    `- OK: ${boolText(status.postMigrationVerification.ok)}`,
+    `- Uploaded rows: ${status.postMigrationVerification.uploadedCount.toLocaleString("ko-KR")} / ${status.postMigrationVerification.expectedCorpusCount.toLocaleString("ko-KR")}`,
+    `- Table ready: ${boolText(status.postMigrationVerification.tableReady)}`,
+    `- RPC ready: ${boolText(status.postMigrationVerification.rpcReady)}`,
+    `- Vector flag: ${status.postMigrationVerification.vectorFeatureFlagEnabled ? "on" : "off"}`,
+    `- Failed checks: ${status.postMigrationVerification.failedCheckIds.join(", ") || "none"}`,
+    `- Next action: ${status.postMigrationVerification.nextAction}`,
+    "",
     "## Canary Embedding Evidence",
     "",
     `- Status: ${status.canary.label}`,
@@ -208,6 +221,7 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     uploaded: status.uploaded,
     canary: status.canary,
     operatorGate: status.operatorGate,
+    postMigrationVerification: status.postMigrationVerification,
     requiredArtifacts: status.approvalPacket.requiredArtifacts,
     approvalFingerprint: status.approvalPacket.approvalFingerprint,
     artifactIntegrity: status.approvalPacket.artifactIntegrity,

@@ -73,8 +73,13 @@ Those remain a separate commercial operations migration gate.
 npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload
 ```
 
-4. Verify uploaded row count equals 6,032.
-5. Run RPC smoke with a real query embedding.
+4. Run the read-only post-migration verifier:
+
+```powershell
+npm.cmd run knowledge:sif-embedding-post-migration-verify -- --output evaluation/sif-embedding-gate/post-migration-verify.json
+```
+
+5. Verify uploaded row count equals 6,032 and RPC smoke returns rows.
 6. Enable `SAFETY_REFERENCE_VECTOR_SEARCH=1`.
 7. Verify `/workspace` evidence path reports vector retrieval, such as `hybrid-vector-rpc`.
 

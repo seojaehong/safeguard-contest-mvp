@@ -139,7 +139,8 @@ npm.cmd run knowledge:sif-embedding-runtime-probe -- --output evaluation/sif-emb
 - 실행 환경의 `OPENAI_API_KEY`와 Supabase service role 유지
 - 승인 후에만 `--embed --approved-embedding` 실행
 - DB migration과 row count 검증 후에만 `--upload --approved-upload` 실행
-- 업로드 row count가 6,032인지 검증한 뒤 `SAFETY_REFERENCE_VECTOR_SEARCH=1` 활성화
+- 업로드 후 `npm.cmd run knowledge:sif-embedding-post-migration-verify -- --output evaluation/sif-embedding-gate/post-migration-verify.json` 실행
+- post-migration verifier에서 table/RPC, metadata sample, 업로드 row count 6,032건이 확인된 뒤 `SAFETY_REFERENCE_VECTOR_SEARCH=1` 활성화
 
 ## Vision/OCR 연결 상태
 
