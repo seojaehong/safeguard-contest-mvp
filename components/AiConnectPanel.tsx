@@ -98,6 +98,18 @@ type SifEmbeddingGateStatusResponse = {
     vectorFeatureFlagEnabled: boolean;
     executionReadyAfterApproval: boolean;
   };
+  learningLifecycle: {
+    productTerm: "retrieval_embedding_index";
+    label: string;
+    answer: string;
+    modelFineTuningPerformed: false;
+    corpusPrepared: boolean;
+    fullEmbeddingGenerated: boolean;
+    dbUploadVerified: boolean;
+    vectorSearchUsable: boolean;
+    nextGateId: "apply-sif-only-migration" | "prepare-runtime-env" | "approve-embedding-generation" | "approve-upload" | "enable-vector-search" | "disable-vector-flag" | "complete";
+    nextGateLabel: string;
+  };
   readinessVerdict: {
     state:
       | "corpus-ready-migration-required"
@@ -525,6 +537,13 @@ export function AiConnectPanel() {
                     ? "승인 후 실행 환경이 준비되어 있습니다."
                     : "승인 후 실행 전 OpenAI key와 Supabase service role 상태를 다시 확인해야 합니다."}
                 </p>
+              </article>
+              <article>
+                <strong>SIF 학습/임베딩</strong>
+                <p>{sifGate.learningLifecycle.answer}</p>
+                <small>
+                  {sifGate.learningLifecycle.label} · 파인튜닝 {sifGate.learningLifecycle.modelFineTuningPerformed ? "실행" : "미실행"}
+                </small>
               </article>
               <article>
                 <strong>Vector 검색</strong>

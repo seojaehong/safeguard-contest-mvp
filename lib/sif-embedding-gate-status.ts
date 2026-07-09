@@ -42,6 +42,18 @@ export type SifEmbeddingGateStatus = {
     vectorFeatureFlagEnabled: boolean;
     executionReadyAfterApproval: boolean;
   };
+  learningLifecycle: {
+    productTerm: "retrieval_embedding_index";
+    label: string;
+    answer: string;
+    modelFineTuningPerformed: false;
+    corpusPrepared: boolean;
+    fullEmbeddingGenerated: boolean;
+    dbUploadVerified: boolean;
+    vectorSearchUsable: boolean;
+    nextGateId: SifEmbeddingGateStatus["nextApprovalGate"]["id"];
+    nextGateLabel: string;
+  };
   readinessVerdict: {
     state:
       | "corpus-ready-migration-required"
@@ -461,6 +473,50 @@ function buildReadinessVerdict(input: {
   };
 }
 
+function buildLearningLifecycle(input: {
+  corpusReady: boolean;
+  embeddedCount: number;
+  uploadedCount: number;
+  corpusCount: number;
+  vectorGuard: SifEmbeddingGateStatus["vectorGuard"];
+  nextApprovalGate: SifEmbeddingGateStatus["nextApprovalGate"];
+}): SifEmbeddingGateStatus["learningLifecycle"] {
+  const fullEmbeddingGenerated = input.corpusCount > 0 && input.embeddedCount === input.corpusCount;
+  const dbUploadVerified = input.vectorGuard.uploadVerified;
+  const vectorSearchUsable = input.vectorGuard.status === "active";
+  const label = vectorSearchUsable
+    ? "검색 인덱스 활성"
+    : dbUploadVerified
+      ? "업로드 검증 완료"
+      : fullEmbeddingGenerated
+        ? "임베딩 생성 완료 · 업로드 전"
+        : input.corpusReady
+          ? "코퍼스 준비 · 임베딩 전"
+          : "코퍼스 점검 필요";
+  const answer = vectorSearchUsable
+    ? "SIF 코퍼스 임베딩, DB 업로드, vector 검색 활성화가 끝났습니다."
+    : dbUploadVerified
+      ? "SIF 임베딩 DB row count는 검증됐고, vector 검색 flag 활성 승인만 남았습니다."
+      : fullEmbeddingGenerated
+        ? "SIF 임베딩 벡터는 생성됐지만 운영 DB 업로드와 row count 검증은 아직입니다."
+        : input.corpusReady
+          ? "SIF 자료는 재생성 가능한 코퍼스로 준비됐지만, 모델 파인튜닝도 전체 임베딩 생성도 아직 실행하지 않았습니다."
+          : "SIF 코퍼스 품질 게이트를 먼저 다시 통과해야 합니다.";
+
+  return {
+    productTerm: "retrieval_embedding_index",
+    label,
+    answer,
+    modelFineTuningPerformed: false,
+    corpusPrepared: input.corpusReady,
+    fullEmbeddingGenerated,
+    dbUploadVerified,
+    vectorSearchUsable,
+    nextGateId: input.nextApprovalGate.id,
+    nextGateLabel: input.nextApprovalGate.label
+  };
+}
+
 function buildApprovalPacket(input: {
   decisions: string[];
   artifacts: SifEmbeddingGateStatus["artifacts"];
@@ -586,6 +642,14 @@ export function getSifEmbeddingGateStatus(
       "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload"
     )
   });
+  const learningLifecycle = buildLearningLifecycle({
+    corpusReady,
+    embeddedCount,
+    uploadedCount,
+    corpusCount: readNumber(report, "corpusCount"),
+    vectorGuard,
+    nextApprovalGate
+  });
 
   return {
     ok: overallOk,
@@ -635,6 +699,7 @@ export function getSifEmbeddingGateStatus(
       vectorFeatureFlagEnabled,
       executionReadyAfterApproval: runtimeExecutionReadyAfterApproval
     },
+    learningLifecycle,
     readinessVerdict: buildReadinessVerdict({
       runtimeReady: runtimeExecutionReadyAfterApproval,
       vectorGuard,

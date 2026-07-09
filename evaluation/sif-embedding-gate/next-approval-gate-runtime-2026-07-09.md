@@ -1,7 +1,7 @@
 # SIF Embedding Next Approval Gate Runtime Check
 
 Generated: 2026-07-09
-Rechecked: 2026-07-09 19:23 KST
+Rechecked: 2026-07-09 19:36 KST
 
 ## 결론
 
@@ -16,6 +16,7 @@ SIF 코퍼스 준비는 완료됐다. 실제 운영 DB 임베딩 검색은 아�
 - 운영 DB `safety_reference_embeddings`: 없음
 - 운영 DB `match_safety_reference_embeddings`: 없음
 - `SAFETY_REFERENCE_VECTOR_SEARCH`: 비활성
+- `/settings/ai-connect` API/UI: `learningLifecycle` 필드로 "코퍼스 준비 · 임베딩 전"을 직접 노출
 
 따라서 다음 순서는 **DB migration 승인 → embedding upload 승인 → row count/RPC smoke → feature flag enable** 이다.
 
@@ -28,7 +29,18 @@ SIF 코퍼스 준비는 완료됐다. 실제 운영 DB 임베딩 검색은 아�
 3. 문서 생성 전에 DB harness가 유사 SIF/KOSHA 근거를 먼저 고정한다.
 4. LLM은 고정된 근거를 문장화한다.
 
-현재 1번은 완료, 2번은 canary 성공이며 전체 6,032건 embedding과 운영 DB 업로드는 승인 전이다. 2026-07-09 19:23 KST 재검증 기준 실행환경은 준비됐지만, 운영 DB의 table/RPC가 아직 없으므로 migration 승인이 먼저다.
+현재 1번은 완료, 2번은 canary 성공이며 전체 6,032건 embedding과 운영 DB 업로드는 승인 전이다. 2026-07-09 19:36 KST 재검증 기준 실행환경은 준비됐지만, 운영 DB의 table/RPC가 아직 없으므로 migration 승인이 먼저다.
+
+`/api/sif-embedding-gate/status`는 이제 아래 lifecycle을 함께 내려준다.
+
+- productTerm: `retrieval_embedding_index`
+- label: `코퍼스 준비 · 임베딩 전`
+- modelFineTuningPerformed: `false`
+- corpusPrepared: `true`
+- fullEmbeddingGenerated: `false`
+- dbUploadVerified: `false`
+- vectorSearchUsable: `false`
+- nextGate: `apply-sif-only-migration`
 
 ## Evidence
 
@@ -124,6 +136,26 @@ Facts:
 - migrationPath: `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql`
 - failedCheckIds: none
 - SIF-only scope check: passed
+
+### Vision/OCR Harness Path
+
+Source:
+
+- `app/api/input-photos/hazard-analysis/route.ts`
+- `lib/photo-vision-analysis.ts`
+- `lib/operation-improvements.ts`
+- `app/api/workpacks/[id]/improvements/route.ts`
+- `tests/photo-vision-analysis.test.ts`
+- `tests/operation-improvements.test.ts`
+
+Facts:
+
+- 초기 입력 사진은 multipart `photos` 배열로 최대 10장까지 받는다.
+- `/api/input-photos/hazard-analysis`는 OpenAI Responses vision 호출로 위험요인 후보, OCR 텍스트, siteSignals를 만든다.
+- 사용자가 채택한 사진 위험요인만 `buildAcceptedHazardPhotoHarnessImprovements`를 통해 DB harness improvement memory로 전달된다.
+- 문서 생성 후 Before/After 개선 사진은 workpack improvement API에서 `analyzeImprovementPhotos`를 호출한다.
+- 분석 결과는 `analysis_payload`에 `visionStatus`, `analysisMode`, `detectedHazards`, `observedImprovement`, `ocrText`, `sourcePhotoNames`, `photoCount`, `siteSignals`로 저장/export된다.
+- Vision/OCR 후보는 자동 확정 사실이 아니라 `reviewable candidate`이며, 사용자가 채택해야 위험성평가/TBM 하네스에 들어간다.
 
 ## SIF-only Migration Proposal
 
