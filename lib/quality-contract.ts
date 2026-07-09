@@ -170,7 +170,12 @@ function dbHarnessItem(response: AskResponse): QualityContractItem {
   const contractReady =
     harness.packet.mode === "db_harness_first" &&
     contract.llmRole === "naturalize_only" &&
-    contract.fallbackChainAllowed === false;
+    contract.llmOutputScope === "rewrite_fixed_evidence_only" &&
+    contract.evidenceAuthority === "db_harness" &&
+    contract.providerRetryScope === "naturalization_retry_only" &&
+    contract.fallbackChainAllowed === false &&
+    contract.genericProseSubstitutionAllowed === false &&
+    contract.missingEvidencePolicy === "surface_review_required";
   if (!contractReady) {
     return {
       key: "dbHarness",
@@ -273,7 +278,12 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
       status: dbHarness.status,
       mode: response.dbHarness?.packet.mode,
       llmRole: response.dbHarness?.packet.generationContract.llmRole,
+      llmOutputScope: response.dbHarness?.packet.generationContract.llmOutputScope,
+      evidenceAuthority: response.dbHarness?.packet.generationContract.evidenceAuthority,
+      providerRetryScope: response.dbHarness?.packet.generationContract.providerRetryScope,
       fallbackChainAllowed: response.dbHarness?.packet.generationContract.fallbackChainAllowed,
+      genericProseSubstitutionAllowed: response.dbHarness?.packet.generationContract.genericProseSubstitutionAllowed,
+      missingEvidencePolicy: response.dbHarness?.packet.generationContract.missingEvidencePolicy,
       directEvidenceCount: response.dbHarness?.summary.directEvidence ?? 0,
       sifCaseCount: response.dbHarness?.summary.sifCases ?? 0,
       supportingEvidenceCount: response.dbHarness?.summary.supportingEvidence ?? 0,

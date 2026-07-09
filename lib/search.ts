@@ -804,7 +804,12 @@ function summarizeDbHarnessPacket(packet: ReturnType<typeof buildDbHarnessPacket
   return {
     mode: packet.mode,
     llmRole: packet.generationContract.llmRole,
+    llmOutputScope: packet.generationContract.llmOutputScope,
+    evidenceAuthority: packet.generationContract.evidenceAuthority,
+    providerRetryScope: packet.generationContract.providerRetryScope,
     fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+    genericProseSubstitutionAllowed: packet.generationContract.genericProseSubstitutionAllowed,
+    missingEvidencePolicy: packet.generationContract.missingEvidencePolicy,
     directEvidence: packet.directEvidence.length,
     sifCases: packet.sifCases.length,
     supportingEvidence: packet.supportingEvidence.length,
