@@ -119,6 +119,22 @@ type SifEmbeddingGateStatusResponse = {
     status: "waiting" | "blocked" | "ready" | "done";
     detail: string;
   }[];
+  runtimeDbProbe: {
+    status: string;
+    message: string;
+    tableReady: boolean;
+    rpcReady: boolean;
+    checkedAt: string;
+  };
+  nextApprovalGate: {
+    id: "apply-sif-only-migration" | "prepare-runtime-env" | "approve-embedding-generation" | "approve-upload" | "enable-vector-search" | "disable-vector-flag" | "complete";
+    label: string;
+    status: "waiting" | "blocked" | "ready" | "done";
+    detail: string;
+    action: string;
+    artifactPath?: string;
+    command?: string;
+  };
   failedCheckIds: string[];
   nextApprovalDecisions: string[];
   artifacts: {
@@ -488,6 +504,20 @@ export function AiConnectPanel() {
               </div>
               <p>{sifGate.vectorGuard.message}</p>
             </div>
+            <div className={`ai-connect-sif-next-gate ${sifGate.nextApprovalGate.status}`}>
+              <div>
+                <span>Next approval</span>
+                <strong>{sifGate.nextApprovalGate.label}</strong>
+              </div>
+              <p>{sifGate.nextApprovalGate.detail}</p>
+              <small>{sifGate.nextApprovalGate.action}</small>
+              {sifGate.nextApprovalGate.artifactPath ? (
+                <code>{sifGate.nextApprovalGate.artifactPath}</code>
+              ) : null}
+              {sifGate.nextApprovalGate.command ? (
+                <pre>{sifGate.nextApprovalGate.command}</pre>
+              ) : null}
+            </div>
             <ol className="ai-connect-sif-approval-steps" aria-label="SIF 임베딩 승인 순서">
               {sifGate.approvalSteps.map((step) => (
                 <li key={step.id} className={step.status}>
@@ -520,6 +550,9 @@ export function AiConnectPanel() {
                 ))}
               </ul>
             </details>
+            <p className="muted">
+              Runtime DB probe: {sifGate.runtimeDbProbe.status} · table {sifGate.runtimeDbProbe.tableReady ? "ready" : "missing"} · RPC {sifGate.runtimeDbProbe.rpcReady ? "ready" : "missing"}
+            </p>
             <p className="muted">근거 파일: {sifGate.artifacts.reportPath} · {sifGate.artifacts.manifestPath}</p>
           </>
         ) : null}

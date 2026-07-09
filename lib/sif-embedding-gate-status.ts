@@ -1,5 +1,6 @@
 import reportJson from "@/evaluation/sif-embedding-gate/report.json";
 import preflightJson from "@/evaluation/sif-embedding-gate/approval-preflight-report.json";
+import runtimeProbeJson from "@/evaluation/sif-embedding-gate/runtime-db-probe.json";
 
 export type SifEmbeddingGateStatus = {
   ok: boolean;
@@ -62,6 +63,22 @@ export type SifEmbeddingGateStatus = {
     status: "waiting" | "blocked" | "ready" | "done";
     detail: string;
   }[];
+  runtimeDbProbe: {
+    status: string;
+    message: string;
+    tableReady: boolean;
+    rpcReady: boolean;
+    checkedAt: string;
+  };
+  nextApprovalGate: {
+    id: "apply-sif-only-migration" | "prepare-runtime-env" | "approve-embedding-generation" | "approve-upload" | "enable-vector-search" | "disable-vector-flag" | "complete";
+    label: string;
+    status: "waiting" | "blocked" | "ready" | "done";
+    detail: string;
+    action: string;
+    artifactPath?: string;
+    command?: string;
+  };
   failedCheckIds: string[];
   nextApprovalDecisions: string[];
   artifacts: {
@@ -119,6 +136,7 @@ function checkLabelFor(id: string) {
     upload_requires_explicit_approval_flag: "업로드 승인 플래그 필요",
     migration_contains_embedding_table_rpc_index: "migration에 table/RPC/index 포함",
     migration_keeps_embeddings_server_side: "임베딩은 서버 측에서만 조회",
+    migration_scope_is_sif_embedding_only: "SIF-only migration 범위 확인",
     vector_feature_flag_stays_off_until_upload_verified: "업로드 검증 전 vector flag 잠금"
   };
   return labels[id] || id;
@@ -184,9 +202,12 @@ function buildVectorGuard(
 
 function buildApprovalSteps(
   runtimeReady: boolean,
-  vectorGuard: SifEmbeddingGateStatus["vectorGuard"]
+  vectorGuard: SifEmbeddingGateStatus["vectorGuard"],
+  migrationPath: string,
+  tableReady: boolean,
+  rpcReady: boolean
 ): SifEmbeddingGateStatus["approvalSteps"] {
-  const migrationStatus = runtimeReady ? "waiting" : "blocked";
+  const migrationStatus = tableReady && rpcReady ? "done" : "waiting";
   const uploadStatus = vectorGuard.uploadVerified ? "done" : "blocked";
   const vectorStatus = vectorGuard.status === "active"
     ? "done"
@@ -198,15 +219,19 @@ function buildApprovalSteps(
   return [
     {
       id: "migration",
-      label: "1. DB migration 승인",
+      label: "1. SIF-only DB migration 승인",
       status: migrationStatus,
-      detail: runtimeReady ? "010 migration 또는 embedding-only migration을 승인 후 적용합니다." : "실행 환경 key를 확인한 뒤 migration 승인을 진행합니다."
+      detail: migrationStatus === "done"
+        ? "운영 DB에서 safety_reference_embeddings table과 match RPC를 확인했습니다."
+        : `${migrationPath} 적용 승인이 먼저 필요합니다. 임베딩 생성/업로드보다 앞선 단계입니다.`
     },
     {
       id: "embedding",
       label: "2. 임베딩 생성 승인",
-      status: "waiting",
-      detail: "비용이 발생하는 단계라 --approved-embedding flag 없이는 실행하지 않습니다."
+      status: tableReady && rpcReady && runtimeReady ? "waiting" : "blocked",
+      detail: tableReady && rpcReady
+        ? "비용이 발생하는 단계라 --approved-embedding flag 없이는 실행하지 않습니다."
+        : "DB migration 적용과 runtime key 확인 후 진행합니다."
     },
     {
       id: "upload",
@@ -221,6 +246,101 @@ function buildApprovalSteps(
       detail: vectorGuard.message
     }
   ];
+}
+
+function buildRuntimeDbProbeStatus(): SifEmbeddingGateStatus["runtimeDbProbe"] {
+  const probe = asRecord(runtimeProbeJson);
+  const table = asRecord(probe.safetyReferenceEmbeddings);
+  const rpc = asRecord(probe.matchRpc);
+  return {
+    status: readString(probe, "status", "unknown"),
+    message: readString(probe, "message", "SIF runtime DB probe 결과를 확인해야 합니다."),
+    tableReady: readBoolean(table, "ok"),
+    rpcReady: readBoolean(rpc, "ok"),
+    checkedAt: readString(probe, "generatedAt")
+  };
+}
+
+function buildNextApprovalGate(input: {
+  runtimeReady: boolean;
+  vectorGuard: SifEmbeddingGateStatus["vectorGuard"];
+  runtimeDbProbe: SifEmbeddingGateStatus["runtimeDbProbe"];
+  migrationPath: string;
+  embeddedCount: number;
+  uploadedCount: number;
+  corpusCount: number;
+  commandHeldUntilApproval: string;
+}): SifEmbeddingGateStatus["nextApprovalGate"] {
+  if (input.vectorGuard.status === "blocked") {
+    return {
+      id: "disable-vector-flag",
+      label: "Vector feature flag 끄기",
+      status: "blocked",
+      detail: "업로드 검증 전 SAFETY_REFERENCE_VECTOR_SEARCH=1이 켜져 있어 runtime vector 검색을 차단했습니다.",
+      action: "SAFETY_REFERENCE_VECTOR_SEARCH를 끄고 runtime probe를 다시 확인합니다."
+    };
+  }
+
+  if (!input.runtimeDbProbe.tableReady || !input.runtimeDbProbe.rpcReady) {
+    return {
+      id: "apply-sif-only-migration",
+      label: "SIF-only DB migration 승인",
+      status: "waiting",
+      detail: "운영 DB에 safety_reference_embeddings table 또는 match_safety_reference_embeddings RPC가 없어 업로드 전 migration 승인이 먼저 필요합니다.",
+      action: "SIF-only migration SQL을 승인 후 적용합니다.",
+      artifactPath: input.migrationPath
+    };
+  }
+
+  if (!input.runtimeReady) {
+    return {
+      id: "prepare-runtime-env",
+      label: "임베딩 실행 환경 확인",
+      status: "blocked",
+      detail: "DB runtime 표면은 준비됐지만 OpenAI key 또는 Supabase service role 확인이 필요합니다.",
+      action: "OPENAI_API_KEY, Supabase URL, service role을 확인한 뒤 임베딩 생성 승인을 진행합니다."
+    };
+  }
+
+  if (input.embeddedCount === 0) {
+    return {
+      id: "approve-embedding-generation",
+      label: "임베딩 생성 비용 승인",
+      status: "waiting",
+      detail: "코퍼스와 DB runtime 표면이 준비됐습니다. 비용 발생 단계이므로 명시 승인 후에만 실행합니다.",
+      action: "임베딩 생성과 업로드 명령을 승인합니다.",
+      command: input.commandHeldUntilApproval
+    };
+  }
+
+  if (input.uploadedCount < input.corpusCount) {
+    return {
+      id: "approve-upload",
+      label: "임베딩 업로드 승인",
+      status: "waiting",
+      detail: "임베딩 벡터가 생성됐지만 DB row count 검증이 끝나지 않았습니다.",
+      action: "업로드 승인 플래그로 DB upsert 후 row count를 검증합니다.",
+      command: input.commandHeldUntilApproval
+    };
+  }
+
+  if (input.vectorGuard.status === "ready") {
+    return {
+      id: "enable-vector-search",
+      label: "Vector 검색 활성 승인",
+      status: "ready",
+      detail: "업로드 수량 검증이 끝났습니다. RPC smoke test 후 feature flag를 켤 수 있습니다.",
+      action: "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화 전 smoke test를 실행합니다."
+    };
+  }
+
+  return {
+    id: "complete",
+    label: "SIF vector gate 완료",
+    status: "done",
+    detail: "SIF vector retrieval 승인 게이트가 완료된 상태입니다.",
+    action: "운영 모니터링과 품질 검수를 유지합니다."
+  };
 }
 
 export function getSifEmbeddingGateStatus(
@@ -250,6 +370,7 @@ export function getSifEmbeddingGateStatus(
   const vectorFeatureFlagEnabled = env.SAFETY_REFERENCE_VECTOR_SEARCH === "1";
   const vectorGuard = buildVectorGuard(vectorFeatureFlagEnabled, uploadedCount, readNumber(report, "corpusCount"));
   const runtimeExecutionReadyAfterApproval = openaiApiKeyPresent && supabaseUrlPresent && supabaseServiceRolePresent;
+  const runtimeDbProbe = buildRuntimeDbProbeStatus();
   const preflightChecks = readRecordArray(preflight, "checks").map((check) => {
     const id = readString(check, "id", "unknown_check");
     return {
@@ -311,7 +432,28 @@ export function getSifEmbeddingGateStatus(
     },
     vectorGuard,
     preflightChecks,
-    approvalSteps: buildApprovalSteps(runtimeExecutionReadyAfterApproval, vectorGuard),
+    approvalSteps: buildApprovalSteps(
+      runtimeExecutionReadyAfterApproval,
+      vectorGuard,
+      readString(preflight, "migrationPath", "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"),
+      runtimeDbProbe.tableReady,
+      runtimeDbProbe.rpcReady
+    ),
+    runtimeDbProbe,
+    nextApprovalGate: buildNextApprovalGate({
+      runtimeReady: runtimeExecutionReadyAfterApproval,
+      vectorGuard,
+      runtimeDbProbe,
+      migrationPath: readString(preflight, "migrationPath", "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"),
+      embeddedCount,
+      uploadedCount,
+      corpusCount: readNumber(report, "corpusCount"),
+      commandHeldUntilApproval: readString(
+        preflight,
+        "commandHeldUntilApproval",
+        "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload"
+      )
+    }),
     failedCheckIds,
     nextApprovalDecisions: readStringArray(preflight, "nextApprovalDecisions"),
     artifacts: {

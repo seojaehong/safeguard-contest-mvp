@@ -39,7 +39,24 @@ describe("SIF embedding gate status", () => {
       uploadedCount: 0,
       requiredUploadCount: 6032
     });
+    expect(status.runtimeDbProbe).toMatchObject({
+      status: "migration-required",
+      tableReady: false,
+      rpcReady: false
+    });
+    expect(status.nextApprovalGate).toMatchObject({
+      id: "apply-sif-only-migration",
+      label: "SIF-only DB migration 승인",
+      status: "waiting",
+      artifactPath: "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
+    });
+    expect(status.nextApprovalGate.detail).toContain("업로드 전 migration 승인");
     expect(status.approvalSteps.map((step) => step.id)).toEqual(["migration", "embedding", "upload", "vector"]);
+    expect(status.approvalSteps[0]).toMatchObject({
+      id: "migration",
+      status: "waiting"
+    });
+    expect(status.approvalSteps[0].detail).toContain("sif-embedding-only-migration.sql");
     expect(status.preflightChecks.some((check) => check.id === "vector_feature_flag_stays_off_until_upload_verified" && check.passed)).toBe(true);
     expect(status.failedCheckIds).toEqual([]);
     expect(status.commandHeldUntilApproval).toBe("npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload");
@@ -68,6 +85,10 @@ describe("SIF embedding gate status", () => {
       status: "blocked",
       flagEnabled: true,
       uploadVerified: false
+    });
+    expect(readyRuntime.nextApprovalGate).toMatchObject({
+      id: "disable-vector-flag",
+      status: "blocked"
     });
     expect(readyRuntime.message).toContain("SAFETY_REFERENCE_VECTOR_SEARCH=1");
   });
