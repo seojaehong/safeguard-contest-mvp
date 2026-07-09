@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { buildStoredCurrentWorkpack } from "@/lib/current-workpack";
-import { parseOperationImprovements } from "@/lib/operation-improvement-history";
+import {
+  operationImprovementToHarnessImprovement,
+  parseOperationImprovements
+} from "@/lib/operation-improvement-history";
 import {
   buildReportCsv,
   buildReportLearningJsonl,
@@ -79,7 +82,14 @@ const improvements: OperationImprovement[] = [
     reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
     beforePhotoName: "before-scaffold.jpg",
     afterPhotoName: "after-guardrail.jpg",
-    photoAnalysisSummary: "Before/After 사진 비교 후보"
+    photoAnalysisSummary: "Before/After 사진 비교 후보",
+    sourceType: "photo_analysis",
+    visionProvider: "openai",
+    visionModel: "gpt-4.1-mini",
+    sourcePhotoNames: ["before-scaffold.jpg", "after-guardrail.jpg"],
+    photoCount: 2,
+    siteSignals: ["비계", "단부"],
+    visionEvidence: "after-guardrail.jpg에서 난간 보강 확인"
   },
   {
     id: "imp-old",
@@ -198,5 +208,21 @@ describe("reporting downloads", () => {
 
     expect(parsed).toHaveLength(1);
     expect(parsed[0]?.id).toBe("imp-1");
+  });
+
+  it("keeps local before/after vision evidence when converted to harness memory", () => {
+    const parsed = parseOperationImprovements(JSON.stringify([improvements[0]]));
+    const memory = operationImprovementToHarnessImprovement(parsed[0]);
+
+    expect(memory).toMatchObject({
+      sourceType: "photo_analysis",
+      visionProvider: "openai",
+      visionModel: "gpt-4.1-mini",
+      sourcePhotoNames: ["before-scaffold.jpg", "after-guardrail.jpg"],
+      photoCount: 2,
+      siteSignals: ["비계", "단부"],
+      visionEvidence: "after-guardrail.jpg에서 난간 보강 확인"
+    });
+    expect(memory.visionSummary).toContain("Before/After 사진 비교 후보");
   });
 });

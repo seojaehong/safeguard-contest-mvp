@@ -209,7 +209,8 @@ describe("photo vision analysis contract", () => {
       candidateText: "작업발판 외측 난간 보강",
       reflectedDocuments: ["위험성평가표", "TBM 기록"],
       hasBeforePhoto: true,
-      hasAfterPhoto: true
+      hasAfterPhoto: true,
+      sourcePhotoNames: ["before-scaffold.jpg", "after-guardrail.jpg"]
     });
 
     expect(payload).toMatchObject({
@@ -217,7 +218,10 @@ describe("photo vision analysis contract", () => {
       analysisMode: "vision_ocr",
       photoPairAttached: true,
       userLabel: "vision/OCR 분석 완료",
-      exportable: true
+      exportable: true,
+      sourcePhotoNames: ["before-scaffold.jpg", "after-guardrail.jpg"],
+      photoCount: 2,
+      visionEvidence: "after 사진에서 난간과 통제선이 보입니다."
     });
   });
 
@@ -237,12 +241,15 @@ describe("photo vision analysis contract", () => {
       candidateText: "Before/After 사진 비교 후보",
       reflectedDocuments: ["위험성평가표"],
       hasBeforePhoto: true,
-      hasAfterPhoto: true
+      hasAfterPhoto: true,
+      sourcePhotoNames: ["before.jpg", "after.jpg"]
     });
 
     expect(payload.analysisMode).toBe("photo_pair_unanalyzed");
     expect(payload.photoPairAttached).toBe(true);
     expect(payload.userLabel).toBe("사진쌍 저장 · vision/OCR 보류");
+    expect(payload.sourcePhotoNames).toEqual(["before.jpg", "after.jpg"]);
+    expect(payload.photoCount).toBe(2);
     expect(payload.errorMessage).toContain("OPENAI_API_KEY");
   });
 });

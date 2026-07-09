@@ -254,7 +254,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     candidateText: draft.improvement_text,
     reflectedDocuments: draft.reflected_documents,
     hasBeforePhoto: Boolean(body.beforePhoto),
-    hasAfterPhoto: Boolean(body.afterPhoto)
+    hasAfterPhoto: Boolean(body.afterPhoto),
+    sourcePhotoNames: [body.beforePhoto?.name || "", body.afterPhoto?.name || ""]
   });
 
   const insert: WorkspaceDatabase["public"]["Tables"]["workpack_improvements"]["Insert"] = {
@@ -344,6 +345,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
       observedImprovement: vision.observedImprovement,
       detectedHazards: vision.detectedHazards,
       ocrText: vision.ocrText,
+      sourcePhotoNames: analysisPayload.sourcePhotoNames,
+      photoCount: analysisPayload.photoCount,
+      siteSignals: analysisPayload.siteSignals,
+      visionEvidence: analysisPayload.visionEvidence,
       reflectedDocuments: draft.reflected_documents,
       errorMessage: vision.errorMessage || undefined,
       photoPairAttached: analysisPayload.photoPairAttached,

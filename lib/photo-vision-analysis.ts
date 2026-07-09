@@ -28,6 +28,10 @@ export type ImprovementAnalysisPayload = {
   observedImprovement: string;
   ocrText: string;
   reflectedDocuments: string[];
+  sourcePhotoNames: string[];
+  photoCount: number;
+  siteSignals: string[];
+  visionEvidence: string;
   errorMessage: string | null;
   photoPairAttached: boolean;
   analysisMode: ImprovementAnalysisMode;
@@ -338,8 +342,14 @@ export function buildImprovementAnalysisPayload(input: {
   reflectedDocuments: string[];
   hasBeforePhoto: boolean;
   hasAfterPhoto: boolean;
+  sourcePhotoNames?: string[];
+  siteSignals?: string[];
 }): ImprovementAnalysisPayload {
   const photoPairAttached = input.hasBeforePhoto && input.hasAfterPhoto;
+  const sourcePhotoNames = (input.sourcePhotoNames || []).map((name) => name.trim()).filter(Boolean).slice(0, 10);
+  const inferredPhotoCount = [input.hasBeforePhoto, input.hasAfterPhoto].filter(Boolean).length;
+  const photoCount = sourcePhotoNames.length || inferredPhotoCount;
+  const siteSignals = (input.siteSignals || []).map((signal) => signal.trim()).filter(Boolean).slice(0, 12);
   const analysisMode = resolveAnalysisMode({
     visionStatus: input.vision.status,
     hasBeforePhoto: input.hasBeforePhoto,
@@ -356,6 +366,10 @@ export function buildImprovementAnalysisPayload(input: {
     observedImprovement: input.vision.observedImprovement,
     ocrText: input.vision.ocrText,
     reflectedDocuments: input.reflectedDocuments,
+    sourcePhotoNames,
+    photoCount,
+    siteSignals,
+    visionEvidence: input.vision.summary || input.vision.observedImprovement,
     errorMessage: input.vision.errorMessage || null,
     photoPairAttached,
     analysisMode,
