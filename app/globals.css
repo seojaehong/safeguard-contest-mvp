@@ -16346,7 +16346,8 @@ body:has(.safeclaw-landing) :is(
 }
 
 /* Submission guard: keep /workspace geometry stable across browser zoom,
-   short presentation screens, and cached theme variants. */
+   short presentation screens, and cached theme variants. Korean bold glyphs
+   need extra textarea line-box room on compressed presentation viewports. */
 .command-center-shell.workspace-theme-day,
 .command-center-shell.workspace-theme-night {
   overflow-x: clip;
@@ -16427,29 +16428,51 @@ body:has(.safeclaw-landing) :is(
 }
 
 @media (min-width: 901px) and (max-height: 560px) {
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    padding-bottom: 20px !important;
+  }
+
   .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
-    min-height: 118px;
-    padding: 16px 18px !important;
-    line-height: 1.68 !important;
+    min-height: 124px;
+    padding: 18px !important;
+    line-height: 1.74 !important;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .input-composer-tray,
+  .command-center-shell.workspace-theme-night .workspace-input-page .input-composer-tray {
+    margin-top: 4px !important;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 430px) {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+    font-size: 14px !important;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .input-composer-tray,
+  .command-center-shell.workspace-theme-night .workspace-input-page .input-composer-tray {
+    margin-top: 8px !important;
   }
 }
 
 @media (min-width: 901px) and (max-height: 380px) {
   .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
-    min-height: 108px;
-    padding: 12px 15px !important;
-    line-height: 1.62 !important;
+    min-height: 116px;
+    padding: 14px 15px !important;
+    line-height: 1.7 !important;
   }
 }
 
 @media (min-width: 901px) and (max-height: 340px) {
   .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
-    min-height: 94px;
-    padding: 11px 12px !important;
-    line-height: 1.58 !important;
+    min-height: 108px;
+    padding: 14px 12px !important;
+    line-height: 1.7 !important;
   }
 }
 
