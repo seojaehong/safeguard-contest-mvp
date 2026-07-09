@@ -17,7 +17,8 @@ import {
   buildAcceptedHazardPhotoHarnessImprovements,
   buildHazardPhotoCandidateKey,
   buildHazardPhotoCandidates,
-  buildPhotoAnalysisCandidate as buildPhotoAnalysisCandidateText
+  buildPhotoAnalysisCandidate as buildPhotoAnalysisCandidateText,
+  MAX_INPUT_HAZARD_PHOTO_FILES
 } from "@/lib/operation-improvements";
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
@@ -154,8 +155,6 @@ type ImprovementApiResult = {
   };
   message: string;
 };
-
-const MAX_INPUT_HAZARD_PHOTOS = 10;
 
 const workflowSteps: WorkflowStep[] = [
   { id: "01", key: "input", label: "입력", caption: "현장 상황" },
@@ -990,8 +989,8 @@ export function SafeGuardCommandCenter({
     const incoming = Array.from(fileList || []);
     if (!incoming.length) return;
     const currentPhotos = inputHazardPhotosRef.current;
-    const remaining = Math.max(0, MAX_INPUT_HAZARD_PHOTOS - currentPhotos.length);
-    const nextPhotos = incoming.slice(0, MAX_INPUT_HAZARD_PHOTOS).map((file) => ({
+    const remaining = Math.max(0, MAX_INPUT_HAZARD_PHOTO_FILES - currentPhotos.length);
+    const nextPhotos = incoming.slice(0, MAX_INPUT_HAZARD_PHOTO_FILES).map((file) => ({
       name: file.name,
       url: URL.createObjectURL(file),
       file
@@ -999,7 +998,7 @@ export function SafeGuardCommandCenter({
     const accepted = nextPhotos.slice(0, remaining);
     nextPhotos.slice(remaining).forEach((photo) => URL.revokeObjectURL(photo.url));
     if (!accepted.length) {
-      setMessage(`현장 사진은 최대 ${MAX_INPUT_HAZARD_PHOTOS}장까지 첨부할 수 있습니다.`);
+      setMessage(`현장 사진은 최대 ${MAX_INPUT_HAZARD_PHOTO_FILES}장까지 첨부할 수 있습니다.`);
       return;
     }
     const nextAllPhotos = [...currentPhotos, ...accepted];
@@ -1647,7 +1646,7 @@ export function SafeGuardCommandCenter({
               aria-describedby="field-command-tips"
             />
             <p className="input-helper" id="field-command-tips">
-              작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 첨부하세요.
+              작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 최대 {MAX_INPUT_HAZARD_PHOTO_FILES}장 첨부하세요.
             </p>
             <div className="input-composer-tray" aria-label="현장 입력 첨부">
               <label className="composer-attach-button" aria-label="현장 사진 첨부">
@@ -1665,11 +1664,11 @@ export function SafeGuardCommandCenter({
                 <b>사진</b>
               </label>
               <div className="composer-attachment-status">
-                <strong>{inputHazardPhotos.length ? `${inputHazardPhotos.length}/${MAX_INPUT_HAZARD_PHOTOS}장 첨부` : "사진·파일 첨부"}</strong>
+                <strong>{inputHazardPhotos.length ? `${inputHazardPhotos.length}/${MAX_INPUT_HAZARD_PHOTO_FILES}장 첨부` : `사진 첨부 최대 ${MAX_INPUT_HAZARD_PHOTO_FILES}장`}</strong>
                 <small>
                   {inputHazardPhotoAnalysis.status === "analyzing"
                     ? "사진에서 위험요인과 OCR 신호를 찾고 있습니다."
-                    : inputHazardPhotoAnalysis.message || "첨부하면 위험요인 후보를 자동 분석합니다."}
+                    : inputHazardPhotoAnalysis.message || "첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다."}
                 </small>
               </div>
               {inputHazardPhotos.length ? (

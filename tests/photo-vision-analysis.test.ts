@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { MAX_INPUT_HAZARD_PHOTO_FILES } from "@/lib/operation-improvements";
 import {
   MAX_HAZARD_PHOTO_FILES,
   buildImprovementAnalysisPayload,
@@ -28,6 +29,7 @@ describe("photo vision analysis contract", () => {
       photoNames: ["workface.jpg", "scaffold.jpg"]
     });
 
+    expect(MAX_HAZARD_PHOTO_FILES).toBe(MAX_INPUT_HAZARD_PHOTO_FILES);
     expect(MAX_HAZARD_PHOTO_FILES).toBe(10);
     expect(prompt).toContain("현장 사진들을 서로 비교");
     expect(prompt).toContain("사진 파일명(2장): workface.jpg, scaffold.jpg");

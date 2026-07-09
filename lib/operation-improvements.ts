@@ -1,5 +1,7 @@
 import type { HarnessImprovement } from "@/lib/db-harness";
 
+export const MAX_INPUT_HAZARD_PHOTO_FILES = 10;
+
 export type ImprovementPhoto = {
   name: string;
 };

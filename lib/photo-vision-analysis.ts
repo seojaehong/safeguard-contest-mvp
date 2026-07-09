@@ -1,5 +1,6 @@
 import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
 import { createLogger } from "@/lib/logger";
+import { MAX_INPUT_HAZARD_PHOTO_FILES } from "@/lib/operation-improvements";
 
 const log = createLogger("photo-vision");
 
@@ -52,7 +53,7 @@ type ResponsesApiResponse = {
 
 const DEFAULT_MODEL = "gpt-4.1-mini";
 const VISION_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_VISION_TIMEOUT_MS, 20_000);
-export const MAX_HAZARD_PHOTO_FILES = 10;
+export const MAX_HAZARD_PHOTO_FILES = MAX_INPUT_HAZARD_PHOTO_FILES;
 
 export type HazardPhotoSeverity = "high" | "medium" | "low" | "review";
 
