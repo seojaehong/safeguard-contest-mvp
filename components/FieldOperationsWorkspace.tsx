@@ -13,6 +13,7 @@ import {
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
+import type { WorkpackReadiness } from "@/lib/workpack-readiness";
 import {
   buildDefaultWorkers,
   buildEducationRecordDrafts,
@@ -671,11 +672,13 @@ function WorkpackHistoryPanel({
 export function FieldOperationsWorkspace({
   data,
   editorFocusToken = 0,
-  requestedDocumentKey
+  requestedDocumentKey,
+  readiness
 }: {
   data: AskResponse;
   editorFocusToken?: number;
   requestedDocumentKey?: DocumentKey;
+  readiness?: WorkpackReadiness;
 }) {
   const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -942,6 +945,7 @@ export function FieldOperationsWorkspace({
           authToken={session?.access_token}
           workpackId={savedWorkpackId}
           ensureWorkpackSaved={ensureWorkpackSaved}
+          readiness={readiness}
         />
         <WorkpackHistoryPanel
           session={session}

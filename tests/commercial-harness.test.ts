@@ -9,7 +9,8 @@ import {
   hasDocumentCoverage,
   parseHarnessMemoryInput
 } from "@/lib/db-harness";
-import { runAsk } from "@/lib/search";
+import { buildMockAskResponse } from "@/lib/mock-data";
+import { attachDbHarnessFallback, runAsk } from "@/lib/search";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
@@ -368,8 +369,69 @@ describe("runAsk DB harness mode", () => {
     expect(response.dbHarness?.summary.improvementMemory).toBe(1);
     expect(response.answer).toContain("하네스 판단");
     expect(response.answer).toContain("작업 전 난간 보강 사진 확인");
+    expect(response.deliverables.riskAssessmentDraft).toContain("작업 전 난간 보강 사진 확인");
+    expect(response.deliverables.tbmBriefing).toContain("작업 전 난간 보강 사진 확인");
+    expect(response.deliverables.tbmLogDraft).toContain("작업 전 난간 보강 사진 확인");
+    expect(response.deliverables.photoEvidenceDraft).toContain("Before/After 사진 첨부");
     expect(response.answer).not.toMatch(/fallback|OPENAI_API_KEY|timeout/i);
     expect(response.practicalPoints).toContain("문서 반영 전 확인: 작업 전 난간 보강 사진 확인");
+    expect(response.qualityContract?.dbHarness.status).toBe("blocked");
+  });
+
+  it("wraps provider fallback output with the DB harness contract before returning it", () => {
+    const question = "성수동 외벽 도장 작업";
+    const response = attachDbHarnessFallback(
+      buildMockAskResponse(
+        question,
+        [],
+        "fallback",
+        "외부 생성 실패"
+      ),
+      {
+        question,
+        harnessMemory: {
+          improvements: [{
+            id: "imp-fallback-1",
+            taskLabel: "성수동 외벽 도장",
+            hazardLabel: "추락",
+            improvementText: "비계 난간 보강 전후 사진을 TBM에 반영",
+            reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+            sourceType: "photo_analysis",
+            visionStatus: "analyzed",
+            analysisMode: "vision_ocr",
+            photoPairAttached: true,
+            visionUserLabel: "사진 2장 분석 완료",
+            visionSummary: "상부 난간 보강과 하부 통제선 설치가 확인됩니다.",
+            detectedHazards: ["추락", "하부 낙하물"],
+            observedImprovement: "상부 난간 추가 설치",
+            ocrText: "추락주의",
+            sourcePhotoNames: ["before.jpg", "after.jpg"],
+            siteSignals: ["외벽", "이동식 비계"],
+            visionEvidence: "after 사진에서 중간난간과 끝막이판이 식별됨"
+          }],
+          workpackMemory: []
+        }
+      }
+    );
+
+    expect(response.mode).toBe("fallback");
+    expect(response.dbHarness?.packet.mode).toBe("db_harness_first");
+    expect(response.dbHarness?.summary.llmRole).toBe("naturalize_only");
+    expect(response.dbHarness?.summary.fallbackChainAllowed).toBe(false);
+    expect(response.dbHarness?.summary.genericProseSubstitutionAllowed).toBe(false);
+    expect(response.dbHarness?.summary.improvementMemory).toBe(1);
+    expect(response.answer).toContain("하네스 판단");
+    expect(response.answer).toContain("비계 난간 보강 전후 사진을 TBM에 반영");
+    expect(response.deliverables.riskAssessmentDraft).toContain("비계 난간 보강 전후 사진을 TBM에 반영");
+    expect(response.deliverables.tbmBriefing).toContain("비계 난간 보강 전후 사진을 TBM에 반영");
+    expect(response.deliverables.tbmLogDraft).toContain("비계 난간 보강 전후 사진을 TBM에 반영");
+    expect(response.deliverables.photoEvidenceDraft).toContain("Before/After 사진 첨부");
+    expect(response.deliverables.photoEvidenceDraft).toContain("before.jpg, after.jpg");
+    expect(response.deliverables.photoEvidenceDraft).toContain("추락주의");
+    expect(response.deliverables.photoEvidenceDraft).toContain("after 사진에서 중간난간과 끝막이판이 식별됨");
+    expect(response.deliverables.riskAssessmentDraft).toContain("추락, 하부 낙하물");
+    expect(response.answer).not.toContain("외부 생성 실패");
+    expect(response.status.detail).toContain("DB 하네스 계약");
     expect(response.qualityContract?.dbHarness.status).toBe("blocked");
   });
 });
