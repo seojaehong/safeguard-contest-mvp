@@ -16299,3 +16299,111 @@ body:has(.safeclaw-landing) :is(
     justify-content: flex-start;
   }
 }
+
+/* Submission guard: keep /workspace geometry stable across browser zoom,
+   short presentation screens, and cached theme variants. */
+.command-center-shell.workspace-theme-day,
+.command-center-shell.workspace-theme-night {
+  overflow-x: clip;
+}
+
+.command-center-shell > .command-topbar,
+.command-center-shell > .command-viewport,
+.command-center-shell .workspace-command-topbar,
+.command-center-shell .linear-workspace-layout,
+.command-center-shell .linear-workspace-layout .command-main,
+.command-center-shell .linear-workspace-layout .workspace-step-page,
+.command-center-shell .workspace-input-page .command-console-input {
+  box-sizing: border-box;
+}
+
+@media (min-width: 901px) {
+  .command-center-shell.workspace-theme-day > .command-topbar,
+  .command-center-shell.workspace-theme-day > .command-viewport,
+  .command-center-shell.workspace-theme-night > .command-topbar,
+  .command-center-shell.workspace-theme-night > .command-viewport {
+    width: min(1360px, calc(100vw - 32px)) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+  }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout {
+    display: grid !important;
+    grid-template-columns: minmax(220px, 264px) minmax(0, 1fr) !important;
+    column-gap: 16px !important;
+    align-items: start !important;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-nav,
+  .command-center-shell.workspace-theme-night .workspace-side-nav {
+    min-width: 0 !important;
+    max-width: 264px;
+    overflow-x: hidden !important;
+  }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .command-main,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .command-main {
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    position: relative !important;
+    display: grid !important;
+    align-content: start !important;
+    isolation: isolate;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-copy,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console {
+    position: relative !important;
+    transform: none !important;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-copy h1 {
+    overflow: visible !important;
+    line-height: 1.14 !important;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+    display: block !important;
+    min-height: 152px;
+    padding: 22px 24px !important;
+    overflow-y: auto !important;
+    line-height: 1.76 !important;
+    resize: vertical;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 560px) {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+    min-height: 118px;
+    padding: 16px 18px !important;
+    line-height: 1.68 !important;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 380px) {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+    min-height: 108px;
+    padding: 12px 15px !important;
+    line-height: 1.62 !important;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 340px) {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+    min-height: 94px;
+    padding: 11px 12px !important;
+    line-height: 1.58 !important;
+  }
+}
