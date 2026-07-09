@@ -9705,6 +9705,28 @@ body:has(.safeclaw-landing) :is(
   background-size: auto, 28px 28px, 28px 28px, auto;
 }
 
+.operation-memory-stats {
+  position: absolute;
+  z-index: 4;
+  top: 14px;
+  left: 14px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.operation-memory-stats span {
+  border: 1px solid rgba(246, 245, 239, 0.12);
+  background: rgba(8, 8, 8, 0.58);
+  color: rgba(246, 245, 239, 0.62);
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 5px 8px;
+  text-transform: uppercase;
+}
+
 .operation-memory-board svg {
   position: absolute;
   inset: 0;
@@ -9727,6 +9749,7 @@ body:has(.safeclaw-landing) :is(
   fill: rgba(246, 245, 239, 0.74);
   stroke: rgba(8, 8, 8, 0.92);
   stroke-width: 0.7;
+  transition: stroke 140ms ease, stroke-width 140ms ease;
 }
 
 .operation-memory-svg-node.kind-Workpack { fill: #ffdc2e; }
@@ -9735,6 +9758,11 @@ body:has(.safeclaw-landing) :is(
 .operation-memory-svg-node.kind-Control { fill: #62d68b; }
 .operation-memory-svg-node.kind-Improvement { fill: #d7bcff; }
 .operation-memory-svg-node.kind-Ack { fill: #f6f5ef; }
+
+.operation-memory-svg-node.is-active {
+  stroke: rgba(255, 220, 46, 0.96);
+  stroke-width: 1.35;
+}
 
 .operation-memory-node-layer {
   position: absolute;
@@ -9757,7 +9785,8 @@ body:has(.safeclaw-landing) :is(
 }
 
 .operation-memory-point:hover,
-.operation-memory-point:focus {
+.operation-memory-point:focus,
+.operation-memory-point.is-active {
   z-index: 8;
   border-color: rgba(255, 220, 46, 0.52);
   background: rgba(22, 22, 20, 0.95);
@@ -9766,12 +9795,15 @@ body:has(.safeclaw-landing) :is(
 }
 
 .operation-memory-point > span,
-.operation-memory-list article > div span,
+.operation-memory-list-item span,
+.operation-memory-detail > span,
 .operation-memory-inline-card > span,
 .operation-memory-popover > span,
 .operation-memory-popover li b,
+.operation-memory-detail li b,
 .operation-memory-inline-card li b,
-.operation-memory-popover dt {
+.operation-memory-popover dt,
+.operation-memory-detail dt {
   color: var(--os-yellow);
   font-family: var(--font-hud);
   font-size: 10px;
@@ -9825,6 +9857,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .operation-memory-popover p,
+.operation-memory-detail p,
 .operation-memory-inline-card p {
   margin: 0;
   color: rgba(246, 245, 239, 0.66);
@@ -9839,13 +9872,15 @@ body:has(.safeclaw-landing) :is(
   margin: 0;
 }
 
-.operation-memory-popover dl div {
+.operation-memory-popover dl div,
+.operation-memory-detail dl div {
   display: grid;
   grid-template-columns: 96px minmax(0, 1fr);
   gap: 10px;
 }
 
-.operation-memory-popover dd {
+.operation-memory-popover dd,
+.operation-memory-detail dd {
   min-width: 0;
   margin: 0;
   color: var(--os-panel-text);
@@ -9855,6 +9890,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .operation-memory-popover ul,
+.operation-memory-detail ul,
 .operation-memory-inline-card ul {
   display: grid;
   gap: 7px;
@@ -9864,6 +9900,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .operation-memory-popover li,
+.operation-memory-detail li,
 .operation-memory-inline-card li {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr);
@@ -9873,6 +9910,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .operation-memory-popover li span,
+.operation-memory-detail li span,
 .operation-memory-inline-card li span {
   color: var(--os-panel-text);
   font-family: var(--font-base);
@@ -9882,37 +9920,78 @@ body:has(.safeclaw-landing) :is(
   text-transform: none;
 }
 
+.operation-memory-side {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+}
+
+.operation-memory-detail {
+  display: grid;
+  gap: 10px;
+  min-height: 186px;
+  border: 1px solid rgba(255, 220, 46, 0.22);
+  background:
+    linear-gradient(145deg, rgba(255, 220, 46, 0.06), transparent 38%),
+    rgba(12, 12, 12, 0.82);
+  color: var(--os-panel-text);
+  padding: 16px;
+}
+
+.operation-memory-detail > strong {
+  color: var(--os-panel-text);
+  font-size: 18px;
+  font-weight: 880;
+  letter-spacing: -0.01em;
+  line-height: 1.34;
+}
+
+.operation-memory-detail dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
 .operation-memory-list {
   display: grid;
-  gap: 1px;
-  max-height: 430px;
+  align-content: start;
+  gap: 6px;
+  max-height: 232px;
   overflow: auto;
   border: 1px solid rgba(246, 245, 239, 0.12);
-  background: rgba(246, 245, 239, 0.08);
+  background: rgba(246, 245, 239, 0.05);
+  padding: 8px;
 }
 
-.operation-memory-list article {
+.operation-memory-list-item {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(220px, 1.1fr);
-  gap: 12px;
-  background: rgba(10, 10, 10, 0.82);
-  padding: 13px 14px;
-}
-
-.operation-memory-list article > div {
-  display: grid;
-  align-content: start;
   gap: 5px;
+  width: 100%;
+  border: 1px solid rgba(246, 245, 239, 0.08);
+  background: rgba(10, 10, 10, 0.54);
+  color: var(--os-panel-text);
+  padding: 11px 12px;
+  text-align: left;
+  transition: border-color 140ms ease, background 140ms ease;
 }
 
-.operation-memory-list article > div strong {
+.operation-memory-list-item:hover,
+.operation-memory-list-item:focus,
+.operation-memory-list-item.is-active {
+  border-color: rgba(255, 220, 46, 0.32);
+  background: rgba(255, 220, 46, 0.07);
+  outline: none;
+}
+
+.operation-memory-list-item strong {
   color: var(--os-panel-text);
   font-size: 14px;
   font-weight: 820;
   line-height: 1.38;
 }
 
-.operation-memory-list article > div small {
+.operation-memory-list-item small {
   color: rgba(246, 245, 239, 0.48);
   font-size: 12px;
   font-weight: 700;
@@ -10152,11 +10231,15 @@ body:has(.safeclaw-landing) :is(
 .ontology-list-column {
   display: grid;
   gap: 14px;
+  min-height: 0;
 }
 
 .ontology-node-list {
   display: grid;
+  align-content: start;
   gap: 1px;
+  max-height: 640px;
+  overflow: auto;
   border: 1px solid rgba(246, 245, 239, 0.12);
   background: rgba(246, 245, 239, 0.08);
 }
@@ -10305,9 +10388,13 @@ body:has(.safeclaw-landing) :is(
     min-height: 520px;
   }
 
+  .ontology-node-list {
+    max-height: 520px;
+  }
+
   .operation-memory-copy,
   .operation-memory-grid,
-  .operation-memory-list article {
+  .operation-memory-side {
     grid-template-columns: 1fr;
   }
 
@@ -10317,6 +10404,14 @@ body:has(.safeclaw-landing) :is(
 
   .operation-memory-board {
     min-height: 520px;
+  }
+
+  .operation-memory-side {
+    grid-template-rows: auto auto;
+  }
+
+  .operation-memory-list {
+    max-height: none;
   }
 
   .operation-memory-point {
