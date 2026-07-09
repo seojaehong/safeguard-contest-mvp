@@ -17,6 +17,10 @@ export type HarnessImprovement = {
   detectedHazards?: string[];
   observedImprovement?: string;
   ocrText?: string;
+  sourcePhotoNames?: string[];
+  photoCount?: number;
+  siteSignals?: string[];
+  visionEvidence?: string;
   visionErrorMessage?: string;
 };
 
@@ -157,6 +161,10 @@ function readStringArray(value: unknown): string[] {
     : [];
 }
 
+function readPositiveNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
 function normalizeSourceType(value: unknown): HarnessImprovement["sourceType"] {
   if (value === "photo_analysis" || value === "operator_note" || value === "manual") return value;
   return "manual";
@@ -196,6 +204,10 @@ function parseHarnessImprovement(value: unknown): HarnessImprovement | null {
     detectedHazards: readStringArray(value.detectedHazards).slice(0, 10),
     observedImprovement: readString(value.observedImprovement) || undefined,
     ocrText: readString(value.ocrText) || undefined,
+    sourcePhotoNames: readStringArray(value.sourcePhotoNames).slice(0, 10),
+    photoCount: readPositiveNumber(value.photoCount),
+    siteSignals: readStringArray(value.siteSignals).slice(0, 12),
+    visionEvidence: readString(value.visionEvidence) || undefined,
     visionErrorMessage: readString(value.visionErrorMessage) || undefined
   };
 }
@@ -240,7 +252,11 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
       item.visionSummary ? `vision: ${item.visionSummary}` : "",
       item.detectedHazards?.length ? `detected: ${item.detectedHazards.join(", ")}` : "",
       item.observedImprovement ? `observed: ${item.observedImprovement}` : "",
-      item.ocrText ? `ocr: ${item.ocrText}` : ""
+      item.ocrText ? `ocr: ${item.ocrText}` : "",
+      item.sourcePhotoNames?.length ? `photos: ${item.sourcePhotoNames.join(", ")}` : "",
+      item.photoCount ? `photoCount: ${item.photoCount}` : "",
+      item.siteSignals?.length ? `siteSignals: ${item.siteSignals.join(", ")}` : "",
+      item.visionEvidence ? `photoEvidence: ${item.visionEvidence}` : ""
     ].filter(Boolean).join(" | ")),
     ...packet.workpackMemory.map((item) => `작업이력: ${item.generatedAt} · ${item.question} · ${item.statusLabel}`)
   ];

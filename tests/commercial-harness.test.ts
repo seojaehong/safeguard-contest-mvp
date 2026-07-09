@@ -305,7 +305,11 @@ describe("workpack learning export", () => {
         visionSummary: "난간 보강이 확인됩니다.",
         detectedHazards: ["추락"],
         observedImprovement: "난간 보강 후 작업구역 통제가 보입니다.",
-        ocrText: "추락주의"
+        ocrText: "추락주의",
+        sourcePhotoNames: ["before.jpg", "after.jpg"],
+        photoCount: 2,
+        siteSignals: ["비계", "단부"],
+        visionEvidence: "after.jpg에서 난간 보강 확인"
       }],
       confirmations: [{ displayName: "Nguyen", languageCode: "vi", readAt: "2026-07-08T09:20:00.000Z" }]
     };
@@ -333,6 +337,10 @@ describe("workpack learning export", () => {
     expect(markdown).toContain("detectedHazards: 추락");
     expect(markdown).toContain("observedImprovement: 난간 보강 후 작업구역 통제가 보입니다.");
     expect(markdown).toContain("ocr: 추락주의");
+    expect(markdown).toContain("sourcePhotos: before.jpg, after.jpg");
+    expect(markdown).toContain("photoCount: 2");
+    expect(markdown).toContain("siteSignals: 비계, 단부");
+    expect(markdown).toContain("photoEvidence: after.jpg에서 난간 보강 확인");
     expect(jsonl.split("\n")).toHaveLength(6);
     expect(jsonl).toContain("\"eventType\":\"governance\"");
     expect(jsonl).toContain("\"promotionStatus\":\"draft_candidate\"");
@@ -351,6 +359,10 @@ describe("workpack learning export", () => {
     expect(jsonl).toContain("\"detectedHazards\":[\"추락\"]");
     expect(jsonl).toContain("\"observedImprovement\":\"난간 보강 후 작업구역 통제가 보입니다.\"");
     expect(jsonl).toContain("\"ocrText\":\"추락주의\"");
+    expect(jsonl).toContain("\"sourcePhotoNames\":[\"before.jpg\",\"after.jpg\"]");
+    expect(jsonl).toContain("\"photoCount\":2");
+    expect(jsonl).toContain("\"siteSignals\":[\"비계\",\"단부\"]");
+    expect(jsonl).toContain("\"visionEvidence\":\"after.jpg에서 난간 보강 확인\"");
     expect(file.fileName).toBe("성수동-외벽-도장-learning.jsonl");
     expect(file.contentType).toContain("application/x-ndjson");
     expect(file.content.endsWith("\n")).toBe(true);

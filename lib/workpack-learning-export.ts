@@ -106,7 +106,7 @@ function readOptionalPayloadBoolean(value: unknown, key: string): boolean | unde
 
 export function normalizeLearningVisionPayload(value: unknown): Pick<
   HarnessImprovement,
-  "visionStatus" | "analysisMode" | "photoPairAttached" | "visionUserLabel" | "visionProvider" | "visionModel" | "visionSummary" | "detectedHazards" | "observedImprovement" | "ocrText" | "visionErrorMessage"
+  "visionStatus" | "analysisMode" | "photoPairAttached" | "visionUserLabel" | "visionProvider" | "visionModel" | "visionSummary" | "detectedHazards" | "observedImprovement" | "ocrText" | "sourcePhotoNames" | "photoCount" | "siteSignals" | "visionEvidence" | "visionErrorMessage"
 > {
   return {
     visionStatus: readVisionStatus(value),
@@ -119,6 +119,12 @@ export function normalizeLearningVisionPayload(value: unknown): Pick<
     detectedHazards: readOptionalPayloadStringArray(value, "detectedHazards"),
     observedImprovement: readOptionalPayloadString(value, "observedImprovement"),
     ocrText: readOptionalPayloadString(value, "ocrText"),
+    sourcePhotoNames: readOptionalPayloadStringArray(value, "sourcePhotoNames"),
+    photoCount: isRecord(value) && typeof value.photoCount === "number" && Number.isFinite(value.photoCount) && value.photoCount > 0
+      ? value.photoCount
+      : undefined,
+    siteSignals: readOptionalPayloadStringArray(value, "siteSignals"),
+    visionEvidence: readOptionalPayloadString(value, "visionEvidence"),
     visionErrorMessage: readOptionalPayloadString(value, "errorMessage", 1000)
   };
 }
@@ -195,6 +201,10 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       detectedHazards: improvement.detectedHazards,
       observedImprovement: improvement.observedImprovement,
       ocrText: improvement.ocrText,
+      sourcePhotoNames: improvement.sourcePhotoNames,
+      photoCount: improvement.photoCount,
+      siteSignals: improvement.siteSignals,
+      visionEvidence: improvement.visionEvidence,
       visionErrorMessage: improvement.visionErrorMessage
     })),
     ...input.confirmations.map((confirmation) => event(input, "ack", {
@@ -271,6 +281,10 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     if (improvement.detectedHazards?.length) lines.push(`  - detectedHazards: ${improvement.detectedHazards.join(", ")}`);
     if (improvement.observedImprovement) lines.push(`  - observedImprovement: ${improvement.observedImprovement}`);
     if (improvement.ocrText) lines.push(`  - ocr: ${improvement.ocrText}`);
+    if (improvement.sourcePhotoNames?.length) lines.push(`  - sourcePhotos: ${improvement.sourcePhotoNames.join(", ")}`);
+    if (improvement.photoCount) lines.push(`  - photoCount: ${improvement.photoCount}`);
+    if (improvement.siteSignals?.length) lines.push(`  - siteSignals: ${improvement.siteSignals.join(", ")}`);
+    if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${improvement.visionEvidence}`);
     if (improvement.visionErrorMessage) lines.push(`  - visionError: ${improvement.visionErrorMessage}`);
   }
 

@@ -103,12 +103,16 @@ describe("hazard photo candidates", () => {
       candidates: [accepted, ignored],
       acceptedCandidateKeys: [buildHazardPhotoCandidateKey(accepted)],
       summary: "외벽 작업면 사진입니다.",
-      ocrText: "추락주의"
+      ocrText: "추락주의",
+      siteSignals: ["외벽", "개구부"],
+      photoCount: 3
     });
 
     expect(appendix).toContain("[사용자 추가 사진 위험요인 후보]");
     expect(appendix).toContain("추락·낙하 위험(high)");
     expect(appendix).toContain("위험성평가표");
+    expect(appendix).toContain("사진 수: 3장");
+    expect(appendix).toContain("사진 신호: 외벽 · 개구부");
     expect(appendix).toContain("추락주의");
     expect(appendix).not.toContain("차량·장비 동선");
   });
@@ -135,7 +139,9 @@ describe("hazard photo candidates", () => {
       candidates: [accepted, ignored],
       acceptedCandidateKeys: [buildHazardPhotoCandidateKey(accepted)],
       summary: "작업발판 외측이 보입니다.",
-      ocrText: "추락주의"
+      ocrText: "추락주의",
+      siteSignals: ["비계", "단부"],
+      photoCount: 2
     });
 
     expect(improvements).toHaveLength(1);
@@ -149,9 +155,15 @@ describe("hazard photo candidates", () => {
       analysisMode: "vision_ocr",
       photoPairAttached: false,
       visionUserLabel: "vision/OCR 사진 분석",
-      ocrText: "추락주의"
+      ocrText: "추락주의",
+      sourcePhotoNames: ["scaffold.jpg"],
+      photoCount: 2,
+      siteSignals: ["비계", "단부"],
+      visionEvidence: "scaffold.jpg에서 작업면 가장자리가 노출되어 보임"
     });
     expect(improvements[0].visionSummary).toContain("scaffold.jpg");
+    expect(improvements[0].visionSummary).toContain("사진수: 2장");
+    expect(improvements[0].visionSummary).toContain("신호: 비계 · 단부");
     expect(improvements[0].detectedHazards).toContain("작업발판 외측 추락 위험");
     expect(improvements[0].detectedHazards).toContain("severity:high");
   });
