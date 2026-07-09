@@ -132,4 +132,57 @@ describe("workspace layout regression", () => {
     expect(metrics.sideGap).toBeGreaterThanOrEqual(18);
     expect(metrics.sideButtonHeight).toBeGreaterThanOrEqual(48);
   }, 90_000);
+
+  it("keeps the day workspace shell from overlapping the first-screen composer", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1600, height: 820 } });
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+
+    const metrics = await page.evaluate(() => {
+      function readRect(selector: string) {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing layout target: ${selector}`);
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return {
+          top: Math.round(rect.top),
+          right: Math.round(rect.right),
+          bottom: Math.round(rect.bottom),
+          left: Math.round(rect.left),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          borderTopWidth: Number.parseFloat(style.borderTopWidth),
+          backgroundColor: style.backgroundColor,
+          scrollTop: element instanceof HTMLTextAreaElement ? element.scrollTop : 0,
+          clientHeight: element instanceof HTMLTextAreaElement ? element.clientHeight : Math.round(rect.height),
+          scrollHeight: element instanceof HTMLTextAreaElement ? element.scrollHeight : Math.round(rect.height)
+        };
+      }
+
+      const topbar = readRect(".command-topbar");
+      const viewport = readRect(".command-viewport");
+      const sideNav = readRect(".workspace-side-nav");
+      const main = readRect(".command-main");
+      const heading = readRect(".workspace-input-page .command-copy h1");
+      const textarea = readRect(".workspace-input-page .command-console-input");
+
+      return {
+        topbar,
+        viewport,
+        sideNav,
+        main,
+        heading,
+        textarea
+      };
+    });
+
+    expect(metrics.topbar.bottom).toBeLessThanOrEqual(metrics.viewport.top - 8);
+    expect(metrics.sideNav.right).toBeLessThanOrEqual(metrics.main.left - 8);
+    expect(metrics.heading.bottom).toBeLessThanOrEqual(metrics.textarea.top - 16);
+    expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
+    expect(metrics.textarea.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+    expect(metrics.textarea.scrollTop).toBe(0);
+    expect(metrics.textarea.clientHeight).toBeGreaterThanOrEqual(140);
+    expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 96);
+  }, 90_000);
 });

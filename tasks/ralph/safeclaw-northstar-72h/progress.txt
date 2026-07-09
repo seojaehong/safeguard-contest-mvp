@@ -9,3 +9,15 @@
 - Verified: `npm.cmd test -- tests\workpack-readiness.test.ts tests\commercial-harness.test.ts tests\quality-contract.test.ts tests\operation-improvements.test.ts tests\photo-vision-analysis.test.ts`; `npm.cmd run typecheck`; `npm.cmd run build`; local browser probe for `/workspace`.
 - Learned: SIF embedding corpus/approval gate is prepared, but Supabase vector table/RPC/upload are still approval-gated and not executed.
 - Next: N3 SIF embedding migration approval packet, then N4 deterministic photo hazard rows and N5 workpack operation graph explorer.
+
+## 2026-07-09 N4
+- Changed: accepted photo/Vision/OCR harness memory now creates deterministic structured risk assessment rows and TBM risk links, with photo names, OCR, site signals, and vision evidence preserved in evidence refs.
+- Verified: `npm.cmd test -- tests\workpack-readiness.test.ts tests\commercial-harness.test.ts tests\quality-contract.test.ts tests\operation-improvements.test.ts tests\photo-vision-analysis.test.ts tests\reporting-downloads.test.ts`; `npm.cmd run typecheck`.
+- Learned: photo analysis was already reaching harness memory, but structured risk rows were still mostly AI/fallback-driven. N4 makes accepted image risk candidates consequential even when prose generation is template/fallback.
+- Next: N3 SIF migration approval packet remains DB-approval gated; N5 workpack operation graph explorer is the next schema-free product surface.
+
+## 2026-07-09 UI overlap regression
+- Changed: added a Day-theme Playwright layout regression test and a final workspace overlap guard so topbar, side nav, main surface, headline, and textarea cannot visually cover each other.
+- Verified: red `npm.cmd test -- tests\workspace-layout-regression.test.ts` failed on first-screen line-height; green rerun passed 3 tests after CSS guard and line-height fix.
+- Learned: the workspace CSS has several historical visual passes, so final shell geometry must be guarded until the stylesheet is consolidated.
+- Next: continue route-by-route design harmonization after the N4/N5 product proof work.

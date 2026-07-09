@@ -32,6 +32,7 @@ import {
   buildDbHarnessPracticalPoints,
   buildHarnessPromptContext,
   type DbHarnessPacket,
+  type HarnessImprovement,
   type HarnessMemoryInput
 } from "./db-harness";
 
@@ -215,6 +216,60 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
       evidenceRefs: ["산업안전보건법", "KOSHA TBM OPS", "전파·이력 로그"]
     })
   ];
+}
+
+function photoSeverityFromImprovement(item: HarnessImprovement): "high" | "medium" | "low" | "review" {
+  const severityTag = item.detectedHazards?.find((hazard) => /^severity:/.test(hazard))?.replace("severity:", "");
+  if (severityTag === "high" || severityTag === "medium" || severityTag === "low") return severityTag;
+  return "review";
+}
+
+function buildPhotoHazardRiskRows(response: AskResponse, improvements: readonly HarnessImprovement[]): RiskAssessmentRow[] {
+  const scenario = response.scenario;
+  const location = scenario.siteName || "현장 작업구역";
+  const process = response.riskSummary.title || scenario.companyType || "현장 작업";
+  return improvements
+    .filter((item) => item.sourceType === "photo_analysis")
+    .filter((item) => item.hazardLabel || item.detectedHazards?.length || item.visionEvidence || item.sourcePhotoNames?.length)
+    .slice(0, 4)
+    .map((item) => {
+      const severity = photoSeverityFromImprovement(item);
+      const hazard = item.hazardLabel || item.detectedHazards?.find((value) => !value.startsWith("severity:")) || "사진 기반 위험요인";
+      const likelihood = severity === "high" ? 4 : severity === "medium" ? 3 : 2;
+      const severityValue = severity === "high" ? 5 : severity === "medium" ? 4 : 3;
+      const photoNames = item.sourcePhotoNames?.length ? item.sourcePhotoNames.slice(0, 5).join(", ") : "";
+      const siteSignals = item.siteSignals?.length ? item.siteSignals.slice(0, 4).join(", ") : "";
+      const evidenceRefs = [
+        item.visionUserLabel || "사진 위험요인 후보",
+        photoNames ? `사진: ${photoNames}` : "",
+        item.ocrText ? `OCR: ${item.ocrText}` : "",
+        siteSignals ? `현장 신호: ${siteSignals}` : "",
+        item.visionEvidence ? `사진 분석 근거: ${item.visionEvidence}` : ""
+      ].filter(Boolean);
+      return buildRiskRow({
+        location,
+        process,
+        task: item.taskLabel || scenario.workSummary || "사진 첨부 작업",
+        equipment: siteSignals ? `사진 첨부 작업면, ${siteSignals}` : "사진 첨부 작업면, 보호구, 작업구역",
+        hazard,
+        currentControls: item.improvementText || "사진 위험요인 확인 결과를 작업 전 현장 확인 항목으로 반영합니다.",
+        likelihood,
+        severity: severityValue,
+        additionalControls: item.observedImprovement || item.visionSummary || item.improvementText || "사진에서 확인된 위험요인을 TBM에서 공유하고 조치 완료 사진을 남깁니다.",
+        owner: "작업반장",
+        due: "현장 확인",
+        verification: "첨부 사진, OCR, 현장 재확인을 통해 위험요인과 조치 반영 여부를 확인",
+        verificationChecker: "관리감독자",
+        evidenceRefs
+      });
+    });
+}
+
+function appendPhotoSeedRiskRows(rows: RiskAssessmentRow[], photoRows: RiskAssessmentRow[]) {
+  if (!photoRows.length) return rows;
+  const existingHazards = new Set(rows.map((row) => row.hazard.trim()));
+  const uniquePhotoRows = photoRows.filter((row) => !existingHazards.has(row.hazard.trim()));
+  return uniquePhotoRows.length ? [...rows, ...uniquePhotoRows] : rows;
 }
 
 function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: string): TbmRiskLink[] {
@@ -915,6 +970,33 @@ function reflectDbHarnessInDeliverables(response: AskResponse, packet: DbHarness
   };
 }
 
+function attachPhotoSeedStructuredOutput(response: AskResponse, improvements: readonly HarnessImprovement[]): AskResponse {
+  const photoRows = buildPhotoHazardRiskRows(response, improvements);
+  if (!photoRows.length) return response;
+  const existingRows = response.structured?.riskAssessmentRows || [];
+  const riskAssessmentRows = appendPhotoSeedRiskRows(existingRows, photoRows);
+  const acceptedPhotoRows = riskAssessmentRows.slice(existingRows.length);
+  const validation = validateRiskAssessmentRows(riskAssessmentRows);
+  const existingLinks = response.structured?.tbmRiskLinks || [];
+  const firstPhotoIndex = existingRows.length;
+  const photoLinks = buildTbmRiskLinks(acceptedPhotoRows, response.scenario.weatherNote)
+    .map((link, index) => ({ ...link, riskRowIndex: firstPhotoIndex + index }));
+  const tbmRiskLinks = existingLinks.length ? [...existingLinks, ...photoLinks] : buildTbmRiskLinks(riskAssessmentRows, response.scenario.weatherNote);
+  return {
+    ...response,
+    structured: {
+      ...response.structured,
+      riskAssessmentRows,
+      tbmRiskLinks,
+      riskAssessmentValidation: {
+        ok: validation.rows.length > 0 && validation.issues.length === 0,
+        issueCount: validation.issues.length,
+        issues: validation.issues
+      }
+    }
+  };
+}
+
 export function attachDbHarnessFallback(response: AskResponse, input: {
   question: string;
   harnessMemory: Required<HarnessMemoryInput>;
@@ -927,8 +1009,9 @@ export function attachDbHarnessFallback(response: AskResponse, input: {
   });
   const promptContext = buildHarnessPromptContext(packet);
   const reflectedResponse = reflectDbHarnessInDeliverables(response, packet);
+  const structuredResponse = attachPhotoSeedStructuredOutput(reflectedResponse, input.harnessMemory.improvements);
   return attachQualityContract({
-    ...reflectedResponse,
+    ...structuredResponse,
     answer: buildDbHarnessAnswer(packet),
     practicalPoints: buildDbHarnessPracticalPoints(packet),
     dbHarness: {
@@ -1334,27 +1417,33 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       )))
     };
     const generatedStructuredRiskRows = aiBodies.structuredRiskRows || [];
+    const photoSeedRiskRows = buildPhotoHazardRiskRows(response, harnessMemory.improvements);
     const fallbackStructuredRiskRows = generatedStructuredRiskRows.length
       ? []
       : buildFallbackRiskAssessmentRows(response, weather.summary);
-    const structuredRiskRows = generatedStructuredRiskRows.length
+    const baseStructuredRiskRows = generatedStructuredRiskRows.length
       ? generatedStructuredRiskRows
       : fallbackStructuredRiskRows;
-    const fallbackValidation = generatedStructuredRiskRows.length
-      ? null
-      : validateRiskAssessmentRows(structuredRiskRows);
+    const structuredRiskRows = appendPhotoSeedRiskRows(baseStructuredRiskRows, photoSeedRiskRows);
+    const acceptedPhotoSeedRiskRows = structuredRiskRows.slice(baseStructuredRiskRows.length);
+    const structuredValidation = validateRiskAssessmentRows(structuredRiskRows);
     const structuredRiskIssues = generatedStructuredRiskRows.length
-      ? (aiBodies.structuredRiskRowsValidationIssues || [])
-      : (fallbackValidation?.issues || []);
+      ? [...(aiBodies.structuredRiskRowsValidationIssues || []), ...structuredValidation.issues]
+      : structuredValidation.issues;
     const structuredRiskSourceDetail = generatedStructuredRiskRows.length
-      ? "structured rows=AI"
-      : "structured rows=deterministic fallback";
+      ? `structured rows=AI${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`
+      : `structured rows=deterministic fallback${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`;
     const generatedTbmRiskLinks = aiBodies.tbmRiskLinks || [];
+    const photoSeedRiskStartIndex = baseStructuredRiskRows.length;
+    const photoSeedTbmRiskLinks = acceptedPhotoSeedRiskRows.length
+      ? buildTbmRiskLinks(acceptedPhotoSeedRiskRows, weather.summary)
+        .map((link, index) => ({ ...link, riskRowIndex: photoSeedRiskStartIndex + index }))
+      : [];
     const tbmRiskLinks = generatedTbmRiskLinks.length
-      ? generatedTbmRiskLinks
+      ? [...generatedTbmRiskLinks, ...photoSeedTbmRiskLinks]
       : buildTbmRiskLinks(structuredRiskRows, weather.summary);
     const tbmRiskSourceDetail = generatedTbmRiskLinks.length
-      ? "TBM-risk links=AI"
+      ? `TBM-risk links=AI${photoSeedTbmRiskLinks.length ? ` + photo seed links ${photoSeedTbmRiskLinks.length}` : ""}`
       : "TBM-risk links=deterministic fallback";
     const linkedWorkPlanStructured = linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows);
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);

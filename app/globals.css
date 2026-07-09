@@ -14674,7 +14674,7 @@ body:has(.safeclaw-landing) :is(
   font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: clamp(52px, 5.2vw, 68px);
   font-weight: 900;
-  line-height: 1.08;
+  line-height: 1.12;
   letter-spacing: 0;
   font-optical-sizing: auto;
   text-rendering: geometricPrecision;
@@ -14704,5 +14704,80 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
     font-size: 36px;
     line-height: 1.18;
+  }
+}
+
+/* Workspace overlap guard.
+   The workspace has accumulated several visual passes. Keep the shell geometry
+   explicit so Day/Night theme overrides cannot cover the menu or composer. */
+.command-center-shell {
+  isolation: isolate;
+}
+
+.command-center-shell > .command-topbar {
+  position: relative !important;
+  z-index: 2;
+  margin-bottom: 12px;
+}
+
+.command-center-shell > .command-viewport {
+  position: relative;
+  z-index: 1;
+}
+
+.command-center-shell .linear-workspace-layout {
+  align-items: start;
+}
+
+.command-center-shell .workspace-side-nav,
+.command-center-shell .linear-workspace-layout .command-main {
+  align-self: start;
+  min-width: 0;
+}
+
+.command-center-shell .workspace-side-nav {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.command-center-shell .linear-workspace-layout .command-main {
+  position: relative;
+  z-index: 0;
+  overflow: visible;
+}
+
+.command-center-shell .linear-workspace-layout .workspace-input-page {
+  display: grid;
+  align-content: start !important;
+  gap: 22px;
+  min-height: auto !important;
+}
+
+.command-center-shell .workspace-input-page .command-copy,
+.command-center-shell .workspace-input-page .command-console,
+.command-center-shell .workspace-input-page .field-brief-chip-row,
+.command-center-shell .workspace-input-page .input-photo-hazard-panel,
+.command-center-shell .workspace-input-page .evidence-readiness-rail,
+.command-center-shell .workspace-input-page .advanced-settings,
+.command-center-shell .workspace-input-page .quick-scenario-chips,
+.command-center-shell .workspace-input-page .command-actions {
+  position: relative;
+  z-index: 0;
+}
+
+.command-center-shell .workspace-input-page .command-console {
+  display: grid;
+}
+
+.command-center-shell .workspace-input-page .command-console-input {
+  box-sizing: border-box;
+  display: block;
+  overflow: auto;
+}
+
+@media (max-width: 900px) {
+  .command-center-shell .workspace-side-nav {
+    overflow: visible;
   }
 }
