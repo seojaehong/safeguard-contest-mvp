@@ -4,9 +4,9 @@ Date: 2026-07-09
 
 ## Verdict
 
-The submitted/public URL is not yet safe for demo review because `https://www.safeclaw.kr/workspace?theme=day` is still serving the old sticky topbar layout.
+The submitted/public URL initially served the old sticky topbar layout, but the current branch has now been deployed to production and re-checked.
 
-The current local branch fixes the overlap: the workspace topbar scrolls as normal content, the left rail is bounded on short screens, and filled textarea content is visible with enough top padding.
+The current production URL fixes the overlap: the workspace topbar scrolls as normal content, the left rail is bounded on short screens, and filled textarea content is visible with enough top padding.
 
 ## Reproduction Surface
 
@@ -17,7 +17,7 @@ The current local branch fixes the overlap: the workspace topbar scrolls as norm
 
 ## Live Finding
 
-Live still uses the old layout rules:
+Before redeploy, live used the old layout rules:
 
 - `.command-topbar`: `position sticky`
 - `.command-topbar`: `z-index 30`
@@ -30,6 +30,23 @@ Evidence:
 - `live-day-2048x638-filled-scroll260.png`
 - `live-day-2048x638-filled-top-metrics.json`
 - `live-day-2048x638-filled-scroll260-metrics.json`
+
+## Post-Deploy Finding
+
+After production deploy, `https://www.safeclaw.kr/workspace?theme=day&verify=4e754fe` uses the corrected layout:
+
+- `.command-topbar`: `position relative`
+- `.command-topbar`: `z-index 2`
+- `.command-topbar`: `height 60px`
+- After scroll, `.command-topbar` moves above the viewport instead of covering the workspace body.
+- Filled textarea remains readable with `padding-top 22px`, `line-height 30.94px`, and `scrollTop 0`.
+
+Evidence:
+
+- `postdeploy-day-2048x638-filled-top.png`
+- `postdeploy-day-2048x638-filled-scroll260.png`
+- `postdeploy-day-2048x638-filled-top-metrics.json`
+- `postdeploy-day-2048x638-filled-scroll260-metrics.json`
 
 ## Local Branch Finding
 
@@ -67,6 +84,10 @@ npm.cmd test -- tests\workspace-layout-regression.test.ts
 
 Result: 6 tests passed.
 
-## Action Required Before Demo
+## Deployment
 
-Deploy the current branch to the production Vercel project before using `www.safeclaw.kr` for submission review. Until production serves the corrected CSS, reviewers can still encounter the overlapping header.
+Production deployment completed:
+
+- Alias: `https://www.safeclaw.kr`
+- Deployment URL: `https://safeguard-contest-1iuqqjent-seojaehongs-projects.vercel.app`
+- Commit verified on live check: `4e754fe`
