@@ -1,3 +1,5 @@
+import type { HarnessImprovement } from "@/lib/db-harness";
+
 export type ImprovementPhoto = {
   name: string;
 };
@@ -83,16 +85,23 @@ export function buildHazardPhotoCandidateKey(candidate: HazardPhotoGenerationCan
   ].join("::");
 }
 
+function acceptedHazardPhotoCandidates(input: {
+  candidates: readonly HazardPhotoGenerationCandidate[];
+  acceptedCandidateKeys: readonly string[];
+}) {
+  const acceptedKeySet = new Set(input.acceptedCandidateKeys);
+  return input.candidates
+    .filter((candidate) => acceptedKeySet.has(buildHazardPhotoCandidateKey(candidate)))
+    .slice(0, 8);
+}
+
 export function buildAcceptedHazardPhotoAppendix(input: {
   candidates: readonly HazardPhotoGenerationCandidate[];
   acceptedCandidateKeys: readonly string[];
   summary?: string;
   ocrText?: string;
 }): string {
-  const acceptedKeySet = new Set(input.acceptedCandidateKeys);
-  const accepted = input.candidates
-    .filter((candidate) => acceptedKeySet.has(buildHazardPhotoCandidateKey(candidate)))
-    .slice(0, 8);
+  const accepted = acceptedHazardPhotoCandidates(input);
   if (!accepted.length) return "";
 
   const lines = [
@@ -109,4 +118,46 @@ export function buildAcceptedHazardPhotoAppendix(input: {
   if (input.summary?.trim()) lines.push(`사진 요약: ${input.summary.trim()}`);
   if (input.ocrText?.trim()) lines.push(`사진 OCR: ${input.ocrText.trim()}`);
   return lines.join("\n");
+}
+
+export function buildAcceptedHazardPhotoHarnessImprovements(input: {
+  taskLabel: string;
+  candidates: readonly HazardPhotoGenerationCandidate[];
+  acceptedCandidateKeys: readonly string[];
+  summary?: string;
+  ocrText?: string;
+}): HarnessImprovement[] {
+  const taskLabel = input.taskLabel.trim() || "현장 사진 첨부 작업";
+  return acceptedHazardPhotoCandidates(input).map((candidate, index) => {
+    const key = buildHazardPhotoCandidateKey(candidate);
+    const reflectedDocuments = candidate.reflectedDocuments?.length
+      ? [...candidate.reflectedDocuments]
+      : ["위험성평가표", "TBM 브리핑", "TBM 기록"];
+    const sourcePhotoNames = candidate.sourcePhotoNames?.filter((name) => name.trim()).join(", ");
+    const sourceLabel = candidate.source === "vision" ? "vision/OCR 사진 분석" : "사진 첨부 후보";
+    const detail = candidate.detail.trim();
+    const evidence = candidate.evidence?.trim();
+    const visionSummary = [
+      input.summary?.trim(),
+      evidence ? `근거: ${evidence}` : "",
+      sourcePhotoNames ? `사진: ${sourcePhotoNames}` : ""
+    ].filter(Boolean).join(" / ");
+
+    return {
+      id: `input-photo-hazard-${index + 1}-${key.slice(0, 24)}`,
+      taskLabel,
+      hazardLabel: candidate.label.trim() || "사진 위험요인 후보",
+      improvementText: `사진 위험요인 확인 및 조치 후보: ${detail}`,
+      reflectedDocuments,
+      sourceType: "photo_analysis",
+      visionStatus: candidate.source === "vision" ? "analyzed" : "unconfigured",
+      analysisMode: candidate.source === "vision" ? "vision_ocr" : "manual_text",
+      photoPairAttached: false,
+      visionUserLabel: sourceLabel,
+      visionSummary: visionSummary || undefined,
+      detectedHazards: [candidate.label, candidate.severity ? `severity:${candidate.severity}` : ""].filter(Boolean),
+      observedImprovement: detail,
+      ocrText: input.ocrText?.trim() || undefined
+    };
+  });
 }

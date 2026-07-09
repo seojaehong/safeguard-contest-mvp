@@ -14,6 +14,7 @@ import type { FieldExample } from "@/lib/field-examples";
 import { formatEvidenceBadge } from "@/lib/smsa-mapping";
 import {
   buildAcceptedHazardPhotoAppendix,
+  buildAcceptedHazardPhotoHarnessImprovements,
   buildHazardPhotoCandidateKey,
   buildHazardPhotoCandidates,
   buildPhotoAnalysisCandidate as buildPhotoAnalysisCandidateText
@@ -1136,7 +1137,14 @@ export function SafeGuardCommandCenter({
   }
 
   function buildGenerationHarnessMemory(): HarnessMemoryInput {
-    const improvements: HarnessImprovement[] = operationImprovements.slice(0, 8).map((item) => ({
+    const acceptedPhotoImprovements = buildAcceptedHazardPhotoHarnessImprovements({
+      taskLabel: fieldBrief.workSummary,
+      candidates: inputPhotoHazardCandidates(),
+      acceptedCandidateKeys: acceptedInputHazardCandidateKeys,
+      summary: inputHazardPhotoAnalysis.summary,
+      ocrText: inputHazardPhotoAnalysis.ocrText
+    });
+    const storedImprovements: HarnessImprovement[] = operationImprovements.slice(0, 8).map((item) => ({
       id: item.remoteImprovementId || item.id,
       taskLabel: item.workSummary,
       hazardLabel: item.hazardLabel,
@@ -1152,6 +1160,7 @@ export function SafeGuardCommandCenter({
       observedImprovement: item.observedImprovement,
       ocrText: item.ocrText
     }));
+    const improvements = [...acceptedPhotoImprovements, ...storedImprovements].slice(0, 12);
     return { improvements, workpackMemory: [] };
   }
 

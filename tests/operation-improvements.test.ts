@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildAcceptedHazardPhotoAppendix,
+  buildAcceptedHazardPhotoHarnessImprovements,
   buildHazardPhotoCandidateKey,
   buildHazardPhotoCandidates,
   buildPhotoAnalysisCandidate
@@ -105,5 +106,48 @@ describe("hazard photo candidates", () => {
     expect(appendix).toContain("위험성평가표");
     expect(appendix).toContain("추락주의");
     expect(appendix).not.toContain("차량·장비 동선");
+  });
+
+  it("turns accepted photo hazards into DB harness improvement memory", () => {
+    const accepted = {
+      source: "vision" as const,
+      label: "작업발판 외측 추락 위험",
+      detail: "외벽 도장 작업면 가장자리의 난간 상태를 현장 확인해야 합니다.",
+      severity: "high" as const,
+      evidence: "scaffold.jpg에서 작업면 가장자리가 노출되어 보임",
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+      sourcePhotoNames: ["scaffold.jpg"]
+    };
+    const ignored = {
+      source: "local" as const,
+      label: "보호구 착용 확인",
+      detail: "작업자 보호구 상태를 확인합니다.",
+      severity: "review" as const
+    };
+
+    const improvements = buildAcceptedHazardPhotoHarnessImprovements({
+      taskLabel: "성수동 외벽 도장 작업",
+      candidates: [accepted, ignored],
+      acceptedCandidateKeys: [buildHazardPhotoCandidateKey(accepted)],
+      summary: "작업발판 외측이 보입니다.",
+      ocrText: "추락주의"
+    });
+
+    expect(improvements).toHaveLength(1);
+    expect(improvements[0]).toMatchObject({
+      taskLabel: "성수동 외벽 도장 작업",
+      hazardLabel: "작업발판 외측 추락 위험",
+      improvementText: "사진 위험요인 확인 및 조치 후보: 외벽 도장 작업면 가장자리의 난간 상태를 현장 확인해야 합니다.",
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+      sourceType: "photo_analysis",
+      visionStatus: "analyzed",
+      analysisMode: "vision_ocr",
+      photoPairAttached: false,
+      visionUserLabel: "vision/OCR 사진 분석",
+      ocrText: "추락주의"
+    });
+    expect(improvements[0].visionSummary).toContain("scaffold.jpg");
+    expect(improvements[0].detectedHazards).toContain("작업발판 외측 추락 위험");
+    expect(improvements[0].detectedHazards).toContain("severity:high");
   });
 });
