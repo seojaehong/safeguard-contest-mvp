@@ -587,65 +587,63 @@ function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
 
 function formCss(pageMargin = "36px") {
   return `
-    body { margin: 0; background: #ece7dc; color: #161b22; font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; }
-    .safety-form-page { max-width: 1080px; margin: ${pageMargin} auto; background: #fffdf8; border: 2px solid #161b22; box-shadow: 8px 8px 0 rgba(22, 27, 34, 0.12); }
-    .form-head { display: grid; grid-template-columns: 1fr 240px; border-bottom: 2px solid #161b22; }
+    body { margin: 0; background: #fafafb; color: #1a1b1e; font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; }
+    .safety-form-page { max-width: 1080px; margin: ${pageMargin} auto; background: #ffffff; border: 1px solid #e6e8eb; border-radius: 12px; box-shadow: none; overflow: hidden; }
+    .form-head { display: grid; grid-template-columns: 1fr 240px; border-bottom: 1px solid #e6e8eb; }
     .form-title { padding: 20px 24px; }
-    .form-title span { display: inline-block; margin-bottom: 8px; color: #21594f; font-size: 12px; font-weight: 900; letter-spacing: 0.12em; }
+    .form-title span { display: inline-block; margin-bottom: 8px; color: #5c6169; font-size: 12px; font-weight: 700; letter-spacing: 0; }
     .form-title h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
-    .form-title p { margin: 8px 0 0; color: #4c5665; font-size: 13px; }
-    .approval-grid { display: grid; grid-template-columns: repeat(var(--approval-count, 3), 1fr); border-left: 2px solid #161b22; }
-    .approval-cell { display: grid; grid-template-rows: 34px 1fr; min-height: 108px; border-left: 1px solid #161b22; text-align: center; }
+    .form-title p { margin: 8px 0 0; color: #5c6169; font-size: 13px; line-height: 1.5; }
+    .approval-grid { display: grid; grid-template-columns: repeat(var(--approval-count, 3), 1fr); border-left: 1px solid #e6e8eb; }
+    .approval-cell { display: grid; grid-template-rows: 34px 1fr; min-height: 108px; border-left: 1px solid #e6e8eb; text-align: center; }
     .approval-cell:first-child { border-left: 0; }
-    .approval-cell b { display: grid; place-items: center; background: #f2ead9; border-bottom: 1px solid #161b22; font-size: 12px; }
-    .approval-cell em { display: grid; place-items: end center; padding-bottom: 12px; color: #707887; font-size: 12px; font-style: normal; }
-    .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
-    .meta-item { min-height: 58px; border-right: 1px solid #161b22; }
+    .approval-cell b { display: grid; place-items: center; background: #f4f5f7; border-bottom: 1px solid #e6e8eb; font-size: 12px; }
+    .approval-cell em { display: grid; place-items: end center; padding-bottom: 12px; color: #8a8f98; font-size: 12px; font-style: normal; }
+    .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #e6e8eb; }
+    .meta-item { min-height: 58px; border-right: 1px solid #e6e8eb; }
     .meta-item:last-child { border-right: 0; }
-    .meta-item b { display: block; padding: 7px 10px; background: #21594f; color: #ffffff; font-size: 11px; }
+    .meta-item b { display: block; padding: 7px 10px; background: #f4f5f7; color: #5c6169; font-size: 11px; }
     .meta-item span { display: block; padding: 10px; font-size: 13px; line-height: 1.35; }
-    .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
-    .check-grid div { padding: 10px; border-right: 1px solid #161b22; font-size: 12px; font-weight: 800; }
+    .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #e6e8eb; }
+    .check-grid div { padding: 10px; border-right: 1px solid #e6e8eb; font-size: 12px; font-weight: 700; }
     .check-grid div:last-child { border-right: 0; }
     .section-block { padding: 18px 22px 4px; }
-    .section-label { display: inline-flex; align-items: center; min-height: 30px; margin-bottom: 8px; padding: 5px 12px; background: #161b22; color: #fffdf8; font-size: 13px; font-weight: 900; }
+    .section-label { display: inline-flex; align-items: center; min-height: 30px; margin-bottom: 10px; padding: 5px 12px; border: 1px solid #e6e8eb; border-radius: 8px; background: #f4f5f7; color: #1a1b1e; font-size: 13px; font-weight: 700; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 16px; }
-    th, td { border: 1px solid #161b22; padding: 9px 10px; vertical-align: top; word-break: keep-all; line-height: 1.48; }
-    th { background: #f2ead9; font-size: 12px; text-align: center; }
+    th, td { border: 1px solid #e6e8eb; padding: 9px 10px; vertical-align: top; word-break: keep-all; line-height: 1.54; }
+    th { background: #f4f5f7; color: #1a1b1e; font-size: 12px; text-align: center; }
     td { font-size: 12px; }
     .center { text-align: center; }
-    .check-cell { text-align: center; color: #5e6677; font-weight: 800; }
-    .signature-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 10px 22px 22px; border: 1px solid #161b22; }
-    .signature-grid div { min-height: 62px; padding: 9px 10px; border-right: 1px solid #161b22; font-size: 12px; }
+    .check-cell { text-align: center; color: #5c6169; font-weight: 700; }
+    .signature-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 10px 22px 22px; border: 1px solid #e6e8eb; border-radius: 8px; overflow: hidden; }
+    .signature-grid div { min-height: 62px; padding: 9px 10px; border-right: 1px solid #e6e8eb; font-size: 12px; }
     .signature-grid div:last-child { border-right: 0; }
     .signature-grid b { display: block; margin-bottom: 18px; }
-    .form-note { margin: 0 22px 22px; color: #596373; font-size: 12px; }
-    .section-help { margin: 0 0 10px; color: #596373; font-size: 12px; line-height: 1.5; }
-    .mini-table th { background: #21594f; color: #fffdf8; }
-    .form-layout-risk .form-title span, .form-layout-risk .meta-item b, .form-layout-risk .mini-table th { background: #7a2e25; }
-    .form-layout-risk .section-label { background: #7a2e25; }
-    .form-layout-risk .check-grid div { background: #fff2ef; }
-    .form-layout-workPlan .form-title span, .form-layout-workPlan .meta-item b, .form-layout-workPlan .mini-table th { background: #1f4d7a; }
-    .form-layout-workPlan .section-label { background: #1f4d7a; }
-    .form-layout-workPlan .check-grid div { background: #edf5ff; }
-    .form-layout-permit .form-title span, .form-layout-permit .meta-item b, .form-layout-permit .mini-table th { background: #6f4b16; }
-    .form-layout-permit .section-label { background: #6f4b16; }
-    .form-layout-permit .check-grid div { background: #fff7df; }
-    .form-layout-tbmBriefing .form-title span, .form-layout-tbmBriefing .meta-item b, .form-layout-tbmBriefing .mini-table th,
-    .form-layout-tbmLog .form-title span, .form-layout-tbmLog .meta-item b, .form-layout-tbmLog .mini-table th { background: #285f45; }
-    .form-layout-tbmBriefing .section-label, .form-layout-tbmLog .section-label { background: #285f45; }
-    .form-layout-tbmBriefing .check-grid div, .form-layout-tbmLog .check-grid div { background: #edf8ef; }
-    .form-lineage { margin: 0; padding: 10px 22px; border-bottom: 2px solid #161b22; background: #fff8d8; color: #394150; font-size: 12px; font-weight: 800; }
+    .form-note { margin: 0 22px 22px; color: #5c6169; font-size: 12px; }
+    .section-help { margin: 0 0 10px; color: #5c6169; font-size: 12px; line-height: 1.55; }
+    .mini-table th { background: #f4f5f7; color: #1a1b1e; }
+    .form-layout-risk .form-title span,
+    .form-layout-workPlan .form-title span,
+    .form-layout-permit .form-title span,
+    .form-layout-tbmBriefing .form-title span,
+    .form-layout-tbmLog .form-title span { color: #6c6ff7; background: transparent; }
+    .form-layout-risk .check-grid div { background: #fff8f7; }
+    .form-layout-workPlan .check-grid div { background: #f8f9ff; }
+    .form-layout-permit .check-grid div { background: #fffaf0; }
+    .form-layout-tbmBriefing .meta-item b, .form-layout-tbmBriefing .mini-table th,
+    .form-layout-tbmLog .meta-item b, .form-layout-tbmLog .mini-table th { background: #f4f5f7; color: #1a1b1e; }
+    .form-layout-tbmBriefing .check-grid div, .form-layout-tbmLog .check-grid div { background: #f8fbf9; }
+    .form-lineage { margin: 0; padding: 10px 22px; border-bottom: 1px solid #e6e8eb; background: #f8f9fb; color: #5c6169; font-size: 12px; font-weight: 700; }
     .risk-table th, .risk-table td { font-size: 11px; padding: 7px 6px; }
     .risk-level-high { background: #ffe3df; font-weight: 900; color: #a83224; }
     .permit-check td:nth-child(2), .permit-check td:nth-child(3) { text-align: center; font-weight: 900; }
     .attendee-table td { height: 42px; }
     .tbm-daily-table th, .tbm-daily-table td { font-size: 11px; padding: 6px 5px; }
-    .tbm-check-list td:first-child { width: 28%; font-weight: 900; background: #f7f1e6; }
+    .tbm-check-list td:first-child { width: 28%; font-weight: 800; background: #f8f9fb; }
     .tbm-two-column td { min-height: 92px; }
     .tbm-attendance th, .tbm-attendance td { text-align: center; font-size: 10px; padding: 5px 4px; }
     .tbm-attendance td:nth-child(3), .tbm-attendance td:nth-child(9) { text-align: left; }
-    @media print { body { background: #ffffff; } .safety-form-page { margin: 0; box-shadow: none; max-width: none; } }
+    @media print { body { background: #ffffff; } .safety-form-page { margin: 0; box-shadow: none; max-width: none; border-radius: 0; } }
   `;
 }
 
@@ -2140,7 +2138,7 @@ export function WorkpackEditor({
     setImageStatus("idle");
     const markup = buildSafetyFormMarkup(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754">
-      <rect width="100%" height="100%" fill="#ece7dc"/>
+      <rect width="100%" height="100%" fill="#fafafb"/>
       <foreignObject x="34" y="34" width="1172" height="1686">
         <div xmlns="http://www.w3.org/1999/xhtml">
           <style>${formCss("0")}</style>
@@ -2156,7 +2154,7 @@ export function WorkpackEditor({
       canvas.height = 1754;
       const context = canvas.getContext("2d");
       if (!context) return;
-      context.fillStyle = "#fffaf1";
+      context.fillStyle = "#fafafb";
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(image, 0, 0);
       canvas.toBlob((blob) => {

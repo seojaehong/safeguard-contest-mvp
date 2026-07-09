@@ -138,10 +138,16 @@ describe("documents editor layout", () => {
     const metrics = await page.evaluate(() => {
       const editor = document.querySelector(".document-editor");
       const preview = document.querySelector(".submission-preview-panel .safety-form-preview");
-      if (!editor || !preview) throw new Error("Missing submission preview targets");
+      const tableWrap = document.querySelector(".submission-preview-panel .safety-form-table-wrap");
+      const sectionTitle = document.querySelector(".submission-preview-panel .safety-form-section-stack h3");
+      const firstHeader = document.querySelector(".submission-preview-panel .safety-form-preview th");
+      if (!editor || !preview || !tableWrap || !sectionTitle || !firstHeader) throw new Error("Missing submission preview targets");
       const editorRect = editor.getBoundingClientRect();
       const previewRect = preview.getBoundingClientRect();
       const previewStyle = getComputedStyle(preview);
+      const tableWrapStyle = getComputedStyle(tableWrap);
+      const sectionTitleStyle = getComputedStyle(sectionTitle);
+      const firstHeaderStyle = getComputedStyle(firstHeader);
       return {
         viewportWidth: window.innerWidth,
         scrollWidth: document.documentElement.scrollWidth,
@@ -151,7 +157,15 @@ describe("documents editor layout", () => {
         previewRight: Math.round(previewRect.right),
         previewOverflowX: previewStyle.overflowX,
         previewBackground: previewStyle.backgroundColor,
-        previewColor: previewStyle.color
+        previewColor: previewStyle.color,
+        tableWrapBorderRadius: Number.parseFloat(tableWrapStyle.borderRadius),
+        tableWrapBorderColor: tableWrapStyle.borderTopColor,
+        sectionTitleBackground: sectionTitleStyle.backgroundColor,
+        sectionTitleColor: sectionTitleStyle.color,
+        sectionTitleBorderRadius: Number.parseFloat(sectionTitleStyle.borderRadius),
+        firstHeaderBackground: firstHeaderStyle.backgroundColor,
+        firstHeaderColor: firstHeaderStyle.color,
+        firstHeaderBorderColor: firstHeaderStyle.borderBottomColor
       };
     });
 
@@ -161,5 +175,55 @@ describe("documents editor layout", () => {
     expect(metrics.previewOverflowX).toBe("auto");
     expect(metrics.previewBackground).toBe("rgb(255, 255, 255)");
     expect(metrics.previewColor).not.toBe("rgb(246, 245, 239)");
+    expect(metrics.tableWrapBorderRadius).toBeGreaterThanOrEqual(8);
+    expect(metrics.tableWrapBorderColor).toBe("rgb(231, 234, 238)");
+    expect(metrics.sectionTitleBackground).toBe("rgb(244, 245, 246)");
+    expect(metrics.sectionTitleColor).toBe("rgb(23, 25, 29)");
+    expect(metrics.sectionTitleBorderRadius).toBeGreaterThanOrEqual(6);
+    expect(metrics.firstHeaderBackground).toBe("rgb(244, 245, 246)");
+    expect(metrics.firstHeaderColor).toBe("rgb(23, 25, 29)");
+    expect(metrics.firstHeaderBorderColor).toBe("rgb(231, 234, 238)");
+  }, 90_000);
+
+  it("keeps exported HTML document styling aligned with the workspace system", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    await page.addInitScript(() => {
+      type CapturedDownload = { type: string; text: string };
+      const captureTarget = window as unknown as { __safeclawDownloads: CapturedDownload[] };
+      captureTarget.__safeclawDownloads = [];
+      const originalCreateObjectUrl = URL.createObjectURL.bind(URL);
+      URL.createObjectURL = (object: Blob | MediaSource) => {
+        if (object instanceof Blob && /html|text|msword|excel/.test(object.type)) {
+          void object.text().then((text) => {
+            captureTarget.__safeclawDownloads.push({ type: object.type, text });
+          });
+        }
+        return originalCreateObjectUrl(object);
+      };
+    });
+
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.locator(".workpack-shell").scrollIntoViewIfNeeded();
+    await page.locator(".download-bar details summary", { hasText: "베타 형식" }).click();
+    await page.locator(".advanced-download-grid button", { hasText: "HTML" }).click();
+    await page.waitForFunction(() => {
+      const captureTarget = window as unknown as { __safeclawDownloads?: Array<{ text: string }> };
+      return Boolean(captureTarget.__safeclawDownloads?.some((item) => item.text.includes("safety-form-page")));
+    });
+
+    const html = await page.evaluate(() => {
+      const captureTarget = window as unknown as { __safeclawDownloads?: Array<{ text: string }> };
+      return captureTarget.__safeclawDownloads?.find((item) => item.text.includes("safety-form-page"))?.text || "";
+    });
+
+    expect(html).toContain("#fafafb");
+    expect(html).toContain("#e6e8eb");
+    expect(html).toContain("border-radius: 12px");
+    expect(html).not.toContain("#ece7dc");
+    expect(html).not.toContain("#f2ead9");
+    expect(html).not.toContain("background: #161b22");
+    expect(html).not.toContain("background: #285f45");
+    expect(html).not.toContain("border: 2px solid #161b22");
   }, 90_000);
 });
