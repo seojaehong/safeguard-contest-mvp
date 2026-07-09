@@ -14830,11 +14830,17 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell > .command-topbar,
-.command-center-shell .command-topbar {
+.command-center-shell .command-topbar,
+.command-center-shell .workspace-command-topbar {
   position: relative !important;
   top: auto !important;
-  z-index: 2;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 2 !important;
   margin-bottom: 12px;
+  transform: none !important;
+  will-change: auto;
 }
 
 .command-center-shell > .command-viewport {
@@ -14896,5 +14902,35 @@ body:has(.safeclaw-landing) :is(
 @media (max-width: 900px) {
   .command-center-shell .workspace-side-nav {
     overflow: visible;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 720px) {
+  .command-center-shell .workspace-side-nav {
+    box-sizing: border-box;
+    min-height: 0 !important;
+    max-height: calc(100vh - 116px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-nav {
+    max-height: calc(100vh - 116px);
+  }
+
+  .command-center-shell .workspace-recent-list,
+  .command-center-shell.workspace-theme-day .workspace-recent-list {
+    display: none;
+  }
+
+  .command-center-shell .workspace-source-status p:nth-of-type(n + 3),
+  .command-center-shell.workspace-theme-day .workspace-source-status p:nth-of-type(n + 3) {
+    display: none;
+  }
+
+  .command-center-shell .linear-workspace-layout .command-main,
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .command-main {
+    min-height: calc(100vh - 116px);
   }
 }

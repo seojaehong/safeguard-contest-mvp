@@ -131,6 +131,44 @@ describe("workspace layout regression", () => {
     expect(metrics.headingBottom).toBeLessThanOrEqual(metrics.textareaTop! - 16);
   }, 90_000);
 
+  it("keeps the day sidebar bounded on wide short presentation screens", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 2048, height: 638 } });
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+
+    const metrics = await page.evaluate(() => {
+      const sideNav = document.querySelector(".workspace-side-nav");
+      const main = document.querySelector(".linear-workspace-layout .command-main");
+      const recentList = document.querySelector(".workspace-recent-list");
+      const hiddenSourceRows = Array.from(document.querySelectorAll(".workspace-source-status p"))
+        .slice(2)
+        .map((element) => getComputedStyle(element).display);
+      if (!sideNav || !main || !recentList) {
+        throw new Error("Workspace sidebar targets were not found");
+      }
+      const sideNavRect = sideNav.getBoundingClientRect();
+      const mainRect = main.getBoundingClientRect();
+      const sideNavStyle = getComputedStyle(sideNav);
+      const recentListStyle = getComputedStyle(recentList);
+      return {
+        sideNavBottom: Math.round(sideNavRect.bottom),
+        sideNavHeight: Math.round(sideNavRect.height),
+        sideNavOverflowY: sideNavStyle.overflowY,
+        mainLeft: Math.round(mainRect.left),
+        sideNavRight: Math.round(sideNavRect.right),
+        recentListDisplay: recentListStyle.display,
+        hiddenSourceRows
+      };
+    });
+
+    expect(metrics.sideNavHeight).toBeLessThanOrEqual(638 - 104);
+    expect(metrics.sideNavBottom).toBeLessThanOrEqual(638);
+    expect(metrics.sideNavOverflowY).toBe("auto");
+    expect(metrics.sideNavRight).toBeLessThanOrEqual(metrics.mainLeft - 8);
+    expect(metrics.recentListDisplay).toBe("none");
+    expect(metrics.hiddenSourceRows).toEqual(["none"]);
+  }, 90_000);
+
   it("keeps the workspace first impression typography solid and readable", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 720 } });
