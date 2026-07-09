@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { chromium, type Browser } from "playwright";
+import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 const port = 3227;
 const baseUrl = `http://127.0.0.1:${port}`;
@@ -524,5 +525,104 @@ describe("workspace layout regression", () => {
     expect(metrics.textarea.scrollTop).toBe(0);
     expect(metrics.textarea.scrollHeight).toBeLessThanOrEqual(metrics.textarea.clientHeight + 44);
     expect(metrics.helper.top).toBeGreaterThanOrEqual(metrics.textarea.bottom + 6);
+  }, 90_000);
+
+  it("keeps the generated document edit flow inside the workspace design system", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    await page.addInitScript(() => {
+      window.localStorage.setItem("safeclaw.aiMode", "template");
+    });
+    await page.route("**/api/weather?**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, weather: null })
+      });
+    });
+    await page.route("**/api/ask", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(sample)
+      });
+    });
+
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: /안전 문서 생성/ }).click();
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
+    await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
+
+    const metrics = await page.evaluate(() => {
+      function readRect(selector: string) {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing layout target: ${selector}`);
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return {
+          top: Math.round(rect.top),
+          bottom: Math.round(rect.bottom),
+          left: Math.round(rect.left),
+          right: Math.round(rect.right),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          display: style.display,
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          borderRadius: Number.parseFloat(style.borderRadius),
+          borderTopWidth: Number.parseFloat(style.borderTopWidth),
+          overflowX: style.overflowX,
+          overflowY: style.overflowY,
+          lineHeight: Number.parseFloat(style.lineHeight),
+          fontSize: Number.parseFloat(style.fontSize)
+        };
+      }
+
+      const fieldWorkspace = readRect(".field-workspace");
+      const rail = readRect(".workspace-rail");
+      const canvas = readRect(".workspace-canvas");
+      const side = readRect(".workspace-side");
+      const shell = readRect(".workpack-shell");
+      const editor = readRect(".document-editor");
+      const textarea = readRect(".document-textarea");
+      const activeTab = readRect(".doc-tab.active");
+      const focusMessage = readRect(".editor-focus-message");
+
+      return {
+        viewportWidth: window.innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        activeElementClass: document.activeElement?.className || "",
+        fieldWorkspace,
+        rail,
+        canvas,
+        side,
+        shell,
+        editor,
+        textarea,
+        activeTab,
+        focusMessage
+      };
+    });
+
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+    expect(metrics.fieldWorkspace.display).toBe("grid");
+    expect(metrics.rail.left).toBeGreaterThanOrEqual(metrics.fieldWorkspace.left);
+    expect(metrics.rail.right).toBeLessThanOrEqual(metrics.fieldWorkspace.right);
+    expect(metrics.rail.bottom).toBeLessThanOrEqual(Math.min(metrics.canvas.top, metrics.side.top) - 12);
+    expect(metrics.canvas.right).toBeLessThanOrEqual(metrics.side.left - 12);
+    expect(metrics.shell.display).toBe("grid");
+    expect(metrics.shell.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    expect(metrics.editor.backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
+    expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(9);
+    expect(metrics.textarea.backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
+    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
+    expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
+    expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
+    expect(metrics.focusMessage.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
+    expect(String(metrics.activeElementClass)).toContain("document-textarea");
   }, 90_000);
 });

@@ -1905,9 +1905,18 @@ export function WorkpackEditor({
     }
     setShowFocusCue(true);
     editorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 360);
+    const focusFrame = window.requestAnimationFrame(() => {
+      textareaRef.current?.focus({ preventScroll: true });
+    });
+    const focusTimer = window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 120);
+    const backupFocusTimer = window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 320);
     const timer = window.setTimeout(() => setShowFocusCue(false), 2200);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.clearTimeout(focusTimer);
+      window.clearTimeout(backupFocusTimer);
+      window.clearTimeout(timer);
+    };
   }, [focusToken, requestedDocumentKey]);
 
   function saveLocalDraft(nextValues: WorkpackDocumentValues) {
@@ -1953,7 +1962,7 @@ export function WorkpackEditor({
       delete next[itemId];
       return next;
     });
-    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 120);
+    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 80);
   }
 
   async function requestRemediation(item: RubricEvaluationItem) {
