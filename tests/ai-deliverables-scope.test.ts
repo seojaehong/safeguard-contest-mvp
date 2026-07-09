@@ -7,8 +7,7 @@ describe("AI deliverable group scope", () => {
       "riskAssessment",
       "tbmBriefingStructured",
       "tbmLogStructured",
-      "structuredRiskRows",
-      "tbmRiskLinks"
+      "structuredRiskRows"
     ]);
   });
 
@@ -19,7 +18,8 @@ describe("AI deliverable group scope", () => {
         "educationRecordStructured",
         "tbmLog",
         "free",
-        "foreign"
+        "foreign",
+        "tbmRiskLinks"
       ])
     );
   });
