@@ -697,8 +697,8 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
 }
 
 .command-topbar {
-  position: sticky;
-  top: 0;
+  position: relative;
+  top: auto;
   z-index: 20;
   display: grid;
   grid-template-columns: minmax(190px, auto) minmax(0, 1fr) minmax(180px, auto);
