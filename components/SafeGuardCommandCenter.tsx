@@ -9,7 +9,7 @@ import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/
 import { fetchAskStream } from "@/lib/ask-stream-client";
 import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
 import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/types";
-import type { HarnessImprovement, HarnessMemoryInput } from "@/lib/db-harness";
+import { buildDbHarnessSurfaceContract, type HarnessImprovement, type HarnessMemoryInput } from "@/lib/db-harness";
 import type { FieldExample } from "@/lib/field-examples";
 import { formatEvidenceBadge } from "@/lib/smsa-mapping";
 import {
@@ -611,23 +611,24 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
   }
 
   if (harnessSummary && harnessPacket) {
+    const harnessSurface = buildDbHarnessSurfaceContract(harnessPacket);
     const memoryCount = harnessSummary.improvementMemory + harnessSummary.workpackMemory;
     items.push({
-      label: "하네스 메모리",
+      label: harnessSurface.label,
       value: memoryCount
         ? `개선 ${harnessSummary.improvementMemory} · 작업 ${harnessSummary.workpackMemory}`
-        : "DB 우선 생성",
+        : harnessSurface.headline,
       detail: documentImprovement
         ? `${documentImprovement.hazardLabel}: ${documentImprovement.improvementText}`
         : documentWorkpackMemory
           ? `${documentWorkpackMemory.generatedAt} · ${documentWorkpackMemory.question}`
           : documentCoverage?.covered
             ? `${documentCoverage.document} 하네스 근거가 연결됐습니다.`
-            : "DB 근거를 먼저 고정하고 LLM은 문장화만 합니다.",
+            : harnessSurface.detail,
       meta: documentCoverage?.covered
         ? `문서 커버됨 · ${documentCoverage.evidenceTypes.join("/")}`
-        : harnessSummary.evidenceAuthority === "db_harness" ? "DB 근거 고정" : "계약 확인",
-      tone: harnessSummary.fallbackChainAllowed === false && documentCoverage?.covered !== false ? "ready" : "warn"
+        : harnessSurface.meta,
+      tone: harnessSurface.status === "locked" && documentCoverage?.covered !== false ? "ready" : "warn"
     });
   }
 

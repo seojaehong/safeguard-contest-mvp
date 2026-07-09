@@ -91,6 +91,15 @@ export type DbHarnessPacket = {
   };
 };
 
+export type DbHarnessSurfaceContract = {
+  label: "DB 하네스 계약";
+  status: "locked" | "review_required";
+  headline: string;
+  detail: string;
+  meta: string;
+  missing: string[];
+};
+
 export type HarnessMemoryInput = {
   improvements?: HarnessImprovement[];
   workpackMemory?: HarnessWorkpackMemory[];
@@ -390,6 +399,37 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
     "근거:",
     ...evidenceLines
   ].join("\n");
+}
+
+export function buildDbHarnessSurfaceContract(packet: DbHarnessPacket): DbHarnessSurfaceContract {
+  const coveredDocuments = packet.generationContract.documentCoverage.filter((item) => item.covered).length;
+  const requiredDocuments = packet.generationContract.requiredDocuments.length;
+  const fixedSourceCount =
+    packet.directEvidence.length +
+    packet.sifCases.length +
+    packet.supportingEvidence.length +
+    packet.improvementMemory.length +
+    packet.workpackMemory.length;
+  const vectorLabel = packet.retrievalContract.vector.ready
+    ? "vector ready"
+    : packet.retrievalContract.vector.attempted
+      ? `vector ${packet.retrievalContract.vector.reason}`
+      : "vector 승인 전";
+  const locked =
+    packet.generationContract.fallbackChainAllowed === false &&
+    packet.generationContract.genericProseSubstitutionAllowed === false &&
+    packet.generationContract.evidenceAuthority === "db_harness";
+
+  return {
+    label: "DB 하네스 계약",
+    status: locked && packet.ontologyChecklist.status === "ready" ? "locked" : "review_required",
+    headline: locked ? "DB 근거 고정 · LLM 문장화 전용" : "하네스 계약 검토 필요",
+    detail: fixedSourceCount
+      ? `고정 근거 ${fixedSourceCount}건 · 필수 문서 ${coveredDocuments}/${requiredDocuments}종 커버`
+      : `고정 근거 없음 · 필수 문서 ${coveredDocuments}/${requiredDocuments}종 커버`,
+    meta: `${packet.retrievalContract.mode} · ${vectorLabel}`,
+    missing: packet.ontologyChecklist.missing
+  };
 }
 
 export function hasDocumentCoverage(packet: DbHarnessPacket, document: string) {

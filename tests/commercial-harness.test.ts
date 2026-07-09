@@ -4,6 +4,7 @@ import {
   buildDbHarnessAnswer,
   buildDbHarnessPacket,
   buildDbHarnessPracticalPoints,
+  buildDbHarnessSurfaceContract,
   buildHarnessPromptContext,
   hasDocumentCoverage,
   parseHarnessMemoryInput
@@ -111,6 +112,7 @@ describe("DB harness packet", () => {
       }]
     });
     const promptContext = buildHarnessPromptContext(packet);
+    const surfaceContract = buildDbHarnessSurfaceContract(packet);
 
     expect(packet.mode).toBe("db_harness_first");
     expect(packet.sifCases).toHaveLength(1);
@@ -156,6 +158,15 @@ describe("DB harness packet", () => {
     expect(promptContext).toContain("detected: 추락, 하부 통제 미흡");
     expect(promptContext).toContain("observed: 작업발판 외측 난간 보강");
     expect(promptContext).toContain("ocr: 추락주의");
+    expect(surfaceContract).toMatchObject({
+      label: "DB 하네스 계약",
+      status: "locked",
+      headline: "DB 근거 고정 · LLM 문장화 전용",
+      meta: "rest-ilike · vector 승인 전"
+    });
+    expect(surfaceContract.detail).toContain("고정 근거");
+    expect(surfaceContract.detail).toContain("필수 문서 3/3종 커버");
+    expect(surfaceContract.missing).toEqual([]);
   });
 
   it("carries vector retrieval status into the DB harness packet after approval", () => {
@@ -210,9 +221,12 @@ describe("DB harness packet", () => {
       question: "성수동 외벽 도장 작업",
       references: [reference({ item_type: "technical-guideline", evidence_role: "direct" })]
     });
+    const surfaceContract = buildDbHarnessSurfaceContract(packet);
 
     expect(packet.ontologyChecklist.status).toBe("review_required");
     expect(packet.ontologyChecklist.missing).toContain("SIF 유사사례");
+    expect(surfaceContract.status).toBe("review_required");
+    expect(surfaceContract.missing).toContain("SIF 유사사례");
   });
 
   it("accepts client-supplied operation improvement memory for the generation harness", () => {
