@@ -1,0 +1,143 @@
+[
+  {
+    "name": "postdeploy-1024x319-dpr2",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-10\\workspace-overlap-current-check\\postdeploy-1024x319-dpr2.png",
+    "flags": {
+      "noHorizontalScroll": true,
+      "topbarClear": true,
+      "sideMainClear": true,
+      "textareaComposerClear": true,
+      "lineBoxComfort": true,
+      "firstViewportSubmit": true
+    },
+    "textarea": {
+      "top": 103,
+      "left": 332,
+      "right": 972,
+      "bottom": 211,
+      "width": 640,
+      "height": 108,
+      "display": "block",
+      "overflowY": "auto",
+      "paddingTop": 14,
+      "paddingBottom": 14,
+      "fontSize": 14,
+      "lineHeight": 23.8,
+      "scrollTop": 0,
+      "clientHeight": 106,
+      "scrollHeight": 106
+    },
+    "copy": {
+      "top": 0,
+      "left": 0,
+      "right": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0,
+      "display": "none",
+      "overflowY": "visible",
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "fontSize": 16,
+      "lineHeight": null,
+      "scrollTop": 0,
+      "clientHeight": 0,
+      "scrollHeight": 0
+    },
+    "messages": 0
+  },
+  {
+    "name": "postdeploy-1365x425-dpr15",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-10\\workspace-overlap-current-check\\postdeploy-1365x425-dpr15.png",
+    "flags": {
+      "noHorizontalScroll": true,
+      "topbarClear": true,
+      "sideMainClear": true,
+      "textareaComposerClear": true,
+      "lineBoxComfort": true,
+      "firstViewportSubmit": true
+    },
+    "textarea": {
+      "top": 129,
+      "left": 447,
+      "right": 1127,
+      "bottom": 253,
+      "width": 680,
+      "height": 124,
+      "display": "block",
+      "overflowY": "auto",
+      "paddingTop": 18,
+      "paddingBottom": 18,
+      "fontSize": 14,
+      "lineHeight": 24.36,
+      "scrollTop": 0,
+      "clientHeight": 122,
+      "scrollHeight": 122
+    },
+    "copy": {
+      "top": 0,
+      "left": 0,
+      "right": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0,
+      "display": "none",
+      "overflowY": "visible",
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "fontSize": 16,
+      "lineHeight": null,
+      "scrollTop": 0,
+      "clientHeight": 0,
+      "scrollHeight": 0
+    },
+    "messages": 0
+  },
+  {
+    "name": "postdeploy-mobile-390x844-dpr3",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-10\\workspace-overlap-current-check\\postdeploy-mobile-390x844-dpr3.png",
+    "flags": {
+      "noHorizontalScroll": true,
+      "topbarClear": true,
+      "sideMainClear": true,
+      "textareaComposerClear": true,
+      "lineBoxComfort": true,
+      "firstViewportSubmit": true
+    },
+    "textarea": {
+      "top": 454,
+      "left": 31,
+      "right": 359,
+      "bottom": 596,
+      "width": 328,
+      "height": 142,
+      "display": "block",
+      "overflowY": "auto",
+      "paddingTop": 16,
+      "paddingBottom": 16,
+      "fontSize": 15,
+      "lineHeight": 25.2,
+      "scrollTop": 0,
+      "clientHeight": 140,
+      "scrollHeight": 158
+    },
+    "copy": {
+      "top": 301,
+      "left": 31,
+      "right": 359,
+      "bottom": 413,
+      "width": 328,
+      "height": 113,
+      "display": "block",
+      "overflowY": "visible",
+      "paddingTop": 0,
+      "paddingBottom": 0,
+      "fontSize": 16,
+      "lineHeight": null,
+      "scrollTop": 0,
+      "clientHeight": 113,
+      "scrollHeight": 113
+    },
+    "messages": 0
+  }
+]
