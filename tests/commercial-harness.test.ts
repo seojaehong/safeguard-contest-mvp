@@ -382,7 +382,10 @@ describe("runAsk DB harness mode", () => {
 
     expect(rows.length).toBeGreaterThanOrEqual(5);
     expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
-    expect(rows[0].hazard).toContain("이동식 비계 작업발판·난간 점검 지침");
+    expect(rows[0].hazard).toContain("추락 위험");
+    expect(rows[0].hazard).toContain("작업발판·난간·아웃트리거");
+    expect(rows[0].hazard).toMatch(/미점검|미확인|미이행/);
+    expect(rows[0].hazard).not.toContain("이동식 비계 작업발판·난간 점검 지침");
     expect(rows[0].currentControls).toContain("작업발판·난간·아웃트리거 사전 점검");
     expect(rows[0].additionalControls).toContain("강풍 시 상부 작업 중지");
     expect(rows[0].evidenceRefs).toEqual(expect.arrayContaining([
@@ -390,7 +393,8 @@ describe("runAsk DB harness mode", () => {
       "이동식 비계 작업발판·난간 점검 지침",
       "검색: ranked"
     ]));
-    expect(rows.some((row) => row.hazard.includes("외벽 도장 중 이동식 비계 추락 사례"))).toBe(true);
+    expect(rows.some((row) => row.evidenceRefs?.includes("외벽 도장 중 이동식 비계 추락 사례"))).toBe(true);
+    expect(rows.every((row) => !/^[A-Z]-[A-Z]-\d{1,4}-\d{4}/.test(row.hazard))).toBe(true);
   });
 
   it("keeps template mode inside the DB harness contract without generic LLM fallback prose", async () => {
@@ -468,6 +472,7 @@ describe("runAsk DB harness mode", () => {
     expect(response.structured?.riskAssessmentRows.length).toBeGreaterThanOrEqual(5);
     expect(response.structured?.riskAssessmentRows.some((row) => row.hazard.includes("작업발판 외측 추락 위험"))).toBe(true);
     expect(response.structured?.tbmRiskLinks?.some((link) => link.hazard.includes("작업발판 외측 추락 위험"))).toBe(true);
+    expect(response.structured?.tbmRiskLinks?.every((link) => !/위험\s*위험/.test(link.confirmQuestion))).toBe(true);
     expect(response.deliverables.tbmBriefingStructured?.hazards.length).toBeGreaterThan(0);
     expect(response.deliverables.tbmLogStructured?.hazardsDiscussed.length).toBeGreaterThan(0);
   }, 20_000);
