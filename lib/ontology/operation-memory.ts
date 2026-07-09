@@ -176,7 +176,11 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
         analysisMode: improvement.analysisMode || null,
         photoPairAttached: improvement.photoPairAttached ?? null,
         visionLabel: improvement.visionUserLabel || null,
-        visionModel: improvement.visionModel || null
+        visionModel: improvement.visionModel || null,
+        photoCount: improvement.photoCount || null,
+        sourcePhotos: improvement.sourcePhotoNames?.join(", ") || null,
+        siteSignals: improvement.siteSignals?.join(", ") || null,
+        photoEvidence: improvement.visionEvidence || null
       }
     });
     pushUniqueEdge(edges, {

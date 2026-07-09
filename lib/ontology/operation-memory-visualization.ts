@@ -122,6 +122,10 @@ function metaLabel(key: string) {
   if (key === "photoPairAttached") return "비포/애프터";
   if (key === "visionLabel") return "이미지 분석";
   if (key === "visionModel") return "분석 모델";
+  if (key === "photoCount") return "사진 수";
+  if (key === "sourcePhotos") return "원본 사진";
+  if (key === "siteSignals") return "현장 신호";
+  if (key === "photoEvidence") return "사진 근거";
   if (key === "languageCode") return "언어";
   if (key === "readAt") return "확인 시각";
   return key;
@@ -138,8 +142,11 @@ function metaRows(node: OperationMemoryNode): OperationMemoryHoverCard["metaRows
     ["visionStatus", 1],
     ["analysisMode", 2],
     ["photoPairAttached", 3],
-    ["sourceType", 4],
-    ["visionModel", 5]
+    ["sourcePhotos", 4],
+    ["siteSignals", 5],
+    ["photoEvidence", 6],
+    ["sourceType", 7],
+    ["visionModel", 8]
   ]);
   return Object.entries(node.meta)
     .flatMap(([label, raw]) => {

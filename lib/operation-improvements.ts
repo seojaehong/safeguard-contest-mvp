@@ -102,6 +102,8 @@ export function buildAcceptedHazardPhotoAppendix(input: {
   acceptedCandidateKeys: readonly string[];
   summary?: string;
   ocrText?: string;
+  siteSignals?: readonly string[];
+  photoCount?: number;
 }): string {
   const accepted = acceptedHazardPhotoCandidates(input);
   if (!accepted.length) return "";
@@ -117,6 +119,8 @@ export function buildAcceptedHazardPhotoAppendix(input: {
       return `- ${candidate.label}(${severity}): ${candidate.detail}${documents}${evidence}`;
     })
   ];
+  if (input.photoCount && input.photoCount > 0) lines.push(`사진 수: ${input.photoCount}장`);
+  if (input.siteSignals?.length) lines.push(`사진 신호: ${input.siteSignals.join(" · ")}`);
   if (input.summary?.trim()) lines.push(`사진 요약: ${input.summary.trim()}`);
   if (input.ocrText?.trim()) lines.push(`사진 OCR: ${input.ocrText.trim()}`);
   return lines.join("\n");
@@ -128,6 +132,8 @@ export function buildAcceptedHazardPhotoHarnessImprovements(input: {
   acceptedCandidateKeys: readonly string[];
   summary?: string;
   ocrText?: string;
+  siteSignals?: readonly string[];
+  photoCount?: number;
 }): HarnessImprovement[] {
   const taskLabel = input.taskLabel.trim() || "현장 사진 첨부 작업";
   return acceptedHazardPhotoCandidates(input).map((candidate, index) => {
@@ -136,13 +142,20 @@ export function buildAcceptedHazardPhotoHarnessImprovements(input: {
       ? [...candidate.reflectedDocuments]
       : ["위험성평가표", "TBM 브리핑", "TBM 기록"];
     const sourcePhotoNames = candidate.sourcePhotoNames?.filter((name) => name.trim()).join(", ");
+    const sourcePhotoNameList = candidate.sourcePhotoNames?.map((name) => name.trim()).filter(Boolean).slice(0, MAX_INPUT_HAZARD_PHOTO_FILES) || [];
+    const photoCount = input.photoCount && input.photoCount > 0
+      ? input.photoCount
+      : sourcePhotoNameList.length || undefined;
+    const siteSignals = input.siteSignals?.map((signal) => signal.trim()).filter(Boolean).slice(0, 12) || [];
     const sourceLabel = candidate.source === "vision" ? "vision/OCR 사진 분석" : "사진 첨부 후보";
     const detail = candidate.detail.trim();
     const evidence = candidate.evidence?.trim();
     const visionSummary = [
       input.summary?.trim(),
       evidence ? `근거: ${evidence}` : "",
-      sourcePhotoNames ? `사진: ${sourcePhotoNames}` : ""
+      sourcePhotoNames ? `사진: ${sourcePhotoNames}` : "",
+      photoCount ? `사진수: ${photoCount}장` : "",
+      siteSignals.length ? `신호: ${siteSignals.join(" · ")}` : ""
     ].filter(Boolean).join(" / ");
 
     return {
@@ -159,7 +172,11 @@ export function buildAcceptedHazardPhotoHarnessImprovements(input: {
       visionSummary: visionSummary || undefined,
       detectedHazards: [candidate.label, candidate.severity ? `severity:${candidate.severity}` : ""].filter(Boolean),
       observedImprovement: detail,
-      ocrText: input.ocrText?.trim() || undefined
+      ocrText: input.ocrText?.trim() || undefined,
+      sourcePhotoNames: sourcePhotoNameList,
+      photoCount,
+      siteSignals,
+      visionEvidence: evidence || undefined
     };
   });
 }

@@ -1137,7 +1137,9 @@ export function SafeGuardCommandCenter({
       candidates: inputPhotoHazardCandidates(),
       acceptedCandidateKeys: acceptedInputHazardCandidateKeys,
       summary: inputHazardPhotoAnalysis.summary,
-      ocrText: inputHazardPhotoAnalysis.ocrText
+      ocrText: inputHazardPhotoAnalysis.ocrText,
+      siteSignals: inputHazardPhotoAnalysis.siteSignals,
+      photoCount: inputHazardPhotos.length
     });
     return [baseQuestion.trim(), appendix].filter(Boolean).join("\n\n").trim();
   }
@@ -1148,7 +1150,9 @@ export function SafeGuardCommandCenter({
       candidates: inputPhotoHazardCandidates(),
       acceptedCandidateKeys: acceptedInputHazardCandidateKeys,
       summary: inputHazardPhotoAnalysis.summary,
-      ocrText: inputHazardPhotoAnalysis.ocrText
+      ocrText: inputHazardPhotoAnalysis.ocrText,
+      siteSignals: inputHazardPhotoAnalysis.siteSignals,
+      photoCount: inputHazardPhotos.length
     });
     const storedImprovements: HarnessImprovement[] = operationImprovements.slice(0, 8).map((item) => ({
       id: item.remoteImprovementId || item.id,
@@ -1164,7 +1168,9 @@ export function SafeGuardCommandCenter({
       visionSummary: item.visionSummary || item.photoAnalysisSummary,
       detectedHazards: item.detectedHazards,
       observedImprovement: item.observedImprovement,
-      ocrText: item.ocrText
+      ocrText: item.ocrText,
+      sourcePhotoNames: [item.beforePhotoName || "", item.afterPhotoName || ""].filter(Boolean),
+      photoCount: [item.beforePhotoName, item.afterPhotoName].filter(Boolean).length || undefined
     }));
     const improvements = [...acceptedPhotoImprovements, ...storedImprovements].slice(0, 12);
     return { improvements, workpackMemory: [] };
