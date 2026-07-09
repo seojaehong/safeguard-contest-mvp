@@ -1,0 +1,171 @@
+{
+  "url": "http://127.0.0.1:3231/documents",
+  "title": "SafeClaw | 안전 문서팩 생성",
+  "scrollWidth": 1440,
+  "viewportWidth": 1440,
+  "panel": {
+    "top": 926,
+    "left": 613,
+    "right": 1395,
+    "bottom": 2101,
+    "width": 782,
+    "height": 1175,
+    "display": "grid",
+    "backgroundColor": "rgb(245, 246, 248)",
+    "color": "rgb(23, 25, 29)",
+    "borderColor": "rgb(225, 229, 235)",
+    "borderWidth": "1px",
+    "borderRadius": "9px",
+    "boxShadow": "none",
+    "fontSize": "16px",
+    "lineHeight": "normal",
+    "fontWeight": "400",
+    "overflowX": "hidden"
+  },
+  "preview": {
+    "top": 1025,
+    "left": 628,
+    "right": 1380,
+    "bottom": 2086,
+    "width": 752,
+    "height": 1061,
+    "display": "block",
+    "backgroundColor": "rgb(255, 255, 255)",
+    "color": "rgb(23, 25, 29)",
+    "borderColor": "rgb(225, 229, 235)",
+    "borderWidth": "1px",
+    "borderRadius": "9px",
+    "boxShadow": "none",
+    "fontSize": "16px",
+    "lineHeight": "normal",
+    "fontWeight": "400",
+    "overflowX": "auto"
+  },
+  "firstTableWrap": {
+    "top": 1320,
+    "left": 649,
+    "right": 1359,
+    "bottom": 1563,
+    "width": 710,
+    "height": 244,
+    "display": "block",
+    "backgroundColor": "rgba(0, 0, 0, 0)",
+    "color": "rgb(23, 25, 29)",
+    "borderColor": "rgb(231, 234, 238)",
+    "borderWidth": "1px",
+    "borderRadius": "10px",
+    "boxShadow": "none",
+    "fontSize": "16px",
+    "lineHeight": "normal",
+    "fontWeight": "400",
+    "overflowX": "auto"
+  },
+  "firstTh": {
+    "top": 1321,
+    "left": 650,
+    "right": 702,
+    "bottom": 1355,
+    "width": 52,
+    "height": 34,
+    "display": "table-cell",
+    "backgroundColor": "rgb(244, 245, 246)",
+    "color": "rgb(23, 25, 29)",
+    "borderColor": "rgb(23, 25, 29)",
+    "borderWidth": "0px",
+    "borderRadius": "0px",
+    "boxShadow": "none",
+    "fontSize": "12px",
+    "lineHeight": "17.52px",
+    "fontWeight": "700",
+    "overflowX": "visible"
+  },
+  "firstTd": {
+    "top": 1355,
+    "left": 650,
+    "right": 702,
+    "bottom": 1407,
+    "width": 52,
+    "height": 52,
+    "display": "table-cell",
+    "backgroundColor": "rgba(0, 0, 0, 0)",
+    "color": "rgb(23, 25, 29)",
+    "borderColor": "rgb(23, 25, 29)",
+    "borderWidth": "0px",
+    "borderRadius": "0px",
+    "boxShadow": "none",
+    "fontSize": "12px",
+    "lineHeight": "17.52px",
+    "fontWeight": "400",
+    "overflowX": "visible"
+  },
+  "sectionTitle": {
+    "top": 1283,
+    "left": 649,
+    "right": 720,
+    "bottom": 1312,
+    "width": 71,
+    "height": 29,
+    "display": "block",
+    "backgroundColor": "rgb(244, 245, 246)",
+    "color": "rgb(23, 25, 29)",
+    "borderColor": "rgb(231, 234, 238)",
+    "borderWidth": "1px",
+    "borderRadius": "8px",
+    "boxShadow": "none",
+    "fontSize": "13px",
+    "lineHeight": "normal",
+    "fontWeight": "700",
+    "overflowX": "visible"
+  },
+  "ths": [
+    {
+      "text": "No.",
+      "backgroundColor": "rgb(244, 245, 246)",
+      "color": "rgb(23, 25, 29)",
+      "borderColor": "rgb(23, 25, 29)"
+    },
+    {
+      "text": "항목",
+      "backgroundColor": "rgb(244, 245, 246)",
+      "color": "rgb(23, 25, 29)",
+      "borderColor": "rgb(23, 25, 29)"
+    },
+    {
+      "text": "내용 / 조치",
+      "backgroundColor": "rgb(244, 245, 246)",
+      "color": "rgb(23, 25, 29)",
+      "borderColor": "rgb(23, 25, 29)"
+    },
+    {
+      "text": "확인/담당",
+      "backgroundColor": "rgb(244, 245, 246)",
+      "color": "rgb(23, 25, 29)",
+      "borderColor": "rgb(23, 25, 29)"
+    },
+    {
+      "text": "No.",
+      "backgroundColor": "rgb(244, 245, 246)",
+      "color": "rgb(23, 25, 29)",
+      "borderColor": "rgb(23, 25, 29)"
+    },
+    {
+      "text": "항목",
+      "backgroundColor": "rgb(244, 245, 246)",
+      "color": "rgb(23, 25, 29)",
+      "borderColor": "rgb(23, 25, 29)"
+    },
+    {
+      "text": "내용 / 조치",
+      "backgroundColor": "rgb(244, 245, 246)",
+      "color": "rgb(23, 25, 29)",
+      "borderColor": "rgb(23, 25, 29)"
+    },
+    {
+      "text": "확인/담당",
+      "backgroundColor": "rgb(244, 245, 246)",
+      "color": "rgb(23, 25, 29)",
+      "borderColor": "rgb(23, 25, 29)"
+    }
+  ],
+  "consoleMessages": []
+}
