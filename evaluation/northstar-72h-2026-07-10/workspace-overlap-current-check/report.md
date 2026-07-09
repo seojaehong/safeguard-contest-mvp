@@ -41,6 +41,16 @@ Local fixed summary:
 
 - `local-fixed-summary.json`
 
+Postdeploy screenshots on `https://www.safeclaw.kr`:
+
+- `postdeploy-1024x319-dpr2.png`
+- `postdeploy-1365x425-dpr15.png`
+- `postdeploy-mobile-390x844-dpr3.png`
+
+Postdeploy summary:
+
+- `postdeploy-summary.json`
+
 Key local fixed result:
 
 - no horizontal scroll: pass
@@ -59,6 +69,10 @@ Key local fixed result:
   - Result: passed
 - `npm.cmd run build`
   - Result: passed
+- Production deployment
+  - Commit: `1492c0f`
+  - Alias: `https://www.safeclaw.kr`
+  - Postdeploy result: all checked viewports passed
 
 ## Notes
 
