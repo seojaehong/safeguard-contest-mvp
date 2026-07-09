@@ -14934,3 +14934,434 @@ body:has(.safeclaw-landing) :is(
     min-height: calc(100vh - 116px);
   }
 }
+
+/* Module pages final alignment: every internal page outside /workspace uses the
+   same quiet daylight workbench language as the workspace Day surface. */
+.safeclaw-module-shell.module-variant-document {
+  --workspace-canvas: #fafafb;
+  --workspace-surface-1: #ffffff;
+  --workspace-surface-2: #f5f6f8;
+  --workspace-surface-3: #eef1f4;
+  --workspace-ink: #17191d;
+  --workspace-muted: #525a66;
+  --workspace-subtle: #7a818c;
+  --workspace-rule: #e1e5eb;
+  --workspace-rule-strong: #cfd6df;
+  --workspace-accent: #6c6ff7;
+  --workspace-accent-hover: #5c60eb;
+  --workspace-success: #16a34a;
+  grid-template-columns: 252px minmax(0, 1fr);
+  background: var(--workspace-canvas) !important;
+  color: var(--workspace-ink) !important;
+  font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: 0;
+  word-break: keep-all;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail {
+  border-right: 1px solid var(--workspace-rule) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  padding: 18px 14px;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-brand {
+  gap: 10px;
+  color: var(--workspace-ink) !important;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-brand img {
+  width: 28px;
+  height: 28px;
+  filter: none;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail p {
+  margin: 7px 0 18px;
+  color: var(--workspace-muted) !important;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail nav {
+  gap: 12px;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail section {
+  border-top-color: var(--workspace-rule) !important;
+  padding: 14px 0;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail h2 {
+  margin-bottom: 8px;
+  color: var(--workspace-subtle) !important;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail a:not(.safeclaw-module-brand) {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--workspace-muted) !important;
+  padding: 8px 10px;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail a:not(.safeclaw-module-brand):hover,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail a.active {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-surface-2) !important;
+  color: var(--workspace-ink) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail a span {
+  color: var(--workspace-subtle) !important;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail a.active span {
+  color: var(--workspace-accent) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-rail a strong {
+  font-size: 14px;
+  font-weight: 620;
+  line-height: 1.45;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-main {
+  background: var(--workspace-canvas);
+  padding-bottom: 64px;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-nav {
+  position: sticky;
+  top: 0;
+  min-height: 58px;
+  border-bottom: 1px solid var(--workspace-rule) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-nav > span {
+  color: var(--workspace-muted) !important;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-nav b {
+  color: var(--workspace-ink) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-status {
+  border-color: var(--workspace-rule) !important;
+  background: var(--workspace-surface-1);
+  color: var(--workspace-muted) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-hero {
+  align-items: center;
+  gap: 24px;
+  border-bottom: 1px solid var(--workspace-rule) !important;
+  background: var(--workspace-canvas);
+  padding: 34px clamp(28px, 5vw, 64px);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-eyebrow,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-hero aside > span:first-child {
+  color: var(--workspace-accent) !important;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-hero h1 {
+  margin: 10px 0 12px;
+  color: var(--workspace-ink) !important;
+  font-size: clamp(36px, 4vw, 52px);
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1.12;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-hero p {
+  color: var(--workspace-muted) !important;
+  font-size: 15px !important;
+  font-weight: 440 !important;
+  line-height: 1.72 !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-hero aside,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-grid article,
+.safeclaw-module-shell.module-variant-document .safeclaw-current-workpack,
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc,
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-rail,
+.safeclaw-module-shell.module-variant-document .safeclaw-report-table,
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list article,
+.safeclaw-module-shell.module-variant-document .safeclaw-report-group,
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-stats p,
+.safeclaw-module-shell.module-variant-document .workspace-panel.card {
+  border-color: var(--workspace-rule) !important;
+  border-radius: 10px !important;
+  background: var(--workspace-surface-1) !important;
+  box-shadow: none !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-hero aside {
+  padding: 20px;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-hero aside strong {
+  color: var(--workspace-ink) !important;
+  font-size: 17px;
+  font-weight: 620;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel,
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-shell {
+  width: min(100% - 48px, 1180px);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel h2,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-grid article strong,
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list strong,
+.safeclaw-module-shell.module-variant-document .safeclaw-report-group strong,
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-stats strong {
+  color: var(--workspace-ink) !important;
+  letter-spacing: 0 !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-module-panel p,
+.safeclaw-module-shell.module-variant-document .safeclaw-module-grid article p,
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list p,
+.safeclaw-module-shell.module-variant-document .safeclaw-report-notes p {
+  color: var(--workspace-muted) !important;
+}
+
+@media (max-width: 980px) {
+  .safeclaw-module-shell.module-variant-document {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-rail {
+    position: relative;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--workspace-rule) !important;
+    padding: 6px 10px;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-brand {
+    margin-bottom: 4px;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-rail > p {
+    display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-rail nav {
+    gap: 6px;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-rail section {
+    border-top: 0 !important;
+    padding: 0;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-rail h2 {
+    display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-primary-nav,
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-secondary-nav {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-primary-nav::-webkit-scrollbar,
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-secondary-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-primary-nav a,
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-secondary-nav a {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    min-width: 108px;
+    min-height: 38px;
+    flex: 0 0 auto;
+    padding: 6px 9px;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-primary-nav a span,
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-secondary-nav a span {
+    grid-row: auto;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-primary-nav a small {
+    display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-nav {
+    position: relative;
+    top: auto;
+    display: flex;
+    min-height: 52px;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 10px 14px;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-nav > span:nth-child(2) {
+    display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-hero {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 24px 20px;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-hero h1 {
+    font-size: 32px;
+    line-height: 1.18;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-hero aside {
+    padding: 16px;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-panel,
+  .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-shell {
+    width: min(100% - 24px, 1180px);
+  }
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-document-cockpit {
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(240px, 300px);
+  width: min(100% - 48px, 1180px);
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 10px;
+  background: var(--workspace-surface-1) !important;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-primary,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export {
+  padding: clamp(20px, 2.4vw, 30px);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-primary {
+  border-right: 1px solid var(--workspace-rule) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index > span,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-primary > span,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export > span,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list small,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-primary-grid small,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export dt {
+  color: var(--workspace-accent) !important;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index h2,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-primary h2,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export h2 {
+  color: var(--workspace-ink) !important;
+  font-size: clamp(24px, 2.6vw, 38px);
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1.14;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-primary > p,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-primary-grid p,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list em {
+  color: var(--workspace-muted) !important;
+  font-weight: 500;
+  line-height: 1.65;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list button,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-primary-grid section,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export dl,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export a {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 9px;
+  background: var(--workspace-surface-2) !important;
+  box-shadow: none;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list button:not(.secondary):not(.ghost):not(.document-tab):not(.template-tab) {
+  border-color: var(--workspace-rule) !important;
+  background: var(--workspace-surface-2) !important;
+  color: var(--workspace-ink) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list button:hover,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list button:focus-visible {
+  border-color: var(--workspace-rule-strong) !important;
+  background: var(--workspace-surface-3) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list strong,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-primary-grid strong,
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export dd {
+  color: var(--workspace-ink) !important;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export dl div {
+  border-bottom: 1px solid var(--workspace-rule) !important;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export a {
+  color: var(--workspace-ink) !important;
+  font-family: inherit;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-doc-export a:first-of-type {
+  border-color: var(--workspace-accent) !important;
+  background: var(--workspace-accent) !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 980px) {
+  .safeclaw-module-shell.module-variant-document .safeclaw-document-cockpit {
+    grid-template-columns: 1fr;
+    width: min(100% - 24px, 1180px);
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-doc-index,
+  .safeclaw-module-shell.module-variant-document .safeclaw-doc-primary {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--workspace-rule) !important;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-doc-primary-grid {
+    grid-template-columns: 1fr;
+  }
+}
