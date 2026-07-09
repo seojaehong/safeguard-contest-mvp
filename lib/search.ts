@@ -59,6 +59,13 @@ function riskLevelFrom(likelihood: number, severity: number): RiskAssessmentRow[
   return "low";
 }
 
+export function normalizeRiskAssessmentRiskLevels(rows: RiskAssessmentRow[]): RiskAssessmentRow[] {
+  return rows.map((row) => ({
+    ...row,
+    riskLevel: riskLevelFrom(row.likelihood, row.severity)
+  }));
+}
+
 function inferFourM(text: string): FourM {
   if (/비계|지게차|장비|기계|차량|전기|용접|공구|호스|배관|펌프|밸브/.test(text)) return "Machine";
   if (/강풍|우천|폭염|자외선|누수|천장|바닥|밀폐|환기|화학|가스|분진/.test(text)) return "Media";
@@ -1416,7 +1423,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         v != null && key !== "structuredRiskRows" && key !== "structuredRiskRowsValidationIssues"
       )))
     };
-    const generatedStructuredRiskRows = aiBodies.structuredRiskRows || [];
+    const generatedStructuredRiskRows = normalizeRiskAssessmentRiskLevels(aiBodies.structuredRiskRows || []);
     const photoSeedRiskRows = buildPhotoHazardRiskRows(response, harnessMemory.improvements);
     const fallbackStructuredRiskRows = generatedStructuredRiskRows.length
       ? []

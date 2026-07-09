@@ -1,5 +1,5 @@
 import type { AskResponse } from "./types";
-import type { QaReviewResult } from "./ontology/qa-review";
+import type { MissingControl, QaReviewFound, QaReviewResult } from "./ontology/qa-review";
 import { resolveReviewTaskLabel } from "./mcp-tools";
 import { reviewDocpack } from "./ontology/qa-review-tool";
 import { createLogger } from "@/lib/logger";
@@ -64,6 +64,98 @@ export function attachOntologyQaResult(
   };
 }
 
+function appendRemediationSection(text: string | undefined, heading: string, lines: string[]) {
+  const body = (text || "").trim();
+  if (!body || !lines.length || body.includes(heading)) return text || "";
+  return `${body}\n\n${heading}\n${lines.map((line) => `- ${line}`).join("\n")}`;
+}
+
+function controlLine(item: MissingControl) {
+  return item.articles.length
+    ? `${item.control} (${item.articles.join(", ")})`
+    : item.control;
+}
+
+function needsRemediation(result: QaReviewResult): result is QaReviewFound {
+  return result.reviewable && (
+    result.missing.hazards.length > 0 ||
+    result.missing.controls.length > 0 ||
+    result.missing.articles.length > 0
+  );
+}
+
+export function applyOntologyQaRemediation(
+  response: AskResponse,
+  reviewTask: string,
+  result: QaReviewFound
+): AskResponse {
+  const missingHazardLines = result.missing.hazards.map((hazard) =>
+    `누락 위험요인 확인: ${hazard}`
+  );
+  const missingControlLines = result.missing.controls.map((control) =>
+    `필수 안전조치 반영: ${controlLine(control)}`
+  );
+  const missingArticleLines = result.missing.articles.slice(0, 6).map((article) =>
+    `관련 조문 확인: ${article}`
+  );
+  const commonLines = [
+    `검수 보완 작업: ${reviewTask}`,
+    ...missingHazardLines,
+    ...missingControlLines,
+    ...missingArticleLines,
+    "현장 여건에 맞는 담당자·확인시각·측정값은 전파 전 관리자가 확인합니다."
+  ];
+
+  if (commonLines.length <= 2) return response;
+
+  const tbmLines = [
+    `검수 보완 전달: ${reviewTask}`,
+    ...result.missing.controls.map((control) => `작업 전 확인: ${controlLine(control)}`),
+    ...result.missing.hazards.map((hazard) => `작업자 질문: ${hazard} 위험을 확인했습니까?`)
+  ];
+  const logLines = [
+    `검수 보완 확인: ${reviewTask}`,
+    ...result.missing.controls.map((control) => `확인 항목: ${controlLine(control)} / 담당자 확인 필요`)
+  ];
+
+  return {
+    ...response,
+    deliverables: {
+      ...response.deliverables,
+      riskAssessmentDraft: appendRemediationSection(
+        response.deliverables.riskAssessmentDraft,
+        "[온톨로지 QA 보완 반영 - 위험성평가]",
+        commonLines
+      ),
+      workPlanDraft: appendRemediationSection(
+        response.deliverables.workPlanDraft,
+        "[온톨로지 QA 보완 반영 - 작업계획]",
+        commonLines
+      ),
+      tbmBriefing: appendRemediationSection(
+        response.deliverables.tbmBriefing,
+        "[온톨로지 QA 보완 반영 - TBM]",
+        tbmLines.length ? tbmLines : commonLines
+      ),
+      tbmLogDraft: appendRemediationSection(
+        response.deliverables.tbmLogDraft,
+        "[온톨로지 QA 보완 반영 - TBM 기록]",
+        logLines.length ? logLines : commonLines
+      ),
+      safetyEducationRecordDraft: appendRemediationSection(
+        response.deliverables.safetyEducationRecordDraft,
+        "[온톨로지 QA 보완 반영 - 교육]",
+        commonLines
+      ),
+      emergencyResponseDraft: appendRemediationSection(
+        response.deliverables.emergencyResponseDraft,
+        "[온톨로지 QA 보완 반영 - 비상대응]",
+        commonLines
+      )
+    }
+  };
+}
+
 function qaErrorResult(message: string): QaReviewResult {
   return {
     reviewable: false,
@@ -87,7 +179,14 @@ export async function attachWebOntologyQa(response: AskResponse, question: strin
 
   try {
     const result = await reviewDocpack(reviewTask, source.text);
-    return attachOntologyQaResult(response, reviewTask, result, source.documentKeys);
+    if (!needsRemediation(result)) {
+      return attachOntologyQaResult(response, reviewTask, result, source.documentKeys);
+    }
+
+    const remediated = applyOntologyQaRemediation(response, reviewTask, result);
+    const remediatedSource = buildOntologyQaSource(remediated);
+    const rereviewed = await reviewDocpack(reviewTask, remediatedSource.text);
+    return attachOntologyQaResult(remediated, reviewTask, rereviewed, remediatedSource.documentKeys);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     log.warn("ontology QA failed", { reviewTask, message });
