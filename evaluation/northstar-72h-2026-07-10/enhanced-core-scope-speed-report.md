@@ -56,3 +56,28 @@ enhanced 모드에서는 `tbmRiskLinks`를 별도 AI 호출로 생성하지 않�
 - 최종 응답의 `structured.tbmRiskLinks`는 deterministic fallback으로 유지되는지
 - 전체 elapsed가 기존 87.8초보다 줄어드는지
 - 사진 개선 이력, DB 하네스, 온톨로지 QA가 계속 결과 첫머리와 품질 패널에 반영되는지
+
+## 배포 후 1차 결과
+
+배포 커밋: `ca8f090`
+프로덕션 alias: `https://www.safeclaw.kr`
+
+- 전체 응답: 66.6초
+- doc events: `riskAssessment`, `tbmBriefingStructured`, `tbmLogStructured`, `structuredRiskRows`
+- `tbmRiskLinks` doc event: 제거됨
+- 최종 `structured.tbmRiskLinks`: 5건 유지
+- DB 하네스: `ready`
+- 온톨로지 QA: `ready`, `통과`
+- raw fallback/camelCase 노출: 없음
+
+속도는 87.8초에서 66.6초로 개선됐다. 다만 품질 계약은 `overall=degraded`로 남았는데, 원인은 enhanced 모드가 의도적으로 `workPlanStructured`를 생성하지 않는데도 품질 계약이 full 모드의 4종 구조화 산출물 기준을 그대로 적용했기 때문이다.
+
+## 후속 수정
+
+`AskResponse.generationMode`를 추가하고, enhanced 응답에는 `generationMode: "enhanced"`를 기록한다. 품질 계약은 enhanced일 때 필수 구조화 산출물을 아래 3종으로 판정한다.
+
+- `riskAssessmentRows`
+- `tbmBriefingStructured`
+- `tbmLogStructured`
+
+`workPlanStructured`는 full 모드의 필수 구조화 산출물로 유지한다. 이렇게 해야 사용자가 일부러 줄인 enhanced 경로를 "미흡"으로 오해하지 않고, 실제 공유 준비 상태가 UI와 맞게 표시된다.

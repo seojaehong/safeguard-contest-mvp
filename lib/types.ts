@@ -328,6 +328,7 @@ export type AskResponse = {
       summary: string;
     };
   };
+  generationMode?: "template" | "enhanced" | "full";
   mode: "mock" | "live" | "fallback";
   scenario: {
     siteName: string;

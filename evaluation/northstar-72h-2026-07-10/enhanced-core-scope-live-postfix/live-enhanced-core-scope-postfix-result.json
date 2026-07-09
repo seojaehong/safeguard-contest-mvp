@@ -1,0 +1,214 @@
+{
+  "checkedAt": "2026-07-09T19:17:09.685Z",
+  "url": "https://www.safeclaw.kr/api/ask/stream",
+  "deployedCommit": "ca8f090",
+  "quality": {
+    "httpStatus": 200,
+    "elapsedMs": 66609,
+    "finalPresent": true,
+    "docEventNames": [
+      "riskAssessment",
+      "tbmBriefingStructured",
+      "tbmLogStructured",
+      "structuredRiskRows"
+    ],
+    "hasTbmRiskLinksDocEvent": false,
+    "docFailures": [
+      {
+        "t": 66349,
+        "name": "riskAssessment",
+        "status": "fail"
+      }
+    ],
+    "stageFailures": [],
+    "hasQualityContract": true,
+    "qualityOverall": "degraded",
+    "qualityItems": [
+      {
+        "key": "fallback",
+        "label": "실시간 근거",
+        "status": "ready",
+        "detail": "주요 근거 조회가 실시간으로 연결됐습니다."
+      },
+      {
+        "key": "ontology",
+        "label": "안전조치 검수",
+        "status": "ready",
+        "detail": "비계 조립·해체 작업의 필수 안전조치가 문서팩에 반영됐습니다."
+      },
+      {
+        "key": "evidence",
+        "label": "증빙 매핑",
+        "status": "ready",
+        "detail": "필수 문서 7/7종이 시행령 제4조 증빙 라벨에 연결됐습니다."
+      },
+      {
+        "key": "structured",
+        "label": "문서 구조 검수",
+        "status": "degraded",
+        "detail": "필수 구조화 산출물 3/4종이 준비됐습니다. 나머지는 기본 문서 형식으로 보완됐습니다."
+      },
+      {
+        "key": "dbHarness",
+        "label": "DB 하네스 계약",
+        "status": "ready",
+        "detail": "DB 근거 10건을 고정했고, 필수 문서 3/3종을 하네스가 커버했습니다."
+      },
+      {
+        "key": "persistence",
+        "label": "DB 저장 준비",
+        "status": "ready",
+        "detail": "문서팩 본문과 증빙 요약이 있어 관리자 로그인 후 서버 저장할 수 있습니다."
+      }
+    ],
+    "dbHarnessStatus": "ready",
+    "ontologyStatus": "ready",
+    "ontologyVerdict": "통과",
+    "structuredTbmRiskLinksCount": 5,
+    "firstTbmRiskLink": {
+      "riskRowIndex": 0,
+      "hazard": "이동식 비계 작업 중 불안정으로 인한 추락",
+      "control": "강풍 예보 시 작업 중지 기준 준수 및 작업 중지 (산업안전보건법 시행규칙 제12조(기상조건 등을 고려한 작업중지 등)), 작업 전 비계 상태 재점검, 안전대 체결 철저 (KOSHA D-C-13-2026 — 작업발판·난간·개구부 상태 확인 · 안전대 체결 및 작업반경 출입통제)",
+      "weatherSignal": "단시간 흐림, 빗방울, 기온 24℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
+      "confirmQuestion": "이동식 비계 작업 중 불안정으로 인한 추락 위험에 대해 강풍 예보 시 작업 중지 기준 준수 및 작업 중지 (산업안전보건법 시행규칙 제12조(기상조건 등을 고려한 작업중지 등)), 작업 전 비계 상태 재점검, 안전대 체결 철저 (KOSHA D-C-13-2026 — 작업발판·난간·개구부 상태 확인 · 안전대 체결 및 작업반경 출입통제) 조치를 이해하고 작업 전 확인했습니까?",
+      "owner": "현장소장",
+      "verification": "안전관리자가 2026-07-10 기준 planned 상태로 확인하고 TBM 기록에 남깁니다.",
+      "evidenceRefs": [
+        "산업안전보건법 시행규칙 제12조",
+        "KOSHA D-C-13-2026"
+      ]
+    },
+    "previewStartsWithMemory": false,
+    "hasPhotoImprovement": true,
+    "hasVisionEvidence": false,
+    "hasKosha": true,
+    "hasRawFallback": false,
+    "hasJigebe": false,
+    "bodyLength": 733,
+    "previewStart": "1) 하네스 판단\n- 직접 근거: D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정 / B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정 / B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정\n- SIF 유사사례: 1122 / 4. 마감공사 / 4.4 도장작업 / 1611 / 4. 마감공사 / 4.8 판넬 등 외부마감 작업\n- 작업·개선 이력: 작업발판 외측 추락 위험: Before 사진의 난간 누락 구간을 보강하고 After 사진에서 출입통제선을 확인 / 2026-07-09T09:10:00+09:00: 개선 반영됨\n\n2) 오늘 문서에 먼저 반영할 조치\n- 작업발판·난간·개구부 상태 확인\n- 안전대 체결 및 작업반경 출입통제\n- 가동부 방호덮개와 비상정지장치 확인\n- 정비 전 전원 차단 및 잠금표지\n- 보행자 동선과 장비 동선 분리\n- 신호수 배치 및 후진 경보 확인\n\n3) 보강 필요\n- 필수 3종 문서에 반영할 근거가 준비됐습니다.\n\n[기상 신호] 단시간 흐림, 빗방울, 기온 24℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)\n\n[교육 연계] [스킬업] 산업안전기사 필기 1편 (현장 적합)\n\n[KOSHA 보강] KOSHA 위험성평가 사업안내 (공식 링크 확인)\n\n[유사 재해사례] 시스템 비계 해체 작업 중 추락: 작업 전 위험요인 공유, 보호구 착용, 작업중지 기준 확인을 예방 포인트로 적용합니다."
+  },
+  "stageEvents": [
+    {
+      "t": 484,
+      "stage": "weather",
+      "status": "start"
+    },
+    {
+      "t": 484,
+      "stage": "training",
+      "status": "start"
+    },
+    {
+      "t": 484,
+      "stage": "koshaEducation",
+      "status": "start"
+    },
+    {
+      "t": 484,
+      "stage": "kosha",
+      "status": "start"
+    },
+    {
+      "t": 484,
+      "stage": "koshaOpenApi",
+      "status": "start"
+    },
+    {
+      "t": 484,
+      "stage": "accidentCases",
+      "status": "start"
+    },
+    {
+      "t": 484,
+      "stage": "response",
+      "status": "start"
+    },
+    {
+      "t": 484,
+      "stage": "safetyReference",
+      "status": "start"
+    },
+    {
+      "t": 484,
+      "stage": "citations",
+      "status": "start"
+    },
+    {
+      "t": 484,
+      "stage": "deliverables",
+      "status": "start"
+    },
+    {
+      "t": 548,
+      "stage": "training",
+      "status": "ok"
+    },
+    {
+      "t": 669,
+      "stage": "koshaEducation",
+      "status": "ok"
+    },
+    {
+      "t": 1013,
+      "stage": "kosha",
+      "status": "ok"
+    },
+    {
+      "t": 1824,
+      "stage": "safetyReference",
+      "status": "ok"
+    },
+    {
+      "t": 3813,
+      "stage": "koshaOpenApi",
+      "status": "ok"
+    },
+    {
+      "t": 3828,
+      "stage": "accidentCases",
+      "status": "ok"
+    },
+    {
+      "t": 6347,
+      "stage": "weather",
+      "status": "ok"
+    },
+    {
+      "t": 13404,
+      "stage": "response",
+      "status": "ok"
+    },
+    {
+      "t": 18545,
+      "stage": "citations",
+      "status": "ok"
+    },
+    {
+      "t": 66354,
+      "stage": "deliverables",
+      "status": "ok"
+    }
+  ],
+  "docEvents": [
+    {
+      "t": 66349,
+      "name": "riskAssessment",
+      "status": "fail"
+    },
+    {
+      "t": 66354,
+      "name": "tbmBriefingStructured",
+      "status": "ok"
+    },
+    {
+      "t": 66354,
+      "name": "tbmLogStructured",
+      "status": "ok"
+    },
+    {
+      "t": 66354,
+      "name": "structuredRiskRows",
+      "status": "ok"
+    }
+  ]
+}

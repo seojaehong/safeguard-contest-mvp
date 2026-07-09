@@ -274,6 +274,26 @@ describe("qualityContract", () => {
     expect(contract.persistence.status).toBe("ready");
   });
 
+  it("uses the core 3-structure contract for enhanced generation", () => {
+    const response = makeLiveStructuredResponse();
+    const deliverables = { ...response.deliverables };
+    delete deliverables.workPlanStructured;
+
+    const contract = buildQualityContract(
+      {
+        ...response,
+        generationMode: "enhanced",
+        deliverables
+      },
+      "2026-07-08T00:00:00.000Z"
+    );
+
+    expect(contract.overall).toBe("ready");
+    expect(contract.structured.status).toBe("ready");
+    expect(contract.structured.readyCount).toBe(3);
+    expect(contract.structured.requiredCount).toBe(3);
+  });
+
   it("attaches the contract without mutating the source response", () => {
     const response = makeLiveStructuredResponse();
     const attached = attachQualityContract(response, "2026-07-08T00:00:00.000Z");

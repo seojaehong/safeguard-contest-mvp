@@ -1540,6 +1540,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 
     const enriched: AskResponse = {
       ...response,
+      generationMode: aiMode,
       answer: [
         dbHarnessAnswer,
         `[기상 신호] ${weather.summary}`,

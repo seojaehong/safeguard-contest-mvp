@@ -17,6 +17,18 @@ const REQUIRED_STRUCTURED_KEYS = [
   "tbmLogStructured"
 ] as const;
 
+const ENHANCED_REQUIRED_STRUCTURED_KEYS = [
+  "riskAssessmentRows",
+  "tbmBriefingStructured",
+  "tbmLogStructured"
+] as const;
+
+type StructuredKey = typeof REQUIRED_STRUCTURED_KEYS[number];
+
+function requiredStructuredKeys(response: AskResponse): readonly StructuredKey[] {
+  return response.generationMode === "enhanced" ? ENHANCED_REQUIRED_STRUCTURED_KEYS : REQUIRED_STRUCTURED_KEYS;
+}
+
 function countReady(items: QualityContractItem[]) {
   return items.filter((item) => item.status === "ready").length;
 }
@@ -137,13 +149,14 @@ function structuredItem(response: AskResponse): QualityContractItem {
     tbmBriefingStructured: Boolean(response.deliverables.tbmBriefingStructured),
     tbmLogStructured: Boolean(response.deliverables.tbmLogStructured)
   };
-  const readyCount = REQUIRED_STRUCTURED_KEYS.filter((key) => readyFlags[key]).length;
-  if (readyCount === REQUIRED_STRUCTURED_KEYS.length) {
+  const requiredKeys = requiredStructuredKeys(response);
+  const readyCount = requiredKeys.filter((key) => readyFlags[key]).length;
+  if (readyCount === requiredKeys.length) {
     return {
       key: "structured",
       label: "문서 구조 검수",
       status: "ready",
-      detail: `필수 구조화 산출물 ${readyCount}/${REQUIRED_STRUCTURED_KEYS.length}종이 준비됐습니다.`
+      detail: `필수 구조화 산출물 ${readyCount}/${requiredKeys.length}종이 준비됐습니다.`
     };
   }
 
@@ -151,7 +164,7 @@ function structuredItem(response: AskResponse): QualityContractItem {
     key: "structured",
     label: "문서 구조 검수",
     status: readyCount === 0 ? "blocked" : "degraded",
-    detail: `필수 구조화 산출물 ${readyCount}/${REQUIRED_STRUCTURED_KEYS.length}종이 준비됐습니다. 나머지는 기본 문서 형식으로 보완됐습니다.`
+    detail: `필수 구조화 산출물 ${readyCount}/${requiredKeys.length}종이 준비됐습니다. 나머지는 기본 문서 형식으로 보완됐습니다.`
   };
 }
 
@@ -230,6 +243,7 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
   ];
   const modes = integrationModes(response);
   const overall = worstStatus(items);
+  const structuredRequiredKeys = requiredStructuredKeys(response);
   const ontology = items.find((item) => item.key === "ontology") ?? ontologyItem(response);
   const evidence = items.find((item) => item.key === "evidence") ?? evidenceItem(response);
   const structured = items.find((item) => item.key === "structured") ?? structuredItem(response);
@@ -265,13 +279,13 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
     },
     structured: {
       status: structured.status,
-      readyCount: REQUIRED_STRUCTURED_KEYS.filter((key) => {
+      readyCount: structuredRequiredKeys.filter((key) => {
         if (key === "riskAssessmentRows") {
           return Boolean(response.structured?.riskAssessmentRows.length && response.structured.riskAssessmentValidation.ok);
         }
         return Boolean(response.deliverables[key]);
       }).length,
-      requiredCount: REQUIRED_STRUCTURED_KEYS.length,
+      requiredCount: structuredRequiredKeys.length,
       detail: structured.detail
     },
     dbHarness: {
