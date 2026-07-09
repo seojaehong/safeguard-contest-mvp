@@ -42,8 +42,8 @@ const DOC_COPY: Record<string, string> = {
   tbmLog: "TBM 기록 작성",
   tbmRiskLinks: "TBM-위험성평가 연계 작성",
   educationRecordStructured: "안전보건교육 기록 작성",
-  free: "본문 상세 작성",
-  foreign: "외국인 근로자 안내문 작성"
+  free: "보조 문서 정리",
+  foreign: "다국어 안내문 정리"
 };
 
 const NON_BLOCKING_DOCS = new Set(["free", "foreign"]);
@@ -116,7 +116,7 @@ export function nextConsoleLines(
     return upsertLine(current, line);
   }
   if (event.kind === "error") {
-    return [...current, { id: `error:${current.length}`, label: "오류 발생", status: "fail", detail: event.message }];
+    return [...current, { id: `error:${current.length}`, label: "생성 경로 검토 필요", status: "warn", detail: event.message }];
   }
   if (event.kind === "final") {
     const deliverables = extractDeliverables(event.payload);

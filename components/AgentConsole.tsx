@@ -15,7 +15,7 @@ const MAX_VISIBLE_LINES = 18;
 function statusIcon(status: AgentConsoleLineStatus): string {
   if (status === "ok") return "✓";
   if (status === "warn") return "!";
-  if (status === "fail") return "✗";
+  if (status === "fail") return "!";
   if (status === "active") return "▸";
   return "·";
 }

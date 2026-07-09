@@ -619,7 +619,7 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
         : documentWorkpackMemory
           ? `${documentWorkpackMemory.generatedAt} · ${documentWorkpackMemory.question}`
           : "DB 근거를 먼저 고정하고 LLM은 문장화만 합니다.",
-      meta: harnessSummary.fallbackChainAllowed === false ? "naturalize_only" : "계약 확인",
+      meta: harnessSummary.fallbackChainAllowed === false ? "DB 근거 우선" : "계약 확인",
       tone: harnessSummary.fallbackChainAllowed === false ? "ready" : "warn"
     });
   }
@@ -1697,7 +1697,7 @@ export function SafeGuardCommandCenter({
                 </div>
               {inputHazardPhotoAnalysis.summary || inputHazardPhotoAnalysis.ocrText || inputHazardPhotoAnalysis.siteSignals.length ? (
                 <article className="input-photo-analysis-summary">
-                  <span>{inputHazardPhotoAnalysis.status === "analyzed" ? "Vision result" : "Vision status"}</span>
+                  <span>{inputHazardPhotoAnalysis.status === "analyzed" ? "사진 분석 결과" : "사진 분석 상태"}</span>
                   {inputHazardPhotoAnalysis.summary ? <p>{inputHazardPhotoAnalysis.summary}</p> : null}
                   {inputHazardPhotoAnalysis.siteSignals.length ? <small>신호: {inputHazardPhotoAnalysis.siteSignals.join(" · ")}</small> : null}
                   {inputHazardPhotoAnalysis.ocrText ? <small>OCR: {inputHazardPhotoAnalysis.ocrText}</small> : null}
@@ -1859,17 +1859,23 @@ export function SafeGuardCommandCenter({
                 </div>
               </div>
             ) : null}
-            <div className="document-review-status-strip" aria-label="문서 검수 상태">
-              {generationStages.map((stage) => (
-                <article key={stage.label} className={readinessClass(stage.tone)}>
-                  <span>{stage.label}</span>
-                  <strong>{stage.tone === "ready" ? "완료" : state === "generating" ? "진행" : "대기"}</strong>
-                </article>
-              ))}
-            </div>
-            <div className={`inline-progress document-review-meter ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${currentDocProgress}/${totalDocumentCount}`}>
-              <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
-            </div>
+            <details className="document-check-details" open={busy}>
+              <summary>
+                <span>제출 전 점검 흐름</span>
+                <strong>{busy ? "진행 중" : data ? "완료" : "생성 후 확인"}</strong>
+              </summary>
+              <div className="document-review-status-strip" aria-label="문서 검수 상태">
+                {generationStages.map((stage) => (
+                  <article key={stage.label} className={readinessClass(stage.tone)}>
+                    <span>{stage.label}</span>
+                    <strong>{stage.tone === "ready" ? "완료" : state === "generating" ? "진행" : "대기"}</strong>
+                  </article>
+                ))}
+              </div>
+              <div className={`inline-progress document-review-meter ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${currentDocProgress}/${totalDocumentCount}`}>
+                <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
+              </div>
+            </details>
             <div className="document-viewer-shell">
               <div className="document-viewer-list" aria-label="문서 목록">
                 {focusDocumentItems.map((item, index) => {

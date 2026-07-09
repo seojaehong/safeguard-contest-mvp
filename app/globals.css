@@ -12085,6 +12085,42 @@ body:has(.safeclaw-landing) :is(
   background: var(--workspace-surface-2);
 }
 
+.command-center-shell .document-check-details {
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-2);
+}
+
+.command-center-shell .document-check-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  list-style: none;
+  padding: 11px 12px;
+  color: var(--workspace-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.command-center-shell .document-check-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.command-center-shell .document-check-details summary strong {
+  color: var(--workspace-ink);
+  font-size: 12px;
+}
+
+.command-center-shell .document-check-details .document-review-status-strip {
+  border-top: 1px solid var(--workspace-rule);
+  padding: 12px;
+}
+
+.command-center-shell .document-check-details .document-review-meter {
+  margin: 0 12px 12px;
+}
+
 .command-center-shell .document-work-history summary {
   display: flex;
   align-items: center;
