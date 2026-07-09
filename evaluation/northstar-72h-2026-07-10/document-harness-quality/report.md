@@ -87,6 +87,39 @@ Result:
 
 Local quality still remained `degraded` because this workstation lacks some public API keys, so several live evidence routes correctly fall back. That is an environment readiness issue, not a harness or ontology remediation failure.
 
+## Post-Deploy Check After First Remediation
+
+Source: `postdeploy-enhanced-after-remediation-summary.json`
+
+Deployment:
+
+- `https://safeguard-contest-evb1wr4ig-seojaehongs-projects.vercel.app`
+- Alias: `https://www.safeclaw.kr`
+
+Result:
+
+- Mode: `live`
+- Public APIs: connected
+- Quality: `degraded`
+- Remaining issue:
+  - The final structured rows were normalized, but stale AI precheck text still remained in `structuredRiskRowsValidationIssues`.
+  - User-visible answer still included `riskLevel: must match likelihood and severity as medium`.
+
+Interpretation:
+
+The server-side row data was being fixed, but the old pre-normalization warning was still merged back into the final quality contract. That made the result look unimproved even when the final rows were corrected.
+
+## Second Fix: Final-Only Structured Validation
+
+Implemented final-only validation for structured risk rows:
+
+1. Normalize AI rows so `riskLevel` follows likelihood/severity.
+2. Validate the normalized rows.
+3. Discard stale AI precheck issues.
+4. Use only final validation issues in `qualityContract` and answer status.
+
+Added a regression test that a row with stale AI risk level mismatch becomes `high` and has no final validation issues after normalization.
+
 ## Verification
 
 ```powershell
@@ -94,6 +127,20 @@ npm.cmd test -- tests\risk-row-normalization.test.ts tests\workpack-ontology-qa.
 ```
 
 Result: 5 test files, 25 tests passed.
+
+Additional verification after the second fix:
+
+```powershell
+npm.cmd test -- tests\workspace-layout-regression.test.ts tests\risk-row-normalization.test.ts tests\quality-contract.test.ts tests\workpack-ontology-qa.test.ts tests\commercial-harness.test.ts
+npm.cmd run typecheck
+npm.cmd run build
+```
+
+Result:
+
+- 5 focused test files, 31 tests passed.
+- Typecheck passed.
+- Production build passed.
 
 ## Product Meaning
 

@@ -20,7 +20,7 @@ import { fetchAccidentCases } from "./accident-cases";
 import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
 import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission, reconcileLanguages } from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
-import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow } from "./risk-assessment-schema";
+import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow, type RiskAssessmentValidationIssue } from "./risk-assessment-schema";
 import { splitDocumentMeta } from "./doc-meta-split";
 import { buildEvidenceLabels } from "./smsa-mapping";
 import { createLogger } from "@/lib/logger";
@@ -64,6 +64,15 @@ export function normalizeRiskAssessmentRiskLevels(rows: RiskAssessmentRow[]): Ri
     ...row,
     riskLevel: riskLevelFrom(row.likelihood, row.severity)
   }));
+}
+
+export function normalizeAndValidateRiskAssessmentRows(rows: RiskAssessmentRow[]): {
+  rows: RiskAssessmentRow[];
+  issues: RiskAssessmentValidationIssue[];
+} {
+  const normalized = normalizeRiskAssessmentRiskLevels(rows);
+  const validation = validateRiskAssessmentRows(normalized);
+  return { rows: validation.rows, issues: validation.issues };
 }
 
 function inferFourM(text: string): FourM {
@@ -1423,7 +1432,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         v != null && key !== "structuredRiskRows" && key !== "structuredRiskRowsValidationIssues"
       )))
     };
-    const generatedStructuredRiskRows = normalizeRiskAssessmentRiskLevels(aiBodies.structuredRiskRows || []);
+    const generatedStructuredRiskValidation = normalizeAndValidateRiskAssessmentRows(aiBodies.structuredRiskRows || []);
+    const generatedStructuredRiskRows = generatedStructuredRiskValidation.rows;
     const photoSeedRiskRows = buildPhotoHazardRiskRows(response, harnessMemory.improvements);
     const fallbackStructuredRiskRows = generatedStructuredRiskRows.length
       ? []
@@ -1434,9 +1444,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const structuredRiskRows = appendPhotoSeedRiskRows(baseStructuredRiskRows, photoSeedRiskRows);
     const acceptedPhotoSeedRiskRows = structuredRiskRows.slice(baseStructuredRiskRows.length);
     const structuredValidation = validateRiskAssessmentRows(structuredRiskRows);
-    const structuredRiskIssues = generatedStructuredRiskRows.length
-      ? [...(aiBodies.structuredRiskRowsValidationIssues || []), ...structuredValidation.issues]
-      : structuredValidation.issues;
+    const structuredRiskIssues = structuredValidation.issues;
     const structuredRiskSourceDetail = generatedStructuredRiskRows.length
       ? `structured rows=AI${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`
       : `structured rows=deterministic fallback${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`;

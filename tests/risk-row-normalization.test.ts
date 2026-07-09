@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeRiskAssessmentRiskLevels } from "@/lib/search";
+import { normalizeAndValidateRiskAssessmentRows, normalizeRiskAssessmentRiskLevels } from "@/lib/search";
 import { validateRiskAssessmentRows, type RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 
 function row(overrides: Partial<RiskAssessmentRow> = {}): RiskAssessmentRow {
@@ -42,5 +42,15 @@ describe("risk row normalization", () => {
     const validation = validateRiskAssessmentRows(normalized);
     expect(validation.ok).toBe(true);
     expect(validation.issues).toEqual([]);
+  });
+
+  it("validates only the final normalized rows, not stale AI precheck issues", () => {
+    const finalValidation = normalizeAndValidateRiskAssessmentRows([
+      row({ likelihood: 4, severity: 5, riskLevel: "medium" })
+    ]);
+
+    expect(finalValidation.rows).toHaveLength(1);
+    expect(finalValidation.rows[0].riskLevel).toBe("high");
+    expect(finalValidation.issues).toEqual([]);
   });
 });

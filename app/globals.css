@@ -14899,6 +14899,10 @@ body:has(.safeclaw-landing) :is(
   overflow: auto;
 }
 
+.command-center-shell .linear-workspace-layout .command-main.workspace-view-input {
+  padding: 0 !important;
+}
+
 @media (max-width: 900px) {
   .command-center-shell .workspace-side-nav {
     overflow: visible;
@@ -14932,6 +14936,85 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .linear-workspace-layout .command-main,
   .command-center-shell.workspace-theme-day .linear-workspace-layout .command-main {
     min-height: calc(100vh - 116px);
+  }
+
+  .command-center-shell .linear-workspace-layout .command-main.workspace-view-input,
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .command-main.workspace-view-input {
+    min-height: calc(100vh - 116px);
+    padding: 0 !important;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 560px) {
+  .command-center-shell .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    gap: 14px;
+    padding: 22px clamp(28px, 4vw, 48px) 28px !important;
+  }
+
+  .command-center-shell .workspace-input-page .command-copy,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy {
+    width: min(760px, 100%);
+  }
+
+  .command-center-shell .workspace-input-page .command-copy h1,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
+    max-width: 680px;
+    margin: 6px 0 8px;
+    font-size: clamp(40px, 4.1vw, 52px);
+    line-height: 1.1;
+  }
+
+  .command-center-shell .workspace-input-page .command-copy p,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy p {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .command-center-shell .workspace-input-page .command-console,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console {
+    width: min(780px, 100%);
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .command-center-shell .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input {
+    min-height: 126px;
+    padding: 16px 18px;
+    font-size: 16px;
+    line-height: 1.78;
+  }
+
+  .command-center-shell .workspace-input-page .input-helper,
+  .command-center-shell.workspace-theme-day .workspace-input-page .input-helper {
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .command-center-shell .workspace-input-page .field-brief-chip-row,
+  .command-center-shell.workspace-theme-day .workspace-input-page .field-brief-chip-row {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .command-center-shell .workspace-input-page .field-brief-chip-row span,
+  .command-center-shell.workspace-theme-day .workspace-input-page .field-brief-chip-row span {
+    min-height: 28px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  .command-center-shell .workspace-input-page .evidence-readiness-rail,
+  .command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-rail {
+    gap: 8px;
+    padding: 0 !important;
+  }
+
+  .command-center-shell .workspace-input-page .evidence-readiness-card,
+  .command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-card {
+    min-height: 54px;
+    padding: 9px 10px;
   }
 }
 
