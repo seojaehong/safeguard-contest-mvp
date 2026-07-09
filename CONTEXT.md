@@ -52,6 +52,14 @@ User-facing copy should call this `제출 전 점검` or `서식 완성도 점�
 
 `작업 이력 그래프` means the graph for a specific workpack or repeated field operation: Workpack, Hazard, Control, Improvement, Evidence, Ack, photo evidence, and dispatch events. It is distinct from the domain ontology of law, hazards, controls, and obligations.
 
+### Knowledge Promotion Candidate
+
+`지식 승격 후보` means a proposed update derived from tenant operation memory, public safety events, or evidence review. It can be stored, compared, and reviewed, but it is not part of the **Public Reference Corpus** until an explicit approval step promotes it.
+
+### Operator Wiki Export
+
+`운영자 위키 내보내기` means a Markdown/JSONL review surface generated from published ontology, public reference material, or tenant-scoped operation memory. It helps operators inspect and curate knowledge, but it is not the production source of truth.
+
 ### SafeClaw Brand System
 
 SafeClaw uses a field-instrument brand system on public and worker-facing safety screens, not a soft demo landing-page style. Workspace screens may use a commercial Day/Night workbench theme when the structure, hierarchy, and safety semantics remain clear.
@@ -67,6 +75,8 @@ Worker-facing safety notices are the only exception to the no-pictogram rule. Li
 - A **Tenant Operation Memory** item may feed the **Evidence Harness** only inside its organization/site scope.
 - A **Tenant Operation Memory** item may become part of the **Public Reference Corpus** only after explicit review and promotion.
 - An **Operation Graph** visualizes field history and improvements; it should not be used as a substitute term for the domain ontology.
+- A **Knowledge Promotion Candidate** may be proposed from **Tenant Operation Memory**, but it remains review-only until approved for the **Public Reference Corpus**.
+- An **Operator Wiki Export** may summarize **Operation Graph** and ontology material for review, but SafeClaw runtime decisions still come from the DB, MCP tools, and **Evidence Harness**.
 
 ## Flagged Ambiguities
 
@@ -74,3 +84,4 @@ Worker-facing safety notices are the only exception to the no-pictogram rule. Li
 - "학습" or "파인튜닝" is ambiguous in product copy. Use **Evidence Harness** or "SIF/KOSHA 기반 근거 검색" unless the model is actually fine-tuned.
 - "LLM Wiki" is ambiguous in product copy. Use **Public Reference Corpus** for reviewed common knowledge and **Tenant Operation Memory** for private work history.
 - "에이전트 내재화" is ambiguous. Use **Agent Runtime Consumer** when OpenClaw/Codex/Hermes calls SafeClaw MCP tools, and reserve "core engine migration" for an approved backend rewrite.
+- "자동 지식 업데이트" is ambiguous. Use **Knowledge Promotion Candidate** when an agent proposes a change, and reserve "published corpus update" for an explicitly approved promotion.
