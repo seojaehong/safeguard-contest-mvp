@@ -10,6 +10,7 @@ import {
   parseHarnessMemoryInput
 } from "@/lib/db-harness";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { validateRiskAssessmentRows } from "@/lib/risk-assessment-schema";
 import { attachDbHarnessFallback, buildSafetyReferenceRiskRows, normalizeSafetyTermTypos, runAsk } from "@/lib/search";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
@@ -380,6 +381,7 @@ describe("runAsk DB harness mode", () => {
     ], "오후 강풍 예보");
 
     expect(rows.length).toBeGreaterThanOrEqual(5);
+    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
     expect(rows[0].hazard).toContain("이동식 비계 작업발판·난간 점검 지침");
     expect(rows[0].currentControls).toContain("작업발판·난간·아웃트리거 사전 점검");
     expect(rows[0].additionalControls).toContain("강풍 시 상부 작업 중지");
