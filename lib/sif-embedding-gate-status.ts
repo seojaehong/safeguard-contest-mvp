@@ -42,6 +42,21 @@ export type SifEmbeddingGateStatus = {
     vectorFeatureFlagEnabled: boolean;
     executionReadyAfterApproval: boolean;
   };
+  readinessVerdict: {
+    state:
+      | "corpus-ready-migration-required"
+      | "runtime-env-required"
+      | "embedding-awaits-approval"
+      | "upload-awaits-approval"
+      | "vector-activation-ready"
+      | "vector-active"
+      | "blocked";
+    label: string;
+    answer: string;
+    nextAction: string;
+    embeddingAlreadyRun: boolean;
+    dbUploadAlreadyRun: boolean;
+  };
   vectorGuard: {
     status: "locked" | "blocked" | "ready" | "active";
     label: string;
@@ -358,6 +373,94 @@ function buildNextApprovalGate(input: {
   };
 }
 
+function buildReadinessVerdict(input: {
+  runtimeReady: boolean;
+  vectorGuard: SifEmbeddingGateStatus["vectorGuard"];
+  runtimeDbProbe: SifEmbeddingGateStatus["runtimeDbProbe"];
+  embeddedCount: number;
+  uploadedCount: number;
+  corpusCount: number;
+  nextApprovalGate: SifEmbeddingGateStatus["nextApprovalGate"];
+}): SifEmbeddingGateStatus["readinessVerdict"] {
+  const embeddingAlreadyRun = input.embeddedCount > 0;
+  const dbUploadAlreadyRun = input.uploadedCount > 0;
+
+  if (input.vectorGuard.status === "blocked") {
+    return {
+      state: "blocked",
+      label: "Vector flag 차단",
+      answer: "업로드 검증 전 vector 검색 flag가 켜져 있어 승인 게이트가 차단된 상태입니다.",
+      nextAction: input.nextApprovalGate.action,
+      embeddingAlreadyRun,
+      dbUploadAlreadyRun
+    };
+  }
+
+  if (input.vectorGuard.status === "active") {
+    return {
+      state: "vector-active",
+      label: "SIF vector 검색 활성",
+      answer: "SIF 임베딩 생성, DB 업로드, vector 검색 활성화가 모두 끝난 상태입니다.",
+      nextAction: input.nextApprovalGate.action,
+      embeddingAlreadyRun,
+      dbUploadAlreadyRun
+    };
+  }
+
+  if (input.vectorGuard.status === "ready") {
+    return {
+      state: "vector-activation-ready",
+      label: "Vector 활성 승인 대기",
+      answer: "SIF 임베딩과 DB 업로드는 검증됐고, vector 검색 flag 활성 승인만 남았습니다.",
+      nextAction: input.nextApprovalGate.action,
+      embeddingAlreadyRun,
+      dbUploadAlreadyRun
+    };
+  }
+
+  if (!input.runtimeDbProbe.tableReady || !input.runtimeDbProbe.rpcReady) {
+    return {
+      state: "corpus-ready-migration-required",
+      label: "코퍼스 준비 · 임베딩 미실행",
+      answer: `SIF 코퍼스 ${input.corpusCount.toLocaleString("ko-KR")}건은 준비됐지만, 임베딩 생성과 DB 업로드는 아직 실행되지 않았습니다.`,
+      nextAction: input.nextApprovalGate.action,
+      embeddingAlreadyRun,
+      dbUploadAlreadyRun
+    };
+  }
+
+  if (!input.runtimeReady) {
+    return {
+      state: "runtime-env-required",
+      label: "실행 환경 확인 필요",
+      answer: "DB 표면은 준비됐지만 OpenAI key 또는 Supabase service role 확인 전이라 임베딩 실행을 보류합니다.",
+      nextAction: input.nextApprovalGate.action,
+      embeddingAlreadyRun,
+      dbUploadAlreadyRun
+    };
+  }
+
+  if (!embeddingAlreadyRun) {
+    return {
+      state: "embedding-awaits-approval",
+      label: "임베딩 생성 승인 대기",
+      answer: "DB 표면과 실행 환경은 준비됐고, 비용 발생 단계인 SIF 임베딩 생성 승인만 남았습니다.",
+      nextAction: input.nextApprovalGate.action,
+      embeddingAlreadyRun,
+      dbUploadAlreadyRun
+    };
+  }
+
+  return {
+    state: "upload-awaits-approval",
+    label: "DB 업로드 승인 대기",
+    answer: "SIF 임베딩 벡터는 생성됐지만 DB 업로드와 row count 검증이 아직 끝나지 않았습니다.",
+    nextAction: input.nextApprovalGate.action,
+    embeddingAlreadyRun,
+    dbUploadAlreadyRun
+  };
+}
+
 function buildApprovalPacket(input: {
   decisions: string[];
   artifacts: SifEmbeddingGateStatus["artifacts"];
@@ -469,6 +572,20 @@ export function getSifEmbeddingGateStatus(
     };
   });
   const overallOk = ok && vectorGuard.status !== "blocked";
+  const nextApprovalGate = buildNextApprovalGate({
+    runtimeReady: runtimeExecutionReadyAfterApproval,
+    vectorGuard,
+    runtimeDbProbe,
+    migrationPath: readString(preflight, "migrationPath", "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"),
+    embeddedCount,
+    uploadedCount,
+    corpusCount: readNumber(report, "corpusCount"),
+    commandHeldUntilApproval: readString(
+      preflight,
+      "commandHeldUntilApproval",
+      "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload"
+    )
+  });
 
   return {
     ok: overallOk,
@@ -518,6 +635,15 @@ export function getSifEmbeddingGateStatus(
       vectorFeatureFlagEnabled,
       executionReadyAfterApproval: runtimeExecutionReadyAfterApproval
     },
+    readinessVerdict: buildReadinessVerdict({
+      runtimeReady: runtimeExecutionReadyAfterApproval,
+      vectorGuard,
+      runtimeDbProbe,
+      embeddedCount,
+      uploadedCount,
+      corpusCount: readNumber(report, "corpusCount"),
+      nextApprovalGate
+    }),
     vectorGuard,
     preflightChecks,
     approvalSteps: buildApprovalSteps(
@@ -528,20 +654,7 @@ export function getSifEmbeddingGateStatus(
       runtimeDbProbe.rpcReady
     ),
     runtimeDbProbe,
-    nextApprovalGate: buildNextApprovalGate({
-      runtimeReady: runtimeExecutionReadyAfterApproval,
-      vectorGuard,
-      runtimeDbProbe,
-      migrationPath: readString(preflight, "migrationPath", "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"),
-      embeddedCount,
-      uploadedCount,
-      corpusCount: readNumber(report, "corpusCount"),
-      commandHeldUntilApproval: readString(
-        preflight,
-        "commandHeldUntilApproval",
-        "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload"
-      )
-    }),
+    nextApprovalGate,
     failedCheckIds,
     approvalPacket: buildApprovalPacket({
       decisions: nextApprovalDecisions,
