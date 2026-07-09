@@ -9992,6 +9992,7 @@ body:has(.safeclaw-landing) :is(
   vector-effect: non-scaling-stroke;
 }
 
+.operation-memory-edge.relation-similarWorkpack,
 .operation-memory-edge.relation-hasImprovement,
 .operation-memory-edge.relation-addressesHazard {
   stroke: rgba(255, 220, 46, 0.38);
@@ -13582,6 +13583,120 @@ body:has(.safeclaw-landing) :is(
   --share-muted: #525a66;
   --share-soft: #303742;
   --share-primary: #f5c518;
+}
+
+.command-center-shell .workspace-operation-memory {
+  min-width: 0;
+}
+
+.command-center-shell .workspace-operation-memory .operation-memory-point {
+  min-width: 18px;
+  max-width: 18px;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  padding: 0;
+}
+
+.command-center-shell .workspace-operation-memory .operation-memory-point > * {
+  display: none;
+}
+
+.command-center-shell .workspace-operation-memory .operation-memory-point:hover,
+.command-center-shell .workspace-operation-memory .operation-memory-point:focus,
+.command-center-shell .workspace-operation-memory .operation-memory-point.is-active {
+  min-width: min(190px, 42vw);
+  max-width: min(220px, 46vw);
+  width: auto;
+  height: auto;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.command-center-shell .workspace-operation-memory .operation-memory-point:hover > *,
+.command-center-shell .workspace-operation-memory .operation-memory-point:focus > *,
+.command-center-shell .workspace-operation-memory .operation-memory-point.is-active > * {
+  display: block;
+}
+
+.command-center-shell .workspace-operation-memory .operation-memory-list {
+  max-height: 360px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-operation-memory {
+  border-color: #e1e5eb !important;
+  border-radius: 14px;
+  background: #ffffff !important;
+  box-shadow: 0 14px 36px rgba(17, 24, 39, 0.045);
+}
+
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-copy p,
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-message {
+  color: #525a66;
+}
+
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-board {
+  border-color: #dfe4eb;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(245, 197, 24, 0.12), transparent 34%),
+    linear-gradient(rgba(17, 24, 39, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, 0.035) 1px, transparent 1px),
+    #f8fafc;
+  background-size: auto, 28px 28px, 28px 28px, auto;
+}
+
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-stats span,
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-list,
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-detail,
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-list-item {
+  border-color: #e1e5eb;
+  background: #ffffff;
+  color: #17191d;
+}
+
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-point {
+  border-color: rgba(17, 24, 39, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+  color: #17191d;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+}
+
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-point:hover,
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-point:focus,
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-point.is-active,
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-list-item:hover,
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-list-item:focus,
+.command-center-shell.workspace-theme-day .workspace-operation-memory .operation-memory-list-item.is-active {
+  border-color: rgba(245, 197, 24, 0.58);
+  background: #fff9dd;
+}
+
+.command-center-shell.workspace-theme-day .workspace-operation-memory :is(
+  .operation-memory-point strong,
+  .operation-memory-list-item strong,
+  .operation-memory-detail > strong
+) {
+  color: #17191d;
+}
+
+.command-center-shell.workspace-theme-day .workspace-operation-memory :is(
+  .operation-memory-point small,
+  .operation-memory-list-item small,
+  .operation-memory-detail p,
+  .operation-memory-detail dd,
+  .operation-memory-detail li span
+) {
+  color: #5f6875;
+}
+
+@media (max-width: 900px) {
+  .command-center-shell .workspace-operation-memory .operation-memory-board {
+    min-height: 360px;
+  }
+
+  .command-center-shell .workspace-operation-memory .operation-memory-list {
+    max-height: 420px;
+  }
 }
 
 .command-center-shell .learning-export-actions {

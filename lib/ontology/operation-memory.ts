@@ -1,4 +1,4 @@
-import type { HarnessImprovement } from "@/lib/db-harness";
+import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
 export type OperationMemoryNodeKind = "Workpack" | "Hazard" | "Control" | "Improvement" | "Evidence" | "Ack";
@@ -15,7 +15,7 @@ export type OperationMemoryEdge = {
   id: string;
   sourceId: string;
   targetId: string;
-  relation: "usesEvidence" | "mentionsHazard" | "mitigatedBy" | "hasImprovement" | "addressesHazard" | "confirmedBy";
+  relation: "similarWorkpack" | "usesEvidence" | "mentionsHazard" | "mitigatedBy" | "hasImprovement" | "addressesHazard" | "confirmedBy";
   label: string;
 };
 
@@ -29,6 +29,7 @@ export type OperationMemoryGraph = {
     improvementCount: number;
     evidenceCount: number;
     ackCount: number;
+    relatedWorkpackCount: number;
     reflectedDocumentCount: number;
   };
 };
@@ -42,6 +43,7 @@ export type OperationMemoryGraphInput = {
   };
   references: SafetyReferenceItem[];
   improvements: HarnessImprovement[];
+  relatedWorkpacks?: HarnessWorkpackMemory[];
   confirmations: Array<{
     displayName: string;
     languageCode: string;
@@ -88,6 +90,30 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
       generatedAt: input.workpack.generatedAt
     }
   });
+
+  for (const relatedWorkpack of input.relatedWorkpacks || []) {
+    const relatedId = `workpack-memory:${slugSegment(relatedWorkpack.id, "previous")}`;
+    pushUniqueNode(nodes, {
+      id: relatedId,
+      kind: "Workpack",
+      label: relatedWorkpack.question.trim() || "유사 과거 작업",
+      detail: relatedWorkpack.statusLabel,
+      meta: {
+        sourceId: relatedWorkpack.id,
+        generatedAt: relatedWorkpack.generatedAt,
+        reflectedDocuments: relatedWorkpack.reflectedDocuments.join(", ")
+      }
+    });
+    pushUniqueEdge(edges, {
+      sourceId: workpackId,
+      targetId: relatedId,
+      relation: "similarWorkpack",
+      label: "유사 과거 작업"
+    });
+    for (const document of relatedWorkpack.reflectedDocuments) {
+      if (document.trim()) reflectedDocuments.add(document.trim());
+    }
+  }
 
   for (const reference of input.references) {
     const evidenceId = `evidence:${slugSegment(reference.id, "reference")}`;
@@ -231,6 +257,7 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
       improvementCount: nodeList.filter((node) => node.kind === "Improvement").length,
       evidenceCount: nodeList.filter((node) => node.kind === "Evidence").length,
       ackCount: nodeList.filter((node) => node.kind === "Ack").length,
+      relatedWorkpackCount: input.relatedWorkpacks?.length || 0,
       reflectedDocumentCount: reflectedDocuments.size
     }
   };

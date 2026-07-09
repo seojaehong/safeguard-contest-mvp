@@ -83,17 +83,21 @@
       "id": "N5",
       "title": "Expose operating ontology as list and hover-card graph",
       "priority": 5,
-      "status": "todo",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Workspace shows Workpack -> Hazard -> Control -> Improvement -> Evidence -> Ack relationships in user language.",
         "List view and hover-card graph work without Hermes or LangGraph core replacement.",
         "Browser check captures desktop and mobile ontology surfaces."
       ],
       "files": [
-        "components",
+        "components/OperationMemoryPreview.tsx",
+        "components/FieldOperationsWorkspace.tsx",
+        "lib/workspace-operation-graph.ts",
+        "lib/ontology/operation-memory.ts",
+        "lib/ontology/operation-memory-visualization.ts",
         "lib/workpack-learning-export.ts",
-        "evaluation/backend-harness-gate-2026-07-08/ontology-browser-check"
+        "evaluation/northstar-72h-2026-07-09/ontology-browser-check"
       ]
     },
     {

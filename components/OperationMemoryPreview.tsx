@@ -1,13 +1,13 @@
 "use client";
 
-import { type KeyboardEvent, useEffect, useMemo, useState } from "react";
+import { type KeyboardEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
   operationImprovementToHarnessImprovement,
   parseOperationImprovements,
   type OperationImprovement
 } from "@/lib/operation-improvement-history";
-import { buildOperationMemoryGraph } from "@/lib/ontology/operation-memory";
+import { buildOperationMemoryGraph, type OperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import {
   buildOperationMemoryVisualizationModel,
   operationRelationLabel
@@ -73,10 +73,170 @@ function downloadTextFile(fileName: string, contentType: string, content: string
   URL.revokeObjectURL(url);
 }
 
+export function OperationMemoryGraphViewer({
+  graph,
+  eyebrow = "Operation Graph",
+  title,
+  description,
+  actions,
+  statusMessage,
+  className = ""
+}: {
+  graph: OperationMemoryGraph;
+  eyebrow?: string;
+  title: string;
+  description: ReactNode;
+  actions?: ReactNode;
+  statusMessage?: ReactNode;
+  className?: string;
+}) {
+  const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
+  const model = useMemo(() => buildOperationMemoryVisualizationModel(graph), [graph]);
+  const hoverCardsById = useMemo(
+    () => new Map(model.hoverCards.map((card) => [card.id, card])),
+    [model.hoverCards]
+  );
+  const activeCard = activeNodeId ? hoverCardsById.get(activeNodeId) : undefined;
+
+  useEffect(() => {
+    setActiveNodeId((current) => {
+      if (current && hoverCardsById.has(current)) return current;
+      return model.focusNodeId;
+    });
+  }, [hoverCardsById, model.focusNodeId]);
+
+  function selectNode(nodeId: string) {
+    setActiveNodeId(nodeId);
+  }
+
+  function selectNodeWithKey(event: KeyboardEvent<HTMLElement>, nodeId: string) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    selectNode(nodeId);
+  }
+
+  return (
+    <section className={`safeclaw-module-panel operation-memory-preview${className ? ` ${className}` : ""}`} aria-label={title}>
+      <div className="compact-head">
+        <span className="eyebrow">{eyebrow}</span>
+        <strong>{title}</strong>
+      </div>
+      <div className="operation-memory-copy">
+        <p>{description}</p>
+        {actions ? <div className="operation-memory-actions" aria-label="작업 이력 액션">{actions}</div> : null}
+      </div>
+      {statusMessage ? <p className="operation-memory-message" role="status">{statusMessage}</p> : null}
+
+      <div className="operation-memory-grid">
+        <div className="operation-memory-board" aria-label="Workpack operation memory map">
+          <div className="operation-memory-stats" aria-label="작업 이력 그래프 통계">
+            <span>노드 {model.stats.visibleNodes}/{model.stats.totalNodes}</span>
+            <span>관계 {model.stats.visibleEdges}/{model.stats.totalEdges}</span>
+            <span>확인 {graph.summary.ackCount}</span>
+          </div>
+          <svg viewBox="0 0 100 100" role="img" aria-label="작업팩, 위험, 개선, 근거, 확인 연결 지도">
+            {model.map.edges.map((edge) => (
+              <line
+                key={edge.id}
+                x1={edge.x1}
+                y1={edge.y1}
+                x2={edge.x2}
+                y2={edge.y2}
+                className={`operation-memory-edge relation-${edge.rel}`}
+              />
+            ))}
+            {model.map.nodes.map((node) => (
+              <circle
+                key={node.id}
+                cx={node.x}
+                cy={node.y}
+                r={node.size}
+                className={`operation-memory-svg-node kind-${node.kind}${node.id === activeNodeId ? " is-active" : ""}`}
+              />
+            ))}
+          </svg>
+          <div className="operation-memory-node-layer">
+            {model.map.nodes.map((node) => {
+              const isActive = node.id === activeNodeId;
+              return (
+                <article
+                  key={node.id}
+                  className={`operation-memory-point kind-${node.kind}${isActive ? " is-active" : ""}`}
+                  style={{ left: `${node.x}%`, top: `${node.y}%` }}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isActive}
+                  onClick={() => selectNode(node.id)}
+                  onMouseEnter={() => selectNode(node.id)}
+                  onFocus={() => selectNode(node.id)}
+                  onKeyDown={(event) => selectNodeWithKey(event, node.id)}
+                >
+                  <span>{node.kind}</span>
+                  <strong>{node.label}</strong>
+                  <small>{node.degree} links</small>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="operation-memory-side">
+          <aside className="operation-memory-detail" aria-live="polite" aria-label="선택한 작업 이력 상세">
+            {activeCard ? (
+              <>
+                <span>{activeCard.subtitle}</span>
+                <strong>{activeCard.title}</strong>
+                {activeCard.detail ? <p>{activeCard.detail}</p> : null}
+                {activeCard.metaRows.length ? (
+                  <dl>
+                    {activeCard.metaRows.slice(0, 5).map((row) => (
+                      <div key={`${activeCard.id}-${row.key}`}>
+                        <dt>{row.label}</dt>
+                        <dd>{row.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+                <ul>
+                  {activeCard.related.slice(0, 6).map((related) => (
+                    <li key={`${activeCard.id}-detail-${related.direction}-${related.rel}-${related.nodeId}`}>
+                      <b>{operationRelationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
+                      <span>{related.nodeLabel}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p>그래프나 리스트에서 노드를 선택하면 연결 관계를 확인할 수 있습니다.</p>
+            )}
+          </aside>
+
+          <div className="operation-memory-list" aria-label="작업 이력 노드 리스트">
+            {model.list.map((item) => {
+              const isActive = item.id === activeNodeId;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`operation-memory-list-item${isActive ? " is-active" : ""}`}
+                  onClick={() => selectNode(item.id)}
+                >
+                  <span>{item.kind}</span>
+                  <strong>{item.label}</strong>
+                  <small>out {item.outgoingCount} · in {item.incomingCount}</small>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function OperationMemoryPreview() {
   const [improvements, setImprovements] = useState<OperationImprovement[]>([]);
   const [downloadMessage, setDownloadMessage] = useState("");
-  const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     setImprovements(loadStoredImprovements());
@@ -136,26 +296,6 @@ export function OperationMemoryPreview() {
     };
   }, [improvements]);
 
-  const hoverCardsById = new Map(preview.model.hoverCards.map((card) => [card.id, card]));
-  const activeCard = activeNodeId ? hoverCardsById.get(activeNodeId) : undefined;
-
-  useEffect(() => {
-    setActiveNodeId((current) => {
-      if (current && hoverCardsById.has(current)) return current;
-      return preview.model.focusNodeId;
-    });
-  }, [preview.model.focusNodeId, preview.model.hoverCards]);
-
-  function selectNode(nodeId: string) {
-    setActiveNodeId(nodeId);
-  }
-
-  function selectNodeWithKey(event: KeyboardEvent<HTMLElement>, nodeId: string) {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    selectNode(nodeId);
-  }
-
   function downloadLearningMemory(format: WorkpackLearningFormat) {
     const file = buildWorkpackLearningFile(preview.learningInput, format);
     downloadTextFile(file.fileName, file.contentType, file.content);
@@ -171,19 +311,19 @@ export function OperationMemoryPreview() {
   }
 
   return (
-    <section className="safeclaw-module-panel operation-memory-preview" aria-label="작업 이력 온톨로지 미리보기">
-      <div className="compact-head">
-        <span className="eyebrow">Operation Graph</span>
-        <strong>오늘 작업 메모리 맵</strong>
-      </div>
-      <div className="operation-memory-copy">
-        <p>
+    <OperationMemoryGraphViewer
+      graph={preview.graph}
+      title="오늘 작업 메모리 맵"
+      description={(
+        <>
           {preview.mode === "local"
             ? "워크스페이스에서 보관한 최근 개선사항을 관리자 검토용 작업 이력 그래프로 재구성했습니다."
             : "아직 로컬 개선 후보가 없어 Before/After 개선 루프 샘플을 보여줍니다."}
           {" "}MD/JSONL/Obsidian 노트는 다음 위험성평가와 TBM 생성에서 DB 하네스가 먼저 조회할 후보입니다.
-        </p>
-        <div className="operation-memory-actions" aria-label="작업 이력 메모리 파일">
+        </>
+      )}
+      actions={(
+        <>
           <button type="button" onClick={() => setImprovements(loadStoredImprovements())}>
             최근 후보 다시 읽기
           </button>
@@ -196,112 +336,9 @@ export function OperationMemoryPreview() {
           <button type="button" onClick={() => downloadLearningMemory("obsidian")}>
             Obsidian MD
           </button>
-        </div>
-      </div>
-      {downloadMessage ? <p className="operation-memory-message" role="status">{downloadMessage}</p> : null}
-
-      <div className="operation-memory-grid">
-        <div className="operation-memory-board" aria-label="Workpack operation memory map">
-          <div className="operation-memory-stats" aria-label="작업 이력 그래프 통계">
-            <span>노드 {preview.model.stats.visibleNodes}/{preview.model.stats.totalNodes}</span>
-            <span>관계 {preview.model.stats.visibleEdges}/{preview.model.stats.totalEdges}</span>
-          </div>
-          <svg viewBox="0 0 100 100" role="img" aria-label="작업팩, 위험, 개선, 근거, 확인 연결 지도">
-            {preview.model.map.edges.map((edge) => (
-              <line
-                key={edge.id}
-                x1={edge.x1}
-                y1={edge.y1}
-                x2={edge.x2}
-                y2={edge.y2}
-                className={`operation-memory-edge relation-${edge.rel}`}
-              />
-            ))}
-            {preview.model.map.nodes.map((node) => (
-              <circle
-                key={node.id}
-                cx={node.x}
-                cy={node.y}
-                r={node.size}
-                className={`operation-memory-svg-node kind-${node.kind}${node.id === activeNodeId ? " is-active" : ""}`}
-              />
-            ))}
-          </svg>
-          <div className="operation-memory-node-layer">
-            {preview.model.map.nodes.map((node) => {
-              const isActive = node.id === activeNodeId;
-              return (
-                <article
-                  key={node.id}
-                  className={`operation-memory-point kind-${node.kind}${isActive ? " is-active" : ""}`}
-                  style={{ left: `${node.x}%`, top: `${node.y}%` }}
-                  role="button"
-                  tabIndex={0}
-                  aria-pressed={isActive}
-                  onClick={() => selectNode(node.id)}
-                  onMouseEnter={() => selectNode(node.id)}
-                  onFocus={() => selectNode(node.id)}
-                  onKeyDown={(event) => selectNodeWithKey(event, node.id)}
-                >
-                  <span>{node.kind}</span>
-                  <strong>{node.label}</strong>
-                  <small>{node.degree} links</small>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="operation-memory-side">
-          <aside className="operation-memory-detail" aria-live="polite" aria-label="선택한 작업 이력 상세">
-            {activeCard ? (
-              <>
-                <span>{activeCard.subtitle}</span>
-                <strong>{activeCard.title}</strong>
-                {activeCard.detail ? <p>{activeCard.detail}</p> : null}
-                {activeCard.metaRows.length ? (
-                  <dl>
-                    {activeCard.metaRows.slice(0, 5).map((row) => (
-                      <div key={`${activeCard.id}-${row.key}`}>
-                        <dt>{row.label}</dt>
-                        <dd>{row.value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : null}
-                <ul>
-                  {activeCard.related.slice(0, 6).map((related) => (
-                    <li key={`${activeCard.id}-detail-${related.direction}-${related.rel}-${related.nodeId}`}>
-                      <b>{operationRelationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
-                      <span>{related.nodeLabel}</span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : (
-              <p>그래프나 리스트에서 노드를 선택하면 연결 관계를 확인할 수 있습니다.</p>
-            )}
-          </aside>
-
-          <div className="operation-memory-list" aria-label="작업 이력 노드 리스트">
-            {preview.model.list.map((item) => {
-              const isActive = item.id === activeNodeId;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`operation-memory-list-item${isActive ? " is-active" : ""}`}
-                  onClick={() => selectNode(item.id)}
-                >
-                  <span>{item.kind}</span>
-                  <strong>{item.label}</strong>
-                  <small>out {item.outgoingCount} · in {item.incomingCount}</small>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </section>
+        </>
+      )}
+      statusMessage={downloadMessage || null}
+    />
   );
 }
