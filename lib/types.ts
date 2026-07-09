@@ -54,7 +54,12 @@ export type QualityContract = {
     status: QualityContractStatus;
     mode?: DbHarnessPacket["mode"];
     llmRole?: DbHarnessPacket["generationContract"]["llmRole"];
+    llmOutputScope?: DbHarnessPacket["generationContract"]["llmOutputScope"];
+    evidenceAuthority?: DbHarnessPacket["generationContract"]["evidenceAuthority"];
+    providerRetryScope?: DbHarnessPacket["generationContract"]["providerRetryScope"];
     fallbackChainAllowed?: DbHarnessPacket["generationContract"]["fallbackChainAllowed"];
+    genericProseSubstitutionAllowed?: DbHarnessPacket["generationContract"]["genericProseSubstitutionAllowed"];
+    missingEvidencePolicy?: DbHarnessPacket["generationContract"]["missingEvidencePolicy"];
     directEvidenceCount: number;
     sifCaseCount: number;
     supportingEvidenceCount: number;
@@ -546,7 +551,12 @@ export type AskResponse = {
     summary: {
       mode: DbHarnessPacket["mode"];
       llmRole: DbHarnessPacket["generationContract"]["llmRole"];
+      llmOutputScope: DbHarnessPacket["generationContract"]["llmOutputScope"];
+      evidenceAuthority: DbHarnessPacket["generationContract"]["evidenceAuthority"];
+      providerRetryScope: DbHarnessPacket["generationContract"]["providerRetryScope"];
       fallbackChainAllowed: DbHarnessPacket["generationContract"]["fallbackChainAllowed"];
+      genericProseSubstitutionAllowed: DbHarnessPacket["generationContract"]["genericProseSubstitutionAllowed"];
+      missingEvidencePolicy: DbHarnessPacket["generationContract"]["missingEvidencePolicy"];
       directEvidence: number;
       sifCases: number;
       supportingEvidence: number;

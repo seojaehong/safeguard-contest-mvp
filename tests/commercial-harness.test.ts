@@ -115,7 +115,12 @@ describe("DB harness packet", () => {
     expect(packet.mode).toBe("db_harness_first");
     expect(packet.sifCases).toHaveLength(1);
     expect(packet.generationContract.llmRole).toBe("naturalize_only");
+    expect(packet.generationContract.llmOutputScope).toBe("rewrite_fixed_evidence_only");
+    expect(packet.generationContract.evidenceAuthority).toBe("db_harness");
+    expect(packet.generationContract.providerRetryScope).toBe("naturalization_retry_only");
     expect(packet.generationContract.fallbackChainAllowed).toBe(false);
+    expect(packet.generationContract.genericProseSubstitutionAllowed).toBe(false);
+    expect(packet.generationContract.missingEvidencePolicy).toBe("surface_review_required");
     expect(packet.generationContract.documentCoverage).toEqual([
       { document: "위험성평가표", covered: true, evidenceTypes: ["sifCase", "supportingEvidence", "improvementMemory"] },
       { document: "TBM 브리핑", covered: true, evidenceTypes: ["sifCase", "supportingEvidence", "improvementMemory"] },
@@ -123,6 +128,10 @@ describe("DB harness packet", () => {
     ]);
     expect(hasDocumentCoverage(packet, "TBM 기록")).toBe(true);
     expect(promptContext).toContain("DB harness가 고정한 근거");
+    expect(promptContext).toContain("근거 권위: safety_reference_items");
+    expect(promptContext).toContain("제공자 재시도");
+    expect(promptContext).toContain("문장화 실패 복구에만 허용");
+    expect(promptContext).toContain("산문으로 메우지 않는다");
     expect(promptContext).toContain("visionStatus: analyzed");
     expect(promptContext).toContain("analysisMode: vision_ocr");
     expect(promptContext).toContain("photoPair: before/after attached");
@@ -238,6 +247,7 @@ describe("DB harness packet", () => {
     const points = buildDbHarnessPracticalPoints(packet);
 
     expect(packet.generationContract.fallbackChainAllowed).toBe(false);
+    expect(packet.generationContract.genericProseSubstitutionAllowed).toBe(false);
     expect(packet.generationContract.documentCoverage.every((item) => item.covered)).toBe(false);
     expect(answer).toContain("DB 하네스가 사용할 직접 근거");
     expect(answer).toContain("보강 필요");
@@ -270,7 +280,12 @@ describe("runAsk DB harness mode", () => {
     expect(response.mode).toBe("mock");
     expect(response.dbHarness?.packet.mode).toBe("db_harness_first");
     expect(response.dbHarness?.summary.llmRole).toBe("naturalize_only");
+    expect(response.dbHarness?.summary.llmOutputScope).toBe("rewrite_fixed_evidence_only");
+    expect(response.dbHarness?.summary.evidenceAuthority).toBe("db_harness");
+    expect(response.dbHarness?.summary.providerRetryScope).toBe("naturalization_retry_only");
     expect(response.dbHarness?.summary.fallbackChainAllowed).toBe(false);
+    expect(response.dbHarness?.summary.genericProseSubstitutionAllowed).toBe(false);
+    expect(response.dbHarness?.summary.missingEvidencePolicy).toBe("surface_review_required");
     expect(response.dbHarness?.summary.documentCoverage.some((item) => item.document === "위험성평가표" && item.covered)).toBe(true);
     expect(response.dbHarness?.summary.improvementMemory).toBe(1);
     expect(response.answer).toContain("하네스 판단");

@@ -626,7 +626,7 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
             : "DB 근거를 먼저 고정하고 LLM은 문장화만 합니다.",
       meta: documentCoverage?.covered
         ? `문서 커버됨 · ${documentCoverage.evidenceTypes.join("/")}`
-        : harnessSummary.fallbackChainAllowed === false ? "DB 근거 우선" : "계약 확인",
+        : harnessSummary.evidenceAuthority === "db_harness" ? "DB 근거 고정" : "계약 확인",
       tone: harnessSummary.fallbackChainAllowed === false && documentCoverage?.covered !== false ? "ready" : "warn"
     });
   }

@@ -210,7 +210,12 @@ function makeLiveStructuredResponse(): AskResponse {
       summary: {
         mode: packet.mode,
         llmRole: packet.generationContract.llmRole,
+        llmOutputScope: packet.generationContract.llmOutputScope,
+        evidenceAuthority: packet.generationContract.evidenceAuthority,
+        providerRetryScope: packet.generationContract.providerRetryScope,
         fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+        genericProseSubstitutionAllowed: packet.generationContract.genericProseSubstitutionAllowed,
+        missingEvidencePolicy: packet.generationContract.missingEvidencePolicy,
         directEvidence: packet.directEvidence.length,
         sifCases: packet.sifCases.length,
         supportingEvidence: packet.supportingEvidence.length,
@@ -257,7 +262,12 @@ describe("qualityContract", () => {
     expect(contract.structured.readyCount).toBe(contract.structured.requiredCount);
     expect(contract.dbHarness.status).toBe("ready");
     expect(contract.dbHarness.llmRole).toBe("naturalize_only");
+    expect(contract.dbHarness.llmOutputScope).toBe("rewrite_fixed_evidence_only");
+    expect(contract.dbHarness.evidenceAuthority).toBe("db_harness");
+    expect(contract.dbHarness.providerRetryScope).toBe("naturalization_retry_only");
     expect(contract.dbHarness.fallbackChainAllowed).toBe(false);
+    expect(contract.dbHarness.genericProseSubstitutionAllowed).toBe(false);
+    expect(contract.dbHarness.missingEvidencePolicy).toBe("surface_review_required");
     expect(contract.dbHarness.documentCoverage.every((item) => item.covered)).toBe(true);
     expect(contract.persistence.status).toBe("ready");
   });

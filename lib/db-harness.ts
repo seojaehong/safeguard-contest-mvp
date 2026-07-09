@@ -52,7 +52,12 @@ export type DbHarnessPacket = {
   };
   generationContract: {
     llmRole: "naturalize_only";
+    llmOutputScope: "rewrite_fixed_evidence_only";
+    evidenceAuthority: "db_harness";
+    providerRetryScope: "naturalization_retry_only";
     fallbackChainAllowed: false;
+    genericProseSubstitutionAllowed: false;
+    missingEvidencePolicy: "surface_review_required";
     requiredDocuments: string[];
     missingEvidence: string[];
     documentCoverage: DbHarnessDocumentCoverage[];
@@ -139,7 +144,12 @@ export function buildDbHarnessPacket(input: {
     },
     generationContract: {
       llmRole: "naturalize_only",
+      llmOutputScope: "rewrite_fixed_evidence_only",
+      evidenceAuthority: "db_harness",
+      providerRetryScope: "naturalization_retry_only",
       fallbackChainAllowed: false,
+      genericProseSubstitutionAllowed: false,
+      missingEvidencePolicy: "surface_review_required",
       requiredDocuments: REQUIRED_DOCUMENTS,
       missingEvidence,
       documentCoverage
@@ -263,6 +273,9 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
 
   return [
     "역할: LLM은 DB harness가 고정한 근거를 문장화만 한다.",
+    "근거 권위: safety_reference_items, SIF 사례, 작업 개선 이력 DB 하네스가 원천이다.",
+    "제공자 재시도: 모델/제공자 재시도는 문장화 실패 복구에만 허용하며 새 근거·새 위험요인을 추가할 수 없다.",
+    "누락 정책: 근거가 없으면 보강 필요로 표시하고 산문으로 메우지 않는다.",
     "금지: 근거 없는 위험요인, 문서 반영 위치, 확인 이력을 새로 만들지 않는다.",
     `작업: ${packet.question}`,
     `필수문서: ${packet.generationContract.requiredDocuments.join(", ")}`,
