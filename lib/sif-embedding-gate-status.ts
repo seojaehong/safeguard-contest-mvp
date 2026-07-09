@@ -79,6 +79,21 @@ export type SifEmbeddingGateStatus = {
     artifactPath?: string;
     command?: string;
   };
+  approvalPacket: {
+    scope: "sif_embedding_next_approval_gate";
+    decisionCount: number;
+    decisions: string[];
+    requiredArtifacts: {
+      label: string;
+      path: string;
+      role: string;
+    }[];
+    safetyLocks: {
+      label: string;
+      locked: boolean;
+      detail: string;
+    }[];
+  };
   failedCheckIds: string[];
   nextApprovalDecisions: string[];
   artifacts: {
@@ -343,6 +358,71 @@ function buildNextApprovalGate(input: {
   };
 }
 
+function buildApprovalPacket(input: {
+  decisions: string[];
+  artifacts: SifEmbeddingGateStatus["artifacts"];
+  approvalHeld: boolean;
+  dbMutationPerformed: boolean;
+  embeddingGenerated: boolean;
+  uploaded: boolean;
+  vectorGuard: SifEmbeddingGateStatus["vectorGuard"];
+}): SifEmbeddingGateStatus["approvalPacket"] {
+  return {
+    scope: "sif_embedding_next_approval_gate",
+    decisionCount: input.decisions.length,
+    decisions: input.decisions,
+    requiredArtifacts: [
+      {
+        label: "Preflight report",
+        path: input.artifacts.reportPath,
+        role: "코퍼스 수량, 품질 게이트, 승인 보류 상태를 확인합니다."
+      },
+      {
+        label: "Batch manifest",
+        path: input.artifacts.manifestPath,
+        role: "임베딩 배치 수량과 corpus hash를 고정합니다."
+      },
+      {
+        label: "SIF corpus JSONL",
+        path: input.artifacts.corpusPath,
+        role: "임베딩 입력 원문과 SIF 레코드 매핑을 검토합니다."
+      },
+      {
+        label: "SIF-only migration",
+        path: input.artifacts.migrationPath,
+        role: "운영 DB에 필요한 table, RPC, index 범위만 승인합니다."
+      }
+    ],
+    safetyLocks: [
+      {
+        label: "승인 전 실행 보류",
+        locked: input.approvalHeld,
+        detail: input.approvalHeld ? "명시 승인 전 command 실행을 보류합니다." : "승인 보류 플래그가 꺼져 있습니다."
+      },
+      {
+        label: "DB 변경 없음",
+        locked: !input.dbMutationPerformed,
+        detail: input.dbMutationPerformed ? "DB 변경이 감지됐습니다." : "현재 패키지는 DB mutation 없이 준비됐습니다."
+      },
+      {
+        label: "임베딩 미생성",
+        locked: !input.embeddingGenerated,
+        detail: input.embeddingGenerated ? "이미 생성된 vector 산출물이 있습니다." : "비용 발생 단계는 아직 실행되지 않았습니다."
+      },
+      {
+        label: "업로드 미수행",
+        locked: !input.uploaded,
+        detail: input.uploaded ? "DB 업로드 이력이 있습니다." : "DB upsert는 승인 전 보류 상태입니다."
+      },
+      {
+        label: "Vector 검색 잠금",
+        locked: input.vectorGuard.status !== "active",
+        detail: input.vectorGuard.message
+      }
+    ]
+  };
+}
+
 export function getSifEmbeddingGateStatus(
   env: Record<string, string | undefined> = process.env
 ): SifEmbeddingGateStatus {
@@ -371,6 +451,14 @@ export function getSifEmbeddingGateStatus(
   const vectorGuard = buildVectorGuard(vectorFeatureFlagEnabled, uploadedCount, readNumber(report, "corpusCount"));
   const runtimeExecutionReadyAfterApproval = openaiApiKeyPresent && supabaseUrlPresent && supabaseServiceRolePresent;
   const runtimeDbProbe = buildRuntimeDbProbeStatus();
+  const artifacts = {
+    reportPath: readString(preflight, "reportPath", "evaluation/sif-embedding-gate/report.json"),
+    manifestPath: readString(preflight, "manifestPath", "evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json"),
+    corpusPath: readString(preflight, "corpusPath", "evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl"),
+    migrationPath: readString(preflight, "migrationPath", "supabase/migrations/010_commercial_operations.sql"),
+    scriptPath: readString(preflight, "scriptPath", "scripts/prepare_sif_embedding_corpus.mjs")
+  };
+  const nextApprovalDecisions = readStringArray(preflight, "nextApprovalDecisions");
   const preflightChecks = readRecordArray(preflight, "checks").map((check) => {
     const id = readString(check, "id", "unknown_check");
     return {
@@ -455,13 +543,16 @@ export function getSifEmbeddingGateStatus(
       )
     }),
     failedCheckIds,
-    nextApprovalDecisions: readStringArray(preflight, "nextApprovalDecisions"),
-    artifacts: {
-      reportPath: readString(preflight, "reportPath", "evaluation/sif-embedding-gate/report.json"),
-      manifestPath: readString(preflight, "manifestPath", "evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json"),
-      corpusPath: readString(preflight, "corpusPath", "evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl"),
-      migrationPath: readString(preflight, "migrationPath", "supabase/migrations/010_commercial_operations.sql"),
-      scriptPath: readString(preflight, "scriptPath", "scripts/prepare_sif_embedding_corpus.mjs")
-    }
+    approvalPacket: buildApprovalPacket({
+      decisions: nextApprovalDecisions,
+      artifacts,
+      approvalHeld,
+      dbMutationPerformed,
+      embeddingGenerated,
+      uploaded,
+      vectorGuard
+    }),
+    nextApprovalDecisions,
+    artifacts
   };
 }
