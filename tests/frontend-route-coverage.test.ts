@@ -504,6 +504,12 @@ describe("module route section hierarchy", () => {
     expect(effectiveDeclarationsAtWidth(css, ".route-supporting-page .card", 767)).toMatchObject({
       padding: "var(--space-4)",
     });
+    expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .hero")).toMatchObject({
+      padding: "var(--space-6)",
+    });
+    expect(effectiveDeclarationsAtWidth(css, ".route-supporting-page .hero", 767)).toMatchObject({
+      padding: "var(--space-4)",
+    });
     expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .subtitle")).toMatchObject({
       "font-size": "var(--text-body-lg)",
       "font-weight": "500",
@@ -522,6 +528,37 @@ describe("module route section hierarchy", () => {
     expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .two")).toMatchObject({
       gap: "var(--space-4)",
     });
+    for (const [width, gutter, heroPadding, surfacePadding, marginTop] of [
+      [1280, "var(--space-6)", "var(--space-12) var(--space-6)", "var(--space-6)", "var(--space-8)"],
+      [1024, "var(--space-5)", "var(--space-10) var(--space-5)", "var(--space-5)", "var(--space-6)"],
+      [767, "var(--space-4)", "var(--space-8) var(--space-4)", "var(--space-4)", "var(--space-4)"],
+    ] as const) {
+      expect(effectiveDeclarationsAtWidth(css, ".safeclaw-module-hero", width), `module hero ${width}`).toMatchObject({
+        padding: heroPadding,
+      });
+      expect(
+        effectiveDeclarationsAtWidth(
+          css,
+          ".safeclaw-module-shell.module-variant-document .safeclaw-module-hero",
+          width,
+        ),
+        `document module hero ${width}`,
+      ).toMatchObject({ padding: heroPadding });
+      for (const selector of [".safeclaw-module-grid", ".safeclaw-module-panel"]) {
+        expect(effectiveDeclarationsAtWidth(css, selector, width), `${selector} ${width}`).toMatchObject({
+          width: `min(var(--content-wide), calc(100% - (${gutter} * 2)))`,
+          margin: `${marginTop} auto 0`,
+        });
+      }
+      for (const selector of [".safeclaw-module-grid article", ".safeclaw-module-grid.nine article"]) {
+        expect(effectiveDeclarationsAtWidth(css, selector, width), `${selector} ${width}`).toMatchObject({
+          padding: surfacePadding,
+        });
+      }
+      expect(effectiveDeclarationsAtWidth(css, ".safeclaw-module-panel", width)).toMatchObject({
+        padding: surfacePadding,
+      });
+    }
     const workpackEditor = read("components/WorkpackEditor.tsx");
     expect(workpackEditor).toContain('className="workpack-sidebar card list"');
     expect(workpackEditor).not.toContain("route-supporting-page");
