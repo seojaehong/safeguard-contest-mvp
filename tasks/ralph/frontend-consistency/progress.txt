@@ -15,3 +15,9 @@
 - Verified: focused contract tests pass (8/8), static audit passes for 32 routes with zero violations, typecheck passes, and production build passes.
 - Learned: named rule-block assertions and adversarial audit fixtures are required to detect cascade and semantic-role false positives.
 - Next: keep F2 `passes: false` until independent reviewer approval; then continue browser evidence in the later route tasks.
+
+## 2026-07-11 F2 re-review remediation
+- Changed: restored four true-circle roles, mapped cited scoped selectors to complete semantic tiers, covered more-specific document-module headings, and replaced effect substring allowlisting with exact normalized selector/value contracts.
+- Verified: focused contract tests pass (11/11), static audit passes for 32 routes with zero violations, typecheck passes, and production build passes with 27/27 static pages generated.
+- Learned: allowlisting a selector name is insufficient unless the exact property value is also contracted; scoped role checks must include the selectors that actually win through specificity.
+- Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in the later route/browser tasks.
