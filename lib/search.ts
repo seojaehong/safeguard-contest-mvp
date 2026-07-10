@@ -9,7 +9,6 @@ import {
   filterAndRankSafetyReferencesByQuery,
   getSafetyReferenceDisplayTitle,
   searchSafetyReferences,
-  scoreSafetyReferenceQueryMatch,
   type SafetyReferenceItem,
   type SafetyReferenceRetrievalMode,
   type SafetyReferenceSearchResult
@@ -267,16 +266,15 @@ export function buildSafetyReferenceRiskRows(
     response.riskSummary.title,
     response.riskSummary.topRisk
   ].filter(Boolean).join(" ");
-  const topCandidates = references
+  const eligibleReferences = references
     .filter(includesRiskAssessmentDocument)
-    .filter((item) => item.title || item.summary || item.controls.length)
-    .map((item, index) => ({ item, index, relevance: scoreSafetyReferenceQueryMatch(rankQuery, item) }))
-    .sort((a, b) => {
-      const relevanceDelta = b.relevance - a.relevance;
-      if (Math.abs(relevanceDelta) > 12) return relevanceDelta;
-      return a.index - b.index;
-    })
-    .map(({ item }) => item);
+    .filter((item) => item.title || item.summary || item.controls.length);
+  const rankedEligibleReferences = filterAndRankSafetyReferencesByQuery(
+    rankQuery,
+    [...eligibleReferences],
+    eligibleReferences.length
+  );
+  const topCandidates = rankedEligibleReferences;
   const seen = new Set<string>();
   const rows: RiskAssessmentRow[] = [];
 
@@ -299,8 +297,7 @@ export function buildSafetyReferenceRiskRows(
       item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
       item.source_url || ""
     ].filter(Boolean);
-
-    rows.push(buildRiskRow({
+    const candidateRow = buildRiskRow({
       location,
       process,
       task: scenario.workSummary || compactRiskCell(displayTitle, 48) || "현장 작업",
@@ -318,7 +315,8 @@ export function buildSafetyReferenceRiskRows(
       verificationChecker: "관리감독자",
       evidenceRefs,
       verificationStatus: operationalView.reviewRequired ? "needsReview" : "planned"
-    }));
+    });
+    rows.push(candidateRow);
 
     if (rows.length >= 4) break;
   }
@@ -858,17 +856,16 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
   const out: CompressedSafetyReference[] = [];
   for (const item of items) {
     const displayTitle = getSafetyReferenceDisplayTitle(item);
-    const evidenceCore = (item.controls || []).slice(0, 1).join(", ");
-    const summary = item.display_summary || item.short_summary || item.summary || "";
-    const dedupeKey = `${(item.controls || []).join("|")}|${(item.primary_documents || []).join("|")}`;
+    const operationalView = deriveSafetyReferenceOperationalView(item);
+    const operationalControls = operationalView.controls.slice(0, 2);
+    const evidenceCore = operationalControls.slice(0, 1).join(", ");
+    const dedupeKey = `${operationalView.hazard}|${operationalControls.join("|")}|${(item.primary_documents || []).join("|")}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
     const documents = (item.primary_documents || []).filter(Boolean).slice(0, 3);
-    const evidenceShort = (evidenceCore || summary).replace(/\s+/g, " ").trim().slice(0, 80);
-    const sentenceBase = summary.replace(/\s+/g, " ").trim();
-    const documentSentence = sentenceBase.endsWith(".") || sentenceBase.endsWith("다") || sentenceBase.endsWith("요")
-      ? sentenceBase
-      : `${sentenceBase}.`;
+    const evidenceShort = evidenceCore.replace(/\s+/g, " ").trim().slice(0, 80);
+    const sentenceBase = `${operationalView.hazard}: ${operationalControls.join(" / ")}`.replace(/\s+/g, " ").trim();
+    const documentSentence = `${sentenceBase}.`;
     const { kind, kindLabel } = classifySafetyReferenceKind(item.item_type);
     out.push({
       id: item.id,
@@ -882,6 +879,26 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
     if (out.length >= limit) break;
   }
   return out;
+}
+
+export function buildSafetyReferenceSurfaceItem(item: SafetyReferenceItem) {
+  const operationalView = deriveSafetyReferenceOperationalView(item);
+  const controls = operationalView.controls.slice(0, 2);
+  const displayTitle = getSafetyReferenceDisplayTitle(item);
+  return {
+    rawTitle: item.title,
+    id: item.id,
+    itemType: item.item_type,
+    title: displayTitle,
+    displayTitle,
+    displaySummary: item.display_summary,
+    shortSummary: item.display_summary || `${operationalView.hazard} · ${controls.join(" · ")}`,
+    primaryDocuments: item.primary_documents || [],
+    controls,
+    evidenceRoleLabel: item.evidence_role_label,
+    sourceKindLabel: item.source_kind_label,
+    operationSignalLabel: controls[0] ? `문서와 TBM에 ${controls[0]} 반영` : item.operation_signal_label
+  };
 }
 
 function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): string {
@@ -1871,20 +1888,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           retrievalMode: safetyReference.retrievalMode,
           vectorSearch: safetyReference.vectorSearch,
           message: safetyReference.message,
-          items: safetyReference.items.slice(0, 8).map((r) => ({
-            rawTitle: r.title,
-            id: r.id,
-            itemType: r.item_type,
-            title: getSafetyReferenceDisplayTitle(r),
-            displayTitle: getSafetyReferenceDisplayTitle(r),
-            displaySummary: r.display_summary,
-            shortSummary: r.display_summary || r.short_summary || r.summary,
-            primaryDocuments: r.primary_documents || [],
-            controls: r.controls || [],
-            evidenceRoleLabel: r.evidence_role_label,
-            sourceKindLabel: r.source_kind_label,
-            operationSignalLabel: r.operation_signal_label
-          }))
+          items: safetyReference.items.slice(0, 8).map(buildSafetyReferenceSurfaceItem)
         },
         safetyKnowledge: {
           source: "safety-knowledge",

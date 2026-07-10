@@ -11,7 +11,7 @@ import {
 } from "@/lib/db-harness";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { validateRiskAssessmentRows } from "@/lib/risk-assessment-schema";
-import { attachDbHarnessFallback, buildSafetyReferenceRiskRows, buildTbmRiskLinks, normalizeSafetyTermTypos, runAsk } from "@/lib/search";
+import { attachDbHarnessFallback, buildSafetyReferenceRiskRows, buildSafetyReferenceSurfaceItem, buildTbmRiskLinks, normalizeSafetyTermTypos, runAsk } from "@/lib/search";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
@@ -29,6 +29,28 @@ describe("safety term normalization", () => {
     expect(normalizeSafetyTermTypos(text)).toBe(
       "지게차 동선과 비계 설치 위치를 구분하고, 지게차 후진 시 신호수를 배치한다."
     );
+  });
+
+  it("keeps raw reference provenance immutable while exposing operational controls to the UI", () => {
+    const rawReference = reference({
+      id: "d-c-13-surface",
+      item_type: "technical-support-regulation",
+      title: "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+      controls: [
+        "작업발판·난간·개구부 상태 확인",
+        "안전대 체결 및 작업반경 출입통제",
+        "가동부 방호덮개와 비상정지장치 확인",
+        "정비 전 전원 차단 및 잠금표지"
+      ]
+    });
+    const rawControls = [...rawReference.controls];
+
+    const surface = buildSafetyReferenceSurfaceItem(rawReference);
+
+    expect(surface.controls.join(" ")).toMatch(/비계|작업발판|안전난간|안전대/);
+    expect(surface.controls.join(" ")).not.toMatch(/방호덮개|비상정지장치|잠금표지/);
+    expect(surface.shortSummary).not.toMatch(/방호덮개|비상정지장치|잠금표지/);
+    expect(rawReference.controls).toEqual(rawControls);
   });
 });
 
@@ -567,6 +589,115 @@ describe("runAsk DB harness mode", () => {
     expect(controls).toMatch(/접지|정전기 제거/);
     expect(controls).toMatch(/방폭|환기|점화원|화기/);
     expect(controls).not.toContain("가동부 방호덮개");
+    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
+  });
+
+  it("keeps the canonical exterior-painting workpack free of machinery and electrostatic false positives", () => {
+    const question = [
+      "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업.",
+      "이동식 비계를 사용하고 작업자 5명 중 신규 투입자 1명이 포함된다.",
+      "오후 강풍 예보가 있으며 자재 반입 지게차 동선과 작업자 통행 동선이 겹친다."
+    ].join(" ");
+    const response = buildMockAskResponse(question, mockSearchResults, "mock", "테스트");
+    const references = [
+      reference({
+        id: "d-c-13-exterior-painting",
+        source_id: "kosha-technical-support-regulations-2025",
+        item_type: "technical-support-regulation",
+        category: "건설안전분야",
+        subcategory: "기술지원규정",
+        title: "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+        summary: "외벽 도장 보수공사의 비계, 추락방지, 작업발판 안전 기준",
+        keywords: ["외벽도장", "비계", "추락"],
+        risk_tags: ["추락", "비계"],
+        controls: [
+          "작업발판·난간·개구부 상태 확인",
+          "안전대 체결 및 작업반경 출입통제",
+          "가동부 방호덮개와 비상정지장치 확인",
+          "정비 전 전원 차단 및 잠금표지"
+        ],
+        evidence_role: "direct",
+        retrieval_source: "rest"
+      }),
+      reference({
+        id: "b-e-17-paint-fire",
+        source_id: "kosha-technical-support-regulations-2025",
+        item_type: "technical-support-regulation",
+        category: "전기안전분야",
+        subcategory: "기술지원규정",
+        title: "B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+        summary: "도료와 유기용제 증기 점화 방지 기준",
+        keywords: ["도장", "도료", "유기용제"],
+        risk_tags: ["화재", "폭발"],
+        controls: ["가동부 방호덮개와 비상정지장치 확인", "정비 전 전원 차단 및 잠금표지"],
+        evidence_role: "direct",
+        retrieval_source: "rest"
+      }),
+      reference({
+        id: "b-e-20-electrostatic",
+        source_id: "kosha-technical-support-regulations-2025",
+        item_type: "technical-support-regulation",
+        category: "전기안전분야",
+        subcategory: "기술지원규정",
+        title: "B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+        summary: "정전도장기의 정전기 방전과 도료 증기 점화 방지 기준",
+        keywords: ["정전도장", "정전기", "접지"],
+        risk_tags: ["화재", "폭발"],
+        controls: ["가동부 방호덮개와 비상정지장치 확인", "정비 전 전원 차단 및 잠금표지"],
+        evidence_role: "direct",
+        retrieval_source: "rest"
+      }),
+      reference({
+        id: "sif-exterior-fall",
+        title: "외벽 도장 중 이동식 비계 추락 사례",
+        summary: "외벽 도장 중 이동식 비계 작업발판에서 추락한 고위험 사례",
+        keywords: ["외벽 도장", "이동식 비계", "추락"],
+        risk_tags: ["추락"],
+        controls: ["작업발판·난간·개구부 상태 확인", "안전대 체결 및 작업반경 출입통제"],
+        evidence_role: "supporting",
+        retrieval_source: "rest"
+      }),
+      reference({
+        id: "forklift-traffic",
+        item_type: "technical-guideline",
+        category: "운반하역",
+        subcategory: "지게차",
+        title: "지게차와 보행자 교차 동선 충돌 예방 기준",
+        summary: "자재 반입 지게차와 작업자 통행 동선을 분리하고 신호수를 배치한다.",
+        keywords: ["지게차", "보행자", "동선", "충돌"],
+        risk_tags: ["충돌"],
+        controls: ["지게차 동선과 보행 동선 분리", "신호수 배치 및 후진 경보 확인"],
+        evidence_role: "direct",
+        retrieval_source: "rest"
+      })
+    ];
+
+    const rows = buildSafetyReferenceRiskRows(response, references, "오후 강풍 예보", question);
+    const rowText = rows.map((row) => [
+      row.hazard,
+      row.currentControls,
+      row.additionalControls,
+      ...row.evidenceRefs
+    ].join(" ")).join("\n");
+    const links = buildTbmRiskLinks(rows, "오후 강풍 예보");
+    const packet = buildDbHarnessPacket({ question, references });
+    const packetText = [
+      ...packet.directEvidence,
+      ...packet.sifCases,
+      ...packet.supportingEvidence
+    ].map((item) => `${item.title} ${item.controls.join(" ")}`).join("\n");
+    const harnessAnswer = buildDbHarnessAnswer(packet);
+
+    expect(rowText).toMatch(/추락|비계/);
+    expect(rowText).toMatch(/강풍|돌풍/);
+    expect(rowText).toMatch(/지게차.*동선|동선.*지게차/);
+    expect(rowText).toMatch(/도료|유기용제/);
+    expect(rowText).not.toMatch(/기계 가동부|방호덮개|정비 중 불시기동/);
+    expect(rowText).not.toMatch(/정전도장|정전도장기|피도장물 접지/);
+    expect(links.some((link) => /지게차.*동선|동선.*지게차/.test(`${link.hazard} ${link.control}`))).toBe(true);
+    expect(packetText).not.toMatch(/정전도장|정전도장기|피도장물 접지/);
+    expect(harnessAnswer).not.toMatch(/기계 가동부|방호덮개|정비 중 불시기동/);
+    expect(harnessAnswer).toMatch(/지게차.*동선|동선.*지게차/);
     expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
   });
 

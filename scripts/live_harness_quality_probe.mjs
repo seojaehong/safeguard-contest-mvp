@@ -55,6 +55,11 @@ const SCENARIO_CONTROL_DOMAINS = [
     signals: ["지게차", "차량", "보행자", "동선", "충돌"],
     controls: ["동선 분리", "보행 동선", "신호수", "접근통제", "후진 경보", "차단", "분리"],
   },
+  {
+    id: "paint_fire",
+    signals: ["도장", "도료", "유기용제", "화재", "폭발"],
+    controls: ["환기", "점화원", "화기", "스파크", "소화기", "방폭", "MSDS"],
+  },
 ];
 
 const IRRELEVANT_CONTROL_RULES = [
@@ -240,7 +245,7 @@ function collectEvidenceArtifacts(packet) {
       const record = asRecord(item);
       artifacts.push({
         source: `dbHarness.packet.${key}[${index}]`,
-        text: [record.displayTitle, record.title, record.summary, ...readStringArray(record.controls)]
+        text: [record.displayTitle, record.title, ...readStringArray(record.controls)]
           .map(readString)
           .filter(Boolean)
           .join(" | "),
@@ -425,7 +430,7 @@ export function evaluateHarnessResponse(responseValue, contextValue) {
   contracts.push(buildContract(
     "scenario_controls_present",
     scenarioControlsReady,
-    "Fall, scaffold, wind, and traffic controls are grounded in structured output.",
+    "Fall, scaffold, wind, traffic, and paint-fire controls are grounded in structured output.",
     "One or more canonical scenario control domains are absent from structured output.",
     domainMatches.map((match) => `${match.id}: ${match.artifact?.source ?? "missing"}`),
   ));

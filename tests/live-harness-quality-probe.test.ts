@@ -60,13 +60,22 @@ function buildGoodFixture() {
   const packet = {
     mode: "db_harness_first",
     question: CANONICAL_SCENARIO.question,
-    directEvidence: [{
-      id: "kosha-exterior-work",
-      title: "건물 외벽 작업 추락 예방",
-      item_type: "guide",
-      evidence_role: "direct",
-      controls: ["작업발판 안전난간과 안전대 부착설비 확인"],
-    }],
+    directEvidence: [
+      {
+        id: "kosha-exterior-work",
+        title: "건물 외벽 작업 추락 예방",
+        item_type: "guide",
+        evidence_role: "direct",
+        controls: ["작업발판 안전난간과 안전대 부착설비 확인"],
+      },
+      {
+        id: "kosha-paint-fire",
+        title: "B-E-17-2026 도장 공정 화재·폭발 예방",
+        item_type: "guide",
+        evidence_role: "direct",
+        controls: ["도료·유기용제 취급 구역 환기", "점화원 통제 및 소화기 비치"],
+      },
+    ],
     sifCases: [{
       id: "sif-forklift-traffic",
       title: "지게차와 보행자 충돌 재해사례",
@@ -121,6 +130,12 @@ function buildGoodFixture() {
       additionalControls: "보행 동선 분리와 신호수 배치",
       evidenceRefs: ["sif-forklift-traffic"],
     },
+    {
+      hazard: "도료·유기용제 증기 점화에 의한 화재·폭발",
+      currentControls: "도장 구역 국소배기·전체환기 실시",
+      additionalControls: "화기·스파크 점화원 통제 및 소화기 비치",
+      evidenceRefs: ["kosha-paint-fire"],
+    },
   ];
 
   const tbmRiskLinks = riskAssessmentRows.map((row, riskRowIndex) => ({
@@ -138,7 +153,7 @@ function buildGoodFixture() {
     dbHarness: {
       packet,
       summary: {
-        directEvidence: 1,
+        directEvidence: 2,
         sifCases: 1,
         supportingEvidence: 1,
         missingEvidence: [],
@@ -240,6 +255,48 @@ describe("live harness quality probe evaluator", () => {
     expect(good.verdict).toBe("pass");
     expect(good.contracts.map((contract) => contract.id)).toEqual(expectedContractIds);
     expect(good.contracts.every((contract) => contract.state === "pass")).toBe(true);
+
+    const missingPaintResponse = {
+      ...goodResponse,
+      structured: {
+        ...goodResponse.structured,
+        riskAssessmentRows: goodResponse.structured.riskAssessmentRows.filter(
+          (row) => !row.evidenceRefs.includes("kosha-paint-fire"),
+        ),
+        tbmRiskLinks: goodResponse.structured.tbmRiskLinks.filter(
+          (link) => !link.evidenceRefs.includes("kosha-paint-fire"),
+        ),
+      },
+    };
+    const missingPaint = evaluateHarnessResponse(missingPaintResponse, buildContext());
+    const scenarioContract = missingPaint.contracts.find((contract) => contract.id === "scenario_controls_present");
+    expect(scenarioContract?.state).toBe("fail");
+    expect(scenarioContract?.evidence).toContain("paint_fire: missing");
+
+    const provenanceSummaryResponse = {
+      ...goodResponse,
+      dbHarness: {
+        ...goodResponse.dbHarness,
+        packet: {
+          ...goodResponse.dbHarness.packet,
+          supportingEvidence: [
+            ...goodResponse.dbHarness.packet.supportingEvidence,
+            {
+              id: "historical-source-summary",
+              title: "외벽 작업 과거 자료",
+              summary: "원문 사고 설명에는 정비 전 잠금표지와 비상정지장치라는 표현이 포함되어 있다.",
+              item_type: "source",
+              evidence_role: "supporting",
+              controls: ["외벽 작업구역 하부 출입통제"],
+            },
+          ],
+        },
+      },
+    };
+    const provenanceSummary = evaluateHarnessResponse(provenanceSummaryResponse, buildContext());
+    expect(
+      provenanceSummary.contracts.find((contract) => contract.id === "irrelevant_controls_absent")?.state,
+    ).toBe("pass");
 
     const goodPacket = goodResponse.dbHarness.packet;
     const badPacket = {
