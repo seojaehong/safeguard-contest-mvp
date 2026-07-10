@@ -58,6 +58,9 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 13. Final independent re-review Important findings
    - RED: representative 1024px assertions showed `.container`, `.v2-shell`, and `.demo-mode-shell` retaining 24px desktop gutters instead of the tablet 20px tier.
    - GREEN: ordered `max-width: 1279px` and `max-width: 767px` overrides now produce exact 24px/20px/16px gutters at 1280px/1024px/767px for all three shell selectors.
+14. Supporting-route completion review
+   - RED: supporting cards had no desktop/mobile padding contract, route introductions inherited Component-title typography, and authentication navigation plus the ask result grid retained off-scale 14px/18px gaps.
+   - GREEN: route-scoped cards resolve to 24px desktop and 16px mobile padding; scoped subtitles use the 17px/500/1.65/zero-tracking Body-large tuple without changing other subtitle consumers; both residual gaps use the 16px spacing token.
 
 ## Final verification evidence
 

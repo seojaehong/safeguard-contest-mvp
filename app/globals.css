@@ -4656,6 +4656,18 @@ ul {
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .route-supporting-page .list { gap: var(--space-4); }
 .route-supporting-page .row { gap: var(--space-2); }
+.route-supporting-page .card { padding: var(--space-6); }
+.route-supporting-page .subtitle {
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
+}
+.route-supporting-page .two { gap: var(--space-4); }
+
+@media (max-width: 767px) {
+  .route-supporting-page .card { padding: var(--space-4); }
+}
 .muted { color: var(--muted); }
 .small { font-size: var(--text-support);
   font-weight: 500;
@@ -9435,7 +9447,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-topbar nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 .safeclaw-login-topbar nav a {

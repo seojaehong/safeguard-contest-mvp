@@ -498,6 +498,30 @@ describe("module route section hierarchy", () => {
     expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .row")).toMatchObject({
       gap: "var(--space-2)",
     });
+    expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .card")).toMatchObject({
+      padding: "var(--space-6)",
+    });
+    expect(effectiveDeclarationsAtWidth(css, ".route-supporting-page .card", 767)).toMatchObject({
+      padding: "var(--space-4)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .subtitle")).toMatchObject({
+      "font-size": "var(--text-body-lg)",
+      "font-weight": "500",
+      "line-height": "var(--leading-body-lg)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".subtitle")).toMatchObject({
+      "font-size": "var(--text-component-title)",
+      "font-weight": "700",
+      "line-height": "var(--leading-component-title)",
+      "letter-spacing": "var(--tracking-component-title)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-login-topbar nav")).toMatchObject({
+      gap: "var(--space-4)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .two")).toMatchObject({
+      gap: "var(--space-4)",
+    });
     const workpackEditor = read("components/WorkpackEditor.tsx");
     expect(workpackEditor).toContain('className="workpack-sidebar card list"');
     expect(workpackEditor).not.toContain("route-supporting-page");
