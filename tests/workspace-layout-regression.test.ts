@@ -851,6 +851,39 @@ describe("workspace layout regression", () => {
     expect(metrics.submit.bottom).toBeLessThanOrEqual(metrics.viewportHeight - 48);
   }, 90_000);
 
+  it("shows honest indeterminate feedback while template generation has no stream", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    await page.addInitScript(() => {
+      window.localStorage.setItem("safeclaw.aiMode", "template");
+    });
+    await page.route("**/api/weather?**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, weather: null })
+      });
+    });
+    await page.route("**/api/ask", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1_200));
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(sample)
+      });
+    });
+
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: /안전 문서 생성/ }).click();
+    const progress = page.locator(".document-progress-summary");
+    await progress.waitFor({ state: "visible" });
+    expect(await progress.textContent()).toContain("생성 중");
+    expect(await progress.textContent()).not.toContain("3/12");
+    await expect.poll(async () => page.locator(".document-review-meter").getAttribute("class")).toContain("indeterminate");
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+  }, 90_000);
+
   it("keeps the generated document edit flow inside the workspace design system", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -952,6 +985,9 @@ describe("workspace layout regression", () => {
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     await page.locator(".doc-card-actions button", { hasText: "편집" }).waitFor({ state: "visible" });
+    const progressSummary = await page.locator(".document-progress-summary").textContent();
+    expect(progressSummary).toContain("12/12 생성");
+    expect(progressSummary).toContain("검수 필요");
     await page.waitForFunction(() => document.querySelector(".document-harness-loop")?.textContent?.includes("근거 고정"));
     const harnessLoop = page.locator(".document-harness-loop");
     await harnessLoop.waitFor({ state: "visible" });
