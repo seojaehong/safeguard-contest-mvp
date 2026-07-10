@@ -293,3 +293,75 @@ Exit code 0
 - The 11px HUD-versus-caption semantic decision is repository-focused and keyword-assisted: existing HUD family/tracking or selectors containing HUD/status/eyebrow/kicker/badge/meta/metric/code/console/source/live/signal semantics remain HUD; other 11px rules are promoted to caption. No rule was made HUD solely because it was 11px. Future selectors with new semantic vocabulary need a RED fixture or an explicit semantic token.
 - The parser still intentionally targets the repository's flat declaration grammar rather than general CSS. Parenthesis-aware top-level selector splitting now matches between tests and audit.
 - Browser screenshot review remains part of later tasks. F2 stays `passes: false` pending independent review.
+
+## Fifth remediation — per-selector semantic classification
+
+### Resolutions
+
+- Added a small semantic override manifest for ambiguous class-only interactive selectors, including `.command-center-shell .command-primary` and `.safeclaw-module-primary`.
+- Changed test and audit tuple classification from one inferred role per selector list to one role per normalized selector. A grouped rule that resolves to multiple semantic roles now emits `mixed-typography-role` and must be split.
+- Mapped `.command-center-shell .command-primary` to the control tuple (`--text-control / 700 / --leading-control / --tracking-body`).
+- Split `.safety-form-preview th, td`: native headers use the table-header tuple, while data cells retain the caption tuple.
+- Split the command-center brand descriptor from status/step labels. The brand descriptor uses product caption typography; status and step labels retain the HUD tuple and HUD family.
+- The stronger invariant exposed two additional current mixed rules. Report-table headers were split from ordinary caption labels, and `.safeclaw-module-primary` was added to the explicit control manifest.
+
+### RED evidence
+
+```text
+npm.cmd test -- tests/frontend-design-contract.test.ts
+Test Files  1 failed (1)
+Tests       3 failed | 13 passed (16)
+
+FAIL assigns control, native table, and mixed HUD selectors to their actual roles
+  command-primary received support tuple instead of control
+FAIL assigns a complete canonical typography tuple to every font-size rule
+  safety-form-preview th/td inferred mixed tableHeader/caption roles
+FAIL rejects ambiguous class controls and mixed selector-list roles
+  audit did not report the three current false-pass patterns
+Exit code 1
+```
+
+After the three cited fixes, the repository-wide gate found two more mixed lists:
+
+```text
+mixed-typography-role 2
+- document report-table strong grouped with ordinary caption labels
+- safeclaw-module-primary grouped with controls but inferred as support
+```
+
+### Final GREEN evidence
+
+Commands ran sequentially after the final source change.
+
+```text
+npm.cmd test -- tests/frontend-design-contract.test.ts
+Test Files  1 passed (1)
+Tests       16 passed (16)
+Duration    4.13s
+Exit code   0
+
+npm.cmd run audit:frontend-consistency
+status                  pass
+pageFiles               32
+componentFiles          22
+cssLines                12815
+importantDeclarations   0
+coverageIssues          0
+violationCount          0
+Exit code               0
+
+npm.cmd run typecheck
+tsc --noEmit --incremental false
+Exit code 0
+
+npm.cmd run build
+Compiled successfully in 11.7s
+Generated static pages 27/27
+Exit code 0
+```
+
+### Concern update
+
+- The explicit semantic manifest is intentionally small and only covers ambiguous class-only selectors that source/DOM evidence identifies as controls or special text roles. New ambiguous class names must be added with a RED fixture.
+- The lightweight parser and keyword fallback remain repository-focused. Mixed selector lists can no longer borrow semantics from one another, which narrows the remaining heuristic risk.
+- Browser screenshot review remains in later tasks. F2 remains `passes: false` pending independent review.

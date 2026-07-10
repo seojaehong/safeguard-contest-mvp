@@ -27,3 +27,9 @@
 - Verified: focused contract tests pass (14/14), static audit passes for 32 routes with zero violations and zero important declarations, typecheck passes, and production build passes with 27/27 static pages generated.
 - Learned: semantic role validation must run before accepting the current token, especially for 14px interactive controls and table headers; 11px alone is not enough to infer HUD semantics.
 - Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in later tasks.
+
+## 2026-07-11 F2 per-selector semantic remediation
+- Changed: classify typography per selector, reject mixed-role selector lists, add explicit ambiguous-class overrides, and split command-primary, native th/td, brand/status, and report-table header typography.
+- Verified: focused contract tests pass (16/16), static audit passes for 32 routes with zero violations and zero important declarations, typecheck passes, and production build passes with 27/27 static pages generated.
+- Learned: selector-list keywords can leak HUD or table semantics across unrelated selectors; role inference and tuple validation must operate on each selector independently.
+- Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in later tasks.
