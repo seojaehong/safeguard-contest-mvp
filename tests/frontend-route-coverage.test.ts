@@ -248,7 +248,7 @@ function familySpacingResiduals(source: string): string[] {
       if (!auditedSpacingProperties.has(property)) return [];
       const selectorsToAudit = ownedSelectors.filter((selector) => !isJustifiedSpacingException(selector, property, value));
       if (selectorsToAudit.length === 0) return [];
-      const offenders = [...value.matchAll(/(?<![-\w])(-?\d+)px\b/g)]
+      const offenders = [...value.matchAll(/(?<![\w.-])([-+]?(?:\d+(?:\.\d+)?|\.\d+))px(?![\w.-])/g)]
         .map((match) => Number(match[1]))
         .filter((number) => !approvedSpacingPixels.has(Math.abs(number)));
       const tokenOffenders = [...value.matchAll(/var\((--[\w-]+)\)/g)]
@@ -906,6 +906,8 @@ describe("module route section hierarchy", () => {
       ".ontology-node-row { gap: var(--unknown-spacing) }",
     ]);
     for (const mutation of [
+      ".ontology-node-row { gap: 7.4px; }",
+      ".ontology-node-row { padding: 16.5px; }",
       ".ontology-node-row { gap: 0.5em; }",
       ".ontology-node-row { gap: 1rem; }",
       ".ontology-node-row { gap: 10%; }",
