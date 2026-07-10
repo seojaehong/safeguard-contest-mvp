@@ -82,6 +82,9 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 21. Delegated-owner and spacing-unit audit
    - RED: briefing and AI-connect component classes were absent from owner traversal, retained off-scale values and a noncanonical submit control, while landing mark `em` padding and arbitrary raw units bypassed parser validation.
    - GREEN: both delegated component files and class families are source-inventoried, live spacing and briefing submit control use canonical tokens/roles, landing mark padding uses the approved scale, and em/rem/percent/arbitrary calc mutations fail unless a selector+property+exact-value responsive exception is registered.
+22. Decimal pixel parser hardening
+   - RED: `7.4px` escaped the spacing audit because the integer-only matcher partially matched its approved trailing `4px` segment.
+   - GREEN: full signed decimal pixel tokens are parsed atomically, approved integer scale values remain valid, and `7.4px` plus `16.5px` mutations are rejected without partial matching.
 
 ## Final verification evidence
 
