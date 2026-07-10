@@ -61,6 +61,9 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 14. Supporting-route completion review
    - RED: supporting cards had no desktop/mobile padding contract, route introductions inherited Component-title typography, and authentication navigation plus the ask result grid retained off-scale 14px/18px gaps.
    - GREEN: route-scoped cards resolve to 24px desktop and 16px mobile padding; scoped subtitles use the 17px/500/1.65/zero-tracking Body-large tuple without changing other subtitle consumers; both residual gaps use the 16px spacing token.
+15. Module geometry completion review
+   - RED: supporting heroes retained 24px mobile padding, while base and document-variant module heroes, wrappers, grid articles, and panels used off-scale or single-width geometry.
+   - GREEN: supporting heroes resolve to 24px/16px desktop/mobile padding; base and document module heroes, grid/panel wrappers, general and nine-grid articles, and panels use allowed 1280px/1024px/767px spacing and gutter tiers without typography changes.
 
 ## Final verification evidence
 

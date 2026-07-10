@@ -4678,6 +4678,7 @@ ul {
 .route-supporting-page .list { gap: var(--space-4); }
 .route-supporting-page .row { gap: var(--space-2); }
 .route-supporting-page .card { padding: var(--space-6); }
+.route-supporting-page .hero { padding: var(--space-6); }
 .route-supporting-page .subtitle {
   font-size: var(--text-body-lg);
   font-weight: 500;
@@ -4688,6 +4689,7 @@ ul {
 
 @media (max-width: 767px) {
   .route-supporting-page .card { padding: var(--space-4); }
+  .route-supporting-page .hero { padding: var(--space-4); }
 }
 .muted { color: var(--muted); }
 .small { font-size: var(--text-support);
@@ -7918,7 +7920,7 @@ body:has(.safeclaw-landing) :is(
   gap: var(--space-6);
   align-items: end;
   border-bottom: 1px solid rgba(246, 245, 239, 0.14);
-  padding: clamp(36px, 5vw, 72px) clamp(20px, 4vw, 72px);
+  padding: var(--space-12) var(--space-6);
 }
 
 .safeclaw-module-eyebrow,
@@ -8069,8 +8071,8 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-grid,
 .safeclaw-module-panel {
-  width: min(100% - 40px, 1440px);
-  margin: 28px auto 0;
+  width: min(var(--content-wide), calc(100% - (var(--space-6) * 2)));
+  margin: var(--space-8) auto 0;
 }
 
 .safeclaw-workdoc-shell {
@@ -8659,7 +8661,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-grid.nine article {
   min-height: 120px;
-  padding: 20px;
+  padding: var(--space-6);
 }
 
 .safeclaw-module-grid.nine article strong {
@@ -8684,7 +8686,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-grid article {
   min-height: 150px;
   border-right: 1px solid rgba(246, 245, 239, 0.12);
-  padding: 28px;
+  padding: var(--space-6);
   background: rgba(14, 14, 18, 0.72);
 }
 
@@ -8705,7 +8707,43 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-panel {
   border: 1px solid rgba(246, 245, 239, 0.16);
   background: rgba(14, 14, 18, 0.72);
-  padding: clamp(24px, 3vw, 44px);
+  padding: var(--space-6);
+}
+
+@media (max-width: 1279px) {
+  .safeclaw-module-hero {
+    padding: var(--space-10) var(--space-5);
+  }
+
+  .safeclaw-module-grid,
+  .safeclaw-module-panel {
+    width: min(var(--content-wide), calc(100% - (var(--space-5) * 2)));
+    margin: var(--space-6) auto 0;
+  }
+
+  .safeclaw-module-grid article,
+  .safeclaw-module-grid.nine article,
+  .safeclaw-module-panel {
+    padding: var(--space-5);
+  }
+}
+
+@media (max-width: 767px) {
+  .safeclaw-module-hero {
+    padding: var(--space-8) var(--space-4);
+  }
+
+  .safeclaw-module-grid,
+  .safeclaw-module-panel {
+    width: min(var(--content-wide), calc(100% - (var(--space-4) * 2)));
+    margin: var(--space-4) auto 0;
+  }
+
+  .safeclaw-module-grid article,
+  .safeclaw-module-grid.nine article,
+  .safeclaw-module-panel {
+    padding: var(--space-4);
+  }
 }
 
 .safeclaw-report-head {
@@ -15333,8 +15371,19 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-hero {
   border-bottom-color: var(--workspace-rule);
-  padding: 40px 72px;
+  padding: var(--space-12) var(--space-6);
 }
+
+@media (max-width: 1279px) {
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-hero {
+    padding: var(--space-10) var(--space-5);
+  }
+}
+
+@media (max-width: 767px) {
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-hero {
+    padding: var(--space-8) var(--space-4);
+  }
 
 .safeclaw-module-shell.module-variant-document .hud-corners::before,
 .safeclaw-module-shell.module-variant-document .hud-corners::after {
