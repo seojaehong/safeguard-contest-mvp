@@ -7,6 +7,10 @@ import { userVisibleRoutes } from "@/lib/frontend-design-contract";
 
 const root = process.cwd();
 
+type CssDeclarations = Record<string, string>;
+type CssRule = { selectors: string[]; declarations: CssDeclarations };
+type MediaBlock = { maxWidth: number; sourceIndex: number; endIndex: number; body: string };
+
 const routeFamilies = {
   landing: ["/", "/home", "/why", "/trust", "/roadmap"],
   workbench: ["/workspace", "/reports"],
@@ -76,6 +80,15 @@ const delegatedHeadingOwners: Partial<Record<(typeof userVisibleRoutes)[number],
   "/auth/callback": "components/AuthCallbackClient.tsx",
 };
 
+const sharedComponentOwners = {
+  "components/AdminLoginPanel.tsx": "AdminLoginPanel",
+  "components/AuthCallbackClient.tsx": "AuthCallbackClient",
+  "components/SafeClawLanding.tsx": "SafeClawLanding",
+  "components/SafeClawModuleShell.tsx": "SafeClawModuleShell",
+  "components/V2DemoExperience.tsx": "V2DemoExperience",
+  "components/SafeGuardCommandCenter.tsx": "SafeGuardCommandCenter",
+} as const;
+
 function listPageFiles(directory: string): string[] {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const absolutePath = path.join(directory, entry.name);
@@ -96,6 +109,68 @@ function pageFileFromRoute(route: string): string {
 
 function read(relativePath: string): string {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
+}
+
+function ruleBlocks(source: string): CssRule[] {
+  const uncommented = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  return [...uncommented.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
+    selectors: match[1].split(",").map((selector) => selector.replace(/\s+/g, " ").trim()),
+    declarations: Object.fromEntries(
+      [...match[2].matchAll(/([\w-]+)\s*:\s*([^;]+);/g)].map((declaration) => [
+        declaration[1].trim(),
+        declaration[2].trim(),
+      ]),
+    ),
+  }));
+}
+
+function declarationsForExactSelector(source: string, selector: string): CssDeclarations {
+  return Object.assign(
+    {},
+    ...ruleBlocks(source).filter((rule) => rule.selectors.includes(selector)).map((rule) => rule.declarations),
+  );
+}
+
+function mediaBlocks(source: string): MediaBlock[] {
+  const blocks: MediaBlock[] = [];
+  const pattern = /@media\s*\(max-width:\s*(\d+)px\)\s*\{/g;
+  for (const match of source.matchAll(pattern)) {
+    if (match.index === undefined) continue;
+    const openingBrace = source.indexOf("{", match.index);
+    let depth = 0;
+    for (let index = openingBrace; index < source.length; index += 1) {
+      if (source[index] === "{") depth += 1;
+      if (source[index] === "}") depth -= 1;
+      if (depth === 0) {
+        blocks.push({
+          maxWidth: Number(match[1]),
+          sourceIndex: match.index,
+          endIndex: index + 1,
+          body: source.slice(openingBrace + 1, index),
+        });
+        break;
+      }
+    }
+  }
+  return blocks;
+}
+
+function withoutMediaBlocks(source: string): string {
+  let cursor = 0;
+  let result = "";
+  for (const block of mediaBlocks(source)) {
+    result += source.slice(cursor, block.sourceIndex);
+    cursor = block.endIndex;
+  }
+  return result + source.slice(cursor);
+}
+
+function effectiveDeclarationsAtWidth(source: string, selector: string, width: number): CssDeclarations {
+  const declarations = declarationsForExactSelector(withoutMediaBlocks(source), selector);
+  for (const block of mediaBlocks(source).filter((item) => item.maxWidth >= width).sort((a, b) => a.sourceIndex - b.sourceIndex)) {
+    Object.assign(declarations, declarationsForExactSelector(block.body, selector));
+  }
+  return declarations;
 }
 
 describe("frontend route classification", () => {
@@ -127,23 +202,25 @@ describe("frontend route classification", () => {
   });
 
   it("verifies every delegated route still renders its declared surface owner", () => {
-    const sharedOwners = {
-      "components/SafeClawLanding.tsx": "SafeClawLanding",
-      "components/SafeClawModuleShell.tsx": "SafeClawModuleShell",
-      "components/V2DemoExperience.tsx": "V2DemoExperience",
-      "components/SafeGuardCommandCenter.tsx": "SafeGuardCommandCenter",
-    } as const;
+    for (const owner of Object.values(delegatedHeadingOwners)) {
+      expect(sharedComponentOwners, `${owner} delegated owner`).toHaveProperty(owner);
+    }
 
     for (const route of userVisibleRoutes) {
-      const owner = routeSurfaceOwners[route];
-      if (!(owner in sharedOwners)) continue;
-      const componentName = sharedOwners[owner as keyof typeof sharedOwners];
       const pageSource = read(pageFileFromRoute(route));
+      const owners = [routeSurfaceOwners[route], delegatedHeadingOwners[route]].filter(
+        (owner): owner is string => Boolean(owner),
+      );
 
-      expect(pageSource, `${route} renders ${componentName}`).toContain(`<${componentName}`);
-      if (componentName === "SafeClawModuleShell") {
-        expect(pageSource, `${route} module title`).toMatch(/\btitle=/);
-        expect(pageSource, `${route} module description`).toMatch(/\bdescription=/);
+      for (const owner of owners) {
+        if (!(owner in sharedComponentOwners)) continue;
+        const componentName = sharedComponentOwners[owner as keyof typeof sharedComponentOwners];
+
+        expect(pageSource, `${route} renders ${componentName}`).toContain(`<${componentName}`);
+        if (componentName === "SafeClawModuleShell") {
+          expect(pageSource, `${route} module title`).toMatch(/\btitle=/);
+          expect(pageSource, `${route} module description`).toMatch(/\bdescription=/);
+        }
       }
     }
   });
@@ -160,7 +237,32 @@ describe("knowledge and legal route hierarchy", () => {
     expect(source.match(/<h1\b/g)).toHaveLength(1);
     expect(source).toContain('<h1 className="title small-title">');
     expect(source.match(/<h2\b/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(source.match(/<h2 className="h2">/g)).toHaveLength(2);
     expect(source).not.toMatch(/<div className="h[23]">/);
+  });
+
+  it("binds legal prose and preformatted bodies to the long-form reading contract", () => {
+    const css = withoutMediaBlocks(read("app/globals.css"));
+    const lawSource = read("app/law/[id]/page.tsx");
+    const precedentSource = read("app/precedent/[id]/page.tsx");
+    const interpretationSource = read("app/interpretation/[id]/page.tsx");
+
+    expect(lawSource).toContain("legal-detail-page");
+    expect(precedentSource).toContain('<pre className="legal-reading-body">');
+    expect(interpretationSource).toContain('<pre className="legal-reading-body">');
+    expect(declarationsForExactSelector(css, ".law-body-viewer")).toMatchObject({
+      "max-width": "var(--content-reading)",
+    });
+    expect(declarationsForExactSelector(css, ".law-section-lines p")).toMatchObject({
+      "font-size": "var(--text-body)",
+      "line-height": "var(--leading-longform)",
+    });
+    expect(declarationsForExactSelector(css, ".legal-reading-body")).toMatchObject({
+      width: "100%",
+      "max-width": "var(--content-reading)",
+      "font-size": "var(--text-body)",
+      "line-height": "var(--leading-longform)",
+    });
   });
 
   it("uses semantic section and result headings on ask and search surfaces", () => {
@@ -192,11 +294,17 @@ describe("informational and demo route hierarchy", () => {
 
   it("uses semantic section and card headings throughout the demo", () => {
     const source = read("components/V2DemoExperience.tsx");
+    const triadStart = source.indexOf('<section className="primary-triad-grid">');
+    const triadEnd = source.indexOf("</section>", triadStart);
+    const triadSource = source.slice(triadStart, triadEnd);
 
     expect(source).toContain("demo-mode-shell");
     expect(source.match(/<h1\b/g)).toHaveLength(1);
     expect(source.match(/<h2\b/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
-    expect(source.match(/<h3\b/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+    expect(source.match(/<h3\b/g)?.length ?? 0).toBeGreaterThanOrEqual(1);
+    expect(triadSource.match(/<h2\b/g)).toHaveLength(3);
+    expect(triadSource).not.toMatch(/<h3\b/);
+    expect(source.indexOf("<h2", source.indexOf("<h1"))).toBeLessThan(source.indexOf("<h3"));
   });
 });
 
@@ -225,26 +333,97 @@ describe("module route section hierarchy", () => {
     expect(source).not.toMatch(/style=\{\{/);
   });
 
-  it("keeps route-family containers, cards, controls, and mobile gutters on canonical geometry", () => {
+  it("binds route-family body, card, control, V2, demo, and legacy geometry to exact selectors", () => {
     const css = read("app/globals.css");
-    const geometryHooks = [
-      "safeclaw-landing",
-      "safeclaw-module-shell",
-      "command-center-shell",
-      "safeclaw-login-page",
-      "v2-shell",
-      "demo-mode-shell",
-      "container",
-    ];
+    const desktopCss = withoutMediaBlocks(css);
 
-    for (const hook of geometryHooks) {
-      expect(css, `${hook} CSS hook`).toContain(`.${hook}`);
+    expect(declarationsForExactSelector(desktopCss, "html")).toMatchObject({
+      "font-size": "var(--text-body)",
+      "line-height": "var(--leading-body)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".card")).toMatchObject({
+      "border-radius": "var(--radius-panel)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".button")).toMatchObject({
+      "min-height": "var(--control-height)",
+      "border-radius": "var(--radius-control)",
+      padding: "var(--space-3) var(--space-4)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-shared-description")).toMatchObject({
+      "font-size": "var(--text-body-lg)",
+      "line-height": "var(--leading-body-lg)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-shared-card")).toMatchObject({
+      "border-radius": "var(--radius-panel)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-shared-action")).toMatchObject({
+      "min-height": "var(--control-height)",
+      "border-radius": "var(--radius-control)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-module-description")).toMatchObject({
+      "font-size": "var(--text-body-lg)",
+      "line-height": "var(--leading-body-lg)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-module-card")).toMatchObject({
+      padding: "var(--space-6)",
+      "border-radius": "var(--radius-panel)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-module-primary")).toMatchObject({
+      "min-height": "var(--control-height)",
+      "border-radius": "var(--radius-control)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-login-panel p")).toMatchObject({
+      "font-size": "var(--text-body-lg)",
+      "line-height": "var(--leading-body-lg)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-login-panel")).toMatchObject({
+      gap: "var(--space-6)",
+      padding: "clamp(var(--space-8), 5vw, var(--space-16))",
+      "border-radius": "var(--radius-panel)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-login-form button")).toMatchObject({
+      "min-height": "var(--control-height)",
+      "border-radius": "var(--radius-control)",
+      padding: "0 var(--space-4)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".v2-shell")).toMatchObject({
+      width: "min(var(--content-standard), calc(100% - (var(--space-6) * 2)))",
+      padding: "var(--space-5) 0 var(--space-16)",
+      gap: "var(--space-6)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".v2-nav")).toMatchObject({
+      top: "var(--space-2)",
+      gap: "var(--space-4)",
+      padding: "var(--space-3) var(--space-4)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".v2-hero")).toMatchObject({
+      gap: "var(--space-4)",
+      padding: "clamp(var(--space-8), 6vw, var(--space-20))",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".demo-stage-panel")).toMatchObject({
+      gap: "var(--space-5)",
+      padding: "var(--space-6)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".demo-screen")).toMatchObject({
+      gap: "var(--space-5)",
+      padding: "clamp(var(--space-5), 3vw, var(--space-8))",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".demo-mode-badges button")).toMatchObject({
+      "min-height": "var(--control-height)",
+      "border-radius": "var(--radius-control)",
+      padding: "var(--space-2) var(--space-3)",
+    });
+    for (const selector of [".scenario-strip", ".api-pulse-grid", ".primary-triad-grid", ".trust-grid", ".roadmap-list"]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({ gap: "var(--space-4)" });
     }
-    expect(css).toContain("width: min(var(--content-standard), calc(100% - (var(--space-6) * 2)))");
-    expect(css).toContain("width: min(var(--content-wide), calc(100% - (var(--space-6) * 2)))");
-    expect(css).toContain("width: min(100%, calc(100% - (var(--space-4) * 2)))");
-    expect(css).toContain("border-radius: var(--radius-panel)");
-    expect(css).toContain("border-radius: var(--radius-control)");
-    expect(css).toContain("min-height: var(--control-height)");
+    for (const selector of [".triad-card", ".preview-hero-card", ".trust-grid article", ".roadmap-item"]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({ padding: "var(--space-6)" });
+    }
+    expect(declarationsForExactSelector(desktopCss, ".list")).toMatchObject({ gap: "var(--space-4)" });
+    expect(declarationsForExactSelector(desktopCss, ".row")).toMatchObject({ gap: "var(--space-2)" });
+    expect(effectiveDeclarationsAtWidth(css, ".container", 720)).toMatchObject({
+      width: "min(100%, calc(100% - (var(--space-4) * 2)))",
+    });
   });
 });

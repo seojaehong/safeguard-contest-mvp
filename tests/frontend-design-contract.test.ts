@@ -68,6 +68,7 @@ const typographyRoles = {
   componentTitle: { size: "var(--text-component-title)", weight: "700", lineHeight: "var(--leading-component-title)", tracking: "var(--tracking-component-title)" },
   bodyLarge: { size: "var(--text-body-lg)", weight: "500", lineHeight: "var(--leading-body-lg)", tracking: "var(--tracking-body)" },
   body: { size: "var(--text-body)", weight: "500", lineHeight: "var(--leading-body)", tracking: "var(--tracking-body)" },
+  longform: { size: "var(--text-body)", weight: "500", lineHeight: "var(--leading-longform)", tracking: "var(--tracking-body)" },
   support: { size: "var(--text-support)", weight: "500", lineHeight: "var(--leading-body)", tracking: "var(--tracking-body)" },
   control: { size: "var(--text-control)", weight: "700", lineHeight: "var(--leading-control)", tracking: "var(--tracking-body)" },
   table: { size: "var(--text-table)", weight: "500", lineHeight: "var(--leading-table)", tracking: "var(--tracking-body)" },
@@ -91,6 +92,8 @@ function isTableHeaderSelector(selector: string): boolean {
 }
 
 const semanticRoleOverrides: Readonly<Record<string, TypographyRole>> = {
+  ".law-section-lines p": "longform",
+  ".legal-reading-body": "longform",
   ".command-center-shell .command-primary": "control",
   ".safeclaw-os-cta button": "control",
   ".safeclaw-os-cta a": "control",

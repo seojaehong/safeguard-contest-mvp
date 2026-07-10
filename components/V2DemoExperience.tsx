@@ -300,17 +300,17 @@ export function V2DemoExperience({
           <section className="primary-triad-grid">
             <article className="triad-card risk">
               <span>위험성평가표</span>
-              <h3>{scenarioRisk(selectedScenario)}</h3>
+              <h2>{scenarioRisk(selectedScenario)}</h2>
               <p>{controls[0]} / {controls[1]} / {controls[2]}</p>
             </article>
             <article className="triad-card tbm">
               <span>TBM</span>
-              <h3>{selectedScenario.workType}</h3>
+              <h2>{selectedScenario.workType}</h2>
               <p>작업 전 회의 질문: 작업중지 기준, 보호구 확인자, 위험구역 통제 담당자를 지정합니다.</p>
             </article>
             <article className="triad-card foreign">
               <span>외국인 전송본</span>
-              <h3>{primaryLanguages(selectedScenario)}</h3>
+              <h2>{primaryLanguages(selectedScenario)}</h2>
               <p>위험하면 멈추고 관리자에게 말하세요. 이해하지 못하면 다시 설명을 요청하세요.</p>
             </article>
           </section>

@@ -50,7 +50,7 @@ export default async function LawDetailPage({ params }: { params: Promise<{ id: 
   const sections = parseLawBody(item.body);
 
   return (
-    <main className="container grid">
+    <main className="container grid legal-detail-page">
       <div className="row">
         <span className="badge">법령 상세</span>
         {item.citation ? <span className="badge">{item.citation}</span> : null}
@@ -60,10 +60,10 @@ export default async function LawDetailPage({ params }: { params: Promise<{ id: 
         <h1 className="title small-title">{item.title}</h1>
         <div className="muted">{item.summary}</div>
         <hr />
-        <h2 className="h3">핵심 포인트</h2>
+        <h2 className="h2">핵심 포인트</h2>
         <ul>{item.points.map((p) => <li key={p}>{p}</li>)}</ul>
         <hr />
-        <h2 className="h3">법령 전문 및 문서 반영</h2>
+        <h2 className="h2">법령 전문 및 문서 반영</h2>
         <div className="muted small">Law.go 상세 호출이 조문을 반환하면 전체 조문을 표시합니다. 상세 호출이 실패한 경우에만 기초 조문 스냅샷과 원문 출처를 함께 표시합니다.</div>
         <div className="law-body-viewer">
           {sections.map((section) => (
