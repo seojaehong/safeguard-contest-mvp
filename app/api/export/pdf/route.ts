@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "node:fs";
+import path from "node:path";
 import {
   buildRiskAssessmentText,
   parseStructuredRiskAssessmentRows,
@@ -604,6 +606,128 @@ function wrapPdfLine(value: string, maxChars: number) {
   return lines.length ? lines : [""];
 }
 
+type EmbeddedPdfFont = {
+  program: Buffer;
+  cidToGidMap: Buffer;
+};
+
+let embeddedPdfFonts: { regular: EmbeddedPdfFont; bold: EmbeddedPdfFont } | null = null;
+
+function findTrueTypeTable(font: Buffer, tag: string): { offset: number; length: number } {
+  const tableCount = font.readUInt16BE(4);
+  for (let index = 0; index < tableCount; index += 1) {
+    const recordOffset = 12 + index * 16;
+    if (font.toString("ascii", recordOffset, recordOffset + 4) !== tag) continue;
+    return {
+      offset: font.readUInt32BE(recordOffset + 8),
+      length: font.readUInt32BE(recordOffset + 12)
+    };
+  }
+  throw new Error(`Embedded PDF font is missing ${tag} table`);
+}
+
+function mapFormat12(font: Buffer, offset: number, mapping: Uint16Array): void {
+  const groupCount = font.readUInt32BE(offset + 12);
+  for (let index = 0; index < groupCount; index += 1) {
+    const groupOffset = offset + 16 + index * 12;
+    const start = font.readUInt32BE(groupOffset);
+    const end = Math.min(font.readUInt32BE(groupOffset + 4), 0xffff);
+    const startGlyph = font.readUInt32BE(groupOffset + 8);
+    for (let codePoint = start; codePoint <= end; codePoint += 1) {
+      mapping[codePoint] = (startGlyph + codePoint - start) & 0xffff;
+    }
+  }
+}
+
+function mapFormat4(font: Buffer, offset: number, mapping: Uint16Array): void {
+  const segmentCount = font.readUInt16BE(offset + 6) / 2;
+  const endCodes = offset + 14;
+  const startCodes = endCodes + segmentCount * 2 + 2;
+  const deltas = startCodes + segmentCount * 2;
+  const rangeOffsets = deltas + segmentCount * 2;
+  for (let index = 0; index < segmentCount; index += 1) {
+    const start = font.readUInt16BE(startCodes + index * 2);
+    const end = font.readUInt16BE(endCodes + index * 2);
+    const delta = font.readInt16BE(deltas + index * 2);
+    const rangeOffsetPosition = rangeOffsets + index * 2;
+    const rangeOffset = font.readUInt16BE(rangeOffsetPosition);
+    for (let codePoint = start; codePoint <= end && codePoint < 0xffff; codePoint += 1) {
+      if (rangeOffset === 0) {
+        mapping[codePoint] = (codePoint + delta) & 0xffff;
+        continue;
+      }
+      const glyphPosition = rangeOffsetPosition + rangeOffset + (codePoint - start) * 2;
+      if (glyphPosition + 2 > font.length) continue;
+      const glyph = font.readUInt16BE(glyphPosition);
+      mapping[codePoint] = glyph === 0 ? 0 : (glyph + delta) & 0xffff;
+    }
+  }
+}
+
+function buildCidToGidMap(font: Buffer): Buffer {
+  const cmap = findTrueTypeTable(font, "cmap");
+  const subtableCount = font.readUInt16BE(cmap.offset + 2);
+  const candidates: Array<{ format: number; offset: number; priority: number }> = [];
+  for (let index = 0; index < subtableCount; index += 1) {
+    const recordOffset = cmap.offset + 4 + index * 8;
+    const platform = font.readUInt16BE(recordOffset);
+    const encoding = font.readUInt16BE(recordOffset + 2);
+    const offset = cmap.offset + font.readUInt32BE(recordOffset + 4);
+    const format = font.readUInt16BE(offset);
+    const priority = format === 12 && platform === 3 && encoding === 10 ? 3
+      : format === 12 ? 2
+        : format === 4 ? 1
+          : 0;
+    if (priority) candidates.push({ format, offset, priority });
+  }
+  const selected = candidates.sort((left, right) => right.priority - left.priority)[0];
+  if (!selected) throw new Error("Embedded PDF font has no Unicode cmap");
+  const mapping = new Uint16Array(0x10000);
+  if (selected.format === 12) mapFormat12(font, selected.offset, mapping);
+  else mapFormat4(font, selected.offset, mapping);
+  const result = Buffer.alloc(mapping.length * 2);
+  mapping.forEach((glyph, codePoint) => result.writeUInt16BE(glyph, codePoint * 2));
+  return result;
+}
+
+function loadEmbeddedPdfFonts(): { regular: EmbeddedPdfFont; bold: EmbeddedPdfFont } {
+  if (embeddedPdfFonts) return embeddedPdfFonts;
+  const load = (fileName: string): EmbeddedPdfFont => {
+    const program = fs.readFileSync(path.join(process.cwd(), "public", "fonts", fileName));
+    return { program, cidToGidMap: buildCidToGidMap(program) };
+  };
+  embeddedPdfFonts = {
+    regular: load("NotoSansKR-Regular.ttf"),
+    bold: load("NotoSansKR-Bold.ttf")
+  };
+  return embeddedPdfFonts;
+}
+
+function pdfStream(dictionary: string, data: Buffer): Buffer {
+  return Buffer.concat([
+    Buffer.from(`<< /Length ${data.length}${dictionary ? ` ${dictionary}` : ""} >>\nstream\n`, "ascii"),
+    data,
+    Buffer.from("\nendstream", "ascii")
+  ]);
+}
+
+const identityToUnicodeCMap = Buffer.from(`/CIDInit /ProcSet findresource begin
+12 dict begin
+begincmap
+/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def
+/CMapName /NotoSansKR-Identity-UCS def
+/CMapType 2 def
+1 begincodespacerange
+<0000> <FFFF>
+endcodespacerange
+1 beginbfrange
+<0000> <FFFF> <0000>
+endbfrange
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end`, "ascii");
+
 type PdfTextRole = "title" | "section" | "body" | "table" | "note";
 type PdfContentLine = { text: string; role: PdfTextRole; gap?: number };
 
@@ -667,6 +791,7 @@ function buildBinaryPdf(
   riskRows: PdfRow[],
   structuredRiskRows: StructuredRiskAssessmentRow[]
 ) {
+  const fonts = loadEmbeddedPdfFonts();
   const commands: string[] = [];
   const roles = {
     title: { font: "F2", size: 20, leading: 24, tracking: -0.4 },
@@ -689,32 +814,40 @@ function buildBinaryPdf(
   });
 
   const content = commands.join("\n");
-  const objects = [
+  const objects: Array<string | Buffer> = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 8 0 R >> >> /Contents 6 0 R >>",
-    "<< /Type /Font /Subtype /Type0 /BaseFont /MalgunGothic /Encoding /UniKS-UCS2-H /DescendantFonts [5 0 R] >>",
-    "<< /Type /Font /Subtype /CIDFontType0 /BaseFont /MalgunGothic /CIDSystemInfo << /Registry (Adobe) /Ordering (Korea1) /Supplement 2 >> /FontDescriptor 7 0 R /DW 1000 >>",
-    `<< /Length ${Buffer.byteLength(content, "ascii")} >>\nstream\n${content}\nendstream`,
-    "<< /Type /FontDescriptor /FontName /MalgunGothic /Flags 6 /FontBBox [0 -200 1000 900] /ItalicAngle 0 /Ascent 800 /Descent -200 /CapHeight 700 /StemV 80 >>",
-    "<< /Type /Font /Subtype /Type0 /BaseFont /MalgunGothic-Bold /Encoding /UniKS-UCS2-H /DescendantFonts [9 0 R] >>",
-    "<< /Type /Font /Subtype /CIDFontType0 /BaseFont /MalgunGothic-Bold /CIDSystemInfo << /Registry (Adobe) /Ordering (Korea1) /Supplement 2 >> /FontDescriptor 10 0 R /DW 1000 >>",
-    "<< /Type /FontDescriptor /FontName /MalgunGothic-Bold /Flags 6 /FontBBox [0 -200 1000 900] /ItalicAngle 0 /Ascent 800 /Descent -200 /CapHeight 700 /StemV 100 >>"
+    "<< /Type /Font /Subtype /Type0 /BaseFont /NotoSansKR-Regular /Encoding /Identity-H /DescendantFonts [5 0 R] /ToUnicode 11 0 R >>",
+    "<< /Type /Font /Subtype /CIDFontType2 /BaseFont /NotoSansKR-Regular /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor 7 0 R /DW 1000 /CIDToGIDMap 12 0 R >>",
+    pdfStream("", Buffer.from(content, "ascii")),
+    "<< /Type /FontDescriptor /FontName /NotoSansKR-Regular /Flags 4 /FontBBox [-1000 -500 3000 1500] /ItalicAngle 0 /Ascent 1160 /Descent -288 /CapHeight 733 /StemV 80 /FontFile2 13 0 R >>",
+    "<< /Type /Font /Subtype /Type0 /BaseFont /NotoSansKR-Bold /Encoding /Identity-H /DescendantFonts [9 0 R] /ToUnicode 11 0 R >>",
+    "<< /Type /Font /Subtype /CIDFontType2 /BaseFont /NotoSansKR-Bold /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor 10 0 R /DW 1000 /CIDToGIDMap 14 0 R >>",
+    "<< /Type /FontDescriptor /FontName /NotoSansKR-Bold /Flags 4 /FontBBox [-1000 -500 3000 1500] /ItalicAngle 0 /Ascent 1160 /Descent -288 /CapHeight 733 /StemV 120 /FontFile2 15 0 R >>",
+    pdfStream("", identityToUnicodeCMap),
+    pdfStream("", fonts.regular.cidToGidMap),
+    pdfStream(`/Length1 ${fonts.regular.program.length}`, fonts.regular.program),
+    pdfStream("", fonts.bold.cidToGidMap),
+    pdfStream(`/Length1 ${fonts.bold.program.length}`, fonts.bold.program)
   ];
 
-  let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+  const chunks: Buffer[] = [Buffer.from("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n", "binary")];
   const offsets = [0];
   objects.forEach((object, index) => {
-    offsets.push(Buffer.byteLength(pdf, "binary"));
-    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+    offsets.push(chunks.reduce((total, chunk) => total + chunk.length, 0));
+    chunks.push(Buffer.from(`${index + 1} 0 obj\n`, "ascii"));
+    chunks.push(typeof object === "string" ? Buffer.from(object, "ascii") : object);
+    chunks.push(Buffer.from("\nendobj\n", "ascii"));
   });
-  const xrefOffset = Buffer.byteLength(pdf, "binary");
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  const xrefOffset = chunks.reduce((total, chunk) => total + chunk.length, 0);
+  let trailer = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
   offsets.slice(1).forEach((offset) => {
-    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+    trailer += `${String(offset).padStart(10, "0")} 00000 n \n`;
   });
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
-  return Buffer.from(pdf, "binary");
+  trailer += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  chunks.push(Buffer.from(trailer, "ascii"));
+  return Buffer.concat(chunks);
 }
 
 export async function POST(request: NextRequest) {

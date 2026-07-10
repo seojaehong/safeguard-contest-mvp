@@ -36,3 +36,11 @@ F6 remains `in_progress` with `passes: false` pending independent specification 
 - Replaced broad source substring evidence with independently delimited template checks and direct `POST` invocation for both default binary PDF and `?format=html` responses. Tests assert representative values, order, signatures, status, MIME, disposition, cache headers, PDF magic, font resources, and every typography role.
 - Review RED: strengthened suite failed 5 of 9 tests before remediation.
 - Review GREEN: generated plus design-contract tests pass 27/27; full suite passes 56 files / 511 tests; static audit, typecheck, build, and diff-check pass.
+
+## Embedded-font remediation
+
+- Replaced the non-embedded Malgun Gothic name declarations with two real Noto Sans KR TrueType programs: static 400 and 700 instances generated from the official Google Fonts variable TTF. The included `NotoSansKR-OFL.txt` records the SIL Open Font License; no Windows system font is redistributed.
+- The binary PDF now uses `/CIDFontType2`, raw `/FontFile2` streams, per-font `/CIDToGIDMap` streams built from each TrueType Unicode `cmap`, `/Identity-H`, and a shared `/ToUnicode` identity CMap. HTML continues to use the Malgun-first print-safe stack and the embedded Noto font is the portable binary fallback.
+- RED: 3 of 10 generated-document tests failed on missing assets, invalid CID subtype, absent font programs/ToUnicode, and missing Korean extraction proof.
+- GREEN: actual response bytes contain two TrueType programs and the expected font-resource graph; the ToUnicode extraction check recovers Korean title, company, site, work, and signature text.
+- Verified: focused generated plus design-contract tests 28/28, full suite 56 files/512 tests, static audit zero violations, typecheck, production build (`6VXzX-xnqM5yUVHrW-rCG`), and diff-check pass.

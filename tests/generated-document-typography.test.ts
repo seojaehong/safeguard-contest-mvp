@@ -13,6 +13,10 @@ const css = read("app/globals.css");
 
 const documentFont = frontendTypography.fonts.document;
 const printRoles = frontendTypography.print;
+const embeddedFontPaths = [
+  "public/fonts/NotoSansKR-Regular.ttf",
+  "public/fonts/NotoSansKR-Bold.ttf",
+] as const;
 
 function exactCssBlock(source: string, selector: string): string {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
@@ -138,7 +142,7 @@ describe("generated document typography", () => {
     expect(pdfRoute).not.toContain("var(--font-hud)");
   });
 
-  it("maps the default binary PDF branch to exact roles and Malgun Gothic resources", () => {
+  it("maps the default binary PDF branch to exact roles and embedded Noto fallback resources", () => {
     const content = functionSlice(pdfRoute, "buildPdfContentLines", "buildBinaryPdf");
     const binary = functionSlice(pdfRoute, "buildBinaryPdf", "POST");
     expect(content).toContain('role: "title"');
@@ -151,9 +155,24 @@ describe("generated document typography", () => {
     expect(binary).toContain('body: { font: "F1", size: 10, leading: 15, tracking: 0 }');
     expect(binary).toContain('table: { font: "F1", size: 8.5, leading: 12, tracking: 0 }');
     expect(binary).toContain('note: { font: "F1", size: 8, leading: 11, tracking: 0 }');
-    expect(binary).toContain("/BaseFont /MalgunGothic");
-    expect(binary).toContain("/BaseFont /MalgunGothic-Bold");
+    expect(pdfRoute).toContain('load("NotoSansKR-Regular.ttf")');
+    expect(pdfRoute).toContain('load("NotoSansKR-Bold.ttf")');
+    expect(binary).toContain("/Subtype /CIDFontType2");
+    expect(binary).toContain("/FontFile2");
+    expect(binary).toContain("/ToUnicode");
+    expect(binary).toContain("/CIDToGIDMap");
     expect(binary).not.toContain("HYSMyeongJo");
+    expect(binary).not.toContain("/BaseFont /MalgunGothic");
+  });
+
+  it("ships licensed, real TrueType Korean font programs for binary PDF fallback", () => {
+    for (const relativePath of embeddedFontPaths) {
+      const font = fs.readFileSync(path.join(root, relativePath));
+      expect(font.subarray(0, 4)).toEqual(Buffer.from([0x00, 0x01, 0x00, 0x00]));
+      expect(font.length).toBeGreaterThan(1_000_000);
+    }
+    const license = read("public/fonts/NotoSansKR-OFL.txt");
+    expect(license).toContain("SIL OPEN FONT LICENSE Version 1.1");
   });
 
   it("preserves binary and HTML response behavior with representative values", async () => {
@@ -168,7 +187,18 @@ describe("generated document typography", () => {
     expect(binaryResponse.headers.get("cache-control")).toBe("no-store");
     const binary = Buffer.from(await binaryResponse.arrayBuffer());
     expect(binary.subarray(0, 5).toString("utf8")).toBe("%PDF-");
-    expect(binary.toString("binary")).toContain("/MalgunGothic");
+    const binarySource = binary.toString("binary");
+    expect(binarySource).toContain("/Subtype /CIDFontType2");
+    expect(binarySource).toContain("/FontFile2");
+    expect(binarySource).toContain("/ToUnicode");
+    expect(binarySource).toContain("/CIDToGIDMap");
+    expect(binarySource.match(/\x00\x01\x00\x00/gu)?.length).toBeGreaterThanOrEqual(2);
+    const extracted = Array.from(binarySource.matchAll(/<([0-9A-F]+)> Tj/gu), (match) =>
+      Buffer.from(match[1], "hex").swap16().toString("utf16le"),
+    ).join(" ");
+    for (const value of ["위험성평가표", "가온테크", "1차 작업장", "천장 배관 점검", "작성자", "승인"]) {
+      expect(extracted).toContain(value);
+    }
 
     const htmlResponse = await POST(new NextRequest("http://localhost/api/export/pdf?format=html", {
       method: "POST",

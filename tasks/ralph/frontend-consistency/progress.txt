@@ -91,3 +91,9 @@
 - Verified: review RED 5/9; review GREEN focused 27/27, full 56 files/511 tests, static audit zero violations, typecheck, production build, and diff-check pass.
 - Learned: an HTML-ready PDF branch does not prove the default binary response; generated-surface contracts must exercise both response branches and every template boundary independently.
 - Next: keep F6 `passes: false` until independent re-review.
+
+## 2026-07-11 F6 embedded-font remediation
+- Changed: embedded licensed Noto Sans KR 400/700 TrueType programs in the default binary PDF using CIDFontType2, FontFile2, cmap-derived CIDToGIDMap, Identity-H, and ToUnicode resources; retained the Malgun-first HTML stack.
+- Verified: structural/font/extraction RED 3/10; GREEN focused 28/28, full 56 files/512 tests, static audit zero violations, typecheck, production build `6VXzX-xnqM5yUVHrW-rCG`, and diff-check pass.
+- Learned: a PDF font descriptor and family name do not supply glyphs; portable Korean output requires the actual licensed font program, Unicode-to-glyph mapping, and ToUnicode extraction mapping.
+- Next: keep F6 `passes: false` until independent re-review confirms the embedded object graph.
