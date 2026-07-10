@@ -2347,13 +2347,13 @@ ul {
 
 .v2-nav {
   position: sticky;
-  top: 10px;
+  top: var(--space-2);
   z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
-  padding: 12px 14px;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid rgba(226, 222, 213, 0.86);
   border-radius: 4px;
   background: rgba(255, 253, 248, 0.82);
@@ -2387,8 +2387,8 @@ ul {
 
 .v2-hero {
   display: grid;
-  gap: 16px;
-  padding: clamp(30px, 6vw, 72px);
+  gap: var(--space-4);
+  padding: clamp(var(--space-8), 6vw, var(--space-20));
   border-radius: 4px;
   background: rgba(255, 253, 248, 0.96);
 }
@@ -2435,8 +2435,8 @@ ul {
   top: 96px;
   align-self: start;
   display: grid;
-  gap: 18px;
-  padding: 24px;
+  gap: var(--space-5);
+  padding: var(--space-6);
 }
 
 .demo-stage-panel h1 {
@@ -2480,8 +2480,8 @@ ul {
 .demo-stage-list li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
+  gap: var(--space-2);
+  padding: var(--space-3);
   border: 1px solid rgba(226, 222, 213, 0.74);
   border-radius: 4px;
   color: var(--muted);
@@ -2510,9 +2510,10 @@ ul {
 }
 
 .demo-mode-badges button {
+  min-height: var(--control-height);
   border: 1px solid rgba(33, 89, 79, 0.18);
-  border-radius: 4px;
-  padding: 9px 12px;
+  border-radius: var(--radius-control);
+  padding: var(--space-2) var(--space-3);
   background: #fffdf8;
   color: var(--accent);
   cursor: pointer;
@@ -2521,8 +2522,8 @@ ul {
 
 .demo-screen {
   display: grid;
-  gap: 18px;
-  padding: clamp(20px, 3vw, 34px);
+  gap: var(--space-5);
+  padding: clamp(var(--space-5), 3vw, var(--space-8));
   min-height: 760px;
 }
 
@@ -2559,7 +2560,7 @@ ul {
 .trust-grid,
 .roadmap-list {
   display: grid;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 .scenario-strip {
@@ -2568,7 +2569,7 @@ ul {
 
 .scenario-strip button {
   min-height: 112px;
-  padding: 14px;
+  padding: var(--space-4);
   border: 1px solid rgba(207, 199, 185, 0.86);
   border-radius: 4px;
   background: rgba(255, 253, 248, 0.78);
@@ -2595,8 +2596,8 @@ ul {
 
 .demo-input-card {
   display: grid;
-  gap: 10px;
-  padding: 18px;
+  gap: var(--space-2);
+  padding: var(--space-4);
   border: 1px solid rgba(226, 222, 213, 0.8);
   border-radius: 4px;
   background: #fffefb;
@@ -2618,11 +2619,11 @@ ul {
 .demo-result-brief {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .demo-result-brief div {
-  padding: 14px;
+  padding: var(--space-4);
   border: 1px solid rgba(226, 222, 213, 0.82);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.64);
@@ -2698,7 +2699,7 @@ ul {
   display: grid;
   gap: 12px;
   min-height: 220px;
-  padding: 22px;
+  padding: var(--space-6);
   border: 1px solid rgba(207, 199, 185, 0.84);
   border-radius: 4px;
   background: #fffdf8;
@@ -2711,7 +2712,7 @@ ul {
   letter-spacing: var(--tracking-hud);
 }
 
-.triad-card h3,
+.triad-card h2,
 .preview-hero-card h2 {
   margin: 0;
   font-size: var(--text-section-title);
@@ -2745,8 +2746,8 @@ ul {
 .demo-generated-pack,
 .demo-evidence-map {
   display: grid;
-  gap: 14px;
-  padding: 18px;
+  gap: var(--space-4);
+  padding: var(--space-4);
   border: 1px solid rgba(226, 222, 213, 0.82);
   border-radius: 4px;
   background: rgba(255, 253, 248, 0.72);
@@ -2760,7 +2761,7 @@ ul {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .demo-section-heading span {
@@ -2791,7 +2792,7 @@ ul {
 .demo-document-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .demo-document-list article {
@@ -2874,7 +2875,7 @@ ul {
 .preview-hero-card b,
 .secondary-doc-grid span,
 .interview-question-list span {
-  padding: 8px 11px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid rgba(226, 222, 213, 0.86);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.66);
@@ -2890,7 +2891,7 @@ ul {
 }
 
 .language-wall div {
-  padding: 14px;
+  padding: var(--space-4);
   border: 1px solid rgba(226, 222, 213, 0.8);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.64);
@@ -2934,7 +2935,7 @@ ul {
 }
 
 .comparison-table span {
-  padding: 13px;
+  padding: var(--space-3);
   border-right: 1px solid rgba(226, 222, 213, 0.75);
   border-bottom: 1px solid rgba(226, 222, 213, 0.75);
   line-height: var(--leading-component-title);
@@ -2957,8 +2958,8 @@ ul {
 .trust-grid article,
 .roadmap-item {
   display: grid;
-  gap: 10px;
-  padding: 22px;
+  gap: var(--space-2);
+  padding: var(--space-6);
   border-radius: 4px;
 }
 
@@ -2982,7 +2983,7 @@ ul {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 @media (max-width: 1180px) {
@@ -3056,7 +3057,7 @@ ul {
 
   .demo-screen {
     min-height: auto;
-    padding: 18px;
+    padding: var(--space-4);
   }
 
   .demo-screen-top,
@@ -4642,8 +4643,8 @@ ul {
   letter-spacing: var(--tracking-body);
 }
 
-.list { display: grid; gap: 14px; }
-.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.list { display: grid; gap: var(--space-4); }
+.row { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
 .muted { color: var(--muted); }
 .small { font-size: var(--text-support);
   font-weight: 500;
@@ -6419,24 +6420,24 @@ ul {
 
 .product-section .card,
 .reference-grid .card {
-  padding: 22px;
+  padding: var(--space-6);
 }
 
 .question-list {
   display: grid;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .question-row {
-  padding: 14px 16px;
+  padding: var(--space-4);
   line-height: var(--leading-body);
 }
 
 .training-card,
 .citation-item {
   display: grid;
-  gap: 10px;
-  padding: 17px;
+  gap: var(--space-2);
+  padding: var(--space-4);
   letter-spacing: var(--tracking-body);
   word-spacing: 0.032em;
 }
@@ -6489,17 +6490,19 @@ ul {
 
 .law-body-viewer {
   display: grid;
-  gap: 18px;
-  margin-top: 14px;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: var(--content-reading);
+  margin-top: var(--space-4);
 }
 
 .law-body-section {
   display: grid;
-  gap: 12px;
+  gap: var(--space-3);
   border: 1px solid rgba(226, 222, 213, 0.95);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.58);
-  padding: 18px;
+  padding: var(--space-4);
 }
 
 .law-section-title {
@@ -6518,13 +6521,16 @@ ul {
 
 .law-section-lines p {
   margin: 0;
-  line-height: var(--leading-body);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-longform);
+  letter-spacing: var(--tracking-body);
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
 
 .law-article-heading {
-  margin-top: 14px;
+  margin-top: var(--space-4);
   border-top: 1px solid rgba(226, 222, 213, 0.9);
   padding-top: 16px;
   color: var(--ink);
@@ -6551,13 +6557,13 @@ ul {
 }
 
 .law-mokitem {
-  margin-left: 44px;
+  margin-left: var(--space-10);
   color: var(--muted);
 }
 
 .law-reflection {
   position: relative;
-  padding-left: 18px;
+  padding-left: var(--space-5);
   color: #72502f;
 }
 
@@ -7035,7 +7041,16 @@ ul {
 .judge-card,
 .action-panel,
 .prompt-card {
-  padding: 22px;
+  padding: var(--space-6);
+}
+
+.legal-reading-body {
+  width: 100%;
+  max-width: var(--content-reading);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-longform);
+  letter-spacing: var(--tracking-body);
 }
 
 .route-internal-page {
@@ -7184,8 +7199,7 @@ ul {
 
 @media (max-width: 720px) {
   .command-center-shell,
-  .product-shell,
-  .container {
+  .product-shell {
     width: min(100% - 24px, 1440px);
   }
 
@@ -7349,7 +7363,7 @@ body:has(.safeclaw-landing) :is(
   .worker-card,
   .phone-shell
 ) {
-  border-radius: 4px;
+  border-radius: var(--radius-control);
   box-shadow: none;
 }
 
@@ -7375,7 +7389,7 @@ body:has(.safeclaw-landing) :is(
   .demo-mode-badges button,
   .scenario-strip button
 ) {
-  border-radius: 4px;
+  border-radius: var(--radius-control);
   box-shadow: none;
 }
 
@@ -7449,7 +7463,7 @@ body:has(.safeclaw-landing) :is(
   .phone-bubble,
   .dispatch-recipient-card
 ) {
-  border-radius: 4px;
+  border-radius: var(--radius-control);
   box-shadow: none;
 }
 
@@ -9490,12 +9504,12 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-panel {
   display: grid;
   width: min(920px, calc(100% - 40px));
-  gap: 22px;
-  margin: clamp(56px, 10vh, 120px) auto;
+  gap: var(--space-6);
+  margin: clamp(var(--space-16), 10vh, var(--space-24)) auto;
   border: 1px solid rgba(246, 245, 239, 0.18);
-  border-radius: 4px;
+  border-radius: var(--radius-panel);
   background: rgba(14, 15, 19, 0.88);
-  padding: clamp(28px, 5vw, 64px);
+  padding: clamp(var(--space-8), 5vw, var(--space-16));
 }
 
 .safeclaw-login-panel h1 {
@@ -9521,9 +9535,9 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-form,
 .safeclaw-login-session {
   display: grid;
-  gap: 14px;
+  gap: var(--space-4);
   border-top: 1px solid rgba(246, 245, 239, 0.14);
-  padding-top: 26px;
+  padding-top: var(--space-6);
 }
 
 .safeclaw-login-form label {
@@ -9537,12 +9551,12 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-login-form input {
-  min-height: 60px;
+  min-height: var(--control-height);
   border: 1px solid rgba(246, 245, 239, 0.22);
-  border-radius: 4px;
+  border-radius: var(--radius-control);
   background: #0b0c10;
   color: var(--os-text, #f6f5ef);
-  padding: 0 18px;
+  padding: 0 var(--space-4);
   font-size: var(--text-component-title);
   font-weight: 700;
   line-height: var(--leading-component-title);
@@ -9559,14 +9573,14 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-actions a,
 .safeclaw-login-actions button {
   display: inline-flex;
-  min-height: 54px;
+  min-height: var(--control-height);
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(246, 245, 239, 0.2);
-  border-radius: 4px;
+  border-radius: var(--radius-control);
   background: rgba(8, 9, 11, 0.72);
   color: rgba(246, 245, 239, 0.78);
-  padding: 0 18px;
+  padding: 0 var(--space-4);
   font-family: var(--font-hud);
   font-size: var(--text-table);
   font-weight: 500;
@@ -9585,7 +9599,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-divider {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   color: rgba(246, 245, 239, 0.46);
   font-family: var(--font-hud);
   font-size: var(--text-caption);
@@ -9604,7 +9618,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-login-social {
   display: grid;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .safeclaw-login-social button.kakao {
@@ -9616,7 +9630,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .safeclaw-login-session dl {
@@ -9631,9 +9645,9 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-login-session dl div {
   display: grid;
-  gap: 8px;
+  gap: var(--space-2);
   background: #0b0c10;
-  padding: 18px;
+  padding: var(--space-4);
 }
 
 .safeclaw-login-session dt {
@@ -9659,7 +9673,7 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-login-topbar {
     align-items: flex-start;
     flex-direction: column;
-    padding-block: 18px;
+    padding-block: var(--space-4);
   }
 
   .safeclaw-login-session dl {

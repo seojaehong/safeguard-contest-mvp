@@ -46,22 +46,25 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 9. Two-axis review hardening
    - RED: review found that shared-owner checks could pass without a route rendering the owner, route geometry was not asserted, new paragraph margins were implicit, citation/law headings missed canonical tiers, module heading specificity overrode component titles, and one new color was raw.
    - GREEN: route pages now prove shared-owner rendering and module title/description props; route families assert standard/wide/mobile geometry plus card/control tokens; paragraph margins, heading tiers, selector specificity, and semantic colors are explicit. The generated static-audit snapshot was removed from the commit scope.
+10. Independent review Important findings
+   - RED: exact selector tests reproduced off-scale V2/demo/legacy gaps and padding plus the later 12px mobile `.container` gutter; legal tests reproduced missing 72ch/15px/1.75 measures and component-tier major headings; demo-order tests reproduced the `h1` to `h3` skip; delegated-owner coverage rejected missing auth owner mappings.
+   - GREEN: V2/demo/legacy geometry now uses approved spacing tokens and effective 16px mobile gutters; legal prose and preformatted bodies use the named long-form role and 72ch measure; legal major headings use section-title tuples; demo triad cards are `h2`; exact selector/media evaluation binds each geometry assertion; both auth child owners are verified from their page sources.
 
 ## Final verification evidence
 
 | Gate | Result |
 | --- | --- |
-| `npm.cmd test -- tests/frontend-route-coverage.test.ts` | PASS, 15/15 |
-| `npm.cmd test -- tests/frontend-route-coverage.test.ts tests/frontend-shared-surfaces.test.ts tests/frontend-design-contract.test.ts` | PASS, 47/47 |
+| `npm.cmd test -- tests/frontend-route-coverage.test.ts` | PASS, 16/16 |
+| `npm.cmd test -- tests/frontend-route-coverage.test.ts tests/frontend-shared-surfaces.test.ts tests/frontend-design-contract.test.ts` | PASS, 48/48 |
 | `npm.cmd run audit:frontend-consistency` | PASS, 32 pages, 22 components, 0 coverage issues, 0 violations, 0 `!important` |
-| `npm.cmd test` | PASS, 54 files, 491/491 |
+| `npm.cmd test` | PASS, 54 files, 492/492 |
 | `npm.cmd run typecheck` | PASS |
 | `npm.cmd run build` | PASS, Next.js 15.5.15 production compile and type validation |
 | `git diff --check` | PASS |
 
 ## Files intentionally changed
 
-- Test/contract: `tests/frontend-route-coverage.test.ts`
+- Test/contract: `tests/frontend-route-coverage.test.ts`, `tests/frontend-design-contract.test.ts`, `scripts/frontend_consistency_audit.mjs`
 - Route semantics: `app/ask/page.tsx`, `app/dryrun/page.tsx`, `app/interpretation/[id]/page.tsx`, `app/knowledge/page.tsx`, `app/law/[id]/page.tsx`, `app/ontology/page.tsx`, `app/precedent/[id]/page.tsx`, `app/preview/page.tsx`, `app/roadmap/page.tsx`, `app/search/page.tsx`, `app/settings/page.tsx`, `app/trust/page.tsx`, `app/why/page.tsx`
 - Shared route surfaces: `components/AnswerPanel.tsx`, `components/BriefingSettingsCard.tsx`, `components/CitationList.tsx`, `components/ResultCard.tsx`, `components/SafeClawLanding.tsx`, `components/V2DemoExperience.tsx`
 - Canonical selector mapping: `app/globals.css`

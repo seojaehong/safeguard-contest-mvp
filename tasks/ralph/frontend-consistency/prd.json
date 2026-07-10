@@ -75,11 +75,17 @@
       "passes": false,
       "acceptance": [
         "Every discovered page belongs to one route family",
-        "Every page has consistent title, body, control, card, and responsive geometry"
+        "Every page has consistent title, body, control, card, and responsive geometry",
+        "Exact selector and breakpoint checks prove effective V2, demo, legacy, and mobile geometry",
+        "Legal detail bodies use the 72ch long-form tier and major sections use section-title headings",
+        "Demo heading order and delegated authentication owners are regression-tested"
       ],
       "files": [
         "app",
-        "components"
+        "components",
+        "tests/frontend-route-coverage.test.ts",
+        "tests/frontend-design-contract.test.ts",
+        "scripts/frontend_consistency_audit.mjs"
       ]
     },
     {
