@@ -10,6 +10,12 @@
 - Learned: static compliance alone cannot prove semantic role correctness after a bulk map.
 - Next: independent diff review, targeted fixes, then browser evidence before marking passed.
 
+## 2026-07-11 F2 review closure
+- Changed: normalized 431 font-size rules to complete semantic tuples and enforced per-selector mixed-role, exact effect, circle, cascade, and reduced-motion contracts.
+- Verified: focused contract test 18/18, static audit 32/32 with zero violations, typecheck, build 27/27, independent spec and code-quality review both pass with zero findings.
+- Learned: class-name keywords cannot prove interactive or HUD semantics; ambiguous current selectors need explicit roles and mixed selector lists must be classified per selector.
+- Next: F3 shared shells and framework states.
+
 ## 2026-07-11 F2 review remediation
 - Changed: normalized later duplicate control and active-state rules so the canonical cascade wins; removed the table-header tracking tier and decorative effects; added selector-aware role/effect audit checks and complete reduced-motion coverage.
 - Verified: focused contract tests pass (8/8), static audit passes for 32 routes with zero violations, typecheck passes, and production build passes.

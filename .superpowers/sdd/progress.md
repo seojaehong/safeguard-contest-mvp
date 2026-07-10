@@ -1,0 +1,2 @@
+Task 1: complete (commit b6f7aeb, focused tests and typecheck pass; route coverage 32/32)
+Task 2: complete (commits ceffb4b..378149d, review clean; 18/18 focused tests, static audit, typecheck, build pass)
