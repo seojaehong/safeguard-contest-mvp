@@ -9,6 +9,20 @@ export type ReportDateRange = {
   end: string;
 };
 
+export type ReportPhotoApproval = {
+  improvementId: string;
+  beforePhotoName: string;
+  afterPhotoName: string;
+};
+
+export type ReportSourceMetadata = {
+  mode: "browser_local" | "sample";
+  scope: "current_browser" | "sample_preview";
+  workpackSavedAt: string;
+  riskRowTimeBasis: "workpack_saved_at";
+  limitations: string[];
+};
+
 export type ReportImprovementStatus = "proposed" | "approved" | "in_progress" | "completed" | "verified" | "on_hold";
 
 export type ReportFilters = {
@@ -17,7 +31,7 @@ export type ReportFilters = {
   riskLevel?: RiskLevel;
   improvementStatus?: ReportImprovementStatus;
   site?: string;
-  team?: string;
+  assignee?: string;
 };
 
 export type RiskReportRow = {
@@ -27,9 +41,7 @@ export type RiskReportRow = {
   task: string;
   riskLevel: RiskLevel;
   riskLevelLabel: string;
-  improvementStatus: ReportImprovementStatus;
-  improvementStatusLabel: string;
-  team: string;
+  assignee: string;
   hazard: string;
   currentControls: string;
   additionalControls: string;
@@ -49,7 +61,7 @@ export type ImprovementReportItem = {
   riskLevelLabel: string;
   improvementStatus: ReportImprovementStatus;
   improvementStatusLabel: string;
-  team: string;
+  assignee: string;
   workSummary: string;
   hazardLabel: string;
   asIs: string;
@@ -59,6 +71,7 @@ export type ImprovementReportItem = {
   hasPhotoPair: boolean;
   photoApproved: boolean;
   photoNames: string[];
+  linkedRiskIndex?: number;
 };
 
 export type ReportGroup = {
@@ -82,6 +95,7 @@ export type ReportSnapshot = {
   filters: ReportFilters;
   title: string;
   fileBaseName: string;
+  source: ReportSourceMetadata;
   scenario: {
     companyName: string;
     siteName: string;
@@ -105,7 +119,7 @@ export type ReportSnapshot = {
     riskLevels: Array<ReportFacetOption<RiskLevel>>;
     improvementStatuses: Array<ReportFacetOption<ReportImprovementStatus>>;
     sites: ReportFacetOption[];
-    teams: ReportFacetOption[];
+    assignees: ReportFacetOption[];
   };
   groups: {
     byProcess: ReportGroup[];
@@ -121,6 +135,7 @@ export type ReportLearningEvent = {
   generatedAt: string;
   period: ReportPeriod;
   siteName: string;
+  source: ReportSourceMetadata;
   payload: Record<string, unknown>;
 };
 
@@ -130,6 +145,30 @@ export type ReportViewState = {
   detail: string;
   canDownload: boolean;
 };
+
+export function toggleReportPhotoApproval(
+  current: readonly ReportPhotoApproval[],
+  improvements: readonly OperationImprovement[],
+  improvementId: string
+): ReportPhotoApproval[] {
+  const candidates = improvements.flatMap((item): ReportPhotoApproval[] => {
+    if (item.id !== improvementId || !item.beforePhotoName || !item.afterPhotoName) return [];
+    return [{
+      improvementId,
+      beforePhotoName: item.beforePhotoName,
+      afterPhotoName: item.afterPhotoName
+    }];
+  });
+  const withoutImprovement = current.filter((approval) => approval.improvementId !== improvementId);
+  if (candidates.length !== 1) return withoutImprovement;
+  const candidate = candidates[0];
+  const alreadyApproved = current.some((approval) => (
+    approval.improvementId === candidate.improvementId
+    && approval.beforePhotoName === candidate.beforePhotoName
+    && approval.afterPhotoName === candidate.afterPhotoName
+  ));
+  return alreadyApproved ? withoutImprovement : [...withoutImprovement, candidate];
+}
 
 export function resolveReportViewState(
   snapshot: ReportSnapshot | null,
@@ -181,11 +220,7 @@ const IMPROVEMENT_STATUS_LABELS: Record<ReportImprovementStatus, string> = {
   on_hold: "보류"
 };
 
-function riskImprovementStatus(row: RiskAssessmentRow): ReportImprovementStatus {
-  if (row.verificationStatus === "done") return "completed";
-  if (row.verificationStatus === "needsReview") return "in_progress";
-  return "proposed";
-}
+const KST_OFFSET_MILLISECONDS = 9 * 60 * 60 * 1000;
 
 const REPORT_LEARNING_GOVERNANCE = {
   memoryScope: "period_operation_memory_export",
@@ -205,29 +240,45 @@ const REPORT_LEARNING_GOVERNANCE = {
 } as const;
 
 function startOfPeriod(period: ReportPeriod, now: Date) {
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
+  const start = new Date(now.getTime() + KST_OFFSET_MILLISECONDS);
+  start.setUTCHours(0, 0, 0, 0);
   if (period === "weekly") {
-    const day = start.getDay();
+    const day = start.getUTCDay();
     const mondayOffset = day === 0 ? -6 : 1 - day;
-    start.setDate(start.getDate() + mondayOffset);
+    start.setUTCDate(start.getUTCDate() + mondayOffset);
   }
   if (period === "monthly") {
-    start.setDate(1);
+    start.setUTCDate(1);
   }
-  return start;
+  return new Date(start.getTime() - KST_OFFSET_MILLISECONDS);
 }
 
 function parseDateBoundary(value: string, endOfDay: boolean) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) {
     throw new Error("사용자 기간은 YYYY-MM-DD 형식이어야 합니다.");
   }
-  const time = endOfDay ? "T23:59:59.999Z" : "T00:00:00.000Z";
-  const date = new Date(`${value}${time}`);
-  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const calendarDate = new Date(Date.UTC(year, monthIndex, day));
+  if (
+    calendarDate.getUTCFullYear() !== year
+    || calendarDate.getUTCMonth() !== monthIndex
+    || calendarDate.getUTCDate() !== day
+  ) {
     throw new Error("사용자 기간에 올바른 날짜를 입력하세요.");
   }
-  return date;
+  const localMilliseconds = Date.UTC(
+    year,
+    monthIndex,
+    day,
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 999 : 0
+  );
+  return new Date(localMilliseconds - KST_OFFSET_MILLISECONDS);
 }
 
 function customDateRange(dateRange?: ReportDateRange) {
@@ -248,8 +299,8 @@ function resolveDateRange(period: ReportPeriod, now: Date, dateRange?: ReportDat
     return { start: dateRange!.start, end: dateRange!.end };
   }
   return {
-    start: startOfPeriod(period, now).toISOString().slice(0, 10),
-    end: now.toISOString().slice(0, 10)
+    start: formatKstDate(startOfPeriod(period, now)),
+    end: formatKstDate(now)
   };
 }
 
@@ -260,18 +311,22 @@ function normalizeFilters(filters?: ReportFilters): ReportFilters {
     ...(filters?.riskLevel ? { riskLevel: filters.riskLevel } : {}),
     ...(filters?.improvementStatus ? { improvementStatus: filters.improvementStatus } : {}),
     ...(filters?.site ? { site: filters.site } : {}),
-    ...(filters?.team ? { team: filters.team } : {})
+    ...(filters?.assignee ? { assignee: filters.assignee } : {})
   };
 }
 
 function isWithinPeriod(isoDate: string, period: ReportPeriod, now: Date, dateRange?: ReportDateRange) {
   const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return true;
+  if (Number.isNaN(date.getTime())) return false;
   if (period === "custom") {
     const range = customDateRange(dateRange);
     return date >= range.start && date <= range.end;
   }
   return date >= startOfPeriod(period, now) && date <= now;
+}
+
+function formatKstDate(date: Date) {
+  return new Date(date.getTime() + KST_OFFSET_MILLISECONDS).toISOString().slice(0, 10);
 }
 
 function formatDate(value: string) {
@@ -282,7 +337,8 @@ function formatDate(value: string) {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
-    minute: "2-digit"
+    minute: "2-digit",
+    timeZone: "Asia/Seoul"
   }).format(date);
 }
 
@@ -300,7 +356,6 @@ function uniqueStrings(values: readonly string[]) {
 }
 
 function normalizeRiskRow(row: RiskAssessmentRow, index: number): RiskReportRow {
-  const improvementStatus = riskImprovementStatus(row);
   return {
     index: index + 1,
     siteName: row.location,
@@ -308,9 +363,7 @@ function normalizeRiskRow(row: RiskAssessmentRow, index: number): RiskReportRow 
     task: row.task,
     riskLevel: row.riskLevel,
     riskLevelLabel: RISK_LEVEL_LABELS[row.riskLevel],
-    improvementStatus,
-    improvementStatusLabel: IMPROVEMENT_STATUS_LABELS[improvementStatus],
-    team: row.owner || "미지정",
+    assignee: row.owner || "미지정",
     hazard: row.hazard,
     currentControls: row.currentControls,
     additionalControls: row.additionalControls,
@@ -325,7 +378,6 @@ function fallbackRiskRow(workpack: StoredCurrentWorkpack): RiskReportRow[] {
   const risk = workpack.data.riskSummary;
   if (!risk.topRisk) return [];
   const riskLevel = risk.riskLevel === "상" ? "high" : risk.riskLevel === "중" ? "medium" : "low";
-  const improvementStatus = "proposed";
   return [{
     index: 1,
     siteName: workpack.data.scenario.siteName || "현장",
@@ -333,9 +385,7 @@ function fallbackRiskRow(workpack: StoredCurrentWorkpack): RiskReportRow[] {
     task: workpack.data.scenario.workSummary || "작업 확인",
     riskLevel,
     riskLevelLabel: RISK_LEVEL_LABELS[riskLevel],
-    improvementStatus,
-    improvementStatusLabel: IMPROVEMENT_STATUS_LABELS[improvementStatus],
-    team: "관리감독자",
+    assignee: "관리감독자",
     hazard: risk.topRisk,
     currentControls: "현재 조치 현장 확인",
     additionalControls: risk.immediateActions.join(" · ") || "추가 조치 현장 확인",
@@ -349,20 +399,27 @@ function fallbackRiskRow(workpack: StoredCurrentWorkpack): RiskReportRow[] {
 function normalizeImprovement(
   item: OperationImprovement,
   riskRows: readonly RiskReportRow[],
-  approvedPhotoImprovementIds: ReadonlySet<string>
+  photoApprovals: readonly ReportPhotoApproval[]
 ): ImprovementReportItem {
-  const matchedRisk = riskRows.find((row) => (
-    item.workSummary.includes(row.task) ||
-    row.task.includes(item.workSummary) ||
-    item.hazardLabel.includes(row.hazard) ||
-    row.hazard.includes(item.hazardLabel)
-  ));
+  const association = item.riskAssociation;
+  const matchingRisks = association
+    ? riskRows.filter((row) => (
+      row.siteName === association.siteName
+      && row.process === association.process
+      && row.task === association.task
+      && row.hazard === association.hazard
+    ))
+    : [];
+  const matchedRisk = matchingRisks.length === 1 ? matchingRisks[0] : undefined;
   const candidatePhotoNames = uniqueStrings([item.beforePhotoName || "", item.afterPhotoName || ""]);
   const hasPhotoPair = Boolean(item.beforePhotoName && item.afterPhotoName);
-  const photoApproved = hasPhotoPair && approvedPhotoImprovementIds.has(item.id);
+  const photoApproved = hasPhotoPair && photoApprovals.some((approval) => (
+    approval.improvementId === item.id
+    && approval.beforePhotoName === item.beforePhotoName
+    && approval.afterPhotoName === item.afterPhotoName
+  ));
   const photoNames = photoApproved ? candidatePhotoNames : [];
-  const matchedStatus = matchedRisk?.improvementStatus || "proposed";
-  const improvementStatus = photoApproved && matchedStatus === "proposed" ? "approved" : matchedStatus;
+  const improvementStatus: ReportImprovementStatus = item.status || "proposed";
   const asIs = photoApproved && item.beforePhotoName
     ? `개선 전 사진: ${item.beforePhotoName}`
     : `${item.hazardLabel} 관련 기존 위험 또는 미조치 상태`;
@@ -374,13 +431,13 @@ function normalizeImprovement(
     id: item.id,
     createdAt: item.createdAt,
     siteName: item.siteName,
-    process: matchedRisk?.process || "현장 개선",
+    process: matchedRisk?.process || "미연결",
     task: matchedRisk?.task || item.workSummary,
     riskLevel: matchedRisk?.riskLevel,
     riskLevelLabel: matchedRisk?.riskLevelLabel || "",
     improvementStatus,
     improvementStatusLabel: IMPROVEMENT_STATUS_LABELS[improvementStatus],
-    team: matchedRisk?.team || "미지정",
+    assignee: matchedRisk?.assignee || "미지정",
     workSummary: item.workSummary,
     hazardLabel: item.hazardLabel,
     asIs,
@@ -389,7 +446,8 @@ function normalizeImprovement(
     sourceLabel: hasPhotoPair ? "Before/After 사진" : "관리자 메모",
     hasPhotoPair,
     photoApproved,
-    photoNames
+    photoNames,
+    linkedRiskIndex: matchedRisk?.index
   };
 }
 
@@ -421,7 +479,7 @@ function groupRiskRows(
     const current = groups.get(label) || emptyGroup(label);
     current.count += 1;
     if (row.riskLevel === "high") current.highRiskCount += 1;
-    current.improvementCount += improvements.filter((item) => item.workSummary.includes(row.task) || item.hazardLabel.includes(row.hazard)).length;
+    current.improvementCount += improvements.filter((item) => item.linkedRiskIndex === row.index).length;
     groups.set(label, current);
   });
   return sortGroups(groups);
@@ -454,9 +512,16 @@ function buildFacetOptions<T extends string>(values: Array<{ value: T; label: st
   return Array.from(options.values());
 }
 
-function buildNotes(workpack: StoredCurrentWorkpack, improvements: readonly ImprovementReportItem[]) {
+function buildNotes(
+  workpack: StoredCurrentWorkpack,
+  improvements: readonly ImprovementReportItem[],
+  source: ReportSourceMetadata
+) {
   const notes = [
-    "이 리포트는 현재 브라우저의 최신 작업팩과 저장된 개선사항 후보를 기준으로 생성됩니다.",
+    source.scope === "sample_preview"
+      ? "이 리포트는 샘플 미리보기 데이터로 생성되며 실제 현장 전체 범위를 나타내지 않습니다."
+      : "이 리포트는 현재 브라우저의 최신 작업팩과 저장된 개선사항 후보만 기준으로 생성됩니다.",
+    "위험행의 기간 포함 여부는 행별 생성시각이 아닌 작업팩 저장시각을 기준으로 판단합니다.",
     "Before/After 사진은 이 화면에서 포함 승인한 항목만 다운로드 산출물에 기록됩니다."
   ];
   if (!workpack.data.structured?.riskAssessmentRows.length) {
@@ -474,20 +539,33 @@ export function buildReportSnapshot(input: {
   period: ReportPeriod;
   dateRange?: ReportDateRange;
   filters?: ReportFilters;
-  approvedPhotoImprovementIds?: readonly string[];
+  photoApprovals?: readonly ReportPhotoApproval[];
+  sourceMode?: ReportSourceMetadata["mode"];
   now?: Date;
 }): ReportSnapshot {
   const now = input.now || new Date();
   const dateRange = resolveDateRange(input.period, now, input.dateRange);
   const filters = normalizeFilters(input.filters);
   const data = input.workpack.data;
-  const allRiskRows = data.structured?.riskAssessmentRows.length
-    ? data.structured.riskAssessmentRows.map(normalizeRiskRow)
-    : fallbackRiskRow(input.workpack);
-  const approvedPhotoImprovementIds = new Set(input.approvedPhotoImprovementIds || []);
+  const sourceMode = input.sourceMode || "browser_local";
+  const source: ReportSourceMetadata = {
+    mode: sourceMode,
+    scope: sourceMode === "sample" ? "sample_preview" : "current_browser",
+    workpackSavedAt: input.workpack.savedAt,
+    riskRowTimeBasis: "workpack_saved_at",
+    limitations: sourceMode === "sample"
+      ? ["sample_data_only", "not_full_operational_history", "risk_rows_share_workpack_timestamp"]
+      : ["current_browser_only", "not_full_operational_history", "risk_rows_share_workpack_timestamp"]
+  };
+  const allRiskRows = isWithinPeriod(input.workpack.savedAt, input.period, now, dateRange)
+    ? data.structured?.riskAssessmentRows.length
+      ? data.structured.riskAssessmentRows.map(normalizeRiskRow)
+      : fallbackRiskRow(input.workpack)
+    : [];
+  const photoApprovals = input.photoApprovals || [];
   const allImprovements = input.improvements
     .filter((item) => isWithinPeriod(item.createdAt, input.period, now, dateRange))
-    .map((item) => normalizeImprovement(item, allRiskRows, approvedPhotoImprovementIds));
+    .map((item) => normalizeImprovement(item, allRiskRows, photoApprovals));
   const facets: ReportSnapshot["facets"] = {
     processes: buildFacetOptions([
       ...allRiskRows.map((row) => ({ value: row.process, label: row.process })),
@@ -504,25 +582,26 @@ export function buildReportSnapshot(input: {
         : [])
     ]),
     improvementStatuses: buildFacetOptions([
-      ...allRiskRows.map((row) => ({ value: row.improvementStatus, label: row.improvementStatusLabel })),
       ...allImprovements.map((item) => ({ value: item.improvementStatus, label: item.improvementStatusLabel }))
     ]),
     sites: buildFacetOptions([
       ...allRiskRows.map((row) => ({ value: row.siteName, label: row.siteName })),
       ...allImprovements.map((item) => ({ value: item.siteName, label: item.siteName }))
     ]),
-    teams: buildFacetOptions([
-      ...allRiskRows.map((row) => ({ value: row.team, label: row.team })),
-      ...allImprovements.map((item) => ({ value: item.team, label: item.team }))
+    assignees: buildFacetOptions([
+      ...allRiskRows.map((row) => ({ value: row.assignee, label: row.assignee })),
+      ...allImprovements.map((item) => ({ value: item.assignee, label: item.assignee }))
     ])
   };
   const riskRows = allRiskRows.filter((row) => (
     (!filters.process || row.process === filters.process) &&
     (!filters.task || row.task === filters.task) &&
     (!filters.riskLevel || row.riskLevel === filters.riskLevel) &&
-    (!filters.improvementStatus || row.improvementStatus === filters.improvementStatus) &&
+    (!filters.improvementStatus || allImprovements.some((item) => (
+      item.linkedRiskIndex === row.index && item.improvementStatus === filters.improvementStatus
+    ))) &&
     (!filters.site || row.siteName === filters.site) &&
-    (!filters.team || row.team === filters.team)
+    (!filters.assignee || row.assignee === filters.assignee)
   ));
   const improvements = allImprovements.filter((item) => (
     (!filters.process || item.process === filters.process) &&
@@ -530,7 +609,7 @@ export function buildReportSnapshot(input: {
     (!filters.riskLevel || item.riskLevel === filters.riskLevel) &&
     (!filters.improvementStatus || item.improvementStatus === filters.improvementStatus) &&
     (!filters.site || item.siteName === filters.site) &&
-    (!filters.team || item.team === filters.team)
+    (!filters.assignee || item.assignee === filters.assignee)
   ));
   const evidenceRefs = uniqueStrings(riskRows.flatMap((row) => row.evidenceRefs));
   const generatedAt = now.toISOString();
@@ -550,6 +629,7 @@ export function buildReportSnapshot(input: {
     filters,
     title: `${siteName} ${periodLabel}`,
     fileBaseName: `${slugSegment(siteName)}-${periodFileSegment}-safety-report`,
+    source,
     scenario: {
       companyName: data.scenario.companyName,
       siteName,
@@ -574,12 +654,14 @@ export function buildReportSnapshot(input: {
       byRiskLevel: groupRiskRows(riskRows, improvements, "riskLevelLabel"),
       byDocument: groupByDocument(improvements)
     },
-    notes: buildNotes(input.workpack, improvements)
+    notes: buildNotes(input.workpack, improvements, source)
   };
 }
 
 function csvEscape(value: string | number) {
-  const text = String(value);
+  const raw = String(value);
+  const trimmedStart = raw.trimStart();
+  const text = /^[=+\-@]/.test(trimmedStart) || /^[\t\r]/.test(raw) ? `'${raw}` : raw;
   if (!/[",\n\r]/.test(text)) return text;
   return `"${text.replace(/"/g, "\"\"")}"`;
 }
@@ -596,13 +678,16 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "작업",
     "위험등급",
     "개선상태",
-    "팀",
+    "담당자",
     "위험요인",
     "As-Is",
     "To-Be",
     "반영문서",
     "근거",
-    "승인사진"
+    "승인사진",
+    "데이터범위",
+    "데이터모드",
+    "작업팩저장시각"
   ];
   const riskRows = snapshot.riskRows.map((row): Array<string | number> => [
     "위험성평가",
@@ -610,14 +695,17 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     row.process,
     row.task,
     row.riskLevelLabel,
-    row.improvementStatusLabel,
-    row.team,
+    "",
+    row.assignee,
     row.hazard,
     row.currentControls,
     row.additionalControls,
     "위험성평가표 · TBM",
     row.evidenceRefs.join(" · "),
-    ""
+    "",
+    snapshot.source.scope,
+    snapshot.source.mode,
+    snapshot.source.workpackSavedAt
   ]);
   const improvementRows = snapshot.improvements.map((item): Array<string | number> => [
     "개선사항",
@@ -626,13 +714,16 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     item.task,
     item.riskLevelLabel,
     item.improvementStatusLabel,
-    item.team,
+    item.assignee,
     item.hazardLabel,
     item.asIs,
     item.toBe,
     item.reflectedDocuments.join(" · "),
     item.sourceLabel,
-    item.photoNames.join(" · ")
+    item.photoNames.join(" · "),
+    snapshot.source.scope,
+    snapshot.source.mode,
+    snapshot.source.workpackSavedAt
   ]);
   return toCsv([header, ...riskRows, ...improvementRows]);
 }
@@ -649,7 +740,7 @@ function reportFilterLines(snapshot: ReportSnapshot) {
     filters.riskLevel ? `- 위험등급: ${riskLevelLabel || filters.riskLevel}` : "",
     filters.improvementStatus ? `- 개선상태: ${improvementStatusLabel || filters.improvementStatus}` : "",
     filters.site ? `- 현장: ${filters.site}` : "",
-    filters.team ? `- 팀: ${filters.team}` : ""
+    filters.assignee ? `- 담당자: ${filters.assignee}` : ""
   ].filter(Boolean);
 }
 
@@ -664,6 +755,14 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
     "",
     `- 기간: ${snapshot.periodLabel}`,
     ...(filterLines.length ? filterLines : ["- 분류: 전체"]),
+    "",
+    "## 데이터 범위",
+    "",
+    `- scope: ${snapshot.source.scope}`,
+    `- mode: ${snapshot.source.mode}`,
+    `- workpackSavedAt: ${snapshot.source.workpackSavedAt}`,
+    `- riskRowTimeBasis: ${snapshot.source.riskRowTimeBasis}`,
+    `- limitations: ${snapshot.source.limitations.join(", ")}`,
     "",
     "## 현장 요약",
     "",
@@ -746,7 +845,8 @@ function buildLearningEvents(snapshot: ReportSnapshot): ReportLearningEvent[] {
   const base = {
     generatedAt: snapshot.generatedAt,
     period: snapshot.period,
-    siteName: snapshot.scenario.siteName
+    siteName: snapshot.scenario.siteName,
+    source: snapshot.source
   };
   return [
     {
@@ -810,7 +910,7 @@ function buildLearningEvents(snapshot: ReportSnapshot): ReportLearningEvent[] {
         reflectedDocuments: item.reflectedDocuments,
         improvementStatus: item.improvementStatus,
         improvementStatusLabel: item.improvementStatusLabel,
-        team: item.team,
+        assignee: item.assignee,
         sourceLabel: item.sourceLabel,
         photoApproved: item.photoApproved,
         photoNames: item.photoNames
@@ -849,6 +949,11 @@ export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
     `- filters: ${JSON.stringify(snapshot.filters)}`,
     `- siteName: ${snapshot.scenario.siteName}`,
     `- workSummary: ${snapshot.scenario.workSummary}`,
+    `- sourceScope: ${snapshot.source.scope}`,
+    `- sourceMode: ${snapshot.source.mode}`,
+    `- workpackSavedAt: ${snapshot.source.workpackSavedAt}`,
+    `- riskRowTimeBasis: ${snapshot.source.riskRowTimeBasis}`,
+    `- sourceLimitations: ${snapshot.source.limitations.join(", ")}`,
     "",
     "## 운영 메모리 계약",
     "",
