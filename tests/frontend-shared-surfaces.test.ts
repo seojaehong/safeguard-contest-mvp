@@ -26,7 +26,7 @@ function ruleBlocks(source: string): CssRule[] {
   }));
 }
 
-function effectiveDeclarations(source: string, selector: string): CssDeclarations {
+function declarationsForExactSelector(source: string, selector: string): CssDeclarations {
   const matches = ruleBlocks(source).filter((rule) => rule.selectors.includes(selector));
   expect(matches.length, `missing CSS rule for ${selector}`).toBeGreaterThan(0);
   return Object.assign({}, ...matches.map((rule) => rule.declarations));
@@ -45,17 +45,18 @@ function blockBody(source: string, blockStart: string): string {
   throw new Error(`Unclosed CSS block: ${blockStart}`);
 }
 
-function boundedLink(source: string, className: string): { openingTag: string; body: string } {
-  const escapedClassName = className.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = source.match(
-    new RegExp(`<Link\\b(?=[^>]*className="[^"]*\\b${escapedClassName}\\b[^"]*")[^>]*>([\\s\\S]*?)<\\/Link>`),
-  );
-  expect(match, `missing bounded Link for ${className}`).not.toBeNull();
-  const fullLink = match?.[0] ?? "";
-  return {
-    openingTag: fullLink.slice(0, fullLink.indexOf(">") + 1),
-    body: match?.[1] ?? "",
-  };
+function iconOnlyControls(source: string): Array<{ accessibleName: boolean; openingTag: string }> {
+  return [...source.matchAll(/<(button|Link)\b([^>]*)>([\s\S]*?)<\/\1>/g)].flatMap((match) => {
+    const openingTag = `<${match[1]}${match[2]}>`;
+    const body = match[3].replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+    const hasIcon = /<(?:img|svg)\b/.test(body);
+    const visibleContent = body.replace(/<[^>]+>/g, "").replace(/\s+/g, "");
+    if (!hasIcon || visibleContent.length > 0) return [];
+    return [{
+      openingTag,
+      accessibleName: /aria-label="[^"]+"/.test(openingTag) || /<img\b[^>]*alt="[^"]+"/.test(body),
+    }];
+  });
 }
 
 describe("shared framework states", () => {
@@ -106,22 +107,22 @@ describe("shared shell hooks and accessibility", () => {
     }
   });
 
-  it.each([
-    ["components/SafeClawModuleShell.tsx", "safeclaw-module-brand"],
-    ["components/SafeClawLanding.tsx", "safeclaw-os-brand"],
-  ])("keeps the bounded brand control accessibly named in %s", (relativePath, className) => {
-    const link = boundedLink(read(relativePath), className);
+  it.each(["components/SafeClawModuleShell.tsx", "components/SafeClawLanding.tsx"])(
+    "requires accessible names for every icon-only control in %s",
+    (relativePath) => {
+      const controls = iconOnlyControls(read(relativePath));
 
-    expect(link.openingTag).toMatch(/aria-label="[^"]+"/);
-    expect(link.body).toMatch(/<img\b[^>]*alt=""[^>]*\/>/);
-  });
+      expect(controls.filter((control) => !control.accessibleName)).toEqual([]);
+      expect(controls).toHaveLength(0);
+    },
+  );
 });
 
 describe("canonical shared surface styles", () => {
   const css = read("app/globals.css");
 
   it("defines the shared special state with canonical panel geometry", () => {
-    const rule = effectiveDeclarations(css, ".special-state");
+    const rule = declarationsForExactSelector(css, ".special-state");
 
     expect(rule).toMatchObject({ padding: "var(--space-6)", "border-radius": "var(--radius-panel)" });
     expect(css).not.toContain("!important");
@@ -129,7 +130,7 @@ describe("canonical shared surface styles", () => {
 
   it("defines a circular named loading spinner on the canonical icon size", () => {
     const reducedMotionStart = css.indexOf("@media (prefers-reduced-motion: reduce)");
-    const rule = effectiveDeclarations(css.slice(0, reducedMotionStart), ".loading-spinner");
+    const rule = declarationsForExactSelector(css.slice(0, reducedMotionStart), ".loading-spinner");
 
     expect(rule).toMatchObject({
       width: "24px",
@@ -138,38 +139,38 @@ describe("canonical shared surface styles", () => {
       animation: "spin 0.8s linear infinite",
     });
     const reducedMotion = blockBody(css, "@media (prefers-reduced-motion: reduce)");
-    expect(effectiveDeclarations(reducedMotion, ".loading-spinner")).toMatchObject({ animation: "none" });
+    expect(declarationsForExactSelector(reducedMotion, ".loading-spinner")).toMatchObject({ animation: "none" });
   });
 
   it("keeps shell titles, descriptions, actions, and cards on canonical tuples", () => {
-    expect(effectiveDeclarations(css, ".safeclaw-module-title")).toMatchObject({
+    expect(declarationsForExactSelector(css, ".safeclaw-module-title")).toMatchObject({
       "font-size": "var(--text-page-title)",
       "line-height": "var(--leading-page-title)",
       "letter-spacing": "var(--tracking-page-title)",
     });
-    expect(effectiveDeclarations(css, ".safeclaw-module-description")).toMatchObject({
+    expect(declarationsForExactSelector(css, ".safeclaw-module-description")).toMatchObject({
       "font-size": "var(--text-body-lg)",
       "line-height": "var(--leading-body-lg)",
       "letter-spacing": "var(--tracking-body)",
     });
-    expect(effectiveDeclarations(css, ".safeclaw-module-primary")).toMatchObject({
+    expect(declarationsForExactSelector(css, ".safeclaw-module-primary")).toMatchObject({
       "min-height": "var(--control-height)",
       "border-radius": "var(--radius-control)",
     });
-    expect(effectiveDeclarations(css, ".safeclaw-module-card")).toMatchObject({
+    expect(declarationsForExactSelector(css, ".safeclaw-module-card")).toMatchObject({
       padding: "var(--space-6)",
       "border-radius": "var(--radius-panel)",
     });
   });
 
   it("keeps effective landing descriptions, actions, and cards canonical", () => {
-    expect(effectiveDeclarations(css, ".safeclaw-os-hero p")).toMatchObject({
+    expect(declarationsForExactSelector(css, ".safeclaw-os-hero p")).toMatchObject({
       "font-size": "var(--text-body-lg)",
       "font-weight": "500",
       "line-height": "var(--leading-body-lg)",
       "letter-spacing": "var(--tracking-body)",
     });
-    expect(effectiveDeclarations(css, ".safeclaw-shared-action")).toMatchObject({
+    expect(declarationsForExactSelector(css, ".safeclaw-shared-action")).toMatchObject({
       "min-height": "var(--control-height)",
       "border-radius": "var(--radius-control)",
       "font-size": "var(--text-control)",
@@ -178,13 +179,13 @@ describe("canonical shared surface styles", () => {
       "letter-spacing": "var(--tracking-body)",
     });
     for (const selector of [".safeclaw-login", ".safeclaw-contact"]) {
-      expect(effectiveDeclarations(css, selector), selector).toMatchObject({
+      expect(declarationsForExactSelector(css, selector), selector).toMatchObject({
         "min-height": "var(--control-height)",
         "border-radius": "var(--radius-control)",
       });
-      expect(effectiveDeclarations(css, selector), selector).not.toHaveProperty("font-size");
+      expect(declarationsForExactSelector(css, selector), selector).not.toHaveProperty("font-size");
     }
-    expect(effectiveDeclarations(css, ".safeclaw-os-cta a")).toMatchObject({
+    expect(declarationsForExactSelector(css, ".safeclaw-os-cta a")).toMatchObject({
       "min-height": "var(--control-height)",
       "border-radius": "var(--radius-control)",
       "font-size": "var(--text-control)",
@@ -198,23 +199,39 @@ describe("canonical shared surface styles", () => {
       ".safeclaw-language-matrix article",
       ".safeclaw-module-map a",
     ]) {
-      expect(effectiveDeclarations(css, selector), selector).toMatchObject({ padding: "var(--space-6)" });
+      expect(declarationsForExactSelector(css, selector), selector).toMatchObject({ padding: "var(--space-6)" });
     }
   });
 
   it("keeps document variant card spacing and descriptions canonical through scoped rules", () => {
-    expect(effectiveDeclarations(css, ".safeclaw-module-hero.document aside")).toMatchObject({
+    expect(declarationsForExactSelector(css, ".safeclaw-module-hero.document aside")).toMatchObject({
       padding: "var(--space-6)",
     });
-    expect(effectiveDeclarations(css, ".safeclaw-module-hero.document p")).toMatchObject({
+    expect(declarationsForExactSelector(css, ".safeclaw-module-hero.document p")).toMatchObject({
       "font-size": "var(--text-body-lg)",
       "line-height": "var(--leading-body-lg)",
     });
     expect(
-      effectiveDeclarations(css, ".safeclaw-module-shell.module-variant-document .safeclaw-module-hero p"),
+      declarationsForExactSelector(css, ".safeclaw-module-shell.module-variant-document .safeclaw-module-hero p"),
     ).toMatchObject({
       "font-size": "var(--text-body-lg)",
       "line-height": "var(--leading-body-lg)",
     });
+    expect(
+      declarationsForExactSelector(css, ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header p"),
+    ).toMatchObject({
+      "font-size": "var(--text-body-lg)",
+      "line-height": "var(--leading-body-lg)",
+    });
+    for (const selector of [
+      ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list p",
+      ".safeclaw-module-shell.module-variant-document .safeclaw-report-notes p",
+    ]) {
+      expect(declarationsForExactSelector(css, selector), selector).toMatchObject({
+        "font-size": "var(--text-body)",
+        "line-height": "var(--leading-body)",
+        "letter-spacing": "var(--tracking-body)",
+      });
+    }
   });
 });

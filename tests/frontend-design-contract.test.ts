@@ -331,6 +331,21 @@ describe("frontend design contract", () => {
         "line-height": "var(--leading-section-title)",
         "letter-spacing": "var(--tracking-section-title)",
       },
+      ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header p": {
+        "font-size": "var(--text-body-lg)",
+        "line-height": "var(--leading-body-lg)",
+        "letter-spacing": "var(--tracking-body)",
+      },
+      ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list p": {
+        "font-size": "var(--text-body)",
+        "line-height": "var(--leading-body)",
+        "letter-spacing": "var(--tracking-body)",
+      },
+      ".safeclaw-module-shell.module-variant-document .safeclaw-report-notes p": {
+        "font-size": "var(--text-body)",
+        "line-height": "var(--leading-body)",
+        "letter-spacing": "var(--tracking-body)",
+      },
       ".safeclaw-module-shell h2": {
         "font-size": "var(--text-section-title)",
         "line-height": "var(--leading-section-title)",

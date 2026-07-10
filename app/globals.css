@@ -12643,13 +12643,20 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-hero p,
-.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header p,
-.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list p,
-.safeclaw-module-shell.module-variant-document .safeclaw-report-notes p {
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header p {
   color: var(--workspace-muted);
   font-size: var(--text-body-lg);
   font-weight: 500;
   line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list p,
+.safeclaw-module-shell.module-variant-document .safeclaw-report-notes p {
+  color: var(--workspace-muted);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
 }
 

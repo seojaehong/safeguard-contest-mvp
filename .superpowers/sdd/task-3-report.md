@@ -117,3 +117,38 @@ Observed after correcting the scoped declarations and tests:
 - Disabled `.loading-spinner` animation under `prefers-reduced-motion: reduce` and covered it in both focused and design-contract tests.
 - Replaced first-match CSS assertions with later-declaration evaluation, asserted every introduced landing hook, and bounded brand-control accessibility checks to each actual `Link` element.
 - Ralph `F3` remains `in_progress` with `passes: false` pending controller review.
+
+## Second review remediation
+
+Review source: updated `.superpowers/sdd/task-3-review.md` against commit `a03ec9e`.
+
+### Second-remediation RED
+
+Command:
+
+```powershell
+npm.cmd test -- tests/frontend-shared-surfaces.test.ts tests/frontend-design-contract.test.ts
+```
+
+Observed before the selector split:
+
+- Exit code: `1`
+- Test files: `2 failed`
+- Tests: `2 failed`, `30 passed`, `32 total`
+- Both failures reproduced the exact high-specificity regression: document workdoc-list and report-note copy resolved to body-large instead of the body tuple.
+
+### Second-remediation GREEN
+
+- Focused + design-contract tests: `32 passed`, `0 failed`
+- Static audit: `pass`; 32 pages, 22 components, 0 coverage issues, 0 violations, 0 `!important` declarations
+- TypeScript: `npm.cmd run typecheck`, exit code `0`
+- Production build: `npm.cmd run build`, exit code `0`; 27 static pages generated
+
+### Second-remediation implementation
+
+- Split the high-specificity document variant rule by semantic role: hero description and workdoc-header intro remain body-large; workdoc-list and report-note copy explicitly use the body tuple at the same specificity.
+- Renamed the focused helper to `declarationsForExactSelector` so it no longer claims to calculate the complete cross-selector cascade.
+- Added focused and design-contract assertions for each actual high-specificity header/list/report selector.
+- Replaced text-bearing brand-link proxy checks with an icon-only control invariant. The reviewed module shell and landing currently contain zero icon-only button/link controls; any future detected icon-only control must have an accessible name.
+- Preserved the landing canonical values and reduced-motion spinner fix from the prior remediation.
+- Ralph `F3` remains `in_progress` with `passes: false` pending controller review.
