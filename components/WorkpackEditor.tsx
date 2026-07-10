@@ -9,6 +9,7 @@ import {
   type RubricDocumentKey,
   type RubricEvaluationItem
 } from "@/lib/safety-document-rubric";
+import styles from "./WorkpackEditor.module.css";
 
 declare global {
   var measureTextWidth: ((font: string, text: string) => number) | undefined;
@@ -227,6 +228,12 @@ const documentMeta: EditableDocument[] = [
     fileBase: "field-message"
   }
 ];
+
+const documentCoverageLabels: Partial<Record<DocumentKey, string>> = {
+  riskAssessmentDraft: "위험성평가표",
+  tbmBriefing: "TBM 브리핑",
+  tbmLogDraft: "TBM 기록"
+};
 
 function sanitizeFileName(value: string) {
   return value.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, "-").slice(0, 80) || "safeclaw";
@@ -1923,7 +1930,73 @@ export function WorkpackEditor({
     if (!isRubricDocumentKey(key)) return [];
     return rubricEvaluation.items.filter((item) => item.documents.includes(key));
   }, [rubricEvaluation.items, selected.key]);
+  const selectedQualityIssues = selectedRubricItems.filter((item) => item.status !== "fulfilled").length;
+  const totalQualityIssues = rubricEvaluation.summary.total - rubricEvaluation.summary.fulfilled;
+  const selectedEvidenceLabel = data.evidenceLabels?.[selected.key];
+  const harnessSummary = data.dbHarness?.summary;
+  const harnessPacket = data.dbHarness?.packet;
+  const selectedCoverage = useMemo(() => {
+    const coverageLabel = documentCoverageLabels[selected.key];
+    if (!coverageLabel || !harnessSummary) return null;
+    return harnessSummary.documentCoverage.find((item) => item.document === coverageLabel) || null;
+  }, [harnessSummary, selected.key]);
+  const evidenceHighlights = useMemo(() => {
+    const references = [
+      ...(harnessPacket?.directEvidence || []).map((item) => ({
+        id: `direct-${item.id}`,
+        badge: item.evidence_role_label || "직접 근거",
+        title: item.display_title || item.title,
+        summary: item.display_summary || item.short_summary || item.summary,
+        href: item.source_url || null
+      })),
+      ...(harnessPacket?.sifCases || []).map((item) => ({
+        id: `sif-${item.id}`,
+        badge: item.source_kind_label || "SIF 사례",
+        title: item.display_title || item.title,
+        summary: item.display_summary || item.short_summary || item.summary,
+        href: item.source_url || null
+      })),
+      ...(harnessPacket?.supportingEvidence || []).map((item) => ({
+        id: `support-${item.id}`,
+        badge: item.evidence_role_label || "보조 근거",
+        title: item.display_title || item.title,
+        summary: item.display_summary || item.short_summary || item.summary,
+        href: item.source_url || null
+      }))
+    ];
 
+    if (references.length) return references.slice(0, 4);
+    return data.citations.slice(0, 4).map((citation) => ({
+      id: citation.id,
+      badge: citation.sourceLabel,
+      title: citation.title,
+      summary: citation.citation || citation.summary,
+      href: citation.sourceUrl || null
+    }));
+  }, [data.citations, harnessPacket]);
+  const evidenceStats = useMemo(() => {
+    const directEvidenceCount = harnessSummary?.directEvidence ?? 0;
+    const sifCaseCount = harnessSummary?.sifCases ?? 0;
+    const supportingEvidenceCount = harnessSummary?.supportingEvidence ?? 0;
+
+    return [
+      {
+        label: "직접 근거",
+        value: directEvidenceCount,
+        description: selectedEvidenceLabel?.article || "문서 라벨 미지정"
+      },
+      {
+        label: "유사사례",
+        value: sifCaseCount,
+        description: harnessSummary ? "DB 하네스 기준" : "현재 페이지 기준"
+      },
+      {
+        label: "인용/보조",
+        value: harnessSummary ? supportingEvidenceCount + data.citations.length : data.citations.length,
+        description: `${data.citations.length.toLocaleString("ko-KR")}건 화면 인용`
+      }
+    ];
+  }, [data.citations.length, harnessSummary, selectedEvidenceLabel]);
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -2335,292 +2408,444 @@ export function WorkpackEditor({
   }
 
   return (
-    <section className="workpack-shell" id="workpack">
-      <div className="workpack-sidebar card list">
-          <div>
-          <div className="eyebrow">SafeClaw 문서팩</div>
-          <div className="h2">오늘 문서팩</div>
-          <p className="muted">현장에서 바로 수정하고 내려받을 수 있는 작업 전 산출물입니다.</p>
+    <section
+      className={`workpack-shell ${styles.workspace}`}
+      id="workpack"
+      data-testid="workpack-editor-workspace"
+    >
+      <aside className={`workpack-sidebar card list ${styles.navigator}`} aria-label="문서팩 문서 목록">
+        <div className={styles.navigatorHeader}>
+          <div className="eyebrow">문서팩</div>
+          <div className="h2">오늘 문서</div>
+          <p className="muted">{documentMeta.length.toLocaleString("ko-KR")}개 문서 · 브라우저 자동 저장</p>
         </div>
-        <div className="doc-tab-list">
-          {documentMeta.map((item) => (
+
+        <label className={styles.mobileDocumentPicker}>
+          <span>편집 문서</span>
+          <select
+            aria-label="편집 문서 선택"
+            value={selected.key}
+            onChange={(event) => setSelectedKey(event.target.value as DocumentKey)}
+          >
+            {documentMeta.map((item) => (
+              <option key={item.key} value={item.key}>{item.title}</option>
+            ))}
+          </select>
+        </label>
+
+        <div className={`doc-tab-list ${styles.documentTabs}`} role="tablist" aria-label="편집 문서 선택">
+          {documentMeta.map((item, index) => (
             <button
               key={item.key}
               type="button"
+              role="tab"
               className={`doc-tab ${item.key === selected.key ? "active" : ""}`}
               onClick={() => setSelectedKey(item.key)}
+              aria-selected={item.key === selected.key}
+              aria-controls="workpack-document-body"
             >
+              <span className={styles.documentIndex}>{String(index + 1).padStart(2, "0")}</span>
               <strong>{item.title}</strong>
-              <span>{item.description}</span>
+              <span className={styles.documentDescription}>{item.description}</span>
             </button>
           ))}
         </div>
-        <div className="sheet-export-panel">
-          <div className="template-picker" aria-label="서식 템플릿 선택">
-            {templatePresets.map((preset) => (
-              <button
-                key={preset.kind}
-                type="button"
-                className={`template-card ${preset.kind === templateKind ? "active" : ""}`}
-                onClick={() => setTemplateKind(preset.kind)}
-                aria-label={`${preset.label} 서식 선택`}
-                aria-pressed={preset.kind === templateKind}
-              >
-                <strong>{preset.label}</strong>
-                <span>{preset.description}</span>
-              </button>
-            ))}
-          </div>
-          <div className={`template-preview template-${templateKind}`} aria-live="polite">
-            <span>{selectedTemplate.label} 미리보기</span>
-            <strong>{selectedTemplate.previewTitle}</strong>
-            <ul>
-              {selectedTemplate.previewBullets.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-          <details className="customer-template-panel">
-            <summary>사업장 서식 매핑 준비</summary>
-            <div className="customer-template-copy">
-              <strong>지금은 SafeClaw 표준 제출형으로 출력합니다.</strong>
-              <p>
-                고객사 원본 XLSX/HWPX 서식은 온보딩 때 업로드하고, 아래 공통 필드를 한 번 매핑한 뒤
-                같은 현장에서 반복 렌더링하는 흐름으로 확장합니다. 자동 덮어쓰기는 하지 않고 제출 전
-                사용자가 확인합니다.
-              </p>
-            </div>
-            <div className="customer-template-stage" aria-label="사업장 서식 적용 단계">
-              <article>
-                <span>01</span>
-                <strong>원본 서식 수집</strong>
-                <p>사업장 위험성평가표, 작업계획서, TBM, 교육일지 원본을 등록합니다.</p>
-              </article>
-              <article>
-                <span>02</span>
-                <strong>필드 매핑</strong>
-                <p>현장명, 작업명, 위험요인, 감소대책, 결재란을 SafeClaw 문서팩과 연결합니다.</p>
-              </article>
-              <article>
-                <span>03</span>
-                <strong>검수 후 반복 출력</strong>
-                <p>검수된 서식만 고객사 제출본으로 쓰고, 원본 셀 단위 복제는 별도 QA로 잠급니다.</p>
-              </article>
-            </div>
-            <div className="customer-template-field-grid" aria-label="고객사 서식 매핑 필드">
-              {customerTemplateFields.map((field) => (
-                <article key={field.key}>
-                  <span>{field.label}</span>
-                  <strong>{field.mapsTo}</strong>
-                  <p>{field.appliesTo}</p>
-                </article>
-              ))}
-            </div>
-          </details>
-          <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
-          <p className="muted small">
-            출력 방식: PDF는 브라우저 인쇄/저장 화면, XLS는 HTML 호환 파일, HWPX는 rhwp 제출형 초안입니다.
-          </p>
-          <details className="advanced-downloads">
-            <summary>전체 다운로드</summary>
-            <div className="advanced-download-grid">
-              <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
-              <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
-              <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
-            </div>
-          </details>
-          <div className="sheets-action-box">
-            <button type="button" className="button" onClick={copySheetsTsv}>새 Google Sheets 열기 + 표 복사</button>
-            <button type="button" className="button secondary" onClick={downloadSheetsTsv}>Sheets용 TSV 다운로드</button>
-            <p className="muted small">Google API/OAuth 없이 자동 입력은 하지 않습니다. 새 시트가 열리면 A1 셀에 붙여넣거나 TSV를 업로드해 사용하세요.</p>
-          </div>
-          {sheetStatus === "copied" ? <p className="muted small">표 데이터를 복사했습니다. 열린 Google Sheets의 A1 셀에 Ctrl+V로 붙여넣어 주세요.</p> : null}
-          {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패해 TSV 파일을 내려받았습니다. Google Sheets에서 파일 가져오기로 업로드해 주세요.</p> : null}
-          <a className="knowledge-link" href="/knowledge">LLM 위키·지식 DB 확인</a>
-          <div className="rubric-panel" aria-label="제출 전 점검">
-            <div className="compact-head">
-              <span className="eyebrow">제출 전 점검</span>
-              <strong>점검 진행</strong>
-            </div>
-            <p className="muted small">
-              공통 안전서류와 법령 기반 필수 확인을 먼저 보고, 공공기관 제출 품질 항목은 보강 대상으로 분리합니다.
-            </p>
-            <div className="rubric-meter" aria-hidden="true">
-              <span style={{ width: `${(rubricEvaluation.summary.fulfilled / rubricEvaluation.summary.total) * 100}%` }} />
-            </div>
-            <div className="rubric-stack">
-              {rubricEvaluation.items.slice(0, 6).map((item) => (
-                <div key={item.id} className={`rubric-item ${item.status}`}>
-                  <span>{rubricCategoryLabel(item.category)}</span>
-                  <strong>{item.title}</strong>
-                  <em>{rubricStatusLabel(item.status)}</em>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      </aside>
 
-      <div className={`card document-editor ${showFocusCue ? "editor-focus-cue" : ""}`} ref={editorRef}>
-        <div className="document-toolbar">
-          <div>
-            <div className="eyebrow">편집 문서</div>
-            <div className="h2">{selected.title}</div>
-            <p className="muted">{selected.description}</p>
-            <p className="editor-status" aria-live="polite">
-              자동저장됨(이 브라우저) · 이력 저장은 관리자 로그인 후 · {selectedText.length.toLocaleString("ko-KR")}자
-              {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
-            </p>
-            <p className="muted small">
-              제출형 출력은 표 양식(Excel .xlsx · 한글 .hwp)을 우선 권장합니다. PDF는 브라우저 인쇄/저장, .hwpx는 텍스트 초안이며 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
-            </p>
-          </div>
-          <div className="download-bar">
-            <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
-              {xlsxStatus === "building" ? "Excel 생성 중" : "Excel 표 양식(.xlsx)"}
-            </button>
-            <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
-              {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
-            </button>
-            <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
-            <details className="advanced-downloads inline">
-              <summary>베타 형식</summary>
-              <div className="advanced-download-grid">
-                <button type="button" className="button secondary" onClick={downloadHwpx} disabled={hwpxStatus === "building"} title="rhwp 텍스트 기반 HWPX 초안 (표 미지원)">
-                  {hwpxStatus === "building" ? "HWPX 생성 중" : ".hwpx 텍스트 초안"}
-                </button>
-                <button type="button" className="button secondary" onClick={downloadXls} title="구버전 호환 HTML 기반 .xls (Excel 보안 경고 가능)">XLS(legacy)</button>
-                <button type="button" className="button secondary" onClick={downloadDoc} title="Word 또는 한글에서 열 수 있는 보고서형 문서">DOC</button>
-                <button type="button" className="button secondary" onClick={downloadText} title="메신저·메일 본문에 붙여넣기 쉬운 순수 텍스트">TXT</button>
-                <button type="button" className="button secondary" onClick={downloadJson} title="외부 시스템 연동과 자동화용 구조화 데이터">JSON</button>
-                <button type="button" className="button secondary" onClick={downloadCsv} title="엑셀·구글시트 업로드용 행 데이터">CSV</button>
-                <button type="button" className="button secondary" onClick={downloadHtml} title="웹 게시·브라우저 인쇄용 문서">HTML</button>
-                <button type="button" className="button secondary" onClick={downloadJpg} title="단톡방 이미지 공유와 현장 게시용 이미지">JPG</button>
-              </div>
-            </details>
-          </div>
-        </div>
-        {xlsxStatus === "error" ? (
-          <p className="export-error">Excel(.xlsx) 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 PDF/XLS(legacy)를 사용해 주세요.</p>
-        ) : null}
-        {hwpStatus === "error" ? (
-          <p className="export-error">한글 표(.hwp) 생성 중 오류가 발생했습니다. .hwpx 텍스트 초안 또는 PDF를 사용해 주세요.</p>
-        ) : null}
-        {hwpxStatus === "error" ? (
-          <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
-        ) : null}
-        {imageStatus === "error" ? (
-          <p className="export-error">JPG 변환 중 오류가 발생했습니다. HTML 또는 PDF 저장/인쇄를 먼저 사용해 주세요.</p>
-        ) : null}
-        {showFocusCue ? (
-          <p className="editor-focus-message" aria-live="polite">
-            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF(브라우저 인쇄)·XLS(HTML 호환)·HWPX 제출형 초안으로 출력할 수 있습니다.
-          </p>
-        ) : null}
-        <textarea
-          ref={textareaRef}
-          className="document-textarea"
-          value={selectedText}
-          onChange={(event) => updateValue(event.target.value)}
-          aria-label={`${selected.title} 편집`}
-        />
-        <div className="selected-rubric-strip" aria-label={`${selected.title} 제출 전 점검`}>
-          {selectedRubricItems.length ? selectedRubricItems.map((item) => {
-            const draft = remediationDrafts[item.id];
-            return (
-              <div key={item.id} className={`selected-rubric-item ${item.status}`}>
-                <span>{rubricCategoryLabel(item.category)}</span>
-                <strong>{item.title}</strong>
-                <small>{rubricStatusLabel(item.status)} · {item.status === "fulfilled" ? "현재 문서에 반영되어 있습니다." : item.improvementAction}</small>
-                {item.status !== "fulfilled" ? (
-                  <div className="remediation-actions">
-                    <button
-                      type="button"
-                      className="button secondary"
-                      onClick={() => requestRemediation(item)}
-                      disabled={remediationLoadingId === item.id}
-                    >
-                      {remediationLoadingId === item.id ? "보완 생성 중" : "보완 문구 생성"}
-                    </button>
-                  </div>
-                ) : null}
-                {draft ? (
-                  <div className={`remediation-draft ${draft.status}`}>
-                    <div className="compact-head">
-                      <span className="eyebrow">AI 보완 제안</span>
-                      <strong>{draft.status === "ready" ? "편집 후 삽입 가능" : "생성 확인 필요"}</strong>
-                    </div>
-                    <textarea
-                      className="remediation-textarea"
-                      value={draft.text}
-                      onChange={(event) => updateRemediationDraft(item.id, event.target.value)}
-                      aria-label={`${item.title} 보완 제안 편집`}
-                    />
-                    <p className="muted small">
-                      {draft.providerLabel ? `${draft.providerLabel} · ` : ""}
-                      {draft.policyNote || draft.message}
-                    </p>
-                    {draft.catalogStatus && !draft.catalogStatus.ok ? (
-                      <p className="export-error">
-                        지식 DB 근거는 점검 필요 상태입니다. {draft.catalogStatus.message}
-                      </p>
-                    ) : null}
-                    {draft.sources.length ? (
-                      <div className="remediation-sources">
-                        {draft.sources.map((source) => (
-                          <a key={`${item.id}-${source.title}`} href={source.url} target="_blank" rel="noreferrer">
-                            <span>{source.roleLabel || (source.sourceType === "catalog" ? "지식 DB" : "기본 근거")}</span>
-                            {source.agency} · {source.title}
-                            {source.reflectionLabel ? <small>{source.reflectionLabel}</small> : null}
-                          </a>
-                        ))}
-                      </div>
-                    ) : null}
-                    <div className="remediation-actions">
-                      <button
-                        type="button"
-                        className="button"
-                        onClick={() => insertRemediationDraft(item.id)}
-                        disabled={draft.status !== "ready" || !draft.text.trim()}
-                      >
-                        문서에 삽입
-                      </button>
-                      <button
-                        type="button"
-                        className="button secondary"
-                        onClick={() => setRemediationDrafts((current) => {
-                          const next = { ...current };
-                          delete next[item.id];
-                          return next;
-                        })}
-                      >
-                        닫기
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            );
-          }) : (
-            <div className="selected-rubric-item fulfilled">
-              <span>현장 운영 추천</span>
-              <strong>문서별 직접 점검 항목 없음</strong>
-              <small>전체 문서팩 점검 패널에서 공통 보강 항목을 확인하세요.</small>
+      <div className={`card document-editor ${styles.editor} ${showFocusCue ? "editor-focus-cue" : ""}`} ref={editorRef}>
+        <div
+          className={styles.documentBody}
+          id="workpack-document-body"
+          data-testid="editor-document-body"
+          role="tabpanel"
+        >
+          <header className={`document-toolbar ${styles.documentHeader}`}>
+            <div className={styles.documentHeading}>
+              <div className="eyebrow">문서 본문</div>
+              <div className="h2">{selected.title}</div>
+              <p className="muted">{selected.description}</p>
             </div>
-          )}
-        </div>
-        <details className="submission-preview-panel">
-          <summary>제출 양식 미리보기</summary>
-          <p className="muted small">다운로드와 출력용 표 서식입니다. 화면 편집은 위 문서 본문에서 먼저 처리하세요.</p>
-          <SafetyDocumentPreview
-            title={selected.title}
-            rows={selectedRows}
-            scenario={data.scenario}
-            profile={selectedFormProfile}
-            data={data}
-            riskRows={riskAssessmentRows}
+            <div className={styles.documentMeta} aria-live="polite">
+              <span className={styles.saveState}>자동 저장</span>
+              <span>{selectedText.length.toLocaleString("ko-KR")}자</span>
+              {lastEditedAt ? (
+                <span>수정 {lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
+              ) : null}
+            </div>
+          </header>
+
+          {showFocusCue ? (
+            <p className={`editor-focus-message ${styles.focusMessage}`} aria-live="polite">
+              {selected.title} 본문 편집을 시작합니다.
+            </p>
+          ) : null}
+
+          <textarea
+            ref={textareaRef}
+            className="document-textarea"
+            value={selectedText}
+            onChange={(event) => updateValue(event.target.value)}
+            aria-label={`${selected.title} 편집`}
           />
-        </details>
+          <p className={`muted small ${styles.documentFootnote}`}>
+            발주처 원본 양식, 직인, 결재선은 제출 전 확인 대상입니다.
+          </p>
+        </div>
+
+        <div className={styles.secondaryTools} data-testid="editor-secondary-tools" aria-label="문서 보조 도구">
+          <details className={styles.utilityPanel} data-testid="editor-evidence-panel">
+            <summary className={styles.utilitySummary}>
+              <span>
+                <b>근거</b>
+                <small>{selectedEvidenceLabel?.article || "법령, KOSHA, 현장 데이터"}</small>
+              </span>
+              <em>{evidenceStats.reduce((sum, item) => sum + item.value, 0).toLocaleString("ko-KR")}건</em>
+            </summary>
+            <div className={styles.utilityContent}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className="eyebrow">생성 근거</span>
+                  <strong>{selected.title}에 연결된 근거</strong>
+                </div>
+                <a className="knowledge-link" href="/knowledge">지식 DB</a>
+              </div>
+              <div className="rubric-stack">
+                {evidenceStats.map((item) => (
+                  <div key={item.label} className="rubric-item fulfilled">
+                    <span>{item.label}</span>
+                    <strong>{item.value.toLocaleString("ko-KR")}건</strong>
+                    <em>{item.description}</em>
+                  </div>
+                ))}
+              </div>
+              {evidenceHighlights.length ? (
+                <div className={styles.evidenceList}>
+                  {evidenceHighlights.map((item) => item.href ? (
+                    <a key={item.id} href={item.href} target="_blank" rel="noreferrer">
+                      <span>{item.badge}</span>
+                      <strong>{item.title}</strong>
+                      <small>{item.summary}</small>
+                    </a>
+                  ) : (
+                    <article key={item.id}>
+                      <span>{item.badge}</span>
+                      <strong>{item.title}</strong>
+                      <small>{item.summary}</small>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="muted small">연결된 출처가 없습니다. 제출 전 근거 확인이 필요합니다.</p>
+              )}
+              {selectedCoverage ? (
+                <p className="muted small">
+                  {selectedCoverage.document} 커버리지: {selectedCoverage.covered ? "연결됨" : "보강 필요"}
+                  {selectedCoverage.evidenceTypes.length ? ` · ${selectedCoverage.evidenceTypes.join(" · ")}` : ""}
+                </p>
+              ) : null}
+            </div>
+          </details>
+
+          <details className={styles.utilityPanel} data-testid="editor-quality-panel">
+            <summary className={styles.utilitySummary}>
+              <span>
+                <b>품질 점검</b>
+                <small>{selected.title} 점검과 AI 보완</small>
+              </span>
+              <em>{selectedQualityIssues ? `${selectedQualityIssues}개 확인` : "반영 완료"}</em>
+            </summary>
+            <div className={`${styles.utilityContent} ${styles.qualityContent}`}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className="eyebrow">현재 문서</span>
+                  <strong>{selected.title} 제출 전 점검</strong>
+                </div>
+              </div>
+              <div className="selected-rubric-strip" aria-label={`${selected.title} 제출 전 점검`}>
+                {selectedRubricItems.length ? selectedRubricItems.map((item) => {
+                  const draft = remediationDrafts[item.id];
+                  return (
+                    <div key={item.id} className={`selected-rubric-item ${item.status}`}>
+                      <span>{rubricCategoryLabel(item.category)}</span>
+                      <strong>{item.title}</strong>
+                      <small>{rubricStatusLabel(item.status)} · {item.status === "fulfilled" ? "현재 문서에 반영되어 있습니다." : item.improvementAction}</small>
+                      {item.status !== "fulfilled" ? (
+                        <div className="remediation-actions">
+                          <button
+                            type="button"
+                            className="button secondary"
+                            onClick={() => requestRemediation(item)}
+                            disabled={remediationLoadingId === item.id}
+                          >
+                            {remediationLoadingId === item.id ? "보완 생성 중" : "보완 문구 생성"}
+                          </button>
+                        </div>
+                      ) : null}
+                      {draft ? (
+                        <div className={`remediation-draft ${draft.status}`}>
+                          <div className="compact-head">
+                            <span className="eyebrow">AI 보완 제안</span>
+                            <strong>{draft.status === "ready" ? "편집 후 삽입 가능" : "생성 확인 필요"}</strong>
+                          </div>
+                          <textarea
+                            className="remediation-textarea"
+                            value={draft.text}
+                            onChange={(event) => updateRemediationDraft(item.id, event.target.value)}
+                            aria-label={`${item.title} 보완 제안 편집`}
+                          />
+                          <p className="muted small">
+                            {draft.providerLabel ? `${draft.providerLabel} · ` : ""}
+                            {draft.policyNote || draft.message}
+                          </p>
+                          {draft.catalogStatus && !draft.catalogStatus.ok ? (
+                            <p className="export-error">
+                              지식 DB 근거는 점검 필요 상태입니다. {draft.catalogStatus.message}
+                            </p>
+                          ) : null}
+                          {draft.sources.length ? (
+                            <div className="remediation-sources">
+                              {draft.sources.map((source) => (
+                                <a key={`${item.id}-${source.title}`} href={source.url} target="_blank" rel="noreferrer">
+                                  <span>{source.roleLabel || (source.sourceType === "catalog" ? "지식 DB" : "기본 근거")}</span>
+                                  {source.agency} · {source.title}
+                                  {source.reflectionLabel ? <small>{source.reflectionLabel}</small> : null}
+                                </a>
+                              ))}
+                            </div>
+                          ) : null}
+                          <div className="remediation-actions">
+                            <button
+                              type="button"
+                              className="button"
+                              onClick={() => insertRemediationDraft(item.id)}
+                              disabled={draft.status !== "ready" || !draft.text.trim()}
+                            >
+                              문서에 삽입
+                            </button>
+                            <button
+                              type="button"
+                              className="button secondary"
+                              onClick={() => setRemediationDrafts((current) => {
+                                const next = { ...current };
+                                delete next[item.id];
+                                return next;
+                              })}
+                            >
+                              닫기
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                }) : (
+                  <div className="selected-rubric-item fulfilled">
+                    <span>현장 운영 추천</span>
+                    <strong>문서별 직접 점검 항목 없음</strong>
+                    <small>전체 문서팩 점검에서 공통 보강 항목을 확인할 수 있습니다.</small>
+                  </div>
+                )}
+              </div>
+
+              <div className="rubric-panel" aria-label="전체 문서팩 제출 전 점검">
+                <div className="compact-head">
+                  <span className="eyebrow">전체 문서팩</span>
+                  <strong>{totalQualityIssues ? `${totalQualityIssues}개 보강 대상` : "점검 완료"}</strong>
+                </div>
+                <div className="rubric-meter" aria-hidden="true">
+                  <span style={{ width: `${(rubricEvaluation.summary.fulfilled / rubricEvaluation.summary.total) * 100}%` }} />
+                </div>
+                <div className="rubric-stack">
+                  {rubricEvaluation.items.slice(0, 6).map((item) => (
+                    <div key={item.id} className={`rubric-item ${item.status}`}>
+                      <span>{rubricCategoryLabel(item.category)}</span>
+                      <strong>{item.title}</strong>
+                      <em>{rubricStatusLabel(item.status)}</em>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details className={styles.utilityPanel} data-testid="editor-graph-panel">
+            <summary className={styles.utilitySummary}>
+              <span>
+                <b>문서 연결 그래프</b>
+                <small>현장 입력에서 제출본까지</small>
+              </span>
+              <em>4단계</em>
+            </summary>
+            <div className={styles.utilityContent}>
+              <ol className={styles.lineageGraph} aria-label={`${selected.title} 생성 연결`}>
+                {[
+                  { label: "현장 입력", value: data.scenario.workSummary },
+                  { label: "핵심 위험", value: data.riskSummary.topRisk },
+                  { label: "현재 문서", value: selected.title },
+                  { label: "제출본", value: "PDF · XLSX · HWP" }
+                ].map((node) => (
+                  <li key={node.label}>
+                    <span>{node.label}</span>
+                    <strong>{node.value}</strong>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </details>
+
+          <details className={styles.utilityPanel} data-testid="editor-export-panel">
+            <summary className={styles.utilitySummary}>
+              <span>
+                <b>내보내기</b>
+                <small>정식 제출본과 호환 형식</small>
+              </span>
+              <em>PDF · XLSX · HWP</em>
+            </summary>
+            <div className={`${styles.utilityContent} ${styles.exportContent}`}>
+              <div className={`download-bar ${styles.primaryExports}`}>
+                <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
+                  {xlsxStatus === "building" ? "Excel 생성 중" : "Excel 표 양식(.xlsx)"}
+                </button>
+                <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
+                  {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
+                </button>
+                <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
+                <details className="advanced-downloads inline">
+                  <summary>베타 형식</summary>
+                  <div className="advanced-download-grid">
+                    <button type="button" className="button secondary" onClick={downloadHwpx} disabled={hwpxStatus === "building"} title="rhwp 텍스트 기반 HWPX 초안 (표 미지원)">
+                      {hwpxStatus === "building" ? "HWPX 생성 중" : ".hwpx 텍스트 초안"}
+                    </button>
+                    <button type="button" className="button secondary" onClick={downloadXls} title="구버전 호환 HTML 기반 .xls (Excel 보안 경고 가능)">XLS(legacy)</button>
+                    <button type="button" className="button secondary" onClick={downloadDoc} title="Word 또는 한글에서 열 수 있는 보고서형 문서">DOC</button>
+                    <button type="button" className="button secondary" onClick={downloadText} title="메신저·메일 본문에 붙여넣기 쉬운 순수 텍스트">TXT</button>
+                    <button type="button" className="button secondary" onClick={downloadJson} title="외부 시스템 연동과 자동화용 구조화 데이터">JSON</button>
+                    <button type="button" className="button secondary" onClick={downloadCsv} title="엑셀·구글시트 업로드용 행 데이터">CSV</button>
+                    <button type="button" className="button secondary" onClick={downloadHtml} title="웹 게시·브라우저 인쇄용 문서">HTML</button>
+                    <button type="button" className="button secondary" onClick={downloadJpg} title="단톡방 이미지 공유와 현장 게시용 이미지">JPG</button>
+                  </div>
+                </details>
+              </div>
+
+              {xlsxStatus === "error" ? (
+                <p className="export-error">Excel(.xlsx) 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 PDF/XLS(legacy)를 사용해 주세요.</p>
+              ) : null}
+              {hwpStatus === "error" ? (
+                <p className="export-error">한글 표(.hwp) 생성 중 오류가 발생했습니다. .hwpx 텍스트 초안 또는 PDF를 사용해 주세요.</p>
+              ) : null}
+              {hwpxStatus === "error" ? (
+                <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
+              ) : null}
+              {imageStatus === "error" ? (
+                <p className="export-error">JPG 변환 중 오류가 발생했습니다. HTML 또는 PDF 저장/인쇄를 먼저 사용해 주세요.</p>
+              ) : null}
+
+              <div className={`sheet-export-panel ${styles.exportWorkbench}`}>
+                <div className="template-picker" aria-label="서식 템플릿 선택">
+                  {templatePresets.map((preset) => (
+                    <button
+                      key={preset.kind}
+                      type="button"
+                      className={`template-card ${preset.kind === templateKind ? "active" : ""}`}
+                      onClick={() => setTemplateKind(preset.kind)}
+                      aria-label={`${preset.label} 서식 선택`}
+                      aria-pressed={preset.kind === templateKind}
+                    >
+                      <strong>{preset.label}</strong>
+                      <span>{preset.description}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className={`template-preview template-${templateKind}`} aria-live="polite">
+                  <span>{selectedTemplate.label} 미리보기</span>
+                  <strong>{selectedTemplate.previewTitle}</strong>
+                  <ul>
+                    {selectedTemplate.previewBullets.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <details className="customer-template-panel">
+                  <summary>사업장 서식 매핑 준비</summary>
+                  <div className="customer-template-copy">
+                    <strong>지금은 SafeClaw 표준 제출형으로 출력합니다.</strong>
+                    <p>
+                      고객사 원본 XLSX/HWPX 서식은 온보딩 때 업로드하고, 아래 공통 필드를 한 번 매핑한 뒤
+                      같은 현장에서 반복 렌더링하는 흐름으로 확장합니다. 자동 덮어쓰기는 하지 않고 제출 전
+                      사용자가 확인합니다.
+                    </p>
+                  </div>
+                  <div className="customer-template-stage" aria-label="사업장 서식 적용 단계">
+                    <article>
+                      <span>01</span>
+                      <strong>원본 서식 수집</strong>
+                      <p>사업장 위험성평가표, 작업계획서, TBM, 교육일지 원본을 등록합니다.</p>
+                    </article>
+                    <article>
+                      <span>02</span>
+                      <strong>필드 매핑</strong>
+                      <p>현장명, 작업명, 위험요인, 감소대책, 결재란을 SafeClaw 문서팩과 연결합니다.</p>
+                    </article>
+                    <article>
+                      <span>03</span>
+                      <strong>검수 후 반복 출력</strong>
+                      <p>검수된 서식만 고객사 제출본으로 쓰고, 원본 셀 단위 복제는 별도 QA로 잠급니다.</p>
+                    </article>
+                  </div>
+                  <div className="customer-template-field-grid" aria-label="고객사 서식 매핑 필드">
+                    {customerTemplateFields.map((field) => (
+                      <article key={field.key}>
+                        <span>{field.label}</span>
+                        <strong>{field.mapsTo}</strong>
+                        <p>{field.appliesTo}</p>
+                      </article>
+                    ))}
+                  </div>
+                </details>
+                <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
+                <p className="muted small">
+                  PDF는 브라우저 인쇄/저장, XLS는 HTML 호환 파일, HWPX는 rhwp 제출형 초안입니다.
+                </p>
+                <details className="advanced-downloads">
+                  <summary>전체 문서팩 다운로드</summary>
+                  <div className="advanced-download-grid">
+                    <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
+                    <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
+                    <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
+                  </div>
+                </details>
+                <div className="sheets-action-box">
+                  <button type="button" className="button" onClick={copySheetsTsv}>새 Google Sheets 열기 + 표 복사</button>
+                  <button type="button" className="button secondary" onClick={downloadSheetsTsv}>Sheets용 TSV 다운로드</button>
+                  <p className="muted small">Google API/OAuth 없이 자동 입력은 하지 않습니다. 새 시트가 열리면 A1 셀에 붙여넣거나 TSV를 업로드해 사용하세요.</p>
+                </div>
+                {sheetStatus === "copied" ? <p className="muted small">표 데이터를 복사했습니다. 열린 Google Sheets의 A1 셀에 Ctrl+V로 붙여넣어 주세요.</p> : null}
+                {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패해 TSV 파일을 내려받았습니다. Google Sheets에서 파일 가져오기로 업로드해 주세요.</p> : null}
+              </div>
+            </div>
+          </details>
+
+          <details className={`submission-preview-panel ${styles.utilityPanel}`}>
+            <summary className={styles.utilitySummary}>
+              <span>
+                <b>제출 양식 미리보기</b>
+                <small>표, 결재선, 인쇄 레이아웃</small>
+              </span>
+              <em>인쇄물</em>
+            </summary>
+            <div className={styles.utilityContent}>
+              <p className="muted small">다운로드와 출력에 사용되는 제출형 표 서식입니다.</p>
+              <SafetyDocumentPreview
+                title={selected.title}
+                rows={selectedRows}
+                scenario={data.scenario}
+                profile={selectedFormProfile}
+                data={data}
+                riskRows={riskAssessmentRows}
+              />
+            </div>
+          </details>
+        </div>
       </div>
     </section>
   );
