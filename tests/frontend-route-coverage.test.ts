@@ -475,6 +475,21 @@ describe("module route section hierarchy", () => {
     expect(effectiveDeclarationsAtWidth(css, ".demo-mode-shell", 767)).toMatchObject({
       width: "min(100%, calc(100% - (var(--space-4) * 2)))",
     });
+    for (const [selector, measure] of [
+      [".container", "var(--content-wide)"],
+      [".v2-shell", "var(--content-standard)"],
+      [".demo-mode-shell", "var(--content-wide)"],
+    ] as const) {
+      expect(effectiveDeclarationsAtWidth(css, selector, 1280), `${selector} desktop`).toMatchObject({
+        width: `min(${measure}, calc(100% - (var(--space-6) * 2)))`,
+      });
+      expect(effectiveDeclarationsAtWidth(css, selector, 1024), `${selector} tablet`).toMatchObject({
+        width: `min(${measure}, calc(100% - (var(--space-5) * 2)))`,
+      });
+      expect(effectiveDeclarationsAtWidth(css, selector, 767), `${selector} mobile precedence`).toMatchObject({
+        width: "min(100%, calc(100% - (var(--space-4) * 2)))",
+      });
+    }
     expect(declarationsForExactSelector(desktopCss, ".list")).toMatchObject({ gap: "14px" });
     expect(declarationsForExactSelector(desktopCss, ".row")).toMatchObject({ gap: "10px" });
     expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .list")).toMatchObject({

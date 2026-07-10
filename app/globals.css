@@ -500,6 +500,13 @@ ul {
   margin: 0 auto;
 }
 
+@media (max-width: 1279px) {
+  .container,
+  .product-shell {
+    width: min(var(--content-wide), calc(100% - (var(--space-5) * 2)));
+  }
+}
+
 @media (max-width: 767px) {
   .container,
   .product-shell {
@@ -2994,6 +3001,16 @@ ul {
 
   .language-wall {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1279px) {
+  .v2-shell {
+    width: min(var(--content-standard), calc(100% - (var(--space-5) * 2)));
+  }
+
+  .demo-mode-shell {
+    width: min(var(--content-wide), calc(100% - (var(--space-5) * 2)));
   }
 }
 
