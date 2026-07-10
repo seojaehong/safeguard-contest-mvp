@@ -1,6 +1,14 @@
 import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
+import { buildDbHarnessPacket } from "@/lib/db-harness";
 import { createLogger } from "@/lib/logger";
 import { MAX_INPUT_HAZARD_PHOTO_FILES } from "@/lib/operation-improvements";
+import {
+  deriveSafetyReferenceOperationalView,
+  getSafetyReferenceDisplaySummary,
+  getSafetyReferenceDisplayTitle,
+  searchSafetyReferences,
+  type SafetyReferenceItem
+} from "@/lib/safety-reference-catalog";
 
 const log = createLogger("photo-vision");
 
@@ -58,27 +66,161 @@ type ResponsesApiResponse = {
 const DEFAULT_MODEL = "gpt-4.1-mini";
 const VISION_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_VISION_TIMEOUT_MS, 20_000);
 export const MAX_HAZARD_PHOTO_FILES = MAX_INPUT_HAZARD_PHOTO_FILES;
+export const MAX_HAZARD_PHOTO_BYTES = 20 * 1024 * 1024;
+export const HAZARD_PHOTO_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
 export type HazardPhotoSeverity = "high" | "medium" | "low" | "review";
 
+export type HazardPhotoObservation = {
+  kind: "visual" | "ocr";
+  text: string;
+};
+
+export type HazardPhotoVisionProvider = {
+  name: string;
+  model: string;
+  mode: "live" | "mock";
+  analyze: (input: {
+    question: string;
+    prompt: string;
+    photo: File;
+    photoIndex: number;
+  }) => Promise<string>;
+};
+
+export type HazardPhotoHarnessEvidence = {
+  sourceId: string;
+  sourceType: "safeclaw-db" | "mcp";
+  title: string;
+  excerpt: string;
+};
+
+export type HazardPhotoHarnessAction = {
+  text: string;
+  evidenceSourceIds: string[];
+};
+
 export type HazardPhotoVisionCandidate = {
+  id: string;
   label: string;
   detail: string;
   severity: HazardPhotoSeverity;
   evidence: string;
   reflectedDocuments: string[];
   sourcePhotoNames: string[];
+  observation: string;
+  inference: string;
+  modelRole: "hazard_candidate";
+  harness: {
+    authority: "safeclaw-db-mcp";
+    status: "pending" | "confirmed" | "insufficient";
+    evidence: HazardPhotoHarnessEvidence[];
+    actions: HazardPhotoHarnessAction[];
+    confirmedAt: string | null;
+    errorMessage: string | null;
+  };
+  userDecision: {
+    status: "pending" | "accepted" | "rejected";
+    allowed: ["accepted", "rejected"];
+    requiresHarnessConfirmation: true;
+    reason: string | null;
+    decidedAt: string | null;
+  };
 };
 
-export type HazardPhotoVisionAnalysis = {
-  status: "analyzed" | "unconfigured" | "failed";
-  provider: "openai";
+type ParsedHazardPhotoVisionOutput = {
+  status: "analyzed" | "failed";
+  provider: string;
   model: string;
   summary: string;
+  observations: HazardPhotoObservation[];
   candidates: HazardPhotoVisionCandidate[];
   ocrText: string;
   siteSignals: string[];
   photoCount: number;
+  errorMessage?: string;
+};
+
+export type HazardPhotoAnalysisErrorCode =
+  | "empty_file"
+  | "unsupported_mime"
+  | "file_too_large"
+  | "provider_unconfigured"
+  | "provider_error"
+  | "invalid_model_output";
+
+export type HazardPhotoAnalysisError = {
+  code: HazardPhotoAnalysisErrorCode;
+  message: string;
+  retryable: boolean;
+};
+
+export type HazardPhotoImageAnalysis = {
+  id: string;
+  index: number;
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+  status: "analyzed" | "rejected" | "failed" | "unconfigured";
+  provider: string;
+  providerMode: "live" | "mock" | "unconfigured";
+  model: string;
+  summary: string;
+  observations: HazardPhotoObservation[];
+  candidates: HazardPhotoVisionCandidate[];
+  ocrText: string;
+  siteSignals: string[];
+  error: HazardPhotoAnalysisError | null;
+};
+
+export type HazardPhotoHarnessResolution = {
+  candidateId: string;
+  status: "confirmed" | "insufficient";
+  evidence: HazardPhotoHarnessEvidence[];
+  actions: HazardPhotoHarnessAction[];
+  confirmedAt: string | null;
+  errorMessage: string | null;
+};
+
+export type HazardPhotoHarnessResolver = {
+  name: string;
+  resolve: (input: {
+    question: string;
+    candidates: HazardPhotoVisionCandidate[];
+    images: HazardPhotoImageAnalysis[];
+  }) => Promise<HazardPhotoHarnessResolution[]>;
+};
+
+export type HazardPhotoVisionAnalysis = {
+  status: "analyzed" | "partial" | "unconfigured" | "failed";
+  provider: string;
+  providerMode: "live" | "mock" | "unconfigured";
+  model: string;
+  summary: string;
+  observations: HazardPhotoObservation[];
+  candidates: HazardPhotoVisionCandidate[];
+  ocrText: string;
+  siteSignals: string[];
+  photoCount: number;
+  images: HazardPhotoImageAnalysis[];
+  counts: {
+    submitted: number;
+    analyzed: number;
+    rejected: number;
+    failed: number;
+    unconfigured: number;
+    candidates: number;
+    harnessConfirmed: number;
+    harnessInsufficient: number;
+  };
+  harness: {
+    modelRole: "candidate_only";
+    authority: "safeclaw-db-mcp";
+    status: "pending" | "confirmed" | "insufficient";
+    confirms: ["evidence", "actions"];
+    confirmedAt: string | null;
+    errorMessage: string | null;
+  };
   errorMessage?: string;
 };
 
@@ -90,6 +232,8 @@ export type PhotoVisionReadiness = {
   apiKeyPresent: boolean;
   timeoutMs: number;
   maxInputPhotos: number;
+  maxBytesPerPhoto: number;
+  allowedMimeTypes: string[];
   hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis";
   hazardAnalysisMethod: "POST multipart/form-data";
   improvementEndpointPattern: "/api/workpacks/[id]/improvements";
@@ -126,6 +270,8 @@ export function getPhotoVisionReadiness(
     apiKeyPresent,
     timeoutMs: VISION_TIMEOUT_MS,
     maxInputPhotos: MAX_HAZARD_PHOTO_FILES,
+    maxBytesPerPhoto: MAX_HAZARD_PHOTO_BYTES,
+    allowedMimeTypes: [...HAZARD_PHOTO_MIME_TYPES],
     hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis",
     hazardAnalysisMethod: "POST multipart/form-data",
     improvementEndpointPattern: "/api/workpacks/[id]/improvements",
@@ -142,12 +288,17 @@ export function getPhotoVisionReadiness(
       {
         step: "analyze",
         label: "Vision/OCR 후보 도출",
-        detail: "OpenAI Responses API가 사진 위험요인 후보, OCR 문구, 현장 신호를 구조화합니다."
+        detail: "OpenAI Responses API가 observation과 inference를 분리한 위험 후보만 구조화합니다."
       },
       {
-        step: "accept",
-        label: "사용자 채택",
-        detail: "사진 분석 결과는 후보이며, 사용자가 추가한 항목만 하네스 개선 메모리에 들어갑니다."
+        step: "ground",
+        label: "DB/MCP 근거 확정",
+        detail: "SafeClaw DB/MCP 하네스가 후보별 근거 source ID와 현장 통제를 확정하거나 근거 부족으로 잠급니다."
+      },
+      {
+        step: "review",
+        label: "사용자 채택·기각",
+        detail: "하네스가 확정한 후보를 사용자가 채택하거나 기각하고, 채택한 항목만 개선 메모리에 들어갑니다."
       },
       {
         step: "export",
@@ -166,17 +317,45 @@ function normalizeStringArray(value: unknown): string[] {
   return value.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean);
 }
 
-function normalizeSeverity(value: unknown): HazardPhotoSeverity {
-  if (value === "high" || value === "medium" || value === "low" || value === "review") return value;
-  return "review";
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function readText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeObservations(value: unknown): HazardPhotoObservation[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item): HazardPhotoObservation[] => {
+    if (!isRecord(item)) return [];
+    const text = readText(item.text);
+    if (!text) return [];
+    return [{
+      kind: item.kind === "ocr" ? "ocr" : "visual",
+      text
+    }];
+  });
+}
+
+function pendingHarnessReview(): Pick<HazardPhotoVisionCandidate, "harness" | "userDecision"> {
+  return {
+    harness: {
+      authority: "safeclaw-db-mcp",
+      status: "pending",
+      evidence: [],
+      actions: [],
+      confirmedAt: null,
+      errorMessage: null
+    },
+    userDecision: {
+      status: "pending",
+      allowed: ["accepted", "rejected"],
+      requiresHarnessConfirmation: true,
+      reason: null,
+      decidedAt: null
+    }
+  };
 }
 
 function extractResponseText(value: unknown) {
@@ -236,26 +415,31 @@ export function parseImprovementVisionOutput(value: string, fallback: {
 
 export function parseHazardPhotoVisionOutput(value: string, fallback: {
   model: string;
-  provider?: "openai";
+  provider?: string;
   photoNames: string[];
-}): HazardPhotoVisionAnalysis {
+}): ParsedHazardPhotoVisionOutput {
   try {
     const parsed = JSON.parse(normalizeJsonPayload(value)) as unknown;
     if (!isRecord(parsed)) throw new Error("Hazard photo vision output is not an object");
     const rawCandidates = Array.isArray(parsed.candidates) ? parsed.candidates : [];
-    const candidates = rawCandidates.flatMap((item): HazardPhotoVisionCandidate[] => {
+    const candidates = rawCandidates.flatMap((item, index): HazardPhotoVisionCandidate[] => {
       if (!isRecord(item)) return [];
       const label = readText(item.label);
-      const detail = readText(item.detail);
-      if (!label || !detail) return [];
-      const sourcePhotoNames = normalizeStringArray(item.sourcePhotoNames);
+      const observation = readText(item.observation);
+      const inference = readText(item.inference);
+      if (!label || !observation || !inference) return [];
       return [{
+        id: `candidate-${index + 1}`,
         label,
-        detail,
-        severity: normalizeSeverity(item.severity),
-        evidence: readText(item.evidence),
-        reflectedDocuments: normalizeStringArray(item.reflectedDocuments),
-        sourcePhotoNames: sourcePhotoNames.length ? sourcePhotoNames : fallback.photoNames
+        detail: inference,
+        severity: "review",
+        evidence: "",
+        reflectedDocuments: [],
+        sourcePhotoNames: fallback.photoNames,
+        observation,
+        inference,
+        modelRole: "hazard_candidate",
+        ...pendingHarnessReview()
       }];
     });
     return {
@@ -263,6 +447,7 @@ export function parseHazardPhotoVisionOutput(value: string, fallback: {
       provider: fallback.provider || "openai",
       model: fallback.model,
       summary: readText(parsed.summary),
+      observations: normalizeObservations(parsed.observations),
       candidates,
       ocrText: readText(parsed.ocrText),
       siteSignals: normalizeStringArray(parsed.siteSignals),
@@ -274,6 +459,7 @@ export function parseHazardPhotoVisionOutput(value: string, fallback: {
       provider: fallback.provider || "openai",
       model: fallback.model,
       summary: "",
+      observations: [],
       candidates: [],
       ocrText: "",
       siteSignals: [],
@@ -306,15 +492,16 @@ export function buildHazardPhotoVisionPrompt(input: {
 }) {
   return [
     "당신은 건설·시설관리 현장 사진 위험요인 검토 보조자입니다.",
-    "업로드된 현장 사진들을 서로 비교해 위험성평가와 TBM에 반영할 후보를 도출합니다.",
-    "사진에서 보이는 것과 OCR 가능한 문구만 근거로 삼고, 확정 판단·법적 판단·안전 보장 표현은 금지합니다.",
+    "각 호출은 사진 1장을 사진별로 독립 분석하며, 다른 사진의 성공이나 실패를 전제로 삼지 않습니다.",
+    "observation에는 사진에서 직접 보이는 사실 또는 OCR 문구만 적습니다.",
+    "inference에는 observation에서 추론한 위험 가능성만 적고 현장 확인 필요를 명시합니다.",
+    "모델은 위험 후보만 제시합니다. 근거 확정과 조치 확정은 SafeClaw DB/MCP 하네스의 책임입니다.",
+    "법적 판단, 안전 보장, 확정 위험도, 근거 ID, 법령 인용, 개선 조치, 사용자 채택 여부를 출력하지 않습니다.",
     "응답은 JSON 객체만 반환합니다.",
     `현장 입력: ${input.question}`,
     `사진 파일명(${input.photoNames.length}장): ${input.photoNames.join(", ")}`,
-    "후보는 최대 8개로 제한합니다.",
-    "severity는 high, medium, low, review 중 하나만 사용합니다.",
-    "reflectedDocuments에는 위험성평가표, TBM 브리핑, TBM 기록, 사진/증빙 중 관련 문서만 넣습니다.",
-    "필드: summary, candidates[{label, detail, severity, evidence, reflectedDocuments, sourcePhotoNames}], ocrText, siteSignals"
+    "후보는 최대 4개로 제한합니다.",
+    "필드: summary, observations[{kind: visual|ocr, text}], candidates[{label, observation, inference}], ocrText, siteSignals"
   ].join("\n");
 }
 
@@ -440,68 +627,443 @@ async function postOpenAiVision(input: {
   });
 }
 
+export function createOpenAiHazardPhotoVisionProvider(
+  env: Record<string, string | undefined> = process.env
+): HazardPhotoVisionProvider | null {
+  const apiKey = configuredApiKey(env);
+  if (!apiKey) return null;
+  const model = configuredModel(env);
+  return {
+    name: "openai",
+    model,
+    mode: "live",
+    analyze: async ({ prompt, photo }) => postOpenAiVisionImages({
+      apiKey,
+      model,
+      prompt,
+      photos: [photo]
+    })
+  };
+}
+
+function uniqueSafetyReferences(items: SafetyReferenceItem[]): SafetyReferenceItem[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}
+
+function resolveCandidateFromReferences(input: {
+  question: string;
+  candidate: HazardPhotoVisionCandidate;
+  references: SafetyReferenceItem[];
+}): HazardPhotoHarnessResolution {
+  const candidateQuestion = [
+    input.question,
+    input.candidate.label,
+    input.candidate.observation,
+    input.candidate.inference
+  ].join(" ");
+  const packet = buildDbHarnessPacket({
+    question: candidateQuestion,
+    references: input.references
+  });
+  const matchedReferences = uniqueSafetyReferences([
+    ...packet.directEvidence,
+    ...packet.sifCases,
+    ...packet.supportingEvidence
+  ]).slice(0, 6);
+  const evidence = matchedReferences.map((item): HazardPhotoHarnessEvidence => ({
+    sourceId: item.id,
+    sourceType: "safeclaw-db",
+    title: getSafetyReferenceDisplayTitle(item),
+    excerpt: getSafetyReferenceDisplaySummary(item).slice(0, 500)
+  }));
+  const actionsByText = new Map<string, HazardPhotoHarnessAction>();
+  let hasConfirmedControl = false;
+
+  matchedReferences.forEach((item) => {
+    const operational = deriveSafetyReferenceOperationalView(item);
+    if (!operational.reviewRequired && operational.controls.length) hasConfirmedControl = true;
+    operational.controls.slice(0, 2).forEach((control) => {
+      const text = control.trim();
+      if (!text) return;
+      const existing = actionsByText.get(text);
+      if (existing) {
+        if (!existing.evidenceSourceIds.includes(item.id)) existing.evidenceSourceIds.push(item.id);
+        return;
+      }
+      actionsByText.set(text, { text, evidenceSourceIds: [item.id] });
+    });
+  });
+
+  const actions = [...actionsByText.values()].slice(0, 6);
+  const confirmed = packet.directEvidence.length > 0 && evidence.length > 0 && actions.length > 0 && hasConfirmedControl;
+  return {
+    candidateId: input.candidate.id,
+    status: confirmed ? "confirmed" : "insufficient",
+    evidence,
+    actions,
+    confirmedAt: confirmed ? new Date().toISOString() : null,
+    errorMessage: confirmed ? null : "DB/MCP 하네스가 직접 근거와 통제를 확정하지 못했습니다."
+  };
+}
+
+export function createSafeClawDbMcpHazardResolver(): HazardPhotoHarnessResolver {
+  return {
+    name: "safeclaw-db-mcp",
+    resolve: async ({ question, candidates }) => {
+      const query = [
+        question,
+        ...candidates.flatMap((candidate) => [candidate.label, candidate.observation, candidate.inference])
+      ].join(" ").slice(0, 4_000);
+      const [direct, sif, supporting] = await Promise.all([
+        searchSafetyReferences({ query, limit: 6, evidenceRole: "direct" }),
+        searchSafetyReferences({ query, limit: 6, itemType: "sif-case" }),
+        searchSafetyReferences({ query, limit: 6, evidenceRole: "supporting" })
+      ]);
+      const references = uniqueSafetyReferences([
+        ...direct.items,
+        ...sif.items,
+        ...supporting.items
+      ]);
+      return candidates.map((candidate) => resolveCandidateFromReferences({
+        question,
+        candidate,
+        references
+      }));
+    }
+  };
+}
+
+function validateHazardPhoto(photo: File): HazardPhotoAnalysisError | null {
+  if (photo.size <= 0) {
+    return {
+      code: "empty_file",
+      message: `${photo.name || "이름 없는 사진"} 파일이 비어 있습니다.`,
+      retryable: false
+    };
+  }
+
+  const mimeType = photo.type.trim().toLowerCase();
+  if (!HAZARD_PHOTO_MIME_TYPES.some((allowed) => allowed === mimeType)) {
+    return {
+      code: "unsupported_mime",
+      message: `${photo.name || "이름 없는 사진"}의 MIME 형식(${mimeType || "없음"})은 지원하지 않습니다.`,
+      retryable: false
+    };
+  }
+
+  if (photo.size > MAX_HAZARD_PHOTO_BYTES) {
+    return {
+      code: "file_too_large",
+      message: `${photo.name || "이름 없는 사진"}은 사진별 최대 용량 20MB를 초과합니다.`,
+      retryable: false
+    };
+  }
+
+  return null;
+}
+
+function harnessContract(input: {
+  status?: HazardPhotoVisionAnalysis["harness"]["status"];
+  confirmedAt?: string | null;
+  errorMessage?: string | null;
+} = {}): HazardPhotoVisionAnalysis["harness"] {
+  return {
+    modelRole: "candidate_only",
+    authority: "safeclaw-db-mcp",
+    status: input.status || "pending",
+    confirms: ["evidence", "actions"],
+    confirmedAt: input.confirmedAt || null,
+    errorMessage: input.errorMessage || null
+  };
+}
+
+function emptyCounts(submitted: number): HazardPhotoVisionAnalysis["counts"] {
+  return {
+    submitted,
+    analyzed: 0,
+    rejected: 0,
+    failed: 0,
+    unconfigured: 0,
+    candidates: 0,
+    harnessConfirmed: 0,
+    harnessInsufficient: 0
+  };
+}
+
 export async function analyzeHazardPhotos(input: {
   question: string;
   photos: File[];
-}): Promise<HazardPhotoVisionAnalysis> {
-  const model = configuredModel();
-  const apiKey = configuredApiKey();
-  const photos = input.photos.slice(0, MAX_HAZARD_PHOTO_FILES);
-  const photoNames = photos.map((photo) => photo.name);
+}, options: {
+  provider?: HazardPhotoVisionProvider | null;
+  harness?: HazardPhotoHarnessResolver | null;
+  env?: Record<string, string | undefined>;
+} = {}): Promise<HazardPhotoVisionAnalysis> {
+  const env = options.env || process.env;
+  const hasInjectedProvider = Object.prototype.hasOwnProperty.call(options, "provider");
+  const provider = hasInjectedProvider
+    ? options.provider || null
+    : createOpenAiHazardPhotoVisionProvider(env);
+  const hasInjectedHarness = Object.prototype.hasOwnProperty.call(options, "harness");
+  const harnessResolver = hasInjectedHarness
+    ? options.harness || null
+    : createSafeClawDbMcpHazardResolver();
+  const providerName = provider?.name || "openai";
+  const providerMode = provider?.mode || "unconfigured";
+  const model = provider?.model || configuredModel(env);
+  const submitted = input.photos.length;
 
-  if (!photos.length) {
+  if (!submitted) {
     return {
-      status: "unconfigured",
-      provider: "openai",
+      status: "failed",
+      provider: providerName,
+      providerMode,
       model,
       summary: "",
+      observations: [],
       candidates: [],
       ocrText: "",
       siteSignals: [],
       photoCount: 0,
+      images: [],
+      counts: emptyCounts(0),
+      harness: harnessContract(),
       errorMessage: "현장 사진을 1장 이상 첨부해야 vision 위험요인 분석을 실행합니다."
     };
   }
 
-  if (!apiKey) {
+  if (submitted > MAX_HAZARD_PHOTO_FILES) {
     return {
-      status: "unconfigured",
-      provider: "openai",
+      status: "failed",
+      provider: providerName,
+      providerMode,
       model,
       summary: "",
+      observations: [],
       candidates: [],
       ocrText: "",
       siteSignals: [],
-      photoCount: photos.length,
-      errorMessage: "OPENAI_API_KEY가 없어 현장 사진 vision 분석을 건너뜁니다."
+      photoCount: submitted,
+      images: [],
+      counts: {
+        ...emptyCounts(submitted),
+        rejected: submitted
+      },
+      harness: harnessContract(),
+      errorMessage: `현장 사진은 최대 ${MAX_HAZARD_PHOTO_FILES}장까지 분석할 수 있습니다.`
     };
   }
 
-  try {
-    const prompt = buildHazardPhotoVisionPrompt({ question: input.question, photoNames });
-    const text = await postOpenAiVisionImages({
-      apiKey,
-      model,
-      prompt,
-      photos
-    });
-    const parsed = parseHazardPhotoVisionOutput(text, { model, photoNames });
-    if (parsed.status === "failed") log.warn("Hazard photo vision output parse failed", parsed.errorMessage);
-    return parsed;
-  } catch (error) {
-    log.error("Hazard photo vision analysis failed", error);
-    return {
-      status: "failed",
-      provider: "openai",
+  const rawImages = await Promise.all(input.photos.map(async (photo, index): Promise<HazardPhotoImageAnalysis> => {
+    const base = {
+      id: `photo-${index + 1}`,
+      index,
+      name: photo.name,
+      mimeType: photo.type.trim().toLowerCase(),
+      sizeBytes: photo.size,
+      provider: providerName,
+      providerMode,
       model,
       summary: "",
+      observations: [],
       candidates: [],
       ocrText: "",
-      siteSignals: [],
-      photoCount: photos.length,
-      errorMessage: error instanceof Error ? error.message : "Hazard photo vision analysis failed"
-    };
+      siteSignals: []
+    } satisfies Omit<HazardPhotoImageAnalysis, "status" | "error">;
+    const validationError = validateHazardPhoto(photo);
+    if (validationError) {
+      return {
+        ...base,
+        status: "rejected",
+        error: validationError
+      };
+    }
+
+    if (!provider) {
+      return {
+        ...base,
+        status: "unconfigured",
+        error: {
+          code: "provider_unconfigured",
+          message: "OPENAI_API_KEY가 없어 현장 사진 vision 분석을 건너뜁니다.",
+          retryable: true
+        }
+      };
+    }
+
+    const prompt = buildHazardPhotoVisionPrompt({
+      question: input.question,
+      photoNames: [photo.name]
+    });
+
+    try {
+      const text = await provider.analyze({
+        question: input.question,
+        prompt,
+        photo,
+        photoIndex: index
+      });
+      const parsed = parseHazardPhotoVisionOutput(text, {
+        model: provider.model,
+        provider: provider.name,
+        photoNames: [photo.name]
+      });
+      if (parsed.status === "failed") {
+        log.warn(`Hazard photo vision output parse failed: ${photo.name}`, parsed.errorMessage);
+        return {
+          ...base,
+          status: "failed",
+          error: {
+            code: "invalid_model_output",
+            message: parsed.errorMessage || "Hazard photo vision output parse failed",
+            retryable: false
+          }
+        };
+      }
+
+      const candidates = parsed.candidates.map((candidate, candidateIndex) => ({
+        ...candidate,
+        id: `photo-${index + 1}-candidate-${candidateIndex + 1}`,
+        sourcePhotoNames: [photo.name]
+      }));
+      return {
+        ...base,
+        status: "analyzed",
+        summary: parsed.summary,
+        observations: parsed.observations,
+        candidates,
+        ocrText: parsed.ocrText,
+        siteSignals: parsed.siteSignals,
+        error: null
+      };
+    } catch (error) {
+      log.error(`Hazard photo vision analysis failed: ${photo.name}`, error);
+      return {
+        ...base,
+        status: "failed",
+        error: {
+          code: "provider_error",
+          message: error instanceof Error ? error.message : "Hazard photo vision analysis failed",
+          retryable: true
+        }
+      };
+    }
+  }));
+
+  const modelCandidates = rawImages.flatMap((image) => image.candidates);
+  let resolvedCandidates = modelCandidates;
+  if (modelCandidates.length && harnessResolver) {
+    try {
+      const resolutions = await harnessResolver.resolve({
+        question: input.question,
+        candidates: modelCandidates,
+        images: rawImages
+      });
+      const resolutionByCandidate = new Map(resolutions.map((resolution) => [resolution.candidateId, resolution]));
+      resolvedCandidates = modelCandidates.map((candidate) => {
+        const resolution = resolutionByCandidate.get(candidate.id);
+        if (!resolution) {
+          return {
+            ...candidate,
+            harness: {
+              ...candidate.harness,
+              status: "insufficient" as const,
+              errorMessage: "DB/MCP 하네스가 후보에 대한 확정 결과를 반환하지 않았습니다."
+            }
+          };
+        }
+        const confirmed = resolution.status === "confirmed" && resolution.evidence.length > 0 && resolution.actions.length > 0;
+        return {
+          ...candidate,
+          harness: {
+            authority: "safeclaw-db-mcp" as const,
+            status: confirmed ? "confirmed" as const : "insufficient" as const,
+            evidence: resolution.evidence,
+            actions: resolution.actions,
+            confirmedAt: confirmed ? resolution.confirmedAt : null,
+            errorMessage: confirmed
+              ? null
+              : resolution.errorMessage || "DB/MCP 하네스가 직접 근거와 통제를 확정하지 못했습니다."
+          }
+        };
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "DB/MCP harness resolution failed";
+      log.error(`Hazard photo DB/MCP harness failed: ${harnessResolver.name}`, error);
+      resolvedCandidates = modelCandidates.map((candidate) => ({
+        ...candidate,
+        harness: {
+          ...candidate.harness,
+          status: "insufficient" as const,
+          errorMessage: message
+        }
+      }));
+    }
   }
+
+  const candidateById = new Map(resolvedCandidates.map((candidate) => [candidate.id, candidate]));
+  const images = rawImages.map((image) => ({
+    ...image,
+    candidates: image.candidates.map((candidate) => candidateById.get(candidate.id) || candidate)
+  }));
+  const candidates = images.flatMap((image) => image.candidates);
+  const counts: HazardPhotoVisionAnalysis["counts"] = {
+    submitted,
+    analyzed: images.filter((image) => image.status === "analyzed").length,
+    rejected: images.filter((image) => image.status === "rejected").length,
+    failed: images.filter((image) => image.status === "failed").length,
+    unconfigured: images.filter((image) => image.status === "unconfigured").length,
+    candidates: candidates.length,
+    harnessConfirmed: candidates.filter((candidate) => candidate.harness.status === "confirmed").length,
+    harnessInsufficient: candidates.filter((candidate) => candidate.harness.status === "insufficient").length
+  };
+  const status: HazardPhotoVisionAnalysis["status"] = counts.analyzed === submitted
+    ? "analyzed"
+    : counts.analyzed > 0
+      ? "partial"
+      : counts.unconfigured > 0
+        ? "unconfigured"
+        : "failed";
+  const summaries = images.map((image) => image.summary).filter(Boolean);
+  const ocrTexts = images.map((image) => image.ocrText).filter(Boolean);
+  const siteSignals = [...new Set(images.flatMap((image) => image.siteSignals))];
+  const firstError = images.find((image) => image.error)?.error;
+  const harnessStatus: HazardPhotoVisionAnalysis["harness"]["status"] = !candidates.length || !harnessResolver
+    ? "pending"
+    : counts.harnessInsufficient > 0
+      ? "insufficient"
+      : counts.harnessConfirmed === candidates.length
+        ? "confirmed"
+        : "pending";
+  const harnessConfirmedAt = harnessStatus === "confirmed"
+    ? candidates.find((candidate) => candidate.harness.confirmedAt)?.harness.confirmedAt || null
+    : null;
+  const harnessErrorMessage = candidates.find((candidate) => candidate.harness.errorMessage)?.harness.errorMessage || null;
+
+  return {
+    status,
+    provider: providerName,
+    providerMode,
+    model,
+    summary: summaries.join("\n"),
+    observations: images.flatMap((image) => image.observations),
+    candidates,
+    ocrText: ocrTexts.join("\n"),
+    siteSignals,
+    photoCount: submitted,
+    images,
+    counts,
+    harness: harnessContract({
+      status: harnessStatus,
+      confirmedAt: harnessConfirmedAt,
+      errorMessage: harnessErrorMessage
+    }),
+    errorMessage: status === "analyzed" || status === "partial" ? undefined : firstError?.message
+  };
 }
 
 export async function analyzeImprovementPhotos(input: {

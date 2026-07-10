@@ -10,7 +10,7 @@ export const maxDuration = 60;
 const limiter = createRateLimiter({ limit: 8, windowMs: 60_000 });
 
 function isFileValue(value: FormDataEntryValue): value is File {
-  return typeof File !== "undefined" && value instanceof File && value.size > 0;
+  return typeof File !== "undefined" && value instanceof File;
 }
 
 function readQuestion(form: FormData) {
@@ -55,12 +55,15 @@ export async function POST(request: NextRequest) {
   }
 
   const analysis = await analyzeHazardPhotos({ question, photos });
+  const hasAnalysis = analysis.status === "analyzed" || analysis.status === "partial";
   return NextResponse.json({
-    ok: analysis.status === "analyzed",
-    configured: analysis.status !== "unconfigured",
+    ok: hasAnalysis,
+    configured: analysis.providerMode !== "unconfigured",
     analysis,
     message: analysis.status === "analyzed"
       ? "현장 사진에서 위험요인 후보를 도출했습니다."
+      : analysis.status === "partial"
+        ? `현장 사진 ${analysis.counts.analyzed}장은 분석했고 ${analysis.photoCount - analysis.counts.analyzed}장은 개별 확인이 필요합니다.`
       : analysis.errorMessage || "현장 사진 분석을 완료하지 못했습니다."
   });
 }
