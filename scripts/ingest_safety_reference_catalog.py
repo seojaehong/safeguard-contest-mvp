@@ -5,6 +5,7 @@ import csv
 import hashlib
 import io
 import json
+import logging
 import os
 import re
 import time
@@ -46,6 +47,10 @@ RISK_KEYWORDS = [
     "낙하",
     "붕괴",
 ]
+SIF_CONSTRUCTION_SUBHEADER = ("공종", "작업명", "단위작업명")
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -175,6 +180,16 @@ def first_non_empty_header(rows: Iterable[tuple[object, ...]]) -> tuple[list[str
     return header, consumed
 
 
+def is_repeated_sif_construction_subheader(header: Sequence[str], row: Sequence[object]) -> bool:
+    values = [compact_text(cell, 120) for cell in row]
+    return (
+        len(header) >= 5
+        and header[2] == "고위험작업·상황"
+        and tuple(values[2:5]) == SIF_CONSTRUCTION_SUBHEADER
+        and not any(value for index, value in enumerate(values) if index not in (2, 3, 4))
+    )
+
+
 def parse_sif_archive(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]:
     source = ReferenceSource(
         id="kosha-sif-archive-20260401",
@@ -188,38 +203,44 @@ def parse_sif_archive(path: Path) -> tuple[ReferenceSource, list[ReferenceItem]]
         published_at="2026-04-01",
         metadata={"parser": "openpyxl", "fileName": path.name},
     )
-    workbook = load_workbook(path, read_only=True, data_only=True)
     items: list[ReferenceItem] = []
-    for sheet_name in workbook.sheetnames:
-        sheet = workbook[sheet_name]
-        rows_iter = sheet.iter_rows(values_only=True)
-        header, data_rows = first_non_empty_header(rows_iter)
-        for index, row in enumerate(data_rows, start=1):
-            record = {
-                header[column_index]: compact_text(row[column_index] if column_index < len(row) else "", 500)
-                for column_index in range(len(header))
-            }
-            if not any(record.values()):
-                continue
-            title_seed = " / ".join(value for value in list(record.values())[:4] if value) or f"{sheet_name} {index}"
-            title = compact_text(title_seed, 180)
-            body = "\n".join(f"{key}: {value}" for key, value in record.items() if value)
-            risk_tags = infer_keywords(title, body)
-            items.append(ReferenceItem(
-                id=f"sif-{slugify(sheet_name)}-{index:05d}",
-                source_id=source.id,
-                item_type="sif-case",
-                category=sheet_name,
-                subcategory=None,
-                title=title,
-                summary=compact_text(body, 260),
-                body=body,
-                keywords=sorted(set(risk_tags + [sheet_name])),
-                risk_tags=risk_tags,
-                primary_documents=infer_documents(title, body),
-                controls=infer_controls(title, body),
-                payload={"sheet": sheet_name, "rowIndex": index, "record": record},
-            ))
+    workbook = load_workbook(path, read_only=True, data_only=True)
+    try:
+        for sheet_name in workbook.sheetnames:
+            sheet = workbook[sheet_name]
+            rows_iter = sheet.iter_rows(values_only=True)
+            header, data_rows = first_non_empty_header(rows_iter)
+            for index, row in enumerate(data_rows, start=1):
+                if index == 1 and is_repeated_sif_construction_subheader(header, row):
+                    LOGGER.info("Skipping repeated SIF construction subheader: sheet=%s data_row_index=%d", sheet_name, index)
+                    continue
+                record = {
+                    header[column_index]: compact_text(row[column_index] if column_index < len(row) else "", 500)
+                    for column_index in range(len(header))
+                }
+                if not any(record.values()):
+                    continue
+                title_seed = " / ".join(value for value in list(record.values())[:4] if value) or f"{sheet_name} {index}"
+                title = compact_text(title_seed, 180)
+                body = "\n".join(f"{key}: {value}" for key, value in record.items() if value)
+                risk_tags = infer_keywords(title, body)
+                items.append(ReferenceItem(
+                    id=f"sif-{slugify(sheet_name)}-{index:05d}",
+                    source_id=source.id,
+                    item_type="sif-case",
+                    category=sheet_name,
+                    subcategory=None,
+                    title=title,
+                    summary=compact_text(body, 260),
+                    body=body,
+                    keywords=sorted(set(risk_tags + [sheet_name])),
+                    risk_tags=risk_tags,
+                    primary_documents=infer_documents(title, body),
+                    controls=infer_controls(title, body),
+                    payload={"sheet": sheet_name, "rowIndex": index, "record": record},
+                ))
+    finally:
+        workbook.close()
     return source, items
 
 
@@ -465,6 +486,7 @@ def write_json(path: Path, value: object) -> None:
 
 
 def main() -> int:
+    logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
     parser = argparse.ArgumentParser(description="Build and optionally upload SafeClaw safety reference catalog.")
     parser.add_argument("--downloads-dir", default=r"C:\Users\iceam\Downloads")
     parser.add_argument("--technical-folder", default=r"C:\Users\iceam\Downloads\기술지원규정")
