@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
-import { assessWorkpackReadiness } from "@/lib/workpack-readiness";
+import { applyWorkpackDeliverablesChange, assessWorkpackReadiness } from "@/lib/workpack-readiness";
 import type { AskResponse, QualityContract } from "@/lib/types";
 
 const readyQuality: QualityContract = {
@@ -151,5 +151,23 @@ describe("workpack readiness", () => {
     expect(readiness.status).toBe("ready");
     expect(readiness.summary).toBe("공유 준비됨");
     expect(readiness.reasons).toEqual([]);
+  });
+
+  it("requires explicit revalidation after a reviewed workpack is edited", () => {
+    const response = makeResponse();
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      { tbmBriefing: `${response.deliverables.tbmBriefing}\n편집된 안전대책` },
+      { requiresRevalidation: true }
+    );
+    const readiness = assessWorkpackReadiness(edited, { requiresRevalidation: true });
+
+    expect(edited.ontologyQa).toBeUndefined();
+    expect(edited.qualityContract).toBeUndefined();
+    expect(edited.dbHarness).toBeUndefined();
+    expect(readiness.canShare).toBe(false);
+    expect(readiness.status).toBe("blocked");
+    expect(readiness.summary).toBe("편집 후 재검수 필요");
+    expect(readiness.reasons).toContain("편집된 문서 재검수 필요");
   });
 });

@@ -30,6 +30,11 @@ export type DocumentKey =
 
 export type WorkpackDocumentValues = Record<DocumentKey, string>;
 
+export type WorkpackDeliverablesChange = {
+  source: "generated" | "stored-draft" | "user-edit";
+  requiresRevalidation: boolean;
+};
+
 const rubricDocumentKeys: RubricDocumentKey[] = [
   "workpackSummaryDraft",
   "riskAssessmentDraft",
@@ -225,6 +230,32 @@ const documentMeta: EditableDocument[] = [
 
 function sanitizeFileName(value: string) {
   return value.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, "-").slice(0, 80) || "safeclaw";
+}
+
+function hashFingerprint(value: string) {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+export function buildGenerationEvidenceFingerprint(data: AskResponse) {
+  return hashFingerprint(JSON.stringify({
+    generationMode: data.generationMode || "unspecified",
+    qualityGeneratedAt: data.qualityContract?.generatedAt || "",
+    deliverables: data.deliverables,
+    citations: data.citations.map((citation) => ({
+      id: citation.id,
+      title: citation.title,
+      citation: citation.citation,
+      sourceUrl: citation.sourceUrl
+    })),
+    evidenceLabels: data.evidenceLabels || {},
+    ontologyQa: data.ontologyQa || null,
+    dbHarness: data.dbHarness?.packet || null
+  }));
 }
 
 function downloadBlob(blob: Blob, fileName: string) {
@@ -1827,14 +1858,16 @@ function SafetyDocumentPreview({
 
 export function WorkpackEditor({
   data,
+  generationFingerprint,
   focusToken = 0,
   requestedDocumentKey,
   onDeliverablesChange
 }: {
   data: AskResponse;
+  generationFingerprint?: string;
   focusToken?: number;
   requestedDocumentKey?: DocumentKey;
-  onDeliverablesChange?: (values: WorkpackDocumentValues) => void;
+  onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
 }) {
   const initialValues = useMemo<WorkpackDocumentValues>(
     () => ({
@@ -1854,8 +1887,8 @@ export function WorkpackEditor({
     [data]
   );
   const storageKey = useMemo(
-    () => `safeclaw-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}`,
-    [data.question, data.scenario.companyName, data.scenario.siteName]
+    () => `safeclaw-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}:${generationFingerprint || buildGenerationEvidenceFingerprint(data)}`,
+    [data, generationFingerprint]
   );
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
@@ -1872,6 +1905,10 @@ export function WorkpackEditor({
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const pendingChangeRef = useRef<WorkpackDeliverablesChange>({
+    source: "generated",
+    requiresRevalidation: false
+  });
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
@@ -1892,6 +1929,12 @@ export function WorkpackEditor({
 
     setHydratedStorageKey(null);
     const stored = parseStoredValues(window.localStorage.getItem(storageKey), initialValues);
+    const restoredDraft = (Object.keys(initialValues) as DocumentKey[])
+      .some((key) => stored[key] !== initialValues[key]);
+    pendingChangeRef.current = {
+      source: restoredDraft ? "stored-draft" : "generated",
+      requiresRevalidation: restoredDraft
+    };
     setValues(stored);
     setLastEditedAt(null);
     setHydratedStorageKey(storageKey);
@@ -1906,7 +1949,7 @@ export function WorkpackEditor({
         console.warn("workpack local draft save failed", error);
       }
     }
-    onDeliverablesChange?.(values);
+    onDeliverablesChange?.(values, pendingChangeRef.current);
   }, [hydratedStorageKey, onDeliverablesChange, storageKey, values]);
 
   useEffect(() => {
@@ -1932,6 +1975,7 @@ export function WorkpackEditor({
   }, [focusToken, requestedDocumentKey]);
 
   function updateValue(value: string) {
+    pendingChangeRef.current = { source: "user-edit", requiresRevalidation: true };
     setValues((current) => ({ ...current, [selected.key]: value }));
     setLastEditedAt(new Date());
   }
@@ -2053,19 +2097,20 @@ export function WorkpackEditor({
       type StructuredMode = "workPlanStructured" | "permitInspectionStructured" | "tbmBriefingStructured" | "tbmLogStructured" | "educationRecordStructured";
       let structuredMode: StructuredMode | null = null;
       let structuredPayload: unknown = null;
-      if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
+      const selectedUsesEditedText = selectedText !== initialValues[selected.key];
+      if (!selectedUsesEditedText && selected.key === "workPlanDraft" && dl?.workPlanStructured) {
         structuredMode = "workPlanStructured";
         structuredPayload = dl.workPlanStructured;
-      } else if (selected.key === "workPermitDraft") {
+      } else if (!selectedUsesEditedText && selected.key === "workPermitDraft") {
         structuredMode = "permitInspectionStructured";
         structuredPayload = dl?.permitInspectionStructured || buildPermitInspectionStructured(data);
-      } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
+      } else if (!selectedUsesEditedText && selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
         structuredMode = "tbmBriefingStructured";
         structuredPayload = dl.tbmBriefingStructured;
-      } else if (selected.key === "tbmLogDraft" && dl?.tbmLogStructured) {
+      } else if (!selectedUsesEditedText && selected.key === "tbmLogDraft" && dl?.tbmLogStructured) {
         structuredMode = "tbmLogStructured";
         structuredPayload = dl.tbmLogStructured;
-      } else if (selected.key === "safetyEducationRecordDraft" && dl?.educationRecordStructured) {
+      } else if (!selectedUsesEditedText && selected.key === "safetyEducationRecordDraft" && dl?.educationRecordStructured) {
         structuredMode = "educationRecordStructured";
         structuredPayload = dl.educationRecordStructured;
       }
@@ -2081,7 +2126,7 @@ export function WorkpackEditor({
             rows: selectedRows,
             profile: selectedFormProfile,
             scenario: data.scenario,
-            riskAssessmentRows: data.structured?.riskAssessmentRows
+            riskAssessmentRows: selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
           };
       const response = await fetch("/api/export/xlsx", {
         method: "POST",

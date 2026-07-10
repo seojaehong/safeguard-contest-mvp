@@ -3,7 +3,12 @@
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { FieldOperationsWorkspace } from "@/components/FieldOperationsWorkspace";
-import type { DocumentKey, WorkpackDocumentValues } from "@/components/WorkpackEditor";
+import {
+  buildGenerationEvidenceFingerprint,
+  type DocumentKey,
+  type WorkpackDeliverablesChange,
+  type WorkpackDocumentValues
+} from "@/components/WorkpackEditor";
 import { AgentConsole } from "@/components/AgentConsole";
 import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import { fetchAskStream } from "@/lib/ask-stream-client";
@@ -35,7 +40,11 @@ import {
   type WorkspaceStepStatus
 } from "@/lib/workspace-pages";
 import { buildGenerationProgressState } from "@/lib/workspace-generation-progress";
-import { assessWorkpackReadiness, type WorkpackReadiness } from "@/lib/workpack-readiness";
+import {
+  applyWorkpackDeliverablesChange,
+  assessWorkpackReadiness,
+  type WorkpackReadiness
+} from "@/lib/workpack-readiness";
 
 type SafeGuardCommandCenterProps = {
   examples: FieldExample[];
@@ -1019,6 +1028,8 @@ export function SafeGuardCommandCenter({
   );
   const [question, setQuestion] = useState(initialQuestion || selectedExample.question);
   const [data, setData] = useState<AskResponse | null>(null);
+  const [generationFingerprint, setGenerationFingerprint] = useState<string | null>(null);
+  const [requiresRevalidation, setRequiresRevalidation] = useState(false);
   const [message, setMessage] = useState("");
   const [state, setState] = useState<GenerationState>("idle");
   const [checkedActions, setCheckedActions] = useState<boolean[]>([]);
@@ -1111,19 +1122,17 @@ export function SafeGuardCommandCenter({
     setMessage("생성된 문서와 근거 검토 화면으로 돌아왔습니다.");
   }
 
-  const handleWorkpackDeliverablesChange = useCallback((values: WorkpackDocumentValues) => {
+  const handleWorkpackDeliverablesChange = useCallback((
+    values: WorkpackDocumentValues,
+    change: WorkpackDeliverablesChange
+  ) => {
+    if (change.requiresRevalidation) setRequiresRevalidation(true);
     setData((current) => {
       if (!current) return current;
       const currentDocuments: Partial<Record<DocumentKey, string>> = current.deliverables;
       const documentKeys = Object.keys(values) as DocumentKey[];
       if (documentKeys.every((key) => currentDocuments[key] === values[key])) return current;
-      return {
-        ...current,
-        deliverables: {
-          ...current.deliverables,
-          ...values
-        }
-      };
+      return applyWorkpackDeliverablesChange(current, values, change);
     });
   }, []);
 
@@ -1562,7 +1571,9 @@ export function SafeGuardCommandCenter({
 
   function applyGeneratedPayload(payload: AskResponse) {
     persistCurrentWorkpack(payload);
+    setGenerationFingerprint(buildGenerationEvidenceFingerprint(payload));
     setData(payload);
+    setRequiresRevalidation(false);
     setSavedWorkpackId(null);
     setImprovementSaveState("idle");
     setCheckedActions(payload.riskSummary.immediateActions.map(() => false));
@@ -1640,6 +1651,8 @@ export function SafeGuardCommandCenter({
     setSelectedExampleId(example.id);
     setQuestion(example.question);
     setData(null);
+    setGenerationFingerprint(null);
+    setRequiresRevalidation(false);
     setSavedWorkpackId(null);
     setImprovementSaveState("idle");
     setLiveWeather(null);
@@ -1688,7 +1701,7 @@ export function SafeGuardCommandCenter({
   const busy = state === "generating";
   const hasWorkpack = Boolean(data);
   const currentStep = workspacePage;
-  const workpackReadiness = data ? assessWorkpackReadiness(data) : null;
+  const workpackReadiness = data ? assessWorkpackReadiness(data, { requiresRevalidation }) : null;
   const statuses = buildWorkspaceStepStatuses({
     currentPage: workspacePage,
     hasWorkpack,
@@ -2278,6 +2291,7 @@ export function SafeGuardCommandCenter({
               </section>
               <FieldOperationsWorkspace
                 data={data}
+                generationFingerprint={generationFingerprint || undefined}
                 editorFocusToken={editorFocusToken}
                 requestedDocumentKey={requestedDocumentKey}
                 readiness={workpackReadiness || undefined}
