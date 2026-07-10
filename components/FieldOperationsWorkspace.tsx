@@ -191,7 +191,22 @@ function buildEvidenceSummary(data: AskResponse) {
       training: data.externalData.training.mode,
       koshaEducation: data.externalData.koshaEducation.mode,
       kosha: data.externalData.kosha.mode,
-      accidentCases: data.externalData.accidentCases.mode
+      accidentCases: data.externalData.accidentCases.mode,
+      safetyReference: data.externalData.safetyReference
+        ? {
+            mode: data.externalData.safetyReference.mode,
+            retrievalMode: data.externalData.safetyReference.retrievalMode,
+            items: data.externalData.safetyReference.items.slice(0, 6).map((item) => ({
+              id: item.id,
+              title: item.displayTitle || item.title,
+              rawTitle: item.rawTitle,
+              itemType: item.itemType,
+              primaryDocuments: item.primaryDocuments,
+              controls: item.controls,
+              shortSummary: item.displaySummary || item.shortSummary
+            }))
+          }
+        : undefined
     }
   };
 }
@@ -512,7 +527,8 @@ function WorkerEducationPanel({
 function EvidenceImpactPanel({ data }: { data: AskResponse }) {
   const koshaReferences = data.externalData.kosha.references.slice(0, 3);
   const accidentCases = data.externalData.accidentCases.cases.slice(0, 2);
-  const hasEvidenceImpact = koshaReferences.length > 0 || accidentCases.length > 0;
+  const safetyReferences = data.externalData.safetyReference?.items.slice(0, 3) || [];
+  const hasEvidenceImpact = koshaReferences.length > 0 || accidentCases.length > 0 || safetyReferences.length > 0;
   const officialFallbackUrl = "https://www.kosha.or.kr/kosha/data/guidance.do";
   const safeExternalUrl = (url?: string) => (url && /^https?:\/\//.test(url) ? url : officialFallbackUrl);
 
@@ -549,6 +565,13 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
               <span>유사 재해사례 · TBM/교육 반영</span>
               <small>{item.preventionPoint}</small>
             </a>
+          ))}
+          {safetyReferences.map((item) => (
+            <div key={item.id} className="impact-card">
+              <strong>{item.displayTitle || item.title}</strong>
+              <span>{item.sourceKindLabel || "안전 지식 DB"} · {(item.primaryDocuments || ["위험성평가표"]).join(", ")}</span>
+              <small>{item.displaySummary || item.shortSummary || item.controls.slice(0, 2).join(", ")}</small>
+            </div>
           ))}
           {!hasEvidenceImpact ? (
             <div className="impact-empty-state">

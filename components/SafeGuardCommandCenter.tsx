@@ -641,6 +641,12 @@ function documentMatchesTitle(documentNames: string[] | undefined, documentTitle
   });
 }
 
+function safetyReferenceEvidenceTitle(
+  item: NonNullable<AskResponse["externalData"]["safetyReference"]>["items"][number] | undefined
+): string | undefined {
+  return item?.displayTitle || item?.title;
+}
+
 function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): DocumentSourceRailItem[] {
   if (!data) {
     return [
@@ -709,7 +715,7 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
       label: "직접 근거",
       value: evidenceLabel
         ? formatEvidenceBadge(evidenceLabel.article)
-        : directReference?.title || lawCitation?.title || "원문 확인 권장",
+        : safetyReferenceEvidenceTitle(directReference) || lawCitation?.title || "원문 확인 권장",
       detail: directReference?.operationSignalLabel
         || directReference?.shortSummary
         || evidenceLabel?.purpose

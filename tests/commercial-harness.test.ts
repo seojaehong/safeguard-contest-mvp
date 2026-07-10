@@ -346,6 +346,44 @@ describe("DB harness packet", () => {
     expect(points).toContain("위험성평가표 근거 보강 후 전파");
     expect(points).not.toContain("일반 체크포인트");
   });
+
+  it("surfaces readable SIF display titles in harness prompts and deterministic risk evidence", () => {
+    const rawTitle = "1919 / 기타의사업 / 시설관리및사업지원서비스업";
+    const readableTitle = "지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임 사례";
+    const archiveSif = reference({
+      id: "sif-archive-readable",
+      title: rawTitle,
+      category: "기타의사업",
+      subcategory: "시설관리및사업지원서비스업",
+      summary: [
+        "연번: 1919",
+        "재해개요: 2024. 3. 11. 피해자가 지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임.",
+        "기인물: 배수펌프",
+        "위험성 감소대책: 산소농도 측정, 강제환기, 전원 차단 및 잠금표지"
+      ].join("\n"),
+      body: "재해개요: 2024. 3. 11. 피해자가 지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임.",
+      keywords: ["배수펌프", "산소결핍", "끼임"],
+      risk_tags: ["질식", "끼임"],
+      controls: ["산소농도 측정", "전원 차단 및 잠금표지"],
+      retrieval_source: "ranked"
+    });
+    const packet = buildDbHarnessPacket({
+      question: "지하 기계실 배수펌프 점검",
+      references: [archiveSif]
+    });
+    const promptContext = buildHarnessPromptContext(packet);
+    const rows = buildSafetyReferenceRiskRows(
+      buildMockAskResponse("지하 기계실 배수펌프 점검", mockSearchResults, "mock", "테스트"),
+      [archiveSif],
+      "실내 작업",
+      "지하 기계실 배수펌프 점검 산소농도 LOTO"
+    );
+
+    expect(promptContext).toContain(readableTitle);
+    expect(promptContext).not.toContain(rawTitle);
+    expect(rows.some((row) => row.evidenceRefs?.includes(readableTitle))).toBe(true);
+    expect(rows.every((row) => !row.evidenceRefs?.includes(rawTitle))).toBe(true);
+  });
 });
 
 describe("runAsk DB harness mode", () => {
