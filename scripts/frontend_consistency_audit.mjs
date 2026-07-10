@@ -8,7 +8,7 @@ const outputPath = path.resolve(
   root,
   process.env.OUTPUT_PATH || "evaluation/frontend-consistency-audit-2026-07-11/static-audit.json",
 );
-const cssPath = path.join(root, "app", "globals.css");
+const cssPath = path.resolve(root, process.env.CSS_PATH || path.join("app", "globals.css"));
 const contractPath = path.join(root, "lib", "frontend-design-contract.ts");
 
 function listFiles(directory, predicate) {
@@ -36,8 +36,98 @@ function lineNumber(source, offset) {
   return source.slice(0, offset).split(/\r?\n/).length;
 }
 
+function cssRuleBlocks(source) {
+  const uncommented = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  return [...uncommented.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
+    selectors: match[1].split(",").map((selector) => selector.trim()),
+    declarations: Object.fromEntries(
+      [...match[2].matchAll(/([\w-]+)\s*:\s*([^;]+);/g)].map((declaration) => [
+        declaration[1].trim(),
+        declaration[2].trim(),
+      ]),
+    ),
+    line: lineNumber(uncommented, match.index),
+  }));
+}
+
+function effectiveDeclarations(rules, selector) {
+  return Object.assign(
+    {},
+    ...rules.filter((rule) => rule.selectors.includes(selector)).map((rule) => rule.declarations),
+  );
+}
+
+const functionalEffectSelectors = new Map([
+  [".scenario-chip.active", "4px active operational rail"],
+  [".template-card.active", "4px active operational rail"],
+  [".doc-tab.active", "4px active operational rail"],
+  [".command-stepper button.active", "4px active operational rail"],
+  [".scenario-strip button.active", "4px active operational rail"],
+  [".demo-stage-list li.active", "4px active operational rail"],
+  [".quick-chip.active", "4px active operational rail"],
+  [".mission-step.active", "4px active operational rail"],
+  [".api-proof-card.active", "4px active operational rail"],
+  [".document-editor.editor-focus-cue", "4px editor focus cue"],
+  [".document-viewer-list button.selected", "4px selected-document rail"],
+  ["body:has(.safeclaw-landing) :is(\n  .scenario-chip.active", "4px landing active operational rail"],
+  [".safeclaw-module-shell .quick-chip.active", "4px module active operational rail"],
+  [".safeclaw-module-shell .language-chip.active", "4px module active operational rail"],
+  [".safeclaw-module-shell .template-tab.active", "4px module active operational rail"],
+  [".safeclaw-module-shell .document-tab.active", "4px module active operational rail"],
+  [".safeclaw-module-shell .workflow-channel-card.active", "4px module active operational rail"],
+  [".command-center-shell .document-viewer-list button.selected", "selected-document rail"],
+]);
+
+const selectorRoleContract = {
+  body: {
+    "font-family": "var(--font-product)",
+    "font-size": "var(--text-body)",
+    "line-height": "var(--leading-body)",
+    "letter-spacing": "var(--tracking-body)",
+  },
+  button: { font: "inherit" },
+  input: { font: "inherit" },
+  select: { font: "inherit" },
+  textarea: { font: "inherit" },
+  h1: {
+    "font-family": "var(--font-product)",
+    "line-height": "var(--leading-page-title)",
+    "letter-spacing": "var(--tracking-page-title)",
+  },
+  h2: {
+    "font-family": "var(--font-product)",
+    "line-height": "var(--leading-section-title)",
+    "letter-spacing": "var(--tracking-section-title)",
+  },
+  h3: {
+    "font-family": "var(--font-product)",
+    "line-height": "var(--leading-component-title)",
+    "letter-spacing": "var(--tracking-component-title)",
+  },
+  ".button": {
+    border: "1px solid var(--sc-black)",
+    background: "var(--sc-hazard-yellow)",
+    "box-shadow": "none",
+    "letter-spacing": "var(--tracking-body)",
+    transform: "none",
+  },
+  ".button:hover": { "box-shadow": "none", transform: "none" },
+  ".command-topbar": { "box-shadow": "none" },
+  ".scenario-chip.active": {
+    "border-color": "var(--sc-black)",
+    background: "var(--sc-steel-060)",
+    "box-shadow": "inset 4px 0 0 var(--sc-hazard-yellow)",
+  },
+  ".document-editor.editor-focus-cue": {
+    "border-color": "var(--sc-black)",
+    "box-shadow": "inset 4px 0 0 var(--sc-hazard-yellow)",
+    transform: "none",
+  },
+};
+
 function cssViolations(source) {
   const violations = [];
+  const rules = cssRuleBlocks(source);
   const allowedFontSizes = new Set([
     "11px", "12px", "13px", "14px", "15px", "17px", "20px",
     "var(--text-display)", "var(--text-page-title)", "var(--text-section-title)",
@@ -77,10 +167,9 @@ function cssViolations(source) {
   }
 
   const allowedTracking = new Set([
-    "0", "-0.015em", "-0.025em", "-0.035em", "-0.045em", "0.04em", "0.08em",
+    "0", "-0.015em", "-0.025em", "-0.035em", "-0.045em", "0.08em",
     "var(--tracking-body)", "var(--tracking-component-title)", "var(--tracking-section-title)",
-    "var(--tracking-page-title)", "var(--tracking-display)", "var(--tracking-table-header)",
-    "var(--tracking-hud)",
+    "var(--tracking-page-title)", "var(--tracking-display)", "var(--tracking-hud)",
   ]);
   for (const match of source.matchAll(/letter-spacing\s*:\s*([^;\r\n}]+)/g)) {
     const value = match[1].trim();
@@ -104,6 +193,50 @@ function cssViolations(source) {
 
   for (const match of source.matchAll(/!important/g)) {
     violations.push({ rule: "important-declaration", file: "app/globals.css", line: lineNumber(source, match.index), value: "!important" });
+  }
+
+  for (const rule of rules) {
+    const boxShadow = rule.declarations["box-shadow"];
+    if (boxShadow && boxShadow !== "none") {
+      const functional = boxShadow.startsWith("inset ")
+        && rule.selectors.every((selector) =>
+          [...functionalEffectSelectors.keys()].some((allowedSelector) => selector.includes(allowedSelector)));
+      if (!functional) {
+        violations.push({
+          rule: "decorative-box-shadow",
+          file: "app/globals.css",
+          line: rule.line,
+          value: `${rule.selectors.join(", ")} => ${boxShadow}`,
+        });
+      }
+    }
+    const textShadow = rule.declarations["text-shadow"];
+    if (textShadow && textShadow !== "none") {
+      violations.push({ rule: "decorative-text-shadow", file: "app/globals.css", line: rule.line, value: textShadow });
+    }
+    for (const property of ["background", "background-image"]) {
+      const value = rule.declarations[property];
+      if (!value?.includes("gradient(")) continue;
+      const functional = rule.selectors.every((selector) =>
+        selector === ".hazard-stripe" || selector === ".hazard-stripe-band::before");
+      if (!functional) {
+        violations.push({ rule: "decorative-gradient", file: "app/globals.css", line: rule.line, value });
+      }
+    }
+  }
+
+  for (const [selector, expected] of Object.entries(selectorRoleContract)) {
+    const actual = effectiveDeclarations(rules, selector);
+    for (const [property, value] of Object.entries(expected)) {
+      if (actual[property] !== value) {
+        violations.push({
+          rule: "selector-role",
+          file: "app/globals.css",
+          line: rules.find((rule) => rule.selectors.includes(selector))?.line || 1,
+          value: `${selector} ${property}: expected ${value}, received ${actual[property] || "missing"}`,
+        });
+      }
+    }
   }
 
   return violations;

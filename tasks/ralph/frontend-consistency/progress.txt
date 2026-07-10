@@ -9,3 +9,9 @@
 - Verified: focused contract tests, static audit, and typecheck currently pass.
 - Learned: static compliance alone cannot prove semantic role correctness after a bulk map.
 - Next: independent diff review, targeted fixes, then browser evidence before marking passed.
+
+## 2026-07-11 F2 review remediation
+- Changed: normalized later duplicate control and active-state rules so the canonical cascade wins; removed the table-header tracking tier and decorative effects; added selector-aware role/effect audit checks and complete reduced-motion coverage.
+- Verified: focused contract tests pass (8/8), static audit passes for 32 routes with zero violations, typecheck passes, and production build passes.
+- Learned: named rule-block assertions and adversarial audit fixtures are required to detect cascade and semantic-role false positives.
+- Next: keep F2 `passes: false` until independent reviewer approval; then continue browser evidence in the later route tasks.

@@ -59,7 +59,6 @@ export const frontendTypography = {
     "--tracking-section-title",
     "--tracking-page-title",
     "--tracking-display",
-    "--tracking-table-header",
     "--tracking-hud",
   ] as const,
 } as const;

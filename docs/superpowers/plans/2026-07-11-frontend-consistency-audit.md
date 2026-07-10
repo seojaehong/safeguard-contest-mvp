@@ -15,6 +15,7 @@
 - Do not change database schemas, migrations, stored data, API response contracts, or backend persistence behavior.
 - Use Pretendard for Korean product UI, Geist Mono for HUD/status/source/numeric UI, Noto multilingual fallbacks for worker messages, and a print-safe Korean stack for generated documents.
 - Screen type values are fixed to: display `clamp(44px, 6vw, 72px)/0.98/800/-0.045em`; page title `clamp(32px, 4vw, 40px)/1.15/800/-0.035em`; section title `clamp(24px, 3vw, 28px)/1.25/800/-0.025em`; component title `20px/1.35/700/-0.015em`; body large `17px/1.65/500/0`; body `15px/1.60/500/0`; support `14px/1.60/500/0`; control `14px/20px/700/0`; table `13px/20px/500/0`; caption `12px/18px/600/0`; HUD `11px/16px/700/0.08em`.
+- Table headers use `12px/18px/700/0`; positive tracking is reserved for short HUD labels.
 - Print type values are fixed to: title `20pt/24pt`; section `14pt/18pt`; body `10pt/15pt`; table `8.5pt/12pt`; note `8pt/11pt`.
 - Use the spacing scale `4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96px`; page gutters are `24px` desktop, `20px` tablet, and `16px` mobile.
 - Product cards, controls, menus, dialogs, and tooltips use `4px` radius; micro tags use `2px`; tables, document paper, progress rails, and structural regions use `0`; `50%` is only for true circles; general-purpose `999px` pills are forbidden.

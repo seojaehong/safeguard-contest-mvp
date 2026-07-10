@@ -86,14 +86,14 @@ Screen typography uses CSS pixels and unitless line-height. Points are reserved 
 | Support | Pretendard | `14px` | 500 | `1.60` | `0` | Helper text and secondary content |
 | Control | Pretendard | `14px` | 700 | `20px` | `0` | Buttons, inputs, tabs, navigation |
 | Table body | Pretendard | `13px` | 500 | `20px` | `0` | Product data tables |
-| Table header | Pretendard | `12px` | 700 | `18px` | `0.04em` | Product table headings |
+| Table header | Pretendard | `12px` | 700 | `18px` | `0` | Product table headings |
 | Caption | Pretendard | `12px` | 600 | `18px` | `0` | Captions and compact metadata |
 | HUD | Geist Mono | `11px` | 700 | `16px` | `0.08em` | Short uppercase status/source labels |
 
 - Text smaller than `11px` is not allowed in product UI.
 - Body, support, control, table body, and caption text always use `letter-spacing: 0`.
 - Negative tracking is allowed only for display, page title, section title, and component title.
-- Positive tracking is allowed only for table headers and short HUD labels.
+- Positive tracking is allowed only for short HUD labels. Table headers use `0` tracking.
 - Long-form knowledge and legal prose uses `15px / 1.75` with a maximum text measure of `72ch`.
 - Mobile does not shrink body copy. Only display, page title, and section title change through their `clamp()` minimums.
 
