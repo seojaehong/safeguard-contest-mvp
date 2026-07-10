@@ -1,0 +1,11 @@
+## 2026-07-11 F1
+- Changed: added exact typography, spacing, radius, route, and generated-surface contracts plus a static audit command.
+- Verified: 32 discovered routes, zero route coverage gaps, focused contract tests pass, typecheck passes.
+- Learned: the original stylesheet contained 637 off-contract declarations before line-height and tracking were added to the audit.
+- Next: F2 independent review and browser-safe correction of mechanical normalization.
+
+## 2026-07-11 F2
+- Changed: removed all important declarations and mechanically mapped font sizes, line heights, tracking, and radii to approved tiers; restored explicit circle and structural geometry.
+- Verified: focused contract tests, static audit, and typecheck currently pass.
+- Learned: static compliance alone cannot prove semantic role correctness after a bulk map.
+- Next: independent diff review, targeted fixes, then browser evidence before marking passed.

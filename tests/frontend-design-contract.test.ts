@@ -68,4 +68,16 @@ describe("frontend design contract", () => {
       expect(css, token).toContain(`--space-${token}:`);
     }
   });
+
+  it("applies the canonical product type and interaction foundation", () => {
+    const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
+    expect(css).toContain("font-family: var(--font-product);");
+    expect(css).toContain("font-size: var(--text-body);");
+    expect(css).toContain("line-height: var(--leading-body);");
+    expect(css).toContain("letter-spacing: var(--tracking-body);");
+    expect(css).toContain("font-synthesis: none;");
+    expect(css).toContain("text-rendering: optimizeLegibility;");
+    expect(css).toContain(":focus-visible");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce)");
+  });
 });

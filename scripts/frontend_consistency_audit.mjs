@@ -62,6 +62,33 @@ function cssViolations(source) {
     }
   }
 
+  const allowedLineHeights = new Set([
+    "0.98", "1.15", "1.25", "1.35", "1.6", "1.65", "1.75", "16px", "18px", "20px",
+    "var(--leading-display)", "var(--leading-page-title)", "var(--leading-section-title)",
+    "var(--leading-component-title)", "var(--leading-body-lg)", "var(--leading-body)",
+    "var(--leading-longform)", "var(--leading-control)", "var(--leading-table)",
+    "var(--leading-caption)", "var(--leading-hud)",
+  ]);
+  for (const match of source.matchAll(/line-height\s*:\s*([^;\r\n}]+)/g)) {
+    const value = match[1].trim();
+    if (!allowedLineHeights.has(value)) {
+      violations.push({ rule: "line-height-tier", file: "app/globals.css", line: lineNumber(source, match.index), value });
+    }
+  }
+
+  const allowedTracking = new Set([
+    "0", "-0.015em", "-0.025em", "-0.035em", "-0.045em", "0.04em", "0.08em",
+    "var(--tracking-body)", "var(--tracking-component-title)", "var(--tracking-section-title)",
+    "var(--tracking-page-title)", "var(--tracking-display)", "var(--tracking-table-header)",
+    "var(--tracking-hud)",
+  ]);
+  for (const match of source.matchAll(/letter-spacing\s*:\s*([^;\r\n}]+)/g)) {
+    const value = match[1].trim();
+    if (!allowedTracking.has(value)) {
+      violations.push({ rule: "tracking-tier", file: "app/globals.css", line: lineNumber(source, match.index), value });
+    }
+  }
+
   for (const match of source.matchAll(/border-radius\s*:\s*([^;\r\n}]+)/g)) {
     const value = match[1].trim().replace(/\s*!important$/, "");
     const allowed = new Set([
