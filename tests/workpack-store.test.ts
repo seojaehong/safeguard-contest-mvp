@@ -1,7 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import type { AskResponse } from "@/lib/types";
 import {
@@ -110,6 +111,10 @@ function makeMcpClient(siteOrganizationId: string) {
 }
 
 describe("workpack store persistence contract", () => {
+  afterEach(() => {
+    delete process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET;
+  });
+
   it("keeps quality, ontology, and generation harness metadata in the existing evidence_summary JSONB shape", () => {
     const response = makeStoredResponse();
     const summary = buildWorkpackEvidenceSummary(response);
@@ -169,5 +174,38 @@ describe("workpack store persistence contract", () => {
     expect(result.saved).toBe(false);
     expect(result.workpackId).toBeNull();
     expect(fake.insertCalled()).toBe(false);
+  });
+
+  it("does not insert an unsealed MCP workpack even when site ownership matches", async () => {
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = "mcp-workpack-generation-evidence-secret";
+    const fake = makeMcpClient("org-from-site");
+
+    const result = await saveMcpDocpackWorkpack(
+      fake.client,
+      { siteId: "site-1", orgId: "org-from-site" },
+      makeStoredResponse()
+    );
+
+    expect(result.saved).toBe(false);
+    expect(fake.insertCalled()).toBe(false);
+  });
+
+  it("inserts an MCP workpack only after generation evidence verification", async () => {
+    const secret = "mcp-workpack-generation-evidence-secret";
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = secret;
+    const fake = makeMcpClient("org-from-site");
+    const response = attachGenerationEvidence(makeStoredResponse(), {
+      secret,
+      generatedAt: "2026-07-10T09:30:00.000Z"
+    });
+
+    const result = await saveMcpDocpackWorkpack(
+      fake.client,
+      { siteId: "site-1", orgId: "org-from-site" },
+      response
+    );
+
+    expect(result.saved).toBe(true);
+    expect(fake.insertCalled()).toBe(true);
   });
 });

@@ -3,6 +3,7 @@ import type { WorkspaceDatabase, WorkspaceUser } from "@/lib/supabase-admin";
 import type { AskResponse } from "@/lib/types";
 import { assessWorkpackReadiness, type WorkpackReadiness } from "@/lib/workpack-readiness";
 import { buildReopenData, type ReopenWorkpackInput } from "@/lib/workpack-store";
+import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
 import {
   buildServerShareRecipients,
   parseShareSessionRecipients,
@@ -29,10 +30,36 @@ export function assessStoredWorkpackShareAuthority(input: ReopenWorkpackInput): 
     };
   }
 
-  return {
-    workpack: reopened.data,
-    readiness: assessWorkpackReadiness(reopened.data)
-  };
+  const readiness = assessWorkpackReadiness(reopened.data);
+  if (!reopened.data.generationEvidence) {
+    return {
+      workpack: reopened.data,
+      readiness: {
+        canShare: false,
+        status: "blocked",
+        summary: "공유 전 보완 필요",
+        reasons: [...readiness.reasons, "생성 근거 봉인 확인 필요"]
+      }
+    };
+  }
+
+  const verification = verifyAskResponseGenerationEvidence(
+    reopened.data,
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET
+  );
+  if (!verification.ok) {
+    return {
+      workpack: reopened.data,
+      readiness: {
+        canShare: false,
+        status: "blocked",
+        summary: "공유 전 보완 필요",
+        reasons: [...readiness.reasons, "생성 근거 서명 검증 필요"]
+      }
+    };
+  }
+
+  return { workpack: reopened.data, readiness };
 }
 
 export type WorkpackOperationContext = {

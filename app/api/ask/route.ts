@@ -4,6 +4,7 @@ import type { AiMode } from "@/lib/ai-deliverables";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
 import { parseHarnessMemoryInput } from "@/lib/db-harness";
+import { attachGenerationEvidence } from "@/lib/generation-evidence";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5min — Pro plan max; 7-way parallel Vertex calls need headroom
@@ -25,5 +26,9 @@ export async function POST(request: NextRequest) {
   const aiMode = requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined;
   const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
   const result = await runAsk(question, { aiMode, harnessMemory });
-  return NextResponse.json(result);
+  const sealed = attachGenerationEvidence(result, {
+    secret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+    generatedAt: new Date().toISOString()
+  });
+  return NextResponse.json(sealed);
 }

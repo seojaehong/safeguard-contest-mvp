@@ -4,14 +4,17 @@ import {
   getWorkspaceUser
 } from "@/lib/supabase-admin";
 import type { HarnessImprovement } from "@/lib/db-harness";
-import { searchSafetyReferences } from "@/lib/safety-reference-catalog";
+import {
+  generationEvidenceReferences,
+  mergeGenerationImprovements,
+  verifyAskResponseGenerationEvidence
+} from "@/lib/generation-evidence";
 import {
   buildWorkpackLearningFile,
   normalizeLearningVisionPayload,
   normalizeWorkpackLearningFormat,
   WORKPACK_LEARNING_GOVERNANCE
 } from "@/lib/workpack-learning-export";
-import { readString } from "@/lib/workspace-api";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
 
 export const dynamic = "force-dynamic";
@@ -110,21 +113,43 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, message: owned.message }, { status: owned.status });
   }
 
+  const storedWorkpack = owned.context.shareAuthority.workpack;
+  if (!storedWorkpack) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      message: "저장된 작업팩을 authoritative 생성 결과로 복원할 수 없습니다."
+    }, { status: 409 });
+  }
+  const verification = verifyAskResponseGenerationEvidence(
+    storedWorkpack,
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET
+  );
+  if (!verification.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      code: `generation_evidence_${verification.code}`,
+      message: verification.message
+    }, { status: verification.code === "secret_unconfigured" ? 503 : 409 });
+  }
+
   const url = new URL(request.url);
   const format = normalizeWorkpackLearningFormat(url.searchParams.get("format"));
-  const [references, improvements, confirmations] = await Promise.all([
-    searchSafetyReferences({ query: owned.context.question, limit: 12 }),
+  const [improvements, confirmations] = await Promise.all([
     loadImprovementMemory(client, owned.context.workpackId),
     loadReadConfirmations(client, owned.context.workpackId)
   ]);
+  const references = generationEvidenceReferences(verification.snapshot);
+  const mergedImprovements = mergeGenerationImprovements(verification.snapshot, improvements);
 
   const file = buildWorkpackLearningFile({
     workpackId: owned.context.workpackId,
-    generatedAt: owned.context.generatedAt,
-    question: owned.context.question,
-    taskLabel: readString(owned.context.question, "현장 작업"),
-    references: references.items,
-    improvements,
+    generatedAt: verification.snapshot.generatedAt,
+    question: verification.snapshot.question,
+    taskLabel: verification.snapshot.scenario.workSummary,
+    references,
+    improvements: mergedImprovements,
     confirmations
   }, format);
 
@@ -132,8 +157,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
     headers: {
       "content-type": file.contentType,
       "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
-      "x-safeclaw-reference-count": String(references.count),
-      "x-safeclaw-improvement-count": String(improvements.length),
+      "x-safeclaw-reference-count": String(references.length),
+      "x-safeclaw-generation-reference-count": String(references.length),
+      "x-safeclaw-improvement-count": String(mergedImprovements.length),
       "x-safeclaw-confirmation-count": String(confirmations.length),
       "x-safeclaw-memory-authority": WORKPACK_LEARNING_GOVERNANCE.authority,
       "x-safeclaw-promotion-status": WORKPACK_LEARNING_GOVERNANCE.promotionStatus,
