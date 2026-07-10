@@ -105,8 +105,8 @@
       "id": "F5",
       "title": "Workspace and reports density",
       "priority": 5,
-      "status": "in_progress",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Day and Night share exact type, spacing, and radius values",
         "Input, document, share, evidence, and reports states pass focused tests and browser checks"
