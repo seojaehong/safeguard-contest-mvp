@@ -1,0 +1,517 @@
+{
+  "capturedAt": "2026-07-10T06:29:25.931Z",
+  "endpoint": "https://www.safeclaw.kr/api/ask",
+  "elapsedMs": 21043,
+  "mode": "live",
+  "status": {
+    "lawgo": "live",
+    "ai": "live",
+    "weather": "live",
+    "work24": "live",
+    "kosha": "live",
+    "summary": "연결됨",
+    "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260710 1400) / 기상청 초단기예보 호출 성공 (서울, base 20260710 1430) / 기상청 단기예보 호출 성공 (서울, base 20260710 1400) / 기상청 기상특보 조회 성공 (전국, 202607101300) / 기상청 영향예보 조회 성공 (하동군북부, 보건(일반인)) / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0 / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 27개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 10건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=DB harness deterministic) / TBM-risk 연결 5건 (TBM-risk links=DB harness deterministic) / TBM structured=deterministic from risk rows / AI_MODE=enhanced (DB 하네스 row-first: 위험성평가 row 확정, TBM 구조 deterministic 조립)",
+    "policyNote": "OpenAI 응답은 timeout 20000ms, retry 없음, 실패 시 graceful fallback 정책을 따릅니다."
+  },
+  "topRisk": "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+  "riskLevel": "상",
+  "riskRows": [
+    {
+      "hazard": "추락 위험: 작업발판·난간·개구부 미확인",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "화재 위험: 가동부 방호덮개와 비상정지장치 미확인",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "전도 위험: 가동부 방호덮개와 비상정지장치 미확인",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "유해·위험요인 미확인",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+      "evidenceRefs": [
+        "산업안전보건법",
+        "KOSHA 위험성평가",
+        "문서팩 입력 조건"
+      ]
+    }
+  ],
+  "tbmRiskLinks": [
+    {
+      "riskRowIndex": 0,
+      "hazard": "추락 위험: 작업발판·난간·개구부 미확인",
+      "control": "안전대 체결 및 작업반경 출입통제",
+      "weatherSignal": "단시간 흐림, 강수없음, 기온 28℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)",
+      "confirmQuestion": "추락 위험: 작업발판·난간·개구부 미확인에 대해 안전대 체결 및 작업반경 출입통제 조치를 이해하고 작업 전 확인했습니까?",
+      "owner": "작업반장",
+      "verification": "관리감독자가 현장 확인 기준 planned 상태로 확인하고 TBM 기록에 남깁니다.",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "riskRowIndex": 1,
+      "hazard": "화재 위험: 가동부 방호덮개와 비상정지장치 미확인",
+      "control": "정비 전 전원 차단 및 잠금표지",
+      "weatherSignal": "단시간 흐림, 강수없음, 기온 28℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)",
+      "confirmQuestion": "화재 위험: 가동부 방호덮개와 비상정지장치 미확인에 대해 정비 전 전원 차단 및 잠금표지 조치를 이해하고 작업 전 확인했습니까?",
+      "owner": "작업반장",
+      "verification": "관리감독자가 현장 확인 기준 planned 상태로 확인하고 TBM 기록에 남깁니다.",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "riskRowIndex": 2,
+      "hazard": "전도 위험: 가동부 방호덮개와 비상정지장치 미확인",
+      "control": "정비 전 전원 차단 및 잠금표지",
+      "weatherSignal": "단시간 흐림, 강수없음, 기온 28℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)",
+      "confirmQuestion": "전도 위험: 가동부 방호덮개와 비상정지장치 미확인에 대해 정비 전 전원 차단 및 잠금표지 조치를 이해하고 작업 전 확인했습니까?",
+      "owner": "작업반장",
+      "verification": "관리감독자가 현장 확인 기준 planned 상태로 확인하고 TBM 기록에 남깁니다.",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "riskRowIndex": 3,
+      "hazard": "유해·위험요인 미확인",
+      "control": "관리감독자 확인 후 작업 시작",
+      "weatherSignal": "단시간 흐림, 강수없음, 기온 28℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)",
+      "confirmQuestion": "유해·위험요인 미확인에 대해 관리감독자 확인 후 작업 시작 조치를 이해하고 작업 전 확인했습니까?",
+      "owner": "작업반장",
+      "verification": "관리감독자가 현장 확인 기준 planned 상태로 확인하고 TBM 기록에 남깁니다.",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+        "검색: rest"
+      ]
+    },
+    {
+      "riskRowIndex": 4,
+      "hazard": "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+      "control": "작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검",
+      "weatherSignal": "단시간 흐림, 강수없음, 기온 28℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)",
+      "confirmQuestion": "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험에 대해 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 조치를 이해하고 작업 전 확인했습니까?",
+      "owner": "작업반장",
+      "verification": "관리감독자가 현장 확인 기준 planned 상태로 확인하고 TBM 기록에 남깁니다.",
+      "evidenceRefs": [
+        "산업안전보건법",
+        "KOSHA 위험성평가",
+        "문서팩 입력 조건"
+      ]
+    }
+  ],
+  "dbHarness": {
+    "mode": "db_harness_first",
+    "llmRole": "naturalize_only",
+    "llmOutputScope": "rewrite_fixed_evidence_only",
+    "evidenceAuthority": "db_harness",
+    "providerRetryScope": "naturalization_retry_only",
+    "fallbackChainAllowed": false,
+    "genericProseSubstitutionAllowed": false,
+    "missingEvidencePolicy": "surface_review_required",
+    "directEvidence": 6,
+    "sifCases": 4,
+    "supportingEvidence": 4,
+    "improvementMemory": 0,
+    "workpackMemory": 0,
+    "missingEvidence": [],
+    "documentCoverage": [
+      {
+        "document": "위험성평가표",
+        "covered": true,
+        "evidenceTypes": [
+          "directEvidence",
+          "sifCase",
+          "supportingEvidence"
+        ]
+      },
+      {
+        "document": "TBM 브리핑",
+        "covered": true,
+        "evidenceTypes": [
+          "directEvidence"
+        ]
+      },
+      {
+        "document": "TBM 기록",
+        "covered": true,
+        "evidenceTypes": [
+          "directEvidence"
+        ]
+      }
+    ],
+    "retrievalContract": {
+      "source": "safety_reference_items",
+      "mode": "rest-ilike",
+      "vector": {
+        "enabled": false,
+        "attempted": false,
+        "ready": false,
+        "reason": "disabled",
+        "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+      },
+      "sourceCounts": {
+        "directEvidence": 6,
+        "sifCases": 4,
+        "supportingEvidence": 4,
+        "rest": 10,
+        "ranked": 0,
+        "vector": 0,
+        "hybrid": 0
+      },
+      "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 3건, SIF 유사사례 2건, 일반 카탈로그 4건, 작업특화 rerank 적용)"
+    },
+    "ontologyStatus": "ready"
+  },
+  "ontologyQa": {
+    "reviewTask": "비계 조립·해체",
+    "result": {
+      "reviewable": true,
+      "task": "비계 조립·해체",
+      "covered": {
+        "hazards": [
+          "낙하물(자재·공구)",
+          "비계 붕괴·도괴",
+          "추락"
+        ],
+        "controls": [
+          "강관비계 구조(기둥 간격·띠장·적재하중)",
+          "강관비계 조립 준수(밑받침·벽이음·가새)",
+          "강관틀비계 준수(밑받침·교차가새·벽이음)",
+          "개구부·단부 안전난간·덮개 설치",
+          "규격 안전난간 설치",
+          "안전대·구명밧줄·송기마스크 착용",
+          "안전대 부착설비(지지로프) 설치",
+          "안전모·안전대 지급·착용",
+          "안전모·안전대 착용",
+          "작업발판 구조(폭 40cm·틈 3cm·안전난간)",
+          "작업발판 설치·추락방호망 설치",
+          "작업발판 최대적재하중 준수",
+          "조립·해체·악천후 후 비계 점검·보수",
+          "조립·해체 준수(관리감독자 지휘·발판·안전대·출입통제)",
+          "지붕 가장자리 안전난간·발판·채광창 덮개"
+        ],
+        "articles": [
+          "기준규칙 제13조(안전난간의 구조 및 설치요건)",
+          "기준규칙 제32조(보호구의 지급 등)",
+          "기준규칙 제42조(추락의 방지)",
+          "기준규칙 제43조(개구부 등의 방호 조치)",
+          "기준규칙 제44조(안전대의 부착설비 등)",
+          "기준규칙 제45조(지붕 위에서의 위험 방지)",
+          "기준규칙 제56조(작업발판의 구조)",
+          "기준규칙 제57조(비계 등의 조립·해체 및 변경)",
+          "기준규칙 제59조(강관비계 조립 시의 준수사항)",
+          "기준규칙 제60조(강관비계의 구조)",
+          "기준규칙 제62조(강관틀비계)",
+          "기준규칙 제624조(안전대 등)"
+        ]
+      },
+      "missing": {
+        "hazards": [],
+        "controls": [],
+        "articles": [
+          "기준규칙 제55조(작업발판의 최대적재하중)",
+          "기준규칙 제58조(비계의 점검 및 보수)"
+        ]
+      },
+      "coverageRate": 1,
+      "verdict": "통과",
+      "advisory": "이 검수는 온톨로지 시드 기준이며 현장 여건 확인을 대체하지 않습니다"
+    },
+    "sourceDocumentKeys": [
+      "riskAssessmentDraft",
+      "workPlanDraft",
+      "tbmBriefing",
+      "tbmLogDraft",
+      "safetyEducationRecordDraft",
+      "emergencyResponseDraft"
+    ],
+    "detail": "안전조치 검수 통과: 위험성평가표, 작업계획서, TBM 브리핑, TBM 기록, 안전보건교육 기록, 비상대응 절차 문서를 확인했습니다."
+  },
+  "qualityContract": {
+    "overall": "ready",
+    "summary": "실시간 근거, 온톨로지, 증빙, 구조화 산출물이 통합 준비 상태입니다.",
+    "generatedAt": "2026-07-10T06:29:26.464Z",
+    "items": [
+      {
+        "key": "fallback",
+        "label": "실시간 근거",
+        "status": "ready",
+        "detail": "주요 근거 조회가 실시간으로 연결됐습니다."
+      },
+      {
+        "key": "ontology",
+        "label": "안전조치 검수",
+        "status": "ready",
+        "detail": "비계 조립·해체 작업의 필수 안전조치가 문서팩에 반영됐습니다."
+      },
+      {
+        "key": "evidence",
+        "label": "증빙 매핑",
+        "status": "ready",
+        "detail": "필수 문서 7/7종이 시행령 제4조 증빙 라벨에 연결됐습니다."
+      },
+      {
+        "key": "structured",
+        "label": "문서 구조 검수",
+        "status": "ready",
+        "detail": "필수 구조화 산출물 3/3종이 준비됐습니다."
+      },
+      {
+        "key": "dbHarness",
+        "label": "DB 하네스 계약",
+        "status": "ready",
+        "detail": "DB 근거 14건을 고정했고, 필수 문서 3/3종을 하네스가 커버했습니다."
+      },
+      {
+        "key": "persistence",
+        "label": "DB 저장 준비",
+        "status": "ready",
+        "detail": "문서팩 본문과 증빙 요약이 있어 관리자 로그인 후 서버 저장할 수 있습니다."
+      }
+    ],
+    "fallback": {
+      "hasFallback": false,
+      "modes": {
+        "answer": "live",
+        "lawgo": "live",
+        "ai": "live",
+        "weather": "live",
+        "work24": "live",
+        "kosha": "live",
+        "koshaEducation": "live",
+        "accidentCases": "live",
+        "safetyKnowledge": "live",
+        "safetyReference": "live"
+      }
+    },
+    "ontology": {
+      "status": "ready",
+      "matchCount": 4,
+      "reviewTask": "비계 조립·해체",
+      "verdict": "통과",
+      "missingControlCount": 0,
+      "detail": "비계 조립·해체 작업의 필수 안전조치가 문서팩에 반영됐습니다."
+    },
+    "evidence": {
+      "status": "ready",
+      "mappedCount": 7,
+      "requiredCount": 7,
+      "detail": "필수 문서 7/7종이 시행령 제4조 증빙 라벨에 연결됐습니다."
+    },
+    "structured": {
+      "status": "ready",
+      "readyCount": 3,
+      "requiredCount": 3,
+      "detail": "필수 구조화 산출물 3/3종이 준비됐습니다."
+    },
+    "dbHarness": {
+      "status": "ready",
+      "mode": "db_harness_first",
+      "llmRole": "naturalize_only",
+      "llmOutputScope": "rewrite_fixed_evidence_only",
+      "evidenceAuthority": "db_harness",
+      "providerRetryScope": "naturalization_retry_only",
+      "fallbackChainAllowed": false,
+      "genericProseSubstitutionAllowed": false,
+      "missingEvidencePolicy": "surface_review_required",
+      "directEvidenceCount": 6,
+      "sifCaseCount": 4,
+      "supportingEvidenceCount": 4,
+      "retrievalContract": {
+        "source": "safety_reference_items",
+        "mode": "rest-ilike",
+        "vector": {
+          "enabled": false,
+          "attempted": false,
+          "ready": false,
+          "reason": "disabled",
+          "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+        },
+        "sourceCounts": {
+          "directEvidence": 6,
+          "sifCases": 4,
+          "supportingEvidence": 4,
+          "rest": 10,
+          "ranked": 0,
+          "vector": 0,
+          "hybrid": 0
+        },
+        "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 3건, SIF 유사사례 2건, 일반 카탈로그 4건, 작업특화 rerank 적용)"
+      },
+      "missingEvidence": [],
+      "documentCoverage": [
+        {
+          "document": "위험성평가표",
+          "covered": true,
+          "evidenceTypes": [
+            "directEvidence",
+            "sifCase",
+            "supportingEvidence"
+          ]
+        },
+        {
+          "document": "TBM 브리핑",
+          "covered": true,
+          "evidenceTypes": [
+            "directEvidence"
+          ]
+        },
+        {
+          "document": "TBM 기록",
+          "covered": true,
+          "evidenceTypes": [
+            "directEvidence"
+          ]
+        }
+      ],
+      "detail": "DB 근거 14건을 고정했고, 필수 문서 3/3종을 하네스가 커버했습니다."
+    },
+    "persistence": {
+      "status": "ready",
+      "requiresLogin": true,
+      "detail": "문서팩 본문과 증빙 요약이 있어 관리자 로그인 후 서버 저장할 수 있습니다."
+    }
+  },
+  "safetyReference": {
+    "mode": "live",
+    "retrievalMode": "rest-ilike",
+    "itemCount": 8,
+    "items": [
+      {
+        "id": "technical-support-01-0065-d-c-13-2026-외벽도장보수공사에-안전작업에-관한-기술지원규정",
+        "itemType": "technical-support-regulation",
+        "title": "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "TBM 브리핑",
+          "TBM 기록",
+          "안전보건교육 기록"
+        ]
+      },
+      {
+        "id": "sif-아카이브-건설업-01123",
+        "itemType": "sif-case",
+        "title": "1122 / 4. 마감공사 / 4.4 도장작업",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "사진/증빙",
+          "비상대응 절차"
+        ]
+      },
+      {
+        "id": "technical-support-09-0009-b-e-17-2026-도장-공정에서의-화재-폭발위험방지에-관한-기술지원규정",
+        "itemType": "technical-support-regulation",
+        "title": "B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "TBM 브리핑",
+          "TBM 기록",
+          "안전보건교육 기록",
+          "사진/증빙",
+          "비상대응 절차"
+        ]
+      },
+      {
+        "id": "technical-support-09-0013-b-e-20-2026-정전도장기-제작-및-설치에-관한-기술지원규정",
+        "itemType": "technical-support-regulation",
+        "title": "B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "TBM 브리핑",
+          "TBM 기록",
+          "안전보건교육 기록",
+          "사진/증빙",
+          "비상대응 절차"
+        ]
+      },
+      {
+        "id": "technical-support-06-0064-g-67-2011-건물-외벽-청소-작업에-관한-기술지침",
+        "itemType": "technical-guideline",
+        "title": "G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서"
+        ]
+      },
+      {
+        "id": "technical-support-06-0033-g-117-2014-선박내부에서-도장작업-시-안전에-관한-기술-지침",
+        "itemType": "technical-guideline",
+        "title": "G-117-2014 선박내부에서 도장작업 시 안전에 관한 기술 지침",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서"
+        ]
+      },
+      {
+        "id": "technical-support-02-0123-m-77-2011-자동차-부분-분무도장-작업에-관한-안전기술지침",
+        "itemType": "technical-guideline",
+        "title": "M-77-2011 자동차 부분 분무도장 작업에 관한 안전기술지침",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서"
+        ]
+      },
+      {
+        "id": "sif-아카이브-건설업-01612",
+        "itemType": "sif-case",
+        "title": "1611 / 4. 마감공사 / 4.8 판넬 등 외부마감 작업",
+        "primaryDocuments": [
+          "점검결과 요약",
+          "위험성평가표",
+          "작업계획서",
+          "사진/증빙",
+          "비상대응 절차"
+        ]
+      }
+    ]
+  }
+}
