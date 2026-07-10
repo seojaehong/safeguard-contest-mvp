@@ -1035,10 +1035,14 @@ describe("workspace layout regression", () => {
       const canvas = readRect(".workspace-canvas");
       const side = readRect(".workspace-side");
       const shell = readRect(".workpack-shell");
+      const navigator = readRect(".workpack-sidebar");
       const editor = readRect(".document-editor");
       const textarea = readRect(".document-textarea");
       const activeTab = readRect(".doc-tab.active");
       const focusMessage = readRect(".editor-focus-message");
+      const desktopTabs = document.querySelector(".doc-tab-list");
+      const mobilePicker = document.querySelector('select[aria-label="편집 문서 선택"]')?.parentElement;
+      if (!desktopTabs || !mobilePicker) throw new Error("Missing responsive document navigation");
 
       return {
         viewportWidth: window.innerWidth,
@@ -1049,10 +1053,13 @@ describe("workspace layout regression", () => {
         canvas,
         side,
         shell,
+        navigator,
         editor,
         textarea,
         activeTab,
-        focusMessage
+        focusMessage,
+        desktopTabsDisplay: getComputedStyle(desktopTabs).display,
+        mobilePickerDisplay: getComputedStyle(mobilePicker).display
       };
     });
 
@@ -1063,13 +1070,19 @@ describe("workspace layout regression", () => {
     expect(metrics.rail.bottom).toBeLessThanOrEqual(Math.min(metrics.canvas.top, metrics.side.top) - 12);
     expect(metrics.canvas.right).toBeLessThanOrEqual(metrics.side.left - 12);
     expect(metrics.shell.display).toBe("grid");
+    expect(metrics.navigator.bottom).toBeLessThanOrEqual(metrics.editor.top - 12);
+    expect(metrics.desktopTabsDisplay).toBe("none");
+    expect(metrics.mobilePickerDisplay).not.toBe("none");
     expect(metrics.shell.backgroundColor).toBe("rgba(0, 0, 0, 0)");
     expect(metrics.editor.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
     expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(9);
+    expect(metrics.editor.overflowX).toBe("visible");
+    expect(metrics.editor.overflowY).toBe("visible");
     expect(metrics.textarea.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
     expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
+    expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.shell.width * 0.78));
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
     expect(metrics.focusMessage.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
@@ -1193,6 +1206,11 @@ describe("workspace layout regression", () => {
     }));
     expect(persistedDrafts.editor).toContain(sentinel);
     expect(persistedDrafts.current).toContain(sentinel);
+
+    const exportPanel = page.locator('[data-testid="editor-export-panel"]');
+    expect(await exportPanel.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
+    await page.locator('[data-testid="editor-export-panel"] > summary').click();
+    expect(await exportPanel.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
 
     await page.getByRole("button", { name: "Excel 표 양식(.xlsx)" }).click();
     await expect.poll(() => xlsxPayload?.mode).toBe("single");

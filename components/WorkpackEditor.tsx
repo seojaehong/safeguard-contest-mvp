@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { AskResponse, type PermitInspectionStructured } from "@/lib/types";
 import {
   evaluatePublicSafetyRubric,
@@ -228,6 +228,10 @@ const documentMeta: EditableDocument[] = [
     fileBase: "field-message"
   }
 ];
+
+function documentTabId(key: DocumentKey) {
+  return `workpack-document-tab-${key}`;
+}
 
 const documentCoverageLabels: Partial<Record<DocumentKey, string>> = {
   riskAssessmentDraft: "위험성평가표",
@@ -2057,6 +2061,30 @@ export function WorkpackEditor({
     setLastEditedAt(new Date());
   }
 
+  function selectDocumentTab(index: number) {
+    const nextDocument = documentMeta[index];
+    if (!nextDocument) return;
+    setSelectedKey(nextDocument.key);
+    document.getElementById(documentTabId(nextDocument.key))?.focus();
+  }
+
+  function handleDocumentTabKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
+    let nextIndex: number | null = null;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (index + 1) % documentMeta.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (index - 1 + documentMeta.length) % documentMeta.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = documentMeta.length - 1;
+    }
+
+    if (nextIndex === null) return;
+    event.preventDefault();
+    selectDocumentTab(nextIndex);
+  }
+
   function updateRemediationDraft(itemId: string, text: string) {
     setRemediationDrafts((current) => {
       const existing = current[itemId];
@@ -2441,12 +2469,15 @@ export function WorkpackEditor({
           {documentMeta.map((item, index) => (
             <button
               key={item.key}
+              id={documentTabId(item.key)}
               type="button"
               role="tab"
               className={`doc-tab ${item.key === selected.key ? "active" : ""}`}
               onClick={() => setSelectedKey(item.key)}
+              onKeyDown={(event) => handleDocumentTabKeyDown(event, index)}
               aria-selected={item.key === selected.key}
               aria-controls="workpack-document-body"
+              tabIndex={item.key === selected.key ? 0 : -1}
             >
               <span className={styles.documentIndex}>{String(index + 1).padStart(2, "0")}</span>
               <strong>{item.title}</strong>
@@ -2462,6 +2493,7 @@ export function WorkpackEditor({
           id="workpack-document-body"
           data-testid="editor-document-body"
           role="tabpanel"
+          aria-labelledby={documentTabId(selected.key)}
           ref={documentBodyRef}
         >
           <header className={`document-toolbar ${styles.documentHeader}`}>

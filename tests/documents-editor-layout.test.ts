@@ -189,6 +189,49 @@ describe("documents editor layout", () => {
     expect(contract.previewOpen).toBe(false);
   }, 90_000);
 
+  it("supports roving keyboard navigation across document tabs", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.locator('[data-testid="workpack-editor-workspace"]').scrollIntoViewIfNeeded();
+
+    const tabs = page.getByRole("tab");
+    expect(await tabs.count()).toBe(12);
+    expect(await tabs.evaluateAll((items) => items.map((item) => item.tabIndex))).toEqual([
+      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    ]);
+
+    const summaryTab = page.getByRole("tab", { name: /점검결과 요약/ });
+    const riskTab = page.getByRole("tab", { name: /위험성평가표/ });
+    const workPlanTab = page.getByRole("tab", { name: /작업계획서/ });
+    const messageTab = page.getByRole("tab", { name: /현장 공유 메시지/ });
+    const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
+    const panel = page.locator('[data-testid="editor-document-body"]');
+
+    await summaryTab.focus();
+    await summaryTab.press("End");
+    expect(await documentSelect.inputValue()).toBe("kakaoMessage");
+    expect(await messageTab.evaluate((element) => document.activeElement === element)).toBe(true);
+
+    await messageTab.press("Home");
+    expect(await documentSelect.inputValue()).toBe("workpackSummaryDraft");
+    expect(await summaryTab.evaluate((element) => document.activeElement === element)).toBe(true);
+
+    await summaryTab.press("ArrowRight");
+    expect(await documentSelect.inputValue()).toBe("riskAssessmentDraft");
+    await riskTab.press("ArrowDown");
+    expect(await documentSelect.inputValue()).toBe("workPlanDraft");
+    await workPlanTab.press("ArrowLeft");
+    expect(await documentSelect.inputValue()).toBe("riskAssessmentDraft");
+    await riskTab.press("ArrowUp");
+    expect(await documentSelect.inputValue()).toBe("workpackSummaryDraft");
+
+    expect(await panel.getAttribute("aria-labelledby")).toBe("workpack-document-tab-workpackSummaryDraft");
+    expect(await tabs.evaluateAll((items) => items.map((item) => item.tabIndex))).toEqual([
+      0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    ]);
+  }, 90_000);
+
   it("keeps the editor workspace and expanded tools contained at 390px", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
