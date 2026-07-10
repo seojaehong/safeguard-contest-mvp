@@ -12525,6 +12525,23 @@ body:has(.safeclaw-landing) :is(
   margin-top: -2px;
 }
 
+.command-center-shell .document-review-meter.indeterminate span {
+  width: 32%;
+  animation: workspaceIndeterminateProgress 1.25s ease-in-out infinite;
+}
+
+@keyframes workspaceIndeterminateProgress {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(360%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .command-center-shell .document-review-meter.indeterminate span {
+    animation: none;
+    transform: none;
+  }
+}
+
 .command-center-shell .document-harness-loop {
   display: grid;
   gap: 10px;

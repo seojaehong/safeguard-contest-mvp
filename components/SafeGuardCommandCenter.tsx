@@ -1715,7 +1715,10 @@ export function SafeGuardCommandCenter({
     state,
     consoleLines,
     totalDocumentCount,
-    citationCount: data?.citations.length ?? currentLawCount
+    citationCount: data?.citations.length ?? currentLawCount,
+    mode: aiMode,
+    shareReady: workpackReadiness?.canShare ?? null,
+    reviewSummary: workpackReadiness?.summary
   });
   const currentDocProgress = generationProgress.count;
   const inputLimit = 600;
@@ -2114,8 +2117,11 @@ export function SafeGuardCommandCenter({
                   </article>
                 ))}
               </div>
-              <div className={`inline-progress document-review-meter ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${generationProgress.primary}`}>
-                <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
+              <div
+                className={`inline-progress document-review-meter ${busy ? "animated" : ""} ${generationProgress.indeterminate ? "indeterminate" : ""}`}
+                aria-label={`문서 작성 진행 ${generationProgress.primary}`}
+              >
+                <span style={generationProgress.indeterminate ? undefined : { width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
               </div>
             </details>
             <section className="document-harness-loop" aria-label="하네스 온톨로지 개선 루프">
