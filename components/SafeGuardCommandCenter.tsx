@@ -1,9 +1,9 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { FieldOperationsWorkspace } from "@/components/FieldOperationsWorkspace";
-import type { DocumentKey } from "@/components/WorkpackEditor";
+import type { DocumentKey, WorkpackDocumentValues } from "@/components/WorkpackEditor";
 import { AgentConsole } from "@/components/AgentConsole";
 import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import { fetchAskStream } from "@/lib/ask-stream-client";
@@ -1110,6 +1110,22 @@ export function SafeGuardCommandCenter({
     window.scrollTo({ top: 0, behavior: "smooth" });
     setMessage("생성된 문서와 근거 검토 화면으로 돌아왔습니다.");
   }
+
+  const handleWorkpackDeliverablesChange = useCallback((values: WorkpackDocumentValues) => {
+    setData((current) => {
+      if (!current) return current;
+      const currentDocuments: Partial<Record<DocumentKey, string>> = current.deliverables;
+      const documentKeys = Object.keys(values) as DocumentKey[];
+      if (documentKeys.every((key) => currentDocuments[key] === values[key])) return current;
+      return {
+        ...current,
+        deliverables: {
+          ...current.deliverables,
+          ...values
+        }
+      };
+    });
+  }, []);
 
   function persistCurrentWorkpack(payload: AskResponse) {
     if (typeof window === "undefined") return;
@@ -2265,6 +2281,7 @@ export function SafeGuardCommandCenter({
                 editorFocusToken={editorFocusToken}
                 requestedDocumentKey={requestedDocumentKey}
                 readiness={workpackReadiness || undefined}
+                onDeliverablesChange={handleWorkpackDeliverablesChange}
               />
             </section>
           ) : null}

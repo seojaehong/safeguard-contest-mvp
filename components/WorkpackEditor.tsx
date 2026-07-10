@@ -484,10 +484,14 @@ function buildPermitInspectionStructured(data: AskResponse): PermitInspectionStr
 }
 
 function withSubmitReadiness(title: string, body: string, data: AskResponse) {
+  const readinessLabel = `서식상태: 준제출형 - ${title} 제출 필수 항목을 반영한 현장 검토용입니다.`;
+  if (body.includes(readinessLabel) && body.includes("[필수 확인 항목]")) {
+    return body;
+  }
   const references = data.externalData.kosha.references.map((item) => item.title).join(" / ");
   return [
     "[제출상태]",
-    `서식상태: 준제출형 - ${title} 제출 필수 항목을 반영한 현장 검토용입니다.`,
+    readinessLabel,
     "원본 재현 한계: 발주처 지정 직인, 허가번호, 결재선, 표 병합 레이아웃은 제출 전 원본 양식으로 확인 필요",
     "",
     "[필수 확인 항목]",
@@ -1855,6 +1859,7 @@ export function WorkpackEditor({
   );
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
+  const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [xlsxStatus, setXlsxStatus] = useState<"idle" | "building" | "error">("idle");
   const [hwpStatus, setHwpStatus] = useState<"idle" | "building" | "error">("idle");
@@ -1883,17 +1888,26 @@ export function WorkpackEditor({
   }, [rubricEvaluation.items, selected.key]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      setValues(initialValues);
-      onDeliverablesChange?.(initialValues);
-      return;
-    }
+    if (typeof window === "undefined") return;
 
+    setHydratedStorageKey(null);
     const stored = parseStoredValues(window.localStorage.getItem(storageKey), initialValues);
     setValues(stored);
-    onDeliverablesChange?.(stored);
     setLastEditedAt(null);
-  }, [initialValues, onDeliverablesChange, storageKey]);
+    setHydratedStorageKey(storageKey);
+  }, [initialValues, storageKey]);
+
+  useEffect(() => {
+    if (hydratedStorageKey !== storageKey) return;
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem(storageKey, JSON.stringify(values));
+      } catch (error) {
+        console.warn("workpack local draft save failed", error);
+      }
+    }
+    onDeliverablesChange?.(values);
+  }, [hydratedStorageKey, onDeliverablesChange, storageKey, values]);
 
   useEffect(() => {
     if (!focusToken) return;
@@ -1917,22 +1931,8 @@ export function WorkpackEditor({
     };
   }, [focusToken, requestedDocumentKey]);
 
-  function saveLocalDraft(nextValues: WorkpackDocumentValues) {
-    if (typeof window === "undefined") return;
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify(nextValues));
-    } catch (error) {
-      console.warn("workpack local draft save failed", error);
-    }
-  }
-
   function updateValue(value: string) {
-    setValues((current) => {
-      const nextValues = { ...current, [selected.key]: value };
-      saveLocalDraft(nextValues);
-      onDeliverablesChange?.(nextValues);
-      return nextValues;
-    });
+    setValues((current) => ({ ...current, [selected.key]: value }));
     setLastEditedAt(new Date());
   }
 
