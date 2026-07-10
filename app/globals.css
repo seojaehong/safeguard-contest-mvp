@@ -7220,6 +7220,45 @@ ul {
   }
 }
 
+/* FieldOperationsWorkspace responsive contract: retain one contextual rail on tablet. */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .field-workspace {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 16px;
+  }
+
+  .workspace-canvas {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .workspace-side {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .workspace-rail {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .field-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  :is(.workspace-rail, .workspace-canvas, .workspace-side) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .workspace-rail {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 720px) {
   .command-center-shell,
   .product-shell {

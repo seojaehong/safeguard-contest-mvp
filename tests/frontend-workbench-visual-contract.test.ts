@@ -91,6 +91,25 @@ describe("workbench visual contract", () => {
     expect(mobile).not.toMatch(/\.command-center-shell \.command-(?:main|console-input)\s*\{[^}]*(?:padding|gap|margin(?:-[\w-]+)?):\s*(?:3|6|10|14|18|42)px/u);
   });
 
+  it("implements the field workspace desktop, tablet, and mobile cascade", () => {
+    const desktopRule = css.match(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\) 320px;[^}]*\}/u)?.[0] ?? "";
+    const tabletStart = css.indexOf("@media (min-width: 768px) and (max-width: 1279px)");
+    const mobileStart = css.indexOf("@media (max-width: 767px)", tabletStart);
+    const nextMedia = css.indexOf("@media", mobileStart + 1);
+    const tabletRule = css.slice(tabletStart, mobileStart);
+    const mobileRule = css.slice(mobileStart, nextMedia);
+
+    expect(desktopRule).toContain("224px minmax(0, 1fr) 320px");
+    expect(tabletRule).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) 320px;/u);
+    expect(tabletRule).toMatch(/\.workspace-canvas\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*1;/u);
+    expect(tabletRule).toMatch(/\.workspace-side\s*\{[^}]*grid-column:\s*2;[^}]*grid-row:\s*1;/u);
+    expect(tabletRule).toMatch(/\.workspace-rail\s*\{[^}]*grid-column:\s*1 \/ -1;[^}]*grid-row:\s*2;/u);
+    expect(mobileRule).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*1fr;/u);
+    expect(mobileRule).toMatch(/:is\(\.workspace-rail, \.workspace-canvas, \.workspace-side\)\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*auto;/u);
+    expect(tabletStart).toBeGreaterThan(css.indexOf("@media (max-width: 1120px)"));
+    expect(mobileStart).toBeGreaterThan(tabletStart);
+  });
+
   it("keeps the rendered progress node animated and reduced-motion safe", () => {
     expect(components["SafeGuardCommandCenter.tsx"]).toMatch(/document-review-meter[\s\S]*?<progress\s+value=/u);
     expect(css).toMatch(/\.inline-progress\.animated progress::-(?:webkit-progress-value|moz-progress-bar)[^{]*\{[\s\S]*?animation:\s*progressPulse/u);

@@ -68,3 +68,8 @@
 - Changed: normalized exact AgentConsole and workspace owners, implemented canonical three-column field geometry plus a documented two-column command-center variant, audited mixed theme selectors individually, and restored progress animation/reduced-motion behavior on the rendered node.
 - Verified: exact-owner, breakpoint-cascade, theme-selector, and rendered-progress tests reproduce all three Important findings before remediation and pass afterward.
 - Next: keep F5 `passes: false` pending independent re-review and F7 browser evidence.
+
+## 2026-07-11 F5 tablet cascade remediation
+- Changed: added the exact 768–1279px two-column field workspace, with the checklist rail spanning below the main canvas and worker/context rail; below 768px remains one column.
+- Verified: representative 1024px/1279px source-order assertions now distinguish desktop, tablet, and mobile owners while leaving the CommandCenter structural exception unchanged.
+- Next: keep F5 pending until independent review confirms the responsive cascade.
