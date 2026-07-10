@@ -233,16 +233,15 @@ function normalizeReferenceItem(item: SafetyReferenceItem): SafetyReferenceItem 
   const reflectedDocuments = item.reflected_documents?.length ? item.reflected_documents : item.primary_documents;
   const displayTitle = deriveSifDisplayTitle(item);
   const displaySummary = deriveSifDisplaySummary(item);
+  const operationalMetadata = buildSafetyReferenceOperationalMetadata(item);
   return {
     ...item,
     source_url: item.source_url || null,
     evidence_role: evidenceRole,
     reflected_documents: reflectedDocuments,
-    short_summary: buildShortSummary(item),
+    ...operationalMetadata,
     evidence_role_label: evidenceRole === "direct" ? "문서 문구 직접 근거" : "현장 판단 보조 근거",
-    document_reflection_label: buildDocumentReflectionLabel(reflectedDocuments, item.controls),
     source_kind_label: buildSourceKindLabel(item.item_type),
-    operation_signal_label: buildOperationSignalLabel(item.item_type, item.controls),
     ...(displayTitle ? { display_title: displayTitle } : {}),
     ...(displaySummary ? { display_summary: displaySummary } : {})
   };
@@ -466,7 +465,10 @@ export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem):
     };
   }
 
-  if (/B-M-11-2025/u.test(text) || (/지게차/u.test(text) && /동선|보행|통행|충돌/u.test(text))) {
+  if (
+    /B-M-11-2025/u.test(text) ||
+    (/지게차/u.test(text) && /동선|보행|통행|충돌|하역|상하차|도크/u.test(text) && !hazardousEnergyIdentity)
+  ) {
     return {
       hazard: "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험",
       controls: [
@@ -546,6 +548,21 @@ export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem):
   return genericOperationalView(item);
 }
 
+export function buildSafetyReferenceOperationalMetadata(item: SafetyReferenceItem): Pick<
+  SafetyReferenceItem,
+  "controls" | "short_summary" | "document_reflection_label" | "operation_signal_label"
+> {
+  const operationalView = deriveSafetyReferenceOperationalView(item);
+  const controls = operationalView.controls.slice(0, 2);
+  const reflectedDocuments = item.reflected_documents?.length ? item.reflected_documents : item.primary_documents;
+  return {
+    controls,
+    short_summary: compactText([operationalView.hazard, ...controls].join(" · "), 180),
+    document_reflection_label: buildDocumentReflectionLabel(reflectedDocuments, controls),
+    operation_signal_label: buildOperationSignalLabel(item.item_type, controls)
+  };
+}
+
 function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "source_id">): "direct" | "supporting" {
   const directTypes = new Set([
     "construction-process",
@@ -563,12 +580,6 @@ function compactText(value: string, maxLength = 96): string {
   const normalized = value.replace(/\s+/g, " ").trim();
   if (normalized.length <= maxLength) return normalized;
   return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
-}
-
-function buildShortSummary(item: SafetyReferenceItem): string {
-  const controlHint = item.controls.slice(0, 2).join(" · ");
-  const base = controlHint || item.summary || item.title;
-  return compactText(base);
 }
 
 function buildDocumentReflectionLabel(documents: string[], controls: string[]): string {

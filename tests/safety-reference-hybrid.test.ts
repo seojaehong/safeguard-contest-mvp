@@ -252,6 +252,48 @@ describe("deriveSafetyReferenceOperationalView", () => {
     expect(view.controls.join(" ")).not.toMatch(/방호덮개|비상정지장치|잠금표지|LOTO/);
     expect(scaffoldSif.controls).toEqual(rawControls);
   });
+
+  it("maps mobile-dock forklift loading equipment to traffic controls instead of machinery LOTO", () => {
+    const mobileDock = reference("machinery-mobile-dock");
+    mobileDock.item_type = "machinery";
+    mobileDock.title = "469 · 운수·창고및통신업 · 창고업";
+    mobileDock.summary = "기계설비명: 이동식도크. 컨테이너와 결합하여 지게차로 상하차 작업을 하는 장비";
+    mobileDock.keywords = ["창고업", "이동식도크", "Mobile dock"];
+    mobileDock.risk_tags = ["지게차"];
+    mobileDock.controls = [
+      "가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+      "정비 전 전원 차단 및 잠금표지(LOTO)"
+    ];
+    const rawControls = [...mobileDock.controls];
+
+    const view = deriveSafetyReferenceOperationalView(mobileDock);
+
+    expect(view.hazard).toMatch(/지게차.*동선|동선.*지게차/);
+    expect(view.controls.join(" ")).toMatch(/지게차.*보행|보행.*지게차/);
+    expect(view.controls.join(" ")).toMatch(/신호수|후진 경보|접근통제/);
+    expect(view.controls.join(" ")).not.toMatch(/방호덮개|비상정지장치|잠금표지|LOTO/);
+    expect(mobileDock.controls).toEqual(rawControls);
+  });
+
+  it("preserves machinery LOTO for explicit mobile-dock maintenance evidence", () => {
+    const mobileDock = reference("machinery-mobile-dock-maintenance");
+    mobileDock.item_type = "machinery";
+    mobileDock.title = "이동식도크 정비 및 불시기동 방지 사례";
+    mobileDock.summary = "지게차 상하차용 이동식도크를 점검·정비하는 동안 설비가 불시에 기동할 위험";
+    mobileDock.keywords = ["지게차", "상하차", "이동식도크", "점검", "정비", "불시기동"];
+    mobileDock.risk_tags = ["끼임"];
+    mobileDock.controls = [
+      "가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+      "정비 전 전원 차단 및 잠금표지(LOTO)"
+    ];
+
+    const view = deriveSafetyReferenceOperationalView(mobileDock);
+
+    expect(view.hazard).toMatch(/기계 가동부|불시기동/);
+    expect(view.controls.join(" ")).toMatch(/방호덮개|비상정지장치/);
+    expect(view.controls.join(" ")).toMatch(/전원 차단|잠금표지|LOTO/);
+    expect(view.controls.join(" ")).not.toMatch(/지게차.*보행|보행.*지게차/);
+  });
 });
 
 describe("filterAndRankSafetyReferencesByQuery", () => {

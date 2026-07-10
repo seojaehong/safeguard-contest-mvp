@@ -19,11 +19,13 @@
 1. 일부 추락 SIF 원시 레코드에는 추락 조치와 기계 조치가 함께 저장되어 있었다.
 2. 운영 조치 분류기가 원시 `controls`까지 분류 텍스트로 사용하면서 잘못 붙은 기계 조치가 기계 근거라는 신호로 다시 사용됐다.
 3. 신규 DB 하네스 패킷에서 조치를 정규화해도, 과거 작업팩의 `short_summary`와 봉인된 reference controls를 작업 이력 그래프가 그대로 투영할 수 있었다.
+4. 이동식 도크 장비 목록은 지게차 상하차 용도임에도 `machinery` 유형만으로 기계 정비 LOTO가 표시될 수 있었다.
 
 ## 수정
 
 - 작업 분류에는 title, category, summary, body, keywords, risk tags만 사용하고 raw controls는 사용하지 않는다.
 - B-E-17과 B-M-11은 공식 코드·원문 정체성으로 운영 조치를 고정한다.
+- 이동식 도크처럼 지게차 상하차·하역 용도가 원문에 명시된 장비는 지게차 동선·신호수 조치로 고정한다.
 - 추락+기계 정비 SIF는 추락 방호와 LOTO를 함께 보존한다.
 - 비계 부재 사이 끼임 같은 비기계 SIF는 추락·협착 통제를 사용하고 기계 방호·LOTO를 배제한다.
 - 작업 이력 그래프는 신규/과거 reference 모두 `deriveSafetyReferenceOperationalView()`를 거쳐 Evidence 상세와 Control 노드를 만든다.
@@ -40,14 +42,8 @@
 집중 검증:
 
 ```text
-npm.cmd test -- tests/workspace-operation-graph.test.ts tests/operation-memory-visualization.test.ts tests/generation-evidence-operation-routes.test.ts --run
-3 files passed, 10 tests passed
-
-npm.cmd test -- tests/workspace-operation-graph.test.ts tests/safety-reference-hybrid.test.ts --run
-2 files passed, 18 tests passed
-
-npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/workspace-operation-graph.test.ts tests/operation-memory-visualization.test.ts tests/generation-evidence-operation-routes.test.ts --run
-4 files passed, 24 tests passed
+npm.cmd test -- tests/safety-reference-hybrid.test.ts tests/commercial-harness.test.ts tests/workspace-operation-graph.test.ts tests/operation-memory-visualization.test.ts tests/generation-evidence-operation-routes.test.ts tests/live-harness-quality-probe.test.ts --run
+6 files passed, 57 tests passed
 
 npm.cmd run typecheck
 passed
@@ -56,7 +52,7 @@ npm.cmd run build
 passed, 27 static pages generated
 
 npm.cmd test -- --maxWorkers=1 --fileParallelism=false
-88 files passed, 656 tests passed
+88 files passed, 659 tests passed
 
 ```
 

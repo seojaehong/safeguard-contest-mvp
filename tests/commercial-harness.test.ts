@@ -52,6 +52,57 @@ describe("safety term normalization", () => {
     expect(surface.shortSummary).not.toMatch(/방호덮개|비상정지장치|잠금표지/);
     expect(rawReference.controls).toEqual(rawControls);
   });
+
+  it("rebuilds mobile-dock packet labels from operational controls without mutating provenance", () => {
+    const rawReference = reference({
+      id: "machinery-mobile-dock-packet",
+      source_id: "kosha-machinery-catalog",
+      item_type: "machinery",
+      category: "운수·창고및통신업",
+      title: "469 · 운수·창고및통신업 · 창고업",
+      summary: "기계설비명: 이동식도크. 컨테이너와 결합하여 지게차로 상하차 작업을 하는 장비",
+      keywords: ["창고업", "이동식도크", "Mobile dock"],
+      risk_tags: ["지게차"],
+      controls: [
+        "가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+        "정비 전 전원 차단 및 잠금표지(LOTO)"
+      ],
+      short_summary: "가동부 방호덮개 설치 · 정비 전 전원 차단 및 잠금표지(LOTO)",
+      document_reflection_label: "위험성평가표에 가동부 방호덮개 설치 반영",
+      operation_signal_label: "기계설비 관리대책을 작업 전 확인"
+    });
+    const rawSnapshot = {
+      controls: [...rawReference.controls],
+      shortSummary: rawReference.short_summary,
+      documentReflectionLabel: rawReference.document_reflection_label,
+      operationSignalLabel: rawReference.operation_signal_label
+    };
+
+    const packet = buildDbHarnessPacket({
+      question: "외벽 도장 현장 자재 반입 지게차 상하차와 작업자 통행 동선이 겹친다.",
+      references: [rawReference]
+    });
+    const packetReference = [
+      ...packet.directEvidence,
+      ...packet.sifCases,
+      ...packet.supportingEvidence
+    ].find((item) => item.id === rawReference.id);
+    expect(packetReference).toBeDefined();
+    if (!packetReference) return;
+    const packetText = [
+      ...(packetReference?.controls || []),
+      packetReference?.short_summary || "",
+      packetReference?.document_reflection_label || "",
+      packetReference?.operation_signal_label || ""
+    ].join(" ");
+
+    expect(packetReference.controls.join(" ")).toMatch(/지게차.*보행|보행.*지게차/);
+    expect(packetText).not.toMatch(/방호덮개|비상정지장치|잠금표지|LOTO/);
+    expect(rawReference.controls).toEqual(rawSnapshot.controls);
+    expect(rawReference.short_summary).toBe(rawSnapshot.shortSummary);
+    expect(rawReference.document_reflection_label).toBe(rawSnapshot.documentReflectionLabel);
+    expect(rawReference.operation_signal_label).toBe(rawSnapshot.operationSignalLabel);
+  });
 });
 
 function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
