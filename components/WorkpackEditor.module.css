@@ -113,6 +113,7 @@
   gap: 16px;
   min-width: 0;
   padding: clamp(18px, 3vw, 28px);
+  scroll-margin-top: 58px;
 }
 
 .documentHeader {
