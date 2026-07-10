@@ -72,7 +72,7 @@ export function SafeClawModuleShell({
           <strong>safeclaw/<em>os</em></strong>
         </Link>
         <p>FIELD OS</p>
-        <nav aria-label="SafeClaw 운영 메뉴">
+        <nav className="safeclaw-module-navigation" aria-label="SafeClaw 운영 메뉴">
           {Object.entries(groupedNav).map(([group, items]) => (
             <section key={group}>
               <h2>{group}</h2>
@@ -92,7 +92,7 @@ export function SafeClawModuleShell({
       </aside>
 
       <section className="safeclaw-module-main">
-        <header className="safeclaw-module-nav">
+        <header className="safeclaw-module-nav safeclaw-module-header">
           <span><i /> SITE 기본 현장</span>
           <span>API <b>Law.go</b> · <b>KOSHA</b> · 기상청</span>
           <span className={`safeclaw-module-status ${status}`}>
@@ -106,17 +106,17 @@ export function SafeClawModuleShell({
         <section className={`safeclaw-module-hero ${variant === "document" ? "document" : ""} hud-corners`}>
           <div>
             <span className="safeclaw-module-eyebrow">{eyebrow}</span>
-            <h1>{title}</h1>
-            <p>{description}</p>
+            <h1 className="safeclaw-module-title">{title}</h1>
+            <p className="safeclaw-module-description">{description}</p>
           </div>
-          <aside>
+          <aside className="safeclaw-module-card">
             <span>업무 범위</span>
             <strong>{mappedTo}</strong>
             {actions ? <div className="safeclaw-module-actions">{actions}</div> : null}
           </aside>
         </section>
 
-        {children}
+        <div className="safeclaw-module-content">{children}</div>
       </section>
     </main>
   );

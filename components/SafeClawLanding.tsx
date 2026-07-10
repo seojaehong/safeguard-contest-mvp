@@ -58,13 +58,13 @@ const productModules = [
 export function SafeClawLanding() {
   return (
     <main className="safeclaw-landing" aria-label="SafeClaw 회사 홈페이지">
-      <header className="safeclaw-landing-nav">
+      <header className="safeclaw-landing-nav safeclaw-shared-header">
         <Link href="/" className="safeclaw-os-brand" aria-label="SafeClaw 홈">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/ClawMark.svg" alt="" className="safeclaw-os-mark" width={28} height={28} />
           <strong>safeclaw/<em>os</em></strong>
         </Link>
-        <nav aria-label="SafeClaw 홈페이지 메뉴">
+        <nav className="safeclaw-shared-navigation" aria-label="SafeClaw 홈페이지 메뉴">
           {navItems.map(([label, id]) => (
             id === "workspace"
               ? <Link key={id} href="/workspace">{label}</Link>
@@ -72,8 +72,8 @@ export function SafeClawLanding() {
           ))}
         </nav>
         <div className="safeclaw-landing-actions">
-          <Link href="/login" className="safeclaw-login">로그인</Link>
-          <Link href="/workspace" className="safeclaw-contact">작업 시작 →</Link>
+          <Link href="/login" className="safeclaw-login safeclaw-shared-action">로그인</Link>
+          <Link href="/workspace" className="safeclaw-contact safeclaw-shared-action">작업 시작 →</Link>
         </div>
       </header>
 
@@ -87,17 +87,17 @@ export function SafeClawLanding() {
         <div className="safeclaw-os-hero-body">
           <div>
             <span className="safeclaw-os-tag">산업안전 · 현장 문서 작업공간</span>
-            <h1>
+            <h1 className="safeclaw-shared-page-title">
               <span className="safeclaw-hero-line">오늘 작업을</span>
               <span className="safeclaw-hero-line"><mark>안전 문서팩으로</mark></span>
               <span className="safeclaw-hero-line">준비합니다.</span>
             </h1>
-            <p>safeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.</p>
-            <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 생성합니다.</p>
+            <p className="safeclaw-shared-description">safeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.</p>
+            <p className="safeclaw-shared-description">한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 생성합니다.</p>
             <p className="safeclaw-hero-position">채용하지 않은 안전관리자 — 한 명 몫의 문서 업무를 대신합니다.</p>
             <div className="safeclaw-os-cta">
-              <Link href="/workspace" className="primary">작업공간 열기 →</Link>
-              <Link href="/documents">문서팩 보기</Link>
+              <Link href="/workspace" className="primary safeclaw-shared-action">작업공간 열기 →</Link>
+              <Link href="/documents" className="safeclaw-shared-action">문서팩 보기</Link>
             </div>
           </div>
           <HeroConsoleReplay />
@@ -112,7 +112,7 @@ export function SafeClawLanding() {
         <h2>작업 전 문서와 공지를<br /><mark>하나의 흐름으로 잇습니다.</mark></h2>
         <div className="safeclaw-pipeline-grid">
           {pipeline.map((item) => (
-            <article key={item.code}>
+            <article key={item.code} className="safeclaw-shared-card">
               <span>{item.code}</span>
               <h3>{item.title}</h3>
               <p>{item.body}</p>
@@ -129,7 +129,7 @@ export function SafeClawLanding() {
         </div>
         <div className="safeclaw-proof-matrix">
           {proofSources.map(([code, title, meta]) => (
-            <article key={code}>
+            <article key={code} className="safeclaw-shared-card">
               <span>{code}</span>
               <h3>{title}</h3>
               <p>{meta}</p>
@@ -146,7 +146,7 @@ export function SafeClawLanding() {
         <h2>외국인 작업자에게<br /><mark>쉬운 문장으로 전달합니다.</mark></h2>
         <div className="safeclaw-language-matrix">
           {languages.map(([code, title, sub]) => (
-            <article key={code}>
+            <article key={code} className="safeclaw-shared-card">
               <span>{code}</span>
               <h3>{title}</h3>
               <p>{sub}</p>
@@ -180,7 +180,7 @@ export function SafeClawLanding() {
         <h2>제품 화면은<br /><mark>실제 업무 탭으로 연결합니다.</mark></h2>
         <div className="safeclaw-module-map">
           {productModules.map((module) => (
-            <Link key={module.href} href={module.href}>
+            <Link key={module.href} href={module.href} className="safeclaw-shared-card">
               <span>{module.code}</span>
               <em>{module.state}</em>
               <h3>{module.title}</h3>
