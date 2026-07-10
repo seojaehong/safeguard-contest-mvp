@@ -278,3 +278,99 @@ Exit code: 0
 
 - Task 2 leak paths are intentionally out of scope per user direction: remediation API, operation-memory graph, and learning-export will need separate review.
 - The SIF parser is label-based and conservative. Unknown future corpus labels may require adding to the boundary list, but current audit gaps are covered by focused tests.
+
+## Reviewer Fix: Display Summary for Empty-Control Risk Rows
+
+Reviewer finding: `lib/search.ts` still used `item.short_summary || item.summary` in deterministic risk-row hazard and current-control fallback paths. Archive SIF rows with `controls: []` could therefore leak raw labels such as `연번:`, `재해개요:`, and `기인물:`.
+
+Fix implemented:
+
+- Added exported `getSafetyReferenceDisplaySummary(item: SafetyReferenceItem): string` in `lib/safety-reference-catalog.ts`.
+- The helper prefers `display_summary`, derives a clean SIF overview when needed, and falls back to label-stripped existing summary/short summary.
+- Updated `deriveSafetyReferenceHazard` and `buildSafetyReferenceRiskRows` current-control fallback to use `getSafetyReferenceDisplaySummary`.
+- Added a regression test with an archive-style SIF row, `controls: []`, and a labeled raw summary.
+
+### Reviewer Fix RED
+
+Command:
+
+```powershell
+npm.cmd test -- tests\commercial-harness.test.ts
+```
+
+Output:
+
+```text
+> safeclaw@0.1.0 test
+> vitest run tests\commercial-harness.test.ts
+
+RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/backend-harness-gate
+
+❯ tests/commercial-harness.test.ts (20 tests | 1 failed) 5513ms
+  × uses cleaned SIF summaries for risk-row text when archive rows have no controls 35ms
+
+AssertionError: expected '질식 위험: 연번: 2020 재해개요: 2019년 03월경 피재자가…' not to match /연번:|재해개요:|기인물:/u
+
+Received:
+"질식 위험: 연번: 2020 재해개요: 2019년 03월경 피재자가 탱크 내부 청소 중 질식함. 기인물: 탱크 위험성 감소대책(예시): 산소농도 측정 및 환기 미… 연번: 2020 재해개요: 2019년 03월경 피재자가 탱크 내부 청소 중 질식함. 기인물: 탱크 위험성 감소대책(예시): 산소농도 측정 및 환기 ..."
+
+Test Files  1 failed (1)
+Tests  1 failed | 19 passed (20)
+```
+
+### Reviewer Fix GREEN
+
+Command:
+
+```powershell
+npm.cmd test -- tests\commercial-harness.test.ts
+```
+
+Output:
+
+```text
+> safeclaw@0.1.0 test
+> vitest run tests\commercial-harness.test.ts
+
+RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/backend-harness-gate
+
+Test Files  1 passed (1)
+Tests  20 passed (20)
+```
+
+### Reviewer Fix Focused Suite
+
+Command:
+
+```powershell
+npm.cmd test -- tests\safety-reference-hybrid.test.ts tests\commercial-harness.test.ts
+```
+
+Output:
+
+```text
+> safeclaw@0.1.0 test
+> vitest run tests\safety-reference-hybrid.test.ts tests\commercial-harness.test.ts
+
+RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/backend-harness-gate
+
+Test Files  2 passed (2)
+Tests  29 passed (29)
+```
+
+### Reviewer Fix Typecheck
+
+Command:
+
+```powershell
+npm.cmd run typecheck
+```
+
+Output:
+
+```text
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+Exit code: 0
+```
