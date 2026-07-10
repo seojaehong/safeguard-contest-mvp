@@ -18,7 +18,8 @@ describe("buildGenerationProgressState", () => {
       count: 0,
       primary: "0/12",
       secondary: "근거 준비",
-      detail: "현장 상황을 입력하면 기상, 법령, SIF/KOSHA DB를 순서대로 확인합니다."
+      detail: "현장 상황을 입력하면 기상, 법령, SIF/KOSHA DB를 순서대로 확인합니다.",
+      indeterminate: false
     });
   });
 
@@ -93,11 +94,47 @@ describe("buildGenerationProgressState", () => {
       state: "ready",
       consoleLines: [],
       totalDocumentCount,
-      citationCount: 6
+      citationCount: 6,
+      shareReady: true
     });
 
     expect(state.count).toBe(12);
-    expect(state.primary).toBe("12/12");
-    expect(state.secondary).toBe("6건 근거");
+    expect(state.primary).toBe("12/12 생성");
+    expect(state.secondary).toBe("공유 준비 · 6건 근거");
+    expect(state.indeterminate).toBe(false);
+  });
+
+  it("keeps generated document count separate from blocked review readiness", () => {
+    const state = buildGenerationProgressState({
+      hasData: true,
+      state: "ready",
+      consoleLines: [],
+      totalDocumentCount,
+      citationCount: 6,
+      shareReady: false,
+      reviewSummary: "안전조치 검수와 결재란 확인이 필요합니다."
+    });
+
+    expect(state.count).toBe(12);
+    expect(state.primary).toBe("12/12 생성");
+    expect(state.secondary).toBe("검수 필요 · 6건 근거");
+    expect(state.detail).toBe("안전조치 검수와 결재란 확인이 필요합니다.");
+    expect(state.indeterminate).toBe(false);
+  });
+
+  it("uses an honest indeterminate state for non-streaming template generation", () => {
+    const state = buildGenerationProgressState({
+      hasData: false,
+      state: "generating",
+      consoleLines: [],
+      totalDocumentCount,
+      citationCount: 0,
+      mode: "template"
+    });
+
+    expect(state.count).toBe(0);
+    expect(state.primary).toBe("생성 중");
+    expect(state.secondary).toBe("근거·문서 일괄 확인");
+    expect(state.indeterminate).toBe(true);
   });
 });
