@@ -15084,6 +15084,26 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+.inline-progress.animated progress::-webkit-progress-value {
+  animation: progressPulse 1.2s ease-in-out infinite;
+}
+
+.inline-progress.animated progress::-moz-progress-bar {
+  animation: progressPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% { opacity: 0.56; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inline-progress.animated progress::-webkit-progress-value,
+  .inline-progress.animated progress::-moz-progress-bar {
+    animation: none;
+  }
+}
+
 /* Shared workbench geometry. Theme selectors may change color only. */
 .command-center-shell.workbench-root {
   font-family: var(--font-product);

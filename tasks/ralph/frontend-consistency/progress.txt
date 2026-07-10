@@ -63,3 +63,8 @@
 - Verified: Task 5 focused tests 32/32, full suite 498/498, static audit with zero violations, typecheck, production build, and diff-check pass.
 - Learned: color-theme selectors must not carry typography, spacing, or shape because those declarations silently create two visual systems.
 - Next: keep F5 `passes: false` until independent review; capture Day/Night and report states in F7 browser evidence.
+
+## 2026-07-11 F5 independent review remediation
+- Changed: normalized exact AgentConsole and workspace owners, implemented canonical three-column field geometry plus a documented two-column command-center variant, audited mixed theme selectors individually, and restored progress animation/reduced-motion behavior on the rendered node.
+- Verified: exact-owner, breakpoint-cascade, theme-selector, and rendered-progress tests reproduce all three Important findings before remediation and pass afterward.
+- Next: keep F5 `passes: false` pending independent re-review and F7 browser evidence.
