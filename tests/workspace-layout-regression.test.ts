@@ -780,10 +780,13 @@ describe("workspace layout regression", () => {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 });
     const mobileQuestion = "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보, 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.";
     await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
-    await page.waitForFunction(() => {
+    await page.waitForFunction(async () => {
       const textarea = document.querySelector("#field-command-input");
-      return textarea instanceof HTMLTextAreaElement
-        && Object.keys(textarea).some((key) => key.startsWith("__reactProps$"));
+      if (!(textarea instanceof HTMLTextAreaElement) || textarea.value !== "") return false;
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
+      });
+      return textarea.isConnected && textarea.value === "";
     });
     await page.fill("#field-command-input", mobileQuestion);
     await page.waitForFunction(
@@ -1040,6 +1043,73 @@ describe("workspace layout regression", () => {
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     expect(await page.locator(".field-workspace").count()).toBe(0);
     expect(await page.locator(".document-workbench").count()).toBe(1);
+  }, 90_000);
+
+  it("preserves the edited active document across review and editor remount", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    const sentinel = "[SAFECLAW_DOCUMENT_EDIT_PRESERVED]";
+    await page.addInitScript(() => {
+      window.localStorage.setItem("safeclaw.aiMode", "template");
+    });
+    await page.route("**/api/weather?**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, weather: null })
+      });
+    });
+    await page.route("**/api/ask", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(sample)
+      });
+    });
+
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: /안전 문서 생성/ }).click();
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await page.locator(".document-viewer-list button", { hasText: "TBM 브리핑" }).click();
+    await page.waitForFunction(() => document.querySelector(".document-preview-head strong")?.textContent === "TBM 브리핑");
+    await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
+
+    const editor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
+    await editor.waitFor({ state: "visible" });
+    const editedValue = `${sentinel}\n${await editor.inputValue()}`;
+    await editor.fill(editedValue);
+    await page.waitForFunction(
+      async (expectedValue) => {
+        const textarea = document.querySelector(".document-textarea");
+        if (!(textarea instanceof HTMLTextAreaElement) || textarea.value !== expectedValue) return false;
+        await new Promise<void>((resolve) => {
+          window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
+        });
+        return textarea.isConnected && textarea.value === expectedValue;
+      },
+      editedValue
+    );
+    expect(await editor.inputValue()).toBe(editedValue);
+    const persistedDrafts = await page.evaluate(() => ({
+      editor: Object.keys(window.localStorage)
+        .filter((key) => key.startsWith("safeclaw-workpack:"))
+        .map((key) => window.localStorage.getItem(key) || "")
+        .join("\n"),
+      current: window.localStorage.getItem("safeclaw.currentWorkpack.v1") || ""
+    }));
+    expect(persistedDrafts.editor).toContain(sentinel);
+    expect(persistedDrafts.current).toContain(sentinel);
+
+    await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    expect(await page.locator(".document-preview-pane pre").textContent()).toContain(sentinel);
+    expect(await page.locator(".document-preview-head strong").textContent()).toBe("TBM 브리핑");
+
+    await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
+    const reopenedEditor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
+    await reopenedEditor.waitFor({ state: "visible" });
+    expect(await reopenedEditor.inputValue()).toBe(editedValue);
   }, 90_000);
 
   it("keeps the Night document editor readable, scroll-safe, and focused", async () => {

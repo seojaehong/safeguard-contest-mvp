@@ -97,9 +97,10 @@ The scroll-height invariant was not relaxed or removed.
 
 ## Verification
 
-- Mobile hydration regression: GREEN, `1 passed`.
-- Focus-mode regression tests: GREEN, `2 passed`.
-- Full workspace regression run before this test-only stabilization: `14 passed`, with the duplicated-value mobile failure as the only reported residual.
+- Mobile hydration regression: GREEN.
+- Focus-mode regression tests: GREEN.
+- Edit preservation regression: GREEN. The test verifies the edited document in the editor draft store, current-workpack snapshot, review preview, and reopened editor.
+- Full workspace regression: GREEN, `16 passed` via `npm.cmd test -- tests/workspace-layout-regression.test.ts`.
 - Typecheck: GREEN via `npm.cmd run typecheck` (`tsc --noEmit --incremental false`).
 - `git diff --check`: no whitespace errors; only Windows line-ending notices were emitted.
 
@@ -107,6 +108,8 @@ The scroll-height invariant was not relaxed or removed.
 
 - No second `WorkpackEditor` instance or editor route was added.
 - Generated payload and selected document key remain parent state across review/editor transitions.
+- Workpack edits propagate from `WorkpackEditor` after local-draft hydration, avoiding an initial-value overwrite race.
+- Submit-readiness decoration is idempotent, so reopening an edited document does not duplicate its header.
 - Review and editor surfaces are mutually exclusive in the DOM.
 - No database, API, ontology, evidence, or share-readiness behavior changed.
 - No unrelated artifact or unowned plan is included in the commit scope.

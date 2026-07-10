@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react";
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { ClawChat } from "@/components/ClawChat";
@@ -793,14 +793,20 @@ export function FieldOperationsWorkspace({
   data,
   editorFocusToken = 0,
   requestedDocumentKey,
-  readiness
+  readiness,
+  onDeliverablesChange
 }: {
   data: AskResponse;
   editorFocusToken?: number;
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
+  onDeliverablesChange?: (values: WorkpackDocumentValues) => void;
 }) {
   const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
+  const editorDataRef = useRef(data);
+  const dataRef = useRef(data);
+  const onDeliverablesChangeRef = useRef(onDeliverablesChange);
+  const lastEditorValuesRef = useRef<WorkpackDocumentValues | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [workers, setWorkers] = useState<WorkerProfile[]>(() => buildDefaultWorkers(data));
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(() => buildDefaultWorkers(data).map((worker) => worker.id));
@@ -846,25 +852,47 @@ export function FieldOperationsWorkspace({
     recipientSuggestions,
     targetWorkers
   }), [recipientSuggestions, targetWorkers]);
+  const workerSnapshotRef = useRef(workerSnapshot);
+  const dispatchSnapshotRef = useRef(dispatchSnapshot);
+
+  useEffect(() => {
+    dataRef.current = data;
+    onDeliverablesChangeRef.current = onDeliverablesChange;
+    workerSnapshotRef.current = workerSnapshot;
+    dispatchSnapshotRef.current = dispatchSnapshot;
+  }, [data, dispatchSnapshot, onDeliverablesChange, workerSnapshot]);
+
   const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues) => {
-    setEditedDeliverables(values);
+    const previousValues = lastEditorValuesRef.current;
+    const documentKeys = Object.keys(values) as DocumentKey[];
+    if (previousValues && documentKeys.every((key) => previousValues[key] === values[key])) return;
+    lastEditorValuesRef.current = values;
+    setEditedDeliverables((current) => {
+      const currentDocuments: Partial<Record<DocumentKey, string>> = current ?? dataRef.current.deliverables;
+      return documentKeys.every((key) => currentDocuments[key] === values[key]) ? current : values;
+    });
+    onDeliverablesChangeRef.current?.(values);
     if (typeof window === "undefined") return;
+    const currentData = dataRef.current;
     const nextData: AskResponse = {
-      ...data,
+      ...currentData,
       deliverables: {
-        ...data.deliverables,
+        ...currentData.deliverables,
         ...values
       }
     };
     try {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
-        JSON.stringify(buildStoredCurrentWorkpack(nextData, { workerSnapshot, dispatchSnapshot }))
+        JSON.stringify(buildStoredCurrentWorkpack(nextData, {
+          workerSnapshot: workerSnapshotRef.current,
+          dispatchSnapshot: dispatchSnapshotRef.current
+        }))
       );
     } catch (error) {
       console.warn("safeclaw current workpack update failed", error);
     }
-  }, [data, dispatchSnapshot, workerSnapshot]);
+  }, []);
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
     ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
@@ -1039,7 +1067,7 @@ export function FieldOperationsWorkspace({
 
       <main className="workspace-canvas">
         <WorkpackEditor
-          data={data}
+          data={editorDataRef.current}
           focusToken={editorFocusToken}
           requestedDocumentKey={requestedDocumentKey}
           onDeliverablesChange={handleDeliverablesChange}
