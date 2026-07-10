@@ -71,13 +71,76 @@ Typography values are limited to named semantic tiers rather than per-selector i
 
 Body tracking defaults to `0`. Negative tracking is reserved for large display headings. Positive tracking is reserved for short uppercase HUD labels. Line-height tiers distinguish display, compact UI, normal body, long-form body, and document text.
 
+#### Screen typography specification
+
+Screen typography uses CSS pixels and unitless line-height. Points are reserved for generated print documents.
+
+| Role | Family | Size | Weight | Line height | Tracking | Use |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| Display | Pretendard | `clamp(44px, 6vw, 72px)` | 800 | `0.98` | `-0.045em` | Landing hero only |
+| Page title | Pretendard | `clamp(32px, 4vw, 40px)` | 800 | `1.15` | `-0.035em` | One primary title per page |
+| Section title | Pretendard | `clamp(24px, 3vw, 28px)` | 800 | `1.25` | `-0.025em` | Major page sections |
+| Component title | Pretendard | `20px` | 700 | `1.35` | `-0.015em` | Cards, panels, dialogs |
+| Body large | Pretendard | `17px` | 500 | `1.65` | `0` | Introductory and high-emphasis prose |
+| Body | Pretendard | `15px` | 500 | `1.60` | `0` | Default product copy |
+| Support | Pretendard | `14px` | 500 | `1.60` | `0` | Helper text and secondary content |
+| Control | Pretendard | `14px` | 700 | `20px` | `0` | Buttons, inputs, tabs, navigation |
+| Table body | Pretendard | `13px` | 500 | `20px` | `0` | Product data tables |
+| Table header | Pretendard | `12px` | 700 | `18px` | `0.04em` | Product table headings |
+| Caption | Pretendard | `12px` | 600 | `18px` | `0` | Captions and compact metadata |
+| HUD | Geist Mono | `11px` | 700 | `16px` | `0.08em` | Short uppercase status/source labels |
+
+- Text smaller than `11px` is not allowed in product UI.
+- Body, support, control, table body, and caption text always use `letter-spacing: 0`.
+- Negative tracking is allowed only for display, page title, section title, and component title.
+- Positive tracking is allowed only for table headers and short HUD labels.
+- Long-form knowledge and legal prose uses `15px / 1.75` with a maximum text measure of `72ch`.
+- Mobile does not shrink body copy. Only display, page title, and section title change through their `clamp()` minimums.
+
+#### Generated document typography specification
+
+| Role | Family | Size | Weight | Line height | Tracking |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Document title | Malgun Gothic / Noto Sans KR | `20pt` | 700 | `24pt` | `-0.02em` |
+| Document section | Malgun Gothic / Noto Sans KR | `14pt` | 700 | `18pt` | `-0.01em` |
+| Document body | Malgun Gothic / Noto Sans KR | `10pt` | 400 | `15pt` | `0` |
+| Document table | Malgun Gothic / Noto Sans KR | `8.5pt` | 400 | `12pt` | `0` |
+| Document table header | Malgun Gothic / Noto Sans KR | `8.5pt` | 700 | `12pt` | `0` |
+| Document note | Malgun Gothic / Noto Sans KR | `8pt` | 400 | `11pt` | `0` |
+
+Document density exceptions require a named class and a recorded reason in the audit; they cannot be anonymous local values.
+
 ### 2. Spacing and shape system
 
-- Use a 4px base spacing rhythm with named component, section, and page tiers.
-- Shared controls use consistent heights and internal padding.
-- Product cards and controls use the approved 4px radius unless the brand guide defines a specific exception.
+- Use the fixed spacing scale `4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96px`.
+- Desktop page gutter is `24px`, tablet gutter is `20px`, and mobile gutter is `16px`.
+- Default section separation is `48px` desktop and `32px` mobile.
+- Default card/panel padding is `24px` desktop and `16px` mobile.
+- Default grid gap is `16px`; dense row gap is `8px`; label-to-control gap is `8px`.
+- Default button/input height is `44px`; compact secondary control height is `36px`; icon-only hit area is `44 × 44px`; textarea minimum height is `120px`.
+- Product cards, panels, inputs, buttons, menus, dialogs, and tooltips use exactly `4px` radius.
+- Micro status tags and inline code markers may use `2px` radius.
+- Tables, document paper, progress rails, active side rails, and full-bleed structural regions use `0` radius.
+- `50%` is allowed only for genuinely circular geometry such as a status dot or avatar.
+- `999px` pill radius is not used for general buttons, tabs, cards, status rows, or navigation.
 - Hazard Yellow is reserved for primary action, active progress, and urgent signals.
 - Decorative gradients, large pill surfaces, and decorative shadows are removed from core product surfaces.
+
+Normal borders are `1px`; keyboard focus is `2px`; the active operational rail is `4px`. Product surfaces do not use decorative box shadows. Modal separation uses a `rgba(10, 10, 11, 0.56)` scrim and a strong border instead of relying on shadow.
+
+Inline icons are `16px`, control icons are `20px`, and section or empty-state icons are `24px`. Icon-to-label gap is `8px`. Emoji are not used as structural navigation or action icons; worker safety pictograms remain the documented exception.
+
+#### Layout geometry specification
+
+- Wide product container: maximum `1440px`.
+- Standard content container: maximum `1200px`.
+- Long-form reading measure: maximum `72ch`.
+- Desktop workbench at `1280px` and above: `224px minmax(0, 1fr) 320px` with `16px` gaps.
+- Tablet workbench from `768px` through `1279px`: main content plus one contextual rail; the secondary rail moves below the main content.
+- Mobile below `768px`: one column, `16px` page gutter, no fixed-width child wider than the viewport.
+- Two-column marketing or information sections use equal `minmax(0, 1fr)` tracks unless one side is a defined contextual rail.
+- Three- and four-column card grids collapse to two columns below `1180px` and one column below `768px`.
+- Text content aligns to an 8px baseline rhythm. Adjacent headings, descriptions, controls, and cards do not use arbitrary offsets to fake alignment.
 
 ### 3. Cascade strategy
 
