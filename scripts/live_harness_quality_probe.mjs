@@ -573,7 +573,7 @@ export function renderMarkdownEvidence(reportValue) {
 
 /** @param {string[]} argv */
 function parseArgs(argv) {
-  /** @type {{ baseUrl?: string; output?: string; timeoutMs: number; help: boolean }} */
+  /** @type {{ baseUrl?: string; inputJson?: string; output?: string; timeoutMs: number; help: boolean }} */
   const parsed = { timeoutMs: DEFAULT_TIMEOUT_MS, help: false };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -581,18 +581,21 @@ function parseArgs(argv) {
       parsed.help = true;
       continue;
     }
-    if (!["--base-url", "--output", "--timeout-ms"].includes(arg)) {
+    if (!["--base-url", "--input-json", "--output", "--timeout-ms"].includes(arg)) {
       throw new Error(`Unknown argument: ${arg}`);
     }
     const value = argv[index + 1];
     if (!value || value.startsWith("--")) throw new Error(`Missing value for ${arg}`);
     index += 1;
     if (arg === "--base-url") parsed.baseUrl = normalizeBaseUrl(value);
+    if (arg === "--input-json") parsed.inputJson = resolveInputJsonPath(value);
     if (arg === "--output") parsed.output = resolveOutputDirectory(value);
     if (arg === "--timeout-ms") parsed.timeoutMs = normalizeTimeout(value);
   }
   if (parsed.help) return parsed;
-  if (!parsed.baseUrl) throw new Error("--base-url is required");
+  if (Boolean(parsed.baseUrl) === Boolean(parsed.inputJson)) {
+    throw new Error("Exactly one of --base-url or --input-json is required");
+  }
   if (!parsed.output) throw new Error("--output is required");
   return parsed;
 }
@@ -624,6 +627,19 @@ function resolveOutputDirectory(value) {
 }
 
 /** @param {string} value */
+function resolveInputJsonPath(value) {
+  const inputPath = path.resolve(value);
+  if (!fs.existsSync(inputPath)) {
+    throw new Error(`--input-json file not found: ${inputPath}`);
+  }
+  const stat = fs.statSync(inputPath);
+  if (!stat.isFile()) {
+    throw new Error(`--input-json must resolve to a file: ${inputPath}`);
+  }
+  return inputPath;
+}
+
+/** @param {string} value */
 function normalizeTimeout(value) {
   const timeoutMs = Number.parseInt(value, 10);
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1_000 || timeoutMs > MAX_TIMEOUT_MS) {
@@ -635,10 +651,11 @@ function normalizeTimeout(value) {
 function usage() {
   return [
     "Usage:",
-    "  node scripts/live_harness_quality_probe.mjs --base-url <url> --output <evaluation-dir> [--timeout-ms <ms>]",
+    "  node scripts/live_harness_quality_probe.mjs (--base-url <url> | --input-json <path>) --output <evaluation-dir> [--timeout-ms <ms>]",
     "",
     "Example:",
     "  node scripts/live_harness_quality_probe.mjs --base-url https://www.safeclaw.kr --output live-harness-quality-probe",
+    "  node scripts/live_harness_quality_probe.mjs --input-json evaluation/live-harness-quality-probe/full.json --output live-harness-quality-probe-recheck",
   ].join("\n");
 }
 
@@ -737,6 +754,60 @@ async function runLiveProbe(options) {
   };
 }
 
+/** @param {{ inputJsonPath: string }} options */
+async function runInputJsonProbe(options) {
+  const request = {
+    method: "POST",
+    path: ASK_PATH,
+    body: {
+      question: CANONICAL_SCENARIO.question,
+      aiMode: CANONICAL_SCENARIO.aiMode,
+    },
+  };
+  const operations = [{ method: "POST", path: ASK_PATH, mutatesDb: false }];
+  const startedAt = new Date().toISOString();
+  const responseText = fs.readFileSync(options.inputJsonPath, "utf8");
+  /** @type {unknown} */
+  let responsePayload;
+  try {
+    responsePayload = JSON.parse(responseText);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`--input-json must contain valid JSON: ${message}`);
+  }
+
+  const transport = {
+    ok: true,
+    status: 200,
+    timeoutMs: 0,
+    elapsedMs: 0,
+    contentType: "application/json",
+    source: "input-json",
+  };
+  const context = {
+    requestedMode: CANONICAL_SCENARIO.aiMode,
+    request,
+    transport,
+    operations,
+  };
+  const evaluation = evaluateHarnessResponse(responsePayload, context);
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    startedAt,
+    baseUrl: "unavailable (input-json)",
+    inputJson: {
+      path: options.inputJsonPath,
+    },
+    scenario: CANONICAL_SCENARIO,
+    request,
+    transport,
+    operations,
+    evaluation,
+    response: responsePayload,
+  };
+}
+
 /** @param {string} outputDirectory @param {unknown} report */
 function writeEvidence(outputDirectory, report) {
   fs.mkdirSync(outputDirectory, { recursive: true });
@@ -762,10 +833,14 @@ async function main() {
     return;
   }
 
-  const report = await runLiveProbe({
-    baseUrl: /** @type {string} */ (options.baseUrl),
-    timeoutMs: options.timeoutMs,
-  });
+  const report = options.inputJson
+    ? await runInputJsonProbe({
+        inputJsonPath: options.inputJson,
+      })
+    : await runLiveProbe({
+        baseUrl: /** @type {string} */ (options.baseUrl),
+        timeoutMs: options.timeoutMs,
+      });
   const outputPaths = writeEvidence(/** @type {string} */ (options.output), report);
   console.log(JSON.stringify({
     verdict: report.evaluation.verdict,
