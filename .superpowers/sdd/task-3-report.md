@@ -79,3 +79,41 @@ Observed result after the minimal implementation:
 - No Task 3 implementation blocker remains.
 - `F3.passes` intentionally remains `false` until controller review, as requested.
 - Route-by-route browser screenshots and Day/Night visual reconciliation belong to later stories and were not expanded into this focused task.
+
+## Review findings correction
+
+Review source: `.superpowers/sdd/task-3-review.md` (`I1`–`I4`).
+
+### Review-fix RED
+
+Command:
+
+```powershell
+npm.cmd test -- tests/frontend-shared-surfaces.test.ts tests/frontend-design-contract.test.ts
+```
+
+Observed before the review fixes:
+
+- Exit code: `1`
+- Test files: `2 failed`
+- Tests: `4 failed`, `28 passed`, `32 total`
+- Failures reproduced the effective landing tuple override, document variant `22px`/mobile body reduction, and missing `.loading-spinner` reduced-motion override in both focused and design-contract coverage.
+
+### Review-fix GREEN
+
+Observed after correcting the scoped declarations and tests:
+
+- Focused + design-contract tests: `32 passed`, `0 failed`
+- Static audit: `pass`; 32 pages, 22 components, 0 coverage issues, 0 violations, 0 `!important` declarations
+- TypeScript: `npm.cmd run typecheck`, exit code `0`
+- Production build: `npm.cmd run build`, exit code `0`; 27 static pages generated
+
+### Review-fix implementation
+
+- Normalized effective landing hero descriptions to the body-large tuple.
+- Normalized login, contact, and landing CTA controls to the shared 44px control geometry and control typography tuple.
+- Normalized landing card padding to `var(--space-6)` (24px).
+- Normalized document variant aside padding and responsive gap to spacing tokens; kept document descriptions body-large through scoped and mobile declarations.
+- Disabled `.loading-spinner` animation under `prefers-reduced-motion: reduce` and covered it in both focused and design-contract tests.
+- Replaced first-match CSS assertions with later-declaration evaluation, asserted every introduced landing hook, and bounded brand-control accessibility checks to each actual `Link` element.
+- Ralph `F3` remains `in_progress` with `passes: false` pending controller review.

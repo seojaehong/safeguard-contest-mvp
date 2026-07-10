@@ -52,7 +52,9 @@
       "passes": false,
       "acceptance": [
         "Shell, navigation, controls, error, loading, and empty states use canonical values",
-        "Focused shared-surface tests pass"
+        "Focused shared-surface tests pass",
+        "Landing and document variant scoped selectors preserve canonical tuples through later declarations",
+        "Loading animations respect reduced-motion preferences"
       ],
       "files": [
         "components/SafeClawModuleShell.tsx",
