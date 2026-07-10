@@ -4149,7 +4149,7 @@ ul {
   align-items: center;
   border: 1px solid var(--sc-black, var(--ink));
   border-radius: 4px;
-  padding: 2px 9px;
+  padding: var(--space-1) var(--space-2);
   background: var(--sc-hazard-yellow, #ffd400);
   color: var(--sc-black, var(--ink));
   font-size: var(--text-hud);
@@ -6937,7 +6937,7 @@ ul {
 
 .worker-language-preview ul {
   margin: 0;
-  padding-left: 18px;
+  padding-left: var(--space-4);
   font-family: var(--font-multilingual);
 }
 
@@ -7026,7 +7026,7 @@ ul {
   justify-content: center;
   border: 1px solid var(--line);
   border-radius: 4px;
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-4);
   background: rgba(255, 255, 255, 0.68);
   color: var(--ink);
   font-weight: 800;
@@ -7051,7 +7051,7 @@ ul {
   min-width: 180px;
   border: 1px solid var(--line);
   border-radius: 4px;
-  padding: 10px;
+  padding: var(--space-2);
   background: #fffdf8;
   box-shadow: none;
 }
@@ -10116,13 +10116,13 @@ body:has(.safeclaw-landing) :is(
 .ontology-workbench {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.55fr);
-  gap: 18px;
+  gap: var(--space-4);
   align-items: start;
 }
 
 .ontology-list-column {
   display: grid;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 .ontology-node-list {
@@ -10137,12 +10137,12 @@ body:has(.safeclaw-landing) :is(
   display: grid;
   min-height: 68px;
   background: rgba(10, 10, 10, 0.82);
-  padding: 14px 16px;
+  padding: var(--space-4);
 }
 
 .ontology-node-row > div {
   display: grid;
-  gap: 5px;
+  gap: var(--space-1);
 }
 
 .ontology-node-row span,
@@ -10178,10 +10178,10 @@ body:has(.safeclaw-landing) :is(
   position: absolute;
   z-index: 4;
   top: 12px;
-  right: 18px;
+  right: var(--space-4);
   width: min(360px, 72vw);
   display: grid;
-  gap: 10px;
+  gap: var(--space-2);
   border: 1px solid rgba(255, 220, 46, 0.35);
   background: rgba(18, 18, 16, 0.98);
   box-shadow: none;
@@ -10217,7 +10217,7 @@ body:has(.safeclaw-landing) :is(
 
 .ontology-hover-card ul {
   display: grid;
-  gap: 7px;
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -10228,7 +10228,7 @@ body:has(.safeclaw-landing) :is(
   justify-content: space-between;
   gap: 12px;
   border-top: 1px solid rgba(246, 245, 239, 0.1);
-  padding-top: 7px;
+  padding-top: var(--space-2);
 }
 
 .ontology-hover-card li b {
@@ -10255,7 +10255,7 @@ body:has(.safeclaw-landing) :is(
 .ontology-kind-list {
   display: grid;
   gap: 1px;
-  margin-top: 18px;
+  margin-top: var(--space-4);
   border: 1px solid rgba(246, 245, 239, 0.12);
 }
 
@@ -10264,7 +10264,7 @@ body:has(.safeclaw-landing) :is(
   justify-content: space-between;
   gap: 12px;
   background: rgba(255, 255, 255, 0.04);
-  padding: 11px 12px;
+  padding: var(--space-3);
 }
 
 .ontology-kind-list strong {

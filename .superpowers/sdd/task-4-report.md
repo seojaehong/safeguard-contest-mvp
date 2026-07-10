@@ -76,6 +76,9 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 19. Approved-scale parser completion
    - RED: the original blacklist accepted new off-scale values, treated comma groups atomically, omitted ordinary module owners, and lacked effective mobile landing/current-workpack assertions.
    - GREEN: the allowlist admits only 4/8/12/16/20/24/32/40/48/64/80/96px spacing, rejects 7px mutations, preserves mixed ordinary rules while excluding document variants selector-by-selector, ignores dimensions/borders/radii, and proves landing/current-workpack breakpoint precedence.
+20. Ordinary-module ownership and token audit
+   - RED: route-owned unprefixed ontology selectors remained outside family ownership, ontology spacing used off-scale values, and arbitrary or unknown `var()` spacing tokens bypassed the raw-pixel audit.
+   - GREEN: route/component class extraction is checked against an explicit ordinary-module inventory, ontology and newly discovered knowledge/evidence/worker descendants use the approved scale, and parser mutations reject raw 7px, `--space-7`, unknown tokens, and omitted `.ontology-node-row` ownership while retaining explicit document/workspace/report/generated exclusions.
 
 ## Final verification evidence
 

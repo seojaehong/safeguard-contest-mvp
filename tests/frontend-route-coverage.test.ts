@@ -174,6 +174,25 @@ function effectiveDeclarationsAtWidth(source: string, selector: string, width: n
 }
 
 const approvedSpacingPixels = new Set([0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96]);
+const approvedSpacingTokens = new Set([
+  "--space-1", "--space-2", "--space-3", "--space-4", "--space-5", "--space-6",
+  "--space-8", "--space-10", "--space-12", "--space-16", "--space-20", "--space-24",
+]);
+const justifiedSemanticSpacingTokens = new Set(["--os-gutter"]);
+const ordinaryModuleOwnedClasses = new Set([
+  "advanced-download-grid", "advanced-downloads", "doc-card-evidence-badge",
+  "knowledge-entry-grid", "knowledge-entry-list", "knowledge-index-card", "knowledge-status-grid",
+  "ontology-empty-panel", "ontology-hover-card", "ontology-kind-list", "ontology-list-column", "ontology-map-column",
+  "ontology-node-list", "ontology-node-row", "ontology-summary-grid", "ontology-workbench",
+  "safeclaw-archive-list", "safeclaw-current-workpack", "safeclaw-evidence-group",
+  "safeclaw-module-actions", "safeclaw-module-brand", "safeclaw-module-card", "safeclaw-module-content",
+  "safeclaw-module-description", "safeclaw-module-eyebrow", "safeclaw-module-grid", "safeclaw-module-header",
+  "safeclaw-module-list", "safeclaw-module-main", "safeclaw-module-nav", "safeclaw-module-navigation",
+  "safeclaw-module-panel", "safeclaw-module-primary", "safeclaw-module-rail", "safeclaw-module-shell",
+  "safeclaw-module-title", "safeclaw-section-title", "safeclaw-setting-description", "safeclaw-tbm-board",
+  "safeclaw-worker-phone", "safeclaw-worker-table", "sc-blink", "sc-blink--good",
+  "worker-ack-note", "worker-language-note", "worker-language-preview", "worker-language-switcher",
+]);
 const auditedSpacingProperties = new Set([
   "gap", "row-gap", "column-gap",
   "padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "padding-inline", "padding-block",
@@ -184,7 +203,7 @@ const auditedSpacingProperties = new Set([
 function isAuditedFamilySelector(selector: string): boolean {
   const landingOwner = /\.(?:safeclaw-(?:landing|os-|hero|proof|statement|core|operation|pipeline|language|module-map|terminal|footer)|hero-console|console-|sc-section-kicker)/.test(selector)
     || /\.safeclaw-(?:contact|login)(?=[\s.:#>+~,\[]|$)/.test(selector);
-  const ordinaryModuleOwner = /\.(?:safeclaw-module-|safeclaw-current-workpack|safeclaw-(?:archive-list|worker-table|worker-phone|tbm-board)|worker-language-switcher)/.test(selector)
+  const ordinaryModuleOwner = [...ordinaryModuleOwnedClasses].some((className) => selector.includes(`.${className}`))
     && !selector.includes("module-variant-document")
     && !selector.includes(".safeclaw-module-hero.document");
   return landingOwner || ordinaryModuleOwner;
@@ -195,6 +214,8 @@ function isJustifiedSpacingException(selector: string, property: string, value: 
     ".safeclaw-proof-strip",
     ".safeclaw-core-grid",
     ".safeclaw-operation-section ol",
+    ".ontology-node-list",
+    ".ontology-kind-list",
   ]);
   return property === "gap" && value === "1px" && separatorGapSelectors.has(selector);
 }
@@ -210,7 +231,10 @@ function familySpacingResiduals(source: string): string[] {
       const offenders = [...value.matchAll(/(?<![-\w])(-?\d+)px\b/g)]
         .map((match) => Number(match[1]))
         .filter((number) => !approvedSpacingPixels.has(Math.abs(number)));
-      return offenders.length
+      const tokenOffenders = [...value.matchAll(/var\((--[\w-]+)\)/g)]
+        .map((match) => match[1])
+        .filter((token) => !approvedSpacingTokens.has(token) && !justifiedSemanticSpacingTokens.has(token));
+      return offenders.length || tokenOffenders.length
         ? selectorsToAudit.map((selector) => `${selector} { ${property}: ${value} }`)
         : [];
     });
@@ -833,5 +857,38 @@ describe("module route section hierarchy", () => {
       .safeclaw-module-shell.module-variant-document .safeclaw-module-panel { gap: 7px; }
     `)).toEqual([".safeclaw-module-panel { gap: 7px }"]);
     expect(familySpacingResiduals(".safeclaw-os-mark { width: 7px; border-width: 7px; }")).toEqual([]);
+    expect(familySpacingResiduals(".ontology-node-row { gap: 7px; }")).toEqual([
+      ".ontology-node-row { gap: 7px }",
+    ]);
+    expect(familySpacingResiduals(".ontology-node-row { gap: var(--space-7); }")).toEqual([
+      ".ontology-node-row { gap: var(--space-7) }",
+    ]);
+    expect(familySpacingResiduals(".ontology-node-row { gap: var(--unknown-spacing); }")).toEqual([
+      ".ontology-node-row { gap: var(--unknown-spacing) }",
+    ]);
+
+    const ordinaryOwnerFiles = [
+      "app/archive/page.tsx", "app/home/page.tsx", "app/dispatch/page.tsx", "app/evidence/page.tsx",
+      "app/workers/page.tsx", "app/tbm/page.tsx", "app/settings/page.tsx", "app/knowledge/page.tsx",
+      "app/evidence-file/page.tsx", "app/ontology/page.tsx", "app/worker/page.tsx",
+      "components/SafeClawModuleShell.tsx", "components/CurrentWorkpackModules.tsx",
+    ];
+    const excludedOwnerClass = /^(?:safeclaw-(?:doc|document|workdoc|report)|workflow-|dispatch-|share-)/;
+    const routeOwnedClass = /^(?:safeclaw-|ontology-|knowledge-|advanced-download|doc-card-evidence-badge|worker-)/;
+    for (const ownerFile of ordinaryOwnerFiles) {
+      const source = read(ownerFile);
+      const extracted = [...source.matchAll(/className="([^"]+)"/g)]
+        .flatMap((match) => match[1].split(/\s+/))
+        .filter((className) => routeOwnedClass.test(className) && !excludedOwnerClass.test(className));
+      const missing = [...new Set(extracted)].filter((className) => !ordinaryModuleOwnedClasses.has(className));
+      expect(missing, `${ownerFile} owner inventory`).toEqual([]);
+    }
+    for (const ontologyClass of [
+      "ontology-summary-grid", "ontology-workbench", "ontology-list-column", "ontology-node-list",
+      "ontology-node-row", "ontology-hover-card", "ontology-map-column", "ontology-kind-list",
+    ]) {
+      expect(read("app/ontology/page.tsx"), `${ontologyClass} source owner`).toContain(ontologyClass);
+      expect(ordinaryModuleOwnedClasses).toContain(ontologyClass);
+    }
   });
 });
