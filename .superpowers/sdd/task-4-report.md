@@ -108,6 +108,9 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 
 ## Review handoff
 
-- `F4.passes` deliberately remains `false` until review.
+- Final implementation commit: `3f7166d` (`fix: reject decimal spacing bypasses`).
+- Independent specification review: PASS with zero findings.
+- Independent code-quality review: PASS with zero findings.
+- `F4.status` is `done` and `F4.passes` is `true` after review closure.
 - Browser screenshots and route-state capture remain Task 7 scope.
 - Workspace interaction-density components and generated-document embedded CSS remain Tasks 5 and 6 scope.

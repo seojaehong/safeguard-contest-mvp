@@ -71,8 +71,8 @@
       "id": "F4",
       "title": "All route families",
       "priority": 4,
-      "status": "in_progress",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Every discovered page belongs to one route family",
         "Every page has consistent title, body, control, card, and responsive geometry",
