@@ -1124,6 +1124,7 @@ describe("workspace layout regression", () => {
     regeneratedSample.deliverables.tbmBriefing = `${regeneratedSentinel}\n${sample.deliverables.tbmBriefing}`;
     let generationCount = 0;
     let xlsxPayload: Record<string, unknown> | null = null;
+    let hwpPayload: Record<string, unknown> | null = null;
     await page.addInitScript(() => {
       window.localStorage.setItem("safeclaw.aiMode", "template");
     });
@@ -1149,6 +1150,14 @@ describe("workspace layout regression", () => {
         status: 200,
         contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         body: "xlsx"
+      });
+    });
+    await page.route("**/api/export/hwp", async (route) => {
+      hwpPayload = route.request().postDataJSON() as Record<string, unknown>;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/x-hwp",
+        body: "hwp"
       });
     });
 
@@ -1189,6 +1198,11 @@ describe("workspace layout regression", () => {
     await expect.poll(() => xlsxPayload?.mode).toBe("single");
     expect(JSON.stringify(xlsxPayload)).toContain("SAFECLAW_DOCUMENT_EDIT_PRESERVED");
     expect(xlsxPayload).not.toHaveProperty("structured");
+
+    await page.getByRole("button", { name: "한글 표 양식(.hwp)" }).click();
+    await expect.poll(() => hwpPayload).not.toBeNull();
+    expect(JSON.stringify(hwpPayload)).toContain("SAFECLAW_DOCUMENT_EDIT_PRESERVED");
+    expect(hwpPayload).not.toHaveProperty("riskAssessmentRows");
 
     const invalidatedReview = await page.evaluate(() => {
       const raw = window.localStorage.getItem("safeclaw.currentWorkpack.v1");

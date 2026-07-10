@@ -137,4 +137,21 @@ describe("buildGenerationProgressState", () => {
     expect(state.secondary).toBe("근거·문서 일괄 확인");
     expect(state.indeterminate).toBe(true);
   });
+
+  it("shows regeneration in progress instead of the previous workpack completion", () => {
+    const state = buildGenerationProgressState({
+      hasData: true,
+      state: "generating",
+      consoleLines: [],
+      totalDocumentCount,
+      citationCount: 6,
+      mode: "template",
+      shareReady: true
+    });
+
+    expect(state.count).toBe(0);
+    expect(state.primary).toBe("생성 중");
+    expect(state.secondary).toBe("근거·문서 일괄 확인");
+    expect(state.indeterminate).toBe(true);
+  });
 });

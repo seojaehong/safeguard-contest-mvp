@@ -153,6 +153,18 @@ describe("workpack readiness", () => {
     expect(readiness.reasons).toEqual([]);
   });
 
+  it("fails closed when required quality or ontology review data is missing", () => {
+    const response = makeResponse();
+    response.qualityContract = undefined;
+    response.ontologyQa = undefined;
+
+    const readiness = assessWorkpackReadiness(response);
+
+    expect(readiness.canShare).toBe(false);
+    expect(readiness.reasons).toContain("품질 계약 확인 필요");
+    expect(readiness.reasons).toContain("안전조치 검수 정보 확인 필요");
+  });
+
   it("requires explicit revalidation after a reviewed workpack is edited", () => {
     const response = makeResponse();
     const edited = applyWorkpackDeliverablesChange(

@@ -1091,10 +1091,12 @@ export function SafeGuardCommandCenter({
   }, []);
 
   function moveToWorkspacePage(targetPage: WorkspacePage) {
+    const readiness = data ? assessWorkpackReadiness(data, { requiresRevalidation }) : null;
     const gate = canOpenWorkspacePage({
       targetPage,
       hasWorkpack: Boolean(data),
-      isGenerating: state === "generating"
+      isGenerating: state === "generating",
+      canShare: readiness?.canShare
     });
     if (!gate.allowed) {
       setMessage(gate.reason || "문서 생성 후 열 수 있습니다.");
@@ -1806,7 +1808,8 @@ export function SafeGuardCommandCenter({
               const gate = canOpenWorkspacePage({
                 targetPage: step.key,
                 hasWorkpack,
-                isGenerating: state === "generating"
+                isGenerating: state === "generating",
+                canShare: workpackReadiness?.canShare
               });
               return (
                 <button
@@ -2195,7 +2198,7 @@ export function SafeGuardCommandCenter({
                   <button
                     type="button"
                     className="button command-primary document-next-button"
-                    disabled={!data}
+                    disabled={!data || !workpackReadiness?.canShare}
                     onClick={() => moveToWorkspacePage("share")}
                   >
                     다음: 공유

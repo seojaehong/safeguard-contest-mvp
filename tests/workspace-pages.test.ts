@@ -48,6 +48,18 @@ describe("workspace page navigation", () => {
     });
   });
 
+  it("keeps the share page locked until the workpack passes readiness", () => {
+    const gate = canOpenWorkspacePage({
+      targetPage: "share",
+      hasWorkpack: true,
+      isGenerating: false,
+      canShare: false
+    });
+
+    expect(gate.allowed).toBe(false);
+    expect(gate.reason).toBe("공유 전 검수와 보완을 완료해 주세요.");
+  });
+
   it("marks share as blocked instead of pending when readiness gates fail", () => {
     expect(
       buildWorkspaceStepStatuses({

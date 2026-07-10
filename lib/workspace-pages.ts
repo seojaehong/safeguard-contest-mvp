@@ -6,6 +6,7 @@ type PageGateInput = {
   targetPage: WorkspacePage;
   hasWorkpack: boolean;
   isGenerating: boolean;
+  canShare?: boolean;
 };
 
 type StepStatusInput = {
@@ -30,8 +31,11 @@ export function canOpenWorkspacePage(input: PageGateInput): { allowed: boolean; 
   if (input.targetPage === "document" && (input.hasWorkpack || input.isGenerating)) {
     return { allowed: true };
   }
-  if (input.targetPage === "share" && input.hasWorkpack) {
+  if (input.targetPage === "share" && input.hasWorkpack && input.canShare !== false) {
     return { allowed: true };
+  }
+  if (input.targetPage === "share" && input.hasWorkpack && input.canShare === false) {
+    return { allowed: false, reason: "공유 전 검수와 보완을 완료해 주세요." };
   }
   return {
     allowed: false,
