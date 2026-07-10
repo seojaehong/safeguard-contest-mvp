@@ -389,9 +389,10 @@ function cssViolations(source) {
   }
 
   const allowedTracking = new Set([
-    "0", "-0.015em", "-0.025em", "-0.035em", "-0.045em", "0.08em",
+    "0", "-0.015em", "-0.025em", "-0.035em", "-0.045em", "0.04em", "0.08em",
     "var(--tracking-body)", "var(--tracking-component-title)", "var(--tracking-section-title)",
-    "var(--tracking-page-title)", "var(--tracking-display)", "var(--tracking-hud)",
+    "var(--tracking-page-title)", "var(--tracking-display)", "var(--tracking-table-header)",
+    "var(--tracking-hud)",
   ]);
   for (const match of source.matchAll(/letter-spacing\s*:\s*([^;\r\n}]+)/g)) {
     const value = match[1].trim();

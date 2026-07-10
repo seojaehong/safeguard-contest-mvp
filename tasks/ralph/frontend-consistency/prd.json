@@ -1,0 +1,131 @@
+{
+  "feature": "SafeClaw frontend consistency audit",
+  "branchName": "feat/frontend-consistency-audit",
+  "qualityChecks": [
+    "npm.cmd test",
+    "npm.cmd run typecheck",
+    "npm.cmd run build",
+    "npm.cmd run audit:frontend-consistency",
+    "npm.cmd run audit:frontend-browser"
+  ],
+  "userStories": [
+    {
+      "id": "F1",
+      "title": "Executable visual design contract",
+      "priority": 1,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "All 32 page routes are inventoried without gaps",
+        "Four font roles and exact screen, print, spacing, and shape values are typed",
+        "npm.cmd test -- tests/frontend-design-contract.test.ts passes"
+      ],
+      "files": [
+        "lib/frontend-design-contract.ts",
+        "tests/frontend-design-contract.test.ts",
+        "scripts/frontend_consistency_audit.mjs"
+      ]
+    },
+    {
+      "id": "F2",
+      "title": "Canonical CSS type and geometry foundation",
+      "priority": 2,
+      "status": "in_progress",
+      "passes": false,
+      "acceptance": [
+        "Static audit reports zero off-contract font, line-height, tracking, radius, and important declarations",
+        "Focused design contract tests and typecheck pass",
+        "Independent review confirms mechanical normalization preserves semantic roles"
+      ],
+      "files": [
+        "app/globals.css",
+        "lib/frontend-design-contract.ts",
+        "tests/frontend-design-contract.test.ts",
+        "scripts/frontend_consistency_audit.mjs"
+      ]
+    },
+    {
+      "id": "F3",
+      "title": "Shared shells and framework states",
+      "priority": 3,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Shell, navigation, controls, error, loading, and empty states use canonical values",
+        "Focused shared-surface tests pass"
+      ],
+      "files": [
+        "components/SafeClawModuleShell.tsx",
+        "components/SafeClawLanding.tsx",
+        "app/not-found.tsx",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/workspace/loading.tsx"
+      ]
+    },
+    {
+      "id": "F4",
+      "title": "All route families",
+      "priority": 4,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Every discovered page belongs to one route family",
+        "Every page has consistent title, body, control, card, and responsive geometry"
+      ],
+      "files": [
+        "app",
+        "components"
+      ]
+    },
+    {
+      "id": "F5",
+      "title": "Workspace and reports density",
+      "priority": 5,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Day and Night share exact type, spacing, and radius values",
+        "Input, document, share, evidence, and reports states pass focused tests and browser checks"
+      ],
+      "files": [
+        "components/SafeGuardCommandCenter.tsx",
+        "components/FieldOperationsWorkspace.tsx",
+        "components/ReportsDownloadCenter.tsx",
+        "components/WorkflowSharePanel.tsx"
+      ]
+    },
+    {
+      "id": "F6",
+      "title": "Generated document typography",
+      "priority": 6,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Print title, section, body, table, and note values use the exact pt contract",
+        "Document data and export contracts are unchanged"
+      ],
+      "files": [
+        "components/WorkpackEditor.tsx",
+        "app/api/export/pdf/route.ts"
+      ]
+    },
+    {
+      "id": "F7",
+      "title": "Complete browser evidence and PR handoff",
+      "priority": 7,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Desktop and mobile evidence exists for every user-visible route",
+        "Day and Night workspace evidence exists",
+        "Tests, typecheck, build, static audit, and browser audit pass",
+        "PR 66 contains final conflict and verification information"
+      ],
+      "files": [
+        "scripts/frontend_consistency_browser_audit.mjs",
+        "evaluation/frontend-consistency-audit-2026-07-11"
+      ]
+    }
+  ]
+}
