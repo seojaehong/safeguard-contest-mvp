@@ -31,6 +31,7 @@ export type WorkpackEvidenceSummary = {
   practicalPoints: string[];
   citations: AskResponse["citations"];
   sourceMix: AskResponse["sourceMix"] | null;
+  generationMode?: AskResponse["generationMode"];
   mode: AskResponse["mode"];
   externalData: AskResponse["externalData"];
   riskSummary: AskResponse["riskSummary"];
@@ -76,6 +77,7 @@ export function buildWorkpackEvidenceSummary(
     practicalPoints: response.practicalPoints,
     citations: response.citations,
     sourceMix: response.sourceMix || null,
+    generationMode: response.generationMode,
     mode: response.mode,
     externalData: response.externalData,
     riskSummary: response.riskSummary,
@@ -146,6 +148,11 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
   const mode = evidence.mode === "live" || evidence.mode === "fallback" || evidence.mode === "mock"
     ? evidence.mode
     : "fallback";
+  const generationMode = evidence.generationMode === "template"
+    || evidence.generationMode === "enhanced"
+    || evidence.generationMode === "full"
+    ? evidence.generationMode
+    : undefined;
   const qualityContract = readJsonObject(evidence.qualityContract);
   const ontologyQa = readJsonObject(evidence.ontologyQa);
   const evidenceLabels = readJsonObject(evidence.evidenceLabels);
@@ -160,6 +167,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
       practicalPoints: readStringArray(evidence.practicalPoints),
       citations: Array.isArray(evidence.citations) ? evidence.citations as AskResponse["citations"] : [],
       sourceMix: isRecord(evidence.sourceMix) ? evidence.sourceMix as AskResponse["sourceMix"] : undefined,
+      generationMode,
       mode,
       scenario: scenario as AskResponse["scenario"],
       externalData: externalData as AskResponse["externalData"],

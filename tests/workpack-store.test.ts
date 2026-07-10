@@ -2,7 +2,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
-import { attachGenerationEvidence } from "@/lib/generation-evidence";
+import {
+  attachGenerationEvidence,
+  verifyAskResponseGenerationEvidence
+} from "@/lib/generation-evidence";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import type { AskResponse } from "@/lib/types";
 import {
@@ -51,6 +54,7 @@ function makeStoredResponse() {
   const response = buildMockAskResponse("성수동 외벽 도장 작업", mockSearchResults.slice(0, 2), "live", "test");
   return {
     ...response,
+    generationMode: "enhanced" as const,
     ontologyQa: {
       reviewTask: "외벽 도장",
       result: qaPass,
@@ -159,6 +163,31 @@ describe("workpack store persistence contract", () => {
     expect(reopen.data?.evidenceLabels).toEqual(response.evidenceLabels);
     expect(reopen.data?.structured).toEqual(response.structured);
     expect(reopen.data?.dbHarness).toEqual(response.dbHarness);
+    expect(reopen.data?.generationMode).toBe("enhanced");
+  });
+
+  it("preserves every signed response field required to verify a reopened workpack", () => {
+    const secret = "workpack-reopen-generation-evidence-secret";
+    const sealed = attachGenerationEvidence(makeStoredResponse(), {
+      secret,
+      generatedAt: "2026-07-10T09:30:00.000Z"
+    });
+    const reopen = buildReopenData({
+      question: sealed.question,
+      scenario: sealed.scenario,
+      deliverables: sealed.deliverables,
+      evidenceSummary: buildWorkpackEvidenceSummary(
+        sealed,
+        sealed.generationEvidence?.snapshot
+      ),
+      status: sealed.status
+    });
+
+    expect(reopen.blockers).toEqual([]);
+    expect(reopen.data).not.toBeNull();
+    expect(verifyAskResponseGenerationEvidence(reopen.data!, secret)).toMatchObject({
+      ok: true
+    });
   });
 
   it("does not insert an MCP workpack when the token org and site org disagree", async () => {
