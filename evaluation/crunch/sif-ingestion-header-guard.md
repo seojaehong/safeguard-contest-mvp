@@ -34,8 +34,21 @@ The source was parsed directly through `parse_sif_archive` in a Python dry-run. 
 
 ```powershell
 @'
-# import scripts/ingest_safety_reference_catalog.py and call parse_sif_archive(...)
-# with C:\Users\iceam\Downloads\붙임1. 사망사고 고위험요인(SIF) 아카이브(제조업 등, 건설업).xlsx
+import importlib.util
+import json
+import sys
+from collections import Counter
+from pathlib import Path
+
+script_path = Path("scripts/ingest_safety_reference_catalog.py").resolve()
+spec = importlib.util.spec_from_file_location("sif_dry_run", script_path)
+if spec is None or spec.loader is None:
+    raise RuntimeError(f"Could not load {script_path}")
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+_, items = module.parse_sif_archive(Path(r"C:\Users\iceam\Downloads\붙임1. 사망사고 고위험요인(SIF) 아카이브(제조업 등, 건설업).xlsx"))
+print(json.dumps({"itemCount": len(items), "bySheet": dict(Counter(item.category for item in items))}, ensure_ascii=True))
 '@ | python -
 ```
 
