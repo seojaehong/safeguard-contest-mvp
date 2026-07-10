@@ -92,6 +92,8 @@ function isTableHeaderSelector(selector: string): boolean {
 
 const semanticRoleOverrides: Readonly<Record<string, TypographyRole>> = {
   ".command-center-shell .command-primary": "control",
+  ".safeclaw-os-cta button": "control",
+  ".safeclaw-os-cta a": "control",
   ".safeclaw-module-primary": "control",
   ".safeclaw-module-actions a": "control",
   ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary": "control",
@@ -458,6 +460,7 @@ describe("frontend design contract", () => {
       ".api-proof-card i",
       ".status-orb.generating",
       ".button-spinner",
+      ".loading-spinner",
       ".inline-progress.animated span",
       ".agent-console-live",
       ".sc-blink",
