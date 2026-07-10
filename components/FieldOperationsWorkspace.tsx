@@ -22,6 +22,7 @@ import type { AskResponse } from "@/lib/types";
 import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
+import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
 import {
   buildDefaultWorkers,
   buildEducationRecordDrafts,
@@ -53,6 +54,7 @@ type WorkspaceSaveSnapshot = {
   workpackId: string | null;
   savedAt: string | null;
   savedCount: number;
+  workerMap: Record<string, string>;
 };
 
 type LearningExportFormat = "markdown" | "jsonl" | "obsidian";
@@ -818,13 +820,15 @@ export function FieldOperationsWorkspace({
   const [workers, setWorkers] = useState<WorkerProfile[]>(() => buildDefaultWorkers(data));
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(() => buildDefaultWorkers(data).map((worker) => worker.id));
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
+  const [savedWorkerMap, setSavedWorkerMap] = useState<Record<string, string>>({});
   const [storageSnapshot, setStorageSnapshot] = useState<WorkspaceSaveSnapshot>({
     ok: false,
     label: "비회원 임시 저장",
     message: "문서 편집 내용은 이 브라우저에 임시 저장됩니다. 관리자 로그인 후 이력을 저장할 수 있습니다.",
     workpackId: null,
     savedAt: null,
-    savedCount: 0
+    savedCount: 0,
+    workerMap: {}
   });
   const workspaceData = useMemo<AskResponse>(() => (
     editedDeliverables
@@ -847,6 +851,15 @@ export function FieldOperationsWorkspace({
     () => buildWorkerDispatchTargets(selectedWorkers),
     [selectedWorkers]
   );
+  const savedWorkerIds = useMemo(() => {
+    if (!savedWorkpackId || !selectedWorkerIds.length) return [];
+    try {
+      return resolveSavedWorkerIds(savedWorkerMap, selectedWorkerIds);
+    } catch (error) {
+      console.error("saved worker UUID resolution failed", error);
+      return [];
+    }
+  }, [savedWorkerMap, savedWorkpackId, selectedWorkerIds]);
   const workerSnapshot = useMemo<CurrentWorkerSnapshot>(() => ({
     savedAt: new Date().toISOString(),
     source: "workspace",
@@ -922,7 +935,8 @@ export function FieldOperationsWorkspace({
       message,
       workpackId: savedWorkpackId,
       savedAt: null,
-      savedCount: 0
+      savedCount: 0,
+      workerMap: savedWorkerMap
     };
     setStorageSnapshot(snapshot);
     return snapshot;
@@ -936,7 +950,8 @@ export function FieldOperationsWorkspace({
         message: "관리자 로그인 후 문서팩, 작업자, 교육 확인, 전파 이력을 저장할 수 있습니다.",
         workpackId: savedWorkpackId,
         savedAt: null,
-        savedCount: 0
+        savedCount: 0,
+        workerMap: savedWorkerMap
       };
       setStorageSnapshot(snapshot);
       return snapshot;
@@ -965,13 +980,18 @@ export function FieldOperationsWorkspace({
         return setStorageFailure(workpackResponse.message);
       }
 
+      const workerMap = workerResponse.workerMap || {};
+      resolveSavedWorkerIds(workerMap, selectedWorkerIds);
+      setSavedWorkpackId(workpackResponse.workpackId);
+      setSavedWorkerMap(workerMap);
+
       const selectedEducationRecords = educationRecords.filter((record) => (
         selectedWorkers.some((worker) => worker.id === record.workerId)
       ));
       const educationResponse = await postJson<SaveResponse>("/api/education-records", {
         scenario: workspaceData.scenario,
         workpackId: workpackResponse.workpackId,
-        workerMap: workerResponse.workerMap || {},
+        workerMap,
         workers,
         records: selectedEducationRecords
       });
@@ -984,9 +1004,9 @@ export function FieldOperationsWorkspace({
         message: `${workpackResponse.message} ${workerResponse.message} ${educationResponse.message}`,
         workpackId: workpackResponse.workpackId,
         savedAt: new Date().toISOString(),
-        savedCount
+        savedCount,
+        workerMap
       };
-      setSavedWorkpackId(workpackResponse.workpackId);
       setStorageSnapshot(snapshot);
       return snapshot;
     } catch (error) {
@@ -996,9 +1016,18 @@ export function FieldOperationsWorkspace({
   }
 
   async function ensureWorkpackSaved() {
-    if (savedWorkpackId) return savedWorkpackId;
+    if (savedWorkpackId) {
+      return {
+        workpackId: savedWorkpackId,
+        workerIds: resolveSavedWorkerIds(savedWorkerMap, selectedWorkerIds)
+      };
+    }
     const snapshot = await saveWorkspaceToSupabase();
-    return snapshot.workpackId;
+    if (!snapshot.ok || !snapshot.workpackId) return null;
+    return {
+      workpackId: snapshot.workpackId,
+      workerIds: resolveSavedWorkerIds(snapshot.workerMap, selectedWorkerIds)
+    };
   }
 
   function toggleWorker(id: string) {
@@ -1099,6 +1128,7 @@ export function FieldOperationsWorkspace({
           targetWorkers={targetWorkers}
           authToken={session?.access_token}
           workpackId={savedWorkpackId}
+          workerIds={savedWorkerIds}
           ensureWorkpackSaved={ensureWorkpackSaved}
           readiness={readiness}
         />
