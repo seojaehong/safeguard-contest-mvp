@@ -74,8 +74,12 @@ export function assessWorkpackReadiness(
 ): WorkpackReadiness {
   const reasons = [
     ...(options.requiresRevalidation ? ["편집된 문서 재검수 필요"] : []),
-    ...(hasOntologyReviewBlocker(response) ? ["안전조치 검수 미통과"] : []),
-    ...(hasQualityBlocker(response) ? ["품질 계약 보완 필요"] : []),
+    ...(!response.ontologyQa
+      ? ["안전조치 검수 정보 확인 필요"]
+      : hasOntologyReviewBlocker(response) ? ["안전조치 검수 미통과"] : []),
+    ...(!response.qualityContract
+      ? ["품질 계약 확인 필요"]
+      : hasQualityBlocker(response) ? ["품질 계약 보완 필요"] : []),
     ...(hasDbHarnessBlocker(response) ? ["DB 하네스 근거 보강 필요"] : []),
     ...(hasApprovalPlaceholders(response) ? ["결재·서명 placeholder 확인 필요"] : [])
   ];

@@ -2148,6 +2148,7 @@ export function WorkpackEditor({
   async function downloadHwp() {
     setHwpStatus("building");
     try {
+      const selectedUsesEditedText = selectedText !== initialValues[selected.key];
       const response = await fetch("/api/export/hwp", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -2156,7 +2157,7 @@ export function WorkpackEditor({
           rows: selectedRows,
           profile: selectedFormProfile,
           scenario: data.scenario,
-          riskAssessmentRows: data.structured?.riskAssessmentRows
+          riskAssessmentRows: selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
         })
       });
       if (!response.ok) {
