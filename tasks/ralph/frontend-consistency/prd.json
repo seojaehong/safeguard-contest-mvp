@@ -71,7 +71,7 @@
       "id": "F4",
       "title": "All route families",
       "priority": 4,
-      "status": "todo",
+      "status": "in_progress",
       "passes": false,
       "acceptance": [
         "Every discovered page belongs to one route family",

@@ -14,13 +14,13 @@ export default async function PrecedentDetailPage({ params }: { params: Promise<
         {item.sourceLabel ? <span className="badge">{item.sourceLabel}</span> : null}
       </div>
       <section className="card list">
-        <div className="h2">{item.title}</div>
+        <h1 className="title small-title">{item.title}</h1>
         <div className="muted">{item.summary}</div>
         <hr />
-        <div className="h3">판단 포인트</div>
+        <h2 className="h3">판단 포인트</h2>
         <ul>{item.points.map((p) => <li key={p}>{p}</li>)}</ul>
         <hr />
-        <div className="h3">요약 본문</div>
+        <h2 className="h3">요약 본문</h2>
         <pre>{item.body}</pre>
         {item.sourceUrl ? <a className="button secondary" href={item.sourceUrl} target="_blank">원문 출처</a> : null}
       </section>

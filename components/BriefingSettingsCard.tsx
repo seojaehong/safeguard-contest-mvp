@@ -106,8 +106,8 @@ export function BriefingSettingsCard() {
 
   return (
     <article className="briefing-settings-card" aria-label="아침 브리핑 설정">
-      <span>아침 브리핑</span>
-      <strong>매일 06:00(KST) 문서팩 자동 생성 + 이메일 발송</strong>
+      <h2 className="safeclaw-section-title">아침 브리핑</h2>
+      <p className="safeclaw-setting-description">매일 06:00(KST) 문서팩 자동 생성 + 이메일 발송</p>
       {!client || (sessionChecked && !session) ? (
         <div>
           <p className="muted">

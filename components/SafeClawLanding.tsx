@@ -125,7 +125,7 @@ export function SafeClawLanding() {
       <section className="safeclaw-os-section compact" id="execution">
         <div className="safeclaw-os-section-head">
           <span>§ 02</span>
-          <b>근거 연결</b>
+          <h2 className="safeclaw-section-title">근거 연결</h2>
         </div>
         <div className="safeclaw-proof-matrix">
           {proofSources.map(([code, title, meta]) => (

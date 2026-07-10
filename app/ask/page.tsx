@@ -25,7 +25,7 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
           복잡한 현장 질문을 법령·해석례·판례 근거와 함께 정리해 문서팩 작성 전 판단을 보조합니다.
         </p>
         <div className="card list surface">
-          <div className="h3">질문 예시</div>
+          <h2 className="h3">질문 예시</h2>
           <pre>{q}</pre>
         </div>
       </section>

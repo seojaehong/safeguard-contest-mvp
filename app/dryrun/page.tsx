@@ -13,10 +13,10 @@ export default function DryrunPage() {
   const report = getLatestDryrunReport();
 
   return (
-    <main className="container grid" style={{ paddingTop: 36, paddingBottom: 48 }}>
-      <section className="hero grid" style={{ gap: 18 }}>
+    <main className="container grid route-internal-page">
+      <section className="hero grid route-internal-hero">
         <span className="badge">SafeClaw 운영 점검</span>
-        <div className="grid" style={{ gap: 12 }}>
+        <div className="grid route-internal-copy">
           <h1 className="title">문서 생성 점검 로그</h1>
           <p className="subtitle">
             위험성평가, TBM 일지, 작업계획서 등 문서형 산출물의 생성 상태와 응답 품질을 운영 관점에서 추적합니다.

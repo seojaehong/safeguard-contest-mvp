@@ -300,17 +300,17 @@ export function V2DemoExperience({
           <section className="primary-triad-grid">
             <article className="triad-card risk">
               <span>위험성평가표</span>
-              <strong>{scenarioRisk(selectedScenario)}</strong>
+              <h3>{scenarioRisk(selectedScenario)}</h3>
               <p>{controls[0]} / {controls[1]} / {controls[2]}</p>
             </article>
             <article className="triad-card tbm">
               <span>TBM</span>
-              <strong>{selectedScenario.workType}</strong>
+              <h3>{selectedScenario.workType}</h3>
               <p>작업 전 회의 질문: 작업중지 기준, 보호구 확인자, 위험구역 통제 담당자를 지정합니다.</p>
             </article>
             <article className="triad-card foreign">
               <span>외국인 전송본</span>
-              <strong>{primaryLanguages(selectedScenario)}</strong>
+              <h3>{primaryLanguages(selectedScenario)}</h3>
               <p>위험하면 멈추고 관리자에게 말하세요. 이해하지 못하면 다시 설명을 요청하세요.</p>
             </article>
           </section>
@@ -318,14 +318,14 @@ export function V2DemoExperience({
           <section className={`demo-generated-pack ${isResultsVisible ? "visible" : ""}`}>
             <div className="demo-section-heading">
               <span>생성 결과</span>
-              <strong>11종 문서팩</strong>
+              <h2>11종 문서팩</h2>
               <p>{isResultsVisible ? "선택한 현장 조건으로 생성된 산출물 요약입니다." : "문서팩 생성 단계에서 결과 요약이 열립니다."}</p>
             </div>
             <div className="demo-document-list">
               {documents.map((document, index) => (
                 <article key={document.code} className={index < 3 ? "primary" : ""}>
                   <span>{document.code}</span>
-                  <strong>{document.title}</strong>
+                  <h3>{document.title}</h3>
                   <p>{document.body}</p>
                 </article>
               ))}
@@ -335,7 +335,7 @@ export function V2DemoExperience({
           <section className="demo-evidence-map">
             <div className="demo-section-heading">
               <span>문서 반영 근거</span>
-              <strong>API 조합이 산출물에 들어가는 위치</strong>
+              <h2>API 조합이 산출물에 들어가는 위치</h2>
             </div>
             <ul>
               <li><b>기상청</b><span>{selectedScenario.weatherSignal}을 작업중지 기준과 TBM 확인 질문에 반영</span></li>
@@ -358,7 +358,7 @@ export function V2DemoExperience({
 
       {presenterNotes ? (
         <section className="presenter-notes card">
-          <strong>운영 메모</strong>
+          <h2>운영 메모</h2>
           <p>Space로 다음 단계, F1~F5로 시나리오 전환, O로 사전 캐시 응답 모드를 전환합니다. API 상태 질문이 나오면 “실시간 연결 우선이며 지연 시 캐시 응답 사용 여부를 표시합니다”라고 설명합니다.</p>
         </section>
       ) : null}
