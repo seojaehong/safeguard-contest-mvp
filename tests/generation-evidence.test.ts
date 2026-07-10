@@ -5,6 +5,7 @@ import {
   attachGenerationEvidence,
   buildResponseContentDigest,
   sealGenerationEvidence,
+  verifyAskResponseGenerationEvidence,
   verifyGenerationEvidence
 } from "@/lib/generation-evidence";
 import { buildMockAskResponse } from "@/lib/mock-data";
@@ -12,6 +13,30 @@ import type { AskResponse } from "@/lib/types";
 import type { GenerationEvidenceSnapshot } from "@/lib/types";
 
 const SECRET = "safeclaw-generation-evidence-test-secret";
+
+const generationTrace = {
+  traceId: "trace-generation-evidence-test",
+  askMode: "full",
+  answer: {
+    provider: "openai",
+    model: "gpt-4.1-mini"
+  },
+  deliverables: {
+    attempted: true,
+    provider: "anthropic",
+    modelPerDocument: {
+      riskAssessment: {
+        provider: "anthropic",
+        model: "claude-opus-4-8"
+      },
+      foreign: {
+        provider: "anthropic",
+        model: "claude-haiku-4-5"
+      }
+    }
+  },
+  fallbackUsed: false
+} as const;
 
 function snapshot(): GenerationEvidenceSnapshot {
   const question = "성수동 외벽 도장 작업";
@@ -36,6 +61,7 @@ function responseWithHarness(): AskResponse {
   const packet = snapshot().dbHarnessPacket;
   return {
     ...response,
+    generationTrace,
     scenario: snapshot().scenario,
     dbHarness: {
       packet,
@@ -119,6 +145,7 @@ describe("generation evidence integrity", () => {
 
     expect(attached.generationEvidence?.snapshot).toEqual({
       ...snapshot(),
+      generationTrace,
       responseContentDigest: buildResponseContentDigest(response)
     });
     expect(attached.generationEvidenceError).toBeUndefined();
@@ -133,6 +160,30 @@ describe("generation evidence integrity", () => {
     expect(attached.generationEvidence).toBeUndefined();
     expect(attached.generationEvidenceError).toMatchObject({
       code: "secret_unconfigured"
+    });
+  });
+
+  it("rejects a response whose top-level generation trace changed after sealing", () => {
+    const attached = attachGenerationEvidence(responseWithHarness(), {
+      secret: SECRET,
+      generatedAt: snapshot().generatedAt
+    });
+    const tampered: AskResponse = {
+      ...attached,
+      generationTrace: attached.generationTrace
+        ? {
+            ...attached.generationTrace,
+            answer: {
+              provider: "vertex",
+              model: "gemini-2.5-flash"
+            }
+          }
+        : undefined
+    };
+
+    expect(verifyAskResponseGenerationEvidence(tampered, SECRET)).toMatchObject({
+      ok: false,
+      code: "payload_mismatch"
     });
   });
 });

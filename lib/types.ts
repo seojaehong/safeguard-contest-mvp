@@ -322,10 +322,33 @@ export type AskScenario = {
   weatherNote: string;
 };
 
+export type GenerationAnswerTrace = {
+  provider: "openai" | "vertex" | "mock";
+  model: string | null;
+};
+
+export type GenerationDeliverableModelTrace = {
+  provider: "anthropic" | "vertex";
+  model: string;
+};
+
+export type GenerationTrace = {
+  traceId: string;
+  askMode: "template" | "enhanced" | "full";
+  answer: GenerationAnswerTrace;
+  deliverables: {
+    attempted: boolean;
+    provider: "anthropic" | "vertex" | "mixed" | null;
+    modelPerDocument: Record<string, GenerationDeliverableModelTrace>;
+  };
+  fallbackUsed: boolean;
+};
+
 export type GenerationEvidenceSnapshot = {
   question: string;
   scenario: AskScenario;
   dbHarnessPacket: DbHarnessPacket;
+  generationTrace?: GenerationTrace;
   responseContentDigest: string;
   generatedAt: string;
 };
@@ -597,6 +620,7 @@ export type AskResponse = {
       ontologyStatus: DbHarnessPacket["ontologyChecklist"]["status"];
     };
   };
+  generationTrace?: GenerationTrace;
   generationEvidence?: GenerationEvidenceEnvelope;
   generationEvidenceError?: GenerationEvidenceError;
   qualityContract?: QualityContract;

@@ -19,6 +19,8 @@ import type {
   TbmBriefingStructured,
   TbmLogStructured,
   EducationRecordStructured,
+  GenerationDeliverableModelTrace,
+  GenerationTrace,
   PermitInspectionStructured,
   TbmRiskLink
 } from "@/lib/types";
@@ -43,6 +45,20 @@ import { safeEmit, type OnAskProgress } from "@/lib/ask-progress";
 
 const log = createLogger("ai-deliverables");
 
+type DeliverablesProviderCallTrace = GenerationDeliverableModelTrace & {
+  fallbackUsed: boolean;
+};
+
+type DeliverablesProviderCallResult = {
+  text: string;
+  trace: DeliverablesProviderCallTrace;
+};
+
+type CallAndParseOptions = {
+  traceId?: string;
+  onTrace?: (document: string, trace: DeliverablesProviderCallTrace) => void;
+};
+
 const providerDecision = resolveDeliverablesProvider({
   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
   providerFlag: process.env.AI_DELIVERABLES_PROVIDER,
@@ -62,6 +78,12 @@ const GEMINI_TIMEOUT_MS = resolveDeliverablesTimeoutMs(process.env.GEMINI_DELIVE
 
 function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
+}
+
+function isDeliverablesProviderConfigured(): boolean {
+  return providerDecision.provider === "anthropic"
+    ? Boolean(providerDecision.model)
+    : isVertexConfigured();
 }
 
 type Scenario = {
@@ -89,16 +111,28 @@ type GenContext = {
   workDate: string;
 };
 
-async function callGemini(prompt: string, budget: DocBudget, label: string): Promise<string> {
+async function callGemini(
+  prompt: string,
+  budget: DocBudget,
+  label: string
+): Promise<DeliverablesProviderCallResult> {
   // Optional demo/pilot route: Claude first, Vertex chain as the runtime fallback.
   let anthropicFailed = false;
   if (providerDecision.provider === "anthropic" && providerDecision.model) {
     const anthropicModel = resolveAnthropicModelForDoc(label, providerDecision.model);
     try {
-      return await generateWithAnthropic(anthropicModel, prompt, {
+      const text = await generateWithAnthropic(anthropicModel, prompt, {
         maxOutputTokens: budget.maxOutputTokens,
         timeoutMs: budget.timeoutMs,
       });
+      return {
+        text,
+        trace: {
+          provider: "anthropic",
+          model: anthropicModel,
+          fallbackUsed: false
+        }
+      };
     } catch (error) {
       anthropicFailed = true;
       log.error(`Anthropic deliverables (${anthropicModel}) failed; falling back to Vertex`, error);
@@ -112,7 +146,7 @@ async function callGemini(prompt: string, budget: DocBudget, label: string): Pro
     : planModelAttempts(geminiModel, geminiFallbackModels, budget.timeoutMs, budget.fallbackTimeoutCapMs);
   let lastError: unknown;
 
-  for (const { model, timeoutMs } of attempts) {
+  for (const [index, { model, timeoutMs }] of attempts.entries()) {
     try {
       // generateWithVertex handles timeout internally via Promise.race.
       // Standard docs (1,500-3,500자): 8,192 output tokens.
@@ -126,7 +160,14 @@ async function callGemini(prompt: string, budget: DocBudget, label: string): Pro
         },
         timeoutMs,
       });
-      return text;
+      return {
+        text,
+        trace: {
+          provider: "vertex",
+          model,
+          fallbackUsed: anthropicFailed || index > 0
+        }
+      };
     } catch (error) {
       lastError = error;
       log.error(`Vertex AI deliverables (${model}) failed`, error);
@@ -151,7 +192,8 @@ function isTimeoutError(error: unknown): boolean {
 async function callAndParse<T>(
   prompt: string,
   parser: (raw: string) => T | null,
-  label: string
+  label: string,
+  options: CallAndParseOptions = {}
 ): Promise<T> {
   const budget = resolveDocBudget(label, GEMINI_TIMEOUT_MS);
   // Heavy docs run 90-135s per attempt — a parse-retry would blow the request
@@ -160,12 +202,23 @@ async function callAndParse<T>(
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      const raw = await callGemini(prompt, budget, label);
-      const parsed = parser(raw);
-      if (parsed) return parsed;
-      lastError = new Error(`json parse failed (raw len=${raw.length})`);
-      const head = raw.slice(0, 200).replace(/\n/g, "\\n");
-      const tail = raw.slice(-200).replace(/\n/g, "\\n");
+      const generated = await callGemini(prompt, budget, label);
+      const parsed = parser(generated.text);
+      if (parsed) {
+        options.onTrace?.(label, generated.trace);
+        if (options.traceId) {
+          log.info("safeclaw_deliverables_trace", {
+            event: "safeclaw_deliverables_trace",
+            traceId: options.traceId,
+            document: label,
+            ...generated.trace
+          });
+        }
+        return parsed;
+      }
+      lastError = new Error(`json parse failed (raw len=${generated.text.length})`);
+      const head = generated.text.slice(0, 200).replace(/\n/g, "\\n");
+      const tail = generated.text.slice(-200).replace(/\n/g, "\\n");
       log.error(`[AI ${label}] attempt ${attempt} parse failed. head=${head} ... tail=${tail}`);
     } catch (error) {
       lastError = error;
@@ -709,6 +762,8 @@ export type GenerateAllOptions = {
   scope?: "full" | "enhanced";
   /** Task D-2a: per-doc progress callback for the SSE console. Defaults to no-op. */
   onProgress?: OnAskProgress;
+  /** Correlates provider/model evidence across per-document calls and the ask response. */
+  traceId?: string;
 };
 
 function buildContext(opts: GenerateAllOptions): GenContext {
@@ -876,13 +931,18 @@ function parseTbmRiskLinks(raw: string, rows: RiskAssessmentRow[]): Partial<AiDe
   return links.length ? { tbmRiskLinks: links.slice(0, 6) } : null;
 }
 
-async function generateTbmRiskLinks(ctx: GenContext, rows: RiskAssessmentRow[]): Promise<Partial<AiDeliverables>> {
+async function generateTbmRiskLinks(
+  ctx: GenContext,
+  rows: RiskAssessmentRow[],
+  traceOptions?: CallAndParseOptions
+): Promise<Partial<AiDeliverables>> {
   if (!rows.length) return { tbmRiskLinks: [] };
   try {
     return await callAndParse(
       tbmRiskLinksPrompt(ctx, rows),
       (raw) => parseTbmRiskLinks(raw, rows),
-      "tbmRiskLinks"
+      "tbmRiskLinks",
+      traceOptions
     );
   } catch (error) {
     log.error("[AI tbmRiskLinks] falling back to []", error);
@@ -989,7 +1049,7 @@ function tabularSpecsForScope(scope: "full" | "enhanced") {
 }
 
 export async function generateAllDeliverables(opts: GenerateAllOptions): Promise<AiDeliverables> {
-  if (!isVertexConfigured()) return {};
+  if (!isDeliverablesProviderConfigured()) return {};
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
 
@@ -1038,25 +1098,57 @@ export type AiDeliverablesDiagnostics = {
     reason?: string;
   }>;
   filledKeys: string[];
+  trace: GenerationTrace["deliverables"] & { fallbackUsed: boolean };
 };
+
+function summarizeDeliverablesProvider(
+  modelPerDocument: Record<string, GenerationDeliverableModelTrace>
+): GenerationTrace["deliverables"]["provider"] {
+  const providers = new Set(Object.values(modelPerDocument).map((item) => item.provider));
+  if (providers.size === 0) return null;
+  if (providers.size > 1) return "mixed";
+  return providers.values().next().value ?? null;
+}
 
 export async function generateAllDeliverablesWithDiagnostics(
   opts: GenerateAllOptions
 ): Promise<{ deliverables: AiDeliverables; diagnostics: AiDeliverablesDiagnostics }> {
-  if (!isVertexConfigured()) {
+  if (!isDeliverablesProviderConfigured()) {
     return {
       deliverables: {},
-      diagnostics: { geminiAvailable: false, groupResults: [], filledKeys: [] }
+      diagnostics: {
+        geminiAvailable: false,
+        groupResults: [],
+        filledKeys: [],
+        trace: {
+          attempted: false,
+          provider: null,
+          modelPerDocument: {},
+          fallbackUsed: false
+        }
+      }
     };
   }
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
   const onProgress = opts.onProgress;
+  const modelPerDocument: Record<string, GenerationDeliverableModelTrace> = {};
+  let providerFallbackUsed = false;
+  const traceOptions: CallAndParseOptions = {
+    traceId: opts.traceId,
+    onTrace: (document, trace) => {
+      modelPerDocument[document] = {
+        provider: trace.provider,
+        model: trace.model
+      };
+      providerFallbackUsed ||= trace.fallbackUsed;
+    }
+  };
 
   const allSpecs: Array<{ name: string; promise: Promise<Partial<AiDeliverables>> }> = [
     ...tabularSpecsForScope(scope).map((spec) => ({
       name: spec.name,
-      promise: callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name) as Promise<Partial<AiDeliverables>>
+      promise: callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name, traceOptions) as Promise<Partial<AiDeliverables>>
     }))
   ];
   if (scope === "full") {
@@ -1066,16 +1158,17 @@ export async function generateAllDeliverablesWithDiagnostics(
         promise: callAndParse(
           structuredRiskRowsPrompt(ctx),
           parseStructuredRiskRows,
-          "structuredRiskRows"
+          "structuredRiskRows",
+          traceOptions
         ) as Promise<Partial<AiDeliverables>>
       },
       {
         name: "free",
-        promise: callAndParse(freeFormPrompt(ctx), parseFree, "free") as Promise<Partial<AiDeliverables>>
+        promise: callAndParse(freeFormPrompt(ctx), parseFree, "free", traceOptions) as Promise<Partial<AiDeliverables>>
       },
       {
         name: "foreign",
-        promise: callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign") as Promise<Partial<AiDeliverables>>
+        promise: callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign", traceOptions) as Promise<Partial<AiDeliverables>>
       }
     );
   }
@@ -1103,7 +1196,7 @@ export async function generateAllDeliverablesWithDiagnostics(
 
   applyRiskRowClamp(out);
   if (scope === "full") {
-    const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || []);
+    const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || [], traceOptions);
     Object.assign(out, tbmRiskLinksResult);
     const tbmRiskLinksOk = (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
     groupResults.push({
@@ -1119,7 +1212,13 @@ export async function generateAllDeliverablesWithDiagnostics(
     diagnostics: {
       geminiAvailable: true,
       groupResults,
-      filledKeys: Object.keys(out)
+      filledKeys: Object.keys(out),
+      trace: {
+        attempted: allSpecs.length > 0,
+        provider: summarizeDeliverablesProvider(modelPerDocument),
+        modelPerDocument,
+        fallbackUsed: providerFallbackUsed || groupResults.some((result) => result.status === "rejected")
+      }
     }
   };
 }

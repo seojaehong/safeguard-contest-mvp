@@ -1,5 +1,6 @@
-import { AskResponse, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
-import { enhanceLegalEvidenceMappings, generateAnswer } from "./ai";
+import { randomUUID } from "node:crypto";
+import { AskResponse, type GenerationTrace, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
+import { enhanceLegalEvidenceMappings, generateAnswer, type AnswerGenerationResult } from "./ai";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
@@ -1396,6 +1397,7 @@ export function attachDbHarnessFallback(response: AskResponse, input: {
 
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
   const onProgress = options.onProgress;
+  const traceId = randomUUID();
   const harnessMemory = {
     improvements: options.harnessMemory?.improvements || [],
     workpackMemory: options.harnessMemory?.workpackMemory || []
@@ -1407,7 +1409,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 
   // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
   if (aiMode === "template") {
-    return attachDbHarnessFallback(
+    const response = attachDbHarnessFallback(
       buildMockAskResponse(
         question,
         mockSearchResults.slice(0, 4),
@@ -1416,6 +1418,21 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       ),
       { question, harnessMemory }
     );
+    const generationTrace: GenerationTrace = {
+      traceId,
+      askMode: aiMode,
+      answer: {
+        provider: "mock",
+        model: null
+      },
+      deliverables: {
+        attempted: false,
+        provider: null,
+        modelPerDocument: {}
+      },
+      fallbackUsed: false
+    };
+    return { ...response, generationTrace };
   }
 
   try {
@@ -1442,14 +1459,21 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     );
     // generateAnswer uses raw citations directly — no longer waits for enhance.
     const responsePromise = rawCitationsBasePromise.then((rawBase) =>
-      generateAnswer(question, rawBase.slice(0, 6)).catch((error) => {
-        const message = error instanceof Error ? error.message : String(error);
-        return buildMockAskResponse(
-          question,
-          rawBase.slice(0, 6),
-          "fallback",
-          `AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다. 사유: ${message}`
-        );
+      generateAnswer(question, rawBase.slice(0, 6), { traceId }).catch((error): AnswerGenerationResult => {
+        log.error("AI response generation failed; using DB harness fallback", error);
+        return {
+          response: buildMockAskResponse(
+            question,
+            rawBase.slice(0, 6),
+            "fallback",
+            "AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다."
+          ),
+          trace: {
+            provider: "mock",
+            model: null,
+            fallbackUsed: true
+          }
+        };
       })
     );
 
@@ -1613,7 +1637,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
               dbHarnessContext,
               scope: "full",
-              onProgress
+              onProgress,
+              traceId
             }).catch((error) => {
               log.error("AI deliverable generation failed (parallel path); falling back to template bodies", error);
               return null;
@@ -1708,7 +1733,17 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const kosha = allResults[3].status === "fulfilled" ? allResults[3].value : (log.warn("koshaPromise failed", (allResults[3] as PromiseRejectedResult).reason), koshaFallback);
     const koshaOpenApi = allResults[4].status === "fulfilled" ? allResults[4].value : (log.warn("koshaOpenApiPromise failed", (allResults[4] as PromiseRejectedResult).reason), koshaOpenApiFallback);
     const accidentCases = allResults[5].status === "fulfilled" ? allResults[5].value : (log.warn("accidentCasesPromise failed", (allResults[5] as PromiseRejectedResult).reason), accidentCasesFallback);
-    const response = allResults[6].status === "fulfilled" ? allResults[6].value : (log.warn("responsePromise failed", (allResults[6] as PromiseRejectedResult).reason), buildMockAskResponse(question, mockSearchResults.slice(0, 4), "fallback", "AI 응답 생성 실패"));
+    const answerResult: AnswerGenerationResult = allResults[6].status === "fulfilled"
+      ? allResults[6].value
+      : (log.warn("responsePromise failed", (allResults[6] as PromiseRejectedResult).reason), {
+          response: buildMockAskResponse(question, mockSearchResults.slice(0, 4), "fallback", "AI 응답 생성 실패"),
+          trace: {
+            provider: "mock" as const,
+            model: null,
+            fallbackUsed: true
+          }
+        });
+    const response = answerResult.response;
     const safetyReference = allResults[7].status === "fulfilled" ? allResults[7].value : (log.warn("safetyReferencePromise failed", (allResults[7] as PromiseRejectedResult).reason), safetyReferenceFallback);
     const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (log.warn("citationsPromise failed", (allResults[8] as PromiseRejectedResult).reason), mockSearchResults.slice(0, 4));
     const deliverablesResult = allResults[9].status === "fulfilled" ? allResults[9].value : (log.warn("deliverablesPromise failed", (allResults[9] as PromiseRejectedResult).reason), null);
@@ -1790,12 +1825,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         aiBodies = deliverables;
         const filled = Object.keys(aiBodies);
         const groupBrief = diagnostics.groupResults
-          .map((g) => {
-            if (g.status === "rejected") return `${g.group}=fail(${(g.reason || "").slice(0, 60)})`;
-            return `${g.group}=${g.reason ? `fulfilled-${(g.reason || "").slice(0, 30)}` : "ok"}`;
-          })
+          .map((g) => `${g.group}=${g.status === "fulfilled" ? "ok" : "fallback"}`)
           .join(" ");
-        aiModeAppliedDetail = `AI_MODE=${aiMode} (Gemini 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"}) [${groupBrief}]`;
+        aiModeAppliedDetail = `AI_MODE=${aiMode} (AI 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"}) [${groupBrief}]`;
       } else {
         aiModeAppliedDetail = `AI_MODE=${aiMode} 문서 생성기 미응답 → 하네스 템플릿 보강`;
       }
@@ -1878,10 +1910,31 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const dbHarnessSummary = summarizeDbHarnessPacket(dbHarnessPacket);
     const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket);
     const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket);
+    const deliverablesExecutionTrace = deliverablesResult?.diagnostics.trace ?? {
+      attempted: false,
+      provider: null,
+      modelPerDocument: {},
+      fallbackUsed: false
+    };
+    const generationTrace: GenerationTrace = {
+      traceId,
+      askMode: aiMode,
+      answer: {
+        provider: answerResult.trace.provider,
+        model: answerResult.trace.model
+      },
+      deliverables: {
+        attempted: deliverablesExecutionTrace.attempted,
+        provider: deliverablesExecutionTrace.provider,
+        modelPerDocument: deliverablesExecutionTrace.modelPerDocument
+      },
+      fallbackUsed: answerResult.trace.fallbackUsed || deliverablesExecutionTrace.fallbackUsed
+    };
 
     const enriched: AskResponse = {
       ...response,
       generationMode: aiMode,
+      generationTrace,
       answer: [
         dbHarnessAnswer,
         `[기상 신호] ${weather.summary}`,
@@ -2049,16 +2102,33 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const withOntologyQa = await attachWebOntologyQa(withMcpDetail, question);
     return attachQualityContract(withOntologyQa);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "알 수 없는 오류";
-    return attachDbHarnessFallback(
+    log.error("runAsk pipeline failed; using DB harness fallback", error);
+    const response = attachDbHarnessFallback(
       buildMockAskResponse(
         question,
         mockSearchResults.slice(0, 4),
         "fallback",
-        `일부 외부 연결을 확인하지 못해 규정 기반 문서팩으로 전환했습니다. 사유: ${message}`
+        "일부 외부 연결을 확인하지 못해 규정 기반 문서팩으로 전환했습니다."
       ),
       { question, harnessMemory }
     );
+    return {
+      ...response,
+      generationTrace: {
+        traceId,
+        askMode: aiMode,
+        answer: {
+          provider: "mock",
+          model: null
+        },
+        deliverables: {
+          attempted: false,
+          provider: null,
+          modelPerDocument: {}
+        },
+        fallbackUsed: true
+      }
+    };
   }
 }
 
