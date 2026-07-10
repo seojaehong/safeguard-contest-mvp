@@ -136,6 +136,8 @@ Inline icons are `16px`, control icons are `20px`, and section or empty-state ic
 - Standard content container: maximum `1200px`.
 - Long-form reading measure: maximum `72ch`.
 - Desktop workbench at `1280px` and above: `224px minmax(0, 1fr) 320px` with `16px` gaps.
+- `FieldOperationsWorkspace` is the canonical three-column implementation: checklist rail `224px`, main canvas `minmax(0, 1fr)`, and worker/context rail `320px`.
+- `SafeGuardCommandCenter` is a named two-column structural variant because its document/evidence context is embedded inside the main workflow page rather than rendered as a third root child. Its root grid is `224px minmax(0, 1fr)` with the same internal `16px` contextual gaps; it must not reserve an empty `320px` column.
 - Tablet workbench from `768px` through `1279px`: main content plus one contextual rail; the secondary rail moves below the main content.
 - Mobile below `768px`: one column, `16px` page gutter, no fixed-width child wider than the viewport.
 - Two-column marketing or information sections use equal `minmax(0, 1fr)` tracks unless one side is a defined contextual rail.

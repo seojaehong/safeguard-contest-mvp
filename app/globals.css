@@ -1747,6 +1747,8 @@ ul {
   .status-orb.generating,
   .button-spinner,
   .inline-progress.animated span,
+  .inline-progress.animated progress::-webkit-progress-value,
+  .inline-progress.animated progress::-moz-progress-bar,
   .agent-console-live,
   .hero-console-replay .agent-console-live,
   .loading-spinner,
@@ -6157,8 +6159,8 @@ ul {
 
 .field-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.38fr);
-  gap: 18px;
+  grid-template-columns: 224px minmax(0, 1fr) 320px;
+  gap: 16px;
   align-items: start;
 }
 
@@ -6170,10 +6172,10 @@ ul {
 }
 
 .workspace-rail {
-  grid-column: 1 / -1;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   align-content: stretch;
-  position: static;
+  position: sticky;
+  top: 88px;
 }
 
 .workspace-side {
@@ -6183,7 +6185,7 @@ ul {
 
 .workspace-canvas {
   display: grid;
-  gap: 18px;
+  gap: 16px;
   min-width: 0;
 }
 
@@ -6272,7 +6274,7 @@ ul {
   border: 1px solid rgba(226, 222, 213, 0.86);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.48);
-  padding: 10px;
+  padding: 12px;
 }
 
 .worker-summary-grid span,
@@ -6286,12 +6288,12 @@ ul {
 
 .worker-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .worker-card {
   display: grid;
-  gap: 9px;
+  gap: 8px;
   border: 1px solid rgba(226, 222, 213, 0.9);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.52);
@@ -6305,14 +6307,14 @@ ul {
 
 .worker-card-head {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: flex-start;
   cursor: pointer;
 }
 
 .worker-card-head span {
   display: grid;
-  gap: 2px;
+  gap: 4px;
 }
 
 .worker-card-head small {
@@ -6324,7 +6326,7 @@ ul {
 .recipient-chip-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .worker-facts span,
@@ -6333,7 +6335,7 @@ ul {
   border: 1px solid rgba(207, 199, 185, 0.8);
   border-radius: 4px;
   background: rgba(255, 253, 248, 0.76);
-  padding: 5px 8px;
+  padding: 4px 8px;
 }
 
 .status-chip {
@@ -6395,12 +6397,12 @@ ul {
 .evidence-impact-grid {
   display: grid;
   grid-template-columns: minmax(280px, 0.65fr) minmax(0, 1fr);
-  gap: 18px;
+  gap: 16px;
 }
 
 .impact-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .impact-card {
@@ -6418,7 +6420,7 @@ ul {
   border: 1px dashed rgba(207, 199, 185, 0.9);
   border-radius: 4px;
   background: rgba(255, 253, 248, 0.58);
-  padding: 14px;
+  padding: 16px;
 }
 
 .impact-card strong {
@@ -6646,11 +6648,11 @@ ul {
 /* AI 작업 콘솔 (Task D-2b) — monospace stage log for /api/ask/stream events. */
 .agent-console {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   border: 1px solid rgba(226, 222, 213, 0.88);
   border-radius: 4px;
   background: rgba(20, 22, 20, 0.94);
-  padding: 10px 12px 12px;
+  padding: 12px;
 }
 
 .agent-console.agent-console-active {
@@ -6671,8 +6673,8 @@ ul {
 }
 
 .agent-console-live {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--sc-hazard-yellow, #ffd400);
   animation: agentConsolePulse 1.1s ease-in-out infinite;
@@ -6685,7 +6687,7 @@ ul {
 
 .agent-console-body {
   display: grid;
-  gap: 3px;
+  gap: 4px;
   max-height: 168px;
   overflow-y: auto;
 }
@@ -6705,7 +6707,7 @@ ul {
 
 .agent-console-icon {
   flex: none;
-  width: 14px;
+  width: 16px;
   text-align: center;
 }
 
@@ -10739,7 +10741,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell .command-main {
-    padding-top: 42px;
+    padding-top: 40px;
   }
 
   .command-center-shell .command-copy h1 {
@@ -10759,7 +10761,7 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .command-console-input {
     min-height: 156px;
     font-size: var(--text-body-lg);
-    padding: 18px;
+    padding: 16px;
     font-weight: 500;
     line-height: var(--leading-body-lg);
     letter-spacing: var(--tracking-body);
@@ -10911,11 +10913,11 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.03);
-  padding: 3px;
+  padding: 4px;
 }
 
 .command-center-shell .workspace-theme-toggle button {
-  min-width: 54px;
+  min-width: 44px;
   border: 0;
   border-radius: 4px;
   background: transparent;
@@ -10935,7 +10937,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .linear-workspace-layout {
   display: grid;
-  grid-template-columns: 242px minmax(0, 1fr);
+  grid-template-columns: 224px minmax(0, 1fr);
   gap: 0;
   min-height: calc(100vh - 92px);
   border: 1px solid var(--workspace-rule);
@@ -11570,7 +11572,7 @@ body:has(.safeclaw-landing) :is(
   border-color: var(--workspace-rule);
   border-radius: 4px;
   background: var(--workspace-surface-2);
-  padding: 0;
+  padding: 12px;
 }
 
 .command-center-shell .agent-console.agent-console-active {
@@ -12574,13 +12576,11 @@ body:has(.safeclaw-landing) :is(
 }
 
 @media (max-width: 720px) {
-  .command-center-shell .evidence-readiness-rail,
-  .command-center-shell.workspace-theme-day .evidence-readiness-rail {
+  .command-center-shell .evidence-readiness-rail {
     grid-template-columns: 1fr;
   }
 
-  .command-center-shell .evidence-readiness-card,
-  .command-center-shell.workspace-theme-day .evidence-readiness-card {
+  .command-center-shell .evidence-readiness-card {
     min-height: 0;
     padding: 16px;
   }
@@ -13132,6 +13132,26 @@ body:has(.safeclaw-landing) :is(
 
 .document-review-meter progress::-moz-progress-bar {
   background: var(--workspace-accent);
+}
+
+.inline-progress.animated progress::-webkit-progress-value {
+  animation: progressPulse 1.2s ease-in-out infinite;
+}
+
+.inline-progress.animated progress::-moz-progress-bar {
+  animation: progressPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% { opacity: 0.56; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inline-progress.animated progress::-webkit-progress-value,
+  .inline-progress.animated progress::-moz-progress-bar {
+    animation: none;
+  }
 }
 
 @media (max-width: 767px) {

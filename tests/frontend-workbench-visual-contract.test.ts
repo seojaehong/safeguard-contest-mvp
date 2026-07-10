@@ -18,6 +18,12 @@ const components = Object.fromEntries(
 ) as Record<(typeof componentNames)[number], string>;
 const css = read("app/globals.css");
 
+const exactBlock = (selector: string): string => {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const matches = [...css.matchAll(new RegExp(`${escaped}\\s*\\{([\\s\\S]*?)\\}`, "gu"))];
+  return matches.at(-1)?.[1] ?? "";
+};
+
 describe("workbench visual contract", () => {
   it("exposes stable hooks for every operational surface and state", () => {
     const commandCenter = components["SafeGuardCommandCenter.tsx"];
@@ -54,10 +60,43 @@ describe("workbench visual contract", () => {
     const themeBlocks = [...css.matchAll(/([^{}]*\.workspace-theme-(?:day|night)[^{}]*)\{([^{}]*)\}/gu)];
     for (const [fullMatch, selector, declarations] of themeBlocks) {
       const selectorList = selector.split(",").map((item) => item.trim());
-      if (selectorList.some((item) => !/\.workspace-theme-(?:day|night)/u.test(item))) continue;
-      expect(declarations, selector).not.toMatch(/(?:font-family|font-size|font-weight|line-height|letter-spacing|padding(?:-[\w-]+)?|margin(?:-[\w-]+)?|gap|(?:min-|max-)?(?:width|height)|border-radius|border-width|border)\s*:(?!\s*[^;]*-color)/u);
+      for (const item of selectorList.filter((candidate) => /\.workspace-theme-(?:day|night)/u.test(candidate))) {
+        expect(declarations, item).not.toMatch(/(?:font-family|font-size|font-weight|line-height|letter-spacing|padding(?:-[\w-]+)?|margin(?:-[\w-]+)?|gap|(?:min-|max-)?(?:width|height)|border-radius|border-width|border)\s*:(?!\s*[^;]*-color)/u);
+      }
       expect(fullMatch).not.toContain("!important");
     }
+  });
+
+  it("asserts the effective owners for all five workbench surfaces", () => {
+    const baseAgentConsole = css.match(/\/\* AI 작업 콘솔[\s\S]*?\.agent-console\s*\{([\s\S]*?)\}/u)?.[1] ?? "";
+    const baseAgentBody = css.match(/\/\* AI 작업 콘솔[\s\S]*?\.agent-console-body\s*\{([\s\S]*?)\}/u)?.[1] ?? "";
+    const baseAgentIcon = css.match(/\/\* AI 작업 콘솔[\s\S]*?\.agent-console-icon\s*\{([\s\S]*?)\}/u)?.[1] ?? "";
+    expect(baseAgentConsole).toMatch(/gap:\s*8px;[\s\S]*padding:\s*12px;/u);
+    expect(exactBlock(".command-center-shell .agent-console")).toMatch(/padding:\s*12px;/u);
+    expect(baseAgentBody).toMatch(/gap:\s*4px;/u);
+    expect(baseAgentIcon).toMatch(/width:\s*16px;/u);
+    expect(exactBlock(".command-center-shell .workspace-theme-toggle")).toMatch(/padding:\s*4px;/u);
+    expect(exactBlock(".command-center-shell .workspace-theme-toggle button")).toMatch(/min-width:\s*44px;/u);
+    expect(css).toMatch(/\.command-center-shell \.linear-workspace-layout\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\);/u);
+    expect(css).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\) 320px;[^}]*gap:\s*16px;/u);
+    expect(css).toMatch(/\.share-panel\.workflow-panel\s*\{[^}]*gap:\s*16px;[^}]*padding:\s*16px;/u);
+    expect(exactBlock(".safeclaw-module-shell.module-variant-document .safeclaw-report-controls button")).toMatch(/min-height:\s*44px;[\s\S]*padding:\s*12px 16px;/u);
+  });
+
+  it("asserts effective mobile workspace values after cascade", () => {
+    const mobile = css.match(/@media \(max-width: 720px\) \{([\s\S]*?)\n\}/gu)?.join("\n") ?? "";
+    expect(mobile).toMatch(/\.command-center-shell \.command-main\s*\{[\s\S]*?padding-top:\s*40px;/u);
+    expect(mobile).toMatch(/\.command-center-shell \.command-console-input\s*\{[\s\S]*?padding:\s*16px;/u);
+    expect(mobile.lastIndexOf("padding-top: 32px")).toBeGreaterThan(mobile.lastIndexOf("padding-top: 40px"));
+    expect(mobile).not.toMatch(/\.command-center-shell \.command-(?:main|console-input)\s*\{[^}]*(?:padding|gap|margin(?:-[\w-]+)?):\s*(?:3|6|10|14|18|42)px/u);
+  });
+
+  it("keeps the rendered progress node animated and reduced-motion safe", () => {
+    expect(components["SafeGuardCommandCenter.tsx"]).toMatch(/document-review-meter[\s\S]*?<progress\s+value=/u);
+    expect(css).toMatch(/\.inline-progress\.animated progress::-(?:webkit-progress-value|moz-progress-bar)[^{]*\{[\s\S]*?animation:\s*progressPulse/u);
+    const reducedMotion = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?)\n\}/u)?.[1] ?? "";
+    expect(reducedMotion).toContain(".inline-progress.animated progress::-webkit-progress-value");
+    expect(reducedMotion).toContain(".inline-progress.animated progress::-moz-progress-bar");
   });
 
   it("normalizes document, evidence, share, report, empty, and loading geometry", () => {

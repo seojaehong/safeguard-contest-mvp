@@ -34,3 +34,11 @@ Ralph story: `F5` remains `in_progress` with `passes: false` pending independent
 - Independent specification and code-quality review is still required before `F5.passes` can become `true`.
 - Task 7 must visually verify both Day and Night plus report empty/populated states at desktop and mobile widths.
 - No backend, API, database, or generated-document export files were changed.
+
+## Independent review remediation
+
+- Exact-owner tests now cover the real AgentConsole, theme toggle, two- and three-column workspace roots, mobile command/input cascade, sharing panel, report controls, and progress pseudo-elements instead of inspecting only `.workbench-*` hooks.
+- Shared AgentConsole spacing is now 8/12/4px with 8px live geometry and a 16px icon slot; workspace mobile input is 16px and all cited 42/18px residuals are on the fixed scale.
+- `FieldOperationsWorkspace` now implements the canonical `224px minmax(0, 1fr) 320px` desktop geometry. `SafeGuardCommandCenter` is documented as a two-child `224px minmax(0, 1fr)` structural variant because its contextual rails are nested inside the main workflow page.
+- Every Day/Night-qualified selector in mixed selector lists is audited individually; redundant Day selectors were removed from common mobile rules.
+- The rendered semantic `progress` value pseudo-elements now carry the loading animation, with a later reduced-motion override targeting the same rendered nodes.
