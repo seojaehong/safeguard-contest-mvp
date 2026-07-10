@@ -67,6 +67,9 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 16. Landing and ordinary-module exhaustive review
    - RED: landing gutters stayed at a 24px minimum, named landing surfaces retained off-scale spacing and noncanonical controls/card titles, and ordinary module panels, prose, cards, language controls, and 980px navigation failed their canonical role/spacing contracts.
    - GREEN: exact 1280px/1024px/767px landing gutter tests prove 24px/20px/16px; named landing spacing, controls, card headings, and console actions use canonical tokens; ordinary module headings/prose/titles, list/article/phone geometry, language controls, and 980px navigation use their assigned roles and fixed-scale values without copy or behavior changes.
+17. Landing/module residual family audit
+   - RED: parser-backed family inspection found off-scale tag, hero-copy, CTA, section, map, pipeline, terminal, replay-console, footer, sidebar, navigation-status, and current-workpack values plus incorrect section/HUD/terminal/control roles.
+   - GREEN: every enumerated residual uses the approved spacing scale; landing section headings, tag, and terminal text use Section/HUD/Body roles; ordinary module sidebar/navigation and current-workpack action use HUD/Control roles; the scoped parser reports zero disallowed fixed spacing values while excluding the document variant reserved for later work.
 
 ## Final verification evidence
 

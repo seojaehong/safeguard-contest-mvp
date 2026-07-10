@@ -583,7 +583,7 @@ ul {
 .safeclaw-hero-console {
   display: grid;
   align-content: center;
-  gap: 18px;
+  gap: var(--space-4);
   border-left: 1px solid var(--line);
   padding: clamp(32px, 5vw, 64px);
   background: #ffffff;
@@ -664,7 +664,7 @@ ul {
   min-height: 64px;
   display: inline-flex;
   align-items: center;
-  padding: 0 22px;
+  padding: 0 var(--space-6);
   background: #ffffff;
 }
 
@@ -1034,8 +1034,8 @@ ul {
 }
 
 .safeclaw-os-brand em {
-  margin-left: 2px;
-  padding: 0 6px;
+  margin-left: var(--space-1);
+  padding: 0 var(--space-2);
   background: var(--os-yellow);
   color: var(--sc-black);
   font-style: normal;
@@ -1166,16 +1166,16 @@ ul {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  margin-bottom: clamp(28px, 4vw, 56px);
+  margin-bottom: clamp(var(--space-8), 4vw, var(--space-16));
   border: 1px solid var(--sc-black);
-  padding: 11px 22px;
+  padding: var(--space-3) var(--space-5);
   background: var(--os-yellow);
   color: var(--sc-black);
   font-family: var(--font-hud);
-  font-size: var(--text-table);
-  font-weight: 500;
-  letter-spacing: var(--tracking-body);
-  line-height: var(--leading-table);
+  font-size: var(--text-hud);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
 }
 
 .safeclaw-os-hero h1,
@@ -1224,7 +1224,7 @@ ul {
 
 .safeclaw-os-hero p {
   max-width: 760px;
-  margin: 22px 0 0;
+  margin: var(--space-6) 0 0;
   color: var(--os-muted);
   font-size: var(--text-body-lg);
   font-weight: 500;
@@ -1239,7 +1239,7 @@ ul {
   align-items: center;
   gap: 12px;
   max-width: 760px;
-  margin-top: 26px;
+  margin-top: var(--space-6);
   padding-left: 16px;
   border-left: 4px solid var(--os-yellow);
   color: var(--sc-black);
@@ -1254,7 +1254,7 @@ ul {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  margin-top: 42px;
+  margin-top: var(--space-10);
 }
 
 .safeclaw-os-cta button,
@@ -1334,13 +1334,13 @@ ul {
 }
 
 .safeclaw-os-section {
-  padding-block: clamp(56px, 6vw, 96px);
+  padding-block: clamp(var(--space-16), 6vw, var(--space-24));
   padding-inline: var(--os-gutter);
   border-bottom: 1px solid var(--os-line);
 }
 
 .safeclaw-os-section.compact {
-  padding-top: clamp(44px, 5vw, 72px);
+  padding-top: clamp(var(--space-12), 5vw, var(--space-20));
 }
 
 .safeclaw-os-section-head {
@@ -1348,7 +1348,7 @@ ul {
   grid-template-columns: auto auto 1fr;
   align-items: center;
   gap: 16px;
-  margin-bottom: 28px;
+  margin-bottom: var(--space-8);
   color: var(--sc-black);
   font-size: var(--text-component-title);
   font-weight: 700;
@@ -1363,7 +1363,7 @@ ul {
 }
 
 .safeclaw-os-section-head span {
-  padding: 4px 9px;
+  padding: var(--space-1) var(--space-2);
   background: var(--sc-black);
   color: var(--os-yellow);
   font-family: var(--font-hud);
@@ -1376,10 +1376,10 @@ ul {
 .safeclaw-os-section h2 {
   max-width: 1280px;
   margin-bottom: 40px;
-  font-size: var(--text-display);
+  font-size: var(--text-section-title);
   font-weight: 800;
-  line-height: var(--leading-display);
-  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
 }
 
 /* §03(외국인 안내)→§04(근거) seam only: the language grid's bottom padding
@@ -1388,11 +1388,11 @@ ul {
    ids so the shared .safeclaw-os-section rhythm (fb20871) stays untouched
    everywhere else. */
 #language {
-  padding-bottom: clamp(28px, 3vw, 48px);
+  padding-bottom: clamp(var(--space-8), 3vw, var(--space-12));
 }
 
 #proof {
-  padding-top: clamp(28px, 3vw, 48px);
+  padding-top: clamp(var(--space-8), 3vw, var(--space-12));
 }
 
 #proof .safeclaw-os-section-head {
@@ -1458,8 +1458,8 @@ ul {
 .safeclaw-module-map a::before {
   content: "";
   position: absolute;
-  top: 30px;
-  left: 30px;
+  top: var(--space-8);
+  left: var(--space-8);
   width: 7px;
   height: 7px;
   background: var(--os-yellow);
@@ -1485,16 +1485,16 @@ ul {
 }
 
 .safeclaw-module-map span {
-  padding-left: 22px;
+  padding-left: var(--space-6);
 }
 
 .safeclaw-module-map em {
   position: absolute;
-  top: 26px;
-  right: 26px;
+  top: var(--space-6);
+  right: var(--space-6);
   border: 1px solid var(--sc-black);
   border-radius: 4px;
-  padding: 5px 12px;
+  padding: var(--space-1) var(--space-3);
   background: var(--sc-black);
   color: var(--os-yellow);
   font-family: var(--font-hud);
@@ -1542,9 +1542,9 @@ ul {
   content: "열기 +";
   display: block;
   width: fit-content;
-  margin-top: 28px;
+  margin-top: var(--space-8);
   border-top: 2px solid var(--os-yellow);
-  padding-top: 10px;
+  padding-top: var(--space-2);
   color: var(--sc-black);
   font-family: var(--font-hud);
   font-size: var(--text-caption);
@@ -1556,8 +1556,8 @@ ul {
 .safeclaw-pipeline-grid b {
   display: inline-block;
   width: fit-content;
-  margin-top: 44px;
-  padding: 6px 12px;
+  margin-top: var(--space-12);
+  padding: var(--space-2) var(--space-3);
   background: var(--os-yellow);
   color: var(--sc-black);
   font-family: var(--font-hud);
@@ -1578,7 +1578,7 @@ ul {
   gap: 12px;
   min-height: 68px;
   border-bottom: 1px solid var(--os-line);
-  padding: 0 28px;
+  padding: 0 var(--space-8);
 }
 
 .safeclaw-terminal div span {
@@ -1609,19 +1609,20 @@ ul {
 .safeclaw-terminal pre {
   min-height: 260px;
   margin: 0;
-  padding: 42px 46px;
+  padding: var(--space-10) var(--space-12);
   white-space: pre-wrap;
-  font-size: var(--text-component-title);
-  line-height: var(--leading-component-title);
-  font-weight: 700;
-  letter-spacing: var(--tracking-component-title);
+  font-family: var(--font-product);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-terminal button,
 .safeclaw-terminal a {
   width: fit-content;
-  margin: 0 46px 42px;
-  padding: 0 28px;
+  margin: 0 var(--space-12) var(--space-10);
+  padding: 0 var(--space-8);
 }
 
 /* Hero AI console replay (Task D-1) — the one black "console panel" in the
@@ -1639,7 +1640,7 @@ ul {
   gap: 16px;
   border: 1px solid var(--sc-black);
   border-left: 6px solid var(--os-yellow);
-  padding: 20px 22px 22px;
+  padding: var(--space-5) var(--space-6) var(--space-6);
   background: var(--os-panel-ink);
 }
 
@@ -1647,7 +1648,7 @@ ul {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-bottom: 14px;
+  padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--os-panel-line);
   color: var(--os-panel-text);
   font-family: var(--font-hud);
@@ -1664,7 +1665,7 @@ ul {
 
 .hero-console-titlebar em {
   margin-left: auto;
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--os-yellow);
   background: rgba(255, 212, 0, 0.14);
   color: var(--os-yellow);
@@ -1687,7 +1688,7 @@ ul {
 .hero-console-prompt {
   display: grid;
   gap: 8px;
-  padding: 14px;
+  padding: var(--space-4);
   border: 1px solid var(--os-panel-line);
   background: rgba(255, 255, 255, 0.03);
 }
@@ -1726,7 +1727,7 @@ ul {
      grid row as the replay accumulates lines, dragging the section far past
      the viewport and leaving a blank gap under the (short) text column. */
   max-height: 340px;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .hero-console-replay .agent-console-line {
@@ -1762,7 +1763,7 @@ ul {
 .safeclaw-landing-footer {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 28px 40px;
+  gap: var(--space-8) var(--space-10);
   align-items: start;
   padding-block: clamp(48px, 6vw, 80px);
   padding-inline: var(--os-gutter);
@@ -1787,7 +1788,7 @@ ul {
 }
 
 .safeclaw-footer-brand em {
-  padding: 0 6px;
+  padding: 0 var(--space-2);
   background: var(--os-yellow);
   color: var(--sc-black);
   font-style: normal;
@@ -1807,7 +1808,7 @@ ul {
 .safeclaw-landing-footer nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 22px;
+  gap: var(--space-2) var(--space-6);
   justify-content: flex-end;
 }
 
@@ -7315,7 +7316,7 @@ ul {
   .safeclaw-statement-card,
   .safeclaw-core-section,
   .safeclaw-operation-section {
-    padding: 28px;
+    padding: var(--space-8);
   }
 
   .safeclaw-proof-strip span,
@@ -7635,16 +7636,16 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-os-section h2 {
-    font-size: var(--text-page-title);
+    font-size: var(--text-section-title);
     font-weight: 800;
-    line-height: var(--leading-page-title);
-    letter-spacing: var(--tracking-page-title);
+    line-height: var(--leading-section-title);
+    letter-spacing: var(--tracking-section-title);
   }
 
   .safeclaw-os-hero mark,
   .safeclaw-os-section mark {
-    padding-right: 10px;
-    padding-left: 10px;
+    padding-right: var(--space-2);
+    padding-left: var(--space-2);
   }
 
   .safeclaw-os-console {
@@ -7666,7 +7667,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-terminal pre {
-    padding: 28px 22px;
+    padding: var(--space-8) var(--space-6);
     font-size: var(--text-body-lg);
     font-weight: 500;
     line-height: var(--leading-body-lg);
@@ -7675,8 +7676,8 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-terminal button,
   .safeclaw-terminal a {
-    margin-right: 22px;
-    margin-left: 22px;
+    margin-right: var(--space-6);
+    margin-left: var(--space-6);
   }
 }
 
@@ -7717,10 +7718,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-rail h2 {
   margin: 0 0 var(--space-2);
   color: rgba(246, 245, 239, 0.34);
-  font-size: var(--text-table);
-  font-weight: 500;
-  line-height: var(--leading-table);
-  letter-spacing: var(--tracking-body);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
 }
 
 .safeclaw-module-rail a:not(.safeclaw-module-brand) {
@@ -7753,15 +7755,15 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-rail a strong {
   color: inherit;
-  font-size: var(--text-body);
-  font-weight: 500;
+  font-size: var(--text-control);
+  font-weight: 700;
   letter-spacing: var(--tracking-body);
-  line-height: var(--leading-body);
+  line-height: var(--leading-control);
 }
 
 .safeclaw-module-main {
   min-width: 0;
-  padding-bottom: 72px;
+  padding-bottom: var(--space-16);
 }
 
 .safeclaw-module-nav {
@@ -7829,7 +7831,7 @@ body:has(.safeclaw-landing) :is(
   width: 8px;
   height: 8px;
   border-radius: var(--radius-circle);
-  margin-right: 10px;
+  margin-right: var(--space-2);
   background: #8ee89a;
 }
 
@@ -8351,13 +8353,13 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-current-workpack {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 18px;
+  gap: var(--space-4);
   align-items: center;
   width: min(100% - 40px, 1440px);
-  margin: 28px auto 0;
+  margin: var(--space-8) auto 0;
   border: 1px solid rgba(246, 245, 239, 0.16);
   background: rgba(14, 14, 18, 0.72);
-  padding: 18px 22px;
+  padding: var(--space-4) var(--space-6);
   color: rgba(246, 245, 239, 0.72);
 }
 
@@ -8381,17 +8383,17 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-current-workpack a {
   display: inline-flex;
-  min-height: 38px;
+  min-height: var(--control-height);
   align-items: center;
   border: 1px solid rgba(255, 220, 46, 0.6);
-  padding: 0 14px;
+  padding: 0 var(--space-4);
   color: var(--os-yellow, #ffdc2e);
-  font-family: var(--font-mono, "Geist Mono", monospace);
-  font-size: var(--text-caption);
-  font-weight: 600;
+  font-family: var(--font-product);
+  font-size: var(--text-control);
+  font-weight: 700;
   letter-spacing: var(--tracking-body);
   text-decoration: none;
-  line-height: var(--leading-caption);
+  line-height: var(--leading-control);
 }
 
 .safeclaw-current-workpack.live {

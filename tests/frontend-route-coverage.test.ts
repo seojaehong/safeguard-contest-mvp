@@ -693,5 +693,81 @@ describe("module route section hierarchy", () => {
       gap: "var(--space-3)",
       padding: "var(--space-4) var(--space-5)",
     });
+
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-tag")).toMatchObject({
+      "margin-bottom": "clamp(var(--space-8), 4vw, var(--space-16))",
+      padding: "var(--space-3) var(--space-5)",
+      "font-family": "var(--font-hud)",
+      "font-size": "var(--text-hud)",
+      "font-weight": "700",
+      "line-height": "var(--leading-hud)",
+      "letter-spacing": "var(--tracking-hud)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-section h2")).toMatchObject({
+      "font-size": "var(--text-section-title)",
+      "font-weight": "800",
+      "line-height": "var(--leading-section-title)",
+      "letter-spacing": "var(--tracking-section-title)",
+    });
+    expect(effectiveDeclarationsAtWidth(css, ".safeclaw-os-section h2", 767)).toMatchObject({
+      "font-size": "var(--text-section-title)",
+      "line-height": "var(--leading-section-title)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-terminal pre")).toMatchObject({
+      "font-family": "var(--font-product)",
+      "font-size": "var(--text-body)",
+      "font-weight": "500",
+      "line-height": "var(--leading-body)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-module-rail h2")).toMatchObject({
+      "font-family": "var(--font-hud)",
+      "font-size": "var(--text-hud)",
+      "font-weight": "700",
+      "line-height": "var(--leading-hud)",
+      "letter-spacing": "var(--tracking-hud)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-module-rail a strong")).toMatchObject({
+      "font-size": "var(--text-control)",
+      "font-weight": "700",
+      "line-height": "var(--leading-control)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-module-main")).toMatchObject({
+      "padding-bottom": "var(--space-16)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-module-nav i")).toMatchObject({
+      "margin-right": "var(--space-2)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-current-workpack")).toMatchObject({
+      gap: "var(--space-4)",
+      margin: "var(--space-8) auto 0",
+      padding: "var(--space-4) var(--space-6)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-current-workpack a")).toMatchObject({
+      "min-height": "var(--control-height)",
+      padding: "0 var(--space-4)",
+      "font-family": "var(--font-product)",
+      "font-size": "var(--text-control)",
+      "font-weight": "700",
+      "line-height": "var(--leading-control)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+
+    const auditedFamilySelector = /(?:safeclaw-(?:landing|os-|pipeline|proof|language|module-map|terminal|footer)|hero-console|safeclaw-module-(?:rail|main|nav)|safeclaw-current-workpack)/;
+    const spacingProperties = new Set(["gap", "row-gap", "column-gap", "padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "padding-inline", "padding-block", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left", "top", "right", "bottom", "left"]);
+    const disallowedFixedSpacing = new Set([2, 5, 6, 9, 10, 11, 14, 18, 22, 26, 28, 30, 42, 44, 46, 56, 72]);
+    const residuals = ruleBlocks(css).flatMap((rule) => {
+      if (!rule.selectors.some((selector) => auditedFamilySelector.test(selector))) return [];
+      if (rule.selectors.some((selector) => selector.includes("module-variant-document"))) return [];
+      return Object.entries(rule.declarations).flatMap(([property, value]) => {
+        if (!spacingProperties.has(property)) return [];
+        const offenders = [...value.matchAll(/(?<![-\w])(-?\d+)px\b/g)]
+          .map((match) => Number(match[1]))
+          .filter((number) => disallowedFixedSpacing.has(Math.abs(number)));
+        return offenders.length ? [`${rule.selectors.join(", ")} { ${property}: ${value} }`] : [];
+      });
+    });
+    expect(residuals).toEqual([]);
   });
 });
