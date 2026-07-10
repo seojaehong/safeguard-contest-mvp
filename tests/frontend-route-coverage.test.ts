@@ -173,6 +173,50 @@ function effectiveDeclarationsAtWidth(source: string, selector: string, width: n
   return declarations;
 }
 
+const approvedSpacingPixels = new Set([0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96]);
+const auditedSpacingProperties = new Set([
+  "gap", "row-gap", "column-gap",
+  "padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "padding-inline", "padding-block",
+  "margin", "margin-top", "margin-right", "margin-bottom", "margin-left",
+  "top", "right", "bottom", "left",
+]);
+
+function isAuditedFamilySelector(selector: string): boolean {
+  const landingOwner = /\.(?:safeclaw-(?:landing|os-|hero|proof|statement|core|operation|pipeline|language|module-map|terminal|footer)|hero-console|console-|sc-section-kicker)/.test(selector)
+    || /\.safeclaw-(?:contact|login)(?=[\s.:#>+~,\[]|$)/.test(selector);
+  const ordinaryModuleOwner = /\.(?:safeclaw-module-|safeclaw-current-workpack|safeclaw-(?:archive-list|worker-table|worker-phone|tbm-board)|worker-language-switcher)/.test(selector)
+    && !selector.includes("module-variant-document")
+    && !selector.includes(".safeclaw-module-hero.document");
+  return landingOwner || ordinaryModuleOwner;
+}
+
+function isJustifiedSpacingException(selector: string, property: string, value: string): boolean {
+  const separatorGapSelectors = new Set([
+    ".safeclaw-proof-strip",
+    ".safeclaw-core-grid",
+    ".safeclaw-operation-section ol",
+  ]);
+  return property === "gap" && value === "1px" && separatorGapSelectors.has(selector);
+}
+
+function familySpacingResiduals(source: string): string[] {
+  return ruleBlocks(source).flatMap((rule) => {
+    const ownedSelectors = rule.selectors.filter(isAuditedFamilySelector);
+    if (ownedSelectors.length === 0) return [];
+    return Object.entries(rule.declarations).flatMap(([property, value]) => {
+      if (!auditedSpacingProperties.has(property)) return [];
+      const selectorsToAudit = ownedSelectors.filter((selector) => !isJustifiedSpacingException(selector, property, value));
+      if (selectorsToAudit.length === 0) return [];
+      const offenders = [...value.matchAll(/(?<![-\w])(-?\d+)px\b/g)]
+        .map((match) => Number(match[1]))
+        .filter((number) => !approvedSpacingPixels.has(Math.abs(number)));
+      return offenders.length
+        ? selectorsToAudit.map((selector) => `${selector} { ${property}: ${value} }`)
+        : [];
+    });
+  });
+}
+
 describe("frontend route classification", () => {
   it("discovers every page and assigns each route to exactly one family", () => {
     const discoveredRoutes = listPageFiles(path.join(root, "app")).map(routeFromPageFile).sort();
@@ -713,6 +757,22 @@ describe("module route section hierarchy", () => {
       "font-size": "var(--text-section-title)",
       "line-height": "var(--leading-section-title)",
     });
+    expect(effectiveDeclarationsAtWidth(css, ".safeclaw-os-section", 767)).toMatchObject({
+      "padding-block": "var(--space-8)",
+    });
+    for (const selector of [
+      ".safeclaw-pipeline-grid article",
+      ".safeclaw-proof-matrix article",
+      ".safeclaw-language-matrix article",
+      ".safeclaw-module-map a",
+    ]) {
+      expect(declarationsForExactSelector(desktopCss, selector), `${selector} desktop`).toMatchObject({
+        padding: "var(--space-6)",
+      });
+      expect(effectiveDeclarationsAtWidth(css, selector, 767), `${selector} mobile`).toMatchObject({
+        padding: "var(--space-4)",
+      });
+    }
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-terminal pre")).toMatchObject({
       "font-family": "var(--font-product)",
       "font-size": "var(--text-body)",
@@ -742,8 +802,18 @@ describe("module route section hierarchy", () => {
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-current-workpack")).toMatchObject({
       gap: "var(--space-4)",
       margin: "var(--space-8) auto 0",
-      padding: "var(--space-4) var(--space-6)",
+      padding: "var(--space-6)",
     });
+    for (const [width, gutter, padding] of [
+      [1280, "var(--space-6)", "var(--space-6)"],
+      [1024, "var(--space-5)", "var(--space-5)"],
+      [767, "var(--space-4)", "var(--space-4)"],
+    ] as const) {
+      expect(effectiveDeclarationsAtWidth(css, ".safeclaw-current-workpack", width), `current workpack ${width}`).toMatchObject({
+        width: `min(var(--content-wide), calc(100% - (${gutter} * 2)))`,
+        padding,
+      });
+    }
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-current-workpack a")).toMatchObject({
       "min-height": "var(--control-height)",
       padding: "0 var(--space-4)",
@@ -754,20 +824,14 @@ describe("module route section hierarchy", () => {
       "letter-spacing": "var(--tracking-body)",
     });
 
-    const auditedFamilySelector = /(?:safeclaw-(?:landing|os-|pipeline|proof|language|module-map|terminal|footer)|hero-console|safeclaw-module-(?:rail|main|nav)|safeclaw-current-workpack)/;
-    const spacingProperties = new Set(["gap", "row-gap", "column-gap", "padding", "padding-top", "padding-right", "padding-bottom", "padding-left", "padding-inline", "padding-block", "margin", "margin-top", "margin-right", "margin-bottom", "margin-left", "top", "right", "bottom", "left"]);
-    const disallowedFixedSpacing = new Set([2, 5, 6, 9, 10, 11, 14, 18, 22, 26, 28, 30, 42, 44, 46, 56, 72]);
-    const residuals = ruleBlocks(css).flatMap((rule) => {
-      if (!rule.selectors.some((selector) => auditedFamilySelector.test(selector))) return [];
-      if (rule.selectors.some((selector) => selector.includes("module-variant-document"))) return [];
-      return Object.entries(rule.declarations).flatMap(([property, value]) => {
-        if (!spacingProperties.has(property)) return [];
-        const offenders = [...value.matchAll(/(?<![-\w])(-?\d+)px\b/g)]
-          .map((match) => Number(match[1]))
-          .filter((number) => disallowedFixedSpacing.has(Math.abs(number)));
-        return offenders.length ? [`${rule.selectors.join(", ")} { ${property}: ${value} }`] : [];
-      });
-    });
-    expect(residuals).toEqual([]);
+    expect(familySpacingResiduals(css)).toEqual([]);
+    expect(familySpacingResiduals(".safeclaw-os-tag { margin: 7px; }")).toEqual([
+      ".safeclaw-os-tag { margin: 7px }",
+    ]);
+    expect(familySpacingResiduals(`
+      .safeclaw-module-panel,
+      .safeclaw-module-shell.module-variant-document .safeclaw-module-panel { gap: 7px; }
+    `)).toEqual([".safeclaw-module-panel { gap: 7px }"]);
+    expect(familySpacingResiduals(".safeclaw-os-mark { width: 7px; border-width: 7px; }")).toEqual([]);
   });
 });

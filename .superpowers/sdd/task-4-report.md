@@ -70,6 +70,12 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 17. Landing/module residual family audit
    - RED: parser-backed family inspection found off-scale tag, hero-copy, CTA, section, map, pipeline, terminal, replay-console, footer, sidebar, navigation-status, and current-workpack values plus incorrect section/HUD/terminal/control roles.
    - GREEN: every enumerated residual uses the approved spacing scale; landing section headings, tag, and terminal text use Section/HUD/Body roles; ordinary module sidebar/navigation and current-workpack action use HUD/Control roles; the scoped parser reports zero disallowed fixed spacing values while excluding the document variant reserved for later work.
+18. Family-parser and responsive-surface hardening
+   - RED: effective 767px checks reproduced 64px landing section separation and 24px card padding; current-workpack retained fixed 20px gutters and desktop panel padding on mobile; blacklist parsing accepted unseen values and could skip mixed ordinary/document selector groups.
+   - GREEN: landing sections/cards resolve to 32px/16px mobile spacing, current-workpack resolves to 24px/20px/16px gutters and panel padding, and a property-aware approved-value parser audits every owned selector independently with mutation coverage, explicit document-variant exclusion, and justified 1px separator exceptions.
+19. Approved-scale parser completion
+   - RED: the original blacklist accepted new off-scale values, treated comma groups atomically, omitted ordinary module owners, and lacked effective mobile landing/current-workpack assertions.
+   - GREEN: the allowlist admits only 4/8/12/16/20/24/32/40/48/64/80/96px spacing, rejects 7px mutations, preserves mixed ordinary rules while excluding document variants selector-by-selector, ignores dimensions/borders/radii, and proves landing/current-workpack breakpoint precedence.
 
 ## Final verification evidence
 

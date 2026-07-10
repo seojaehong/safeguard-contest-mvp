@@ -32,6 +32,30 @@ function declarationsForExactSelector(source: string, selector: string): CssDecl
   return Object.assign({}, ...matches.map((rule) => rule.declarations));
 }
 
+function withoutMediaBlocks(source: string): string {
+  const blocks: Array<{ start: number; end: number }> = [];
+  for (const match of source.matchAll(/@media[^\{]+\{/g)) {
+    if (match.index === undefined) continue;
+    const openingBrace = source.indexOf("{", match.index);
+    let depth = 0;
+    for (let index = openingBrace; index < source.length; index += 1) {
+      if (source[index] === "{") depth += 1;
+      if (source[index] === "}") depth -= 1;
+      if (depth === 0) {
+        blocks.push({ start: match.index, end: index + 1 });
+        break;
+      }
+    }
+  }
+  let cursor = 0;
+  let result = "";
+  for (const block of blocks) {
+    result += source.slice(cursor, block.start);
+    cursor = block.end;
+  }
+  return result + source.slice(cursor);
+}
+
 function blockBody(source: string, blockStart: string): string {
   const start = source.indexOf(blockStart);
   expect(start, `${blockStart} block`).toBeGreaterThanOrEqual(0);
@@ -164,6 +188,7 @@ describe("canonical shared surface styles", () => {
   });
 
   it("keeps effective landing descriptions, actions, and cards canonical", () => {
+    const desktopCss = withoutMediaBlocks(css);
     expect(declarationsForExactSelector(css, ".safeclaw-os-hero p")).toMatchObject({
       "font-size": "var(--text-body-lg)",
       "font-weight": "500",
@@ -202,7 +227,7 @@ describe("canonical shared surface styles", () => {
       ".safeclaw-language-matrix article",
       ".safeclaw-module-map a",
     ]) {
-      expect(declarationsForExactSelector(css, selector), selector).toMatchObject({ padding: "var(--space-6)" });
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({ padding: "var(--space-6)" });
     }
   });
 
