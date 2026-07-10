@@ -21,17 +21,47 @@ import {
   buildReportLearningMarkdown,
   buildReportMarkdown,
   buildReportSnapshot,
+  resolveReportViewState,
+  type ReportDateRange,
+  type ReportFilters,
   type ReportGroup,
   type ReportPeriod,
-  type ReportSnapshot
+  type ReportSnapshot,
+  type ReportViewState
 } from "@/lib/reporting-downloads";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 const periodOptions: Array<{ value: ReportPeriod; label: string; detail: string }> = [
   { value: "daily", label: "오늘", detail: "당일" },
   { value: "weekly", label: "주간", detail: "이번 주" },
-  { value: "monthly", label: "월간", detail: "이번 달" }
+  { value: "monthly", label: "월간", detail: "이번 달" },
+  { value: "custom", label: "사용자", detail: "직접 선택" }
 ];
+
+type DownloadState = {
+  status: "idle" | "preparing" | "ready" | "error";
+  message: string;
+};
+
+type DownloadRequest = {
+  fileName: string;
+  contentType: string;
+  buildContent: () => string;
+};
+
+const EMPTY_REPORT_FACETS: ReportSnapshot["facets"] = {
+  processes: [],
+  tasks: [],
+  riskLevels: [],
+  improvementStatuses: [],
+  sites: [],
+  teams: []
+};
+
+const INITIAL_DOWNLOAD_STATE: DownloadState = {
+  status: "idle",
+  message: ""
+};
 
 const evidenceLabelMap: Record<string, string> = {
   workpackSummaryDraft: "요약",
@@ -79,7 +109,8 @@ function compactText(value: string, maxLength: number) {
 function shortPeriodLabel(period: ReportPeriod) {
   if (period === "daily") return "오늘";
   if (period === "weekly") return "주간";
-  return "월간";
+  if (period === "monthly") return "월간";
+  return "사용자 기간";
 }
 
 function shortReportTitle(snapshot: ReportSnapshot) {
@@ -92,6 +123,10 @@ function shortEvidenceRef(ref: string) {
 
 function formatGroupMeta(group: ReportGroup) {
   return `위험 ${group.count} · 개선 ${group.improvementCount}`;
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
 }
 
 function readCurrentWorkpack(): { workpack: StoredCurrentWorkpack; sample: boolean } {
@@ -121,42 +156,63 @@ function GroupList({ title, groups }: { title: string; groups: ReportGroup[] }) 
   );
 }
 
-function DownloadActions({ snapshot }: { snapshot: ReportSnapshot }) {
+function DownloadActions({
+  snapshot,
+  canDownload,
+  downloadState,
+  onDownload
+}: {
+  snapshot: ReportSnapshot;
+  canDownload: boolean;
+  downloadState: DownloadState;
+  onDownload: (request: DownloadRequest) => Promise<void>;
+}) {
+  const disabled = !canDownload || downloadState.status === "preparing";
+
   return (
     <div className="safeclaw-download-actions" aria-label="리포트 다운로드">
       <p className="safeclaw-download-note">
-        개선사항 포함 문서와 다음 생성용 운영 메모리를 분리해 내려받습니다.
+        승인한 Before/After 사진만 포함해 개선 리포트와 운영 메모리를 분리합니다.
+      </p>
+      <p
+        className={downloadState.status === "error" ? "export-error" : "safeclaw-download-note"}
+        aria-live="polite"
+      >
+        {downloadState.message || (canDownload ? "다운로드 준비됨" : "기간 또는 필터를 조정하세요.")}
       </p>
       <button
         type="button"
         className="button"
-        onClick={() => downloadTextFile(
-          `${snapshot.fileBaseName}.md`,
-          buildReportMarkdown(snapshot),
-          "text/markdown;charset=utf-8"
-        )}
+        disabled={disabled}
+        onClick={() => void onDownload({
+          fileName: `${snapshot.fileBaseName}.md`,
+          contentType: "text/markdown;charset=utf-8",
+          buildContent: () => buildReportMarkdown(snapshot)
+        })}
       >
         개선사항 포함 MD
       </button>
       <button
         type="button"
         className="button secondary"
-        onClick={() => downloadTextFile(
-          `${snapshot.fileBaseName}.csv`,
-          buildReportCsv(snapshot),
-          "text/csv;charset=utf-8"
-        )}
+        disabled={disabled}
+        onClick={() => void onDownload({
+          fileName: `${snapshot.fileBaseName}.csv`,
+          contentType: "text/csv;charset=utf-8",
+          buildContent: () => buildReportCsv(snapshot)
+        })}
       >
         공정·작업 분류 CSV
       </button>
       <button
         type="button"
         className="button secondary"
-        onClick={() => downloadTextFile(
-          `${snapshot.fileBaseName}.json`,
-          buildReportJson(snapshot),
-          "application/json;charset=utf-8"
-        )}
+        disabled={disabled}
+        onClick={() => void onDownload({
+          fileName: `${snapshot.fileBaseName}.json`,
+          contentType: "application/json;charset=utf-8",
+          buildContent: () => buildReportJson(snapshot)
+        })}
       >
         관리자 원본 JSON
       </button>
@@ -166,22 +222,24 @@ function DownloadActions({ snapshot }: { snapshot: ReportSnapshot }) {
       <button
         type="button"
         className="button secondary"
-        onClick={() => downloadTextFile(
-          `${snapshot.fileBaseName}-corpus.md`,
-          buildReportLearningMarkdown(snapshot),
-          "text/markdown;charset=utf-8"
-        )}
+        disabled={disabled}
+        onClick={() => void onDownload({
+          fileName: `${snapshot.fileBaseName}-corpus.md`,
+          contentType: "text/markdown;charset=utf-8",
+          buildContent: () => buildReportLearningMarkdown(snapshot)
+        })}
       >
         다음 생성용 MD
       </button>
       <button
         type="button"
         className="button secondary"
-        onClick={() => downloadTextFile(
-          `${snapshot.fileBaseName}-corpus.jsonl`,
-          buildReportLearningJsonl(snapshot),
-          "application/x-ndjson;charset=utf-8"
-        )}
+        disabled={disabled}
+        onClick={() => void onDownload({
+          fileName: `${snapshot.fileBaseName}-corpus.jsonl`,
+          contentType: "application/x-ndjson;charset=utf-8",
+          buildContent: () => buildReportLearningJsonl(snapshot)
+        })}
       >
         하네스 JSONL
       </button>
@@ -197,38 +255,232 @@ function EvidenceList({ refs }: { refs: string[] }) {
   );
 }
 
+function ReportStatePanel({ viewState }: { viewState: ReportViewState }) {
+  return (
+    <article className="safeclaw-workdoc" aria-label="리포트 상태">
+      <header className="safeclaw-workdoc-header">
+        <span>{viewState.status === "error" ? "오류" : "빈 상태"}</span>
+        <h2>{viewState.title}</h2>
+        <p>{viewState.detail}</p>
+      </header>
+      <section className="safeclaw-workdoc-section">
+        <div className="safeclaw-workdoc-section-head">
+          <span>01</span>
+          <h3>선택 조건</h3>
+        </div>
+        <div className="safeclaw-report-notes">
+          <p>우측에서 기간과 필터를 조정하면 리포트를 다시 준비합니다.</p>
+          <p>사진 파일명은 Before/After 포함 승인 전까지 산출물에 들어가지 않습니다.</p>
+        </div>
+      </section>
+    </article>
+  );
+}
+
+function ReportDocument({
+  snapshot,
+  onTogglePhotoApproval
+}: {
+  snapshot: ReportSnapshot;
+  onTogglePhotoApproval: (improvementId: string) => void;
+}) {
+  return (
+    <article className="safeclaw-workdoc" aria-label="작업문서형 리포트">
+      <header className="safeclaw-workdoc-header">
+        <span>리포트</span>
+        <h2>{shortReportTitle(snapshot)}</h2>
+        <p>위험성평가와 개선사항을 한 문서에서 검토합니다. 외부 제출은 하지 않습니다.</p>
+        <div className="safeclaw-workdoc-meta">
+          <p><strong>현장</strong><span>{compactText(snapshot.scenario.siteName, 16)}</span></p>
+          <p><strong>작업</strong><span>{compactText(snapshot.scenario.workSummary, 16)}</span></p>
+          <p><strong>기간</strong><span>{shortPeriodLabel(snapshot.period)}</span></p>
+          <p><strong>생성</strong><span>{formatDate(snapshot.generatedAt)}</span></p>
+        </div>
+      </header>
+
+      <section className="safeclaw-workdoc-section">
+        <div className="safeclaw-workdoc-section-head">
+          <span>01</span>
+          <h3>작업 기준</h3>
+        </div>
+        <div className="safeclaw-report-facts">
+          <p><strong>회사</strong><span>{snapshot.scenario.companyName || "확인 필요"}</span></p>
+          <p><strong>현장</strong><span>{snapshot.scenario.siteName}</span></p>
+          <p><strong>작업</strong><span>{snapshot.scenario.workSummary}</span></p>
+          <p><strong>인원</strong><span>{snapshot.scenario.workerCount}명</span></p>
+          <p><strong>기상/조건</strong><span>{snapshot.scenario.weatherNote || "확인 필요"}</span></p>
+        </div>
+      </section>
+
+      <section className="safeclaw-workdoc-section">
+        <div className="safeclaw-workdoc-section-head">
+          <span>02</span>
+          <h3>위험 As-Is/To-Be</h3>
+        </div>
+        <div className="safeclaw-report-table" role="table" aria-label="위험성평가 리포트">
+          <div role="row">
+            <strong role="columnheader">작업</strong>
+            <strong role="columnheader">위험</strong>
+            <strong role="columnheader">현재</strong>
+            <strong role="columnheader">개선</strong>
+            <strong role="columnheader">근거</strong>
+          </div>
+          {snapshot.riskRows.map((row) => (
+            <div key={`${row.index}-${row.hazard}`} role="row">
+              <span role="cell" data-label="작업">
+                {compactText(row.task, 18)}
+                <em>{compactText(row.process, 12)} · {row.riskLevelLabel} · {row.improvementStatusLabel}</em>
+              </span>
+              <span role="cell" data-label="위험">{compactText(row.hazard, 24)}</span>
+              <span role="cell" data-label="현재">{compactText(row.currentControls, 34)}</span>
+              <span role="cell" data-label="개선">{compactText(row.additionalControls, 42)}</span>
+              <span role="cell" data-label="근거">{row.evidenceRefs.map(shortEvidenceRef).join(" · ")}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="safeclaw-workdoc-section">
+        <div className="safeclaw-workdoc-section-head">
+          <span>03</span>
+          <h3>개선사항</h3>
+        </div>
+        <div className="safeclaw-workdoc-list">
+          {snapshot.improvements.length ? snapshot.improvements.map((item) => (
+            <article key={item.id}>
+              <div>
+                <strong>{item.hazardLabel}</strong>
+                <code>{item.improvementStatusLabel} · {formatDate(item.createdAt)}</code>
+              </div>
+              <p><b>현재</b>{compactText(item.asIs, 44)}</p>
+              <p><b>개선</b>{compactText(item.toBe, 62)}</p>
+              <span>{item.reflectedDocuments.join(" · ") || "반영 문서 확인"}</span>
+              {item.hasPhotoPair ? (
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={item.photoApproved}
+                    onChange={() => onTogglePhotoApproval(item.id)}
+                  />
+                  Before/After 사진 포함 승인
+                </label>
+              ) : null}
+            </article>
+          )) : (
+            <article>
+              <div>
+                <strong>개선사항 없음</strong>
+                <code>{snapshot.periodLabel}</code>
+              </div>
+              <p><b>다음</b>작업공간에서 개선 메모를 저장하면 표시됩니다.</p>
+              <Link href="/workspace">개선사항 저장하기</Link>
+            </article>
+          )}
+        </div>
+      </section>
+
+      <section className="safeclaw-workdoc-section">
+        <div className="safeclaw-workdoc-section-head">
+          <span>04</span>
+          <h3>리포트 메모</h3>
+        </div>
+        <div className="safeclaw-report-notes">
+          {snapshot.notes.map((note) => <p key={note}>{note}</p>)}
+        </div>
+      </section>
+    </article>
+  );
+}
+
 export function ReportsDownloadCenter() {
   const [period, setPeriod] = useState<ReportPeriod>("weekly");
+  const [dateRange, setDateRange] = useState<ReportDateRange>({ start: "", end: "" });
+  const [filters, setFilters] = useState<ReportFilters>({});
+  const [approvedPhotoImprovementIds, setApprovedPhotoImprovementIds] = useState<string[]>([]);
   const [workpack, setWorkpack] = useState<StoredCurrentWorkpack | null>(null);
   const [improvements, setImprovements] = useState<OperationImprovement[]>([]);
   const [usingSample, setUsingSample] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [downloadState, setDownloadState] = useState<DownloadState>(INITIAL_DOWNLOAD_STATE);
 
   function loadLocalState() {
-    const current = readCurrentWorkpack();
-    setWorkpack(current.workpack);
-    setUsingSample(current.sample);
-    setImprovements(parseOperationImprovements(window.localStorage.getItem(OPERATION_IMPROVEMENTS_STORAGE_KEY)));
+    try {
+      const current = readCurrentWorkpack();
+      setWorkpack(current.workpack);
+      setUsingSample(current.sample);
+      setImprovements(parseOperationImprovements(window.localStorage.getItem(OPERATION_IMPROVEMENTS_STORAGE_KEY)));
+      setLoadError(null);
+      setDownloadState(INITIAL_DOWNLOAD_STATE);
+    } catch (error) {
+      console.error("safeclaw report state load failed", error);
+      setWorkpack(null);
+      setLoadError("브라우저의 현재 작업 데이터를 불러오지 못했습니다.");
+    }
   }
 
   useEffect(() => {
     loadLocalState();
   }, []);
 
-  const snapshot = useMemo(() => {
-    if (!workpack) return null;
-    return buildReportSnapshot({ workpack, improvements, period });
-  }, [improvements, period, workpack]);
+  const reportResult = useMemo((): { snapshot: ReportSnapshot | null; error: string | null } => {
+    if (!workpack) return { snapshot: null, error: null };
+    try {
+      return {
+        snapshot: buildReportSnapshot({
+          workpack,
+          improvements,
+          period,
+          dateRange: period === "custom" ? dateRange : undefined,
+          filters,
+          approvedPhotoImprovementIds
+        }),
+        error: null
+      };
+    } catch (error) {
+      return { snapshot: null, error: errorMessage(error) };
+    }
+  }, [approvedPhotoImprovementIds, dateRange, filters, improvements, period, workpack]);
+  const snapshot = reportResult.snapshot;
+  const viewState = resolveReportViewState(snapshot, reportResult.error || loadError);
+  const facets = snapshot?.facets || EMPTY_REPORT_FACETS;
   const evidenceRefs = useMemo(
     () => snapshot ? Array.from(new Set(snapshot.riskRows.flatMap((row) => row.evidenceRefs))).filter(Boolean) : [],
     [snapshot]
   );
+  const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
-  if (!snapshot || !workpack) {
+  useEffect(() => {
+    setDownloadState(INITIAL_DOWNLOAD_STATE);
+  }, [approvedPhotoImprovementIds, dateRange, filters, period]);
+
+  function togglePhotoApproval(improvementId: string) {
+    setApprovedPhotoImprovementIds((current) => (
+      current.includes(improvementId)
+        ? current.filter((id) => id !== improvementId)
+        : [...current, improvementId]
+    ));
+  }
+
+  async function handleDownload(request: DownloadRequest) {
+    if (!viewState.canDownload) return;
+    setDownloadState({ status: "preparing", message: "다운로드 준비 중" });
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    try {
+      downloadTextFile(request.fileName, request.buildContent(), request.contentType);
+      setDownloadState({ status: "ready", message: `다운로드 시작됨 · ${request.fileName}` });
+    } catch (error) {
+      console.error("safeclaw report download failed", error);
+      setDownloadState({ status: "error", message: `다운로드 오류 · ${errorMessage(error)}` });
+    }
+  }
+
+  if (!workpack) {
     return (
       <section className="safeclaw-module-panel">
-        <span>리포트 준비</span>
-        <h2>최근 작업팩을 확인하고 있습니다.</h2>
-        <p>작업공간에서 문서팩을 만든 뒤 이 화면으로 돌아오면 개선사항과 위험성평가를 묶어 내려받을 수 있습니다.</p>
+        <span>{loadError ? "리포트 오류" : "리포트 준비"}</span>
+        <h2>{loadError ? "현재 작업을 불러오지 못했습니다." : "최근 작업팩을 확인하고 있습니다."}</h2>
+        <p>{loadError || "작업공간에서 만든 위험성평가와 개선사항을 연결하고 있습니다."}</p>
+        {loadError ? <button type="button" className="button secondary" onClick={loadLocalState}>다시 불러오기</button> : null}
       </section>
     );
   }
@@ -237,109 +489,16 @@ export function ReportsDownloadCenter() {
     <>
       <section className={`safeclaw-current-workpack ${usingSample ? "sample" : "live"}`} aria-live="polite">
         <span>{usingSample ? "샘플 리포트" : "현재 작업 연결"}</span>
-        <strong>
-          {usingSample
-            ? "샘플 데이터로 다운로드 흐름을 보여줍니다."
-            : `${compactText(snapshot.scenario.siteName, 18)} · 개선 후보 ${snapshot.summary.improvements}건`}
-        </strong>
+        <strong>{viewState.title} · {viewState.detail}</strong>
         <button type="button" className="button secondary" onClick={loadLocalState}>다시 불러오기</button>
       </section>
 
       <section className="safeclaw-workdoc-shell">
-        <article className="safeclaw-workdoc" aria-label="작업문서형 리포트">
-          <header className="safeclaw-workdoc-header">
-            <span>리포트</span>
-            <h2>{shortReportTitle(snapshot)}</h2>
-            <p>위험성평가와 개선사항을 한 문서에서 검토합니다. 외부 제출은 하지 않습니다.</p>
-            <div className="safeclaw-workdoc-meta">
-              <p><strong>현장</strong><span>{compactText(snapshot.scenario.siteName, 16)}</span></p>
-              <p><strong>작업</strong><span>{compactText(snapshot.scenario.workSummary, 16)}</span></p>
-              <p><strong>기간</strong><span>{shortPeriodLabel(snapshot.period)}</span></p>
-              <p><strong>생성</strong><span>{formatDate(snapshot.generatedAt)}</span></p>
-            </div>
-          </header>
-
-          <section className="safeclaw-workdoc-section">
-            <div className="safeclaw-workdoc-section-head">
-              <span>01</span>
-              <h3>작업 기준</h3>
-            </div>
-            <div className="safeclaw-report-facts">
-              <p><strong>회사</strong><span>{snapshot.scenario.companyName || "확인 필요"}</span></p>
-              <p><strong>현장</strong><span>{snapshot.scenario.siteName}</span></p>
-              <p><strong>작업</strong><span>{snapshot.scenario.workSummary}</span></p>
-              <p><strong>인원</strong><span>{snapshot.scenario.workerCount}명</span></p>
-              <p><strong>기상/조건</strong><span>{snapshot.scenario.weatherNote || "확인 필요"}</span></p>
-            </div>
-          </section>
-
-          <section className="safeclaw-workdoc-section">
-            <div className="safeclaw-workdoc-section-head">
-              <span>02</span>
-              <h3>위험 As-Is/To-Be</h3>
-            </div>
-            <div className="safeclaw-report-table" role="table" aria-label="위험성평가 리포트">
-              <div role="row">
-                <strong role="columnheader">작업</strong>
-                <strong role="columnheader">위험</strong>
-                <strong role="columnheader">현재</strong>
-                <strong role="columnheader">개선</strong>
-                <strong role="columnheader">근거</strong>
-              </div>
-              {snapshot.riskRows.map((row) => (
-                <div key={`${row.index}-${row.hazard}`} role="row">
-                  <span role="cell" data-label="작업">
-                    {compactText(row.task, 18)}<em>{compactText(row.process, 12)} · {row.riskLevelLabel}</em>
-                  </span>
-                  <span role="cell" data-label="위험">{compactText(row.hazard, 24)}</span>
-                  <span role="cell" data-label="현재">{compactText(row.currentControls, 34)}</span>
-                  <span role="cell" data-label="개선">{compactText(row.additionalControls, 42)}</span>
-                  <span role="cell" data-label="근거">{row.evidenceRefs.map(shortEvidenceRef).join(" · ")}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="safeclaw-workdoc-section">
-            <div className="safeclaw-workdoc-section-head">
-              <span>03</span>
-              <h3>개선사항 후보</h3>
-            </div>
-            <div className="safeclaw-workdoc-list">
-              {snapshot.improvements.length ? snapshot.improvements.map((item) => (
-                <article key={item.id}>
-                  <div>
-                    <strong>{item.hazardLabel}</strong>
-                    <code>{item.sourceLabel} · {formatDate(item.createdAt)}</code>
-                  </div>
-                  <p><b>현재</b>{compactText(item.asIs, 44)}</p>
-                  <p><b>개선</b>{compactText(item.toBe, 62)}</p>
-                  <span>{item.reflectedDocuments.join(" · ") || "반영 문서 확인"}</span>
-                </article>
-              )) : (
-                <article>
-                  <div>
-                    <strong>개선사항 후보 없음</strong>
-                    <code>{snapshot.periodLabel}</code>
-                  </div>
-                  <p><b>다음</b>작업공간에서 사진이나 메모를 저장하면 표시됩니다.</p>
-                  <Link href="/workspace">개선사항 저장하기</Link>
-                </article>
-              )}
-            </div>
-          </section>
-
-          <section className="safeclaw-workdoc-section">
-            <div className="safeclaw-workdoc-section-head">
-              <span>04</span>
-              <h3>리포트 메모</h3>
-            </div>
-            <div className="safeclaw-report-notes">
-              {snapshot.notes.map((note) => <p key={note}>{note}</p>)}
-            </div>
-          </section>
-        </article>
-
+        {snapshot ? (
+          <ReportDocument snapshot={snapshot} onTogglePhotoApproval={togglePhotoApproval} />
+        ) : (
+          <ReportStatePanel viewState={viewState} />
+        )}
         <aside className="safeclaw-workdoc-rail" aria-label="작업문서 도구">
           <section>
             <span>기간</span>
@@ -356,20 +515,146 @@ export function ReportsDownloadCenter() {
                 </button>
               ))}
             </div>
+            {period === "custom" ? (
+              <div className="safeclaw-report-facts">
+                <p>
+                  <strong>시작</strong>
+                  <input
+                    type="date"
+                    aria-label="사용자 기간 시작일"
+                    value={dateRange.start}
+                    max={dateRange.end || undefined}
+                    onChange={(event) => setDateRange((current) => ({ ...current, start: event.target.value }))}
+                  />
+                </p>
+                <p>
+                  <strong>종료</strong>
+                  <input
+                    type="date"
+                    aria-label="사용자 기간 종료일"
+                    value={dateRange.end}
+                    min={dateRange.start || undefined}
+                    onChange={(event) => setDateRange((current) => ({ ...current, end: event.target.value }))}
+                  />
+                </p>
+              </div>
+            ) : null}
+          </section>
+
+          <section>
+            <span>필터 {activeFilterCount ? `${activeFilterCount}` : ""}</span>
+            <div className="safeclaw-report-facts" aria-label="리포트 필터">
+              <p>
+                <strong>공정</strong>
+                <select
+                  aria-label="공정 필터"
+                  value={filters.process || ""}
+                  onChange={(event) => setFilters((current) => ({ ...current, process: event.target.value || undefined }))}
+                >
+                  <option value="">전체</option>
+                  {facets.processes.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </p>
+              <p>
+                <strong>작업</strong>
+                <select
+                  aria-label="작업 필터"
+                  value={filters.task || ""}
+                  onChange={(event) => setFilters((current) => ({ ...current, task: event.target.value || undefined }))}
+                >
+                  <option value="">전체</option>
+                  {facets.tasks.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </p>
+              <p>
+                <strong>위험등급</strong>
+                <select
+                  aria-label="위험등급 필터"
+                  value={filters.riskLevel || ""}
+                  onChange={(event) => setFilters((current) => ({
+                    ...current,
+                    riskLevel: event.target.value
+                      ? event.target.value as NonNullable<ReportFilters["riskLevel"]>
+                      : undefined
+                  }))}
+                >
+                  <option value="">전체</option>
+                  {facets.riskLevels.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </p>
+              <p>
+                <strong>개선상태</strong>
+                <select
+                  aria-label="개선상태 필터"
+                  value={filters.improvementStatus || ""}
+                  onChange={(event) => setFilters((current) => ({
+                    ...current,
+                    improvementStatus: event.target.value
+                      ? event.target.value as NonNullable<ReportFilters["improvementStatus"]>
+                      : undefined
+                  }))}
+                >
+                  <option value="">전체</option>
+                  {facets.improvementStatuses.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </p>
+              <p>
+                <strong>현장</strong>
+                <select
+                  aria-label="현장 필터"
+                  value={filters.site || ""}
+                  onChange={(event) => setFilters((current) => ({ ...current, site: event.target.value || undefined }))}
+                >
+                  <option value="">전체</option>
+                  {facets.sites.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </p>
+              <p>
+                <strong>팀</strong>
+                <select
+                  aria-label="팀 필터"
+                  value={filters.team || ""}
+                  onChange={(event) => setFilters((current) => ({ ...current, team: event.target.value || undefined }))}
+                >
+                  <option value="">전체</option>
+                  {facets.teams.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </p>
+            </div>
+            <button
+              type="button"
+              className="button secondary"
+              disabled={!activeFilterCount}
+              onClick={() => setFilters({})}
+            >
+              필터 초기화
+            </button>
           </section>
 
           <section>
             <span>다운로드</span>
-            <DownloadActions snapshot={snapshot} />
+            {snapshot ? (
+              <DownloadActions
+                snapshot={snapshot}
+                canDownload={viewState.canDownload}
+                downloadState={downloadState}
+                onDownload={handleDownload}
+              />
+            ) : (
+              <p className={viewState.status === "error" ? "export-error" : "safeclaw-download-note"}>
+                {viewState.detail}
+              </p>
+            )}
           </section>
 
           <section>
             <span>요약</span>
             <div className="safeclaw-workdoc-stats">
-              <p><strong>{snapshot.summary.riskRows}</strong><span>평가 행</span></p>
-              <p><strong>{snapshot.summary.highRiskRows}</strong><span>고위험</span></p>
-              <p><strong>{snapshot.summary.improvements}</strong><span>개선사항</span></p>
-              <p><strong>{snapshot.summary.photoImprovements}</strong><span>사진 개선</span></p>
+              <p><strong>{snapshot?.summary.riskRows || 0}</strong><span>평가 행</span></p>
+              <p><strong>{snapshot?.summary.highRiskRows || 0}</strong><span>고위험</span></p>
+              <p><strong>{snapshot?.summary.improvements || 0}</strong><span>개선사항</span></p>
+              <p><strong>{snapshot?.summary.photoCandidates || 0}</strong><span>사진 후보</span></p>
+              <p><strong>{snapshot?.summary.photoImprovements || 0}</strong><span>승인 사진</span></p>
             </div>
           </section>
 
@@ -381,10 +666,10 @@ export function ReportsDownloadCenter() {
           <section>
             <span>분류</span>
             <div className="safeclaw-report-groups">
-              <GroupList title="공정별" groups={snapshot.groups.byProcess} />
-              <GroupList title="작업별" groups={snapshot.groups.byTask} />
-              <GroupList title="위험등급별" groups={snapshot.groups.byRiskLevel} />
-              <GroupList title="문서반영별" groups={snapshot.groups.byDocument} />
+              <GroupList title="공정별" groups={snapshot?.groups.byProcess || []} />
+              <GroupList title="작업별" groups={snapshot?.groups.byTask || []} />
+              <GroupList title="위험등급별" groups={snapshot?.groups.byRiskLevel || []} />
+              <GroupList title="문서반영별" groups={snapshot?.groups.byDocument || []} />
             </div>
           </section>
 
