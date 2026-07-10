@@ -64,15 +64,18 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 15. Module geometry completion review
    - RED: supporting heroes retained 24px mobile padding, while base and document-variant module heroes, wrappers, grid articles, and panels used off-scale or single-width geometry.
    - GREEN: supporting heroes resolve to 24px/16px desktop/mobile padding; base and document module heroes, grid/panel wrappers, general and nine-grid articles, and panels use allowed 1280px/1024px/767px spacing and gutter tiers without typography changes.
+16. Landing and ordinary-module exhaustive review
+   - RED: landing gutters stayed at a 24px minimum, named landing surfaces retained off-scale spacing and noncanonical controls/card titles, and ordinary module panels, prose, cards, language controls, and 980px navigation failed their canonical role/spacing contracts.
+   - GREEN: exact 1280px/1024px/767px landing gutter tests prove 24px/20px/16px; named landing spacing, controls, card headings, and console actions use canonical tokens; ordinary module headings/prose/titles, list/article/phone geometry, language controls, and 980px navigation use their assigned roles and fixed-scale values without copy or behavior changes.
 
 ## Final verification evidence
 
 | Gate | Result |
 | --- | --- |
-| `npm.cmd test -- tests/frontend-route-coverage.test.ts` | PASS, 16/16 |
-| `npm.cmd test -- tests/frontend-route-coverage.test.ts tests/frontend-shared-surfaces.test.ts tests/frontend-design-contract.test.ts` | PASS, 48/48 |
+| `npm.cmd test -- tests/frontend-route-coverage.test.ts` | PASS, 17/17 |
+| `npm.cmd test -- tests/frontend-route-coverage.test.ts tests/frontend-shared-surfaces.test.ts tests/frontend-design-contract.test.ts` | PASS, 49/49 |
 | `npm.cmd run audit:frontend-consistency` | PASS, 32 pages, 22 components, 0 coverage issues, 0 violations, 0 `!important` |
-| `npm.cmd test` | PASS, 54 files, 492/492 |
+| `npm.cmd test` | PASS, 54 files, 493/493 |
 | `npm.cmd run typecheck` | PASS |
 | `npm.cmd run build` | PASS, Next.js 15.5.15 production compile and type validation |
 | `git diff --check` | PASS |

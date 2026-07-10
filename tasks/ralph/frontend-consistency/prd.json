@@ -80,6 +80,7 @@
         "Supporting route gutters follow the exact desktop, tablet, and mobile contract: 24px at 1280px and above, 20px from 768px through 1279px, and 16px below 768px",
         "Supporting route cards use 24px desktop and 16px mobile padding, introductory subtitles use Body large, and route-specific layout gaps use the fixed spacing scale",
         "Supporting heroes and shared module shell heroes, wrappers, grid articles, and panels use allowed geometry at 1280px, 1024px, and 767px",
+        "Landing gutters, controls, cards, and console plus ordinary module headings, prose, lists, controls, and 980px navigation use canonical roles and the fixed spacing scale",
         "At every viewport below 768px, verified at 767px, informational and demo cards use 16px padding while desktop cards retain 24px padding",
         "Informational and login titles, card headings, and authentication controls use canonical typography roles",
         "Task 4 list and row spacing is route-scoped and does not alter WorkpackEditor density",
