@@ -2396,9 +2396,9 @@ ul {
 .v2-hero h1 {
   max-width: 920px;
   margin: 0;
-  font-size: var(--text-display);
-  line-height: var(--leading-display);
-  letter-spacing: var(--tracking-display);
+  font-size: var(--text-page-title);
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
   font-weight: 800;
 }
 
@@ -2715,10 +2715,10 @@ ul {
 .triad-card h2,
 .preview-hero-card h2 {
   margin: 0;
-  font-size: var(--text-section-title);
-  line-height: var(--leading-section-title);
-  font-weight: 800;
-  letter-spacing: var(--tracking-section-title);
+  font-size: var(--text-component-title);
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .triad-card p,
@@ -3057,6 +3057,13 @@ ul {
 
   .demo-screen {
     min-height: auto;
+    padding: var(--space-4);
+  }
+
+  .triad-card,
+  .preview-hero-card,
+  .trust-grid article,
+  .roadmap-item {
     padding: var(--space-4);
   }
 
@@ -4643,8 +4650,10 @@ ul {
   letter-spacing: var(--tracking-body);
 }
 
-.list { display: grid; gap: var(--space-4); }
-.row { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+.list { display: grid; gap: 14px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.route-supporting-page .list { gap: var(--space-4); }
+.route-supporting-page .row { gap: var(--space-2); }
 .muted { color: var(--muted); }
 .small { font-size: var(--text-support);
   font-weight: 500;
@@ -9516,10 +9525,10 @@ body:has(.safeclaw-landing) :is(
   max-width: 780px;
   margin: 0;
   color: var(--os-text, #f6f5ef);
-  font-size: var(--text-display);
+  font-size: var(--text-page-title);
   font-weight: 800;
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-page-title);
+  line-height: var(--leading-page-title);
 }
 
 .safeclaw-login-panel p {
@@ -9557,10 +9566,11 @@ body:has(.safeclaw-landing) :is(
   background: #0b0c10;
   color: var(--os-text, #f6f5ef);
   padding: 0 var(--space-4);
-  font-size: var(--text-component-title);
+  font-family: var(--font-product);
+  font-size: var(--text-control);
   font-weight: 700;
-  line-height: var(--leading-component-title);
-  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-login-form input:focus {
@@ -9581,12 +9591,12 @@ body:has(.safeclaw-landing) :is(
   background: rgba(8, 9, 11, 0.72);
   color: rgba(246, 245, 239, 0.78);
   padding: 0 var(--space-4);
-  font-family: var(--font-hud);
-  font-size: var(--text-table);
-  font-weight: 500;
+  font-family: var(--font-product);
+  font-size: var(--text-control);
+  font-weight: 700;
   letter-spacing: var(--tracking-body);
   text-decoration: none;
-  line-height: var(--leading-table);
+  line-height: var(--leading-control);
 }
 
 .safeclaw-login-form button,
