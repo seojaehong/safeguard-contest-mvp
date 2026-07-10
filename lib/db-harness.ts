@@ -4,6 +4,7 @@ import type {
   SafetyReferenceVectorStatus
 } from "@/lib/safety-reference-catalog";
 import {
+  buildSafetyReferenceOperationalMetadata,
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplayTitle,
   isSafetyReferenceCompatibleWithQuery
@@ -231,7 +232,7 @@ export function buildDbHarnessPacket(input: {
     .filter((item) => isSafetyReferenceCompatibleWithQuery(input.question, item))
     .map((item) => ({
       ...item,
-      controls: deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)
+      ...buildSafetyReferenceOperationalMetadata(item)
     }));
   const directEvidence = references.filter((item) => item.evidence_role === "direct");
   const sifCases = references.filter((item) => item.item_type === "sif-case");
