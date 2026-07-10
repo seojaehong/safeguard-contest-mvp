@@ -2,6 +2,15 @@ import type { HarnessImprovement } from "@/lib/db-harness";
 
 export const OPERATION_IMPROVEMENTS_STORAGE_KEY = "safeclaw.operationImprovements.v1";
 
+export type OperationImprovementStatus = "proposed" | "approved" | "in_progress" | "completed" | "verified" | "on_hold";
+
+export type OperationRiskAssociation = {
+  siteName: string;
+  process: string;
+  task: string;
+  hazard: string;
+};
+
 export type OperationImprovement = {
   id: string;
   createdAt: string;
@@ -10,6 +19,8 @@ export type OperationImprovement = {
   hazardLabel: string;
   improvementText: string;
   reflectedDocuments: string[];
+  status?: OperationImprovementStatus;
+  riskAssociation?: OperationRiskAssociation;
   beforePhotoName?: string;
   afterPhotoName?: string;
   photoAnalysisSummary?: string;
@@ -54,6 +65,29 @@ function readPositiveNumber(value: unknown): number | undefined {
 
 function readString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function isValidCreatedAt(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0 && !Number.isNaN(new Date(value).getTime());
+}
+
+function isImprovementStatus(value: unknown): value is OperationImprovementStatus {
+  return value === "proposed"
+    || value === "approved"
+    || value === "in_progress"
+    || value === "completed"
+    || value === "verified"
+    || value === "on_hold";
+}
+
+function parseRiskAssociation(value: unknown): OperationRiskAssociation | undefined {
+  if (!isRecord(value)) return undefined;
+  const siteName = readString(value.siteName);
+  const process = readString(value.process);
+  const task = readString(value.task);
+  const hazard = readString(value.hazard);
+  if (!siteName || !process || !task || !hazard) return undefined;
+  return { siteName, process, task, hazard };
 }
 
 function uniqueStrings(values: readonly string[]) {
@@ -107,14 +141,17 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
       if (!isRecord(item)) return [];
       const workSummary = readString(item.workSummary) || readString(item.taskLabel);
       const siteName = readString(item.siteName) || readString(item.siteLabel) || workSummary;
+      const riskAssociation = parseRiskAssociation(item.riskAssociation);
       const valid = (
         typeof item.id === "string" &&
-        typeof item.createdAt === "string" &&
+        isValidCreatedAt(item.createdAt) &&
         Boolean(siteName) &&
         Boolean(workSummary) &&
         typeof item.hazardLabel === "string" &&
         typeof item.improvementText === "string" &&
         isStringArray(item.reflectedDocuments) &&
+        (isImprovementStatus(item.status) || typeof item.status === "undefined") &&
+        (Boolean(riskAssociation) || typeof item.riskAssociation === "undefined") &&
         (typeof item.beforePhotoName === "string" || typeof item.beforePhotoName === "undefined") &&
         (typeof item.afterPhotoName === "string" || typeof item.afterPhotoName === "undefined") &&
         (typeof item.photoAnalysisSummary === "string" || typeof item.photoAnalysisSummary === "undefined") &&
@@ -150,6 +187,8 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
         hazardLabel: typeof item.hazardLabel === "string" ? item.hazardLabel : "",
         improvementText: typeof item.improvementText === "string" ? item.improvementText : "",
         reflectedDocuments,
+        status: isImprovementStatus(item.status) ? item.status : undefined,
+        riskAssociation,
         beforePhotoName: typeof item.beforePhotoName === "string" ? item.beforePhotoName : undefined,
         afterPhotoName: typeof item.afterPhotoName === "string" ? item.afterPhotoName : undefined,
         photoAnalysisSummary: typeof item.photoAnalysisSummary === "string" ? item.photoAnalysisSummary : undefined,

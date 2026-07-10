@@ -22,10 +22,12 @@ import {
   buildReportMarkdown,
   buildReportSnapshot,
   resolveReportViewState,
+  toggleReportPhotoApproval,
   type ReportDateRange,
   type ReportFilters,
   type ReportGroup,
   type ReportPeriod,
+  type ReportPhotoApproval,
   type ReportSnapshot,
   type ReportViewState
 } from "@/lib/reporting-downloads";
@@ -55,7 +57,7 @@ const EMPTY_REPORT_FACETS: ReportSnapshot["facets"] = {
   riskLevels: [],
   improvementStatuses: [],
   sites: [],
-  teams: []
+  assignees: []
 };
 
 const INITIAL_DOWNLOAD_STATE: DownloadState = {
@@ -96,7 +98,8 @@ function formatDate(value: string) {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
-    minute: "2-digit"
+    minute: "2-digit",
+    timeZone: "Asia/Seoul"
   }).format(date);
 }
 
@@ -329,7 +332,7 @@ function ReportDocument({
             <div key={`${row.index}-${row.hazard}`} role="row">
               <span role="cell" data-label="작업">
                 {compactText(row.task, 18)}
-                <em>{compactText(row.process, 12)} · {row.riskLevelLabel} · {row.improvementStatusLabel}</em>
+                <em>{compactText(row.process, 12)} · {row.riskLevelLabel}</em>
               </span>
               <span role="cell" data-label="위험">{compactText(row.hazard, 24)}</span>
               <span role="cell" data-label="현재">{compactText(row.currentControls, 34)}</span>
@@ -396,7 +399,7 @@ export function ReportsDownloadCenter() {
   const [period, setPeriod] = useState<ReportPeriod>("weekly");
   const [dateRange, setDateRange] = useState<ReportDateRange>({ start: "", end: "" });
   const [filters, setFilters] = useState<ReportFilters>({});
-  const [approvedPhotoImprovementIds, setApprovedPhotoImprovementIds] = useState<string[]>([]);
+  const [photoApprovals, setPhotoApprovals] = useState<ReportPhotoApproval[]>([]);
   const [workpack, setWorkpack] = useState<StoredCurrentWorkpack | null>(null);
   const [improvements, setImprovements] = useState<OperationImprovement[]>([]);
   const [usingSample, setUsingSample] = useState(false);
@@ -404,11 +407,15 @@ export function ReportsDownloadCenter() {
   const [downloadState, setDownloadState] = useState<DownloadState>(INITIAL_DOWNLOAD_STATE);
 
   function loadLocalState() {
+    setPhotoApprovals([]);
     try {
       const current = readCurrentWorkpack();
       setWorkpack(current.workpack);
       setUsingSample(current.sample);
-      setImprovements(parseOperationImprovements(window.localStorage.getItem(OPERATION_IMPROVEMENTS_STORAGE_KEY)));
+      const localImprovements = parseOperationImprovements(
+        window.localStorage.getItem(OPERATION_IMPROVEMENTS_STORAGE_KEY)
+      );
+      setImprovements(current.sample ? [] : localImprovements);
       setLoadError(null);
       setDownloadState(INITIAL_DOWNLOAD_STATE);
     } catch (error) {
@@ -432,14 +439,15 @@ export function ReportsDownloadCenter() {
           period,
           dateRange: period === "custom" ? dateRange : undefined,
           filters,
-          approvedPhotoImprovementIds
+          photoApprovals,
+          sourceMode: usingSample ? "sample" : "browser_local"
         }),
         error: null
       };
     } catch (error) {
       return { snapshot: null, error: errorMessage(error) };
     }
-  }, [approvedPhotoImprovementIds, dateRange, filters, improvements, period, workpack]);
+  }, [dateRange, filters, improvements, period, photoApprovals, usingSample, workpack]);
   const snapshot = reportResult.snapshot;
   const viewState = resolveReportViewState(snapshot, reportResult.error || loadError);
   const facets = snapshot?.facets || EMPTY_REPORT_FACETS;
@@ -451,14 +459,10 @@ export function ReportsDownloadCenter() {
 
   useEffect(() => {
     setDownloadState(INITIAL_DOWNLOAD_STATE);
-  }, [approvedPhotoImprovementIds, dateRange, filters, period]);
+  }, [dateRange, filters, period, photoApprovals]);
 
   function togglePhotoApproval(improvementId: string) {
-    setApprovedPhotoImprovementIds((current) => (
-      current.includes(improvementId)
-        ? current.filter((id) => id !== improvementId)
-        : [...current, improvementId]
-    ));
+    setPhotoApprovals((current) => toggleReportPhotoApproval(current, improvements, improvementId));
   }
 
   async function handleDownload(request: DownloadRequest) {
@@ -610,14 +614,14 @@ export function ReportsDownloadCenter() {
                 </select>
               </p>
               <p>
-                <strong>팀</strong>
+                <strong>담당자</strong>
                 <select
-                  aria-label="팀 필터"
-                  value={filters.team || ""}
-                  onChange={(event) => setFilters((current) => ({ ...current, team: event.target.value || undefined }))}
+                  aria-label="담당자 필터"
+                  value={filters.assignee || ""}
+                  onChange={(event) => setFilters((current) => ({ ...current, assignee: event.target.value || undefined }))}
                 >
                   <option value="">전체</option>
-                  {facets.teams.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                  {facets.assignees.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                 </select>
               </p>
             </div>

@@ -1513,6 +1513,18 @@ export function SafeGuardCommandCenter({
       saveMessage = error instanceof Error ? error.message : "DB 저장 연결이 보류되어 로컬 후보로 보관합니다.";
     }
 
+    const associationCandidates = (data?.structured?.riskAssessmentRows || []).filter((row) => (
+      row.location.trim() === fieldBrief.siteName.trim()
+      && row.hazard.trim() === (data?.riskSummary.topRisk || "").trim()
+    ));
+    const riskAssociation = associationCandidates.length === 1
+      ? {
+        siteName: associationCandidates[0].location,
+        process: associationCandidates[0].process,
+        task: associationCandidates[0].task,
+        hazard: associationCandidates[0].hazard
+      }
+      : undefined;
     const nextItem: OperationImprovement = {
       id: remoteImprovementId || `improvement-${Date.now()}`,
       createdAt: new Date().toISOString(),
@@ -1521,6 +1533,8 @@ export function SafeGuardCommandCenter({
       hazardLabel: data?.riskSummary.topRisk || "현장 개선사항",
       improvementText: text,
       reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      status: "proposed",
+      riskAssociation,
       beforePhotoName: beforePhoto?.name,
       afterPhotoName: afterPhoto?.name,
       photoAnalysisSummary: visionSummary || photoCandidate || undefined,
