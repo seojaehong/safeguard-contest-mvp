@@ -40,6 +40,7 @@ export type WorkpackEvidenceSummary = {
   evidenceLabels?: AskResponse["evidenceLabels"];
   structured?: AskResponse["structured"];
   dbHarness?: AskResponse["dbHarness"];
+  generationTrace?: AskResponse["generationTrace"];
   generationEvidence?: AskResponse["generationEvidence"];
   generationEvidenceSnapshot?: GenerationEvidenceSnapshot;
 };
@@ -86,6 +87,7 @@ export function buildWorkpackEvidenceSummary(
     evidenceLabels: response.evidenceLabels,
     structured: response.structured,
     dbHarness: response.dbHarness,
+    generationTrace: response.generationTrace,
     generationEvidence: generationEvidenceSnapshot ? response.generationEvidence : undefined,
     generationEvidenceSnapshot
   };
@@ -159,6 +161,11 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
   const structured = readJsonObject(evidence.structured);
   const dbHarness = readJsonObject(evidence.dbHarness);
   const generationEvidence = readJsonObject(evidence.generationEvidence);
+  const generationEvidenceSnapshot = generationEvidence
+    ? readJsonObject(generationEvidence.snapshot)
+    : null;
+  const generationTrace = readJsonObject(evidence.generationTrace)
+    || (generationEvidenceSnapshot ? readJsonObject(generationEvidenceSnapshot.generationTrace) : null);
 
   return {
     data: {
@@ -178,6 +185,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
       ontologyQa: ontologyQa ? ontologyQa as AskResponse["ontologyQa"] : undefined,
       qualityContract: qualityContract ? qualityContract as AskResponse["qualityContract"] : undefined,
       dbHarness: dbHarness ? dbHarness as AskResponse["dbHarness"] : undefined,
+      generationTrace: generationTrace ? generationTrace as AskResponse["generationTrace"] : undefined,
       generationEvidence: generationEvidence
         ? generationEvidence as AskResponse["generationEvidence"]
         : undefined,

@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { AskResponse, type GenerationTrace, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
+import { AskResponse, type GenerationDeliverableModelTrace, type GenerationTrace, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
 import { enhanceLegalEvidenceMappings, generateAnswer, type AnswerGenerationResult } from "./ai";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
-import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
+import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import {
   deriveSafetyReferenceOperationalView,
   filterAndRankSafetyReferencesByQuery,
@@ -43,6 +43,86 @@ import {
 } from "./db-harness";
 
 const log = createLogger("search");
+
+function safeFailureContext(error: unknown): { errorType: string } {
+  return { errorType: error instanceof Error ? error.name : typeof error };
+}
+
+const FINAL_DELIVERABLE_TRACE_KEYS = [
+  "workpackSummaryDraft",
+  "riskAssessmentDraft",
+  "workPlanDraft",
+  "workPlanStructured",
+  "permitInspectionStructured",
+  "tbmBriefing",
+  "tbmBriefingStructured",
+  "tbmLogDraft",
+  "tbmLogStructured",
+  "safetyEducationRecordDraft",
+  "educationRecordStructured",
+  "emergencyResponseDraft",
+  "photoEvidenceDraft",
+  "foreignWorkerBriefing",
+  "foreignWorkerTransmission",
+  "kakaoMessage"
+] as const;
+
+function buildFinalAnswerTrace(upstream: AnswerGenerationResult["trace"]): GenerationTrace["answer"] {
+  return {
+    provider: "safeclaw",
+    model: null,
+    composition: "safeclaw_db_harness",
+    upstream: {
+      provider: upstream.provider,
+      model: upstream.model,
+      fallbackUsed: upstream.fallbackUsed,
+      usedInFinal: false
+    }
+  };
+}
+
+function deterministicDeliverableTrace(fallbackUsed: boolean): GenerationDeliverableModelTrace {
+  return {
+    provider: "safeclaw",
+    model: null,
+    source: "deterministic",
+    fallbackUsed
+  };
+}
+
+function summarizeFinalDeliverablesProvider(
+  modelPerDocument: Record<string, GenerationDeliverableModelTrace>
+): GenerationTrace["deliverables"]["provider"] {
+  const providers = new Set(Object.values(modelPerDocument).map((item) => item.provider));
+  if (!providers.size) return null;
+  if (providers.size > 1) return "mixed";
+  return providers.values().next().value ?? null;
+}
+
+function finalizeDeliverablesTrace(
+  response: AskResponse,
+  execution: GenerationTrace["deliverables"] & { fallbackUsed: boolean }
+): GenerationTrace["deliverables"] & { fallbackUsed: boolean } {
+  const modelPerDocument = { ...execution.modelPerDocument };
+  for (const key of FINAL_DELIVERABLE_TRACE_KEYS) {
+    if (typeof response.deliverables[key] !== "undefined" && !modelPerDocument[key]) {
+      modelPerDocument[key] = deterministicDeliverableTrace(false);
+    }
+  }
+  if (response.structured?.riskAssessmentRows.length && !modelPerDocument.structuredRiskRows) {
+    modelPerDocument.structuredRiskRows = deterministicDeliverableTrace(false);
+  }
+  if (response.structured?.tbmRiskLinks?.length && !modelPerDocument.tbmRiskLinks) {
+    modelPerDocument.tbmRiskLinks = deterministicDeliverableTrace(false);
+  }
+  return {
+    attempted: execution.attempted,
+    provider: summarizeFinalDeliverablesProvider(modelPerDocument),
+    modelPerDocument,
+    fallbackUsed: execution.fallbackUsed
+      || Object.values(modelPerDocument).some((item) => item.fallbackUsed === true)
+  };
+}
 
 export async function runSearch(query: string) {
   return searchLegalSources(query);
@@ -1406,6 +1486,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     requestedMode: options.aiMode,
     envDefault: process.env.AI_MODE_DEFAULT
   });
+  let deliverablesAttempted = false;
 
   // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
   if (aiMode === "template") {
@@ -1418,19 +1499,27 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       ),
       { question, harnessMemory }
     );
+    const upstreamTrace = {
+      provider: "mock",
+      model: null,
+      fallbackUsed: false
+    } as const;
+    const deliverablesTrace = finalizeDeliverablesTrace(response, {
+      attempted: false,
+      provider: null,
+      modelPerDocument: {},
+      fallbackUsed: false
+    });
     const generationTrace: GenerationTrace = {
       traceId,
       askMode: aiMode,
-      answer: {
-        provider: "mock",
-        model: null
-      },
+      answer: buildFinalAnswerTrace(upstreamTrace),
       deliverables: {
-        attempted: false,
-        provider: null,
-        modelPerDocument: {}
+        attempted: deliverablesTrace.attempted,
+        provider: deliverablesTrace.provider,
+        modelPerDocument: deliverablesTrace.modelPerDocument
       },
-      fallbackUsed: false
+      fallbackUsed: deliverablesTrace.fallbackUsed
     };
     return { ...response, generationTrace };
   }
@@ -1453,14 +1542,17 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.
     const citationsPromise = rawCitationsBasePromise.then((base) =>
       enhanceLegalEvidenceMappings(question, base).catch((error) => {
-        log.error("AI legal evidence mapping failed; using original legal evidence order", error);
+        log.error(
+          "AI legal evidence mapping failed; using original legal evidence order",
+          safeFailureContext(error)
+        );
         return base;
       })
     );
     // generateAnswer uses raw citations directly — no longer waits for enhance.
     const responsePromise = rawCitationsBasePromise.then((rawBase) =>
       generateAnswer(question, rawBase.slice(0, 6), { traceId }).catch((error): AnswerGenerationResult => {
-        log.error("AI response generation failed; using DB harness fallback", error);
+        log.error("AI response generation failed; using DB harness fallback", safeFailureContext(error));
         return {
           response: buildMockAskResponse(
             question,
@@ -1626,6 +1718,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             ].slice(0, 12);
             const trainingLinesEarly = (trng?.recommendations ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
             const accidentLinesEarly = (acc?.cases ?? []).slice(0, 5).map((c, i) => `${i + 1}. ${c.title} | ${c.preventionPoint}`);
+            deliverablesAttempted = true;
             return generateAllDeliverablesWithDiagnostics({
               scenario: earlyScenarioParsed,
               question,
@@ -1639,13 +1732,28 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               scope: "full",
               onProgress,
               traceId
+            }).then((result) => {
+              deliverablesAttempted = result.diagnostics.trace.attempted;
+              return result;
             }).catch((error) => {
-              log.error("AI deliverable generation failed (parallel path); falling back to template bodies", error);
-              return null;
+              log.error(
+                "AI deliverable generation failed (parallel path); falling back to template bodies",
+                safeFailureContext(error)
+              );
+              return {
+                deliverables: {},
+                diagnostics: buildFailedDeliverablesDiagnostics({
+                  attempted: deliverablesAttempted,
+                  fallbackUsed: true
+                })
+              };
             });
           }).catch((error) => {
-            log.error("deliverablesPromise setup failed", error);
-            return null;
+            log.error("deliverablesPromise setup failed", safeFailureContext(error));
+            return {
+              deliverables: {},
+              diagnostics: buildFailedDeliverablesDiagnostics({ attempted: false, fallbackUsed: true })
+            };
           })
         : Promise.resolve(null);
 
@@ -1727,26 +1835,69 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       deliverablesPromise     // 9 — runs in parallel with the above
     ]);
 
-    const weather = allResults[0].status === "fulfilled" ? allResults[0].value : (log.warn("weatherPromise failed", (allResults[0] as PromiseRejectedResult).reason), weatherFallback);
-    const training = allResults[1].status === "fulfilled" ? allResults[1].value : (log.warn("trainingPromise failed", (allResults[1] as PromiseRejectedResult).reason), trainingFallback);
-    const koshaEducation = allResults[2].status === "fulfilled" ? allResults[2].value : (log.warn("koshaEducationPromise failed", (allResults[2] as PromiseRejectedResult).reason), koshaEducationFallback);
-    const kosha = allResults[3].status === "fulfilled" ? allResults[3].value : (log.warn("koshaPromise failed", (allResults[3] as PromiseRejectedResult).reason), koshaFallback);
-    const koshaOpenApi = allResults[4].status === "fulfilled" ? allResults[4].value : (log.warn("koshaOpenApiPromise failed", (allResults[4] as PromiseRejectedResult).reason), koshaOpenApiFallback);
-    const accidentCases = allResults[5].status === "fulfilled" ? allResults[5].value : (log.warn("accidentCasesPromise failed", (allResults[5] as PromiseRejectedResult).reason), accidentCasesFallback);
+    const weather = allResults[0].status === "fulfilled" ? allResults[0].value : (
+      log.warn("weatherPromise failed", safeFailureContext((allResults[0] as PromiseRejectedResult).reason)),
+      weatherFallback
+    );
+    const training = allResults[1].status === "fulfilled" ? allResults[1].value : (
+      log.warn("trainingPromise failed", safeFailureContext((allResults[1] as PromiseRejectedResult).reason)),
+      trainingFallback
+    );
+    const koshaEducation = allResults[2].status === "fulfilled" ? allResults[2].value : (
+      log.warn("koshaEducationPromise failed", safeFailureContext((allResults[2] as PromiseRejectedResult).reason)),
+      koshaEducationFallback
+    );
+    const kosha = allResults[3].status === "fulfilled" ? allResults[3].value : (
+      log.warn("koshaPromise failed", safeFailureContext((allResults[3] as PromiseRejectedResult).reason)),
+      koshaFallback
+    );
+    const koshaOpenApi = allResults[4].status === "fulfilled" ? allResults[4].value : (
+      log.warn("koshaOpenApiPromise failed", safeFailureContext((allResults[4] as PromiseRejectedResult).reason)),
+      koshaOpenApiFallback
+    );
+    const accidentCases = allResults[5].status === "fulfilled" ? allResults[5].value : (
+      log.warn("accidentCasesPromise failed", safeFailureContext((allResults[5] as PromiseRejectedResult).reason)),
+      accidentCasesFallback
+    );
     const answerResult: AnswerGenerationResult = allResults[6].status === "fulfilled"
       ? allResults[6].value
-      : (log.warn("responsePromise failed", (allResults[6] as PromiseRejectedResult).reason), {
+      : (
+          log.warn("responsePromise failed", safeFailureContext((allResults[6] as PromiseRejectedResult).reason)),
+          {
           response: buildMockAskResponse(question, mockSearchResults.slice(0, 4), "fallback", "AI 응답 생성 실패"),
           trace: {
             provider: "mock" as const,
             model: null,
             fallbackUsed: true
           }
-        });
+          }
+        );
     const response = answerResult.response;
-    const safetyReference = allResults[7].status === "fulfilled" ? allResults[7].value : (log.warn("safetyReferencePromise failed", (allResults[7] as PromiseRejectedResult).reason), safetyReferenceFallback);
-    const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (log.warn("citationsPromise failed", (allResults[8] as PromiseRejectedResult).reason), mockSearchResults.slice(0, 4));
-    const deliverablesResult = allResults[9].status === "fulfilled" ? allResults[9].value : (log.warn("deliverablesPromise failed", (allResults[9] as PromiseRejectedResult).reason), null);
+    const safetyReference = allResults[7].status === "fulfilled" ? allResults[7].value : (
+      log.warn("safetyReferencePromise failed", safeFailureContext((allResults[7] as PromiseRejectedResult).reason)),
+      safetyReferenceFallback
+    );
+    const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (
+      log.warn("citationsPromise failed", safeFailureContext((allResults[8] as PromiseRejectedResult).reason)),
+      mockSearchResults.slice(0, 4)
+    );
+    const deliverablesResult = allResults[9].status === "fulfilled"
+      ? allResults[9].value
+      : (
+          log.warn(
+            "deliverablesPromise failed",
+            safeFailureContext((allResults[9] as PromiseRejectedResult).reason)
+          ),
+          aiMode === "full"
+            ? {
+                deliverables: {},
+                diagnostics: buildFailedDeliverablesDiagnostics({
+                  attempted: deliverablesAttempted,
+                  fallbackUsed: true
+                })
+              }
+            : null
+        );
     const koreanLawMcpCount = citations.filter((item) => item.sourceSystem === "korean-law-mcp").length;
     const sourceMix = summarizeLegalSourceMix(citations);
     const legalEvidenceMode = inferLegalEvidenceMode(sourceMix);
@@ -1919,10 +2070,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const generationTrace: GenerationTrace = {
       traceId,
       askMode: aiMode,
-      answer: {
-        provider: answerResult.trace.provider,
-        model: answerResult.trace.model
-      },
+      answer: buildFinalAnswerTrace(answerResult.trace),
       deliverables: {
         attempted: deliverablesExecutionTrace.attempted,
         provider: deliverablesExecutionTrace.provider,
@@ -2100,9 +2248,24 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     };
 
     const withOntologyQa = await attachWebOntologyQa(withMcpDetail, question);
-    return attachQualityContract(withOntologyQa);
+    const finalResponse = attachQualityContract(withOntologyQa);
+    const finalDeliverablesTrace = finalizeDeliverablesTrace(finalResponse, deliverablesExecutionTrace);
+    return {
+      ...finalResponse,
+      generationTrace: {
+        ...generationTrace,
+        deliverables: {
+          attempted: finalDeliverablesTrace.attempted,
+          provider: finalDeliverablesTrace.provider,
+          modelPerDocument: finalDeliverablesTrace.modelPerDocument
+        },
+        fallbackUsed: answerResult.trace.fallbackUsed || finalDeliverablesTrace.fallbackUsed
+      }
+    };
   } catch (error) {
-    log.error("runAsk pipeline failed; using DB harness fallback", error);
+    log.error("runAsk pipeline failed; using DB harness fallback", {
+      errorType: error instanceof Error ? error.name : typeof error
+    });
     const response = attachDbHarnessFallback(
       buildMockAskResponse(
         question,
@@ -2112,19 +2275,26 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       ),
       { question, harnessMemory }
     );
+    const upstreamTrace = {
+      provider: "mock",
+      model: null,
+      fallbackUsed: true
+    } as const;
+    const failedDeliverables = buildFailedDeliverablesDiagnostics({
+      attempted: deliverablesAttempted,
+      fallbackUsed: true
+    });
+    const finalDeliverablesTrace = finalizeDeliverablesTrace(response, failedDeliverables.trace);
     return {
       ...response,
       generationTrace: {
         traceId,
         askMode: aiMode,
-        answer: {
-          provider: "mock",
-          model: null
-        },
+        answer: buildFinalAnswerTrace(upstreamTrace),
         deliverables: {
-          attempted: false,
-          provider: null,
-          modelPerDocument: {}
+          attempted: finalDeliverablesTrace.attempted,
+          provider: finalDeliverablesTrace.provider,
+          modelPerDocument: finalDeliverablesTrace.modelPerDocument
         },
         fallbackUsed: true
       }

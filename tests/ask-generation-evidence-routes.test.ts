@@ -112,4 +112,16 @@ describe("ask generation evidence routes", () => {
     expect(body).toContain('"version":"safeclaw-generation-evidence/v1"');
     expect(body).toContain('"algorithm":"HMAC-SHA256"');
   });
+
+  it("does not expose raw internal errors through the SSE response", async () => {
+    mocks.runAsk.mockRejectedValueOnce(new Error("PII_MARKER worker=Kim secret=internal"));
+    const { POST } = await import("@/app/api/ask/stream/route");
+    const response = await POST(request("/api/ask/stream"));
+    const body = await response.text();
+
+    expect(body).toContain('"kind":"error"');
+    expect(body).toContain("요청 처리 중 오류가 발생했습니다");
+    expect(body).not.toContain("PII_MARKER");
+    expect(body).not.toContain("secret=internal");
+  });
 });
