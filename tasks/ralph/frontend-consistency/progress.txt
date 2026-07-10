@@ -51,3 +51,9 @@
 - Verified: focused shared plus design-contract tests 32/32, static audit, typecheck, build 27/27, independent spec and code-quality review pass with zero findings.
 - Learned: shared hooks do not prove effective styling when later scoped selectors win; tests must assert the higher-specificity current selectors explicitly.
 - Next: F4 all route families.
+
+## 2026-07-11 F4 review closure
+- Changed: closed all route-family semantics, responsive geometry, ownership, spacing-token, delegated-owner, and signed-decimal parser acceptance through final implementation commit `3f7166d`.
+- Verified: route test 17/17, focused tests 49/49, full suite 493/493, static audit over 32 pages and 22 components with zero coverage issues or violations, typecheck, production build, and diff-check pass.
+- Reviewed: independent specification and code-quality review both PASS with zero findings across `b9ec074...3f7166d`.
+- Next: F5 workspace and reports density; browser screenshots and route-state capture remain F7 scope.
