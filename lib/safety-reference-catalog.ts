@@ -317,15 +317,16 @@ const OPERATIONAL_RISK_PATTERN = /추락|전도|질식|폭발|화재|감전|붕�
 const OPERATIONAL_ACTION_PATTERN = /중지|차단|통제|부착|배치|체결|착용|잠금|설치|공유|교육|보고|복창|격리|환기|측정/;
 const GENERIC_OPERATIONAL_CONTROL_PATTERN = /유해[·\s]?위험요인.*확인|관리감독자.*확인|필수 확인 항목|현장 확인 항목|일반 안전사항/;
 
-function operationalReferenceText(item: SafetyReferenceItem): string {
+function operationalIdentityText(item: SafetyReferenceItem): string {
   return [
     getSafetyReferenceDisplayTitle(item),
+    item.title,
     item.category || "",
     item.subcategory || "",
-    getSafetyReferenceDisplaySummary(item),
+    item.summary,
+    item.body || "",
     ...item.risk_tags,
-    ...item.keywords,
-    ...item.controls
+    ...item.keywords
   ].join(" ");
 }
 
@@ -414,7 +415,12 @@ function genericOperationalView(item: SafetyReferenceItem): SafetyReferenceOpera
 }
 
 export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem): SafetyReferenceOperationalView {
-  const text = operationalReferenceText(item);
+  const text = operationalIdentityText(item);
+  const sifFallRisk = item.item_type === "sif-case" && item.risk_tags.some((tag) => /추락|비계|고소/u.test(tag));
+  const sifPinchRisk = item.item_type === "sif-case" && item.risk_tags.some((tag) => /끼임|협착|말림|절단/u.test(tag));
+  const machineryIdentity = item.item_type === "machinery" || /프레스|선반|컨베이어|산업용 로봇|기계설비|가동부|회전체|불시기동/u.test(text);
+  const hazardousEnergyIdentity = /정비|보수|점검|불시기동|전원\s*차단|잠금표지|LOTO/u.test(text);
+  const sifMachineryRisk = item.item_type === "sif-case" && machineryIdentity && (sifPinchRisk || hazardousEnergyIdentity);
 
   if (/D-C-13-2026|외벽도장보수공사/u.test(text)) {
     return {
@@ -460,7 +466,7 @@ export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem):
     };
   }
 
-  if (/지게차/u.test(text) && /동선|보행|통행|충돌/u.test(text)) {
+  if (/B-M-11-2025/u.test(text) || (/지게차/u.test(text) && /동선|보행|통행|충돌/u.test(text))) {
     return {
       hazard: "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험",
       controls: [
@@ -482,7 +488,51 @@ export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem):
     };
   }
 
-  if (item.item_type === "machinery" || /프레스|선반|컨베이어|산업용 로봇|가동부|비상정지장치/u.test(text)) {
+  if (sifFallRisk && sifMachineryRisk) {
+    return {
+      hazard: "기계설비 정비 중 작업대 추락·가동부 끼임 및 불시기동 위험",
+      controls: [
+        "작업발판·안전난간 상태 확인 및 안전대 체결",
+        "가동부 방호덮개·비상정지장치 확인 후 정비 전 전원 차단·잠금표지(LOTO)"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  if (sifFallRisk && sifPinchRisk) {
+    return {
+      hazard: "비계·부재 해체 중 작업발판 추락 및 손·신체 끼임 위험",
+      controls: [
+        "작업발판·안전난간 상태 확인 및 안전대 체결",
+        "부재 사이 손 끼임점 확인, 작업구역 접근 통제 및 작업자 간 신호 확인"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  if (sifFallRisk) {
+    return {
+      hazard: "고소·비계 작업 중 작업발판·단부 방호 미확인으로 인한 추락 위험",
+      controls: [
+        "작업발판·안전난간·개구부 상태 확인",
+        "안전대 체결 및 작업반경 출입통제"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  if (sifPinchRisk && !machineryIdentity) {
+    return {
+      hazard: "수작업·부재 취급 중 손·신체 끼임 위험",
+      controls: [
+        "부재 사이 손 끼임점 확인 및 작업구역 접근 통제",
+        "취급 보조도구 사용과 작업자 간 신호 확인"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  if (machineryIdentity) {
     return {
       hazard: "기계 가동부 끼임 및 정비 중 불시기동 위험",
       controls: [

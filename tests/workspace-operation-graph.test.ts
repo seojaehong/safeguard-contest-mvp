@@ -133,6 +133,101 @@ describe("buildWorkspaceOperationMemoryGraph", () => {
     });
   });
 
+  it("keeps contaminated fall-case controls out of the exterior-painting operation graph", () => {
+    const question = [
+      "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업.",
+      "이동식 비계를 사용하고 작업자 5명 중 신규 투입자 1명이 포함된다.",
+      "오후 강풍 예보가 있으며 자재 반입 지게차 동선과 작업자 통행 동선이 겹친다."
+    ].join(" ");
+    const packet = buildDbHarnessPacket({
+      question,
+      references: [
+        reference({
+          id: "d-c-13-exterior-painting",
+          source_id: "kosha-technical-support-regulations-2025",
+          item_type: "technical-support-regulation",
+          title: "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+          summary: "외벽 도장 보수공사의 비계, 추락방지, 작업발판 안전 기준",
+          keywords: ["외벽도장", "비계", "추락"],
+          risk_tags: ["추락", "비계"],
+          controls: ["가동부 방호덮개 설치", "정비 전 전원 차단 및 잠금표지"],
+          evidence_role: "direct"
+        }),
+        reference({
+          id: "b-e-17-paint-fire",
+          source_id: "kosha-technical-support-regulations-2025",
+          item_type: "technical-support-regulation",
+          title: "B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+          summary: "도료와 유기용제 증기 점화 방지 기준",
+          keywords: ["도장", "도료", "유기용제"],
+          risk_tags: ["화재", "폭발"],
+          controls: ["정전도장기·피도장물 접지", "정비 전 전원 차단 및 잠금표지(LOTO)"],
+          evidence_role: "direct"
+        }),
+        reference({
+          id: "b-m-11-forklift-traffic",
+          source_id: "kosha-technical-support-regulations-2025",
+          item_type: "technical-support-regulation",
+          title: "B-M-11-2025 지게차의 안전작업에 관한 기술지원규정",
+          summary: "지게차 안전작업의 일반 원칙",
+          keywords: ["지게차"],
+          risk_tags: ["지게차"],
+          controls: ["가동부 방호덮개 설치", "정비 전 전원 차단 및 잠금표지(LOTO)"],
+          evidence_role: "direct"
+        }),
+        reference({
+          id: "sif-archive-construction-01005",
+          title: "1004 / 4. 마감공사 / 4.2 방수 작업",
+          summary: "옥상 경사 지붕에서 방수작업 중 지붕 단부 아래로 추락한 사례",
+          keywords: ["마감공사", "방수 작업", "지붕"],
+          risk_tags: ["추락", "비계", "고소"],
+          controls: [
+            "작업발판·난간·개구부 상태 확인",
+            "안전대 체결 및 작업반경 출입통제",
+            "가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+            "정비 전 전원 차단 및 잠금표지(LOTO)"
+          ],
+          evidence_role: "supporting"
+        })
+      ]
+    });
+    const legacyFallCase = packet.sifCases.find((item) => item.id === "sif-archive-construction-01005");
+    expect(legacyFallCase).toBeDefined();
+    if (!legacyFallCase) return;
+    legacyFallCase.controls = [
+      "가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+      "정비 전 전원 차단 및 잠금표지(LOTO)"
+    ];
+    legacyFallCase.short_summary = "가동부 방호덮개 설치 · 정비 전 전원 차단 및 잠금표지(LOTO)";
+    const legacyRawControls = [...legacyFallCase.controls];
+    const response = attachDbHarness(
+      buildMockAskResponse(question, [], "mock", "test"),
+      packet
+    );
+
+    const graph = buildWorkspaceOperationMemoryGraph(response, {
+      workpackId: "wp-exterior-painting",
+      generatedAt: "2026-07-10T09:00:00.000Z"
+    });
+    const controlText = graph.nodes
+      .filter((node) => node.kind === "Control")
+      .map((node) => node.label)
+      .join("\n");
+    const evidenceDetailText = graph.nodes
+      .filter((node) => node.kind === "Evidence")
+      .map((node) => node.detail || "")
+      .join("\n");
+
+    expect(controlText).toMatch(/지게차.*동선|동선.*지게차/);
+    expect(controlText).toMatch(/비계|작업발판|안전난간/);
+    expect(controlText).toMatch(/강풍.*작업중지|작업중지.*강풍/);
+    expect(controlText).toMatch(/도료|유기용제/);
+    expect(controlText).toMatch(/점화원|소화기|MSDS|환기/);
+    expect(controlText).not.toMatch(/방호덮개|비상정지장치|잠금표지|LOTO|정전도장|피도장물 접지/);
+    expect(evidenceDetailText).not.toMatch(/방호덮개|비상정지장치|잠금표지|LOTO|정전도장|피도장물 접지/);
+    expect(legacyFallCase.controls).toEqual(legacyRawControls);
+  });
+
   it("keeps read confirmations empty until the share acknowledgement flow creates them", () => {
     const packet = buildDbHarnessPacket({
       question: "부산 밀폐공간 누수 점검",

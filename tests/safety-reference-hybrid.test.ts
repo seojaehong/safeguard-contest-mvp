@@ -165,6 +165,93 @@ describe("deriveSafetyReferenceOperationalView", () => {
     expect(view.reviewRequired).toBe(false);
     expect(paint.controls).toEqual(rawControls);
   });
+
+  it("classifies B-E-17 from source identity instead of electrostatic contamination in raw controls", () => {
+    const paint = reference("b-e-17-electrostatic-contamination");
+    paint.title = "B-E-17-2026 도장 공정에서의 화재·폭발위험방지";
+    paint.summary = "도료와 유기용제 증기가 체류하는 도장 공정";
+    paint.keywords = ["도장", "도료", "유기용제"];
+    paint.risk_tags = ["화재", "폭발"];
+    paint.controls = [
+      "정전도장기·피도장물 접지 및 정전기 제거",
+      "정비 전 전원 차단 및 잠금표지(LOTO)"
+    ];
+    const rawControls = [...paint.controls];
+
+    const view = deriveSafetyReferenceOperationalView(paint);
+
+    expect(view.hazard).toMatch(/도장 공정.*화재·폭발/);
+    expect(view.hazard).not.toMatch(/정전도장 중/);
+    expect(view.controls.join(" ")).toMatch(/도료|유기용제|환기/);
+    expect(view.controls.join(" ")).toMatch(/점화원|MSDS|소화기/);
+    expect(view.controls.join(" ")).not.toMatch(/정전도장기|피도장물 접지|LOTO/);
+    expect(paint.controls).toEqual(rawControls);
+  });
+
+  it("keeps both fall protection and LOTO for a mixed-hazard machinery SIF case", () => {
+    const machinerySif = reference("sif-conveyor-fall-entanglement", "supporting");
+    machinerySif.title = "컨베이어 정비 작업 중 작업대 추락 및 가동부 끼임 사례";
+    machinerySif.summary = "컨베이어 상부 정비 중 작업대에서 추락하고 불시기동된 가동부에 끼일 위험";
+    machinerySif.keywords = ["컨베이어", "정비", "추락", "끼임"];
+    machinerySif.risk_tags = ["추락", "끼임"];
+    machinerySif.controls = [
+      "작업발판·안전난간 상태 확인",
+      "가동부 방호덮개 설치",
+      "정비 전 전원 차단 및 잠금표지(LOTO)"
+    ];
+    const rawControls = [...machinerySif.controls];
+
+    const view = deriveSafetyReferenceOperationalView(machinerySif);
+
+    expect(view.hazard).toMatch(/추락/);
+    expect(view.hazard).toMatch(/끼임|불시기동/);
+    expect(view.controls.join(" ")).toMatch(/작업발판|안전난간|안전대/);
+    expect(view.controls.join(" ")).toMatch(/전원 차단|잠금표지|LOTO/);
+    expect(machinerySif.controls).toEqual(rawControls);
+  });
+
+  it("keeps LOTO when legacy machinery SIF prose carries hazardous-energy identity without a pinch tag", () => {
+    const machinerySif = reference("sif-conveyor-fall-unexpected-start", "supporting");
+    machinerySif.title = "컨베이어 정비 중 작업대 추락 및 불시기동 사례";
+    machinerySif.summary = "컨베이어 상부 점검 중 작업대에서 추락하고 설비가 불시에 기동할 위험";
+    machinerySif.keywords = ["컨베이어", "정비", "점검", "불시기동", "추락"];
+    machinerySif.risk_tags = ["추락"];
+    machinerySif.controls = [
+      "작업발판·안전난간 상태 확인",
+      "정비 전 전원 차단 및 잠금표지(LOTO)"
+    ];
+    const rawControls = [...machinerySif.controls];
+
+    const view = deriveSafetyReferenceOperationalView(machinerySif);
+
+    expect(view.hazard).toMatch(/추락/);
+    expect(view.hazard).toMatch(/불시기동/);
+    expect(view.controls.join(" ")).toMatch(/작업발판|안전난간|안전대/);
+    expect(view.controls.join(" ")).toMatch(/전원 차단|잠금표지|LOTO/);
+    expect(machinerySif.controls).toEqual(rawControls);
+  });
+
+  it("keeps non-machinery pinch cases free of machine-guard and LOTO controls", () => {
+    const scaffoldSif = reference("sif-scaffold-fall-pinch", "supporting");
+    scaffoldSif.title = "비계 해체 중 부재 사이 손가락 끼임 후 작업발판 추락 사례";
+    scaffoldSif.summary = "비계 부재를 손으로 해체하던 중 손가락이 부재 사이에 끼이고 작업발판에서 추락";
+    scaffoldSif.keywords = ["비계", "해체", "부재", "손가락 끼임", "추락"];
+    scaffoldSif.risk_tags = ["추락", "끼임"];
+    scaffoldSif.controls = [
+      "가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+      "정비 전 전원 차단 및 잠금표지(LOTO)"
+    ];
+    const rawControls = [...scaffoldSif.controls];
+
+    const view = deriveSafetyReferenceOperationalView(scaffoldSif);
+
+    expect(view.hazard).toMatch(/추락/);
+    expect(view.hazard).toMatch(/끼임|협착/);
+    expect(view.controls.join(" ")).toMatch(/작업발판|안전난간|안전대/);
+    expect(view.controls.join(" ")).toMatch(/손 끼임|부재|접근 통제/);
+    expect(view.controls.join(" ")).not.toMatch(/방호덮개|비상정지장치|잠금표지|LOTO/);
+    expect(scaffoldSif.controls).toEqual(rawControls);
+  });
 });
 
 describe("filterAndRankSafetyReferencesByQuery", () => {
