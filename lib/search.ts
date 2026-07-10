@@ -5,7 +5,9 @@ import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import {
+  filterAndRankSafetyReferencesByQuery,
   searchSafetyReferences,
+  scoreSafetyReferenceQueryMatch,
   type SafetyReferenceItem,
   type SafetyReferenceRetrievalMode,
   type SafetyReferenceSearchResult
@@ -329,21 +331,34 @@ function deriveSafetyReferenceHazard(item: SafetyReferenceItem): string {
 export function buildSafetyReferenceRiskRows(
   response: AskResponse,
   references: readonly SafetyReferenceItem[],
-  weatherSummary: string
+  weatherSummary: string,
+  query?: string
 ): RiskAssessmentRow[] {
   const scenario = response.scenario;
   const location = scenario.siteName || "현장 작업구역";
   const process = response.riskSummary.title || scenario.companyType || "현장 작업";
+  const rankQuery = query || [
+    scenario.siteName,
+    scenario.workSummary,
+    response.riskSummary.title,
+    response.riskSummary.topRisk
+  ].filter(Boolean).join(" ");
   const topCandidates = references
     .filter(includesRiskAssessmentDocument)
     .filter((item) => item.title || item.summary || item.controls.length)
+    .map((item, index) => ({ item, index, relevance: scoreSafetyReferenceQueryMatch(rankQuery, item) }))
     .sort((a, b) => {
-      const roleA = a.evidence_role === "direct" ? 0 : 1;
-      const roleB = b.evidence_role === "direct" ? 0 : 1;
-      const sourceA = a.retrieval_source === "hybrid" || a.retrieval_source === "vector" ? 0 : a.retrieval_source === "ranked" ? 1 : 2;
-      const sourceB = b.retrieval_source === "hybrid" || b.retrieval_source === "vector" ? 0 : b.retrieval_source === "ranked" ? 1 : 2;
-      return roleA - roleB || sourceA - sourceB;
-    });
+      const roleA = a.item.evidence_role === "direct" ? 0 : 1;
+      const roleB = b.item.evidence_role === "direct" ? 0 : 1;
+      const sourceA = a.item.retrieval_source === "hybrid" || a.item.retrieval_source === "vector" ? 0 : a.item.retrieval_source === "ranked" ? 1 : 2;
+      const sourceB = b.item.retrieval_source === "hybrid" || b.item.retrieval_source === "vector" ? 0 : b.item.retrieval_source === "ranked" ? 1 : 2;
+      const typeA = a.item.item_type === "sif-case" ? 0 : a.item.item_type === "technical-guideline" || a.item.item_type === "technical-support-regulation" ? 1 : 2;
+      const typeB = b.item.item_type === "sif-case" ? 0 : b.item.item_type === "technical-guideline" || b.item.item_type === "technical-support-regulation" ? 1 : 2;
+      const relevanceDelta = b.relevance - a.relevance;
+      if (Math.abs(relevanceDelta) > 12) return relevanceDelta;
+      return roleA - roleB || typeA - typeB || sourceA - sourceB || relevanceDelta || a.index - b.index;
+    })
+    .map(({ item }) => item);
   const seen = new Set<string>();
   const rows: RiskAssessmentRow[] = [];
 
@@ -1534,18 +1549,20 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         safeSearch({ query: question, limit: 3, itemType: "sif-case" }),
         safeSearch({ query: question, limit: 5 })
       ]);
-      // Merge order: support-regulation → guideline → SIF → general (deduped by id).
+      // Merge all buckets, then rerank by task-specific query relevance. Official
+      // KOSHA refs still stay in the candidate set, but broad support regulations
+      // should not outrank SIF/confined-space/LOTO-specific evidence.
       const seen = new Set<string>();
-      const merged: SafetyReferenceItem[] = [];
+      const candidates: SafetyReferenceItem[] = [];
       for (const bucket of [supportReg.items, guideline.items, sif.items, general.items]) {
         for (const item of bucket) {
           if (seen.has(item.id)) continue;
           seen.add(item.id);
-          merged.push(item);
-          if (merged.length >= 10) break;
+          candidates.push(item);
         }
-        if (merged.length >= 10) break;
       }
+      const rankedCandidates = filterAndRankSafetyReferencesByQuery(question, candidates, 10);
+      const merged = rankedCandidates.length ? rankedCandidates : candidates.slice(0, 10);
       const configured = supportReg.configured || guideline.configured || sif.configured || general.configured;
       const messageParts = [
         `KOSHA 기술지원규정 ${supportReg.count}건`,
@@ -1576,7 +1593,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         retrievalMode,
         vectorSearch,
         message: configured
-          ? `Supabase 안전 지식 DB 호출 완료 (${messageParts.join(", ")})`
+          ? `Supabase 안전 지식 DB 호출 완료 (${messageParts.join(", ")}, 작업특화 rerank 적용)`
           : "Supabase 안전 지식 DB가 설정되지 않았습니다."
       };
     })();
@@ -1837,7 +1854,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const photoSeedRiskRows = buildPhotoHazardRiskRows(response, harnessMemory.improvements);
     const harnessStructuredRiskRows = generatedStructuredRiskRows.length
       ? []
-      : buildSafetyReferenceRiskRows(response, safetyReference.items, weather.summary);
+      : buildSafetyReferenceRiskRows(response, safetyReference.items, weather.summary, question);
     const fallbackStructuredRiskRows = generatedStructuredRiskRows.length
       ? []
       : harnessStructuredRiskRows.length
