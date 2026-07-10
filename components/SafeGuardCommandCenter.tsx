@@ -1077,7 +1077,7 @@ export function SafeGuardCommandCenter({
     : "workspace-theme-night";
 
   return (
-    <main className={`command-center-shell ${themeShellClass}`}>
+    <main className={`command-center-shell workbench-root ${themeShellClass}`}>
       <header className="command-topbar workspace-command-topbar">
         <Link href="/" className="brand-lockup safeclaw-lockup" aria-label="SafeClaw 홈으로 이동">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1091,7 +1091,7 @@ export function SafeGuardCommandCenter({
           <span>{currentWorkflowStep.caption}</span>
           <strong>{currentWorkflowStep.label}</strong>
         </div>
-        <div className="workspace-theme-toggle" aria-label="작업공간 테마 선택">
+        <div className="workspace-theme-toggle workbench-theme-toggle" aria-label="작업공간 테마 선택">
           <button
             type="button"
             className={activeWorkspaceTheme === "day" ? "active" : ""}
@@ -1252,7 +1252,7 @@ export function SafeGuardCommandCenter({
                 )}
               </div>
             </section>
-            <div className="evidence-readiness-rail" aria-label="근거 준비 레일">
+            <div className="evidence-readiness-rail workbench-evidence-rail" aria-label="근거 준비 레일">
               {readinessRail.map((item) => (
                 <article key={item.key} className={`evidence-readiness-card ${readinessClass(item.tone)}`}>
                   <span>{item.label}</span>
@@ -1310,7 +1310,7 @@ export function SafeGuardCommandCenter({
               </fieldset>
             </details>
             <div className="command-actions">
-              <button type="submit" className="button command-primary" disabled={busy} aria-busy={busy}>
+              <button type="submit" className={`button command-primary workbench-primary-action ${busy ? "workbench-loading-state workbench-disabled-state" : ""}`} disabled={busy} aria-busy={busy}>
                 {busy ? <span className="button-spinner" aria-hidden="true" /> : null}
                 {busy ? "근거 확인 중" : "안전 문서 생성"}
               </button>
@@ -1384,7 +1384,7 @@ export function SafeGuardCommandCenter({
               ))}
             </div>
             <div className={`inline-progress document-review-meter ${busy ? "animated" : ""}`} aria-label={`문서 작성 진행률 ${currentDocProgress}/${totalDocumentCount}`}>
-              <span style={{ width: `${Math.max(8, (currentDocProgress / totalDocumentCount) * 100)}%` }} />
+              <progress value={Math.max(8, (currentDocProgress / totalDocumentCount) * 100)} max="100" />
             </div>
             <div className="document-viewer-shell">
               <div className="document-viewer-list" aria-label="문서 목록">
@@ -1448,7 +1448,7 @@ export function SafeGuardCommandCenter({
                     다음: 공유
                   </button>
                 </article>
-                <aside className="document-evidence-panel" aria-label="선택 문서 인용 근거">
+                <aside className="document-evidence-panel workbench-document-rail workbench-evidence-rail" aria-label="선택 문서 인용 근거">
                   <div className="compact-head">
                     <span className="eyebrow">인용 근거</span>
                     <strong>{selectedOutputItem.title}</strong>

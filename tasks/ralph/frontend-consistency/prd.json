@@ -105,7 +105,7 @@
       "id": "F5",
       "title": "Workspace and reports density",
       "priority": 5,
-      "status": "todo",
+      "status": "in_progress",
       "passes": false,
       "acceptance": [
         "Day and Night share exact type, spacing, and radius values",

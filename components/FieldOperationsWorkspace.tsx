@@ -485,7 +485,7 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
   const safeExternalUrl = (url?: string) => (url && /^https?:\/\//.test(url) ? url : officialFallbackUrl);
 
   return (
-    <section className="evidence-impact-grid" id="references">
+    <section className="evidence-impact-grid workbench-evidence-rail" id="references">
       <article className="workspace-panel card">
         <div className="compact-head">
           <span className="eyebrow">근거</span>
@@ -803,7 +803,7 @@ export function FieldOperationsWorkspace({
   }, [dispatchSnapshot, workerSnapshot, workspaceData]);
 
   return (
-    <section className="field-workspace" id="workpack">
+    <section className="field-workspace workbench-root" id="workpack">
       <aside className="workspace-rail card" aria-label="SafeClaw 파일럿 체크리스트">
         <div className="compact-head">
           <span className="eyebrow">운영 체크</span>

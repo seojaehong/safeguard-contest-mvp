@@ -10924,7 +10924,7 @@ body:has(.safeclaw-landing) :is(
   font-size: var(--text-caption);
   font-weight: 600;
   line-height: var(--leading-caption);
-  padding: 6px 10px;
+  padding: 8px 12px;
   letter-spacing: var(--tracking-body);
 }
 
@@ -10956,7 +10956,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .workspace-side-group {
   display: grid;
-  gap: 9px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -10975,12 +10975,12 @@ body:has(.safeclaw-landing) :is(
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  min-height: 40px;
+  min-height: 44px;
   border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
   color: var(--workspace-muted);
-  padding: 8px 10px;
+  padding: 8px 12px;
   text-align: left;
 }
 
@@ -11026,7 +11026,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .workspace-current-brief {
   border-top: 1px solid var(--workspace-rule);
   border-bottom: 1px solid var(--workspace-rule);
-  padding: 16px 10px;
+  padding: 16px 12px;
 }
 
 .command-center-shell .workspace-current-brief strong {
@@ -11054,7 +11054,7 @@ body:has(.safeclaw-landing) :is(
   min-height: calc(100vh - 92px);
   border: 0;
   background: var(--workspace-canvas);
-  padding: 48px clamp(24px, 4vw, 56px) 56px;
+  padding: 48px clamp(24px, 4vw, 64px) 64px;
 }
 
 .command-center-shell .linear-workspace-layout .workspace-step-page {
@@ -11066,13 +11066,13 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .linear-workspace-layout .workspace-input-page {
   align-content: start;
   min-height: auto;
-  padding-top: clamp(28px, 7vh, 76px);
+  padding-top: clamp(32px, 7vh, 80px);
 }
 
 .command-center-shell .command-main {
   min-height: calc(100vh - 104px);
   background: var(--workspace-canvas);
-  padding-top: 52px;
+  padding-top: 48px;
 }
 
 .command-center-shell .workspace-input-page {
@@ -11086,7 +11086,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .command-copy h1 {
   max-width: 620px;
-  margin: 10px 0 12px;
+  margin: 8px 0 12px;
   color: var(--workspace-ink);
   font-size: var(--text-page-title);
   font-weight: 800;
@@ -11105,7 +11105,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .command-console {
   width: min(760px, 100%);
-  margin-top: 22px;
+  margin-top: 24px;
   border: 0;
   background: transparent;
   padding: 0;
@@ -11147,7 +11147,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .field-brief-chip-row {
   gap: 12px;
   justify-content: flex-start;
-  margin-top: 18px;
+  margin-top: 20px;
 }
 
 .command-center-shell .field-brief-chip-row span,
@@ -11159,7 +11159,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .field-brief-chip-row span {
-  min-height: 38px;
+  min-height: 44px;
   border-radius: 4px;
   padding: 8px 16px;
   color: #a4aab4;
@@ -11170,7 +11170,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .input-helper {
-  margin-top: 14px;
+  margin-top: 16px;
   color: #9aa1ad;
   font-size: var(--text-support);
   line-height: var(--leading-body);
@@ -11183,7 +11183,7 @@ body:has(.safeclaw-landing) :is(
   grid-template-columns: minmax(0, 0.9fr) minmax(180px, 0.46fr);
   gap: 12px;
   width: min(760px, 100%);
-  margin-top: 18px;
+  margin-top: 20px;
 }
 
 .command-center-shell .input-photo-copy,
@@ -11196,8 +11196,8 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .input-photo-copy {
   display: grid;
-  gap: 6px;
-  padding: 14px;
+  gap: 8px;
+  padding: 16px;
 }
 
 .command-center-shell .input-photo-copy span {
@@ -11233,7 +11233,7 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-muted);
   cursor: pointer;
   overflow: hidden;
-  padding: 14px;
+  padding: 16px;
   text-align: center;
 }
 
@@ -11276,7 +11276,7 @@ body:has(.safeclaw-landing) :is(
   grid-column: 1 / -1;
   display: grid;
   gap: 8px;
-  padding: 10px;
+  padding: 12px;
 }
 
 .command-center-shell .input-photo-candidates p {
@@ -11296,7 +11296,7 @@ body:has(.safeclaw-landing) :is(
   background: var(--workspace-surface-2);
   color: var(--workspace-ink);
   cursor: pointer;
-  padding: 10px 12px;
+  padding: 8px 12px;
   text-align: left;
 }
 
@@ -11336,7 +11336,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .command-primary {
-  min-height: 42px;
+  min-height: 44px;
   border-color: var(--workspace-accent);
   border-radius: 4px;
   background: var(--workspace-accent);
@@ -11420,13 +11420,13 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: var(--workspace-surface-1);
-  padding: 14px;
+  padding: 16px;
 }
 
 .command-center-shell .evidence-readiness-rail {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 16px;
   border: 0;
 }
 
@@ -11449,10 +11449,10 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .evidence-live-panel {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
-  padding: 18px;
+  padding: 16px;
 }
 
 .command-center-shell .compact-head strong,
@@ -11580,7 +11580,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .agent-console-head {
   cursor: pointer;
   list-style: none;
-  padding: 10px 12px;
+  padding: 12px;
   color: var(--workspace-muted);
   font-family: var(--font-base);
   font-size: var(--text-caption);
@@ -11609,7 +11609,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .agent-console-body {
   border-top: 1px solid var(--workspace-rule);
-  padding: 10px 12px 12px;
+  padding: 12px;
 }
 
 .command-center-shell .agent-console-line {
@@ -11710,15 +11710,15 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell .linear-workspace-layout .command-main {
-    padding: 28px 16px 40px;
+    padding: 32px 16px 40px;
   }
 
   .command-center-shell .workspace-side-nav {
-    padding: 10px;
+    padding: 12px;
   }
 
   .command-center-shell .workspace-side-group:first-child button {
-    min-height: 40px;
+    min-height: 44px;
     grid-template-columns: auto minmax(0, 1fr);
   }
 
@@ -11758,7 +11758,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .document-workbench {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   width: min(1180px, 100%);
   margin: 0 auto;
   border: 1px solid var(--workspace-rule);
@@ -11771,14 +11771,14 @@ body:has(.safeclaw-landing) :is(
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 18px;
+  gap: 16px;
   border-bottom: 1px solid var(--workspace-rule);
-  padding-bottom: 14px;
+  padding-bottom: 16px;
 }
 
 .command-center-shell .document-workbench-head > div:first-child {
   display: grid;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -11806,7 +11806,7 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: var(--workspace-surface-2);
-  padding: 9px 11px;
+  padding: 8px 12px;
   text-align: right;
 }
 
@@ -11829,7 +11829,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .document-review-status-strip {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 
 .command-center-shell .document-review-status-strip article {
@@ -11839,7 +11839,7 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: var(--workspace-surface-2);
-  padding: 9px 10px;
+  padding: 8px 12px;
 }
 
 .command-center-shell .document-review-status-strip span,
@@ -11870,19 +11870,19 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .document-review-meter {
-  margin-top: -2px;
+  margin-top: 0;
 }
 
 .command-center-shell .document-workbench .document-viewer-shell {
   display: grid;
   grid-template-columns: minmax(194px, 0.24fr) minmax(0, 1fr);
-  gap: 10px;
+  gap: 16px;
 }
 
 .command-center-shell .document-workbench .document-preview-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 0.34fr);
-  gap: 10px;
+  gap: 16px;
 }
 
 .command-center-shell .document-workbench .document-viewer-list,
@@ -11913,7 +11913,7 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: var(--workspace-surface-2);
-  padding: 14px;
+  padding: 16px;
 }
 
 .command-center-shell .document-workbench .document-preview-head {
@@ -11921,7 +11921,7 @@ body:has(.safeclaw-landing) :is(
   justify-content: space-between;
   gap: 12px;
   border-bottom: 1px solid var(--workspace-rule);
-  padding-bottom: 10px;
+  padding-bottom: 12px;
 }
 
 .command-center-shell .document-workbench .document-preview-pane pre {
@@ -11932,7 +11932,7 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   background: #090a0b;
   color: var(--workspace-ink);
-  padding: 18px;
+  padding: 16px;
   font-family: var(--font-multilingual);
   font-size: var(--text-table);
   line-height: var(--leading-table);
@@ -11946,20 +11946,20 @@ body:has(.safeclaw-landing) :is(
   top: 86px;
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 16px;
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: var(--workspace-surface-2);
-  padding: 12px;
+  padding: 24px;
 }
 
 .command-center-shell .document-workbench .document-evidence-panel article {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: var(--workspace-surface-1);
-  padding: 11px;
+  padding: 12px;
 }
 
 .command-center-shell .document-workbench .document-evidence-panel article strong {
@@ -11992,7 +11992,7 @@ body:has(.safeclaw-landing) :is(
   justify-content: space-between;
   cursor: pointer;
   list-style: none;
-  padding: 11px 12px;
+  padding: 12px;
   color: var(--workspace-muted);
   font-size: var(--text-caption);
   font-weight: 600;
@@ -12014,7 +12014,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .document-work-history-body {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   border-top: 1px solid var(--workspace-rule);
   padding: 12px;
 }
@@ -12049,7 +12049,7 @@ body:has(.safeclaw-landing) :is(
 
 .share-panel.workflow-panel {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   border: 1px solid var(--share-line);
   border-radius: 4px;
   background: color-mix(in srgb, var(--share-canvas) 86%, var(--share-surface));
@@ -12069,7 +12069,7 @@ body:has(.safeclaw-landing) :is(
 .share-workbench-title,
 .operation-capture-head > div {
   display: grid;
-  gap: 7px;
+  gap: 8px;
 }
 
 .share-workflow-header strong,
@@ -12099,11 +12099,11 @@ body:has(.safeclaw-landing) :is(
   flex: 0 0 auto;
   min-width: 170px;
   display: grid;
-  gap: 5px;
+  gap: 4px;
   border: 1px solid var(--share-line);
   border-radius: 4px;
   background: var(--share-surface);
-  padding: 10px 12px;
+  padding: 8px 12px;
 }
 
 .share-permission-grid,
@@ -12125,7 +12125,7 @@ body:has(.safeclaw-landing) :is(
 .share-form-shell {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 10px;
+  gap: 16px;
 }
 
 .share-form-card,
@@ -12175,12 +12175,12 @@ body:has(.safeclaw-landing) :is(
 
 .share-panel.workflow-panel .channel-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 7px;
+  gap: 8px;
 }
 
 .share-panel.workflow-panel .channel-card {
   min-height: 70px;
-  padding: 10px;
+  padding: 12px;
 }
 
 .share-panel.workflow-panel :is(.channel-card.active, .language-chip.active) {
@@ -12216,11 +12216,11 @@ body:has(.safeclaw-landing) :is(
 
 .message-preview-lines {
   display: grid;
-  gap: 5px;
+  gap: 4px;
   max-height: 190px;
   overflow: auto;
   border-top: 1px solid var(--share-line);
-  padding-top: 10px;
+  padding-top: 12px;
 }
 
 .message-preview-lines p {
@@ -12239,7 +12239,7 @@ body:has(.safeclaw-landing) :is(
 .message-source-detail summary {
   cursor: pointer;
   list-style: none;
-  padding: 11px 12px;
+  padding: 12px;
   color: var(--share-soft);
   font-size: var(--text-caption);
   font-weight: 600;
@@ -12269,20 +12269,20 @@ body:has(.safeclaw-landing) :is(
 .share-panel.workflow-panel .command-actions,
 .command-center-shell .operation-ontology-actions {
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
 }
 
 .share-panel.workflow-panel .button,
 .command-center-shell .operation-ontology-panel .button {
-  min-height: 38px;
+  min-height: 44px;
   border-color: var(--share-primary);
   border-radius: 4px;
   background: var(--share-primary);
   color: #ffffff;
-  padding: 8px 13px;
-  font-size: var(--text-table);
-  font-weight: 500;
-  line-height: var(--leading-table);
+  padding: 12px 16px;
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
   letter-spacing: var(--tracking-body);
 }
 
@@ -12296,7 +12296,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .dispatch-preview-panel {
   display: grid;
   grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
-  gap: 14px;
+  gap: 16px;
   border: 1px solid var(--share-line);
   border-radius: 4px;
   background: var(--share-canvas);
@@ -12322,7 +12322,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .operation-ontology-panel {
   grid-column: 1 / -1;
   display: grid;
-  gap: 14px;
+  gap: 16px;
   margin-top: 0;
   border: 1px solid var(--share-line);
   border-radius: 4px;
@@ -12339,7 +12339,7 @@ body:has(.safeclaw-landing) :is(
 .operation-capture-form {
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 8px;
 }
 
 .command-center-shell .before-after-photo-grid {
@@ -12385,7 +12385,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .photo-analysis-candidate {
   border-color: rgba(94, 106, 210, 0.46);
   background: rgba(94, 106, 210, 0.12);
-  padding: 10px;
+  padding: 12px;
 }
 
 .command-center-shell .operation-improvement-list {
@@ -12474,20 +12474,12 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell.workspace-theme-day {
-  font-family: var(--font-product);
   background: #f3f6fb;
 }
 
-.command-center-shell.workspace-theme-day > .command-topbar,
-.command-center-shell.workspace-theme-day > .command-viewport {
-  width: min(1320px, calc(100% - 28px));
-}
-
 .command-center-shell.workspace-theme-day .command-topbar {
-  border: 1px solid rgba(218, 224, 234, 0.86);
-  border-radius: 4px;
+  border-color: rgba(218, 224, 234, 0.86);
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: none;
 }
 
 .command-center-shell.workspace-theme-day .workspace-theme-toggle {
@@ -12500,41 +12492,28 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell.workspace-theme-day .linear-workspace-layout {
-  gap: 14px;
-  border: 0;
-  border-radius: 0;
   background: transparent;
-  overflow: visible;
 }
 
 .command-center-shell.workspace-theme-day .workspace-side-nav {
-  gap: 12px;
-  border-right: 0;
-  border-radius: 4px;
   background: transparent;
-  padding: 0;
 }
 
 .command-center-shell.workspace-theme-day .workspace-side-group {
-  border: 1px solid #e5eaf1;
-  border-radius: 4px;
+  border-color: #e5eaf1;
   background: rgba(255, 255, 255, 0.92);
-  box-shadow: none;
-  padding: 12px;
 }
 
 .command-center-shell.workspace-theme-day .workspace-side-group > span {
   color: #6b7280;
-  padding: 0 2px 4px;
 }
 
 .command-center-shell.workspace-theme-day .workspace-current-brief {
-  border: 1px solid #e5eaf1;
+  border-color: #e5eaf1;
 }
 
 .command-center-shell.workspace-theme-day .workspace-side-group button,
 .command-center-shell.workspace-theme-day .workspace-source-status p {
-  border-radius: 4px;
   color: #374151;
 }
 
@@ -12545,17 +12524,12 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell.workspace-theme-day .linear-workspace-layout .command-main {
-  border: 0;
   background: transparent;
-  box-shadow: none;
 }
 
 .command-center-shell.workspace-theme-day .workspace-input-page {
-  border: 1px solid #e5eaf1;
-  border-radius: 4px;
+  border-color: #e5eaf1;
   background: #ffffff;
-  box-shadow: none;
-  padding: clamp(30px, 5vw, 72px);
 }
 
 .command-center-shell.workspace-theme-day .command-copy h1,
@@ -12577,22 +12551,12 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-day .command-console-input,
 .command-center-shell.workspace-theme-day :is(.evidence-readiness-card, .api-proof, .generation-stage-rail article, .document-evidence-panel article, .document-viewer-list button, .document-preview-pane, .document-evidence-panel, .share-session-grid section, .before-after-photo-grid label, .photo-analysis-candidate, .operation-improvement-list article, .supporting-doc-cards),
 .command-center-shell.workspace-theme-day :is(.document-workbench, .dispatch-preview-panel, .operation-ontology-panel, .share-panel.workflow-panel) {
-  border: 1px solid #e5eaf1;
-  border-radius: 4px;
+  border-color: #e5eaf1;
   background: rgba(255, 255, 255, 0.94);
-  box-shadow: none;
-}
-
-.command-center-shell.workspace-theme-day .evidence-readiness-rail {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  border: 0;
 }
 
 .command-center-shell.workspace-theme-day .evidence-readiness-card {
-  border-right: 1px solid #e5eaf1;
-  padding: 12px;
+  border-color: #e5eaf1;
 }
 
 .command-center-shell.workspace-theme-day .document-review-status-strip article,
@@ -12601,14 +12565,12 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-day .acknowledgment-ledger,
 .command-center-shell.workspace-theme-day .message-preview-panel,
 .command-center-shell.workspace-theme-day .operation-evidence-summary article {
-  border-radius: 4px;
   background: #ffffff;
 }
 
 .command-center-shell.workspace-theme-day .document-workbench .document-preview-pane pre {
   background: #fbfcfe;
   color: #1f2937;
-  line-height: var(--leading-longform);
 }
 
 @media (max-width: 720px) {
@@ -12620,7 +12582,7 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .evidence-readiness-card,
   .command-center-shell.workspace-theme-day .evidence-readiness-card {
     min-height: 0;
-    padding: 13px 16px;
+    padding: 16px;
   }
 
   .command-center-shell .evidence-readiness-card span,
@@ -12628,9 +12590,6 @@ body:has(.safeclaw-landing) :is(
     white-space: normal;
   }
 
-  .command-center-shell.workspace-theme-day .workspace-input-page {
-    padding: 26px;
-  }
 }
 
 @media (max-width: 980px) {
@@ -12673,7 +12632,7 @@ body:has(.safeclaw-landing) :is(
 
 @media (max-width: 720px) {
   .command-center-shell .document-workbench {
-    padding: 12px;
+    padding: 16px;
   }
 
   .command-center-shell .document-workbench .document-preview-pane pre {
@@ -12681,7 +12640,7 @@ body:has(.safeclaw-landing) :is(
     max-height: 58vh;
     font-size: var(--text-caption);
     line-height: var(--leading-caption);
-    padding: 14px;
+    padding: 16px;
     font-weight: 600;
     letter-spacing: var(--tracking-body);
   }
@@ -13049,11 +13008,12 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-report-controls button {
+  min-height: 44px;
   border-color: var(--workspace-rule);
   border-radius: 4px;
   background: var(--workspace-surface-1);
   color: var(--workspace-muted);
-  padding: 10px 12px;
+  padding: 12px 16px;
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-report-controls button.active,
@@ -13077,6 +13037,109 @@ body:has(.safeclaw-landing) :is(
   font-weight: 600;
   line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
+}
+
+/* Task 5: shared workbench geometry. Theme selectors may change color only. */
+.command-center-shell.workbench-root {
+  font-family: var(--font-product);
+}
+
+.command-center-shell .workbench-theme-toggle button {
+  min-height: 36px;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .workbench-primary-action {
+  min-height: 44px;
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
+}
+
+.workbench-document-rail {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 4px;
+}
+
+.workbench-evidence-rail {
+  gap: 16px;
+  border-radius: 4px;
+}
+
+.workbench-share-confirmation {
+  padding: 24px;
+  border-radius: 4px;
+}
+
+.workbench-report-filters {
+  gap: 8px;
+  min-height: 44px;
+  border-radius: 4px;
+}
+
+.workbench-report-filters button {
+  min-height: 44px;
+  border-radius: 4px;
+  padding: 12px 16px;
+}
+
+.workbench-empty-state {
+  padding: 24px;
+  border-radius: 4px;
+}
+
+.workbench-loading-state {
+  font-family: var(--font-product);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.workbench-disabled-state,
+.workbench-root :disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.document-review-meter progress {
+  display: block;
+  width: 100%;
+  height: 4px;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  background: transparent;
+}
+
+.document-review-meter progress::-webkit-progress-bar {
+  background: var(--workspace-rule);
+}
+
+.document-review-meter progress::-webkit-progress-value {
+  background: var(--workspace-accent);
+}
+
+.document-review-meter progress::-moz-progress-bar {
+  background: var(--workspace-accent);
+}
+
+@media (max-width: 767px) {
+  .workbench-document-rail,
+  .workbench-share-confirmation,
+  .workbench-empty-state {
+    padding: 16px;
+  }
 }
 
 @media (max-width: 980px) {
