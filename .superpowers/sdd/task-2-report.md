@@ -200,3 +200,96 @@ Exit code 0
 
 - The audit remains intentionally repository-focused and does not calculate arbitrary browser specificity. Its supported grammar now handles top-level selector lists with nested functional pseudo-classes, and every currently cited base/scoped selector plus exact functional effect is explicitly contracted. New complex selector families still require a new RED fixture and explicit contract entry.
 - Browser screenshot review remains assigned to the later route/browser audit tasks. F2 remains `passes: false` until independent reviewer approval.
+
+## Fourth remediation — repository-wide typography tuples
+
+### Scope and implementation
+
+- Replaced curated typography-only proof with a repository-wide rule invariant: every parsed `font-size` declaration must map to one complete canonical size/weight/leading/tracking tuple.
+- Normalized 428 current `app/globals.css` font-size rules, including media-query and scoped duplicates. Raw/legacy font-size aliases were replaced by semantic tokens.
+- Enforced the exact role tuples requested for display, page title, section title, component title, body large, body, support, control, table, caption, table header, and HUD.
+- Classified 14px interactive selectors as controls and other 14px selectors as support. Table headers are caption-sized with `700 / 18px / 0`.
+- Kept 11px only for HUD semantics and required `var(--font-hud)`; non-HUD 11px rules were promoted to caption. The final distribution includes 28 HUD rules and 144 caption rules.
+- Updated the test helper to use the same parenthesis-aware top-level selector-list splitting and normalization behavior as the production audit.
+- Preserved prior no-`!important`, exact functional-effect, true-circle, and reduced-motion gates.
+
+### RED evidence
+
+Initial focused test:
+
+```text
+npm.cmd test -- tests/frontend-design-contract.test.ts
+Test Files  1 failed (1)
+Tests       2 failed | 11 passed (13)
+
+FAIL assigns a complete canonical typography tuple to every font-size rule
+  first mismatch: .hud-label used raw 16px leading instead of var(--leading-hud)
+FAIL rejects incomplete or mismatched typography tuples in audit fixtures
+  audit did not emit typography-tuple
+Exit code 1
+```
+
+Initial repository audit after adding the tuple gate:
+
+```text
+npm.cmd run audit:frontend-consistency
+status          fail
+violationCount  427
+all 427 violations were typography-tuple
+Exit code       1
+```
+
+Semantic precedence fixture:
+
+```text
+Tests  1 failed | 13 passed (14)
+FAIL classifies interactive 14px and table-header rules by semantics before their current token
+  .toolbar-button and .report-table strong were not rejected by the old token-first classifier
+```
+
+Raw duplicate guard:
+
+```text
+Tests  1 failed | 13 passed (14)
+FAIL assigns a complete canonical typography tuple to every font-size rule
+  two compact rules retained earlier raw 11px/17px declarations before canonical declarations
+```
+
+An intermediate typecheck also caught a test-only HUD union-narrowing error. The HUD assertion now references the explicit HUD tuple and the complete sequence was rerun from the beginning.
+
+### Final GREEN evidence
+
+Commands were run sequentially after the last source change.
+
+```text
+npm.cmd test -- tests/frontend-design-contract.test.ts
+Test Files  1 passed (1)
+Tests       14 passed (14)
+Duration    3.86s
+Exit code   0
+
+npm.cmd run audit:frontend-consistency
+status                  pass
+pageFiles               32
+componentFiles          22
+cssLines                12793
+importantDeclarations   0
+coverageIssues          0
+violationCount          0
+Exit code               0
+
+npm.cmd run typecheck
+tsc --noEmit --incremental false
+Exit code 0
+
+npm.cmd run build
+Compiled successfully in 15.1s
+Generated static pages 27/27
+Exit code 0
+```
+
+### Concern update
+
+- The 11px HUD-versus-caption semantic decision is repository-focused and keyword-assisted: existing HUD family/tracking or selectors containing HUD/status/eyebrow/kicker/badge/meta/metric/code/console/source/live/signal semantics remain HUD; other 11px rules are promoted to caption. No rule was made HUD solely because it was 11px. Future selectors with new semantic vocabulary need a RED fixture or an explicit semantic token.
+- The parser still intentionally targets the repository's flat declaration grammar rather than general CSS. Parenthesis-aware top-level selector splitting now matches between tests and audit.
+- Browser screenshot review remains part of later tasks. F2 stays `passes: false` pending independent review.

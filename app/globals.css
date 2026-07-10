@@ -156,8 +156,10 @@
 /* HUD micro label utility — mono + uppercase + 0.16em letter-spacing. */
 .hud-label {
   font-family: var(--font-hud);
-  font-size: var(--t-micro);
-  letter-spacing: 0.16em;
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
   text-transform: uppercase;
 }
 
@@ -442,9 +444,10 @@ ul {
   padding-left: 10px;
   color: var(--sc-steel-800);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-hero-copy h1 {
@@ -452,7 +455,7 @@ ul {
   margin: 0;
   color: var(--sc-black);
   font-size: var(--text-display);
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: var(--tracking-display);
   line-height: var(--leading-display);
 }
@@ -462,9 +465,9 @@ ul {
   margin: 0;
   color: var(--sc-steel-650);
   font-size: var(--text-component-title);
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: var(--tracking-component-title);
-  line-height: var(--leading-body);
+  line-height: var(--leading-component-title);
 }
 
 .safeclaw-hero-actions {
@@ -490,9 +493,10 @@ ul {
   padding: 12px;
   background: var(--sc-steel-060);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .console-status-line b {
@@ -506,8 +510,8 @@ ul {
   background: #ffffff;
   color: var(--sc-black);
   font-size: var(--text-section-title);
-  font-weight: 900;
-  letter-spacing: -0.035em;
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
   line-height: var(--leading-section-title);
 }
 
@@ -528,15 +532,18 @@ ul {
 .console-grid span {
   color: var(--sc-steel-650);
   font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: var(--text-hud);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
 }
 
 .console-grid b {
   color: var(--sc-black);
   font-size: var(--text-section-title);
-  line-height: var(--leading-page-title);
+  line-height: var(--leading-section-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
 }
 
 .safeclaw-proof-strip {
@@ -560,14 +567,18 @@ ul {
 .safeclaw-proof-strip span {
   color: var(--sc-steel-650);
   font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--text-hud);
+  font-weight: 700;
   letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
 }
 
 .safeclaw-proof-strip b {
   color: var(--sc-black);
-  font-size: 17px;
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-section-grid {
@@ -600,9 +611,9 @@ ul {
   margin: 0;
   color: inherit;
   font-size: var(--text-page-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-display);
+  font-weight: 800;
+  letter-spacing: var(--tracking-page-title);
+  line-height: var(--leading-page-title);
 }
 
 .safeclaw-statement-card p {
@@ -610,8 +621,9 @@ ul {
   margin: 0;
   color: var(--sc-steel-650);
   font-size: var(--text-component-title);
-  font-weight: 650;
-  line-height: var(--leading-longform);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .safeclaw-statement-card.strong p {
@@ -652,23 +664,28 @@ ul {
   color: var(--sc-hazard-yellow);
   font-family: var(--font-hud);
   font-size: var(--text-body-lg);
-  font-weight: 950;
+  font-weight: 500;
   text-shadow: none;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-core-card h3 {
   margin: 0;
   color: var(--sc-black);
   font-size: var(--text-section-title);
-  letter-spacing: var(--tracking-display);
+  letter-spacing: var(--tracking-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
 }
 
 .safeclaw-core-card p {
   margin: 0;
   color: var(--sc-steel-650);
   font-size: var(--text-body-lg);
-  font-weight: 650;
-  line-height: 1.65;
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-core-card b {
@@ -679,8 +696,10 @@ ul {
   background: var(--sc-steel-060);
   color: var(--sc-black);
   font-family: var(--font-hud);
-  font-size: 11px;
+  font-size: var(--text-hud);
   letter-spacing: var(--tracking-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
 }
 
 .safeclaw-operation-section {
@@ -713,9 +732,10 @@ ul {
   min-height: 76px;
   background: #ffffff;
   color: var(--sc-black);
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: -0.025em;
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
 }
 
 .safeclaw-operation-section li::before {
@@ -725,8 +745,11 @@ ul {
   background: var(--sc-black);
   color: var(--sc-hazard-yellow);
   font-family: var(--font-hud);
-  font-size: 13px;
+  font-size: var(--text-table);
   content: counter(safeclaw-ops, decimal-leading-zero);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .topbar {
@@ -757,8 +780,15 @@ ul {
   gap: 1px;
 }
 
-.brand-lockup strong { font-size: var(--text-body-lg); }
-.brand-lockup small { color: var(--muted); font-size: 11px; }
+.brand-lockup strong { font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body); }
+.brand-lockup small { color: var(--muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body); }
 
 /* (.brand-mark second declaration — also overridden by SVG variant above.) */
 
@@ -775,7 +805,10 @@ ul {
   border: 1px solid var(--line);
   border-radius: 4px;
   color: #4f5967;
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .topnav a:hover,
@@ -895,8 +928,9 @@ ul {
   color: var(--os-text);
   font-family: var(--font-hud);
   font-size: var(--text-section-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
+  line-height: var(--leading-section-title);
 }
 
 .safeclaw-os-brand em {
@@ -931,9 +965,10 @@ ul {
   color: var(--sc-steel-650);
   cursor: pointer;
   font-size: var(--text-body-lg);
-  font-weight: 800;
-  letter-spacing: var(--tracking-page-title);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   text-decoration: none;
+  line-height: var(--leading-body-lg);
 }
 
 .safeclaw-landing-nav nav button:hover,
@@ -970,8 +1005,9 @@ ul {
   color: #090909;
   cursor: pointer;
   font-size: var(--text-body-lg);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body-lg);
 }
 
 .safeclaw-os-hero {
@@ -990,9 +1026,10 @@ ul {
   background: var(--sc-black);
   color: var(--os-panel-muted);
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 850;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-table);
 }
 
 .safeclaw-os-status span {
@@ -1033,9 +1070,10 @@ ul {
   background: var(--os-yellow);
   color: var(--sc-black);
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-table);
 }
 
 .safeclaw-os-hero h1,
@@ -1052,6 +1090,9 @@ ul {
 .safeclaw-os-hero h1 {
   max-width: min(1160px, calc(100vw - 56px));
   font-size: var(--text-display);
+  font-weight: 800;
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
 }
 
 .safeclaw-os-hero mark,
@@ -1083,10 +1124,10 @@ ul {
   max-width: 760px;
   margin: var(--space-6) 0 0;
   color: var(--os-muted);
-  font-size: var(--text-body-lg);
-  font-weight: 500;
-  letter-spacing: var(--tracking-body);
-  line-height: var(--leading-body-lg);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
   text-wrap: balance;
 }
 
@@ -1101,9 +1142,9 @@ ul {
   border-left: 4px solid var(--os-yellow);
   color: var(--sc-black);
   font-size: var(--text-body-lg);
-  font-weight: 800;
-  letter-spacing: var(--tracking-section-title);
-  line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body-lg);
   text-wrap: balance;
 }
 
@@ -1124,8 +1165,9 @@ ul {
   padding: 0 40px;
   text-decoration: none;
   font-size: var(--text-component-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
 }
 
 .safeclaw-os-cta button,
@@ -1183,8 +1225,10 @@ ul {
   color: var(--os-yellow);
   cursor: pointer;
   font-size: var(--text-body-lg);
-  font-weight: 950;
+  font-weight: 500;
   text-decoration: none;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-os-section {
@@ -1205,7 +1249,9 @@ ul {
   margin-bottom: 28px;
   color: var(--sc-black);
   font-size: var(--text-component-title);
-  font-weight: 900;
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .safeclaw-os-section-head::after {
@@ -1219,14 +1265,19 @@ ul {
   background: var(--sc-black);
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 13px;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-table);
+  letter-spacing: var(--tracking-body);
+  font-weight: 500;
+  line-height: var(--leading-table);
 }
 
 .safeclaw-os-section h2 {
   max-width: 1280px;
   margin-bottom: 40px;
   font-size: var(--text-display);
+  font-weight: 800;
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
 }
 
 /* §03(외국인 안내)→§04(근거) seam only: the language grid's bottom padding
@@ -1324,10 +1375,11 @@ ul {
   margin-bottom: 24px;
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 15px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   text-shadow: none;
+  line-height: var(--leading-body);
 }
 
 .safeclaw-module-map span {
@@ -1344,10 +1396,11 @@ ul {
   background: var(--sc-black);
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-style: normal;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-pipeline-grid h3,
@@ -1357,9 +1410,9 @@ ul {
   margin: 0 0 26px;
   color: var(--os-text);
   font-size: var(--text-section-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-page-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
+  line-height: var(--leading-section-title);
 }
 
 .safeclaw-language-matrix h3,
@@ -1377,10 +1430,10 @@ ul {
 .safeclaw-module-map p {
   margin: 0;
   color: var(--os-muted);
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: var(--tracking-section-title);
-  line-height: var(--leading-body);
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body-lg);
 }
 
 .safeclaw-module-map p::after {
@@ -1392,9 +1445,10 @@ ul {
   padding-top: 10px;
   color: var(--sc-black);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-pipeline-grid b {
@@ -1406,8 +1460,9 @@ ul {
   color: var(--sc-black);
   font-family: var(--font-hud);
   font-size: var(--text-body-lg);
-  font-weight: 950;
-  letter-spacing: var(--tracking-component-title);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body-lg);
 }
 
 .safeclaw-terminal {
@@ -1455,7 +1510,9 @@ ul {
   padding: 42px 46px;
   white-space: pre-wrap;
   font-size: var(--text-component-title);
-  line-height: var(--leading-longform);
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .safeclaw-terminal button,
@@ -1492,8 +1549,10 @@ ul {
   border-bottom: 1px solid var(--os-panel-line);
   color: var(--os-panel-text);
   font-family: var(--font-hud);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-body);
+  font-weight: 600;
+  line-height: var(--leading-caption);
 }
 
 .hero-console-titlebar b {
@@ -1534,19 +1593,21 @@ ul {
 .hero-console-prompt span {
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--text-hud);
+  font-weight: 700;
   letter-spacing: var(--tracking-hud);
   text-transform: uppercase;
+  line-height: var(--leading-hud);
 }
 
 .hero-console-prompt p {
   margin: 0;
   color: var(--os-panel-text);
-  font-size: 15px;
-  font-weight: 650;
+  font-size: var(--text-body);
+  font-weight: 500;
   line-height: var(--leading-body);
   word-break: keep-all;
+  letter-spacing: var(--tracking-body);
 }
 
 /* Blend the shared console into the frame (no double panel) and give it more
@@ -1567,7 +1628,10 @@ ul {
 }
 
 .hero-console-replay .agent-console-line {
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1611,8 +1675,9 @@ ul {
 .safeclaw-footer-brand strong {
   font-family: var(--font-hud);
   font-size: var(--text-section-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
+  line-height: var(--leading-section-title);
 }
 
 .safeclaw-footer-brand em {
@@ -1627,9 +1692,10 @@ ul {
   margin: 4px 0 0;
   max-width: 520px;
   color: var(--os-panel-muted);
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-landing-footer nav {
@@ -1641,9 +1707,10 @@ ul {
 
 .safeclaw-landing-footer nav a {
   color: var(--os-panel-text);
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: var(--tracking-section-title);
+  font-size: var(--text-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 .safeclaw-landing-footer nav a:hover {
@@ -1657,8 +1724,10 @@ ul {
   border-top: 1px solid var(--os-panel-line);
   color: var(--os-panel-muted);
   font-family: var(--font-hud);
-  font-size: 12px;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-body);
+  font-weight: 600;
+  line-height: var(--leading-caption);
 }
 
 @media (max-width: 860px) {
@@ -1695,9 +1764,10 @@ ul {
   color: #f6f5ef;
   font-family: var(--font-hud);
   font-size: var(--text-section-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
   text-decoration: none;
+  line-height: var(--leading-section-title);
 }
 
 .safeclaw-prototype-rail p {
@@ -1715,8 +1785,10 @@ ul {
 .safeclaw-prototype-rail h2 {
   margin: 0 0 12px;
   color: rgba(246, 245, 239, 0.38);
-  font-size: 14px;
-  font-weight: 800;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-prototype-rail button {
@@ -1741,8 +1813,10 @@ ul {
 }
 
 .safeclaw-prototype-rail button strong {
-  font-size: 15px;
-  font-weight: 900;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-prototype-rail button.active {
@@ -1819,18 +1893,20 @@ ul {
 .safeclaw-prototype-notice strong {
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 14px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-support);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   white-space: nowrap;
+  line-height: var(--leading-body);
 }
 
 .safeclaw-prototype-notice p {
   margin: 0;
   color: rgba(246, 245, 239, 0.72);
   font-size: var(--text-body-lg);
-  font-weight: 800;
-  line-height: var(--leading-body);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-prototype-title span {
@@ -1849,6 +1925,7 @@ ul {
   letter-spacing: var(--tracking-display);
   word-break: keep-all;
   text-wrap: balance;
+  font-weight: 800;
 }
 
 .safeclaw-prototype-title p {
@@ -1856,7 +1933,9 @@ ul {
   margin: 0;
   color: rgba(246, 245, 239, 0.62);
   font-size: var(--text-body-lg);
-  line-height: var(--leading-body);
+  line-height: var(--leading-body-lg);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-prototype-grid {
@@ -1899,11 +1978,12 @@ ul {
   border-radius: 4px;
   padding: 0 12px;
   font-family: var(--font-hud);
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-style: normal;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   white-space: nowrap;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-prototype-status.live {
@@ -1929,13 +2009,17 @@ ul {
   color: #fff;
   font-size: var(--text-page-title);
   line-height: var(--leading-page-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-page-title);
 }
 
 .safeclaw-prototype-card p,
 .safeclaw-prototype-card li {
   color: rgba(246, 245, 239, 0.62);
   font-size: var(--text-component-title);
-  line-height: 1.65;
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .safeclaw-prototype-map-target {
@@ -1944,8 +2028,10 @@ ul {
   padding: 12px 14px;
   color: rgba(246, 245, 239, 0.82);
   font-family: var(--font-hud);
-  font-size: 15px;
-  letter-spacing: var(--tracking-section-title);
+  font-size: var(--text-body);
+  letter-spacing: var(--tracking-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
 }
 
 .safeclaw-prototype-scope {
@@ -1985,8 +2071,10 @@ ul {
   color: #050506;
   padding: 0 22px;
   text-decoration: none;
-  font-size: 17px;
-  font-weight: 950;
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-prototype-card a.safeclaw-prototype-open-link {
@@ -2056,15 +2144,18 @@ ul {
 .step-copy small {
   color: var(--muted);
   font-size: var(--text-hud);
-  font-weight: 800;
-  letter-spacing: var(--tracking-body);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
+  font-family: var(--font-hud);
 }
 
 .step-copy strong {
   color: var(--ink);
-  font-size: 12px;
-  line-height: 1.15;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
+  font-weight: 600;
 }
 
 .step-dot {
@@ -2077,8 +2168,10 @@ ul {
   border-radius: var(--radius-circle);
   background: #fffefb;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .step-dot.active {
@@ -2121,13 +2214,19 @@ ul {
 
 .topbar-status span {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .topbar-status b {
   color: var(--ink);
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .topbar-v2-link {
@@ -2137,8 +2236,10 @@ ul {
   border-radius: 4px;
   background: rgba(232, 241, 237, 0.75);
   color: var(--accent);
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .v2-shell {
@@ -2177,8 +2278,10 @@ ul {
   border: 1px solid rgba(226, 222, 213, 0.75);
   border-radius: 4px;
   color: #556070;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .v2-nav nav a:hover {
@@ -2199,8 +2302,9 @@ ul {
   max-width: 920px;
   margin: 0;
   font-size: var(--text-display);
-  line-height: 0.98;
-  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  font-weight: 800;
 }
 
 .v2-hero p {
@@ -2208,8 +2312,9 @@ ul {
   margin: 0;
   color: var(--muted);
   font-size: var(--text-body-lg);
-  line-height: var(--leading-body);
+  line-height: var(--leading-body-lg);
   letter-spacing: var(--tracking-body);
+  font-weight: 500;
 }
 
 .demo-mode-shell {
@@ -2243,7 +2348,8 @@ ul {
   margin: 0;
   font-size: var(--text-page-title);
   line-height: var(--leading-page-title);
-  letter-spacing: var(--tracking-body);
+  letter-spacing: var(--tracking-page-title);
+  font-weight: 800;
 }
 
 .demo-stage-panel p {
@@ -2338,8 +2444,10 @@ ul {
   border-radius: 4px;
   background: var(--accent-soft);
   color: var(--accent);
-  font-size: 13px;
-  font-weight: 900;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .demo-screen-top b {
@@ -2406,9 +2514,10 @@ ul {
 
 .demo-input-card p {
   margin: 0;
-  font-size: 20px;
-  line-height: var(--leading-body);
-  letter-spacing: var(--tracking-body);
+  font-size: var(--text-component-title);
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+  font-weight: 700;
 }
 
 .demo-result-brief {
@@ -2427,9 +2536,10 @@ ul {
 .demo-result-brief span {
   display: block;
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
   letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .demo-result-brief strong {
@@ -2437,7 +2547,9 @@ ul {
   margin-top: 8px;
   color: var(--ink);
   font-size: var(--text-component-title);
-  line-height: var(--leading-section-title);
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .api-pulse-grid,
@@ -2508,7 +2620,9 @@ ul {
 .preview-hero-card h2 {
   margin: 0;
   font-size: var(--text-section-title);
-  line-height: var(--leading-page-title);
+  line-height: var(--leading-section-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
 }
 
 .triad-card p,
@@ -2556,17 +2670,19 @@ ul {
 
 .demo-section-heading span {
   color: var(--accent);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-caption);
 }
 
 .demo-section-heading strong {
   color: var(--ink);
   font-size: var(--text-section-title);
-  line-height: var(--leading-page-title);
-  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
+  font-weight: 800;
 }
 
 .demo-section-heading p {
@@ -2600,21 +2716,27 @@ ul {
 
 .demo-document-list article span {
   color: var(--accent);
-  font-size: 12px;
-  font-weight: 950;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .demo-document-list article strong {
   color: var(--ink);
   font-size: var(--text-component-title);
-  line-height: 1.25;
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .demo-document-list article p {
   margin: 0;
   color: #556070;
-  font-size: 14px;
+  font-size: var(--text-support);
   line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .demo-evidence-map ul {
@@ -2660,7 +2782,10 @@ ul {
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.66);
   color: #546071;
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .language-wall {
@@ -2814,6 +2939,9 @@ ul {
 
   .v2-hero h1 {
     font-size: var(--text-page-title);
+    font-weight: 800;
+    line-height: var(--leading-page-title);
+    letter-spacing: var(--tracking-page-title);
   }
 
   .scenario-strip,
@@ -2892,9 +3020,10 @@ ul {
 
 .left-widget-head span {
   color: var(--accent);
-  font-size: 11px;
-  font-weight: 950;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .left-widget-head b {
@@ -2904,7 +3033,10 @@ ul {
   color: var(--muted);
   padding: 4px 8px;
   font-size: var(--text-hud);
-  font-weight: 900;
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .live-status-widget {
@@ -2930,14 +3062,18 @@ ul {
 
 .status-row span {
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 750;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .status-row b {
   color: var(--ink);
-  font-size: 12px;
-  line-height: 1.25;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .status-row.live {
@@ -2991,15 +3127,18 @@ ul {
 
 .brief-mini-grid span {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 760;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .brief-mini-grid b {
   color: var(--ink);
-  font-size: 13px;
-  line-height: var(--leading-section-title);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
   letter-spacing: var(--tracking-body);
+  font-weight: 500;
 }
 
 .brief-mini-grid b.amber {
@@ -3020,17 +3159,23 @@ ul {
 .brief-meta summary {
   width: max-content;
   color: var(--accent);
-  font-size: 11px;
-  font-weight: 850;
+  font-size: var(--text-hud);
+  font-weight: 700;
   cursor: pointer;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .brief-meta small {
   display: block;
   margin-top: 4px;
   color: var(--muted);
-  font-size: 11px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-hud);
+  line-height: var(--leading-hud);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .current-site-card {
@@ -3040,8 +3185,9 @@ ul {
 
 .current-site-card strong {
   font-size: var(--text-section-title);
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
+  font-weight: 800;
 }
 
 .current-site-card p {
@@ -3062,8 +3208,10 @@ ul {
   background: var(--accent-soft);
   color: var(--accent);
   padding: 6px 9px;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .recent-list {
@@ -3101,12 +3249,18 @@ ul {
 }
 
 .recent-list strong {
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .recent-list small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .mission-rail {
@@ -3122,10 +3276,11 @@ ul {
 .rail-kicker {
   padding: 8px 8px 10px;
   color: var(--accent);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-caption);
 }
 
 .mission-step {
@@ -3140,13 +3295,17 @@ ul {
 
 .mission-step span {
   color: var(--accent-warm);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .mission-step strong {
-  font-size: 14px;
-  line-height: 1.25;
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-main {
@@ -3187,8 +3346,9 @@ ul {
   max-width: 720px;
   margin: 10px 0 16px;
   font-size: var(--text-page-title);
-  line-height: var(--leading-display);
-  letter-spacing: 0;
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
+  font-weight: 800;
 }
 
 .command-copy p {
@@ -3196,7 +3356,9 @@ ul {
   margin: 0;
   color: var(--muted);
   font-size: var(--text-body-lg);
-  line-height: var(--leading-longform);
+  line-height: var(--leading-body-lg);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-console {
@@ -3223,8 +3385,10 @@ ul {
 
 .console-head span {
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-console-input {
@@ -3232,6 +3396,9 @@ ul {
   border-radius: 4px;
   background: #fffefb;
   font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-primary {
@@ -3251,9 +3418,11 @@ ul {
 }
 .ai-mode-toggle legend {
   padding: 0 6px;
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: #5e6677;
   font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 .ai-mode-option {
   display: flex;
@@ -3279,14 +3448,20 @@ ul {
 }
 .ai-mode-option strong {
   display: block;
-  font-size: 13px;
+  font-size: var(--text-table);
   color: #17201d;
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 .ai-mode-option small {
   display: block;
   margin-top: 2px;
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: #5e6677;
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .quick-scenario-chips {
@@ -3308,8 +3483,10 @@ ul {
   background: rgba(255, 253, 248, 0.72);
   color: var(--ink);
   padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .evidence-readiness-rail,
@@ -3350,23 +3527,30 @@ ul {
 .document-evidence-panel article span {
   color: var(--muted);
   font-size: var(--text-hud);
-  font-weight: 950;
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .evidence-readiness-card strong,
 .generation-stage-rail strong,
 .document-evidence-panel article strong {
   color: var(--ink);
-  font-size: 13px;
-  line-height: 1.25;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .evidence-readiness-card small,
 .generation-stage-rail small,
 .document-evidence-panel article small {
   color: var(--muted);
-  font-size: 11px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .advanced-settings {
@@ -3379,9 +3563,11 @@ ul {
 .advanced-settings summary {
   cursor: pointer;
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
   list-style: none;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .advanced-settings summary::-webkit-details-marker {
@@ -3392,7 +3578,10 @@ ul {
   content: "열기";
   float: right;
   color: var(--accent);
-  font-size: 11px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .advanced-settings[open] summary::after {
@@ -3402,9 +3591,11 @@ ul {
 .quick-scenario-chips summary {
   cursor: pointer;
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
   list-style: none;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .quick-scenario-chips summary::-webkit-details-marker {
@@ -3415,7 +3606,10 @@ ul {
   content: "열기";
   float: right;
   color: var(--accent);
-  font-size: 11px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .quick-scenario-chips[open] summary::after {
@@ -3436,9 +3630,11 @@ ul {
   background: rgba(255, 255, 255, 0.58);
   color: var(--ink);
   padding: 8px 11px;
-  font-size: 12px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
   cursor: pointer;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .quick-chip.active {
@@ -3479,13 +3675,18 @@ ul {
 
 .generation-focus strong {
   color: var(--accent);
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .generation-focus small {
   color: var(--muted);
-  font-size: 12px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .api-proof-grid {
@@ -3505,19 +3706,26 @@ ul {
 
 .api-proof strong {
   color: var(--ink);
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .api-proof span {
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .api-proof small {
   color: var(--muted);
-  font-size: 11px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .api-proof.live {
@@ -3586,18 +3794,25 @@ ul {
 .document-viewer-list span {
   color: var(--accent-warm);
   font-size: var(--text-hud);
-  font-weight: 950;
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .document-viewer-list strong {
-  font-size: 14px;
-  line-height: 1.25;
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .document-viewer-list small {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .document-preview-pane {
@@ -3626,14 +3841,19 @@ ul {
 
 .document-preview-head span {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .document-preview-head strong {
   display: block;
   margin-top: 4px;
   font-size: var(--text-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
 }
 
 .document-preview-pane pre {
@@ -3648,8 +3868,10 @@ ul {
   white-space: pre-wrap;
   word-break: keep-all;
   font-family: inherit;
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .document-next-button {
@@ -3676,9 +3898,11 @@ ul {
 .supporting-doc-cards summary {
   cursor: pointer;
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
   list-style: none;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .supporting-doc-cards summary::-webkit-details-marker {
@@ -3715,13 +3939,18 @@ ul {
 }
 
 .supporting-doc-list strong {
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .supporting-doc-list span {
   color: var(--muted);
-  font-size: 11px;
-  line-height: 1.35;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .doc-card {
@@ -3736,22 +3965,27 @@ ul {
 
 .doc-card span {
   color: var(--accent-warm);
-  font-size: 11px;
-  font-weight: 950;
+  font-size: var(--text-caption);
+  font-weight: 600;
   letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .doc-card strong {
   font-size: var(--text-body-lg);
-  line-height: 1.25;
+  line-height: var(--leading-body-lg);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .doc-card p {
   align-self: end;
   margin: 0;
   color: var(--muted);
-  font-size: 12px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .doc-card.active {
@@ -3775,7 +4009,10 @@ ul {
 }
 
 .doc-card.secondary strong {
-  font-size: 14px;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 /* 중대재해처벌법 시행령 제4조 증빙 매핑 배지 (SafeClaw 2 Phase 0 프리뷰) */
@@ -3789,10 +4026,11 @@ ul {
   background: var(--sc-hazard-yellow, #ffd400);
   color: var(--sc-black, var(--ink));
   font-size: var(--text-hud);
-  font-weight: 800;
-  letter-spacing: var(--tracking-body);
-  line-height: 1.6;
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
   white-space: nowrap;
+  font-family: var(--font-hud);
 }
 
 .dispatch-preview-panel {
@@ -3819,18 +4057,25 @@ ul {
 
 .share-session-grid span {
   color: var(--accent);
-  font-size: 11px;
-  font-weight: 950;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .share-session-grid strong {
   font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .share-session-grid small {
   color: var(--accent-warm);
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .operation-ontology-panel {
@@ -3851,13 +4096,18 @@ ul {
 .operation-ontology-panel span,
 .operation-improvement-list span {
   color: var(--accent);
-  font-size: 11px;
-  font-weight: 950;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .operation-ontology-panel strong {
   color: var(--ink);
   font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .operation-ontology-panel p,
@@ -3865,14 +4115,18 @@ ul {
 .operation-improvement-list p,
 .operation-improvement-list small {
   color: var(--muted);
-  font-size: 12px;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .operation-ontology-panel label {
   color: var(--ink);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .before-after-photo-grid {
@@ -3911,7 +4165,10 @@ ul {
   align-self: center;
   justify-self: center;
   color: var(--accent);
-  font-size: 14px;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .before-after-photo-grid input {
@@ -4007,21 +4264,28 @@ ul {
 .share-scope-banner span,
 .dispatch-evidence-ledger span {
   color: var(--accent);
-  font-size: 11px;
-  font-weight: 950;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .share-scope-banner strong,
 .dispatch-evidence-ledger strong {
   color: var(--ink);
-  font-size: 15px;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .share-scope-banner p,
 .dispatch-evidence-ledger small {
   color: var(--muted);
-  font-size: 12px;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .quick-scenario-grid {
@@ -4044,21 +4308,27 @@ ul {
 }
 
 .quick-scenario strong {
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .quick-scenario span {
   color: var(--muted);
-  font-size: 12px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .quick-scenario small {
   align-self: end;
   color: var(--accent);
-  font-size: 11px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .quick-scenario.active {
@@ -4131,6 +4401,9 @@ ul {
 
 .field-brief-card strong {
   font-size: var(--text-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
 }
 
 .brief-stat-grid {
@@ -4153,13 +4426,17 @@ ul {
 .output-line span,
 .result-ribbon span {
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .brief-stat-grid b {
-  font-size: 14px;
-  line-height: 1.35;
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .brief-signal-row {
@@ -4174,8 +4451,10 @@ ul {
   background: rgba(255, 255, 255, 0.58);
   color: var(--muted);
   padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .output-line {
@@ -4192,7 +4471,10 @@ ul {
 
 .output-line strong {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .output-line.ready strong {
@@ -4220,7 +4502,9 @@ ul {
 .result-ribbon strong {
   align-self: end;
   font-size: var(--text-section-title);
-  line-height: 1.25;
+  line-height: var(--leading-section-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
 }
 
 .empty-workspace {
@@ -4235,8 +4519,9 @@ ul {
 .empty-workspace h2 {
   margin: 8px 0 10px;
   font-size: var(--text-page-title);
-  line-height: var(--leading-display);
-  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
+  font-weight: 800;
 }
 
 .empty-workspace p {
@@ -4254,7 +4539,10 @@ ul {
 
 .empty-preview-grid article span {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .card {
@@ -4267,36 +4555,49 @@ ul {
 .list { display: grid; gap: 14px; }
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .muted { color: var(--muted); }
-.small { font-size: var(--text-support); }
-.tiny { font-size: var(--text-caption); }
-.lead { margin: 0; font-size: 17px; line-height: 1.65; }
+.small { font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body); }
+.tiny { font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body); }
+.lead { margin: 0;
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body); }
 .eyebrow {
   color: var(--accent);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
   letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-caption);
 }
 
 .h2 {
   margin: 0;
   font-size: var(--text-section-title);
-  line-height: var(--leading-page-title);
-  font-weight: 850;
+  line-height: var(--leading-section-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
 }
 
 .h3 {
   margin: 0;
   font-size: var(--text-component-title);
-  line-height: var(--leading-section-title);
-  font-weight: 800;
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .title {
   margin: 0 0 12px;
   font-size: var(--text-page-title);
-  line-height: 0.98;
-  font-weight: 900;
+  line-height: var(--leading-page-title);
+  font-weight: 800;
   letter-spacing: var(--tracking-page-title);
 }
 
@@ -4304,7 +4605,9 @@ ul {
   margin: 0;
   color: var(--muted);
   font-size: var(--text-component-title);
-  line-height: 1.65;
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .workspace-hero {
@@ -4334,6 +4637,7 @@ ul {
   font-size: var(--text-display);
   line-height: var(--leading-display);
   letter-spacing: var(--tracking-display);
+  font-weight: 800;
 }
 
 .command-panel p {
@@ -4341,7 +4645,9 @@ ul {
   margin: 0;
   color: var(--muted);
   font-size: var(--text-component-title);
-  line-height: var(--leading-longform);
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .command-form {
@@ -4388,8 +4694,10 @@ ul {
 
 .counter {
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .counter.warning {
@@ -4399,8 +4707,10 @@ ul {
 .input-helper {
   margin: -4px 0 0;
   color: #586275;
-  font-size: 13px;
-  line-height: var(--leading-body);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .button-spinner {
@@ -4433,14 +4743,18 @@ ul {
 }
 
 .scenario-chip strong {
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .scenario-chip span {
   color: var(--muted);
-  font-size: 11px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .scenario-chip.active {
@@ -4499,8 +4813,10 @@ ul {
   padding: 6px 10px;
   background: rgba(255, 255, 255, 0.58);
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .panel-heading {
@@ -4510,7 +4826,9 @@ ul {
 
 .panel-heading strong {
   font-size: var(--text-section-title);
-  line-height: var(--leading-page-title);
+  line-height: var(--leading-section-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
 }
 
 .today-panel {
@@ -4549,12 +4867,17 @@ ul {
 .summary-grid span,
 .risk-brief span {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .summary-grid strong {
   font-size: var(--text-component-title);
-  line-height: 1.35;
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .risk-brief {
@@ -4566,8 +4889,9 @@ ul {
 .risk-brief p {
   margin: 0;
   font-size: var(--text-section-title);
-  line-height: var(--leading-component-title);
-  font-weight: 850;
+  line-height: var(--leading-section-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
 }
 
 .output-row {
@@ -4580,7 +4904,10 @@ ul {
 
 .output-row strong {
   color: var(--accent);
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .action-strip {
@@ -4640,8 +4967,10 @@ ul {
 
 .doc-tab span {
   color: var(--muted);
-  font-size: 13px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .doc-tab.active {
@@ -4675,8 +5004,10 @@ ul {
   background: rgba(255, 255, 255, 0.62);
   padding: 9px 12px;
   color: var(--accent);
-  font-size: 13px;
-  font-weight: 850;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .rubric-panel {
@@ -4721,21 +5052,28 @@ ul {
 .rubric-item span,
 .selected-rubric-item span {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .rubric-item strong,
 .selected-rubric-item strong {
   color: var(--ink);
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .rubric-item em {
   color: #6f4b26;
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-style: normal;
-  font-weight: 850;
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .rubric-item.fulfilled,
@@ -4762,9 +5100,10 @@ ul {
 
 .selected-rubric-item small {
   color: #526075;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .remediation-actions {
@@ -4798,9 +5137,11 @@ ul {
   background: rgba(255, 255, 255, 0.9);
   color: var(--ink);
   font: inherit;
-  font-size: 13px;
-  line-height: var(--leading-body);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
   padding: 12px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .remediation-textarea:focus {
@@ -4820,9 +5161,11 @@ ul {
   border-radius: 4px;
   padding: 5px 8px;
   color: #526075;
-  font-size: 11px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
   text-decoration: none;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .template-picker {
@@ -4843,13 +5186,18 @@ ul {
 }
 
 .template-card strong {
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .template-card span {
   color: var(--muted);
-  font-size: 11px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .template-card.active {
@@ -4868,15 +5216,18 @@ ul {
 
 .template-preview span {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
   letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .template-preview strong {
   color: var(--ink);
-  font-size: 15px;
+  font-size: var(--text-body);
   letter-spacing: var(--tracking-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
 }
 
 .template-preview ul {
@@ -4891,9 +5242,10 @@ ul {
   position: relative;
   padding-left: 18px;
   color: #526075;
-  font-size: 12px;
-  font-weight: 720;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .template-preview li::before {
@@ -4943,15 +5295,19 @@ ul {
 
 .customer-template-copy strong {
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .customer-template-copy p {
   margin: 0;
   color: #526075;
-  font-size: 12px;
-  font-weight: 720;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .customer-template-stage,
@@ -4977,9 +5333,11 @@ ul {
 .customer-template-field-grid span {
   display: block;
   color: var(--accent);
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--text-hud);
+  font-weight: 700;
   letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
+  font-family: var(--font-hud);
 }
 
 .customer-template-stage strong,
@@ -4987,17 +5345,20 @@ ul {
   display: block;
   margin-top: 4px;
   color: var(--ink);
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .customer-template-stage p,
 .customer-template-field-grid p {
   margin: 6px 0 0;
   color: #5f6a7b;
-  font-size: 11px;
-  font-weight: 720;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .customer-template-field-grid {
@@ -5089,14 +5450,17 @@ ul {
 .safety-form-preview-head span {
   color: var(--muted);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .safety-form-preview-head strong {
   font-size: var(--text-section-title);
-  letter-spacing: var(--tracking-page-title);
+  letter-spacing: var(--tracking-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
 }
 
 .safety-form-preview-head small {
@@ -5125,9 +5489,12 @@ ul {
 .approval-preview b {
   display: grid;
   place-items: center;
-  border-bottom: 1px solid var(--line);
-  background: var(--accent-soft);
-  font-size: 12px;
+  border-bottom: 1px solid #171b22;
+  background: #f2ead9;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .approval-preview em {
@@ -5135,8 +5502,11 @@ ul {
   place-items: end center;
   padding-bottom: 10px;
   color: #707887;
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-style: normal;
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safety-form-meta-grid {
@@ -5157,16 +5527,22 @@ ul {
 .safety-form-meta-grid b {
   display: block;
   padding: 7px 10px;
-  background: var(--accent-soft);
-  color: var(--muted);
-  font-size: 11px;
+  background: #21594f;
+  color: #ffffff;
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .safety-form-meta-grid span {
   display: block;
   padding: 10px;
-  font-size: 13px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .safety-form-check-row {
@@ -5177,9 +5553,11 @@ ul {
 
 .safety-form-check-row span {
   padding: 10px;
-  border-right: 1px solid var(--line);
-  font-size: 12px;
-  font-weight: 850;
+  border-right: 1px solid #171b22;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safety-form-check-row span:last-child {
@@ -5196,11 +5574,13 @@ ul {
   justify-self: start;
   margin: 0;
   padding: 6px 12px;
-  background: var(--accent-soft);
-  color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  font-size: 13px;
+  background: #ffe24a;
+  color: #171b22;
+  border: 1px solid #171b22;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safety-form-bridge td:nth-child(2) {
@@ -5227,11 +5607,12 @@ ul {
   justify-self: start;
   margin: 0;
   padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--accent-soft);
-  color: var(--ink);
-  font-size: 13px;
+  background: #171b22;
+  color: #fffdf8;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safety-form-table-wrap {
@@ -5255,8 +5636,10 @@ ul {
   border-bottom: 1px solid var(--line);
   padding: 8px 9px;
   vertical-align: top;
-  font-size: 12px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .safety-form-preview tr > :last-child {
@@ -5297,8 +5680,10 @@ ul {
   min-height: 54px;
   padding: 9px 10px;
   border-right: 1px solid #171b22;
-  font-size: 12px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safety-form-signatures span:last-child {
@@ -5321,7 +5706,10 @@ ul {
 .export-error {
   margin: -4px 0 0;
   color: #9a3d18;
-  font-size: 14px;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .two,
@@ -5372,7 +5760,9 @@ ul {
 
 .compact-head strong {
   font-size: var(--text-component-title);
-  line-height: 1.35;
+  line-height: var(--leading-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .compact-list {
@@ -5397,7 +5787,10 @@ ul {
 
 .plain-list {
   color: #424b59;
-  font-size: 14px;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .reference-card .training-card {
@@ -5445,16 +5838,19 @@ ul {
 }
 
 .channel-card strong {
-  font-size: 14px;
+  font-size: var(--text-support);
   letter-spacing: var(--tracking-body);
   word-spacing: 0.035em;
+  font-weight: 500;
+  line-height: var(--leading-body);
 }
 
 .channel-card span {
   color: var(--muted);
-  font-size: 11px;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
+  font-weight: 600;
 }
 
 .channel-card em {
@@ -5466,8 +5862,10 @@ ul {
   padding: 3px 8px;
   font-size: var(--text-hud);
   font-style: normal;
-  font-weight: 900;
-  letter-spacing: var(--tracking-body);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
+  font-family: var(--font-hud);
 }
 
 .channel-card.active {
@@ -5484,9 +5882,9 @@ ul {
 .channel-readiness-note {
   margin: -2px 0 0;
   color: #526075;
-  font-size: 12px;
-  font-weight: 760;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
 }
 
@@ -5520,18 +5918,21 @@ ul {
   padding: 8px 11px;
   background: rgba(255, 255, 255, 0.62);
   color: var(--ink);
-  font-size: 12px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
   letter-spacing: var(--tracking-body);
   cursor: pointer;
   min-width: 0;
   scroll-margin-block: 12px;
+  line-height: var(--leading-caption);
 }
 
 .language-chip span {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 750;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .language-chip.active {
@@ -5542,10 +5943,11 @@ ul {
 
 .field-label {
   color: #3b424f;
-  font-size: 13px;
-  font-weight: 850;
+  font-size: var(--text-table);
+  font-weight: 500;
   letter-spacing: var(--tracking-body);
   word-spacing: 0;
+  line-height: var(--leading-table);
 }
 
 .recipient-section-head {
@@ -5561,10 +5963,11 @@ ul {
   background: var(--accent-soft);
   color: var(--accent);
   padding: 5px 9px;
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
   letter-spacing: var(--tracking-body);
   white-space: nowrap;
+  line-height: var(--leading-caption);
 }
 
 .workflow-textarea {
@@ -5579,8 +5982,10 @@ ul {
   margin: 0;
   border-radius: 4px;
   padding: 10px 12px;
-  font-size: 13px;
-  line-height: var(--leading-body);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .workflow-result.ok {
@@ -5655,14 +6060,18 @@ ul {
 
 .dispatch-confirm-grid span {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 850;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .dispatch-confirm-grid strong {
   color: var(--ink);
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .share-panel pre {
@@ -5672,7 +6081,10 @@ ul {
   border: 1px solid rgba(226, 222, 213, 0.9);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.62);
-  font-size: 14px;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .field-workspace {
@@ -5736,16 +6148,20 @@ ul {
 .history-save-card span,
 .history-save-card small {
   color: var(--muted);
-  font-size: 12px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .storage-status-grid strong,
 .history-save-card strong {
   color: var(--ink);
-  font-size: 14px;
-  line-height: 1.35;
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
   overflow-wrap: anywhere;
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .workspace-step {
@@ -5760,8 +6176,10 @@ ul {
 
 .workspace-step span {
   color: var(--accent-warm);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .workspace-step small {
@@ -5792,7 +6210,10 @@ ul {
 .worker-summary-grid span,
 .worker-facts span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .worker-list {
@@ -5850,8 +6271,10 @@ ul {
 .status-chip {
   color: #4f5967;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .status-chip.active {
@@ -5877,8 +6300,10 @@ ul {
 
 .worker-edit-grid span {
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .worker-add-box {
@@ -5939,10 +6364,11 @@ ul {
 .impact-empty-state span,
 .recipient-chip {
   color: var(--muted);
-  font-size: 12px;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
   word-spacing: 0.035em;
+  font-weight: 600;
 }
 
 .product-section .card,
@@ -6001,9 +6427,11 @@ ul {
   padding: 4px 9px;
   background: rgba(232, 241, 237, 0.8);
   color: var(--accent);
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-style: normal;
-  font-weight: 800;
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .reference-grid .card {
@@ -6027,10 +6455,11 @@ ul {
 
 .law-section-title {
   color: var(--accent);
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-table);
 }
 
 .law-section-lines {
@@ -6051,7 +6480,9 @@ ul {
   padding-top: 16px;
   color: var(--ink);
   font-size: var(--text-section-title);
-  font-weight: 900;
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
 }
 
 .law-section-lines .law-article-heading:first-child {
@@ -6105,7 +6536,11 @@ ul {
 .stat { display: grid; gap: 6px; padding: 14px; }
 .surface { background: rgba(255, 255, 255, 0.44); }
 .relevance-note { color: #72502f; line-height: var(--leading-body); }
-.small-title { max-width: none; font-size: var(--text-page-title); }
+.small-title { max-width: none; font-size: var(--text-page-title);
+  font-size: var(--text-page-title);
+  font-weight: 800;
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title); }
 
 .inline-progress {
   height: 8px;
@@ -6150,11 +6585,13 @@ ul {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-hud, "Geist Mono", monospace);
-  font-size: 11px;
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
   letter-spacing: var(--tracking-hud);
   text-transform: uppercase;
   color: #d9d5c9;
+  font-weight: 700;
+  line-height: var(--leading-hud);
 }
 
 .agent-console-live {
@@ -6183,9 +6620,11 @@ ul {
   gap: 8px;
   margin: 0;
   font-family: var(--font-hud, "Geist Mono", monospace);
-  font-size: 12px;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
   color: #b9c4bd;
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .agent-console-icon {
@@ -6200,7 +6639,11 @@ ul {
 
 .agent-console-detail {
   color: #8a8f86;
-  font-size: 11px;
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .agent-console-line-active .agent-console-icon {
@@ -6240,7 +6683,10 @@ ul {
   display: grid;
   gap: 10px;
   color: var(--muted, #6b6f68);
-  font-size: 14px;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .claw-suggestions {
@@ -6254,8 +6700,11 @@ ul {
   border-radius: 4px;
   padding: 9px 12px;
   background: rgba(0, 0, 0, 0.02);
-  font-size: 13px;
+  font-size: var(--text-table);
   cursor: pointer;
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .claw-suggestion:hover:not(:disabled) {
@@ -6266,10 +6715,12 @@ ul {
   margin: 0;
   border-radius: 4px;
   padding: 10px 13px;
-  font-size: 14px;
+  font-size: var(--text-support);
   line-height: var(--leading-body);
   white-space: pre-wrap;
   word-break: break-word;
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .claw-bubble-user {
@@ -6294,14 +6745,20 @@ ul {
 .claw-guest-note,
 .claw-disclaimer {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--text-caption);
   color: var(--muted, #6b6f68);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .claw-error {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--text-table);
   color: #b23c3c;
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .claw-input-row {
@@ -6331,9 +6788,11 @@ ul {
   padding: 7px 11px;
   background: rgba(255, 255, 255, 0.72);
   color: var(--ink);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
   cursor: pointer;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .risk-badge {
@@ -6343,8 +6802,10 @@ ul {
   border-radius: 4px;
   padding: 7px 12px;
   color: #fff;
-  font-size: 13px;
-  font-weight: 900;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .risk-high { background: #dc2626; }
@@ -6372,8 +6833,10 @@ ul {
   gap: 10px;
   align-items: flex-start;
   color: #526075;
-  font-size: 12px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .worker-language-preview {
@@ -6391,7 +6854,9 @@ ul {
   display: block;
   margin-top: 4px;
   font-size: var(--text-component-title);
-  font-weight: 900;
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .worker-language-preview ul {
@@ -6403,9 +6868,10 @@ ul {
 .worker-language-preview p {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
-  font-weight: 750;
-  line-height: var(--leading-body);
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .status-chip[role="radio"] {
@@ -6427,9 +6893,11 @@ ul {
 .phone-status {
   margin-bottom: 10px;
   color: #657084;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: var(--text-caption);
+  font-weight: 600;
   text-align: center;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .phone-bubble {
@@ -6439,8 +6907,10 @@ ul {
   padding: 13px 14px;
   background: #e8f1ed;
   color: #17202a;
-  font-size: 13px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .phone-bubble p {
@@ -6450,9 +6920,10 @@ ul {
 .editor-status {
   margin: 8px 0 0;
   color: #526075;
-  font-size: 12px;
-  font-weight: 750;
+  font-size: var(--text-caption);
+  font-weight: 600;
   letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .editor-focus-message {
@@ -6462,9 +6933,10 @@ ul {
   background: var(--accent-soft);
   color: var(--accent);
   padding: 10px 12px;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: var(--leading-body);
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .advanced-downloads {
@@ -6702,6 +7174,9 @@ ul {
 
   .command-copy h1 {
     font-size: var(--text-page-title);
+    font-weight: 800;
+    line-height: var(--leading-page-title);
+    letter-spacing: var(--tracking-page-title);
   }
 
   .quick-scenario-grid,
@@ -6728,10 +7203,16 @@ ul {
   .command-panel h1 {
     max-width: none;
     font-size: var(--text-page-title);
+    font-weight: 800;
+    line-height: var(--leading-page-title);
+    letter-spacing: var(--tracking-page-title);
   }
 
   .safeclaw-hero-copy h1 {
     font-size: var(--text-display);
+    font-weight: 800;
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
   }
 
   .safeclaw-hero-copy,
@@ -7040,11 +7521,18 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-os-status {
     gap: 12px;
     padding: 20px 18px;
-    font-size: 11px;
+    font-size: var(--text-hud);
+    font-weight: 700;
+    line-height: var(--leading-hud);
+    letter-spacing: var(--tracking-hud);
+    font-family: var(--font-hud);
   }
 
   .safeclaw-os-hero h1 {
     font-size: var(--text-page-title);
+    font-weight: 800;
+    line-height: var(--leading-page-title);
+    letter-spacing: var(--tracking-page-title);
   }
 
   .safeclaw-hero-line {
@@ -7053,6 +7541,9 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-os-section h2 {
     font-size: var(--text-page-title);
+    font-weight: 800;
+    line-height: var(--leading-page-title);
+    letter-spacing: var(--tracking-page-title);
   }
 
   .safeclaw-os-hero mark,
@@ -7082,6 +7573,9 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-terminal pre {
     padding: 28px 22px;
     font-size: var(--text-body-lg);
+    font-weight: 500;
+    line-height: var(--leading-body-lg);
+    letter-spacing: var(--tracking-body);
   }
 
   .safeclaw-terminal button,
@@ -7114,9 +7608,10 @@ body:has(.safeclaw-landing) :is(
   margin: 8px 0 26px;
   color: rgba(246, 245, 239, 0.48);
   font-family: var(--font-hud);
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-support);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 .safeclaw-module-rail section {
@@ -7127,8 +7622,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-rail h2 {
   margin: 0 0 10px;
   color: rgba(246, 245, 239, 0.34);
-  font-size: 13px;
-  font-weight: 900;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-rail a:not(.safeclaw-module-brand) {
@@ -7153,16 +7650,18 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-rail a span {
   color: rgba(246, 245, 239, 0.46);
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 950;
-  letter-spacing: 0.08em;
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-table);
 }
 
 .safeclaw-module-rail a strong {
   color: inherit;
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: var(--tracking-page-title);
+  font-size: var(--text-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 .safeclaw-module-main {
@@ -7198,8 +7697,9 @@ body:has(.safeclaw-landing) :is(
   text-decoration: none;
   font-family: var(--font-hud);
   font-size: var(--text-section-title);
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: var(--tracking-section-title);
+  line-height: var(--leading-section-title);
 }
 
 .safeclaw-module-brand em {
@@ -7218,10 +7718,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-nav > span {
   color: rgba(246, 245, 239, 0.58);
   font-family: var(--font-hud);
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-control);
+  font-weight: 700;
+  letter-spacing: var(--tracking-body);
   white-space: nowrap;
+  line-height: var(--leading-control);
 }
 
 .safeclaw-module-nav > span:first-child {
@@ -7249,9 +7750,10 @@ body:has(.safeclaw-landing) :is(
   color: rgba(246, 245, 239, 0.72);
   text-decoration: none;
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 850;
+  font-size: var(--text-table);
+  font-weight: 500;
   letter-spacing: var(--tracking-body);
+  line-height: var(--leading-table);
 }
 
 .safeclaw-module-actions a:hover {
@@ -7284,10 +7786,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-tbm-board span {
   color: var(--os-yellow, #ffdc2e);
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-table);
 }
 
 .safeclaw-module-hero h1 {
@@ -7295,9 +7798,9 @@ body:has(.safeclaw-landing) :is(
   margin: 18px 0;
   color: #f6f5ef;
   font-size: var(--text-display);
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: var(--tracking-display);
-  line-height: 0.98;
+  line-height: var(--leading-display);
   word-break: keep-all;
   text-wrap: balance;
 }
@@ -7307,9 +7810,9 @@ body:has(.safeclaw-landing) :is(
   margin: 0;
   color: rgba(246, 245, 239, 0.62);
   font-size: var(--text-body-lg);
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body-lg);
   word-break: keep-all;
 }
 
@@ -7323,9 +7826,10 @@ body:has(.safeclaw-landing) :is(
   display: block;
   color: var(--os-yellow, #ffdc2e);
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-table);
 }
 
 .safeclaw-module-hero aside strong {
@@ -7333,7 +7837,9 @@ body:has(.safeclaw-landing) :is(
   margin-top: 18px;
   color: #f6f5ef;
   font-size: var(--text-section-title);
-  line-height: 1.35;
+  line-height: var(--leading-section-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
 }
 
 .safeclaw-module-hero.document {
@@ -7347,12 +7853,15 @@ body:has(.safeclaw-landing) :is(
   font-size: var(--text-page-title);
   letter-spacing: var(--tracking-page-title);
   line-height: var(--leading-page-title);
+  font-weight: 800;
 }
 
 .safeclaw-module-hero.document p {
   max-width: 720px;
   font-size: var(--text-body-lg);
-  line-height: var(--leading-body);
+  line-height: var(--leading-body-lg);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-hero.document aside {
@@ -7403,10 +7912,11 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid rgba(246, 245, 239, 0.2);
   padding: 0 12px;
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   white-space: nowrap;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-module-status.live {
@@ -7463,10 +7973,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-workdoc-rail section > span {
   color: rgba(255, 220, 46, 0.82);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-workdoc-header h2 {
@@ -7474,7 +7985,7 @@ body:has(.safeclaw-landing) :is(
   margin: 14px 0;
   color: #f6f5ef;
   font-size: var(--text-page-title);
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: var(--tracking-page-title);
   line-height: var(--leading-page-title);
 }
@@ -7483,10 +7994,11 @@ body:has(.safeclaw-landing) :is(
   max-width: 780px;
   margin: 0;
   color: rgba(246, 245, 239, 0.66);
-  font-size: 17px;
-  font-weight: 720;
-  line-height: var(--leading-longform);
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
   word-break: keep-all;
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-workdoc-meta {
@@ -7511,16 +8023,19 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-workdoc-meta strong {
   color: rgba(255, 220, 46, 0.78);
-  font-size: 11px;
-  font-weight: 950;
-  letter-spacing: 0.08em;
+  font-size: var(--text-hud);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
+  font-family: var(--font-hud);
 }
 
 .safeclaw-workdoc-meta span {
   color: #f6f5ef;
-  font-size: 14px;
-  font-weight: 760;
-  letter-spacing: var(--tracking-section-title);
+  font-size: var(--text-support);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 .safeclaw-workdoc-section {
@@ -7545,7 +8060,7 @@ body:has(.safeclaw-landing) :is(
   margin: 0;
   color: #f6f5ef;
   font-size: var(--text-section-title);
-  font-weight: 920;
+  font-weight: 800;
   letter-spacing: var(--tracking-section-title);
   line-height: var(--leading-section-title);
 }
@@ -7572,14 +8087,18 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-workdoc-list strong {
   color: #f6f5ef;
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: var(--tracking-display);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
 }
 
 .safeclaw-workdoc-list code {
   color: rgba(246, 245, 239, 0.52);
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-workdoc-list p {
@@ -7588,22 +8107,28 @@ body:has(.safeclaw-landing) :is(
   gap: 14px;
   margin: 0;
   color: rgba(246, 245, 239, 0.68);
-  font-size: 15px;
+  font-size: var(--text-body);
   line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-workdoc-list b {
   color: rgba(255, 220, 46, 0.78);
-  font-size: 12px;
-  font-weight: 950;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-workdoc-list article > span,
 .safeclaw-workdoc-list a {
   color: rgba(255, 220, 46, 0.78);
-  font-size: 13px;
-  font-weight: 850;
+  font-size: var(--text-table);
+  font-weight: 500;
   text-decoration: none;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-preserved-history-list article {
@@ -7693,14 +8218,17 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-workdoc-stats strong {
   color: #f6f5ef;
   font-size: var(--text-section-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
+  line-height: var(--leading-section-title);
 }
 
 .safeclaw-workdoc-stats span {
   color: rgba(246, 245, 239, 0.54);
-  font-size: 12px;
-  font-weight: 760;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-workdoc-evidence {
@@ -7714,7 +8242,10 @@ body:has(.safeclaw-landing) :is(
   background: rgba(8, 9, 11, 0.6);
   color: rgba(246, 245, 239, 0.7);
   padding: 6px 8px;
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-workdoc-links {
@@ -7730,10 +8261,11 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid rgba(246, 245, 239, 0.14);
   color: rgba(246, 245, 239, 0.72);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: var(--text-caption);
+  font-weight: 600;
   letter-spacing: var(--tracking-body);
   text-decoration: none;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-workdoc-links a:hover {
@@ -7757,16 +8289,19 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-current-workpack span {
   color: var(--os-yellow, #ffdc2e);
   font-family: var(--font-mono, "Geist Mono", monospace);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-current-workpack strong {
   color: #f6f5ef;
-  font-size: 15px;
-  letter-spacing: var(--tracking-component-title);
+  font-size: var(--text-body);
+  letter-spacing: var(--tracking-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
 }
 
 .safeclaw-current-workpack a {
@@ -7777,10 +8312,11 @@ body:has(.safeclaw-landing) :is(
   padding: 0 14px;
   color: var(--os-yellow, #ffdc2e);
   font-family: var(--font-mono, "Geist Mono", monospace);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   text-decoration: none;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-current-workpack.live {
@@ -7817,10 +8353,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-doc-export > span {
   color: var(--os-yellow, #ffdc2e);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-doc-index h2,
@@ -7829,9 +8366,9 @@ body:has(.safeclaw-landing) :is(
   margin: 14px 0 18px;
   color: #f6f5ef;
   font-size: var(--text-page-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-display);
+  font-weight: 800;
+  letter-spacing: var(--tracking-page-title);
+  line-height: var(--leading-page-title);
 }
 
 .safeclaw-doc-primary > p {
@@ -7839,8 +8376,9 @@ body:has(.safeclaw-landing) :is(
   margin: 0 0 24px;
   color: rgba(246, 245, 239, 0.64);
   font-size: var(--text-component-title);
-  font-weight: 760;
-  line-height: var(--leading-body);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .safeclaw-doc-index-list,
@@ -7880,25 +8418,29 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-doc-export dt {
   color: rgba(255, 220, 46, 0.78);
   font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 950;
+  font-size: var(--text-hud);
+  font-weight: 700;
   letter-spacing: var(--tracking-hud);
   text-transform: uppercase;
+  line-height: var(--leading-hud);
 }
 
 .safeclaw-doc-index-list strong,
 .safeclaw-doc-primary-grid strong {
   color: #f6f5ef;
-  font-size: 20px;
-  font-weight: 950;
-  letter-spacing: -0.035em;
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
 }
 
 .safeclaw-doc-index-list em {
   color: rgba(246, 245, 239, 0.56);
   font-style: normal;
-  font-size: 13px;
-  font-weight: 760;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-doc-primary-grid {
@@ -7912,9 +8454,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-doc-primary-grid p {
   margin: 16px 0 0;
   color: rgba(246, 245, 239, 0.62);
-  font-size: 15px;
-  font-weight: 720;
+  font-size: var(--text-body);
+  font-weight: 500;
   line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-doc-export dl {
@@ -7950,10 +8493,11 @@ body:has(.safeclaw-landing) :is(
   margin-top: 10px;
   color: #f6f5ef;
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   text-decoration: none;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-doc-export a:first-of-type {
@@ -7990,6 +8534,9 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-grid.nine article strong {
   font-size: var(--text-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
 }
 
 .safeclaw-module-grid article.zero {
@@ -7998,9 +8545,10 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-grid article.zero strong {
   color: var(--muted);
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 .safeclaw-module-grid article {
@@ -8019,8 +8567,9 @@ body:has(.safeclaw-landing) :is(
   margin-top: 24px;
   color: #f6f5ef;
   font-size: var(--text-page-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
+  font-weight: 800;
+  letter-spacing: var(--tracking-page-title);
+  line-height: var(--leading-page-title);
 }
 
 .safeclaw-module-panel {
@@ -8066,14 +8615,17 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-report-controls strong {
   color: inherit;
   font-size: var(--text-component-title);
-  font-weight: 900;
-  letter-spacing: -0.035em;
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
 }
 
 .safeclaw-report-controls span {
   color: rgba(246, 245, 239, 0.56);
-  font-size: 13px;
-  font-weight: 720;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-download-actions {
@@ -8112,16 +8664,19 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-report-facts strong {
   color: rgba(255, 220, 46, 0.78);
-  font-size: 13px;
-  font-weight: 900;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-report-facts span,
 .safeclaw-report-notes p {
   color: rgba(246, 245, 239, 0.72);
-  font-size: 15px;
-  font-weight: 720;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-report-table {
@@ -8155,16 +8710,18 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-report-table strong {
   background: rgba(246, 245, 239, 0.05);
   color: rgba(255, 220, 46, 0.78);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-report-table span {
   color: rgba(246, 245, 239, 0.72);
-  font-size: 14px;
-  font-weight: 720;
+  font-size: var(--text-support);
+  font-weight: 500;
   line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-report-table span em {
@@ -8172,7 +8729,10 @@ body:has(.safeclaw-landing) :is(
   margin-top: 6px;
   color: rgba(246, 245, 239, 0.44);
   font-style: normal;
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-report-groups {
@@ -8191,9 +8751,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-report-group > span {
   color: rgba(255, 220, 46, 0.78);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-report-group div {
@@ -8207,13 +8768,18 @@ body:has(.safeclaw-landing) :is(
   gap: 4px;
   margin: 0;
   color: rgba(246, 245, 239, 0.7);
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-report-group strong {
   color: #f6f5ef;
-  font-size: 15px;
-  font-weight: 900;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-report-group em {
@@ -8226,9 +8792,9 @@ body:has(.safeclaw-landing) :is(
   margin: 16px 0 14px;
   color: #f6f5ef;
   font-size: var(--text-page-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-display);
+  font-weight: 800;
+  letter-spacing: var(--tracking-page-title);
+  line-height: var(--leading-page-title);
 }
 
 .safeclaw-module-panel p,
@@ -8237,8 +8803,9 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-tbm-board p {
   color: rgba(246, 245, 239, 0.64);
   font-size: var(--text-component-title);
-  font-weight: 750;
-  line-height: var(--leading-body);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .safeclaw-worker-table,
@@ -8263,8 +8830,9 @@ body:has(.safeclaw-landing) :is(
   display: block;
   color: #f6f5ef;
   font-size: var(--text-section-title);
-  font-weight: 950;
-  letter-spacing: var(--tracking-display);
+  font-weight: 800;
+  letter-spacing: var(--tracking-section-title);
+  line-height: var(--leading-section-title);
 }
 
 .safeclaw-worker-phone {
@@ -8301,15 +8869,20 @@ body:has(.safeclaw-landing) :is(
 }
 
 .worker-language-switcher b {
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .worker-language-switcher small,
 .worker-language-note,
 .worker-ack-note {
   color: rgba(246, 245, 239, 0.64);
-  font-size: 12px;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-worker-phone button:disabled {
@@ -8401,12 +8974,16 @@ body:has(.safeclaw-landing) :is(
     font-size: var(--text-page-title);
     line-height: var(--leading-page-title);
     word-break: keep-all;
+    font-weight: 800;
+    letter-spacing: var(--tracking-page-title);
   }
 
   .safeclaw-module-hero.document p {
     max-width: 100%;
-    font-size: 15px;
-    line-height: 1.65;
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    font-weight: 500;
+    letter-spacing: var(--tracking-body);
   }
 
   .safeclaw-workdoc,
@@ -8528,6 +9105,7 @@ body:has(.safeclaw-landing) :is(
   font-size: var(--text-section-title);
   line-height: var(--leading-section-title);
   letter-spacing: var(--tracking-section-title);
+  font-weight: 800;
 }
 
 .safeclaw-module-shell .h3,
@@ -8536,6 +9114,7 @@ body:has(.safeclaw-landing) :is(
   font-size: var(--text-component-title);
   line-height: var(--leading-component-title);
   letter-spacing: var(--tracking-component-title);
+  font-weight: 700;
 }
 
 .safeclaw-module-shell strong {
@@ -8543,6 +9122,7 @@ body:has(.safeclaw-landing) :is(
   font-size: var(--text-body);
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
+  font-weight: 500;
 }
 
 .safeclaw-module-shell .muted,
@@ -8556,9 +9136,10 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell .safeclaw-report-facts strong {
   color: rgba(255, 220, 46, 0.78);
-  font-size: 13px;
-  font-weight: 900;
+  font-size: var(--text-table);
+  font-weight: 500;
   letter-spacing: var(--tracking-body);
+  line-height: var(--leading-table);
 }
 
 .safeclaw-module-shell .safeclaw-report-facts span,
@@ -8566,7 +9147,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell .safeclaw-report-group em {
   color: rgba(246, 245, 239, 0.72);
   font-size: var(--text-body);
-  font-weight: 720;
+  font-weight: 500;
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
 }
@@ -8574,21 +9155,25 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell .safeclaw-report-table span {
   color: rgba(246, 245, 239, 0.72);
   font-size: var(--text-table);
-  font-weight: 720;
+  font-weight: 500;
   line-height: var(--leading-table);
   letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-shell .safeclaw-report-table strong {
   color: rgba(255, 220, 46, 0.78);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-body);
+  font-weight: 700;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-module-shell .safeclaw-report-group strong {
   color: #f6f5ef;
-  font-size: 15px;
-  font-weight: 900;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-shell .badge,
@@ -8819,10 +9404,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-topbar nav a {
   color: rgba(246, 245, 239, 0.62);
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   text-decoration: none;
+  line-height: var(--leading-table);
 }
 
 .safeclaw-login-topbar nav a:hover {
@@ -8845,7 +9431,7 @@ body:has(.safeclaw-landing) :is(
   margin: 0;
   color: var(--os-text, #f6f5ef);
   font-size: var(--text-display);
-  font-weight: 950;
+  font-weight: 800;
   letter-spacing: var(--tracking-display);
   line-height: var(--leading-display);
 }
@@ -8855,8 +9441,9 @@ body:has(.safeclaw-landing) :is(
   margin: 0;
   color: rgba(246, 245, 239, 0.68);
   font-size: var(--text-body-lg);
-  font-weight: 800;
-  line-height: var(--leading-body);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-login-form,
@@ -8870,10 +9457,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-form label {
   color: var(--os-yellow, #ffdc2e);
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-table);
 }
 
 .safeclaw-login-form input {
@@ -8884,7 +9472,9 @@ body:has(.safeclaw-landing) :is(
   color: var(--os-text, #f6f5ef);
   padding: 0 18px;
   font-size: var(--text-component-title);
-  font-weight: 800;
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .safeclaw-login-form input:focus {
@@ -8906,10 +9496,11 @@ body:has(.safeclaw-landing) :is(
   color: rgba(246, 245, 239, 0.78);
   padding: 0 18px;
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 950;
-  letter-spacing: 0.08em;
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   text-decoration: none;
+  line-height: var(--leading-table);
 }
 
 .safeclaw-login-form button,
@@ -8925,9 +9516,10 @@ body:has(.safeclaw-landing) :is(
   gap: 12px;
   color: rgba(246, 245, 239, 0.46);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-login-divider::before,
@@ -8975,17 +9567,20 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-login-session dt {
   color: rgba(246, 245, 239, 0.5);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-login-session dd {
   margin: 0;
   color: var(--os-text, #f6f5ef);
   font-size: var(--text-component-title);
-  font-weight: 950;
+  font-weight: 700;
   overflow-wrap: anywhere;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 @media (max-width: 720px) {
@@ -9114,10 +9709,11 @@ body:has(.safeclaw-landing) :is(
   gap: 10px;
   color: var(--os-yellow, #ffdc2e);
   font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: var(--tracking-hud);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   text-transform: uppercase;
+  line-height: var(--leading-caption);
 }
 
 .briefing-settings-form input[type="email"],
@@ -9127,9 +9723,11 @@ body:has(.safeclaw-landing) :is(
   background: #0b0c10;
   color: var(--os-text, #f6f5ef);
   padding: 12px 14px;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--text-body);
+  font-weight: 500;
   font-family: inherit;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .briefing-settings-form input[type="email"]:focus,
@@ -9156,10 +9754,11 @@ body:has(.safeclaw-landing) :is(
   color: #08090b;
   padding: 0 18px;
   font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 950;
-  letter-spacing: 0.08em;
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   cursor: pointer;
+  line-height: var(--leading-table);
 }
 
 .briefing-settings-form button:disabled {
@@ -9202,12 +9801,17 @@ body:has(.safeclaw-landing) :is(
 .ai-connect-tabs button strong {
   margin-bottom: 10px;
   font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .ai-connect-tabs button span {
   color: rgba(246, 245, 239, 0.72);
   font-size: var(--text-table);
-  line-height: var(--leading-component-title);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .ai-connect-actions {
@@ -9237,9 +9841,10 @@ body:has(.safeclaw-landing) :is(
   color: var(--os-yellow, #ffdc2e);
   font-family: var(--font-hud);
   font-size: var(--text-hud);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: var(--tracking-hud);
   text-transform: uppercase;
+  line-height: var(--leading-hud);
 }
 
 .ai-connect-meta dd {
@@ -9248,6 +9853,9 @@ body:has(.safeclaw-landing) :is(
   font-family: var(--font-hud);
   font-size: var(--text-table);
   overflow-wrap: anywhere;
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .ai-connect-secret,
@@ -9266,7 +9874,9 @@ body:has(.safeclaw-landing) :is(
   color: #f6f5ef;
   font-family: var(--font-hud);
   font-size: var(--text-table);
-  line-height: 1.6;
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .ai-connect-secret textarea {
@@ -9943,7 +10553,9 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   padding: 7px 10px;
   font-size: var(--text-caption);
-  font-weight: 900;
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .ai-connect-token-items article > span.on {
@@ -10712,23 +11324,27 @@ body:has(.safeclaw-landing) :is(
 .ontology-hover-card > span {
   color: rgba(246, 245, 239, 0.54);
   font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: var(--text-hud);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
   text-transform: uppercase;
+  line-height: var(--leading-hud);
 }
 
 .ontology-node-row strong {
   color: var(--os-panel-text);
   font-size: var(--text-body-lg);
-  font-weight: 820;
-  line-height: 1.35;
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .ontology-node-row small {
   color: rgba(246, 245, 239, 0.48);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .ontology-hover-card {
@@ -10758,15 +11374,18 @@ body:has(.safeclaw-landing) :is(
 .ontology-hover-card strong {
   color: var(--os-panel-text);
   font-size: var(--text-component-title);
-  font-weight: 880;
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .ontology-hover-card p {
   margin: 0;
   color: rgba(246, 245, 239, 0.68);
-  font-size: 13px;
-  font-weight: 720;
-  line-height: var(--leading-body);
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .ontology-hover-card ul {
@@ -10788,20 +11407,22 @@ body:has(.safeclaw-landing) :is(
 .ontology-hover-card li b {
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 950;
+  font-size: var(--text-hud);
+  font-weight: 700;
   letter-spacing: var(--tracking-hud);
+  line-height: var(--leading-hud);
 }
 
 .ontology-hover-card li span {
   max-width: 220px;
   color: var(--os-panel-text);
   font-family: var(--font-base);
-  font-size: 13px;
-  font-weight: 760;
-  letter-spacing: 0;
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   text-align: right;
   text-transform: none;
+  line-height: var(--leading-table);
 }
 
 .ontology-kind-list {
@@ -10822,8 +11443,10 @@ body:has(.safeclaw-landing) :is(
 .ontology-kind-list strong {
   color: var(--os-panel-text);
   font-family: var(--font-hud);
-  font-size: 14px;
-  font-weight: 950;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 @media (max-width: 900px) {
@@ -10938,11 +11561,12 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .topbar-status span,
 .command-center-shell .step-copy small {
   color: var(--workspace-muted);
-  font-family: var(--font-base);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
   text-transform: none;
+  line-height: var(--leading-hud);
 }
 
 .command-center-shell .command-stepper {
@@ -10977,9 +11601,10 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .step-copy strong {
   color: var(--workspace-ink);
-  font-size: 12px;
-  font-weight: 550;
-  letter-spacing: 0;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .command-center-shell .step-dot {
@@ -10989,6 +11614,10 @@ body:has(.safeclaw-landing) :is(
   background: #ffffff;
   color: var(--workspace-muted);
   font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .command-center-shell .step-dot.active {
@@ -11021,8 +11650,10 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .topbar-status b {
   color: var(--workspace-ink);
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .topbar-v2-link {
@@ -11070,10 +11701,11 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .command-copy .eyebrow {
   color: var(--workspace-muted);
   font-family: var(--font-base);
-  font-size: 13px;
+  font-size: var(--text-table);
   font-weight: 500;
-  letter-spacing: 0;
+  letter-spacing: var(--tracking-body);
   text-transform: none;
+  line-height: var(--leading-table);
 }
 
 .command-center-shell .command-copy h1 {
@@ -11081,9 +11713,9 @@ body:has(.safeclaw-landing) :is(
   margin: 14px auto 16px;
   color: var(--workspace-ink);
   font-size: var(--text-display);
-  font-weight: 760;
-  line-height: var(--leading-page-title);
-  letter-spacing: 0;
+  font-weight: 800;
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
   text-wrap: balance;
 }
 
@@ -11091,10 +11723,11 @@ body:has(.safeclaw-landing) :is(
   max-width: 620px;
   margin: 0 auto;
   color: var(--workspace-muted);
-  font-size: 17px;
-  line-height: var(--leading-body);
-  letter-spacing: 0;
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
   word-spacing: 0;
+  font-weight: 500;
 }
 
 .command-center-shell .command-console {
@@ -11113,17 +11746,20 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .command-console label {
   color: var(--workspace-ink);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .console-head span,
 .command-center-shell .input-helper {
   color: var(--workspace-muted);
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
   word-spacing: 0;
+  line-height: var(--leading-caption);
 }
 
 .command-center-shell .command-console-input {
@@ -11132,9 +11768,11 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   background: #ffffff;
   color: var(--workspace-ink);
-  font-size: 20px;
-  line-height: var(--leading-body);
+  font-size: var(--text-component-title);
+  line-height: var(--leading-component-title);
   padding: 22px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
 }
 
 .command-center-shell .command-console-input:focus {
@@ -11152,8 +11790,10 @@ body:has(.safeclaw-landing) :is(
   border-color: var(--workspace-rule);
   background: #ffffff;
   color: var(--workspace-muted);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .evidence-readiness-rail {
@@ -11182,15 +11822,18 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .evidence-readiness-card span {
   color: var(--workspace-muted);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-caption);
 }
 
 .command-center-shell .evidence-readiness-card strong {
   color: var(--workspace-ink);
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .evidence-readiness-card small {
@@ -11225,9 +11868,10 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   background: var(--workspace-ink);
   color: #ffffff;
-  font-size: 14px;
-  font-weight: 560;
-  letter-spacing: 0;
+  font-size: var(--text-support);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 .command-center-shell .button.secondary {
@@ -11335,17 +11979,25 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .command-copy h1 {
     font-size: var(--text-display);
-    line-height: var(--leading-page-title);
+    line-height: var(--leading-display);
+    font-weight: 800;
+    letter-spacing: var(--tracking-display);
   }
 
   .command-center-shell .command-copy p {
-    font-size: 15px;
+    font-size: var(--text-body);
+    font-weight: 500;
+    line-height: var(--leading-body);
+    letter-spacing: var(--tracking-body);
   }
 
   .command-center-shell .command-console-input {
     min-height: 156px;
-    font-size: 17px;
+    font-size: var(--text-body-lg);
     padding: 18px;
+    font-weight: 500;
+    line-height: var(--leading-body-lg);
+    letter-spacing: var(--tracking-body);
   }
 
   .command-center-shell .evidence-readiness-rail {
@@ -11479,15 +12131,18 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .workspace-top-title span {
   color: var(--workspace-muted);
-  font-size: 11px;
-  line-height: 1.35;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .workspace-top-title strong {
   color: var(--workspace-ink);
-  font-size: 14px;
-  font-weight: 560;
-  line-height: 1.35;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .workspace-theme-toggle {
@@ -11507,10 +12162,11 @@ body:has(.safeclaw-landing) :is(
   background: transparent;
   color: var(--workspace-muted);
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 560;
-  line-height: var(--leading-section-title);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
   padding: 6px 10px;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .workspace-theme-toggle button.active {
@@ -11547,10 +12203,11 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .workspace-side-group > span {
   color: var(--workspace-subtle);
-  font-size: 11px;
-  font-weight: 560;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
   padding: 0 8px;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .workspace-side-group button,
@@ -11588,19 +12245,23 @@ body:has(.safeclaw-landing) :is(
   min-width: 0;
   overflow: hidden;
   color: inherit;
-  font-size: 13px;
-  font-weight: 520;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .workspace-side-group button small,
 .command-center-shell .workspace-source-status small {
   color: var(--workspace-subtle);
-  font-size: 11px;
-  line-height: var(--leading-component-title);
+  font-size: var(--text-hud);
+  line-height: var(--leading-hud);
   white-space: nowrap;
+  font-weight: 700;
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .command-center-shell .workspace-current-brief {
@@ -11611,15 +12272,19 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .workspace-current-brief strong {
   color: var(--workspace-ink);
-  font-size: 13px;
-  font-weight: 560;
-  line-height: 1.6;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
   overflow-wrap: anywhere;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .workspace-current-brief small {
   color: var(--workspace-subtle);
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .workspace-recent-list button {
@@ -11665,16 +12330,18 @@ body:has(.safeclaw-landing) :is(
   margin: 10px 0 12px;
   color: var(--workspace-ink);
   font-size: var(--text-page-title);
-  font-weight: 620;
+  font-weight: 800;
   line-height: var(--leading-page-title);
-  letter-spacing: 0;
+  letter-spacing: var(--tracking-page-title);
 }
 
 .command-center-shell .command-copy p {
   max-width: 560px;
   margin: 0;
-  font-size: 15px;
-  line-height: 1.75;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .command-console {
@@ -11701,8 +12368,10 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   background: var(--workspace-surface-1);
   color: var(--workspace-ink);
-  font-size: 17px;
-  line-height: var(--leading-longform);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body-lg);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .command-console-input::placeholder {
@@ -11735,15 +12404,19 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   padding: 8px 16px;
   color: #a4aab4;
-  font-size: 14px;
-  font-weight: 540;
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-helper {
   margin-top: 14px;
   color: #9aa1ad;
-  font-size: 14px;
-  line-height: var(--leading-longform);
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-composer-tray {
@@ -11872,22 +12545,28 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .input-photo-copy span {
   color: var(--workspace-subtle);
-  font-size: 11px;
-  font-weight: 640;
+  font-size: var(--text-caption);
+  font-weight: 600;
   text-transform: uppercase;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-photo-copy strong {
   color: var(--workspace-ink);
-  font-size: 15px;
-  font-weight: 620;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-photo-copy p {
   margin: 0;
   color: var(--workspace-muted);
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-photo-dropzone {
@@ -11909,14 +12588,18 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .input-photo-dropzone strong {
   color: var(--workspace-ink);
-  font-size: 14px;
-  font-weight: 620;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-photo-dropzone span {
   color: var(--workspace-muted);
-  font-size: 12px;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-photo-dropzone.has-photo {
@@ -12043,7 +12726,10 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .input-photo-candidates p {
   margin: 0;
   color: var(--workspace-muted);
-  font-size: 13px;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-photo-candidates button {
@@ -12060,14 +12746,18 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .input-photo-candidates button strong {
   color: var(--workspace-ink);
-  font-size: 13px;
-  font-weight: 620;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-photo-candidates button span {
   color: var(--workspace-muted);
-  font-size: 12px;
-  line-height: var(--leading-body);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .input-photo-candidates-head,
@@ -12410,9 +13100,11 @@ body:has(.safeclaw-landing) :is(
   padding: 10px 12px;
   color: var(--workspace-muted);
   font-family: var(--font-base);
-  font-size: 12px;
-  letter-spacing: 0;
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-body);
   text-transform: none;
+  font-weight: 600;
+  line-height: var(--leading-caption);
 }
 
 .command-center-shell .agent-console-head::-webkit-details-marker {
@@ -12422,7 +13114,10 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .agent-console-head small {
   margin-left: auto;
   color: var(--workspace-subtle);
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .agent-console-live {
@@ -12480,6 +13175,8 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .command-copy h1 {
     font-size: var(--text-page-title);
     line-height: var(--leading-page-title);
+    font-weight: 800;
+    letter-spacing: var(--tracking-page-title);
   }
 
   .command-center-shell .command-copy,
@@ -12605,15 +13302,18 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .document-workbench-head strong {
   color: var(--workspace-ink);
   font-size: var(--text-section-title);
-  font-weight: 620;
-  line-height: 1.25;
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
 }
 
 .command-center-shell .document-workbench-head small {
   max-width: 740px;
   color: var(--workspace-muted);
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-progress-summary {
@@ -12630,15 +13330,17 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .document-progress-summary span {
   color: var(--workspace-ink);
   font-size: var(--text-component-title);
-  font-weight: 640;
-  line-height: 1.15;
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .command-center-shell .document-progress-summary b {
   color: var(--workspace-muted);
-  font-size: 11px;
-  font-weight: 560;
-  line-height: 1.35;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-review-status-strip {
@@ -12660,15 +13362,20 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .document-review-status-strip span,
 .command-center-shell .document-evidence-panel article em {
   color: var(--workspace-subtle);
-  font-size: 11px;
+  font-size: var(--text-hud);
   font-style: normal;
-  font-weight: 560;
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+  font-family: var(--font-hud);
 }
 
 .command-center-shell .document-review-status-strip strong {
   color: var(--workspace-muted);
-  font-size: 12px;
-  font-weight: 620;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-review-status-strip article.ready strong {
@@ -12835,9 +13542,11 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink);
   padding: 18px;
   font-family: var(--font-multilingual);
-  font-size: 13px;
-  line-height: var(--leading-longform);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
   white-space: pre-wrap;
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-workbench .document-evidence-panel {
@@ -12872,9 +13581,11 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .document-workbench .document-evidence-panel article a {
   width: fit-content;
   color: var(--workspace-accent-hover);
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-weight: 600;
   text-decoration: none;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-work-history {
@@ -12927,8 +13638,10 @@ body:has(.safeclaw-landing) :is(
   list-style: none;
   padding: 11px 12px;
   color: var(--workspace-muted);
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-work-history summary::-webkit-details-marker {
@@ -12937,7 +13650,10 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .document-work-history summary strong {
   color: var(--workspace-ink);
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-work-history-body {
@@ -12950,7 +13666,10 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .document-work-history-body p {
   margin: 0;
   color: var(--workspace-muted);
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .share-panel.workflow-panel,
@@ -13001,9 +13720,10 @@ body:has(.safeclaw-landing) :is(
 .share-workbench-title strong,
 .operation-capture-head strong {
   color: var(--share-ink);
-  font-size: 20px;
-  font-weight: 640;
-  line-height: var(--leading-section-title);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .share-workflow-header p,
@@ -13012,8 +13732,10 @@ body:has(.safeclaw-landing) :is(
   max-width: 680px;
   margin: 0;
   color: var(--share-muted);
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .share-status-pill,
@@ -13130,8 +13852,10 @@ body:has(.safeclaw-landing) :is(
 .channel-readiness-note {
   margin: 0;
   color: var(--share-muted);
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .share-inline-note.warn {
@@ -13185,8 +13909,10 @@ body:has(.safeclaw-landing) :is(
 .message-preview-lines p {
   margin: 0;
   color: var(--share-soft);
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
 }
 
 .message-source-detail {
@@ -13198,8 +13924,10 @@ body:has(.safeclaw-landing) :is(
   list-style: none;
   padding: 11px 12px;
   color: var(--share-soft);
-  font-size: 12px;
+  font-size: var(--text-caption);
   font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .message-source-detail summary::-webkit-details-marker {
@@ -13215,8 +13943,10 @@ body:has(.safeclaw-landing) :is(
   background: transparent;
   color: var(--share-soft);
   padding: 12px;
-  font-size: 12px;
-  line-height: var(--leading-longform);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .share-panel.workflow-panel .command-actions,
@@ -13233,8 +13963,10 @@ body:has(.safeclaw-landing) :is(
   background: var(--share-primary);
   color: #ffffff;
   padding: 8px 13px;
-  font-size: 13px;
-  font-weight: 620;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .share-panel.workflow-panel .button.secondary,
@@ -13321,8 +14053,11 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   background: var(--share-surface);
   color: var(--share-muted);
-  font-size: 13px;
+  font-size: var(--text-table);
   font-style: normal;
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .before-after-photo-grid img {
@@ -14160,9 +14895,11 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .document-workbench .document-preview-pane pre {
     min-height: 360px;
     max-height: 58vh;
-    font-size: 12px;
-    line-height: var(--leading-longform);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
     padding: 14px;
+    font-weight: 600;
+    letter-spacing: var(--tracking-body);
   }
 
   .share-panel.workflow-panel .channel-grid {
@@ -14306,9 +15043,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-module-brand {
   color: var(--workspace-ink);
   font-family: inherit;
-  font-size: 15px;
-  font-weight: 620;
-  letter-spacing: var(--tracking-component-title);
+  font-size: var(--text-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-brand em {
@@ -14409,9 +15147,10 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-rail a strong {
   color: inherit;
-  font-size: 14px;
-  font-weight: 540;
-  letter-spacing: var(--tracking-component-title);
+  font-size: var(--text-control);
+  font-weight: 700;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-control);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-nav {
@@ -14424,9 +15163,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-module-nav > span {
   color: var(--workspace-muted);
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 420;
-  letter-spacing: 0;
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-table);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-nav i {
@@ -14466,10 +15206,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-current-workpack span {
   color: var(--workspace-accent);
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 520;
-  letter-spacing: 0;
+  font-size: var(--text-table);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   text-transform: none;
+  line-height: var(--leading-table);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-hero h1,
@@ -14477,7 +15218,7 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink);
   font-family: inherit;
   font-size: var(--text-page-title);
-  font-weight: 640;
+  font-weight: 800;
   line-height: var(--leading-page-title);
   letter-spacing: var(--tracking-page-title);
 }
@@ -14486,7 +15227,7 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink);
   font-family: inherit;
   font-size: var(--text-section-title);
-  font-weight: 640;
+  font-weight: 800;
   line-height: var(--leading-section-title);
   letter-spacing: var(--tracking-section-title);
 }
@@ -14494,6 +15235,8 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-module-hero h1 {
   font-size: var(--text-page-title);
   line-height: var(--leading-page-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-page-title);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-hero p,
@@ -14501,10 +15244,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list p,
 .safeclaw-module-shell.module-variant-document .safeclaw-report-notes p {
   color: var(--workspace-muted);
-  font-size: 15px;
-  font-weight: 420;
+  font-size: var(--text-body);
+  font-weight: 500;
   line-height: var(--leading-body);
-  letter-spacing: 0;
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-hero aside,
@@ -14559,10 +15302,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-report-group > span {
   color: var(--workspace-subtle);
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 520;
-  letter-spacing: 0;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: var(--tracking-body);
   text-transform: none;
+  line-height: var(--leading-caption);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-meta span,
@@ -14571,9 +15315,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-report-group em,
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-stats span {
   color: var(--workspace-muted);
-  font-size: 14px;
-  font-weight: 420;
-  letter-spacing: 0;
+  font-size: var(--text-support);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-report-table strong {
@@ -14623,14 +15368,19 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-evidence code {
   color: var(--workspace-muted);
   font-family: var(--font-hud);
-  font-size: 12px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list article > span,
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list a {
   color: var(--workspace-accent);
-  font-size: 13px;
-  font-weight: 560;
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-shell.module-variant-document button,
@@ -14640,9 +15390,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-links a {
   border-radius: 4px;
   font-family: inherit;
-  font-size: 14px;
-  font-weight: 520;
-  letter-spacing: 0;
+  font-size: var(--text-control);
+  font-weight: 700;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-control);
 }
 
 .safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .document-tab, .doc-tab, .template-tab, .template-card, .safeclaw-module-chrome-button)),
@@ -14687,14 +15438,18 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-report-controls strong {
   color: inherit;
-  font-size: 14px;
-  font-weight: 520;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-report-controls span {
   color: var(--workspace-muted);
-  font-size: 12px;
-  font-weight: 420;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-download-note {
@@ -15027,6 +15782,8 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell.module-variant-document .safeclaw-module-hero.document h1 {
     font-size: var(--text-page-title);
     line-height: var(--leading-page-title);
+    font-weight: 800;
+    letter-spacing: var(--tracking-page-title);
   }
 
   .safeclaw-module-shell.module-variant-document .safeclaw-report-table span::before {
@@ -15034,8 +15791,10 @@ body:has(.safeclaw-landing) :is(
     display: block;
     margin-bottom: 4px;
     color: var(--workspace-subtle);
-    font-size: 12px;
-    font-weight: 520;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-body);
   }
 }
 
