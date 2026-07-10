@@ -1,6 +1,6 @@
 import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
 import {
-  getSafetyReferenceDisplaySummary,
+  deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplayTitle,
   type SafetyReferenceItem
 } from "@/lib/safety-reference-catalog";
@@ -122,11 +122,12 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
   for (const reference of input.references) {
     const evidenceId = `evidence:${slugSegment(reference.id, "reference")}`;
     const displayTitle = getSafetyReferenceDisplayTitle(reference);
+    const operationalView = deriveSafetyReferenceOperationalView(reference);
     pushUniqueNode(nodes, {
       id: evidenceId,
       kind: "Evidence",
       label: displayTitle,
-      detail: getSafetyReferenceDisplaySummary(reference),
+      detail: [operationalView.hazard, ...operationalView.controls.slice(0, 2)].join(" · "),
       meta: {
         referenceItemId: reference.id,
         itemType: reference.item_type,
@@ -164,7 +165,7 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
         label: "언급한 위험"
       });
 
-      for (const controlLabel of reference.controls.slice(0, 4)) {
+      for (const controlLabel of operationalView.controls.slice(0, 4)) {
         const controlId = `control:${slugSegment(controlLabel, "control")}`;
         pushUniqueNode(nodes, {
           id: controlId,
