@@ -9,6 +9,10 @@ export type WorkpackReadiness = {
   reasons: string[];
 };
 
+export type WorkpackReadinessOptions = {
+  requiresRevalidation?: boolean;
+};
+
 const APPROVAL_PLACEHOLDER_PATTERNS = [
   /\[결재\]/,
   /작성\s*_{2,}/,
@@ -42,8 +46,34 @@ function hasDbHarnessBlocker(response: AskResponse) {
   return response.dbHarness.summary.missingEvidence.length > 0 || response.dbHarness.summary.ontologyStatus !== "ready";
 }
 
-export function assessWorkpackReadiness(response: AskResponse): WorkpackReadiness {
+export function applyWorkpackDeliverablesChange(
+  response: AskResponse,
+  deliverables: Partial<AskResponse["deliverables"]>,
+  options: WorkpackReadinessOptions = {}
+): AskResponse {
+  const nextResponse: AskResponse = {
+    ...response,
+    deliverables: {
+      ...response.deliverables,
+      ...deliverables
+    }
+  };
+  if (!options.requiresRevalidation) return nextResponse;
+
+  return {
+    ...nextResponse,
+    ontologyQa: undefined,
+    qualityContract: undefined,
+    dbHarness: undefined
+  };
+}
+
+export function assessWorkpackReadiness(
+  response: AskResponse,
+  options: WorkpackReadinessOptions = {}
+): WorkpackReadiness {
   const reasons = [
+    ...(options.requiresRevalidation ? ["편집된 문서 재검수 필요"] : []),
     ...(hasOntologyReviewBlocker(response) ? ["안전조치 검수 미통과"] : []),
     ...(hasQualityBlocker(response) ? ["품질 계약 보완 필요"] : []),
     ...(hasDbHarnessBlocker(response) ? ["DB 하네스 근거 보강 필요"] : []),
@@ -54,7 +84,7 @@ export function assessWorkpackReadiness(response: AskResponse): WorkpackReadines
     return {
       canShare: false,
       status: "blocked",
-      summary: "공유 전 보완 필요",
+      summary: options.requiresRevalidation ? "편집 후 재검수 필요" : "공유 전 보완 필요",
       reasons
     };
   }

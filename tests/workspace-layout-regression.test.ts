@@ -1049,7 +1049,45 @@ describe("workspace layout regression", () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const sample = buildSampleWorkpack();
-    const sentinel = "[SAFECLAW_DOCUMENT_EDIT_PRESERVED]";
+    const sentinel = "편집안전대책: SAFECLAW_DOCUMENT_EDIT_PRESERVED";
+    const regeneratedSentinel = "[SAFECLAW_REGENERATED_TBM]";
+    sample.deliverables.tbmBriefingStructured = {
+      meta: {
+        dateTime: "2026-07-10 08:00",
+        location: sample.scenario.siteName,
+        target: "전 작업자",
+        attendees: "서명 확인"
+      },
+      todayWork: {
+        name: sample.scenario.workSummary,
+        location: sample.scenario.siteName,
+        time: "08:00 - 17:00",
+        equipment: ["이동식 비계"]
+      },
+      hazards: [{ category: "Machine", description: "생성 시점 구조화 위험요인" }],
+      measures: [{ hazardRef: 1, action: "생성 시점 구조화 안전대책", owner: "관리감독자" }],
+      stopCriteria: ["강풍 시 작업중지"],
+      confirmTopics: ["작업중지 기준 확인"],
+      photoEvidenceLocation: "현장 안전 폴더"
+    };
+    sample.ontologyQa = {
+      reviewTask: "외벽 도장",
+      result: {
+        reviewable: true,
+        task: "외벽 도장",
+        covered: { hazards: ["추락"], controls: ["작업발판 점검"], articles: [] },
+        missing: { hazards: [], controls: [], articles: [] },
+        coverageRate: 1,
+        verdict: "통과",
+        advisory: "검수 통과"
+      },
+      sourceDocumentKeys: ["riskAssessmentDraft", "tbmBriefing"],
+      detail: "안전조치 검수 통과"
+    };
+    const regeneratedSample = structuredClone(sample);
+    regeneratedSample.deliverables.tbmBriefing = `${regeneratedSentinel}\n${sample.deliverables.tbmBriefing}`;
+    let generationCount = 0;
+    let xlsxPayload: Record<string, unknown> | null = null;
     await page.addInitScript(() => {
       window.localStorage.setItem("safeclaw.aiMode", "template");
     });
@@ -1061,10 +1099,20 @@ describe("workspace layout regression", () => {
       });
     });
     await page.route("**/api/ask", async (route) => {
+      const responseBody = generationCount === 0 ? sample : regeneratedSample;
+      generationCount += 1;
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify(sample)
+        body: JSON.stringify(responseBody)
+      });
+    });
+    await page.route("**/api/export/xlsx", async (route) => {
+      xlsxPayload = route.request().postDataJSON() as Record<string, unknown>;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        body: "xlsx"
       });
     });
 
@@ -1101,6 +1149,20 @@ describe("workspace layout regression", () => {
     expect(persistedDrafts.editor).toContain(sentinel);
     expect(persistedDrafts.current).toContain(sentinel);
 
+    await page.getByRole("button", { name: "Excel 표 양식(.xlsx)" }).click();
+    await expect.poll(() => xlsxPayload?.mode).toBe("single");
+    expect(JSON.stringify(xlsxPayload)).toContain("SAFECLAW_DOCUMENT_EDIT_PRESERVED");
+    expect(xlsxPayload).not.toHaveProperty("structured");
+
+    const invalidatedReview = await page.evaluate(() => {
+      const raw = window.localStorage.getItem("safeclaw.currentWorkpack.v1");
+      if (!raw) return null;
+      const stored = JSON.parse(raw) as { data?: Record<string, unknown> };
+      return stored.data || null;
+    });
+    expect(invalidatedReview).not.toHaveProperty("ontologyQa");
+    expect(invalidatedReview).not.toHaveProperty("dbHarness");
+
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     expect(await page.locator(".document-preview-pane pre").textContent()).toContain(sentinel);
@@ -1110,6 +1172,18 @@ describe("workspace layout regression", () => {
     const reopenedEditor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
     await reopenedEditor.waitFor({ state: "visible" });
     expect(await reopenedEditor.inputValue()).toBe(editedValue);
+
+    await page.getByRole("button", { name: /^입력/ }).click();
+    await page.getByRole("button", { name: /안전 문서 생성/ }).click();
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await page.locator(".document-viewer-list button", { hasText: "TBM 브리핑" }).click();
+    await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
+    const regeneratedEditor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
+    await regeneratedEditor.waitFor({ state: "visible" });
+    expect(await regeneratedEditor.inputValue()).toContain(regeneratedSentinel);
+    expect(await regeneratedEditor.inputValue()).not.toContain(sentinel);
+    const draftKeys = await page.evaluate(() => Object.keys(window.localStorage).filter((key) => key.startsWith("safeclaw-workpack:")));
+    expect(draftKeys).toHaveLength(2);
   }, 90_000);
 
   it("keeps the Night document editor readable, scroll-safe, and focused", async () => {

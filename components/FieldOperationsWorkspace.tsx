@@ -6,7 +6,12 @@ import { CitationList } from "@/components/CitationList";
 import { ClawChat } from "@/components/ClawChat";
 import { OperationMemoryGraphViewer } from "@/components/OperationMemoryPreview";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
-import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
+import {
+  WorkpackEditor,
+  type DocumentKey,
+  type WorkpackDeliverablesChange,
+  type WorkpackDocumentValues
+} from "@/components/WorkpackEditor";
 import {
   buildStoredCurrentWorkpack,
   CURRENT_WORKPACK_STORAGE_KEY,
@@ -15,7 +20,7 @@ import {
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
 import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
-import type { WorkpackReadiness } from "@/lib/workpack-readiness";
+import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
 import {
   buildDefaultWorkers,
@@ -791,16 +796,18 @@ function WorkspaceOperationGraphPanel({
 
 export function FieldOperationsWorkspace({
   data,
+  generationFingerprint,
   editorFocusToken = 0,
   requestedDocumentKey,
   readiness,
   onDeliverablesChange
 }: {
   data: AskResponse;
+  generationFingerprint?: string;
   editorFocusToken?: number;
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
-  onDeliverablesChange?: (values: WorkpackDocumentValues) => void;
+  onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
 }) {
   const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
   const editorDataRef = useRef(data);
@@ -862,7 +869,7 @@ export function FieldOperationsWorkspace({
     dispatchSnapshotRef.current = dispatchSnapshot;
   }, [data, dispatchSnapshot, onDeliverablesChange, workerSnapshot]);
 
-  const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues) => {
+  const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => {
     const previousValues = lastEditorValuesRef.current;
     const documentKeys = Object.keys(values) as DocumentKey[];
     if (previousValues && documentKeys.every((key) => previousValues[key] === values[key])) return;
@@ -871,16 +878,10 @@ export function FieldOperationsWorkspace({
       const currentDocuments: Partial<Record<DocumentKey, string>> = current ?? dataRef.current.deliverables;
       return documentKeys.every((key) => currentDocuments[key] === values[key]) ? current : values;
     });
-    onDeliverablesChangeRef.current?.(values);
+    onDeliverablesChangeRef.current?.(values, change);
     if (typeof window === "undefined") return;
     const currentData = dataRef.current;
-    const nextData: AskResponse = {
-      ...currentData,
-      deliverables: {
-        ...currentData.deliverables,
-        ...values
-      }
-    };
+    const nextData = applyWorkpackDeliverablesChange(currentData, values, change);
     try {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
@@ -1068,6 +1069,7 @@ export function FieldOperationsWorkspace({
       <main className="workspace-canvas">
         <WorkpackEditor
           data={editorDataRef.current}
+          generationFingerprint={generationFingerprint}
           focusToken={editorFocusToken}
           requestedDocumentKey={requestedDocumentKey}
           onDeliverablesChange={handleDeliverablesChange}
