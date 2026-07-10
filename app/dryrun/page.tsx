@@ -13,7 +13,7 @@ export default function DryrunPage() {
   const report = getLatestDryrunReport();
 
   return (
-    <main className="container grid route-internal-page">
+    <main className="container grid route-internal-page route-supporting-page">
       <section className="hero grid route-internal-hero">
         <span className="badge">SafeClaw 운영 점검</span>
         <div className="grid route-internal-copy">

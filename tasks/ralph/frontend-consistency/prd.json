@@ -77,6 +77,9 @@
         "Every discovered page belongs to one route family",
         "Every page has consistent title, body, control, card, and responsive geometry",
         "Exact selector and breakpoint checks prove effective V2, demo, legacy, and mobile geometry",
+        "At 760px informational and demo cards use 16px padding while desktop cards retain 24px padding",
+        "Informational and login titles, card headings, and authentication controls use canonical typography roles",
+        "Task 4 list and row spacing is route-scoped and does not alter WorkpackEditor density",
         "Legal detail bodies use the 72ch long-form tier and major sections use section-title headings",
         "Demo heading order and delegated authentication owners are regression-tested"
       ],

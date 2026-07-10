@@ -8,7 +8,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const results = await runSearch(q);
 
   return (
-    <main className="container grid">
+    <main className="container grid route-supporting-page">
       <section className="hero grid">
         <div className="row">
           <span className="badge">근거 탐색</span>

@@ -401,6 +401,12 @@ describe("module route section hierarchy", () => {
       gap: "var(--space-4)",
       padding: "clamp(var(--space-8), 6vw, var(--space-20))",
     });
+    expect(declarationsForExactSelector(desktopCss, ".v2-hero h1")).toMatchObject({
+      "font-size": "var(--text-page-title)",
+      "font-weight": "800",
+      "line-height": "var(--leading-page-title)",
+      "letter-spacing": "var(--tracking-page-title)",
+    });
     expect(declarationsForExactSelector(desktopCss, ".demo-stage-panel")).toMatchObject({
       gap: "var(--space-5)",
       padding: "var(--space-6)",
@@ -414,14 +420,53 @@ describe("module route section hierarchy", () => {
       "border-radius": "var(--radius-control)",
       padding: "var(--space-2) var(--space-3)",
     });
+    for (const selector of [".triad-card h2", ".preview-hero-card h2"]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({
+        "font-size": "var(--text-component-title)",
+        "font-weight": "700",
+        "line-height": "var(--leading-component-title)",
+        "letter-spacing": "var(--tracking-component-title)",
+      });
+    }
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-login-panel h1")).toMatchObject({
+      "font-size": "var(--text-page-title)",
+      "font-weight": "800",
+      "line-height": "var(--leading-page-title)",
+      "letter-spacing": "var(--tracking-page-title)",
+    });
+    for (const selector of [
+      ".safeclaw-login-form input",
+      ".safeclaw-login-form button",
+      ".safeclaw-login-actions a",
+      ".safeclaw-login-actions button",
+    ]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({
+        "font-size": "var(--text-control)",
+        "font-weight": "700",
+        "line-height": "var(--leading-control)",
+        "letter-spacing": "var(--tracking-body)",
+      });
+    }
     for (const selector of [".scenario-strip", ".api-pulse-grid", ".primary-triad-grid", ".trust-grid", ".roadmap-list"]) {
       expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({ gap: "var(--space-4)" });
     }
     for (const selector of [".triad-card", ".preview-hero-card", ".trust-grid article", ".roadmap-item"]) {
       expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({ padding: "var(--space-6)" });
+      expect(effectiveDeclarationsAtWidth(css, selector, 760), `${selector} mobile`).toMatchObject({
+        padding: "var(--space-4)",
+      });
     }
-    expect(declarationsForExactSelector(desktopCss, ".list")).toMatchObject({ gap: "var(--space-4)" });
-    expect(declarationsForExactSelector(desktopCss, ".row")).toMatchObject({ gap: "var(--space-2)" });
+    expect(declarationsForExactSelector(desktopCss, ".list")).toMatchObject({ gap: "14px" });
+    expect(declarationsForExactSelector(desktopCss, ".row")).toMatchObject({ gap: "10px" });
+    expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .list")).toMatchObject({
+      gap: "var(--space-4)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .row")).toMatchObject({
+      gap: "var(--space-2)",
+    });
+    const workpackEditor = read("components/WorkpackEditor.tsx");
+    expect(workpackEditor).toContain('className="workpack-sidebar card list"');
+    expect(workpackEditor).not.toContain("route-supporting-page");
     expect(effectiveDeclarationsAtWidth(css, ".container", 720)).toMatchObject({
       width: "min(100%, calc(100% - (var(--space-4) * 2)))",
     });

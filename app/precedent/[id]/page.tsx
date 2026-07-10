@@ -7,7 +7,7 @@ export default async function PrecedentDetailPage({ params }: { params: Promise<
   if (!item || item.type !== "precedent") return notFound();
 
   return (
-    <main className="container grid legal-detail-page">
+    <main className="container grid legal-detail-page route-supporting-page">
       <div className="row">
         <span className="badge">판례 상세</span>
         {item.citation ? <span className="badge">{item.citation}</span> : null}

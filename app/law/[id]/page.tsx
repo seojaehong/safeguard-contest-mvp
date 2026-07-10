@@ -50,7 +50,7 @@ export default async function LawDetailPage({ params }: { params: Promise<{ id: 
   const sections = parseLawBody(item.body);
 
   return (
-    <main className="container grid legal-detail-page">
+    <main className="container grid legal-detail-page route-supporting-page">
       <div className="row">
         <span className="badge">법령 상세</span>
         {item.citation ? <span className="badge">{item.citation}</span> : null}

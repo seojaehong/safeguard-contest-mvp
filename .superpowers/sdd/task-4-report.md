@@ -49,6 +49,9 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 10. Independent review Important findings
    - RED: exact selector tests reproduced off-scale V2/demo/legacy gaps and padding plus the later 12px mobile `.container` gutter; legal tests reproduced missing 72ch/15px/1.75 measures and component-tier major headings; demo-order tests reproduced the `h1` to `h3` skip; delegated-owner coverage rejected missing auth owner mappings.
    - GREEN: V2/demo/legacy geometry now uses approved spacing tokens and effective 16px mobile gutters; legal prose and preformatted bodies use the named long-form role and 72ch measure; legal major headings use section-title tuples; demo triad cards are `h2`; exact selector/media evaluation binds each geometry assertion; both auth child owners are verified from their page sources.
+11. Independent re-review Important findings
+   - RED: effective 760px assertions reproduced 24px card padding on demo/informational routes; exact typography assertions reproduced display/component/table role drift; global utility assertions reproduced `.list`/`.row` changes leaking into `WorkpackEditor`.
+   - GREEN: the four mobile card selectors now resolve to 16px padding; informational/login titles, card headings, and login controls use canonical page/component/control tuples; global `.list`/`.row` values are restored and Task 4 spacing is isolated behind `route-supporting-page`, which `WorkpackEditor` does not consume.
 
 ## Final verification evidence
 

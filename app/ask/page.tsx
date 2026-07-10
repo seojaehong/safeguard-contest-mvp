@@ -14,7 +14,7 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
   const data = await runAsk(q);
 
   return (
-    <main className="container grid">
+    <main className="container grid route-supporting-page">
       <section className="hero grid">
         <div className="row">
           <span className="badge">근거 기반 질의</span>

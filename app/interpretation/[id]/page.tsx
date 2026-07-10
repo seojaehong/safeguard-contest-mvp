@@ -7,7 +7,7 @@ export default async function InterpretationDetailPage({ params }: { params: Pro
   if (!item || item.type !== "interpretation") return notFound();
 
   return (
-    <main className="container grid legal-detail-page">
+    <main className="container grid legal-detail-page route-supporting-page">
       <div className="row">
         <span className="badge">해석례 상세</span>
         {item.citation ? <span className="badge">{item.citation}</span> : null}
