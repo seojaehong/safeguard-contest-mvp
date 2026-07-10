@@ -48,8 +48,8 @@
       "id": "F3",
       "title": "Shared shells and framework states",
       "priority": 3,
-      "status": "in_progress",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Shell, navigation, controls, error, loading, and empty states use canonical values",
         "Focused shared-surface tests pass",

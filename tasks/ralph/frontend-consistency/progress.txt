@@ -45,3 +45,9 @@
 - Verified: focused contract tests pass (18/18), static audit passes for 32 routes with zero violations and zero important declarations, typecheck passes, and production build passes with 27/27 static pages generated.
 - Learned: explicit DOM-backed semantics must precede the current font-size token for class-only action selectors.
 - Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in later tasks.
+
+## 2026-07-11 F3 review closure
+- Changed: added semantic framework headings, named loading state, stable shell/landing hooks, canonical landing/document cascade values, and reduced-motion spinner handling.
+- Verified: focused shared plus design-contract tests 32/32, static audit, typecheck, build 27/27, independent spec and code-quality review pass with zero findings.
+- Learned: shared hooks do not prove effective styling when later scoped selectors win; tests must assert the higher-specificity current selectors explicitly.
+- Next: F4 all route families.
