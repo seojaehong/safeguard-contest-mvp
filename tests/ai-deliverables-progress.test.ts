@@ -41,6 +41,12 @@ describe("generateAllDeliverablesWithDiagnostics onProgress wiring", () => {
 
     expect(result.diagnostics.geminiAvailable).toBe(false);
     expect(result.diagnostics.groupResults).toEqual([]);
+    expect(result.diagnostics.trace).toEqual({
+      attempted: false,
+      provider: null,
+      modelPerDocument: {},
+      fallbackUsed: false
+    });
     expect(onProgress).not.toHaveBeenCalled();
   });
 

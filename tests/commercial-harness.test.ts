@@ -953,6 +953,20 @@ describe("runAsk DB harness mode", () => {
     });
 
     expect(response.mode).toBe("mock");
+    expect(response.generationTrace).toMatchObject({
+      traceId: expect.any(String),
+      askMode: "template",
+      answer: {
+        provider: "mock",
+        model: null
+      },
+      deliverables: {
+        attempted: false,
+        provider: null,
+        modelPerDocument: {}
+      },
+      fallbackUsed: false
+    });
     expect(response.dbHarness?.packet.mode).toBe("db_harness_first");
     expect(response.dbHarness?.summary.llmRole).toBe("naturalize_only");
     expect(response.dbHarness?.summary.llmOutputScope).toBe("rewrite_fixed_evidence_only");
@@ -1001,6 +1015,15 @@ describe("runAsk DB harness mode", () => {
     });
 
     expect(response.generationMode).toBe("enhanced");
+    expect(response.generationTrace).toMatchObject({
+      traceId: expect.any(String),
+      askMode: "enhanced",
+      deliverables: {
+        attempted: false,
+        provider: null,
+        modelPerDocument: {}
+      }
+    });
     expect(response.status.detail).toContain("AI_MODE=enhanced (DB 하네스 row-first");
     expect(response.status.detail).toMatch(/structured rows=(DB harness deterministic|deterministic baseline)/);
     expect(response.status.detail).toContain("TBM structured=deterministic from risk rows");

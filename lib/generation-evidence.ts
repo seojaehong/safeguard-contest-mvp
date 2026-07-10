@@ -140,6 +140,7 @@ export function attachGenerationEvidence(
     question: response.question,
     scenario: response.scenario,
     dbHarnessPacket: response.dbHarness.packet,
+    ...(response.generationTrace ? { generationTrace: response.generationTrace } : {}),
     responseContentDigest: buildResponseContentDigest(response),
     generatedAt: options.generatedAt
   };
@@ -221,6 +222,7 @@ export function verifyAskResponseGenerationEvidence(
     question: response.question,
     scenario: response.scenario,
     dbHarnessPacket: response.dbHarness.packet,
+    ...(response.generationTrace ? { generationTrace: response.generationTrace } : {}),
     responseContentDigest: buildResponseContentDigest(response),
     generatedAt
   }, secret);

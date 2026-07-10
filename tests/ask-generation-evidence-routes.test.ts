@@ -19,6 +19,25 @@ function responseWithHarness(): AskResponse {
   const packet = buildDbHarnessPacket({ question, references: [] });
   return {
     ...response,
+    generationTrace: {
+      traceId: "trace-ask-route-test",
+      askMode: "full",
+      answer: {
+        provider: "openai",
+        model: "gpt-4.1-mini"
+      },
+      deliverables: {
+        attempted: true,
+        provider: "anthropic",
+        modelPerDocument: {
+          riskAssessment: {
+            provider: "anthropic",
+            model: "claude-opus-4-8"
+          }
+        }
+      },
+      fallbackUsed: false
+    },
     dbHarness: {
       packet,
       promptContext: "server generation harness",
@@ -68,6 +87,7 @@ describe("ask generation evidence routes", () => {
   });
 
   it("attaches generation evidence to the JSON response", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
     const { POST } = await import("@/app/api/ask/route");
     const response = await POST(request("/api/ask"));
     const body = await response.json() as AskResponse;
@@ -77,6 +97,10 @@ describe("ask generation evidence routes", () => {
       algorithm: "HMAC-SHA256"
     });
     expect(body.generationEvidence?.snapshot.dbHarnessPacket).toEqual(body.dbHarness?.packet);
+    expect(body.generationEvidence?.snapshot.generationTrace).toEqual(body.generationTrace);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("[api/ask] safeclaw_generation_trace"));
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"traceId":"trace-ask-route-test"'));
+    logSpy.mockRestore();
   });
 
   it("attaches generation evidence to the SSE final payload", async () => {
