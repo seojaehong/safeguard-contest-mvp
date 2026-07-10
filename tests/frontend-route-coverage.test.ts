@@ -566,4 +566,132 @@ describe("module route section hierarchy", () => {
       width: "min(100%, calc(100% - (var(--space-4) * 2)))",
     });
   });
+
+  it("binds landing and ordinary module internals to canonical roles and spacing", () => {
+    const css = read("app/globals.css");
+    const desktopCss = withoutMediaBlocks(css);
+
+    for (const [width, gutter] of [
+      [1280, "var(--space-6)"],
+      [1024, "var(--space-5)"],
+      [767, "var(--space-4)"],
+    ] as const) {
+      expect(effectiveDeclarationsAtWidth(css, ".safeclaw-landing", width), `landing gutter ${width}`).toMatchObject({
+        "--os-gutter": gutter,
+      });
+    }
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-brand")).toMatchObject({
+      gap: "var(--space-4)",
+      padding: "0 var(--space-6) 0 0",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-status")).toMatchObject({ gap: "var(--space-6)" });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-hero-body")).toMatchObject({
+      gap: "clamp(var(--space-8), 5vw, var(--space-20))",
+      padding: "clamp(var(--space-12), 6vw, var(--space-20)) 0",
+      "padding-inline": "var(--os-gutter)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-console")).toMatchObject({
+      gap: "var(--space-4)",
+      padding: "var(--space-6)",
+    });
+
+    for (const selector of [
+      ".safeclaw-landing-nav nav button",
+      ".safeclaw-landing-nav nav a",
+      ".safeclaw-login",
+      ".safeclaw-contact",
+      ".safeclaw-os-console button",
+      ".safeclaw-os-console a",
+      ".safeclaw-terminal button",
+      ".safeclaw-terminal a",
+    ]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({
+        "min-height": "var(--control-height)",
+        "font-size": "var(--text-control)",
+        "font-weight": "700",
+        "line-height": "var(--leading-control)",
+        "letter-spacing": "var(--tracking-body)",
+      });
+    }
+    for (const selector of [
+      ".safeclaw-pipeline-grid h3",
+      ".safeclaw-proof-matrix h3",
+      ".safeclaw-language-matrix h3",
+      ".safeclaw-module-map h3",
+    ]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({
+        margin: "0 0 var(--space-6)",
+        "font-size": "var(--text-component-title)",
+        "font-weight": "700",
+        "line-height": "var(--leading-component-title)",
+        "letter-spacing": "var(--tracking-component-title)",
+      });
+    }
+
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-module-panel h2")).toMatchObject({
+      margin: "var(--space-4) 0 var(--space-3)",
+      "font-size": "var(--text-component-title)",
+      "font-weight": "700",
+      "line-height": "var(--leading-component-title)",
+      "letter-spacing": "var(--tracking-component-title)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-module-panel p")).toMatchObject({
+      "font-size": "var(--text-body)",
+      "font-weight": "500",
+      "line-height": "var(--leading-body)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    for (const selector of [".safeclaw-archive-list p", ".safeclaw-worker-table p", ".safeclaw-tbm-board p"]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({
+        "font-size": "var(--text-support)",
+        "font-weight": "500",
+        "line-height": "var(--leading-body)",
+        "letter-spacing": "var(--tracking-body)",
+      });
+    }
+    for (const selector of [
+      ".safeclaw-worker-table strong",
+      ".safeclaw-archive-list strong",
+      ".safeclaw-tbm-board strong",
+    ]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({
+        "font-size": "var(--text-component-title)",
+        "font-weight": "700",
+        "line-height": "var(--leading-component-title)",
+        "letter-spacing": "var(--tracking-component-title)",
+      });
+    }
+    for (const selector of [".safeclaw-worker-table", ".safeclaw-archive-list", ".safeclaw-tbm-board"]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({ gap: "var(--space-4)" });
+    }
+    for (const selector of [
+      ".safeclaw-worker-table article",
+      ".safeclaw-archive-list article",
+      ".safeclaw-tbm-board article",
+    ]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({ padding: "var(--space-6)" });
+    }
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-worker-phone")).toMatchObject({
+      "margin-top": "var(--space-4)",
+      "padding-left": "var(--space-4)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".worker-language-switcher")).toMatchObject({
+      margin: "var(--space-4) 0 var(--space-2)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".worker-language-switcher button")).toMatchObject({
+      "min-height": "var(--control-height)",
+      padding: "var(--space-3)",
+      "font-size": "var(--text-control)",
+      "font-weight": "700",
+      "line-height": "var(--leading-control)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    expect(effectiveDeclarationsAtWidth(css, ".safeclaw-module-rail nav", 980)).toMatchObject({
+      gap: "0 var(--space-4)",
+    });
+    expect(effectiveDeclarationsAtWidth(css, ".safeclaw-module-nav", 980)).toMatchObject({
+      gap: "var(--space-3)",
+      padding: "var(--space-4) var(--space-5)",
+    });
+  });
 });

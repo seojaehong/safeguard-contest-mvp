@@ -120,6 +120,8 @@ function isTableHeaderSelector(selector) {
 }
 
 const semanticRoleOverrides = {
+  ".safeclaw-login": "control",
+  ".safeclaw-contact": "control",
   ".law-section-lines p": "longform",
   ".legal-reading-body": "longform",
   ".command-center-shell .command-primary": "control",

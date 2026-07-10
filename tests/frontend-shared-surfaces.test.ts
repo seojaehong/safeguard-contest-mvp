@@ -182,8 +182,11 @@ describe("canonical shared surface styles", () => {
       expect(declarationsForExactSelector(css, selector), selector).toMatchObject({
         "min-height": "var(--control-height)",
         "border-radius": "var(--radius-control)",
+        "font-size": "var(--text-control)",
+        "font-weight": "700",
+        "line-height": "var(--leading-control)",
+        "letter-spacing": "var(--tracking-body)",
       });
-      expect(declarationsForExactSelector(css, selector), selector).not.toHaveProperty("font-size");
     }
     expect(declarationsForExactSelector(css, ".safeclaw-os-cta a")).toMatchObject({
       "min-height": "var(--control-height)",

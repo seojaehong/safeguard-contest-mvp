@@ -971,7 +971,7 @@ ul {
   --os-panel-text: #f6f5ef;
   --os-panel-muted: #9aa0a6;
   /* Centered content column shared by every full-bleed band. */
-  --os-gutter: max(24px, calc((100% - 1280px) / 2));
+  --os-gutter: var(--space-6);
   width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
@@ -980,6 +980,18 @@ ul {
   background: var(--os-bg);
   color: var(--os-text);
   font-family: var(--font-base);
+}
+
+@media (max-width: 1279px) {
+  .safeclaw-landing {
+    --os-gutter: var(--space-5);
+  }
+}
+
+@media (max-width: 767px) {
+  .safeclaw-landing {
+    --os-gutter: var(--space-4);
+  }
 }
 
 .safeclaw-landing button,
@@ -1004,9 +1016,9 @@ ul {
 .safeclaw-os-brand {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--space-4);
   height: 100%;
-  padding: 0 28px 0 0;
+  padding: 0 var(--space-6) 0 0;
   border-right: 1px solid var(--os-line);
   color: var(--os-text);
   text-decoration: none;
@@ -1042,20 +1054,23 @@ ul {
 .safeclaw-landing-nav nav {
   display: flex;
   justify-content: center;
-  gap: clamp(14px, 2.4vw, 36px);
+  gap: clamp(var(--space-4), 2.4vw, var(--space-10));
 }
 
 .safeclaw-landing-nav nav button,
 .safeclaw-landing-nav nav a {
+  display: inline-flex;
+  min-height: var(--control-height);
+  align-items: center;
   border: 0;
   background: transparent;
   color: var(--sc-steel-650);
   cursor: pointer;
-  font-size: var(--text-body-lg);
-  font-weight: 500;
+  font-size: var(--text-control);
+  font-weight: 700;
   letter-spacing: var(--tracking-body);
   text-decoration: none;
-  line-height: var(--leading-body-lg);
+  line-height: var(--leading-control);
 }
 
 .safeclaw-landing-nav nav button:hover,
@@ -1079,6 +1094,10 @@ ul {
   min-height: var(--control-height);
   border-radius: var(--radius-control);
   padding: 0 var(--space-4);
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
   text-decoration: none;
 }
 
@@ -1101,7 +1120,7 @@ ul {
 .safeclaw-os-status {
   display: grid;
   grid-template-columns: minmax(260px, auto) repeat(3, minmax(0, 1fr));
-  gap: 26px;
+  gap: var(--space-6);
   align-items: center;
   min-height: 60px;
   padding-inline: var(--os-gutter);
@@ -1136,10 +1155,10 @@ ul {
 .safeclaw-os-hero-body {
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.58fr);
-  gap: clamp(28px, 5vw, 76px);
+  gap: clamp(var(--space-8), 5vw, var(--space-20));
   align-items: center;
   min-height: calc(100svh - 148px);
-  padding: clamp(44px, 6vw, 84px) 0 clamp(48px, 6vw, 78px);
+  padding: clamp(var(--space-12), 6vw, var(--space-20)) 0;
   padding-inline: var(--os-gutter);
 }
 
@@ -1278,11 +1297,11 @@ ul {
 
 .safeclaw-os-console {
   display: grid;
-  gap: 18px;
+  gap: var(--space-4);
   align-self: stretch;
   min-height: 340px;
   align-content: end;
-  padding: 28px;
+  padding: var(--space-6);
 }
 
 .safeclaw-os-console span,
@@ -1301,16 +1320,16 @@ ul {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 58px;
+  min-height: var(--control-height);
   border: 1px solid var(--os-yellow);
   border-radius: 4px;
   background: transparent;
   color: var(--os-yellow);
   cursor: pointer;
-  font-size: var(--text-body-lg);
-  font-weight: 500;
+  font-size: var(--text-control);
+  font-weight: 700;
   text-decoration: none;
-  line-height: var(--leading-body-lg);
+  line-height: var(--leading-control);
   letter-spacing: var(--tracking-body);
 }
 
@@ -1490,12 +1509,12 @@ ul {
 .safeclaw-proof-matrix h3,
 .safeclaw-language-matrix h3,
 .safeclaw-module-map h3 {
-  margin: 0 0 26px;
+  margin: 0 0 var(--space-6);
   color: var(--os-text);
-  font-size: var(--text-section-title);
-  font-weight: 800;
-  letter-spacing: var(--tracking-section-title);
-  line-height: var(--leading-section-title);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
 }
 
 .safeclaw-language-matrix h3,
@@ -7515,8 +7534,8 @@ body:has(.safeclaw-landing) :is(
 @media (max-width: 1180px) {
   .safeclaw-landing-nav {
     grid-template-columns: 1fr;
-    gap: 18px;
-    padding: 18px 20px;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--os-gutter);
   }
 
   .safeclaw-os-brand {
@@ -7590,13 +7609,13 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-os-hero-body,
   .safeclaw-os-section {
-    padding-right: 18px;
-    padding-left: 18px;
+    padding-right: var(--os-gutter);
+    padding-left: var(--os-gutter);
   }
 
   .safeclaw-os-status {
     gap: 12px;
-    padding: 20px 18px;
+    padding: var(--space-5) var(--os-gutter);
     font-size: var(--text-hud);
     font-weight: 700;
     line-height: var(--leading-hud);
@@ -8877,30 +8896,37 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-panel h2 {
   max-width: 920px;
-  margin: 16px 0 14px;
+  margin: var(--space-4) 0 var(--space-3);
   color: #f6f5ef;
-  font-size: var(--text-page-title);
-  font-weight: 800;
-  letter-spacing: var(--tracking-page-title);
-  line-height: var(--leading-page-title);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
 }
 
-.safeclaw-module-panel p,
+.safeclaw-module-panel p {
+  color: rgba(246, 245, 239, 0.64);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
 .safeclaw-archive-list p,
 .safeclaw-worker-table p,
 .safeclaw-tbm-board p {
   color: rgba(246, 245, 239, 0.64);
-  font-size: var(--text-component-title);
-  font-weight: 700;
-  line-height: var(--leading-component-title);
-  letter-spacing: var(--tracking-component-title);
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-worker-table,
 .safeclaw-archive-list,
 .safeclaw-tbm-board {
   display: grid;
-  gap: 14px;
+  gap: var(--space-4);
   margin-top: 24px;
 }
 
@@ -8909,7 +8935,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-tbm-board article {
   border: 1px solid rgba(246, 245, 239, 0.14);
   background: rgba(8, 9, 11, 0.72);
-  padding: 22px;
+  padding: var(--space-6);
 }
 
 .safeclaw-worker-table strong,
@@ -8917,16 +8943,16 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-tbm-board strong {
   display: block;
   color: #f6f5ef;
-  font-size: var(--text-section-title);
-  font-weight: 800;
-  letter-spacing: var(--tracking-section-title);
-  line-height: var(--leading-section-title);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
 }
 
 .safeclaw-worker-phone {
-  margin-top: 18px;
+  margin-top: var(--space-4);
   border-left: 4px solid var(--os-yellow, #ffdc2e);
-  padding-left: 14px;
+  padding-left: var(--space-4);
 }
 
 .safeclaw-worker-phone article {
@@ -8937,17 +8963,22 @@ body:has(.safeclaw-landing) :is(
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  margin: 18px 0 10px;
+  margin: var(--space-4) 0 var(--space-2);
 }
 
 .worker-language-switcher button {
   display: grid;
-  gap: 2px;
+  min-height: var(--control-height);
+  gap: var(--space-1);
   border: 1px solid rgba(246, 245, 239, 0.18);
   background: rgba(246, 245, 239, 0.06);
   color: #f6f5ef;
   text-align: left;
-  padding: 10px;
+  padding: var(--space-3);
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
   cursor: pointer;
 }
 
@@ -8997,7 +9028,7 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-rail nav {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 18px;
+    gap: 0 var(--space-4);
   }
 
   .safeclaw-module-rail section {
@@ -9022,8 +9053,8 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-nav {
     position: relative;
-    gap: 12px;
-    padding: 18px 20px;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
   }
 
   .safeclaw-module-grid article {
