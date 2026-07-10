@@ -2369,13 +2369,16 @@ ul {
 }
 
 .v2-nav nav a {
+  display: inline-flex;
+  min-height: var(--control-height);
+  align-items: center;
   padding: 8px 12px;
   border: 1px solid rgba(226, 222, 213, 0.75);
   border-radius: 4px;
   color: #556070;
-  font-size: var(--text-table);
-  font-weight: 500;
-  line-height: var(--leading-table);
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
   letter-spacing: var(--tracking-body);
 }
 
@@ -2517,7 +2520,10 @@ ul {
   background: #fffdf8;
   color: var(--accent);
   cursor: pointer;
-  font-weight: 850;
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
 }
 
 .demo-screen {
@@ -3012,7 +3018,7 @@ ul {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 767px) {
   .v2-shell,
   .demo-mode-shell {
     width: min(100%, calc(100% - (var(--space-4) * 2)));
@@ -9497,13 +9503,16 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-login-topbar nav a {
+  display: inline-flex;
+  min-height: var(--control-height);
+  align-items: center;
   color: rgba(246, 245, 239, 0.62);
-  font-family: var(--font-hud);
-  font-size: var(--text-table);
-  font-weight: 500;
+  font-family: var(--font-product);
+  font-size: var(--text-control);
+  font-weight: 700;
   letter-spacing: var(--tracking-body);
   text-decoration: none;
-  line-height: var(--leading-table);
+  line-height: var(--leading-control);
 }
 
 .safeclaw-login-topbar nav a:hover {
