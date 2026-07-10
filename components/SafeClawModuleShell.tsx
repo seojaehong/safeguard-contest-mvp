@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import type { Route } from "next";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { getModuleNavModel } from "@/lib/module-navigation";
 
 type ModuleStatus = "live" | "partial" | "planned";
+type ModuleTheme = "day" | "night";
 
 const statusLabel: Record<ModuleStatus, string> = {
   live: "바로 사용",
@@ -23,6 +26,41 @@ type SafeClawModuleShellProps = {
   variant?: "default" | "document";
 };
 
+type PageDecisionHeaderProps = Pick<
+  SafeClawModuleShellProps,
+  "eyebrow" | "title" | "description" | "mappedTo" | "actions"
+> & {
+  command: { href: string; label: string };
+};
+
+function PageDecisionHeader({
+  eyebrow,
+  title,
+  description,
+  mappedTo,
+  actions,
+  command
+}: PageDecisionHeaderProps) {
+  return (
+    <header className="safeclaw-page-decision-header" data-testid="page-decision-header">
+      <div className="safeclaw-page-decision-copy">
+        <span className="safeclaw-module-eyebrow">{eyebrow}</span>
+        <h1>{title}</h1>
+        <p>{description}</p>
+      </div>
+      <aside className="safeclaw-page-decision-action" aria-label="현재 모듈 결정">
+        <div>
+          <span>업무 범위</span>
+          <strong>{mappedTo}</strong>
+        </div>
+        <div className="safeclaw-module-principal-command" data-principal-command>
+          {actions ?? <Link href={command.href as Route}>{command.label}</Link>}
+        </div>
+      </aside>
+    </header>
+  );
+}
+
 export function SafeClawModuleShell({
   eyebrow,
   title,
@@ -35,17 +73,59 @@ export function SafeClawModuleShell({
   variant = "document"
 }: SafeClawModuleShellProps) {
   const navModel = getModuleNavModel(activeHref);
+  const [theme, setTheme] = useState<ModuleTheme>("day");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const queryTheme = new URLSearchParams(window.location.search).get("theme");
+    const savedTheme = window.localStorage.getItem("safeclaw.moduleTheme");
+    const nextTheme = queryTheme === "night" || queryTheme === "day"
+      ? queryTheme
+      : savedTheme === "night"
+        ? "night"
+        : "day";
+    setTheme(nextTheme);
+    setIsReady(true);
+  }, []);
+
+  function updateTheme(nextTheme: ModuleTheme) {
+    setTheme(nextTheme);
+    window.localStorage.setItem("safeclaw.moduleTheme", nextTheme);
+    const url = new URL(window.location.href);
+    url.searchParams.set("theme", nextTheme);
+    window.history.replaceState(window.history.state, "", url);
+  }
 
   return (
-    <main className={`safeclaw-module-shell module-variant-${variant}`}>
+    <main
+      className={`safeclaw-module-shell module-variant-${variant}`}
+      data-theme={theme}
+      data-ready={isReady}
+    >
       <aside className="safeclaw-module-rail" aria-label="SafeClaw 제품 메뉴">
-        <Link href="/" className="safeclaw-module-brand" aria-label="SafeClaw 홈">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/ClawMark.svg" alt="" width={28} height={28} />
-          <strong>SafeClaw</strong>
-        </Link>
+        <div className="safeclaw-module-rail-head">
+          <Link href="/" className="safeclaw-module-brand" aria-label="SafeClaw 홈">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/ClawMark.svg" alt="" width={28} height={28} />
+            <strong>SafeClaw</strong>
+          </Link>
+          <button
+            type="button"
+            className="safeclaw-module-menu-button"
+            aria-controls="safeclaw-module-navigation"
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen((isOpen) => !isOpen)}
+          >
+            메뉴
+          </button>
+        </div>
         <p>현장 안전 문서팩</p>
-        <nav aria-label="SafeClaw 운영 메뉴">
+        <nav
+          id="safeclaw-module-navigation"
+          className={mobileNavOpen ? "open" : ""}
+          aria-label="SafeClaw 운영 메뉴"
+        >
           <section className="safeclaw-module-primary-nav">
             <h2>주요 메뉴</h2>
             {navModel.primaryItems.map((item) => (
@@ -88,24 +168,36 @@ export function SafeClawModuleShell({
             {status === "live" ? <i className="sc-blink sc-blink--good" aria-hidden="true" /> : null}
             {statusLabel[status]}
           </span>
-          <Link href="/workspace" className="safeclaw-module-primary">작업 시작</Link>
+          <div className="safeclaw-module-theme-toggle" aria-label="화면 테마">
+            <button
+              type="button"
+              className={theme === "day" ? "active" : ""}
+              aria-pressed={theme === "day"}
+              onClick={() => updateTheme("day")}
+            >
+              Day
+            </button>
+            <button
+              type="button"
+              className={theme === "night" ? "active" : ""}
+              aria-pressed={theme === "night"}
+              onClick={() => updateTheme("night")}
+            >
+              Night
+            </button>
+          </div>
         </header>
 
-        {/* 시그니처 패턴 3/4: HudCorners — 모듈 페이지마다 1개 hero 프레임에만 적용. */}
-        <section className={`safeclaw-module-hero ${variant === "document" ? "document" : ""} hud-corners`}>
-          <div>
-            <span className="safeclaw-module-eyebrow">{eyebrow}</span>
-            <h1>{title}</h1>
-            <p>{description}</p>
-          </div>
-          <aside>
-            <span>업무 범위</span>
-            <strong>{mappedTo}</strong>
-            {actions ? <div className="safeclaw-module-actions">{actions}</div> : null}
-          </aside>
-        </section>
+        <PageDecisionHeader
+          eyebrow={eyebrow}
+          title={title}
+          description={description}
+          mappedTo={mappedTo}
+          actions={actions}
+          command={navModel.principalCommand}
+        />
 
-        {children}
+        <div className="safeclaw-module-content">{children}</div>
       </section>
     </main>
   );
