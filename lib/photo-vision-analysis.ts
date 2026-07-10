@@ -3,6 +3,17 @@ import { buildDbHarnessPacket } from "@/lib/db-harness";
 import { createLogger } from "@/lib/logger";
 import { MAX_INPUT_HAZARD_PHOTO_FILES } from "@/lib/operation-improvements";
 import {
+  HAZARD_PHOTO_SIGNATURE_MIME_TYPES,
+  HAZARD_PHOTO_MODEL_LIMITS,
+  buildHazardCandidateReferenceQuery,
+  createPendingHazardPhotoUserDecision,
+  filterPositivelyRelevantHazardReferences,
+  hasMatchingHazardPhotoSignature,
+  parseHazardPhotoModelPayload,
+  type HazardPhotoSignatureMimeType,
+  type HazardPhotoUserDecision
+} from "@/lib/photo-vision-analysis-policy";
+import {
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
@@ -67,7 +78,7 @@ const DEFAULT_MODEL = "gpt-4.1-mini";
 const VISION_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_VISION_TIMEOUT_MS, 20_000);
 export const MAX_HAZARD_PHOTO_FILES = MAX_INPUT_HAZARD_PHOTO_FILES;
 export const MAX_HAZARD_PHOTO_BYTES = 20 * 1024 * 1024;
-export const HAZARD_PHOTO_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const HAZARD_PHOTO_MIME_TYPES = HAZARD_PHOTO_SIGNATURE_MIME_TYPES;
 
 export type HazardPhotoSeverity = "high" | "medium" | "low" | "review";
 
@@ -95,7 +106,7 @@ export type HazardPhotoHarnessEvidence = {
   excerpt: string;
 };
 
-export type HazardPhotoHarnessAction = {
+export type HazardPhotoHarnessControl = {
   text: string;
   evidenceSourceIds: string[];
 };
@@ -115,17 +126,11 @@ export type HazardPhotoVisionCandidate = {
     authority: "safeclaw-db-mcp";
     status: "pending" | "confirmed" | "insufficient";
     evidence: HazardPhotoHarnessEvidence[];
-    actions: HazardPhotoHarnessAction[];
+    confirmedControls: HazardPhotoHarnessControl[];
     confirmedAt: string | null;
     errorMessage: string | null;
   };
-  userDecision: {
-    status: "pending" | "accepted" | "rejected";
-    allowed: ["accepted", "rejected"];
-    requiresHarnessConfirmation: true;
-    reason: string | null;
-    decidedAt: string | null;
-  };
+  userDecision: HazardPhotoUserDecision;
 };
 
 type ParsedHazardPhotoVisionOutput = {
@@ -144,6 +149,7 @@ type ParsedHazardPhotoVisionOutput = {
 export type HazardPhotoAnalysisErrorCode =
   | "empty_file"
   | "unsupported_mime"
+  | "invalid_signature"
   | "file_too_large"
   | "provider_unconfigured"
   | "provider_error"
@@ -177,7 +183,7 @@ export type HazardPhotoHarnessResolution = {
   candidateId: string;
   status: "confirmed" | "insufficient";
   evidence: HazardPhotoHarnessEvidence[];
-  actions: HazardPhotoHarnessAction[];
+  confirmedControls: HazardPhotoHarnessControl[];
   confirmedAt: string | null;
   errorMessage: string | null;
 };
@@ -217,7 +223,7 @@ export type HazardPhotoVisionAnalysis = {
     modelRole: "candidate_only";
     authority: "safeclaw-db-mcp";
     status: "pending" | "confirmed" | "insufficient";
-    confirms: ["evidence", "actions"];
+    confirms: ["evidence", "confirmedControls"];
     confirmedAt: string | null;
     errorMessage: string | null;
   };
@@ -325,36 +331,17 @@ function readText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function normalizeObservations(value: unknown): HazardPhotoObservation[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item): HazardPhotoObservation[] => {
-    if (!isRecord(item)) return [];
-    const text = readText(item.text);
-    if (!text) return [];
-    return [{
-      kind: item.kind === "ocr" ? "ocr" : "visual",
-      text
-    }];
-  });
-}
-
 function pendingHarnessReview(): Pick<HazardPhotoVisionCandidate, "harness" | "userDecision"> {
   return {
     harness: {
       authority: "safeclaw-db-mcp",
       status: "pending",
       evidence: [],
-      actions: [],
+      confirmedControls: [],
       confirmedAt: null,
       errorMessage: null
     },
-    userDecision: {
-      status: "pending",
-      allowed: ["accepted", "rejected"],
-      requiresHarnessConfirmation: true,
-      reason: null,
-      decidedAt: null
-    }
+    userDecision: createPendingHazardPhotoUserDecision("pending")
   };
 }
 
@@ -420,37 +407,29 @@ export function parseHazardPhotoVisionOutput(value: string, fallback: {
 }): ParsedHazardPhotoVisionOutput {
   try {
     const parsed = JSON.parse(normalizeJsonPayload(value)) as unknown;
-    if (!isRecord(parsed)) throw new Error("Hazard photo vision output is not an object");
-    const rawCandidates = Array.isArray(parsed.candidates) ? parsed.candidates : [];
-    const candidates = rawCandidates.flatMap((item, index): HazardPhotoVisionCandidate[] => {
-      if (!isRecord(item)) return [];
-      const label = readText(item.label);
-      const observation = readText(item.observation);
-      const inference = readText(item.inference);
-      if (!label || !observation || !inference) return [];
-      return [{
+    const modelPayload = parseHazardPhotoModelPayload(parsed);
+    const candidates = modelPayload.candidates.map((item, index): HazardPhotoVisionCandidate => ({
         id: `candidate-${index + 1}`,
-        label,
-        detail: inference,
+        label: item.label,
+        detail: item.inference,
         severity: "review",
         evidence: "",
         reflectedDocuments: [],
         sourcePhotoNames: fallback.photoNames,
-        observation,
-        inference,
+        observation: item.observation,
+        inference: item.inference,
         modelRole: "hazard_candidate",
         ...pendingHarnessReview()
-      }];
-    });
+      }));
     return {
       status: "analyzed",
       provider: fallback.provider || "openai",
       model: fallback.model,
-      summary: readText(parsed.summary),
-      observations: normalizeObservations(parsed.observations),
+      summary: modelPayload.summary,
+      observations: modelPayload.observations,
       candidates,
-      ocrText: readText(parsed.ocrText),
-      siteSignals: normalizeStringArray(parsed.siteSignals),
+      ocrText: modelPayload.ocrText,
+      siteSignals: modelPayload.siteSignals,
       photoCount: fallback.photoNames.length
     };
   } catch (error) {
@@ -497,11 +476,14 @@ export function buildHazardPhotoVisionPrompt(input: {
     "inference에는 observation에서 추론한 위험 가능성만 적고 현장 확인 필요를 명시합니다.",
     "모델은 위험 후보만 제시합니다. 근거 확정과 조치 확정은 SafeClaw DB/MCP 하네스의 책임입니다.",
     "법적 판단, 안전 보장, 확정 위험도, 근거 ID, 법령 인용, 개선 조치, 사용자 채택 여부를 출력하지 않습니다.",
+    "summary와 siteSignals에는 관찰 요약과 현장 명사만 적고 통제·법적 근거 주장을 넣지 않습니다.",
     "응답은 JSON 객체만 반환합니다.",
     `현장 입력: ${input.question}`,
     `사진 파일명(${input.photoNames.length}장): ${input.photoNames.join(", ")}`,
-    "후보는 최대 4개로 제한합니다.",
-    "필드: summary, observations[{kind: visual|ocr, text}], candidates[{label, observation, inference}], ocrText, siteSignals"
+    `후보는 최대 ${HAZARD_PHOTO_MODEL_LIMITS.candidates}개로 제한하고 observations와 candidates를 각각 1개 이상 반환합니다.`,
+    `문자열 제한: summary ${HAZARD_PHOTO_MODEL_LIMITS.summary}자, observation/inference ${HAZARD_PHOTO_MODEL_LIMITS.observation}자, label ${HAZARD_PHOTO_MODEL_LIMITS.candidateLabel}자, ocrText ${HAZARD_PHOTO_MODEL_LIMITS.ocrText}자, siteSignal ${HAZARD_PHOTO_MODEL_LIMITS.siteSignal}자.`,
+    "허용 필드 외 추가 필드는 출력하지 않습니다.",
+    "허용 필드: summary, observations[{kind: visual|ocr, text}], candidates[{label, observation, inference}], ocrText, siteSignals"
   ].join("\n");
 }
 
@@ -656,18 +638,12 @@ function uniqueSafetyReferences(items: SafetyReferenceItem[]): SafetyReferenceIt
 }
 
 function resolveCandidateFromReferences(input: {
-  question: string;
+  query: string;
   candidate: HazardPhotoVisionCandidate;
   references: SafetyReferenceItem[];
 }): HazardPhotoHarnessResolution {
-  const candidateQuestion = [
-    input.question,
-    input.candidate.label,
-    input.candidate.observation,
-    input.candidate.inference
-  ].join(" ");
   const packet = buildDbHarnessPacket({
-    question: candidateQuestion,
+    question: input.query,
     references: input.references
   });
   const matchedReferences = uniqueSafetyReferences([
@@ -681,7 +657,7 @@ function resolveCandidateFromReferences(input: {
     title: getSafetyReferenceDisplayTitle(item),
     excerpt: getSafetyReferenceDisplaySummary(item).slice(0, 500)
   }));
-  const actionsByText = new Map<string, HazardPhotoHarnessAction>();
+  const controlsByText = new Map<string, HazardPhotoHarnessControl>();
   let hasConfirmedControl = false;
 
   matchedReferences.forEach((item) => {
@@ -690,22 +666,22 @@ function resolveCandidateFromReferences(input: {
     operational.controls.slice(0, 2).forEach((control) => {
       const text = control.trim();
       if (!text) return;
-      const existing = actionsByText.get(text);
+      const existing = controlsByText.get(text);
       if (existing) {
         if (!existing.evidenceSourceIds.includes(item.id)) existing.evidenceSourceIds.push(item.id);
         return;
       }
-      actionsByText.set(text, { text, evidenceSourceIds: [item.id] });
+      controlsByText.set(text, { text, evidenceSourceIds: [item.id] });
     });
   });
 
-  const actions = [...actionsByText.values()].slice(0, 6);
-  const confirmed = packet.directEvidence.length > 0 && evidence.length > 0 && actions.length > 0 && hasConfirmedControl;
+  const confirmedControls = [...controlsByText.values()].slice(0, 6);
+  const confirmed = packet.directEvidence.length > 0 && evidence.length > 0 && confirmedControls.length > 0 && hasConfirmedControl;
   return {
     candidateId: input.candidate.id,
     status: confirmed ? "confirmed" : "insufficient",
-    evidence,
-    actions,
+    evidence: confirmed ? evidence : [],
+    confirmedControls: confirmed ? confirmedControls : [],
     confirmedAt: confirmed ? new Date().toISOString() : null,
     errorMessage: confirmed ? null : "DB/MCP 하네스가 직접 근거와 통제를 확정하지 못했습니다."
   };
@@ -714,31 +690,38 @@ function resolveCandidateFromReferences(input: {
 export function createSafeClawDbMcpHazardResolver(): HazardPhotoHarnessResolver {
   return {
     name: "safeclaw-db-mcp",
-    resolve: async ({ question, candidates }) => {
-      const query = [
-        question,
-        ...candidates.flatMap((candidate) => [candidate.label, candidate.observation, candidate.inference])
-      ].join(" ").slice(0, 4_000);
-      const [direct, sif, supporting] = await Promise.all([
-        searchSafetyReferences({ query, limit: 6, evidenceRole: "direct" }),
-        searchSafetyReferences({ query, limit: 6, itemType: "sif-case" }),
-        searchSafetyReferences({ query, limit: 6, evidenceRole: "supporting" })
-      ]);
-      const references = uniqueSafetyReferences([
-        ...direct.items,
-        ...sif.items,
-        ...supporting.items
-      ]);
-      return candidates.map((candidate) => resolveCandidateFromReferences({
-        question,
-        candidate,
-        references
-      }));
-    }
+    resolve: async ({ question, candidates }) => Promise.all(candidates.map(async (candidate) => {
+      const query = buildHazardCandidateReferenceQuery({ question, candidate });
+      try {
+        const [direct, sif, supporting] = await Promise.all([
+          searchSafetyReferences({ query, limit: 6, evidenceRole: "direct" }),
+          searchSafetyReferences({ query, limit: 6, itemType: "sif-case" }),
+          searchSafetyReferences({ query, limit: 6, evidenceRole: "supporting" })
+        ]);
+        const referencePool = uniqueSafetyReferences([
+          ...direct.items,
+          ...sif.items,
+          ...supporting.items
+        ]);
+        const references = filterPositivelyRelevantHazardReferences(candidate, referencePool);
+        return resolveCandidateFromReferences({ query, candidate, references });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Candidate DB/MCP search failed";
+        log.error(`Hazard candidate DB/MCP search failed: ${candidate.id}`, error);
+        return {
+          candidateId: candidate.id,
+          status: "insufficient" as const,
+          evidence: [],
+          confirmedControls: [],
+          confirmedAt: null,
+          errorMessage: message
+        };
+      }
+    }))
   };
 }
 
-function validateHazardPhoto(photo: File): HazardPhotoAnalysisError | null {
+async function validateHazardPhoto(photo: File): Promise<HazardPhotoAnalysisError | null> {
   if (photo.size <= 0) {
     return {
       code: "empty_file",
@@ -764,6 +747,25 @@ function validateHazardPhoto(photo: File): HazardPhotoAnalysisError | null {
     };
   }
 
+  let signatureBytes: Uint8Array;
+  try {
+    signatureBytes = new Uint8Array(await photo.slice(0, 12).arrayBuffer());
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : "file read failed";
+    return {
+      code: "invalid_signature",
+      message: `${photo.name || "이름 없는 사진"}의 파일 시그니처를 읽지 못했습니다: ${detail}`,
+      retryable: false
+    };
+  }
+  if (!hasMatchingHazardPhotoSignature(mimeType as HazardPhotoSignatureMimeType, signatureBytes)) {
+    return {
+      code: "invalid_signature",
+      message: `${photo.name || "이름 없는 사진"}의 파일 내용이 선언된 MIME 형식(${mimeType})과 일치하지 않습니다.`,
+      retryable: false
+    };
+  }
+
   return null;
 }
 
@@ -776,7 +778,7 @@ function harnessContract(input: {
     modelRole: "candidate_only",
     authority: "safeclaw-db-mcp",
     status: input.status || "pending",
-    confirms: ["evidence", "actions"],
+    confirms: ["evidence", "confirmedControls"],
     confirmedAt: input.confirmedAt || null,
     errorMessage: input.errorMessage || null
   };
@@ -874,7 +876,7 @@ export async function analyzeHazardPhotos(input: {
       ocrText: "",
       siteSignals: []
     } satisfies Omit<HazardPhotoImageAnalysis, "status" | "error">;
-    const validationError = validateHazardPhoto(photo);
+    const validationError = await validateHazardPhoto(photo);
     if (validationError) {
       return {
         ...base,
@@ -970,25 +972,34 @@ export async function analyzeHazardPhotos(input: {
           return {
             ...candidate,
             harness: {
-              ...candidate.harness,
+              authority: "safeclaw-db-mcp" as const,
               status: "insufficient" as const,
+              evidence: [],
+              confirmedControls: [],
+              confirmedAt: null,
               errorMessage: "DB/MCP 하네스가 후보에 대한 확정 결과를 반환하지 않았습니다."
-            }
+            },
+            userDecision: createPendingHazardPhotoUserDecision("insufficient")
           };
         }
-        const confirmed = resolution.status === "confirmed" && resolution.evidence.length > 0 && resolution.actions.length > 0;
+        const confirmed = resolution.status === "confirmed" &&
+          resolution.evidence.length > 0 &&
+          resolution.confirmedControls.length > 0 &&
+          Boolean(resolution.confirmedAt);
+        const harnessStatus = confirmed ? "confirmed" as const : "insufficient" as const;
         return {
           ...candidate,
           harness: {
             authority: "safeclaw-db-mcp" as const,
-            status: confirmed ? "confirmed" as const : "insufficient" as const,
-            evidence: resolution.evidence,
-            actions: resolution.actions,
+            status: harnessStatus,
+            evidence: confirmed ? resolution.evidence : [],
+            confirmedControls: confirmed ? resolution.confirmedControls : [],
             confirmedAt: confirmed ? resolution.confirmedAt : null,
             errorMessage: confirmed
               ? null
               : resolution.errorMessage || "DB/MCP 하네스가 직접 근거와 통제를 확정하지 못했습니다."
-          }
+          },
+          userDecision: createPendingHazardPhotoUserDecision(harnessStatus)
         };
       });
     } catch (error) {
@@ -997,10 +1008,14 @@ export async function analyzeHazardPhotos(input: {
       resolvedCandidates = modelCandidates.map((candidate) => ({
         ...candidate,
         harness: {
-          ...candidate.harness,
+          authority: "safeclaw-db-mcp" as const,
           status: "insufficient" as const,
+          evidence: [],
+          confirmedControls: [],
+          confirmedAt: null,
           errorMessage: message
-        }
+        },
+        userDecision: createPendingHazardPhotoUserDecision("insufficient")
       }));
     }
   }
