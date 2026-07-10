@@ -48,7 +48,7 @@
       "id": "F3",
       "title": "Shared shells and framework states",
       "priority": 3,
-      "status": "todo",
+      "status": "in_progress",
       "passes": false,
       "acceptance": [
         "Shell, navigation, controls, error, loading, and empty states use canonical values",
