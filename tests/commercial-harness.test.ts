@@ -384,6 +384,47 @@ describe("DB harness packet", () => {
     expect(rows.some((row) => row.evidenceRefs?.includes(readableTitle))).toBe(true);
     expect(rows.every((row) => !row.evidenceRefs?.includes(rawTitle))).toBe(true);
   });
+
+  it("uses cleaned SIF summaries for risk-row text when archive rows have no controls", () => {
+    const response = buildMockAskResponse(
+      "탱크 내부 청소 작업, 질식 위험",
+      mockSearchResults,
+      "mock",
+      "테스트"
+    );
+    const rows = buildSafetyReferenceRiskRows(response, [
+      reference({
+        id: "sif-labeled-summary-no-controls",
+        title: "2020 / 제조업 / 금속제품제조업",
+        category: "제조업",
+        subcategory: "금속제품제조업",
+        summary: [
+          "연번: 2020",
+          "재해개요: 2019년 03월경 피재자가 탱크 내부 청소 중 질식함.",
+          "기인물: 탱크",
+          "위험성 감소대책(예시): 산소농도 측정 및 환기"
+        ].join("\n"),
+        body: "",
+        keywords: ["탱크", "청소", "질식"],
+        risk_tags: ["질식"],
+        controls: [],
+        primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+        evidence_role: "supporting",
+        retrieval_source: "ranked"
+      })
+    ], "실내 작업", "탱크 내부 청소 질식");
+
+    const rowText = rows.map((row) => [
+      row.hazard,
+      row.currentControls,
+      row.additionalControls,
+      ...(row.evidenceRefs || [])
+    ].join(" ")).join("\n");
+
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rowText).toContain("탱크 내부 청소 중 질식함");
+    expect(rowText).not.toMatch(/연번:|재해개요:|기인물:/u);
+  });
 });
 
 describe("runAsk DB harness mode", () => {

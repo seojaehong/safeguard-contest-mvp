@@ -294,6 +294,19 @@ export function getSafetyReferenceDisplayTitle(item: SafetyReferenceItem): strin
   return item.display_title || deriveSifDisplayTitle(item) || item.title;
 }
 
+function stripRawSifSummaryLabels(value: string): string {
+  return value
+    .replace(/\b(?:연번|재해개요|기인물|재해유발요인|위험성\s*감소대책(?:\([^)]*\))?)\s*:\s*/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function getSafetyReferenceDisplaySummary(item: SafetyReferenceItem): string {
+  const displaySummary = item.display_summary || deriveSifDisplaySummary(item);
+  if (displaySummary) return displaySummary;
+  return compactText(stripRawSifSummaryLabels(item.short_summary || item.summary || item.title), 140);
+}
+
 function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "source_id">): "direct" | "supporting" {
   const directTypes = new Set([
     "construction-process",

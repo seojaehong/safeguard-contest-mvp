@@ -6,6 +6,7 @@ import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import {
   filterAndRankSafetyReferencesByQuery,
+  getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
   searchSafetyReferences,
   scoreSafetyReferenceQueryMatch,
@@ -318,7 +319,7 @@ function deriveSafetyReferenceHazard(item: SafetyReferenceItem): string {
   const subcategory = compactRiskCell(item.subcategory, 28);
   const titleSubject = buildHazardSubjectFromTitle(getSafetyReferenceDisplayTitle(item));
   const controlSubject = buildHazardSubjectFromControl(item.controls?.[0]) ||
-    buildHazardSubjectFromControl(item.short_summary || item.summary);
+    buildHazardSubjectFromControl(getSafetyReferenceDisplaySummary(item));
   const subject = controlSubject || titleSubject;
   const riskTag = deriveSafetyReferenceRiskTag(item);
   if (riskTag && subject) return `${riskTag} 위험: ${subject}`;
@@ -359,8 +360,9 @@ export function buildSafetyReferenceRiskRows(
 
   for (const item of topCandidates) {
     const displayTitle = getSafetyReferenceDisplayTitle(item);
+    const displaySummary = getSafetyReferenceDisplaySummary(item);
     const control = compactRiskCell(item.controls?.[0], 120) ||
-      compactRiskCell(item.short_summary || item.summary, 120) ||
+      compactRiskCell(displaySummary, 120) ||
       "해당 근거의 필수 확인 항목을 작업 전 점검합니다.";
     const additionalControl = compactRiskCell(item.controls?.[1], 120) ||
       compactRiskCell(item.document_reflection_label, 120) ||
