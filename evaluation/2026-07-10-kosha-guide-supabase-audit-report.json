@@ -1,0 +1,261 @@
+{
+  "item_count": 1040,
+  "success_count": 1040,
+  "failure_count": 0,
+  "elapsed_seconds": 11.581,
+  "read_only": true,
+  "checked_at": "2026-07-10T14:23:52.272Z",
+  "collection_count_semantics": "success_count and failure_count describe read-only collection of the 1040 live Supabase GUIDE candidate rows; freshness discrepancies are reported separately",
+  "database": {
+    "source_count": 1063,
+    "item_count": 9920,
+    "ingestion_run_count": 2,
+    "kosha_source_count": 6,
+    "kosha_item_count": 8431,
+    "kosha_sources": {
+      "kosha-sif-archive-20260401": {
+        "item_count": 6033,
+        "item_types": {
+          "sif-case": 6033
+        }
+      },
+      "kosha-technical-support-regulations-2025": {
+        "item_count": 1040,
+        "item_types": {
+          "technical-guideline": 803,
+          "technical-support-regulation": 237
+        }
+      },
+      "kosha-machinery-20210909": {
+        "item_count": 730,
+        "item_types": {
+          "machinery": 730
+        }
+      },
+      "kosha-construction-process-20210910": {
+        "item_count": 626,
+        "item_types": {
+          "construction-process": 626
+        }
+      },
+      "kosha-risk-assessment-approach-manual": {
+        "item_count": 1,
+        "item_types": {
+          "risk-manual": 1
+        }
+      },
+      "kosha-jsa-training-deck": {
+        "item_count": 1,
+        "item_types": {
+          "jsa-training": 1
+        }
+      }
+    },
+    "guide_source": {
+      "id": "kosha-technical-support-regulations-2025",
+      "source_group": "kosha-reference",
+      "source_type": "zip-folder",
+      "agency": "한국산업안전보건공단",
+      "title": "기술지원규정 및 안전보건 기술지침 묶음",
+      "published_at": "2025-01-01",
+      "origin_url": null,
+      "created_at": "2026-05-02T04:24:41.700198+00:00",
+      "updated_at": "2026-05-02T04:24:41.700198+00:00",
+      "item_count": 1040,
+      "item_type_distribution": {
+        "technical-guideline": 803,
+        "technical-support-regulation": 237
+      },
+      "category_distribution": {
+        "화학안전분야": 234,
+        "산업위생분야": 174,
+        "기계안전분야": 138,
+        "전기안전분야": 95,
+        "산업안전일반분야": 84,
+        "산업보건일반분야": 83,
+        "산업의학분야": 81,
+        "건설안전분야": 76,
+        "산업독성분야": 44,
+        "리스크관리분야": 31
+      },
+      "year_distribution": {
+        "2010": 3,
+        "2011": 57,
+        "2012": 192,
+        "2013": 66,
+        "2014": 25,
+        "2015": 35,
+        "2016": 31,
+        "2017": 35,
+        "2018": 159,
+        "2019": 11,
+        "2020": 41,
+        "2021": 95,
+        "2022": 19,
+        "2023": 34,
+        "2025": 62,
+        "2026": 175
+      },
+      "item_created_at_range": [
+        "2026-05-02T04:24:55.971033+00:00",
+        "2026-05-02T04:24:57.2222+00:00"
+      ],
+      "item_updated_at_range": [
+        "2026-05-02T04:24:55.971033+00:00",
+        "2026-05-02T04:24:57.2222+00:00"
+      ],
+      "missing": {
+        "source_origin_url": 1,
+        "item_url_field": "schema-absent",
+        "body": 818,
+        "summary": 0,
+        "keywords": 0,
+        "risk_tags": 764,
+        "controls": 0,
+        "primary_documents": 0,
+        "status_field": "schema-absent",
+        "status_payload_values": 0,
+        "official_file_id": 1040,
+        "official_published_at": 1040
+      },
+      "quality": {
+        "body_missing_by_item_type": {
+          "technical-guideline": 803,
+          "technical-support-regulation": 15
+        },
+        "needs_ocr_true": 30,
+        "parsed_pages_zero": 803,
+        "duplicate_summary_groups": 11,
+        "duplicate_summary_rows": 822,
+        "exact_body_duplicate_candidate_rows": 4,
+        "normalized_title_duplicate_groups": 0,
+        "controls_unique_sets": 20,
+        "primary_documents_unique_sets": 8
+      },
+      "text_estimate": {
+        "total_chars": 737249,
+        "approx_tokens": 368625,
+        "note": "rough estimate from current incomplete title/summary/body/array text; 818 rows have empty body"
+      }
+    }
+  },
+  "official_kosha": {
+    "list_url": "https://portal.kosha.or.kr/archive/resources/tech-support/search/all?page=1&rowsPerPage=10",
+    "api_url": "https://portal.kosha.or.kr/api/portal24/bizV/p/VCPDG08009/selectList",
+    "current_count": 1039,
+    "deleted_count": 683,
+    "current_date_range": {
+      "min": "2010-08-31",
+      "max": "2026-01-30"
+    },
+    "latest_published_count": 175,
+    "change_state_distribution": {
+      "개정": 759,
+      "제정": 280
+    },
+    "deleted_state_distribution": {
+      "폐지": 683
+    },
+    "field_distribution": {
+      "CC": 234,
+      "EH": 174,
+      "BM": 139,
+      "BE": 94,
+      "AG": 84,
+      "EG": 83,
+      "EM": 81,
+      "DC": 76,
+      "ET": 43,
+      "AR": 31
+    }
+  },
+  "official_comparison": {
+    "exact_code_matches": 1032,
+    "stable_key_matches": 1039,
+    "official_current_missing_stable_key_count": 0,
+    "version_code_mismatch_count": 7,
+    "version_code_mismatches": [
+      {
+        "stable_key": "B-M-7",
+        "official_code": "B-M-7-2025",
+        "db_code": "B-M-7-2026"
+      },
+      {
+        "stable_key": "C-C-83",
+        "official_code": "C-C-83-2020",
+        "db_code": "C-C-83-2026"
+      },
+      {
+        "stable_key": "W-26",
+        "official_code": "W-26-2023",
+        "db_code": "W-26-2022"
+      },
+      {
+        "stable_key": "A-48",
+        "official_code": "A-48-2021",
+        "db_code": "A-48-2018"
+      },
+      {
+        "stable_key": "A-46",
+        "official_code": "A-46-2021",
+        "db_code": "A-46-2018"
+      },
+      {
+        "stable_key": "D-61",
+        "official_code": "D-61-2018",
+        "db_code": "D-61-2017"
+      },
+      {
+        "stable_key": "M-91",
+        "official_code": "M-91-2012",
+        "db_code": "M-91-2011"
+      }
+    ],
+    "stale_db_current_count": 1,
+    "stale_db_current": [
+      {
+        "id": "technical-support-04-0036-w-14-2022-경고표지-작성-지침",
+        "code": "W-14-2022",
+        "title": "W-14-2022_경고표지 작성 지침",
+        "official_state": "폐지"
+      }
+    ]
+  },
+  "retrieval_runtime": {
+    "ranked_rpc": {
+      "ok": true,
+      "status": 200,
+      "query": "밀폐공간 작업",
+      "row_count": 10,
+      "item_type_distribution": {
+        "sif-case": 5,
+        "risk_assessment": 2,
+        "tbm": 1,
+        "technical-guideline": 1,
+        "technical-support-regulation": 1
+      }
+    },
+    "safety_reference_embeddings": {
+      "ok": false,
+      "status": 404,
+      "reason": "table missing from live schema cache"
+    },
+    "match_safety_reference_embeddings": {
+      "ok": false,
+      "status": 404,
+      "reason": "RPC missing from live schema cache"
+    },
+    "vector_feature_flag_enabled": false,
+    "db_mutation_performed": false
+  },
+  "verdict": {
+    "embedding_candidate": "conditional-adopt",
+    "index_strategy": "separate-logical-index-from-sif",
+    "current_corpus_ready": false,
+    "migration_required": true,
+    "migration_applied": false,
+    "embedding_generated": false,
+    "embedding_uploaded": false
+  },
+  "failures": []
+}
