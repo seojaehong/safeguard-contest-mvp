@@ -18,6 +18,7 @@ type ModuleShellMetrics = {
   hasShell: boolean;
   shellBackground: string;
   shellColor: string;
+  shellColumnCount: number;
   railBackground: string;
   railHeight: number;
   navTop: number;
@@ -64,14 +65,15 @@ async function readModuleMetrics(route: string, viewport: { width: number; heigh
     const shell = document.querySelector(".safeclaw-module-shell");
     const rail = document.querySelector(".safeclaw-module-rail");
     const nav = document.querySelector(".safeclaw-module-nav");
-    const hero = document.querySelector(".safeclaw-module-hero");
-    const h1 = document.querySelector(".safeclaw-module-hero h1");
+    const hero = document.querySelector(".safeclaw-page-decision-header");
+    const h1 = document.querySelector(".safeclaw-page-decision-header h1");
     if (!shell || !rail || !nav || !hero || !h1) {
       return {
         route: currentRoute,
         hasShell: false,
         shellBackground: "",
         shellColor: "",
+        shellColumnCount: 0,
         railBackground: "",
         railHeight: 0,
         navTop: 0,
@@ -98,6 +100,7 @@ async function readModuleMetrics(route: string, viewport: { width: number; heigh
       hasShell: true,
       shellBackground: shellStyle.backgroundColor,
       shellColor: shellStyle.color,
+      shellColumnCount: shellStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
       railBackground: railStyle.backgroundColor,
       railHeight: Math.round(railRect.height),
       navTop: Math.round(navRect.top),
@@ -147,7 +150,7 @@ describe("module shell design regression", () => {
       expect(metrics.railBackground, metrics.route).not.toBe("rgb(1, 1, 2)");
       if (metrics.route === "/documents") {
         expect(metrics.cockpitBackground, metrics.route).toBe("rgb(255, 255, 255)");
-        expect(metrics.documentIndexButtonBackground, metrics.route).toBe("rgb(245, 246, 248)");
+        expect(metrics.documentIndexButtonBackground, metrics.route).toBe("rgb(244, 245, 247)");
       }
       expect(metrics.heroTop, metrics.route).toBeLessThanOrEqual(70);
       expect(metrics.horizontalOverflow, metrics.route).toBe(false);
@@ -169,9 +172,19 @@ describe("module shell design regression", () => {
       expect(metrics.h1Color, metrics.route).toBe("rgb(23, 25, 29)");
       if (metrics.route === "/documents") {
         expect(metrics.cockpitBackground, metrics.route).toBe("rgb(255, 255, 255)");
-        expect(metrics.documentIndexButtonBackground, metrics.route).toBe("rgb(245, 246, 248)");
+        expect(metrics.documentIndexButtonBackground, metrics.route).toBe("rgb(244, 245, 247)");
       }
       expect(metrics.horizontalOverflow, metrics.route).toBe(false);
     }
   }, 120_000);
+
+  it("keeps the module rail in the desktop shell above the unified 900px breakpoint", async () => {
+    const metrics = await readModuleMetrics("/home", { width: 940, height: 820 });
+
+    expect(metrics.hasShell).toBe(true);
+    expect(metrics.shellColumnCount).toBe(2);
+    expect(metrics.railHeight).toBeGreaterThanOrEqual(820);
+    expect(metrics.navTop).toBe(0);
+    expect(metrics.horizontalOverflow).toBe(false);
+  }, 90_000);
 });

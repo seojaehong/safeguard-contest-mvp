@@ -111,18 +111,20 @@ describe("documents editor layout", () => {
 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
     expect(metrics.shell.display).toBe("grid");
-    expect(metrics.shell.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    expect(metrics.shell.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.sidebar.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editor.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
     expect(metrics.sidebar.right).toBeLessThanOrEqual(metrics.editor.left - 12);
-    expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(9);
+    expect(metrics.editor.borderRadius).toBeGreaterThanOrEqual(6);
+    expect(metrics.editor.borderRadius).toBeLessThanOrEqual(8);
     expect(metrics.textarea.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
     expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
-    expect(metrics.sheetExportPanel.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    expect(metrics.sheetExportPanel.backgroundColor).toBe("rgb(255, 255, 255)");
+    expect(metrics.sheetExportPanel.borderRadius).toBeLessThanOrEqual(8);
     expect(metrics.sheetExportPanel.color).not.toBe("rgb(246, 245, 239)");
     expect(metrics.previewPanel.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
     expect(metrics.previewDisplay).toBe("none");
@@ -176,11 +178,12 @@ describe("documents editor layout", () => {
     expect(metrics.previewBackground).toBe("rgb(255, 255, 255)");
     expect(metrics.previewColor).not.toBe("rgb(246, 245, 239)");
     expect(metrics.tableWrapBorderRadius).toBeGreaterThanOrEqual(8);
+    expect(metrics.tableWrapBorderRadius).toBeLessThanOrEqual(8);
     expect(metrics.tableWrapBorderColor).toBe("rgb(231, 234, 238)");
-    expect(metrics.sectionTitleBackground).toBe("rgb(244, 245, 246)");
+    expect(metrics.sectionTitleBackground).toBe("rgb(244, 245, 247)");
     expect(metrics.sectionTitleColor).toBe("rgb(23, 25, 29)");
     expect(metrics.sectionTitleBorderRadius).toBeGreaterThanOrEqual(6);
-    expect(metrics.firstHeaderBackground).toBe("rgb(244, 245, 246)");
+    expect(metrics.firstHeaderBackground).toBe("rgb(244, 245, 247)");
     expect(metrics.firstHeaderColor).toBe("rgb(23, 25, 29)");
     expect(metrics.firstHeaderBorderColor).toBe("rgb(231, 234, 238)");
   }, 90_000);
