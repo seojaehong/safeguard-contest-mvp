@@ -90,16 +90,24 @@ function isTableHeaderSelector(selector: string): boolean {
   return /(^|[\s>+~])th(?=$|[\s.:#>+~[])|table[^,{]*(head|header)|report-table[^,{]*strong/i.test(selector);
 }
 
-function isHudSelector(rule: CssRule): boolean {
-  const selector = selectorText(rule);
+const semanticRoleOverrides: Readonly<Record<string, TypographyRole>> = {
+  ".command-center-shell .command-primary": "control",
+  ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary": "control",
+  ".command-center-shell .brand-lockup small": "caption",
+  ".command-center-shell .topbar-status span": "hud",
+  ".command-center-shell .step-copy small": "hud",
+};
+
+function isHudSelector(rule: CssRule, selector: string): boolean {
   return rule.declarations["font-family"] === "var(--font-hud)"
     || rule.declarations["letter-spacing"] === "var(--tracking-hud)"
     || /\b(hud|status|eyebrow|kicker|badge|meta|metric|code|console|source|live|signal)\b/i.test(selector);
 }
 
-function expectedTypographyRole(rule: CssRule): TypographyRole | undefined {
+function expectedTypographyRole(rule: CssRule, selector: string): TypographyRole | undefined {
+  const override = semanticRoleOverrides[selector];
+  if (override) return override;
   const size = rule.declarations["font-size"];
-  const selector = selectorText(rule);
   if (isTableHeaderSelector(selector) && !isInteractiveSelector(selector)) return "tableHeader";
   if (["var(--text-display)", "var(--t-display)", "clamp(44px, 6vw, 72px)"].includes(size)) return "display";
   if (["var(--text-page-title)", "var(--t-hero)", "clamp(32px, 4vw, 40px)"].includes(size)) return "pageTitle";
@@ -112,7 +120,7 @@ function expectedTypographyRole(rule: CssRule): TypographyRole | undefined {
   }
   if (["var(--text-table)", "13px"].includes(size)) return "table";
   if (["var(--text-caption)", "var(--t-caption)", "12px"].includes(size)) return "caption";
-  if (["var(--text-hud)", "var(--t-micro)"].includes(size) || size === "11px" && isHudSelector(rule)) return "hud";
+  if (["var(--text-hud)", "var(--t-micro)"].includes(size) || size === "11px" && isHudSelector(rule, selector)) return "hud";
   if (size === "11px") return "caption";
   return undefined;
 }
@@ -359,14 +367,57 @@ describe("frontend design contract", () => {
     }
   });
 
+  it("assigns control, native table, and mixed HUD selectors to their actual roles", () => {
+    const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
+    expect(effectiveDeclarations(css, ".command-center-shell .command-primary")).toMatchObject({
+      "font-size": "var(--text-control)",
+      "font-weight": "700",
+      "line-height": "var(--leading-control)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    expect(effectiveDeclarations(css, ".safety-form-preview th")).toMatchObject({
+      "font-size": "var(--text-caption)",
+      "font-weight": "700",
+      "line-height": "var(--leading-caption)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    expect(effectiveDeclarations(css, ".safety-form-preview td")).toMatchObject({
+      "font-size": "var(--text-caption)",
+      "font-weight": "600",
+      "line-height": "var(--leading-caption)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    expect(effectiveDeclarations(css, ".command-center-shell .brand-lockup small")).toMatchObject({
+      "font-family": "var(--font-product)",
+      "font-size": "var(--text-caption)",
+      "font-weight": "600",
+      "line-height": "var(--leading-caption)",
+      "letter-spacing": "var(--tracking-body)",
+    });
+    for (const selector of [
+      ".command-center-shell .topbar-status span",
+      ".command-center-shell .step-copy small",
+    ]) {
+      expect(effectiveDeclarations(css, selector), selector).toMatchObject({
+        "font-family": "var(--font-hud)",
+        "font-size": "var(--text-hud)",
+        "font-weight": "700",
+        "line-height": "var(--leading-hud)",
+        "letter-spacing": "var(--tracking-hud)",
+      });
+    }
+  });
+
   it("assigns a complete canonical typography tuple to every font-size rule", () => {
     const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
     expect(css).not.toMatch(/font-size:\s*(?:11px|12px|13px|14px|15px|17px|20px|var\(--t-|clamp\()/);
     const sizedRules = ruleBlocks(css).filter((rule) => rule.declarations["font-size"]);
     expect(sizedRules.length).toBeGreaterThan(0);
     for (const rule of sizedRules) {
-      const roleName = expectedTypographyRole(rule);
-      expect(roleName, `${selectorText(rule)} => ${rule.declarations["font-size"]}`).toBeDefined();
+      const roleNames = rule.selectors.map((selector) => expectedTypographyRole(rule, selector));
+      expect(roleNames, `${selectorText(rule)} => ${rule.declarations["font-size"]}`).not.toContain(undefined);
+      expect(new Set(roleNames).size, `${selectorText(rule)} => mixed roles ${roleNames.join(", ")}`).toBe(1);
+      const roleName = roleNames[0] as TypographyRole;
       const role = typographyRoles[roleName as TypographyRole];
       expect(rule.declarations, `${selectorText(rule)} => ${roleName}`).toMatchObject({
         "font-size": role.size,
@@ -444,5 +495,18 @@ describe("frontend design contract", () => {
       .map((violation) => violation.value || "");
     expect(tupleValues.some((value) => value.includes(".toolbar-button"))).toBe(true);
     expect(tupleValues.some((value) => value.includes(".report-table strong"))).toBe(true);
+  });
+
+  it("rejects ambiguous class controls and mixed selector-list roles", () => {
+    const audit = runAudit(`
+      .command-center-shell .command-primary { font-size: var(--text-support); font-weight: 500; line-height: var(--leading-body); letter-spacing: var(--tracking-body); }
+      .safety-form-preview th, .safety-form-preview td { font-size: var(--text-caption); font-weight: 600; line-height: var(--leading-caption); letter-spacing: var(--tracking-body); }
+      .command-center-shell .brand-lockup small, .command-center-shell .topbar-status span { font-family: var(--font-hud); font-size: var(--text-hud); font-weight: 700; line-height: var(--leading-hud); letter-spacing: var(--tracking-hud); }
+    `);
+    const tupleViolations = audit.report.violations.filter((violation) =>
+      violation.rule === "typography-tuple" || violation.rule === "mixed-typography-role");
+    expect(tupleViolations.some((violation) => violation.value?.includes("command-primary"))).toBe(true);
+    expect(tupleViolations.some((violation) => violation.value?.includes("safety-form-preview th"))).toBe(true);
+    expect(tupleViolations.some((violation) => violation.value?.includes("brand-lockup small"))).toBe(true);
   });
 });

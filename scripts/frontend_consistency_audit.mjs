@@ -118,16 +118,24 @@ function isTableHeaderSelector(selector) {
   return /(^|[\s>+~])th(?=$|[\s.:#>+~[])|table[^,{]*(head|header)|report-table[^,{]*strong/i.test(selector);
 }
 
-function isHudSelector(rule) {
-  const selector = selectorText(rule);
+const semanticRoleOverrides = {
+  ".command-center-shell .command-primary": "control",
+  ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary": "control",
+  ".command-center-shell .brand-lockup small": "caption",
+  ".command-center-shell .topbar-status span": "hud",
+  ".command-center-shell .step-copy small": "hud",
+};
+
+function isHudSelector(rule, selector) {
   return rule.declarations["font-family"] === "var(--font-hud)"
     || rule.declarations["letter-spacing"] === "var(--tracking-hud)"
     || /\b(hud|status|eyebrow|kicker|badge|meta|metric|code|console|source|live|signal)\b/i.test(selector);
 }
 
-function expectedTypographyRole(rule) {
+function expectedTypographyRole(rule, selector) {
+  const override = semanticRoleOverrides[selector];
+  if (override) return override;
   const size = rule.declarations["font-size"];
-  const selector = selectorText(rule);
   if (isTableHeaderSelector(selector) && !isInteractiveSelector(selector)) return "tableHeader";
   if (["var(--text-display)", "var(--t-display)", "clamp(44px, 6vw, 72px)"].includes(size)) return "display";
   if (["var(--text-page-title)", "var(--t-hero)", "clamp(32px, 4vw, 40px)"].includes(size)) return "pageTitle";
@@ -140,7 +148,7 @@ function expectedTypographyRole(rule) {
   }
   if (["var(--text-table)", "13px"].includes(size)) return "table";
   if (["var(--text-caption)", "var(--t-caption)", "12px"].includes(size)) return "caption";
-  if (["var(--text-hud)", "var(--t-micro)"].includes(size) || size === "11px" && isHudSelector(rule)) return "hud";
+  if (["var(--text-hud)", "var(--t-micro)"].includes(size) || size === "11px" && isHudSelector(rule, selector)) return "hud";
   if (size === "11px") return "caption";
   return undefined;
 }
@@ -402,7 +410,19 @@ function cssViolations(source) {
   for (const rule of rules) {
     const fontSize = rule.declarations["font-size"];
     if (fontSize) {
-      const roleName = expectedTypographyRole(rule);
+      const roleNames = rule.selectors.map((selector) => expectedTypographyRole(rule, selector));
+      const definedRoles = roleNames.filter(Boolean);
+      const mixedRoles = new Set(definedRoles).size > 1;
+      const hasUnmappedRole = roleNames.some((roleName) => !roleName);
+      if (mixedRoles) {
+        violations.push({
+          rule: "mixed-typography-role",
+          file: "app/globals.css",
+          line: rule.line,
+          value: `${selectorText(rule)} => ${roleNames.join(", ")}`,
+        });
+      }
+      const roleName = mixedRoles || hasUnmappedRole ? undefined : roleNames[0];
       const role = roleName ? typographyRoles[roleName] : undefined;
       const expected = role ? {
         "font-size": role.size,
@@ -411,8 +431,8 @@ function cssViolations(source) {
         "letter-spacing": role.tracking,
         ...(roleName === "hud" ? { "font-family": role.fontFamily } : {}),
       } : undefined;
-      const mismatch = !expected || Object.entries(expected).some(([property, value]) =>
-        rule.declarations[property] !== value);
+      const mismatch = !mixedRoles && (!expected || Object.entries(expected).some(([property, value]) =>
+        rule.declarations[property] !== value));
       if (mismatch) {
         violations.push({
           rule: "typography-tuple",

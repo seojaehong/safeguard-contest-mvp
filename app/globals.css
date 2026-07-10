@@ -5591,15 +5591,22 @@ ul {
   border: 1px solid #171b22;
   padding: 8px 9px;
   vertical-align: top;
+}
+
+.safety-form-preview th {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 700;
+  letter-spacing: var(--tracking-body);
+  background: #f2ead9;
+  text-align: center;
+}
+
+.safety-form-preview td {
   font-size: var(--text-caption);
   line-height: var(--leading-caption);
   font-weight: 600;
   letter-spacing: var(--tracking-body);
-}
-
-.safety-form-preview th {
-  background: #f2ead9;
-  text-align: center;
 }
 
 .safety-form-preview th:first-child,
@@ -10041,7 +10048,16 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: 0;
 }
 
-.command-center-shell .brand-lockup small,
+.command-center-shell .brand-lockup small {
+  color: var(--workspace-muted);
+  font-family: var(--font-product);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  text-transform: none;
+  line-height: var(--leading-caption);
+}
+
 .command-center-shell .topbar-status span,
 .command-center-shell .step-copy small {
   color: var(--workspace-muted);
@@ -10346,10 +10362,10 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   background: var(--workspace-ink);
   color: #ffffff;
-  font-size: var(--text-support);
-  font-weight: 500;
+  font-size: var(--text-control);
+  font-weight: 700;
   letter-spacing: var(--tracking-body);
-  line-height: var(--leading-body);
+  line-height: var(--leading-control);
 }
 
 .command-center-shell .button.secondary {
@@ -12631,9 +12647,18 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-meta strong,
 .safeclaw-module-shell.module-variant-document .safeclaw-report-facts strong,
-.safeclaw-module-shell.module-variant-document .safeclaw-report-table strong,
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list b,
 .safeclaw-module-shell.module-variant-document .safeclaw-report-group > span {
+  color: var(--workspace-subtle);
+  font-family: inherit;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
+  text-transform: none;
+  line-height: var(--leading-caption);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-report-table strong {
   color: var(--workspace-subtle);
   font-family: inherit;
   font-size: var(--text-caption);
@@ -12641,6 +12666,7 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
   text-transform: none;
   line-height: var(--leading-caption);
+  background: var(--workspace-surface-2);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-meta span,
@@ -12653,10 +12679,6 @@ body:has(.safeclaw-landing) :is(
   font-weight: 500;
   letter-spacing: var(--tracking-body);
   line-height: var(--leading-body);
-}
-
-.safeclaw-module-shell.module-variant-document .safeclaw-report-table strong {
-  background: var(--workspace-surface-2);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-report-table strong,
