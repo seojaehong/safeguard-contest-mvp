@@ -61,7 +61,7 @@ function makeWorkpack(riskRows: RiskAssessmentRow[] = [riskRow]) {
     "리포트 테스트"
   );
 
-  return buildStoredCurrentWorkpack({
+  const workpack = buildStoredCurrentWorkpack({
     ...response,
     scenario: {
       ...response.scenario,
@@ -82,6 +82,11 @@ function makeWorkpack(riskRows: RiskAssessmentRow[] = [riskRow]) {
       }
     }
   });
+
+  return {
+    ...workpack,
+    savedAt: "2026-07-08T08:00:00.000Z"
+  };
 }
 
 const improvements: OperationImprovement[] = [
@@ -93,6 +98,13 @@ const improvements: OperationImprovement[] = [
     hazardLabel: "추락 위험",
     improvementText: "비계 난간과 바퀴 잠금 상태를 보강하고 TBM에서 재확인",
     reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+    status: "proposed",
+    riskAssociation: {
+      siteName: riskRow.location,
+      process: riskRow.process,
+      task: riskRow.task,
+      hazard: riskRow.hazard
+    },
     beforePhotoName: "before-scaffold.jpg",
     afterPhotoName: "after-guardrail.jpg",
     photoAnalysisSummary: "Before/After 사진 비교 후보",
@@ -123,7 +135,14 @@ const mixedImprovements: OperationImprovement[] = [
     siteName: "부산 물류센터",
     workSummary: "분전반 점검",
     hazardLabel: "감전 위험",
-    improvementText: "절연 보호구와 잠금 절차를 확인"
+    improvementText: "절연 보호구와 잠금 절차를 확인",
+    status: "completed",
+    riskAssociation: {
+      siteName: electricalRow.location,
+      process: electricalRow.process,
+      task: electricalRow.task,
+      hazard: electricalRow.hazard
+    }
   }
 ];
 
@@ -138,13 +157,84 @@ function buildMixedSnapshot(filters: Record<string, string>) {
 }
 
 describe("reporting downloads", () => {
+  it("filters risk rows by the workpack timestamp for the selected period", () => {
+    const workpack = {
+      ...makeWorkpack(),
+      savedAt: "2026-07-08T08:00:00.000Z"
+    };
+
+    const snapshot = buildReportSnapshot({
+      workpack,
+      improvements: [],
+      period: "custom",
+      dateRange: { start: "2026-07-09", end: "2026-07-09" },
+      now: new Date("2026-07-09T12:00:00.000Z")
+    });
+
+    expect(snapshot.riskRows).toEqual([]);
+  });
+
+  it("uses KST calendar boundaries consistently for custom periods", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: {
+        ...makeWorkpack(),
+        savedAt: "2026-07-09T15:00:00.000Z"
+      },
+      improvements: [
+        { ...improvements[0], id: "before-kst-day", createdAt: "2026-07-09T14:59:59.999Z" },
+        { ...improvements[0], id: "start-kst-day", createdAt: "2026-07-09T15:00:00.000Z" },
+        { ...improvements[0], id: "end-kst-day", createdAt: "2026-07-10T14:59:59.999Z" },
+        { ...improvements[0], id: "after-kst-day", createdAt: "2026-07-10T15:00:00.000Z" }
+      ],
+      period: "custom",
+      dateRange: { start: "2026-07-10", end: "2026-07-10" },
+      now: new Date("2026-07-10T03:00:00.000Z")
+    });
+
+    expect(snapshot.riskRows).toHaveLength(1);
+    expect(snapshot.improvements.map((item) => item.id)).toEqual([
+      "start-kst-day",
+      "end-kst-day"
+    ]);
+  });
+
+  it("uses KST Monday and month starts for rolling period reports", () => {
+    const boundaryItems: OperationImprovement[] = [
+      { ...improvements[0], id: "before-month", createdAt: "2026-06-30T14:59:59.999Z" },
+      { ...improvements[0], id: "month-start", createdAt: "2026-06-30T15:00:00.000Z" },
+      { ...improvements[0], id: "before-week", createdAt: "2026-07-05T14:59:59.999Z" },
+      { ...improvements[0], id: "week-start", createdAt: "2026-07-05T15:00:00.000Z" }
+    ];
+    const monthly = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: boundaryItems,
+      period: "monthly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const weekly = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: boundaryItems,
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(monthly.improvements.map((item) => item.id)).toEqual([
+      "month-start",
+      "before-week",
+      "week-start"
+    ]);
+    expect(weekly.improvements.map((item) => item.id)).toEqual(["week-start"]);
+    expect(monthly.dateRange.start).toBe("2026-07-01");
+    expect(weekly.dateRange.start).toBe("2026-07-06");
+  });
+
   it("builds an inclusive custom-period report with a stable range filename", () => {
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
       improvements: [
-        { ...improvements[0], id: "imp-before", createdAt: "2026-07-06T23:59:59.999Z" },
+        { ...improvements[0], id: "imp-before", createdAt: "2026-07-06T14:59:59.999Z" },
         improvements[0],
-        { ...improvements[0], id: "imp-after", createdAt: "2026-07-10T00:00:00.000Z" }
+        { ...improvements[0], id: "imp-after", createdAt: "2026-07-09T15:00:00.000Z" }
       ],
       period: "custom",
       dateRange: { start: "2026-07-07", end: "2026-07-09" },
@@ -176,7 +266,11 @@ describe("reporting downloads", () => {
       workpack: makeWorkpack(),
       improvements,
       period: "weekly",
-      approvedPhotoImprovementIds: ["imp-1"],
+      photoApprovals: [{
+        improvementId: "imp-1",
+        beforePhotoName: "before-scaffold.jpg",
+        afterPhotoName: "after-guardrail.jpg"
+      }],
       now: new Date("2026-07-08T12:00:00.000Z")
     });
 
@@ -187,6 +281,151 @@ describe("reporting downloads", () => {
     expect(snapshot.summary.photoImprovements).toBe(1);
     expect(snapshot.groups.byProcess[0]?.label).toBe("외벽 도장");
     expect(snapshot.groups.byDocument.map((group) => group.label)).toContain("TBM 기록");
+  });
+
+  it("does not infer improvement status from risk verification or photo approval", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack([electricalRow]),
+      improvements: [{
+        ...improvements[0],
+        id: "status-independent",
+        siteName: electricalRow.location,
+        workSummary: electricalRow.task,
+        hazardLabel: electricalRow.hazard
+      }],
+      period: "weekly",
+      photoApprovals: [{
+        improvementId: "status-independent",
+        beforePhotoName: "before-scaffold.jpg",
+        afterPhotoName: "after-guardrail.jpg"
+      }],
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(snapshot.improvements[0]?.improvementStatus).toBe("proposed");
+    expect(snapshot.riskRows[0]).not.toHaveProperty("improvementStatus");
+
+    const completedFilter = buildReportSnapshot({
+      workpack: makeWorkpack([electricalRow]),
+      improvements: [{
+        ...improvements[0],
+        id: "status-independent",
+        siteName: electricalRow.location,
+        workSummary: electricalRow.task,
+        hazardLabel: electricalRow.hazard,
+        riskAssociation: {
+          siteName: electricalRow.location,
+          process: electricalRow.process,
+          task: electricalRow.task,
+          hazard: electricalRow.hazard
+        }
+      }],
+      period: "weekly",
+      filters: { improvementStatus: "completed" },
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(completedFilter.riskRows).toEqual([]);
+    expect(completedFilter.improvements).toEqual([]);
+  });
+
+  it("preserves an explicit status stored on the improvement", () => {
+    const completedImprovement = {
+      ...improvements[0],
+      status: "completed"
+    } as OperationImprovement & { status: "completed" };
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [completedImprovement],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(snapshot.improvements[0]?.improvementStatus).toBe("completed");
+    expect(snapshot.improvements[0]?.improvementStatusLabel).toBe("완료");
+  });
+
+  it("links an improvement only through its exact explicit risk association", () => {
+    const secondRisk = {
+      ...electricalRow,
+      location: riskRow.location,
+      hazard: riskRow.hazard
+    };
+    const explicitlyLinked = {
+      ...improvements[0],
+      riskAssociation: {
+        siteName: secondRisk.location,
+        process: secondRisk.process,
+        task: secondRisk.task,
+        hazard: secondRisk.hazard
+      }
+    } as OperationImprovement & {
+      riskAssociation: { siteName: string; process: string; task: string; hazard: string };
+    };
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack([riskRow, secondRisk]),
+      improvements: [explicitlyLinked],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(snapshot.improvements[0]?.process).toBe(secondRisk.process);
+    expect(snapshot.improvements[0]?.task).toBe(secondRisk.task);
+    expect(snapshot.improvements[0]?.linkedRiskIndex).toBe(2);
+  });
+
+  it("fails closed for missing or ambiguous risk associations", () => {
+    const legacyImprovement: OperationImprovement = {
+      ...improvements[0],
+      id: "legacy-unlinked",
+      riskAssociation: undefined
+    };
+    const ambiguousImprovement: OperationImprovement = {
+      ...improvements[0],
+      id: "ambiguous-link"
+    };
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack([riskRow, { ...riskRow }]),
+      improvements: [legacyImprovement, ambiguousImprovement],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const filtered = buildReportSnapshot({
+      workpack: makeWorkpack([riskRow, { ...riskRow }]),
+      improvements: [legacyImprovement, ambiguousImprovement],
+      period: "weekly",
+      filters: { process: riskRow.process },
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(snapshot.improvements.map((item) => item.process)).toEqual(["미연결", "미연결"]);
+    expect(snapshot.improvements.every((item) => item.linkedRiskIndex === undefined)).toBe(true);
+    expect(filtered.improvements).toEqual([]);
+  });
+
+  it("exposes row ownership as assignee rather than a fictional team", () => {
+    const linkedImprovement = {
+      ...improvements[0],
+      riskAssociation: {
+        siteName: riskRow.location,
+        process: riskRow.process,
+        task: riskRow.task,
+        hazard: riskRow.hazard
+      }
+    } as OperationImprovement & {
+      riskAssociation: { siteName: string; process: string; task: string; hazard: string };
+    };
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [linkedImprovement],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(snapshot.riskRows[0]?.assignee).toBe("현장소장");
+    expect(snapshot.improvements[0]?.assignee).toBe("현장소장");
+    expect(snapshot.facets.assignees.map((option) => option.value)).toEqual(["현장소장"]);
+    expect(snapshot.filters).not.toHaveProperty("team");
   });
 
   it("filters risk rows and their matched improvements by process", () => {
@@ -215,7 +454,7 @@ describe("reporting downloads", () => {
 
     expect(snapshot.riskRows.map((row) => row.hazard)).toEqual(["감전 위험"]);
     expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-electrical"]);
-    expect(snapshot.riskRows[0]?.improvementStatusLabel).toBe("완료");
+    expect(snapshot.improvements[0]?.improvementStatusLabel).toBe("완료");
   });
 
   it("filters risk rows and improvements by site", () => {
@@ -225,8 +464,8 @@ describe("reporting downloads", () => {
     expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-electrical"]);
   });
 
-  it("filters risk rows and their matched improvements by team", () => {
-    const snapshot = buildMixedSnapshot({ team: "전기팀" });
+  it("filters risk rows and their matched improvements by assignee", () => {
+    const snapshot = buildMixedSnapshot({ assignee: "전기팀" });
 
     expect(snapshot.riskRows.map((row) => row.hazard)).toEqual(["감전 위험"]);
     expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-electrical"]);
@@ -246,7 +485,7 @@ describe("reporting downloads", () => {
       expect.objectContaining({ value: "completed", label: "완료" })
     ]);
     expect(snapshot.facets.sites.map((option) => option.value)).toEqual(["서울 성수동", "부산 물류센터"]);
-    expect(snapshot.facets.teams.map((option) => option.value)).toEqual(["현장소장", "전기팀"]);
+    expect(snapshot.facets.assignees.map((option) => option.value)).toEqual(["현장소장", "전기팀"]);
   });
 
   it("includes before and after photo names only after explicit report approval", () => {
@@ -259,7 +498,11 @@ describe("reporting downloads", () => {
     const unapproved = buildReportSnapshot(baseInput);
     const approved = buildReportSnapshot({
       ...baseInput,
-      approvedPhotoImprovementIds: ["imp-1"]
+      photoApprovals: [{
+        improvementId: "imp-1",
+        beforePhotoName: "before-scaffold.jpg",
+        afterPhotoName: "after-guardrail.jpg"
+      }]
     });
 
     expect(unapproved.summary.photoCandidates).toBe(1);
@@ -273,6 +516,30 @@ describe("reporting downloads", () => {
     expect(buildReportMarkdown(approved)).toContain("before-scaffold.jpg");
     expect(buildReportCsv(approved)).toContain("before-scaffold.jpg · after-guardrail.jpg");
     expect(buildReportJson(approved)).toContain("after-guardrail.jpg");
+  });
+
+  it("binds photo approval to the exact improvement and photo pair", () => {
+    const baseInput = {
+      workpack: makeWorkpack(),
+      improvements: [improvements[0]],
+      period: "weekly" as const,
+      now: new Date("2026-07-08T12:00:00.000Z")
+    };
+    const approval = {
+      improvementId: "imp-1",
+      beforePhotoName: "before-scaffold.jpg",
+      afterPhotoName: "after-guardrail.jpg"
+    };
+    const approved = buildReportSnapshot({ ...baseInput, photoApprovals: [approval] });
+    const changedPair = buildReportSnapshot({
+      ...baseInput,
+      improvements: [{ ...improvements[0], afterPhotoName: "replacement.jpg" }],
+      photoApprovals: [approval]
+    });
+
+    expect(approved.improvements[0]?.photoApproved).toBe(true);
+    expect(changedPair.improvements[0]?.photoApproved).toBe(false);
+    expect(changedPair.improvements[0]?.photoNames).toEqual([]);
   });
 
   it("resolves exact empty, download-ready, and error states", () => {
@@ -308,7 +575,7 @@ describe("reporting downloads", () => {
       filters: {
         process: "전기 설비",
         site: "부산 물류센터",
-        team: "전기팀"
+        assignee: "전기팀"
       },
       now: new Date("2026-07-11T12:00:00.000Z")
     });
@@ -320,12 +587,47 @@ describe("reporting downloads", () => {
 
     expect(snapshot.title).toContain("부산 물류센터");
     expect(json.dateRange).toEqual({ start: "2026-07-07", end: "2026-07-09" });
-    expect(json.filters).toEqual({ process: "전기 설비", site: "부산 물류센터", team: "전기팀" });
+    expect(json.filters).toEqual({ process: "전기 설비", site: "부산 물류센터", assignee: "전기팀" });
     expect(markdown).toContain("## 적용 조건");
     expect(markdown).toContain("- 기간: 2026.07.07 - 2026.07.09 사용자 기간 리포트");
     expect(markdown).toContain("- 공정: 전기 설비");
     expect(markdown).toContain("- 현장: 부산 물류센터");
-    expect(markdown).toContain("- 팀: 전기팀");
+    expect(markdown).toContain("- 담당자: 전기팀");
+  });
+
+  it("embeds local or sample scope metadata in every export", () => {
+    const localSnapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [improvements[0]],
+      period: "weekly",
+      sourceMode: "browser_local",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const sampleSnapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [improvements[0]],
+      period: "weekly",
+      sourceMode: "sample",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(localSnapshot.source.scope).toBe("current_browser");
+    expect(sampleSnapshot.source.scope).toBe("sample_preview");
+    expect(sampleSnapshot.source.riskRowTimeBasis).toBe("workpack_saved_at");
+    for (const [snapshot, scope] of [
+      [localSnapshot, "current_browser"],
+      [sampleSnapshot, "sample_preview"]
+    ] as const) {
+      for (const exported of [
+        buildReportCsv(snapshot),
+        buildReportJson(snapshot),
+        buildReportMarkdown(snapshot),
+        buildReportLearningJsonl(snapshot),
+        buildReportLearningMarkdown(snapshot)
+      ]) {
+        expect(exported).toContain(scope);
+      }
+    }
   });
 
   it("renders As-Is/To-Be markdown without external submission wording", () => {
@@ -333,7 +635,11 @@ describe("reporting downloads", () => {
       workpack: makeWorkpack(),
       improvements,
       period: "weekly",
-      approvedPhotoImprovementIds: ["imp-1"],
+      photoApprovals: [{
+        improvementId: "imp-1",
+        beforePhotoName: "before-scaffold.jpg",
+        afterPhotoName: "after-guardrail.jpg"
+      }],
       now: new Date("2026-07-08T12:00:00.000Z")
     });
     const markdown = buildReportMarkdown(snapshot);
@@ -358,6 +664,29 @@ describe("reporting downloads", () => {
     expect(csv).toContain("위험성평가");
     expect(csv).toContain("개선사항");
     expect(csv).toContain("난간 보강");
+  });
+
+  it("neutralizes formula-capable values in every CSV cell", () => {
+    const maliciousRisk: RiskAssessmentRow = {
+      ...riskRow,
+      hazard: "=2+3",
+      currentControls: "+SUM(A1)",
+      additionalControls: "-1+1",
+      owner: "@SUM(A1)"
+    };
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack([maliciousRisk]),
+      improvements: [],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const csv = buildReportCsv(snapshot);
+
+    expect(csv).toContain(",'=2+3,");
+    expect(csv).toContain(",'+SUM(A1),");
+    expect(csv).toContain(",'-1+1,");
+    expect(csv).toContain(",'@SUM(A1),");
+    expect(csv).not.toContain(",=2+3,");
   });
 
   it("exports a period learning corpus as JSONL events", () => {
@@ -412,11 +741,14 @@ describe("reporting downloads", () => {
   it("parses local improvement history defensively", () => {
     const parsed = parseOperationImprovements(JSON.stringify([
       improvements[0],
+      { ...improvements[0], id: "invalid-date", createdAt: "not-a-date" },
       { id: "bad", createdAt: "2026-07-08T00:00:00.000Z" }
     ]));
 
     expect(parsed).toHaveLength(1);
     expect(parsed[0]?.id).toBe("imp-1");
+    expect(parsed[0]?.status).toBe("proposed");
+    expect(parsed[0]?.riskAssociation).toEqual(improvements[0].riskAssociation);
   });
 
   it("keeps local before/after vision evidence when converted to harness memory", () => {

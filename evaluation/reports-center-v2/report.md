@@ -1,44 +1,63 @@
-# Reports Center V2 Evaluation
+# Reports Center V2 Remediation Evaluation
 
 Date: 2026-07-11
 Branch: `feature/reports-center-v2`
+Reviewed implementation: `626bfb65c4f15342f71e840e4b4cac7271b46e41`
 
 ## Scope
 
 - Kept the existing Linear-style work-document and right-rail layout.
-- Added weekly, monthly, and custom date-range reports while retaining the existing daily mode.
-- Added process, task, risk-level, improvement-status, site, and team facets.
-- Kept As-Is/To-Be risk and improvement rows in Markdown, CSV, JSON, Markdown corpus, and JSONL corpus downloads.
-- Added an explicit in-session approval gate for Before/After photo names.
-- Added empty, download-ready, report-error, download-preparing, and download-error states.
-- Made no DB schema, migration, Supabase mutation, upload, or remote-state changes.
+- Applied daily, weekly, monthly, and custom periods to both the current workpack risk rows and improvement history.
+- Standardized period boundaries and rendered timestamps on `Asia/Seoul` calendar time.
+- Kept six filters while renaming the unsupported team concept to the actual risk-row assignee/owner.
+- Removed improvement-status inference from risk verification and photo approval; status now comes from the improvement record and legacy records default to `proposed`.
+- Replaced substring matching with an explicit site/process/task/hazard association that links only when exactly one risk row matches.
+- Bound photo approval to the exact improvement ID plus Before/After filename pair and reset approval on reload.
+- Added CSV formula-injection neutralization and local/sample source metadata to every export format.
+- Made no DB schema, migration, Supabase mutation, environment, secret, upload, or remote-state changes.
 
 ## Behavioral Evidence
 
 | Contract | Evidence |
 | --- | --- |
-| Custom period | Inclusive `YYYY-MM-DD` range, exact missing/reversed range errors, stable range filename |
-| Facets | Risk rows and matched improvements share the six filter axes; options come from unfiltered period data |
-| Photo approval | Unapproved photo names are absent from Markdown, CSV, and JSON; approved pairs are included |
-| Export context | JSON stores `dateRange` and `filters`; Markdown renders an `적용 조건` section |
-| Empty/ready/error | `resolveReportViewState` controls copy and download availability |
-| UI wiring | Custom date controls, six labeled selects, approval checkbox, and guarded download buttons |
+| Period and timezone | Risk rows use workpack `savedAt`; improvements use `createdAt`; custom midnight, weekly start, labels, and rendering use KST |
+| Invalid timestamps | Invalid improvement `createdAt` values are rejected by the local-history parser and excluded by period evaluation |
+| Six filters | Process, task, risk level, explicit improvement status, site, and assignee operate on period-scoped data |
+| Improvement status | Risk verification and photo approval do not promote status; a stored status is preserved |
+| Risk association | Only an exact, unique explicit association links an improvement; missing or ambiguous associations remain `미연결` |
+| Photo approval | Unapproved names are absent; ID plus both filenames must match; duplicate IDs or incomplete pairs fail closed |
+| CSV safety | Cells beginning with formula-capable prefixes are emitted as text before CSV quoting |
+| Source scope | JSON, CSV, report Markdown, corpus JSONL, and corpus Markdown include `current_browser` or `sample_preview`, workpack time basis, and limitations |
+| UI state | Pure behavior tests cover approval transitions; existing empty/ready/error and preparing/error download states remain wired |
+
+## TDD Evidence
+
+Observed RED before implementation for:
+
+- risk rows surviving outside the selected period;
+- UTC rather than KST custom-day boundaries;
+- status inherited from risk verification;
+- explicit status being ignored;
+- substring matching choosing the wrong risk row;
+- owner being exposed as a fictional team;
+- invalid `createdAt` being accepted;
+- photo approval using only an improvement ID;
+- CSV formula-capable values remaining executable;
+- missing export source scope;
+- missing behavior-level photo approval transition helper.
 
 ## Verification
 
 - `npm.cmd test -- tests/reporting-downloads.test.ts tests/reports-download-center.test.ts`
-  - Result: 2 test files passed, 20 tests passed, 0 failed.
+  - Result: 2 test files passed, 32 tests passed, 0 failed.
 - `npm.cmd run typecheck`
   - Result: `tsc --noEmit --incremental false` completed successfully.
-- `Invoke-WebRequest http://127.0.0.1:3127/reports`
-  - Result: HTTP 200.
-- Playwright DOM smoke at `1440x1000`
-  - Initial: title `개선 리포트.`, document present, rail present, 6 filters, no horizontal overflow.
-  - Invalid custom range: error state present, 2 date inputs, 0 enabled downloads.
-  - Valid custom range: download-ready state present, 5 enabled downloads.
+- Browser/Playwright smoke was not rerun for this remediation pass; no visual-layout change was intended beyond the `담당자` label and risk-status removal.
 
 ## Concerns
 
-- The current source remains the browser's single current workpack plus local improvement history; durable multi-workpack history still requires a separately approved data design.
-- A dedicated team field does not exist in the current local model, so the report facet uses each risk row's improvement owner as the team value.
-- Local photo evidence stores filenames and analysis metadata, not binary attachments; this implementation gates and exports approved filenames only.
+- The report remains a current-browser snapshot, not durable multi-workpack history. Exports now state this directly.
+- Risk rows do not have row-level creation timestamps, so period inclusion uses the enclosing workpack `savedAt`; this basis is included in source metadata.
+- Legacy improvement records without `riskAssociation` remain visible as `미연결` and intentionally fail process/task/risk/assignee linkage filters until saved with an explicit association.
+- Older improvements without an explicit status remain `proposed`; risk verification and photo review do not backfill status.
+- Photo evidence remains filenames and analysis metadata rather than binary attachments; only an approved exact pair is exported.
