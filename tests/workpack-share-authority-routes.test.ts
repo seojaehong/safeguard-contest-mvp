@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { evaluateShareSessionReuse } from "@/components/WorkflowSharePolicy";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
@@ -48,6 +49,7 @@ const serverRecipient = {
     displayName: "Server Nguyen",
     workerRole: "도장공",
     languageCode: "vi",
+    languageLabel: "베트남어",
     phone: "010-1111-2222",
     email: "server@example.com"
   }
@@ -182,6 +184,27 @@ describe("share session route authority", () => {
       requestedWorkerIds: [WORKER_ID]
     }));
     expect(fake.inserted()).toMatchObject({ recipients_snapshot: [serverRecipient] });
+    const inserted = fake.inserted() as {
+      expires_at?: string;
+      status: string;
+      share_scope: string;
+      access_policy: { anonymousAllowed?: boolean };
+      recipients_snapshot: Array<typeof serverRecipient>;
+    };
+    expect(Date.parse(inserted.expires_at || "")).toBeGreaterThan(Date.now());
+    const body = await response.json() as { expiresAt?: string };
+    expect(body.expiresAt).toBe(inserted.expires_at);
+    expect(evaluateShareSessionReuse({
+      id: SESSION_ID,
+      status: inserted.status,
+      shareScope: inserted.share_scope,
+      anonymousAllowed: inserted.access_policy.anonymousAllowed === true,
+      expiresAt: inserted.expires_at || null,
+      recipients: inserted.recipients_snapshot
+    }, {
+      workpackId: WORKPACK_ID,
+      workerIds: [WORKER_ID]
+    }, 1, Date.now())).toEqual({ reusable: true });
   });
 });
 
@@ -202,26 +225,61 @@ describe("workflow dispatch route authority", () => {
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
-  it("dispatches only the owned server workpack and active session snapshots", async () => {
+  it("fails closed before provider dispatch when persistent idempotency is unavailable", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     const { POST } = await import("@/app/api/workflow/dispatch/route");
 
     const response = await POST(jsonRequest("/api/workflow/dispatch", {
       workpackId: WORKPACK_ID,
       shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["email", "sms"],
       operatorNote: "server authority"
     }));
+    const body = await response.json() as {
+      duplicateRisk?: boolean;
+      idempotencySupported?: boolean;
+      idempotencyKey?: string;
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      duplicateRisk: true,
+      idempotencySupported: false,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("keeps fixture validation non-delivery while accepting the idempotency contract", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["email"],
+      operatorNote: "fixture validation"
+    }));
+    const body = await response.json() as {
+      providerStatus?: string;
+      duplicateRisk?: boolean;
+      idempotencyKey?: string;
+      providerCalled?: boolean;
+    };
 
     expect(response.status).toBe(200);
-    expect(mocks.postWebhookWithTimeout).toHaveBeenCalledWith(
-      "https://n8n.example/webhook",
-      "secret",
-      expect.objectContaining({
-        workpack: serverWorkpack,
-        recipients: [serverRecipient.workerSnapshot]
-      })
-    );
+    expect(body).toMatchObject({
+      providerStatus: "fixture",
+      duplicateRisk: false,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 });
 

@@ -14,6 +14,10 @@ export type WorkflowDispatchResult = {
   message: string;
   workflowRunId?: string;
   providerStatus?: string;
+  idempotencyKey?: string;
+  idempotencySupported?: boolean;
+  duplicateRisk?: boolean;
+  providerCalled?: boolean;
   channelResults?: WorkflowDispatchChannelResult[];
 };
 
@@ -29,11 +33,13 @@ type DispatchRequest = {
   authToken: string;
   workpackId: string;
   shareSessionId: string;
+  idempotencyKey: string;
   channels: WorkflowShareChannel[];
   operatorNote: string;
 };
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const providerIdempotencyKeyPattern = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -110,7 +116,7 @@ export function resolveSavedWorkerIds(
 export async function createAuthenticatedShareSession(
   fetcher: Fetcher,
   request: ShareSessionRequest
-): Promise<{ shareSessionId: string; message: string }> {
+): Promise<{ shareSessionId: string; expiresAt: string; message: string }> {
   requireBearerContext(request.authToken, request.workpackId);
   if (!request.workerIds.length || request.workerIds.some((workerId) => !uuidPattern.test(workerId))) {
     throw new Error("공유 세션에는 실제 서버 작업자 UUID가 필요합니다.");
@@ -131,8 +137,13 @@ export async function createAuthenticatedShareSession(
   if (!uuidPattern.test(shareSessionId)) {
     throw new Error("공유 세션 응답의 shareSessionId가 올바른 UUID가 아닙니다.");
   }
+  const expiresAt = readString(body.expiresAt);
+  if (!expiresAt || !Number.isFinite(Date.parse(expiresAt)) || Date.parse(expiresAt) <= Date.now()) {
+    throw new Error("공유 세션 응답의 expiresAt이 유효한 미래 시각이 아닙니다.");
+  }
   return {
     shareSessionId,
+    expiresAt,
     message: readString(body.message) || "공유 세션을 만들었습니다."
   };
 }
@@ -145,6 +156,9 @@ export async function dispatchAuthenticatedShareSession(
   if (!uuidPattern.test(request.shareSessionId)) {
     throw new Error("서버 shareSessionId가 올바른 UUID가 아닙니다.");
   }
+  if (!providerIdempotencyKeyPattern.test(request.idempotencyKey)) {
+    throw new Error("provider 전송 idempotency key가 올바르지 않습니다.");
+  }
   if (!request.channels.length) throw new Error("전파 채널을 하나 이상 선택해 주세요.");
 
   const response = await fetcher("/api/workflow/dispatch", {
@@ -153,21 +167,32 @@ export async function dispatchAuthenticatedShareSession(
     body: JSON.stringify({
       workpackId: request.workpackId,
       shareSessionId: request.shareSessionId,
+      idempotencyKey: request.idempotencyKey,
       channels: request.channels,
       operatorNote: request.operatorNote
     })
   });
   const body = await readResponseBody(response);
-  if (!response.ok) throw buildHttpError(body, response, "전파 요청에 실패했습니다.");
-
-  return {
+  const responseIdempotencyKey = readString(body.idempotencyKey);
+  const result: WorkflowDispatchResult = {
     ok: body.ok === true,
     configured: body.configured === true,
     message: readString(body.message) || (body.ok === true ? "전파 요청을 접수했습니다." : "전파 요청이 완료되지 않았습니다."),
     workflowRunId: readString(body.workflowRunId),
     providerStatus: readString(body.providerStatus),
+    idempotencyKey: responseIdempotencyKey,
+    idempotencySupported: typeof body.idempotencySupported === "boolean" ? body.idempotencySupported : undefined,
+    duplicateRisk: typeof body.duplicateRisk === "boolean" ? body.duplicateRisk : undefined,
+    providerCalled: typeof body.providerCalled === "boolean" ? body.providerCalled : undefined,
     channelResults: parseChannelResults(body.channelResults)
   };
+  if (!response.ok && !result.duplicateRisk) {
+    throw buildHttpError(body, response, "전파 요청에 실패했습니다.");
+  }
+  if (responseIdempotencyKey !== request.idempotencyKey) {
+    throw new Error("provider 전송 응답의 idempotency key가 요청과 일치하지 않습니다.");
+  }
+  return result;
 }
 
 function isValidationOnlyMarker(value: string | undefined): boolean {
@@ -182,7 +207,12 @@ function isValidationOnlyMarker(value: string | undefined): boolean {
 }
 
 export function isProviderDispatchConfirmed(result: WorkflowDispatchResult): boolean {
-  if (!result.ok || isValidationOnlyMarker(result.providerStatus)) return false;
+  if (
+    !result.ok
+    || result.duplicateRisk
+    || result.providerCalled === false
+    || isValidationOnlyMarker(result.providerStatus)
+  ) return false;
   return Boolean(result.channelResults?.some((item) => (
     item.status === "sent" && !isValidationOnlyMarker(item.provider)
   )));
