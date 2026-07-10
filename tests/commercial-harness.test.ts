@@ -51,6 +51,26 @@ function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenc
   };
 }
 
+function archiveSifReference(): SafetyReferenceItem {
+  return reference({
+    id: "sif-archive-readable",
+    title: "1919 / 기타의사업 / 시설관리및사업지원서비스업",
+    category: "기타의사업",
+    subcategory: "시설관리및사업지원서비스업",
+    summary: [
+      "연번: 1919",
+      "재해개요: 2024. 3. 11. 피해자가 지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임.",
+      "기인물: 배수펌프",
+      "위험성 감소대책: 산소농도 측정, 강제환기, 전원 차단 및 잠금표지"
+    ].join("\n"),
+    body: "재해개요: 2024. 3. 11. 피해자가 지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임.",
+    keywords: ["배수펌프", "산소결핍", "끼임"],
+    risk_tags: ["질식", "끼임"],
+    controls: ["산소농도 측정", "전원 차단 및 잠금표지"],
+    retrieval_source: "ranked"
+  });
+}
+
 describe("SIF embedding corpus", () => {
   it("keeps only SIF cases and creates stable embedding text", () => {
     const corpus = buildSifEmbeddingCorpus([
@@ -817,6 +837,37 @@ describe("workpack learning export", () => {
     expect(normalizeWorkpackLearningFormat("jsonl")).toBe("jsonl");
     expect(normalizeWorkpackLearningFormat("obsidian")).toBe("obsidian");
     expect(normalizeWorkpackLearningFormat("bad")).toBe("markdown");
+  });
+
+  it("exports readable SIF evidence labels while JSONL preserves raw title provenance", () => {
+    const rawTitle = "1919 / 기타의사업 / 시설관리및사업지원서비스업";
+    const readableTitle = "지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임 사례";
+    const input = {
+      workpackId: "wp-sif-readable",
+      generatedAt: "2026-07-08T00:00:00.000Z",
+      question: "지하 기계실 배수펌프 점검",
+      taskLabel: "지하 기계실 배수펌프 점검",
+      references: [archiveSifReference()],
+      improvements: [],
+      confirmations: []
+    };
+
+    const markdown = buildWorkpackLearningMarkdown(input);
+    const jsonl = buildWorkpackLearningJsonl(input);
+    const obsidianFile = buildWorkpackLearningFile(input, "obsidian");
+    const referenceEvent = jsonl
+      .split("\n")
+      .map((line) => JSON.parse(line) as { eventType: string; payload: Record<string, unknown> })
+      .find((line) => line.eventType === "reference");
+
+    expect(markdown).toContain(`- ${readableTitle}`);
+    expect(markdown).not.toContain(`- ${rawTitle}`);
+    expect(obsidianFile.content).toContain(`[[Evidence/${readableTitle}]]`);
+    expect(obsidianFile.content).not.toContain(`[[Evidence/${rawTitle}]]`);
+    expect(referenceEvent?.payload).toMatchObject({
+      title: rawTitle,
+      displayTitle: readableTitle
+    });
   });
 
   it("preserves long vision/OCR payloads for memory export instead of clipping to UI summary length", () => {

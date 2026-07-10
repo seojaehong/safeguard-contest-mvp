@@ -1,5 +1,9 @@
 import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
-import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import {
+  getSafetyReferenceDisplaySummary,
+  getSafetyReferenceDisplayTitle,
+  type SafetyReferenceItem
+} from "@/lib/safety-reference-catalog";
 
 export type OperationMemoryNodeKind = "Workpack" | "Hazard" | "Control" | "Improvement" | "Evidence" | "Ack";
 
@@ -117,14 +121,17 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
 
   for (const reference of input.references) {
     const evidenceId = `evidence:${slugSegment(reference.id, "reference")}`;
+    const displayTitle = getSafetyReferenceDisplayTitle(reference);
     pushUniqueNode(nodes, {
       id: evidenceId,
       kind: "Evidence",
-      label: reference.title,
-      detail: reference.short_summary || reference.summary,
+      label: displayTitle,
+      detail: getSafetyReferenceDisplaySummary(reference),
       meta: {
         referenceItemId: reference.id,
         itemType: reference.item_type,
+        rawTitle: reference.title,
+        displayTitle,
         evidenceRole: reference.evidence_role || "supporting"
       }
     });

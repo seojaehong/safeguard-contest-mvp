@@ -1,6 +1,9 @@
 import type { HarnessImprovement } from "@/lib/db-harness";
 import { buildOperationMemoryGraph } from "@/lib/ontology/operation-memory";
-import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import {
+  getSafetyReferenceDisplayTitle,
+  type SafetyReferenceItem
+} from "@/lib/safety-reference-catalog";
 
 export type WorkpackLearningInput = {
   workpackId: string;
@@ -213,6 +216,7 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       sourceId: reference.source_id,
       itemType: reference.item_type,
       title: reference.title,
+      displayTitle: getSafetyReferenceDisplayTitle(reference),
       summary: reference.short_summary || reference.summary,
       riskTags: reference.risk_tags,
       controls: reference.controls,
@@ -300,7 +304,7 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
   ];
 
   for (const reference of input.references) {
-    lines.push(`- ${reference.title}`);
+    lines.push(`- ${getSafetyReferenceDisplayTitle(reference)}`);
     lines.push(`  - sourceId: ${reference.source_id}`);
     lines.push(`  - type: ${reference.item_type}`);
     lines.push(`  - retrieval: ${referenceRetrievalLabel(reference)}`);
@@ -408,7 +412,7 @@ export function buildWorkpackObsidianMarkdown(input: WorkpackLearningInput) {
 
   lines.push("## 근거 후보", "");
   for (const reference of input.references) {
-    lines.push(`- ${obsidianLink("Evidence", reference.title)}`);
+    lines.push(`- ${obsidianLink("Evidence", getSafetyReferenceDisplayTitle(reference))}`);
     lines.push(`  - retrieval: ${referenceRetrievalLabel(reference)}`);
     lines.push(`  - sourceId: ${reference.source_id}`);
     lines.push(`  - type: ${reference.item_type}`);

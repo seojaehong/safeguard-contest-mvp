@@ -23,6 +23,25 @@ function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenc
   };
 }
 
+function archiveSifReference(): SafetyReferenceItem {
+  return reference({
+    id: "sif-archive-readable",
+    title: "1919 / 기타의사업 / 시설관리및사업지원서비스업",
+    category: "기타의사업",
+    subcategory: "시설관리및사업지원서비스업",
+    summary: [
+      "연번: 1919",
+      "재해개요: 2024. 3. 11. 피해자가 지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임.",
+      "기인물: 배수펌프",
+      "위험성 감소대책: 산소농도 측정, 강제환기, 전원 차단 및 잠금표지"
+    ].join("\n"),
+    body: "재해개요: 2024. 3. 11. 피해자가 지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임.",
+    keywords: ["배수펌프", "산소결핍", "끼임"],
+    risk_tags: ["질식", "끼임"],
+    controls: ["산소농도 측정", "전원 차단 및 잠금표지"]
+  });
+}
+
 const photoImprovement: HarnessImprovement = {
   id: "improvement-001",
   taskLabel: "외벽 도장",
@@ -109,5 +128,29 @@ describe("buildOperationMemoryGraph", () => {
     const hazards = graph.nodes.filter((node) => node.kind === "Hazard" && node.label === "추락");
     expect(hazards).toHaveLength(1);
     expect(graph.edges.filter((edge) => edge.targetId === hazards[0]?.id).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("uses readable SIF labels for evidence nodes while preserving raw title metadata", () => {
+    const rawTitle = "1919 / 기타의사업 / 시설관리및사업지원서비스업";
+    const readableTitle = "지하 기계실 배수펌프 점검 중 산소결핍으로 쓰러지고, 구조 과정에서 불시기동된 펌프에 끼임 사례";
+    const graph = buildOperationMemoryGraph({
+      workpack: {
+        id: "wp-archive-sif",
+        question: "지하 기계실 배수펌프 점검",
+        generatedAt: "2026-07-09T00:00:00.000Z"
+      },
+      references: [archiveSifReference()],
+      improvements: [],
+      confirmations: []
+    });
+
+    const evidenceNode = graph.nodes.find((node) => node.kind === "Evidence");
+
+    expect(evidenceNode?.label).toBe(readableTitle);
+    expect(evidenceNode?.label).not.toBe(rawTitle);
+    expect(evidenceNode?.meta).toMatchObject({
+      rawTitle,
+      displayTitle: readableTitle
+    });
   });
 });

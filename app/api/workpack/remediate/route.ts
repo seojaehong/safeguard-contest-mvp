@@ -7,7 +7,12 @@ import {
 } from "@/lib/safety-document-rubric";
 import { matchSafetyKnowledge } from "@/lib/safety-knowledge";
 import { generateKnowledgeText } from "@/lib/ai";
-import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import {
+  getSafetyReferenceDisplaySummary,
+  getSafetyReferenceDisplayTitle,
+  searchSafetyReferences,
+  type SafetyReferenceItem
+} from "@/lib/safety-reference-catalog";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // 2min — single Vertex call with 1 retry
@@ -84,7 +89,7 @@ function buildFallbackText(itemTitle: string, improvementAction: string): string
 function mapCatalogEvidence(items: SafetyReferenceItem[]) {
   return items.map((item, index) => ({
     order: index + 1,
-    title: item.title,
+    title: getSafetyReferenceDisplayTitle(item),
     type: item.item_type,
     category: item.category,
     role: item.evidence_role,
@@ -94,7 +99,7 @@ function mapCatalogEvidence(items: SafetyReferenceItem[]) {
     controls: item.controls.slice(0, 3),
     keywords: item.keywords.slice(0, 5),
     sourceUrl: item.source_url,
-    summary: item.short_summary || item.summary
+    summary: getSafetyReferenceDisplaySummary(item)
   }));
 }
 
