@@ -420,6 +420,19 @@ describe("module route section hierarchy", () => {
       "border-radius": "var(--radius-control)",
       padding: "var(--space-2) var(--space-3)",
     });
+    for (const selector of [
+      ".v2-nav nav a",
+      ".safeclaw-login-topbar nav a",
+      ".demo-mode-badges button",
+    ]) {
+      expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({
+        "min-height": "var(--control-height)",
+        "font-size": "var(--text-control)",
+        "font-weight": "700",
+        "line-height": "var(--leading-control)",
+        "letter-spacing": "var(--tracking-body)",
+      });
+    }
     for (const selector of [".triad-card h2", ".preview-hero-card h2"]) {
       expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({
         "font-size": "var(--text-component-title)",
@@ -452,10 +465,16 @@ describe("module route section hierarchy", () => {
     }
     for (const selector of [".triad-card", ".preview-hero-card", ".trust-grid article", ".roadmap-item"]) {
       expect(declarationsForExactSelector(desktopCss, selector), selector).toMatchObject({ padding: "var(--space-6)" });
-      expect(effectiveDeclarationsAtWidth(css, selector, 760), `${selector} mobile`).toMatchObject({
+      expect(effectiveDeclarationsAtWidth(css, selector, 767), `${selector} at 767px`).toMatchObject({
         padding: "var(--space-4)",
       });
     }
+    expect(effectiveDeclarationsAtWidth(css, ".v2-shell", 767)).toMatchObject({
+      width: "min(100%, calc(100% - (var(--space-4) * 2)))",
+    });
+    expect(effectiveDeclarationsAtWidth(css, ".demo-mode-shell", 767)).toMatchObject({
+      width: "min(100%, calc(100% - (var(--space-4) * 2)))",
+    });
     expect(declarationsForExactSelector(desktopCss, ".list")).toMatchObject({ gap: "14px" });
     expect(declarationsForExactSelector(desktopCss, ".row")).toMatchObject({ gap: "10px" });
     expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .list")).toMatchObject({
