@@ -45,7 +45,7 @@ export function AgentConsole({ lines, active }: AgentConsoleProps) {
 
   return (
     <details
-      className={`agent-console ${active ? "agent-console-active" : ""}`}
+      className={`agent-console ${active ? "agent-console-active workbench-loading-state" : ""}`}
       open={open}
       aria-label="작업 이력"
     >

@@ -1391,7 +1391,7 @@ export function WorkflowSharePanel({
       </div>
 
       {isConfirming ? (
-        <div className="dispatch-confirm-panel" role="dialog" aria-modal="false" aria-label="현장 전파 전 확인">
+        <div className="dispatch-confirm-panel workbench-share-confirmation" role="dialog" aria-modal="false" aria-label="현장 전파 전 확인">
           <div className="compact-head">
             <span className="eyebrow">전송 전 확인</span>
             <strong>{activeChannelLabel}</strong>

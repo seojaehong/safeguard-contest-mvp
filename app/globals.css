@@ -12764,7 +12764,7 @@ body:has(.safeclaw-landing) :is(
   grid-template-columns: 1fr;
   gap: 10px;
   width: min(760px, 100%);
-  margin-top: 12px;
+  margin-top: 20px;
 }
 
 .command-center-shell .input-photo-copy,
@@ -15081,6 +15081,87 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .learning-export-actions {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Shared workbench geometry. Theme selectors may change color only. */
+.command-center-shell.workbench-root {
+  font-family: var(--font-product);
+}
+
+.command-center-shell .workbench-theme-toggle button {
+  min-height: var(--control-height-compact);
+  border-radius: var(--radius-control);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .workbench-primary-action {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
+}
+
+.workbench-document-rail {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-panel);
+}
+
+.workbench-evidence-rail {
+  gap: var(--space-4);
+  border-radius: var(--radius-panel);
+}
+
+.workbench-share-confirmation {
+  padding: var(--space-6);
+  border-radius: var(--radius-panel);
+}
+
+.workbench-report-filters {
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+}
+
+.workbench-report-filters button {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+}
+
+.workbench-empty-state {
+  padding: var(--space-6);
+  border-radius: var(--radius-panel);
+}
+
+.workbench-loading-state {
+  font-family: var(--font-product);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.workbench-disabled-state,
+.workbench-root :disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 767px) {
+  .workbench-document-rail,
+  .workbench-share-confirmation,
+  .workbench-empty-state {
+    padding: var(--space-4);
   }
 }
 

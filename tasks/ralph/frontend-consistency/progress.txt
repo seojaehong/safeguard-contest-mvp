@@ -57,3 +57,9 @@
 - Verified: route test 17/17, focused tests 49/49, full suite 493/493, static audit over 32 pages and 22 components with zero coverage issues or violations, typecheck, production build, and diff-check pass.
 - Reviewed: independent specification and code-quality review both PASS with zero findings across `b9ec074...3f7166d`.
 - Next: F5 workspace and reports density; browser screenshots and route-state capture remain F7 scope.
+
+## 2026-07-11 F5 implementation
+- Changed: normalized workspace/report typography, spacing, radii, controls, state hooks, and Day/Night geometry; replaced the inline progress width with semantic progress markup.
+- Verified: Task 5 focused tests 32/32, full suite 498/498, static audit with zero violations, typecheck, production build, and diff-check pass.
+- Learned: color-theme selectors must not carry typography, spacing, or shape because those declarations silently create two visual systems.
+- Next: keep F5 `passes: false` until independent review; capture Day/Night and report states in F7 browser evidence.
