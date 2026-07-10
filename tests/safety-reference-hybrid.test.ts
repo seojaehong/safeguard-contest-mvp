@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import * as safetyCatalog from "@/lib/safety-reference-catalog";
 import {
+  deriveSafetyReferenceOperationalView,
   filterAndRankSafetyReferencesByQuery,
   mergeSafetyReferenceHybridResults,
   resolveSafetyReferenceVectorSearchState,
@@ -144,6 +145,25 @@ describe("SIF display labels", () => {
     expect(helper.getSafetyReferenceDisplayTitle?.(headerRow)).toBe("공종 / 작업명");
     expect(merged.display_title).toBeUndefined();
     expect(merged.display_summary).toBeUndefined();
+  });
+});
+
+describe("deriveSafetyReferenceOperationalView", () => {
+  it("derives a deterministic operational view without mutating raw provenance controls", () => {
+    const paint = reference("b-e-17-operational");
+    paint.title = "B-E-17-2026 도장 공정에서의 화재·폭발위험방지";
+    paint.summary = "도료와 유기용제 증기가 체류하는 도장 공정";
+    paint.risk_tags = ["화재", "폭발"];
+    paint.controls = ["가동부 방호덮개 설치", "정비 전 전원 차단 및 잠금표지"];
+    const rawControls = [...paint.controls];
+
+    const view = deriveSafetyReferenceOperationalView(paint);
+
+    expect(view.hazard).toMatch(/화재·폭발/);
+    expect(view.controls.join(" ")).toMatch(/유기용제|도료|환기/);
+    expect(view.controls.join(" ")).not.toContain("가동부 방호덮개");
+    expect(view.reviewRequired).toBe(false);
+    expect(paint.controls).toEqual(rawControls);
   });
 });
 

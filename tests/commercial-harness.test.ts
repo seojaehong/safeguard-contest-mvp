@@ -11,7 +11,7 @@ import {
 } from "@/lib/db-harness";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { validateRiskAssessmentRows } from "@/lib/risk-assessment-schema";
-import { attachDbHarnessFallback, buildSafetyReferenceRiskRows, normalizeSafetyTermTypos, runAsk } from "@/lib/search";
+import { attachDbHarnessFallback, buildSafetyReferenceRiskRows, buildTbmRiskLinks, normalizeSafetyTermTypos, runAsk } from "@/lib/search";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
@@ -505,10 +505,159 @@ describe("runAsk DB harness mode", () => {
     expect(rows.some((row) => row.evidenceRefs?.includes("외벽 도장 중 이동식 비계 추락 사례"))).toBe(true);
     expect(rows.every((row) => !/^[A-Z]-[A-Z]-\d{1,4}-\d{4}/.test(row.hazard))).toBe(true);
     expect(rows.every((row) => !/기술지원규정|기술지침/.test(row.hazard))).toBe(true);
-    const genericHazardRow = rows.find((row) => row.hazard.includes("유해·위험요인 미확인"));
-    expect(genericHazardRow).toBeDefined();
-    expect(genericHazardRow?.hazard).not.toContain("관련 위험");
+    const exteriorCleaningRow = rows.find((row) => row.evidenceRefs.includes("G-67-2011 건물 외벽 청소 작업에 관한 기술지침"));
+    expect(exteriorCleaningRow?.hazard).toMatch(/외벽.*추락|추락.*외벽/);
+    expect(`${exteriorCleaningRow?.currentControls} ${exteriorCleaningRow?.additionalControls}`).toMatch(/안전대|작업로프|구명줄|난간|추락/);
+    expect(exteriorCleaningRow?.hazard).not.toContain("유해·위험요인 미확인");
     expect(rows.every((row) => !/위험.*관련 위험/.test(row.hazard))).toBe(true);
+  });
+
+  it("aligns B-E-17 paint evidence to fire and explosion controls without changing raw provenance", () => {
+    const paintReference = reference({
+      id: "b-e-17-paint",
+      source_id: "kosha-technical-support-regulations-2025",
+      item_type: "technical-support-regulation",
+      category: "산업안전일반분야",
+      subcategory: "기술지원규정",
+      title: "B-E-17-2026 도장 공정에서의 화재·폭발위험방지",
+      summary: "도료와 유기용제 증기가 체류하는 도장 공정의 화재·폭발 방지 기준",
+      keywords: ["도장", "도료", "유기용제"],
+      risk_tags: ["화재", "폭발"],
+      controls: ["가동부 방호덮개 설치", "정비 전 전원 차단 및 잠금표지"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    });
+    const rawControls = [...paintReference.controls];
+    const response = buildMockAskResponse("도장 공정 화재·폭발", mockSearchResults, "mock", "테스트");
+    const rows = buildSafetyReferenceRiskRows(response, [paintReference], "실내 작업", "도장 공정 화재 폭발 유기용제");
+    const row = rows.find((candidate) => candidate.evidenceRefs.includes(paintReference.title));
+    const controls = `${row?.currentControls} ${row?.additionalControls}`;
+
+    expect(row?.hazard).toMatch(/도장.*화재·폭발|화재·폭발.*도장/);
+    expect(controls).toMatch(/도료|유기용제|환기/);
+    expect(controls).toMatch(/점화원|화기|방폭|MSDS|보호구|소화기/);
+    expect(controls).not.toContain("가동부 방호덮개");
+    expect(controls.trim()).not.toBe("정비 전 전원 차단 및 잠금표지");
+    expect(paintReference.controls).toEqual(rawControls);
+    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
+  });
+
+  it("aligns B-E-20 electrostatic coating evidence to grounding and explosion controls", () => {
+    const electrostaticReference = reference({
+      id: "b-e-20-electrostatic",
+      source_id: "kosha-technical-support-regulations-2025",
+      item_type: "technical-support-regulation",
+      category: "전기안전분야",
+      subcategory: "기술지원규정",
+      title: "B-E-20-2026 정전도장기",
+      summary: "정전도장기의 정전기 방전과 도료 증기 점화 방지 기준",
+      keywords: ["정전도장", "정전기", "접지"],
+      risk_tags: ["화재", "폭발"],
+      controls: ["가동부 방호덮개 설치", "정비 전 전원 차단 및 잠금표지"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    });
+    const response = buildMockAskResponse("정전도장기 화재·폭발", mockSearchResults, "mock", "테스트");
+    const rows = buildSafetyReferenceRiskRows(response, [electrostaticReference], "실내 작업", "정전도장 정전기 접지 화재 폭발");
+    const row = rows.find((candidate) => candidate.evidenceRefs.includes(electrostaticReference.title));
+    const controls = `${row?.currentControls} ${row?.additionalControls}`;
+
+    expect(row?.hazard).toMatch(/정전도장|정전기/);
+    expect(row?.hazard).toMatch(/화재·폭발|폭발|화재/);
+    expect(controls).toMatch(/접지|정전기 제거/);
+    expect(controls).toMatch(/방폭|환기|점화원|화기/);
+    expect(controls).not.toContain("가동부 방호덮개");
+    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
+  });
+
+  it("aligns G-67 exterior cleaning evidence and carries the same controls and refs into TBM links", () => {
+    const exteriorReference = reference({
+      id: "g-67-exterior-cleaning",
+      source_id: "kosha-technical-guidelines",
+      item_type: "technical-guideline",
+      category: "산업안전일반분야",
+      subcategory: "기술지침",
+      title: "G-67-2011 건물 외벽 청소",
+      summary: "건물 외벽에서 로프와 작업대를 사용해 청소하는 작업",
+      keywords: ["건물 외벽", "청소", "로프"],
+      risk_tags: [],
+      controls: ["작업 전 유해·위험요인 확인", "관리감독자 확인 후 작업 시작"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    });
+    const response = buildMockAskResponse("건물 외벽 청소", mockSearchResults, "mock", "테스트");
+    const rows = buildSafetyReferenceRiskRows(response, [exteriorReference], "맑음", "건물 외벽 청소 로프 추락");
+    const row = rows.find((candidate) => candidate.evidenceRefs.includes(exteriorReference.title));
+    const controls = `${row?.currentControls} ${row?.additionalControls}`;
+
+    expect(row?.hazard).toMatch(/외벽.*추락|추락.*외벽/);
+    expect(row?.hazard).not.toContain("유해·위험요인 미확인");
+    expect(controls).toMatch(/작업로프|안전대|구명줄|작업발판|난간|하부 출입 통제/);
+    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
+
+    expect(row).toBeDefined();
+    if (!row) return;
+    const link = buildTbmRiskLinks([row], "맑음")[0];
+    expect(link.control).toBe(row.additionalControls);
+    expect(link.evidenceRefs).toEqual(row.evidenceRefs);
+  });
+
+  it("retains confined-space pump and actual machinery controls while generic evidence stays review-required", () => {
+    const confinedReference = reference({
+      id: "confined-pump-controls",
+      item_type: "sif-case",
+      category: "밀폐공간",
+      title: "지하 기계실 배수펌프 정비 중 산소결핍 및 불시기동 끼임 사례",
+      summary: "밀폐공간 진입 중 산소결핍과 배수펌프 불시기동 위험",
+      keywords: ["밀폐공간", "배수펌프", "산소농도", "LOTO"],
+      risk_tags: ["질식", "끼임"],
+      controls: ["산소·유해가스 농도 측정", "강제환기 및 감시인 배치", "배수펌프 전원 차단 및 잠금표지"],
+      retrieval_source: "ranked"
+    });
+    const machineryReference = reference({
+      id: "machinery-loto-controls",
+      item_type: "machinery",
+      category: "기계안전",
+      title: "프레스 점검 및 정비 안전",
+      summary: "프레스 가동부 끼임과 정비 중 불시기동 방지",
+      keywords: ["프레스", "정비", "LOTO"],
+      risk_tags: ["끼임"],
+      controls: ["가동부 방호덮개 설치", "비상정지장치 작동 확인", "정비 전 전원 차단 및 잠금표지(LOTO)"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    });
+    const genericReference = reference({
+      id: "generic-review-required",
+      item_type: "technical-guideline",
+      category: "산업안전일반분야",
+      title: "일반 작업 안전 참고자료",
+      summary: "작업 전 일반 안전사항을 확인합니다.",
+      keywords: ["일반", "안전"],
+      risk_tags: [],
+      controls: ["작업 전 유해·위험요인 확인", "관리감독자 확인 후 작업 시작"],
+      evidence_role: "supporting",
+      retrieval_source: "rest"
+    });
+    const response = buildMockAskResponse("설비 점검", mockSearchResults, "mock", "테스트");
+    const rows = buildSafetyReferenceRiskRows(
+      response,
+      [confinedReference, machineryReference, genericReference],
+      "실내 작업",
+      "밀폐공간 배수펌프 프레스 정비 일반 작업"
+    );
+    const confinedRow = rows.find((candidate) => candidate.evidenceRefs.includes(confinedReference.title));
+    const machineryRow = rows.find((candidate) => candidate.evidenceRefs.includes(machineryReference.title));
+    const genericRow = rows.find((candidate) => candidate.evidenceRefs.includes(genericReference.title));
+
+    expect(`${confinedRow?.currentControls} ${confinedRow?.additionalControls}`).toMatch(/산소.*유해가스|유해가스.*산소/);
+    expect(`${confinedRow?.currentControls} ${confinedRow?.additionalControls}`).toMatch(/환기.*감시인|감시인.*환기/);
+    expect(`${confinedRow?.currentControls} ${confinedRow?.additionalControls}`).toMatch(/전원 차단.*잠금표지|LOTO/);
+    expect(`${machineryRow?.currentControls} ${machineryRow?.additionalControls}`).toMatch(/방호덮개/);
+    expect(`${machineryRow?.currentControls} ${machineryRow?.additionalControls}`).toMatch(/비상정지/);
+    expect(`${machineryRow?.currentControls} ${machineryRow?.additionalControls}`).toMatch(/잠금표지|LOTO/);
+    expect(genericRow?.verificationStatus).toBe("needsReview");
+    expect(genericRow?.hazard).toMatch(/검토 필요|미확정/);
+    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
   });
 
   it("preserves upstream task-specific rerank order when building risk rows", () => {

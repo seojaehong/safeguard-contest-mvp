@@ -25,6 +25,12 @@ export type SafetyReferenceItem = {
   vector_similarity?: number;
 };
 
+export type SafetyReferenceOperationalView = {
+  hazard: string;
+  controls: string[];
+  reviewRequired: boolean;
+};
+
 export type SafetyReferenceRetrievalMode = "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
 
 export type SafetyReferenceVectorStatus = {
@@ -305,6 +311,167 @@ export function getSafetyReferenceDisplaySummary(item: SafetyReferenceItem): str
   const displaySummary = item.display_summary || deriveSifDisplaySummary(item);
   if (displaySummary) return displaySummary;
   return compactText(stripRawSifSummaryLabels(item.short_summary || item.summary || item.title), 140);
+}
+
+const OPERATIONAL_RISK_PATTERN = /추락|전도|질식|폭발|화재|감전|붕괴|끼임|협착|충돌|낙하|비래|중독|매몰|익사|화상|절단|전기|소음|분진|밀폐|강풍|유해/;
+const OPERATIONAL_ACTION_PATTERN = /중지|차단|통제|부착|배치|체결|착용|잠금|설치|공유|교육|보고|복창|격리|환기|측정/;
+const GENERIC_OPERATIONAL_CONTROL_PATTERN = /유해[·\s]?위험요인.*확인|관리감독자.*확인|필수 확인 항목|현장 확인 항목|일반 안전사항/;
+
+function operationalReferenceText(item: SafetyReferenceItem): string {
+  return [
+    getSafetyReferenceDisplayTitle(item),
+    item.category || "",
+    item.subcategory || "",
+    getSafetyReferenceDisplaySummary(item),
+    ...item.risk_tags,
+    ...item.keywords,
+    ...item.controls
+  ].join(" ");
+}
+
+function normalizeOperationalRiskTag(value: string | null | undefined): string {
+  return compactText(value || "", 24)
+    .replace(/\s*위험(?:요인)?$/g, "")
+    .replace(/\s*관련$/g, "")
+    .trim();
+}
+
+function stripOperationalTitle(value: string): string {
+  return value
+    .replace(/^[A-Z]-[A-Z]-\d{1,4}-\d{4}\s*/i, "")
+    .replace(/^\d{4,}\s*/, "")
+    .replace(/\s*에\s*관한\s*(기술지원규정|기술지침|안전작업지침|가이드|지침)$/g, "")
+    .replace(/\s*(기술지원규정|기술지침|안전작업지침|가이드|지침)$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function operationalHazardSubjectFromControl(value: string | undefined): string {
+  const control = compactText(value || "", 92);
+  if (!control) return "";
+  const subject = control
+    .replace(/^작업\s*(전|중|후)\s*/g, "")
+    .replace(/\s*사전\s*/g, " ")
+    .replace(/\s*상태를?\s*확인(?:합니다)?\.?$/g, "")
+    .replace(/\s*여부를?\s*확인(?:합니다)?\.?$/g, "")
+    .replace(/\s*확인(?:합니다)?\.?$/g, "")
+    .replace(/\s*점검(?:합니다)?\.?$/g, "")
+    .replace(/\s*측정(?:합니다)?\.?$/g, "")
+    .replace(/[.。]$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!subject) return "";
+  const suffix = OPERATIONAL_ACTION_PATTERN.test(control) ? "미이행" : /점검/.test(control) ? "미점검" : "미확인";
+  return compactText(`${subject} ${suffix}`, 84);
+}
+
+function deriveDefaultOperationalHazard(item: SafetyReferenceItem, controls: string[]): string {
+  const explicitTag = normalizeOperationalRiskTag(item.risk_tags.find((tag) => OPERATIONAL_RISK_PATTERN.test(tag)));
+  const categoryTag = normalizeOperationalRiskTag(item.category);
+  const subcategoryTag = normalizeOperationalRiskTag(item.subcategory);
+  const title = stripOperationalTitle(getSafetyReferenceDisplayTitle(item));
+  const titleTag = normalizeOperationalRiskTag(title.match(OPERATIONAL_RISK_PATTERN)?.[0]);
+  const riskTag = explicitTag || (OPERATIONAL_RISK_PATTERN.test(categoryTag) ? categoryTag : "") ||
+    (OPERATIONAL_RISK_PATTERN.test(subcategoryTag) ? subcategoryTag : "") || titleTag;
+  const controlSubject = operationalHazardSubjectFromControl(controls[0]) ||
+    operationalHazardSubjectFromControl(getSafetyReferenceDisplaySummary(item));
+  const titleSubject = title
+    ? /사례|재해|사고/.test(title)
+      ? compactText(`${title} 재발 위험`, 84)
+      : compactText(`${title} 조치 미확인`, 84)
+    : "";
+  const subject = controlSubject || titleSubject;
+  if (riskTag && subject) return `${riskTag} 위험: ${subject}`;
+  if (riskTag) return `${riskTag} 위험: 현장 조치 미확인`;
+  if (subject) return /위험/.test(subject) ? subject : `${subject} 관련 위험`;
+  return "DB 하네스 근거 기반 위험요인";
+}
+
+function genericOperationalView(item: SafetyReferenceItem): SafetyReferenceOperationalView {
+  const displaySummary = getSafetyReferenceDisplaySummary(item);
+  const rawControls = item.controls.map((control) => control.trim()).filter(Boolean);
+  const onlyGenericControls = rawControls.length > 0 && rawControls.every((control) => GENERIC_OPERATIONAL_CONTROL_PATTERN.test(control));
+  if (onlyGenericControls) {
+    const subject = stripOperationalTitle(getSafetyReferenceDisplayTitle(item)) || "일반 안전 참고자료";
+    return {
+      hazard: `검토 필요: ${compactText(subject, 64)}의 현장 위험요인 미확정`,
+      controls: [
+        "근거 원문과 현장 조건을 대조해 위험요인·통제대책 검토",
+        "관리감독자 검토 완료 전 특정 통제대책으로 확정하지 않음"
+      ],
+      reviewRequired: true
+    };
+  }
+
+  const controls = rawControls.length
+    ? rawControls
+    : [displaySummary || "근거 원문의 위험요인과 통제대책 검토", "관리감독자 확인 후 현장 통제대책 확정"];
+  return {
+    hazard: deriveDefaultOperationalHazard(item, controls),
+    controls,
+    reviewRequired: rawControls.length === 0
+  };
+}
+
+export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem): SafetyReferenceOperationalView {
+  const text = operationalReferenceText(item);
+
+  if (/B-E-20-2026|정전도장기|정전도장/u.test(text)) {
+    return {
+      hazard: "정전도장 중 정전기 방전과 도료 증기 점화로 인한 화재·폭발 위험",
+      controls: [
+        "정전도장기·피도장물 접지 및 정전기 제거 상태 확인",
+        "방폭형 환기설비 가동 및 화기·스파크 등 점화원 통제"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  if (/B-E-17-2026|도장 공정.*(?:화재|폭발|도료|유기용제)/u.test(text)) {
+    return {
+      hazard: "도장 공정의 도료·유기용제 증기 점화로 인한 화재·폭발 위험",
+      controls: [
+        "도료·유기용제 취급 구역 국소배기·전체환기 실시",
+        "화기·스파크 등 점화원 통제, MSDS·보호구 확인 및 소화기 비치"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  if (/G-67(?:-2011)?|건물 외벽 청소/u.test(text)) {
+    return {
+      hazard: "건물 외벽 청소 중 작업로프·작업발판에서의 추락 위험",
+      controls: [
+        "작업로프·안전대·구명줄 체결 및 고정점 사전 점검",
+        "작업발판·난간 설치, 하부 출입 통제 및 강풍·우천 시 작업 중지"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  if (/밀폐공간|산소결핍|유해가스|맨홀|탱크 내부|지하 기계실.*배수펌프/u.test(text)) {
+    return {
+      hazard: "밀폐공간 진입 중 산소결핍·유해가스 노출 및 펌프 불시기동 위험",
+      controls: [
+        "진입 전 산소·유해가스 농도 측정 및 강제환기 실시",
+        "감시인 외부 배치 및 펌프 전원 차단·잠금표지(LOTO)"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  if (item.item_type === "machinery" || /프레스|선반|컨베이어|산업용 로봇|가동부|비상정지장치/u.test(text)) {
+    return {
+      hazard: "기계 가동부 끼임 및 정비 중 불시기동 위험",
+      controls: [
+        "가동부 방호덮개 설치 및 비상정지장치 작동 확인",
+        "정비 전 전원 차단 및 잠금표지(LOTO)"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  return genericOperationalView(item);
 }
 
 function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "source_id">): "direct" | "supporting" {
