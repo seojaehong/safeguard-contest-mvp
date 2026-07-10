@@ -167,3 +167,54 @@ Result:
 - internal document keys in user-facing answer/deliverables: no
 
 Remaining product-quality note: several retrieved direct evidence rows are still broad KOSHA support-regulation matches rather than highly specific pump/confined-space-only rows. The core harness loop now works, but the next quality lift should rerank evidence so 밀폐공간/LOTO/배수펌프-specific SIF and standards appear ahead of generic safety support regulations.
+
+## Task-Specific Rerank Evidence
+
+Source artifacts:
+
+- `postdeploy-rerank-api-ask-harness-summary.json`
+- `postdeploy-rerank-api-ask-harness-full.json`
+
+Deployment:
+
+- commits: `5c968cc`, `ffcdb9e`
+- production deployment: `https://safeguard-contest-neroaj60w-seojaehongs-projects.vercel.app`
+- alias: `https://www.safeclaw.kr`
+
+Local verification:
+
+```powershell
+npm.cmd test -- tests\safety-reference-hybrid.test.ts tests\commercial-harness.test.ts tests\quality-contract.test.ts tests\pump-confined-scenario.test.ts
+npm.cmd run build
+npm.cmd run typecheck
+```
+
+Result:
+
+- focused tests: 4 files / 30 tests passed
+- build: passed
+- typecheck: passed
+- production API status: 200
+- mode: `live`
+- generationMode: `enhanced`
+- quality: `ready`
+- DB harness quality: `ready`
+- ontology QA: `통과`
+- safety reference message includes: `작업특화 rerank 적용`
+- retrieval mode: `rest-ilike`
+- vector search: `disabled`
+- first safety reference item: SIF case `1919 / 기타의사업 / 시설관리및사업지원서비스업`
+- first safety reference item is pump/confined-space specific: yes
+- first safety reference item is broad support-only material: no
+- risk rows: 6
+- TBM risk links: 6
+- first risk row is pump/LOTO specific: yes
+- improvement memory: 1
+- similar workpack memory: 1
+- Before/After improvement reflected in risk assessment: yes
+- Before/After improvement reflected in TBM briefing: yes
+- Before/After improvement reflected in TBM log: yes
+- ceiling-leak template bleed: no
+- internal document keys in user-facing answer/deliverables: no
+
+The previous product-quality note is resolved for ordering: SIF/confined-space/LOTO-specific evidence now appears before broad KOSHA support material in the safety reference surface and is preserved when deterministic risk rows are built. Remaining long-term quality lift: enrich SIF titles/summaries so the evidence labels themselves are more human-readable than archive row numbers.
