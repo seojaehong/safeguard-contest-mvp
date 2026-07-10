@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { AskResponse } from "@/lib/types";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import styles from "@/components/WorkflowSharePanel.module.css";
+import type { AskResponse } from "@/lib/types";
 import type { WorkpackReadiness } from "@/lib/workpack-readiness";
 import {
   buildDisplayTargetWorkers,
@@ -12,14 +13,44 @@ import {
 import {
   createAuthenticatedShareSession,
   dispatchAuthenticatedShareSession,
-  isProviderDispatchConfirmed,
   type WorkflowDispatchChannelResult,
   type WorkflowDispatchResult
 } from "@/lib/workflow-share-client";
+import {
+  buildDispatchLogIdempotencyKey,
+  buildProviderDispatchIdempotencyKey,
+  buildReadConfirmationStatus,
+  buildShareEvidenceSummary,
+  buildWorkflowShareEvidenceScopeKey,
+  buildWorkflowShareTargetSignature,
+  classifyWorkflowDispatchPresentation,
+  createWorkflowShareEvidenceState,
+  DISPATCH_LOG_IDEMPOTENCY_SUPPORTED,
+  evaluateShareSessionReuse,
+  getDispatchLogRetryPolicy,
+  isShareSessionPermissionReady,
+  isShareUuid,
+  parseAdminConfirmationRows,
+  parseShareSessionRows,
+  readWorkflowShareEvidenceForScope,
+  reduceWorkflowShareEvidence,
+  resolveShareLanguagePresentation,
+  selectAuthorityShareSession,
+  selectReusableShareSession,
+  summarizeReadConfirmations,
+  validateShareAuthority,
+  type ShareAuthority,
+  type ShareReadConfirmation,
+  type ShareSessionArchiveRecord,
+  type ShareSessionReuseReason,
+  type WorkflowShareLogSaveStatus
+} from "@/components/WorkflowSharePolicy";
 
 type Channel = "email" | "sms" | "kakao" | "band";
 type ActiveChannel = Extract<Channel, "email" | "sms" | "kakao">;
 type MessageTarget = "manager" | `foreign:${string}`;
+type WorkflowSharePhase = "idle" | "saving-workpack" | "creating-session" | "dispatching" | "saving-log";
+type RemoteRecordStatus = "idle" | "loading" | "ready" | "unconfigured" | "error";
 
 type WorkflowSharePanelProps = {
   data: AskResponse;
@@ -32,13 +63,430 @@ type WorkflowSharePanelProps = {
   readiness?: WorkpackReadiness;
 };
 
-const channelOptions: Array<{ key: Channel; label: string; helper: string; enabled: boolean }> = [
-  { key: "email", label: "메일", helper: "관리자·원청 보고", enabled: true },
-  { key: "sms", label: "문자", helper: "작업자 즉시 공지", enabled: true },
-  { key: "kakao", label: "카카오", helper: "알림톡 · 승인 템플릿 필요", enabled: true },
-  { key: "band", label: "밴드", helper: "잠김 · 팀 채널 승인 후 활성화", enabled: false }
+type PersistedShareSession = ShareSessionArchiveRecord;
+
+type PersistedReadConfirmation = ShareReadConfirmation;
+
+type PersistedDispatchLog = {
+  id: string;
+  workpackId: string;
+  channel: string;
+  provider: string;
+  providerStatus: string;
+  workflowRunId: string;
+  failureReason: string;
+  createdAt: string | null;
+};
+
+type WorkflowShareArchive = {
+  shareOk: boolean;
+  shareConfigured: boolean;
+  shareMessage: string;
+  dispatchOk: boolean;
+  dispatchConfigured: boolean;
+  dispatchMessage: string;
+  sessions: PersistedShareSession[];
+  confirmations: PersistedReadConfirmation[];
+  logs: PersistedDispatchLog[];
+};
+
+type ShareRecordsState = {
+  status: RemoteRecordStatus;
+  message: string;
+  sessions: PersistedShareSession[];
+  confirmations: PersistedReadConfirmation[];
+};
+
+type DispatchRecordsState = {
+  status: RemoteRecordStatus;
+  message: string;
+  logs: PersistedDispatchLog[];
+};
+
+type DispatchLogDraft = {
+  channel: string;
+  targetLabel: string;
+  provider?: string;
+  providerStatus: string;
+  workflowRunId?: string;
+  failureReason?: string;
+  payload: {
+    workpackId: string;
+    shareSessionId: string;
+    accessScope: "invited";
+    recipientWorkerIds: string[];
+    channelStatus?: string;
+    providerMessage?: string;
+    responseMessage: string;
+    idempotencyKey?: string;
+  };
+};
+
+type DispatchArchiveRequest = {
+  scenario: AskResponse["scenario"];
+  workpackId: string;
+  idempotencyKey: string;
+  logs: DispatchLogDraft[];
+};
+
+type ShareStateDescriptor = {
+  label: string;
+  detail: string;
+  nextAction: string;
+};
+
+type WorkflowShareStatusInput = {
+  authenticated: boolean;
+  targetCount: number;
+  workpackId: string | null;
+  serverWorkerIdCount: number;
+  phase: WorkflowSharePhase;
+  shareRecordsStatus: RemoteRecordStatus;
+  dispatchRecordsStatus: RemoteRecordStatus;
+  logSaveStatus: WorkflowShareLogSaveStatus;
+  activeSession: PersistedShareSession | null;
+  sessionReusable: boolean;
+  sessionReuseReason: ShareSessionReuseReason | null;
+  dispatchLogCount: number;
+  workerConfirmationCount: number;
+  adminMarkedCount: number;
+};
+
+const channelOptions: Array<{
+  key: Channel;
+  label: string;
+  helper: string;
+  nextAction: string;
+  badge: string;
+  enabled: boolean;
+}> = [
+  {
+    key: "email",
+    label: "메일",
+    helper: "관리자·원청 보고",
+    nextAction: "초대 대상의 이메일 확인",
+    badge: "사용 가능",
+    enabled: true
+  },
+  {
+    key: "sms",
+    label: "문자",
+    helper: "작업자 즉시 공지",
+    nextAction: "초대 대상의 휴대전화 확인",
+    badge: "사용 가능",
+    enabled: true
+  },
+  {
+    key: "kakao",
+    label: "카카오",
+    helper: "채널·템플릿 승인을 서버에서 확인",
+    nextAction: "승인된 발신 채널과 템플릿 연결",
+    badge: "승인 확인 필요",
+    enabled: true
+  },
+  {
+    key: "band",
+    label: "밴드",
+    helper: "팀 채널 운영 승인이 없어 선택 불가",
+    nextAction: "관리자 채널 승인 후 활성화",
+    badge: "잠김",
+    enabled: false
+  }
 ];
 const activeDispatchChannels: ActiveChannel[] = ["email", "sms", "kakao"];
+const EMPTY_SHARE_RECORDS: ShareRecordsState = {
+  status: "idle",
+  message: "저장된 workpack ID가 생기면 공유 세션과 열람 이력을 조회합니다.",
+  sessions: [],
+  confirmations: []
+};
+const EMPTY_DISPATCH_RECORDS: DispatchRecordsState = {
+  status: "idle",
+  message: "저장된 workpack ID가 생기면 전송 로그를 조회합니다.",
+  logs: []
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function readArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+export function parseWorkflowShareArchive(
+  sharePayload: unknown,
+  dispatchPayload: unknown,
+  workpackId: string
+): WorkflowShareArchive {
+  const shareBody = isRecord(sharePayload) ? sharePayload : {};
+  const dispatchBody = isRecord(dispatchPayload) ? dispatchPayload : {};
+  const sessions: PersistedShareSession[] = parseShareSessionRows(shareBody.sessions);
+  const confirmations: PersistedReadConfirmation[] = parseAdminConfirmationRows(shareBody.confirmations);
+  const parsedLogs = readArray(dispatchBody.logs).flatMap((item): PersistedDispatchLog[] => {
+    if (!isRecord(item)) return [];
+    const id = readString(item.id);
+    const savedWorkpackId = readString(item.workpackId);
+    if (!id || !savedWorkpackId) return [];
+    return [{
+      id,
+      workpackId: savedWorkpackId,
+      channel: readString(item.channel),
+      provider: readString(item.provider),
+      providerStatus: readString(item.providerStatus),
+      workflowRunId: readString(item.workflowRunId),
+      failureReason: readString(item.failureReason),
+      createdAt: readString(item.createdAt) || null
+    }];
+  });
+  const logs = parsedLogs.filter((log) => log.workpackId === workpackId);
+
+  return {
+    shareOk: shareBody.ok === true,
+    shareConfigured: shareBody.configured === true,
+    shareMessage: readString(shareBody.message) || "공유 세션 이력 응답을 확인하지 못했습니다.",
+    dispatchOk: dispatchBody.ok === true,
+    dispatchConfigured: dispatchBody.configured === true,
+    dispatchMessage: readString(dispatchBody.message) || "전송 로그 응답을 확인하지 못했습니다.",
+    sessions,
+    confirmations,
+    logs
+  };
+}
+
+function isValidationOnlyMarker(value: string | undefined): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return ["fixture", "validation-only", "dry-run", "mock", "test"].some((marker) => (
+    normalized === marker
+    || normalized.startsWith(`${marker}-`)
+    || normalized.endsWith(`-${marker}`)
+    || normalized.includes(`-${marker}-`)
+  ));
+}
+
+export function isValidationOnlyDispatch(result: WorkflowDispatchResult): boolean {
+  return [
+    result.providerStatus,
+    result.workflowRunId,
+    ...(result.channelResults || []).map((item) => item.provider)
+  ].some(isValidationOnlyMarker);
+}
+
+export function buildDispatchLogDrafts(input: {
+  result: WorkflowDispatchResult;
+  workpackId: string;
+  shareSessionId: string;
+  workerIds: string[];
+}): DispatchLogDraft[] {
+  if (isValidationOnlyDispatch(input.result) || input.result.providerCalled === false || input.result.duplicateRisk) return [];
+  return (input.result.channelResults || []).flatMap((item): DispatchLogDraft[] => {
+    if (!item.channel) return [];
+    return [{
+      channel: item.channel,
+      targetLabel: `초대 작업자 ${input.workerIds.length}명`,
+      provider: item.provider,
+      providerStatus: item.status || "unknown",
+      workflowRunId: input.result.workflowRunId,
+      failureReason: item.status === "sent" ? undefined : item.message,
+      payload: {
+        workpackId: input.workpackId,
+        shareSessionId: input.shareSessionId,
+        accessScope: "invited",
+        recipientWorkerIds: input.workerIds,
+        channelStatus: item.status,
+        providerMessage: item.message,
+        responseMessage: input.result.message
+      }
+    }];
+  });
+}
+
+function formatSessionReuseReason(reason: ShareSessionReuseReason | null): string {
+  if (reason === "expiry_missing") return "expires_at이 없어 과거 세션을 재사용하지 않습니다.";
+  if (reason === "expiry_invalid") return "expires_at 형식이 올바르지 않아 세션을 재사용하지 않습니다.";
+  if (reason === "expired") return "만료된 세션이라 재사용하지 않습니다.";
+  if (reason === "permission_not_ready") return "invited · anonymous false · viewer · workerSnapshot 조건을 모두 확인할 수 없습니다.";
+  if (reason === "recipient_mismatch") return "현재 대상과 저장된 recipient snapshot이 일치하지 않습니다.";
+  return "현재 대상과 재사용 정책을 모두 충족한 세션이 아닙니다.";
+}
+
+export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
+  storage: ShareStateDescriptor;
+  session: ShareStateDescriptor;
+  dispatch: ShareStateDescriptor;
+  acknowledgment: ShareStateDescriptor;
+} {
+  const authorityReady = Boolean(
+    input.authenticated
+    && input.workpackId
+    && input.targetCount > 0
+    && input.serverWorkerIdCount === input.targetCount
+  );
+  let storage: ShareStateDescriptor;
+  if (!input.authenticated) {
+    storage = {
+      label: "로그인 필요",
+      detail: "서버 workpack을 아직 만들지 않았습니다.",
+      nextAction: "관리자 로그인"
+    };
+  } else if (!input.targetCount) {
+    storage = {
+      label: "대상 선택 필요",
+      detail: "저장할 작업자 대상이 없습니다.",
+      nextAction: "공유할 작업자 선택"
+    };
+  } else if (input.phase === "saving-workpack") {
+    storage = {
+      label: "저장 ID 발급 중",
+      detail: "workpack과 worker UUID를 서버에 저장하고 있습니다.",
+      nextAction: "저장 완료 대기"
+    };
+  } else if (authorityReady) {
+    storage = {
+      label: "저장됨",
+      detail: `workpack · worker UUID ${input.serverWorkerIdCount}명`,
+      nextAction: "공유 세션 확인"
+    };
+  } else if (input.workpackId) {
+    storage = {
+      label: "작업자 ID 대기",
+      detail: `대상 ${input.targetCount}명 · 서버 ID ${input.serverWorkerIdCount}명`,
+      nextAction: "작업자 저장 완료 후 다시 확인"
+    };
+  } else {
+    storage = {
+      label: "저장 ID 대기",
+      detail: "workpack과 작업자 서버 ID가 아직 없습니다.",
+      nextAction: "전송 확인에서 서버 저장"
+    };
+  }
+
+  const recipientCount = input.activeSession?.recipients.length || 0;
+  let session: ShareStateDescriptor;
+  if (input.phase === "creating-session") {
+    session = {
+      label: "세션 생성 중",
+      detail: "초대 대상과 권한 snapshot을 저장하고 있습니다.",
+      nextAction: "세션 ID 발급 대기"
+    };
+  } else if (input.activeSession) {
+    session = {
+      label: input.sessionReusable ? `활성 · ${recipientCount}명` : `재사용 불가 · ${recipientCount}명`,
+      detail: input.sessionReusable && isShareSessionPermissionReady(input.activeSession)
+        ? "초대 대상 snapshot · viewer 권한"
+        : formatSessionReuseReason(input.sessionReuseReason),
+      nextAction: input.shareRecordsStatus === "error"
+        ? "세션 이력 다시 조회"
+        : input.sessionReusable
+          ? "채널별 전송 결과 확인"
+          : "전송 시 새 공유 세션 생성"
+    };
+  } else if (!authorityReady) {
+    session = {
+      label: "저장 후 생성",
+      detail: "workpack과 worker UUID가 있어야 세션을 만듭니다.",
+      nextAction: "저장 ID 확보"
+    };
+  } else if (input.shareRecordsStatus === "loading") {
+    session = {
+      label: "세션 조회 중",
+      detail: "저장된 활성 세션을 확인하고 있습니다.",
+      nextAction: "조회 완료 대기"
+    };
+  } else if (input.shareRecordsStatus === "unconfigured") {
+    session = {
+      label: "세션 저장소 미연결",
+      detail: "Supabase 공유 세션 저장소가 연결되지 않았습니다.",
+      nextAction: "서버 저장소 설정 확인"
+    };
+  } else if (input.shareRecordsStatus === "error") {
+    session = {
+      label: "세션 조회 실패",
+      detail: "활성 공유 세션을 확인하지 못했습니다.",
+      nextAction: "세션 이력 다시 조회"
+    };
+  } else {
+    session = {
+      label: "아직 없음",
+      detail: "전송 전 초대 대상 snapshot으로 생성합니다.",
+      nextAction: "전송할 채널 확인"
+    };
+  }
+
+  let dispatch: ShareStateDescriptor;
+  if (input.phase === "dispatching") {
+    dispatch = {
+      label: "provider 응답 대기",
+      detail: "채널별 전송 결과를 기다리고 있습니다.",
+      nextAction: "전송 창을 닫지 않기"
+    };
+  } else if (input.phase === "saving-log") {
+    dispatch = {
+      label: "전송 결과 · 로그 저장 중",
+      detail: "provider 결과를 dispatch_logs에 저장하고 있습니다.",
+      nextAction: "로그 저장 완료 대기"
+    };
+  } else if (input.logSaveStatus === "duplicate-risk") {
+    dispatch = {
+      label: "저장 미확인 · 중복 가능",
+      detail: "서버 idempotency 지원이 없어 전송 로그 재시도를 중단했습니다.",
+      nextAction: "관리자에게 저장 여부 대조 요청"
+    };
+  } else if (input.logSaveStatus === "error") {
+    dispatch = {
+      label: "로그 저장 실패",
+      detail: "provider 결과와 서버 로그 저장은 별도 상태입니다.",
+      nextAction: "관리자에게 저장 상태 확인 요청"
+    };
+  } else if (input.dispatchRecordsStatus === "loading") {
+    dispatch = {
+      label: "로그 조회 중",
+      detail: "현재 workpack의 전송 로그를 확인하고 있습니다.",
+      nextAction: "조회 완료 대기"
+    };
+  } else if (input.dispatchLogCount > 0) {
+    dispatch = {
+      label: `저장 로그 ${input.dispatchLogCount}건`,
+      detail: input.dispatchRecordsStatus === "error"
+        ? "조회 오류 · 마지막 확인 기록 기준"
+        : "채널·provider 상태·실행 ID 저장",
+      nextAction: input.dispatchRecordsStatus === "error" ? "전송 로그 다시 조회" : "채널별 결과 검토"
+    };
+  } else if (input.dispatchRecordsStatus === "unconfigured") {
+    dispatch = {
+      label: "로그 저장소 미연결",
+      detail: "dispatch_logs 저장소가 연결되지 않았습니다.",
+      nextAction: "서버 저장소 설정 확인"
+    };
+  } else if (input.dispatchRecordsStatus === "error") {
+    dispatch = {
+      label: "로그 조회 실패",
+      detail: "저장된 전송 로그를 확인하지 못했습니다.",
+      nextAction: "전송 로그 다시 조회"
+    };
+  } else {
+    dispatch = {
+      label: "최근 조회 로그 없음",
+      detail: "최근 100건 서버 조회 범위에 현재 workpack의 provider 결과가 없습니다.",
+      nextAction: "채널 선택 후 전송"
+    };
+  }
+
+  const acknowledgment: ShareStateDescriptor = buildReadConfirmationStatus({
+    hasSession: Boolean(input.activeSession),
+    recipientCount,
+    workerConfirmedCount: input.workerConfirmationCount,
+    adminMarkedCount: input.adminMarkedCount,
+    historyError: input.shareRecordsStatus === "error"
+  });
+
+  return { storage, session, dispatch, acknowledgment };
+}
 
 function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
   const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
@@ -114,24 +562,182 @@ export function WorkflowSharePanel({
   const [note, setNote] = useState("작업 전 TBM에서 공유하고, 교육 확인 서명까지 받은 뒤 보관해 주세요.");
   const [isSending, setIsSending] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
-  const [result, setResult] = useState<WorkflowDispatchResult | null>(null);
-  const [shareSessionId, setShareSessionId] = useState<string | null>(null);
-  const [shareSessionAuthorityKey, setShareSessionAuthorityKey] = useState("");
-  const [confirmedAuthorityKey, setConfirmedAuthorityKey] = useState("");
-  const [resultSource, setResultSource] = useState<"copy" | "dispatch" | null>(null);
+  const [phase, setPhase] = useState<WorkflowSharePhase>("idle");
+  const [resolvedAuthority, setResolvedAuthority] = useState<(ShareAuthority & { targetSignature: string }) | null>(null);
+  const [shareRecords, setShareRecords] = useState<ShareRecordsState>(EMPTY_SHARE_RECORDS);
+  const [dispatchRecords, setDispatchRecords] = useState<DispatchRecordsState>(EMPTY_DISPATCH_RECORDS);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const selectedMessage = useMemo(() => {
-    if (selectedMessageTarget === "manager") {
-      return data.deliverables.kakaoMessage;
-    }
-
+    if (selectedMessageTarget === "manager") return data.deliverables.kakaoMessage;
     return buildForeignLanguageMessage(data, selectedMessageTarget.replace("foreign:", ""));
   }, [data, selectedMessageTarget]);
+  const targetSignature = useMemo(
+    () => buildWorkflowShareTargetSignature(targetWorkers),
+    [targetWorkers]
+  );
+  const propAuthority = useMemo<ShareAuthority | null>(() => {
+    if (!workpackId || !targetWorkers.length || workerIds.length !== targetWorkers.length) return null;
+    const candidate = { workpackId, workerIds };
+    return validateShareAuthority(candidate, targetWorkers.length).ok ? candidate : null;
+  }, [targetWorkers.length, workerIds, workpackId]);
+  const resolvedAuthorityCandidate = resolvedAuthority
+    && resolvedAuthority.targetSignature === targetSignature
+    && (!workpackId || resolvedAuthority.workpackId === workpackId)
+      ? { workpackId: resolvedAuthority.workpackId, workerIds: resolvedAuthority.workerIds }
+      : null;
+  const effectiveAuthority = propAuthority || (
+    validateShareAuthority(resolvedAuthorityCandidate, targetWorkers.length).ok
+      ? resolvedAuthorityCandidate
+      : null
+  );
+  const archiveWorkpackId = authToken
+    ? effectiveAuthority?.workpackId || (workpackId && isShareUuid(workpackId) ? workpackId : null)
+    : null;
+  const dispatchEvidenceScopeKey = buildWorkflowShareEvidenceScopeKey({
+    workpackId: archiveWorkpackId,
+    targetSignature,
+    workerIds: effectiveAuthority?.workerIds || []
+  });
+  const [dispatchEvidence, updateDispatchEvidence] = useReducer(
+    reduceWorkflowShareEvidence,
+    dispatchEvidenceScopeKey,
+    createWorkflowShareEvidenceState
+  );
+  const visibleDispatchEvidence = readWorkflowShareEvidenceForScope(
+    dispatchEvidence,
+    dispatchEvidenceScopeKey
+  );
+  const { result, resultSource, shareSessionId, logSaveState } = visibleDispatchEvidence;
+  const targetSignatureRef = useRef(targetSignature);
+  const archiveWorkpackIdRef = useRef(archiveWorkpackId);
+  targetSignatureRef.current = targetSignature;
+  archiveWorkpackIdRef.current = archiveWorkpackId;
+
+  useEffect(() => {
+    updateDispatchEvidence({ type: "scope_changed", scopeKey: dispatchEvidenceScopeKey });
+    setIsConfirming(false);
+  }, [dispatchEvidenceScopeKey]);
+
+  useEffect(() => {
+    if (!authToken || !archiveWorkpackId) {
+      setShareRecords(EMPTY_SHARE_RECORDS);
+      setDispatchRecords(EMPTY_DISPATCH_RECORDS);
+      return;
+    }
+
+    let cancelled = false;
+    setShareRecords((current) => ({ ...current, status: "loading", message: "공유 세션과 열람 이력을 조회하고 있습니다." }));
+    setDispatchRecords((current) => ({ ...current, status: "loading", message: "현재 workpack의 전송 로그를 조회하고 있습니다." }));
+
+    const requestJson = async (url: string): Promise<{ httpOk: boolean; payload: unknown }> => {
+      const response = await fetch(url, {
+        headers: { authorization: `Bearer ${authToken}` }
+      });
+      let payload: unknown = {};
+      try {
+        payload = await response.json() as unknown;
+      } catch (error) {
+        console.warn("workflow share archive response parse failed", error);
+      }
+      return { httpOk: response.ok, payload };
+    };
+
+    void Promise.allSettled([
+      requestJson(`/api/workpacks/${encodeURIComponent(archiveWorkpackId)}/share-sessions`),
+      requestJson("/api/dispatch-logs?limit=100")
+    ]).then(([shareOutcome, dispatchOutcome]) => {
+      if (cancelled) return;
+      const shareResponse = shareOutcome.status === "fulfilled" ? shareOutcome.value : null;
+      const dispatchResponse = dispatchOutcome.status === "fulfilled" ? dispatchOutcome.value : null;
+      const archive = parseWorkflowShareArchive(
+        shareResponse?.payload || {},
+        dispatchResponse?.payload || {},
+        archiveWorkpackId
+      );
+      const shareStatus: RemoteRecordStatus = shareOutcome.status === "rejected"
+        ? "error"
+        : !archive.shareConfigured
+          ? "unconfigured"
+          : !shareResponse?.httpOk || !archive.shareOk
+            ? "error"
+            : "ready";
+      const dispatchStatus: RemoteRecordStatus = dispatchOutcome.status === "rejected"
+        ? "error"
+        : !archive.dispatchConfigured
+          ? "unconfigured"
+          : !dispatchResponse?.httpOk || !archive.dispatchOk
+            ? "error"
+            : "ready";
+      const shareFailure = shareOutcome.status === "rejected"
+        ? shareOutcome.reason instanceof Error ? shareOutcome.reason.message : "공유 세션 조회 요청에 실패했습니다."
+        : archive.shareMessage;
+      const dispatchFailure = dispatchOutcome.status === "rejected"
+        ? dispatchOutcome.reason instanceof Error ? dispatchOutcome.reason.message : "전송 로그 조회 요청에 실패했습니다."
+        : archive.dispatchMessage;
+
+      setShareRecords({
+        status: shareStatus,
+        message: shareFailure,
+        sessions: archive.sessions,
+        confirmations: archive.confirmations
+      });
+      setDispatchRecords({
+        status: dispatchStatus,
+        message: dispatchFailure,
+        logs: archive.logs
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [archiveWorkpackId, authToken, historyRefreshKey]);
+
+  const sessionPolicyNow = Date.now();
+  const reusableSession = selectReusableShareSession(
+    shareRecords.sessions,
+    effectiveAuthority,
+    targetWorkers.length,
+    sessionPolicyNow
+  );
+  const authoritySession = selectAuthorityShareSession(
+    shareRecords.sessions,
+    effectiveAuthority,
+    targetWorkers.length
+  );
+  const activeSession = reusableSession || authoritySession;
+  const sessionReuseDecision = activeSession
+    ? evaluateShareSessionReuse(activeSession, effectiveAuthority, targetWorkers.length, sessionPolicyNow)
+    : null;
+  const sessionReuseReason = sessionReuseDecision && !sessionReuseDecision.reusable
+    ? sessionReuseDecision.reason
+    : null;
+  const confirmationSummary = summarizeReadConfirmations(
+    shareRecords.confirmations,
+    activeSession?.id || null
+  );
+  const dispatchLogCount = Math.max(dispatchRecords.logs.length, logSaveState.knownTotal);
+  const statusModel = deriveWorkflowShareStatus({
+    authenticated: Boolean(authToken),
+    targetCount: targetWorkers.length,
+    workpackId: archiveWorkpackId,
+    serverWorkerIdCount: effectiveAuthority?.workerIds.length || 0,
+    phase,
+    shareRecordsStatus: shareRecords.status,
+    dispatchRecordsStatus: dispatchRecords.status,
+    logSaveStatus: logSaveState.status,
+    activeSession,
+    sessionReusable: Boolean(reusableSession),
+    sessionReuseReason,
+    dispatchLogCount,
+    workerConfirmationCount: confirmationSummary.workerConfirmedCount,
+    adminMarkedCount: confirmationSummary.adminMarkedCount
+  });
 
   function toggleChannel(channel: Channel) {
     const option = channelOptions.find((item) => item.key === channel);
     if (!option?.enabled) return;
-
     setSelectedChannels((current) => (
       current.includes(channel)
         ? current.filter((item) => item !== channel)
@@ -142,161 +748,449 @@ export function WorkflowSharePanel({
   async function copyMessage() {
     try {
       await navigator.clipboard.writeText(selectedMessage);
-      setResult({
-        ok: true,
-        configured: true,
-        message: "공유 메시지를 클립보드에 복사했습니다."
+      updateDispatchEvidence({
+        type: "set_result",
+        scopeKey: dispatchEvidenceScopeKey,
+        result: { ok: true, configured: true, message: "공유 메시지를 클립보드에 복사했습니다." },
+        resultSource: "copy"
       });
-      setResultSource("copy");
     } catch (error) {
       console.error("field message copy failed", error);
-      setResult({
-        ok: false,
-        configured: true,
-        message: "클립보드 복사에 실패했습니다. 아래 메시지를 직접 선택해 복사해 주세요."
+      updateDispatchEvidence({
+        type: "set_result",
+        scopeKey: dispatchEvidenceScopeKey,
+        result: {
+          ok: false,
+          configured: true,
+          message: "클립보드 복사에 실패했습니다. 아래 메시지를 직접 선택해 복사해 주세요."
+        },
+        resultSource: "copy"
       });
-      setResultSource("copy");
+    }
+  }
+
+  async function saveDispatchHistory(request: DispatchArchiveRequest, evidenceScopeKey: string): Promise<void> {
+    if (!authToken) {
+      updateDispatchEvidence({
+        type: "set_log",
+        scopeKey: evidenceScopeKey,
+        logSaveState: {
+          status: "error",
+          message: "관리자 세션이 없어 provider 결과를 저장하지 못했습니다.",
+          savedCount: 0,
+          knownTotal: dispatchRecords.logs.length
+        }
+      });
+      return;
+    }
+
+    setPhase("saving-log");
+    updateDispatchEvidence({
+      type: "set_log",
+      scopeKey: evidenceScopeKey,
+      logSaveState: {
+        status: "saving",
+        message: "provider 결과를 dispatch_logs에 저장하고 있습니다.",
+        savedCount: 0,
+        knownTotal: dispatchRecords.logs.length
+      }
+    });
+    try {
+      const response = await fetch("/api/dispatch-logs", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${authToken}`,
+          "content-type": "application/json"
+        },
+        body: JSON.stringify(request)
+      });
+      let body: unknown = {};
+      try {
+        body = await response.json() as unknown;
+      } catch (error) {
+        console.warn("dispatch log save response parse failed", error);
+      }
+      const payload = isRecord(body) ? body : {};
+      if (!response.ok || payload.ok !== true) {
+        throw new Error(readString(payload.message) || `전송 로그 저장 실패 (HTTP ${response.status})`);
+      }
+      const savedCount = typeof payload.savedCount === "number" ? payload.savedCount : request.logs.length;
+      updateDispatchEvidence({
+        type: "set_log",
+        scopeKey: evidenceScopeKey,
+        logSaveState: {
+          status: "saved",
+          message: `provider 결과 ${savedCount}건을 전송 로그로 저장했습니다.`,
+          savedCount,
+          knownTotal: dispatchRecords.logs.length + savedCount
+        }
+      });
+      setHistoryRefreshKey((current) => current + 1);
+    } catch (error) {
+      console.error("dispatch log save failed", error);
+      const retryPolicy = getDispatchLogRetryPolicy(DISPATCH_LOG_IDEMPOTENCY_SUPPORTED);
+      const failureMessage = error instanceof Error
+        ? error.message
+        : "전송 로그 저장 중 알 수 없는 오류가 발생했습니다.";
+      updateDispatchEvidence({
+        type: "set_log",
+        scopeKey: evidenceScopeKey,
+        logSaveState: {
+          status: retryPolicy.duplicateRisk ? "duplicate-risk" : "error",
+          message: `${failureMessage} ${retryPolicy.message} 요청 키 ${request.idempotencyKey}`,
+          savedCount: 0,
+          knownTotal: dispatchRecords.logs.length
+        }
+      });
     }
   }
 
   async function dispatchWorkflow() {
+    let evidenceScopeKey = dispatchEvidenceScopeKey;
     const activeChannels = selectedChannels.filter((channel): channel is ActiveChannel => (
       activeDispatchChannels.includes(channel as ActiveChannel)
     ));
     if (!authToken) {
-      setResult({
-        ok: false,
-        configured: true,
-        message: "관리자 로그인 후 서버 공유 세션을 만들 수 있습니다. 비회원 초안은 서버 전파나 열람 확인으로 기록되지 않습니다."
+      updateDispatchEvidence({
+        type: "set_result",
+        scopeKey: evidenceScopeKey,
+        result: {
+          ok: false,
+          configured: true,
+          message: "관리자 로그인 후 서버 공유 세션을 만들 수 있습니다. 비회원 초안은 서버 전파나 열람 확인으로 기록되지 않습니다."
+        },
+        resultSource: "dispatch"
       });
       setIsConfirming(false);
       return;
     }
     if (!targetWorkers.length) {
-      setResult({ ok: false, configured: true, message: "공유할 작업자를 한 명 이상 선택해 주세요." });
-      setIsConfirming(false);
-      return;
-    }
-    if (!activeChannels.length) {
-      setResult({
-        ok: false,
-        configured: true,
-        message: "현재 활성 전파 채널은 메일·문자·카카오 알림톡입니다. 하나 이상의 채널을 선택해 주세요."
+      updateDispatchEvidence({
+        type: "set_result",
+        scopeKey: evidenceScopeKey,
+        result: { ok: false, configured: true, message: "공유할 작업자를 한 명 이상 선택해 주세요." },
+        resultSource: "dispatch"
       });
       setIsConfirming(false);
       return;
     }
+    if (!activeChannels.length) {
+      updateDispatchEvidence({
+        type: "set_result",
+        scopeKey: evidenceScopeKey,
+        result: {
+          ok: false,
+          configured: true,
+          message: "현재 활성 전파 채널은 메일·문자·카카오 알림톡입니다. 하나 이상의 채널을 선택해 주세요."
+        },
+        resultSource: "dispatch"
+      });
+      setIsConfirming(false);
+      return;
+    }
+
     setIsSending(true);
     setIsConfirming(false);
-    setResult(null);
-    setResultSource("dispatch");
-    setConfirmedAuthorityKey("");
+    updateDispatchEvidence({ type: "begin_dispatch", scopeKey: evidenceScopeKey });
     try {
-      const authority = workpackId && workerIds.length
-        ? { workpackId, workerIds }
-        : await ensureWorkpackSaved?.();
+      let authority = effectiveAuthority;
+      if (!authority) {
+        setPhase("saving-workpack");
+        authority = await ensureWorkpackSaved?.() || null;
+      }
       if (!authority) {
         throw new Error("문서팩과 작업자 서버 저장이 완료되지 않아 공유 세션을 만들 수 없습니다.");
       }
-      const authorityKey = `${authority.workpackId}:${authority.workerIds.join(",")}`;
-      let activeShareSessionId = shareSessionAuthorityKey === authorityKey ? shareSessionId : null;
+      const authorityValidation = validateShareAuthority(authority, targetWorkers.length);
+      if (!authorityValidation.ok) {
+        if (authorityValidation.reason === "workpack_id_invalid") {
+          throw new Error("서버가 반환한 workpack ID가 올바른 UUID가 아니어서 공유를 중단했습니다.");
+        }
+        throw new Error(`대상 ${targetWorkers.length}명과 유효한 서버 작업자 UUID가 일치하지 않습니다.`);
+      }
+      setResolvedAuthority({ ...authority, targetSignature });
+      const authorityScopeKey = buildWorkflowShareEvidenceScopeKey({
+        workpackId: authority.workpackId,
+        targetSignature,
+        workerIds: authority.workerIds
+      });
+      if (
+        targetSignatureRef.current !== targetSignature
+        || Boolean(archiveWorkpackIdRef.current && archiveWorkpackIdRef.current !== authority.workpackId)
+      ) {
+        throw new Error("공유 대상 또는 workpack이 변경되어 provider 전송을 시작하지 않았습니다.");
+      }
+      if (authorityScopeKey !== evidenceScopeKey) {
+        updateDispatchEvidence({ type: "scope_changed", scopeKey: authorityScopeKey });
+        evidenceScopeKey = authorityScopeKey;
+      }
+
+      const reusableSession = selectReusableShareSession(
+        shareRecords.sessions,
+        authority,
+        targetWorkers.length,
+        Date.now()
+      );
+      let activeShareSessionId = reusableSession?.id || null;
       if (!activeShareSessionId) {
+        setPhase("creating-session");
         const session = await createAuthenticatedShareSession(fetch, {
           authToken,
           workpackId: authority.workpackId,
           workerIds: authority.workerIds
         });
         activeShareSessionId = session.shareSessionId;
-        setShareSessionId(session.shareSessionId);
-        setShareSessionAuthorityKey(authorityKey);
+        setHistoryRefreshKey((current) => current + 1);
       }
+      if (
+        targetSignatureRef.current !== targetSignature
+        || Boolean(archiveWorkpackIdRef.current && archiveWorkpackIdRef.current !== authority.workpackId)
+      ) {
+        throw new Error("공유 대상 또는 workpack이 변경되어 provider 전송을 시작하지 않았습니다.");
+      }
+      updateDispatchEvidence({
+        type: "set_session",
+        scopeKey: evidenceScopeKey,
+        shareSessionId: activeShareSessionId
+      });
 
+      setPhase("dispatching");
+      const dispatchAttemptId = crypto.randomUUID();
+      const providerIdempotencyKey = buildProviderDispatchIdempotencyKey({
+        workpackId: authority.workpackId,
+        shareSessionId: activeShareSessionId,
+        dispatchAttemptId,
+        channels: activeChannels
+      });
       const payload = await dispatchAuthenticatedShareSession(fetch, {
         authToken,
         workpackId: authority.workpackId,
         shareSessionId: activeShareSessionId,
+        idempotencyKey: providerIdempotencyKey,
         channels: activeChannels,
         operatorNote: note
       });
-      setResult(payload);
-      if (isProviderDispatchConfirmed(payload)) setConfirmedAuthorityKey(authorityKey);
+      updateDispatchEvidence({
+        type: "set_result",
+        scopeKey: evidenceScopeKey,
+        result: payload,
+        resultSource: "dispatch"
+      });
+      const logs = buildDispatchLogDrafts({
+        result: payload,
+        workpackId: authority.workpackId,
+        shareSessionId: activeShareSessionId,
+        workerIds: authority.workerIds
+      });
+      if (payload.duplicateRisk || payload.providerStatus === "idempotency-unsupported") {
+        updateDispatchEvidence({
+          type: "set_log",
+          scopeKey: evidenceScopeKey,
+          logSaveState: {
+            status: "skipped",
+            message: payload.providerCalled === true
+              ? `Provider 응답 미확정 · 중복 가능 · 재전송 금지 · 요청 키 ${providerIdempotencyKey}`
+              : `Provider 호출 차단 · 영속 idempotency 미지원 · 요청 키 ${providerIdempotencyKey}`,
+            savedCount: 0,
+            knownTotal: dispatchRecords.logs.length
+          }
+        });
+      } else if (isValidationOnlyDispatch(payload)) {
+        updateDispatchEvidence({
+          type: "set_log",
+          scopeKey: evidenceScopeKey,
+          logSaveState: {
+            status: "skipped",
+            message: "Fixture·검증 전용 응답은 실제 전송 로그로 저장하지 않았습니다.",
+            savedCount: 0,
+            knownTotal: dispatchRecords.logs.length
+          }
+        });
+      } else if (payload.providerCalled === false) {
+        updateDispatchEvidence({
+          type: "set_log",
+          scopeKey: evidenceScopeKey,
+          logSaveState: {
+            status: "skipped",
+            message: `Provider 호출 없음 · ${payload.message}`,
+            savedCount: 0,
+            knownTotal: dispatchRecords.logs.length
+          }
+        });
+      } else if (!logs.length) {
+        updateDispatchEvidence({
+          type: "set_log",
+          scopeKey: evidenceScopeKey,
+          logSaveState: {
+            status: "error",
+            message: "채널별 provider 결과가 없어 저장할 전송 로그를 만들지 못했습니다.",
+            savedCount: 0,
+            knownTotal: dispatchRecords.logs.length
+          }
+        });
+      } else {
+        const idempotencyKey = buildDispatchLogIdempotencyKey({
+          workpackId: authority.workpackId,
+          shareSessionId: activeShareSessionId,
+          dispatchAttemptId,
+          workflowRunId: payload.workflowRunId,
+          logs
+        });
+        const idempotentLogs = logs.map((log) => ({
+          ...log,
+          payload: { ...log.payload, idempotencyKey }
+        }));
+        await saveDispatchHistory({
+          scenario: data.scenario,
+          workpackId: authority.workpackId,
+          idempotencyKey,
+          logs: idempotentLogs
+        }, evidenceScopeKey);
+      }
     } catch (error) {
       console.error("workflow dispatch request failed", error);
-      setResult({
-        ok: false,
-        configured: true,
-        message: error instanceof Error
-          ? error.message
-          : "전파 요청 중 알 수 없는 오류가 발생했습니다."
+      updateDispatchEvidence({
+        type: "set_result",
+        scopeKey: evidenceScopeKey,
+        result: {
+          ok: false,
+          configured: true,
+          message: error instanceof Error ? error.message : "전파 요청 중 알 수 없는 오류가 발생했습니다."
+        },
+        resultSource: "dispatch"
       });
     } finally {
+      setPhase("idle");
       setIsSending(false);
     }
   }
 
   const channelLabel = selectedChannels.map((channel) => formatChannelName(channel)).join(", ");
-  const recipientLabel = targetWorkers.length ? `${targetWorkers.length}명` : "작업자 선택 필요";
-  const targetLabel = formatMessageTargetLabel(data, selectedMessageTarget);
-  const authorityKey = workpackId && workerIds.length ? `${workpackId}:${workerIds.join(",")}` : "";
-  const storageReady = Boolean(authToken && authorityKey);
-  const sessionReady = Boolean(shareSessionId && authorityKey && shareSessionAuthorityKey === authorityKey);
-  const dispatchConfirmed = Boolean(authorityKey && confirmedAuthorityKey === authorityKey);
-  const validationOnlyResult = Boolean(
-    resultSource === "dispatch" && result?.ok && !isProviderDispatchConfirmed(result)
-  );
+  const recipientLabel = targetWorkers.length ? `${targetWorkers.length}명 초대` : "작업자 선택 필요";
   const displayTargetWorkers = buildDisplayTargetWorkers(data, targetWorkers);
   const targetCountLabel = formatDisplayTargetCount(data, targetWorkers);
-  const storageLabel = storageReady ? "workpack·worker UUID 연결" : "서버 저장 전";
-  const storageDetail = storageReady
-    ? `${workerIds.length}명의 서버 작업자 ID를 공유 권한에 사용`
-    : "로그인 후 문서팩과 작업자를 저장해야 공유 세션을 만들 수 있음";
-  const workerDisplayLabel = displayTargetWorkers.length
-    ? displayTargetWorkers.map((worker) => worker.displayName).slice(0, 3).join(", ")
-    : "관리자 입력 수신자";
+  const targetLabel = formatMessageTargetLabel(data, selectedMessageTarget);
+  const workerDisplayLabel = `${displayTargetWorkers.slice(0, 3).map((worker) => worker.displayName).join(", ")}${displayTargetWorkers.length > 3 ? ` 외 ${displayTargetWorkers.length - 3}명` : ""}`;
+  const languagePresentation = resolveShareLanguagePresentation({
+    session: activeSession,
+    sessionReusable: Boolean(reusableSession),
+    plannedLanguageLabels: targetWorkers.map((worker) => worker.languageLabel)
+  });
+  const languageLabel = languagePresentation.label;
+  const languageBasis = languagePresentation.basis;
   const activeChannelLabel = channelLabel || "채널 미선택";
   const previewItems = previewLines(selectedMessage);
-  const acknowledgmentStatus = dispatchConfirmed
-    ? "열람 확인 대기"
-    : sessionReady
-      ? "공유 세션 생성됨 · 전파 대기"
-      : "서버 확인 전";
+  const storageReady = Boolean(authToken && effectiveAuthority);
+  const sessionReady = Boolean(reusableSession);
+  const validationOnlyResult = Boolean(
+    resultSource === "dispatch" && result && isValidationOnlyDispatch(result)
+  );
+  const dispatchPresentation = classifyWorkflowDispatchPresentation({
+    result,
+    resultSource,
+    validationOnly: validationOnlyResult
+  });
+  const resultSucceeded = dispatchPresentation.succeeded;
+  const resultHasFailure = dispatchPresentation.hasFailure;
+  const resultClassName = resultSucceeded
+    ? "workflow-result ok"
+    : resultHasFailure
+      ? "workflow-result error"
+      : "workflow-result";
   const shareBlocked = Boolean(readiness && !readiness.canShare);
-  const shareDisabledReason = readiness?.reasons.join(" · ") || "";
+  const shareDisabledReasons = readiness?.reasons.length
+    ? readiness.reasons
+    : ["서버 검수 조건을 확인해 주세요."];
+  const canResolveAuthority = Boolean(effectiveAuthority || ensureWorkpackSaved);
+  const primaryDisabled = Boolean(
+    !authToken
+    || shareBlocked
+    || isSending
+    || !selectedChannels.length
+    || !targetWorkers.length
+    || !canResolveAuthority
+  );
+  const phaseLabel: Record<WorkflowSharePhase, string> = {
+    idle: "전송 확인",
+    "saving-workpack": "저장 ID 발급 중",
+    "creating-session": "공유 세션 생성 중",
+    dispatching: "provider 전송 중",
+    "saving-log": "전송 로그 저장 중"
+  };
+  const primaryLabel = isSending
+    ? phaseLabel[phase]
+    : !authToken
+      ? "관리자 로그인 필요"
+      : shareBlocked
+        ? "공유 잠김"
+        : !targetWorkers.length
+          ? "작업자 선택 필요"
+          : !canResolveAuthority
+            ? "작업공간에서 저장 필요"
+            : !effectiveAuthority
+              ? "저장 후 전송 확인"
+              : "전송 확인";
+  const permissionReady = Boolean(activeSession && isShareSessionPermissionReady(activeSession));
+  const permissionLabel = activeSession
+    ? permissionReady ? "초대된 사람만" : "서버 정책 확인 필요"
+    : "기본: 초대된 사람만";
+  const permissionDetail = activeSession
+    ? permissionReady
+      ? "관리자 편집 · 작업자 viewer · 공개 링크 없음"
+      : "현재 세션의 share scope와 익명 접근 정책을 확인해야 합니다."
+    : "새 세션 요청값 · invited · viewer · anonymous false";
+  const sessionDetail = shareRecords.status === "error" || shareRecords.status === "unconfigured"
+    ? shareRecords.message
+    : statusModel.session.detail;
+  const dispatchDetail = dispatchRecords.status === "error" || dispatchRecords.status === "unconfigured"
+    ? dispatchRecords.message
+    : statusModel.dispatch.detail;
+  const historyHasError = shareRecords.status === "error" || dispatchRecords.status === "error";
+  const dispatchEvidenceSummary = buildShareEvidenceSummary({
+    workpackSaved: storageReady,
+    sessionSaved: Boolean(activeSession),
+    dispatchLogState: logSaveState.status === "error" || logSaveState.status === "duplicate-risk"
+      ? "uncertain"
+      : logSaveState.status === "saved" || dispatchLogCount > 0
+        ? "saved"
+        : "planned",
+    workerConfirmationSupported: false
+  });
 
   return (
-    <article className="share-panel workflow-panel" id="dispatch">
+    <article className={`share-panel workflow-panel ${styles.panel}`} id="dispatch">
       <header className="share-workflow-header">
         <div>
-          <span className="eyebrow">Share workflow</span>
-          <strong>권한 있는 공유 세션</strong>
-          <p>문서팩, 다국어 안내, 확인 상태, 저장 증빙을 한 번에 검토한 뒤 전송합니다.</p>
+          <span className="eyebrow">Share session</span>
+          <strong>현장 공유</strong>
+          <p>저장된 workpack과 초대 대상만 사용하고, provider 전송과 작업자 열람을 서로 다른 이력으로 확인합니다.</p>
         </div>
-        <div className="share-status-pill" aria-label="공유 워크플로 상태">
-          <span>{storageReady ? "workpack linked" : "draft session"}</span>
-          <strong>{shareBlocked ? readiness?.summary : acknowledgmentStatus}</strong>
+        <div className="share-status-pill" aria-label="공유 워크플로 상태" aria-live="polite">
+          <span>{shareBlocked ? "locked" : sessionReady ? "active session" : storageReady ? "workpack saved" : "draft"}</span>
+          <strong>{shareBlocked ? readiness?.summary : isSending ? phaseLabel[phase] : statusModel.dispatch.label}</strong>
         </div>
       </header>
 
-      <div className="share-permission-grid" aria-label="공유 권한과 상태 요약">
+      <div className="share-permission-grid" aria-label="공유 대상과 권한 요약">
         <section>
-          <span>Permission</span>
-          <strong>초대된 사람만 열람</strong>
-          <p>관리자 편집, 작업자 열람 기준으로 공개 링크 없이 운영합니다.</p>
+          <span>권한</span>
+          <strong>{permissionLabel}</strong>
+          <p>{permissionDetail}</p>
         </section>
         <section>
-          <span>Recipients</span>
-          <strong>{recipientLabel} · {targetCountLabel}</strong>
-          <p>{workerDisplayLabel} 기준으로 수신자, 표시명, 언어를 확인합니다.</p>
+          <span>대상</span>
+          <strong>{targetCountLabel}</strong>
+          <p>{workerDisplayLabel}</p>
         </section>
         <section>
-          <span>Language preview</span>
-          <strong>{targetLabel}</strong>
-          <p>미리보기 언어 선택은 검토·복사용입니다. 실제 전파 언어와 메시지는 서버가 저장된 작업팩과 작업자 언어 스냅샷에서 생성합니다.</p>
+          <span>언어</span>
+          <strong>{languageLabel}</strong>
+          <p>{languageBasis} · 현재 미리보기 {targetLabel}</p>
         </section>
         <section>
-          <span>Acknowledgment</span>
-          <strong>{shareBlocked ? "공유 전 보완" : acknowledgmentStatus}</strong>
-          <p>{shareBlocked ? "검수·근거·결재 상태를 먼저 정리한 뒤 전파합니다." : "열람·확인 기록은 TBM·교육 확인 후보로 보관합니다."}</p>
+          <span>기록 상태</span>
+          <strong>{dispatchEvidenceSummary.headline}</strong>
+          <p>{dispatchEvidenceSummary.detail}</p>
         </section>
       </div>
 
@@ -316,16 +1210,17 @@ export function WorkflowSharePanel({
                 disabled={!channel.enabled}
                 aria-disabled={!channel.enabled}
                 aria-pressed={selectedChannels.includes(channel.key)}
-                aria-label={`${channel.label} 채널 ${selectedChannels.includes(channel.key) ? "선택됨" : "선택"}`}
+                aria-label={`${channel.label} · ${channel.badge}. 다음 행동: ${channel.nextAction}`}
               >
                 <strong>{channel.label}</strong>
                 <span>{channel.helper}</span>
-                {!channel.enabled ? <em>승인 대기</em> : null}
+                <span>다음 행동 · {channel.nextAction}</span>
+                {channel.badge !== "사용 가능" ? <em>{channel.badge}</em> : null}
               </button>
             ))}
           </div>
           <p className="channel-readiness-note">
-            카카오 알림톡은 승인 채널과 템플릿 설정이 없으면 채널별 결과에 설정 필요로 표시됩니다.
+            카카오는 선택할 수 있지만 서버 승인·템플릿 검사에서 설정 필요로 반환될 수 있습니다. 밴드는 운영 승인 전까지 잠깁니다.
           </p>
         </section>
 
@@ -361,25 +1256,41 @@ export function WorkflowSharePanel({
               );
             })}
           </div>
+          <p className="channel-readiness-note">
+            미리보기는 검토·복사용입니다. 실제 provider 메시지는 저장된 작업팩과 작업자 언어 스냅샷에서 서버가 생성합니다.
+          </p>
         </section>
 
         <section className="share-form-card share-recipient-card" aria-labelledby="workflow-recipient-heading">
           <div className="recipient-section-head">
             <span className="share-form-step">03</span>
-            <span className="field-label" id="workflow-recipient-heading">수신자</span>
+            <span className="field-label" id="workflow-recipient-heading">초대 대상</span>
             <span>{recipientLabel}</span>
           </div>
-          {recipientSuggestions.length ? (
-            <div className="recipient-chip-list" aria-label="선택된 근로자 전파 대상">
-              {recipientSuggestions.map((recipient) => (
-                <span key={`${recipient.channel}-${recipient.value}`} className="recipient-chip">
-                  {recipient.label} · {recipient.languageLabel}
+          {targetWorkers.length ? (
+            <div className="recipient-chip-list" aria-label="선택된 공유 대상">
+              {targetWorkers.map((worker) => (
+                <span key={`${worker.displayName}-${worker.languageCode}`} className="recipient-chip">
+                  {worker.displayName} · {worker.languageLabel} · viewer
                 </span>
               ))}
             </div>
+          ) : (
+            <p className="muted small">선택된 작업자가 없습니다. 예시 인원은 실제 초대 대상으로 표시하지 않습니다.</p>
+          )}
+          {recipientSuggestions.length ? (
+            <div className="recipient-chip-list" aria-label="저장 전 확인할 채널 연락처">
+              {recipientSuggestions.map((recipient) => (
+                <span key={`${recipient.channel}-${recipient.value}`} className="recipient-chip">
+                  {recipient.label} · {formatChannelName(recipient.channel)} · {recipient.languageLabel}
+                </span>
+              ))}
+            </div>
+          ) : targetWorkers.length ? (
+            <p className="muted small">선택 대상의 채널 연락처가 없습니다. 서버 preflight에서 해당 채널 전송이 거부될 수 있습니다.</p>
           ) : null}
           <p className="muted small">
-            서버에 저장된 선택 작업자의 UUID와 연락처 스냅샷만 공유 세션에 포함됩니다. 직접 입력 수신자는 서버 확인 대상으로 간주하지 않습니다.
+            공유 세션에는 서버에 저장된 worker UUID와 연락처 snapshot만 들어갑니다. 직접 입력 문자열은 확인 대상으로 승격하지 않습니다.
           </p>
         </section>
 
@@ -388,65 +1299,93 @@ export function WorkflowSharePanel({
             <span>04</span>
             <strong id="workflow-note-heading">전달 메모</strong>
           </div>
-          <input
+          <textarea
             id="workflow-note"
-            className="input"
+            className="input workflow-textarea"
+            rows={3}
             value={note}
             onChange={(event) => setNote(event.target.value)}
+            aria-labelledby="workflow-note-heading"
           />
         </section>
       </div>
 
-      {!authToken || !workpackId ? (
+      {!authToken ? (
         <p className="share-inline-note">
-          지금 화면은 공유 초안입니다. 관리자 로그인 전에는 서버 공유 세션이나 열람 확인 상태로 표시하지 않습니다.
+          현재는 로컬 공유 초안입니다. 관리자 로그인 전에는 workpack, 공유 세션, 전송 로그, 열람 확인을 서버 상태로 표시하지 않습니다.
+        </p>
+      ) : !archiveWorkpackId ? (
+        <p className="share-inline-note">
+          저장 ID 대기 · 전송을 확정하면 workpack과 선택 작업자를 먼저 저장합니다. 다음 행동 · 대상과 채널을 확인하세요.
         </p>
       ) : null}
 
       {shareBlocked ? (
-        <p className="share-inline-note warn">
-          {shareDisabledReason}
-        </p>
+        <section className="share-readiness-warning" aria-label="공유 잠김 사유" role="status">
+          <span>공유 잠김</span>
+          <strong>{readiness?.summary || "공유 전 보완 필요"}</strong>
+          <ul>
+            {shareDisabledReasons.map((reason) => <li key={reason}>{reason}</li>)}
+          </ul>
+          <p className="share-inline-note">다음 행동 · 문서 검수, 근거, 결재 항목을 보완한 뒤 공유 준비 상태를 다시 확인하세요.</p>
+        </section>
       ) : null}
 
-      <section className="acknowledgment-ledger" aria-label="확인 상태와 저장 증빙">
-        <article>
-          <span>확인 대상</span>
-          <strong>{targetCountLabel}</strong>
-          <small>{workerDisplayLabel} · 작업자 표시명 기준</small>
-        </article>
-        <article>
-          <span>현재 상태</span>
-          <strong>{shareBlocked ? readiness?.summary : acknowledgmentStatus}</strong>
-          <small>{shareBlocked ? "검수 통과 전에는 일반 전송을 잠급니다." : "열람 확인은 전파 결과와 분리해 검토"}</small>
-        </article>
-        <article className={storageReady ? "ready" : "warn"}>
-          <span>저장 증빙</span>
-          <strong>{storageLabel}</strong>
-          <small>{storageDetail}</small>
-        </article>
+      <section className="share-permission-grid" aria-label="실제 저장 및 공유 이력 상태" aria-live="polite">
+        <section>
+          <span>Workpack</span>
+          <strong>{statusModel.storage.label}</strong>
+          <p>{statusModel.storage.detail}</p>
+          <small>다음 행동 · {statusModel.storage.nextAction}</small>
+        </section>
+        <section>
+          <span>Share session</span>
+          <strong>{statusModel.session.label}</strong>
+          <p>{sessionDetail}</p>
+          <small>다음 행동 · {statusModel.session.nextAction}</small>
+        </section>
+        <section>
+          <span>전송 로그</span>
+          <strong>{statusModel.dispatch.label}</strong>
+          <p>{logSaveState.status === "error" || logSaveState.status === "duplicate-risk" ? logSaveState.message : dispatchDetail}</p>
+          <small>다음 행동 · {statusModel.dispatch.nextAction}</small>
+        </section>
+        <section>
+          <span>열람 확인</span>
+          <strong>{statusModel.acknowledgment.label}</strong>
+          <p>{shareRecords.status === "error" ? `${statusModel.acknowledgment.detail} · ${shareRecords.message}` : statusModel.acknowledgment.detail}</p>
+          <small>다음 행동 · {statusModel.acknowledgment.nextAction}</small>
+        </section>
       </section>
 
       <section className="message-preview-panel" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)}>
         <div className="compact-head">
-          <span className="eyebrow">Preview</span>
+          <span className="eyebrow">Preview only</span>
           <strong>{formatMessagePreviewHeading(data, selectedMessageTarget)}</strong>
         </div>
         <div className="message-preview-lines">
-          {previewItems.map((line, index) => (
-            <p key={`${line}-${index}`}>{line}</p>
-          ))}
+          {previewItems.map((line, index) => <p key={`${line}-${index}`}>{line}</p>)}
         </div>
       </section>
 
       <div className="command-actions">
+        {historyHasError ? (
+          <button
+            type="button"
+            className="button secondary"
+            onClick={() => setHistoryRefreshKey((current) => current + 1)}
+            disabled={isSending}
+          >
+            이력 다시 조회
+          </button>
+        ) : null}
         <button
           type="button"
           className="button"
           onClick={() => setIsConfirming(true)}
-          disabled={!authToken || shareBlocked || isSending || selectedChannels.length === 0 || targetWorkers.length === 0}
+          disabled={primaryDisabled}
         >
-          {isSending ? "전파 요청 중" : !authToken ? "관리자 로그인 필요" : shareBlocked ? "공유 전 보완 필요" : "전송 확인"}
+          {primaryLabel}
         </button>
         <button type="button" className="button secondary" onClick={copyMessage}>메시지 복사</button>
       </div>
@@ -458,44 +1397,44 @@ export function WorkflowSharePanel({
             <strong>{activeChannelLabel}</strong>
           </div>
           <div className="dispatch-confirm-grid">
-            <div><span>수신</span><strong>{recipientLabel}</strong></div>
-            <div><span>미리보기 언어</span><strong>{targetLabel}</strong></div>
-            <div><span>대상 작업자</span><strong>{targetCountLabel}</strong></div>
+            <div><span>대상</span><strong>{recipientLabel}</strong></div>
+            <div><span>권한</span><strong>초대된 사람만 · viewer</strong></div>
+            <div><span>언어</span><strong>{languageLabel}</strong></div>
           </div>
-          <p className="muted small">전송 후 provider 응답을 채널별로 표시하고, 관리자 로그인 상태에서는 전파 이력을 저장합니다.</p>
-          <div className="dispatch-evidence-ledger" aria-label="전송 후 저장될 이력">
+          <p className="muted small">미리보기 {targetLabel} · {languageBasis}</p>
+          <div className="dispatch-evidence-ledger" aria-label="전송 과정의 저장 확인과 기록 계획">
             <article className={storageReady ? "ready" : "warn"}>
-              <span>문서팩 저장</span>
-              <strong>{storageReady ? "서버 workpack 연결" : "저장 전 후보"}</strong>
-              <small>{storageReady ? "서버 작업자 UUID로 공유 세션을 생성합니다." : "로그인과 문서팩·작업자 저장이 먼저 필요합니다."}</small>
+              <span>Workpack</span>
+              <strong>{storageReady ? "저장 ID 사용" : "먼저 저장"}</strong>
+              <small>{storageReady ? `${effectiveAuthority?.workerIds.length || 0}명의 worker UUID 확인` : "workpack과 worker UUID 발급 후 진행"}</small>
+            </article>
+            <article className={sessionReady ? "ready" : "pending"}>
+              <span>Share session</span>
+              <strong>{sessionReady ? "활성 세션 재사용" : "초대 snapshot 생성"}</strong>
+              <small>anonymous false · viewer 권한 · 선택 작업자만</small>
             </article>
             <article className="pending">
-              <span>교육 확인</span>
-              <strong>{dispatchConfirmed ? "열람 확인 대기" : "서버 확인 전"}</strong>
-              <small>{dispatchConfirmed ? "성공한 공유 세션과 전파 요청에만 확인 이력을 연결합니다." : "세션 생성과 전파 성공 전에는 확인 준비 상태가 아닙니다."}</small>
+              <span>전송 로그</span>
+              <strong>provider 응답 후 저장</strong>
+              <small>안정 요청 키 포함 · 서버 중복 방지 지원 전에는 실패 시 재시도 중단</small>
             </article>
-            <article className="ready">
-              <span>전파 로그</span>
-              <strong>dispatch_logs</strong>
-              <small>provider 응답, 실패 사유, 실행 ID를 전송 로그로 분리 저장합니다.</small>
+            <article className="pending">
+              <span>열람 확인</span>
+              <strong>관리자 표시와 분리</strong>
+              <small>현재 관리자 Bearer 기록은 admin_marked이며 작업자 확인 집계에서 제외</small>
             </article>
           </div>
           <p className="channel-readiness-note">
-            이 확인 단계에서 전송되는 채널은 {activeChannelLabel}입니다. 카카오 알림톡은 승인 채널과 템플릿 설정이 없으면 채널별 결과에 설정 필요로 표시됩니다.
+            선택 채널 · {activeChannelLabel}. 카카오는 승인·템플릿 미설정 시 해당 채널만 설정 필요로 남습니다.
           </p>
-          {shareBlocked ? (
-            <p className="channel-readiness-note">
-              공유 전 보완 항목: {shareDisabledReason}
-            </p>
-          ) : null}
           {selectedMessageTarget !== "manager" ? (
             <p className="channel-readiness-note">
-              외국어 미리보기는 현장 검토와 복사용입니다. 실제 provider 전파본은 저장된 작업팩과 작업자 언어 스냅샷을 서버가 조합합니다.
+              외국어 미리보기는 검토·복사용이며 provider 전송본 자체로 저장하지 않습니다.
             </p>
           ) : null}
           <div className="command-actions">
             <button type="button" className="button" onClick={dispatchWorkflow} disabled={shareBlocked || isSending}>
-              {isSending ? "전파 요청 중" : "지금 전송"}
+              {isSending ? phaseLabel[phase] : storageReady ? "지금 전송" : "저장 후 전송"}
             </button>
             <button type="button" className="button secondary" onClick={() => setIsConfirming(false)} disabled={isSending}>
               취소
@@ -505,16 +1444,27 @@ export function WorkflowSharePanel({
       ) : null}
 
       {result ? (
-        <div className={dispatchConfirmed || (result.ok && !validationOnlyResult) ? "workflow-result ok" : result.ok ? "workflow-result" : "workflow-result error"}>
+        <div className={resultClassName}>
           <p>
             {result.message}
             {result.workflowRunId ? ` 실행 ID: ${result.workflowRunId}` : ""}
+            {resultSource === "dispatch" && shareSessionId ? ` 공유 세션 ID: ${shareSessionId}` : ""}
           </p>
           {validationOnlyResult ? (
-            <p>Fixture·검증 전용 응답입니다. 실제 provider 전송이나 열람 확인 준비로 간주하지 않습니다.</p>
+            <p>Fixture·검증 전용 응답입니다. 실제 provider 전송, 운영 로그, 열람 확인으로 간주하지 않습니다.</p>
+          ) : null}
+          {result.duplicateRisk ? (
+            <p role="alert">
+              {result.providerCalled === true
+                ? "Provider 호출 후 응답을 확정하지 못했습니다. 실제 발송 가능성이 있으므로 재전송하지 말고 요청 키로 대조하세요."
+                : "영속 provider idempotency를 보장할 수 없어 실제 전송을 시작하지 않았습니다. 서버 중복방지 계약이 준비될 때까지 재전송하지 마세요."}
+            </p>
+          ) : null}
+          {resultSource === "dispatch" ? (
+            <p>전송 로그 · {logSaveState.message} 열람 확인 · {statusModel.acknowledgment.label}, 전송 완료와 별도 기록.</p>
           ) : null}
           {result.channelResults?.length ? (
-            <div className="workflow-channel-results" aria-label="채널별 전송 결과">
+            <div className="workflow-channel-results" aria-label="채널별 provider 전송 결과">
               {result.channelResults.map((item, index) => (
                 <div
                   key={`${item.channel || "channel"}-${index}`}
@@ -526,6 +1476,9 @@ export function WorkflowSharePanel({
                 </div>
               ))}
             </div>
+          ) : null}
+          {logSaveState.status === "duplicate-risk" ? (
+            <p role="alert">전송 로그는 자동 재시도하지 않습니다. 관리자에게 요청 키로 저장 여부를 먼저 대조해 주세요.</p>
           ) : null}
         </div>
       ) : null}

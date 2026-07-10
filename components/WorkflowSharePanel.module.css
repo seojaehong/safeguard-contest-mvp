@@ -1,0 +1,46 @@
+.panel {
+  container-type: inline-size;
+}
+
+.panel :global(.channel-card),
+.panel :global(.share-permission-grid) section,
+.panel :global(.dispatch-evidence-ledger) article {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.panel :global(.workflow-textarea) {
+  min-height: 84px;
+  resize: vertical;
+}
+
+@container (max-width: 560px) {
+  .panel :global(.share-workflow-header),
+  .panel :global(.share-form-shell) {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .panel :global(.share-permission-grid),
+  .panel :global(.acknowledgment-ledger),
+  .panel :global(.dispatch-evidence-ledger) {
+    grid-template-columns: 1fr;
+  }
+
+  .panel :global(.channel-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .panel :global(.share-status-pill) {
+    min-width: 0;
+    text-align: left;
+  }
+
+  .panel :global(.command-actions) {
+    flex-wrap: wrap;
+  }
+
+  .panel :global(.command-actions) :global(.button) {
+    flex: 1 1 120px;
+  }
+}

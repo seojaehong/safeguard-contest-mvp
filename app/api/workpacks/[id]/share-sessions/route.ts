@@ -14,6 +14,8 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const SHARE_SESSION_TTL_MS = 24 * 60 * 60 * 1_000;
+
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
@@ -121,6 +123,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     createdBy: user.id,
     recipients: serverRecipients.recipients
   });
+  const expiresAt = new Date(Date.now() + SHARE_SESSION_TTL_MS).toISOString();
 
   const insert: WorkspaceDatabase["public"]["Tables"]["workpack_share_sessions"]["Insert"] = {
     organization_id: draft.organization_id,
@@ -130,13 +133,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
     recipients_snapshot: toJson(draft.recipients_snapshot),
     access_policy: toJson(draft.access_policy),
     status: draft.status,
+    expires_at: expiresAt,
     created_by: draft.created_by
   };
 
   const { data, error } = await client
     .from("workpack_share_sessions")
     .insert(insert)
-    .select("id")
+    .select("id,expires_at")
     .single();
 
   if (error) {
@@ -148,6 +152,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     ok: true,
     configured: true,
     shareSessionId: data.id,
+    expiresAt: data.expires_at || expiresAt,
     message: "초대된 작업자 기준 공유 세션을 만들었습니다."
   });
 }
