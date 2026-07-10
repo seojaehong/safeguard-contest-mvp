@@ -365,3 +365,62 @@ Exit code 0
 - The explicit semantic manifest is intentionally small and only covers ambiguous class-only selectors that source/DOM evidence identifies as controls or special text roles. New ambiguous class names must be added with a RED fixture.
 - The lightweight parser and keyword fallback remain repository-focused. Mixed selector lists can no longer borrow semantics from one another, which narrows the remaining heuristic risk.
 - Browser screenshot review remains in later tasks. F2 remains `passes: false` pending independent review.
+
+## Sixth remediation — base module actions
+
+### Resolution
+
+- Added the exact base `.safeclaw-module-primary` and `.safeclaw-module-actions a` selectors to the semantic control manifest in both test and production audit.
+- Added the document-variant action selectors to the same manifest so base and variant behavior share the same semantic precedence.
+- Kept explicit semantic manifest lookup ahead of token-size classification, preventing the previous 13px table token from defining an action's role.
+- Changed the base grouped CSS from the table tuple to the full control tuple while preserving the already-correct document variant.
+
+### RED evidence
+
+```text
+npm.cmd test -- tests/frontend-design-contract.test.ts
+Test Files  1 failed (1)
+Tests       3 failed | 15 passed (18)
+
+FAIL keeps base and document module actions on the control tuple
+  .safeclaw-module-primary received table tuple
+FAIL assigns a complete canonical typography tuple to every font-size rule
+  base module action group expected control but received table
+FAIL rejects table-sized base module actions before token-size classification
+  audit did not reject exact base selectors
+Exit code 1
+```
+
+### Final GREEN evidence
+
+```text
+npm.cmd test -- tests/frontend-design-contract.test.ts
+Test Files  1 passed (1)
+Tests       18 passed (18)
+Duration    11.91s
+Exit code   0
+
+npm.cmd run audit:frontend-consistency
+status                  pass
+pageFiles               32
+componentFiles          22
+cssLines                12815
+importantDeclarations   0
+coverageIssues          0
+violationCount          0
+Exit code               0
+
+npm.cmd run typecheck
+tsc --noEmit --incremental false
+Exit code 0
+
+npm.cmd run build
+Compiled successfully in 18.9s
+Generated static pages 27/27
+Exit code 0
+```
+
+### Concern update
+
+- The semantic manifest remains repository-scoped; newly introduced class-only controls need an explicit entry plus RED fixture.
+- Browser screenshot review remains assigned to later tasks. F2 remains `passes: false` pending independent review.
