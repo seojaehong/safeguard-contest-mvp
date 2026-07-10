@@ -7,10 +7,12 @@ import {
 } from "@/lib/operation-improvement-history";
 import {
   buildReportCsv,
+  buildReportJson,
   buildReportLearningJsonl,
   buildReportLearningMarkdown,
   buildReportMarkdown,
-  buildReportSnapshot
+  buildReportSnapshot,
+  resolveReportViewState
 } from "@/lib/reporting-downloads";
 import type { OperationImprovement } from "@/lib/operation-improvement-history";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
@@ -40,7 +42,18 @@ const riskRow: RiskAssessmentRow = {
   evidenceRefs: ["riskAssessmentDraft", "tbmBriefing"]
 };
 
-function makeWorkpack() {
+const electricalRow: RiskAssessmentRow = {
+  ...riskRow,
+  location: "부산 물류센터",
+  process: "전기 설비",
+  task: "분전반 점검",
+  hazard: "감전 위험",
+  riskLevel: "medium",
+  owner: "전기팀",
+  verificationStatus: "done"
+};
+
+function makeWorkpack(riskRows: RiskAssessmentRow[] = [riskRow]) {
   const response = buildMockAskResponse(
     "세이프건설 서울 성수동 외벽 도장 작업. 이동식 비계 사용, 작업자 5명.",
     mockSearchResults.slice(0, 2),
@@ -60,7 +73,7 @@ function makeWorkpack() {
       weatherNote: "오후 강풍 예보"
     },
     structured: {
-      riskAssessmentRows: [riskRow],
+      riskAssessmentRows: riskRows,
       tbmRiskLinks: [],
       riskAssessmentValidation: {
         ok: true,
@@ -102,12 +115,68 @@ const improvements: OperationImprovement[] = [
   }
 ];
 
+const mixedImprovements: OperationImprovement[] = [
+  improvements[0],
+  {
+    ...improvements[0],
+    id: "imp-electrical",
+    siteName: "부산 물류센터",
+    workSummary: "분전반 점검",
+    hazardLabel: "감전 위험",
+    improvementText: "절연 보호구와 잠금 절차를 확인"
+  }
+];
+
+function buildMixedSnapshot(filters: Record<string, string>) {
+  return buildReportSnapshot({
+    workpack: makeWorkpack([riskRow, electricalRow]),
+    improvements: mixedImprovements,
+    period: "weekly",
+    filters,
+    now: new Date("2026-07-08T12:00:00.000Z")
+  });
+}
+
 describe("reporting downloads", () => {
+  it("builds an inclusive custom-period report with a stable range filename", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [
+        { ...improvements[0], id: "imp-before", createdAt: "2026-07-06T23:59:59.999Z" },
+        improvements[0],
+        { ...improvements[0], id: "imp-after", createdAt: "2026-07-10T00:00:00.000Z" }
+      ],
+      period: "custom",
+      dateRange: { start: "2026-07-07", end: "2026-07-09" },
+      now: new Date("2026-07-11T12:00:00.000Z")
+    });
+
+    expect(snapshot.periodLabel).toBe("2026.07.07 - 2026.07.09 사용자 기간 리포트");
+    expect(snapshot.fileBaseName).toContain("2026-07-07-to-2026-07-09");
+    expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-1"]);
+  });
+
+  it("rejects incomplete and reversed custom date ranges with exact messages", () => {
+    expect(() => buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [],
+      period: "custom"
+    })).toThrowError("사용자 기간의 시작일과 종료일을 모두 선택하세요.");
+
+    expect(() => buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [],
+      period: "custom",
+      dateRange: { start: "2026-07-10", end: "2026-07-09" }
+    })).toThrowError("사용자 기간의 시작일은 종료일보다 늦을 수 없습니다.");
+  });
+
   it("builds a period report with risk rows and photo improvements", () => {
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
       improvements,
       period: "weekly",
+      approvedPhotoImprovementIds: ["imp-1"],
       now: new Date("2026-07-08T12:00:00.000Z")
     });
 
@@ -120,11 +189,151 @@ describe("reporting downloads", () => {
     expect(snapshot.groups.byDocument.map((group) => group.label)).toContain("TBM 기록");
   });
 
+  it("filters risk rows and their matched improvements by process", () => {
+    const snapshot = buildMixedSnapshot({ process: "외벽 도장" });
+
+    expect(snapshot.riskRows.map((row) => row.hazard)).toEqual(["추락 위험"]);
+    expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-1"]);
+  });
+
+  it("filters risk rows and their matched improvements by task", () => {
+    const snapshot = buildMixedSnapshot({ task: "분전반 점검" });
+
+    expect(snapshot.riskRows.map((row) => row.hazard)).toEqual(["감전 위험"]);
+    expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-electrical"]);
+  });
+
+  it("filters risk rows and their matched improvements by risk level", () => {
+    const snapshot = buildMixedSnapshot({ riskLevel: "medium" });
+
+    expect(snapshot.riskRows.map((row) => row.hazard)).toEqual(["감전 위험"]);
+    expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-electrical"]);
+  });
+
+  it("filters risk rows and their matched improvements by improvement status", () => {
+    const snapshot = buildMixedSnapshot({ improvementStatus: "completed" });
+
+    expect(snapshot.riskRows.map((row) => row.hazard)).toEqual(["감전 위험"]);
+    expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-electrical"]);
+    expect(snapshot.riskRows[0]?.improvementStatusLabel).toBe("완료");
+  });
+
+  it("filters risk rows and improvements by site", () => {
+    const snapshot = buildMixedSnapshot({ site: "부산 물류센터" });
+
+    expect(snapshot.riskRows.map((row) => row.hazard)).toEqual(["감전 위험"]);
+    expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-electrical"]);
+  });
+
+  it("filters risk rows and their matched improvements by team", () => {
+    const snapshot = buildMixedSnapshot({ team: "전기팀" });
+
+    expect(snapshot.riskRows.map((row) => row.hazard)).toEqual(["감전 위험"]);
+    expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-electrical"]);
+  });
+
+  it("exposes six report facets from the unfiltered source rows", () => {
+    const snapshot = buildMixedSnapshot({});
+
+    expect(snapshot.facets.processes.map((option) => option.value)).toEqual(["외벽 도장", "전기 설비"]);
+    expect(snapshot.facets.tasks.map((option) => option.value)).toEqual(["이동식 비계 작업", "분전반 점검"]);
+    expect(snapshot.facets.riskLevels).toEqual([
+      expect.objectContaining({ value: "high", label: "상" }),
+      expect.objectContaining({ value: "medium", label: "중" })
+    ]);
+    expect(snapshot.facets.improvementStatuses).toEqual([
+      expect.objectContaining({ value: "proposed", label: "제안됨" }),
+      expect.objectContaining({ value: "completed", label: "완료" })
+    ]);
+    expect(snapshot.facets.sites.map((option) => option.value)).toEqual(["서울 성수동", "부산 물류센터"]);
+    expect(snapshot.facets.teams.map((option) => option.value)).toEqual(["현장소장", "전기팀"]);
+  });
+
+  it("includes before and after photo names only after explicit report approval", () => {
+    const baseInput = {
+      workpack: makeWorkpack(),
+      improvements: [improvements[0]],
+      period: "weekly" as const,
+      now: new Date("2026-07-08T12:00:00.000Z")
+    };
+    const unapproved = buildReportSnapshot(baseInput);
+    const approved = buildReportSnapshot({
+      ...baseInput,
+      approvedPhotoImprovementIds: ["imp-1"]
+    });
+
+    expect(unapproved.summary.photoCandidates).toBe(1);
+    expect(unapproved.summary.photoImprovements).toBe(0);
+    expect(unapproved.improvements[0]?.photoNames).toEqual([]);
+    expect(buildReportMarkdown(unapproved)).not.toContain("before-scaffold.jpg");
+    expect(buildReportCsv(unapproved)).not.toContain("before-scaffold.jpg");
+    expect(buildReportJson(unapproved)).not.toContain("after-guardrail.jpg");
+    expect(approved.summary.photoImprovements).toBe(1);
+    expect(approved.improvements[0]?.photoNames).toEqual(["before-scaffold.jpg", "after-guardrail.jpg"]);
+    expect(buildReportMarkdown(approved)).toContain("before-scaffold.jpg");
+    expect(buildReportCsv(approved)).toContain("before-scaffold.jpg · after-guardrail.jpg");
+    expect(buildReportJson(approved)).toContain("after-guardrail.jpg");
+  });
+
+  it("resolves exact empty, download-ready, and error states", () => {
+    const readySnapshot = buildMixedSnapshot({});
+    const emptySnapshot = buildMixedSnapshot({ process: "없는 공정" });
+
+    expect(resolveReportViewState(readySnapshot)).toEqual({
+      status: "ready",
+      title: "다운로드 준비됨",
+      detail: "위험 2건 · 개선 2건",
+      canDownload: true
+    });
+    expect(resolveReportViewState(emptySnapshot)).toEqual({
+      status: "empty",
+      title: "조건에 맞는 리포트가 없습니다.",
+      detail: "기간 또는 필터를 조정하세요.",
+      canDownload: false
+    });
+    expect(resolveReportViewState(null, "사용자 기간 오류")).toEqual({
+      status: "error",
+      title: "리포트를 준비하지 못했습니다.",
+      detail: "사용자 기간 오류",
+      canDownload: false
+    });
+  });
+
+  it("records the selected date range and filters in JSON and markdown exports", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack([riskRow, electricalRow]),
+      improvements: mixedImprovements,
+      period: "custom",
+      dateRange: { start: "2026-07-07", end: "2026-07-09" },
+      filters: {
+        process: "전기 설비",
+        site: "부산 물류센터",
+        team: "전기팀"
+      },
+      now: new Date("2026-07-11T12:00:00.000Z")
+    });
+    const json = JSON.parse(buildReportJson(snapshot)) as {
+      dateRange: { start: string; end: string };
+      filters: Record<string, string>;
+    };
+    const markdown = buildReportMarkdown(snapshot);
+
+    expect(snapshot.title).toContain("부산 물류센터");
+    expect(json.dateRange).toEqual({ start: "2026-07-07", end: "2026-07-09" });
+    expect(json.filters).toEqual({ process: "전기 설비", site: "부산 물류센터", team: "전기팀" });
+    expect(markdown).toContain("## 적용 조건");
+    expect(markdown).toContain("- 기간: 2026.07.07 - 2026.07.09 사용자 기간 리포트");
+    expect(markdown).toContain("- 공정: 전기 설비");
+    expect(markdown).toContain("- 현장: 부산 물류센터");
+    expect(markdown).toContain("- 팀: 전기팀");
+  });
+
   it("renders As-Is/To-Be markdown without external submission wording", () => {
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
       improvements,
       period: "weekly",
+      approvedPhotoImprovementIds: ["imp-1"],
       now: new Date("2026-07-08T12:00:00.000Z")
     });
     const markdown = buildReportMarkdown(snapshot);

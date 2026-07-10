@@ -6,7 +6,7 @@ import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 export const metadata: Metadata = {
   title: "SafeClaw 리포트 · 다운로드 센터",
-  description: "현재 작업팩의 위험성평가, 개선사항, 기간별 요약을 다운로드합니다."
+  description: "위험성평가 As-Is/To-Be와 승인된 사진을 기간·분류별로 내려받습니다."
 };
 
 export default function ReportsPage() {
@@ -14,7 +14,7 @@ export default function ReportsPage() {
     <SafeClawModuleShell
       eyebrow="리포트"
       title="개선 리포트."
-      description="위험성평가, TBM, 개선사항을 현재 작업팩 기준으로 짧게 정리합니다."
+      description="주간·월간·사용자 기간의 위험성평가와 승인된 개선 근거를 분류별로 정리합니다."
       status="partial"
       mappedTo="기간 리포트 · 다운로드"
       activeHref="/reports"
