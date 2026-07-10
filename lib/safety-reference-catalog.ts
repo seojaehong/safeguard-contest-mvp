@@ -19,6 +19,8 @@ export type SafetyReferenceItem = {
   document_reflection_label?: string;
   source_kind_label?: string;
   operation_signal_label?: string;
+  display_title?: string;
+  display_summary?: string;
   retrieval_source?: "rest" | "ranked" | "vector" | "hybrid";
   vector_similarity?: number;
 };
@@ -223,6 +225,8 @@ function isReferenceItem(value: unknown): value is SafetyReferenceItem {
 function normalizeReferenceItem(item: SafetyReferenceItem): SafetyReferenceItem {
   const evidenceRole = deriveEvidenceRole(item);
   const reflectedDocuments = item.reflected_documents?.length ? item.reflected_documents : item.primary_documents;
+  const displayTitle = deriveSifDisplayTitle(item);
+  const displaySummary = deriveSifDisplaySummary(item);
   return {
     ...item,
     source_url: item.source_url || null,
@@ -232,8 +236,62 @@ function normalizeReferenceItem(item: SafetyReferenceItem): SafetyReferenceItem 
     evidence_role_label: evidenceRole === "direct" ? "문서 문구 직접 근거" : "현장 판단 보조 근거",
     document_reflection_label: buildDocumentReflectionLabel(reflectedDocuments, item.controls),
     source_kind_label: buildSourceKindLabel(item.item_type),
-    operation_signal_label: buildOperationSignalLabel(item.item_type, item.controls)
+    operation_signal_label: buildOperationSignalLabel(item.item_type, item.controls),
+    ...(displayTitle ? { display_title: displayTitle } : {}),
+    ...(displaySummary ? { display_summary: displaySummary } : {})
   };
+}
+
+function hasArchiveStyleSifTitle(item: Pick<SafetyReferenceItem, "item_type" | "title">): boolean {
+  return item.item_type === "sif-case" && /^\s*\d+\s*\/\s*/u.test(item.title);
+}
+
+function stripLabeledPrefix(value: string): string {
+  return value.replace(/^\s*(연번|재해개요|기인물|재해유발요인|위험성\s*감소대책(?:\([^)]*\))?)\s*:\s*/u, "").trim();
+}
+
+function extractSifAccidentOverview(item: Pick<SafetyReferenceItem, "summary" | "body">): string | null {
+  const text = [item.summary, item.body || ""].filter(Boolean).join("\n");
+  const match = text.match(/재해개요\s*:\s*([\s\S]*?)(?=\n?\s*(?:연번|업종|사업장명|발생형태|재해발생형태|기인물|재해유발요인|위험성\s*감소대책(?:\([^)]*\))?|공종|작업내용|원인|대책)\s*:|$)/u);
+  if (!match) return null;
+  const overview = stripLabeledPrefix(match[1] || "").replace(/\s+/g, " ").trim();
+  return overview || null;
+}
+
+function cleanSifAccidentOverview(value: string): string {
+  return value
+    .replace(/^\s*(?:\d{4}\s*년\s*\d{1,2}\s*월(?:\s*\d{1,2}\s*일)?\s*경?|\d{4}\s*\.\s*\d{1,2}\s*\.\s*\d{1,2}\s*\.?|\d{4}-\d{1,2}-\d{1,2})\s*[.,]?\s*/u, "")
+    .replace(/^\s*(?:피해자|피재자|재해자|근로자|작업자)(?:가|는|이)\s+/u, "")
+    .replace(/\s+(?:피해자|피재자|재해자|근로자|작업자)(?:가|는|이)\s+/gu, " ")
+    .replace(/[.。]\s*$/u, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function appendCaseSuffix(value: string): string {
+  if (/사례$/u.test(value)) return value;
+  return `${value} 사례`;
+}
+
+function deriveSifDisplayTitle(item: SafetyReferenceItem): string | null {
+  if (!hasArchiveStyleSifTitle(item)) return null;
+  const overview = extractSifAccidentOverview(item);
+  if (!overview) return null;
+  const cleaned = cleanSifAccidentOverview(overview);
+  if (!cleaned) return null;
+  return appendCaseSuffix(compactText(cleaned, 86));
+}
+
+function deriveSifDisplaySummary(item: SafetyReferenceItem): string | null {
+  if (!hasArchiveStyleSifTitle(item)) return null;
+  const overview = extractSifAccidentOverview(item);
+  if (!overview) return null;
+  const cleaned = cleanSifAccidentOverview(overview);
+  return cleaned ? compactText(cleaned, 140) : null;
+}
+
+export function getSafetyReferenceDisplayTitle(item: SafetyReferenceItem): string {
+  return item.display_title || deriveSifDisplayTitle(item) || item.title;
 }
 
 function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "source_id">): "direct" | "supporting" {
@@ -467,8 +525,9 @@ function withRetrievalSource(
   retrievalSource: NonNullable<SafetyReferenceItem["retrieval_source"]>,
   vectorSimilarity?: number
 ): SafetyReferenceItem {
+  const normalized = normalizeReferenceItem(item);
   return {
-    ...item,
+    ...normalized,
     retrieval_source: retrievalSource,
     vector_similarity: vectorSimilarity
   };

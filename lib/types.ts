@@ -480,6 +480,9 @@ export type AskResponse = {
         id: string;
         itemType: string;
         title: string;
+        rawTitle?: string;
+        displayTitle?: string;
+        displaySummary?: string;
         shortSummary?: string;
         primaryDocuments: string[];
         controls: string[];

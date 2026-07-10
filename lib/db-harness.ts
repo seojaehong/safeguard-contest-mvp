@@ -3,6 +3,7 @@ import type {
   SafetyReferenceRetrievalMode,
   SafetyReferenceVectorStatus
 } from "@/lib/safety-reference-catalog";
+import { getSafetyReferenceDisplayTitle } from "@/lib/safety-reference-catalog";
 
 export type HarnessImprovement = {
   id: string;
@@ -365,8 +366,8 @@ export function parseHarnessMemoryInput(value: unknown): Required<HarnessMemoryI
 
 export function buildHarnessPromptContext(packet: DbHarnessPacket) {
   const evidenceLines = [
-    ...packet.sifCases.map((item) => `SIF: ${item.title} -> ${item.controls.slice(0, 2).join(" / ")}`),
-    ...packet.directEvidence.map((item) => `공식자료: ${item.title} -> ${item.primary_documents.join(", ")}`),
+    ...packet.sifCases.map((item) => `SIF: ${getSafetyReferenceDisplayTitle(item)} -> ${item.controls.slice(0, 2).join(" / ")}`),
+    ...packet.directEvidence.map((item) => `공식자료: ${getSafetyReferenceDisplayTitle(item)} -> ${item.primary_documents.join(", ")}`),
     ...packet.improvementMemory.map((item) => [
       `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
       item.visionStatus ? `visionStatus: ${item.visionStatus}` : "",
@@ -443,7 +444,7 @@ function uniqueNonEmpty(values: string[], limit: number) {
 }
 
 function evidenceTitles(items: SafetyReferenceItem[], limit: number) {
-  return uniqueNonEmpty(items.map((item) => item.title), limit);
+  return uniqueNonEmpty(items.map(getSafetyReferenceDisplayTitle), limit);
 }
 
 function controlCandidates(packet: DbHarnessPacket) {

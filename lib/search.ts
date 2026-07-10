@@ -6,6 +6,7 @@ import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import {
   filterAndRankSafetyReferencesByQuery,
+  getSafetyReferenceDisplayTitle,
   searchSafetyReferences,
   scoreSafetyReferenceQueryMatch,
   type SafetyReferenceItem,
@@ -267,7 +268,7 @@ function deriveSafetyReferenceRiskTag(item: SafetyReferenceItem): string {
   if (categoryTag && FIELD_RISK_KEYWORD_PATTERN.test(categoryTag)) return categoryTag;
   const subcategoryTag = normalizeRiskTag(item.subcategory);
   if (subcategoryTag && FIELD_RISK_KEYWORD_PATTERN.test(subcategoryTag)) return subcategoryTag;
-  const titleTag = item.title?.match(FIELD_RISK_KEYWORD_PATTERN)?.[0];
+  const titleTag = getSafetyReferenceDisplayTitle(item).match(FIELD_RISK_KEYWORD_PATTERN)?.[0];
   return normalizeRiskTag(titleTag);
 }
 
@@ -315,7 +316,7 @@ function buildHazardSubjectFromTitle(value: string | null | undefined): string {
 function deriveSafetyReferenceHazard(item: SafetyReferenceItem): string {
   const category = compactRiskCell(item.category, 28);
   const subcategory = compactRiskCell(item.subcategory, 28);
-  const titleSubject = buildHazardSubjectFromTitle(item.title);
+  const titleSubject = buildHazardSubjectFromTitle(getSafetyReferenceDisplayTitle(item));
   const controlSubject = buildHazardSubjectFromControl(item.controls?.[0]) ||
     buildHazardSubjectFromControl(item.short_summary || item.summary);
   const subject = controlSubject || titleSubject;
@@ -357,6 +358,7 @@ export function buildSafetyReferenceRiskRows(
   const rows: RiskAssessmentRow[] = [];
 
   for (const item of topCandidates) {
+    const displayTitle = getSafetyReferenceDisplayTitle(item);
     const control = compactRiskCell(item.controls?.[0], 120) ||
       compactRiskCell(item.short_summary || item.summary, 120) ||
       "해당 근거의 필수 확인 항목을 작업 전 점검합니다.";
@@ -370,7 +372,7 @@ export function buildSafetyReferenceRiskRows(
     const evidenceRefs = [
       item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
       item.source_kind_label || item.item_type || "safety_reference_items",
-      item.title,
+      displayTitle,
       item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
       item.source_url || ""
     ].filter(Boolean);
@@ -378,7 +380,7 @@ export function buildSafetyReferenceRiskRows(
     rows.push(buildRiskRow({
       location,
       process,
-      task: scenario.workSummary || compactRiskCell(item.title, 48) || "현장 작업",
+      task: scenario.workSummary || compactRiskCell(displayTitle, 48) || "현장 작업",
       equipment: compactRiskCell([item.category, item.subcategory].filter(Boolean).join(", "), 80) || "작업 장비·공구·보호구",
       hazard,
       currentControls: control,
@@ -929,8 +931,9 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
   const seen = new Set<string>();
   const out: CompressedSafetyReference[] = [];
   for (const item of items) {
+    const displayTitle = getSafetyReferenceDisplayTitle(item);
     const evidenceCore = (item.controls || []).slice(0, 1).join(", ");
-    const summary = item.short_summary || item.summary || "";
+    const summary = item.display_summary || item.short_summary || item.summary || "";
     const dedupeKey = `${(item.controls || []).join("|")}|${(item.primary_documents || []).join("|")}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
@@ -943,7 +946,7 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
     const { kind, kindLabel } = classifySafetyReferenceKind(item.item_type);
     out.push({
       id: item.id,
-      title: item.title,
+      title: displayTitle,
       reflectsDocuments: documents,
       evidenceShort,
       documentSentence: documentSentence.slice(0, 200),
@@ -1943,10 +1946,13 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           vectorSearch: safetyReference.vectorSearch,
           message: safetyReference.message,
           items: safetyReference.items.slice(0, 8).map((r) => ({
+            rawTitle: r.title,
             id: r.id,
             itemType: r.item_type,
-            title: r.title,
-            shortSummary: r.short_summary || r.summary,
+            title: getSafetyReferenceDisplayTitle(r),
+            displayTitle: getSafetyReferenceDisplayTitle(r),
+            displaySummary: r.display_summary,
+            shortSummary: r.display_summary || r.short_summary || r.summary,
             primaryDocuments: r.primary_documents || [],
             controls: r.controls || [],
             evidenceRoleLabel: r.evidence_role_label,
