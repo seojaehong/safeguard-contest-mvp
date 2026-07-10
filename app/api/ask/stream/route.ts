@@ -41,7 +41,9 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode(formatSseEvent(event)));
         } catch (error) {
           // Connection likely closed client-side; nothing further to do.
-          log.warn("SSE enqueue failed (client likely disconnected)", error);
+          log.warn("SSE enqueue failed (client likely disconnected)", {
+            errorType: error instanceof Error ? error.name : typeof error
+          });
         }
       };
       try {
@@ -52,9 +54,10 @@ export async function POST(request: NextRequest) {
         });
         emit({ kind: "final", payload: sealed });
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        log.error("runAsk failed in stream route", error);
-        emit({ kind: "error", message });
+        log.error("runAsk failed in stream route", {
+          errorType: error instanceof Error ? error.name : typeof error
+        });
+        emit({ kind: "error", message: "요청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." });
       } finally {
         controller.close();
       }

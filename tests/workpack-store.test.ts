@@ -190,6 +190,67 @@ describe("workpack store persistence contract", () => {
     });
   });
 
+  it("persists and restores the generation trace required by the signed digest", () => {
+    const secret = "workpack-trace-reopen-secret";
+    const generationTrace = {
+      traceId: "trace-workpack-reopen",
+      askMode: "full",
+      answer: {
+        provider: "safeclaw",
+        model: null,
+        composition: "safeclaw_db_harness",
+        upstream: {
+          provider: "openai",
+          model: "gpt-4.1-mini",
+          fallbackUsed: false,
+          usedInFinal: false
+        }
+      },
+      deliverables: {
+        attempted: true,
+        provider: "mixed",
+        modelPerDocument: {
+          riskAssessmentDraft: {
+            provider: "anthropic",
+            model: "claude-opus-4-8",
+            source: "provider",
+            fallbackUsed: false
+          },
+          foreignWorkerTransmission: {
+            provider: "safeclaw",
+            model: null,
+            source: "deterministic",
+            fallbackUsed: true
+          }
+        }
+      },
+      fallbackUsed: true
+    } as const;
+    const response: AskResponse = { ...makeStoredResponse(), generationTrace };
+    const sealed = attachGenerationEvidence(response, {
+      secret,
+      generatedAt: "2026-07-11T03:45:00.000Z"
+    });
+    const summary = buildWorkpackEvidenceSummary(
+      sealed,
+      sealed.generationEvidence?.snapshot
+    );
+    const reopen = buildReopenData({
+      question: sealed.question,
+      scenario: sealed.scenario,
+      deliverables: sealed.deliverables,
+      evidenceSummary: summary,
+      status: sealed.status
+    });
+
+    expect(summary).toMatchObject({ generationTrace });
+    expect(reopen.data?.generationTrace).toEqual(generationTrace);
+    expect(verifyAskResponseGenerationEvidence(reopen.data!, secret)).toEqual({
+      ok: true,
+      snapshot: sealed.generationEvidence?.snapshot
+    });
+  });
+
   it("does not insert an MCP workpack when the token org and site org disagree", async () => {
     const fake = makeMcpClient("org-from-site");
     const response = makeStoredResponse();

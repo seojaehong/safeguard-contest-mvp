@@ -957,13 +957,27 @@ describe("runAsk DB harness mode", () => {
       traceId: expect.any(String),
       askMode: "template",
       answer: {
-        provider: "mock",
-        model: null
+        provider: "safeclaw",
+        model: null,
+        composition: "safeclaw_db_harness",
+        upstream: {
+          provider: "mock",
+          model: null,
+          fallbackUsed: false,
+          usedInFinal: false
+        }
       },
       deliverables: {
         attempted: false,
-        provider: null,
-        modelPerDocument: {}
+        provider: "safeclaw",
+        modelPerDocument: {
+          riskAssessmentDraft: {
+            provider: "safeclaw",
+            model: null,
+            source: "deterministic",
+            fallbackUsed: false
+          }
+        }
       },
       fallbackUsed: false
     });
@@ -1020,8 +1034,15 @@ describe("runAsk DB harness mode", () => {
       askMode: "enhanced",
       deliverables: {
         attempted: false,
-        provider: null,
-        modelPerDocument: {}
+        provider: "safeclaw",
+        modelPerDocument: {
+          riskAssessmentDraft: {
+            provider: "safeclaw",
+            model: null,
+            source: "deterministic",
+            fallbackUsed: false
+          }
+        }
       }
     });
     expect(response.status.detail).toContain("AI_MODE=enhanced (DB 하네스 row-first");

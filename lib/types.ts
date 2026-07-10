@@ -323,13 +323,22 @@ export type AskScenario = {
 };
 
 export type GenerationAnswerTrace = {
-  provider: "openai" | "vertex" | "mock";
+  provider: "openai" | "vertex" | "mock" | "safeclaw";
   model: string | null;
+  composition?: "provider" | "safeclaw_db_harness";
+  upstream?: {
+    provider: "openai" | "vertex" | "mock";
+    model: string | null;
+    fallbackUsed: boolean;
+    usedInFinal: boolean;
+  };
 };
 
 export type GenerationDeliverableModelTrace = {
-  provider: "anthropic" | "vertex";
-  model: string;
+  provider: "anthropic" | "vertex" | "safeclaw";
+  model: string | null;
+  source?: "provider" | "deterministic";
+  fallbackUsed?: boolean;
 };
 
 export type GenerationTrace = {
@@ -338,7 +347,7 @@ export type GenerationTrace = {
   answer: GenerationAnswerTrace;
   deliverables: {
     attempted: boolean;
-    provider: "anthropic" | "vertex" | "mixed" | null;
+    provider: "anthropic" | "vertex" | "safeclaw" | "mixed" | null;
     modelPerDocument: Record<string, GenerationDeliverableModelTrace>;
   };
   fallbackUsed: boolean;

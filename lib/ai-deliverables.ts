@@ -45,7 +45,9 @@ import { safeEmit, type OnAskProgress } from "@/lib/ask-progress";
 
 const log = createLogger("ai-deliverables");
 
-type DeliverablesProviderCallTrace = GenerationDeliverableModelTrace & {
+type DeliverablesProviderCallTrace = {
+  provider: "anthropic" | "vertex";
+  model: string;
   fallbackUsed: boolean;
 };
 
@@ -56,7 +58,7 @@ type DeliverablesProviderCallResult = {
 
 type CallAndParseOptions = {
   traceId?: string;
-  onTrace?: (document: string, trace: DeliverablesProviderCallTrace) => void;
+  onTrace?: (document: string, trace: DeliverablesProviderCallTrace, outputKeys: string[]) => void;
 };
 
 const providerDecision = resolveDeliverablesProvider({
@@ -80,10 +82,20 @@ function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
 }
 
+function configuredDeliverablesProvider(): "anthropic" | "vertex" | null {
+  if (providerDecision.provider === "anthropic" && providerDecision.model) return "anthropic";
+  return isVertexConfigured() ? "vertex" : null;
+}
+
 function isDeliverablesProviderConfigured(): boolean {
-  return providerDecision.provider === "anthropic"
-    ? Boolean(providerDecision.model)
-    : isVertexConfigured();
+  return configuredDeliverablesProvider() !== null;
+}
+
+function safeProviderFailureContext(error: unknown): { errorType: string; timeout: boolean } {
+  return {
+    errorType: error instanceof Error ? error.name : typeof error,
+    timeout: isTimeoutError(error)
+  };
 }
 
 type Scenario = {
@@ -135,7 +147,10 @@ async function callGemini(
       };
     } catch (error) {
       anthropicFailed = true;
-      log.error(`Anthropic deliverables (${anthropicModel}) failed; falling back to Vertex`, error);
+      log.error(
+        `Anthropic deliverables (${anthropicModel}) failed; falling back to Vertex`,
+        safeProviderFailureContext(error)
+      );
     }
   }
   if (!isVertexConfigured()) throw new Error("Vertex AI not configured (GOOGLE_APPLICATION_CREDENTIALS_JSON / GCP_PROJECT_ID missing)");
@@ -170,7 +185,7 @@ async function callGemini(
       };
     } catch (error) {
       lastError = error;
-      log.error(`Vertex AI deliverables (${model}) failed`, error);
+      log.error(`Vertex AI deliverables (${model}) failed`, safeProviderFailureContext(error));
       // A timeout on the primary no longer aborts the chain: the fallback
       // model still gets one short capped attempt (see planModelAttempts).
     }
@@ -205,7 +220,10 @@ async function callAndParse<T>(
       const generated = await callGemini(prompt, budget, label);
       const parsed = parser(generated.text);
       if (parsed) {
-        options.onTrace?.(label, generated.trace);
+        const outputKeys = typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+          ? Object.keys(parsed as Record<string, unknown>)
+          : [];
+        options.onTrace?.(label, generated.trace, outputKeys);
         if (options.traceId) {
           log.info("safeclaw_deliverables_trace", {
             event: "safeclaw_deliverables_trace",
@@ -217,12 +235,12 @@ async function callAndParse<T>(
         return parsed;
       }
       lastError = new Error(`json parse failed (raw len=${generated.text.length})`);
-      const head = generated.text.slice(0, 200).replace(/\n/g, "\\n");
-      const tail = generated.text.slice(-200).replace(/\n/g, "\\n");
-      log.error(`[AI ${label}] attempt ${attempt} parse failed. head=${head} ... tail=${tail}`);
+      log.error(`[AI ${label}] attempt ${attempt} parse failed`, {
+        rawLength: generated.text.length
+      });
     } catch (error) {
       lastError = error;
-      log.error(`[AI ${label}] attempt ${attempt} call failed:`, error);
+      log.error(`[AI ${label}] attempt ${attempt} call failed`, safeProviderFailureContext(error));
       // Don't waste time retrying if we already hit the timeout budget.
       if (isTimeoutError(error)) break;
     }
@@ -804,7 +822,7 @@ export function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | 
   const s = j?.workPlanStructured;
   if (!s || typeof s !== "object") return null;
   if (!s.workOverview || typeof s.workOverview.workName !== "string") return null;
-  if (!Array.isArray(s.workSteps) || s.workSteps.length < 3) return null;
+  if (!Array.isArray(s.workSteps) || s.workSteps.length < 3 || !s.workSteps.every(isRecord)) return null;
   if (!Array.isArray(s.stopCriteria) || s.stopCriteria.length < 2) return null;
   if (!s.emergencyResponse || !Array.isArray(s.emergencyResponse.contacts)) return null;
   if (!s.approvers) return null;
@@ -818,7 +836,7 @@ export function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables>
   if (!s.meta || typeof s.meta.dateTime !== "string") return null;
   if (!s.todayWork || typeof s.todayWork.name !== "string") return null;
   if (!Array.isArray(s.hazards) || s.hazards.length < 2) return null;
-  if (!Array.isArray(s.measures) || s.measures.length < 2) return null;
+  if (!Array.isArray(s.measures) || s.measures.length < 2 || !s.measures.every(isRecord)) return null;
   if (!Array.isArray(s.stopCriteria) || s.stopCriteria.length < 2) return null;
   if (!Array.isArray(s.confirmTopics) || s.confirmTopics.length < 3) return null;
   // hazardRef is 1-based and references s.hazards (same object, count known here) —
@@ -847,7 +865,7 @@ export function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | nu
   if (!s.attendance || typeof s.attendance.confirmationMethod !== "string") return null;
   if (!s.todayWork || typeof s.todayWork.name !== "string") return null;
   if (!Array.isArray(s.workerConfirmations) || s.workerConfirmations.length < 3) return null;
-  if (!Array.isArray(s.hazardsDiscussed) || s.hazardsDiscussed.length < 2) return null;
+  if (!Array.isArray(s.hazardsDiscussed) || s.hazardsDiscussed.length < 2 || !s.hazardsDiscussed.every(isRecord)) return null;
   if (!s.safetyEducation || typeof s.safetyEducation.topic !== "string") return null;
   if (!Array.isArray(s.safetyEducation.keyPoints) || s.safetyEducation.keyPoints.length < 2) return null;
   if (!Array.isArray(s.unaddressedItems)) return null; // 빈 배열 허용
@@ -860,7 +878,7 @@ export function parseEducationRecordStructured(raw: string): Partial<AiDeliverab
   const s = j?.educationRecordStructured;
   if (!s || typeof s !== "object") return null;
   if (typeof s.educationName !== "string" || s.educationName.length === 0) return null;
-  if (!Array.isArray(s.curriculum) || s.curriculum.length < 2) return null;
+  if (!Array.isArray(s.curriculum) || s.curriculum.length < 2 || !s.curriculum.every(isRecord)) return null;
   if (typeof s.understandingCheck !== "string") return null;
   // curriculum[].lawCitation is model-authored free text (e.g. "산업안전보건법 제29조")
   // and is exactly the hallucination surface the citation gate exists for — gate it
@@ -945,7 +963,7 @@ async function generateTbmRiskLinks(
       traceOptions
     );
   } catch (error) {
-    log.error("[AI tbmRiskLinks] falling back to []", error);
+    log.error("[AI tbmRiskLinks] falling back to []", safeProviderFailureContext(error));
     return { tbmRiskLinks: [] };
   }
 }
@@ -1033,6 +1051,30 @@ const TABULAR_SPECS = [
   { name: "educationRecordStructured", buildPrompt: educationRecordStructuredPrompt, parse: parseEducationRecordStructured }
 ] as const;
 
+const DELIVERABLE_GROUP_DOCUMENT_KEYS: Record<string, readonly string[]> = {
+  riskAssessment: ["riskAssessmentDraft"],
+  workPlanStructured: ["workPlanStructured"],
+  tbmBriefingStructured: ["tbmBriefingStructured", "tbmQuestions"],
+  tbmLogStructured: ["tbmLogStructured"],
+  tbmLog: ["tbmLogDraft"],
+  educationRecordStructured: ["educationRecordStructured", "safetyEducationPoints"],
+  structuredRiskRows: ["structuredRiskRows"],
+  free: ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft", "kakaoMessage"],
+  foreign: ["foreignWorkerBriefing", "foreignWorkerTransmission"],
+  tbmRiskLinks: ["tbmRiskLinks"]
+};
+
+const FULL_AI_DOCUMENT_KEYS = [...new Set(Object.values(DELIVERABLE_GROUP_DOCUMENT_KEYS).flat())];
+
+function deterministicDocumentTrace(fallbackUsed: boolean): GenerationDeliverableModelTrace {
+  return {
+    provider: "safeclaw",
+    model: null,
+    source: "deterministic",
+    fallbackUsed
+  };
+}
+
 const ENHANCED_CORE_SPEC_NAMES = new Set<string>();
 
 export function listAiDeliverableGroupsForScope(scope: "full" | "enhanced" = "full"): string[] {
@@ -1090,6 +1132,8 @@ const DELIVERABLE_GENERATION_FAILURE_MESSAGE = "문서 생성 단계를 완료�
 
 export type AiDeliverablesDiagnostics = {
   geminiAvailable: boolean;
+  providerAvailable: boolean;
+  configuredProvider: "anthropic" | "vertex" | null;
   // group: per-doc name (riskAssessment / workPlan / tbmBriefing / tbmLog / safetyEducation / free / foreign).
   groupResults: Array<{
     group: string;
@@ -1110,14 +1154,42 @@ function summarizeDeliverablesProvider(
   return providers.values().next().value ?? null;
 }
 
+export function buildFailedDeliverablesDiagnostics(input: {
+  attempted: boolean;
+  fallbackUsed: boolean;
+}): AiDeliverablesDiagnostics {
+  const configuredProvider = configuredDeliverablesProvider();
+  const modelPerDocument = input.fallbackUsed
+    ? Object.fromEntries(FULL_AI_DOCUMENT_KEYS.map((key) => [key, deterministicDocumentTrace(true)]))
+    : {};
+  return {
+    geminiAvailable: isVertexConfigured(),
+    providerAvailable: configuredProvider !== null,
+    configuredProvider,
+    groupResults: input.fallbackUsed
+      ? [{ group: "deliverablesPipeline", status: "rejected", reason: "provider pipeline unavailable" }]
+      : [],
+    filledKeys: [],
+    trace: {
+      attempted: input.attempted,
+      provider: summarizeDeliverablesProvider(modelPerDocument),
+      modelPerDocument,
+      fallbackUsed: input.fallbackUsed
+    }
+  };
+}
+
 export async function generateAllDeliverablesWithDiagnostics(
   opts: GenerateAllOptions
 ): Promise<{ deliverables: AiDeliverables; diagnostics: AiDeliverablesDiagnostics }> {
-  if (!isDeliverablesProviderConfigured()) {
+  const configuredProvider = configuredDeliverablesProvider();
+  if (!configuredProvider) {
     return {
       deliverables: {},
       diagnostics: {
-        geminiAvailable: false,
+        geminiAvailable: isVertexConfigured(),
+        providerAvailable: false,
+        configuredProvider: null,
         groupResults: [],
         filledKeys: [],
         trace: {
@@ -1133,15 +1205,27 @@ export async function generateAllDeliverablesWithDiagnostics(
   const scope = opts.scope || "full";
   const onProgress = opts.onProgress;
   const modelPerDocument: Record<string, GenerationDeliverableModelTrace> = {};
-  let providerFallbackUsed = false;
+  const activeGroupNames = [
+    ...tabularSpecsForScope(scope).map((spec) => spec.name),
+    ...(scope === "full" ? ["structuredRiskRows", "free", "foreign", "tbmRiskLinks"] : [])
+  ];
+  activeGroupNames.forEach((group) => {
+    for (const documentKey of DELIVERABLE_GROUP_DOCUMENT_KEYS[group] || []) {
+      modelPerDocument[documentKey] = deterministicDocumentTrace(true);
+    }
+  });
   const traceOptions: CallAndParseOptions = {
     traceId: opts.traceId,
-    onTrace: (document, trace) => {
-      modelPerDocument[document] = {
-        provider: trace.provider,
-        model: trace.model
-      };
-      providerFallbackUsed ||= trace.fallbackUsed;
+    onTrace: (document, trace, outputKeys) => {
+      const expectedKeys = new Set(DELIVERABLE_GROUP_DOCUMENT_KEYS[document] || []);
+      outputKeys.filter((key) => expectedKeys.has(key)).forEach((key) => {
+        modelPerDocument[key] = {
+          provider: trace.provider,
+          model: trace.model,
+          source: "provider",
+          fallbackUsed: trace.fallbackUsed
+        };
+      });
     }
   };
 
@@ -1210,14 +1294,17 @@ export async function generateAllDeliverablesWithDiagnostics(
   return {
     deliverables: out,
     diagnostics: {
-      geminiAvailable: true,
+      geminiAvailable: isVertexConfigured(),
+      providerAvailable: true,
+      configuredProvider,
       groupResults,
       filledKeys: Object.keys(out),
       trace: {
         attempted: allSpecs.length > 0,
         provider: summarizeDeliverablesProvider(modelPerDocument),
         modelPerDocument,
-        fallbackUsed: providerFallbackUsed || groupResults.some((result) => result.status === "rejected")
+        fallbackUsed: Object.values(modelPerDocument).some((item) => item.fallbackUsed === true)
+          || groupResults.some((result) => result.status === "rejected")
       }
     }
   };

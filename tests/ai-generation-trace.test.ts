@@ -57,7 +57,8 @@ describe("answer generation trace", () => {
   test("marks the answer trace when Vertex falls back to OpenAI", async () => {
     process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON = "{}";
     process.env.GCP_PROJECT_ID = "test-project";
-    mocks.vertexGenerate.mockRejectedValue(new Error("fixture Vertex unavailable"));
+    mocks.vertexGenerate.mockRejectedValue(new Error("PII_MARKER worker=Kim fixture Vertex unavailable"));
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { generateAnswer } = await import("@/lib/ai");
 
     const result = await generateAnswer("성수동 외벽 도장 작업", [], {
@@ -69,5 +70,8 @@ describe("answer generation trace", () => {
       model: "gpt-4.1-mini",
       fallbackUsed: true
     });
+    const logged = errorSpy.mock.calls.flat().map(String).join("\n");
+    expect(logged).not.toContain("PII_MARKER");
+    expect(logged).not.toContain("worker=Kim");
   });
 });
