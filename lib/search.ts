@@ -348,15 +348,9 @@ export function buildSafetyReferenceRiskRows(
     .filter((item) => item.title || item.summary || item.controls.length)
     .map((item, index) => ({ item, index, relevance: scoreSafetyReferenceQueryMatch(rankQuery, item) }))
     .sort((a, b) => {
-      const roleA = a.item.evidence_role === "direct" ? 0 : 1;
-      const roleB = b.item.evidence_role === "direct" ? 0 : 1;
-      const sourceA = a.item.retrieval_source === "hybrid" || a.item.retrieval_source === "vector" ? 0 : a.item.retrieval_source === "ranked" ? 1 : 2;
-      const sourceB = b.item.retrieval_source === "hybrid" || b.item.retrieval_source === "vector" ? 0 : b.item.retrieval_source === "ranked" ? 1 : 2;
-      const typeA = a.item.item_type === "sif-case" ? 0 : a.item.item_type === "technical-guideline" || a.item.item_type === "technical-support-regulation" ? 1 : 2;
-      const typeB = b.item.item_type === "sif-case" ? 0 : b.item.item_type === "technical-guideline" || b.item.item_type === "technical-support-regulation" ? 1 : 2;
       const relevanceDelta = b.relevance - a.relevance;
       if (Math.abs(relevanceDelta) > 12) return relevanceDelta;
-      return roleA - roleB || typeA - typeB || sourceA - sourceB || relevanceDelta || a.index - b.index;
+      return a.index - b.index;
     })
     .map(({ item }) => item);
   const seen = new Set<string>();

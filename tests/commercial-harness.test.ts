@@ -412,6 +412,44 @@ describe("runAsk DB harness mode", () => {
     expect(rows.every((row) => !/위험.*관련 위험/.test(row.hazard))).toBe(true);
   });
 
+  it("preserves upstream task-specific rerank order when building risk rows", () => {
+    const response = buildMockAskResponse(
+      "부산 해운대 지하 기계실 배수펌프 점검, 밀폐공간 진입 전 환기와 산소농도 측정, LOTO, 누수 바닥",
+      mockSearchResults,
+      "mock",
+      "테스트"
+    );
+    const rows = buildSafetyReferenceRiskRows(response, [
+      reference({
+        id: "confined-sif-first",
+        item_type: "sif-case",
+        category: "기타의사업",
+        subcategory: "시설관리및사업지원서비스업",
+        title: "지하 기계실 배수펌프 정비 중 산소결핍 및 불시기동 끼임 사례",
+        summary: "밀폐공간 진입 전 산소농도 측정, 환기, 감시인 배치, 배수펌프 전원 차단 및 잠금표지 미흡",
+        controls: ["진입 전 산소·유해가스 농도 측정", "배수펌프 전원 차단 및 잠금표지"],
+        evidence_role: "supporting",
+        retrieval_source: "ranked"
+      }),
+      reference({
+        id: "broad-direct-second",
+        item_type: "technical-support-regulation",
+        category: "산업안전일반분야",
+        subcategory: "기술지원규정",
+        title: "A-G-15-2026 중소규모 사업장 비상조치계획 작성에 관한 기술지원규정",
+        summary: "사업장 비상조치계획 작성과 연락체계 기준",
+        controls: ["비상조치계획 수립", "연락체계 확인"],
+        evidence_role: "direct",
+        retrieval_source: "ranked"
+      })
+    ], "단시간 구름많음", "부산 해운대 지하 기계실 배수펌프 점검, 밀폐공간 진입 전 환기와 산소농도 측정, LOTO, 누수 바닥");
+
+    expect(rows[0].evidenceRefs).toEqual(expect.arrayContaining([
+      "지하 기계실 배수펌프 정비 중 산소결핍 및 불시기동 끼임 사례"
+    ]));
+    expect(rows[0].hazard).toMatch(/산소|질식|끼임|배수펌프|잠금표지/);
+  });
+
   it("keeps template mode inside the DB harness contract without generic LLM fallback prose", async () => {
     const response = await runAsk("성수동 외벽 도장 작업", {
       aiMode: "template",
