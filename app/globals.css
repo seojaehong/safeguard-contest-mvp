@@ -1200,7 +1200,7 @@ ul {
 .safeclaw-os-hero mark,
 .safeclaw-os-section mark {
   display: inline-block;
-  padding: 0 0.16em 0.05em;
+  padding: 0 var(--space-1);
   background: var(--os-yellow);
   color: #050505;
   font-style: normal;
@@ -9851,13 +9851,13 @@ body:has(.safeclaw-landing) :is(
 .briefing-settings-form {
   display: grid;
   gap: 12px;
-  margin-top: 14px;
+  margin-top: var(--space-4);
 }
 
 .briefing-settings-form label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   color: var(--os-yellow, #ffdc2e);
   font-family: var(--font-hud);
   font-size: var(--text-caption);
@@ -9873,7 +9873,7 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   background: #0b0c10;
   color: var(--os-text, #f6f5ef);
-  padding: 12px 14px;
+  padding: var(--space-3) var(--space-4);
   font-size: var(--text-body);
   font-weight: 500;
   font-family: inherit;
@@ -9896,20 +9896,20 @@ body:has(.safeclaw-landing) :is(
 
 .briefing-settings-form button {
   display: inline-flex;
-  min-height: 46px;
+  min-height: var(--control-height);
   align-items: center;
   justify-content: center;
   border: 1px solid var(--os-yellow, #ffdc2e);
   border-radius: 4px;
   background: var(--os-yellow, #ffdc2e);
   color: #08090b;
-  padding: 0 18px;
-  font-family: var(--font-hud);
-  font-size: var(--text-table);
-  font-weight: 500;
+  padding: 0 var(--space-4);
+  font-family: var(--font-product);
+  font-size: var(--text-control);
+  font-weight: 700;
   letter-spacing: var(--tracking-body);
   cursor: pointer;
-  line-height: var(--leading-table);
+  line-height: var(--leading-control);
 }
 
 .briefing-settings-form button:disabled {
@@ -9920,7 +9920,7 @@ body:has(.safeclaw-landing) :is(
 /* 내 AI 연결 (/settings/ai-connect) — 기존 모듈 셸 안에서 쓰는 고급 연결 표면. */
 .ai-connect-workspace {
   display: grid;
-  gap: 18px;
+  gap: var(--space-4);
 }
 
 .ai-connect-tabs {
@@ -9950,7 +9950,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .ai-connect-tabs button strong {
-  margin-bottom: 10px;
+  margin-bottom: var(--space-2);
   font-size: var(--text-body);
   font-weight: 500;
   line-height: var(--leading-body);
@@ -9968,14 +9968,14 @@ body:has(.safeclaw-landing) :is(
 .ai-connect-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 18px 0;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
 }
 
 .ai-connect-meta {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr);
-  gap: 10px;
+  gap: var(--space-2);
   margin: 16px 0;
 }
 
@@ -9983,7 +9983,7 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid rgba(246, 245, 239, 0.16);
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.24);
-  padding: 14px;
+  padding: var(--space-4);
 }
 
 .ai-connect-meta dt,
@@ -10012,7 +10012,7 @@ body:has(.safeclaw-landing) :is(
 .ai-connect-secret,
 .ai-connect-command-box {
   display: grid;
-  gap: 10px;
+  gap: var(--space-2);
   margin-top: 16px;
 }
 
@@ -10051,7 +10051,7 @@ body:has(.safeclaw-landing) :is(
 
 .ai-connect-token-items {
   display: grid;
-  gap: 10px;
+  gap: var(--space-2);
   margin-top: 16px;
 }
 
@@ -10063,16 +10063,16 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid rgba(246, 245, 239, 0.16);
   border-radius: 4px;
   background: rgba(11, 12, 16, 0.64);
-  padding: 14px;
+  padding: var(--space-4);
 }
 
 .ai-connect-token-items article p {
-  margin: 6px 0 0;
+  margin: var(--space-2) 0 0;
 }
 
 .ai-connect-token-items article > span {
   border-radius: 4px;
-  padding: 7px 10px;
+  padding: var(--space-2);
   font-size: var(--text-caption);
   font-weight: 600;
   line-height: var(--leading-caption);

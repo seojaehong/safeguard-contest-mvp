@@ -179,6 +179,23 @@ const approvedSpacingTokens = new Set([
   "--space-8", "--space-10", "--space-12", "--space-16", "--space-20", "--space-24",
 ]);
 const justifiedSemanticSpacingTokens = new Set(["--os-gutter"]);
+const justifiedResponsiveSpacingExpressions = new Set([
+  ".safeclaw-landing-nav nav|gap|clamp(var(--space-4), 2.4vw, var(--space-10))",
+  ".safeclaw-hero-copy|padding|clamp(var(--space-10), 7vw, var(--space-24))",
+  ".safeclaw-hero-console|padding|clamp(32px, 5vw, 64px)",
+  ".safeclaw-statement-card|padding|clamp(var(--space-8), 5vw, var(--space-16))",
+  ".safeclaw-core-section|padding|clamp(var(--space-10), 6vw, var(--space-20))",
+  ".safeclaw-operation-section|padding|clamp(var(--space-10), 6vw, var(--space-20))",
+  ".safeclaw-os-tag|margin-bottom|clamp(var(--space-8), 4vw, var(--space-16))",
+  ".safeclaw-os-hero-body|gap|clamp(var(--space-8), 5vw, var(--space-20))",
+  ".safeclaw-os-hero-body|padding|clamp(var(--space-12), 6vw, var(--space-20)) 0",
+  ".safeclaw-os-section|padding-block|clamp(var(--space-16), 6vw, var(--space-24))",
+  ".safeclaw-os-section.compact|padding-top|clamp(var(--space-12), 5vw, var(--space-20))",
+  "#language|padding-bottom|clamp(var(--space-8), 3vw, var(--space-12))",
+  "#proof|padding-top|clamp(var(--space-8), 3vw, var(--space-12))",
+  ".safeclaw-landing-footer|padding-block|clamp(48px, 6vw, 80px)",
+  ".safeclaw-module-nav|padding|0 clamp(20px, 3vw, 48px)",
+]);
 const ordinaryModuleOwnedClasses = new Set([
   "advanced-download-grid", "advanced-downloads", "doc-card-evidence-badge",
   "knowledge-entry-grid", "knowledge-entry-list", "knowledge-index-card", "knowledge-status-grid",
@@ -192,6 +209,9 @@ const ordinaryModuleOwnedClasses = new Set([
   "safeclaw-module-title", "safeclaw-section-title", "safeclaw-setting-description", "safeclaw-tbm-board",
   "safeclaw-worker-phone", "safeclaw-worker-table", "sc-blink", "sc-blink--good",
   "worker-ack-note", "worker-language-note", "worker-language-preview", "worker-language-switcher",
+  "briefing-settings-card", "briefing-settings-form",
+  "ai-connect-actions", "ai-connect-command", "ai-connect-command-box", "ai-connect-empty", "ai-connect-meta",
+  "ai-connect-secret", "ai-connect-tabs", "ai-connect-token-items", "ai-connect-token-list", "ai-connect-workspace",
 ]);
 const auditedSpacingProperties = new Set([
   "gap", "row-gap", "column-gap",
@@ -234,7 +254,11 @@ function familySpacingResiduals(source: string): string[] {
       const tokenOffenders = [...value.matchAll(/var\((--[\w-]+)\)/g)]
         .map((match) => match[1])
         .filter((token) => !approvedSpacingTokens.has(token) && !justifiedSemanticSpacingTokens.has(token));
-      return offenders.length || tokenOffenders.length
+      const hasForbiddenUnit = /(?:^|[\s,(])[-+]?\d*\.?\d+(?:em|rem|%|vw|vh|vmin|vmax)(?![\w-])/.test(value);
+      const hasExpression = /\b(?:calc|clamp|min|max)\(/.test(value);
+      const expressionAllowed = selectorsToAudit.every((selector) => justifiedResponsiveSpacingExpressions.has(`${selector}|${property}|${value}`));
+      const expressionOffender = (hasForbiddenUnit || hasExpression) && !expressionAllowed;
+      return offenders.length || tokenOffenders.length || expressionOffender
         ? selectorsToAudit.map((selector) => `${selector} { ${property}: ${value} }`)
         : [];
     });
@@ -771,6 +795,12 @@ describe("module route section hierarchy", () => {
       "line-height": "var(--leading-hud)",
       "letter-spacing": "var(--tracking-hud)",
     });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-hero mark")).toMatchObject({
+      padding: "0 var(--space-1)",
+    });
+    expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-section mark")).toMatchObject({
+      padding: "0 var(--space-1)",
+    });
     expect(declarationsForExactSelector(desktopCss, ".safeclaw-os-section h2")).toMatchObject({
       "font-size": "var(--text-section-title)",
       "font-weight": "800",
@@ -847,6 +877,15 @@ describe("module route section hierarchy", () => {
       "line-height": "var(--leading-control)",
       "letter-spacing": "var(--tracking-body)",
     });
+    expect(declarationsForExactSelector(desktopCss, ".briefing-settings-form button")).toMatchObject({
+      "min-height": "var(--control-height)",
+      padding: "0 var(--space-4)",
+      "font-family": "var(--font-product)",
+      "font-size": "var(--text-control)",
+      "font-weight": "700",
+      "line-height": "var(--leading-control)",
+      "letter-spacing": "var(--tracking-body)",
+    });
 
     expect(familySpacingResiduals(css)).toEqual([]);
     expect(familySpacingResiduals(".safeclaw-os-tag { margin: 7px; }")).toEqual([
@@ -866,15 +905,26 @@ describe("module route section hierarchy", () => {
     expect(familySpacingResiduals(".ontology-node-row { gap: var(--unknown-spacing); }")).toEqual([
       ".ontology-node-row { gap: var(--unknown-spacing) }",
     ]);
+    for (const mutation of [
+      ".ontology-node-row { gap: 0.5em; }",
+      ".ontology-node-row { gap: 1rem; }",
+      ".ontology-node-row { gap: 10%; }",
+      ".ontology-node-row { gap: calc(100% - 4px); }",
+      ".briefing-settings-form { gap: 7px; }",
+      ".ai-connect-tabs { gap: 7px; }",
+    ]) {
+      expect(familySpacingResiduals(mutation), mutation).toHaveLength(1);
+    }
 
     const ordinaryOwnerFiles = [
       "app/archive/page.tsx", "app/home/page.tsx", "app/dispatch/page.tsx", "app/evidence/page.tsx",
       "app/workers/page.tsx", "app/tbm/page.tsx", "app/settings/page.tsx", "app/knowledge/page.tsx",
       "app/evidence-file/page.tsx", "app/ontology/page.tsx", "app/worker/page.tsx",
       "components/SafeClawModuleShell.tsx", "components/CurrentWorkpackModules.tsx",
+      "components/BriefingSettingsCard.tsx", "components/AiConnectPanel.tsx",
     ];
     const excludedOwnerClass = /^(?:safeclaw-(?:doc|document|workdoc|report)|workflow-|dispatch-|share-)/;
-    const routeOwnedClass = /^(?:safeclaw-|ontology-|knowledge-|advanced-download|doc-card-evidence-badge|worker-)/;
+    const routeOwnedClass = /^(?:safeclaw-|ontology-|knowledge-|advanced-download|doc-card-evidence-badge|worker-|briefing-settings-|ai-connect-)/;
     for (const ownerFile of ordinaryOwnerFiles) {
       const source = read(ownerFile);
       const extracted = [...source.matchAll(/className="([^"]+)"/g)]
@@ -889,6 +939,17 @@ describe("module route section hierarchy", () => {
     ]) {
       expect(read("app/ontology/page.tsx"), `${ontologyClass} source owner`).toContain(ontologyClass);
       expect(ordinaryModuleOwnedClasses).toContain(ontologyClass);
+    }
+    for (const [ownerFile, prefix] of [
+      ["components/BriefingSettingsCard.tsx", "briefing-settings-"],
+      ["components/AiConnectPanel.tsx", "ai-connect-"],
+    ] as const) {
+      const source = read(ownerFile);
+      const delegatedClasses = [...source.matchAll(/className="([^"]+)"/g)]
+        .flatMap((match) => match[1].split(/\s+/))
+        .filter((className) => className.startsWith(prefix));
+      expect(delegatedClasses.length, `${ownerFile} delegated classes`).toBeGreaterThan(0);
+      for (const className of delegatedClasses) expect(ordinaryModuleOwnedClasses).toContain(className);
     }
   });
 });
