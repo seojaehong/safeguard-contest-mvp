@@ -3,7 +3,11 @@ import type {
   SafetyReferenceRetrievalMode,
   SafetyReferenceVectorStatus
 } from "@/lib/safety-reference-catalog";
-import { getSafetyReferenceDisplayTitle } from "@/lib/safety-reference-catalog";
+import {
+  deriveSafetyReferenceOperationalView,
+  getSafetyReferenceDisplayTitle,
+  isSafetyReferenceCompatibleWithQuery
+} from "@/lib/safety-reference-catalog";
 
 export type HarnessImprovement = {
   id: string;
@@ -223,17 +227,23 @@ export function buildDbHarnessPacket(input: {
 }): DbHarnessPacket {
   const improvements = input.improvements || [];
   const workpackMemory = input.workpackMemory || [];
-  const directEvidence = input.references.filter((item) => item.evidence_role === "direct");
-  const sifCases = input.references.filter((item) => item.item_type === "sif-case");
-  const supportingEvidence = input.references.filter((item) => item.evidence_role !== "direct");
+  const references = input.references
+    .filter((item) => isSafetyReferenceCompatibleWithQuery(input.question, item))
+    .map((item) => ({
+      ...item,
+      controls: deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)
+    }));
+  const directEvidence = references.filter((item) => item.evidence_role === "direct");
+  const sifCases = references.filter((item) => item.item_type === "sif-case");
+  const supportingEvidence = references.filter((item) => item.evidence_role !== "direct");
   const retrievalContract = buildRetrievalContract({
-    references: input.references,
+    references,
     directEvidence,
     sifCases,
     supportingEvidence,
     retrieval: input.retrieval
   });
-  const availableDocuments = uniqueDocuments(input.references, improvements);
+  const availableDocuments = uniqueDocuments(references, improvements);
   const documentCoverage = buildDocumentCoverage({ directEvidence, sifCases, supportingEvidence, improvements });
   const missingEvidence = REQUIRED_DOCUMENTS.filter((document) =>
     !availableDocuments.has(document) || !documentCoverage.find((item) => item.document === document)?.covered
@@ -366,7 +376,7 @@ export function parseHarnessMemoryInput(value: unknown): Required<HarnessMemoryI
 
 export function buildHarnessPromptContext(packet: DbHarnessPacket) {
   const evidenceLines = [
-    ...packet.sifCases.map((item) => `SIF: ${getSafetyReferenceDisplayTitle(item)} -> ${item.controls.slice(0, 2).join(" / ")}`),
+    ...packet.sifCases.map((item) => `SIF: ${getSafetyReferenceDisplayTitle(item)} -> ${deriveSafetyReferenceOperationalView(item).controls.slice(0, 2).join(" / ")}`),
     ...packet.directEvidence.map((item) => `공식자료: ${getSafetyReferenceDisplayTitle(item)} -> ${item.primary_documents.join(", ")}`),
     ...packet.improvementMemory.map((item) => [
       `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
@@ -449,8 +459,8 @@ function evidenceTitles(items: SafetyReferenceItem[], limit: number) {
 
 function controlCandidates(packet: DbHarnessPacket) {
   return uniqueNonEmpty([
-    ...packet.sifCases.flatMap((item) => item.controls),
-    ...packet.directEvidence.flatMap((item) => item.controls),
+    ...packet.sifCases.flatMap((item) => deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)),
+    ...packet.directEvidence.flatMap((item) => deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)),
     ...packet.improvementMemory.map((item) => item.improvementText),
     ...packet.improvementMemory.flatMap((item) => item.detectedHazards || [])
   ], 6);

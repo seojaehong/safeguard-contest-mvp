@@ -416,6 +416,17 @@ function genericOperationalView(item: SafetyReferenceItem): SafetyReferenceOpera
 export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem): SafetyReferenceOperationalView {
   const text = operationalReferenceText(item);
 
+  if (/D-C-13-2026|외벽도장보수공사/u.test(text)) {
+    return {
+      hazard: "외벽 도장 중 이동식 비계 작업발판·난간 미확인으로 인한 추락·전도 위험",
+      controls: [
+        "이동식 비계 작업발판·안전난간·바퀴 잠금·아웃트리거 상태 확인",
+        "안전대 체결, 하부 출입통제 및 강풍 시 작업중지 기준 적용"
+      ],
+      reviewRequired: false
+    };
+  }
+
   if (/B-E-20-2026|정전도장기|정전도장/u.test(text)) {
     return {
       hazard: "정전도장 중 정전기 방전과 도료 증기 점화로 인한 화재·폭발 위험",
@@ -444,6 +455,17 @@ export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem):
       controls: [
         "작업로프·안전대·구명줄 체결 및 고정점 사전 점검",
         "작업발판·난간 설치, 하부 출입 통제 및 강풍·우천 시 작업 중지"
+      ],
+      reviewRequired: false
+    };
+  }
+
+  if (/지게차/u.test(text) && /동선|보행|통행|충돌/u.test(text)) {
+    return {
+      hazard: "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험",
+      controls: [
+        "지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
+        "교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인"
       ],
       reviewRequired: false
     };
@@ -528,6 +550,27 @@ function safeIlikeTerm(value: string): string {
   return value.replaceAll("*", "").replaceAll(",", " ").replace(/[()]/g, " ").trim();
 }
 
+const PRIORITY_QUERY_TERMS = [
+  "밀폐공간",
+  "배수펌프",
+  "산소농도",
+  "유해가스",
+  "지게차",
+  "비계",
+  "외벽",
+  "도장",
+  "도료",
+  "유기용제",
+  "강풍",
+  "추락",
+  "동선",
+  "충돌",
+  "감전",
+  "누수",
+  "화재",
+  "폭발"
+];
+
 function extractFallbackTerms(value: string): string[] {
   const stopwords = new Set([
     "부산",
@@ -549,12 +592,12 @@ function extractFallbackTerms(value: string): string[] {
     "방향"
   ]);
   const normalized = value.replace(/[^\p{L}\p{N}\s]/gu, " ");
-  return Array.from(new Set(
-    normalized
-      .split(/\s+/)
-      .map((term) => term.trim())
-      .filter((term) => term.length >= 2 && !stopwords.has(term))
-  )).slice(0, 8);
+  const priorityTerms = PRIORITY_QUERY_TERMS.filter((term) => normalized.includes(term));
+  const ordinaryTerms = normalized
+    .split(/\s+/)
+    .map((term) => term.trim())
+    .filter((term) => term.length >= 2 && !stopwords.has(term));
+  return Array.from(new Set([...priorityTerms, ...ordinaryTerms])).slice(0, 12);
 }
 
 const QUERY_TERM_ALIASES: Record<string, string[]> = {
@@ -570,7 +613,13 @@ const QUERY_TERM_ALIASES: Record<string, string[]> = {
   "전원": ["전원", "잠금", "LOTO", "정비"],
   "잠금표지": ["잠금", "표지", "LOTO", "전원차단"],
   "추락": ["추락", "비계", "사다리", "작업발판", "고소"],
-  "지게차": ["지게차", "동선", "충돌", "하역"]
+  "지게차": ["지게차", "동선", "충돌", "하역", "보행자", "신호수"],
+  "비계": ["비계", "작업발판", "난간", "고소", "추락"],
+  "강풍": ["강풍", "돌풍", "풍속", "악천후", "작업중지"],
+  "동선": ["동선", "통행", "보행", "보행자", "충돌", "교차"],
+  "충돌": ["충돌", "지게차", "차량", "동선", "보행자"],
+  "외벽": ["외벽", "외부마감", "고소", "비계"],
+  "도장": ["도장", "도료", "페인트", "유기용제"]
 };
 
 const STRONG_RELEVANCE_ALIASES = new Set([
@@ -591,7 +640,12 @@ const STRONG_RELEVANCE_ALIASES = new Set([
   "추락",
   "비계",
   "작업발판",
-  "지게차"
+  "지게차",
+  "강풍",
+  "동선",
+  "충돌",
+  "보행",
+  "보행자"
 ]);
 
 const CONFINED_OR_PUMP_QUERY_TERMS = ["밀폐공간", "산소농도", "환기", "배수펌프", "기계실", "누수"];
@@ -643,11 +697,38 @@ function hasStrongQueryMatch(query: string, item: SafetyReferenceItem): boolean 
 function isIncompatibleReferenceForQuery(query: string, item: SafetyReferenceItem): boolean {
   const queryText = normalizeMatchText(query);
   const text = referenceMatchText(item);
+  const identityText = normalizeMatchText([
+    item.title,
+    item.category || "",
+    item.subcategory || "",
+    ...item.keywords
+  ].join(" "));
+  const specializedGuards: Array<{ reference: RegExp; query: RegExp }> = [
+    {
+      reference: /B-E-20-2026|정전도장기|정전도장/u,
+      query: /정전\s*도장|정전도장기|정전기.*(?:도장|도료)|(?:도장|도료).*정전기|고전압\s*도장/u
+    },
+    {
+      reference: /G-117-2014|선박\s*내부|선박내부/u,
+      query: /선박|선체|조선/u
+    },
+    {
+      reference: /M-77-2011|자동차\s*부분\s*분무도장/u,
+      query: /자동차|차량\s*도장|분무도장|스프레이\s*도장/u
+    }
+  ];
+  if (specializedGuards.some((guard) => guard.reference.test(identityText) && !guard.query.test(queryText))) {
+    return true;
+  }
   const confinedOrPumpQuery = CONFINED_OR_PUMP_QUERY_TERMS.some((term) => queryText.includes(normalizeMatchText(term)));
   if (!confinedOrPumpQuery) return false;
   return CONFINED_OR_PUMP_INCOMPATIBLE_TERMS.some((term) =>
     !queryText.includes(normalizeMatchText(term)) && text.includes(normalizeMatchText(term))
   );
+}
+
+export function isSafetyReferenceCompatibleWithQuery(query: string, item: SafetyReferenceItem): boolean {
+  return !isIncompatibleReferenceForQuery(query, item);
 }
 
 export function scoreSafetyReferenceQueryMatch(query: string, item: SafetyReferenceItem): number {
@@ -672,6 +753,39 @@ export function scoreSafetyReferenceQueryMatch(query: string, item: SafetyRefere
   return hasStrongQueryMatch(query, item) ? score : Math.min(score, 1);
 }
 
+function referenceRiskDomain(item: SafetyReferenceItem): string {
+  const text = referenceMatchText(item);
+  return /정전도장|정전도장기/.test(text)
+    ? "electrostatic_paint"
+    : /지게차/.test(text) && /동선|보행|통행|충돌|하역/.test(text)
+      ? "forklift_traffic"
+      : /도장|도료|유기용제/.test(text) && /화재|폭발|점화/.test(text)
+        ? "paint_fire"
+        : /외벽|비계|추락|작업발판|고소/.test(text)
+          ? "fall_scaffold"
+          : /밀폐공간|산소결핍|유해가스|배수펌프/.test(text)
+            ? "confined_space"
+            : /감전|누전|전기작업/.test(text)
+              ? "electrical"
+              : `reference:${item.id}`;
+}
+
+function referenceDomainSpecificity(domain: string, item: SafetyReferenceItem): number {
+  const title = normalizeMatchText(item.title);
+  switch (domain) {
+    case "forklift_traffic":
+      return (/지게차/.test(title) ? 6 : 0) + (/안전작업|충돌|보행/.test(title) ? 2 : 0);
+    case "fall_scaffold":
+      return (/d-c-13-2026|외벽도장|비계\s*구조/.test(title) ? 6 : 0) + (/추락|작업발판/.test(title) ? 2 : 0);
+    case "paint_fire":
+      return (/b-e-17-2026/.test(title) ? 6 : 0) + (/도장/.test(title) && /화재|폭발/.test(title) ? 2 : 0);
+    case "confined_space":
+      return (/밀폐공간|산소결핍|유해가스/.test(title) ? 6 : 0) + (/배수펌프/.test(title) ? 2 : 0);
+    default:
+      return 0;
+  }
+}
+
 export function filterAndRankSafetyReferencesByQuery(
   query: string,
   items: SafetyReferenceItem[],
@@ -679,12 +793,47 @@ export function filterAndRankSafetyReferencesByQuery(
 ): SafetyReferenceItem[] {
   const terms = expandedQueryTerms(query);
   if (!terms.length) return items.slice(0, limit);
-  return items
+  const ranked = items
+    .filter((item) => isSafetyReferenceCompatibleWithQuery(query, item))
     .map((item, index) => ({ item, index, score: scoreSafetyReferenceQueryMatch(query, item) }))
     .filter(({ score }) => score >= 2)
-    .sort((a, b) => b.score - a.score || a.index - b.index)
-    .map(({ item }) => item)
-    .slice(0, limit);
+    .sort((a, b) => b.score - a.score || a.index - b.index);
+  const selected: typeof ranked = [];
+  const deferred: typeof ranked = [];
+  const selectedDomainIndexes = new Map<string, number>();
+
+  for (const candidate of ranked) {
+    const domain = referenceRiskDomain(candidate.item);
+    const selectedIndex = selectedDomainIndexes.get(domain);
+    if (selectedIndex !== undefined) {
+      const selectedCandidate = selected[selectedIndex];
+      const shouldPreferDirect = candidate.item.evidence_role === "direct" &&
+        selectedCandidate.item.evidence_role !== "direct";
+      const sameEvidenceAuthority = candidate.item.evidence_role === selectedCandidate.item.evidence_role;
+      const shouldPreferSpecificReference = sameEvidenceAuthority &&
+        referenceDomainSpecificity(domain, candidate.item) > referenceDomainSpecificity(domain, selectedCandidate.item);
+      if (shouldPreferDirect || shouldPreferSpecificReference) {
+        selected[selectedIndex] = candidate;
+        deferred.push(selectedCandidate);
+      } else {
+        deferred.push(candidate);
+      }
+      continue;
+    }
+    if (selected.length >= limit) {
+      deferred.push(candidate);
+      continue;
+    }
+    selectedDomainIndexes.set(domain, selected.length);
+    selected.push(candidate);
+  }
+
+  for (const candidate of deferred) {
+    if (selected.length >= limit) break;
+    selected.push(candidate);
+  }
+
+  return selected.map(({ item }) => item);
 }
 
 export function readSafetyReferenceLimit(value: string | null): number {
@@ -1140,7 +1289,8 @@ export async function searchSafetyReferences(options: {
   if (items.length === 0 && searchTerm.includes(" ")) {
     const byId = new Map<string, SafetyReferenceItem>();
     const fallbackTerms = extractFallbackTerms(searchTerm);
-    for (const term of fallbackTerms) {
+    const minimumSignalPasses = Math.min(4, fallbackTerms.length);
+    for (const [index, term] of fallbackTerms.entries()) {
       const fallbackParams = new URLSearchParams(params);
       fallbackParams.set("limit", String(fetchLimit));
       fallbackParams.set("or", `(title.ilike.*${term}*,summary.ilike.*${term}*,body.ilike.*${term}*)`);
@@ -1153,7 +1303,7 @@ export async function searchSafetyReferences(options: {
       } else {
         console.error("Safety reference fallback search failed", fallback.message);
       }
-      if (byId.size >= limit) break;
+      if (index + 1 >= minimumSignalPasses && byId.size >= limit) break;
     }
     items = Array.from(byId.values());
   }

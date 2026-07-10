@@ -78,4 +78,131 @@ describe("safety reference relevance guard", () => {
 
     expect(filterAndRankSafetyReferencesByQuery(query, [vdt, fall], 2).map((item) => item.id)).toEqual(["fall"]);
   });
+
+  it("rejects electrostatic-only painting evidence and preserves explicit forklift traffic evidence", () => {
+    const query = [
+      "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업.",
+      "이동식 비계를 사용하고 작업자 5명 중 신규 투입자 1명이 포함된다.",
+      "오후 강풍 예보가 있으며 자재 반입 지게차 동선과 작업자 통행 동선이 겹친다."
+    ].join(" ");
+    const exteriorPainting = reference({
+      id: "exterior-painting",
+      category: "건설안전분야",
+      subcategory: "기술지원규정",
+      title: "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+      summary: "외벽 도장 보수공사의 비계, 추락방지, 작업발판 안전 기준",
+      keywords: ["외벽도장", "비계", "추락"],
+      risk_tags: ["추락", "비계"],
+      controls: ["가동부 방호덮개와 비상정지장치 확인", "정비 전 전원 차단 및 잠금표지"]
+    });
+    const electrostaticPainting = reference({
+      id: "electrostatic-painting",
+      category: "전기안전분야",
+      subcategory: "기술지원규정",
+      title: "B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+      summary: "정전도장기의 정전기 방전과 도료 증기 점화 방지 기준",
+      keywords: ["정전도장", "정전기", "접지"],
+      risk_tags: ["화재", "폭발"],
+      controls: ["정전도장기 접지", "방폭형 환기설비 가동"]
+    });
+    const forkliftTraffic = reference({
+      id: "forklift-traffic",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "지게차와 보행자 교차 동선 충돌 예방 기준",
+      summary: "자재 반입 지게차와 작업자 통행 동선을 분리하고 신호수를 배치한다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      controls: ["지게차 동선과 보행 동선 분리", "신호수 배치 및 후진 경보 확인"]
+    });
+
+    const ids = filterAndRankSafetyReferencesByQuery(
+      query,
+      [electrostaticPainting, exteriorPainting, forkliftTraffic],
+      3
+    ).map((item) => item.id);
+
+    expect(ids).toEqual(expect.arrayContaining(["exterior-painting", "forklift-traffic"]));
+    expect(ids).not.toContain("electrostatic-painting");
+  });
+
+  it("keeps multiple explicit risk domains instead of filling the result with one repeated domain", () => {
+    const query = "외벽 도장 작업, 이동식 비계, 강풍, 지게차와 작업자 동선 중첩";
+    const trafficReferences = ["traffic-1", "traffic-2", "traffic-3"].map((id) => reference({
+      id,
+      category: "운반하역",
+      subcategory: "지게차",
+      title: `${id} 지게차 보행자 동선 충돌 예방`,
+      summary: "지게차와 보행자 동선을 분리하고 신호수를 배치한다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      controls: ["지게차 동선과 보행 동선 분리", "신호수 배치"]
+    }));
+    const exteriorPainting = reference({
+      id: "exterior-painting",
+      category: "건설안전분야",
+      title: "D-C-13-2026 외벽도장보수공사 안전작업",
+      summary: "이동식 비계 작업발판과 안전난간, 강풍 작업중지 기준",
+      keywords: ["외벽도장", "비계", "추락", "강풍"],
+      risk_tags: ["추락", "비계"],
+      controls: ["비계 작업발판·난간 확인", "강풍 시 작업중지"]
+    });
+    const paintFire = reference({
+      id: "paint-fire",
+      category: "화재폭발",
+      title: "B-E-17-2026 도장 공정 화재·폭발 예방",
+      summary: "도료와 유기용제 증기 점화 방지 기준",
+      keywords: ["도장", "도료", "유기용제"],
+      risk_tags: ["화재", "폭발"],
+      controls: ["환기 실시", "점화원 통제"]
+    });
+
+    const ids = filterAndRankSafetyReferencesByQuery(
+      query,
+      [...trafficReferences, exteriorPainting, paintFire],
+      3
+    ).map((item) => item.id);
+
+    expect(ids).toEqual(expect.arrayContaining(["exterior-painting", "paint-fire"]));
+    expect(ids.filter((id) => id.startsWith("traffic-"))).toHaveLength(1);
+  });
+
+  it("uses the forklift-specific official reference as the traffic representative", () => {
+    const query = "외벽 도장 작업, 이동식 비계 사용, 오후 강풍, 자재 반입 지게차 동선과 작업자 통행 동선 중첩";
+    const broadConstructionEquipment = reference({
+      id: "broad-construction-equipment",
+      category: "건설안전분야",
+      title: "D-C-10-2026 이동식크레인·항타기·타워크레인 작업계획서 작성",
+      summary: "건설장비 작업계획서와 이동식크레인 고소작업 기준",
+      keywords: ["크레인", "지게차", "고소"],
+      risk_tags: ["크레인", "지게차"],
+      controls: [
+        "작업발판·난간·개구부 상태 확인",
+        "안전대 체결 및 작업반경 출입통제",
+        "가동부 방호덮개와 비상정지장치 확인",
+        "정비 전 전원 차단 및 잠금표지",
+        "보행자 동선과 장비 동선 분리",
+        "신호수 배치 및 후진 경보 확인"
+      ],
+      evidence_role: "direct"
+    });
+    const forkliftOfficial = reference({
+      id: "forklift-official",
+      category: "기계안전분야",
+      title: "B-M-11-2025 지게차의 안전작업에 관한 기술지원규정",
+      summary: "지게차 운행과 보행자 충돌 예방 기준",
+      keywords: ["지게차", "보행자", "동선"],
+      risk_tags: ["지게차", "충돌"],
+      controls: ["지게차 동선과 보행 동선 분리", "신호수 배치 및 후진 경보 확인"],
+      evidence_role: "direct"
+    });
+
+    const ranked = filterAndRankSafetyReferencesByQuery(
+      query,
+      [broadConstructionEquipment, forkliftOfficial],
+      2
+    );
+
+    expect(ranked[0]?.id).toBe("forklift-official");
+  });
 });
