@@ -27,3 +27,12 @@
 ## Review state
 
 F6 remains `in_progress` with `passes: false` pending independent specification and code-quality review.
+
+## Independent-review remediation
+
+- Added exact `title`, `section`, `body`, `table`, and `note` roles to the default binary PDF branch. The CID PDF now declares Malgun Gothic regular and bold resources and emits role-specific font size, leading, and tracking operators.
+- Covered every editor-preview text owner with a document-scoped rule that defeats the earlier screen/HUD cascade, including approval, metadata labels and values, confirmation rows, tables, notes, and signatures.
+- Removed the newly introduced shared `@page` declaration from `formCss`; downloadable HTML/XLS/Word/browser-print behavior retains its prior page-size behavior. The pre-existing PDF-ready HTML A4 rule remains unchanged.
+- Replaced broad source substring evidence with independently delimited template checks and direct `POST` invocation for both default binary PDF and `?format=html` responses. Tests assert representative values, order, signatures, status, MIME, disposition, cache headers, PDF magic, font resources, and every typography role.
+- Review RED: strengthened suite failed 5 of 9 tests before remediation.
+- Review GREEN: generated plus design-contract tests pass 27/27; full suite passes 56 files / 511 tests; static audit, typecheck, build, and diff-check pass.

@@ -574,7 +574,6 @@ function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
 
 function formCss(pageMargin = "36px") {
   return `
-    @page { size: A4; margin: 14mm; }
     body { margin: 0; background: #ece7dc; color: #161b22; font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
     .safety-form-page { max-width: 1080px; margin: ${pageMargin} auto; background: #fffdf8; border: 2px solid #161b22; box-shadow: 8px 8px 0 rgba(22, 27, 34, 0.12); }
     .form-head { display: grid; grid-template-columns: 1fr 240px; border-bottom: 2px solid #161b22; }
@@ -677,6 +676,41 @@ const documentPreviewCss = `
     font-size: 8pt;
     font-weight: 400;
     line-height: 11pt;
+    letter-spacing: 0;
+    font-family: inherit;
+  }
+  .document-print-typography .approval-preview b {
+    font-size: 8.5pt;
+    font-weight: 700;
+    line-height: 12pt;
+    letter-spacing: 0;
+    font-family: inherit;
+  }
+  .document-print-typography .approval-preview em {
+    font-size: 8pt;
+    font-weight: 400;
+    line-height: 11pt;
+    letter-spacing: 0;
+    font-family: inherit;
+  }
+  .document-print-typography .safety-form-meta-grid b {
+    font-size: 8.5pt;
+    font-weight: 700;
+    line-height: 12pt;
+    letter-spacing: 0;
+    font-family: inherit;
+  }
+  .document-print-typography .safety-form-check-row span {
+    font-size: 8.5pt;
+    font-weight: 400;
+    line-height: 12pt;
+    letter-spacing: 0;
+    font-family: inherit;
+  }
+  .document-print-typography .safety-form-signatures span {
+    font-size: 8.5pt;
+    font-weight: 400;
+    line-height: 12pt;
     letter-spacing: 0;
     font-family: inherit;
   }

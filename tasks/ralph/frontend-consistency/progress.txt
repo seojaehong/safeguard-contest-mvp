@@ -85,3 +85,9 @@
 - Verified: RED 4/5 failures before implementation plus a second RED for fallback XLS/workbook px overrides; generated-document 6/6, focused 24/24, full 508/508, static audit 32 routes/22 components with zero violations, typecheck, build, and diff-check pass.
 - Learned: the editor preview needs a generated-document-specific owner so the print hierarchy can coexist with the existing screen typography audit without changing ordinary product UI selectors.
 - Next: keep F6 `passes: false` until independent review; run the server-backed output-contract smoke during the integrated F7 server verification.
+
+## 2026-07-11 F6 independent-review remediation
+- Changed: standardized the default binary PDF branch with five exact text roles and Malgun Gothic regular/bold CID resources; closed preview HUD/caption cascade leaks; removed the newly added shared A4 rule; strengthened tests per generated template and actual API response branch.
+- Verified: review RED 5/9; review GREEN focused 27/27, full 56 files/511 tests, static audit zero violations, typecheck, production build, and diff-check pass.
+- Learned: an HTML-ready PDF branch does not prove the default binary response; generated-surface contracts must exercise both response branches and every template boundary independently.
+- Next: keep F6 `passes: false` until independent re-review.
