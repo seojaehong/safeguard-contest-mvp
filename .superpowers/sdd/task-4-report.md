@@ -79,6 +79,9 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 20. Ordinary-module ownership and token audit
    - RED: route-owned unprefixed ontology selectors remained outside family ownership, ontology spacing used off-scale values, and arbitrary or unknown `var()` spacing tokens bypassed the raw-pixel audit.
    - GREEN: route/component class extraction is checked against an explicit ordinary-module inventory, ontology and newly discovered knowledge/evidence/worker descendants use the approved scale, and parser mutations reject raw 7px, `--space-7`, unknown tokens, and omitted `.ontology-node-row` ownership while retaining explicit document/workspace/report/generated exclusions.
+21. Delegated-owner and spacing-unit audit
+   - RED: briefing and AI-connect component classes were absent from owner traversal, retained off-scale values and a noncanonical submit control, while landing mark `em` padding and arbitrary raw units bypassed parser validation.
+   - GREEN: both delegated component files and class families are source-inventoried, live spacing and briefing submit control use canonical tokens/roles, landing mark padding uses the approved scale, and em/rem/percent/arbitrary calc mutations fail unless a selector+property+exact-value responsive exception is registered.
 
 ## Final verification evidence
 
