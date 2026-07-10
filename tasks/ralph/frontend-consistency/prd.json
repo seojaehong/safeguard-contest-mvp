@@ -30,8 +30,8 @@
       "id": "F2",
       "title": "Canonical CSS type and geometry foundation",
       "priority": 2,
-      "status": "in_progress",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Static audit reports zero off-contract font, line-height, tracking, radius, and important declarations",
         "Focused design contract tests and typecheck pass",
