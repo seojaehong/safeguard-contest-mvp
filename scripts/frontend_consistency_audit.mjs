@@ -91,6 +91,60 @@ function effectiveDeclarations(rules, selector) {
   );
 }
 
+const typographyRoles = {
+  display: { size: "var(--text-display)", weight: "800", lineHeight: "var(--leading-display)", tracking: "var(--tracking-display)" },
+  pageTitle: { size: "var(--text-page-title)", weight: "800", lineHeight: "var(--leading-page-title)", tracking: "var(--tracking-page-title)" },
+  sectionTitle: { size: "var(--text-section-title)", weight: "800", lineHeight: "var(--leading-section-title)", tracking: "var(--tracking-section-title)" },
+  componentTitle: { size: "var(--text-component-title)", weight: "700", lineHeight: "var(--leading-component-title)", tracking: "var(--tracking-component-title)" },
+  bodyLarge: { size: "var(--text-body-lg)", weight: "500", lineHeight: "var(--leading-body-lg)", tracking: "var(--tracking-body)" },
+  body: { size: "var(--text-body)", weight: "500", lineHeight: "var(--leading-body)", tracking: "var(--tracking-body)" },
+  support: { size: "var(--text-support)", weight: "500", lineHeight: "var(--leading-body)", tracking: "var(--tracking-body)" },
+  control: { size: "var(--text-control)", weight: "700", lineHeight: "var(--leading-control)", tracking: "var(--tracking-body)" },
+  table: { size: "var(--text-table)", weight: "500", lineHeight: "var(--leading-table)", tracking: "var(--tracking-body)" },
+  caption: { size: "var(--text-caption)", weight: "600", lineHeight: "var(--leading-caption)", tracking: "var(--tracking-body)" },
+  tableHeader: { size: "var(--text-caption)", weight: "700", lineHeight: "var(--leading-caption)", tracking: "var(--tracking-body)" },
+  hud: { size: "var(--text-hud)", weight: "700", lineHeight: "var(--leading-hud)", tracking: "var(--tracking-hud)", fontFamily: "var(--font-hud)" },
+};
+
+function selectorText(rule) {
+  return rule.selectors.join(", ");
+}
+
+function isInteractiveSelector(selector) {
+  return /(^|[\s.:#>+~])(a|button|input|select|textarea)(?=$|[\s.:#>+~[])|\b(action|button|control|tab|chip|nav|link|toggle|filter)\b/i.test(selector);
+}
+
+function isTableHeaderSelector(selector) {
+  return /(^|[\s>+~])th(?=$|[\s.:#>+~[])|table[^,{]*(head|header)|report-table[^,{]*strong/i.test(selector);
+}
+
+function isHudSelector(rule) {
+  const selector = selectorText(rule);
+  return rule.declarations["font-family"] === "var(--font-hud)"
+    || rule.declarations["letter-spacing"] === "var(--tracking-hud)"
+    || /\b(hud|status|eyebrow|kicker|badge|meta|metric|code|console|source|live|signal)\b/i.test(selector);
+}
+
+function expectedTypographyRole(rule) {
+  const size = rule.declarations["font-size"];
+  const selector = selectorText(rule);
+  if (isTableHeaderSelector(selector) && !isInteractiveSelector(selector)) return "tableHeader";
+  if (["var(--text-display)", "var(--t-display)", "clamp(44px, 6vw, 72px)"].includes(size)) return "display";
+  if (["var(--text-page-title)", "var(--t-hero)", "clamp(32px, 4vw, 40px)"].includes(size)) return "pageTitle";
+  if (["var(--text-section-title)", "var(--t-title)", "clamp(24px, 3vw, 28px)"].includes(size)) return "sectionTitle";
+  if (["var(--text-component-title)", "var(--t-h)", "20px"].includes(size)) return "componentTitle";
+  if (["var(--text-body-lg)", "var(--t-body-lg)", "17px"].includes(size)) return "bodyLarge";
+  if (["var(--text-body)", "var(--t-body)", "15px"].includes(size)) return "body";
+  if (["var(--text-control)", "var(--text-support)", "14px"].includes(size)) {
+    return isInteractiveSelector(selector) ? "control" : "support";
+  }
+  if (["var(--text-table)", "13px"].includes(size)) return "table";
+  if (["var(--text-caption)", "var(--t-caption)", "12px"].includes(size)) return "caption";
+  if (["var(--text-hud)", "var(--t-micro)"].includes(size) || size === "11px" && isHudSelector(rule)) return "hud";
+  if (size === "11px") return "caption";
+  return undefined;
+}
+
 const hazardRail = "inset 4px 0 0 var(--sc-hazard-yellow)";
 const moduleRail = "inset 4px 0 0 var(--os-yellow, #ffdc2e)";
 const effectContracts = new Map();
@@ -346,6 +400,28 @@ function cssViolations(source) {
   }
 
   for (const rule of rules) {
+    const fontSize = rule.declarations["font-size"];
+    if (fontSize) {
+      const roleName = expectedTypographyRole(rule);
+      const role = roleName ? typographyRoles[roleName] : undefined;
+      const expected = role ? {
+        "font-size": role.size,
+        "font-weight": role.weight,
+        "line-height": role.lineHeight,
+        "letter-spacing": role.tracking,
+        ...(roleName === "hud" ? { "font-family": role.fontFamily } : {}),
+      } : undefined;
+      const mismatch = !expected || Object.entries(expected).some(([property, value]) =>
+        rule.declarations[property] !== value);
+      if (mismatch) {
+        violations.push({
+          rule: "typography-tuple",
+          file: "app/globals.css",
+          line: rule.line,
+          value: `${selectorText(rule)} => ${roleName || "unmapped"}: ${JSON.stringify(rule.declarations)}`,
+        });
+      }
+    }
     const boxShadow = rule.declarations["box-shadow"];
     if (boxShadow && boxShadow !== "none") {
       const normalizedValue = normalizeEffectValue(boxShadow);

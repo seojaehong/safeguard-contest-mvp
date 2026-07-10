@@ -18,8 +18,36 @@ const root = process.cwd();
 
 type CssDeclarations = Record<string, string>;
 
-function ruleBlocks(source: string): Array<{ selectors: string[]; declarations: CssDeclarations }> {
-  return [...source.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => {
+type CssRule = { selectors: string[]; declarations: CssDeclarations };
+
+function normalizeSelector(selector: string): string {
+  return selector
+    .replace(/\s+/g, " ")
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")")
+    .replace(/,\s*/g, ", ")
+    .trim();
+}
+
+function splitSelectorList(selectorList: string): string[] {
+  const selectors: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let index = 0; index < selectorList.length; index += 1) {
+    if (selectorList[index] === "(") depth += 1;
+    if (selectorList[index] === ")") depth -= 1;
+    if (selectorList[index] === "," && depth === 0) {
+      selectors.push(normalizeSelector(selectorList.slice(start, index)));
+      start = index + 1;
+    }
+  }
+  selectors.push(normalizeSelector(selectorList.slice(start)));
+  return selectors.filter(Boolean);
+}
+
+function ruleBlocks(source: string): CssRule[] {
+  const uncommented = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  return [...uncommented.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => {
     const declarations = Object.fromEntries(
       [...match[2].matchAll(/([\w-]+)\s*:\s*([^;]+);/g)].map((declaration) => [
         declaration[1].trim(),
@@ -27,10 +55,66 @@ function ruleBlocks(source: string): Array<{ selectors: string[]; declarations: 
       ]),
     );
     return {
-      selectors: match[1].split(",").map((selector) => selector.trim()),
+      selectors: splitSelectorList(match[1]),
       declarations,
     };
   });
+}
+
+const typographyRoles = {
+  display: { size: "var(--text-display)", weight: "800", lineHeight: "var(--leading-display)", tracking: "var(--tracking-display)" },
+  pageTitle: { size: "var(--text-page-title)", weight: "800", lineHeight: "var(--leading-page-title)", tracking: "var(--tracking-page-title)" },
+  sectionTitle: { size: "var(--text-section-title)", weight: "800", lineHeight: "var(--leading-section-title)", tracking: "var(--tracking-section-title)" },
+  componentTitle: { size: "var(--text-component-title)", weight: "700", lineHeight: "var(--leading-component-title)", tracking: "var(--tracking-component-title)" },
+  bodyLarge: { size: "var(--text-body-lg)", weight: "500", lineHeight: "var(--leading-body-lg)", tracking: "var(--tracking-body)" },
+  body: { size: "var(--text-body)", weight: "500", lineHeight: "var(--leading-body)", tracking: "var(--tracking-body)" },
+  support: { size: "var(--text-support)", weight: "500", lineHeight: "var(--leading-body)", tracking: "var(--tracking-body)" },
+  control: { size: "var(--text-control)", weight: "700", lineHeight: "var(--leading-control)", tracking: "var(--tracking-body)" },
+  table: { size: "var(--text-table)", weight: "500", lineHeight: "var(--leading-table)", tracking: "var(--tracking-body)" },
+  caption: { size: "var(--text-caption)", weight: "600", lineHeight: "var(--leading-caption)", tracking: "var(--tracking-body)" },
+  tableHeader: { size: "var(--text-caption)", weight: "700", lineHeight: "var(--leading-caption)", tracking: "var(--tracking-body)" },
+  hud: { size: "var(--text-hud)", weight: "700", lineHeight: "var(--leading-hud)", tracking: "var(--tracking-hud)", fontFamily: "var(--font-hud)" },
+} as const;
+
+type TypographyRole = keyof typeof typographyRoles;
+
+function selectorText(rule: CssRule): string {
+  return rule.selectors.join(", ");
+}
+
+function isInteractiveSelector(selector: string): boolean {
+  return /(^|[\s.:#>+~])(a|button|input|select|textarea)(?=$|[\s.:#>+~[])|\b(action|button|control|tab|chip|nav|link|toggle|filter)\b/i.test(selector);
+}
+
+function isTableHeaderSelector(selector: string): boolean {
+  return /(^|[\s>+~])th(?=$|[\s.:#>+~[])|table[^,{]*(head|header)|report-table[^,{]*strong/i.test(selector);
+}
+
+function isHudSelector(rule: CssRule): boolean {
+  const selector = selectorText(rule);
+  return rule.declarations["font-family"] === "var(--font-hud)"
+    || rule.declarations["letter-spacing"] === "var(--tracking-hud)"
+    || /\b(hud|status|eyebrow|kicker|badge|meta|metric|code|console|source|live|signal)\b/i.test(selector);
+}
+
+function expectedTypographyRole(rule: CssRule): TypographyRole | undefined {
+  const size = rule.declarations["font-size"];
+  const selector = selectorText(rule);
+  if (isTableHeaderSelector(selector) && !isInteractiveSelector(selector)) return "tableHeader";
+  if (["var(--text-display)", "var(--t-display)", "clamp(44px, 6vw, 72px)"].includes(size)) return "display";
+  if (["var(--text-page-title)", "var(--t-hero)", "clamp(32px, 4vw, 40px)"].includes(size)) return "pageTitle";
+  if (["var(--text-section-title)", "var(--t-title)", "clamp(24px, 3vw, 28px)"].includes(size)) return "sectionTitle";
+  if (["var(--text-component-title)", "var(--t-h)", "20px"].includes(size)) return "componentTitle";
+  if (["var(--text-body-lg)", "var(--t-body-lg)", "17px"].includes(size)) return "bodyLarge";
+  if (["var(--text-body)", "var(--t-body)", "15px"].includes(size)) return "body";
+  if (["var(--text-control)", "var(--text-support)", "14px"].includes(size)) {
+    return isInteractiveSelector(selector) ? "control" : "support";
+  }
+  if (["var(--text-table)", "13px"].includes(size)) return "table";
+  if (["var(--text-caption)", "var(--t-caption)", "12px"].includes(size)) return "caption";
+  if (["var(--text-hud)", "var(--t-micro)"].includes(size) || size === "11px" && isHudSelector(rule)) return "hud";
+  if (size === "11px") return "caption";
+  return undefined;
 }
 
 function effectiveDeclarations(source: string, selector: string): CssDeclarations {
@@ -55,7 +139,7 @@ function blockBody(source: string, blockStart: string): string {
   throw new Error(`Unclosed CSS block: ${blockStart}`);
 }
 
-function runAudit(css: string): { status: number | null; report: { violations: Array<{ rule: string }> } } {
+function runAudit(css: string): { status: number | null; report: { violations: Array<{ rule: string; value?: string }> } } {
   const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "frontend-consistency-audit-"));
   const cssPath = path.join(tempDirectory, "fixture.css");
   const outputPath = path.join(tempDirectory, "report.json");
@@ -66,7 +150,7 @@ function runAudit(css: string): { status: number | null; report: { violations: A
     env: { ...process.env, CSS_PATH: cssPath, OUTPUT_PATH: outputPath },
   });
   const report = JSON.parse(fs.readFileSync(outputPath, "utf8")) as {
-    violations: Array<{ rule: string }>;
+    violations: Array<{ rule: string; value?: string }>;
   };
   fs.rmSync(tempDirectory, { recursive: true, force: true });
   return { status: result.status, report };
@@ -275,6 +359,25 @@ describe("frontend design contract", () => {
     }
   });
 
+  it("assigns a complete canonical typography tuple to every font-size rule", () => {
+    const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
+    expect(css).not.toMatch(/font-size:\s*(?:11px|12px|13px|14px|15px|17px|20px|var\(--t-|clamp\()/);
+    const sizedRules = ruleBlocks(css).filter((rule) => rule.declarations["font-size"]);
+    expect(sizedRules.length).toBeGreaterThan(0);
+    for (const rule of sizedRules) {
+      const roleName = expectedTypographyRole(rule);
+      expect(roleName, `${selectorText(rule)} => ${rule.declarations["font-size"]}`).toBeDefined();
+      const role = typographyRoles[roleName as TypographyRole];
+      expect(rule.declarations, `${selectorText(rule)} => ${roleName}`).toMatchObject({
+        "font-size": role.size,
+        "font-weight": role.weight,
+        "line-height": role.lineHeight,
+        "letter-spacing": role.tracking,
+        ...(roleName === "hud" ? { "font-family": typographyRoles.hud.fontFamily } : {}),
+      });
+    }
+  });
+
   it("disables every infinite animation and smooth scrolling for reduced motion", () => {
     const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
     const reducedMotion = blockBody(css, "@media (prefers-reduced-motion: reduce)");
@@ -313,5 +416,33 @@ describe("frontend design contract", () => {
     expect(audit.report.violations.map((violation) => violation.rule)).toEqual(
       expect.arrayContaining(["decorative-box-shadow", "decorative-gradient"]),
     );
+  });
+
+  it("rejects incomplete or mismatched typography tuples in audit fixtures", () => {
+    const audit = runAudit(`
+      .bad-title {
+        font-size: var(--text-page-title);
+        font-weight: 500;
+        line-height: var(--leading-display);
+        letter-spacing: var(--tracking-body);
+      }
+      .bad-control { font-size: 14px; font-weight: 500; }
+      .bad-micro { font-size: 11px; font-weight: 700; line-height: 16px; letter-spacing: 0.08em; }
+      .toolbar-button { font-size: var(--text-support); font-weight: 500; line-height: var(--leading-body); letter-spacing: var(--tracking-body); }
+      .report-table strong { font-size: var(--text-hud); font-family: var(--font-hud); font-weight: 700; line-height: var(--leading-hud); letter-spacing: var(--tracking-hud); }
+    `);
+    expect(audit.report.violations.map((violation) => violation.rule)).toContain("typography-tuple");
+  });
+
+  it("classifies interactive 14px and table-header rules by semantics before their current token", () => {
+    const audit = runAudit(`
+      .toolbar-button { font-size: var(--text-support); font-weight: 500; line-height: var(--leading-body); letter-spacing: var(--tracking-body); }
+      .report-table strong { font-size: var(--text-hud); font-family: var(--font-hud); font-weight: 700; line-height: var(--leading-hud); letter-spacing: var(--tracking-hud); }
+    `);
+    const tupleValues = audit.report.violations
+      .filter((violation) => violation.rule === "typography-tuple")
+      .map((violation) => violation.value || "");
+    expect(tupleValues.some((value) => value.includes(".toolbar-button"))).toBe(true);
+    expect(tupleValues.some((value) => value.includes(".report-table strong"))).toBe(true);
   });
 });
