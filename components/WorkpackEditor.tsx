@@ -1910,7 +1910,7 @@ export function WorkpackEditor({
   const [showFocusCue, setShowFocusCue] = useState(false);
   const [remediationDrafts, setRemediationDrafts] = useState<Record<string, RemediationDraft>>({});
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
-  const editorRef = useRef<HTMLDivElement | null>(null);
+  const documentBodyRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const pendingChangeRef = useRef<WorkpackDeliverablesChange>({
     source: "generated",
@@ -2032,7 +2032,11 @@ export function WorkpackEditor({
       setSelectedKey(requestedDocumentKey);
     }
     setShowFocusCue(true);
-    editorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const root = document.documentElement;
+    const previousScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    documentBodyRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
+    root.style.scrollBehavior = previousScrollBehavior;
     const focusFrame = window.requestAnimationFrame(() => {
       textareaRef.current?.focus({ preventScroll: true });
     });
@@ -2452,12 +2456,13 @@ export function WorkpackEditor({
         </div>
       </aside>
 
-      <div className={`card document-editor ${styles.editor} ${showFocusCue ? "editor-focus-cue" : ""}`} ref={editorRef}>
+      <div className={`card document-editor ${styles.editor} ${showFocusCue ? "editor-focus-cue" : ""}`}>
         <div
           className={styles.documentBody}
           id="workpack-document-body"
           data-testid="editor-document-body"
           role="tabpanel"
+          ref={documentBodyRef}
         >
           <header className={`document-toolbar ${styles.documentHeader}`}>
             <div className={styles.documentHeading}>

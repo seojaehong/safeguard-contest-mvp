@@ -117,16 +117,19 @@ describe("documents editor layout", () => {
       const exportPanel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-export-panel"]');
       const previewPanel = document.querySelector<HTMLDetailsElement>('.submission-preview-panel');
       const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
-      if (!shell || !documentBody || !secondaryTools || !textarea || !evidencePanel || !qualityPanel || !graphPanel || !exportPanel || !previewPanel || !documentSelect) {
+      const topbar = document.querySelector(".safeclaw-module-nav");
+      if (!shell || !documentBody || !secondaryTools || !textarea || !evidencePanel || !qualityPanel || !graphPanel || !exportPanel || !previewPanel || !documentSelect || !topbar) {
         throw new Error("Missing editor-first workspace contract target");
       }
 
       const bodyRect = documentBody.getBoundingClientRect();
       const toolsRect = secondaryTools.getBoundingClientRect();
+      const topbarRect = topbar.getBoundingClientRect();
       return {
         activeLabel: document.activeElement?.getAttribute("aria-label"),
         bodyBeforeTools: Boolean(documentBody.compareDocumentPosition(secondaryTools) & Node.DOCUMENT_POSITION_FOLLOWING),
         bodyTop: Math.round(bodyRect.top),
+        topbarBottom: Math.round(topbarRect.bottom),
         toolsTop: Math.round(toolsRect.top),
         textareaLength: textarea.value.length,
         selectedDocument: documentSelect.value,
@@ -144,6 +147,8 @@ describe("documents editor layout", () => {
     expect(contract.documentCount).toBe(12);
     expect(contract.textareaLength).toBeGreaterThan(100);
     expect(contract.bodyBeforeTools).toBe(true);
+    expect(contract.bodyTop).toBeGreaterThanOrEqual(contract.topbarBottom + 8);
+    expect(contract.bodyTop).toBeLessThanOrEqual(contract.topbarBottom + 96);
     expect(contract.bodyTop).toBeLessThan(contract.toolsTop);
     expect(contract.evidenceOpen).toBe(false);
     expect(contract.qualityOpen).toBe(false);
