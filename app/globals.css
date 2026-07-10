@@ -1,31 +1,9 @@
 /* Font loading moved to app/layout.tsx via non-blocking <link> elements.
    Removing render-blocking CSS @import to eliminate LCP bottleneck. */
 
-:root {
-  --bg: #f6f3ed;
-  --paper: #fffdf8;
-  --panel: rgba(255, 253, 248, 0.92);
-  --panel-strong: #ffffff;
-  --ink: #171b22;
-  --muted: #667085;
-  --line: #e2ded5;
-  --line-strong: #cfc7b9;
-  --accent: #21594f;
-  --accent-warm: #b85f24;
-  --accent-soft: #e8f1ed;
-  --danger-soft: #fff0df;
-  --shadow: none;
-  --radius-lg: 4px;
-  --radius-md: 4px;
-  --radius-sm: 4px;
-  --font-base: "Pretendard", "Inter", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
-  --font-multilingual: "Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", system-ui, sans-serif;
-}
-
 /* SafeClaw Brand Guide alignment
-   Source: safeclaw Brand Guide standalone. This layer keeps the current
-   workflow intact while shifting the product from soft demo UI to field
-   instrument UI: steel surfaces, hazard-yellow actions, 4px corners, no shadow. */
+   Source: safeclaw Brand Guide standalone. This is the single product token
+   contract for typography, spacing, shape, color, and layout geometry. */
 :root {
   --sc-black: #0a0a0b;
   --sc-steel-950: #14171a;
@@ -55,8 +33,11 @@
   --radius-lg: 4px;
   --radius-md: 4px;
   --radius-sm: 4px;
-  --font-base: "Pretendard", "Inter", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
-  --font-hud: "Geist Mono", "JetBrains Mono", "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+  --font-product: "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-hud: "Geist Mono", "Cascadia Mono", Consolas, monospace;
+  --font-multilingual: "Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", sans-serif;
+  --font-document: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --font-base: var(--font-product);
 
   /* Design handoff v1.0 — semantic colors. Aliased to existing --sc-* where the
      hex matches; new HEX values where the guide differs. Components built to
@@ -74,22 +55,72 @@
   --line-d: rgba(255, 255, 255, 0.10);
   --line-d-2: rgba(255, 255, 255, 0.16);
 
-  /* Round scale (cards default 6px). */
+  /* Shape scale: structural, micro, product, and true circle only. */
   --r-xs: 2px;
   --r-sm: 4px;
-  --r-md: 6px;     /* card default */
-  --r-lg: 10px;
-  --r-xl: 14px;
+  --r-md: 4px;
+  --r-lg: 4px;
+  --r-xl: 4px;
+  --radius-structural: 0;
+  --radius-micro: 2px;
+  --radius-control: 4px;
+  --radius-panel: 4px;
+  --radius-circle: 50%;
 
-  /* Type scale (Pretendard for KR, Geist Mono for telemetry). */
-  --t-display: clamp(64px, 8vw, 144px);
-  --t-hero: clamp(40px, 5vw, 80px);
-  --t-title: clamp(28px, 3vw, 44px);
-  --t-h: 18px;
-  --t-body-lg: 16px;
-  --t-body: 14px;
+  /* Screen type scale. */
+  --text-display: clamp(44px, 6vw, 72px);
+  --text-page-title: clamp(32px, 4vw, 40px);
+  --text-section-title: clamp(24px, 3vw, 28px);
+  --text-component-title: 20px;
+  --text-body-lg: 17px;
+  --text-body: 15px;
+  --text-support: 14px;
+  --text-control: 14px;
+  --text-table: 13px;
+  --text-caption: 12px;
+  --text-hud: 11px;
+  --leading-display: 0.98;
+  --leading-page-title: 1.15;
+  --leading-section-title: 1.25;
+  --leading-component-title: 1.35;
+  --leading-body: 1.6;
+  --leading-longform: 1.75;
+  --tracking-body: 0;
+  --tracking-component-title: -0.015em;
+  --tracking-section-title: -0.025em;
+  --tracking-page-title: -0.035em;
+  --tracking-display: -0.045em;
+  --tracking-hud: 0.08em;
+
+  /* Spacing, control, and layout geometry. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --control-height: 44px;
+  --control-height-compact: 36px;
+  --icon-hit-area: 44px;
+  --content-wide: 1440px;
+  --content-standard: 1200px;
+  --content-reading: 72ch;
+
+  /* Compatibility aliases while live selectors move to semantic tokens. */
+  --t-display: var(--text-display);
+  --t-hero: var(--text-page-title);
+  --t-title: var(--text-section-title);
+  --t-h: var(--text-component-title);
+  --t-body-lg: var(--text-body-lg);
+  --t-body: var(--text-body);
   --t-caption: 12px;
-  --t-micro: 10.5px;
+  --t-micro: var(--text-hud);
 }
 
 /* Global numeric tabular nums — guide rule: 모든 숫자는 tabular-nums. */
@@ -103,17 +134,19 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* HUD micro label utility — mono + uppercase + 0.16em letter-spacing. */
+/* HUD micro label utility — mono, compact, and deliberately tracked. */
 .hud-label {
   font-family: var(--font-hud);
-  font-size: var(--t-micro);
-  letter-spacing: 0.16em;
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: var(--tracking-hud);
   text-transform: uppercase;
 }
 
 body {
   background: var(--sc-paper);
-  letter-spacing: 0.012em;
+  letter-spacing: var(--tracking-body);
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
