@@ -55,6 +55,9 @@ Ralph story: `F4` remains `in_progress` with `passes: false` pending independent
 12. Third independent re-review Important findings
    - RED: the exact 767px boundary retained desktop gutters/card padding, while V2 navigation, login navigation, and demo mode controls failed the canonical Control tuple.
    - GREEN: the V2/demo breakpoint now covers every viewport below 768px and exact 767px assertions prove 16px gutters/card padding; all three audited controls use 14px/700/20px/zero tracking with a 44px minimum height.
+13. Final independent re-review Important findings
+   - RED: representative 1024px assertions showed `.container`, `.v2-shell`, and `.demo-mode-shell` retaining 24px desktop gutters instead of the tablet 20px tier.
+   - GREEN: ordered `max-width: 1279px` and `max-width: 767px` overrides now produce exact 24px/20px/16px gutters at 1280px/1024px/767px for all three shell selectors.
 
 ## Final verification evidence
 
