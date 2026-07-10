@@ -574,40 +574,40 @@ function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
 
 function formCss(pageMargin = "36px") {
   return `
-    body { margin: 0; background: #ece7dc; color: #161b22; font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; }
+    @page { size: A4; margin: 14mm; }
+    body { margin: 0; background: #ece7dc; color: #161b22; font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
     .safety-form-page { max-width: 1080px; margin: ${pageMargin} auto; background: #fffdf8; border: 2px solid #161b22; box-shadow: 8px 8px 0 rgba(22, 27, 34, 0.12); }
     .form-head { display: grid; grid-template-columns: 1fr 240px; border-bottom: 2px solid #161b22; }
     .form-title { padding: 20px 24px; }
-    .form-title span { display: inline-block; margin-bottom: 8px; color: #21594f; font-size: 12px; font-weight: 900; letter-spacing: 0.12em; }
-    .form-title h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
-    .form-title p { margin: 8px 0 0; color: #4c5665; font-size: 13px; }
+    .form-title span { display: inline-block; margin-bottom: 8px; color: #21594f; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    .form-title h1 { margin: 0; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
+    .form-title p { margin: 8px 0 0; color: #4c5665; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
     .approval-grid { display: grid; grid-template-columns: repeat(var(--approval-count, 3), 1fr); border-left: 2px solid #161b22; }
     .approval-cell { display: grid; grid-template-rows: 34px 1fr; min-height: 108px; border-left: 1px solid #161b22; text-align: center; }
     .approval-cell:first-child { border-left: 0; }
-    .approval-cell b { display: grid; place-items: center; background: #f2ead9; border-bottom: 1px solid #161b22; font-size: 12px; }
-    .approval-cell em { display: grid; place-items: end center; padding-bottom: 12px; color: #707887; font-size: 12px; font-style: normal; }
+    .approval-cell b { display: grid; place-items: center; background: #f2ead9; border-bottom: 1px solid #161b22; font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; }
+    .approval-cell em { display: grid; place-items: end center; padding-bottom: 12px; color: #707887; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; font-style: normal; }
     .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
     .meta-item { min-height: 58px; border-right: 1px solid #161b22; }
     .meta-item:last-child { border-right: 0; }
-    .meta-item b { display: block; padding: 7px 10px; background: #21594f; color: #ffffff; font-size: 11px; }
-    .meta-item span { display: block; padding: 10px; font-size: 13px; line-height: 1.35; }
+    .meta-item b { display: block; padding: 7px 10px; background: #21594f; color: #ffffff; font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; }
+    .meta-item span { display: block; padding: 10px; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
     .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
-    .check-grid div { padding: 10px; border-right: 1px solid #161b22; font-size: 12px; font-weight: 800; }
+    .check-grid div { padding: 10px; border-right: 1px solid #161b22; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; }
     .check-grid div:last-child { border-right: 0; }
     .section-block { padding: 18px 22px 4px; }
-    .section-label { display: inline-flex; align-items: center; min-height: 30px; margin-bottom: 8px; padding: 5px 12px; background: #161b22; color: #fffdf8; font-size: 13px; font-weight: 900; }
+    .section-label { display: inline-flex; align-items: center; min-height: 30px; margin-bottom: 8px; padding: 5px 12px; background: #161b22; color: #fffdf8; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 16px; }
-    th, td { border: 1px solid #161b22; padding: 9px 10px; vertical-align: top; word-break: keep-all; line-height: 1.48; }
-    th { background: #f2ead9; font-size: 12px; text-align: center; }
-    td { font-size: 12px; }
+    th, td { border: 1px solid #161b22; padding: 9px 10px; vertical-align: top; word-break: keep-all; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+    th { background: #f2ead9; font-weight: 700; text-align: center; }
     .center { text-align: center; }
     .check-cell { text-align: center; color: #5e6677; font-weight: 800; }
     .signature-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 10px 22px 22px; border: 1px solid #161b22; }
-    .signature-grid div { min-height: 62px; padding: 9px 10px; border-right: 1px solid #161b22; font-size: 12px; }
+    .signature-grid div { min-height: 62px; padding: 9px 10px; border-right: 1px solid #161b22; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; }
     .signature-grid div:last-child { border-right: 0; }
     .signature-grid b { display: block; margin-bottom: 18px; }
-    .form-note { margin: 0 22px 22px; color: #596373; font-size: 12px; }
-    .section-help { margin: 0 0 10px; color: #596373; font-size: 12px; line-height: 1.5; }
+    .form-note { margin: 0 22px 22px; color: #596373; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    .section-help { margin: 0 0 10px; color: #596373; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
     .mini-table th { background: #21594f; color: #fffdf8; }
     .form-layout-risk .form-title span, .form-layout-risk .meta-item b, .form-layout-risk .mini-table th { background: #7a2e25; }
     .form-layout-risk .section-label { background: #7a2e25; }
@@ -622,19 +622,65 @@ function formCss(pageMargin = "36px") {
     .form-layout-tbmLog .form-title span, .form-layout-tbmLog .meta-item b, .form-layout-tbmLog .mini-table th { background: #285f45; }
     .form-layout-tbmBriefing .section-label, .form-layout-tbmLog .section-label { background: #285f45; }
     .form-layout-tbmBriefing .check-grid div, .form-layout-tbmLog .check-grid div { background: #edf8ef; }
-    .form-lineage { margin: 0; padding: 10px 22px; border-bottom: 2px solid #161b22; background: #fff8d8; color: #394150; font-size: 12px; font-weight: 800; }
-    .risk-table th, .risk-table td { font-size: 11px; padding: 7px 6px; }
+    .form-lineage { margin: 0; padding: 10px 22px; border-bottom: 2px solid #161b22; background: #fff8d8; color: #394150; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    .risk-table th, .risk-table td { padding: 7px 6px; }
     .risk-level-high { background: #ffe3df; font-weight: 900; color: #a83224; }
     .permit-check td:nth-child(2), .permit-check td:nth-child(3) { text-align: center; font-weight: 900; }
     .attendee-table td { height: 42px; }
-    .tbm-daily-table th, .tbm-daily-table td { font-size: 11px; padding: 6px 5px; }
+    .tbm-daily-table th, .tbm-daily-table td { padding: 6px 5px; }
     .tbm-check-list td:first-child { width: 28%; font-weight: 900; background: #f7f1e6; }
     .tbm-two-column td { min-height: 92px; }
-    .tbm-attendance th, .tbm-attendance td { text-align: center; font-size: 10px; padding: 5px 4px; }
+    .tbm-attendance th, .tbm-attendance td { text-align: center; padding: 5px 4px; }
     .tbm-attendance td:nth-child(3), .tbm-attendance td:nth-child(9) { text-align: left; }
     @media print { body { background: #ffffff; } .safety-form-page { margin: 0; box-shadow: none; max-width: none; } }
   `;
 }
+
+const documentPreviewCss = `
+  .document-print-typography {
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    font-size: 10pt;
+    font-weight: 400;
+    line-height: 15pt;
+    letter-spacing: 0;
+  }
+  .document-print-typography .safety-form-preview-head strong {
+    font-size: 20pt;
+    font-weight: 700;
+    line-height: 24pt;
+    letter-spacing: -0.02em;
+  }
+  .document-print-typography .safety-form-bridge h3,
+  .document-print-typography .safety-form-section-stack h3 {
+    font-size: 14pt;
+    font-weight: 700;
+    line-height: 18pt;
+    letter-spacing: -0.01em;
+  }
+  .document-print-typography .safety-form-meta-grid span {
+    font-size: 10pt;
+    font-weight: 400;
+    line-height: 15pt;
+    letter-spacing: 0;
+  }
+  .document-print-typography th,
+  .document-print-typography td {
+    font-size: 8.5pt;
+    font-weight: 400;
+    line-height: 12pt;
+    letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .document-print-typography th { font-weight: 700; }
+  .document-print-typography .safety-form-preview-head small,
+  .document-print-typography .safety-form-preview-head span {
+    font-size: 8pt;
+    font-weight: 400;
+    line-height: 11pt;
+    letter-spacing: 0;
+    font-family: inherit;
+  }
+`;
 
 function buildGenericSections(rows: SheetRow[], profile: SafetyFormProfile) {
   return groupRowsBySection(rows).map((group) => `
@@ -1362,21 +1408,21 @@ function buildExcelHtml(
   </xml>
   <![endif]-->
   <style>
-    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; color: #17201d; }
+    body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: #17201d; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
     .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 14px; }
-    .cover h1 { margin: 0 0 8px; font-size: 22px; }
-    .cover p { margin: 0; color: #5e6677; }
+    .cover h1 { margin: 0 0 8px; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
+    .cover p { margin: 0; color: #5e6677; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
     .meta-grid td { background: #fffdf8; }
     .meta-grid .label { background: #21594f; color: #ffffff; font-weight: 700; text-align: center; width: 16%; }
-    table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: "Malgun Gothic", sans-serif; margin-bottom: 14px; }
-    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; word-break: keep-all; }
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; margin-bottom: 14px; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; mso-number-format:"\\@"; word-break: keep-all; }
     th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
     .summary th { background: #6f4b26; }
-    .section-row td { background: #e8f1ed; color: #1f4d43; font-weight: 700; font-size: 14px; border-top: 2px solid #1f4d43; }
+    .section-row td { background: #e8f1ed; color: #1f4d43; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; border-top: 2px solid #1f4d43; }
     .center { text-align: center; width: 42px; }
     .check-cell { text-align: center; color: #6f4b26; width: 90px; }
     .confirm td, .approval td { text-align: center; font-weight: 700; }
-    .note { color: #5e6677; font-size: 12px; margin-top: 10px; }
+    .note { color: #5e6677; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -1427,13 +1473,13 @@ function buildLaunchWorkbookHtml(title: string, rows: SheetRow[]) {
   <meta charset="utf-8" />
   <title>${escapeHtml(title)}</title>
   <style>
-    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; color: #17201d; }
+    body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: #17201d; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
     .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 16px; }
-    .cover h1 { margin: 0 0 8px; font-size: 24px; }
-    .cover p { margin: 0; color: #5e6677; }
-    h2 { margin: 24px 0 8px; color: #21594f; border-left: 5px solid #21594f; padding-left: 9px; }
+    .cover h1 { margin: 0 0 8px; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
+    .cover p { margin: 0; color: #5e6677; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    h2 { margin: 24px 0 8px; color: #21594f; border-left: 5px solid #21594f; padding-left: 9px; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; }
     table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-bottom: 18px; }
-    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; word-break: keep-all; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; mso-number-format:"\\@"; word-break: keep-all; }
     th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
     td:nth-child(1) { width: 18%; }
     td:nth-child(2) { width: 20%; }
@@ -1715,7 +1761,8 @@ function SafetyDocumentPreview({
           : { primary: profile.primaryColumn, action: profile.actionColumn, confirm: "확인/담당" };
 
   return (
-    <div className="safety-form-preview" aria-label={`${title} 서식 미리보기`}>
+    <div className="safety-form-preview document-print-typography" aria-label={`${title} 서식 미리보기`}>
+      <style>{documentPreviewCss}</style>
       <div className="safety-form-preview-head">
         <div>
           <span>{profile.code}</span>

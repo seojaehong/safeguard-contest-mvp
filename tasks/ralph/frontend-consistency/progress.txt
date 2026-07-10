@@ -79,3 +79,9 @@
 - Verified: focused Task 5 suite 36/36, full suite 502/502, static audit over 32 pages and 22 components with zero coverage issues or violations, typecheck, production build, and diff-check pass.
 - Reviewed: independent specification and code-quality review both PASS with zero Critical, Important, or Minor findings across `1582261..37485ac`.
 - Next: F6 generated-document typography; F7 retains browser screenshots and route-state capture.
+
+## 2026-07-11 F6 implementation
+- Changed: aligned editor preview, printable/download HTML, and PDF-ready HTML to the exact document title, section, body, table, and note point scale with the print-safe Korean stack and table-only tabular numerals.
+- Verified: RED 4/5 failures before implementation plus a second RED for fallback XLS/workbook px overrides; generated-document 6/6, focused 24/24, full 508/508, static audit 32 routes/22 components with zero violations, typecheck, build, and diff-check pass.
+- Learned: the editor preview needs a generated-document-specific owner so the print hierarchy can coexist with the existing screen typography audit without changing ordinary product UI selectors.
+- Next: keep F6 `passes: false` until independent review; run the server-backed output-contract smoke during the integrated F7 server verification.

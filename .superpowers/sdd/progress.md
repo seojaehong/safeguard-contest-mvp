@@ -3,3 +3,4 @@ Task 2: complete (commits ceffb4b..378149d, review clean; 18/18 focused tests, s
 Task 3: complete (commits 2971bc6..988d3b4, review clean; 32/32 focused tests, static audit, typecheck, build pass)
 Task 4: complete (commits b9ec074..3f7166d, independent spec and code-quality review PASS with zero findings; 17/17 route tests, 49/49 focused tests, 493/493 full suite, static audit, typecheck, build, and diff-check pass)
 Task 5: complete (commits cdee89a, 261910a, 37485ac; independent spec and code-quality review PASS with zero findings; focused 36/36, full 502/502, static audit, typecheck, build, and diff-check pass)
+Task 6: implementation complete pending review (RED 4/5 plus fallback XLS/workbook override RED; GREEN generated 6/6, focused 24/24, full 508/508, static audit, typecheck, build, diff-check pass; output-contract smoke requires integrated local server)

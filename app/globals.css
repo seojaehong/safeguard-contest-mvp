@@ -5709,6 +5709,10 @@ ul {
   vertical-align: top;
 }
 
+.document-print-typography {
+  font-family: var(--font-document);
+}
+
 .safety-form-preview th {
   font-size: var(--text-caption);
   line-height: var(--leading-caption);

@@ -435,7 +435,10 @@ function buildPdfReadyHtml(
       background: #f4f1e8;
       color: #15171b;
       font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      line-height: 1.55;
+      font-size: 10pt;
+      font-weight: 400;
+      line-height: 15pt;
+      letter-spacing: 0;
     }
     .page {
       max-width: 210mm;
@@ -454,10 +457,10 @@ function buildPdfReadyHtml(
       padding-bottom: 14px;
       margin-bottom: 16px;
     }
-    h1 { margin: 0; font-size: 28px; letter-spacing: -0.04em; }
-    .subtitle { margin: 8px 0 0; color: #5c6472; font-size: 13px; }
+    h1 { margin: 0; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
+    .subtitle { margin: 8px 0 0; color: #5c6472; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
     .approval { display: grid; grid-template-columns: repeat(3, 70px); border: 1px solid #17191d; }
-    .approval div { min-height: 58px; border-left: 1px solid #17191d; padding: 6px; text-align: center; font-size: 12px; }
+    .approval div { min-height: 58px; border-left: 1px solid #17191d; padding: 6px; text-align: center; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; }
     .approval div:first-child { border-left: 0; }
     .approval b { display: block; margin-bottom: 14px; }
     .meta {
@@ -466,10 +469,10 @@ function buildPdfReadyHtml(
       border: 1px solid #17191d;
       margin-bottom: 16px;
     }
-    .meta div { padding: 10px 12px; border-right: 1px solid #17191d; border-bottom: 1px solid #17191d; }
+    .meta div { padding: 10px 12px; border-right: 1px solid #17191d; border-bottom: 1px solid #17191d; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
     .meta div:nth-child(2n) { border-right: 0; }
     .meta div:nth-last-child(-n+2) { border-bottom: 0; }
-    .meta b { display: block; color: #4f5663; font-size: 12px; margin-bottom: 3px; }
+    .meta b { display: block; color: #4f5663; font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; margin-bottom: 3px; }
     .riskbox {
       display: grid;
       grid-template-columns: 130px 1fr;
@@ -479,10 +482,10 @@ function buildPdfReadyHtml(
     .riskbox b { padding: 12px; background: #f5de41; border-right: 2px solid #17191d; }
     .riskbox span { padding: 12px; }
     .section { margin-top: 18px; break-inside: avoid; }
-    h2 { margin: 0 0 8px; font-size: 18px; border-left: 5px solid #17191d; padding-left: 8px; }
+    h2 { margin: 0 0 8px; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; border-left: 5px solid #17191d; padding-left: 8px; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    th, td { border: 1px solid #17191d; padding: 8px; vertical-align: top; font-size: 12px; word-break: keep-all; overflow-wrap: anywhere; }
-    th { background: #ebe6dc; }
+    th, td { border: 1px solid #17191d; padding: 8px; vertical-align: top; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; word-break: keep-all; overflow-wrap: anywhere; }
+    th { background: #ebe6dc; font-weight: 700; }
     .meta-table th { width: 18%; }
     .meta-table td { width: 32%; }
     .no { width: 44px; }
@@ -493,13 +496,16 @@ function buildPdfReadyHtml(
       border: 1px solid #17191d;
       margin-top: 22px;
     }
-    .signature div { min-height: 54px; border-right: 1px solid #17191d; padding: 9px; font-size: 12px; }
+    .signature div { min-height: 54px; border-right: 1px solid #17191d; padding: 9px; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; }
     .signature div:last-child { border-right: 0; }
     .notice {
       margin-top: 18px;
       border: 2px solid #17191d;
       padding: 10px 12px;
-      font-size: 12px;
+      font-size: 8pt;
+      font-weight: 400;
+      line-height: 11pt;
+      letter-spacing: 0;
       background: #fff8d8;
     }
     .empty { color: #6b7280; }
@@ -520,8 +526,10 @@ function buildPdfReadyHtml(
       border: 1px solid #17191d;
       padding: 9px 12px;
       background: #fff8d8;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 8pt;
+      font-weight: 400;
+      line-height: 11pt;
+      letter-spacing: 0;
     }
     @media print {
       body { background: #fff; }
