@@ -5,8 +5,8 @@ import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import {
+  deriveSafetyReferenceOperationalView,
   filterAndRankSafetyReferencesByQuery,
-  getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
   searchSafetyReferences,
   scoreSafetyReferenceQueryMatch,
@@ -115,6 +115,7 @@ function buildRiskRow(params: {
   verification: string;
   verificationChecker: string;
   evidenceRefs: string[];
+  verificationStatus?: RiskAssessmentRow["verificationStatus"];
 }): RiskAssessmentRow {
   const hazardContext = `${params.task} ${params.equipment} ${params.hazard}`;
   return {
@@ -133,7 +134,7 @@ function buildRiskRow(params: {
     owner: params.owner,
     due: params.due,
     verification: params.verification,
-    verificationStatus: "planned",
+    verificationStatus: params.verificationStatus || "planned",
     verificationDate: params.due,
     verificationChecker: params.verificationChecker,
     whyLikelihood: `${params.location}의 작업 조건과 ${params.equipment} 사용 상태를 고려해 발생 가능성을 ${params.likelihood}로 산정했습니다.`,
@@ -251,85 +252,6 @@ function includesRiskAssessmentDocument(item: SafetyReferenceItem): boolean {
   );
 }
 
-const FIELD_RISK_KEYWORD_PATTERN = /추락|전도|질식|폭발|화재|감전|붕괴|끼임|협착|충돌|낙하|비래|중독|매몰|익사|화상|절단|전기|소음|분진|밀폐|강풍|유해/;
-const FIELD_ACTION_PATTERN = /중지|차단|통제|부착|배치|체결|착용|잠금|설치|공유|교육|보고|복창|격리|환기|측정/;
-
-function normalizeRiskTag(value: string | null | undefined): string {
-  const tag = compactRiskCell(value, 24)
-    .replace(/\s*위험(?:요인)?$/g, "")
-    .replace(/\s*관련$/g, "")
-    .trim();
-  return tag;
-}
-
-function deriveSafetyReferenceRiskTag(item: SafetyReferenceItem): string {
-  const explicitTag = normalizeRiskTag(item.risk_tags?.find((tag) => FIELD_RISK_KEYWORD_PATTERN.test(tag)));
-  if (explicitTag) return explicitTag;
-  const categoryTag = normalizeRiskTag(item.category);
-  if (categoryTag && FIELD_RISK_KEYWORD_PATTERN.test(categoryTag)) return categoryTag;
-  const subcategoryTag = normalizeRiskTag(item.subcategory);
-  if (subcategoryTag && FIELD_RISK_KEYWORD_PATTERN.test(subcategoryTag)) return subcategoryTag;
-  const titleTag = getSafetyReferenceDisplayTitle(item).match(FIELD_RISK_KEYWORD_PATTERN)?.[0];
-  return normalizeRiskTag(titleTag);
-}
-
-function stripReferenceTitlePrefix(value: string): string {
-  return value
-    .replace(/^[A-Z]-[A-Z]-\d{1,4}-\d{4}\s*/i, "")
-    .replace(/^\d{4,}\s*/, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function buildHazardSubjectFromControl(value: string | null | undefined): string {
-  const control = compactRiskCell(value, 92);
-  if (!control) return "";
-  const subject = control
-    .replace(/^작업\s*(전|중|후)\s*/g, "")
-    .replace(/\s*사전\s*/g, " ")
-    .replace(/\s*상태를?\s*확인(?:합니다)?\.?$/g, "")
-    .replace(/\s*여부를?\s*확인(?:합니다)?\.?$/g, "")
-    .replace(/\s*확인(?:합니다)?\.?$/g, "")
-    .replace(/\s*점검(?:합니다)?\.?$/g, "")
-    .replace(/\s*측정(?:합니다)?\.?$/g, "")
-    .replace(/[.。]$/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (!subject) return "";
-  const suffix = FIELD_ACTION_PATTERN.test(control) ? "미이행" : /점검/.test(control) ? "미점검" : "미확인";
-  return compactRiskCell(`${subject} ${suffix}`, 84);
-}
-
-function buildHazardSubjectFromTitle(value: string | null | undefined): string {
-  const title = compactRiskCell(stripReferenceTitlePrefix(value || ""), 92);
-  if (!title) return "";
-  const subject = title
-    .replace(/\s*에\s*관한\s*(기술지원규정|기술지침|안전작업지침|가이드|지침)$/g, "")
-    .replace(/\s*(기술지원규정|기술지침|안전작업지침|가이드|지침)$/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (!subject) return "";
-  return /사례|재해|사고/.test(subject)
-    ? compactRiskCell(`${subject} 재발 위험`, 84)
-    : compactRiskCell(`${subject} 조치 미확인`, 84);
-}
-
-function deriveSafetyReferenceHazard(item: SafetyReferenceItem): string {
-  const category = compactRiskCell(item.category, 28);
-  const subcategory = compactRiskCell(item.subcategory, 28);
-  const titleSubject = buildHazardSubjectFromTitle(getSafetyReferenceDisplayTitle(item));
-  const controlSubject = buildHazardSubjectFromControl(item.controls?.[0]) ||
-    buildHazardSubjectFromControl(getSafetyReferenceDisplaySummary(item));
-  const subject = controlSubject || titleSubject;
-  const riskTag = deriveSafetyReferenceRiskTag(item);
-  if (riskTag && subject) return `${riskTag} 위험: ${subject}`;
-  if (riskTag) return `${riskTag} 위험: 현장 조치 미확인`;
-  const prefix = [category, subcategory].filter(Boolean).join("·");
-  if (prefix && subject && FIELD_RISK_KEYWORD_PATTERN.test(prefix)) return `${prefix} 관련 위험: ${subject}`;
-  if (subject) return /위험/.test(subject) ? subject : `${subject} 관련 위험`;
-  return "DB 하네스 근거 기반 위험요인";
-}
-
 export function buildSafetyReferenceRiskRows(
   response: AskResponse,
   references: readonly SafetyReferenceItem[],
@@ -360,14 +282,13 @@ export function buildSafetyReferenceRiskRows(
 
   for (const item of topCandidates) {
     const displayTitle = getSafetyReferenceDisplayTitle(item);
-    const displaySummary = getSafetyReferenceDisplaySummary(item);
-    const control = compactRiskCell(item.controls?.[0], 120) ||
-      compactRiskCell(displaySummary, 120) ||
+    const operationalView = deriveSafetyReferenceOperationalView(item);
+    const control = compactRiskCell(operationalView.controls[0], 120) ||
       "해당 근거의 필수 확인 항목을 작업 전 점검합니다.";
-    const additionalControl = compactRiskCell(item.controls?.[1], 120) ||
+    const additionalControl = compactRiskCell(operationalView.controls[1], 120) ||
       compactRiskCell(item.document_reflection_label, 120) ||
       control;
-    const hazard = deriveSafetyReferenceHazard(item);
+    const hazard = compactRiskCell(operationalView.hazard, 120);
     const dedupeKey = `${hazard}|${control}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
@@ -391,9 +312,12 @@ export function buildSafetyReferenceRiskRows(
       additionalControls: additionalControl,
       owner: "작업반장",
       due: "현장 확인",
-      verification: "DB 하네스 근거와 현장 사진·TBM 확인으로 조치 반영 여부를 확인",
+      verification: operationalView.reviewRequired
+        ? "DB 하네스 근거의 위험요인·통제대책을 원문 및 현장 조건과 대조해 검토"
+        : "DB 하네스 근거와 현장 사진·TBM 확인으로 조치 반영 여부를 확인",
       verificationChecker: "관리감독자",
-      evidenceRefs
+      evidenceRefs,
+      verificationStatus: operationalView.reviewRequired ? "needsReview" : "planned"
     }));
 
     if (rows.length >= 4) break;
@@ -473,7 +397,7 @@ function buildTbmQuestionHazardLabel(hazard: string): string {
   return /위험/.test(label) ? label : `${label} 위험`;
 }
 
-function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: string): TbmRiskLink[] {
+export function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: string): TbmRiskLink[] {
   return rows.slice(0, 6).map((row, index) => {
     const owner = row.owner || "작업반장";
     const checker = row.verificationChecker || "관리감독자";
