@@ -1,3 +1,7 @@
+import { execFileSync, spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 // @ts-expect-error -- the executable MJS module exposes a runtime API tested here.
@@ -49,6 +53,8 @@ const {
   evaluateHarnessResponse,
   renderMarkdownEvidence,
 } = rawProbeModule as unknown as ProbeModule;
+
+const SCRIPT_PATH = path.resolve(process.cwd(), "scripts/live_harness_quality_probe.mjs");
 
 function buildGoodFixture() {
   const packet = {
@@ -196,6 +202,23 @@ function buildContext(path = "/api/ask", mutatesDb = false): ProbeContext {
   };
 }
 
+function createTempEvaluationDir() {
+  return fs.mkdtempSync(path.join(os.tmpdir(), "live-harness-quality-probe-"));
+}
+
+function runCli(args: string[]) {
+  return spawnSync(process.execPath, [SCRIPT_PATH, ...args], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+  });
+}
+
+function removeDirectoryIfPresent(targetPath: string) {
+  if (fs.existsSync(targetPath)) {
+    fs.rmSync(targetPath, { recursive: true, force: true });
+  }
+}
+
 describe("live harness quality probe evaluator", () => {
   it("passes canonical evidence and pinpoints every bad-fixture contract", () => {
     const goodResponse = buildGoodFixture();
@@ -331,5 +354,79 @@ describe("live harness quality probe evaluator", () => {
     });
     expect(badMarkdown).toContain("additional evidence in JSON");
     expect(badMarkdown).not.toMatch(/score|probability|점수|확률/i);
+  });
+
+  it("revalidates a saved api ask response from --input-json without network access", () => {
+    const fixtureDir = createTempEvaluationDir();
+    const outputName = `input-json-recheck-${path.basename(fixtureDir)}`;
+    const inputJsonPath = path.join(fixtureDir, "api-ask-response.json");
+    const outputDir = path.join(process.cwd(), "evaluation", outputName);
+    try {
+      fs.writeFileSync(inputJsonPath, `${JSON.stringify(buildGoodFixture(), null, 2)}\n`, "utf8");
+
+      const stdout = execFileSync(
+        process.execPath,
+        [SCRIPT_PATH, "--input-json", inputJsonPath, "--output", outputName],
+        { cwd: process.cwd(), encoding: "utf8" },
+      );
+
+      const summary = JSON.parse(stdout) as {
+        verdict: string;
+        httpStatus: number | null;
+        failedContracts: string[];
+        json: string;
+        markdown: string;
+      };
+      const reportJsonPath = path.join(process.cwd(), summary.json);
+      const reportMdPath = path.join(process.cwd(), summary.markdown);
+      const report = JSON.parse(fs.readFileSync(reportJsonPath, "utf8")) as {
+        baseUrl?: string;
+        inputJson?: { path?: string };
+        transport: { status: number | null };
+        evaluation: { verdict: string };
+      };
+      const markdown = fs.readFileSync(reportMdPath, "utf8");
+
+      expect(summary).toEqual({
+        verdict: "pass",
+        httpStatus: 200,
+        failedContracts: [],
+        json: path.relative(process.cwd(), path.join(outputDir, "report.json")),
+        markdown: path.relative(process.cwd(), path.join(outputDir, "report.md")),
+      });
+      expect(report.baseUrl).toBe("unavailable (input-json)");
+      expect(report.inputJson?.path).toBe(inputJsonPath);
+      expect(report.transport.status).toBe(200);
+      expect(report.evaluation.verdict).toBe("pass");
+      expect(markdown).toContain("Overall: PASS");
+      expect(markdown).toContain("Base URL: unavailable (input-json)");
+      expect(markdown).toContain("HTTP: 200");
+    } finally {
+      removeDirectoryIfPresent(outputDir);
+      removeDirectoryIfPresent(fixtureDir);
+    }
+  });
+
+  it("prints the exact CLI error when --base-url and --input-json are combined", () => {
+    const inputDir = createTempEvaluationDir();
+    const inputJsonPath = path.join(inputDir, "api-ask-response.json");
+    try {
+      fs.writeFileSync(inputJsonPath, `${JSON.stringify(buildGoodFixture(), null, 2)}\n`, "utf8");
+
+      const result = runCli([
+        "--base-url",
+        "https://www.safeclaw.kr",
+        "--input-json",
+        inputJsonPath,
+        "--output",
+        "evaluation/live-harness-quality-probe-cli-error",
+      ]);
+
+      expect(result.status).toBe(2);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Exactly one of --base-url or --input-json is required");
+    } finally {
+      removeDirectoryIfPresent(inputDir);
+    }
   });
 });
