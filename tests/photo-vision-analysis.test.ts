@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { MAX_INPUT_HAZARD_PHOTO_FILES } from "@/lib/operation-improvements";
+import { transitionHazardPhotoUserDecision } from "@/lib/photo-vision-analysis-policy";
+import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
   MAX_HAZARD_PHOTO_FILES,
   analyzeHazardPhotos,
@@ -12,8 +14,27 @@ import {
   parseImprovementVisionOutput
 } from "@/lib/photo-vision-analysis";
 
-function createPhoto(name: string, type: string, content = "image-bytes"): File {
-  return new File([content], name, { type });
+vi.mock("@/lib/safety-reference-catalog", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/safety-reference-catalog")>();
+  return {
+    ...actual,
+    searchSafetyReferences: vi.fn()
+  };
+});
+
+function photoBytes(values: number[]): ArrayBuffer {
+  return Uint8Array.from(values).buffer as ArrayBuffer;
+}
+
+const PHOTO_BYTES: Record<string, ArrayBuffer> = {
+  "image/jpeg": photoBytes([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]),
+  "image/png": photoBytes([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+  "image/webp": photoBytes([0x52, 0x49, 0x46, 0x46, 0x04, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50]),
+  "image/gif": photoBytes([0x47, 0x49, 0x46, 0x38, 0x39, 0x61])
+};
+
+function createPhoto(name: string, type: string, content?: BlobPart): File {
+  return new File([content ?? PHOTO_BYTES[type] ?? "not-an-image"], name, { type });
 }
 
 function createSizedPhoto(name: string, type: string, size: number): File {
@@ -23,6 +44,30 @@ function createSizedPhoto(name: string, type: string, size: number): File {
     size,
     arrayBuffer: async () => new ArrayBuffer(0)
   } as unknown as File;
+}
+
+function safetyReference(input: {
+  id: string;
+  title: string;
+  keywords: string[];
+  riskTags: string[];
+  controls: string[];
+}): SafetyReferenceItem {
+  return {
+    id: input.id,
+    source_id: `${input.id}-source`,
+    item_type: "guideline",
+    category: "construction",
+    subcategory: null,
+    title: input.title,
+    summary: `${input.title} 현장 안전 참고자료`,
+    keywords: input.keywords,
+    risk_tags: input.riskTags,
+    primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+    controls: input.controls,
+    evidence_role: "direct",
+    retrieval_source: "ranked"
+  };
 }
 
 describe("photo vision analysis contract", () => {
@@ -41,7 +86,7 @@ describe("photo vision analysis contract", () => {
       status: "unconfigured",
       maxInputPhotos: 10,
       maxBytesPerPhoto: 20 * 1024 * 1024,
-      allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+      allowedMimeTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
       acceptedOnly: true,
       beforeAfterSupported: true,
       ocrSupported: true,
@@ -84,6 +129,10 @@ describe("photo vision analysis contract", () => {
     expect(prompt).toContain("inference");
     expect(prompt).toContain("근거 확정");
     expect(prompt).toContain("조치 확정");
+    expect(prompt).toContain("허용 필드 외 추가 필드");
+    expect(prompt).toContain("summary 500자");
+    expect(prompt).toContain("summary와 siteSignals");
+    expect(prompt).toContain("통제·법적 근거 주장");
     expect(prompt).not.toContain("severity는 high, medium, low, review");
   });
 
@@ -98,13 +147,7 @@ describe("photo vision analysis contract", () => {
         {
           label: "작업발판 외측 추락 위험",
           observation: "작업면 가장자리에서 난간이 식별되지 않습니다.",
-          inference: "추락 위험 가능성이 있어 현장 확인이 필요합니다.",
-          severity: "high",
-          evidence: "모델이 확정했다고 주장한 근거",
-          actions: ["난간을 즉시 설치"] ,
-          reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
-          sourcePhotoNames: ["scaffold.jpg"],
-          decision: "accepted"
+          inference: "추락 위험 가능성이 있어 현장 확인이 필요합니다."
         },
         {
           label: "통로 정리정돈 미흡",
@@ -132,12 +175,12 @@ describe("photo vision analysis contract", () => {
         authority: "safeclaw-db-mcp",
         status: "pending",
         evidence: [],
-        actions: [],
+        confirmedControls: [],
         confirmedAt: null
       },
       userDecision: {
         status: "pending",
-        allowed: ["accepted", "rejected"],
+        allowed: ["rejected"],
         requiresHarnessConfirmation: true,
         decidedAt: null
       }
@@ -171,7 +214,7 @@ describe("photo vision analysis contract", () => {
     expect(parsed.ocrText).toContain("추락주의");
   });
 
-  it("drops hazard candidates that do not separate observation and inference", () => {
+  it("rejects hazard output that does not contain valid observations and candidates", () => {
     const parsed = parseHazardPhotoVisionOutput(JSON.stringify({
       summary: "보완 확인 필요",
       candidates: [
@@ -182,8 +225,126 @@ describe("photo vision analysis contract", () => {
       ]
     }), { model: "gpt-4.1-mini", photoNames: ["worker.jpg"] });
 
-    expect(parsed.status).toBe("analyzed");
+    expect(parsed.status).toBe("failed");
     expect(parsed.candidates).toEqual([]);
+    expect(parsed.errorMessage).toContain("observations");
+  });
+
+  it("does not mark an empty provider JSON object as analyzed", () => {
+    const parsed = parseHazardPhotoVisionOutput("{}", {
+      model: "gpt-4.1-mini",
+      photoNames: ["worker.jpg"]
+    });
+
+    expect(parsed.status).toBe("failed");
+    expect(parsed.candidates).toEqual([]);
+  });
+
+  it.each(["actions", "evidence", "controls", "legalClaim"])(
+    "rejects model authority field %s instead of silently accepting it",
+    (field) => {
+      const parsed = parseHazardPhotoVisionOutput(JSON.stringify({
+        summary: "작업면 가장자리가 열려 보입니다.",
+        observations: [{ kind: "visual", text: "작업면 가장자리가 열려 보입니다." }],
+        candidates: [{
+          label: "작업면 추락 위험 후보",
+          observation: "작업면 가장자리가 열려 보입니다.",
+          inference: "추락 위험 가능성을 현장에서 확인해야 합니다.",
+          [field]: field === "actions" || field === "controls" ? ["난간 설치"] : "법적 근거 주장"
+        }],
+        ocrText: "",
+        siteSignals: ["작업면"]
+      }), { model: "gpt-4.1-mini", photoNames: ["worker.jpg"] });
+
+      expect(parsed.status).toBe("failed");
+      expect(parsed.errorMessage).toContain(field);
+    }
+  );
+
+  it("rejects provider output with more than four hazard candidates", () => {
+    const parsed = parseHazardPhotoVisionOutput(JSON.stringify({
+      summary: "여러 위험 후보가 보입니다.",
+      observations: [{ kind: "visual", text: "작업 구역에 여러 설비가 보입니다." }],
+      candidates: Array.from({ length: 5 }, (_, index) => ({
+        label: `위험 후보 ${index + 1}`,
+        observation: "작업 구역에 여러 설비가 보입니다.",
+        inference: `위험 가능성 ${index + 1}을 현장에서 확인해야 합니다.`
+      })),
+      ocrText: "",
+      siteSignals: ["작업 구역"]
+    }), { model: "gpt-4.1-mini", photoNames: ["worker.jpg"] });
+
+    expect(parsed.status).toBe("failed");
+    expect(parsed.errorMessage).toContain("at most 4");
+  });
+
+  it("rejects provider strings that exceed the bounded hazard schema", () => {
+    const base = {
+      summary: "작업 구역 가장자리가 보입니다.",
+      observations: [{ kind: "visual", text: "작업 구역 가장자리가 보입니다." }],
+      candidates: [{
+        label: "작업면 위험 후보",
+        observation: "작업 구역 가장자리가 보입니다.",
+        inference: "추락 가능성을 현장에서 확인해야 합니다."
+      }],
+      ocrText: "",
+      siteSignals: ["작업면"]
+    };
+    const oversizedPayloads = [
+      { ...base, summary: "s".repeat(501) },
+      { ...base, observations: [{ kind: "visual", text: "o".repeat(501) }] },
+      { ...base, candidates: [{ ...base.candidates[0], label: "l".repeat(161) }] },
+      { ...base, candidates: [{ ...base.candidates[0], inference: "i".repeat(501) }] },
+      { ...base, ocrText: "t".repeat(2_001) },
+      { ...base, siteSignals: ["g".repeat(121)] }
+    ];
+
+    const results = oversizedPayloads.map((payload) => parseHazardPhotoVisionOutput(
+      JSON.stringify(payload),
+      { model: "gpt-4.1-mini", photoNames: ["worker.jpg"] }
+    ));
+
+    expect(results.every((result) => result.status === "failed")).toBe(true);
+    expect(results.every((result) => result.errorMessage?.includes("maximum"))).toBe(true);
+  });
+
+  it.each([
+    { summary: "산업안전보건법 제42조 위반입니다.", siteSignals: ["작업면"] },
+    { summary: "안전난간을 즉시 설치해야 합니다.", siteSignals: ["작업면"] },
+    { summary: "작업면 가장자리가 열려 보입니다.", siteSignals: ["KOSHA 근거 확인"] },
+    { summary: "작업면 가장자리가 열려 보입니다.", siteSignals: ["난간 설치 필요"] }
+  ])("rejects control or legal-authority claims in summary and site signals", ({ summary, siteSignals }) => {
+    const parsed = parseHazardPhotoVisionOutput(JSON.stringify({
+      summary,
+      observations: [{ kind: "visual", text: "작업면 가장자리가 열려 보입니다." }],
+      candidates: [{
+        label: "작업면 추락 위험 후보",
+        observation: "작업면 가장자리가 열려 보입니다.",
+        inference: "추락 위험 가능성을 현장에서 확인해야 합니다."
+      }],
+      ocrText: "",
+      siteSignals
+    }), { model: "gpt-4.1-mini", photoNames: ["worker.jpg"] });
+
+    expect(parsed.status).toBe("failed");
+    expect(parsed.errorMessage).toContain("candidate-only");
+  });
+
+  it("rejects a control recommendation hidden in candidate inference", () => {
+    const parsed = parseHazardPhotoVisionOutput(JSON.stringify({
+      summary: "작업면 가장자리가 열려 보입니다.",
+      observations: [{ kind: "visual", text: "작업면 가장자리가 열려 보입니다." }],
+      candidates: [{
+        label: "작업면 추락 위험 후보",
+        observation: "작업면 가장자리가 열려 보입니다.",
+        inference: "안전난간을 즉시 설치해야 합니다."
+      }],
+      ocrText: "",
+      siteSignals: ["작업면"]
+    }), { model: "gpt-4.1-mini", photoNames: ["worker.jpg"] });
+
+    expect(parsed.status).toBe("failed");
+    expect(parsed.errorMessage).toContain("candidate-only");
   });
 
   it("analyzes each valid image independently and preserves partial failures", async () => {
@@ -199,10 +360,7 @@ describe("photo vision analysis contract", () => {
           candidates: [{
             label: "개구부 추락 위험 후보",
             observation: "개구부 가장자리에 난간이 보이지 않습니다.",
-            inference: "추락 위험 가능성이 있습니다.",
-            evidence: "모델 임의 근거",
-            actions: ["모델 임의 조치"],
-            decision: "accepted"
+            inference: "추락 위험 가능성이 있습니다."
           }],
           ocrText: "추락주의",
           siteSignals: ["개구부"]
@@ -220,7 +378,7 @@ describe("photo vision analysis contract", () => {
           title: "개구부 추락 예방",
           excerpt: "개구부 방호 조치 확인"
         }],
-        actions: [{
+        confirmedControls: [{
           text: "개구부 덮개 또는 안전난간 상태를 현장에서 확인합니다.",
           evidenceSourceIds: ["kosha-open-edge"]
         }],
@@ -271,7 +429,7 @@ describe("photo vision analysis contract", () => {
         authority: "safeclaw-db-mcp",
         status: "confirmed",
         evidence: [{ sourceId: "kosha-open-edge", sourceType: "safeclaw-db" }],
-        actions: [{
+        confirmedControls: [{
           text: "개구부 덮개 또는 안전난간 상태를 현장에서 확인합니다.",
           evidenceSourceIds: ["kosha-open-edge"]
         }],
@@ -306,6 +464,82 @@ describe("photo vision analysis contract", () => {
     expect(provider.analyze).not.toHaveBeenCalled();
     expect(analysis.status).toBe("failed");
     expect(analysis.images.map((image) => image.error?.code)).toEqual(["empty_file", "file_too_large"]);
+  });
+
+  it("accepts authentic GIF bytes and rejects a mismatched JPEG signature before provider analysis", async () => {
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async () => JSON.stringify({
+        summary: "작업 구역 표지가 보입니다.",
+        observations: [{ kind: "visual", text: "작업 구역 표지가 보입니다." }],
+        candidates: [{
+          label: "작업 구역 확인 후보",
+          observation: "작업 구역 표지가 보입니다.",
+          inference: "표지 주변 위험요인을 현장에서 확인해야 합니다."
+        }],
+        ocrText: "",
+        siteSignals: ["작업 구역"]
+      }))
+    };
+
+    const analysis = await analyzeHazardPhotos({
+      question: "현장 점검",
+      photos: [
+        createPhoto("authentic.gif", "image/gif"),
+        createPhoto("spoofed.jpg", "image/jpeg", PHOTO_BYTES["image/png"])
+      ]
+    }, { provider, harness: null });
+
+    expect(provider.analyze).toHaveBeenCalledTimes(1);
+    expect(analysis.status).toBe("partial");
+    expect(analysis.images.map((image) => image.status)).toEqual(["analyzed", "rejected"]);
+    expect(analysis.images[1]?.error).toMatchObject({
+      code: "invalid_signature",
+      retryable: false
+    });
+  });
+
+  it("isolates signature read failures to the affected image", async () => {
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async () => JSON.stringify({
+        summary: "작업 구역이 보입니다.",
+        observations: [{ kind: "visual", text: "작업 구역이 보입니다." }],
+        candidates: [{
+          label: "작업 구역 위험 후보",
+          observation: "작업 구역이 보입니다.",
+          inference: "현장 위험 가능성을 확인해야 합니다."
+        }],
+        ocrText: "",
+        siteSignals: ["작업 구역"]
+      }))
+    };
+    const unreadablePhoto = {
+      name: "unreadable.png",
+      type: "image/png",
+      size: 8,
+      slice: () => ({
+        arrayBuffer: async () => {
+          throw new Error("fixture read failure");
+        }
+      })
+    } as unknown as File;
+
+    const analysis = await analyzeHazardPhotos({
+      question: "현장 점검",
+      photos: [createPhoto("readable.jpg", "image/jpeg"), unreadablePhoto]
+    }, { provider, harness: null });
+
+    expect(provider.analyze).toHaveBeenCalledTimes(1);
+    expect(analysis.status).toBe("partial");
+    expect(analysis.images[1]?.error).toMatchObject({
+      code: "invalid_signature",
+      retryable: false
+    });
   });
 
   it("returns an explicit unconfigured result without an external API key", async () => {
@@ -371,12 +605,190 @@ describe("photo vision analysis contract", () => {
       harness: {
         status: "insufficient",
         evidence: [],
-        actions: [],
+        confirmedControls: [],
         errorMessage: "fixture harness unavailable"
       },
       userDecision: {
         status: "pending",
+        allowed: ["rejected"],
         requiresHarnessConfirmation: true
+      }
+    });
+  });
+
+  it("clears unconfirmed evidence and controls and blocks acceptance for insufficient candidates", async () => {
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async () => JSON.stringify({
+        summary: "작업자 주변에 차량이 보입니다.",
+        observations: [{ kind: "visual", text: "작업자 주변에 차량이 보입니다." }],
+        candidates: [{
+          label: "차량과 작업자 충돌 위험 후보",
+          observation: "작업자 주변에 차량이 보입니다.",
+          inference: "동선 중첩 가능성을 현장에서 확인해야 합니다."
+        }],
+        ocrText: "",
+        siteSignals: ["차량", "작업자"]
+      }))
+    };
+    const harness = {
+      name: "safeclaw-db-mcp",
+      resolve: vi.fn(async ({ candidates }: { candidates: Array<{ id: string }> }) => candidates.map((candidate) => ({
+        candidateId: candidate.id,
+        status: "insufficient" as const,
+        evidence: [{
+          sourceId: "unrelated-source",
+          sourceType: "safeclaw-db" as const,
+          title: "무관한 근거",
+          excerpt: "후보와 관련 없는 내용"
+        }],
+        confirmedControls: [{
+          text: "근거 없는 통제",
+          evidenceSourceIds: ["unrelated-source"]
+        }],
+        confirmedAt: null,
+        errorMessage: "positive relevance not established"
+      })))
+    };
+
+    const analysis = await analyzeHazardPhotos({
+      question: "자재 반입 작업",
+      photos: [createPhoto("vehicle.jpg", "image/jpeg")]
+    }, { provider, harness });
+    const candidate = analysis.candidates[0];
+    if (!candidate) throw new Error("Expected one hazard candidate");
+
+    expect(candidate.harness).toMatchObject({
+      status: "insufficient",
+      evidence: [],
+      confirmedControls: [],
+      confirmedAt: null
+    });
+    expect(candidate.userDecision.allowed).toEqual(["rejected"]);
+
+    const transition = transitionHazardPhotoUserDecision({
+      harnessStatus: candidate.harness.status,
+      decision: candidate.userDecision,
+      nextStatus: "accepted",
+      reason: "사용자 채택 시도",
+      decidedAt: "2026-07-11T00:00:00.000Z"
+    });
+
+    expect(transition).toMatchObject({
+      ok: false,
+      code: "harness_confirmation_required"
+    });
+  });
+
+  it("grounds each candidate with an independent default resolver query and positively relevant pool", async () => {
+    const fallReference = safetyReference({
+      id: "fall-scaffold",
+      title: "비계 작업발판 추락 예방",
+      keywords: ["비계", "작업발판", "추락"],
+      riskTags: ["추락"],
+      controls: ["비계 작업발판 안전난간 상태 확인"]
+    });
+    const forkliftReference = safetyReference({
+      id: "forklift-traffic",
+      title: "지게차 보행자 충돌 예방",
+      keywords: ["지게차", "보행자", "충돌"],
+      riskTags: ["충돌"],
+      controls: ["지게차와 보행자 동선 분리 상태 확인"]
+    });
+    const genericReference = safetyReference({
+      id: "generic-site-check",
+      title: "현장 위험 후보 확인",
+      keywords: ["현장", "확인"],
+      riskTags: [],
+      controls: ["일반 작업 전 현장 확인"]
+    });
+    vi.mocked(searchSafetyReferences).mockReset();
+    vi.mocked(searchSafetyReferences).mockImplementation(async ({ query }) => ({
+      ok: true,
+      configured: true,
+      query,
+      count: 3,
+      items: [fallReference, forkliftReference, genericReference],
+      retrievalMode: "ranked-rpc",
+      vectorSearch: {
+        enabled: false,
+        attempted: false,
+        ok: false,
+        reason: "disabled",
+        count: 0,
+        model: "text-embedding-3-small",
+        message: "disabled"
+      },
+      message: "contract fixture"
+    }));
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async () => JSON.stringify({
+        summary: "비계와 지게차 작업 구역이 각각 보입니다.",
+        observations: [
+          { kind: "visual", text: "비계 작업발판 가장자리가 보입니다." },
+          { kind: "visual", text: "지게차와 보행자가 가까이 보입니다." }
+        ],
+        candidates: [
+          {
+            label: "비계 작업발판 추락 위험 후보",
+            observation: "비계 작업발판 가장자리가 보입니다.",
+            inference: "추락 위험 가능성을 현장에서 확인해야 합니다."
+          },
+          {
+            label: "지게차 보행자 충돌 위험 후보",
+            observation: "지게차와 보행자가 가까이 보입니다.",
+            inference: "충돌 위험 가능성을 현장에서 확인해야 합니다."
+          }
+        ],
+        ocrText: "",
+        siteSignals: ["비계", "지게차"]
+      }))
+    };
+
+    const analysis = await analyzeHazardPhotos({
+      question: "복합 작업 구역 점검",
+      photos: [createPhoto("mixed-work.jpg", "image/jpeg")]
+    }, { provider });
+
+    expect(searchSafetyReferences).toHaveBeenCalledTimes(6);
+    const queries = vi.mocked(searchSafetyReferences).mock.calls.map(([options]) => options.query);
+    expect(queries.filter((query) => query.includes("비계"))).toHaveLength(3);
+    expect(queries.filter((query) => query.includes("지게차"))).toHaveLength(3);
+    expect(analysis.counts.harnessConfirmed).toBe(2);
+    expect(analysis.candidates[0]?.harness.evidence.map((item) => item.sourceId)).toEqual(["fall-scaffold"]);
+    expect(analysis.candidates[0]?.harness.confirmedControls).toEqual([{
+      text: "비계 작업발판 안전난간 상태 확인",
+      evidenceSourceIds: ["fall-scaffold"]
+    }]);
+    expect(analysis.candidates[1]?.harness.evidence.map((item) => item.sourceId)).toEqual(["forklift-traffic"]);
+    const forkliftControls = analysis.candidates[1]?.harness.confirmedControls || [];
+    expect(forkliftControls.length).toBeGreaterThan(0);
+    expect(forkliftControls.every((control) =>
+      control.evidenceSourceIds.length === 1 && control.evidenceSourceIds[0] === "forklift-traffic"
+    )).toBe(true);
+    expect(forkliftControls.map((control) => control.text).join(" ")).toContain("지게차");
+    expect(forkliftControls.map((control) => control.text).join(" ")).not.toContain("비계");
+
+    const confirmedCandidate = analysis.candidates[0];
+    if (!confirmedCandidate) throw new Error("Expected a confirmed hazard candidate");
+    const accepted = transitionHazardPhotoUserDecision({
+      harnessStatus: confirmedCandidate.harness.status,
+      decision: confirmedCandidate.userDecision,
+      nextStatus: "accepted",
+      reason: "현장 검토 완료",
+      decidedAt: "2026-07-11T00:00:00.000Z"
+    });
+    expect(accepted).toMatchObject({
+      ok: true,
+      decision: {
+        status: "accepted",
+        allowed: [],
+        reason: "현장 검토 완료"
       }
     });
   });
