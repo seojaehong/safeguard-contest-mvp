@@ -98,12 +98,15 @@ export function SafeClawModuleShell({
   }
 
   return (
-    <main
+    <div
       className={`safeclaw-module-shell module-variant-${variant}`}
       data-theme={theme}
       data-ready={isReady}
     >
-      <aside className="safeclaw-module-rail" aria-label="SafeClaw 제품 메뉴">
+      <a className="safeclaw-skip-link" href="#safeclaw-module-main">
+        본문으로 건너뛰기
+      </a>
+      <aside key={`module-rail-${theme}`} className="safeclaw-module-rail" aria-label="SafeClaw 제품 메뉴">
         <div className="safeclaw-module-rail-head">
           <Link href="/" className="safeclaw-module-brand" aria-label="SafeClaw 홈">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -112,7 +115,7 @@ export function SafeClawModuleShell({
           </Link>
           <button
             type="button"
-            className="safeclaw-module-menu-button"
+            className="safeclaw-module-menu-button safeclaw-module-chrome-button"
             aria-controls="safeclaw-module-navigation"
             aria-expanded={mobileNavOpen}
             onClick={() => setMobileNavOpen((isOpen) => !isOpen)}
@@ -160,18 +163,18 @@ export function SafeClawModuleShell({
         </nav>
       </aside>
 
-      <section className="safeclaw-module-main">
-        <header className="safeclaw-module-nav">
+      <main id="safeclaw-module-main" className="safeclaw-module-main" tabIndex={-1}>
+        <header key={`module-nav-${theme}`} className="safeclaw-module-nav">
           <span><i /> SITE 기본 현장</span>
           <span>API <b>Law.go</b> · <b>KOSHA</b> · 기상청</span>
           <span className={`safeclaw-module-status ${status}`}>
             {status === "live" ? <i className="sc-blink sc-blink--good" aria-hidden="true" /> : null}
             {statusLabel[status]}
           </span>
-          <div className="safeclaw-module-theme-toggle" aria-label="화면 테마">
+          <div className="safeclaw-module-theme-toggle" role="group" aria-label="화면 테마">
             <button
               type="button"
-              className={theme === "day" ? "active" : ""}
+              className={`safeclaw-module-chrome-button${theme === "day" ? " active" : ""}`}
               aria-pressed={theme === "day"}
               onClick={() => updateTheme("day")}
             >
@@ -179,7 +182,7 @@ export function SafeClawModuleShell({
             </button>
             <button
               type="button"
-              className={theme === "night" ? "active" : ""}
+              className={`safeclaw-module-chrome-button${theme === "night" ? " active" : ""}`}
               aria-pressed={theme === "night"}
               onClick={() => updateTheme("night")}
             >
@@ -198,7 +201,7 @@ export function SafeClawModuleShell({
         />
 
         <div className="safeclaw-module-content">{children}</div>
-      </section>
-    </main>
+      </main>
+    </div>
   );
 }
