@@ -7704,10 +7704,10 @@ body:has(.safeclaw-landing) :is(
   color: rgba(246, 245, 239, 0.72);
   text-decoration: none;
   font-family: var(--font-hud);
-  font-size: var(--text-table);
-  font-weight: 500;
+  font-size: var(--text-control);
+  font-weight: 700;
   letter-spacing: var(--tracking-body);
-  line-height: var(--leading-table);
+  line-height: var(--leading-control);
 }
 
 .safeclaw-module-actions a:hover {

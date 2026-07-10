@@ -33,3 +33,9 @@
 - Verified: focused contract tests pass (16/16), static audit passes for 32 routes with zero violations and zero important declarations, typecheck passes, and production build passes with 27/27 static pages generated.
 - Learned: selector-list keywords can leak HUD or table semantics across unrelated selectors; role inference and tuple validation must operate on each selector independently.
 - Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in later tasks.
+
+## 2026-07-11 F2 base module action remediation
+- Changed: base and document-variant module primary/action selectors now have explicit control precedence, and the base CSS group uses the full control tuple.
+- Verified: focused contract tests pass (18/18), static audit passes for 32 routes with zero violations and zero important declarations, typecheck passes, and production build passes with 27/27 static pages generated.
+- Learned: explicit DOM-backed semantics must precede the current font-size token for class-only action selectors.
+- Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in later tasks.

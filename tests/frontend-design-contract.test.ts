@@ -92,7 +92,10 @@ function isTableHeaderSelector(selector: string): boolean {
 
 const semanticRoleOverrides: Readonly<Record<string, TypographyRole>> = {
   ".command-center-shell .command-primary": "control",
+  ".safeclaw-module-primary": "control",
+  ".safeclaw-module-actions a": "control",
   ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary": "control",
+  ".safeclaw-module-shell.module-variant-document .safeclaw-module-actions a": "control",
   ".command-center-shell .brand-lockup small": "caption",
   ".command-center-shell .topbar-status span": "hud",
   ".command-center-shell .step-copy small": "hud",
@@ -408,6 +411,23 @@ describe("frontend design contract", () => {
     }
   });
 
+  it("keeps base and document module actions on the control tuple", () => {
+    const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
+    for (const selector of [
+      ".safeclaw-module-primary",
+      ".safeclaw-module-actions a",
+      ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary",
+      ".safeclaw-module-shell.module-variant-document .safeclaw-module-actions a",
+    ]) {
+      expect(effectiveDeclarations(css, selector), selector).toMatchObject({
+        "font-size": "var(--text-control)",
+        "font-weight": "700",
+        "line-height": "var(--leading-control)",
+        "letter-spacing": "var(--tracking-body)",
+      });
+    }
+  });
+
   it("assigns a complete canonical typography tuple to every font-size rule", () => {
     const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
     expect(css).not.toMatch(/font-size:\s*(?:11px|12px|13px|14px|15px|17px|20px|var\(--t-|clamp\()/);
@@ -508,5 +528,29 @@ describe("frontend design contract", () => {
     expect(tupleViolations.some((violation) => violation.value?.includes("command-primary"))).toBe(true);
     expect(tupleViolations.some((violation) => violation.value?.includes("safety-form-preview th"))).toBe(true);
     expect(tupleViolations.some((violation) => violation.value?.includes("brand-lockup small"))).toBe(true);
+  });
+
+  it("rejects table-sized base module actions before token-size classification", () => {
+    const audit = runAudit(`
+      .safeclaw-module-primary, .safeclaw-module-actions a {
+        font-size: var(--text-table);
+        font-weight: 500;
+        line-height: var(--leading-table);
+        letter-spacing: var(--tracking-body);
+      }
+      .safeclaw-module-shell.module-variant-document .safeclaw-module-primary,
+      .safeclaw-module-shell.module-variant-document .safeclaw-module-actions a {
+        font-size: var(--text-control);
+        font-weight: 700;
+        line-height: var(--leading-control);
+        letter-spacing: var(--tracking-body);
+      }
+    `);
+    const tupleValues = audit.report.violations
+      .filter((violation) => violation.rule === "typography-tuple")
+      .map((violation) => violation.value || "");
+    expect(tupleValues.some((value) => value.includes(".safeclaw-module-primary"))).toBe(true);
+    expect(tupleValues.some((value) => value.includes(".safeclaw-module-actions a"))).toBe(true);
+    expect(tupleValues.every((value) => !value.includes("module-variant-document"))).toBe(true);
   });
 });

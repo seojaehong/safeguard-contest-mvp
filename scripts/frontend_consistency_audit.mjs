@@ -120,7 +120,10 @@ function isTableHeaderSelector(selector) {
 
 const semanticRoleOverrides = {
   ".command-center-shell .command-primary": "control",
+  ".safeclaw-module-primary": "control",
+  ".safeclaw-module-actions a": "control",
   ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary": "control",
+  ".safeclaw-module-shell.module-variant-document .safeclaw-module-actions a": "control",
   ".command-center-shell .brand-lockup small": "caption",
   ".command-center-shell .topbar-status span": "hud",
   ".command-center-shell .step-copy small": "hud",
