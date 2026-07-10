@@ -1743,6 +1743,10 @@ ul {
   }
 }
 
+.safeclaw-os-section-head .safeclaw-section-title {
+  max-width: none;
+}
+
 /* Footer — the third and final black "tape" band. */
 .safeclaw-landing-footer {
   display: grid;
@@ -2334,11 +2338,11 @@ ul {
 }
 
 .v2-shell {
-  width: min(1360px, calc(100% - 36px));
+  width: min(var(--content-standard), calc(100% - (var(--space-6) * 2)));
   margin: 0 auto;
-  padding: 18px 0 64px;
+  padding: var(--space-5) 0 var(--space-16);
   display: grid;
-  gap: 22px;
+  gap: var(--space-6);
 }
 
 .v2-nav {
@@ -2409,7 +2413,7 @@ ul {
 }
 
 .demo-mode-shell {
-  width: min(1500px, calc(100% - 28px));
+  width: min(var(--content-wide), calc(100% - (var(--space-6) * 2)));
 }
 
 .demo-hero-grid {
@@ -2707,7 +2711,7 @@ ul {
   letter-spacing: var(--tracking-hud);
 }
 
-.triad-card strong,
+.triad-card h3,
 .preview-hero-card h2 {
   margin: 0;
   font-size: var(--text-section-title);
@@ -2768,7 +2772,8 @@ ul {
   line-height: var(--leading-caption);
 }
 
-.demo-section-heading strong {
+.demo-section-heading h2 {
+  margin: 0;
   color: var(--ink);
   font-size: var(--text-section-title);
   line-height: var(--leading-section-title);
@@ -2813,7 +2818,8 @@ ul {
   letter-spacing: var(--tracking-body);
 }
 
-.demo-document-list article strong {
+.demo-document-list article h3 {
+  margin: 0;
   color: var(--ink);
   font-size: var(--text-component-title);
   line-height: var(--leading-component-title);
@@ -3008,8 +3014,8 @@ ul {
 @media (max-width: 760px) {
   .v2-shell,
   .demo-mode-shell {
-    width: min(100% - 20px, 680px);
-    padding-top: 10px;
+    width: min(100%, calc(100% - (var(--space-4) * 2)));
+    padding-top: var(--space-3);
   }
 
   .v2-nav {
@@ -5288,6 +5294,20 @@ ul {
   background: rgba(255, 255, 255, 0.68);
 }
 
+.api-proof-card h2,
+.comparison-card h2,
+.trust-grid h2,
+.interview-card h2,
+.roadmap-item h2,
+.v2-link-band h2,
+.presenter-notes h2 {
+  margin: 0;
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
 .template-preview.template-word {
   background: rgba(255, 255, 255, 0.95);
   box-shadow: none;
@@ -6421,9 +6441,12 @@ ul {
   word-spacing: 0.032em;
 }
 
-.citation-item strong {
+.citation-item h3 {
+  margin: 0;
+  font-size: var(--text-component-title);
+  font-weight: 700;
   line-height: var(--leading-component-title);
-  letter-spacing: var(--tracking-body);
+  letter-spacing: var(--tracking-component-title);
   word-spacing: 0;
 }
 
@@ -6480,12 +6503,12 @@ ul {
 }
 
 .law-section-title {
+  margin: 0;
   color: var(--accent);
-  font-size: var(--text-table);
-  font-weight: 500;
-  letter-spacing: var(--tracking-body);
-  text-transform: uppercase;
-  line-height: var(--leading-table);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  letter-spacing: var(--tracking-component-title);
+  line-height: var(--leading-component-title);
 }
 
 .law-section-lines {
@@ -7013,6 +7036,18 @@ ul {
 .action-panel,
 .prompt-card {
   padding: 22px;
+}
+
+.route-internal-page {
+  padding-block: var(--space-10) var(--space-12);
+}
+
+.route-internal-hero {
+  gap: var(--space-5);
+}
+
+.route-internal-copy {
+  gap: var(--space-3);
 }
 
 @media (max-width: 1120px) {
@@ -7781,6 +7816,29 @@ body:has(.safeclaw-landing) :is(
   font-weight: 700;
   letter-spacing: var(--tracking-body);
   line-height: var(--leading-control);
+}
+
+.safeclaw-section-title,
+.safeclaw-module-shell .safeclaw-section-title {
+  margin: 0;
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
+.safeclaw-setting-description {
+  margin: var(--space-4) 0 0;
+  color: var(--sc-steel-300);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.route-section-description,
+.result-card-copy {
+  margin: 0;
 }
 
 .safeclaw-module-actions a:hover {
