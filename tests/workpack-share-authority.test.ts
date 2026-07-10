@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import * as commercial from "@/lib/workpack-commercial";
 import * as commercialStore from "@/lib/workpack-commercial-store";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import { buildWorkpackEvidenceSummary } from "@/lib/workpack-store";
 import type { AskResponse } from "@/lib/types";
 
@@ -44,6 +45,51 @@ function readyResponse(): AskResponse {
 }
 
 describe("server-only workpack share authority", () => {
+  afterEach(() => {
+    delete process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET;
+  });
+
+  it("fails closed for a persisted envelope when the verification secret is missing", () => {
+    const assess = Reflect.get(commercialStore, "assessStoredWorkpackShareAuthority") as (input: unknown) => {
+      readiness: { canShare: boolean; reasons: string[] };
+    };
+    const secret = "share-authority-generation-evidence-secret";
+    const response = attachGenerationEvidence(readyResponse(), {
+      secret,
+      generatedAt: "2026-07-10T09:30:00.000Z"
+    });
+    const snapshot = response.generationEvidence?.snapshot;
+
+    const result = assess({
+      question: response.question,
+      scenario: response.scenario,
+      deliverables: response.deliverables,
+      evidenceSummary: buildWorkpackEvidenceSummary(response, snapshot),
+      status: response.status
+    });
+
+    expect(result.readiness.canShare).toBe(false);
+    expect(result.readiness.reasons).toContain("생성 근거 서명 검증 필요");
+  });
+
+  it("keeps legacy DB-harness workpacks non-shareable without a generation seal", () => {
+    const assess = Reflect.get(commercialStore, "assessStoredWorkpackShareAuthority") as (input: unknown) => {
+      readiness: { canShare: boolean; reasons: string[] };
+    };
+    const response = readyResponse();
+
+    const result = assess({
+      question: response.question,
+      scenario: response.scenario,
+      deliverables: response.deliverables,
+      evidenceSummary: buildWorkpackEvidenceSummary(response),
+      status: response.status
+    });
+
+    expect(result.readiness.canShare).toBe(false);
+    expect(result.readiness.reasons).toContain("생성 근거 봉인 확인 필요");
+  });
+
   it("blocks legacy stored workpacks that have no generation harness", () => {
     const assess = Reflect.get(commercialStore, "assessStoredWorkpackShareAuthority") as (input: unknown) => {
       readiness: { canShare: boolean; reasons: string[] };

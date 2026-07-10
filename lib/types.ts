@@ -313,6 +313,35 @@ export type DetailRecord = {
   tags?: string[];
 };
 
+export type AskScenario = {
+  siteName: string;
+  companyName: string;
+  companyType: string;
+  workSummary: string;
+  workerCount: number;
+  weatherNote: string;
+};
+
+export type GenerationEvidenceSnapshot = {
+  question: string;
+  scenario: AskScenario;
+  dbHarnessPacket: DbHarnessPacket;
+  responseContentDigest: string;
+  generatedAt: string;
+};
+
+export type GenerationEvidenceEnvelope = {
+  version: "safeclaw-generation-evidence/v1";
+  algorithm: "HMAC-SHA256";
+  snapshot: GenerationEvidenceSnapshot;
+  signature: string;
+};
+
+export type GenerationEvidenceError = {
+  code: "secret_unconfigured" | "db_harness_missing";
+  message: string;
+};
+
 export type AskResponse = {
   question: string;
   answer: string;
@@ -330,14 +359,7 @@ export type AskResponse = {
   };
   generationMode?: "template" | "enhanced" | "full";
   mode: "mock" | "live" | "fallback";
-  scenario: {
-    siteName: string;
-    companyName: string;
-    companyType: string;
-    workSummary: string;
-    workerCount: number;
-    weatherNote: string;
-  };
+  scenario: AskScenario;
   externalData: {
     weather: {
       source: "kma";
@@ -573,6 +595,8 @@ export type AskResponse = {
       ontologyStatus: DbHarnessPacket["ontologyChecklist"]["status"];
     };
   };
+  generationEvidence?: GenerationEvidenceEnvelope;
+  generationEvidenceError?: GenerationEvidenceError;
   qualityContract?: QualityContract;
   status: {
     lawgo: IntegrationMode;

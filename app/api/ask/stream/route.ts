@@ -6,6 +6,7 @@ import { enforceRateLimit } from "@/lib/api-guard";
 import { formatSseEvent, type AskProgressEvent } from "@/lib/ask-progress";
 import { createLogger } from "@/lib/logger";
 import { parseHarnessMemoryInput } from "@/lib/db-harness";
+import { attachGenerationEvidence } from "@/lib/generation-evidence";
 
 // Task D-2a: streaming twin of /api/ask (app/api/ask/route.ts is untouched — demo
 // stability). Same request body, but responds with an SSE stream of stage/doc progress
@@ -45,7 +46,11 @@ export async function POST(request: NextRequest) {
       };
       try {
         const payload = await runAsk(question, { aiMode, harnessMemory, onProgress: emit });
-        emit({ kind: "final", payload });
+        const sealed = attachGenerationEvidence(payload, {
+          secret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+          generatedAt: new Date().toISOString()
+        });
+        emit({ kind: "final", payload: sealed });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         log.error("runAsk failed in stream route", error);

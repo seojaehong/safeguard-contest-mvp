@@ -8,7 +8,8 @@ import {
   toJson,
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
-import type { AskResponse } from "@/lib/types";
+import type { AskResponse, GenerationEvidenceSnapshot } from "@/lib/types";
+import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
 
 type WorkpackInsert = WorkspaceDatabase["public"]["Tables"]["workpacks"]["Insert"];
 
@@ -38,6 +39,8 @@ export type WorkpackEvidenceSummary = {
   evidenceLabels?: AskResponse["evidenceLabels"];
   structured?: AskResponse["structured"];
   dbHarness?: AskResponse["dbHarness"];
+  generationEvidence?: AskResponse["generationEvidence"];
+  generationEvidenceSnapshot?: GenerationEvidenceSnapshot;
 };
 
 export type ReopenWorkpackInput = {
@@ -64,7 +67,10 @@ function readJsonObject(value: unknown): Record<string, unknown> | null {
   return isRecord(value) ? value : null;
 }
 
-export function buildWorkpackEvidenceSummary(response: AskResponse): WorkpackEvidenceSummary {
+export function buildWorkpackEvidenceSummary(
+  response: AskResponse,
+  generationEvidenceSnapshot?: GenerationEvidenceSnapshot
+): WorkpackEvidenceSummary {
   return {
     answer: response.answer,
     practicalPoints: response.practicalPoints,
@@ -77,7 +83,9 @@ export function buildWorkpackEvidenceSummary(response: AskResponse): WorkpackEvi
     ontologyQa: response.ontologyQa,
     evidenceLabels: response.evidenceLabels,
     structured: response.structured,
-    dbHarness: response.dbHarness
+    dbHarness: response.dbHarness,
+    generationEvidence: generationEvidenceSnapshot ? response.generationEvidence : undefined,
+    generationEvidenceSnapshot
   };
 }
 
@@ -143,6 +151,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
   const evidenceLabels = readJsonObject(evidence.evidenceLabels);
   const structured = readJsonObject(evidence.structured);
   const dbHarness = readJsonObject(evidence.dbHarness);
+  const generationEvidence = readJsonObject(evidence.generationEvidence);
 
   return {
     data: {
@@ -161,6 +170,9 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
       ontologyQa: ontologyQa ? ontologyQa as AskResponse["ontologyQa"] : undefined,
       qualityContract: qualityContract ? qualityContract as AskResponse["qualityContract"] : undefined,
       dbHarness: dbHarness ? dbHarness as AskResponse["dbHarness"] : undefined,
+      generationEvidence: generationEvidence
+        ? generationEvidence as AskResponse["generationEvidence"]
+        : undefined,
       status: status as AskResponse["status"]
     },
     blockers: []
@@ -188,6 +200,18 @@ export async function saveMcpDocpackWorkpack(
 
   if (!context.siteId) return base;
 
+  const verification = verifyAskResponseGenerationEvidence(
+    response,
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET
+  );
+  if (!verification.ok) {
+    console.warn("mcp docpack workpack save blocked by generation evidence", {
+      code: verification.code,
+      message: verification.message
+    });
+    return base;
+  }
+
   let organizationId = context.orgId;
   try {
     const { data: site, error: siteError } = await client
@@ -207,7 +231,7 @@ export async function saveMcpDocpackWorkpack(
     }
 
     organizationId = site.organization_id;
-    const evidenceSummary = buildWorkpackEvidenceSummary(response);
+    const evidenceSummary = buildWorkpackEvidenceSummary(response, verification.snapshot);
 
     const { data, error } = await client
       .from("workpacks")
@@ -271,6 +295,22 @@ export async function saveAskResponseAsWorkpack(
   siteName: string,
   response: AskResponse
 ): Promise<SaveWorkpackResult> {
+  const verification = verifyAskResponseGenerationEvidence(
+    response,
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET
+  );
+  if (!verification.ok) {
+    console.warn("briefing workpack save blocked by generation evidence", {
+      code: verification.code,
+      message: verification.message
+    });
+    return {
+      ok: false,
+      workpackId: null,
+      message: `생성 근거 검증 실패: ${verification.message}`
+    };
+  }
+
   let userId: string | null;
   try {
     userId = await findUserIdByEmail(client, ownerEmail);
@@ -288,7 +328,7 @@ export async function saveAskResponseAsWorkpack(
     companyName: siteName
   });
 
-  const evidenceSummary = buildWorkpackEvidenceSummary(response);
+  const evidenceSummary = buildWorkpackEvidenceSummary(response, verification.snapshot);
 
   const { data, error } = await client
     .from("workpacks")
