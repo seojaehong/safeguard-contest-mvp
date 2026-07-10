@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
 import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
+import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
+import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
+import {
+  loadActiveOwnedShareSession,
+  loadOwnedWorkpackOperationContext
+} from "@/lib/workpack-commercial-store";
 
 export const dynamic = "force-dynamic";
 
@@ -10,10 +16,10 @@ const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
 type WorkflowChannel = "email" | "sms" | "kakao" | "band";
 
 type WorkflowRequest = {
+  workpackId?: string;
+  shareSessionId?: string;
   channels?: WorkflowChannel[];
-  recipients?: string[];
   operatorNote?: string;
-  workpack?: unknown;
 };
 
 type WorkflowSuccessResponse = {
@@ -92,15 +98,6 @@ function parseUnsupportedChannels(value: unknown): string[] {
     .filter((item) => item && !allowed.has(item));
 }
 
-function parseRecipients(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value
-    .filter((item): item is string => typeof item === "string")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .slice(0, 50);
-}
-
 function parseChannelStatus(value: unknown): WorkflowChannelStatus {
   if (value === "sent" || value === "failed" || value === "unconfigured" || value === "skipped" || value === "partial") {
     return value;
@@ -159,7 +156,7 @@ function summarizeChannelResults(results: WorkflowChannelResult[]): WorkflowSumm
   });
 }
 
-function buildFixtureDispatchResponse(channels: WorkflowChannel[], recipients: string[]): WorkflowSuccessResponse {
+function buildFixtureDispatchResponse(channels: WorkflowChannel[], recipients: Array<Record<string, unknown>>): WorkflowSuccessResponse {
   return {
     ok: true,
     workflowRunId: `fixture-${Date.now()}`,
@@ -230,7 +227,17 @@ export async function POST(request: NextRequest) {
   const channels = parseChannels(body.channels);
   const lockedChannels = parseLockedChannels(body.channels);
   const unsupportedChannels = parseUnsupportedChannels(body.channels);
-  const recipients = parseRecipients(body.recipients);
+  const allowedFields = new Set(["workpackId", "shareSessionId", "channels", "operatorNote"]);
+  const rejectedFields = Object.keys(body).filter((key) => !allowedFields.has(key));
+
+  if (rejectedFields.length) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      rejectedFields,
+      message: "전파 요청에는 workpackId, shareSessionId, channels, operatorNote만 사용할 수 있습니다."
+    }, { status: 400 });
+  }
 
   if (lockedChannels.length) {
     return NextResponse.json({
@@ -250,13 +257,57 @@ export async function POST(request: NextRequest) {
     }, { status: 400 });
   }
 
-  if (!body.workpack || channels.length === 0) {
+  const workpackId = typeof body.workpackId === "string" ? body.workpackId.trim() : "";
+  const shareSessionId = typeof body.shareSessionId === "string" ? body.shareSessionId.trim() : "";
+  if (!workpackId || !shareSessionId || channels.length === 0) {
     return NextResponse.json({
       ok: false,
       configured: Boolean(webhookConfig.url && webhookConfig.token),
-      message: "문서팩과 전파 채널을 확인해 주세요. 현재 활성 채널은 메일·문자와 설정된 카카오 알림톡입니다."
+      message: "작업팩, 공유 세션, 전파 채널을 확인해 주세요."
     }, { status: 400 });
   }
+
+  const client = createSupabaseAdminClient();
+  if (!client) {
+    return NextResponse.json({ ok: false, configured: false, message: "Supabase 저장소가 아직 설정되지 않았습니다." }, { status: 503 });
+  }
+  const user = await getWorkspaceUser(client, request.headers);
+  if (!user) {
+    return NextResponse.json({ ok: false, configured: true, message: "관리자 로그인이 필요합니다." }, { status: 401 });
+  }
+
+  const owned = await loadOwnedWorkpackOperationContext(client, user, workpackId);
+  if (!owned.ok) {
+    return NextResponse.json({ ok: false, configured: true, message: owned.message }, { status: owned.status });
+  }
+  if (!owned.context.shareAuthority.readiness.canShare || !owned.context.shareAuthority.workpack) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      readiness: owned.context.shareAuthority.readiness,
+      message: "서버 검수에서 공유 준비가 확인되지 않은 작업팩은 전파할 수 없습니다."
+    }, { status: 409 });
+  }
+
+  const activeSession = await loadActiveOwnedShareSession(client, {
+    organizationId: owned.context.organizationId,
+    siteId: owned.context.siteId,
+    workpackId: owned.context.workpackId,
+    shareSessionId,
+    userId: user.id
+  });
+  if (!activeSession.ok) {
+    return NextResponse.json({ ok: false, configured: true, message: activeSession.message }, { status: activeSession.status });
+  }
+
+  const contactValidation = validateDispatchContacts({
+    channels: channels as WorkpackDispatchChannel[],
+    recipients: activeSession.session.recipients
+  });
+  if (!contactValidation.ok) {
+    return NextResponse.json({ ok: false, configured: true, message: contactValidation.message }, { status: 409 });
+  }
+  const recipients = activeSession.session.recipients.map((recipient) => recipient.workerSnapshot || {});
 
   const webhookConfigured = Boolean(webhookConfig.url && webhookConfig.token);
   const preflightChannelResults = buildPreflightChannelResults(channels, webhookConfigured);
@@ -298,7 +349,7 @@ export async function POST(request: NextRequest) {
     channels: dispatchChannels,
     recipients,
     operatorNote: typeof body.operatorNote === "string" ? body.operatorNote : "",
-    workpack: body.workpack
+    workpack: owned.context.shareAuthority.workpack
   };
 
   try {

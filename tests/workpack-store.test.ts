@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
+import type { AskResponse } from "@/lib/types";
 import {
   buildReopenData,
   buildSelectedWorkpackEvidenceSummary,
@@ -21,6 +22,30 @@ const qaPass: QaReviewFound = {
   advisory: "검수 고지"
 };
 
+const dbHarness = {
+  packet: {} as NonNullable<AskResponse["dbHarness"]>["packet"],
+  promptContext: "server generation harness",
+  summary: {
+    mode: "db_harness_first" as const,
+    llmRole: "naturalize_only" as const,
+    llmOutputScope: "rewrite_fixed_evidence_only" as const,
+    evidenceAuthority: "db_harness" as const,
+    providerRetryScope: "naturalization_retry_only" as const,
+    fallbackChainAllowed: false as const,
+    genericProseSubstitutionAllowed: false as const,
+    missingEvidencePolicy: "surface_review_required" as const,
+    directEvidence: 2,
+    sifCases: 1,
+    supportingEvidence: 1,
+    improvementMemory: 0,
+    workpackMemory: 0,
+    missingEvidence: [],
+    documentCoverage: [],
+    retrievalContract: {} as NonNullable<AskResponse["dbHarness"]>["summary"]["retrievalContract"],
+    ontologyStatus: "ready" as const
+  }
+} satisfies NonNullable<AskResponse["dbHarness"]>;
+
 function makeStoredResponse() {
   const response = buildMockAskResponse("성수동 외벽 도장 작업", mockSearchResults.slice(0, 2), "live", "test");
   return {
@@ -35,7 +60,8 @@ function makeStoredResponse() {
       riskAssessmentRows: [],
       tbmRiskLinks: [],
       riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
-    }
+    },
+    dbHarness
   };
 }
 
@@ -84,7 +110,7 @@ function makeMcpClient(siteOrganizationId: string) {
 }
 
 describe("workpack store persistence contract", () => {
-  it("keeps Phase 1 quality and ontology metadata in the existing evidence_summary JSONB shape", () => {
+  it("keeps quality, ontology, and generation harness metadata in the existing evidence_summary JSONB shape", () => {
     const response = makeStoredResponse();
     const summary = buildWorkpackEvidenceSummary(response);
 
@@ -92,6 +118,7 @@ describe("workpack store persistence contract", () => {
     expect(summary.ontologyQa).toEqual(response.ontologyQa);
     expect(summary.evidenceLabels).toEqual(response.evidenceLabels);
     expect(summary.structured).toEqual(response.structured);
+    expect(summary.dbHarness).toEqual(response.dbHarness);
   });
 
   it("prefers the full AskResponse evidence contract over caller-provided slim evidence summaries", () => {
@@ -108,9 +135,10 @@ describe("workpack store persistence contract", () => {
     expect(selected.ontologyQa).toEqual(response.ontologyQa);
     expect(selected.evidenceLabels).toEqual(response.evidenceLabels);
     expect(selected.riskSummary).toEqual(response.riskSummary);
+    expect(selected.dbHarness).toEqual(response.dbHarness);
   });
 
-  it("reopens a stored workpack without losing quality, ontology, evidence label, or structured fields", () => {
+  it("reopens a stored workpack without losing quality, ontology, generation harness, evidence label, or structured fields", () => {
     const response = makeStoredResponse();
     const reopen = buildReopenData({
       question: response.question,
@@ -125,6 +153,7 @@ describe("workpack store persistence contract", () => {
     expect(reopen.data?.ontologyQa).toEqual(response.ontologyQa);
     expect(reopen.data?.evidenceLabels).toEqual(response.evidenceLabels);
     expect(reopen.data?.structured).toEqual(response.structured);
+    expect(reopen.data?.dbHarness).toEqual(response.dbHarness);
   });
 
   it("does not insert an MCP workpack when the token org and site org disagree", async () => {

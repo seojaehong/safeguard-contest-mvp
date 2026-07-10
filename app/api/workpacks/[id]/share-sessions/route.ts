@@ -5,31 +5,18 @@ import {
   toJson,
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
-import { isRecord, readString } from "@/lib/workspace-api";
-import { buildShareSessionDraft, type ShareRecipientInput } from "@/lib/workpack-commercial";
-import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
+import { isRecord } from "@/lib/workspace-api";
+import { buildShareSessionDraft, parseShareRecipientIds } from "@/lib/workpack-commercial";
+import {
+  loadOwnedWorkpackOperationContext,
+  loadServerShareRecipients
+} from "@/lib/workpack-commercial-store";
 
 export const dynamic = "force-dynamic";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
-
-function parseRecipients(value: unknown): ShareRecipientInput[] {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((item): ShareRecipientInput[] => {
-    if (!isRecord(item)) return [];
-    const displayName = readString(item.displayName);
-    if (!displayName) return [];
-    return [{
-      workerId: readString(item.workerId),
-      displayName,
-      languageCode: readString(item.languageCode, "ko"),
-      role: item.role === "editor" ? "editor" : "viewer",
-      ...(isRecord(item.workerSnapshot) ? { workerSnapshot: item.workerSnapshot } : {})
-    }];
-  });
-}
 
 export async function GET(request: NextRequest, context: RouteContext) {
   const client = createSupabaseAdminClient();
@@ -101,15 +88,38 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (!owned.ok) {
     return NextResponse.json({ ok: false, configured: true, shareSessionId: null, message: owned.message }, { status: owned.status });
   }
+  if (!owned.context.shareAuthority.readiness.canShare || !owned.context.shareAuthority.workpack) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      shareSessionId: null,
+      readiness: owned.context.shareAuthority.readiness,
+      message: "서버 검수에서 공유 준비가 확인된 작업팩만 공유 세션을 만들 수 있습니다."
+    }, { status: 409 });
+  }
 
   const parsed = await request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
+  const recipientIds = parseShareRecipientIds(body.recipients);
+  if (!recipientIds.ok) {
+    return NextResponse.json({ ok: false, configured: true, shareSessionId: null, message: recipientIds.message }, { status: 400 });
+  }
+
+  const serverRecipients = await loadServerShareRecipients(client, {
+    organizationId: owned.context.organizationId,
+    siteId: owned.context.siteId,
+    requestedWorkerIds: recipientIds.workerIds
+  });
+  if (!serverRecipients.ok) {
+    return NextResponse.json({ ok: false, configured: true, shareSessionId: null, message: serverRecipients.message }, { status: 400 });
+  }
+
   const draft = buildShareSessionDraft({
     organizationId: owned.context.organizationId,
     siteId: owned.context.siteId,
     workpackId: owned.context.workpackId,
     createdBy: user.id,
-    recipients: parseRecipients(body.recipients)
+    recipients: serverRecipients.recipients
   });
 
   const insert: WorkspaceDatabase["public"]["Tables"]["workpack_share_sessions"]["Insert"] = {

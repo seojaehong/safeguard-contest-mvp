@@ -6,8 +6,11 @@ import {
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
 import { isRecord, readString } from "@/lib/workspace-api";
-import { buildReadConfirmationDraft } from "@/lib/workpack-commercial";
-import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
+import { buildReadConfirmationDraft, findShareSessionRecipient } from "@/lib/workpack-commercial";
+import {
+  loadActiveOwnedShareSession,
+  loadOwnedWorkpackOperationContext
+} from "@/lib/workpack-commercial-store";
 
 export const dynamic = "force-dynamic";
 
@@ -70,15 +73,74 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
   const parsed = await request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
+  const shareSessionId = readString(body.shareSessionId);
+  const workerId = readString(body.workerId);
+  if (!shareSessionId || !workerId) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      confirmationId: null,
+      message: "공유 세션과 작업자 식별자를 확인해 주세요."
+    }, { status: 400 });
+  }
+
+  const activeSession = await loadActiveOwnedShareSession(client, {
+    organizationId: owned.context.organizationId,
+    siteId: owned.context.siteId,
+    workpackId: owned.context.workpackId,
+    shareSessionId,
+    userId: user.id
+  });
+  if (!activeSession.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      confirmationId: null,
+      message: activeSession.message
+    }, { status: activeSession.status });
+  }
+
+  const recipient = findShareSessionRecipient(activeSession.session.recipients, workerId);
+  if (!recipient || !recipient.workerSnapshot) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      confirmationId: null,
+      message: "공유 세션 snapshot에 포함된 작업자만 열람 확인을 저장할 수 있습니다."
+    }, { status: 400 });
+  }
+
+  const { data: existing, error: existingError } = await client
+    .from("workpack_read_confirmations")
+    .select("id")
+    .eq("workpack_id", owned.context.workpackId)
+    .eq("share_session_id", activeSession.session.id)
+    .eq("worker_id", workerId)
+    .maybeSingle();
+
+  if (existingError) {
+    console.error("read confirmation idempotency check failed", existingError);
+    return NextResponse.json({ ok: false, configured: true, confirmationId: null, message: "열람 확인 중복 여부를 확인하지 못했습니다." }, { status: 500 });
+  }
+  if (existing) {
+    return NextResponse.json({
+      ok: true,
+      configured: true,
+      confirmationId: existing.id,
+      idempotent: true,
+      message: "이미 저장된 작업자 열람 확인입니다."
+    });
+  }
+
   const draft = buildReadConfirmationDraft({
     organizationId: owned.context.organizationId,
     siteId: owned.context.siteId,
     workpackId: owned.context.workpackId,
-    shareSessionId: readString(body.shareSessionId) || null,
-    workerId: readString(body.workerId) || null,
-    displayName: readString(body.displayName),
-    workerSnapshot: isRecord(body.workerSnapshot) ? body.workerSnapshot : {},
-    languageCode: readString(body.languageCode, "ko")
+    shareSessionId: activeSession.session.id,
+    workerId,
+    displayName: recipient.displayName,
+    workerSnapshot: recipient.workerSnapshot,
+    languageCode: recipient.languageCode
   });
 
   if (!draft.ok) {

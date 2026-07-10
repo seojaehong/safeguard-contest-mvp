@@ -37,6 +37,7 @@ export type WorkpackEvidenceSummary = {
   ontologyQa?: AskResponse["ontologyQa"];
   evidenceLabels?: AskResponse["evidenceLabels"];
   structured?: AskResponse["structured"];
+  dbHarness?: AskResponse["dbHarness"];
 };
 
 export type ReopenWorkpackInput = {
@@ -75,7 +76,8 @@ export function buildWorkpackEvidenceSummary(response: AskResponse): WorkpackEvi
     qualityContract: response.qualityContract,
     ontologyQa: response.ontologyQa,
     evidenceLabels: response.evidenceLabels,
-    structured: response.structured
+    structured: response.structured,
+    dbHarness: response.dbHarness
   };
 }
 
@@ -140,6 +142,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
   const ontologyQa = readJsonObject(evidence.ontologyQa);
   const evidenceLabels = readJsonObject(evidence.evidenceLabels);
   const structured = readJsonObject(evidence.structured);
+  const dbHarness = readJsonObject(evidence.dbHarness);
 
   return {
     data: {
@@ -157,6 +160,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
       evidenceLabels: evidenceLabels ? evidenceLabels as AskResponse["evidenceLabels"] : undefined,
       ontologyQa: ontologyQa ? ontologyQa as AskResponse["ontologyQa"] : undefined,
       qualityContract: qualityContract ? qualityContract as AskResponse["qualityContract"] : undefined,
+      dbHarness: dbHarness ? dbHarness as AskResponse["dbHarness"] : undefined,
       status: status as AskResponse["status"]
     },
     blockers: []
