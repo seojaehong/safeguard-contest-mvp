@@ -109,6 +109,20 @@ describe("frontend design contract", () => {
     expect(Object.values(frontendShape)).not.toContain("999px");
   });
 
+  it("preserves true-circle geometry on every named circular role", () => {
+    const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
+    for (const selector of [
+      ".safeclaw-prototype-topbar i",
+      ".recent-list button i",
+      ".status-orb",
+      ".button-spinner",
+    ]) {
+      expect(effectiveDeclarations(css, selector), selector).toMatchObject({
+        "border-radius": "var(--radius-circle)",
+      });
+    }
+  });
+
   it("inventories every browser and generated-document surface", () => {
     expect(userVisibleRoutes).toHaveLength(32);
     expect(new Set(userVisibleRoutes).size).toBe(userVisibleRoutes.length);
@@ -187,6 +201,80 @@ describe("frontend design contract", () => {
     });
   });
 
+  it("maps scoped module and document selectors to complete semantic type roles", () => {
+    const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
+    const roles: Record<string, CssDeclarations> = {
+      ".safeclaw-module-hero.document h1": {
+        "font-size": "var(--text-page-title)",
+        "line-height": "var(--leading-page-title)",
+        "letter-spacing": "var(--tracking-page-title)",
+      },
+      ".safeclaw-workdoc-header h2": {
+        "font-size": "var(--text-page-title)",
+        "line-height": "var(--leading-page-title)",
+        "letter-spacing": "var(--tracking-page-title)",
+      },
+      ".safeclaw-workdoc-section-head h3": {
+        "font-size": "var(--text-section-title)",
+        "line-height": "var(--leading-section-title)",
+        "letter-spacing": "var(--tracking-section-title)",
+      },
+      ".safeclaw-module-shell.module-variant-document .safeclaw-module-hero h1": {
+        "font-size": "var(--text-page-title)",
+        "line-height": "var(--leading-page-title)",
+        "letter-spacing": "var(--tracking-page-title)",
+      },
+      ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header h2": {
+        "font-size": "var(--text-page-title)",
+        "line-height": "var(--leading-page-title)",
+        "letter-spacing": "var(--tracking-page-title)",
+      },
+      ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-section-head h3": {
+        "font-size": "var(--text-section-title)",
+        "line-height": "var(--leading-section-title)",
+        "letter-spacing": "var(--tracking-section-title)",
+      },
+      ".safeclaw-module-shell h2": {
+        "font-size": "var(--text-section-title)",
+        "line-height": "var(--leading-section-title)",
+        "letter-spacing": "var(--tracking-section-title)",
+      },
+      ".safeclaw-module-shell h3": {
+        "font-size": "var(--text-component-title)",
+        "line-height": "var(--leading-component-title)",
+        "letter-spacing": "var(--tracking-component-title)",
+      },
+      ".safeclaw-module-shell strong": {
+        "font-size": "var(--text-body)",
+        "line-height": "var(--leading-body)",
+        "letter-spacing": "var(--tracking-body)",
+      },
+      ".safeclaw-module-shell .safeclaw-report-facts span": {
+        "font-size": "var(--text-body)",
+        "line-height": "var(--leading-body)",
+        "letter-spacing": "var(--tracking-body)",
+      },
+      ".safeclaw-module-shell .safeclaw-report-notes p": {
+        "font-size": "var(--text-body)",
+        "line-height": "var(--leading-body)",
+        "letter-spacing": "var(--tracking-body)",
+      },
+      ".safeclaw-module-shell .safeclaw-report-table span": {
+        "font-size": "var(--text-table)",
+        "line-height": "var(--leading-table)",
+        "letter-spacing": "var(--tracking-body)",
+      },
+      ".safeclaw-module-shell .safeclaw-report-group em": {
+        "font-size": "var(--text-body)",
+        "line-height": "var(--leading-body)",
+        "letter-spacing": "var(--tracking-body)",
+      },
+    };
+    for (const [selector, expected] of Object.entries(roles)) {
+      expect(effectiveDeclarations(css, selector), selector).toMatchObject(expected);
+    }
+  });
+
   it("disables every infinite animation and smooth scrolling for reduced motion", () => {
     const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
     const reducedMotion = blockBody(css, "@media (prefers-reduced-motion: reduce)");
@@ -213,6 +301,17 @@ describe("frontend design contract", () => {
     expect(audit.status).not.toBe(0);
     expect(audit.report.violations.map((violation) => violation.rule)).toEqual(
       expect.arrayContaining(["selector-role", "decorative-box-shadow", "decorative-gradient", "decorative-text-shadow"]),
+    );
+  });
+
+  it("rejects malformed values on exact functional-effect selectors", () => {
+    const audit = runAudit(`
+      .quick-chip.active { box-shadow: inset 99px 99px 99px hotpink; }
+      .hazard-stripe { background-image: radial-gradient(red, blue); }
+    `);
+    expect(audit.status).not.toBe(0);
+    expect(audit.report.violations.map((violation) => violation.rule)).toEqual(
+      expect.arrayContaining(["decorative-box-shadow", "decorative-gradient"]),
     );
   });
 });

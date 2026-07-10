@@ -122,3 +122,81 @@ Exit code: 0
 
 - The selector-aware audit is intentionally a lightweight repository CSS parser, not a general standards-complete CSS parser. Named canonical selectors and adversarial fixtures are covered, while future use of deeply nested at-rules or complex selector-list functions may require upgrading the parser.
 - This task verifies source contracts, static audit, TypeScript, and production compilation. Browser screenshot review remains part of the later route/browser audit tasks.
+
+## Re-review remediation — 2026-07-11
+
+### Additional resolutions
+
+- Removed the trailing `4px` declarations that overrode true-circle geometry on `.safeclaw-prototype-topbar i`, `.recent-list button i`, `.status-orb`, and `.button-spinner`.
+- Mapped the cited document/module selectors to complete semantic roles. Page headings now use page-title size/leading/tracking together, section headings use section-title values together, component headings use component-title values together, product body roles use body values, and report-table cells use the table tier.
+- Covered the more-specific `module-variant-document` heading selectors so their actual cascade no longer restores display-tier values.
+- Replaced substring effect allowlisting with a parenthesis-aware top-level selector-list splitter, normalized exact selectors, and exact documented property/value contracts. The contract now rejects altered width, direction, color, gradient kind, or selector near-matches.
+- Normalized selected-document rails from `3px` to the documented `4px` active rail.
+
+### RED evidence
+
+Command:
+
+```powershell
+npm.cmd test -- tests/frontend-design-contract.test.ts
+```
+
+Output:
+
+```text
+Test Files  1 failed (1)
+Tests       3 failed | 8 passed (11)
+
+FAIL preserves true-circle geometry on every named circular role
+  .safeclaw-prototype-topbar i expected var(--radius-circle), received 4px
+FAIL maps scoped module and document selectors to complete semantic type roles
+  document h1 expected page-title tracking/leading, received display tracking/leading
+FAIL rejects malformed values on exact functional-effect selectors
+  malformed quick-chip inset shadow and hazard radial gradient produced no effect violations
+```
+
+Exit code: `1` (expected RED).
+
+An additional RED run exposed the later responsive duplicate:
+
+```text
+Tests       1 failed | 10 passed (11)
+FAIL .safeclaw-module-hero.document h1
+  expected var(--leading-page-title), received var(--leading-display)
+```
+
+### Final GREEN evidence
+
+Commands were run sequentially in the requested order.
+
+```text
+npm.cmd test -- tests/frontend-design-contract.test.ts
+Test Files  1 passed (1)
+Tests       11 passed (11)
+Duration    2.27s
+Exit code   0
+
+npm.cmd run audit:frontend-consistency
+status                  pass
+pageFiles               32
+componentFiles          22
+cssLines                12033
+importantDeclarations   0
+coverageIssues          0
+violationCount          0
+Exit code               0
+
+npm.cmd run typecheck
+tsc --noEmit --incremental false
+Exit code 0
+
+npm.cmd run build
+Compiled successfully in 15.0s
+Generated static pages 27/27
+Exit code 0
+```
+
+### Updated concern
+
+- The audit remains intentionally repository-focused and does not calculate arbitrary browser specificity. Its supported grammar now handles top-level selector lists with nested functional pseudo-classes, and every currently cited base/scoped selector plus exact functional effect is explicitly contracted. New complex selector families still require a new RED fixture and explicit contract entry.
+- Browser screenshot review remains assigned to the later route/browser audit tasks. F2 remains `passes: false` until independent reviewer approval.
