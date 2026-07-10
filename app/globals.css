@@ -16543,3 +16543,150 @@ body:has(.safeclaw-landing) :is(
     min-height: 44px !important;
   }
 }
+
+/* Document focus mode keeps review and editing as separate workspace surfaces. */
+.command-center-shell .document-editor-surface {
+  display: grid;
+  gap: 18px;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.command-center-shell .document-editor-surface-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--workspace-rule);
+  padding-bottom: 14px;
+}
+
+.command-center-shell .document-editor-surface-head > div {
+  display: grid;
+  gap: 4px;
+}
+
+.command-center-shell .document-editor-surface-head strong {
+  color: var(--workspace-ink);
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.command-center-shell .document-editor-surface-head .button {
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 8px;
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace .workpack-shell {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  overflow: visible;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace :is(.workspace-rail, .workspace-side, .workspace-panel, .workpack-sidebar, .document-editor) {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 10px !important;
+  background: var(--workspace-surface-1) !important;
+  color: var(--workspace-ink) !important;
+  box-shadow: none !important;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace .document-editor {
+  align-content: start;
+  gap: 16px;
+  min-height: 0;
+  padding: 20px;
+  overflow: visible;
+  transform: none;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace .document-editor.editor-focus-cue {
+  border-color: var(--workspace-accent) !important;
+  box-shadow: 0 0 0 3px rgba(108, 111, 247, 0.22) !important;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace :is(.workpack-sidebar, .document-editor) :is(.h2, .h3, h2, h3, strong),
+.command-center-shell.workspace-theme-night .field-workspace .submission-preview-panel summary {
+  color: var(--workspace-ink) !important;
+  font-family: inherit !important;
+  letter-spacing: 0 !important;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace :is(.workpack-sidebar, .document-editor) :is(.muted, .small, p, li, label, small),
+.command-center-shell.workspace-theme-night .field-workspace .editor-status {
+  color: var(--workspace-muted) !important;
+  font-family: inherit !important;
+  line-height: 1.65;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace :is(.doc-tab, .template-card, .template-preview, .customer-template-panel, .rubric-panel, .rubric-item, .selected-rubric-item, .submission-preview-panel, .remediation-draft, .remediation-sources a) {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 9px !important;
+  background: var(--workspace-surface-2) !important;
+  color: var(--workspace-ink) !important;
+  box-shadow: none !important;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace .doc-tab.active {
+  border-color: var(--workspace-accent) !important;
+  background: var(--workspace-surface-3) !important;
+  box-shadow: inset 3px 0 0 var(--workspace-accent) !important;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace :is(.document-textarea, .remediation-textarea) {
+  border: 1px solid var(--workspace-rule-strong) !important;
+  border-radius: 10px !important;
+  background: #090a0b !important;
+  color: var(--workspace-ink) !important;
+  caret-color: var(--workspace-ink);
+  line-height: 1.72;
+  padding: 18px 20px;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace .document-textarea {
+  min-height: 460px;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace :is(.document-textarea, .remediation-textarea):focus {
+  border-color: var(--workspace-accent) !important;
+  box-shadow: 0 0 0 3px rgba(108, 111, 247, 0.24) !important;
+  outline: none;
+}
+
+.command-center-shell.workspace-theme-night .field-workspace .editor-focus-message {
+  border: 1px solid var(--workspace-rule) !important;
+  border-radius: 9px !important;
+  background: var(--workspace-surface-2) !important;
+  color: var(--workspace-muted) !important;
+  box-shadow: none !important;
+}
+
+.command-center-shell.workspace-theme-night .document-editor-surface :is(.result-ribbon article, .action-tile) {
+  border-color: var(--workspace-rule) !important;
+  background: var(--workspace-surface-2) !important;
+  color: var(--workspace-ink);
+  box-shadow: none;
+}
+
+@media (max-width: 1180px) {
+  .command-center-shell.workspace-theme-night .field-workspace .workpack-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .command-center-shell .document-editor-surface-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

@@ -46,6 +46,7 @@ type SafeGuardCommandCenterProps = {
 };
 
 type WorkspaceTheme = "night" | "day";
+type DocumentSurfaceMode = "review" | "editor";
 
 type GenerationState = "idle" | "generating" | "ready" | "error";
 
@@ -1024,6 +1025,7 @@ export function SafeGuardCommandCenter({
   const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [workspacePage, setWorkspacePage] = useState<WorkspacePage>("input");
+  const [documentSurfaceMode, setDocumentSurfaceMode] = useState<DocumentSurfaceMode>("review");
   const [editorFocusToken, setEditorFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("riskAssessmentDraft");
   const [consoleLines, setConsoleLines] = useState<AgentConsoleLine[]>([]);
@@ -1087,16 +1089,26 @@ export function SafeGuardCommandCenter({
       setMessage(gate.reason || "문서 생성 후 열 수 있습니다.");
       return;
     }
+    if (targetPage === "input") {
+      setDocumentSurfaceMode("review");
+    }
     setWorkspacePage(targetPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function focusWorkpackEditor(key: DocumentKey) {
     setRequestedDocumentKey(key);
+    setDocumentSurfaceMode("editor");
     setWorkspacePage("document");
     window.scrollTo({ top: 0, behavior: "smooth" });
     setEditorFocusToken((current) => current + 1);
     setMessage("선택한 문서를 편집·다운로드 영역으로 열었습니다. PDF·XLS·HWPX 버튼으로 출력하세요.");
+  }
+
+  function returnToDocumentReview() {
+    setDocumentSurfaceMode("review");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setMessage("생성된 문서와 근거 검토 화면으로 돌아왔습니다.");
   }
 
   function persistCurrentWorkpack(payload: AskResponse) {
@@ -1539,6 +1551,7 @@ export function SafeGuardCommandCenter({
     setImprovementSaveState("idle");
     setCheckedActions(payload.riskSummary.immediateActions.map(() => false));
     setState("ready");
+    setDocumentSurfaceMode("review");
     setWorkspacePage("document");
     setMessage("문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요.");
   }
@@ -1551,6 +1564,7 @@ export function SafeGuardCommandCenter({
     }
 
     setState("generating");
+    setDocumentSurfaceMode("review");
     setWorkspacePage(nextWorkspacePageAfterGenerate());
     setMessage("법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.");
     setConsoleLines([]);
@@ -1614,6 +1628,7 @@ export function SafeGuardCommandCenter({
     setImprovementSaveState("idle");
     setLiveWeather(null);
     setState("idle");
+    setDocumentSurfaceMode("review");
     setWorkspacePage("input");
     setMessage(`${example.label} 현장 예시를 불러왔습니다. 필요하면 작업 조건을 수정한 뒤 생성하세요.`);
   }
@@ -2035,6 +2050,7 @@ export function SafeGuardCommandCenter({
 
           {workspacePage === "document" ? (
             <section className="workspace-step-page workspace-document-page" id="workspace-document-page">
+          {documentSurfaceMode === "review" ? (
           <section className="output-card-grid document-workbench" id="workpack">
             <div className="compact-head document-workbench-head">
               <div>
@@ -2202,6 +2218,56 @@ export function SafeGuardCommandCenter({
               </div>
             </details>
           </section>
+          ) : data ? (
+            <section className="document-editor-surface" aria-label="문서 편집 영역">
+              <div className="document-editor-surface-head">
+                <div>
+                  <span className="eyebrow">문서 편집</span>
+                  <strong>{selectedOutputItem.title}</strong>
+                </div>
+                <button type="button" className="button" onClick={returnToDocumentReview}>
+                  문서 검토로 돌아가기
+                </button>
+              </div>
+              <section className="result-ribbon" aria-label="생성 결과 요약">
+                <article>
+                  <span>위험도</span>
+                  <strong className={`risk-badge ${riskToneClass(data.riskSummary.riskLevel)}`}>위험도 {data.riskSummary.riskLevel}</strong>
+                </article>
+                <article>
+                  <span>핵심 위험</span>
+                  <strong>{data.riskSummary.topRisk}</strong>
+                </article>
+                <article>
+                  <span>연결 상태</span>
+                  <strong>{data.status.summary}</strong>
+                  <small className="muted">{workpackReadiness && !workpackReadiness.canShare ? workpackReadiness.summary : statusDetailCopy(state)}</small>
+                </article>
+              </section>
+              <section className="action-strip">
+                {data.riskSummary.immediateActions.map((item, index) => (
+                  <article key={item} className="action-tile">
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <strong>{item}</strong>
+                    <label className="action-check">
+                      <input
+                        type="checkbox"
+                        checked={checkedActions[index] || false}
+                        onChange={(event) => setCheckedActions((current) => current.map((checked, itemIndex) => itemIndex === index ? event.target.checked : checked))}
+                      />
+                      확인 완료
+                    </label>
+                  </article>
+                ))}
+              </section>
+              <FieldOperationsWorkspace
+                data={data}
+                editorFocusToken={editorFocusToken}
+                requestedDocumentKey={requestedDocumentKey}
+                readiness={workpackReadiness || undefined}
+              />
+            </section>
+          ) : null}
             </section>
           ) : null}
 
@@ -2368,47 +2434,6 @@ export function SafeGuardCommandCenter({
         </section>
       </section>
 
-      {workspacePage === "document" && data ? (
-        <>
-          <section className="result-ribbon" aria-label="생성 결과 요약">
-            <article>
-              <span>위험도</span>
-              <strong className={`risk-badge ${riskToneClass(data.riskSummary.riskLevel)}`}>위험도 {data.riskSummary.riskLevel}</strong>
-            </article>
-            <article>
-              <span>핵심 위험</span>
-              <strong>{data.riskSummary.topRisk}</strong>
-            </article>
-            <article>
-              <span>연결 상태</span>
-              <strong>{data.status.summary}</strong>
-              <small className="muted">{workpackReadiness && !workpackReadiness.canShare ? workpackReadiness.summary : statusDetailCopy(state)}</small>
-            </article>
-          </section>
-          <section className="action-strip">
-            {data.riskSummary.immediateActions.map((item, index) => (
-              <article key={item} className="action-tile">
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>{item}</strong>
-                <label className="action-check">
-                  <input
-                    type="checkbox"
-                    checked={checkedActions[index] || false}
-                    onChange={(event) => setCheckedActions((current) => current.map((checked, itemIndex) => itemIndex === index ? event.target.checked : checked))}
-                  />
-                  확인 완료
-                </label>
-              </article>
-            ))}
-          </section>
-          <FieldOperationsWorkspace
-            data={data}
-            editorFocusToken={editorFocusToken}
-            requestedDocumentKey={requestedDocumentKey}
-            readiness={workpackReadiness || undefined}
-          />
-        </>
-      ) : null}
     </main>
   );
 }

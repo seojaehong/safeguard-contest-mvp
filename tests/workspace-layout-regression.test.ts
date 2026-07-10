@@ -778,11 +778,26 @@ describe("workspace layout regression", () => {
   it("keeps the mobile day composer action inside the first viewport", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 });
+    const mobileQuestion = "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보, 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.";
     await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
-    await page.fill(
-      "#field-command-input",
-      "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보, 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘."
+    await page.waitForFunction(() => {
+      const textarea = document.querySelector("#field-command-input");
+      return textarea instanceof HTMLTextAreaElement
+        && Object.keys(textarea).some((key) => key.startsWith("__reactProps$"));
+    });
+    await page.fill("#field-command-input", mobileQuestion);
+    await page.waitForFunction(
+      async (expectedValue) => {
+        const textarea = document.querySelector("#field-command-input");
+        if (!(textarea instanceof HTMLTextAreaElement)) return false;
+        await new Promise<void>((resolve) => {
+          window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
+        });
+        return textarea.value === expectedValue;
+      },
+      mobileQuestion
     );
+    expect(await page.inputValue("#field-command-input")).toBe(mobileQuestion);
 
     const metrics = await page.evaluate(() => {
       function readRect(selector: string) {
@@ -943,8 +958,13 @@ describe("workspace layout regression", () => {
     expect(harnessLoopText).toContain("근거 고정");
     expect(harnessLoopText).toContain("온톨로지 QA");
     expect(harnessLoopText).toContain("개선 루프");
+    expect(await page.locator(".field-workspace").count()).toBe(0);
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
+    await page.getByRole("button", { name: "문서 검토로 돌아가기" }).waitFor({ state: "visible" });
+
+    expect(await page.locator(".document-workbench").count()).toBe(0);
+    expect(await page.locator(".field-workspace").count()).toBe(1);
 
     const metrics = await page.evaluate(() => {
       function readRect(selector: string) {
@@ -1014,6 +1034,94 @@ describe("workspace layout regression", () => {
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
     expect(metrics.focusMessage.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
+    expect(String(metrics.activeElementClass)).toContain("document-textarea");
+
+    await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    expect(await page.locator(".field-workspace").count()).toBe(0);
+    expect(await page.locator(".document-workbench").count()).toBe(1);
+  }, 90_000);
+
+  it("keeps the Night document editor readable, scroll-safe, and focused", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    await page.addInitScript(() => {
+      window.localStorage.setItem("safeclaw.aiMode", "template");
+    });
+    await page.route("**/api/weather?**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, weather: null })
+      });
+    });
+    await page.route("**/api/ask", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(sample)
+      });
+    });
+
+    await page.goto(`${baseUrl}/workspace?theme=night`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: /안전 문서 생성/ }).click();
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    expect.soft(await page.locator(".field-workspace").count()).toBe(0);
+
+    await page.getByRole("button", { name: "다운로드 영역 열기" }).click();
+    await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
+    expect.soft(await page.locator(".document-workbench").count()).toBe(0);
+    expect(await page.locator(".field-workspace").count()).toBe(1);
+
+    const metrics = await page.evaluate(() => {
+      function readColor(selector: string, property: "color" | "backgroundColor") {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing color target: ${selector}`);
+        return getComputedStyle(element)[property];
+      }
+
+      function contrastRatio(foreground: string, background: string) {
+        const channels = (value: string) => {
+          const matches = value.match(/[\d.]+/g);
+          if (!matches || matches.length < 3) throw new Error(`Unsupported color: ${value}`);
+          return matches.slice(0, 3).map((channel) => {
+            const normalized = Number(channel) / 255;
+            return normalized <= 0.04045
+              ? normalized / 12.92
+              : ((normalized + 0.055) / 1.055) ** 2.4;
+          });
+        };
+        const luminance = (value: string) => {
+          const [red, green, blue] = channels(value);
+          return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+        };
+        const foregroundLuminance = luminance(foreground);
+        const backgroundLuminance = luminance(background);
+        const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+        const darker = Math.min(foregroundLuminance, backgroundLuminance);
+        return (lighter + 0.05) / (darker + 0.05);
+      }
+
+      const editor = document.querySelector(".document-editor");
+      if (!editor) throw new Error("Missing Night editor");
+      const editorStyle = getComputedStyle(editor);
+      const foreground = readColor(".document-editor", "color");
+      const background = readColor(".document-editor", "backgroundColor");
+
+      return {
+        activeElementClass: document.activeElement?.className || "",
+        backgroundImage: editorStyle.backgroundImage,
+        contrast: contrastRatio(foreground, background),
+        overflowX: editorStyle.overflowX,
+        overflowY: editorStyle.overflowY
+      };
+    });
+
+    expect.soft(metrics.backgroundImage).toBe("none");
+    expect.soft(metrics.contrast).toBeGreaterThanOrEqual(4.5);
+    expect.soft(metrics.overflowX).toBe("visible");
+    expect.soft(metrics.overflowY).toBe("visible");
     expect(String(metrics.activeElementClass)).toContain("document-textarea");
   }, 90_000);
 });
