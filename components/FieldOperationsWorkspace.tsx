@@ -15,6 +15,7 @@ import {
 import {
   buildStoredCurrentWorkpack,
   CURRENT_WORKPACK_STORAGE_KEY,
+  parseStoredCurrentWorkpack,
   type CurrentDispatchSnapshot,
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
@@ -47,6 +48,11 @@ type SaveResponse = {
 
 type StorageStatusLabel = "비회원 임시 저장" | "관리자 로그인 필요" | "관리자 이력 저장 완료" | "저장 실패";
 
+type InitialWorkerState = {
+  workers: WorkerProfile[];
+  selectedWorkerIds: string[];
+};
+
 type WorkspaceSaveSnapshot = {
   ok: boolean;
   label: StorageStatusLabel;
@@ -56,6 +62,26 @@ type WorkspaceSaveSnapshot = {
   savedCount: number;
   workerMap: Record<string, string>;
 };
+
+function resolveInitialWorkerState(data: AskResponse, generationFingerprint?: string): InitialWorkerState {
+  const fallbackWorkers = buildDefaultWorkers(data);
+  const fallback = {
+    workers: fallbackWorkers,
+    selectedWorkerIds: fallbackWorkers.map((worker) => worker.id)
+  };
+  if (typeof window === "undefined") return fallback;
+
+  const stored = parseStoredCurrentWorkpack(window.localStorage.getItem(CURRENT_WORKPACK_STORAGE_KEY));
+  const sameGeneration = stored && generationFingerprint
+    ? stored.generationFingerprint === generationFingerprint
+    : stored?.data.question === data.question;
+  if (!stored?.workerSnapshot || !sameGeneration) return fallback;
+
+  return {
+    workers: stored.workerSnapshot.workers,
+    selectedWorkerIds: stored.workerSnapshot.selectedWorkerIds
+  };
+}
 
 type LearningExportFormat = "markdown" | "jsonl" | "obsidian";
 
@@ -811,14 +837,15 @@ export function FieldOperationsWorkspace({
   readiness?: WorkpackReadiness;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
 }) {
+  const [initialWorkerState] = useState(() => resolveInitialWorkerState(data, generationFingerprint));
   const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
   const editorDataRef = useRef(data);
   const dataRef = useRef(data);
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
   const lastEditorValuesRef = useRef<WorkpackDocumentValues | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [workers, setWorkers] = useState<WorkerProfile[]>(() => buildDefaultWorkers(data));
-  const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(() => buildDefaultWorkers(data).map((worker) => worker.id));
+  const [workers, setWorkers] = useState<WorkerProfile[]>(initialWorkerState.workers);
+  const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(initialWorkerState.selectedWorkerIds);
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
   const [savedWorkerMap, setSavedWorkerMap] = useState<Record<string, string>>({});
   const [storageSnapshot, setStorageSnapshot] = useState<WorkspaceSaveSnapshot>({

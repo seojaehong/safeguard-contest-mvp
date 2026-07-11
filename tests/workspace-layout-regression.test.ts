@@ -1,6 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Browser } from "playwright";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
+import {
+  buildStoredCurrentWorkpack,
+  CURRENT_WORKPACK_STORAGE_KEY,
+  type CurrentWorkerSnapshot
+} from "@/lib/current-workpack";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 import {
   startIsolatedNextBrowserHarness,
@@ -16,7 +21,7 @@ describe("workspace layout regression", () => {
     harness = await startIsolatedNextBrowserHarness({
       slug: "workspace-layout",
       initialPath: "/workspace?theme=night",
-      portSalt: 3227
+      portSalt: 3247
     });
     baseUrl = harness.baseUrl;
     browser = harness.browser;
@@ -25,6 +30,49 @@ describe("workspace layout regression", () => {
   afterAll(async () => {
     await harness?.stop();
   }, 30_000);
+
+  it("resumes the canonical browser workpack when the operator returns to the workspace", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const workerSnapshot = {
+      savedAt: "2026-07-11T16:40:00+09:00",
+      source: "workspace",
+      workers: [{
+        id: "worker-restored-1",
+        displayName: "복원 작업자",
+        role: "도장 작업자",
+        joinedAt: "2026-07-11",
+        experienceLevel: "숙련",
+        experienceSummary: "외벽 도장 숙련 작업자",
+        nationality: "대한민국",
+        languageCode: "ko",
+        languageLabel: "한국어",
+        isNewWorker: false,
+        isForeignWorker: false,
+        trainingStatus: "이수",
+        trainingSummary: "당일 TBM 확인 완료"
+      }],
+      selectedWorkerIds: ["worker-restored-1"]
+    } satisfies CurrentWorkerSnapshot;
+    const stored = buildStoredCurrentWorkpack(buildSampleWorkpack(), { workerSnapshot });
+    await page.addInitScript(
+      ({ key, value }) => window.localStorage.setItem(key, value),
+      {
+        key: CURRENT_WORKPACK_STORAGE_KEY,
+        value: JSON.stringify(stored)
+      }
+    );
+
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+
+    await page.locator(".workspace-document-page").waitFor({ state: "visible" });
+    expect(await page.locator(".workspace-top-title strong").textContent()).toBe("문서");
+    expect(await page.locator(".workspace-current-brief strong").textContent()).toContain(stored.data.scenario.workSummary);
+    await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
+    await page.locator(".field-workspace").waitFor({ state: "visible" });
+    expect(await page.locator(".field-workspace").textContent()).toContain("복원 작업자");
+    expect(await page.locator(".workspace-input-page").count()).toBe(0);
+  }, 90_000);
 
   it("does not pin the large workspace topbar over menu and content while scrolling", async () => {
     if (!browser) throw new Error("Browser was not started");
