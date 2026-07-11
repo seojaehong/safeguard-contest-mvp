@@ -10,7 +10,8 @@ import sys
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Iterable
+from unittest.mock import patch
 
 from pypdf import PdfWriter
 from pypdf.generic import (
@@ -262,9 +263,14 @@ class SnapshotKoshaGuideCorpusTest(unittest.TestCase):
 
 
 class KoshaBodyRecoveryTest(unittest.TestCase):
-    def write_zip(self, root: Path, members: dict[str, bytes]) -> Path:
+    def write_zip(
+        self,
+        root: Path,
+        members: dict[str, bytes],
+        compression: int = zipfile.ZIP_STORED,
+    ) -> Path:
         zip_path = root / "[2025] 기술지원규정(테스트분야).zip"
-        with zipfile.ZipFile(zip_path, "w") as archive:
+        with zipfile.ZipFile(zip_path, "w", compression=compression) as archive:
             for name, data in members.items():
                 archive.writestr(name, data)
         return zip_path
@@ -280,7 +286,15 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
         resume: bool = False,
         max_files: int | None = None,
         chunk_chars: int = 200,
+        resource_limits: snapshot_kosha_guide_corpus.ResourceLimits | None = None,
+        progress: Callable[[int, int, str], None] | None = None,
+        publication_hook: Callable[[str], None] | None = None,
     ) -> dict[str, object]:
+        kwargs: dict[str, object] = {}
+        if resource_limits is not None:
+            kwargs["resource_limits"] = resource_limits
+        if publication_hook is not None:
+            kwargs["publication_hook"] = publication_hook
         return snapshot_kosha_guide_corpus.recover_corpus(
             source=source,
             output_dir=output_dir,
@@ -290,7 +304,14 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             state=None,
             chunk_chars=chunk_chars,
             provenance_path=None,
+            progress=progress,
+            **kwargs,
         )
+
+    def snapshot_dir(self, summary: dict[str, object]) -> Path:
+        value = summary["snapshot_dir"]
+        self.assertIsInstance(value, str)
+        return Path(value)
 
     def test_extracts_every_page_and_includes_technical_guidelines(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -301,9 +322,9 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             )
             output_dir = root / "output"
 
-            self.run_recovery(source, output_dir)
+            summary = self.run_recovery(source, output_dir)
 
-            items = self.read_jsonl(output_dir / "items.jsonl")
+            items = self.read_jsonl(self.snapshot_dir(summary) / "items.jsonl")
             self.assertEqual(len(items), 1)
             self.assertEqual(items[0]["item_type"], "technical-guideline")
             self.assertEqual(items[0]["page_count"], 2)
@@ -324,9 +345,9 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             )
             output_dir = root / "output"
 
-            self.run_recovery(source, output_dir)
+            summary = self.run_recovery(source, output_dir)
 
-            item = self.read_jsonl(output_dir / "items.jsonl")[0]
+            item = self.read_jsonl(self.snapshot_dir(summary) / "items.jsonl")[0]
             pages = item["pages"]
             self.assertFalse(pages[0]["ocr_candidate"])
             self.assertTrue(pages[1]["has_image"])
@@ -348,13 +369,17 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             output_dir = root / "output"
 
             first = self.run_recovery(source, output_dir, max_files=1)
-            second = self.run_recovery(source, output_dir, resume=True)
-
+            self.assertEqual(first["status"], "staged")
+            self.assertFalse((output_dir / "current.json").exists())
             self.assertEqual(first["processed_this_run"], 1)
+            second = self.run_recovery(source, output_dir, resume=True)
             self.assertEqual(second["processed_this_run"], 1)
-            self.assertEqual(len(self.read_jsonl(output_dir / "items.jsonl")), 2)
-            checkpoint = json.loads((output_dir / "checkpoint.json").read_text(encoding="utf-8"))
+            snapshot_dir = self.snapshot_dir(second)
+            self.assertEqual(len(self.read_jsonl(snapshot_dir / "items.jsonl")), 2)
+            checkpoint = json.loads((snapshot_dir / "checkpoint.json").read_text(encoding="utf-8"))
             self.assertEqual(checkpoint["completed_count"], 2)
+            clean = self.run_recovery(source, root / "clean-output")
+            self.assertEqual(second["reproducibility_hash"], clean["reproducibility_hash"])
 
     def test_hashes_and_outputs_are_stable_across_clean_runs(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -370,8 +395,10 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             second = self.run_recovery(source, second_output)
 
             self.assertEqual(first["reproducibility_hash"], second["reproducibility_hash"])
+            first_snapshot = self.snapshot_dir(first)
+            second_snapshot = self.snapshot_dir(second)
             for name in ["manifest.json", "items.jsonl", "chunks.jsonl", "failures.jsonl", "checkpoint.json"]:
-                self.assertEqual((first_output / name).read_bytes(), (second_output / name).read_bytes())
+                self.assertEqual((first_snapshot / name).read_bytes(), (second_snapshot / name).read_bytes())
 
     def test_initial_manifest_report_and_zero_work_resume_share_one_hash(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -387,8 +414,9 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             snapshot_kosha_guide_corpus.write_quality_report(
                 initial, output_dir, report_dir, 1.25
             )
+            current_before = (output_dir / "current.json").read_bytes()
             resumed = self.run_recovery(source, output_dir, resume=True)
-            manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+            manifest = json.loads((self.snapshot_dir(initial) / "manifest.json").read_text(encoding="utf-8"))
             report = json.loads((report_dir / "report.json").read_text(encoding="utf-8"))
 
             canonical_hash = initial["reproducibility_hash"]
@@ -396,6 +424,7 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             self.assertEqual(report["reproducibility_hash"], canonical_hash)
             self.assertEqual(resumed["reproducibility_hash"], canonical_hash)
             self.assertEqual(resumed["processed_this_run"], 0)
+            self.assertEqual((output_dir / "current.json").read_bytes(), current_before)
             descriptor = initial["manifest_output"]
             manifest_path = Path(descriptor["path"])
             self.assertTrue(manifest_path.is_file())
@@ -455,11 +484,12 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             )
             output_dir = root / "output"
 
-            self.run_recovery(source, output_dir)
+            summary = self.run_recovery(source, output_dir)
 
-            items = self.read_jsonl(output_dir / "items.jsonl")
-            failures = self.read_jsonl(output_dir / "failures.jsonl")
-            chunks = self.read_jsonl(output_dir / "chunks.jsonl")
+            snapshot_dir = self.snapshot_dir(summary)
+            items = self.read_jsonl(snapshot_dir / "items.jsonl")
+            failures = self.read_jsonl(snapshot_dir / "failures.jsonl")
+            chunks = self.read_jsonl(snapshot_dir / "chunks.jsonl")
             self.assertEqual(len(items), 3)
             self.assertEqual(len(failures), 2)
             self.assertEqual({failure["error_code"] for failure in failures}, {"zero-byte-pdf", "bad-pdf"})
@@ -477,10 +507,11 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             )
             output_dir = root / "output"
 
-            self.run_recovery(source, output_dir, chunk_chars=12)
+            summary = self.run_recovery(source, output_dir, chunk_chars=12)
 
-            item = self.read_jsonl(output_dir / "items.jsonl")[0]
-            chunks = self.read_jsonl(output_dir / "chunks.jsonl")
+            snapshot_dir = self.snapshot_dir(summary)
+            item = self.read_jsonl(snapshot_dir / "items.jsonl")[0]
+            chunks = self.read_jsonl(snapshot_dir / "chunks.jsonl")
             self.assertGreater(len(chunks), 2)
             self.assertEqual("".join(chunk["text"] for chunk in chunks).replace(" ", ""), item["body"].replace("\n", "").replace(" ", ""))
             for chunk in chunks:
@@ -498,6 +529,282 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             snapshot_kosha_guide_corpus._write_jsonl(path, rows)
 
             self.assertEqual(snapshot_kosha_guide_corpus._read_jsonl(path), rows)
+
+    def test_resume_rejects_staging_without_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["body"])})
+            output_dir = root / "output"
+            orphan = output_dir / "staging" / "orphan"
+            orphan.mkdir(parents=True)
+            (orphan / "items.jsonl").write_text("{}\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(RuntimeError, "checkpoint"):
+                self.run_recovery(source, output_dir, resume=True)
+
+    def test_resume_rejects_legacy_root_outputs_without_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["body"])})
+            output_dir = root / "output"
+            output_dir.mkdir()
+            (output_dir / "items.jsonl").write_text('{"source_key":"stale"}\n', encoding="utf-8")
+
+            with self.assertRaisesRegex(RuntimeError, "checkpoint|legacy"):
+                self.run_recovery(source, output_dir, resume=True)
+
+    def test_falls_back_to_chunked_zip_member_read_after_memory_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "G-1-2025 first.pdf": build_pdf_bytes(["first"]),
+                    "G-2-2025 second.pdf": build_pdf_bytes(["second"]),
+                },
+            )
+            output_dir = root / "output"
+            original_read = zipfile.ZipFile.read
+
+            def flaky_read(
+                archive: zipfile.ZipFile,
+                name: str,
+                pwd: bytes | None = None,
+            ) -> bytes:
+                if name == "G-2-2025 second.pdf":
+                    raise MemoryError("Unable to allocate output buffer.")
+                return original_read(archive, name, pwd)
+
+            with patch.object(zipfile.ZipFile, "read", autospec=True, side_effect=flaky_read):
+                summary = self.run_recovery(source, output_dir)
+
+            items = self.read_jsonl(self.snapshot_dir(summary) / "items.jsonl")
+            self.assertEqual(summary["failure"], 0)
+            self.assertEqual(summary["success"], 2)
+            self.assertEqual(len(items), 2)
+            self.assertTrue(all(item["extraction_status"] == "success" for item in items))
+
+    def test_resume_rejects_source_identity_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "G-1-2025 first.pdf": build_pdf_bytes(["first"]),
+                    "G-2-2025 second.pdf": build_pdf_bytes(["second"]),
+                },
+            )
+            output_dir = root / "output"
+            self.run_recovery(source, output_dir, max_files=1)
+            self.write_zip(
+                root,
+                {
+                    "G-1-2025 first.pdf": build_pdf_bytes(["changed"]),
+                    "G-2-2025 second.pdf": build_pdf_bytes(["second"]),
+                },
+            )
+
+            with self.assertRaisesRegex(RuntimeError, "source identity"):
+                self.run_recovery(source, output_dir, resume=True)
+
+    def test_resume_rejects_generation_policy_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "G-1-2025 first.pdf": build_pdf_bytes(["first"]),
+                    "G-2-2025 second.pdf": build_pdf_bytes(["second"]),
+                },
+            )
+            output_dir = root / "output"
+            self.run_recovery(source, output_dir, max_files=1, chunk_chars=12)
+
+            with self.assertRaisesRegex(RuntimeError, "generation policy"):
+                self.run_recovery(source, output_dir, resume=True, chunk_chars=13)
+
+    def test_zero_work_resume_rejects_completed_policy_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["body"])})
+            output_dir = root / "output"
+            self.run_recovery(source, output_dir, chunk_chars=12)
+
+            with self.assertRaisesRegex(RuntimeError, "generation policy"):
+                self.run_recovery(source, output_dir, resume=True, chunk_chars=13)
+
+    def test_zero_work_resume_rejects_missing_snapshot_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["body"])})
+            output_dir = root / "output"
+            initial = self.run_recovery(source, output_dir)
+            (self.snapshot_dir(initial) / "checkpoint.json").unlink()
+
+            with self.assertRaisesRegex(RuntimeError, "checkpoint"):
+                self.run_recovery(source, output_dir, resume=True)
+
+    def test_zero_work_resume_rejects_corpus_hash_tampering(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["body"])})
+            output_dir = root / "output"
+            initial = self.run_recovery(source, output_dir)
+            with (self.snapshot_dir(initial) / "items.jsonl").open("ab") as file:
+                file.write(b"{}\n")
+
+            with self.assertRaisesRegex(RuntimeError, "hash mismatch"):
+                self.run_recovery(source, output_dir, resume=True)
+
+    def test_interruption_persists_checkpoint_and_resume_publishes_atomically(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "G-1-2025 first.pdf": build_pdf_bytes(["first"]),
+                    "G-2-2025 second.pdf": build_pdf_bytes(["second"]),
+                },
+            )
+            output_dir = root / "output"
+
+            def interrupt(current: int, total: int, key: str) -> None:
+                del total, key
+                if current == 1:
+                    raise InterruptedError("fixture interruption")
+
+            with self.assertRaisesRegex(InterruptedError, "fixture interruption"):
+                self.run_recovery(source, output_dir, progress=interrupt)
+
+            self.assertFalse((output_dir / "current.json").exists())
+            self.assertFalse((output_dir / "items.jsonl").exists())
+            checkpoints = list((output_dir / "staging").glob("*/checkpoint.json"))
+            self.assertEqual(len(checkpoints), 1)
+            checkpoint = json.loads(checkpoints[0].read_text(encoding="utf-8"))
+            self.assertEqual(checkpoint["completed_count"], 1)
+
+            resumed = self.run_recovery(source, output_dir, resume=True)
+            self.assertEqual(resumed["processed_this_run"], 1)
+            self.assertTrue((output_dir / "current.json").is_file())
+            self.assertEqual(len(self.read_jsonl(self.snapshot_dir(resumed) / "items.jsonl")), 2)
+
+    def test_publication_interruption_leaves_no_mixed_root_and_can_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["body"])})
+            output_dir = root / "output"
+
+            def interrupt_publication(phase: str) -> None:
+                if phase == "snapshot-ready":
+                    raise InterruptedError("publish interruption")
+
+            with self.assertRaisesRegex(InterruptedError, "publish interruption"):
+                self.run_recovery(source, output_dir, publication_hook=interrupt_publication)
+
+            self.assertFalse((output_dir / "current.json").exists())
+            for name in ["manifest.json", "items.jsonl", "chunks.jsonl", "failures.jsonl", "checkpoint.json"]:
+                self.assertFalse((output_dir / name).exists())
+
+            resumed = self.run_recovery(source, output_dir, resume=True)
+            self.assertEqual(resumed["processed_this_run"], 0)
+            self.assertTrue((output_dir / "current.json").is_file())
+
+    def test_resume_truncates_only_uncheckpointed_tail_after_prefix_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "G-1-2025 first.pdf": build_pdf_bytes(["first"]),
+                    "G-2-2025 second.pdf": build_pdf_bytes(["second"]),
+                },
+            )
+            output_dir = root / "output"
+            staged = self.run_recovery(source, output_dir, max_files=1)
+            staging_dir = Path(str(staged["staging_dir"]))
+            with (staging_dir / "items.jsonl").open("ab") as file:
+                file.write(b'{"partial":')
+
+            resumed = self.run_recovery(source, output_dir, resume=True)
+
+            self.assertEqual(resumed["processed_this_run"], 1)
+            items = self.read_jsonl(self.snapshot_dir(resumed) / "items.jsonl")
+            self.assertEqual(len(items), 2)
+            self.assertFalse(any("partial" in item for item in items))
+
+    def test_generation_policy_identity_is_canonical_and_zero_work_stable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"G-1-2025 body.pdf": build_pdf_bytes(["body"])})
+            output_dir = root / "output"
+
+            initial = self.run_recovery(source, output_dir, chunk_chars=32)
+            snapshot_dir = self.snapshot_dir(initial)
+            manifest = json.loads((snapshot_dir / "manifest.json").read_text(encoding="utf-8"))
+            checkpoint = json.loads((snapshot_dir / "checkpoint.json").read_text(encoding="utf-8"))
+            policy = manifest["generation_policy"]
+
+            self.assertEqual(policy["chunk_chars"], 32)
+            self.assertEqual(policy["ocr_thresholds"]["page_normalized_chars"], 80)
+            self.assertEqual(policy["ocr_thresholds"]["document_normalized_chars"], 500)
+            self.assertIn("extractor_version", policy)
+            self.assertIn("resource_limits", policy)
+            self.assertEqual(manifest["generation_policy_sha256"], checkpoint["generation_policy_sha256"])
+            resumed = self.run_recovery(source, output_dir, resume=True, chunk_chars=32)
+            self.assertEqual(resumed["processed_this_run"], 0)
+            self.assertEqual(resumed["reproducibility_hash"], initial["reproducibility_hash"])
+
+    def test_rejects_oversize_and_zip_bomb_members_before_pdf_read(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"G-1-2025 large.pdf": b"x" * 1024})
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(max_member_bytes=100)
+
+            with self.assertRaisesRegex(ValueError, "member.*bytes"):
+                self.run_recovery(source, root / "oversize-output", resource_limits=limits)
+
+            compressed_source = self.write_zip(
+                root,
+                {"G-1-2025 compressed.pdf": b"0" * 10000},
+                compression=zipfile.ZIP_DEFLATED,
+            )
+            ratio_limits = snapshot_kosha_guide_corpus.ResourceLimits(max_compression_ratio=2.0)
+            with self.assertRaisesRegex(ValueError, "compression ratio"):
+                self.run_recovery(
+                    compressed_source,
+                    root / "ratio-output",
+                    resource_limits=ratio_limits,
+                )
+
+    def test_page_count_limit_fails_item_closed_in_ledger(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {"G-1-2025 pages.pdf": build_pdf_bytes(["first", "second"])},
+            )
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(max_pages_per_pdf=1)
+
+            summary = self.run_recovery(source, root / "output", resource_limits=limits)
+
+            snapshot_dir = self.snapshot_dir(summary)
+            item = self.read_jsonl(snapshot_dir / "items.jsonl")[0]
+            failure = self.read_jsonl(snapshot_dir / "failures.jsonl")[0]
+            self.assertEqual(item["extraction_status"], "failure")
+            self.assertEqual(failure["error_code"], "resource-limit-pages")
+
+    def test_jsonl_writer_streams_iterables_without_path_write_text(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "stream.jsonl"
+
+            def rows() -> Iterable[dict[str, object]]:
+                for index in range(5):
+                    yield {"index": index, "body": "x" * 1024}
+
+            with patch.object(Path, "write_text", side_effect=AssertionError("write_text buffers output")):
+                snapshot_kosha_guide_corpus._write_jsonl(path, rows())
+
+            self.assertEqual(len(self.read_jsonl(path)), 5)
 
 
 if __name__ == "__main__":

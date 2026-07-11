@@ -1,0 +1,51 @@
+# KOSHA body recovery remediation summary
+
+## Rejected v2
+
+- output_dir: `C:\Users\iceam\dev\safeclaw-local-artifacts\kosha-corpus-body-recovery-2026-07-12-v2`
+- external log: `C:\Users\iceam\dev\safeclaw-local-artifacts\kosha-corpus-body-recovery-2026-07-12-v2-resume.log`
+- reproducibility_hash: `0b636415dc0ca9300a353d298cb807a498abab0242c51ef63cb1465671a9ef0a`
+- counts: `completed=1040`, `success=1038`, `boundary=1`, `failure=1`, `failure_ledger=2`
+- rejected reason: regression against the previously verified accounting target `1039 native + 1 boundary + 0 hard failure`
+
+### v2 failure ledger
+
+1. `B-E-18-2026 산업용 설비에서의 전자파 적합성에 관한 기술지원규정.pdf`
+   - `error_code=source-read-failure`
+   - `error_type=MemoryError`
+   - message: `Unable to allocate output buffer.`
+2. `B-E-3-2025 변전실 등의 양압유지에 관한 기술지원규정.pdf`
+   - `error_code=empty-body`
+   - `error_type=EmptyNativeText`
+   - message: `all PDF pages produced empty native text`
+
+## Fix
+
+- code change: add ZIP member byte-read fallback from `ZipFile.read(...)` to chunked streaming via `ZipFile.open(...).read(...)`
+- rationale: the rejected v2 hard failure was transient on one ZIP member; direct repro showed the same member bytes and PDF text parsed successfully outside the failing run
+- regression test: `test_falls_back_to_chunked_zip_member_read_after_memory_error`
+
+## Corrected v3
+
+- output_dir: `C:\Users\iceam\dev\safeclaw-local-artifacts\kosha-corpus-body-recovery-2026-07-12-v3`
+- snapshot_dir: `C:\Users\iceam\dev\safeclaw-local-artifacts\kosha-corpus-body-recovery-2026-07-12-v3\snapshots\bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51`
+- reproducibility_hash: `bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51`
+- current.json sha256: `071dbcbd8a1b9666139d235f14078f92e1ce13d232bc1884b95e594f1b49168b`
+- manifest sha256: `f90262fc98c190243d80124b5e8711866d3372b3affef7d294c881ed194806d2`
+- counts: `completed=1040`, `success=1039`, `boundary=1`, `failure=0`, `failure_ledger=1`, `chunks=20520`
+- accepted boundary ledger:
+  - `B-E-3-2025 변전실 등의 양압유지에 관한 기술지원규정.pdf`
+  - `error_code=empty-body`
+  - `raw_sha256=24aee7bdb72a1d69159122329267eed2fd68dc607d35d5270eeb6b326513a3c9`
+
+## Verification
+
+- unit tests x2:
+  - `evaluation/kosha-corpus-body-recovery-2026-07-12-v3/verification/python-unittest-run1.log`
+  - `evaluation/kosha-corpus-body-recovery-2026-07-12-v3/verification/python-unittest-run2.log`
+- fresh regeneration log:
+  - `evaluation/kosha-corpus-body-recovery-2026-07-12-v3/verification/full-regeneration.log`
+- resume no-op identity log:
+  - `evaluation/kosha-corpus-body-recovery-2026-07-12-v3/verification/cli-resume-noop-v3.log`
+- post-run validation:
+  - `evaluation/kosha-corpus-body-recovery-2026-07-12-v3/verification/postrun-validation.json`
