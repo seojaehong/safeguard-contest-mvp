@@ -1,4 +1,5 @@
 import type { AskResponse } from "@/lib/types";
+import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import type {
   RecipientSuggestion,
   WorkerDispatchTarget,
@@ -159,7 +160,7 @@ export function parseStoredCurrentWorkpack(raw: string | null): StoredCurrentWor
   if (!raw) return null;
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed) || typeof parsed.savedAt !== "string" || !isRecord(parsed.data)) {
+    if (!isRecord(parsed) || !isRfc3339OffsetTimestamp(parsed.savedAt) || !isRecord(parsed.data)) {
       return null;
     }
     const data = parsed.data;

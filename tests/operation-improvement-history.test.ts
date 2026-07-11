@@ -3,6 +3,51 @@ import { describe, expect, it } from "vitest";
 import { parseOperationImprovements } from "@/lib/operation-improvement-history";
 
 describe("parseOperationImprovements", () => {
+  it("preserves canonical review statuses and only maps the lossless legacy candidate status", () => {
+    const base = {
+      createdAt: "2026-07-09T00:00:00.000Z",
+      siteName: "성수동 현장",
+      workSummary: "외벽 도장",
+      hazardLabel: "추락",
+      improvementText: "난간 보강 후 작업",
+      reflectedDocuments: ["위험성평가표"]
+    };
+    const parsed = parseOperationImprovements(JSON.stringify([
+      { ...base, id: "candidate", status: "candidate" },
+      { ...base, id: "approved", status: "approved" },
+      { ...base, id: "rejected", status: "rejected" },
+      { ...base, id: "reflected", status: "reflected" },
+      { ...base, id: "legacy-proposed", status: "proposed" },
+      { ...base, id: "legacy-completed", status: "completed" }
+    ]));
+
+    expect(parsed.map(({ id, status }) => ({ id, status }))).toEqual([
+      { id: "candidate", status: "candidate" },
+      { id: "approved", status: "approved" },
+      { id: "rejected", status: "rejected" },
+      { id: "reflected", status: "reflected" },
+      { id: "legacy-proposed", status: "candidate" }
+    ]);
+  });
+
+  it("rejects calendar rollover and timestamps without an RFC3339 offset", () => {
+    const base = {
+      siteName: "성수동 현장",
+      workSummary: "외벽 도장",
+      hazardLabel: "추락",
+      improvementText: "난간 보강 후 작업",
+      reflectedDocuments: ["위험성평가표"]
+    };
+    const parsed = parseOperationImprovements(JSON.stringify([
+      { ...base, id: "utc", createdAt: "2026-02-28T00:00:00Z" },
+      { ...base, id: "offset", createdAt: "2026-02-28T09:00:00+09:00" },
+      { ...base, id: "rollover", createdAt: "2026-02-30T00:00:00Z" },
+      { ...base, id: "no-offset", createdAt: "2026-02-28T00:00:00" }
+    ]));
+
+    expect(parsed.map((item) => item.id)).toEqual(["utc", "offset"]);
+  });
+
   it("preserves DB-backed vision and OCR metadata for learning export handoff", () => {
     const parsed = parseOperationImprovements(JSON.stringify([{
       id: "improvement-1",
