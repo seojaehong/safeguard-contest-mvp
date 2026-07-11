@@ -2,40 +2,57 @@
   "date": "2026-07-12",
   "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation",
   "branch": "feat/frontend-design-contract-remediation",
-  "baseCommit": "2c3fb9b",
+  "productCommit": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
+  "evidenceCommit": "follow-up evidence commit on feat/frontend-design-contract-remediation",
+  "evidenceCommitRelation": "This evidence bundle was generated after product commit 6af13474726d8c3f7f992f6a2f94ef9aa687011e. static-audit.json intentionally keeps sourceSha on that product commit, while this report and the screenshots are committed in the follow-up evidence commit on this branch.",
   "scope": {
     "ownedFiles": [
       "app/globals.css",
       "components/ReportsDownloadCenter.tsx",
       "components/SafeClawModuleShell.tsx",
+      "tests/helpers/isolated-next-browser-harness.ts",
       "tests/reports-design-remediation.test.ts",
       "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports"
     ],
     "packageSourceDiff": 0
   },
-  "gates": [
-    {
-      "name": "reports-focused-tests",
+  "tdd": {
+    "red": {
       "status": "pass",
-      "command": "npm.cmd test -- tests/reports-design-remediation.test.ts",
+      "command": "npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose",
       "result": {
-        "passed": 9,
+        "failed": 1,
+        "passed": 9
+      },
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/fresh-focused-reports-tests.log",
+      "note": "Initial contract-tightening run failed once before the final browser matcher correction."
+    },
+    "green": {
+      "status": "pass",
+      "command": "npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose",
+      "result": {
+        "passed": 10,
         "failed": 0,
         "skipped": 0
       },
       "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-design-tests.log"
-    },
+    }
+  },
+  "gates": [
     {
       "name": "frontend-static-audit",
       "status": "fail",
       "command": "npm.cmd run audit:frontend-consistency",
       "result": {
         "violationCount": 2367,
+        "previousViolationCount": 2367,
+        "delta": 0,
         "importantDeclarations": 725,
         "coverageIssues": 0,
         "pageFiles": 32,
         "componentFiles": 23,
-        "cssLines": 17719
+        "cssLines": 17725,
+        "sourceSha": "6af13474726d8c3f7f992f6a2f94ef9aa687011e"
       },
       "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/static-audit.log",
       "json": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/static-audit.json"
@@ -53,9 +70,21 @@
       "result": {
         "nextVersion": "15.5.20",
         "staticPagesGenerated": 27,
-        "buildDurationSeconds": 196.36
+        "buildDurationSeconds": 246.7
       },
       "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/build.log"
+    },
+    {
+      "name": "production-browser-contract",
+      "status": "pass",
+      "command": "SAFECLAW_HARNESS_MODE=prod npm.cmd test -- tests/reports-design-remediation.test.ts -t \"Reports Wave 1 browser design contract\" --pool=forks --maxWorkers=1 --reporter=verbose",
+      "result": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 5,
+        "harnessMode": "prod"
+      },
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/green-browser-tests.log"
     }
   ],
   "browserArtifacts": {
@@ -63,37 +92,156 @@
     "sampleNightDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-desktop.png",
     "sampleDayMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-day-mobile.png",
     "sampleNightMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-mobile.png",
+    "serverErrorDayDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-day-desktop.png",
+    "serverErrorNightDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-night-desktop.png",
+    "serverErrorDayMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-day-mobile.png",
     "serverErrorNightMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-night-mobile.png",
     "emptyDayDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-empty-day-desktop.png"
   },
   "geometry": {
+    "sampleDayDesktop": {
+      "harnessMode": "prod",
+      "horizontalOverflow": 0,
+      "heroColumnCount": 2,
+      "heroCtaHeight": 44,
+      "heroCtaRadius": "8px",
+      "heroCtaClipped": false,
+      "heroMetaCtaOverlap": false,
+      "controlHeights": [
+        60,
+        60,
+        60,
+        60
+      ],
+      "controlRadii": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "contrastGate": "pass>=4.5"
+    },
+    "sampleNightDesktop": {
+      "harnessMode": "prod",
+      "horizontalOverflow": 0,
+      "heroColumnCount": 2,
+      "heroCtaHeight": 44,
+      "heroCtaRadius": "8px",
+      "heroCtaClipped": false,
+      "heroMetaCtaOverlap": false,
+      "controlHeights": [
+        60,
+        60,
+        60,
+        60
+      ],
+      "controlRadii": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "contrastGate": "pass>=4.5"
+    },
     "sampleDayMobile": {
+      "harnessMode": "prod",
       "horizontalOverflow": 0,
       "heroColumnCount": 1,
       "heroCtaHeight": 44,
+      "heroCtaRadius": "8px",
       "heroCtaClipped": false,
       "heroMetaCtaOverlap": false,
-      "controlHeights": [60, 60, 60, 60]
+      "controlHeights": [
+        60,
+        60,
+        60,
+        60
+      ],
+      "controlRadii": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "contrastGate": "pass>=4.5"
     },
     "sampleNightMobile": {
+      "harnessMode": "prod",
       "horizontalOverflow": 0,
       "heroColumnCount": 1,
       "heroCtaHeight": 44,
+      "heroCtaRadius": "8px",
       "heroCtaClipped": false,
       "heroMetaCtaOverlap": false,
-      "controlHeights": [60, 60, 60, 60]
+      "controlHeights": [
+        60,
+        60,
+        60,
+        60
+      ],
+      "controlRadii": [
+        "8px",
+        "8px",
+        "8px",
+        "8px"
+      ],
+      "contrastGate": "pass>=4.5"
     },
-    "serverErrorNightMobile": {
-      "horizontalOverflow": 0,
-      "heroColumnCount": 1,
-      "heroCtaHeight": 44,
-      "heroCtaClipped": false,
-      "heroMetaCtaOverlap": false,
-      "disabledDownloadCount": 5
+    "serverError": {
+      "harnessMode": "prod",
+      "dayDesktop": {
+        "horizontalOverflow": 0,
+        "heroColumnCount": 2,
+        "heroCtaHeight": 44,
+        "heroCtaRadius": "8px",
+        "heroCtaClipped": false,
+        "heroMetaCtaOverlap": false,
+        "disabledDownloadCount": 5,
+        "readinessOccluded": false,
+        "overlayVisible": false,
+        "contrastGate": "pass>=4.5"
+      },
+      "nightDesktop": {
+        "horizontalOverflow": 0,
+        "heroColumnCount": 2,
+        "heroCtaHeight": 44,
+        "heroCtaRadius": "8px",
+        "heroCtaClipped": false,
+        "heroMetaCtaOverlap": false,
+        "disabledDownloadCount": 5,
+        "readinessOccluded": false,
+        "overlayVisible": false,
+        "contrastGate": "pass>=4.5"
+      },
+      "dayMobile": {
+        "horizontalOverflow": 0,
+        "heroColumnCount": 1,
+        "heroCtaHeight": 44,
+        "heroCtaRadius": "8px",
+        "heroCtaClipped": false,
+        "heroMetaCtaOverlap": false,
+        "disabledDownloadCount": 5,
+        "readinessOccluded": false,
+        "overlayVisible": false,
+        "contrastGate": "pass>=4.5"
+      },
+      "nightMobile": {
+        "horizontalOverflow": 0,
+        "heroColumnCount": 1,
+        "heroCtaHeight": 44,
+        "heroCtaRadius": "8px",
+        "heroCtaClipped": false,
+        "heroMetaCtaOverlap": false,
+        "disabledDownloadCount": 5,
+        "readinessOccluded": false,
+        "overlayVisible": false,
+        "contrastGate": "pass>=4.5"
+      }
     }
   },
   "doneStatus": {
-    "reportsWave1CtaFollowup": "done",
-    "staticAuditCleanup": "red-out-of-scope"
+    "reportsWave1DesktopCtaMin44": "done",
+    "reportsWave1PeriodRadius8": "done",
+    "reportsWave1StaticAuditHonestRed": "done"
   }
 }

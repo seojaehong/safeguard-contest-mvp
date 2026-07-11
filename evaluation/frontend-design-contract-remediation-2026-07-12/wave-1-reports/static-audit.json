@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-11T17:35:09.616Z",
-  "sourceSha": "2c3fb9ba7eb309c6ab512ea656463a7f1ce17673",
-  "sourceIdentity": "327e524250e2c4f02f5273ef3009a5ada7022d047746b1b8425a2bf91c5cf6b6",
+  "generatedAt": "2026-07-11T18:26:42.598Z",
+  "sourceSha": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
+  "sourceIdentity": "a97db33b5224bc80e4a0555a72af4553cc092029ac1ddde76320cd64bb1a6db7",
   "status": "fail",
   "counts": {
     "pageFiles": 32,
     "componentFiles": 23,
-    "cssLines": 17719,
+    "cssLines": 17725,
     "importantDeclarations": 725
   },
   "coverage": {
@@ -5147,7 +5147,7 @@
       "rule": "radius-tier",
       "file": "app/globals.css",
       "line": 16724,
-      "value": ".safeclaw-module-shell .safeclaw-module-principal-command a => 6px"
+      "value": ".safeclaw-module-shell .safeclaw-module-principal-command a => var(--safeclaw-principal-command-radius, 6px)"
     },
     {
       "rule": "radius-tier",
@@ -5200,19 +5200,19 @@
     {
       "rule": "radius-tier",
       "file": "app/globals.css",
-      "line": 17346,
+      "line": 17352,
       "value": ".safeclaw-module-shell[data-module-route=\"/reports\"] .safeclaw-report-controls button => 8px"
     },
     {
       "rule": "radius-tier",
       "file": "app/globals.css",
-      "line": 17453,
+      "line": 17459,
       "value": ".safeclaw-module-shell[data-module-route=\"/reports\"] .safeclaw-report-table => 8px"
     },
     {
       "rule": "radius-tier",
       "file": "app/globals.css",
-      "line": 17526,
+      "line": 17532,
       "value": ".safeclaw-module-shell[data-module-route=\"/reports\"] .safeclaw-report-group => 8px"
     },
     {
@@ -13757,7 +13757,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 16724,
-      "value": ".safeclaw-module-shell .safeclaw-module-principal-command a => caption: {\"display\":\"inline-flex\",\"min-height\":\"36px\",\"align-items\":\"center\",\"justify-content\":\"center\",\"border\":\"1px solid var(--workspace-accent)\",\"border-radius\":\"6px\",\"background\":\"var(--workspace-accent)\",\"color\":\"#08090b\",\"padding\":\"0 13px\",\"font-size\":\"12px\",\"font-weight\":\"650\",\"white-space\":\"nowrap\"}"
+      "value": ".safeclaw-module-shell .safeclaw-module-principal-command a => caption: {\"display\":\"inline-flex\",\"min-height\":\"var(--safeclaw-principal-command-min-height, 36px)\",\"align-items\":\"center\",\"justify-content\":\"center\",\"border\":\"1px solid var(--workspace-accent)\",\"border-radius\":\"var(--safeclaw-principal-command-radius, 6px)\",\"background\":\"var(--workspace-accent)\",\"color\":\"#08090b\",\"padding\":\"var(--safeclaw-principal-command-padding, 0 13px)\",\"font-size\":\"12px\",\"font-weight\":\"650\",\"white-space\":\"nowrap\"}"
     },
     {
       "rule": "typography-tuple",
@@ -13852,13 +13852,13 @@
     {
       "rule": "decorative-box-shadow",
       "file": "app/globals.css",
-      "line": 17371,
+      "line": 17377,
       "value": ".safeclaw-module-shell[data-module-route=\"/reports\"] .safeclaw-report-controls button[aria-pressed=\"true\"] => inset 3px 0 0 var(--workspace-accent)"
     },
     {
       "rule": "typography-tuple",
       "file": "app/globals.css",
-      "line": 17386,
+      "line": 17392,
       "value": ".safeclaw-module-shell[data-module-route=\"/reports\"] .safeclaw-report-controls strong => support: {\"color\":\"inherit\",\"font-size\":\"var(--text-control)\",\"font-weight\":\"700\",\"line-height\":\"var(--leading-control)\",\"letter-spacing\":\"var(--tracking-body)\"}"
     },
     {

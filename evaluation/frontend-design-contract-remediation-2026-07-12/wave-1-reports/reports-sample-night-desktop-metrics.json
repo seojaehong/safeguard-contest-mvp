@@ -1,4 +1,5 @@
 {
+  "harnessMode": "prod",
   "theme": "night",
   "viewport": {
     "width": 1440,
@@ -14,9 +15,18 @@
     60,
     60
   ],
+  "controlRadii": [
+    "8px",
+    "8px",
+    "8px",
+    "8px"
+  ],
   "accentText": "rgb(139, 141, 252)",
   "heroColumnCount": 2,
-  "heroCtaHeight": 36,
+  "heroCtaHeight": 44,
+  "heroCtaRadius": "8px",
+  "heroCtaBackground": "rgb(108, 111, 247)",
+  "heroCtaColor": "rgb(8, 9, 11)",
   "heroCtaClipped": false,
   "heroMetaCtaOverlap": false,
   "tuples": {

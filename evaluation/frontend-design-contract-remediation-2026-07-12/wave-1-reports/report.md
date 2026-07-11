@@ -1,62 +1,85 @@
-# SafeClaw Reports design Wave 1 closeout
+# SafeClaw Reports Wave 1 closeout
 
 ## Scope
 
 - Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation`
 - Branch: `feat/frontend-design-contract-remediation`
-- Base: `2c3fb9b`
-- Owned scope only: `app/globals.css`, `components/ReportsDownloadCenter.tsx`, `components/SafeClawModuleShell.tsx`, `tests/reports-design-remediation.test.ts`, `evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports`
+- Product commit: `6af13474726d8c3f7f992f6a2f94ef9aa687011e`
+- Evidence commit: follow-up evidence commit on this branch
+- Owned scope only: `app/globals.css`, `components/ReportsDownloadCenter.tsx`, `components/SafeClawModuleShell.tsx`, `tests/helpers/isolated-next-browser-harness.ts`, `tests/reports-design-remediation.test.ts`, `evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports`
+
+## Commit sequencing
+
+1. Product and test fixes were committed first at `6af13474726d8c3f7f992f6a2f94ef9aa687011e`.
+2. `static-audit.json` was generated at that product HEAD, so its `sourceSha` stays on the product commit and does not drift to the later evidence commit.
+3. The screenshots, logs, metrics, and this closeout report were committed afterwards in the follow-up evidence commit on this branch.
 
 ## Result
 
-The mobile Reports hero CTA regression is closed with TDD coverage and refreshed artifacts.
+Wave 1 Reports findings are closed inside the bounded scope.
 
-- The browser contract now verifies 390px Day/Night sample pages and the Night server-error page for:
+- Desktop and mobile Reports hero CTA now compute to `44px` minimum height.
+- Reports period controls now compute to exact `8px` border radius after splitting the shared global button-radius selector.
+- The server-error view now proves exactly five disabled download buttons before the disabled assertions.
+- Production `next start` captures replaced the dev-overlay-contaminated server-error image set.
+- Day/Night sample and error states on desktop and `390px` mobile show:
   - horizontal overflow `0`
-  - hero columns `1`
-  - hero CTA clipped `false`
   - hero meta/CTA overlap `false`
-  - hero CTA height `44px`
-  - report period control heights `60px`
-- The focused Reports suite is stable even when the first browser harness port is blocked; the test retries alternate isolated harness salts instead of failing on a transient Windows port reservation.
-- `package.json` and `package-lock.json` remain source-diff `0`.
+  - hero CTA clipped `false`
+  - CTA contrast gate `pass>=4.5`
+  - server-error locked text occluded `false`
+  - overlay pixels/text visible `false`
+
+## TDD RED / GREEN
+
+- RED during contract tightening:
+  - Command: `npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose`
+  - Result: `1 failed`, `9 passed`
+  - Log: `fresh-focused-reports-tests.log`
+- Final focused suite:
+  - Command: `npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose`
+  - Result: `10 passed`
+  - Log: `reports-design-tests.log`
 
 ## Honest RED / GREEN
 
-- Focused Reports test file: **GREEN**
-  - Command: `npm.cmd test -- tests/reports-design-remediation.test.ts`
-  - Result: `9 passed`
-  - Log: `reports-design-tests.log`
-- Static frontend consistency audit: **RED by design**
+- Static frontend consistency audit: **RED, unchanged**
   - Command: `npm.cmd run audit:frontend-consistency`
-  - Result: `status=fail`, `violationCount=2367`, `importantDeclarations=725`, `coverageIssues=0`
+  - Result: `violationCount=2367`, `delta=0`, `importantDeclarations=725`, `coverageIssues=0`
+  - JSON `sourceSha`: `6af13474726d8c3f7f992f6a2f94ef9aa687011e`
   - Log: `static-audit.log`
   - JSON: `static-audit.json`
-- Strict typecheck: **GREEN**
+- Typecheck: **GREEN**
   - Command: `npm.cmd run typecheck`
   - Log: `typecheck.log`
-- Production build: **GREEN**
+- Sequential production build: **GREEN**
   - Command: `npm.cmd run build`
-  - Result: Next `15.5.20`, static pages `27/27`, build duration `196.36s`
+  - Result: Next `15.5.20`, static pages `27/27`, build duration `246.70s`
   - Log: `build.log`
+- Production browser contract: **GREEN**
+  - Command: `SAFECLAW_HARNESS_MODE=prod npm.cmd test -- tests/reports-design-remediation.test.ts -t "Reports Wave 1 browser design contract" --pool=forks --maxWorkers=1 --reporter=verbose`
+  - Result: `5 passed`, `5 skipped`
+  - Log: `green-browser-tests.log`
 
 ## Refreshed captures
 
-- `reports-sample-day-desktop.png`
-- `reports-sample-night-desktop.png`
-- `reports-sample-day-mobile.png`
-- `reports-sample-night-mobile.png`
-- `reports-server-error-night-mobile.png`
-- `reports-empty-day-desktop.png`
+- Samples:
+  - `reports-sample-day-desktop.png`
+  - `reports-sample-night-desktop.png`
+  - `reports-sample-day-mobile.png`
+  - `reports-sample-night-mobile.png`
+- Server error:
+  - `reports-server-error-day-desktop.png`
+  - `reports-server-error-night-desktop.png`
+  - `reports-server-error-day-mobile.png`
+  - `reports-server-error-night-mobile.png`
+- Empty:
+  - `reports-empty-day-desktop.png`
 
-Key metrics:
+Metrics files:
 
-- Day mobile sample: `heroCtaHeight=44`, `heroCtaClipped=false`, `heroMetaCtaOverlap=false`, `horizontalOverflow=0`
-- Night mobile sample: `heroCtaHeight=44`, `heroCtaClipped=false`, `heroMetaCtaOverlap=false`, `horizontalOverflow=0`
-- Night mobile server error: `heroCtaHeight=44`, `heroCtaClipped=false`, `heroMetaCtaOverlap=false`, `horizontalOverflow=0`, disabled downloads `5`
-
-Metric files:
-
+- `reports-sample-day-desktop-metrics.json`
+- `reports-sample-night-desktop-metrics.json`
 - `reports-sample-day-mobile-metrics.json`
 - `reports-sample-night-mobile-metrics.json`
 - `reports-state-metrics.json`
@@ -64,13 +87,18 @@ Metric files:
 ## Files changed in owned scope
 
 - `app/globals.css`
-- `components/ReportsDownloadCenter.tsx`
-- `components/SafeClawModuleShell.tsx`
+- `tests/helpers/isolated-next-browser-harness.ts`
 - `tests/reports-design-remediation.test.ts`
 - `evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/report.md`
 - `evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/report.json`
+- `evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/static-audit.json`
+- `evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/red-static-audit.json`
+- `evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/*.png`
+- `evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/*-metrics.json`
 
 ## Done status
 
-- Wave 1 Reports CTA clipping follow-up: **DONE**
-- Static frontend audit cleanup beyond current Reports scope: **NOT DONE here; remains honest RED**
+- Desktop Reports hero CTA min-height `44px`: **DONE**
+- Reports period control radius `8px`: **DONE**
+- Production server-error captures without overlay contamination: **DONE**
+- Static audit honest RED count not worsened: **DONE**
