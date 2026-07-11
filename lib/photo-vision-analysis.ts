@@ -732,6 +732,10 @@ function resolveCandidateFromReferences(input: {
   references: SafetyReferenceItem[];
   provenanceByReference: ReadonlyMap<string, HazardPhotoReferenceRetrieval[]>;
 }): HazardPhotoHarnessResolution {
+  const operationalByReferenceId = new Map(input.references.map((item) => [
+    item.id,
+    deriveSafetyReferenceOperationalView(item)
+  ]));
   const packet = buildDbHarnessPacket({
     question: input.query,
     references: input.references
@@ -756,8 +760,9 @@ function resolveCandidateFromReferences(input: {
   let hasConfirmedControl = false;
 
   matchedReferences.forEach((item) => {
-    const operational = deriveSafetyReferenceOperationalView(item);
-    if (!operational.reviewRequired && operational.controls.length) hasConfirmedControl = true;
+    const operational = operationalByReferenceId.get(item.id);
+    if (!operational || operational.reviewRequired) return;
+    if (operational.controls.length) hasConfirmedControl = true;
     operational.controls.slice(0, 2).forEach((control) => {
       const text = control.trim();
       if (!text) return;
