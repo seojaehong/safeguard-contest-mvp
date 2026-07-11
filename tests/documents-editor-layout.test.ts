@@ -549,7 +549,10 @@ describe("documents editor layout", () => {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
 
-    const ratios = await page.locator(".document-toolbar > div:last-child > span").evaluateAll((elements) => {
+    const metadataLabels = page.locator(".document-toolbar > div:last-child > span");
+    await expect.poll(() => metadataLabels.count()).toBeGreaterThanOrEqual(2);
+
+    const ratios = await metadataLabels.evaluateAll((elements) => {
       const channels = (value: string) => {
         const matches = value.match(/[\d.]+/g);
         if (!matches || matches.length < 3) throw new Error(`Unsupported color: ${value}`);
