@@ -398,8 +398,8 @@ async function readScreenshotPixelAudit(page: Page, screenshotPath?: string): Pr
         { x: Math.round(railRect.right - 8), y: Math.round(Math.min(window.innerHeight - 24, railRect.bottom - 24)) }
       ],
       navPoints: [
-        { x: Math.round(navRect.left + navRect.width * 0.36), y: Math.round(navRect.top + 6) },
-        { x: Math.round(navRect.left + navRect.width * 0.64), y: Math.round(navRect.top + 6) }
+        { x: Math.round(navRect.left + 6), y: Math.round(navRect.top + navRect.height / 2) },
+        { x: Math.round(navRect.right - 6), y: Math.round(navRect.top + navRect.height / 2) }
       ],
       mainPoints: [
         { x: Math.round(mainRect.right - 8), y: Math.round(Math.min(window.innerHeight - 8, decisionRect.bottom + 10)) }
