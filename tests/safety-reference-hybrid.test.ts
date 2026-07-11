@@ -1,15 +1,22 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import * as safetyCatalog from "@/lib/safety-reference-catalog";
 import {
   deriveSafetyReferenceOperationalView,
   filterAndRankSafetyReferencesByQuery,
   mergeSafetyReferenceHybridResults,
   resolveSafetyReferenceVectorSearchState,
+  searchSafetyReferences,
   type SafetyReferenceItem
 } from "@/lib/safety-reference-catalog";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
 
 function reference(id: string, role: "direct" | "supporting" = "direct"): SafetyReferenceItem {
   return {
@@ -101,6 +108,39 @@ describe("resolveSafetyReferenceVectorSearchState", () => {
     expect(state.status.enabled).toBe(true);
     expect(state.status.reason).toBe("missing-openai-key");
     expect(state.status.message).toContain("text/ranked");
+  });
+});
+
+describe("searchSafetyReferences failure privacy", () => {
+  it("keeps PII and secrets from provider error bodies out of payloads and logs", async () => {
+    const privateFailure = "resident=900101-1234567 api_key=sk-private-vector";
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "1");
+    vi.stubEnv("OPENAI_API_KEY", "openai-test-key");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(privateFailure, { status: 500 })));
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const result = await searchSafetyReferences({ query: "성수동 외벽 도장 작업", limit: 3 });
+
+    expect(result).toMatchObject({
+      ok: false,
+      configured: true,
+      errorCode: "safety_reference_search_failed",
+      message: "안전 지식 DB 조회를 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      vectorSearch: {
+        errorCode: "safety_reference_vector_failed",
+        reason: "embedding-failed",
+        message: "벡터 조회를 완료하지 못해 text/ranked 검색으로 대체합니다."
+      }
+    });
+
+    const publicSurface = JSON.stringify(result);
+    const internalLogs = JSON.stringify(errorSpy.mock.calls);
+    expect(publicSurface).not.toContain("900101-1234567");
+    expect(publicSurface).not.toContain("sk-private-vector");
+    expect(internalLogs).not.toContain("900101-1234567");
+    expect(internalLogs).not.toContain("sk-private-vector");
   });
 });
 

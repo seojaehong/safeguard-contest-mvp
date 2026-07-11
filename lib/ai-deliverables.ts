@@ -1025,10 +1025,18 @@ export async function generateAllDeliverables(opts: GenerateAllOptions): Promise
   return out;
 }
 
+const DELIVERABLE_GENERATION_FAILURE_CODE = "deliverable_generation_failed" as const;
+const DELIVERABLE_GENERATION_FAILURE_MESSAGE = "문서 생성 단계를 완료하지 못했습니다.";
+
 export type AiDeliverablesDiagnostics = {
   geminiAvailable: boolean;
   // group: per-doc name (riskAssessment / workPlan / tbmBriefing / tbmLog / safetyEducation / free / foreign).
-  groupResults: Array<{ group: string; status: "fulfilled" | "rejected"; reason?: string }>;
+  groupResults: Array<{
+    group: string;
+    status: "fulfilled" | "rejected";
+    errorCode?: typeof DELIVERABLE_GENERATION_FAILURE_CODE;
+    reason?: string;
+  }>;
   filledKeys: string[];
 };
 
@@ -1086,7 +1094,8 @@ export async function generateAllDeliverablesWithDiagnostics(
       groupResults.push({
         group: name,
         status: "rejected",
-        reason: s.reason instanceof Error ? s.reason.message : String(s.reason)
+        errorCode: DELIVERABLE_GENERATION_FAILURE_CODE,
+        reason: DELIVERABLE_GENERATION_FAILURE_MESSAGE
       });
       safeEmit(onProgress, { kind: "doc", name, status: "fail" });
     }

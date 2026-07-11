@@ -8,6 +8,8 @@ import {
   deriveSafetyReferenceOperationalView,
   filterAndRankSafetyReferencesByQuery,
   getSafetyReferenceDisplayTitle,
+  SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+  SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE,
   searchSafetyReferences,
   type SafetyReferenceItem,
   type SafetyReferenceRetrievalMode,
@@ -1479,8 +1481,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     };
     const safeSearch = (opts: Parameters<typeof searchSafetyReferences>[0]) =>
       searchSafetyReferences(opts).catch((error) => {
-        log.error("safety reference search failed", error);
-        return { ...emptyResult, message: error instanceof Error ? error.message : String(error) };
+        log.error("safety reference search failed", safeFailureContext(error));
+        return {
+          ...emptyResult,
+          errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+          message: SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE
+        };
       });
     const safetyReferencePromise = (async () => {
       const [supportReg, guideline, sif, general] = await Promise.all([
@@ -1511,6 +1517,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         `일반 카탈로그 ${general.count}건`
       ];
       const buckets = [supportReg, guideline, sif, general];
+      const errorCode = buckets.some((bucket) => bucket.errorCode === SAFETY_REFERENCE_SEARCH_FAILURE_CODE)
+        ? SAFETY_REFERENCE_SEARCH_FAILURE_CODE
+        : undefined;
       const retrievalMode: SafetyReferenceRetrievalMode = buckets.some((bucket) => bucket.retrievalMode === "hybrid-vector-rpc")
         ? "hybrid-vector-rpc"
         : buckets.some((bucket) => bucket.retrievalMode === "ranked-rpc")
@@ -1527,12 +1536,15 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       return {
         ok: merged.length > 0 || general.ok || guideline.ok || supportReg.ok,
         configured,
+        ...(errorCode ? { errorCode } : {}),
         query: question,
         count: merged.length,
         items: merged,
         retrievalMode,
         vectorSearch,
-        message: configured
+        message: errorCode
+          ? SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE
+          : configured
           ? `Supabase 안전 지식 DB 호출 완료 (${messageParts.join(", ")}, 작업특화 rerank 적용)`
           : "Supabase 안전 지식 DB가 설정되지 않았습니다."
       };
@@ -1571,6 +1583,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               workpackMemory: harnessMemory.workpackMemory,
               retrieval: safeRef
                 ? {
+                    errorCode: safeRef.errorCode,
                     mode: safeRef.retrievalMode,
                     vectorSearch: safeRef.vectorSearch,
                     message: safeRef.message
@@ -1652,7 +1665,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       detail: "KOSHA 사고사례 호출에 실패했습니다.",
       cases: []
     };
-    const safetyReferenceFallback = { ...emptyResult, message: "Supabase 안전 지식 DB 호출 실패" };
+    const safetyReferenceFallback: SafetyReferenceSearchResult = {
+      ...emptyResult,
+      errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+      message: SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE
+    };
 
     // Task D-2a: side-listener attachment only — does not alter allSettled's inputs or
     // timing. Each promise below is passed through to Promise.allSettled unchanged.
@@ -1851,6 +1868,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       workpackMemory: harnessMemory.workpackMemory,
       ontologyMissing: structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`),
       retrieval: {
+        errorCode: safetyReference.errorCode,
         mode: safetyReference.retrievalMode,
         vectorSearch: safetyReference.vectorSearch,
         message: safetyReference.message
@@ -1881,7 +1899,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         accidentCases,
         safetyReference: {
           source: "safety-reference-catalog",
-          mode: safetyReference.configured ? (safetyReference.ok ? "live" : "fallback") : "unconfigured",
+          mode: safetyReference.errorCode
+            ? "fallback"
+            : safetyReference.configured
+              ? (safetyReference.ok ? "live" : "fallback")
+              : "unconfigured",
+          ...(safetyReference.errorCode ? { errorCode: safetyReference.errorCode } : {}),
           query: safetyReference.query,
           count: safetyReference.count,
           totalItems: safetyReference.items.length,

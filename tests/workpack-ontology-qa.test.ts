@@ -117,4 +117,36 @@ describe("web workpack ontology QA", () => {
     expect(remediated.deliverables.riskAssessmentDraft).toContain("감시인 외부 배치 및 연락설비");
     expect(remediated.deliverables.emergencyResponseDraft).toContain("대피용 기구(공기호흡기·사다리·섬유로프) 비치");
   });
+
+  it("keeps ontology QA exception PII and secrets out of result detail and structured logs", async () => {
+    const privateFailure = "resident=900101-1234567 Authorization=Bearer ontology-secret";
+    vi.mocked(reviewDocpack).mockRejectedValueOnce(new Error(privateFailure));
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const response = buildMockAskResponse(
+      "부산 지하 기계실 밀폐공간 작업",
+      mockSearchResults.slice(0, 2),
+      "live",
+      "test"
+    );
+
+    const reviewed = await attachWebOntologyQa(response, "부산 지하 기계실 밀폐공간 작업");
+
+    expect(reviewed.ontologyQa).toMatchObject({
+      detail: "안전조치 검수를 완료하지 못했습니다. 검수 상태를 확인한 뒤 전송하세요.",
+      result: {
+        reviewable: false,
+        errorCode: "ontology_qa_failed",
+        message: "안전조치 검수를 완료하지 못했습니다. 검수 상태를 확인한 뒤 전송하세요."
+      }
+    });
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"event":"ontology_qa_failed"'));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"errorType":"Error"'));
+
+    const publicSurface = JSON.stringify(reviewed.ontologyQa);
+    const internalLogs = JSON.stringify(warnSpy.mock.calls);
+    expect(publicSurface).not.toContain("900101-1234567");
+    expect(publicSurface).not.toContain("ontology-secret");
+    expect(internalLogs).not.toContain("900101-1234567");
+    expect(internalLogs).not.toContain("ontology-secret");
+  });
 });

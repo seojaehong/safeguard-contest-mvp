@@ -1,5 +1,6 @@
 import type {
   SafetyReferenceItem,
+  SafetyReferenceErrorCode,
   SafetyReferenceRetrievalMode,
   SafetyReferenceVectorStatus
 } from "@/lib/safety-reference-catalog";
@@ -50,11 +51,13 @@ export type DbHarnessDocumentCoverage = {
 
 export type DbHarnessRetrievalContract = {
   source: "safety_reference_items";
+  errorCode?: SafetyReferenceErrorCode;
   mode: SafetyReferenceRetrievalMode;
   vector: {
     enabled: boolean;
     attempted: boolean;
     ready: boolean;
+    errorCode?: SafetyReferenceVectorStatus["errorCode"];
     reason: SafetyReferenceVectorStatus["reason"];
     message: string;
   };
@@ -112,6 +115,7 @@ export type HarnessMemoryInput = {
 };
 
 export type DbHarnessRetrievalInput = {
+  errorCode?: SafetyReferenceErrorCode;
   mode?: SafetyReferenceRetrievalMode;
   vectorSearch?: SafetyReferenceVectorStatus;
   message?: string;
@@ -200,11 +204,13 @@ function buildRetrievalContract(input: {
   const sourceCounts = countRetrievalSources(input.references);
   return {
     source: "safety_reference_items",
+    ...(input.retrieval?.errorCode ? { errorCode: input.retrieval.errorCode } : {}),
     mode: inferRetrievalMode({ references: input.references, retrieval: input.retrieval }),
     vector: {
       enabled: vectorSearch.enabled,
       attempted: vectorSearch.attempted,
       ready: vectorSearch.ok,
+      ...(vectorSearch.errorCode ? { errorCode: vectorSearch.errorCode } : {}),
       reason: vectorSearch.reason,
       message: vectorSearch.message
     },

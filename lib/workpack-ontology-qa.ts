@@ -5,6 +5,9 @@ import { reviewDocpack } from "./ontology/qa-review-tool";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("workpack-ontology-qa");
+const ONTOLOGY_QA_FAILURE_CODE = "ontology_qa_failed" as const;
+const ONTOLOGY_QA_FAILURE_MESSAGE =
+  "안전조치 검수를 완료하지 못했습니다. 검수 상태를 확인한 뒤 전송하세요.";
 
 export const ONTOLOGY_QA_DOCUMENT_KEYS = [
   "riskAssessmentDraft",
@@ -156,9 +159,13 @@ export function applyOntologyQaRemediation(
   };
 }
 
-function qaErrorResult(message: string): QaReviewResult {
+function qaErrorResult(
+  message: string,
+  errorCode?: typeof ONTOLOGY_QA_FAILURE_CODE
+): QaReviewResult {
   return {
     reviewable: false,
+    ...(errorCode ? { errorCode } : {}),
     message,
     registeredTasks: []
   };
@@ -188,12 +195,16 @@ export async function attachWebOntologyQa(response: AskResponse, question: strin
     const rereviewed = await reviewDocpack(reviewTask, remediatedSource.text);
     return attachOntologyQaResult(remediated, reviewTask, rereviewed, remediatedSource.documentKeys);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    log.warn("ontology QA failed", { reviewTask, message });
+    log.warn("ontology QA failed", {
+      event: ONTOLOGY_QA_FAILURE_CODE,
+      errorCode: ONTOLOGY_QA_FAILURE_CODE,
+      errorType: error instanceof Error ? error.name : typeof error,
+      reviewTask
+    });
     return attachOntologyQaResult(
       response,
       reviewTask,
-      qaErrorResult(`안전조치 검수를 완료하지 못했습니다: ${message}`),
+      qaErrorResult(ONTOLOGY_QA_FAILURE_MESSAGE, ONTOLOGY_QA_FAILURE_CODE),
       source.documentKeys
     );
   }
