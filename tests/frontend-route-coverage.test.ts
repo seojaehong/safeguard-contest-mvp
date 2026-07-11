@@ -455,6 +455,32 @@ describe("browser evidence reconciliation", () => {
     }
   }, 30_000);
 
+  it("rejects a product font leaking into any generated-document role", () => {
+    const role = (fontFamily: string) => ({
+      fontFamily, fontLoaded: true, fontSize: "18.6667px", fontWeight: "700",
+      lineHeight: "24px", letterSpacing: "-0.186667px",
+    });
+    const documentFamily = '"Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
+    const row = {
+      route: "generated:document-preview", viewport: "desktop-1440", status: 200,
+      consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "문서",
+      boundaryMarker: "", bodyFont: 'Pretendard, "Noto Sans KR", sans-serif',
+      bodyFontSize: "15px", bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px",
+      productFontLoaded: true,
+      primaryHeading: { fontFamily: "Pretendard", fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      renderedControls: [], keySurfaces: [],
+      documentTypography: {
+        title: { ...role(documentFamily), fontSize: "26.6667px", lineHeight: "32px", letterSpacing: "-0.533333px" },
+        section: role('Pretendard, "Noto Sans KR", sans-serif'),
+        body: { ...role(documentFamily), fontSize: "13.3333px", fontWeight: "400", lineHeight: "20px", letterSpacing: "0px" },
+        table: { ...role(documentFamily), fontSize: "11.3333px", fontWeight: "400", lineHeight: "16px", letterSpacing: "0px" },
+        note: { ...role(documentFamily), fontSize: "10.6667px", fontWeight: "400", lineHeight: "14.6667px", letterSpacing: "0px" },
+      },
+    };
+    const result = runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
+    expect(result.findings).toContain("document section family outside document stack: Pretendard, \"Noto Sans KR\", sans-serif");
+  }, 15_000);
+
   it("retains unrelated boundary and hydration errors", () => {
     const probeErrors = ["SafeClaw deterministic frontend audit error boundary probe", "unrelated runtime failure"];
     const filtered = runBrowserContractProbe(`audit.filterExpectedBoundaryErrors(${JSON.stringify(probeErrors)}, "error", "page")`) as string[];

@@ -43,4 +43,12 @@ The error and global-error boundaries are now exercised by environment-gated aud
 - Browser review found and fixed the landing mobile hero's 32px regression; it now renders the required 44px Display tuple. The generated PDF fixture now includes a real table row so all five document roles are browser-verified.
 - Final evidence: browser 108 successes, zero failed/recovered rows, zero findings; 56 files/519 tests; typecheck; audit-mode and normal builds; static audit 32 routes/22 components with zero issues.
 
+## Generated font-family remediation
+
+- Added a RED mutation proving a generated section with Pretendard fails even when all numerical values remain exact.
+- Preview title, section, body, table, and note selectors now explicitly inherit the document stack, preventing stronger product heading rules from leaking into generated content.
+- Every generated role records its computed family and role-specific `document.fonts.check()` result. The gate requires a Malgun Gothic-first stack with the Noto Sans KR fallback and a loaded available document face.
+- Final browser evidence records all five roles on both preview and PDF with the document stack and `fontLoaded: true`: 108 successes, zero failed/recovered rows, zero findings.
+- Final regression: 56 files/520 tests, typecheck, normal and audit-mode builds, static audit 32 routes/22 components with zero issues.
+
 F7 remains `in_progress` with `passes: false` pending independent re-review and PR handoff.

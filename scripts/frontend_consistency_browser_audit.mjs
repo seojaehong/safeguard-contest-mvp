@@ -132,7 +132,12 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
   };
   if (row.route === "generated:document-preview" || documentRole) {
     for (const [roleName, expected] of Object.entries(documentExpectations)) {
-      findings.push(...tupleFindings(`document ${roleName}`, row.documentTypography?.[roleName], expected));
+      const tuple = row.documentTypography?.[roleName];
+      findings.push(...tupleFindings(`document ${roleName}`, tuple, expected));
+      if (tuple && !/^"?Malgun Gothic"?.*Noto Sans KR/i.test(tuple.fontFamily)) {
+        findings.push(`document ${roleName} family outside document stack: ${tuple.fontFamily}`);
+      }
+      if (tuple && !tuple.fontLoaded) findings.push(`document ${roleName} font load check failed`);
     }
   }
   for (const control of row.renderedControls) {
@@ -189,7 +194,7 @@ async function capture(page, options) {
     const typographyTuple = (element) => {
       if (!element) return null;
       const style = getComputedStyle(element);
-      return { fontFamily: style.fontFamily, fontSize: style.fontSize, fontWeight: style.fontWeight, lineHeight: style.lineHeight, letterSpacing: style.letterSpacing === "normal" ? "0px" : style.letterSpacing };
+      return { fontFamily: style.fontFamily, fontLoaded: document.fonts.check(`${style.fontWeight} ${style.fontSize} "Malgun Gothic"`) || document.fonts.check(`${style.fontWeight} ${style.fontSize} "Noto Sans KR"`), fontSize: style.fontSize, fontWeight: style.fontWeight, lineHeight: style.lineHeight, letterSpacing: style.letterSpacing === "normal" ? "0px" : style.letterSpacing };
     };
     const heading = document.querySelector("h1") ?? document.querySelector("h2");
     const headingStyle = heading ? getComputedStyle(heading) : null;
@@ -355,7 +360,7 @@ async function main() {
         const element = document.querySelector(selector);
         if (!element) return null;
         const style = getComputedStyle(element);
-        return { fontFamily: style.fontFamily, fontSize: style.fontSize, fontWeight: style.fontWeight, lineHeight: style.lineHeight, letterSpacing: style.letterSpacing === "normal" ? "0px" : style.letterSpacing };
+        return { fontFamily: style.fontFamily, fontLoaded: document.fonts.check(`${style.fontWeight} ${style.fontSize} "Malgun Gothic"`) || document.fonts.check(`${style.fontWeight} ${style.fontSize} "Noto Sans KR"`), fontSize: style.fontSize, fontWeight: style.fontWeight, lineHeight: style.lineHeight, letterSpacing: style.letterSpacing === "normal" ? "0px" : style.letterSpacing };
       };
       return { title: tuple("h1"), section: tuple("h2"), body: tuple(".meta div"), table: tuple("td"), note: tuple(".notice") };
     })(),

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-11T06:49:42.922Z",
+  "generatedAt": "2026-07-11T07:08:34.100Z",
   "baseUrl": "http://127.0.0.1:3011",
   "totals": {
     "routes": 32,
@@ -14,7 +14,7 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 101745
+    "elapsedMs": 103422
   },
   "staticAudit": {
     "command": "npm.cmd run audit:frontend-consistency",
@@ -1826,13 +1826,15 @@
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "26.6667px",
           "fontWeight": "700",
           "lineHeight": "32px",
           "letterSpacing": "-0.533333px"
         },
         "section": {
-          "fontFamily": "Pretendard, \"Noto Sans KR\", \"Malgun Gothic\", system-ui, sans-serif",
+          "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "18.6667px",
           "fontWeight": "700",
           "lineHeight": "24px",
@@ -1840,6 +1842,7 @@
         },
         "body": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "13.3333px",
           "fontWeight": "400",
           "lineHeight": "20px",
@@ -1847,6 +1850,7 @@
         },
         "table": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "11.3333px",
           "fontWeight": "400",
           "lineHeight": "16px",
@@ -1854,6 +1858,7 @@
         },
         "note": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "10.6667px",
           "fontWeight": "400",
           "lineHeight": "14.6667px",
@@ -2199,13 +2204,15 @@
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "26.6667px",
           "fontWeight": "700",
           "lineHeight": "32px",
           "letterSpacing": "-0.533333px"
         },
         "section": {
-          "fontFamily": "Pretendard, \"Noto Sans KR\", \"Malgun Gothic\", system-ui, sans-serif",
+          "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "18.6667px",
           "fontWeight": "700",
           "lineHeight": "24px",
@@ -2213,6 +2220,7 @@
         },
         "body": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "13.3333px",
           "fontWeight": "400",
           "lineHeight": "20px",
@@ -2220,6 +2228,7 @@
         },
         "table": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "11.3333px",
           "fontWeight": "400",
           "lineHeight": "16px",
@@ -2227,6 +2236,7 @@
         },
         "note": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "10.6667px",
           "fontWeight": "400",
           "lineHeight": "14.6667px",
@@ -2572,13 +2582,15 @@
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "26.6667px",
           "fontWeight": "700",
           "lineHeight": "32px",
           "letterSpacing": "-0.533333px"
         },
         "section": {
-          "fontFamily": "Pretendard, \"Noto Sans KR\", \"Malgun Gothic\", system-ui, sans-serif",
+          "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "18.6667px",
           "fontWeight": "700",
           "lineHeight": "24px",
@@ -2586,6 +2598,7 @@
         },
         "body": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "13.3333px",
           "fontWeight": "400",
           "lineHeight": "20px",
@@ -2593,6 +2606,7 @@
         },
         "table": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "11.3333px",
           "fontWeight": "400",
           "lineHeight": "16px",
@@ -2600,6 +2614,7 @@
         },
         "note": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "10.6667px",
           "fontWeight": "400",
           "lineHeight": "14.6667px",
@@ -10749,13 +10764,15 @@
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "26.6667px",
           "fontWeight": "700",
           "lineHeight": "32px",
           "letterSpacing": "-0.533333px"
         },
         "section": {
-          "fontFamily": "Pretendard, \"Noto Sans KR\", \"Malgun Gothic\", system-ui, sans-serif",
+          "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "18.6667px",
           "fontWeight": "700",
           "lineHeight": "24px",
@@ -10763,6 +10780,7 @@
         },
         "body": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "13.3333px",
           "fontWeight": "400",
           "lineHeight": "20px",
@@ -10770,6 +10788,7 @@
         },
         "table": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "11.3333px",
           "fontWeight": "400",
           "lineHeight": "16px",
@@ -10777,6 +10796,7 @@
         },
         "note": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "10.6667px",
           "fontWeight": "400",
           "lineHeight": "14.6667px",
@@ -10825,10 +10845,11 @@
         "lineHeight": "32px",
         "letterSpacing": "-0.533333px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 11. 오후 3:49:42 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 11. 오후 4:08:33 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "26.6667px",
           "fontWeight": "700",
           "lineHeight": "32px",
@@ -10836,6 +10857,7 @@
         },
         "section": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "18.6667px",
           "fontWeight": "700",
           "lineHeight": "24px",
@@ -10843,6 +10865,7 @@
         },
         "body": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "13.3333px",
           "fontWeight": "400",
           "lineHeight": "20px",
@@ -10850,6 +10873,7 @@
         },
         "table": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "11.3333px",
           "fontWeight": "400",
           "lineHeight": "16px",
@@ -10857,6 +10881,7 @@
         },
         "note": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
+          "fontLoaded": true,
           "fontSize": "10.6667px",
           "fontWeight": "400",
           "lineHeight": "14.6667px",

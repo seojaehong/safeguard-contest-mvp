@@ -1,6 +1,6 @@
 # SafeClaw frontend consistency browser audit
 
-- Generated: 2026-07-11T06:49:42.922Z
+- Generated: 2026-07-11T07:08:34.100Z
 - Routes: 32/32
 - Route matrix: 96/96
 - Workspace Day/Night: 6/6
@@ -11,7 +11,7 @@
 - Failed rows: 0
 - Recovered transient rows: 0
 - Findings: 0
-- Elapsed: 101745 ms
+- Elapsed: 103422 ms
 
 ## Visual review
 

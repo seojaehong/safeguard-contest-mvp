@@ -644,6 +644,7 @@ const documentPreviewCss = `
     letter-spacing: 0;
   }
   .document-print-typography .safety-form-preview-head strong {
+    font-family: inherit;
     font-size: 20pt;
     font-weight: 700;
     line-height: 24pt;
@@ -651,12 +652,14 @@ const documentPreviewCss = `
   }
   .document-print-typography .safety-form-bridge h3,
   .document-print-typography .safety-form-section-stack h3 {
+    font-family: inherit;
     font-size: 14pt;
     font-weight: 700;
     line-height: 18pt;
     letter-spacing: -0.01em;
   }
   .document-print-typography .safety-form-meta-grid span {
+    font-family: inherit;
     font-size: 10pt;
     font-weight: 400;
     line-height: 15pt;
@@ -664,6 +667,7 @@ const documentPreviewCss = `
   }
   .document-print-typography th,
   .document-print-typography td {
+    font-family: inherit;
     font-size: 8.5pt;
     font-weight: 400;
     line-height: 12pt;

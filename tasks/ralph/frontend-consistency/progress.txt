@@ -117,6 +117,12 @@
 - Verified: distinct boundary markers and screenshots; browser 108 successes/0 failed rows/0 findings; reconciliation 22/22; full 56 files/517 tests; typecheck; normal build; static audit 32 routes/22 components and zero issues; diff review pending.
 - Next: keep F7 pending independent re-review.
 
+## 2026-07-11 F7 generated font-family remediation
+- RED: a generated section using Pretendard passed because document roles checked only numerical tuples.
+- Changed: all five preview roles explicitly inherit the document stack; preview/PDF rows collect computed family and role-specific font-loaded evidence; the gate enforces Malgun-first plus Noto fallback.
+- Verified: family mutation GREEN; browser 108/108 failed0 recovered0 findings0; full 520/520, typecheck, static 32/22 zero issues, audit-mode and normal builds pass.
+- Next: keep F7 pending independent re-review.
+
 ## 2026-07-11 F7 exact computed-style remediation
 - RED: a ratio-preserving 39px page title passed, while boundary helpers could erase probe-plus-unrelated and hydration-plus-unrelated failures.
 - Changed: exact spec-derived Display/Page/body/document tuples, actual font-load evidence, strict probe filtering, separately counted recovered transients, 44px landing mobile Display, and representative PDF table evidence.
