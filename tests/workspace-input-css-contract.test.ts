@@ -32,4 +32,27 @@ describe("workspace input CSS contract", () => {
       ),
     ).toBe(0);
   });
+
+  it("keeps the seven responsive textarea blocks on the reviewed declaration matrix", () => {
+    const textareaBlocks = Array.from(
+      workspaceSubmissionGuardCss().matchAll(
+        /([^{}]*\.workspace-input-page \.command-console-input[^{}]*)\{([^{}]*)\}/g,
+      ),
+      (match) => match[2]
+        .trim()
+        .split(/;\s*/u)
+        .filter(Boolean)
+        .map((declaration) => declaration.replace(/\s+/gu, " ")),
+    );
+
+    expect(textareaBlocks).toEqual([
+      ["box-sizing: border-box"],
+      ["display: block", "min-height: 152px", "padding: 22px 24px", "overflow-y: auto", "line-height: 1.76", "resize: vertical"],
+      ["min-height: 124px", "padding: 18px", "line-height: 1.74"],
+      ["font-size: 14px"],
+      ["min-height: 116px", "padding: 14px 15px", "line-height: 1.7"],
+      ["min-height: 108px", "padding: 14px 12px", "line-height: 1.7"],
+      ["min-height: 142px", "padding: 16px", "font-size: 15px", "line-height: 1.68"],
+    ]);
+  });
 });
