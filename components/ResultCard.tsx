@@ -33,9 +33,9 @@ export function ResultCard({ item }: { item: SearchResult }) {
         <span className="badge">{item.sourceLabel}</span>
         {item.citation ? <span className="badge">{item.citation}</span> : null}
       </div>
-      <div className="h3">{item.title}</div>
-      <div className="muted">{item.summary}</div>
-      <div className="small relevance-note">{getRelevanceText(item)}</div>
+      <h3 className="h3">{item.title}</h3>
+      <p className="muted result-card-copy">{item.summary}</p>
+      <p className="small relevance-note result-card-copy">{getRelevanceText(item)}</p>
       {item.tags?.length ? <div className="row">{item.tags.map((tag) => <span key={tag} className="badge">{tag}</span>)}</div> : null}
     </Link>
   );
