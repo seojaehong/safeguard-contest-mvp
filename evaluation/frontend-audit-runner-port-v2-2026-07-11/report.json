@@ -10,6 +10,11 @@
     "postNormalizationViolations": 2444,
     "status": "fail",
     "routeCoverageIssues": 0,
+    "currentInventory": {
+      "pageFiles": 32,
+      "productComponentFiles": 23,
+      "auditProbeIncludedInSourceIdentity": true
+    },
     "classification": {
       "parserFalsePositive": 38,
       "validCurrentScopedRole": 6,
@@ -130,8 +135,21 @@
     "nextVersion": "15.5.20",
     "staticPages": "27/27",
     "exitCode": 0,
-    "buildId": "a5Ak_ESo7zZxI5rr4HuNg",
-    "log": "build27-clean-final.log"
+    "buildId": "lG3Jy9qUeJdXoFtileF_I",
+    "log": "build-audit-final.log",
+    "normalBundle": {
+      "status": "pass",
+      "chunkCount": 97,
+      "markerCount": 0,
+      "log": "bundle-normal.json"
+    },
+    "auditBundle": {
+      "status": "pass",
+      "chunkCount": 97,
+      "markerCount": 1,
+      "markerFile": "static/chunks/app/layout-6a0a9a9b3dfa7576.js",
+      "log": "bundle-audit.json"
+    }
   },
   "browserAudit": {
     "status": "not-run",
@@ -144,6 +162,29 @@
     "findings": null,
     "recoveredRows": null,
     "reason": "Static audit remains RED with 2444 unresolved blockers."
+  },
+  "boundaryProbe": {
+    "status": "pass",
+    "port": 3021,
+    "provenanceVerified": true,
+    "discardedAttempts": [
+      "3011 EADDRINUSE from another worktree",
+      "app/error self-throw stayed on ordinary error boundary"
+    ],
+    "rows": [
+      {
+        "mode": "error",
+        "httpStatus": 500,
+        "selector": "[data-audit-boundary=\"error\"]",
+        "count": 1
+      },
+      {
+        "mode": "global-error",
+        "httpStatus": 500,
+        "selector": "[data-audit-boundary=\"global-error\"]",
+        "count": 1
+      }
+    ]
   },
   "hardExclusionsModified": [],
   "dbChanges": false

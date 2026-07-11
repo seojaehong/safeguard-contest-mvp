@@ -37,6 +37,8 @@ Focused parser/role GREEN:
 
 Original source audit: `status=fail`, 2,488 violations, 32 pages, 24 components, zero route coverage issues.
 
+After removing the globally shipped audit trigger from `components/`, current product inventory is 32 pages and 23 product components. The audit-only probe lives under `lib/frontend-audit/` and is included explicitly in the source-identity digest without inflating the product component count.
+
 | Family | Original | Parser false positive | Valid current scoped role | Unresolved blocker | Representative evidence |
 |---|---:|---:|---:|---:|---|
 | important-declaration | 752 | 0 | 0 | 752 | line 145, `!important` |
@@ -61,12 +63,21 @@ The post-normalization runner reports 2,444 unresolved violations: radius 288 an
 - `npm.cmd run typecheck`: PASS after local install. Log: `typecheck-after-ci.log`.
 - Early build attempts were race-contaminated and are preserved in `build27-after-ci.log` and `build27-exitcode.log`.
 - Clean final: resolved and removed only this worktree's `.next`, then ran one build with no competing Next process.
-- `npm.cmd run build`: PASS, Next 15.5.20, static pages 27/27, `EXIT_CODE=0`, BUILD_ID `a5Ak_ESo7zZxI5rr4HuNg`.
-- Clean log: `build27-clean-final.log`.
+- Root-boundary remediation reran both builds sequentially after safely removing only this worktree's `.next`.
+- Normal build: PASS, Next 15.5.20, static pages 27/27; all 97 static JS chunks contain zero audit probe markers. Logs: `build-normal-root-probe.log`, `bundle-normal.json`.
+- Final audit build: PASS, Next 15.5.20, static pages 27/27, BUILD_ID `lG3Jy9qUeJdXoFtileF_I`; exactly one probe marker appears in `static/chunks/app/layout-6a0a9a9b3dfa7576.js`. Logs: `build-audit-final.log`, `bundle-audit.json`.
 
 ## Browser Audit
 
-Not run. Static status is still RED with 2,444 unresolved violations, so no production server was started and no claim is made for routes96 + themes6 + special4 + generated2 = 108, failedRows, findings, or recoveredRows.
+The full 108-row audit was not run. Static status is still RED with 2,444 unresolved violations, and the browser runner correctly fails closed on that prerequisite. No claim is made for routes96 + themes6 + special4 + generated2 = 108, failedRows, findings, or recoveredRows.
+
+The audit-only framework boundary probes were run separately on the v2 audit build:
+
+- The first 3011 start failed with `EADDRINUSE`; that port belonged to a different worktree and no result from it was accepted.
+- An isolated v2 server was verified on port 3021 by listening PID, command line, worktree path, and BUILD_ID.
+- `/dryrun?__auditBoundary=error`: HTTP 500; exactly one visible `[data-audit-boundary="error"]`; expected Korean title and deterministic console marker.
+- `/dryrun?__auditBoundary=global-error`: HTTP 500; exactly one visible `[data-audit-boundary="global-error"]`; expected Korean title and deterministic probe error from the audit-only layout chunk.
+- A rejected intermediate design that rethrew inside `app/error` remained on the ordinary error boundary and emitted repeated errors. It was replaced by the virtual root-layout probe. Only the owned 3021 listener was stopped; the other worktree's 3011 server was preserved.
 
 ## Ported Files
 
@@ -85,6 +96,8 @@ Minimal audit-only support:
 - `app/global-error.tsx`
 - `app/layout.tsx`
 - `app/not-found.tsx`
-- `components/AuditGlobalBoundaryTrigger.tsx`
+- `lib/frontend-audit/GlobalBoundaryProbe.audit.tsx`
+- `lib/frontend-audit/GlobalBoundaryProbe.noop.tsx`
+- `types/audit-error-escalation.d.ts`
 
 Hard-excluded files were not modified. Integration onto `b30c0d8` requires conflict review because this branch intentionally remains based on `8263527`.

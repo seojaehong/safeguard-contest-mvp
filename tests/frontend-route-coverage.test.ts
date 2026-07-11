@@ -326,8 +326,41 @@ describe("frontend route classification", () => {
   });
 });
 describe("browser evidence reconciliation", () => {
+  it("keeps the audit boundary trigger out of the normal layout graph", () => {
+    const layout = read("app/layout.tsx");
+    const errorBoundary = read("app/error.tsx");
+
+    expect(layout).not.toContain("AuditGlobalBoundaryTrigger");
+    expect(layout).toContain('process.env.SAFECLAW_FRONTEND_AUDIT === "1"');
+    expect(layout).toContain('import { GlobalBoundaryProbe } from "safeclaw-audit-error-escalation"');
+    expect(layout).toContain("<GlobalBoundaryProbe />");
+    expect(errorBoundary).not.toContain("safeclaw-audit-error-escalation");
+    const auditEscalation = read("lib/frontend-audit/GlobalBoundaryProbe.audit.tsx");
+    expect(auditEscalation).toContain('boundary === "global-error"');
+    expect(auditEscalation).toContain("SafeClaw deterministic frontend audit global boundary probe");
+    expect(read("lib/frontend-audit/GlobalBoundaryProbe.noop.tsx")).not.toContain("frontend audit");
+    expect(read("next.config.mjs")).toContain('config.resolve.alias["safeclaw-audit-error-escalation$"]');
+  });
+
+  it("reports only executed browser facts and fails closed on the static prerequisite", () => {
+    const runner = read("scripts/frontend_consistency_browser_audit.mjs");
+
+    expect(runner).not.toContain('command: "npm.cmd test"');
+    expect(runner).not.toContain('command: "npm.cmd run typecheck"');
+    expect(runner).not.toContain('command: "npm.cmd run build"');
+    expect(runner).not.toContain('command: "npm.cmd run audit:frontend-browser"');
+    expect(runner).not.toContain("testFiles: 56");
+    expect(runner).toContain('staticAudit.status !== "pass"');
+    expect(runner).toContain('command: "node ./scripts/frontend_consistency_browser_audit.mjs"');
+    expect(runner).toContain('"browser-report.json"');
+    expect(runner).toContain('"browser-report.md"');
+    expect(runner).not.toContain('path.join(outputDirectory, "report.json")');
+    expect(runner).not.toContain("2d0ff44");
+    expect(runner).not.toContain("99a42d2");
+  });
+
   it("reconciles the complete route, theme, special-state, and generated-surface evidence", () => {
-    const reportPath = path.join(root, "evaluation/frontend-consistency-audit-2026-07-11/report.json");
+    const reportPath = path.join(root, "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json");
     expect(fs.existsSync(reportPath), "browser audit report exists").toBe(true);
 
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
@@ -377,14 +410,14 @@ describe("browser evidence reconciliation", () => {
     ]) {
       for (const field of requiredFields) expect(row, `${String(row.route ?? row.surface)} ${field}`).toHaveProperty(field);
       const screenshot = String(row.screenshot);
-      expect(screenshot).toMatch(/^evaluation\/frontend-consistency-audit-2026-07-11\/screenshots\//);
+      expect(screenshot).toMatch(/^evaluation\/frontend-audit-runner-port-v2-2026-07-11\/browser-screenshots\//);
       expect(fs.existsSync(path.join(root, screenshot)), screenshot).toBe(true);
     }
     expect(report.totals.failures).toBe(0);
   });
 
   it("proves actual named framework boundaries and numerical rendered contracts", () => {
-    const report = JSON.parse(read("evaluation/frontend-consistency-audit-2026-07-11/report.json")) as {
+    const report = JSON.parse(read("evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json")) as {
       specialSurfaceRows: Array<Record<string, unknown>>;
       routeRows: Array<Record<string, unknown>>;
       workspaceThemeRows: Array<Record<string, unknown>>;
@@ -513,12 +546,11 @@ describe("browser evidence reconciliation", () => {
   it("keeps the normal-production audit query inert and reports structured gates", () => {
     const errorSource = read("app/error.tsx");
     expect(errorSource).toContain('[data-safeclaw-audit-enabled="true"]');
-    expect(errorSource).toContain('__auditBoundary") === "error"');
-    const report = JSON.parse(read("evaluation/frontend-consistency-audit-2026-07-11/report.json")) as { verificationCommands: unknown[] };
-    expect(report.verificationCommands).toEqual(expect.arrayContaining([
-      expect.objectContaining({ command: "npm.cmd test", outcome: "pass", exitCode: 0, testFiles: 56, tests: 523 }),
-      expect.objectContaining({ command: "npm.cmd run build", outcome: "pass", exitCode: 0 }),
-    ]));
+    expect(errorSource).toContain('boundary === "error"');
+    const report = JSON.parse(read("evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json")) as { verificationCommands: unknown[] };
+    expect(report.verificationCommands).toEqual([
+      expect.objectContaining({ command: "node ./scripts/frontend_consistency_browser_audit.mjs" }),
+    ]);
   });
 });
 
