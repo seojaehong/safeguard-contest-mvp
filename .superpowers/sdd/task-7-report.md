@@ -75,19 +75,18 @@ F7 is complete with `passes: true`. PR 66 handoff remains a root-task coordinati
 - Final implementation head reviewed: `b61929f`.
 - Final branch review: specification compliance PASS; code quality PASS; Critical 0, Important 0, Minor 0.
 - Draft PR #66 body was updated on 2026-07-11 with the final evidence, merge matrix, backend blockers, and post-integration gates.
-- Backend patch `99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49` is pushed and backend-owned. It changes only the document-module shell CSS plus focused test/report evidence: Day `#f5c518`, Night `#6c6ff7`, mobile gap 8, controls 44, rail/nav radii 14/8, title 30 desktop/27 mobile.
+- Backend patch `99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49` is integrated as `cab4a19` and backend-owned. It changes only the document-module shell CSS plus focused test/report evidence: Day `#f5c518`, Night `#6c6ff7`, mobile gap 8, controls 44, rail/nav radii 14/8, title 30 desktop/27 mobile.
 - Backend geometry evidence: Workspace y 105/281 unchanged; Documents 218/446 to 218/331; Reports 218/446 to 218/285; sample y 659 to 498; horizontal overflow 0.
-- The backend patch remains subject to independent backend review before integration. After integration, rerun the documented full tests, typecheck, build, static audit, 108 browser rows, and explicit identity/y-position comparison.
+- Module integration review evidence is complete. Reports/PDF/documents-mobile work and the documented full post-integration gates remain external.
 
 F7 is done with `passes: true`.
 
 ## Post-closure backend integration matrix
 
-- Current authoritative backend head is `3900892`. Comparison evidence from frontend `d2ef1df` versus backend base `2d0ff44` has exactly 22 shared files; the complete path list is stored in `evaluation/frontend-consistency-audit-2026-07-11/report.json`.
+- Current authoritative backend head `cab4a19` integrates `3900892` current-workpack/worker snapshot and module `99a42d2`. Comparison evidence from frontend `d2ef1df` versus backend base `2d0ff44` has exactly 22 shared files; the complete path list is stored in `evaluation/frontend-consistency-audit-2026-07-11/report.json`.
 - Per-file policy: never merge shared files wholesale. Preserve backend behavior/contracts first, then selectively port frontend visual/audit hunks under per-file review.
-- Backend `3900892` focused browser checks, 12 related tests, and typecheck pass.
-- Module `99a42d2...`: worker tests/typecheck/build pass; the first reviewer hung and was terminated without verdict; a fresh bounded read-only review is active. Not integrated.
+- Module integration evidence: browser 4/4 and typecheck pass; `evaluation/module-shell-unify-2026-07-11/report.md` records focused 4, typecheck, build 27, and diff. Metrics: Documents mobile 446 to 331, Reports 446 to 285, Workspace 281 unchanged, overflow 0.
 - Reports `a935fdb`: independent review REJECT (P1 unsafe server-error fallback with exports enabled; P2 shallow response guard/cast). Fail-closed, explicit-local-switch-only remediation is active. Not integrated.
 - PDF `b61929f` selective port is active on `3900892` with missing-font controlled 500, literal NFT paths, dynamic subsets, and regenerated tracked lock; `WorkpackEditor`/`globals.css` are excluded. Full desktop/390px, full tests/build, direct PDF, and 108 rows remain intentionally pending.
-- Required backend-owned integration: `3900892` (canonical current-workpack resilience). It restores `/workspace` return behavior and fingerprint-matches worker/selection snapshots; browser test and typecheck passed.
+- New isolated backend-owned documents-mobile-priority patch is active/not integrated: core-three launcher reducing editor y from approximately 3424 while preserving the desktop cockpit.
 - F7 remains done. Integration and the complete post-integration verification matrix remain external gates.

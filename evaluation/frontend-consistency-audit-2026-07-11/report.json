@@ -78,18 +78,17 @@
   "backendSessionConflicts": [
     "Frontend head owns typography, PDF/font assets, browser audit, and evidence through this branch.",
     "Backend head 2d0ff44 owns harness/history/grounded-vision behavior; preserve those changes during integration.",
-    "Backend shell patch 99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49 is not integrated. Worker tests, typecheck, and build pass; the first reviewer hung and was terminated without verdict, and a fresh bounded read-only review is active.",
-    "Backend canonical current-workpack resilience patch 3900892 is the current authoritative backend head: focused browser checks, 12 related tests, and typecheck pass.",
+    "Backend authoritative head cab4a19 integrates 3900892 current-workpack/worker snapshot and module shell 99a42d2. Post-integration module browser 4/4 and typecheck pass; module review evidence is recorded at evaluation/module-shell-unify-2026-07-11/report.md.",
     "Reports provenance/state candidate a935fdb is isolated and not integrated. Independent review REJECT found unsafe server-error fallback with exports enabled and shallow response validation; fail-closed explicit-local-switch-only remediation is active.",
     "High-risk shared files include app/globals.css, SafeGuardCommandCenter.tsx, WorkpackEditor.tsx, lib/types.ts, current-workpack.ts, and db-harness.ts.",
-    "Known launch blocker delegated to the backend post-integration patch: document modules currently retain a purple shell identity and tall mobile rail/header; preserve report/document body styling while aligning shell identity to Workspace.",
+    "The document-module shell blocker is integrated at cab4a19 with reviewed evidence; reports, PDF, and the isolated documents-mobile-priority patch remain external integration work.",
     "Backend-owned P1 followup: persist report provenance beyond the banner (source.mode, scope, workpackSavedAt).",
     "Backend-owned P2 followups: separate empty/readiness/data/download states; reduce /documents mobile editor y≈3424 by showing core three items first, collapsing the remainder, and removing duplicate CTA. Current evidence has no horizontal overflow or overlap.",
     "After integration rerun full tests, typecheck, build, static audit, all 108 browser rows, and explicit /documents-/reports-vs-/workspace y-position and identity comparison."
   ],
   "mergeMatrix": {
     "frontend": { "head": "d2ef1df", "status": "reviewed-pass", "ownership": "typography, PDF/font assets, browser audit, evidence" },
-    "authoritativeBackendHead": "3900892",
+    "authoritativeBackendHead": "cab4a19",
     "intersectionBaseBackendHead": "2d0ff44",
     "sharedFilesCount": 22,
     "sharedFiles": [
@@ -117,14 +116,16 @@
       "package.json"
     ],
     "sharedFilePolicy": "Never merge a shared file wholesale. Preserve backend behavior and contracts first, then selectively port frontend visual and audit hunks with per-file review.",
-    "currentBackendValidation": "Backend 3900892 focused browser, 12 related tests, and typecheck pass.",
+    "currentBackendValidation": "Backend cab4a19 post-integration module browser 4/4 and typecheck pass; module report records focused 4, typecheck, build 27, and diff evidence.",
     "pdfPorting": { "status": "active-not-integrated", "base": "3900892", "source": "b61929f", "scope": "missing-font controlled 500, literal NFT paths, dynamic subsets, regenerated tracked lockfile", "excluded": "WorkpackEditor and globals.css", "pending": "full desktop and 390px browser checks, full tests, build, direct PDF, and all 108 browser rows" },
-    "backendRequired": [
-      { "commit": "3900892", "status": "required-integration", "ownership": "canonical current-workpack resilience", "evidence": "workspace return fixed; fingerprint-matched worker/selection snapshot; browser test and typecheck pass" }
+    "backendIntegrated": [
+      { "commit": "cab4a19", "lineage": ["3900892", "99a42d2"], "status": "integrated-reviewed-evidence", "ownership": "canonical current-workpack resilience, worker snapshot, and document-module shell", "evidence": "module browser 4/4 and typecheck pass; evaluation/module-shell-unify-2026-07-11/report.md records focused 4, typecheck, build 27, and diff" }
     ],
     "backendPendingReview": [
-      { "commit": "99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49", "status": "fresh-bounded-review-active-not-integrated", "ownership": "document-module shell CSS", "evidence": "worker tests, typecheck, and build pass; first reviewer hung and was terminated without verdict" },
       { "commit": "a935fdb", "status": "independent-review-rejected-remediation-active-not-integrated", "ownership": "reports provenance and state", "evidence": "P1 server 401/404/corruption silently falls to unrelated local state with exports enabled; P2 shallow AskResponse guard and server_saved cast. Fail-closed explicit-local-switch-only remediation is active." }
+    ],
+    "backendActiveIsolated": [
+      { "status": "active-not-integrated", "ownership": "documents mobile priority", "scope": "core-three launcher reducing editor y from approximately 3424 while preserving the desktop cockpit" }
     ],
     "postIntegration": "Run full tests, typecheck, build, static audit, all 108 browser rows, and explicit documents/reports versus workspace identity and y-position comparisons."
   },
