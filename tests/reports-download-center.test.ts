@@ -2,7 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { chromium, type Browser } from "playwright";
+import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 
 import {
   buildStoredCurrentWorkpack,
@@ -99,6 +99,67 @@ async function stopServer(): Promise<void> {
     });
     server?.kill();
   });
+}
+
+async function installAuthSession(context: BrowserContext): Promise<void> {
+  await context.addInitScript(({ expectedOrigin, authStorageKey, accessToken }) => {
+    if (window.location.origin !== expectedOrigin) return;
+    window.localStorage.setItem(authStorageKey, JSON.stringify({
+      access_token: accessToken,
+      refresh_token: "reports-test-refresh-token",
+      expires_at: 4_102_444_800,
+      token_type: "bearer"
+    }));
+  }, {
+    expectedOrigin: baseUrl,
+    authStorageKey: testSupabaseAuthStorageKey,
+    accessToken: testAccessToken
+  });
+}
+
+async function installLocalWorkpack(context: BrowserContext, marker: string): Promise<void> {
+  const response = buildMockAskResponse(
+    "브라우저 로컬 작업팩",
+    mockSearchResults.slice(0, 2),
+    "live",
+    "local switch candidate"
+  );
+  const workpack = {
+    ...buildStoredCurrentWorkpack({
+      ...response,
+      scenario: {
+        ...response.scenario,
+        siteName: "브라우저 최근 현장",
+        workSummary: marker
+      }
+    }),
+    savedAt: "2026-07-10T08:00:00.000Z"
+  };
+  await context.addInitScript(({ expectedOrigin, workpackKey, workpackJson }) => {
+    if (window.location.origin !== expectedOrigin) return;
+    window.localStorage.setItem(workpackKey, workpackJson);
+  }, {
+    expectedOrigin: baseUrl,
+    workpackKey: CURRENT_WORKPACK_STORAGE_KEY,
+    workpackJson: JSON.stringify(workpack)
+  });
+}
+
+async function expectBlockedServerState(page: Page, workpackId: string): Promise<void> {
+  const errorState = page.getByLabel("서버 작업팩 오류 상태");
+  await errorState.waitFor({ state: "visible", timeout: 5_000 });
+  expect(await errorState.getByRole("heading", { name: "서버 저장 작업팩을 열지 못했습니다." }).count()).toBe(1);
+  const provenance = errorState.getByLabel("요청한 서버 작업팩 출처");
+  expect(await provenance.getByText("서버 저장 작업팩", { exact: true }).count()).toBe(1);
+  expect(await provenance.getByText(workpackId, { exact: true }).count()).toBe(1);
+  expect(await page.getByLabel("작업문서형 리포트").count()).toBe(0);
+  expect(await page.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(0);
+
+  const exportButtons = errorState.getByLabel("리포트 다운로드").getByRole("button");
+  expect(await exportButtons.count()).toBe(5);
+  for (const button of await exportButtons.all()) {
+    expect(await button.isDisabled()).toBe(true);
+  }
 }
 
 describe("reports download center remount behavior", () => {
@@ -263,6 +324,105 @@ describe("reports download center remount behavior", () => {
       expect(await stickyProvenance.getByText("서버 저장 작업팩", { exact: true }).count()).toBe(1);
       expect(await stickyProvenance.locator(`time[datetime="${serverSavedAt}"]`).count()).toBe(1);
       expect(await stickyProvenance.locator(`time[datetime="${workpackGeneratedAt}"]`).count()).toBe(1);
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it("keeps a no-session server request blocked until the user explicitly switches to a valid local workpack", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const localMarker = "LOCAL_SWITCH_SENTINEL";
+    const context = await browser.newContext();
+    await installLocalWorkpack(context, localMarker);
+    const page = await context.newPage();
+
+    try {
+      await page.goto(`${baseUrl}/reports?workpackId=server-no-session`, { waitUntil: "networkidle" });
+
+      await expectBlockedServerState(page, "server-no-session");
+      expect(await page.getByText(localMarker, { exact: true }).count()).toBe(0);
+      const switchButton = page.getByRole("button", { name: "브라우저 최근 작업팩으로 전환" });
+      expect(await switchButton.count()).toBe(1);
+
+      await switchButton.click();
+      const browserProvenance = page.getByLabel("고정 리포트 데이터 출처");
+      await browserProvenance.waitFor({ state: "visible" });
+      expect(await browserProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
+      expect(await page.getByText(localMarker, { exact: true }).count()).toBeGreaterThan(0);
+      expect(await page.getByLabel("서버 작업팩 오류 상태").count()).toBe(0);
+      const exportButtons = page.getByLabel("리포트 다운로드").getByRole("button");
+      for (const button of await exportButtons.all()) {
+        expect(await button.isEnabled()).toBe(true);
+      }
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it.each([
+    { status: 401, id: "server-unauthorized", message: "관리자 로그인이 필요합니다." },
+    { status: 404, id: "server-not-found", message: "저장된 문서팩 상세를 찾지 못했습니다." }
+  ])("keeps a $status server response blocked when no valid local workpack exists", async ({ status, id, message }) => {
+    if (!browser) throw new Error("Browser was not started");
+    const context = await browser.newContext();
+    await installAuthSession(context);
+    const page = await context.newPage();
+    await page.route(`**/api/workpacks/${id}`, async (route) => {
+      await route.fulfill({
+        status,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: false, configured: true, workpack: null, message })
+      });
+    });
+
+    try {
+      await page.goto(`${baseUrl}/reports?workpackId=${id}`, { waitUntil: "networkidle" });
+
+      await expectBlockedServerState(page, id);
+      expect(await page.getByText(message, { exact: true }).count()).toBe(1);
+      expect(await page.getByRole("button", { name: "브라우저 최근 작업팩으로 전환" }).count()).toBe(0);
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it("fails closed on a malformed legacy server response without exposing local data", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const malformed = buildMockAskResponse(
+      "형식이 오래된 서버 작업팩",
+      mockSearchResults.slice(0, 2),
+      "live",
+      "malformed server report test"
+    );
+    const context = await browser.newContext();
+    await installAuthSession(context);
+    const page = await context.newPage();
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    await page.route("**/api/workpacks/server-malformed", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          configured: true,
+          canReopen: true,
+          workpack: {
+            id: "server-malformed",
+            createdAt: "2026-07-10T09:05:00.000Z",
+            updatedAt: "2026-07-10T09:15:00.000Z",
+            reopenData: { ...malformed, citations: [null] }
+          }
+        })
+      });
+    });
+
+    try {
+      await page.goto(`${baseUrl}/reports?workpackId=server-malformed`, { waitUntil: "networkidle" });
+
+      await expectBlockedServerState(page, "server-malformed");
+      expect(await page.getByRole("button", { name: "브라우저 최근 작업팩으로 전환" }).count()).toBe(0);
+      expect(pageErrors).toEqual([]);
     } finally {
       await context.close();
     }
