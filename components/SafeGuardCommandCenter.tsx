@@ -1141,12 +1141,12 @@ export function SafeGuardCommandCenter({
     });
   }, []);
 
-  function persistCurrentWorkpack(payload: AskResponse) {
+  function persistCurrentWorkpack(payload: AskResponse, fingerprint: string) {
     if (typeof window === "undefined") return;
     try {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
-        JSON.stringify(buildStoredCurrentWorkpack(payload))
+        JSON.stringify(buildStoredCurrentWorkpack(payload, { generationFingerprint: fingerprint }))
       );
     } catch (error) {
       console.warn("safeclaw current workpack save failed", error);
@@ -1593,8 +1593,9 @@ export function SafeGuardCommandCenter({
   }
 
   function applyGeneratedPayload(payload: AskResponse) {
-    persistCurrentWorkpack(payload);
-    setGenerationFingerprint(buildGenerationEvidenceFingerprint(payload));
+    const fingerprint = buildGenerationEvidenceFingerprint(payload);
+    persistCurrentWorkpack(payload, fingerprint);
+    setGenerationFingerprint(fingerprint);
     setData(payload);
     setRequiresRevalidation(false);
     setSavedWorkpackId(null);

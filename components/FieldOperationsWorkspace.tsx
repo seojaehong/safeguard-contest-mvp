@@ -899,6 +899,7 @@ export function FieldOperationsWorkspace({
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(nextData, {
+          generationFingerprint,
           workerSnapshot: workerSnapshotRef.current,
           dispatchSnapshot: dispatchSnapshotRef.current
         }))
@@ -1072,12 +1073,16 @@ export function FieldOperationsWorkspace({
     try {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
-        JSON.stringify(buildStoredCurrentWorkpack(workspaceData, { workerSnapshot, dispatchSnapshot }))
+        JSON.stringify(buildStoredCurrentWorkpack(workspaceData, {
+          generationFingerprint,
+          workerSnapshot,
+          dispatchSnapshot
+        }))
       );
     } catch (error) {
       console.warn("safeclaw current workpack snapshot update failed", error);
     }
-  }, [dispatchSnapshot, workerSnapshot, workspaceData]);
+  }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
 
   return (
     <section className="field-workspace" id="workpack">

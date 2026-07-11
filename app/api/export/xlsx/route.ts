@@ -201,7 +201,7 @@ export async function POST(request: NextRequest) {
             title,
             rows: parseRows(d.rows, title),
             profile: parseProfile(d.profile),
-            structuredRiskRows: parseRiskRowsFromBody(d)
+            structuredRiskRows: d.edited === true ? [] : parseRiskRowsFromBody(d)
           };
         })
         .filter((d): d is {
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
     const title = readString(body.title, "SafeClaw 안전 문서");
     const rows = parseRows(body.rows, title);
     const profile = parseProfile(body.profile);
-    const structuredRiskRows = parseRiskRowsFromBody(body);
+    const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
     const buffer = await buildXlsxForDocument({ title, rows, profile, scenario, structuredRiskRows });
     return xlsxResponse(buffer, `${scenario.companyName}-${title}`, "safeclaw-document");
   } catch (error) {

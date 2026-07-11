@@ -1067,6 +1067,7 @@ describe("workspace layout regression", () => {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const sample = buildSampleWorkpack();
     const sentinel = "편집안전대책: SAFECLAW_DOCUMENT_EDIT_PRESERVED";
+    const proseSentinel = "사용자가 직접 편집한 외벽 도장 작업 안전조치 문장은 내보내기에 반드시 보존됩니다.";
     const regeneratedSentinel = "[SAFECLAW_REGENERATED_TBM]";
     sample.deliverables.tbmBriefingStructured = {
       meta: {
@@ -1151,7 +1152,7 @@ describe("workspace layout regression", () => {
 
     const editor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
     await editor.waitFor({ state: "visible" });
-    const editedValue = `${sentinel}\n${await editor.inputValue()}`;
+    const editedValue = `${proseSentinel}\n${sentinel}\n${await editor.inputValue()}`;
     await editor.fill(editedValue);
     await page.waitForFunction(
       async (expectedValue) => {
@@ -1182,12 +1183,24 @@ describe("workspace layout regression", () => {
 
     await page.getByRole("button", { name: "Excel 표 양식(.xlsx)" }).click();
     await expect.poll(() => xlsxPayload?.mode).toBe("single");
-    expect(JSON.stringify(xlsxPayload)).toContain("SAFECLAW_DOCUMENT_EDIT_PRESERVED");
+    expect((xlsxPayload as Record<string, unknown> | null)?.edited).toBe(true);
+    expect((xlsxPayload as { rows?: Array<{ content?: unknown }> } | null)?.rows)
+      .toEqual(expect.arrayContaining([expect.objectContaining({ content: proseSentinel })]));
+    expect((xlsxPayload as { rows?: Array<{ item?: unknown; content?: unknown }> } | null)?.rows)
+      .toEqual(expect.arrayContaining([
+        expect.objectContaining({ item: "편집안전대책", content: "SAFECLAW_DOCUMENT_EDIT_PRESERVED" })
+      ]));
     expect(xlsxPayload).not.toHaveProperty("structured");
 
     await page.getByRole("button", { name: "한글 표 양식(.hwp)" }).click();
     await expect.poll(() => hwpPayload).not.toBeNull();
-    expect(JSON.stringify(hwpPayload)).toContain("SAFECLAW_DOCUMENT_EDIT_PRESERVED");
+    expect((hwpPayload as Record<string, unknown> | null)?.edited).toBe(true);
+    expect((hwpPayload as { rows?: Array<{ content?: unknown }> } | null)?.rows)
+      .toEqual(expect.arrayContaining([expect.objectContaining({ content: proseSentinel })]));
+    expect((hwpPayload as { rows?: Array<{ item?: unknown; content?: unknown }> } | null)?.rows)
+      .toEqual(expect.arrayContaining([
+        expect.objectContaining({ item: "편집안전대책", content: "SAFECLAW_DOCUMENT_EDIT_PRESERVED" })
+      ]));
     expect(hwpPayload).not.toHaveProperty("riskAssessmentRows");
 
     const invalidatedReview = await page.evaluate(() => {
