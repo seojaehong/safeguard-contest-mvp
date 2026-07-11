@@ -8578,7 +8578,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell .document-toolbar span,
 .safeclaw-module-shell .workflow-panel span,
 .safeclaw-module-shell .dispatch-confirm-grid span {
-  color: var(--os-yellow, #ffdc2e) !important;
+  color: var(--workspace-accent-text, var(--os-yellow, #ffdc2e)) !important;
   font-family: var(--font-hud);
   letter-spacing: 0.08em;
 }
@@ -14336,7 +14336,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-section-head span,
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-rail section > span,
 .safeclaw-module-shell.module-variant-document .safeclaw-current-workpack span {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text, var(--workspace-accent)) !important;
   font-family: inherit;
   font-size: 13px;
   font-weight: 520;
@@ -14490,7 +14490,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list article > span,
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list a {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text, var(--workspace-accent)) !important;
   font-size: 13px;
   font-weight: 560;
 }
@@ -14581,7 +14581,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-panel > span,
 .safeclaw-module-shell.module-variant-document .safeclaw-module-grid article span {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text, var(--workspace-accent)) !important;
   font-family: inherit;
   font-size: 12px;
   font-weight: 560;
@@ -14664,7 +14664,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-meta dt,
 .safeclaw-module-shell.module-variant-document .ai-connect-secret label,
 .safeclaw-module-shell.module-variant-document .ai-connect-command-box strong {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text, var(--workspace-accent)) !important;
   font-family: inherit;
   font-size: 12px;
   font-weight: 560;
@@ -14799,7 +14799,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate span {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text, var(--workspace-accent)) !important;
   font-family: inherit;
   font-weight: 560;
   letter-spacing: 0;
@@ -15306,7 +15306,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-rail a.active span {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text, var(--workspace-accent)) !important;
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-rail a strong {
@@ -15355,7 +15355,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-eyebrow,
 .safeclaw-module-shell.module-variant-document .safeclaw-module-hero aside > span:first-child {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text, var(--workspace-accent)) !important;
   font-size: 12px;
   font-weight: 650;
 }
@@ -15556,7 +15556,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list small,
 .safeclaw-module-shell.module-variant-document .safeclaw-doc-primary-grid small,
 .safeclaw-module-shell.module-variant-document .safeclaw-doc-export dt {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text, var(--workspace-accent)) !important;
   font-family: inherit;
   font-size: 12px;
   font-weight: 650;
@@ -16232,7 +16232,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .workpack-sidebar :is(.eyebrow, .template-preview span, .document-toolbar span, .rubric-item span, .selected-rubric-item span) {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text, var(--workspace-accent)) !important;
   font-family: inherit !important;
   font-size: 12px;
   font-weight: 650;
@@ -16755,6 +16755,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #dfe2e7;
   --workspace-rule-strong: #c9cdd4;
   --workspace-accent: #f5c518;
+  --workspace-accent-text: #725b00;
   --workspace-accent-hover: #d9ad00;
   --workspace-success: #187a36;
   width: 100%;
@@ -16778,6 +16779,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #292b30;
   --workspace-rule-strong: #3b3d44;
   --workspace-accent: #6c6ff7;
+  --workspace-accent-text: #8b8dfc;
   --workspace-accent-hover: #8588ff;
   --workspace-success: #4fc66a;
 }
@@ -17039,7 +17041,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell .safeclaw-page-decision-copy .safeclaw-module-eyebrow,
 .safeclaw-module-shell .safeclaw-page-decision-action span {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text) !important;
   font-family: inherit;
   font-size: 12px;
   font-weight: 580;
@@ -17193,7 +17195,7 @@ body:has(.safeclaw-landing) :is(
   .customer-template-field-grid
 ) span,
 .safeclaw-module-shell .safeclaw-module-content :is(.rubric-item, .selected-rubric-item) > span {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text) !important;
 }
 
 .safeclaw-module-shell .safeclaw-module-content :is(.field-label, .consent-check span) {
@@ -17203,7 +17205,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell .safeclaw-module-content .badge {
   border-color: var(--workspace-rule) !important;
   background: var(--workspace-surface-2) !important;
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text) !important;
 }
 
 .safeclaw-module-shell .safeclaw-module-content :is(.doc-tab, .template-card).active {
@@ -17271,7 +17273,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell .safeclaw-module-content :is(.eyebrow, .safeclaw-module-grid article > span) {
-  color: var(--workspace-accent) !important;
+  color: var(--workspace-accent-text) !important;
 }
 
 .safeclaw-module-shell .knowledge-status-grid {
@@ -17481,7 +17483,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document .safeclaw-mobile-document-priority > span {
-    color: var(--workspace-accent);
+    color: var(--workspace-accent-text);
     font-size: 11px;
     font-weight: 650;
     line-height: 1.4;

@@ -1,0 +1,45 @@
+{
+  "date": "2026-07-11",
+  "baseCommit": "24513457c7855450c4c335269325df28a6ecbd37",
+  "scope": {
+    "productFiles": [
+      "app/globals.css",
+      "app/knowledge/KnowledgePage.module.css",
+      "components/WorkpackEditor.module.css"
+    ],
+    "testFiles": [
+      "tests/product-module-shell.test.ts"
+    ],
+    "backendContractsChanged": false
+  },
+  "red": {
+    "testFilesPassed": 101,
+    "testFilesTotal": 102,
+    "testsPassed": 862,
+    "testsTotal": 864,
+    "dayContrastRange": "1.49-1.63",
+    "nightContrastRange": "4.18-4.39"
+  },
+  "tokens": {
+    "dayAccent": "#f5c518",
+    "dayAccentText": "#725b00",
+    "nightAccent": "#6c6ff7",
+    "nightAccentText": "#8b8dfc"
+  },
+  "verification": {
+    "focusedTestFiles": 1,
+    "focusedTests": 3,
+    "focusedPassed": true,
+    "typecheck": "passed",
+    "build": "passed",
+    "staticPagesGenerated": 27,
+    "diffCheck": "passed"
+  },
+  "pending": [
+    "independent review",
+    "selective backend integration",
+    "final full suite",
+    "PDF NFT and direct POST",
+    "audit-mode 108-row browser verification"
+  ]
+}
