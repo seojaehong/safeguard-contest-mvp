@@ -1,29 +1,51 @@
 {
   "date": "2026-07-12",
-  "existingHardeningCommit": "c1891cd5935bc3647b943bf771bfebaf271e5afa",
   "branch": "fix/openclaw-broker-hardening",
-  "integration": "continue on the same branch from c1891cd; do not merge or wholesale rebase onto master",
+  "productSeries": [
+    "c1891cd5935bc3647b943bf771bfebaf271e5afa",
+    "0b8799e38275f09b74d0e691fddc6271f23b3f01",
+    "a94f94acec4e2610fb6846822da7f500121f8e66"
+  ],
+  "scope": "exactly three independently confirmed OpenClaw release blockers",
+  "integration": "same-branch follow-up only; controller will selectively cherry-pick after review",
   "schemaChanges": 0,
   "dataMutations": 0,
   "paidCalls": 0,
   "oauthInvocations": 0,
   "liveDeployments": 0,
   "controls": {
-    "ownedSiteContext": "authenticated read-only selector with broker owner/site recheck",
-    "guestChat": "removed; token plus owned-site context required",
-    "openclawSession": "opaque per-request --session-key verified from installed 2026.6.5 help",
-    "toolExecution": "zero executable capabilities and local fail-closed pending enforcing sidecar attestation",
-    "relay": "removed/deferred; no config, types, or transport remain",
-    "rateLimits": "coarse IP pre-auth plus authenticated user limiter",
-    "termination": "abort and timeout await underlying run; deterministic child close ordering tested",
-    "logging": "broker logs stable codes only; raw stderr is not appended"
+    "chatContextIsolation": "authToken or siteId changes abort the active fetch/SSE controller, clear turns, and prevent aborted requests from updating later turns",
+    "rateLimits": "coarse IP pre-auth limiter retained; authenticated user limiter now runs immediately after authentication and before body parsing or owned-site lookup",
+    "fieldWorkspaceLogging": "owned-site context load failures emit only CLAW_CONTEXT_LOAD_FAILED with no raw Error or object"
+  },
+  "tdd": {
+    "chatContextRed": {
+      "command": "npm.cmd test -- tests/openclaw-broker-ui-context.test.ts",
+      "passed": 4,
+      "failed": 1,
+      "failure": "expected active AbortSignal to be aborted, received false"
+    },
+    "authenticatedLimiterRed": {
+      "command": "npm.cmd test -- tests/claw-chat-route.test.ts tests/openclaw-broker-ui-context.test.ts",
+      "passed": 16,
+      "failed": 2,
+      "failure": "body and owned-site work preceded fine-limit; quota-following request returned 200 instead of 429"
+    },
+    "fieldLoggingRed": {
+      "command": "npm.cmd test -- tests/openclaw-broker-ui-context.test.ts",
+      "passed": 5,
+      "failed": 1,
+      "failure": "stable logging function was absent"
+    }
   },
   "verification": {
     "focusedTestCommand": "npm.cmd test -- tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/engine-adapter.test.ts tests/openclaw-broker-ui-context.test.ts",
     "focusedFiles": 4,
-    "focusedPassed": 36,
+    "focusedPassed": 40,
     "focusedFailed": 0,
+    "typecheckCommand": "npm.cmd run typecheck",
     "typecheck": "passed",
+    "buildCommand": "npm.cmd run build",
     "build": "passed",
     "buildStaticPages": 27,
     "buildLog": "evaluation/openclaw-broker-hardening-2026-07-12/build.stdout.log",

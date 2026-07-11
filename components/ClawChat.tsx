@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createClawChatRequestSession,
+  type ClawChatRequestSession,
+} from "@/lib/claw-chat-session";
 import { parseSseChunk } from "@/lib/sse-client";
 
 // 클로(Claw) AI 안전관리자 채팅 v0의 UI.
@@ -53,11 +57,25 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const requestSessionRef = useRef<ClawChatRequestSession | null>(null);
+  if (!requestSessionRef.current) {
+    requestSessionRef.current = createClawChatRequestSession({
+      resetTurns: () => setTurns([]),
+      setBusy,
+    });
+  }
+  const requestSession = requestSessionRef.current;
 
   useEffect(() => {
     const node = scrollRef.current;
     if (node) node.scrollTop = node.scrollHeight;
   }, [turns]);
+
+  useEffect(() => {
+    requestSession.synchronizeContext(authToken, selectedSiteId);
+  }, [authToken, requestSession, selectedSiteId]);
+
+  useEffect(() => () => requestSession.dispose(), [requestSession]);
 
   const canSend = Boolean(authToken && selectedSiteId && contextStatus === "ready");
 
@@ -71,7 +89,7 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
         .filter((entry) => entry.content.trim().length > 0);
 
       setInput("");
-      setBusy(true);
+      const requestController = requestSession.beginRequest();
       setTurns((current) => [
         ...current,
         { role: "user", text: message },
@@ -79,6 +97,7 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
       ]);
 
       const updateAssistant = (updater: (turn: Extract<ClawTurn, { role: "assistant" }>) => Extract<ClawTurn, { role: "assistant" }>) => {
+        if (requestController.signal.aborted) return;
         setTurns((current) => {
           const next = [...current];
           for (let i = next.length - 1; i >= 0; i -= 1) {
@@ -100,6 +119,7 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
             Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({ message, history, siteId: selectedSiteId }),
+          signal: requestController.signal,
         });
 
         if (!response.ok || !response.body) {
@@ -148,13 +168,14 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
         }
         updateAssistant((turn) => ({ ...turn, done: true }));
       } catch (error) {
+        if (requestController.signal.aborted) return;
         const detail = error instanceof Error ? error.message : String(error);
         updateAssistant((turn) => ({ ...turn, done: true, error: detail }));
       } finally {
-        setBusy(false);
+        requestSession.completeRequest(requestController);
       }
     },
-    [authToken, busy, canSend, selectedSiteId, turns]
+    [authToken, busy, canSend, requestSession, selectedSiteId, turns]
   );
 
   return (

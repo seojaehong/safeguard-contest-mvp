@@ -9,6 +9,7 @@ import {
   type EngineAdapter,
 } from "@/lib/engine-adapter";
 import { createBrokerContextResolver } from "@/lib/openclaw-broker-auth";
+import { createRateLimiter } from "@/lib/rate-limit";
 
 const validContext: BrokerRequestContext = {
   userId: "user-1",
@@ -141,6 +142,82 @@ describe("/api/agent/chat broker boundary", () => {
       ip: "198.51.100.199",
     }));
     expect(limited.status).toBe(429);
+  });
+
+  it("runs the authenticated limiter immediately after auth and before body or site work", async () => {
+    const events: string[] = [];
+    const engine = adapter();
+    const resolveContext = createBrokerContextResolver({
+      createClient: () => ({ marker: "client" }),
+      authenticate: async () => {
+        events.push("authenticate");
+        return { id: validContext.userId, email: "owner@example.com" };
+      },
+      findOwnedSite: async () => {
+        events.push("owned-site");
+        return validContext;
+      },
+    });
+    const authenticatedLimiter = {
+      check: vi.fn(() => {
+        events.push("fine-limit");
+        return { allowed: false, retryAfterSeconds: 60 };
+      }),
+      size: () => 1,
+    };
+    const incoming = request({ token: "valid-token", siteId: validContext.siteId });
+    const parseBody = vi.spyOn(incoming, "json").mockImplementation(async () => {
+      events.push("body");
+      return { message: "오늘 작업 위험을 봐줘", siteId: validContext.siteId };
+    });
+    const post = createAgentChatPost({ resolveContext, engine, authenticatedLimiter });
+
+    const response = await post(incoming);
+
+    expect(response.status).toBe(429);
+    expect(events).toEqual(["authenticate", "fine-limit"]);
+    expect(parseBody).not.toHaveBeenCalled();
+    expect(engine.checkAvailability).not.toHaveBeenCalled();
+  });
+
+  it("charges malformed and unowned authenticated requests against the user quota", async () => {
+    const engine = adapter();
+    const findOwnedSite = vi.fn(async (_client: { marker: string }, user: { id: string }, siteId: string) => {
+      if (user.id !== validContext.userId || siteId !== validContext.siteId) return null;
+      return validContext;
+    });
+    const resolveContext = createBrokerContextResolver({
+      createClient: () => ({ marker: "client" }),
+      authenticate: async () => ({ id: validContext.userId, email: "owner@example.com" }),
+      findOwnedSite,
+    });
+    const post = createAgentChatPost({
+      resolveContext,
+      engine,
+      authenticatedLimiter: createRateLimiter({ limit: 2, windowMs: 60_000 }),
+    });
+
+    const malformed = await post(request({
+      token: "valid-token",
+      ip: "198.51.100.210",
+      rawBody: "not-json",
+    }));
+    const unowned = await post(request({
+      token: "valid-token",
+      ip: "198.51.100.211",
+      siteId: "site-other",
+    }));
+    const limited = await post(request({
+      token: "valid-token",
+      ip: "198.51.100.212",
+      siteId: validContext.siteId,
+    }));
+
+    expect(malformed.status).toBe(400);
+    expect(unowned.status).toBe(403);
+    expect(limited.status).toBe(429);
+    expect(findOwnedSite).toHaveBeenCalledTimes(1);
+    expect(engine.checkAvailability).not.toHaveBeenCalled();
   });
 
   it("authenticates malformed anonymous payloads before returning a body error", async () => {
