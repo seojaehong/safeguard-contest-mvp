@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   buildOpenClawChatArgs,
@@ -6,12 +6,15 @@ import {
   buildOpenClawStatusArgs,
   parseOpenClawOAuthStatusOutput,
   resolveOpenClawChatConfig,
-  resolveOpenClawSpawn
+  resolveOpenClawSpawn,
+  resolveSpawnOptions,
+  createLocalOpenClawAdapter,
 } from "@/lib/openclaw-chat";
+import type { BrokerRequestContext } from "@/lib/engine-adapter";
 
 describe("OpenClaw chat routing", () => {
   it("builds a safeclaw local agent command that uses the profile OAuth runtime", () => {
-    const config = resolveOpenClawChatConfig({});
+    const config = resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" });
     expect(config).toMatchObject({
       bin: "openclaw",
       profile: "safeclaw",
@@ -42,7 +45,8 @@ describe("OpenClaw chat routing", () => {
       ANTHROPIC_API_KEY: "anthropic-placeholder",
       ANTHROPIC_MODEL: "claude-sonnet-5",
       OPENCLAW_PROFILE: "safeclaw",
-      OPENCLAW_AGENT: "main"
+      OPENCLAW_AGENT: "main",
+      OPENCLAW_LOCAL: "1"
     });
 
     expect(config.requiredAuthProvider).toBe("openai/oauth");
@@ -82,6 +86,94 @@ describe("OpenClaw chat routing", () => {
     expect(command.args).toContain("--profile");
     expect(command.args).toContain("safeclaw");
     expect(command.args).toContain("ping");
+  });
+
+  it("does not enable the local CLI flag without explicit server-only configuration", () => {
+    expect(resolveOpenClawChatConfig({}).local).toBe(false);
+    expect(resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" }).local).toBe(true);
+  });
+
+  it("always spawns OpenClaw without a shell", () => {
+    expect(resolveSpawnOptions()).toMatchObject({
+      shell: false,
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  });
+
+  it("fails before OAuth or spawn when site-bound MCP identity cannot be proven", async () => {
+    const context: BrokerRequestContext = {
+      userId: "user-1",
+      organizationId: "org-1",
+      siteId: "site-1",
+      site: { siteName: "성수 현장", region: null, briefingQuestion: null },
+    };
+    const assertOAuth = vi.fn(async () => ({
+      ok: true as const,
+      provider: "openai" as const,
+      authProvider: "openai/oauth" as const,
+      model: "openai/gpt-5.5",
+      checkedAt: "2026-07-12T00:00:00.000Z",
+      message: "ok",
+    }));
+    const engine = createLocalOpenClawAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "local-openclaw", OPENCLAW_LOCAL: "1" },
+      runtimeCapability: async () => true,
+      verifySiteBinding: async () => false,
+      assertOAuth,
+      runChat: vi.fn(async () => undefined),
+    });
+
+    await expect(engine.checkAvailability(context)).rejects.toMatchObject({
+      code: "ENGINE_SITE_BINDING_UNPROVEN",
+      status: 503,
+    });
+    expect(assertOAuth).not.toHaveBeenCalled();
+  });
+
+  it("does not let a later preflight overwrite another site's runnable context", async () => {
+    const contextA: BrokerRequestContext = {
+      userId: "user-1",
+      organizationId: "org-1",
+      siteId: "site-1",
+      site: { siteName: "성수 현장", region: null, briefingQuestion: null },
+    };
+    const contextB: BrokerRequestContext = {
+      userId: "user-2",
+      organizationId: "org-2",
+      siteId: "site-2",
+      site: { siteName: "판교 현장", region: null, briefingQuestion: null },
+    };
+    const assertOAuth = vi.fn(async () => ({
+      ok: true as const,
+      provider: "openai" as const,
+      authProvider: "openai/oauth" as const,
+      model: "openai/gpt-5.5",
+      checkedAt: "2026-07-12T00:00:00.000Z",
+      message: "ok",
+    }));
+    const runChat = vi.fn(async () => undefined);
+    const engine = createLocalOpenClawAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "local-openclaw", OPENCLAW_LOCAL: "1" },
+      runtimeCapability: async () => true,
+      verifySiteBinding: async () => true,
+      assertOAuth,
+      runChat,
+    });
+
+    await expect(engine.checkAvailability(contextA)).resolves.toBeUndefined();
+    await expect(engine.checkAvailability(contextB)).resolves.toBeUndefined();
+    await expect(engine.run({
+      context: contextA,
+      prompt: "첫 번째 현장",
+      emit: () => undefined,
+      signal: new AbortController().signal,
+    })).resolves.toBeUndefined();
+
+    expect(assertOAuth).toHaveBeenCalledTimes(3);
+    expect(runChat).toHaveBeenCalledWith(expect.objectContaining({
+      prompt: "첫 번째 현장",
+    }));
   });
 
   it("injects the DB harness priority into the OpenClaw prompt", () => {

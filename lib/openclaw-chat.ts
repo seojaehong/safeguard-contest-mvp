@@ -3,6 +3,14 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { ClawChatEvent, ClawHistoryMessage } from "./agent-loop";
+import {
+  BrokerError,
+  ENGINE_TOOL_EFFECTS,
+  resolveEngineMode,
+  type BrokerRequestContext,
+  type EngineAdapter,
+  type EnvLike,
+} from "./engine-adapter";
 
 export type OpenClawChatConfig = {
   bin: string;
@@ -28,7 +36,6 @@ export const DEFAULT_OPENCLAW_CHAT_TIMEOUT_MS = 240_000;
 const OAUTH_STATUS_TIMEOUT_MS = 30_000;
 const OAUTH_STATUS_CACHE_MS = 60_000;
 
-type EnvLike = Record<string, string | undefined>;
 type JsonRecord = Record<string, unknown>;
 
 let oauthStatusCache: {
@@ -54,7 +61,7 @@ export function resolveOpenClawChatConfig(env: EnvLike): OpenClawChatConfig {
     agent: env.OPENCLAW_AGENT?.trim() || "main",
     model: openAiModel(env.OPENCLAW_CHAT_MODEL || env.OPENCLAW_MODEL),
     requiredAuthProvider: "openai/oauth",
-    local: env.OPENCLAW_LOCAL?.trim() !== "0",
+    local: env.OPENCLAW_LOCAL?.trim() === "1",
     timeoutMs: positiveInt(env.OPENCLAW_CHAT_TIMEOUT_MS, DEFAULT_OPENCLAW_CHAT_TIMEOUT_MS)
   };
 }
@@ -82,6 +89,31 @@ function resolveOpenClawCommand(config: OpenClawChatConfig, args: string[]): {
     return { command: process.execPath, args: [defaultWindowsMjs, ...args] };
   }
   return { command: config.bin, args };
+}
+
+export function resolveSpawnOptions(): {
+  shell: false;
+  windowsHide: true;
+  stdio: ["ignore", "pipe", "pipe"];
+} {
+  return {
+    shell: false,
+    windowsHide: true,
+    stdio: ["ignore", "pipe", "pipe"],
+  };
+}
+
+export function hasLocalOpenClawCapability(config: OpenClawChatConfig): boolean {
+  if (path.isAbsolute(config.bin)) return fs.existsSync(config.bin);
+  if (process.platform !== "win32" || !process.env.APPDATA) return false;
+  const defaultWindowsMjs = path.join(
+    process.env.APPDATA,
+    "npm",
+    "node_modules",
+    "openclaw",
+    "openclaw.mjs",
+  );
+  return fs.existsSync(defaultWindowsMjs);
 }
 
 export function buildOpenClawStatusArgs(config: OpenClawChatConfig): string[] {
@@ -232,10 +264,7 @@ export async function assertOpenClawOpenAiOAuth(config: OpenClawChatConfig): Pro
 
   const status = await new Promise<OpenClawOAuthStatus>((resolve, reject) => {
     const command = resolveOpenClawCommand(config, buildOpenClawStatusArgs(config));
-    const child = spawn(command.command, command.args, {
-      windowsHide: true,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+    const child = spawn(command.command, command.args, resolveSpawnOptions());
     let stdout = "";
     let stderr = "";
     let settled = false;
@@ -282,13 +311,11 @@ export async function runOpenClawChat(input: {
   config: OpenClawChatConfig;
   prompt: string;
   emit: (event: ClawChatEvent) => void;
+  signal?: AbortSignal;
 }): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     const command = resolveOpenClawSpawn(input.config, input.prompt);
-    const child = spawn(command.command, command.args, {
-      windowsHide: true,
-      stdio: ["ignore", "pipe", "pipe"]
-    });
+    const child = spawn(command.command, command.args, resolveSpawnOptions());
     let stderr = "";
     let settled = false;
     const timeout = setTimeout(() => {
@@ -297,6 +324,14 @@ export async function runOpenClawChat(input: {
       child.kill();
       reject(new Error(`OpenClaw chat timed out after ${input.config.timeoutMs}ms`));
     }, input.config.timeoutMs);
+    const abort = (): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      child.kill();
+      reject(input.signal?.reason ?? new BrokerError("ENGINE_EXECUTION_FAILED", 500));
+    };
+    input.signal?.addEventListener("abort", abort, { once: true });
 
     child.stdout.on("data", (chunk: Buffer) => {
       const text = chunk.toString();
@@ -309,12 +344,14 @@ export async function runOpenClawChat(input: {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
+      input.signal?.removeEventListener("abort", abort);
       reject(error);
     });
     child.on("close", (code, signal) => {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
+      input.signal?.removeEventListener("abort", abort);
       if (code === 0) {
         resolve();
         return;
@@ -323,4 +360,54 @@ export async function runOpenClawChat(input: {
       reject(new Error(`OpenClaw chat failed (code=${code ?? "null"}, signal=${signal ?? "none"})${suffix}`));
     });
   });
+}
+
+export type LocalOpenClawAdapterDependencies = {
+  env: EnvLike;
+  runtimeCapability?: (config: OpenClawChatConfig) => boolean | Promise<boolean>;
+  verifySiteBinding: (
+    context: BrokerRequestContext,
+    config: OpenClawChatConfig,
+  ) => boolean | Promise<boolean>;
+  assertOAuth?: typeof assertOpenClawOpenAiOAuth;
+  runChat?: typeof runOpenClawChat;
+};
+
+export function createLocalOpenClawAdapter(
+  dependencies: LocalOpenClawAdapterDependencies,
+): EngineAdapter {
+  const config = resolveOpenClawChatConfig(dependencies.env);
+  const assertOAuth = dependencies.assertOAuth ?? assertOpenClawOpenAiOAuth;
+  const runChat = dependencies.runChat ?? runOpenClawChat;
+  const runtimeCapability = dependencies.runtimeCapability ?? hasLocalOpenClawCapability;
+
+  async function assertRunnableContext(context: BrokerRequestContext): Promise<void> {
+    if (resolveEngineMode(dependencies.env) !== "local-openclaw" || !config.local) {
+      throw new BrokerError("ENGINE_UNAVAILABLE", 503);
+    }
+    if (!await runtimeCapability(config)) {
+      throw new BrokerError("ENGINE_RUNTIME_UNAVAILABLE", 503);
+    }
+    if (!await dependencies.verifySiteBinding(context, config)) {
+      throw new BrokerError("ENGINE_SITE_BINDING_UNPROVEN", 503);
+    }
+    await assertOAuth(config);
+  }
+
+  return {
+    id: "local-openclaw",
+    capabilities: ENGINE_TOOL_EFFECTS,
+    async checkAvailability(context): Promise<void> {
+      await assertRunnableContext(context);
+    },
+    async run(input): Promise<void> {
+      await assertRunnableContext(input.context);
+      await runChat({
+        config,
+        prompt: input.prompt,
+        emit: input.emit,
+        signal: input.signal,
+      });
+    },
+  };
 }
