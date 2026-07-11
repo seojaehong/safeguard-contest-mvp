@@ -249,6 +249,39 @@ describe("documents editor layout", () => {
       .toContain(sentinel);
   }, 90_000);
 
+  it("keeps an explicitly empty workPermitDraft empty across current-workpack reopen and reload", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPermitDraft = "";
+    const stored = buildStoredCurrentWorkpack(sample);
+
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+
+    await page.goto(`${baseUrl}/home`, { waitUntil: "networkidle" });
+    await page.getByRole("link", { name: "문서팩 다시 열기" }).click();
+    await page.getByRole("tab", { name: /안전작업허가 확인서/ }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "안전작업허가 확인서 편집" }).inputValue())
+      .toBe("");
+
+    await page.reload({ waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /안전작업허가 확인서/ }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "안전작업허가 확인서 편집" }).inputValue())
+      .toBe("");
+  }, 90_000);
+
+  it("uses generated permit fallback when legacy data has no workPermitDraft field", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /안전작업허가 확인서/ }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "안전작업허가 확인서 편집" }).inputValue())
+      .toContain("허가대상 작업:");
+  }, 90_000);
+
   it("announces meaningful save state without live-reading every keystroke", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
