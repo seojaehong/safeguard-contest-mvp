@@ -1,11 +1,20 @@
 {
   "item_count": 1040,
-  "success_count": 1040,
-  "failure_count": 0,
+  "rows_returned": 1040,
+  "success_count": null,
+  "failure_count": null,
   "elapsed_seconds": 11.581,
   "read_only": true,
   "checked_at": "2026-07-10T14:23:52.272Z",
-  "collection_count_semantics": "success_count and failure_count describe read-only collection of the 1040 live Supabase GUIDE candidate rows; freshness discrepancies are reported separately",
+  "snapshot_scope": "env-configured-supabase-snapshot",
+  "deployment_identity_proven": false,
+  "identity_boundary": "the historical probe did not record direct Vercel deployment-to-Supabase project-ref evidence",
+  "row_accounting": {
+    "rows_returned": 1040,
+    "returned_row_count_matches_reported_item_count": true,
+    "per_row_outcome_accounting_available": false
+  },
+  "collection_count_semantics": "item_count and rows_returned preserve the historical read-only env-configured Supabase snapshot result; per-row success/failure outcomes were not measured, so success_count and failure_count are null; count parity does not prove deployment identity",
   "database": {
     "source_count": 1063,
     "item_count": 9920,
@@ -238,12 +247,12 @@
     "safety_reference_embeddings": {
       "ok": false,
       "status": 404,
-      "reason": "table missing from live schema cache"
+      "reason": "table missing from env-configured Supabase snapshot schema cache"
     },
     "match_safety_reference_embeddings": {
       "ok": false,
       "status": 404,
-      "reason": "RPC missing from live schema cache"
+      "reason": "RPC missing from env-configured Supabase snapshot schema cache"
     },
     "vector_feature_flag_enabled": false,
     "db_mutation_performed": false

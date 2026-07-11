@@ -14,6 +14,60 @@ import {
 
 export const KOSHA_GUIDE_SOURCE_ID = "kosha-technical-support-regulations-2025";
 export const KOSHA_GUIDE_OFFICIAL_DOWNLOAD_BASE = "https://portal.kosha.or.kr/openapi/v1/file/down";
+export const KOSHA_AUDIT_REQUEST_TIMEOUT_MS = 20_000;
+export const KOSHA_AUDIT_REQUEST_RETRIES = 1;
+
+export type KoshaJsonResponse = {
+  ok: boolean;
+  status: number;
+  headers: Headers;
+  json: () => Promise<unknown>;
+};
+
+export type KoshaJsonFetch = (
+  input: string | URL,
+  init?: RequestInit
+) => Promise<KoshaJsonResponse>;
+
+export type KoshaJsonFetchOptions = {
+  timeoutMs?: number;
+  retries?: number;
+  fetchImpl?: KoshaJsonFetch;
+};
+
+export async function fetchKoshaJsonWithRetry(
+  input: string | URL,
+  init: RequestInit,
+  label: string,
+  options: KoshaJsonFetchOptions = {}
+): Promise<{ response: KoshaJsonResponse; payload: unknown; attemptCount: number }> {
+  const timeoutMs = options.timeoutMs ?? KOSHA_AUDIT_REQUEST_TIMEOUT_MS;
+  const retries = options.retries ?? KOSHA_AUDIT_REQUEST_RETRIES;
+  const fetchImpl: KoshaJsonFetch = options.fetchImpl || ((fetchInput, fetchInit) => fetch(fetchInput, fetchInit));
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetchImpl(input, { ...init, signal: controller.signal });
+      if (response.status >= 500 && attempt < retries) {
+        lastError = new Error(`${label} returned HTTP ${response.status}`);
+        continue;
+      }
+      const payload = await response.json();
+      return { response, payload, attemptCount: attempt + 1 };
+    } catch (error) {
+      lastError = error;
+      if (attempt === retries) break;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  const reason = lastError instanceof Error ? lastError.message : String(lastError || "unknown error");
+  throw new Error(`${label} failed after ${retries + 1} attempts: ${reason}`);
+}
 
 export type KoshaGuideItemType = "technical-guideline" | "technical-support-regulation";
 
