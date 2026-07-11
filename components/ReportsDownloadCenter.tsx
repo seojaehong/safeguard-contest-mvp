@@ -22,6 +22,7 @@ import {
   buildReportLearningMarkdown,
   buildReportMarkdown,
   buildReportSnapshot,
+  inspectServerReportWorkpackPayload,
   resolveReportProvenancePresentation,
   resolveReportViewState,
   toggleReportPhotoApproval,
@@ -32,11 +33,10 @@ import {
   type ReportPhotoApproval,
   type ReportSnapshot,
   type ReportSourceMode,
+  type ServerReportWorkpack,
   type ReportViewState
 } from "@/lib/reporting-downloads";
-import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
-import type { AskResponse } from "@/lib/types";
 
 const periodOptions: Array<{ value: ReportPeriod; label: string; detail: string }> = [
   { value: "daily", label: "오늘", detail: "당일" },
@@ -61,9 +61,9 @@ type CurrentWorkpackReadResult =
   | { status: "missing" }
   | { status: "invalid"; reason: string };
 
-type ServerReportWorkpack = {
-  id: string;
+type LocalWorkpackCandidate = {
   workpack: StoredCurrentWorkpack;
+  improvements: OperationImprovement[];
 };
 
 const EMPTY_REPORT_FACETS: ReportSnapshot["facets"] = {
@@ -79,6 +79,14 @@ const INITIAL_DOWNLOAD_STATE: DownloadState = {
   status: "idle",
   message: ""
 };
+
+const reportExportLabels = [
+  "개선사항 포함 MD",
+  "공정·작업 분류 CSV",
+  "관리자 원본 JSON",
+  "다음 생성용 MD",
+  "하네스 JSONL"
+] as const;
 
 const preservedHistoryStatusLabelMap: Record<NonNullable<OperationImprovement["status"]>, string> = {
   candidate: "후보",
@@ -193,38 +201,6 @@ function readCurrentWorkpack(): CurrentWorkpackReadResult {
   return { status: "missing" };
 }
 
-function readServerReportWorkpack(payload: unknown, requestedId: string): ServerReportWorkpack | null {
-  if (!isRecord(payload) || payload.canReopen !== true || !isRecord(payload.workpack)) return null;
-  const serverWorkpack = payload.workpack;
-  const id = typeof serverWorkpack.id === "string" ? serverWorkpack.id : "";
-  if (!id || id !== requestedId || !isRecord(serverWorkpack.reopenData)) return null;
-
-  const reopenData = serverWorkpack.reopenData;
-  if (
-    typeof reopenData.question !== "string"
-    || !isRecord(reopenData.scenario)
-    || !isRecord(reopenData.deliverables)
-    || !isRecord(reopenData.externalData)
-    || !isRecord(reopenData.riskSummary)
-    || !isRecord(reopenData.status)
-  ) {
-    return null;
-  }
-
-  const savedAt = [serverWorkpack.updatedAt, serverWorkpack.createdAt].find((value) => (
-    typeof value === "string" && isRfc3339OffsetTimestamp(value)
-  ));
-  if (typeof savedAt !== "string") return null;
-
-  return {
-    id,
-    workpack: {
-      ...buildStoredCurrentWorkpack(reopenData as AskResponse),
-      savedAt
-    }
-  };
-}
-
 function readResponseMessage(payload: unknown, fallback: string) {
   return isRecord(payload) && typeof payload.message === "string" ? payload.message : fallback;
 }
@@ -258,7 +234,7 @@ async function fetchServerReportWorkpack(
   if (!response.ok) {
     throw new Error(readResponseMessage(payload, "서버 저장 작업팩을 불러오지 못했습니다."));
   }
-  const parsed = readServerReportWorkpack(payload, workpackId);
+  const parsed = inspectServerReportWorkpackPayload(payload, workpackId);
   if (!parsed) {
     throw new Error("서버 저장 작업팩의 리포트 복원 데이터 또는 저장시각을 확인해야 합니다.");
   }
@@ -318,6 +294,43 @@ function ReportProvenanceFacts({
       {snapshot.source.workpackId ? (
         <p><strong>서버 문서팩</strong><span>{snapshot.source.workpackId}</span></p>
       ) : null}
+    </div>
+  );
+}
+
+function RequestedServerProvenance({ workpackId }: { workpackId: string }) {
+  return (
+    <div
+      className="safeclaw-report-facts"
+      aria-label="요청한 서버 작업팩 출처"
+      data-report-source-mode="server_saved"
+    >
+      <p><strong>데이터 출처</strong><span>서버 저장 작업팩</span></p>
+      <p><strong>서버 문서팩</strong><span>{workpackId}</span></p>
+    </div>
+  );
+}
+
+function BlockedDownloadActions({ detail }: { detail: string }) {
+  return (
+    <div className="safeclaw-download-actions" aria-label="리포트 다운로드">
+      <p
+        className="safeclaw-download-note"
+        aria-label="다운로드 준비 상태"
+        data-download-readiness="blocked"
+      >
+        <strong>다운로드 잠김</strong> · {detail}
+      </p>
+      {reportExportLabels.map((label, index) => (
+        <button
+          key={label}
+          type="button"
+          className={index === 0 ? "button" : "button secondary"}
+          disabled
+        >
+          {label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -615,11 +628,11 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
   const [loadError, setLoadError] = useState<string | null>(null);
   const [missingCurrent, setMissingCurrent] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [sourceNotice, setSourceNotice] = useState<string | null>(null);
+  const [localSwitchCandidate, setLocalSwitchCandidate] = useState<LocalWorkpackCandidate | null>(null);
   const [downloadState, setDownloadState] = useState<DownloadState>(INITIAL_DOWNLOAD_STATE);
   const usingSample = sourceMode === "sample";
 
-  function loadLocalState(notice: string | null = null) {
+  function loadLocalState() {
     setPhotoApprovals([]);
     try {
       const localImprovements = parseOperationImprovements(
@@ -629,7 +642,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
       setImprovements(localImprovements);
       setSourceMode("browser_local");
       setSourceWorkpackId(undefined);
-      setSourceNotice(notice);
+      setLocalSwitchCandidate(null);
       if (current.status === "ready") {
         setWorkpack(current.workpack);
         setMissingCurrent(false);
@@ -650,7 +663,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
       setWorkpack(null);
       setMissingCurrent(false);
       setLoadError("브라우저의 현재 작업 데이터를 불러오지 못했습니다.");
-      setSourceNotice(notice);
+      setLocalSwitchCandidate(null);
       setLoading(false);
     }
   }
@@ -662,27 +675,63 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
     }
 
     setLoading(true);
+    setWorkpack(null);
+    setSourceMode("server_saved");
+    setSourceWorkpackId(serverWorkpackId);
     setLoadError(null);
     setMissingCurrent(false);
-    setSourceNotice(null);
     setPhotoApprovals([]);
     setDownloadState(INITIAL_DOWNLOAD_STATE);
+    let localImprovements: OperationImprovement[] = [];
+    let candidate: LocalWorkpackCandidate | null = null;
     try {
-      const localImprovements = parseOperationImprovements(
+      localImprovements = parseOperationImprovements(
         window.localStorage.getItem(OPERATION_IMPROVEMENTS_STORAGE_KEY)
       );
+      const current = readCurrentWorkpack();
+      if (current.status === "ready") {
+        candidate = { workpack: current.workpack, improvements: localImprovements };
+      }
+    } catch (error) {
+      console.error("local report switch candidate read failed", error);
+    }
+    setLocalSwitchCandidate(candidate);
+
+    try {
       const server = await fetchServerReportWorkpack(serverWorkpackId, signal);
       if (signal?.aborted) return;
       setWorkpack(server.workpack);
       setImprovements(localImprovements);
       setSourceMode("server_saved");
       setSourceWorkpackId(server.id);
+      setLocalSwitchCandidate(null);
       setLoading(false);
     } catch (error) {
       if (signal?.aborted) return;
       console.error("server report workpack load failed", error);
-      loadLocalState(`서버 저장 작업팩을 열지 못해 브라우저 최근 작업을 확인합니다. ${errorMessage(error)}`);
+      setWorkpack(null);
+      setImprovements(localImprovements);
+      setSourceMode("server_saved");
+      setSourceWorkpackId(serverWorkpackId);
+      setLoadError(errorMessage(error));
+      setMissingCurrent(false);
+      setLocalSwitchCandidate(candidate);
+      setLoading(false);
     }
+  }
+
+  function switchToLocalWorkpack() {
+    if (!localSwitchCandidate) return;
+    setPhotoApprovals([]);
+    setWorkpack(localSwitchCandidate.workpack);
+    setImprovements(localSwitchCandidate.improvements);
+    setSourceMode("browser_local");
+    setSourceWorkpackId(undefined);
+    setLoadError(null);
+    setMissingCurrent(false);
+    setLocalSwitchCandidate(null);
+    setLoading(false);
+    setDownloadState(INITIAL_DOWNLOAD_STATE);
   }
 
   function loadSamplePreview() {
@@ -692,7 +741,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
     setSourceWorkpackId(undefined);
     setMissingCurrent(false);
     setLoadError(null);
-    setSourceNotice(null);
+    setLocalSwitchCandidate(null);
     setLoading(false);
     setDownloadState(INITIAL_DOWNLOAD_STATE);
   }
@@ -766,6 +815,28 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
           <span>데이터 출처 확인</span>
           <h2>{serverWorkpackId ? "서버 저장 작업팩을 확인하고 있습니다." : "최근 작업팩을 확인하고 있습니다."}</h2>
           <p>리포트에 사용할 작업팩을 확인하는 중입니다.</p>
+          {serverWorkpackId ? <RequestedServerProvenance workpackId={serverWorkpackId} /> : null}
+        </section>
+      );
+    }
+    if (serverWorkpackId && sourceMode === "server_saved" && loadError) {
+      return (
+        <section className="safeclaw-module-panel" aria-label="서버 작업팩 오류 상태">
+          <span>서버 작업팩 오류</span>
+          <h2>서버 저장 작업팩을 열지 못했습니다.</h2>
+          <RequestedServerProvenance workpackId={serverWorkpackId} />
+          <p>{loadError}</p>
+          <BlockedDownloadActions detail="요청한 서버 작업팩을 확인하기 전에는 내보낼 수 없습니다." />
+          <div className="safeclaw-workdoc-links">
+            <button type="button" className="button secondary" onClick={() => void loadRequestedState()}>
+              서버 작업팩 다시 시도
+            </button>
+            {localSwitchCandidate ? (
+              <button type="button" className="button secondary" onClick={switchToLocalWorkpack}>
+                브라우저 최근 작업팩으로 전환
+              </button>
+            ) : null}
+          </div>
         </section>
       );
     }
@@ -775,7 +846,6 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
         <span>{isCalmEmpty ? "데이터 출처 · 없음" : "리포트 오류"}</span>
         <h2>{isCalmEmpty ? "최근 작업팩이 없습니다." : "현재 작업을 불러오지 못했습니다."}</h2>
         <p>{isCalmEmpty ? "작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요." : loadError}</p>
-        {sourceNotice ? <p>{sourceNotice}</p> : null}
         {improvements.length ? <p>보존된 개선 이력 {improvements.length}건은 유지됩니다.</p> : null}
         <div className="safeclaw-report-facts" aria-label="다운로드 준비 상태">
           <p>
