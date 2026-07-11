@@ -168,7 +168,7 @@ function readEnvFile(path) {
   return true;
 }
 
-async function fetchWithRetry(url, init, label) {
+async function fetchHeadersWithRetry(url, init, label) {
   let lastError;
   for (let attempt = 0; attempt <= REQUEST_RETRIES; attempt += 1) {
     const controller = new AbortController();
@@ -269,11 +269,10 @@ function canonicalGuideRows(rows) {
     .sort((left, right) => codepointCompare(left.id, right.id));
 }
 
-async function fetchProductionStatus(productionBase, summarizeKoshaVisibleStatus) {
+async function fetchProductionStatus(productionBase, summarizeKoshaVisibleStatus, fetchJsonWithRetry) {
   const url = new URL("/api/safety-reference/status", productionBase);
   url.searchParams.set("audit", new Date().toISOString());
-  const response = await fetchWithRetry(url, {}, "production safety-reference status");
-  const payload = await response.json();
+  const { response, payload } = await fetchJsonWithRetry(url, {}, "production safety-reference status");
   return {
     httpStatus: response.status,
     checkedAt: response.headers.get("date"),
@@ -285,7 +284,7 @@ async function fetchProductionStatus(productionBase, summarizeKoshaVisibleStatus
   };
 }
 
-async function probeSupabaseFullRowsFromEnv() {
+async function probeSupabaseFullRowsFromEnv(fetchJsonWithRetry) {
   const url = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/u, "");
   const credentials = [
     { role: "service_role", value: process.env.SUPABASE_SERVICE_ROLE_KEY || "" },
@@ -306,10 +305,13 @@ async function probeSupabaseFullRowsFromEnv() {
     const sourceUrl = new URL("/rest/v1/safety_reference_sources", url);
     sourceUrl.searchParams.set("select", "*");
     sourceUrl.searchParams.set("id", "eq.kosha-technical-support-regulations-2025");
-    const sourceResponse = await fetchWithRetry(sourceUrl, { headers }, `Supabase ${credential.role} source probe`);
+    const { response: sourceResponse, payload: sources } = await fetchJsonWithRetry(
+      sourceUrl,
+      { headers },
+      `Supabase ${credential.role} source probe`
+    );
     attempts.push({ role: credential.role, httpStatus: sourceResponse.status });
     if (!sourceResponse.ok) continue;
-    const sources = await sourceResponse.json();
     if (!Array.isArray(sources) || !sources.length) {
       attempts.at(-1).reason = "source-empty";
       continue;
@@ -338,15 +340,16 @@ async function probeSupabaseFullRowsFromEnv() {
     itemUrl.searchParams.set("order", "id.asc");
     const rows = [];
     for (const range of ["0-999", "1000-1999"]) {
-      const response = await fetchWithRetry(itemUrl, {
-        headers: { ...headers, Range: range, "Range-Unit": "items" }
-      }, `Supabase ${credential.role} row probe ${range}`);
+      const { response, payload: page } = await fetchJsonWithRetry(
+        itemUrl,
+        { headers: { ...headers, Range: range, "Range-Unit": "items" } },
+        `Supabase ${credential.role} row probe ${range}`
+      );
       if (!response.ok) {
         attempts.at(-1).reason = `row-http-${response.status}`;
         rows.length = 0;
         break;
       }
-      const page = await response.json();
       if (!Array.isArray(page)) {
         attempts.at(-1).reason = "row-payload-invalid";
         rows.length = 0;
@@ -369,7 +372,7 @@ async function probeSupabaseFullRowsFromEnv() {
   return { available: false, reason: "credentials-rejected-or-source-empty", attempts, source: null, rows: [] };
 }
 
-async function fetchOfficialPage(category, current, page) {
+async function fetchOfficialPage(category, current, page, fetchJsonWithRetry) {
   const body = {
     techGdlnCtgryCd: category,
     techGdlnSttsSeCdIng: current ? "1" : "0",
@@ -381,26 +384,25 @@ async function fetchOfficialPage(category, current, page) {
     page,
     rowsPerPage: "100"
   };
-  const response = await fetchWithRetry(OFFICIAL_API_URL, {
+  const { response, payload } = await fetchJsonWithRetry(OFFICIAL_API_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body)
   }, `official KOSHA ${category}/${current ? "current" : "retired"}/${page}`);
   if (!response.ok) throw new Error(`official KOSHA returned HTTP ${response.status}`);
-  const payload = await response.json();
   if (payload.result !== "success" || !payload.payload) {
     throw new Error(`official KOSHA payload invalid for ${category}/${page}`);
   }
   return payload.payload;
 }
 
-async function fetchOfficialState(current, toKoshaOfficialGuideRecord) {
+async function fetchOfficialState(current, toKoshaOfficialGuideRecord, fetchJsonWithRetry) {
   const rawRows = [];
   const categoryCounts = {};
   const emptyPages = [];
   let requestCount = 0;
   for (const category of OFFICIAL_CATEGORIES) {
-    const first = await fetchOfficialPage(category, current, 1);
+    const first = await fetchOfficialPage(category, current, 1, fetchJsonWithRetry);
     requestCount += 1;
     const totalCount = Number(first.totalCount || 0);
     categoryCounts[category] = totalCount;
@@ -409,7 +411,7 @@ async function fetchOfficialState(current, toKoshaOfficialGuideRecord) {
     rawRows.push(...firstRows);
     const pageCount = Math.ceil(totalCount / 100);
     for (let page = 2; page <= pageCount; page += 1) {
-      const payload = await fetchOfficialPage(category, current, page);
+      const payload = await fetchOfficialPage(category, current, page, fetchJsonWithRetry);
       requestCount += 1;
       const rows = Array.isArray(payload.list) ? payload.list : [];
       if (!rows.length) emptyPages.push(`${category}:${page}`);
@@ -442,7 +444,7 @@ async function probeOfficialUrls(records, buildKoshaOfficialDownloadUrl) {
     }
     const started = performance.now();
     try {
-      const response = await fetchWithRetry(url, { method: "HEAD" }, `official PDF ${code}`);
+      const response = await fetchHeadersWithRetry(url, { method: "HEAD" }, `official PDF ${code}`);
       const contentType = response.headers.get("content-type");
       const contentLength = Number(response.headers.get("content-length") || 0);
       probes.push({
@@ -470,15 +472,18 @@ async function probeOfficialUrls(records, buildKoshaOfficialDownloadUrl) {
   return probes;
 }
 
-async function fetchProductionRetrieval(productionBase, scenario, branch) {
+async function fetchProductionRetrieval(productionBase, scenario, branch, fetchJsonWithRetry) {
   const url = new URL("/api/safety-reference/search", productionBase);
   url.searchParams.set("q", scenario.query);
   url.searchParams.set("limit", "12");
   if (branch === "technical-regulation") url.searchParams.set("itemType", "technical-support-regulation");
   if (branch === "source-rest") url.searchParams.set("sourceId", "kosha-technical-support-regulations-2025");
   const started = performance.now();
-  const response = await fetchWithRetry(url, {}, `production retrieval ${scenario.id}/${branch}`);
-  const payload = await response.json();
+  const { response, payload } = await fetchJsonWithRetry(
+    url,
+    {},
+    `production retrieval ${scenario.id}/${branch}`
+  );
   return {
     scenarioId: scenario.id,
     requestedBranch: branch,
@@ -493,13 +498,13 @@ async function fetchProductionRetrieval(productionBase, scenario, branch) {
   };
 }
 
-async function auditProductionRetrieval(productionBase, auditKoshaRetrievalScenario) {
+async function auditProductionRetrieval(productionBase, auditKoshaRetrievalScenario, fetchJsonWithRetry) {
   const liveResults = [];
   const downstream = [];
   for (const scenario of RETRIEVAL_SCENARIOS) {
     const scenarioResults = [];
     for (const branch of ["catalog", "technical-regulation", "source-rest"]) {
-      const result = await fetchProductionRetrieval(productionBase, scenario, branch);
+      const result = await fetchProductionRetrieval(productionBase, scenario, branch, fetchJsonWithRetry);
       liveResults.push(result);
       scenarioResults.push(result);
     }
@@ -817,12 +822,28 @@ try {
   let retrieval = { liveResults: [], downstream: [] };
 
   if (!options.offline) {
-    productionStatus = await fetchProductionStatus(options.productionBase, audit.summarizeKoshaVisibleStatus);
-    supabaseProbe = await probeSupabaseFullRowsFromEnv();
-    officialCurrent = await fetchOfficialState(true, audit.toKoshaOfficialGuideRecord);
-    officialRetired = await fetchOfficialState(false, audit.toKoshaOfficialGuideRecord);
+    productionStatus = await fetchProductionStatus(
+      options.productionBase,
+      audit.summarizeKoshaVisibleStatus,
+      audit.fetchKoshaJsonWithRetry
+    );
+    supabaseProbe = await probeSupabaseFullRowsFromEnv(audit.fetchKoshaJsonWithRetry);
+    officialCurrent = await fetchOfficialState(
+      true,
+      audit.toKoshaOfficialGuideRecord,
+      audit.fetchKoshaJsonWithRetry
+    );
+    officialRetired = await fetchOfficialState(
+      false,
+      audit.toKoshaOfficialGuideRecord,
+      audit.fetchKoshaJsonWithRetry
+    );
     officialUrlProbes = await probeOfficialUrls(officialCurrent.records, audit.buildKoshaOfficialDownloadUrl);
-    retrieval = await auditProductionRetrieval(options.productionBase, audit.auditKoshaRetrievalScenario);
+    retrieval = await auditProductionRetrieval(
+      options.productionBase,
+      audit.auditKoshaRetrievalScenario,
+      audit.fetchKoshaJsonWithRetry
+    );
     logLines.push(`production status=${productionStatus.httpStatus} visibleRows=${productionStatus.visible?.rowCount || 0}`);
     logLines.push(`official current=${officialCurrent.records.length} retired=${officialRetired.records.length}`);
   }
