@@ -452,6 +452,52 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
                 descriptor["sha256"], hashlib.sha256(manifest_path.read_bytes()).hexdigest()
             )
 
+    def test_two_zero_work_reports_never_promote_validation_time_to_build_time(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {"G-1-2025 validation-only.pdf": build_pdf_bytes(["body"])},
+            )
+            output_dir = root / "output"
+            report_dir = root / "evaluation"
+            self.run_recovery(source, output_dir)
+
+            first_noop = self.run_recovery(source, output_dir, resume=True)
+            snapshot_kosha_guide_corpus.write_quality_report(
+                first_noop,
+                output_dir,
+                report_dir,
+                0.25,
+            )
+            first_report = json.loads(
+                (report_dir / "report.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(first_report["elapsed_seconds"], 0.25)
+            self.assertEqual(
+                first_report["elapsed_semantics"],
+                "resume_validation_wall_time_only",
+            )
+
+            second_noop = self.run_recovery(source, output_dir, resume=True)
+            snapshot_kosha_guide_corpus.write_quality_report(
+                second_noop,
+                output_dir,
+                report_dir,
+                0.1,
+            )
+            second_report = json.loads(
+                (report_dir / "report.json").read_text(encoding="utf-8")
+            )
+
+            self.assertEqual(second_report["elapsed_seconds"], 0.1)
+            self.assertEqual(second_report["snapshot_elapsed_seconds"], 0.1)
+            self.assertEqual(second_report["invocation_elapsed_seconds"], 0.1)
+            self.assertEqual(
+                second_report["elapsed_semantics"],
+                "resume_validation_wall_time_only",
+            )
+
     def test_cli_stdout_exposes_existing_manifest_descriptor(self) -> None:
         repo_root = Path(__file__).resolve().parents[2]
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -801,6 +847,96 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             )
             self.assertEqual(source_identity["max_member_bytes"], len(payload))
             self.assertGreaterEqual(source_identity["max_compression_ratio"], 1.0)
+
+    def test_directory_entries_count_toward_zip_member_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "first/": b"",
+                    "second/": b"",
+                },
+            )
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(max_member_count=1)
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"ZIP member count exceeds limit: 2/1",
+            ):
+                snapshot_kosha_guide_corpus._discover_entries(source, limits)
+
+    def test_directory_entry_declared_size_obeys_member_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(root, {"oversize/": b"x" * 64})
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(max_member_bytes=32)
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"ZIP member exceeds max member bytes: .*::oversize/ \(64/32\)",
+            ):
+                snapshot_kosha_guide_corpus._discover_entries(source, limits)
+
+    def test_directory_entry_obeys_compression_ratio_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {"compressed/": b"0" * 20_000},
+                compression=zipfile.ZIP_DEFLATED,
+            )
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(
+                max_member_bytes=50_000,
+                max_compression_ratio=2.0,
+            )
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"ZIP member compression ratio exceeds limit: .*::compressed/",
+            ):
+                snapshot_kosha_guide_corpus._discover_entries(source, limits)
+
+    def test_directory_entry_bytes_obey_total_uncompressed_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "first/": b"a" * 700,
+                    "second/": b"b" * 700,
+                },
+            )
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(
+                max_member_bytes=1024,
+                max_total_uncompressed_bytes=1000,
+            )
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"total uncompressed ZIP member bytes exceed limit: 1400/1000",
+            ):
+                snapshot_kosha_guide_corpus._discover_entries(source, limits)
+
+    def test_duplicate_normalized_pdf_paths_fail_before_completed_accounting(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "[2025] 기술지원규정(테스트분야).zip"
+            member_name = "G-1-2025 duplicate.pdf"
+            with zipfile.ZipFile(source, "w") as archive:
+                archive.writestr(member_name, build_pdf_bytes(["first body"]))
+                with self.assertWarnsRegex(UserWarning, "Duplicate name"):
+                    archive.writestr(member_name, build_pdf_bytes(["second body"]))
+            output_dir = root / "output"
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"duplicate normalized ZIP member path: .*::G-1-2025 duplicate\.pdf",
+            ):
+                self.run_recovery(source, output_dir)
+
+            self.assertFalse((output_dir / "current.json").exists())
+            self.assertEqual(list(output_dir.glob("staging/*/checkpoint.json")), [])
 
     def test_rejects_oversize_and_zip_bomb_members_before_pdf_read(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
