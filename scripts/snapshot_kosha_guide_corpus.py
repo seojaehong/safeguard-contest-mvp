@@ -1657,6 +1657,26 @@ def build_snapshot(
     }
 
 
+def _existing_snapshot_elapsed_seconds(
+    report_path: Path,
+    reproducibility_hash: str,
+) -> float | None:
+    if not report_path.is_file():
+        return None
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("reproducibility_hash") != reproducibility_hash:
+        return None
+    value = payload.get("snapshot_elapsed_seconds", payload.get("elapsed_seconds"))
+    if not isinstance(value, int | float):
+        return None
+    return round(float(value), 3)
+
+
 def write_quality_report(
     summary: dict[str, object],
     output_dir: Path,
@@ -1695,6 +1715,9 @@ def write_quality_report(
     body_missing = int(counts.get("boundary", 0)) + int(counts.get("failure", 0))
     completed = int(counts.get("completed", 0))
     inventory = int(counts.get("inventory", 0))
+    reproducibility_hash = summary.get("reproducibility_hash")
+    if not isinstance(reproducibility_hash, str):
+        raise TypeError("recovery summary reproducibility_hash must be a string")
     provenance = manifest.get("official_provenance")
     item_download_boundary = (
         provenance.get("download_boundary")
@@ -1712,6 +1735,29 @@ def write_quality_report(
         name: (snapshot_dir / name).stat().st_size
         for name in ("manifest.json", *OUTPUT_FILES)
     }
+    report_dir.mkdir(parents=True, exist_ok=True)
+    json_path = report_dir / "report.json"
+    markdown_path = report_dir / "report.md"
+    invocation_elapsed_seconds = round(elapsed_seconds, 3)
+    processed_this_run = summary.get("processed_this_run")
+    processed_count = (
+        int(processed_this_run)
+        if isinstance(processed_this_run, int)
+        else None
+    )
+    existing_snapshot_elapsed_seconds = _existing_snapshot_elapsed_seconds(
+        json_path,
+        reproducibility_hash,
+    )
+    if processed_count is not None and processed_count > 0:
+        snapshot_elapsed_seconds = invocation_elapsed_seconds
+        elapsed_semantics = "snapshot_build_wall_time"
+    elif existing_snapshot_elapsed_seconds is not None:
+        snapshot_elapsed_seconds = existing_snapshot_elapsed_seconds
+        elapsed_semantics = "preserved_snapshot_build_wall_time"
+    else:
+        snapshot_elapsed_seconds = invocation_elapsed_seconds
+        elapsed_semantics = "resume_validation_wall_time_only"
     report = {
         "schema_version": "safeclaw-kosha-body-recovery-report/v2",
         "status": "DONE" if body_missing == 0 and int(counts.get("failure", 0)) == 0 else "DONE_WITH_CONCERNS",
@@ -1726,12 +1772,16 @@ def write_quality_report(
         "db_mutation_performed": False,
         "network_calls_performed": False,
         "ocr_performed": False,
-        "elapsed_seconds": round(elapsed_seconds, 3),
+        "elapsed_seconds": snapshot_elapsed_seconds,
+        "snapshot_elapsed_seconds": snapshot_elapsed_seconds,
+        "invocation_elapsed_seconds": invocation_elapsed_seconds,
+        "elapsed_semantics": elapsed_semantics,
+        "processed_this_run": processed_count,
         "counts": counts,
         "body_missing": body_missing,
         "failure_ledger_count": sum(1 for _ in _iter_jsonl(snapshot_dir / "failures.jsonl")),
         "gates": gates,
-        "reproducibility_hash": summary.get("reproducibility_hash"),
+        "reproducibility_hash": reproducibility_hash,
         "manifest": manifest_output,
         "output_hash_validation": {
             "matched": True,
@@ -1747,17 +1797,26 @@ def write_quality_report(
             "sizes_bytes": artifact_sizes,
         },
     }
-    report_dir.mkdir(parents=True, exist_ok=True)
-    json_path = report_dir / "report.json"
-    markdown_path = report_dir / "report.md"
     _write_json(json_path, report)
+    invocation_elapsed_line = (
+        f"- invocation_elapsed_seconds: {report['invocation_elapsed_seconds']}"
+        if report["invocation_elapsed_seconds"] != report["snapshot_elapsed_seconds"]
+        or report["elapsed_semantics"] != "snapshot_build_wall_time"
+        else None
+    )
     markdown = "\n".join(
         [
             "# KOSHA local full-body corpus recovery",
             "",
             f"- status: **{report['status']}**",
             f"- launch-ready: **{str(launch_ready).lower()}**",
-            f"- elapsed_seconds: {report['elapsed_seconds']}",
+            f"- snapshot_elapsed_seconds: {report['snapshot_elapsed_seconds']}",
+            *(
+                [invocation_elapsed_line]
+                if invocation_elapsed_line is not None
+                else []
+            ),
+            f"- elapsed_semantics: `{report['elapsed_semantics']}`",
             f"- source PDF inventory / completed: {inventory} / {completed}",
             f"- native body success: {counts.get('success', 0)}",
             f"- body missing boundary / hard failure: {counts.get('boundary', 0)} / {counts.get('failure', 0)}",

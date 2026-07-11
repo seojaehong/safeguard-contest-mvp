@@ -416,6 +416,9 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             )
             current_before = (output_dir / "current.json").read_bytes()
             resumed = self.run_recovery(source, output_dir, resume=True)
+            snapshot_kosha_guide_corpus.write_quality_report(
+                resumed, output_dir, report_dir, 0.25
+            )
             manifest = json.loads((self.snapshot_dir(initial) / "manifest.json").read_text(encoding="utf-8"))
             report = json.loads((report_dir / "report.json").read_text(encoding="utf-8"))
 
@@ -425,6 +428,10 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             self.assertEqual(resumed["reproducibility_hash"], canonical_hash)
             self.assertEqual(resumed["processed_this_run"], 0)
             self.assertEqual((output_dir / "current.json").read_bytes(), current_before)
+            self.assertEqual(report["elapsed_seconds"], 1.25)
+            self.assertEqual(report["snapshot_elapsed_seconds"], 1.25)
+            self.assertEqual(report["invocation_elapsed_seconds"], 0.25)
+            self.assertEqual(report["elapsed_semantics"], "preserved_snapshot_build_wall_time")
             descriptor = initial["manifest_output"]
             manifest_path = Path(descriptor["path"])
             self.assertTrue(manifest_path.is_file())

@@ -2,7 +2,8 @@
 
 - status: **DONE_WITH_CONCERNS**
 - launch-ready: **false**
-- elapsed_seconds: 8.701
+- snapshot_elapsed_seconds: 2466.908
+- elapsed_semantics: `snapshot_build_wall_time`
 - source PDF inventory / completed: 1040 / 1040
 - native body success: 1038
 - body missing boundary / hard failure: 1 / 1
