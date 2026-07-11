@@ -1,8 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-11T14:32:34.967Z",
+  "generatedAt": "2026-07-11T14:45:14.632Z",
   "mode": "normal",
   "buildDirectory": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-audit-runner-port-v2\\.next",
+  "buildId": "tFT43oHhkysWDqeWCmhdU",
+  "sourceSha": "cbbafe40b010c3ee46b307eb29a0928d4622296b",
+  "sourceIdentity": "52eb4299f1a3f8ec78936282b821e447d260e19e54298d2b695dfacb178b53bc",
+  "buildIdentity": "ff6ed7fb8c46d06aa0b2be3cee40e4870c63fd6ee055c6b0be8f5eef550e3fba",
   "chunkCount": 97,
   "markerCount": 0,
   "markerFiles": [],
