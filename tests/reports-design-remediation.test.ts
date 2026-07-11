@@ -2,6 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Browser, Page } from "playwright";
+import {
+  REPORTS_WAVE1_BUILD_MANIFEST_FILENAME,
+  REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR,
+  resolveReportsWave1OutputDirectory,
+  validateReportsWave1BuildManifest,
+} from "@/scripts/reports_wave1_publish_support.mjs";
 
 import {
   startIsolatedNextBrowserHarness,
@@ -12,11 +18,11 @@ const root = process.cwd();
 const cssPath = path.join(root, "app", "globals.css");
 const componentPath = path.join(root, "components", "ReportsDownloadCenter.tsx");
 const shellPath = path.join(root, "components", "SafeClawModuleShell.tsx");
-const outputDirectory = path.join(
+const outputDirectory = resolveReportsWave1OutputDirectory({ root, env: process.env }).directory;
+const defaultProductionBuildManifestPath = path.join(
   root,
-  "evaluation",
-  "frontend-design-contract-remediation-2026-07-12",
-  "wave-1-reports"
+  REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR,
+  REPORTS_WAVE1_BUILD_MANIFEST_FILENAME,
 );
 
 const targetLegacySelectors = [
@@ -222,6 +228,13 @@ async function prepareSample(page: Page, theme: Theme): Promise<void> {
 async function startReportsHarness(): Promise<IsolatedNextBrowserHarness> {
   const candidateSalts = [7121, 8121, 9121, 10121];
   const mode = process.env.SAFECLAW_HARNESS_MODE === "prod" ? "prod" : "dev";
+  if (mode === "prod") {
+    validateReportsWave1BuildManifest({
+      root,
+      manifestPath: process.env.SAFECLAW_PRODUCTION_BUILD_MANIFEST ?? defaultProductionBuildManifestPath,
+      expectedBuildDirectory: path.join(root, ".next"),
+    });
+  }
   let lastError: unknown;
   for (const portSalt of candidateSalts) {
     try {

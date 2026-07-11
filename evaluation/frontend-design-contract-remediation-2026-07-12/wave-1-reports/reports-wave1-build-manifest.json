@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "publisher": "safeclaw-reports-wave1-explicit-publish",
+  "generatedAt": "2026-07-11T19:29:40.873Z",
+  "publisherCommitSha": "1e0d177d573d8a673d365d7c95a8f1e407d2b076",
+  "publisherCommand": "node .\\scripts\\publish_reports_wave1_evidence.mjs",
+  "productSourceSha": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
+  "productSourceIdentity": "a14c425c4d37dca7814a5a93e98e960944f75045327d0655e1d2d3b42138e434",
+  "productSourceFiles": [
+    "app/globals.css",
+    "app/reports/page.tsx",
+    "components/ReportsDownloadCenter.tsx",
+    "components/SafeClawModuleShell.tsx"
+  ],
+  "buildDirectory": ".next",
+  "buildId": "XQffvAJA8kBAQhD1qAqLz",
+  "buildIdentity": "2d6129fc27a447ab78ba1fe2899a5d6245340ec76b8a610ae4baeaa950f3591f",
+  "buildFileCount": 427
+}

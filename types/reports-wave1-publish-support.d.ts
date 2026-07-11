@@ -1,0 +1,88 @@
+declare module "@/scripts/reports_wave1_publish_support.mjs" {
+  export const REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR: string;
+  export const REPORTS_WAVE1_BUILD_MANIFEST_FILENAME: string;
+  export const REPORTS_WAVE1_PRODUCT_RELATIVE_FILES: string[];
+  export const REPORTS_WAVE1_PUBLISHER: string;
+
+  export function listFilesRecursively(directory: string): string[];
+  export function digestFiles(baseDirectory: string, files: string[]): string;
+  export function getReportsWave1ProductIdentity(
+    root: string,
+    relativeFiles?: string[],
+  ): {
+    sourceSha: string;
+    sourceIdentity: string;
+    sourceFiles: string[];
+  };
+  export function computeNextBuildIdentity(options?: {
+    root?: string;
+    buildDirectory?: string;
+  }): {
+    buildDirectory: string;
+    relativeBuildDirectory: string;
+    buildId: string;
+    buildIdentity: string;
+    buildFileCount: number;
+  };
+  export function resolveReportsWave1OutputDirectory(options?: {
+    root?: string;
+    env?: Record<string, string | undefined>;
+    prefix?: string;
+    tempRoot?: string;
+    makeTempDirectory?: (prefix: string) => string;
+  }): {
+    directory: string;
+    publish: boolean;
+    cleanup: boolean;
+  };
+  export function writeReportsWave1BuildManifest(options?: {
+    root?: string;
+    buildDirectory?: string;
+    outputPath?: string;
+    publisherCommand?: string;
+    publisherCommitSha?: string;
+    productIdentity?: {
+      sourceSha: string;
+      sourceIdentity: string;
+      sourceFiles: string[];
+    };
+  }): {
+    schemaVersion: number;
+    publisher: string;
+    generatedAt: string;
+    publisherCommitSha: string;
+    publisherCommand: string;
+    productSourceSha: string;
+    productSourceIdentity: string;
+    productSourceFiles: string[];
+    buildDirectory: string;
+    buildId: string;
+    buildIdentity: string;
+    buildFileCount: number;
+  };
+  export function validateReportsWave1BuildManifest(options?: {
+    root?: string;
+    manifestPath?: string;
+    expectedBuildDirectory?: string;
+    productIdentity?: {
+      sourceSha: string;
+      sourceIdentity: string;
+      sourceFiles: string[];
+    };
+  }): {
+    schemaVersion: number;
+    publisher: string;
+    generatedAt: string;
+    publisherCommitSha: string;
+    publisherCommand: string;
+    productSourceSha: string;
+    productSourceIdentity: string;
+    productSourceFiles: string[];
+    buildDirectory: string;
+    buildId: string;
+    buildIdentity: string;
+    buildFileCount: number;
+    absoluteManifestPath: string;
+    absoluteBuildDirectory: string;
+  };
+}

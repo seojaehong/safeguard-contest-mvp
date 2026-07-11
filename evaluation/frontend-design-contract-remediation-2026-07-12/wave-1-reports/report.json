@@ -1,247 +1,134 @@
 {
   "date": "2026-07-12",
-  "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation",
+  "workingDirectory": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation",
   "branch": "feat/frontend-design-contract-remediation",
-  "productCommit": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
-  "evidenceCommit": "follow-up evidence commit on feat/frontend-design-contract-remediation",
-  "evidenceCommitRelation": "This evidence bundle was generated after product commit 6af13474726d8c3f7f992f6a2f94ef9aa687011e. static-audit.json intentionally keeps sourceSha on that product commit, while this report and the screenshots are committed in the follow-up evidence commit on this branch.",
-  "scope": {
-    "ownedFiles": [
-      "app/globals.css",
-      "components/ReportsDownloadCenter.tsx",
-      "components/SafeClawModuleShell.tsx",
-      "tests/helpers/isolated-next-browser-harness.ts",
-      "tests/reports-design-remediation.test.ts",
-      "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports"
-    ],
-    "packageSourceDiff": 0
-  },
-  "tdd": {
-    "red": {
-      "status": "pass",
-      "command": "npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose",
-      "result": {
-        "failed": 1,
-        "passed": 9
-      },
-      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/fresh-focused-reports-tests.log",
-      "note": "Initial contract-tightening run failed once before the final browser matcher correction."
-    },
-    "green": {
-      "status": "pass",
-      "command": "npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose",
-      "result": {
-        "passed": 10,
-        "failed": 0,
-        "skipped": 0
-      },
-      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-design-tests.log"
-    }
-  },
-  "gates": [
+  "publishedProductCommit": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
+  "publishHelperBaselineCommit": "1e0d177d573d8a673d365d7c95a8f1e407d2b076",
+  "commitRelation": "This closeout hardens helper and test orchestration only. Published Reports product evidence remains anchored to product commit 6af13474726d8c3f7f992f6a2f94ef9aa687011e unless product files change.",
+  "changes": [
+    "Prod Reports browser mode now requires a validated explicit build manifest before next start.",
+    "Default Reports browser evidence output moved to a unique temp directory.",
+    "Committed evaluation evidence refresh now requires the explicit publish step.",
+    "Unavailable ignored log claims were removed from the committed closeout report."
+  ],
+  "regressionTests": [
     {
-      "name": "frontend-static-audit",
+      "file": "tests/reports-wave1-publish-support.test.ts",
+      "covers": [
+        "default temp output",
+        "explicit publish output",
+        "stale build rejection",
+        "source SHA mismatch rejection"
+      ]
+    },
+    {
+      "file": "tests/isolated-next-browser-harness.test.ts",
+      "covers": [
+        "cleanup after stop",
+        "same port salt reuse"
+      ]
+    },
+    {
+      "file": "tests/reports-design-remediation.test.ts",
+      "covers": [
+        "prod Reports mode validates the explicit build manifest before browser startup"
+      ]
+    }
+  ],
+  "freshChecks": [
+    {
+      "name": "focused-regression-suite",
+      "status": "pass",
+      "command": [
+        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
+        "npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "result": {
+        "passed": 13,
+        "failed": 0
+      }
+    },
+    {
+      "name": "fresh-static-audit",
       "status": "fail",
-      "command": "npm.cmd run audit:frontend-consistency",
+      "command": [
+        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
+        "$tempJson = Join-Path $env:TEMP \"safeclaw-frontend-static-audit-20260712.json\"",
+        "$env:OUTPUT_PATH = $tempJson",
+        "npm.cmd run audit:frontend-consistency",
+        "Remove-Item Env:OUTPUT_PATH"
+      ],
       "result": {
         "violationCount": 2367,
-        "previousViolationCount": 2367,
-        "delta": 0,
         "importantDeclarations": 725,
         "coverageIssues": 0,
         "pageFiles": 32,
-        "componentFiles": 23,
-        "cssLines": 17725,
-        "sourceSha": "6af13474726d8c3f7f992f6a2f94ef9aa687011e"
+        "componentFiles": 23
       },
-      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/static-audit.log",
-      "json": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/static-audit.json"
+      "note": "This fresh helper-turn check was intentionally kept out of committed product evidence."
     },
     {
-      "name": "strict-typecheck",
+      "name": "typecheck",
       "status": "pass",
-      "command": "npm.cmd run typecheck",
-      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/typecheck.log"
+      "command": [
+        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
+        "npm.cmd run typecheck"
+      ]
     },
     {
-      "name": "build27",
+      "name": "build",
       "status": "pass",
-      "command": "npm.cmd run build",
+      "command": [
+        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
+        "npm.cmd run build"
+      ],
       "result": {
         "nextVersion": "15.5.20",
-        "staticPagesGenerated": 27,
-        "buildDurationSeconds": 246.7
-      },
-      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/build.log"
+        "staticPagesGenerated": 27
+      }
     },
     {
-      "name": "production-browser-contract",
+      "name": "explicit-production-publish",
       "status": "pass",
-      "command": "SAFECLAW_HARNESS_MODE=prod npm.cmd test -- tests/reports-design-remediation.test.ts -t \"Reports Wave 1 browser design contract\" --pool=forks --maxWorkers=1 --reporter=verbose",
+      "command": [
+        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
+        "node .\\scripts\\publish_reports_wave1_evidence.mjs"
+      ],
       "result": {
-        "passed": 5,
-        "failed": 0,
-        "skipped": 5,
-        "harnessMode": "prod"
-      },
-      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/green-browser-tests.log"
-    }
-  ],
-  "browserArtifacts": {
-    "sampleDayDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-day-desktop.png",
-    "sampleNightDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-desktop.png",
-    "sampleDayMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-day-mobile.png",
-    "sampleNightMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-mobile.png",
-    "serverErrorDayDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-day-desktop.png",
-    "serverErrorNightDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-night-desktop.png",
-    "serverErrorDayMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-day-mobile.png",
-    "serverErrorNightMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-night-mobile.png",
-    "emptyDayDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-empty-day-desktop.png"
-  },
-  "geometry": {
-    "sampleDayDesktop": {
-      "harnessMode": "prod",
-      "horizontalOverflow": 0,
-      "heroColumnCount": 2,
-      "heroCtaHeight": 44,
-      "heroCtaRadius": "8px",
-      "heroCtaClipped": false,
-      "heroMetaCtaOverlap": false,
-      "controlHeights": [
-        60,
-        60,
-        60,
-        60
-      ],
-      "controlRadii": [
-        "8px",
-        "8px",
-        "8px",
-        "8px"
-      ],
-      "contrastGate": "pass>=4.5"
-    },
-    "sampleNightDesktop": {
-      "harnessMode": "prod",
-      "horizontalOverflow": 0,
-      "heroColumnCount": 2,
-      "heroCtaHeight": 44,
-      "heroCtaRadius": "8px",
-      "heroCtaClipped": false,
-      "heroMetaCtaOverlap": false,
-      "controlHeights": [
-        60,
-        60,
-        60,
-        60
-      ],
-      "controlRadii": [
-        "8px",
-        "8px",
-        "8px",
-        "8px"
-      ],
-      "contrastGate": "pass>=4.5"
-    },
-    "sampleDayMobile": {
-      "harnessMode": "prod",
-      "horizontalOverflow": 0,
-      "heroColumnCount": 1,
-      "heroCtaHeight": 44,
-      "heroCtaRadius": "8px",
-      "heroCtaClipped": false,
-      "heroMetaCtaOverlap": false,
-      "controlHeights": [
-        60,
-        60,
-        60,
-        60
-      ],
-      "controlRadii": [
-        "8px",
-        "8px",
-        "8px",
-        "8px"
-      ],
-      "contrastGate": "pass>=4.5"
-    },
-    "sampleNightMobile": {
-      "harnessMode": "prod",
-      "horizontalOverflow": 0,
-      "heroColumnCount": 1,
-      "heroCtaHeight": 44,
-      "heroCtaRadius": "8px",
-      "heroCtaClipped": false,
-      "heroMetaCtaOverlap": false,
-      "controlHeights": [
-        60,
-        60,
-        60,
-        60
-      ],
-      "controlRadii": [
-        "8px",
-        "8px",
-        "8px",
-        "8px"
-      ],
-      "contrastGate": "pass>=4.5"
-    },
-    "serverError": {
-      "harnessMode": "prod",
-      "dayDesktop": {
-        "horizontalOverflow": 0,
-        "heroColumnCount": 2,
-        "heroCtaHeight": 44,
-        "heroCtaRadius": "8px",
-        "heroCtaClipped": false,
-        "heroMetaCtaOverlap": false,
-        "disabledDownloadCount": 5,
-        "readinessOccluded": false,
-        "overlayVisible": false,
-        "contrastGate": "pass>=4.5"
-      },
-      "nightDesktop": {
-        "horizontalOverflow": 0,
-        "heroColumnCount": 2,
-        "heroCtaHeight": 44,
-        "heroCtaRadius": "8px",
-        "heroCtaClipped": false,
-        "heroMetaCtaOverlap": false,
-        "disabledDownloadCount": 5,
-        "readinessOccluded": false,
-        "overlayVisible": false,
-        "contrastGate": "pass>=4.5"
-      },
-      "dayMobile": {
-        "horizontalOverflow": 0,
-        "heroColumnCount": 1,
-        "heroCtaHeight": 44,
-        "heroCtaRadius": "8px",
-        "heroCtaClipped": false,
-        "heroMetaCtaOverlap": false,
-        "disabledDownloadCount": 5,
-        "readinessOccluded": false,
-        "overlayVisible": false,
-        "contrastGate": "pass>=4.5"
-      },
-      "nightMobile": {
-        "horizontalOverflow": 0,
-        "heroColumnCount": 1,
-        "heroCtaHeight": 44,
-        "heroCtaRadius": "8px",
-        "heroCtaClipped": false,
-        "heroMetaCtaOverlap": false,
-        "disabledDownloadCount": 5,
-        "readinessOccluded": false,
-        "overlayVisible": false,
-        "contrastGate": "pass>=4.5"
+        "browserPassed": 5,
+        "browserSkipped": 5,
+        "manifest": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-wave1-build-manifest.json",
+        "productSourceSha": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
+        "buildId": "XQffvAJA8kBAQhD1qAqLz",
+        "buildIdentity": "2d6129fc27a447ab78ba1fe2899a5d6245340ec76b8a610ae4baeaa950f3591f"
       }
     }
-  },
-  "doneStatus": {
-    "reportsWave1DesktopCtaMin44": "done",
-    "reportsWave1PeriodRadius8": "done",
-    "reportsWave1StaticAuditHonestRed": "done"
+  ],
+  "committedEvidence": [
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/report.md",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/report.json",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/static-audit.json",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/red-static-audit.json",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-wave1-build-manifest.json",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-day-desktop.png",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-desktop.png",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-day-mobile.png",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-mobile.png",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-day-desktop.png",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-night-desktop.png",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-day-mobile.png",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-night-mobile.png",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-empty-day-desktop.png",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-day-desktop-metrics.json",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-desktop-metrics.json",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-day-mobile-metrics.json",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-mobile-metrics.json",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-state-metrics.json"
+  ],
+  "gateSummary": {
+    "publishedProductEvidence": "honest-6af1347-red2367-725",
+    "prodModeFailsClosed": true,
+    "defaultRoutineOutputIsTemp": true,
+    "explicitPublishRequiredForCommittedEvidence": true
   }
 }
