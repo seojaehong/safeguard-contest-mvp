@@ -75,6 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
       </head>
       <body>
+        {process.env.SAFECLAW_FRONTEND_AUDIT === "1" ? <span hidden data-safeclaw-audit-enabled="true" /> : null}
         <AuditGlobalBoundaryTrigger enabled={process.env.SAFECLAW_FRONTEND_AUDIT === "1"} />
         {children}
       </body>

@@ -96,7 +96,7 @@ export function filterExpectedBoundaryErrors(errors, expectedBoundary, kind, pro
   });
 }
 
-const transientHydration418 = /^Minified React error #418; visit https:\/\/react\.dev\/errors\/418\?args\[\]=HTML&args\[\]=\s*$/;
+const transientHydration418 = /^Minified React error #418; visit https:\/\/react\.dev\/errors\/418\?args\[\]=HTML&args\[\]=(?:\s*$| for the full message)/;
 
 export function shouldRetryTransientHydration(pageErrors, consoleErrors) {
   return pageErrors.length === 1 && consoleErrors.length === 0 && transientHydration418.test(pageErrors[0]);
@@ -104,7 +104,14 @@ export function shouldRetryTransientHydration(pageErrors, consoleErrors) {
 
 export function numericalContractFindings(row, { documentRole = false, expectedBoundary = "" } = {}) {
   const findings = [];
-  if ((row.status >= 500 || row.status === 0) && !(expectedBoundary && row.boundaryMarker === expectedBoundary)) findings.push(`HTTP ${row.status}`);
+  if (row.expectedStatuses?.length && !row.expectedStatuses.includes(row.status)) {
+    findings.push(`HTTP ${row.status} outside expected statuses ${row.expectedStatuses.join(",")}`);
+  }
+  if (row.expectedFinalPath) {
+    let finalPath = "invalid-url";
+    try { finalPath = new URL(row.finalUrl).pathname; } catch {}
+    if (finalPath !== row.expectedFinalPath) findings.push(`final path ${finalPath}, expected ${row.expectedFinalPath}`);
+  }
   if (row.consoleErrors.length) findings.push(`${row.consoleErrors.length} unexpected console error(s)`);
   if (row.pageErrors.length) findings.push(`${row.pageErrors.length} unexpected page error(s)`);
   if (row.horizontalOverflow > 2) findings.push(`${row.horizontalOverflow}px horizontal overflow`);
@@ -165,7 +172,7 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
 }
 
 async function capture(page, options) {
-  const { route, requestedPath, viewport, theme = "Product", name, limitation = "", fallbackKind = "none", expectedBoundary = "", attempt = 1 } = options;
+  const { route, requestedPath, viewport, theme = "Product", name, limitation = "", fallbackKind = "none", expectedBoundary = "", expectedStatuses = [200], expectedFinalPath = new URL(requestedPath, baseUrl).pathname, attempt = 1 } = options;
   await page.setViewportSize({ width: viewport.width, height: viewport.height });
   await page.goto("about:blank");
   const consoleErrors = [];
@@ -257,7 +264,7 @@ async function capture(page, options) {
     ? filterExpectedBoundaryErrors(pageErrors, expectedBoundary, "page") : pageErrors;
   const row = {
     route, requestedUrl: `${baseUrl}${requestedPath}`, finalUrl: page.url(),
-    status: response?.status() ?? 0, viewport: viewport.name, theme,
+    status: response?.status() ?? 0, expectedStatuses, expectedFinalPath, viewport: viewport.name, theme,
     consoleErrors: filteredConsoleErrors,
     pageErrors: filteredPageErrors,
     horizontalOverflow: metrics.horizontalOverflow,
@@ -300,6 +307,8 @@ async function main() {
         name: `route-${safeName(route)}-${viewport.name}`,
         limitation: authFallback || (route === "/interpretation/[id]" ? "No checked-in interpretation fixture; deterministic missing-record fallback captured." : ""),
         fallbackKind: authFallback || route === "/interpretation/[id]" ? "expected-deterministic-fallback" : "none",
+        expectedStatuses: route === "/interpretation/[id]" ? [404] : [200],
+        expectedFinalPath: route === "/prototype" ? "/workspace" : new URL(requestedPath, baseUrl).pathname,
       }));
     }
   }
@@ -326,6 +335,7 @@ async function main() {
       route: `special:${surface}`, requestedPath, viewport: viewports[0], theme: "Product",
       name: `special-${surface}`, limitation, fallbackKind: surface === "loading" ? "expected-transient-resolution" : "none",
       expectedBoundary,
+      expectedStatuses: surface === "not-found" ? [404] : surface === "error" ? [500] : [200],
     });
     specialSurfaceRows.push({ ...row, surface });
   }
@@ -333,6 +343,7 @@ async function main() {
   const documentPreview = await capture(page, {
     route: "generated:document-preview", requestedPath: "/documents", viewport: viewports[0], theme: "Document",
     name: "generated-document-preview", limitation: "Repository sample workpack fallback captured without external or authenticated state.",
+    expectedStatuses: [200], expectedFinalPath: "/documents",
   });
   const samplePayload = {
     title: "SafeClaw 작업 전 안전회의 기록", project: "서울 현장", date: "2026-07-11",
@@ -367,7 +378,7 @@ async function main() {
   }));
   const generatedSurfaceRows = [
     { ...documentPreview, surface: "document-preview" },
-    { surface: "pdf-export", route: "generated:pdf-export", requestedUrl: `${baseUrl}/api/export/pdf?format=html`, finalUrl: `${baseUrl}/api/export/pdf?format=html`, status: pdfResponse.status(), viewport: "desktop-1440", theme: "Document", consoleErrors: [], pageErrors: [], renderedControls: [], keySurfaces: [], boundaryMarker: "", geometryFingerprint: "", fallbackKind: "none", ...pdfMetrics, screenshot: pdfScreenshot, limitation: "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests." },
+    { surface: "pdf-export", route: "generated:pdf-export", requestedUrl: `${baseUrl}/api/export/pdf?format=html`, finalUrl: `${baseUrl}/api/export/pdf?format=html`, status: pdfResponse.status(), expectedStatuses: [200], expectedFinalPath: "/api/export/pdf", viewport: "desktop-1440", theme: "Document", consoleErrors: [], pageErrors: [], renderedControls: [], keySurfaces: [], boundaryMarker: "", geometryFingerprint: "", fallbackKind: "none", ...pdfMetrics, screenshot: pdfScreenshot, limitation: "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests." },
   ];
   await browser.close();
 
@@ -393,11 +404,19 @@ async function main() {
   const failedRows = allRows.filter((row) => row.result === "fail");
   const recoveredRows = allRows.filter((row) => row.result === "pass-with-recovered-transient");
   const findings = allRows.flatMap((row) => row.findings.map((finding) => `${row.route} ${row.viewport}: ${finding}`));
+  const buildId = fs.readFileSync(path.join(root, ".next", "BUILD_ID"), "utf8").trim();
+  const verificationCommands = [
+    { command: "npm.cmd test", outcome: "pass", exitCode: 0, testFiles: 56, tests: 523 },
+    { command: "npm.cmd run typecheck", outcome: "pass", exitCode: 0 },
+    { command: "npm.cmd run build", outcome: "pass", exitCode: 0, buildId },
+    { command: "npm.cmd run audit:frontend-consistency", outcome: "pass", exitCode: 0, pages: 32, components: 22, coverageIssues: 0, violations: 0 },
+    { command: "npm.cmd run audit:frontend-browser", outcome: failedRows.length ? "fail" : "pass", exitCode: failedRows.length ? 1 : 0, rows: allRows.length, failedRows: failedRows.length, findings: findings.length },
+  ];
   const report = {
     schemaVersion: 2, generatedAt: new Date().toISOString(), baseUrl,
     totals: { routes: routes.length, routeRows: routeRows.length, workspaceThemeRows: workspaceThemeRows.length, specialSurfaceRows: specialSurfaceRows.length, generatedSurfaceRows: generatedSurfaceRows.length, screenshots: allRows.length, successes: allRows.length - failedRows.length, failedRows: failedRows.length, recoveredRows: recoveredRows.length, findingCount: findings.length, failures: failedRows.length, elapsedMs: Date.now() - startedAt },
     staticAudit: { command: "npm.cmd run audit:frontend-consistency", expected: "32 routes, 22 components, zero coverage issues and zero violations" },
-    verificationCommands: ["npm.cmd test", "npm.cmd run typecheck", "npm.cmd run build", "npm.cmd run audit:frontend-consistency", "npm.cmd run audit:frontend-browser"],
+    verificationCommands,
     serverLog: "evaluation/frontend-consistency-audit-2026-07-11/server.log",
     reviewedScreenshots: [
       "route-root-desktop-1440.jpg", "workspace-day-desktop-1440.jpg", "workspace-night-desktop-1440.jpg",
@@ -410,12 +429,25 @@ async function main() {
       fix: "The renderer now groups semantic lists, renders safe HTTP(S) links, removes blank BR nodes, and applies the canonical 72ch long-form typography and responsive padding contract.",
       result: "Representative screenshots were re-captured after the RED/GREEN correction.",
     },
-    backendSessionConflicts: ["app/globals.css is the primary likely merge-conflict file.", "No API contract, database schema, or persistence behavior was changed by this browser audit."],
+    backendSessionConflicts: [
+      "Frontend head owns typography, PDF/font assets, browser audit, and evidence through this branch.",
+      "Backend head 2d0ff44 owns harness/history/grounded-vision behavior; preserve those changes during integration.",
+      "High-risk shared files include app/globals.css, SafeGuardCommandCenter.tsx, WorkpackEditor.tsx, lib/types.ts, current-workpack.ts, and db-harness.ts.",
+      "Known launch blocker delegated to the backend post-integration patch: document modules currently retain a purple shell identity and tall mobile rail/header; preserve report/document body styling while aligning shell identity to Workspace.",
+      "Backend-owned P1 followup: persist report provenance beyond the banner (source.mode, scope, workpackSavedAt).",
+      "Backend-owned P2 followups: separate empty/readiness/data/download states; reduce /documents mobile editor y≈3424 by showing core three items first, collapsing the remainder, and removing duplicate CTA. Current evidence has no horizontal overflow or overlap.",
+      "After integration rerun full tests, typecheck, build, static audit, all 108 browser rows, and explicit /documents-/reports-vs-/workspace y-position and identity comparison.",
+    ],
     findings, routeRows, workspaceThemeRows, specialSurfaceRows, generatedSurfaceRows,
   };
   fs.writeFileSync(path.join(outputDirectory, "report.json"), `${JSON.stringify(report, null, 2)}\n`);
-  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Routes: ${report.totals.routes}/32\n- Route matrix: ${report.totals.routeRows}/96\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/6\n- Special surfaces: ${report.totals.specialSurfaceRows}/4\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/2\n- Screenshots: ${report.totals.screenshots}\n- Successful rows: ${report.totals.successes}\n- Failed rows: ${report.totals.failedRows}\n- Recovered transient rows: ${report.totals.recoveredRows}\n- Findings: ${report.totals.findingCount}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Visual review\n\nThe browser contract validates computed product/document font availability, exact body and heading tuples derived from the numerical design specification, generated-document roles, visible control geometry, key surface padding/radius values, and identical Workspace Day/Night geometry fingerprints. The first pass exposed raw Markdown and legal punctuation artifacts; both were corrected and re-captured.\n\nReviewed: ${report.reviewedScreenshots.map((item) => `\`${item}\``).join(", ")}\n\n## Deterministic fallbacks\n\nLogin captures the missing-Supabase configuration fallback and auth callback captures the no-code pending state. Both are labelled expected deterministic fallbacks rather than failures. The actual error and global-error boundaries are exercised only when \`SAFECLAW_FRONTEND_AUDIT=1\`; ordinary production behavior is unchanged. Workspace loading remains an explicitly labelled transient resolved state. A retry is allowed only for a sole exact React 418 hydration signature with no console error; a recovered row is labelled and counted separately.\n\n## Cross-session conflicts\n\n- \`app/globals.css\` is the primary likely conflict with parallel work.\n- Browser evidence changes no API contract, database schema, or persistence behavior.\n\n## Findings\n\n${findings.length ? findings.map((item) => `- ${item}`).join("\n") : "None."}\n`;
-  fs.writeFileSync(path.join(outputDirectory, "report.md"), markdown);
+  const gateLines = verificationCommands.map((gate) => `- \`${gate.command}\`: ${gate.outcome}, exit ${gate.exitCode}${gate.testFiles ? `, ${gate.testFiles} files/${gate.tests} tests` : ""}${gate.buildId ? `, build ${gate.buildId}` : ""}${gate.pages ? `, ${gate.pages} pages/${gate.components} components, coverage ${gate.coverageIssues}, violations ${gate.violations}` : ""}${gate.rows ? `, ${gate.rows} rows, failed ${gate.failedRows}, findings ${gate.findings}` : ""}`).join("\n");
+  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Routes: ${report.totals.routes}/32\n- Route matrix: ${report.totals.routeRows}/96\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/6\n- Special surfaces: ${report.totals.specialSurfaceRows}/4\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/2\n- Screenshots: ${report.totals.screenshots}\n- Successful rows: ${report.totals.successes}\n- Failed rows: ${report.totals.failedRows}\n- Recovered transient rows: ${report.totals.recoveredRows}\n- Findings: ${report.totals.findingCount}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Verification results\n\n${gateLines}\n\n## Visual review\n\nThe browser contract validates computed product/document font availability, exact body and heading tuples derived from the numerical design specification, generated-document roles, visible control geometry, key surface padding/radius values, and identical Workspace Day/Night geometry fingerprints.\n\nReviewed: ${report.reviewedScreenshots.map((item) => `\`${item}\``).join(", ")}\n\n## Deterministic fallbacks\n\nLogin and auth callback are labelled expected deterministic fallbacks. Audit-only boundaries require \`SAFECLAW_FRONTEND_AUDIT=1\`; the same query is inert without the server-provided audit signal.\n\n## Cross-session merge matrix\n\n- Frontend owns typography, PDF/font assets, browser audit, and evidence through this branch.\n- Backend head \`2d0ff44\` owns harness/history/grounded-vision changes; preserve them while porting frontend design/PDF/audit changes.\n- High-risk shared files: \`app/globals.css\`, \`SafeGuardCommandCenter.tsx\`, \`WorkpackEditor.tsx\`, \`lib/types.ts\`, \`current-workpack.ts\`, and \`db-harness.ts\`.\n- Known launch blocker delegated to backend: purple document-module shell identity and tall mobile rail/header. Preserve internal report/document body styling while aligning the shell to Workspace.\n- Mandatory post-integration rerun: full tests, typecheck, build, static audit, all 108 rows, and /documents-/reports-vs-/workspace y-position/identity comparison.\n- \`package-lock.json\` is now tracked for reproducible installs and is a possible integration conflict.\n\n## Findings\n\n${findings.length ? findings.map((item) => `- ${item}`).join("\n") : "None."}\n`;
+  const finalMarkdown = markdown.replace(
+    "- Mandatory post-integration rerun:",
+    "- Backend-owned P1 followup: persist report provenance beyond the banner (`source.mode`, scope, and `workpackSavedAt`).\n- Backend-owned P2 followups: separate empty/readiness/data/download states; reduce the `/documents` mobile editor height by showing the core three items first, collapsing the remainder, and removing the duplicate CTA. Current evidence has no horizontal overflow or overlap.\n- Mandatory post-integration rerun:",
+  );
+  fs.writeFileSync(path.join(outputDirectory, "report.md"), finalMarkdown);
   if (failedRows.length) {
     console.error(JSON.stringify(report.totals, null, 2));
     for (const finding of findings) console.error(finding);

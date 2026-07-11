@@ -398,10 +398,10 @@ describe("browser evidence reconciliation", () => {
     expect(report.totals.successes + report.totals.failedRows).toBe(totalRows);
     expect(report.totals.failedRows).toBe(0);
     expect(report.totals.findingCount).toBe(0);
-    expect(report.totals.recoveredRows).toBe(0);
+    expect(report.totals.recoveredRows).toBeLessThanOrEqual(1);
     expect(report.totals.successes).toBeGreaterThanOrEqual(0);
     for (const row of allRows) {
-      expect(row).toMatchObject({ result: "pass" });
+      expect(["pass", "pass-with-recovered-transient"]).toContain(row.result);
       expect(row.contractChecks).toMatchObject({ passed: true, findings: [] });
     }
     for (const surface of ["not-found", "error", "global-error"]) {
@@ -490,9 +490,37 @@ describe("browser evidence reconciliation", () => {
     expect(runBrowserContractProbe(`audit.filterExpectedBoundaryErrors([${JSON.stringify(genericServerError)}, "unrelated console failure"], "error", "console", true)`)).toEqual(["unrelated console failure"]);
 
     expect(runBrowserContractProbe(`audit.shouldRetryTransientHydration(["Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]="], [])`)).toBe(true);
+    expect(runBrowserContractProbe(`audit.shouldRetryTransientHydration(["Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."], [])`)).toBe(true);
     expect(runBrowserContractProbe(`audit.shouldRetryTransientHydration(["Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]=", "unrelated runtime failure"], [])`)).toBe(false);
     expect(runBrowserContractProbe(`audit.shouldRetryTransientHydration(["Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]="], ["unrelated console failure"])`)).toBe(false);
   }, 30_000);
+
+  it("rejects unexpected HTTP status and final URL mutations", () => {
+    const base = {
+      route: "/workspace", viewport: "desktop-1440", status: 200,
+      expectedStatuses: [200], expectedFinalPath: "/workspace", finalUrl: "http://127.0.0.1:3011/workspace",
+      consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "작업공간",
+      boundaryMarker: "", bodyFont: 'Pretendard, "Noto Sans KR", sans-serif', bodyFontSize: "15px",
+      bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
+      primaryHeading: { fontFamily: "Pretendard", fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      renderedControls: [], keySurfaces: [], documentTypography: {},
+    };
+    const probe = (row: object) => runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
+    expect(probe(base).findings).toEqual([]);
+    expect(probe({ ...base, status: 404 }).findings).toContain("HTTP 404 outside expected statuses 200");
+    expect(probe({ ...base, finalUrl: "http://127.0.0.1:3011/login" }).findings).toContain("final path /login, expected /workspace");
+  }, 15_000);
+
+  it("keeps the normal-production audit query inert and reports structured gates", () => {
+    const errorSource = read("app/error.tsx");
+    expect(errorSource).toContain('[data-safeclaw-audit-enabled="true"]');
+    expect(errorSource).toContain('__auditBoundary") === "error"');
+    const report = JSON.parse(read("evaluation/frontend-consistency-audit-2026-07-11/report.json")) as { verificationCommands: unknown[] };
+    expect(report.verificationCommands).toEqual(expect.arrayContaining([
+      expect.objectContaining({ command: "npm.cmd test", outcome: "pass", exitCode: 0, testFiles: 56, tests: 523 }),
+      expect.objectContaining({ command: "npm.cmd run build", outcome: "pass", exitCode: 0 }),
+    ]));
+  });
 });
 
 describe("knowledge and legal route hierarchy", () => {

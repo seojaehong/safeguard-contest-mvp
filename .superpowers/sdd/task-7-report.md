@@ -59,3 +59,15 @@ The error and global-error boundaries are now exercised by environment-gated aud
 - Final gates: browser 108/108 with failed/recovered/findings all zero; focused reconciliation 25/25; full 56 files/520 tests; typecheck; audit-mode and normal builds; static audit 32/22 with zero issues; diff-check.
 
 F7 is complete with `passes: true`. PR 66 handoff remains a root-task coordination step, not an implementation blocker.
+
+## Final-branch review remediation
+
+- Route evidence now enforces expected HTTP statuses and final URL paths; mutation tests reject both classes of drift.
+- Audit boundary queries require the server-only `SAFECLAW_FRONTEND_AUDIT=1` signal. A normal production build returned `/dryrun?__auditBoundary=error` as HTTP 200 with no audit signal or boundary marker.
+- The binary PDF route uses statically traceable Regular/Bold TTF and OFL paths, returns a controlled `PDF_FONT_ASSET_UNAVAILABLE` 500 on asset failure, and converts the PDFKit buffer to a standards-compatible `Uint8Array` response body.
+- Next output tracing includes all three font/license assets. A direct binary POST returned HTTP 200, `application/pdf`, 16,245 bytes, and the `%PDF-` signature.
+- Browser audit: 108/108, failed 0, findings 0, recovered 1 (sole known React 418 on `/ontology` mobile, passed its immediate isolated retry). Expected-status and final-URL findings are zero.
+- Final gates: 56 files/523 tests, typecheck, normal and audit-mode builds, static audit 32 routes/22 components with zero coverage issues/violations.
+- `package-lock.json` is now tracked. Frontend/backend ownership, shared-file conflict risks, delegated P1/P2 followups, and mandatory post-integration gates are recorded in the audit JSON/Markdown merge matrix.
+
+F7 remains `in_progress` with `passes: false` pending independent final re-review.

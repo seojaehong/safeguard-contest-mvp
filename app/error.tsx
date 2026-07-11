@@ -10,7 +10,8 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("__auditBoundary") === "error") {
+    if (document.querySelector('[data-safeclaw-audit-enabled="true"]')
+      && new URLSearchParams(window.location.search).get("__auditBoundary") === "error") {
       console.error("SafeClaw deterministic frontend audit error boundary probe");
     }
   }, []);

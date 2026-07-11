@@ -608,13 +608,16 @@ function wrapPdfLine(value: string, maxChars: number) {
 }
 
 let embeddedPdfFonts: { regular: Buffer; bold: Buffer } | null = null;
+const regularPdfFontPath = path.join(process.cwd(), "public/fonts/NotoSansKR-Regular.ttf");
+const boldPdfFontPath = path.join(process.cwd(), "public/fonts/NotoSansKR-Bold.ttf");
+const pdfFontLicensePath = path.join(process.cwd(), "public/fonts/NotoSansKR-OFL.txt");
 
 function loadEmbeddedPdfFonts(): { regular: Buffer; bold: Buffer } {
   if (embeddedPdfFonts) return embeddedPdfFonts;
-  const load = (fileName: string): Buffer => fs.readFileSync(path.join(process.cwd(), "public", "fonts", fileName));
+  fs.accessSync(pdfFontLicensePath, fs.constants.R_OK);
   embeddedPdfFonts = {
-    regular: load("NotoSansKR-Regular.ttf"),
-    bold: load("NotoSansKR-Bold.ttf")
+    regular: fs.readFileSync(regularPdfFontPath),
+    bold: fs.readFileSync(boldPdfFontPath)
   };
   return embeddedPdfFonts;
 }
@@ -738,9 +741,18 @@ export async function POST(request: NextRequest) {
   const wantsBinaryPdf = !wantsHtml;
 
   if (wantsBinaryPdf) {
-    const pdf = await buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
+    let pdf: Buffer;
+    try {
+      pdf = await buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
+    } catch (error) {
+      console.error("PDF export font assets are unavailable or invalid", error);
+      return NextResponse.json(
+        { ok: false, error: "PDF_FONT_ASSET_UNAVAILABLE" },
+        { status: 500, headers: { "cache-control": "no-store" } }
+      );
+    }
     const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
-    return new NextResponse(pdf, {
+    return new NextResponse(new Uint8Array(pdf), {
       headers: {
         "content-type": "application/pdf",
         "content-disposition": `attachment; filename="safeclaw-document.pdf"; filename*=UTF-8''${encodeURIComponent(pdfFileName)}`,

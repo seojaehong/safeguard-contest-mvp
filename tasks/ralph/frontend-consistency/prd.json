@@ -13,8 +13,8 @@
       "id": "F1",
       "title": "Executable visual design contract",
       "priority": 1,
-      "status": "done",
-      "passes": true,
+      "status": "in_progress",
+      "passes": false,
       "acceptance": [
         "All 32 page routes are inventoried without gaps",
         "Four font roles and exact screen, print, spacing, and shape values are typed",
