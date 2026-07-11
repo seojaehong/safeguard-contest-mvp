@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "safeclaw-frontend-design-wave/v1",
+  "generatedAt": "2026-07-12T05:04:31.9088945+09:00",
+  "baseSha": "aecfd3304cd7c488883e36e8b89741c278d03e6f",
+  "productSha": "5db5220f240ed6c499128dbbc082943c321e9a40",
+  "scope": {
+    "route": "/workspace",
+    "surface": "responsive input textarea cascade",
+    "removedImportantDeclarations": 15
+  },
+  "tdd": {
+    "red": {
+      "testFiles": 1,
+      "passed": 0,
+      "failed": 1,
+      "observedImportantDeclarations": 15
+    },
+    "green": {
+      "testFiles": 1,
+      "passed": 1,
+      "failed": 0,
+      "observedImportantDeclarations": 0
+    }
+  },
+  "browser": {
+    "testFiles": 1,
+    "passed": 5,
+    "skipped": 13,
+    "failed": 0
+  },
+  "typecheck": {
+    "status": "pass",
+    "command": "npm.cmd run typecheck",
+    "dependencySource": "backend-harness-gate node_modules",
+    "nextVersion": "15.5.20"
+  },
+  "build": {
+    "status": "pass",
+    "exitCode": 0,
+    "staticPages": 27
+  },
+  "staticAudit": {
+    "status": "fail",
+    "expectedResidual": true,
+    "before": {
+      "violationCount": 2367,
+      "importantDeclarations": 725,
+      "coverageIssues": 0
+    },
+    "after": {
+      "violationCount": 2352,
+      "importantDeclarations": 710,
+      "coverageIssues": 0
+    }
+  },
+  "browser108": {
+    "status": "not-run",
+    "reason": "static prerequisite remains RED"
+  }
+}
