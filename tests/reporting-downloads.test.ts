@@ -16,6 +16,7 @@ import {
   buildReportLearningMarkdown,
   buildReportMarkdown,
   buildReportSnapshot,
+  inspectServerReportWorkpackPayload,
   resolveReportViewState
 } from "@/lib/reporting-downloads";
 import type { OperationImprovement } from "@/lib/operation-improvement-history";
@@ -739,7 +740,7 @@ describe("reporting downloads", () => {
       workpack: generatedWorkpack,
       improvements: [],
       period: "weekly",
-      sourceMode: "server_saved" as "browser_local",
+      sourceMode: "server_saved",
       sourceWorkpackId: "server-workpack-1",
       now: new Date("2026-07-08T12:00:00.000Z")
     });
@@ -786,6 +787,59 @@ describe("reporting downloads", () => {
         expect(exported).toContain("workpack_saved_at");
         expect(exported).toContain(limitation);
       }
+    }
+  });
+
+  it("validates a server reopen payload before fingerprinting it", () => {
+    const workpack = makeWorkpack();
+    const validPayload = {
+      canReopen: true,
+      workpack: {
+        id: "server-workpack-validated",
+        createdAt: "2026-07-08T07:55:00.000Z",
+        updatedAt: "2026-07-08T08:00:00.000Z",
+        reopenData: workpack.data
+      }
+    };
+
+    const parsed = inspectServerReportWorkpackPayload(validPayload, "server-workpack-validated");
+    expect(parsed).toMatchObject({
+      id: "server-workpack-validated",
+      workpack: {
+        savedAt: "2026-07-08T08:00:00.000Z",
+        data: { question: workpack.data.question }
+      }
+    });
+
+    const malformedCandidates: unknown[] = [
+      { ...workpack.data, citations: [null] },
+      { ...workpack.data, practicalPoints: ["valid", null] },
+      { ...workpack.data, scenario: { ...workpack.data.scenario, workSummary: 42 } },
+      { ...workpack.data, deliverables: { ...workpack.data.deliverables, riskAssessmentDraft: null } },
+      { ...workpack.data, externalData: [] },
+      { ...workpack.data, riskSummary: { ...workpack.data.riskSummary, immediateActions: "legacy" } },
+      { ...workpack.data, status: { ...workpack.data.status, summary: 42 } },
+      {
+        ...workpack.data,
+        structured: {
+          ...workpack.data.structured,
+          riskAssessmentRows: [{ ...riskRow, evidenceRefs: ["valid", null] }]
+        }
+      }
+    ];
+    for (const reopenData of malformedCandidates) {
+      const malformedPayload = {
+        ...validPayload,
+        workpack: { ...validPayload.workpack, reopenData }
+      };
+      expect(() => inspectServerReportWorkpackPayload(
+        malformedPayload,
+        "server-workpack-validated"
+      )).not.toThrow();
+      expect(inspectServerReportWorkpackPayload(
+        malformedPayload,
+        "server-workpack-validated"
+      )).toBeNull();
     }
   });
 

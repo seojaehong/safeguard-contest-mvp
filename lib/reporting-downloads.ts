@@ -1,4 +1,7 @@
-import type { StoredCurrentWorkpack } from "@/lib/current-workpack";
+import {
+  inspectStoredCurrentWorkpack,
+  type StoredCurrentWorkpack
+} from "@/lib/current-workpack";
 import type {
   OperationImprovement,
   OperationImprovementStatus
@@ -35,6 +38,199 @@ export type ReportProvenancePresentation = {
   label: "샘플 데이터" | "브라우저 최근 작업팩" | "서버 저장 작업팩";
   savedTimeLabel: "미리보기 준비" | "브라우저 저장" | "서버 저장";
 };
+
+export type ServerReportWorkpack = {
+  id: string;
+  workpack: StoredCurrentWorkpack;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function hasStringFields(value: Record<string, unknown>, fields: readonly string[]): boolean {
+  return fields.every((field) => typeof value[field] === "string");
+}
+
+function isCitation(value: unknown): boolean {
+  if (!isRecord(value) || !hasStringFields(value, ["id", "type", "title", "summary", "sourceLabel"])) {
+    return false;
+  }
+  return (value.citation === undefined || typeof value.citation === "string")
+    && (value.sourceUrl === undefined || typeof value.sourceUrl === "string")
+    && (value.tags === undefined || isStringArray(value.tags));
+}
+
+function isScenario(value: unknown): boolean {
+  return isRecord(value)
+    && hasStringFields(value, ["siteName", "companyName", "companyType", "workSummary", "weatherNote"])
+    && typeof value.workerCount === "number"
+    && Number.isFinite(value.workerCount);
+}
+
+function isForeignWorkerLanguage(value: unknown): boolean {
+  return isRecord(value)
+    && hasStringFields(value, ["code", "label", "nativeLabel", "rationale"])
+    && isStringArray(value.lines);
+}
+
+function isDeliverables(value: unknown): boolean {
+  if (!isRecord(value) || !hasStringFields(value, [
+    "workpackSummaryDraft",
+    "riskAssessmentDraft",
+    "workPlanDraft",
+    "tbmBriefing",
+    "tbmLogDraft",
+    "safetyEducationRecordDraft",
+    "emergencyResponseDraft",
+    "photoEvidenceDraft",
+    "foreignWorkerBriefing",
+    "foreignWorkerTransmission",
+    "kakaoMessage"
+  ])) {
+    return false;
+  }
+  return Array.isArray(value.foreignWorkerLanguages)
+    && value.foreignWorkerLanguages.every(isForeignWorkerLanguage)
+    && isStringArray(value.safetyEducationPoints)
+    && isStringArray(value.tbmQuestions);
+}
+
+function isExternalData(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  const weather = value.weather;
+  const training = value.training;
+  const koshaEducation = value.koshaEducation;
+  const kosha = value.kosha;
+  const accidentCases = value.accidentCases;
+  return isRecord(weather)
+    && hasStringFields(weather, ["source", "mode", "locationLabel", "summary", "detail"])
+    && isStringArray(weather.actions)
+    && isRecord(training)
+    && hasStringFields(training, ["source", "mode", "detail"])
+    && Array.isArray(training.recommendations)
+    && isRecord(koshaEducation)
+    && hasStringFields(koshaEducation, ["source", "mode", "detail"])
+    && Array.isArray(koshaEducation.recommendations)
+    && isRecord(kosha)
+    && hasStringFields(kosha, ["source", "mode", "detail"])
+    && Array.isArray(kosha.references)
+    && isRecord(accidentCases)
+    && hasStringFields(accidentCases, ["source", "mode", "detail"])
+    && Array.isArray(accidentCases.cases);
+}
+
+function isRiskSummary(value: unknown): boolean {
+  return isRecord(value)
+    && hasStringFields(value, ["title", "riskLevel", "topRisk"])
+    && ["상", "중", "하"].includes(value.riskLevel as string)
+    && isStringArray(value.immediateActions);
+}
+
+function isStatus(value: unknown): boolean {
+  if (!isRecord(value) || !hasStringFields(value, [
+    "lawgo",
+    "ai",
+    "weather",
+    "work24",
+    "kosha",
+    "summary",
+    "detail"
+  ])) {
+    return false;
+  }
+  return [value.lawgo, value.ai, value.weather, value.work24, value.kosha]
+    .every((mode) => mode === "mock" || mode === "live" || mode === "fallback");
+}
+
+function isRiskAssessmentRow(value: unknown): boolean {
+  return isRecord(value)
+    && hasStringFields(value, [
+      "location",
+      "process",
+      "task",
+      "equipment",
+      "hazard",
+      "fourM",
+      "accidentType",
+      "currentControls",
+      "additionalControls",
+      "owner",
+      "due",
+      "verification",
+      "verificationStatus",
+      "verificationDate",
+      "verificationChecker",
+      "whyLikelihood",
+      "whySeverity"
+    ])
+    && typeof value.likelihood === "number"
+    && Number.isFinite(value.likelihood)
+    && typeof value.severity === "number"
+    && Number.isFinite(value.severity)
+    && (value.riskLevel === "high" || value.riskLevel === "medium" || value.riskLevel === "low")
+    && isStringArray(value.evidenceRefs);
+}
+
+function isStructuredData(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!isRecord(value) || !Array.isArray(value.riskAssessmentRows)) return false;
+  if (!value.riskAssessmentRows.every(isRiskAssessmentRow)) return false;
+  if (!isRecord(value.riskAssessmentValidation)) return false;
+  return typeof value.riskAssessmentValidation.ok === "boolean"
+    && typeof value.riskAssessmentValidation.issueCount === "number"
+    && Array.isArray(value.riskAssessmentValidation.issues);
+}
+
+function isGenerationEvidence(value: unknown): boolean {
+  if (value === undefined) return true;
+  return isRecord(value)
+    && typeof value.signature === "string"
+    && isRecord(value.snapshot)
+    && typeof value.snapshot.generatedAt === "string";
+}
+
+function isServerAskResponse(value: unknown): value is Record<string, unknown> {
+  return isRecord(value)
+    && hasStringFields(value, ["question", "answer", "mode"])
+    && (value.mode === "mock" || value.mode === "live" || value.mode === "fallback")
+    && isStringArray(value.practicalPoints)
+    && Array.isArray(value.citations)
+    && value.citations.every(isCitation)
+    && isScenario(value.scenario)
+    && isDeliverables(value.deliverables)
+    && isExternalData(value.externalData)
+    && isRiskSummary(value.riskSummary)
+    && isStatus(value.status)
+    && isStructuredData(value.structured)
+    && isGenerationEvidence(value.generationEvidence);
+}
+
+export function inspectServerReportWorkpackPayload(
+  payload: unknown,
+  requestedId: string
+): ServerReportWorkpack | null {
+  if (!isRecord(payload) || payload.canReopen !== true || !isRecord(payload.workpack)) return null;
+  const serverWorkpack = payload.workpack;
+  const id = typeof serverWorkpack.id === "string" ? serverWorkpack.id : "";
+  if (!id || id !== requestedId || !isServerAskResponse(serverWorkpack.reopenData)) return null;
+
+  const savedAt = [serverWorkpack.updatedAt, serverWorkpack.createdAt].find((value) => (
+    typeof value === "string" && isRfc3339OffsetTimestamp(value)
+  ));
+  if (typeof savedAt !== "string") return null;
+
+  const inspected = inspectStoredCurrentWorkpack(JSON.stringify({
+    savedAt,
+    source: "workspace",
+    data: serverWorkpack.reopenData
+  }));
+  return inspected.status === "valid" ? { id, workpack: inspected.workpack } : null;
+}
 
 export type ReportImprovementStatus = OperationImprovementStatus;
 
