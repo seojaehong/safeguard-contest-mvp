@@ -9,6 +9,7 @@ import {
   type RubricDocumentKey,
   type RubricEvaluationItem
 } from "@/lib/safety-document-rubric";
+import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
 import styles from "./WorkpackEditor.module.css";
 
 declare global {
@@ -243,30 +244,8 @@ function sanitizeFileName(value: string) {
   return value.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, "-").slice(0, 80) || "safeclaw";
 }
 
-function hashFingerprint(value: string) {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(16).padStart(8, "0");
-}
-
 export function buildGenerationEvidenceFingerprint(data: AskResponse) {
-  return hashFingerprint(JSON.stringify({
-    generationMode: data.generationMode || "unspecified",
-    qualityGeneratedAt: data.qualityContract?.generatedAt || "",
-    deliverables: data.deliverables,
-    citations: data.citations.map((citation) => ({
-      id: citation.id,
-      title: citation.title,
-      citation: citation.citation,
-      sourceUrl: citation.sourceUrl
-    })),
-    evidenceLabels: data.evidenceLabels || {},
-    ontologyQa: data.ontologyQa || null,
-    dbHarness: data.dbHarness?.packet || null
-  }));
+  return buildWorkpackGenerationFingerprint(data);
 }
 
 function downloadBlob(blob: Blob, fileName: string) {
@@ -1297,13 +1276,6 @@ function parseSheetRows(title: string, body: string): SheetRow[] {
       return;
     }
 
-    // Drop full-sentence lines that look like notice/policy text (those that don't fit
-    // any [section]/key:val/numbered/bullet pattern). They were noise rows in the
-    // earlier output (e.g., "준제출형 - 작업계획서 제출 필수 항목을 반영한 현장 검토용입니다.").
-    if (/^[가-힯].{20,}[다요\.]$/.test(line)) {
-      return;
-    }
-
     rows.push({ document: title, section, item: String(itemNumber), content: line });
     itemNumber += 1;
   });
@@ -1662,22 +1634,41 @@ function buildCombinedText(values: Record<DocumentKey, string>) {
   ].join("\n\n---\n\n");
 }
 
-function parseStoredValues(raw: string | null, fallback: Record<DocumentKey, string>) {
-  if (!raw) return fallback;
+type StoredEditorDraft = {
+  version: 1;
+  values: WorkpackDocumentValues;
+  dirtyKeys: DocumentKey[];
+};
+
+function isDocumentKey(value: unknown): value is DocumentKey {
+  return typeof value === "string" && documentMeta.some((item) => item.key === value);
+}
+
+function parseDocumentValues(value: unknown, fallback: WorkpackDocumentValues): WorkpackDocumentValues {
+  const record = readObject(value) || {};
+  return documentMeta.reduce<WorkpackDocumentValues>((acc, item) => {
+    const documentValue = record[item.key];
+    acc[item.key] = typeof documentValue === "string" ? documentValue : fallback[item.key];
+    return acc;
+  }, { ...fallback });
+}
+
+function parseStoredDraft(raw: string | null, fallback: WorkpackDocumentValues): StoredEditorDraft {
+  if (!raw) return { version: 1, values: fallback, dirtyKeys: [] };
 
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return fallback;
+    const record = readObject(parsed);
+    if (!record) return { version: 1, values: fallback, dirtyKeys: [] };
 
-    const record = parsed as Partial<Record<DocumentKey, unknown>>;
-    return documentMeta.reduce<Record<DocumentKey, string>>((acc, item) => {
-      const value = record[item.key];
-      acc[item.key] = typeof value === "string" ? value : fallback[item.key];
-      return acc;
-    }, { ...fallback });
+    const values = parseDocumentValues(record.values || record, fallback);
+    const storedDirtyKeys = Array.isArray(record.dirtyKeys)
+      ? record.dirtyKeys.filter(isDocumentKey)
+      : documentMeta.filter((item) => values[item.key] !== fallback[item.key]).map((item) => item.key);
+    return { version: 1, values, dirtyKeys: [...new Set(storedDirtyKeys)] };
   } catch (error) {
     console.warn("workpack local draft parse failed", error);
-    return fallback;
+    return { version: 1, values: fallback, dirtyKeys: [] };
   }
 }
 
@@ -1903,6 +1894,7 @@ export function WorkpackEditor({
   );
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
+  const [dirtyDocumentKeys, setDirtyDocumentKeys] = useState<DocumentKey[]>([]);
   const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [xlsxStatus, setXlsxStatus] = useState<"idle" | "building" | "error">("idle");
@@ -1916,6 +1908,7 @@ export function WorkpackEditor({
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
   const documentBodyRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const onDeliverablesChangeRef = useRef(onDeliverablesChange);
   const pendingChangeRef = useRef<WorkpackDeliverablesChange>({
     source: "generated",
     requiresRevalidation: false
@@ -1923,6 +1916,8 @@ export function WorkpackEditor({
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
+  const selectedUsesEditedText = dirtyDocumentKeys.includes(selected.key)
+    || selectedText !== initialValues[selected.key];
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
   const selectedRows = buildRowsForDocument(selected, values);
   const riskAssessmentMeta = documentMeta.find((item) => item.key === "riskAssessmentDraft") || documentMeta[1];
@@ -2001,33 +1996,44 @@ export function WorkpackEditor({
       }
     ];
   }, [data.citations.length, harnessSummary, selectedEvidenceLabel]);
+
+  useEffect(() => {
+    onDeliverablesChangeRef.current = onDeliverablesChange;
+  }, [onDeliverablesChange]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (hydratedStorageKey === storageKey) return;
 
     setHydratedStorageKey(null);
-    const stored = parseStoredValues(window.localStorage.getItem(storageKey), initialValues);
-    const restoredDraft = (Object.keys(initialValues) as DocumentKey[])
-      .some((key) => stored[key] !== initialValues[key]);
+    const stored = parseStoredDraft(window.localStorage.getItem(storageKey), initialValues);
+    const restoredDraft = stored.dirtyKeys.length > 0;
     pendingChangeRef.current = {
       source: restoredDraft ? "stored-draft" : "generated",
       requiresRevalidation: restoredDraft
     };
-    setValues(stored);
+    setValues(stored.values);
+    setDirtyDocumentKeys(stored.dirtyKeys);
     setLastEditedAt(null);
     setHydratedStorageKey(storageKey);
-  }, [initialValues, storageKey]);
+  }, [hydratedStorageKey, initialValues, storageKey]);
 
   useEffect(() => {
     if (hydratedStorageKey !== storageKey) return;
     if (typeof window !== "undefined") {
       try {
-        window.localStorage.setItem(storageKey, JSON.stringify(values));
+        const storedDraft: StoredEditorDraft = {
+          version: 1,
+          values,
+          dirtyKeys: dirtyDocumentKeys
+        };
+        window.localStorage.setItem(storageKey, JSON.stringify(storedDraft));
       } catch (error) {
         console.warn("workpack local draft save failed", error);
       }
     }
-    onDeliverablesChange?.(values, pendingChangeRef.current);
-  }, [hydratedStorageKey, onDeliverablesChange, storageKey, values]);
+    onDeliverablesChangeRef.current?.(values, pendingChangeRef.current);
+  }, [dirtyDocumentKeys, hydratedStorageKey, storageKey, values]);
 
   useEffect(() => {
     if (!focusToken) return;
@@ -2058,6 +2064,7 @@ export function WorkpackEditor({
   function updateValue(value: string) {
     pendingChangeRef.current = { source: "user-edit", requiresRevalidation: true };
     setValues((current) => ({ ...current, [selected.key]: value }));
+    setDirtyDocumentKeys((current) => current.includes(selected.key) ? current : [...current, selected.key]);
     setLastEditedAt(new Date());
   }
 
@@ -2202,7 +2209,6 @@ export function WorkpackEditor({
       type StructuredMode = "workPlanStructured" | "permitInspectionStructured" | "tbmBriefingStructured" | "tbmLogStructured" | "educationRecordStructured";
       let structuredMode: StructuredMode | null = null;
       let structuredPayload: unknown = null;
-      const selectedUsesEditedText = selectedText !== initialValues[selected.key];
       if (!selectedUsesEditedText && selected.key === "workPlanDraft" && dl?.workPlanStructured) {
         structuredMode = "workPlanStructured";
         structuredPayload = dl.workPlanStructured;
@@ -2222,11 +2228,13 @@ export function WorkpackEditor({
       const requestBody = structuredMode
         ? {
             mode: structuredMode,
+            edited: false,
             scenario: data.scenario,
             structured: structuredPayload
           }
         : {
             mode: "single",
+            edited: selectedUsesEditedText,
             title: selected.title,
             rows: selectedRows,
             profile: selectedFormProfile,
@@ -2253,11 +2261,11 @@ export function WorkpackEditor({
   async function downloadHwp() {
     setHwpStatus("building");
     try {
-      const selectedUsesEditedText = selectedText !== initialValues[selected.key];
       const response = await fetch("/api/export/hwp", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
+          edited: selectedUsesEditedText,
           title: selected.title,
           rows: selectedRows,
           profile: selectedFormProfile,
@@ -2502,8 +2510,8 @@ export function WorkpackEditor({
               <div className="h2">{selected.title}</div>
               <p className="muted">{selected.description}</p>
             </div>
-            <div className={styles.documentMeta} aria-live="polite">
-              <span className={styles.saveState}>자동 저장</span>
+            <div className={`editor-document-meta ${styles.documentMeta}`} aria-live="polite">
+              <span className={`editor-save-state ${styles.saveState}`}>자동 저장</span>
               <span>{selectedText.length.toLocaleString("ko-KR")}자</span>
               {lastEditedAt ? (
                 <span>수정 {lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>

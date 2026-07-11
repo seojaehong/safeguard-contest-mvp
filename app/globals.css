@@ -16240,6 +16240,17 @@ body:has(.safeclaw-landing) :is(
   text-transform: none;
 }
 
+.safeclaw-module-shell.module-variant-document .document-editor :is(.editor-document-meta span, .template-preview span) {
+  color: var(--workspace-muted) !important;
+  font-family: inherit !important;
+  letter-spacing: 0 !important;
+  text-transform: none;
+}
+
+.safeclaw-module-shell.module-variant-document .document-editor .editor-document-meta .editor-save-state {
+  color: var(--workspace-success) !important;
+}
+
 .safeclaw-module-shell.module-variant-document .doc-tab-list,
 .safeclaw-module-shell.module-variant-document .sheet-export-panel,
 .safeclaw-module-shell.module-variant-document .rubric-stack,

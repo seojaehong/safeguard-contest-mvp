@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
   const rows = parseRows(body.rows, title);
   const profile = parseProfile(body.profile);
   const scenario = parseScenario(body.scenario);
-  const structuredRiskRows = parseRiskRowsFromBody(body);
+  const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
 
   try {
     const buffer = buildHwpBuffer({ title, rows, profile, scenario, structuredRiskRows });
