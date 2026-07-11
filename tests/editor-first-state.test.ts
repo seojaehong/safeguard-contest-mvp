@@ -56,4 +56,23 @@ describe("editor-first draft identity", () => {
     expect(parseStoredCurrentWorkpack(JSON.stringify(resaved))?.data.deliverables.workPermitDraft)
       .toContain(sentinel);
   });
+
+  it("preserves an explicitly empty workPermitDraft in the canonical current workpack snapshot", () => {
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPermitDraft = "";
+
+    const stored = buildStoredCurrentWorkpack(sample);
+    const reopened = parseStoredCurrentWorkpack(JSON.stringify(stored));
+
+    expect(reopened).not.toBeNull();
+    expect(reopened?.data.deliverables.workPermitDraft).toBe("");
+
+    if (!reopened) throw new Error("Stored workpack should reopen");
+    const resaved = buildStoredCurrentWorkpack(reopened.data, {
+      generationFingerprint: reopened.generationFingerprint
+    });
+
+    expect(parseStoredCurrentWorkpack(JSON.stringify(resaved))?.data.deliverables.workPermitDraft)
+      .toBe("");
+  });
 });
