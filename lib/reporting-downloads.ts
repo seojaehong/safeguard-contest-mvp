@@ -1,5 +1,9 @@
 import type { StoredCurrentWorkpack } from "@/lib/current-workpack";
-import type { OperationImprovement } from "@/lib/operation-improvement-history";
+import type {
+  OperationImprovement,
+  OperationImprovementStatus
+} from "@/lib/operation-improvement-history";
+import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import type { RiskAssessmentRow, RiskLevel } from "@/lib/risk-assessment-schema";
 
 export type ReportPeriod = "daily" | "weekly" | "monthly" | "custom";
@@ -23,7 +27,7 @@ export type ReportSourceMetadata = {
   limitations: string[];
 };
 
-export type ReportImprovementStatus = "proposed" | "approved" | "in_progress" | "completed" | "verified" | "on_hold";
+export type ReportImprovementStatus = OperationImprovementStatus;
 
 export type ReportFilters = {
   process?: string;
@@ -212,12 +216,10 @@ const RISK_LEVEL_LABELS: Record<RiskLevel, string> = {
 };
 
 const IMPROVEMENT_STATUS_LABELS: Record<ReportImprovementStatus, string> = {
-  proposed: "제안됨",
+  candidate: "후보",
   approved: "승인됨",
-  in_progress: "진행중",
-  completed: "완료",
-  verified: "검증됨",
-  on_hold: "보류"
+  rejected: "반려됨",
+  reflected: "반영됨"
 };
 
 const KST_OFFSET_MILLISECONDS = 9 * 60 * 60 * 1000;
@@ -316,8 +318,8 @@ function normalizeFilters(filters?: ReportFilters): ReportFilters {
 }
 
 function isWithinPeriod(isoDate: string, period: ReportPeriod, now: Date, dateRange?: ReportDateRange) {
+  if (!isRfc3339OffsetTimestamp(isoDate)) return false;
   const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return false;
   if (period === "custom") {
     const range = customDateRange(dateRange);
     return date >= range.start && date <= range.end;
@@ -402,7 +404,7 @@ function normalizeImprovement(
   photoApprovals: readonly ReportPhotoApproval[]
 ): ImprovementReportItem {
   const association = item.riskAssociation;
-  const matchingRisks = association
+  const matchingRisks = association && item.siteName.trim() === association.siteName
     ? riskRows.filter((row) => (
       row.siteName === association.siteName
       && row.process === association.process
@@ -419,7 +421,7 @@ function normalizeImprovement(
     && approval.afterPhotoName === item.afterPhotoName
   ));
   const photoNames = photoApproved ? candidatePhotoNames : [];
-  const improvementStatus: ReportImprovementStatus = item.status || "proposed";
+  const improvementStatus: ReportImprovementStatus = item.status || "candidate";
   const asIs = photoApproved && item.beforePhotoName
     ? `개선 전 사진: ${item.beforePhotoName}`
     : `${item.hazardLabel} 관련 기존 위험 또는 미조치 상태`;
@@ -543,6 +545,9 @@ export function buildReportSnapshot(input: {
   sourceMode?: ReportSourceMetadata["mode"];
   now?: Date;
 }): ReportSnapshot {
+  if (!isRfc3339OffsetTimestamp(input.workpack.savedAt)) {
+    throw new Error("작업팩 저장시각은 유효한 RFC3339 offset 시각이어야 합니다.");
+  }
   const now = input.now || new Date();
   const dateRange = resolveDateRange(input.period, now, input.dateRange);
   const filters = normalizeFilters(input.filters);
@@ -687,7 +692,29 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "승인사진",
     "데이터범위",
     "데이터모드",
-    "작업팩저장시각"
+    "작업팩저장시각",
+    "위험행시간기준",
+    "데이터제한"
+  ];
+  const metadataRow: Array<string | number> = [
+    "메타데이터",
+    snapshot.scenario.siteName,
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "source_metadata",
+    "",
+    snapshot.source.scope,
+    snapshot.source.mode,
+    snapshot.source.workpackSavedAt,
+    snapshot.source.riskRowTimeBasis,
+    snapshot.source.limitations.join(" · ")
   ];
   const riskRows = snapshot.riskRows.map((row): Array<string | number> => [
     "위험성평가",
@@ -705,7 +732,9 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "",
     snapshot.source.scope,
     snapshot.source.mode,
-    snapshot.source.workpackSavedAt
+    snapshot.source.workpackSavedAt,
+    snapshot.source.riskRowTimeBasis,
+    snapshot.source.limitations.join(" · ")
   ]);
   const improvementRows = snapshot.improvements.map((item): Array<string | number> => [
     "개선사항",
@@ -723,9 +752,11 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     item.photoNames.join(" · "),
     snapshot.source.scope,
     snapshot.source.mode,
-    snapshot.source.workpackSavedAt
+    snapshot.source.workpackSavedAt,
+    snapshot.source.riskRowTimeBasis,
+    snapshot.source.limitations.join(" · ")
   ]);
-  return toCsv([header, ...riskRows, ...improvementRows]);
+  return toCsv([header, metadataRow, ...riskRows, ...improvementRows]);
 }
 
 function reportFilterLines(snapshot: ReportSnapshot) {

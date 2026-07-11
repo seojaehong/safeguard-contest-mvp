@@ -1,8 +1,9 @@
 import type { HarnessImprovement } from "@/lib/db-harness";
+import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 
 export const OPERATION_IMPROVEMENTS_STORAGE_KEY = "safeclaw.operationImprovements.v1";
 
-export type OperationImprovementStatus = "proposed" | "approved" | "in_progress" | "completed" | "verified" | "on_hold";
+export type OperationImprovementStatus = "candidate" | "approved" | "rejected" | "reflected";
 
 export type OperationRiskAssociation = {
   siteName: string;
@@ -67,17 +68,11 @@ function readString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function isValidCreatedAt(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0 && !Number.isNaN(new Date(value).getTime());
-}
-
-function isImprovementStatus(value: unknown): value is OperationImprovementStatus {
-  return value === "proposed"
-    || value === "approved"
-    || value === "in_progress"
-    || value === "completed"
-    || value === "verified"
-    || value === "on_hold";
+export function parseOperationImprovementStatus(value: unknown): OperationImprovementStatus | undefined {
+  if (value === "candidate" || value === "approved" || value === "rejected" || value === "reflected") {
+    return value;
+  }
+  return value === "proposed" ? "candidate" : undefined;
 }
 
 function parseRiskAssociation(value: unknown): OperationRiskAssociation | undefined {
@@ -142,15 +137,16 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
       const workSummary = readString(item.workSummary) || readString(item.taskLabel);
       const siteName = readString(item.siteName) || readString(item.siteLabel) || workSummary;
       const riskAssociation = parseRiskAssociation(item.riskAssociation);
+      const status = parseOperationImprovementStatus(item.status);
       const valid = (
         typeof item.id === "string" &&
-        isValidCreatedAt(item.createdAt) &&
+        isRfc3339OffsetTimestamp(item.createdAt) &&
         Boolean(siteName) &&
         Boolean(workSummary) &&
         typeof item.hazardLabel === "string" &&
         typeof item.improvementText === "string" &&
         isStringArray(item.reflectedDocuments) &&
-        (isImprovementStatus(item.status) || typeof item.status === "undefined") &&
+        (Boolean(status) || typeof item.status === "undefined") &&
         (Boolean(riskAssociation) || typeof item.riskAssociation === "undefined") &&
         (typeof item.beforePhotoName === "string" || typeof item.beforePhotoName === "undefined") &&
         (typeof item.afterPhotoName === "string" || typeof item.afterPhotoName === "undefined") &&
@@ -187,7 +183,7 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
         hazardLabel: typeof item.hazardLabel === "string" ? item.hazardLabel : "",
         improvementText: typeof item.improvementText === "string" ? item.improvementText : "",
         reflectedDocuments,
-        status: isImprovementStatus(item.status) ? item.status : undefined,
+        status,
         riskAssociation,
         beforePhotoName: typeof item.beforePhotoName === "string" ? item.beforePhotoName : undefined,
         afterPhotoName: typeof item.afterPhotoName === "string" ? item.afterPhotoName : undefined,
