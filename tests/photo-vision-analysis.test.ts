@@ -9,6 +9,7 @@ import {
   buildImprovementAnalysisPayload,
   buildImprovementVisionPrompt,
   buildHazardPhotoVisionPrompt,
+  createOpenAiHazardPhotoVisionProvider,
   getPhotoVisionReadiness,
   parseHazardPhotoVisionOutput,
   parseImprovementVisionOutput
@@ -65,6 +66,7 @@ function safetyReference(input: {
     risk_tags: input.riskTags,
     primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
     controls: input.controls,
+    source_url: `https://safety.example/${input.id}`,
     evidence_role: "direct",
     retrieval_source: "ranked"
   };
@@ -87,6 +89,11 @@ describe("photo vision analysis contract", () => {
       maxInputPhotos: 10,
       maxBytesPerPhoto: 20 * 1024 * 1024,
       allowedMimeTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+      fileValidation: {
+        mode: "signature_only",
+        decodesPixels: false,
+        signatureBytes: 12
+      },
       acceptedOnly: true,
       beforeAfterSupported: true,
       ocrSupported: true,
@@ -100,8 +107,59 @@ describe("photo vision analysis contract", () => {
     expect(ready).toMatchObject({
       ok: true,
       status: "ready",
-      model: "gpt-4.1-mini"
+      model: "gpt-4.1-mini",
+      fileValidation: {
+        mode: "signature_only",
+        decodesPixels: false
+      }
     });
+  });
+
+  it("preserves the actual OpenAI response id and model", async () => {
+    const actualModel = "gpt-4.1-mini-2026-06-01";
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+      id: "resp_vision_actual",
+      model: actualModel,
+      created_at: 1_783_500_000,
+      output_text: JSON.stringify({
+        summary: "비계 작업면이 보입니다.",
+        observations: [{ kind: "visual", text: "비계 작업면 가장자리가 보입니다." }],
+        candidates: [{
+          label: "비계 작업면 추락 위험 후보",
+          observation: "비계 작업면 가장자리가 보입니다.",
+          inference: "추락 가능성을 현장에서 확인합니다."
+        }],
+        ocrText: "",
+        siteSignals: ["비계"]
+      })
+    }), { status: 200, headers: { "content-type": "application/json" } }));
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const provider = createOpenAiHazardPhotoVisionProvider({
+        OPENAI_API_KEY: "sk-contract",
+        OPENAI_VISION_MODEL: "gpt-configured-model"
+      });
+      if (!provider) throw new Error("Expected configured provider");
+
+      const analysis = await analyzeHazardPhotos({
+        question: "비계 작업",
+        photos: [createPhoto("scaffold.jpg", "image/jpeg")]
+      }, { provider, harness: null });
+
+      expect(analysis.model).toBe(actualModel);
+      expect(analysis.providerResponses).toEqual([{
+        photoId: "photo-1",
+        responseId: "resp_vision_actual",
+        model: actualModel,
+        createdAt: 1_783_500_000
+      }]);
+      expect(analysis.images[0]?.providerResponse).toMatchObject({
+        responseId: "resp_vision_actual",
+        model: actualModel
+      });
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("builds a constrained safety improvement prompt", () => {
@@ -347,6 +405,40 @@ describe("photo vision analysis contract", () => {
     expect(parsed.errorMessage).toContain("candidate-only");
   });
 
+  it("rejects instructions in every non-OCR observation field but preserves literal OCR", () => {
+    const base = {
+      summary: "작업면 가장자리가 보입니다.",
+      observations: [{ kind: "visual", text: "작업면 가장자리가 보입니다." }],
+      candidates: [{
+        label: "작업면 추락 위험 후보",
+        observation: "작업면 가장자리가 보입니다.",
+        inference: "추락 가능성을 현장에서 확인합니다."
+      }],
+      ocrText: "",
+      siteSignals: ["작업면"]
+    };
+    const visualInstruction = parseHazardPhotoVisionOutput(JSON.stringify({
+      ...base,
+      observations: [{ kind: "visual", text: "안전난간을 즉시 설치해야 합니다." }]
+    }), { model: "gpt-4.1-mini", photoNames: ["visual.jpg"] });
+    const candidateObservationInstruction = parseHazardPhotoVisionOutput(JSON.stringify({
+      ...base,
+      candidates: [{
+        ...base.candidates[0],
+        observation: "안전난간을 즉시 설치해야 합니다."
+      }]
+    }), { model: "gpt-4.1-mini", photoNames: ["candidate.jpg"] });
+    const literalOcr = parseHazardPhotoVisionOutput(JSON.stringify({
+      ...base,
+      observations: [{ kind: "ocr", text: "안전난간을 즉시 설치해야 합니다." }],
+      ocrText: "안전난간을 즉시 설치해야 합니다."
+    }), { model: "gpt-4.1-mini", photoNames: ["sign.jpg"] });
+
+    expect(visualInstruction.status).toBe("failed");
+    expect(candidateObservationInstruction.status).toBe("failed");
+    expect(literalOcr.status).toBe("analyzed");
+  });
+
   it("analyzes each valid image independently and preserves partial failures", async () => {
     const provider = {
       name: "contract-stub",
@@ -445,6 +537,41 @@ describe("photo vision analysis contract", () => {
     });
   });
 
+  it("bounds concurrent provider calls while preserving image order", async () => {
+    let active = 0;
+    let maximumActive = 0;
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async ({ photoIndex }: { photoIndex: number }) => {
+        active += 1;
+        maximumActive = Math.max(maximumActive, active);
+        await new Promise<void>((resolve) => setTimeout(resolve, 10));
+        active -= 1;
+        return JSON.stringify({
+          summary: `사진 ${photoIndex + 1} 관찰`,
+          observations: [{ kind: "visual", text: `비계 ${photoIndex + 1}번 구역이 보입니다.` }],
+          candidates: [{
+            label: `비계 ${photoIndex + 1}번 구역 추락 위험 후보`,
+            observation: `비계 ${photoIndex + 1}번 구역이 보입니다.`,
+            inference: "추락 가능성을 현장에서 확인합니다."
+          }],
+          ocrText: "",
+          siteSignals: ["비계"]
+        });
+      })
+    };
+    const photos = Array.from({ length: 5 }, (_, index) => (
+      createPhoto(`scaffold-${index + 1}.jpg`, "image/jpeg")
+    ));
+
+    const analysis = await analyzeHazardPhotos({ question: "비계 점검", photos }, { provider, harness: null });
+
+    expect(maximumActive).toBeLessThanOrEqual(2);
+    expect(analysis.images.map((image) => image.name)).toEqual(photos.map((photo) => photo.name));
+  });
+
   it("rejects empty and oversized images before calling the provider", async () => {
     const provider = {
       name: "contract-stub",
@@ -464,6 +591,27 @@ describe("photo vision analysis contract", () => {
     expect(provider.analyze).not.toHaveBeenCalled();
     expect(analysis.status).toBe("failed");
     expect(analysis.images.map((image) => image.error?.code)).toEqual(["empty_file", "file_too_large"]);
+  });
+
+  it("rejects an oversized aggregate before reading images or calling the provider", async () => {
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async () => "{}")
+    };
+    const photos = [
+      createSizedPhoto("one.jpg", "image/jpeg", 15 * 1024 * 1024),
+      createSizedPhoto("two.jpg", "image/jpeg", 15 * 1024 * 1024),
+      createSizedPhoto("three.jpg", "image/jpeg", 15 * 1024 * 1024)
+    ];
+
+    const analysis = await analyzeHazardPhotos({ question: "점검", photos }, { provider, harness: null });
+
+    expect(analysis.status).toBe("failed");
+    expect(analysis.images).toEqual([]);
+    expect(analysis.errorMessage).toContain("합계 용량");
+    expect(provider.analyze).not.toHaveBeenCalled();
   });
 
   it("accepts authentic GIF bytes and rejects a mismatched JPEG signature before provider analysis", async () => {
@@ -761,6 +909,17 @@ describe("photo vision analysis contract", () => {
     expect(queries.filter((query) => query.includes("지게차"))).toHaveLength(3);
     expect(analysis.counts.harnessConfirmed).toBe(2);
     expect(analysis.candidates[0]?.harness.evidence.map((item) => item.sourceId)).toEqual(["fall-scaffold"]);
+    expect(analysis.candidates[0]?.harness.evidence[0]).toMatchObject({
+      catalogSourceId: "fall-scaffold-source",
+      sourceUrl: "https://safety.example/fall-scaffold",
+      itemType: "guideline",
+      evidenceRole: "direct",
+      retrievals: expect.arrayContaining([
+        expect.objectContaining({ channel: "direct", mode: "ranked-rpc", source: "ranked" }),
+        expect.objectContaining({ channel: "sif", mode: "ranked-rpc", source: "ranked" }),
+        expect.objectContaining({ channel: "supporting", mode: "ranked-rpc", source: "ranked" })
+      ])
+    });
     expect(analysis.candidates[0]?.harness.confirmedControls).toEqual([{
       text: "비계 작업발판 안전난간 상태 확인",
       evidenceSourceIds: ["fall-scaffold"]
@@ -791,6 +950,63 @@ describe("photo vision analysis contract", () => {
         reason: "현장 검토 완료"
       }
     });
+  });
+
+  it("does not ground a candidate from generic review vocabulary alone", async () => {
+    const genericReference = safetyReference({
+      id: "generic-review",
+      title: "현장 안전 상태 검토 필요",
+      keywords: ["현장", "안전", "상태", "검토", "필요", "확인"],
+      riskTags: [],
+      controls: ["작업 전 안전 상태 확인"]
+    });
+    vi.mocked(searchSafetyReferences).mockReset();
+    vi.mocked(searchSafetyReferences).mockResolvedValue({
+      ok: true,
+      configured: true,
+      query: "현장 안전 상태 검토 필요",
+      count: 1,
+      items: [genericReference],
+      retrievalMode: "ranked-rpc",
+      vectorSearch: {
+        enabled: false,
+        attempted: false,
+        ok: false,
+        reason: "disabled",
+        count: 0,
+        model: "text-embedding-3-small",
+        message: "disabled"
+      },
+      message: "generic-only fixture"
+    });
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async () => JSON.stringify({
+        summary: "현장 안전 상태를 검토할 필요가 있어 보입니다.",
+        observations: [{ kind: "visual", text: "현장 상태가 보입니다." }],
+        candidates: [{
+          label: "현장 안전 검토 필요 후보",
+          observation: "현장 상태가 보입니다.",
+          inference: "안전 확인 필요 여부를 현장에서 검토합니다."
+        }],
+        ocrText: "",
+        siteSignals: ["현장", "상태"]
+      }))
+    };
+
+    const analysis = await analyzeHazardPhotos({
+      question: "사진 검토",
+      photos: [createPhoto("generic.jpg", "image/jpeg")]
+    }, { provider });
+
+    expect(analysis.candidates[0]?.harness).toMatchObject({
+      status: "insufficient",
+      evidence: [],
+      confirmedControls: []
+    });
+    expect(analysis.counts.harnessConfirmed).toBe(0);
   });
 
   it("returns failed status for non-JSON hazard model output", () => {
