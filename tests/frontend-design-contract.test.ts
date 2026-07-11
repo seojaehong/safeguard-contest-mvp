@@ -96,6 +96,8 @@ const semanticRoleOverrides: Readonly<Record<string, TypographyRole>> = {
   ".safeclaw-contact": "control",
   ".law-section-lines p": "longform",
   ".legal-reading-body": "longform",
+  ".knowledge-detail-card p": "longform",
+  ".knowledge-detail-card li": "longform",
   ".command-center-shell .command-primary": "control",
   ".safeclaw-os-cta button": "control",
   ".safeclaw-os-cta a": "control",

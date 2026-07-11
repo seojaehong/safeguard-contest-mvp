@@ -124,6 +124,8 @@ const semanticRoleOverrides = {
   ".safeclaw-contact": "control",
   ".law-section-lines p": "longform",
   ".legal-reading-body": "longform",
+  ".knowledge-detail-card p": "longform",
+  ".knowledge-detail-card li": "longform",
   ".command-center-shell .command-primary": "control",
   ".safeclaw-module-primary": "control",
   ".safeclaw-module-actions a": "control",

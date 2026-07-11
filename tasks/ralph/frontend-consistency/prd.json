@@ -137,7 +137,7 @@
       "id": "F7",
       "title": "Complete browser evidence and PR handoff",
       "priority": 7,
-      "status": "todo",
+      "status": "in_progress",
       "passes": false,
       "acceptance": [
         "Desktop and mobile evidence exists for every user-visible route",

@@ -5342,6 +5342,70 @@ ul {
   background: rgba(255, 255, 255, 0.68);
 }
 
+.knowledge-detail-card {
+  width: min(100%, 72ch);
+  margin: var(--space-6) auto var(--space-16);
+  padding: var(--space-6);
+}
+
+.knowledge-detail-card h1 {
+  margin: 0 0 var(--space-8);
+  font-size: var(--text-page-title);
+  font-weight: 800;
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
+}
+
+.knowledge-detail-card h2 {
+  margin: var(--space-10) 0 var(--space-4);
+  font-size: var(--text-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
+}
+
+.knowledge-detail-card p,
+.knowledge-detail-card li {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-longform);
+  letter-spacing: var(--tracking-body);
+}
+
+.knowledge-detail-card p + p {
+  margin-top: var(--space-4);
+}
+
+.knowledge-detail-card ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-6);
+}
+
+.knowledge-detail-card a {
+  color: var(--accent);
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
+
+@media (max-width: 767px) {
+  .knowledge-detail-card {
+    margin: var(--space-4) auto var(--space-8);
+    padding: var(--space-4);
+  }
+
+  .knowledge-detail-card h1 {
+    margin-bottom: var(--space-6);
+  }
+
+  .knowledge-detail-card h2 {
+    margin-top: var(--space-8);
+  }
+}
+
 .api-proof-card h2,
 .comparison-card h2,
 .trust-grid h2,

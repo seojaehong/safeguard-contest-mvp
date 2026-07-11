@@ -1,0 +1,36 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/frontend-route-coverage.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-consistency-audit
+
+ ❯ tests/frontend-route-coverage.test.ts (18 tests | 1 failed) 1448ms
+     × reconciles the complete route, theme, special-state, and generated-surface evidence 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/frontend-route-coverage.test.ts > browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence
+AssertionError: browser audit report exists: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/frontend-route-coverage.test.ts:324:70
+    322|   it("reconciles the complete route, theme, special-state, and generat…
+    323|     const reportPath = path.join(root, "evaluation/frontend-consistenc…
+    324|     expect(fs.existsSync(reportPath), "browser audit report exists").t…
+       |                                                                      ^
+    325|
+    326|     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  13:56:59
+   Duration  2.44s (transform 108ms, setup 0ms, import 152ms, tests 1.45s, environment 0ms)

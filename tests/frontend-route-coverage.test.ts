@@ -318,7 +318,74 @@ describe("frontend route classification", () => {
   });
 });
 
+describe("browser evidence reconciliation", () => {
+  it("reconciles the complete route, theme, special-state, and generated-surface evidence", () => {
+    const reportPath = path.join(root, "evaluation/frontend-consistency-audit-2026-07-11/report.json");
+    expect(fs.existsSync(reportPath), "browser audit report exists").toBe(true);
+
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      routeRows: Array<Record<string, unknown>>;
+      workspaceThemeRows: Array<Record<string, unknown>>;
+      specialSurfaceRows: Array<Record<string, unknown>>;
+      generatedSurfaceRows: Array<Record<string, unknown>>;
+      totals: { failures: number };
+    };
+    const viewports = ["desktop-1440", "tablet-1024", "mobile-390"];
+    const requiredFields = [
+      "requestedUrl", "finalUrl", "status", "viewport", "theme", "consoleErrors",
+      "pageErrors", "horizontalOverflow", "bodyFont", "primaryHeading", "visiblePrimaryContent",
+      "screenshot", "limitation",
+    ];
+
+    expect(report.routeRows).toHaveLength(userVisibleRoutes.length * viewports.length);
+    for (const route of userVisibleRoutes) {
+      for (const viewport of viewports) {
+        const row = report.routeRows.find((item) => item.route === route && item.viewport === viewport);
+        expect(row, `${route} ${viewport}`).toBeDefined();
+      }
+    }
+
+    expect(report.workspaceThemeRows).toHaveLength(viewports.length * 2);
+    for (const theme of ["Day", "Night"]) {
+      for (const viewport of viewports) {
+        expect(
+          report.workspaceThemeRows.find((item) => item.theme === theme && item.viewport === viewport),
+          `workspace ${theme} ${viewport}`,
+        ).toBeDefined();
+      }
+    }
+    expect(report.specialSurfaceRows.map((row) => row.surface).sort()).toEqual([
+      "error", "global-error", "loading", "not-found",
+    ]);
+    expect(report.generatedSurfaceRows.map((row) => row.surface).sort()).toEqual([
+      "document-preview", "pdf-export",
+    ]);
+
+    for (const row of [
+      ...report.routeRows,
+      ...report.workspaceThemeRows,
+      ...report.specialSurfaceRows,
+      ...report.generatedSurfaceRows,
+    ]) {
+      for (const field of requiredFields) expect(row, `${String(row.route ?? row.surface)} ${field}`).toHaveProperty(field);
+      const screenshot = String(row.screenshot);
+      expect(screenshot).toMatch(/^evaluation\/frontend-consistency-audit-2026-07-11\/screenshots\//);
+      expect(fs.existsSync(path.join(root, screenshot)), screenshot).toBe(true);
+    }
+    expect(report.totals.failures).toBe(0);
+  });
+});
+
 describe("knowledge and legal route hierarchy", () => {
+  it("renders knowledge Markdown as compact semantic prose, lists, and links", () => {
+    const source = read("app/knowledge/[section]/[slug]/page.tsx");
+
+    expect(source).toContain("function renderInlineMarkdown");
+    expect(source).toContain("<ul key={`list-${listStart}`}>");
+    expect(source).toContain("renderInlineMarkdown(line)");
+    expect(source).not.toContain("<br key={index}");
+  });
+
   it.each([
     "app/law/[id]/page.tsx",
     "app/precedent/[id]/page.tsx",
