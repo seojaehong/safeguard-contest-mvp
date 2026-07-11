@@ -1,7 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { homedir } from "node:os";
+import { relative, resolve } from "node:path";
 
 import AdmZip from "adm-zip";
 import { createServer } from "vite";
@@ -9,7 +10,7 @@ import { createServer } from "vite";
 const OFFICIAL_LIST_URL = "https://portal.kosha.or.kr/archive/resources/tech-support/search/all?page=1&rowsPerPage=10";
 const OFFICIAL_API_URL = "https://portal.kosha.or.kr/api/portal24/bizV/p/VCPDG08009/selectList";
 const DEFAULT_PRODUCTION_BASE = "https://safeguard-contest-mvp.vercel.app";
-const DEFAULT_TECHNICAL_FOLDER = "C:\\Users\\iceam\\Downloads\\기술지원규정";
+const DEFAULT_TECHNICAL_FOLDER = process.env.KOSHA_TECHNICAL_FOLDER || resolve(homedir(), "Downloads", "기술지원규정");
 const DEFAULT_MANIFEST_PATH = "data/safety-knowledge/kosha-guide-audit-manifest.json";
 const DEFAULT_OUTPUT_DIR = "evaluation/kosha-guide-audit-2026-07-11";
 const REQUEST_TIMEOUT_MS = 20_000;
@@ -118,6 +119,41 @@ function timestampRange(rows, key) {
   return [values[0] || null, values.at(-1) || null];
 }
 
+function toReportPath(path) {
+  return relative(process.cwd(), path).replaceAll("\\", "/");
+}
+
+function sanitizeLocalSource(source) {
+  if (!source || typeof source !== "object") return source;
+  const metadata = source.metadata && typeof source.metadata === "object"
+    ? { ...source.metadata, folder: source.metadata.folder ? "$KOSHA_TECHNICAL_FOLDER" : undefined }
+    : source.metadata;
+  return {
+    ...source,
+    source_path: source.source_path ? "$KOSHA_TECHNICAL_FOLDER" : source.source_path,
+    metadata
+  };
+}
+
+function validateLocalParseStats(stats, expectedPdfRows) {
+  if (!stats || typeof stats !== "object") {
+    return { accountingMatches: false, mismatches: ["parse-stats-unavailable"] };
+  }
+  const mismatches = Array.isArray(stats.mismatches) ? [...stats.mismatches] : [];
+  if (stats.rowsReturned !== expectedPdfRows) {
+    mismatches.push(`rows-returned:${stats.rowsReturned ?? "missing"}/${expectedPdfRows}`);
+  }
+  if (stats.parseSuccessCount + stats.parseFailureCount !== stats.parseAttemptedCount) {
+    mismatches.push(
+      `parse-outcomes:${stats.parseSuccessCount + stats.parseFailureCount}/${stats.parseAttemptedCount}`
+    );
+  }
+  if (!Array.isArray(stats.outcomes) || stats.outcomes.length !== expectedPdfRows) {
+    mismatches.push(`outcome-rows:${Array.isArray(stats.outcomes) ? stats.outcomes.length : "missing"}/${expectedPdfRows}`);
+  }
+  return { ...stats, accountingMatches: stats.accountingMatches === true && mismatches.length === 0, mismatches };
+}
+
 function readEnvFile(path) {
   if (!path || !existsSync(path)) return false;
   for (const line of readFileSync(path, "utf8").split(/\r?\n/gu)) {
@@ -204,6 +240,13 @@ function readLocalParsedSnapshot(technicalFolder) {
       .map((line) => line.trim())
       .filter(Boolean)
   };
+}
+
+function retrievalBranchFromMode(mode) {
+  if (mode === "rest-ilike") return "rest";
+  if (mode === "ranked-rpc") return "ranked";
+  if (mode === "hybrid-vector-rpc") return "hybrid";
+  return null;
 }
 
 function canonicalGuideRows(rows) {
@@ -462,8 +505,14 @@ async function auditProductionRetrieval(productionBase, auditKoshaRetrievalScena
     }
     const byId = new Map();
     for (const result of scenarioResults) {
+      const executedBranch = retrievalBranchFromMode(result.retrievalMode);
       for (const item of result.items) {
-        if (item && typeof item.id === "string") byId.set(item.id, item);
+        if (item && typeof item.id === "string") {
+          byId.set(item.id, {
+            ...item,
+            retrieval_source: item.retrieval_source || executedBranch || undefined
+          });
+        }
       }
     }
     const candidates = [...byId.values()];
@@ -533,7 +582,7 @@ function formatMarkdown(report) {
     `| \`${check.id}\` | ${check.status} | ${check.count.toLocaleString("ko-KR")} | ${check.detail.replaceAll("|", "/")} |`
   ).join("\n");
   const retrievalRows = report.retrieval.downstream.map((item) =>
-    `| ${item.scenarioId} | ${item.branch} | ${item.selectedTitles.length} | ${item.failures.length} |`
+    `| ${item.scenarioId} | ${item.branch} | ${item.executionStatus} | ${item.selectedTitles.length} | ${item.failures.length} |`
   ).join("\n");
   const blockerRows = report.launchReadiness.blockers.map((item) =>
     `| ${item.rank} | ${item.severity} | \`${item.id}\` | ${item.count.toLocaleString("ko-KR")} | ${markdownCell(item.evidence)} | ${markdownCell(item.releaseCondition)} |`
@@ -550,8 +599,8 @@ function formatMarkdown(report) {
   ).join("\n") || "| 0 | - | 0 | - |";
   const dryRunCounts = report.refreshPlan.dryRun.counts;
   const fullRowStatement = report.inventory.directSupabaseProbe.available
-    ? `Current live full-row ${report.inventory.directSupabaseProbe.rowCount.toLocaleString("ko-KR")}건과 canonical hash \`${report.inventory.directSupabaseProbe.canonicalRowSha256}\`를 직접 검증했다. 로컬 parsed hash와 live hash의 parity도 별도 check로 확인했다.`
-    : `Current live full-row canonical hash와 created/updated range는 검증하지 못했다. 사유: ${report.inventory.directSupabaseProbe.reason}.`;
+    ? `Env-configured Supabase snapshot ${report.inventory.directSupabaseProbe.rowCount.toLocaleString("ko-KR")}건과 canonical hash \`${report.inventory.directSupabaseProbe.canonicalRowSha256}\`를 직접 검증했다. production deployment와 같은 project라는 identity는 직접 증명되지 않았다.`
+    : `Env-configured Supabase snapshot canonical hash와 created/updated range는 검증하지 못했다. 사유: ${report.inventory.directSupabaseProbe.reason}.`;
   const currentLiveRange = report.inventory.directSupabaseProbe.available
     ? `created ${report.inventory.directSupabaseProbe.createdAtRange.join(" ~ ")} / updated ${report.inventory.directSupabaseProbe.updatedAtRange.join(" ~ ")}`
     : "검증 불가";
@@ -566,9 +615,9 @@ function formatMarkdown(report) {
 
 ## 결론
 
-**NOT launch-ready for authoritative KOSHA-guide grounding.** 로컬 ZIP과 current live Supabase의 ${report.inventory.supabaseVisible.rowCount.toLocaleString("ko-KR")}행 count/hash parity는 같은 corpus snapshot을 읽었다는 사실만 증명한다. authoritative 본문, item-level provenance, control causality, 공식 version/current-state 적합성은 증명하지 않는다.
+**${report.launchReadiness.conclusion}.** 로컬 ZIP과 env-configured Supabase snapshot의 ${report.inventory.supabaseVisible.rowCount.toLocaleString("ko-KR")}행 count/hash parity는 corpus content parity만 증명한다. production deployment identity, authoritative 본문, item-level provenance, control causality, 공식 version/current-state 적합성은 증명하지 않는다.
 
-로컬 ZIP 10개에는 PDF ${report.inventory.localArchive.pdfEntryCount.toLocaleString("ko-KR")}건이 있으며 production status도 KOSHA GUIDE ${report.inventory.supabaseVisible.rowCount.toLocaleString("ko-KR")}건을 노출한다. 공식 KOSHA 현행 목록은 ${report.inventory.official.current.count.toLocaleString("ko-KR")}건이다. 로컬은 현행 stable key를 모두 포함하지만 version 불일치 ${comparison.versionMismatches.length}건과 공식 폐지 ${comparison.staleLocalRows.length}건을 포함한다.
+로컬 ZIP ${report.inventory.localArchive.archiveCount}개에는 PDF ${report.inventory.localArchive.pdfEntryCount.toLocaleString("ko-KR")}건이 있으며 production status도 KOSHA GUIDE ${report.inventory.supabaseVisible.rowCount.toLocaleString("ko-KR")}건을 노출한다. 공식 KOSHA 현행 목록은 ${report.inventory.official.current.count.toLocaleString("ko-KR")}건이다. 로컬은 현행 stable key를 모두 포함하지만 version 불일치 ${comparison.versionMismatches.length}건과 공식 폐지 ${comparison.staleLocalRows.length}건을 포함한다.
 
 Production status는 fresh ${report.inventory.productionStatus.cache || "unknown"} 응답이다. ${fullRowStatement}
 
@@ -598,13 +647,15 @@ ${blockerRows}
 | non-empty exact-body duplicate candidates group / rows | ${quality.exactBodyDuplicateCandidateGroups} / ${quality.exactBodyDuplicateCandidateRows} |
 | ZIP CRC32+size duplicate candidates group / rows | ${report.inventory.localArchive.duplicateContentCandidateGroups} / ${report.inventory.localArchive.duplicateContentCandidateRows} |
 | raw-control initial heuristic rows | ${quality.rawInitialControlContaminationCount} |
-| raw-control alias-cleared false-positive rows | ${quality.rawControlFalsePositiveCount} |
-| raw-control alias-removed flags | ${quality.rawControlAliasRemovedFlagCount} |
-| raw-control calibrated candidates | ${quality.rawControlContaminationCount} |
+| raw-control ground-truth-cleared rows | ${quality.rawControlGroundTruthClearedCount} |
+| raw-control review-required heuristic rows | ${quality.rawControlReviewRequiredCount} |
+| raw-control heuristic delta flags | ${quality.rawControlHeuristicDeltaFlagCount} |
+| raw-control secondary-heuristic candidates | ${quality.rawControlContaminationCount} |
 | operational initial heuristic rows | ${quality.operationalInitialControlContaminationCount} |
-| operational alias-cleared false-positive rows | ${quality.operationalControlFalsePositiveCount} |
-| operational alias-removed flags | ${quality.operationalControlAliasRemovedFlagCount} |
-| operational calibrated candidates | ${quality.operationalControlContaminationCount} |
+| operational ground-truth-cleared rows | ${quality.operationalControlGroundTruthClearedCount} |
+| operational review-required heuristic rows | ${quality.operationalControlReviewRequiredCount} |
+| operational heuristic delta flags | ${quality.operationalControlHeuristicDeltaFlagCount} |
+| operational secondary-heuristic candidates | ${quality.operationalControlContaminationCount} |
 
 ## Snapshot manifest gate (not readiness)
 
@@ -612,7 +663,7 @@ ${blockerRows}
 
 - local entry hash: \`${report.inventory.localArchive.entryManifestSha256}\`
 - local parsed row hash: \`${report.inventory.localParsedCanonicalSha256}\`
-- current live row hash: \`${report.inventory.directSupabaseProbe.canonicalRowSha256 || "unavailable"}\`
+- env-configured Supabase row hash: \`${report.inventory.directSupabaseProbe.canonicalRowSha256 || "unavailable"}\`
 - official current hash: \`${report.inventory.official.current.canonicalSha256}\`
 - official retired hash: \`${report.inventory.official.retired.canonicalSha256}\`
 - snapshot manifest failures: ${report.manifestGate.failures.length ? report.manifestGate.failures.map((item) => `\`${item}\``).join(", ") : "없음 (shape/count/hash only; readiness blockers remain)"}
@@ -626,7 +677,7 @@ ${blockerRows}
 - previous Supabase source createdAt: ${report.inventory.previousSupabaseSnapshot.sourceCreatedAt || "검증 불가"}
 - previous Supabase source updatedAt: ${report.inventory.previousSupabaseSnapshot.sourceUpdatedAt || "검증 불가"}
 - official published range: ${report.inventory.official.current.publishedRange.join(" ~ ")}
-- current live full-row created/updated range: ${currentLiveRange}
+- env-configured Supabase created/updated range: ${currentLiveRange}
 - DB item URL column: schema-absent; payload official URL provenance missing: ${quality.missingSourceUrlCount}
 - DB item official file ID/published/status missing: ${quality.missingOfficialFileIdCount} / ${quality.missingOfficialPublishedAtCount} / ${quality.missingOfficialStatusCount}
 - representative official PDF URL probes: ${report.officialUrlProbes.filter((item) => item.ok).length}/${report.officialUrlProbes.length}
@@ -639,9 +690,9 @@ ${quality.duplicateSummaryRows.toLocaleString("ko-KR")}건은 normalized summary
 |---:|---|---:|---|
 ${duplicateDetailRows}
 
-## Representative calibrated contamination candidates
+## Representative secondary-heuristic candidates
 
-아래는 alias calibration 후에도 deterministic rule이 cross-task로 표시한 operational control 사례다. initial heuristic ${quality.operationalInitialControlContaminationCount}행 중 ${quality.operationalControlFalsePositiveCount}행은 legitimate alias로 완전히 해소되었고 ${quality.operationalControlAliasRemovedFlagCount}개 flag가 제거되었다. 남은 ${quality.operationalControlContaminationCount}행도 launch 전 source text 기반 재검토가 필요하며, 이 표 자체를 문서 내용의 최종 의미 판정으로 사용하지 않는다.
+아래는 두 heuristic 간 비교 후에도 cross-task 후보로 남은 operational control 사례다. initial heuristic ${quality.operationalInitialControlContaminationCount}행에서 사라진 delta 중 명시 ground-truth로 cleared된 행은 ${quality.operationalControlGroundTruthClearedCount}건이고, 라벨이 없어 review-required인 행은 ${quality.operationalControlReviewRequiredCount}건이다. heuristic 차이만으로 contamination pass나 false-positive 판정을 내리지 않는다.
 
 | row | title | flags | matched operational controls |
 |---|---|---|---|
@@ -657,10 +708,10 @@ ${versionRows}
 
 ## Retrieval / reflection
 
-Production search가 관측한 mode: ${[...new Set(report.retrieval.liveResults.map((item) => item.retrievalMode))].join(", ")}. Vector 상태는 ${[...new Set(report.retrieval.liveResults.map((item) => item.vectorSearch?.reason || "unknown"))].join(", ")}다. 실제 production ranked/hybrid branch는 관측되지 않았고, 현재 production에서 받은 KOSHA 행을 동일한 DB harness에 넣어 rest/ranked/hybrid downstream reflection 계약을 결정적으로 재실행했다.
+Production search가 관측한 mode: ${[...new Set(report.retrieval.liveResults.map((item) => item.retrievalMode))].join(", ")}. Vector 상태는 ${[...new Set(report.retrieval.liveResults.map((item) => item.vectorSearch?.reason || "unknown"))].join(", ")}다. 실제 관측 mode에 해당하는 branch만 tested이며, 나머지 ranked/vector/hybrid branch는 untested boundary다.
 
-| scenario | branch | selected evidence | failures |
-|---|---|---:|---:|
+| scenario | branch | execution | selected evidence | failures |
+|---|---|---|---:|---:|
 ${retrievalRows}
 
 각 downstream record에는 selected title, prompt context, deterministic answer, document reflection label이 JSON 보고서에 보존된다. KOSHA code/title과 task-specific control이 함께 있어야 통과하며 generic prose만 있는 경우 실패한다.
@@ -678,7 +729,7 @@ ${retrievalRows}
 3. empty page, 빈 file ID/seq, zero-byte 또는 empty-response 다운로드는 저장 후보에서 제외하고 shard failure로 기록한다.
 4. identity diff ${dryRunCounts.insert}/${dryRunCounts.update}/${dryRunCounts.retire}/${dryRunCounts.unchanged}를 검토하고, update ${comparison.versionMismatches.length}건과 retire ${comparison.refreshDryRun.counts.retire}건의 공식 URL/hash를 개별 확인한다.
 5. body가 빈 ${quality.emptyBodyCount}건을 shard별 HEAD/download/hash/text/OCR dry-run 대상으로 만들고, item-level URL/file ID/published/status ${quality.missingSourceUrlCount}건을 기존 필드에 backfill할 후보 JSON으로만 산출한다.
-6. fallback/non-template summary ${quality.duplicateSummaryRows}건을 source-grounded abstract 후보로 교체하고 calibrated operational candidate ${quality.operationalControlContaminationCount}건의 controls를 본문 근거로 재도출한다.
+6. fallback/non-template summary ${quality.duplicateSummaryRows}건을 source-grounded abstract 후보로 교체하고 secondary-heuristic operational candidate ${quality.operationalControlContaminationCount}건의 controls를 본문 근거로 재도출한다.
 7. representative high-risk retrieval을 rest/ranked/hybrid로 다시 실행해 KOSHA title, source URL, source-grounded control, document reflection이 모두 있는지 확인한다.
 8. **Approval gate 2:** zero mutation dry-run artifact와 focused tests 승인 후에만 별도 작업에서 incremental mutation을 허용한다. 본 audit 실행은 계속 read-only다.
 
@@ -735,8 +786,19 @@ try {
   const localArchive = audit.buildKoshaArchiveInventory(archiveEntries);
   const localParsed = readLocalParsedSnapshot(technicalFolder);
   const localRows = Array.isArray(localParsed.snapshot.items) ? localParsed.snapshot.items : [];
+  const localParseStats = validateLocalParseStats(
+    localParsed.snapshot.parseStats,
+    localArchive.pdfEntryCount
+  );
+  const parserNotices = [
+    ...(Array.isArray(localParsed.snapshot.parserNotices) ? localParsed.snapshot.parserNotices : []),
+    ...localParsed.notices
+  ];
   const localParsedCanonicalSha256 = hashValue(canonicalGuideRows(localRows));
-  logLines.push(`local archives=${localArchive.archiveCount} rows=${localArchive.pdfEntryCount} parsed=${localRows.length}`);
+  logLines.push(
+    `local archives=${localArchive.archiveCount} rows=${localArchive.pdfEntryCount} returned=${localRows.length} ` +
+    `parseSuccess=${localParseStats.parseSuccessCount ?? "unavailable"} parseFailure=${localParseStats.parseFailureCount ?? "unavailable"}`
+  );
 
   const defaultEnvCandidates = [
     resolve(process.cwd(), ".env.local"),
@@ -861,7 +923,9 @@ try {
     }
   };
 
-  const downstreamFailures = retrieval.downstream.flatMap((item) =>
+  const downstreamFailures = retrieval.downstream
+    .filter((item) => item.executionStatus === "tested")
+    .flatMap((item) =>
     item.failures.map((failure) => `${item.scenarioId}/${item.branch}:${failure}`)
   );
   const liveModes = [...new Set(retrieval.liveResults.map((item) => item.retrievalMode))];
@@ -885,6 +949,20 @@ try {
       status: localArchive.duplicateContentCandidateRows ? "fail" : "pass",
       count: localArchive.duplicateContentCandidateRows,
       detail: "same CRC32 and byte length candidates"
+    },
+    {
+      id: "local-parse-accounting",
+      status: localParseStats.accountingMatches ? "pass" : "fail",
+      count: localParseStats.mismatches.length,
+      detail: localParseStats.mismatches.join(", ") ||
+        `${localParseStats.rowsReturned} returned; ${localParseStats.parseAttemptedCount} attempted; ` +
+        `${localParseStats.parseSuccessCount} succeeded; ${localParseStats.parseFailureCount} failed`
+    },
+    {
+      id: "local-pdf-parse-failure",
+      status: localParseStats.parseFailureCount > 0 ? "fail" : "pass",
+      count: localParseStats.parseFailureCount,
+      detail: "per-PDF parser exceptions; empty extracted text is tracked separately as body quality"
     },
     {
       id: "operational-audit-deterministic",
@@ -947,16 +1025,17 @@ try {
       detail: "pre-calibration candidate rows; not a launch blocker count"
     },
     {
-      id: "raw-control-alias-false-positive",
-      status: "pass",
-      count: corpusRowAuditRun1.rawControlFalsePositiveCount,
-      detail: `${corpusRowAuditRun1.rawControlAliasRemovedFlagCount} initial flags removed by legitimate aliases`
+      id: "raw-control-ground-truth-clearance",
+      status: corpusRowAuditRun1.rawControlReviewRequiredCount ? "boundary" : "pass",
+      count: corpusRowAuditRun1.rawControlReviewRequiredCount,
+      detail: `${corpusRowAuditRun1.rawControlGroundTruthClearedCount} explicitly cleared rows; ` +
+        `${corpusRowAuditRun1.rawControlHeuristicDeltaFlagCount} heuristic delta flags`
     },
     {
-      id: "raw-control-contamination",
-      status: corpusRowAuditRun1.rawControlContaminationCount ? "fail" : "pass",
+      id: "raw-control-secondary-heuristic",
+      status: "boundary",
       count: corpusRowAuditRun1.rawControlContaminationCount,
-      detail: "calibrated raw-control cross-domain candidates"
+      detail: "secondary-heuristic candidate rows; not a contamination verdict"
     },
     {
       id: "operational-control-initial-heuristic",
@@ -965,16 +1044,17 @@ try {
       detail: "pre-calibration candidate rows; not a launch blocker count"
     },
     {
-      id: "operational-control-alias-false-positive",
-      status: "pass",
-      count: corpusRowAuditRun1.operationalControlFalsePositiveCount,
-      detail: `${corpusRowAuditRun1.operationalControlAliasRemovedFlagCount} initial flags removed by legitimate aliases`
+      id: "operational-control-ground-truth-clearance",
+      status: corpusRowAuditRun1.operationalControlReviewRequiredCount ? "boundary" : "pass",
+      count: corpusRowAuditRun1.operationalControlReviewRequiredCount,
+      detail: `${corpusRowAuditRun1.operationalControlGroundTruthClearedCount} explicitly cleared rows; ` +
+        `${corpusRowAuditRun1.operationalControlHeuristicDeltaFlagCount} heuristic delta flags`
     },
     {
-      id: "operational-control-contamination",
-      status: corpusRowAuditRun1.operationalControlContaminationCount ? "fail" : "pass",
+      id: "operational-control-secondary-heuristic",
+      status: "boundary",
       count: corpusRowAuditRun1.operationalControlContaminationCount,
-      detail: "calibrated cross-domain candidates remain after operational derivation"
+      detail: "secondary-heuristic candidate rows; not a contamination verdict"
     },
     {
       id: "official-current-stable-key-parity",
@@ -1010,10 +1090,11 @@ try {
       id: "supabase-visible-parity",
       status: visibleReconciliation.parityFailures.length ? "fail" : "pass",
       count: visibleReconciliation.parityFailures.length,
-      detail: visibleReconciliation.parityFailures.join(", ") || "production status and direct full-row snapshot matched"
+      detail: visibleReconciliation.parityFailures.join(", ") ||
+        "production status counts and env-configured Supabase snapshot counts matched; deployment identity unproven"
     },
     {
-      id: "local-live-canonical-parity",
+      id: "local-env-supabase-canonical-parity",
       status: !supabaseProbe.available
         ? "boundary"
         : localParsedCanonicalSha256 === supabaseProbe.canonicalRowSha256
@@ -1023,10 +1104,16 @@ try {
       detail: `${localParsedCanonicalSha256} / ${supabaseProbe.canonicalRowSha256 || "unavailable"}`
     },
     {
-      id: "current-live-full-row-hash",
+      id: "env-configured-supabase-full-row-hash",
       status: supabaseProbe.available ? "pass" : "boundary",
       count: supabaseProbe.available ? 0 : 1,
       detail: supabaseProbe.available ? supabaseProbe.canonicalRowSha256 : supabaseProbe.reason
+    },
+    {
+      id: "deployment-supabase-identity",
+      status: "boundary",
+      count: 1,
+      detail: visibleReconciliation.identityBoundary
     },
     {
       id: "production-ranked-branch",
@@ -1044,8 +1131,8 @@ try {
   const verification = audit.summarizeKoshaAuditChecks(checks);
   const boundaries = [
     supabaseProbe.available
-      ? "Current live full-row Supabase snapshot was available."
-      : `Current live full-row Supabase snapshot was unavailable: ${supabaseProbe.reason}; attempts=${supabaseProbe.attempts.map((item) => `${item.role}:${item.httpStatus}${item.reason ? `/${item.reason}` : ""}`).join(", ") || "none"}.`,
+      ? "Env-configured Supabase snapshot was available; deployment/project identity was not directly proven."
+      : `Env-configured Supabase snapshot was unavailable: ${supabaseProbe.reason}; attempts=${supabaseProbe.attempts.map((item) => `${item.role}:${item.httpStatus}${item.reason ? `/${item.reason}` : ""}`).join(", ") || "none"}.`,
     `Production status remained visible through ${options.productionBase}/api/safety-reference/status.`,
     `Production retrieval modes observed: ${liveModes.join(", ") || "none"}; vector states: ${liveVectorReasons.join(", ") || "none"}.`,
     `The official list probe read ${officialCurrent.records.length} current and ${officialRetired.records.length} retired rows; only ${officialUrlProbes.length} representative PDF URLs received HEAD probes.`,
@@ -1074,14 +1161,31 @@ try {
     },
     {
       rank: 3,
-      severity: "HIGH",
-      id: "operational-control-calibrated-candidate",
-      count: corpusRowAuditRun1.operationalControlContaminationCount,
-      evidence: `${corpusRowAuditRun1.operationalInitialControlContaminationCount} initial rows; ${corpusRowAuditRun1.operationalControlFalsePositiveCount} fully cleared false positives; ${corpusRowAuditRun1.operationalControlAliasRemovedFlagCount} flags removed; ${corpusRowAuditRun1.operationalControlContaminationCount} calibrated candidate rows remain`,
-      releaseCondition: "remaining controls are re-derived from source body and cross-domain fixtures pass"
+      severity: "BLOCKER",
+      id: "local-parse-accounting-unverified",
+      count: localParseStats.mismatches.length + localParseStats.parseFailureCount,
+      evidence: `${localParseStats.mismatches.length} accounting mismatches and ${localParseStats.parseFailureCount} per-PDF parse failures`,
+      releaseCondition: "returned rows equal archived PDFs and every attempted parse has an explicit success or failure outcome"
     },
     {
       rank: 4,
+      severity: "HIGH",
+      id: "operational-control-ground-truth-review",
+      count: corpusRowAuditRun1.operationalControlReviewRequiredCount,
+      evidence: `${corpusRowAuditRun1.operationalControlReviewRequiredCount} heuristic-delta rows lack explicit labels; ` +
+        `${corpusRowAuditRun1.operationalControlGroundTruthClearedCount} rows explicitly cleared`,
+      releaseCondition: "every heuristic delta receives explicit reviewed ground-truth labels"
+    },
+    {
+      rank: 5,
+      severity: "HIGH",
+      id: "operational-control-cross-domain-candidate",
+      count: corpusRowAuditRun1.operationalControlContaminationCount,
+      evidence: `${corpusRowAuditRun1.operationalControlContaminationCount} cross-domain candidate rows remain after the second heuristic`,
+      releaseCondition: "remaining controls are re-derived from source body and cross-domain fixtures pass"
+    },
+    {
+      rank: 6,
       severity: "HIGH",
       id: "official-version-or-state-drift",
       count: versionStateBlockerCount,
@@ -1089,7 +1193,7 @@ try {
       releaseCondition: "official current version replaces stale version and retired rows are excluded after approval"
     },
     {
-      rank: 5,
+      rank: 7,
       severity: "HIGH",
       id: "summary-not-source-grounded",
       count: corpusRowAuditRun1.duplicateSummaryRows,
@@ -1097,7 +1201,7 @@ try {
       releaseCondition: "source-grounded summaries replace fallback and bullet-only values"
     },
     {
-      rank: 6,
+      rank: 8,
       severity: "MEDIUM",
       id: "production-retrieval-branch-unobserved",
       count: productionBranchBoundaryCount,
@@ -1112,6 +1216,7 @@ try {
   const deterministicResultSha256 = hashValue({
     localArchive,
     localParsedCanonicalSha256,
+    localParseStats,
     visible,
     officialSnapshot,
     corpusQuality: corpusRowAuditRun1,
@@ -1134,16 +1239,16 @@ try {
     dbMutationPerformed: false,
     uploadPerformed: false,
     item_count: localRows.length,
-    success_count: localRows.length,
-    failure_count: 0,
-    collection_count_semantics: "success_count and failure_count describe deterministic local ZIP parsing; verification failures and access boundaries are separate",
+    success_count: localParseStats.parseSuccessCount,
+    failure_count: localParseStats.parseFailureCount,
+    collection_count_semantics: "item_count is rows returned; success_count/failure_count are per-PDF parse attempts; non-attempted guideline rows and verification failures are separate",
     elapsed_seconds: elapsedSeconds,
     launchReadiness: {
       launchReadyForAuthoritativeGrounding,
       conclusion: launchReadyForAuthoritativeGrounding
         ? "READY for authoritative KOSHA-guide grounding"
         : "NOT launch-ready for authoritative KOSHA-guide grounding",
-      parityScope: "count/hash parity proves snapshot identity only, not content authority or provenance completeness",
+      parityScope: "count/hash parity proves corpus content parity between local and env snapshots only; deployment/project identity remains unproven",
       blockers: launchBlockers,
       contaminationExamples
     },
@@ -1156,15 +1261,15 @@ try {
     manifestGate: {
       scope: "snapshot-shape-count-hash-only",
       isLaunchReadinessGate: false,
-      manifestPath,
+      manifestPath: toReportPath(manifestPath),
       manifestAvailable: Boolean(manifest),
       failures: manifestFailures,
-      candidatePath: manifestCandidatePath
+      candidatePath: toReportPath(manifestCandidatePath)
     },
     inventory: {
       localArchive,
       localParsedCanonicalSha256,
-      localSource: localParsed.snapshot.source,
+      localSource: sanitizeLocalSource(localParsed.snapshot.source),
       provenanceSchema: {
         itemUrlColumn: "schema-absent",
         evaluatedPayloadUrlAliases: [
@@ -1189,6 +1294,9 @@ try {
         message: productionStatus?.message || null
       },
       directSupabaseProbe: {
+        scope: "env-configured-supabase-snapshot",
+        deploymentIdentityProven: visibleReconciliation.deploymentIdentityProven,
+        identityBoundary: visibleReconciliation.identityBoundary,
         available: supabaseProbe.available,
         reason: supabaseProbe.reason,
         attempts: supabaseProbe.attempts,
@@ -1196,20 +1304,21 @@ try {
         canonicalRowSha256: supabaseProbe.canonicalRowSha256 || null,
         createdAtRange: liveCreatedAtRange,
         updatedAtRange: liveUpdatedAtRange,
-        source: supabaseProbe.source
+        source: sanitizeLocalSource(supabaseProbe.source)
       },
       previousSupabaseSnapshot: previousSnapshot,
       official: officialInventory,
       officialComparison: comparison
     },
     corpusQuality: {
-      scope: supabaseProbe.available ? "current-live-full-row" : "current-local-ingest-equivalent",
+      scope: supabaseProbe.available ? "env-configured-supabase-snapshot" : "current-local-ingest-equivalent",
       ...corpusRowAuditRun1,
       operationalAuditHashRun1,
       operationalAuditHashRun2,
       deterministic: operationalAuditDeterministic,
-      parserNoticeCount: localParsed.notices.length,
-      parserNotices: localParsed.notices
+      parseStats: localParseStats,
+      parserNoticeCount: parserNotices.length,
+      parserNotices
     },
     officialUrlProbes,
     retrieval: {
@@ -1228,7 +1337,10 @@ try {
         }))
       })),
       downstream: retrieval.downstream,
-      failures: downstreamFailures
+      failures: downstreamFailures,
+      untestedBranches: retrieval.downstream
+        .filter((item) => item.executionStatus === "untested")
+        .map((item) => `${item.scenarioId}/${item.branch}`)
     },
     refreshPlan: {
       ...audit.KOSHA_GUIDE_REFRESH_PLAN,
@@ -1237,7 +1349,7 @@ try {
         hydrateBody: corpusRowAuditRun1.emptyBodyCount,
         provenanceBackfill: corpusRowAuditRun1.missingSourceUrlCount,
         summaryRegeneration: corpusRowAuditRun1.duplicateSummaryRows,
-        calibratedControlReview: corpusRowAuditRun1.operationalControlContaminationCount
+        secondaryHeuristicControlReview: corpusRowAuditRun1.operationalControlContaminationCount
       },
       approvalGate: {
         currentState: "blocked-before-mutation",
@@ -1248,10 +1360,9 @@ try {
     checks,
     boundaries,
     artifacts: {
-      reportPath,
-      markdownPath,
-      logPath,
-      manifestCandidatePath
+      reportPath: toReportPath(reportPath),
+      markdownPath: toReportPath(markdownPath),
+      manifestCandidatePath: toReportPath(manifestCandidatePath)
     },
     environment: {
       envFileConfigured: Boolean(envFile),

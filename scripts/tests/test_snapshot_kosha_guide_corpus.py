@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Callable
 
 from scripts.ingest_safety_reference_catalog import ReferenceItem, ReferenceSource
+from scripts import snapshot_kosha_guide_corpus
 from scripts.snapshot_kosha_guide_corpus import build_snapshot
 
 
@@ -96,6 +97,92 @@ class SnapshotKoshaGuideCorpusTest(unittest.TestCase):
         self.assertEqual(snapshot["source"]["id"], source.id)
         self.assertEqual(snapshot["items"][0]["id"], item.id)
         self.assertEqual(snapshot["itemCount"], 1)
+        self.assertEqual(snapshot["parseStats"]["rowsReturned"], 1)
+        self.assertEqual(snapshot["parseStats"]["parseAttemptedCount"], 1)
+        self.assertEqual(snapshot["parseStats"]["parseSuccessCount"], 1)
+        self.assertEqual(snapshot["parseStats"]["parseFailureCount"], 0)
+        self.assertTrue(snapshot["parseStats"]["accountingMatches"])
+
+    def test_accounts_for_each_pdf_parse_failure_instead_of_treating_returned_rows_as_success(self) -> None:
+        source = ReferenceSource(
+            id="kosha-technical-support-regulations-2025",
+            source_group="kosha-reference",
+            source_type="zip-folder",
+            agency="한국산업안전보건공단",
+            title="기술지원규정 및 안전보건 기술지침 묶음",
+            source_path="C:/fixture",
+            origin_url=None,
+            file_format="zip/pdf",
+            published_at="2025-01-01",
+            metadata={"priorityOnly": False},
+        )
+        good = ReferenceItem(
+            id="good",
+            source_id=source.id,
+            item_type="technical-support-regulation",
+            category="전기안전분야",
+            subcategory="기술지원규정",
+            title="B-E-17-2026 good",
+            summary="good",
+            body="parsed",
+            keywords=[],
+            risk_tags=[],
+            primary_documents=[],
+            controls=[],
+            payload={"internalPath": "B-E-17-2026 good.pdf", "isPriority": True},
+        )
+        failed = ReferenceItem(
+            id="failed",
+            source_id=source.id,
+            item_type="technical-support-regulation",
+            category="전기안전분야",
+            subcategory="기술지원규정",
+            title="B-E-18-2026 failed",
+            summary="fallback",
+            body="",
+            keywords=[],
+            risk_tags=[],
+            primary_documents=[],
+            controls=[],
+            payload={"internalPath": "B-E-18-2026 failed.pdf", "isPriority": True},
+        )
+
+        def parser(folder: Path, max_pdf_pages: int, priority_only: bool) -> tuple[ReferenceSource, list[ReferenceItem]]:
+            print("[warn] PDF text extraction failed: B-E-18-2026 failed.pdf (fixture)")
+            return source, [good, failed]
+
+        snapshot = build_snapshot(Path("C:/fixture"), 3, parser)
+
+        self.assertEqual(snapshot["parseStats"]["rowsReturned"], 2)
+        self.assertEqual(snapshot["parseStats"]["parseAttemptedCount"], 2)
+        self.assertEqual(snapshot["parseStats"]["parseSuccessCount"], 1)
+        self.assertEqual(snapshot["parseStats"]["parseFailureCount"], 1)
+        self.assertTrue(snapshot["parseStats"]["accountingMatches"])
+        self.assertEqual(
+            snapshot["parseStats"]["outcomes"],
+            [
+                {"internalPath": "B-E-17-2026 good.pdf", "status": "success"},
+                {"internalPath": "B-E-18-2026 failed.pdf", "status": "failure"},
+            ],
+        )
+
+    def test_parse_accounting_fails_closed_on_count_mismatch(self) -> None:
+        self.assertTrue(hasattr(snapshot_kosha_guide_corpus, "validate_parse_accounting"))
+        stats = {
+            "rowsReturned": 2,
+            "parseAttemptedCount": 2,
+            "parseSuccessCount": 2,
+            "parseFailureCount": 1,
+            "outcomes": [],
+        }
+
+        validated = snapshot_kosha_guide_corpus.validate_parse_accounting(stats, expected_pdf_rows=3)
+
+        self.assertFalse(validated["accountingMatches"])
+        self.assertEqual(
+            validated["mismatches"],
+            ["rows-returned:2/3", "parse-outcomes:3/2", "outcome-rows:0/2"],
+        )
 
 
 if __name__ == "__main__":
