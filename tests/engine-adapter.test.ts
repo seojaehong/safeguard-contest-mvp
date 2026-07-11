@@ -3,10 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { ClawChatEvent } from "@/lib/agent-loop";
 import {
   BrokerError,
-  ENGINE_TOOL_EFFECTS,
   createGuardedEngineAdapter,
   createUnavailableEngineAdapter,
-  parseRelayAdapterConfig,
   resolveEngineMode,
   type BrokerRequestContext,
   type EngineAdapter,
@@ -43,9 +41,8 @@ describe("engine adapter policy", () => {
     expect(resolveEngineMode({ SAFECLAW_ENGINE_MODE: "local-openclaw" })).toBe("local-openclaw");
   });
 
-  it("publishes only read, compute, and unpersisted draft effects", () => {
-    expect(ENGINE_TOOL_EFFECTS).toEqual(["read", "compute", "draft_write"]);
-    expect(ENGINE_TOOL_EFFECTS).not.toContain("db_write");
+  it("exposes no executable capabilities until an enforcing sidecar exists", () => {
+    expect(createUnavailableEngineAdapter().capabilities).toEqual([]);
   });
 
   it("uses a stable fail-closed unavailable adapter", async () => {
@@ -57,35 +54,15 @@ describe("engine adapter policy", () => {
     await expect(engine.run(runInput())).rejects.toBeInstanceOf(BrokerError);
   });
 
-  it("accepts only a fixed allowlisted HTTPS relay origin", () => {
-    expect(parseRelayAdapterConfig({
-      SAFECLAW_RELAY_ORIGIN: "https://relay.safeclaw.example",
-      SAFECLAW_RELAY_ORIGIN_ALLOWLIST: "https://relay.safeclaw.example,https://backup.safeclaw.example",
-      SAFECLAW_RELAY_SIGNING_KEY_ID: "broker-key-1",
-    })).toEqual({
-      origin: "https://relay.safeclaw.example",
-      allowedOrigins: ["https://relay.safeclaw.example", "https://backup.safeclaw.example"],
-      signingKeyId: "broker-key-1",
-      maxTtlSeconds: 60,
-    });
-
-    expect(() => parseRelayAdapterConfig({
-      SAFECLAW_RELAY_ORIGIN: "http://127.0.0.1:8787",
-      SAFECLAW_RELAY_ORIGIN_ALLOWLIST: "http://127.0.0.1:8787",
-      SAFECLAW_RELAY_SIGNING_KEY_ID: "broker-key-1",
-    })).toThrow("RELAY_CONFIG_INVALID");
-    expect(() => parseRelayAdapterConfig({
-      SAFECLAW_RELAY_ORIGIN: "https://attacker.example",
-      SAFECLAW_RELAY_ORIGIN_ALLOWLIST: "https://relay.safeclaw.example",
-      SAFECLAW_RELAY_SIGNING_KEY_ID: "broker-key-1",
-    })).toThrow("RELAY_CONFIG_INVALID");
+  it("treats the deferred relay mode as disabled instead of exposing partial config", () => {
+    expect(resolveEngineMode({ SAFECLAW_ENGINE_MODE: "relay" })).toBe("disabled");
   });
 
   it("enforces one concurrent run per instance and releases the slot", async () => {
     const first = deferred();
     const base: EngineAdapter = {
       id: "blocking",
-      capabilities: ENGINE_TOOL_EFFECTS,
+      capabilities: [],
       checkAvailability: async () => undefined,
       run: vi.fn(async () => first.promise),
     };
@@ -102,7 +79,7 @@ describe("engine adapter policy", () => {
     let calls = 0;
     const base: EngineAdapter = {
       id: "timeout",
-      capabilities: ENGINE_TOOL_EFFECTS,
+      capabilities: [],
       checkAvailability: async () => undefined,
       run: vi.fn(async ({ signal }) => {
         calls += 1;
@@ -116,5 +93,35 @@ describe("engine adapter policy", () => {
 
     await expect(guarded.run(runInput())).rejects.toMatchObject({ code: "ENGINE_TIMEOUT", status: 503 });
     await expect(guarded.run(runInput())).resolves.toBeUndefined();
+  });
+
+  it("keeps the concurrency slot occupied until aborted execution confirms close", async () => {
+    const childClosed = deferred();
+    let abortObserved = false;
+    const base: EngineAdapter = {
+      id: "close-aware",
+      capabilities: [],
+      checkAvailability: async () => undefined,
+      run: async ({ signal }) => {
+        await new Promise<void>((_resolve, reject) => {
+          signal.addEventListener("abort", () => {
+            abortObserved = true;
+            void childClosed.promise.then(() => reject(signal.reason));
+          }, { once: true });
+        });
+      },
+    };
+    const guarded = createGuardedEngineAdapter(base, { maxConcurrent: 1, timeoutMs: 10 });
+    const first = guarded.run(runInput());
+    let settled = false;
+    void first.catch(() => { settled = true; });
+
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    expect(abortObserved).toBe(true);
+    expect(settled).toBe(false);
+    await expect(guarded.run(runInput())).rejects.toMatchObject({ code: "ENGINE_BUSY" });
+
+    childClosed.resolve();
+    await expect(first).rejects.toMatchObject({ code: "ENGINE_TIMEOUT" });
   });
 });

@@ -26,6 +26,7 @@ function request(input: {
   siteId?: string;
   message?: string;
   ip?: string;
+  rawBody?: string;
 } = {}): NextRequest {
   return new Request("https://www.safeclaw.kr/api/agent/chat", {
     method: "POST",
@@ -34,7 +35,7 @@ function request(input: {
       "x-forwarded-for": input.ip ?? `203.0.113.${Math.floor(Math.random() * 200) + 1}`,
       ...(input.token ? { authorization: `Bearer ${input.token}` } : {}),
     },
-    body: JSON.stringify({
+    body: input.rawBody ?? JSON.stringify({
       message: input.message ?? "오늘 작업 위험을 봐줘",
       ...(input.siteId ? { siteId: input.siteId } : {}),
     }),
@@ -44,7 +45,7 @@ function request(input: {
 function adapter(overrides: Partial<EngineAdapter> = {}): EngineAdapter {
   return {
     id: "test-engine",
-    capabilities: ["read", "compute", "draft_write"],
+    capabilities: [],
     checkAvailability: vi.fn(async () => undefined),
     run: vi.fn(async ({ emit }) => {
       emit({ kind: "text-delta", text: "adapter reached" });
@@ -102,6 +103,54 @@ describe("/api/agent/chat broker boundary", () => {
     }
 
     expect(engine.checkAvailability).not.toHaveBeenCalled();
+    expect(engine.run).not.toHaveBeenCalled();
+  });
+
+  it("applies a coarse pre-auth IP limit before JSON parsing while preserving initial 401 responses", async () => {
+    const engine = adapter();
+    const post = createAgentChatPost({ resolveContext: resolver(), engine });
+    const ip = "198.51.100.78";
+
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const response = await post(request({ ip, rawBody: "not-json" }));
+      expect(response.status).toBe(401);
+    }
+
+    const limited = await post(request({ ip, rawBody: "not-json" }));
+    expect(limited.status).toBe(429);
+    expect(engine.checkAvailability).not.toHaveBeenCalled();
+  });
+
+  it("uses an authenticated identity limiter even when requests rotate IP addresses", async () => {
+    const engine = adapter();
+    const post = createAgentChatPost({ resolveContext: resolver(), engine });
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const response = await post(request({
+        token: "valid-token",
+        siteId: validContext.siteId,
+        ip: `198.51.100.${100 + attempt}`,
+      }));
+      expect(response.status).toBe(200);
+      await response.text();
+    }
+
+    const limited = await post(request({
+      token: "valid-token",
+      siteId: validContext.siteId,
+      ip: "198.51.100.199",
+    }));
+    expect(limited.status).toBe(429);
+  });
+
+  it("authenticates malformed anonymous payloads before returning a body error", async () => {
+    const engine = adapter();
+    const post = createAgentChatPost({ resolveContext: resolver(), engine });
+
+    const response = await post(request({ rawBody: "not-json" }));
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({ code: "AUTH_REQUIRED" });
     expect(engine.run).not.toHaveBeenCalled();
   });
 
@@ -192,6 +241,9 @@ describe("/api/agent/chat broker boundary", () => {
     expect(body).not.toContain("owner@example.com");
     expect(body).not.toContain("stderr boom");
     expect(logError).toHaveBeenCalledWith(expect.stringContaining("openclaw broker execution failed"));
-    expect(logError).toHaveBeenCalledWith(expect.stringContaining("stderr boom"));
+    expect(logError).not.toHaveBeenCalledWith(expect.stringContaining("operator"));
+    expect(logError).not.toHaveBeenCalledWith(expect.stringContaining("safeclaw"));
+    expect(logError).not.toHaveBeenCalledWith(expect.stringContaining("owner@example.com"));
+    expect(logError).not.toHaveBeenCalledWith(expect.stringContaining("stderr boom"));
   });
 });

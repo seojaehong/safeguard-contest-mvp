@@ -61,3 +61,12 @@
 - [x] Run focused tests, typecheck, build27, and `git diff --check`.
 - [x] Inspect the final diff for bypasses, secret exposure, direct writes, and unrelated changes.
 - [ ] Pull with rebase, commit, push, and record the exact SHA and gates.
+
+### Follow-up: Consolidated Review Corrections
+
+- [x] Add a server-authenticated read-only owned-site selector route and wire the actual workspace `ClawChat` callsite to it.
+- [x] Remove guest chat behavior and require token plus owned-site context before any chat control is enabled.
+- [x] Use the installed CLI's documented opaque `--session-key` per broker run; remove the partial relay boundary.
+- [x] Remove effect metadata as an enforcement claim; expose no executable capabilities and fail local execution closed pending sidecar authorization.
+- [x] Add coarse pre-auth IP and authenticated identity limits, child-close ordering, already-aborted, and stable-code-only logging tests.
+- [x] Record focused tests, strict typecheck, normal build, and final whitespace gate. The full suite remains intentionally unrun.
