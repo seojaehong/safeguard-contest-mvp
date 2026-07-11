@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workspace-input-css-contract.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-design-contract-wave2
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  05:34:39
+   Duration  784ms (transform 29ms, setup 0ms, import 50ms, tests 12ms, environment 0ms)

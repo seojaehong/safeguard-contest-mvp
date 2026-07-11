@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "safeclaw-frontend-design-wave-verification/v3",
+  "status": "review-pending",
+  "sourceSha": "0c37547018c6516b811c8a2ccd88ef2c4ccc071e",
+  "portableProductCommits": [
+    "5db5220f240ed6c499128dbbc082943c321e9a40",
+    "0fdaed4048252b812a82a47982db9ad80874718e",
+    "0c37547018c6516b811c8a2ccd88ef2c4ccc071e"
+  ],
+  "supersedesEvidence": ["21bb393b5f535cba3a0b162f1981b75f3cf4d4c2", "392a0aeb1cb13d6900fb47c1c7c8350c815efd73"],
+  "scope": {
+    "route": "/workspace",
+    "surface": "responsive input textarea cascade",
+    "removedImportantDeclarations": 15,
+    "reportsFilesChanged": 0,
+    "packageFilesChanged": 0
+  },
+  "format": { "submissionGuardBareLf": 0, "mediaSelectorIndentation": "normalized" },
+  "tests": {
+    "staticContract": { "passed": 2, "failed": 0, "log": "static-contract.log" },
+    "computedStyleMatrix": {
+      "readiness": ["expected workspace theme class", "visible textarea", "document.fonts.ready", "two animation frames"],
+      "themes": ["day", "night"],
+      "viewports": ["1440x900", "1440x500", "1440x410", "1440x360", "1440x320", "390x844"],
+      "combinationsPerRun": 12,
+      "consecutiveRuns": 2,
+      "passed": 24,
+      "failed": 0,
+      "assertedProperties": ["shell theme", "display", "min-height", "padding-top", "padding-right", "padding-bottom", "padding-left", "overflow-y", "font-size", "line-height", "resize"],
+      "logs": ["browser-matrix-run1.log", "browser-matrix-run2.log"]
+    },
+    "typecheck": { "status": "pass", "log": "typecheck.log" }
+  },
+  "dependency": {
+    "lockSha256": "116da99b26a160322d632df067fe9177a14bb6152a3ab05dc543e7919c059ccd",
+    "nextVersion": "15.5.20"
+  },
+  "build": {
+    "status": "pass",
+    "staticPages": 27,
+    "buildId": "y5B0IgyNkl-xRcSlIL_U6",
+    "sourceIdentity": "b6c70c9b091aa6425f5aec2289640a25aad7fb033185b53ec6c8e0b1345ed4f3",
+    "buildIdentity": "05d42fe75d2fdafc701e7ecb9398de4960415fcce97797d80034b10f10399a17",
+    "chunkCount": 97,
+    "auditMarkerCount": 0,
+    "log": "build.log",
+    "bundleEvidence": "bundle-normal.json"
+  },
+  "runtime": {
+    "url": "http://127.0.0.1:3131/workspace?theme=night",
+    "httpStatus": 200,
+    "contentLength": 26672,
+    "evidence": "runtime-probe.json",
+    "stdout": "production-runtime.stdout.log",
+    "stderr": "production-runtime.stderr.log"
+  },
+  "staticAudit": {
+    "status": "fail",
+    "expectedResidual": true,
+    "violationCount": 2352,
+    "importantDeclarations": 710,
+    "coverageIssues": 0,
+    "evidence": "static-audit.json"
+  },
+  "browser108": { "status": "not-run", "reason": "static prerequisite remains RED" }
+}
