@@ -11,12 +11,12 @@ import {
   getSafetyReferenceDisplayTitle,
   SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
   SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE,
-  searchSafetyReferences,
   isSafetyReferenceRiskEligible,
   type SafetyReferenceItem,
   type SafetyReferenceRetrievalMode,
   type SafetyReferenceSearchResult
 } from "./safety-reference-catalog";
+import { searchSafetyReferences } from "./safety-reference-catalog-server";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
 import { summarizeLegalSourceMix } from "./legal-sources";
 import { fetchWeatherSignal } from "./weather";

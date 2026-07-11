@@ -1518,7 +1518,8 @@ export function buildSafetyReferenceOperationalMetadata(item: SafetyReferenceIte
   };
 }
 
-function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "source_id">): "direct" | "supporting" {
+function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "source_id" | "evidence_role" | "kosha_guide">): "direct" | "supporting" {
+  if (item.kosha_guide) return item.evidence_role || "supporting";
   const directTypes = new Set([
     "construction-process",
     "machinery",
@@ -1686,11 +1687,16 @@ function referenceMatchText(item: SafetyReferenceItem): string {
 }
 
 function isKoshaTechnicalGuideItem(item: SafetyReferenceItem): boolean {
-  return item.item_type === "technical-guideline" || item.item_type === "technical-support-regulation";
+  return isKoshaTechnicalGuideItemType(item.item_type);
+}
+
+function isKoshaTechnicalGuideItemType(itemType: string): boolean {
+  return itemType === "technical-guideline" || itemType === "technical-support-regulation";
 }
 
 function isLocalSnapshotEnabled(options: SafetyReferenceSearchOptions): boolean {
-  return !options.sourceId && !options.riskTag;
+  if (options.sourceId || options.riskTag) return false;
+  return !options.itemType || isKoshaTechnicalGuideItemType(options.itemType);
 }
 
 function buildLocalSafetyReferenceItem(
@@ -1728,7 +1734,7 @@ function buildLocalSafetyReferenceItem(
   });
 }
 
-function mergeCatalogItems(localItems: SafetyReferenceItem[], remoteItems: SafetyReferenceItem[], limit: number): SafetyReferenceItem[] {
+export function mergeCatalogItems(localItems: SafetyReferenceItem[], remoteItems: SafetyReferenceItem[], limit: number): SafetyReferenceItem[] {
   const merged = new Map<string, SafetyReferenceItem>();
   localItems.forEach((item) => merged.set(item.id, item));
   remoteItems.forEach((item) => {
@@ -1739,10 +1745,6 @@ function mergeCatalogItems(localItems: SafetyReferenceItem[], remoteItems: Safet
 
 function stripRemoteKoshaDirectItems(items: SafetyReferenceItem[]): SafetyReferenceItem[] {
   return items.filter((item) => !(item.evidence_role === "direct" && isKoshaTechnicalGuideItem(item)));
-}
-
-async function loadKoshaGuideRuntimeModule(): Promise<typeof import("./kosha-guide-corpus")> {
-  return (0, eval)('import("./kosha-guide-corpus")') as Promise<typeof import("./kosha-guide-corpus")>;
 }
 
 function expandedQueryTerms(query: string): string[] {
@@ -2412,52 +2414,8 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   const query = options.query.trim();
   const limit = Math.min(Math.max(options.limit || 12, 1), 50);
   const vectorRuntime = resolveSafetyReferenceVectorSearchState(options.offlineCorpus?.env || process.env);
-  const localAllowed = isLocalSnapshotEnabled(options);
-  let localCorpus: Awaited<ReturnType<typeof import("./kosha-guide-corpus")["loadKoshaGuideCorpus"]>> | { status: "unconfigured"; rootDir: null; failures: [] };
-  let localSearch: { retrievalMode: KoshaGuideOfflineRetrievalMode | null; items: KoshaGuideCorpusHit[] } = { retrievalMode: null, items: [] };
-  if (localAllowed) {
-    const localModule = await loadKoshaGuideRuntimeModule();
-    localCorpus = await localModule.loadKoshaGuideCorpus(options.offlineCorpus);
-    if (localCorpus.status === "ready") {
-      localSearch = localModule.searchKoshaGuideCorpus(
-        localCorpus,
-        query,
-        options.evidenceRole === "direct" ? Math.min(limit * 3, 50) : limit
-      );
-    }
-  } else {
-    localCorpus = { status: "unconfigured", rootDir: null, failures: [] };
-  }
-  const localItems = localSearch.items
-    .filter((item) => !options.evidenceRole || (options.evidenceRole === "direct" ? item.directEligible : !item.directEligible))
-    .map(buildLocalSafetyReferenceItem);
-
   const config = getSupabaseConfig();
   if (!config) {
-    if (localItems.length) {
-      return {
-        ok: true,
-        configured: true,
-        query,
-        count: localItems.length,
-        items: localItems.slice(0, limit),
-        retrievalMode: localSearch.retrievalMode || "local-tag",
-        vectorSearch: vectorRuntime.status,
-        message: "서버 전용 KOSHA 스냅샷에서 오프라인 직접근거를 조회했습니다."
-      };
-    }
-    if (localCorpus.status === "blocked") {
-      return {
-        ok: false,
-        configured: true,
-        query,
-        count: 0,
-        items: [],
-        retrievalMode: "unconfigured",
-        vectorSearch: vectorRuntime.status,
-        message: `KOSHA 오프라인 스냅샷 게이트 차단: ${localCorpus.failures.join(", ")}`
-      };
-    }
     return {
       ok: false,
       configured: false,
@@ -2469,41 +2427,12 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
       message: "Supabase service role key가 없어 안전 지식 DB 검색을 실행하지 않았습니다."
     };
   }
-
-  if (!localAllowed || localCorpus.status === "unconfigured") {
-    return searchSupabaseSafetyReferences(options, config, vectorRuntime);
-  }
-
-  if (localCorpus.status === "blocked") {
-    return {
-      ok: false,
-      configured: true,
-      query,
-      count: 0,
-      items: [],
-      retrievalMode: "unconfigured",
-      vectorSearch: vectorRuntime.status,
-      message: `KOSHA 오프라인 스냅샷 게이트 차단: ${localCorpus.failures.join(", ")}`
-    };
-  }
-
-  return {
-    ok: localItems.length > 0,
-    configured: true,
-    query,
-    count: localItems.length,
-    items: localItems.slice(0, limit),
-    retrievalMode: localSearch.retrievalMode || "local-tag",
-    vectorSearch: vectorRuntime.status,
-    message: localItems.length
-      ? "서버 전용 KOSHA 스냅샷에서 오프라인 직접근거를 조회했습니다."
-      : "KOSHA 오프라인 스냅샷에서 일치하는 직접근거를 찾지 못했습니다."
-  };
+  return await searchSupabaseSafetyReferences(options, config, vectorRuntime);
 }
 
 export function isSafetyReferenceRiskEligible(item: SafetyReferenceItem): boolean {
   if (!item.kosha_guide) return true;
-  return item.kosha_guide.directEligible;
+  return item.kosha_guide.directEligible || Boolean(item.kosha_guide.evidenceRef);
 }
 
 function filterByEvidenceRole(

@@ -21,7 +21,8 @@ import {
 } from "./mcp-tools";
 import { querySafetyKnowledge } from "./ontology/knowledge-tool";
 import { reviewDocpack } from "./ontology/qa-review-tool";
-import { searchSafetyReferences, type SafetyReferenceItem } from "./safety-reference-catalog";
+import type { SafetyReferenceItem } from "./safety-reference-catalog";
+import { searchSafetyReferences } from "./safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "./sif-embedding-corpus";
 
 function asString(input: unknown, key: string): string {

@@ -1,39 +1,103 @@
 {
   "date": "2026-07-12",
   "branch": "feat/kosha-offline-harness",
-  "base_commit": "84c04cd",
-  "status": "green",
-  "changed_files": [
-    "lib/kosha-guide-corpus.ts",
-    "lib/safety-reference-catalog.ts",
-    "lib/db-harness.ts",
-    "lib/search.ts",
-    "tests/kosha-guide-offline-harness.test.ts",
-    "tests/kosha-guide-provenance-gate.test.ts"
-  ],
+  "base_commit": "19a098f",
+  "status": "reviewed_with_build_exit_status_not_observable",
+  "artifact": {
+    "root": "C:/Users/iceam/dev/safeclaw-local-artifacts/kosha-corpus-body-recovery-2026-07-12-v3",
+    "current_schema_version": "safeclaw-kosha-body-current/v1",
+    "corpus_schema_version": "safeclaw-kosha-body-corpus/v2",
+    "snapshot_id": "bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51",
+    "manifest_sha256": "f90262fc98c190243d80124b5e8711866d3372b3affef7d294c881ed194806d2",
+    "read_only": true,
+    "items_inventory": 1040,
+    "searchable_items": 1039,
+    "chunks": 20520,
+    "failure_ledger_rows": 1,
+    "jsonl_bytes": 79424010
+  },
+  "resource_limits": {
+    "current_bytes": 131072,
+    "manifest_bytes": 1048576,
+    "items_file_bytes": 50331648,
+    "chunks_file_bytes": 50331648,
+    "failures_file_bytes": 1048576,
+    "items_lines": 2000,
+    "chunks_lines": 30000,
+    "failure_lines": 2000,
+    "item_record_bytes": 8388608,
+    "chunk_record_bytes": 524288,
+    "failure_record_bytes": 131072
+  },
+  "required_callsites": {
+    "client_policy_split": [
+      "lib/db-harness.ts"
+    ],
+    "server_search_boundary": [
+      "lib/search.ts",
+      "lib/claw-tools.ts",
+      "lib/photo-vision-analysis.ts",
+      "app/api/safety-reference/search/route.ts",
+      "app/api/workpack/remediate/route.ts",
+      "app/api/workpacks/[id]/operation-graph/route.ts",
+      "app/api/mcp/[transport]/route.ts"
+    ],
+    "boundary_modules": [
+      "lib/safety-reference-catalog.ts",
+      "lib/safety-reference-catalog-client.ts",
+      "lib/safety-reference-catalog-server.ts",
+      "lib/kosha-guide-corpus.ts"
+    ]
+  },
   "verification": {
-    "focused_command": "npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/commercial-harness.test.ts tests/safety-reference-relevance.test.ts tests/tbm-deterministic-structures.test.ts tests/risk-ref-gate-wiring.test.ts",
-    "focused_test_files": 6,
-    "focused_tests_passed": 52,
+    "focused_command": "npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts",
+    "focused_test_files": 2,
+    "focused_tests_passed": 8,
+    "post_build_merge_helper_reuse": {
+      "focused_tests": "passed",
+      "typecheck": "passed",
+      "note": "The server wrapper now imports the existing mergeCatalogItems helper; this preserves the already-built merge implementation rather than changing its behavior."
+    },
+    "typecheck_command": "npm.cmd run typecheck",
     "typecheck": "passed",
-    "build": "passed",
+    "final_build_command": "npm.cmd run build",
+    "single_final_build": {
+      "attempts_after_cleanup": 1,
+      "compiled_successfully_output_observed": true,
+      "processes_remaining_after_completion": 0,
+      "build_id_present": true,
+      "build_manifest_present": true,
+      "exit_status": "not_observable_from_execution_tool_output",
+      "source_note": "The subsequent mergeCatalogItems import consolidation was verified by focused tests and typecheck; no second build was run because the race-correction instruction required exactly one final build."
+    },
     "git_diff_check": "passed_with_crlf_warnings_only"
   },
+  "race_audit": {
+    "invalidated_prior_build_pairs": [
+      [193232, 24272],
+      [226608, 154340]
+    ],
+    "action": "confirmed no matching cmd.exe or node.exe remained for this worktree, then removed only this worktree .next before the single final build",
+    "other_worktrees_or_frontend_audit_runner_touched": false
+  },
   "gates": {
-    "snapshot_v2_loader": true,
-    "hash_verification": true,
-    "exact_accounting_verification": true,
-    "fail_closed_missing": true,
-    "fail_closed_stale": true,
-    "fail_closed_hash_mismatch": true,
-    "fail_closed_partial_stage": true,
-    "fail_closed_failure_ledger": true,
-    "accepted_direct_requires_native_anchored_body": true,
-    "review_required_boundaries_never_seed_risk_rows": true,
-    "risk_tbm_page_anchor_provenance_propagation": true
+    "actual_v3_snake_case_contract": true,
+    "read_only_actual_v3_load": true,
+    "same_open_fd_hash_and_parse": true,
+    "path_escape_symlink_and_toctou_rejection": true,
+    "bounded_jsonl_and_identity_cache": true,
+    "unique_item_and_chunk_membership": true,
+    "failed_ledger_item_accounting": true,
+    "sif_case_never_serves_local_kosha": true,
+    "local_kosha_merges_with_successful_remote": true,
+    "remote_failure_not_masked": true,
+    "same_page_evidence_ref_risk_tbm": true,
+    "direct_evidence_gate_preserved": true,
+    "surface_has_no_ranking_value": true,
+    "no_database_or_network_access_for_local_load": true
   },
   "limitations": [
-    "No external corpus content is committed in this branch.",
-    "Offline corpus loading is runtime-only from the server path to avoid client bundle contamination."
+    "The final build process completed with generated build artifacts and no remaining worktree process, but the execution tool did not expose its final exit status.",
+    "No external corpus content is committed in this branch."
   ]
 }

@@ -1,287 +1,272 @@
 import { createHash } from "node:crypto";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  getKoshaGuideCorpusCacheStatsForTests,
+  isKoshaGuideDirectEvidenceAccepted,
   loadKoshaGuideCorpus,
-  searchKoshaGuideCorpus,
-  type KoshaGuideCorpusRecord
+  resetKoshaGuideCorpusCacheForTests
 } from "@/lib/kosha-guide-corpus";
-import { searchSafetyReferences } from "@/lib/safety-reference-catalog";
+import { buildSafetyReferenceRiskRows, buildTbmRiskLinks } from "@/lib/search";
+import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 
-type SnapshotLifecycle = "current" | "stale" | "retired";
-type SnapshotStage = "complete" | "partial";
+type JsonRecord = Record<string, unknown>;
 
-type FixtureChunk = {
-  chunkId: string;
-  itemIds: string[];
-};
-
-type FixtureFailure = {
-  chunkId: string;
-  stage: string;
-  message: string;
-};
-
-type FixtureOptions = {
-  records: KoshaGuideCorpusRecord[];
-  lifecycle?: SnapshotLifecycle;
-  stage?: SnapshotStage;
-  failures?: FixtureFailure[];
-  manifestItemCount?: number;
-  currentItemCount?: number;
-  currentManifestSha256?: string;
-  removeManifest?: boolean;
-};
-
+const ACTUAL_ROOT = "C:/Users/iceam/dev/safeclaw-local-artifacts/kosha-corpus-body-recovery-2026-07-12-v3";
 const tempDirs: string[] = [];
+let actualSourceCache: ReturnType<typeof readActualSource> | null = null;
+
+function asRecord(value: unknown): JsonRecord {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Expected JSON object");
+  return value as JsonRecord;
+}
+
+function sha256(value: string | Buffer): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function readJson(path: string): JsonRecord {
+  return asRecord(JSON.parse(readFileSync(path, "utf8")) as unknown);
+}
+
+function readActualSource(): { current: JsonRecord; manifest: JsonRecord; items: JsonRecord[]; chunks: JsonRecord[]; failures: JsonRecord[] } {
+  if (actualSourceCache) return actualSourceCache;
+  const current = readJson(join(ACTUAL_ROOT, "current.json"));
+  const manifestRef = asRecord(current.manifest);
+  const manifestPath = join(ACTUAL_ROOT, String(manifestRef.path));
+  const manifest = readJson(manifestPath);
+  const snapshotDir = join(ACTUAL_ROOT, String(current.snapshot_path));
+  const failures = readFileSync(join(snapshotDir, "failures.jsonl"), "utf8")
+    .trim().split("\n").filter(Boolean).map((line) => asRecord(JSON.parse(line) as unknown));
+  const failedIds = new Set(failures.map((failure) => String(failure.item_id)));
+  const items = readFileSync(join(snapshotDir, "items.jsonl"), "utf8")
+    .trim().split("\n").filter(Boolean).map((line) => asRecord(JSON.parse(line) as unknown))
+    .filter((item) => !failedIds.has(String(item.item_id))).slice(0, 2);
+  const selectedIds = new Set(items.map((item) => String(item.item_id)));
+  const chunks = readFileSync(join(snapshotDir, "chunks.jsonl"), "utf8")
+    .trim().split("\n").filter(Boolean).map((line) => asRecord(JSON.parse(line) as unknown))
+    .filter((chunk) => selectedIds.has(String(chunk.item_id)));
+  actualSourceCache = { current, manifest, items, chunks, failures };
+  return actualSourceCache;
+}
+
+function writeSnapshot(rootDir: string, snapshotId: string, source = readActualSource(), overrides: {
+  items?: JsonRecord[];
+  chunks?: JsonRecord[];
+  failures?: JsonRecord[];
+  manifestPath?: string;
+} = {}): void {
+  const items = overrides.items || source.items;
+  const chunks = overrides.chunks || source.chunks;
+  const failures = overrides.failures || [];
+  const snapshotPath = `snapshots/${snapshotId}`;
+  const snapshotDir = join(rootDir, snapshotPath);
+  mkdirSync(snapshotDir, { recursive: true });
+  const itemsText = items.map((item) => JSON.stringify(item)).join("\n") + "\n";
+  const chunksText = chunks.map((chunk) => JSON.stringify(chunk)).join("\n") + "\n";
+  const failuresText = failures.map((failure) => JSON.stringify(failure)).join("\n") + (failures.length ? "\n" : "");
+  writeFileSync(join(snapshotDir, "items.jsonl"), itemsText, { encoding: "utf8", flag: "w" });
+  writeFileSync(join(snapshotDir, "chunks.jsonl"), chunksText, { encoding: "utf8", flag: "w" });
+  writeFileSync(join(snapshotDir, "failures.jsonl"), failuresText, { encoding: "utf8", flag: "w" });
+  const sourceIdentity = asRecord(source.manifest.source_identity);
+  const manifest: JsonRecord = {
+    schema_version: source.manifest.schema_version,
+    snapshot_id: snapshotId,
+    reproducibility_hash: sha256(snapshotId),
+    generation_policy_sha256: source.current.generation_policy_sha256,
+    source_identity: { identity_sha256: sourceIdentity.identity_sha256 },
+    counts: {
+      inventory: items.length,
+      completed: items.length,
+      success: items.length - failures.length,
+      failure: 0,
+      chunks: chunks.length,
+      failure_ledger: failures.length
+    },
+    output_hashes: {
+      "items.jsonl": sha256(itemsText),
+      "chunks.jsonl": sha256(chunksText),
+      "failures.jsonl": sha256(failuresText)
+    }
+  };
+  const manifestText = JSON.stringify(manifest, null, 2);
+  writeFileSync(join(snapshotDir, "manifest.json"), manifestText, "utf8");
+  const current: JsonRecord = {
+    schema_version: source.current.schema_version,
+    generation_policy_sha256: source.current.generation_policy_sha256,
+    manifest: {
+      path: overrides.manifestPath || `${snapshotPath}/manifest.json`,
+      sha256: sha256(manifestText),
+      size_bytes: Buffer.byteLength(manifestText)
+    },
+    reproducibility_hash: manifest.reproducibility_hash,
+    snapshot_id: snapshotId,
+    snapshot_path: snapshotPath,
+    source_identity_sha256: sourceIdentity.identity_sha256
+  };
+  writeFileSync(join(rootDir, "current.json"), JSON.stringify(current, null, 2), "utf8");
+}
+
+function writeFixture(overrides: Parameters<typeof writeSnapshot>[3] = {}): string {
+  const rootDir = mkdtempSync(join(tmpdir(), "kosha-v3-fixture-"));
+  tempDirs.push(rootDir);
+  writeSnapshot(rootDir, "fixture-v3", readActualSource(), overrides);
+  return rootDir;
+}
+
+function withNoSupabase<T>(run: () => Promise<T>): Promise<T> {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  return run().finally(() => {
+    if (url === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = url;
+    if (key === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY; else process.env.SUPABASE_SERVICE_ROLE_KEY = key;
+  });
+}
 
 afterEach(() => {
-  while (tempDirs.length > 0) {
+  resetKoshaGuideCorpusCacheForTests();
+  vi.unstubAllGlobals();
+  while (tempDirs.length) {
     const target = tempDirs.pop();
     if (target) rmSync(target, { recursive: true, force: true });
   }
 });
 
-function stableStringify(value: unknown): string {
-  if (Array.isArray(value)) {
-    return `[${value.map((item) => stableStringify(item)).join(",")}]`;
-  }
-  if (value && typeof value === "object") {
-    return `{${Object.entries(value as Record<string, unknown>)
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([key, item]) => `${JSON.stringify(key)}:${stableStringify(item)}`)
-      .join(",")}}`;
-  }
-  return JSON.stringify(value);
-}
+describe("KOSHA v3 offline harness", () => {
+  it.skipIf(!existsSync(ACTUAL_ROOT))("loads the read-only actual v3 artifact with bounded snake_case JSONL", async () => {
+    const loaded = await loadKoshaGuideCorpus({ rootDir: ACTUAL_ROOT });
+    expect(loaded.status === "blocked" ? loaded.failures.join(", ") : loaded.status).toBe("ready");
+    if (loaded.status !== "ready") return;
+    expect(loaded.inventoryCount).toBe(1040);
+    expect(loaded.itemCount).toBe(1039);
+    expect(loaded.chunkCount).toBe(20520);
+    expect(loaded.failureCount).toBe(1);
+    expect(loaded.records[0]?.referenceId).toMatch(/^kosha-/u);
+    expect(loaded.records[0] && isKoshaGuideDirectEvidenceAccepted(loaded.records[0])).toBe(false);
+  }, 20_000);
 
-function sha256Text(value: string): string {
-  return createHash("sha256").update(value, "utf8").digest("hex");
-}
+  it("caches a v3 load by current and manifest identity, then invalidates on snapshot switch", async () => {
+    const rootDir = writeFixture();
+    expect((await loadKoshaGuideCorpus({ rootDir })).status).toBe("ready");
+    expect((await loadKoshaGuideCorpus({ rootDir })).status).toBe("ready");
+    expect(getKoshaGuideCorpusCacheStatsForTests().uncachedLoads).toBe(1);
+    writeSnapshot(rootDir, "fixture-v3-switched");
+    expect((await loadKoshaGuideCorpus({ rootDir })).status).toBe("ready");
+    expect(getKoshaGuideCorpusCacheStatsForTests().uncachedLoads).toBe(2);
+  });
 
-function defaultRecord(overrides: Partial<KoshaGuideCorpusRecord> = {}): KoshaGuideCorpusRecord {
-  const nativeBody = overrides.nativeBody || "작업발판과 난간 상태를 확인하고 강풍 시 상부 작업을 중지한다.";
-  const base: KoshaGuideCorpusRecord = {
-    referenceId: "B-E-17-2026",
-    stableDocumentKey: "B-E-17",
-    version: "B-E-17-2026",
-    itemType: "technical-support-regulation",
-    title: "도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
-    category: "전기안전분야",
-    nativeBody,
-    bodyKind: "native",
-    quality: "accepted",
-    provenance: {
-      sourceId: "kosha-guide-offline",
-      generationId: "gen-2026-07-12",
-      generatedAt: "2026-07-12T00:00:00.000Z",
-      lifecycle: "current",
-      chunkId: "chunk-1",
-      bodyHash: sha256Text(nativeBody)
-    },
-    tags: {
-      keywords: ["도장", "도료", "유기용제", "외벽"],
-      riskTags: ["화재", "폭발", "추락"],
-      controls: ["작업발판과 난간 상태 확인", "강풍 시 상부 작업 중지"],
-      primaryDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"]
-    },
-    anchors: [{ page: 12, excerpt: "작업발판과 난간 상태를 확인한다." }]
-  };
-  return {
-    ...base,
-    ...overrides,
-    provenance: {
-      ...base.provenance,
-      ...overrides.provenance
-    },
-    tags: {
-      ...base.tags,
-      ...overrides.tags
-    },
-    anchors: overrides.anchors ?? base.anchors
-  };
-}
+  it("rejects absolute and parent path escapes plus a file symlink", async () => {
+    const rootDir = writeFixture({ manifestPath: "../outside.json" });
+    const escaped = await loadKoshaGuideCorpus({ rootDir });
+    expect(escaped.status).toBe("blocked");
+    expect(escaped.status === "blocked" && escaped.failures).toContain("path:escape");
 
-function writeSnapshotFixture(options: FixtureOptions): string {
-  const rootDir = mkdtempSync(join(tmpdir(), "kosha-offline-harness-"));
-  tempDirs.push(rootDir);
-  mkdirSync(rootDir, { recursive: true });
+    const symlinkRoot = writeFixture();
+    const outside = join(symlinkRoot, "outside-current.json");
+    writeFileSync(outside, readFileSync(join(symlinkRoot, "current.json")));
+    unlinkSync(join(symlinkRoot, "current.json"));
+    symlinkSync(outside, join(symlinkRoot, "current.json"), "file");
+    const linked = await loadKoshaGuideCorpus({ rootDir: symlinkRoot });
+    expect(linked.status).toBe("blocked");
+    expect(linked.status === "blocked" && linked.failures).toContain("path:symlink");
+  });
 
-  const records = options.records;
-  const failures = options.failures || [];
-  const chunks: FixtureChunk[] = [
-    {
-      chunkId: "chunk-1",
-      itemIds: records.map((record) => record.referenceId)
-    }
-  ];
-  const itemsBody = records.map((record) => JSON.stringify(record)).join("\n");
-  const chunksBody = chunks
-    .map((chunk) => JSON.stringify({ ...chunk, itemCount: chunk.itemIds.length }))
-    .join("\n");
-  const failuresBody = failures.map((failure) => JSON.stringify(failure)).join("\n");
-  const itemsSha256 = sha256Text(itemsBody);
-  const chunksSha256 = sha256Text(chunksBody);
-  const failuresSha256 = sha256Text(failuresBody);
-
-  const manifestSource = {
-    sourceId: "kosha-guide-offline",
-    snapshotVersion: "v2",
-    corpusVersion: "2026-07-12"
-  };
-  const manifestGeneration = {
-    generationId: "gen-2026-07-12",
-    generatedAt: "2026-07-12T00:00:00.000Z",
-    lifecycle: options.lifecycle || "current",
-    stage: options.stage || "complete"
-  };
-  const manifestAccounting = {
-    itemCount: options.manifestItemCount ?? records.length,
-    chunkCount: chunks.length,
-    failureCount: failures.length,
-    acceptedCount: records.filter((record) => record.quality === "accepted").length,
-    reviewRequiredCount: records.filter((record) => record.quality === "review_required").length
-  };
-  const manifest = {
-    schemaVersion: 2,
-    source: {
-      ...manifestSource,
-      sourceHash: sha256Text(stableStringify(manifestSource))
-    },
-    generation: {
-      ...manifestGeneration,
-      generationHash: sha256Text(stableStringify(manifestGeneration))
-    },
-    accounting: {
-      ...manifestAccounting,
-      accountingHash: sha256Text(stableStringify(manifestAccounting))
-    },
-    files: {
-      items: { path: "items.jsonl", sha256: itemsSha256, count: records.length },
-      chunks: { path: "chunks.jsonl", sha256: chunksSha256, count: chunks.length },
-      failures: { path: "failures.jsonl", sha256: failuresSha256, count: failures.length }
-    }
-  };
-  const manifestText = JSON.stringify(manifest, null, 2);
-  const manifestSha256 = sha256Text(manifestText);
-  const current = {
-    schemaVersion: 2,
-    paths: {
-      manifest: "manifest.json",
-      items: "items.jsonl",
-      chunks: "chunks.jsonl",
-      failures: "failures.jsonl"
-    },
-    counts: {
-      items: options.currentItemCount ?? records.length,
-      chunks: chunks.length,
-      failures: failures.length
-    },
-    hashes: {
-      sourceSha256: manifest.source.sourceHash,
-      generationSha256: manifest.generation.generationHash,
-      accountingSha256: manifest.accounting.accountingHash,
-      manifestSha256: options.currentManifestSha256 ?? manifestSha256
-    }
-  };
-
-  writeFileSync(join(rootDir, "current.json"), JSON.stringify(current, null, 2));
-  if (!options.removeManifest) {
-    writeFileSync(join(rootDir, "manifest.json"), manifestText);
-  }
-  writeFileSync(join(rootDir, "items.jsonl"), itemsBody ? `${itemsBody}\n` : "");
-  writeFileSync(join(rootDir, "chunks.jsonl"), chunksBody ? `${chunksBody}\n` : "");
-  writeFileSync(join(rootDir, "failures.jsonl"), failuresBody ? `${failuresBody}\n` : "");
-  return rootDir;
-}
-
-describe("KOSHA offline harness", () => {
-  it("loads a current snapshot, indexes tag/body text, and exposes local-hybrid retrieval without UI scores", async () => {
-    const accepted = defaultRecord();
-    const reviewRequired = defaultRecord({
-      referenceId: "E-G-18-2026-review",
-      stableDocumentKey: "E-G-18",
-      version: "E-G-18-2026",
-      itemType: "technical-support-regulation",
-      title: "밀폐공간 작업 프로그램 수립 및 시행에 관한 기술지원규정",
-      category: "산업보건일반분야",
-      nativeBody: "밀폐공간 진입 전 산소농도 측정과 감시인 배치가 필요하다.",
-      bodyKind: "summary",
-      quality: "review_required",
-      tags: {
-        keywords: ["밀폐공간", "산소농도", "감시인"],
-        riskTags: ["질식"],
-        controls: ["산소농도 측정", "감시인 배치"],
-        primaryDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"]
-      },
-      anchors: []
+  it("rejects a replacement at the lstat-to-open TOCTOU seam", async () => {
+    const rootDir = writeFixture();
+    let replaced = false;
+    const loaded = await loadKoshaGuideCorpus({
+      rootDir,
+      testHooks: {
+        afterPathChecked(path) {
+          if (basename(path) !== "items.jsonl" || replaced) return;
+          replaced = true;
+          const replacement = `${path}.replacement`;
+          writeFileSync(replacement, "{\"schema_version\":\"replaced\"}\n", "utf8");
+          renameSync(replacement, path);
+        }
+      }
     });
-    const rootDir = writeSnapshotFixture({ records: [accepted, reviewRequired] });
+    expect(replaced).toBe(true);
+    expect(loaded.status).toBe("blocked");
+    expect(loaded.status === "blocked" && loaded.failures).toContain("path:toctou");
+  });
 
-    const corpus = await loadKoshaGuideCorpus({ rootDir });
-    expect(corpus.status).toBe("ready");
-    if (corpus.status !== "ready") return;
+  it("enforces record bounds and blocks duplicate or orphan memberships", async () => {
+    const source = readActualSource();
+    const firstItem = source.items[0];
+    const firstChunk = source.chunks[0];
+    if (!firstItem || !firstChunk) throw new Error("Actual v3 fixture source is incomplete");
+    const oversizedItem: JsonRecord = { ...firstItem, body: "x".repeat(8 * 1024 * 1024 + 1) };
+    const bounded = await loadKoshaGuideCorpus({ rootDir: writeFixture({ items: [oversizedItem], chunks: source.chunks.filter((chunk) => String(chunk.item_id) === String(oversizedItem.item_id)) }) });
+    expect(bounded.status).toBe("blocked");
+    expect(bounded.status === "blocked" && bounded.failures).toContain("limit:record:items.jsonl");
 
-    const local = searchKoshaGuideCorpus(corpus, "외벽 도장 작업발판 강풍", 5);
-    expect(local.retrievalMode).toBe("local-hybrid");
-    expect(local.items.map((item) => item.referenceId)).toEqual(["B-E-17-2026"]);
+    const duplicateItem = await loadKoshaGuideCorpus({ rootDir: writeFixture({ items: [firstItem, firstItem], chunks: source.chunks.filter((chunk) => String(chunk.item_id) === String(firstItem.item_id)) }) });
+    expect(duplicateItem.status).toBe("blocked");
+    expect(duplicateItem.status === "blocked" && duplicateItem.failures.some((failure) => failure.startsWith("duplicate:item:"))).toBe(true);
 
-    const result = await searchSafetyReferences({
-      query: "외벽 도장 작업발판 강풍",
-      limit: 5,
-      offlineCorpus: { rootDir }
-    });
+    const orphanChunk: JsonRecord = { ...firstChunk, item_id: "kosha-orphan-item" };
+    const orphan = await loadKoshaGuideCorpus({ rootDir: writeFixture({ items: [firstItem], chunks: [orphanChunk] }) });
+    expect(orphan.status).toBe("blocked");
+    expect(orphan.status === "blocked" && orphan.failures).toContain("orphan:chunk:kosha-orphan-item");
+  }, 20_000);
 
+  it("keeps v3 KOSHA as supporting evidence, preserves its same-page evidenceRef into TBM, and never exposes a score", async () => {
+    const rootDir = writeFixture();
+    const result = await withNoSupabase(() => searchSafetyReferences({ query: "작업", limit: 3, offlineCorpus: { rootDir } }));
     expect(result.ok).toBe(true);
-    expect(result.retrievalMode).toBe("local-hybrid");
-    expect(result.items.map((item) => item.id)).toEqual(["B-E-17-2026"]);
-    expect(result.items[0]?.retrieval_source).toBe("local-hybrid");
+    expect(result.items.length).toBeGreaterThan(0);
+    expect(result.items[0]?.evidence_role).toBe("supporting");
+    expect(result.items[0]?.kosha_guide?.evidenceRef).toMatch(/p\.\d+/u);
     expect("score" in (result.items[0] || {})).toBe(false);
-  });
+    const response = buildMockAskResponse("작업", mockSearchResults, "mock", "test");
+    const rows = buildSafetyReferenceRiskRows(response, result.items, "강풍", "작업");
+    const links = buildTbmRiskLinks(rows, "강풍");
+    const evidenceRefs = new Set(result.items.map((item) => item.kosha_guide?.evidenceRef).filter((ref): ref is string => Boolean(ref)));
+    const anchoredRow = rows.find((row) => row.evidenceRefs.some((ref) => evidenceRefs.has(ref)));
+    expect(anchoredRow).toBeDefined();
+    expect(links.some((link) => link.evidenceRefs.some((ref) => anchoredRow?.evidenceRefs.includes(ref)))).toBe(true);
+  }, 20_000);
 
-  it("rejects irrelevant local documents even when the snapshot passed integrity", async () => {
-    const rootDir = writeSnapshotFixture({
-      records: [
-        defaultRecord(),
-        defaultRecord({
-          referenceId: "H-1-2026",
-          stableDocumentKey: "H-1",
-          version: "H-1-2026",
-          title: "특수화학물질 취급 지침",
-          category: "산업보건일반분야",
-          nativeBody: "MSDS와 특수화학물질 보호구를 확인한다.",
-          tags: {
-            keywords: ["화학물질", "MSDS"],
-            riskTags: ["중독"],
-            controls: ["MSDS 확인", "적정 보호구 착용"],
-            primaryDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"]
-          }
-        })
-      ]
-    });
+  it("does not serve KOSHA records for sif-case and merges local KOSHA with successful ranked remote results", async () => {
+    const rootDir = writeFixture();
+    const sifResult = await withNoSupabase(() => searchSafetyReferences({ query: "작업", itemType: "sif-case", limit: 4, offlineCorpus: { rootDir } }));
+    expect(sifResult.items).toEqual([]);
+    expect(sifResult.retrievalMode).toBe("unconfigured");
 
-    const result = await searchSafetyReferences({
-      query: "지게차 보행 동선 충돌",
-      limit: 5,
-      offlineCorpus: { rootDir }
-    });
-
-    expect(result.items).toEqual([]);
-    expect(result.count).toBe(0);
-  });
-
-  it("preserves the unconfigured fallback contract when no snapshot path is supplied", async () => {
-    const result = await searchSafetyReferences({
-      query: "외벽 도장 작업",
-      limit: 3,
-      offlineCorpus: { rootDir: null }
-    });
-
-    expect(["local-tag", "local-ranked", "local-hybrid"]).not.toContain(result.retrievalMode);
-    expect(result.items.every((item) => item.id !== "B-E-17-2026")).toBe(true);
-  });
+    const oldUrl = process.env.SUPABASE_URL;
+    const oldKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    process.env.SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role";
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify([{
+      id: "remote-ranked-item",
+      source_id: "remote",
+      item_type: "construction-process",
+      category: "remote",
+      subcategory: null,
+      title: "작업 원격 순위 근거",
+      summary: "작업 안전 원격 근거",
+      keywords: ["작업"],
+      risk_tags: [],
+      primary_documents: [],
+      controls: []
+    }]), { status: 200, headers: { "content-type": "application/json" } })));
+    try {
+      const merged = await searchSafetyReferences({ query: "작업", limit: 4, offlineCorpus: { rootDir } });
+      expect(merged.ok).toBe(true);
+      expect(merged.items.map((item) => item.id)).toContain("remote-ranked-item");
+      expect(merged.items.some((item) => item.kosha_guide !== undefined)).toBe(true);
+      expect(merged.retrievalMode).toBe("ranked-rpc");
+    } finally {
+      if (oldUrl === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldUrl;
+      if (oldKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY; else process.env.SUPABASE_SERVICE_ROLE_KEY = oldKey;
+    }
+  }, 20_000);
 });

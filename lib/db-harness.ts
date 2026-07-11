@@ -3,13 +3,13 @@ import type {
   SafetyReferenceErrorCode,
   SafetyReferenceRetrievalMode,
   SafetyReferenceVectorStatus
-} from "@/lib/safety-reference-catalog";
+} from "@/lib/safety-reference-catalog-client";
 import {
   buildSafetyReferenceOperationalMetadata,
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplayTitle,
   isSafetyReferenceCompatibleWithQuery
-} from "@/lib/safety-reference-catalog";
+} from "@/lib/safety-reference-catalog-client";
 
 export type HarnessImprovement = {
   id: string;
