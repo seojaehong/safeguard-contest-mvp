@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { AuditGlobalBoundaryTrigger } from "@/components/AuditGlobalBoundaryTrigger";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.safeclaw.kr"),
@@ -73,7 +74,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700;800;900&family=Noto+Sans:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&family=Noto+Sans+Khmer:wght@400;600;700;800&family=Noto+Sans+Myanmar:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" />
         </noscript>
       </head>
-      <body>{children}</body>
+      <body>
+        {process.env.SAFECLAW_FRONTEND_AUDIT === "1" ? <span hidden data-safeclaw-audit-enabled="true" /> : null}
+        <AuditGlobalBoundaryTrigger enabled={process.env.SAFECLAW_FRONTEND_AUDIT === "1"} />
+        {children}
+      </body>
     </html>
   );
 }

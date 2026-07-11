@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-11T22:25:00+09:00",
+  "verdict": "blocked",
+  "baseSha": "826352719eab692ed9c5c638bfd9b2db691e95b9",
+  "sourceSha": "44c27e9153d1c33b6b18a70854ee9240336bb1ae",
+  "integrationHead": "b30c0d81f30881a0e63d0de6080a75a152290ac2",
+  "staticAudit": {
+    "originalViolations": 2488,
+    "postNormalizationViolations": 2444,
+    "status": "fail",
+    "routeCoverageIssues": 0,
+    "classification": {
+      "parserFalsePositive": 38,
+      "validCurrentScopedRole": 6,
+      "unresolvedBlocking": 2444
+    },
+    "families": [
+      {
+        "rule": "important-declaration",
+        "original": 752,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 752
+      },
+      {
+        "rule": "typography-tuple",
+        "original": 612,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 612
+      },
+      {
+        "rule": "radius-tier",
+        "original": 290,
+        "parser": 0,
+        "valid": 2,
+        "unresolved": 288
+      },
+      {
+        "rule": "line-height-tier",
+        "original": 235,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 235
+      },
+      {
+        "rule": "font-size-tier",
+        "original": 192,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 192
+      },
+      {
+        "rule": "tracking-tier",
+        "original": 147,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 147
+      },
+      {
+        "rule": "decorative-box-shadow",
+        "original": 101,
+        "parser": 38,
+        "valid": 4,
+        "unresolved": 59
+      },
+      {
+        "rule": "selector-role",
+        "original": 71,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 71
+      },
+      {
+        "rule": "decorative-gradient",
+        "original": 53,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 53
+      },
+      {
+        "rule": "font-family-token",
+        "original": 28,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 28
+      },
+      {
+        "rule": "mixed-typography-role",
+        "original": 5,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 5
+      },
+      {
+        "rule": "decorative-text-shadow",
+        "original": 2,
+        "parser": 0,
+        "valid": 0,
+        "unresolved": 2
+      }
+    ]
+  },
+  "tests": {
+    "initialRed": {
+      "filesFailed": 4,
+      "failed": 19,
+      "passed": 4
+    },
+    "fullFocused": {
+      "filesFailed": 4,
+      "failed": 48,
+      "passed": 22
+    },
+    "parserRegression": {
+      "filesPassed": 1,
+      "passed": 2,
+      "skipped": 18
+    }
+  },
+  "typecheck": {
+    "status": "pass",
+    "command": "npm.cmd run typecheck",
+    "log": "typecheck-after-ci.log"
+  },
+  "build": {
+    "status": "pass",
+    "command": "npm.cmd run build",
+    "nextVersion": "15.5.20",
+    "staticPages": "27/27",
+    "exitCode": 0,
+    "buildId": "a5Ak_ESo7zZxI5rr4HuNg",
+    "log": "build27-clean-final.log"
+  },
+  "browserAudit": {
+    "status": "not-run",
+    "expectedRows": 108,
+    "routeRows": 96,
+    "themeRows": 6,
+    "specialRows": 4,
+    "generatedRows": 2,
+    "failedRows": null,
+    "findings": null,
+    "recoveredRows": null,
+    "reason": "Static audit remains RED with 2444 unresolved blockers."
+  },
+  "hardExclusionsModified": [],
+  "dbChanges": false
+}
