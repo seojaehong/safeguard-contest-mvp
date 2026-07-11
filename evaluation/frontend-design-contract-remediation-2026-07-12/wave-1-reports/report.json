@@ -1,0 +1,99 @@
+{
+  "date": "2026-07-12",
+  "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation",
+  "branch": "feat/frontend-design-contract-remediation",
+  "baseCommit": "2c3fb9b",
+  "scope": {
+    "ownedFiles": [
+      "app/globals.css",
+      "components/ReportsDownloadCenter.tsx",
+      "components/SafeClawModuleShell.tsx",
+      "tests/reports-design-remediation.test.ts",
+      "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports"
+    ],
+    "packageSourceDiff": 0
+  },
+  "gates": [
+    {
+      "name": "reports-focused-tests",
+      "status": "pass",
+      "command": "npm.cmd test -- tests/reports-design-remediation.test.ts",
+      "result": {
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0
+      },
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-design-tests.log"
+    },
+    {
+      "name": "frontend-static-audit",
+      "status": "fail",
+      "command": "npm.cmd run audit:frontend-consistency",
+      "result": {
+        "violationCount": 2367,
+        "importantDeclarations": 725,
+        "coverageIssues": 0,
+        "pageFiles": 32,
+        "componentFiles": 23,
+        "cssLines": 17719
+      },
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/static-audit.log",
+      "json": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/static-audit.json"
+    },
+    {
+      "name": "strict-typecheck",
+      "status": "pass",
+      "command": "npm.cmd run typecheck",
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/typecheck.log"
+    },
+    {
+      "name": "build27",
+      "status": "pass",
+      "command": "npm.cmd run build",
+      "result": {
+        "nextVersion": "15.5.20",
+        "staticPagesGenerated": 27,
+        "buildDurationSeconds": 196.36
+      },
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/build.log"
+    }
+  ],
+  "browserArtifacts": {
+    "sampleDayDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-day-desktop.png",
+    "sampleNightDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-desktop.png",
+    "sampleDayMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-day-mobile.png",
+    "sampleNightMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-sample-night-mobile.png",
+    "serverErrorNightMobile": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-server-error-night-mobile.png",
+    "emptyDayDesktop": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-empty-day-desktop.png"
+  },
+  "geometry": {
+    "sampleDayMobile": {
+      "horizontalOverflow": 0,
+      "heroColumnCount": 1,
+      "heroCtaHeight": 44,
+      "heroCtaClipped": false,
+      "heroMetaCtaOverlap": false,
+      "controlHeights": [60, 60, 60, 60]
+    },
+    "sampleNightMobile": {
+      "horizontalOverflow": 0,
+      "heroColumnCount": 1,
+      "heroCtaHeight": 44,
+      "heroCtaClipped": false,
+      "heroMetaCtaOverlap": false,
+      "controlHeights": [60, 60, 60, 60]
+    },
+    "serverErrorNightMobile": {
+      "horizontalOverflow": 0,
+      "heroColumnCount": 1,
+      "heroCtaHeight": 44,
+      "heroCtaClipped": false,
+      "heroMetaCtaOverlap": false,
+      "disabledDownloadCount": 5
+    }
+  },
+  "doneStatus": {
+    "reportsWave1CtaFollowup": "done",
+    "staticAuditCleanup": "red-out-of-scope"
+  }
+}

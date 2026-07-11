@@ -1,0 +1,79 @@
+{
+  "theme": "night",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "selectedBackground": "rgb(24, 25, 26)",
+  "hoverBackground": "rgb(20, 21, 22)",
+  "focusOutline": "rgb(108, 111, 247)",
+  "horizontalOverflow": 0,
+  "controlHeights": [
+    60,
+    60,
+    60,
+    60
+  ],
+  "accentText": "rgb(139, 141, 252)",
+  "heroColumnCount": 2,
+  "heroCtaHeight": 36,
+  "heroCtaClipped": false,
+  "heroMetaCtaOverlap": false,
+  "tuples": {
+    "factLabel": [
+      "12px",
+      "600",
+      "18px",
+      "normal"
+    ],
+    "factValue": [
+      "15px",
+      "500",
+      "24px",
+      "normal"
+    ],
+    "note": [
+      "15px",
+      "500",
+      "24px",
+      "normal"
+    ],
+    "tableHeader": [
+      "12px",
+      "700",
+      "18px",
+      "normal"
+    ],
+    "tableBody": [
+      "13px",
+      "500",
+      "20px",
+      "normal"
+    ],
+    "groupLabel": [
+      "12px",
+      "600",
+      "18px",
+      "normal"
+    ],
+    "groupBody": [
+      "15px",
+      "500",
+      "24px",
+      "normal"
+    ],
+    "groupMeta": [
+      "14px",
+      "500",
+      "22.4px",
+      "normal"
+    ],
+    "control": [
+      "14px",
+      "700",
+      "20px",
+      "normal"
+    ]
+  },
+  "overlapCount": 0
+}

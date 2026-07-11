@@ -897,7 +897,8 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
                 <button
                   key={option.value}
                   type="button"
-                  className={period === option.value ? "active" : ""}
+                  className="safeclaw-report-period-control"
+                  aria-pressed={period === option.value}
                   onClick={() => setPeriod(option.value)}
                 >
                   <strong>{option.label}</strong>
