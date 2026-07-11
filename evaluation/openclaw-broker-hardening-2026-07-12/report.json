@@ -1,47 +1,33 @@
 {
   "date": "2026-07-12",
-  "base": "84c04cd98c05b16f207e37be848d57de852f9509",
+  "existingHardeningCommit": "c1891cd5935bc3647b943bf771bfebaf271e5afa",
   "branch": "fix/openclaw-broker-hardening",
+  "integration": "continue on the same branch from c1891cd; do not merge or wholesale rebase onto master",
   "schemaChanges": 0,
+  "dataMutations": 0,
   "paidCalls": 0,
   "oauthInvocations": 0,
-  "publicExposureChanges": 0,
-  "focusedBaseline": {
-    "files": 0,
-    "passed": 0,
-    "failed": 0,
-    "note": "Broker/auth modules were absent before the hardening slice."
+  "liveDeployments": 0,
+  "controls": {
+    "ownedSiteContext": "authenticated read-only selector with broker owner/site recheck",
+    "guestChat": "removed; token plus owned-site context required",
+    "openclawSession": "opaque per-request --session-key verified from installed 2026.6.5 help",
+    "toolExecution": "zero executable capabilities and local fail-closed pending enforcing sidecar attestation",
+    "relay": "removed/deferred; no config, types, or transport remain",
+    "rateLimits": "coarse IP pre-auth plus authenticated user limiter",
+    "termination": "abort and timeout await underlying run; deterministic child close ordering tested",
+    "logging": "broker logs stable codes only; raw stderr is not appended"
   },
-  "focusedFinal": {
-    "files": 3,
-    "passed": 25,
-    "failed": 0
-  },
-  "gates": {
-    "typecheck": "passed",
-    "build27": "passed",
-    "diffCheck": "passed",
-    "selfReview": "passed"
-  },
-  "topology": {
-    "vercel": "fail_closed_503_no_spawn",
-    "defaultLocal": "fail_closed_503_no_spawn",
-    "explicitLocal": "fail_closed_until_site_binding_attestation",
-    "relay": "boundary_only_not_implemented"
-  },
-  "deferred": [
-    "site-bound OpenClaw profile credential attestation sidecar",
-    "distributed quota and durable job coordination",
-    "relay transport and durable replay protection",
-    "invalid-bearer pre-auth abuse limiter"
-  ],
   "verification": {
-    "focusedTestCommand": "npm.cmd test -- tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/engine-adapter.test.ts",
-    "typecheckCommand": "npm.cmd run typecheck",
-    "buildCommand": "npm.cmd run build",
+    "focusedTestCommand": "npm.cmd test -- tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/engine-adapter.test.ts tests/openclaw-broker-ui-context.test.ts",
+    "focusedFiles": 4,
+    "focusedPassed": 36,
+    "focusedFailed": 0,
+    "typecheck": "passed",
+    "build": "passed",
     "buildStaticPages": 27,
-    "diffCheckCommand": "git diff --check",
-    "buildCount": 1,
-    "raceRegression": "checkAvailability(A)->checkAvailability(B)->run(A)"
+    "buildLog": "evaluation/openclaw-broker-hardening-2026-07-12/build.stdout.log",
+    "diffCheck": "passed",
+    "fullSuite": "not run"
   }
 }

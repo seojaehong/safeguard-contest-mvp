@@ -63,6 +63,10 @@ type WorkspaceSaveSnapshot = {
   workerMap: Record<string, string>;
 };
 
+type ClawSiteOption = { id: string; name: string };
+type ClawContextStatus = "login-required" | "loading" | "ready" | "unavailable";
+type ClawContextResponse = { sites?: ClawSiteOption[] };
+
 function resolveInitialWorkerState(data: AskResponse, generationFingerprint?: string): InitialWorkerState {
   const fallbackWorkers = buildDefaultWorkers(data);
   const fallback = {
@@ -844,6 +848,9 @@ export function FieldOperationsWorkspace({
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
   const lastEditorValuesRef = useRef<WorkpackDocumentValues | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [clawSiteOptions, setClawSiteOptions] = useState<ClawSiteOption[]>([]);
+  const [selectedClawSiteId, setSelectedClawSiteId] = useState<string | null>(null);
+  const [clawContextStatus, setClawContextStatus] = useState<ClawContextStatus>("login-required");
   const [workers, setWorkers] = useState<WorkerProfile[]>(initialWorkerState.workers);
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(initialWorkerState.selectedWorkerIds);
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
@@ -857,6 +864,52 @@ export function FieldOperationsWorkspace({
     savedCount: 0,
     workerMap: {}
   });
+
+  useEffect(() => {
+    const token = session?.access_token;
+    if (!token) {
+      setClawSiteOptions([]);
+      setSelectedClawSiteId(null);
+      setClawContextStatus("login-required");
+      return;
+    }
+
+    const controller = new AbortController();
+    setClawContextStatus("loading");
+    fetch("/api/agent/context", {
+      headers: { authorization: `Bearer ${token}` },
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`agent context request failed (${response.status})`);
+        return await response.json() as ClawContextResponse;
+      })
+      .then((payload) => {
+        const sites = Array.isArray(payload.sites)
+          ? payload.sites.filter((site): site is ClawSiteOption => (
+            typeof site?.id === "string" && typeof site.name === "string"
+          ))
+          : [];
+        if (sites.length === 0) {
+          setClawSiteOptions([]);
+          setSelectedClawSiteId(null);
+          setClawContextStatus("unavailable");
+          return;
+        }
+        setClawSiteOptions(sites);
+        setSelectedClawSiteId((current) => sites.some((site) => site.id === current) ? current : sites[0].id);
+        setClawContextStatus("ready");
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        console.warn("claw owned-site context load failed", error);
+        setClawSiteOptions([]);
+        setSelectedClawSiteId(null);
+        setClawContextStatus("unavailable");
+      });
+
+    return () => controller.abort();
+  }, [session?.access_token]);
   const workspaceData = useMemo<AskResponse>(() => (
     editedDeliverables
       ? { ...data, deliverables: { ...data.deliverables, ...editedDeliverables } }
@@ -1144,7 +1197,13 @@ export function FieldOperationsWorkspace({
       </main>
 
       <aside className="workspace-side" id="workers">
-        <ClawChat authToken={session?.access_token} />
+        <ClawChat
+          authToken={session?.access_token}
+          siteOptions={clawSiteOptions}
+          selectedSiteId={selectedClawSiteId}
+          onSiteChange={setSelectedClawSiteId}
+          contextStatus={clawContextStatus}
+        />
         <AdminAccessPanel session={session} storageSnapshot={storageSnapshot} onSessionChange={setSession} />
         <WorkerEducationPanel
           workers={workers}

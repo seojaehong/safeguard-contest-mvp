@@ -1,3 +1,6 @@
+import { EventEmitter } from "node:events";
+import { PassThrough } from "node:stream";
+
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -13,6 +16,70 @@ import {
 import type { BrokerRequestContext } from "@/lib/engine-adapter";
 
 describe("OpenClaw chat routing", () => {
+  it("waits for deterministic child close after abort before resolving the run", async () => {
+    const module = await import("@/lib/openclaw-chat") as typeof import("@/lib/openclaw-chat") & {
+      createOpenClawChatRunner?: (dependencies: {
+        spawnProcess: () => EventEmitter & {
+          stdout: PassThrough;
+          stderr: PassThrough;
+          kill: ReturnType<typeof vi.fn>;
+        };
+      }) => (input: {
+        config: ReturnType<typeof resolveOpenClawChatConfig>;
+        prompt: string;
+        emit: () => void;
+        signal: AbortSignal;
+      }) => Promise<void>;
+    };
+    expect(module.createOpenClawChatRunner).toBeTypeOf("function");
+    if (!module.createOpenClawChatRunner) return;
+
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: vi.fn(() => true),
+    });
+    const runChat = module.createOpenClawChatRunner({ spawnProcess: () => child });
+    const controller = new AbortController();
+    const run = runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1", OPENCLAW_CHAT_TIMEOUT_MS: "60000" }),
+      prompt: "test",
+      emit: () => undefined,
+      signal: controller.signal,
+    });
+    let settled = false;
+    void run.catch(() => { settled = true; });
+
+    controller.abort(new Error("request cancelled"));
+    await Promise.resolve();
+    expect(child.kill).toHaveBeenCalledTimes(1);
+    expect(settled).toBe(false);
+
+    child.emit("close", null, "SIGTERM");
+    await expect(run).rejects.toBeInstanceOf(Error);
+  });
+
+  it("does not spawn an already-aborted request", async () => {
+    const module = await import("@/lib/openclaw-chat") as typeof import("@/lib/openclaw-chat") & {
+      createOpenClawChatRunner?: (dependencies: { spawnProcess: ReturnType<typeof vi.fn> }) => typeof import("@/lib/openclaw-chat").runOpenClawChat;
+    };
+    expect(module.createOpenClawChatRunner).toBeTypeOf("function");
+    if (!module.createOpenClawChatRunner) return;
+
+    const spawnProcess = vi.fn();
+    const runChat = module.createOpenClawChatRunner({ spawnProcess });
+    const controller = new AbortController();
+    controller.abort(new Error("cancelled before spawn"));
+
+    await expect(runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" }),
+      prompt: "test",
+      emit: () => undefined,
+      signal: controller.signal,
+    })).rejects.toBeInstanceOf(Error);
+    expect(spawnProcess).not.toHaveBeenCalled();
+  });
+
   it("builds a safeclaw local agent command that uses the profile OAuth runtime", () => {
     const config = resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" });
     expect(config).toMatchObject({
@@ -24,7 +91,7 @@ describe("OpenClaw chat routing", () => {
       local: true
     });
 
-    expect(buildOpenClawChatArgs(config, "성수동 외벽 도장 작업")).toEqual([
+    expect(buildOpenClawChatArgs(config, "성수동 외벽 도장 작업", "broker-opaque-request-key")).toEqual([
       "--profile",
       "safeclaw",
       "agent",
@@ -33,6 +100,8 @@ describe("OpenClaw chat routing", () => {
       "--local",
       "--model",
       "openai/gpt-5.5",
+      "--session-key",
+      "agent:main:broker-opaque-request-key",
       "-m",
       "성수동 외벽 도장 작업"
     ]);
@@ -131,6 +200,37 @@ describe("OpenClaw chat routing", () => {
     expect(assertOAuth).not.toHaveBeenCalled();
   });
 
+  it("fails closed before OAuth when the sidecar has not attested executable tools", async () => {
+    const context: BrokerRequestContext = {
+      userId: "user-1",
+      organizationId: "org-1",
+      siteId: "site-1",
+      site: { siteName: "성수 현장", region: null, briefingQuestion: null },
+    };
+    const assertOAuth = vi.fn(async () => ({
+      ok: true as const,
+      provider: "openai" as const,
+      authProvider: "openai/oauth" as const,
+      model: "openai/gpt-5.5",
+      checkedAt: "2026-07-12T00:00:00.000Z",
+      message: "ok",
+    }));
+    const engine = createLocalOpenClawAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "local-openclaw", OPENCLAW_LOCAL: "1" },
+      runtimeCapability: async () => true,
+      verifySiteBinding: async () => true,
+      assertOAuth,
+      runChat: vi.fn(async () => undefined),
+    });
+
+    await expect(engine.checkAvailability(context)).rejects.toMatchObject({
+      code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+      status: 503,
+    });
+    expect(engine.capabilities).toEqual([]);
+    expect(assertOAuth).not.toHaveBeenCalled();
+  });
+
   it("does not let a later preflight overwrite another site's runnable context", async () => {
     const contextA: BrokerRequestContext = {
       userId: "user-1",
@@ -157,6 +257,7 @@ describe("OpenClaw chat routing", () => {
       env: { SAFECLAW_ENGINE_MODE: "local-openclaw", OPENCLAW_LOCAL: "1" },
       runtimeCapability: async () => true,
       verifySiteBinding: async () => true,
+      verifyExecutionAttestation: async () => true,
       assertOAuth,
       runChat,
     });

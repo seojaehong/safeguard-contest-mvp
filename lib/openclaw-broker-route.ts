@@ -26,11 +26,11 @@ import {
 import type { ResolveBrokerContext } from "@/lib/openclaw-broker-auth";
 
 const log = createLogger("api/agent/chat");
-const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
-
 export type AgentChatRouteDependencies = {
   resolveContext: ResolveBrokerContext;
   engine: EngineAdapter;
+  preAuthLimiter?: ReturnType<typeof createRateLimiter>;
+  authenticatedLimiter?: ReturnType<typeof createRateLimiter>;
 };
 
 function jsonError(error: BrokerError): Response {
@@ -38,6 +38,19 @@ function jsonError(error: BrokerError): Response {
     status: error.status,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+function enforceAuthenticatedRateLimit(userId: string, limiter: ReturnType<typeof createRateLimiter>): Response | null {
+  const result = limiter.check(userId);
+  if (result.allowed) return null;
+  const retryAfter = String(result.retryAfterSeconds ?? 60);
+  return new Response(
+    JSON.stringify({ error: "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.", retryAfterSeconds: Number(retryAfter) }),
+    {
+      status: 429,
+      headers: { "Content-Type": "application/json", "Retry-After": retryAfter },
+    },
+  );
 }
 
 export function createProductionEngineAdapter(env: EnvLike): EngineAdapter {
@@ -56,7 +69,23 @@ export function createProductionEngineAdapter(env: EnvLike): EngineAdapter {
 }
 
 export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
+  const routePreAuthLimiter = dependencies.preAuthLimiter ?? createRateLimiter({ limit: 20, windowMs: 60_000 });
+  const routeAuthenticatedLimiter = dependencies.authenticatedLimiter ?? createRateLimiter({ limit: 5, windowMs: 60_000 });
   return async function post(request: NextRequest): Promise<Response> {
+    const coarseLimited = enforceRateLimit(request, routePreAuthLimiter);
+    if (coarseLimited) return coarseLimited;
+
+    let authentication;
+    try {
+      authentication = await dependencies.resolveContext.authenticate(request);
+    } catch (error) {
+      const brokerError = error instanceof BrokerError
+        ? error
+        : new BrokerError("AUTH_BACKEND_UNAVAILABLE", 503, error);
+      log.error("openclaw broker authentication failed", { code: brokerError.code });
+      return jsonError(brokerError);
+    }
+
     const body = await request.json().catch(() => null);
     if (!body || typeof body !== "object") {
       return jsonError(new BrokerError("SITE_CONTEXT_REQUIRED", 400));
@@ -74,16 +103,16 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
 
     let context;
     try {
-      context = await dependencies.resolveContext(request, requestedSiteId);
+      context = await dependencies.resolveContext.resolveOwnedSite(authentication, requestedSiteId);
     } catch (error) {
       const brokerError = error instanceof BrokerError
         ? error
         : new BrokerError("AUTH_BACKEND_UNAVAILABLE", 503, error);
-      log.error("openclaw broker preflight failed", { code: brokerError.code, error });
+      log.error("openclaw broker preflight failed", { code: brokerError.code });
       return jsonError(brokerError);
     }
 
-    const limited = enforceRateLimit(request, limiter);
+    const limited = enforceAuthenticatedRateLimit(context.userId, routeAuthenticatedLimiter);
     if (limited) return limited;
 
     try {
@@ -92,7 +121,7 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
       const brokerError = error instanceof BrokerError
         ? error
         : new BrokerError("ENGINE_UNAVAILABLE", 503, error);
-      log.error("openclaw broker engine preflight failed", { code: brokerError.code, error });
+      log.error("openclaw broker engine preflight failed", { code: brokerError.code });
       return jsonError(brokerError);
     }
 
@@ -106,7 +135,7 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
           try {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
           } catch (error) {
-            log.warn("SSE enqueue failed", error);
+            log.warn("SSE enqueue failed", { code: "SSE_ENQUEUE_FAILED" });
           }
         };
         try {
@@ -126,7 +155,7 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
           emit({ kind: "final" });
         } catch (error) {
           const brokerError = publicBrokerError(error);
-          log.error("openclaw broker execution failed", { code: brokerError.code, error });
+          log.error("openclaw broker execution failed", { code: brokerError.code });
           emit({
             kind: "tool",
             name: "agent_engine",
