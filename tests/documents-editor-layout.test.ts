@@ -221,6 +221,59 @@ describe("documents editor layout", () => {
     expect(keysAfterReload).toEqual(keysBeforeReload);
   }, 90_000);
 
+  it("restores workPermitDraft from the canonical current-workpack snapshot across surfaces and reload", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sentinel = "SAFECLAW_WORK_PERMIT_CURRENT_SNAPSHOT";
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPermitDraft = [
+      "[1. 허가 기본정보]",
+      `허가대상 작업: ${sentinel}`,
+      "작업현장: 세이프건설"
+    ].join("\n");
+    const stored = buildStoredCurrentWorkpack(sample);
+
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+
+    await page.goto(`${baseUrl}/home`, { waitUntil: "networkidle" });
+    await page.getByRole("link", { name: "문서팩 다시 열기" }).click();
+    await page.getByRole("tab", { name: /안전작업허가 확인서/ }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "안전작업허가 확인서 편집" }).inputValue())
+      .toContain(sentinel);
+
+    await page.reload({ waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /안전작업허가 확인서/ }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "안전작업허가 확인서 편집" }).inputValue())
+      .toContain(sentinel);
+  }, 90_000);
+
+  it("announces meaningful save state without live-reading every keystroke", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sentinel = "SAFECLAW_SAVE_STATUS_SENTINEL";
+
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    const editor = page.getByRole("textbox", { name: "점검결과 요약 편집" });
+    const meta = page.locator(".editor-document-meta");
+
+    expect(await meta.getAttribute("aria-live")).toBeNull();
+    expect(await editor.getAttribute("aria-label")).toBe("점검결과 요약 편집");
+
+    await editor.fill(`${await editor.inputValue()}\n${sentinel}`);
+
+    const saveStatus = page.getByTestId("editor-save-status");
+    await expect.poll(() => saveStatus.textContent()).toContain("저장됨");
+    expect(await saveStatus.getAttribute("role")).toBe("status");
+    expect(await saveStatus.getAttribute("aria-live")).toBe("polite");
+
+    const focusMessage = page.locator(".editor-focus-message");
+    if (await focusMessage.count()) {
+      expect(await focusMessage.first().getAttribute("aria-live")).toBeNull();
+    }
+  }, 90_000);
+
   it("keeps every Day document metadata label at AA text contrast", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });

@@ -132,6 +132,10 @@ export type XlsxBuildInput = {
   structuredRiskRows?: StructuredRiskAssessmentRow[];
 };
 
+type StructuredEditOptions = {
+  editedRows?: SheetRow[];
+};
+
 function applyRiskAssessmentColumns(ws: ExcelJS.Worksheet) {
   ws.columns = RISK_ASSESSMENT_COLUMNS.map((column) => ({ width: column.width }));
 }
@@ -340,6 +344,38 @@ function addWorkbookNote(ws: ExcelJS.Worksheet, row: number, note: string): void
   cell.alignment = { vertical: "middle", horizontal: "left", indent: 1, wrapText: true };
   applyBorders(ws, `A${row}:F${row}`);
   ws.pageSetup.printArea = `A1:F${row}`;
+}
+
+function addManualEditRows(ws: ExcelJS.Worksheet, row: number, editedRows: SheetRow[]): number {
+  const normalizedRows = editedRows.filter((editedRow) => (
+    editedRow.section.trim().length > 0 || editedRow.item.trim().length > 0 || editedRow.content.trim().length > 0
+  ));
+  if (!normalizedRows.length) return row;
+
+  row += 1;
+  row = addSectionHeader(ws, row, "사용자 편집 반영");
+  row = addTableHeader(ws, row, ["No.", "섹션", "편집 항목", "편집 내용", "상태", "비고"]);
+  normalizedRows.slice(0, 24).forEach((editedRow, index) => {
+    row = setRowValues(ws, row, [
+      String(index + 1),
+      editedRow.section || "본문",
+      editedRow.item || "편집",
+      editedRow.content || "",
+      "반영",
+      "structured 양식 유지"
+    ]);
+  });
+  if (normalizedRows.length > 24) {
+    row = setRowValues(ws, row, [
+      "…",
+      "추가 편집",
+      `${normalizedRows.length - 24}건`,
+      "추가 편집은 원문 저장본과 함께 확인하세요.",
+      "메모",
+      ""
+    ]);
+  }
+  return row;
 }
 
 function createStructuredWorkbook(sheetName: string): { wb: ExcelJS.Workbook; ws: ExcelJS.Worksheet } {
@@ -649,7 +685,8 @@ function parsePermitInspectionStructured(value: StructuredRecord): PermitInspect
 
 export async function buildWorkPlanStructuredXlsx(
   scenario: Scenario,
-  structured: StructuredRecord
+  structured: StructuredRecord,
+  options: StructuredEditOptions = {}
 ): Promise<Buffer> {
   const data = parseWorkPlanStructured(structured);
   const { wb, ws } = createStructuredWorkbook("작업계획서");
@@ -697,6 +734,7 @@ export async function buildWorkPlanStructuredXlsx(
     ["응급조치", data.emergencyResponse.firstAid]
   ]);
 
+  row = addManualEditRows(ws, row, options.editedRows || []);
   row += 1;
   row = addApprovalRows(ws, row, [data.approvers.author, data.approvers.reviewer, data.approvers.approver]);
   addWorkbookNote(ws, row, "본 작업계획서는 structured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 현장 확인 후 결재 및 서명하세요.");
@@ -707,7 +745,8 @@ export async function buildWorkPlanStructuredXlsx(
 
 export async function buildPermitInspectionStructuredXlsx(
   scenario: Scenario,
-  structured: StructuredRecord
+  structured: StructuredRecord,
+  options: StructuredEditOptions = {}
 ): Promise<Buffer> {
   const data = parsePermitInspectionStructured(structured);
   const { wb, ws } = createStructuredWorkbook("작업허가 확인");
@@ -782,6 +821,7 @@ export async function buildPermitInspectionStructuredXlsx(
     ]);
   });
 
+  row = addManualEditRows(ws, row, options.editedRows || []);
   row += 1;
   row = addSectionHeader(ws, row, "결재");
   row = addTableHeader(ws, row, ["구분", "신청자", "안전관리자", "현장소장", "종료 확인자", "확인"]);
@@ -801,7 +841,8 @@ export async function buildPermitInspectionStructuredXlsx(
 
 export async function buildTbmBriefingStructuredXlsx(
   scenario: Scenario,
-  structured: StructuredRecord
+  structured: StructuredRecord,
+  options: StructuredEditOptions = {}
 ): Promise<Buffer> {
   const data = parseTbmBriefingStructured(structured);
   const { wb, ws } = createStructuredWorkbook("TBM 브리핑");
@@ -848,6 +889,7 @@ export async function buildTbmBriefingStructuredXlsx(
   });
   row = addKeyValueRows(ws, row, [["사진증빙", data.photoEvidenceLocation]]);
 
+  row = addManualEditRows(ws, row, options.editedRows || []);
   row += 1;
   row = addApprovalRows(ws, row, ["TBM 리더", "관리감독자", "참석자 대표"]);
   addWorkbookNote(ws, row, "본 TBM 브리핑은 structured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 브리핑 후 참석자 확인과 사진증빙을 보관하세요.");
@@ -858,7 +900,8 @@ export async function buildTbmBriefingStructuredXlsx(
 
 export async function buildTbmLogStructuredXlsx(
   scenario: Scenario,
-  structured: StructuredRecord
+  structured: StructuredRecord,
+  options: StructuredEditOptions = {}
 ): Promise<Buffer> {
   const data = parseTbmLogStructured(structured);
   const { wb, ws } = createStructuredWorkbook("TBM 일지");
@@ -991,6 +1034,7 @@ export async function buildTbmLogStructuredXlsx(
     ]);
   });
 
+  row = addManualEditRows(ws, row, options.editedRows || []);
   row += 1;
   row = addSectionHeader(ws, row, "결재/확인");
   [
@@ -1017,7 +1061,8 @@ export async function buildTbmLogStructuredXlsx(
 
 export async function buildEducationRecordStructuredXlsx(
   scenario: Scenario,
-  structured: StructuredRecord
+  structured: StructuredRecord,
+  options: StructuredEditOptions = {}
 ): Promise<Buffer> {
   const data = parseEducationRecordStructured(structured);
   const { wb, ws } = createStructuredWorkbook("안전보건교육");
@@ -1063,6 +1108,7 @@ export async function buildEducationRecordStructuredXlsx(
     row = setRowValues(ws, row, [no, "", "", "□ 이해함", "서명: ______", ""]);
   });
 
+  row = addManualEditRows(ws, row, options.editedRows || []);
   row += 1;
   row = addApprovalRows(ws, row, [data.instructor, data.confirmer, "보관담당"]);
   addWorkbookNote(ws, row, "본 안전보건교육 기록은 structured JSON을 직접 매핑한 OOXML(.xlsx) 양식입니다. 교육 후 참석자 서명과 이해확인을 남기세요.");
