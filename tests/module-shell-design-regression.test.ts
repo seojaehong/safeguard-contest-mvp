@@ -1,14 +1,13 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { chromium, type Browser } from "playwright";
+import type { Browser } from "playwright";
+import {
+  startIsolatedNextBrowserHarness,
+  type IsolatedNextBrowserHarness
+} from "./helpers/isolated-next-browser-harness";
 
-const port = 3233;
-const baseUrl = `http://127.0.0.1:${port}`;
-let server: ChildProcessWithoutNullStreams | null = null;
+let baseUrl = "";
 let browser: Browser | null = null;
-const serverOutput: string[] = [];
+let harness: IsolatedNextBrowserHarness | null = null;
 
 const desktopRoutes = ["/home", "/documents", "/evidence", "/reports", "/settings/ai-connect"] as const;
 const mobileRoutes = ["/home", "/documents", "/reports", "/settings/ai-connect"] as const;
@@ -30,32 +29,6 @@ type ModuleShellMetrics = {
   documentIndexButtonBackground: string | null;
   horizontalOverflow: boolean;
 };
-
-function resolveNextBin(): string {
-  const candidates = [
-    path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next"),
-    path.resolve(process.cwd(), "..", "..", "node_modules", "next", "dist", "bin", "next")
-  ];
-  const nextBin = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!nextBin) {
-    throw new Error(`Unable to locate next dev binary. Checked: ${candidates.join(", ")}`);
-  }
-  return nextBin;
-}
-
-async function waitForHttp(url: string, timeoutMs = 60_000): Promise<void> {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) return;
-    } catch {
-      // The dev server is still booting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-  throw new Error(`Timed out waiting for ${url}\n${serverOutput.slice(-20).join("")}`);
-}
 
 async function readModuleMetrics(route: string, viewport: { width: number; height: number }): Promise<ModuleShellMetrics> {
   if (!browser) throw new Error("Browser was not started");
@@ -119,23 +92,18 @@ async function readModuleMetrics(route: string, viewport: { width: number; heigh
 
 describe("module shell design regression", () => {
   beforeAll(async () => {
-    const nextBin = resolveNextBin();
-    server = spawn(process.execPath, [nextBin, "dev", "--port", String(port)], {
-      cwd: process.cwd(),
-      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" }
+    harness = await startIsolatedNextBrowserHarness({
+      slug: "module-shell-design",
+      initialPath: "/documents",
+      portSalt: 3233
     });
-    server.stdout.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
-    server.stderr.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
-    await waitForHttp(`${baseUrl}/documents`);
-    browser = await chromium.launch({ headless: true });
+    baseUrl = harness.baseUrl;
+    browser = harness.browser;
   }, 90_000);
 
   afterAll(async () => {
-    await browser?.close();
-    if (server && !server.killed) {
-      server.kill();
-    }
-  });
+    await harness?.stop();
+  }, 30_000);
 
   it("uses the workspace daylight shell on core module desktop pages", async () => {
     const results = await Promise.all(

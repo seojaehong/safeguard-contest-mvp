@@ -1,62 +1,30 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { chromium, type Browser } from "playwright";
+import type { Browser } from "playwright";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import {
+  startIsolatedNextBrowserHarness,
+  type IsolatedNextBrowserHarness
+} from "./helpers/isolated-next-browser-harness";
 
-const port = 3227;
-const baseUrl = `http://127.0.0.1:${port}`;
-let server: ChildProcessWithoutNullStreams | null = null;
+let baseUrl = "";
 let browser: Browser | null = null;
-const serverOutput: string[] = [];
-
-function resolveNextBin(): string {
-  const candidates = [
-    path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next"),
-    path.resolve(process.cwd(), "..", "..", "node_modules", "next", "dist", "bin", "next")
-  ];
-  const nextBin = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!nextBin) {
-    throw new Error(`Unable to locate next dev binary. Checked: ${candidates.join(", ")}`);
-  }
-  return nextBin;
-}
-
-async function waitForHttp(url: string, timeoutMs = 60_000): Promise<void> {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) return;
-    } catch {
-      // The dev server is still booting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-  throw new Error(`Timed out waiting for ${url}\n${serverOutput.slice(-20).join("")}`);
-}
+let harness: IsolatedNextBrowserHarness | null = null;
 
 describe("workspace layout regression", () => {
   beforeAll(async () => {
-    const nextBin = resolveNextBin();
-    server = spawn(process.execPath, [nextBin, "dev", "--port", String(port)], {
-      cwd: process.cwd(),
-      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" }
+    harness = await startIsolatedNextBrowserHarness({
+      slug: "workspace-layout",
+      initialPath: "/workspace?theme=night",
+      portSalt: 3227
     });
-    server.stdout.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
-    server.stderr.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
-    await waitForHttp(`${baseUrl}/workspace?theme=night`);
-    browser = await chromium.launch({ headless: true });
+    baseUrl = harness.baseUrl;
+    browser = harness.browser;
   }, 90_000);
 
   afterAll(async () => {
-    await browser?.close();
-    if (server && !server.killed) {
-      server.kill();
-    }
-  });
+    await harness?.stop();
+  }, 30_000);
 
   it("does not pin the large workspace topbar over menu and content while scrolling", async () => {
     if (!browser) throw new Error("Browser was not started");
