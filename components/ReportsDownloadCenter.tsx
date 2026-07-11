@@ -1,5 +1,6 @@
 "use client";
 
+import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -21,6 +22,7 @@ import {
   buildReportLearningMarkdown,
   buildReportMarkdown,
   buildReportSnapshot,
+  resolveReportProvenancePresentation,
   resolveReportViewState,
   toggleReportPhotoApproval,
   type ReportDateRange,
@@ -29,11 +31,12 @@ import {
   type ReportPeriod,
   type ReportPhotoApproval,
   type ReportSnapshot,
+  type ReportSourceMode,
   type ReportViewState
 } from "@/lib/reporting-downloads";
+import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
-
-const MISSING_CURRENT_WORKPACK_REASON = "저장된 현재 작업팩이 없습니다. 작업공간에서 문서팩을 다시 저장해 주세요.";
+import type { AskResponse } from "@/lib/types";
 
 const periodOptions: Array<{ value: ReportPeriod; label: string; detail: string }> = [
   { value: "daily", label: "오늘", detail: "당일" },
@@ -51,6 +54,16 @@ type DownloadRequest = {
   fileName: string;
   contentType: string;
   buildContent: () => string;
+};
+
+type CurrentWorkpackReadResult =
+  | { status: "ready"; workpack: StoredCurrentWorkpack }
+  | { status: "missing" }
+  | { status: "invalid"; reason: string };
+
+type ServerReportWorkpack = {
+  id: string;
+  workpack: StoredCurrentWorkpack;
 };
 
 const EMPTY_REPORT_FACETS: ReportSnapshot["facets"] = {
@@ -159,21 +172,97 @@ function preservedHistorySourceLabel(item: OperationImprovement) {
 
 function resolveReportPreviewImprovements(
   improvements: readonly OperationImprovement[],
-  usingSample: boolean
+  sourceMode: ReportSourceMode
 ): OperationImprovement[] {
-  if (usingSample) return [];
+  if (sourceMode !== "browser_local") return [];
   return [...improvements];
 }
 
-function readCurrentWorkpack(): { workpack: StoredCurrentWorkpack | null; sample: boolean; error: string | null } {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readCurrentWorkpack(): CurrentWorkpackReadResult {
   const inspected = inspectStoredCurrentWorkpack(window.localStorage.getItem(CURRENT_WORKPACK_STORAGE_KEY));
   if (inspected.status === "valid") {
-    return { workpack: inspected.workpack, sample: false, error: null };
+    return { status: "ready", workpack: inspected.workpack };
   }
   if (inspected.status === "invalid") {
-    return { workpack: null, sample: false, error: inspected.reason };
+    return { status: "invalid", reason: inspected.reason };
   }
-  return { workpack: null, sample: false, error: MISSING_CURRENT_WORKPACK_REASON };
+  return { status: "missing" };
+}
+
+function readServerReportWorkpack(payload: unknown, requestedId: string): ServerReportWorkpack | null {
+  if (!isRecord(payload) || payload.canReopen !== true || !isRecord(payload.workpack)) return null;
+  const serverWorkpack = payload.workpack;
+  const id = typeof serverWorkpack.id === "string" ? serverWorkpack.id : "";
+  if (!id || id !== requestedId || !isRecord(serverWorkpack.reopenData)) return null;
+
+  const reopenData = serverWorkpack.reopenData;
+  if (
+    typeof reopenData.question !== "string"
+    || !isRecord(reopenData.scenario)
+    || !isRecord(reopenData.deliverables)
+    || !isRecord(reopenData.externalData)
+    || !isRecord(reopenData.riskSummary)
+    || !isRecord(reopenData.status)
+  ) {
+    return null;
+  }
+
+  const savedAt = [serverWorkpack.updatedAt, serverWorkpack.createdAt].find((value) => (
+    typeof value === "string" && isRfc3339OffsetTimestamp(value)
+  ));
+  if (typeof savedAt !== "string") return null;
+
+  return {
+    id,
+    workpack: {
+      ...buildStoredCurrentWorkpack(reopenData as AskResponse),
+      savedAt
+    }
+  };
+}
+
+function readResponseMessage(payload: unknown, fallback: string) {
+  return isRecord(payload) && typeof payload.message === "string" ? payload.message : fallback;
+}
+
+async function readReportAccessToken(): Promise<string | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return null;
+  const client = createClient(url, anonKey);
+  const { data, error } = await client.auth.getSession();
+  if (error) {
+    console.error("report session read failed", error);
+    return null;
+  }
+  return data.session?.access_token || null;
+}
+
+async function fetchServerReportWorkpack(
+  workpackId: string,
+  signal?: AbortSignal
+): Promise<ServerReportWorkpack> {
+  const accessToken = await readReportAccessToken();
+  if (!accessToken) {
+    throw new Error("관리자 로그인 세션이 없어 서버 저장 작업팩을 열 수 없습니다.");
+  }
+  const response = await fetch(`/api/workpacks/${encodeURIComponent(workpackId)}`, {
+    headers: { authorization: `Bearer ${accessToken}` },
+    signal
+  });
+  const payload: unknown = await response.json().catch((): unknown => ({}));
+  if (!response.ok) {
+    throw new Error(readResponseMessage(payload, "서버 저장 작업팩을 불러오지 못했습니다."));
+  }
+  const parsed = readServerReportWorkpack(payload, workpackId);
+  if (!parsed) {
+    throw new Error("서버 저장 작업팩의 리포트 복원 데이터 또는 저장시각을 확인해야 합니다.");
+  }
+  return parsed;
 }
 
 function GroupList({ title, groups }: { title: string; groups: ReportGroup[] }) {
@@ -197,19 +286,54 @@ function GroupList({ title, groups }: { title: string; groups: ReportGroup[] }) 
   );
 }
 
+function ReportProvenanceFacts({
+  snapshot,
+  label
+}: {
+  snapshot: ReportSnapshot;
+  label: string;
+}) {
+  const provenance = resolveReportProvenancePresentation(snapshot.source);
+  return (
+    <div
+      className="safeclaw-report-facts"
+      aria-label={label}
+      data-report-source-mode={snapshot.source.mode}
+    >
+      <p><strong>데이터 출처</strong><span>{provenance.label}</span></p>
+      <p>
+        <strong>{provenance.savedTimeLabel}</strong>
+        <span><time dateTime={snapshot.source.workpackSavedAt}>{formatDate(snapshot.source.workpackSavedAt)}</time></span>
+      </p>
+      {snapshot.source.workpackGeneratedAt ? (
+        <p>
+          <strong>작업팩 생성</strong>
+          <span><time dateTime={snapshot.source.workpackGeneratedAt}>{formatDate(snapshot.source.workpackGeneratedAt)}</time></span>
+        </p>
+      ) : null}
+      <p>
+        <strong>리포트 생성</strong>
+        <span><time dateTime={snapshot.generatedAt}>{formatDate(snapshot.generatedAt)}</time></span>
+      </p>
+      {snapshot.source.workpackId ? (
+        <p><strong>서버 문서팩</strong><span>{snapshot.source.workpackId}</span></p>
+      ) : null}
+    </div>
+  );
+}
+
 function DownloadActions({
   snapshot,
-  canDownload,
-  disabledMessage,
+  viewState,
   downloadState,
   onDownload
 }: {
   snapshot: ReportSnapshot;
-  canDownload: boolean;
-  disabledMessage: string;
+  viewState: ReportViewState;
   downloadState: DownloadState;
   onDownload: (request: DownloadRequest) => Promise<void>;
 }) {
+  const canDownload = viewState.canDownload;
   const disabled = !canDownload || downloadState.status === "preparing";
 
   return (
@@ -219,9 +343,12 @@ function DownloadActions({
       </p>
       <p
         className={downloadState.status === "error" ? "export-error" : "safeclaw-download-note"}
+        aria-label="다운로드 준비 상태"
+        data-download-readiness={viewState.status}
         aria-live="polite"
       >
-        {downloadState.message || (canDownload ? "다운로드 준비됨" : disabledMessage)}
+        <strong>{downloadState.message || viewState.title}</strong>
+        {downloadState.message ? null : <> · {viewState.detail}</>}
       </p>
       <button
         type="button"
@@ -321,9 +448,11 @@ function ReportStatePanel({ viewState }: { viewState: ReportViewState }) {
 }
 
 function PreservedHistorySection({
-  improvements
+  improvements,
+  excludedFrom
 }: {
   improvements: readonly OperationImprovement[];
+  excludedFrom: "샘플" | "서버 저장 작업팩";
 }) {
   return (
     <section aria-label="보존된 실제 개선 이력">
@@ -332,7 +461,7 @@ function PreservedHistorySection({
         이 목록은 현재 브라우저에 저장된 실제 개선 이력입니다.
       </p>
       <p className="safeclaw-download-note">
-        샘플 리포트 본문과 증빙 다운로드에는 합치지 않습니다.
+        {excludedFrom} 리포트 본문과 증빙 다운로드에는 합치지 않습니다.
       </p>
       <div className="safeclaw-workdoc-list safeclaw-preserved-history-list">
         {improvements.map((item) => (
@@ -377,6 +506,7 @@ function ReportDocument({
           <p><strong>기간</strong><span>{shortPeriodLabel(snapshot.period)}</span></p>
           <p><strong>생성</strong><span>{formatDate(snapshot.generatedAt)}</span></p>
         </div>
+        <ReportProvenanceFacts snapshot={snapshot} label="리포트 헤더 데이터 출처" />
       </header>
 
       <section className="safeclaw-workdoc-section">
@@ -473,47 +603,105 @@ function ReportDocument({
   );
 }
 
-export function ReportsDownloadCenter() {
+export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?: string }) {
   const [period, setPeriod] = useState<ReportPeriod>("weekly");
   const [dateRange, setDateRange] = useState<ReportDateRange>({ start: "", end: "" });
   const [filters, setFilters] = useState<ReportFilters>({});
   const [photoApprovals, setPhotoApprovals] = useState<ReportPhotoApproval[]>([]);
   const [workpack, setWorkpack] = useState<StoredCurrentWorkpack | null>(null);
   const [improvements, setImprovements] = useState<OperationImprovement[]>([]);
-  const [usingSample, setUsingSample] = useState(false);
+  const [sourceMode, setSourceMode] = useState<ReportSourceMode>("browser_local");
+  const [sourceWorkpackId, setSourceWorkpackId] = useState<string | undefined>();
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [missingCurrent, setMissingCurrent] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [sourceNotice, setSourceNotice] = useState<string | null>(null);
   const [downloadState, setDownloadState] = useState<DownloadState>(INITIAL_DOWNLOAD_STATE);
+  const usingSample = sourceMode === "sample";
 
-  function loadLocalState() {
+  function loadLocalState(notice: string | null = null) {
     setPhotoApprovals([]);
     try {
       const localImprovements = parseOperationImprovements(
         window.localStorage.getItem(OPERATION_IMPROVEMENTS_STORAGE_KEY)
       );
       const current = readCurrentWorkpack();
-      setWorkpack(current.workpack);
-      setUsingSample(current.sample);
       setImprovements(localImprovements);
-      setLoadError(current.error);
+      setSourceMode("browser_local");
+      setSourceWorkpackId(undefined);
+      setSourceNotice(notice);
+      if (current.status === "ready") {
+        setWorkpack(current.workpack);
+        setMissingCurrent(false);
+        setLoadError(null);
+      } else if (current.status === "missing") {
+        setWorkpack(null);
+        setMissingCurrent(true);
+        setLoadError(null);
+      } else {
+        setWorkpack(null);
+        setMissingCurrent(false);
+        setLoadError(current.reason);
+      }
+      setLoading(false);
       setDownloadState(INITIAL_DOWNLOAD_STATE);
     } catch (error) {
       console.error("safeclaw report state load failed", error);
       setWorkpack(null);
+      setMissingCurrent(false);
       setLoadError("브라우저의 현재 작업 데이터를 불러오지 못했습니다.");
+      setSourceNotice(notice);
+      setLoading(false);
+    }
+  }
+
+  async function loadRequestedState(signal?: AbortSignal) {
+    if (!serverWorkpackId) {
+      loadLocalState();
+      return;
+    }
+
+    setLoading(true);
+    setLoadError(null);
+    setMissingCurrent(false);
+    setSourceNotice(null);
+    setPhotoApprovals([]);
+    setDownloadState(INITIAL_DOWNLOAD_STATE);
+    try {
+      const localImprovements = parseOperationImprovements(
+        window.localStorage.getItem(OPERATION_IMPROVEMENTS_STORAGE_KEY)
+      );
+      const server = await fetchServerReportWorkpack(serverWorkpackId, signal);
+      if (signal?.aborted) return;
+      setWorkpack(server.workpack);
+      setImprovements(localImprovements);
+      setSourceMode("server_saved");
+      setSourceWorkpackId(server.id);
+      setLoading(false);
+    } catch (error) {
+      if (signal?.aborted) return;
+      console.error("server report workpack load failed", error);
+      loadLocalState(`서버 저장 작업팩을 열지 못해 브라우저 최근 작업을 확인합니다. ${errorMessage(error)}`);
     }
   }
 
   function loadSamplePreview() {
     setPhotoApprovals([]);
     setWorkpack(buildStoredCurrentWorkpack(buildSampleWorkpack()));
-    setUsingSample(true);
+    setSourceMode("sample");
+    setSourceWorkpackId(undefined);
+    setMissingCurrent(false);
     setLoadError(null);
+    setSourceNotice(null);
+    setLoading(false);
     setDownloadState(INITIAL_DOWNLOAD_STATE);
   }
 
   useEffect(() => {
-    loadLocalState();
-  }, []);
+    const controller = new AbortController();
+    void loadRequestedState(controller.signal);
+    return () => controller.abort();
+  }, [serverWorkpackId]);
 
   const preservedHistory = useMemo(
     () => [...improvements].sort((left, right) => right.createdAt.localeCompare(left.createdAt)),
@@ -522,7 +710,7 @@ export function ReportsDownloadCenter() {
 
   const reportResult = useMemo((): { snapshot: ReportSnapshot | null; error: string | null } => {
     if (!workpack) return { snapshot: null, error: null };
-    const reportImprovements = resolveReportPreviewImprovements(preservedHistory, usingSample);
+    const reportImprovements = resolveReportPreviewImprovements(preservedHistory, sourceMode);
     try {
       return {
         snapshot: buildReportSnapshot({
@@ -532,14 +720,15 @@ export function ReportsDownloadCenter() {
           dateRange: period === "custom" ? dateRange : undefined,
           filters,
           photoApprovals,
-          sourceMode: usingSample ? "sample" : "browser_local"
+          sourceMode,
+          sourceWorkpackId
         }),
         error: null
       };
     } catch (error) {
       return { snapshot: null, error: errorMessage(error) };
     }
-  }, [dateRange, filters, improvements, period, photoApprovals, usingSample, workpack]);
+  }, [dateRange, filters, period, photoApprovals, preservedHistory, sourceMode, sourceWorkpackId, workpack]);
   const snapshot = reportResult.snapshot;
   const viewState = resolveReportViewState(snapshot, reportResult.error || loadError);
   const facets = snapshot?.facets || EMPTY_REPORT_FACETS;
@@ -571,26 +760,51 @@ export function ReportsDownloadCenter() {
   }
 
   if (!workpack) {
+    if (loading) {
+      return (
+        <section className="safeclaw-module-panel" aria-label="리포트 데이터 확인 상태">
+          <span>데이터 출처 확인</span>
+          <h2>{serverWorkpackId ? "서버 저장 작업팩을 확인하고 있습니다." : "최근 작업팩을 확인하고 있습니다."}</h2>
+          <p>리포트에 사용할 작업팩을 확인하는 중입니다.</p>
+        </section>
+      );
+    }
+    const isCalmEmpty = missingCurrent && !loadError;
     return (
-      <section className="safeclaw-module-panel">
-        <span>{loadError ? "리포트 오류" : "리포트 준비"}</span>
-        <h2>{loadError ? "현재 작업을 불러오지 못했습니다." : "최근 작업팩을 확인하고 있습니다."}</h2>
-        <p>{loadError || "작업공간에서 만든 위험성평가와 개선사항을 연결하고 있습니다."}</p>
+      <section className="safeclaw-module-panel" aria-label={isCalmEmpty ? "리포트 빈 상태" : "리포트 데이터 오류"}>
+        <span>{isCalmEmpty ? "데이터 출처 · 없음" : "리포트 오류"}</span>
+        <h2>{isCalmEmpty ? "최근 작업팩이 없습니다." : "현재 작업을 불러오지 못했습니다."}</h2>
+        <p>{isCalmEmpty ? "작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요." : loadError}</p>
+        {sourceNotice ? <p>{sourceNotice}</p> : null}
         {improvements.length ? <p>보존된 개선 이력 {improvements.length}건은 유지됩니다.</p> : null}
+        <div className="safeclaw-report-facts" aria-label="다운로드 준비 상태">
+          <p>
+            <strong>{isCalmEmpty ? "현재 작업팩 필요" : "다운로드 잠김"}</strong>
+            <span>{isCalmEmpty ? "작업팩을 만든 뒤 다운로드를 준비할 수 있습니다." : "작업팩 데이터를 확인한 뒤 다시 시도하세요."}</span>
+          </p>
+        </div>
         <div className="safeclaw-workdoc-links">
-          <button type="button" className="button secondary" onClick={loadLocalState}>다시 불러오기</button>
+          {isCalmEmpty ? <Link href="/workspace">작업공간에서 만들기</Link> : (
+            <button type="button" className="button secondary" onClick={() => void loadRequestedState()}>다시 불러오기</button>
+          )}
           <button type="button" className="button secondary" onClick={loadSamplePreview}>샘플 미리보기</button>
         </div>
       </section>
     );
   }
 
+  const topProvenance = snapshot ? resolveReportProvenancePresentation(snapshot.source) : null;
+
   return (
     <>
       <section className={`safeclaw-current-workpack ${usingSample ? "sample" : "live"}`} aria-live="polite">
-        <span>{usingSample ? "샘플 리포트" : "현재 작업 연결"}</span>
-        <strong>{viewState.title} · {viewState.detail}</strong>
-        <button type="button" className="button secondary" onClick={loadLocalState}>다시 불러오기</button>
+        <span>{usingSample ? "샘플 리포트" : "데이터 출처"}</span>
+        <strong>
+          {topProvenance
+            ? `${topProvenance.label} · ${topProvenance.savedTimeLabel} ${formatDate(workpack.savedAt)}`
+            : "리포트 데이터 확인 필요"}
+        </strong>
+        <button type="button" className="button secondary" onClick={() => void loadRequestedState()}>다시 불러오기</button>
       </section>
 
       <section className="safeclaw-workdoc-shell">
@@ -600,6 +814,12 @@ export function ReportsDownloadCenter() {
           <ReportStatePanel viewState={viewState} />
         )}
         <aside className="safeclaw-workdoc-rail" aria-label="작업문서 도구">
+          {snapshot ? (
+            <section>
+              <span>데이터 출처</span>
+              <ReportProvenanceFacts snapshot={snapshot} label="고정 리포트 데이터 출처" />
+            </section>
+          ) : null}
           <section>
             <span>기간</span>
             <div className="safeclaw-report-controls" aria-label="리포트 기간 선택">
@@ -736,14 +956,16 @@ export function ReportsDownloadCenter() {
             {snapshot ? (
               <DownloadActions
                 snapshot={snapshot}
-                canDownload={viewState.canDownload}
-                disabledMessage={viewState.detail}
+                viewState={viewState}
                 downloadState={downloadState}
                 onDownload={handleDownload}
               />
             ) : (
-              <p className={viewState.status === "error" ? "export-error" : "safeclaw-download-note"}>
-                {viewState.detail}
+              <p
+                className={viewState.status === "error" ? "export-error" : "safeclaw-download-note"}
+                aria-label="다운로드 준비 상태"
+              >
+                <strong>{viewState.title}</strong> · {viewState.detail}
               </p>
             )}
           </section>
@@ -759,8 +981,11 @@ export function ReportsDownloadCenter() {
             </div>
           </section>
 
-          {usingSample && preservedHistory.length ? (
-            <PreservedHistorySection improvements={preservedHistory} />
+          {sourceMode !== "browser_local" && preservedHistory.length ? (
+            <PreservedHistorySection
+              improvements={preservedHistory}
+              excludedFrom={usingSample ? "샘플" : "서버 저장 작업팩"}
+            />
           ) : null}
 
           <section>
