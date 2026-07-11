@@ -15,13 +15,15 @@ import {
 let baseUrl = "";
 let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
+const workspaceInputProductionMatrix = process.env.WORKSPACE_INPUT_PROD_MATRIX === "1" ? it : it.skip;
 
 describe("workspace layout regression", () => {
   beforeAll(async () => {
     harness = await startIsolatedNextBrowserHarness({
       slug: "workspace-layout",
       initialPath: "/workspace?theme=night",
-      portSalt: 3247
+      portSalt: 3247,
+      mode: process.env.WORKSPACE_INPUT_PROD_MATRIX === "1" ? "prod" : "dev",
     });
     baseUrl = harness.baseUrl;
     browser = harness.browser;
@@ -31,8 +33,9 @@ describe("workspace layout regression", () => {
     await harness?.stop();
   }, 30_000);
 
-  it("preserves the exact Day and Night textarea cascade at every responsive band", async () => {
+  workspaceInputProductionMatrix("preserves the exact Day and Night textarea cascade at every responsive band", async () => {
     if (!browser) throw new Error("Browser was not started");
+    expect(harness?.mode).toBe("prod");
     const scenarios = [
       { width: 1440, height: 900, minHeight: 152, paddingTop: 22, paddingRight: 24, fontSize: 17, lineHeight: 29.92, resize: "vertical" },
       { width: 1440, height: 500, minHeight: 124, paddingTop: 18, paddingRight: 18, fontSize: 15, lineHeight: 26.1, resize: "vertical" },
@@ -54,6 +57,20 @@ describe("workspace layout regression", () => {
           await document.fonts.ready;
           await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
         });
+        await page.waitForFunction(
+          ({ expectedTheme }) => {
+            const input = document.querySelector(
+              `.command-center-shell.workspace-theme-${expectedTheme} .workspace-input-page #field-command-input`,
+            );
+            if (!input) return false;
+            const style = getComputedStyle(input);
+            return style.display === "block"
+              && Number.parseFloat(style.minHeight) >= 108
+              && Number.parseFloat(style.paddingTop) >= 14;
+          },
+          { expectedTheme: theme },
+          { timeout: 10_000 },
+        );
         const metrics = await themedInput.evaluate((element) => {
           const style = getComputedStyle(element);
           return {
