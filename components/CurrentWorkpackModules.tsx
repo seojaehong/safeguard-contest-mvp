@@ -121,7 +121,7 @@ const launchDocuments: LaunchDocument[] = [
   {
     key: "foreignWorkerTransmission",
     title: "외국인 전송본",
-    tier: "핵심",
+    tier: "제출",
     owner: "현장 전파",
     description: "언어별 짧은 공지와 관리자 확인 문구를 씁니다."
   },
@@ -142,7 +142,7 @@ const launchDocuments: LaunchDocument[] = [
   {
     key: "tbmLogDraft",
     title: "TBM 기록",
-    tier: "제출",
+    tier: "핵심",
     owner: "기록 보관",
     description: "참석자, 보호구, 미조치 위험요인을 확인합니다."
   },
@@ -500,8 +500,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
     setState((current) => ({
       ...current,
       data: nextData,
-      isCurrent: true,
-      savedAt: new Date().toISOString()
+      savedAt: current.isCurrent ? new Date().toISOString() : current.savedAt
     }));
   }, []);
 
@@ -595,7 +594,6 @@ function CurrentWorkpackBanner({ isCurrent, savedAt }: { isCurrent: boolean; sav
           ? `작업공간에서 생성한 최신 문서팩을 사용합니다${formatSavedAt(savedAt) ? ` · ${formatSavedAt(savedAt)}` : ""}.`
           : "아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다."}
       </strong>
-      <a href="/workspace">작업공간에서 새로 생성</a>
     </section>
   );
 }
@@ -622,8 +620,11 @@ function buildDeliverablePatch(values: WorkpackDocumentValues) {
   return patch;
 }
 
-function countDocuments(data: AskResponse) {
-  return Object.values(data.deliverables).filter((value) => typeof value === "string" && value.trim()).length;
+function countLaunchDocuments(data: AskResponse) {
+  return launchDocuments.filter((item) => {
+    const documentText = data.deliverables[item.key];
+    return typeof documentText === "string" && Boolean(documentText.trim());
+  }).length;
 }
 
 function countEvidence(data: AskResponse) {
@@ -773,17 +774,89 @@ function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard
   );
 }
 
-function DocumentCockpit({ data, onSelectDocument }: { data: AskResponse; onSelectDocument: (key: DocumentKey) => void }) {
+function DocumentCockpit({
+  data,
+  selectedDocumentKey,
+  onSelectDocument
+}: {
+  data: AskResponse;
+  selectedDocumentKey?: DocumentKey;
+  onSelectDocument: (key: DocumentKey) => void;
+}) {
   const primaryDocuments = launchDocuments.filter((item) => item.tier === "핵심");
+  const remainingDocuments = launchDocuments.filter((item) => item.tier !== "핵심");
+  const readyDocumentCount = countLaunchDocuments(data);
 
   return (
     <section className="safeclaw-document-cockpit" aria-label="문서팩 운영 요약">
+      <section className="safeclaw-mobile-document-priority" data-testid="mobile-core-document-launcher">
+        <span>오늘 문서</span>
+        <h2>핵심 3종</h2>
+        <div className="safeclaw-mobile-core-list">
+          {primaryDocuments.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              data-document-key={item.key}
+              aria-pressed={selectedDocumentKey === item.key}
+              onClick={() => onSelectDocument(item.key)}
+            >
+              {item.title}
+            </button>
+          ))}
+        </div>
+
+        <details className="safeclaw-mobile-document-details" data-testid="mobile-document-details">
+          <summary>문서 {launchDocuments.length}종 · 제출 정보</summary>
+          <div className="safeclaw-mobile-remaining-list">
+            {remainingDocuments.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                data-document-key={item.key}
+                aria-pressed={selectedDocumentKey === item.key}
+                onClick={() => onSelectDocument(item.key)}
+              >
+                <small>{item.tier} · {item.owner}</small>
+                <strong>{item.title}</strong>
+              </button>
+            ))}
+          </div>
+          <div className="safeclaw-mobile-primary-preview" data-testid="mobile-primary-preview">
+            {primaryDocuments.map((item) => (
+              <div key={item.key}>
+                <strong>{item.title}</strong>
+                <p>{excerpt(buildDerivedDocumentText(data, item.key), 96)}</p>
+              </div>
+            ))}
+          </div>
+          <dl className="safeclaw-mobile-submission-facts" data-testid="mobile-submission-facts">
+            <div>
+              <dt>작성</dt>
+              <dd>{readyDocumentCount}/{launchDocuments.length}종</dd>
+            </div>
+            <div>
+              <dt>근거</dt>
+              <dd>{countEvidence(data)}건</dd>
+            </div>
+            <div>
+              <dt>출력</dt>
+              <dd>PDF · XLS · HWPX</dd>
+            </div>
+          </dl>
+          <div className="safeclaw-mobile-detail-actions">
+            <a href="/evidence">문서 근거</a>
+            <a href="/dispatch">현장 전파</a>
+          </div>
+        </details>
+      </section>
+
       <aside className="safeclaw-doc-index">
         <span>문서 인덱스</span>
-        <h2>3종 핵심. 6종 제출.</h2>
+        <h2>3종 핵심. 6종 추가.</h2>
         <div className="safeclaw-doc-index-list">
           {launchDocuments.map((item, index) => (
-            <button key={item.key} type="button" onClick={() => onSelectDocument(item.key)}>
+            <button key={item.key} type="button" data-document-key={item.key} onClick={() => onSelectDocument(item.key)}>
               <small>{String(index + 1).padStart(2, "0")} · {item.tier}</small>
               <strong>{item.title}</strong>
               <em>{item.owner}</em>
@@ -809,7 +882,7 @@ function DocumentCockpit({ data, onSelectDocument }: { data: AskResponse; onSele
 
       <aside className="safeclaw-doc-export">
         <span>제출 준비</span>
-        <h2>{countDocuments(data)}종 작성.</h2>
+        <h2>{readyDocumentCount}/{launchDocuments.length}종 작성.</h2>
         <dl>
           <div>
             <dt>위험도</dt>
@@ -836,13 +909,14 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
   const currentRef = useRef(current);
   const [focusToken, setFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey | undefined>();
+  const [selectedDocumentKey, setSelectedDocumentKey] = useState<DocumentKey>("workpackSummaryDraft");
   useEffect(() => {
     currentRef.current = current;
   }, [current]);
 
   const updateCurrentDeliverables = useCallback((values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => {
     const snapshot = currentRef.current;
-    if (!snapshot.isCurrent || typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
 
     const patch = buildDeliverablePatch(values);
     const documentKeys = Object.keys(patch) as DeliverableDocumentKey[];
@@ -850,19 +924,22 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
 
     const nextData = applyWorkpackDeliverablesChange(snapshot.data, patch, change);
 
-    window.localStorage.setItem(
-      CURRENT_WORKPACK_STORAGE_KEY,
-      JSON.stringify(buildStoredCurrentWorkpack(nextData, {
-        generationFingerprint: snapshot.generationFingerprint,
-        workerSnapshot: snapshot.workerSnapshot,
-        dispatchSnapshot: snapshot.dispatchSnapshot
-      }))
-    );
+    if (snapshot.isCurrent) {
+      window.localStorage.setItem(
+        CURRENT_WORKPACK_STORAGE_KEY,
+        JSON.stringify(buildStoredCurrentWorkpack(nextData, {
+          generationFingerprint: snapshot.generationFingerprint,
+          workerSnapshot: snapshot.workerSnapshot,
+          dispatchSnapshot: snapshot.dispatchSnapshot
+        }))
+      );
+    }
     snapshot.updateData(nextData);
   }, []);
 
   function selectDocument(key: DocumentKey) {
     setRequestedDocumentKey(key);
+    setSelectedDocumentKey(key);
     setFocusToken((value) => value + 1);
   }
 
@@ -886,12 +963,17 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
           ) : null}
         </section>
       ) : null}
-      <DocumentCockpit data={current.data} onSelectDocument={selectDocument} />
+      <DocumentCockpit
+        data={current.data}
+        selectedDocumentKey={selectedDocumentKey}
+        onSelectDocument={selectDocument}
+      />
       <WorkpackEditor
         data={current.data}
         generationFingerprint={current.generationFingerprint}
         focusToken={focusToken}
         requestedDocumentKey={requestedDocumentKey}
+        onSelectedDocumentChange={setSelectedDocumentKey}
         onDeliverablesChange={updateCurrentDeliverables}
       />
     </>

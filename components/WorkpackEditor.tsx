@@ -1879,12 +1879,14 @@ export function WorkpackEditor({
   generationFingerprint,
   focusToken = 0,
   requestedDocumentKey,
+  onSelectedDocumentChange,
   onDeliverablesChange
 }: {
   data: AskResponse;
   generationFingerprint?: string;
   focusToken?: number;
   requestedDocumentKey?: DocumentKey;
+  onSelectedDocumentChange?: (key: DocumentKey) => void;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
 }) {
   const initialValues = useMemo<WorkpackDocumentValues>(
@@ -1927,6 +1929,7 @@ export function WorkpackEditor({
   const documentBodyRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
+  const onSelectedDocumentChangeRef = useRef(onSelectedDocumentChange);
   const saveAnnouncementTimerRef = useRef<number | null>(null);
   const pendingChangeRef = useRef<WorkpackDeliverablesChange>({
     source: "generated",
@@ -2026,6 +2029,14 @@ export function WorkpackEditor({
   useEffect(() => {
     onDeliverablesChangeRef.current = onDeliverablesChange;
   }, [onDeliverablesChange]);
+
+  useEffect(() => {
+    onSelectedDocumentChangeRef.current = onSelectedDocumentChange;
+  }, [onSelectedDocumentChange]);
+
+  useEffect(() => {
+    onSelectedDocumentChangeRef.current?.(selected.key);
+  }, [selected.key]);
 
   useEffect(() => () => {
     if (saveAnnouncementTimerRef.current) {
