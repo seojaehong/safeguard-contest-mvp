@@ -7484,6 +7484,30 @@ body:has(.safeclaw-landing) :is(
   text-decoration: none;
 }
 
+.safeclaw-preserved-history-list article {
+  gap: 10px;
+  padding: 14px;
+}
+
+.safeclaw-preserved-history-list article > div {
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.safeclaw-preserved-history-list strong {
+  font-size: 16px;
+}
+
+.safeclaw-preserved-history-list p {
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 13px;
+}
+
+.safeclaw-preserved-history-list article > span {
+  font-size: 12px;
+}
+
 .safeclaw-workdoc-rail {
   position: sticky;
   top: 88px;
