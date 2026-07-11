@@ -191,6 +191,7 @@ describe("reports download center remount behavior", () => {
 
     try {
       await page.goto(`${baseUrl}/reports`, { waitUntil: "networkidle" });
+      await page.getByLabel("리포트 빈 상태").waitFor({ state: "visible" });
 
       expect(await page.getByText("바로 사용", { exact: true }).count()).toBeGreaterThan(0);
       expect(await page.getByLabel("리포트 빈 상태").count()).toBe(1);
