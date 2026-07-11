@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { createServer } from "vite";
 
 const EXPECTED_CORPUS_ROWS = 6032;
 const EXPECTED_CORPUS_SHA256 = "54db348b32016725afcf1a550d819ef7cb9b6ef6a278c728ac6f8d7eed02a5f7";
@@ -95,12 +95,17 @@ function findCausalityFlags(record) {
 const options = parseArguments(process.argv.slice(2));
 const corpusPath = resolve(process.cwd(), options.corpus);
 const outputPath = resolve(process.cwd(), options.output);
-const { deriveSafetyReferenceOperationalView, getSafetyReferenceOperationalIncidentOverview } = await import(
-  pathToFileURL(resolve(process.cwd(), "lib/safety-reference-catalog.ts")).href
-);
-const auditGate = await import(
-  pathToFileURL(resolve(process.cwd(), "lib/sif-causality-audit-gate.ts")).href
-);
+const moduleServer = await createServer({
+  root: process.cwd(),
+  appType: "custom",
+  logLevel: "silent",
+  resolve: { alias: { "@": process.cwd() } },
+  server: { middlewareMode: true }
+});
+const safetyCatalog = await moduleServer.ssrLoadModule("/lib/safety-reference-catalog.ts");
+const auditGate = await moduleServer.ssrLoadModule("/lib/sif-causality-audit-gate.ts");
+await moduleServer.close();
+const { deriveSafetyReferenceOperationalView, getSafetyReferenceOperationalIncidentOverview } = safetyCatalog;
 const { listSifCausalityAuditGateFailures } = auditGate;
 hasPoweredMachineryCausalSignal = auditGate.hasPoweredMachineryCausalSignal;
 
