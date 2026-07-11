@@ -1074,12 +1074,12 @@ ul {
 
 .safeclaw-os-hero p {
   max-width: 760px;
-  margin: 22px 0 0;
+  margin: var(--space-6) 0 0;
   color: var(--os-muted);
-  font-size: var(--text-component-title);
-  font-weight: 650;
-  letter-spacing: var(--tracking-page-title);
-  line-height: var(--leading-body);
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body-lg);
   text-wrap: balance;
 }
 
@@ -1568,6 +1568,10 @@ ul {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+  }
+
   .hero-console-replay .agent-console-live {
     animation: none;
   }
@@ -7272,6 +7276,8 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-primary {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
   background: var(--os-yellow, #ffdc2e);
   color: #08090b;
   justify-content: center;
@@ -7366,7 +7372,43 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-hero.document aside {
-  padding: 22px;
+  padding: var(--space-6);
+}
+
+.special-state {
+  width: min(100%, 72ch);
+  margin-inline: auto;
+  padding: var(--space-6);
+  border-radius: var(--radius-panel);
+}
+
+.special-state-title,
+.safeclaw-module-title {
+  font-size: var(--text-page-title);
+  font-weight: 800;
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--accent);
+  border-radius: var(--radius-circle);
+  animation: spin 0.8s linear infinite;
+}
+
+.safeclaw-module-description {
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-card {
+  padding: var(--space-6);
+  border-radius: var(--radius-panel);
 }
 
 .safeclaw-module-status {

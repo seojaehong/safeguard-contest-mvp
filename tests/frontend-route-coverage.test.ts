@@ -68,24 +68,31 @@ const canonicalSurfaceHooks: Record<string, string> = {
   "components/SafeClawModuleShell.tsx": "safeclaw-module-shell",
   "components/V2DemoExperience.tsx": "demo-mode-shell",
   "components/SafeGuardCommandCenter.tsx": "command-center-shell",
-  "app/ask/page.tsx": "container grid",
+  "app/ask/page.tsx": "SafeClawModuleShell",
   "app/auth/callback/page.tsx": "safeclaw-login-page",
-  "app/dryrun/page.tsx": "route-internal-page",
+  "app/dryrun/page.tsx": "SafeClawModuleShell",
   "app/interpretation/[id]/page.tsx": "container grid",
   "app/knowledge/[section]/[slug]/page.tsx": "knowledge-shell",
   "app/law/[id]/page.tsx": "container grid",
   "app/login/page.tsx": "safeclaw-login-page",
   "app/precedent/[id]/page.tsx": "container grid",
-  "app/preview/page.tsx": "v2-shell",
-  "app/roadmap/page.tsx": "v2-shell",
-  "app/search/page.tsx": "container grid",
-  "app/trust/page.tsx": "v2-shell",
-  "app/why/page.tsx": "v2-shell",
+  "app/preview/page.tsx": "SafeClawModuleShell",
+  "app/roadmap/page.tsx": "SafeClawModuleShell",
+  "app/search/page.tsx": "SafeClawModuleShell",
+  "app/trust/page.tsx": "SafeClawModuleShell",
+  "app/why/page.tsx": "SafeClawModuleShell",
 };
 
 const delegatedHeadingOwners: Partial<Record<(typeof userVisibleRoutes)[number], string>> = {
+  "/ask": "components/SafeClawModuleShell.tsx",
   "/login": "components/AdminLoginPanel.tsx",
   "/auth/callback": "components/AuthCallbackClient.tsx",
+  "/dryrun": "components/SafeClawModuleShell.tsx",
+  "/preview": "components/SafeClawModuleShell.tsx",
+  "/roadmap": "components/SafeClawModuleShell.tsx",
+  "/search": "components/SafeClawModuleShell.tsx",
+  "/trust": "components/SafeClawModuleShell.tsx",
+  "/why": "components/SafeClawModuleShell.tsx",
 };
 
 const sharedComponentOwners = {
@@ -603,8 +610,8 @@ describe("informational and demo route hierarchy", () => {
     (relativePath) => {
       const source = read(relativePath);
 
-      expect(source).toContain('className="v2-shell"');
-      expect(source.match(/<h1\b/g)).toHaveLength(1);
+      expect(source).toContain("SafeClawModuleShell");
+      expect(read("components/SafeClawModuleShell.tsx").match(/<h1\b/g)).toHaveLength(1);
       expect(source.match(/<h2\b/g)?.length ?? 0).toBeGreaterThan(0);
     },
   );
@@ -645,8 +652,7 @@ describe("module route section hierarchy", () => {
   it("uses named canonical spacing hooks instead of inline layout styles on the dry-run route", () => {
     const source = read("app/dryrun/page.tsx");
 
-    expect(source).toContain("route-internal-page");
-    expect(source).toContain("route-internal-hero");
+    expect(source).toContain("SafeClawModuleShell");
     expect(source).not.toMatch(/style=\{\{/);
   });
 

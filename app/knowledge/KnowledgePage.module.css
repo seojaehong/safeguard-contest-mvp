@@ -30,7 +30,7 @@
   background: var(--workspace-surface-1, #ffffff);
 }
 
-.overviewItem strong {
+.overviewItem h2 {
   font-size: 16px;
   line-height: 1.4;
 }
