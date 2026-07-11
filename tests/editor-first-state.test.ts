@@ -32,4 +32,28 @@ describe("editor-first draft identity", () => {
     expect(parseStoredCurrentWorkpack(JSON.stringify(resaved))?.generationFingerprint)
       .toBe(firstStored.generationFingerprint);
   });
+
+  it("preserves workPermitDraft edits in the canonical current workpack snapshot", () => {
+    const sample = buildSampleWorkpack();
+    const sentinel = "SAFECLAW_WORK_PERMIT_RESTORED";
+
+    sample.deliverables.workPermitDraft = [
+      "[1. 허가 기본정보]",
+      `허가대상 작업: ${sentinel}`,
+      "작업현장: 세이프건설"
+    ].join("\n");
+
+    const stored = buildStoredCurrentWorkpack(sample);
+    const reopened = parseStoredCurrentWorkpack(JSON.stringify(stored));
+
+    expect(reopened?.data.deliverables.workPermitDraft).toContain(sentinel);
+
+    if (!reopened) throw new Error("Stored workpack should reopen");
+    const resaved = buildStoredCurrentWorkpack(reopened.data, {
+      generationFingerprint: reopened.generationFingerprint
+    });
+
+    expect(parseStoredCurrentWorkpack(JSON.stringify(resaved))?.data.deliverables.workPermitDraft)
+      .toContain(sentinel);
+  });
 });

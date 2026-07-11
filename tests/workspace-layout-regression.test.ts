@@ -1182,15 +1182,15 @@ describe("workspace layout regression", () => {
     expect(await exportPanel.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
 
     await page.getByRole("button", { name: "Excel 표 양식(.xlsx)" }).click();
-    await expect.poll(() => xlsxPayload?.mode).toBe("single");
+    await expect.poll(() => xlsxPayload?.mode).toBe("tbmBriefingStructured");
     expect((xlsxPayload as Record<string, unknown> | null)?.edited).toBe(true);
+    expect((xlsxPayload as Record<string, unknown> | null)?.structured).toBeTruthy();
     expect((xlsxPayload as { rows?: Array<{ content?: unknown }> } | null)?.rows)
       .toEqual(expect.arrayContaining([expect.objectContaining({ content: proseSentinel })]));
     expect((xlsxPayload as { rows?: Array<{ item?: unknown; content?: unknown }> } | null)?.rows)
       .toEqual(expect.arrayContaining([
         expect.objectContaining({ item: "편집안전대책", content: "SAFECLAW_DOCUMENT_EDIT_PRESERVED" })
       ]));
-    expect(xlsxPayload).not.toHaveProperty("structured");
 
     await page.getByRole("button", { name: "한글 표 양식(.hwp)" }).click();
     await expect.poll(() => hwpPayload).not.toBeNull();

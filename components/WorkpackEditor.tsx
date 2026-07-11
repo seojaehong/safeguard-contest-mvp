@@ -244,6 +244,8 @@ function sanitizeFileName(value: string) {
   return value.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, "-").slice(0, 80) || "safeclaw";
 }
 
+const SAVE_ANNOUNCEMENT_DELAY_MS = 450;
+
 export function buildGenerationEvidenceFingerprint(data: AskResponse) {
   return buildWorkpackGenerationFingerprint(data);
 }
@@ -1661,11 +1663,16 @@ function parseStoredDraft(raw: string | null, fallback: WorkpackDocumentValues):
     const record = readObject(parsed);
     if (!record) return { version: 1, values: fallback, dirtyKeys: [] };
 
-    const values = parseDocumentValues(record.values || record, fallback);
+    const parsedValues = parseDocumentValues(record.values || record, fallback);
     const storedDirtyKeys = Array.isArray(record.dirtyKeys)
       ? record.dirtyKeys.filter(isDocumentKey)
-      : documentMeta.filter((item) => values[item.key] !== fallback[item.key]).map((item) => item.key);
-    return { version: 1, values, dirtyKeys: [...new Set(storedDirtyKeys)] };
+      : documentMeta.filter((item) => parsedValues[item.key] !== fallback[item.key]).map((item) => item.key);
+    const dirtyKeys = [...new Set(storedDirtyKeys)];
+    const values = dirtyKeys.reduce<WorkpackDocumentValues>((acc, key) => {
+      acc[key] = parsedValues[key];
+      return acc;
+    }, { ...fallback });
+    return { version: 1, values, dirtyKeys };
   } catch (error) {
     console.warn("workpack local draft parse failed", error);
     return { version: 1, values: fallback, dirtyKeys: [] };
@@ -1876,7 +1883,11 @@ export function WorkpackEditor({
       workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
       riskAssessmentDraft: withSubmitReadiness("위험성평가표", data.deliverables.riskAssessmentDraft, data),
       workPlanDraft: withSubmitReadiness("작업계획서", data.deliverables.workPlanDraft, data),
-      workPermitDraft: withSubmitReadiness("허가서/첨부 안전작업허가 확인서", buildPermitDraft(data), data),
+      workPermitDraft: withSubmitReadiness(
+        "허가서/첨부 안전작업허가 확인서",
+        data.deliverables.workPermitDraft || buildPermitDraft(data),
+        data
+      ),
       tbmBriefing: withSubmitReadiness("TBM 브리핑", data.deliverables.tbmBriefing, data),
       tbmLogDraft: withSubmitReadiness("TBM 일지", data.deliverables.tbmLogDraft, data),
       safetyEducationRecordDraft: withSubmitReadiness("안전교육", data.deliverables.safetyEducationRecordDraft, data),
@@ -1903,12 +1914,15 @@ export function WorkpackEditor({
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
   const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null);
+  const [saveStatusLabel, setSaveStatusLabel] = useState("자동 저장");
+  const [saveAnnouncement, setSaveAnnouncement] = useState("");
   const [showFocusCue, setShowFocusCue] = useState(false);
   const [remediationDrafts, setRemediationDrafts] = useState<Record<string, RemediationDraft>>({});
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
   const documentBodyRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
+  const saveAnnouncementTimerRef = useRef<number | null>(null);
   const pendingChangeRef = useRef<WorkpackDeliverablesChange>({
     source: "generated",
     requiresRevalidation: false
@@ -2001,6 +2015,12 @@ export function WorkpackEditor({
     onDeliverablesChangeRef.current = onDeliverablesChange;
   }, [onDeliverablesChange]);
 
+  useEffect(() => () => {
+    if (saveAnnouncementTimerRef.current) {
+      window.clearTimeout(saveAnnouncementTimerRef.current);
+    }
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (hydratedStorageKey === storageKey) return;
@@ -2015,6 +2035,16 @@ export function WorkpackEditor({
     setValues(stored.values);
     setDirtyDocumentKeys(stored.dirtyKeys);
     setLastEditedAt(null);
+    if (saveAnnouncementTimerRef.current) {
+      window.clearTimeout(saveAnnouncementTimerRef.current);
+    }
+    if (restoredDraft) {
+      setSaveStatusLabel("저장본 복원됨");
+      setSaveAnnouncement("저장된 편집본을 복원했습니다.");
+    } else {
+      setSaveStatusLabel("자동 저장");
+      setSaveAnnouncement("");
+    }
     setHydratedStorageKey(storageKey);
   }, [hydratedStorageKey, initialValues, storageKey]);
 
@@ -2030,10 +2060,35 @@ export function WorkpackEditor({
         window.localStorage.setItem(storageKey, JSON.stringify(storedDraft));
       } catch (error) {
         console.warn("workpack local draft save failed", error);
+        setSaveStatusLabel("저장 실패");
+        setSaveAnnouncement("편집 내용 저장에 실패했습니다.");
       }
     }
     onDeliverablesChangeRef.current?.(values, pendingChangeRef.current);
-  }, [dirtyDocumentKeys, hydratedStorageKey, storageKey, values]);
+    if (saveAnnouncementTimerRef.current) {
+      window.clearTimeout(saveAnnouncementTimerRef.current);
+    }
+    if (pendingChangeRef.current.source === "stored-draft") {
+      setSaveStatusLabel("저장본 복원됨");
+      return;
+    }
+    if (dirtyDocumentKeys.length > 0) {
+      const savedAt = lastEditedAt;
+      setSaveStatusLabel("저장 중...");
+      setSaveAnnouncement("");
+      saveAnnouncementTimerRef.current = window.setTimeout(() => {
+        const timeLabel = (savedAt || new Date()).toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+        setSaveStatusLabel(`저장됨 ${timeLabel}`);
+        setSaveAnnouncement(`저장됨 ${timeLabel}`);
+      }, SAVE_ANNOUNCEMENT_DELAY_MS);
+      return;
+    }
+    setSaveStatusLabel("자동 저장");
+    setSaveAnnouncement("");
+  }, [dirtyDocumentKeys, hydratedStorageKey, lastEditedAt, storageKey, values]);
 
   useEffect(() => {
     if (!focusToken) return;
@@ -2209,28 +2264,29 @@ export function WorkpackEditor({
       type StructuredMode = "workPlanStructured" | "permitInspectionStructured" | "tbmBriefingStructured" | "tbmLogStructured" | "educationRecordStructured";
       let structuredMode: StructuredMode | null = null;
       let structuredPayload: unknown = null;
-      if (!selectedUsesEditedText && selected.key === "workPlanDraft" && dl?.workPlanStructured) {
+      if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
         structuredMode = "workPlanStructured";
         structuredPayload = dl.workPlanStructured;
-      } else if (!selectedUsesEditedText && selected.key === "workPermitDraft") {
+      } else if (selected.key === "workPermitDraft") {
         structuredMode = "permitInspectionStructured";
         structuredPayload = dl?.permitInspectionStructured || buildPermitInspectionStructured(data);
-      } else if (!selectedUsesEditedText && selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
+      } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
         structuredMode = "tbmBriefingStructured";
         structuredPayload = dl.tbmBriefingStructured;
-      } else if (!selectedUsesEditedText && selected.key === "tbmLogDraft" && dl?.tbmLogStructured) {
+      } else if (selected.key === "tbmLogDraft" && dl?.tbmLogStructured) {
         structuredMode = "tbmLogStructured";
         structuredPayload = dl.tbmLogStructured;
-      } else if (!selectedUsesEditedText && selected.key === "safetyEducationRecordDraft" && dl?.educationRecordStructured) {
+      } else if (selected.key === "safetyEducationRecordDraft" && dl?.educationRecordStructured) {
         structuredMode = "educationRecordStructured";
         structuredPayload = dl.educationRecordStructured;
       }
       const requestBody = structuredMode
         ? {
             mode: structuredMode,
-            edited: false,
+            edited: selectedUsesEditedText,
             scenario: data.scenario,
-            structured: structuredPayload
+            structured: structuredPayload,
+            rows: selectedRows
           }
         : {
             mode: "single",
@@ -2510,17 +2566,25 @@ export function WorkpackEditor({
               <div className="h2">{selected.title}</div>
               <p className="muted">{selected.description}</p>
             </div>
-            <div className={`editor-document-meta ${styles.documentMeta}`} aria-live="polite">
-              <span className={`editor-save-state ${styles.saveState}`}>자동 저장</span>
+            <div className={`editor-document-meta ${styles.documentMeta}`}>
+              <span className={`editor-save-state ${styles.saveState}`}>{saveStatusLabel}</span>
               <span>{selectedText.length.toLocaleString("ko-KR")}자</span>
               {lastEditedAt ? (
                 <span>수정 {lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
               ) : null}
+              <span
+                data-testid="editor-save-status"
+                role="status"
+                aria-live="polite"
+                className={styles.visuallyHidden}
+              >
+                {saveAnnouncement}
+              </span>
             </div>
           </header>
 
           {showFocusCue ? (
-            <p className={`editor-focus-message ${styles.focusMessage}`} aria-live="polite">
+            <p className={`editor-focus-message ${styles.focusMessage}`}>
               {selected.title} 본문 편집을 시작합니다.
             </p>
           ) : null}

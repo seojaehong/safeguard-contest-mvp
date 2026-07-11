@@ -558,6 +558,7 @@ export type AskResponse = {
     workpackSummaryDraft: string;
     riskAssessmentDraft: string;
     workPlanDraft: string;
+    workPermitDraft?: string;
     /**
      * Structured 작업계획서. AI가 산문(workPlanDraft) 대신 표 양식의 셀 단위 데이터를
      * 직접 반환하도록 했을 때 채워진다. 존재하면 xlsx/pdf 렌더러는 산문 파싱
