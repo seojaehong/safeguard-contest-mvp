@@ -60,7 +60,7 @@
 - [x] Record Vercel/local truth, stable codes, sidecar requirement, and distributed quota deferral.
 - [x] Run focused tests, typecheck, build27, and `git diff --check`.
 - [x] Inspect the final diff for bypasses, secret exposure, direct writes, and unrelated changes.
-- [ ] Pull with rebase, commit, push, and record the exact SHA and gates.
+- [x] Pull the same branch with rebase, commit, push, and record the exact gates in the verification artifact/final handoff.
 
 ### Follow-up: Consolidated Review Corrections
 
