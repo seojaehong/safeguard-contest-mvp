@@ -12,12 +12,14 @@ type HarnessOptions = {
   slug: string;
   initialPath: string;
   portSalt: number;
+  mode?: "dev" | "prod";
   timeoutMs?: number;
 };
 
 export type IsolatedNextBrowserHarness = {
   baseUrl: string;
   browser: Browser;
+  mode: "dev" | "prod";
   stop: () => Promise<void>;
 };
 
@@ -72,63 +74,72 @@ export async function startIsolatedNextBrowserHarness(
   }
 
   const timeoutMs = options.timeoutMs ?? 90_000;
+  const mode = options.mode ?? "dev";
   const port = 20_000 + ((process.pid * 97 + options.portSalt) % 30_000);
   const baseUrl = `http://127.0.0.1:${port}`;
   const distDir = path.join(".next-browser-tests", `${options.slug}-${process.pid}`);
   const output: string[] = [];
   let serverExit: ServerExit | null = null;
   let ready = false;
-
-  const serverScript = `
-    const http = require("node:http");
-    const imported = require(${JSON.stringify(resolveNextModule())});
-    const createNextServer = imported.default || imported;
-    const app = createNextServer({
-      dev: true,
-      dir: process.cwd(),
-      hostname: "127.0.0.1",
-      port: ${port},
-      conf: { distDir: ${JSON.stringify(distDir)} }
-    });
-    let httpServer;
-    async function shutdown() {
-      if (httpServer) await new Promise((resolve) => httpServer.close(resolve));
-      await app.close();
-      process.exit(0);
-    }
-    process.on("SIGTERM", () => void shutdown());
-    process.on("SIGINT", () => void shutdown());
-    app.prepare()
-      .then(() => {
-        const handler = app.getRequestHandler();
-        httpServer = http.createServer((request, response) => {
-          handler(request, response).catch((error) => {
-            console.error(error);
-            if (!response.headersSent) response.statusCode = 500;
-            response.end("Internal browser harness error");
+  const nextModule = resolveNextModule();
+  const server = mode === "prod"
+    ? spawn(
+      process.execPath,
+      [path.join(nextModule, "dist", "bin", "next"), "start", "-H", "127.0.0.1", "-p", String(port)],
+      {
+        cwd: process.cwd(),
+        env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" },
+        windowsHide: true
+      }
+    )
+    : spawn(process.execPath, ["-e", `
+      const http = require("node:http");
+      const imported = require(${JSON.stringify(nextModule)});
+      const createNextServer = imported.default || imported;
+      const app = createNextServer({
+        dev: true,
+        dir: process.cwd(),
+        hostname: "127.0.0.1",
+        port: ${port},
+        conf: { distDir: ${JSON.stringify(distDir)} }
+      });
+      let httpServer;
+      async function shutdown() {
+        if (httpServer) await new Promise((resolve) => httpServer.close(resolve));
+        await app.close();
+        process.exit(0);
+      }
+      process.on("SIGTERM", () => void shutdown());
+      process.on("SIGINT", () => void shutdown());
+      app.prepare()
+        .then(() => {
+          const handler = app.getRequestHandler();
+          httpServer = http.createServer((request, response) => {
+            handler(request, response).catch((error) => {
+              console.error(error);
+              if (!response.headersSent) response.statusCode = 500;
+              response.end("Internal browser harness error");
+            });
           });
-        });
-        httpServer.on("error", (error) => {
+          httpServer.on("error", (error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          httpServer.listen(${port}, "127.0.0.1", () => console.log("SAFECLAW_TEST_SERVER_READY"));
+        })
+        .catch((error) => {
           console.error(error);
           process.exit(1);
         });
-        httpServer.listen(${port}, "127.0.0.1", () => console.log("SAFECLAW_TEST_SERVER_READY"));
-      })
-      .catch((error) => {
-        console.error(error);
-        process.exit(1);
-      });
-  `;
-
-  const server = spawn(process.execPath, ["-e", serverScript], {
-    cwd: process.cwd(),
-    env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" },
-    windowsHide: true
-  });
+    `], {
+      cwd: process.cwd(),
+      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" },
+      windowsHide: true
+    });
   server.stdout.on("data", (chunk: Buffer) => {
     const value = chunk.toString();
     output.push(value);
-    if (value.includes("SAFECLAW_TEST_SERVER_READY")) ready = true;
+    if (value.includes("SAFECLAW_TEST_SERVER_READY") || value.includes("Ready in")) ready = true;
   });
   server.stderr.on("data", (chunk: Buffer) => output.push(chunk.toString()));
   server.on("exit", (code, signal) => {
@@ -157,15 +168,17 @@ export async function startIsolatedNextBrowserHarness(
                 }
               } finally {
                 stopProcessTree(server);
-                const absoluteDistDir = path.resolve(process.cwd(), distDir);
-                const workspaceRoot = `${path.resolve(process.cwd())}${path.sep}`;
-                if (!absoluteDistDir.startsWith(workspaceRoot)) {
-                  throw new Error(`Refusing to remove unexpected test dist directory: ${absoluteDistDir}`);
+                if (mode === "dev") {
+                  const absoluteDistDir = path.resolve(process.cwd(), distDir);
+                  const workspaceRoot = `${path.resolve(process.cwd())}${path.sep}`;
+                  if (!absoluteDistDir.startsWith(workspaceRoot)) {
+                    throw new Error(`Refusing to remove unexpected test dist directory: ${absoluteDistDir}`);
+                  }
+                  fs.rmSync(absoluteDistDir, { recursive: true, force: true });
                 }
-                fs.rmSync(absoluteDistDir, { recursive: true, force: true });
               }
             };
-            return { baseUrl, browser, stop };
+            return { baseUrl, browser, mode, stop };
           }
         } catch (error) {
           if (serverExit) throw error;
