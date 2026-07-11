@@ -67,6 +67,18 @@ const INITIAL_DOWNLOAD_STATE: DownloadState = {
   message: ""
 };
 
+const preservedHistoryStatusLabelMap: Record<NonNullable<OperationImprovement["status"]>, string> = {
+  candidate: "후보",
+  approved: "승인됨",
+  rejected: "반려됨",
+  reflected: "반영됨",
+  proposed: "제안됨",
+  in_progress: "진행 중",
+  on_hold: "보류됨",
+  completed: "완료됨",
+  verified: "검증됨"
+};
+
 const evidenceLabelMap: Record<string, string> = {
   workpackSummaryDraft: "요약",
   riskAssessmentDraft: "위험성평가",
@@ -132,6 +144,25 @@ function formatGroupMeta(group: ReportGroup) {
 
 function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
+}
+
+function preservedHistoryStatusLabel(status?: OperationImprovement["status"]) {
+  return status ? preservedHistoryStatusLabelMap[status] : "후보";
+}
+
+function preservedHistorySourceLabel(item: OperationImprovement) {
+  if (item.sourceType === "photo_analysis") {
+    return item.visionStatus === "analyzed" ? "실제 이력 · 사진 분석" : "실제 이력 · 사진 후보";
+  }
+  return "실제 이력 · 현장 메모";
+}
+
+function resolveReportPreviewImprovements(
+  improvements: readonly OperationImprovement[],
+  usingSample: boolean
+): OperationImprovement[] {
+  if (usingSample) return [];
+  return [...improvements];
 }
 
 function readCurrentWorkpack(): { workpack: StoredCurrentWorkpack | null; sample: boolean; error: string | null } {
@@ -286,6 +317,44 @@ function ReportStatePanel({ viewState }: { viewState: ReportViewState }) {
         </div>
       </section>
     </article>
+  );
+}
+
+function PreservedHistorySection({
+  improvements
+}: {
+  improvements: readonly OperationImprovement[];
+}) {
+  return (
+    <section aria-label="보존된 실제 개선 이력">
+      <span>보존 이력</span>
+      <p className="safeclaw-download-note">
+        이 목록은 현재 브라우저에 저장된 실제 개선 이력입니다.
+      </p>
+      <p className="safeclaw-download-note">
+        샘플 리포트 본문과 증빙 다운로드에는 합치지 않습니다.
+      </p>
+      <div className="safeclaw-workdoc-list safeclaw-preserved-history-list">
+        {improvements.map((item) => (
+          <article key={item.id}>
+            <div>
+              <strong>{compactText(item.hazardLabel, 22)}</strong>
+              <code>{preservedHistoryStatusLabel(item.status)} · {formatDate(item.createdAt)}</code>
+            </div>
+            <p>
+              <b>현장</b>
+              <span>{compactText(`${item.siteName} · ${item.workSummary}`, 48)}</span>
+            </p>
+            <p>
+              <b>개선</b>
+              <span>{compactText(item.improvementText, 72)}</span>
+            </p>
+            <span>{preservedHistorySourceLabel(item)}</span>
+            <span>{item.reflectedDocuments.join(" · ") || "반영 문서 확인"}</span>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -446,9 +515,14 @@ export function ReportsDownloadCenter() {
     loadLocalState();
   }, []);
 
+  const preservedHistory = useMemo(
+    () => [...improvements].sort((left, right) => right.createdAt.localeCompare(left.createdAt)),
+    [improvements]
+  );
+
   const reportResult = useMemo((): { snapshot: ReportSnapshot | null; error: string | null } => {
     if (!workpack) return { snapshot: null, error: null };
-    const reportImprovements = usingSample ? [] : improvements;
+    const reportImprovements = resolveReportPreviewImprovements(preservedHistory, usingSample);
     try {
       return {
         snapshot: buildReportSnapshot({
@@ -684,6 +758,10 @@ export function ReportsDownloadCenter() {
               <p><strong>{snapshot?.summary.photoImprovements || 0}</strong><span>승인 사진</span></p>
             </div>
           </section>
+
+          {usingSample && preservedHistory.length ? (
+            <PreservedHistorySection improvements={preservedHistory} />
+          ) : null}
 
           <section>
             <span>근거</span>

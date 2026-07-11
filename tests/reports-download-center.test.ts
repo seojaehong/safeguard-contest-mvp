@@ -160,9 +160,17 @@ describe("reports download center remount behavior", () => {
     }
   }, 90_000);
 
-  it("shows an honest invalid-workpack state, preserves improvement history, and only opens an explicit sample preview", async () => {
+  it("keeps preserved authoritative history inspectable beside sample preview without merging it into sample evidence", async () => {
     if (!browser) throw new Error("Browser was not started");
     const context = await browser.newContext();
+    const preservedImprovement: OperationImprovement = {
+      ...improvement,
+      id: "preserved-authoritative-history",
+      hazardLabel: "권한분리 고유 위험",
+      improvementText: "샘플과 합치면 안 되는 실제 개선 이력",
+      reflectedDocuments: ["위험성평가표", "TBM 기록"],
+      status: "completed"
+    };
     await context.addInitScript(({ expectedOrigin, workpackJson, improvementsJson, workpackKey, improvementsKey }) => {
       if (window.location.origin !== expectedOrigin) return;
       window.localStorage.setItem(workpackKey, workpackJson);
@@ -178,7 +186,7 @@ describe("reports download center remount behavior", () => {
         )),
         savedAt: "2026-07-08T08:00:00"
       }),
-      improvementsJson: JSON.stringify([{ ...improvement, status: "completed" }]),
+      improvementsJson: JSON.stringify([preservedImprovement]),
       workpackKey: CURRENT_WORKPACK_STORAGE_KEY,
       improvementsKey: OPERATION_IMPROVEMENTS_STORAGE_KEY
     });
@@ -197,9 +205,18 @@ describe("reports download center remount behavior", () => {
       expect(await previewButton.isVisible()).toBe(true);
       await previewButton.click();
 
-      expect(await page.getByText("샘플 리포트").isVisible()).toBe(true);
+      expect(await page.getByText("샘플 리포트", { exact: true }).isVisible()).toBe(true);
       expect(await page.getByText("샘플 미리보기만 가능합니다. · 실제 작업팩 저장시각이 유효해질 때까지 증빙 다운로드는 잠겨 있습니다.").isVisible()).toBe(true);
       expect(await page.getByRole("button", { name: "개선사항 포함 MD" }).isDisabled()).toBe(true);
+
+      const preservedHistory = page.getByLabel("보존된 실제 개선 이력");
+      await preservedHistory.waitFor({ state: "visible" });
+      expect(await preservedHistory.getByText("샘플과 합치면 안 되는 실제 개선 이력").isVisible()).toBe(true);
+      expect(await preservedHistory.getByText("샘플 리포트 본문과 증빙 다운로드에는 합치지 않습니다.").isVisible()).toBe(true);
+
+      const sampleReport = page.getByLabel("작업문서형 리포트");
+      await sampleReport.waitFor({ state: "visible" });
+      expect(await sampleReport.getByText("샘플과 합치면 안 되는 실제 개선 이력").count()).toBe(0);
     } finally {
       await context.close();
     }
