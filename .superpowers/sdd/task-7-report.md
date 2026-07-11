@@ -23,6 +23,15 @@ The reconciliation test first failed because no browser report existed (`reconci
 
 ## Limitations and coordination
 
-The production application intentionally exposes no deterministic runtime-throw hook for error/global-error, and optimized workspace loading is transient. Those rows remain explicit, carry limitations, retain source-level contract coverage, and capture the common fallback/resolved geometry rather than being skipped. The parallel backend session should expect `app/globals.css` as the primary merge-conflict candidate. This task changes no database, API contract, or persistence behavior.
+The error and global-error boundaries are now exercised by environment-gated audit probes and verified through distinct boundary markers, DOM content, HTTP outcomes, and screenshots. The probes are inert unless `SAFECLAW_FRONTEND_AUDIT=1`, so ordinary production behavior is unchanged. Optimized workspace loading remains an explicitly labelled transient resolved state. Login and callback rows identify their expected deterministic authentication fallbacks. The parallel backend session should expect `app/globals.css` as the primary merge-conflict candidate. This task changes no database, API contract, or persistence behavior.
 
-F7 remains `in_progress` with `passes: false` pending independent final review and PR handoff.
+## Independent-review remediation
+
+- Actual `not-found`, `error`, and `global-error` boundaries have distinct `data-audit-boundary` markers and screenshots; the error probe returns its real 500 boundary response without being misclassified.
+- Every row now validates computed product/document font roles, numerical heading tuples, visible control geometry, key surface padding/radius values, and horizontal overflow.
+- Workspace Day/Night rows compare color-independent geometry fingerprints at all three widths.
+- Totals distinguish failed rows from finding count and enforce `successes + failedRows = 108`; a mutation test proves one row with two findings is counted once.
+- Login and callback fallbacks are explicitly labelled; legal divider artifacts, 34px quick chips, and a 30px worker acknowledgement control were corrected through RED/GREEN checks.
+- Final browser audit: 108 successes, zero failed rows, zero findings. Final regression: 56 files/517 tests, typecheck, normal production build, static audit 32 routes/22 components with zero coverage issues or violations.
+
+F7 remains `in_progress` with `passes: false` pending independent re-review and PR handoff.

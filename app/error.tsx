@@ -9,7 +9,7 @@ export default function Error({
 }) {
   return (
     <main className="container grid">
-      <section className="card list special-state">
+      <section className="card list special-state" data-audit-boundary="error">
         <h1 className="special-state-title">일시적인 오류가 발생했습니다</h1>
         <div className="muted">
           요청을 처리하는 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.

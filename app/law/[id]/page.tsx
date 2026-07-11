@@ -12,6 +12,7 @@ function parseLawBody(body: string): LawBodySection[] {
 
   for (const rawLine of body.split(/\r?\n/)) {
     const line = rawLine.trimEnd();
+    if (line.trim() === ".") continue;
     const sectionMatch = line.match(/^\[([^\]]+)\]$/);
     if (sectionMatch) {
       if (current.lines.length) sections.push(current);

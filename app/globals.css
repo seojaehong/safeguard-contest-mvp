@@ -3755,6 +3755,7 @@ ul {
 
 .quick-chip {
   border: 1px solid rgba(207, 199, 185, 0.78);
+  min-height: var(--control-height-compact);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.58);
   color: var(--ink);
@@ -6587,6 +6588,13 @@ ul {
   margin-top: var(--space-4);
 }
 
+.legal-detail-page hr {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
 .law-body-section {
   display: grid;
   gap: var(--space-3);
@@ -9362,6 +9370,10 @@ body:has(.safeclaw-landing) :is(
   line-height: var(--leading-section-title);
   letter-spacing: var(--tracking-section-title);
   font-weight: 800;
+}
+
+.safeclaw-worker-phone article > button {
+  min-height: var(--control-height);
 }
 
 .safeclaw-module-shell .h3,

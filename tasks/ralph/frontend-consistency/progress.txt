@@ -110,3 +110,9 @@
 - Visual review: raw Markdown links, loose list nodes, and excessive vertical rhythm were found on knowledge detail and fixed through a semantic renderer plus the 72ch long-form contract.
 - Verified: 56 test files/514 tests, strict typecheck, production build, static audit 32 pages/22 components with zero issues, browser 108/108, and reconciliation 19/19 pass.
 - Next: keep F7 `in_progress` and `passes: false` until independent final branch review and PR handoff.
+
+## 2026-07-11 F7 independent-review remediation
+- RED: review identified fake shared fallback evidence, presence-only contract checks, incorrect row/finding arithmetic, undisclosed auth fallbacks, and legal divider artifacts; focused tests reproduced totals/boundary and legal failures.
+- Changed: added audit-only env-gated actual error/global boundary probes, numerical rendered contract checks, Day/Night geometry fingerprints, correct row totals, explicit auth fallback labels, and fixed legal dividers plus undersized quick-chip/worker controls.
+- Verified: distinct boundary markers and screenshots; browser 108 successes/0 failed rows/0 findings; reconciliation 22/22; full 56 files/517 tests; typecheck; normal build; static audit 32 routes/22 components and zero issues; diff review pending.
+- Next: keep F7 pending independent re-review.

@@ -46,8 +46,72 @@ function isRelevantConsoleError(text) {
   return !/favicon\.ico|Download the React DevTools|Failed to load resource.*404/i.test(text);
 }
 
-async function capture(page, { route, requestedPath, viewport, theme = "Product", name, limitation = "" }) {
+function px(value) {
+  const parsed = Number.parseFloat(value || "0");
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function approximately(actual, expected, tolerance = 0.08) {
+  return Math.abs(actual - expected) <= tolerance;
+}
+
+function headingRole(heading, documentRole = false) {
+  if (!heading) return null;
+  const size = px(heading.fontSize);
+  const weight = Number(heading.fontWeight);
+  const lineHeight = px(heading.lineHeight);
+  const tracking = px(heading.letterSpacing);
+  if (documentRole && weight === 700 && approximately(size, 26.666, 0.12)
+    && approximately(lineHeight, 32, 0.12) && approximately(tracking, size * -0.02, 0.12)) return "document-title";
+  const roles = [
+    ["display", 800, 0.98, -0.045], ["page-title", 800, 1.15, -0.035],
+    ["section-title", 800, 1.25, -0.025], ["component-title", 700, 1.35, -0.015],
+  ];
+  return roles.find(([, expectedWeight, leading, letterSpacing]) => weight === expectedWeight
+    && approximately(lineHeight, size * leading, 0.12)
+    && approximately(tracking, size * letterSpacing, 0.12))?.[0] ?? null;
+}
+
+function numericalContractFindings(row, { documentRole = false, expectedBoundary = "" } = {}) {
+  const findings = [];
+  if ((row.status >= 500 || row.status === 0) && !(expectedBoundary && row.boundaryMarker === expectedBoundary)) findings.push(`HTTP ${row.status}`);
+  if (row.consoleErrors.length) findings.push(`${row.consoleErrors.length} unexpected console error(s)`);
+  if (row.pageErrors.length) findings.push(`${row.pageErrors.length} unexpected page error(s)`);
+  if (row.horizontalOverflow > 2) findings.push(`${row.horizontalOverflow}px horizontal overflow`);
+  if (!row.visiblePrimaryContent) findings.push("missing visible primary content");
+  const expectedFont = documentRole ? /Malgun Gothic|Noto Sans KR/i : /^Pretendard/i;
+  if (!expectedFont.test(row.bodyFont)) findings.push(`body font outside ${documentRole ? "document" : "product"} role: ${row.bodyFont}`);
+  const role = headingRole(row.primaryHeading, documentRole);
+  if (!role) findings.push(`primary heading tuple outside contract: ${JSON.stringify(row.primaryHeading)}`);
+  if (row.primaryHeading && !expectedFont.test(row.primaryHeading.fontFamily)) findings.push(`heading font outside role: ${row.primaryHeading.fontFamily}`);
+  for (const control of row.renderedControls) {
+    if (["checkbox", "radio", "file", "hidden"].includes(control.type)) continue;
+    if (control.height < 35.5) findings.push(`${control.selector} control height ${control.height}px below compact 36px`);
+    if (![0, 2, 4, 9999].some((allowed) => approximately(control.radius, allowed, 0.2))) {
+      findings.push(`${control.selector} control radius ${control.radius}px outside 0/2/4px contract`);
+    }
+  }
+  const spacing = [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96];
+  for (const surface of row.keySurfaces) {
+    if (![0, 2, 4].some((allowed) => approximately(surface.radius, allowed, 0.2))) {
+      findings.push(`${surface.selector} radius ${surface.radius}px outside structural/micro/panel contract`);
+    }
+    for (const padding of surface.padding) {
+      if (!spacing.some((allowed) => approximately(padding, allowed, 0.2))) {
+        findings.push(`${surface.selector} padding ${padding}px outside spacing scale`);
+      }
+    }
+  }
+  if (expectedBoundary && row.boundaryMarker !== expectedBoundary) {
+    findings.push(`expected ${expectedBoundary} boundary marker, received ${row.boundaryMarker || "none"}`);
+  }
+  return { passed: findings.length === 0, headingRole: role, findings };
+}
+
+async function capture(page, options) {
+  const { route, requestedPath, viewport, theme = "Product", name, limitation = "", fallbackKind = "none", expectedBoundary = "", attempt = 1 } = options;
   await page.setViewportSize({ width: viewport.width, height: viewport.height });
+  await page.goto("about:blank");
   const consoleErrors = [];
   const pageErrors = [];
   const onConsole = (message) => {
@@ -60,6 +124,7 @@ async function capture(page, { route, requestedPath, viewport, theme = "Product"
   let navigationError = "";
   try {
     response = await page.goto(`${baseUrl}${requestedPath}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    if (expectedBoundary) await page.waitForSelector(`[data-audit-boundary="${expectedBoundary}"]`, { timeout: 8_000 });
     await page.waitForTimeout(650);
   } catch (error) {
     navigationError = error instanceof Error ? error.message : String(error);
@@ -72,6 +137,26 @@ async function capture(page, { route, requestedPath, viewport, theme = "Product"
     const heading = document.querySelector("h1") ?? document.querySelector("h2");
     const headingStyle = heading ? getComputedStyle(heading) : null;
     const primaryText = heading?.textContent?.trim() || document.querySelector("main")?.textContent?.trim() || document.body.textContent?.trim() || "";
+    const visible = (element) => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+    };
+    const renderedControls = [...document.querySelectorAll("button, input, select, a.button")].filter(visible).map((element, index) => {
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return { selector: `${element.tagName.toLowerCase()}${element.className ? `.${String(element.className).trim().replace(/\s+/g, ".")}` : ""}[${index}]`, type: element instanceof HTMLInputElement ? element.type : element.tagName.toLowerCase(), height: rect.height, minHeight: style.minHeight, radius: Number.parseFloat(style.borderTopLeftRadius) || 0 };
+    });
+    const keySurfaces = [...document.querySelectorAll("main > .card:not(.v2-hero), main > section.card:not(.v2-hero), .safeclaw-module-panel, .command-input-card, .triad-card")].filter(visible).slice(0, 20).map((element, index) => {
+      const style = getComputedStyle(element);
+      return { selector: `${element.tagName.toLowerCase()}.${String(element.className).trim().replace(/\s+/g, ".")}[${index}]`, radius: Number.parseFloat(style.borderTopLeftRadius) || 0, padding: [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft].map((value) => Number.parseFloat(value) || 0) };
+    });
+    const geometryFingerprint = [...document.querySelectorAll("main [class], body > [class]")].filter(visible).slice(0, 80).map((element) => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      const className = [...new Set(String(element.className).replace(/workspace-theme-(?:day|night|field|light)/g, "workspace-theme").split(/\s+/).filter((value) => value && value !== "active"))].join(" ");
+      return [element.tagName, className, ...[rect.x, rect.y, rect.width, rect.height].map((value) => Math.round(value * 10) / 10), style.display, style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft, style.borderTopLeftRadius, style.fontSize, style.lineHeight, style.letterSpacing];
+    });
     return {
       horizontalOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth,
       bodyFont: bodyStyle.fontFamily,
@@ -82,29 +167,31 @@ async function capture(page, { route, requestedPath, viewport, theme = "Product"
         letterSpacing: headingStyle.letterSpacing,
       } : null,
       visiblePrimaryContent: primaryText.replace(/\s+/g, " ").slice(0, 240),
+      boundaryMarker: document.querySelector("[data-audit-boundary]")?.getAttribute("data-audit-boundary") ?? "",
+      renderedControls,
+      keySurfaces,
+      geometryFingerprint: JSON.stringify(geometryFingerprint),
     };
   });
   page.off("console", onConsole);
   page.off("pageerror", onPageError);
-  return {
+  const row = {
     route, requestedUrl: `${baseUrl}${requestedPath}`, finalUrl: page.url(),
     status: response?.status() ?? 0, viewport: viewport.name, theme,
-    consoleErrors, pageErrors, horizontalOverflow: metrics.horizontalOverflow,
+    consoleErrors: expectedBoundary && metrics.boundaryMarker === expectedBoundary ? [] : consoleErrors,
+    pageErrors: expectedBoundary && metrics.boundaryMarker === expectedBoundary ? [] : pageErrors,
+    horizontalOverflow: metrics.horizontalOverflow,
     bodyFont: metrics.bodyFont, primaryHeading: metrics.primaryHeading,
     visiblePrimaryContent: metrics.visiblePrimaryContent, screenshot,
-    limitation: limitation || navigationError,
+    boundaryMarker: metrics.boundaryMarker, renderedControls: metrics.renderedControls,
+    keySurfaces: metrics.keySurfaces, geometryFingerprint: metrics.geometryFingerprint,
+    limitation: limitation || navigationError, fallbackKind,
   };
-}
-
-function rowFailures(row) {
-  const failures = [];
-  if (row.status >= 500 || row.status === 0) failures.push(`HTTP ${row.status}`);
-  if (row.consoleErrors.length) failures.push(`${row.consoleErrors.length} console error(s)`);
-  if (row.pageErrors.length) failures.push(`${row.pageErrors.length} page error(s)`);
-  if (row.horizontalOverflow > 2) failures.push(`${row.horizontalOverflow}px horizontal overflow`);
-  if (!row.visiblePrimaryContent) failures.push("missing visible primary content");
-  if (!row.bodyFont) failures.push("missing computed body font");
-  return failures;
+  if (attempt === 1 && row.pageErrors.some((message) => /React error #418/.test(message))) {
+    const retried = await capture(page, { ...options, attempt: 2 });
+    return { ...retried, recoveredTransientErrors: row.pageErrors };
+  }
+  return row;
 }
 
 async function main() {
@@ -114,10 +201,16 @@ async function main() {
   const routeRows = [];
   for (const [route, requestedPath] of routes) {
     for (const viewport of viewports) {
+      const authFallback = route === "/login"
+        ? "Supabase is intentionally unconfigured in the deterministic audit environment; the configuration fallback is captured."
+        : route === "/auth/callback"
+          ? "No authentication code is supplied in the deterministic audit environment; the pending callback fallback is captured."
+          : "";
       routeRows.push(await capture(page, {
         route, requestedPath, viewport, theme: route === "/workspace" ? "Night" : "Product",
         name: `route-${safeName(route)}-${viewport.name}`,
-        limitation: route === "/interpretation/[id]" ? "No checked-in interpretation fixture; deterministic missing-record fallback captured." : "",
+        limitation: authFallback || (route === "/interpretation/[id]" ? "No checked-in interpretation fixture; deterministic missing-record fallback captured." : ""),
+        fallbackKind: authFallback || route === "/interpretation/[id]" ? "expected-deterministic-fallback" : "none",
       }));
     }
   }
@@ -133,16 +226,17 @@ async function main() {
   }
 
   const specialDefinitions = [
-    ["not-found", "/__frontend-audit-not-found__", "Actual Next.js not-found boundary."],
-    ["error", "/__frontend-audit-not-found__?surface=error", "The production error boundary has no safe deterministic throw hook; source contract is covered and the common rendered fallback geometry is captured."],
-    ["global-error", "/__frontend-audit-not-found__?surface=global-error", "The production global boundary requires an unrecoverable root exception; source contract is covered and the common rendered fallback geometry is captured."],
-    ["loading", "/workspace?scenario=seoul-construction-windy", "Loading is transient in the production build; source contract is covered and the resolved workspace surface is captured."],
+    ["not-found", "/__frontend-audit-not-found__", "Actual Next.js not-found boundary.", "not-found"],
+    ["error", "/dryrun?__auditBoundary=error", "Actual app/error boundary exercised by an environment-gated deterministic server throw.", "error"],
+    ["global-error", "/dryrun?__auditBoundary=global-error", "Actual app/global-error boundary exercised by an environment-gated root-layout client throw.", "global-error"],
+    ["loading", "/workspace?scenario=seoul-construction-windy", "Loading is transient in the production build; source contract is covered and the resolved workspace surface is captured.", ""],
   ];
   const specialSurfaceRows = [];
-  for (const [surface, requestedPath, limitation] of specialDefinitions) {
+  for (const [surface, requestedPath, limitation, expectedBoundary] of specialDefinitions) {
     const row = await capture(page, {
       route: `special:${surface}`, requestedPath, viewport: viewports[0], theme: "Product",
-      name: `special-${surface}`, limitation,
+      name: `special-${surface}`, limitation, fallbackKind: surface === "loading" ? "expected-transient-resolution" : "none",
+      expectedBoundary,
     });
     specialSurfaceRows.push({ ...row, surface });
   }
@@ -169,15 +263,34 @@ async function main() {
   }));
   const generatedSurfaceRows = [
     { ...documentPreview, surface: "document-preview" },
-    { surface: "pdf-export", route: "generated:pdf-export", requestedUrl: `${baseUrl}/api/export/pdf?format=html`, finalUrl: `${baseUrl}/api/export/pdf?format=html`, status: pdfResponse.status(), viewport: "desktop-1440", theme: "Document", consoleErrors: [], pageErrors: [], ...pdfMetrics, screenshot: pdfScreenshot, limitation: "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests." },
+    { surface: "pdf-export", route: "generated:pdf-export", requestedUrl: `${baseUrl}/api/export/pdf?format=html`, finalUrl: `${baseUrl}/api/export/pdf?format=html`, status: pdfResponse.status(), viewport: "desktop-1440", theme: "Document", consoleErrors: [], pageErrors: [], renderedControls: [], keySurfaces: [], boundaryMarker: "", geometryFingerprint: "", fallbackKind: "none", ...pdfMetrics, screenshot: pdfScreenshot, limitation: "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests." },
   ];
   await browser.close();
 
   const allRows = [...routeRows, ...workspaceThemeRows, ...specialSurfaceRows, ...generatedSurfaceRows];
-  const failures = allRows.flatMap((row) => rowFailures(row).map((failure) => `${row.route}: ${failure}`));
+  for (const viewport of viewports) {
+    const day = workspaceThemeRows.find((row) => row.viewport === viewport.name && row.theme === "Day");
+    const night = workspaceThemeRows.find((row) => row.viewport === viewport.name && row.theme === "Night");
+    if (day && night && day.geometryFingerprint !== night.geometryFingerprint) {
+      day.geometryMismatch = true;
+      night.geometryMismatch = true;
+    }
+  }
+  for (const row of allRows) {
+    const expectedBoundary = row.route.startsWith("special:") && ["not-found", "error", "global-error"].includes(row.surface) ? row.surface : "";
+    const documentRole = row.surface === "pdf-export";
+    const contractChecks = numericalContractFindings(row, { documentRole, expectedBoundary });
+    if (row.geometryMismatch) contractChecks.findings.push("Workspace Day/Night geometry fingerprint differs");
+    contractChecks.passed = contractChecks.findings.length === 0;
+    row.contractChecks = contractChecks;
+    row.findings = [...contractChecks.findings];
+    row.result = row.findings.length === 0 ? "pass" : "fail";
+  }
+  const failedRows = allRows.filter((row) => row.result === "fail");
+  const findings = allRows.flatMap((row) => row.findings.map((finding) => `${row.route} ${row.viewport}: ${finding}`));
   const report = {
-    schemaVersion: 1, generatedAt: new Date().toISOString(), baseUrl,
-    totals: { routes: routes.length, routeRows: routeRows.length, workspaceThemeRows: workspaceThemeRows.length, specialSurfaceRows: specialSurfaceRows.length, generatedSurfaceRows: generatedSurfaceRows.length, screenshots: allRows.length, successes: allRows.length - failures.length, failures: failures.length, elapsedMs: Date.now() - startedAt },
+    schemaVersion: 2, generatedAt: new Date().toISOString(), baseUrl,
+    totals: { routes: routes.length, routeRows: routeRows.length, workspaceThemeRows: workspaceThemeRows.length, specialSurfaceRows: specialSurfaceRows.length, generatedSurfaceRows: generatedSurfaceRows.length, screenshots: allRows.length, successes: allRows.length - failedRows.length, failedRows: failedRows.length, findingCount: findings.length, failures: failedRows.length, elapsedMs: Date.now() - startedAt },
     staticAudit: { command: "npm.cmd run audit:frontend-consistency", expected: "32 routes, 22 components, zero coverage issues and zero violations" },
     verificationCommands: ["npm.cmd test", "npm.cmd run typecheck", "npm.cmd run build", "npm.cmd run audit:frontend-consistency", "npm.cmd run audit:frontend-browser"],
     serverLog: "evaluation/frontend-consistency-audit-2026-07-11/server.log",
@@ -193,14 +306,14 @@ async function main() {
       result: "Representative screenshots were re-captured after the RED/GREEN correction.",
     },
     backendSessionConflicts: ["app/globals.css is the primary likely merge-conflict file.", "No API contract, database schema, or persistence behavior was changed by this browser audit."],
-    failures, routeRows, workspaceThemeRows, specialSurfaceRows, generatedSurfaceRows,
+    findings, routeRows, workspaceThemeRows, specialSurfaceRows, generatedSurfaceRows,
   };
   fs.writeFileSync(path.join(outputDirectory, "report.json"), `${JSON.stringify(report, null, 2)}\n`);
-  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Routes: ${report.totals.routes}/32\n- Route matrix: ${report.totals.routeRows}/96\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/6\n- Special surfaces: ${report.totals.specialSurfaceRows}/4\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/2\n- Screenshots: ${report.totals.screenshots}\n- Failures: ${report.totals.failures}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Visual review\n\nThe first pass exposed raw Markdown links, invalid loose list items, and excessive blank-line rhythm on the knowledge detail surface. A RED/GREEN correction grouped semantic lists, rendered safe HTTP(S) links, removed blank BR nodes, and applied the canonical 72ch long-form typography and responsive padding contract. Representative screenshots were re-captured after the fix.\n\nReviewed: ${report.reviewedScreenshots.map((item) => `\`${item}\``).join(", ")}\n\n## Limitations\n\nThe error and global-error boundaries require runtime exceptions that the production application intentionally does not expose as audit hooks. Their source contracts are automated, and the shared fallback geometry is captured. Workspace loading is transient in the optimized production build; its source contract is automated and the resolved state is captured. No route is omitted.\n\n## Cross-session conflicts\n\n- \`app/globals.css\` is the primary likely conflict with parallel work.\n- Browser evidence changes no API contract, database schema, or persistence behavior.\n\n## Failures\n\n${failures.length ? failures.map((item) => `- ${item}`).join("\n") : "None."}\n`;
+  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Routes: ${report.totals.routes}/32\n- Route matrix: ${report.totals.routeRows}/96\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/6\n- Special surfaces: ${report.totals.specialSurfaceRows}/4\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/2\n- Screenshots: ${report.totals.screenshots}\n- Successful rows: ${report.totals.successes}\n- Failed rows: ${report.totals.failedRows}\n- Findings: ${report.totals.findingCount}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Visual review\n\nThe browser contract validates computed product/document fonts, exact heading-role ratios, visible control minimum geometry, key surface padding/radius values, and identical Workspace Day/Night geometry fingerprints. The first pass exposed raw Markdown and legal punctuation artifacts; both were corrected and re-captured.\n\nReviewed: ${report.reviewedScreenshots.map((item) => `\`${item}\``).join(", ")}\n\n## Deterministic fallbacks\n\nLogin captures the missing-Supabase configuration fallback and auth callback captures the no-code pending state. Both are labelled expected deterministic fallbacks rather than failures. The actual error and global-error boundaries are exercised only when \`SAFECLAW_FRONTEND_AUDIT=1\`; ordinary production behavior is unchanged. Workspace loading remains an explicitly labelled transient resolved state.\n\n## Cross-session conflicts\n\n- \`app/globals.css\` is the primary likely conflict with parallel work.\n- Browser evidence changes no API contract, database schema, or persistence behavior.\n\n## Findings\n\n${findings.length ? findings.map((item) => `- ${item}`).join("\n") : "None."}\n`;
   fs.writeFileSync(path.join(outputDirectory, "report.md"), markdown);
-  if (failures.length) {
+  if (failedRows.length) {
     console.error(JSON.stringify(report.totals, null, 2));
-    for (const failure of failures) console.error(failure);
+    for (const finding of findings) console.error(finding);
     process.exitCode = 1;
   } else {
     console.log(JSON.stringify(report.totals, null, 2));

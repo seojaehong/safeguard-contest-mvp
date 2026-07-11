@@ -374,6 +374,53 @@ describe("browser evidence reconciliation", () => {
     }
     expect(report.totals.failures).toBe(0);
   });
+
+  it("proves actual named framework boundaries and numerical rendered contracts", () => {
+    const report = JSON.parse(read("evaluation/frontend-consistency-audit-2026-07-11/report.json")) as {
+      specialSurfaceRows: Array<Record<string, unknown>>;
+      routeRows: Array<Record<string, unknown>>;
+      workspaceThemeRows: Array<Record<string, unknown>>;
+      generatedSurfaceRows: Array<Record<string, unknown>>;
+      totals: Record<string, number>;
+    };
+    const allRows = [...report.routeRows, ...report.workspaceThemeRows, ...report.specialSurfaceRows, ...report.generatedSurfaceRows];
+    const totalRows = allRows.length;
+
+    expect(report.totals.successes + report.totals.failedRows).toBe(totalRows);
+    expect(report.totals.failedRows).toBe(0);
+    expect(report.totals.findingCount).toBe(0);
+    expect(report.totals.successes).toBeGreaterThanOrEqual(0);
+    for (const row of allRows) {
+      expect(row).toMatchObject({ result: "pass" });
+      expect(row.contractChecks).toMatchObject({ passed: true, findings: [] });
+    }
+    for (const surface of ["not-found", "error", "global-error"]) {
+      const row = report.specialSurfaceRows.find((item) => item.surface === surface);
+      expect(row?.boundaryMarker, surface).toBe(surface);
+      expect(String(row?.visiblePrimaryContent), surface).toContain(
+        surface === "not-found" ? "찾을 수 없는 문서" : surface === "error" ? "일시적인 오류" : "서비스에 일시적인 문제",
+      );
+    }
+    for (const route of ["/login", "/auth/callback"]) {
+      for (const row of report.routeRows.filter((item) => item.route === route)) {
+        expect(String(row.limitation), `${route} fallback`).not.toBe("");
+        expect(row.fallbackKind).toBe("expected-deterministic-fallback");
+      }
+    }
+  });
+
+  it("keeps total reconciliation correct when one failed row has multiple findings", () => {
+    const summarize = (rows: Array<{ findings: string[] }>) => ({
+      successes: rows.filter((row) => row.findings.length === 0).length,
+      failedRows: rows.filter((row) => row.findings.length > 0).length,
+      findingCount: rows.reduce((total, row) => total + row.findings.length, 0),
+    });
+    const totals = summarize([{ findings: [] }, { findings: ["font", "radius"] }]);
+
+    expect(totals).toEqual({ successes: 1, failedRows: 1, findingCount: 2 });
+    expect(totals.successes + totals.failedRows).toBe(2);
+    expect(totals.successes).toBeGreaterThanOrEqual(0);
+  });
 });
 
 describe("knowledge and legal route hierarchy", () => {
@@ -384,6 +431,17 @@ describe("knowledge and legal route hierarchy", () => {
     expect(source).toContain("<ul key={`list-${listStart}`}>");
     expect(source).toContain("renderInlineMarkdown(line)");
     expect(source).not.toContain("<br key={index}");
+  });
+
+  it("filters isolated punctuation artifacts from legal body sections", () => {
+    const source = read("app/law/[id]/page.tsx");
+    expect(source).toContain('if (line.trim() === ".") continue;');
+    expect(declarationsForExactSelector(read("app/globals.css"), ".legal-detail-page hr")).toMatchObject({
+      width: "100%",
+      margin: "0",
+      border: "0",
+      "border-top": "1px solid var(--line)",
+    });
   });
 
   it.each([
