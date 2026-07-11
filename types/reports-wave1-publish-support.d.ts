@@ -1,11 +1,15 @@
 declare module "@/scripts/reports_wave1_publish_support.mjs" {
   export const REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR: string;
   export const REPORTS_WAVE1_BUILD_MANIFEST_FILENAME: string;
+  export const REPORTS_WAVE1_PRODUCT_ENTRY_FILES: string[];
   export const REPORTS_WAVE1_PRODUCT_RELATIVE_FILES: string[];
+  export const REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES: string[];
   export const REPORTS_WAVE1_PUBLISHER: string;
+  export const REPORTS_WAVE1_SOURCE_IDENTITY_ALGORITHM: string;
 
   export function listFilesRecursively(directory: string): string[];
   export function digestFiles(baseDirectory: string, files: string[]): string;
+  export function collectReportsWave1ProductFiles(root: string, commitSha?: string): string[];
   export function getReportsWave1ProductIdentity(
     root: string,
     relativeFiles?: string[],
@@ -35,6 +39,14 @@ declare module "@/scripts/reports_wave1_publish_support.mjs" {
     publish: boolean;
     cleanup: boolean;
   };
+  export function cleanupReportsWave1OutputDirectory(
+    output: {
+      directory: string;
+      publish: boolean;
+      cleanup: boolean;
+    },
+    options?: { tempRoot?: string },
+  ): void;
   export function writeReportsWave1BuildManifest(options?: {
     root?: string;
     buildDirectory?: string;
@@ -52,7 +64,9 @@ declare module "@/scripts/reports_wave1_publish_support.mjs" {
     generatedAt: string;
     publisherCommitSha: string;
     publisherCommand: string;
+    publisherSourceFiles: string[];
     productSourceSha: string;
+    productSourceIdentityAlgorithm: string;
     productSourceIdentity: string;
     productSourceFiles: string[];
     buildDirectory: string;
@@ -75,7 +89,9 @@ declare module "@/scripts/reports_wave1_publish_support.mjs" {
     generatedAt: string;
     publisherCommitSha: string;
     publisherCommand: string;
+    publisherSourceFiles: string[];
     productSourceSha: string;
+    productSourceIdentityAlgorithm: string;
     productSourceIdentity: string;
     productSourceFiles: string[];
     buildDirectory: string;

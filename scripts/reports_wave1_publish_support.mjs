@@ -3,20 +3,216 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import ts from "typescript";
 
 export const REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR =
   "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports";
 export const REPORTS_WAVE1_BUILD_MANIFEST_FILENAME = "reports-wave1-build-manifest.json";
-export const REPORTS_WAVE1_PRODUCT_RELATIVE_FILES = [
+export const REPORTS_WAVE1_PRODUCT_ENTRY_FILES = [
+  "next.config.mjs",
+  "app/error.tsx",
+  "app/global-error.tsx",
   "app/globals.css",
+  "app/layout.tsx",
+  "app/not-found.tsx",
   "app/reports/page.tsx",
-  "components/ReportsDownloadCenter.tsx",
-  "components/SafeClawModuleShell.tsx",
+];
+export const REPORTS_WAVE1_PRODUCT_RELATIVE_FILES = REPORTS_WAVE1_PRODUCT_ENTRY_FILES;
+export const REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES = [
+  "scripts/publish_reports_wave1_evidence.mjs",
+  "scripts/reports_wave1_publish_support.mjs",
 ];
 export const REPORTS_WAVE1_PUBLISHER = "safeclaw-reports-wave1-explicit-publish";
+export const REPORTS_WAVE1_SOURCE_IDENTITY_ALGORITHM = "git-head-blob-oids-sha256-v1";
+
+const LOCAL_SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".css", ".json"];
+const SPECIAL_LOCAL_IMPORTS = new Map([
+  [
+    "safeclaw-audit-error-escalation",
+    [
+      "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx",
+      "lib/frontend-audit/GlobalBoundaryProbe.noop.tsx",
+    ],
+  ],
+]);
 
 function normalizeRelative(filePath) {
   return filePath.replaceAll("\\", "/");
+}
+
+function normalizeIdentityRelative(filePath) {
+  if (path.isAbsolute(filePath)) {
+    throw new Error(`Reports Wave 1 identity paths must be relative: ${filePath}`);
+  }
+  const normalized = path.posix.normalize(normalizeRelative(filePath).replace(/^\.\//u, ""));
+  if (!normalized || normalized === "." || normalized === ".." || normalized.startsWith("../")) {
+    throw new Error(`Reports Wave 1 identity path escapes the repository: ${filePath}`);
+  }
+  return normalized;
+}
+
+function resolveGitHeadSha(root) {
+  const sourceSha = execFileSync("git", ["rev-parse", "--verify", "HEAD"], {
+    cwd: root,
+    encoding: "utf8",
+  }).trim();
+  if (!/^[0-9a-f]{40}$/u.test(sourceSha)) {
+    throw new Error(`Unable to resolve Reports Wave 1 Git HEAD in ${root}`);
+  }
+  return sourceSha;
+}
+
+function listGitTree(root, commitSha) {
+  const output = execFileSync("git", ["ls-tree", "-r", "-z", commitSha], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  const entries = new Map();
+  for (const record of output.split("\0").filter(Boolean)) {
+    const tabIndex = record.indexOf("\t");
+    const header = record.slice(0, tabIndex).split(" ");
+    const relativePath = normalizeIdentityRelative(record.slice(tabIndex + 1));
+    entries.set(relativePath, header[2]);
+  }
+  return entries;
+}
+
+function moduleSpecifiers(relativePath, source) {
+  if (/\.(?:css|json)$/u.test(relativePath)) return [];
+  const sourceFile = ts.createSourceFile(relativePath, source.toString("utf8"), ts.ScriptTarget.Latest, true);
+  const specifiers = new Set();
+  const visit = (node) => {
+    if (
+      (ts.isImportDeclaration(node) || ts.isExportDeclaration(node))
+      && node.moduleSpecifier
+      && ts.isStringLiteralLike(node.moduleSpecifier)
+    ) {
+      specifiers.add(node.moduleSpecifier.text);
+    }
+    if (
+      ts.isCallExpression(node)
+      && node.arguments.length === 1
+      && ts.isStringLiteralLike(node.arguments[0])
+      && (
+        node.expression.kind === ts.SyntaxKind.ImportKeyword
+        || (ts.isIdentifier(node.expression) && node.expression.text === "require")
+      )
+    ) {
+      specifiers.add(node.arguments[0].text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return [...specifiers];
+}
+
+function resolveLocalImport(importer, specifier, trackedFiles) {
+  const specialFiles = SPECIAL_LOCAL_IMPORTS.get(specifier);
+  if (specialFiles) return [...specialFiles];
+
+  let unresolvedPath;
+  if (specifier.startsWith("@/")) {
+    unresolvedPath = specifier.slice(2);
+  } else if (specifier.startsWith(".")) {
+    unresolvedPath = path.posix.join(path.posix.dirname(importer), normalizeRelative(specifier));
+  } else {
+    return [];
+  }
+
+  const normalizedPath = normalizeIdentityRelative(unresolvedPath);
+  const candidates = [
+    normalizedPath,
+    ...LOCAL_SOURCE_EXTENSIONS.map((extension) => `${normalizedPath}${extension}`),
+    ...LOCAL_SOURCE_EXTENSIONS.map((extension) => path.posix.join(normalizedPath, `index${extension}`)),
+  ];
+  const resolved = candidates.find((candidate) => trackedFiles.has(candidate));
+  if (!resolved) {
+    throw new Error(`Unable to resolve Reports Wave 1 dependency ${specifier} imported by ${importer}`);
+  }
+  return [resolved];
+}
+
+export function collectReportsWave1ProductFiles(root, commitSha = resolveGitHeadSha(root)) {
+  const trackedFiles = listGitTree(root, commitSha);
+  const pending = [...REPORTS_WAVE1_PRODUCT_ENTRY_FILES];
+  const sourceFiles = new Set();
+
+  while (pending.length) {
+    const relativePath = normalizeIdentityRelative(pending.shift());
+    if (sourceFiles.has(relativePath)) continue;
+    if (!trackedFiles.has(relativePath)) {
+      throw new Error(`Missing committed Reports Wave 1 product file: ${relativePath}`);
+    }
+    sourceFiles.add(relativePath);
+    const source = fs.readFileSync(path.join(root, relativePath));
+    for (const specifier of moduleSpecifiers(relativePath, source)) {
+      for (const dependency of resolveLocalImport(relativePath, specifier, trackedFiles)) {
+        if (!sourceFiles.has(dependency)) pending.push(dependency);
+      }
+    }
+  }
+
+  return [...sourceFiles].sort();
+}
+
+function assertIdentityFilesClean(root, relativeFiles) {
+  const status = execFileSync(
+    "git",
+    ["status", "--porcelain=v1", "--untracked-files=all", "--", ...relativeFiles],
+    { cwd: root, encoding: "utf8" },
+  ).trimEnd();
+  if (status) {
+    throw new Error(`Reports Wave 1 identity files are not clean:\n${status}`);
+  }
+}
+
+function assertCommitContainsFiles(root, commitSha, relativeFiles, label) {
+  if (!/^[0-9a-f]{40}$/u.test(commitSha)) {
+    throw new Error(`Invalid ${label} commit SHA: ${commitSha}`);
+  }
+  const trackedFiles = listGitTree(root, commitSha);
+  const missingFiles = relativeFiles.filter((relativePath) => !trackedFiles.has(relativePath));
+  if (missingFiles.length) {
+    throw new Error(`${label} commit ${commitSha} does not contain: ${missingFiles.join(", ")}`);
+  }
+}
+
+function assertCommitIsAncestorOfHead(root, commitSha, label) {
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", commitSha, "HEAD"], {
+      cwd: root,
+      stdio: "ignore",
+    });
+  } catch {
+    throw new Error(`${label} commit ${commitSha} is not an ancestor of Git HEAD`);
+  }
+}
+
+function resolveProductSourceSha(root, sourceFiles) {
+  const sourceSha = execFileSync(
+    "git",
+    ["log", "-n", "1", "--format=%H", "HEAD", "--", ...sourceFiles, ...REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES],
+    { cwd: root, encoding: "utf8" },
+  ).trim();
+  if (!/^[0-9a-f]{40}$/u.test(sourceSha)) {
+    throw new Error(`Unable to resolve Reports Wave 1 source commit for ${sourceFiles.join(", ")}`);
+  }
+  return sourceSha;
+}
+
+function digestGitFiles(root, commitSha, relativeFiles) {
+  if (!relativeFiles.length) throw new Error(`Cannot digest an empty Git file set in ${root}`);
+  const trackedFiles = listGitTree(root, commitSha);
+  const hash = crypto.createHash("sha256");
+  for (const relativePath of [...relativeFiles].sort()) {
+    const blobOid = trackedFiles.get(relativePath);
+    if (!blobOid) throw new Error(`Missing committed Reports Wave 1 identity file: ${relativePath}`);
+    hash.update(relativePath);
+    hash.update("\0");
+    hash.update(blobOid);
+    hash.update("\0");
+  }
+  return hash.digest("hex");
 }
 
 function ensureWithinRoot(root, targetPath, label) {
@@ -52,28 +248,24 @@ export function digestFiles(baseDirectory, files) {
   return hash.digest("hex");
 }
 
-function absoluteProductFiles(root, relativeFiles = REPORTS_WAVE1_PRODUCT_RELATIVE_FILES) {
-  const absoluteFiles = relativeFiles.map((relativePath) => path.join(root, relativePath));
-  for (const filePath of absoluteFiles) {
-    if (!fs.existsSync(filePath)) throw new Error(`Missing Reports Wave 1 product file: ${filePath}`);
-  }
-  return absoluteFiles;
-}
-
-export function getReportsWave1ProductIdentity(root, relativeFiles = REPORTS_WAVE1_PRODUCT_RELATIVE_FILES) {
-  const absoluteFiles = absoluteProductFiles(root, relativeFiles);
-  const gitPaths = relativeFiles.map(normalizeRelative);
-  const sourceSha = execFileSync("git", ["log", "-n", "1", "--format=%H", "--", ...gitPaths], {
-    cwd: root,
-    encoding: "utf8",
-  }).trim();
-  if (!/^[0-9a-f]{40}$/u.test(sourceSha)) {
-    throw new Error(`Unable to resolve Reports Wave 1 product source SHA for ${gitPaths.join(", ")}`);
-  }
+export function getReportsWave1ProductIdentity(root, relativeFiles) {
+  const headSha = resolveGitHeadSha(root);
+  const sourceFiles = relativeFiles
+    ? [...new Set(relativeFiles.map(normalizeIdentityRelative))].sort()
+    : collectReportsWave1ProductFiles(root, headSha);
+  assertIdentityFilesClean(root, sourceFiles);
+  assertCommitContainsFiles(root, headSha, sourceFiles, "Reports Wave 1 HEAD");
+  const sourceSha = resolveProductSourceSha(root, sourceFiles);
+  assertCommitContainsFiles(
+    root,
+    sourceSha,
+    REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES,
+    "Reports Wave 1 product source",
+  );
   return {
     sourceSha,
-    sourceIdentity: digestFiles(root, absoluteFiles),
-    sourceFiles: [...relativeFiles],
+    sourceIdentity: digestGitFiles(root, headSha, sourceFiles),
+    sourceFiles,
   };
 }
 
@@ -129,25 +321,64 @@ export function resolveReportsWave1OutputDirectory({
   return { directory, publish: false, cleanup: true };
 }
 
+export function cleanupReportsWave1OutputDirectory(
+  output,
+  { tempRoot = os.tmpdir() } = {},
+) {
+  if (!output.cleanup) return;
+  const absoluteTempRoot = path.resolve(tempRoot);
+  const absoluteDirectory = path.resolve(output.directory);
+  if (
+    absoluteDirectory === absoluteTempRoot
+    || !absoluteDirectory.startsWith(`${absoluteTempRoot}${path.sep}`)
+  ) {
+    throw new Error(`Refusing to remove Reports Wave 1 output outside its temp root: ${absoluteDirectory}`);
+  }
+  fs.rmSync(absoluteDirectory, { recursive: true, force: true });
+}
+
+function sameStringArray(actual, expected) {
+  return Array.isArray(actual)
+    && actual.length === expected.length
+    && actual.every((value, index) => value === expected[index]);
+}
+
 export function writeReportsWave1BuildManifest({
   root = process.cwd(),
   buildDirectory = path.join(root, ".next"),
   outputPath = path.join(root, REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR, REPORTS_WAVE1_BUILD_MANIFEST_FILENAME),
   publisherCommand = "node .\\scripts\\publish_reports_wave1_evidence.mjs",
-  publisherCommitSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(),
+  publisherCommitSha = resolveGitHeadSha(root),
   productIdentity,
 } = {}) {
   const absoluteRoot = path.resolve(root);
   const identity = productIdentity ?? getReportsWave1ProductIdentity(absoluteRoot);
+  assertIdentityFilesClean(absoluteRoot, REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES);
+  assertCommitContainsFiles(
+    absoluteRoot,
+    publisherCommitSha,
+    REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES,
+    "Reports Wave 1 publisher",
+  );
+  assertCommitContainsFiles(
+    absoluteRoot,
+    identity.sourceSha,
+    REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES,
+    "Reports Wave 1 product source",
+  );
+  assertCommitIsAncestorOfHead(absoluteRoot, publisherCommitSha, "Reports Wave 1 publisher");
+  assertCommitIsAncestorOfHead(absoluteRoot, identity.sourceSha, "Reports Wave 1 product source");
   const build = computeNextBuildIdentity({ root: absoluteRoot, buildDirectory });
   const absoluteOutputPath = ensureWithinRoot(absoluteRoot, outputPath, "Reports Wave 1 build manifest");
   const manifest = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     publisher: REPORTS_WAVE1_PUBLISHER,
     generatedAt: new Date().toISOString(),
     publisherCommitSha,
     publisherCommand,
+    publisherSourceFiles: [...REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES],
     productSourceSha: identity.sourceSha,
+    productSourceIdentityAlgorithm: REPORTS_WAVE1_SOURCE_IDENTITY_ALGORITHM,
     productSourceIdentity: identity.sourceIdentity,
     productSourceFiles: identity.sourceFiles,
     buildDirectory: build.relativeBuildDirectory,
@@ -173,9 +404,30 @@ export function validateReportsWave1BuildManifest({
     throw new Error(`Production build manifest is missing: ${absoluteManifestPath}`);
   }
   const manifest = JSON.parse(fs.readFileSync(absoluteManifestPath, "utf8"));
-  if (manifest.schemaVersion !== 1 || manifest.publisher !== REPORTS_WAVE1_PUBLISHER) {
+  if (manifest.schemaVersion !== 2 || manifest.publisher !== REPORTS_WAVE1_PUBLISHER) {
     throw new Error(`Unsupported production build manifest: ${absoluteManifestPath}`);
   }
+  if (manifest.productSourceIdentityAlgorithm !== REPORTS_WAVE1_SOURCE_IDENTITY_ALGORITHM) {
+    throw new Error(`Unsupported Reports Wave 1 source identity algorithm: ${manifest.productSourceIdentityAlgorithm}`);
+  }
+  if (!sameStringArray(manifest.publisherSourceFiles, REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES)) {
+    throw new Error("Production build manifest publisher source files mismatch.");
+  }
+  assertIdentityFilesClean(absoluteRoot, REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES);
+  assertCommitContainsFiles(
+    absoluteRoot,
+    manifest.publisherCommitSha,
+    REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES,
+    "Reports Wave 1 publisher",
+  );
+  assertCommitContainsFiles(
+    absoluteRoot,
+    manifest.productSourceSha,
+    REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES,
+    "Reports Wave 1 product source",
+  );
+  assertCommitIsAncestorOfHead(absoluteRoot, manifest.publisherCommitSha, "Reports Wave 1 publisher");
+  assertCommitIsAncestorOfHead(absoluteRoot, manifest.productSourceSha, "Reports Wave 1 product source");
   const expectedBuild = ensureWithinRoot(absoluteRoot, expectedBuildDirectory, "expected Next build directory");
   const declaredBuild = ensureWithinRoot(absoluteRoot, path.join(absoluteRoot, manifest.buildDirectory), "declared Next build directory");
   if (declaredBuild !== expectedBuild) {
@@ -189,6 +441,9 @@ export function validateReportsWave1BuildManifest({
   }
   if (manifest.productSourceIdentity !== currentIdentity.sourceIdentity) {
     throw new Error("Production build manifest source identity mismatch.");
+  }
+  if (!sameStringArray(manifest.productSourceFiles, currentIdentity.sourceFiles)) {
+    throw new Error("Production build manifest source file list mismatch.");
   }
   const currentBuild = computeNextBuildIdentity({ root: absoluteRoot, buildDirectory: declaredBuild });
   if (manifest.buildId !== currentBuild.buildId) {

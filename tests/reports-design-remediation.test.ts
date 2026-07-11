@@ -5,6 +5,7 @@ import type { Browser, Page } from "playwright";
 import {
   REPORTS_WAVE1_BUILD_MANIFEST_FILENAME,
   REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR,
+  cleanupReportsWave1OutputDirectory,
   resolveReportsWave1OutputDirectory,
   validateReportsWave1BuildManifest,
 } from "@/scripts/reports_wave1_publish_support.mjs";
@@ -18,7 +19,6 @@ const root = process.cwd();
 const cssPath = path.join(root, "app", "globals.css");
 const componentPath = path.join(root, "components", "ReportsDownloadCenter.tsx");
 const shellPath = path.join(root, "components", "SafeClawModuleShell.tsx");
-const outputDirectory = resolveReportsWave1OutputDirectory({ root, env: process.env }).directory;
 const defaultProductionBuildManifestPath = path.join(
   root,
   REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR,
@@ -216,6 +216,8 @@ type Viewport = { width: number; height: number; label: "desktop" | "mobile" };
 let baseUrl = "";
 let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
+let outputDirectory = "";
+let outputResolution: ReturnType<typeof resolveReportsWave1OutputDirectory> | null = null;
 
 async function prepareSample(page: Page, theme: Theme): Promise<void> {
   await page.goto(`${baseUrl}/reports?theme=${theme}`, { waitUntil: "networkidle" });
@@ -257,14 +259,32 @@ async function startReportsHarness(): Promise<IsolatedNextBrowserHarness> {
 
 describe("Reports Wave 1 browser design contract", () => {
   beforeAll(async () => {
-    fs.mkdirSync(outputDirectory, { recursive: true });
-    harness = await startReportsHarness();
-    baseUrl = harness.baseUrl;
-    browser = harness.browser;
+    outputResolution = resolveReportsWave1OutputDirectory({ root, env: process.env });
+    outputDirectory = outputResolution.directory;
+    try {
+      harness = await startReportsHarness();
+      baseUrl = harness.baseUrl;
+      browser = harness.browser;
+    } catch (error) {
+      cleanupReportsWave1OutputDirectory(outputResolution);
+      outputResolution = null;
+      throw error;
+    }
   }, 90_000);
 
   afterAll(async () => {
-    await harness?.stop();
+    const currentOutput = outputResolution;
+    try {
+      await harness?.stop();
+    } finally {
+      try {
+        if (currentOutput) cleanupReportsWave1OutputDirectory(currentOutput);
+      } finally {
+        harness = null;
+        browser = null;
+        outputResolution = null;
+      }
+    }
   }, 30_000);
 
   it.each([
