@@ -2,36 +2,44 @@
   "date": "2026-07-12",
   "workingDirectory": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation",
   "branch": "feat/frontend-design-contract-remediation",
-  "publishedProductCommit": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
-  "publishHelperBaselineCommit": "1e0d177d573d8a673d365d7c95a8f1e407d2b076",
-  "commitRelation": "This closeout hardens helper and test orchestration only. Published Reports product evidence remains anchored to product commit 6af13474726d8c3f7f992f6a2f94ef9aa687011e unless product files change.",
+  "publishedSourceAnchorCommit": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
+  "uiProductBaselineCommit": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
+  "publisherCommit": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
+  "commitRelation": "The Reports UI product files remain unchanged from 6af1347. Canonical product identity and publisher provenance are anchored to 5c5943a, the clean commit that contains both publisher scripts.",
   "changes": [
-    "Prod Reports browser mode now requires a validated explicit build manifest before next start.",
-    "Default Reports browser evidence output moved to a unique temp directory.",
-    "Committed evaluation evidence refresh now requires the explicit publish step.",
-    "Unavailable ignored log claims were removed from the committed closeout report."
+    "Reports source identity now follows the complete local import graph from Next config, root route boundaries, layout, and /reports through all direct and transitive product files.",
+    "Source identity hashes canonical Git HEAD blob OIDs and fails closed when an identity file is dirty, staged, untracked, or missing.",
+    "Manifest schema 2 verifies source file coverage, product and publisher commit ancestry, publisher script presence, BUILD_ID, and build digest before next start.",
+    "Routine Reports evidence and isolated Next dev dist output use unique OS temp roots and clean on normal stop and startup failure.",
+    "The documented PowerShell static-audit command now allocates a random temp file and restores environment state while deleting the file in finally."
   ],
   "regressionTests": [
     {
       "file": "tests/reports-wave1-publish-support.test.ts",
       "covers": [
-        "default temp output",
-        "explicit publish output",
-        "stale build rejection",
-        "source SHA mismatch rejection"
+        "complete /reports dependency graph",
+        "canonical LF and CRLF identity parity",
+        "dirty, staged, and untracked identity rejection",
+        "dependency-only stale build rejection",
+        "publisher script provenance",
+        "routine output cleanup and explicit publish preservation",
+        "hermetic PowerShell static-audit command"
       ]
     },
     {
       "file": "tests/isolated-next-browser-harness.test.ts",
       "covers": [
+        "unique OS temp project and dist directory",
         "cleanup after stop",
+        "cleanup after startup failure",
         "same port salt reuse"
       ]
     },
     {
       "file": "tests/reports-design-remediation.test.ts",
       "covers": [
-        "prod Reports mode validates the explicit build manifest before browser startup"
+        "prod Reports mode validates the explicit build manifest before browser startup",
+        "routine evidence output cleanup after browser completion and initialization failure"
       ]
     }
   ],
@@ -44,7 +52,7 @@
         "npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
       ],
       "result": {
-        "passed": 13,
+        "passed": 23,
         "failed": 0
       }
     },
@@ -53,19 +61,32 @@
       "status": "fail",
       "command": [
         "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
-        "$tempJson = Join-Path $env:TEMP \"safeclaw-frontend-static-audit-20260712.json\"",
-        "$env:OUTPUT_PATH = $tempJson",
-        "npm.cmd run audit:frontend-consistency",
-        "Remove-Item Env:OUTPUT_PATH"
+        "$tempJson = Join-Path ([System.IO.Path]::GetTempPath()) (\"safeclaw-frontend-static-audit-{0}.json\" -f [System.IO.Path]::GetRandomFileName())",
+        "$hadOutputPath = Test-Path Env:OUTPUT_PATH",
+        "$previousOutputPath = $env:OUTPUT_PATH",
+        "try {",
+        "  $env:OUTPUT_PATH = $tempJson",
+        "  npm.cmd run audit:frontend-consistency",
+        "  $auditExitCode = $LASTEXITCODE",
+        "  $audit = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json",
+        "  $audit | Select-Object status, violationCount, coverageIssues, @{Name='importantDeclarations';Expression={$_.counts.importantDeclarations}}",
+        "} finally {",
+        "  if ($hadOutputPath) { $env:OUTPUT_PATH = $previousOutputPath } else { Remove-Item Env:OUTPUT_PATH -ErrorAction SilentlyContinue }",
+        "  Remove-Item -LiteralPath $tempJson -Force -ErrorAction SilentlyContinue",
+        "}",
+        "if ($auditExitCode -ne 1) { throw \"Expected the bounded frontend audit to remain RED, received exit $auditExitCode\" }"
       ],
       "result": {
+        "auditExitCode": 1,
         "violationCount": 2367,
         "importantDeclarations": 725,
         "coverageIssues": 0,
         "pageFiles": 32,
-        "componentFiles": 23
+        "componentFiles": 23,
+        "sourceSha": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
+        "sourceIdentity": "a97db33b5224bc80e4a0555a72af4553cc092029ac1ddde76320cd64bb1a6db7"
       },
-      "note": "This fresh helper-turn check was intentionally kept out of committed product evidence."
+      "note": "The audit remains honestly RED outside Wave 1 scope. The random temp file was removed in finally; the parsed result was explicitly copied into the two bounded static evidence files."
     },
     {
       "name": "typecheck",
@@ -76,31 +97,45 @@
       ]
     },
     {
-      "name": "build",
-      "status": "pass",
-      "command": [
-        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
-        "npm.cmd run build"
-      ],
-      "result": {
-        "nextVersion": "15.5.20",
-        "staticPagesGenerated": 27
-      }
-    },
-    {
-      "name": "explicit-production-publish",
+      "name": "sequential-build-publish",
       "status": "pass",
       "command": [
         "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
         "node .\\scripts\\publish_reports_wave1_evidence.mjs"
       ],
       "result": {
+        "buildRuns": 1,
+        "nextVersion": "15.5.20",
+        "staticPagesGenerated": 27,
         "browserPassed": 5,
         "browserSkipped": 5,
         "manifest": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-wave1-build-manifest.json",
-        "productSourceSha": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
-        "buildId": "XQffvAJA8kBAQhD1qAqLz",
-        "buildIdentity": "2d6129fc27a447ab78ba1fe2899a5d6245340ec76b8a610ae4baeaa950f3591f"
+        "manifestSchemaVersion": 2,
+        "publisherCommitSha": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
+        "productSourceSha": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
+        "productSourceIdentityAlgorithm": "git-head-blob-oids-sha256-v1",
+        "productSourceIdentity": "d7a58d8792f1e8e0881768d6bb442bda7da0f9ad846af10faca1de129854b80e",
+        "productSourceFileCount": 31,
+        "buildId": "tuRcrMczwFV1FXjudqjtA",
+        "buildIdentity": "d2040486cf657cd1ea7d39e00653d7725755a6fd0f93ef46fa8bcaaa2f024453",
+        "buildFileCount": 427,
+        "visualContracts": {
+          "sample": [
+            "day-desktop-1440x900",
+            "night-desktop-1440x900",
+            "day-mobile-390x844",
+            "night-mobile-390x844"
+          ],
+          "serverError": [
+            "day-desktop-1440x900",
+            "night-desktop-1440x900",
+            "day-mobile-390x844",
+            "night-mobile-390x844"
+          ],
+          "empty": [
+            "day-desktop-1440x900"
+          ]
+        }
       }
     }
   ],
@@ -126,9 +161,26 @@
     "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-state-metrics.json"
   ],
   "gateSummary": {
-    "publishedProductEvidence": "honest-6af1347-red2367-725",
+    "publishedProductEvidence": "honest-5c5943a-red2367-725-coverage0",
+    "completeProductSourceFileCount": 31,
+    "canonicalCrossEolIdentity": true,
+    "dirtyStagedUntrackedFailClosed": true,
     "prodModeFailsClosed": true,
     "defaultRoutineOutputIsTemp": true,
+    "newRoutineTempResidualCount": 0,
+    "staticAuditTempResidualCount": 0,
+    "isolatedNextTempResidualCount": 0,
+    "isolatedNextCleanup": [
+      "normal-stop",
+      "startup-failure"
+    ],
+    "staticAuditTempCleanup": "try-finally",
+    "visualInspection": [
+      "sample-day-desktop",
+      "sample-night-mobile-390",
+      "server-error-night-desktop",
+      "server-error-day-mobile-390"
+    ],
     "explicitPublishRequiredForCommittedEvidence": true
   }
 }

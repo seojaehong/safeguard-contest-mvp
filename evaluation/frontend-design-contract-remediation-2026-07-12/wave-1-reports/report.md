@@ -4,30 +4,34 @@
 
 - Working directory: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation`
 - Branch: `feat/frontend-design-contract-remediation`
-- Published product commit: `6af13474726d8c3f7f992f6a2f94ef9aa687011e`
-- Publish helper baseline at manifest time: `1e0d177d573d8a673d365d7c95a8f1e407d2b076`
-- Current closeout is helper/test-only hardening. The committed product evidence stays anchored to the published Reports product commit above.
+- Reports UI baseline commit: `6af13474726d8c3f7f992f6a2f94ef9aa687011e`
+- Published source anchor and publisher commit: `5c5943ad799638009d8718d1b91c0b7be7cb5ac3`
+- The UI product files remain unchanged. The manifest source anchor moved to the clean commit that contains both publisher scripts.
 
 ## What changed
 
-- Production Reports browser mode now refuses to run without a validated explicit build manifest.
-- The manifest checks product source SHA, product source digest, `BUILD_ID`, and build digest before `next start` is allowed.
-- Routine Reports browser tests now write screenshots and metrics to a unique temp directory by default, so normal runs leave git status clean.
-- Committed `evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports` evidence updates only when explicit publish is requested.
-- The closeout report no longer claims ignored log files as committed evidence.
+- Reports source identity follows the complete local import graph from Next config, root boundaries, layout, and `/reports` through 31 direct and transitive product files.
+- Identity hashes canonical Git HEAD blob OIDs, so clean LF and CRLF checkouts agree. Dirty, staged, untracked, or missing identity files fail closed.
+- Manifest schema 2 verifies source coverage, publisher script presence at both provenance SHAs, commit ancestry, `BUILD_ID`, and build digest before `next start`.
+- Routine Reports evidence and isolated Next dev output use unique OS temp roots. Cleanup runs after normal stop and startup failure.
+- The reusable PowerShell static-audit command uses a random temp file and restores environment state while deleting the file in `finally`.
 
 ## Added regression coverage
 
 - `tests/reports-wave1-publish-support.test.ts`
-  - default temp output
-  - explicit publish output
-  - stale build rejection
-  - source SHA mismatch rejection
+  - complete `/reports` dependency graph and dependency-only stale build rejection
+  - LF/CRLF clean-checkout identity parity
+  - dirty, staged, and untracked identity rejection
+  - publisher script provenance
+  - routine output cleanup and explicit publish preservation
+  - hermetic static-audit report command
 - `tests/isolated-next-browser-harness.test.ts`
-  - dev harness cleanup
+  - unique OS temp project and dist directory
+  - dev harness cleanup after stop and startup failure
   - same port salt reuse after stop
 - `tests/reports-design-remediation.test.ts`
   - prod mode now validates `reports-wave1-build-manifest.json` before the harness starts
+  - routine output cleanup is retained through initialization and teardown
 
 ## Fresh checks run in this turn
 
@@ -38,20 +42,31 @@ Set-Location "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-desig
 npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose
 ```
 
-- Result: `13 passed`
+- Result: `23 passed`, `0 failed`
 
 Fresh static audit check:
 
 ```powershell
 Set-Location "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation"
-$tempJson = Join-Path $env:TEMP "safeclaw-frontend-static-audit-20260712.json"
-$env:OUTPUT_PATH = $tempJson
-npm.cmd run audit:frontend-consistency
-Remove-Item Env:OUTPUT_PATH
+$tempJson = Join-Path ([System.IO.Path]::GetTempPath()) ("safeclaw-frontend-static-audit-{0}.json" -f [System.IO.Path]::GetRandomFileName())
+$hadOutputPath = Test-Path Env:OUTPUT_PATH
+$previousOutputPath = $env:OUTPUT_PATH
+try {
+  $env:OUTPUT_PATH = $tempJson
+  npm.cmd run audit:frontend-consistency
+  $auditExitCode = $LASTEXITCODE
+  $audit = Get-Content -LiteralPath $tempJson -Raw | ConvertFrom-Json
+  $audit | Select-Object status, violationCount, coverageIssues, @{Name="importantDeclarations";Expression={$_.counts.importantDeclarations}}
+} finally {
+  if ($hadOutputPath) { $env:OUTPUT_PATH = $previousOutputPath } else { Remove-Item Env:OUTPUT_PATH -ErrorAction SilentlyContinue }
+  Remove-Item -LiteralPath $tempJson -Force -ErrorAction SilentlyContinue
+}
+if ($auditExitCode -ne 1) { throw "Expected the bounded frontend audit to remain RED, received exit $auditExitCode" }
 ```
 
-- Result: `violationCount=2367`, `importantDeclarations=725`, `coverageIssues=0`
-- Note: this fresh helper-turn check ran against current helper HEAD and was intentionally kept out of committed evidence.
+- Result: exit `1`, `violationCount=2367`, `importantDeclarations=725`, `coverageIssues=0`
+- Source: `5c5943ad799638009d8718d1b91c0b7be7cb5ac3`, identity `a97db33b5224bc80e4a0555a72af4553cc092029ac1ddde76320cd64bb1a6db7`
+- The random temp file was removed in `finally`; the parsed result was explicitly copied into the two bounded static evidence files.
 
 Typecheck:
 
@@ -62,16 +77,7 @@ npm.cmd run typecheck
 
 - Result: `pass`
 
-Build:
-
-```powershell
-Set-Location "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation"
-npm.cmd run build
-```
-
-- Result: `pass`, Next `15.5.20`, static pages `27/27`
-
-Explicit production publish:
+Sequential build and explicit production publish:
 
 ```powershell
 Set-Location "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation"
@@ -79,10 +85,14 @@ node .\scripts\publish_reports_wave1_evidence.mjs
 ```
 
 - Result: `pass`
-- Manifest: `reports-wave1-build-manifest.json`
-- Manifest product SHA: `6af13474726d8c3f7f992f6a2f94ef9aa687011e`
-- Manifest build ID: `XQffvAJA8kBAQhD1qAqLz`
+- Build executions: `1`, Next `15.5.20`, static pages `27/27`
+- Manifest: schema `2`, `reports-wave1-build-manifest.json`
+- Publisher and product source SHA: `5c5943ad799638009d8718d1b91c0b7be7cb5ac3`
+- Product identity: `git-head-blob-oids-sha256-v1`, 31 files, `d7a58d8792f1e8e0881768d6bb442bda7da0f9ad846af10faca1de129854b80e`
+- Manifest build ID: `tuRcrMczwFV1FXjudqjtA`
+- Build identity: `d2040486cf657cd1ea7d39e00653d7725755a6fd0f93ef46fa8bcaaa2f024453`, 427 files
 - Published browser contract: `5 passed`, `5 skipped`
+- Captured contracts: sample Day/Night at `1440x900` and `390x844`; server-error Day/Night at both viewports; empty Day desktop
 
 ## Committed evidence
 
@@ -108,7 +118,10 @@ node .\scripts\publish_reports_wave1_evidence.mjs
 
 ## Gate summary
 
-- Published product evidence remains honest to `6af1347 / RED 2367 / 725`
-- Prod mode fails closed on missing, stale, or mismatched build identity
-- Routine Reports test runs no longer dirty the repo with screenshots or metrics
+- Published evidence is anchored to `5c5943a / RED 2367 / 725 / coverage 0`
+- Prod mode fails closed on incomplete source coverage, dirty identity files, invalid provenance, or stale build identity
+- Clean LF and CRLF checkouts produce the same source identity
+- Routine Reports runs created `0` new temp residual directories; isolated Next cleanup passed normal-stop and startup-failure paths
+- Static-audit and isolated Next residual counts are both `0`; the prior fixed static-audit temp file was removed after exact-path validation
+- Visual inspection passed for Day desktop, Night 390, Night desktop error, and Day 390 error evidence
 - Explicit publish is the only path that refreshes committed Reports Wave 1 evidence

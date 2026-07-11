@@ -275,6 +275,28 @@ describe("Reports Wave 1 publish support", () => {
     }
   });
 
+  it("documents a hermetic PowerShell static-audit command", () => {
+    const evidenceDirectory = path.join(root, REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR);
+    const report = JSON.parse(fs.readFileSync(path.join(evidenceDirectory, "report.json"), "utf8")) as {
+      freshChecks?: Array<{ name?: unknown; command?: unknown }>;
+    };
+    const staticCheck = report.freshChecks?.find((check) => check.name === "fresh-static-audit");
+    if (!staticCheck || !Array.isArray(staticCheck.command)
+      || !staticCheck.command.every((line) => typeof line === "string")) {
+      throw new Error("Reports Wave 1 report is missing the static-audit command");
+    }
+    const command = staticCheck.command.join("\n");
+    const markdown = fs.readFileSync(path.join(evidenceDirectory, "report.md"), "utf8");
+
+    for (const documentedCommand of [command, markdown]) {
+      expect(documentedCommand).toContain("[System.IO.Path]::GetRandomFileName()");
+      expect(documentedCommand).toContain("try {");
+      expect(documentedCommand).toContain("} finally {");
+      expect(documentedCommand).toContain("Remove-Item -LiteralPath $tempJson");
+      expect(documentedCommand).not.toContain("safeclaw-frontend-static-audit-20260712.json");
+    }
+  });
+
   it("writes explicit build manifests and rejects stale or mismatched production builds", () => {
     const tempRoot = createReportsGitFixture("safeclaw-wave1-manifest-");
     const buildDirectory = createFixtureBuild(tempRoot);
