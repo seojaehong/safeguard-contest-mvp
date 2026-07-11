@@ -17750,6 +17750,12 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+/* Resolve the legacy font aliases at the final cascade position. */
+:root {
+  --font-base: var(--font-product);
+  --font-hud: "Geist Mono", "Cascadia Mono", Consolas, monospace;
+}
+
 /* The foundation remains last so legacy route families inherit one product
    baseline while their more-specific semantic role selectors keep precedence. */
 body {
