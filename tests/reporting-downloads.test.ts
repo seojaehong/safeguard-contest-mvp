@@ -21,6 +21,7 @@ import {
 import type { OperationImprovement } from "@/lib/operation-improvement-history";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { attachQualityContract } from "@/lib/quality-contract";
 
 const riskRow: RiskAssessmentRow = {
   location: "서울 성수동",
@@ -429,9 +430,18 @@ describe("reporting downloads", () => {
     const viewState = resolveReportViewState(snapshot);
 
     expect(viewState).toEqual({
-      status: "ready",
-      title: "샘플 미리보기만 가능합니다.",
-      detail: "실제 작업팩 저장시각이 유효해질 때까지 증빙 다운로드는 잠겨 있습니다.",
+      status: "blocked",
+      title: "다운로드 잠김",
+      detail: "샘플 데이터는 미리보기 전용이며 모든 내보내기가 비활성화됩니다.",
+      canDownload: false
+    });
+  });
+
+  it("treats a normally missing current workpack as a calm empty state", () => {
+    expect(resolveReportViewState(null)).toEqual({
+      status: "empty",
+      title: "최근 작업팩이 없습니다.",
+      detail: "작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요.",
       canDownload: false
     });
   });
@@ -714,27 +724,53 @@ describe("reporting downloads", () => {
     expect(markdown).toContain("- 담당자: 전기팀");
   });
 
-  it("embeds local or sample scope metadata in every export", () => {
+  it("distinguishes sample, browser recent, and server-saved provenance", () => {
+    const generatedAt = "2026-07-08T07:45:00.000Z";
+    const generatedWorkpack = makeWorkpack();
+    generatedWorkpack.data = attachQualityContract(generatedWorkpack.data, generatedAt);
     const localSnapshot = buildReportSnapshot({
-      workpack: makeWorkpack(),
+      workpack: generatedWorkpack,
       improvements: [improvements[0]],
       period: "weekly",
       sourceMode: "browser_local",
       now: new Date("2026-07-08T12:00:00.000Z")
     });
+    const serverSnapshot = buildReportSnapshot({
+      workpack: generatedWorkpack,
+      improvements: [],
+      period: "weekly",
+      sourceMode: "server_saved" as "browser_local",
+      sourceWorkpackId: "server-workpack-1",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
     const sampleSnapshot = buildReportSnapshot({
-      workpack: makeWorkpack(),
+      workpack: generatedWorkpack,
       improvements: [],
       period: "weekly",
       sourceMode: "sample",
       now: new Date("2026-07-08T12:00:00.000Z")
     });
 
-    expect(localSnapshot.source.scope).toBe("current_browser");
-    expect(sampleSnapshot.source.scope).toBe("sample_preview");
+    expect(localSnapshot.source).toMatchObject({
+      mode: "browser_local",
+      scope: "current_browser",
+      workpackGeneratedAt: generatedAt
+    });
+    expect(serverSnapshot.source).toMatchObject({
+      mode: "server_saved",
+      scope: "server_workpack",
+      workpackId: "server-workpack-1",
+      workpackGeneratedAt: generatedAt
+    });
+    expect(sampleSnapshot.source).toMatchObject({
+      mode: "sample",
+      scope: "sample_preview",
+      workpackGeneratedAt: generatedAt
+    });
     expect(sampleSnapshot.source.riskRowTimeBasis).toBe("workpack_saved_at");
     for (const [snapshot, scope, limitation] of [
       [localSnapshot, "current_browser", "current_browser_only"],
+      [serverSnapshot, "server_workpack", "server_saved_workpack_only"],
       [sampleSnapshot, "sample_preview", "sample_data_only"]
     ] as const) {
       for (const exported of [
@@ -746,6 +782,7 @@ describe("reporting downloads", () => {
       ]) {
         expect(exported).toContain(scope);
         expect(exported).toContain(snapshot.source.workpackSavedAt);
+        expect(exported).toContain(generatedAt);
         expect(exported).toContain("workpack_saved_at");
         expect(exported).toContain(limitation);
       }

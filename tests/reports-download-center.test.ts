@@ -14,6 +14,7 @@ import {
   type OperationImprovement
 } from "@/lib/operation-improvement-history";
 import { toggleReportPhotoApproval } from "@/lib/reporting-downloads";
+import { attachQualityContract } from "@/lib/quality-contract";
 
 const improvement: OperationImprovement = {
   id: "improvement-1",
@@ -55,6 +56,9 @@ describe("reports download center behavior", () => {
 
 const port = 35_000 + (process.pid % 10_000);
 const baseUrl = `http://127.0.0.1:${port}`;
+const testSupabaseUrl = "https://reports-test.supabase.co";
+const testSupabaseAuthStorageKey = "sb-reports-test-auth-token";
+const testAccessToken = "reports-test-access-token";
 let server: ChildProcessWithoutNullStreams | null = null;
 let browser: Browser | null = null;
 const serverOutput: string[] = [];
@@ -101,7 +105,12 @@ describe("reports download center remount behavior", () => {
   beforeAll(async () => {
     server = spawn(process.execPath, [resolveNextBin(), "dev", "--port", String(port)], {
       cwd: process.cwd(),
-      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" }
+      env: {
+        ...process.env,
+        NEXT_TELEMETRY_DISABLED: "1",
+        NEXT_PUBLIC_SUPABASE_URL: testSupabaseUrl,
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "reports-test-anon-key"
+      }
     });
     server.stdout.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
     server.stderr.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
@@ -114,15 +123,39 @@ describe("reports download center remount behavior", () => {
     await stopServer();
   });
 
+  it("renders a normal missing workpack as an available feature with a calm next action", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    try {
+      await page.goto(`${baseUrl}/reports`, { waitUntil: "networkidle" });
+
+      expect(await page.getByText("바로 사용", { exact: true }).count()).toBeGreaterThan(0);
+      expect(await page.getByLabel("리포트 빈 상태").count()).toBe(1);
+      expect(await page.getByRole("heading", { name: "최근 작업팩이 없습니다." }).count()).toBe(1);
+      expect(await page.getByRole("link", { name: "작업공간에서 만들기" }).count()).toBe(1);
+      expect(await page.getByLabel("다운로드 준비 상태").getByText("현재 작업팩 필요", { exact: true }).count()).toBe(1);
+      expect(await page.getByText("리포트 오류", { exact: true }).count()).toBe(0);
+      expect(await page.getByRole("heading", { name: "현재 작업을 불러오지 못했습니다." }).count()).toBe(0);
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
   it("resets exact-pair photo approval after a real page reload", async () => {
     if (!browser) throw new Error("Browser was not started");
     const now = new Date().toISOString();
-    const workpack = buildStoredCurrentWorkpack(buildMockAskResponse(
+    const generatedAt = "2026-07-10T07:45:00.000Z";
+    const workpack = {
+      ...buildStoredCurrentWorkpack(attachQualityContract(buildMockAskResponse(
       "성수동 외벽 도장 작업",
       mockSearchResults.slice(0, 2),
       "live",
       "report remount test"
-    ));
+      ), generatedAt)),
+      savedAt: "2026-07-10T08:00:00.000Z"
+    };
     const storedImprovement: OperationImprovement = {
       ...improvement,
       createdAt: now,
@@ -144,6 +177,19 @@ describe("reports download center remount behavior", () => {
 
     try {
       await page.goto(`${baseUrl}/reports`, { waitUntil: "networkidle" });
+      const headerProvenance = page.getByLabel("리포트 헤더 데이터 출처");
+      const stickyProvenance = page.getByLabel("고정 리포트 데이터 출처");
+      expect(await headerProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
+      expect(await stickyProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
+      expect(await stickyProvenance.locator('time[datetime="2026-07-10T08:00:00.000Z"]').count()).toBe(1);
+      expect(await stickyProvenance.locator(`time[datetime="${generatedAt}"]`).count()).toBe(1);
+
+      await page.evaluate(() => window.scrollTo(0, 900));
+      const stickyBox = await stickyProvenance.boundingBox();
+      if (!stickyBox) throw new Error("Sticky report provenance was not rendered");
+      expect(stickyBox.y).toBeGreaterThanOrEqual(0);
+      expect(stickyBox.y).toBeLessThan(720);
+
       const approval = page.getByLabel("Before/After 사진 포함 승인");
       await approval.waitFor({ state: "visible" });
       expect(await approval.isChecked()).toBe(false);
@@ -155,6 +201,68 @@ describe("reports download center remount behavior", () => {
       const remountedApproval = page.getByLabel("Before/After 사진 포함 승인");
       await remountedApproval.waitFor({ state: "visible" });
       expect(await remountedApproval.isChecked()).toBe(false);
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
+
+  it("loads a requested server-saved workpack through the existing bearer session contract", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const serverSavedAt = "2026-07-10T09:15:00.000Z";
+    const workpackGeneratedAt = "2026-07-10T09:00:00.000Z";
+    const reopenData = attachQualityContract(buildMockAskResponse(
+      "서버 저장 문서팩 리포트",
+      mockSearchResults.slice(0, 2),
+      "live",
+      "server report provenance test"
+    ), workpackGeneratedAt);
+    const context = await browser.newContext();
+    await context.addInitScript(({ expectedOrigin, authStorageKey, accessToken }) => {
+      if (window.location.origin !== expectedOrigin) return;
+      window.localStorage.setItem(authStorageKey, JSON.stringify({
+        access_token: accessToken,
+        refresh_token: "reports-test-refresh-token",
+        expires_at: 4_102_444_800,
+        token_type: "bearer"
+      }));
+    }, {
+      expectedOrigin: baseUrl,
+      authStorageKey: testSupabaseAuthStorageKey,
+      accessToken: testAccessToken
+    });
+    const page = await context.newPage();
+    let authorizationHeader = "";
+    await page.route("**/api/workpacks/server-report-1", async (route) => {
+      authorizationHeader = route.request().headers().authorization || "";
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          configured: true,
+          canReopen: true,
+          workpack: {
+            id: "server-report-1",
+            createdAt: "2026-07-10T09:05:00.000Z",
+            updatedAt: serverSavedAt,
+            reopenData
+          },
+          blockers: [],
+          message: "저장된 문서팩 상세를 불러왔습니다."
+        })
+      });
+    });
+
+    try {
+      await page.goto(`${baseUrl}/reports?workpackId=server-report-1`, { waitUntil: "networkidle" });
+
+      const headerProvenance = page.getByLabel("리포트 헤더 데이터 출처");
+      const stickyProvenance = page.getByLabel("고정 리포트 데이터 출처");
+      expect(authorizationHeader).toBe(`Bearer ${testAccessToken}`);
+      expect(await headerProvenance.getByText("서버 저장 작업팩", { exact: true }).count()).toBe(1);
+      expect(await stickyProvenance.getByText("서버 저장 작업팩", { exact: true }).count()).toBe(1);
+      expect(await stickyProvenance.locator(`time[datetime="${serverSavedAt}"]`).count()).toBe(1);
+      expect(await stickyProvenance.locator(`time[datetime="${workpackGeneratedAt}"]`).count()).toBe(1);
     } finally {
       await context.close();
     }
@@ -208,8 +316,13 @@ describe("reports download center remount behavior", () => {
       await previewButton.click();
 
       expect(await page.getByText("샘플 리포트", { exact: true }).isVisible()).toBe(true);
-      expect(await page.getByText("샘플 미리보기만 가능합니다. · 실제 작업팩 저장시각이 유효해질 때까지 증빙 다운로드는 잠겨 있습니다.").isVisible()).toBe(true);
-      expect(await page.getByRole("button", { name: "개선사항 포함 MD" }).isDisabled()).toBe(true);
+      expect(await page.getByLabel("고정 리포트 데이터 출처").getByText("샘플 데이터", { exact: true }).count()).toBe(1);
+      expect(await page.getByLabel("다운로드 준비 상태").getByText("다운로드 잠김", { exact: true }).count()).toBe(1);
+      const exportButtons = page.getByLabel("리포트 다운로드").getByRole("button");
+      expect(await exportButtons.count()).toBe(5);
+      for (const button of await exportButtons.all()) {
+        expect(await button.isDisabled()).toBe(true);
+      }
 
       const preservedHistory = page.getByLabel("보존된 실제 개선 이력");
       await preservedHistory.waitFor({ state: "visible" });
