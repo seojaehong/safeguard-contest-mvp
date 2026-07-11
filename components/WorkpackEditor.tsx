@@ -382,6 +382,15 @@ function buildPermitDraft(data: AskResponse) {
   ].join("\n");
 }
 
+function resolveInitialWorkPermitDraft(data: AskResponse) {
+  if (data.deliverables.workPermitDraft === "") return "";
+  return withSubmitReadiness(
+    "허가서/첨부 안전작업허가 확인서",
+    data.deliverables.workPermitDraft ?? buildPermitDraft(data),
+    data
+  );
+}
+
 function inferPermitType(data: AskResponse): PermitInspectionStructured["basicInfo"]["permitType"] {
   const text = `${data.question} ${data.scenario.workSummary} ${data.riskSummary.topRisk}`;
   if (/비계|고소|추락|지붕|외벽/.test(text)) return "고소작업";
@@ -1883,11 +1892,7 @@ export function WorkpackEditor({
       workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
       riskAssessmentDraft: withSubmitReadiness("위험성평가표", data.deliverables.riskAssessmentDraft, data),
       workPlanDraft: withSubmitReadiness("작업계획서", data.deliverables.workPlanDraft, data),
-      workPermitDraft: withSubmitReadiness(
-        "허가서/첨부 안전작업허가 확인서",
-        data.deliverables.workPermitDraft || buildPermitDraft(data),
-        data
-      ),
+      workPermitDraft: resolveInitialWorkPermitDraft(data),
       tbmBriefing: withSubmitReadiness("TBM 브리핑", data.deliverables.tbmBriefing, data),
       tbmLogDraft: withSubmitReadiness("TBM 일지", data.deliverables.tbmLogDraft, data),
       safetyEducationRecordDraft: withSubmitReadiness("안전교육", data.deliverables.safetyEducationRecordDraft, data),
