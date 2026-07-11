@@ -199,44 +199,90 @@ const HAZARD_RELEVANCE_TERMS = [
 ] as const;
 
 const RELEVANCE_STOPWORDS = new Set([
+  "관련",
+  "검토",
+  "검토가",
+  "검토할",
+  "검토합니다",
   "가능성",
   "가까이",
   "각각",
   "구역",
+  "내용",
+  "대상",
   "보입니다",
+  "사진",
+  "상태",
+  "안전",
+  "일반",
   "위험",
+  "위험요인",
   "작업",
   "작업자",
   "점검",
+  "주의",
   "현장",
   "현장에서",
   "확인",
   "확인해야",
-  "후보"
+  "필요",
+  "후보",
+  "candidate",
+  "check",
+  "hazard",
+  "needed",
+  "photo",
+  "review",
+  "safety",
+  "site",
+  "status"
 ]);
+
+const GENERIC_RELEVANCE_PREFIXES = [
+  "검토",
+  "관련",
+  "보이",
+  "상태",
+  "안전",
+  "일반",
+  "주의",
+  "확인",
+  "필요",
+  "candidate",
+  "check",
+  "hazard",
+  "need",
+  "photo",
+  "review",
+  "safety",
+  "site",
+  "status"
+] as const;
 
 function normalizeRelevanceText(value: string): string {
   return value.toLocaleLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+}
+
+function isGenericRelevanceTerm(term: string): boolean {
+  return RELEVANCE_STOPWORDS.has(term)
+    || GENERIC_RELEVANCE_PREFIXES.some((prefix) => term.startsWith(prefix));
 }
 
 function candidateSpecificTerms(candidate: HazardPhotoCandidateReferenceInput): string[] {
   const normalized = normalizeRelevanceText(candidateRelevanceQuery(candidate));
   const hazardTerms = HAZARD_RELEVANCE_TERMS.filter((term) => normalized.includes(term));
   const ordinaryTerms = normalized.split(" ")
-    .filter((term) => term.length >= 2 && !RELEVANCE_STOPWORDS.has(term));
+    .filter((term) => term.length >= 2 && !isGenericRelevanceTerm(term));
   return [...new Set([...hazardTerms, ...ordinaryTerms])];
 }
 
-function referenceRelevanceText(reference: SafetyReferenceItem): string {
+function referenceDomainText(reference: SafetyReferenceItem): string {
   return normalizeRelevanceText([
     reference.title,
-    reference.summary,
-    reference.body || "",
     reference.category || "",
     reference.subcategory || "",
     ...reference.keywords,
-    ...reference.risk_tags,
-    ...reference.controls
+    ...reference.risk_tags
   ].join(" "));
 }
 
@@ -260,7 +306,7 @@ export function filterPositivelyRelevantHazardReferences(
   return references.filter((reference) =>
     isSafetyReferenceCompatibleWithQuery(query, reference) &&
     scoreSafetyReferenceQueryMatch(query, reference) >= 2 &&
-    specificTerms.some((term) => referenceRelevanceText(reference).includes(term))
+    specificTerms.some((term) => referenceDomainText(reference).includes(term))
   );
 }
 
@@ -279,14 +325,15 @@ export function parseHazardPhotoModelPayload(value: unknown): HazardPhotoModelPa
     if (item.kind !== "visual" && item.kind !== "ocr") {
       throw new Error(`observations[${index}].kind must be visual or ocr`);
     }
-    return {
-      kind: item.kind,
-      text: readRequiredString(
-        item.text,
-        `observations[${index}].text`,
-        HAZARD_PHOTO_MODEL_LIMITS.observation
-      )
-    };
+    const text = readRequiredString(
+      item.text,
+      `observations[${index}].text`,
+      HAZARD_PHOTO_MODEL_LIMITS.observation
+    );
+    if (item.kind === "visual") {
+      assertCandidateOnlyNarrative(text, `observations[${index}].text`);
+    }
+    return { kind: item.kind, text };
   });
 
   if (!Array.isArray(value.candidates) || value.candidates.length === 0) {
@@ -316,6 +363,7 @@ export function parseHazardPhotoModelPayload(value: unknown): HazardPhotoModelPa
       )
     };
     assertCandidateOnlyNarrative(candidate.label, `candidates[${index}].label`);
+    assertCandidateOnlyNarrative(candidate.observation, `candidates[${index}].observation`);
     assertCandidateOnlyNarrative(candidate.inference, `candidates[${index}].inference`);
     return candidate;
   });

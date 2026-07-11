@@ -6,8 +6,38 @@ import {
   buildAcceptedHazardPhotoHarnessImprovements,
   buildHazardPhotoCandidateKey,
   buildHazardPhotoCandidates,
-  buildPhotoAnalysisCandidate
+  buildPhotoAnalysisCandidate,
+  canAcceptHazardPhotoCandidate,
+  parseHazardPhotoWorkspaceResponse
 } from "@/lib/operation-improvements";
+
+function confirmedReview() {
+  return {
+    harness: {
+      authority: "safeclaw-db-mcp" as const,
+      status: "confirmed" as const,
+      evidence: [{
+        sourceId: "confirmed-reference",
+        sourceType: "safeclaw-db" as const,
+        title: "확정 근거",
+        excerpt: "후보별 직접 근거"
+      }],
+      confirmedControls: [{
+        text: "확정 통제",
+        evidenceSourceIds: ["confirmed-reference"]
+      }],
+      confirmedAt: "2026-07-11T00:00:00.000Z",
+      errorMessage: null
+    },
+    userDecision: {
+      status: "pending" as const,
+      allowed: ["accepted", "rejected"] as Array<"accepted" | "rejected">,
+      requiresHarnessConfirmation: true as const,
+      reason: null,
+      decidedAt: null
+    }
+  };
+}
 
 describe("operation improvement photo analysis candidate", () => {
   it("returns an empty candidate until both before and after photos are attached", () => {
@@ -39,6 +69,209 @@ describe("operation improvement photo analysis candidate", () => {
 });
 
 describe("hazard photo candidates", () => {
+  it("preserves partial status and candidate review authority in the workspace DTO", () => {
+    const parsed = parseHazardPhotoWorkspaceResponse({
+      ok: true,
+      message: "1장 분석, 1장 실패",
+      analysis: {
+        status: "partial",
+        provider: "openai",
+        providerMode: "live",
+        model: "gpt-4.1-mini-2026-06-01",
+        providerResponses: [{
+          photoId: "photo-1",
+          responseId: "resp_workspace_vision",
+          model: "gpt-4.1-mini-2026-06-01",
+          createdAt: 1_783_500_000
+        }],
+        fileValidation: {
+          mode: "signature_only",
+          decodesPixels: false,
+          signatureBytes: 12,
+          description: "signature only"
+        },
+        summary: "부분 분석 결과",
+        ocrText: "",
+        siteSignals: ["비계"],
+        counts: {
+          submitted: 2,
+          analyzed: 1,
+          rejected: 0,
+          failed: 1,
+          unconfigured: 0,
+          candidates: 2,
+          harnessConfirmed: 1,
+          harnessInsufficient: 1
+        },
+        images: [{
+          name: "failed.jpg",
+          status: "failed",
+          error: { message: "provider timeout" }
+        }],
+        candidates: [
+          {
+            id: "confirmed-candidate",
+            label: "비계 추락 위험 후보",
+            detail: "작업발판 외측 노출 가능성",
+            severity: "review",
+            evidence: "",
+            reflectedDocuments: [],
+            sourcePhotoNames: ["scaffold.jpg"],
+            harness: {
+              authority: "safeclaw-db-mcp",
+              status: "confirmed",
+              evidence: [{
+                sourceId: "fall-reference",
+                sourceType: "safeclaw-db",
+                title: "비계 추락 예방",
+                excerpt: "작업발판 안전난간",
+                catalogSourceId: "kosha-guide-source",
+                sourceUrl: "https://safety.example/kosha-guide",
+                itemType: "guideline",
+                evidenceRole: "direct",
+                retrievals: [{
+                  channel: "direct",
+                  query: "비계 추락",
+                  mode: "ranked-rpc",
+                  source: "ranked",
+                  vectorAttempted: false,
+                  vectorOk: false,
+                  vectorModel: "text-embedding-3-small"
+                }]
+              }],
+              confirmedControls: [{
+                text: "작업발판 안전난간 상태 확인",
+                evidenceSourceIds: ["fall-reference"]
+              }],
+              confirmedAt: "2026-07-11T00:00:00.000Z",
+              errorMessage: null
+            },
+            userDecision: {
+              status: "pending",
+              allowed: ["accepted", "rejected"],
+              requiresHarnessConfirmation: true,
+              reason: null,
+              decidedAt: null
+            }
+          },
+          {
+            id: "insufficient-candidate",
+            label: "일반 검토 후보",
+            detail: "추가 근거 필요",
+            severity: "review",
+            evidence: "",
+            reflectedDocuments: [],
+            sourcePhotoNames: ["scaffold.jpg"],
+            harness: {
+              authority: "safeclaw-db-mcp",
+              status: "insufficient",
+              evidence: [],
+              confirmedControls: [],
+              confirmedAt: null,
+              errorMessage: "positive relevance not established"
+            },
+            userDecision: {
+              status: "pending",
+              allowed: ["rejected"],
+              requiresHarnessConfirmation: true,
+              reason: null,
+              decidedAt: null
+            }
+          }
+        ]
+      }
+    }, true);
+
+    expect(parsed.analysis.status).toBe("partial");
+    expect(parsed.analysis.model).toBe("gpt-4.1-mini-2026-06-01");
+    expect(parsed.analysis.providerResponses).toEqual([expect.objectContaining({
+      responseId: "resp_workspace_vision",
+      model: "gpt-4.1-mini-2026-06-01"
+    })]);
+    expect(parsed.analysis.fileValidation).toMatchObject({ mode: "signature_only", decodesPixels: false });
+    expect(parsed.analysis.counts).toMatchObject({ analyzed: 1, failed: 1 });
+    expect(parsed.analysis.failures).toEqual([{
+      name: "failed.jpg",
+      status: "failed",
+      message: "provider timeout"
+    }]);
+    expect(parsed.analysis.candidates[0]?.harness.status).toBe("confirmed");
+    expect(parsed.analysis.candidates[0]?.harness.evidence[0]).toMatchObject({
+      catalogSourceId: "kosha-guide-source",
+      sourceUrl: "https://safety.example/kosha-guide",
+      retrievals: [expect.objectContaining({ channel: "direct", mode: "ranked-rpc" })]
+    });
+    expect(parsed.analysis.candidates[0]?.userDecision.allowed).toEqual(["accepted", "rejected"]);
+    expect(canAcceptHazardPhotoCandidate(parsed.analysis.candidates[0])).toBe(true);
+    expect(canAcceptHazardPhotoCandidate(parsed.analysis.candidates[1])).toBe(false);
+  });
+
+  it("adds only harness-confirmed candidates even when insufficient keys are selected", () => {
+    const confirmed = {
+      source: "vision" as const,
+      label: "비계 추락 위험 후보",
+      detail: "작업발판 외측 노출 가능성",
+      sourcePhotoNames: ["scaffold.jpg"],
+      harness: {
+        authority: "safeclaw-db-mcp" as const,
+        status: "confirmed" as const,
+        evidence: [{
+          sourceId: "fall-reference",
+          sourceType: "safeclaw-db" as const,
+          title: "비계 추락 예방",
+          excerpt: "작업발판 안전난간"
+        }],
+        confirmedControls: [{
+          text: "작업발판 안전난간 상태 확인",
+          evidenceSourceIds: ["fall-reference"]
+        }],
+        confirmedAt: "2026-07-11T00:00:00.000Z",
+        errorMessage: null
+      },
+      userDecision: {
+        status: "pending" as const,
+        allowed: ["accepted", "rejected"] as Array<"accepted" | "rejected">,
+        requiresHarnessConfirmation: true as const,
+        reason: null,
+        decidedAt: null
+      }
+    };
+    const insufficient = {
+      ...confirmed,
+      label: "일반 검토 후보",
+      harness: {
+        ...confirmed.harness,
+        status: "insufficient" as const,
+        evidence: [],
+        confirmedControls: [],
+        confirmedAt: null,
+        errorMessage: "positive relevance not established"
+      },
+      userDecision: {
+        ...confirmed.userDecision,
+        allowed: ["rejected"] as Array<"accepted" | "rejected">
+      }
+    };
+    const acceptedCandidateKeys = [
+      buildHazardPhotoCandidateKey(confirmed),
+      buildHazardPhotoCandidateKey(insufficient)
+    ];
+
+    const appendix = buildAcceptedHazardPhotoAppendix({
+      candidates: [confirmed, insufficient],
+      acceptedCandidateKeys
+    });
+    const improvements = buildAcceptedHazardPhotoHarnessImprovements({
+      taskLabel: "외벽 도장",
+      candidates: [confirmed, insufficient],
+      acceptedCandidateKeys
+    });
+
+    expect(appendix).toContain("비계 추락 위험 후보");
+    expect(appendix).not.toContain("일반 검토 후보");
+    expect(improvements.map((item) => item.hazardLabel)).toEqual(["비계 추락 위험 후보"]);
+  });
+
   it("keeps the input photo cap aligned with the vision API route", () => {
     expect(MAX_INPUT_HAZARD_PHOTO_FILES).toBe(10);
   });
@@ -89,7 +322,8 @@ describe("hazard photo candidates", () => {
       severity: "high" as const,
       evidence: "사진의 개구부와 통제선 미확인",
       reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
-      sourcePhotoNames: ["workface.jpg"]
+      sourcePhotoNames: ["workface.jpg"],
+      ...confirmedReview()
     };
     const ignored = {
       source: "vision" as const,
@@ -125,7 +359,8 @@ describe("hazard photo candidates", () => {
       severity: "high" as const,
       evidence: "scaffold.jpg에서 작업면 가장자리가 노출되어 보임",
       reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
-      sourcePhotoNames: ["scaffold.jpg"]
+      sourcePhotoNames: ["scaffold.jpg"],
+      ...confirmedReview()
     };
     const ignored = {
       source: "local" as const,

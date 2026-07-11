@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 import { FieldOperationsWorkspace } from "@/components/FieldOperationsWorkspace";
 import {
   buildGenerationEvidenceFingerprint,
@@ -23,7 +24,11 @@ import {
   buildHazardPhotoCandidateKey,
   buildHazardPhotoCandidates,
   buildPhotoAnalysisCandidate as buildPhotoAnalysisCandidateText,
-  MAX_INPUT_HAZARD_PHOTO_FILES
+  canAcceptHazardPhotoCandidate,
+  MAX_INPUT_HAZARD_PHOTO_FILES,
+  parseHazardPhotoWorkspaceResponse,
+  type HazardPhotoGenerationCandidate,
+  type HazardPhotoWorkspaceAnalysis
 } from "@/lib/operation-improvements";
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
@@ -118,24 +123,49 @@ type LocalPhoto = {
   file: File;
 };
 
-type InputHazardCandidate = {
-  label: string;
-  detail: string;
-  severity?: "high" | "medium" | "low" | "review";
-  evidence?: string;
-  reflectedDocuments?: string[];
-  sourcePhotoNames?: string[];
-  source: "vision" | "local";
-};
+type InputHazardCandidate = HazardPhotoGenerationCandidate & { source: "vision" | "local" };
 
 type InputHazardPhotoAnalysis = {
-  status: "idle" | "analyzing" | "analyzed" | "unconfigured" | "failed";
+  status: "idle" | "analyzing" | HazardPhotoWorkspaceAnalysis["status"];
   summary: string;
   ocrText: string;
   siteSignals: string[];
   candidates: InputHazardCandidate[];
+  counts: HazardPhotoWorkspaceAnalysis["counts"];
+  failures: HazardPhotoWorkspaceAnalysis["failures"];
   message: string;
 };
+
+const EMPTY_HAZARD_PHOTO_COUNTS: HazardPhotoWorkspaceAnalysis["counts"] = {
+  submitted: 0,
+  analyzed: 0,
+  rejected: 0,
+  failed: 0,
+  unconfigured: 0,
+  candidates: 0,
+  harnessConfirmed: 0,
+  harnessInsufficient: 0
+};
+
+let workspaceAuthClient: ReturnType<typeof createClient> | null = null;
+
+async function readWorkspaceAccessToken(): Promise<string | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return null;
+  try {
+    if (!workspaceAuthClient) workspaceAuthClient = createClient(url, anonKey);
+    const { data, error } = await workspaceAuthClient.auth.getSession();
+    if (error) {
+      console.error("workspace photo analysis session read failed", error);
+      return null;
+    }
+    return data.session?.access_token || null;
+  } catch (error) {
+    console.error("workspace photo analysis session read failed", error);
+    return null;
+  }
+}
 
 type ImprovementSaveState = "idle" | "saving" | "saved" | "local";
 
@@ -1051,6 +1081,8 @@ export function SafeGuardCommandCenter({
     ocrText: "",
     siteSignals: [],
     candidates: [],
+    counts: EMPTY_HAZARD_PHOTO_COUNTS,
+    failures: [],
     message: ""
   });
   const [acceptedInputHazardCandidateKeys, setAcceptedInputHazardCandidateKeys] = useState<string[]>([]);
@@ -1171,6 +1203,8 @@ export function SafeGuardCommandCenter({
       ocrText: "",
       siteSignals: [],
       candidates: [],
+      counts: EMPTY_HAZARD_PHOTO_COUNTS,
+      failures: [],
       message
     });
     setAcceptedInputHazardCandidateKeys([]);
@@ -1233,62 +1267,54 @@ export function SafeGuardCommandCenter({
     setAcceptedInputHazardCandidateKeys([]);
     setDismissedInputHazardCandidateKeys([]);
     setInputHazardPhotoAnalysis((current) => ({ ...current, status: "analyzing", message: "현장 사진을 vision API로 분석 중입니다." }));
+    const accessToken = await readWorkspaceAccessToken();
+    if (!accessToken) {
+      const message = "관리자 로그인 후 현장 사진 분석을 사용할 수 있습니다.";
+      setInputHazardPhotoAnalysis({
+        status: "failed",
+        summary: "",
+        ocrText: "",
+        siteSignals: [],
+        candidates: [],
+        counts: { ...EMPTY_HAZARD_PHOTO_COUNTS, submitted: photos.length },
+        failures: [],
+        message
+      });
+      setMessage(message);
+      return;
+    }
     const form = new FormData();
     form.set("question", question);
     photos.forEach((photo) => form.append("photos", photo.file, photo.name));
     try {
       const response = await fetch("/api/input-photos/hazard-analysis", {
         method: "POST",
+        headers: { authorization: `Bearer ${accessToken}` },
         body: form
       });
       const parsed = (await response.json().catch((): unknown => ({}))) as unknown;
       if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
         throw new Error(`사진 분석 응답이 올바르지 않습니다: HTTP ${response.status}`);
       }
-      const record = parsed as Record<string, unknown>;
-      const analysis = typeof record.analysis === "object" && record.analysis !== null && !Array.isArray(record.analysis)
-        ? record.analysis as Record<string, unknown>
-        : {};
-      const rawCandidates = Array.isArray(analysis.candidates) ? analysis.candidates : [];
-      const candidates = rawCandidates.flatMap((item): InputHazardCandidate[] => {
-        if (typeof item !== "object" || item === null || Array.isArray(item)) return [];
-        const candidate = item as Record<string, unknown>;
-        const label = typeof candidate.label === "string" ? candidate.label.trim() : "";
-        const detail = typeof candidate.detail === "string" ? candidate.detail.trim() : "";
-        if (!label || !detail) return [];
-        const reflectedDocuments = Array.isArray(candidate.reflectedDocuments)
-          ? candidate.reflectedDocuments.filter((value): value is string => typeof value === "string")
-          : [];
-        const sourcePhotoNames = Array.isArray(candidate.sourcePhotoNames)
-          ? candidate.sourcePhotoNames.filter((value): value is string => typeof value === "string")
-          : [];
-        const severity = candidate.severity === "high" || candidate.severity === "medium" || candidate.severity === "low" || candidate.severity === "review"
-          ? candidate.severity
-          : "review";
-        return [{
-          label,
-          detail,
-          severity,
-          evidence: typeof candidate.evidence === "string" ? candidate.evidence : "",
-          reflectedDocuments,
-          sourcePhotoNames,
-          source: "vision"
-        }];
-      });
-      const status: InputHazardPhotoAnalysis["status"] = analysis.status === "analyzed" || analysis.status === "unconfigured" || analysis.status === "failed"
-        ? analysis.status
-        : response.ok ? "analyzed" : "failed";
+      if (!response.ok) {
+        throw new Error(readApiMessage(parsed, `사진 분석 요청 실패: HTTP ${response.status}`));
+      }
+      const workspaceResponse = parseHazardPhotoWorkspaceResponse(parsed, response.ok);
+      const analysis = workspaceResponse.analysis;
+      const candidates = analysis.candidates.map((candidate): InputHazardCandidate => ({
+        ...candidate,
+        source: "vision"
+      }));
       setInputHazardPhotoAnalysis({
-        status,
-        summary: typeof analysis.summary === "string" ? analysis.summary : "",
-        ocrText: typeof analysis.ocrText === "string" ? analysis.ocrText : "",
-        siteSignals: Array.isArray(analysis.siteSignals) ? analysis.siteSignals.filter((value): value is string => typeof value === "string") : [],
+        ...analysis,
         candidates,
-        message: typeof record.message === "string" ? record.message : "현장 사진 분석 결과를 확인했습니다."
+        message: workspaceResponse.message
       });
-      setMessage(candidates.length
-        ? "현장 사진에서 위험요인 후보를 도출했습니다. 필요한 후보를 입력에 반영하세요."
-        : typeof record.message === "string" ? record.message : "사진 분석 결과 후보가 부족합니다. 현장 확인 후 직접 입력해 주세요.");
+      setMessage(analysis.status === "partial"
+        ? workspaceResponse.message
+        : candidates.length
+          ? "현장 사진에서 위험요인 후보를 도출했습니다. 필요한 후보를 입력에 반영하세요."
+          : workspaceResponse.message || "사진 분석 결과 후보가 부족합니다. 현장 확인 후 직접 입력해 주세요.");
     } catch (error) {
       console.error("input hazard photo analysis failed", error);
       setInputHazardPhotoAnalysis({
@@ -1297,6 +1323,8 @@ export function SafeGuardCommandCenter({
         ocrText: "",
         siteSignals: [],
         candidates: [],
+        counts: EMPTY_HAZARD_PHOTO_COUNTS,
+        failures: [],
         message: error instanceof Error ? error.message : "현장 사진 분석에 실패했습니다."
       });
       setMessage("현장 사진 분석에 실패했습니다. 사진 후보 없이도 문서 생성은 계속할 수 있습니다.");
@@ -1304,6 +1332,10 @@ export function SafeGuardCommandCenter({
   }
 
   function acceptInputPhotoCandidate(candidate: InputHazardCandidate) {
+    if (!canAcceptHazardPhotoCandidate(candidate)) {
+      setMessage("DB/MCP 하네스가 근거를 확정한 사진 후보만 추가할 수 있습니다.");
+      return;
+    }
     const key = buildHazardPhotoCandidateKey(candidate);
     setAcceptedInputHazardCandidateKeys((current) => current.includes(key) ? current : [...current, key]);
     setDismissedInputHazardCandidateKeys((current) => current.filter((item) => item !== key));
@@ -1946,10 +1978,22 @@ export function SafeGuardCommandCenter({
                     </article>
                   ))}
                 </div>
-              {inputHazardPhotoAnalysis.summary || inputHazardPhotoAnalysis.ocrText || inputHazardPhotoAnalysis.siteSignals.length ? (
+              {inputHazardPhotoAnalysis.summary
+                || inputHazardPhotoAnalysis.ocrText
+                || inputHazardPhotoAnalysis.siteSignals.length
+                || inputHazardPhotoAnalysis.failures.length
+                || inputHazardPhotoAnalysis.status === "partial" ? (
                 <article className="input-photo-analysis-summary">
-                  <span>{inputHazardPhotoAnalysis.status === "analyzed" ? "사진 분석 결과" : "사진 분석 상태"}</span>
+                  <span>{inputHazardPhotoAnalysis.status === "analyzed" ? "사진 분석 결과" : inputHazardPhotoAnalysis.status === "partial" ? "사진 부분 분석 결과" : "사진 분석 상태"}</span>
                   {inputHazardPhotoAnalysis.summary ? <p>{inputHazardPhotoAnalysis.summary}</p> : null}
+                  {inputHazardPhotoAnalysis.status === "partial" ? (
+                    <small>
+                      처리: 분석 {inputHazardPhotoAnalysis.counts.analyzed} · 거부 {inputHazardPhotoAnalysis.counts.rejected} · 실패 {inputHazardPhotoAnalysis.counts.failed} · 미설정 {inputHazardPhotoAnalysis.counts.unconfigured}
+                    </small>
+                  ) : null}
+                  {inputHazardPhotoAnalysis.failures.map((failure, index) => (
+                    <small key={`${failure.name}-${failure.status}-${index}`}>{failure.name}: {failure.message}</small>
+                  ))}
                   {inputHazardPhotoAnalysis.siteSignals.length ? <small>신호: {inputHazardPhotoAnalysis.siteSignals.join(" · ")}</small> : null}
                   {inputHazardPhotoAnalysis.ocrText ? <small>OCR: {inputHazardPhotoAnalysis.ocrText}</small> : null}
                 </article>
@@ -1969,10 +2013,15 @@ export function SafeGuardCommandCenter({
                           <strong>{candidate.label}{candidate.severity ? ` · ${candidate.severity}` : ""}</strong>
                           <span>{candidate.detail}</span>
                           {candidate.evidence ? <small>{candidate.evidence}</small> : null}
+                          <small>DB/MCP: {canAcceptHazardPhotoCandidate(candidate) ? "근거 확정" : "근거 부족"}</small>
                         </div>
                         <div className="input-photo-candidate-actions">
-                          <button type="button" onClick={() => acceptInputPhotoCandidate(candidate)}>
-                            {accepted ? "추가됨" : "추가"}
+                          <button
+                            type="button"
+                            onClick={() => acceptInputPhotoCandidate(candidate)}
+                            disabled={!canAcceptHazardPhotoCandidate(candidate)}
+                          >
+                            {accepted ? "추가됨" : canAcceptHazardPhotoCandidate(candidate) ? "추가" : "근거 부족"}
                           </button>
                           <button type="button" onClick={() => dismissInputPhotoCandidate(candidate)}>
                             무시
