@@ -4,6 +4,8 @@ import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  KOSHA_AUDIT_REQUEST_RETRIES,
+  KOSHA_AUDIT_REQUEST_TIMEOUT_MS,
   KOSHA_GUIDE_REFRESH_PLAN,
   auditKoshaGuideRows,
   auditKoshaRetrievalScenario,
@@ -11,6 +13,7 @@ import {
   buildKoshaOfficialDownloadUrl,
   compareKoshaInventoryToOfficial,
   decodeKoshaArchiveEntryName,
+  fetchHeadersWithRetry,
   fetchKoshaJsonWithRetry,
   listKoshaManifestGateFailures,
   normalizeKoshaVersionCode,
@@ -114,6 +117,9 @@ describe("KOSHA GUIDE read-only runner contract", () => {
     expect(script).not.toMatch(/method:\s*"(?:PATCH|PUT|DELETE)"/u);
     expect(script).toContain("fetchKoshaJsonWithRetry");
     expect(script).not.toMatch(/\.json\(\)/u);
+    expect(script).toContain('id: "local-pdf-empty-output"');
+    expect(script).toContain('localParse: {');
+    expect(script).toContain('parseEmptyOutputCount');
   });
 
   it("derives Markdown readiness from the JSON conclusion and avoids machine-specific defaults", () => {
@@ -162,6 +168,40 @@ describe("KOSHA GUIDE read-only runner contract", () => {
 });
 
 describe("KOSHA GUIDE bounded JSON fetch", () => {
+  it("keeps the audit network defaults at 20 seconds and one retry", () => {
+    expect(KOSHA_AUDIT_REQUEST_TIMEOUT_MS).toBe(20_000);
+    expect(KOSHA_AUDIT_REQUEST_RETRIES).toBe(1);
+  });
+
+  it("aborts a fetch stalled before headers, retries once, and leaves no timer behind", async () => {
+    vi.useFakeTimers();
+    let attempts = 0;
+    let aborts = 0;
+    const promise = fetchKoshaJsonWithRetry("https://example.invalid/no-headers", {}, "stalled headers", {
+      timeoutMs: 20,
+      retries: 1,
+      fetchImpl: async (_input, init) => {
+        attempts += 1;
+        const signal = init?.signal;
+        if (!signal) throw new Error("missing abort signal");
+        return new Promise((_resolve, reject) => {
+          signal.addEventListener("abort", () => {
+            aborts += 1;
+            reject(new DOMException("Aborted", "AbortError"));
+          }, { once: true });
+        });
+      }
+    });
+    const rejection = expect(promise).rejects.toThrow(/stalled headers.*2 attempts/iu);
+
+    await vi.runAllTimersAsync();
+    await rejection;
+
+    expect(attempts).toBe(2);
+    expect(aborts).toBe(2);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("aborts stalled body consumption on every attempt and leaves no timer behind", async () => {
     vi.useFakeTimers();
     let attempts = 0;
@@ -220,6 +260,77 @@ describe("KOSHA GUIDE bounded JSON fetch", () => {
     expect(result.payload).toEqual({ ok: true });
     expect(result.attemptCount).toBe(2);
     expect(attempts).toBe(2);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe("KOSHA GUIDE bounded HEAD fetch", () => {
+  it("retries one HEAD 5xx response and returns the successful probe without a timer", async () => {
+    vi.useFakeTimers();
+    let attempts = 0;
+
+    const response = await fetchHeadersWithRetry("https://example.invalid/head", { method: "HEAD" }, "HEAD probe", {
+      timeoutMs: 20_000,
+      retries: 1,
+      fetchImpl: async () => {
+        attempts += 1;
+        return {
+          ok: attempts === 2,
+          status: attempts === 1 ? 503 : 200,
+          headers: new Headers()
+        };
+      }
+    });
+
+    expect(response.status).toBe(200);
+    expect(attempts).toBe(2);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("returns the final failed HEAD probe after one retry and clears its timer", async () => {
+    vi.useFakeTimers();
+    let attempts = 0;
+
+    const response = await fetchHeadersWithRetry("https://example.invalid/head", { method: "HEAD" }, "HEAD probe", {
+      timeoutMs: 20_000,
+      retries: 1,
+      fetchImpl: async () => {
+        attempts += 1;
+        return { ok: false, status: 503, headers: new Headers() };
+      }
+    });
+
+    expect(response.status).toBe(503);
+    expect(attempts).toBe(2);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("fails closed when HEAD stalls before headers on both attempts", async () => {
+    vi.useFakeTimers();
+    let attempts = 0;
+    let aborts = 0;
+    const promise = fetchHeadersWithRetry("https://example.invalid/head", { method: "HEAD" }, "HEAD stalled", {
+      timeoutMs: 20,
+      retries: 1,
+      fetchImpl: async (_input, init) => {
+        attempts += 1;
+        const signal = init?.signal;
+        if (!signal) throw new Error("missing abort signal");
+        return new Promise((_resolve, reject) => {
+          signal.addEventListener("abort", () => {
+            aborts += 1;
+            reject(new DOMException("Aborted", "AbortError"));
+          }, { once: true });
+        });
+      }
+    });
+    const rejection = expect(promise).rejects.toThrow(/HEAD stalled.*2 attempts/iu);
+
+    await vi.runAllTimersAsync();
+    await rejection;
+
+    expect(attempts).toBe(2);
+    expect(aborts).toBe(2);
     expect(vi.getTimerCount()).toBe(0);
   });
 });

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "measuredAt": "2026-07-11T12:27:05.635Z",
+  "measuredAt": "2026-07-11T13:04:38.485Z",
   "localArchive": {
     "archiveCount": 10,
     "pdfEntryCount": 1040,
@@ -9,6 +9,15 @@
       "technical-guideline": 803,
       "technical-support-regulation": 237
     }
+  },
+  "localParse": {
+    "rowsReturned": 1040,
+    "parseAttemptedCount": 237,
+    "parseSuccessCount": 222,
+    "parseEmptyOutputCount": 15,
+    "parseFailureCount": 0,
+    "parseNotAttemptedCount": 803,
+    "accountingMatches": true
   },
   "supabaseVisible": {
     "sourceId": "kosha-technical-support-regulations-2025",

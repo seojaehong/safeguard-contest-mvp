@@ -32,6 +32,7 @@ def validate_parse_accounting(
     rows_returned = int(stats["rowsReturned"])
     attempted = int(stats["parseAttemptedCount"])
     succeeded = int(stats["parseSuccessCount"])
+    empty_output = int(stats["parseEmptyOutputCount"])
     failed = int(stats["parseFailureCount"])
     outcomes = stats["outcomes"]
     if not isinstance(outcomes, list):
@@ -39,8 +40,10 @@ def validate_parse_accounting(
     mismatches: list[str] = []
     if rows_returned != expected_pdf_rows:
         mismatches.append(f"rows-returned:{rows_returned}/{expected_pdf_rows}")
-    if succeeded + failed != attempted:
-        mismatches.append(f"parse-outcomes:{succeeded + failed}/{attempted}")
+    if succeeded + empty_output + failed != attempted:
+        mismatches.append(
+            f"parse-outcomes:{succeeded + empty_output + failed}/{attempted}"
+        )
     if len(outcomes) != rows_returned:
         mismatches.append(f"outcome-rows:{len(outcomes)}/{rows_returned}")
     return {**stats, "accountingMatches": not mismatches, "mismatches": mismatches}
@@ -86,6 +89,8 @@ def build_snapshot(
         elif internal_path in failure_paths:
             status = "failure"
             matched_failure_paths.add(internal_path)
+        elif not item.body.strip():
+            status = "empty_output"
         else:
             status = "success"
         outcomes.append({"internalPath": internal_path, "status": status})
@@ -95,6 +100,7 @@ def build_snapshot(
             "rowsReturned": len(items),
             "parseAttemptedCount": sum(outcome["status"] != "not-attempted" for outcome in outcomes),
             "parseSuccessCount": sum(outcome["status"] == "success" for outcome in outcomes),
+            "parseEmptyOutputCount": sum(outcome["status"] == "empty_output" for outcome in outcomes),
             "parseFailureCount": sum(outcome["status"] == "failure" for outcome in outcomes),
             "parseNotAttemptedCount": sum(outcome["status"] == "not-attempted" for outcome in outcomes),
             "unmatchedFailureNotices": sorted(failure_paths - matched_failure_paths),

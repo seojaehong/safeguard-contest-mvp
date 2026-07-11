@@ -1,10 +1,10 @@
 # KOSHA GUIDE corpus / harness audit
 
-- generatedAt: 2026-07-11T12:27:05.635Z
+- generatedAt: 2026-07-11T13:04:38.485Z
 - readOnly: true
 - dbMutationPerformed: false
 - uploadPerformed: false
-- elapsedSeconds: 107.85
+- elapsedSeconds: 73.65
 
 ## 결론
 
@@ -18,7 +18,7 @@ Production status는 fresh MISS 응답이다. Env-configured Supabase snapshot 1
 
 | rank | severity | blocker | rows | evidence | release condition |
 |---:|---|---|---:|---|---|
-| 1 | BLOCKER | `authoritative-body-empty` | 818 | 818 rows have no parsed body; count/hash parity cannot ground answers in missing text | source PDF text or reviewed OCR body is non-empty and hash/provenance linked |
+| 1 | BLOCKER | `authoritative-body-empty` | 818 | 818 rows have no parsed body, including 15 attempted empty outputs and 803 non-attempted guideline rows; count/hash parity cannot ground answers in missing text | source PDF text or reviewed OCR body is non-empty and hash/provenance linked |
 | 2 | BLOCKER | `item-provenance-missing` | 1,040 | item URL column schema-absent; payload URL/file ID/published/status missing 1040/1040/1040/1040 | every launch row resolves to official item URL, file ID, publication date, and current/retired state |
 | 4 | HIGH | `operational-control-ground-truth-review` | 70 | 70 heuristic-delta rows lack explicit labels; 0 rows explicitly cleared | every heuristic delta receives explicit reviewed ground-truth labels |
 | 5 | HIGH | `operational-control-cross-domain-candidate` | 1 | 1 cross-domain candidate rows remain after the second heuristic | remaining controls are re-derived from source body and cross-domain fixtures pass |
@@ -34,6 +34,11 @@ Production status는 fresh MISS 응답이다. Env-configured Supabase snapshot 1
 | 로컬 PDF | 1040 |
 | 로컬 기술지원규정 | 237 |
 | 로컬 기술지침 | 803 |
+| PDF parse attempted | 237 |
+| usable nonempty parse success | 222 |
+| empty_output / OCR-required boundary | 15 |
+| hard parse failure | 0 |
+| parse not attempted | 803 |
 | production visible | 1040 |
 | 공식 현행 | 1039 |
 | 공식 폐지 | 679 |
@@ -58,14 +63,15 @@ Production status는 fresh MISS 응답이다. Env-configured Supabase snapshot 1
 
 ## Snapshot manifest gate (not readiness)
 
-이 gate는 측정된 shape/count/hash snapshot의 재현성만 확인한다. launch readiness는 위 blocker table과 전체 checks에서 별도로 판정한다.
+이 gate는 측정된 shape/count/hash와 parse accounting snapshot의 재현성을 확인한다. empty_output은 성공이 아닌 boundary이며, launch readiness는 위 blocker table과 전체 checks에서 별도로 판정한다.
 
 - local entry hash: `164ef50791bc6f3581420efa5cdcbbd675681e96ab0d83b848eb680151beeb5c`
 - local parsed row hash: `8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0`
+- local parse accounting: 237 attempted = 222 usable + 15 empty_output + 0 hard failure
 - env-configured Supabase row hash: `8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0`
 - official current hash: `4ccd2d3a8e72ebaf3666882533df0b3f4f2ec04403a6458f3d72d62c07a99156`
 - official retired hash: `28dce36e21ed4a6caa261146cd79bbd2e24f5011b9e2b95def9dc8934e24a56f`
-- snapshot manifest failures: 없음 (shape/count/hash only; readiness blockers remain)
+- snapshot manifest failures: 없음 (shape/count/hash/parse accounting matched; readiness blockers remain)
 
 ## Metadata / provenance
 
@@ -159,8 +165,9 @@ Production search가 관측한 mode: rest-ilike. Vector 상태는 disabled다. �
 | `manifest-gate` | pass | 0 | snapshot shape/count/hash manifest matched; readiness evaluated separately |
 | `local-empty-pdf` | pass | 0 | zero-byte PDF archive entries |
 | `local-duplicate-content` | pass | 0 | same CRC32 and byte length candidates |
-| `local-parse-accounting` | pass | 0 | 1040 returned; 237 attempted; 237 succeeded; 0 failed |
-| `local-pdf-parse-failure` | pass | 0 | per-PDF parser exceptions; empty extracted text is tracked separately as body quality |
+| `local-parse-accounting` | pass | 0 | 1040 returned; 237 attempted; 222 usable nonempty; 15 empty output; 0 hard failed |
+| `local-pdf-empty-output` | boundary | 15 | attempted PDF parses with no usable nonempty body; OCR or extraction review required |
+| `local-pdf-parse-failure` | pass | 0 | per-PDF parser exceptions; empty outputs are tracked as a separate boundary |
 | `operational-audit-deterministic` | pass | 0 | a01aae777ca702f0827f4774fc1d13ad31201762f135f9e9b3d3fe5398d70785 / a01aae777ca702f0827f4774fc1d13ad31201762f135f9e9b3d3fe5398d70785 |
 | `source-mutation` | pass | 0 | derive operational metadata must not mutate source rows |
 | `empty-body` | fail | 818 | local ingest-equivalent rows with empty body |
