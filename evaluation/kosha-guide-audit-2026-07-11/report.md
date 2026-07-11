@@ -1,18 +1,18 @@
 # KOSHA GUIDE corpus / harness audit
 
-- generatedAt: 2026-07-11T09:05:30.571Z
+- generatedAt: 2026-07-11T12:03:41.009Z
 - readOnly: true
 - dbMutationPerformed: false
 - uploadPerformed: false
-- elapsedSeconds: 69.52
+- elapsedSeconds: 92.9
 
 ## 결론
 
-**NOT launch-ready for authoritative KOSHA-guide grounding.** 로컬 ZIP과 current live Supabase의 1,040행 count/hash parity는 같은 corpus snapshot을 읽었다는 사실만 증명한다. authoritative 본문, item-level provenance, control causality, 공식 version/current-state 적합성은 증명하지 않는다.
+**NOT launch-ready for authoritative KOSHA-guide grounding.** 로컬 ZIP과 env-configured Supabase snapshot의 1,040행 count/hash parity는 corpus content parity만 증명한다. production deployment identity, authoritative 본문, item-level provenance, control causality, 공식 version/current-state 적합성은 증명하지 않는다.
 
 로컬 ZIP 10개에는 PDF 1,040건이 있으며 production status도 KOSHA GUIDE 1,040건을 노출한다. 공식 KOSHA 현행 목록은 1,039건이다. 로컬은 현행 stable key를 모두 포함하지만 version 불일치 7건과 공식 폐지 1건을 포함한다.
 
-Production status는 fresh MISS 응답이다. Current live full-row 1,040건과 canonical hash `8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0`를 직접 검증했다. 로컬 parsed hash와 live hash의 parity도 별도 check로 확인했다.
+Production status는 fresh MISS 응답이다. Env-configured Supabase snapshot 1,040건과 canonical hash `8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0`를 직접 검증했다. production deployment와 같은 project라는 identity는 직접 증명되지 않았다.
 
 ## Severity-ranked blockers
 
@@ -20,10 +20,11 @@ Production status는 fresh MISS 응답이다. Current live full-row 1,040건과 
 |---:|---|---|---:|---|---|
 | 1 | BLOCKER | `authoritative-body-empty` | 818 | 818 rows have no parsed body; count/hash parity cannot ground answers in missing text | source PDF text or reviewed OCR body is non-empty and hash/provenance linked |
 | 2 | BLOCKER | `item-provenance-missing` | 1,040 | item URL column schema-absent; payload URL/file ID/published/status missing 1040/1040/1040/1040 | every launch row resolves to official item URL, file ID, publication date, and current/retired state |
-| 3 | HIGH | `operational-control-calibrated-candidate` | 1 | 71 initial rows; 70 fully cleared false positives; 71 flags removed; 1 calibrated candidate rows remain | remaining controls are re-derived from source body and cross-domain fixtures pass |
-| 4 | HIGH | `official-version-or-state-drift` | 8 | 7 current version mismatches and 1 officially retired local row | official current version replaces stale version and retired rows are excluded after approval |
-| 5 | HIGH | `summary-not-source-grounded` | 822 | 818 fallback-template rows plus 4 non-template reused summaries; not identical full-content count | source-grounded summaries replace fallback and bullet-only values |
-| 6 | MEDIUM | `production-retrieval-branch-unobserved` | 2 | observed modes rest-ilike; vector states disabled | ranked and hybrid production branches are observed with KOSHA evidence reflection |
+| 4 | HIGH | `operational-control-ground-truth-review` | 70 | 70 heuristic-delta rows lack explicit labels; 0 rows explicitly cleared | every heuristic delta receives explicit reviewed ground-truth labels |
+| 5 | HIGH | `operational-control-cross-domain-candidate` | 1 | 1 cross-domain candidate rows remain after the second heuristic | remaining controls are re-derived from source body and cross-domain fixtures pass |
+| 6 | HIGH | `official-version-or-state-drift` | 8 | 7 current version mismatches and 1 officially retired local row | official current version replaces stale version and retired rows are excluded after approval |
+| 7 | HIGH | `summary-not-source-grounded` | 822 | 818 fallback-template rows plus 4 non-template reused summaries; not identical full-content count | source-grounded summaries replace fallback and bullet-only values |
+| 8 | MEDIUM | `production-retrieval-branch-unobserved` | 2 | observed modes rest-ilike; vector states disabled | ranked and hybrid production branches are observed with KOSHA evidence reflection |
 
 ## 정확한 건수
 
@@ -45,13 +46,15 @@ Production status는 fresh MISS 응답이다. Current live full-row 1,040건과 
 | non-empty exact-body duplicate candidates group / rows | 1 / 4 |
 | ZIP CRC32+size duplicate candidates group / rows | 0 / 0 |
 | raw-control initial heuristic rows | 73 |
-| raw-control alias-cleared false-positive rows | 73 |
-| raw-control alias-removed flags | 74 |
-| raw-control calibrated candidates | 0 |
+| raw-control ground-truth-cleared rows | 0 |
+| raw-control review-required heuristic rows | 73 |
+| raw-control heuristic delta flags | 74 |
+| raw-control secondary-heuristic candidates | 0 |
 | operational initial heuristic rows | 71 |
-| operational alias-cleared false-positive rows | 70 |
-| operational alias-removed flags | 71 |
-| operational calibrated candidates | 1 |
+| operational ground-truth-cleared rows | 0 |
+| operational review-required heuristic rows | 70 |
+| operational heuristic delta flags | 71 |
+| operational secondary-heuristic candidates | 1 |
 
 ## Snapshot manifest gate (not readiness)
 
@@ -59,7 +62,7 @@ Production status는 fresh MISS 응답이다. Current live full-row 1,040건과 
 
 - local entry hash: `164ef50791bc6f3581420efa5cdcbbd675681e96ab0d83b848eb680151beeb5c`
 - local parsed row hash: `8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0`
-- current live row hash: `8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0`
+- env-configured Supabase row hash: `8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0`
 - official current hash: `4ccd2d3a8e72ebaf3666882533df0b3f4f2ec04403a6458f3d72d62c07a99156`
 - official retired hash: `28dce36e21ed4a6caa261146cd79bbd2e24f5011b9e2b95def9dc8934e24a56f`
 - snapshot manifest failures: 없음 (shape/count/hash only; readiness blockers remain)
@@ -73,7 +76,7 @@ Production status는 fresh MISS 응답이다. Current live full-row 1,040건과 
 - previous Supabase source createdAt: 2026-05-02T04:24:41.700198+00:00
 - previous Supabase source updatedAt: 2026-05-02T04:24:41.700198+00:00
 - official published range: 2010-08-31 ~ 2026-01-30
-- current live full-row created/updated range: created 2026-05-02T04:24:55.971033+00:00 ~ 2026-05-02T04:24:57.2222+00:00 / updated 2026-05-02T04:24:55.971033+00:00 ~ 2026-05-02T04:24:57.2222+00:00
+- env-configured Supabase created/updated range: created 2026-05-02T04:24:55.971033+00:00 ~ 2026-05-02T04:24:57.2222+00:00 / updated 2026-05-02T04:24:55.971033+00:00 ~ 2026-05-02T04:24:57.2222+00:00
 - DB item URL column: schema-absent; payload official URL provenance missing: 1040
 - DB item official file ID/published/status missing: 1040 / 1040 / 1040
 - representative official PDF URL probes: 5/5
@@ -89,9 +92,9 @@ Production status는 fresh MISS 응답이다. Current live full-row 1,040건과 
 | 106 | fallback template | 0 | 기계안전분야 분야의 KOSHA 기술지원규정 또는 안전보건 기술지침 자료입니다. |
 | 4 | non-template | 4 | ㆍ |
 
-## Representative calibrated contamination candidates
+## Representative secondary-heuristic candidates
 
-아래는 alias calibration 후에도 deterministic rule이 cross-task로 표시한 operational control 사례다. initial heuristic 71행 중 70행은 legitimate alias로 완전히 해소되었고 71개 flag가 제거되었다. 남은 1행도 launch 전 source text 기반 재검토가 필요하며, 이 표 자체를 문서 내용의 최종 의미 판정으로 사용하지 않는다.
+아래는 두 heuristic 간 비교 후에도 cross-task 후보로 남은 operational control 사례다. initial heuristic 71행에서 사라진 delta 중 명시 ground-truth로 cleared된 행은 0건이고, 라벨이 없어 review-required인 행은 70건이다. heuristic 차이만으로 contamination pass나 false-positive 판정을 내리지 않는다.
 
 | row | title | flags | matched operational controls |
 |---|---|---|---|
@@ -113,22 +116,22 @@ Production status는 fresh MISS 응답이다. Current live full-row 1,040건과 
 
 ## Retrieval / reflection
 
-Production search가 관측한 mode: rest-ilike. Vector 상태는 disabled다. 실제 production ranked/hybrid branch는 관측되지 않았고, 현재 production에서 받은 KOSHA 행을 동일한 DB harness에 넣어 rest/ranked/hybrid downstream reflection 계약을 결정적으로 재실행했다.
+Production search가 관측한 mode: rest-ilike. Vector 상태는 disabled다. 실제 관측 mode에 해당하는 branch만 tested이며, 나머지 ranked/vector/hybrid branch는 untested boundary다.
 
-| scenario | branch | selected evidence | failures |
-|---|---|---:|---:|
-| exterior-paint | rest | 39 | 0 |
-| exterior-paint | ranked | 39 | 0 |
-| exterior-paint | hybrid | 39 | 0 |
-| confined-pump | rest | 27 | 0 |
-| confined-pump | ranked | 27 | 0 |
-| confined-pump | hybrid | 27 | 0 |
-| forklift-traffic | rest | 16 | 0 |
-| forklift-traffic | ranked | 16 | 0 |
-| forklift-traffic | hybrid | 16 | 0 |
-| electrostatic-paint | rest | 38 | 0 |
-| electrostatic-paint | ranked | 38 | 0 |
-| electrostatic-paint | hybrid | 38 | 0 |
+| scenario | branch | execution | selected evidence | failures |
+|---|---|---|---:|---:|
+| exterior-paint | rest | tested | 39 | 0 |
+| exterior-paint | ranked | untested | 0 | 1 |
+| exterior-paint | hybrid | untested | 0 | 1 |
+| confined-pump | rest | tested | 27 | 0 |
+| confined-pump | ranked | untested | 0 | 1 |
+| confined-pump | hybrid | untested | 0 | 1 |
+| forklift-traffic | rest | tested | 16 | 0 |
+| forklift-traffic | ranked | untested | 0 | 1 |
+| forklift-traffic | hybrid | untested | 0 | 1 |
+| electrostatic-paint | rest | tested | 38 | 0 |
+| electrostatic-paint | ranked | untested | 0 | 1 |
+| electrostatic-paint | hybrid | untested | 0 | 1 |
 
 각 downstream record에는 selected title, prompt context, deterministic answer, document reflection label이 JSON 보고서에 보존된다. KOSHA code/title과 task-specific control이 함께 있어야 통과하며 generic prose만 있는 경우 실패한다.
 
@@ -145,7 +148,7 @@ Production search가 관측한 mode: rest-ilike. Vector 상태는 disabled다. �
 3. empty page, 빈 file ID/seq, zero-byte 또는 empty-response 다운로드는 저장 후보에서 제외하고 shard failure로 기록한다.
 4. identity diff 0/7/1/1032를 검토하고, update 7건과 retire 1건의 공식 URL/hash를 개별 확인한다.
 5. body가 빈 818건을 shard별 HEAD/download/hash/text/OCR dry-run 대상으로 만들고, item-level URL/file ID/published/status 1040건을 기존 필드에 backfill할 후보 JSON으로만 산출한다.
-6. fallback/non-template summary 822건을 source-grounded abstract 후보로 교체하고 calibrated operational candidate 1건의 controls를 본문 근거로 재도출한다.
+6. fallback/non-template summary 822건을 source-grounded abstract 후보로 교체하고 secondary-heuristic operational candidate 1건의 controls를 본문 근거로 재도출한다.
 7. representative high-risk retrieval을 rest/ranked/hybrid로 다시 실행해 KOSHA title, source URL, source-grounded control, document reflection이 모두 있는지 확인한다.
 8. **Approval gate 2:** zero mutation dry-run artifact와 focused tests 승인 후에만 별도 작업에서 incremental mutation을 허용한다. 본 audit 실행은 계속 read-only다.
 
@@ -156,7 +159,9 @@ Production search가 관측한 mode: rest-ilike. Vector 상태는 disabled다. �
 | `manifest-gate` | pass | 0 | snapshot shape/count/hash manifest matched; readiness evaluated separately |
 | `local-empty-pdf` | pass | 0 | zero-byte PDF archive entries |
 | `local-duplicate-content` | pass | 0 | same CRC32 and byte length candidates |
-| `operational-audit-deterministic` | pass | 0 | 3b67ac9f3f80a86d2e451e59693216caec6d4e0c1722d3280504f4cf652cfeec / 3b67ac9f3f80a86d2e451e59693216caec6d4e0c1722d3280504f4cf652cfeec |
+| `local-parse-accounting` | pass | 0 | 1040 returned; 237 attempted; 237 succeeded; 0 failed |
+| `local-pdf-parse-failure` | pass | 0 | per-PDF parser exceptions; empty extracted text is tracked separately as body quality |
+| `operational-audit-deterministic` | pass | 0 | a01aae777ca702f0827f4774fc1d13ad31201762f135f9e9b3d3fe5398d70785 / a01aae777ca702f0827f4774fc1d13ad31201762f135f9e9b3d3fe5398d70785 |
 | `source-mutation` | pass | 0 | derive operational metadata must not mutate source rows |
 | `empty-body` | fail | 818 | local ingest-equivalent rows with empty body |
 | `duplicate-summary` | fail | 822 | 11 normalized-summary groups; 818 fallback rows; not an identical full-content count |
@@ -166,25 +171,26 @@ Production search가 관측한 mode: rest-ilike. Vector 상태는 disabled다. �
 | `missing-official-status` | fail | 1,040 | rows without current or retired state |
 | `raw-tag-control-alias` | pass | 0 | raw risk tag emitted as a standalone control |
 | `raw-control-initial-heuristic` | boundary | 73 | pre-calibration candidate rows; not a launch blocker count |
-| `raw-control-alias-false-positive` | pass | 73 | 74 initial flags removed by legitimate aliases |
-| `raw-control-contamination` | pass | 0 | calibrated raw-control cross-domain candidates |
+| `raw-control-ground-truth-clearance` | boundary | 73 | 0 explicitly cleared rows; 74 heuristic delta flags |
+| `raw-control-secondary-heuristic` | boundary | 0 | secondary-heuristic candidate rows; not a contamination verdict |
 | `operational-control-initial-heuristic` | boundary | 71 | pre-calibration candidate rows; not a launch blocker count |
-| `operational-control-alias-false-positive` | pass | 70 | 71 initial flags removed by legitimate aliases |
-| `operational-control-contamination` | fail | 1 | calibrated cross-domain candidates remain after operational derivation |
+| `operational-control-ground-truth-clearance` | boundary | 70 | 0 explicitly cleared rows; 71 heuristic delta flags |
+| `operational-control-secondary-heuristic` | boundary | 1 | secondary-heuristic candidate rows; not a contamination verdict |
 | `official-current-stable-key-parity` | pass | 0 | 1039/1039 current stable keys found locally |
 | `official-version-mismatch` | fail | 7 | stable key matched but canonical version code differed |
 | `retired-local-row` | fail | 1 | local rows absent from current and present in retired list |
 | `official-url-representative` | pass | 0 | 5/5 representative PDF HEAD probes passed |
 | `retrieval-document-reflection` | pass | 0 | KOSHA title, controls, and document labels surfaced |
-| `supabase-visible-parity` | pass | 0 | production status and direct full-row snapshot matched |
-| `local-live-canonical-parity` | pass | 0 | 8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0 / 8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0 |
-| `current-live-full-row-hash` | pass | 0 | 8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0 |
+| `supabase-visible-parity` | pass | 0 | production status counts and env-configured Supabase snapshot counts matched; deployment identity unproven |
+| `local-env-supabase-canonical-parity` | pass | 0 | 8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0 / 8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0 |
+| `env-configured-supabase-full-row-hash` | pass | 0 | 8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0 |
+| `deployment-supabase-identity` | boundary | 1 | deployment-project-identity-unverified |
 | `production-ranked-branch` | boundary | 1 | observed modes: rest-ilike |
 | `production-hybrid-branch` | boundary | 1 | observed vector states: disabled |
 
 ## 접근 경계
 
-- Current live full-row Supabase snapshot was available.
+- Env-configured Supabase snapshot was available; deployment/project identity was not directly proven.
 - Production status remained visible through https://safeguard-contest-mvp.vercel.app/api/safety-reference/status.
 - Production retrieval modes observed: rest-ilike; vector states: disabled.
 - The official list probe read 1039 current and 679 retired rows; only 5 representative PDF URLs received HEAD probes.
