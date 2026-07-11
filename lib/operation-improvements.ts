@@ -1,4 +1,10 @@
-import type { HarnessImprovement } from "@/lib/db-harness";
+import type {
+  HarnessImprovement,
+  HarnessPhotoHazardControl,
+  HarnessPhotoHazardEvidence,
+  HarnessPhotoHazardProvenance,
+  HarnessPhotoHazardProviderResponse
+} from "@/lib/db-harness";
 
 export const MAX_INPUT_HAZARD_PHOTO_FILES = 10;
 
@@ -145,16 +151,16 @@ function parseWorkspaceHarness(value: unknown): HazardPhotoWorkspaceHarness | un
     const excerpt = readString(item.excerpt);
     const retrievals = Array.isArray(item.retrievals) ? item.retrievals.flatMap((retrieval) => {
       if (!isRecord(retrieval)) return [];
-      const channel = retrieval.channel === "direct" || retrieval.channel === "sif" || retrieval.channel === "supporting"
+      const channel: NonNullable<HazardPhotoWorkspaceHarness["evidence"][number]["retrievals"]>[number]["channel"] | null = retrieval.channel === "direct" || retrieval.channel === "sif" || retrieval.channel === "supporting"
         ? retrieval.channel
         : null;
-      const mode = retrieval.mode === "unconfigured"
+      const mode: NonNullable<HazardPhotoWorkspaceHarness["evidence"][number]["retrievals"]>[number]["mode"] | null = retrieval.mode === "unconfigured"
         || retrieval.mode === "rest-ilike"
         || retrieval.mode === "ranked-rpc"
         || retrieval.mode === "hybrid-vector-rpc"
         ? retrieval.mode
         : null;
-      const source = retrieval.source === "rest"
+      const source: NonNullable<HazardPhotoWorkspaceHarness["evidence"][number]["retrievals"]>[number]["source"] = retrieval.source === "rest"
         || retrieval.source === "ranked"
         || retrieval.source === "vector"
         || retrieval.source === "hybrid"
@@ -171,18 +177,22 @@ function parseWorkspaceHarness(value: unknown): HazardPhotoWorkspaceHarness | un
         vectorModel: readString(retrieval.vectorModel)
       }];
     }) : [];
-    return sourceId && sourceType && title
+    const normalizedSourceType: HazardPhotoWorkspaceHarness["evidence"][number]["sourceType"] | null = sourceType === "safeclaw-db" || sourceType === "mcp"
+      ? sourceType
+      : null;
+    const evidenceRole: HazardPhotoWorkspaceHarness["evidence"][number]["evidenceRole"] = item.evidenceRole === "direct" || item.evidenceRole === "supporting"
+      ? item.evidenceRole
+      : undefined;
+    return sourceId && normalizedSourceType && title
       ? [{
         sourceId,
-        sourceType,
+        sourceType: normalizedSourceType,
         title,
         excerpt,
         catalogSourceId: readString(item.catalogSourceId) || undefined,
         sourceUrl: typeof item.sourceUrl === "string" ? item.sourceUrl : null,
         itemType: readString(item.itemType) || undefined,
-        evidenceRole: item.evidenceRole === "direct" || item.evidenceRole === "supporting"
-          ? item.evidenceRole
-          : undefined,
+        evidenceRole,
         retrievals
       }]
       : [];
@@ -298,9 +308,13 @@ export function parseHazardPhotoWorkspaceResponse(
       return [];
     }
     const error = isRecord(item.error) ? item.error : {};
+    const status: HazardPhotoWorkspaceAnalysis["failures"][number]["status"] | null = item.status === "rejected" || item.status === "failed" || item.status === "unconfigured"
+      ? item.status
+      : null;
+    if (!status) return [];
     return [{
       name: readString(item.name) || "이름 없는 사진",
-      status: item.status,
+      status,
       message: readString(error.message) || "사진별 분석을 완료하지 못했습니다."
     }];
   }) : [];
@@ -411,6 +425,73 @@ function acceptedHazardPhotoCandidates(input: {
     .slice(0, 8);
 }
 
+type AcceptedHazardPhotoAnalysisMetadata = {
+  provider?: string;
+  providerMode?: "live" | "mock" | "unconfigured";
+  model?: string;
+  providerResponses?: readonly HarnessPhotoHazardProviderResponse[];
+};
+
+function normalizeProviderResponses(
+  responses: readonly HarnessPhotoHazardProviderResponse[] | undefined
+): HarnessPhotoHazardProviderResponse[] | undefined {
+  if (!responses?.length) return undefined;
+  return responses
+    .map((response) => ({
+      photoId: response.photoId.trim(),
+      responseId: response.responseId.trim(),
+      model: response.model.trim(),
+      createdAt: typeof response.createdAt === "number" && Number.isFinite(response.createdAt)
+        ? response.createdAt
+        : null
+    }))
+    .filter((response) => response.photoId && response.responseId && response.model)
+    .slice(0, 10);
+}
+
+function buildAcceptedHazardPhotoProvenance(
+  candidate: HazardPhotoGenerationCandidate,
+  candidateKey: string,
+  analysis: AcceptedHazardPhotoAnalysisMetadata
+): HarnessPhotoHazardProvenance {
+  const providerResponses = normalizeProviderResponses(analysis.providerResponses);
+  const evidence = candidate.harness?.evidence.map((item): HarnessPhotoHazardEvidence => ({
+    sourceId: item.sourceId,
+    sourceType: item.sourceType,
+    title: item.title,
+    excerpt: item.excerpt,
+    catalogSourceId: item.catalogSourceId,
+    sourceUrl: item.sourceUrl,
+    itemType: item.itemType,
+    evidenceRole: item.evidenceRole,
+    retrievals: item.retrievals?.map((retrieval) => ({
+      channel: retrieval.channel,
+      query: retrieval.query,
+      mode: retrieval.mode,
+      source: retrieval.source,
+      vectorAttempted: retrieval.vectorAttempted,
+      vectorOk: retrieval.vectorOk,
+      vectorModel: retrieval.vectorModel
+    }))
+  }));
+  const confirmedControls = candidate.harness?.confirmedControls.map((control): HarnessPhotoHazardControl => ({
+    text: control.text,
+    evidenceSourceIds: [...control.evidenceSourceIds]
+  }));
+  return {
+    candidateKey,
+    candidateId: candidate.id,
+    source: candidate.source || "local",
+    provider: analysis.provider?.trim() || undefined,
+    providerMode: analysis.providerMode,
+    model: analysis.model?.trim() || undefined,
+    providerResponses,
+    evidence: evidence?.length ? evidence : undefined,
+    confirmedControls: confirmedControls?.length ? confirmedControls : undefined,
+    confirmedAt: candidate.harness?.confirmedAt ?? null
+  };
+}
+
 export function buildAcceptedHazardPhotoAppendix(input: {
   candidates: readonly HazardPhotoGenerationCandidate[];
   acceptedCandidateKeys: readonly string[];
@@ -418,19 +499,47 @@ export function buildAcceptedHazardPhotoAppendix(input: {
   ocrText?: string;
   siteSignals?: readonly string[];
   photoCount?: number;
+  provider?: string;
+  providerMode?: "live" | "mock" | "unconfigured";
+  model?: string;
+  providerResponses?: readonly HarnessPhotoHazardProviderResponse[];
 }): string {
   const accepted = acceptedHazardPhotoCandidates(input);
   if (!accepted.length) return "";
 
   const lines = [
     "[사용자 추가 사진 위험요인 후보]",
-    ...accepted.map((candidate) => {
+    ...accepted.flatMap((candidate) => {
+      const candidateKey = buildHazardPhotoCandidateKey(candidate);
+      const provenance = buildAcceptedHazardPhotoProvenance(candidate, candidateKey, input);
       const severity = candidate.severity || "review";
       const documents = candidate.reflectedDocuments?.length
         ? ` / 반영: ${candidate.reflectedDocuments.join(", ")}`
         : "";
       const evidence = candidate.evidence ? ` / 근거: ${candidate.evidence}` : "";
-      return `- ${candidate.label}(${severity}): ${candidate.detail}${documents}${evidence}`;
+      const responseSummary = provenance.providerResponses?.length
+        ? provenance.providerResponses
+          .map((response) => `${response.photoId}=${response.responseId}@${response.model}`)
+          .join(", ")
+        : "";
+      const evidenceSummary = provenance.evidence?.length
+        ? provenance.evidence
+          .map((item) => `${item.title}#${item.sourceId}`)
+          .join(", ")
+        : "";
+      const confirmedControls = provenance.confirmedControls?.length
+        ? provenance.confirmedControls.map((control) => control.text).join(", ")
+        : "";
+      return [
+        `- ${candidate.label}(${severity}): ${candidate.detail}${documents}${evidence}`,
+        `  후보 키: ${candidateKey}`,
+        provenance.provider && provenance.providerMode && provenance.model
+          ? `  모델: ${provenance.provider}/${provenance.providerMode}/${provenance.model}`
+          : "",
+        responseSummary ? `  응답 메타: ${responseSummary}` : "",
+        evidenceSummary ? `  근거 출처: ${evidenceSummary}` : "",
+        confirmedControls ? `  확정 통제: ${confirmedControls}` : ""
+      ].filter(Boolean);
     })
   ];
   if (input.photoCount && input.photoCount > 0) lines.push(`사진 수: ${input.photoCount}장`);
@@ -448,10 +557,15 @@ export function buildAcceptedHazardPhotoHarnessImprovements(input: {
   ocrText?: string;
   siteSignals?: readonly string[];
   photoCount?: number;
+  provider?: string;
+  providerMode?: "live" | "mock" | "unconfigured";
+  model?: string;
+  providerResponses?: readonly HarnessPhotoHazardProviderResponse[];
 }): HarnessImprovement[] {
   const taskLabel = input.taskLabel.trim() || "현장 사진 첨부 작업";
   return acceptedHazardPhotoCandidates(input).map((candidate, index) => {
     const key = buildHazardPhotoCandidateKey(candidate);
+    const provenance = buildAcceptedHazardPhotoProvenance(candidate, key, input);
     const reflectedDocuments = candidate.reflectedDocuments?.length
       ? [...candidate.reflectedDocuments]
       : ["위험성평가표", "TBM 브리핑", "TBM 기록"];
@@ -483,6 +597,8 @@ export function buildAcceptedHazardPhotoHarnessImprovements(input: {
       analysisMode: candidate.source === "vision" ? "vision_ocr" : "manual_text",
       photoPairAttached: false,
       visionUserLabel: sourceLabel,
+      visionProvider: provenance.provider,
+      visionModel: provenance.model,
       visionSummary: visionSummary || undefined,
       detectedHazards: [candidate.label, candidate.severity ? `severity:${candidate.severity}` : ""].filter(Boolean),
       observedImprovement: detail,
@@ -490,7 +606,8 @@ export function buildAcceptedHazardPhotoHarnessImprovements(input: {
       sourcePhotoNames: sourcePhotoNameList,
       photoCount,
       siteSignals,
-      visionEvidence: evidence || undefined
+      visionEvidence: evidence || undefined,
+      photoHazardProvenance: provenance
     };
   });
 }

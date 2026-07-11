@@ -32,6 +32,52 @@ export type HarnessImprovement = {
   siteSignals?: string[];
   visionEvidence?: string;
   visionErrorMessage?: string;
+  photoHazardProvenance?: HarnessPhotoHazardProvenance;
+};
+
+export type HarnessPhotoHazardProviderResponse = {
+  photoId: string;
+  responseId: string;
+  model: string;
+  createdAt: number | null;
+};
+
+export type HarnessPhotoHazardEvidence = {
+  sourceId: string;
+  sourceType: "safeclaw-db" | "mcp";
+  title: string;
+  excerpt: string;
+  catalogSourceId?: string;
+  sourceUrl?: string | null;
+  itemType?: string;
+  evidenceRole?: "direct" | "supporting";
+  retrievals?: Array<{
+    channel: "direct" | "sif" | "supporting";
+    query: string;
+    mode: "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
+    source: "rest" | "ranked" | "vector" | "hybrid" | null;
+    vectorAttempted: boolean;
+    vectorOk: boolean;
+    vectorModel: string;
+  }>;
+};
+
+export type HarnessPhotoHazardControl = {
+  text: string;
+  evidenceSourceIds: string[];
+};
+
+export type HarnessPhotoHazardProvenance = {
+  candidateKey: string;
+  candidateId?: string;
+  source: "vision" | "local";
+  provider?: string;
+  providerMode?: "live" | "mock" | "unconfigured";
+  model?: string;
+  providerResponses?: HarnessPhotoHazardProviderResponse[];
+  evidence?: HarnessPhotoHazardEvidence[];
+  confirmedControls?: HarnessPhotoHazardControl[];
+  confirmedAt?: string | null;
 };
 
 export type HarnessWorkpackMemory = {
@@ -316,6 +362,129 @@ function normalizeAnalysisMode(value: unknown): HarnessImprovement["analysisMode
   return undefined;
 }
 
+function normalizeProviderMode(value: unknown): HarnessPhotoHazardProvenance["providerMode"] | undefined {
+  if (value === "live" || value === "mock" || value === "unconfigured") return value;
+  return undefined;
+}
+
+function parsePhotoHazardProviderResponse(value: unknown): HarnessPhotoHazardProviderResponse | null {
+  if (!isRecord(value)) return null;
+  const photoId = readString(value.photoId);
+  const responseId = readString(value.responseId);
+  const model = readString(value.model);
+  if (!photoId || !responseId || !model) return null;
+  return {
+    photoId,
+    responseId,
+    model,
+    createdAt: typeof value.createdAt === "number" && Number.isFinite(value.createdAt) ? value.createdAt : null
+  };
+}
+
+function parsePhotoHazardEvidenceRetrieval(value: unknown): NonNullable<HarnessPhotoHazardEvidence["retrievals"]>[number] | null {
+  if (!isRecord(value)) return null;
+  const channel = value.channel === "direct" || value.channel === "sif" || value.channel === "supporting"
+    ? value.channel
+    : null;
+  const mode = value.mode === "unconfigured" || value.mode === "rest-ilike" || value.mode === "ranked-rpc" || value.mode === "hybrid-vector-rpc"
+    ? value.mode
+    : null;
+  const source = value.source === "rest" || value.source === "ranked" || value.source === "vector" || value.source === "hybrid"
+    ? value.source
+    : null;
+  const query = readString(value.query);
+  const vectorModel = readString(value.vectorModel);
+  if (!channel || !mode || !query || !vectorModel) return null;
+  return {
+    channel,
+    query,
+    mode,
+    source,
+    vectorAttempted: value.vectorAttempted === true,
+    vectorOk: value.vectorOk === true,
+    vectorModel
+  };
+}
+
+function parsePhotoHazardEvidence(value: unknown): HarnessPhotoHazardEvidence | null {
+  if (!isRecord(value)) return null;
+  const sourceId = readString(value.sourceId);
+  const sourceType = value.sourceType === "safeclaw-db" || value.sourceType === "mcp"
+    ? value.sourceType
+    : null;
+  const title = readString(value.title);
+  const excerpt = readString(value.excerpt);
+  if (!sourceId || !sourceType || !title || !excerpt) return null;
+  const evidenceRole = value.evidenceRole === "direct" || value.evidenceRole === "supporting"
+    ? value.evidenceRole
+    : undefined;
+  const retrievals = Array.isArray(value.retrievals)
+    ? value.retrievals
+      .map(parsePhotoHazardEvidenceRetrieval)
+      .filter((item): item is NonNullable<HarnessPhotoHazardEvidence["retrievals"]>[number] => item !== null)
+    : undefined;
+  return {
+    sourceId,
+    sourceType,
+    title,
+    excerpt,
+    catalogSourceId: readString(value.catalogSourceId) || undefined,
+    sourceUrl: typeof value.sourceUrl === "string" ? value.sourceUrl : null,
+    itemType: readString(value.itemType) || undefined,
+    evidenceRole,
+    retrievals: retrievals?.length ? retrievals : undefined
+  };
+}
+
+function parsePhotoHazardControl(value: unknown): HarnessPhotoHazardControl | null {
+  if (!isRecord(value)) return null;
+  const text = readString(value.text);
+  if (!text) return null;
+  return {
+    text,
+    evidenceSourceIds: readStringArray(value.evidenceSourceIds).slice(0, 12)
+  };
+}
+
+function parsePhotoHazardProvenance(value: unknown): HarnessPhotoHazardProvenance | undefined {
+  if (!isRecord(value)) return undefined;
+  const candidateKey = readString(value.candidateKey);
+  const source = value.source === "vision" || value.source === "local"
+    ? value.source
+    : null;
+  if (!candidateKey || !source) return undefined;
+  const providerResponses = Array.isArray(value.providerResponses)
+    ? value.providerResponses
+      .map(parsePhotoHazardProviderResponse)
+      .filter((item): item is HarnessPhotoHazardProviderResponse => item !== null)
+      .slice(0, 10)
+    : undefined;
+  const evidence = Array.isArray(value.evidence)
+    ? value.evidence
+      .map(parsePhotoHazardEvidence)
+      .filter((item): item is HarnessPhotoHazardEvidence => item !== null)
+      .slice(0, 8)
+    : undefined;
+  const confirmedControls = Array.isArray(value.confirmedControls)
+    ? value.confirmedControls
+      .map(parsePhotoHazardControl)
+      .filter((item): item is HarnessPhotoHazardControl => item !== null)
+      .slice(0, 8)
+    : undefined;
+  return {
+    candidateKey,
+    candidateId: readString(value.candidateId) || undefined,
+    source,
+    provider: readString(value.provider) || undefined,
+    providerMode: normalizeProviderMode(value.providerMode),
+    model: readString(value.model) || undefined,
+    providerResponses: providerResponses?.length ? providerResponses : undefined,
+    evidence: evidence?.length ? evidence : undefined,
+    confirmedControls: confirmedControls?.length ? confirmedControls : undefined,
+    confirmedAt: typeof value.confirmedAt === "string" ? value.confirmedAt : null
+  };
+}
+
 function parseHarnessImprovement(value: unknown): HarnessImprovement | null {
   if (!isRecord(value)) return null;
   const id = readString(value.id);
@@ -344,7 +513,8 @@ function parseHarnessImprovement(value: unknown): HarnessImprovement | null {
     photoCount: readPositiveNumber(value.photoCount),
     siteSignals: readStringArray(value.siteSignals).slice(0, 12),
     visionEvidence: readString(value.visionEvidence) || undefined,
-    visionErrorMessage: readString(value.visionErrorMessage) || undefined
+    visionErrorMessage: readString(value.visionErrorMessage) || undefined,
+    photoHazardProvenance: parsePhotoHazardProvenance(value.photoHazardProvenance)
   };
 }
 

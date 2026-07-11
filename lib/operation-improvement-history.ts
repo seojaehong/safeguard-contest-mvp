@@ -1,4 +1,4 @@
-import type { HarnessImprovement } from "@/lib/db-harness";
+import type { HarnessImprovement, HarnessPhotoHazardProvenance } from "@/lib/db-harness";
 
 export const OPERATION_IMPROVEMENTS_STORAGE_KEY = "safeclaw.operationImprovements.v1";
 
@@ -32,6 +32,7 @@ export type OperationImprovement = {
   siteSignals?: string[];
   visionEvidence?: string;
   visionErrorMessage?: string;
+  photoHazardProvenance?: HarnessPhotoHazardProvenance;
   saveMessage?: string;
 };
 
@@ -93,7 +94,8 @@ export function operationImprovementToHarnessImprovement(item: OperationImprovem
     photoCount,
     siteSignals: item.siteSignals,
     visionEvidence: item.visionEvidence,
-    visionErrorMessage: item.visionErrorMessage
+    visionErrorMessage: item.visionErrorMessage,
+    photoHazardProvenance: item.photoHazardProvenance
   };
 }
 
@@ -137,6 +139,7 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
         (isStringArray(item.siteSignals) || typeof item.siteSignals === "undefined") &&
         (typeof item.visionEvidence === "string" || typeof item.visionEvidence === "undefined") &&
         (typeof item.visionErrorMessage === "string" || typeof item.visionErrorMessage === "undefined") &&
+        (typeof item.photoHazardProvenance === "object" || typeof item.photoHazardProvenance === "undefined" || item.photoHazardProvenance === null) &&
         (typeof item.saveMessage === "string" || typeof item.saveMessage === "undefined")
       );
       if (!valid) return [];
@@ -172,6 +175,9 @@ export function parseOperationImprovements(raw: string | null): OperationImprove
         siteSignals: readStringArray(item.siteSignals),
         visionEvidence: typeof item.visionEvidence === "string" ? item.visionEvidence : undefined,
         visionErrorMessage: typeof item.visionErrorMessage === "string" ? item.visionErrorMessage : undefined,
+        photoHazardProvenance: isRecord(item.photoHazardProvenance)
+          ? item.photoHazardProvenance as HarnessPhotoHazardProvenance
+          : undefined,
         saveMessage: typeof item.saveMessage === "string" ? item.saveMessage : undefined
       }];
     });

@@ -349,7 +349,32 @@ describe("DB harness packet", () => {
         visionSummary: "After 사진에서 난간 보강이 확인됩니다.",
         detectedHazards: ["추락"],
         observedImprovement: "비계 단부 난간 보강",
-        ocrText: "작업중 출입금지"
+        ocrText: "작업중 출입금지",
+        photoHazardProvenance: {
+          candidateId: "photo-1-candidate-1",
+          candidateKey: "vision::추락::오전 작업 전 이동식 비계 난간을 보강함::before.jpg|after.jpg",
+          source: "vision",
+          provider: "openai",
+          providerMode: "live",
+          model: "gpt-4.1-mini-2026-06-01",
+          providerResponses: [{
+            photoId: "photo-1",
+            responseId: "resp_workspace_vision",
+            model: "gpt-4.1-mini-2026-06-01",
+            createdAt: 1_783_500_000
+          }],
+          evidence: [{
+            sourceId: "fall-reference",
+            sourceType: "safeclaw-db",
+            title: "비계 추락 예방",
+            excerpt: "작업발판 안전난간 상태를 확인합니다."
+          }],
+          confirmedControls: [{
+            text: "이동식 비계 난간 보강",
+            evidenceSourceIds: ["fall-reference"]
+          }],
+          confirmedAt: "2026-07-11T00:00:00.000Z"
+        }
       }, {
         id: "",
         taskLabel: "invalid",
@@ -383,6 +408,24 @@ describe("DB harness packet", () => {
     expect(promptContext).toContain("개선이력: 추락 -> 오전 작업 전 이동식 비계 난간을 보강함");
     expect(promptContext).toContain("visionStatus: analyzed");
     expect(promptContext).toContain("작업이력: 2026-07-08T00:00:00.000Z · 지난주 성수동 외벽 도장 · 문서팩 준비됨");
+    expect(harnessMemory.improvements[0]?.photoHazardProvenance).toMatchObject({
+      candidateId: "photo-1-candidate-1",
+      candidateKey: "vision::추락::오전 작업 전 이동식 비계 난간을 보강함::before.jpg|after.jpg",
+      source: "vision",
+      provider: "openai",
+      providerMode: "live",
+      model: "gpt-4.1-mini-2026-06-01",
+      providerResponses: [{
+        photoId: "photo-1",
+        responseId: "resp_workspace_vision",
+        model: "gpt-4.1-mini-2026-06-01",
+        createdAt: 1_783_500_000
+      }],
+      confirmedControls: [{
+        text: "이동식 비계 난간 보강",
+        evidenceSourceIds: ["fall-reference"]
+      }]
+    });
   });
 
   it("builds the visible judgment summary from the DB harness packet before generic answer text", () => {
