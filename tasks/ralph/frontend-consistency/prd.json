@@ -1,0 +1,156 @@
+{
+  "feature": "SafeClaw frontend consistency audit",
+  "branchName": "feat/frontend-consistency-audit",
+  "qualityChecks": [
+    "npm.cmd test",
+    "npm.cmd run typecheck",
+    "npm.cmd run build",
+    "npm.cmd run audit:frontend-consistency",
+    "npm.cmd run audit:frontend-browser"
+  ],
+  "userStories": [
+    {
+      "id": "F1",
+      "title": "Executable visual design contract",
+      "priority": 1,
+      "status": "in_progress",
+      "passes": false,
+      "acceptance": [
+        "All 32 page routes are inventoried without gaps",
+        "Four font roles and exact screen, print, spacing, and shape values are typed",
+        "npm.cmd test -- tests/frontend-design-contract.test.ts passes"
+      ],
+      "files": [
+        "lib/frontend-design-contract.ts",
+        "tests/frontend-design-contract.test.ts",
+        "scripts/frontend_consistency_audit.mjs"
+      ]
+    },
+    {
+      "id": "F2",
+      "title": "Canonical CSS type and geometry foundation",
+      "priority": 2,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Static audit reports zero off-contract font, line-height, tracking, radius, and important declarations",
+        "Focused design contract tests and typecheck pass",
+        "Independent review confirms mechanical normalization preserves semantic roles"
+      ],
+      "files": [
+        "app/globals.css",
+        "lib/frontend-design-contract.ts",
+        "tests/frontend-design-contract.test.ts",
+        "scripts/frontend_consistency_audit.mjs"
+      ]
+    },
+    {
+      "id": "F3",
+      "title": "Shared shells and framework states",
+      "priority": 3,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Shell, navigation, controls, error, loading, and empty states use canonical values",
+        "Focused shared-surface tests pass",
+        "Landing and document variant scoped selectors preserve canonical tuples through later declarations",
+        "Loading animations respect reduced-motion preferences",
+        "Document variant high-specific selectors keep intros body-large and list or report copy body-sized",
+        "Reviewed shared surfaces enforce accessible names if icon-only controls are introduced"
+      ],
+      "files": [
+        "components/SafeClawModuleShell.tsx",
+        "components/SafeClawLanding.tsx",
+        "app/not-found.tsx",
+        "app/error.tsx",
+        "app/global-error.tsx",
+        "app/workspace/loading.tsx"
+      ]
+    },
+    {
+      "id": "F4",
+      "title": "All route families",
+      "priority": 4,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Every discovered page belongs to one route family",
+        "Every page has consistent title, body, control, card, and responsive geometry",
+        "Exact selector and breakpoint checks prove effective V2, demo, legacy, and mobile geometry",
+        "Supporting route gutters follow the exact desktop, tablet, and mobile contract: 24px at 1280px and above, 20px from 768px through 1279px, and 16px below 768px",
+        "Supporting route cards use 24px desktop and 16px mobile padding, introductory subtitles use Body large, and route-specific layout gaps use the fixed spacing scale",
+        "Supporting heroes and shared module shell heroes, wrappers, grid articles, and panels use allowed geometry at 1280px, 1024px, and 767px",
+        "Landing gutters, controls, cards, and console plus ordinary module headings, prose, lists, controls, and 980px navigation use canonical roles and the fixed spacing scale",
+        "A parser-backed landing and ordinary-module family audit reports zero disallowed fixed spacing values while section, HUD, terminal, sidebar, navigation, and current-workpack roles remain canonical",
+        "The family parser accepts only the approved spacing scale, audits comma selectors independently, rejects mutation values such as 7px, and excludes only explicit document variants and justified 1px separator seams",
+        "Landing mobile sections and cards plus current-workpack desktop, tablet, and mobile geometry are asserted through effective breakpoint precedence",
+        "Ordinary module route and component class ownership is source-checked, including unprefixed ontology and knowledge descendants, and spacing tokens reject unknown or undeclared scale names",
+        "Delegated briefing and AI-connect components are source-owned, their route spacing and controls are canonical, and forbidden em/rem/percent/arbitrary expressions are mutation-tested",
+        "Full signed decimal pixel tokens are parsed atomically and unapproved decimal spacing mutations are rejected",
+        "At every viewport below 768px, verified at 767px, informational and demo cards use 16px padding while desktop cards retain 24px padding",
+        "Informational and login titles, card headings, and authentication controls use canonical typography roles",
+        "Task 4 list and row spacing is route-scoped and does not alter WorkpackEditor density",
+        "Legal detail bodies use the 72ch long-form tier and major sections use section-title headings",
+        "Demo heading order and delegated authentication owners are regression-tested"
+      ],
+      "files": [
+        "app",
+        "components",
+        "tests/frontend-route-coverage.test.ts",
+        "tests/frontend-design-contract.test.ts",
+        "scripts/frontend_consistency_audit.mjs"
+      ]
+    },
+    {
+      "id": "F5",
+      "title": "Workspace and reports density",
+      "priority": 5,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Day and Night share exact type, spacing, and radius values",
+        "Input, document, share, evidence, and reports states pass focused tests and browser checks"
+      ],
+      "files": [
+        "components/SafeGuardCommandCenter.tsx",
+        "components/FieldOperationsWorkspace.tsx",
+        "components/ReportsDownloadCenter.tsx",
+        "components/WorkflowSharePanel.tsx"
+      ]
+    },
+    {
+      "id": "F6",
+      "title": "Generated document typography",
+      "priority": 6,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Print title, section, body, table, and note values use the exact pt contract",
+        "Document data and export contracts are unchanged"
+      ],
+      "files": [
+        "components/WorkpackEditor.tsx",
+        "app/api/export/pdf/route.ts"
+      ]
+    },
+    {
+      "id": "F7",
+      "title": "Complete browser evidence and PR handoff",
+      "priority": 7,
+      "status": "done",
+      "passes": true,
+      "closure": "b61929f passed final branch specification and code-quality review with zero findings; browser 108/108, recovered 1, full 56 files/523 tests, typecheck, audit/normal build, and static 32/22 gates passed. Draft PR #66 body updated 2026-07-11. Backend patch 99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49 remains backend-owned and pending independent review before post-integration gates.",
+      "externalIntegration": "F7 remains done. Backend-owned 3900892 is required for canonical current-workpack resilience. Module shell 99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49 and isolated reports candidate a935fdb await independent review; a935fdb is not integrated. Full post-integration gates remain required.",
+      "acceptance": [
+        "Desktop and mobile evidence exists for every user-visible route",
+        "Day and Night workspace evidence exists",
+        "Tests, typecheck, build, static audit, and browser audit pass",
+        "PR 66 contains final conflict and verification information"
+      ],
+      "files": [
+        "scripts/frontend_consistency_browser_audit.mjs",
+        "evaluation/frontend-consistency-audit-2026-07-11"
+      ]
+    }
+  ]
+}

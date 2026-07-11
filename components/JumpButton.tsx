@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 interface JumpButtonProps {
   id: string;
   children: React.ReactNode;
@@ -17,4 +19,20 @@ export function JumpButton({ id, children }: JumpButtonProps) {
       {children}
     </button>
   );
+}
+
+export function AuditGlobalBoundaryTrigger({ enabled }: { enabled: boolean }) {
+  const [shouldThrow, setShouldThrow] = useState(false);
+
+  useEffect(() => {
+    if (enabled && new URLSearchParams(window.location.search).get("__auditBoundary") === "global-error") {
+      setShouldThrow(true);
+    }
+  }, [enabled]);
+
+  if (shouldThrow) {
+    throw new Error("SafeClaw deterministic frontend audit global boundary probe");
+  }
+
+  return null;
 }

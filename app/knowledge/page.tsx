@@ -86,17 +86,17 @@ export default async function KnowledgePage() {
       <section className="knowledge-status-grid">
         <article className="card">
           <span className="eyebrow">Built-in Wiki</span>
-          <strong>{hazardEntries.length}개 위험요인 · {formEntries.length}개 서식</strong>
+          <h2 className="safeclaw-section-title">{hazardEntries.length}개 위험요인 · {formEntries.length}개 서식</h2>
           <p className="muted">기본 위험요인과 서식 기준을 내장 위키로 관리하고, 현장 문서 보완 때 짧은 근거 요약만 보여줍니다.</p>
         </article>
         <article className="card">
           <span className="eyebrow">Runtime Knowledge</span>
-          <strong>근거 매칭 · 원본 누적 · AI 보완</strong>
+          <h2 className="safeclaw-section-title">근거 매칭 · 원본 누적 · AI 보완</h2>
           <p className="muted">현장 API 호출 결과는 원본 이벤트로 검증되고, 로그인 시 Supabase 지식 테이블에 누적됩니다.</p>
         </article>
         <article className="card">
           <span className="eyebrow">Knowledge Catalog</span>
-          <strong>{stats.items.toLocaleString("ko-KR")}개 항목 · {stats.sources}개 출처</strong>
+          <h2 className="safeclaw-section-title">{stats.items.toLocaleString("ko-KR")}개 항목 · {stats.sources}개 출처</h2>
           <p className="muted">{stats.message}</p>
         </article>
       </section>
@@ -104,7 +104,7 @@ export default async function KnowledgePage() {
       <section className="card knowledge-index-card">
         <div className="compact-head">
           <span className="eyebrow">KOSHA Technical Support</span>
-          <strong>문서 반영용 KOSHA 기술 지원 자료</strong>
+          <h2 className="safeclaw-section-title">문서 반영용 KOSHA 기술 지원 자료</h2>
         </div>
         <p className="muted small">
           아래 항목은 원문 목록이 아니라 보완 생성에 쓰는 역할, 짧은 요약, 문서 반영 위치만 보여줍니다.
@@ -131,7 +131,7 @@ export default async function KnowledgePage() {
       <section className="card knowledge-index-card">
         <div className="compact-head">
           <span className="eyebrow">KOSHA Reference Library</span>
-          <strong>참고 자료실 (PDF)</strong>
+          <h2 className="safeclaw-section-title">참고 자료실 (PDF)</h2>
         </div>
         <p className="muted small">
           KOSHA 공식 발간 매뉴얼·가이드라인 PDF. 출처: 안전보건공단 (공공누리 1유형, 출처표시 자유사용/재배포 가능).
@@ -186,7 +186,7 @@ export default async function KnowledgePage() {
       <section className="card knowledge-index-card">
         <div className="compact-head">
           <span className="eyebrow">Index</span>
-          <strong>위키 인덱스</strong>
+          <h2 className="safeclaw-section-title">위키 인덱스</h2>
         </div>
         <p className="muted small">위험요인/서식 위키의 전체 목차입니다. 화면 기본 흐름에서는 근거 카드와 반영 위치를 먼저 확인합니다.</p>
         <details>
@@ -199,7 +199,7 @@ export default async function KnowledgePage() {
         <article className="card">
           <div className="compact-head">
             <span className="eyebrow">Hazards</span>
-            <strong>위험요인 위키</strong>
+            <h2 className="safeclaw-section-title">위험요인 위키</h2>
           </div>
           <div className="knowledge-entry-list">
             {hazardEntries.map((entry) => (
@@ -213,7 +213,7 @@ export default async function KnowledgePage() {
         <article className="card">
           <div className="compact-head">
             <span className="eyebrow">Forms</span>
-            <strong>서식 위키</strong>
+            <h2 className="safeclaw-section-title">서식 위키</h2>
           </div>
           <div className="knowledge-entry-list">
             {formEntries.map((entry) => (
@@ -229,7 +229,7 @@ export default async function KnowledgePage() {
       <section className="card knowledge-index-card">
         <div className="compact-head">
           <span className="eyebrow">Schema</span>
-          <strong>LLM 재생성 스키마</strong>
+          <h2 className="safeclaw-section-title">LLM 재생성 스키마</h2>
         </div>
         <p className="muted small">
           재생성 스키마는 개발/운영 확인용입니다. 현장 문서에는 roleLabel, shortSummary, documentReflectionLabel만 반영합니다.

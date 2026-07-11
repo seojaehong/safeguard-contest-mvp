@@ -195,7 +195,7 @@ export function ReportsDownloadCenter() {
 
   if (!snapshot || !workpack) {
     return (
-      <section className="safeclaw-module-panel">
+      <section className="safeclaw-module-panel workbench-empty-state">
         <span>리포트 준비</span>
         <h2>최근 작업팩을 확인하고 있습니다.</h2>
         <p>작업공간에서 문서팩을 만든 뒤 이 화면으로 돌아오면 개선사항과 위험성평가를 묶어 내려받을 수 있습니다.</p>
@@ -313,7 +313,7 @@ export function ReportsDownloadCenter() {
         <aside className="safeclaw-workdoc-rail" aria-label="작업문서 도구">
           <section>
             <span>기간</span>
-            <div className="safeclaw-report-controls" aria-label="리포트 기간 선택">
+            <div className="safeclaw-report-controls workbench-report-filters" aria-label="리포트 기간 선택">
               {periodOptions.map((option) => (
                 <button
                   key={option.value}

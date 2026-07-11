@@ -8,7 +8,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const results = await runSearch(q);
 
   return (
-    <main className="container grid">
+    <main className="container grid route-supporting-page">
       <section className="hero grid">
         <div className="row">
           <span className="badge">근거 탐색</span>
@@ -22,8 +22,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       </section>
       <SearchBox initialQuery={q} />
       <div className="card list">
-        <div className="h3">검색 결과 {results.length}건</div>
-        <div className="muted">법제처 법령정보를 우선 확인하고, 설정된 보조 근거가 있으면 판례·해석례를 함께 정리합니다.</div>
+        <h2 className="h3">검색 결과 {results.length}건</h2>
+        <p className="muted route-section-description">법제처 법령정보를 우선 확인하고, 설정된 보조 근거가 있으면 판례·해석례를 함께 정리합니다.</p>
       </div>
       <section className="list">
         {results.map((item) => <ResultCard key={item.id} item={item} />)}

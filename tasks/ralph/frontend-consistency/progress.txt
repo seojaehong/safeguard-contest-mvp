@@ -1,0 +1,143 @@
+## 2026-07-11 F1
+- Changed: added exact typography, spacing, radius, route, and generated-surface contracts plus a static audit command.
+- Verified: 32 discovered routes, zero route coverage gaps, focused contract tests pass, typecheck passes.
+- Learned: the original stylesheet contained 637 off-contract declarations before line-height and tracking were added to the audit.
+- Next: F2 independent review and browser-safe correction of mechanical normalization.
+
+## 2026-07-11 F2
+- Changed: removed all important declarations and mechanically mapped font sizes, line heights, tracking, and radii to approved tiers; restored explicit circle and structural geometry.
+- Verified: focused contract tests, static audit, and typecheck currently pass.
+- Learned: static compliance alone cannot prove semantic role correctness after a bulk map.
+- Next: independent diff review, targeted fixes, then browser evidence before marking passed.
+
+## 2026-07-11 F2 review closure
+- Changed: normalized 431 font-size rules to complete semantic tuples and enforced per-selector mixed-role, exact effect, circle, cascade, and reduced-motion contracts.
+- Verified: focused contract test 18/18, static audit 32/32 with zero violations, typecheck, build 27/27, independent spec and code-quality review both pass with zero findings.
+- Learned: class-name keywords cannot prove interactive or HUD semantics; ambiguous current selectors need explicit roles and mixed selector lists must be classified per selector.
+- Next: F3 shared shells and framework states.
+
+## 2026-07-11 F2 review remediation
+- Changed: normalized later duplicate control and active-state rules so the canonical cascade wins; removed the table-header tracking tier and decorative effects; added selector-aware role/effect audit checks and complete reduced-motion coverage.
+- Verified: focused contract tests pass (8/8), static audit passes for 32 routes with zero violations, typecheck passes, and production build passes.
+- Learned: named rule-block assertions and adversarial audit fixtures are required to detect cascade and semantic-role false positives.
+- Next: keep F2 `passes: false` until independent reviewer approval; then continue browser evidence in the later route tasks.
+
+## 2026-07-11 F2 re-review remediation
+- Changed: restored four true-circle roles, mapped cited scoped selectors to complete semantic tiers, covered more-specific document-module headings, and replaced effect substring allowlisting with exact normalized selector/value contracts.
+- Verified: focused contract tests pass (11/11), static audit passes for 32 routes with zero violations, typecheck passes, and production build passes with 27/27 static pages generated.
+- Learned: allowlisting a selector name is insufficient unless the exact property value is also contracted; scoped role checks must include the selectors that actually win through specificity.
+- Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in the later route/browser tasks.
+
+## 2026-07-11 F2 repository-wide typography remediation
+- Changed: normalized 428 font-size rules to complete canonical tuples and replaced curated typography checks with a repository-wide invariant; test and audit selector-list parsing now match.
+- Verified: focused contract tests pass (14/14), static audit passes for 32 routes with zero violations and zero important declarations, typecheck passes, and production build passes with 27/27 static pages generated.
+- Learned: semantic role validation must run before accepting the current token, especially for 14px interactive controls and table headers; 11px alone is not enough to infer HUD semantics.
+- Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in later tasks.
+
+## 2026-07-11 F2 per-selector semantic remediation
+- Changed: classify typography per selector, reject mixed-role selector lists, add explicit ambiguous-class overrides, and split command-primary, native th/td, brand/status, and report-table header typography.
+- Verified: focused contract tests pass (16/16), static audit passes for 32 routes with zero violations and zero important declarations, typecheck passes, and production build passes with 27/27 static pages generated.
+- Learned: selector-list keywords can leak HUD or table semantics across unrelated selectors; role inference and tuple validation must operate on each selector independently.
+- Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in later tasks.
+
+## 2026-07-11 F2 base module action remediation
+- Changed: base and document-variant module primary/action selectors now have explicit control precedence, and the base CSS group uses the full control tuple.
+- Verified: focused contract tests pass (18/18), static audit passes for 32 routes with zero violations and zero important declarations, typecheck passes, and production build passes with 27/27 static pages generated.
+- Learned: explicit DOM-backed semantics must precede the current font-size token for class-only action selectors.
+- Next: keep F2 `passes: false` until independent reviewer approval; browser screenshot review remains in later tasks.
+
+## 2026-07-11 F3 review closure
+- Changed: added semantic framework headings, named loading state, stable shell/landing hooks, canonical landing/document cascade values, and reduced-motion spinner handling.
+- Verified: focused shared plus design-contract tests 32/32, static audit, typecheck, build 27/27, independent spec and code-quality review pass with zero findings.
+- Learned: shared hooks do not prove effective styling when later scoped selectors win; tests must assert the higher-specificity current selectors explicitly.
+- Next: F4 all route families.
+
+## 2026-07-11 F4 review closure
+- Changed: closed all route-family semantics, responsive geometry, ownership, spacing-token, delegated-owner, and signed-decimal parser acceptance through final implementation commit `3f7166d`.
+- Verified: route test 17/17, focused tests 49/49, full suite 493/493, static audit over 32 pages and 22 components with zero coverage issues or violations, typecheck, production build, and diff-check pass.
+- Reviewed: independent specification and code-quality review both PASS with zero findings across `b9ec074...3f7166d`.
+- Next: F5 workspace and reports density; browser screenshots and route-state capture remain F7 scope.
+
+## 2026-07-11 F5 implementation
+- Changed: normalized workspace/report typography, spacing, radii, controls, state hooks, and Day/Night geometry; replaced the inline progress width with semantic progress markup.
+- Verified: Task 5 focused tests 32/32, full suite 498/498, static audit with zero violations, typecheck, production build, and diff-check pass.
+- Learned: color-theme selectors must not carry typography, spacing, or shape because those declarations silently create two visual systems.
+- Next: keep F5 `passes: false` until independent review; capture Day/Night and report states in F7 browser evidence.
+
+## 2026-07-11 F5 independent review remediation
+- Changed: normalized exact AgentConsole and workspace owners, implemented canonical three-column field geometry plus a documented two-column command-center variant, audited mixed theme selectors individually, and restored progress animation/reduced-motion behavior on the rendered node.
+- Verified: exact-owner, breakpoint-cascade, theme-selector, and rendered-progress tests reproduce all three Important findings before remediation and pass afterward.
+- Next: keep F5 `passes: false` pending independent re-review and F7 browser evidence.
+
+## 2026-07-11 F5 tablet cascade remediation
+- Changed: added the exact 768–1279px two-column field workspace, with the checklist rail spanning below the main canvas and worker/context rail; below 768px remains one column.
+- Verified: representative 1024px/1279px source-order assertions now distinguish desktop, tablet, and mobile owners while leaving the CommandCenter structural exception unchanged.
+- Next: keep F5 pending until independent review confirms the responsive cascade.
+
+## 2026-07-11 F5 review closure
+- Changed: closed the exact-owner, Day/Night geometry, rendered progress, and desktop/tablet/mobile FieldOperationsWorkspace contracts through implementation commit `37485ac`.
+- Verified: focused Task 5 suite 36/36, full suite 502/502, static audit over 32 pages and 22 components with zero coverage issues or violations, typecheck, production build, and diff-check pass.
+- Reviewed: independent specification and code-quality review both PASS with zero Critical, Important, or Minor findings across `1582261..37485ac`.
+- Next: F6 generated-document typography; F7 retains browser screenshots and route-state capture.
+
+## 2026-07-11 F6 implementation
+- Changed: aligned editor preview, printable/download HTML, and PDF-ready HTML to the exact document title, section, body, table, and note point scale with the print-safe Korean stack and table-only tabular numerals.
+- Verified: RED 4/5 failures before implementation plus a second RED for fallback XLS/workbook px overrides; generated-document 6/6, focused 24/24, full 508/508, static audit 32 routes/22 components with zero violations, typecheck, build, and diff-check pass.
+- Learned: the editor preview needs a generated-document-specific owner so the print hierarchy can coexist with the existing screen typography audit without changing ordinary product UI selectors.
+- Next: keep F6 `passes: false` until independent review; run the server-backed output-contract smoke during the integrated F7 server verification.
+
+## 2026-07-11 F6 independent-review remediation
+- Changed: standardized the default binary PDF branch with five exact text roles and Malgun Gothic regular/bold CID resources; closed preview HUD/caption cascade leaks; removed the newly added shared A4 rule; strengthened tests per generated template and actual API response branch.
+- Verified: review RED 5/9; review GREEN focused 27/27, full 56 files/511 tests, static audit zero violations, typecheck, production build, and diff-check pass.
+- Learned: an HTML-ready PDF branch does not prove the default binary response; generated-surface contracts must exercise both response branches and every template boundary independently.
+- Next: keep F6 `passes: false` until independent re-review.
+
+## 2026-07-11 F6 embedded-font remediation
+- Changed: embedded licensed Noto Sans KR 400/700 TrueType programs in the default binary PDF using CIDFontType2, FontFile2, cmap-derived CIDToGIDMap, Identity-H, and ToUnicode resources; retained the Malgun-first HTML stack.
+- Verified: structural/font/extraction RED 3/10; GREEN focused 28/28, full 56 files/512 tests, static audit zero violations, typecheck, production build `6VXzX-xnqM5yUVHrW-rCG`, and diff-check pass.
+- Learned: a PDF font descriptor and family name do not supply glyphs; portable Korean output requires the actual licensed font program, Unicode-to-glyph mapping, and ToUnicode extraction mapping.
+- Next: keep F6 `passes: false` until independent re-review confirms the embedded object graph.
+
+## 2026-07-11 F6 final review closure
+- Changed: implementation `a66a682` replaced both 6.2 MB full-font streams with dynamically subset Noto Sans KR Regular/Bold resources, corrected their internal metadata, and linked the generated page resource keys to every exact document role.
+- Verified: representative PDF 15,770 bytes, SHA-256 `4DC006D2BCDEDEF95F6ACF124C955D54612CBCB494F5A32A0A20C5319D3D62D9`; PDF.js extracts Korean fields and signatures, canvas renders nonblank Korean title glyphs, focused 28/28, full 512/512, static audit zero issues, strict typecheck, production build, and diff-check pass.
+- Reviewed: independent specification and code-quality review both PASS with zero Critical, Important, or Minor findings across `d8dbe75..a66a682`; all five prior findings are closed.
+- Next: F7 complete browser evidence and PR handoff.
+
+## 2026-07-11 F7 browser implementation
+- RED: reconciliation failed because `report.json` did not exist; evidence is in `evaluation/frontend-consistency-audit-2026-07-11/reconciliation-red.log`.
+- Captured: 32 routes at 1440px, 1024px, and 390px; Workspace Day/Night at all widths; four special and two generated surfaces; 108 screenshots and zero automatic failures.
+- Visual review: raw Markdown links, loose list nodes, and excessive vertical rhythm were found on knowledge detail and fixed through a semantic renderer plus the 72ch long-form contract.
+- Verified: 56 test files/514 tests, strict typecheck, production build, static audit 32 pages/22 components with zero issues, browser 108/108, and reconciliation 19/19 pass.
+- Next: keep F7 `in_progress` and `passes: false` until independent final branch review and PR handoff.
+
+## 2026-07-11 F7 independent-review remediation
+- RED: review identified fake shared fallback evidence, presence-only contract checks, incorrect row/finding arithmetic, undisclosed auth fallbacks, and legal divider artifacts; focused tests reproduced totals/boundary and legal failures.
+- Changed: added audit-only env-gated actual error/global boundary probes, numerical rendered contract checks, Day/Night geometry fingerprints, correct row totals, explicit auth fallback labels, and fixed legal dividers plus undersized quick-chip/worker controls.
+- Verified: distinct boundary markers and screenshots; browser 108 successes/0 failed rows/0 findings; reconciliation 22/22; full 56 files/517 tests; typecheck; normal build; static audit 32 routes/22 components and zero issues; diff review pending.
+- Next: keep F7 pending independent re-review.
+
+## 2026-07-11 F7 final review closure
+- Changed: closed browser evidence through implementation commits `3b46629`, `bffaa77`, `defe91e`, and `05ee201`.
+- Verified: 32 routes × 3 viewports, six Workspace Day/Night rows, four actual/labelled special surfaces, two generated surfaces, and 108 screenshots; browser totals 108 successes, 0 failed rows, 0 recovered rows, 0 findings.
+- Gates: focused reconciliation 25/25, full 56 files/520 tests, strict typecheck, audit-mode and normal production builds, static audit 32 routes/22 components with zero coverage issues or violations, and diff-check pass.
+- Reviewed: independent specification and code-quality review PASS/PASS with zero Important or Minor findings; all prior browser-audit findings are closed.
+- Next: PR 66 handoff and cross-session conflict communication may proceed from the root task.
+
+## 2026-07-11 F7 generated font-family remediation
+- RED: a generated section using Pretendard passed because document roles checked only numerical tuples.
+- Changed: all five preview roles explicitly inherit the document stack; preview/PDF rows collect computed family and role-specific font-loaded evidence; the gate enforces Malgun-first plus Noto fallback.
+- Verified: family mutation GREEN; browser 108/108 failed0 recovered0 findings0; full 520/520, typecheck, static 32/22 zero issues, audit-mode and normal builds pass.
+- Next: keep F7 pending independent re-review.
+
+## 2026-07-11 F7 exact computed-style remediation
+- RED: a ratio-preserving 39px page title passed, while boundary helpers could erase probe-plus-unrelated and hydration-plus-unrelated failures.
+- Changed: exact spec-derived Display/Page/body/document tuples, actual font-load evidence, strict probe filtering, separately counted recovered transients, 44px landing mobile Display, and representative PDF table evidence.
+- Verified: mutation tests reject five independent typography regressions and mixed-error cases; browser 108/108 with zero failed/recovered rows and findings; full 519/519, typecheck, static 32/22 zero issues, audit-mode and normal builds pass.
+- Next: keep F7 pending independent re-review.
+
+## 2026-07-11 Documents selective integration
+- Changed: recorded independently reviewed Documents mobile source commits `2226aa2`/`ec13212` selected into backend as `cf451c5`/`2451345`.
+- Verified: Spec PASS, Code Quality PASS, P0-P3 zero; fresh source-branch documents suite 20/20 twice with exit 0, strict typecheck, package/lock diff zero, and production build 27/27 after installing the worktree dependencies.
+- Learned: an empty worktree `node_modules` can resolve the parent repository binaries while producing incomplete Next page manifests; verify the local dependency tree before accepting build evidence.
+- Next: run the combined full suite, PDF/NFT/direct POST, and 108-row browser audit on the final backend head after pending Next security and KOSHA evidence patches are integrated.

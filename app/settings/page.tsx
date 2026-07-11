@@ -25,8 +25,8 @@ export default function SettingsPage() {
       <section className="safeclaw-module-grid two">
         {settings.map(([title, body]) => (
           <article key={title}>
-            <span>{title}</span>
-            <strong>{body}</strong>
+            <h2 className="safeclaw-section-title">{title}</h2>
+            <p className="safeclaw-setting-description">{body}</p>
           </article>
         ))}
         <BriefingSettingsCard />

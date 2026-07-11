@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 export default function Error({
   error,
   reset,
@@ -7,10 +9,17 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    if (document.querySelector('[data-safeclaw-audit-enabled="true"]')
+      && new URLSearchParams(window.location.search).get("__auditBoundary") === "error") {
+      console.error("SafeClaw deterministic frontend audit error boundary probe");
+    }
+  }, []);
+
   return (
     <main className="container grid">
-      <section className="card list">
-        <div className="h2">일시적인 오류가 발생했습니다</div>
+      <section className="card list special-state" data-audit-boundary="error">
+        <h1 className="special-state-title">일시적인 오류가 발생했습니다</h1>
         <div className="muted">
           요청을 처리하는 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.
           문제가 계속되면 새로고침하거나 처음 화면에서 다시 시작해 주세요.
