@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-11T14:59:43.330Z",
-  "sourceSha": "20951bc727714f63a7fe3ef5c8d3a0bb23e51d5e",
-  "sourceIdentity": "e8c74febec6a01b2354b86b62a2273472a4a5933d9ad98c1489065ac1e2c64e7",
+  "generatedAt": "2026-07-11T15:08:47.777Z",
+  "sourceSha": "84c04cd98c05b16f207e37be848d57de852f9509",
+  "sourceIdentity": "6ef1e16efee7a24a6df5aedb2aa16c2ebf8b4344776598ae1416aa377c9820d7",
   "status": "fail",
   "counts": {
     "pageFiles": 32,
@@ -83,7 +83,7 @@
     "unexpectedRoutes": []
   },
   "coverageIssues": 0,
-  "violationCount": 2444,
+  "violationCount": 2412,
   "violations": [
     {
       "rule": "font-family-token",
@@ -166,12 +166,6 @@
     {
       "rule": "font-family-token",
       "file": "app/globals.css",
-      "line": 14504,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
       "line": 14953,
       "value": "\"Pretendard\", \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
     },
@@ -180,78 +174,6 @@
       "file": "app/globals.css",
       "line": 15237,
       "value": "\"Pretendard\", \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16113,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16120,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16154,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16221,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16229,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16236,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16245,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16299,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16323,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16336,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16673,
-      "value": "inherit !important"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 16680,
-      "value": "inherit !important"
     },
     {
       "rule": "font-size-tier",
@@ -3461,19 +3383,13 @@
       "rule": "tracking-tier",
       "file": "app/globals.css",
       "line": 8427,
-      "value": "0.02em !important"
+      "value": "0.02em"
     },
     {
       "rule": "tracking-tier",
       "file": "app/globals.css",
       "line": 8437,
-      "value": "-0.01em !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 8443,
-      "value": "0.08em !important"
+      "value": "-0.01em"
     },
     {
       "rule": "tracking-tier",
@@ -3588,114 +3504,6 @@
       "file": "app/globals.css",
       "line": 14066,
       "value": "0px"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 14369,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 14426,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 14438,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 14462,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 14507,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 15417,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 16114,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 16122,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 16222,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 16231,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 16239,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 16246,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 16300,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 16325,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 16674,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 17068,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 17092,
-      "value": "0 !important"
-    },
-    {
-      "rule": "tracking-tier",
-      "file": "app/globals.css",
-      "line": 17268,
-      "value": "0 !important"
     },
     {
       "rule": "radius-tier",
