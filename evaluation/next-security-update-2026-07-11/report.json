@@ -2,6 +2,8 @@
   "date": "2026-07-11",
   "baseCommit": "23a451c",
   "outcome": "fixed",
+  "verificationState": "reproducible_after_clean_lock_install",
+  "evidence": "evaluation/next-security-update-2026-07-11/verification.txt",
   "scope": {
     "next": {
       "before": "15.5.15",
@@ -28,6 +30,18 @@
       "@next/swc-win32-x64-msvc"
     ]
   },
+  "evidenceCorrection": {
+    "cause": "incomplete ignored node_modules/next installation",
+    "damagedDeclarationCount": 511,
+    "publishedDeclarationCount": 1424,
+    "damagedTypecheckErrors": 2,
+    "damagedTypecheckErrorCode": "TS7006",
+    "repairCommand": "npm.cmd ci",
+    "installedPackageCount": 373,
+    "cleanNextDeclarationCount": 1424,
+    "cleanNextFileCount": 7270,
+    "previousVerificationSuperseded": true
+  },
   "audit": {
     "command": "npm.cmd audit --omit=dev --json",
     "before": {
@@ -38,7 +52,7 @@
       "critical": 0,
       "total": 5
     },
-    "after": {
+    "afterCleanInstall": {
       "info": 0,
       "low": 0,
       "moderate": 5,
@@ -47,9 +61,15 @@
       "total": 5
     },
     "nextHighRemoved": true,
+    "postcssSemantics": {
+      "path": "next@15.5.20 -> postcss@8.4.31",
+      "meaning": "npm reports postcss and its affected direct parent next as moderate; the original Next high advisories are absent",
+      "npmSuggestedNextVersion": "9.3.3",
+      "suggestionRejectedBecause": "breaking downgrade outside the bounded same-minor remediation"
+    },
     "remainingModerateItems": [
-      "exceljs via uuid",
-      "gaxios via uuid",
+      "exceljs@4.4.0 via uuid@8.3.2",
+      "gaxios@6.7.1 via uuid@9.0.1",
       "uuid",
       "next via postcss@8.4.31",
       "postcss@8.4.31"
@@ -57,13 +77,19 @@
   },
   "verification": [
     {
+      "command": "npm.cmd ci",
+      "result": "passed",
+      "details": "373 packages installed from package-lock.json"
+    },
+    {
       "command": "npm.cmd ls --omit=dev next react react-dom --depth=0",
       "result": "passed",
       "details": "next@15.5.20, react@19.0.0, react-dom@19.0.0"
     },
     {
       "command": "npm.cmd run typecheck",
-      "result": "passed"
+      "result": "passed",
+      "exitCode": 0
     },
     {
       "command": "npm.cmd test -- tests/module-shell-navigation.test.ts --reporter=verbose",
@@ -83,7 +109,13 @@
     {
       "command": "npm.cmd run build",
       "result": "passed",
+      "exitCode": 0,
       "details": "Next 15.5.20; static pages 27/27"
+    },
+    {
+      "command": "npm.cmd audit --omit=dev --json",
+      "result": "passed_security_gate",
+      "details": "high 0, moderate 5, total 5"
     }
   ]
 }
