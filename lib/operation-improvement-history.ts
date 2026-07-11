@@ -3,7 +3,28 @@ import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 
 export const OPERATION_IMPROVEMENTS_STORAGE_KEY = "safeclaw.operationImprovements.v1";
 
-export type OperationImprovementStatus = "candidate" | "approved" | "rejected" | "reflected";
+export type OperationImprovementStatus =
+  | "candidate"
+  | "approved"
+  | "rejected"
+  | "reflected"
+  | "proposed"
+  | "in_progress"
+  | "on_hold"
+  | "completed"
+  | "verified";
+
+const OPERATION_IMPROVEMENT_STATUSES: ReadonlySet<OperationImprovementStatus> = new Set([
+  "candidate",
+  "approved",
+  "rejected",
+  "reflected",
+  "proposed",
+  "in_progress",
+  "on_hold",
+  "completed",
+  "verified"
+]);
 
 export type OperationRiskAssociation = {
   siteName: string;
@@ -69,10 +90,9 @@ function readString(value: unknown): string {
 }
 
 export function parseOperationImprovementStatus(value: unknown): OperationImprovementStatus | undefined {
-  if (value === "candidate" || value === "approved" || value === "rejected" || value === "reflected") {
-    return value;
-  }
-  return value === "proposed" ? "candidate" : undefined;
+  return typeof value === "string" && OPERATION_IMPROVEMENT_STATUSES.has(value as OperationImprovementStatus)
+    ? value as OperationImprovementStatus
+    : undefined;
 }
 
 function parseRiskAssociation(value: unknown): OperationRiskAssociation | undefined {
