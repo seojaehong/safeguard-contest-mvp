@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "1b4e7128a6d0dd470f6bfdc594628d4e13c8b5c2",
+  "buildId": "3bh_CjmANHAQrLavkzG2p",
+  "lockSha256": "116da99b26a160322d632df067fe9177a14bb6152a3ab05dc543e7919c059ccd",
+  "nextVersion": "15.5.20",
+  "url": "http://127.0.0.1:3137/workspace?theme=night",
+  "httpStatus": 200,
+  "contentLength": 26672,
+  "probedAt": "2026-07-12T05:45:13.1280931+09:00"
+}
