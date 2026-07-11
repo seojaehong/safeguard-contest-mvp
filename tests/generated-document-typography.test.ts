@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import { frontendTypography, generatedSurfaceFiles } from "@/lib/frontend-design-contract";
 import { NextRequest } from "next/server";
 import { POST } from "@/app/api/export/pdf/route";
+import fontkit from "@pdf-lib/fontkit";
+import { createCanvas, DOMMatrix, ImageData, Path2D } from "@napi-rs/canvas";
 
 const root = process.cwd();
 const read = (relativePath: string) => fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -142,7 +144,7 @@ describe("generated document typography", () => {
     expect(pdfRoute).not.toContain("var(--font-hud)");
   });
 
-  it("maps the default binary PDF branch to exact roles and embedded Noto fallback resources", () => {
+  it("maps the default binary PDF branch to exact roles and subset Noto fallback resources", () => {
     const content = functionSlice(pdfRoute, "buildPdfContentLines", "buildBinaryPdf");
     const binary = functionSlice(pdfRoute, "buildBinaryPdf", "POST");
     expect(content).toContain('role: "title"');
@@ -155,21 +157,28 @@ describe("generated document typography", () => {
     expect(binary).toContain('body: { font: "F1", size: 10, leading: 15, tracking: 0 }');
     expect(binary).toContain('table: { font: "F1", size: 8.5, leading: 12, tracking: 0 }');
     expect(binary).toContain('note: { font: "F1", size: 8, leading: 11, tracking: 0 }');
-    expect(pdfRoute).toContain('load("NotoSansKR-Regular.ttf")');
-    expect(pdfRoute).toContain('load("NotoSansKR-Bold.ttf")');
-    expect(binary).toContain("/Subtype /CIDFontType2");
-    expect(binary).toContain("/FontFile2");
-    expect(binary).toContain("/ToUnicode");
-    expect(binary).toContain("/CIDToGIDMap");
-    expect(binary).not.toContain("HYSMyeongJo");
-    expect(binary).not.toContain("/BaseFont /MalgunGothic");
+    expect(pdfRoute).toContain("PDFDocument.create()");
+    expect(pdfRoute).toContain("registerFontkit(fontkit)");
+    expect(pdfRoute).toContain("embedFont(fonts.regular, { subset: true })");
+    expect(pdfRoute).toContain("embedFont(fonts.bold, { subset: true })");
+    expect(binary).not.toContain("buildCidToGidMap");
+    expect(binary).not.toContain("identityToUnicodeCMap");
   });
 
   it("ships licensed, real TrueType Korean font programs for binary PDF fallback", () => {
-    for (const relativePath of embeddedFontPaths) {
+    const expectedMetadata = [
+      { path: embeddedFontPaths[0], postscriptName: "NotoSansKR-Regular", subfamilyName: "Regular" },
+      { path: embeddedFontPaths[1], postscriptName: "NotoSansKR-Bold", subfamilyName: "Bold" },
+    ];
+    for (const expected of expectedMetadata) {
+      const relativePath = expected.path;
       const font = fs.readFileSync(path.join(root, relativePath));
       expect(font.subarray(0, 4)).toEqual(Buffer.from([0x00, 0x01, 0x00, 0x00]));
       expect(font.length).toBeGreaterThan(1_000_000);
+      const parsed = fontkit.create(font);
+      expect(parsed.familyName).toBe("Noto Sans KR");
+      expect(parsed.postscriptName).toBe(expected.postscriptName);
+      expect(parsed.subfamilyName).toBe(expected.subfamilyName);
     }
     const license = read("public/fonts/NotoSansKR-OFL.txt");
     expect(license).toContain("SIL OPEN FONT LICENSE Version 1.1");
@@ -187,18 +196,37 @@ describe("generated document typography", () => {
     expect(binaryResponse.headers.get("cache-control")).toBe("no-store");
     const binary = Buffer.from(await binaryResponse.arrayBuffer());
     expect(binary.subarray(0, 5).toString("utf8")).toBe("%PDF-");
+    expect(binary.length).toBeLessThan(1_048_576);
     const binarySource = binary.toString("binary");
     expect(binarySource).toContain("/Subtype /CIDFontType2");
     expect(binarySource).toContain("/FontFile2");
     expect(binarySource).toContain("/ToUnicode");
-    expect(binarySource).toContain("/CIDToGIDMap");
-    expect(binarySource.match(/\x00\x01\x00\x00/gu)?.length).toBeGreaterThanOrEqual(2);
-    const extracted = Array.from(binarySource.matchAll(/<([0-9A-F]+)> Tj/gu), (match) =>
-      Buffer.from(match[1], "hex").swap16().toString("utf16le"),
-    ).join(" ");
+    expect(binarySource).toMatch(/\/BaseFont \/NotoSansKR-Regular-[A-Z0-9]+/u);
+    expect(binarySource).toMatch(/\/BaseFont \/NotoSansKR-Bold-[A-Z0-9]+/u);
+    Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const document = await pdfjs.getDocument({ data: new Uint8Array(binary) }).promise;
+    const page = await document.getPage(1);
+    const textContent = await page.getTextContent();
+    const extracted = textContent.items.flatMap((item) => "str" in item ? [item.str] : []).join(" ");
     for (const value of ["위험성평가표", "가온테크", "1차 작업장", "천장 배관 점검", "작성자", "승인"]) {
       expect(extracted).toContain(value);
     }
+    const viewport = page.getViewport({ scale: 1 });
+    const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
+    await page.render({
+      canvas: canvas as never,
+      canvasContext: canvas.getContext("2d") as never,
+      viewport,
+    }).promise;
+    const titleRegion = canvas.getContext("2d").getImageData(30, 28, Math.min(520, canvas.width - 30), 80);
+    const pixels = titleRegion.data;
+    let darkPixels = 0;
+    for (let index = 0; index < pixels.length; index += 4) {
+      if (pixels[index] < 220 || pixels[index + 1] < 220 || pixels[index + 2] < 220) darkPixels += 1;
+    }
+    expect(darkPixels).toBeGreaterThan(100);
+    await document.destroy();
 
     const htmlResponse = await POST(new NextRequest("http://localhost/api/export/pdf?format=html", {
       method: "POST",

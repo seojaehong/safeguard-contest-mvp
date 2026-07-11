@@ -44,3 +44,13 @@ F6 remains `in_progress` with `passes: false` pending independent specification 
 - RED: 3 of 10 generated-document tests failed on missing assets, invalid CID subtype, absent font programs/ToUnicode, and missing Korean extraction proof.
 - GREEN: actual response bytes contain two TrueType programs and the expected font-resource graph; the ToUnicode extraction check recovers Korean title, company, site, work, and signature text.
 - Verified: focused generated plus design-contract tests 28/28, full suite 56 files/512 tests, static audit zero violations, typecheck, production build (`6VXzX-xnqM5yUVHrW-rCG`), and diff-check pass.
+
+## Subset-font recovery
+
+- Replaced the 12.13 MiB handcrafted full-font PDF assembly with `pdf-lib` plus `@pdf-lib/fontkit` dynamic subsetting. A representative response is 15,770 bytes, below the enforced 1 MiB budget (SHA-256 `4DC006D2BCDEDEF95F6ACF124C955D54612CBCB494F5A32A0A20C5319D3D62D9`).
+- Corrected both source TrueType name tables and checksums. Independent fontTools inspection reports family `Noto Sans KR`, PostScript names `NotoSansKR-Regular` and `NotoSansKR-Bold`, subfamilies `Regular` and `Bold`, OS/2 weights 400 and 700, and zero checksum errors.
+- Registered the exact subset font resource keys on the PDF page before emitting the title, section, body, table, and note operators. This preserves the exact role sizes, leading, tracking, A4 media box, row order, signatures, and response headers while producing valid `/CIDFontType2`, `/FontFile2`, and `/ToUnicode` resources.
+- Independent runtime proof now uses PDF.js text extraction rather than raw operand decoding. It recovers the Korean title, company, site, work description, writer, and approver. `@napi-rs/canvas` then renders the title region and requires nonblank dark glyph pixels.
+- Recovery RED: focused verification failed 1 of 28 checks because the first low-level operator version referenced logical font names instead of the page's generated resource keys; PDF.js returned subset CIDs instead of Korean text.
+- Recovery GREEN: focused generated-document and design-contract verification passes 28/28; the full suite passes 56 files/512 tests; static audit covers 32 routes and 22 components with zero coverage issues and zero violations; strict typecheck passes; production build `CIHaGCAgAeMgGgzv-QwIB` passes; diff-check passes.
+- F6 remains `in_progress` with `passes: false` pending fresh independent specification and code-quality review.
