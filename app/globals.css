@@ -17445,3 +17445,241 @@ body:has(.safeclaw-landing) :is(
     width: 100%;
   }
 }
+
+/* Documents: desktop keeps the full cockpit; mobile starts with the three
+   documents required for today's risk assessment and TBM. */
+.safeclaw-mobile-document-priority {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .safeclaw-module-shell.module-variant-document .safeclaw-document-cockpit {
+    display: block;
+    width: calc(100% - 24px);
+    margin-top: 16px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  .safeclaw-module-shell.module-variant-document :is(
+    .safeclaw-doc-index,
+    .safeclaw-doc-primary,
+    .safeclaw-doc-export
+  ) {
+    display: none;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-mobile-document-priority {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    border: 1px solid var(--workspace-rule);
+    border-radius: 8px;
+    background: var(--workspace-surface-1);
+    padding: 16px;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-mobile-document-priority > span {
+    color: var(--workspace-accent);
+    font-size: 11px;
+    font-weight: 650;
+    line-height: 1.4;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-mobile-document-priority > h2 {
+    margin: 0 0 4px;
+    color: var(--workspace-ink);
+    font-size: 22px;
+    font-weight: 680;
+    line-height: 1.25;
+  }
+
+  .safeclaw-mobile-core-list,
+  .safeclaw-mobile-remaining-list,
+  .safeclaw-mobile-detail-actions {
+    display: grid;
+    row-gap: 8px;
+  }
+
+  .safeclaw-module-shell.module-variant-document :is(
+    .safeclaw-mobile-core-list,
+    .safeclaw-mobile-remaining-list
+  ) button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    border: 1px solid var(--workspace-rule) !important;
+    border-radius: 6px !important;
+    background: var(--workspace-surface-2) !important;
+    color: var(--workspace-ink) !important;
+    padding: 9px 12px !important;
+    font: inherit;
+    text-align: left;
+    box-shadow: none !important;
+  }
+
+  .safeclaw-module-shell.module-variant-document :is(
+    .safeclaw-mobile-core-list,
+    .safeclaw-mobile-remaining-list
+  ) button[aria-pressed="true"] {
+    border-color: var(--workspace-accent) !important;
+    background: var(--workspace-surface-3) !important;
+    box-shadow: inset 3px 0 0 var(--workspace-accent) !important;
+  }
+
+  .safeclaw-mobile-core-list button {
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.45;
+  }
+
+  .safeclaw-mobile-document-details {
+    min-width: 0;
+    margin-top: 4px;
+    border-top: 1px solid var(--workspace-rule);
+  }
+
+  .safeclaw-mobile-document-details > summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--workspace-muted);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 580;
+    line-height: 1.45;
+    list-style: none;
+  }
+
+  .safeclaw-mobile-document-details > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .safeclaw-mobile-document-details > summary::after {
+    content: "+";
+    color: var(--workspace-muted);
+    font-size: 18px;
+    font-weight: 450;
+  }
+
+  .safeclaw-mobile-document-details[open] > summary::after {
+    content: "-";
+  }
+
+  .safeclaw-mobile-remaining-list {
+    padding-top: 8px;
+  }
+
+  .safeclaw-mobile-remaining-list button {
+    display: grid;
+    gap: 2px;
+  }
+
+  .safeclaw-mobile-remaining-list button small {
+    color: var(--workspace-muted) !important;
+    font-size: 11px;
+    font-weight: 520;
+    line-height: 1.4;
+  }
+
+  .safeclaw-mobile-remaining-list button strong {
+    color: var(--workspace-ink) !important;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.45;
+  }
+
+  .safeclaw-mobile-primary-preview {
+    display: grid;
+    margin-top: 16px;
+    border-top: 1px solid var(--workspace-rule);
+  }
+
+  .safeclaw-mobile-primary-preview > div {
+    min-width: 0;
+    border-bottom: 1px solid var(--workspace-rule);
+    padding: 12px 0;
+  }
+
+  .safeclaw-mobile-primary-preview strong {
+    display: block;
+    color: var(--workspace-ink) !important;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.45;
+  }
+
+  .safeclaw-module-shell .safeclaw-mobile-primary-preview p {
+    display: -webkit-box;
+    margin: 5px 0 0;
+    overflow: hidden;
+    color: var(--workspace-muted) !important;
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .safeclaw-mobile-submission-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    margin: 16px 0 0;
+    overflow: hidden;
+    border: 1px solid var(--workspace-rule);
+    border-radius: 6px;
+    background: var(--workspace-rule);
+  }
+
+  .safeclaw-mobile-submission-facts > div {
+    min-width: 0;
+    background: var(--workspace-surface-2);
+    padding: 10px 8px;
+  }
+
+  .safeclaw-mobile-submission-facts :is(dt, dd) {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .safeclaw-mobile-submission-facts dt {
+    color: var(--workspace-muted);
+    font-size: 10px;
+    font-weight: 520;
+    line-height: 1.4;
+  }
+
+  .safeclaw-mobile-submission-facts dd {
+    margin-top: 3px;
+    color: var(--workspace-ink);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.45;
+  }
+
+  .safeclaw-mobile-detail-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 8px;
+    margin-top: 12px;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-mobile-detail-actions a {
+    display: inline-flex;
+    min-width: 0;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--workspace-rule);
+    border-radius: 6px;
+    background: var(--workspace-surface-2);
+    color: var(--workspace-ink);
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 620;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+  }
+}
