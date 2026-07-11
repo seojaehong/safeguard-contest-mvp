@@ -54,7 +54,7 @@
       "required": ["state", "official_version_key"],
       "properties": {
         "state": {
-          "enum": ["current", "retired", "unverified-local", "current-unverified"]
+          "enum": ["current", "retired", "unverified-local", "current-unverified", "current-version-mismatch"]
         },
         "official_version_key": {
           "type": ["string", "null"]
@@ -118,7 +118,7 @@
         },
         "category": { "type": ["string", "null"] },
         "state": {
-          "enum": ["current", "retired", "unverified-local", "current-unverified"]
+          "enum": ["current", "retired", "unverified-local", "current-unverified", "current-version-mismatch"]
         },
         "source_zip": { "type": ["string", "null"] },
         "source_member": { "type": "string", "minLength": 1 },

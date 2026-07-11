@@ -297,6 +297,7 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
         resume: bool = False,
         max_files: int | None = None,
         chunk_chars: int = 200,
+        provenance_path: Path | None = None,
         resource_limits: snapshot_kosha_guide_corpus.ResourceLimits | None = None,
         progress: Callable[[int, int, str], None] | None = None,
         publication_hook: Callable[[str], None] | None = None,
@@ -314,7 +315,7 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             category=None,
             state=None,
             chunk_chars=chunk_chars,
-            provenance_path=None,
+            provenance_path=provenance_path,
             progress=progress,
             **kwargs,
         )
@@ -966,6 +967,53 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             validator.validate(failures[0])
             validator.validate(current)
             validator.validate(manifest)
+
+    def test_json_schema_validates_generated_item_with_current_version_mismatch(self) -> None:
+        validator = Draft202012Validator(self.load_corpus_schema())
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            member_name = "G-1-2025 success.pdf"
+            source = self.write_zip(
+                root,
+                {member_name: build_pdf_bytes(["first page"])},
+            )
+            provenance_path = root / "provenance.json"
+            provenance_path.write_text(
+                json.dumps(
+                    {
+                        "inventory": {
+                            "official": {
+                                "listUrl": "https://example.test/list",
+                                "apiUrl": "https://example.test/api",
+                            },
+                            "officialComparison": {
+                                "versionMismatches": [
+                                    {
+                                        "internalPath": member_name,
+                                        "officialCode": "G-1-2026",
+                                        "localCode": "G-1-2025",
+                                    }
+                                ]
+                            },
+                        }
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            summary = self.run_recovery(
+                source,
+                root / "output",
+                provenance_path=provenance_path,
+            )
+
+            item = self.read_jsonl(self.snapshot_dir(summary) / "items.jsonl")[0]
+
+            self.assertEqual(item["state"], "current-version-mismatch")
+            self.assertEqual(item["version_lineage"]["state"], "current-version-mismatch")
+            validator.validate(item)
 
     def test_json_schema_rejects_legacy_policy_fixture_without_max_member_count(self) -> None:
         validator = Draft202012Validator(self.load_corpus_schema())
