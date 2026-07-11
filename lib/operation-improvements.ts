@@ -5,6 +5,7 @@ import type {
   HarnessPhotoHazardProvenance,
   HarnessPhotoHazardProviderResponse
 } from "@/lib/db-harness";
+import type { LatestOnlyRequestGate } from "@/lib/request-version-guard";
 
 export const MAX_INPUT_HAZARD_PHOTO_FILES = 10;
 
@@ -116,6 +117,66 @@ export type HazardPhotoWorkspaceResponse = {
   ok: boolean;
   message: string;
   analysis: HazardPhotoWorkspaceAnalysis;
+};
+
+export type InputHazardPhotoAnalysisState<TCandidate extends HazardPhotoGenerationCandidate = HazardPhotoGenerationCandidate> = {
+  status: "idle" | "analyzing" | HazardPhotoWorkspaceAnalysis["status"];
+  provider: string;
+  providerMode: HazardPhotoWorkspaceAnalysis["providerMode"];
+  model: string;
+  providerResponses: HazardPhotoWorkspaceAnalysis["providerResponses"];
+  summary: string;
+  ocrText: string;
+  siteSignals: string[];
+  candidates: TCandidate[];
+  counts: HazardPhotoWorkspaceAnalysis["counts"];
+  failures: HazardPhotoWorkspaceAnalysis["failures"];
+  message: string;
+};
+
+export const EMPTY_HAZARD_PHOTO_COUNTS: HazardPhotoWorkspaceAnalysis["counts"] = {
+  submitted: 0,
+  analyzed: 0,
+  rejected: 0,
+  failed: 0,
+  unconfigured: 0,
+  candidates: 0,
+  harnessConfirmed: 0,
+  harnessInsufficient: 0
+};
+
+export function createEmptyInputHazardPhotoAnalysis<TCandidate extends HazardPhotoGenerationCandidate = HazardPhotoGenerationCandidate>(): InputHazardPhotoAnalysisState<TCandidate> {
+  return {
+    status: "idle",
+    provider: "",
+    providerMode: "unconfigured",
+    model: "",
+    providerResponses: [],
+    summary: "",
+    ocrText: "",
+    siteSignals: [],
+    candidates: [],
+    counts: { ...EMPTY_HAZARD_PHOTO_COUNTS },
+    failures: [],
+    message: ""
+  };
+}
+
+export type InputHazardPhotoAnalysisSetter<TCandidate extends HazardPhotoGenerationCandidate = HazardPhotoGenerationCandidate> = (
+  update:
+    | InputHazardPhotoAnalysisState<TCandidate>
+    | ((current: InputHazardPhotoAnalysisState<TCandidate>) => InputHazardPhotoAnalysisState<TCandidate>)
+) => void;
+
+export type HazardPhotoAnalysisFetchResponse = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+};
+
+export type InputHazardPhotoAnalysisPhoto = {
+  name: string;
+  file: File;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -350,6 +411,124 @@ export function parseHazardPhotoWorkspaceResponse(
       failures
     }
   };
+}
+
+function readApiMessage(value: unknown, fallback: string): string {
+  if (!isRecord(value)) return fallback;
+  const message = readString(value.message);
+  return message || fallback;
+}
+
+function isAbortLikeError(error: unknown): boolean {
+  return error instanceof DOMException
+    ? error.name === "AbortError"
+    : error instanceof Error && error.name === "AbortError";
+}
+
+export async function runInputHazardPhotoAnalysis<TCandidate extends HazardPhotoGenerationCandidate = HazardPhotoGenerationCandidate>(input: {
+  question: string;
+  photos: readonly InputHazardPhotoAnalysisPhoto[];
+  requestGate: LatestOnlyRequestGate;
+  clearCandidateDecisions: () => void;
+  setAnalysis: InputHazardPhotoAnalysisSetter<TCandidate>;
+  setMessage: (message: string) => void;
+  readAccessToken: () => Promise<string | null>;
+  fetchAnalysis: (request: {
+    accessToken: string;
+    formData: FormData;
+    signal: AbortSignal;
+  }) => Promise<HazardPhotoAnalysisFetchResponse>;
+  mapCandidate: (candidate: HazardPhotoGenerationCandidate) => TCandidate;
+}): Promise<void> {
+  const {
+    question,
+    photos,
+    requestGate,
+    clearCandidateDecisions,
+    setAnalysis,
+    setMessage,
+    readAccessToken,
+    fetchAnalysis,
+    mapCandidate
+  } = input;
+
+  if (!photos.length) {
+    setMessage("분석할 현장 사진을 먼저 첨부해 주세요.");
+    return;
+  }
+
+  const request = requestGate.begin();
+  clearCandidateDecisions();
+  setAnalysis((current) => ({
+    ...current,
+    status: "analyzing",
+    message: "현장 사진을 vision API로 분석 중입니다."
+  }));
+
+  const accessToken = await readAccessToken();
+  if (request.signal.aborted || !requestGate.isCurrent(request.requestId)) return;
+
+  if (!accessToken) {
+    const message = "관리자 로그인 후 현장 사진 분석을 사용할 수 있습니다.";
+    setAnalysis({
+      ...createEmptyInputHazardPhotoAnalysis<TCandidate>(),
+      status: "failed",
+      counts: { ...EMPTY_HAZARD_PHOTO_COUNTS, submitted: photos.length },
+      message
+    });
+    setMessage(message);
+    return;
+  }
+
+  const formData = new FormData();
+  formData.set("question", question);
+  photos.forEach((photo) => formData.append("photos", photo.file, photo.name));
+
+  try {
+    const response = await fetchAnalysis({
+      accessToken,
+      formData,
+      signal: request.signal
+    });
+    const parsed = await response.json().catch((): unknown => ({}));
+    if (request.signal.aborted || !requestGate.isCurrent(request.requestId)) return;
+
+    if (!isRecord(parsed)) {
+      throw new Error(`사진 분석 응답이 올바르지 않습니다: HTTP ${response.status}`);
+    }
+    if (!response.ok) {
+      throw new Error(readApiMessage(parsed, `사진 분석 요청 실패: HTTP ${response.status}`));
+    }
+
+    const workspaceResponse = parseHazardPhotoWorkspaceResponse(parsed, response.ok);
+    const analysis = workspaceResponse.analysis;
+    const candidates = analysis.candidates.map(mapCandidate);
+    setAnalysis({
+      ...analysis,
+      candidates,
+      message: workspaceResponse.message
+    });
+    setMessage(
+      analysis.status === "partial"
+        ? workspaceResponse.message
+        : candidates.length
+          ? "현장 사진에서 위험요인 후보를 도출했습니다. 필요한 후보를 입력에 반영하세요."
+          : workspaceResponse.message || "사진 분석 결과 후보가 부족합니다. 현장 확인 후 직접 입력해 주세요."
+    );
+  } catch (error) {
+    if (request.signal.aborted || !requestGate.isCurrent(request.requestId) || isAbortLikeError(error)) {
+      return;
+    }
+    console.error("input hazard photo analysis failed", error);
+    setAnalysis({
+      ...createEmptyInputHazardPhotoAnalysis<TCandidate>(),
+      status: "failed",
+      message: error instanceof Error ? error.message : "현장 사진 분석에 실패했습니다."
+    });
+    setMessage("현장 사진 분석에 실패했습니다. 사진 후보 없이도 문서 생성은 계속할 수 있습니다.");
+  } finally {
+    requestGate.finish(request.requestId);
+  }
 }
 
 export function buildPhotoAnalysisCandidate(input: PhotoAnalysisCandidateInput): string {

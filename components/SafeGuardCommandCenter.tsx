@@ -25,10 +25,11 @@ import {
   buildHazardPhotoCandidates,
   buildPhotoAnalysisCandidate as buildPhotoAnalysisCandidateText,
   canAcceptHazardPhotoCandidate,
+  createEmptyInputHazardPhotoAnalysis,
   MAX_INPUT_HAZARD_PHOTO_FILES,
-  parseHazardPhotoWorkspaceResponse,
+  runInputHazardPhotoAnalysis,
   type HazardPhotoGenerationCandidate,
-  type HazardPhotoWorkspaceAnalysis
+  type InputHazardPhotoAnalysisState
 } from "@/lib/operation-improvements";
 import { createLatestOnlyRequestGate } from "@/lib/request-version-guard";
 import {
@@ -125,32 +126,7 @@ type LocalPhoto = {
 };
 
 type InputHazardCandidate = HazardPhotoGenerationCandidate & { source: "vision" | "local" };
-
-type InputHazardPhotoAnalysis = {
-  status: "idle" | "analyzing" | HazardPhotoWorkspaceAnalysis["status"];
-  provider: string;
-  providerMode: HazardPhotoWorkspaceAnalysis["providerMode"];
-  model: string;
-  providerResponses: HazardPhotoWorkspaceAnalysis["providerResponses"];
-  summary: string;
-  ocrText: string;
-  siteSignals: string[];
-  candidates: InputHazardCandidate[];
-  counts: HazardPhotoWorkspaceAnalysis["counts"];
-  failures: HazardPhotoWorkspaceAnalysis["failures"];
-  message: string;
-};
-
-const EMPTY_HAZARD_PHOTO_COUNTS: HazardPhotoWorkspaceAnalysis["counts"] = {
-  submitted: 0,
-  analyzed: 0,
-  rejected: 0,
-  failed: 0,
-  unconfigured: 0,
-  candidates: 0,
-  harnessConfirmed: 0,
-  harnessInsufficient: 0
-};
+type InputHazardPhotoAnalysis = InputHazardPhotoAnalysisState<InputHazardCandidate>;
 
 let workspaceAuthClient: ReturnType<typeof createClient> | null = null;
 
@@ -378,10 +354,6 @@ function readApiMessage(value: unknown, fallback: string) {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return fallback;
   const message = (value as Record<string, unknown>).message;
   return typeof message === "string" && message.trim() ? message : fallback;
-}
-
-function isAbortLikeError(error: unknown) {
-  return error instanceof Error && error.name === "AbortError";
 }
 
 function inferWeatherFromText(text: string, fallback: string) {
@@ -1084,20 +1056,7 @@ export function SafeGuardCommandCenter({
   const [beforePhoto, setBeforePhoto] = useState<LocalPhoto | null>(null);
   const [afterPhoto, setAfterPhoto] = useState<LocalPhoto | null>(null);
   const [inputHazardPhotos, setInputHazardPhotos] = useState<LocalPhoto[]>([]);
-  const [inputHazardPhotoAnalysis, setInputHazardPhotoAnalysis] = useState<InputHazardPhotoAnalysis>({
-    status: "idle",
-    provider: "",
-    providerMode: "unconfigured",
-    model: "",
-    providerResponses: [],
-    summary: "",
-    ocrText: "",
-    siteSignals: [],
-    candidates: [],
-    counts: EMPTY_HAZARD_PHOTO_COUNTS,
-    failures: [],
-    message: ""
-  });
+  const [inputHazardPhotoAnalysis, setInputHazardPhotoAnalysis] = useState<InputHazardPhotoAnalysis>(() => createEmptyInputHazardPhotoAnalysis<InputHazardCandidate>());
   const [acceptedInputHazardCandidateKeys, setAcceptedInputHazardCandidateKeys] = useState<string[]>([]);
   const [dismissedInputHazardCandidateKeys, setDismissedInputHazardCandidateKeys] = useState<string[]>([]);
   const inputHazardPhotosRef = useRef<LocalPhoto[]>([]);
@@ -1214,17 +1173,7 @@ export function SafeGuardCommandCenter({
   function resetInputHazardAnalysis(message = "") {
     inputHazardPhotoRequestGateRef.current.abortCurrent();
     setInputHazardPhotoAnalysis({
-      status: "idle",
-      provider: "",
-      providerMode: "unconfigured",
-      model: "",
-      providerResponses: [],
-      summary: "",
-      ocrText: "",
-      siteSignals: [],
-      candidates: [],
-      counts: EMPTY_HAZARD_PHOTO_COUNTS,
-      failures: [],
+      ...createEmptyInputHazardPhotoAnalysis<InputHazardCandidate>(),
       message
     });
     setAcceptedInputHazardCandidateKeys([]);
@@ -1279,93 +1228,28 @@ export function SafeGuardCommandCenter({
   }
 
   async function analyzeInputHazardPhotos(photosOverride?: LocalPhoto[]) {
-    const photos = photosOverride || inputHazardPhotosRef.current;
-    if (!photos.length) {
-      setMessage("분석할 현장 사진을 먼저 첨부해 주세요.");
-      return;
-    }
-    const request = inputHazardPhotoRequestGateRef.current.begin();
-    setAcceptedInputHazardCandidateKeys([]);
-    setDismissedInputHazardCandidateKeys([]);
-    setInputHazardPhotoAnalysis((current) => ({ ...current, status: "analyzing", message: "현장 사진을 vision API로 분석 중입니다." }));
-    const accessToken = await readWorkspaceAccessToken();
-    if (request.signal.aborted || !inputHazardPhotoRequestGateRef.current.isCurrent(request.requestId)) return;
-    if (!accessToken) {
-      const message = "관리자 로그인 후 현장 사진 분석을 사용할 수 있습니다.";
-      setInputHazardPhotoAnalysis({
-        status: "failed",
-        provider: "",
-        providerMode: "unconfigured",
-        model: "",
-        providerResponses: [],
-        summary: "",
-        ocrText: "",
-        siteSignals: [],
-        candidates: [],
-        counts: { ...EMPTY_HAZARD_PHOTO_COUNTS, submitted: photos.length },
-        failures: [],
-        message
-      });
-      setMessage(message);
-      return;
-    }
-    const form = new FormData();
-    form.set("question", question);
-    photos.forEach((photo) => form.append("photos", photo.file, photo.name));
-    try {
-      const response = await fetch("/api/input-photos/hazard-analysis", {
+    await runInputHazardPhotoAnalysis<InputHazardCandidate>({
+      question,
+      photos: photosOverride || inputHazardPhotosRef.current,
+      requestGate: inputHazardPhotoRequestGateRef.current,
+      clearCandidateDecisions: () => {
+        setAcceptedInputHazardCandidateKeys([]);
+        setDismissedInputHazardCandidateKeys([]);
+      },
+      setAnalysis: setInputHazardPhotoAnalysis,
+      setMessage,
+      readAccessToken: readWorkspaceAccessToken,
+      fetchAnalysis: async ({ accessToken, formData, signal }) => fetch("/api/input-photos/hazard-analysis", {
         method: "POST",
         headers: { authorization: `Bearer ${accessToken}` },
-        body: form,
-        signal: request.signal
-      });
-      const parsed = (await response.json().catch((): unknown => ({}))) as unknown;
-      if (request.signal.aborted || !inputHazardPhotoRequestGateRef.current.isCurrent(request.requestId)) return;
-      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-        throw new Error(`사진 분석 응답이 올바르지 않습니다: HTTP ${response.status}`);
-      }
-      if (!response.ok) {
-        throw new Error(readApiMessage(parsed, `사진 분석 요청 실패: HTTP ${response.status}`));
-      }
-      const workspaceResponse = parseHazardPhotoWorkspaceResponse(parsed, response.ok);
-      const analysis = workspaceResponse.analysis;
-      const candidates = analysis.candidates.map((candidate): InputHazardCandidate => ({
+        body: formData,
+        signal
+      }),
+      mapCandidate: (candidate) => ({
         ...candidate,
         source: "vision"
-      }));
-      setInputHazardPhotoAnalysis({
-        ...analysis,
-        candidates,
-        message: workspaceResponse.message
-      });
-      setMessage(analysis.status === "partial"
-        ? workspaceResponse.message
-        : candidates.length
-          ? "현장 사진에서 위험요인 후보를 도출했습니다. 필요한 후보를 입력에 반영하세요."
-          : workspaceResponse.message || "사진 분석 결과 후보가 부족합니다. 현장 확인 후 직접 입력해 주세요.");
-    } catch (error) {
-      if (request.signal.aborted || !inputHazardPhotoRequestGateRef.current.isCurrent(request.requestId) || isAbortLikeError(error)) {
-        return;
-      }
-      console.error("input hazard photo analysis failed", error);
-      setInputHazardPhotoAnalysis({
-        status: "failed",
-        provider: "",
-        providerMode: "unconfigured",
-        model: "",
-        providerResponses: [],
-        summary: "",
-        ocrText: "",
-        siteSignals: [],
-        candidates: [],
-        counts: EMPTY_HAZARD_PHOTO_COUNTS,
-        failures: [],
-        message: error instanceof Error ? error.message : "현장 사진 분석에 실패했습니다."
-      });
-      setMessage("현장 사진 분석에 실패했습니다. 사진 후보 없이도 문서 생성은 계속할 수 있습니다.");
-    } finally {
-      inputHazardPhotoRequestGateRef.current.finish(request.requestId);
-    }
+      })
+    });
   }
 
   function acceptInputPhotoCandidate(candidate: InputHazardCandidate) {
