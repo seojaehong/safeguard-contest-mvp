@@ -75,4 +75,55 @@ describe("editor-first draft identity", () => {
     expect(parseStoredCurrentWorkpack(JSON.stringify(resaved))?.data.deliverables.workPermitDraft)
       .toBe("");
   });
+
+  it("round-trips generation trace, fingerprint, and an explicit empty permit together", () => {
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPermitDraft = "";
+    sample.generationTrace = {
+      traceId: "trace-cross-contract",
+      askMode: "enhanced",
+      answer: {
+        provider: "safeclaw",
+        model: null,
+        composition: "safeclaw_db_harness",
+        upstream: {
+          provider: "openai",
+          model: "gpt-4.1-mini",
+          fallbackUsed: false,
+          usedInFinal: true
+        }
+      },
+      deliverables: {
+        attempted: true,
+        provider: "safeclaw",
+        modelPerDocument: {
+          workPermitDraft: {
+            provider: "safeclaw",
+            model: null,
+            source: "deterministic",
+            fallbackUsed: false
+          }
+        }
+      },
+      fallbackUsed: false
+    };
+
+    const stored = buildStoredCurrentWorkpack(sample);
+    const reopened = parseStoredCurrentWorkpack(JSON.stringify(stored));
+
+    expect(reopened).not.toBeNull();
+    expect(reopened?.generationFingerprint).toBe(stored.generationFingerprint);
+    expect(reopened?.data.generationTrace).toEqual(sample.generationTrace);
+    expect(reopened?.data.deliverables.workPermitDraft).toBe("");
+
+    if (!reopened) throw new Error("Stored workpack should reopen");
+    const resaved = buildStoredCurrentWorkpack(reopened.data, {
+      generationFingerprint: reopened.generationFingerprint
+    });
+    const roundTripped = parseStoredCurrentWorkpack(JSON.stringify(resaved));
+
+    expect(roundTripped?.generationFingerprint).toBe(stored.generationFingerprint);
+    expect(roundTripped?.data.generationTrace).toEqual(sample.generationTrace);
+    expect(roundTripped?.data.deliverables.workPermitDraft).toBe("");
+  });
 });

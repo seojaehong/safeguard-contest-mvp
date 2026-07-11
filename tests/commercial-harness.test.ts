@@ -274,6 +274,89 @@ describe("DB harness packet", () => {
     expect(surfaceContract.missing).toEqual([]);
   });
 
+  it("keeps retrieval failures and grounded photo provenance in the same packet", () => {
+    const packet = buildDbHarnessPacket({
+      question: "성수동 외벽 도장 작업발판 점검",
+      references: [reference()],
+      improvements: [{
+        id: "improvement-cross-contract",
+        taskLabel: "성수동 외벽 도장",
+        hazardLabel: "작업발판 단부 추락",
+        improvementText: "난간 보강 후 작업",
+        reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+        sourceType: "photo_analysis",
+        photoHazardProvenance: {
+          candidateKey: "candidate-cross-contract",
+          source: "vision",
+          provider: "openai",
+          providerMode: "live",
+          model: "gpt-4.1-mini",
+          providerResponses: [{
+            photoId: "before-photo",
+            responseId: "response-1",
+            model: "gpt-4.1-mini",
+            createdAt: 1783753200
+          }],
+          evidence: [{
+            sourceId: "sif-1",
+            sourceType: "safeclaw-db",
+            title: "외벽 도장 중 추락 사례",
+            excerpt: "작업발판과 난간 상태 미확인",
+            retrievals: [{
+              channel: "sif",
+              query: "외벽 도장 작업발판",
+              mode: "hybrid-vector-rpc",
+              source: "hybrid",
+              vectorAttempted: true,
+              vectorOk: false,
+              vectorModel: "text-embedding-3-small"
+            }]
+          }],
+          confirmedControls: [{
+            text: "작업발판과 난간 상태 확인",
+            evidenceSourceIds: ["sif-1"]
+          }],
+          confirmedAt: "2026-07-11T15:00:00+09:00"
+        }
+      }],
+      retrieval: {
+        errorCode: "safety_reference_search_failed",
+        mode: "hybrid-vector-rpc",
+        vectorSearch: {
+          enabled: true,
+          attempted: true,
+          ok: false,
+          errorCode: "safety_reference_vector_failed",
+          reason: "rpc-failed",
+          count: 0,
+          model: "text-embedding-3-small",
+          message: "벡터 RPC 조회 실패"
+        },
+        message: "근거 검색 일부 실패"
+      }
+    });
+
+    expect(packet.retrievalContract).toMatchObject({
+      errorCode: "safety_reference_search_failed",
+      mode: "hybrid-vector-rpc",
+      vector: {
+        errorCode: "safety_reference_vector_failed",
+        enabled: true,
+        attempted: true,
+        ready: false,
+        reason: "rpc-failed"
+      }
+    });
+    expect(packet.improvementMemory[0]?.photoHazardProvenance).toMatchObject({
+      candidateKey: "candidate-cross-contract",
+      providerMode: "live",
+      confirmedControls: [{
+        text: "작업발판과 난간 상태 확인",
+        evidenceSourceIds: ["sif-1"]
+      }]
+    });
+  });
+
   it("carries vector retrieval status into the DB harness packet after approval", () => {
     const packet = buildDbHarnessPacket({
       question: "성수동 외벽 도장 작업",
