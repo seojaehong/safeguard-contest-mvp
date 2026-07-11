@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-11T14:34:57.635Z",
+  "mode": "audit",
+  "buildDirectory": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-audit-runner-port-v2\\.next",
+  "chunkCount": 97,
+  "markerCount": 1,
+  "markerFiles": [
+    "static/chunks/app/layout-6a0a9a9b3dfa7576.js"
+  ],
+  "status": "pass"
+}

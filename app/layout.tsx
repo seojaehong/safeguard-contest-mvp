@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { AuditGlobalBoundaryTrigger } from "@/components/AuditGlobalBoundaryTrigger";
+import { GlobalBoundaryProbe } from "safeclaw-audit-error-escalation";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.safeclaw.kr"),
@@ -23,6 +23,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const auditEnabled = process.env.SAFECLAW_FRONTEND_AUDIT === "1";
+
   return (
     <html lang="ko">
       <head>
@@ -75,8 +77,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
       </head>
       <body>
-        {process.env.SAFECLAW_FRONTEND_AUDIT === "1" ? <span hidden data-safeclaw-audit-enabled="true" /> : null}
-        <AuditGlobalBoundaryTrigger enabled={process.env.SAFECLAW_FRONTEND_AUDIT === "1"} />
+        {auditEnabled ? <span hidden data-safeclaw-audit-enabled="true" /> : null}
+        <GlobalBoundaryProbe />
         {children}
       </body>
     </html>

@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const projectRoot = dirname(fileURLToPath(import.meta.url));
@@ -22,6 +22,15 @@ const nextConfig = {
   outputFileTracingRoot: projectRoot,
   env: {
     NEXT_PUBLIC_BUILD_DATE: buildDate
+  },
+  webpack(config) {
+    config.resolve.alias["safeclaw-audit-error-escalation$"] = join(
+      projectRoot,
+      process.env.SAFECLAW_FRONTEND_AUDIT === "1"
+        ? "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx"
+        : "lib/frontend-audit/GlobalBoundaryProbe.noop.tsx"
+    );
+    return config;
   },
   async redirects() {
     return [
