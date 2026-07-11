@@ -80,3 +80,10 @@ F7 is complete with `passes: true`. PR 66 handoff remains a root-task coordinati
 - The backend patch remains subject to independent backend review before integration. After integration, rerun the documented full tests, typecheck, build, static audit, 108 browser rows, and explicit identity/y-position comparison.
 
 F7 is done with `passes: true`.
+
+## Post-closure backend integration matrix
+
+- Required backend-owned integration: `3900892` (canonical current-workpack resilience). It restores `/workspace` return behavior and fingerprint-matches worker/selection snapshots; browser test and typecheck passed.
+- Independent review pending: `99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49` (document-module shell CSS).
+- Isolated candidate, not integrated: `a935fdb` (reports provenance/state). It adds sample/browser/server labels, timestamps, sticky provenance, missing-workpack empty state, and export lock; independent review is pending.
+- F7 remains done. Integration and the complete post-integration verification matrix remain external gates.

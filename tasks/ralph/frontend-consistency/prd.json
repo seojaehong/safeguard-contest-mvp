@@ -140,6 +140,7 @@
       "status": "done",
       "passes": true,
       "closure": "b61929f passed final branch specification and code-quality review with zero findings; browser 108/108, recovered 1, full 56 files/523 tests, typecheck, audit/normal build, and static 32/22 gates passed. Draft PR #66 body updated 2026-07-11. Backend patch 99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49 remains backend-owned and pending independent review before post-integration gates.",
+      "externalIntegration": "F7 remains done. Backend-owned 3900892 is required for canonical current-workpack resilience. Module shell 99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49 and isolated reports candidate a935fdb await independent review; a935fdb is not integrated. Full post-integration gates remain required.",
       "acceptance": [
         "Desktop and mobile evidence exists for every user-visible route",
         "Day and Night workspace evidence exists",
