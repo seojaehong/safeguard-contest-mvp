@@ -1935,8 +1935,15 @@ export function WorkpackEditor({
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
+  const selectedHasIntentionalEmptyPermitDraft = selected.key === "workPermitDraft"
+    && selectedText === ""
+    && (
+      Object.prototype.hasOwnProperty.call(data.deliverables, "workPermitDraft")
+      || dirtyDocumentKeys.includes("workPermitDraft")
+    );
   const selectedUsesEditedText = dirtyDocumentKeys.includes(selected.key)
-    || selectedText !== initialValues[selected.key];
+    || selectedText !== initialValues[selected.key]
+    || selectedHasIntentionalEmptyPermitDraft;
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
   const selectedRows = buildRowsForDocument(selected, values);
   const riskAssessmentMeta = documentMeta.find((item) => item.key === "riskAssessmentDraft") || documentMeta[1];
@@ -2272,7 +2279,7 @@ export function WorkpackEditor({
       if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
         structuredMode = "workPlanStructured";
         structuredPayload = dl.workPlanStructured;
-      } else if (selected.key === "workPermitDraft") {
+      } else if (selected.key === "workPermitDraft" && !selectedHasIntentionalEmptyPermitDraft) {
         structuredMode = "permitInspectionStructured";
         structuredPayload = dl?.permitInspectionStructured || buildPermitInspectionStructured(data);
       } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
