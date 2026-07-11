@@ -421,6 +421,60 @@ describe("DB harness packet", () => {
     expect(points).toContain("위험성평가표에 같은 위험요인·조치·확인자를 연결");
   });
 
+  it("keeps fire controls and energy isolation in the bounded DB harness surface", () => {
+    const maintenanceFire = reference({
+      id: "sif-forklift-maintenance-fire-packet",
+      title: "LPG 지게차 연료계통 정비 중 화재·폭발 사례",
+      summary: "지게차 연료계통을 수리하던 중 잔류 가스가 누출되고 점화원과 접촉해 화재가 발생",
+      keywords: ["지게차", "정비", "연료 누출", "화재", "폭발", "LOTO"],
+      risk_tags: ["지게차", "화재", "폭발"],
+      controls: ["충전 구역 환기", "정비 전 전원 차단 및 잠금표지(LOTO)"]
+    });
+
+    const packet = buildDbHarnessPacket({
+      question: "LPG 지게차 연료계통 정비 작업",
+      references: [maintenanceFire]
+    });
+    const packetReference = packet.sifCases.find((item) => item.id === maintenanceFire.id);
+    const promptContext = buildHarnessPromptContext(packet);
+    const answer = buildDbHarnessAnswer(packet);
+
+    expect(packetReference).toBeDefined();
+    expect(packetReference?.controls).toHaveLength(2);
+    expect(packetReference?.controls.join(" ")).toMatch(/연료|가스|누출/);
+    expect(packetReference?.controls.join(" ")).toMatch(/환기|점화원|소화기/);
+    expect(packetReference?.controls.join(" ")).toMatch(/차단|잠금표지|LOTO/);
+    expect(promptContext).toMatch(/차단|잠금표지|LOTO/);
+    expect(answer).toMatch(/차단|잠금표지|LOTO/);
+  });
+
+  it("keeps molten-metal explosion controls in the bounded DB harness surface", () => {
+    const moltenMetalSif = reference({
+      id: "sif-아카이브-제조업등-00851",
+      title: "851 / 제조업 / 도가니 원료 투입 중 용탕 폭발",
+      summary: "지게차로 운반한 원료의 수분이 도가니 용탕과 접촉하면서 증기폭발이 발생한 사례",
+      keywords: ["지게차", "도가니", "용탕", "수분", "증기폭발"],
+      risk_tags: ["지게차", "화재", "폭발", "화상"],
+      controls: [
+        "지게차 연료·가스·배터리 누출 및 충전·주유 설비 상태 확인",
+        "충전·주유 구역 환기, 점화원 통제 및 적합 소화기 비치"
+      ]
+    });
+
+    const packet = buildDbHarnessPacket({
+      question: "도가니에 지게차로 원료를 운반해 투입하는 작업",
+      references: [moltenMetalSif]
+    });
+    const packetReference = packet.sifCases.find((item) => item.id === moltenMetalSif.id);
+    const answer = buildDbHarnessAnswer(packet);
+
+    expect(packetReference?.controls.join(" ")).toMatch(/건조|수분 제거|수분 유입/);
+    expect(packetReference?.controls.join(" ")).toMatch(/냉각수|출입통제|방열|보호구/);
+    expect(packetReference?.controls.join(" ")).not.toMatch(/지게차 연료|배터리|충전|주유/);
+    expect(answer).toMatch(/용탕|수분|냉각수|증기폭발/);
+    expect(answer).not.toMatch(/지게차 연료|배터리|충전|주유/);
+  });
+
   it("does not fall back to generic LLM prose when the DB harness has no evidence", () => {
     const packet = buildDbHarnessPacket({
       question: "성수동 외벽 도장 작업",
