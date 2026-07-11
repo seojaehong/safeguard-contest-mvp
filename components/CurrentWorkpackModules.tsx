@@ -606,12 +606,9 @@ function excerpt(text: string, maxLength = 190) {
   return `${normalized.slice(0, maxLength).trim()}...`;
 }
 
-function hasDeliverableKey(key: DocumentKey): key is DeliverableDocumentKey {
-  return key !== "workPermitDraft";
-}
-
 function buildDerivedDocumentText(data: AskResponse, key: DocumentKey) {
-  if (hasDeliverableKey(key)) return data.deliverables[key];
+  const storedDraft = data.deliverables[key];
+  if (typeof storedDraft === "string" && storedDraft.trim()) return storedDraft;
 
   const actions = data.riskSummary.immediateActions.slice(0, 2).join(" / ");
   return `허가대상 작업: ${data.scenario.workSummary}. 핵심위험: ${data.riskSummary.topRisk}. 작업 전 허가조건: ${actions}`;
@@ -620,9 +617,7 @@ function buildDerivedDocumentText(data: AskResponse, key: DocumentKey) {
 function buildDeliverablePatch(values: WorkpackDocumentValues) {
   const patch: Partial<AskResponse["deliverables"]> = {};
   (Object.keys(values) as DocumentKey[]).forEach((key) => {
-    if (hasDeliverableKey(key)) {
-      patch[key] = values[key];
-    }
+    patch[key] = values[key];
   });
   return patch;
 }
