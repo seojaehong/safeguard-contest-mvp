@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, startTransition } fr
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { ClawChat } from "@/components/ClawChat";
+import { reportClawContextLoadFailure } from "@/lib/claw-chat-session";
 import { OperationMemoryGraphViewer } from "@/components/OperationMemoryPreview";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import {
@@ -900,9 +901,9 @@ export function FieldOperationsWorkspace({
         setSelectedClawSiteId((current) => sites.some((site) => site.id === current) ? current : sites[0].id);
         setClawContextStatus("ready");
       })
-      .catch((error: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
-        console.warn("claw owned-site context load failed", error);
+        reportClawContextLoadFailure();
         setClawSiteOptions([]);
         setSelectedClawSiteId(null);
         setClawContextStatus("unavailable");

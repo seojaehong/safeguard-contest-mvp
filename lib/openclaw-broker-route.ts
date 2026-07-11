@@ -86,6 +86,9 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
       return jsonError(brokerError);
     }
 
+    const limited = enforceAuthenticatedRateLimit(authentication.user.id, routeAuthenticatedLimiter);
+    if (limited) return limited;
+
     const body = await request.json().catch(() => null);
     if (!body || typeof body !== "object") {
       return jsonError(new BrokerError("SITE_CONTEXT_REQUIRED", 400));
@@ -111,9 +114,6 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
       log.error("openclaw broker preflight failed", { code: brokerError.code });
       return jsonError(brokerError);
     }
-
-    const limited = enforceAuthenticatedRateLimit(context.userId, routeAuthenticatedLimiter);
-    if (limited) return limited;
 
     try {
       await dependencies.engine.checkAvailability(context);

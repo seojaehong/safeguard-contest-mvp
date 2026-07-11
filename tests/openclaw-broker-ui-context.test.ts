@@ -1,8 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import {
+  CLAW_CONTEXT_LOAD_FAILED_EVENT,
+  createClawChatRequestSession,
+  reportClawContextLoadFailure,
+} from "@/lib/claw-chat-session";
 import { createAgentContextGet } from "@/lib/openclaw-broker-context";
 
 const root = process.cwd();
@@ -53,5 +58,48 @@ describe("OpenClaw owned-site context wiring", () => {
     expect(source).toContain("const canSend = Boolean(authToken && selectedSiteId && contextStatus === \"ready\")");
     expect(source).toContain("disabled={busy || !canSend}");
     expect(source).toContain("로그인 후 소유 현장을 연결하면");
+  });
+
+  it("aborts active requests and resets turns when the auth token or site changes", async () => {
+    const resetTurns = vi.fn();
+    const setBusy = vi.fn();
+    const session = createClawChatRequestSession({ resetTurns, setBusy });
+    session.synchronizeContext("token-a", "site-a");
+    resetTurns.mockClear();
+    setBusy.mockClear();
+
+    const authRequest = session.beginRequest();
+    const authFetch = new Promise<void>((_resolve, reject) => {
+      authRequest.signal.addEventListener("abort", () => reject(authRequest.signal.reason), { once: true });
+    });
+    session.synchronizeContext("token-b", "site-a");
+
+    expect(authRequest.signal.aborted).toBe(true);
+    await expect(authFetch).rejects.toBeDefined();
+    expect(resetTurns).toHaveBeenCalledTimes(1);
+    expect(setBusy).toHaveBeenLastCalledWith(false);
+
+    resetTurns.mockClear();
+    setBusy.mockClear();
+    const siteRequest = session.beginRequest();
+    const siteFetch = new Promise<void>((_resolve, reject) => {
+      siteRequest.signal.addEventListener("abort", () => reject(siteRequest.signal.reason), { once: true });
+    });
+    session.synchronizeContext("token-b", "site-b");
+
+    expect(siteRequest.signal.aborted).toBe(true);
+    await expect(siteFetch).rejects.toBeDefined();
+    expect(resetTurns).toHaveBeenCalledTimes(1);
+    expect(setBusy).toHaveBeenLastCalledWith(false);
+    session.dispose();
+  });
+
+  it("logs only a stable event code when owned-site context loading fails", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    reportClawContextLoadFailure();
+
+    expect(warn.mock.calls).toEqual([[CLAW_CONTEXT_LOAD_FAILED_EVENT]]);
+    warn.mockRestore();
   });
 });
