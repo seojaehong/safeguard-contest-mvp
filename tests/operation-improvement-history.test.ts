@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { parseOperationImprovements } from "@/lib/operation-improvement-history";
+import {
+  operationImprovementToHarnessImprovement,
+  parseOperationImprovements
+} from "@/lib/operation-improvement-history";
 
 describe("parseOperationImprovements", () => {
   it("preserves canonical and legacy review statuses without dropping them", () => {
@@ -146,5 +149,72 @@ describe("parseOperationImprovements", () => {
     }]));
 
     expect(parsed).toEqual([]);
+  });
+
+  it("round-trips report status, risk association, and photo provenance together", () => {
+    const parsed = parseOperationImprovements(JSON.stringify([{
+      id: "improvement-cross-contract",
+      createdAt: "2026-07-11T15:00:00+09:00",
+      siteName: "성수동 현장",
+      workSummary: "외벽 도장",
+      hazardLabel: "추락",
+      improvementText: "작업발판 난간을 보강하고 통제선을 설치",
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+      status: "approved",
+      riskAssociation: {
+        siteName: "성수동 현장",
+        process: "도장공사",
+        task: "외벽 도장",
+        hazard: "작업발판 단부 추락"
+      },
+      sourceType: "photo_analysis",
+      photoHazardProvenance: {
+        candidateKey: "candidate-cross-contract",
+        candidateId: "candidate-1",
+        source: "vision",
+        provider: "openai",
+        providerMode: "live",
+        model: "gpt-4.1-mini",
+        providerResponses: [{
+          photoId: "before-photo",
+          responseId: "response-1",
+          model: "gpt-4.1-mini",
+          createdAt: 1783753200
+        }],
+        evidence: [{
+          sourceId: "sif-1",
+          sourceType: "safeclaw-db",
+          title: "외벽 작업 추락 사례",
+          excerpt: "작업발판 단부에서 추락 위험이 확인됨"
+        }],
+        confirmedControls: [{
+          text: "작업발판 난간과 하부 출입통제를 확인",
+          evidenceSourceIds: ["sif-1"]
+        }],
+        confirmedAt: "2026-07-11T15:00:00+09:00"
+      }
+    }]));
+
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0]).toMatchObject({
+      status: "approved",
+      riskAssociation: {
+        siteName: "성수동 현장",
+        process: "도장공사",
+        task: "외벽 도장",
+        hazard: "작업발판 단부 추락"
+      },
+      photoHazardProvenance: {
+        candidateKey: "candidate-cross-contract",
+        providerMode: "live",
+        confirmedControls: [{
+          text: "작업발판 난간과 하부 출입통제를 확인",
+          evidenceSourceIds: ["sif-1"]
+        }]
+      }
+    });
+
+    expect(operationImprovementToHarnessImprovement(parsed[0]).photoHazardProvenance)
+      .toEqual(parsed[0].photoHazardProvenance);
   });
 });
