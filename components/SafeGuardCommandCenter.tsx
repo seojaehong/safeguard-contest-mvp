@@ -30,6 +30,7 @@ import {
   type HazardPhotoGenerationCandidate,
   type HazardPhotoWorkspaceAnalysis
 } from "@/lib/operation-improvements";
+import { createLatestOnlyRequestGate } from "@/lib/request-version-guard";
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
   operationImprovementToHarnessImprovement,
@@ -129,6 +130,10 @@ type InputHazardCandidate = HazardPhotoGenerationCandidate & { source: "vision" 
 
 type InputHazardPhotoAnalysis = {
   status: "idle" | "analyzing" | HazardPhotoWorkspaceAnalysis["status"];
+  provider: string;
+  providerMode: HazardPhotoWorkspaceAnalysis["providerMode"];
+  model: string;
+  providerResponses: HazardPhotoWorkspaceAnalysis["providerResponses"];
   summary: string;
   ocrText: string;
   siteSignals: string[];
@@ -376,6 +381,10 @@ function readApiMessage(value: unknown, fallback: string) {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return fallback;
   const message = (value as Record<string, unknown>).message;
   return typeof message === "string" && message.trim() ? message : fallback;
+}
+
+function isAbortLikeError(error: unknown) {
+  return error instanceof Error && error.name === "AbortError";
 }
 
 function inferWeatherFromText(text: string, fallback: string) {
@@ -1080,6 +1089,10 @@ export function SafeGuardCommandCenter({
   const [inputHazardPhotos, setInputHazardPhotos] = useState<LocalPhoto[]>([]);
   const [inputHazardPhotoAnalysis, setInputHazardPhotoAnalysis] = useState<InputHazardPhotoAnalysis>({
     status: "idle",
+    provider: "",
+    providerMode: "unconfigured",
+    model: "",
+    providerResponses: [],
     summary: "",
     ocrText: "",
     siteSignals: [],
@@ -1091,6 +1104,7 @@ export function SafeGuardCommandCenter({
   const [acceptedInputHazardCandidateKeys, setAcceptedInputHazardCandidateKeys] = useState<string[]>([]);
   const [dismissedInputHazardCandidateKeys, setDismissedInputHazardCandidateKeys] = useState<string[]>([]);
   const inputHazardPhotosRef = useRef<LocalPhoto[]>([]);
+  const inputHazardPhotoRequestGateRef = useRef(createLatestOnlyRequestGate());
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
   const [improvementSaveState, setImprovementSaveState] = useState<ImprovementSaveState>("idle");
   const [activeWorkspaceTheme, setActiveWorkspaceTheme] = useState<WorkspaceTheme>(workspaceTheme);
@@ -1122,6 +1136,7 @@ export function SafeGuardCommandCenter({
   }, [inputHazardPhotos]);
 
   useEffect(() => () => {
+    inputHazardPhotoRequestGateRef.current.abortCurrent();
     inputHazardPhotosRef.current.forEach((photo) => URL.revokeObjectURL(photo.url));
   }, []);
 
@@ -1200,8 +1215,13 @@ export function SafeGuardCommandCenter({
   }
 
   function resetInputHazardAnalysis(message = "") {
+    inputHazardPhotoRequestGateRef.current.abortCurrent();
     setInputHazardPhotoAnalysis({
       status: "idle",
+      provider: "",
+      providerMode: "unconfigured",
+      model: "",
+      providerResponses: [],
       summary: "",
       ocrText: "",
       siteSignals: [],
@@ -1267,14 +1287,20 @@ export function SafeGuardCommandCenter({
       setMessage("분석할 현장 사진을 먼저 첨부해 주세요.");
       return;
     }
+    const request = inputHazardPhotoRequestGateRef.current.begin();
     setAcceptedInputHazardCandidateKeys([]);
     setDismissedInputHazardCandidateKeys([]);
     setInputHazardPhotoAnalysis((current) => ({ ...current, status: "analyzing", message: "현장 사진을 vision API로 분석 중입니다." }));
     const accessToken = await readWorkspaceAccessToken();
+    if (request.signal.aborted || !inputHazardPhotoRequestGateRef.current.isCurrent(request.requestId)) return;
     if (!accessToken) {
       const message = "관리자 로그인 후 현장 사진 분석을 사용할 수 있습니다.";
       setInputHazardPhotoAnalysis({
         status: "failed",
+        provider: "",
+        providerMode: "unconfigured",
+        model: "",
+        providerResponses: [],
         summary: "",
         ocrText: "",
         siteSignals: [],
@@ -1293,9 +1319,11 @@ export function SafeGuardCommandCenter({
       const response = await fetch("/api/input-photos/hazard-analysis", {
         method: "POST",
         headers: { authorization: `Bearer ${accessToken}` },
-        body: form
+        body: form,
+        signal: request.signal
       });
       const parsed = (await response.json().catch((): unknown => ({}))) as unknown;
+      if (request.signal.aborted || !inputHazardPhotoRequestGateRef.current.isCurrent(request.requestId)) return;
       if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
         throw new Error(`사진 분석 응답이 올바르지 않습니다: HTTP ${response.status}`);
       }
@@ -1319,9 +1347,16 @@ export function SafeGuardCommandCenter({
           ? "현장 사진에서 위험요인 후보를 도출했습니다. 필요한 후보를 입력에 반영하세요."
           : workspaceResponse.message || "사진 분석 결과 후보가 부족합니다. 현장 확인 후 직접 입력해 주세요.");
     } catch (error) {
+      if (request.signal.aborted || !inputHazardPhotoRequestGateRef.current.isCurrent(request.requestId) || isAbortLikeError(error)) {
+        return;
+      }
       console.error("input hazard photo analysis failed", error);
       setInputHazardPhotoAnalysis({
         status: "failed",
+        provider: "",
+        providerMode: "unconfigured",
+        model: "",
+        providerResponses: [],
         summary: "",
         ocrText: "",
         siteSignals: [],
@@ -1331,6 +1366,8 @@ export function SafeGuardCommandCenter({
         message: error instanceof Error ? error.message : "현장 사진 분석에 실패했습니다."
       });
       setMessage("현장 사진 분석에 실패했습니다. 사진 후보 없이도 문서 생성은 계속할 수 있습니다.");
+    } finally {
+      inputHazardPhotoRequestGateRef.current.finish(request.requestId);
     }
   }
 
@@ -1359,7 +1396,11 @@ export function SafeGuardCommandCenter({
       summary: inputHazardPhotoAnalysis.summary,
       ocrText: inputHazardPhotoAnalysis.ocrText,
       siteSignals: inputHazardPhotoAnalysis.siteSignals,
-      photoCount: inputHazardPhotos.length
+      photoCount: inputHazardPhotos.length,
+      provider: inputHazardPhotoAnalysis.provider,
+      providerMode: inputHazardPhotoAnalysis.providerMode,
+      model: inputHazardPhotoAnalysis.model,
+      providerResponses: inputHazardPhotoAnalysis.providerResponses
     });
     return [baseQuestion.trim(), appendix].filter(Boolean).join("\n\n").trim();
   }
@@ -1372,7 +1413,11 @@ export function SafeGuardCommandCenter({
       summary: inputHazardPhotoAnalysis.summary,
       ocrText: inputHazardPhotoAnalysis.ocrText,
       siteSignals: inputHazardPhotoAnalysis.siteSignals,
-      photoCount: inputHazardPhotos.length
+      photoCount: inputHazardPhotos.length,
+      provider: inputHazardPhotoAnalysis.provider,
+      providerMode: inputHazardPhotoAnalysis.providerMode,
+      model: inputHazardPhotoAnalysis.model,
+      providerResponses: inputHazardPhotoAnalysis.providerResponses
     });
     const storedImprovements: HarnessImprovement[] = operationImprovements.slice(0, 8).map(operationImprovementToHarnessImprovement);
     const improvements = [...acceptedPhotoImprovements, ...storedImprovements].slice(0, 12);
