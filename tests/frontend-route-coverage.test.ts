@@ -357,6 +357,7 @@ describe("browser evidence reconciliation", () => {
     expect(runner).not.toContain('path.join(outputDirectory, "report.json")');
     expect(runner).not.toContain("2d0ff44");
     expect(runner).not.toContain("99a42d2");
+    expect(runner).toContain('surface === "error" || surface === "global-error"');
   });
 
   it("reconciles the complete route, theme, special-state, and generated-surface evidence", () => {
