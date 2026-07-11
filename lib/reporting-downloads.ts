@@ -19,12 +19,21 @@ export type ReportPhotoApproval = {
   afterPhotoName: string;
 };
 
+export type ReportSourceMode = "browser_local" | "server_saved" | "sample";
+
 export type ReportSourceMetadata = {
-  mode: "browser_local" | "sample";
-  scope: "current_browser" | "sample_preview";
+  mode: ReportSourceMode;
+  scope: "current_browser" | "server_workpack" | "sample_preview";
+  workpackId?: string;
   workpackSavedAt: string;
+  workpackGeneratedAt?: string;
   riskRowTimeBasis: "workpack_saved_at";
   limitations: string[];
+};
+
+export type ReportProvenancePresentation = {
+  label: "샘플 데이터" | "브라우저 최근 작업팩" | "서버 저장 작업팩";
+  savedTimeLabel: "미리보기 준비" | "브라우저 저장" | "서버 저장";
 };
 
 export type ReportImprovementStatus = OperationImprovementStatus;
@@ -144,11 +153,23 @@ export type ReportLearningEvent = {
 };
 
 export type ReportViewState = {
-  status: "empty" | "ready" | "error";
+  status: "empty" | "ready" | "blocked" | "error";
   title: string;
   detail: string;
   canDownload: boolean;
 };
+
+export function resolveReportProvenancePresentation(
+  source: ReportSourceMetadata
+): ReportProvenancePresentation {
+  if (source.mode === "sample") {
+    return { label: "샘플 데이터", savedTimeLabel: "미리보기 준비" };
+  }
+  if (source.mode === "server_saved") {
+    return { label: "서버 저장 작업팩", savedTimeLabel: "서버 저장" };
+  }
+  return { label: "브라우저 최근 작업팩", savedTimeLabel: "브라우저 저장" };
+}
 
 export function toggleReportPhotoApproval(
   current: readonly ReportPhotoApproval[],
@@ -188,13 +209,21 @@ export function resolveReportViewState(
   }
   if (snapshot?.source.mode === "sample") {
     return {
-      status: "ready",
-      title: "샘플 미리보기만 가능합니다.",
-      detail: "실제 작업팩 저장시각이 유효해질 때까지 증빙 다운로드는 잠겨 있습니다.",
+      status: "blocked",
+      title: "다운로드 잠김",
+      detail: "샘플 데이터는 미리보기 전용이며 모든 내보내기가 비활성화됩니다.",
       canDownload: false
     };
   }
-  if (!snapshot || snapshot.summary.riskRows + snapshot.summary.improvements === 0) {
+  if (!snapshot) {
+    return {
+      status: "empty",
+      title: "최근 작업팩이 없습니다.",
+      detail: "작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요.",
+      canDownload: false
+    };
+  }
+  if (snapshot.summary.riskRows + snapshot.summary.improvements === 0) {
     return {
       status: "empty",
       title: "조건에 맞는 리포트가 없습니다.",
@@ -535,7 +564,9 @@ function buildNotes(
   const notes = [
     source.scope === "sample_preview"
       ? "이 리포트는 샘플 미리보기 데이터로 생성되며 실제 현장 전체 범위를 나타내지 않습니다."
-      : "이 리포트는 현재 브라우저의 최신 작업팩과 저장된 개선사항 후보만 기준으로 생성됩니다.",
+      : source.scope === "server_workpack"
+        ? "이 리포트는 서버에 저장된 해당 작업팩만 기준으로 생성됩니다."
+        : "이 리포트는 현재 브라우저의 최신 작업팩과 저장된 개선사항 후보만 기준으로 생성됩니다.",
     "위험행의 기간 포함 여부는 행별 생성시각이 아닌 작업팩 저장시각을 기준으로 판단합니다.",
     "Before/After 사진은 이 화면에서 포함 승인한 항목만 다운로드 산출물에 기록됩니다."
   ];
@@ -555,7 +586,8 @@ export function buildReportSnapshot(input: {
   dateRange?: ReportDateRange;
   filters?: ReportFilters;
   photoApprovals?: readonly ReportPhotoApproval[];
-  sourceMode?: ReportSourceMetadata["mode"];
+  sourceMode?: ReportSourceMode;
+  sourceWorkpackId?: string;
   now?: Date;
 }): ReportSnapshot {
   if (!isRfc3339OffsetTimestamp(input.workpack.savedAt)) {
@@ -566,14 +598,31 @@ export function buildReportSnapshot(input: {
   const filters = normalizeFilters(input.filters);
   const data = input.workpack.data;
   const sourceMode = input.sourceMode || "browser_local";
+  const generatedAtCandidates = [
+    data.generationEvidence?.snapshot.generatedAt,
+    data.qualityContract?.generatedAt
+  ];
+  const workpackGeneratedAt = generatedAtCandidates.find((value) => (
+    typeof value === "string" && isRfc3339OffsetTimestamp(value)
+  ));
   const source: ReportSourceMetadata = {
     mode: sourceMode,
-    scope: sourceMode === "sample" ? "sample_preview" : "current_browser",
+    scope: sourceMode === "sample"
+      ? "sample_preview"
+      : sourceMode === "server_saved"
+        ? "server_workpack"
+        : "current_browser",
+    ...(sourceMode === "server_saved" && input.sourceWorkpackId
+      ? { workpackId: input.sourceWorkpackId }
+      : {}),
     workpackSavedAt: input.workpack.savedAt,
+    ...(workpackGeneratedAt ? { workpackGeneratedAt } : {}),
     riskRowTimeBasis: "workpack_saved_at",
     limitations: sourceMode === "sample"
       ? ["sample_data_only", "not_full_operational_history", "risk_rows_share_workpack_timestamp"]
-      : ["current_browser_only", "not_full_operational_history", "risk_rows_share_workpack_timestamp"]
+      : sourceMode === "server_saved"
+        ? ["server_saved_workpack_only", "not_full_operational_history", "risk_rows_share_workpack_timestamp"]
+        : ["current_browser_only", "not_full_operational_history", "risk_rows_share_workpack_timestamp"]
   };
   const allRiskRows = isWithinPeriod(input.workpack.savedAt, input.period, now, dateRange)
     ? data.structured?.riskAssessmentRows.length
@@ -705,7 +754,9 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "승인사진",
     "데이터범위",
     "데이터모드",
+    "작업팩ID",
     "작업팩저장시각",
+    "작업팩생성시각",
     "위험행시간기준",
     "데이터제한"
   ];
@@ -725,7 +776,9 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "",
     snapshot.source.scope,
     snapshot.source.mode,
+    snapshot.source.workpackId || "",
     snapshot.source.workpackSavedAt,
+    snapshot.source.workpackGeneratedAt || "",
     snapshot.source.riskRowTimeBasis,
     snapshot.source.limitations.join(" · ")
   ];
@@ -745,7 +798,9 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "",
     snapshot.source.scope,
     snapshot.source.mode,
+    snapshot.source.workpackId || "",
     snapshot.source.workpackSavedAt,
+    snapshot.source.workpackGeneratedAt || "",
     snapshot.source.riskRowTimeBasis,
     snapshot.source.limitations.join(" · ")
   ]);
@@ -765,7 +820,9 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     item.photoNames.join(" · "),
     snapshot.source.scope,
     snapshot.source.mode,
+    snapshot.source.workpackId || "",
     snapshot.source.workpackSavedAt,
+    snapshot.source.workpackGeneratedAt || "",
     snapshot.source.riskRowTimeBasis,
     snapshot.source.limitations.join(" · ")
   ]);
@@ -804,7 +861,9 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
     "",
     `- scope: ${snapshot.source.scope}`,
     `- mode: ${snapshot.source.mode}`,
+    ...(snapshot.source.workpackId ? [`- workpackId: ${snapshot.source.workpackId}`] : []),
     `- workpackSavedAt: ${snapshot.source.workpackSavedAt}`,
+    `- workpackGeneratedAt: ${snapshot.source.workpackGeneratedAt || "unavailable"}`,
     `- riskRowTimeBasis: ${snapshot.source.riskRowTimeBasis}`,
     `- limitations: ${snapshot.source.limitations.join(", ")}`,
     "",
@@ -995,7 +1054,9 @@ export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
     `- workSummary: ${snapshot.scenario.workSummary}`,
     `- sourceScope: ${snapshot.source.scope}`,
     `- sourceMode: ${snapshot.source.mode}`,
+    ...(snapshot.source.workpackId ? [`- workpackId: ${snapshot.source.workpackId}`] : []),
     `- workpackSavedAt: ${snapshot.source.workpackSavedAt}`,
+    `- workpackGeneratedAt: ${snapshot.source.workpackGeneratedAt || "unavailable"}`,
     `- riskRowTimeBasis: ${snapshot.source.riskRowTimeBasis}`,
     `- sourceLimitations: ${snapshot.source.limitations.join(", ")}`,
     "",
