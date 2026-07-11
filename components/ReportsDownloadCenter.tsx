@@ -811,7 +811,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
   if (!workpack) {
     if (loading) {
       return (
-        <section className="safeclaw-module-panel" aria-label="리포트 데이터 확인 상태">
+        <section className="safeclaw-module-panel workbench-loading-state" aria-label="리포트 데이터 확인 상태">
           <span>데이터 출처 확인</span>
           <h2>{serverWorkpackId ? "서버 저장 작업팩을 확인하고 있습니다." : "최근 작업팩을 확인하고 있습니다."}</h2>
           <p>리포트에 사용할 작업팩을 확인하는 중입니다.</p>
@@ -842,7 +842,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
     }
     const isCalmEmpty = missingCurrent && !loadError;
     return (
-      <section className="safeclaw-module-panel" aria-label={isCalmEmpty ? "리포트 빈 상태" : "리포트 데이터 오류"}>
+      <section className="safeclaw-module-panel workbench-empty-state" aria-label={isCalmEmpty ? "리포트 빈 상태" : "리포트 데이터 오류"}>
         <span>{isCalmEmpty ? "데이터 출처 · 없음" : "리포트 오류"}</span>
         <h2>{isCalmEmpty ? "최근 작업팩이 없습니다." : "현재 작업을 불러오지 못했습니다."}</h2>
         <p>{isCalmEmpty ? "작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요." : loadError}</p>
@@ -892,7 +892,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
           ) : null}
           <section>
             <span>기간</span>
-            <div className="safeclaw-report-controls" aria-label="리포트 기간 선택">
+            <div className="safeclaw-report-controls workbench-report-filters" aria-label="리포트 기간 선택">
               {periodOptions.map((option) => (
                 <button
                   key={option.value}

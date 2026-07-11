@@ -83,6 +83,8 @@ export const frontendShape = {
   microRadius: "2px",
   controlRadius: "4px",
   panelRadius: "4px",
+  softRadius: "8px",
+  workbenchRadius: "12px",
   circleRadius: "50%",
   controlHeight: "44px",
   compactControlHeight: "36px",

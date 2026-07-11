@@ -63,7 +63,7 @@ describe("generated document typography", () => {
     for (const asset of ["public/fonts/NotoSansKR-Regular.ttf", "public/fonts/NotoSansKR-Bold.ttf", "public/fonts/NotoSansKR-OFL.txt"]) {
       expect(source).toContain(`path.join(process.cwd(), "${asset}")`);
     }
-    expect(source).toContain('console.error("PDF export font assets are unavailable or invalid", error)');
+    expect(source).toContain('console.error("PDF export font assets are unavailable or invalid", error.source)');
     expect(source).toContain('error: "PDF_FONT_ASSET_UNAVAILABLE"');
   });
   it("keeps the generated surface inventory explicit", () => {

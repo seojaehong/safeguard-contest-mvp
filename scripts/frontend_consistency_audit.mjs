@@ -218,6 +218,36 @@ allowEffect(
   "inset 4px 0 0 var(--workspace-accent)",
   "4px themed selected-document rail",
 );
+for (const [selector, value, reason] of [
+  [".command-center-shell .input-photo-candidates article.accepted", "inset 4px 0 0 var(--workspace-success)", "accepted photo rail"],
+  [".command-center-shell.workspace-theme-day .input-photo-candidates article.accepted", "inset 4px 0 0 #16a34a", "day accepted photo rail"],
+  [".command-center-shell.workspace-theme-day .command-console-input:focus", "0 0 0 3px rgba(245, 197, 24, 0.22)", "visible keyboard focus ring"],
+  [".command-center-shell.workspace-theme-day .field-workspace .document-editor.editor-focus-cue", "0 0 0 3px rgba(108, 111, 247, 0.12)", "day editor focus cue"],
+  [".command-center-shell.workspace-theme-day .field-workspace .doc-tab.active", "inset 4px 0 0 var(--workspace-accent)", "day active document rail"],
+  [".command-center-shell.workspace-theme-day .field-workspace :is(.document-textarea, .remediation-textarea):focus", "0 0 0 3px rgba(108, 111, 247, 0.18)", "day textarea focus ring"],
+  [".safeclaw-module-shell.module-variant-document .doc-tab.active, .safeclaw-module-shell.module-variant-document .template-card.active", "inset 4px 0 0 var(--workspace-accent)", "module active document rail"],
+  [".safeclaw-module-shell.module-variant-document .document-textarea:focus, .safeclaw-module-shell.module-variant-document .remediation-textarea:focus", "0 0 0 3px rgba(108, 111, 247, 0.18)", "module textarea focus ring"],
+  [".command-center-shell.workspace-theme-night .field-workspace .document-editor.editor-focus-cue", "0 0 0 3px rgba(108, 111, 247, 0.22)", "night editor focus cue"],
+  [".command-center-shell.workspace-theme-night .field-workspace .doc-tab.active", "inset 4px 0 0 var(--workspace-accent)", "night active document rail"],
+  [".command-center-shell.workspace-theme-night .field-workspace :is(.document-textarea, .remediation-textarea):focus", "0 0 0 3px rgba(108, 111, 247, 0.24)", "night textarea focus ring"],
+  [".safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-rail a.active", "inset 4px 0 0 var(--workspace-accent)", "module navigation active rail"],
+  [".safeclaw-module-shell .safeclaw-module-theme-toggle button.active", "inset 0 0 0 1px var(--workspace-rule-strong)", "active theme boundary"],
+  [".safeclaw-module-shell.module-variant-document :is(.safeclaw-mobile-core-list, .safeclaw-mobile-remaining-list) button[aria-pressed=\"true\"]", "inset 4px 0 0 var(--workspace-accent)", "mobile selected document rail"],
+]) {
+  allowEffect(selector, "box-shadow", value, reason);
+}
+for (const selector of [
+  ".safeclaw-module-shell.module-variant-document .doc-tab.active",
+  ".safeclaw-module-shell.module-variant-document .template-card.active",
+]) {
+  allowEffect(selector, "box-shadow", "inset 4px 0 0 var(--workspace-accent)", "module active document rail");
+}
+for (const selector of [
+  ".safeclaw-module-shell.module-variant-document .document-textarea:focus",
+  ".safeclaw-module-shell.module-variant-document .remediation-textarea:focus",
+]) {
+  allowEffect(selector, "box-shadow", "0 0 0 3px rgba(108, 111, 247, 0.18)", "module textarea focus ring");
+}
 allowEffect(
   ".hazard-stripe",
   "background-image",
@@ -389,9 +419,9 @@ function cssViolations(source) {
   }
 
   const allowedTracking = new Set([
-    "0", "-0.015em", "-0.025em", "-0.035em", "-0.045em", "0.04em", "0.08em",
+    "0", "-0.015em", "-0.025em", "-0.035em", "-0.045em", "0.08em",
     "var(--tracking-body)", "var(--tracking-component-title)", "var(--tracking-section-title)",
-    "var(--tracking-page-title)", "var(--tracking-display)", "var(--tracking-table-header)",
+    "var(--tracking-page-title)", "var(--tracking-display)",
     "var(--tracking-hud)",
   ]);
   for (const match of source.matchAll(/letter-spacing\s*:\s*([^;\r\n}]+)/g)) {
@@ -406,6 +436,7 @@ function cssViolations(source) {
     const allowed = new Set([
       "0", "2px", "4px", "50%", "var(--radius-structural)", "var(--radius-micro)",
       "var(--radius-control)", "var(--radius-panel)", "var(--radius-circle)",
+      "var(--radius-soft)", "var(--radius-workbench)",
       "var(--radius-sm)", "var(--radius-md)", "var(--radius-lg)", "var(--r-xs)",
       "var(--r-sm)", "var(--r-md)", "var(--r-lg)", "var(--r-xl)",
     ]);

@@ -72,7 +72,7 @@ const canonicalSurfaceHooks: Record<string, string> = {
   "app/auth/callback/page.tsx": "safeclaw-login-page",
   "app/dryrun/page.tsx": "SafeClawModuleShell",
   "app/interpretation/[id]/page.tsx": "container grid",
-  "app/knowledge/[section]/[slug]/page.tsx": "knowledge-shell",
+  "app/knowledge/[section]/[slug]/page.tsx": "SafeClawModuleShell",
   "app/law/[id]/page.tsx": "container grid",
   "app/login/page.tsx": "safeclaw-login-page",
   "app/precedent/[id]/page.tsx": "container grid",
@@ -88,6 +88,7 @@ const delegatedHeadingOwners: Partial<Record<(typeof userVisibleRoutes)[number],
   "/login": "components/AdminLoginPanel.tsx",
   "/auth/callback": "components/AuthCallbackClient.tsx",
   "/dryrun": "components/SafeClawModuleShell.tsx",
+  "/knowledge/[section]/[slug]": "components/SafeClawModuleShell.tsx",
   "/preview": "components/SafeClawModuleShell.tsx",
   "/roadmap": "components/SafeClawModuleShell.tsx",
   "/search": "components/SafeClawModuleShell.tsx",
@@ -193,7 +194,7 @@ const approvedSpacingTokens = new Set([
   "--space-1", "--space-2", "--space-3", "--space-4", "--space-5", "--space-6",
   "--space-8", "--space-10", "--space-12", "--space-16", "--space-20", "--space-24",
 ]);
-const justifiedSemanticSpacingTokens = new Set(["--os-gutter"]);
+const justifiedSemanticSpacingTokens = new Set(["--os-gutter", "--module-nav-inline", "--decision-header-inline"]);
 const justifiedResponsiveSpacingExpressions = new Set([
   ".safeclaw-landing-nav nav|gap|clamp(var(--space-4), 2.4vw, var(--space-10))",
   ".safeclaw-hero-copy|padding|clamp(var(--space-10), 7vw, var(--space-24))",
@@ -216,17 +217,31 @@ const ordinaryModuleOwnedClasses = new Set([
   "knowledge-entry-grid", "knowledge-entry-list", "knowledge-index-card", "knowledge-status-grid",
   "ontology-empty-panel", "ontology-hover-card", "ontology-kind-list", "ontology-list-column", "ontology-map-column",
   "ontology-node-list", "ontology-node-row", "ontology-summary-grid", "ontology-workbench",
+  "ontology-operation-loop", "ontology-operation-flow", "ontology-graph-shell", "ontology-graph-board",
+  "ontology-graph-node-layer", "ontology-graph-popover", "ontology-graph-stats", "ontology-graph-legend",
   "safeclaw-archive-list", "safeclaw-current-workpack", "safeclaw-evidence-group",
   "safeclaw-module-actions", "safeclaw-module-brand", "safeclaw-module-card", "safeclaw-module-content",
   "safeclaw-module-description", "safeclaw-module-eyebrow", "safeclaw-module-grid", "safeclaw-module-header",
   "safeclaw-module-list", "safeclaw-module-main", "safeclaw-module-nav", "safeclaw-module-navigation",
   "safeclaw-module-panel", "safeclaw-module-primary", "safeclaw-module-rail", "safeclaw-module-shell",
+  "safeclaw-page-decision-header", "safeclaw-page-decision-copy", "safeclaw-page-decision-action",
+  "safeclaw-module-principal-command", "safeclaw-skip-link", "safeclaw-module-rail-head",
+  "safeclaw-module-menu-button", "safeclaw-module-chrome-button", "safeclaw-module-primary-nav",
+  "safeclaw-module-secondary-nav", "safeclaw-module-theme-toggle",
+  "safeclaw-mobile-document-priority", "safeclaw-mobile-core-list", "safeclaw-mobile-document-details",
+  "safeclaw-mobile-remaining-list", "safeclaw-mobile-primary-preview", "safeclaw-mobile-submission-facts",
+  "safeclaw-mobile-detail-actions",
   "safeclaw-module-title", "safeclaw-section-title", "safeclaw-setting-description", "safeclaw-tbm-board",
   "safeclaw-worker-phone", "safeclaw-worker-table", "sc-blink", "sc-blink--good",
   "worker-ack-note", "worker-language-note", "worker-language-preview", "worker-language-switcher",
   "briefing-settings-card", "briefing-settings-form",
   "ai-connect-actions", "ai-connect-command", "ai-connect-command-box", "ai-connect-empty", "ai-connect-meta",
   "ai-connect-secret", "ai-connect-tabs", "ai-connect-token-items", "ai-connect-token-list", "ai-connect-workspace",
+  "ai-connect-sif-gate", "ai-connect-section-head", "ai-connect-sif-metrics", "ai-connect-sif-state-grid",
+  "ai-connect-sif-packet-actions", "ai-connect-sif-operator-columns", "ai-connect-sif-operator-checklist",
+  "ai-connect-sif-approval-packet", "ai-connect-sif-fingerprint", "ai-connect-sif-artifact-grid",
+  "ai-connect-sif-lock-grid", "ai-connect-sif-approval-steps", "ai-connect-sif-command",
+  "ai-connect-sif-preflight", "ai-connect-vision-gate", "ai-connect-vision-flow",
 ]);
 const auditedSpacingProperties = new Set([
   "gap", "row-gap", "column-gap",
@@ -252,7 +267,8 @@ function isJustifiedSpacingException(selector: string, property: string, value: 
     ".ontology-node-list",
     ".ontology-kind-list",
   ]);
-  return property === "gap" && value === "1px" && separatorGapSelectors.has(selector);
+  if (property === "gap" && value === "1px" && separatorGapSelectors.has(selector)) return true;
+  return selector === ".ontology-graph-popover" && (property === "left" || property === "top");
 }
 
 function familySpacingResiduals(source: string): string[] {
@@ -813,8 +829,8 @@ describe("module route section hierarchy", () => {
         width: "min(100%, calc(100% - (var(--space-4) * 2)))",
       });
     }
-    expect(declarationsForExactSelector(desktopCss, ".list")).toMatchObject({ gap: "14px" });
-    expect(declarationsForExactSelector(desktopCss, ".row")).toMatchObject({ gap: "10px" });
+    expect(declarationsForExactSelector(desktopCss, ".list")).toMatchObject({ gap: "16px" });
+    expect(declarationsForExactSelector(desktopCss, ".row")).toMatchObject({ gap: "12px" });
     expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .list")).toMatchObject({
       gap: "var(--space-4)",
     });
@@ -883,7 +899,8 @@ describe("module route section hierarchy", () => {
       });
     }
     const workpackEditor = read("components/WorkpackEditor.tsx");
-    expect(workpackEditor).toContain('className="workpack-sidebar card list"');
+    expect(workpackEditor).toContain('data-testid="workpack-editor-workspace"');
+    expect(workpackEditor).toContain("workpack-sidebar card list");
     expect(workpackEditor).not.toContain("route-supporting-page");
     expect(effectiveDeclarationsAtWidth(css, ".container", 720)).toMatchObject({
       width: "min(100%, calc(100% - (var(--space-4) * 2)))",
