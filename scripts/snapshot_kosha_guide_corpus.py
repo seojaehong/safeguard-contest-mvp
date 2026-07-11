@@ -57,6 +57,7 @@ class ResourceLimitError(ValueError):
 
 @dataclass(frozen=True)
 class ResourceLimits:
+    max_member_count: int = 10_000
     max_member_bytes: int = 64 * 1024 * 1024
     max_compression_ratio: float = 100.0
     max_total_uncompressed_bytes: int = 1024 * 1024 * 1024
@@ -65,6 +66,7 @@ class ResourceLimits:
 
     def as_policy(self) -> dict[str, object]:
         return {
+            "max_member_count": self.max_member_count,
             "max_member_bytes": self.max_member_bytes,
             "max_compression_ratio": self.max_compression_ratio,
             "max_total_uncompressed_bytes": self.max_total_uncompressed_bytes,
@@ -73,6 +75,8 @@ class ResourceLimits:
         }
 
     def validate(self) -> None:
+        if self.max_member_count <= 0:
+            raise ValueError("max_member_count must be greater than zero")
         if self.max_member_bytes <= 0:
             raise ValueError("max_member_bytes must be greater than zero")
         if self.max_compression_ratio <= 0:
@@ -83,6 +87,14 @@ class ResourceLimits:
             raise ValueError("max_pages_per_pdf must be greater than zero")
         if self.max_normalized_chars_per_pdf <= 0:
             raise ValueError("max_normalized_chars_per_pdf must be greater than zero")
+
+
+@dataclass(frozen=True)
+class SourceScanStats:
+    source_member_count: int
+    total_uncompressed_bytes: int
+    max_member_bytes: int
+    max_compression_ratio: float
 
 
 @dataclass
@@ -253,7 +265,7 @@ def _validate_archive_entry_bounds(
 def _discover_entries(
     source: Path,
     limits: ResourceLimits | None = None,
-) -> tuple[list[LocalPdfEntry], list[Path]]:
+) -> tuple[list[LocalPdfEntry], list[Path], SourceScanStats]:
     effective_limits = limits or ResourceLimits()
     effective_limits.validate()
     if not source.exists():
@@ -273,15 +285,23 @@ def _discover_entries(
         raise ValueError(f"local source must be a directory, ZIP, or PDF: {source}")
 
     entries: list[LocalPdfEntry] = []
+    total_member_count = 0
+    total_uncompressed = 0
+    max_member_bytes = 0
+    max_compression_ratio = 0.0
     for archive_path in archives:
         try:
             with zipfile.ZipFile(archive_path) as archive:
                 for info in archive.infolist():
                     if info.is_dir():
                         continue
+                    total_member_count += 1
+                    if total_member_count > effective_limits.max_member_count:
+                        raise ResourceLimitError(
+                            f"ZIP member count exceeds limit: "
+                            f"{total_member_count}/{effective_limits.max_member_count}"
+                        )
                     member_name = decode_zip_name(info.filename).replace("\\", "/")
-                    if not member_name.lower().endswith(".pdf"):
-                        continue
                     _validate_archive_entry_bounds(
                         archive_path.name,
                         member_name,
@@ -289,6 +309,19 @@ def _discover_entries(
                         info.compress_size,
                         effective_limits,
                     )
+                    total_uncompressed += info.file_size
+                    max_member_bytes = max(max_member_bytes, info.file_size)
+                    max_compression_ratio = max(
+                        max_compression_ratio,
+                        info.file_size / max(info.compress_size, 1),
+                    )
+                    if total_uncompressed > effective_limits.max_total_uncompressed_bytes:
+                        raise ResourceLimitError(
+                            f"total uncompressed ZIP member bytes exceed limit: "
+                            f"{total_uncompressed}/{effective_limits.max_total_uncompressed_bytes}"
+                        )
+                    if not member_name.lower().endswith(".pdf"):
+                        continue
                     entries.append(
                         LocalPdfEntry(
                             archive_path=archive_path,
@@ -305,6 +338,12 @@ def _discover_entries(
             raise ValueError(f"bad ZIP source: {archive_path.name}: {exc}") from exc
     for pdf_path in direct_pdfs:
         direct_size = pdf_path.stat().st_size
+        total_member_count += 1
+        if total_member_count > effective_limits.max_member_count:
+            raise ResourceLimitError(
+                f"source member count exceeds limit: "
+                f"{total_member_count}/{effective_limits.max_member_count}"
+            )
         _validate_archive_entry_bounds(
             "<direct>",
             pdf_path.name,
@@ -312,6 +351,14 @@ def _discover_entries(
             direct_size,
             effective_limits,
         )
+        total_uncompressed += direct_size
+        max_member_bytes = max(max_member_bytes, direct_size)
+        max_compression_ratio = max(max_compression_ratio, 1.0)
+        if total_uncompressed > effective_limits.max_total_uncompressed_bytes:
+            raise ResourceLimitError(
+                f"total uncompressed source bytes exceed limit: "
+                f"{total_uncompressed}/{effective_limits.max_total_uncompressed_bytes}"
+            )
         entries.append(
             LocalPdfEntry(
                 archive_path=None,
@@ -325,13 +372,16 @@ def _discover_entries(
             )
         )
     entries.sort(key=lambda entry: (entry.archive_name or "", entry.member_name))
-    total_uncompressed = sum(entry.file_size for entry in entries)
-    if total_uncompressed > effective_limits.max_total_uncompressed_bytes:
-        raise ResourceLimitError(
-            f"total uncompressed PDF bytes exceed limit: "
-            f"{total_uncompressed}/{effective_limits.max_total_uncompressed_bytes}"
-        )
-    return entries, archives + direct_pdfs
+    return (
+        entries,
+        archives + direct_pdfs,
+        SourceScanStats(
+            source_member_count=total_member_count,
+            total_uncompressed_bytes=total_uncompressed,
+            max_member_bytes=max_member_bytes,
+            max_compression_ratio=max_compression_ratio,
+        ),
+    )
 
 
 def _read_entry_bytes(entry: LocalPdfEntry, archive: zipfile.ZipFile | None = None) -> bytes:
@@ -715,7 +765,11 @@ def _build_item(
     }, None
 
 
-def _source_identity(files: Sequence[Path], entries: Sequence[LocalPdfEntry]) -> dict[str, object]:
+def _source_identity(
+    files: Sequence[Path],
+    entries: Sequence[LocalPdfEntry],
+    scan_stats: SourceScanStats,
+) -> dict[str, object]:
     file_rows = [
         {"name": path.name, "size": path.stat().st_size, "sha256": _sha256_file(path)}
         for path in sorted(files, key=lambda value: value.name)
@@ -730,18 +784,19 @@ def _source_identity(files: Sequence[Path], entries: Sequence[LocalPdfEntry]) ->
         }
         for entry in entries
     ]
-    identity_hash = _sha256_bytes(_canonical_json({"files": file_rows, "entries": inventory_rows}).encode("utf-8"))
+    source_identity = {
+        "files": file_rows,
+        "source_member_count": scan_stats.source_member_count,
+        "pdf_entry_count": len(entries),
+        "total_uncompressed_bytes": scan_stats.total_uncompressed_bytes,
+        "max_member_bytes": scan_stats.max_member_bytes,
+        "max_compression_ratio": scan_stats.max_compression_ratio,
+        "entry_manifest_sha256": _sha256_bytes(_canonical_json(inventory_rows).encode("utf-8")),
+    }
+    identity_hash = _sha256_bytes(_canonical_json(source_identity).encode("utf-8"))
     return {
         "identity_sha256": identity_hash,
-        "files": file_rows,
-        "pdf_entry_count": len(entries),
-        "total_uncompressed_bytes": sum(entry.file_size for entry in entries),
-        "max_member_bytes": max((entry.file_size for entry in entries), default=0),
-        "max_compression_ratio": max(
-            (entry.file_size / max(entry.compressed_size, 1) for entry in entries),
-            default=0.0,
-        ),
-        "entry_manifest_sha256": _sha256_bytes(_canonical_json(inventory_rows).encode("utf-8")),
+        **source_identity,
     }
 
 
@@ -1348,9 +1403,9 @@ def recover_corpus(
         raise ValueError("chunk_chars must be greater than zero")
     effective_limits = resource_limits or ResourceLimits()
     effective_limits.validate()
-    entries, source_files = _discover_entries(source.resolve(), effective_limits)
+    entries, source_files, scan_stats = _discover_entries(source.resolve(), effective_limits)
     provenance = _load_provenance(provenance_path.resolve() if provenance_path else None)
-    source_identity = _source_identity(source_files, entries)
+    source_identity = _source_identity(source_files, entries, scan_stats)
     if category:
         entries = [entry for entry in entries if entry.category == category]
     if state:
@@ -1868,6 +1923,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--category", help="Process only an exact archive-derived category.")
     parser.add_argument("--state", help="Process only an exact state when provenance metadata permits.")
     parser.add_argument("--chunk-chars", type=int, default=4000)
+    parser.add_argument("--max-member-count", type=int, default=ResourceLimits.max_member_count)
     parser.add_argument("--max-member-bytes", type=int, default=ResourceLimits.max_member_bytes)
     parser.add_argument(
         "--max-compression-ratio",
@@ -1909,14 +1965,15 @@ def main() -> int:
         if args.source:
             source = Path(args.source)
             resource_limits = ResourceLimits(
+                max_member_count=args.max_member_count,
                 max_member_bytes=args.max_member_bytes,
                 max_compression_ratio=args.max_compression_ratio,
                 max_total_uncompressed_bytes=args.max_total_uncompressed_bytes,
                 max_pages_per_pdf=args.max_pages_per_pdf,
                 max_normalized_chars_per_pdf=args.max_normalized_chars_per_pdf,
             )
-            entries, source_files = _discover_entries(source.resolve(), resource_limits)
-            source_identity = _source_identity(source_files, entries)
+            entries, source_files, scan_stats = _discover_entries(source.resolve(), resource_limits)
+            source_identity = _source_identity(source_files, entries, scan_stats)
             if args.preflight:
                 print(_canonical_json({"ok": True, "source": str(source.resolve()), "source_identity": source_identity}))
                 return 0
