@@ -1,60 +1,30 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { chromium, type Browser } from "playwright";
+import type { Browser } from "playwright";
+import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
+import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import {
+  startIsolatedNextBrowserHarness,
+  type IsolatedNextBrowserHarness
+} from "./helpers/isolated-next-browser-harness";
 
-const port = 3228;
-const baseUrl = `http://127.0.0.1:${port}`;
-let server: ChildProcessWithoutNullStreams | null = null;
+let baseUrl = "";
 let browser: Browser | null = null;
-const serverOutput: string[] = [];
-
-function resolveNextBin(): string {
-  const candidates = [
-    path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next"),
-    path.resolve(process.cwd(), "..", "..", "node_modules", "next", "dist", "bin", "next")
-  ];
-  const nextBin = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!nextBin) {
-    throw new Error(`Unable to locate next dev binary. Checked: ${candidates.join(", ")}`);
-  }
-  return nextBin;
-}
-
-async function waitForHttp(url: string, timeoutMs = 60_000): Promise<void> {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) return;
-    } catch {
-      // The dev server is still booting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-  throw new Error(`Timed out waiting for ${url}\n${serverOutput.slice(-20).join("")}`);
-}
+let harness: IsolatedNextBrowserHarness | null = null;
 
 describe("documents editor layout", () => {
   beforeAll(async () => {
-    const nextBin = resolveNextBin();
-    server = spawn(process.execPath, [nextBin, "dev", "--port", String(port)], {
-      cwd: process.cwd(),
-      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" }
+    harness = await startIsolatedNextBrowserHarness({
+      slug: "documents-editor-layout",
+      initialPath: "/documents",
+      portSalt: 3228
     });
-    server.stdout.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
-    server.stderr.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
-    await waitForHttp(`${baseUrl}/documents`);
-    browser = await chromium.launch({ headless: true });
+    baseUrl = harness.baseUrl;
+    browser = harness.browser;
   }, 90_000);
 
   afterAll(async () => {
-    await browser?.close();
-    if (server && !server.killed) {
-      server.kill();
-    }
-  });
+    await harness?.stop();
+  }, 30_000);
 
   it("keeps the document editor in the same light workbench system", async () => {
     if (!browser) throw new Error("Browser was not started");
@@ -187,6 +157,103 @@ describe("documents editor layout", () => {
     expect(contract.graphOpen).toBe(false);
     expect(contract.exportOpen).toBe(false);
     expect(contract.previewOpen).toBe(false);
+  }, 90_000);
+
+  it("does not enter a maximum update-depth loop for a real current workpack", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const stored = buildStoredCurrentWorkpack(buildSampleWorkpack());
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+      const target = window as typeof window & { __safeclawCurrentWorkpackWrites?: number };
+      target.__safeclawCurrentWorkpackWrites = 0;
+      const originalSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function setItem(key: string, value: string) {
+        if (key === storageKey) {
+          target.__safeclawCurrentWorkpackWrites = (target.__safeclawCurrentWorkpackWrites || 0) + 1;
+        }
+        return originalSetItem.call(this, key, value);
+      };
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+    const runtimeErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") runtimeErrors.push(message.text());
+    });
+    page.on("pageerror", (error) => runtimeErrors.push(error.message));
+
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.getByRole("textbox", { name: "점검결과 요약 편집" }).waitFor({ state: "visible" });
+    await page.waitForTimeout(750);
+    const writeCount = await page.evaluate(() => (
+      (window as typeof window & { __safeclawCurrentWorkpackWrites?: number }).__safeclawCurrentWorkpackWrites || 0
+    ));
+
+    expect(runtimeErrors.join("\n")).not.toMatch(/maximum update depth|too many re-renders/i);
+    expect(writeCount).toBeLessThanOrEqual(4);
+  }, 90_000);
+
+  it("restores an edited browser draft after a full reload with the same draft key", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sentinel = "SAFECLAW_RELOAD_DRAFT_PRESERVED";
+
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /위험성평가표/ }).click();
+    const editor = page.getByRole("textbox", { name: "위험성평가표 편집" });
+    const editedValue = `${await editor.inputValue()}\n${sentinel}`;
+    await editor.fill(editedValue);
+    await expect.poll(async () => page.evaluate((marker) => (
+      Object.keys(window.localStorage)
+        .filter((key) => key.startsWith("safeclaw-workpack:"))
+        .some((key) => window.localStorage.getItem(key)?.includes(marker))
+    ), sentinel)).toBe(true);
+    const keysBeforeReload = await page.evaluate(() => (
+      Object.keys(window.localStorage).filter((key) => key.startsWith("safeclaw-workpack:")).sort()
+    ));
+
+    await page.reload({ waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /위험성평가표/ }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "위험성평가표 편집" }).inputValue()).toBe(editedValue);
+    const keysAfterReload = await page.evaluate(() => (
+      Object.keys(window.localStorage).filter((key) => key.startsWith("safeclaw-workpack:")).sort()
+    ));
+
+    expect(keysAfterReload).toEqual(keysBeforeReload);
+  }, 90_000);
+
+  it("keeps every Day document metadata label at AA text contrast", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+
+    const ratios = await page.locator(".document-toolbar > div:last-child > span").evaluateAll((elements) => {
+      const channels = (value: string) => {
+        const matches = value.match(/[\d.]+/g);
+        if (!matches || matches.length < 3) throw new Error(`Unsupported color: ${value}`);
+        return matches.slice(0, 3).map((channel) => {
+          const normalized = Number(channel) / 255;
+          return normalized <= 0.04045
+            ? normalized / 12.92
+            : ((normalized + 0.055) / 1.055) ** 2.4;
+        });
+      };
+      const luminance = (value: string) => {
+        const [red, green, blue] = channels(value);
+        return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+      };
+      return elements.map((element) => {
+        const style = getComputedStyle(element);
+        const foreground = luminance(style.color);
+        const background = luminance(style.backgroundColor);
+        return {
+          text: element.textContent?.trim() || "",
+          ratio: (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05)
+        };
+      });
+    });
+
+    expect(ratios.length).toBeGreaterThanOrEqual(2);
+    ratios.forEach(({ text, ratio }) => expect(ratio, text).toBeGreaterThanOrEqual(4.5));
   }, 90_000);
 
   it("supports roving keyboard navigation across document tabs", async () => {

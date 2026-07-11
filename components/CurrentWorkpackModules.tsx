@@ -1,18 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient, type Session } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
-import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
+import {
+  WorkpackEditor,
+  type DocumentKey,
+  type WorkpackDeliverablesChange,
+  type WorkpackDocumentValues
+} from "@/components/WorkpackEditor";
 import {
   buildStoredCurrentWorkpack,
+  buildWorkpackGenerationFingerprint,
   CURRENT_WORKPACK_STORAGE_KEY,
   parseStoredCurrentWorkpack,
   type CurrentDispatchSnapshot,
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
+import { applyWorkpackDeliverablesChange } from "@/lib/workpack-readiness";
 import {
   buildDefaultWorkers,
   buildEducationRecordDrafts,
@@ -32,6 +39,7 @@ type CurrentWorkpackSnapshot = {
   data: AskResponse;
   isCurrent: boolean;
   savedAt: string | null;
+  generationFingerprint: string;
   workerSnapshot?: CurrentWorkerSnapshot;
   dispatchSnapshot?: CurrentDispatchSnapshot;
 };
@@ -408,7 +416,8 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
   const [state, setState] = useState<CurrentWorkpackSnapshot>({
     data: sample,
     isCurrent: false,
-    savedAt: null
+    savedAt: null,
+    generationFingerprint: buildWorkpackGenerationFingerprint(sample)
   });
   const [reopenMessage, setReopenMessage] = useState<string | null>(null);
   const [reopenStatus, setReopenStatus] = useState<"idle" | "loading" | "ready" | "blocked">("idle");
@@ -420,6 +429,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
         data: stored.data,
         isCurrent: true,
         savedAt: stored.savedAt,
+        generationFingerprint: stored.generationFingerprint,
         workerSnapshot: stored.workerSnapshot,
         dispatchSnapshot: stored.dispatchSnapshot
       });
@@ -465,7 +475,8 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
           setState({
             data: reopenData,
             isCurrent: true,
-            savedAt: nextStored.savedAt
+            savedAt: nextStored.savedAt,
+            generationFingerprint: nextStored.generationFingerprint
           });
           setReopenStatus("ready");
           setReopenMessage("서버 아카이브의 저장 문서팩을 현재 문서 화면으로 복원했습니다. 문서와 근거 요약은 현재 작업으로 저장됐고, 작업자·전파 snapshot은 저장된 항목이 있을 때만 별도 화면에서 이어집니다.");
@@ -505,6 +516,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(nextState.data, {
+          generationFingerprint: nextState.generationFingerprint,
           workerSnapshot,
           dispatchSnapshot: nextState.dispatchSnapshot
         }))
@@ -524,6 +536,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(nextState.data, {
+          generationFingerprint: nextState.generationFingerprint,
           workerSnapshot: nextState.workerSnapshot,
           dispatchSnapshot
         }))
@@ -825,28 +838,33 @@ function DocumentCockpit({ data, onSelectDocument }: { data: AskResponse; onSele
 
 export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
+  const currentRef = useRef(current);
   const [focusToken, setFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey | undefined>();
-  const updateCurrentDeliverables = useCallback((values: WorkpackDocumentValues) => {
-    if (!current.isCurrent || typeof window === "undefined") return;
+  useEffect(() => {
+    currentRef.current = current;
+  }, [current]);
 
-    const nextData: AskResponse = {
-      ...current.data,
-      deliverables: {
-        ...current.data.deliverables,
-        ...buildDeliverablePatch(values)
-      }
-    };
+  const updateCurrentDeliverables = useCallback((values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => {
+    const snapshot = currentRef.current;
+    if (!snapshot.isCurrent || typeof window === "undefined") return;
+
+    const patch = buildDeliverablePatch(values);
+    const documentKeys = Object.keys(patch) as DeliverableDocumentKey[];
+    if (documentKeys.every((key) => snapshot.data.deliverables[key] === patch[key])) return;
+
+    const nextData = applyWorkpackDeliverablesChange(snapshot.data, patch, change);
 
     window.localStorage.setItem(
       CURRENT_WORKPACK_STORAGE_KEY,
       JSON.stringify(buildStoredCurrentWorkpack(nextData, {
-        workerSnapshot: current.workerSnapshot,
-        dispatchSnapshot: current.dispatchSnapshot
+        generationFingerprint: snapshot.generationFingerprint,
+        workerSnapshot: snapshot.workerSnapshot,
+        dispatchSnapshot: snapshot.dispatchSnapshot
       }))
     );
-    current.updateData(nextData);
-  }, [current.data, current.dispatchSnapshot, current.isCurrent, current.workerSnapshot]);
+    snapshot.updateData(nextData);
+  }, []);
 
   function selectDocument(key: DocumentKey) {
     setRequestedDocumentKey(key);
@@ -876,6 +894,7 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
       <DocumentCockpit data={current.data} onSelectDocument={selectDocument} />
       <WorkpackEditor
         data={current.data}
+        generationFingerprint={current.generationFingerprint}
         focusToken={focusToken}
         requestedDocumentKey={requestedDocumentKey}
         onDeliverablesChange={updateCurrentDeliverables}

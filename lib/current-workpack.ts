@@ -26,6 +26,7 @@ export type CurrentDispatchSnapshot = {
 export type StoredCurrentWorkpack = {
   savedAt: string;
   source: "workspace";
+  generationFingerprint: string;
   data: AskResponse;
   workerSnapshot?: CurrentWorkerSnapshot;
   dispatchSnapshot?: CurrentDispatchSnapshot;
@@ -33,6 +34,44 @@ export type StoredCurrentWorkpack = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function canonicalizeFingerprintValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalizeFingerprintValue);
+  if (!isRecord(value)) return value;
+  return Object.keys(value).sort().reduce<Record<string, unknown>>((record, key) => {
+    record[key] = canonicalizeFingerprintValue(value[key]);
+    return record;
+  }, {});
+}
+
+function hashFingerprint(value: string) {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+export function buildWorkpackGenerationFingerprint(data: AskResponse): string {
+  return hashFingerprint(JSON.stringify(canonicalizeFingerprintValue({
+    generationMode: data.generationMode || "unspecified",
+    mode: data.mode,
+    question: data.question,
+    scenario: data.scenario,
+    deliverables: data.deliverables,
+    citations: data.citations.map((citation) => ({
+      id: citation.id,
+      title: citation.title,
+      citation: citation.citation,
+      sourceUrl: citation.sourceUrl
+    })),
+    evidenceLabels: data.evidenceLabels || {},
+    ontologyQa: data.ontologyQa || null,
+    dbHarness: data.dbHarness?.packet || null,
+    generationEvidenceSignature: data.generationEvidence?.signature || null
+  })));
 }
 
 function readString(value: unknown, fallback = "") {
@@ -176,6 +215,7 @@ export function parseStoredCurrentWorkpack(raw: string | null): StoredCurrentWor
     return {
       savedAt: parsed.savedAt,
       source: "workspace",
+      generationFingerprint: readString(parsed.generationFingerprint) || buildWorkpackGenerationFingerprint(data as AskResponse),
       data: data as AskResponse,
       workerSnapshot: parseWorkerSnapshot(parsed.workerSnapshot),
       dispatchSnapshot: parseDispatchSnapshot(parsed.dispatchSnapshot)
@@ -191,11 +231,13 @@ export function buildStoredCurrentWorkpack(
   snapshots: {
     workerSnapshot?: CurrentWorkerSnapshot;
     dispatchSnapshot?: CurrentDispatchSnapshot;
+    generationFingerprint?: string;
   } = {}
 ): StoredCurrentWorkpack {
   return {
     savedAt: new Date().toISOString(),
     source: "workspace",
+    generationFingerprint: snapshots.generationFingerprint || buildWorkpackGenerationFingerprint(data),
     data,
     workerSnapshot: snapshots.workerSnapshot,
     dispatchSnapshot: snapshots.dispatchSnapshot

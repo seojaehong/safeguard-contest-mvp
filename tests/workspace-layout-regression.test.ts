@@ -1,62 +1,30 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { chromium, type Browser } from "playwright";
+import type { Browser } from "playwright";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import {
+  startIsolatedNextBrowserHarness,
+  type IsolatedNextBrowserHarness
+} from "./helpers/isolated-next-browser-harness";
 
-const port = 3227;
-const baseUrl = `http://127.0.0.1:${port}`;
-let server: ChildProcessWithoutNullStreams | null = null;
+let baseUrl = "";
 let browser: Browser | null = null;
-const serverOutput: string[] = [];
-
-function resolveNextBin(): string {
-  const candidates = [
-    path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next"),
-    path.resolve(process.cwd(), "..", "..", "node_modules", "next", "dist", "bin", "next")
-  ];
-  const nextBin = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!nextBin) {
-    throw new Error(`Unable to locate next dev binary. Checked: ${candidates.join(", ")}`);
-  }
-  return nextBin;
-}
-
-async function waitForHttp(url: string, timeoutMs = 60_000): Promise<void> {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) return;
-    } catch {
-      // The dev server is still booting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-  throw new Error(`Timed out waiting for ${url}\n${serverOutput.slice(-20).join("")}`);
-}
+let harness: IsolatedNextBrowserHarness | null = null;
 
 describe("workspace layout regression", () => {
   beforeAll(async () => {
-    const nextBin = resolveNextBin();
-    server = spawn(process.execPath, [nextBin, "dev", "--port", String(port)], {
-      cwd: process.cwd(),
-      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" }
+    harness = await startIsolatedNextBrowserHarness({
+      slug: "workspace-layout",
+      initialPath: "/workspace?theme=night",
+      portSalt: 3227
     });
-    server.stdout.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
-    server.stderr.on("data", (chunk: Buffer) => serverOutput.push(chunk.toString()));
-    await waitForHttp(`${baseUrl}/workspace?theme=night`);
-    browser = await chromium.launch({ headless: true });
+    baseUrl = harness.baseUrl;
+    browser = harness.browser;
   }, 90_000);
 
   afterAll(async () => {
-    await browser?.close();
-    if (server && !server.killed) {
-      server.kill();
-    }
-  });
+    await harness?.stop();
+  }, 30_000);
 
   it("does not pin the large workspace topbar over menu and content while scrolling", async () => {
     if (!browser) throw new Error("Browser was not started");
@@ -1099,6 +1067,7 @@ describe("workspace layout regression", () => {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const sample = buildSampleWorkpack();
     const sentinel = "편집안전대책: SAFECLAW_DOCUMENT_EDIT_PRESERVED";
+    const proseSentinel = "사용자가 직접 편집한 외벽 도장 작업 안전조치 문장은 내보내기에 반드시 보존됩니다.";
     const regeneratedSentinel = "[SAFECLAW_REGENERATED_TBM]";
     sample.deliverables.tbmBriefingStructured = {
       meta: {
@@ -1183,7 +1152,7 @@ describe("workspace layout regression", () => {
 
     const editor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
     await editor.waitFor({ state: "visible" });
-    const editedValue = `${sentinel}\n${await editor.inputValue()}`;
+    const editedValue = `${proseSentinel}\n${sentinel}\n${await editor.inputValue()}`;
     await editor.fill(editedValue);
     await page.waitForFunction(
       async (expectedValue) => {
@@ -1214,12 +1183,24 @@ describe("workspace layout regression", () => {
 
     await page.getByRole("button", { name: "Excel 표 양식(.xlsx)" }).click();
     await expect.poll(() => xlsxPayload?.mode).toBe("single");
-    expect(JSON.stringify(xlsxPayload)).toContain("SAFECLAW_DOCUMENT_EDIT_PRESERVED");
+    expect((xlsxPayload as Record<string, unknown> | null)?.edited).toBe(true);
+    expect((xlsxPayload as { rows?: Array<{ content?: unknown }> } | null)?.rows)
+      .toEqual(expect.arrayContaining([expect.objectContaining({ content: proseSentinel })]));
+    expect((xlsxPayload as { rows?: Array<{ item?: unknown; content?: unknown }> } | null)?.rows)
+      .toEqual(expect.arrayContaining([
+        expect.objectContaining({ item: "편집안전대책", content: "SAFECLAW_DOCUMENT_EDIT_PRESERVED" })
+      ]));
     expect(xlsxPayload).not.toHaveProperty("structured");
 
     await page.getByRole("button", { name: "한글 표 양식(.hwp)" }).click();
     await expect.poll(() => hwpPayload).not.toBeNull();
-    expect(JSON.stringify(hwpPayload)).toContain("SAFECLAW_DOCUMENT_EDIT_PRESERVED");
+    expect((hwpPayload as Record<string, unknown> | null)?.edited).toBe(true);
+    expect((hwpPayload as { rows?: Array<{ content?: unknown }> } | null)?.rows)
+      .toEqual(expect.arrayContaining([expect.objectContaining({ content: proseSentinel })]));
+    expect((hwpPayload as { rows?: Array<{ item?: unknown; content?: unknown }> } | null)?.rows)
+      .toEqual(expect.arrayContaining([
+        expect.objectContaining({ item: "편집안전대책", content: "SAFECLAW_DOCUMENT_EDIT_PRESERVED" })
+      ]));
     expect(hwpPayload).not.toHaveProperty("riskAssessmentRows");
 
     const invalidatedReview = await page.evaluate(() => {
