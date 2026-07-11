@@ -292,9 +292,8 @@ def _discover_entries(
     for archive_path in archives:
         try:
             with zipfile.ZipFile(archive_path) as archive:
+                normalized_member_paths: set[str] = set()
                 for info in archive.infolist():
-                    if info.is_dir():
-                        continue
                     total_member_count += 1
                     if total_member_count > effective_limits.max_member_count:
                         raise ResourceLimitError(
@@ -302,6 +301,12 @@ def _discover_entries(
                             f"{total_member_count}/{effective_limits.max_member_count}"
                         )
                     member_name = decode_zip_name(info.filename).replace("\\", "/")
+                    if member_name in normalized_member_paths:
+                        raise ResourceLimitError(
+                            f"duplicate normalized ZIP member path: "
+                            f"{archive_path.name}::{member_name}"
+                        )
+                    normalized_member_paths.add(member_name)
                     _validate_archive_entry_bounds(
                         archive_path.name,
                         member_name,
@@ -320,6 +325,8 @@ def _discover_entries(
                             f"total uncompressed ZIP member bytes exceed limit: "
                             f"{total_uncompressed}/{effective_limits.max_total_uncompressed_bytes}"
                         )
+                    if info.is_dir():
+                        continue
                     if not member_name.lower().endswith(".pdf"):
                         continue
                     entries.append(
@@ -1725,6 +1732,11 @@ def _existing_snapshot_elapsed_seconds(
     if not isinstance(payload, dict):
         return None
     if payload.get("reproducibility_hash") != reproducibility_hash:
+        return None
+    if payload.get("elapsed_semantics") not in {
+        "snapshot_build_wall_time",
+        "preserved_snapshot_build_wall_time",
+    }:
         return None
     value = payload.get("snapshot_elapsed_seconds", payload.get("elapsed_seconds"))
     if not isinstance(value, int | float):
