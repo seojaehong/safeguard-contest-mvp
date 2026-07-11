@@ -408,7 +408,11 @@ async function main() {
       route: `special:${surface}`, requestedPath, viewport: viewports[0], theme: "Product",
       name: `special-${surface}`, limitation, fallbackKind: surface === "loading" ? "expected-transient-resolution" : "none",
       expectedBoundary,
-      expectedStatuses: surface === "not-found" ? [404] : surface === "error" ? [500] : [200],
+      expectedStatuses: surface === "not-found"
+        ? [404]
+        : surface === "error" || surface === "global-error"
+          ? [500]
+          : [200],
     });
     specialSurfaceRows.push({ ...row, surface });
   }
