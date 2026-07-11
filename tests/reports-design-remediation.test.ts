@@ -64,6 +64,31 @@ function declarationsFor(source: string, selector: string): Record<string, strin
   return result;
 }
 
+function parseRgbTriplet(value: string): [number, number, number] {
+  const match = value.match(/\d+(?:\.\d+)?/gu);
+  if (!match || match.length < 3) throw new Error(`Unsupported color: ${value}`);
+  return [Number(match[0]), Number(match[1]), Number(match[2])];
+}
+
+function relativeLuminanceChannel(channel: number): number {
+  const normalized = channel / 255;
+  return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+}
+
+function contrastRatio(foreground: string, background: string): number {
+  const [fr, fg, fb] = parseRgbTriplet(foreground);
+  const [br, bg, bb] = parseRgbTriplet(background);
+  const foregroundLuminance = 0.2126 * relativeLuminanceChannel(fr)
+    + 0.7152 * relativeLuminanceChannel(fg)
+    + 0.0722 * relativeLuminanceChannel(fb);
+  const backgroundLuminance = 0.2126 * relativeLuminanceChannel(br)
+    + 0.7152 * relativeLuminanceChannel(bg)
+    + 0.0722 * relativeLuminanceChannel(bb);
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+  const darker = Math.min(foregroundLuminance, backgroundLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 describe("Reports Wave 1 static design contract", () => {
   it("removes exactly 27 physical important declarations from the Reports family", () => {
     const css = fs.readFileSync(cssPath, "utf8");
@@ -150,6 +175,33 @@ describe("Reports Wave 1 static design contract", () => {
     expect(component).toMatch(/className="safeclaw-report-period-control"[\s\S]*aria-pressed=\{period === option\.value\}/u);
     expect(css).toMatch(/button:not\(:where\([^)]*\.safeclaw-report-period-control/u);
   });
+
+  it("splits the shared button radius selector so Reports controls compute to 8px", () => {
+    const css = fs.readFileSync(cssPath, "utf8");
+    expect(css).toContain(".safeclaw-module-shell button:not(.safeclaw-report-period-control)");
+    expect(css).not.toContain(".safeclaw-module-shell button,\r\n.safeclaw-module-shell .button");
+    expect(declarationsFor(
+      css,
+      '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button'
+    )).toMatchObject({
+      "min-height": "44px",
+      "border-radius": "8px"
+    });
+    expect(declarationsFor(
+      css,
+      '.safeclaw-module-shell .safeclaw-module-principal-command a'
+    )).toMatchObject({
+      "border-radius": "var(--safeclaw-principal-command-radius, 6px)",
+      "font-size": "12px"
+    });
+    expect(declarationsFor(
+      css,
+      '.safeclaw-module-shell[data-module-route="/reports"]'
+    )).toMatchObject({
+      "--safeclaw-principal-command-min-height": "44px",
+      "--safeclaw-principal-command-radius": "8px"
+    });
+  });
 });
 
 type Theme = "day" | "night";
@@ -169,13 +221,15 @@ async function prepareSample(page: Page, theme: Theme): Promise<void> {
 
 async function startReportsHarness(): Promise<IsolatedNextBrowserHarness> {
   const candidateSalts = [7121, 8121, 9121, 10121];
+  const mode = process.env.SAFECLAW_HARNESS_MODE === "prod" ? "prod" : "dev";
   let lastError: unknown;
   for (const portSalt of candidateSalts) {
     try {
       return await startIsolatedNextBrowserHarness({
         slug: "reports-design-wave-1",
         initialPath: "/reports",
-        portSalt
+        portSalt,
+        mode
       });
     } catch (error) {
       lastError = error;
@@ -238,6 +292,8 @@ describe("Reports Wave 1 browser design contract", () => {
       };
       const controlHeights = Array.from(document.querySelectorAll(".safeclaw-report-controls button"))
         .map((element) => Math.round(element.getBoundingClientRect().height));
+      const controlRadii = Array.from(document.querySelectorAll(".safeclaw-report-controls button"))
+        .map((element) => getComputedStyle(element).borderRadius);
       const selectedControl = document.querySelector('.safeclaw-report-controls button[aria-pressed="true"]');
       const hero = document.querySelector(".safeclaw-page-decision-header");
       const heroMeta = document.querySelector(".safeclaw-page-decision-action > div:first-child");
@@ -246,12 +302,17 @@ describe("Reports Wave 1 browser design contract", () => {
       if (!hero || !heroMeta || !heroCta) throw new Error("Reports hero geometry targets were not rendered");
       const heroMetaRect = heroMeta.getBoundingClientRect();
       const heroCtaRect = heroCta.getBoundingClientRect();
+      const heroCtaStyle = getComputedStyle(heroCta);
       return {
         horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
         controlHeights,
+        controlRadii,
         accentText: getComputedStyle(selectedControl).color,
         heroColumnCount: getComputedStyle(hero).gridTemplateColumns.split(" ").filter(Boolean).length,
         heroCtaHeight: Math.round(heroCtaRect.height),
+        heroCtaRadius: heroCtaStyle.borderRadius,
+        heroCtaBackground: heroCtaStyle.backgroundColor,
+        heroCtaColor: heroCtaStyle.color,
         heroCtaClipped: heroCta.scrollWidth > heroCta.clientWidth + 1,
         heroMetaCtaOverlap: !(
           heroMetaRect.bottom <= heroCtaRect.top
@@ -281,10 +342,17 @@ describe("Reports Wave 1 browser design contract", () => {
 
     expect(metrics.horizontalOverflow).toBe(0);
     expect(metrics.controlHeights.every((controlHeight) => controlHeight >= 44)).toBe(true);
+    expect(metrics.controlRadii.every((radius) => radius === "8px")).toBe(true);
     expect(metrics.overlapCount).toBe(0);
+    expect(metrics.heroCtaHeight).toBeGreaterThanOrEqual(44);
+    expect(metrics.heroCtaRadius).toBe("8px");
+    expect(contrastRatio(metrics.heroCtaColor, metrics.heroCtaBackground)).toBeGreaterThanOrEqual(4.5);
     if (label === "mobile") {
       expect(metrics.heroColumnCount).toBe(1);
-      expect(metrics.heroCtaHeight).toBeGreaterThanOrEqual(44);
+      expect(metrics.heroCtaClipped).toBe(false);
+      expect(metrics.heroMetaCtaOverlap).toBe(false);
+    } else {
+      expect(metrics.heroColumnCount).toBe(2);
       expect(metrics.heroCtaClipped).toBe(false);
       expect(metrics.heroMetaCtaOverlap).toBe(false);
     }
@@ -305,6 +373,7 @@ describe("Reports Wave 1 browser design contract", () => {
     fs.writeFileSync(
       path.join(outputDirectory, `reports-sample-${theme}-${label}-metrics.json`),
       `${JSON.stringify({
+        harnessMode: harness?.mode ?? "dev",
         theme,
         viewport: { width, height },
         selectedBackground: selectedBeforeHover,
@@ -333,56 +402,103 @@ describe("Reports Wave 1 browser design contract", () => {
     await empty.screenshot({ path: path.join(outputDirectory, "reports-empty-day-desktop.png"), fullPage: true });
     await empty.close();
 
-    const serverError = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await serverError.route("**/api/workpacks/wave-1-error", async (route) => {
-      await route.fulfill({
-        status: 500,
-        contentType: "application/json",
-        body: JSON.stringify({ ok: false, message: "Wave 1 deterministic server error" })
+    const serverErrorResults: Array<Record<string, unknown>> = [];
+    for (const scenario of [
+      { theme: "day" as const, width: 1440, height: 900, label: "desktop" as const },
+      { theme: "night" as const, width: 1440, height: 900, label: "desktop" as const },
+      { theme: "day" as const, width: 390, height: 844, label: "mobile" as const },
+      { theme: "night" as const, width: 390, height: 844, label: "mobile" as const }
+    ]) {
+      const serverError = await browser.newPage({ viewport: { width: scenario.width, height: scenario.height } });
+      await serverError.route("**/api/workpacks/wave-1-error", async (route) => {
+        await route.fulfill({
+          status: 500,
+          contentType: "application/json",
+          body: JSON.stringify({ ok: false, message: "Wave 1 deterministic server error" })
+        });
       });
-    });
-    await serverError.goto(`${baseUrl}/reports?theme=night&workpackId=wave-1-error`, { waitUntil: "networkidle" });
-    const errorState = serverError.getByLabel("서버 작업팩 오류 상태");
-    await errorState.waitFor({ state: "visible" });
-    const downloads = errorState.getByLabel("리포트 다운로드").getByRole("button");
-    for (const button of await downloads.all()) expect(await button.isDisabled()).toBe(true);
-    const serverErrorMetrics = await serverError.evaluate(() => {
-      const hero = document.querySelector(".safeclaw-page-decision-header");
-      const heroMeta = document.querySelector(".safeclaw-page-decision-action > div:first-child");
-      const heroCta = document.querySelector(".safeclaw-module-principal-command a");
-      if (!hero || !heroMeta || !heroCta) throw new Error("Reports error-state hero geometry targets were not rendered");
-      const heroMetaRect = heroMeta.getBoundingClientRect();
-      const heroCtaRect = heroCta.getBoundingClientRect();
-      return {
-        horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
-        heroColumnCount: getComputedStyle(hero).gridTemplateColumns.split(" ").filter(Boolean).length,
-        heroCtaHeight: Math.round(heroCtaRect.height),
-        heroCtaClipped: heroCta.scrollWidth > heroCta.clientWidth + 1,
-        heroMetaCtaOverlap: !(
-          heroMetaRect.bottom <= heroCtaRect.top
-          || heroCtaRect.bottom <= heroMetaRect.top
-          || heroMetaRect.right <= heroCtaRect.left
-          || heroCtaRect.right <= heroMetaRect.left
-        )
-      };
-    });
-    expect(serverErrorMetrics.heroColumnCount).toBe(1);
-    expect(serverErrorMetrics.heroCtaHeight).toBeGreaterThanOrEqual(44);
-    expect(serverErrorMetrics.heroCtaClipped).toBe(false);
-    expect(serverErrorMetrics.heroMetaCtaOverlap).toBe(false);
-    expect(serverErrorMetrics.horizontalOverflow).toBe(0);
+      await serverError.goto(`${baseUrl}/reports?theme=${scenario.theme}&workpackId=wave-1-error`, {
+        waitUntil: "networkidle"
+      });
+      const errorState = serverError.getByLabel("서버 작업팩 오류 상태");
+      await errorState.waitFor({ state: "visible" });
+      const downloads = errorState.getByLabel("리포트 다운로드").getByRole("button");
+      expect(await downloads.count()).toBe(5);
+      for (const button of await downloads.all()) expect(await button.isDisabled()).toBe(true);
+      const readiness = errorState.getByLabel("다운로드 준비 상태");
+      expect(await readiness.textContent()).toContain("다운로드 잠김");
+      const metrics = await serverError.evaluate(() => {
+        const hero = document.querySelector(".safeclaw-page-decision-header");
+        const heroMeta = document.querySelector(".safeclaw-page-decision-action > div:first-child");
+        const heroCta = document.querySelector(".safeclaw-module-principal-command a");
+        const readiness = document.querySelector("[aria-label='다운로드 준비 상태']");
+        const downloads = Array.from(document.querySelectorAll("[aria-label='리포트 다운로드'] button"));
+        if (!hero || !heroMeta || !heroCta || !readiness || downloads.length === 0) {
+          throw new Error("Reports error-state geometry targets were not rendered");
+        }
+        const heroMetaRect = heroMeta.getBoundingClientRect();
+        const heroCtaRect = heroCta.getBoundingClientRect();
+        const readinessRect = readiness.getBoundingClientRect();
+        const downloadRects = downloads.map((button) => button.getBoundingClientRect());
+        const heroCtaStyle = getComputedStyle(heroCta);
+        return {
+          horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
+          heroColumnCount: getComputedStyle(hero).gridTemplateColumns.split(" ").filter(Boolean).length,
+          heroCtaHeight: Math.round(heroCtaRect.height),
+          heroCtaRadius: heroCtaStyle.borderRadius,
+          heroCtaColor: heroCtaStyle.color,
+          heroCtaBackground: heroCtaStyle.backgroundColor,
+          heroCtaClipped: heroCta.scrollWidth > heroCta.clientWidth + 1,
+          heroMetaCtaOverlap: !(
+            heroMetaRect.bottom <= heroCtaRect.top
+            || heroCtaRect.bottom <= heroMetaRect.top
+            || heroMetaRect.right <= heroCtaRect.left
+            || heroCtaRect.right <= heroMetaRect.left
+          ),
+          readinessOccluded: downloadRects.some((rect) => !(
+            readinessRect.bottom <= rect.top
+            || rect.bottom <= readinessRect.top
+            || readinessRect.right <= rect.left
+            || rect.right <= readinessRect.left
+          )),
+          overlayVisible: document.body.innerText.includes("N 1 Issue")
+            || document.body.innerText.includes("1 Issue")
+            || document.body.innerText.includes("Next.js")
+        };
+      });
+      expect(metrics.horizontalOverflow).toBe(0);
+      expect(metrics.heroCtaHeight).toBeGreaterThanOrEqual(44);
+      expect(metrics.heroCtaRadius).toBe("8px");
+      expect(metrics.heroCtaClipped).toBe(false);
+      expect(metrics.heroMetaCtaOverlap).toBe(false);
+      expect(metrics.readinessOccluded).toBe(false);
+      expect(metrics.overlayVisible).toBe(false);
+      expect(contrastRatio(String(metrics.heroCtaColor), String(metrics.heroCtaBackground))).toBeGreaterThanOrEqual(4.5);
+      if (scenario.label === "mobile") {
+        expect(metrics.heroColumnCount).toBe(1);
+      } else {
+        expect(metrics.heroColumnCount).toBe(2);
+      }
+      serverErrorResults.push({
+        harnessMode: harness?.mode ?? "dev",
+        ...scenario,
+        disabledDownloadCount: await downloads.count(),
+        state: "server-error",
+        ...metrics
+      });
+      await serverError.screenshot({
+        path: path.join(outputDirectory, `reports-server-error-${scenario.theme}-${scenario.label}.png`),
+        fullPage: true
+      });
+      await serverError.close();
+    }
     fs.writeFileSync(
       path.join(outputDirectory, "reports-state-metrics.json"),
       `${JSON.stringify({
+        harnessMode: harness?.mode ?? "dev",
         empty: emptyMetrics,
-        serverError: {
-          ...serverErrorMetrics,
-          disabledDownloadCount: await downloads.count(),
-          state: "server-error"
-        }
+        serverError: serverErrorResults
       }, null, 2)}\n`
     );
-    await serverError.screenshot({ path: path.join(outputDirectory, "reports-server-error-night-mobile.png"), fullPage: true });
-    await serverError.close();
   }, 120_000);
 });

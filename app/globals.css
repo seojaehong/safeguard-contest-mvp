@@ -8231,7 +8231,7 @@ body:has(.safeclaw-landing) :is(
   box-shadow: inset 4px 0 0 var(--os-yellow, #ffdc2e) !important;
 }
 
-.safeclaw-module-shell button,
+.safeclaw-module-shell button:not(.safeclaw-report-period-control),
 .safeclaw-module-shell .button,
 .safeclaw-module-shell .full-button,
 .safeclaw-module-shell a.button,
@@ -16779,14 +16779,14 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell .safeclaw-module-principal-command a {
   display: inline-flex;
-  min-height: 36px;
+  min-height: var(--safeclaw-principal-command-min-height, 36px);
   align-items: center;
   justify-content: center;
   border: 1px solid var(--workspace-accent);
-  border-radius: 6px;
+  border-radius: var(--safeclaw-principal-command-radius, 6px);
   background: var(--workspace-accent);
   color: #08090b;
-  padding: 0 13px;
+  padding: var(--safeclaw-principal-command-padding, 0 13px);
   font-size: 12px;
   font-weight: 650;
   white-space: nowrap;
@@ -17398,6 +17398,12 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls {
   display: grid;
   gap: 8px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] {
+  --safeclaw-principal-command-min-height: 44px;
+  --safeclaw-principal-command-radius: 8px;
+  --safeclaw-principal-command-padding: 0 16px;
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button {
