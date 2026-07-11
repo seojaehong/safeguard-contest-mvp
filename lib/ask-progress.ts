@@ -5,10 +5,14 @@
 // these via an injected onProgress callback that defaults to a no-op — existing callers
 // of runAsk / generateAllDeliverablesWithDiagnostics are unaffected.
 
+export const ASK_STAGE_FAILURE_CODE = "ask_stage_failed" as const;
+export const ASK_STAGE_FAILURE_MESSAGE = "이 단계를 완료하지 못했습니다. 다음 단계는 계속 진행합니다.";
+
 export type AskStageEvent = {
   kind: "stage";
   stage: string;
   status: "start" | "ok" | "fail";
+  code?: typeof ASK_STAGE_FAILURE_CODE;
   detail?: string;
 };
 
@@ -71,12 +75,13 @@ export function attachProgressListeners(
     safeEmit(onProgress, { kind: "stage", stage, status: "start" });
     promise.then(
       () => safeEmit(onProgress, { kind: "stage", stage, status: "ok" }),
-      (error: unknown) =>
+      () =>
         safeEmit(onProgress, {
           kind: "stage",
           stage,
           status: "fail",
-          detail: error instanceof Error ? error.message : String(error)
+          code: ASK_STAGE_FAILURE_CODE,
+          detail: ASK_STAGE_FAILURE_MESSAGE
         })
     );
   }

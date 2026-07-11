@@ -484,6 +484,7 @@ export type AskResponse = {
     safetyReference?: {
       source: "safety-reference-catalog";
       mode: "live" | "fallback" | "unconfigured";
+      errorCode?: "safety_reference_search_failed";
       query: string;
       count: number;
       totalItems: number;
@@ -492,6 +493,7 @@ export type AskResponse = {
         enabled: boolean;
         attempted: boolean;
         ok: boolean;
+        errorCode?: "safety_reference_vector_failed";
         reason: string;
         count: number;
         model: string;

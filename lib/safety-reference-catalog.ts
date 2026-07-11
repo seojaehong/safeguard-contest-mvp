@@ -1,3 +1,5 @@
+import { createLogger } from "@/lib/logger";
+
 export type SafetyReferenceItem = {
   id: string;
   source_id: string;
@@ -33,10 +35,21 @@ export type SafetyReferenceOperationalView = {
 
 export type SafetyReferenceRetrievalMode = "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
 
+export const SAFETY_REFERENCE_SEARCH_FAILURE_CODE = "safety_reference_search_failed" as const;
+export const SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE =
+  "안전 지식 DB 조회를 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+export type SafetyReferenceErrorCode = typeof SAFETY_REFERENCE_SEARCH_FAILURE_CODE;
+export const SAFETY_REFERENCE_VECTOR_FAILURE_CODE = "safety_reference_vector_failed" as const;
+export const SAFETY_REFERENCE_VECTOR_FAILURE_MESSAGE =
+  "벡터 조회를 완료하지 못해 text/ranked 검색으로 대체합니다.";
+
+const log = createLogger("safety-reference-catalog");
+
 export type SafetyReferenceVectorStatus = {
   enabled: boolean;
   attempted: boolean;
   ok: boolean;
+  errorCode?: typeof SAFETY_REFERENCE_VECTOR_FAILURE_CODE;
   reason:
     | "disabled"
     | "missing-openai-key"
@@ -53,6 +66,7 @@ export type SafetyReferenceVectorStatus = {
 export type SafetyReferenceSearchResult = {
   ok: boolean;
   configured: boolean;
+  errorCode?: SafetyReferenceErrorCode;
   query: string;
   count: number;
   items: SafetyReferenceItem[];
@@ -1890,11 +1904,10 @@ async function fetchReferenceItems(config: SupabaseConfig, params: URLSearchPara
 }> {
   const response = await fetchRest(config, "safety_reference_items", params);
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
     return {
       ok: false,
       status: response.status,
-      message: `safety_reference_items 조회 실패: ${response.status} ${body}`,
+      message: "안전 지식 DB 자료 조회를 완료하지 못했습니다.",
       items: []
     };
   }
@@ -1939,10 +1952,15 @@ async function fetchRankedReferences(
       cache: "no-store"
     });
   } catch (error) {
+    log.error("safety reference ranked RPC failed", {
+      event: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+      errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+      errorType: error instanceof Error ? error.name : typeof error
+    });
     return {
       ok: false,
       status: 0,
-      message: `RPC 호출 실패: ${error instanceof Error ? error.message : String(error)}`,
+      message: "안전 지식 DB ranked 조회를 완료하지 못했습니다.",
       items: []
     };
   }
@@ -1950,11 +1968,10 @@ async function fetchRankedReferences(
     return null; // RPC missing — caller should fall back.
   }
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
     return {
       ok: false,
       status: response.status,
-      message: `RPC 조회 실패: ${response.status} ${body}`,
+      message: "안전 지식 DB ranked 조회를 완료하지 못했습니다.",
       items: []
     };
   }
@@ -2014,7 +2031,7 @@ async function fetchQueryEmbedding(
       const text = await response.text();
       if (!response.ok) {
         if (attempt === 0) continue;
-        return { ok: false, message: `OpenAI embedding 생성 실패: ${response.status} ${text}` };
+        return { ok: false, message: SAFETY_REFERENCE_VECTOR_FAILURE_MESSAGE };
       }
       const parsed = JSON.parse(text) as unknown;
       if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
@@ -2034,11 +2051,11 @@ async function fetchQueryEmbedding(
         return { ok: false, message: `OpenAI embedding 차원이 ${runtime.dimensions}이 아닙니다.` };
       }
       return { ok: true, embedding };
-    } catch (error) {
+    } catch {
       if (attempt === 0) continue;
       return {
         ok: false,
-        message: `OpenAI embedding 호출 실패: ${error instanceof Error ? error.message : String(error)}`
+        message: SAFETY_REFERENCE_VECTOR_FAILURE_MESSAGE
       };
     } finally {
       clearTimeout(timeout);
@@ -2061,15 +2078,20 @@ async function fetchVectorReferences(
 
   const embedding = await fetchQueryEmbedding(query, runtime);
   if (!embedding.ok) {
-    console.error("Safety reference vector embedding failed", embedding.message);
+    log.error("safety reference vector embedding failed", {
+      event: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
+      errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
+      reason: "embedding-failed"
+    });
     return {
       status: {
         ...runtime.status,
         attempted: true,
         ok: false,
+        errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
         reason: "embedding-failed",
         count: 0,
-        message: embedding.message
+        message: SAFETY_REFERENCE_VECTOR_FAILURE_MESSAGE
       },
       items: []
     };
@@ -2093,16 +2115,21 @@ async function fetchVectorReferences(
       cache: "no-store"
     });
   } catch (error) {
-    const message = `SIF 임베딩 RPC 호출 실패: ${error instanceof Error ? error.message : String(error)}`;
-    console.error(message);
+    log.error("safety reference vector RPC failed", {
+      event: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
+      errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
+      errorType: error instanceof Error ? error.name : typeof error,
+      reason: "rpc-failed"
+    });
     return {
       status: {
         ...runtime.status,
         attempted: true,
         ok: false,
+        errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
         reason: "rpc-failed",
         count: 0,
-        message
+        message: SAFETY_REFERENCE_VECTOR_FAILURE_MESSAGE
       },
       items: []
     };
@@ -2123,15 +2150,15 @@ async function fetchVectorReferences(
   }
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
     return {
       status: {
         ...runtime.status,
         attempted: true,
         ok: false,
+        errorCode: SAFETY_REFERENCE_VECTOR_FAILURE_CODE,
         reason: "rpc-failed",
         count: 0,
-        message: `SIF 임베딩 RPC 조회 실패: ${response.status} ${body}`
+        message: SAFETY_REFERENCE_VECTOR_FAILURE_MESSAGE
       },
       items: []
     };
@@ -2170,8 +2197,7 @@ async function countRows(config: SupabaseConfig, spec: CountSpec): Promise<numbe
     cache: "no-store"
   });
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(`${spec.table} count failed: ${response.status} ${text}`);
+    throw new Error(`${spec.table} count failed with status ${response.status}`);
   }
   return parseContentRange(response.headers.get("content-range"));
 }
@@ -2252,12 +2278,13 @@ export async function searchSafetyReferences(options: {
     return {
       ok: false,
       configured: true,
+      errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
       query,
       count: 0,
       items: [],
       retrievalMode: "rest-ilike",
       vectorSearch,
-      message: firstPass.message
+      message: SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE
     };
   }
 
@@ -2280,7 +2307,11 @@ export async function searchSafetyReferences(options: {
           options.evidenceRole
         ).forEach((item) => byId.set(item.id, item));
       } else {
-        console.error("Safety reference fallback search failed", fallback.message);
+        log.error("safety reference fallback search failed", {
+          event: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+          errorCode: SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
+          status: fallback.status
+        });
       }
       if (index + 1 >= minimumSignalPasses && byId.size >= limit) break;
     }
@@ -2408,7 +2439,11 @@ export async function getSafetyReferenceStats(): Promise<SafetyReferenceStats> {
         : `기술지원규정 기준 ${EXPECTED_TECHNICAL_TOTAL.toLocaleString("ko-KR")}건과 현재 연결 ${countMap.technicalTotal.toLocaleString("ko-KR")}건이 달라 점검이 필요합니다.`
     };
   } catch (error) {
-    console.error("Safety reference stats failed", error);
+    log.error("safety reference stats failed", {
+      event: "safety_reference_stats_failed",
+      errorCode: "safety_reference_stats_failed",
+      errorType: error instanceof Error ? error.name : typeof error
+    });
     return {
       ok: false,
       configured: true,
@@ -2424,7 +2459,7 @@ export async function getSafetyReferenceStats(): Promise<SafetyReferenceStats> {
       ingestionRuns: 0,
       itemTypes: [],
       samples: [],
-      message: error instanceof Error ? error.message : "안전 지식 DB 상태 확인 중 오류가 발생했습니다."
+      message: "안전 지식 DB 상태 확인 중 오류가 발생했습니다."
     };
   }
 }
