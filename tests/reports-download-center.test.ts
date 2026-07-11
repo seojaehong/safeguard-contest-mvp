@@ -159,4 +159,49 @@ describe("reports download center remount behavior", () => {
       await context.close();
     }
   }, 90_000);
+
+  it("shows an honest invalid-workpack state, preserves improvement history, and only opens an explicit sample preview", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const context = await browser.newContext();
+    await context.addInitScript(({ expectedOrigin, workpackJson, improvementsJson, workpackKey, improvementsKey }) => {
+      if (window.location.origin !== expectedOrigin) return;
+      window.localStorage.setItem(workpackKey, workpackJson);
+      window.localStorage.setItem(improvementsKey, improvementsJson);
+    }, {
+      expectedOrigin: baseUrl,
+      workpackJson: JSON.stringify({
+        ...buildStoredCurrentWorkpack(buildMockAskResponse(
+          "성수동 외벽 도장 작업",
+          mockSearchResults.slice(0, 2),
+          "live",
+          "invalid current workpack test"
+        )),
+        savedAt: "2026-07-08T08:00:00"
+      }),
+      improvementsJson: JSON.stringify([{ ...improvement, status: "completed" }]),
+      workpackKey: CURRENT_WORKPACK_STORAGE_KEY,
+      improvementsKey: OPERATION_IMPROVEMENTS_STORAGE_KEY
+    });
+    const page = await context.newPage();
+
+    try {
+      await page.goto(`${baseUrl}/reports`, { waitUntil: "networkidle" });
+      const errorHeading = page.getByRole("heading", { name: "현재 작업을 불러오지 못했습니다." });
+      await errorHeading.waitFor({ state: "visible" });
+      expect(await errorHeading.isVisible()).toBe(true);
+      expect(await page.getByText("현재 작업팩 저장시각이 유효한 RFC3339 offset 시각이 아니어서 증빙 리포트를 복원할 수 없습니다.").isVisible()).toBe(true);
+      expect(await page.getByText("보존된 개선 이력 1건은 유지됩니다.").isVisible()).toBe(true);
+
+      const previewButton = page.getByRole("button", { name: "샘플 미리보기" });
+      await previewButton.waitFor({ state: "visible" });
+      expect(await previewButton.isVisible()).toBe(true);
+      await previewButton.click();
+
+      expect(await page.getByText("샘플 리포트").isVisible()).toBe(true);
+      expect(await page.getByText("샘플 미리보기만 가능합니다. · 실제 작업팩 저장시각이 유효해질 때까지 증빙 다운로드는 잠겨 있습니다.").isVisible()).toBe(true);
+      expect(await page.getByRole("button", { name: "개선사항 포함 MD" }).isDisabled()).toBe(true);
+    } finally {
+      await context.close();
+    }
+  }, 90_000);
 });

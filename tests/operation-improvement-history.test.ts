@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parseOperationImprovements } from "@/lib/operation-improvement-history";
 
 describe("parseOperationImprovements", () => {
-  it("preserves canonical review statuses and only maps the lossless legacy candidate status", () => {
+  it("preserves canonical and legacy review statuses without dropping them", () => {
     const base = {
       createdAt: "2026-07-09T00:00:00.000Z",
       siteName: "성수동 현장",
@@ -18,7 +18,10 @@ describe("parseOperationImprovements", () => {
       { ...base, id: "rejected", status: "rejected" },
       { ...base, id: "reflected", status: "reflected" },
       { ...base, id: "legacy-proposed", status: "proposed" },
-      { ...base, id: "legacy-completed", status: "completed" }
+      { ...base, id: "legacy-in-progress", status: "in_progress" },
+      { ...base, id: "legacy-on-hold", status: "on_hold" },
+      { ...base, id: "legacy-completed", status: "completed" },
+      { ...base, id: "legacy-verified", status: "verified" }
     ]));
 
     expect(parsed.map(({ id, status }) => ({ id, status }))).toEqual([
@@ -26,7 +29,11 @@ describe("parseOperationImprovements", () => {
       { id: "approved", status: "approved" },
       { id: "rejected", status: "rejected" },
       { id: "reflected", status: "reflected" },
-      { id: "legacy-proposed", status: "candidate" }
+      { id: "legacy-proposed", status: "proposed" },
+      { id: "legacy-in-progress", status: "in_progress" },
+      { id: "legacy-on-hold", status: "on_hold" },
+      { id: "legacy-completed", status: "completed" },
+      { id: "legacy-verified", status: "verified" }
     ]);
   });
 

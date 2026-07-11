@@ -186,6 +186,14 @@ export function resolveReportViewState(
       canDownload: false
     };
   }
+  if (snapshot?.source.mode === "sample") {
+    return {
+      status: "ready",
+      title: "샘플 미리보기만 가능합니다.",
+      detail: "실제 작업팩 저장시각이 유효해질 때까지 증빙 다운로드는 잠겨 있습니다.",
+      canDownload: false
+    };
+  }
   if (!snapshot || snapshot.summary.riskRows + snapshot.summary.improvements === 0) {
     return {
       status: "empty",
@@ -219,7 +227,12 @@ const IMPROVEMENT_STATUS_LABELS: Record<ReportImprovementStatus, string> = {
   candidate: "후보",
   approved: "승인됨",
   rejected: "반려됨",
-  reflected: "반영됨"
+  reflected: "반영됨",
+  proposed: "제안됨",
+  in_progress: "진행 중",
+  on_hold: "보류됨",
+  completed: "완료됨",
+  verified: "검증됨"
 };
 
 const KST_OFFSET_MILLISECONDS = 9 * 60 * 60 * 1000;
