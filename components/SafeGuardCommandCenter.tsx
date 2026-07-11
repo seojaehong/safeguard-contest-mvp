@@ -11,7 +11,11 @@ import {
   type WorkpackDocumentValues
 } from "@/components/WorkpackEditor";
 import { AgentConsole } from "@/components/AgentConsole";
-import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
+import {
+  buildStoredCurrentWorkpack,
+  CURRENT_WORKPACK_STORAGE_KEY,
+  parseStoredCurrentWorkpack
+} from "@/lib/current-workpack";
 import { fetchAskStream } from "@/lib/ask-stream-client";
 import { nextConsoleLines, type AgentConsoleLine } from "@/lib/agent-console-copy";
 import type { AskResponse, IntegrationMode, QualityContractStatus } from "@/lib/types";
@@ -1646,6 +1650,22 @@ export function SafeGuardCommandCenter({
     setWorkspacePage("input");
     setMessage(`${example.label} 현장 예시를 불러왔습니다. 필요하면 작업 조건을 수정한 뒤 생성하세요.`);
   }
+
+  useEffect(() => {
+    if (autoGenerate || typeof window === "undefined") return;
+    const stored = parseStoredCurrentWorkpack(window.localStorage.getItem(CURRENT_WORKPACK_STORAGE_KEY));
+    if (!stored) return;
+
+    setSelectedExampleId(null);
+    setQuestion(stored.data.question);
+    setData(stored.data);
+    setGenerationFingerprint(stored.generationFingerprint);
+    setRequiresRevalidation(false);
+    setState("ready");
+    setDocumentSurfaceMode("review");
+    setWorkspacePage("document");
+    setMessage("브라우저에 저장된 최근 작업팩을 이어서 열었습니다. 새 작업은 입력 메뉴에서 시작하세요.");
+  }, [autoGenerate]);
 
   useEffect(() => {
     const trimmed = question.trim();
