@@ -17,7 +17,7 @@ type ClawChatEvent =
   | { kind: "text-delta"; text: string }
   | { kind: "tool"; name: string; status: "start" | "ok" | "fail"; label: string }
   | { kind: "final" }
-  | { kind: "error"; message: string };
+  | { kind: "error"; code?: string; message: string };
 
 type HistoryMessage = { role: "user" | "assistant"; content: string };
 
@@ -36,11 +36,13 @@ function statusIcon(status: ToolLine["status"]): string {
 }
 
 export type ClawChatProps = {
-  /** 로그인 세션 토큰(있으면 사업장 프로필 컨텍스트 주입). 없으면 비로그인. */
+  /** 로그인 세션 토큰. */
   authToken?: string;
+  /** 서버가 로그인 사용자의 소유권을 다시 확인할 명시적 현장 ID. */
+  siteId?: string;
 };
 
-export function ClawChat({ authToken }: ClawChatProps) {
+export function ClawChat({ authToken, siteId }: ClawChatProps) {
   const [turns, setTurns] = useState<ClawTurn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -92,7 +94,7 @@ export function ClawChat({ authToken }: ClawChatProps) {
             "Content-Type": "application/json",
             ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
           },
-          body: JSON.stringify({ message, history }),
+          body: JSON.stringify({ message, history, siteId }),
         });
 
         if (!response.ok || !response.body) {
@@ -147,7 +149,7 @@ export function ClawChat({ authToken }: ClawChatProps) {
         setBusy(false);
       }
     },
-    [authToken, busy, guestCapReached, turns]
+    [authToken, busy, guestCapReached, siteId, turns]
   );
 
   return (

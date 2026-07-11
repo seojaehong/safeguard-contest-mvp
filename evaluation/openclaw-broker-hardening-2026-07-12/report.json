@@ -1,0 +1,47 @@
+{
+  "date": "2026-07-12",
+  "base": "84c04cd98c05b16f207e37be848d57de852f9509",
+  "branch": "fix/openclaw-broker-hardening",
+  "schemaChanges": 0,
+  "paidCalls": 0,
+  "oauthInvocations": 0,
+  "publicExposureChanges": 0,
+  "focusedBaseline": {
+    "files": 0,
+    "passed": 0,
+    "failed": 0,
+    "note": "Broker/auth modules were absent before the hardening slice."
+  },
+  "focusedFinal": {
+    "files": 3,
+    "passed": 25,
+    "failed": 0
+  },
+  "gates": {
+    "typecheck": "passed",
+    "build27": "passed",
+    "diffCheck": "passed",
+    "selfReview": "passed"
+  },
+  "topology": {
+    "vercel": "fail_closed_503_no_spawn",
+    "defaultLocal": "fail_closed_503_no_spawn",
+    "explicitLocal": "fail_closed_until_site_binding_attestation",
+    "relay": "boundary_only_not_implemented"
+  },
+  "deferred": [
+    "site-bound OpenClaw profile credential attestation sidecar",
+    "distributed quota and durable job coordination",
+    "relay transport and durable replay protection",
+    "invalid-bearer pre-auth abuse limiter"
+  ],
+  "verification": {
+    "focusedTestCommand": "npm.cmd test -- tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/engine-adapter.test.ts",
+    "typecheckCommand": "npm.cmd run typecheck",
+    "buildCommand": "npm.cmd run build",
+    "buildStaticPages": 27,
+    "diffCheckCommand": "git diff --check",
+    "buildCount": 1,
+    "raceRegression": "checkAvailability(A)->checkAvailability(B)->run(A)"
+  }
+}
