@@ -1,4 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import fs from "node:fs";
+import path from "node:path";
+import fontkit from "@pdf-lib/fontkit";
+import {
+  PDFDocument,
+  beginText,
+  endText,
+  setCharacterSpacing,
+  setFontAndSize,
+  setLineHeight,
+  setTextMatrix,
+  showText
+} from "pdf-lib";
 import {
   buildRiskAssessmentText,
   parseStructuredRiskAssessmentRows,
@@ -566,16 +579,6 @@ function buildPdfReadyHtml(
 </html>`;
 }
 
-function utf16BeHex(value: string) {
-  const source = Buffer.from(value, "utf16le");
-  const swapped = Buffer.alloc(source.length);
-  for (let index = 0; index < source.length; index += 2) {
-    swapped[index] = source[index + 1] || 0;
-    swapped[index + 1] = source[index] || 0;
-  }
-  return swapped.toString("hex").toUpperCase();
-}
-
 function normalizePdfText(value: string) {
   return value.replace(/\s+/g, " ").trim();
 }
@@ -596,6 +599,24 @@ function wrapPdfLine(value: string, maxChars: number) {
   return lines.length ? lines : [""];
 }
 
+let embeddedPdfFonts: { regular: Buffer; bold: Buffer } | null = null;
+const regularPdfFontPath = path.join(process.cwd(), "public/fonts/NotoSansKR-Regular.ttf");
+const boldPdfFontPath = path.join(process.cwd(), "public/fonts/NotoSansKR-Bold.ttf");
+const pdfFontLicensePath = path.join(process.cwd(), "public/fonts/NotoSansKR-OFL.txt");
+
+function loadEmbeddedPdfFonts(): { regular: Buffer; bold: Buffer } {
+  if (embeddedPdfFonts) return embeddedPdfFonts;
+  fs.accessSync(pdfFontLicensePath, fs.constants.R_OK);
+  embeddedPdfFonts = {
+    regular: fs.readFileSync(regularPdfFontPath),
+    bold: fs.readFileSync(boldPdfFontPath)
+  };
+  return embeddedPdfFonts;
+}
+
+type PdfTextRole = "title" | "section" | "body" | "table" | "note";
+type PdfContentLine = { text: string; role: PdfTextRole; gap?: number };
+
 function buildPdfContentLines(
   title: string,
   scenario: PdfScenario,
@@ -607,17 +628,17 @@ function buildPdfContentLines(
 ) {
   const generatedAt = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
   const kind = detectDocumentKind(title);
-  const lines: Array<{ text: string; size: number; gap?: number }> = [
-    { text: title, size: 18, gap: 18 },
-    { text: `SafeClaw 현장 검토용 PDF 초안 · 생성 ${generatedAt}`, size: 9, gap: 16 },
-    { text: `사업장: ${scenario.companyName}`, size: 10 },
-    { text: `현장: ${scenario.siteName}`, size: 10 },
-    { text: `작업: ${scenario.workSummary}`, size: 10 },
-    { text: `인원/기상: ${scenario.workerCount.toLocaleString("ko-KR")}명 · ${scenario.weatherNote}`, size: 10, gap: 14 },
-    { text: `위험수준: ${riskLevel || "확인"}`, size: 12 },
-    { text: `핵심위험: ${topRisk || "현장 최종 확인 필요"}`, size: 10, gap: 16 },
-    { text: `서식 구분: ${kind === "risk" ? "위험성평가표" : kind === "workPlan" ? "작업계획서" : kind === "permit" ? "허가/점검" : kind === "tbm" ? "TBM일지" : "일반 문서"}`, size: 10, gap: 12 },
-    { text: "확인 항목", size: 13, gap: 10 }
+  const lines: PdfContentLine[] = [
+    { text: title, role: "title", gap: 18 },
+    { text: `SafeClaw 현장 검토용 PDF 초안 · 생성 ${generatedAt}`, role: "note", gap: 16 },
+    { text: `사업장: ${scenario.companyName}`, role: "body" },
+    { text: `현장: ${scenario.siteName}`, role: "body" },
+    { text: `작업: ${scenario.workSummary}`, role: "body" },
+    { text: `인원/기상: ${scenario.workerCount.toLocaleString("ko-KR")}명 · ${scenario.weatherNote}`, role: "body", gap: 14 },
+    { text: `위험수준: ${riskLevel || "확인"}`, role: "section" },
+    { text: `핵심위험: ${topRisk || "현장 최종 확인 필요"}`, role: "body", gap: 16 },
+    { text: `서식 구분: ${kind === "risk" ? "위험성평가표" : kind === "workPlan" ? "작업계획서" : kind === "permit" ? "허가/점검" : kind === "tbm" ? "TBM일지" : "일반 문서"}`, role: "body", gap: 12 },
+    { text: "확인 항목", role: "section", gap: 10 }
   ];
 
   const canonicalRiskRows = kind === "risk" && structuredRiskRows.length
@@ -627,27 +648,27 @@ function buildPdfContentLines(
     ? canonicalRiskRows.slice(0, 18)
     : kind === "tbm" && riskRows.length ? riskRows.slice(0, 8) : (rows.length ? rows.slice(0, 18) : [{ document: title, section: "본문", item: "확인", content: "문서 본문을 현장에서 확인하세요." }]);
   if (kind === "tbm") {
-    lines.push({ text: "위험성평가표 위험요인과 오늘 기상/환경 신호를 TBM 전달사항으로 연결합니다.", size: 9 });
-    lines.push({ text: `오늘 기상/환경 신호: ${scenario.weatherNote}`, size: 9, gap: 8 });
+    lines.push({ text: "위험성평가표 위험요인과 오늘 기상/환경 신호를 TBM 전달사항으로 연결합니다.", role: "table" });
+    lines.push({ text: `오늘 기상/환경 신호: ${scenario.weatherNote}`, role: "table", gap: 8 });
   }
   sourceRows.forEach((row, index) => {
     const prefix = kind === "tbm"
       ? `${index + 1}. [위험성평가표 → TBM] `
       : `${index + 1}. [${row.section}] ${row.item}: `;
     wrapPdfLine(`${prefix}${row.content}`, 42).slice(0, 3).forEach((line, lineIndex) => {
-      lines.push({ text: lineIndex === 0 ? line : `   ${line}`, size: 9 });
+      lines.push({ text: lineIndex === 0 ? line : `   ${line}`, role: "table" });
     });
   });
 
   lines.push(
-    { text: "", size: 9, gap: 14 },
-    { text: "작성자: ____________________    검토: ____________________    승인: ____________________", size: 9 },
-    { text: "본 출력물은 공식자료 기반 현장 검토용 초안입니다. 발주처 지정 양식, 현장 실측, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.", size: 8 }
+    { text: "", role: "note", gap: 14 },
+    { text: "작성자: ____________________    검토: ____________________    승인: ____________________", role: "table" },
+    { text: "본 출력물은 공식자료 기반 현장 검토용 초안입니다. 발주처 지정 양식, 현장 실측, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.", role: "note" }
   );
   return lines;
 }
 
-function buildBinaryPdf(
+async function buildBinaryPdf(
   title: string,
   scenario: PdfScenario,
   rows: PdfRow[],
@@ -656,43 +677,44 @@ function buildBinaryPdf(
   riskRows: PdfRow[],
   structuredRiskRows: StructuredRiskAssessmentRow[]
 ) {
-  const commands: string[] = [];
+  const fonts = loadEmbeddedPdfFonts();
+  const pdf = await PDFDocument.create();
+  pdf.registerFontkit(fontkit);
+  const regularFont = await pdf.embedFont(fonts.regular, { subset: true });
+  const boldFont = await pdf.embedFont(fonts.bold, { subset: true });
+  const page = pdf.addPage([595, 842]);
+  const regularFontKey = page.node.newFontDictionary(regularFont.name, regularFont.ref);
+  const boldFontKey = page.node.newFontDictionary(boldFont.name, boldFont.ref);
+  const roles = {
+    title: { font: "F2", size: 20, leading: 24, tracking: -0.4 },
+    section: { font: "F2", size: 14, leading: 18, tracking: -0.14 },
+    body: { font: "F1", size: 10, leading: 15, tracking: 0 },
+    table: { font: "F1", size: 8.5, leading: 12, tracking: 0 },
+    note: { font: "F1", size: 8, leading: 11, tracking: 0 }
+  } as const;
   let y = 790;
   buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows, structuredRiskRows).forEach((line) => {
+    const typography = roles[line.role];
     if (line.gap) y -= line.gap;
     if (!line.text) {
-      y -= 8;
+      y -= typography.leading;
       return;
     }
     if (y < 48) return;
-    commands.push(`BT /F1 ${line.size} Tf 1 0 0 1 42 ${y} Tm <${utf16BeHex(line.text)}> Tj ET`);
-    y -= Math.max(12, line.size + 4);
+    const font = typography.font === "F2" ? boldFont : regularFont;
+    const fontKey = typography.font === "F2" ? boldFontKey : regularFontKey;
+    page.pushOperators(
+      beginText(),
+      setFontAndSize(fontKey, typography.size),
+      setLineHeight(typography.leading),
+      setCharacterSpacing(typography.tracking),
+      setTextMatrix(1, 0, 0, 1, 42, y),
+      showText(font.encodeText(line.text)),
+      endText()
+    );
+    y -= typography.leading;
   });
-
-  const content = commands.join("\n");
-  const objects = [
-    "<< /Type /Catalog /Pages 2 0 R >>",
-    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 6 0 R >>",
-    "<< /Type /Font /Subtype /Type0 /BaseFont /HYSMyeongJo-Medium /Encoding /UniKS-UCS2-H /DescendantFonts [5 0 R] >>",
-    "<< /Type /Font /Subtype /CIDFontType0 /BaseFont /HYSMyeongJo-Medium /CIDSystemInfo << /Registry (Adobe) /Ordering (Korea1) /Supplement 2 >> /FontDescriptor 7 0 R /DW 1000 >>",
-    `<< /Length ${Buffer.byteLength(content, "ascii")} >>\nstream\n${content}\nendstream`,
-    "<< /Type /FontDescriptor /FontName /HYSMyeongJo-Medium /Flags 6 /FontBBox [0 -200 1000 900] /ItalicAngle 0 /Ascent 800 /Descent -200 /CapHeight 700 /StemV 80 >>"
-  ];
-
-  let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
-  const offsets = [0];
-  objects.forEach((object, index) => {
-    offsets.push(Buffer.byteLength(pdf, "binary"));
-    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
-  });
-  const xrefOffset = Buffer.byteLength(pdf, "binary");
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
-  offsets.slice(1).forEach((offset) => {
-    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
-  });
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
-  return Buffer.from(pdf, "binary");
+  return Buffer.from(await pdf.save({ useObjectStreams: false }));
 }
 
 export async function POST(request: NextRequest) {
@@ -711,9 +733,18 @@ export async function POST(request: NextRequest) {
   const wantsBinaryPdf = !wantsHtml;
 
   if (wantsBinaryPdf) {
-    const pdf = buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
+    let pdf: Buffer;
+    try {
+      pdf = await buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
+    } catch (error) {
+      console.error("PDF export font assets are unavailable or invalid", error);
+      return NextResponse.json(
+        { ok: false, error: "PDF_FONT_ASSET_UNAVAILABLE" },
+        { status: 500, headers: { "cache-control": "no-store" } }
+      );
+    }
     const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
-    return new NextResponse(pdf, {
+    return new NextResponse(new Uint8Array(pdf), {
       headers: {
         "content-type": "application/pdf",
         "content-disposition": `attachment; filename="safeclaw-document.pdf"; filename*=UTF-8''${encodeURIComponent(pdfFileName)}`,
