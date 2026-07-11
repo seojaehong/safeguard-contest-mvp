@@ -604,13 +604,24 @@ const regularPdfFontPath = path.join(process.cwd(), "public/fonts/NotoSansKR-Reg
 const boldPdfFontPath = path.join(process.cwd(), "public/fonts/NotoSansKR-Bold.ttf");
 const pdfFontLicensePath = path.join(process.cwd(), "public/fonts/NotoSansKR-OFL.txt");
 
+class PdfFontAssetError extends Error {
+  constructor(readonly source: unknown) {
+    super("PDF font assets are unavailable or invalid");
+    this.name = "PdfFontAssetError";
+  }
+}
+
 function loadEmbeddedPdfFonts(): { regular: Buffer; bold: Buffer } {
   if (embeddedPdfFonts) return embeddedPdfFonts;
-  fs.accessSync(pdfFontLicensePath, fs.constants.R_OK);
-  embeddedPdfFonts = {
-    regular: fs.readFileSync(regularPdfFontPath),
-    bold: fs.readFileSync(boldPdfFontPath)
-  };
+  try {
+    fs.accessSync(pdfFontLicensePath, fs.constants.R_OK);
+    embeddedPdfFonts = {
+      regular: fs.readFileSync(regularPdfFontPath),
+      bold: fs.readFileSync(boldPdfFontPath)
+    };
+  } catch (error) {
+    throw new PdfFontAssetError(error);
+  }
   return embeddedPdfFonts;
 }
 
@@ -680,8 +691,16 @@ async function buildBinaryPdf(
   const fonts = loadEmbeddedPdfFonts();
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(fontkit);
-  const regularFont = await pdf.embedFont(fonts.regular, { subset: true });
-  const boldFont = await pdf.embedFont(fonts.bold, { subset: true });
+  const [regularFont, boldFont] = await (async () => {
+    try {
+      return [
+        await pdf.embedFont(fonts.regular, { subset: true }),
+        await pdf.embedFont(fonts.bold, { subset: true })
+      ] as const;
+    } catch (error) {
+      throw new PdfFontAssetError(error);
+    }
+  })();
   const page = pdf.addPage([595, 842]);
   const regularFontKey = page.node.newFontDictionary(regularFont.name, regularFont.ref);
   const boldFontKey = page.node.newFontDictionary(boldFont.name, boldFont.ref);
@@ -737,11 +756,15 @@ export async function POST(request: NextRequest) {
     try {
       pdf = await buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
     } catch (error) {
-      console.error("PDF export font assets are unavailable or invalid", error);
-      return NextResponse.json(
-        { ok: false, error: "PDF_FONT_ASSET_UNAVAILABLE" },
-        { status: 500, headers: { "cache-control": "no-store" } }
-      );
+      if (error instanceof PdfFontAssetError) {
+        console.error("PDF export font assets are unavailable or invalid", error.source);
+        return NextResponse.json(
+          { ok: false, error: "PDF_FONT_ASSET_UNAVAILABLE" },
+          { status: 500, headers: { "cache-control": "no-store" } }
+        );
+      }
+      console.error("PDF export failed", error);
+      throw error;
     }
     const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
     return new NextResponse(new Uint8Array(pdf), {

@@ -94,7 +94,9 @@ describe("Korean PDF font integration", () => {
     ]) {
       expect(source).toContain(`path.join(process.cwd(), "${asset}")`);
     }
-    expect(source).toContain('console.error("PDF export font assets are unavailable or invalid", error)');
+    expect(source).toContain("class PdfFontAssetError extends Error");
+    expect(source).toContain('console.error("PDF export font assets are unavailable or invalid", error.source)');
+    expect(source).toContain('console.error("PDF export failed", error)');
     expect(source).toContain('error: "PDF_FONT_ASSET_UNAVAILABLE"');
   });
 
