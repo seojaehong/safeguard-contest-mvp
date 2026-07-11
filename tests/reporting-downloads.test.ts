@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildStoredCurrentWorkpack } from "@/lib/current-workpack";
+import { buildStoredCurrentWorkpack, parseStoredCurrentWorkpack } from "@/lib/current-workpack";
 import {
   operationImprovementToHarnessImprovement,
   parseOperationImprovements
@@ -98,7 +98,7 @@ const improvements: OperationImprovement[] = [
     hazardLabel: "추락 위험",
     improvementText: "비계 난간과 바퀴 잠금 상태를 보강하고 TBM에서 재확인",
     reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
-    status: "proposed",
+    status: "candidate",
     riskAssociation: {
       siteName: riskRow.location,
       process: riskRow.process,
@@ -136,7 +136,7 @@ const mixedImprovements: OperationImprovement[] = [
     workSummary: "분전반 점검",
     hazardLabel: "감전 위험",
     improvementText: "절연 보호구와 잠금 절차를 확인",
-    status: "completed",
+    status: "reflected",
     riskAssociation: {
       siteName: electricalRow.location,
       process: electricalRow.process,
@@ -157,6 +157,32 @@ function buildMixedSnapshot(filters: Record<string, string>) {
 }
 
 describe("reporting downloads", () => {
+  it("rejects invalid workpack savedAt values and excludes invalid direct improvement timestamps", () => {
+    const workpack = makeWorkpack();
+    for (const savedAt of ["2026-02-30T00:00:00Z", "2026-07-08T08:00:00"]) {
+      expect(parseStoredCurrentWorkpack(JSON.stringify({ ...workpack, savedAt }))).toBeNull();
+      expect(() => buildReportSnapshot({
+        workpack: { ...workpack, savedAt },
+        improvements: [],
+        period: "weekly",
+        now: new Date("2026-07-08T12:00:00.000Z")
+      })).toThrowError("작업팩 저장시각은 유효한 RFC3339 offset 시각이어야 합니다.");
+    }
+
+    const snapshot = buildReportSnapshot({
+      workpack,
+      improvements: [
+        { ...improvements[0], id: "valid-offset", createdAt: "2026-07-08T17:30:00+09:00" },
+        { ...improvements[0], id: "rollover", createdAt: "2026-02-30T08:30:00Z" },
+        { ...improvements[0], id: "no-offset", createdAt: "2026-07-08T08:30:00" }
+      ],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(snapshot.improvements.map((item) => item.id)).toEqual(["valid-offset"]);
+  });
+
   it("filters risk rows by the workpack timestamp for the selected period", () => {
     const workpack = {
       ...makeWorkpack(),
@@ -302,10 +328,10 @@ describe("reporting downloads", () => {
       now: new Date("2026-07-08T12:00:00.000Z")
     });
 
-    expect(snapshot.improvements[0]?.improvementStatus).toBe("proposed");
+    expect(snapshot.improvements[0]?.improvementStatus).toBe("candidate");
     expect(snapshot.riskRows[0]).not.toHaveProperty("improvementStatus");
 
-    const completedFilter = buildReportSnapshot({
+    const reflectedFilter = buildReportSnapshot({
       workpack: makeWorkpack([electricalRow]),
       improvements: [{
         ...improvements[0],
@@ -321,28 +347,28 @@ describe("reporting downloads", () => {
         }
       }],
       period: "weekly",
-      filters: { improvementStatus: "completed" },
+      filters: { improvementStatus: "reflected" },
       now: new Date("2026-07-08T12:00:00.000Z")
     });
 
-    expect(completedFilter.riskRows).toEqual([]);
-    expect(completedFilter.improvements).toEqual([]);
+    expect(reflectedFilter.riskRows).toEqual([]);
+    expect(reflectedFilter.improvements).toEqual([]);
   });
 
   it("preserves an explicit status stored on the improvement", () => {
-    const completedImprovement = {
+    const reflectedImprovement = {
       ...improvements[0],
-      status: "completed"
-    } as OperationImprovement & { status: "completed" };
+      status: "reflected"
+    } as OperationImprovement & { status: "reflected" };
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
-      improvements: [completedImprovement],
+      improvements: [reflectedImprovement],
       period: "weekly",
       now: new Date("2026-07-08T12:00:00.000Z")
     });
 
-    expect(snapshot.improvements[0]?.improvementStatus).toBe("completed");
-    expect(snapshot.improvements[0]?.improvementStatusLabel).toBe("완료");
+    expect(snapshot.improvements[0]?.improvementStatus).toBe("reflected");
+    expect(snapshot.improvements[0]?.improvementStatusLabel).toBe("반영됨");
   });
 
   it("links an improvement only through its exact explicit risk association", () => {
@@ -403,6 +429,34 @@ describe("reporting downloads", () => {
     expect(filtered.improvements).toEqual([]);
   });
 
+  it("fails closed when an explicit risk association conflicts with the improvement site", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [{
+        ...improvements[0],
+        id: "cross-site-conflict",
+        siteName: "부산 물류센터",
+        workSummary: "부산 설비 점검",
+        riskAssociation: {
+          siteName: riskRow.location,
+          process: riskRow.process,
+          task: riskRow.task,
+          hazard: riskRow.hazard
+        }
+      }],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(snapshot.improvements[0]).toMatchObject({
+      siteName: "부산 물류센터",
+      process: "미연결",
+      task: "부산 설비 점검",
+      assignee: "미지정"
+    });
+    expect(snapshot.improvements[0]?.linkedRiskIndex).toBeUndefined();
+  });
+
   it("exposes row ownership as assignee rather than a fictional team", () => {
     const linkedImprovement = {
       ...improvements[0],
@@ -450,11 +504,11 @@ describe("reporting downloads", () => {
   });
 
   it("filters risk rows and their matched improvements by improvement status", () => {
-    const snapshot = buildMixedSnapshot({ improvementStatus: "completed" });
+    const snapshot = buildMixedSnapshot({ improvementStatus: "reflected" });
 
     expect(snapshot.riskRows.map((row) => row.hazard)).toEqual(["감전 위험"]);
     expect(snapshot.improvements.map((item) => item.id)).toEqual(["imp-electrical"]);
-    expect(snapshot.improvements[0]?.improvementStatusLabel).toBe("완료");
+    expect(snapshot.improvements[0]?.improvementStatusLabel).toBe("반영됨");
   });
 
   it("filters risk rows and improvements by site", () => {
@@ -481,8 +535,8 @@ describe("reporting downloads", () => {
       expect.objectContaining({ value: "medium", label: "중" })
     ]);
     expect(snapshot.facets.improvementStatuses).toEqual([
-      expect.objectContaining({ value: "proposed", label: "제안됨" }),
-      expect.objectContaining({ value: "completed", label: "완료" })
+      expect.objectContaining({ value: "candidate", label: "후보" }),
+      expect.objectContaining({ value: "reflected", label: "반영됨" })
     ]);
     expect(snapshot.facets.sites.map((option) => option.value)).toEqual(["서울 성수동", "부산 물류센터"]);
     expect(snapshot.facets.assignees.map((option) => option.value)).toEqual(["현장소장", "전기팀"]);
@@ -614,9 +668,9 @@ describe("reporting downloads", () => {
     expect(localSnapshot.source.scope).toBe("current_browser");
     expect(sampleSnapshot.source.scope).toBe("sample_preview");
     expect(sampleSnapshot.source.riskRowTimeBasis).toBe("workpack_saved_at");
-    for (const [snapshot, scope] of [
-      [localSnapshot, "current_browser"],
-      [sampleSnapshot, "sample_preview"]
+    for (const [snapshot, scope, limitation] of [
+      [localSnapshot, "current_browser", "current_browser_only"],
+      [sampleSnapshot, "sample_preview", "sample_data_only"]
     ] as const) {
       for (const exported of [
         buildReportCsv(snapshot),
@@ -626,8 +680,30 @@ describe("reporting downloads", () => {
         buildReportLearningMarkdown(snapshot)
       ]) {
         expect(exported).toContain(scope);
+        expect(exported).toContain(snapshot.source.workpackSavedAt);
+        expect(exported).toContain("workpack_saved_at");
+        expect(exported).toContain(limitation);
       }
     }
+  });
+
+  it("keeps complete source metadata in CSV when filters produce no data rows", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [improvements[0]],
+      period: "weekly",
+      filters: { process: "없는 공정" },
+      sourceMode: "browser_local",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const csv = buildReportCsv(snapshot);
+
+    expect(snapshot.riskRows).toEqual([]);
+    expect(snapshot.improvements).toEqual([]);
+    expect(csv).toContain("current_browser");
+    expect(csv).toContain("current_browser_only");
+    expect(csv).toContain("workpack_saved_at");
+    expect(csv).toContain(snapshot.source.workpackSavedAt);
   });
 
   it("renders As-Is/To-Be markdown without external submission wording", () => {
@@ -747,7 +823,7 @@ describe("reporting downloads", () => {
 
     expect(parsed).toHaveLength(1);
     expect(parsed[0]?.id).toBe("imp-1");
-    expect(parsed[0]?.status).toBe("proposed");
+    expect(parsed[0]?.status).toBe("candidate");
     expect(parsed[0]?.riskAssociation).toEqual(improvements[0].riskAssociation);
   });
 

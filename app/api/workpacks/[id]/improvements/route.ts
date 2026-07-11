@@ -336,6 +336,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     ok: true,
     configured: true,
     improvementId: data.id,
+    reviewStatus: draft.review_status,
     sourceType: draft.source_type,
     vision: {
       status: vision.status,

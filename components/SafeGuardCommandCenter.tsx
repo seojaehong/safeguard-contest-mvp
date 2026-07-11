@@ -28,8 +28,10 @@ import {
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
   operationImprovementToHarnessImprovement,
+  parseOperationImprovementStatus,
   parseOperationImprovements,
-  type OperationImprovement
+  type OperationImprovement,
+  type OperationImprovementStatus
 } from "@/lib/operation-improvement-history";
 import {
   buildWorkspaceStepStatuses,
@@ -150,6 +152,7 @@ type ImprovementApiResult = {
   ok: boolean;
   configured?: boolean;
   improvementId: string | null;
+  reviewStatus?: OperationImprovementStatus;
   sourceType?: "manual" | "photo_analysis";
   vision?: {
     status?: "analyzed" | "unconfigured" | "failed";
@@ -1425,13 +1428,15 @@ export function SafeGuardCommandCenter({
 
     const record = parsed as Record<string, unknown>;
     const improvementId = typeof record.improvementId === "string" ? record.improvementId : null;
+    const reviewStatus = parseOperationImprovementStatus(record.reviewStatus);
     const vision = typeof record.vision === "object" && record.vision !== null && !Array.isArray(record.vision)
       ? record.vision as ImprovementApiResult["vision"]
       : undefined;
     return {
-      ok: record.ok === true && Boolean(improvementId),
+      ok: record.ok === true && Boolean(improvementId) && Boolean(reviewStatus),
       configured: typeof record.configured === "boolean" ? record.configured : undefined,
       improvementId,
+      reviewStatus,
       sourceType: record.sourceType === "photo_analysis" ? "photo_analysis" : "manual",
       vision,
       message: readApiMessage(record, "개선사항 저장 결과를 확인했습니다.")
@@ -1457,6 +1462,7 @@ export function SafeGuardCommandCenter({
     setImprovementSaveState("saving");
 
     let storageMode: OperationImprovement["storageMode"] = "local";
+    let reviewStatus: OperationImprovementStatus = "candidate";
     let remoteImprovementId: string | undefined;
     let workpackId: string | undefined;
     let sourceType: OperationImprovement["sourceType"] = beforePhoto && afterPhoto ? "photo_analysis" : "manual";
@@ -1488,6 +1494,7 @@ export function SafeGuardCommandCenter({
         if (improvementSave.ok && improvementSave.improvementId) {
           storageMode = "db";
           remoteImprovementId = improvementSave.improvementId;
+          reviewStatus = improvementSave.reviewStatus || reviewStatus;
           sourceType = improvementSave.sourceType || sourceType;
           visionStatus = improvementSave.vision?.status;
           analysisMode = improvementSave.vision?.analysisMode;
@@ -1533,7 +1540,7 @@ export function SafeGuardCommandCenter({
       hazardLabel: data?.riskSummary.topRisk || "현장 개선사항",
       improvementText: text,
       reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
-      status: "proposed",
+      status: reviewStatus,
       riskAssociation,
       beforePhotoName: beforePhoto?.name,
       afterPhotoName: afterPhoto?.name,
