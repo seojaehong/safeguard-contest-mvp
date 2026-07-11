@@ -64,8 +64,9 @@ The post-normalization runner reports 2,444 unresolved violations: radius 288 an
 - Early build attempts were race-contaminated and are preserved in `build27-after-ci.log` and `build27-exitcode.log`.
 - Clean final: resolved and removed only this worktree's `.next`, then ran one build with no competing Next process.
 - Root-boundary remediation reran both builds sequentially after safely removing only this worktree's `.next`.
-- Normal build: PASS, Next 15.5.20, static pages 27/27; all 97 static JS chunks contain zero audit probe markers. Logs: `build-normal-root-probe.log`, `bundle-normal.json`.
-- Final audit build: PASS, Next 15.5.20, static pages 27/27, BUILD_ID `lG3Jy9qUeJdXoFtileF_I`; exactly one probe marker appears in `static/chunks/app/layout-6a0a9a9b3dfa7576.js`. Logs: `build-audit-final.log`, `bundle-audit.json`.
+- Provenance-bound normal build: PASS, Next 15.5.20, static pages 27/27, BUILD_ID `tFT43oHhkysWDqeWCmhdU`; all 97 static JS chunks contain zero audit probe markers. Logs: `build-normal-provenance.log`, `bundle-normal.json`.
+- Provenance-bound audit build: PASS, Next 15.5.20, static pages 27/27, BUILD_ID `MVWMaosATWmDNyIm1URTO`; exactly one probe marker appears in `static/chunks/app/layout-6a0a9a9b3dfa7576.js`. Logs: `build-audit-provenance.log`, `bundle-audit.json`.
+- Both bundle artifacts record source SHA `cbbafe40b010c3ee46b307eb29a0928d4622296b`, matching source identity `52eb4299f1a3f8ec78936282b821e447d260e19e54298d2b695dfacb178b53bc`, plus a mode-specific build identity digest.
 
 ## Browser Audit
 
