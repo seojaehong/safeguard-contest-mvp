@@ -88,7 +88,36 @@
     "After integration rerun full tests, typecheck, build, static audit, all 108 browser rows, and explicit /documents-/reports-vs-/workspace y-position and identity comparison."
   ],
   "mergeMatrix": {
-    "frontend": { "head": "b61929f", "status": "reviewed-pass", "ownership": "typography, PDF/font assets, browser audit, evidence" },
+    "frontend": { "head": "d2ef1df", "status": "reviewed-pass", "ownership": "typography, PDF/font assets, browser audit, evidence" },
+    "authoritativeBackendHead": "3900892",
+    "intersectionBaseBackendHead": "2d0ff44",
+    "sharedFilesCount": 22,
+    "sharedFiles": [
+      ".gitignore",
+      "app/ask/page.tsx",
+      "app/dryrun/page.tsx",
+      "app/globals.css",
+      "app/knowledge/[section]/[slug]/page.tsx",
+      "app/knowledge/page.tsx",
+      "app/layout.tsx",
+      "app/ontology/page.tsx",
+      "app/preview/page.tsx",
+      "app/roadmap/page.tsx",
+      "app/search/page.tsx",
+      "app/trust/page.tsx",
+      "app/why/page.tsx",
+      "components/AgentConsole.tsx",
+      "components/AnswerPanel.tsx",
+      "components/FieldOperationsWorkspace.tsx",
+      "components/ReportsDownloadCenter.tsx",
+      "components/SafeClawModuleShell.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "components/WorkflowSharePanel.tsx",
+      "components/WorkpackEditor.tsx",
+      "package.json"
+    ],
+    "sharedFilePolicy": "Never merge a shared file wholesale. Preserve backend behavior and contracts first, then selectively port frontend visual and audit hunks with per-file review.",
+    "pdfPorting": "Port b61929f PDF/font changes onto backend 3900892 and regenerate the tracked package-lock.json; do not copy package.json or the lockfile wholesale.",
     "backendRequired": [
       { "commit": "3900892", "status": "required-integration", "ownership": "canonical current-workpack resilience", "evidence": "workspace return fixed; fingerprint-matched worker/selection snapshot; browser test and typecheck pass" }
     ],

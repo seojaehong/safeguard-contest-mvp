@@ -83,6 +83,9 @@ F7 is done with `passes: true`.
 
 ## Post-closure backend integration matrix
 
+- Current authoritative backend head is `3900892`. Comparison evidence from frontend `d2ef1df` versus backend base `2d0ff44` has exactly 22 shared files; the complete path list is stored in `evaluation/frontend-consistency-audit-2026-07-11/report.json`.
+- Per-file policy: never merge shared files wholesale. Preserve backend behavior/contracts first, then selectively port frontend visual/audit hunks under per-file review.
+- PDF worker must port `b61929f` PDF/font changes onto `3900892` and regenerate the tracked lockfile instead of copying dependency manifests wholesale. Module-shell and reports-candidate independent reviews remain pending.
 - Required backend-owned integration: `3900892` (canonical current-workpack resilience). It restores `/workspace` return behavior and fingerprint-matches worker/selection snapshots; browser test and typecheck passed.
 - Independent review pending: `99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49` (document-module shell CSS).
 - Isolated candidate, not integrated: `a935fdb` (reports provenance/state). It adds sample/browser/server labels, timestamps, sticky provenance, missing-workpack empty state, and export lock; independent review is pending.
