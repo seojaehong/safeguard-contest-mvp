@@ -19,6 +19,7 @@ The existing request and response contract remains in place:
 - Default binary success headers remain exactly `application/pdf`, the existing ASCII plus RFC 5987 filename disposition, and `cache-control: no-store`.
 - `?format=html` retains its existing HTML body, filename, content type, disposition, and cache header.
 - Missing or invalid font assets are logged and return status 500 with `{ "ok": false, "error": "PDF_FONT_ASSET_UNAVAILABLE" }` and `cache-control: no-store`.
+- Only font file access/read and font parse/embed failures use that controlled code. Other PDF construction or save failures are logged as `PDF export failed` and rethrown to the route's normal internal-error handling.
 
 ## Dependency and lock audit
 
@@ -55,19 +56,23 @@ TDD evidence:
 - Expanded RED: missing and invalid asset requests still returned 200; typography roles and PDF render assertions failed against the generic CIDFontType0 output.
 - GREEN after implementation: the two focused files passed all binary, error, HTML, and asset checks.
 - Final characterization: canonical structured-row extraction was added without changing the existing sequence-number normalization contract.
+- Remediation RED at `66a05fee93256e56539427f7c049aec247552cc6`: an injected `PDFDocument.create()` rejection incorrectly resolved to a JSON 500 response with the font-asset code instead of rejecting as a non-font build failure.
+- Remediation GREEN: a typed `PdfFontAssetError` now bounds file access/read and `embedFont` failures; the same injected create failure is logged and rethrown without the font-asset code.
 
 Final commands:
 
 | Command | Result |
 | --- | --- |
-| `npm.cmd test -- tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts` | 2 files, 10 tests passed |
-| `npm.cmd run typecheck` | passed after production build |
+| `npm.cmd test -- tests/pdf-font-failure.test.ts -t "logs and rethrows non-font PDF build failures without using the font error contract"` | RED before remediation: 1 failed because the promise resolved to the font JSON 500; GREEN after remediation: 1 passed |
+| `npm.cmd test -- tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts` | 2 files, 11 tests passed |
+| `npm.cmd run typecheck` | passed |
 | `npm.cmd run build` | passed; `/api/export/pdf` emitted as a dynamic route |
 
 The focused suite verifies:
 
 - Exact binary and HTML success headers and filenames.
 - Controlled JSON 500 plus `console.error` for both missing and invalid font assets.
+- A deterministic non-font `PDFDocument.create()` failure logs through the general PDF error path and is rethrown without `PDF_FONT_ASSET_UNAVAILABLE`.
 - HTML availability while binary assets are unavailable.
 - Actual `/CIDFontType2`, `/FontFile2`, `/ToUnicode`, and subset font names.
 - No `HYSMyeongJo`, `UniKS-UCS2-H`, or generic `/CIDFontType0` fallback.
@@ -92,8 +97,8 @@ Local build measurements:
 | NFT referenced files | 57 |
 | NFT referenced bytes | 13,614,781 |
 | Font bytes inside NFT set | 12,452,255 |
-| Compiled route JavaScript | 1,146,979 |
-| Route JavaScript plus NFT approximation | 14,761,760 |
+| Compiled route JavaScript | 1,147,308 |
+| Route JavaScript plus NFT approximation | 14,762,089 |
 | Representative built POST output | 16,716 bytes on first request; 16,713 bytes on second request |
 | Local built POST latency | 657 ms on first request; 129 ms on the next request in the same process |
 
@@ -105,5 +110,5 @@ Cold-start cost is the meaningful residual risk. Each new process must make the 
 
 - Full source fonts must remain in the server function bundle even though each generated PDF contains only small subsets.
 - The route preserves its existing one-page, bounded-row generation behavior; this integration does not add pagination or expand row limits.
-- The authoritative controlled-error pattern wraps the complete binary builder. A non-font exception during binary construction will currently receive the same `PDF_FONT_ASSET_UNAVAILABLE` code.
+- The controlled font response intentionally covers only local font file access/read and `embedFont` parse/embed failures. `PDFDocument.create`, page/content construction, and `pdf.save` remain outside the typed font boundary.
 - No Vercel deployment was performed from this worktree. Static tracing, production build, and local built-route POST were verified; live Vercel cold-start behavior remains a post-deploy check.
