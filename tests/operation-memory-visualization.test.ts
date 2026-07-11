@@ -94,6 +94,38 @@ describe("buildOperationMemoryVisualizationModel", () => {
     ]));
   });
 
+  it("keeps fire controls and energy isolation visible in evidence and control nodes", () => {
+    const maintenanceFire: SafetyReferenceItem = {
+      ...reference(),
+      id: "sif-forklift-maintenance-fire-graph",
+      title: "LPG 지게차 연료계통 정비 중 화재·폭발 사례",
+      summary: "지게차 연료계통을 수리하던 중 잔류 가스가 누출되고 점화원과 접촉해 화재가 발생",
+      keywords: ["지게차", "정비", "연료 누출", "화재", "폭발", "LOTO"],
+      risk_tags: ["지게차", "화재", "폭발"],
+      controls: ["충전 구역 환기", "정비 전 전원 차단 및 잠금표지(LOTO)"]
+    };
+    const graph = buildOperationMemoryGraph({
+      workpack: {
+        id: "wp-maintenance-fire",
+        question: "LPG 지게차 연료계통 정비 작업",
+        generatedAt: "2026-07-10T00:00:00.000Z"
+      },
+      references: [maintenanceFire],
+      improvements: [],
+      confirmations: []
+    });
+    const evidence = graph.nodes.find((node) => node.kind === "Evidence");
+    const controlText = graph.nodes
+      .filter((node) => node.kind === "Control")
+      .map((node) => `${node.label} ${node.detail || ""}`)
+      .join(" ");
+
+    expect(evidence?.detail).toMatch(/연료|가스|누출/);
+    expect(evidence?.detail).toMatch(/환기|점화원|소화기/);
+    expect(evidence?.detail).toMatch(/차단|잠금표지|LOTO/);
+    expect(controlText).toMatch(/차단|잠금표지|LOTO/);
+  });
+
   it("bounds only the visual map while keeping the full operation list", () => {
     const improvements = Array.from({ length: 30 }, (_, index) => improvement(`imp-${index}`));
     const graph = buildOperationMemoryGraph({
