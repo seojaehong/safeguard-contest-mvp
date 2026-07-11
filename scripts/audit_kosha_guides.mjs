@@ -13,8 +13,6 @@ const DEFAULT_PRODUCTION_BASE = "https://safeguard-contest-mvp.vercel.app";
 const DEFAULT_TECHNICAL_FOLDER = process.env.KOSHA_TECHNICAL_FOLDER || resolve(homedir(), "Downloads", "기술지원규정");
 const DEFAULT_MANIFEST_PATH = "data/safety-knowledge/kosha-guide-audit-manifest.json";
 const DEFAULT_OUTPUT_DIR = "evaluation/kosha-guide-audit-2026-07-11";
-const REQUEST_TIMEOUT_MS = 20_000;
-const REQUEST_RETRIES = 1;
 const OFFICIAL_CATEGORIES = ["A", "B", "C", "D", "E"];
 
 const RETRIEVAL_SCENARIOS = [
@@ -143,9 +141,10 @@ function validateLocalParseStats(stats, expectedPdfRows) {
   if (stats.rowsReturned !== expectedPdfRows) {
     mismatches.push(`rows-returned:${stats.rowsReturned ?? "missing"}/${expectedPdfRows}`);
   }
-  if (stats.parseSuccessCount + stats.parseFailureCount !== stats.parseAttemptedCount) {
+  const accountedAttempts = stats.parseSuccessCount + stats.parseEmptyOutputCount + stats.parseFailureCount;
+  if (accountedAttempts !== stats.parseAttemptedCount) {
     mismatches.push(
-      `parse-outcomes:${stats.parseSuccessCount + stats.parseFailureCount}/${stats.parseAttemptedCount}`
+      `parse-outcomes:${accountedAttempts}/${stats.parseAttemptedCount}`
     );
   }
   if (!Array.isArray(stats.outcomes) || stats.outcomes.length !== expectedPdfRows) {
@@ -166,25 +165,6 @@ function readEnvFile(path) {
     if (!process.env[match[1]]) process.env[match[1]] = value;
   }
   return true;
-}
-
-async function fetchHeadersWithRetry(url, init, label) {
-  let lastError;
-  for (let attempt = 0; attempt <= REQUEST_RETRIES; attempt += 1) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-    try {
-      const response = await fetch(url, { ...init, signal: controller.signal, cache: "no-store" });
-      if (response.status < 500 || attempt === REQUEST_RETRIES) return response;
-      lastError = new Error(`${label} returned HTTP ${response.status}`);
-    } catch (error) {
-      lastError = error;
-      if (attempt === REQUEST_RETRIES) throw error;
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
-  throw lastError || new Error(`${label} failed`);
 }
 
 function readLocalArchiveEntries(technicalFolder, decodeKoshaArchiveEntryName) {
@@ -432,7 +412,7 @@ async function fetchOfficialState(current, toKoshaOfficialGuideRecord, fetchJson
   };
 }
 
-async function probeOfficialUrls(records, buildKoshaOfficialDownloadUrl) {
+async function probeOfficialUrls(records, buildKoshaOfficialDownloadUrl, fetchHeadersWithRetry) {
   const codes = [...new Set(RETRIEVAL_SCENARIOS.flatMap((scenario) => scenario.expectedCodes))];
   const probes = [];
   for (const code of codes) {
@@ -528,7 +508,7 @@ async function auditProductionRetrieval(productionBase, auditKoshaRetrievalScena
   return { liveResults, downstream };
 }
 
-function buildManifestCandidate(generatedAt, localArchive, supabaseVisible, officialSnapshot) {
+function buildManifestCandidate(generatedAt, localArchive, localParse, supabaseVisible, officialSnapshot) {
   return {
     version: 1,
     measuredAt: generatedAt,
@@ -537,6 +517,15 @@ function buildManifestCandidate(generatedAt, localArchive, supabaseVisible, offi
       pdfEntryCount: localArchive.pdfEntryCount,
       entryManifestSha256: localArchive.entryManifestSha256,
       itemTypes: localArchive.itemTypes
+    },
+    localParse: {
+      rowsReturned: localParse.rowsReturned,
+      parseAttemptedCount: localParse.parseAttemptedCount,
+      parseSuccessCount: localParse.parseSuccessCount,
+      parseEmptyOutputCount: localParse.parseEmptyOutputCount,
+      parseFailureCount: localParse.parseFailureCount,
+      parseNotAttemptedCount: localParse.parseNotAttemptedCount,
+      accountingMatches: localParse.accountingMatches
     },
     supabaseVisible: {
       sourceId: supabaseVisible.sourceId,
@@ -640,6 +629,11 @@ ${blockerRows}
 | 로컬 PDF | ${report.inventory.localArchive.pdfEntryCount} |
 | 로컬 기술지원규정 | ${report.inventory.localArchive.itemTypes["technical-support-regulation"]} |
 | 로컬 기술지침 | ${report.inventory.localArchive.itemTypes["technical-guideline"]} |
+| PDF parse attempted | ${quality.parseStats.parseAttemptedCount} |
+| usable nonempty parse success | ${quality.parseStats.parseSuccessCount} |
+| empty_output / OCR-required boundary | ${quality.parseStats.parseEmptyOutputCount} |
+| hard parse failure | ${quality.parseStats.parseFailureCount} |
+| parse not attempted | ${quality.parseStats.parseNotAttemptedCount} |
 | production visible | ${report.inventory.supabaseVisible.rowCount} |
 | 공식 현행 | ${report.inventory.official.current.count} |
 | 공식 폐지 | ${report.inventory.official.retired.count} |
@@ -664,14 +658,15 @@ ${blockerRows}
 
 ## Snapshot manifest gate (not readiness)
 
-이 gate는 측정된 shape/count/hash snapshot의 재현성만 확인한다. launch readiness는 위 blocker table과 전체 checks에서 별도로 판정한다.
+이 gate는 측정된 shape/count/hash와 parse accounting snapshot의 재현성을 확인한다. empty_output은 성공이 아닌 boundary이며, launch readiness는 위 blocker table과 전체 checks에서 별도로 판정한다.
 
 - local entry hash: \`${report.inventory.localArchive.entryManifestSha256}\`
 - local parsed row hash: \`${report.inventory.localParsedCanonicalSha256}\`
+- local parse accounting: ${quality.parseStats.parseAttemptedCount} attempted = ${quality.parseStats.parseSuccessCount} usable + ${quality.parseStats.parseEmptyOutputCount} empty_output + ${quality.parseStats.parseFailureCount} hard failure
 - env-configured Supabase row hash: \`${report.inventory.directSupabaseProbe.canonicalRowSha256 || "unavailable"}\`
 - official current hash: \`${report.inventory.official.current.canonicalSha256}\`
 - official retired hash: \`${report.inventory.official.retired.canonicalSha256}\`
-- snapshot manifest failures: ${report.manifestGate.failures.length ? report.manifestGate.failures.map((item) => `\`${item}\``).join(", ") : "없음 (shape/count/hash only; readiness blockers remain)"}
+- snapshot manifest failures: ${report.manifestGate.failures.length ? report.manifestGate.failures.map((item) => `\`${item}\``).join(", ") : "없음 (shape/count/hash/parse accounting matched; readiness blockers remain)"}
 
 ## Metadata / provenance
 
@@ -802,7 +797,9 @@ try {
   const localParsedCanonicalSha256 = hashValue(canonicalGuideRows(localRows));
   logLines.push(
     `local archives=${localArchive.archiveCount} rows=${localArchive.pdfEntryCount} returned=${localRows.length} ` +
-    `parseSuccess=${localParseStats.parseSuccessCount ?? "unavailable"} parseFailure=${localParseStats.parseFailureCount ?? "unavailable"}`
+    `parseSuccess=${localParseStats.parseSuccessCount ?? "unavailable"} ` +
+    `parseEmptyOutput=${localParseStats.parseEmptyOutputCount ?? "unavailable"} ` +
+    `parseFailure=${localParseStats.parseFailureCount ?? "unavailable"}`
   );
 
   const defaultEnvCandidates = [
@@ -838,7 +835,11 @@ try {
       audit.toKoshaOfficialGuideRecord,
       audit.fetchKoshaJsonWithRetry
     );
-    officialUrlProbes = await probeOfficialUrls(officialCurrent.records, audit.buildKoshaOfficialDownloadUrl);
+    officialUrlProbes = await probeOfficialUrls(
+      officialCurrent.records,
+      audit.buildKoshaOfficialDownloadUrl,
+      audit.fetchHeadersWithRetry
+    );
     retrieval = await auditProductionRetrieval(
       options.productionBase,
       audit.auditKoshaRetrievalScenario,
@@ -896,7 +897,13 @@ try {
     retiredCount: officialRetired.records.length,
     retiredCanonicalSha256: officialRetired.canonicalSha256
   };
-  const manifestCandidate = buildManifestCandidate(generatedAt, localArchive, visible, officialSnapshot);
+  const manifestCandidate = buildManifestCandidate(
+    generatedAt,
+    localArchive,
+    localParseStats,
+    visible,
+    officialSnapshot
+  );
   writeFileSync(manifestCandidatePath, `${JSON.stringify(manifestCandidate, null, 2)}\n`, "utf8");
 
   const manifestPath = resolve(process.cwd(), options.manifest);
@@ -904,6 +911,7 @@ try {
   const manifestFailures = manifest
     ? audit.listKoshaManifestGateFailures({
         localArchive,
+        localParse: localParseStats,
         supabaseVisible: visible,
         officialSnapshot
       }, manifest)
@@ -976,14 +984,21 @@ try {
       status: localParseStats.accountingMatches ? "pass" : "fail",
       count: localParseStats.mismatches.length,
       detail: localParseStats.mismatches.join(", ") ||
-        `${localParseStats.rowsReturned} returned; ${localParseStats.parseAttemptedCount} attempted; ` +
-        `${localParseStats.parseSuccessCount} succeeded; ${localParseStats.parseFailureCount} failed`
+         `${localParseStats.rowsReturned} returned; ${localParseStats.parseAttemptedCount} attempted; ` +
+        `${localParseStats.parseSuccessCount} usable nonempty; ` +
+        `${localParseStats.parseEmptyOutputCount} empty output; ${localParseStats.parseFailureCount} hard failed`
+    },
+    {
+      id: "local-pdf-empty-output",
+      status: localParseStats.parseEmptyOutputCount ? "boundary" : "pass",
+      count: localParseStats.parseEmptyOutputCount,
+      detail: "attempted PDF parses with no usable nonempty body; OCR or extraction review required"
     },
     {
       id: "local-pdf-parse-failure",
       status: localParseStats.parseFailureCount > 0 ? "fail" : "pass",
       count: localParseStats.parseFailureCount,
-      detail: "per-PDF parser exceptions; empty extracted text is tracked separately as body quality"
+      detail: "per-PDF parser exceptions; empty outputs are tracked as a separate boundary"
     },
     {
       id: "operational-audit-deterministic",
@@ -1169,7 +1184,9 @@ try {
       severity: "BLOCKER",
       id: "authoritative-body-empty",
       count: corpusRowAuditRun1.emptyBodyCount,
-      evidence: `${corpusRowAuditRun1.emptyBodyCount} rows have no parsed body; count/hash parity cannot ground answers in missing text`,
+      evidence: `${corpusRowAuditRun1.emptyBodyCount} rows have no parsed body, including ` +
+        `${localParseStats.parseEmptyOutputCount} attempted empty outputs and ` +
+        `${localParseStats.parseNotAttemptedCount} non-attempted guideline rows; count/hash parity cannot ground answers in missing text`,
       releaseCondition: "source PDF text or reviewed OCR body is non-empty and hash/provenance linked"
     },
     {
@@ -1186,7 +1203,7 @@ try {
       id: "local-parse-accounting-unverified",
       count: localParseStats.mismatches.length + localParseStats.parseFailureCount,
       evidence: `${localParseStats.mismatches.length} accounting mismatches and ${localParseStats.parseFailureCount} per-PDF parse failures`,
-      releaseCondition: "returned rows equal archived PDFs and every attempted parse has an explicit success or failure outcome"
+      releaseCondition: "returned rows equal archived PDFs and every attempted parse is explicitly usable, empty_output, or hard failure"
     },
     {
       rank: 4,
@@ -1261,8 +1278,10 @@ try {
     uploadPerformed: false,
     item_count: localRows.length,
     success_count: localParseStats.parseSuccessCount,
+    boundary_count: localParseStats.parseEmptyOutputCount,
+    empty_output_count: localParseStats.parseEmptyOutputCount,
     failure_count: localParseStats.parseFailureCount,
-    collection_count_semantics: "item_count is rows returned; success_count/failure_count are per-PDF parse attempts; non-attempted guideline rows and verification failures are separate",
+    collection_count_semantics: "item_count is rows returned; success_count is attempted PDFs with usable nonempty output; boundary_count/empty_output_count is attempted PDFs requiring OCR or extraction review; failure_count is hard parser exceptions; non-attempted guideline rows and verification failures are separate",
     elapsed_seconds: elapsedSeconds,
     launchReadiness: {
       launchReadyForAuthoritativeGrounding,
@@ -1280,7 +1299,7 @@ try {
     },
     verification,
     manifestGate: {
-      scope: "snapshot-shape-count-hash-only",
+      scope: "snapshot-shape-count-hash-and-parse-accounting",
       isLaunchReadinessGate: false,
       manifestPath: toReportPath(manifestPath),
       manifestAvailable: Boolean(manifest),
@@ -1403,6 +1422,8 @@ try {
   console.log(JSON.stringify({
     item_count: report.item_count,
     success_count: report.success_count,
+    boundary_count: report.boundary_count,
+    empty_output_count: report.empty_output_count,
     failure_count: report.failure_count,
     elapsed_seconds: report.elapsed_seconds,
     verification,

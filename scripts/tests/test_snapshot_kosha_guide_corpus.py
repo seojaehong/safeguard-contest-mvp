@@ -100,10 +100,11 @@ class SnapshotKoshaGuideCorpusTest(unittest.TestCase):
         self.assertEqual(snapshot["parseStats"]["rowsReturned"], 1)
         self.assertEqual(snapshot["parseStats"]["parseAttemptedCount"], 1)
         self.assertEqual(snapshot["parseStats"]["parseSuccessCount"], 1)
+        self.assertEqual(snapshot["parseStats"]["parseEmptyOutputCount"], 0)
         self.assertEqual(snapshot["parseStats"]["parseFailureCount"], 0)
         self.assertTrue(snapshot["parseStats"]["accountingMatches"])
 
-    def test_accounts_for_each_pdf_parse_failure_instead_of_treating_returned_rows_as_success(self) -> None:
+    def test_separates_usable_empty_output_and_hard_failure_for_attempted_pdfs(self) -> None:
         source = ReferenceSource(
             id="kosha-technical-support-regulations-2025",
             source_group="kosha-reference",
@@ -146,16 +147,32 @@ class SnapshotKoshaGuideCorpusTest(unittest.TestCase):
             controls=[],
             payload={"internalPath": "B-E-18-2026 failed.pdf", "isPriority": True},
         )
+        empty_output = ReferenceItem(
+            id="empty-output",
+            source_id=source.id,
+            item_type="technical-support-regulation",
+            category="전기안전분야",
+            subcategory="기술지원규정",
+            title="B-E-19-2026 empty output",
+            summary="fallback",
+            body="   ",
+            keywords=[],
+            risk_tags=[],
+            primary_documents=[],
+            controls=[],
+            payload={"internalPath": "B-E-19-2026 empty output.pdf", "isPriority": True},
+        )
 
         def parser(folder: Path, max_pdf_pages: int, priority_only: bool) -> tuple[ReferenceSource, list[ReferenceItem]]:
             print("[warn] PDF text extraction failed: B-E-18-2026 failed.pdf (fixture)")
-            return source, [good, failed]
+            return source, [good, failed, empty_output]
 
         snapshot = build_snapshot(Path("C:/fixture"), 3, parser)
 
-        self.assertEqual(snapshot["parseStats"]["rowsReturned"], 2)
-        self.assertEqual(snapshot["parseStats"]["parseAttemptedCount"], 2)
+        self.assertEqual(snapshot["parseStats"]["rowsReturned"], 3)
+        self.assertEqual(snapshot["parseStats"]["parseAttemptedCount"], 3)
         self.assertEqual(snapshot["parseStats"]["parseSuccessCount"], 1)
+        self.assertEqual(snapshot["parseStats"]["parseEmptyOutputCount"], 1)
         self.assertEqual(snapshot["parseStats"]["parseFailureCount"], 1)
         self.assertTrue(snapshot["parseStats"]["accountingMatches"])
         self.assertEqual(
@@ -163,6 +180,7 @@ class SnapshotKoshaGuideCorpusTest(unittest.TestCase):
             [
                 {"internalPath": "B-E-17-2026 good.pdf", "status": "success"},
                 {"internalPath": "B-E-18-2026 failed.pdf", "status": "failure"},
+                {"internalPath": "B-E-19-2026 empty output.pdf", "status": "empty_output"},
             ],
         )
 
@@ -172,6 +190,7 @@ class SnapshotKoshaGuideCorpusTest(unittest.TestCase):
             "rowsReturned": 2,
             "parseAttemptedCount": 2,
             "parseSuccessCount": 2,
+            "parseEmptyOutputCount": 0,
             "parseFailureCount": 1,
             "outcomes": [],
         }
