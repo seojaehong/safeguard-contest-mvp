@@ -3,7 +3,7 @@
 - 감사일: 2026-07-10 KST
 - 기준 커밋: `596ea1447702b4b13cf06f3b6014e7cb5e87e883`
 - 브랜치: `audit/kosha-guide-embedding`
-- DB 접근: Supabase REST/RPC 읽기 전용
+- DB 접근: env-configured Supabase snapshot REST/RPC 읽기 전용
 - 공식 현황: 산업안전포털 공개 화면 및 공개 조회 API 읽기 전용
 - DB mutation, schema 변경, migration 적용, embedding 생성·업로드: 미실행
 
@@ -29,8 +29,9 @@ KOSHA GUIDE는 SIF 다음 embedding 후보로 가치가 높다. 공식 현행 �
 - 기존 `scripts/sif_embedding_runtime_probe.mjs`를 임시 출력 경로로 재사용했다.
 - 새 probe 스크립트는 만들지 않았다.
 - 최종 수치는 `evaluation/2026-07-10-kosha-guide-supabase-audit-report.json`과 동일한 마지막 통합 probe 기준이다.
+- 이 historical probe는 env-configured Supabase snapshot을 읽었으며 Vercel deployment와 Supabase project-ref의 직접 연결 증거를 기록하지 않았다. 따라서 deployment identity는 증명하지 않는다.
 
-## 1. Repo schema와 live Supabase 대조
+## 1. Repo schema와 env-configured Supabase snapshot 대조
 
 ### 1.1 실제 테이블과 필드
 
@@ -42,9 +43,9 @@ KOSHA GUIDE는 SIF 다음 embedding 후보로 가치가 높다. 공식 현행 �
 
 상태 판정에 필요한 `published/draft/review_state/active` 컬럼은 source/item에 없다. item별 공식 URL이나 공식 파일 ID 전용 컬럼도 없다. 세 테이블의 공개 select RLS는 `using (true)`다 (`004_safety_reference_catalog.sql:58-72`).
 
-### 1.2 live 전체 분포
+### 1.2 snapshot 전체 분포
 
-| 구분 | live count |
+| 구분 | snapshot count |
 |---|---:|
 | `safety_reference_sources` | 1,063 |
 | `safety_reference_items` | 9,920 |
@@ -145,7 +146,7 @@ DB에서는 판정 불가다.
 
 현행 목록 probe body의 핵심은 `techGdlnSttsSeCdIng=1`, `techGdlnSttsSeCdDel=0`, `page`, `rowsPerPage`다. 폐지 목록은 두 상태 플래그를 반대로 조회했다. endpoint 응답에는 규정번호, 제목, 분야, 공표일, 제정/개정/폐지 상태, 공식 파일 ID와 seq가 포함된다.
 
-### 2.2 공식 live 현황
+### 2.2 공식 현행 현황
 
 | 구분 | count |
 |---|---:|
@@ -216,9 +217,9 @@ DB-only 1건은 공식 폐지 683건에서 확인된 `W-14-2022 경고표지 작
 | retry/timeout | 부분 지원 | Supabase upsert timeout 60초는 있으나 retry가 없다 (`:454-478`). 공식 GUIDE API adapter 자체가 없다. runtime query embedding은 20초 timeout과 1회 재시도가 있으나 ingest와 별개다 (`lib/safety-reference-catalog.ts:1067-1127`). |
 | provenance | 부분 지원 | ZIP명, 내부 경로, 파일 크기, page count, OCR 필요 여부는 payload에 남긴다 (`ingest...py:435-444`). 공식 URL, 파일 ID/seq, 공표일, 상태, checksum, fetched_at은 없다. |
 | upsert | 부분 지원 | `on_conflict=id` merge upsert는 지원한다 (`ingest...py:454-478`). 그러나 ID가 stable하지 않고 retire/delete reconciliation이 없다. |
-| dry-run | 부분 지원 | 기본 실행은 seed/report만 만들고 `--upload` 때만 쓴다 (`:488-570`). 별도 prepare 스크립트는 review-only SQL을 만든다 (`prepare_supabase_safety_ingestion.py:628-672`). 하지만 live diff 기반 insert/update/retire plan은 없고 `execute_safety_reference_upsert.py`는 실행 즉시 write한다 (`:243-280`). |
+| dry-run | 부분 지원 | 기본 실행은 seed/report만 만들고 `--upload` 때만 쓴다 (`:488-570`). 별도 prepare 스크립트는 review-only SQL을 만든다 (`prepare_supabase_safety_ingestion.py:628-672`). 하지만 env-configured snapshot diff 기반 insert/update/retire plan은 없고 `execute_safety_reference_upsert.py`는 실행 즉시 write한다 (`:243-280`). |
 | search fallback | 지원 | ranked RPC 실패 시 REST ilike로 fallback한다 (`lib/safety-reference-catalog.ts:1288-1382`). |
-| vector gate | 준비만 됨 | feature flag 기본 off, query embedding timeout/retry, ranked+vector merge 코드는 있다 (`lib/safety-reference-catalog.ts:138-194`, `:1067-1238`). live table/RPC는 404다. |
+| vector gate | 준비만 됨 | feature flag 기본 off, query embedding timeout/retry, ranked+vector merge 코드는 있다 (`lib/safety-reference-catalog.ts:138-194`, `:1067-1238`). env-configured snapshot의 table/RPC는 404다. |
 
 추가 위험:
 
@@ -266,7 +267,7 @@ Chunking:
 
 ### 4.4 embedding table 연계와 승인 migration
 
-현재 승인 후보 `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql`은 `unique(reference_item_id, embedding_model)`이라 문서당 여러 chunk를 저장할 수 없다. live DB에는 이 table과 RPC가 아직 없다.
+현재 승인 후보 `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql`은 `unique(reference_item_id, embedding_model)`이라 문서당 여러 chunk를 저장할 수 없다. env-configured Supabase snapshot에는 이 table과 RPC가 아직 없다.
 
 승인 전 migration 후보를 다음처럼 수정해야 한다.
 
@@ -330,7 +331,7 @@ OpenAI embedding API는 입력별 token 한도와 batch 전체 token 한도가 �
 
 현재 blocker:
 
-1. live DB에 `safety_reference_embeddings`와 `match_safety_reference_embeddings`가 없어 둘 다 404다.
+1. env-configured Supabase snapshot에 `safety_reference_embeddings`와 `match_safety_reference_embeddings`가 없어 둘 다 404다.
 2. 818개 GUIDE item의 body가 비어 있다.
 3. 공식 상태/URL/file ID/published_at provenance가 없다.
 4. 폐지 1건이 active 후보에 남고 code version 7건이 공식값과 다르다.
@@ -362,9 +363,11 @@ npx.cmd --yes --package @playwright/cli playwright-cli -s=kosha requests
 
 Supabase/공식 API 통합 probe는 PowerShell 프로세스에서 env를 읽고 inline Node로 실행했다. secret은 출력하지 않았다. 마지막 통합 probe 결과:
 
-- `item_count=1040`
-- `success_count=1040`
-- `failure_count=0`
+- `item_count=1040` (historical rows returned)
+- `rows_returned=1040`
+- `row_accounting_matches=true`
+- `success_count=null` (per-row outcome 미측정)
+- `failure_count=null` (per-row outcome 미측정)
 - `elapsed_seconds=11.581`
 - `read_only=true`
 

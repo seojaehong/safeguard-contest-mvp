@@ -1,10 +1,10 @@
 # KOSHA GUIDE corpus / harness audit
 
-- generatedAt: 2026-07-11T12:03:41.009Z
+- generatedAt: 2026-07-11T12:27:05.635Z
 - readOnly: true
 - dbMutationPerformed: false
 - uploadPerformed: false
-- elapsedSeconds: 92.9
+- elapsedSeconds: 107.85
 
 ## 결론
 

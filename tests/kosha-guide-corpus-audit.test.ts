@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   KOSHA_GUIDE_REFRESH_PLAN,
@@ -11,6 +11,7 @@ import {
   buildKoshaOfficialDownloadUrl,
   compareKoshaInventoryToOfficial,
   decodeKoshaArchiveEntryName,
+  fetchKoshaJsonWithRetry,
   listKoshaManifestGateFailures,
   normalizeKoshaVersionCode,
   reconcileKoshaVisibleSnapshots,
@@ -23,6 +24,10 @@ import {
   type KoshaOfficialGuideRecord
 } from "@/lib/kosha-guide-corpus-audit";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
   return {
@@ -107,6 +112,8 @@ describe("KOSHA GUIDE read-only runner contract", () => {
     expect(fieldSelection).toContain('"payload"');
     expect(fieldSelection).not.toContain('"source_url"');
     expect(script).not.toMatch(/method:\s*"(?:PATCH|PUT|DELETE)"/u);
+    expect(script).toContain("fetchKoshaJsonWithRetry");
+    expect(script).not.toMatch(/\.json\(\)/u);
   });
 
   it("derives Markdown readiness from the JSON conclusion and avoids machine-specific defaults", () => {
@@ -129,6 +136,92 @@ describe("KOSHA GUIDE read-only runner contract", () => {
     expect(script).not.toContain('id: "operational-control-contamination"');
   });
 
+  it("keeps retained snapshots historical without claiming live deployment identity or row successes", () => {
+    const retainedJson = JSON.parse(readFileSync(
+      resolve(process.cwd(), "evaluation/2026-07-10-kosha-guide-supabase-audit-report.json"),
+      "utf8"
+    )) as Record<string, unknown>;
+    const retainedMarkdown = readFileSync(
+      resolve(process.cwd(), "evaluation/2026-07-10-kosha-guide-supabase-embedding-audit.md"),
+      "utf8"
+    );
+
+    expect(retainedJson).toMatchObject({
+      item_count: 1040,
+      rows_returned: 1040,
+      success_count: null,
+      failure_count: null,
+      snapshot_scope: "env-configured-supabase-snapshot",
+      deployment_identity_proven: false
+    });
+    expect(retainedMarkdown).toContain("env-configured Supabase snapshot");
+    expect(retainedMarkdown).toContain("deployment identity는 증명하지 않는다");
+    expect(`${JSON.stringify(retainedJson)}\n${retainedMarkdown}`).not.toMatch(/\blive Supabase\b/iu);
+    expect(retainedMarkdown).not.toContain("success_count=1040");
+  });
+});
+
+describe("KOSHA GUIDE bounded JSON fetch", () => {
+  it("aborts stalled body consumption on every attempt and leaves no timer behind", async () => {
+    vi.useFakeTimers();
+    let attempts = 0;
+    let aborts = 0;
+    const promise = fetchKoshaJsonWithRetry("https://example.invalid/stalled", {}, "stalled body", {
+      timeoutMs: 20,
+      retries: 1,
+      fetchImpl: async (_input, init) => {
+        attempts += 1;
+        const signal = init?.signal;
+        if (!signal) throw new Error("missing abort signal");
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers(),
+          json: () => new Promise((_resolve, reject) => {
+            signal.addEventListener("abort", () => {
+              aborts += 1;
+              reject(new DOMException("Aborted", "AbortError"));
+            }, { once: true });
+          })
+        };
+      }
+    });
+    const rejection = expect(promise).rejects.toThrow(/stalled body.*2 attempts/iu);
+
+    await vi.runAllTimersAsync();
+    await rejection;
+
+    expect(attempts).toBe(2);
+    expect(aborts).toBe(2);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("retries a rejected JSON body once and clears the successful attempt timer", async () => {
+    vi.useFakeTimers();
+    let attempts = 0;
+
+    const result = await fetchKoshaJsonWithRetry("https://example.invalid/retry", {}, "failed body", {
+      timeoutMs: 20_000,
+      retries: 1,
+      fetchImpl: async () => {
+        attempts += 1;
+        return {
+          ok: true,
+          status: 200,
+          headers: new Headers(),
+          json: async () => {
+            if (attempts === 1) throw new Error("body failed");
+            return { ok: true };
+          }
+        };
+      }
+    });
+
+    expect(result.payload).toEqual({ ok: true });
+    expect(result.attemptCount).toBe(2);
+    expect(attempts).toBe(2);
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
 
 describe("KOSHA GUIDE measured manifest gate", () => {

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-kosha-guide-audit/v2",
-  "generatedAt": "2026-07-11T12:03:41.009Z",
+  "generatedAt": "2026-07-11T12:27:05.635Z",
   "readOnly": true,
   "dbMutationPerformed": false,
   "uploadPerformed": false,
@@ -8,7 +8,7 @@
   "success_count": 237,
   "failure_count": 0,
   "collection_count_semantics": "item_count is rows returned; success_count/failure_count are per-PDF parse attempts; non-attempted guideline rows and verification failures are separate",
-  "elapsed_seconds": 92.9,
+  "elapsed_seconds": 107.85,
   "launchReadiness": {
     "launchReadyForAuthoritativeGrounding": false,
     "conclusion": "NOT launch-ready for authoritative KOSHA-guide grounding",
@@ -197,7 +197,7 @@
     "productionStatus": {
       "url": "https://safeguard-contest-mvp.vercel.app/api/safety-reference/status",
       "httpStatus": 200,
-      "checkedAt": "Sat, 11 Jul 2026 12:04:53 GMT",
+      "checkedAt": "Sat, 11 Jul 2026 12:28:31 GMT",
       "cache": "MISS",
       "matchedPath": "/api/safety-reference/status",
       "message": "기술지원규정 폴더 1,040건 기준과 Supabase 기술지원규정 소스 1,040건을 연결했습니다."
@@ -8342,7 +8342,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 438739,
-      "elapsedMs": 64
+      "elapsedMs": 75
     },
     {
       "code": "D-C-13-2026",
@@ -8352,7 +8352,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 775152,
-      "elapsedMs": 89
+      "elapsedMs": 78
     },
     {
       "code": "E-G-18-2026",
@@ -8362,7 +8362,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 751075,
-      "elapsedMs": 131
+      "elapsedMs": 144
     },
     {
       "code": "B-M-11-2025",
@@ -8372,7 +8372,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 5670197,
-      "elapsedMs": 122
+      "elapsedMs": 110
     },
     {
       "code": "B-E-20-2026",
@@ -8382,7 +8382,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 524246,
-      "elapsedMs": 103
+      "elapsedMs": 104
     }
   ],
   "retrieval": {
@@ -8404,7 +8404,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 975,
+        "elapsedMs": 1047,
         "items": [
           {
             "id": "sif-아카이브-건설업-01001",
@@ -8688,7 +8688,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 696,
+        "elapsedMs": 730,
         "items": [
           {
             "id": "technical-support-01-0065-d-c-13-2026-외벽도장보수공사에-안전작업에-관한-기술지원규정",
@@ -8967,7 +8967,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 512,
+        "elapsedMs": 505,
         "items": [
           {
             "id": "technical-support-01-0065-d-c-13-2026-외벽도장보수공사에-안전작업에-관한-기술지원규정",
@@ -9219,7 +9219,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 918,
+        "elapsedMs": 902,
         "items": [
           {
             "id": "downloads-15-2023년-동절기-건설현장-안전보건-길잡이-057603902c-record-0004-item",
@@ -9418,7 +9418,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 568,
+        "elapsedMs": 582,
         "items": [
           {
             "id": "technical-support-10-0012-c-c-2-2025-화학설비-정비-보수작업계획서-작성-등에-관한-기술지원규정",
@@ -9702,7 +9702,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 498,
+        "elapsedMs": 501,
         "items": [
           {
             "id": "technical-support-10-0012-c-c-2-2025-화학설비-정비-보수작업계획서-작성-등에-관한-기술지원규정",
@@ -9977,7 +9977,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 919,
+        "elapsedMs": 899,
         "items": [
           {
             "id": "machinery-0469",
@@ -10219,7 +10219,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 2,
-        "elapsedMs": 1037,
+        "elapsedMs": 1088,
         "items": [
           {
             "id": "technical-support-02-0005-b-m-11-2025-지게차의-안전작업에-관한-기술지원규정",
@@ -10281,7 +10281,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 3,
-        "elapsedMs": 945,
+        "elapsedMs": 962,
         "items": [
           {
             "id": "technical-support-06-0024-g-100-2013-지게차-운전자의-안전교육훈련에-관한-기술지침",
@@ -10360,7 +10360,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 1347,
+        "elapsedMs": 1302,
         "items": [
           {
             "id": "technical-support-09-0013-b-e-20-2026-정전도장기-제작-및-설치에-관한-기술지원규정",
@@ -10637,7 +10637,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 6,
-        "elapsedMs": 836,
+        "elapsedMs": 810,
         "items": [
           {
             "id": "technical-support-09-0013-b-e-20-2026-정전도장기-제작-및-설치에-관한-기술지원규정",
@@ -10785,7 +10785,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 389,
+        "elapsedMs": 380,
         "items": [
           {
             "id": "technical-support-09-0061-e-182-2021-정전기에-의한-화재폭발-재해조사에-대한-기술지침",
