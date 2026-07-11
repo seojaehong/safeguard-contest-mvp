@@ -952,6 +952,73 @@ describe("photo vision analysis contract", () => {
     });
   });
 
+  it("confirms controls and source IDs only from individually trusted evidence", async () => {
+    const trustedReference = safetyReference({
+      id: "trusted-fall-control",
+      title: "비계 추락 방지 통제",
+      keywords: ["비계", "추락", "안전난간"],
+      riskTags: ["추락"],
+      controls: ["비계 작업발판 안전난간 상태 확인"]
+    });
+    const reviewRequiredReference = safetyReference({
+      id: "review-required-fall-control",
+      title: "비계 추락 일반 안전자료",
+      keywords: ["비계", "추락", "안전난간"],
+      riskTags: ["추락"],
+      controls: ["일반 안전사항"]
+    });
+    vi.mocked(searchSafetyReferences).mockReset();
+    vi.mocked(searchSafetyReferences).mockResolvedValue({
+      ok: true,
+      configured: true,
+      query: "비계 작업발판 추락 위험",
+      count: 2,
+      items: [trustedReference, reviewRequiredReference],
+      retrievalMode: "ranked-rpc",
+      vectorSearch: {
+        enabled: false,
+        attempted: false,
+        ok: false,
+        reason: "disabled",
+        count: 0,
+        model: "text-embedding-3-small",
+        message: "disabled"
+      },
+      message: "mixed trust fixture"
+    });
+    const provider = {
+      name: "contract-stub",
+      model: "vision-contract-v1",
+      mode: "mock" as const,
+      analyze: vi.fn(async () => JSON.stringify({
+        summary: "비계 작업발판 가장자리가 보입니다.",
+        observations: [{ kind: "visual", text: "비계 작업발판 가장자리가 보입니다." }],
+        candidates: [{
+          label: "비계 작업발판 추락 위험 후보",
+          observation: "비계 작업발판 가장자리가 보입니다.",
+          inference: "추락 위험 가능성을 현장에서 확인해야 합니다."
+        }],
+        ocrText: "",
+        siteSignals: ["비계", "작업발판"]
+      }))
+    };
+
+    const analysis = await analyzeHazardPhotos({
+      question: "비계 작업 구역 점검",
+      photos: [createPhoto("mixed-trust.jpg", "image/jpeg")]
+    }, { provider });
+
+    expect(analysis.candidates[0]?.harness.status).toBe("confirmed");
+    expect(analysis.candidates[0]?.harness.evidence.map((item) => item.sourceId)).toEqual([
+      "trusted-fall-control",
+      "review-required-fall-control"
+    ]);
+    expect(analysis.candidates[0]?.harness.confirmedControls).toEqual([{
+      text: "비계 작업발판 안전난간 상태 확인",
+      evidenceSourceIds: ["trusted-fall-control"]
+    }]);
+  });
+
   it("does not ground a candidate from generic review vocabulary alone", async () => {
     const genericReference = safetyReference({
       id: "generic-review",
