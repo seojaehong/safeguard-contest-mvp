@@ -35,6 +35,7 @@ Login and auth callback are labelled expected deterministic fallbacks. Audit-onl
 
 - Frontend owns typography, PDF/font assets, browser audit, and evidence through this branch.
 - Backend head `2d0ff44` owns harness/history/grounded-vision changes; preserve them while porting frontend design/PDF/audit changes.
+- Backend shell patch `99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49` is pushed and backend-owned, with independent backend review pending before integration. It is CSS-shell-only with focused test/report evidence: Day `#f5c518`, Night `#6c6ff7`, mobile gap 8, controls 44, rail/nav radii 14/8, title 30 desktop/27 mobile; Workspace y 105/281 unchanged, Documents 218/446 to 218/331, Reports 218/446 to 218/285, sample y 659 to 498, overflow 0.
 - High-risk shared files: `app/globals.css`, `SafeGuardCommandCenter.tsx`, `WorkpackEditor.tsx`, `lib/types.ts`, `current-workpack.ts`, and `db-harness.ts`.
 - Known launch blocker delegated to backend: purple document-module shell identity and tall mobile rail/header. Preserve internal report/document body styling while aligning the shell to Workspace.
 - Backend-owned P1 followup: persist report provenance beyond the banner (`source.mode`, scope, and `workpackSavedAt`).

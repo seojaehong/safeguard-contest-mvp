@@ -70,4 +70,13 @@ F7 is complete with `passes: true`. PR 66 handoff remains a root-task coordinati
 - Final gates: 56 files/523 tests, typecheck, normal and audit-mode builds, static audit 32 routes/22 components with zero coverage issues/violations.
 - `package-lock.json` is now tracked. Frontend/backend ownership, shared-file conflict risks, delegated P1/P2 followups, and mandatory post-integration gates are recorded in the audit JSON/Markdown merge matrix.
 
-F7 remains `in_progress` with `passes: false` pending independent final re-review.
+## Final closure and external handoff
+
+- Final implementation head reviewed: `b61929f`.
+- Final branch review: specification compliance PASS; code quality PASS; Critical 0, Important 0, Minor 0.
+- Draft PR #66 body was updated on 2026-07-11 with the final evidence, merge matrix, backend blockers, and post-integration gates.
+- Backend patch `99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49` is pushed and backend-owned. It changes only the document-module shell CSS plus focused test/report evidence: Day `#f5c518`, Night `#6c6ff7`, mobile gap 8, controls 44, rail/nav radii 14/8, title 30 desktop/27 mobile.
+- Backend geometry evidence: Workspace y 105/281 unchanged; Documents 218/446 to 218/331; Reports 218/446 to 218/285; sample y 659 to 498; horizontal overflow 0.
+- The backend patch remains subject to independent backend review before integration. After integration, rerun the documented full tests, typecheck, build, static audit, 108 browser rows, and explicit identity/y-position comparison.
+
+F7 is done with `passes: true`.

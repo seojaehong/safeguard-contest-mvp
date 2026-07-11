@@ -78,6 +78,7 @@
   "backendSessionConflicts": [
     "Frontend head owns typography, PDF/font assets, browser audit, and evidence through this branch.",
     "Backend head 2d0ff44 owns harness/history/grounded-vision behavior; preserve those changes during integration.",
+    "Backend shell patch 99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49 is pushed and backend-owned, with independent backend review pending before integration. CSS-shell-only focused evidence: Day #f5c518, Night #6c6ff7, mobile gap 8, controls 44, rail/nav radii 14/8, title 30 desktop/27 mobile; Workspace y 105/281 unchanged, Documents 218/446 to 218/331, Reports 218/446 to 218/285, sample y 659 to 498, overflow 0.",
     "High-risk shared files include app/globals.css, SafeGuardCommandCenter.tsx, WorkpackEditor.tsx, lib/types.ts, current-workpack.ts, and db-harness.ts.",
     "Known launch blocker delegated to the backend post-integration patch: document modules currently retain a purple shell identity and tall mobile rail/header; preserve report/document body styling while aligning shell identity to Workspace.",
     "Backend-owned P1 followup: persist report provenance beyond the banner (source.mode, scope, workpackSavedAt).",
