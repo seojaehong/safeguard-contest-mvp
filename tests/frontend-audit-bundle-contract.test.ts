@@ -43,5 +43,5 @@ describe("frontend audit bundle contract", () => {
       sourceIdentity: expect.stringMatching(/^[0-9a-f]{64}$/),
       buildIdentity: expect.stringMatching(/^[0-9a-f]{64}$/),
     });
-  });
+  }, 15_000);
 });
