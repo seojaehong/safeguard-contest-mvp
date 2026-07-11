@@ -195,15 +195,24 @@ describe("hazard photo candidates", () => {
       status: "failed",
       message: "provider timeout"
     }]);
-    expect(parsed.analysis.candidates[0]?.harness.status).toBe("confirmed");
-    expect(parsed.analysis.candidates[0]?.harness.evidence[0]).toMatchObject({
+    const confirmedCandidate = parsed.analysis.candidates[0];
+    const insufficientCandidate = parsed.analysis.candidates[1];
+    const confirmedHarness = confirmedCandidate?.harness;
+    const confirmedDecision = confirmedCandidate?.userDecision;
+    expect(confirmedCandidate).toBeDefined();
+    expect(insufficientCandidate).toBeDefined();
+    expect(confirmedHarness?.status).toBe("confirmed");
+    expect(confirmedHarness?.evidence[0]).toMatchObject({
       catalogSourceId: "kosha-guide-source",
       sourceUrl: "https://safety.example/kosha-guide",
       retrievals: [expect.objectContaining({ channel: "direct", mode: "ranked-rpc" })]
     });
-    expect(parsed.analysis.candidates[0]?.userDecision.allowed).toEqual(["accepted", "rejected"]);
-    expect(canAcceptHazardPhotoCandidate(parsed.analysis.candidates[0])).toBe(true);
-    expect(canAcceptHazardPhotoCandidate(parsed.analysis.candidates[1])).toBe(false);
+    expect(confirmedDecision?.allowed).toEqual(["accepted", "rejected"]);
+    if (!confirmedCandidate || !insufficientCandidate || !confirmedHarness || !confirmedDecision) {
+      throw new Error("Expected parsed workspace candidates");
+    }
+    expect(canAcceptHazardPhotoCandidate(confirmedCandidate)).toBe(true);
+    expect(canAcceptHazardPhotoCandidate(insufficientCandidate)).toBe(false);
   });
 
   it("adds only harness-confirmed candidates even when insufficient keys are selected", () => {
@@ -351,6 +360,79 @@ describe("hazard photo candidates", () => {
     expect(appendix).not.toContain("차량·장비 동선");
   });
 
+  it("preserves grounded provenance in the generation appendix for accepted photo hazards", () => {
+    const accepted = {
+      id: "photo-1-candidate-1",
+      source: "vision" as const,
+      label: "작업발판 외측 추락 위험",
+      detail: "작업면 가장자리 난간 상태를 현장 확인해야 합니다.",
+      severity: "high" as const,
+      evidence: "workface.jpg에서 작업면 단부가 노출되어 보임",
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+      sourcePhotoNames: ["workface.jpg", "detail.jpg"],
+      harness: {
+        authority: "safeclaw-db-mcp" as const,
+        status: "confirmed" as const,
+        evidence: [{
+          sourceId: "fall-reference",
+          sourceType: "safeclaw-db" as const,
+          title: "비계 추락 예방",
+          excerpt: "작업발판 안전난간과 끝막이판 상태를 확인합니다.",
+          catalogSourceId: "kosha-guide-source",
+          sourceUrl: "https://safety.example/kosha-guide",
+          itemType: "guideline",
+          evidenceRole: "direct" as const,
+          retrievals: [{
+            channel: "direct" as const,
+            query: "비계 추락",
+            mode: "ranked-rpc" as const,
+            source: "ranked" as const,
+            vectorAttempted: false,
+            vectorOk: false,
+            vectorModel: "text-embedding-3-small"
+          }]
+        }],
+        confirmedControls: [{
+          text: "작업발판 안전난간 상태 확인",
+          evidenceSourceIds: ["fall-reference"]
+        }],
+        confirmedAt: "2026-07-11T00:00:00.000Z",
+        errorMessage: null
+      },
+      userDecision: {
+        status: "pending" as const,
+        allowed: ["accepted", "rejected"] as Array<"accepted" | "rejected">,
+        requiresHarnessConfirmation: true as const,
+        reason: null,
+        decidedAt: null
+      }
+    };
+
+    const appendix = buildAcceptedHazardPhotoAppendix({
+      candidates: [accepted],
+      acceptedCandidateKeys: [buildHazardPhotoCandidateKey(accepted)],
+      summary: "작업발판 외측이 열려 보입니다.",
+      ocrText: "추락주의",
+      siteSignals: ["비계", "외벽"],
+      photoCount: 2,
+      provider: "openai",
+      providerMode: "live",
+      model: "gpt-4.1-mini-2026-06-01",
+      providerResponses: [{
+        photoId: "photo-1",
+        responseId: "resp_workspace_vision",
+        model: "gpt-4.1-mini-2026-06-01",
+        createdAt: 1_783_500_000
+      }]
+    });
+
+    expect(appendix).toContain("후보 키: vision::작업발판 외측 추락 위험::작업면 가장자리 난간 상태를 현장 확인해야 합니다.::workface.jpg|detail.jpg");
+    expect(appendix).toContain("모델: openai/live/gpt-4.1-mini-2026-06-01");
+    expect(appendix).toContain("응답 메타: photo-1=resp_workspace_vision@gpt-4.1-mini-2026-06-01");
+    expect(appendix).toContain("근거 출처: 비계 추락 예방#fall-reference");
+    expect(appendix).toContain("확정 통제: 작업발판 안전난간 상태 확인");
+  });
+
   it("turns accepted photo hazards into DB harness improvement memory", () => {
     const accepted = {
       source: "vision" as const,
@@ -376,7 +458,16 @@ describe("hazard photo candidates", () => {
       summary: "작업발판 외측이 보입니다.",
       ocrText: "추락주의",
       siteSignals: ["비계", "단부"],
-      photoCount: 2
+      photoCount: 2,
+      provider: "openai",
+      providerMode: "live",
+      model: "gpt-4.1-mini-2026-06-01",
+      providerResponses: [{
+        photoId: "photo-1",
+        responseId: "resp_workspace_vision",
+        model: "gpt-4.1-mini-2026-06-01",
+        createdAt: 1_783_500_000
+      }]
     });
 
     expect(improvements).toHaveLength(1);
@@ -390,6 +481,8 @@ describe("hazard photo candidates", () => {
       analysisMode: "vision_ocr",
       photoPairAttached: false,
       visionUserLabel: "vision/OCR 사진 분석",
+      visionProvider: "openai",
+      visionModel: "gpt-4.1-mini-2026-06-01",
       ocrText: "추락주의",
       sourcePhotoNames: ["scaffold.jpg"],
       photoCount: 2,
@@ -401,5 +494,22 @@ describe("hazard photo candidates", () => {
     expect(improvements[0].visionSummary).toContain("신호: 비계 · 단부");
     expect(improvements[0].detectedHazards).toContain("작업발판 외측 추락 위험");
     expect(improvements[0].detectedHazards).toContain("severity:high");
+    expect(improvements[0].photoHazardProvenance).toMatchObject({
+      candidateKey: "vision::작업발판 외측 추락 위험::외벽 도장 작업면 가장자리의 난간 상태를 현장 확인해야 합니다.::scaffold.jpg",
+      source: "vision",
+      provider: "openai",
+      providerMode: "live",
+      model: "gpt-4.1-mini-2026-06-01",
+      providerResponses: [{
+        photoId: "photo-1",
+        responseId: "resp_workspace_vision",
+        model: "gpt-4.1-mini-2026-06-01",
+        createdAt: 1_783_500_000
+      }],
+      confirmedControls: [{
+        text: "확정 통제",
+        evidenceSourceIds: ["confirmed-reference"]
+      }]
+    });
   });
 });
