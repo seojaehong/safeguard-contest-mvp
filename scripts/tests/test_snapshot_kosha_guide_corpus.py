@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Callable, Iterable
 from unittest.mock import patch
 
+from jsonschema import Draft202012Validator
+from jsonschema.exceptions import ValidationError
 from pypdf import PdfWriter
 from pypdf.generic import (
     DecodedStreamObject,
@@ -263,6 +265,15 @@ class SnapshotKoshaGuideCorpusTest(unittest.TestCase):
 
 
 class KoshaBodyRecoveryTest(unittest.TestCase):
+    def load_corpus_schema(self) -> dict[str, object]:
+        schema_path = (
+            Path(__file__).resolve().parents[2]
+            / "data"
+            / "safety-knowledge"
+            / "kosha-body-corpus.schema.json"
+        )
+        return json.loads(schema_path.read_text(encoding="utf-8"))
+
     def write_zip(
         self,
         root: Path,
@@ -756,10 +767,39 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             self.assertEqual(policy["ocr_thresholds"]["document_normalized_chars"], 500)
             self.assertIn("extractor_version", policy)
             self.assertIn("resource_limits", policy)
+            self.assertEqual(policy["resource_limits"]["max_member_count"], 10_000)
             self.assertEqual(manifest["generation_policy_sha256"], checkpoint["generation_policy_sha256"])
             resumed = self.run_recovery(source, output_dir, resume=True, chunk_chars=32)
             self.assertEqual(resumed["processed_this_run"], 0)
             self.assertEqual(resumed["reproducibility_hash"], initial["reproducibility_hash"])
+
+    def test_source_identity_tracks_all_members_before_pdf_filtering(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            payload = os.urandom(4096)
+            note = b"metadata-note"
+            pdf_bytes = build_pdf_bytes(["body"])
+            source = self.write_zip(
+                root,
+                {
+                    "payload.bin": payload,
+                    "notes.txt": note,
+                    "G-1-2025 body.pdf": pdf_bytes,
+                },
+                compression=zipfile.ZIP_DEFLATED,
+            )
+
+            summary = self.run_recovery(source, root / "output")
+            source_identity = summary["source_identity"]
+
+            self.assertEqual(source_identity["source_member_count"], 3)
+            self.assertEqual(source_identity["pdf_entry_count"], 1)
+            self.assertEqual(
+                source_identity["total_uncompressed_bytes"],
+                len(payload) + len(note) + len(pdf_bytes),
+            )
+            self.assertEqual(source_identity["max_member_bytes"], len(payload))
+            self.assertGreaterEqual(source_identity["max_compression_ratio"], 1.0)
 
     def test_rejects_oversize_and_zip_bomb_members_before_pdf_read(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -782,6 +822,83 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
                     root / "ratio-output",
                     resource_limits=ratio_limits,
                 )
+
+    def test_rejects_non_pdf_member_size_limit_before_type_filtering(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "payload.bin": b"0" * (10 * 1024 * 1024),
+                    "G-1-2025 body.pdf": build_pdf_bytes(["body"]),
+                },
+                compression=zipfile.ZIP_DEFLATED,
+            )
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(max_member_bytes=2 * 1024 * 1024)
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"ZIP member exceeds max member bytes: .*::payload\.bin \(10485760/2097152\)",
+            ):
+                self.run_recovery(source, root / "output", resource_limits=limits)
+
+    def test_rejects_non_pdf_member_compression_ratio_limit_before_type_filtering(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "payload.bin": b"0" * 20_000,
+                    "G-1-2025 body.pdf": build_pdf_bytes(["body"]),
+                },
+                compression=zipfile.ZIP_DEFLATED,
+            )
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(
+                max_member_bytes=50_000,
+                max_compression_ratio=2.0,
+            )
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"ZIP member compression ratio exceeds limit: .*::payload\.bin",
+            ):
+                self.run_recovery(source, root / "output", resource_limits=limits)
+
+    def test_rejects_non_pdf_total_uncompressed_limit_before_type_filtering(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "part-1.txt": b"a" * (1536 * 1024),
+                    "part-2.txt": b"b" * (1536 * 1024),
+                },
+            )
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(
+                max_member_bytes=2 * 1024 * 1024,
+                max_total_uncompressed_bytes=2 * 1024 * 1024,
+            )
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"total uncompressed ZIP member bytes exceed limit: 3145728/2097152",
+            ):
+                self.run_recovery(source, root / "output", resource_limits=limits)
+
+    def test_rejects_excessive_zip_member_count_before_type_filtering(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {f"tiny-{index}.txt": b"x" for index in range(6)},
+            )
+            limits = snapshot_kosha_guide_corpus.ResourceLimits(max_member_count=5)
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"ZIP member count exceeds limit: 6/5",
+            ):
+                self.run_recovery(source, root / "output", resource_limits=limits)
 
     def test_page_count_limit_fails_item_closed_in_ledger(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -812,6 +929,61 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
                 snapshot_kosha_guide_corpus._write_jsonl(path, rows())
 
             self.assertEqual(len(self.read_jsonl(path)), 5)
+
+    def test_json_schema_validates_generated_v2_records_and_final_artifacts(self) -> None:
+        schema = self.load_corpus_schema()
+        Draft202012Validator.check_schema(schema)
+        validator = Draft202012Validator(schema)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {
+                    "G-1-2025 success.pdf": build_pdf_bytes(["first page", "second page"]),
+                    "G-2-2025 boundary.pdf": build_pdf_bytes([""]),
+                    "G-3-2025 corrupt.pdf": b"not a pdf",
+                },
+            )
+            output_dir = root / "output"
+            summary = self.run_recovery(source, output_dir, chunk_chars=8)
+            snapshot_dir = self.snapshot_dir(summary)
+
+            items = self.read_jsonl(snapshot_dir / "items.jsonl")
+            chunks = self.read_jsonl(snapshot_dir / "chunks.jsonl")
+            failures = self.read_jsonl(snapshot_dir / "failures.jsonl")
+            current = json.loads((output_dir / "current.json").read_text(encoding="utf-8"))
+            manifest = json.loads((snapshot_dir / "manifest.json").read_text(encoding="utf-8"))
+
+            success_item = next(item for item in items if item["extraction_status"] == "success")
+            boundary_item = next(item for item in items if item["extraction_status"] == "boundary")
+            failure_item = next(item for item in items if item["extraction_status"] == "failure")
+
+            validator.validate(success_item)
+            validator.validate(boundary_item)
+            validator.validate(failure_item)
+            validator.validate(chunks[0])
+            validator.validate(failures[0])
+            validator.validate(current)
+            validator.validate(manifest)
+
+    def test_json_schema_rejects_legacy_policy_fixture_without_max_member_count(self) -> None:
+        validator = Draft202012Validator(self.load_corpus_schema())
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = self.write_zip(
+                root,
+                {"G-1-2025 success.pdf": build_pdf_bytes(["first page"])},
+            )
+            summary = self.run_recovery(source, root / "output")
+            manifest = json.loads(
+                (self.snapshot_dir(summary) / "manifest.json").read_text(encoding="utf-8")
+            )
+            del manifest["generation_policy"]["resource_limits"]["max_member_count"]
+
+            with self.assertRaisesRegex(ValidationError, "max_member_count"):
+                validator.validate(manifest)
 
 
 if __name__ == "__main__":

@@ -1,17 +1,41 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://safeclaw.local/schema/kosha-body-corpus-v1.json",
-  "title": "SafeClaw KOSHA local body corpus records",
+  "$id": "https://safeclaw.local/schema/kosha-body-corpus-v2.json",
+  "title": "SafeClaw KOSHA local body corpus artifacts",
   "oneOf": [
     { "$ref": "#/$defs/item" },
     { "$ref": "#/$defs/chunk" },
-    { "$ref": "#/$defs/failure" }
+    { "$ref": "#/$defs/failure" },
+    { "$ref": "#/$defs/current" },
+    { "$ref": "#/$defs/manifest" }
   ],
   "$defs": {
-    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "crc32": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{8}$"
+    },
+    "countValue": {
+      "type": "integer",
+      "minimum": 0
+    },
     "page": {
       "type": "object",
-      "required": ["page_number", "char_count", "normalized_char_count", "normalized_text_sha256", "has_image", "ocr_candidate", "body_char_start", "body_char_end", "extraction_status"],
+      "additionalProperties": false,
+      "required": [
+        "page_number",
+        "char_count",
+        "normalized_char_count",
+        "normalized_text_sha256",
+        "has_image",
+        "ocr_candidate",
+        "body_char_start",
+        "body_char_end",
+        "extraction_status"
+      ],
       "properties": {
         "page_number": { "type": "integer", "minimum": 1 },
         "char_count": { "type": "integer", "minimum": 0 },
@@ -24,19 +48,86 @@
         "extraction_status": { "enum": ["success", "empty"] }
       }
     },
+    "versionLineage": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["state", "official_version_key"],
+      "properties": {
+        "state": {
+          "enum": ["current", "retired", "unverified-local", "current-unverified"]
+        },
+        "official_version_key": {
+          "type": ["string", "null"]
+        },
+        "local_version_key": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "itemProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "official_list_url",
+        "official_api_url",
+        "official_download_url",
+        "official_download_boundary"
+      ],
+      "properties": {
+        "official_list_url": { "type": ["string", "null"] },
+        "official_api_url": { "type": ["string", "null"] },
+        "official_download_url": { "type": ["string", "null"] },
+        "official_download_boundary": { "type": "string" }
+      }
+    },
     "item": {
       "type": "object",
-      "required": ["schema_version", "item_id", "source_key", "source_member", "raw_sha256", "extraction_status", "page_count", "pages", "ocr_candidate", "raw_duplicate_of", "text_duplicate_of"],
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "item_id",
+        "stable_key",
+        "version_key",
+        "title",
+        "item_type",
+        "category",
+        "state",
+        "source_zip",
+        "source_member",
+        "source_key",
+        "source_file_size",
+        "source_compressed_size",
+        "source_crc32",
+        "extraction_status",
+        "page_count",
+        "pages",
+        "ocr_candidate",
+        "ocr_candidate_reasons",
+        "raw_duplicate_of",
+        "text_duplicate_of"
+      ],
       "properties": {
-        "schema_version": { "const": "safeclaw-kosha-body-corpus/v1" },
+        "schema_version": { "const": "safeclaw-kosha-body-corpus/v2" },
         "item_id": { "type": "string" },
         "stable_key": { "type": ["string", "null"] },
         "version_key": { "type": ["string", "null"] },
-        "version_lineage": { "type": "object" },
+        "version_lineage": { "$ref": "#/$defs/versionLineage" },
+        "title": { "type": "string", "minLength": 1 },
+        "item_type": {
+          "enum": ["technical-support-regulation", "technical-guideline"]
+        },
+        "category": { "type": ["string", "null"] },
+        "state": {
+          "enum": ["current", "retired", "unverified-local", "current-unverified"]
+        },
         "source_zip": { "type": ["string", "null"] },
-        "source_member": { "type": "string" },
-        "source_key": { "type": "string" },
+        "source_member": { "type": "string", "minLength": 1 },
+        "source_key": { "type": "string", "minLength": 1 },
+        "source_file_size": { "type": "integer", "minimum": 0 },
+        "source_compressed_size": { "type": "integer", "minimum": 0 },
+        "source_crc32": { "$ref": "#/$defs/crc32" },
         "raw_sha256": { "$ref": "#/$defs/sha256" },
+        "normalized_char_count": { "type": "integer", "minimum": 0 },
         "normalized_text_sha256": { "$ref": "#/$defs/sha256" },
         "extraction_status": { "enum": ["success", "boundary", "failure"] },
         "page_count": { "type": "integer", "minimum": 0 },
@@ -46,11 +137,34 @@
         "ocr_candidate_reasons": { "type": "array", "items": { "type": "string" } },
         "raw_duplicate_of": { "type": ["string", "null"] },
         "text_duplicate_of": { "type": ["string", "null"] },
-        "provenance": { "type": "object" }
-      }
+        "provenance": { "$ref": "#/$defs/itemProvenance" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "extraction_status": { "const": "success" }
+            }
+          },
+          "then": {
+            "required": ["raw_sha256", "normalized_char_count", "normalized_text_sha256", "body", "provenance"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "extraction_status": { "const": "boundary" }
+            }
+          },
+          "then": {
+            "required": ["raw_sha256", "normalized_char_count", "normalized_text_sha256", "provenance"]
+          }
+        }
+      ]
     },
     "span": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["page_number", "char_start", "char_end"],
       "properties": {
         "page_number": { "type": "integer", "minimum": 1 },
@@ -60,31 +174,327 @@
     },
     "chunk": {
       "type": "object",
-      "required": ["schema_version", "chunk_id", "chunk_sha256", "item_id", "source_member", "page_start", "page_end", "text", "source_spans"],
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "chunk_id",
+        "chunk_sha256",
+        "item_id",
+        "stable_key",
+        "version_key",
+        "source_zip",
+        "source_member",
+        "page_start",
+        "page_end",
+        "text",
+        "source_spans"
+      ],
       "properties": {
-        "schema_version": { "const": "safeclaw-kosha-body-corpus/v1" },
+        "schema_version": { "const": "safeclaw-kosha-body-corpus/v2" },
         "chunk_id": { "type": "string" },
         "chunk_sha256": { "$ref": "#/$defs/sha256" },
         "item_id": { "type": "string" },
+        "stable_key": { "type": ["string", "null"] },
+        "version_key": { "type": ["string", "null"] },
+        "source_zip": { "type": ["string", "null"] },
         "source_member": { "type": "string" },
         "page_start": { "type": "integer", "minimum": 1 },
         "page_end": { "type": "integer", "minimum": 1 },
         "text": { "type": "string", "minLength": 1 },
-        "source_spans": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/span" } }
+        "source_spans": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/span" }
+        }
       }
     },
     "failure": {
       "type": "object",
-      "required": ["schema_version", "item_id", "source_key", "source_member", "error_code", "error_type", "message"],
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "item_id",
+        "source_key",
+        "source_zip",
+        "source_member",
+        "error_code",
+        "error_type",
+        "message"
+      ],
       "properties": {
-        "schema_version": { "const": "safeclaw-kosha-body-corpus/v1" },
+        "schema_version": { "const": "safeclaw-kosha-body-corpus/v2" },
         "item_id": { "type": "string" },
         "source_key": { "type": "string" },
+        "source_zip": { "type": ["string", "null"] },
         "source_member": { "type": "string" },
         "raw_sha256": { "$ref": "#/$defs/sha256" },
-        "error_code": { "type": "string" },
-        "error_type": { "type": "string" },
-        "message": { "type": "string" }
+        "error_code": { "type": "string", "minLength": 1 },
+        "error_type": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sourceIdentityFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "size", "sha256"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "size": { "type": "integer", "minimum": 0 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity_sha256",
+        "files",
+        "source_member_count",
+        "pdf_entry_count",
+        "total_uncompressed_bytes",
+        "max_member_bytes",
+        "max_compression_ratio",
+        "entry_manifest_sha256"
+      ],
+      "properties": {
+        "identity_sha256": { "$ref": "#/$defs/sha256" },
+        "files": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sourceIdentityFile" }
+        },
+        "source_member_count": { "$ref": "#/$defs/countValue" },
+        "pdf_entry_count": { "$ref": "#/$defs/countValue" },
+        "total_uncompressed_bytes": { "$ref": "#/$defs/countValue" },
+        "max_member_bytes": { "$ref": "#/$defs/countValue" },
+        "max_compression_ratio": { "type": "number", "minimum": 0 },
+        "entry_manifest_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "resourceLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_member_count",
+        "max_member_bytes",
+        "max_compression_ratio",
+        "max_total_uncompressed_bytes",
+        "max_pages_per_pdf",
+        "max_normalized_chars_per_pdf"
+      ],
+      "properties": {
+        "max_member_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_member_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_compression_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max_total_uncompressed_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_pages_per_pdf": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_normalized_chars_per_pdf": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "generationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "extractor_version",
+        "pypdf_version",
+        "chunk_chars",
+        "filters",
+        "ocr_thresholds",
+        "resource_limits",
+        "provenance_identity_sha256",
+        "normalization",
+        "chunking"
+      ],
+      "properties": {
+        "schema_version": { "const": "safeclaw-kosha-body-corpus/v2" },
+        "extractor_version": { "const": "safeclaw-kosha-native-pdf/v2" },
+        "pypdf_version": { "type": "string", "minLength": 1 },
+        "chunk_chars": { "type": "integer", "minimum": 1 },
+        "filters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["category", "state"],
+          "properties": {
+            "category": { "type": ["string", "null"] },
+            "state": { "type": ["string", "null"] }
+          }
+        },
+        "ocr_thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "page_requires_image",
+            "page_normalized_chars",
+            "document_normalized_chars"
+          ],
+          "properties": {
+            "page_requires_image": { "type": "boolean" },
+            "page_normalized_chars": { "type": "integer", "minimum": 0 },
+            "document_normalized_chars": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "resource_limits": { "$ref": "#/$defs/resourceLimits" },
+        "provenance_identity_sha256": { "type": ["string", "null"] },
+        "normalization": { "const": "NFKC+line-ending+horizontal-whitespace/v1" },
+        "chunking": { "const": "per-page-fixed-character-span/v1" }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inventory",
+        "completed",
+        "success",
+        "boundary",
+        "failure",
+        "chunks",
+        "ocr_candidate_items",
+        "ocr_candidate_pages",
+        "raw_duplicate_rows",
+        "text_duplicate_rows",
+        "failure_ledger"
+      ],
+      "properties": {
+        "inventory": { "$ref": "#/$defs/countValue" },
+        "completed": { "$ref": "#/$defs/countValue" },
+        "success": { "$ref": "#/$defs/countValue" },
+        "boundary": { "$ref": "#/$defs/countValue" },
+        "failure": { "$ref": "#/$defs/countValue" },
+        "chunks": { "$ref": "#/$defs/countValue" },
+        "ocr_candidate_items": { "$ref": "#/$defs/countValue" },
+        "ocr_candidate_pages": { "$ref": "#/$defs/countValue" },
+        "raw_duplicate_rows": { "$ref": "#/$defs/countValue" },
+        "text_duplicate_rows": { "$ref": "#/$defs/countValue" },
+        "failure_ledger": { "$ref": "#/$defs/countValue" }
+      }
+    },
+    "officialProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["list_url", "api_url", "snapshot", "download_boundary"],
+      "properties": {
+        "list_url": { "type": ["string", "null"] },
+        "api_url": { "type": ["string", "null"] },
+        "snapshot": { "type": ["object", "null"] },
+        "download_boundary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "outputHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items.jsonl", "chunks.jsonl", "failures.jsonl", "checkpoint.json"],
+      "properties": {
+        "items.jsonl": { "$ref": "#/$defs/sha256" },
+        "chunks.jsonl": { "$ref": "#/$defs/sha256" },
+        "failures.jsonl": { "$ref": "#/$defs/sha256" },
+        "checkpoint.json": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonical_source", "authoritative_field"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "canonical_source": { "type": "string", "minLength": 1 },
+        "authoritative_field": {
+          "const": "manifest.json#/reproducibility_hash"
+        }
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "snapshot_id",
+        "read_only_source",
+        "offline",
+        "db_mutation_performed",
+        "network_calls_performed",
+        "ocr_performed",
+        "source_identity",
+        "generation_policy",
+        "generation_policy_sha256",
+        "official_provenance",
+        "counts",
+        "output_hashes",
+        "reproducibility",
+        "reproducibility_hash"
+      ],
+      "properties": {
+        "schema_version": { "const": "safeclaw-kosha-body-corpus/v2" },
+        "snapshot_id": { "$ref": "#/$defs/sha256" },
+        "read_only_source": { "const": true },
+        "offline": { "const": true },
+        "db_mutation_performed": { "const": false },
+        "network_calls_performed": { "const": false },
+        "ocr_performed": { "const": false },
+        "source_identity": { "$ref": "#/$defs/sourceIdentity" },
+        "generation_policy": { "$ref": "#/$defs/generationPolicy" },
+        "generation_policy_sha256": { "$ref": "#/$defs/sha256" },
+        "official_provenance": { "$ref": "#/$defs/officialProvenance" },
+        "counts": { "$ref": "#/$defs/counts" },
+        "output_hashes": { "$ref": "#/$defs/outputHashes" },
+        "reproducibility": { "$ref": "#/$defs/reproducibility" },
+        "reproducibility_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "currentManifestDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size_bytes", "sha256"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^snapshots/[0-9a-f]{64}/manifest\\.json$"
+        },
+        "size_bytes": { "$ref": "#/$defs/countValue" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "current": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "snapshot_path",
+        "snapshot_id",
+        "source_identity_sha256",
+        "generation_policy_sha256",
+        "reproducibility_hash",
+        "manifest"
+      ],
+      "properties": {
+        "schema_version": { "const": "safeclaw-kosha-body-current/v1" },
+        "snapshot_path": {
+          "type": "string",
+          "pattern": "^snapshots/[0-9a-f]{64}$"
+        },
+        "snapshot_id": { "$ref": "#/$defs/sha256" },
+        "source_identity_sha256": { "$ref": "#/$defs/sha256" },
+        "generation_policy_sha256": { "$ref": "#/$defs/sha256" },
+        "reproducibility_hash": { "$ref": "#/$defs/sha256" },
+        "manifest": { "$ref": "#/$defs/currentManifestDescriptor" }
       }
     }
   }
