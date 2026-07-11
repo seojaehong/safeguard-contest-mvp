@@ -16754,8 +16754,8 @@ body:has(.safeclaw-landing) :is(
   --workspace-subtle: #68717d;
   --workspace-rule: #dfe2e7;
   --workspace-rule-strong: #c9cdd4;
-  --workspace-accent: #5148d8;
-  --workspace-accent-hover: #4338ca;
+  --workspace-accent: #f5c518;
+  --workspace-accent-hover: #d9ad00;
   --workspace-success: #187a36;
   width: 100%;
   max-width: 100%;
@@ -16777,8 +16777,8 @@ body:has(.safeclaw-landing) :is(
   --workspace-subtle: #858b95;
   --workspace-rule: #292b30;
   --workspace-rule-strong: #3b3d44;
-  --workspace-accent: #8b8dfc;
-  --workspace-accent-hover: #a6a8ff;
+  --workspace-accent: #6c6ff7;
+  --workspace-accent-hover: #8588ff;
   --workspace-success: #4fc66a;
 }
 
@@ -16790,6 +16790,7 @@ body:has(.safeclaw-landing) :is(
   min-width: 0;
   overflow-y: auto;
   border-right: 1px solid var(--workspace-rule) !important;
+  border-radius: 14px;
   background: var(--workspace-surface-1) !important;
   padding: 20px 16px;
 }
@@ -16954,6 +16955,7 @@ body:has(.safeclaw-landing) :is(
   grid-template-columns: minmax(0, 1fr) auto auto auto;
   gap: 18px;
   border-bottom: 1px solid var(--workspace-rule);
+  border-radius: 8px;
   background: var(--workspace-surface-1) !important;
   padding: 0 clamp(18px, 3vw, 36px);
   backdrop-filter: none;
@@ -17102,7 +17104,7 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid var(--workspace-accent);
   border-radius: 6px;
   background: var(--workspace-accent);
-  color: #ffffff;
+  color: #08090b;
   padding: 0 13px;
   font-size: 12px;
   font-weight: 650;
@@ -17318,7 +17320,7 @@ body:has(.safeclaw-landing) :is(
     overflow: visible;
     border-right: 0;
     border-bottom: 1px solid var(--workspace-rule);
-    padding: 12px;
+    padding: 8px 12px;
   }
 
   .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-rail > p {
@@ -17360,6 +17362,7 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-primary-nav,
   .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-secondary-nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-rail h2 {
@@ -17378,7 +17381,7 @@ body:has(.safeclaw-landing) :is(
     grid-template-columns: minmax(0, 1fr) auto auto;
     gap: 8px;
     min-height: 46px;
-    padding: 7px 12px;
+    padding: 4px 12px;
   }
 
   .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-nav > span:nth-child(2) {
@@ -17386,18 +17389,19 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-page-decision-header {
-    grid-template-columns: 1fr;
-    gap: 18px;
-    align-items: stretch;
-    padding: 22px 18px;
+    grid-template-columns: minmax(0, 1fr) minmax(118px, 32%);
+    gap: 12px;
+    align-items: start;
+    padding: 14px 12px;
   }
 
   .safeclaw-page-decision-action {
-    grid-template-columns: minmax(0, 1fr) auto;
-    border-top: 1px solid var(--workspace-rule);
-    border-left: 0;
-    padding-top: 16px;
-    padding-left: 0;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    border-top: 0;
+    border-left: 1px solid var(--workspace-rule);
+    padding-top: 0;
+    padding-left: 12px;
   }
 
   .safeclaw-module-shell .knowledge-status-grid,
