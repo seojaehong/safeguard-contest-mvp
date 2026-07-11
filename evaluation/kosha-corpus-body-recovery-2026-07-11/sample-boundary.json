@@ -1,0 +1,43 @@
+{
+  "item": {
+    "schema_version": "safeclaw-kosha-body-corpus/v1",
+    "item_id": "kosha-60492776122f8b433994fc10",
+    "stable_key": "B-E-3",
+    "version_key": "B-E-3-2025",
+    "title": "B-E-3-2025 변전실 등의 양압유지에 관한 기술지원규정",
+    "item_type": "technical-support-regulation",
+    "category": "전기안전분야",
+    "source_zip": "[2025] 기술지원규정(전기안전분야).zip",
+    "source_member": "B-E-3-2025 변전실 등의 양압유지에 관한 기술지원규정.pdf",
+    "source_file_size": 2830682,
+    "raw_sha256": "24aee7bdb72a1d69159122329267eed2fd68dc607d35d5270eeb6b326513a3c9",
+    "normalized_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "extraction_status": "boundary",
+    "page_count": 14,
+    "normalized_char_count": 0,
+    "ocr_candidate": true,
+    "ocr_candidate_reasons": [
+      "image-low-text-page",
+      "document-below-500-normalized-chars",
+      "empty-native-text"
+    ],
+    "page_boundary_summary": {
+      "page_count": 14,
+      "all_pages_have_image": true,
+      "all_pages_normalized_char_count": 0,
+      "all_pages_ocr_candidate": true
+    },
+    "raw_duplicate_of": null,
+    "text_duplicate_of": null
+  },
+  "failure": {
+    "schema_version": "safeclaw-kosha-body-corpus/v1",
+    "item_id": "kosha-60492776122f8b433994fc10",
+    "source_key": "[2025] 기술지원규정(전기안전분야).zip::B-E-3-2025 변전실 등의 양압유지에 관한 기술지원규정.pdf",
+    "source_member": "B-E-3-2025 변전실 등의 양압유지에 관한 기술지원규정.pdf",
+    "raw_sha256": "24aee7bdb72a1d69159122329267eed2fd68dc607d35d5270eeb6b326513a3c9",
+    "error_code": "empty-body",
+    "error_type": "EmptyNativeText",
+    "message": "all PDF pages produced empty native text"
+  }
+}
