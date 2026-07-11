@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/frontend-design-contract.test.ts -t applies the canonical product type and interaction foundation --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-approved-waves-integration
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 20 skipped (21)
+   Start at  05:58:56
+   Duration  828ms (transform 48ms, setup 0ms, import 69ms, tests 100ms, environment 0ms)

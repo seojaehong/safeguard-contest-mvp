@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workspace-layout-regression.test.ts -t preserves the exact Day and Night textarea cascade --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-approved-waves-integration
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 18 skipped (19)
+   Start at  06:01:33
+   Duration  50.83s (transform 266ms, setup 0ms, import 652ms, tests 49.55s, environment 0ms)

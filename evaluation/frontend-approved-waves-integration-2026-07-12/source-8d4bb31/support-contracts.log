@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workspace-input-css-contract.test.ts tests/isolated-next-browser-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-approved-waves-integration
+
+
+ Test Files  2 passed (2)
+      Tests  3 passed (3)
+   Start at  05:58:59
+   Duration  26.62s (transform 72ms, setup 0ms, import 505ms, tests 24.75s, environment 0ms)

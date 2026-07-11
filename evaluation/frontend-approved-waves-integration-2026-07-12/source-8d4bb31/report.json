@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "safeclaw-frontend-approved-waves-integration/v1",
+  "status": "review-pending",
+  "backendBaseSha": "84c04cd98c05b16f207e37be848d57de852f9509",
+  "sourceSha": "8d4bb31e5751baa11dba66ca2918e8db0b35475f",
+  "mappedCommits": {
+    "2c3fb9b": "a89fc12",
+    "d4d4656": "e56d9d5",
+    "e38bf26": "f7c5fc9",
+    "5db5220": "a208776",
+    "0fdaed4": "afb70fc",
+    "0c37547": "818fbd0",
+    "1b4e712": "5e47124",
+    "isolatedProductionHarness": "8d4bb31"
+  },
+  "excluded": ["Reports Wave 1 ancestry", "21bb393 and superseded Wave 2 evidence", "backend screenshot changes", "package and lock changes"],
+  "tests": {
+    "typographyFoundation": { "passed": 1, "failed": 0, "log": "typography-foundation.log" },
+    "supportContracts": { "passed": 3, "failed": 0, "log": "support-contracts.log" },
+    "typecheck": { "status": "pass", "log": "typecheck.log" },
+    "productionMatrix": {
+      "consecutiveRuns": 2,
+      "combinationsPerRun": 12,
+      "passed": 24,
+      "failed": 0,
+      "logs": ["browser-matrix-run1.log", "browser-matrix-run2.log"]
+    }
+  },
+  "dependency": { "lockSha256": "116da99b26a160322d632df067fe9177a14bb6152a3ab05dc543e7919c059ccd", "nextVersion": "15.5.20" },
+  "build": {
+    "status": "pass",
+    "staticPages": 27,
+    "buildId": "p3qykaioXcn1jwKPnPele",
+    "sourceIdentity": "11c8b1025b1d315fb50564c15f6c4e57fa0bab7ccfe5e6f4352993ea9b5eaf2d",
+    "buildIdentity": "c919c4abd2454b73f12101df5bd8f7cc00951dfec082b0209325b62eb934ed83",
+    "chunkCount": 97,
+    "auditMarkerCount": 0,
+    "log": "build.log",
+    "bundleEvidence": "bundle-normal.json"
+  },
+  "runtime": { "url": "http://127.0.0.1:3141/workspace?theme=night", "httpStatus": 200, "contentLength": 26672, "evidence": "runtime-probe.json" },
+  "staticAudit": { "status": "fail", "expectedResidual": true, "violationCount": 2383, "importantDeclarations": 737, "coverageIssues": 0, "pageFiles": 32, "componentFiles": 23, "evidence": "static-audit.json" },
+  "browser108": { "status": "not-run", "reason": "static prerequisite remains RED" }
+}
