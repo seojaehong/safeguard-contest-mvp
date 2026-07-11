@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import ExcelJS from "exceljs";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { Browser, Download, Page } from "playwright";
 import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
@@ -71,6 +71,11 @@ describe("documents editor layout", () => {
 
   afterAll(async () => {
     await harness?.stop();
+  }, 90_000);
+
+  afterEach(async () => {
+    if (!browser) return;
+    await Promise.all(browser.contexts().map((context) => context.close()));
   }, 30_000);
 
   it("keeps the document editor in the same light workbench system", async () => {
@@ -145,6 +150,99 @@ describe("documents editor layout", () => {
     expect(metrics.sheetExportPanel.color).not.toBe("rgb(246, 245, 239)");
     expect(metrics.previewPanel.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
     expect(metrics.previewDisplay).toBe("none");
+  }, 90_000);
+
+  it("keeps the desktop cockpit in three columns with one launch-document count", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+
+    const contract = await page.evaluate(() => {
+      const cockpit = document.querySelector(".safeclaw-document-cockpit");
+      const index = document.querySelector(".safeclaw-doc-index");
+      const primary = document.querySelector(".safeclaw-doc-primary");
+      const exportPanel = document.querySelector(".safeclaw-doc-export");
+      const banner = document.querySelector(".safeclaw-current-workpack");
+      if (!cockpit || !index || !primary || !exportPanel || !banner) {
+        throw new Error("Missing desktop document cockpit target");
+      }
+
+      const cockpitStyle = getComputedStyle(cockpit);
+      const indexRect = index.getBoundingClientRect();
+      const primaryRect = primary.getBoundingClientRect();
+      const exportRect = exportPanel.getBoundingClientRect();
+      return {
+        cockpitDisplay: cockpitStyle.display,
+        cockpitText: cockpit.textContent || "",
+        indexHeading: index.querySelector("h2")?.textContent,
+        exportHeading: exportPanel.querySelector("h2")?.textContent,
+        indexLeft: Math.round(indexRect.left),
+        indexRight: Math.round(indexRect.right),
+        primaryLeft: Math.round(primaryRect.left),
+        primaryRight: Math.round(primaryRect.right),
+        exportLeft: Math.round(exportRect.left),
+        indexButtons: index.querySelectorAll("button").length,
+        primaryPreviews: primary.querySelectorAll(".safeclaw-doc-primary-grid > section").length,
+        exportFacts: exportPanel.querySelectorAll("dl > div").length,
+        bannerWorkspaceCtas: banner.querySelectorAll('a[href="/workspace"]').length
+      };
+    });
+
+    expect(contract.cockpitDisplay).toBe("grid");
+    expect(contract.indexRight).toBeLessThanOrEqual(contract.primaryLeft);
+    expect(contract.primaryRight).toBeLessThanOrEqual(contract.exportLeft);
+    expect(contract.indexLeft).toBeLessThan(contract.primaryLeft);
+    expect(contract.indexButtons).toBe(9);
+    expect(contract.primaryPreviews).toBe(3);
+    expect(contract.exportFacts).toBe(3);
+    expect(contract.indexHeading).toBe("3종 핵심. 6종 추가.");
+    expect(contract.exportHeading).toBe("9/9종 작성.");
+    expect(contract.cockpitText).not.toMatch(/(?:11|12)종/u);
+    expect(contract.bannerWorkspaceCtas).toBe(0);
+  }, 90_000);
+
+  it("counts only non-empty launch documents as written", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const stored = buildStoredCurrentWorkpack(buildSampleWorkpack());
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await page.locator(".safeclaw-current-workpack.live").waitFor({ state: "visible" });
+
+    const writtenCount = page.getByTestId("mobile-submission-facts").locator("dd").first();
+    await expect.poll(() => writtenCount.textContent()).toBe("9/9종");
+
+    await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
+    await page.getByRole("textbox", { name: "위험성평가표 편집" }).fill("");
+
+    await expect.poll(() => writtenCount.textContent()).toBe("8/9종");
+  }, 90_000);
+
+  it("keeps sample display counts aligned without promoting the sample to a current workpack", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await page.locator(".safeclaw-current-workpack.sample").waitFor({ state: "visible" });
+
+    const writtenCount = page.getByTestId("mobile-submission-facts").locator("dd").first();
+    await expect.poll(() => writtenCount.textContent()).toBe("9/9종");
+
+    await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
+    const editor = page.getByRole("textbox", { name: "위험성평가표 편집" });
+    await editor.fill("");
+
+    await expect.poll(() => writtenCount.textContent()).toBe("8/9종");
+    expect(await page.locator(".safeclaw-current-workpack.sample").count()).toBe(1);
+    expect(await page.evaluate((storageKey) => window.localStorage.getItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY)).toBeNull();
+
+    await page.reload({ waitUntil: "networkidle" });
+    await page.locator(".safeclaw-current-workpack.sample").waitFor({ state: "visible" });
+    await expect.poll(() => page.getByTestId("mobile-submission-facts").locator("dd").first().textContent()).toBe("8/9종");
+    await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "위험성평가표 편집" }).inputValue()).toBe("");
+    expect(await page.evaluate((storageKey) => window.localStorage.getItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY)).toBeNull();
   }, 90_000);
 
   it("opens a requested document in an editor-first workspace with secondary tools collapsed", async () => {
@@ -523,6 +621,169 @@ describe("documents editor layout", () => {
       0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
     ]);
   }, 90_000);
+
+  it.each(["day", "night"] as const)(
+    "puts the core launcher before the mobile editor in %s mode",
+    async (theme) => {
+      if (!browser) throw new Error("Browser was not started");
+      const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+      await page.goto(`${baseUrl}/documents?theme=${theme}`, { waitUntil: "networkidle" });
+      await page.waitForFunction((expectedTheme) => {
+        const shell = document.querySelector(".safeclaw-module-shell");
+        return shell?.getAttribute("data-ready") === "true" && shell.getAttribute("data-theme") === expectedTheme;
+      }, theme);
+
+      const initialEditorTop = await page.locator('[data-testid="workpack-editor-workspace"]').evaluate((element) => {
+        return Math.round(element.getBoundingClientRect().top + window.scrollY);
+      });
+      expect(initialEditorTop).toBeLessThan(1200);
+
+      const launcher = page.getByTestId("mobile-core-document-launcher");
+      const details = page.getByTestId("mobile-document-details");
+      const initial = await page.evaluate(() => {
+        const launcherElement = document.querySelector('[data-testid="mobile-core-document-launcher"]');
+        const launcherList = document.querySelector(".safeclaw-mobile-core-list");
+        const detailsElement = document.querySelector<HTMLDetailsElement>('[data-testid="mobile-document-details"]');
+        const cockpit = document.querySelector(".safeclaw-document-cockpit");
+        const editor = document.querySelector('[data-testid="workpack-editor-workspace"]');
+        const desktopPanels = [
+          document.querySelector(".safeclaw-doc-index"),
+          document.querySelector(".safeclaw-doc-primary"),
+          document.querySelector(".safeclaw-doc-export")
+        ];
+        if (!launcherElement || !launcherList || !detailsElement || !cockpit || !editor || desktopPanels.some((panel) => !panel)) {
+          throw new Error("Missing mobile document-priority target");
+        }
+
+        const launcherRect = launcherElement.getBoundingClientRect();
+        const editorRect = editor.getBoundingClientRect();
+        return {
+          theme: document.querySelector(".safeclaw-module-shell")?.getAttribute("data-theme"),
+          viewportWidth: window.innerWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+          launcherDisplay: getComputedStyle(launcherElement).display,
+          launcherTop: Math.round(launcherRect.top + window.scrollY),
+          editorTop: Math.round(editorRect.top + window.scrollY),
+          coreGap: Number.parseFloat(getComputedStyle(launcherList).rowGap),
+          coreLabels: Array.from(launcherList.querySelectorAll("button"), (button) => button.textContent?.trim()),
+          coreHeights: Array.from(launcherList.querySelectorAll("button"), (button) => Math.round(button.getBoundingClientRect().height)),
+          detailsOpen: detailsElement.open,
+          detailsCount: document.querySelectorAll('[data-testid="mobile-document-details"]').length,
+          detailsLabel: detailsElement.querySelector(":scope > summary")?.textContent?.replace(/\s+/gu, " ").trim(),
+          desktopPanelDisplays: desktopPanels.map((panel) => getComputedStyle(panel as Element).display),
+          cockpitText: cockpit.textContent || "",
+          bannerWorkspaceCtas: document.querySelectorAll('.safeclaw-current-workpack a[href="/workspace"]').length
+        };
+      });
+
+      expect(initial.theme).toBe(theme);
+      expect(initial.scrollWidth).toBeLessThanOrEqual(initial.viewportWidth + 1);
+      expect(initial.launcherDisplay).not.toBe("none");
+      expect(initial.launcherTop).toBeLessThan(initial.editorTop);
+      expect(initial.coreGap).toBe(8);
+      expect(initial.coreLabels).toEqual(["위험성평가표", "TBM 브리핑", "TBM 기록"]);
+      expect(initial.coreHeights.every((height) => height >= 44)).toBe(true);
+      expect(initial.detailsOpen).toBe(false);
+      expect(initial.detailsCount).toBe(1);
+      expect(initial.detailsLabel).toBe("문서 9종 · 제출 정보");
+      expect(initial.desktopPanelDisplays).toEqual(["none", "none", "none"]);
+      expect(initial.cockpitText).not.toMatch(/(?:11|12)종/u);
+      expect(initial.bannerWorkspaceCtas).toBe(0);
+
+      await launcher.getByRole("button", { name: "TBM 기록" }).click();
+      await page.waitForFunction(() => document.activeElement?.getAttribute("aria-label") === "TBM 기록 편집");
+      const selected = await page.evaluate(() => {
+        const textarea = document.querySelector<HTMLTextAreaElement>('.document-textarea[aria-label="TBM 기록 편집"]');
+        const documentBody = document.querySelector('[data-testid="editor-document-body"]');
+        const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
+        const selectedLauncher = document.querySelector<HTMLButtonElement>(
+          '[data-testid="mobile-core-document-launcher"] button[data-document-key="tbmLogDraft"]'
+        );
+        if (!textarea || !documentBody || !documentSelect || !selectedLauncher) {
+          throw new Error("Missing selected mobile editor target");
+        }
+        const textareaRect = textarea.getBoundingClientRect();
+        const bodyRect = documentBody.getBoundingClientRect();
+        return {
+          activeLabel: document.activeElement?.getAttribute("aria-label"),
+          selectedDocument: documentSelect.value,
+          selectedPressed: selectedLauncher.getAttribute("aria-pressed"),
+          textareaTop: Math.round(textareaRect.top),
+          textareaBottom: Math.round(textareaRect.bottom),
+          bodyTop: Math.round(bodyRect.top),
+          scrollY: Math.round(window.scrollY)
+        };
+      });
+
+      expect(selected.activeLabel).toBe("TBM 기록 편집");
+      expect(selected.selectedDocument).toBe("tbmLogDraft");
+      expect(selected.selectedPressed).toBe("true");
+      expect(selected.scrollY).toBeGreaterThan(0);
+      expect(selected.bodyTop).toBeGreaterThanOrEqual(0);
+      expect(selected.bodyTop).toBeLessThanOrEqual(96);
+      expect(selected.textareaTop).toBeGreaterThanOrEqual(0);
+      expect(selected.textareaTop).toBeLessThan(844);
+      expect(selected.textareaBottom).toBeGreaterThan(selected.textareaTop);
+
+      await page.locator('select[aria-label="편집 문서 선택"]').selectOption("riskAssessmentDraft");
+      await expect.poll(async () => {
+        const riskAssessmentPressed = await launcher.getByRole("button", { name: "위험성평가표" }).getAttribute("aria-pressed");
+        const tbmLogPressed = await launcher.getByRole("button", { name: "TBM 기록" }).getAttribute("aria-pressed");
+        return [riskAssessmentPressed, tbmLogPressed];
+      }).toEqual(["true", "false"]);
+
+      await details.locator(":scope > summary").click();
+      const expanded = await page.evaluate(() => {
+        const detailsElement = document.querySelector<HTMLDetailsElement>('[data-testid="mobile-document-details"]');
+        const remainingList = document.querySelector(".safeclaw-mobile-remaining-list");
+        const actionList = document.querySelector(".safeclaw-mobile-detail-actions");
+        if (!detailsElement || !remainingList || !actionList) {
+          throw new Error("Missing expanded mobile document detail target");
+        }
+        const controls = detailsElement.querySelectorAll(":scope > summary, button, a");
+        const allLaunchKeys = Array.from(
+          document.querySelectorAll<HTMLElement>('.safeclaw-document-cockpit [data-document-key]'),
+          (element) => element.dataset.documentKey
+        );
+        return {
+          open: detailsElement.open,
+          viewportWidth: window.innerWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+          remainingGap: Number.parseFloat(getComputedStyle(remainingList).rowGap),
+          actionGap: Number.parseFloat(getComputedStyle(actionList).rowGap),
+          remainingLabels: Array.from(remainingList.querySelectorAll("button"), (button) => button.querySelector("strong")?.textContent),
+          controlHeights: Array.from(controls, (control) => Math.round(control.getBoundingClientRect().height)),
+          uniqueLaunchKeys: Array.from(new Set(allLaunchKeys)),
+          previewCount: detailsElement.querySelectorAll('[data-testid="mobile-primary-preview"] > div').length,
+          factCount: detailsElement.querySelectorAll('[data-testid="mobile-submission-facts"] > div').length,
+          actionCount: actionList.querySelectorAll("a").length,
+          nestedDetails: detailsElement.querySelectorAll("details").length,
+          nestedCards: detailsElement.querySelectorAll(".card").length
+        };
+      });
+
+      expect(expanded.open).toBe(true);
+      expect(expanded.scrollWidth).toBeLessThanOrEqual(expanded.viewportWidth + 1);
+      expect(expanded.remainingGap).toBe(8);
+      expect(expanded.actionGap).toBe(8);
+      expect(expanded.remainingLabels).toEqual([
+        "외국인 전송본",
+        "작업계획서",
+        "안전보건교육 기록",
+        "점검결과 요약",
+        "비상대응 절차",
+        "사진·증빙"
+      ]);
+      expect(expanded.controlHeights.every((height) => height >= 44)).toBe(true);
+      expect(expanded.uniqueLaunchKeys).toHaveLength(9);
+      expect(expanded.previewCount).toBe(3);
+      expect(expanded.factCount).toBe(3);
+      expect(expanded.actionCount).toBe(2);
+      expect(expanded.nestedDetails).toBe(0);
+      expect(expanded.nestedCards).toBe(0);
+    },
+    90_000
+  );
 
   it("keeps the editor workspace and expanded tools contained at 390px", async () => {
     if (!browser) throw new Error("Browser was not started");
