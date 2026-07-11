@@ -364,7 +364,7 @@ function cssViolations(source) {
   ]);
 
   for (const match of source.matchAll(/font-family\s*:\s*([^;\r\n}]+)/g)) {
-    const value = match[1].trim();
+    const value = match[1].trim().replace(/\s*!important$/, "");
     if (!value.startsWith("var(") && value !== "inherit") {
       violations.push({ rule: "font-family-token", file: "app/globals.css", line: lineNumber(source, match.index), value });
     }
@@ -397,7 +397,7 @@ function cssViolations(source) {
     "var(--tracking-page-title)", "var(--tracking-display)", "var(--tracking-hud)",
   ]);
   for (const match of source.matchAll(/letter-spacing\s*:\s*([^;\r\n}]+)/g)) {
-    const value = match[1].trim();
+    const value = match[1].trim().replace(/\s*!important$/, "");
     if (!allowedTracking.has(value)) {
       violations.push({ rule: "tracking-tier", file: "app/globals.css", line: lineNumber(source, match.index), value });
     }

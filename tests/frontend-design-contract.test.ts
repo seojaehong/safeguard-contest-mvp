@@ -530,6 +530,18 @@ describe("frontend design contract", () => {
     expect(rejected.report.violations.map((violation) => violation.rule)).toContain("decorative-box-shadow");
   });
 
+  it("normalizes important suffixes without duplicating valid typography findings", () => {
+    const audit = runAudit(`.fixture {
+      font-family: inherit !important;
+      letter-spacing: 0 !important;
+    }`);
+    const rules = audit.report.violations.map((violation) => violation.rule);
+
+    expect(rules).toContain("important-declaration");
+    expect(rules).not.toContain("font-family-token");
+    expect(rules).not.toContain("tracking-tier");
+  });
+
   it("scopes reviewed module rail and navigation radii to their exact roles", () => {
     const approved = runAudit(`
       .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-rail {
