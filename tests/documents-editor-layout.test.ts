@@ -1,5 +1,7 @@
+import { readFile } from "node:fs/promises";
+import ExcelJS from "exceljs";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { Browser } from "playwright";
+import type { Browser, Download, Page } from "playwright";
 import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 import {
@@ -10,6 +12,51 @@ import {
 let baseUrl = "";
 let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
+
+type XlsxLoadBuffer = Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0];
+
+async function loadDownloadedWorkbook(download: Download) {
+  const path = await download.path();
+  if (!path) throw new Error("Downloaded XLSX path is unavailable");
+
+  const workbook = new ExcelJS.Workbook();
+  const buffer = await readFile(path);
+  await workbook.xlsx.load(buffer as unknown as XlsxLoadBuffer);
+  return workbook;
+}
+
+function readWorkbookText(workbook: ExcelJS.Workbook) {
+  const cells: string[] = [];
+  workbook.eachSheet((worksheet) => {
+    worksheet.eachRow((row) => {
+      row.eachCell({ includeEmpty: false }, (cell) => {
+        if (typeof cell.value === "string") cells.push(cell.value);
+        if (typeof cell.value === "number") cells.push(String(cell.value));
+      });
+    });
+  });
+  return cells.join("\n");
+}
+
+async function exportSelectedXlsx(page: Page) {
+  const exportPanel = page.getByTestId("editor-export-panel");
+  if (!await exportPanel.evaluate((element) => (element as HTMLDetailsElement).open)) {
+    await exportPanel.locator(":scope > summary").click();
+  }
+
+  const [request, download] = await Promise.all([
+    page.waitForRequest((candidate) => (
+      candidate.method() === "POST" && new URL(candidate.url()).pathname === "/api/export/xlsx"
+    )),
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: "Excel 표 양식(.xlsx)" }).click()
+  ]);
+
+  return {
+    payload: request.postDataJSON() as Record<string, unknown>,
+    workbook: await loadDownloadedWorkbook(download)
+  };
+}
 
 describe("documents editor layout", () => {
   beforeAll(async () => {
@@ -272,14 +319,106 @@ describe("documents editor layout", () => {
       .toBe("");
   }, 90_000);
 
+  it("exports an explicitly empty workPermitDraft without regenerating structured permit content", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPermitDraft = "";
+    const stored = buildStoredCurrentWorkpack(sample);
+
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /안전작업허가 확인서/ }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "안전작업허가 확인서 편집" }).inputValue())
+      .toBe("");
+
+    const { payload, workbook } = await exportSelectedXlsx(page);
+
+    expect(payload).toMatchObject({ mode: "single", edited: true, rows: [] });
+    expect(workbook.worksheets.map((worksheet) => worksheet.name)).toEqual(["안전작업허가 확인서"]);
+    const workbookText = readWorkbookText(workbook);
+    expect(workbookText).not.toContain("허가 기본정보");
+    expect(workbookText).not.toContain("작업 전 허가조건");
+  }, 90_000);
+
+  it("keeps a nonempty structured work permit on the schema-first XLSX export path", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sentinel = "SAFECLAW_STRUCTURED_PERMIT_EXPORT";
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPermitDraft = `허가대상 작업: ${sentinel}`;
+    sample.deliverables.permitInspectionStructured = {
+      basicInfo: {
+        permitNo: "SC-PTW-TEST",
+        permitType: "고소작업",
+        workName: sentinel,
+        location: sample.scenario.siteName,
+        workDate: "2026-07-11",
+        workerCount: sample.scenario.workerCount,
+        requester: "작업반장",
+        approver: "관리감독자"
+      },
+      conditions: [{
+        category: "추락·낙하",
+        requirement: "작업발판과 안전대 확인",
+        action: "작업 전 이중 확인",
+        owner: "작업반장",
+        status: "적합"
+      }],
+      attachments: [],
+      completionChecks: [],
+      approvers: {
+        requester: "작업반장",
+        safetyManager: "안전관리자",
+        siteManager: "현장소장",
+        completionChecker: "종료 확인자"
+      }
+    };
+    const stored = buildStoredCurrentWorkpack(sample);
+
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /안전작업허가 확인서/ }).click();
+    const { payload, workbook } = await exportSelectedXlsx(page);
+
+    expect(payload).toMatchObject({ mode: "permitInspectionStructured", edited: false });
+    expect(workbook.worksheets.map((worksheet) => worksheet.name)).toEqual(["작업허가 확인"]);
+    const workbookText = readWorkbookText(workbook);
+    expect(workbookText).toContain("허가 기본정보");
+    expect(workbookText).toContain(sentinel);
+  }, 90_000);
+
   it("uses generated permit fallback when legacy data has no workPermitDraft field", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    delete sample.deliverables.workPermitDraft;
+    delete sample.deliverables.permitInspectionStructured;
+    const stored = buildStoredCurrentWorkpack(sample);
+
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
 
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
     await page.getByRole("tab", { name: /안전작업허가 확인서/ }).click();
     await expect.poll(() => page.getByRole("textbox", { name: "안전작업허가 확인서 편집" }).inputValue())
       .toContain("허가대상 작업:");
+
+    const { payload, workbook } = await exportSelectedXlsx(page);
+
+    expect(payload).toMatchObject({ mode: "permitInspectionStructured", edited: false });
+    expect(workbook.worksheets.map((worksheet) => worksheet.name)).toEqual(["작업허가 확인"]);
+    const workbookText = readWorkbookText(workbook);
+    expect(workbookText).toContain("허가 기본정보");
+    expect(workbookText).toContain("작업 전 허가조건");
+    expect(workbookText).toContain(sample.scenario.workSummary);
   }, 90_000);
 
   it("announces meaningful save state without live-reading every keystroke", async () => {
