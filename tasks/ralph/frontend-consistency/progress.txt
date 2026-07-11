@@ -117,6 +117,13 @@
 - Verified: distinct boundary markers and screenshots; browser 108 successes/0 failed rows/0 findings; reconciliation 22/22; full 56 files/517 tests; typecheck; normal build; static audit 32 routes/22 components and zero issues; diff review pending.
 - Next: keep F7 pending independent re-review.
 
+## 2026-07-11 F7 final review closure
+- Changed: closed browser evidence through implementation commits `3b46629`, `bffaa77`, `defe91e`, and `05ee201`.
+- Verified: 32 routes × 3 viewports, six Workspace Day/Night rows, four actual/labelled special surfaces, two generated surfaces, and 108 screenshots; browser totals 108 successes, 0 failed rows, 0 recovered rows, 0 findings.
+- Gates: focused reconciliation 25/25, full 56 files/520 tests, strict typecheck, audit-mode and normal production builds, static audit 32 routes/22 components with zero coverage issues or violations, and diff-check pass.
+- Reviewed: independent specification and code-quality review PASS/PASS with zero Important or Minor findings; all prior browser-audit findings are closed.
+- Next: PR 66 handoff and cross-session conflict communication may proceed from the root task.
+
 ## 2026-07-11 F7 generated font-family remediation
 - RED: a generated section using Pretendard passed because document roles checked only numerical tuples.
 - Changed: all five preview roles explicitly inherit the document stack; preview/PDF rows collect computed family and role-specific font-loaded evidence; the gate enforces Malgun-first plus Noto fallback.
