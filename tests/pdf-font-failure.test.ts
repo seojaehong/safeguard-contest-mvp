@@ -1,5 +1,6 @@
 import fs, { type PathOrFileDescriptor } from "node:fs";
 import { NextRequest } from "next/server";
+import { PDFDocument } from "pdf-lib";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/export/pdf/route";
 
@@ -77,6 +78,19 @@ describe.sequential("PDF font asset failures", () => {
     expect(logger).toHaveBeenCalledWith(
       "PDF export font assets are unavailable or invalid",
       expect.any(Error)
+    );
+  });
+
+  it("logs and rethrows non-font PDF build failures without using the font error contract", async () => {
+    const buildFailure = new Error("deterministic PDF create failure");
+    vi.spyOn(PDFDocument, "create").mockRejectedValueOnce(buildFailure);
+    const logger = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(POST(createRequest())).rejects.toBe(buildFailure);
+    expect(logger).toHaveBeenCalledWith("PDF export failed", buildFailure);
+    expect(logger).not.toHaveBeenCalledWith(
+      "PDF export font assets are unavailable or invalid",
+      buildFailure
     );
   });
 
