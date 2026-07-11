@@ -135,3 +135,9 @@
 - Changed: exact spec-derived Display/Page/body/document tuples, actual font-load evidence, strict probe filtering, separately counted recovered transients, 44px landing mobile Display, and representative PDF table evidence.
 - Verified: mutation tests reject five independent typography regressions and mixed-error cases; browser 108/108 with zero failed/recovered rows and findings; full 519/519, typecheck, static 32/22 zero issues, audit-mode and normal builds pass.
 - Next: keep F7 pending independent re-review.
+
+## 2026-07-11 Documents selective integration
+- Changed: recorded independently reviewed Documents mobile source commits `2226aa2`/`ec13212` selected into backend as `cf451c5`/`2451345`.
+- Verified: Spec PASS, Code Quality PASS, P0-P3 zero; fresh source-branch documents suite 20/20 twice with exit 0, strict typecheck, package/lock diff zero, and production build 27/27 after installing the worktree dependencies.
+- Learned: an empty worktree `node_modules` can resolve the parent repository binaries while producing incomplete Next page manifests; verify the local dependency tree before accepting build evidence.
+- Next: run the combined full suite, PDF/NFT/direct POST, and 108-row browser audit on the final backend head after pending Next security and KOSHA evidence patches are integrated.

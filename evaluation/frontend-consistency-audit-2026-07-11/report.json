@@ -78,17 +78,17 @@
   "backendSessionConflicts": [
     "Frontend head owns typography, PDF/font assets, browser audit, and evidence through this branch.",
     "Backend head 2d0ff44 owns harness/history/grounded-vision behavior; preserve those changes during integration.",
-    "Backend authoritative head 23a451c integrates current-workpack/worker snapshot, module shell, reports provenance/state, and Korean PDF lineage 20995db/23a451c. Module browser 4/4, reports single plus 49-test combined runs, and post-integration PDF 2 files/11 tests plus typecheck pass.",
+    "Backend authoritative head 2451345 integrates current-workpack/worker snapshot, module shell, reports provenance/state, Korean PDF lineage 20995db/23a451c, and reviewed Documents mobile lineage cf451c5/2451345.",
     "Reports fail-closed remediation and explicit-local-switch behavior are integrated. Independent review found no P0-P3 product findings; the reproduced early empty-state assertion is fixed by waiting for the rendered empty state.",
     "High-risk shared files include app/globals.css, SafeGuardCommandCenter.tsx, WorkpackEditor.tsx, lib/types.ts, current-workpack.ts, and db-harness.ts.",
-    "The document-module shell, reports provenance/state, and PDF work are integrated at 23a451c. Documents-mobile-priority remains external after independent review REJECTED a sample-workpack authored-count synchronization P2; remediation and fresh review are required before combined verification.",
+    "Documents-mobile-priority is independently reviewed and integrated at 2451345 with Spec PASS, Code Quality PASS, and P0-P3 zero. Fresh source-branch evidence includes 20/20 twice with exit 0, strict typecheck, and build 27/27 after dependency synchronization.",
     "Backend-owned P1 followup: persist report provenance beyond the banner (source.mode, scope, workpackSavedAt).",
-    "Backend-owned P2 followups: separate empty/readiness/data/download states; reduce /documents mobile editor y≈3424 by showing core three items first, collapsing the remainder, and removing duplicate CTA. Current evidence has no horizontal overflow or overlap.",
+    "Documents mobile P2 is closed: core three first, remaining six collapsed, sample 9/9 to 8/9 with draft reload and no canonical promotion, editor y 3141 to 789, Day/Night overflow zero, 44px controls, and desktop three-column preservation.",
     "After integration rerun full tests, typecheck, build, static audit, all 108 browser rows, and explicit /documents-/reports-vs-/workspace y-position and identity comparison."
   ],
   "mergeMatrix": {
     "frontend": { "head": "d2ef1df", "status": "reviewed-pass", "ownership": "typography, PDF/font assets, browser audit, evidence" },
-    "authoritativeBackendHead": "23a451c",
+    "authoritativeBackendHead": "2451345",
     "intersectionBaseBackendHead": "2d0ff44",
     "sharedFilesCount": 22,
     "sharedFiles": [
@@ -116,19 +116,17 @@
       "package.json"
     ],
     "sharedFilePolicy": "Never merge a shared file wholesale. Preserve backend behavior and contracts first, then selectively port frontend visual and audit hunks with per-file review.",
-    "currentBackendValidation": "Backend 23a451c includes module browser 4/4, reviewed reports behavior with single plus 49-test combined runs, and post-integration PDF 2 files/11 tests plus strict typecheck.",
+    "currentBackendValidation": "Backend 2451345 includes module browser 4/4, reviewed reports behavior, post-integration PDF 2 files/11 tests plus strict typecheck, and reviewed Documents mobile integration. The first full combined suite attempt OOMed before assertions and is not a PASS.",
     "pdfPorting": { "status": "integrated-reviewed-evidence-final-head-gates-pending", "base": "3900892", "source": "b61929f", "sourceCommits": ["66a05fe", "76bc266"], "integratedCommits": ["20995db", "23a451c"], "scope": "typed font-error boundary, missing-font controlled 500, literal NFT paths, dynamic subsets, regenerated tracked lockfile", "excluded": "WorkpackEditor and globals.css", "evidence": "fresh review P0-P3 0; integrated 2 files/11 tests and strict typecheck pass after dependency synchronization; source evidence covers extraction, nonblank render, below 1 MiB, controlled font 500, NFT assets, and build", "pending": "final documents-integrated build, NFT, direct PDF, combined tests, and all 108 browser rows" },
     "backendIntegrated": [
-      { "commit": "cab4a19", "lineage": ["3900892", "99a42d2"], "status": "integrated-reviewed-evidence", "ownership": "canonical current-workpack resilience, worker snapshot, and document-module shell", "evidence": "module browser 4/4 and typecheck pass; evaluation/module-shell-unify-2026-07-11/report.md records focused 4, typecheck, build 27, and diff" }
+      { "commit": "cab4a19", "lineage": ["3900892", "99a42d2"], "status": "integrated-reviewed-evidence", "ownership": "canonical current-workpack resilience, worker snapshot, and document-module shell", "evidence": "module browser 4/4 and typecheck pass; evaluation/module-shell-unify-2026-07-11/report.md records focused 4, typecheck, build 27, and diff" },
+      { "commit": "2451345", "lineage": ["cf451c5", "2451345"], "sourceLineage": ["2226aa2", "ec13212"], "status": "integrated-reviewed-evidence-final-head-gates-pending", "ownership": "documents mobile priority", "evidence": "Spec PASS and Code Quality PASS with P0-P3 zero; source branch 20/20 twice exit zero, strict typecheck, package/lock diff zero, build 27/27; sample authored-count, draft reload, no promotion, selection sync, mobile geometry, and desktop layout covered." }
     ],
     "backendPendingReview": [
       { "commit": "178f53a", "lineage": ["95d8b8c", "5a16ebe", "178f53a"], "sourceLineage": ["a935fdb", "b42bc0d", "846afb2"], "status": "integrated-reviewed-evidence", "ownership": "reports provenance and state", "evidence": "No P0-P3 product findings; fail-closed server errors, explicit local switching, nested validation, single empty-state and 49-test combined runs pass." },
-      { "commit": "23a451c", "lineage": ["20995db", "23a451c"], "sourceLineage": ["b61929f", "66a05fe", "76bc266"], "status": "integrated-reviewed-evidence-final-head-gates-pending", "ownership": "Korean PDF dynamic subset integration", "evidence": "Fresh review P0-P3 0; integrated 2 files/11 tests and typecheck pass; final-head build/NFT/direct POST pending." },
-      { "commit": null, "base": "cab4a19", "status": "independent-review-rejected-p2-remediation-required", "ownership": "documents mobile priority", "evidence": "Current-workpack 19/19, typecheck, build and geometry pass, but sample edits leave cockpit falsely at 9/9 because display state is not synchronized after the persistence guard. Require sample empty-to-8/9 and restored-sample-draft tests." }
+      { "commit": "23a451c", "lineage": ["20995db", "23a451c"], "sourceLineage": ["b61929f", "66a05fe", "76bc266"], "status": "integrated-reviewed-evidence-final-head-gates-pending", "ownership": "Korean PDF dynamic subset integration", "evidence": "Fresh review P0-P3 0; integrated 2 files/11 tests and typecheck pass; final-head build/NFT/direct POST pending." }
     ],
-    "backendActiveIsolated": [
-      { "status": "active-not-integrated", "ownership": "documents mobile priority", "scope": "core-three launcher reducing editor y from approximately 3424 while preserving the desktop cockpit" }
-    ],
+    "backendActiveIsolated": [],
     "postIntegration": "Run full tests, typecheck, build, static audit, all 108 browser rows, and explicit documents/reports versus workspace identity and y-position comparisons."
   },
   "findings": [],
