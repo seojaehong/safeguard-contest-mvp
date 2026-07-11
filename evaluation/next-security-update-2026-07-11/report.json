@@ -1,0 +1,89 @@
+{
+  "date": "2026-07-11",
+  "baseCommit": "23a451c",
+  "outcome": "fixed",
+  "scope": {
+    "next": {
+      "before": "15.5.15",
+      "after": "15.5.20"
+    },
+    "react": {
+      "before": "19.0.0",
+      "after": "19.0.0"
+    },
+    "reactDom": {
+      "before": "19.0.0",
+      "after": "19.0.0"
+    },
+    "lockfileChanges": [
+      "next",
+      "@next/env",
+      "@next/swc-darwin-arm64",
+      "@next/swc-darwin-x64",
+      "@next/swc-linux-arm64-gnu",
+      "@next/swc-linux-arm64-musl",
+      "@next/swc-linux-x64-gnu",
+      "@next/swc-linux-x64-musl",
+      "@next/swc-win32-arm64-msvc",
+      "@next/swc-win32-x64-msvc"
+    ]
+  },
+  "audit": {
+    "command": "npm.cmd audit --omit=dev --json",
+    "before": {
+      "info": 0,
+      "low": 0,
+      "moderate": 4,
+      "high": 1,
+      "critical": 0,
+      "total": 5
+    },
+    "after": {
+      "info": 0,
+      "low": 0,
+      "moderate": 5,
+      "high": 0,
+      "critical": 0,
+      "total": 5
+    },
+    "nextHighRemoved": true,
+    "remainingModerateItems": [
+      "exceljs via uuid",
+      "gaxios via uuid",
+      "uuid",
+      "next via postcss@8.4.31",
+      "postcss@8.4.31"
+    ]
+  },
+  "verification": [
+    {
+      "command": "npm.cmd ls --omit=dev next react react-dom --depth=0",
+      "result": "passed",
+      "details": "next@15.5.20, react@19.0.0, react-dom@19.0.0"
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "passed"
+    },
+    {
+      "command": "npm.cmd test -- tests/module-shell-navigation.test.ts --reporter=verbose",
+      "result": "passed",
+      "details": "1 file, 5 tests"
+    },
+    {
+      "command": "npm.cmd test -- tests/reports-download-center.test.ts tests/reporting-downloads.test.ts --pool=forks --maxWorkers=1 --reporter=verbose",
+      "result": "passed",
+      "details": "2 files, 49 tests"
+    },
+    {
+      "command": "npm.cmd test -- tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts --pool=forks --maxWorkers=1 --reporter=verbose",
+      "result": "passed",
+      "details": "2 files, 11 tests"
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "passed",
+      "details": "Next 15.5.20; static pages 27/27"
+    }
+  ]
+}
