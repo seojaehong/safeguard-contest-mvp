@@ -9,7 +9,16 @@ export const metadata = {
   robots: { index: false, follow: false }
 };
 
-export default function DryrunPage() {
+export default async function DryrunPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ __auditBoundary?: string }>;
+}) {
+  const query = await searchParams;
+  if (process.env.SAFECLAW_FRONTEND_AUDIT === "1" && query.__auditBoundary === "error") {
+    throw new Error("SafeClaw deterministic frontend audit error boundary probe");
+  }
+
   const snapshot = getLatestDryrunSnapshot();
   const report = getLatestDryrunReport();
 

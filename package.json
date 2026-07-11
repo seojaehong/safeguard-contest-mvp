@@ -15,6 +15,7 @@
     "audit:release-scale": "node ./scripts/final_release_scale_audit.mjs",
     "audit:release-scale:strict": "node ./scripts/final_release_scale_audit.mjs --strict",
     "audit:output-integrity": "node ./scripts/final_output_integrity_audit.mjs",
+    "audit:frontend-consistency": "node ./scripts/frontend_consistency_audit.mjs",
     "release:closeout": "node ./scripts/final_release_closeout.mjs",
     "smoke:orchestration-download": "node ./scripts/prod_orchestration_download_smoke.mjs",
     "smoke:submission": "node ./scripts/submission_readiness_smoke.mjs",
