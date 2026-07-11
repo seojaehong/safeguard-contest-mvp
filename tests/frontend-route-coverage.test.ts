@@ -1,11 +1,19 @@
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
 import { userVisibleRoutes } from "@/lib/frontend-design-contract";
 
 const root = process.cwd();
+
+function runBrowserContractProbe(expression: string): unknown {
+  const moduleUrl = pathToFileURL(path.join(root, "scripts/frontend_consistency_browser_audit.mjs")).href;
+  const source = `import * as audit from ${JSON.stringify(moduleUrl)}; console.log(JSON.stringify(${expression}));`;
+  return JSON.parse(execFileSync(process.execPath, ["--input-type=module", "--eval", source], { encoding: "utf8" }));
+}
 
 type CssDeclarations = Record<string, string>;
 type CssRule = { selectors: string[]; declarations: CssDeclarations };
@@ -333,7 +341,8 @@ describe("browser evidence reconciliation", () => {
     const viewports = ["desktop-1440", "tablet-1024", "mobile-390"];
     const requiredFields = [
       "requestedUrl", "finalUrl", "status", "viewport", "theme", "consoleErrors",
-      "pageErrors", "horizontalOverflow", "bodyFont", "primaryHeading", "visiblePrimaryContent",
+      "pageErrors", "horizontalOverflow", "bodyFont", "bodyFontSize", "bodyFontWeight",
+      "bodyLineHeight", "bodyLetterSpacing", "productFontLoaded", "primaryHeading", "visiblePrimaryContent",
       "screenshot", "limitation",
     ];
 
@@ -389,6 +398,7 @@ describe("browser evidence reconciliation", () => {
     expect(report.totals.successes + report.totals.failedRows).toBe(totalRows);
     expect(report.totals.failedRows).toBe(0);
     expect(report.totals.findingCount).toBe(0);
+    expect(report.totals.recoveredRows).toBe(0);
     expect(report.totals.successes).toBeGreaterThanOrEqual(0);
     for (const row of allRows) {
       expect(row).toMatchObject({ result: "pass" });
@@ -421,6 +431,42 @@ describe("browser evidence reconciliation", () => {
     expect(totals.successes + totals.failedRows).toBe(2);
     expect(totals.successes).toBeGreaterThanOrEqual(0);
   });
+
+  it("rejects independent exact typography and unloaded-font mutations", () => {
+    const validRow = {
+      route: "/workspace", viewport: "desktop-1440", status: 200, consoleErrors: [], pageErrors: [],
+      horizontalOverflow: 0, visiblePrimaryContent: "작업공간", boundaryMarker: "",
+      bodyFont: 'Pretendard, "Noto Sans KR", sans-serif', bodyFontSize: "15px", bodyFontWeight: "500",
+      bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
+      primaryHeading: { tag: "h1", text: "작업공간", fontFamily: "Pretendard", fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      renderedControls: [], keySurfaces: [], documentTypography: {},
+    };
+    const probe = (row: object) => runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
+
+    expect(probe(validRow).findings).toEqual([]);
+    for (const mutation of [
+      { primaryHeading: { ...validRow.primaryHeading, fontSize: "39px", lineHeight: "44.85px", letterSpacing: "-1.365px" } },
+      { bodyFont: "Arial, sans-serif" },
+      { bodyLineHeight: "23px" },
+      { bodyLetterSpacing: "1px" },
+      { productFontLoaded: false },
+    ]) {
+      expect(probe({ ...validRow, ...mutation }).findings, JSON.stringify(mutation)).not.toEqual([]);
+    }
+  }, 30_000);
+
+  it("retains unrelated boundary and hydration errors", () => {
+    const probeErrors = ["SafeClaw deterministic frontend audit error boundary probe", "unrelated runtime failure"];
+    const filtered = runBrowserContractProbe(`audit.filterExpectedBoundaryErrors(${JSON.stringify(probeErrors)}, "error", "page")`) as string[];
+    expect(filtered).toEqual(["unrelated runtime failure"]);
+    const genericServerError = "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.";
+    expect(runBrowserContractProbe(`audit.filterExpectedBoundaryErrors([${JSON.stringify(genericServerError)}], "error", "console")`)).toEqual([genericServerError]);
+    expect(runBrowserContractProbe(`audit.filterExpectedBoundaryErrors([${JSON.stringify(genericServerError)}, "unrelated console failure"], "error", "console", true)`)).toEqual(["unrelated console failure"]);
+
+    expect(runBrowserContractProbe(`audit.shouldRetryTransientHydration(["Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]="], [])`)).toBe(true);
+    expect(runBrowserContractProbe(`audit.shouldRetryTransientHydration(["Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]=", "unrelated runtime failure"], [])`)).toBe(false);
+    expect(runBrowserContractProbe(`audit.shouldRetryTransientHydration(["Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]="], ["unrelated console failure"])`)).toBe(false);
+  }, 30_000);
 });
 
 describe("knowledge and legal route hierarchy", () => {

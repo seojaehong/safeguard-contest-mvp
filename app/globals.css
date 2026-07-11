@@ -7755,10 +7755,10 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-os-hero h1 {
-    font-size: var(--text-page-title);
+    font-size: var(--text-display);
     font-weight: 800;
-    line-height: var(--leading-page-title);
-    letter-spacing: var(--tracking-page-title);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
   }
 
   .safeclaw-hero-line {

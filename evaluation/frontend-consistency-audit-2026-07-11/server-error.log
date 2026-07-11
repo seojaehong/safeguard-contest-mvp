@@ -1,0 +1,4 @@
+ ⨯ Error: SafeClaw deterministic frontend audit error boundary probe
+    at j (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-consistency-audit\.next\server\app\dryrun\page.js:2:12738) {
+  digest: '3807253654'
+}

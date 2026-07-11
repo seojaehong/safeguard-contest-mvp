@@ -34,4 +34,13 @@ The error and global-error boundaries are now exercised by environment-gated aud
 - Login and callback fallbacks are explicitly labelled; legal divider artifacts, 34px quick chips, and a 30px worker acknowledgement control were corrected through RED/GREEN checks.
 - Final browser audit: 108 successes, zero failed rows, zero findings. Final regression: 56 files/517 tests, typecheck, normal production build, static audit 32 routes/22 components with zero coverage issues or violations.
 
+## Exact computed-style remediation
+
+- Replaced ratio-only role inference with exact viewport-derived Display and Page-title sizes, weights, line heights, and tracking values from the design specification.
+- Added exact `15px/500/24px/0` product body checks, `document.fonts.check()` evidence, and exact generated title/section/body/table/note point-equivalent tuples.
+- Mutation tests independently reject a ratio-preserving wrong heading size, wrong family, body line-height, body tracking, and an unloaded font.
+- Boundary filtering removes only exact audit probe messages and their confirmed production 500 consequence; unrelated probe/hydration errors remain findings. React 418 retry requires a sole exact signature and zero console errors, with recovered rows separately labelled and counted.
+- Browser review found and fixed the landing mobile hero's 32px regression; it now renders the required 44px Display tuple. The generated PDF fixture now includes a real table row so all five document roles are browser-verified.
+- Final evidence: browser 108 successes, zero failed/recovered rows, zero findings; 56 files/519 tests; typecheck; audit-mode and normal builds; static audit 32 routes/22 components with zero issues.
+
 F7 remains `in_progress` with `passes: false` pending independent re-review and PR handoff.

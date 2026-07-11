@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 export default function Error({
   error,
   reset,
@@ -7,6 +9,12 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("__auditBoundary") === "error") {
+      console.error("SafeClaw deterministic frontend audit error boundary probe");
+    }
+  }, []);
+
   return (
     <main className="container grid">
       <section className="card list special-state" data-audit-boundary="error">
