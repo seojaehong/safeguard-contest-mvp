@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "0fdaed4048252b812a82a47982db9ad80874718e",
+  "buildId": "3PrUUfsEcsHga0TxNOVqt",
+  "lockSha256": "116da99b26a160322d632df067fe9177a14bb6152a3ab05dc543e7919c059ccd",
+  "nextVersion": "15.5.20",
+  "url": "http://127.0.0.1:3127/workspace?theme=day",
+  "httpStatus": 200,
+  "contentLength": 26686,
+  "probedAt": "2026-07-12T05:23:47.4248301+09:00"
+}

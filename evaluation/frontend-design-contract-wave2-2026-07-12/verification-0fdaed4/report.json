@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "safeclaw-frontend-design-wave-verification/v2",
+  "status": "review-pending",
+  "sourceSha": "0fdaed4048252b812a82a47982db9ad80874718e",
+  "portableProductCommits": [
+    "5db5220f240ed6c499128dbbc082943c321e9a40",
+    "0fdaed4048252b812a82a47982db9ad80874718e"
+  ],
+  "supersedesEvidenceCommit": "21bb393b5f535cba3a0b162f1981b75f3cf4d4c2",
+  "scope": {
+    "route": "/workspace",
+    "surface": "responsive input textarea cascade",
+    "removedImportantDeclarations": 15,
+    "reportsFilesChanged": 0,
+    "packageFilesChanged": 0
+  },
+  "format": {
+    "submissionGuardBareLf": 0,
+    "mediaSelectorIndentation": "normalized"
+  },
+  "tests": {
+    "staticContract": {
+      "passed": 2,
+      "failed": 0,
+      "log": "static-contract.log"
+    },
+    "computedStyleMatrix": {
+      "themes": ["day", "night"],
+      "viewports": ["1440x900", "1440x500", "1440x410", "1440x360", "1440x320", "390x844"],
+      "combinations": 12,
+      "passed": 12,
+      "failed": 0,
+      "assertedProperties": ["display", "min-height", "padding", "overflow-y", "font-size", "line-height", "resize"],
+      "log": "browser-matrix.log"
+    },
+    "typecheck": {
+      "status": "pass",
+      "log": "typecheck.log"
+    }
+  },
+  "dependency": {
+    "lockSha256": "116da99b26a160322d632df067fe9177a14bb6152a3ab05dc543e7919c059ccd",
+    "nextVersion": "15.5.20"
+  },
+  "build": {
+    "status": "pass",
+    "staticPages": 27,
+    "buildId": "3PrUUfsEcsHga0TxNOVqt",
+    "sourceIdentity": "b6c70c9b091aa6425f5aec2289640a25aad7fb033185b53ec6c8e0b1345ed4f3",
+    "buildIdentity": "7e128e8d400530a9de7177d85536f10517d41b225681698eb3ee2abaa3bf962f",
+    "chunkCount": 97,
+    "auditMarkerCount": 0,
+    "log": "build.log",
+    "bundleEvidence": "bundle-normal.json"
+  },
+  "runtime": {
+    "url": "http://127.0.0.1:3127/workspace?theme=day",
+    "httpStatus": 200,
+    "contentLength": 26686,
+    "evidence": "runtime-probe.json",
+    "stdout": "production-runtime.stdout.log",
+    "stderr": "production-runtime.stderr.log"
+  },
+  "staticAudit": {
+    "status": "fail",
+    "expectedResidual": true,
+    "violationCount": 2352,
+    "importantDeclarations": 710,
+    "coverageIssues": 0,
+    "evidence": "static-audit.json"
+  },
+  "browser108": {
+    "status": "not-run",
+    "reason": "static prerequisite remains RED"
+  }
+}
