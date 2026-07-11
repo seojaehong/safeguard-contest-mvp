@@ -53,4 +53,5 @@ F6 remains `in_progress` with `passes: false` pending independent specification 
 - Independent runtime proof now uses PDF.js text extraction rather than raw operand decoding. It recovers the Korean title, company, site, work description, writer, and approver. `@napi-rs/canvas` then renders the title region and requires nonblank dark glyph pixels.
 - Recovery RED: focused verification failed 1 of 28 checks because the first low-level operator version referenced logical font names instead of the page's generated resource keys; PDF.js returned subset CIDs instead of Korean text.
 - Recovery GREEN: focused generated-document and design-contract verification passes 28/28; the full suite passes 56 files/512 tests; static audit covers 32 routes and 22 components with zero coverage issues and zero violations; strict typecheck passes; production build `CIHaGCAgAeMgGgzv-QwIB` passes; diff-check passes.
-- F6 remains `in_progress` with `passes: false` pending fresh independent specification and code-quality review.
+- Final independent review: specification compliance PASS and code quality PASS, with zero Critical, Important, or Minor findings across `d8dbe75..a66a682`. All five prior findings are closed.
+- F6 is complete with `passes: true`. F7 retains the integrated browser/server evidence and PR handoff.

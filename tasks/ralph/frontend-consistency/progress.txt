@@ -97,3 +97,9 @@
 - Verified: structural/font/extraction RED 3/10; GREEN focused 28/28, full 56 files/512 tests, static audit zero violations, typecheck, production build `6VXzX-xnqM5yUVHrW-rCG`, and diff-check pass.
 - Learned: a PDF font descriptor and family name do not supply glyphs; portable Korean output requires the actual licensed font program, Unicode-to-glyph mapping, and ToUnicode extraction mapping.
 - Next: keep F6 `passes: false` until independent re-review confirms the embedded object graph.
+
+## 2026-07-11 F6 final review closure
+- Changed: implementation `a66a682` replaced both 6.2 MB full-font streams with dynamically subset Noto Sans KR Regular/Bold resources, corrected their internal metadata, and linked the generated page resource keys to every exact document role.
+- Verified: representative PDF 15,770 bytes, SHA-256 `4DC006D2BCDEDEF95F6ACF124C955D54612CBCB494F5A32A0A20C5319D3D62D9`; PDF.js extracts Korean fields and signatures, canvas renders nonblank Korean title glyphs, focused 28/28, full 512/512, static audit zero issues, strict typecheck, production build, and diff-check pass.
+- Reviewed: independent specification and code-quality review both PASS with zero Critical, Important, or Minor findings across `d8dbe75..a66a682`; all five prior findings are closed.
+- Next: F7 complete browser evidence and PR handoff.

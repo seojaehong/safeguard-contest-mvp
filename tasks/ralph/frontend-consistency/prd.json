@@ -122,8 +122,8 @@
       "id": "F6",
       "title": "Generated document typography",
       "priority": 6,
-      "status": "in_progress",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Print title, section, body, table, and note values use the exact pt contract",
         "Document data and export contracts are unchanged"
