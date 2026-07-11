@@ -724,7 +724,7 @@ describe("reporting downloads", () => {
     });
     const sampleSnapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
-      improvements: [improvements[0]],
+      improvements: [],
       period: "weekly",
       sourceMode: "sample",
       now: new Date("2026-07-08T12:00:00.000Z")
@@ -749,6 +749,36 @@ describe("reporting downloads", () => {
         expect(exported).toContain("workpack_saved_at");
         expect(exported).toContain(limitation);
       }
+    }
+  });
+
+  it("strips caller-provided authoritative improvements from every sample export", () => {
+    const authoritativeSentinel = "AUTHORITATIVE_IMPROVEMENT_MUST_NOT_SERIALIZE";
+    const sampleSnapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [{
+        ...improvements[0],
+        id: "authoritative-improvement",
+        improvementText: authoritativeSentinel
+      }],
+      period: "weekly",
+      sourceMode: "sample",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(sampleSnapshot.improvements).toEqual([]);
+    expect(sampleSnapshot.summary.improvements).toBe(0);
+    expect(sampleSnapshot.facets.improvementStatuses).toEqual([]);
+    expect(sampleSnapshot.groups.byDocument).toEqual([]);
+    for (const exported of [
+      buildReportCsv(sampleSnapshot),
+      buildReportJson(sampleSnapshot),
+      buildReportMarkdown(sampleSnapshot),
+      buildReportLearningJsonl(sampleSnapshot),
+      buildReportLearningMarkdown(sampleSnapshot)
+    ]) {
+      expect(exported).not.toContain(authoritativeSentinel);
+      expect(exported).not.toContain("authoritative-improvement");
     }
   });
 

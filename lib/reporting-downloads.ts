@@ -581,7 +581,7 @@ export function buildReportSnapshot(input: {
       : fallbackRiskRow(input.workpack)
     : [];
   const photoApprovals = input.photoApprovals || [];
-  const allImprovements = input.improvements
+  const allImprovements = (sourceMode === "sample" ? [] : input.improvements)
     .filter((item) => isWithinPeriod(item.createdAt, input.period, now, dateRange))
     .map((item) => normalizeImprovement(item, allRiskRows, photoApprovals));
   const facets: ReportSnapshot["facets"] = {

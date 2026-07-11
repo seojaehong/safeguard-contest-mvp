@@ -163,9 +163,11 @@ describe("reports download center remount behavior", () => {
   it("keeps preserved authoritative history inspectable beside sample preview without merging it into sample evidence", async () => {
     if (!browser) throw new Error("Browser was not started");
     const context = await browser.newContext();
+    const currentPeriodTimestamp = new Date().toISOString();
     const preservedImprovement: OperationImprovement = {
       ...improvement,
       id: "preserved-authoritative-history",
+      createdAt: currentPeriodTimestamp,
       hazardLabel: "권한분리 고유 위험",
       improvementText: "샘플과 합치면 안 되는 실제 개선 이력",
       reflectedDocuments: ["위험성평가표", "TBM 기록"],
