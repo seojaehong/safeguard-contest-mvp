@@ -1,9 +1,12 @@
 {
-  "generatedAt": "2026-07-11T13:14:54.005Z",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-11T14:29:32.530Z",
+  "sourceSha": "482357af7ff86514d766ba1d1ee22482ae31160a",
+  "sourceIdentity": "9587d89e67489abc88490eb4b129b923153de6a0b56909e357e7e5a4f0e7e79f",
   "status": "fail",
   "counts": {
     "pageFiles": 32,
-    "componentFiles": 24,
+    "componentFiles": 23,
     "cssLines": 17688,
     "importantDeclarations": 752
   },
@@ -79,6 +82,8 @@
     "missingRoutes": [],
     "unexpectedRoutes": []
   },
+  "coverageIssues": 0,
+  "violationCount": 2444,
   "violations": [
     {
       "rule": "font-family-token",
