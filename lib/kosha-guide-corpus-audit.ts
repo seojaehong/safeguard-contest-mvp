@@ -35,6 +35,23 @@ export type KoshaJsonFetchOptions = {
   fetchImpl?: KoshaJsonFetch;
 };
 
+export type KoshaHeadersResponse = {
+  ok: boolean;
+  status: number;
+  headers: Headers;
+};
+
+export type KoshaHeadersFetch = (
+  input: string | URL,
+  init?: RequestInit
+) => Promise<KoshaHeadersResponse>;
+
+export type KoshaHeadersFetchOptions = {
+  timeoutMs?: number;
+  retries?: number;
+  fetchImpl?: KoshaHeadersFetch;
+};
+
 export async function fetchKoshaJsonWithRetry(
   input: string | URL,
   init: RequestInit,
@@ -50,13 +67,52 @@ export async function fetchKoshaJsonWithRetry(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetchImpl(input, { ...init, signal: controller.signal });
+      const response = await fetchImpl(input, {
+        cache: "no-store",
+        ...init,
+        signal: controller.signal
+      });
       if (response.status >= 500 && attempt < retries) {
         lastError = new Error(`${label} returned HTTP ${response.status}`);
         continue;
       }
       const payload = await response.json();
       return { response, payload, attemptCount: attempt + 1 };
+    } catch (error) {
+      lastError = error;
+      if (attempt === retries) break;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  const reason = lastError instanceof Error ? lastError.message : String(lastError || "unknown error");
+  throw new Error(`${label} failed after ${retries + 1} attempts: ${reason}`);
+}
+
+export async function fetchHeadersWithRetry(
+  input: string | URL,
+  init: RequestInit,
+  label: string,
+  options: KoshaHeadersFetchOptions = {}
+): Promise<KoshaHeadersResponse> {
+  const timeoutMs = options.timeoutMs ?? KOSHA_AUDIT_REQUEST_TIMEOUT_MS;
+  const retries = options.retries ?? KOSHA_AUDIT_REQUEST_RETRIES;
+  const fetchImpl: KoshaHeadersFetch = options.fetchImpl || ((fetchInput, fetchInit) =>
+    fetch(fetchInput, fetchInit));
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetchImpl(input, {
+        cache: "no-store",
+        ...init,
+        signal: controller.signal
+      });
+      if (response.status < 500 || attempt === retries) return response;
+      lastError = new Error(`${label} returned HTTP ${response.status}`);
     } catch (error) {
       lastError = error;
       if (attempt === retries) break;
@@ -100,6 +156,16 @@ export type KoshaSupabaseVisibleExpectation = {
   canonicalRowSha256?: string | null;
 };
 
+export type KoshaParseStatsExpectation = {
+  rowsReturned: number;
+  parseAttemptedCount: number;
+  parseSuccessCount: number;
+  parseEmptyOutputCount: number;
+  parseFailureCount: number;
+  parseNotAttemptedCount: number;
+  accountingMatches: boolean;
+};
+
 export type KoshaGuideAuditManifest = {
   version: 1;
   measuredAt: string;
@@ -107,6 +173,7 @@ export type KoshaGuideAuditManifest = {
     KoshaArchiveInventory,
     "archiveCount" | "pdfEntryCount" | "entryManifestSha256" | "itemTypes"
   >;
+  localParse?: KoshaParseStatsExpectation;
   supabaseVisible: KoshaSupabaseVisibleExpectation;
   officialSnapshot?: KoshaOfficialSnapshotExpectation;
 };
@@ -413,6 +480,7 @@ function compareItemTypes(
 export function listKoshaManifestGateFailures(
   actual: {
     localArchive: Pick<KoshaArchiveInventory, "archiveCount" | "pdfEntryCount" | "entryManifestSha256" | "itemTypes">;
+    localParse?: KoshaParseStatsExpectation | null;
     supabaseVisible: KoshaSupabaseVisibleExpectation | null;
     officialSnapshot?: KoshaOfficialSnapshotExpectation | null;
   },
@@ -429,6 +497,29 @@ export function listKoshaManifestGateFailures(
     failures.push(`local-entry-manifest-sha256:${actual.localArchive.entryManifestSha256}`);
   }
   failures.push(...compareItemTypes(actual.localArchive.itemTypes, expected.localArchive.itemTypes, "local"));
+
+  if (expected.localParse) {
+    if (!actual.localParse) {
+      failures.push("local-parse-unavailable");
+    } else {
+      const parseFields: Array<[keyof KoshaParseStatsExpectation, string]> = [
+        ["rowsReturned", "rows-returned"],
+        ["parseAttemptedCount", "attempted"],
+        ["parseSuccessCount", "success"],
+        ["parseEmptyOutputCount", "empty-output"],
+        ["parseFailureCount", "failure"],
+        ["parseNotAttemptedCount", "not-attempted"]
+      ];
+      for (const [field, label] of parseFields) {
+        if (actual.localParse[field] !== expected.localParse[field]) {
+          failures.push(`local-parse-${label}:${actual.localParse[field]}`);
+        }
+      }
+      if (actual.localParse.accountingMatches !== expected.localParse.accountingMatches) {
+        failures.push(`local-parse-accounting:${actual.localParse.accountingMatches}`);
+      }
+    }
+  }
 
   if (!actual.supabaseVisible) {
     failures.push("supabase-visible-unavailable");

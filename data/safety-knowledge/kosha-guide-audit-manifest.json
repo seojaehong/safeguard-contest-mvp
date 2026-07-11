@@ -10,6 +10,15 @@
       "technical-support-regulation": 237
     }
   },
+  "localParse": {
+    "rowsReturned": 1040,
+    "parseAttemptedCount": 237,
+    "parseSuccessCount": 222,
+    "parseEmptyOutputCount": 15,
+    "parseFailureCount": 0,
+    "parseNotAttemptedCount": 803,
+    "accountingMatches": true
+  },
   "supabaseVisible": {
     "sourceId": "kosha-technical-support-regulations-2025",
     "rowCount": 1040,

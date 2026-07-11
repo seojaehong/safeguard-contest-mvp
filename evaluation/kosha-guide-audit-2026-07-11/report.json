@@ -1,14 +1,16 @@
 {
   "schemaVersion": "safeclaw-kosha-guide-audit/v2",
-  "generatedAt": "2026-07-11T12:27:05.635Z",
+  "generatedAt": "2026-07-11T13:04:38.485Z",
   "readOnly": true,
   "dbMutationPerformed": false,
   "uploadPerformed": false,
   "item_count": 1040,
-  "success_count": 237,
+  "success_count": 222,
+  "boundary_count": 15,
+  "empty_output_count": 15,
   "failure_count": 0,
-  "collection_count_semantics": "item_count is rows returned; success_count/failure_count are per-PDF parse attempts; non-attempted guideline rows and verification failures are separate",
-  "elapsed_seconds": 107.85,
+  "collection_count_semantics": "item_count is rows returned; success_count is attempted PDFs with usable nonempty output; boundary_count/empty_output_count is attempted PDFs requiring OCR or extraction review; failure_count is hard parser exceptions; non-attempted guideline rows and verification failures are separate",
+  "elapsed_seconds": 73.65,
   "launchReadiness": {
     "launchReadyForAuthoritativeGrounding": false,
     "conclusion": "NOT launch-ready for authoritative KOSHA-guide grounding",
@@ -19,7 +21,7 @@
         "severity": "BLOCKER",
         "id": "authoritative-body-empty",
         "count": 818,
-        "evidence": "818 rows have no parsed body; count/hash parity cannot ground answers in missing text",
+        "evidence": "818 rows have no parsed body, including 15 attempted empty outputs and 803 non-attempted guideline rows; count/hash parity cannot ground answers in missing text",
         "releaseCondition": "source PDF text or reviewed OCR body is non-empty and hash/provenance linked"
       },
       {
@@ -85,7 +87,7 @@
     ]
   },
   "determinism": {
-    "stableFieldsSha256": "dfb3df7b16a8d1bec19db55d44f04f93ecf7ce19a654ba54e7bd5406eaac92f7",
+    "stableFieldsSha256": "7ed955fe8cbdac5d8f99ae55ad3299ddeef4e165c34c073fb2d9ab097ce79ba0",
     "excludesVolatileFields": [
       "generatedAt",
       "elapsed_seconds",
@@ -94,10 +96,10 @@
     "operationalAuditRepeatMatched": true
   },
   "verification": {
-    "checkCount": 31,
+    "checkCount": 32,
     "passedCheckCount": 14,
     "failedCheckCount": 8,
-    "boundaryCheckCount": 9,
+    "boundaryCheckCount": 10,
     "failures": [
       "empty-body:818",
       "duplicate-summary:822",
@@ -109,6 +111,7 @@
       "retired-local-row:1"
     ],
     "boundaries": [
+      "local-pdf-empty-output:15",
       "raw-control-initial-heuristic:73",
       "raw-control-ground-truth-clearance:73",
       "raw-control-secondary-heuristic:0",
@@ -121,7 +124,7 @@
     ]
   },
   "manifestGate": {
-    "scope": "snapshot-shape-count-hash-only",
+    "scope": "snapshot-shape-count-hash-and-parse-accounting",
     "isLaunchReadinessGate": false,
     "manifestPath": "data/safety-knowledge/kosha-guide-audit-manifest.json",
     "manifestAvailable": true,
@@ -197,7 +200,7 @@
     "productionStatus": {
       "url": "https://safeguard-contest-mvp.vercel.app/api/safety-reference/status",
       "httpStatus": 200,
-      "checkedAt": "Sat, 11 Jul 2026 12:28:31 GMT",
+      "checkedAt": "Sat, 11 Jul 2026 13:05:31 GMT",
       "cache": "MISS",
       "matchedPath": "/api/safety-reference/status",
       "message": "기술지원규정 폴더 1,040건 기준과 Supabase 기술지원규정 소스 1,040건을 연결했습니다."
@@ -4161,7 +4164,8 @@
     "parseStats": {
       "rowsReturned": 1040,
       "parseAttemptedCount": 237,
-      "parseSuccessCount": 237,
+      "parseSuccessCount": 222,
+      "parseEmptyOutputCount": 15,
       "parseFailureCount": 0,
       "parseNotAttemptedCount": 803,
       "unmatchedFailureNotices": [],
@@ -4816,7 +4820,7 @@
         },
         {
           "internalPath": "A-G-3-2025 오토바이 배달작업 시 안전에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "A-G-4-2025 이동식 사다리의 사용에 관한 기술지원규정.pdf",
@@ -4836,11 +4840,11 @@
         },
         {
           "internalPath": "A-G-8-2025 산업재해 기록·분류에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "A-G-9-2025 창고 작업 시 안전에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "A-R-1-2026 자율안전보건체계 구축 및 운영에 관한 기술지원규정.pdf",
@@ -4864,7 +4868,7 @@
         },
         {
           "internalPath": "B-E-1-2025 피뢰시스템에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-E-10-2026 정전전로 및 그 인근에서의 전기작업에 관한 기술지원규정.pdf",
@@ -4924,7 +4928,7 @@
         },
         {
           "internalPath": "B-E-3-2025 변전실 등의 양압유지에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-E-4-2025 전기기기의 코드 접속기구에 관한 기술지원규정.pdf",
@@ -4932,15 +4936,15 @@
         },
         {
           "internalPath": "B-E-5-2025 비상전원의 선정 및 설치에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-E-6-2025 전기울타리의 안전에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-E-7-2025 건설현장의 전기설비 설치 및 관리에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-E-8-2026 계측장치의 선정·설치·사용에 관한 기술지원규정.pdf",
@@ -4956,7 +4960,7 @@
         },
         {
           "internalPath": "B-M-10-2025 화학설비의 설치에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-M-11-2025 지게차의 안전작업에 관한 기술지원규정.pdf",
@@ -4964,7 +4968,7 @@
         },
         {
           "internalPath": "B-M-12-2025 크레인 달기기구 및 줄걸이 작업용 와이어로프의 작업에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-M-13-2025 기계톱을 이용한 벌목작업에 관한 기술지원규정.pdf",
@@ -4972,7 +4976,7 @@
         },
         {
           "internalPath": "B-M-14-2025 연삭기 안전작업에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-M-15-2026 고온 염색기 안전에 관한 기술지원규정.pdf",
@@ -5040,7 +5044,7 @@
         },
         {
           "internalPath": "B-M-3-2025 파쇄기의 방호조치에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-M-30-2026 자분탐상과 침투탐상검사에 관한 기술지원규정.pdf",
@@ -5088,7 +5092,7 @@
         },
         {
           "internalPath": "B-M-5-2025 분쇄기의 안전작업에 관한 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-M-6-2025 식품가공용 기계의 안전작업에 관한 기술지원규정.pdf",
@@ -5100,11 +5104,11 @@
         },
         {
           "internalPath": "B-M-8-2025 이동식 크레인 안전보건작업 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "B-M-9-2025 이동식크레인 양중작업의 안정성 검토 기술지원규정.pdf",
-          "status": "success"
+          "status": "empty_output"
         },
         {
           "internalPath": "C-05-2016 건설공사 돌관작업 안전보건작업 지침.pdf",
@@ -8342,7 +8346,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 438739,
-      "elapsedMs": 75
+      "elapsedMs": 88
     },
     {
       "code": "D-C-13-2026",
@@ -8352,7 +8356,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 775152,
-      "elapsedMs": 78
+      "elapsedMs": 73
     },
     {
       "code": "E-G-18-2026",
@@ -8362,7 +8366,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 751075,
-      "elapsedMs": 144
+      "elapsedMs": 119
     },
     {
       "code": "B-M-11-2025",
@@ -8372,7 +8376,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 5670197,
-      "elapsedMs": 110
+      "elapsedMs": 108
     },
     {
       "code": "B-E-20-2026",
@@ -8382,7 +8386,7 @@
       "httpStatus": 200,
       "contentType": "application/pdf;charset=UTF-8",
       "contentLength": 524246,
-      "elapsedMs": 104
+      "elapsedMs": 103
     }
   ],
   "retrieval": {
@@ -8404,7 +8408,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 1047,
+        "elapsedMs": 1057,
         "items": [
           {
             "id": "sif-아카이브-건설업-01001",
@@ -8688,7 +8692,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 730,
+        "elapsedMs": 729,
         "items": [
           {
             "id": "technical-support-01-0065-d-c-13-2026-외벽도장보수공사에-안전작업에-관한-기술지원규정",
@@ -8967,7 +8971,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 505,
+        "elapsedMs": 545,
         "items": [
           {
             "id": "technical-support-01-0065-d-c-13-2026-외벽도장보수공사에-안전작업에-관한-기술지원규정",
@@ -9219,7 +9223,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 902,
+        "elapsedMs": 893,
         "items": [
           {
             "id": "downloads-15-2023년-동절기-건설현장-안전보건-길잡이-057603902c-record-0004-item",
@@ -9418,7 +9422,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 582,
+        "elapsedMs": 593,
         "items": [
           {
             "id": "technical-support-10-0012-c-c-2-2025-화학설비-정비-보수작업계획서-작성-등에-관한-기술지원규정",
@@ -9702,7 +9706,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 501,
+        "elapsedMs": 500,
         "items": [
           {
             "id": "technical-support-10-0012-c-c-2-2025-화학설비-정비-보수작업계획서-작성-등에-관한-기술지원규정",
@@ -9977,7 +9981,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 899,
+        "elapsedMs": 907,
         "items": [
           {
             "id": "machinery-0469",
@@ -10219,7 +10223,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 2,
-        "elapsedMs": 1088,
+        "elapsedMs": 1059,
         "items": [
           {
             "id": "technical-support-02-0005-b-m-11-2025-지게차의-안전작업에-관한-기술지원규정",
@@ -10281,7 +10285,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 3,
-        "elapsedMs": 962,
+        "elapsedMs": 1001,
         "items": [
           {
             "id": "technical-support-06-0024-g-100-2013-지게차-운전자의-안전교육훈련에-관한-기술지침",
@@ -10360,7 +10364,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 1302,
+        "elapsedMs": 1314,
         "items": [
           {
             "id": "technical-support-09-0013-b-e-20-2026-정전도장기-제작-및-설치에-관한-기술지원규정",
@@ -10637,7 +10641,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 6,
-        "elapsedMs": 810,
+        "elapsedMs": 824,
         "items": [
           {
             "id": "technical-support-09-0013-b-e-20-2026-정전도장기-제작-및-설치에-관한-기술지원규정",
@@ -10785,7 +10789,7 @@
           "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
         },
         "count": 12,
-        "elapsedMs": 380,
+        "elapsedMs": 411,
         "items": [
           {
             "id": "technical-support-09-0061-e-182-2021-정전기에-의한-화재폭발-재해조사에-대한-기술지침",
@@ -11632,13 +11636,19 @@
       "id": "local-parse-accounting",
       "status": "pass",
       "count": 0,
-      "detail": "1040 returned; 237 attempted; 237 succeeded; 0 failed"
+      "detail": "1040 returned; 237 attempted; 222 usable nonempty; 15 empty output; 0 hard failed"
+    },
+    {
+      "id": "local-pdf-empty-output",
+      "status": "boundary",
+      "count": 15,
+      "detail": "attempted PDF parses with no usable nonempty body; OCR or extraction review required"
     },
     {
       "id": "local-pdf-parse-failure",
       "status": "pass",
       "count": 0,
-      "detail": "per-PDF parser exceptions; empty extracted text is tracked separately as body quality"
+      "detail": "per-PDF parser exceptions; empty outputs are tracked as a separate boundary"
     },
     {
       "id": "operational-audit-deterministic",
