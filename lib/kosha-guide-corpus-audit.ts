@@ -115,12 +115,14 @@ export type KoshaGuideRowAudit = {
   rawTagStandaloneControlLeakCount: number;
   rawInitialControlContaminationCount: number;
   rawControlContaminationCount: number;
-  rawControlFalsePositiveCount: number;
-  rawControlAliasRemovedFlagCount: number;
+  rawControlGroundTruthClearedCount: number;
+  rawControlReviewRequiredCount: number;
+  rawControlHeuristicDeltaFlagCount: number;
   operationalInitialControlContaminationCount: number;
   operationalControlContaminationCount: number;
-  operationalControlFalsePositiveCount: number;
-  operationalControlAliasRemovedFlagCount: number;
+  operationalControlGroundTruthClearedCount: number;
+  operationalControlReviewRequiredCount: number;
+  operationalControlHeuristicDeltaFlagCount: number;
   sourceMutationCount: number;
   rawInitialControlContaminationRows: Array<{
     id: string;
@@ -146,19 +148,38 @@ export type KoshaGuideRowAudit = {
     flags: string[];
     controls: string[];
   }>;
-  rawControlFalsePositiveRows: Array<{
+  rawControlGroundTruthClearedRows: Array<{
     id: string;
     title: string;
     initialFlags: string[];
     removedFlags: string[];
   }>;
-  operationalControlFalsePositiveRows: Array<{
+  rawControlReviewRequiredRows: Array<{
     id: string;
     title: string;
     initialFlags: string[];
     removedFlags: string[];
+    unlabelledFlags: string[];
+  }>;
+  operationalControlGroundTruthClearedRows: Array<{
+    id: string;
+    title: string;
+    initialFlags: string[];
+    removedFlags: string[];
+  }>;
+  operationalControlReviewRequiredRows: Array<{
+    id: string;
+    title: string;
+    initialFlags: string[];
+    removedFlags: string[];
+    unlabelledFlags: string[];
   }>;
 };
+
+export type KoshaControlGroundTruthLabels = Record<
+  string,
+  Record<string, "false-positive" | "confirmed-contamination">
+>;
 
 export type KoshaRetrievalScenario = {
   id: string;
@@ -173,6 +194,7 @@ export type KoshaRetrievalBranch = NonNullable<SafetyReferenceItem["retrieval_so
 export type KoshaRetrievalScenarioAudit = {
   scenarioId: string;
   branch: KoshaRetrievalBranch;
+  executionStatus: "tested" | "untested";
   selectedIds: string[];
   selectedTitles: string[];
   retrievalSources: KoshaRetrievalBranch[];
@@ -469,7 +491,8 @@ function isTemplatedFallbackSummary(summary: string): boolean {
 }
 
 export function auditKoshaGuideRows(
-  rows: Array<SafetyReferenceItem & { payload?: Record<string, unknown> }>
+  rows: Array<SafetyReferenceItem & { payload?: Record<string, unknown> }>,
+  groundTruthLabels: KoshaControlGroundTruthLabels = {}
 ): KoshaGuideRowAudit {
   const duplicateIds = duplicateGroups(rows.map((row) => row.id));
   const duplicateTitles = duplicateGroups(rows.map((row) => normalizeWhitespace(row.title).toLowerCase()));
@@ -501,19 +524,21 @@ export function auditKoshaGuideRows(
   const rawControlContaminationRows: KoshaGuideRowAudit["rawControlContaminationRows"] = [];
   const operationalInitialControlContaminationRows: KoshaGuideRowAudit["operationalInitialControlContaminationRows"] = [];
   const operationalControlContaminationRows: KoshaGuideRowAudit["operationalControlContaminationRows"] = [];
-  const rawControlFalsePositiveRows: KoshaGuideRowAudit["rawControlFalsePositiveRows"] = [];
-  const operationalControlFalsePositiveRows: KoshaGuideRowAudit["operationalControlFalsePositiveRows"] = [];
+  const rawControlGroundTruthClearedRows: KoshaGuideRowAudit["rawControlGroundTruthClearedRows"] = [];
+  const rawControlReviewRequiredRows: KoshaGuideRowAudit["rawControlReviewRequiredRows"] = [];
+  const operationalControlGroundTruthClearedRows: KoshaGuideRowAudit["operationalControlGroundTruthClearedRows"] = [];
+  const operationalControlReviewRequiredRows: KoshaGuideRowAudit["operationalControlReviewRequiredRows"] = [];
   let sourceMutationCount = 0;
   let rawTagStandaloneControlLeakCount = 0;
-  let rawControlAliasRemovedFlagCount = 0;
-  let operationalControlAliasRemovedFlagCount = 0;
+  let rawControlHeuristicDeltaFlagCount = 0;
+  let operationalControlHeuristicDeltaFlagCount = 0;
 
   for (const row of rows) {
     const before = JSON.stringify(row);
     const rawInitialFlags = controlContaminationFlags(row, row.controls, "initial");
     const rawFlags = controlContaminationFlags(row, row.controls, "calibrated");
     const rawRemovedFlags = rawInitialFlags.filter((flag) => !rawFlags.includes(flag));
-    rawControlAliasRemovedFlagCount += rawRemovedFlags.length;
+    rawControlHeuristicDeltaFlagCount += rawRemovedFlags.length;
     if (rawInitialFlags.length) {
       rawInitialControlContaminationRows.push({
         id: row.id,
@@ -530,13 +555,21 @@ export function auditKoshaGuideRows(
         controls: [...row.controls]
       });
     }
-    if (rawInitialFlags.length && !rawFlags.length) {
-      rawControlFalsePositiveRows.push({
+    if (rawRemovedFlags.length) {
+      const unlabelledFlags = rawRemovedFlags.filter(
+        (flag) => groundTruthLabels[row.id]?.[flag] !== "false-positive"
+      );
+      const delta = {
         id: row.id,
         title: row.title,
         initialFlags: rawInitialFlags,
         removedFlags: rawRemovedFlags
-      });
+      };
+      if (unlabelledFlags.length) {
+        rawControlReviewRequiredRows.push({ ...delta, unlabelledFlags });
+      } else {
+        rawControlGroundTruthClearedRows.push(delta);
+      }
     }
     rawTagStandaloneControlLeakCount += row.controls.some((control) =>
       row.risk_tags.some((tag) => normalizeWhitespace(tag) === normalizeWhitespace(control))
@@ -545,7 +578,7 @@ export function auditKoshaGuideRows(
     const operationalInitialFlags = controlContaminationFlags(row, operationalView.controls, "initial");
     const operationalFlags = controlContaminationFlags(row, operationalView.controls, "calibrated");
     const operationalRemovedFlags = operationalInitialFlags.filter((flag) => !operationalFlags.includes(flag));
-    operationalControlAliasRemovedFlagCount += operationalRemovedFlags.length;
+    operationalControlHeuristicDeltaFlagCount += operationalRemovedFlags.length;
     if (operationalInitialFlags.length) {
       operationalInitialControlContaminationRows.push({
         id: row.id,
@@ -562,13 +595,21 @@ export function auditKoshaGuideRows(
         controls: [...operationalView.controls]
       });
     }
-    if (operationalInitialFlags.length && !operationalFlags.length) {
-      operationalControlFalsePositiveRows.push({
+    if (operationalRemovedFlags.length) {
+      const unlabelledFlags = operationalRemovedFlags.filter(
+        (flag) => groundTruthLabels[row.id]?.[flag] !== "false-positive"
+      );
+      const delta = {
         id: row.id,
         title: row.title,
         initialFlags: operationalInitialFlags,
         removedFlags: operationalRemovedFlags
-      });
+      };
+      if (unlabelledFlags.length) {
+        operationalControlReviewRequiredRows.push({ ...delta, unlabelledFlags });
+      } else {
+        operationalControlGroundTruthClearedRows.push(delta);
+      }
     }
     if (JSON.stringify(row) !== before) sourceMutationCount += 1;
   }
@@ -622,19 +663,23 @@ export function auditKoshaGuideRows(
     rawTagStandaloneControlLeakCount,
     rawInitialControlContaminationCount: rawInitialControlContaminationRows.length,
     rawControlContaminationCount: rawControlContaminationRows.length,
-    rawControlFalsePositiveCount: rawControlFalsePositiveRows.length,
-    rawControlAliasRemovedFlagCount,
+    rawControlGroundTruthClearedCount: rawControlGroundTruthClearedRows.length,
+    rawControlReviewRequiredCount: rawControlReviewRequiredRows.length,
+    rawControlHeuristicDeltaFlagCount,
     operationalInitialControlContaminationCount: operationalInitialControlContaminationRows.length,
     operationalControlContaminationCount: operationalControlContaminationRows.length,
-    operationalControlFalsePositiveCount: operationalControlFalsePositiveRows.length,
-    operationalControlAliasRemovedFlagCount,
+    operationalControlGroundTruthClearedCount: operationalControlGroundTruthClearedRows.length,
+    operationalControlReviewRequiredCount: operationalControlReviewRequiredRows.length,
+    operationalControlHeuristicDeltaFlagCount,
     sourceMutationCount,
     rawInitialControlContaminationRows,
     rawControlContaminationRows,
     operationalInitialControlContaminationRows,
     operationalControlContaminationRows,
-    rawControlFalsePositiveRows,
-    operationalControlFalsePositiveRows
+    rawControlGroundTruthClearedRows,
+    rawControlReviewRequiredRows,
+    operationalControlGroundTruthClearedRows,
+    operationalControlReviewRequiredRows
   };
 }
 
@@ -714,11 +759,21 @@ export function summarizeKoshaVisibleStatus(value: unknown): KoshaVisibleStatus 
 export function reconcileKoshaVisibleSnapshots(
   production: KoshaSupabaseVisibleExpectation,
   fullRows: KoshaSupabaseVisibleExpectation | null
-): { snapshot: KoshaSupabaseVisibleExpectation; parityFailures: string[] } {
+): {
+  snapshot: KoshaSupabaseVisibleExpectation;
+  parityFailures: string[];
+  deploymentIdentityProven: false;
+  identityBoundary: "deployment-project-identity-unverified";
+} {
+  const identity = {
+    deploymentIdentityProven: false as const,
+    identityBoundary: "deployment-project-identity-unverified" as const
+  };
   if (!fullRows) {
     return {
       snapshot: { ...production, canonicalRowSha256: production.canonicalRowSha256 || null },
-      parityFailures: []
+      parityFailures: [],
+      ...identity
     };
   }
   const parityFailures: string[] = [];
@@ -738,11 +793,13 @@ export function reconcileKoshaVisibleSnapshots(
   return parityFailures.length
     ? {
         snapshot: { ...production, canonicalRowSha256: null },
-        parityFailures
+        parityFailures,
+        ...identity
       }
     : {
         snapshot: fullRows,
-        parityFailures
+        parityFailures,
+        ...identity
       };
 }
 
@@ -832,7 +889,21 @@ export function auditKoshaRetrievalScenario(
   items: SafetyReferenceItem[],
   branch: KoshaRetrievalBranch
 ): KoshaRetrievalScenarioAudit {
-  const candidates = items.map((item) => ({ ...item, retrieval_source: branch }));
+  const candidates = items.filter((item) => item.retrieval_source === branch);
+  if (!candidates.length) {
+    return {
+      scenarioId: scenario.id,
+      branch,
+      executionStatus: "untested",
+      selectedIds: [],
+      selectedTitles: [],
+      retrievalSources: [],
+      promptContext: "",
+      answer: "",
+      documentReflections: [],
+      failures: [`branch-not-executed:${branch}`]
+    };
+  }
   const ranked = filterAndRankSafetyReferencesByQuery(scenario.query, candidates, candidates.length);
   const packet = buildDbHarnessPacket({ question: scenario.query, references: ranked });
   const promptContext = buildHarnessPromptContext(packet);
@@ -852,7 +923,15 @@ export function auditKoshaRetrievalScenario(
       label: metadata.document_reflection_label || ""
     };
   });
-  const evidenceText = [promptContext, answer, ...documentReflections.map((item) => item.label)].join("\n");
+  const sourceEvidenceText = selected.map((item) => [
+    item.title,
+    item.summary,
+    item.body || "",
+    ...item.keywords,
+    ...item.risk_tags,
+    ...item.controls,
+    ...item.primary_documents
+  ].join("\n")).join("\n");
   const failures: string[] = [];
 
   for (const expectedCode of expectedCodeSet) {
@@ -865,10 +944,10 @@ export function auditKoshaRetrievalScenario(
     if (item.retrieval_source !== branch) failures.push(`retrieval-source:${item.id}:${item.retrieval_source || "missing"}`);
   }
   for (const term of scenario.requiredControlTerms) {
-    if (!evidenceText.includes(term)) failures.push(`missing-control-term:${term}`);
+    if (!sourceEvidenceText.includes(term)) failures.push(`missing-control-term:${term}`);
   }
   for (const term of scenario.forbiddenTerms) {
-    if (evidenceText.includes(term)) failures.push(`cross-task-term:${term}`);
+    if (sourceEvidenceText.includes(term)) failures.push(`cross-task-term:${term}`);
   }
   for (const reflection of documentReflections) {
     if (!reflection.documents.includes("위험성평가표")) failures.push(`missing-risk-document:${reflection.code || reflection.title}`);
@@ -878,6 +957,7 @@ export function auditKoshaRetrievalScenario(
   return {
     scenarioId: scenario.id,
     branch,
+    executionStatus: "tested",
     selectedIds: selected.map((item) => item.id),
     selectedTitles: selected.map((item) => item.title),
     retrievalSources: [...new Set(

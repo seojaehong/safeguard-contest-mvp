@@ -108,6 +108,27 @@ describe("KOSHA GUIDE read-only runner contract", () => {
     expect(fieldSelection).not.toContain('"source_url"');
     expect(script).not.toMatch(/method:\s*"(?:PATCH|PUT|DELETE)"/u);
   });
+
+  it("derives Markdown readiness from the JSON conclusion and avoids machine-specific defaults", () => {
+    const script = readFileSync(resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"), "utf8");
+
+    expect(script).toContain("${report.launchReadiness.conclusion}");
+    expect(script).not.toContain("**NOT launch-ready for authoritative KOSHA-guide grounding.**");
+    expect(script).not.toMatch(/C:\\\\Users\\\\[^\\]+\\\\Downloads/u);
+    expect(script).not.toContain("logPath,\n      manifestCandidatePath");
+    expect(script).not.toContain("count/hash parity proves snapshot identity only");
+    expect(script).toContain("deployment/project identity remains unproven");
+  });
+
+  it("keeps secondary heuristic candidates as boundaries instead of contamination pass or fail claims", () => {
+    const script = readFileSync(resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"), "utf8");
+
+    expect(script).toContain('id: "raw-control-secondary-heuristic"');
+    expect(script).toContain('id: "operational-control-secondary-heuristic"');
+    expect(script).not.toContain('id: "raw-control-contamination"');
+    expect(script).not.toContain('id: "operational-control-contamination"');
+  });
+
 });
 
 describe("KOSHA GUIDE measured manifest gate", () => {
@@ -332,7 +353,7 @@ describe("KOSHA GUIDE corpus quality", () => {
     ]));
   });
 
-  it("calibrates legitimate task aliases while retaining true cross-domain controls", () => {
+  it("keeps unlabelled heuristic deltas review-required instead of calling them false positives", () => {
     const rows = [
       reference({
         id: "roof",
@@ -403,8 +424,9 @@ describe("KOSHA GUIDE corpus quality", () => {
 
     expect(report.rawInitialControlContaminationCount).toBe(7);
     expect(report.rawControlContaminationCount).toBe(1);
-    expect(report.rawControlFalsePositiveCount).toBe(6);
-    expect(report.rawControlAliasRemovedFlagCount).toBe(6);
+    expect(report.rawControlGroundTruthClearedCount).toBe(0);
+    expect(report.rawControlReviewRequiredCount).toBe(6);
+    expect(report.rawControlHeuristicDeltaFlagCount).toBe(6);
     expect(report.rawControlContaminationRows).toEqual([
       expect.objectContaining({
         id: "office-cross-domain",
@@ -414,7 +436,30 @@ describe("KOSHA GUIDE corpus quality", () => {
     expect(report.operationalInitialControlContaminationCount).toBeGreaterThanOrEqual(
       report.operationalControlContaminationCount
     );
-    expect(report.operationalControlFalsePositiveCount).toBeGreaterThanOrEqual(6);
+    expect(report.operationalControlGroundTruthClearedCount).toBe(0);
+    expect(report.operationalControlReviewRequiredCount).toBeGreaterThanOrEqual(6);
+  });
+
+  it("clears a heuristic delta only when every removed flag has an explicit false-positive label", () => {
+    const row = reference({
+      id: "roof",
+      title: "C-59-2022 지붕공사 안전보건작업 기술지침",
+      summary: "지붕공사 작업",
+      body: "",
+      keywords: [],
+      risk_tags: [],
+      controls: ["작업발판과 안전난간 확인", "안전대 체결"]
+    });
+
+    const unlabelled = auditKoshaGuideRows([row]);
+    const labelled = auditKoshaGuideRows([row], {
+      roof: { "fall-control-cross-task": "false-positive" }
+    });
+
+    expect(unlabelled.rawControlGroundTruthClearedCount).toBe(0);
+    expect(unlabelled.rawControlReviewRequiredCount).toBe(1);
+    expect(labelled.rawControlGroundTruthClearedCount).toBe(1);
+    expect(labelled.rawControlReviewRequiredCount).toBe(0);
   });
 });
 
@@ -526,7 +571,7 @@ describe("KOSHA GUIDE production visibility", () => {
     expect(summarizeKoshaVisibleStatus({ ok: true, technicalTotal: "1040" })).toBeNull();
   });
 
-  it("uses a matching live full-row snapshot for the manifest hash", () => {
+  it("keeps a matching env snapshot distinct from unproven production identity", () => {
     const production = {
       sourceId: "kosha-technical-support-regulations-2025",
       rowCount: 1040,
@@ -540,7 +585,9 @@ describe("KOSHA GUIDE production visibility", () => {
 
     expect(reconcileKoshaVisibleSnapshots(production, fullRows)).toEqual({
       snapshot: fullRows,
-      parityFailures: []
+      parityFailures: [],
+      deploymentIdentityProven: false,
+      identityBoundary: "deployment-project-identity-unverified"
     });
   });
 
@@ -561,16 +608,17 @@ describe("KOSHA GUIDE production visibility", () => {
 
     expect(reconcileKoshaVisibleSnapshots(production, fullRows)).toEqual({
       snapshot: { ...production, canonicalRowSha256: null },
-      parityFailures: ["supabase-visible-row-parity:1039/1040"]
+      parityFailures: ["supabase-visible-row-parity:1039/1040"],
+      deploymentIdentityProven: false,
+      identityBoundary: "deployment-project-identity-unverified"
     });
   });
 });
 
 describe("KOSHA GUIDE retrieval-to-document evidence", () => {
-  it.each(["rest", "ranked", "hybrid"] as const)(
-    "surfaces task-specific KOSHA evidence through the %s branch instead of generic prose",
-    (branch) => {
-      const items = [
+  it("surfaces task-specific KOSHA evidence only through the branch actually executed", () => {
+    const branch = "rest" as const;
+    const items = [
         reference({ retrieval_source: branch }),
         reference({
           id: "technical-support-01-0065-d-c-13",
@@ -592,7 +640,7 @@ describe("KOSHA GUIDE retrieval-to-document evidence", () => {
         })
       ];
 
-      const result = auditKoshaRetrievalScenario({
+    const result = auditKoshaRetrievalScenario({
         id: "exterior-paint",
         query: "외벽 도장 이동식 비계 강풍 도료 유기용제 화재 폭발",
         expectedCodes: ["B-E-17-2026", "D-C-13-2026"],
@@ -600,17 +648,48 @@ describe("KOSHA GUIDE retrieval-to-document evidence", () => {
         forbiddenTerms: ["정전도장기", "피도장물 접지"]
       }, items, branch);
 
-      expect(result.failures).toEqual([]);
-      expect(result.retrievalSources).toEqual([branch]);
-      expect(result.promptContext).toContain("공식자료: B-E-17-2026");
-      expect(result.promptContext).toContain("공식자료: D-C-13-2026");
-      expect(result.answer).toMatch(/도료|유기용제/);
-      expect(result.answer).toMatch(/작업발판|안전대/);
-      expect(result.answer).not.toContain("정전도장기");
-      expect(result.documentReflections.every((item) => item.documents.includes("위험성평가표"))).toBe(true);
-      expect(result.documentReflections.every((item) => item.label.includes("위험성평가표"))).toBe(true);
+    expect(result.failures).toEqual([]);
+    expect(result.executionStatus).toBe("tested");
+    expect(result.retrievalSources).toEqual([branch]);
+    expect(result.promptContext).toContain("공식자료: B-E-17-2026");
+    expect(result.promptContext).toContain("공식자료: D-C-13-2026");
+    expect(result.answer).toMatch(/도료|유기용제/);
+    expect(result.answer).toMatch(/작업발판|안전대/);
+    expect(result.answer).not.toContain("정전도장기");
+    expect(result.documentReflections.every((item) => item.documents.includes("위험성평가표"))).toBe(true);
+    expect(result.documentReflections.every((item) => item.label.includes("위험성평가표"))).toBe(true);
+  });
+
+  it.each(["ranked", "hybrid"] as const)(
+    "marks %s untested when only REST candidates were executed",
+    (branch) => {
+      const result = auditKoshaRetrievalScenario({
+        id: "exterior-paint",
+        query: "외벽 도장 도료 유기용제 작업발판 안전대",
+        expectedCodes: ["B-E-17-2026"],
+        requiredControlTerms: ["도료"],
+        forbiddenTerms: []
+      }, [reference({ retrieval_source: "rest" })], branch);
+
+      expect(result.executionStatus).toBe("untested");
+      expect(result.selectedIds).toEqual([]);
+      expect(result.promptContext).toBe("");
+      expect(result.failures).toEqual([`branch-not-executed:${branch}`]);
     }
   );
+
+  it("does not let required terms self-pass from the user query", () => {
+    const result = auditKoshaRetrievalScenario({
+      id: "prompt-only-term",
+      query: "외벽 도장 사용자질의전용어",
+      expectedCodes: ["B-E-17-2026"],
+      requiredControlTerms: ["사용자질의전용어"],
+      forbiddenTerms: []
+    }, [reference({ retrieval_source: "rest" })], "rest");
+
+    expect(result.executionStatus).toBe("tested");
+    expect(result.failures).toContain("missing-control-term:사용자질의전용어");
+  });
 });
 
 describe("KOSHA GUIDE refresh plan", () => {
