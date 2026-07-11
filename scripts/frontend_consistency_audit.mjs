@@ -146,6 +146,8 @@ function expectedTypographyRole(rule, selector) {
   const override = semanticRoleOverrides[selector];
   if (override) return override;
   const size = rule.declarations["font-size"];
+  if (rule.selectors.every((candidate) => /textarea/i.test(candidate) && !/input/i.test(candidate))
+    && ["var(--text-body)", "var(--t-body)", "15px"].includes(size)) return "longform";
   if (isTableHeaderSelector(selector) && !isInteractiveSelector(selector)) return "tableHeader";
   if (["var(--text-display)", "var(--t-display)", "clamp(44px, 6vw, 72px)"].includes(size)) return "display";
   if (["var(--text-page-title)", "var(--t-hero)", "clamp(32px, 4vw, 40px)"].includes(size)) return "pageTitle";
@@ -377,7 +379,7 @@ const selectorRoleContract = {
   },
 };
 
-function cssViolations(source) {
+function cssViolations(source, file, enforceGlobalSelectors = false) {
   const violations = [];
   const rules = cssRuleBlocks(source);
   const allowedFontSizes = new Set([
@@ -392,15 +394,15 @@ function cssViolations(source) {
 
   for (const match of source.matchAll(/font-family\s*:\s*([^;\r\n}]+)/g)) {
     const value = match[1].trim();
-    if (!value.startsWith("var(") && value !== "inherit") {
-      violations.push({ rule: "font-family-token", file: "app/globals.css", line: lineNumber(source, match.index), value });
+    if (!value.startsWith("var(") && value !== "inherit" && value !== '"Noto Sans KR"') {
+      violations.push({ rule: "font-family-token", file, line: lineNumber(source, match.index), value });
     }
   }
 
   for (const match of source.matchAll(/font-size\s*:\s*([^;\r\n}]+)/g)) {
     const value = match[1].trim().replace(/\s*!important$/, "");
     if (!allowedFontSizes.has(value)) {
-      violations.push({ rule: "font-size-tier", file: "app/globals.css", line: lineNumber(source, match.index), value });
+      violations.push({ rule: "font-size-tier", file, line: lineNumber(source, match.index), value });
     }
   }
 
@@ -414,7 +416,7 @@ function cssViolations(source) {
   for (const match of source.matchAll(/line-height\s*:\s*([^;\r\n}]+)/g)) {
     const value = match[1].trim();
     if (!allowedLineHeights.has(value)) {
-      violations.push({ rule: "line-height-tier", file: "app/globals.css", line: lineNumber(source, match.index), value });
+      violations.push({ rule: "line-height-tier", file, line: lineNumber(source, match.index), value });
     }
   }
 
@@ -427,7 +429,7 @@ function cssViolations(source) {
   for (const match of source.matchAll(/letter-spacing\s*:\s*([^;\r\n}]+)/g)) {
     const value = match[1].trim();
     if (!allowedTracking.has(value)) {
-      violations.push({ rule: "tracking-tier", file: "app/globals.css", line: lineNumber(source, match.index), value });
+      violations.push({ rule: "tracking-tier", file, line: lineNumber(source, match.index), value });
     }
   }
 
@@ -441,12 +443,12 @@ function cssViolations(source) {
       "var(--r-sm)", "var(--r-md)", "var(--r-lg)", "var(--r-xl)",
     ]);
     if (!allowed.has(value)) {
-      violations.push({ rule: "radius-tier", file: "app/globals.css", line: lineNumber(source, match.index), value });
+      violations.push({ rule: "radius-tier", file, line: lineNumber(source, match.index), value });
     }
   }
 
   for (const match of source.matchAll(/!important/g)) {
-    violations.push({ rule: "important-declaration", file: "app/globals.css", line: lineNumber(source, match.index), value: "!important" });
+    violations.push({ rule: "important-declaration", file, line: lineNumber(source, match.index), value: "!important" });
   }
 
   for (const rule of rules) {
@@ -459,7 +461,7 @@ function cssViolations(source) {
       if (mixedRoles) {
         violations.push({
           rule: "mixed-typography-role",
-          file: "app/globals.css",
+          file,
           line: rule.line,
           value: `${selectorText(rule)} => ${roleNames.join(", ")}`,
         });
@@ -478,7 +480,7 @@ function cssViolations(source) {
       if (mismatch) {
         violations.push({
           rule: "typography-tuple",
-          file: "app/globals.css",
+          file,
           line: rule.line,
           value: `${selectorText(rule)} => ${roleName || "unmapped"}: ${JSON.stringify(rule.declarations)}`,
         });
@@ -494,7 +496,7 @@ function cssViolations(source) {
       if (!functional) {
         violations.push({
           rule: "decorative-box-shadow",
-          file: "app/globals.css",
+          file,
           line: rule.line,
           value: `${rule.selectors.join(", ")} => ${boxShadow}`,
         });
@@ -502,7 +504,7 @@ function cssViolations(source) {
     }
     const textShadow = rule.declarations["text-shadow"];
     if (textShadow && textShadow !== "none") {
-      violations.push({ rule: "decorative-text-shadow", file: "app/globals.css", line: rule.line, value: textShadow });
+      violations.push({ rule: "decorative-text-shadow", file, line: rule.line, value: textShadow });
     }
     for (const property of ["background", "background-image"]) {
       const value = rule.declarations[property];
@@ -513,18 +515,18 @@ function cssViolations(source) {
         return contract?.values.has(normalizedValue);
       });
       if (!functional) {
-        violations.push({ rule: "decorative-gradient", file: "app/globals.css", line: rule.line, value });
+        violations.push({ rule: "decorative-gradient", file, line: rule.line, value });
       }
     }
   }
 
-  for (const [selector, expected] of Object.entries(selectorRoleContract)) {
+  if (enforceGlobalSelectors) for (const [selector, expected] of Object.entries(selectorRoleContract)) {
     const actual = effectiveDeclarations(rules, selector);
     for (const [property, value] of Object.entries(expected)) {
       if (actual[property] !== value) {
         violations.push({
           rule: "selector-role",
-          file: "app/globals.css",
+          file,
           line: rules.find((rule) => rule.selectors.includes(selector))?.line || 1,
           value: `${selector} ${property}: expected ${value}, received ${actual[property] || "missing"}`,
         });
@@ -537,13 +539,22 @@ function cssViolations(source) {
 
 const css = fs.readFileSync(cssPath, "utf8");
 const contract = fs.readFileSync(contractPath, "utf8");
+const cssFiles = [cssPath, ...listFiles(path.join(root, "app"), (filePath) => filePath.endsWith(".module.css")), ...listFiles(path.join(root, "components"), (filePath) => filePath.endsWith(".module.css"))]
+  .filter((filePath, index, files) => files.indexOf(filePath) === index);
+const cssSources = cssFiles.map((filePath) => ({
+  filePath,
+  enforceGlobalSelectors: filePath === cssPath,
+  relativePath: path.relative(root, filePath).replaceAll("\\", "/"),
+  source: fs.readFileSync(filePath, "utf8"),
+}));
 const pageFiles = listFiles(path.join(root, "app"), (filePath) => path.basename(filePath) === "page.tsx");
 const componentFiles = listFiles(path.join(root, "components"), (filePath) => filePath.endsWith(".tsx"));
 const discoveredRoutes = pageFiles.map(toRoute).sort();
 const expectedRoutes = contractRoutes(contract).sort();
 const missingRoutes = expectedRoutes.filter((route) => !discoveredRoutes.includes(route));
 const unexpectedRoutes = discoveredRoutes.filter((route) => !expectedRoutes.includes(route));
-const violations = cssViolations(css);
+const violations = cssSources.flatMap(({ relativePath, source, enforceGlobalSelectors }) =>
+  cssViolations(source, relativePath, enforceGlobalSelectors));
 
 const report = {
   generatedAt: new Date().toISOString(),
@@ -551,8 +562,9 @@ const report = {
   counts: {
     pageFiles: pageFiles.length,
     componentFiles: componentFiles.length,
-    cssLines: css.split(/\r?\n/).length,
-    importantDeclarations: [...css.matchAll(/!important/g)].length,
+    cssFiles: cssSources.length,
+    cssLines: cssSources.reduce((total, item) => total + item.source.split(/\r?\n/).length, 0),
+    importantDeclarations: cssSources.reduce((total, item) => total + [...item.source.matchAll(/!important/g)].length, 0),
   },
   coverage: { expectedRoutes, discoveredRoutes, missingRoutes, unexpectedRoutes },
   violations,

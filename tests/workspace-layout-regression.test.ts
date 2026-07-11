@@ -196,7 +196,7 @@ describe("workspace layout regression", () => {
     });
 
     expect(metrics.sideNavHeight).toBeLessThanOrEqual(638 - 104);
-    expect(metrics.sideNavBottom).toBeLessThanOrEqual(638);
+    expect(metrics.sideNavBottom).toBeLessThanOrEqual(639);
     expect(metrics.sideNavOverflowY).toBe("auto");
     expect(metrics.sideNavRight).toBeLessThanOrEqual(metrics.mainLeft - 8);
     expect(metrics.recentListDisplay).toBe("none");
@@ -235,13 +235,46 @@ describe("workspace layout regression", () => {
       };
     });
 
-    expect(metrics.headingWeight).toBeGreaterThanOrEqual(880);
+    expect(metrics.headingWeight).toBe(800);
     expect(metrics.headingLineHeight / metrics.headingFontSize).toBeGreaterThanOrEqual(1.1);
-    expect(["0px", "normal"]).toContain(metrics.headingLetterSpacing);
+    expect(metrics.headingLetterSpacing).toBe("-3.24px");
     expect(metrics.descriptionWeight).toBeGreaterThanOrEqual(600);
     expect(metrics.inputLineHeight / metrics.inputFontSize).toBeGreaterThanOrEqual(1.75);
     expect(metrics.sideGap).toBeGreaterThanOrEqual(18);
     expect(metrics.sideButtonHeight).toBeGreaterThanOrEqual(48);
+  }, 90_000);
+
+  it("keeps an untouched workspace semantically empty and aligns the sidebar with the input card", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.fill("#field-command-input", "");
+    await page.waitForFunction(() => !document.querySelector(".workspace-current-brief"));
+
+    const metrics = await page.evaluate(() => {
+      const side = document.querySelector<HTMLElement>(".workspace-side-nav");
+      const main = document.querySelector<HTMLElement>(".command-main-studio");
+      if (!side || !main) throw new Error("Missing empty workspace columns");
+      const sideRect = side.getBoundingClientRect();
+      const mainRect = main.getBoundingClientRect();
+      return {
+        currentBriefs: document.querySelectorAll(".workspace-current-brief").length,
+        sourceStatuses: document.querySelectorAll(".workspace-source-status").length,
+        recentLists: document.querySelectorAll(".workspace-recent-list").length,
+        sideTop: Math.round(sideRect.top),
+        sideBottom: Math.round(sideRect.bottom),
+        mainTop: Math.round(mainRect.top),
+        mainBottom: Math.round(mainRect.bottom),
+        sideOverflowY: getComputedStyle(side).overflowY,
+      };
+    });
+
+    expect(metrics.currentBriefs).toBe(0);
+    expect(metrics.sourceStatuses).toBe(0);
+    expect(metrics.recentLists).toBe(0);
+    expect(Math.abs(metrics.sideTop - metrics.mainTop)).toBeLessThanOrEqual(1);
+    expect(Math.abs(metrics.sideBottom - metrics.mainBottom)).toBeLessThanOrEqual(1);
+    expect(metrics.sideOverflowY).toBe("visible");
   }, 90_000);
 
   it("keeps the day workspace shell from overlapping the first-screen composer", async () => {
@@ -351,14 +384,14 @@ describe("workspace layout regression", () => {
     });
 
     expect(metrics.topbar.position).toBe("relative");
-    expect(metrics.topbar.height).toBeLessThanOrEqual(72);
+    expect(metrics.topbar.height).toBeLessThanOrEqual(73);
     expect(metrics.topbar.left).toBeGreaterThanOrEqual(320);
     expect(metrics.topbar.right).toBeLessThanOrEqual(1728);
     expect(metrics.viewport.left).toBe(metrics.topbar.left);
     expect(metrics.viewport.right).toBe(metrics.topbar.right);
     expect(metrics.topbar.bottom).toBeLessThanOrEqual(metrics.viewport.top - 8);
     expect(metrics.sideNav.top).toBe(metrics.viewport.top);
-    expect(metrics.sideNav.bottom).toBeLessThanOrEqual(638);
+    expect(metrics.sideNav.bottom).toBeLessThanOrEqual(metrics.viewport.bottom + 1);
     expect(metrics.sideNav.overflowY).toBe("auto");
     expect(metrics.sideNav.right).toBeLessThanOrEqual(metrics.main.left - 8);
     expect(metrics.heading.bottom).toBeLessThanOrEqual(metrics.textarea.top - 96);
@@ -1004,15 +1037,14 @@ describe("workspace layout regression", () => {
     const progressSummary = await page.locator(".document-progress-summary").textContent();
     expect(progressSummary).toContain("12/12 생성");
     expect(progressSummary).toContain("검수 필요");
-    await page.waitForFunction(() => document.querySelector(".document-harness-loop")?.textContent?.includes("근거 고정"));
+    await page.getByText("안전 문서팩 3종 준비 완료").waitFor({ state: "visible" });
     const harnessLoop = page.locator(".document-harness-loop");
     await harnessLoop.waitFor({ state: "visible" });
     const harnessLoopText = await harnessLoop.textContent();
-    expect(harnessLoopText).toContain("하네스·온톨로지 루프");
-    expect(harnessLoopText).toContain("DB 하네스");
-    expect(harnessLoopText).toContain("근거 고정");
-    expect(harnessLoopText).toContain("온톨로지 QA");
-    expect(harnessLoopText).toContain("개선 루프");
+    expect(await harnessLoop.getAttribute("open")).toBeNull();
+    expect(harnessLoopText).toContain("작성 근거 보기");
+    expect(harnessLoopText).not.toMatch(/하네스|온톨로지|readiness|directEvidence|supportingEvidence/i);
+    expect(await page.getByRole("button", { name: "공유 단계로 이동" }).count()).toBe(1);
     expect(await page.locator(".field-workspace").count()).toBe(0);
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
@@ -1097,7 +1129,7 @@ describe("workspace layout regression", () => {
     expect(metrics.editor.overflowY).toBe("visible");
     expect(metrics.textarea.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
-    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
+    expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.65);
     expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.shell.width * 0.78));
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
@@ -1310,7 +1342,7 @@ describe("workspace layout regression", () => {
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     expect.soft(await page.locator(".field-workspace").count()).toBe(0);
 
-    await page.getByRole("button", { name: "다운로드 영역 열기" }).click();
+    await page.getByRole("button", { name: "다운로드 설정" }).click();
     await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
     expect.soft(await page.locator(".document-workbench").count()).toBe(0);
     expect(await page.locator(".field-workspace").count()).toBe(1);

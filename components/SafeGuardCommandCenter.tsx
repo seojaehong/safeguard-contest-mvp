@@ -574,28 +574,28 @@ function buildDocumentHarnessLoop(
     return [
       {
         key: "harness",
-        label: "DB 하네스",
-        status: "생성 후 고정",
-        detail: "SIF/KOSHA/현장 이력 근거를 먼저 고정한 뒤 문서화합니다.",
+        label: "작성 근거",
+        status: "문서 생성 후 확인",
+        detail: "KOSHA와 현장 이력 근거를 확인한 뒤 문서에 반영합니다.",
         tone: "pending"
       },
       {
         key: "ontology",
-        label: "온톨로지 QA",
-        status: "검수 대기",
+        label: "안전조치 확인",
+        status: "문서 생성 후 확인",
         detail: "작업유형, 위험요인, 감소대책 누락을 문서 본문과 대조합니다.",
         tone: "pending"
       },
       {
         key: "memory",
-        label: "개선 루프",
-        status: "후보 대기",
-        detail: "오늘 개선사항과 과거 작업이 다음 위험성평가/TBM 후보가 됩니다.",
+        label: "이전 개선사항",
+        status: "저장된 내용 확인",
+        detail: "오늘 개선사항과 과거 작업을 다음 위험성평가와 작업 전 회의에 참고합니다.",
         tone: "pending"
       },
       {
         key: "share",
-        label: "공유 readiness",
+        label: "공유 전 확인",
         status: "문서 생성 후",
         detail: "공유 전 근거, 검수, 확인 이력 저장 조건을 확인합니다.",
         tone: "pending"
@@ -615,18 +615,18 @@ function buildDocumentHarnessLoop(
   return [
     {
       key: "harness",
-      label: "DB 하네스",
+      label: "작성 근거",
       status: harnessSurface
         ? harnessSurface.status === "locked" ? "근거 고정" : "검토 필요"
         : "응답 없음",
       detail: harnessSurface
         ? `${harnessSurface.headline} · ${harnessSurface.detail}`
-        : "응답에 DB 하네스 계약이 없어 근거 고정 상태를 확인해야 합니다.",
+        : "작성 근거를 확인한 뒤 문서를 공유해 주세요.",
       tone: harnessSurface?.status === "locked" ? "ready" : "warn"
     },
     {
       key: "ontology",
-      label: "온톨로지 QA",
+      label: "안전조치 확인",
       status: qa?.reviewable
         ? missingControls ? "보완 반영 확인" : qa.verdict
         : data.qualityContract?.ontology.status ? qualityStatusCopy(data.qualityContract.ontology.status) : "검수 보류",
@@ -639,10 +639,10 @@ function buildDocumentHarnessLoop(
     },
     {
       key: "memory",
-      label: "개선 루프",
+      label: "이전 개선사항",
       status: improvementMemory || workpackMemory
         ? `개선 ${improvementMemory} · 작업 ${workpackMemory}`
-        : "후보 없음",
+        : "저장 내용 없음",
       detail: firstImprovement
         ? `${firstImprovement.hazardLabel}: ${firstImprovement.improvementText}`
         : firstWorkpack
@@ -652,8 +652,8 @@ function buildDocumentHarnessLoop(
     },
     {
       key: "share",
-      label: "공유 readiness",
-      status: readiness?.canShare ? "공유 준비" : qualityStatus,
+      label: "공유 전 확인",
+      status: readiness?.canShare ? "전송 가능" : qualityStatus,
       detail: readiness?.summary || data.qualityContract?.summary || "공유 전 검수 상태를 확인합니다.",
       tone: readiness?.canShare ? "ready" : "warn"
     }
@@ -1705,6 +1705,7 @@ export function SafeGuardCommandCenter({
 
   const busy = state === "generating";
   const hasWorkpack = Boolean(data);
+  const hasOperatorInput = Boolean(question.trim()) || hasWorkpack;
   const currentStep = workspacePage;
   const workpackReadiness = data ? assessWorkpackReadiness(data, { requiresRevalidation }) : null;
   const statuses = buildWorkspaceStepStatuses({
@@ -1737,6 +1738,10 @@ export function SafeGuardCommandCenter({
   const documentHarnessLoop = buildDocumentHarnessLoop(data, workpackReadiness);
   const documentEvidence = selectedDocumentEvidence(data, selectedOutputItem.key);
   const supportingDocumentItems = outputItems.filter((item) => !primaryDocumentKeys.has(item.key));
+  const coreDocumentsReady = Boolean(data && focusDocumentItems.every((item) => {
+    const body = (data.deliverables as Record<string, unknown>)[item.key];
+    return typeof body === "string" && body.trim().length > 0;
+  }));
   const photoAnalysisCandidate = buildPhotoAnalysisCandidate();
   const inputPhotoCandidates = inputPhotoHazardCandidates();
   const visibleInputPhotoCandidates = inputPhotoCandidates.filter((candidate) =>
@@ -1747,16 +1752,16 @@ export function SafeGuardCommandCenter({
   ).length;
   const shareTargetSnapshotLabel = data
     ? `${fieldBrief.workerCount} 작업자 + 관리자`
-    : "문서 생성 후 작업자 snapshot";
+    : "문서 생성 후 참여자 확인";
   const shareStorageLabel = savedWorkpackId
     ? "DB 이력 연결"
     : data
-      ? "저장 전 후보"
-      : "생성 후 후보";
+      ? "로그인하면 안전하게 저장"
+      : "문서 생성 후 저장";
   const shareAckLabel = workpackReadiness && !workpackReadiness.canShare
     ? "공유 전 보완 필요"
     : data
-      ? "확인 세션 후보 준비"
+      ? "열람 확인 대기 중"
       : "문서 생성 후 활성화";
   const currentWorkflowStep = workflowSteps.find((step) => step.key === workspacePage) ?? workflowSteps[0];
   const themeShellClass = activeWorkspaceTheme === "day"
@@ -1804,7 +1809,7 @@ export function SafeGuardCommandCenter({
       </header>
 
       <section className="command-viewport linear-workspace-layout" id="command">
-        <aside className="workspace-side-nav" aria-label="작업공간 메뉴">
+        <aside className={`workspace-side-nav ${hasOperatorInput ? "" : "is-empty"}`} aria-label="작업공간 메뉴">
           <div className="workspace-side-group">
             <span>작업공간</span>
             {workflowSteps.map((step) => {
@@ -1829,12 +1834,12 @@ export function SafeGuardCommandCenter({
               );
             })}
           </div>
-          <div className="workspace-side-group workspace-current-brief">
+          {hasOperatorInput ? <div className="workspace-side-group workspace-current-brief">
             <span>현재 작업</span>
             <strong>{fieldBrief.workSummary}</strong>
             <small>{fieldBrief.siteName} · {fieldBrief.workerCount}</small>
-          </div>
-          <div className="workspace-side-group workspace-source-status">
+          </div> : null}
+          {hasOperatorInput ? <div className="workspace-side-group workspace-source-status">
             <span>근거 준비</span>
             {readinessRail.slice(0, 3).map((item) => (
               <p key={item.key}>
@@ -1842,8 +1847,8 @@ export function SafeGuardCommandCenter({
                 <small>{item.status}</small>
               </p>
             ))}
-          </div>
-          <div className="workspace-side-group workspace-recent-list">
+          </div> : null}
+          {hasOperatorInput ? <div className="workspace-side-group workspace-recent-list">
             <span>최근 예시</span>
             {examples.slice(0, 4).map((example) => (
               <button
@@ -1856,7 +1861,7 @@ export function SafeGuardCommandCenter({
                 <small>{example.region}</small>
               </button>
             ))}
-          </div>
+          </div> : null}
         </aside>
         <section className={`command-main card command-main-studio workspace-view-${workspacePage}`}>
           {workspacePage === "input" ? (
@@ -1923,6 +1928,9 @@ export function SafeGuardCommandCenter({
                   다시 분석
                 </button>
               ) : null}
+              <span className="composer-mode-label" aria-label="현재 문서 생성 방식">
+                {aiMode === "template" ? "빠른 생성" : aiMode === "enhanced" ? "강화 모드" : "전체 문서 AI"}
+              </span>
               <button type="submit" className="button command-primary composer-submit-button workbench-primary-action" disabled={busy} aria-busy={busy}>
                 {busy ? <span className="button-spinner" aria-hidden="true" /> : null}
                 {busy ? "근거 확인 중" : "안전 문서 생성"}
@@ -2109,8 +2117,8 @@ export function SafeGuardCommandCenter({
           <section className="output-card-grid document-workbench" id="workpack">
             <div className="compact-head document-workbench-head">
               <div>
-                <span className="eyebrow">안전조치 검수</span>
-                <strong>{selectedOutputItem.title}</strong>
+                <span className="eyebrow">문서 생성 완료</span>
+                <strong>{coreDocumentsReady ? "안전 문서팩 3종 준비 완료" : selectedOutputItem.title}</strong>
                 <small>{message || "선택 문서의 본문, 인용 근거, 원문 확인 상태를 함께 검토합니다."}</small>
               </div>
               <div className="document-progress-summary" aria-label={`문서팩 진행 ${generationProgress.primary}`}>
@@ -2150,11 +2158,11 @@ export function SafeGuardCommandCenter({
                 />
               </div>
             </details>
-            <section className="document-harness-loop" aria-label="하네스 온톨로지 개선 루프">
-              <div className="document-harness-loop-head">
-                <span>하네스·온톨로지 루프</span>
-                <strong>{data ? "오늘 문서 반영 상태" : "생성 후 확인"}</strong>
-              </div>
+            <details className="document-harness-loop">
+              <summary className="document-harness-loop-head">
+                <span>작성 근거 보기</span>
+                <strong>{data ? "법령·안전조치 확인" : "생성 후 확인"}</strong>
+              </summary>
               <div className="document-harness-loop-grid">
                 {documentHarnessLoop.map((item) => (
                   <article key={item.key} className={readinessClass(item.tone)}>
@@ -2164,7 +2172,7 @@ export function SafeGuardCommandCenter({
                   </article>
                 ))}
               </div>
-            </section>
+            </details>
             <div className="document-viewer-shell">
               <div className="document-viewer-list workbench-document-rail" aria-label="문서 목록">
                 {focusDocumentItems.map((item, index) => {
@@ -2200,7 +2208,7 @@ export function SafeGuardCommandCenter({
                           onClick={() => focusWorkpackEditor(selectedOutputItem.key)}
                           title={`${selectedOutputItem.title} 준제출형 내려받기`}
                         >
-                          다운로드 영역 열기
+                          다운로드 설정
                         </button>
                       </div>
                     ) : null}
@@ -2224,7 +2232,7 @@ export function SafeGuardCommandCenter({
                     disabled={!data || !workpackReadiness?.canShare}
                     onClick={() => moveToWorkspacePage("share")}
                   >
-                    다음: 공유
+                    공유 단계로 이동
                   </button>
                 </article>
                 <aside className="document-evidence-panel workbench-evidence-rail" aria-label="선택 문서 인용 근거">
@@ -2338,10 +2346,29 @@ export function SafeGuardCommandCenter({
             <section className="workspace-step-page workspace-share-page" id="workspace-share-page">
           <section className="dispatch-preview-panel" id="dispatch-overview">
             <div className="share-workbench-title">
-              <span className="eyebrow">Share</span>
-              <strong>권한·확인·증빙 워크플로</strong>
-              <p>공유 범위, 작업자 권한, 확인 상태, 저장될 근거를 전송 전에 같은 화면에서 검토합니다.</p>
+              <span className="eyebrow">현장 공유</span>
+              <strong>문서팩을 현장에 전송하세요</strong>
+              <p>받는 사람 {fieldBrief.workerCount} · 사용 가능한 전송 채널과 열람 권한을 확인합니다.</p>
+              <button
+                type="button"
+                className="button command-primary workbench-primary-action"
+                onClick={() => document.getElementById("dispatch")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                disabled={!data || !workpackReadiness?.canShare}
+              >
+                문서팩 전송하기
+              </button>
             </div>
+            {data ? (
+              <div className="share-live-workspace">
+                <FieldOperationsWorkspace
+                  data={data}
+                  generationFingerprint={generationFingerprint || undefined}
+                  readiness={workpackReadiness || undefined}
+                  onDeliverablesChange={handleWorkpackDeliverablesChange}
+                  surface="share"
+                />
+              </div>
+            ) : null}
             {workpackReadiness && !workpackReadiness.canShare ? (
               <section className="share-readiness-warning" aria-label="공유 전 보완 항목">
                 <span>공유 전 보완</span>
@@ -2353,36 +2380,41 @@ export function SafeGuardCommandCenter({
                 </ul>
               </section>
             ) : null}
+            <details className="share-session-details">
+              <summary>공유 설정 보기</summary>
             <div className="share-session-grid">
               <section>
-                <span>Permission</span>
+                <span>열람 권한</span>
                 <strong>{fieldBrief.companyName} 현장팀</strong>
-                <p>초대된 관리자와 작업자 snapshot 기준으로만 열람합니다. 공개 링크 익명 확인은 기본으로 열지 않습니다.</p>
+                <p>초대된 관리자와 작업자만 열람할 수 있습니다. 공개 링크는 사용하지 않습니다.</p>
                 <small>초대된 사람만 열람 가능</small>
               </section>
               <section>
-                <span>Role</span>
+                <span>참여자</span>
                 <strong>{shareTargetSnapshotLabel}</strong>
                 <p>관리자는 편집, 작업자는 열람 전용으로 보고 자동 언어 보기와 수동 언어 전환을 함께 사용합니다.</p>
-                <small>작업자 표시명 snapshot 기준</small>
+                <small>저장된 작업자 명단 기준</small>
               </section>
               <section>
-                <span>Acknowledgment</span>
+                <span>열람 확인</span>
                 <strong>{shareAckLabel}</strong>
                 <p>{workpackReadiness && !workpackReadiness.canShare ? "검수·근거·결재 상태를 정리한 뒤 확인 세션을 엽니다." : "열람 전용 화면의 확인 기록을 TBM·교육 확인 후보로 연결합니다."}</p>
-                <small>{workpackReadiness && !workpackReadiness.canShare ? "일반 전송 잠금" : "판정 문구 없이 이력으로 보관"}</small>
+                <small>{workpackReadiness && !workpackReadiness.canShare ? "보완 후 전송할 수 있어요" : "열람 이력으로 안전하게 보관"}</small>
               </section>
               <section>
-                <span>Evidence</span>
+                <span>저장 증빙</span>
                 <strong>{shareStorageLabel}</strong>
-                <p>문서팩, 교육 확인 후보, provider 전송 로그를 분리해서 남깁니다. DB 저장 전에는 화면 초안으로 먼저 검토합니다.</p>
-                <small>workpack · education · dispatch 분리</small>
+                <p>문서팩, 교육 확인, 전송 결과를 각각 저장해 나중에 확인할 수 있습니다.</p>
+                <small>문서 · 교육 · 전송 이력 보관</small>
               </section>
             </div>
+            </details>
+            <details className="operation-improvement-details">
+              <summary>Before/After 개선 기록 보기</summary>
             <section className="operation-ontology-panel" aria-label="그날 작업 개선사항">
               <div className="operation-capture-head">
                 <div>
-                  <span>Improvement capture</span>
+                  <span>개선 기록</span>
                   <strong>Before/After 개선 캡처</strong>
                   <p>
                     같은 작업을 다시 입력했을 때 이전 개선사항이 위험성평가와 TBM 후보로 돌아오도록 사진과 메모를 함께 보관합니다.
@@ -2394,12 +2426,12 @@ export function SafeGuardCommandCenter({
                     {improvementSaveState === "saving"
                       ? "저장 중"
                       : savedWorkpackId
-                        ? "DB 후보"
+                        ? "서버에 저장됨"
                         : data
-                          ? "DB 연결 준비"
-                          : "로컬 후보"}
+                          ? "로그인하면 안전하게 저장"
+                          : "기기에 임시 저장"}
                   </strong>
-                  <small>{savedWorkpackId ? "사진쌍과 vision/OCR 상태를 export에 포함" : "로그인·DB 미연결 시 로컬 후보로 보관"}</small>
+                  <small>{savedWorkpackId ? "사진과 분석 결과를 함께 보관" : "로그인하면 서버에 안전하게 저장"}</small>
                 </aside>
               </div>
               <div className="operation-capture-layout">
@@ -2438,7 +2470,7 @@ export function SafeGuardCommandCenter({
                     <article className="photo-analysis-candidate">
                       <span>사진 비교 후보</span>
                       <p>{photoAnalysisCandidate}</p>
-                      <small>{data ? "저장 시 Before/After 파일을 서버 vision/OCR 분석으로 전달합니다." : "문서팩 생성 후 DB 저장과 함께 분석합니다."}</small>
+                      <small>{data ? "저장하면 개선 전후 사진을 함께 분석합니다." : "문서팩 생성 후 사진을 함께 분석합니다."}</small>
                     </article>
                   ) : null}
                   <div className="operation-evidence-summary" aria-label="개선사항 반영 후보">
@@ -2463,7 +2495,7 @@ export function SafeGuardCommandCenter({
                       {improvementSaveState === "saving" ? "보관 중..." : "개선사항 보관"}
                     </button>
                     <Link href="/reports" className="button secondary">기간 리포트 보기</Link>
-                    <small>DB 저장이 가능하면 workpack 개선 이력으로, 아니면 로컬 후보로 남깁니다.</small>
+                    <small>로그인하면 개선 이력을 서버에 안전하게 저장합니다.</small>
                   </div>
                 </div>
               </div>
@@ -2478,19 +2510,20 @@ export function SafeGuardCommandCenter({
                         <small>사진: {item.beforePhotoName || "Before 미첨부"} → {item.afterPhotoName || "After 미첨부"}</small>
                       ) : null}
                       {item.visionStatus || item.visionUserLabel ? (
-                        <small>vision/OCR: {formatVisionStatus(item.visionStatus, item.visionUserLabel)}</small>
+                        <small>사진 분석: {formatVisionStatus(item.visionStatus, item.visionUserLabel)}</small>
                       ) : null}
                       {item.photoAnalysisSummary ? <small>{item.photoAnalysisSummary}</small> : null}
                       {item.detectedHazards?.length ? <small>위험요인: {item.detectedHazards.join(" · ")}</small> : null}
                       {item.observedImprovement ? <small>관찰 개선: {item.observedImprovement}</small> : null}
-                      {item.ocrText ? <small>OCR: {item.ocrText}</small> : null}
-                      {item.storageMode ? <small>{item.storageMode === "db" ? "DB 후보 저장됨" : "로컬 후보"}{item.saveMessage ? ` · ${item.saveMessage}` : ""}</small> : null}
+                      {item.ocrText ? <small>사진에서 읽은 글자: {item.ocrText}</small> : null}
+                      {item.storageMode ? <small>{item.storageMode === "db" ? "서버에 저장됨" : "기기에 임시 저장"}{item.saveMessage ? ` · ${item.saveMessage}` : ""}</small> : null}
                       <small>{item.reflectedDocuments.join(" · ")} 후보</small>
                     </article>
                   ))}
                 </div>
               ) : null}
             </section>
+            </details>
           </section>
             </section>
           ) : null}

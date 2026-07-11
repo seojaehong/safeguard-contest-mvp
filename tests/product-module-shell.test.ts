@@ -485,9 +485,18 @@ function expectScreenshotPixelAudit(
   theme: "day" | "night",
   label: string
 ): void {
+  const isMobile = label.includes("mobile");
   const expected = theme === "day"
-    ? { rail: { red: 255, green: 255, blue: 255 }, nav: { red: 255, green: 255, blue: 255 }, main: { red: 250, green: 250, blue: 251 } }
-    : { rail: { red: 15, green: 16, blue: 17 }, nav: { red: 15, green: 16, blue: 17 }, main: { red: 1, green: 1, blue: 2 } };
+    ? {
+      rail: { red: 255, green: 255, blue: 255 },
+      nav: isMobile ? { red: 244, green: 245, blue: 247 } : { red: 255, green: 255, blue: 255 },
+      main: { red: 250, green: 250, blue: 251 }
+    }
+    : {
+      rail: { red: 15, green: 16, blue: 17 },
+      nav: isMobile ? { red: 20, green: 21, blue: 22 } : { red: 15, green: 16, blue: 17 },
+      main: { red: 1, green: 1, blue: 2 }
+    };
   const channelDelta = (pixel: ScreenshotPixel, target: ScreenshotPixel) => Math.max(
     Math.abs(pixel.red - target.red),
     Math.abs(pixel.green - target.green),
@@ -498,7 +507,9 @@ function expectScreenshotPixelAudit(
     expect.soft(channelDelta(pixel, expected.rail), `${label} rail screenshot pixel ${JSON.stringify(pixel)}`).toBeLessThanOrEqual(2);
   }
   for (const pixel of audit.navPixels) {
-    expect.soft(channelDelta(pixel, expected.nav), `${label} nav screenshot pixel ${JSON.stringify(pixel)}`).toBeLessThanOrEqual(2);
+    const allowedNavTargets = isMobile ? [expected.nav, expected.rail] : [expected.nav];
+    const nearestTokenDelta = Math.min(...allowedNavTargets.map((target) => channelDelta(pixel, target)));
+    expect.soft(nearestTokenDelta, `${label} nav screenshot pixel ${JSON.stringify(pixel)}`).toBeLessThanOrEqual(2);
   }
   for (const pixel of audit.mainPixels) {
     expect.soft(channelDelta(pixel, expected.main), `${label} main screenshot pixel ${JSON.stringify(pixel)}`).toBeLessThanOrEqual(2);

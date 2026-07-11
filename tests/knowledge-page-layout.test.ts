@@ -175,11 +175,11 @@ describe("knowledge page decision layout", () => {
     expect(fs.existsSync(cssPath)).toBe(true);
 
     const css = fs.readFileSync(cssPath, "utf8");
-    const radii = [...css.matchAll(/border-radius:\s*([\d.]+)px/g)]
-      .map((match) => Number.parseFloat(match[1]));
+    const radiusValues = [...css.matchAll(/border-radius:\s*([^;]+);/g)]
+      .map((match) => match[1].trim());
 
-    expect(radii.length).toBeGreaterThan(0);
-    expect(Math.max(...radii)).toBeLessThanOrEqual(8);
+    expect(radiusValues.length).toBeGreaterThan(0);
+    expect(radiusValues.every((value) => ["0", "2px", "4px", "8px", "var(--radius-control)", "var(--radius-soft)"].includes(value))).toBe(true);
     expect(css).toContain("@media (max-width: 720px)");
     expect(css).toContain("grid-template-columns: minmax(0, 1fr)");
     expect(css).toContain("overflow-wrap: anywhere");

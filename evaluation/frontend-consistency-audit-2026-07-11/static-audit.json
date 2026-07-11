@@ -1,10 +1,11 @@
 {
-  "generatedAt": "2026-07-11T13:36:11.624Z",
+  "generatedAt": "2026-07-11T19:41:28.609Z",
   "status": "pass",
   "counts": {
     "pageFiles": 32,
     "componentFiles": 23,
-    "cssLines": 19381,
+    "cssFiles": 4,
+    "cssLines": 20866,
     "importantDeclarations": 0
   },
   "coverage": {

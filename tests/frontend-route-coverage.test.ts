@@ -459,9 +459,9 @@ describe("browser evidence reconciliation", () => {
     const validRow = {
       route: "/workspace", viewport: "desktop-1440", status: 200, consoleErrors: [], pageErrors: [],
       horizontalOverflow: 0, visiblePrimaryContent: "작업공간", boundaryMarker: "",
-      bodyFont: 'Pretendard, "Noto Sans KR", sans-serif', bodyFontSize: "15px", bodyFontWeight: "500",
+      bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px", bodyFontWeight: "500",
       bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
-      primaryHeading: { tag: "h1", text: "작업공간", fontFamily: "Pretendard", fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      primaryHeading: { tag: "h1", text: "작업공간", fontFamily: '"Noto Sans KR"', fontSize: "72px", fontWeight: "800", lineHeight: "82.8px", letterSpacing: "-3.24px" },
       renderedControls: [], keySurfaces: [], documentTypography: {},
     };
     const probe = (row: object) => runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
@@ -487,21 +487,21 @@ describe("browser evidence reconciliation", () => {
     const row = {
       route: "generated:document-preview", viewport: "desktop-1440", status: 200,
       consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "문서",
-      boundaryMarker: "", bodyFont: 'Pretendard, "Noto Sans KR", sans-serif',
+      boundaryMarker: "", bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif',
       bodyFontSize: "15px", bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px",
       productFontLoaded: true,
-      primaryHeading: { fontFamily: "Pretendard", fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
       renderedControls: [], keySurfaces: [],
       documentTypography: {
         title: { ...role(documentFamily), fontSize: "26.6667px", lineHeight: "32px", letterSpacing: "-0.533333px" },
-        section: role('Pretendard, "Noto Sans KR", sans-serif'),
+        section: role('"Noto Sans KR", "Malgun Gothic", sans-serif'),
         body: { ...role(documentFamily), fontSize: "13.3333px", fontWeight: "400", lineHeight: "20px", letterSpacing: "0px" },
         table: { ...role(documentFamily), fontSize: "11.3333px", fontWeight: "400", lineHeight: "16px", letterSpacing: "0px" },
         note: { ...role(documentFamily), fontSize: "10.6667px", fontWeight: "400", lineHeight: "14.6667px", letterSpacing: "0px" },
       },
     };
     const result = runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
-    expect(result.findings).toContain("document section family outside document stack: Pretendard, \"Noto Sans KR\", sans-serif");
+    expect(result.findings).toContain('document section family outside document stack: "Noto Sans KR", "Malgun Gothic", sans-serif');
   }, 15_000);
 
   it("retains unrelated boundary and hydration errors", () => {
@@ -523,9 +523,9 @@ describe("browser evidence reconciliation", () => {
       route: "/workspace", viewport: "desktop-1440", status: 200,
       expectedStatuses: [200], expectedFinalPath: "/workspace", finalUrl: "http://127.0.0.1:3011/workspace",
       consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "작업공간",
-      boundaryMarker: "", bodyFont: 'Pretendard, "Noto Sans KR", sans-serif', bodyFontSize: "15px",
+      boundaryMarker: "", bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
       bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
-      primaryHeading: { fontFamily: "Pretendard", fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "72px", fontWeight: "800", lineHeight: "82.8px", letterSpacing: "-3.24px" },
       renderedControls: [], keySurfaces: [], documentTypography: {},
     };
     const probe = (row: object) => runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
@@ -540,9 +540,32 @@ describe("browser evidence reconciliation", () => {
     expect(errorSource).toContain('__auditBoundary") === "error"');
     const report = JSON.parse(read("evaluation/frontend-consistency-audit-2026-07-11/report.json")) as { verificationCommands: unknown[] };
     expect(report.verificationCommands).toEqual(expect.arrayContaining([
-      expect.objectContaining({ command: "npm.cmd test", outcome: "pass", exitCode: 0, testFiles: 56, tests: 523 }),
+      expect.objectContaining({ command: "npm.cmd test -- --run --maxWorkers=1 --no-file-parallelism", outcome: "not-run-by-browser-audit", exitCode: null }),
       expect.objectContaining({ command: "npm.cmd run build", outcome: "pass", exitCode: 0 }),
     ]));
+  });
+
+  it("connects the launch share CTA to the real customer-facing send panel", () => {
+    const commandCenter = read("components/SafeGuardCommandCenter.tsx");
+    const sharePanel = read("components/WorkflowSharePanel.tsx");
+    const fieldWorkspace = read("components/FieldOperationsWorkspace.tsx");
+
+    expect(fieldWorkspace).toContain('if (surface !== "share") return;');
+    expect(fieldWorkspace).toContain("client.auth.getSession()");
+    expect(fieldWorkspace).toContain("client.auth.onAuthStateChange");
+    expect(sharePanel).toContain("void message;");
+    expect(sharePanel).toContain('return option?.label || "기타 채널";');
+    expect(sharePanel).toContain('return "결과 확인 필요";');
+    expect(sharePanel).not.toContain("? shareRecords.message");
+    expect(sharePanel).not.toContain("${shareRecords.message}");
+
+    expect(commandCenter).toContain('document.getElementById("dispatch")?.scrollIntoView');
+    expect(commandCenter).toContain('className="share-live-workspace"');
+    expect(commandCenter).toContain("<FieldOperationsWorkspace");
+    expect(commandCenter).toContain("문서팩 전송하기");
+    expect(commandCenter).not.toContain("onClick={() => focusWorkpackEditor(selectedOutputItem.key)}\n                disabled={!data || !workpackReadiness?.canShare}");
+    expect(sharePanel).toContain('id="dispatch"');
+    expect(sharePanel).toContain("로그인하면 문서팩과 전송·열람 이력이 서버에 안전하게 저장됩니다.");
   });
 });
 

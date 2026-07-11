@@ -1,5 +1,34 @@
-/* Font loading moved to app/layout.tsx via non-blocking <link> elements.
-   Removing render-blocking CSS @import to eliminate LCP bottleneck. */
+@font-face {
+  font-family: "Noto Sans KR";
+  src: url("/fonts/NotoSansKR-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans KR";
+  src: url("/fonts/NotoSansKR-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans KR";
+  src: url("/fonts/NotoSansKR-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans KR";
+  src: url("/fonts/NotoSansKR-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
 
 :root {
   --bg: #f6f3ed;
@@ -18,7 +47,7 @@
   --radius-lg: 4px;
   --radius-md: 4px;
   --radius-sm: 4px;
-  --font-product: "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-product: "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
   --font-base: var(--font-product);
   --font-document: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   --font-multilingual: "Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", system-ui, sans-serif;
@@ -57,7 +86,7 @@
   --radius-lg: 4px;
   --radius-md: 4px;
   --radius-sm: 4px;
-  --font-product: "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-product: "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
   --font-base: var(--font-product);
   --font-hud: "Geist Mono", "JetBrains Mono", "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
   --radius-structural: 0;
@@ -84,11 +113,11 @@
   --line-d: rgba(255, 255, 255, 0.10);
   --line-d-2: rgba(255, 255, 255, 0.16);
 
-  /* Round scale (cards default 6px). */
+  /* Contextual radius scale: micro 2, control 4, soft card 8, workbench 12, rail 14. */
   --r-xs: 2px;
   --r-sm: 4px;
-  --r-md: 6px;     /* card default */
-  --r-lg: 10px;
+  --r-md: 8px;
+  --r-lg: 12px;
   --r-xl: 14px;
 
   /* Screen type scale. */
@@ -103,7 +132,7 @@
   --text-table: 13px;
   --text-caption: 12px;
   --text-hud: 11px;
-  --leading-display: 0.98;
+  --leading-display: 1.15;
   --leading-page-title: 1.15;
   --leading-section-title: 1.25;
   --leading-component-title: 1.35;
@@ -3785,6 +3814,7 @@ ul {
 }
 
 .quick-chip {
+  min-height: var(--control-height-compact);
   border: 1px solid rgba(207, 199, 185, 0.78);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.58);
@@ -6611,6 +6641,45 @@ ul {
   border-top: 1px solid var(--line);
 }
 
+.command-center-shell .composer-mode-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height-compact);
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-control);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-muted);
+  padding: 0 var(--space-3);
+}
+
+.command-center-shell .share-workbench-title > .workbench-primary-action {
+  justify-self: start;
+  margin-top: var(--space-3);
+}
+
+.command-center-shell :is(.share-session-details, .operation-improvement-details) {
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-soft);
+  background: var(--workspace-surface-1);
+}
+
+.command-center-shell :is(.share-session-details, .operation-improvement-details) > summary {
+  min-height: var(--control-height);
+  padding: var(--space-3) var(--space-4);
+  color: var(--workspace-ink);
+  cursor: pointer;
+}
+
+.command-center-shell .share-session-details .share-session-grid,
+.command-center-shell .operation-improvement-details .operation-ontology-panel {
+  margin: 0;
+  border-top: 1px solid var(--workspace-rule);
+}
+
+.command-center-shell .share-live-workspace > .field-workspace {
+  display: block;
+}
+
 .law-section-lines p {
   margin: 0;
   font-size: var(--text-body);
@@ -9356,6 +9425,14 @@ body:has(.safeclaw-landing) :is(
     grid-template-columns: 1fr;
     gap: 8px;
   }
+}
+
+.safeclaw-worker-phone > button {
+  min-height: var(--control-height-compact);
+}
+
+.safeclaw-worker-phone article > button {
+  min-height: var(--control-height-compact);
 }
 
 .document-print-typography {
@@ -14555,6 +14632,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #e6e8eb;
   --workspace-rule-strong: #d0d3d9;
   --workspace-accent: #f5c518;
+  --workspace-accent-text: #665100;
   --workspace-accent-hover: #e0b30f;
   --workspace-success: #16a34a;
   --share-canvas: #fafafb;
@@ -15607,6 +15685,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #23252a;
   --workspace-rule-strong: #34343a;
   --workspace-accent: #6c6ff7;
+  --workspace-accent-text: #b5b7ff;
   --workspace-accent-hover: #8b8dfc;
   --workspace-success: #27a644;
   background: var(--workspace-canvas);
@@ -15635,7 +15714,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-brand em {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-rail p,
@@ -15735,7 +15814,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-rail a.active span {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-rail a strong {
@@ -15798,6 +15877,14 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+.command-center-shell .workspace-side-nav.is-empty {
+  align-self: stretch;
+  min-height: 0;
+  max-height: none;
+  overflow-x: visible;
+  overflow-y: visible;
+}
+
 .safeclaw-module-shell.module-variant-document .hud-corners::before,
 .safeclaw-module-shell.module-variant-document .hud-corners::after {
   display: none;
@@ -15809,7 +15896,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-section-head span,
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-rail section > span,
 .safeclaw-module-shell.module-variant-document .safeclaw-current-workpack span {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
   font-family: inherit;
   font-size: var(--text-table);
   font-weight: 500;
@@ -15996,7 +16083,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list article > span,
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list a {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
   font-size: var(--text-table);
   font-weight: 500;
   line-height: var(--leading-table);
@@ -16092,12 +16179,11 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-panel {
   width: min(100% - 40px, 1120px);
-  padding: clamp(24px, 3.2vw, 44px);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-panel > span,
 .safeclaw-module-shell.module-variant-document .safeclaw-module-grid article span {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
   font-family: inherit;
   font-size: var(--text-caption);
   font-weight: 600;
@@ -16187,7 +16273,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .ai-connect-meta dt,
 .safeclaw-module-shell.module-variant-document .ai-connect-secret label,
 .safeclaw-module-shell.module-variant-document .ai-connect-command-box strong {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
   font-family: inherit;
   font-size: var(--text-caption);
   font-weight: 600;
@@ -16323,7 +16409,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-operator-gate span {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
   font-family: inherit;
   font-weight: 560;
   letter-spacing: 0;
@@ -16858,7 +16944,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-rail a.active span {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-rail a strong {
@@ -16910,7 +16996,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .safeclaw-module-eyebrow,
 .safeclaw-module-shell.module-variant-document .safeclaw-module-hero aside > span:first-child {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
   font-size: var(--text-caption);
   font-weight: 600;
   line-height: var(--leading-caption);
@@ -17118,7 +17204,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-doc-index-list small,
 .safeclaw-module-shell.module-variant-document .safeclaw-doc-primary-grid small,
 .safeclaw-module-shell.module-variant-document .safeclaw-doc-export dt {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
   font-family: inherit;
   font-size: var(--text-caption);
   font-weight: 600;
@@ -17711,6 +17797,7 @@ body:has(.safeclaw-landing) :is(
   gap: 16px;
   min-height: 0;
   overflow: visible;
+  padding: 0;
   transform: none;
 }
 
@@ -17764,7 +17851,7 @@ body:has(.safeclaw-landing) :is(
   box-shadow: none;
   font-family: inherit;
   font-size: var(--text-body);
-  line-height: var(--leading-body);
+  line-height: var(--leading-longform);
   padding: 20px 20px;
   font-weight: 500;
   letter-spacing: var(--tracking-body);
@@ -17845,7 +17932,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell.module-variant-document .workpack-sidebar :is(.eyebrow, .template-preview span, .document-toolbar span, .rubric-item span, .selected-rubric-item span) {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
   font-family: inherit;
   font-size: var(--text-caption);
   font-weight: 600;
@@ -17949,7 +18036,7 @@ body:has(.safeclaw-landing) :is(
   box-shadow: none;
   font-family: inherit;
   font-size: var(--text-body);
-  line-height: var(--leading-body);
+  line-height: var(--leading-longform);
   padding: 20px 20px;
   font-weight: 500;
   letter-spacing: var(--tracking-body);
@@ -18382,6 +18469,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #dfe2e7;
   --workspace-rule-strong: #c9cdd4;
   --workspace-accent: #f5c518;
+  --workspace-accent-text: #665100;
   --workspace-accent-hover: #d9ad00;
   --workspace-success: #187a36;
   width: 100%;
@@ -18405,6 +18493,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #292b30;
   --workspace-rule-strong: #3b3d44;
   --workspace-accent: #6c6ff7;
+  --workspace-accent-text: #b5b7ff;
   --workspace-accent-hover: #8588ff;
   --workspace-success: #4fc66a;
 }
@@ -18681,7 +18770,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell .safeclaw-page-decision-copy .safeclaw-module-eyebrow,
 .safeclaw-module-shell .safeclaw-page-decision-action span {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
   font-family: inherit;
   font-size: var(--text-caption);
   font-weight: 600;
@@ -18838,7 +18927,7 @@ body:has(.safeclaw-landing) :is(
   .customer-template-field-grid
 ) span,
 .safeclaw-module-shell .safeclaw-module-content :is(.rubric-item, .selected-rubric-item) > span {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
 }
 
 .safeclaw-module-shell .safeclaw-module-content :is(.field-label, .consent-check span) {
@@ -18848,7 +18937,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell .safeclaw-module-content .badge {
   border-color: var(--workspace-rule);
   background: var(--workspace-surface-2);
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
 }
 
 .safeclaw-module-shell .safeclaw-module-content :is(.doc-tab, .template-card).active {
@@ -18916,7 +19005,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .safeclaw-module-shell .safeclaw-module-content :is(.eyebrow, .safeclaw-module-grid article > span) {
-  color: var(--workspace-accent);
+  color: var(--workspace-accent-text);
 }
 
 .safeclaw-module-shell .knowledge-status-grid {
@@ -19131,7 +19220,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell.module-variant-document .safeclaw-mobile-document-priority > span {
-    color: var(--workspace-accent);
+    color: var(--workspace-accent-text);
     font-size: var(--text-caption);
     font-weight: 600;
     line-height: var(--leading-caption);
@@ -19346,9 +19435,166 @@ body:has(.safeclaw-landing) :is(
     text-decoration: none;
     letter-spacing: var(--tracking-body);
 }
+
+}
+
+.safeclaw-module-shell .safeclaw-module-chrome-button {
+  height: var(--control-height-compact);
+  min-height: var(--control-height-compact);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.safeclaw-module-shell :is(
+  .safeclaw-module-brand em,
+  .safeclaw-module-rail a.active span,
+  .safeclaw-module-eyebrow,
+  .safeclaw-page-decision-action span,
+  .safeclaw-module-panel > span,
+  .safeclaw-module-grid article span,
+  .safeclaw-doc-index-list small,
+  .safeclaw-doc-primary-grid small,
+  .safeclaw-doc-export dt,
+  .safeclaw-current-workpack span,
+  .safeclaw-workdoc-section-head span,
+  .safeclaw-workdoc-rail section > span,
+  .ai-connect-meta dt,
+  .ai-connect-secret label,
+  .ai-connect-command-box strong,
+  .ai-connect-sif-operator-gate span,
+  .workpack-sidebar .eyebrow,
+  .workpack-sidebar .template-preview span,
+  .workpack-sidebar .document-toolbar span,
+  .workpack-sidebar .rubric-item span,
+  .workpack-sidebar .selected-rubric-item span,
+  .customer-template-stage span,
+  .customer-template-field-grid span,
+  .safeclaw-mobile-document-priority > span,
+  .badge
+) {
+  color: var(--workspace-accent-text);
+}
+
+.safeclaw-module-shell :is(.document-textarea, .remediation-textarea),
+.command-center-shell .command-console-input {
+  line-height: var(--leading-body-lg);
+}
+
+.safeclaw-module-shell .document-print-typography .safety-form-section-stack h3 {
+  border-radius: var(--radius-structural);
+}
+
+@media (min-width: 721px) and (min-height: 641px) {
+  .command-center-shell .workspace-input-page .command-copy h1,
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-copy h1 {
+    font-size: var(--text-display);
+    font-weight: 800;
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+  }
+}
+
+@media (max-width: 900px) {
+  .safeclaw-module-shell .safeclaw-module-menu-button.safeclaw-module-chrome-button {
+    height: var(--control-height);
+    min-height: var(--control-height);
+  }
+
+  .safeclaw-module-shell.module-variant-document .advanced-downloads.inline .advanced-download-grid {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: 0;
+  }
+
+  .safeclaw-module-shell.module-variant-document .advanced-downloads.inline .advanced-download-grid .button {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-5);
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+    min-height: 150px;
+    line-height: var(--leading-body-lg);
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .input-helper,
+  .command-center-shell.workspace-theme-night .workspace-input-page .input-helper {
+    display: none;
+  }
+}
+
+@media (min-width: 1201px) and (min-height: 431px) and (max-height: 560px) {
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    gap: var(--space-1);
+    padding-top: var(--space-1);
+    padding-bottom: var(--space-2);
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console {
+    margin-top: 0;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+    min-height: 118px;
+  }
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+.command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+  line-height: var(--leading-longform);
 }
 
 /* Final integrated route geometry owners. */
+.command-center-shell.workspace-theme-day .workspace-side-nav.is-empty,
+.command-center-shell.workspace-theme-night .workspace-side-nav.is-empty {
+  align-self: stretch;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+}
+
+@media (max-width: 900px) {
+  .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-shell {
+    min-width: 0;
+    max-width: calc(100% - var(--space-6));
+    overflow-x: clip;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-shell :is(
+    .safeclaw-workdoc,
+    .safeclaw-workdoc-rail,
+    .safeclaw-report-table,
+    .safeclaw-report-groups,
+    .safeclaw-report-group,
+    .safeclaw-report-facts,
+    .safeclaw-report-notes
+  ) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-shell :is(p, span, strong, em, code) {
+    overflow-wrap: anywhere;
+  }
+}
+
 .legal-section-lines {
   width: 100%;
   margin: 0;

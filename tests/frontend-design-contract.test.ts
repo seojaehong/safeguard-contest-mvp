@@ -120,6 +120,8 @@ function expectedTypographyRole(rule: CssRule, selector: string): TypographyRole
   const override = semanticRoleOverrides[selector];
   if (override) return override;
   const size = rule.declarations["font-size"];
+  if (rule.selectors.every((candidate) => /textarea/i.test(candidate) && !/input/i.test(candidate))
+    && ["var(--text-body)", "var(--t-body)", "15px"].includes(size)) return "longform";
   if (isTableHeaderSelector(selector) && !isInteractiveSelector(selector)) return "tableHeader";
   if (["var(--text-display)", "var(--t-display)", "clamp(44px, 6vw, 72px)"].includes(size)) return "display";
   if (["var(--text-page-title)", "var(--t-hero)", "clamp(32px, 4vw, 40px)"].includes(size)) return "pageTitle";

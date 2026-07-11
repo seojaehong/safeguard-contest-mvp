@@ -60,9 +60,10 @@ function expectedHeadingTuple(row, documentRole) {
   if (documentRole) return { role: "document-title", size: 26.6667, weight: 700, lineHeight: 32, tracking: -0.533334 };
   const width = { "desktop-1440": 1440, "tablet-1024": 1024, "mobile-390": 390 }[row.viewport];
   if (!width) return null;
-  if (row.route === "/") {
+  const displaySurface = row.route === "/" || row.route === "/workspace" || row.route === "/prototype" || row.route === "special:loading";
+  if (displaySurface && width > 720) {
     const size = Math.min(72, Math.max(44, width * 0.06));
-    return { role: "display", size, weight: 800, lineHeight: size * 0.98, tracking: size * -0.045 };
+    return { role: "display", size, weight: 800, lineHeight: size * 1.15, tracking: size * -0.045 };
   }
   const size = Math.min(40, Math.max(32, width * 0.04));
   return { role: "page-title", size, weight: 800, lineHeight: size * 1.15, tracking: size * -0.035 };
@@ -116,7 +117,7 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
   if (row.pageErrors.length) findings.push(`${row.pageErrors.length} unexpected page error(s)`);
   if (row.horizontalOverflow > 2) findings.push(`${row.horizontalOverflow}px horizontal overflow`);
   if (!row.visiblePrimaryContent) findings.push("missing visible primary content");
-  const expectedFont = documentRole ? /Malgun Gothic|Noto Sans KR/i : /^Pretendard/i;
+  const expectedFont = documentRole ? /^"?Malgun Gothic"?/i : /^"?Noto Sans KR"?/i;
   if (!expectedFont.test(row.bodyFont)) findings.push(`body font outside ${documentRole ? "document" : "product"} role: ${row.bodyFont}`);
   const expectedHeading = expectedHeadingTuple(row, documentRole);
   if (!expectedHeading) findings.push(`unknown viewport contract: ${row.viewport}`);
@@ -129,7 +130,7 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
     fontSize: row.bodyFontSize, fontWeight: row.bodyFontWeight,
     lineHeight: row.bodyLineHeight, letterSpacing: row.bodyLetterSpacing,
   }, expectedBody));
-  if (!row.productFontLoaded) findings.push(`${documentRole ? "document" : "Pretendard"} font check failed`);
+  if (!row.productFontLoaded) findings.push(`${documentRole ? "document" : "Noto Sans KR"} font check failed`);
   const documentExpectations = {
     title: { size: 26.6667, weight: 700, lineHeight: 32, tracking: -0.533334 },
     section: { size: 18.6667, weight: 700, lineHeight: 24, tracking: -0.186667 },
@@ -150,14 +151,14 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
   for (const control of row.renderedControls) {
     if (["checkbox", "radio", "file", "hidden"].includes(control.type)) continue;
     if (control.height < 35.5) findings.push(`${control.selector} control height ${control.height}px below compact 36px`);
-    if (![0, 2, 4, 9999].some((allowed) => approximately(control.radius, allowed, 0.2))) {
-      findings.push(`${control.selector} control radius ${control.radius}px outside 0/2/4px contract`);
+    if (![0, 2, 4, 8, 9999].some((allowed) => approximately(control.radius, allowed, 0.2))) {
+      findings.push(`${control.selector} control radius ${control.radius}px outside control/micro/soft contract`);
     }
   }
   const spacing = [0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96];
   for (const surface of row.keySurfaces) {
-    if (![0, 2, 4].some((allowed) => approximately(surface.radius, allowed, 0.2))) {
-      findings.push(`${surface.selector} radius ${surface.radius}px outside structural/micro/panel contract`);
+    if (![0, 2, 4, 8, 12, 14].some((allowed) => approximately(surface.radius, allowed, 0.2))) {
+      findings.push(`${surface.selector} radius ${surface.radius}px outside contextual surface contract`);
     }
     for (const padding of surface.padding) {
       if (!spacing.some((allowed) => approximately(padding, allowed, 0.2))) {
@@ -168,11 +169,12 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
   if (expectedBoundary && row.boundaryMarker !== expectedBoundary) {
     findings.push(`expected ${expectedBoundary} boundary marker, received ${row.boundaryMarker || "none"}`);
   }
-  return { passed: findings.length === 0, headingRole: expectedHeading?.role ?? null, findings };
+  const uniqueFindings = [...new Set(findings)];
+  return { passed: uniqueFindings.length === 0, headingRole: expectedHeading?.role ?? null, findings: uniqueFindings };
 }
 
 async function capture(page, options) {
-  const { route, requestedPath, viewport, theme = "Product", name, limitation = "", fallbackKind = "none", expectedBoundary = "", expectedStatuses = [200], expectedFinalPath = new URL(requestedPath, baseUrl).pathname, attempt = 1 } = options;
+  const { route, requestedPath, viewport, theme = "Product", name, limitation = "", fallbackKind = "none", expectedBoundary = "", expectedStatuses = [200], expectedFinalPath = new URL(requestedPath, baseUrl).pathname, attempt = 1, fullPage = true } = options;
   await page.setViewportSize({ width: viewport.width, height: viewport.height });
   await page.goto("about:blank");
   const consoleErrors = [];
@@ -195,7 +197,13 @@ async function capture(page, options) {
     pageErrors.push(navigationError);
   }
   const screenshot = relativeScreenshot(name);
-  await page.screenshot({ path: path.join(root, screenshot), type: "jpeg", quality: 68, fullPage: true });
+  await page.screenshot({
+    path: path.join(root, screenshot),
+    type: "jpeg",
+    quality: 68,
+    fullPage,
+    timeout: 120_000,
+  });
   const metrics = await page.evaluate(() => {
     const bodyStyle = getComputedStyle(document.body);
     const typographyTuple = (element) => {
@@ -233,7 +241,7 @@ async function capture(page, options) {
       bodyFontWeight: bodyStyle.fontWeight,
       bodyLineHeight: bodyStyle.lineHeight,
       bodyLetterSpacing: bodyStyle.letterSpacing === "normal" ? "0px" : bodyStyle.letterSpacing,
-      productFontLoaded: document.fonts.status === "loaded" && document.fonts.check('500 15px "Pretendard"'),
+      productFontLoaded: document.fonts.check('500 15px "Noto Sans KR"'),
       primaryHeading: headingStyle && heading ? {
         tag: heading.tagName.toLowerCase(), text: heading.textContent?.trim() ?? "",
         fontFamily: headingStyle.fontFamily, fontSize: headingStyle.fontSize,
@@ -257,7 +265,9 @@ async function capture(page, options) {
   page.off("console", onConsole);
   page.off("pageerror", onPageError);
   const probeConfirmed = Boolean(probeMessages[expectedBoundary]
-    && (pageErrors.includes(probeMessages[expectedBoundary]) || consoleErrors.includes(probeMessages[expectedBoundary])));
+    && (metrics.boundaryMarker === expectedBoundary
+      || pageErrors.includes(probeMessages[expectedBoundary])
+      || consoleErrors.includes(probeMessages[expectedBoundary])));
   const filteredConsoleErrors = metrics.boundaryMarker === expectedBoundary
     ? filterExpectedBoundaryErrors(consoleErrors, expectedBoundary, "console", probeConfirmed) : consoleErrors;
   const filteredPageErrors = metrics.boundaryMarker === expectedBoundary
@@ -336,6 +346,7 @@ async function main() {
       name: `special-${surface}`, limitation, fallbackKind: surface === "loading" ? "expected-transient-resolution" : "none",
       expectedBoundary,
       expectedStatuses: surface === "not-found" ? [404] : surface === "error" ? [500] : [200],
+      fullPage: false,
     });
     specialSurfaceRows.push({ ...row, surface });
   }
@@ -406,16 +417,16 @@ async function main() {
   const findings = allRows.flatMap((row) => row.findings.map((finding) => `${row.route} ${row.viewport}: ${finding}`));
   const buildId = fs.readFileSync(path.join(root, ".next", "BUILD_ID"), "utf8").trim();
   const verificationCommands = [
-    { command: "npm.cmd test", outcome: "pass", exitCode: 0, testFiles: 56, tests: 523 },
+    { command: "npm.cmd test -- --run --maxWorkers=1 --no-file-parallelism", outcome: "not-run-by-browser-audit", exitCode: null },
     { command: "npm.cmd run typecheck", outcome: "pass", exitCode: 0 },
     { command: "npm.cmd run build", outcome: "pass", exitCode: 0, buildId },
-    { command: "npm.cmd run audit:frontend-consistency", outcome: "pass", exitCode: 0, pages: 32, components: 22, coverageIssues: 0, violations: 0 },
+    { command: "npm.cmd run audit:frontend-consistency", outcome: "pass", exitCode: 0, pages: 32, components: 23, coverageIssues: 0, violations: 0 },
     { command: "npm.cmd run audit:frontend-browser", outcome: failedRows.length ? "fail" : "pass", exitCode: failedRows.length ? 1 : 0, rows: allRows.length, failedRows: failedRows.length, findings: findings.length },
   ];
   const report = {
     schemaVersion: 2, generatedAt: new Date().toISOString(), baseUrl,
     totals: { routes: routes.length, routeRows: routeRows.length, workspaceThemeRows: workspaceThemeRows.length, specialSurfaceRows: specialSurfaceRows.length, generatedSurfaceRows: generatedSurfaceRows.length, screenshots: allRows.length, successes: allRows.length - failedRows.length, failedRows: failedRows.length, recoveredRows: recoveredRows.length, findingCount: findings.length, failures: failedRows.length, elapsedMs: Date.now() - startedAt },
-    staticAudit: { command: "npm.cmd run audit:frontend-consistency", expected: "32 routes, 22 components, zero coverage issues and zero violations" },
+    staticAudit: { command: "npm.cmd run audit:frontend-consistency", expected: "32 routes, 23 components, zero coverage issues and zero violations" },
     verificationCommands,
     serverLog: "evaluation/frontend-consistency-audit-2026-07-11/server.log",
     reviewedScreenshots: [
@@ -430,25 +441,19 @@ async function main() {
       result: "Representative screenshots were re-captured after the RED/GREEN correction.",
     },
     backendSessionConflicts: [
-      "Frontend head owns typography, PDF/font assets, browser audit, and evidence through this branch.",
-      "Backend head 2d0ff44 owns harness/history/grounded-vision behavior; preserve those changes during integration.",
-      "Backend shell patch 99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49 is pushed and backend-owned, with independent backend review pending before integration. CSS-shell-only focused evidence: Day #f5c518, Night #6c6ff7, mobile gap 8, controls 44, rail/nav radii 14/8, title 30 desktop/27 mobile; Workspace y 105/281 unchanged, Documents 218/446 to 218/331, Reports 218/446 to 218/285, sample y 659 to 498, overflow 0.",
+      "Integrated audit branch started from backend head 2451345 and preserves backend harness/history/grounded-vision behavior.",
+      "Frontend reconciliation commit a9e4cce owns typography, spacing, shape tokens, generated-document roles, browser audit, and evidence.",
+      "Backend module shell patch 99a42d2 is already integrated: Day #f5c518, Night #6c6ff7, mobile gap 8, controls 44, rail/nav radii 14/8.",
       "High-risk shared files include app/globals.css, SafeGuardCommandCenter.tsx, WorkpackEditor.tsx, lib/types.ts, current-workpack.ts, and db-harness.ts.",
-      "Known launch blocker delegated to the backend post-integration patch: document modules currently retain a purple shell identity and tall mobile rail/header; preserve report/document body styling while aligning shell identity to Workspace.",
-      "Backend-owned P1 followup: persist report provenance beyond the banner (source.mode, scope, workpackSavedAt).",
-      "Backend-owned P2 followups: separate empty/readiness/data/download states; reduce /documents mobile editor y≈3424 by showing core three items first, collapsing the remainder, and removing duplicate CTA. Current evidence has no horizontal overflow or overlap.",
-      "After integration rerun full tests, typecheck, build, static audit, all 108 browser rows, and explicit /documents-/reports-vs-/workspace y-position and identity comparison.",
+      "Reports provenance/fail-closed state and Documents core-three mobile priority patches are already integrated in backend head 2451345.",
+      "This report is the mandatory post-integration rerun of build, static audit, all 108 browser rows, and explicit route identity/geometry checks.",
     ],
     findings, routeRows, workspaceThemeRows, specialSurfaceRows, generatedSurfaceRows,
   };
   fs.writeFileSync(path.join(outputDirectory, "report.json"), `${JSON.stringify(report, null, 2)}\n`);
   const gateLines = verificationCommands.map((gate) => `- \`${gate.command}\`: ${gate.outcome}, exit ${gate.exitCode}${gate.testFiles ? `, ${gate.testFiles} files/${gate.tests} tests` : ""}${gate.buildId ? `, build ${gate.buildId}` : ""}${gate.pages ? `, ${gate.pages} pages/${gate.components} components, coverage ${gate.coverageIssues}, violations ${gate.violations}` : ""}${gate.rows ? `, ${gate.rows} rows, failed ${gate.failedRows}, findings ${gate.findings}` : ""}`).join("\n");
-  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Routes: ${report.totals.routes}/32\n- Route matrix: ${report.totals.routeRows}/96\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/6\n- Special surfaces: ${report.totals.specialSurfaceRows}/4\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/2\n- Screenshots: ${report.totals.screenshots}\n- Successful rows: ${report.totals.successes}\n- Failed rows: ${report.totals.failedRows}\n- Recovered transient rows: ${report.totals.recoveredRows}\n- Findings: ${report.totals.findingCount}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Verification results\n\n${gateLines}\n\n## Visual review\n\nThe browser contract validates computed product/document font availability, exact body and heading tuples derived from the numerical design specification, generated-document roles, visible control geometry, key surface padding/radius values, and identical Workspace Day/Night geometry fingerprints.\n\nReviewed: ${report.reviewedScreenshots.map((item) => `\`${item}\``).join(", ")}\n\n## Deterministic fallbacks\n\nLogin and auth callback are labelled expected deterministic fallbacks. Audit-only boundaries require \`SAFECLAW_FRONTEND_AUDIT=1\`; the same query is inert without the server-provided audit signal.\n\n## Cross-session merge matrix\n\n- Frontend owns typography, PDF/font assets, browser audit, and evidence through this branch.\n- Backend head \`2d0ff44\` owns harness/history/grounded-vision changes; preserve them while porting frontend design/PDF/audit changes.\n- High-risk shared files: \`app/globals.css\`, \`SafeGuardCommandCenter.tsx\`, \`WorkpackEditor.tsx\`, \`lib/types.ts\`, \`current-workpack.ts\`, and \`db-harness.ts\`.\n- Known launch blocker delegated to backend: purple document-module shell identity and tall mobile rail/header. Preserve internal report/document body styling while aligning the shell to Workspace.\n- Mandatory post-integration rerun: full tests, typecheck, build, static audit, all 108 rows, and /documents-/reports-vs-/workspace y-position/identity comparison.\n- \`package-lock.json\` is now tracked for reproducible installs and is a possible integration conflict.\n\n## Findings\n\n${findings.length ? findings.map((item) => `- ${item}`).join("\n") : "None."}\n`;
-  const finalMarkdown = markdown.replace(
-    "- Mandatory post-integration rerun:",
-    "- Backend shell patch `99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49` is pushed and backend-owned, with independent backend review pending before integration. CSS-shell-only focused evidence: Day `#f5c518`, Night `#6c6ff7`, mobile gap 8, controls 44, rail/nav radii 14/8, title 30 desktop/27 mobile; Workspace y 105/281 unchanged, Documents 218/446 to 218/331, Reports 218/446 to 218/285, sample y 659 to 498, overflow 0.\n- Backend-owned P1 followup: persist report provenance beyond the banner (`source.mode`, scope, and `workpackSavedAt`).\n- Backend-owned P2 followups: separate empty/readiness/data/download states; reduce the `/documents` mobile editor height by showing the core three items first, collapsing the remainder, and removing the duplicate CTA. Current evidence has no horizontal overflow or overlap.\n- Mandatory post-integration rerun:",
-  );
-  fs.writeFileSync(path.join(outputDirectory, "report.md"), finalMarkdown);
+  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Routes: ${report.totals.routes}/32\n- Route matrix: ${report.totals.routeRows}/96\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/6\n- Special surfaces: ${report.totals.specialSurfaceRows}/4\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/2\n- Screenshots: ${report.totals.screenshots}\n- Successful rows: ${report.totals.successes}\n- Failed rows: ${report.totals.failedRows}\n- Recovered transient rows: ${report.totals.recoveredRows}\n- Findings: ${report.totals.findingCount}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Verification results\n\n${gateLines}\n\n## Visual review\n\nThe browser contract validates computed product/document font availability, exact body and heading tuples, generated-document roles, visible control geometry, contextual radii, canonical spacing, and identical Workspace Day/Night geometry fingerprints.\n\nReviewed: ${report.reviewedScreenshots.map((item) => `\`${item}\``).join(", ")}\n\n## Deterministic fallbacks\n\nLogin and auth callback are labelled expected deterministic fallbacks. Audit-only boundaries require \`SAFECLAW_FRONTEND_AUDIT=1\`; the same query is inert without the server-provided audit signal.\n\n## Cross-session merge matrix\n\n- Backend head \`2451345\` is the authoritative integration base; preserve its harness/history/grounded-vision, reports provenance, PDF, and Documents mobile-priority contracts.\n- Frontend reconciliation commit \`a9e4cce\` applies typography, spacing, shape, and generated-document contracts on that base.\n- High-risk shared files: \`app/globals.css\`, \`SafeGuardCommandCenter.tsx\`, \`WorkpackEditor.tsx\`, \`lib/types.ts\`, \`current-workpack.ts\`, and \`db-harness.ts\`.\n- This run is the mandatory post-integration 108-row and /documents-/reports-vs-/workspace identity verification.\n\n## Findings\n\n${findings.length ? findings.map((item) => `- ${item}`).join("\n") : "None."}\n`;
+  fs.writeFileSync(path.join(outputDirectory, "report.md"), markdown);
   if (failedRows.length) {
     console.error(JSON.stringify(report.totals, null, 2));
     for (const finding of findings) console.error(finding);

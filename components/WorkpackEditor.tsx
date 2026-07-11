@@ -698,6 +698,11 @@ const documentPreviewCss = `
   .document-print-typography .safety-form-meta-grid b { font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
   .document-print-typography .safety-form-check-row span { font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
   .document-print-typography .safety-form-signatures span { font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-content .document-print-typography .safety-form-preview-head strong { letter-spacing: -0.02em; }
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-content .document-print-typography .safety-form-bridge h3,
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-content .document-print-typography .safety-form-section-stack h3 { letter-spacing: -0.01em; }
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-content .document-print-typography .safety-form-preview-head small,
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-content .document-print-typography .safety-form-preview-head span { line-height: 11pt; }
 `;
 
 function buildGenericSections(rows: SheetRow[], profile: SafetyFormProfile) {
