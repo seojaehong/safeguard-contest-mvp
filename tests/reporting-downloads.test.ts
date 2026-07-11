@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildStoredCurrentWorkpack, parseStoredCurrentWorkpack } from "@/lib/current-workpack";
+import {
+  buildStoredCurrentWorkpack,
+  inspectStoredCurrentWorkpack,
+  parseStoredCurrentWorkpack
+} from "@/lib/current-workpack";
 import {
   operationImprovementToHarnessImprovement,
   parseOperationImprovements
@@ -371,6 +375,67 @@ describe("reporting downloads", () => {
     expect(snapshot.improvements[0]?.improvementStatusLabel).toBe("반영됨");
   });
 
+  it("preserves legacy improvement statuses in report rows, filters, and labels", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [
+        { ...improvements[0], id: "legacy-proposed", status: "proposed" },
+        { ...improvements[0], id: "legacy-in-progress", status: "in_progress" },
+        { ...improvements[0], id: "legacy-on-hold", status: "on_hold" },
+        { ...improvements[0], id: "legacy-completed", status: "completed" },
+        { ...improvements[0], id: "legacy-verified", status: "verified" }
+      ],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(snapshot.improvements.map((item) => [item.id, item.improvementStatus, item.improvementStatusLabel])).toEqual([
+      ["legacy-proposed", "proposed", "제안됨"],
+      ["legacy-in-progress", "in_progress", "진행 중"],
+      ["legacy-on-hold", "on_hold", "보류됨"],
+      ["legacy-completed", "completed", "완료됨"],
+      ["legacy-verified", "verified", "검증됨"]
+    ]);
+    expect(snapshot.facets.improvementStatuses).toEqual(expect.arrayContaining([
+      expect.objectContaining({ value: "proposed", label: "제안됨" }),
+      expect.objectContaining({ value: "in_progress", label: "진행 중" }),
+      expect.objectContaining({ value: "on_hold", label: "보류됨" }),
+      expect.objectContaining({ value: "completed", label: "완료됨" }),
+      expect.objectContaining({ value: "verified", label: "검증됨" })
+    ]));
+
+    const filtered = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [
+        { ...improvements[0], id: "legacy-proposed", status: "proposed" },
+        { ...improvements[0], id: "legacy-completed", status: "completed" }
+      ],
+      period: "weekly",
+      filters: { improvementStatus: "completed" },
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    expect(filtered.improvements.map((item) => item.id)).toEqual(["legacy-completed"]);
+  });
+
+  it("keeps sample previews non-downloadable until a valid real workpack exists", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [],
+      period: "weekly",
+      sourceMode: "sample",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const viewState = resolveReportViewState(snapshot);
+
+    expect(viewState).toEqual({
+      status: "ready",
+      title: "샘플 미리보기만 가능합니다.",
+      detail: "실제 작업팩 저장시각이 유효해질 때까지 증빙 다운로드는 잠겨 있습니다.",
+      canDownload: false
+    });
+  });
+
   it("links an improvement only through its exact explicit risk association", () => {
     const secondRisk = {
       ...electricalRow,
@@ -685,6 +750,19 @@ describe("reporting downloads", () => {
         expect(exported).toContain(limitation);
       }
     }
+  });
+
+  it("surfaces an honest parse error when the stored current-workpack timestamp is legacy or invalid", () => {
+    const workpack = makeWorkpack();
+    const result = inspectStoredCurrentWorkpack(JSON.stringify({
+      ...workpack,
+      savedAt: "2026-07-08T08:00:00"
+    }));
+
+    expect(result).toEqual({
+      status: "invalid",
+      reason: "현재 작업팩 저장시각이 유효한 RFC3339 offset 시각이 아니어서 증빙 리포트를 복원할 수 없습니다."
+    });
   });
 
   it("keeps complete source metadata in CSV when filters produce no data rows", () => {

@@ -32,6 +32,14 @@ export type StoredCurrentWorkpack = {
   dispatchSnapshot?: CurrentDispatchSnapshot;
 };
 
+export type StoredCurrentWorkpackInspection =
+  | { status: "missing" }
+  | { status: "invalid"; reason: string }
+  | { status: "valid"; workpack: StoredCurrentWorkpack };
+
+const INVALID_CURRENT_WORKPACK_TIMESTAMP_REASON =
+  "현재 작업팩 저장시각이 유효한 RFC3339 offset 시각이 아니어서 증빙 리포트를 복원할 수 없습니다.";
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -156,35 +164,68 @@ function parseDispatchSnapshot(value: unknown): CurrentDispatchSnapshot | undefi
   };
 }
 
-export function parseStoredCurrentWorkpack(raw: string | null): StoredCurrentWorkpack | null {
-  if (!raw) return null;
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed) || !isRfc3339OffsetTimestamp(parsed.savedAt) || !isRecord(parsed.data)) {
-      return null;
-    }
-    const data = parsed.data;
-    if (
-      typeof data.question !== "string" ||
-      !isRecord(data.scenario) ||
-      !isRecord(data.deliverables) ||
-      !isRecord(data.externalData) ||
-      !isRecord(data.riskSummary)
-    ) {
-      return null;
-    }
-
+function parseStoredCurrentWorkpackValue(parsed: Record<string, unknown>): StoredCurrentWorkpackInspection {
+  if (!isRfc3339OffsetTimestamp(parsed.savedAt)) {
     return {
+      status: "invalid",
+      reason: INVALID_CURRENT_WORKPACK_TIMESTAMP_REASON
+    };
+  }
+  if (!isRecord(parsed.data)) {
+    return {
+      status: "invalid",
+      reason: "저장된 현재 작업팩 본문이 없어 증빙 리포트를 복원할 수 없습니다."
+    };
+  }
+  const data = parsed.data;
+  if (
+    typeof data.question !== "string" ||
+    !isRecord(data.scenario) ||
+    !isRecord(data.deliverables) ||
+    !isRecord(data.externalData) ||
+    !isRecord(data.riskSummary)
+  ) {
+    return {
+      status: "invalid",
+      reason: "저장된 현재 작업팩 형식이 오래되어 증빙 리포트를 복원할 수 없습니다."
+    };
+  }
+
+  return {
+    status: "valid",
+    workpack: {
       savedAt: parsed.savedAt,
       source: "workspace",
       data: data as AskResponse,
       workerSnapshot: parseWorkerSnapshot(parsed.workerSnapshot),
       dispatchSnapshot: parseDispatchSnapshot(parsed.dispatchSnapshot)
-    };
+    }
+  };
+}
+
+export function inspectStoredCurrentWorkpack(raw: string | null): StoredCurrentWorkpackInspection {
+  if (!raw) return { status: "missing" };
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) {
+      return {
+        status: "invalid",
+        reason: "저장된 현재 작업팩 JSON 형식이 손상되어 증빙 리포트를 복원할 수 없습니다."
+      };
+    }
+    return parseStoredCurrentWorkpackValue(parsed);
   } catch (error) {
     console.warn("safeclaw current workpack parse failed", error);
-    return null;
+    return {
+      status: "invalid",
+      reason: "저장된 현재 작업팩 JSON을 해석하지 못해 증빙 리포트를 복원할 수 없습니다."
+    };
   }
+}
+
+export function parseStoredCurrentWorkpack(raw: string | null): StoredCurrentWorkpack | null {
+  const inspected = inspectStoredCurrentWorkpack(raw);
+  return inspected.status === "valid" ? inspected.workpack : null;
 }
 
 export function buildStoredCurrentWorkpack(
