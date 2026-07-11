@@ -249,6 +249,10 @@ describe("frontend design contract", () => {
 
   it("applies the canonical product type and interaction foundation", () => {
     const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
+    expect(effectiveDeclarations(css, ":root")).toMatchObject({
+      "--font-base": "var(--font-product)",
+      "--font-hud": '"Geist Mono", "Cascadia Mono", Consolas, monospace',
+    });
     expect(effectiveDeclarations(css, "body")).toMatchObject({
       "font-family": "var(--font-product)",
       "font-size": "var(--text-body)",
