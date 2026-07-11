@@ -78,9 +78,9 @@
   "backendSessionConflicts": [
     "Frontend head owns typography, PDF/font assets, browser audit, and evidence through this branch.",
     "Backend head 2d0ff44 owns harness/history/grounded-vision behavior; preserve those changes during integration.",
-    "Backend shell patch 99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49 is pushed and backend-owned, with independent backend review pending before integration. CSS-shell-only focused evidence: Day #f5c518, Night #6c6ff7, mobile gap 8, controls 44, rail/nav radii 14/8, title 30 desktop/27 mobile; Workspace y 105/281 unchanged, Documents 218/446 to 218/331, Reports 218/446 to 218/285, sample y 659 to 498, overflow 0.",
-    "Backend canonical current-workpack resilience patch 3900892 is a required backend-owned integration: it restores /workspace return behavior and fingerprint-matches worker/selection snapshots; browser test and typecheck passed.",
-    "Reports provenance/state candidate a935fdb is isolated and not integrated: sample/browser/server labels, timestamps, sticky provenance, missing-workpack empty state, and export lock are implemented, but independent review is pending.",
+    "Backend shell patch 99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49 is not integrated. Worker tests, typecheck, and build pass; the first reviewer hung and was terminated without verdict, and a fresh bounded read-only review is active.",
+    "Backend canonical current-workpack resilience patch 3900892 is the current authoritative backend head: focused browser checks, 12 related tests, and typecheck pass.",
+    "Reports provenance/state candidate a935fdb is isolated and not integrated. Independent review REJECT found unsafe server-error fallback with exports enabled and shallow response validation; fail-closed explicit-local-switch-only remediation is active.",
     "High-risk shared files include app/globals.css, SafeGuardCommandCenter.tsx, WorkpackEditor.tsx, lib/types.ts, current-workpack.ts, and db-harness.ts.",
     "Known launch blocker delegated to the backend post-integration patch: document modules currently retain a purple shell identity and tall mobile rail/header; preserve report/document body styling while aligning shell identity to Workspace.",
     "Backend-owned P1 followup: persist report provenance beyond the banner (source.mode, scope, workpackSavedAt).",
@@ -117,13 +117,14 @@
       "package.json"
     ],
     "sharedFilePolicy": "Never merge a shared file wholesale. Preserve backend behavior and contracts first, then selectively port frontend visual and audit hunks with per-file review.",
-    "pdfPorting": "Port b61929f PDF/font changes onto backend 3900892 and regenerate the tracked package-lock.json; do not copy package.json or the lockfile wholesale.",
+    "currentBackendValidation": "Backend 3900892 focused browser, 12 related tests, and typecheck pass.",
+    "pdfPorting": { "status": "active-not-integrated", "base": "3900892", "source": "b61929f", "scope": "missing-font controlled 500, literal NFT paths, dynamic subsets, regenerated tracked lockfile", "excluded": "WorkpackEditor and globals.css", "pending": "full desktop and 390px browser checks, full tests, build, direct PDF, and all 108 browser rows" },
     "backendRequired": [
       { "commit": "3900892", "status": "required-integration", "ownership": "canonical current-workpack resilience", "evidence": "workspace return fixed; fingerprint-matched worker/selection snapshot; browser test and typecheck pass" }
     ],
     "backendPendingReview": [
-      { "commit": "99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49", "status": "independent-review-pending", "ownership": "document-module shell CSS" },
-      { "commit": "a935fdb", "status": "isolated-candidate-not-integrated", "ownership": "reports provenance and state", "evidence": "sample/browser/server labels, timestamps, sticky provenance, missing-workpack empty state, export lock" }
+      { "commit": "99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49", "status": "fresh-bounded-review-active-not-integrated", "ownership": "document-module shell CSS", "evidence": "worker tests, typecheck, and build pass; first reviewer hung and was terminated without verdict" },
+      { "commit": "a935fdb", "status": "independent-review-rejected-remediation-active-not-integrated", "ownership": "reports provenance and state", "evidence": "P1 server 401/404/corruption silently falls to unrelated local state with exports enabled; P2 shallow AskResponse guard and server_saved cast. Fail-closed explicit-local-switch-only remediation is active." }
     ],
     "postIntegration": "Run full tests, typecheck, build, static audit, all 108 browser rows, and explicit documents/reports versus workspace identity and y-position comparisons."
   },

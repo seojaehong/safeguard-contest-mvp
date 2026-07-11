@@ -85,8 +85,9 @@ F7 is done with `passes: true`.
 
 - Current authoritative backend head is `3900892`. Comparison evidence from frontend `d2ef1df` versus backend base `2d0ff44` has exactly 22 shared files; the complete path list is stored in `evaluation/frontend-consistency-audit-2026-07-11/report.json`.
 - Per-file policy: never merge shared files wholesale. Preserve backend behavior/contracts first, then selectively port frontend visual/audit hunks under per-file review.
-- PDF worker must port `b61929f` PDF/font changes onto `3900892` and regenerate the tracked lockfile instead of copying dependency manifests wholesale. Module-shell and reports-candidate independent reviews remain pending.
+- Backend `3900892` focused browser checks, 12 related tests, and typecheck pass.
+- Module `99a42d2...`: worker tests/typecheck/build pass; the first reviewer hung and was terminated without verdict; a fresh bounded read-only review is active. Not integrated.
+- Reports `a935fdb`: independent review REJECT (P1 unsafe server-error fallback with exports enabled; P2 shallow response guard/cast). Fail-closed, explicit-local-switch-only remediation is active. Not integrated.
+- PDF `b61929f` selective port is active on `3900892` with missing-font controlled 500, literal NFT paths, dynamic subsets, and regenerated tracked lock; `WorkpackEditor`/`globals.css` are excluded. Full desktop/390px, full tests/build, direct PDF, and 108 rows remain intentionally pending.
 - Required backend-owned integration: `3900892` (canonical current-workpack resilience). It restores `/workspace` return behavior and fingerprint-matches worker/selection snapshots; browser test and typecheck passed.
-- Independent review pending: `99a42d2a3c6df8cbcc23786ee1dfdc3b09920c49` (document-module shell CSS).
-- Isolated candidate, not integrated: `a935fdb` (reports provenance/state). It adds sample/browser/server labels, timestamps, sticky provenance, missing-workpack empty state, and export lock; independent review is pending.
 - F7 remains done. Integration and the complete post-integration verification matrix remain external gates.
