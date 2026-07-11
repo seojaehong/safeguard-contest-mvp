@@ -16153,8 +16153,8 @@ body:has(.safeclaw-landing) :is(
     line-height: 1.14 !important;
   }
 
-.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
-.command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     display: block;
     min-height: 152px;
     padding: 22px 24px;
@@ -16170,8 +16170,8 @@ body:has(.safeclaw-landing) :is(
     padding-bottom: 20px !important;
   }
 
-.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
-.command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     min-height: 124px;
     padding: 18px;
     line-height: 1.74;
@@ -16184,8 +16184,8 @@ body:has(.safeclaw-landing) :is(
 }
 
 @media (min-width: 901px) and (max-height: 430px) {
-.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
-.command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     font-size: 14px;
   }
 
@@ -16196,8 +16196,8 @@ body:has(.safeclaw-landing) :is(
 }
 
 @media (min-width: 901px) and (max-height: 380px) {
-.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
-.command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     min-height: 116px;
     padding: 14px 15px;
     line-height: 1.7;
@@ -16205,8 +16205,8 @@ body:has(.safeclaw-landing) :is(
 }
 
 @media (min-width: 901px) and (max-height: 340px) {
-.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
-.command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     min-height: 108px;
     padding: 14px 12px;
     line-height: 1.7;
@@ -16238,8 +16238,8 @@ body:has(.safeclaw-landing) :is(
     margin-top: 0 !important;
   }
 
-.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
-.command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     min-height: 142px;
     padding: 16px;
     font-size: 15px;

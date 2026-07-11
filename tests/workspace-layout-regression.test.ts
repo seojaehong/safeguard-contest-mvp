@@ -31,6 +31,50 @@ describe("workspace layout regression", () => {
     await harness?.stop();
   }, 30_000);
 
+  it("preserves the exact Day and Night textarea cascade at every responsive band", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const scenarios = [
+      { width: 1440, height: 900, minHeight: 152, paddingTop: 22, paddingRight: 24, fontSize: 17, lineHeight: 29.92, resize: "vertical" },
+      { width: 1440, height: 500, minHeight: 124, paddingTop: 18, paddingRight: 18, fontSize: 15, lineHeight: 26.1, resize: "vertical" },
+      { width: 1440, height: 410, minHeight: 124, paddingTop: 18, paddingRight: 18, fontSize: 14, lineHeight: 24.36, resize: "vertical" },
+      { width: 1440, height: 360, minHeight: 116, paddingTop: 14, paddingRight: 15, fontSize: 14, lineHeight: 23.8, resize: "vertical" },
+      { width: 1440, height: 320, minHeight: 108, paddingTop: 14, paddingRight: 12, fontSize: 14, lineHeight: 23.8, resize: "vertical" },
+      { width: 390, height: 844, minHeight: 142, paddingTop: 16, paddingRight: 16, fontSize: 15, lineHeight: 25.2, resize: "both" },
+    ];
+
+    for (const theme of ["day", "night"] as const) {
+      for (const scenario of scenarios) {
+        const page = await browser.newPage({ viewport: { width: scenario.width, height: scenario.height } });
+        await page.goto(`${baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
+        const metrics = await page.locator("#field-command-input").evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            display: style.display,
+            minHeight: Number.parseFloat(style.minHeight),
+            paddingTop: Number.parseFloat(style.paddingTop),
+            paddingRight: Number.parseFloat(style.paddingRight),
+            overflowY: style.overflowY,
+            fontSize: Number.parseFloat(style.fontSize),
+            lineHeight: Number.parseFloat(style.lineHeight),
+            resize: style.resize,
+          };
+        });
+
+        expect(metrics, `${theme} ${scenario.width}x${scenario.height}`).toMatchObject({
+          display: "block",
+          minHeight: scenario.minHeight,
+          paddingTop: scenario.paddingTop,
+          paddingRight: scenario.paddingRight,
+          overflowY: "auto",
+          fontSize: scenario.fontSize,
+          resize: scenario.resize,
+        });
+        expect(metrics.lineHeight).toBeCloseTo(scenario.lineHeight, 1);
+        await page.close();
+      }
+    }
+  }, 120_000);
+
   it("resumes the canonical browser workpack when the operator returns to the workspace", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
