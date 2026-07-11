@@ -22,6 +22,70 @@
   --font-multilingual: "Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", system-ui, sans-serif;
 }
 
+/* Frontend design contract: canonical product typography and geometry.
+   Route-specific selectors may choose a semantic role, but they must resolve
+   through this shared scale instead of introducing ad-hoc values. */
+:root {
+  --font-product: "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --font-hud: "Geist Mono", "Cascadia Mono", Consolas, monospace;
+  --font-multilingual: "Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", sans-serif;
+  --font-document: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --font-base: var(--font-product);
+
+  --text-display: clamp(44px, 6vw, 72px);
+  --text-page-title: clamp(32px, 4vw, 40px);
+  --text-section-title: clamp(24px, 3vw, 28px);
+  --text-component-title: 20px;
+  --text-body-lg: 17px;
+  --text-body: 15px;
+  --text-support: 14px;
+  --text-control: 14px;
+  --text-table: 13px;
+  --text-caption: 12px;
+  --text-hud: 11px;
+
+  --leading-display: 0.98;
+  --leading-page-title: 1.15;
+  --leading-section-title: 1.25;
+  --leading-component-title: 1.35;
+  --leading-body-lg: 1.65;
+  --leading-body: 1.6;
+  --leading-longform: 1.75;
+  --leading-control: 20px;
+  --leading-table: 20px;
+  --leading-caption: 18px;
+  --leading-hud: 16px;
+
+  --tracking-body: 0;
+  --tracking-component-title: -0.015em;
+  --tracking-section-title: -0.025em;
+  --tracking-page-title: -0.035em;
+  --tracking-display: -0.045em;
+  --tracking-hud: 0.08em;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  --radius-structural: 0;
+  --radius-micro: 2px;
+  --radius-control: 4px;
+  --radius-panel: 4px;
+  --radius-circle: 50%;
+  --control-height: 44px;
+  --control-height-compact: 36px;
+  --icon-hit-area: 44px;
+}
+
 /* SafeClaw Brand Guide alignment
    Source: safeclaw Brand Guide standalone. This layer keeps the current
    workflow intact while shifting the product from soft demo UI to field
@@ -17684,4 +17748,44 @@ body:has(.safeclaw-landing) :is(
     text-align: center;
     text-decoration: none;
   }
+}
+
+/* The foundation remains last so legacy route families inherit one product
+   baseline while their more-specific semantic role selectors keep precedence. */
+body {
+  font-family: var(--font-product);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-product);
+}
+
+h1 {
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
+}
+
+h2 {
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
+}
+
+h3 {
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
