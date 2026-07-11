@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { enforceRateLimit } from "@/lib/api-guard";
-import { analyzeHazardPhotos, getPhotoVisionReadiness, MAX_HAZARD_PHOTO_FILES } from "@/lib/photo-vision-analysis";
+import {
+  analyzeHazardPhotos,
+  getPhotoVisionReadiness,
+  MAX_HAZARD_PHOTO_FILES,
+  MAX_HAZARD_PHOTO_REQUEST_BYTES,
+  MAX_HAZARD_PHOTO_TOTAL_BYTES
+} from "@/lib/photo-vision-analysis";
 import { createRateLimiter } from "@/lib/rate-limit";
+import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -22,6 +29,20 @@ function readPhotos(form: FormData) {
   return form.getAll("photos").filter(isFileValue);
 }
 
+function partialAnalysisMessage(counts: {
+  analyzed: number;
+  rejected: number;
+  failed: number;
+  unconfigured: number;
+}) {
+  return [
+    `분석 ${counts.analyzed}장`,
+    `거부 ${counts.rejected}장`,
+    `실패 ${counts.failed}장`,
+    `미설정 ${counts.unconfigured}장`
+  ].join(" · ");
+}
+
 export async function GET() {
   return NextResponse.json(getPhotoVisionReadiness());
 }
@@ -29,6 +50,40 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const limited = enforceRateLimit(request, limiter);
   if (limited) return limited;
+
+  const client = createSupabaseAdminClient();
+  if (!client) {
+    return NextResponse.json({
+      ok: false,
+      configured: false,
+      message: "관리자 인증 저장소가 설정되지 않아 사진 분석을 시작할 수 없습니다."
+    }, { status: 503 });
+  }
+  const user = await getWorkspaceUser(client, request.headers);
+  if (!user) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      message: "관리자 로그인이 필요합니다."
+    }, { status: 401 });
+  }
+
+  const contentLengthValue = request.headers.get("content-length");
+  const contentLength = Number(contentLengthValue);
+  if (!contentLengthValue || !Number.isFinite(contentLength) || contentLength <= 0) {
+    return NextResponse.json({
+      ok: false,
+      code: "content_length_required",
+      message: "사진 분석 요청의 Content-Length가 필요합니다."
+    }, { status: 411 });
+  }
+  if (contentLength > MAX_HAZARD_PHOTO_REQUEST_BYTES) {
+    return NextResponse.json({
+      ok: false,
+      code: "photo_payload_too_large",
+      message: "사진 분석 요청 전체 용량이 허용 한도를 초과합니다."
+    }, { status: 413 });
+  }
 
   const contentType = request.headers.get("content-type") || "";
   if (!contentType.includes("multipart/form-data")) {
@@ -53,6 +108,14 @@ export async function POST(request: NextRequest) {
       message: `현장 사진은 최대 ${MAX_HAZARD_PHOTO_FILES}장까지 분석할 수 있습니다.`
     }, { status: 400 });
   }
+  const totalPhotoBytes = photos.reduce((total, photo) => total + photo.size, 0);
+  if (totalPhotoBytes > MAX_HAZARD_PHOTO_TOTAL_BYTES) {
+    return NextResponse.json({
+      ok: false,
+      code: "photo_payload_too_large",
+      message: "첨부한 사진의 합계 용량이 허용 한도를 초과합니다."
+    }, { status: 413 });
+  }
 
   const analysis = await analyzeHazardPhotos({ question, photos });
   const hasAnalysis = analysis.status === "analyzed" || analysis.status === "partial";
@@ -63,7 +126,7 @@ export async function POST(request: NextRequest) {
     message: analysis.status === "analyzed"
       ? "현장 사진에서 위험요인 후보를 도출했습니다."
       : analysis.status === "partial"
-        ? `현장 사진 ${analysis.counts.analyzed}장은 분석했고 ${analysis.photoCount - analysis.counts.analyzed}장은 개별 확인이 필요합니다.`
-      : analysis.errorMessage || "현장 사진 분석을 완료하지 못했습니다."
+        ? `현장 사진 일부 처리: ${partialAnalysisMessage(analysis.counts)}.`
+        : analysis.errorMessage || "현장 사진 분석을 완료하지 못했습니다."
   });
 }

@@ -275,6 +275,15 @@ type PhotoVisionReadinessResponse = {
   apiKeyPresent: boolean;
   timeoutMs: number;
   maxInputPhotos: number;
+  maxBytesPerPhoto: number;
+  maxTotalPhotoBytes: number;
+  maxRequestBytes: number;
+  fileValidation: {
+    mode: "signature_only";
+    decodesPixels: false;
+    signatureBytes: 12;
+    description: string;
+  };
   hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis";
   hazardAnalysisMethod: "POST multipart/form-data";
   improvementEndpointPattern: "/api/workpacks/[id]/improvements";
@@ -869,6 +878,10 @@ export function AiConnectPanel() {
               <div>
                 <dt>OCR</dt>
                 <dd>{photoVision.ocrSupported ? "지원" : "미지원"}</dd>
+              </div>
+              <div>
+                <dt>파일 검증</dt>
+                <dd>{photoVision.fileValidation.mode === "signature_only" ? "시그니처만" : photoVision.fileValidation.mode}</dd>
               </div>
               <div>
                 <dt>저장 기준</dt>

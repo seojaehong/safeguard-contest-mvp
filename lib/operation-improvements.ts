@@ -24,8 +24,319 @@ export type HazardPhotoCandidate = {
 };
 
 export type HazardPhotoGenerationCandidate = HazardPhotoCandidate & {
+  id?: string;
   source?: "vision" | "local";
+  harness?: HazardPhotoWorkspaceHarness;
+  userDecision?: HazardPhotoWorkspaceUserDecision;
 };
+
+export type HazardPhotoWorkspaceHarness = {
+  authority: "safeclaw-db-mcp";
+  status: "pending" | "confirmed" | "insufficient";
+  evidence: Array<{
+    sourceId: string;
+    sourceType: "safeclaw-db" | "mcp";
+    title: string;
+    excerpt: string;
+    catalogSourceId?: string;
+    sourceUrl?: string | null;
+    itemType?: string;
+    evidenceRole?: "direct" | "supporting";
+    retrievals?: Array<{
+      channel: "direct" | "sif" | "supporting";
+      query: string;
+      mode: "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
+      source: "rest" | "ranked" | "vector" | "hybrid" | null;
+      vectorAttempted: boolean;
+      vectorOk: boolean;
+      vectorModel: string;
+    }>;
+  }>;
+  confirmedControls: Array<{
+    text: string;
+    evidenceSourceIds: string[];
+  }>;
+  confirmedAt: string | null;
+  errorMessage: string | null;
+};
+
+export type HazardPhotoWorkspaceUserDecision = {
+  status: "pending" | "accepted" | "rejected";
+  allowed: Array<"accepted" | "rejected">;
+  requiresHarnessConfirmation: true;
+  reason: string | null;
+  decidedAt: string | null;
+};
+
+export type HazardPhotoWorkspaceAnalysis = {
+  status: "analyzed" | "partial" | "unconfigured" | "failed";
+  provider: string;
+  providerMode: "live" | "mock" | "unconfigured";
+  model: string;
+  providerResponses: Array<{
+    photoId: string;
+    responseId: string;
+    model: string;
+    createdAt: number | null;
+  }>;
+  fileValidation: {
+    mode: "signature_only";
+    decodesPixels: false;
+    signatureBytes: 12;
+    description: string;
+  } | null;
+  summary: string;
+  ocrText: string;
+  siteSignals: string[];
+  candidates: HazardPhotoGenerationCandidate[];
+  counts: {
+    submitted: number;
+    analyzed: number;
+    rejected: number;
+    failed: number;
+    unconfigured: number;
+    candidates: number;
+    harnessConfirmed: number;
+    harnessInsufficient: number;
+  };
+  failures: Array<{
+    name: string;
+    status: "rejected" | "failed" | "unconfigured";
+    message: string;
+  }>;
+};
+
+export type HazardPhotoWorkspaceResponse = {
+  ok: boolean;
+  message: string;
+  analysis: HazardPhotoWorkspaceAnalysis;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function readStringList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean)
+    : [];
+}
+
+function readCount(record: Record<string, unknown>, key: string): number {
+  const value = record[key];
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? Math.trunc(value) : 0;
+}
+
+function parseWorkspaceHarness(value: unknown): HazardPhotoWorkspaceHarness | undefined {
+  if (!isRecord(value)) return undefined;
+  const status = value.status === "pending" || value.status === "confirmed" || value.status === "insufficient"
+    ? value.status
+    : null;
+  if (value.authority !== "safeclaw-db-mcp" || !status) return undefined;
+  const evidence = Array.isArray(value.evidence) ? value.evidence.flatMap((item) => {
+    if (!isRecord(item)) return [];
+    const sourceId = readString(item.sourceId);
+    const sourceType = item.sourceType === "safeclaw-db" || item.sourceType === "mcp" ? item.sourceType : null;
+    const title = readString(item.title);
+    const excerpt = readString(item.excerpt);
+    const retrievals = Array.isArray(item.retrievals) ? item.retrievals.flatMap((retrieval) => {
+      if (!isRecord(retrieval)) return [];
+      const channel = retrieval.channel === "direct" || retrieval.channel === "sif" || retrieval.channel === "supporting"
+        ? retrieval.channel
+        : null;
+      const mode = retrieval.mode === "unconfigured"
+        || retrieval.mode === "rest-ilike"
+        || retrieval.mode === "ranked-rpc"
+        || retrieval.mode === "hybrid-vector-rpc"
+        ? retrieval.mode
+        : null;
+      const source = retrieval.source === "rest"
+        || retrieval.source === "ranked"
+        || retrieval.source === "vector"
+        || retrieval.source === "hybrid"
+        ? retrieval.source
+        : null;
+      if (!channel || !mode) return [];
+      return [{
+        channel,
+        query: readString(retrieval.query),
+        mode,
+        source,
+        vectorAttempted: retrieval.vectorAttempted === true,
+        vectorOk: retrieval.vectorOk === true,
+        vectorModel: readString(retrieval.vectorModel)
+      }];
+    }) : [];
+    return sourceId && sourceType && title
+      ? [{
+        sourceId,
+        sourceType,
+        title,
+        excerpt,
+        catalogSourceId: readString(item.catalogSourceId) || undefined,
+        sourceUrl: typeof item.sourceUrl === "string" ? item.sourceUrl : null,
+        itemType: readString(item.itemType) || undefined,
+        evidenceRole: item.evidenceRole === "direct" || item.evidenceRole === "supporting"
+          ? item.evidenceRole
+          : undefined,
+        retrievals
+      }]
+      : [];
+  }) : [];
+  const confirmedControls = Array.isArray(value.confirmedControls) ? value.confirmedControls.flatMap((item) => {
+    if (!isRecord(item)) return [];
+    const text = readString(item.text);
+    return text ? [{ text, evidenceSourceIds: readStringList(item.evidenceSourceIds) }] : [];
+  }) : [];
+  return {
+    authority: "safeclaw-db-mcp",
+    status,
+    evidence,
+    confirmedControls,
+    confirmedAt: typeof value.confirmedAt === "string" ? value.confirmedAt : null,
+    errorMessage: typeof value.errorMessage === "string" ? value.errorMessage : null
+  };
+}
+
+function parseWorkspaceUserDecision(value: unknown): HazardPhotoWorkspaceUserDecision | undefined {
+  if (!isRecord(value)) return undefined;
+  const status = value.status === "pending" || value.status === "accepted" || value.status === "rejected"
+    ? value.status
+    : null;
+  if (!status || value.requiresHarnessConfirmation !== true) return undefined;
+  const allowed = Array.isArray(value.allowed)
+    ? value.allowed.filter((item): item is "accepted" | "rejected" => item === "accepted" || item === "rejected")
+    : [];
+  return {
+    status,
+    allowed,
+    requiresHarnessConfirmation: true,
+    reason: typeof value.reason === "string" ? value.reason : null,
+    decidedAt: typeof value.decidedAt === "string" ? value.decidedAt : null
+  };
+}
+
+function parseWorkspaceCandidate(value: unknown): HazardPhotoGenerationCandidate | null {
+  if (!isRecord(value)) return null;
+  const label = readString(value.label);
+  const detail = readString(value.detail);
+  if (!label || !detail) return null;
+  const severity = value.severity === "high" || value.severity === "medium" || value.severity === "low" || value.severity === "review"
+    ? value.severity
+    : "review";
+  return {
+    id: readString(value.id) || undefined,
+    label,
+    detail,
+    severity,
+    evidence: readString(value.evidence),
+    reflectedDocuments: readStringList(value.reflectedDocuments),
+    sourcePhotoNames: readStringList(value.sourcePhotoNames),
+    source: "vision",
+    harness: parseWorkspaceHarness(value.harness),
+    userDecision: parseWorkspaceUserDecision(value.userDecision)
+  };
+}
+
+export function canAcceptHazardPhotoCandidate(candidate: HazardPhotoGenerationCandidate | undefined): boolean {
+  return candidate?.harness?.status === "confirmed"
+    && candidate.harness.evidence.length > 0
+    && candidate.harness.confirmedControls.length > 0
+    && Boolean(candidate.harness.confirmedAt)
+    && candidate.userDecision?.status === "pending"
+    && candidate.userDecision.allowed.includes("accepted");
+}
+
+export function parseHazardPhotoWorkspaceResponse(
+  value: unknown,
+  responseOk: boolean
+): HazardPhotoWorkspaceResponse {
+  if (!isRecord(value) || !isRecord(value.analysis)) {
+    throw new Error("사진 분석 응답이 올바르지 않습니다.");
+  }
+  const analysis = value.analysis;
+  const status = analysis.status === "analyzed"
+    || analysis.status === "partial"
+    || analysis.status === "unconfigured"
+    || analysis.status === "failed"
+    ? analysis.status
+    : "failed";
+  const counts = isRecord(analysis.counts) ? analysis.counts : {};
+  const providerMode = analysis.providerMode === "live" || analysis.providerMode === "mock" || analysis.providerMode === "unconfigured"
+    ? analysis.providerMode
+    : "unconfigured";
+  const providerResponses = Array.isArray(analysis.providerResponses) ? analysis.providerResponses.flatMap((item) => {
+    if (!isRecord(item)) return [];
+    const photoId = readString(item.photoId);
+    const responseId = readString(item.responseId);
+    const model = readString(item.model);
+    if (!photoId || !responseId || !model) return [];
+    return [{
+      photoId,
+      responseId,
+      model,
+      createdAt: typeof item.createdAt === "number" && Number.isFinite(item.createdAt) ? item.createdAt : null
+    }];
+  }) : [];
+  const rawFileValidation = isRecord(analysis.fileValidation) ? analysis.fileValidation : null;
+  const fileValidation = rawFileValidation?.mode === "signature_only"
+    && rawFileValidation.decodesPixels === false
+    && rawFileValidation.signatureBytes === 12
+    ? {
+      mode: "signature_only" as const,
+      decodesPixels: false as const,
+      signatureBytes: 12 as const,
+      description: readString(rawFileValidation.description)
+    }
+    : null;
+  const failures = Array.isArray(analysis.images) ? analysis.images.flatMap((item) => {
+    if (!isRecord(item) || (item.status !== "rejected" && item.status !== "failed" && item.status !== "unconfigured")) {
+      return [];
+    }
+    const error = isRecord(item.error) ? item.error : {};
+    return [{
+      name: readString(item.name) || "이름 없는 사진",
+      status: item.status,
+      message: readString(error.message) || "사진별 분석을 완료하지 못했습니다."
+    }];
+  }) : [];
+  return {
+    ok: responseOk && value.ok === true,
+    message: readString(value.message) || "현장 사진 분석 결과를 확인했습니다.",
+    analysis: {
+      status,
+      provider: readString(analysis.provider),
+      providerMode,
+      model: readString(analysis.model),
+      providerResponses,
+      fileValidation,
+      summary: readString(analysis.summary),
+      ocrText: readString(analysis.ocrText),
+      siteSignals: readStringList(analysis.siteSignals),
+      candidates: Array.isArray(analysis.candidates)
+        ? analysis.candidates.flatMap((item) => {
+          const candidate = parseWorkspaceCandidate(item);
+          return candidate ? [candidate] : [];
+        })
+        : [],
+      counts: {
+        submitted: readCount(counts, "submitted"),
+        analyzed: readCount(counts, "analyzed"),
+        rejected: readCount(counts, "rejected"),
+        failed: readCount(counts, "failed"),
+        unconfigured: readCount(counts, "unconfigured"),
+        candidates: readCount(counts, "candidates"),
+        harnessConfirmed: readCount(counts, "harnessConfirmed"),
+        harnessInsufficient: readCount(counts, "harnessInsufficient")
+      },
+      failures
+    }
+  };
+}
 
 export function buildPhotoAnalysisCandidate(input: PhotoAnalysisCandidateInput): string {
   if (!input.beforePhoto || !input.afterPhoto) return "";
@@ -93,7 +404,10 @@ function acceptedHazardPhotoCandidates(input: {
 }) {
   const acceptedKeySet = new Set(input.acceptedCandidateKeys);
   return input.candidates
-    .filter((candidate) => acceptedKeySet.has(buildHazardPhotoCandidateKey(candidate)))
+    .filter((candidate) => (
+      acceptedKeySet.has(buildHazardPhotoCandidateKey(candidate))
+      && canAcceptHazardPhotoCandidate(candidate)
+    ))
     .slice(0, 8);
 }
 

@@ -18,7 +18,8 @@ import {
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
   searchSafetyReferences,
-  type SafetyReferenceItem
+  type SafetyReferenceItem,
+  type SafetyReferenceSearchResult
 } from "@/lib/safety-reference-catalog";
 
 const log = createLogger("photo-vision");
@@ -65,6 +66,9 @@ type ResponsesApiContent = {
 };
 
 type ResponsesApiResponse = {
+  id?: string;
+  model?: string;
+  created_at?: number;
   output_text?: string;
   output?: Array<{
     content?: Array<{
@@ -78,7 +82,25 @@ const DEFAULT_MODEL = "gpt-4.1-mini";
 const VISION_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_VISION_TIMEOUT_MS, 20_000);
 export const MAX_HAZARD_PHOTO_FILES = MAX_INPUT_HAZARD_PHOTO_FILES;
 export const MAX_HAZARD_PHOTO_BYTES = 20 * 1024 * 1024;
+export const MAX_HAZARD_PHOTO_TOTAL_BYTES = 40 * 1024 * 1024;
+export const MAX_HAZARD_PHOTO_REQUEST_BYTES = MAX_HAZARD_PHOTO_TOTAL_BYTES + 1024 * 1024;
+export const HAZARD_PHOTO_PROVIDER_CONCURRENCY = 2;
+export const HAZARD_PHOTO_HARNESS_CONCURRENCY = 2;
 export const HAZARD_PHOTO_MIME_TYPES = HAZARD_PHOTO_SIGNATURE_MIME_TYPES;
+
+export type HazardPhotoFileValidation = {
+  mode: "signature_only";
+  decodesPixels: false;
+  signatureBytes: 12;
+  description: string;
+};
+
+export const HAZARD_PHOTO_FILE_VALIDATION: HazardPhotoFileValidation = {
+  mode: "signature_only",
+  decodesPixels: false,
+  signatureBytes: 12,
+  description: "JPEG/PNG/WebP/GIF 파일-family 시그니처만 확인하며 실제 pixel decode는 vision provider 단계에서 수행합니다."
+};
 
 export type HazardPhotoSeverity = "high" | "medium" | "low" | "review";
 
@@ -96,7 +118,20 @@ export type HazardPhotoVisionProvider = {
     prompt: string;
     photo: File;
     photoIndex: number;
-  }) => Promise<string>;
+  }) => Promise<string | HazardPhotoProviderOutput>;
+};
+
+export type HazardPhotoProviderOutput = {
+  outputText: string;
+  responseId: string | null;
+  model: string;
+  createdAt: number | null;
+};
+
+export type HazardPhotoProviderResponse = {
+  responseId: string;
+  model: string;
+  createdAt: number | null;
 };
 
 export type HazardPhotoHarnessEvidence = {
@@ -104,6 +139,21 @@ export type HazardPhotoHarnessEvidence = {
   sourceType: "safeclaw-db" | "mcp";
   title: string;
   excerpt: string;
+  catalogSourceId?: string;
+  sourceUrl?: string | null;
+  itemType?: string;
+  evidenceRole?: "direct" | "supporting";
+  retrievals?: HazardPhotoReferenceRetrieval[];
+};
+
+export type HazardPhotoReferenceRetrieval = {
+  channel: "direct" | "sif" | "supporting";
+  query: string;
+  mode: SafetyReferenceSearchResult["retrievalMode"];
+  source: NonNullable<SafetyReferenceItem["retrieval_source"]> | null;
+  vectorAttempted: boolean;
+  vectorOk: boolean;
+  vectorModel: string;
 };
 
 export type HazardPhotoHarnessControl = {
@@ -171,6 +221,7 @@ export type HazardPhotoImageAnalysis = {
   provider: string;
   providerMode: "live" | "mock" | "unconfigured";
   model: string;
+  providerResponse: HazardPhotoProviderResponse | null;
   summary: string;
   observations: HazardPhotoObservation[];
   candidates: HazardPhotoVisionCandidate[];
@@ -202,6 +253,8 @@ export type HazardPhotoVisionAnalysis = {
   provider: string;
   providerMode: "live" | "mock" | "unconfigured";
   model: string;
+  providerResponses: Array<HazardPhotoProviderResponse & { photoId: string }>;
+  fileValidation: HazardPhotoFileValidation;
   summary: string;
   observations: HazardPhotoObservation[];
   candidates: HazardPhotoVisionCandidate[];
@@ -239,6 +292,9 @@ export type PhotoVisionReadiness = {
   timeoutMs: number;
   maxInputPhotos: number;
   maxBytesPerPhoto: number;
+  maxTotalPhotoBytes: number;
+  maxRequestBytes: number;
+  fileValidation: HazardPhotoFileValidation;
   allowedMimeTypes: string[];
   hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis";
   hazardAnalysisMethod: "POST multipart/form-data";
@@ -277,6 +333,9 @@ export function getPhotoVisionReadiness(
     timeoutMs: VISION_TIMEOUT_MS,
     maxInputPhotos: MAX_HAZARD_PHOTO_FILES,
     maxBytesPerPhoto: MAX_HAZARD_PHOTO_BYTES,
+    maxTotalPhotoBytes: MAX_HAZARD_PHOTO_TOTAL_BYTES,
+    maxRequestBytes: MAX_HAZARD_PHOTO_REQUEST_BYTES,
+    fileValidation: HAZARD_PHOTO_FILE_VALIDATION,
     allowedMimeTypes: [...HAZARD_PHOTO_MIME_TYPES],
     hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis",
     hazardAnalysisMethod: "POST multipart/form-data",
@@ -588,7 +647,15 @@ async function postOpenAiVisionImages(input: {
     }
 
     const data = await response.json() as unknown;
-    return extractResponseText(data);
+    const record = isRecord(data) ? data : {};
+    return {
+      outputText: extractResponseText(data),
+      responseId: readText(record.id) || null,
+      model: readText(record.model) || input.model,
+      createdAt: typeof record.created_at === "number" && Number.isFinite(record.created_at)
+        ? record.created_at
+        : null
+    } satisfies HazardPhotoProviderOutput;
   } finally {
     clearTimeout(timeout);
   }
@@ -601,12 +668,13 @@ async function postOpenAiVision(input: {
   beforePhoto: File;
   afterPhoto: File;
 }) {
-  return postOpenAiVisionImages({
+  const response = await postOpenAiVisionImages({
     apiKey: input.apiKey,
     model: input.model,
     prompt: input.prompt,
     photos: [input.beforePhoto, input.afterPhoto]
   });
+  return response.outputText;
 }
 
 export function createOpenAiHazardPhotoVisionProvider(
@@ -637,10 +705,32 @@ function uniqueSafetyReferences(items: SafetyReferenceItem[]): SafetyReferenceIt
   });
 }
 
+async function mapWithConcurrency<T, R>(
+  items: readonly T[],
+  concurrency: number,
+  worker: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let nextIndex = 0;
+  const run = async () => {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await worker(items[index], index);
+    }
+  };
+  await Promise.all(Array.from(
+    { length: Math.min(Math.max(1, concurrency), items.length) },
+    () => run()
+  ));
+  return results;
+}
+
 function resolveCandidateFromReferences(input: {
   query: string;
   candidate: HazardPhotoVisionCandidate;
   references: SafetyReferenceItem[];
+  provenanceByReference: ReadonlyMap<string, HazardPhotoReferenceRetrieval[]>;
 }): HazardPhotoHarnessResolution {
   const packet = buildDbHarnessPacket({
     question: input.query,
@@ -655,7 +745,12 @@ function resolveCandidateFromReferences(input: {
     sourceId: item.id,
     sourceType: "safeclaw-db",
     title: getSafetyReferenceDisplayTitle(item),
-    excerpt: getSafetyReferenceDisplaySummary(item).slice(0, 500)
+    excerpt: getSafetyReferenceDisplaySummary(item).slice(0, 500),
+    catalogSourceId: item.source_id,
+    sourceUrl: item.source_url || null,
+    itemType: item.item_type,
+    evidenceRole: item.evidence_role || "supporting",
+    retrievals: input.provenanceByReference.get(item.id) || []
   }));
   const controlsByText = new Map<string, HazardPhotoHarnessControl>();
   let hasConfirmedControl = false;
@@ -690,34 +785,59 @@ function resolveCandidateFromReferences(input: {
 export function createSafeClawDbMcpHazardResolver(): HazardPhotoHarnessResolver {
   return {
     name: "safeclaw-db-mcp",
-    resolve: async ({ question, candidates }) => Promise.all(candidates.map(async (candidate) => {
-      const query = buildHazardCandidateReferenceQuery({ question, candidate });
-      try {
-        const [direct, sif, supporting] = await Promise.all([
-          searchSafetyReferences({ query, limit: 6, evidenceRole: "direct" }),
-          searchSafetyReferences({ query, limit: 6, itemType: "sif-case" }),
-          searchSafetyReferences({ query, limit: 6, evidenceRole: "supporting" })
-        ]);
-        const referencePool = uniqueSafetyReferences([
-          ...direct.items,
-          ...sif.items,
-          ...supporting.items
-        ]);
-        const references = filterPositivelyRelevantHazardReferences(candidate, referencePool);
-        return resolveCandidateFromReferences({ query, candidate, references });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Candidate DB/MCP search failed";
-        log.error(`Hazard candidate DB/MCP search failed: ${candidate.id}`, error);
-        return {
-          candidateId: candidate.id,
-          status: "insufficient" as const,
-          evidence: [],
-          confirmedControls: [],
-          confirmedAt: null,
-          errorMessage: message
-        };
+    resolve: async ({ question, candidates }) => mapWithConcurrency(
+      candidates,
+      HAZARD_PHOTO_HARNESS_CONCURRENCY,
+      async (candidate) => {
+        const query = buildHazardCandidateReferenceQuery({ question, candidate });
+        try {
+          const [direct, sif, supporting] = await Promise.all([
+            searchSafetyReferences({ query, limit: 6, evidenceRole: "direct" }),
+            searchSafetyReferences({ query, limit: 6, itemType: "sif-case" }),
+            searchSafetyReferences({ query, limit: 6, evidenceRole: "supporting" })
+          ]);
+          const provenanceByReference = new Map<string, HazardPhotoReferenceRetrieval[]>();
+          ([
+            ["direct", direct],
+            ["sif", sif],
+            ["supporting", supporting]
+          ] as const).forEach(([channel, result]) => {
+            result.items.forEach((item) => {
+              const retrieval: HazardPhotoReferenceRetrieval = {
+                channel,
+                query: result.query,
+                mode: result.retrievalMode,
+                source: item.retrieval_source || null,
+                vectorAttempted: result.vectorSearch.attempted,
+                vectorOk: result.vectorSearch.ok,
+                vectorModel: result.vectorSearch.model
+              };
+              const current = provenanceByReference.get(item.id) || [];
+              current.push(retrieval);
+              provenanceByReference.set(item.id, current);
+            });
+          });
+          const referencePool = uniqueSafetyReferences([
+            ...direct.items,
+            ...sif.items,
+            ...supporting.items
+          ]);
+          const references = filterPositivelyRelevantHazardReferences(candidate, referencePool);
+          return resolveCandidateFromReferences({ query, candidate, references, provenanceByReference });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Candidate DB/MCP search failed";
+          log.error(`Hazard candidate DB/MCP search failed: ${candidate.id}`, error);
+          return {
+            candidateId: candidate.id,
+            status: "insufficient" as const,
+            evidence: [],
+            confirmedControls: [],
+            confirmedAt: null,
+            errorMessage: message
+          };
+        }
       }
-    }))
+    )
   };
 }
 
@@ -832,6 +952,8 @@ export async function analyzeHazardPhotos(input: {
       siteSignals: [],
       photoCount: 0,
       images: [],
+      providerResponses: [],
+      fileValidation: HAZARD_PHOTO_FILE_VALIDATION,
       counts: emptyCounts(0),
       harness: harnessContract(),
       errorMessage: "현장 사진을 1장 이상 첨부해야 vision 위험요인 분석을 실행합니다."
@@ -851,6 +973,8 @@ export async function analyzeHazardPhotos(input: {
       siteSignals: [],
       photoCount: submitted,
       images: [],
+      providerResponses: [],
+      fileValidation: HAZARD_PHOTO_FILE_VALIDATION,
       counts: {
         ...emptyCounts(submitted),
         rejected: submitted
@@ -860,7 +984,35 @@ export async function analyzeHazardPhotos(input: {
     };
   }
 
-  const rawImages = await Promise.all(input.photos.map(async (photo, index): Promise<HazardPhotoImageAnalysis> => {
+  const totalPhotoBytes = input.photos.reduce((total, photo) => total + photo.size, 0);
+  if (totalPhotoBytes > MAX_HAZARD_PHOTO_TOTAL_BYTES) {
+    return {
+      status: "failed",
+      provider: providerName,
+      providerMode,
+      model,
+      summary: "",
+      observations: [],
+      candidates: [],
+      ocrText: "",
+      siteSignals: [],
+      photoCount: submitted,
+      images: [],
+      providerResponses: [],
+      fileValidation: HAZARD_PHOTO_FILE_VALIDATION,
+      counts: {
+        ...emptyCounts(submitted),
+        rejected: submitted
+      },
+      harness: harnessContract(),
+      errorMessage: "첨부한 사진의 합계 용량이 허용 한도를 초과합니다."
+    };
+  }
+
+  const rawImages = await mapWithConcurrency(
+    input.photos,
+    HAZARD_PHOTO_PROVIDER_CONCURRENCY,
+    async (photo, index): Promise<HazardPhotoImageAnalysis> => {
     const base = {
       id: `photo-${index + 1}`,
       index,
@@ -870,6 +1022,7 @@ export async function analyzeHazardPhotos(input: {
       provider: providerName,
       providerMode,
       model,
+      providerResponse: null,
       summary: "",
       observations: [],
       candidates: [],
@@ -903,14 +1056,22 @@ export async function analyzeHazardPhotos(input: {
     });
 
     try {
-      const text = await provider.analyze({
+      const providerOutput = await provider.analyze({
         question: input.question,
         prompt,
         photo,
         photoIndex: index
       });
-      const parsed = parseHazardPhotoVisionOutput(text, {
-        model: provider.model,
+      const output = typeof providerOutput === "string"
+        ? {
+          outputText: providerOutput,
+          responseId: null,
+          model: provider.model,
+          createdAt: null
+        }
+        : providerOutput;
+      const parsed = parseHazardPhotoVisionOutput(output.outputText, {
+        model: output.model,
         provider: provider.name,
         photoNames: [photo.name]
       });
@@ -935,6 +1096,12 @@ export async function analyzeHazardPhotos(input: {
       return {
         ...base,
         status: "analyzed",
+        model: output.model,
+        providerResponse: output.responseId ? {
+          responseId: output.responseId,
+          model: output.model,
+          createdAt: output.createdAt
+        } : null,
         summary: parsed.summary,
         observations: parsed.observations,
         candidates,
@@ -954,7 +1121,8 @@ export async function analyzeHazardPhotos(input: {
         }
       };
     }
-  }));
+    }
+  );
 
   const modelCandidates = rawImages.flatMap((image) => image.candidates);
   let resolvedCandidates = modelCandidates;
@@ -1047,6 +1215,10 @@ export async function analyzeHazardPhotos(input: {
   const ocrTexts = images.map((image) => image.ocrText).filter(Boolean);
   const siteSignals = [...new Set(images.flatMap((image) => image.siteSignals))];
   const firstError = images.find((image) => image.error)?.error;
+  const providerResponses = images.flatMap((image) => image.providerResponse
+    ? [{ photoId: image.id, ...image.providerResponse }]
+    : []);
+  const actualModel = providerResponses[0]?.model || images.find((image) => image.status === "analyzed")?.model || model;
   const harnessStatus: HazardPhotoVisionAnalysis["harness"]["status"] = !candidates.length || !harnessResolver
     ? "pending"
     : counts.harnessInsufficient > 0
@@ -1063,7 +1235,7 @@ export async function analyzeHazardPhotos(input: {
     status,
     provider: providerName,
     providerMode,
-    model,
+    model: actualModel,
     summary: summaries.join("\n"),
     observations: images.flatMap((image) => image.observations),
     candidates,
@@ -1071,6 +1243,8 @@ export async function analyzeHazardPhotos(input: {
     siteSignals,
     photoCount: submitted,
     images,
+    providerResponses,
+    fileValidation: HAZARD_PHOTO_FILE_VALIDATION,
     counts,
     harness: harnessContract({
       status: harnessStatus,
