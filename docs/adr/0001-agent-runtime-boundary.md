@@ -4,7 +4,8 @@ Date: 2026-07-09
 
 ## Status
 
-Accepted for the current commercial workbench plan.
+Accepted for the current commercial workbench plan. The Phase 4 target in this
+ADR is directional: it is not implemented or approved for production today.
 
 ## Context
 
@@ -22,16 +23,33 @@ Moving the core engine to Hermes now would create a second source of truth, intr
 
 ## Decision
 
-SafeClaw core remains:
+The current production decision remains:
 
 - Next.js application and API routes
 - Supabase/Postgres data layer
 - SafeClaw MCP tool contract
 - DB Evidence Harness as the fact boundary
 
-OpenClaw, Codex, Hermes, or other runtimes are treated as **agent runtime consumers**. They may decide when to call SafeClaw tools, but they must treat SafeClaw harness packets as the fixed source of facts.
+Together, these are the SafeClaw product system of record. OpenClaw, Codex,
+Hermes, or other runtimes are **agent runtime consumers**. They may plan tool
+intents, but they must treat SafeClaw harness packets as the fixed source of
+facts and must execute intents through SafeClaw-owned MCP and ledger controls.
 
-Hermes is not adopted as the production core engine in the active plan. A Hermes experiment may be run later as a separate branch or service PoC, limited to an MCP client worker that consumes SafeClaw tools without moving `claw-tools` or domain data ownership out of SafeClaw.
+Hermes is not adopted as the production core engine in the active plan. A
+Hermes experiment may be run later as a separate branch or service PoC, limited
+to an MCP client worker that consumes SafeClaw tools without moving
+`claw-tools` or domain data ownership out of SafeClaw.
+
+The explicit long-term target is that, after the Phase 4 promotion gate passes,
+Hermes becomes the default and primary planner-runtime behind a versioned
+`EngineAdapter` contract. OpenClaw remains available as the trajectory parity
+oracle, compatibility runtime, and failover runtime. This future promotion
+changes the planner implementation, not the product system of record.
+
+Hermes never owns product facts and never writes directly to Supabase/Postgres.
+That invariant applies during the PoC, after any future promotion, and during
+failover. No current deployment or active-plan milestone is claimed to have
+implemented this target.
 
 ## Why Hermes Core Migration Is Deferred
 
@@ -52,22 +70,56 @@ Deferred does not mean rejected as a long-term direction. It means the architect
 5. **Current bottleneck is not agent orchestration**
    The immediate product gap is DB harness correctness: SIF embeddings, evidence packet contracts, tenant operation memory, photo/OCR hazard intake, and reviewed corpus promotion. A larger agent runtime does not solve those unless the fact boundary already exists.
 
-## Long-Term Reconsideration Conditions
+## Phase 4 Promotion Gate
 
-Hermes or another agent runtime can be reconsidered as a core-adjacent worker only when all of the following are true:
+Hermes may become the default and primary planner-runtime only after every gate
+below has executable evidence and explicit promotion approval:
 
-- DB Evidence Harness packet is the only accepted fact boundary for external agents.
-- Tenant learning contract has tests for public corpus, tenant operation memory, and review/promotion queues.
-- SIF embedding table/RPC/upload gate is approved and verified in production.
-- Async document job layer exists with idempotency, retry state, terminal error state, and workpack linkage.
-- MCP tokens are org/site scoped and never logged or stored in plaintext.
-- A Hermes PoC proves MCP parity without direct DB writes or domain tool migration.
-- License/security/deployment review is complete.
+1. **Versioned engine contract and trajectory parity**
+   A versioned `EngineAdapter` contract defines planner requests, results,
+   errors, cancellation, resume, capability negotiation, and trajectory
+   records. Hermes must match the accepted OpenClaw oracle trajectories for
+   tool intent, evidence use, approvals, effects, and terminal state across the
+   agreed parity corpus.
+
+2. **SafeClaw-owned intent interception and ledger**
+   Every tool intent from every runtime passes through the SafeClaw MCP
+   interceptor. Supabase remains authoritative for the run, step, approval,
+   and effect-receipt ledger. No runtime may bypass that path to create a fact
+   or perform an effect.
+
+3. **Tenant isolation**
+   Tests and production evidence prove isolation across runtime context,
+   retrieval, harness packets, ledger records, approvals, resumes, and
+   failover. Public reference data and tenant operation memory remain separate.
+
+4. **HITL knowledge promotion**
+   Knowledge changes follow the complete SafeClaw-owned flow: candidate ->
+   review -> graph validation -> published wiki/ontology promotion. Hermes may
+   propose a candidate but cannot approve, publish, or directly mutate the
+   ontology, wiki, or product facts.
+
+5. **Idempotent failover and resume**
+   A run can fail over between Hermes and OpenClaw, or resume after interruption,
+   without repeating an externally visible effect. Idempotency keys and effect
+   receipts prove that completed effects are not duplicated.
+
+6. **License, security, secret, and operations review**
+   License and redistribution, dependency security, tenant and data boundaries,
+   secret handling and rotation, deployment, observability, incident response,
+   capacity, rollback, and compatibility ownership are reviewed and accepted.
+
+The existing DB Evidence Harness, tenant learning, SIF embedding, async job,
+and org/site-scoped token gates remain prerequisites to this evidence. Until
+the full gate passes, Hermes remains a deferred PoC and OpenClaw remains the
+current compatibility runtime.
 
 ## Consequences
 
 - The active backend goal stays focused on DB harness engineering, SIF embeddings, operation memory, and tenant-scoped retrieval.
 - External agents must obey the MCP packet contract: no creating facts outside the harness packet, no cross-tenant memory, no unreviewed public corpus promotion.
+- Runtime selection may eventually vary behind `EngineAdapter`, but SafeClaw remains the product fact and effect authority for every adapter.
+- After an approved Phase 4 promotion, Hermes is the primary planner-runtime and OpenClaw remains the parity oracle, compatibility runtime, and failover path.
 - Automatic "learning" is not product terminology. The product language is reviewed corpus, embedding index, tenant operation memory, and evidence harness.
 - Asynchronous jobs, retries, status tracking, idempotency, and tenant isolation tests are the next scalability layer before any agent runtime replacement.
 - Any future Hermes/OpenClaw code embedding requires a separate license, security, deployment, secret handling, and data-boundary review.
@@ -76,6 +128,8 @@ Hermes or another agent runtime can be reconsidered as a core-adjacent worker on
 
 - Replace the SafeClaw backend with Hermes/FastAPI as the core engine now.
 - Move SafeClaw domain tools from Next.js/MCP into a Python tool registry now.
+- Give Hermes product-fact ownership or direct database write access at any phase.
+- Retire the OpenClaw parity, compatibility, or failover path as part of Hermes promotion.
 - Automatically promote customer work history into a shared LLM Wiki after anonymization only.
 
 ## Follow-Up Work
