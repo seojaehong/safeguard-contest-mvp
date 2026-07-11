@@ -12,6 +12,7 @@ import {
   SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
   SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE,
   searchSafetyReferences,
+  isSafetyReferenceRiskEligible,
   type SafetyReferenceItem,
   type SafetyReferenceRetrievalMode,
   type SafetyReferenceSearchResult
@@ -350,6 +351,7 @@ export function buildSafetyReferenceRiskRows(
     response.riskSummary.topRisk
   ].filter(Boolean).join(" ");
   const eligibleReferences = references
+    .filter(isSafetyReferenceRiskEligible)
     .filter(includesRiskAssessmentDocument)
     .filter((item) => item.title || item.summary || item.controls.length);
   const rankedEligibleReferences = filterAndRankSafetyReferencesByQuery(
@@ -374,11 +376,15 @@ export function buildSafetyReferenceRiskRows(
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
     const evidenceRefs = [
-      item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
-      item.source_kind_label || item.item_type || "safety_reference_items",
-      displayTitle,
-      item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
-      item.source_url || ""
+      ...(item.kosha_guide?.evidenceRef
+        ? [item.kosha_guide.evidenceRef]
+        : [
+          item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
+          item.source_kind_label || item.item_type || "safety_reference_items",
+          displayTitle,
+          item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
+          item.source_url || ""
+        ])
     ].filter(Boolean);
     const candidateRow = buildRiskRow({
       location,
@@ -980,8 +986,16 @@ export function buildSafetyReferenceSurfaceItem(item: SafetyReferenceItem) {
     controls,
     evidenceRoleLabel: item.evidence_role_label,
     sourceKindLabel: item.source_kind_label,
-    operationSignalLabel: controls[0] ? `문서와 TBM에 ${controls[0]} 반영` : item.operation_signal_label
+    operationSignalLabel: controls[0] ? `문서와 TBM에 ${controls[0]} 반영` : item.operation_signal_label,
+    evidenceRef: item.kosha_guide?.evidenceRef || null,
+    reviewRequired: item.kosha_guide ? !item.kosha_guide.directEligible : operationalView.reviewRequired
   };
+}
+
+function toSurfaceRetrievalMode(mode: SafetyReferenceRetrievalMode): "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc" | undefined {
+  return mode === "unconfigured" || mode === "rest-ilike" || mode === "ranked-rpc" || mode === "hybrid-vector-rpc"
+    ? mode
+    : undefined;
 }
 
 function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): string {
@@ -2109,7 +2123,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           query: safetyReference.query,
           count: safetyReference.count,
           totalItems: safetyReference.items.length,
-          retrievalMode: safetyReference.retrievalMode,
+          ...(toSurfaceRetrievalMode(safetyReference.retrievalMode)
+            ? { retrievalMode: toSurfaceRetrievalMode(safetyReference.retrievalMode) }
+            : {}),
           vectorSearch: safetyReference.vectorSearch,
           message: safetyReference.message,
           items: safetyReference.items.slice(0, 8).map(buildSafetyReferenceSurfaceItem)

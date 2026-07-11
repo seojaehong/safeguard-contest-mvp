@@ -1,0 +1,39 @@
+{
+  "date": "2026-07-12",
+  "branch": "feat/kosha-offline-harness",
+  "base_commit": "84c04cd",
+  "status": "green",
+  "changed_files": [
+    "lib/kosha-guide-corpus.ts",
+    "lib/safety-reference-catalog.ts",
+    "lib/db-harness.ts",
+    "lib/search.ts",
+    "tests/kosha-guide-offline-harness.test.ts",
+    "tests/kosha-guide-provenance-gate.test.ts"
+  ],
+  "verification": {
+    "focused_command": "npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/commercial-harness.test.ts tests/safety-reference-relevance.test.ts tests/tbm-deterministic-structures.test.ts tests/risk-ref-gate-wiring.test.ts",
+    "focused_test_files": 6,
+    "focused_tests_passed": 52,
+    "typecheck": "passed",
+    "build": "passed",
+    "git_diff_check": "passed_with_crlf_warnings_only"
+  },
+  "gates": {
+    "snapshot_v2_loader": true,
+    "hash_verification": true,
+    "exact_accounting_verification": true,
+    "fail_closed_missing": true,
+    "fail_closed_stale": true,
+    "fail_closed_hash_mismatch": true,
+    "fail_closed_partial_stage": true,
+    "fail_closed_failure_ledger": true,
+    "accepted_direct_requires_native_anchored_body": true,
+    "review_required_boundaries_never_seed_risk_rows": true,
+    "risk_tbm_page_anchor_provenance_propagation": true
+  },
+  "limitations": [
+    "No external corpus content is committed in this branch.",
+    "Offline corpus loading is runtime-only from the server path to avoid client bundle contamination."
+  ]
+}

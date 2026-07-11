@@ -1,4 +1,12 @@
 import { createLogger } from "@/lib/logger";
+import type {
+  KoshaGuideCorpusAnchor,
+  KoshaGuideCorpusBodyKind,
+  KoshaGuideCorpusHit,
+  KoshaGuideCorpusLookup,
+  KoshaGuideCorpusQuality,
+  KoshaGuideOfflineRetrievalMode
+} from "@/lib/kosha-guide-corpus";
 
 export type SafetyReferenceItem = {
   id: string;
@@ -23,8 +31,18 @@ export type SafetyReferenceItem = {
   operation_signal_label?: string;
   display_title?: string;
   display_summary?: string;
-  retrieval_source?: "rest" | "ranked" | "vector" | "hybrid";
+  retrieval_source?: "rest" | "ranked" | "vector" | "hybrid" | KoshaGuideOfflineRetrievalMode;
   vector_similarity?: number;
+  kosha_guide?: {
+    referenceId: string;
+    stableDocumentKey: string;
+    version: string;
+    quality: KoshaGuideCorpusQuality;
+    bodyKind: KoshaGuideCorpusBodyKind;
+    anchors: KoshaGuideCorpusAnchor[];
+    evidenceRef: string | null;
+    directEligible: boolean;
+  };
 };
 
 export type SafetyReferenceOperationalView = {
@@ -33,7 +51,12 @@ export type SafetyReferenceOperationalView = {
   reviewRequired: boolean;
 };
 
-export type SafetyReferenceRetrievalMode = "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
+export type SafetyReferenceRetrievalMode =
+  | "unconfigured"
+  | "rest-ilike"
+  | "ranked-rpc"
+  | "hybrid-vector-rpc"
+  | KoshaGuideOfflineRetrievalMode;
 
 export const SAFETY_REFERENCE_SEARCH_FAILURE_CODE = "safety_reference_search_failed" as const;
 export const SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE =
@@ -1652,6 +1675,7 @@ function referenceMatchText(item: SafetyReferenceItem): string {
   return normalizeMatchText([
     item.title,
     item.summary,
+    item.body || "",
     item.category || "",
     item.subcategory || "",
     ...item.keywords,
@@ -1659,6 +1683,66 @@ function referenceMatchText(item: SafetyReferenceItem): string {
     ...item.controls,
     ...item.primary_documents
   ].join(" "));
+}
+
+function isKoshaTechnicalGuideItem(item: SafetyReferenceItem): boolean {
+  return item.item_type === "technical-guideline" || item.item_type === "technical-support-regulation";
+}
+
+function isLocalSnapshotEnabled(options: SafetyReferenceSearchOptions): boolean {
+  return !options.sourceId && !options.riskTag;
+}
+
+function buildLocalSafetyReferenceItem(
+  hit: KoshaGuideCorpusHit
+): SafetyReferenceItem {
+  const record = hit.record;
+  return normalizeReferenceItem({
+    id: record.referenceId,
+    source_id: `kosha-guide-offline:${record.stableDocumentKey}`,
+    item_type: record.itemType,
+    category: record.category,
+    subcategory: null,
+    title: record.version,
+    summary: record.anchors[0]?.excerpt || record.nativeBody,
+    body: record.nativeBody,
+    keywords: record.tags.keywords,
+    risk_tags: record.tags.riskTags,
+    primary_documents: record.tags.primaryDocuments,
+    controls: record.tags.controls,
+    source_url: null,
+    evidence_role: hit.directEligible ? "direct" : "supporting",
+    retrieval_source: hit.retrievalMode,
+    display_title: `${record.version} ${record.title}`,
+    display_summary: record.anchors[0]?.excerpt || compactText(record.nativeBody, 140),
+    kosha_guide: {
+      referenceId: record.referenceId,
+      stableDocumentKey: record.stableDocumentKey,
+      version: record.version,
+      quality: record.quality,
+      bodyKind: record.bodyKind,
+      anchors: record.anchors,
+      evidenceRef: hit.evidenceRef,
+      directEligible: hit.directEligible
+    }
+  });
+}
+
+function mergeCatalogItems(localItems: SafetyReferenceItem[], remoteItems: SafetyReferenceItem[], limit: number): SafetyReferenceItem[] {
+  const merged = new Map<string, SafetyReferenceItem>();
+  localItems.forEach((item) => merged.set(item.id, item));
+  remoteItems.forEach((item) => {
+    if (!merged.has(item.id)) merged.set(item.id, item);
+  });
+  return Array.from(merged.values()).slice(0, limit);
+}
+
+function stripRemoteKoshaDirectItems(items: SafetyReferenceItem[]): SafetyReferenceItem[] {
+  return items.filter((item) => !(item.evidence_role === "direct" && isKoshaTechnicalGuideItem(item)));
+}
+
+async function loadKoshaGuideRuntimeModule(): Promise<typeof import("./kosha-guide-corpus")> {
+  return (0, eval)('import("./kosha-guide-corpus")') as Promise<typeof import("./kosha-guide-corpus")>;
 }
 
 function expandedQueryTerms(query: string): string[] {
@@ -2202,32 +2286,25 @@ async function countRows(config: SupabaseConfig, spec: CountSpec): Promise<numbe
   return parseContentRange(response.headers.get("content-range"));
 }
 
-export async function searchSafetyReferences(options: {
+export type SafetyReferenceSearchOptions = {
   query: string;
   limit?: number;
   itemType?: string;
   sourceId?: string;
   riskTag?: string;
   evidenceRole?: "direct" | "supporting";
-}): Promise<SafetyReferenceSearchResult> {
-  const config = getSupabaseConfig();
+  offlineCorpus?: KoshaGuideCorpusLookup;
+};
+
+async function searchSupabaseSafetyReferences(
+  options: SafetyReferenceSearchOptions,
+  config: SupabaseConfig,
+  vectorRuntime: SafetyReferenceVectorRuntime
+): Promise<SafetyReferenceSearchResult> {
   const query = options.query.trim();
   const limit = Math.min(Math.max(options.limit || 12, 1), 50);
   const fetchLimit = options.evidenceRole ? Math.min(limit * 3, 50) : limit;
-  const vectorRuntime = resolveSafetyReferenceVectorSearchState();
   let vectorSearch = vectorRuntime.status;
-  if (!config) {
-    return {
-      ok: false,
-      configured: false,
-      query,
-      count: 0,
-      items: [],
-      retrievalMode: "unconfigured",
-      vectorSearch,
-      message: "Supabase service role key가 없어 안전 지식 DB 검색을 실행하지 않았습니다."
-    };
-  }
 
   // Track E-3: try the ranked RPC first when no specialised filters block it.
   // RPC handles only `query` + `itemType`. For sourceId/riskTag we still use the
@@ -2329,6 +2406,104 @@ export async function searchSafetyReferences(options: {
     vectorSearch,
     message: "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
   };
+}
+
+export async function searchSafetyReferences(options: SafetyReferenceSearchOptions): Promise<SafetyReferenceSearchResult> {
+  const query = options.query.trim();
+  const limit = Math.min(Math.max(options.limit || 12, 1), 50);
+  const vectorRuntime = resolveSafetyReferenceVectorSearchState(options.offlineCorpus?.env || process.env);
+  const localAllowed = isLocalSnapshotEnabled(options);
+  let localCorpus: Awaited<ReturnType<typeof import("./kosha-guide-corpus")["loadKoshaGuideCorpus"]>> | { status: "unconfigured"; rootDir: null; failures: [] };
+  let localSearch: { retrievalMode: KoshaGuideOfflineRetrievalMode | null; items: KoshaGuideCorpusHit[] } = { retrievalMode: null, items: [] };
+  if (localAllowed) {
+    const localModule = await loadKoshaGuideRuntimeModule();
+    localCorpus = await localModule.loadKoshaGuideCorpus(options.offlineCorpus);
+    if (localCorpus.status === "ready") {
+      localSearch = localModule.searchKoshaGuideCorpus(
+        localCorpus,
+        query,
+        options.evidenceRole === "direct" ? Math.min(limit * 3, 50) : limit
+      );
+    }
+  } else {
+    localCorpus = { status: "unconfigured", rootDir: null, failures: [] };
+  }
+  const localItems = localSearch.items
+    .filter((item) => !options.evidenceRole || (options.evidenceRole === "direct" ? item.directEligible : !item.directEligible))
+    .map(buildLocalSafetyReferenceItem);
+
+  const config = getSupabaseConfig();
+  if (!config) {
+    if (localItems.length) {
+      return {
+        ok: true,
+        configured: true,
+        query,
+        count: localItems.length,
+        items: localItems.slice(0, limit),
+        retrievalMode: localSearch.retrievalMode || "local-tag",
+        vectorSearch: vectorRuntime.status,
+        message: "서버 전용 KOSHA 스냅샷에서 오프라인 직접근거를 조회했습니다."
+      };
+    }
+    if (localCorpus.status === "blocked") {
+      return {
+        ok: false,
+        configured: true,
+        query,
+        count: 0,
+        items: [],
+        retrievalMode: "unconfigured",
+        vectorSearch: vectorRuntime.status,
+        message: `KOSHA 오프라인 스냅샷 게이트 차단: ${localCorpus.failures.join(", ")}`
+      };
+    }
+    return {
+      ok: false,
+      configured: false,
+      query,
+      count: 0,
+      items: [],
+      retrievalMode: "unconfigured",
+      vectorSearch: vectorRuntime.status,
+      message: "Supabase service role key가 없어 안전 지식 DB 검색을 실행하지 않았습니다."
+    };
+  }
+
+  if (!localAllowed || localCorpus.status === "unconfigured") {
+    return searchSupabaseSafetyReferences(options, config, vectorRuntime);
+  }
+
+  if (localCorpus.status === "blocked") {
+    return {
+      ok: false,
+      configured: true,
+      query,
+      count: 0,
+      items: [],
+      retrievalMode: "unconfigured",
+      vectorSearch: vectorRuntime.status,
+      message: `KOSHA 오프라인 스냅샷 게이트 차단: ${localCorpus.failures.join(", ")}`
+    };
+  }
+
+  return {
+    ok: localItems.length > 0,
+    configured: true,
+    query,
+    count: localItems.length,
+    items: localItems.slice(0, limit),
+    retrievalMode: localSearch.retrievalMode || "local-tag",
+    vectorSearch: vectorRuntime.status,
+    message: localItems.length
+      ? "서버 전용 KOSHA 스냅샷에서 오프라인 직접근거를 조회했습니다."
+      : "KOSHA 오프라인 스냅샷에서 일치하는 직접근거를 찾지 못했습니다."
+  };
+}
+
+export function isSafetyReferenceRiskEligible(item: SafetyReferenceItem): boolean {
+  if (!item.kosha_guide) return true;
+  return item.kosha_guide.directEligible;
 }
 
 function filterByEvidenceRole(
