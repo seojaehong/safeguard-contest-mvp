@@ -46,13 +46,28 @@ describe("workspace layout regression", () => {
       for (const scenario of scenarios) {
         const page = await browser.newPage({ viewport: { width: scenario.width, height: scenario.height } });
         await page.goto(`${baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
-        const metrics = await page.locator("#field-command-input").evaluate((element) => {
+        const themedInput = page.locator(
+          `.command-center-shell.workspace-theme-${theme} .workspace-input-page #field-command-input`,
+        );
+        await themedInput.waitFor({ state: "visible" });
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        });
+        const metrics = await themedInput.evaluate((element) => {
           const style = getComputedStyle(element);
           return {
+            shellTheme: element.closest(".command-center-shell")?.classList.contains("workspace-theme-day")
+              ? "day"
+              : element.closest(".command-center-shell")?.classList.contains("workspace-theme-night")
+                ? "night"
+                : "unknown",
             display: style.display,
             minHeight: Number.parseFloat(style.minHeight),
             paddingTop: Number.parseFloat(style.paddingTop),
             paddingRight: Number.parseFloat(style.paddingRight),
+            paddingBottom: Number.parseFloat(style.paddingBottom),
+            paddingLeft: Number.parseFloat(style.paddingLeft),
             overflowY: style.overflowY,
             fontSize: Number.parseFloat(style.fontSize),
             lineHeight: Number.parseFloat(style.lineHeight),
@@ -61,10 +76,13 @@ describe("workspace layout regression", () => {
         });
 
         expect(metrics, `${theme} ${scenario.width}x${scenario.height}`).toMatchObject({
+          shellTheme: theme,
           display: "block",
           minHeight: scenario.minHeight,
           paddingTop: scenario.paddingTop,
           paddingRight: scenario.paddingRight,
+          paddingBottom: scenario.paddingTop,
+          paddingLeft: scenario.paddingRight,
           overflowY: "auto",
           fontSize: scenario.fontSize,
           resize: scenario.resize,
