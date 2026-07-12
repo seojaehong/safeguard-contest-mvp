@@ -7,7 +7,7 @@
 
 
  Test Files  1 passed (1)
-      Tests  54 passed (54)
-   Start at  12:33:48
-   Duration  648ms (transform 56ms, setup 0ms, import 86ms, tests 32ms, environment 0ms)
+      Tests  60 passed (60)
+   Start at  13:18:53
+   Duration  813ms (transform 78ms, setup 0ms, import 113ms, tests 46ms, environment 0ms)
 

@@ -4,7 +4,8 @@ export const REMOTE_ENGINE_PROTOCOL_VERSION = "v1" as const;
 export const REMOTE_ENGINE_MAX_TTL_MS = 5 * 60 * 1_000;
 export const REMOTE_ENGINE_MAX_FUTURE_SKEW_MS = 60 * 1_000;
 export const REMOTE_ENGINE_MAX_BODY_BYTES = 16_384;
-export const REMOTE_ENGINE_MAX_HEADER_COUNT = 32;
+export const REMOTE_ENGINE_MAX_RAW_HEADER_LINES = 32;
+export const REMOTE_ENGINE_MAX_NORMALIZED_HEADER_ENTRIES = 32;
 export const REMOTE_ENGINE_MAX_HEADER_BYTES = 8_192;
 
 const MAX_ID_LENGTH = 128;
@@ -79,6 +80,7 @@ export type RemoteEngineProtocolErrorCode =
   | "PROTOCOL_BODY_DUPLICATE_MEMBER"
   | "PROTOCOL_BODY_TOO_LARGE"
   | "PROTOCOL_BODY_TAMPERED"
+  | "PROTOCOL_UNICODE_INVALID"
   | "PROTOCOL_METHOD_INVALID"
   | "PROTOCOL_PATH_INVALID"
   | "PROTOCOL_METHOD_MISMATCH"
@@ -122,14 +124,63 @@ export type VerifiedRemoteEngineRequest = {
   request: RemoteEngineRequestV1;
 };
 
-type HeaderInput = Headers | Readonly<Record<string, string | readonly string[] | undefined>>;
+export type RemoteEngineRawHeader = readonly [name: string, value: string];
+export type RemoteEngineHeaderRecord = Readonly<
+  Record<string, string | readonly string[] | undefined>
+>;
+export type RemoteEngineHeaderInput =
+  | Headers
+  | RemoteEngineHeaderRecord
+  | readonly RemoteEngineRawHeader[];
 
 function fail(code: RemoteEngineProtocolErrorCode): never {
   throw new RemoteEngineProtocolError(code);
 }
 
+function isWellFormedUnicode(value: string): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    if (code >= 0xd800 && code <= 0xdbff) {
+      if (index + 1 >= value.length) return false;
+      const next = value.charCodeAt(index + 1);
+      if (next < 0xdc00 || next > 0xdfff) return false;
+      index += 1;
+    } else if (code >= 0xdc00 && code <= 0xdfff) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function assertWellFormedUnicode(value: string): void {
+  if (!isWellFormedUnicode(value)) fail("PROTOCOL_UNICODE_INVALID");
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function assertRequestUnicode(value: unknown): void {
+  if (!isRecord(value)) return;
+  for (const field of [
+    "requestId",
+    "userId",
+    "organizationId",
+    "siteId",
+    "issuedAt",
+    "expiresAt",
+    "prompt",
+    "audience",
+  ]) {
+    const fieldValue = value[field];
+    if (typeof fieldValue === "string") assertWellFormedUnicode(fieldValue);
+  }
+  const intents = value.allowedToolIntents;
+  if (Array.isArray(intents)) {
+    for (const intent of intents) {
+      if (typeof intent === "string") assertWellFormedUnicode(intent);
+    }
+  }
 }
 
 function isBoundedString(value: unknown, maxLength: number, pattern?: RegExp): value is string {
@@ -185,6 +236,7 @@ function validateRequest(value: unknown): RemoteEngineRequestV1 {
 }
 
 export function serializeRemoteEngineRequest(request: RemoteEngineRequestV1): string {
+  assertRequestUnicode(request);
   const valid = validateRequest(request);
   const serialized = JSON.stringify({
     requestId: valid.requestId,
@@ -202,6 +254,7 @@ export function serializeRemoteEngineRequest(request: RemoteEngineRequestV1): st
 }
 
 function assertBodySize(body: string): void {
+  assertWellFormedUnicode(body);
   if (Buffer.byteLength(body, "utf8") > REMOTE_ENGINE_MAX_BODY_BYTES) {
     fail("PROTOCOL_BODY_TOO_LARGE");
   }
@@ -235,6 +288,7 @@ function validatePath(path: string): string {
 
 function validateKey(key: RemoteEngineSigningKey): void {
   if (!isBoundedString(key.keyId, MAX_ID_LENGTH, TOKEN)) fail("PROTOCOL_HEADER_MALFORMED");
+  if (typeof key.secret === "string") assertWellFormedUnicode(key.secret);
   const secretLength = typeof key.secret === "string"
     ? Buffer.byteLength(key.secret, "utf8")
     : key.secret.byteLength;
@@ -311,16 +365,27 @@ export function signRemoteEngineRequest(input: {
   };
 }
 
-function collectHeaders(headers: HeaderInput): ReadonlyMap<string, string> {
+function isRawHeaderList(
+  headers: RemoteEngineHeaderInput,
+): headers is readonly RemoteEngineRawHeader[] {
+  return Array.isArray(headers);
+}
+
+function collectHeaders(headers: RemoteEngineHeaderInput): ReadonlyMap<string, string> {
   const collected = new Map<string, string>();
-  let headerCount = 0;
+  let headerEntries = 0;
   let headerBytes = 0;
   let duplicateProtocolHeader = false;
 
-  const collect = (name: string, value: string, coalesced: boolean): void => {
-    headerCount += 1;
+  const collect = (
+    name: string,
+    value: string,
+    coalesced: boolean,
+    maxEntries: number,
+  ): void => {
+    headerEntries += 1;
     headerBytes += Buffer.byteLength(name, "utf8") + Buffer.byteLength(value, "utf8");
-    if (headerCount > REMOTE_ENGINE_MAX_HEADER_COUNT || headerBytes > REMOTE_ENGINE_MAX_HEADER_BYTES) {
+    if (headerEntries > maxEntries || headerBytes > REMOTE_ENGINE_MAX_HEADER_BYTES) {
       fail("PROTOCOL_HEADERS_TOO_LARGE");
     }
     const normalizedName = name.toLowerCase();
@@ -333,16 +398,36 @@ function collectHeaders(headers: HeaderInput): ReadonlyMap<string, string> {
   };
 
   if (typeof Headers !== "undefined" && headers instanceof Headers) {
-    for (const [name, value] of headers.entries()) collect(name, value, true);
+    for (const [name, value] of headers.entries()) {
+      collect(name, value, true, REMOTE_ENGINE_MAX_NORMALIZED_HEADER_ENTRIES);
+    }
+  } else if (isRawHeaderList(headers)) {
+    if (headers.length > REMOTE_ENGINE_MAX_RAW_HEADER_LINES) {
+      fail("PROTOCOL_HEADERS_TOO_LARGE");
+    }
+    for (const header of headers) {
+      if (!Array.isArray(header)
+        || header.length !== 2
+        || typeof header[0] !== "string"
+        || typeof header[1] !== "string") {
+        fail("PROTOCOL_HEADER_MALFORMED");
+      }
+      collect(header[0], header[1], false, REMOTE_ENGINE_MAX_RAW_HEADER_LINES);
+    }
   } else {
     const entries = Object.entries(headers);
     for (const [name, rawValue] of entries) {
       if (typeof rawValue === "undefined") continue;
       if (Array.isArray(rawValue)) {
-        if (rawValue.length === 0) collect(name, "", false);
-        for (const value of rawValue) collect(name, value, false);
+        if (rawValue.length === 0) {
+          collect(name, "", false, REMOTE_ENGINE_MAX_NORMALIZED_HEADER_ENTRIES);
+        }
+        for (const value of rawValue) {
+          if (typeof value !== "string") fail("PROTOCOL_HEADER_MALFORMED");
+          collect(name, value, false, REMOTE_ENGINE_MAX_NORMALIZED_HEADER_ENTRIES);
+        }
       } else if (typeof rawValue === "string") {
-        collect(name, rawValue, false);
+        collect(name, rawValue, false, REMOTE_ENGINE_MAX_NORMALIZED_HEADER_ENTRIES);
       } else {
         fail("PROTOCOL_HEADER_MALFORMED");
       }
@@ -473,7 +558,9 @@ function assertNoDuplicateJsonMembers(body: string): void {
 function parseBody(body: string): RemoteEngineRequestV1 {
   assertNoDuplicateJsonMembers(body);
   try {
-    return validateRequest(JSON.parse(body) as unknown);
+    const parsed = JSON.parse(body) as unknown;
+    assertRequestUnicode(parsed);
+    return validateRequest(parsed);
   } catch (error) {
     if (error instanceof RemoteEngineProtocolError) throw error;
     return fail("PROTOCOL_BODY_MALFORMED");
@@ -499,11 +586,17 @@ function validatePolicyValue(value: number, hardMaximum: number): number {
   return value;
 }
 
+function resolvePolicyValue(value: unknown, hardMaximum: number): number {
+  if (typeof value === "undefined") return hardMaximum;
+  if (typeof value !== "number") fail("PROTOCOL_POLICY_INVALID");
+  return validatePolicyValue(value, hardMaximum);
+}
+
 export function verifyRemoteEngineRequest(input: {
   method: string;
   path: string;
   body: string;
-  headers: HeaderInput;
+  headers: RemoteEngineHeaderInput;
   expectedAudience: string;
   keyring: RemoteEngineKeyring;
   now?: Date;
@@ -514,12 +607,12 @@ export function verifyRemoteEngineRequest(input: {
   const headers = collectHeaders(input.headers);
   const nowMs = (input.now ?? new Date()).getTime();
   if (!Number.isFinite(nowMs)) fail("PROTOCOL_POLICY_INVALID");
-  const maxFutureSkewMs = validatePolicyValue(
-    input.maxFutureSkewMs ?? REMOTE_ENGINE_MAX_FUTURE_SKEW_MS,
+  const maxFutureSkewMs = resolvePolicyValue(
+    input.maxFutureSkewMs,
     REMOTE_ENGINE_MAX_FUTURE_SKEW_MS,
   );
-  const maxTtlMs = validatePolicyValue(
-    input.maxTtlMs ?? REMOTE_ENGINE_MAX_TTL_MS,
+  const maxTtlMs = resolvePolicyValue(
+    input.maxTtlMs,
     REMOTE_ENGINE_MAX_TTL_MS,
   );
 
