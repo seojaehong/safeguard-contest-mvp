@@ -4,11 +4,11 @@
 
 Status: `review_pending`
 
-Product commits: `ebef495df600419a21e02838c4aa1554152db233`, `1051f18b8cff86d3b87461d862dcb141f39ad429`
+Product commits: `ad25f99aca3251c9f5866f490b5f5b6392d51000`, `8fe1fc2084a4ce7b8d6115053e5f84d58a85c3c9`
 
-Documentation commit: `894942c72868f052119f423de6009caf631695ee`
+Documentation commits: `848b23c4f629118985f052766720aa7f36a06bee`, `f18686c3f069881342787ab73f1320cbbfadf9ed`
 
-Base: `87798d15aea085284332942390f215f49f3399cf`
+Base: `31a44c0d972c46a47c94ad387eeeff39528d1be9`
 
 This patch makes the existing `mcp_tokens.scopes` field an enforced authorization boundary. It does not change the database schema, mutate database rows, enable the remote sidecar, or change OpenClaw runtime selection.
 
@@ -24,13 +24,13 @@ This patch makes the existing `mcp_tokens.scopes` field an enforced authorizatio
 
 ## TDD Evidence
 
-The auditable RED tree used the committed tests from `1051f18` while restoring the affected production files from base `87798d1`.
+The auditable RED tree used the committed tests from `8fe1fc2` while restoring the affected production files from base `31a44c0`. RED and GREEN both used Vitest `4.1.10`.
 
 - RED: 4 files failed, 11 tests failed, 57 passed, exit 1.
 - GREEN: 4 files passed, 68 tests passed, exit 0.
 - Strict typecheck: exit 0.
-- Production build: exit 0, static generation 27/27, build ID `lDN0C9snqjJuwzXd2_U1r`.
-- Dependency sync: `npm.cmd install`, package and lock hashes unchanged.
+- Production build: exit 0, static generation 27/27, build ID `Fe2cUnGZBCZ221uM8PfJO`.
+- Dependency sync: `npm.cmd install`, package and lock hashes unchanged; GREEN, typecheck, and build were rerun after sync.
 - `git diff --check`: exit 0.
 
 Raw logs:
@@ -39,6 +39,7 @@ Raw logs:
 - `evaluation/mcp-tool-scope-enforcement-2026-07-12/green-test.log`
 - `evaluation/mcp-tool-scope-enforcement-2026-07-12/typecheck.log`
 - `evaluation/mcp-tool-scope-enforcement-2026-07-12/build.log`
+- `evaluation/mcp-tool-scope-enforcement-2026-07-12/dependency-sync.log`
 
 ## Compatibility And Residual Risk
 
