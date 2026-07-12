@@ -8,6 +8,7 @@
     "ebef495df600419a21e02838c4aa1554152db233",
     "1051f18b8cff86d3b87461d862dcb141f39ad429"
   ],
+  "documentationCommit": "894942c72868f052119f423de6009caf631695ee",
   "scope": {
     "registeredToolCount": 10,
     "databaseSchemaChanged": false,
@@ -59,6 +60,7 @@
   },
   "changedFiles": [
     "app/api/mcp/[transport]/route.ts",
+    "docs/mcp-server.md",
     "lib/mcp-auth.ts",
     "lib/mcp-tool-contract.d.mts",
     "lib/mcp-tool-contract.mjs",
