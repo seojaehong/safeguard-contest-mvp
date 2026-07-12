@@ -14,7 +14,7 @@ describe("mixed typography role contract", () => {
       encoding: "utf8",
       env: { ...process.env, OUTPUT_PATH: outputPath },
     });
-    expect(result.status).toBe(1);
+    expect(result.status).toBe(0);
     const report = JSON.parse(fs.readFileSync(outputPath, "utf8")) as { violations: Violation[] };
     fs.rmSync(outputPath, { force: true });
 

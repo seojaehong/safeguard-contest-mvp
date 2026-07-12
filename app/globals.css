@@ -15141,7 +15141,7 @@ body:has(.safeclaw-landing) :is(
   border-radius: var(--r-lg);
   background: #fbfcfe;
   color: #20242b;
-  font-family: var(--font-multilingual);
+  font-family: var(--font-document);
   font-size: var(--text-table);
   line-height: var(--leading-table);
   font-weight: 500;
