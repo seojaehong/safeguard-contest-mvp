@@ -3,6 +3,9 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 export const REMOTE_ENGINE_PROTOCOL_VERSION = "v1" as const;
 export const REMOTE_ENGINE_MAX_TTL_MS = 5 * 60 * 1_000;
 export const REMOTE_ENGINE_MAX_FUTURE_SKEW_MS = 60 * 1_000;
+export const REMOTE_ENGINE_MAX_BODY_BYTES = 16_384;
+export const REMOTE_ENGINE_MAX_HEADER_COUNT = 32;
+export const REMOTE_ENGINE_MAX_HEADER_BYTES = 8_192;
 
 const MAX_ID_LENGTH = 128;
 const MAX_AUDIENCE_LENGTH = 256;
@@ -11,8 +14,11 @@ const MAX_PATH_LENGTH = 2_048;
 const MAX_PROMPT_LENGTH = 12_000;
 const MAX_TOOL_INTENTS = 32;
 const MAX_TOOL_INTENT_LENGTH = 128;
+const MAX_JSON_DEPTH = 64;
 const SHA256_HEX = /^[a-f0-9]{64}$/;
 const TOKEN = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
+const CANONICAL_METHOD = /^[A-Z]{1,16}$/;
+const CANONICAL_PATH_SEGMENT = /^[A-Za-z0-9._~-]+$/;
 const REQUEST_KEYS = [
   "requestId",
   "userId",
@@ -36,6 +42,7 @@ const HEADER_NAMES = {
   bodyHash: "x-safeclaw-body-sha256",
   signature: "x-safeclaw-signature",
 } as const;
+const PROTOCOL_HEADER_NAMES = new Set<string>(Object.values(HEADER_NAMES));
 
 export type RemoteEngineRequestV1 = {
   requestId: string;
@@ -62,10 +69,18 @@ export type RemoteEngineKeyring = {
 export type RemoteEngineProtocolErrorCode =
   | "PROTOCOL_HEADER_MISSING"
   | "PROTOCOL_HEADER_MALFORMED"
+  | "PROTOCOL_HEADER_DUPLICATE"
+  | "PROTOCOL_HEADERS_TOO_LARGE"
   | "PROTOCOL_VERSION_UNSUPPORTED"
   | "PROTOCOL_KEY_UNKNOWN"
+  | "PROTOCOL_KEYRING_INVALID"
+  | "PROTOCOL_POLICY_INVALID"
   | "PROTOCOL_BODY_MALFORMED"
+  | "PROTOCOL_BODY_DUPLICATE_MEMBER"
+  | "PROTOCOL_BODY_TOO_LARGE"
   | "PROTOCOL_BODY_TAMPERED"
+  | "PROTOCOL_METHOD_INVALID"
+  | "PROTOCOL_PATH_INVALID"
   | "PROTOCOL_METHOD_MISMATCH"
   | "PROTOCOL_PATH_MISMATCH"
   | "PROTOCOL_AUDIENCE_MISMATCH"
@@ -171,7 +186,7 @@ function validateRequest(value: unknown): RemoteEngineRequestV1 {
 
 export function serializeRemoteEngineRequest(request: RemoteEngineRequestV1): string {
   const valid = validateRequest(request);
-  return JSON.stringify({
+  const serialized = JSON.stringify({
     requestId: valid.requestId,
     userId: valid.userId,
     organizationId: valid.organizationId,
@@ -182,17 +197,38 @@ export function serializeRemoteEngineRequest(request: RemoteEngineRequestV1): st
     allowedToolIntents: valid.allowedToolIntents,
     audience: valid.audience,
   });
+  assertBodySize(serialized);
+  return serialized;
 }
 
-function normalizeMethod(method: string): string {
-  const normalized = method.toUpperCase();
-  if (!/^[A-Z]{1,16}$/.test(normalized)) fail("PROTOCOL_HEADER_MALFORMED");
-  return normalized;
+function assertBodySize(body: string): void {
+  if (Buffer.byteLength(body, "utf8") > REMOTE_ENGINE_MAX_BODY_BYTES) {
+    fail("PROTOCOL_BODY_TOO_LARGE");
+  }
+}
+
+function validateMethod(method: string): string {
+  if (typeof method !== "string" || !CANONICAL_METHOD.test(method)) {
+    fail("PROTOCOL_METHOD_INVALID");
+  }
+  return method;
 }
 
 function validatePath(path: string): string {
-  if (!isBoundedString(path, MAX_PATH_LENGTH) || !path.startsWith("/") || /[\r\n]/.test(path)) {
-    fail("PROTOCOL_HEADER_MALFORMED");
+  if (typeof path !== "string"
+    || path.length === 0
+    || path.length > MAX_PATH_LENGTH
+    || path.normalize("NFC") !== path
+    || !path.startsWith("/")) {
+    fail("PROTOCOL_PATH_INVALID");
+  }
+  if (path === "/") return path;
+  const segments = path.slice(1).split("/");
+  if (segments.some((segment) => segment.length === 0
+    || segment === "."
+    || segment === ".."
+    || !CANONICAL_PATH_SEGMENT.test(segment))) {
+    fail("PROTOCOL_PATH_INVALID");
   }
   return path;
 }
@@ -242,7 +278,7 @@ export function signRemoteEngineRequest(input: {
   key: RemoteEngineSigningKey;
   nonce: string;
 }): RemoteEngineSignedRequest {
-  const method = normalizeMethod(input.method);
+  const method = validateMethod(input.method);
   const path = validatePath(input.path);
   validateKey(input.key);
   if (!isBoundedString(input.nonce, MAX_NONCE_LENGTH, TOKEN)) fail("PROTOCOL_HEADER_MALFORMED");
@@ -275,18 +311,167 @@ export function signRemoteEngineRequest(input: {
   };
 }
 
-function readHeader(headers: HeaderInput, name: string): string {
-  const raw = headers instanceof Headers
-    ? headers.get(name) ?? undefined
-    : Object.entries(headers).find(([key]) => key.toLowerCase() === name)?.[1];
-  if (typeof raw === "undefined") fail("PROTOCOL_HEADER_MISSING");
-  if (Array.isArray(raw) || typeof raw !== "string" || raw.length === 0) {
-    fail("PROTOCOL_HEADER_MALFORMED");
+function collectHeaders(headers: HeaderInput): ReadonlyMap<string, string> {
+  const collected = new Map<string, string>();
+  let headerCount = 0;
+  let headerBytes = 0;
+  let duplicateProtocolHeader = false;
+
+  const collect = (name: string, value: string, coalesced: boolean): void => {
+    headerCount += 1;
+    headerBytes += Buffer.byteLength(name, "utf8") + Buffer.byteLength(value, "utf8");
+    if (headerCount > REMOTE_ENGINE_MAX_HEADER_COUNT || headerBytes > REMOTE_ENGINE_MAX_HEADER_BYTES) {
+      fail("PROTOCOL_HEADERS_TOO_LARGE");
+    }
+    const normalizedName = name.toLowerCase();
+    if (!PROTOCOL_HEADER_NAMES.has(normalizedName)) return;
+    if (collected.has(normalizedName) || (coalesced && value.includes(","))) {
+      duplicateProtocolHeader = true;
+      return;
+    }
+    collected.set(normalizedName, value);
+  };
+
+  if (typeof Headers !== "undefined" && headers instanceof Headers) {
+    for (const [name, value] of headers.entries()) collect(name, value, true);
+  } else {
+    const entries = Object.entries(headers);
+    for (const [name, rawValue] of entries) {
+      if (typeof rawValue === "undefined") continue;
+      if (Array.isArray(rawValue)) {
+        if (rawValue.length === 0) collect(name, "", false);
+        for (const value of rawValue) collect(name, value, false);
+      } else if (typeof rawValue === "string") {
+        collect(name, rawValue, false);
+      } else {
+        fail("PROTOCOL_HEADER_MALFORMED");
+      }
+    }
   }
+  if (duplicateProtocolHeader) fail("PROTOCOL_HEADER_DUPLICATE");
+  return collected;
+}
+
+function readHeader(headers: ReadonlyMap<string, string>, name: string): string {
+  const raw = headers.get(name);
+  if (typeof raw === "undefined") fail("PROTOCOL_HEADER_MISSING");
+  if (raw.length === 0) fail("PROTOCOL_HEADER_MALFORMED");
   return raw;
 }
 
+function assertNoDuplicateJsonMembers(body: string): void {
+  let index = 0;
+
+  const malformed = (): never => fail("PROTOCOL_BODY_MALFORMED");
+  const skipWhitespace = (): void => {
+    while (index < body.length && /[\t\n\r ]/.test(body[index])) index += 1;
+  };
+  const parseString = (): string => {
+    if (body[index] !== '"') return malformed();
+    const start = index;
+    index += 1;
+    while (index < body.length) {
+      const code = body.charCodeAt(index);
+      if (code === 0x22) {
+        index += 1;
+        try {
+          const parsed = JSON.parse(body.slice(start, index)) as unknown;
+          return typeof parsed === "string" ? parsed : malformed();
+        } catch {
+          return malformed();
+        }
+      }
+      if (code === 0x5c) {
+        index += 1;
+        const escape = body[index];
+        if (typeof escape === "undefined") return malformed();
+        if (escape === "u") {
+          if (!/^[a-fA-F0-9]{4}$/.test(body.slice(index + 1, index + 5))) return malformed();
+          index += 5;
+        } else if ('"\\/bfnrt'.includes(escape)) {
+          index += 1;
+        } else {
+          return malformed();
+        }
+      } else {
+        if (code <= 0x1f) return malformed();
+        index += 1;
+      }
+    }
+    return malformed();
+  };
+  const parseValue = (depth: number): void => {
+    if (depth > MAX_JSON_DEPTH) return malformed();
+    skipWhitespace();
+    const token = body[index];
+    if (token === "{") {
+      index += 1;
+      skipWhitespace();
+      const keys = new Set<string>();
+      if (body[index] === "}") {
+        index += 1;
+        return;
+      }
+      while (index < body.length) {
+        const key = parseString();
+        if (keys.has(key)) fail("PROTOCOL_BODY_DUPLICATE_MEMBER");
+        keys.add(key);
+        skipWhitespace();
+        if (body[index] !== ":") return malformed();
+        index += 1;
+        parseValue(depth + 1);
+        skipWhitespace();
+        if (body[index] === "}") {
+          index += 1;
+          return;
+        }
+        if (body[index] !== ",") return malformed();
+        index += 1;
+        skipWhitespace();
+      }
+      return malformed();
+    }
+    if (token === "[") {
+      index += 1;
+      skipWhitespace();
+      if (body[index] === "]") {
+        index += 1;
+        return;
+      }
+      while (index < body.length) {
+        parseValue(depth + 1);
+        skipWhitespace();
+        if (body[index] === "]") {
+          index += 1;
+          return;
+        }
+        if (body[index] !== ",") return malformed();
+        index += 1;
+      }
+      return malformed();
+    }
+    if (token === '"') {
+      parseString();
+      return;
+    }
+    for (const literal of ["true", "false", "null"]) {
+      if (body.startsWith(literal, index)) {
+        index += literal.length;
+        return;
+      }
+    }
+    const number = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/.exec(body.slice(index));
+    if (!number) return malformed();
+    index += number[0].length;
+  };
+
+  parseValue(0);
+  skipWhitespace();
+  if (index !== body.length) malformed();
+}
+
 function parseBody(body: string): RemoteEngineRequestV1 {
+  assertNoDuplicateJsonMembers(body);
   try {
     return validateRequest(JSON.parse(body) as unknown);
   } catch (error) {
@@ -301,9 +486,17 @@ function selectKey(keyring: RemoteEngineKeyring, keyId: string): {
 } {
   validateKey(keyring.current);
   if (keyring.next) validateKey(keyring.next);
+  if (keyring.next?.keyId === keyring.current.keyId) fail("PROTOCOL_KEYRING_INVALID");
   if (keyring.current.keyId === keyId) return { key: keyring.current, keySlot: "current" };
   if (keyring.next?.keyId === keyId) return { key: keyring.next, keySlot: "next" };
   return fail("PROTOCOL_KEY_UNKNOWN");
+}
+
+function validatePolicyValue(value: number, hardMaximum: number): number {
+  if (!Number.isSafeInteger(value) || value <= 0 || value > hardMaximum) {
+    fail("PROTOCOL_POLICY_INVALID");
+  }
+  return value;
 }
 
 export function verifyRemoteEngineRequest(input: {
@@ -317,15 +510,28 @@ export function verifyRemoteEngineRequest(input: {
   maxTtlMs?: number;
   maxFutureSkewMs?: number;
 }): VerifiedRemoteEngineRequest {
-  const version = readHeader(input.headers, HEADER_NAMES.version);
-  const signedMethod = readHeader(input.headers, HEADER_NAMES.method);
-  const signedPath = readHeader(input.headers, HEADER_NAMES.path);
-  const keyId = readHeader(input.headers, HEADER_NAMES.keyId);
-  const timestamp = readHeader(input.headers, HEADER_NAMES.timestamp);
-  const nonce = readHeader(input.headers, HEADER_NAMES.nonce);
-  const audience = readHeader(input.headers, HEADER_NAMES.audience);
-  const claimedBodyHash = readHeader(input.headers, HEADER_NAMES.bodyHash);
-  const claimedSignature = readHeader(input.headers, HEADER_NAMES.signature);
+  assertBodySize(input.body);
+  const headers = collectHeaders(input.headers);
+  const nowMs = (input.now ?? new Date()).getTime();
+  if (!Number.isFinite(nowMs)) fail("PROTOCOL_POLICY_INVALID");
+  const maxFutureSkewMs = validatePolicyValue(
+    input.maxFutureSkewMs ?? REMOTE_ENGINE_MAX_FUTURE_SKEW_MS,
+    REMOTE_ENGINE_MAX_FUTURE_SKEW_MS,
+  );
+  const maxTtlMs = validatePolicyValue(
+    input.maxTtlMs ?? REMOTE_ENGINE_MAX_TTL_MS,
+    REMOTE_ENGINE_MAX_TTL_MS,
+  );
+
+  const version = readHeader(headers, HEADER_NAMES.version);
+  const signedMethod = validateMethod(readHeader(headers, HEADER_NAMES.method));
+  const signedPath = validatePath(readHeader(headers, HEADER_NAMES.path));
+  const keyId = readHeader(headers, HEADER_NAMES.keyId);
+  const timestamp = readHeader(headers, HEADER_NAMES.timestamp);
+  const nonce = readHeader(headers, HEADER_NAMES.nonce);
+  const audience = readHeader(headers, HEADER_NAMES.audience);
+  const claimedBodyHash = readHeader(headers, HEADER_NAMES.bodyHash);
+  const claimedSignature = readHeader(headers, HEADER_NAMES.signature);
 
   if (version !== REMOTE_ENGINE_PROTOCOL_VERSION) fail("PROTOCOL_VERSION_UNSUPPORTED");
   if (!isBoundedString(keyId, MAX_ID_LENGTH, TOKEN)) fail("PROTOCOL_HEADER_MALFORMED");
@@ -335,7 +541,7 @@ export function verifyRemoteEngineRequest(input: {
   if (!SHA256_HEX.test(claimedBodyHash)) fail("PROTOCOL_BODY_HASH_INVALID");
   if (!SHA256_HEX.test(claimedSignature)) fail("PROTOCOL_SIGNATURE_INVALID");
 
-  const method = normalizeMethod(input.method);
+  const method = validateMethod(input.method);
   const path = validatePath(input.path);
   if (signedMethod !== method) fail("PROTOCOL_METHOD_MISMATCH");
   if (signedPath !== path) fail("PROTOCOL_PATH_MISMATCH");
@@ -361,14 +567,8 @@ export function verifyRemoteEngineRequest(input: {
   if (request.audience !== audience) fail("PROTOCOL_AUDIENCE_MISMATCH");
   if (request.issuedAt !== timestamp) fail("PROTOCOL_HEADER_MALFORMED");
 
-  const nowMs = (input.now ?? new Date()).getTime();
   const issuedAtMs = Date.parse(request.issuedAt);
   const expiresAtMs = Date.parse(request.expiresAt);
-  const maxFutureSkewMs = input.maxFutureSkewMs ?? REMOTE_ENGINE_MAX_FUTURE_SKEW_MS;
-  const maxTtlMs = input.maxTtlMs ?? REMOTE_ENGINE_MAX_TTL_MS;
-  if (!Number.isFinite(nowMs) || maxFutureSkewMs < 0 || maxTtlMs <= 0) {
-    fail("PROTOCOL_HEADER_MALFORMED");
-  }
   if (issuedAtMs > nowMs + maxFutureSkewMs) fail("PROTOCOL_ISSUED_AT_FUTURE");
   if (expiresAtMs <= nowMs) fail("PROTOCOL_EXPIRED");
   if (expiresAtMs - issuedAtMs > maxTtlMs) fail("PROTOCOL_TTL_TOO_LONG");

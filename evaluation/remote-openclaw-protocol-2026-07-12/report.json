@@ -4,34 +4,49 @@
   "base": "3b0edfe48c29e603f3156440362fca9304ef4d1a",
   "phase": 1,
   "scope": "pure signed remote engine protocol only",
+  "securityReviewDisposition": "finding set remediated; final commit and remote SHA recorded in handoff",
   "runtimeWiringAdded": false,
   "runtimeChanged": false,
   "remoteDemoReady": false,
   "schemaChanges": 0,
   "dataMutations": 0,
   "environmentChanges": 0,
-  "request": {
-    "version": "v1",
-    "fieldCount": 9,
-    "credentialFields": 0,
-    "maxPromptLength": 12000,
-    "maxToolIntents": 32,
-    "maxToolIntentLength": 128
+  "limits": {
+    "maxBodyUtf8Bytes": 16384,
+    "maxHeaderCount": 32,
+    "maxHeaderAggregateUtf8Bytes": 8192,
+    "maxFutureSkewMs": 60000,
+    "maxTtlMs": 300000,
+    "maxJsonDepth": 64
+  },
+  "canonicalPolicy": {
+    "method": "exact uppercase ASCII token; no normalization",
+    "path": "path-only ASCII unreserved segments; no empty/dot segments, query, fragment, backslash, control, percent encoding, or Unicode",
+    "sharedBySignerAndVerifier": true
   },
   "cryptography": {
     "bodyHash": "SHA-256",
     "signature": "HMAC-SHA256",
-    "signatureComparison": "constant-time",
-    "canonicalFieldCount": 8,
-    "keySlots": ["current", "next"]
+    "signatureComparison": "timingSafeEqual over exact 32-byte digests",
+    "fixedKnownAnswerVector": true,
+    "keySlots": ["current", "next"],
+    "collidingKeyIdsRejected": true
   },
   "stableErrorCodes": [
     "PROTOCOL_HEADER_MISSING",
     "PROTOCOL_HEADER_MALFORMED",
+    "PROTOCOL_HEADER_DUPLICATE",
+    "PROTOCOL_HEADERS_TOO_LARGE",
     "PROTOCOL_VERSION_UNSUPPORTED",
     "PROTOCOL_KEY_UNKNOWN",
+    "PROTOCOL_KEYRING_INVALID",
+    "PROTOCOL_POLICY_INVALID",
     "PROTOCOL_BODY_MALFORMED",
+    "PROTOCOL_BODY_DUPLICATE_MEMBER",
+    "PROTOCOL_BODY_TOO_LARGE",
     "PROTOCOL_BODY_TAMPERED",
+    "PROTOCOL_METHOD_INVALID",
+    "PROTOCOL_PATH_INVALID",
     "PROTOCOL_METHOD_MISMATCH",
     "PROTOCOL_PATH_MISMATCH",
     "PROTOCOL_AUDIENCE_MISMATCH",
@@ -43,36 +58,58 @@
   ],
   "tdd": {
     "red": {
+      "productionParentCommit": "97b30076779d798544353f713afe911804c8a0d5",
+      "testOnlyCommit": "b65e70de72d73cd4d314b65f18bc91e732c3822f",
+      "testOnlyTree": "f7d6e7dfa267682a06ebfcc87adee9f07f00c12d",
       "command": "npm.cmd test -- tests/remote-engine-protocol.test.ts",
       "exitCode": 1,
-      "failedSuites": 1,
-      "reason": "protocol production module absent"
+      "passed": 22,
+      "failed": 32,
+      "total": 54,
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/red-security-review.stdout.log",
+      "rawLogGitBlob": "7abf3c09f5362bdd73090f4349e42e08d70df1a3",
+      "provenance": "evaluation/remote-openclaw-protocol-2026-07-12/red-security-review.provenance.json"
     },
     "green": {
       "command": "npm.cmd test -- tests/remote-engine-protocol.test.ts",
       "files": 1,
-      "passed": 20,
-      "failed": 0
+      "passed": 54,
+      "failed": 0,
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/green-security-review.stdout.log",
+      "rawLogGitBlob": "24db64ea8e95f7242f0c21ab6bfaaa4fcd6f1913"
     }
   },
   "verification": {
     "relatedTests": {
       "command": "npm.cmd test -- tests/engine-adapter.test.ts tests/remote-engine-protocol.test.ts",
       "files": 2,
-      "passed": 29,
-      "failed": 0
+      "passed": 63,
+      "failed": 0,
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/related-engine-tests.stdout.log",
+      "rawLogGitBlob": "5efea9dab52d0eb1743cb55fc0804f9a20544dba"
     },
     "typecheck": {
       "command": "npm.cmd run typecheck",
-      "status": "passed"
+      "status": "passed",
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/typecheck-security-review.stdout.log",
+      "rawLogGitBlob": "b60052d6022e1d3c1b1ddc772e194ff4e4de384b"
     },
     "build27": {
       "command": "npm.cmd run build",
       "status": "passed",
-      "staticPages": 27
+      "staticPages": 27,
+      "sequentialRuns": 1,
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/build-security-review.stdout.log",
+      "rawLogGitBlob": "bae16c593e167c9c6772001023f635ce29c3539b"
     },
     "diffCheck": "passed",
+    "runtimeWiringSearchMatches": 0,
     "fullSuite": "not run"
+  },
+  "freshReReview": {
+    "reportedFindingBypassesRemaining": 0,
+    "nonceReplayClaimed": false,
+    "remoteDemoReadyClaimed": false
   },
   "openRisks": [
     "durable atomic nonce replay storage is required before runtime dispatch",

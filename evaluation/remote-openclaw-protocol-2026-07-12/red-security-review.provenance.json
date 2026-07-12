@@ -1,0 +1,18 @@
+{
+  "purpose": "auditable RED evidence for the fresh security review finding set",
+  "branch": "feat/remote-openclaw-protocol",
+  "productionParentCommit": "97b30076779d798544353f713afe911804c8a0d5",
+  "testOnlyCommit": "b65e70de72d73cd4d314b65f18bc91e732c3822f",
+  "testOnlyTree": "f7d6e7dfa267682a06ebfcc87adee9f07f00c12d",
+  "testOnlyFilesChanged": [
+    "tests/remote-engine-protocol.test.ts"
+  ],
+  "command": "npm.cmd test -- tests/remote-engine-protocol.test.ts",
+  "exitCode": 1,
+  "testFilesFailed": 1,
+  "testsPassed": 22,
+  "testsFailed": 32,
+  "testsTotal": 54,
+  "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/red-security-review.stdout.log",
+  "rawLogGitBlob": "7abf3c09f5362bdd73090f4349e42e08d70df1a3"
+}
