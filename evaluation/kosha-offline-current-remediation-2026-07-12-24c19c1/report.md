@@ -4,7 +4,7 @@
 - Base: `24c19c17cc8c932a333fdae8785426218e57ae15`
 - Test-first RED: `7730b9d033fadd1cd4bef57dcd2e3be8ca596055`
 - Product: `c62162df2368234146c353d713fc3d1d26eff88b`
-- Evidence: `SELF` (bound to the evidence commit in the follow-up provenance commit)
+- Evidence: `6eaa8308dcf20b996e60fb17eae8428ab60c9dd4`
 - Independent review: `pending`
 
 ## Remediation
