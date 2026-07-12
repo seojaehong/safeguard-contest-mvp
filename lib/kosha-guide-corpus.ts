@@ -103,6 +103,7 @@ export type KoshaGuideCorpusLookup = {
   env?: Record<string, string | undefined>;
   testHooks?: {
     afterPathChecked?: (path: string) => Promise<void> | void;
+    afterStreamChunk?: (path: string, bytesRead: number) => Promise<void> | void;
   };
 };
 
@@ -396,8 +397,14 @@ async function readBoundedJsonLines<T>(rootDir: string, requestedPath: string, m
       rows.push(value);
     };
     let pending = Buffer.alloc(0);
+    let bytesRead = 0;
     for await (const chunk of stream) {
       const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      bytesRead += bytes.length;
+      const currentStats = await file.handle.stat();
+      if (bytesRead > maxBytes || currentStats.size > maxBytes) {
+        throw new KoshaCorpusError(`limit:file:${basename(requestedPath)}`);
+      }
       hash.update(bytes);
       pending = pending.length ? Buffer.concat([pending, bytes]) : bytes;
       let newline = pending.indexOf(10);
@@ -407,6 +414,9 @@ async function readBoundedJsonLines<T>(rootDir: string, requestedPath: string, m
         newline = pending.indexOf(10);
       }
       if (pending.length > maxLineBytes) throw new KoshaCorpusError(`limit:record:${basename(requestedPath)}`);
+      await hook?.afterStreamChunk?.(file.path, bytesRead);
+      const postHookStats = await file.handle.stat();
+      if (postHookStats.size > maxBytes) throw new KoshaCorpusError(`limit:file:${basename(requestedPath)}`);
     }
     parseLine(pending);
     return { rows, sha256: hash.digest("hex") };

@@ -6,13 +6,13 @@ import {
   type KoshaGuideCorpusHit
 } from "@/lib/kosha-guide-corpus";
 import {
-  mergeCatalogItems,
   resolveSafetyReferenceVectorSearchState,
   searchSafetyReferences as searchRemoteSafetyReferences,
   type SafetyReferenceItem,
   type SafetyReferenceSearchOptions,
   type SafetyReferenceSearchResult
 } from "@/lib/safety-reference-catalog";
+import { mergeLocalAndRemoteSafetyReferenceResults } from "@/lib/safety-reference-policy";
 
 function isKoshaTechnicalItemType(itemType: string): boolean {
   return itemType === "technical-guideline" || itemType === "technical-support-regulation";
@@ -67,6 +67,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
     : [];
   const localItems = localHits
     .filter((item) => !options.evidenceRole || (options.evidenceRole === "direct" ? item.directEligible : !item.directEligible))
+    .filter((item) => !options.itemType || item.record.itemType === options.itemType)
     .map(buildLocalItem);
   const remote = await searchRemoteSafetyReferences(options);
   if (!remote.configured) {
@@ -96,11 +97,16 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
     return { ...remote, message: `${remote.message} KOSHA 오프라인 스냅샷 게이트 차단: ${localCorpus.failures.join(", ")}` };
   }
   if (!localItems.length) return remote;
-  const items = mergeCatalogItems(localItems, remote.items, limit);
+  const merged = mergeLocalAndRemoteSafetyReferenceResults({
+    localItems,
+    remoteItems: remote.items,
+    limit
+  });
   return {
     ...remote,
-    count: items.length,
-    items,
+    count: merged.items.length,
+    items: merged.items,
+    retrievalMode: merged.retrievalMode,
     message: `KOSHA 오프라인 보조근거와 ${remote.message}`
   };
 }

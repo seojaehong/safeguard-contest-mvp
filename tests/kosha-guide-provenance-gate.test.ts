@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import { loadKoshaGuideCorpus, resetKoshaGuideCorpusCacheForTests } from "@/lib/kosha-guide-corpus";
@@ -5,7 +7,7 @@ import { loadKoshaGuideCorpus, resetKoshaGuideCorpusCacheForTests } from "@/lib/
 const ACTUAL_ROOT = "C:/Users/iceam/dev/safeclaw-local-artifacts/kosha-corpus-body-recovery-2026-07-12-v3";
 
 describe("KOSHA v3 provenance gate", () => {
-  it("records the actual recovery generator contract instead of accepting invented camelCase snapshots", async () => {
+  it.skipIf(!existsSync(ACTUAL_ROOT))("records the actual recovery generator contract instead of accepting invented camelCase snapshots", async () => {
     resetKoshaGuideCorpusCacheForTests();
     const loaded = await loadKoshaGuideCorpus({ rootDir: ACTUAL_ROOT });
     expect(loaded.status === "blocked" ? loaded.failures.join(", ") : loaded.status).toBe("ready");

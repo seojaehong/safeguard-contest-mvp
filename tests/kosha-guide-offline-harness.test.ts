@@ -21,6 +21,53 @@ const ACTUAL_ROOT = "C:/Users/iceam/dev/safeclaw-local-artifacts/kosha-corpus-bo
 const tempDirs: string[] = [];
 let actualSourceCache: ReturnType<typeof readActualSource> | null = null;
 
+function readSyntheticSource(): { current: JsonRecord; manifest: JsonRecord; items: JsonRecord[]; chunks: JsonRecord[]; failures: JsonRecord[] } {
+  const body = "작업 전 작업발판과 환기 상태를 확인한다.";
+  const item: JsonRecord = {
+    schema_version: "safeclaw-kosha-body-corpus/v2",
+    item_id: "kosha-synthetic-guideline",
+    item_type: "technical-guideline",
+    title: "합성 작업 안전 기준",
+    category: "건설안전",
+    body,
+    normalized_text_sha256: sha256(body),
+    state: "stale",
+    stable_key: "kosha-synthetic-guideline-stable",
+    version_key: "K-SYN-1",
+    source_key: "kosha-synthetic",
+    extraction_status: "success"
+  };
+  const chunkText = "작업 전 작업발판과 환기 상태를 확인한다.";
+  const chunk: JsonRecord = {
+    schema_version: "safeclaw-kosha-body-corpus/v2",
+    chunk_id: "kosha-synthetic-guideline:p1",
+    chunk_sha256: sha256(chunkText),
+    item_id: "kosha-synthetic-guideline",
+    page_start: 1,
+    page_end: 1,
+    text: chunkText
+  };
+  const identity = "1".repeat(64);
+  const policy = "2".repeat(64);
+  return {
+    current: {
+      schema_version: "safeclaw-kosha-body-current/v1",
+      generation_policy_sha256: policy,
+      reproducibility_hash: sha256("synthetic-v3"),
+      snapshot_id: "synthetic-v3",
+      snapshot_path: "snapshots/synthetic-v3",
+      source_identity_sha256: identity
+    },
+    manifest: {
+      schema_version: "safeclaw-kosha-body-corpus/v2",
+      source_identity: { identity_sha256: identity }
+    },
+    items: [item],
+    chunks: [chunk],
+    failures: []
+  };
+}
+
 function asRecord(value: unknown): JsonRecord {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Expected JSON object");
   return value as JsonRecord;
@@ -55,7 +102,7 @@ function readActualSource(): { current: JsonRecord; manifest: JsonRecord; items:
   return actualSourceCache;
 }
 
-function writeSnapshot(rootDir: string, snapshotId: string, source = readActualSource(), overrides: {
+function writeSnapshot(rootDir: string, snapshotId: string, source = readSyntheticSource(), overrides: {
   items?: JsonRecord[];
   chunks?: JsonRecord[];
   failures?: JsonRecord[];
@@ -115,7 +162,7 @@ function writeSnapshot(rootDir: string, snapshotId: string, source = readActualS
 function writeFixture(overrides: Parameters<typeof writeSnapshot>[3] = {}): string {
   const rootDir = mkdtempSync(join(tmpdir(), "kosha-v3-fixture-"));
   tempDirs.push(rootDir);
-  writeSnapshot(rootDir, "fixture-v3", readActualSource(), overrides);
+  writeSnapshot(rootDir, "fixture-v3", readSyntheticSource(), overrides);
   return rootDir;
 }
 
@@ -199,7 +246,7 @@ describe("KOSHA v3 offline harness", () => {
   });
 
   it("enforces record bounds and blocks duplicate or orphan memberships", async () => {
-    const source = readActualSource();
+    const source = readSyntheticSource();
     const firstItem = source.items[0];
     const firstChunk = source.chunks[0];
     if (!firstItem || !firstChunk) throw new Error("Actual v3 fixture source is incomplete");
@@ -263,7 +310,7 @@ describe("KOSHA v3 offline harness", () => {
       expect(merged.ok).toBe(true);
       expect(merged.items.map((item) => item.id)).toContain("remote-ranked-item");
       expect(merged.items.some((item) => item.kosha_guide !== undefined)).toBe(true);
-      expect(merged.retrievalMode).toBe("ranked-rpc");
+      expect(merged.retrievalMode).toBe("hybrid-local-supabase");
     } finally {
       if (oldUrl === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldUrl;
       if (oldKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY; else process.env.SUPABASE_SERVICE_ROLE_KEY = oldKey;
