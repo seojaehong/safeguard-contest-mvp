@@ -21,6 +21,7 @@
     "suiteRun1": { "passed": 44, "failed": 0, "elapsedSeconds": 6.281 },
     "suiteRun2": { "passed": 44, "failed": 0, "elapsedSeconds": 6.503 },
     "focusedSchemaPolicy": { "passed": 4, "failed": 0 },
+    "productSurfaceRegression": { "testFiles": 6, "passed": 87, "failed": 0 },
     "diffCheck": "pass"
   },
   "externalSnapshot": {

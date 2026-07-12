@@ -19,6 +19,7 @@ Final independent review: `SPEC PASS / CODE QUALITY PASS`, P0-P3 findings `0` af
 - Python recovery/catalog suite run 1: `44/44` passed in `6.281s`.
 - Python recovery/catalog suite run 2: `44/44` passed in `6.503s`.
 - Focused schema and policy tests: `4/4` passed.
+- Product-surface regression after integration: generation progress, 10-photo request lifecycle, vision analysis, share client, and share authority routes passed `6 files / 87 tests`.
 - `git diff --check 84c04cd..1ecd686`: passed.
 - KOSHA target paths: clean after integration.
 - Preserved user screenshots: `16/16`, SHA-256 mismatch count `0`.
@@ -32,4 +33,3 @@ Final independent review: `SPEC PASS / CODE QUALITY PASS`, P0-P3 findings `0` af
 - `launch_ready=false` remains intentional because the preserved snapshot predates the final member-count policy and retains one OCR boundary.
 
 This integration makes the full-body recovery pipeline available in the authoritative branch. It does not yet enable the rejected offline search harness; local KOSHA retrieval remains gated until its expanded product-contract review passes.
-
