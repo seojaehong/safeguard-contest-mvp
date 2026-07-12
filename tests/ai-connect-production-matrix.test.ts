@@ -193,7 +193,7 @@ type TypographyMetric = {
 const roleChecks: readonly { selectors: readonly string[]; expected: TypographyMetric }[] = [
   {
     selectors: [".ai-connect-command > p"],
-    expected: { firstFont: "Pretendard", size: "15px", weight: "500", lineHeight: 24, tracking: 0 },
+    expected: { firstFont: "Noto Sans KR", size: "15px", weight: "500", lineHeight: 24, tracking: 0 },
   },
   {
     selectors: [
@@ -229,7 +229,7 @@ const roleChecks: readonly { selectors: readonly string[]; expected: TypographyM
       ".ai-connect-sif-preflight strong",
       ".ai-connect-token-items article strong",
     ],
-    expected: { firstFont: "Pretendard", size: "20px", weight: "700", lineHeight: 27, tracking: -0.3 },
+    expected: { firstFont: "Noto Sans KR", size: "20px", weight: "700", lineHeight: 27, tracking: -0.3 },
   },
   {
     selectors: [
@@ -250,7 +250,7 @@ const roleChecks: readonly { selectors: readonly string[]; expected: TypographyM
       ".ai-connect-sif-preflight p",
       ".ai-connect-sif-preflight summary",
     ],
-    expected: { firstFont: "Pretendard", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 },
+    expected: { firstFont: "Noto Sans KR", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 },
   },
   {
     selectors: [".ai-connect-meta dd"],
@@ -258,7 +258,7 @@ const roleChecks: readonly { selectors: readonly string[]; expected: TypographyM
   },
   {
     selectors: [".ai-connect-sif-metrics dd"],
-    expected: { firstFont: "Pretendard", size: "13px", weight: "500", lineHeight: 20, tracking: 0 },
+    expected: { firstFont: "Noto Sans KR", size: "13px", weight: "500", lineHeight: 20, tracking: 0 },
   },
   {
     selectors: [
@@ -273,7 +273,7 @@ const roleChecks: readonly { selectors: readonly string[]; expected: TypographyM
       ".ai-connect-sif-preflight li > span",
       ".ai-connect-token-items article > span",
     ],
-    expected: { firstFont: "Pretendard", size: "12px", weight: "600", lineHeight: 18, tracking: 0 },
+    expected: { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 },
   },
   {
     selectors: [
@@ -284,7 +284,7 @@ const roleChecks: readonly { selectors: readonly string[]; expected: TypographyM
       ".ai-connect-token-items button",
       ".ai-connect-sif-packet-actions a",
     ],
-    expected: { firstFont: "Pretendard", size: "14px", weight: "700", lineHeight: 20, tracking: 0 },
+    expected: { firstFont: "Noto Sans KR", size: "14px", weight: "700", lineHeight: 20, tracking: 0 },
   },
 ];
 
@@ -523,7 +523,7 @@ productionMatrix("AI connect production matrix", () => {
         await login.waitFor({ state: "visible" });
         expect(await login.getAttribute("href")).toBe("/login?next=/settings/ai-connect");
         await expectRole(page, ".ai-connect-empty .button", {
-          firstFont: "Pretendard", size: "14px", weight: "700", lineHeight: 20, tracking: 0,
+          firstFont: "Noto Sans KR", size: "14px", weight: "700", lineHeight: 20, tracking: 0,
         });
         await expectVisibleControls(page, ".ai-connect-empty a");
         expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
