@@ -53,7 +53,7 @@ describe("workspace input CSS contract", () => {
       ["box-sizing: border-box"],
       ["display: block", "min-height: 152px", "padding: 22px 24px", "overflow-y: auto", "line-height: 1.76", "resize: vertical"],
       ["min-height: 124px", "padding: 18px", "font-size: var(--text-body)", "line-height: 1.74"],
-      ["font-size: var(--text-body)", "font-weight: 500", "line-height: var(--leading-body)", "letter-spacing: var(--tracking-body)"],
+      ["font-size: var(--text-control)", "font-weight: 500", "line-height: 1.74", "letter-spacing: var(--tracking-body)"],
       ["min-height: 116px", "padding: 14px 15px", "line-height: 1.7"],
       ["min-height: 108px", "padding: 14px 12px", "line-height: 1.7"],
       ["min-height: 142px", "padding: 16px", "font-size: var(--text-body)", "line-height: var(--leading-body)", "font-weight: 500", "letter-spacing: var(--tracking-body)"],
