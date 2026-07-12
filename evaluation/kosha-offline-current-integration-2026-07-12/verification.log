@@ -1,0 +1,921 @@
+KOSHA CURRENT INTEGRATION VERIFICATION
+
+===== NEW_REGRESSION1 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-supporting-row-relevance.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  12:19:52
+   Duration  2.58s (transform 965ms, setup 0ms, import 1.81s, tests 29ms, environment 0ms)
+
+NEW_REGRESSION1_EXIT_CODE=0
+===== BOUNDED26 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  2 passed (2)
+      Tests  26 passed (26)
+   Start at  12:19:57
+   Duration  8.27s (transform 1.15s, setup 0ms, import 2.69s, tests 4.06s, environment 0ms)
+
+BOUNDED26_EXIT_CODE=0
+===== ORIGINAL8 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  12:20:08
+   Duration  8.07s (transform 778ms, setup 0ms, import 1.49s, tests 5.26s, environment 0ms)
+
+ORIGINAL8_EXIT_CODE=0
+===== EXPANDED113 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/safety-reference-hybrid.test.ts tests/safety-reference-relevance.test.ts tests/commercial-harness.test.ts tests/generation-evidence-operation-routes.test.ts tests/ontology-operation-memory.test.ts tests/workpack-remediate-route.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  9 passed (9)
+      Tests  113 passed (113)
+   Start at  12:20:19
+   Duration  20.67s (transform 1.37s, setup 0ms, import 3.70s, tests 10.42s, environment 1ms)
+
+EXPANDED113_EXIT_CODE=0
+===== CORPUS34 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  1 passed (1)
+      Tests  34 passed (34)
+   Start at  12:20:42
+   Duration  801ms (transform 148ms, setup 0ms, import 192ms, tests 67ms, environment 0ms)
+
+CORPUS34_EXIT_CODE=0
+===== IMPACT41 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/generation-trace-privacy.test.ts tests/photo-vision-analysis.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  2 passed (2)
+      Tests  41 passed (41)
+   Start at  12:20:45
+   Duration  6.55s (transform 1.40s, setup 0ms, import 2.45s, tests 2.48s, environment 0ms)
+
+IMPACT41_EXIT_CODE=0
+===== CURRENT_GENERATION_PHOTO_SHARE_ONTOLOGY_QUALITY_MCP =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/ask-generation-evidence-routes.test.ts tests/generation-evidence-operation-routes.test.ts tests/generation-evidence.test.ts tests/generation-trace-privacy.test.ts tests/workpack-generation-evidence-route.test.ts tests/workspace-generation-progress.test.ts tests/photo-vision-analysis.test.ts tests/photo-vision-analysis-route.test.ts tests/workflow-share-panel-behavior.test.ts tests/workflow-share-client.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-share-authority.test.ts tests/frontend-shared-surfaces.test.ts tests/ontology-visualization.test.ts tests/ontology-seed.test.ts tests/ontology-schema.test.ts tests/ontology-query.test.ts tests/ontology-qa-review.test.ts tests/ontology-operation-memory.test.ts tests/ontology-knowledge-tool.test.ts tests/ontology-graph-store.test.ts tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/live-harness-quality-probe.test.ts tests/mcp-tools.test.ts tests/mcp-token-service.test.ts tests/mcp-auth.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+ ❯ tests/live-harness-quality-probe.test.ts (0 test)
+ ❯ tests/frontend-shared-surfaces.test.ts (14 tests | 12 failed) 86ms
+     × uses a semantic title and the shared special-state hook in app/not-found.tsx 7ms
+     × uses a semantic title and the shared special-state hook in app/error.tsx 2ms
+     × uses a semantic title and the shared special-state hook in app/global-error.tsx 1ms
+     × uses a semantic title and the shared special-state hook in app/workspace/loading.tsx 1ms
+     × uses a named loading spinner instead of inline numeric styles 5ms
+     × exposes stable module shell hooks 4ms
+     × exposes every introduced landing hook 4ms
+     × defines the shared special state with canonical panel geometry 12ms
+     × defines a circular named loading spinner on the canonical icon size 1ms
+     × keeps shell titles, descriptions, actions, and cards on canonical tuples 11ms
+     × keeps effective landing descriptions, actions, and cards canonical 15ms
+     × keeps document variant card spacing and descriptions canonical through scoped rules 15ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/live-harness-quality-probe.test.ts [ tests/live-harness-quality-probe.test.ts ]
+SyntaxError: Invalid or unexpected token
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > shared framework states > uses a semantic title and the shared special-state hook in app/not-found.tsx
+AssertionError: expected 'export default function NotFound() {\…' to match /<h[12][^>]*className="special-state-t…/
+
+- Expected:
+/<h[12][^>]*className="special-state-title"/
+
++ Received:
+"export default function NotFound() {
+  return (
+    <main className=\"container grid\">
+      <section className=\"card list\" data-audit-boundary=\"not-found\">
+        <h1 className=\"h2\">찾을 수 없는 문서</h1>
+        <div className=\"muted\">현재 열 수 없는 문서입니다. 검색 화면에서 근거를 다시 선택해 주세요.</div>
+        <a className=\"button\" href=\"/search\">검색으로 돌아가기</a>
+      </section>
+    </main>
+  );
+}
+"
+
+ ❯ tests/frontend-shared-surfaces.test.ts:92:20
+     90|     const source = read(relativePath);
+     91|
+     92|     expect(source).toMatch(/<h[12][^>]*className="special-state-title"…
+       |                    ^
+     93|     expect(source).toContain('className="card list special-state"');
+     94|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > shared framework states > uses a semantic title and the shared special-state hook in app/error.tsx
+AssertionError: expected '"use client";\r\n\r\nimport { useEffe…' to match /<h[12][^>]*className="special-state-t…/
+
+- Expected:
+/<h[12][^>]*className="special-state-title"/
+
++ Received:
+"\"use client\";
+
+import { useEffect } from \"react\";
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    if (document.querySelector('[data-safeclaw-audit-enabled=\"true\"]')
+      && new URLSearchParams(window.location.search).get(\"__auditBoundary\") === \"error\") {
+      console.error(\"SafeClaw deterministic frontend audit error boundary probe\");
+    }
+  }, []);
+
+  return (
+    <main className=\"container grid\">
+      <section className=\"card list\" data-audit-boundary=\"error\">
+        <h1 className=\"h2\">일시적인 오류가 발생했습니다</h1>
+        <div className=\"muted\">
+          요청을 처리하는 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.
+          문제가 계속되면 새로고침하거나 처음 화면에서 다시 시작해 주세요.
+        </div>
+        {error.digest ? <div className=\"muted\">오류 코드: {error.digest}</div> : null}
+        <button className=\"button\" type=\"button\" onClick={() => reset()}>
+          다시 시도
+        </button>
+      </section>
+    </main>
+  );
+}
+"
+
+ ❯ tests/frontend-shared-surfaces.test.ts:92:20
+     90|     const source = read(relativePath);
+     91|
+     92|     expect(source).toMatch(/<h[12][^>]*className="special-state-title"…
+       |                    ^
+     93|     expect(source).toContain('className="card list special-state"');
+     94|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > shared framework states > uses a semantic title and the shared special-state hook in app/global-error.tsx
+AssertionError: expected '"use client";\r\n\r\nexport default f…' to match /<h[12][^>]*className="special-state-t…/
+
+- Expected:
+/<h[12][^>]*className="special-state-title"/
+
++ Received:
+"\"use client\";
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  return (
+    <html lang=\"ko\">
+      <body>
+        <main className=\"container grid\">
+          <section className=\"card list\" data-audit-boundary=\"global-error\">
+            <h1 className=\"h2\">서비스에 일시적인 문제가 발생했습니다</h1>
+            <div className=\"muted\">
+              화면을 표시하는 중 오류가 발생했습니다. 아래 버튼으로 다시 시도해 주세요.
+            </div>
+            {error.digest ? <div className=\"muted\">오류 코드: {error.digest}</div> : null}
+            <button className=\"button\" type=\"button\" onClick={() => reset()}>
+              다시 시도
+            </button>
+          </section>
+        </main>
+      </body>
+    </html>
+  );
+}
+"
+
+ ❯ tests/frontend-shared-surfaces.test.ts:92:20
+     90|     const source = read(relativePath);
+     91|
+     92|     expect(source).toMatch(/<h[12][^>]*className="special-state-title"…
+       |                    ^
+     93|     expect(source).toContain('className="card list special-state"');
+     94|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > shared framework states > uses a semantic title and the shared special-state hook in app/workspace/loading.tsx
+AssertionError: expected 'export default function Loading() {\r…' to match /<h[12][^>]*className="special-state-t…/
+
+- Expected:
+/<h[12][^>]*className="special-state-title"/
+
++ Received:
+"export default function Loading() {
+  return (
+    <main className=\"container grid\">
+      <section className=\"card list\">
+        <div
+          aria-hidden
+          style={{
+            width: 22,
+            height: 22,
+            border: \"3px solid var(--line-strong)\",
+            borderTopColor: \"var(--accent)\",
+            borderRadius: 999,
+            animation: \"spin 0.8s linear infinite\",
+          }}
+        />
+        <div className=\"h2\">작업 화면을 준비하고 있습니다</div>
+        <div className=\"muted\">
+          현장 정보와 문서팩 생성 환경을 불러오는 중입니다. AI 문서 생성은 최대 수십 초가 걸릴 수
+          있습니다. 잠시만 기다려 주세요.
+        </div>
+      </section>
+    </main>
+  );
+}
+"
+
+ ❯ tests/frontend-shared-surfaces.test.ts:92:20
+     90|     const source = read(relativePath);
+     91|
+     92|     expect(source).toMatch(/<h[12][^>]*className="special-state-title"…
+       |                    ^
+     93|     expect(source).toContain('className="card list special-state"');
+     94|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > shared framework states > uses a named loading spinner instead of inline numeric styles
+AssertionError: expected 'export default function Loading() {\r…' to contain 'className="loading-spinner"'
+
+- Expected
++ Received
+
+- className="loading-spinner"
++ export default function Loading() {
++   return (
++     <main className="container grid">
++       <section className="card list">
++         <div
++           aria-hidden
++           style={{
++             width: 22,
++             height: 22,
++             border: "3px solid var(--line-strong)",
++             borderTopColor: "var(--accent)",
++             borderRadius: 999,
++             animation: "spin 0.8s linear infinite",
++           }}
++         />
++         <div className="h2">작업 화면을 준비하고 있습니다</div>
++         <div className="muted">
++           현장 정보와 문서팩 생성 환경을 불러오는 중입니다. AI 문서 생성은 최대 수십 초가 걸릴 수
++           있습니다. 잠시만 기다려 주세요.
++         </div>
++       </section>
++     </main>
++   );
++ }
++
+
+ ❯ tests/frontend-shared-surfaces.test.ts:99:20
+     97|     const source = read("app/workspace/loading.tsx");
+     98|
+     99|     expect(source).toContain('className="loading-spinner"');
+       |                    ^
+    100|     expect(source).not.toMatch(/style=\{\{/);
+    101|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > shared shell hooks and accessibility > exposes stable module shell hooks
+AssertionError: expected '"use client";\r\n\r\nimport Link from…' to contain 'safeclaw-module-header'
+
+- Expected
++ Received
+
+- safeclaw-module-header
++ "use client";
++
++ import Link from "next/link";
++ import type { Route } from "next";
++ import { useEffect, useState, type ReactNode } from "react";
++ import { getModuleNavModel } from "@/lib/module-navigation";
++
++ type ModuleStatus = "live" | "partial" | "planned";
++ type ModuleTheme = "day" | "night";
++
++ const statusLabel: Record<ModuleStatus, string> = {
++   live: "바로 사용",
++   partial: "연결 확인",
++   planned: "설정 필요"
++ };
++
++ type SafeClawModuleShellProps = {
++   eyebrow: string;
++   title: string;
++   description: string;
++   status: ModuleStatus;
++   mappedTo: string;
++   children: ReactNode;
++   actions?: ReactNode;
++   activeHref?: string;
++   variant?: "default" | "document";
++ };
++
++ type PageDecisionHeaderProps = Pick<
++   SafeClawModuleShellProps,
++   "eyebrow" | "title" | "description" | "mappedTo" | "actions"
++ > & {
++   command: { href: string; label: string };
++ };
++
++ function PageDecisionHeader({
++   eyebrow,
++   title,
++   description,
++   mappedTo,
++   actions,
++   command
++ }: PageDecisionHeaderProps) {
++   return (
++     <header className="safeclaw-page-decision-header" data-testid="page-decision-header">
++       <div className="safeclaw-page-decision-copy">
++         <span className="safeclaw-module-eyebrow">{eyebrow}</span>
++         <h1>{title}</h1>
++         <p>{description}</p>
++       </div>
++       <aside className="safeclaw-page-decision-action" aria-label="현재 모듈 결정">
++         <div>
++           <span>업무 범위</span>
++           <strong>{mappedTo}</strong>
++         </div>
++         <div className="safeclaw-module-principal-command" data-principal-command>
++           {actions ?? <Link href={command.href as Route}>{command.label}</Link>}
++         </div>
++       </aside>
++     </header>
++   );
++ }
++
++ export function SafeClawModuleShell({
++   eyebrow,
++   title,
++   description,
++   status,
++   mappedTo,
++   children,
++   actions,
++   activeHref,
++   variant = "document"
++ }: SafeClawModuleShellProps) {
++   const navModel = getModuleNavModel(activeHref);
++   const [theme, setTheme] = useState<ModuleTheme>("day");
++   const [mobileNavOpen, setMobileNavOpen] = useState(false);
++   const [isReady, setIsReady] = useState(false);
++
++   useEffect(() => {
++     const queryTheme = new URLSearchParams(window.location.search).get("theme");
++     const savedTheme = window.localStorage.getItem("safeclaw.moduleTheme");
++     const nextTheme = queryTheme === "night" || queryTheme === "day"
++       ? queryTheme
++       : savedTheme === "night"
++         ? "night"
++         : "day";
++     setTheme(nextTheme);
++     setIsReady(true);
++   }, []);
++
++   function updateTheme(nextTheme: ModuleTheme) {
++     setTheme(nextTheme);
++     window.localStorage.setItem("safeclaw.moduleTheme", nextTheme);
++     const url = new URL(window.location.href);
++     url.searchParams.set("theme", nextTheme);
++     window.history.replaceState(window.history.state, "", url);
++   }
++
++   return (
++     <div
++       className={`safeclaw-module-shell module-variant-${variant}`}
++       data-theme={theme}
++       data-ready={isReady}
++     >
++       <a className="safeclaw-skip-link" href="#safeclaw-module-main">
++         본문으로 건너뛰기
++       </a>
++       <aside key={`module-rail-${theme}`} className="safeclaw-module-rail" aria-label="SafeClaw 제품 메뉴">
++         <div className="safeclaw-module-rail-head">
++           <Link href="/" className="safeclaw-module-brand" aria-label="SafeClaw 홈">
++             {/* eslint-disable-next-line @next/next/no-img-element */}
++             <img src="/brand/ClawMark.svg" alt="" width={28} height={28} />
++             <strong>SafeClaw</strong>
++           </Link>
++           <button
++             type="button"
++             className="safeclaw-module-menu-button safeclaw-module-chrome-button"
++             aria-controls="safeclaw-module-navigation"
++             aria-expanded={mobileNavOpen}
++             onClick={() => setMobileNavOpen((isOpen) => !isOpen)}
++           >
++             메뉴
++           </button>
++         </div>
++         <p>현장 안전 문서팩</p>
++         <nav
++           id="safeclaw-module-navigation"
++           className={mobileNavOpen ? "open" : ""}
++           aria-label="SafeClaw 운영 메뉴"
++         >
++           <section className="safeclaw-module-primary-nav">
++             <h2>주요 메뉴</h2>
++             {navModel.primaryItems.map((item) => (
++               <Link
++                 key={item.href}
++                 href={item.href as Route}
++                 className={item.isActive ? "active" : ""}
++                 aria-current={item.isActive ? "page" : undefined}
++               >
++                 <span>{item.code}</span>
++                 <strong>{item.label}</strong>
++                 <small>{item.hint}</small>
++               </Link>
++             ))}
++           </section>
++           {navModel.secondaryItems.length ? (
++             <section className="safeclaw-module-secondary-nav">
++               <h2>{navModel.activeSection.label} 관련</h2>
++               {navModel.secondaryItems.map((item) => (
++                 <Link
++                   key={item.href}
++                   href={item.href as Route}
++                   className={item.isActive ? "active" : ""}
++                   aria-current={item.isActive ? "page" : undefined}
++                 >
++                   <span>{item.code}</span>
++                   <strong>{item.label}</strong>
++                 </Link>
++               ))}
++             </section>
++           ) : null}
++         </nav>
++       </aside>
++
++       <main id="safeclaw-module-main" className="safeclaw-module-main" tabIndex={-1}>
++         <header key={`module-nav-${theme}`} className="safeclaw-module-nav">
++           <span><i /> SITE 기본 현장</span>
++           <span>API <b>Law.go</b> · <b>KOSHA</b> · 기상청</span>
++           <span className={`safeclaw-module-status ${status}`}>
++             {status === "live" ? <i className="sc-blink sc-blink--good" aria-hidden="true" /> : null}
++             {statusLabel[status]}
++           </span>
++           <div className="safeclaw-module-theme-toggle" role="group" aria-label="화면 테마">
++             <button
++               type="button"
++               className={`safeclaw-module-chrome-button${theme === "day" ? " active" : ""}`}
++               aria-pressed={theme === "day"}
++               onClick={() => updateTheme("day")}
++             >
++               Day
++             </button>
++             <button
++               type="button"
++               className={`safeclaw-module-chrome-button${theme === "night" ? " active" : ""}`}
++               aria-pressed={theme === "night"}
++               onClick={() => updateTheme("night")}
++             >
++               Night
++             </button>
++           </div>
++         </header>
++
++         <PageDecisionHeader
++           eyebrow={eyebrow}
++           title={title}
++           description={description}
++           mappedTo={mappedTo}
++           actions={actions}
++           command={navModel.principalCommand}
++         />
++
++         <div className="safeclaw-module-content">{children}</div>
++       </main>
++     </div>
++   );
++ }
++
+
+ ❯ tests/frontend-shared-surfaces.test.ts:114:22
+    112|       "safeclaw-module-content",
+    113|     ]) {
+    114|       expect(source).toContain(hook);
+       |                      ^
+    115|     }
+    116|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > shared shell hooks and accessibility > exposes every introduced landing hook
+AssertionError: expected 'import Link from "next/link";\r\nimpo…' to contain 'safeclaw-shared-header'
+
+- Expected
++ Received
+
+- safeclaw-shared-header
++ import Link from "next/link";
++ import { JumpButton } from "./JumpButton";
++ import { HeroConsoleReplay } from "./HeroConsoleReplay";
++
++ const navItems = [
++   ["제품", "system"],
++   ["문제", "manifesto"],
++   ["작동 방식", "execution"],
++   ["외국인 안내", "language"],
++   ["근거", "proof"],
++   ["제품 구성", "product-map"],
++   ["작업 시작", "workspace"]
++ ] as const;
++
++ // SafeClawLanding is a Server Component — JumpButton is the only interactive part
++
++ const pipeline = [
++   { code: "01 · INPUT", title: "입력", body: "오늘 작업 내용을 한 줄로 정리합니다.", metric: "작업" },
++   { code: "02 · CHECK", title: "확인", body: "법령, 기상, KOSHA, 교육 근거를 함께 확인합니다.", metric: "근거" },
++   { code: "03 · DRAFT", title: "초안", body: "위험성평가, TBM, 안전교육 기록 초안을 만듭니다.", metric: "문서팩" },
++   { code: "04 · SHARE", title: "전파", body: "작업자 언어와 채널에 맞는 공지 문안을 준비합니다.", metric: "다국어" },
++   { code: "05 · RECORD", title: "기록", body: "전파 결과와 확인 내용을 작업 이력으로 남깁니다.", metric: "이력" }
++ ];
++
++ const proofSources = [
++   ["L.14991", "산업안전보건법", "법령 조항"],
++   ["KOSHA-2024", "KOSHA Guide", "공식자료"],
++   ["MOEL", "고용노동부 고시", "교육·지침"],
++   ["KMA", "기상청", "현재·예보"],
++   ["WORK24", "고용24", "연계 교육"],
++   ["AI", "Gemini", "문서 초안"]
++ ];
++
++ const languages = [
++   ["KO", "한국어", "오늘의 안전 수칙"],
++   ["VI", "Tiếng Việt", "Quy tắc an toàn hôm nay"],
++   ["TH", "ภาษาไทย", "กฎความปลอดภัยวันนี้"],
++   ["UZ", "O'zbek", "Bugungi xavfsizlik qoidalari"],
++   ["MN", "Монгол", "Өнөөдрийн аюулгүй"],
++   ["ZH", "中文", "今日安全守则"],
++   ["KM", "ភាសាខ្មែរ", "ច្បាប់សុវត្ថិភាពថ្ងៃនេះ"],
++   ["NE", "नेपाली", "आजको सुरक्षा नियम"],
++   ["ID", "Bahasa", "Aturan keselamatan"],
++   ["MY", "မြန်မာ", "ယနေ့ဘေးကင်းရေး"]
++ ];
++
++ const productModules = [
++   { code: "01", title: "작업공간", body: "오늘 작업을 입력하고 공공 API 근거 결합을 시작합니다.", href: "/workspace", state: "실행" },
++   { code: "02", title: "문서", body: "위험성평가, 작업계획서, TBM, 안전교육 기록을 편집하고 출력합니다.", href: "/documents", state: "실행" },
++   { code: "03", title: "근거", body: "법령, 해석례, 판례, KOSHA 자료를 문서 문장에 연결합니다.", href: "/evidence", state: "근거" },
++   { code: "04", title: "작업자", body: "언어, 교육 상태, 연락처를 현장 전파에 필요한 만큼만 관리합니다.", href: "/workers", state: "관리" },
++   { code: "05", title: "전파", body: "메일과 문자로 안전공지와 외국인 안내문을 보내고 결과를 남깁니다.", href: "/dispatch", state: "전송" },
++   { code: "06", title: "이력", body: "문서팩과 전파 로그를 현장 기록으로 다시 찾습니다.", href: "/archive", state: "기록" },
++   { code: "07", title: "지식 DB", body: "법령 전문, KOSHA 자료, API 스냅샷을 검색 가능한 근거층으로 유지합니다.", href: "/knowledge", state: "지식" },
++   { code: "08", title: "API 상태", body: "기상청, Law.go, KOSHA, Work24, Gemini, n8n 연결을 점검합니다.", href: "/ops/api", state: "점검" }
++ ] as const;
++
++ export function SafeClawLanding() {
++   return (
++     <main className="safeclaw-landing" aria-label="SafeClaw 회사 홈페이지">
++       <header className="safeclaw-landing-nav">
++         <Link href="/" className="safeclaw-os-brand" aria-label="SafeClaw 홈">
++           {/* eslint-disable-next-line @next/next/no-img-element */}
++           <img src="/brand/ClawMark.svg" alt="" className="safeclaw-os-mark" width={28} height={28} />
++           <strong>safeclaw/<em>os</em></strong>
++         </Link>
++         <nav aria-label="SafeClaw 홈페이지 메뉴">
++           {navItems.map(([label, id]) => (
++             id === "workspace"
++               ? <Link key={id} href="/workspace">{label}</Link>
++               : <JumpButton key={id} id={id}>{label}</JumpButton>
++           ))}
++         </nav>
++         <div className="safeclaw-landing-actions">
++           <Link href="/login" className="safeclaw-login">로그인</Link>
++           <Link href="/workspace" className="safeclaw-contact">작업 시작 →</Link>
++         </div>
++       </header>
++
++       <section className="safeclaw-os-hero grid-bg" id="system">
++         <div className="safeclaw-os-status">
++           <span><i /> 제품 · 운영 준비</span>
++           <b>REGION · KR-CENTRAL</b>
++           <b>PUBLIC API · ACTIVE</b>
++           <b>UPDATED · {process.env.NEXT_PUBLIC_BUILD_DATE ?? "—"}</b>
++         </div>
++         <div className="safeclaw-os-hero-body">
++           <div>
++             <span className="safeclaw-os-tag">산업안전 · 현장 문서 작업공간</span>
++             <h1>
++               <span className="safeclaw-hero-line">오늘 작업을</span>
++               <span className="safeclaw-hero-line"><mark>안전 문서팩으로</mark></span>
++               <span className="safeclaw-hero-line">준비합니다.</span>
++             </h1>
++             <p>safeclaw는 현장관리자가 작업 전 필요한 안전 문서를 근거와 함께 준비하도록 돕는 웹 작업공간입니다.</p>
++             <p>한 줄 입력으로 위험성평가, TBM, 안전교육, 외국인 안내문, 현장 전파 메시지 초안을 생성합니다.</p>
++             <p className="safeclaw-hero-position">채용하지 않은 안전관리자 — 한 명 몫의 문서 업무를 대신합니다.</p>
++             <div className="safeclaw-os-cta">
++               <Link href="/workspace" className="primary">작업공간 열기 →</Link>
++               <Link href="/documents">문서팩 보기</Link>
++             </div>
++           </div>
++           <HeroConsoleReplay />
++         </div>
++       </section>
++
++       <section className="safeclaw-os-section" id="manifesto">
++         <div className="safeclaw-os-section-head">
++           <span>§ 01</span>
++           <b>문제</b>
++         </div>
++         <h2>작업 전 문서와 공지를<br /><mark>하나의 흐름으로 잇습니다.</mark></h2>
++         <div className="safeclaw-pipeline-grid">
++           {pipeline.map((item) => (
++             <article key={item.code}>
++               <span>{item.code}</span>
++               <h3>{item.title}</h3>
++               <p>{item.body}</p>
++               <b>{item.metric}</b>
++             </article>
++           ))}
++         </div>
++       </section>
++
++       <section className="safeclaw-os-section compact" id="execution">
++         <div className="safeclaw-os-section-head">
++           <span>§ 02</span>
++           <b>근거 연결</b>
++         </div>
++         <div className="safeclaw-proof-matrix">
++           {proofSources.map(([code, title, meta]) => (
++             <article key={code}>
++               <span>{code}</span>
++               <h3>{title}</h3>
++               <p>{meta}</p>
++             </article>
++           ))}
++         </div>
++       </section>
++
++       <section className="safeclaw-os-section" id="language">
++         <div className="safeclaw-os-section-head">
++           <span>§ 03</span>
++           <b>외국인 안내</b>
++         </div>
++         <h2>외국인 작업자에게<br /><mark>쉬운 문장으로 전달합니다.</mark></h2>
++         <div className="safeclaw-language-matrix">
++           {languages.map(([code, title, sub]) => (
++             <article key={code}>
++               <span>{code}</span>
++               <h3>{title}</h3>
++               <p>{sub}</p>
++             </article>
++           ))}
++         </div>
++       </section>
++
++       <section className="safeclaw-os-section terminal" id="proof">
++         <div className="safeclaw-os-section-head">
++           <span>§ 04</span>
++           <b>근거</b>
++         </div>
++         <h2>법령과 공식자료를<br /><mark>문서 문장에 연결합니다.</mark></h2>
++         <div className="safeclaw-terminal">
++           <div><span /> <span /> <span /> <b>safeclaw@evidence ~ %</b><em>연결됨</em></div>
++           <pre>{`# 근거는 별도 장식이 아니라 문서 반영 위치에 붙습니다
++ - 산업안전보건법: 위험성평가와 작업중지 기준
++ - KOSHA: 위험성평가 절차, TBM, 안전교육 항목
++ - 기상청: 옥외작업, 강풍, 폭염, 자외선 작업조건
++ - Work24: 연계 교육 확인`}</pre>
++           <Link href="/evidence">근거 화면 열기 →</Link>
++         </div>
++       </section>
++
++       <section className="safeclaw-os-section compact" id="product-map">
++         <div className="safeclaw-os-section-head">
++           <span>§ 05</span>
++           <b>기능 구성</b>
++         </div>
++         <h2>제품 화면은<br /><mark>실제 업무 탭으로 연결합니다.</mark></h2>
++         <div className="safeclaw-module-map">
++           {productModules.map((module) => (
++             <Link key={module.href} href={module.href}>
++               <span>{module.code}</span>
++               <em>{module.state}</em>
++               <h3>{module.title}</h3>
++               <p>{module.body}</p>
++             </Link>
++           ))}
++         </div>
++       </section>
++
++       <section className="safeclaw-os-section terminal" id="start">
++         <div className="safeclaw-os-section-head">
++           <span>§ 06</span>
++           <b>작업 시작</b>
++         </div>
++         <h2>샘플 작업으로<br /><mark>바로 확인합니다.</mark></h2>
++         <div className="safeclaw-terminal">
++           <div><span /> <span /> <span /> <b>safeclaw@workspace ~ %</b><em>준비됨</em></div>
++           <pre>{`# 샘플 작업을 실제 API 조합으로 생성합니다
++ 질문: 서울 성수동 외벽 도장 · 이동식 비계 · 강풍 · 신규 작업자
++ 출력: 위험성평가표 / TBM / 안전교육 / 외국인 전송본 / 현장 전파 메시지`}</pre>
++           <Link href="/workspace?scenario=seoul-construction-windy">샘플 작업 생성으로 이동 →</Link>
++         </div>
++       </section>
++
++       <footer className="safeclaw-landing-footer">
++         <div className="safeclaw-footer-brand">
++           {/* eslint-disable-next-line @next/next/no-img-element */}
++           <img src="/brand/ClawMark-Inverse.svg" alt="" width={26} height={26} />
++           <strong>safeclaw/<em>os</em></strong>
++           <p>현장관리자를 위한 산업안전 문서 작업공간 · 공공 API 근거 결합</p>
++         </div>
++         <nav aria-label="푸터 메뉴">
++           <Link href="/workspace">작업공간</Link>
++           <Link href="/documents">문서</Link>
++           <Link href="/evidence">근거</Link>
++           <Link href="/ops/api">API 상태</Link>
++           <Link href="/login">로그인</Link>
++         </nav>
++         <p className="safeclaw-footer-note">© {new Date().getFullYear()} safeclaw · 안전 문서는 사람의 검토를 전제로 합니다.</p>
++       </footer>
++     </main>
++   );
++ }
++
+
+ ❯ tests/frontend-shared-surfaces.test.ts:129:22
+    127|       "safeclaw-shared-card",
+    128|     ]) {
+    129|       expect(source).toContain(hook);
+       |                      ^
+    130|     }
+    131|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > canonical shared surface styles > defines the shared special state with canonical panel geometry
+AssertionError: missing CSS rule for .special-state: expected 0 to be greater than 0
+ ❯ declarationsForExactSelector tests/frontend-shared-surfaces.test.ts:31:62
+     29| function declarationsForExactSelector(source: string, selector: string…
+     30|   const matches = ruleBlocks(source).filter((rule) => rule.selectors.i…
+     31|   expect(matches.length, `missing CSS rule for ${selector}`).toBeGreat…
+       |                                                              ^
+     32|   return Object.assign({}, ...matches.map((rule) => rule.declarations)…
+     33| }
+ ❯ tests/frontend-shared-surfaces.test.ts:148:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > canonical shared surface styles > defines a circular named loading spinner on the canonical icon size
+AssertionError: missing CSS rule for .loading-spinner: expected 0 to be greater than 0
+ ❯ declarationsForExactSelector tests/frontend-shared-surfaces.test.ts:31:62
+     29| function declarationsForExactSelector(source: string, selector: string…
+     30|   const matches = ruleBlocks(source).filter((rule) => rule.selectors.i…
+     31|   expect(matches.length, `missing CSS rule for ${selector}`).toBeGreat…
+       |                                                              ^
+     32|   return Object.assign({}, ...matches.map((rule) => rule.declarations)…
+     33| }
+ ❯ tests/frontend-shared-surfaces.test.ts:156:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > canonical shared surface styles > keeps shell titles, descriptions, actions, and cards on canonical tuples
+AssertionError: missing CSS rule for .safeclaw-module-title: expected 0 to be greater than 0
+ ❯ declarationsForExactSelector tests/frontend-shared-surfaces.test.ts:31:62
+     29| function declarationsForExactSelector(source: string, selector: string…
+     30|   const matches = ruleBlocks(source).filter((rule) => rule.selectors.i…
+     31|   expect(matches.length, `missing CSS rule for ${selector}`).toBeGreat…
+       |                                                              ^
+     32|   return Object.assign({}, ...matches.map((rule) => rule.declarations)…
+     33| }
+ ❯ tests/frontend-shared-surfaces.test.ts:169:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > canonical shared surface styles > keeps effective landing descriptions, actions, and cards canonical
+AssertionError: expected { 'max-width': '760px', …(7) } to match object { …(4) }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "font-size": "var(--text-body-lg)",
+-   "font-weight": "500",
+-   "letter-spacing": "var(--tracking-body)",
+-   "line-height": "var(--leading-body-lg)",
++   "font-size": "clamp(18px, 1.7vw, 24px)",
++   "font-weight": "650",
++   "letter-spacing": "-0.03em",
++   "line-height": "1.58",
+  }
+
+ ❯ tests/frontend-shared-surfaces.test.ts:191:70
+    189|   it("keeps effective landing descriptions, actions, and cards canonic…
+    190|     const desktopCss = withoutMediaBlocks(css);
+    191|     expect(declarationsForExactSelector(css, ".safeclaw-os-hero p")).t…
+       |                                                                      ^
+    192|       "font-size": "var(--text-body-lg)",
+    193|       "font-weight": "500",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/13]⎯
+
+ FAIL  tests/frontend-shared-surfaces.test.ts > canonical shared surface styles > keeps document variant card spacing and descriptions canonical through scoped rules
+AssertionError: expected { padding: '22px' } to match object { padding: 'var(--space-6)' }
+
+- Expected
++ Received
+
+  {
+-   "padding": "var(--space-6)",
++   "padding": "22px",
+  }
+
+ ❯ tests/frontend-shared-surfaces.test.ts:234:87
+    232|
+    233|   it("keeps document variant card spacing and descriptions canonical t…
+    234|     expect(declarationsForExactSelector(css, ".safeclaw-module-hero.do…
+       |                                                                                       ^
+    235|       padding: "var(--space-6)",
+    236|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/13]⎯
+
+
+ Test Files  2 failed | 27 passed (29)
+      Tests  12 failed | 256 passed (268)
+   Start at  12:21:30
+   Duration  32.42s (transform 2.59s, setup 0ms, import 5.56s, tests 3.81s, environment 4ms)
+
+CURRENT_CONTRACTS_EXIT_CODE=1
+===== CURRENT_SCOPED_CONTRACTS =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/ask-generation-evidence-routes.test.ts tests/generation-evidence-operation-routes.test.ts tests/generation-evidence.test.ts tests/generation-trace-privacy.test.ts tests/workpack-generation-evidence-route.test.ts tests/workspace-generation-progress.test.ts tests/photo-vision-analysis.test.ts tests/photo-vision-analysis-route.test.ts tests/workflow-share-panel-behavior.test.ts tests/workflow-share-client.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-share-authority.test.ts tests/ontology-visualization.test.ts tests/ontology-seed.test.ts tests/ontology-schema.test.ts tests/ontology-query.test.ts tests/ontology-qa-review.test.ts tests/ontology-operation-memory.test.ts tests/ontology-knowledge-tool.test.ts tests/ontology-graph-store.test.ts tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts tests/mcp-token-service.test.ts tests/mcp-auth.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  27 passed (27)
+      Tests  254 passed (254)
+   Start at  12:23:12
+   Duration  40.36s (transform 2.84s, setup 0ms, import 6.48s, tests 3.91s, environment 5ms)
+
+CURRENT_SCOPED_CONTRACTS_EXIT_CODE=0
