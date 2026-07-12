@@ -20137,7 +20137,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell.workspace-theme-day .workspace-theme-toggle button,
 .command-center-shell.workspace-theme-night .workspace-theme-toggle button {
-  min-width: 58px;
+  min-width: var(--control-height);
   border-radius: var(--radius-soft);
   padding: 8px 12px;
 }
@@ -20245,14 +20245,47 @@ body:has(.safeclaw-landing) :is(
   border-radius: var(--r-lg);
 }
 
+.command-center-shell.workspace-theme-day .workspace-input-page .composer-submit-button,
+.command-center-shell.workspace-theme-night .workspace-input-page .composer-submit-button {
+  font-weight: 700;
+}
+
 .command-center-shell.workspace-theme-day .workspace-input-page .field-brief-chip-row,
 .command-center-shell.workspace-theme-night .workspace-input-page .field-brief-chip-row {
   margin-top: 20px;
 }
 
+.command-center-shell.workspace-theme-day .workspace-input-page .field-brief-chip-row span,
+.command-center-shell.workspace-theme-night .workspace-input-page .field-brief-chip-row span {
+  min-height: 36px;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .advanced-settings[open],
+.command-center-shell.workspace-theme-day .workspace-input-page .quick-scenario-chips[open],
+.command-center-shell.workspace-theme-night .workspace-input-page .advanced-settings[open],
+.command-center-shell.workspace-theme-night .workspace-input-page .quick-scenario-chips[open] {
+  border-radius: 4px;
+}
+
 .command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-card,
 .command-center-shell.workspace-theme-night .workspace-input-page .evidence-readiness-card {
   min-height: 0;
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-card:last-child,
+.command-center-shell.workspace-theme-night .workspace-input-page .evidence-readiness-card:last-child {
+  border-right: 0;
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-card:nth-last-child(-n + 2),
+.command-center-shell.workspace-theme-night .workspace-input-page .evidence-readiness-card:nth-last-child(-n + 2) {
+  border-bottom: 0;
 }
 
 @media (max-width: 900px) {
@@ -20301,10 +20334,6 @@ body:has(.safeclaw-landing) :is(
     padding: var(--space-4) 18px var(--space-5);
   }
 
-  .command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-card,
-  .command-center-shell.workspace-theme-night .workspace-input-page .evidence-readiness-card {
-    min-height: 44px;
-  }
 }
 
 @media (min-width: 901px) and (max-width: 1200px) and (max-height: 640px) {
@@ -20333,11 +20362,6 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-night .workspace-theme-toggle button {
     min-width: 46px;
     padding: 4px 8px;
-  }
-
-  .command-center-shell.workspace-theme-day .linear-workspace-layout,
-  .command-center-shell.workspace-theme-night .linear-workspace-layout {
-    column-gap: 8px;
   }
 
   .command-center-shell.workspace-theme-day .workspace-side-nav,
