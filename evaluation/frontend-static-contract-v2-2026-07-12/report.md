@@ -19,7 +19,7 @@ At base `924e497`:
   - 6 noncanonical workspace input line-height findings
   - 3 incomplete workspace input typography tuple findings
 - route/design regression: 15 Reports spacing findings
-- integrated module browser regression at 390px:
+- externally observed pre-remediation integrated-module result at 390px; this branch does not claim to reproduce it:
   - `/reports` content top `410`
   - allowed maximum `387`
 
@@ -40,7 +40,7 @@ At base `924e497`:
 - Reports mobile action static regression: 1 selected test passed
 - `npm.cmd run typecheck`: passed after `npm.cmd ci`
 - package and lockfile source diff after dependency sync: none
-- `git diff --check`: passed; only Windows line-ending warnings
+- `git diff --check`: passed with exit code 0
 
 Raw evidence:
 

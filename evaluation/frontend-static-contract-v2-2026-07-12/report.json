@@ -7,6 +7,8 @@
     "staticViolations": 9,
     "reportsSpacingFindings": 15,
     "mobileReportsContentTop": 410,
+    "mobileReportsContentTopSource": "external pre-remediation integrated-module result; not reproduced in this branch",
+    "mobileReportsContentTopVerifiedInBranch": false,
     "mobileReportsMaximumContentTop": 387
   },
   "green": {
