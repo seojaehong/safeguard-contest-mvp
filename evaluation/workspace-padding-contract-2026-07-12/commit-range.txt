@@ -1,0 +1,11 @@
+4a700c2 fix: align mobile workspace line height
+89aee92 test: lock mobile workspace line height
+3b4ca10 fix: preserve mobile workspace input geometry
+8484d76 test: lock mobile workspace input height
+018a4f1 fix: align compact workspace typography
+7255a5d test: lock workspace 430px readability
+4dda2a6 fix: preserve readable workspace input at short heights
+d8600ca test: lock short viewport workspace readability
+42478c8 test: scope workspace line-height regression
+5cf5cc2 fix: restore workspace textarea readability
+bb78d12 test: restore approved workspace padding contract

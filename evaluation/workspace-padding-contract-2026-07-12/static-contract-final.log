@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workspace-input-css-contract.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workspace-padding-contract-fix
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  18:50:28
+   Duration  706ms (transform 35ms, setup 0ms, import 63ms, tests 15ms, environment 0ms)
+

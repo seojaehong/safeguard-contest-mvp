@@ -1,0 +1,3 @@
+COMMAND=git diff --check 693ec41bc330baa2933d25bff824885356bd8bcb..4a700c233d0c742970330e6f666b71582e3211c6 -- app/globals.css tests/workspace-input-css-contract.test.ts
+EXIT_CODE=0
+OUTPUT=(empty)
