@@ -1,57 +1,33 @@
-# Reports Wave 1 Current-Base Integration
+# Reports Wave 1 current-base integration
 
-- Authoritative backend: `87798d15aea085284332942390f215f49f3399cf`
-- Rebased implementation: `91366daa39b3d8e2a20bceb8c17a44b0b28720c3`
-- Reviewed source: `3fb4e57e4be5d1a0555122574341e909a9650754`
-- Original destination baseline: `3b0edfe48c29e603f3156440362fca9304ef4d1a`
-- Status: DONE_WITH_CONCERNS
-- Product identity: `4d73a26e5b3715b11d99e426748cb4b80123fc392807b391995d97e3ac7386de`
-- Build: `NfA3qi1aTB396s_KNSaHM` (`075edcdf40ea3bb9a9d473e4c90cd1520587cb4597a2d74382228298fceeb5f9`)
+- Authoritative backend: `24c19c17cc8c932a333fdae8785426218e57ae15`
+- Product source: `02b4598ef7bab4c57eb8550f59be024ae66cdcd3`
+- Build: `pfWi4QTypPEcr5mHBK9P-` (`27/27` static pages)
+- Build identity: `025ce0a3592e150a49e27abcbe751c2424ed0baadd176f3ac528e85072ea3637`
 
-## Preservation
+## Scope and preservation
 
-- W6 ontology tests are identical to the authoritative backend blobs.
-- The W6 ontology CSS tail is identical after newline normalization.
-- The only shared-selector resolution combines the W6 operation-memory exception with the Reports period-control exception.
-- The Reports route layer follows the complete W6 route layer.
+Reports was rebased onto the final-launch and scenario/protocol backend. Scenario/protocol delta files are `0`; W7 and W8 test files are byte-exact to backend. `app/globals.css` preserves the final-launch tree and adds only the final `/reports` route layer after shared rules.
 
-## Static Delta
+## Fresh gates
 
-The fresh audit remains intentionally RED because the repository-wide prerequisite is not closed. Relative to the W6 snapshot, total violations changed from 2,307 to 2,262, `!important` declarations from 737 to 710, typography tuples from 576 to 560, and coverage stayed at 0 issues.
+| Gate | Result |
+| --- | --- |
+| Exact Reports | `23/23` |
+| Destination Reports | `51/51` |
+| Focused static | `14/14` |
+| Strict typecheck | PASS |
+| Broad frontend contract | `19/19`, delta `0` |
+| Static audit | PASS, `0` violations, `0` important, `0` coverage issues |
+| Production build | PASS, one authoritative run after final rebase, `27/27` |
+| Reports production browser | `5/5` |
+| W8 AI connect production matrix | `2/2` |
+| W7 workspace matrix | RED, `22/23` |
 
-The fresh static audit used a unique OS-temp output and removed it even when the expected RED process exited with status 1:
+## Browser metrics
 
-```powershell
-$tempJson = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
-$hadOutputPath = Test-Path Env:OUTPUT_PATH
-$previousOutputPath = $env:OUTPUT_PATH
-try {
-  $env:OUTPUT_PATH = $tempJson
-  node .\scripts\frontend_consistency_audit.mjs
-  $auditExit = $LASTEXITCODE
-  $report = Get-Content -Raw -LiteralPath $tempJson | ConvertFrom-Json
-  if ($auditExit -ne 1) { throw "Expected static audit RED exit 1, got $auditExit" }
-} finally {
-  if ($hadOutputPath) { $env:OUTPUT_PATH = $previousOutputPath } else { Remove-Item Env:OUTPUT_PATH -ErrorAction SilentlyContinue }
-  Remove-Item -LiteralPath $tempJson -Force -ErrorAction SilentlyContinue
-}
-```
+Day/Night desktop and 390px mobile all record horizontal overflow `0`, period controls `62px`, CTA `44px`, radius `8px`, overlap `0`, and Reports route isolation PASS. Screenshots, per-scenario metrics, state metrics, and the build manifest are in this directory.
 
-## Current Results
+## Remaining RED
 
-- Reports static contract: 5/5 PASS.
-- W5, W6 ontology, Documents, font-token, and workspace-input contracts: 5 files, 8/8 PASS.
-- Strict typecheck: PASS.
-- Exact Reports suite: 3 files, 23/23 PASS after correcting an evidence-only Markdown omission found by the first run (22 PASS / 1 FAIL).
-- Existing destination Reports suite: 3 files, 51/51 PASS; the `3b0` baseline Bearer-header failure is resolved on backend `87798d1`.
-- Production build: Next.js 15.5.20, 27/27 static pages PASS.
-- Reports production browser: 5/5 PASS, with 9 screenshots and 5 metrics files.
-- W5 mixed, W6 ontology, Documents, and font-family production matrices: 1/1 PASS each.
-- Final staged diff check: PASS; W6 ontology test blobs remain exact to `87798d1`.
-- Broad frontend design contract: existing RED, 13 PASS / 8 FAIL.
-- Fresh static audit: expected RED, exit 1, 2,262 violations, 710 `!important` declarations, 0 coverage issues.
-- Final global 108-row audit: not run, per scope and because the static prerequisite remains RED.
-
-The first W6 production-matrix launch failed before assertions because Windows reserved TCP port `49227` inside excluded range `49168-49267`. A direct Node bind reproduced `EACCES`; the same matrix command passed in a fresh process on a non-reserved port.
-
-The exact commands and machine-readable deltas are recorded in `report.json`.
+The preserved W7 production test expects `22px` textarea top/bottom padding at Day `1440x900`, while the final-launch production CSS computes `24px`. Reports CSS is scoped by `data-module-route="/reports"` and does not match `/workspace`, so this backend-owned expectation drift was not changed.

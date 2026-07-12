@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "publisher": "safeclaw-reports-wave1-explicit-publish",
-  "generatedAt": "2026-07-12T03:59:23.968Z",
-  "publisherCommitSha": "91366daa39b3d8e2a20bceb8c17a44b0b28720c3",
+  "generatedAt": "2026-07-12T08:28:01.908Z",
+  "publisherCommitSha": "02b4598ef7bab4c57eb8550f59be024ae66cdcd3",
   "publisherCommand": "node .\\scripts\\publish_reports_wave1_evidence.mjs",
   "publisherSourceFiles": [
     "scripts/publish_reports_wave1_evidence.mjs",
     "scripts/reports_wave1_publish_support.mjs"
   ],
-  "productSourceSha": "91366daa39b3d8e2a20bceb8c17a44b0b28720c3",
+  "productSourceSha": "02b4598ef7bab4c57eb8550f59be024ae66cdcd3",
   "productSourceIdentityAlgorithm": "git-head-runtime-contract-blob-oids-sha256-v2",
-  "productSourceIdentity": "4d73a26e5b3715b11d99e426748cb4b80123fc392807b391995d97e3ac7386de",
+  "productSourceIdentity": "f12202585028e311f2d7e0384054c8777641a3562453934f5556715d4abac2ed",
   "productSourceFiles": [
     "app/api/workpacks/[id]/route.ts",
     "app/archive/page.tsx",
@@ -72,7 +72,7 @@
     "public/favicon.svg"
   ],
   "buildDirectory": ".next",
-  "buildId": "NfA3qi1aTB396s_KNSaHM",
-  "buildIdentity": "075edcdf40ea3bb9a9d473e4c90cd1520587cb4597a2d74382228298fceeb5f9",
+  "buildId": "pfWi4QTypPEcr5mHBK9P-",
+  "buildIdentity": "025ce0a3592e150a49e27abcbe751c2424ed0baadd176f3ac528e85072ea3637",
   "buildFileCount": 431
 }
