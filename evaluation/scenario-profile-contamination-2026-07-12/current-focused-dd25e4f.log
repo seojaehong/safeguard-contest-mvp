@@ -1,10 +1,11 @@
+STATUS=current
 EVIDENCE_KIND=FOCUSED_TEST
 CWD=C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\scenario-profile-contamination
-SOURCE_HEAD=952ad85db207d384f6451e45ced28c3293d27745
-SOURCE_TREE=f1ae350fdb412ef4c2dc7d43b7d5ae2c0c525f78
-RUNNER_PID=6640
+PRODUCT_SHA=dd25e4f18e5db9ea7beed710fe9b2cd1ffa964d5
+PRODUCT_TREE=8d826a546050f230b1c8d3a104e4b6d3586ac6bb
+RUNNER_PID=51956
 COMMAND=npm.cmd test -- tests/scenario-inference.test.ts tests/accident-cases.test.ts tests/briefing.test.ts tests/workpack-generation-evidence-route.test.ts tests/generation-evidence.test.ts tests/workpack-readiness.test.ts --maxWorkers=1 --no-file-parallelism
-STARTED_AT_UTC=2026-07-12T03:25:07.2923187Z
+STARTED_AT_UTC=2026-07-12T03:48:16.9902782Z
 
 > safeclaw@0.1.0 test
 > vitest run tests/scenario-inference.test.ts tests/accident-cases.test.ts tests/briefing.test.ts tests/workpack-generation-evidence-route.test.ts tests/generation-evidence.test.ts tests/workpack-readiness.test.ts --maxWorkers=1 --no-file-parallelism
@@ -14,9 +15,9 @@ STARTED_AT_UTC=2026-07-12T03:25:07.2923187Z
 
 
  Test Files  6 passed (6)
-      Tests  74 passed (74)
-   Start at  12:25:13
-   Duration  10.50s (transform 737ms, setup 0ms, import 1.23s, tests 438ms, environment 1ms)
+      Tests  76 passed (76)
+   Start at  12:48:20
+   Duration  8.03s (transform 621ms, setup 0ms, import 971ms, tests 389ms, environment 1ms)
 
-FINISHED_AT_UTC=2026-07-12T03:25:24.9492246Z
+FINISHED_AT_UTC=2026-07-12T03:48:29.0130706Z
 EXIT_CODE=0
