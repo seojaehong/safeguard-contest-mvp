@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "status": "done_with_concerns",
+  "generatedAt": "2026-07-12T13:07:22.6819184+09:00",
+  "authoritativeBackendSha": "87798d15aea085284332942390f215f49f3399cf",
+  "implementationSha": "91366daa39b3d8e2a20bceb8c17a44b0b28720c3",
+  "implementationParentSha": "87798d15aea085284332942390f215f49f3399cf",
+  "prePortDestinationSha": "3b0edfe48c29e603f3156440362fca9304ef4d1a",
+  "reviewedSourceSha": "3fb4e57e4be5d1a0555122574341e909a9650754",
+  "staticAuditSourceIdentity": "f6b811fcd163ea8f23301a5b27aa63351be8a2b4fc61f2c0c56f8fcc9623bc51",
+  "productSourceIdentity": "4d73a26e5b3715b11d99e426748cb4b80123fc392807b391995d97e3ac7386de",
+  "buildId": "NfA3qi1aTB396s_KNSaHM",
+  "buildIdentity": "075edcdf40ea3bb9a9d473e4c90cd1520587cb4597a2d74382228298fceeb5f9",
+  "scope": {
+    "files": [
+      "app/globals.css",
+      "components/ReportsDownloadCenter.tsx",
+      "components/SafeClawModuleShell.tsx",
+      "scripts/publish_reports_wave1_evidence.mjs",
+      "scripts/reports_wave1_publish_support.mjs",
+      "tests/helpers/isolated-next-browser-harness.ts",
+      "tests/isolated-next-browser-harness.test.ts",
+      "tests/reports-design-remediation.test.ts",
+      "tests/reports-wave1-publish-support.test.ts",
+      "types/reports-wave1-publish-support.d.ts"
+    ],
+    "excluded": [
+      "source evaluation evidence",
+      "global audit rewrites",
+      "unrelated product UI",
+      "ontology test changes",
+      "whole source branch history"
+    ]
+  },
+  "preservation": {
+    "ontologyTestFilesExactToBackend": true,
+    "w6OntologyCssTailExactToBackend": true,
+    "reportsConflictResolution": "combined operation-memory and Reports button exceptions; appended Reports route layer after exact W6 route layer"
+  },
+  "destinationBaseline": {
+    "sha": "3b0edfe48c29e603f3156440362fca9304ef4d1a",
+    "focusedReportsExistingSuite": {
+      "status": "fail",
+      "passed": 49,
+      "failed": 1,
+      "failure": "reports-download-center expected a Bearer token but received an empty authorization header"
+    },
+    "destinationSpecificRedContract": {
+      "status": "fail_as_expected",
+      "failed": 5,
+      "reason": "all five reviewed Reports behaviors were absent before the manual port"
+    }
+  },
+  "rebasedDestinationSuite": {
+    "status": "pass",
+    "files": 3,
+    "tests": 51,
+    "note": "the baseline Bearer-header failure is resolved on authoritative backend 87798d1"
+  },
+  "staticAudit": {
+    "status": "expected_red",
+    "processExit": 1,
+    "backendW6": {
+      "sourceSha": "6a582a358b8f6c3ef54a7fe89915dd9048e92326",
+      "violationCount": 2307,
+      "importantDeclarations": 737,
+      "coverageIssues": 0,
+      "rules": {
+        "decorative-box-shadow": 59,
+        "decorative-gradient": 53,
+        "decorative-text-shadow": 2,
+        "font-size-tier": 181,
+        "important-declaration": 737,
+        "line-height-tier": 232,
+        "radius-tier": 288,
+        "selector-role": 51,
+        "tracking-tier": 128,
+        "typography-tuple": 576
+      }
+    },
+    "rebasedReports": {
+      "sourceSha": "91366daa39b3d8e2a20bceb8c17a44b0b28720c3",
+      "sourceIdentity": "f6b811fcd163ea8f23301a5b27aa63351be8a2b4fc61f2c0c56f8fcc9623bc51",
+      "violationCount": 2262,
+      "importantDeclarations": 710,
+      "coverageIssues": 0,
+      "rules": {
+        "decorative-box-shadow": 60,
+        "decorative-gradient": 53,
+        "decorative-text-shadow": 2,
+        "font-size-tier": 180,
+        "important-declaration": 710,
+        "line-height-tier": 231,
+        "radius-tier": 290,
+        "selector-role": 51,
+        "tracking-tier": 125,
+        "typography-tuple": 560
+      }
+    },
+    "delta": {
+      "violationCount": -45,
+      "importantDeclarations": -27,
+      "coverageIssues": 0,
+      "rules": {
+        "decorative-box-shadow": 1,
+        "decorative-gradient": 0,
+        "decorative-text-shadow": 0,
+        "font-size-tier": -1,
+        "important-declaration": -27,
+        "line-height-tier": -1,
+        "radius-tier": 2,
+        "selector-role": 0,
+        "tracking-tier": -3,
+        "typography-tuple": -16
+      }
+    }
+  },
+  "freshChecks": [
+    {
+      "name": "reports-static-contract",
+      "command": [
+        "npm.cmd test -- tests/reports-design-remediation.test.ts -t \"Reports Wave 1 static design contract\" --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "result": "pass: 1 file, 5 passed, 5 skipped"
+    },
+    {
+      "name": "w5-w6-and-token-static-contracts",
+      "command": [
+        "npm.cmd test -- tests/mixed-typography-role-contract.test.ts tests/document-typography-token-contract.test.ts tests/font-family-token-contract.test.ts tests/workspace-input-css-contract.test.ts tests/ontology-typography-role-contract.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "result": "pass: 5 files, 8 passed"
+    },
+    {
+      "name": "strict-typecheck",
+      "command": [
+        "npm.cmd run typecheck"
+      ],
+      "result": "pass"
+    },
+    {
+      "name": "broad-frontend-static-contract",
+      "command": [
+        "npm.cmd test -- tests/frontend-design-contract.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "result": "expected existing red: 1 file, 13 passed, 8 failed"
+    },
+    {
+      "name": "fresh-static-audit",
+      "command": [
+        "$tempJson = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName()); $hadOutputPath = Test-Path Env:OUTPUT_PATH; $previousOutputPath = $env:OUTPUT_PATH; try { $env:OUTPUT_PATH = $tempJson; node .\\scripts\\frontend_consistency_audit.mjs; $auditExit = $LASTEXITCODE; $report = Get-Content -Raw -LiteralPath $tempJson | ConvertFrom-Json; $rules = [ordered]@{}; $report.violations | Group-Object rule | Sort-Object Name | ForEach-Object { $rules[$_.Name] = $_.Count }; [ordered]@{ auditProcessExit = $auditExit; status = $report.status; sourceSha = $report.sourceSha; sourceIdentity = $report.sourceIdentity; violationCount = $report.violationCount; importantDeclarations = $report.counts.importantDeclarations; coverageIssues = $report.coverageIssues; rules = $rules } | ConvertTo-Json -Depth 6; if ($auditExit -ne 1) { throw \"Expected static audit RED exit 1, got $auditExit\" } } finally { if ($hadOutputPath) { $env:OUTPUT_PATH = $previousOutputPath } else { Remove-Item Env:OUTPUT_PATH -ErrorAction SilentlyContinue }; Remove-Item -LiteralPath $tempJson -Force -ErrorAction SilentlyContinue }"
+      ],
+      "result": "expected red: exit 1, 2262 violations, 710 important declarations, 0 coverage issues"
+    },
+    {
+      "name": "exact-reports-suite",
+      "command": [
+        "npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "attempts": [
+        "red: 3 files, 22 passed, 1 failed because report.md omitted the hermetic command body",
+        "pass after evidence-only correction: 3 files, 23 passed"
+      ],
+      "result": "pass: 3 files, 23 passed"
+    },
+    {
+      "name": "rebased-destination-reports-suite",
+      "command": [
+        "npm.cmd test -- tests/reports-download-center.test.ts tests/reporting-downloads.test.ts tests/isolated-next-browser-harness.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "result": "pass: 3 files, 51 passed"
+    },
+    {
+      "name": "production-build-and-reports-browser",
+      "command": [
+        "node .\\scripts\\publish_reports_wave1_evidence.mjs"
+      ],
+      "result": "pass: Next.js 15.5.20, 27/27 static pages, Reports browser 1 file with 5 passed and 5 skipped, build NfA3qi1aTB396s_KNSaHM",
+      "artifacts": {
+        "screenshots": 9,
+        "metrics": 5,
+        "manifest": "reports-wave1-build-manifest.json"
+      }
+    },
+    {
+      "name": "w5-mixed-typography-production-matrix",
+      "command": [
+        "$env:MIXED_TYPOGRAPHY_PROD_MATRIX='1'; npm.cmd test -- tests/mixed-typography-production-matrix.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "result": "pass: 1 file, 1 passed"
+    },
+    {
+      "name": "w6-ontology-typography-production-matrix",
+      "command": [
+        "$env:ONTOLOGY_TYPOGRAPHY_PROD_MATRIX='1'; npm.cmd test -- tests/ontology-typography-production-matrix.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "attempts": [
+        "infrastructure fail before assertions: Windows EACCES on excluded TCP port 49227 in range 49168-49267",
+        "pass with the same command in a fresh process: 1 file, 1 passed"
+      ],
+      "result": "pass after infrastructure retry: 1 file, 1 passed"
+    },
+    {
+      "name": "document-typography-production-matrix",
+      "command": [
+        "$env:DOCUMENT_TYPOGRAPHY_PROD_MATRIX='1'; npm.cmd test -- tests/document-typography-production-matrix.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "result": "pass: 1 file, 1 passed"
+    },
+    {
+      "name": "font-family-production-matrix",
+      "command": [
+        "$env:FONT_FAMILY_PROD_MATRIX='1'; npm.cmd test -- tests/font-family-production-matrix.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "result": "pass: 1 file, 1 passed"
+    },
+    {
+      "name": "final-integrity",
+      "command": [
+        "git diff --cached --check",
+        "git diff --exit-code 87798d15aea085284332942390f215f49f3399cf -- tests/ontology-typography-role-contract.test.ts tests/ontology-typography-production-matrix.test.ts",
+        "git rev-parse HEAD^"
+      ],
+      "result": "pass: no whitespace errors; ontology tests exact; implementation parent is authoritative backend 87798d15aea085284332942390f215f49f3399cf"
+    }
+  ],
+  "notRun": [
+    "final global 108-row audit, per explicit scope and because the static prerequisite remains RED"
+  ],
+  "concerns": [
+    "fresh repository-wide static audit remains RED with 2262 violations",
+    "broad frontend-design-contract remains RED with 8 existing failures",
+    "the first W6 production-matrix launch hit a Windows excluded port; the same command passed in a fresh process"
+  ]
+}
