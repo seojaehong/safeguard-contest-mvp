@@ -31,9 +31,10 @@ At base `924e497`:
   - coverage issues 0
   - violations 0
   - important declarations 0
-- five static contract files: 57 tests passed
-- frontend design contract alone: 21 tests passed
+- five static contract files: 58 tests passed
+- frontend design contract alone: 22 tests passed
 - important-suffix parser regression: 1 selected test passed; two real important findings remain and font/tracking duplicates remain absent
+- multiline-comment line reference regression: 1 selected test passed; reported CSS line offsets are preserved
 - Reports mobile action static regression: 1 selected test passed
 - `npm.cmd run typecheck`: passed after `npm.cmd ci`
 - package and lockfile source diff after dependency sync: none
@@ -43,9 +44,9 @@ At base `924e497`:
 
 - Workspace input exceptions are accepted only for the exact Day/Night selector pair, exact media context, and exact typography declarations.
 - Reports spacing uses existing 4px tokens; no broad selector allowlist was added.
-- The mobile Reports header remains one column. Its action row uses scope text and the primary command side by side to reduce vertical delay without hiding information.
+- The mobile Reports header remains one column. Its action row uses scope text and the primary command side by side to reduce vertical delay without hiding information. The static assertion is bound to the exact Reports `@media (max-width: 900px)` block and the browser assertion requires content top `<= 387px` at 390px.
 - Cross-session commit `2c3fb9b` is not re-applied because its parser patch already exists as patch-equivalent commit `a89fc12`; only its missing regression fixture is restored here.
 
 ## Deferred final gates
 
-The production build and browser geometry are intentionally deferred to the final integrated HEAD after the isolated Next harness patch is merged. The final module-shell test must prove the 390px Reports content top and overflow contract.
+The production build and browser geometry execution are intentionally deferred to the final integrated HEAD after the isolated Next harness patch is merged. The browser assertion itself is present in this branch. The final module-shell and Reports tests must prove the 390px content top and overflow contracts.

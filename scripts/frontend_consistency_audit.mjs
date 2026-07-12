@@ -175,22 +175,28 @@ function cssAtRuleRanges(source, prefix) {
 }
 
 function cssRuleBlocks(source) {
-  const uncommented = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  const uncommented = source.replace(
+    /\/\*[\s\S]*?\*\//g,
+    (comment) => comment.replace(/[^\r\n]/g, " "),
+  );
   const mediaRanges = cssAtRuleRanges(uncommented, "@media");
-  return [...uncommented.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
-    selectors: splitSelectorList(match[1]),
-    declarations: Object.fromEntries(
-      [...match[2].matchAll(/([\w-]+)\s*:\s*([^;]+);/g)].map((declaration) => [
-        declaration[1].trim(),
-        declaration[2].trim(),
-      ]),
-    ),
-    line: lineNumber(uncommented, match.index),
-    contexts: mediaRanges
-      .filter((range) => range.start < match.index && match.index < range.end)
-      .sort((left, right) => left.start - right.start)
-      .map((range) => range.context),
-  }));
+  return [...uncommented.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => {
+    const selectorOffset = match.index + Math.max(0, match[1].search(/\S/));
+    return {
+      selectors: splitSelectorList(match[1]),
+      declarations: Object.fromEntries(
+        [...match[2].matchAll(/([\w-]+)\s*:\s*([^;]+);/g)].map((declaration) => [
+          declaration[1].trim(),
+          declaration[2].trim(),
+        ]),
+      ),
+      line: lineNumber(uncommented, selectorOffset),
+      contexts: mediaRanges
+        .filter((range) => range.start < match.index && match.index < range.end)
+        .sort((left, right) => left.start - right.start)
+        .map((range) => range.context),
+    };
+  });
 }
 
 function effectiveDeclarations(rules, selector) {

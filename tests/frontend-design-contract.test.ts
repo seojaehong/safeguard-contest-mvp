@@ -185,7 +185,10 @@ function blockBody(source: string, blockStart: string): string {
   throw new Error(`Unclosed CSS block: ${blockStart}`);
 }
 
-function runAudit(css: string): { status: number | null; report: { violations: Array<{ rule: string; value?: string }> } } {
+function runAudit(css: string): {
+  status: number | null;
+  report: { violations: Array<{ rule: string; value?: string; line?: number }> };
+} {
   const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "frontend-consistency-audit-"));
   const cssPath = path.join(tempDirectory, "fixture.css");
   const outputPath = path.join(tempDirectory, "report.json");
@@ -196,7 +199,7 @@ function runAudit(css: string): { status: number | null; report: { violations: A
     env: { ...process.env, CSS_PATH: cssPath, OUTPUT_PATH: outputPath },
   });
   const report = JSON.parse(fs.readFileSync(outputPath, "utf8")) as {
-    violations: Array<{ rule: string; value?: string }>;
+    violations: Array<{ rule: string; value?: string; line?: number }>;
   };
   fs.rmSync(tempDirectory, { recursive: true, force: true });
   return { status: result.status, report };
@@ -588,6 +591,16 @@ describe("frontend design contract", () => {
     expect(rules.filter((rule) => rule === "important-declaration")).toHaveLength(2);
     expect(rules).not.toContain("font-family-token");
     expect(rules).not.toContain("tracking-tier");
+  });
+
+  it("preserves source line references across multiline CSS comments", () => {
+    const audit = runAudit(`/* first comment line
+      second comment line */
+      .fixture { line-height: 1.11; }
+    `);
+    const finding = audit.report.violations.find((violation) => violation.rule === "line-height-tier");
+
+    expect(finding?.line).toBe(3);
   });
 
   it("rejects malformed values on exact functional-effect selectors", () => {
