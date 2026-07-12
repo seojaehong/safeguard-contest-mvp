@@ -543,6 +543,7 @@ describe("browser evidence reconciliation", () => {
       boundaryMarker: "loading",
       fallbackKind: "deterministic-audit-probe",
       visiblePrimaryContent: "작업 화면을 준비하고 있습니다",
+      visibleOutsideBoundary: false,
       screenshotSha256: "1".repeat(64),
     };
     const resolvedWorkspaceRows = [
@@ -558,6 +559,9 @@ describe("browser evidence reconciliation", () => {
     );
     expect(probe({ ...validLoadingRow, visiblePrimaryContent: "오늘 작업은 무엇인가요?" })).toContain(
       "loading probe content was not present at capture",
+    );
+    expect(probe({ ...validLoadingRow, visibleOutsideBoundary: true })).toContain(
+      "resolved workspace content remained visible during loading capture",
     );
     expect(probe({ ...validLoadingRow, screenshotSha256: "2".repeat(64) })).toContain(
       "loading screenshot duplicates resolved workspace evidence",
@@ -628,7 +632,7 @@ describe("browser evidence reconciliation", () => {
       "requestedUrl", "finalUrl", "status", "viewport", "theme", "consoleErrors",
       "pageErrors", "horizontalOverflow", "bodyFont", "bodyFontSize", "bodyFontWeight",
       "bodyLineHeight", "bodyLetterSpacing", "productFontLoaded", "primaryHeading", "visiblePrimaryContent",
-      "screenshot", "screenshotSha256", "limitation",
+      "screenshot", "screenshotSha256", "visibleOutsideBoundary", "limitation",
     ];
 
     expect(report.schemaVersion).toBe(3);
@@ -694,6 +698,7 @@ describe("browser evidence reconciliation", () => {
     expect(loading).toMatchObject({
       boundaryMarker: "loading",
       fallbackKind: "deterministic-audit-probe",
+      visibleOutsideBoundary: false,
       result: "pass",
     });
     expect(String(loading?.visiblePrimaryContent)).toContain("작업 화면을 준비하고 있습니다");
