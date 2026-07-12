@@ -32,7 +32,6 @@ productionMatrix("font family production matrix", () => {
       { path: "/workspace?theme=day", selector: ".command-center-shell.workspace-theme-day", firstFont: "Pretendard" },
       { path: "/workspace?theme=night", selector: ".command-center-shell.workspace-theme-night", firstFont: "Pretendard" },
       { path: "/documents?theme=day", selector: ".safeclaw-module-shell.module-variant-document", firstFont: "Pretendard" },
-      { path: "/settings/ai-connect", selector: ".ai-connect-meta dd", firstFont: "Geist Mono" },
     ] as const;
 
     for (const scenario of scenarios) {
@@ -47,5 +46,15 @@ productionMatrix("font family production matrix", () => {
       expect(firstFont, `${scenario.path} ${scenario.selector}`).toBe(scenario.firstFont);
       await page.close();
     }
+
+    const tokenPage = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await tokenPage.goto(`${harness.baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    const hudFirstFont = await tokenPage.locator(":root").evaluate((element) => getComputedStyle(element)
+      .getPropertyValue("--font-hud")
+      .split(",")[0]
+      .trim()
+      .replace(/^['"]|['"]$/gu, ""));
+    expect(hudFirstFont).toBe("Geist Mono");
+    await tokenPage.close();
   }, 90_000);
 });
