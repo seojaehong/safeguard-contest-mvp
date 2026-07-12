@@ -55,8 +55,8 @@
       "id": "W7",
       "title": "Workspace viewport geometry blockers",
       "priority": 4,
-      "status": "todo",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Scaled desktop composer bottom stays within the production viewport",
         "Mobile submit control stays within the 390px production viewport",
