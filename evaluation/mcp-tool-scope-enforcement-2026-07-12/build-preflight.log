@@ -1,0 +1,2 @@
+command=Get-CimInstance Win32_Process (node build filter)
+globalBuildProcesses=0

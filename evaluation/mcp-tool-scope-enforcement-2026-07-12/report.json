@@ -1,27 +1,56 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-07-12T07:39:59.0725793Z",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-12T08:13:43.2430481Z",
   "status": "review_pending",
-  "baseSha": "31a44c0d972c46a47c94ad387eeeff39528d1be9",
-  "productCommit": "8fe1fc2084a4ce7b8d6115053e5f84d58a85c3c9",
-  "productCommits": [
-    "ad25f99aca3251c9f5866f490b5f5b6392d51000",
-    "8fe1fc2084a4ce7b8d6115053e5f84d58a85c3c9"
+  "independentReview": "pending",
+  "authoritativeBaseSha": "24c19c17cc8c932a333fdae8785426218e57ae15",
+  "testCommit": "7054bb03f6e367d43cd3cf872937336eee8a5031",
+  "productCommit": "8c62499e5da2e260defe5d5656a45a166bb0f533",
+  "productTree": "f9c25285d64a2517499c1e65604d71b40a3abe5a",
+  "featureProductCommits": [
+    "b4dcc156cd3c44885a8a331e417956d5459a494e",
+    "dd1bc82ddf5dcb010be731ff6d2c77a12d1216ea",
+    "8c62499e5da2e260defe5d5656a45a166bb0f533"
   ],
-  "documentationCommit": "f18686c3f069881342787ab73f1320cbbfadf9ed",
-  "documentationCommits": [
-    "848b23c4f629118985f052766720aa7f36a06bee",
-    "f18686c3f069881342787ab73f1320cbbfadf9ed"
+  "featureDocumentationCommits": [
+    "493c74f313a525216b8d7c59548f2a3e9f49e76a",
+    "c014039d52db023c3f1156950fb1ba11f91babde"
   ],
   "scope": {
     "registeredToolCount": 10,
     "databaseSchemaChanged": false,
     "databaseDataChanged": false,
-    "runtimeSidecarEnabled": false
+    "environmentChanged": false,
+    "runtimeSidecarEnabled": false,
+    "koshaBranchIntegrated": false
   },
-  "red": {
+  "remediationRed": {
+    "provenance": "exact_reachable_git_commit",
+    "commit": "7054bb03f6e367d43cd3cf872937336eee8a5031",
+    "tree": "b31bd661f823a8f996b5074052c2fe611e10ca87",
+    "parent": "8bab30603699711cc7048c7b3018e2191188102d",
     "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
-    "proofTree": "8fe1fc2084a4ce7b8d6115053e5f84d58a85c3c9 with production files restored from 31a44c0d972c46a47c94ad387eeeff39528d1be9",
+    "testFilesTotal": 4,
+    "testFilesPassed": 1,
+    "testFilesFailed": 3,
+    "testsTotal": 71,
+    "testsPassed": 65,
+    "testsFailed": 6,
+    "exitCode": 1,
+    "gitBlobs": {
+      "command": "c15be0f9bf72331844c89d68dc23a7ca0affafcc",
+      "counts": "4cd8ceb60c4348e1444a14ca1432dfd78bae5344",
+      "log": "baf18a3ed7099c78c5843149b22b250d18abee9d"
+    },
+    "commandFile": "evaluation/mcp-tool-scope-enforcement-2026-07-12/remediation-red-command.txt",
+    "countsFile": "evaluation/mcp-tool-scope-enforcement-2026-07-12/remediation-red-counts.json",
+    "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/remediation-red-test.log"
+  },
+  "originalFeatureRed": {
+    "provenance": "historical_reconstructed",
+    "exactReachableTree": false,
+    "statement": "The original feature RED log was reconstructed by restoring selected production files against the old base. It is retained as historical evidence and is not claimed to identify an exact reachable Git tree.",
+    "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
     "testFilesFailed": 4,
     "testsFailed": 11,
     "testsPassed": 57,
@@ -31,57 +60,71 @@
   "green": {
     "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
     "testFilesPassed": 4,
-    "testsPassed": 68,
+    "testsPassed": 71,
     "exitCode": 0,
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/green-test.log"
   },
   "typecheck": {
     "command": "npm.cmd run typecheck",
+    "strict": true,
     "exitCode": 0,
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/typecheck.log"
   },
+  "diffCheck": {
+    "command": "git diff --check 24c19c17cc8c932a333fdae8785426218e57ae15 --",
+    "exitCode": 0,
+    "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/diff-check.log"
+  },
   "build": {
+    "preflightGlobalBuildProcesses": 0,
+    "preflightLog": "evaluation/mcp-tool-scope-enforcement-2026-07-12/build-preflight.log",
     "command": "npm.cmd run build",
+    "sequentialInvocationCountAfterPreflight": 1,
+    "validatedBeforeMetadataOnlyRebaseBaseSha": "e040ce0dad0d74c9f7a068fa5a0e5c6a2ff4771b",
+    "finalAuthoritativeBaseSha": "24c19c17cc8c932a333fdae8785426218e57ae15",
+    "metadataOnlyRebaseFiles": [
+      "evaluation/backend-scenario-protocol-integration-2026-07-12/report.json",
+      "evaluation/backend-scenario-protocol-integration-2026-07-12/report.md"
+    ],
+    "rerunAfterMetadataOnlyRebase": false,
+    "rerunReason": "Not rerun because the authoritative delta was metadata-only and the requested build invocation count was exactly one.",
     "exitCode": 0,
     "staticPages": "27/27",
-    "buildId": "Fe2cUnGZBCZ221uM8PfJO",
+    "buildId": "ZJRVHMPheqa6pINj2wz-S",
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/build.log"
   },
-  "dependencySync": {
-    "command": "npm.cmd install",
-    "exitCode": 0,
-    "packageJsonChanged": false,
-    "packageLockChanged": false,
-    "vitestVersion": "4.1.10",
-    "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/dependency-sync.log"
-  },
   "contracts": {
-    "malformedDatabaseScopes": "deny_all",
+    "malformedDatabaseScopes": "deny_entire_array",
     "newTokenScopes": "explicit_registered_tools",
     "legacyEnvironmentTokenScope": "tools:*",
     "existingWildcardCompatibility": true,
     "unknownFutureToolsAutoGranted": false,
-    "missingAuthContext": "MCP_TOOL_FORBIDDEN",
-    "internalErrorCodesExposed": false
+    "allToolRegistrationsUseCentralScopedWrapper": true,
+    "authorizationGuardRunsBeforeHandlerWork": true,
+    "authorizationPublicCode": "MCP_TOOL_FORBIDDEN",
+    "internalPublicCode": "MCP_TOOL_INTERNAL_ERROR",
+    "internalExceptionsServerLogged": true,
+    "internalMessagesCodesAndSecretsExposed": false
   },
   "changedFiles": [
     "app/api/mcp/[transport]/route.ts",
     "docs/mcp-server.md",
     "lib/mcp-auth.ts",
+    "lib/mcp-scoped-tool.ts",
     "lib/mcp-tool-contract.d.mts",
     "lib/mcp-tool-contract.mjs",
     "lib/mcp-token-service.ts",
     "lib/mcp-tools.ts",
     "scripts/issue-mcp-token.mjs",
     "tests/mcp-auth.test.ts",
+    "tests/mcp-route-scope-contract.test.ts",
     "tests/mcp-token-service.test.ts",
-    "tests/mcp-tools.test.ts",
-    "tests/mcp-route-scope-contract.test.ts"
+    "tests/mcp-tools.test.ts"
   ],
   "remainingRisks": [
     "Existing database tokens that already carry tools:* remain full-trust for compatibility.",
     "Legacy SAFECLAW_MCP_TOKENS remain operator-level wildcard credentials.",
-    "Migration 007 still has a tools:* column default; product and CLI inserts bypass it with explicit scopes, but changing the database default requires separate migration approval.",
-    "Signed remote sidecar transport and durable replay protection are still disabled and outside this patch."
+    "Migration 007 still has a tools:* column default; changing it remains approval-gated and was not performed.",
+    "The future KOSHA branch remains separate and was not integrated into this remediation."
   ]
 }

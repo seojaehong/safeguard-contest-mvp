@@ -1,0 +1,7 @@
+command=git diff --check 24c19c17cc8c932a333fdae8785426218e57ae15 --
+exitCode=0
+warning: in the working copy of 'evaluation/mcp-tool-scope-enforcement-2026-07-12/build.log', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/mcp-tool-scope-enforcement-2026-07-12/green-test.log', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/mcp-tool-scope-enforcement-2026-07-12/report.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/mcp-tool-scope-enforcement-2026-07-12/report.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/mcp-tool-scope-enforcement-2026-07-12/typecheck.log', LF will be replaced by CRLF the next time Git touches it
