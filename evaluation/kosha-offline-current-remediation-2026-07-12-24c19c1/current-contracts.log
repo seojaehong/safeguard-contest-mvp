@@ -1,0 +1,15 @@
+COMMAND: npm.cmd test -- tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/ask-generation-evidence-routes.test.ts tests/generation-evidence-operation-routes.test.ts tests/generation-evidence.test.ts tests/generation-trace-privacy.test.ts tests/workpack-generation-evidence-route.test.ts tests/workspace-generation-progress.test.ts tests/photo-vision-analysis.test.ts tests/photo-vision-analysis-route.test.ts tests/workflow-share-panel-behavior.test.ts tests/workflow-share-client.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-share-authority.test.ts tests/ontology-visualization.test.ts tests/ontology-seed.test.ts tests/ontology-schema.test.ts tests/ontology-query.test.ts tests/ontology-qa-review.test.ts tests/ontology-operation-memory.test.ts tests/ontology-knowledge-tool.test.ts tests/ontology-graph-store.test.ts tests/workpack-ontology-qa.test.ts tests/ontology-typography-production-matrix.test.ts tests/ontology-typography-role-contract.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts tests/mcp-token-service.test.ts tests/mcp-auth.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/ask-generation-evidence-routes.test.ts tests/generation-evidence-operation-routes.test.ts tests/generation-evidence.test.ts tests/generation-trace-privacy.test.ts tests/workpack-generation-evidence-route.test.ts tests/workspace-generation-progress.test.ts tests/photo-vision-analysis.test.ts tests/photo-vision-analysis-route.test.ts tests/workflow-share-panel-behavior.test.ts tests/workflow-share-client.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-share-authority.test.ts tests/ontology-visualization.test.ts tests/ontology-seed.test.ts tests/ontology-schema.test.ts tests/ontology-query.test.ts tests/ontology-qa-review.test.ts tests/ontology-operation-memory.test.ts tests/ontology-knowledge-tool.test.ts tests/ontology-graph-store.test.ts tests/workpack-ontology-qa.test.ts tests/ontology-typography-production-matrix.test.ts tests/ontology-typography-role-contract.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts tests/mcp-token-service.test.ts tests/mcp-auth.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  28 passed | 1 skipped (29)
+      Tests  255 passed | 1 skipped (256)
+   Start at  17:19:11
+   Duration  29.75s (transform 2.19s, setup 0ms, import 4.83s, tests 5.64s, environment 3ms)
+
+EXIT_CODE=0

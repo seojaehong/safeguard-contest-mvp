@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "gitObjectFormat": "sha1",
+  "base": "24c19c17cc8c932a333fdae8785426218e57ae15",
+  "red": "7730b9d033fadd1cd4bef57dcd2e3be8ca596055",
+  "product": "c62162df2368234146c353d713fc3d1d26eff88b",
+  "provenance": "Raw command output captured on the rebased product tree; ANSI sequences and trailing whitespace removed without changing command results.",
+  "logs": [
+    {
+      "path": "evaluation/kosha-offline-current-remediation-2026-07-12-24c19c1/red.log",
+      "bytes": 9336,
+      "gitBlob": "5372bf9e852eb87a4221377194f8a1794fc67a5c",
+      "normalizedWhitespace": true,
+      "committedRequired": true
+    },
+    {
+      "path": "evaluation/kosha-offline-current-remediation-2026-07-12-24c19c1/targeted.log",
+      "bytes": 1406,
+      "gitBlob": "e729e91af29ce852d0e4bba83bedf8859e63f110",
+      "normalizedWhitespace": true,
+      "committedRequired": true
+    },
+    {
+      "path": "evaluation/kosha-offline-current-remediation-2026-07-12-24c19c1/source-gates.log",
+      "bytes": 4094,
+      "gitBlob": "45e421c92d988d7db36c78902a2c7fac9a2fe0da",
+      "normalizedWhitespace": true,
+      "committedRequired": true
+    },
+    {
+      "path": "evaluation/kosha-offline-current-remediation-2026-07-12-24c19c1/current-contracts.log",
+      "bytes": 2651,
+      "gitBlob": "803efc8361c3202f662eb565bbee1b595198fb77",
+      "normalizedWhitespace": true,
+      "committedRequired": true
+    },
+    {
+      "path": "evaluation/kosha-offline-current-remediation-2026-07-12-24c19c1/typecheck.log",
+      "bytes": 107,
+      "gitBlob": "10506695a6a513c77dc9ba4ac960a8815a30128b",
+      "normalizedWhitespace": true,
+      "committedRequired": true
+    },
+    {
+      "path": "evaluation/kosha-offline-current-remediation-2026-07-12-24c19c1/diff-check.log",
+      "bytes": 781,
+      "gitBlob": "caac39d7ac8c2339401d3fe6e168e1dfd8805af8",
+      "normalizedWhitespace": true,
+      "committedRequired": true
+    },
+    {
+      "path": "evaluation/kosha-offline-current-remediation-2026-07-12-24c19c1/build.log",
+      "bytes": 5940,
+      "gitBlob": "6a0de26e43cb56339143ab80b1a6366ad383609e",
+      "normalizedWhitespace": true,
+      "committedRequired": true
+    },
+    {
+      "path": "evaluation/kosha-offline-current-remediation-2026-07-12-24c19c1/git-provenance.log",
+      "bytes": 3543,
+      "gitBlob": "5a750e79b63cb074aedadf1815e434c79b0c1e11",
+      "normalizedWhitespace": true,
+      "committedRequired": true
+    }
+  ]
+}
