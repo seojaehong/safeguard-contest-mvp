@@ -76,7 +76,13 @@ function auditMetrics(label: string, value: unknown): void {
 async function readWorkspaceMetrics(theme: ModuleTheme, viewport: Viewport): Promise<WorkspaceMetrics> {
   if (!browser) throw new Error("Browser was not started");
   const page = await browser.newPage({ viewport });
-  await page.goto(`${baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
+  const response = await page.goto(`${baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
+  if (!response?.ok()) {
+    const body = response ? await response.text() : "no response";
+    throw new Error(
+      `Workspace audit route failed: ${response?.status() ?? "unknown"} ${body}\n${harness?.readServerOutput().slice(-20_000) ?? ""}`
+    );
+  }
   const metrics = await page.evaluate((currentTheme) => {
     const shell = document.querySelector(".command-center-shell");
     const rail = document.querySelector(".workspace-side-nav");
@@ -108,8 +114,27 @@ async function readModuleMetrics(
   if (!browser) throw new Error("Browser was not started");
   const theme = options.theme ?? "day";
   const page = await browser.newPage({ viewport });
-  await page.goto(`${baseUrl}${route}?theme=${theme}`, { waitUntil: "networkidle" });
-  await page.locator(".safeclaw-module-shell[data-ready='true']").waitFor({ state: "attached" });
+  const runtimeErrors: string[] = [];
+  page.on("pageerror", (error) => runtimeErrors.push(error.stack ?? error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") runtimeErrors.push(message.text());
+  });
+  const response = await page.goto(`${baseUrl}${route}?theme=${theme}`, { waitUntil: "networkidle" });
+  if (!response?.ok()) {
+    const body = response ? await response.text() : "no response";
+    throw new Error(
+      `Module audit route failed (${route}): ${response?.status() ?? "unknown"} ${body}\n${harness?.readServerOutput().slice(-20_000) ?? ""}`
+    );
+  }
+  try {
+    await page.locator(".safeclaw-module-shell[data-ready='true']").waitFor({ state: "attached" });
+  } catch (error) {
+    const body = await page.locator("body").innerText().catch(() => "body unavailable");
+    throw new Error(
+      `Module audit target missing (${route}). Browser errors: ${runtimeErrors.join(" | ")}\nBody: ${body.slice(0, 2_000)}\n${harness?.readServerOutput().slice(-20_000) ?? ""}`,
+      { cause: error }
+    );
+  }
   if (options.loadSampleReport) {
     await page.getByRole("button", { name: "샘플 미리보기" }).click();
     await page.locator(".safeclaw-workdoc-shell").waitFor({ state: "visible" });

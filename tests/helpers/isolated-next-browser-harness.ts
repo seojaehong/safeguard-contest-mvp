@@ -2,7 +2,6 @@ import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:chil
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 import { chromium, type Browser } from "playwright";
 
 type ServerExit = {
@@ -28,6 +27,7 @@ export type IsolatedNextBrowserHarness = {
   mode: "dev" | "prod";
   temporaryDirectory?: string;
   distDirectory?: string;
+  readServerOutput: () => string;
   stop: () => Promise<void>;
 };
 
@@ -133,10 +133,21 @@ export async function startIsolatedNextBrowserHarness(
     try {
       const sourceRoot = process.cwd();
       const directoryLinkType = process.platform === "win32" ? "junction" : "dir";
-      for (const directoryName of ["app", "components", "data", "lib", "types"]) {
-        const sourceDirectory = path.join(sourceRoot, directoryName);
+      const copiedDirectories = [
+        "app",
+        "components",
+        "data",
+        "knowledge",
+        "lib",
+        "templates",
+        "types",
+        path.join("evaluation", "sif-embedding-gate"),
+        path.join("evaluation", "sif-embedding-canary-2026-07-09")
+      ];
+      for (const relativeDirectory of copiedDirectories) {
+        const sourceDirectory = path.join(sourceRoot, relativeDirectory);
         if (fs.existsSync(sourceDirectory)) {
-          fs.cpSync(sourceDirectory, path.join(temporaryDirectory, directoryName), { recursive: true });
+          fs.cpSync(sourceDirectory, path.join(temporaryDirectory, relativeDirectory), { recursive: true });
         }
       }
       for (const directoryName of ["node_modules", "public"]) {
@@ -149,10 +160,13 @@ export async function startIsolatedNextBrowserHarness(
         const sourceFile = path.join(sourceRoot, fileName);
         if (fs.existsSync(sourceFile)) fs.copyFileSync(sourceFile, path.join(temporaryDirectory, fileName));
       }
-      const sourceConfigUrl = pathToFileURL(path.join(sourceRoot, "next.config.mjs")).href;
+      fs.copyFileSync(
+        path.join(sourceRoot, "next.config.mjs"),
+        path.join(temporaryDirectory, "source-next.config.mjs")
+      );
       fs.writeFileSync(
         path.join(temporaryDirectory, "next.config.mjs"),
-        `import sourceConfig from ${JSON.stringify(sourceConfigUrl)};\n\nexport default { ...sourceConfig, distDir: "dist" };\n`,
+        `import sourceConfig from "./source-next.config.mjs";\n\nexport default { ...sourceConfig, distDir: "dist" };\n`,
         "utf8",
       );
       options.onTemporaryDirectory?.(temporaryDirectory);
@@ -268,6 +282,7 @@ export async function startIsolatedNextBrowserHarness(
               mode,
               temporaryDirectory: tempPaths?.temporaryDirectory,
               distDirectory: tempPaths?.distDirectory,
+              readServerOutput: () => output.join(""),
               stop,
             };
           }

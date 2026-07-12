@@ -1,0 +1,37 @@
+# Module Shell Browser Harness Remediation
+
+## Scope
+
+- Base: `924e497cce1af4cfd8642c98cb754991050da3b1`
+- Product source changes: none
+- Test infrastructure changes:
+  - make the temporary Next config resolve its project root inside the temporary project
+  - copy the runtime data directories used by isolated routes
+  - expose bounded server diagnostics to browser assertions
+  - prove concurrent `/documents`, `/workspace`, and `/home` requests remain healthy
+
+## RED evidence
+
+The integrated module-shell suite initially failed all four tests. The isolated server returned either a generic 500 or a hydrated error document. Captured server output identified two defects:
+
+1. The temporary config imported the source worktree config by absolute URL, so Next `dir` pointed to the temporary project while webpack aliases and `outputFileTracingRoot` pointed to the source worktree.
+2. The temporary project omitted the SIF embedding gate artifacts statically imported by `lib/sif-embedding-gate-status.ts`, causing `/settings/ai-connect` and related API compilation to fail.
+
+Concurrent first compilation also reproduced `__webpack_modules__[moduleId] is not a function` while the project root was split.
+
+## GREEN evidence
+
+- `npm.cmd test -- tests/isolated-next-browser-harness.test.ts --maxWorkers=1 --no-file-parallelism --reporter=verbose`
+  - 1 file, 2 tests passed
+  - concurrent `/documents`, `/workspace`, `/home` HTTP 200 contract included
+- `npm.cmd test -- tests/module-shell-design-regression.test.ts -t "uses the workspace daylight shell" --maxWorkers=1 --no-file-parallelism --reporter=verbose`
+  - 1 selected test passed with five module routes requested concurrently
+- `npm.cmd run typecheck`
+  - passed
+- `git diff --check`
+  - passed; only Windows line-ending warnings
+
+## Remaining integration gate
+
+The complete module-shell file must be rerun after the separate mobile Reports spacing patch is integrated. The previously hidden product RED is `/reports` at 390px: content top `410`, contract maximum `387`. This report does not claim that separate CSS issue is fixed.
+

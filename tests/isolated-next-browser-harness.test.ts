@@ -33,6 +33,27 @@ describe("isolated next browser harness", () => {
       expect(path.dirname(firstTemporaryDirectory)).toBe(tempRoot);
       expect(first.distDirectory.startsWith(`${firstTemporaryDirectory}${path.sep}`)).toBe(true);
       expect(fs.existsSync(first.distDirectory)).toBe(true);
+      expect(fs.existsSync(path.join(firstTemporaryDirectory, "source-next.config.mjs"))).toBe(true);
+      expect(fs.readFileSync(path.join(firstTemporaryDirectory, "next.config.mjs"), "utf8"))
+        .toContain("./source-next.config.mjs");
+      expect(fs.existsSync(path.join(
+        firstTemporaryDirectory,
+        "evaluation",
+        "sif-embedding-gate",
+        "report.json"
+      ))).toBe(true);
+      expect(first.readServerOutput()).toContain("SAFECLAW_TEST_SERVER_READY");
+      const routeResponses = await Promise.all(
+        ["/documents?theme=day", "/workspace?theme=day", "/home?theme=day"]
+          .map(async (route) => {
+            const response = await fetch(`${firstBaseUrl}${route}`);
+            return { route, response, body: await response.text() };
+          })
+      );
+      for (const { route, response, body } of routeResponses) {
+        expect(response.status, route).toBe(200);
+        expect(body, route).not.toContain("Internal browser harness error");
+      }
       await first.stop();
       first = null;
       expect(fs.existsSync(firstTemporaryDirectory)).toBe(false);
