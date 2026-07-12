@@ -61,8 +61,9 @@
       "log": "prod-layout-matrix-final.log"
     },
     "diffCheck": {
-      "command": "git diff --check",
+      "command": "git diff --check 693ec41bc330baa2933d25bff824885356bd8bcb..4a700c233d0c742970330e6f666b71582e3211c6 -- app/globals.css tests/workspace-input-css-contract.test.ts",
       "result": "pass",
+      "scope": "product-and-regression-test-only",
       "log": "diff-check-final.log"
     }
   },
@@ -73,6 +74,7 @@
   },
   "limitations": [
     "This report verifies the isolated workspace padding branch, not the final KOSHA, MCP, Reports combined head.",
+    "Raw command-output logs retain their original whitespace and are excluded from the product-only diff-check claim.",
     "The final combined branch still requires full serial tests, PDF gates, static audit, and 108-row browser audit."
   ]
 }

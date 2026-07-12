@@ -12,7 +12,7 @@
 - static contract: 3/3
 - production layout regression: 21/21
 - strict typecheck: PASS
-- `git diff --check`: PASS
+- product range `git diff --check`: PASS
 
 ## 복구한 계약
 
@@ -42,7 +42,10 @@
 - `typecheck-final.log`: strict TypeScript PASS
 - `build-final.log`, `build-id-final.txt`: 27 pages, final BUILD_ID
 - `prod-layout-matrix-final.log`: Day/Night 7개 viewport를 포함한 21 tests PASS
+- `diff-check-final.log`: 제품 및 회귀 테스트 두 파일 범위의 exact command와 `EXIT_CODE=0`
 - RED 로그: `red-static-contract.log`, `red-cascade-owner.log`, `red-430-readability.log`, `red-mobile-owner.log`, `red-mobile-line-height.log`
+
+Raw command-output 로그는 원본 공백을 보존하므로 전체 evidence range의 `git diff --check` PASS를 주장하지 않는다.
 
 ## 남은 범위
 
