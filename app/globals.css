@@ -18331,9 +18331,9 @@ body:has(.safeclaw-landing) :is(
 @media (min-width: 901px) and (max-height: 430px) {
   .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
-    font-size: var(--text-body);
+    font-size: var(--text-control);
     font-weight: 500;
-    line-height: var(--leading-body);
+    line-height: 1.74;
     letter-spacing: var(--tracking-body);
 }
 
