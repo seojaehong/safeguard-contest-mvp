@@ -30,4 +30,14 @@ describe("selectFallbackAccidentCases", () => {
     expect(cases[0]?.title).toContain(primaryCase);
     expect(JSON.stringify(cases)).not.toMatch(/화학|세척|세제/);
   });
+
+  it.each([
+    "물류센터 바닥 세척 작업. 화학세제 사용.",
+    "지하 기계실 바닥 세척 작업. 화학세제 사용."
+  ])("prioritizes genuine chemical-cleaning work at a domain-specific site: %s", (question) => {
+    const cases = selectFallbackAccidentCases(question);
+
+    expect(cases[0]?.title).toContain("세척");
+    expect(JSON.stringify(cases)).toMatch(/화학|세척|세제/);
+  });
 });

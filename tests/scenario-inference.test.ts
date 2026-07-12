@@ -41,6 +41,9 @@ describe("inferScenario", () => {
     expect(scenario.companyName).toBe("도시가스공사");
     expect(scenario.companyType).toBe("건설업");
     expect(scenario.siteName).toContain("굴착");
+    expect(scenario.workerCount).toBe(7);
+    expect(scenario.specialContext.join(" ")).toContain("외국인 근로자 2명");
+    expect(scenario.specialContext.join(" ")).toContain("신규 투입자 1명");
     expect(scenario.siteName).not.toContain("광주 하남산단");
     expect(scenario.profile.workName).toContain("굴착");
     expect(scenario.profile.hazards.join(" ")).toMatch(/붕괴|매몰/);
