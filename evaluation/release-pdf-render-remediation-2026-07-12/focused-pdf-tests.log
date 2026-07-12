@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation
+
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  01:53:34
+   Duration  2.47s (transform 136ms, setup 0ms, import 1.26s, tests 1.10s, environment 0ms)

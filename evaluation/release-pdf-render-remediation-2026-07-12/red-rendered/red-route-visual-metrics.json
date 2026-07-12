@@ -1,0 +1,601 @@
+{
+  "input_pdf": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/red-route.pdf",
+  "input_bytes": 16635,
+  "dpi": 144,
+  "renderers": {
+    "pymupdf": [
+      {
+        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-pymupdf-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 4532,
+        "dark_fraction": 0.0022615221860715785,
+        "bbox": [
+          85,
+          207,
+          951,
+          697
+        ],
+        "active_row_count": 126,
+        "line_bands": [
+          {
+            "top": 207,
+            "bottom": 220,
+            "height": 14,
+            "dark_pixels": 585,
+            "x_min": 85,
+            "x_max": 504,
+            "width": 420
+          },
+          {
+            "top": 226,
+            "bottom": 242,
+            "height": 17,
+            "dark_pixels": 283,
+            "x_min": 140,
+            "x_max": 202,
+            "width": 63
+          },
+          {
+            "top": 286,
+            "bottom": 287,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 217,
+            "x_max": 231,
+            "width": 15
+          },
+          {
+            "top": 290,
+            "bottom": 294,
+            "height": 5,
+            "dark_pixels": 49,
+            "x_min": 122,
+            "x_max": 231,
+            "width": 110
+          },
+          {
+            "top": 297,
+            "bottom": 298,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 220,
+            "x_max": 231,
+            "width": 12
+          },
+          {
+            "top": 302,
+            "bottom": 303,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 123,
+            "x_max": 231,
+            "width": 109
+          },
+          {
+            "top": 344,
+            "bottom": 361,
+            "height": 18,
+            "dark_pixels": 472,
+            "x_min": 85,
+            "x_max": 242,
+            "width": 158
+          },
+          {
+            "top": 447,
+            "bottom": 449,
+            "height": 3,
+            "dark_pixels": 34,
+            "x_min": 104,
+            "x_max": 161,
+            "width": 58
+          },
+          {
+            "top": 452,
+            "bottom": 453,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 106,
+            "x_max": 118,
+            "width": 13
+          },
+          {
+            "top": 455,
+            "bottom": 459,
+            "height": 5,
+            "dark_pixels": 50,
+            "x_min": 106,
+            "x_max": 161,
+            "width": 56
+          },
+          {
+            "top": 496,
+            "bottom": 497,
+            "height": 2,
+            "dark_pixels": 25,
+            "x_min": 129,
+            "x_max": 141,
+            "width": 13
+          },
+          {
+            "top": 504,
+            "bottom": 505,
+            "height": 2,
+            "dark_pixels": 34,
+            "x_min": 127,
+            "x_max": 143,
+            "width": 17
+          },
+          {
+            "top": 539,
+            "bottom": 548,
+            "height": 10,
+            "dark_pixels": 151,
+            "x_min": 172,
+            "x_max": 189,
+            "width": 18
+          },
+          {
+            "top": 551,
+            "bottom": 553,
+            "height": 3,
+            "dark_pixels": 72,
+            "x_min": 169,
+            "x_max": 192,
+            "width": 24
+          },
+          {
+            "top": 556,
+            "bottom": 558,
+            "height": 3,
+            "dark_pixels": 57,
+            "x_min": 171,
+            "x_max": 189,
+            "width": 19
+          },
+          {
+            "top": 584,
+            "bottom": 598,
+            "height": 15,
+            "dark_pixels": 823,
+            "x_min": 124,
+            "x_max": 524,
+            "width": 401
+          },
+          {
+            "top": 660,
+            "bottom": 660,
+            "height": 1,
+            "dark_pixels": 9,
+            "x_min": 607,
+            "x_max": 618,
+            "width": 12
+          },
+          {
+            "top": 663,
+            "bottom": 665,
+            "height": 3,
+            "dark_pixels": 43,
+            "x_min": 132,
+            "x_max": 624,
+            "width": 493
+          },
+          {
+            "top": 670,
+            "bottom": 672,
+            "height": 3,
+            "dark_pixels": 33,
+            "x_min": 132,
+            "x_max": 624,
+            "width": 493
+          },
+          {
+            "top": 683,
+            "bottom": 696,
+            "height": 14,
+            "dark_pixels": 1441,
+            "x_min": 133,
+            "x_max": 951,
+            "width": 819
+          }
+        ]
+      }
+    ],
+    "pdfium": [
+      {
+        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-pdfium-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 4847,
+        "dark_fraction": 0.0024187109523144176,
+        "bbox": [
+          85,
+          207,
+          951,
+          697
+        ],
+        "active_row_count": 129,
+        "line_bands": [
+          {
+            "top": 207,
+            "bottom": 220,
+            "height": 14,
+            "dark_pixels": 615,
+            "x_min": 85,
+            "x_max": 503,
+            "width": 419
+          },
+          {
+            "top": 226,
+            "bottom": 242,
+            "height": 17,
+            "dark_pixels": 298,
+            "x_min": 140,
+            "x_max": 202,
+            "width": 63
+          },
+          {
+            "top": 286,
+            "bottom": 287,
+            "height": 2,
+            "dark_pixels": 26,
+            "x_min": 217,
+            "x_max": 231,
+            "width": 15
+          },
+          {
+            "top": 290,
+            "bottom": 294,
+            "height": 5,
+            "dark_pixels": 55,
+            "x_min": 122,
+            "x_max": 231,
+            "width": 110
+          },
+          {
+            "top": 297,
+            "bottom": 298,
+            "height": 2,
+            "dark_pixels": 26,
+            "x_min": 219,
+            "x_max": 231,
+            "width": 13
+          },
+          {
+            "top": 300,
+            "bottom": 303,
+            "height": 4,
+            "dark_pixels": 42,
+            "x_min": 122,
+            "x_max": 231,
+            "width": 110
+          },
+          {
+            "top": 344,
+            "bottom": 361,
+            "height": 18,
+            "dark_pixels": 493,
+            "x_min": 85,
+            "x_max": 242,
+            "width": 158
+          },
+          {
+            "top": 447,
+            "bottom": 450,
+            "height": 4,
+            "dark_pixels": 46,
+            "x_min": 103,
+            "x_max": 161,
+            "width": 59
+          },
+          {
+            "top": 452,
+            "bottom": 453,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 106,
+            "x_max": 118,
+            "width": 13
+          },
+          {
+            "top": 456,
+            "bottom": 459,
+            "height": 4,
+            "dark_pixels": 42,
+            "x_min": 106,
+            "x_max": 161,
+            "width": 56
+          },
+          {
+            "top": 496,
+            "bottom": 497,
+            "height": 2,
+            "dark_pixels": 26,
+            "x_min": 129,
+            "x_max": 141,
+            "width": 13
+          },
+          {
+            "top": 504,
+            "bottom": 505,
+            "height": 2,
+            "dark_pixels": 34,
+            "x_min": 127,
+            "x_max": 143,
+            "width": 17
+          },
+          {
+            "top": 539,
+            "bottom": 548,
+            "height": 10,
+            "dark_pixels": 160,
+            "x_min": 172,
+            "x_max": 189,
+            "width": 18
+          },
+          {
+            "top": 551,
+            "bottom": 553,
+            "height": 3,
+            "dark_pixels": 72,
+            "x_min": 169,
+            "x_max": 192,
+            "width": 24
+          },
+          {
+            "top": 556,
+            "bottom": 558,
+            "height": 3,
+            "dark_pixels": 57,
+            "x_min": 171,
+            "x_max": 189,
+            "width": 19
+          },
+          {
+            "top": 584,
+            "bottom": 598,
+            "height": 15,
+            "dark_pixels": 897,
+            "x_min": 124,
+            "x_max": 524,
+            "width": 401
+          },
+          {
+            "top": 660,
+            "bottom": 661,
+            "height": 2,
+            "dark_pixels": 17,
+            "x_min": 606,
+            "x_max": 618,
+            "width": 13
+          },
+          {
+            "top": 663,
+            "bottom": 665,
+            "height": 3,
+            "dark_pixels": 42,
+            "x_min": 132,
+            "x_max": 624,
+            "width": 493
+          },
+          {
+            "top": 670,
+            "bottom": 672,
+            "height": 3,
+            "dark_pixels": 34,
+            "x_min": 132,
+            "x_max": 624,
+            "width": 493
+          },
+          {
+            "top": 683,
+            "bottom": 696,
+            "height": 14,
+            "dark_pixels": 1554,
+            "x_min": 133,
+            "x_max": 951,
+            "width": 819
+          }
+        ]
+      }
+    ],
+    "poppler": [
+      {
+        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-poppler-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 4523,
+        "dark_fraction": 0.0022570310784646402,
+        "bbox": [
+          85,
+          207,
+          951,
+          697
+        ],
+        "active_row_count": 123,
+        "line_bands": [
+          {
+            "top": 207,
+            "bottom": 220,
+            "height": 14,
+            "dark_pixels": 588,
+            "x_min": 85,
+            "x_max": 503,
+            "width": 419
+          },
+          {
+            "top": 226,
+            "bottom": 242,
+            "height": 17,
+            "dark_pixels": 283,
+            "x_min": 140,
+            "x_max": 202,
+            "width": 63
+          },
+          {
+            "top": 286,
+            "bottom": 287,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 216,
+            "x_max": 230,
+            "width": 15
+          },
+          {
+            "top": 290,
+            "bottom": 294,
+            "height": 5,
+            "dark_pixels": 48,
+            "x_min": 121,
+            "x_max": 230,
+            "width": 110
+          },
+          {
+            "top": 297,
+            "bottom": 298,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 219,
+            "x_max": 230,
+            "width": 12
+          },
+          {
+            "top": 302,
+            "bottom": 303,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 219,
+            "x_max": 230,
+            "width": 12
+          },
+          {
+            "top": 344,
+            "bottom": 361,
+            "height": 18,
+            "dark_pixels": 454,
+            "x_min": 85,
+            "x_max": 242,
+            "width": 158
+          },
+          {
+            "top": 447,
+            "bottom": 449,
+            "height": 3,
+            "dark_pixels": 32,
+            "x_min": 104,
+            "x_max": 160,
+            "width": 57
+          },
+          {
+            "top": 452,
+            "bottom": 453,
+            "height": 2,
+            "dark_pixels": 22,
+            "x_min": 106,
+            "x_max": 117,
+            "width": 12
+          },
+          {
+            "top": 458,
+            "bottom": 459,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 106,
+            "x_max": 117,
+            "width": 12
+          },
+          {
+            "top": 496,
+            "bottom": 497,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 129,
+            "x_max": 140,
+            "width": 12
+          },
+          {
+            "top": 504,
+            "bottom": 505,
+            "height": 2,
+            "dark_pixels": 33,
+            "x_min": 127,
+            "x_max": 143,
+            "width": 17
+          },
+          {
+            "top": 539,
+            "bottom": 548,
+            "height": 10,
+            "dark_pixels": 151,
+            "x_min": 172,
+            "x_max": 189,
+            "width": 18
+          },
+          {
+            "top": 551,
+            "bottom": 553,
+            "height": 3,
+            "dark_pixels": 72,
+            "x_min": 169,
+            "x_max": 192,
+            "width": 24
+          },
+          {
+            "top": 556,
+            "bottom": 558,
+            "height": 3,
+            "dark_pixels": 57,
+            "x_min": 171,
+            "x_max": 189,
+            "width": 19
+          },
+          {
+            "top": 584,
+            "bottom": 598,
+            "height": 15,
+            "dark_pixels": 836,
+            "x_min": 124,
+            "x_max": 524,
+            "width": 401
+          },
+          {
+            "top": 660,
+            "bottom": 660,
+            "height": 1,
+            "dark_pixels": 9,
+            "x_min": 607,
+            "x_max": 618,
+            "width": 12
+          },
+          {
+            "top": 663,
+            "bottom": 665,
+            "height": 3,
+            "dark_pixels": 40,
+            "x_min": 132,
+            "x_max": 624,
+            "width": 493
+          },
+          {
+            "top": 670,
+            "bottom": 672,
+            "height": 3,
+            "dark_pixels": 30,
+            "x_min": 132,
+            "x_max": 624,
+            "width": 493
+          },
+          {
+            "top": 683,
+            "bottom": 696,
+            "height": 14,
+            "dark_pixels": 1454,
+            "x_min": 133,
+            "x_max": 951,
+            "width": 819
+          }
+        ]
+      }
+    ]
+  }
+}

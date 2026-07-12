@@ -1,0 +1,412 @@
+{
+  "input_pdf": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-route.pdf",
+  "input_bytes": 16591,
+  "dpi": 144,
+  "renderers": {
+    "pymupdf": [
+      {
+        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-pymupdf-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 23951,
+        "dark_fraction": 0.011951835365975369,
+        "bbox": [
+          85,
+          106,
+          970,
+          698
+        ],
+        "active_row_count": 269,
+        "line_bands": [
+          {
+            "top": 106,
+            "bottom": 143,
+            "height": 38,
+            "dark_pixels": 3821,
+            "x_min": 86,
+            "x_max": 298,
+            "width": 213
+          },
+          {
+            "top": 207,
+            "bottom": 220,
+            "height": 14,
+            "dark_pixels": 1936,
+            "x_min": 85,
+            "x_max": 522,
+            "width": 438
+          },
+          {
+            "top": 225,
+            "bottom": 243,
+            "height": 19,
+            "dark_pixels": 828,
+            "x_min": 85,
+            "x_max": 221,
+            "width": 137
+          },
+          {
+            "top": 255,
+            "bottom": 273,
+            "height": 19,
+            "dark_pixels": 786,
+            "x_min": 85,
+            "x_max": 220,
+            "width": 136
+          },
+          {
+            "top": 285,
+            "bottom": 303,
+            "height": 19,
+            "dark_pixels": 1047,
+            "x_min": 85,
+            "x_max": 249,
+            "width": 165
+          },
+          {
+            "top": 343,
+            "bottom": 361,
+            "height": 19,
+            "dark_pixels": 1003,
+            "x_min": 85,
+            "x_max": 260,
+            "width": 176
+          },
+          {
+            "top": 366,
+            "bottom": 392,
+            "height": 27,
+            "dark_pixels": 1656,
+            "x_min": 85,
+            "x_max": 225,
+            "width": 141
+          },
+          {
+            "top": 441,
+            "bottom": 459,
+            "height": 19,
+            "dark_pixels": 1673,
+            "x_min": 85,
+            "x_max": 352,
+            "width": 268
+          },
+          {
+            "top": 495,
+            "bottom": 513,
+            "height": 19,
+            "dark_pixels": 1178,
+            "x_min": 85,
+            "x_max": 282,
+            "width": 198
+          },
+          {
+            "top": 538,
+            "bottom": 564,
+            "height": 27,
+            "dark_pixels": 1290,
+            "x_min": 85,
+            "x_max": 192,
+            "width": 108
+          },
+          {
+            "top": 584,
+            "bottom": 599,
+            "height": 16,
+            "dark_pixels": 2573,
+            "x_min": 85,
+            "x_max": 559,
+            "width": 475
+          },
+          {
+            "top": 658,
+            "bottom": 674,
+            "height": 17,
+            "dark_pixels": 1740,
+            "x_min": 85,
+            "x_max": 819,
+            "width": 735
+          },
+          {
+            "top": 682,
+            "bottom": 697,
+            "height": 16,
+            "dark_pixels": 4401,
+            "x_min": 85,
+            "x_max": 970,
+            "width": 886
+          }
+        ]
+      }
+    ],
+    "pdfium": [
+      {
+        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-pdfium-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 25472,
+        "dark_fraction": 0.012710832551547936,
+        "bbox": [
+          84,
+          106,
+          970,
+          698
+        ],
+        "active_row_count": 270,
+        "line_bands": [
+          {
+            "top": 106,
+            "bottom": 143,
+            "height": 38,
+            "dark_pixels": 3905,
+            "x_min": 85,
+            "x_max": 299,
+            "width": 215
+          },
+          {
+            "top": 207,
+            "bottom": 220,
+            "height": 14,
+            "dark_pixels": 2049,
+            "x_min": 85,
+            "x_max": 521,
+            "width": 437
+          },
+          {
+            "top": 225,
+            "bottom": 243,
+            "height": 19,
+            "dark_pixels": 883,
+            "x_min": 85,
+            "x_max": 221,
+            "width": 137
+          },
+          {
+            "top": 255,
+            "bottom": 273,
+            "height": 19,
+            "dark_pixels": 883,
+            "x_min": 85,
+            "x_max": 220,
+            "width": 136
+          },
+          {
+            "top": 285,
+            "bottom": 303,
+            "height": 19,
+            "dark_pixels": 1178,
+            "x_min": 85,
+            "x_max": 249,
+            "width": 165
+          },
+          {
+            "top": 343,
+            "bottom": 361,
+            "height": 19,
+            "dark_pixels": 1085,
+            "x_min": 85,
+            "x_max": 260,
+            "width": 176
+          },
+          {
+            "top": 366,
+            "bottom": 392,
+            "height": 27,
+            "dark_pixels": 1735,
+            "x_min": 85,
+            "x_max": 225,
+            "width": 141
+          },
+          {
+            "top": 441,
+            "bottom": 459,
+            "height": 19,
+            "dark_pixels": 1798,
+            "x_min": 85,
+            "x_max": 352,
+            "width": 268
+          },
+          {
+            "top": 495,
+            "bottom": 513,
+            "height": 19,
+            "dark_pixels": 1279,
+            "x_min": 85,
+            "x_max": 282,
+            "width": 198
+          },
+          {
+            "top": 538,
+            "bottom": 564,
+            "height": 27,
+            "dark_pixels": 1340,
+            "x_min": 85,
+            "x_max": 192,
+            "width": 108
+          },
+          {
+            "top": 584,
+            "bottom": 600,
+            "height": 17,
+            "dark_pixels": 2790,
+            "x_min": 85,
+            "x_max": 559,
+            "width": 475
+          },
+          {
+            "top": 658,
+            "bottom": 674,
+            "height": 17,
+            "dark_pixels": 1796,
+            "x_min": 85,
+            "x_max": 819,
+            "width": 735
+          },
+          {
+            "top": 682,
+            "bottom": 697,
+            "height": 16,
+            "dark_pixels": 4733,
+            "x_min": 84,
+            "x_max": 970,
+            "width": 887
+          }
+        ]
+      }
+    ],
+    "poppler": [
+      {
+        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-poppler-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 23927,
+        "dark_fraction": 0.011939859079023533,
+        "bbox": [
+          85,
+          106,
+          970,
+          698
+        ],
+        "active_row_count": 270,
+        "line_bands": [
+          {
+            "top": 106,
+            "bottom": 143,
+            "height": 38,
+            "dark_pixels": 3821,
+            "x_min": 86,
+            "x_max": 298,
+            "width": 213
+          },
+          {
+            "top": 207,
+            "bottom": 220,
+            "height": 14,
+            "dark_pixels": 1932,
+            "x_min": 85,
+            "x_max": 522,
+            "width": 438
+          },
+          {
+            "top": 225,
+            "bottom": 243,
+            "height": 19,
+            "dark_pixels": 819,
+            "x_min": 85,
+            "x_max": 221,
+            "width": 137
+          },
+          {
+            "top": 255,
+            "bottom": 273,
+            "height": 19,
+            "dark_pixels": 790,
+            "x_min": 85,
+            "x_max": 219,
+            "width": 135
+          },
+          {
+            "top": 285,
+            "bottom": 303,
+            "height": 19,
+            "dark_pixels": 1067,
+            "x_min": 85,
+            "x_max": 249,
+            "width": 165
+          },
+          {
+            "top": 343,
+            "bottom": 361,
+            "height": 19,
+            "dark_pixels": 978,
+            "x_min": 85,
+            "x_max": 260,
+            "width": 176
+          },
+          {
+            "top": 366,
+            "bottom": 392,
+            "height": 27,
+            "dark_pixels": 1639,
+            "x_min": 85,
+            "x_max": 224,
+            "width": 140
+          },
+          {
+            "top": 441,
+            "bottom": 459,
+            "height": 19,
+            "dark_pixels": 1647,
+            "x_min": 85,
+            "x_max": 352,
+            "width": 268
+          },
+          {
+            "top": 495,
+            "bottom": 513,
+            "height": 19,
+            "dark_pixels": 1160,
+            "x_min": 85,
+            "x_max": 282,
+            "width": 198
+          },
+          {
+            "top": 538,
+            "bottom": 564,
+            "height": 27,
+            "dark_pixels": 1297,
+            "x_min": 85,
+            "x_max": 192,
+            "width": 108
+          },
+          {
+            "top": 584,
+            "bottom": 600,
+            "height": 17,
+            "dark_pixels": 2602,
+            "x_min": 85,
+            "x_max": 559,
+            "width": 475
+          },
+          {
+            "top": 658,
+            "bottom": 674,
+            "height": 17,
+            "dark_pixels": 1728,
+            "x_min": 85,
+            "x_max": 818,
+            "width": 734
+          },
+          {
+            "top": 682,
+            "bottom": 697,
+            "height": 16,
+            "dark_pixels": 4434,
+            "x_min": 85,
+            "x_max": 970,
+            "width": 886
+          }
+        ]
+      }
+    ]
+  }
+}
