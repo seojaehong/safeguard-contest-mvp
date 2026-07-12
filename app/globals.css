@@ -14575,7 +14575,7 @@ body:has(.safeclaw-landing) :is(
   font-weight: 560;
 }
 
-.safeclaw-module-shell.module-variant-document button,
+.safeclaw-module-shell.module-variant-document button:not(.operation-memory-preview button),
 .safeclaw-module-shell.module-variant-document .button,
 .safeclaw-module-shell.module-variant-document .safeclaw-module-primary,
 .safeclaw-module-shell.module-variant-document .safeclaw-module-actions a,
