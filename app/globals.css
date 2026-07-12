@@ -9176,7 +9176,7 @@ body:has(.safeclaw-landing) :is(
 .ai-connect-meta dd {
   margin: 8px 0 0;
   color: var(--os-text, #f6f5ef);
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-hud);
   font-size: 0.82rem;
   overflow-wrap: anywhere;
 }
@@ -9195,7 +9195,7 @@ body:has(.safeclaw-landing) :is(
   border-radius: 6px;
   background: #0b0c10;
   color: #f6f5ef;
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-hud);
   font-size: 0.82rem;
   line-height: 1.6;
 }
@@ -9480,7 +9480,7 @@ body:has(.safeclaw-landing) :is(
   background: rgba(0, 0, 0, 0.24);
   color: rgba(246, 245, 239, 0.88);
   padding: 10px;
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-hud);
   font-size: 0.78rem;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
@@ -9683,7 +9683,7 @@ body:has(.safeclaw-landing) :is(
 
 .ai-connect-sif-fingerprint code {
   color: rgba(255, 220, 46, 0.86);
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-hud);
   font-size: 0.72rem;
   overflow-wrap: anywhere;
 }
@@ -9715,7 +9715,7 @@ body:has(.safeclaw-landing) :is(
 
 .ai-connect-sif-artifact-grid code {
   color: rgba(255, 220, 46, 0.86);
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-hud);
   font-size: 0.72rem;
   overflow-wrap: anywhere;
 }
@@ -9823,7 +9823,7 @@ body:has(.safeclaw-landing) :is(
   background: #0b0c10;
   color: #f6f5ef;
   padding: 16px;
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-hud);
   font-size: 0.82rem;
   line-height: 1.6;
   overflow-wrap: anywhere;
@@ -13355,7 +13355,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell.workspace-theme-day {
-  font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-product);
   background:
     radial-gradient(circle at 18% 0%, rgba(245, 197, 24, 0.08), transparent 28%),
     #f3f6fb;
@@ -13641,7 +13641,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-day .command-copy h1 {
   max-width: 680px;
   color: #111318;
-  font-family: "Noto Sans KR", "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-product);
   font-size: clamp(36px, 4vw, 56px);
   font-weight: 760;
   letter-spacing: 0;
@@ -13787,7 +13787,7 @@ body:has(.safeclaw-landing) :is(
   border-radius: 10px;
   background: #fbfcfe;
   color: #20242b;
-  font-family: "Noto Sans KR", "Pretendard", var(--font-multilingual);
+  font-family: var(--font-document);
   font-size: 13px;
   line-height: 1.92;
 }
@@ -14108,13 +14108,13 @@ body:has(.safeclaw-landing) :is(
 
 /* Workspace final polish: sturdier first impression and calmer menu density. */
 .command-center-shell {
-  font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-product);
 }
 
 .command-center-shell .command-copy h1,
 .command-center-shell.workspace-theme-day .command-copy h1 {
   max-width: 780px;
-  font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-product);
   font-size: 58px;
   font-weight: 860;
   letter-spacing: 0px;
@@ -14225,7 +14225,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-success: #27a644;
   background: var(--workspace-canvas);
   color: var(--workspace-ink);
-  font-family: Inter, "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-product);
 }
 
 .safeclaw-module-shell.module-variant-document :is(p, li, small, span, button, label, textarea, input, summary, pre) {
@@ -14548,7 +14548,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list code,
 .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-evidence code {
   color: var(--workspace-muted) !important;
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-family: var(--font-hud);
   font-size: 12px;
 }
 
@@ -15014,7 +15014,7 @@ body:has(.safeclaw-landing) :is(
    the Korean headline and composer copy enough weight for a field product. */
 .command-center-shell .workspace-input-page .command-copy h1,
 .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 {
-  font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-product);
   font-size: clamp(52px, 5.2vw, 68px);
   font-weight: 900;
   line-height: 1.12;
@@ -15298,7 +15298,7 @@ body:has(.safeclaw-landing) :is(
   grid-template-columns: 252px minmax(0, 1fr);
   background: var(--workspace-canvas) !important;
   color: var(--workspace-ink) !important;
-  font-family: "Pretendard", "Noto Sans KR", "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-product);
   letter-spacing: 0;
   word-break: keep-all;
 }
