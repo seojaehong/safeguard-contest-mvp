@@ -1,84 +1,61 @@
-# Release browser-audit evidence integrity remediation
+# Release audit evidence remediation
 
 - Branch: `fix/release-audit-evidence-remediation`
-- Remediation base: `9f20be9eed0fdf360a61e620993c7075870c29aa`
-- Authoritative source commit: `7a132c04d9ef6f28689a02e8e1f4e81d2edc8885`
-- Canonical source identity: `c14b2350a6f98c92ce71cbc9ab6cfbd96552e712c755d444f6fb84f83e8324c3`
-- Generated: `2026-07-13T07:57:53.4757673+09:00`
+- Review base: `03358b8398bd859d25c84de11609a09c214c74c3`
+- Authoritative source commit: `d690bbaebad3ed059d194328437e707481f55eee`
+- Canonical source identity: `cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978`
+- Generated: `2026-07-13T08:40:46.2623755+09:00`
 - Result: PASS
 
-## Identity remediation
+## Bundle contract
 
-Static, browser, and bundle audits now share `scripts/frontend_audit_source_identity.mjs`. The canonical inventory includes every `app/**/*.tsx` surface, all component TSX files, audit runners, probes, and the existing fixed contract files. It explicitly includes:
+The bundle runner emits a repo-relative `.next` build directory. Local usernames and worktree paths are forbidden in the complete evidence ranges. Normal mode requires marker count `0`; audit mode requires marker count exactly `1` and rejects duplicate marker chunks fail-closed.
 
-- `app/layout.tsx`
-- `app/error.tsx`
-- `app/global-error.tsx`
-- `app/not-found.tsx`
-- `app/workspace/loading.tsx`
+- Normal clean build: 27 static pages, build `tAHQvEbkuJVTVAZzXRQ_L`, marker count `0`.
+- Audit clean build: 27 static pages, build `45f_hWm4AcaxgWePQUOHL`, marker count `1`.
+- Rejected preflight: a non-clean normal rebuild retained one audit marker, so the bundle gate rejected it before both canonical builds were repeated from empty `.next` directories.
 
-Mutation tests copy the canonical inventory to an isolated fixture, mutate each boundary file, verify that every mutation changes the identity, and verify that the old prerequisite is rejected as stale.
+## Typecheck evidence
 
-## Canonical browser evidence
+- Command: `npm.cmd run typecheck`
+- Exit code: `0`
+- Completion marker: `typecheck-complete`
+- Log: `p2-final-typecheck.log`
 
-The checked-in canonical evidence under `evaluation/frontend-audit-runner-port-v2-2026-07-11/` was regenerated from one clean audit build and one server on port 3037.
+The log records the command before execution and records both the process exit code and the completion marker after TypeScript finishes. An empty command-banner log is not accepted.
 
-- Schema: 3
-- Routes: 32
-- Route rows: 96
-- Workspace theme rows: 6
-- Special rows: 4
-- Generated rows: 2
-- Total: 108
-- Successes: 108
-- Failed rows: 0
-- Findings: 0
-- Recovered rows: 0
-- Elapsed: 121,269 ms
+## Static and browser evidence
 
-The browser report top-level source SHA/identity and nested static prerequisite SHA/identity all equal the authoritative values above. The explicit row contract is `96 + 6 + 4 + 2 = 108`.
+- Static audit: 32 page files, 23 component files, 0 coverage issues, 0 violations.
+- Browser rows: 108/108.
+- Failed rows: 0.
+- Findings: 0.
+- Recovered transient rows: 0.
+- Loading evidence remains distinct from all resolved workspace desktop captures.
 
-## Loading evidence
+The static report, normal bundle report, audit bundle report, and browser report all identify source `d690bbaebad3ed059d194328437e707481f55eee` and identity `cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978`.
 
-`special:loading` is an audit-only deterministic rendering of the checked-in `app/workspace/loading.tsx` component. Passing requires the loading marker, deterministic probe kind, loading content, no visible `<main>` outside the boundary, a valid screenshot SHA-256, resolved workspace comparison evidence, and a digest distinct from every resolved desktop workspace screenshot.
+## Final verification
 
-- Boundary marker: `loading`
-- Fallback kind: `deterministic-audit-probe`
-- Visible heading: `작업 화면을 준비하고 있습니다`
-- Visible content outside boundary: `false`
-- Screenshot size: 1440 x 1000
-- Screenshot SHA-256: `66ad25859ff30d2c947c78cabf97fc565306e569e6fbd208d08f0ba89cd4479c`
-- Resolved workspace digest matches: 0
-
-The image was inspected directly. It contains the loading surface only; the resolved workspace is not visible below it.
-
-## Verification
-
-- Browser evidence reconciliation: PASS, 1 file and 17 tests.
-- Bundle contract test: PASS, 1 file and 1 test.
-- Typecheck: PASS.
-- Static prerequisite: PASS, 32 page files, 23 component files, 0 coverage issues, 0 violations.
-- Normal build: PASS, 27/27 static pages, BUILD_ID `XwZEPt1aBUgLTFDh1AvjG`, marker count 0.
-- Audit build: PASS, 27/27 static pages, BUILD_ID `sI2fZ2rWpDW_x_YhvBgl3`, marker count 1.
-- Full browser audit: PASS, 108/108.
-
-## Audit trail
-
-The first full regeneration at source `7c8030d` passed machine checks, but direct image inspection found resolved workspace content below the fixed loading overlay. A fail-closed visible-outside-boundary check was added. The next run correctly failed the loading row because author CSS overrode the HTML `hidden` attribute. Source `7a132c0` uses audit-only inline `display:none` with cleanup; its preflight and final 108-row run are the authoritative evidence.
-
-The historical runner-port `report.md/json` remains unchanged as a record of its original blocked state. This remediation report and the regenerated schema-3 `browser-report.md/json` supersede it for current release evidence.
+- Bundle contract tests: 5/5.
+- Browser evidence reconciliation tests: 17/17.
+- Combined focused tests: 22/22 across 2 files.
+- Complete evidence byte scan: 169 files, 0 forbidden local/worktree path matches.
+- Generated logs use one terminal newline with trailing whitespace removed.
 
 ## Raw evidence
 
-- `p1-final-static-audit.log`
-- `p1-final-build-normal.log`
-- `p1-final-bundle-normal.log`
-- `p1-final-build-audit.log`
-- `p1-final-bundle-audit.log`
-- `p1-final-loading-preflight.log`
-- `p1-final-browser-108.log`
-- `p1-final-focused-tests.log`
-- `p1-final-bundle-tests.log`
-- `p1-final-typecheck.log`
+- `p2-final-static-audit.log`
+- `p2-final-typecheck.log`
+- `p2-final-build-normal.log`
+- `p2-final-bundle-normal.log`
+- `p2-final-build-audit.log`
+- `p2-final-bundle-audit.log`
+- `p2-final-browser-108.log`
+- `p2-final-audit-server.log`
+- `p2-final-bundle-tests.log`
+- `p2-final-focused-tests.log`
+- `p2-final-path-scan.log`
+- `p2-stale-cache-normal-bundle-fail.log`
 
-No product CSS, Reports, PDF, DB/schema, or environment files were modified.
+No DB, schema, environment, protected `output/playwright` artifact, or hard-excluded source file was modified.

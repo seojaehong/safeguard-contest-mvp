@@ -1,0 +1,16 @@
+[audit-command] npm.cmd test -- tests/frontend-audit-bundle-contract.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/frontend-audit-bundle-contract.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 <local-user-root>/dev/safeguard-contest-mvp/<worktree-root>/release-audit-evidence-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  08:39:21
+   Duration  5.81s (transform 35ms, setup 0ms, import 57ms, tests 5.17s, environment 0ms)
+
+[audit-exit-code] 0
+[audit-completion] bundle-contract-tests-complete

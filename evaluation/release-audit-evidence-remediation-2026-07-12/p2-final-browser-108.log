@@ -1,0 +1,18 @@
+[audit-command] node ./scripts/frontend_consistency_browser_audit.mjs
+[audit-base-url] http://127.0.0.1:3047
+{
+  "routes": 32,
+  "routeRows": 96,
+  "workspaceThemeRows": 6,
+  "specialSurfaceRows": 4,
+  "generatedSurfaceRows": 2,
+  "screenshots": 108,
+  "successes": 108,
+  "failedRows": 0,
+  "recoveredRows": 0,
+  "findingCount": 0,
+  "failures": 0,
+  "elapsedMs": 115346
+}
+[audit-exit-code] 0
+[audit-completion] browser-audit-108-complete

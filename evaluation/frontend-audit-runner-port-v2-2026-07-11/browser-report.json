@@ -1,9 +1,9 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-12T22:52:16.366Z",
-  "baseUrl": "http://127.0.0.1:3037",
-  "sourceSha": "7a132c04d9ef6f28689a02e8e1f4e81d2edc8885",
-  "sourceIdentity": "c14b2350a6f98c92ce71cbc9ab6cfbd96552e712c755d444f6fb84f83e8324c3",
+  "generatedAt": "2026-07-12T23:32:54.116Z",
+  "baseUrl": "http://127.0.0.1:3047",
+  "sourceSha": "d690bbaebad3ed059d194328437e707481f55eee",
+  "sourceIdentity": "cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978",
   "rowContract": {
     "routes": 32,
     "viewports": 3,
@@ -25,11 +25,11 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 121269
+    "elapsedMs": 115346
   },
   "staticAudit": {
-    "sourceSha": "7a132c04d9ef6f28689a02e8e1f4e81d2edc8885",
-    "sourceIdentity": "c14b2350a6f98c92ce71cbc9ab6cfbd96552e712c755d444f6fb84f83e8324c3",
+    "sourceSha": "d690bbaebad3ed059d194328437e707481f55eee",
+    "sourceIdentity": "cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
@@ -70,8 +70,8 @@
   "routeRows": [
     {
       "route": "/",
-      "requestedUrl": "http://127.0.0.1:3037/",
-      "finalUrl": "http://127.0.0.1:3037/",
+      "requestedUrl": "http://127.0.0.1:3047/",
+      "finalUrl": "http://127.0.0.1:3047/",
       "status": 200,
       "expectedStatuses": [
         200
@@ -168,8 +168,8 @@
     },
     {
       "route": "/",
-      "requestedUrl": "http://127.0.0.1:3037/",
-      "finalUrl": "http://127.0.0.1:3037/",
+      "requestedUrl": "http://127.0.0.1:3047/",
+      "finalUrl": "http://127.0.0.1:3047/",
       "status": 200,
       "expectedStatuses": [
         200
@@ -266,8 +266,8 @@
     },
     {
       "route": "/",
-      "requestedUrl": "http://127.0.0.1:3037/",
-      "finalUrl": "http://127.0.0.1:3037/",
+      "requestedUrl": "http://127.0.0.1:3047/",
+      "finalUrl": "http://127.0.0.1:3047/",
       "status": 200,
       "expectedStatuses": [
         200
@@ -364,8 +364,8 @@
     },
     {
       "route": "/archive",
-      "requestedUrl": "http://127.0.0.1:3037/archive",
-      "finalUrl": "http://127.0.0.1:3037/archive",
+      "requestedUrl": "http://127.0.0.1:3047/archive",
+      "finalUrl": "http://127.0.0.1:3047/archive",
       "status": 200,
       "expectedStatuses": [
         200
@@ -489,8 +489,8 @@
     },
     {
       "route": "/archive",
-      "requestedUrl": "http://127.0.0.1:3037/archive",
-      "finalUrl": "http://127.0.0.1:3037/archive",
+      "requestedUrl": "http://127.0.0.1:3047/archive",
+      "finalUrl": "http://127.0.0.1:3047/archive",
       "status": 200,
       "expectedStatuses": [
         200
@@ -614,8 +614,8 @@
     },
     {
       "route": "/archive",
-      "requestedUrl": "http://127.0.0.1:3037/archive",
-      "finalUrl": "http://127.0.0.1:3037/archive",
+      "requestedUrl": "http://127.0.0.1:3047/archive",
+      "finalUrl": "http://127.0.0.1:3047/archive",
       "status": 200,
       "expectedStatuses": [
         200
@@ -739,8 +739,8 @@
     },
     {
       "route": "/ask",
-      "requestedUrl": "http://127.0.0.1:3037/ask?q=추락",
-      "finalUrl": "http://127.0.0.1:3037/ask?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3047/ask?q=추락",
+      "finalUrl": "http://127.0.0.1:3047/ask?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -827,8 +827,8 @@
     },
     {
       "route": "/ask",
-      "requestedUrl": "http://127.0.0.1:3037/ask?q=추락",
-      "finalUrl": "http://127.0.0.1:3037/ask?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3047/ask?q=추락",
+      "finalUrl": "http://127.0.0.1:3047/ask?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -915,8 +915,8 @@
     },
     {
       "route": "/ask",
-      "requestedUrl": "http://127.0.0.1:3037/ask?q=추락",
-      "finalUrl": "http://127.0.0.1:3037/ask?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3047/ask?q=추락",
+      "finalUrl": "http://127.0.0.1:3047/ask?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1003,8 +1003,8 @@
     },
     {
       "route": "/auth/callback",
-      "requestedUrl": "http://127.0.0.1:3037/auth/callback",
-      "finalUrl": "http://127.0.0.1:3037/auth/callback",
+      "requestedUrl": "http://127.0.0.1:3047/auth/callback",
+      "finalUrl": "http://127.0.0.1:3047/auth/callback",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1058,8 +1058,8 @@
     },
     {
       "route": "/auth/callback",
-      "requestedUrl": "http://127.0.0.1:3037/auth/callback",
-      "finalUrl": "http://127.0.0.1:3037/auth/callback",
+      "requestedUrl": "http://127.0.0.1:3047/auth/callback",
+      "finalUrl": "http://127.0.0.1:3047/auth/callback",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1113,8 +1113,8 @@
     },
     {
       "route": "/auth/callback",
-      "requestedUrl": "http://127.0.0.1:3037/auth/callback",
-      "finalUrl": "http://127.0.0.1:3037/auth/callback",
+      "requestedUrl": "http://127.0.0.1:3047/auth/callback",
+      "finalUrl": "http://127.0.0.1:3047/auth/callback",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1168,8 +1168,8 @@
     },
     {
       "route": "/demo",
-      "requestedUrl": "http://127.0.0.1:3037/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
-      "finalUrl": "http://127.0.0.1:3037/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "requestedUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "finalUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1304,8 +1304,8 @@
     },
     {
       "route": "/demo",
-      "requestedUrl": "http://127.0.0.1:3037/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
-      "finalUrl": "http://127.0.0.1:3037/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "requestedUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "finalUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1440,8 +1440,8 @@
     },
     {
       "route": "/demo",
-      "requestedUrl": "http://127.0.0.1:3037/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
-      "finalUrl": "http://127.0.0.1:3037/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "requestedUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "finalUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1576,8 +1576,8 @@
     },
     {
       "route": "/dispatch",
-      "requestedUrl": "http://127.0.0.1:3037/dispatch",
-      "finalUrl": "http://127.0.0.1:3037/dispatch",
+      "requestedUrl": "http://127.0.0.1:3047/dispatch",
+      "finalUrl": "http://127.0.0.1:3047/dispatch",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1674,8 +1674,8 @@
     },
     {
       "route": "/dispatch",
-      "requestedUrl": "http://127.0.0.1:3037/dispatch",
-      "finalUrl": "http://127.0.0.1:3037/dispatch",
+      "requestedUrl": "http://127.0.0.1:3047/dispatch",
+      "finalUrl": "http://127.0.0.1:3047/dispatch",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1772,8 +1772,8 @@
     },
     {
       "route": "/dispatch",
-      "requestedUrl": "http://127.0.0.1:3037/dispatch",
-      "finalUrl": "http://127.0.0.1:3037/dispatch",
+      "requestedUrl": "http://127.0.0.1:3047/dispatch",
+      "finalUrl": "http://127.0.0.1:3047/dispatch",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1870,8 +1870,8 @@
     },
     {
       "route": "/documents",
-      "requestedUrl": "http://127.0.0.1:3037/documents",
-      "finalUrl": "http://127.0.0.1:3037/documents",
+      "requestedUrl": "http://127.0.0.1:3047/documents",
+      "finalUrl": "http://127.0.0.1:3047/documents",
       "status": 200,
       "expectedStatuses": [
         200
@@ -2276,8 +2276,8 @@
     },
     {
       "route": "/documents",
-      "requestedUrl": "http://127.0.0.1:3037/documents",
-      "finalUrl": "http://127.0.0.1:3037/documents",
+      "requestedUrl": "http://127.0.0.1:3047/documents",
+      "finalUrl": "http://127.0.0.1:3047/documents",
       "status": 200,
       "expectedStatuses": [
         200
@@ -2605,8 +2605,8 @@
     },
     {
       "route": "/documents",
-      "requestedUrl": "http://127.0.0.1:3037/documents",
-      "finalUrl": "http://127.0.0.1:3037/documents",
+      "requestedUrl": "http://127.0.0.1:3047/documents",
+      "finalUrl": "http://127.0.0.1:3047/documents",
       "status": 200,
       "expectedStatuses": [
         200
@@ -2934,8 +2934,8 @@
     },
     {
       "route": "/dryrun",
-      "requestedUrl": "http://127.0.0.1:3037/dryrun",
-      "finalUrl": "http://127.0.0.1:3037/dryrun",
+      "requestedUrl": "http://127.0.0.1:3047/dryrun",
+      "finalUrl": "http://127.0.0.1:3047/dryrun",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3042,8 +3042,8 @@
     },
     {
       "route": "/dryrun",
-      "requestedUrl": "http://127.0.0.1:3037/dryrun",
-      "finalUrl": "http://127.0.0.1:3037/dryrun",
+      "requestedUrl": "http://127.0.0.1:3047/dryrun",
+      "finalUrl": "http://127.0.0.1:3047/dryrun",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3150,8 +3150,8 @@
     },
     {
       "route": "/dryrun",
-      "requestedUrl": "http://127.0.0.1:3037/dryrun",
-      "finalUrl": "http://127.0.0.1:3037/dryrun",
+      "requestedUrl": "http://127.0.0.1:3047/dryrun",
+      "finalUrl": "http://127.0.0.1:3047/dryrun",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3258,8 +3258,8 @@
     },
     {
       "route": "/evidence",
-      "requestedUrl": "http://127.0.0.1:3037/evidence",
-      "finalUrl": "http://127.0.0.1:3037/evidence",
+      "requestedUrl": "http://127.0.0.1:3047/evidence",
+      "finalUrl": "http://127.0.0.1:3047/evidence",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3366,8 +3366,8 @@
     },
     {
       "route": "/evidence",
-      "requestedUrl": "http://127.0.0.1:3037/evidence",
-      "finalUrl": "http://127.0.0.1:3037/evidence",
+      "requestedUrl": "http://127.0.0.1:3047/evidence",
+      "finalUrl": "http://127.0.0.1:3047/evidence",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3474,8 +3474,8 @@
     },
     {
       "route": "/evidence",
-      "requestedUrl": "http://127.0.0.1:3037/evidence",
-      "finalUrl": "http://127.0.0.1:3037/evidence",
+      "requestedUrl": "http://127.0.0.1:3047/evidence",
+      "finalUrl": "http://127.0.0.1:3047/evidence",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3582,8 +3582,8 @@
     },
     {
       "route": "/evidence-file",
-      "requestedUrl": "http://127.0.0.1:3037/evidence-file",
-      "finalUrl": "http://127.0.0.1:3037/evidence-file",
+      "requestedUrl": "http://127.0.0.1:3047/evidence-file",
+      "finalUrl": "http://127.0.0.1:3047/evidence-file",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3690,8 +3690,8 @@
     },
     {
       "route": "/evidence-file",
-      "requestedUrl": "http://127.0.0.1:3037/evidence-file",
-      "finalUrl": "http://127.0.0.1:3037/evidence-file",
+      "requestedUrl": "http://127.0.0.1:3047/evidence-file",
+      "finalUrl": "http://127.0.0.1:3047/evidence-file",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3798,8 +3798,8 @@
     },
     {
       "route": "/evidence-file",
-      "requestedUrl": "http://127.0.0.1:3037/evidence-file",
-      "finalUrl": "http://127.0.0.1:3037/evidence-file",
+      "requestedUrl": "http://127.0.0.1:3047/evidence-file",
+      "finalUrl": "http://127.0.0.1:3047/evidence-file",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3906,8 +3906,8 @@
     },
     {
       "route": "/home",
-      "requestedUrl": "http://127.0.0.1:3037/home",
-      "finalUrl": "http://127.0.0.1:3037/home",
+      "requestedUrl": "http://127.0.0.1:3047/home",
+      "finalUrl": "http://127.0.0.1:3047/home",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4004,8 +4004,8 @@
     },
     {
       "route": "/home",
-      "requestedUrl": "http://127.0.0.1:3037/home",
-      "finalUrl": "http://127.0.0.1:3037/home",
+      "requestedUrl": "http://127.0.0.1:3047/home",
+      "finalUrl": "http://127.0.0.1:3047/home",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4102,8 +4102,8 @@
     },
     {
       "route": "/home",
-      "requestedUrl": "http://127.0.0.1:3037/home",
-      "finalUrl": "http://127.0.0.1:3037/home",
+      "requestedUrl": "http://127.0.0.1:3047/home",
+      "finalUrl": "http://127.0.0.1:3047/home",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4200,8 +4200,8 @@
     },
     {
       "route": "/interpretation/[id]",
-      "requestedUrl": "http://127.0.0.1:3037/interpretation/audit-missing-interpretation",
-      "finalUrl": "http://127.0.0.1:3037/interpretation/audit-missing-interpretation",
+      "requestedUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
+      "finalUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
       "status": 404,
       "expectedStatuses": [
         404
@@ -4274,8 +4274,8 @@
     },
     {
       "route": "/interpretation/[id]",
-      "requestedUrl": "http://127.0.0.1:3037/interpretation/audit-missing-interpretation",
-      "finalUrl": "http://127.0.0.1:3037/interpretation/audit-missing-interpretation",
+      "requestedUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
+      "finalUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
       "status": 404,
       "expectedStatuses": [
         404
@@ -4348,8 +4348,8 @@
     },
     {
       "route": "/interpretation/[id]",
-      "requestedUrl": "http://127.0.0.1:3037/interpretation/audit-missing-interpretation",
-      "finalUrl": "http://127.0.0.1:3037/interpretation/audit-missing-interpretation",
+      "requestedUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
+      "finalUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
       "status": 404,
       "expectedStatuses": [
         404
@@ -4422,8 +4422,8 @@
     },
     {
       "route": "/knowledge",
-      "requestedUrl": "http://127.0.0.1:3037/knowledge",
-      "finalUrl": "http://127.0.0.1:3037/knowledge",
+      "requestedUrl": "http://127.0.0.1:3047/knowledge",
+      "finalUrl": "http://127.0.0.1:3047/knowledge",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4499,8 +4499,8 @@
     },
     {
       "route": "/knowledge",
-      "requestedUrl": "http://127.0.0.1:3037/knowledge",
-      "finalUrl": "http://127.0.0.1:3037/knowledge",
+      "requestedUrl": "http://127.0.0.1:3047/knowledge",
+      "finalUrl": "http://127.0.0.1:3047/knowledge",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4576,8 +4576,8 @@
     },
     {
       "route": "/knowledge",
-      "requestedUrl": "http://127.0.0.1:3037/knowledge",
-      "finalUrl": "http://127.0.0.1:3037/knowledge",
+      "requestedUrl": "http://127.0.0.1:3047/knowledge",
+      "finalUrl": "http://127.0.0.1:3047/knowledge",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4653,8 +4653,8 @@
     },
     {
       "route": "/knowledge/[section]/[slug]",
-      "requestedUrl": "http://127.0.0.1:3037/knowledge/hazards/fall-scaffold",
-      "finalUrl": "http://127.0.0.1:3037/knowledge/hazards/fall-scaffold",
+      "requestedUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
+      "finalUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4741,8 +4741,8 @@
     },
     {
       "route": "/knowledge/[section]/[slug]",
-      "requestedUrl": "http://127.0.0.1:3037/knowledge/hazards/fall-scaffold",
-      "finalUrl": "http://127.0.0.1:3037/knowledge/hazards/fall-scaffold",
+      "requestedUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
+      "finalUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4829,8 +4829,8 @@
     },
     {
       "route": "/knowledge/[section]/[slug]",
-      "requestedUrl": "http://127.0.0.1:3037/knowledge/hazards/fall-scaffold",
-      "finalUrl": "http://127.0.0.1:3037/knowledge/hazards/fall-scaffold",
+      "requestedUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
+      "finalUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4917,8 +4917,8 @@
     },
     {
       "route": "/law/[id]",
-      "requestedUrl": "http://127.0.0.1:3037/law/law-osha-main",
-      "finalUrl": "http://127.0.0.1:3037/law/law-osha-main",
+      "requestedUrl": "http://127.0.0.1:3047/law/law-osha-main",
+      "finalUrl": "http://127.0.0.1:3047/law/law-osha-main",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4991,8 +4991,8 @@
     },
     {
       "route": "/law/[id]",
-      "requestedUrl": "http://127.0.0.1:3037/law/law-osha-main",
-      "finalUrl": "http://127.0.0.1:3037/law/law-osha-main",
+      "requestedUrl": "http://127.0.0.1:3047/law/law-osha-main",
+      "finalUrl": "http://127.0.0.1:3047/law/law-osha-main",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5065,8 +5065,8 @@
     },
     {
       "route": "/law/[id]",
-      "requestedUrl": "http://127.0.0.1:3037/law/law-osha-main",
-      "finalUrl": "http://127.0.0.1:3037/law/law-osha-main",
+      "requestedUrl": "http://127.0.0.1:3047/law/law-osha-main",
+      "finalUrl": "http://127.0.0.1:3047/law/law-osha-main",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5139,8 +5139,8 @@
     },
     {
       "route": "/login",
-      "requestedUrl": "http://127.0.0.1:3037/login",
-      "finalUrl": "http://127.0.0.1:3037/login",
+      "requestedUrl": "http://127.0.0.1:3047/login",
+      "finalUrl": "http://127.0.0.1:3047/login",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5194,8 +5194,8 @@
     },
     {
       "route": "/login",
-      "requestedUrl": "http://127.0.0.1:3037/login",
-      "finalUrl": "http://127.0.0.1:3037/login",
+      "requestedUrl": "http://127.0.0.1:3047/login",
+      "finalUrl": "http://127.0.0.1:3047/login",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5249,8 +5249,8 @@
     },
     {
       "route": "/login",
-      "requestedUrl": "http://127.0.0.1:3037/login",
-      "finalUrl": "http://127.0.0.1:3037/login",
+      "requestedUrl": "http://127.0.0.1:3047/login",
+      "finalUrl": "http://127.0.0.1:3047/login",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5304,8 +5304,8 @@
     },
     {
       "route": "/ontology",
-      "requestedUrl": "http://127.0.0.1:3037/ontology",
-      "finalUrl": "http://127.0.0.1:3037/ontology",
+      "requestedUrl": "http://127.0.0.1:3047/ontology",
+      "finalUrl": "http://127.0.0.1:3047/ontology",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5529,8 +5529,8 @@
     },
     {
       "route": "/ontology",
-      "requestedUrl": "http://127.0.0.1:3037/ontology",
-      "finalUrl": "http://127.0.0.1:3037/ontology",
+      "requestedUrl": "http://127.0.0.1:3047/ontology",
+      "finalUrl": "http://127.0.0.1:3047/ontology",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5560,7 +5560,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ontology-tablet-1024.jpg",
-      "screenshotSha256": "ebf440bc9a16be64c77e9b5fe78fdc1f43e27af58493becad9ae0811b8271fab",
+      "screenshotSha256": "c1ce56477ef40494d46816d240feb23922f286755eb6a7d1d9a0bdd5ba4d3368",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -5754,8 +5754,8 @@
     },
     {
       "route": "/ontology",
-      "requestedUrl": "http://127.0.0.1:3037/ontology",
-      "finalUrl": "http://127.0.0.1:3037/ontology",
+      "requestedUrl": "http://127.0.0.1:3047/ontology",
+      "finalUrl": "http://127.0.0.1:3047/ontology",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5979,8 +5979,8 @@
     },
     {
       "route": "/ops/api",
-      "requestedUrl": "http://127.0.0.1:3037/ops/api",
-      "finalUrl": "http://127.0.0.1:3037/ops/api",
+      "requestedUrl": "http://127.0.0.1:3047/ops/api",
+      "finalUrl": "http://127.0.0.1:3047/ops/api",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6077,8 +6077,8 @@
     },
     {
       "route": "/ops/api",
-      "requestedUrl": "http://127.0.0.1:3037/ops/api",
-      "finalUrl": "http://127.0.0.1:3037/ops/api",
+      "requestedUrl": "http://127.0.0.1:3047/ops/api",
+      "finalUrl": "http://127.0.0.1:3047/ops/api",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6175,8 +6175,8 @@
     },
     {
       "route": "/ops/api",
-      "requestedUrl": "http://127.0.0.1:3037/ops/api",
-      "finalUrl": "http://127.0.0.1:3037/ops/api",
+      "requestedUrl": "http://127.0.0.1:3047/ops/api",
+      "finalUrl": "http://127.0.0.1:3047/ops/api",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6273,8 +6273,8 @@
     },
     {
       "route": "/precedent/[id]",
-      "requestedUrl": "http://127.0.0.1:3037/precedent/prec-subcontract-safety",
-      "finalUrl": "http://127.0.0.1:3037/precedent/prec-subcontract-safety",
+      "requestedUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
+      "finalUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6347,8 +6347,8 @@
     },
     {
       "route": "/precedent/[id]",
-      "requestedUrl": "http://127.0.0.1:3037/precedent/prec-subcontract-safety",
-      "finalUrl": "http://127.0.0.1:3037/precedent/prec-subcontract-safety",
+      "requestedUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
+      "finalUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6421,8 +6421,8 @@
     },
     {
       "route": "/precedent/[id]",
-      "requestedUrl": "http://127.0.0.1:3037/precedent/prec-subcontract-safety",
-      "finalUrl": "http://127.0.0.1:3037/precedent/prec-subcontract-safety",
+      "requestedUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
+      "finalUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6495,8 +6495,8 @@
     },
     {
       "route": "/preview",
-      "requestedUrl": "http://127.0.0.1:3037/preview",
-      "finalUrl": "http://127.0.0.1:3037/preview",
+      "requestedUrl": "http://127.0.0.1:3047/preview",
+      "finalUrl": "http://127.0.0.1:3047/preview",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6583,8 +6583,8 @@
     },
     {
       "route": "/preview",
-      "requestedUrl": "http://127.0.0.1:3037/preview",
-      "finalUrl": "http://127.0.0.1:3037/preview",
+      "requestedUrl": "http://127.0.0.1:3047/preview",
+      "finalUrl": "http://127.0.0.1:3047/preview",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6671,8 +6671,8 @@
     },
     {
       "route": "/preview",
-      "requestedUrl": "http://127.0.0.1:3037/preview",
-      "finalUrl": "http://127.0.0.1:3037/preview",
+      "requestedUrl": "http://127.0.0.1:3047/preview",
+      "finalUrl": "http://127.0.0.1:3047/preview",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6759,8 +6759,8 @@
     },
     {
       "route": "/prototype",
-      "requestedUrl": "http://127.0.0.1:3037/prototype",
-      "finalUrl": "http://127.0.0.1:3037/workspace",
+      "requestedUrl": "http://127.0.0.1:3047/prototype",
+      "finalUrl": "http://127.0.0.1:3047/workspace",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6934,8 +6934,8 @@
     },
     {
       "route": "/prototype",
-      "requestedUrl": "http://127.0.0.1:3037/prototype",
-      "finalUrl": "http://127.0.0.1:3037/workspace",
+      "requestedUrl": "http://127.0.0.1:3047/prototype",
+      "finalUrl": "http://127.0.0.1:3047/workspace",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7109,8 +7109,8 @@
     },
     {
       "route": "/prototype",
-      "requestedUrl": "http://127.0.0.1:3037/prototype",
-      "finalUrl": "http://127.0.0.1:3037/workspace",
+      "requestedUrl": "http://127.0.0.1:3047/prototype",
+      "finalUrl": "http://127.0.0.1:3047/workspace",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7284,8 +7284,8 @@
     },
     {
       "route": "/reports",
-      "requestedUrl": "http://127.0.0.1:3037/reports",
-      "finalUrl": "http://127.0.0.1:3037/reports",
+      "requestedUrl": "http://127.0.0.1:3047/reports",
+      "finalUrl": "http://127.0.0.1:3047/reports",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7379,8 +7379,8 @@
     },
     {
       "route": "/reports",
-      "requestedUrl": "http://127.0.0.1:3037/reports",
-      "finalUrl": "http://127.0.0.1:3037/reports",
+      "requestedUrl": "http://127.0.0.1:3047/reports",
+      "finalUrl": "http://127.0.0.1:3047/reports",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7474,8 +7474,8 @@
     },
     {
       "route": "/reports",
-      "requestedUrl": "http://127.0.0.1:3037/reports",
-      "finalUrl": "http://127.0.0.1:3037/reports",
+      "requestedUrl": "http://127.0.0.1:3047/reports",
+      "finalUrl": "http://127.0.0.1:3047/reports",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7569,8 +7569,8 @@
     },
     {
       "route": "/roadmap",
-      "requestedUrl": "http://127.0.0.1:3037/roadmap",
-      "finalUrl": "http://127.0.0.1:3037/roadmap",
+      "requestedUrl": "http://127.0.0.1:3047/roadmap",
+      "finalUrl": "http://127.0.0.1:3047/roadmap",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7664,8 +7664,8 @@
     },
     {
       "route": "/roadmap",
-      "requestedUrl": "http://127.0.0.1:3037/roadmap",
-      "finalUrl": "http://127.0.0.1:3037/roadmap",
+      "requestedUrl": "http://127.0.0.1:3047/roadmap",
+      "finalUrl": "http://127.0.0.1:3047/roadmap",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7759,8 +7759,8 @@
     },
     {
       "route": "/roadmap",
-      "requestedUrl": "http://127.0.0.1:3037/roadmap",
-      "finalUrl": "http://127.0.0.1:3037/roadmap",
+      "requestedUrl": "http://127.0.0.1:3047/roadmap",
+      "finalUrl": "http://127.0.0.1:3047/roadmap",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7854,8 +7854,8 @@
     },
     {
       "route": "/search",
-      "requestedUrl": "http://127.0.0.1:3037/search?q=추락",
-      "finalUrl": "http://127.0.0.1:3037/search?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3047/search?q=추락",
+      "finalUrl": "http://127.0.0.1:3047/search?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7956,8 +7956,8 @@
     },
     {
       "route": "/search",
-      "requestedUrl": "http://127.0.0.1:3037/search?q=추락",
-      "finalUrl": "http://127.0.0.1:3037/search?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3047/search?q=추락",
+      "finalUrl": "http://127.0.0.1:3047/search?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8058,8 +8058,8 @@
     },
     {
       "route": "/search",
-      "requestedUrl": "http://127.0.0.1:3037/search?q=추락",
-      "finalUrl": "http://127.0.0.1:3037/search?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3047/search?q=추락",
+      "finalUrl": "http://127.0.0.1:3047/search?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8160,8 +8160,8 @@
     },
     {
       "route": "/settings",
-      "requestedUrl": "http://127.0.0.1:3037/settings",
-      "finalUrl": "http://127.0.0.1:3037/settings",
+      "requestedUrl": "http://127.0.0.1:3047/settings",
+      "finalUrl": "http://127.0.0.1:3047/settings",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8237,8 +8237,8 @@
     },
     {
       "route": "/settings",
-      "requestedUrl": "http://127.0.0.1:3037/settings",
-      "finalUrl": "http://127.0.0.1:3037/settings",
+      "requestedUrl": "http://127.0.0.1:3047/settings",
+      "finalUrl": "http://127.0.0.1:3047/settings",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8314,8 +8314,8 @@
     },
     {
       "route": "/settings",
-      "requestedUrl": "http://127.0.0.1:3037/settings",
-      "finalUrl": "http://127.0.0.1:3037/settings",
+      "requestedUrl": "http://127.0.0.1:3047/settings",
+      "finalUrl": "http://127.0.0.1:3047/settings",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8391,8 +8391,8 @@
     },
     {
       "route": "/settings/ai-connect",
-      "requestedUrl": "http://127.0.0.1:3037/settings/ai-connect",
-      "finalUrl": "http://127.0.0.1:3037/settings/ai-connect",
+      "requestedUrl": "http://127.0.0.1:3047/settings/ai-connect",
+      "finalUrl": "http://127.0.0.1:3047/settings/ai-connect",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8486,8 +8486,8 @@
     },
     {
       "route": "/settings/ai-connect",
-      "requestedUrl": "http://127.0.0.1:3037/settings/ai-connect",
-      "finalUrl": "http://127.0.0.1:3037/settings/ai-connect",
+      "requestedUrl": "http://127.0.0.1:3047/settings/ai-connect",
+      "finalUrl": "http://127.0.0.1:3047/settings/ai-connect",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8581,8 +8581,8 @@
     },
     {
       "route": "/settings/ai-connect",
-      "requestedUrl": "http://127.0.0.1:3037/settings/ai-connect",
-      "finalUrl": "http://127.0.0.1:3037/settings/ai-connect",
+      "requestedUrl": "http://127.0.0.1:3047/settings/ai-connect",
+      "finalUrl": "http://127.0.0.1:3047/settings/ai-connect",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8676,8 +8676,8 @@
     },
     {
       "route": "/tbm",
-      "requestedUrl": "http://127.0.0.1:3037/tbm",
-      "finalUrl": "http://127.0.0.1:3037/tbm",
+      "requestedUrl": "http://127.0.0.1:3047/tbm",
+      "finalUrl": "http://127.0.0.1:3047/tbm",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8764,8 +8764,8 @@
     },
     {
       "route": "/tbm",
-      "requestedUrl": "http://127.0.0.1:3037/tbm",
-      "finalUrl": "http://127.0.0.1:3037/tbm",
+      "requestedUrl": "http://127.0.0.1:3047/tbm",
+      "finalUrl": "http://127.0.0.1:3047/tbm",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8852,8 +8852,8 @@
     },
     {
       "route": "/tbm",
-      "requestedUrl": "http://127.0.0.1:3037/tbm",
-      "finalUrl": "http://127.0.0.1:3037/tbm",
+      "requestedUrl": "http://127.0.0.1:3047/tbm",
+      "finalUrl": "http://127.0.0.1:3047/tbm",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8940,8 +8940,8 @@
     },
     {
       "route": "/trust",
-      "requestedUrl": "http://127.0.0.1:3037/trust",
-      "finalUrl": "http://127.0.0.1:3037/trust",
+      "requestedUrl": "http://127.0.0.1:3047/trust",
+      "finalUrl": "http://127.0.0.1:3047/trust",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9028,8 +9028,8 @@
     },
     {
       "route": "/trust",
-      "requestedUrl": "http://127.0.0.1:3037/trust",
-      "finalUrl": "http://127.0.0.1:3037/trust",
+      "requestedUrl": "http://127.0.0.1:3047/trust",
+      "finalUrl": "http://127.0.0.1:3047/trust",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9116,8 +9116,8 @@
     },
     {
       "route": "/trust",
-      "requestedUrl": "http://127.0.0.1:3037/trust",
-      "finalUrl": "http://127.0.0.1:3037/trust",
+      "requestedUrl": "http://127.0.0.1:3047/trust",
+      "finalUrl": "http://127.0.0.1:3047/trust",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9204,8 +9204,8 @@
     },
     {
       "route": "/why",
-      "requestedUrl": "http://127.0.0.1:3037/why",
-      "finalUrl": "http://127.0.0.1:3037/why",
+      "requestedUrl": "http://127.0.0.1:3047/why",
+      "finalUrl": "http://127.0.0.1:3047/why",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9309,8 +9309,8 @@
     },
     {
       "route": "/why",
-      "requestedUrl": "http://127.0.0.1:3037/why",
-      "finalUrl": "http://127.0.0.1:3037/why",
+      "requestedUrl": "http://127.0.0.1:3047/why",
+      "finalUrl": "http://127.0.0.1:3047/why",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9414,8 +9414,8 @@
     },
     {
       "route": "/why",
-      "requestedUrl": "http://127.0.0.1:3037/why",
-      "finalUrl": "http://127.0.0.1:3037/why",
+      "requestedUrl": "http://127.0.0.1:3047/why",
+      "finalUrl": "http://127.0.0.1:3047/why",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9519,8 +9519,8 @@
     },
     {
       "route": "/worker",
-      "requestedUrl": "http://127.0.0.1:3037/worker",
-      "finalUrl": "http://127.0.0.1:3037/worker",
+      "requestedUrl": "http://127.0.0.1:3047/worker",
+      "finalUrl": "http://127.0.0.1:3047/worker",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9645,8 +9645,8 @@
     },
     {
       "route": "/worker",
-      "requestedUrl": "http://127.0.0.1:3037/worker",
-      "finalUrl": "http://127.0.0.1:3037/worker",
+      "requestedUrl": "http://127.0.0.1:3047/worker",
+      "finalUrl": "http://127.0.0.1:3047/worker",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9771,8 +9771,8 @@
     },
     {
       "route": "/worker",
-      "requestedUrl": "http://127.0.0.1:3037/worker",
-      "finalUrl": "http://127.0.0.1:3037/worker",
+      "requestedUrl": "http://127.0.0.1:3047/worker",
+      "finalUrl": "http://127.0.0.1:3047/worker",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9897,8 +9897,8 @@
     },
     {
       "route": "/workers",
-      "requestedUrl": "http://127.0.0.1:3037/workers",
-      "finalUrl": "http://127.0.0.1:3037/workers",
+      "requestedUrl": "http://127.0.0.1:3047/workers",
+      "finalUrl": "http://127.0.0.1:3047/workers",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10100,8 +10100,8 @@
     },
     {
       "route": "/workers",
-      "requestedUrl": "http://127.0.0.1:3037/workers",
-      "finalUrl": "http://127.0.0.1:3037/workers",
+      "requestedUrl": "http://127.0.0.1:3047/workers",
+      "finalUrl": "http://127.0.0.1:3047/workers",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10303,8 +10303,8 @@
     },
     {
       "route": "/workers",
-      "requestedUrl": "http://127.0.0.1:3037/workers",
-      "finalUrl": "http://127.0.0.1:3037/workers",
+      "requestedUrl": "http://127.0.0.1:3047/workers",
+      "finalUrl": "http://127.0.0.1:3047/workers",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10506,8 +10506,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10709,8 +10709,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10912,8 +10912,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11089,8 +11089,8 @@
   "workspaceThemeRows": [
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=day",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=day",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11292,8 +11292,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=day",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=day",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11495,8 +11495,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=day",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=day",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11670,8 +11670,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=night",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=night",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11873,8 +11873,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=night",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=night",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12076,8 +12076,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=night",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&theme=night",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12253,8 +12253,8 @@
   "specialSurfaceRows": [
     {
       "route": "special:not-found",
-      "requestedUrl": "http://127.0.0.1:3037/__frontend-audit-not-found__",
-      "finalUrl": "http://127.0.0.1:3037/__frontend-audit-not-found__",
+      "requestedUrl": "http://127.0.0.1:3047/__frontend-audit-not-found__",
+      "finalUrl": "http://127.0.0.1:3047/__frontend-audit-not-found__",
       "status": 404,
       "expectedStatuses": [
         404
@@ -12328,8 +12328,8 @@
     },
     {
       "route": "special:error",
-      "requestedUrl": "http://127.0.0.1:3037/dryrun?__auditBoundary=error",
-      "finalUrl": "http://127.0.0.1:3037/dryrun?__auditBoundary=error",
+      "requestedUrl": "http://127.0.0.1:3047/dryrun?__auditBoundary=error",
+      "finalUrl": "http://127.0.0.1:3047/dryrun?__auditBoundary=error",
       "status": 500,
       "expectedStatuses": [
         500
@@ -12403,8 +12403,8 @@
     },
     {
       "route": "special:global-error",
-      "requestedUrl": "http://127.0.0.1:3037/dryrun?__auditBoundary=global-error",
-      "finalUrl": "http://127.0.0.1:3037/dryrun?__auditBoundary=global-error",
+      "requestedUrl": "http://127.0.0.1:3047/dryrun?__auditBoundary=global-error",
+      "finalUrl": "http://127.0.0.1:3047/dryrun?__auditBoundary=global-error",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12478,8 +12478,8 @@
     },
     {
       "route": "special:loading",
-      "requestedUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&__auditBoundary=loading",
-      "finalUrl": "http://127.0.0.1:3037/workspace?scenario=seoul-construction-windy&__auditBoundary=loading",
+      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&__auditBoundary=loading",
+      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&__auditBoundary=loading",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12524,7 +12524,7 @@
           ]
         }
       ],
-      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.2,20,33.9,33.9,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.8,20.6,32.8,32.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -12547,8 +12547,8 @@
   "generatedSurfaceRows": [
     {
       "route": "generated:document-preview",
-      "requestedUrl": "http://127.0.0.1:3037/documents",
-      "finalUrl": "http://127.0.0.1:3037/documents",
+      "requestedUrl": "http://127.0.0.1:3047/documents",
+      "finalUrl": "http://127.0.0.1:3047/documents",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12955,8 +12955,8 @@
     {
       "surface": "pdf-export",
       "route": "generated:pdf-export",
-      "requestedUrl": "http://127.0.0.1:3037/api/export/pdf?format=html",
-      "finalUrl": "http://127.0.0.1:3037/api/export/pdf?format=html",
+      "requestedUrl": "http://127.0.0.1:3047/api/export/pdf?format=html",
+      "finalUrl": "http://127.0.0.1:3047/api/export/pdf?format=html",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12988,7 +12988,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 13. 오전 7:52:16 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 13. 오전 8:32:53 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13032,7 +13032,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "bbb922072e1cef4edde4a5d8ed38cd7c4998ae58b21c7cbcffab4d320bb86e56",
+      "screenshotSha256": "510b0979233791c881cd433dc7f05e00f6816c6321ded3b057a2cae80b7fbc6f",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generatedAt": "2026-07-12T16:42:59.812Z",
   "mode": "audit",
-  "buildDirectory": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\release-audit-evidence-remediation\\.next",
+  "buildDirectory": "<local-user-root>\\dev\\safeguard-contest-mvp\\<worktree-root>\\release-audit-evidence-remediation\\.next",
   "buildId": "MR8Dw1Qptpwxgm229Y0Gy",
   "sourceSha": "a1dbedb64e177a4909584274eaad87484aa732f4",
   "sourceIdentity": "d29fc63319e2f0a2f88ad3fe5842634d896140530e32c11e92f1075f4264537c",
