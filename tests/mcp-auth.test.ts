@@ -51,8 +51,12 @@ describe("matchesLegacyToken", () => {
 });
 
 describe("normalizeScopes", () => {
-  it("keeps a non-empty string array", () => {
-    expect(normalizeScopes(["tools:read", "tools:write"])).toEqual(["tools:read", "tools:write"]);
+  it("normalizes and deduplicates an all-known non-empty string array", () => {
+    expect(normalizeScopes([
+      " tools:get_weather_signals ",
+      "tools:get_weather_signals",
+      "tools:read",
+    ])).toEqual(["tools:get_weather_signals", "tools:read"]);
   });
 
   it("fails closed for malformed or empty DB scope values", () => {
@@ -62,13 +66,10 @@ describe("normalizeScopes", () => {
     expect(normalizeScopes("tools:*")).toEqual([]);
   });
 
-  it("keeps only known scopes, trims them, and removes duplicates", () => {
-    expect(normalizeScopes([
-      " tools:get_weather_signals ",
-      "tools:unknown_future_tool",
-      "tools:get_weather_signals",
-      "tools:read",
-    ])).toEqual(["tools:get_weather_signals", "tools:read"]);
+  it("denies the entire array when one entry is malformed or unknown", () => {
+    expect(normalizeScopes(["tools:write", 1])).toEqual([]);
+    expect(normalizeScopes(["tools:read", "tools:unknown_future_tool"])).toEqual([]);
+    expect(normalizeScopes(["tools:read", "   "])).toEqual([]);
   });
 });
 
