@@ -1,0 +1,54 @@
+{
+  "feature": "frontend consistency completion",
+  "branchName": "feat/frontend-document-typography-wave4",
+  "qualityChecks": [
+    "npm.cmd test -- tests/document-typography-token-contract.test.ts",
+    "node scripts/frontend_consistency_audit.mjs",
+    "npm.cmd run typecheck",
+    "npm.cmd run build"
+  ],
+  "userStories": [
+    {
+      "id": "W4",
+      "title": "Canonical document heading typography",
+      "priority": 1,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Work document h2 resolves to page-title tokens and section h3 resolves to section-title tokens",
+        "Desktop and 390px production browser checks show no overflow",
+        "Static violations decrease without parser, allowlist, coverage, Reports behavior, package, or backend contract changes"
+      ],
+      "files": [
+        "app/globals.css",
+        "tests/document-typography-token-contract.test.ts",
+        "tests/document-typography-production-matrix.test.ts"
+      ]
+    },
+    {
+      "id": "W5",
+      "title": "Split mixed typography roles",
+      "priority": 2,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "All five mixed-typography-role findings are resolved by semantic selector separation",
+        "Computed browser typography remains role-correct"
+      ],
+      "files": ["app/globals.css", "tests"]
+    },
+    {
+      "id": "FINAL",
+      "title": "Prove complete frontend consistency",
+      "priority": 99,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Static audit violations are exactly zero with coverage issues zero",
+        "Actual 108-row production audit has failed rows zero and findings zero",
+        "Full tests, strict typecheck, normal and audit builds pass"
+      ],
+      "files": ["evaluation/frontend-consistency-audit-2026-07-11"]
+    }
+  ]
+}

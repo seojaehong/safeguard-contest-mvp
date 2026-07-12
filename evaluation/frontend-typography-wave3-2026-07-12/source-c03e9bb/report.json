@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "3bfa273a43a9e2587c8efc21800f05469d49ee8e",
+  "productSha": "3fb1caed47efee7df395ef0879f8e641b09d61b3",
+  "sourceSha": "c03e9bb64e4d49b7552e4585629cff3acd19a2d4",
+  "status": "bounded-pass-full-audit-red",
+  "scope": {
+    "literalFontFamilyDeclarationsBefore": 15,
+    "literalFontFamilyDeclarationsAfter": 0
+  },
+  "verification": {
+    "focusedTests": { "files": 1, "tests": 2, "status": "pass" },
+    "typecheck": "pass",
+    "buildStaticPages": { "generated": 27, "status": "pass" },
+    "productionBrowser": { "files": 1, "tests": 1, "status": "pass" },
+    "staticAudit": {
+      "status": "fail",
+      "violations": 2368,
+      "importantDeclarations": 737,
+      "coverageIssues": 0,
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "fontFamilyTokenViolations": 0
+    },
+    "audit108Rows": "not-run-static-prerequisite-red"
+  }
+}

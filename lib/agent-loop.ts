@@ -27,7 +27,7 @@ export type ClawToolEvent = {
   label: string;
 };
 export type ClawFinalEvent = { kind: "final" };
-export type ClawErrorEvent = { kind: "error"; message: string };
+export type ClawErrorEvent = { kind: "error"; code?: string; message: string };
 export type ClawChatEvent = ClawTextDeltaEvent | ClawToolEvent | ClawFinalEvent | ClawErrorEvent;
 
 /** 클라이언트가 보내는 stateless 히스토리 1건. */

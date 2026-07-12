@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { EventEmitter } from "node:events";
+import { PassThrough } from "node:stream";
+
+import { describe, expect, it, vi } from "vitest";
 
 import {
   buildOpenClawChatArgs,
@@ -6,12 +9,79 @@ import {
   buildOpenClawStatusArgs,
   parseOpenClawOAuthStatusOutput,
   resolveOpenClawChatConfig,
-  resolveOpenClawSpawn
+  resolveOpenClawSpawn,
+  resolveSpawnOptions,
+  createLocalOpenClawAdapter,
 } from "@/lib/openclaw-chat";
+import type { BrokerRequestContext } from "@/lib/engine-adapter";
 
 describe("OpenClaw chat routing", () => {
+  it("waits for deterministic child close after abort before resolving the run", async () => {
+    const module = await import("@/lib/openclaw-chat") as typeof import("@/lib/openclaw-chat") & {
+      createOpenClawChatRunner?: (dependencies: {
+        spawnProcess: () => EventEmitter & {
+          stdout: PassThrough;
+          stderr: PassThrough;
+          kill: ReturnType<typeof vi.fn>;
+        };
+      }) => (input: {
+        config: ReturnType<typeof resolveOpenClawChatConfig>;
+        prompt: string;
+        emit: () => void;
+        signal: AbortSignal;
+      }) => Promise<void>;
+    };
+    expect(module.createOpenClawChatRunner).toBeTypeOf("function");
+    if (!module.createOpenClawChatRunner) return;
+
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: vi.fn(() => true),
+    });
+    const runChat = module.createOpenClawChatRunner({ spawnProcess: () => child });
+    const controller = new AbortController();
+    const run = runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1", OPENCLAW_CHAT_TIMEOUT_MS: "60000" }),
+      prompt: "test",
+      emit: () => undefined,
+      signal: controller.signal,
+    });
+    let settled = false;
+    void run.catch(() => { settled = true; });
+
+    controller.abort(new Error("request cancelled"));
+    await Promise.resolve();
+    expect(child.kill).toHaveBeenCalledTimes(1);
+    expect(settled).toBe(false);
+
+    child.emit("close", null, "SIGTERM");
+    await expect(run).rejects.toBeInstanceOf(Error);
+  });
+
+  it("does not spawn an already-aborted request", async () => {
+    const module = await import("@/lib/openclaw-chat") as typeof import("@/lib/openclaw-chat") & {
+      createOpenClawChatRunner?: (dependencies: { spawnProcess: ReturnType<typeof vi.fn> }) => typeof import("@/lib/openclaw-chat").runOpenClawChat;
+    };
+    expect(module.createOpenClawChatRunner).toBeTypeOf("function");
+    if (!module.createOpenClawChatRunner) return;
+
+    const spawnProcess = vi.fn();
+    const runChat = module.createOpenClawChatRunner({ spawnProcess });
+    const controller = new AbortController();
+    controller.abort(new Error("cancelled before spawn"));
+
+    await expect(runChat({
+      config: resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" }),
+      prompt: "test",
+      emit: () => undefined,
+      signal: controller.signal,
+    })).rejects.toBeInstanceOf(Error);
+    expect(spawnProcess).not.toHaveBeenCalled();
+  });
+
   it("builds a safeclaw local agent command that uses the profile OAuth runtime", () => {
-    const config = resolveOpenClawChatConfig({});
+    const config = resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" });
     expect(config).toMatchObject({
       bin: "openclaw",
       profile: "safeclaw",
@@ -21,7 +91,7 @@ describe("OpenClaw chat routing", () => {
       local: true
     });
 
-    expect(buildOpenClawChatArgs(config, "성수동 외벽 도장 작업")).toEqual([
+    expect(buildOpenClawChatArgs(config, "성수동 외벽 도장 작업", "broker-opaque-request-key")).toEqual([
       "--profile",
       "safeclaw",
       "agent",
@@ -30,10 +100,60 @@ describe("OpenClaw chat routing", () => {
       "--local",
       "--model",
       "openai/gpt-5.5",
+      "--session-key",
+      "agent:main:broker-opaque-request-key",
       "-m",
       "성수동 외벽 도장 작업"
     ]);
-    expect(buildOpenClawStatusArgs(config)).toEqual(["--profile", "safeclaw", "models", "status", "--json"]);
+    expect(buildOpenClawStatusArgs(config)).toEqual([
+      "--profile",
+      "safeclaw",
+      "models",
+      "status",
+      "--agent",
+      "main",
+      "--json",
+    ]);
+  });
+
+  it("queries OAuth status for the exact configured agent and preserves child abort semantics", async () => {
+    const module = await import("@/lib/openclaw-chat") as typeof import("@/lib/openclaw-chat") & {
+      createOpenClawOAuthStatusChecker?: (dependencies: {
+        spawnProcess: ReturnType<typeof vi.fn>;
+      }) => (
+        config: ReturnType<typeof resolveOpenClawChatConfig>,
+        signal?: AbortSignal,
+      ) => Promise<unknown>;
+    };
+    expect(module.createOpenClawOAuthStatusChecker).toBeTypeOf("function");
+    if (!module.createOpenClawOAuthStatusChecker) return;
+
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: vi.fn(() => true),
+    });
+    const spawnProcess = vi.fn(() => child);
+    const checkOAuth = module.createOpenClawOAuthStatusChecker({ spawnProcess });
+    const controller = new AbortController();
+    const reason = new Error("preflight cancelled");
+    const config = resolveOpenClawChatConfig({ OPENCLAW_AGENT: "field-operations" });
+    const check = checkOAuth(config, controller.signal);
+    let settled = false;
+    void check.catch(() => { settled = true; });
+
+    expect(spawnProcess).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.arrayContaining(["--agent", "field-operations"]),
+      expect.objectContaining({ shell: false }),
+    );
+    controller.abort(reason);
+    await Promise.resolve();
+    expect(child.kill).toHaveBeenCalledTimes(1);
+    expect(settled).toBe(false);
+
+    child.emit("close", null, "SIGTERM");
+    await expect(check).rejects.toBe(reason);
   });
 
   it("ignores legacy chat provider flags and keeps the OpenClaw OAuth runtime", () => {
@@ -42,7 +162,8 @@ describe("OpenClaw chat routing", () => {
       ANTHROPIC_API_KEY: "anthropic-placeholder",
       ANTHROPIC_MODEL: "claude-sonnet-5",
       OPENCLAW_PROFILE: "safeclaw",
-      OPENCLAW_AGENT: "main"
+      OPENCLAW_AGENT: "main",
+      OPENCLAW_LOCAL: "1"
     });
 
     expect(config.requiredAuthProvider).toBe("openai/oauth");
@@ -84,6 +205,162 @@ describe("OpenClaw chat routing", () => {
     expect(command.args).toContain("ping");
   });
 
+  it("does not enable the local CLI flag without explicit server-only configuration", () => {
+    expect(resolveOpenClawChatConfig({}).local).toBe(false);
+    expect(resolveOpenClawChatConfig({ OPENCLAW_LOCAL: "1" }).local).toBe(true);
+  });
+
+  it("always spawns OpenClaw without a shell", () => {
+    expect(resolveSpawnOptions()).toMatchObject({
+      shell: false,
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  });
+
+  it("fails before OAuth or spawn when site-bound MCP identity cannot be proven", async () => {
+    const context: BrokerRequestContext = {
+      userId: "user-1",
+      organizationId: "org-1",
+      siteId: "site-1",
+      site: { siteName: "성수 현장", region: null, briefingQuestion: null },
+    };
+    const assertOAuth = vi.fn(async () => ({
+      ok: true as const,
+      provider: "openai" as const,
+      authProvider: "openai/oauth" as const,
+      model: "openai/gpt-5.5",
+      checkedAt: "2026-07-12T00:00:00.000Z",
+      message: "ok",
+    }));
+    const engine = createLocalOpenClawAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "local-openclaw", OPENCLAW_LOCAL: "1" },
+      runtimeCapability: async () => true,
+      verifySiteBinding: async () => false,
+      assertOAuth,
+      runChat: vi.fn(async () => undefined),
+    });
+
+    await expect(engine.checkAvailability(context)).rejects.toMatchObject({
+      code: "ENGINE_SITE_BINDING_UNPROVEN",
+      status: 503,
+    });
+    expect(assertOAuth).not.toHaveBeenCalled();
+  });
+
+  it("fails closed before OAuth when the sidecar has not attested executable tools", async () => {
+    const context: BrokerRequestContext = {
+      userId: "user-1",
+      organizationId: "org-1",
+      siteId: "site-1",
+      site: { siteName: "성수 현장", region: null, briefingQuestion: null },
+    };
+    const assertOAuth = vi.fn(async () => ({
+      ok: true as const,
+      provider: "openai" as const,
+      authProvider: "openai/oauth" as const,
+      model: "openai/gpt-5.5",
+      checkedAt: "2026-07-12T00:00:00.000Z",
+      message: "ok",
+    }));
+    const engine = createLocalOpenClawAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "local-openclaw", OPENCLAW_LOCAL: "1" },
+      runtimeCapability: async () => true,
+      verifySiteBinding: async () => true,
+      assertOAuth,
+      runChat: vi.fn(async () => undefined),
+    });
+
+    await expect(engine.checkAvailability(context)).rejects.toMatchObject({
+      code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+      status: 503,
+    });
+    expect(engine.capabilities).toEqual([]);
+    expect(assertOAuth).not.toHaveBeenCalled();
+  });
+
+  it("propagates the availability abort signal into the OAuth preflight", async () => {
+    const context: BrokerRequestContext = {
+      userId: "user-1",
+      organizationId: "org-1",
+      siteId: "site-1",
+      site: { siteName: "성수 현장", region: null, briefingQuestion: null },
+    };
+    let observedSignal: AbortSignal | undefined;
+    const assertOAuth = vi.fn(async (_config, signal?: AbortSignal) => {
+      if (!signal) throw new Error("missing OAuth abort signal");
+      observedSignal = signal;
+      await new Promise<void>((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+      });
+      throw new Error("unreachable");
+    });
+    const engine = createLocalOpenClawAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "local-openclaw", OPENCLAW_LOCAL: "1" },
+      runtimeCapability: async () => true,
+      verifySiteBinding: async () => true,
+      verifyExecutionAttestation: async () => true,
+      assertOAuth,
+      runChat: vi.fn(async () => undefined),
+    });
+    const controller = new AbortController();
+    const reason = new Error("request cancelled");
+
+    const preflight = engine.checkAvailability(context, controller.signal);
+    void preflight.catch(() => undefined);
+    await vi.waitFor(() => expect(observedSignal).toBeDefined());
+    controller.abort(reason);
+
+    await expect(preflight).rejects.toBe(reason);
+    expect(observedSignal?.aborted).toBe(true);
+  });
+
+  it("does not let a later preflight overwrite another site's runnable context", async () => {
+    const contextA: BrokerRequestContext = {
+      userId: "user-1",
+      organizationId: "org-1",
+      siteId: "site-1",
+      site: { siteName: "성수 현장", region: null, briefingQuestion: null },
+    };
+    const contextB: BrokerRequestContext = {
+      userId: "user-2",
+      organizationId: "org-2",
+      siteId: "site-2",
+      site: { siteName: "판교 현장", region: null, briefingQuestion: null },
+    };
+    const assertOAuth = vi.fn(async () => ({
+      ok: true as const,
+      provider: "openai" as const,
+      authProvider: "openai/oauth" as const,
+      model: "openai/gpt-5.5",
+      checkedAt: "2026-07-12T00:00:00.000Z",
+      message: "ok",
+    }));
+    const runChat = vi.fn(async () => undefined);
+    const engine = createLocalOpenClawAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "local-openclaw", OPENCLAW_LOCAL: "1" },
+      runtimeCapability: async () => true,
+      verifySiteBinding: async () => true,
+      verifyExecutionAttestation: async () => true,
+      assertOAuth,
+      runChat,
+    });
+
+    await expect(engine.checkAvailability(contextA)).resolves.toBeUndefined();
+    await expect(engine.checkAvailability(contextB)).resolves.toBeUndefined();
+    await expect(engine.run({
+      context: contextA,
+      prompt: "첫 번째 현장",
+      emit: () => undefined,
+      signal: new AbortController().signal,
+    })).resolves.toBeUndefined();
+
+    expect(assertOAuth).toHaveBeenCalledTimes(3);
+    expect(runChat).toHaveBeenCalledWith(expect.objectContaining({
+      prompt: "첫 번째 현장",
+    }));
+  });
+
   it("injects the DB harness priority into the OpenClaw prompt", () => {
     const prompt = buildOpenClawChatPrompt({
       systemPrompt: "당신은 클로입니다.",
@@ -113,7 +390,13 @@ describe("OpenClaw chat routing", () => {
               },
             ],
             runtimeAuthRoutes: [
-              { provider: "openai", runtime: "codex", authProvider: "openai", status: "usable" },
+              {
+                provider: "openai",
+                runtime: "codex",
+                authProvider: "openai",
+                status: "usable",
+                effective: { kind: "profiles", detail: "agent auth store" },
+              },
             ],
             oauth: {
               providers: [
@@ -138,6 +421,67 @@ describe("OpenClaw chat routing", () => {
       authProvider: "openai/oauth",
       model: "openai/gpt-5.5",
     });
+  });
+
+  it("rejects mixed OpenAI OAuth and token credentials", () => {
+    const config = resolveOpenClawChatConfig({});
+    expect(() => parseOpenClawOAuthStatusOutput(JSON.stringify({
+      defaultModel: "openai/gpt-5.5",
+      resolvedDefault: "openai/gpt-5.5",
+      auth: {
+        providers: [{
+          provider: "openai",
+          profiles: { count: 2, oauth: 1, token: 1, apiKey: 0 },
+        }],
+        runtimeAuthRoutes: [{
+          provider: "openai",
+          runtime: "codex",
+          authProvider: "openai",
+          status: "usable",
+          effective: { kind: "profiles", detail: "agent auth store" },
+        }],
+        oauth: {
+          providers: [{
+            provider: "openai",
+            status: "ok",
+            effectiveProfiles: [
+              { provider: "openai", type: "oauth", status: "ok", source: "store" },
+              { provider: "openai", type: "token", status: "static", source: "store" },
+            ],
+          }],
+        },
+      },
+    }), config)).toThrow("OpenClaw safeclaw profile is not ready for OpenAI OAuth chat");
+  });
+
+  it("rejects a usable runtime route whose effective credential path is not OAuth profiles", () => {
+    const config = resolveOpenClawChatConfig({});
+    expect(() => parseOpenClawOAuthStatusOutput(JSON.stringify({
+      defaultModel: "openai/gpt-5.5",
+      resolvedDefault: "openai/gpt-5.5",
+      auth: {
+        providers: [{
+          provider: "openai",
+          profiles: { count: 1, oauth: 1, token: 0, apiKey: 0 },
+        }],
+        runtimeAuthRoutes: [{
+          provider: "openai",
+          runtime: "codex",
+          authProvider: "openai",
+          status: "usable",
+          effective: { kind: "env", detail: "OPENAI_API_KEY" },
+        }],
+        oauth: {
+          providers: [{
+            provider: "openai",
+            status: "ok",
+            effectiveProfiles: [
+              { provider: "openai", type: "oauth", status: "ok", source: "store" },
+            ],
+          }],
+        },
+      },
+    }), config)).toThrow("OpenClaw safeclaw profile is not ready for OpenAI OAuth chat");
   });
 
   it("rejects OpenAI API-key-only status for the Claw chat route", () => {

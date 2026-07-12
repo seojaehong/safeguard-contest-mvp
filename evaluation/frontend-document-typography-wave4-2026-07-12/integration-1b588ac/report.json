@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "backendBaseSha": "4c2a35ec24a3be4ddb54cfe839c22fd779e55075",
+  "integratedSourceSha": "1b588ac",
+  "review": { "spec": "pass", "codeQuality": "pass", "findings": 0 },
+  "verification": {
+    "staticAudit": { "status": "fail", "violations": 2362, "selectorRole": 51, "typographyTuple": 612, "important": 737, "coverageIssues": 0 },
+    "contract": { "files": 1, "tests": 2, "status": "pass" },
+    "typecheck": "pass",
+    "build": { "staticPages": 27, "status": "pass" },
+    "productionBrowser": { "files": 1, "tests": 1, "viewThemeCombinations": 4, "horizontalOverflow": 0, "status": "pass" },
+    "audit108Rows": "not-run-static-prerequisite-red"
+  }
+}
