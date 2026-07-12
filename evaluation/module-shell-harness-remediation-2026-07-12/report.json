@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "baseSha": "924e497cce1af4cfd8642c98cb754991050da3b1",
+  "testedSha": "6174d27",
   "status": "pass_with_external_css_gate",
   "productSourceChanges": 0,
   "changedTestInfrastructureFiles": 3,
@@ -22,5 +23,6 @@
     "observedContentTop": 410,
     "maximumContentTop": 387,
     "owner": "frontend-static-contract-v2"
-  }
+  },
+  "evidencePath": "evaluation/module-shell-harness-remediation-2026-07-12/exact-6174d27-evidence.json"
 }

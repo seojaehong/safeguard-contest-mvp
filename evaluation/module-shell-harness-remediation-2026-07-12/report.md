@@ -34,6 +34,16 @@ The first independent review rejected the initial patch because its concurrency 
 - `git diff --check`
   - passed; only Windows line-ending warnings
 
+## Exact-SHA evidence
+
+- Tested SHA: `6174d27`
+- Raw logs:
+  - `exact-6174d27-harness.log`
+  - `exact-6174d27-module-desktop.log`
+  - `exact-6174d27-typecheck.log`
+  - `exact-6174d27-diff-check.log`
+- Machine-readable result: `exact-6174d27-evidence.json`
+
 ## Remaining integration gate
 
 The complete module-shell file must be rerun after the separate mobile Reports spacing patch is integrated. The previously hidden product RED is `/reports` at 390px: content top `410`, contract maximum `387`. This report does not claim that separate CSS issue is fixed.
