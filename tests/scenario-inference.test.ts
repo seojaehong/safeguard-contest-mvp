@@ -73,11 +73,30 @@ describe("inferScenario", () => {
     expect(scenario.profile.workName).toContain("굴착");
   });
 
+  it.each([
+    "굴착공사 작업자 5명",
+    "보수공사 배수펌프 점검 작업"
+  ])("does not infer a work descriptor as the company name: %s", (question) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.companyName).not.toMatch(/^(굴착|보수)공사$/);
+  });
+
+  it("preserves a top-level region in an excavation site name", () => {
+    const scenario = inferScenario("세종 열수송관 굴착공사");
+
+    expect(scenario.siteName).toContain("세종");
+    expect(scenario.siteName).toContain("굴착");
+  });
+
   it("does not let the canonical Gwangju cleaning location overwrite excavation identity", () => {
     const excavation = inferScenario("광주 하남산단 열수송관 굴착공사");
     const cleaning = inferScenario("클린온 광주 하남산단 공장 바닥 세척 작업. 화학세제 사용.");
 
+    expect(excavation.companyName).not.toBe("굴착공사");
+    expect(excavation.siteName).toContain("광주 하남산단");
     expect(excavation.siteName).toContain("굴착");
+    expect(excavation.siteName).not.toMatch(/^굴착공사/);
     expect(excavation.siteName).not.toContain("청소");
     expect(cleaning.siteName).toBe("광주 하남산단 청소 현장");
   });
