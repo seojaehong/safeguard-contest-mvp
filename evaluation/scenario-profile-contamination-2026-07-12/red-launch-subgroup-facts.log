@@ -1,0 +1,33 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/scenario-inference.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/scenario-profile-contamination
+
+ ❯ tests/scenario-inference.test.ts (26 tests | 1 failed) 39ms
+     × keeps an excavation job out of a profile matched only by worker attributes 21ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/scenario-inference.test.ts > inferScenario > keeps an excavation job out of a profile matched only by worker attributes
+AssertionError: expected '외국인 근로자 포함 — 쉬운 한국어와 다국어 안내로 이해 여부를 확…' to contain '외국인 근로자 2명'
+
+Expected: "외국인 근로자 2명"
+Received: "외국인 근로자 포함 — 쉬운 한국어와 다국어 안내로 이해 여부를 확인 신규 작업자 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인"
+
+ ❯ tests/scenario-inference.test.ts:45:47
+     43|     expect(scenario.siteName).toContain("굴착");
+     44|     expect(scenario.workerCount).toBe(7);
+     45|     expect(scenario.specialContext.join(" ")).toContain("외국인 근로자 2명");
+       |                                               ^
+     46|     expect(scenario.specialContext.join(" ")).toContain("신규 투입자 1명");
+     47|     expect(scenario.siteName).not.toContain("광주 하남산단");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 25 passed (26)
+   Start at  12:45:19
+   Duration  1.81s (transform 250ms, setup 0ms, import 319ms, tests 39ms, environment 0ms)
