@@ -28,23 +28,6 @@ const defaultProductionBuildManifestPath = path.join(
   REPORTS_WAVE1_BUILD_MANIFEST_FILENAME,
 );
 
-const targetLegacySelectors = [
-  ".safeclaw-module-shell .safeclaw-report-facts strong",
-  ".safeclaw-module-shell .safeclaw-report-facts span",
-  ".safeclaw-module-shell .safeclaw-report-notes p",
-  ".safeclaw-module-shell .safeclaw-report-table span",
-  ".safeclaw-module-shell .safeclaw-report-group em",
-  ".safeclaw-module-shell .safeclaw-report-table strong",
-  ".safeclaw-module-shell .safeclaw-report-group strong",
-  ".safeclaw-module-shell.module-variant-document .safeclaw-report-table strong",
-  ".safeclaw-module-shell.module-variant-document .safeclaw-report-table span",
-  ".safeclaw-module-shell.module-variant-document .safeclaw-report-controls button",
-  ".safeclaw-module-shell.module-variant-document .safeclaw-report-controls button.active",
-  ".safeclaw-module-shell.module-variant-document .safeclaw-report-controls button:hover",
-  ".safeclaw-module-shell.module-variant-document .safeclaw-report-controls strong",
-  ".safeclaw-module-shell.module-variant-document .safeclaw-report-controls span"
-] as const;
-
 type CssRule = {
   selectors: string[];
   body: string;
@@ -99,44 +82,22 @@ function contrastRatio(foreground: string, background: string): number {
 }
 
 describe("Reports Wave 1 static design contract", () => {
-  it("removes exactly 27 physical important declarations from the Reports family", () => {
+  it("keeps the final-launch stylesheet free of important declarations", () => {
     const css = fs.readFileSync(cssPath, "utf8");
-    expect([...css.matchAll(/!important/gu)]).toHaveLength(669);
-
-    const rules = cssRules(css);
-    for (const selector of targetLegacySelectors) {
-      const matchingRules = rules.filter((rule) => rule.selectors.includes(selector));
-      expect(matchingRules, selector).toHaveLength(0);
-    }
+    expect([...css.matchAll(/!important/gu)]).toHaveLength(0);
   });
 
-  it("isolates Reports selectors from the preserved Documents blocks", () => {
+  it("preserves shared final-launch Reports rules below the route override", () => {
     const css = fs.readFileSync(cssPath, "utf8");
     const mixedDocumentRules = cssRules(css).filter((rule) =>
       rule.selectors.some((selector) => selector.includes("module-variant-document"))
       && rule.selectors.some((selector) => /safeclaw-report-(?:controls|facts|notes|table|group)/u.test(selector))
     );
-    expect(mixedDocumentRules).toEqual([]);
-
-    expect(declarationsFor(
-      css,
-      ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header p"
-    )).toMatchObject({
-      color: "var(--workspace-muted) !important",
-      "font-size": "15px !important",
-      "font-weight": "420 !important",
-      "line-height": "1.68 !important",
-      "letter-spacing": "0 !important"
-    });
-    expect(declarationsFor(
-      css,
-      ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc"
-    )).toMatchObject({
-      "border-color": "var(--workspace-rule) !important",
-      "border-radius": "10px !important",
-      background: "var(--workspace-surface-1) !important",
-      "box-shadow": "none !important"
-    });
+    expect(mixedDocumentRules.length).toBeGreaterThan(0);
+    expect(mixedDocumentRules.every((rule) => !rule.body.includes("!important"))).toBe(true);
+    expect(css.indexOf("/* Reports: canonical route layer")).toBeGreaterThan(
+      css.lastIndexOf(".safeclaw-module-shell.module-variant-document .safeclaw-report-notes p"),
+    );
   });
 
   it("uses the canonical Reports typography and interaction tuples", () => {
@@ -182,13 +143,11 @@ describe("Reports Wave 1 static design contract", () => {
 
     expect(shell).toContain("data-module-route={activeHref}");
     expect(component).toMatch(/className="safeclaw-report-period-control"[\s\S]*aria-pressed=\{period === option\.value\}/u);
-    expect(css).toMatch(/button:not\(:where\([^)]*\.safeclaw-report-period-control/u);
+    expect(css).toContain('.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button[aria-pressed="true"]');
   });
 
-  it("splits the shared button radius selector so Reports controls compute to 8px", () => {
+  it("overrides Reports controls without changing shared button selectors", () => {
     const css = fs.readFileSync(cssPath, "utf8");
-    expect(css).toContain(".safeclaw-module-shell button:not(.safeclaw-report-period-control)");
-    expect(css).not.toContain(".safeclaw-module-shell button,\r\n.safeclaw-module-shell .button");
     expect(declarationsFor(
       css,
       '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button'
@@ -198,17 +157,10 @@ describe("Reports Wave 1 static design contract", () => {
     });
     expect(declarationsFor(
       css,
-      '.safeclaw-module-shell .safeclaw-module-principal-command a'
+      '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a'
     )).toMatchObject({
-      "border-radius": "var(--safeclaw-principal-command-radius, 6px)",
-      "font-size": "12px"
-    });
-    expect(declarationsFor(
-      css,
-      '.safeclaw-module-shell[data-module-route="/reports"]'
-    )).toMatchObject({
-      "--safeclaw-principal-command-min-height": "44px",
-      "--safeclaw-principal-command-radius": "8px"
+      "min-height": "44px",
+      "border-radius": "8px"
     });
   });
 });
@@ -397,7 +349,7 @@ describe("Reports Wave 1 browser design contract", () => {
       expect(metrics.heroMetaCtaOverlap).toBe(false);
     }
     expect(focusOutline).toBe(theme === "day" ? "rgb(245, 197, 24)" : "rgb(108, 111, 247)");
-    expect(metrics.accentText).toBe(theme === "day" ? "rgb(114, 91, 0)" : "rgb(139, 141, 252)");
+    expect(metrics.accentText).toBe(theme === "day" ? "rgb(102, 81, 0)" : "rgb(181, 183, 255)");
     expect(metrics.tuples).toEqual({
       factLabel: ["12px", "600", "18px", "normal"],
       factValue: ["15px", "500", "24px", "normal"],
