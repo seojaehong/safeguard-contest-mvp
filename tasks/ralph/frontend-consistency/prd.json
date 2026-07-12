@@ -29,7 +29,7 @@
       "id": "W5",
       "title": "Split mixed typography roles",
       "priority": 2,
-      "status": "todo",
+      "status": "in_progress",
       "passes": false,
       "acceptance": [
         "All five mixed-typography-role findings are resolved by semantic selector separation",

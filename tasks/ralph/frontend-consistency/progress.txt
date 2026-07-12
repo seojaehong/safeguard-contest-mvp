@@ -11,3 +11,12 @@
 - Review: SPEC PASS / CODE QUALITY PASS, P0-P3 none for 4c2a35e..3ff6ed4.
 - Learned: `.safeclaw-module-hero` is legacy CSS with no TSX renderer; do not claim it as a visible browser target.
 - Next: W5 mixed typography role separation, then AI-connect/ontology typography clusters.
+
+## 2026-07-12 W5 implementation
+- Base: authoritative backend 7def9dd.
+- RED: mixed-role contract found exactly five caption/HUD and control/support grouped rules.
+- Changed: split those rules and applied canonical caption, HUD, control, support, and table-header tuples.
+- Static: honest RED 2,362 -> 2,354; mixed-role 5 -> 0; line-height 235 -> 232; tuple 612 and important 737 unchanged.
+- Verified: W5 contract 1/1, strict typecheck, normal build 27/27, production workspace/document role matrix 1/1 PASS.
+- Known unrelated RED: existing frontend-design-contract stops at `.command-primary` legacy 14px/560/0 tuple; preserved for a later wave.
+- Next: source-bound evidence and independent review.
