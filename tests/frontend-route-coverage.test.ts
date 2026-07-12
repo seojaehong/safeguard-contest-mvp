@@ -350,6 +350,161 @@ describe("frontend route classification", () => {
 });
 
 describe("browser evidence reconciliation", () => {
+  it("binds report provenance to the exact current source and validated static prerequisite", () => {
+    const source = runBrowserContractProbe("audit.currentSourceIdentity()") as {
+      sourceSha: string;
+      sourceIdentity: string;
+      newestMtime: number;
+    };
+    const currentHead = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+    const staticAudit = {
+      schemaVersion: 2,
+      generatedAt: new Date(source.newestMtime + 1_000).toISOString(),
+      sourceSha: source.sourceSha,
+      sourceIdentity: source.sourceIdentity,
+      status: "pass",
+      counts: { pageFiles: 32, componentFiles: 23 },
+      coverageIssues: 0,
+      violationCount: 0,
+    };
+    const timing = {
+      now: source.newestMtime + 3_000,
+      reportMtime: source.newestMtime + 2_000,
+    };
+    const validationExpression = `audit.validateStaticAuditPrerequisite(${JSON.stringify(staticAudit)}, ${JSON.stringify(source)}, ${JSON.stringify(timing)})`;
+    const provenance = runBrowserContractProbe(`audit.browserReportProvenance(${validationExpression})`);
+
+    expect(source.sourceSha).toBe(currentHead);
+    expect(source.sourceSha).toMatch(/^[0-9a-f]{40}$/u);
+    expect(source.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
+    expect(provenance).toEqual({
+      sourceSha: source.sourceSha,
+      sourceIdentity: source.sourceIdentity,
+      staticAudit: {
+        sourceSha: source.sourceSha,
+        sourceIdentity: source.sourceIdentity,
+      },
+    });
+
+    for (const mutation of [
+      { sourceSha: "0".repeat(40) },
+      { sourceIdentity: "0".repeat(64) },
+    ]) {
+      const mutated = { ...staticAudit, ...mutation };
+      const failure = runBrowserContractProbe(`(() => {
+        try {
+          audit.validateStaticAuditPrerequisite(${JSON.stringify(mutated)}, ${JSON.stringify(source)}, ${JSON.stringify(timing)});
+          return "accepted";
+        } catch (error) {
+          return error instanceof Error ? error.message : String(error);
+        }
+      })()`);
+      expect(failure, JSON.stringify(mutation)).toBe("Static audit prerequisite is stale.");
+    }
+  }, 30_000);
+
+  it("preserves the passing static prerequisite gate without weakening it", () => {
+    const source = runBrowserContractProbe("audit.currentSourceIdentity()") as {
+      sourceSha: string;
+      sourceIdentity: string;
+      newestMtime: number;
+    };
+    const failedStaticAudit = {
+      schemaVersion: 2,
+      generatedAt: new Date(source.newestMtime + 1_000).toISOString(),
+      sourceSha: source.sourceSha,
+      sourceIdentity: source.sourceIdentity,
+      status: "fail",
+      counts: { pageFiles: 32, componentFiles: 23 },
+      coverageIssues: 0,
+      violationCount: 1,
+    };
+    const failure = runBrowserContractProbe(`(() => {
+      try {
+        audit.validateStaticAuditPrerequisite(
+          ${JSON.stringify(failedStaticAudit)},
+          ${JSON.stringify(source)},
+          ${JSON.stringify({ now: source.newestMtime + 3_000, reportMtime: source.newestMtime + 2_000 })},
+        );
+        return "accepted";
+      } catch (error) {
+        return error instanceof Error ? error.message : String(error);
+      }
+    })()`);
+
+    expect(String(failure)).toContain("Static audit prerequisite failed:");
+  }, 15_000);
+
+  it("keeps the route-row contract explicit", () => {
+    expect(runBrowserContractProbe("audit.browserAuditRowContract()")).toEqual({
+      routes: 32,
+      viewports: 3,
+      routeRows: 96,
+      workspaceThemeRows: 6,
+      specialSurfaceRows: 4,
+      generatedSurfaceRows: 2,
+      totalRows: 108,
+    });
+  });
+
+  it("requires durable, distinct audit-only loading evidence", () => {
+    const validLoadingRow = {
+      route: "special:loading",
+      viewport: "desktop-1440",
+      boundaryMarker: "loading",
+      fallbackKind: "deterministic-audit-probe",
+      visiblePrimaryContent: "작업 화면을 준비하고 있습니다",
+      screenshotSha256: "1".repeat(64),
+    };
+    const resolvedWorkspaceRows = [
+      { route: "/workspace", viewport: "desktop-1440", screenshotSha256: "2".repeat(64) },
+    ];
+    const probe = (row: object) => runBrowserContractProbe(
+      `audit.loadingEvidenceFindings(${JSON.stringify(row)}, ${JSON.stringify(resolvedWorkspaceRows)})`,
+    ) as string[];
+
+    expect(probe(validLoadingRow)).toEqual([]);
+    expect(probe({ ...validLoadingRow, boundaryMarker: "" })).toContain(
+      "loading probe marker was not present at capture",
+    );
+    expect(probe({ ...validLoadingRow, visiblePrimaryContent: "오늘 작업은 무엇인가요?" })).toContain(
+      "loading probe content was not present at capture",
+    );
+    expect(probe({ ...validLoadingRow, screenshotSha256: "2".repeat(64) })).toContain(
+      "loading screenshot duplicates resolved workspace evidence",
+    );
+  }, 30_000);
+
+  it("uses the loading component page-title tuple instead of the resolved workspace display tuple", () => {
+    const loadingRow = {
+      route: "special:loading", viewport: "desktop-1440", status: 200,
+      expectedStatuses: [200], expectedFinalPath: "/workspace", finalUrl: "http://127.0.0.1:3011/workspace",
+      consoleErrors: [], pageErrors: [], horizontalOverflow: 0,
+      visiblePrimaryContent: "작업 화면을 준비하고 있습니다", boundaryMarker: "loading",
+      bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
+      bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
+      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      renderedControls: [], keySurfaces: [], documentTypography: {},
+    };
+    const result = runBrowserContractProbe(
+      `audit.numericalContractFindings(${JSON.stringify(loadingRow)}, { expectedBoundary: "loading" })`,
+    ) as { findings: string[] };
+
+    expect(result.findings).toEqual([]);
+  }, 15_000);
+
+  it("renders the checked-in loading component only from the audit probe", () => {
+    const auditProbe = read("lib/frontend-audit/GlobalBoundaryProbe.audit.tsx");
+    const normalProbe = read("lib/frontend-audit/GlobalBoundaryProbe.noop.tsx");
+
+    expect(auditProbe).toContain('import WorkspaceLoading from "../../app/workspace/loading";');
+    expect(auditProbe).toContain('boundary === "loading"');
+    expect(auditProbe).toContain('data-audit-boundary="loading"');
+    expect(auditProbe).toContain("<WorkspaceLoading />");
+    expect(normalProbe).not.toContain("WorkspaceLoading");
+    expect(normalProbe).not.toContain('data-audit-boundary="loading"');
+  });
+
   it("reconciles the complete route, theme, special-state, and generated-surface evidence", () => {
     const reportPath = path.join(root, "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json");
     expect(fs.existsSync(reportPath), "browser audit report exists").toBe(true);

@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-13T01:46:24.6137592+09:00",
+  "branch": "fix/release-audit-evidence-remediation",
+  "baseSha": "a1dbedb64e177a4909584274eaad87484aa732f4",
+  "verificationHead": "a1dbedb64e177a4909584274eaad87484aa732f4",
+  "status": "pass",
+  "scope": "focused release browser-audit evidence integrity remediation",
+  "sourceEvidence": {
+    "sourceSha": "a1dbedb64e177a4909584274eaad87484aa732f4",
+    "sourceIdentity": "2252a515516e45d2f1ad244c498c6ebf3ac88ec7cce8057e729565867eb5914f",
+    "staticAuditSourceSha": "a1dbedb64e177a4909584274eaad87484aa732f4",
+    "staticAuditSourceIdentity": "2252a515516e45d2f1ad244c498c6ebf3ac88ec7cce8057e729565867eb5914f",
+    "validated": true
+  },
+  "rowContract": {
+    "routes": 32,
+    "viewports": 3,
+    "routeRows": 96,
+    "workspaceThemeRows": 6,
+    "specialSurfaceRows": 4,
+    "generatedSurfaceRows": 2,
+    "totalRows": 108
+  },
+  "testSummary": {
+    "itemCount": 7,
+    "successCount": 7,
+    "failureCount": 0,
+    "testFiles": 2
+  },
+  "checks": [
+    {
+      "name": "focused-remediation-tests",
+      "status": "pass",
+      "testFiles": 1,
+      "tests": 6,
+      "elapsedMs": 11770,
+      "log": "focused-tests.log"
+    },
+    {
+      "name": "bundle-contract-unit-test",
+      "status": "pass",
+      "testFiles": 1,
+      "tests": 1,
+      "elapsedMs": 3180,
+      "log": "bundle-contract-tests.log"
+    },
+    {
+      "name": "typecheck",
+      "status": "pass",
+      "log": "typecheck.log"
+    },
+    {
+      "name": "static-prerequisite",
+      "status": "pass",
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violations": 0,
+      "report": "static-audit.json",
+      "log": "static-audit.log"
+    },
+    {
+      "name": "normal-build-bundle-contract",
+      "status": "pass",
+      "staticPages": 27,
+      "buildId": "-2Q8BfqPZWYgchTUO4FaZ",
+      "chunkCount": 98,
+      "markerCount": 0,
+      "report": "bundle-normal.json",
+      "log": "build-normal.log"
+    },
+    {
+      "name": "audit-build-bundle-contract",
+      "status": "pass",
+      "staticPages": 27,
+      "buildId": "MR8Dw1Qptpwxgm229Y0Gy",
+      "chunkCount": 98,
+      "markerCount": 1,
+      "report": "bundle-audit.json",
+      "log": "build-audit.log"
+    },
+    {
+      "name": "focused-live-loading-probe",
+      "status": "pass",
+      "resolvedMarkerCount": 0,
+      "loadingMarkerCount": 1,
+      "loadingHeading": "작업 화면을 준비하고 있습니다",
+      "resolvedScreenshotSha256": "3dfaaa52e8280b0f71921ea2a392a4fcaf7194aefc2d1a70dd5ecc2b866e2f9e",
+      "loadingScreenshotSha256": "f157a08c11945e4f6999740a072f64f5ac67346c9f852c39aed7302c1f9b5a6d",
+      "screenshotsDiffer": true,
+      "log": "loading-probe.log"
+    }
+  ],
+  "loadingRowSemantics": {
+    "kind": "deterministic-audit-probe",
+    "rendersCheckedInComponent": "app/workspace/loading.tsx",
+    "requiresBoundaryMarkerAtCapture": true,
+    "requiresLoadingContentAtCapture": true,
+    "requiresScreenshotSha256": true,
+    "rejectsResolvedWorkspaceScreenshotDigest": true,
+    "claimsProductionTransitionTiming": false
+  },
+  "fullBrowserAudit": {
+    "executed": false,
+    "rows": 108,
+    "reason": "Focused code, contract, bundle, and live loading-probe verification was sufficient; canonical 108-row evidence was not rewritten."
+  },
+  "bundleRebinding": {
+    "performed": false,
+    "owner": "final release orchestrator"
+  }
+}
