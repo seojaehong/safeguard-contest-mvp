@@ -41,8 +41,15 @@ export function toToolResult(payload: unknown): McpToolResult {
 /** 도구 실행 실패를 MCP 오류 응답(isError)으로 매핑한다. */
 export function toToolError(error: unknown): McpToolResult {
   const message = error instanceof Error ? error.message : String(error);
+  const rawCode = typeof error === "object" && error !== null && "code" in error
+    ? (error as { code?: unknown }).code
+    : undefined;
+  const code = rawCode === "MCP_TOOL_FORBIDDEN" ? rawCode : undefined;
   return {
-    content: [{ type: "text", text: JSON.stringify({ error: message }, null, 2) }],
+    content: [{
+      type: "text",
+      text: JSON.stringify(code ? { code, error: message } : { error: message }, null, 2),
+    }],
     isError: true,
   };
 }

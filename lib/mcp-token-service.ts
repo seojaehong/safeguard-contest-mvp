@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { hashToken } from "@/lib/mcp-auth";
+import { MCP_TOOL_NAMES, hashToken } from "@/lib/mcp-auth";
 import {
   MCP_ENDPOINT_URL,
   buildOpenClawHarnessAgentCommand,
@@ -10,7 +10,7 @@ import {
 } from "@/lib/mcp-connect";
 import type { Json } from "@/lib/supabase-admin";
 
-export const DEFAULT_MCP_SCOPES = ["tools:*"] as const;
+export const DEFAULT_MCP_SCOPES = MCP_TOOL_NAMES.map((toolName) => `tools:${toolName}`);
 export const DEFAULT_MCP_TOKEN_LIST_LIMIT = 25;
 export const MAX_MCP_TOKEN_LIST_LIMIT = 50;
 export const MAX_ACTIVE_MCP_TOKENS_PER_SITE = 50;

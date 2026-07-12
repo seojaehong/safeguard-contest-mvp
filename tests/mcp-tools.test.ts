@@ -364,4 +364,18 @@ describe("tool result helpers", () => {
     expect(fromString.isError).toBe(true);
     expect(JSON.parse(fromString.content[0].text).error).toBe("plain");
   });
+
+  it("toToolError preserves a stable public code without exposing extra fields", () => {
+    const error = Object.assign(new Error("도구 권한이 없습니다."), {
+      code: "MCP_TOOL_FORBIDDEN",
+      secret: "must-not-leak",
+    });
+    const payload = JSON.parse(toToolError(error).content[0].text) as Record<string, unknown>;
+
+    expect(payload).toEqual({ code: "MCP_TOOL_FORBIDDEN", error: "도구 권한이 없습니다." });
+    expect(payload).not.toHaveProperty("secret");
+
+    const internal = Object.assign(new Error("transport failed"), { code: "ECONNRESET" });
+    expect(JSON.parse(toToolError(internal).content[0].text)).toEqual({ error: "transport failed" });
+  });
 });
