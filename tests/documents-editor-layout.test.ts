@@ -855,13 +855,15 @@ describe("documents editor layout", () => {
       const editor = document.querySelector(".document-editor");
       const preview = document.querySelector(".submission-preview-panel .safety-form-preview");
       const tableWrap = document.querySelector(".submission-preview-panel .safety-form-table-wrap");
+      const documentTitle = document.querySelector(".submission-preview-panel .safety-form-preview-head strong");
       const sectionTitle = document.querySelector(".submission-preview-panel .safety-form-section-stack h3");
       const firstHeader = document.querySelector(".submission-preview-panel .safety-form-preview th");
-      if (!editor || !preview || !tableWrap || !sectionTitle || !firstHeader) throw new Error("Missing submission preview targets");
+      if (!editor || !preview || !tableWrap || !documentTitle || !sectionTitle || !firstHeader) throw new Error("Missing submission preview targets");
       const editorRect = editor.getBoundingClientRect();
       const previewRect = preview.getBoundingClientRect();
       const previewStyle = getComputedStyle(preview);
       const tableWrapStyle = getComputedStyle(tableWrap);
+      const documentTitleStyle = getComputedStyle(documentTitle);
       const sectionTitleStyle = getComputedStyle(sectionTitle);
       const firstHeaderStyle = getComputedStyle(firstHeader);
       return {
@@ -876,6 +878,8 @@ describe("documents editor layout", () => {
         previewColor: previewStyle.color,
         tableWrapBorderRadius: Number.parseFloat(tableWrapStyle.borderRadius),
         tableWrapBorderColor: tableWrapStyle.borderTopColor,
+        documentTitleLetterSpacing: documentTitleStyle.letterSpacing === "normal" ? 0 : Number.parseFloat(documentTitleStyle.letterSpacing),
+        sectionTitleLetterSpacing: sectionTitleStyle.letterSpacing === "normal" ? 0 : Number.parseFloat(sectionTitleStyle.letterSpacing),
         sectionTitleBackground: sectionTitleStyle.backgroundColor,
         sectionTitleColor: sectionTitleStyle.color,
         sectionTitleBorderRadius: Number.parseFloat(sectionTitleStyle.borderRadius),
@@ -894,6 +898,13 @@ describe("documents editor layout", () => {
     expect(metrics.tableWrapBorderRadius).toBeGreaterThanOrEqual(8);
     expect(metrics.tableWrapBorderRadius).toBeLessThanOrEqual(8);
     expect(metrics.tableWrapBorderColor).toBe("rgb(231, 234, 238)");
+    expect({
+      title: metrics.documentTitleLetterSpacing,
+      section: metrics.sectionTitleLetterSpacing
+    }).toEqual({
+      title: expect.closeTo(-0.533334, 5),
+      section: expect.closeTo(-0.186667, 5)
+    });
     expect(metrics.sectionTitleBackground).toBe("rgb(244, 245, 247)");
     expect(metrics.sectionTitleColor).toBe("rgb(23, 25, 29)");
     expect(metrics.sectionTitleBorderRadius).toBeGreaterThanOrEqual(6);
