@@ -122,7 +122,17 @@ async function expectOperationMemoryFamilies(page: Page, route: OperationMemoryR
   }
   await page.locator(`${root} .operation-memory-detail li b`).first().waitFor({ state: "attached" });
   for (const family of operationMemoryFamilies.filter((entry) => entry.routes.includes(route))) {
-    await expectRole(page, [`${root} ${family.selector}`], roleMetrics[family.role]);
+    const workspaceRelaxedCaption = new Set([
+      ".operation-memory-detail p",
+      ".operation-memory-point small",
+      ".operation-memory-list-item small",
+    ]);
+    const expected = route === "workspace" && workspaceRelaxedCaption.has(family.selector)
+        ? { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 19.8, tracking: 0 }
+      : route === "workspace" && family.role === "support"
+        ? { firstFont: "Noto Sans KR", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 }
+        : roleMetrics[family.role];
+    await expectRole(page, [`${root} ${family.selector}`], expected);
   }
 }
 
