@@ -1,9 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T03:38:38.1657855Z",
+  "generatedAt": "2026-07-12T03:53:43.3808119Z",
   "status": "review_pending",
   "baseSha": "87798d15aea085284332942390f215f49f3399cf",
-  "productCommit": "ebef495df600419a21e02838c4aa1554152db233",
+  "productCommit": "1051f18b8cff86d3b87461d862dcb141f39ad429",
+  "productCommits": [
+    "ebef495df600419a21e02838c4aa1554152db233",
+    "1051f18b8cff86d3b87461d862dcb141f39ad429"
+  ],
   "scope": {
     "registeredToolCount": 10,
     "databaseSchemaChanged": false,
@@ -12,9 +16,9 @@
   },
   "red": {
     "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
-    "proofTree": "ebef495df600419a21e02838c4aa1554152db233 with production files restored from 87798d15aea085284332942390f215f49f3399cf",
+    "proofTree": "1051f18b8cff86d3b87461d862dcb141f39ad429 with production files restored from 87798d15aea085284332942390f215f49f3399cf",
     "testFilesFailed": 4,
-    "testsFailed": 10,
+    "testsFailed": 11,
     "testsPassed": 57,
     "exitCode": 1,
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/red-test.log"
@@ -22,7 +26,7 @@
   "green": {
     "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
     "testFilesPassed": 4,
-    "testsPassed": 67,
+    "testsPassed": 68,
     "exitCode": 0,
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/green-test.log"
   },
@@ -35,7 +39,7 @@
     "command": "npm.cmd run build",
     "exitCode": 0,
     "staticPages": "27/27",
-    "buildId": "OOOHOIpiuidXKnMRyy61A",
+    "buildId": "lDN0C9snqjJuwzXd2_U1r",
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/build.log"
   },
   "dependencySync": {
@@ -56,8 +60,11 @@
   "changedFiles": [
     "app/api/mcp/[transport]/route.ts",
     "lib/mcp-auth.ts",
+    "lib/mcp-tool-contract.d.mts",
+    "lib/mcp-tool-contract.mjs",
     "lib/mcp-token-service.ts",
     "lib/mcp-tools.ts",
+    "scripts/issue-mcp-token.mjs",
     "tests/mcp-auth.test.ts",
     "tests/mcp-token-service.test.ts",
     "tests/mcp-tools.test.ts",
