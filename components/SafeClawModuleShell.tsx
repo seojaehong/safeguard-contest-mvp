@@ -102,6 +102,7 @@ export function SafeClawModuleShell({
       className={`safeclaw-module-shell module-variant-${variant}`}
       data-theme={theme}
       data-ready={isReady}
+      data-module-route={activeHref}
     >
       <a className="safeclaw-skip-link" href="#safeclaw-module-main">
         본문으로 건너뛰기
