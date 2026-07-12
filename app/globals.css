@@ -2329,6 +2329,18 @@ ul { margin: 0; padding-left: 20px; line-height: 1.7; }
   color: #7a481c;
 }
 
+.demo-screen-top b.live {
+  border: 1px solid var(--sc-ok);
+  background: var(--sc-steel-060);
+  color: var(--sc-ok);
+}
+
+.demo-screen-top b.offline {
+  border: 1px solid var(--sc-warning);
+  background: var(--danger-soft);
+  color: var(--sc-black);
+}
+
 .scenario-strip,
 .api-pulse-grid,
 .primary-triad-grid,
@@ -18369,7 +18381,7 @@ body .safeclaw-module-shell.module-variant-document .ontology-hover-card strong 
 }
 
 .demo-mode-shell .api-pulse-grid strong,
-.demo-mode-shell + .presenter-notes strong {
+.demo-mode-shell .presenter-notes strong {
   font-size: var(--text-component-title);
   font-weight: 700;
   line-height: var(--leading-component-title);
@@ -18385,7 +18397,7 @@ body .safeclaw-module-shell.module-variant-document .ontology-hover-card strong 
 
 .demo-mode-shell .triad-card p,
 .demo-mode-shell .language-wall p,
-.demo-mode-shell + .presenter-notes p {
+.demo-mode-shell .presenter-notes p {
   font-size: var(--text-body);
   font-weight: 500;
   line-height: var(--leading-body);
@@ -18396,7 +18408,7 @@ body .safeclaw-module-shell.module-variant-document .ontology-hover-card strong 
 .demo-mode-shell .triad-card,
 .demo-mode-shell .language-wall > div,
 .demo-mode-shell.demo-mode-shell .demo-screen.card,
-.demo-mode-shell + .presenter-notes.card {
+.demo-mode-shell .presenter-notes.card {
   border-radius: var(--radius-panel);
 }
 
@@ -18405,6 +18417,6 @@ body .safeclaw-module-shell.module-variant-document .ontology-hover-card strong 
 }
 
 .demo-mode-shell.demo-mode-shell .demo-screen.card,
-.demo-mode-shell + .presenter-notes.card {
+.demo-mode-shell .presenter-notes.card {
   box-shadow: none;
 }

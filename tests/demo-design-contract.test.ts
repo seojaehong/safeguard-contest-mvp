@@ -272,8 +272,8 @@ describe("demo design contract", () => {
       [".demo-mode-shell .triad-card p", ["var(--text-body)", "500", "var(--leading-body)", "var(--tracking-body)"]],
       [".demo-mode-shell .language-wall span", ["var(--text-caption)", "600", "var(--leading-caption)", "var(--tracking-body)"]],
       [".demo-mode-shell .language-wall p", ["var(--text-body)", "500", "var(--leading-body)", "var(--tracking-body)"]],
-      [".demo-mode-shell + .presenter-notes strong", ["var(--text-component-title)", "700", "var(--leading-component-title)", "var(--tracking-component-title)"]],
-      [".demo-mode-shell + .presenter-notes p", ["var(--text-body)", "500", "var(--leading-body)", "var(--tracking-body)"]],
+      [".demo-mode-shell .presenter-notes strong", ["var(--text-component-title)", "700", "var(--leading-component-title)", "var(--tracking-component-title)"]],
+      [".demo-mode-shell .presenter-notes p", ["var(--text-body)", "500", "var(--leading-body)", "var(--tracking-body)"]],
     ] as const;
     for (const [selector, tuple] of tuples) expectTuple(css, selector, tuple);
 
@@ -282,10 +282,18 @@ describe("demo design contract", () => {
       ".demo-mode-shell .triad-card",
       ".demo-mode-shell .language-wall > div",
       ".demo-mode-shell.demo-mode-shell .demo-screen.card",
-      ".demo-mode-shell + .presenter-notes.card",
+      ".demo-mode-shell .presenter-notes.card",
     ]) {
       expect(declarationValue(css, selector, "border-radius"), selector).toBe("var(--radius-panel)");
     }
+  });
+
+  it("gives live and offline mode explicit semantic visual states", () => {
+    expect(demoComponent).toContain("className={mode}");
+    expect(declarationValue(css, ".demo-screen-top b.live", "color")).toBe("var(--sc-ok)");
+    expect(declarationValue(css, ".demo-screen-top b.live", "border")).toBe("1px solid var(--sc-ok)");
+    expect(declarationValue(css, ".demo-screen-top b.offline", "color")).toBe("var(--sc-black)");
+    expect(declarationValue(css, ".demo-screen-top b.offline", "border")).toBe("1px solid var(--sc-warning)");
   });
 
   it("requires complete tokenized typography, radius, gradient, and shadow contracts", () => {

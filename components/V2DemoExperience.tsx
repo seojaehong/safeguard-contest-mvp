@@ -243,7 +243,7 @@ export function V2DemoExperience({
         <section className="demo-screen card">
           <div className="demo-screen-top">
             <span>{demoStages[step]}</span>
-            <b>{mode === "offline" ? "사전 캐시 응답 표시 중" : "실시간 연결 우선"}</b>
+            <b className={mode}>{mode === "offline" ? "사전 캐시 응답 표시 중" : "실시간 연결 우선"}</b>
           </div>
 
           <div className="scenario-strip">
