@@ -38,6 +38,33 @@
       "files": ["app/globals.css", "tests"]
     },
     {
+      "id": "W6",
+      "title": "Ontology and operation-memory typography roles",
+      "priority": 3,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Every ontology-* and operation-memory-* text selector uses one canonical semantic typography tuple",
+        "Production /ontology Day/Night at desktop, 390px, and short-height viewport verifies computed size, weight, leading, tracking, role font, and overflow",
+        "Shared OperationMemoryPreview usage on /workspace has no geometry or typography regression",
+        "Static findings decrease without parser, allowlist, coverage, Reports, package, or backend-contract changes"
+      ],
+      "files": ["app/globals.css", "tests", "evaluation/frontend-ontology-typography-wave6-2026-07-12"]
+    },
+    {
+      "id": "W7",
+      "title": "Workspace viewport geometry blockers",
+      "priority": 4,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Scaled desktop composer bottom stays within the production viewport",
+        "Mobile submit control stays within the 390px production viewport",
+        "Day, Night, short-height desktop, and 390px geometry regressions pass without hiding content"
+      ],
+      "files": ["app/globals.css", "tests/workspace-layout-regression.test.ts"]
+    },
+    {
       "id": "FINAL",
       "title": "Prove complete frontend consistency",
       "priority": 99,
