@@ -159,7 +159,16 @@ describe("Reports Wave 1 static design contract", () => {
       '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a'
     )).toMatchObject({
       "min-height": "44px",
-      "border-radius": "var(--radius-control)"
+      "border-radius": "var(--radius-control)",
+      "width": "auto",
+      "max-width": "176px"
+    });
+    expect(declarationsFor(
+      css,
+      '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-action'
+    )).toMatchObject({
+      "grid-template-columns": "minmax(0, 1fr) auto",
+      "gap": "var(--space-3)"
     });
   });
 });

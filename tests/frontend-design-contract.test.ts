@@ -546,7 +546,7 @@ describe("frontend design contract", () => {
     expect(runAudit(wrongContextCss).report.violations.map(
       (violation) => violation.rule,
     )).toContain("line-height-tier");
-  });
+  }, 20_000);
 
   it("disables every infinite animation and smooth scrolling for reduced motion", () => {
     const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");

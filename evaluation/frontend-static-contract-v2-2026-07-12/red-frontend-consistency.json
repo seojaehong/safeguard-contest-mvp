@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-12T10:52:00.488Z",
+  "sourceSha": "924e497cce1af4cfd8642c98cb754991050da3b1",
+  "sourceIdentity": "bd7c0b6423c1482782c445e81ac46b6074e9b734b9f0d4dbf3dc51528d9750e4",
+  "status": "fail",
+  "counts": {
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "cssLines": 20121,
+    "importantDeclarations": 0
+  },
+  "coverage": {
+    "expectedRoutes": [
+      "/",
+      "/archive",
+      "/ask",
+      "/auth/callback",
+      "/demo",
+      "/dispatch",
+      "/documents",
+      "/dryrun",
+      "/evidence",
+      "/evidence-file",
+      "/home",
+      "/interpretation/[id]",
+      "/knowledge",
+      "/knowledge/[section]/[slug]",
+      "/law/[id]",
+      "/login",
+      "/ontology",
+      "/ops/api",
+      "/precedent/[id]",
+      "/preview",
+      "/prototype",
+      "/reports",
+      "/roadmap",
+      "/search",
+      "/settings",
+      "/settings/ai-connect",
+      "/tbm",
+      "/trust",
+      "/why",
+      "/worker",
+      "/workers",
+      "/workspace"
+    ],
+    "discoveredRoutes": [
+      "/",
+      "/archive",
+      "/ask",
+      "/auth/callback",
+      "/demo",
+      "/dispatch",
+      "/documents",
+      "/dryrun",
+      "/evidence",
+      "/evidence-file",
+      "/home",
+      "/interpretation/[id]",
+      "/knowledge",
+      "/knowledge/[section]/[slug]",
+      "/law/[id]",
+      "/login",
+      "/ontology",
+      "/ops/api",
+      "/precedent/[id]",
+      "/preview",
+      "/prototype",
+      "/reports",
+      "/roadmap",
+      "/search",
+      "/settings",
+      "/settings/ai-connect",
+      "/tbm",
+      "/trust",
+      "/why",
+      "/worker",
+      "/workers",
+      "/workspace"
+    ],
+    "missingRoutes": [],
+    "unexpectedRoutes": []
+  },
+  "coverageIssues": 0,
+  "violationCount": 9,
+  "violations": [
+    {
+      "rule": "line-height-tier",
+      "file": "app/globals.css",
+      "line": 18306,
+      "value": "1.76"
+    },
+    {
+      "rule": "line-height-tier",
+      "file": "app/globals.css",
+      "line": 18322,
+      "value": "1.74"
+    },
+    {
+      "rule": "line-height-tier",
+      "file": "app/globals.css",
+      "line": 18336,
+      "value": "1.74"
+    },
+    {
+      "rule": "line-height-tier",
+      "file": "app/globals.css",
+      "line": 18351,
+      "value": "1.7"
+    },
+    {
+      "rule": "line-height-tier",
+      "file": "app/globals.css",
+      "line": 18360,
+      "value": "1.7"
+    },
+    {
+      "rule": "line-height-tier",
+      "file": "app/globals.css",
+      "line": 18396,
+      "value": "1.68"
+    },
+    {
+      "rule": "typography-tuple",
+      "file": "app/globals.css",
+      "line": 18262,
+      "value": ".command-center-shell.workspace-theme-day .workspace-input-page .command-console-input, .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input => body: {\"min-height\":\"124px\",\"padding\":\"18px\",\"font-size\":\"var(--text-body)\",\"line-height\":\"1.74\"}"
+    },
+    {
+      "rule": "typography-tuple",
+      "file": "app/globals.css",
+      "line": 18278,
+      "value": ".command-center-shell.workspace-theme-day .workspace-input-page .command-console-input, .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input => support: {\"font-size\":\"var(--text-control)\",\"font-weight\":\"500\",\"line-height\":\"1.74\",\"letter-spacing\":\"var(--tracking-body)\"}"
+    },
+    {
+      "rule": "typography-tuple",
+      "file": "app/globals.css",
+      "line": 18336,
+      "value": ".command-center-shell.workspace-theme-day .workspace-input-page .command-console-input, .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input => body: {\"min-height\":\"142px\",\"padding\":\"16px\",\"font-size\":\"var(--text-body)\",\"line-height\":\"1.68\",\"font-weight\":\"500\",\"letter-spacing\":\"var(--tracking-body)\"}"
+    }
+  ]
+}

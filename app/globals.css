@@ -20052,21 +20052,22 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-action {
     width: 100%;
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-3);
     border-top: 1px solid var(--workspace-rule);
     border-left: 0;
-    padding-top: 12px;
+    padding-top: var(--space-3);
     padding-left: 0;
   }
 
-  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command,
-  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a {
-    width: 100%;
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command {
+    width: auto;
     min-width: 0;
   }
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a {
+    width: auto;
+    max-width: 176px;
     white-space: normal;
     overflow-wrap: anywhere;
     text-align: center;

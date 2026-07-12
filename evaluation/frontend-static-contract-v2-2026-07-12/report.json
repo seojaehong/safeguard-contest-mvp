@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "924e497cce1af4cfd8642c98cb754991050da3b1",
+  "status": "pass_pending_integrated_browser_gate",
+  "red": {
+    "staticViolations": 9,
+    "reportsSpacingFindings": 15,
+    "mobileReportsContentTop": 410,
+    "mobileReportsMaximumContentTop": 387
+  },
+  "green": {
+    "staticAudit": {
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violations": 0,
+      "importantDeclarations": 0
+    },
+    "contractTests": { "files": 5, "passed": 56, "failed": 0 },
+    "frontendDesignContract": { "passed": 20, "failed": 0 },
+    "reportsMobileStatic": { "selected": 1, "passed": 1, "failed": 0 },
+    "typecheck": "pass",
+    "packageLockDiff": 0,
+    "diffCheck": "pass"
+  },
+  "deferred": [
+    "integrated module-shell mobile browser regression",
+    "production build",
+    "final 108-row browser audit"
+  ]
+}
