@@ -18301,9 +18301,9 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     display: block;
     min-height: 152px;
-    padding: 24px 24px;
+    padding: 22px 24px;
     overflow-y: auto;
-    line-height: 1.75;
+    line-height: 1.76;
     resize: vertical;
   }
 }
@@ -18317,8 +18317,8 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     min-height: 124px;
-    padding: 20px;
-    line-height: 1.75;
+    padding: 18px;
+    line-height: 1.74;
   }
 
   .command-center-shell.workspace-theme-day .workspace-input-page .input-composer-tray,
@@ -18346,8 +18346,8 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     min-height: 116px;
-    padding: 16px 15px;
-    line-height: 1.75;
+    padding: 14px 15px;
+    line-height: 1.7;
   }
 }
 
@@ -18355,8 +18355,8 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     min-height: 108px;
-    padding: 16px 12px;
-    line-height: 1.75;
+    padding: 14px 12px;
+    line-height: 1.7;
   }
 }
 
@@ -19692,11 +19692,6 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     min-height: 118px;
   }
-}
-
-.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
-.command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
-  line-height: var(--leading-longform);
 }
 
 /* Final integrated route geometry owners. */
