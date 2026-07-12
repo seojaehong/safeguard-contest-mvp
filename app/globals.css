@@ -18318,6 +18318,7 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
     min-height: 124px;
     padding: 18px;
+    font-size: var(--text-body);
     line-height: 1.74;
   }
 
@@ -19688,10 +19689,6 @@ body:has(.safeclaw-landing) :is(
     margin-top: 0;
   }
 
-  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
-  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
-    min-height: 118px;
-  }
 }
 
 /* Final integrated route geometry owners. */
