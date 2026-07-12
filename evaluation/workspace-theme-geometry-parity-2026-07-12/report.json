@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "f5cac0feedeb188c86b4e7b2aaa52f3ab79ca5b6",
+  "branch": "fix/workspace-theme-geometry-parity",
+  "status": "pass_pending_integrated_108_row_audit",
+  "scope": {
+    "productFiles": [
+      "app/globals.css"
+    ],
+    "testFiles": [
+      "tests/workspace-layout-regression.test.ts"
+    ],
+    "databaseChanged": false,
+    "apiChanged": false,
+    "themeGeometryOwner": "night_linear_structure"
+  },
+  "red": {
+    "testFiles": 1,
+    "failedTests": 1,
+    "reason": "Day and Night computed workspace geometry differed"
+  },
+  "green": {
+    "geometryViewports": 6,
+    "geometryTestsPassed": 1,
+    "productionTextareaThemeViewportCases": 14,
+    "productionTextareaTestsPassed": 1,
+    "focusedContractFiles": 3,
+    "focusedContractTestsPassed": 34,
+    "typecheck": "pass",
+    "buildStaticPages": 27,
+    "staticAudit": {
+      "status": "pass",
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violationCount": 0,
+      "importantDeclarations": 0,
+      "path": "evaluation/workspace-theme-geometry-parity-2026-07-12/static-audit.json"
+    },
+    "diffCheck": "pass"
+  },
+  "pending": [
+    "independent code review",
+    "selective integration into authoritative release branch",
+    "integrated audit build",
+    "integrated 108-row browser audit",
+    "integrated screenshot visual review"
+  ]
+}
