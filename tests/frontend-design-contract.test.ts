@@ -578,6 +578,18 @@ describe("frontend design contract", () => {
     );
   });
 
+  it("normalizes important suffixes without duplicating valid typography findings", () => {
+    const audit = runAudit(`.fixture {
+      font-family: inherit !important;
+      letter-spacing: 0 !important;
+    }`);
+    const rules = audit.report.violations.map((violation) => violation.rule);
+
+    expect(rules.filter((rule) => rule === "important-declaration")).toHaveLength(2);
+    expect(rules).not.toContain("font-family-token");
+    expect(rules).not.toContain("tracking-tier");
+  });
+
   it("rejects malformed values on exact functional-effect selectors", () => {
     const audit = runAudit(`
       .quick-chip.active { box-shadow: inset 99px 99px 99px hotpink; }

@@ -16,8 +16,9 @@
       "violations": 0,
       "importantDeclarations": 0
     },
-    "contractTests": { "files": 5, "passed": 56, "failed": 0 },
-    "frontendDesignContract": { "passed": 20, "failed": 0 },
+    "contractTests": { "files": 5, "passed": 57, "failed": 0 },
+    "frontendDesignContract": { "passed": 21, "failed": 0 },
+    "importantSuffixRegression": { "selected": 1, "passed": 1, "failed": 0 },
     "reportsMobileStatic": { "selected": 1, "passed": 1, "failed": 0 },
     "typecheck": "pass",
     "packageLockDiff": 0,
