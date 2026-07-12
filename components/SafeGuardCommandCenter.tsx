@@ -1889,7 +1889,7 @@ export function SafeGuardCommandCenter({
                 setWorkspacePage("input");
               }}
               maxLength={inputLimit}
-              placeholder="오늘 작업 내용을 한 줄로 입력하세요."
+              placeholder=""
               aria-describedby="field-command-tips"
             />
             <p className="input-helper" id="field-command-tips">
@@ -2072,23 +2072,25 @@ export function SafeGuardCommandCenter({
                 </label>
               </fieldset>
             </details>
-            <div className="command-actions">
-              <button
-                type="button"
-                className="button secondary"
-                onClick={() => {
-                  if (question !== selectedExample.question && !window.confirm("현재 입력한 내용을 예시 문장으로 되돌릴까요?")) {
-                    return;
-                  }
-                  setQuestion(selectedExample.question);
-                  setData(null);
-                  setState("idle");
-                  setWorkspacePage("input");
-                }}
-              >
-                예시로 되돌리기
-              </button>
-            </div>
+            {selectedExampleId ? (
+              <div className="command-actions">
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={() => {
+                    if (question !== selectedExample.question && !window.confirm("현재 입력한 내용을 예시 문장으로 되돌릴까요?")) {
+                      return;
+                    }
+                    setQuestion(selectedExample.question);
+                    setData(null);
+                    setState("idle");
+                    setWorkspacePage("input");
+                  }}
+                >
+                  예시로 되돌리기
+                </button>
+              </div>
+            ) : null}
           </form>
 
           <details className="quick-scenario-chips" aria-label="현장 예시">

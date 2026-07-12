@@ -19694,7 +19694,7 @@ body:has(.safeclaw-landing) :is(
   overflow: visible;
 }
 
-@media (min-width: 901px) and (min-height: 721px) {
+@media (min-width: 901px) and (min-height: 680px) {
   .command-center-shell.workspace-theme-day .workspace-side-nav,
   .command-center-shell.workspace-theme-night .workspace-side-nav {
     align-self: stretch;
