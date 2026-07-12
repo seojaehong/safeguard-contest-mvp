@@ -2,12 +2,24 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const scanner = path.join(root, "scripts", "frontend_audit_bundle_contract.mjs");
 const marker = "SafeClaw deterministic frontend audit global boundary probe";
+
+function currentCanonicalIdentity(): string {
+  const moduleUrl = pathToFileURL(path.join(root, "scripts", "frontend_audit_source_identity.mjs")).href;
+  const source = `import * as identity from ${JSON.stringify(moduleUrl)}; console.log(JSON.stringify(identity.canonicalFrontendSourceIdentity(${JSON.stringify(root)}).sourceIdentity));`;
+  const result = spawnSync(process.execPath, ["--input-type=module", "--eval", source], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  if (result.status !== 0) throw new Error(result.stderr || "Canonical frontend identity probe failed.");
+  return JSON.parse(result.stdout) as string;
+}
 
 function runScanner(mode: "normal" | "audit", source: string) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-audit-bundle-"));
@@ -40,7 +52,7 @@ describe("frontend audit bundle contract", () => {
     expect(audit.report).toMatchObject({
       buildId: "fixture-build-id",
       sourceSha: expect.stringMatching(/^[0-9a-f]{40}$/),
-      sourceIdentity: expect.stringMatching(/^[0-9a-f]{64}$/),
+      sourceIdentity: currentCanonicalIdentity(),
       buildIdentity: expect.stringMatching(/^[0-9a-f]{64}$/),
     });
   }, 15_000);

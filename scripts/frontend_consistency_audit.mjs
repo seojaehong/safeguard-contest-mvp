@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
-import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+
+import { canonicalFrontendSourceIdentity } from "./frontend_audit_source_identity.mjs";
 
 const root = process.cwd();
 const outputPath = path.resolve(
@@ -719,32 +720,14 @@ const expectedRoutes = contractRoutes(contract).sort();
 const missingRoutes = expectedRoutes.filter((route) => !discoveredRoutes.includes(route));
 const unexpectedRoutes = discoveredRoutes.filter((route) => !expectedRoutes.includes(route));
 const violations = cssViolations(css);
-const identityFiles = [
-  cssPath,
-  contractPath,
-  path.join(root, "package.json"),
-  path.join(root, "next.config.mjs"),
-  path.join(root, "scripts", "frontend_consistency_audit.mjs"),
-  path.join(root, "lib", "frontend-audit", "GlobalBoundaryProbe.audit.tsx"),
-  path.join(root, "lib", "frontend-audit", "GlobalBoundaryProbe.noop.tsx"),
-  path.join(root, "types", "audit-error-escalation.d.ts"),
-  ...pageFiles,
-  ...componentFiles,
-].sort();
-const sourceIdentity = crypto.createHash("sha256");
-for (const filePath of identityFiles) {
-  sourceIdentity.update(path.relative(root, filePath).replaceAll("\\", "/"));
-  sourceIdentity.update("\0");
-  sourceIdentity.update(fs.readFileSync(filePath));
-  sourceIdentity.update("\0");
-}
+const { sourceIdentity } = canonicalFrontendSourceIdentity(root);
 const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
 
 const report = {
   schemaVersion: 2,
   generatedAt: new Date().toISOString(),
   sourceSha,
-  sourceIdentity: sourceIdentity.digest("hex"),
+  sourceIdentity,
   status: missingRoutes.length || unexpectedRoutes.length || violations.length ? "fail" : "pass",
   counts: {
     pageFiles: pageFiles.length,
