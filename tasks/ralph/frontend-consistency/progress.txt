@@ -33,3 +33,12 @@
 - Confirmed: final cascade follows all short-height overrides and preserves Day/Night specificity.
 - Confirmed: production evidence covers size, weight, leading, tracking, role font family, and overflow.
 - Next: selectively integrate onto authoritative c4a11c6 and regenerate destination evidence.
+
+## 2026-07-12 W6 complete
+- Source series: 59d056f/b6a8437, reviewer fixes 5aea3a9/a6e6432 and a7f21cc/55eceaf.
+- Static: honest RED 2,354 -> 2,307; typography-tuple 612 -> 576; font-size-tier 192 -> 181; coverage 0.
+- Verified: focused contract, strict typecheck, build 27/27, `/ontology` and restored `/workspace` Day/Night x 1440/390/short-height matrix.
+- Browser evidence covers every actually rendered scoped support/HUD/component-title/caption/table family with full tuples, real conditional relations, hover opacity transition, geometry, and overflow.
+- Third independent review: SPEC PASS / CODE QUALITY PASS, P0-P3 none for 6a5d57c..55eceaf.
+- Known separate W7 RED: scaled desktop composer bottom +12px and mobile submit +10px beyond viewport; do not mask with typography changes.
+- Next: integrate W6 onto current authoritative backend, then execute W7 viewport TDD.
