@@ -1,30 +1,97 @@
 {
-  "generatedAt": "2026-07-12T02:01:19.6192396Z",
-  "baseCommit": "4c2a35ec24a3be4ddb54cfe839c22fd779e55075",
-  "status": "implementation_verified_review_pending",
+  "generatedAt": "2026-07-12T02:22:09.7865374Z",
+  "remediatesCommit": "ac728ed9c452a9843e3a4ac417b060f35603cb1e",
+  "status": "implementation_verified",
   "databaseMutation": false,
-  "reproduction": {
-    "companyName": "도시가스공사",
-    "companyType": "서비스업",
-    "siteName": "광주 하남산단 공장 세척 구역",
-    "weatherNote": "실내 환기 제한, 화학물질 노출과 미끄럼 위험 동시 관리"
+  "scope": {
+    "database": false,
+    "schema": false,
+    "environment": false,
+    "ui": false
   },
-  "result": {
+  "tdd": {
+    "productionEditedAfterRed": true,
+    "red": {
+      "testFiles": 2,
+      "testsExecuted": 19,
+      "testsPassed": 14,
+      "testsFailed": 5,
+      "failureReasons": [
+        "worker attribute selected a chemical-cleaning fallback accident",
+        "equipment or service maintenance selected excavation",
+        "cleaning location label overwrote excavation"
+      ]
+    },
+    "green": {
+      "testFiles": 2,
+      "testsPassed": 19,
+      "testsFailed": 0
+    }
+  },
+  "askResponseContract": {
     "companyName": "도시가스공사",
     "companyType": "건설업",
+    "profileId": "construction-excavation",
     "siteName": "도시가스공사 열수송관 굴착공사 현장",
+    "profileWorkNameContains": [
+      "굴착"
+    ],
+    "profileHazardsContain": [
+      "붕괴 또는 매몰",
+      "매설물"
+    ],
+    "weatherNoteExcludes": [
+      "화학물질"
+    ],
     "riskAssessmentContains": [
       "굴착면 붕괴"
     ],
     "riskAssessmentExcludes": [
       "화학세제"
+    ],
+    "accidentCases": {
+      "mode": "fallback",
+      "titles": [
+        "이동식 비계 작업 중 추락 재해사례",
+        "지게차 후진 중 보행자 충돌 재해사례",
+        "용접 불티에 의한 화재 재해사례"
+      ],
+      "excludes": [
+        "화학",
+        "세척",
+        "세제"
+      ]
+    }
+  },
+  "classificationMatrix": {
+    "nonExcavation": [
+      "굴착기 정비 작업",
+      "열수송관 밸브 점검 작업"
+    ],
+    "excavation": [
+      "열수송관 굴착공사",
+      "굴착 작업",
+      "도로 굴착 보수 작업",
+      "터파기 작업"
+    ],
+    "canonicalCleaningSiteName": "광주 하남산단 청소 현장",
+    "workerAttributesExcludedFromAccidentIdentity": [
+      "외국인",
+      "신규",
+      "고령",
+      "숙련"
     ]
   },
   "verification": {
-    "testFiles": 3,
-    "testsPassed": 40,
+    "focusedTestFiles": 6,
+    "testsPassed": 60,
     "testsFailed": 0,
     "typecheck": "pass",
-    "diffCheck": "pass"
-  }
+    "build": "pass",
+    "buildRuns": 1,
+    "sameWorktreeBuildProcessBeforeRun": false,
+    "diffCheck": "pass",
+    "diffCheckNotes": "line-ending conversion notices only"
+  },
+  "historyQualification": "This report records commands observed during this remediation and does not independently verify ordering in the earlier rejected commit."
 }

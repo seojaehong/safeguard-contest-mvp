@@ -377,10 +377,17 @@ function inferCompanyName(question: string) {
   return "현장 업체";
 }
 
-const excavationWorkPattern = /굴착|터파기|열수송관/;
+const excavationWorkIdentityPatterns = [
+  /(?:굴착|터파기)\s*(?:공사|작업)/,
+  /굴착\s+보수\s+작업/
+];
+
+function hasExcavationWorkIdentity(question: string) {
+  return excavationWorkIdentityPatterns.some((pattern) => pattern.test(question));
+}
 
 function inferCustomWorkName(question: string) {
-  if (excavationWorkPattern.test(question)) return "열수송관 굴착공사";
+  if (hasExcavationWorkIdentity(question)) return "열수송관 굴착공사";
   if (/배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question)) {
     return "지하 기계실 배수펌프 점검";
   }
@@ -402,6 +409,8 @@ function inferSpecialContext(question: string): string[] {
 }
 
 function inferSiteName(question: string, fallback: string) {
+  if (hasExcavationWorkIdentity(question)) return fallback;
+
   const siteRules: Array<[RegExp, string]> = [
     [/서울\s*성수동|성수동/, "서울 성수동 근린생활시설 현장"],
     [/인천\s*남동공단|남동공단/, "인천 남동공단 물류센터"],
@@ -455,7 +464,7 @@ function buildExcavationScenarioProfile(companyName: string): ScenarioProfile {
 
 function buildCustomScenarioProfile(question: string): ScenarioProfile {
   const companyName = inferCompanyName(question);
-  if (excavationWorkPattern.test(question)) return buildExcavationScenarioProfile(companyName);
+  if (hasExcavationWorkIdentity(question)) return buildExcavationScenarioProfile(companyName);
 
   const isPumpConfinedSpace = /배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question);
   const isLeakMaintenance = /누수|비가\s*새|천장/.test(question);
@@ -595,7 +604,7 @@ function pickExplicitIndustryProfile(question: string) {
 function pickScenarioProfile(question: string) {
   const normalized = question.trim().toLowerCase();
 
-  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question) || excavationWorkPattern.test(question)) {
+  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question) || hasExcavationWorkIdentity(question)) {
     return buildCustomScenarioProfile(question);
   }
 
