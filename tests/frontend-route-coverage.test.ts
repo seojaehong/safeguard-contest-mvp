@@ -1,4 +1,6 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
@@ -13,6 +15,20 @@ function runBrowserContractProbe(expression: string): unknown {
   const moduleUrl = pathToFileURL(path.join(root, "scripts/frontend_consistency_browser_audit.mjs")).href;
   const source = `import * as audit from ${JSON.stringify(moduleUrl)}; console.log(JSON.stringify(${expression}));`;
   return JSON.parse(execFileSync(process.execPath, ["--input-type=module", "--eval", source], { encoding: "utf8" }));
+}
+
+function runFrontendIdentityProbe(directory: string): {
+  sourceIdentity: string;
+  newestMtime: number;
+  files: string[];
+} {
+  const moduleUrl = pathToFileURL(path.join(root, "scripts/frontend_audit_source_identity.mjs")).href;
+  const source = `import * as identity from ${JSON.stringify(moduleUrl)}; console.log(JSON.stringify(identity.canonicalFrontendSourceIdentity(${JSON.stringify(directory)})));`;
+  return JSON.parse(execFileSync(process.execPath, ["--input-type=module", "--eval", source], { encoding: "utf8" })) as {
+    sourceIdentity: string;
+    newestMtime: number;
+    files: string[];
+  };
 }
 
 type CssDeclarations = Record<string, string>;
@@ -110,6 +126,14 @@ function listPageFiles(directory: string): string[] {
     const absolutePath = path.join(directory, entry.name);
     if (entry.isDirectory()) return listPageFiles(absolutePath);
     return entry.name === "page.tsx" ? [absolutePath] : [];
+  });
+}
+
+function listTsxFiles(directory: string): string[] {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const absolutePath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return listTsxFiles(absolutePath);
+    return entry.name.endsWith(".tsx") ? [absolutePath] : [];
   });
 }
 
@@ -350,6 +374,71 @@ describe("frontend route classification", () => {
 });
 
 describe("browser evidence reconciliation", () => {
+  it("includes every app TSX surface and invalidates stale identity after a boundary mutation", () => {
+    const identity = runFrontendIdentityProbe(root);
+    const appTsxFiles = listTsxFiles(path.join(root, "app"))
+      .map((filePath) => path.relative(root, filePath).replaceAll("\\", "/"))
+      .sort();
+    const boundaryFiles = [
+      "app/layout.tsx",
+      "app/error.tsx",
+      "app/global-error.tsx",
+      "app/not-found.tsx",
+      "app/workspace/loading.tsx",
+    ];
+
+    expect(identity.files.filter((filePath) => filePath.startsWith("app/") && filePath.endsWith(".tsx"))).toEqual(appTsxFiles);
+    expect(identity.files).toEqual(expect.arrayContaining(boundaryFiles));
+
+    const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-frontend-identity-"));
+    try {
+      for (const relativePath of identity.files) {
+        const destination = path.join(fixtureRoot, relativePath);
+        fs.mkdirSync(path.dirname(destination), { recursive: true });
+        fs.copyFileSync(path.join(root, relativePath), destination);
+      }
+      const fixtureIdentity = runFrontendIdentityProbe(fixtureRoot);
+      expect(fixtureIdentity.sourceIdentity).toBe(identity.sourceIdentity);
+
+      for (const relativePath of boundaryFiles) {
+        const target = path.join(fixtureRoot, relativePath);
+        fs.appendFileSync(target, "\n// deterministic identity mutation\n", "utf8");
+        const mutated = runFrontendIdentityProbe(fixtureRoot);
+        expect(mutated.sourceIdentity, relativePath).not.toBe(fixtureIdentity.sourceIdentity);
+        fs.copyFileSync(path.join(root, relativePath), target);
+      }
+
+      const mutatedTarget = path.join(fixtureRoot, "app/workspace/loading.tsx");
+      fs.appendFileSync(mutatedTarget, "\n// stale prerequisite mutation\n", "utf8");
+      const mutated = runFrontendIdentityProbe(fixtureRoot);
+      const staticAudit = {
+        schemaVersion: 2,
+        generatedAt: new Date(mutated.newestMtime + 1_000).toISOString(),
+        sourceSha: "1".repeat(40),
+        sourceIdentity: fixtureIdentity.sourceIdentity,
+        status: "pass",
+        counts: { pageFiles: 32, componentFiles: 23 },
+        coverageIssues: 0,
+        violationCount: 0,
+      };
+      const failure = runBrowserContractProbe(`(() => {
+        try {
+          audit.validateStaticAuditPrerequisite(
+            ${JSON.stringify(staticAudit)},
+            ${JSON.stringify({ sourceSha: "1".repeat(40), sourceIdentity: mutated.sourceIdentity, newestMtime: mutated.newestMtime })},
+            ${JSON.stringify({ now: mutated.newestMtime + 3_000, reportMtime: mutated.newestMtime + 2_000 })},
+          );
+          return "accepted";
+        } catch (error) {
+          return error instanceof Error ? error.message : String(error);
+        }
+      })()`);
+      expect(failure).toBe("Static audit prerequisite is stale.");
+    } finally {
+      fs.rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 30_000);
+
   it("binds report provenance to the exact current source and validated static prerequisite", () => {
     const source = runBrowserContractProbe("audit.currentSourceIdentity()") as {
       sourceSha: string;
@@ -510,19 +599,57 @@ describe("browser evidence reconciliation", () => {
     expect(fs.existsSync(reportPath), "browser audit report exists").toBe(true);
 
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as {
+      schemaVersion: number;
+      sourceSha: string;
+      sourceIdentity: string;
+      rowContract: {
+        routes: number;
+        viewports: number;
+        routeRows: number;
+        workspaceThemeRows: number;
+        specialSurfaceRows: number;
+        generatedSurfaceRows: number;
+        totalRows: number;
+      };
+      staticAudit: { sourceSha: string; sourceIdentity: string };
       routeRows: Array<Record<string, unknown>>;
       workspaceThemeRows: Array<Record<string, unknown>>;
       specialSurfaceRows: Array<Record<string, unknown>>;
       generatedSurfaceRows: Array<Record<string, unknown>>;
-      totals: { failures: number };
+      totals: { failures: number; screenshots: number };
     };
+    const staticAudit = JSON.parse(read("evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json")) as {
+      sourceSha: string;
+      sourceIdentity: string;
+    };
+    const currentSource = runBrowserContractProbe("audit.currentSourceIdentity()") as { sourceIdentity: string };
     const viewports = ["desktop-1440", "tablet-1024", "mobile-390"];
     const requiredFields = [
       "requestedUrl", "finalUrl", "status", "viewport", "theme", "consoleErrors",
       "pageErrors", "horizontalOverflow", "bodyFont", "bodyFontSize", "bodyFontWeight",
       "bodyLineHeight", "bodyLetterSpacing", "productFontLoaded", "primaryHeading", "visiblePrimaryContent",
-      "screenshot", "limitation",
+      "screenshot", "screenshotSha256", "limitation",
     ];
+
+    expect(report.schemaVersion).toBe(3);
+    expect(report.sourceSha).toMatch(/^[0-9a-f]{40}$/u);
+    expect(report.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
+    expect(report.sourceIdentity).toBe(currentSource.sourceIdentity);
+    expect(report.sourceSha).toBe(staticAudit.sourceSha);
+    expect(report.sourceIdentity).toBe(staticAudit.sourceIdentity);
+    expect(report.staticAudit).toMatchObject({
+      sourceSha: staticAudit.sourceSha,
+      sourceIdentity: staticAudit.sourceIdentity,
+    });
+    expect(report.rowContract).toEqual({
+      routes: 32,
+      viewports: 3,
+      routeRows: 96,
+      workspaceThemeRows: 6,
+      specialSurfaceRows: 4,
+      generatedSurfaceRows: 2,
+      totalRows: 108,
+    });
 
     expect(report.routeRows).toHaveLength(userVisibleRoutes.length * viewports.length);
     for (const route of userVisibleRoutes) {
@@ -560,7 +687,23 @@ describe("browser evidence reconciliation", () => {
       const screenshot = String(row.screenshot);
       expect(screenshot).toMatch(/^evaluation\/frontend-audit-runner-port-v2-2026-07-11\/browser-screenshots\//);
       expect(fs.existsSync(path.join(root, screenshot)), screenshot).toBe(true);
+      const screenshotSha256 = crypto.createHash("sha256").update(fs.readFileSync(path.join(root, screenshot))).digest("hex");
+      expect(row.screenshotSha256, screenshot).toBe(screenshotSha256);
     }
+    const loading = report.specialSurfaceRows.find((row) => row.surface === "loading");
+    expect(loading).toMatchObject({
+      boundaryMarker: "loading",
+      fallbackKind: "deterministic-audit-probe",
+      result: "pass",
+    });
+    expect(String(loading?.visiblePrimaryContent)).toContain("작업 화면을 준비하고 있습니다");
+    expect(String(loading?.screenshotSha256)).toMatch(/^[0-9a-f]{64}$/u);
+    const resolvedWorkspaceDigests = [...report.routeRows, ...report.workspaceThemeRows]
+      .filter((row) => row.route === "/workspace" && row.viewport === "desktop-1440")
+      .map((row) => row.screenshotSha256);
+    expect(resolvedWorkspaceDigests.length).toBeGreaterThan(0);
+    expect(resolvedWorkspaceDigests).not.toContain(loading?.screenshotSha256);
+    expect(report.totals.screenshots).toBe(report.rowContract.totalRows);
     expect(report.totals.failures).toBe(0);
   });
 

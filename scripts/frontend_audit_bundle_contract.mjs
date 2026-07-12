@@ -6,6 +6,8 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
+import { canonicalFrontendSourceIdentity } from "./frontend_audit_source_identity.mjs";
+
 const marker = "SafeClaw deterministic frontend audit global boundary probe";
 const modeIndex = process.argv.indexOf("--mode");
 const mode = modeIndex >= 0 ? process.argv[modeIndex + 1] : "";
@@ -32,17 +34,6 @@ function listJavaScript(directory) {
   return files;
 }
 
-function listFiles(directory, predicate) {
-  if (!fs.existsSync(directory)) return [];
-  const files = [];
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    const absolutePath = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...listFiles(absolutePath, predicate));
-    else if (predicate(absolutePath)) files.push(absolutePath);
-  }
-  return files;
-}
-
 function digestFiles(baseDirectory, files) {
   const hash = crypto.createHash("sha256");
   for (const filePath of [...files].sort()) {
@@ -59,24 +50,8 @@ const buildIdPath = path.join(buildDirectory, "BUILD_ID");
 if (!fs.existsSync(buildIdPath)) throw new Error(`Missing BUILD_ID: ${buildIdPath}`);
 const buildId = fs.readFileSync(buildIdPath, "utf8").trim();
 if (!buildId) throw new Error("BUILD_ID is empty.");
-const sourceFiles = [
-  path.join(root, "app", "globals.css"),
-  path.join(root, "lib", "frontend-design-contract.ts"),
-  path.join(root, "package.json"),
-  path.join(root, "next.config.mjs"),
-  path.join(root, "scripts", "frontend_consistency_audit.mjs"),
-  path.join(root, "scripts", "frontend_audit_bundle_contract.mjs"),
-  path.join(root, "lib", "frontend-audit", "GlobalBoundaryProbe.audit.tsx"),
-  path.join(root, "lib", "frontend-audit", "GlobalBoundaryProbe.noop.tsx"),
-  path.join(root, "types", "audit-error-escalation.d.ts"),
-  ...listFiles(path.join(root, "app"), (file) => path.basename(file) === "page.tsx"),
-  ...listFiles(path.join(root, "components"), (file) => file.endsWith(".tsx")),
-];
-for (const sourceFile of sourceFiles) {
-  if (!fs.existsSync(sourceFile)) throw new Error(`Missing source identity file: ${sourceFile}`);
-}
 const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
-const sourceIdentity = digestFiles(root, sourceFiles);
+const { sourceIdentity } = canonicalFrontendSourceIdentity(root);
 const buildIdentity = digestFiles(buildDirectory, [buildIdPath, ...chunkFiles]);
 const markerFiles = chunkFiles.filter((file) => fs.readFileSync(file, "utf8").includes(marker));
 const passed = mode === "normal" ? markerFiles.length === 0 : markerFiles.length > 0;

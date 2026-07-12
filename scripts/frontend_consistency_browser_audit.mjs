@@ -6,6 +6,8 @@ import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 
+import { canonicalFrontendSourceIdentity } from "./frontend_audit_source_identity.mjs";
+
 const root = process.cwd();
 const baseUrl = process.env.FRONTEND_AUDIT_BASE_URL ?? "http://127.0.0.1:3011";
 const outputDirectory = path.join(root, "evaluation/frontend-audit-runner-port-v2-2026-07-11");
@@ -57,40 +59,11 @@ export function browserAuditRowContract() {
 
 fs.mkdirSync(screenshotDirectory, { recursive: true });
 
-function listFiles(directory, predicate) {
-  const files = [];
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    const absolutePath = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...listFiles(absolutePath, predicate));
-    else if (predicate(absolutePath)) files.push(absolutePath);
-  }
-  return files;
-}
-
 export function currentSourceIdentity() {
-  const identityFiles = [
-    path.join(root, "app", "globals.css"),
-    path.join(root, "lib", "frontend-design-contract.ts"),
-    path.join(root, "package.json"),
-    path.join(root, "next.config.mjs"),
-    path.join(root, "scripts", "frontend_consistency_audit.mjs"),
-    path.join(root, "lib", "frontend-audit", "GlobalBoundaryProbe.audit.tsx"),
-    path.join(root, "lib", "frontend-audit", "GlobalBoundaryProbe.noop.tsx"),
-    path.join(root, "types", "audit-error-escalation.d.ts"),
-    ...listFiles(path.join(root, "app"), (file) => path.basename(file) === "page.tsx"),
-    ...listFiles(path.join(root, "components"), (file) => file.endsWith(".tsx")),
-  ].sort();
-  const identity = crypto.createHash("sha256");
-  for (const filePath of identityFiles) {
-    identity.update(path.relative(root, filePath).replaceAll("\\", "/"));
-    identity.update("\0");
-    identity.update(fs.readFileSync(filePath));
-    identity.update("\0");
-  }
+  const identity = canonicalFrontendSourceIdentity(root);
   return {
     sourceSha: execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(),
-    sourceIdentity: identity.digest("hex"),
-    newestMtime: Math.max(...identityFiles.map((file) => fs.statSync(file).mtimeMs)),
+    ...identity,
   };
 }
 
