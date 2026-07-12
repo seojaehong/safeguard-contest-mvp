@@ -29,6 +29,12 @@ type RoleMetric = {
 };
 
 type ViewportRect = { left: number; right: number; top: number; bottom: number; width: number; height: number };
+type SurfaceClipMetric = {
+  overflowY: string;
+  scrollHeight: number;
+  clientHeight: number;
+  clippedDescendants: number;
+};
 
 function roleMetricMatches(metric: RoleMetric, weight: string): boolean {
   return metric.fontSize === metric.expectedFontSize
@@ -51,6 +57,11 @@ function surfaceHasViewportIntersection(rect: ViewportRect, width: number, heigh
   return visibleBottom - visibleTop >= Math.min(44, rect.height);
 }
 
+function surfaceHasNoInternalClipping(metric: SurfaceClipMetric): boolean {
+  if (!new Set(["hidden", "clip"]).has(metric.overflowY)) return true;
+  return metric.scrollHeight <= metric.clientHeight + 0.5 && metric.clippedDescendants === 0;
+}
+
 type Rgba = { red: number; green: number; blue: number; alpha: number };
 
 function parseColor(value: string): Rgba {
@@ -69,10 +80,10 @@ function composite(foreground: Rgba, background: Rgba): Rgba {
   };
 }
 
-function contrastRatio(foreground: string, background: string): number {
-  const white = { red: 255, green: 255, blue: 255, alpha: 1 };
-  const foregroundColor = composite(parseColor(foreground), white);
-  const backgroundColor = composite(parseColor(background), white);
+function contrastRatio(foreground: Rgba, background: Rgba): number {
+  if (background.alpha < 0.999) throw new Error("Contrast background must be ancestor-composited and opaque");
+  const foregroundColor = composite(foreground, background);
+  const backgroundColor = background;
   const luminance = (color: Rgba): number => {
     const channels = [color.red, color.green, color.blue].map((channel) => {
       const normalized = channel / 255;
@@ -83,6 +94,11 @@ function contrastRatio(foreground: string, background: string): number {
   const first = luminance(foregroundColor);
   const second = luminance(backgroundColor);
   return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+}
+
+function independentWhiteContrast(foreground: string, background: string): number {
+  const white = { red: 255, green: 255, blue: 255, alpha: 1 };
+  return contrastRatio(composite(parseColor(foreground), white), composite(parseColor(background), white));
 }
 
 const roles: readonly RoleContract[] = [
@@ -129,6 +145,15 @@ describe("demo matrix assertion helpers", () => {
     expect(rectFitsViewport({ left: 0, right: 44, top: 810, bottom: 854, width: 44, height: 44 }, 390, 844)).toBe(false);
     expect(surfaceHasViewportIntersection({ left: 0, right: 390, top: -100, bottom: 900, width: 390, height: 1000 }, 390, 844)).toBe(true);
     expect(surfaceHasViewportIntersection({ left: 0, right: 390, top: 900, bottom: 1900, width: 390, height: 1000 }, 390, 844)).toBe(false);
+    const clippedSurface = { overflowY: "hidden", scrollHeight: 120, clientHeight: 80, clippedDescendants: 1 };
+    expect(surfaceHasViewportIntersection({ left: 0, right: 390, top: 100, bottom: 180, width: 390, height: 80 }, 390, 844)).toBe(true);
+    expect(surfaceHasNoInternalClipping(clippedSurface)).toBe(false);
+    const foreground = "rgba(0, 0, 0, 0.8)";
+    const translucentBackground = "rgba(0, 0, 0, 0.1)";
+    const blackAncestor = parseColor("rgb(0, 0, 0)");
+    const effectiveBackground = composite(parseColor(translucentBackground), blackAncestor);
+    expect(independentWhiteContrast(foreground, translucentBackground)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(composite(parseColor(foreground), effectiveBackground), effectiveBackground)).toBeLessThan(4.5);
   });
 });
 
@@ -266,6 +291,34 @@ productionMatrix("demo production design matrix", () => {
             surfaceHasViewportIntersection(rect, viewport.width, viewport.height),
             `${theme} ${viewport.label} critical surface ${index} has four-edge-derived viewport intersection`,
           ).toBe(true);
+          const clipMetric = await surface.evaluate((element) => {
+            const computed = getComputedStyle(element);
+            const bounds = element.getBoundingClientRect();
+            const borderLeft = Number.parseFloat(computed.borderLeftWidth) || 0;
+            const borderRight = Number.parseFloat(computed.borderRightWidth) || 0;
+            const borderTop = Number.parseFloat(computed.borderTopWidth) || 0;
+            const borderBottom = Number.parseFloat(computed.borderBottomWidth) || 0;
+            const inner = {
+              left: bounds.left + borderLeft,
+              right: bounds.right - borderRight,
+              top: bounds.top + borderTop,
+              bottom: bounds.bottom - borderBottom,
+            };
+            const clippedDescendants = ["hidden", "clip"].includes(computed.overflowY)
+              ? Array.from(element.children).filter((child) => {
+                const rect = child.getBoundingClientRect();
+                return rect.left < inner.left - 0.5 || rect.right > inner.right + 0.5
+                  || rect.top < inner.top - 0.5 || rect.bottom > inner.bottom + 0.5;
+              }).length
+              : 0;
+            return {
+              overflowY: computed.overflowY,
+              scrollHeight: element.scrollHeight,
+              clientHeight: element.clientHeight,
+              clippedDescendants,
+            };
+          });
+          expect(surfaceHasNoInternalClipping(clipMetric), `${theme} ${viewport.label} critical surface ${index} internal clipping`).toBe(true);
         }
 
         const signatureKey = `${viewport.width}x${viewport.height}`;
@@ -273,8 +326,41 @@ productionMatrix("demo production design matrix", () => {
         else expect(geometry.surfaceSignature, `${signatureKey} has no route-owned Night theme`).toBe(surfaceSignatures.get(signatureKey));
 
         const stateStyle = async (selector: string) => page.locator(selector).first().evaluate((element) => {
+          type BrowserRgba = { red: number; green: number; blue: number; alpha: number };
+          const parse = (value: string): BrowserRgba => {
+            const parts = value.match(/[\d.]+/gu)?.map(Number) ?? [];
+            if (parts.length < 3) throw new Error(`Unsupported computed color: ${value}`);
+            return { red: parts[0], green: parts[1], blue: parts[2], alpha: parts[3] ?? 1 };
+          };
+          const over = (foreground: BrowserRgba, background: BrowserRgba): BrowserRgba => {
+            const alpha = foreground.alpha + background.alpha * (1 - foreground.alpha);
+            return {
+              red: (foreground.red * foreground.alpha + background.red * background.alpha * (1 - foreground.alpha)) / alpha,
+              green: (foreground.green * foreground.alpha + background.green * background.alpha * (1 - foreground.alpha)) / alpha,
+              blue: (foreground.blue * foreground.alpha + background.blue * background.alpha * (1 - foreground.alpha)) / alpha,
+              alpha,
+            };
+          };
+          const chain: Element[] = [];
+          let current: Element | null = element;
+          while (current) {
+            chain.unshift(current);
+            current = current.parentElement;
+          }
+          let effectiveBackground: BrowserRgba = { red: 255, green: 255, blue: 255, alpha: 1 };
+          for (const ancestor of chain) {
+            effectiveBackground = over(parse(getComputedStyle(ancestor).backgroundColor), effectiveBackground);
+          }
           const computed = getComputedStyle(element);
-          return { color: computed.color, background: computed.backgroundColor, border: computed.borderColor, shadow: computed.boxShadow };
+          const effectiveForeground = over(parse(computed.color), effectiveBackground);
+          return {
+            color: computed.color,
+            background: computed.backgroundColor,
+            border: computed.borderColor,
+            shadow: computed.boxShadow,
+            effectiveForeground,
+            effectiveBackground,
+          };
         });
         const activeScenarioStyle = await stateStyle(".scenario-strip button.active");
         const pendingScenarioStyle = await stateStyle(".scenario-strip button:not(.active)");
@@ -285,13 +371,13 @@ productionMatrix("demo production design matrix", () => {
         const liveIndicatorParent = await stateStyle(".api-pulse-grid .live");
         const liveModeStyle = await stateStyle(".demo-screen-top b.live");
 
-        expect(contrastRatio(activeScenarioStyle.color, activeScenarioStyle.background)).toBeGreaterThanOrEqual(4.5);
-        expect(contrastRatio(pendingScenarioStyle.color, pendingScenarioStyle.background)).toBeGreaterThanOrEqual(4.5);
-        expect(contrastRatio(activeStageStyle.color, activeStageStyle.background)).toBeGreaterThanOrEqual(4.5);
-        expect(contrastRatio(doneStageStyle.color, doneStageStyle.background)).toBeGreaterThanOrEqual(4.5);
-        expect(contrastRatio(pendingStageStyle.color, pendingStageStyle.background)).toBeGreaterThanOrEqual(4.5);
-        expect(contrastRatio(liveModeStyle.color, liveModeStyle.background)).toBeGreaterThanOrEqual(4.5);
-        expect(contrastRatio(liveIndicatorStyle.background, liveIndicatorParent.background)).toBeGreaterThanOrEqual(3);
+        expect(contrastRatio(activeScenarioStyle.effectiveForeground, activeScenarioStyle.effectiveBackground)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(pendingScenarioStyle.effectiveForeground, pendingScenarioStyle.effectiveBackground)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(activeStageStyle.effectiveForeground, activeStageStyle.effectiveBackground)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(doneStageStyle.effectiveForeground, doneStageStyle.effectiveBackground)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(pendingStageStyle.effectiveForeground, pendingStageStyle.effectiveBackground)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(liveModeStyle.effectiveForeground, liveModeStyle.effectiveBackground)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(liveIndicatorStyle.effectiveBackground, liveIndicatorParent.effectiveBackground)).toBeGreaterThanOrEqual(3);
         expect(new Set([JSON.stringify(activeStageStyle), JSON.stringify(doneStageStyle), JSON.stringify(pendingStageStyle)]).size).toBe(3);
         expect(activeScenarioStyle.border).not.toBe(pendingScenarioStyle.border);
         expect(activeScenarioStyle.shadow).not.toBe(pendingScenarioStyle.shadow);
@@ -299,7 +385,7 @@ productionMatrix("demo production design matrix", () => {
         await page.keyboard.press("o");
         await page.locator(".demo-screen-top b.offline").waitFor({ state: "visible" });
         const offlineModeStyle = await stateStyle(".demo-screen-top b.offline");
-        expect(contrastRatio(offlineModeStyle.color, offlineModeStyle.background)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(offlineModeStyle.effectiveForeground, offlineModeStyle.effectiveBackground)).toBeGreaterThanOrEqual(4.5);
         expect(offlineModeStyle).not.toEqual(liveModeStyle);
         const secondScenario = page.locator(".scenario-strip button").nth(1);
         await secondScenario.click();
