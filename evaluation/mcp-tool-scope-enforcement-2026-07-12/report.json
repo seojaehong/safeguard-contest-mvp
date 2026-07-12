@@ -75,6 +75,7 @@
   "remainingRisks": [
     "Existing database tokens that already carry tools:* remain full-trust for compatibility.",
     "Legacy SAFECLAW_MCP_TOKENS remain operator-level wildcard credentials.",
+    "Migration 007 still has a tools:* column default; product and CLI inserts bypass it with explicit scopes, but changing the database default requires separate migration approval.",
     "Signed remote sidecar transport and durable replay protection are still disabled and outside this patch."
   ]
 }

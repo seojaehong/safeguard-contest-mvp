@@ -42,4 +42,4 @@ Raw logs:
 
 ## Compatibility And Residual Risk
 
-Existing database tokens explicitly carrying `tools:*` remain full-trust. Legacy `SAFECLAW_MCP_TOKENS` also remain operator-level wildcard credentials. These paths are intentionally preserved for compatibility and must not be used as the dedicated sidecar credential. The signed remote transport, sidecar tool allowlist, and durable atomic nonce replay store remain separate fail-closed gates.
+Existing database tokens explicitly carrying `tools:*` remain full-trust. Legacy `SAFECLAW_MCP_TOKENS` also remain operator-level wildcard credentials. Migration `007_mcp_tokens.sql` still defines a wildcard column default; product and CLI inserts now bypass it with explicit scopes, but changing that database default requires a separately approved migration. These compatibility paths must not be used as the dedicated sidecar credential. The signed remote transport, sidecar tool allowlist, and durable atomic nonce replay store remain separate fail-closed gates.

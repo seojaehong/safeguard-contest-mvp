@@ -57,6 +57,10 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
 - 지원 scope는 정확한 `tools:<tool_name>`, 제한된 `tools:read`/`tools:write`, 기존 DB·env
   운영자 호환용 `tools:*`다. 신규 웹/CLI 발급 토큰은 현재 등록된 10개 도구의 정확한 scope를
   저장하므로, 나중에 새 도구가 추가되어도 기존 토큰에 자동으로 권한이 생기지 않는다.
+- 적용된 `007_mcp_tokens.sql`의 컬럼 기본값은 기존 호환을 위해 아직 `tools:*`다. 제품 API와
+  발급 CLI는 항상 명시적 scope를 저장해 이 기본값을 사용하지 않는다. 기본값 자체를
+  fail-closed로 바꾸는 작업은 별도 승인 migration 전까지 수행하지 않으며, 수동 SQL insert는
+  scope를 반드시 명시해야 한다.
 - `generate_safety_docpack`은
   `siteId`가 있으면 결과 workpack을 해당 사이트로 귀속 저장하고, 성패와 무관하게
   `attribution`(`{siteId, orgId, workpackId, saved}`) 메타를 응답에 기록한다. 나머지 도구는
