@@ -299,7 +299,7 @@ describe("remote engine signed protocol v1", () => {
     expect(verify(paired).request.prompt).toBe("😀");
   });
 
-  it("bounds raw header count and aggregate bytes", () => {
+  it("bounds normalized Record header entries and aggregate bytes", () => {
     const input = signed();
     const tooMany = { ...input.headers };
     for (let index = 0; index <= maxHeaderCount - Object.keys(input.headers).length; index += 1) {

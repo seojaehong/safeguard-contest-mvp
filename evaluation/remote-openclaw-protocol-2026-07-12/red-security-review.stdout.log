@@ -5,49 +5,16 @@
 
  RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/remote-openclaw-protocol
 
- ❯ tests/remote-engine-protocol.test.ts (54 tests | 32 failed) 82ms
-     × rejects invalid verifier policy maxFutureSkewMs=NaN 7ms
-     × rejects invalid verifier policy maxFutureSkewMs=Infinity 1ms
-     × rejects invalid verifier policy maxFutureSkewMs=0 1ms
-     × rejects invalid verifier policy maxFutureSkewMs=-1 7ms
-     × rejects invalid verifier policy maxFutureSkewMs=60001 1ms
-     × rejects invalid verifier policy maxTtlMs=NaN 1ms
-     × rejects invalid verifier policy maxTtlMs=Infinity 3ms
-     × rejects invalid verifier policy maxTtlMs=0 2ms
-     × rejects invalid verifier policy maxTtlMs=-1 2ms
-     × rejects invalid verifier policy maxTtlMs=300001 1ms
-     × bounds unsigned and correctly signed raw body bytes before protocol work 1ms
-     × bounds serialized UTF-8 body bytes before signing 1ms
-     × bounds raw header count and aggregate bytes 1ms
-     × collects Record headers once instead of rescanning for every protocol field 2ms
-     × rejects non-canonical method post in signer and verifier 1ms
-     × rejects non-canonical method POST  in signer and verifier 1ms
-     × rejects non-canonical method ＰＯＳＴ in signer and verifier 1ms
-     × rejects non-canonical method POſT in signer and verifier 1ms
-     × rejects non-canonical path "//v1/engine/run" in signer and verifier 1ms
-     × rejects non-canonical path "/v1//engine/run" in signer and verifier 1ms
-     × rejects non-canonical path "/v1/./engine/run" in signer and verifier 0ms
-     × rejects non-canonical path "/v1/../engine/run" in signer and verifier 0ms
-     × rejects non-canonical path "/v1/engine/run?mode=1" in signer and verifier 0ms
-     × rejects non-canonical path "/v1/engine/run#fragment" in signer and verifier 0ms
-     × rejects non-canonical path "/v1\\engine\\run" in signer and verifier 0ms
-     × rejects non-canonical path "/v1/engine/\u0000run" in signer and verifier 0ms
-     × rejects non-canonical path "/v1/engine/%72un" in signer and verifier 0ms
-     × rejects non-canonical path "/v1/engine/rún" in signer and verifier 1ms
-     × rejects non-canonical path "/v1/engine/rún" in signer and verifier 0ms
-     × rejects case-insensitive duplicate protocol headers from Record and Headers 1ms
-     × rejects duplicate JSON members before last-wins interpretation 1ms
-     × rejects a colliding current/next key-id configuration 1ms
+ ❯ tests/remote-engine-protocol.test.ts (60 tests | 4 failed) 82ms
+     × rejects runtime null instead of applying the maxFutureSkewMs default 6ms
+     × rejects runtime null instead of applying the maxTtlMs default 1ms
+     × rejects lone surrogates before distinct bodies can share UTF-8 hash and HMAC bytes 1ms
+     × accepts raw header tuples within the pre-fold line limit and rejects excess or duplicates 2ms
 
-⎯⎯⎯⎯⎯⎯ Failed Tests 32 ⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
 
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxFutureSkewMs=NaN
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxFutureSkewMs=Infinity
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxFutureSkewMs=0
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxFutureSkewMs=60001
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxTtlMs=NaN
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxTtlMs=Infinity
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxTtlMs=300001
+ FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects runtime null instead of applying the maxFutureSkewMs default
+ FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects runtime null instead of applying the maxTtlMs default
 AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
  ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
     114|     thrown = error;
@@ -56,61 +23,11 @@ AssertionError: expected undefined to be an instance of RemoteEngineProtocolErro
        |                  ^
     117|   expect(thrown).toMatchObject({ code });
     118| }
- ❯ tests/remote-engine-protocol.test.ts:233:5
+ ❯ tests/remote-engine-protocol.test.ts:242:7
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
 
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxFutureSkewMs=-1
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxTtlMs=0
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects invalid verifier policy maxTtlMs=-1
-AssertionError: expected RemoteEngineProtocolError: PROTOCOL_HEADE… { code: '…' } to match object { code: 'PROTOCOL_POLICY_INVALID' }
-(1 matching property omitted from actual)
-
-- Expected
-+ Received
-
-- {
--   "code": "PROTOCOL_POLICY_INVALID",
-+ RemoteEngineProtocolError {
-+   "code": "PROTOCOL_HEADER_MALFORMED",
-  }
-
- ❯ expectCode tests/remote-engine-protocol.test.ts:117:18
-    115|   }
-    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
-    117|   expect(thrown).toMatchObject({ code });
-       |                  ^
-    118| }
-    119|
- ❯ tests/remote-engine-protocol.test.ts:233:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/32]⎯
-
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > bounds unsigned and correctly signed raw body bytes before protocol work
-AssertionError: expected RemoteEngineProtocolError: PROTOCOL_HEADE… { code: '…' } to match object { code: 'PROTOCOL_BODY_TOO_LARGE' }
-(1 matching property omitted from actual)
-
-- Expected
-+ Received
-
-- {
--   "code": "PROTOCOL_BODY_TOO_LARGE",
-+ RemoteEngineProtocolError {
-+   "code": "PROTOCOL_HEADER_MISSING",
-  }
-
- ❯ expectCode tests/remote-engine-protocol.test.ts:117:18
-    115|   }
-    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
-    117|   expect(thrown).toMatchObject({ code });
-       |                  ^
-    118| }
-    119|
- ❯ tests/remote-engine-protocol.test.ts:240:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/32]⎯
-
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > bounds serialized UTF-8 body bytes before signing
+ FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects lone surrogates before distinct bodies can share UTF-8 hash and HMAC bytes
 AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
  ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
     114|     thrown = error;
@@ -119,146 +36,30 @@ AssertionError: expected undefined to be an instance of RemoteEngineProtocolErro
        |                  ^
     117|   expect(thrown).toMatchObject({ code });
     118| }
- ❯ tests/remote-engine-protocol.test.ts:256:5
+ ❯ tests/remote-engine-protocol.test.ts:288:5
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
 
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > bounds raw header count and aggregate bytes
-AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
- ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
-    114|     thrown = error;
-    115|   }
-    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
-       |                  ^
-    117|   expect(thrown).toMatchObject({ code });
-    118| }
- ❯ tests/remote-engine-protocol.test.ts:269:5
+ FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > accepts raw header tuples within the pre-fold line limit and rejects excess or duplicates
+RemoteEngineProtocolError: PROTOCOL_HEADERS_TOO_LARGE
+ ❯ fail lib/remote-engine-protocol.ts:128:9
+    126|
+    127| function fail(code: RemoteEngineProtocolErrorCode): never {
+    128|   throw new RemoteEngineProtocolError(code);
+       |         ^
+    129| }
+    130|
+ ❯ collect lib/remote-engine-protocol.ts:324:7
+ ❯ collectHeaders lib/remote-engine-protocol.ts:343:39
+ ❯ verifyRemoteEngineRequest lib/remote-engine-protocol.ts:514:19
+ ❯ verify tests/remote-engine-protocol.test.ts:97:10
+ ❯ tests/remote-engine-protocol.test.ts:321:12
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/32]⎯
-
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > collects Record headers once instead of rescanning for every protocol field
-AssertionError: expected 9 to be 1 // Object.is equality
-
-- Expected
-+ Received
-
-- 1
-+ 9
-
- ❯ tests/remote-engine-protocol.test.ts:286:19
-    284|
-    285|     expect(verify(input, { headers }).requestId).toBe("req-001");
-    286|     expect(scans).toBe(1);
-       |                   ^
-    287|   });
-    288|
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/32]⎯
-
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical method post in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical method POſT in signer and verifier
-AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
- ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
-    114|     thrown = error;
-    115|   }
-    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
-       |                  ^
-    117|   expect(thrown).toMatchObject({ code });
-    118| }
- ❯ tests/remote-engine-protocol.test.ts:290:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/32]⎯
-
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical method POST  in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical method ＰＯＳＴ in signer and verifier
-AssertionError: expected RemoteEngineProtocolError: PROTOCOL_HEADE… { code: '…' } to match object { code: 'PROTOCOL_METHOD_INVALID' }
-(1 matching property omitted from actual)
-
-- Expected
-+ Received
-
-- {
--   "code": "PROTOCOL_METHOD_INVALID",
-+ RemoteEngineProtocolError {
-+   "code": "PROTOCOL_HEADER_MALFORMED",
-  }
-
- ❯ expectCode tests/remote-engine-protocol.test.ts:117:18
-    115|   }
-    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
-    117|   expect(thrown).toMatchObject({ code });
-       |                  ^
-    118| }
-    119|
- ❯ tests/remote-engine-protocol.test.ts:290:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/32]⎯
-
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "//v1/engine/run" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1//engine/run" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1/./engine/run" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1/../engine/run" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1/engine/run?mode=1" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1/engine/run#fragment" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1\\engine\\run" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1/engine/\u0000run" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1/engine/%72un" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1/engine/rún" in signer and verifier
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects non-canonical path "/v1/engine/rún" in signer and verifier
-AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
- ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
-    114|     thrown = error;
-    115|   }
-    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
-       |                  ^
-    117|   expect(thrown).toMatchObject({ code });
-    118| }
- ❯ tests/remote-engine-protocol.test.ts:307:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/32]⎯
-
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects case-insensitive duplicate protocol headers from Record and Headers
-AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
- ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
-    114|     thrown = error;
-    115|   }
-    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
-       |                  ^
-    117|   expect(thrown).toMatchObject({ code });
-    118| }
- ❯ tests/remote-engine-protocol.test.ts:322:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/32]⎯
-
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects duplicate JSON members before last-wins interpretation
-AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
- ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
-    114|     thrown = error;
-    115|   }
-    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
-       |                  ^
-    117|   expect(thrown).toMatchObject({ code });
-    118| }
- ❯ tests/remote-engine-protocol.test.ts:334:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/32]⎯
-
- FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects a colliding current/next key-id configuration
-AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
- ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
-    114|     thrown = error;
-    115|   }
-    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
-       |                  ^
-    117|   expect(thrown).toMatchObject({ code });
-    118| }
- ❯ tests/remote-engine-protocol.test.ts:338:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
 
 
  Test Files  1 failed (1)
-      Tests  32 failed | 22 passed (54)
-   Start at  12:29:33
-   Duration  1.58s (transform 99ms, setup 0ms, import 160ms, tests 82ms, environment 0ms)
+      Tests  4 failed | 56 passed (60)
+   Start at  13:14:15
+   Duration  915ms (transform 81ms, setup 0ms, import 125ms, tests 82ms, environment 0ms)
 

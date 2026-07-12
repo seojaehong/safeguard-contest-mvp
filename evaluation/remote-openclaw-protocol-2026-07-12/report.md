@@ -2,45 +2,42 @@
 
 ## Scope and disposition
 
-The fresh security review finding set is remediated within the pure Node protocol module and its focused tests. No engine selection, runtime route, MCP, existing OpenClaw file, UI, database, schema, environment, or sidecar repository is wired or changed. Runtime remains disabled and unchanged. `remoteDemoReady` remains `false`.
+The second independent security review finding set is remediated within the pure Node protocol module and its focused tests. No engine selection, runtime route, MCP, existing OpenClaw file, UI, database, schema, environment, or sidecar repository is wired or changed. Runtime remains disabled and unchanged. `remoteDemoReady` remains `false`. A third independent review remains pending.
 
-## Security controls
+## Current security controls
 
-- Verifier policy overrides must be positive safe integers and may only tighten the hard 60-second future-skew and 300-second TTL limits. `NaN`, infinities, zero, negatives, fractions, and values above the hard limits fail with `PROTOCOL_POLICY_INVALID` before temporal comparisons.
-- Raw bodies are limited to 16,384 UTF-8 bytes before header access, hashing, key selection, or JSON parsing. Signing applies the same byte limit before hashing, including multi-byte prompts.
-- Headers are snapshotted once into a lowercase map. All raw headers are limited to 32 entries and 8,192 aggregate UTF-8 name/value bytes before hashing or key selection.
-- Case-insensitive duplicate protocol headers fail with `PROTOCOL_HEADER_DUPLICATE`. Record aliases/arrays and WHATWG `Headers` comma-coalesced duplicates are covered.
-- Methods are exact uppercase ASCII tokens. They are never case-normalized.
-- Paths are path-only ASCII segments. Root is allowed; every other segment is non-empty and limited to ASCII unreserved characters. Dot segments, duplicate/trailing slashes, query, fragment, backslash, NUL/control characters, all percent encoding, and all Unicode forms are rejected. Signer, signed headers, and verifier transport input use the same validators.
-- A bounded duplicate-aware JSON scanner validates the full JSON grammar and decoded object-member names before whole-object `JSON.parse`, preventing last-wins member ambiguity.
-- Current/next key IDs must differ. A colliding rotation configuration fails with `PROTOCOL_KEYRING_INVALID` without trying either key.
-- The exact-field body validator rejects OAuth, Supabase bearer, credential, and other unknown envelope fields after a correctly re-signed body passes hash/signature checks.
-- HMAC-SHA256 still uses exact 32-byte digest comparison through `timingSafeEqual`. A fixed body-hash and HMAC known-answer vector is asserted independently of self sign/verify behavior.
+- A portable UTF-16 scanner rejects unpaired high and low surrogates with `PROTOCOL_UNICODE_INVALID` before body byte measurement, hashing, signing, or verification. Signer envelope fields, tool intents, string keys, raw verifier bodies, and decoded envelope values use the same check. Valid surrogate pairs remain accepted.
+- Verifier policy defaults apply only when an option is `undefined`. Runtime `null`, non-number values, `NaN`, infinities, zero, negatives, fractions, and values above the hard limit fail with `PROTOCOL_POLICY_INVALID` before temporal comparisons.
+- Raw bodies remain limited to 16,384 UTF-8 bytes before header access, hashing, key selection, or JSON parsing.
+- `RemoteEngineRawHeader[]` preserves pre-fold header lines and enforces a 32-line limit plus the 8,192-byte aggregate limit before hashing or key selection. Case-insensitive duplicate protocol lines fail closed.
+- WHATWG `Headers` is explicitly a folded representation. Its mode enforces at most 32 unique normalized entries and 8,192 aggregate UTF-8 name/value bytes after folding. It does not and cannot claim the original raw line count. Any future transport adapter requiring a raw-line limit must enforce that limit before constructing `Headers`, or pass raw tuples instead.
+- Record input enforces at most 32 normalized enumerable entries; explicit string-array values are counted individually. It does not claim to reconstruct already folded transport lines.
+- Methods remain exact uppercase ASCII tokens. Paths remain path-only ASCII segments without empty/dot segments, query, fragment, backslash, controls, percent encoding, or Unicode.
+- Duplicate-aware JSON validation, exact envelope fields, current/next key-ID uniqueness, SHA-256 body hashing, the fixed HMAC-SHA256 known-answer vector, and exact 32-byte `timingSafeEqual` signature comparison remain unchanged.
 
 ## Auditable RED provenance
 
-- Test-only commit: `b65e70de72d73cd4d314b65f18bc91e732c3822f`
-- Test-only tree: `f7d6e7dfa267682a06ebfcc87adee9f07f00c12d`
-- Production parent: `97b30076779d798544353f713afe911804c8a0d5`
+- Production parent: `c3fa528fbd2ac90e07c67e9d63c9d636ab04fc3c`
+- Test-only commit: `6086418e832243d10d63ceacd2b409c7fbb75ed9`
+- Test-only tree: `277f480d25b9b60ac246794796da1c43855f50e4`
 - Command: `npm.cmd test -- tests/remote-engine-protocol.test.ts`
-- Result on that exact tree: exit 1; 1 failed file; 32 failed and 22 passed of 54 tests.
-- Raw output: `red-security-review.stdout.log`, Git blob `7abf3c09f5362bdd73090f4349e42e08d70df1a3`.
+- Result on that exact tree: exit 1; 1 failed file; 4 failed and 56 passed of 60 tests.
+- Failing families: runtime `null` policy values, D800/D801 UTF-8 hash/HMAC reuse, and raw tuple-list interpretation/counting.
+- Raw output: `red-security-review.stdout.log`, Git blob `63c8936b04f21df31a1a12f5313102650e1dfa26`.
 - Structured provenance: `red-security-review.provenance.json`.
-
-The failures cover invalid numeric policy, unsigned and correctly signed oversized bodies, multi-byte signer overflow, header budgets, repeated Record scans, non-canonical method/path inputs, duplicate Record/Headers protocol fields, duplicate JSON members, and colliding key IDs. The fixed known-answer vector and correctly re-signed unknown-field control are test corrections rather than manufactured failures.
 
 ## GREEN and repository verification
 
-- Focused GREEN: `npm.cmd test -- tests/remote-engine-protocol.test.ts`, 1 file, 54 passed, 0 failed. Raw log: `green-security-review.stdout.log`.
-- Related engine tests: `npm.cmd test -- tests/engine-adapter.test.ts tests/remote-engine-protocol.test.ts`, 2 files, 63 passed, 0 failed. Raw log: `related-engine-tests.stdout.log`.
-- Strict typecheck: `npm.cmd run typecheck`, exit 0. Raw log: `typecheck-security-review.stdout.log`.
-- One sequential production build: `npm.cmd run build`, exit 0, static pages 27/27. Raw log: `build-security-review.stdout.log`.
+- Focused GREEN: `npm.cmd test -- tests/remote-engine-protocol.test.ts`, 1 file, 60 passed, 0 failed. Raw log: `green-security-review.stdout.log`, Git blob `41603c9ea841f5ebb8012ca45e9b92aeeb9b3a80`.
+- Related engine tests: `npm.cmd test -- tests/engine-adapter.test.ts tests/remote-engine-protocol.test.ts`, 2 files, 69 passed, 0 failed. Raw log: `related-engine-tests.stdout.log`, Git blob `149b4138e2ddaca77c5696cd7f3ad4920f765c5b`.
+- Strict typecheck: `npm.cmd run typecheck`, exit 0. Raw log: `typecheck-security-review.stdout.log`, Git blob `b60052d6022e1d3c1b1ddc772e194ff4e4de384b`.
+- One sequential production build: `npm.cmd run build`, exit 0, static pages 27/27. Raw log: `build-security-review.stdout.log`, Git blob `cfdf13962a28eb5d0124f96befaa1a557534e9fc`.
 - Final staged whitespace/scope checks and remote SHA equality are recorded in the final handoff after commit/push.
 - The complete repository test suite was not run; the requested focused and related engine-adapter suites were run.
 
-## Fresh re-review
+## Review handoff
 
-The final candidate was retraced from untrusted raw body/header input through budget gates, canonical transport binding, body hash, unique key selection, constant-time signature verification, duplicate-aware JSON validation, exact envelope validation, and temporal policy. Alternate inputs reviewed include multi-byte bodies, Record and WHATWG header representations, lowercase/full-width method forms, composed/decomposed Unicode paths, percent escapes, dot/empty segments, and signed unknown/duplicate JSON fields. No bypass in the reported finding set remains in this pure module.
+The current candidate carries no prior blanket bypass-count assertion. The second-review reproducers now fail closed while valid paired Unicode, undefined defaults, bounded raw tuples, folded WHATWG headers, both rotation slots, and the security KAT remain green. The pushed SHA is intended for a third fresh independent review.
 
 ## Open risks and deferred requirements
 

@@ -7,7 +7,7 @@
 
 
  Test Files  2 passed (2)
-      Tests  63 passed (63)
-   Start at  12:33:58
-   Duration  989ms (transform 88ms, setup 0ms, import 149ms, tests 89ms, environment 0ms)
+      Tests  69 passed (69)
+   Start at  13:19:04
+   Duration  993ms (transform 91ms, setup 0ms, import 153ms, tests 112ms, environment 0ms)
 
