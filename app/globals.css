@@ -19815,10 +19815,10 @@ body:has(.safeclaw-landing) :is(
   gap: 8px;
 }
 
-.safeclaw-module-shell[data-module-route="/reports"] {
-  --safeclaw-principal-command-min-height: 44px;
-  --safeclaw-principal-command-radius: 8px;
-  --safeclaw-principal-command-padding: 0 16px;
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a {
+  min-height: 44px;
+  border-radius: 8px;
+  padding: 0 16px;
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button {

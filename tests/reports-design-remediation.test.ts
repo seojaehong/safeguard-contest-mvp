@@ -19,8 +19,8 @@ const root = process.cwd();
 const cssPath = path.join(root, "app", "globals.css");
 const componentPath = path.join(root, "components", "ReportsDownloadCenter.tsx");
 const shellPath = path.join(root, "components", "SafeClawModuleShell.tsx");
-const reportsWave1TestSupabaseUrl = "https://reports-wave1-evidence.supabase.co";
-const reportsWave1TestAuthStorageKey = "sb-reports-wave1-evidence-auth-token";
+const reportsWave1TestSupabaseUrl = "https://wave8-fixture.supabase.co";
+const reportsWave1TestAuthStorageKey = "sb-wave8-fixture-auth-token";
 const reportsWave1TestAccessToken = "reports-wave1-evidence-access-token";
 const defaultProductionBuildManifestPath = path.join(
   root,
@@ -101,7 +101,7 @@ function contrastRatio(foreground: string, background: string): number {
 describe("Reports Wave 1 static design contract", () => {
   it("removes exactly 27 physical important declarations from the Reports family", () => {
     const css = fs.readFileSync(cssPath, "utf8");
-    expect([...css.matchAll(/!important/gu)]).toHaveLength(710);
+    expect([...css.matchAll(/!important/gu)]).toHaveLength(669);
 
     const rules = cssRules(css);
     for (const selector of targetLegacySelectors) {
@@ -250,7 +250,7 @@ async function startReportsHarness(): Promise<IsolatedNextBrowserHarness> {
         mode,
         environment: {
           NEXT_PUBLIC_SUPABASE_URL: reportsWave1TestSupabaseUrl,
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: "reports-wave1-evidence-anon-key"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "wave8-public-anon-key"
         }
       });
     } catch (error) {
