@@ -1,0 +1,17 @@
+
+> safeclaw@0.1.0 start
+> next start -p 3037
+
+   ▲ Next.js 15.5.20
+   - Local:        http://localhost:3037
+   - Network:      http://172.30.1.36:3037
+
+ ✓ Starting...
+ ✓ Ready in 968ms
+[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"5f691ee3-ed00-4371-ad75-b904b0b9d597","provider":"mock","model":null,"fallbackUsed":false}
+[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"54423aac-ada6-4c24-9ef3-b48378dc2528","provider":"mock","model":null,"fallbackUsed":false}
+[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"3862c824-4d26-4a11-bd82-3a29e442a516","provider":"mock","model":null,"fallbackUsed":false}
+ ⨯ Error: SafeClaw deterministic frontend audit error boundary probe
+    at k (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\release-audit-evidence-remediation\.next\server\app\dryrun\page.js:2:7794) {
+  digest: '2742078557'
+}
