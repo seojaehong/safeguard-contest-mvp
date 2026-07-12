@@ -25,6 +25,7 @@ import type {
   SafetyReferenceSearchResult,
   SafetyReferenceVectorStatus
 } from "./safety-reference-catalog";
+import { deriveSafetyReferenceRetrievalModeFromItems } from "./safety-reference-catalog";
 
 /** MCP 도구가 반환하는 CallToolResult의 최소 형태 (SDK 타입과 호환). */
 export type McpToolResult = {
@@ -240,7 +241,7 @@ export function summarizeHarnessSearch(
   };
 }
 
-function combineHarnessRetrievalMode(searches: HarnessAgentSearchSummary[]): SafetyReferenceRetrievalMode {
+function combineAttemptedHarnessRetrievalMode(searches: HarnessAgentSearchSummary[]): SafetyReferenceRetrievalMode {
   if (searches.some((item) => item.retrievalMode === "hybrid-vector-rpc")) return "hybrid-vector-rpc";
   if (searches.some((item) => item.retrievalMode === "ranked-rpc")) return "ranked-rpc";
   if (searches.some((item) => item.retrievalMode === "rest-ilike")) return "rest-ilike";
@@ -268,7 +269,10 @@ export function buildHarnessAgentResult(input: {
     improvements: input.improvements,
     workpackMemory: input.workpackMemory,
     retrieval: {
-      mode: combineHarnessRetrievalMode(input.referenceSearch),
+      mode: deriveSafetyReferenceRetrievalModeFromItems(
+        input.references,
+        combineAttemptedHarnessRetrievalMode(input.referenceSearch)
+      ),
       vectorSearch: combineHarnessVectorStatus(input.referenceSearch),
       message: input.referenceSearch.map((item) => `${item.source}: ${item.message}`).join(" / ")
     }

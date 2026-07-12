@@ -2330,6 +2330,34 @@ export type SafetyReferenceSearchOptions = {
   evidenceRole?: "direct" | "supporting";
 };
 
+export function deriveSafetyReferenceRetrievalModeFromItems(
+  items: readonly SafetyReferenceItem[],
+  fallback: SafetyReferenceRetrievalMode = "unconfigured"
+): SafetyReferenceRetrievalMode {
+  if (!items.length) return "unconfigured";
+  const hasLocal = items.some((item) => item.retrieval_source === "local-tag"
+    || item.retrieval_source === "local-ranked"
+    || item.retrieval_source === "local-hybrid");
+  const hasRemote = items.some((item) => item.retrieval_source === "rest"
+    || item.retrieval_source === "ranked"
+    || item.retrieval_source === "vector"
+    || item.retrieval_source === "hybrid");
+  if (hasLocal && hasRemote) return "hybrid-local-supabase";
+  if (hasLocal) {
+    if (items.some((item) => item.retrieval_source === "local-hybrid")) return "local-hybrid";
+    if (items.some((item) => item.retrieval_source === "local-ranked")) return "local-ranked";
+    return "local-tag";
+  }
+  if (hasRemote) {
+    if (items.some((item) => item.retrieval_source === "hybrid" || item.retrieval_source === "vector")) {
+      return "hybrid-vector-rpc";
+    }
+    if (items.some((item) => item.retrieval_source === "ranked")) return "ranked-rpc";
+    return "rest-ilike";
+  }
+  return fallback;
+}
+
 export async function searchSafetyReferences(options: SafetyReferenceSearchOptions): Promise<SafetyReferenceSearchResult> {
   const config = getSupabaseConfig();
   const query = options.query.trim();

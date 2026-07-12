@@ -27,7 +27,9 @@ export function asRecord(value: unknown): JsonRecord {
   return value as JsonRecord;
 }
 
-function defaultItems(state: "current" | "stale"): JsonRecord[] {
+type FixtureLifecycle = "current" | "stale" | "retired";
+
+function defaultItems(state: FixtureLifecycle): JsonRecord[] {
   const guidelineBody = "지게차 운행경로와 보행자 통행 동선을 분리하고 후진 경보를 확인한다.";
   const regulationBody = "지게차 하역구역의 출입을 통제하고 신호수를 배치한다.";
   return [
@@ -83,7 +85,7 @@ export type SnapshotOverrides = {
   chunks?: JsonRecord[];
   failures?: JsonRecord[];
   manifestPath?: string;
-  state?: "current" | "stale";
+  state?: FixtureLifecycle;
 };
 
 export function writeSnapshot(

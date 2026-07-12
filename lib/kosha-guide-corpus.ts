@@ -420,6 +420,9 @@ function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): Kos
     .slice(0, 2)
     .map((sentence) => sentence.slice(0, 180));
   const lifecycle = item.state === "current" ? "current" : item.state === "retired" ? "retired" : "stale";
+  const quality = validBody && anchors.length > 0 && lifecycle === "current"
+    ? "accepted"
+    : "review_required";
   return {
     referenceId: item.itemId.startsWith("kosha-") ? item.itemId : `kosha-${item.itemId}`,
     stableDocumentKey: item.stableKey,
@@ -429,7 +432,7 @@ function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): Kos
     category: item.category,
     nativeBody: normalizedBody,
     bodyKind: validBody ? "native" : "unknown",
-    quality: validBody && anchors.length ? "accepted" : "review_required",
+    quality,
     provenance: {
       sourceId: item.sourceKey,
       generationId: snapshotId,

@@ -52,8 +52,16 @@ export type HazardPhotoWorkspaceHarness = {
     retrievals?: Array<{
       channel: "direct" | "sif" | "supporting";
       query: string;
-      mode: "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
-      source: "rest" | "ranked" | "vector" | "hybrid" | null;
+      mode:
+        | "unconfigured"
+        | "rest-ilike"
+        | "ranked-rpc"
+        | "hybrid-vector-rpc"
+        | "hybrid-local-supabase"
+        | "local-tag"
+        | "local-ranked"
+        | "local-hybrid";
+      source: "rest" | "ranked" | "vector" | "hybrid" | "local-tag" | "local-ranked" | "local-hybrid" | null;
       vectorAttempted: boolean;
       vectorOk: boolean;
       vectorModel: string;
@@ -219,12 +227,19 @@ function parseWorkspaceHarness(value: unknown): HazardPhotoWorkspaceHarness | un
         || retrieval.mode === "rest-ilike"
         || retrieval.mode === "ranked-rpc"
         || retrieval.mode === "hybrid-vector-rpc"
+        || retrieval.mode === "hybrid-local-supabase"
+        || retrieval.mode === "local-tag"
+        || retrieval.mode === "local-ranked"
+        || retrieval.mode === "local-hybrid"
         ? retrieval.mode
         : null;
       const source: NonNullable<HazardPhotoWorkspaceHarness["evidence"][number]["retrievals"]>[number]["source"] = retrieval.source === "rest"
         || retrieval.source === "ranked"
         || retrieval.source === "vector"
         || retrieval.source === "hybrid"
+        || retrieval.source === "local-tag"
+        || retrieval.source === "local-ranked"
+        || retrieval.source === "local-hybrid"
         ? retrieval.source
         : null;
       if (!channel || !mode) return [];

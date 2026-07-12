@@ -7,6 +7,7 @@ import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import {
   deriveSafetyReferenceOperationalView,
+  deriveSafetyReferenceRetrievalModeFromItems,
   filterAndRankSafetyReferencesByQuery,
   getSafetyReferenceDisplayTitle,
   hasStrongSafetyReferenceRowOverlap,
@@ -381,15 +382,17 @@ export function buildSafetyReferenceRiskRows(
     const dedupeKey = `${hazard}|${control}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
-    const supportingEvidenceRefs = Array.from(new Set(filterAndRankSafetyReferencesByQuery(
+    const supportingEvidenceRefs = item.evidence_role === "direct"
+      ? Array.from(new Set(filterAndRankSafetyReferencesByQuery(
       `${rankQuery} ${displayTitle} ${hazard} ${control}`,
       supportingKoshaReferences.filter((supporting) => hasStrongSafetyReferenceRowOverlap(item, supporting)),
       supportingKoshaReferences.length
     ).map((supporting) => supporting.kosha_guide?.evidenceRef)
       .filter((ref): ref is string => Boolean(ref))))
-      .slice(0, MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW);
+        .slice(0, MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW)
+      : [];
     const evidenceRefs = [
-      "DB 하네스 직접근거",
+      item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
       item.source_kind_label || item.item_type || "safety_reference_items",
       displayTitle,
       item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
@@ -1652,13 +1655,14 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       const errorCode = buckets.some((bucket) => bucket.errorCode === SAFETY_REFERENCE_SEARCH_FAILURE_CODE)
         ? SAFETY_REFERENCE_SEARCH_FAILURE_CODE
         : undefined;
-      const retrievalMode: SafetyReferenceRetrievalMode = buckets.some((bucket) => bucket.retrievalMode === "hybrid-vector-rpc")
+      const attemptedRetrievalMode: SafetyReferenceRetrievalMode = buckets.some((bucket) => bucket.retrievalMode === "hybrid-vector-rpc")
         ? "hybrid-vector-rpc"
         : buckets.some((bucket) => bucket.retrievalMode === "ranked-rpc")
           ? "ranked-rpc"
           : buckets.some((bucket) => bucket.retrievalMode === "rest-ilike")
             ? "rest-ilike"
             : "unconfigured";
+      const retrievalMode = deriveSafetyReferenceRetrievalModeFromItems(merged, attemptedRetrievalMode);
       const vectorSearch =
         buckets.find((bucket) => bucket.vectorSearch.ok)?.vectorSearch ||
         buckets.find((bucket) => bucket.vectorSearch.attempted)?.vectorSearch ||

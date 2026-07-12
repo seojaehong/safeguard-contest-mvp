@@ -146,11 +146,22 @@ function event(input: WorkpackLearningInput, eventType: LearningJsonlEvent["even
 }
 
 function referenceRetrievalLabel(reference: SafetyReferenceItem) {
+  if (reference.retrieval_source === "local-hybrid") return "local-hybrid";
+  if (reference.retrieval_source === "local-ranked") return "local-ranked";
+  if (reference.retrieval_source === "local-tag") return "local-tag";
   if (reference.retrieval_source === "hybrid") return "hybrid-vector-rpc";
   if (reference.retrieval_source === "vector") return "vector-rpc";
   if (reference.retrieval_source === "ranked") return "ranked-rpc";
   if (reference.retrieval_source === "rest") return "rest-ilike";
   return "not-recorded";
+}
+
+function photoRetrievalLabels(improvement: HarnessImprovement): string[] {
+  return [...new Set((improvement.photoHazardProvenance?.evidence || []).flatMap((evidence) =>
+    (evidence.retrievals || []).map((retrieval) =>
+      `${retrieval.mode}/${retrieval.source || "source-unspecified"}`
+    )
+  ))];
 }
 
 function slugSegment(value: string) {
@@ -248,7 +259,8 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       photoCount: improvement.photoCount,
       siteSignals: improvement.siteSignals,
       visionEvidence: improvement.visionEvidence,
-      visionErrorMessage: improvement.visionErrorMessage
+      visionErrorMessage: improvement.visionErrorMessage,
+      photoHazardProvenance: improvement.photoHazardProvenance
     })),
     ...input.confirmations.map((confirmation) => event(input, "ack", {
       displayName: confirmation.displayName,
@@ -334,6 +346,9 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     if (improvement.siteSignals?.length) lines.push(`  - siteSignals: ${improvement.siteSignals.join(", ")}`);
     if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${improvement.visionEvidence}`);
     if (improvement.visionErrorMessage) lines.push(`  - visionError: ${improvement.visionErrorMessage}`);
+    for (const retrieval of photoRetrievalLabels(improvement)) {
+      lines.push(`  - photoRetrieval: ${retrieval}`);
+    }
   }
 
   lines.push("", "## 확인 이력", "");
@@ -438,6 +453,9 @@ export function buildWorkpackObsidianMarkdown(input: WorkpackLearningInput) {
     if (improvement.ocrText) lines.push(`  - ocr: ${improvement.ocrText}`);
     if (improvement.sourcePhotoNames?.length) lines.push(`  - sourcePhotos: ${improvement.sourcePhotoNames.join(", ")}`);
     if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${improvement.visionEvidence}`);
+    for (const retrieval of photoRetrievalLabels(improvement)) {
+      lines.push(`  - photoRetrieval: ${retrieval}`);
+    }
   }
 
   lines.push("", "## 확인 후보", "");

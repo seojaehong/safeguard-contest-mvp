@@ -6,6 +6,7 @@ import type {
 } from "@/lib/safety-reference-catalog";
 import {
   buildSafetyReferenceOperationalMetadata,
+  deriveSafetyReferenceRetrievalModeFromItems,
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplayTitle,
   isSafetyReferenceCompatibleWithQuery
@@ -55,8 +56,8 @@ export type HarnessPhotoHazardEvidence = {
   retrievals?: Array<{
     channel: "direct" | "sif" | "supporting";
     query: string;
-    mode: "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
-    source: "rest" | "ranked" | "vector" | "hybrid" | null;
+    mode: SafetyReferenceRetrievalMode;
+    source: NonNullable<SafetyReferenceItem["retrieval_source"]> | null;
     vectorAttempted: boolean;
     vectorOk: boolean;
     vectorModel: string;
@@ -236,13 +237,10 @@ function inferRetrievalMode(input: {
   references: SafetyReferenceItem[];
   retrieval?: DbHarnessRetrievalInput;
 }): SafetyReferenceRetrievalMode {
-  if (input.retrieval?.mode) return input.retrieval.mode;
-  if (input.references.some((item) => item.retrieval_source === "vector" || item.retrieval_source === "hybrid")) {
-    return "hybrid-vector-rpc";
-  }
-  if (input.references.some((item) => item.retrieval_source === "ranked")) return "ranked-rpc";
-  if (input.references.length) return "rest-ilike";
-  return "unconfigured";
+  return deriveSafetyReferenceRetrievalModeFromItems(
+    input.references,
+    input.retrieval?.mode || (input.references.length ? "rest-ilike" : "unconfigured")
+  );
 }
 
 function buildRetrievalContract(input: {
@@ -398,10 +396,23 @@ function parsePhotoHazardEvidenceRetrieval(value: unknown): NonNullable<HarnessP
   const channel = value.channel === "direct" || value.channel === "sif" || value.channel === "supporting"
     ? value.channel
     : null;
-  const mode = value.mode === "unconfigured" || value.mode === "rest-ilike" || value.mode === "ranked-rpc" || value.mode === "hybrid-vector-rpc"
+  const mode = value.mode === "unconfigured"
+    || value.mode === "rest-ilike"
+    || value.mode === "ranked-rpc"
+    || value.mode === "hybrid-vector-rpc"
+    || value.mode === "hybrid-local-supabase"
+    || value.mode === "local-tag"
+    || value.mode === "local-ranked"
+    || value.mode === "local-hybrid"
     ? value.mode
     : null;
-  const source = value.source === "rest" || value.source === "ranked" || value.source === "vector" || value.source === "hybrid"
+  const source = value.source === "rest"
+    || value.source === "ranked"
+    || value.source === "vector"
+    || value.source === "hybrid"
+    || value.source === "local-tag"
+    || value.source === "local-ranked"
+    || value.source === "local-hybrid"
     ? value.source
     : null;
   const query = readString(value.query);
