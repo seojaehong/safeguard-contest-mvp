@@ -68,7 +68,7 @@ describe("workspace input CSS contract", () => {
     expect(submissionGuard).toBeGreaterThanOrEqual(0);
     expect(documentFocus).toBeGreaterThan(submissionGuard);
     expect(css.slice(documentFocus)).not.toMatch(
-      /\.workspace-input-page \.command-console-input[^{}]*\{[^{}]*line-height:/u,
+      /\.command-center-shell\.workspace-theme-day \.workspace-input-page \.command-console-input,\s*\.command-center-shell\.workspace-theme-night \.workspace-input-page \.command-console-input\s*\{\s*line-height:\s*var\(--leading-longform\);\s*\}/u,
     );
   });
 });
