@@ -17795,3 +17795,18 @@ h3 {
   line-height: var(--leading-component-title);
   letter-spacing: var(--tracking-component-title);
 }
+
+/* Document work surfaces use the same heading hierarchy at every viewport. */
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header h2 {
+  font-size: var(--text-page-title);
+  font-weight: 800;
+  line-height: var(--leading-page-title);
+  letter-spacing: var(--tracking-page-title);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-workdoc-section-head h3 {
+  font-size: var(--text-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
+}
