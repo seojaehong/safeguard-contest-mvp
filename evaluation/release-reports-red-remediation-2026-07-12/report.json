@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-07-13T01:36:48.6763197+09:00",
+  "branch": "fix/release-reports-red-remediation",
+  "baseSha": "a1dbedb64e177a4909584274eaad87484aa732f4",
+  "rootCause": {
+    "classification": "deterministic_fixture_state_bug",
+    "timingRace": false,
+    "workpackValidation": "valid",
+    "settledSourceMode": "browser_local",
+    "settledViewState": "empty",
+    "disabledExports": 5,
+    "detail": "The fixed 2026-07-10 savedAt fell outside the default KST weekly period after the calendar boundary advanced."
+  },
+  "remediation": {
+    "productionFilesChanged": 0,
+    "testFilesChanged": 1,
+    "arbitrarySleepsAdded": 0,
+    "conditionWait": "data-download-readiness=ready",
+    "fixtureTimestamp": "builder-generated current RFC3339 timestamp"
+  },
+  "verification": {
+    "diagnosticRedRuns": {
+      "runs": 2,
+      "expectedFailures": 2,
+      "matchingSettledStates": 2
+    },
+    "focusedGreen": {
+      "runs": 2,
+      "passedRuns": 2,
+      "failedRuns": 0,
+      "selectedTestsPerRun": 1
+    },
+    "reportingTests": {
+      "files": 4,
+      "passed": 71,
+      "failed": 0
+    },
+    "strictTypecheck": {
+      "status": "pass",
+      "exitCode": 0
+    }
+  },
+  "failClosed": {
+    "initialNoSessionBlocked": true,
+    "initialDisabledExports": 5,
+    "http401Blocked": true,
+    "http404Blocked": true,
+    "malformedPayloadBlocked": true,
+    "optimisticExportsAdded": false,
+    "serverErrorsHidden": false
+  },
+  "gitSync": {
+    "fetch": "pass",
+    "remoteBranchExisted": false,
+    "pullRebase": "aborted_out_of_scope_conflicts",
+    "conflictsResolved": 0,
+    "basePreserved": true,
+    "pushMode": "new_branch_no_force"
+  },
+  "logs": [
+    "focused-pass-1.log",
+    "focused-pass-2.log",
+    "reporting-tests.log",
+    "typecheck.log"
+  ]
+}
