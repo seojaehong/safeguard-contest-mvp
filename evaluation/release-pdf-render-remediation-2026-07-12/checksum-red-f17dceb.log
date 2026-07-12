@@ -1,0 +1,6 @@
+font=/NotoSansKR-Regular-7098480789 bytes=15399 table_mismatches=['head:00000000!=29C58252', 'hhea:00000000!=0C1108E8', 'loca:00000000!=1CA50E43', 'maxp:00000000!=00B401E0', 'prep:00000000!=68068C85', 'glyf:00000000!=BE13B594', 'hmtx:00000000!=77741A59']
+actual_adjustment=0x580468FC expected_adjustment=0x20C770A3
+whole_checksum=0xE8EDA813 expected=0xB1B0AFBA valid=False
+font=/NotoSansKR-Bold-9742682568 bytes=2529 table_mismatches=['head:00000000!=29B88252', 'hhea:00000000!=0C040862', 'loca:00000000!=12F514E8', 'maxp:00000000!=004F01E0', 'prep:00000000!=68068C85', 'glyf:00000000!=7899390D', 'hmtx:00000000!=35E002A3']
+actual_adjustment=0x247C03A9 expected_adjustment=0x4C31A975
+whole_checksum=0x89FB09EE expected=0xB1B0AFBA valid=False

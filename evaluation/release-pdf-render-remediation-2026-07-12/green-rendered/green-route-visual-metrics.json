@@ -1,6 +1,6 @@
 {
   "input_pdf": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-route.pdf",
-  "input_bytes": 16591,
+  "input_bytes": 16620,
   "dpi": 144,
   "renderers": {
     "pymupdf": [
@@ -8,8 +8,8 @@
         "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-pymupdf-page-1.png",
         "width": 1190,
         "height": 1684,
-        "dark_pixels": 23951,
-        "dark_fraction": 0.011951835365975369,
+        "dark_pixels": 23940,
+        "dark_fraction": 0.011946346234455778,
         "bbox": [
           85,
           106,
@@ -31,10 +31,10 @@
             "top": 207,
             "bottom": 220,
             "height": 14,
-            "dark_pixels": 1936,
+            "dark_pixels": 1925,
             "x_min": 85,
-            "x_max": 522,
-            "width": 438
+            "x_max": 521,
+            "width": 437
           },
           {
             "top": 225,
@@ -143,8 +143,8 @@
         "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-pdfium-page-1.png",
         "width": 1190,
         "height": 1684,
-        "dark_pixels": 25472,
-        "dark_fraction": 0.012710832551547936,
+        "dark_pixels": 25456,
+        "dark_fraction": 0.012702848360246712,
         "bbox": [
           84,
           106,
@@ -166,7 +166,7 @@
             "top": 207,
             "bottom": 220,
             "height": 14,
-            "dark_pixels": 2049,
+            "dark_pixels": 2033,
             "x_min": 85,
             "x_max": 521,
             "width": 437
@@ -278,8 +278,8 @@
         "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-poppler-page-1.png",
         "width": 1190,
         "height": 1684,
-        "dark_pixels": 23927,
-        "dark_fraction": 0.011939859079023533,
+        "dark_pixels": 23908,
+        "dark_fraction": 0.01193037785185333,
         "bbox": [
           85,
           106,
@@ -301,10 +301,10 @@
             "top": 207,
             "bottom": 220,
             "height": 14,
-            "dark_pixels": 1932,
+            "dark_pixels": 1913,
             "x_min": 85,
-            "x_max": 522,
-            "width": 438
+            "x_max": 521,
+            "width": 437
           },
           {
             "top": 225,
