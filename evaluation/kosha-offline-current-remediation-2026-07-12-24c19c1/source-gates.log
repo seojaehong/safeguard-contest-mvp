@@ -1,0 +1,97 @@
+
+===== NEW_REGRESSION1 =====
+COMMAND: npm.cmd test -- tests/kosha-guide-supporting-row-relevance.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-supporting-row-relevance.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  17:17:37
+   Duration  2.48s (transform 956ms, setup 0ms, import 1.75s, tests 20ms, environment 0ms)
+
+EXIT_CODE=0
+===== BOUNDED26 =====
+COMMAND: npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  2 passed (2)
+      Tests  26 passed (26)
+   Start at  17:17:42
+   Duration  6.83s (transform 900ms, setup 0ms, import 2.35s, tests 3.16s, environment 0ms)
+
+EXIT_CODE=0
+===== ORIGINAL8 =====
+COMMAND: npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  17:17:51
+   Duration  7.37s (transform 774ms, setup 0ms, import 1.43s, tests 4.76s, environment 0ms)
+
+EXIT_CODE=0
+===== EXPANDED113 =====
+COMMAND: npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/safety-reference-hybrid.test.ts tests/safety-reference-relevance.test.ts tests/commercial-harness.test.ts tests/generation-evidence-operation-routes.test.ts tests/ontology-operation-memory.test.ts tests/workpack-remediate-route.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/safety-reference-hybrid.test.ts tests/safety-reference-relevance.test.ts tests/commercial-harness.test.ts tests/generation-evidence-operation-routes.test.ts tests/ontology-operation-memory.test.ts tests/workpack-remediate-route.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  9 passed (9)
+      Tests  113 passed (113)
+   Start at  17:18:01
+   Duration  19.29s (transform 1.22s, setup 0ms, import 3.79s, tests 9.73s, environment 1ms)
+
+EXIT_CODE=0
+===== CORPUS34 =====
+COMMAND: npm.cmd test -- tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  1 passed (1)
+      Tests  34 passed (34)
+   Start at  17:18:23
+   Duration  890ms (transform 163ms, setup 0ms, import 215ms, tests 65ms, environment 0ms)
+
+EXIT_CODE=0
+===== IMPACT41 =====
+COMMAND: npm.cmd test -- tests/generation-trace-privacy.test.ts tests/photo-vision-analysis.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/generation-trace-privacy.test.ts tests/photo-vision-analysis.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+
+ Test Files  2 passed (2)
+      Tests  41 passed (41)
+   Start at  17:18:26
+   Duration  5.24s (transform 948ms, setup 0ms, import 1.70s, tests 2.25s, environment 0ms)
+
+EXIT_CODE=0

@@ -2,6 +2,7 @@ import type { HarnessImprovement } from "@/lib/db-harness";
 import { buildOperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import {
   getSafetyReferenceDisplayTitle,
+  isSafetyReferenceDirectEligible,
   type SafetyReferenceItem
 } from "@/lib/safety-reference-catalog";
 
@@ -146,11 +147,22 @@ function event(input: WorkpackLearningInput, eventType: LearningJsonlEvent["even
 }
 
 function referenceRetrievalLabel(reference: SafetyReferenceItem) {
+  if (reference.retrieval_source === "local-hybrid") return "local-hybrid";
+  if (reference.retrieval_source === "local-ranked") return "local-ranked";
+  if (reference.retrieval_source === "local-tag") return "local-tag";
   if (reference.retrieval_source === "hybrid") return "hybrid-vector-rpc";
   if (reference.retrieval_source === "vector") return "vector-rpc";
   if (reference.retrieval_source === "ranked") return "ranked-rpc";
   if (reference.retrieval_source === "rest") return "rest-ilike";
   return "not-recorded";
+}
+
+function photoRetrievalLabels(improvement: HarnessImprovement): string[] {
+  return [...new Set((improvement.photoHazardProvenance?.evidence || []).flatMap((evidence) =>
+    (evidence.retrievals || []).map((retrieval) =>
+      `${retrieval.mode}/${retrieval.source || "source-unspecified"}`
+    )
+  ))];
 }
 
 function slugSegment(value: string) {
@@ -225,7 +237,13 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       evidenceRole: reference.evidence_role,
       sourceUrl: reference.source_url,
       retrievalSource: reference.retrieval_source || "not-recorded",
-      retrievalMode: referenceRetrievalLabel(reference)
+      retrievalMode: referenceRetrievalLabel(reference),
+      stableDocumentKey: reference.kosha_guide?.stableDocumentKey,
+      anchor: reference.kosha_guide?.anchors[0],
+      quality: reference.kosha_guide?.quality,
+      lifecycle: reference.kosha_guide?.lifecycle,
+      directEligible: reference.kosha_guide?.directEligible,
+      reviewRequired: !isSafetyReferenceDirectEligible(reference)
     })),
     ...input.improvements.map((improvement) => event(input, "improvement", {
       improvementId: improvement.id,
@@ -248,7 +266,8 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       photoCount: improvement.photoCount,
       siteSignals: improvement.siteSignals,
       visionEvidence: improvement.visionEvidence,
-      visionErrorMessage: improvement.visionErrorMessage
+      visionErrorMessage: improvement.visionErrorMessage,
+      photoHazardProvenance: improvement.photoHazardProvenance
     })),
     ...input.confirmations.map((confirmation) => event(input, "ack", {
       displayName: confirmation.displayName,
@@ -309,6 +328,14 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     lines.push(`  - type: ${reference.item_type}`);
     lines.push(`  - retrieval: ${referenceRetrievalLabel(reference)}`);
     if (reference.evidence_role) lines.push(`  - role: ${reference.evidence_role}`);
+    if (reference.kosha_guide) {
+      lines.push(`  - stableDocumentKey: ${reference.kosha_guide.stableDocumentKey}`);
+      lines.push(`  - quality: ${reference.kosha_guide.quality}`);
+      lines.push(`  - lifecycle: ${reference.kosha_guide.lifecycle}`);
+      lines.push(`  - directEligible: ${reference.kosha_guide.directEligible}`);
+      const anchor = reference.kosha_guide.anchors[0];
+      if (anchor) lines.push(`  - anchor: p.${anchor.page} ${anchor.excerpt}`);
+    }
     lines.push(`  - documents: ${reference.primary_documents.join(", ") || "없음"}`);
     if (reference.reflected_documents?.length) lines.push(`  - reflected: ${reference.reflected_documents.join(", ")}`);
     lines.push(`  - controls: ${reference.controls.join(" / ") || "없음"}`);
@@ -334,6 +361,9 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     if (improvement.siteSignals?.length) lines.push(`  - siteSignals: ${improvement.siteSignals.join(", ")}`);
     if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${improvement.visionEvidence}`);
     if (improvement.visionErrorMessage) lines.push(`  - visionError: ${improvement.visionErrorMessage}`);
+    for (const retrieval of photoRetrievalLabels(improvement)) {
+      lines.push(`  - photoRetrieval: ${retrieval}`);
+    }
   }
 
   lines.push("", "## 확인 이력", "");
@@ -438,6 +468,9 @@ export function buildWorkpackObsidianMarkdown(input: WorkpackLearningInput) {
     if (improvement.ocrText) lines.push(`  - ocr: ${improvement.ocrText}`);
     if (improvement.sourcePhotoNames?.length) lines.push(`  - sourcePhotos: ${improvement.sourcePhotoNames.join(", ")}`);
     if (improvement.visionEvidence) lines.push(`  - photoEvidence: ${improvement.visionEvidence}`);
+    for (const retrieval of photoRetrievalLabels(improvement)) {
+      lines.push(`  - photoRetrieval: ${retrieval}`);
+    }
   }
 
   lines.push("", "## 확인 후보", "");

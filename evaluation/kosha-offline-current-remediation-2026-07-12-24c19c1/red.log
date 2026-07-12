@@ -1,0 +1,229 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-current-review-lifecycle.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-current-review-photo-storage.test.ts tests/photo-vision-analysis.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+ ❯ tests/kosha-current-review-run-ask.test.ts (3 tests | 1 failed) 3952ms
+     × surfaces D-C-13 current-unverified as review-required with stable provenance 1040ms
+ ❯ tests/photo-vision-analysis.test.ts (39 tests | 1 failed) 124ms
+     × confirms controls and source IDs only from individually trusted evidence 8ms
+ ❯ tests/kosha-current-review-provenance.test.ts (5 tests | 2 failed) 29ms
+     × does not attach stale review-required local evidence to a direct risk row 5ms
+     × does not attach retired review-required local evidence to a direct risk row 2ms
+ ❯ tests/kosha-current-review-photo-storage.test.ts (2 tests | 2 failed) 31ms
+     × preserves local and hybrid retrievals through workspace acceptance and DB parsing 15ms
+     × exports local reference and photo provenance without not-recorded fallbacks 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-current-review-photo-storage.test.ts > current-base photo and learning provenance > preserves local and hybrid retrievals through workspace acceptance and DB parsing
+AssertionError: expected { sourceId: 'local-kosha-guide', …(8) } to match object { stableDocumentKey: 'D-C-13', …(5) }
+(9 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "anchor": {
++   "catalogSourceId": undefined,
++   "evidenceRole": "supporting",
+    "excerpt": "외벽 작업발판 상태를 확인한다.",
+-     "page": 7,
++   "itemType": undefined,
++   "retrievals": [
++     {
++       "channel": "supporting",
++       "mode": "local-ranked",
++       "query": "지게차 동선",
++       "source": "local-ranked",
++       "vectorAttempted": false,
++       "vectorModel": "text-embedding-3-small",
++       "vectorOk": false,
++     },
++     {
++       "channel": "supporting",
++       "mode": "hybrid-local-supabase",
++       "query": "지게차 동선",
++       "source": "local-hybrid",
++       "vectorAttempted": false,
++       "vectorModel": "text-embedding-3-small",
++       "vectorOk": false,
+      },
+-   "directEligible": false,
+-   "lifecycle": "stale",
+-   "quality": "review_required",
+-   "reviewRequired": true,
+-   "stableDocumentKey": "D-C-13",
++   ],
++   "sourceId": "local-kosha-guide",
++   "sourceType": "safeclaw-db",
++   "sourceUrl": null,
++   "title": "D-C-13-2026 외벽 작업 안전 기술지원규정",
+  }
+
+ ❯ tests/kosha-current-review-photo-storage.test.ts:162:34
+    160|       expect.objectContaining({ mode: "hybrid-local-supabase", source:…
+    161|     ]);
+    162|     expect(storedReviewEvidence).toMatchObject({
+       |                                  ^
+    163|       stableDocumentKey: "D-C-13",
+    164|       anchor: { page: 7, excerpt: "외벽 작업발판 상태를 확인한다." },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/kosha-current-review-photo-storage.test.ts > current-base photo and learning provenance > exports local reference and photo provenance without not-recorded fallbacks
+AssertionError: expected '# 외벽 작업\n\n- workpackId: `wp-local-pr…' to contain 'quality: review_required'
+
+- Expected
++ Received
+
+- quality: review_required
++ # 외벽 작업
++
++ - workpackId: `wp-local-provenance`
++ - generatedAt: 2026-07-12T00:00:00.000Z
++ - question: 외벽 작업
++
++ ## 운영 메모리 계약
++
++ - scope: operation_memory_export
++ - authority: operator_review_corpus
++ - promotionStatus: draft_candidate
++ - runtimeAuthority: no
++ - modelFineTuning: no
++ - nextUse: 관리자 검토 후 DB 하네스 메모리 또는 published ontology 후보로 승격합니다. / 다음 위험성평가와 TBM 생성 시 승인된 개선사항만 근거로 고정합니다.
++ - guardrails: 이 파일은 모델 파인튜닝 산출물이 아닙니다. / 검토 전 항목은 사용자 근거처럼 노출하지 않습니다. / LLM은 승인된 근거와 개선사항을 문장화하는 역할로 제한합니다.
++
++ ## 운영 그래프
++
++ - nodes: 6
++ - edges: 6
++ - hazards: 1
++ - controls: 2
++ - improvements: 1
++ - acks: 0
++ - reflectedDocuments: 3
++
++ ## 근거
++
++ - D-C-13-2026 외벽 작업 안전 기술지원규정
++   - sourceId: kosha-guide-offline:D-C-13
++   - type: technical-support-regulation
++   - retrieval: local-ranked
++   - role: supporting
++   - documents: 위험성평가표, TBM 브리핑
++   - controls: 작업발판 상태 확인
++
++ ## 개선사항
++
++ - 추락: 작업발판 상태 확인
++   - reflected: 위험성평가표, TBM 기록
++   - source: photo_analysis
++   - photoRetrieval: hybrid-local-supabase/local-ranked
++
++ ## 확인 이력
++
++
+
+ ❯ tests/kosha-current-review-photo-storage.test.ts:228:30
+    226|
+    227|     expect(markdown.content).toContain("retrieval: local-ranked");
+    228|     expect(markdown.content).toContain("quality: review_required");
+       |                              ^
+    229|     expect(markdown.content).toContain("lifecycle: stale");
+    230|     expect(markdown.content).toContain("directEligible: false");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/kosha-current-review-provenance.test.ts > current-base KOSHA provenance review regressions > does not attach stale review-required local evidence to a direct risk row
+AssertionError: expected [ 'DB 하네스 직접근거', 'machinery', …(3) ] to not include 'KOSHA 근거 D-C-13-2026 p.1: 외벽 작업발판과 안전…'
+ ❯ tests/kosha-current-review-provenance.test.ts:114:41
+    112|
+    113|     expect(directRow).toBeDefined();
+    114|     expect(directRow?.evidenceRefs).not.toContain(reviewRequired.kosha…
+       |                                         ^
+    115|     expect(directRow?.evidenceRefs.some((item) => item.includes(versio…
+    116|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/kosha-current-review-provenance.test.ts > current-base KOSHA provenance review regressions > does not attach retired review-required local evidence to a direct risk row
+AssertionError: expected [ 'DB 하네스 직접근거', 'machinery', …(3) ] to not include 'KOSHA 근거 KOSHA-RETIRED-1 p.1: 외벽 작업발판…'
+ ❯ tests/kosha-current-review-provenance.test.ts:114:41
+    112|
+    113|     expect(directRow).toBeDefined();
+    114|     expect(directRow?.evidenceRefs).not.toContain(reviewRequired.kosha…
+       |                                         ^
+    115|     expect(directRow?.evidenceRefs.some((item) => item.includes(versio…
+    116|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/kosha-current-review-run-ask.test.ts > current-base runAsk retrieval provenance > surfaces D-C-13 current-unverified as review-required with stable provenance
+AssertionError: expected { …(12) } to match object { …(8) }
+(11 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "anchor": {
+-     "excerpt": "외벽 작업발판과 안전난간 상태를 확인한다.",
+-     "page": 7,
+-   },
+-   "directEligible": false,
+    "id": "d-c-13-current-unverified",
+-   "lifecycle": "stale",
+-   "quality": "review_required",
+-   "retrievalMode": "hybrid-local-supabase",
+-   "retrievalSource": "local-ranked",
+-   "stableDocumentKey": "D-C-13",
+  }
+
+ ❯ tests/kosha-current-review-run-ask.test.ts:190:22
+    188|
+    189|     expect(response.externalData.safetyReference?.retrievalMode).toBe(…
+    190|     expect(surfaced).toMatchObject({
+       |                      ^
+    191|       id: "d-c-13-current-unverified",
+    192|       stableDocumentKey: "D-C-13",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  tests/photo-vision-analysis.test.ts > photo vision analysis contract > confirms controls and source IDs only from individually trusted evidence
+AssertionError: expected { …(9) } to match object { evidenceRole: 'supporting', …(6) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "anchor": {
+-     "excerpt": "외벽 작업발판 안전난간 상태 확인",
+-     "page": 7,
+-   },
+-   "directEligible": false,
+    "evidenceRole": "supporting",
+-   "lifecycle": "stale",
+-   "quality": "review_required",
+-   "reviewRequired": true,
+-   "stableDocumentKey": "D-C-13",
+  }
+
+ ❯ tests/photo-vision-analysis.test.ts:1031:57
+    1029|       "review-required-fall-control"
+    1030|     ]);
+    1031|     expect(analysis.candidates[0]?.harness.evidence[1]).toMatchObject({
+       |                                                         ^
+    1032|       evidenceRole: "supporting",
+    1033|       stableDocumentKey: "D-C-13",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  4 failed | 1 passed (5)
+      Tests  6 failed | 45 passed (51)
+   Start at  17:07:19
+   Duration  11.37s (transform 914ms, setup 0ms, import 2.24s, tests 5.88s, environment 1ms)

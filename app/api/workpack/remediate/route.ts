@@ -10,9 +10,9 @@ import { generateKnowledgeText } from "@/lib/ai";
 import {
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
-  searchSafetyReferences,
   type SafetyReferenceItem
 } from "@/lib/safety-reference-catalog";
+import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // 2min — single Vertex call with 1 retry

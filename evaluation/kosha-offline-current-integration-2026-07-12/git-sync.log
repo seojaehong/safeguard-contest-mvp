@@ -1,0 +1,7 @@
+SAME_BRANCH_PULL_COMMAND=git pull --rebase --autostash origin feat/kosha-offline-current-integration
+SAME_BRANCH_PULL_EXIT_CODE=1
+SAME_BRANCH_PULL_RESULT=remote ref absent before first publish
+FETCH_EXIT_CODE=0
+REMOTE_BASE=3b0edfe48c29e603f3156440362fca9304ef4d1a
+Current branch feat/kosha-offline-current-integration is up to date.
+REBASE_EXIT_CODE=0

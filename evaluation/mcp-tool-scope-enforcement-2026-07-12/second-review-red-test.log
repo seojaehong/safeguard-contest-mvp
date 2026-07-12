@@ -1,0 +1,93 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/mcp-tool-scope-enforcement
+
+ ❯ tests/mcp-route-scope-contract.test.ts (9 tests | 4 failed) 67ms
+     × routes every literal registered tool through the central scoped wrapper 48ms
+     × rejects an aliased registration invoked before the authorization guard 1ms
+     × rejects registration through an alternate object's registerScopedTool 1ms
+     × binds the committed raw build log to the report build ID 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/mcp-route-scope-contract.test.ts > MCP route scope contract > routes every literal registered tool through the central scoped wrapper
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/mcp-route-scope-contract.test.ts:157:43
+    155|     const analysis = analyzeRouteRegistrations(route);
+    156|
+    157|     expect(analysis.canonicalImportCount).toBe(1);
+       |                                           ^
+    158|     expect(analysis.directRegisterToolCalls).toBe(0);
+    159|     expect(analysis.alternateScopedToolCalls).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/mcp-route-scope-contract.test.ts > MCP route scope contract > rejects an aliased registration invoked before the authorization guard
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/mcp-route-scope-contract.test.ts:212:50
+    210|     const analysis = analyzeRouteRegistrations(aliasBeforeGuard);
+    211|
+    212|     expect(analysis.registrationAliasReferences).toBe(1);
+       |                                                  ^
+    213|     expect(analysis.scopedToolNames).toEqual([]);
+    214|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/mcp-route-scope-contract.test.ts > MCP route scope contract > rejects registration through an alternate object's registerScopedTool
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/mcp-route-scope-contract.test.ts:225:47
+    223|     const analysis = analyzeRouteRegistrations(alternateObject);
+    224|
+    225|     expect(analysis.alternateScopedToolCalls).toBe(1);
+       |                                               ^
+    226|     expect(analysis.scopedToolNames).toEqual([]);
+    227|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/mcp-route-scope-contract.test.ts > MCP remediation evidence > binds the committed raw build log to the report build ID
+AssertionError: expected undefined to be type of 'string'
+
+Expected: "string"
+Received: "undefined"
+
+ ❯ tests/mcp-route-scope-contract.test.ts:303:27
+    301|     const loggedBuildId = /^BUILD_ID=(\S+)$/m.exec(buildLog)?.[1];
+    302|
+    303|     expect(loggedBuildId).toBeTypeOf("string");
+       |                           ^
+    304|     expect(report.build?.buildId).toBe(loggedBuildId);
+    305|     expect(report.build?.staticPages).toBe("27/27");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  4 failed | 73 passed (77)
+   Start at  17:30:44
+   Duration  3.79s (transform 385ms, setup 0ms, import 1.08s, tests 139ms, environment 0ms)

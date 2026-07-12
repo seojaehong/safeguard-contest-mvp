@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-07-12",
+  "branch": "feat/kosha-offline-current-integration",
+  "status": "passed_pending_independent_review",
+  "commits": {
+    "base": "24c19c17cc8c932a333fdae8785426218e57ae15",
+    "red": "7730b9d033fadd1cd4bef57dcd2e3be8ca596055",
+    "product": "c62162df2368234146c353d713fc3d1d26eff88b",
+    "evidence": "6eaa8308dcf20b996e60fb17eae8428ab60c9dd4"
+  },
+  "priorRejected": {
+    "product": "b7e609b948bed4b5334f0801b2e05f0742b9aa6b",
+    "evidence": "70f233cbbba597257a4a99406c87c0860249bc2e",
+    "independentReview": "rejected"
+  },
+  "independentReview": {
+    "status": "pending",
+    "claim": "No independent PASS is claimed by this report."
+  },
+  "tdd": {
+    "red": {
+      "exitCode": 1,
+      "files": { "passed": 1, "failed": 4, "total": 5 },
+      "tests": { "passed": 45, "failed": 6, "total": 51 },
+      "failureBoundaries": [
+        "risk-row stale and retired local attachment",
+        "runAsk final safety-reference provenance",
+        "photo evidence and storage provenance",
+        "learning markdown and JSONL provenance"
+      ]
+    },
+    "green": {
+      "exitCode": 0,
+      "files": { "passed": 5, "failed": 0, "total": 5 },
+      "tests": { "passed": 51, "failed": 0, "total": 51 }
+    }
+  },
+  "verification": {
+    "targeted": {
+      "exitCode": 0,
+      "files": { "passed": 12, "skipped": 0, "failed": 0, "total": 12 },
+      "tests": { "passed": 126, "skipped": 0, "failed": 0, "total": 126 }
+    },
+    "sourceGates": [
+      { "label": "NEW_REGRESSION1", "exitCode": 0, "files": 1, "tests": 1 },
+      { "label": "BOUNDED26", "exitCode": 0, "files": 2, "tests": 26 },
+      { "label": "ORIGINAL8", "exitCode": 0, "files": 2, "tests": 8 },
+      { "label": "EXPANDED113", "exitCode": 0, "files": 9, "tests": 113 },
+      { "label": "CORPUS34", "exitCode": 0, "files": 1, "tests": 34 },
+      { "label": "IMPACT41", "exitCode": 0, "files": 2, "tests": 41 }
+    ],
+    "currentScopedContracts": {
+      "exitCode": 0,
+      "files": { "passed": 28, "skipped": 1, "failed": 0, "total": 29 },
+      "tests": { "passed": 255, "skipped": 1, "failed": 0, "total": 256 }
+    },
+    "typecheck": { "exitCode": 0 },
+    "diffCheck": {
+      "exitCode": 0,
+      "frontendLaunchPreserved": true,
+      "scenarioProtocolPreserved": true,
+      "runtimeUnwiredPreserved": true
+    },
+    "build": {
+      "exitCode": 0,
+      "attempts": 1,
+      "matchingProcessesBefore": 0,
+      "compiledSuccessfully": true,
+      "staticPagesGenerated": 27,
+      "staticPagesTotal": 27
+    }
+  },
+  "koshaLifecycle": {
+    "actualV3": { "stale": 1038, "retired": 1, "reviewRequired": 1039 },
+    "dc13": {
+      "version": "D-C-13-2026",
+      "sourceState": "current-unverified",
+      "normalizedLifecycle": "stale",
+      "quality": "review_required",
+      "directEligible": false
+    }
+  },
+  "integrity": {
+    "externalV3": {
+      "fileCount": 6,
+      "totalBytes": 79572222,
+      "allHashIdentical": true,
+      "integrationAccess": "read-only"
+    },
+    "forbiddenChangeCount": 0,
+    "clientCorpusImportViolationCount": 0,
+    "serverWrapperImportCount": 4
+  },
+  "runtime": {
+    "runtimeProtocolConsumerCount": 0,
+    "remoteProtocolWired": false,
+    "remoteDemoReady": false
+  },
+  "rawLogs": [
+    "red.log",
+    "targeted.log",
+    "source-gates.log",
+    "current-contracts.log",
+    "typecheck.log",
+    "diff-check.log",
+    "build.log",
+    "git-provenance.log"
+  ]
+}

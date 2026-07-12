@@ -1,0 +1,5 @@
+COMMAND: git diff --exit-code 24c19c17cc8c932a333fdae8785426218e57ae15 -- tests/frontend-shared-surfaces.test.ts tests/live-harness-quality-probe.test.ts app/not-found.tsx app/error.tsx app/global-error.tsx app/workspace/loading.tsx components/SafeClawModuleShell.tsx components/SafeClawLanding.tsx app/globals.css scripts/live_harness_quality_probe.mjs
+EXIT_CODE=0
+
+COMMAND: git diff --exit-code 24c19c17cc8c932a333fdae8785426218e57ae15 -- lib/accident-cases.ts lib/mock-data.ts lib/remote-engine-protocol.ts tests/accident-cases.test.ts tests/remote-engine-protocol.test.ts tests/scenario-inference.test.ts evaluation/backend-scenario-protocol-integration-2026-07-12 evaluation/remote-openclaw-protocol-2026-07-12 evaluation/scenario-profile-contamination-2026-07-12
+EXIT_CODE=0

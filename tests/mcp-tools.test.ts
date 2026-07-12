@@ -359,9 +359,45 @@ describe("tool result helpers", () => {
   it("toToolError maps Error and non-Error to isError content", () => {
     const fromError = toToolError(new Error("boom"));
     expect(fromError.isError).toBe(true);
-    expect(JSON.parse(fromError.content[0].text).error).toBe("boom");
+    expect(JSON.parse(fromError.content[0].text)).toEqual({
+      code: "MCP_TOOL_INTERNAL_ERROR",
+      error: "도구 실행 중 오류가 발생했습니다.",
+    });
     const fromString = toToolError("plain");
     expect(fromString.isError).toBe(true);
-    expect(JSON.parse(fromString.content[0].text).error).toBe("plain");
+    expect(JSON.parse(fromString.content[0].text)).toEqual({
+      code: "MCP_TOOL_INTERNAL_ERROR",
+      error: "도구 실행 중 오류가 발생했습니다.",
+    });
+  });
+
+  it("toToolError fixes authorization output without exposing internal fields", () => {
+    const error = Object.assign(new Error("scope details for tenant-secret"), {
+      code: "MCP_TOOL_FORBIDDEN",
+      secret: "must-not-leak",
+    });
+    const payload = JSON.parse(toToolError(error).content[0].text) as Record<string, unknown>;
+
+    expect(payload).toEqual({ code: "MCP_TOOL_FORBIDDEN", error: "도구 권한이 없습니다." });
+    expect(payload).not.toHaveProperty("secret");
+    expect(toToolError(error).content[0].text).not.toContain("tenant-secret");
+  });
+
+  it("toToolError hides transport and Supabase-like internal exception details", () => {
+    const internal = Object.assign(
+      new Error('Supabase response: {"message":"JWT secret leaked","details":"private-row"}'),
+      { code: "PGRST301", details: "service-role-secret" },
+    );
+    const serialized = toToolError(internal).content[0].text;
+
+    expect(JSON.parse(serialized)).toEqual({
+      code: "MCP_TOOL_INTERNAL_ERROR",
+      error: "도구 실행 중 오류가 발생했습니다.",
+    });
+    expect(serialized).not.toContain("Supabase");
+    expect(serialized).not.toContain("PGRST301");
+    expect(serialized).not.toContain("JWT secret leaked");
+    expect(serialized).not.toContain("private-row");
+    expect(serialized).not.toContain("service-role-secret");
   });
 });

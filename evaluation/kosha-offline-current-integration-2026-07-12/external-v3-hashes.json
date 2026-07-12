@@ -1,0 +1,63 @@
+{
+  "capturedAt": "2026-07-12T12:27:24.9163419+09:00",
+  "root": "C:\\Users\\iceam\\dev\\safeclaw-local-artifacts\\kosha-corpus-body-recovery-2026-07-12-v3",
+  "fileCount": 6,
+  "totalBytes": 79572222.0,
+  "allHashIdentical": true,
+  "files": [
+    {
+      "path": "current.json",
+      "length": 707,
+      "expectedSha256": "071DBCBD8A1B9666139D235F14078F92E1CE13D232BC1884B95E594F1B49168B",
+      "actualSha256": "071DBCBD8A1B9666139D235F14078F92E1CE13D232BC1884B95E594F1B49168B",
+      "hashIdentical": true,
+      "integrationAccess": "read-only",
+      "fileAttributeReadOnly": false
+    },
+    {
+      "path": "snapshots/bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51/checkpoint.json",
+      "length": 141935,
+      "expectedSha256": "A458D8F0084D31C7C2F268B746BA574BC6D5520C881EBAA0598CD11D8B2104A5",
+      "actualSha256": "A458D8F0084D31C7C2F268B746BA574BC6D5520C881EBAA0598CD11D8B2104A5",
+      "hashIdentical": true,
+      "integrationAccess": "read-only",
+      "fileAttributeReadOnly": false
+    },
+    {
+      "path": "snapshots/bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51/chunks.jsonl",
+      "length": 41665957,
+      "expectedSha256": "33733A50DC835FBF3CF3776DDEB20253DA47FA50034A95035F86794303463786",
+      "actualSha256": "33733A50DC835FBF3CF3776DDEB20253DA47FA50034A95035F86794303463786",
+      "hashIdentical": true,
+      "integrationAccess": "read-only",
+      "fileAttributeReadOnly": false
+    },
+    {
+      "path": "snapshots/bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51/failures.jsonl",
+      "length": 581,
+      "expectedSha256": "9CCDFC86C21C3C5AAB65624778DFADE5B6062504748D1FF162784C3E2F1242A1",
+      "actualSha256": "9CCDFC86C21C3C5AAB65624778DFADE5B6062504748D1FF162784C3E2F1242A1",
+      "hashIdentical": true,
+      "integrationAccess": "read-only",
+      "fileAttributeReadOnly": false
+    },
+    {
+      "path": "snapshots/bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51/items.jsonl",
+      "length": 37758053,
+      "expectedSha256": "17AC72EC9BA85330E9A02F77B4C68C5FC4ADE1F735B432233A31F6E8B424BF78",
+      "actualSha256": "17AC72EC9BA85330E9A02F77B4C68C5FC4ADE1F735B432233A31F6E8B424BF78",
+      "hashIdentical": true,
+      "integrationAccess": "read-only",
+      "fileAttributeReadOnly": false
+    },
+    {
+      "path": "snapshots/bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51/manifest.json",
+      "length": 4989,
+      "expectedSha256": "F90262FC98C190243D80124B5E8711866D3372B3AFFEF7D294C881ED194806D2",
+      "actualSha256": "F90262FC98C190243D80124B5E8711866D3372B3AFFEF7D294C881ED194806D2",
+      "hashIdentical": true,
+      "integrationAccess": "read-only",
+      "fileAttributeReadOnly": false
+    }
+  ]
+}

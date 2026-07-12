@@ -49,11 +49,25 @@ export type HazardPhotoWorkspaceHarness = {
     sourceUrl?: string | null;
     itemType?: string;
     evidenceRole?: "direct" | "supporting";
+    stableDocumentKey?: string;
+    anchor?: { page: number; excerpt: string };
+    quality?: "accepted" | "review_required";
+    lifecycle?: "current" | "stale" | "retired";
+    directEligible?: boolean;
+    reviewRequired?: boolean;
     retrievals?: Array<{
       channel: "direct" | "sif" | "supporting";
       query: string;
-      mode: "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
-      source: "rest" | "ranked" | "vector" | "hybrid" | null;
+      mode:
+        | "unconfigured"
+        | "rest-ilike"
+        | "ranked-rpc"
+        | "hybrid-vector-rpc"
+        | "hybrid-local-supabase"
+        | "local-tag"
+        | "local-ranked"
+        | "local-hybrid";
+      source: "rest" | "ranked" | "vector" | "hybrid" | "local-tag" | "local-ranked" | "local-hybrid" | null;
       vectorAttempted: boolean;
       vectorOk: boolean;
       vectorModel: string;
@@ -219,12 +233,19 @@ function parseWorkspaceHarness(value: unknown): HazardPhotoWorkspaceHarness | un
         || retrieval.mode === "rest-ilike"
         || retrieval.mode === "ranked-rpc"
         || retrieval.mode === "hybrid-vector-rpc"
+        || retrieval.mode === "hybrid-local-supabase"
+        || retrieval.mode === "local-tag"
+        || retrieval.mode === "local-ranked"
+        || retrieval.mode === "local-hybrid"
         ? retrieval.mode
         : null;
       const source: NonNullable<HazardPhotoWorkspaceHarness["evidence"][number]["retrievals"]>[number]["source"] = retrieval.source === "rest"
         || retrieval.source === "ranked"
         || retrieval.source === "vector"
         || retrieval.source === "hybrid"
+        || retrieval.source === "local-tag"
+        || retrieval.source === "local-ranked"
+        || retrieval.source === "local-hybrid"
         ? retrieval.source
         : null;
       if (!channel || !mode) return [];
@@ -244,6 +265,19 @@ function parseWorkspaceHarness(value: unknown): HazardPhotoWorkspaceHarness | un
     const evidenceRole: HazardPhotoWorkspaceHarness["evidence"][number]["evidenceRole"] = item.evidenceRole === "direct" || item.evidenceRole === "supporting"
       ? item.evidenceRole
       : undefined;
+    const anchor = isRecord(item.anchor)
+      && typeof item.anchor.page === "number"
+      && Number.isInteger(item.anchor.page)
+      && item.anchor.page > 0
+      && readString(item.anchor.excerpt)
+      ? { page: item.anchor.page, excerpt: readString(item.anchor.excerpt) }
+      : undefined;
+    const quality: HazardPhotoWorkspaceHarness["evidence"][number]["quality"] = item.quality === "accepted" || item.quality === "review_required"
+      ? item.quality
+      : undefined;
+    const lifecycle: HazardPhotoWorkspaceHarness["evidence"][number]["lifecycle"] = item.lifecycle === "current" || item.lifecycle === "stale" || item.lifecycle === "retired"
+      ? item.lifecycle
+      : undefined;
     return sourceId && normalizedSourceType && title
       ? [{
         sourceId,
@@ -254,14 +288,30 @@ function parseWorkspaceHarness(value: unknown): HazardPhotoWorkspaceHarness | un
         sourceUrl: typeof item.sourceUrl === "string" ? item.sourceUrl : null,
         itemType: readString(item.itemType) || undefined,
         evidenceRole,
+        stableDocumentKey: readString(item.stableDocumentKey) || undefined,
+        anchor,
+        quality,
+        lifecycle,
+        directEligible: typeof item.directEligible === "boolean" ? item.directEligible : undefined,
+        reviewRequired: typeof item.reviewRequired === "boolean" ? item.reviewRequired : undefined,
         retrievals
       }]
       : [];
   }) : [];
+  const reviewRequiredEvidenceIds = new Set(evidence
+    .filter((item) => (
+      item.reviewRequired === true
+      || item.quality === "review_required"
+      || (item.lifecycle !== undefined && item.lifecycle !== "current")
+      || item.directEligible === false
+    ))
+    .map((item) => item.sourceId));
   const confirmedControls = Array.isArray(value.confirmedControls) ? value.confirmedControls.flatMap((item) => {
     if (!isRecord(item)) return [];
     const text = readString(item.text);
-    return text ? [{ text, evidenceSourceIds: readStringList(item.evidenceSourceIds) }] : [];
+    const evidenceSourceIds = readStringList(item.evidenceSourceIds)
+      .filter((sourceId) => !reviewRequiredEvidenceIds.has(sourceId));
+    return text && evidenceSourceIds.length ? [{ text, evidenceSourceIds }] : [];
   }) : [];
   return {
     authority: "safeclaw-db-mcp",
@@ -643,6 +693,12 @@ function buildAcceptedHazardPhotoProvenance(
     sourceUrl: item.sourceUrl,
     itemType: item.itemType,
     evidenceRole: item.evidenceRole,
+    stableDocumentKey: item.stableDocumentKey,
+    anchor: item.anchor,
+    quality: item.quality,
+    lifecycle: item.lifecycle,
+    directEligible: item.directEligible,
+    reviewRequired: item.reviewRequired,
     retrievals: item.retrievals?.map((retrieval) => ({
       channel: retrieval.channel,
       query: retrieval.query,

@@ -25,6 +25,7 @@ import type {
   SafetyReferenceSearchResult,
   SafetyReferenceVectorStatus
 } from "./safety-reference-catalog";
+import { deriveSafetyReferenceRetrievalModeFromItems } from "./safety-reference-catalog";
 
 /** MCP 도구가 반환하는 CallToolResult의 최소 형태 (SDK 타입과 호환). */
 export type McpToolResult = {
@@ -39,9 +40,17 @@ export function toToolResult(payload: unknown): McpToolResult {
 
 /** 도구 실행 실패를 MCP 오류 응답(isError)으로 매핑한다. */
 export function toToolError(error: unknown): McpToolResult {
-  const message = error instanceof Error ? error.message : String(error);
+  const rawCode = typeof error === "object" && error !== null && "code" in error
+    ? (error as { code?: unknown }).code
+    : undefined;
+  const payload = rawCode === "MCP_TOOL_FORBIDDEN"
+    ? { code: "MCP_TOOL_FORBIDDEN", error: "도구 권한이 없습니다." }
+    : { code: "MCP_TOOL_INTERNAL_ERROR", error: "도구 실행 중 오류가 발생했습니다." };
   return {
-    content: [{ type: "text", text: JSON.stringify({ error: message }, null, 2) }],
+    content: [{
+      type: "text",
+      text: JSON.stringify(payload, null, 2),
+    }],
     isError: true,
   };
 }
@@ -240,7 +249,7 @@ export function summarizeHarnessSearch(
   };
 }
 
-function combineHarnessRetrievalMode(searches: HarnessAgentSearchSummary[]): SafetyReferenceRetrievalMode {
+function combineAttemptedHarnessRetrievalMode(searches: HarnessAgentSearchSummary[]): SafetyReferenceRetrievalMode {
   if (searches.some((item) => item.retrievalMode === "hybrid-vector-rpc")) return "hybrid-vector-rpc";
   if (searches.some((item) => item.retrievalMode === "ranked-rpc")) return "ranked-rpc";
   if (searches.some((item) => item.retrievalMode === "rest-ilike")) return "rest-ilike";
@@ -268,7 +277,10 @@ export function buildHarnessAgentResult(input: {
     improvements: input.improvements,
     workpackMemory: input.workpackMemory,
     retrieval: {
-      mode: combineHarnessRetrievalMode(input.referenceSearch),
+      mode: deriveSafetyReferenceRetrievalModeFromItems(
+        input.references,
+        combineAttemptedHarnessRetrievalMode(input.referenceSearch)
+      ),
       vectorSearch: combineHarnessVectorStatus(input.referenceSearch),
       message: input.referenceSearch.map((item) => `${item.source}: ${item.message}`).join(" / ")
     }

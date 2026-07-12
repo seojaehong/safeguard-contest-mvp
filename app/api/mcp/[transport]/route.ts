@@ -24,17 +24,18 @@ import { createRateLimiter } from "@/lib/rate-limit";
 import { createLogger } from "@/lib/logger";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { saveMcpDocpackWorkpack } from "@/lib/workpack-store";
-import { searchSafetyReferences, type SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
 import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
 import { querySafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import {
-  asAuthContext,
   isMcpEnabled,
   resolveMcpAuth,
   type McpAuthContext,
 } from "@/lib/mcp-auth";
+import { registerScopedTool } from "@/lib/mcp-scoped-tool";
 import {
   buildAccidentCasesResult,
   buildDocpackResult,
@@ -45,7 +46,6 @@ import {
   buildWeatherResult,
   resolveReviewTaskLabel,
   summarizeHarnessSearch,
-  toToolError,
   toToolResult,
   validateCitations,
 } from "@/lib/mcp-tools";
@@ -54,30 +54,6 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300; // docpack full 생성 ~150초
 
 const log = createLogger("mcp-route");
-
-// MCP 도구 핸들러의 두 번째 인자(extra: RequestHandlerExtra)에서 인증 컨텍스트를 꺼낸다.
-// mcp-handler의 withMcpAuth가 verifyToken 반환 AuthInfo를 req.auth로 보관하고, 이를
-// transport가 extra.authInfo로 전달한다. 우리는 AuthInfo.extra에 McpAuthContext를 실어 보냈다.
-function readAuthContext(extra: unknown): McpAuthContext | null {
-  const authInfo = (extra as { authInfo?: { extra?: unknown } } | undefined)?.authInfo;
-  return asAuthContext(authInfo?.extra);
-}
-
-// 평문 토큰(AuthInfo.token)은 절대 로그하지 않는다 — 컨텍스트 요약만 남긴다.
-function logToolContext(tool: string, ctx: McpAuthContext | null): void {
-  if (!ctx) {
-    log.debug("tool call (no auth context)", { tool });
-    return;
-  }
-  log.debug("tool call", {
-    tool,
-    source: ctx.source,
-    siteId: ctx.siteId,
-    orgId: ctx.orgId,
-    scopes: ctx.scopes,
-    tokenId: ctx.tokenId,
-  });
-}
 
 type SupabaseAdminClient = NonNullable<ReturnType<typeof createSupabaseAdminClient>>;
 
@@ -234,7 +210,7 @@ async function loadHarnessImprovementMemory(
 }
 
 function registerTools(server: McpServer): void {
-  server.registerTool(
+  registerScopedTool(server,
     "run_safeclaw_harness_agent",
     {
       title: "SafeClaw Harness Agent",
@@ -244,11 +220,7 @@ function registerTools(server: McpServer): void {
         question: z.string().describe("현장 작업 상황 설명"),
       },
     },
-    async ({ question }, extra) => {
-      try {
-        const authContext = readAuthContext(extra);
-        logToolContext("run_safeclaw_harness_agent", authContext);
-
+    async ({ question }, authContext) => {
         const [direct, sif, supporting] = await Promise.all([
           searchSafetyReferences({ query: question, limit: 6, evidenceRole: "direct" }),
           searchSafetyReferences({ query: question, limit: 6, itemType: "sif-case" }),
@@ -288,13 +260,10 @@ function registerTools(server: McpServer): void {
         });
 
         return toToolResult(result);
-      } catch (error) {
-        return toToolError(error);
-      }
     }
   );
 
-  server.registerTool(
+  registerScopedTool(server,
     "generate_reviewed_safety_docpack",
     {
       title: "검수 포함 안전 문서팩 생성",
@@ -315,11 +284,7 @@ function registerTools(server: McpServer): void {
           .describe("각 문서 전체 본문 포함 여부 (기본 false — 프리뷰만)"),
       },
     },
-    async ({ question, task, mode, includeFull }, extra) => {
-      try {
-        const authContext = readAuthContext(extra);
-        logToolContext("generate_reviewed_safety_docpack", authContext);
-
+    async ({ question, task, mode, includeFull }, authContext) => {
         const reviewTask = resolveReviewTaskLabel(task, question);
         const response = await runAsk(question, { aiMode: mode ?? "full" });
         const qaSource =
@@ -351,13 +316,10 @@ function registerTools(server: McpServer): void {
         }
 
         return toToolResult(result);
-      } catch (error) {
-        return toToolError(error);
-      }
     }
   );
 
-  server.registerTool(
+  registerScopedTool(server,
     "generate_safety_docpack",
     {
       title: "안전 문서팩 생성",
@@ -375,11 +337,7 @@ function registerTools(server: McpServer): void {
           .describe("각 문서 전체 본문 포함 여부 (기본 false — 프리뷰만)"),
       },
     },
-    async ({ question, mode, includeFull }, extra) => {
-      try {
-        const authContext = readAuthContext(extra);
-        logToolContext("generate_safety_docpack", authContext);
-
+    async ({ question, mode, includeFull }, authContext) => {
         const response = await runAsk(question, { aiMode: mode ?? "full" });
         const result = buildDocpackResult(response, includeFull ?? false) as Record<string, unknown>;
 
@@ -405,13 +363,10 @@ function registerTools(server: McpServer): void {
         }
 
         return toToolResult(result);
-      } catch (error) {
-        return toToolError(error);
-      }
     }
   );
 
-  server.registerTool(
+  registerScopedTool(server,
     "get_weather_signals",
     {
       title: "현장 기상 신호 조회",
@@ -421,19 +376,13 @@ function registerTools(server: McpServer): void {
         region: z.string().describe("현장 지역명 (예: 서울, 인천, 안산, 부산, 광주, 대구, 창원)"),
       },
     },
-    async ({ region }, extra) => {
-      try {
-        // 향후 확장점: authContext.siteId로 사이트 기본 지역 프리필/조회 로깅 등에 활용.
-        logToolContext("get_weather_signals", readAuthContext(extra));
-        const signal = await fetchWeatherSignal(region);
-        return toToolResult(buildWeatherResult(region, signal));
-      } catch (error) {
-        return toToolError(error);
-      }
+    async ({ region }) => {
+      const signal = await fetchWeatherSignal(region);
+      return toToolResult(buildWeatherResult(region, signal));
     }
   );
 
-  server.registerTool(
+  registerScopedTool(server,
     "validate_safety_citations",
     {
       title: "안전 법령 인용 검증",
@@ -443,18 +392,12 @@ function registerTools(server: McpServer): void {
         text: z.string().describe("검증할 안전 문서 초안 텍스트"),
       },
     },
-    async ({ text }, extra) => {
-      try {
-        // 향후 확장점: authContext로 사이트별 인용 화이트리스트 확장 가능.
-        logToolContext("validate_safety_citations", readAuthContext(extra));
-        return toToolResult(validateCitations(text));
-      } catch (error) {
-        return toToolError(error);
-      }
+    async ({ text }) => {
+      return toToolResult(validateCitations(text));
     }
   );
 
-  server.registerTool(
+  registerScopedTool(server,
     "sanitize_emergency_contacts",
     {
       title: "비상 연락처 정화",
@@ -464,18 +407,12 @@ function registerTools(server: McpServer): void {
         text: z.string().describe("정화할 초안 텍스트 (비상대응/사고보고 절차 등)"),
       },
     },
-    async ({ text }, extra) => {
-      try {
-        // 향후 확장점: authContext로 사이트별 비상 연락처 세트 주입 가능.
-        logToolContext("sanitize_emergency_contacts", readAuthContext(extra));
-        return toToolResult(buildSanitizeContactsResult(text));
-      } catch (error) {
-        return toToolError(error);
-      }
+    async ({ text }) => {
+      return toToolResult(buildSanitizeContactsResult(text));
     }
   );
 
-  server.registerTool(
+  registerScopedTool(server,
     "search_accident_cases",
     {
       title: "유사 재해사례 검색",
@@ -485,19 +422,13 @@ function registerTools(server: McpServer): void {
         keyword: z.string().describe("검색 키워드 (예: 비계 추락, 밀폐공간 질식, 지게차 충돌)"),
       },
     },
-    async ({ keyword }, extra) => {
-      try {
-        // 향후 확장점: authContext.siteId로 사이트 업종별 재해사례 가중치 부여 가능.
-        logToolContext("search_accident_cases", readAuthContext(extra));
-        const result = await fetchAccidentCases(keyword);
-        return toToolResult(buildAccidentCasesResult(keyword, result));
-      } catch (error) {
-        return toToolError(error);
-      }
+    async ({ keyword }) => {
+      const result = await fetchAccidentCases(keyword);
+      return toToolResult(buildAccidentCasesResult(keyword, result));
     }
   );
 
-  server.registerTool(
+  registerScopedTool(server,
     "get_evidence_mapping",
     {
       title: "중처법 증빙 매핑 조회",
@@ -510,18 +441,12 @@ function registerTools(server: McpServer): void {
           .describe("문서 타입 키 (예: riskAssessment, tbmBriefing, workPlan). 생략 시 전체 매핑."),
       },
     },
-    async ({ docType }, extra) => {
-      try {
-        // 향후 확장점: authContext로 조직별 증빙 파일철 구성 로깅 가능.
-        logToolContext("get_evidence_mapping", readAuthContext(extra));
-        return toToolResult(buildEvidenceMappingResult(docType));
-      } catch (error) {
-        return toToolError(error);
-      }
+    async ({ docType }) => {
+      return toToolResult(buildEvidenceMappingResult(docType));
     }
   );
 
-  server.registerTool(
+  registerScopedTool(server,
     "query_safety_knowledge",
     {
       title: "검증된 안전 지식 그래프 조회",
@@ -531,18 +456,12 @@ function registerTools(server: McpServer): void {
         query: z.string().describe("작업유형 또는 위험요인 라벨 (예: 밀폐공간, 용접, 산소결핍 질식)"),
       },
     },
-    async ({ query }, extra) => {
-      try {
-        // 향후 확장점: authContext.siteId로 사이트 업종별 조회 로깅 가능.
-        logToolContext("query_safety_knowledge", readAuthContext(extra));
-        return toToolResult(await querySafetyKnowledge(query));
-      } catch (error) {
-        return toToolError(error);
-      }
+    async ({ query }) => {
+      return toToolResult(await querySafetyKnowledge(query));
     }
   );
 
-  server.registerTool(
+  registerScopedTool(server,
     "qa_review_docpack",
     {
       title: "안전 문서 QA 검수",
@@ -555,14 +474,8 @@ function registerTools(server: McpServer): void {
           .describe("검수할 안전 문서 본문 (최대 20000자 — 초과분은 잘라내고 검수)"),
       },
     },
-    async ({ task, document_text }, extra) => {
-      try {
-        // 향후 확장점: authContext.siteId로 사이트별 검수 로깅 가능.
-        logToolContext("qa_review_docpack", readAuthContext(extra));
-        return toToolResult(await reviewDocpack(task, document_text));
-      } catch (error) {
-        return toToolError(error);
-      }
+    async ({ task, document_text }) => {
+      return toToolResult(await reviewDocpack(task, document_text));
     }
   );
 }

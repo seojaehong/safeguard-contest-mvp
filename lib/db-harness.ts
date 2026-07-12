@@ -6,8 +6,10 @@ import type {
 } from "@/lib/safety-reference-catalog";
 import {
   buildSafetyReferenceOperationalMetadata,
+  deriveSafetyReferenceRetrievalModeFromItems,
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplayTitle,
+  isSafetyReferenceDirectEligible,
   isSafetyReferenceCompatibleWithQuery
 } from "@/lib/safety-reference-catalog";
 
@@ -52,11 +54,17 @@ export type HarnessPhotoHazardEvidence = {
   sourceUrl?: string | null;
   itemType?: string;
   evidenceRole?: "direct" | "supporting";
+  stableDocumentKey?: string;
+  anchor?: { page: number; excerpt: string };
+  quality?: "accepted" | "review_required";
+  lifecycle?: "current" | "stale" | "retired";
+  directEligible?: boolean;
+  reviewRequired?: boolean;
   retrievals?: Array<{
     channel: "direct" | "sif" | "supporting";
     query: string;
-    mode: "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
-    source: "rest" | "ranked" | "vector" | "hybrid" | null;
+    mode: SafetyReferenceRetrievalMode;
+    source: NonNullable<SafetyReferenceItem["retrieval_source"]> | null;
     vectorAttempted: boolean;
     vectorOk: boolean;
     vectorModel: string;
@@ -115,6 +123,9 @@ export type DbHarnessRetrievalContract = {
     ranked: number;
     vector: number;
     hybrid: number;
+    localTag: number;
+    localRanked: number;
+    localHybrid: number;
   };
   message: string;
 };
@@ -176,6 +187,7 @@ function includesDocument(item: SafetyReferenceItem, document: string) {
 function uniqueDocuments(items: SafetyReferenceItem[], improvements: HarnessImprovement[]) {
   const documents = new Set<string>();
   for (const item of items) {
+    if (!isSafetyReferenceDirectEligible(item)) continue;
     item.primary_documents.forEach((document) => documents.add(document));
     item.reflected_documents?.forEach((document) => documents.add(document));
   }
@@ -195,7 +207,9 @@ function buildDocumentCoverage(input: {
     const evidenceTypes: DbHarnessDocumentCoverage["evidenceTypes"] = [];
     if (input.directEvidence.some((item) => includesDocument(item, document))) evidenceTypes.push("directEvidence");
     if (input.sifCases.some((item) => includesDocument(item, document))) evidenceTypes.push("sifCase");
-    if (input.supportingEvidence.some((item) => includesDocument(item, document))) evidenceTypes.push("supportingEvidence");
+    if (input.supportingEvidence.some((item) => (
+      isSafetyReferenceDirectEligible(item) && includesDocument(item, document)
+    ))) evidenceTypes.push("supportingEvidence");
     if (input.improvements.some((item) => item.reflectedDocuments.includes(document))) evidenceTypes.push("improvementMemory");
     return {
       document,
@@ -222,7 +236,10 @@ function countRetrievalSources(items: SafetyReferenceItem[]) {
     rest: items.filter((item) => item.retrieval_source === "rest").length,
     ranked: items.filter((item) => item.retrieval_source === "ranked").length,
     vector: items.filter((item) => item.retrieval_source === "vector").length,
-    hybrid: items.filter((item) => item.retrieval_source === "hybrid").length
+    hybrid: items.filter((item) => item.retrieval_source === "hybrid").length,
+    localTag: items.filter((item) => item.retrieval_source === "local-tag").length,
+    localRanked: items.filter((item) => item.retrieval_source === "local-ranked").length,
+    localHybrid: items.filter((item) => item.retrieval_source === "local-hybrid").length
   };
 }
 
@@ -230,13 +247,10 @@ function inferRetrievalMode(input: {
   references: SafetyReferenceItem[];
   retrieval?: DbHarnessRetrievalInput;
 }): SafetyReferenceRetrievalMode {
-  if (input.retrieval?.mode) return input.retrieval.mode;
-  if (input.references.some((item) => item.retrieval_source === "vector" || item.retrieval_source === "hybrid")) {
-    return "hybrid-vector-rpc";
-  }
-  if (input.references.some((item) => item.retrieval_source === "ranked")) return "ranked-rpc";
-  if (input.references.length) return "rest-ilike";
-  return "unconfigured";
+  return deriveSafetyReferenceRetrievalModeFromItems(
+    input.references,
+    input.retrieval?.mode || (input.references.length ? "rest-ilike" : "unconfigured")
+  );
 }
 
 function buildRetrievalContract(input: {
@@ -392,10 +406,23 @@ function parsePhotoHazardEvidenceRetrieval(value: unknown): NonNullable<HarnessP
   const channel = value.channel === "direct" || value.channel === "sif" || value.channel === "supporting"
     ? value.channel
     : null;
-  const mode = value.mode === "unconfigured" || value.mode === "rest-ilike" || value.mode === "ranked-rpc" || value.mode === "hybrid-vector-rpc"
+  const mode = value.mode === "unconfigured"
+    || value.mode === "rest-ilike"
+    || value.mode === "ranked-rpc"
+    || value.mode === "hybrid-vector-rpc"
+    || value.mode === "hybrid-local-supabase"
+    || value.mode === "local-tag"
+    || value.mode === "local-ranked"
+    || value.mode === "local-hybrid"
     ? value.mode
     : null;
-  const source = value.source === "rest" || value.source === "ranked" || value.source === "vector" || value.source === "hybrid"
+  const source = value.source === "rest"
+    || value.source === "ranked"
+    || value.source === "vector"
+    || value.source === "hybrid"
+    || value.source === "local-tag"
+    || value.source === "local-ranked"
+    || value.source === "local-hybrid"
     ? value.source
     : null;
   const query = readString(value.query);
@@ -429,6 +456,19 @@ function parsePhotoHazardEvidence(value: unknown): HarnessPhotoHazardEvidence | 
       .map(parsePhotoHazardEvidenceRetrieval)
       .filter((item): item is NonNullable<HarnessPhotoHazardEvidence["retrievals"]>[number] => item !== null)
     : undefined;
+  const anchor = isRecord(value.anchor)
+    && typeof value.anchor.page === "number"
+    && Number.isInteger(value.anchor.page)
+    && value.anchor.page > 0
+    && readString(value.anchor.excerpt)
+    ? { page: value.anchor.page, excerpt: readString(value.anchor.excerpt) }
+    : undefined;
+  const quality = value.quality === "accepted" || value.quality === "review_required"
+    ? value.quality
+    : undefined;
+  const lifecycle = value.lifecycle === "current" || value.lifecycle === "stale" || value.lifecycle === "retired"
+    ? value.lifecycle
+    : undefined;
   return {
     sourceId,
     sourceType,
@@ -438,6 +478,12 @@ function parsePhotoHazardEvidence(value: unknown): HarnessPhotoHazardEvidence | 
     sourceUrl: typeof value.sourceUrl === "string" ? value.sourceUrl : null,
     itemType: readString(value.itemType) || undefined,
     evidenceRole,
+    stableDocumentKey: readString(value.stableDocumentKey) || undefined,
+    anchor,
+    quality,
+    lifecycle,
+    directEligible: typeof value.directEligible === "boolean" ? value.directEligible : undefined,
+    reviewRequired: typeof value.reviewRequired === "boolean" ? value.reviewRequired : undefined,
     retrievals: retrievals?.length ? retrievals : undefined
   };
 }
@@ -471,10 +517,23 @@ function parsePhotoHazardProvenance(value: unknown): HarnessPhotoHazardProvenanc
       .filter((item): item is HarnessPhotoHazardEvidence => item !== null)
       .slice(0, 8)
     : undefined;
+  const reviewRequiredEvidenceIds = new Set((evidence || [])
+    .filter((item) => (
+      item.reviewRequired === true
+      || item.quality === "review_required"
+      || (item.lifecycle !== undefined && item.lifecycle !== "current")
+      || item.directEligible === false
+    ))
+    .map((item) => item.sourceId));
   const confirmedControls = Array.isArray(value.confirmedControls)
     ? value.confirmedControls
       .map(parsePhotoHazardControl)
       .filter((item): item is HarnessPhotoHazardControl => item !== null)
+      .map((item) => ({
+        ...item,
+        evidenceSourceIds: item.evidenceSourceIds.filter((sourceId) => !reviewRequiredEvidenceIds.has(sourceId))
+      }))
+      .filter((item) => item.evidenceSourceIds.length > 0)
       .slice(0, 8)
     : undefined;
   return {
@@ -577,7 +636,7 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
     "역할: LLM은 DB harness가 고정한 근거를 문장화만 한다.",
     "근거 권위: safety_reference_items, SIF 사례, 작업 개선 이력 DB 하네스가 원천이다.",
     `검색 경로: ${packet.retrievalContract.mode} / vector=${packet.retrievalContract.vector.ready ? "ready" : packet.retrievalContract.vector.reason}`,
-    `검색 출처: direct ${packet.retrievalContract.sourceCounts.directEvidence}, SIF ${packet.retrievalContract.sourceCounts.sifCases}, supporting ${packet.retrievalContract.sourceCounts.supportingEvidence}, hybrid ${packet.retrievalContract.sourceCounts.hybrid}, vector ${packet.retrievalContract.sourceCounts.vector}, ranked ${packet.retrievalContract.sourceCounts.ranked}, rest ${packet.retrievalContract.sourceCounts.rest}`,
+    `검색 출처: direct ${packet.retrievalContract.sourceCounts.directEvidence}, SIF ${packet.retrievalContract.sourceCounts.sifCases}, supporting ${packet.retrievalContract.sourceCounts.supportingEvidence}, localHybrid ${packet.retrievalContract.sourceCounts.localHybrid}, localRanked ${packet.retrievalContract.sourceCounts.localRanked}, localTag ${packet.retrievalContract.sourceCounts.localTag}, hybrid ${packet.retrievalContract.sourceCounts.hybrid}, vector ${packet.retrievalContract.sourceCounts.vector}, ranked ${packet.retrievalContract.sourceCounts.ranked}, rest ${packet.retrievalContract.sourceCounts.rest}`,
     "제공자 재시도: 모델/제공자 재시도는 문장화 실패 복구에만 허용하며 새 근거·새 위험요인을 추가할 수 없다.",
     "누락 정책: 근거가 없으면 보강 필요로 표시하고 산문으로 메우지 않는다.",
     "금지: 근거 없는 위험요인, 문서 반영 위치, 확인 이력을 새로 만들지 않는다.",

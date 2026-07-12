@@ -17,10 +17,11 @@ import {
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
-  searchSafetyReferences,
+  isSafetyReferenceDirectEligible,
   type SafetyReferenceItem,
   type SafetyReferenceSearchResult
 } from "@/lib/safety-reference-catalog";
+import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 
 const log = createLogger("photo-vision");
 
@@ -143,6 +144,12 @@ export type HazardPhotoHarnessEvidence = {
   sourceUrl?: string | null;
   itemType?: string;
   evidenceRole?: "direct" | "supporting";
+  stableDocumentKey?: string;
+  anchor?: { page: number; excerpt: string };
+  quality?: "accepted" | "review_required";
+  lifecycle?: "current" | "stale" | "retired";
+  directEligible?: boolean;
+  reviewRequired?: boolean;
   retrievals?: HazardPhotoReferenceRetrieval[];
 };
 
@@ -745,17 +752,26 @@ function resolveCandidateFromReferences(input: {
     ...packet.sifCases,
     ...packet.supportingEvidence
   ]).slice(0, 6);
-  const evidence = matchedReferences.map((item): HazardPhotoHarnessEvidence => ({
-    sourceId: item.id,
-    sourceType: "safeclaw-db",
-    title: getSafetyReferenceDisplayTitle(item),
-    excerpt: getSafetyReferenceDisplaySummary(item).slice(0, 500),
-    catalogSourceId: item.source_id,
-    sourceUrl: item.source_url || null,
-    itemType: item.item_type,
-    evidenceRole: item.evidence_role || "supporting",
-    retrievals: input.provenanceByReference.get(item.id) || []
-  }));
+  const evidence = matchedReferences.map((item): HazardPhotoHarnessEvidence => {
+    const operational = operationalByReferenceId.get(item.id);
+    return {
+      sourceId: item.id,
+      sourceType: "safeclaw-db",
+      title: getSafetyReferenceDisplayTitle(item),
+      excerpt: getSafetyReferenceDisplaySummary(item).slice(0, 500),
+      catalogSourceId: item.source_id,
+      sourceUrl: item.source_url || null,
+      itemType: item.item_type,
+      evidenceRole: item.evidence_role || "supporting",
+      stableDocumentKey: item.kosha_guide?.stableDocumentKey,
+      anchor: item.kosha_guide?.anchors[0],
+      quality: item.kosha_guide?.quality,
+      lifecycle: item.kosha_guide?.lifecycle,
+      directEligible: item.kosha_guide?.directEligible,
+      reviewRequired: operational?.reviewRequired || !isSafetyReferenceDirectEligible(item),
+      retrievals: input.provenanceByReference.get(item.id) || []
+    };
+  });
   const controlsByText = new Map<string, HazardPhotoHarnessControl>();
   let hasConfirmedControl = false;
 

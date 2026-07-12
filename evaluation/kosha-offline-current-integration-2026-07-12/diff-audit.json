@@ -1,0 +1,38 @@
+{
+  "base": "3b0edfe",
+  "changedTracked": [
+    "app/api/mcp/[transport]/route.ts",
+    "app/api/safety-reference/search/route.ts",
+    "app/api/workpack/remediate/route.ts",
+    "app/api/workpacks/[id]/operation-graph/route.ts",
+    "lib/claw-tools.ts",
+    "lib/db-harness.ts",
+    "lib/photo-vision-analysis.ts",
+    "lib/safety-reference-catalog.ts",
+    "lib/search.ts",
+    "lib/types.ts"
+  ],
+  "untracked": [
+    "evaluation/kosha-offline-current-integration-2026-07-12/build-process-before.json",
+    "evaluation/kosha-offline-current-integration-2026-07-12/external-v3-hashes.json",
+    "lib/kosha-guide-corpus.ts",
+    "lib/safety-reference-catalog-server.ts",
+    "tests/helpers/kosha-offline-fixture.ts",
+    "tests/kosha-guide-offline-harness-expanded.test.ts",
+    "tests/kosha-guide-offline-harness.test.ts",
+    "tests/kosha-guide-provenance-gate.test.ts",
+    "tests/kosha-guide-supporting-row-relevance.test.ts"
+  ],
+  "forbiddenChanges": [],
+  "safetyReferencePolicyFileExists": false,
+  "serverWrapperImports": [
+    "lib\\claw-tools.ts:25:import { searchSafetyReferences } from \"./safety-reference-catalog-server\";",
+    "app\\api\\mcp\\[transport]\\route.ts:28:import { searchSafetyReferences } from \"@/lib/safety-reference-catalog-server\";",
+    "app\\api\\workpacks\\[id]\\operation-graph\\route.ts:4:import { searchSafetyReferences } from \"@/lib/safety-reference-catalog-server\";",
+    "app\\api\\safety-reference\\search\\route.ts:3:import { searchSafetyReferences } from \"@/lib/safety-reference-catalog-server\";",
+    "lib\\photo-vision-analysis.ts:23:import { searchSafetyReferences } from \"@/lib/safety-reference-catalog-server\";",
+    "app\\api\\workpack\\remediate\\route.ts:15:import { searchSafetyReferences } from \"@/lib/safety-reference-catalog-server\";",
+    "lib\\search.ts:20:import { searchSafetyReferences } from \"./safety-reference-catalog-server\";"
+  ],
+  "clientCorpusImportViolations": []
+}

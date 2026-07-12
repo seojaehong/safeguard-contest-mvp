@@ -1,0 +1,11 @@
+warning: in the working copy of 'app/api/mcp/[transport]/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/safety-reference/search/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/workpack/remediate/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/workpacks/[id]/operation-graph/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/claw-tools.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/db-harness.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/photo-vision-analysis.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/safety-reference-catalog.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/search.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/types.ts', LF will be replaced by CRLF the next time Git touches it
+DIFF_CHECK_EXIT_CODE=0

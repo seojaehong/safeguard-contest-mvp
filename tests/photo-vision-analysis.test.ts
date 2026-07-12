@@ -962,11 +962,26 @@ describe("photo vision analysis contract", () => {
     });
     const reviewRequiredReference = safetyReference({
       id: "review-required-fall-control",
-      title: "비계 추락 일반 안전자료",
+      title: "D-C-13-2026 외벽 작업 안전 기술지원규정",
       keywords: ["비계", "추락", "안전난간"],
       riskTags: ["추락"],
-      controls: ["일반 안전사항"]
+      controls: ["외벽 작업발판 안전난간 상태 확인"]
     });
+    reviewRequiredReference.source_id = "kosha-guide-offline:D-C-13";
+    reviewRequiredReference.item_type = "technical-support-regulation";
+    reviewRequiredReference.evidence_role = "supporting";
+    reviewRequiredReference.retrieval_source = "local-ranked";
+    reviewRequiredReference.kosha_guide = {
+      referenceId: reviewRequiredReference.id,
+      stableDocumentKey: "D-C-13",
+      version: "D-C-13-2026",
+      quality: "review_required",
+      lifecycle: "stale",
+      bodyKind: "native",
+      anchors: [{ page: 7, excerpt: "외벽 작업발판 안전난간 상태 확인" }],
+      evidenceRef: "KOSHA 근거 D-C-13-2026 p.7: 외벽 작업발판 안전난간 상태 확인",
+      directEligible: false
+    };
     vi.mocked(searchSafetyReferences).mockReset();
     vi.mocked(searchSafetyReferences).mockResolvedValue({
       ok: true,
@@ -1013,6 +1028,15 @@ describe("photo vision analysis contract", () => {
       "trusted-fall-control",
       "review-required-fall-control"
     ]);
+    expect(analysis.candidates[0]?.harness.evidence[1]).toMatchObject({
+      evidenceRole: "supporting",
+      stableDocumentKey: "D-C-13",
+      anchor: { page: 7, excerpt: "외벽 작업발판 안전난간 상태 확인" },
+      quality: "review_required",
+      lifecycle: "stale",
+      directEligible: false,
+      reviewRequired: true
+    });
     expect(analysis.candidates[0]?.harness.confirmedControls).toEqual([{
       text: "비계 작업발판 안전난간 상태 확인",
       evidenceSourceIds: ["trusted-fall-control"]

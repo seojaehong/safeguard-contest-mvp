@@ -7,15 +7,19 @@ import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import {
   deriveSafetyReferenceOperationalView,
+  deriveSafetyReferenceRetrievalModeFromItems,
   filterAndRankSafetyReferencesByQuery,
   getSafetyReferenceDisplayTitle,
+  hasStrongSafetyReferenceRowOverlap,
+  isSafetyReferenceDirectEligible,
+  isSafetyReferenceRiskEligible,
   SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
   SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE,
-  searchSafetyReferences,
   type SafetyReferenceItem,
   type SafetyReferenceRetrievalMode,
   type SafetyReferenceSearchResult
 } from "./safety-reference-catalog";
+import { searchSafetyReferences } from "./safety-reference-catalog-server";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
 import { summarizeLegalSourceMix } from "./legal-sources";
 import { fetchWeatherSignal } from "./weather";
@@ -334,6 +338,8 @@ function includesRiskAssessmentDocument(item: SafetyReferenceItem): boolean {
   );
 }
 
+const MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW = 2;
+
 export function buildSafetyReferenceRiskRows(
   response: AskResponse,
   references: readonly SafetyReferenceItem[],
@@ -350,8 +356,14 @@ export function buildSafetyReferenceRiskRows(
     response.riskSummary.topRisk
   ].filter(Boolean).join(" ");
   const eligibleReferences = references
+    .filter(isSafetyReferenceRiskEligible)
     .filter(includesRiskAssessmentDocument)
     .filter((item) => item.title || item.summary || item.controls.length);
+  const supportingKoshaReferences = references.filter((item) =>
+    item.evidence_role === "supporting"
+      && Boolean(item.kosha_guide?.evidenceRef)
+      && isSafetyReferenceDirectEligible(item)
+  );
   const rankedEligibleReferences = filterAndRankSafetyReferencesByQuery(
     rankQuery,
     [...eligibleReferences],
@@ -373,12 +385,22 @@ export function buildSafetyReferenceRiskRows(
     const dedupeKey = `${hazard}|${control}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
+    const supportingEvidenceRefs = item.evidence_role === "direct"
+      ? Array.from(new Set(filterAndRankSafetyReferencesByQuery(
+      `${rankQuery} ${displayTitle} ${hazard} ${control}`,
+      supportingKoshaReferences.filter((supporting) => hasStrongSafetyReferenceRowOverlap(item, supporting)),
+      supportingKoshaReferences.length
+    ).map((supporting) => supporting.kosha_guide?.evidenceRef)
+      .filter((ref): ref is string => Boolean(ref))))
+        .slice(0, MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW)
+      : [];
     const evidenceRefs = [
       item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
       item.source_kind_label || item.item_type || "safety_reference_items",
       displayTitle,
       item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
-      item.source_url || ""
+      item.source_url || "",
+      ...supportingEvidenceRefs
     ].filter(Boolean);
     const candidateRow = buildRiskRow({
       location,
@@ -909,6 +931,9 @@ type CompressedSafetyReference = {
   kind: "kosha-support-regulation" | "kosha-guideline" | "construction-process" | "machinery" | "sif-case" | "other";
   /** Short label for the source kind, e.g., "KOSHA 기술지침" / "KOSHA 기술지원규정" / "KOSHA 사고사례" */
   kindLabel: string;
+  quality?: "accepted" | "review_required";
+  lifecycle?: "current" | "stale" | "retired";
+  directEligible?: boolean;
 };
 
 function classifySafetyReferenceKind(itemType: string | undefined): { kind: CompressedSafetyReference["kind"]; kindLabel: string } {
@@ -957,14 +982,20 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
       evidenceShort,
       documentSentence: documentSentence.slice(0, 200),
       kind,
-      kindLabel
+      kindLabel,
+      quality: item.kosha_guide?.quality,
+      lifecycle: item.kosha_guide?.lifecycle,
+      directEligible: item.kosha_guide?.directEligible
     });
     if (out.length >= limit) break;
   }
   return out;
 }
 
-export function buildSafetyReferenceSurfaceItem(item: SafetyReferenceItem) {
+export function buildSafetyReferenceSurfaceItem(
+  item: SafetyReferenceItem,
+  retrievalMode?: SafetyReferenceRetrievalMode
+) {
   const operationalView = deriveSafetyReferenceOperationalView(item);
   const controls = operationalView.controls.slice(0, 2);
   const displayTitle = getSafetyReferenceDisplayTitle(item);
@@ -979,8 +1010,17 @@ export function buildSafetyReferenceSurfaceItem(item: SafetyReferenceItem) {
     primaryDocuments: item.primary_documents || [],
     controls,
     evidenceRoleLabel: item.evidence_role_label,
+    evidenceRole: item.evidence_role,
     sourceKindLabel: item.source_kind_label,
-    operationSignalLabel: controls[0] ? `문서와 TBM에 ${controls[0]} 반영` : item.operation_signal_label
+    operationSignalLabel: controls[0] ? `문서와 TBM에 ${controls[0]} 반영` : item.operation_signal_label,
+    stableDocumentKey: item.kosha_guide?.stableDocumentKey,
+    anchor: item.kosha_guide?.anchors[0],
+    retrievalSource: item.retrieval_source,
+    retrievalMode,
+    quality: item.kosha_guide?.quality,
+    lifecycle: item.kosha_guide?.lifecycle,
+    directEligible: item.kosha_guide?.directEligible,
+    reviewRequired: operationalView.reviewRequired
   };
 }
 
@@ -988,7 +1028,9 @@ function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): stri
   if (!items.length) return "";
   // Surface KOSHA 기술지침/기술지원규정 as a separate, prominent block above
   // the generic 내부 안전지식 DB block.
-  const koshaPrimary = items.filter((item) => item.kind === "kosha-support-regulation" || item.kind === "kosha-guideline");
+  const koshaItems = items.filter((item) => item.kind === "kosha-support-regulation" || item.kind === "kosha-guideline");
+  const koshaPrimary = koshaItems.filter((item) => item.directEligible !== false && item.quality !== "review_required");
+  const koshaReviewRequired = koshaItems.filter((item) => item.directEligible === false || item.quality === "review_required");
   const others = items.filter((item) => item.kind !== "kosha-support-regulation" && item.kind !== "kosha-guideline");
   const blocks: string[] = [];
   if (koshaPrimary.length) {
@@ -997,6 +1039,15 @@ function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): stri
     for (const item of koshaPrimary) {
       blocks.push(
         `- ${item.kindLabel}: ${item.title} / 반영 위치: ${item.reflectsDocuments.join(" / ") || "현장 확인 필요"} / 문서 문장: ${item.documentSentence}`
+      );
+    }
+  }
+  if (koshaReviewRequired.length) {
+    blocks.push("");
+    blocks.push("[KOSHA 기술지침/기술지원규정 검토 필요]");
+    for (const item of koshaReviewRequired) {
+      blocks.push(
+        `- ${item.kindLabel}: ${item.title} / quality=${item.quality || "review_required"} / lifecycle=${item.lifecycle || "stale"} / 현행 여부 검토 전 직접 근거로 사용하지 않음`
       );
     }
   }
@@ -1636,13 +1687,14 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       const errorCode = buckets.some((bucket) => bucket.errorCode === SAFETY_REFERENCE_SEARCH_FAILURE_CODE)
         ? SAFETY_REFERENCE_SEARCH_FAILURE_CODE
         : undefined;
-      const retrievalMode: SafetyReferenceRetrievalMode = buckets.some((bucket) => bucket.retrievalMode === "hybrid-vector-rpc")
+      const attemptedRetrievalMode: SafetyReferenceRetrievalMode = buckets.some((bucket) => bucket.retrievalMode === "hybrid-vector-rpc")
         ? "hybrid-vector-rpc"
         : buckets.some((bucket) => bucket.retrievalMode === "ranked-rpc")
           ? "ranked-rpc"
           : buckets.some((bucket) => bucket.retrievalMode === "rest-ilike")
             ? "rest-ilike"
             : "unconfigured";
+      const retrievalMode = deriveSafetyReferenceRetrievalModeFromItems(merged, attemptedRetrievalMode);
       const vectorSearch =
         buckets.find((bucket) => bucket.vectorSearch.ok)?.vectorSearch ||
         buckets.find((bucket) => bucket.vectorSearch.attempted)?.vectorSearch ||
@@ -1952,7 +2004,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const safetyReferenceAppendix = formatSafetyReferenceAppendix(safetyReferenceCompressed);
     // KOSHA 기술지침/기술지원규정 are flagged for mandatory in-body citation by the AI.
     const koshaPrimaryRefs = safetyReferenceCompressed
-      .filter((c) => c.kind === "kosha-support-regulation" || c.kind === "kosha-guideline")
+      .filter((c) => (
+        (c.kind === "kosha-support-regulation" || c.kind === "kosha-guideline")
+        && c.directEligible !== false
+        && c.quality !== "review_required"
+      ))
       .slice(0, 4)
       .map((c) => ({
         kindLabel: c.kindLabel,
@@ -1962,7 +2018,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // For the AI prompt context, give a short summary form (not the appendix verbatim).
     const koshaLinesCtx = [
       ...kosha.references.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`),
-      ...safetyReferenceCompressed.slice(0, 5).map((c, i) => `${kosha.references.slice(0, 5).length + i + 1}. [${c.kindLabel}] ${c.title} | 반영: ${c.reflectsDocuments.join("·") || "-"} | ${c.documentSentence}`)
+      ...safetyReferenceCompressed.slice(0, 5).map((c, i) => `${kosha.references.slice(0, 5).length + i + 1}. [${c.kindLabel}] ${c.title} | ${c.quality === "review_required" || c.directEligible === false ? `검토필요 quality=${c.quality || "review_required"} lifecycle=${c.lifecycle || "stale"}` : "확정근거"} | 반영: ${c.reflectsDocuments.join("·") || "-"} | ${c.documentSentence}`)
     ].slice(0, 12);
 
     // Fix 6 continued: consume deliverables from the parallel Promise (allResults[9]).
@@ -2112,7 +2168,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           retrievalMode: safetyReference.retrievalMode,
           vectorSearch: safetyReference.vectorSearch,
           message: safetyReference.message,
-          items: safetyReference.items.slice(0, 8).map(buildSafetyReferenceSurfaceItem)
+          items: safetyReference.items.slice(0, 8).map((item) => (
+            buildSafetyReferenceSurfaceItem(item, safetyReference.retrievalMode)
+          ))
         },
         safetyKnowledge: {
           source: "safety-knowledge",

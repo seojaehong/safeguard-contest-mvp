@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 2,
+  "status": "done_with_one_backend_red",
+  "generatedAt": "2026-07-12T17:31:41.3687137+09:00",
+  "authoritativeBackendSha": "24c19c17cc8c932a333fdae8785426218e57ae15",
+  "productSourceSha": "02b4598ef7bab4c57eb8550f59be024ae66cdcd3",
+  "buildId": "pfWi4QTypPEcr5mHBK9P-",
+  "buildIdentity": "025ce0a3592e150a49e27abcbe751c2424ed0baadd176f3ac528e85072ea3637",
+  "buildFileCount": 431,
+  "preservation": {
+    "scenarioProtocolDeltaFiles": 0,
+    "w7W8TestFilesExactToBackend": true,
+    "reportsCssStrategy": "Preserve the complete final-launch stylesheet and append only data-module-route=/reports overrides."
+  },
+  "gates": {
+    "exactReports": { "files": 3, "passed": 23, "failed": 0 },
+    "destinationReports": { "files": 3, "passed": 51, "failed": 0 },
+    "focusedStatic": { "files": 6, "passed": 14, "failed": 0 },
+    "strictTypecheck": { "status": "pass" },
+    "broadFrontendContract": { "files": 1, "passed": 19, "failed": 0, "delta": 0 },
+    "staticAudit": { "status": "pass", "violations": 0, "importantDeclarations": 0, "coverageIssues": 0 },
+    "productionBuild": { "status": "pass", "staticPages": 27, "concurrentBuildCount": 0, "authoritativeBuildRunsAfterFinalRebase": 1 },
+    "reportsProductionBrowser": { "files": 1, "passed": 5, "failed": 0, "skippedStatic": 5 },
+    "workspaceW7": {
+      "files": 2,
+      "passed": 22,
+      "failed": 1,
+      "remainingRed": "At 1440x900 Day, preserved backend test expects textarea vertical padding 22px while the final-launch production CSS computes 24px. Reports route CSS does not match /workspace."
+    },
+    "aiConnectW8": { "files": 1, "passed": 2, "failed": 0 }
+  },
+  "reportsBrowserMetrics": {
+    "scenarios": 4,
+    "themes": ["day", "night"],
+    "viewports": ["desktop", "390px mobile"],
+    "horizontalOverflow": 0,
+    "minimumControlHeight": 62,
+    "heroCtaHeight": 44,
+    "controlRadius": "8px",
+    "overlapCount": 0,
+    "routeIsolation": "pass"
+  },
+  "remainingRed": [
+    "W7 workspace production matrix: 1 backend-owned padding expectation drift; 22 assertions pass."
+  ]
+}

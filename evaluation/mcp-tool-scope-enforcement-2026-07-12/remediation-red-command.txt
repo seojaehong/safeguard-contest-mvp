@@ -1,0 +1,1 @@
+npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism

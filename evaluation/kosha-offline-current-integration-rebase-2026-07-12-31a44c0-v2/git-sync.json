@@ -1,0 +1,33 @@
+{
+  "branch": "feat/kosha-offline-current-integration",
+  "product": "b7e609b948bed4b5334f0801b2e05f0742b9aa6b",
+  "rebaseTarget": "origin/feature/backend-harness-gate",
+  "rebaseTargetCommit": "31a44c0d972c46a47c94ad387eeeff39528d1be9",
+  "remoteFeature": "origin/feat/kosha-offline-current-integration",
+  "remoteFeatureCompare": "3\t23",
+  "remoteFeatureCherry": [
+    "> b7e609b (HEAD -> feat/kosha-offline-current-integration) fix: preserve kosha current review provenance",
+    "= 24e253e chore: record kosha integration evidence",
+    "= ae9bede feat: integrate kosha offline supporting evidence",
+    "= 4c5b107 test: port kosha offline contracts",
+    "> 31a44c0 (origin/feature/backend-harness-gate, feature/backend-harness-gate) chore: verify AI connect design integration",
+    "> e55f672 chore: close AI connect design wave ledger",
+    "> ef3341e chore: record AI connect wave 8 evidence",
+    "> f02b7bb test: harden AI connect color contract",
+    "> f8136a6 fix: preserve AI connect semantic states",
+    "> f8d92e0 feat: normalize AI connect design surface",
+    "> 447c267 chore: verify workspace viewport integration",
+    "> 173ab87 chore: close workspace viewport wave ledger",
+    "> 8bd9126 docs: clarify workspace compact cascade",
+    "> beaa0ae docs: record wave 7 viewport evidence",
+    "> 97a036a fix: keep workspace actions inside viewport",
+    "> 87798d1 chore: verify ontology typography integration",
+    "> 6a582a3 chore: close ontology typography wave ledger",
+    "> f2688e9 chore: record exhaustive matrix evidence",
+    "> 57f3b7d test: exhaust operation memory typography matrix",
+    "> 9e417bb chore: record ontology matrix fix evidence",
+    "> 584fd01 fix: expand ontology typography matrix",
+    "> dc9667a chore: record ontology typography evidence",
+    "> 455cdd5 feat: normalize ontology typography roles"
+  ]
+}

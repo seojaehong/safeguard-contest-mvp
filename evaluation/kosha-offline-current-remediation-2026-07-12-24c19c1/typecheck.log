@@ -1,0 +1,6 @@
+COMMAND: npm.cmd run typecheck
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+EXIT_CODE=0

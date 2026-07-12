@@ -23,8 +23,19 @@ export type SafetyReferenceItem = {
   operation_signal_label?: string;
   display_title?: string;
   display_summary?: string;
-  retrieval_source?: "rest" | "ranked" | "vector" | "hybrid";
+  retrieval_source?: "rest" | "ranked" | "vector" | "hybrid" | "local-tag" | "local-ranked" | "local-hybrid";
   vector_similarity?: number;
+  kosha_guide?: {
+    referenceId: string;
+    stableDocumentKey: string;
+    version: string;
+    quality: "accepted" | "review_required";
+    lifecycle: "current" | "stale" | "retired";
+    bodyKind: "native" | "unknown";
+    anchors: Array<{ page: number; excerpt: string }>;
+    evidenceRef: string | null;
+    directEligible: boolean;
+  };
 };
 
 export type SafetyReferenceOperationalView = {
@@ -33,7 +44,15 @@ export type SafetyReferenceOperationalView = {
   reviewRequired: boolean;
 };
 
-export type SafetyReferenceRetrievalMode = "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
+export type SafetyReferenceRetrievalMode =
+  | "unconfigured"
+  | "rest-ilike"
+  | "ranked-rpc"
+  | "hybrid-vector-rpc"
+  | "hybrid-local-supabase"
+  | "local-tag"
+  | "local-ranked"
+  | "local-hybrid";
 
 export const SAFETY_REFERENCE_SEARCH_FAILURE_CODE = "safety_reference_search_failed" as const;
 export const SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE =
@@ -472,6 +491,16 @@ function genericOperationalView(item: SafetyReferenceItem): SafetyReferenceOpera
 }
 
 export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem): SafetyReferenceOperationalView {
+  if (!isSafetyReferenceDirectEligible(item)) {
+    const controls = item.controls.map((control) => control.trim()).filter(Boolean);
+    return {
+      hazard: `검토 필요: ${compactText(getSafetyReferenceDisplayTitle(item), 64)} 근거 상태 미확정`,
+      controls: controls.length
+        ? controls
+        : ["근거 원문과 현행 여부를 검토한 뒤 현장 통제대책으로 확정"],
+      reviewRequired: true
+    };
+  }
   const text = operationalIdentityText(item);
   const incidentText = operationalIncidentText(item);
   const accidentType = extractOperationalAccidentType(incidentText);
@@ -1495,7 +1524,11 @@ export function buildSafetyReferenceOperationalMetadata(item: SafetyReferenceIte
   };
 }
 
-function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "source_id">): "direct" | "supporting" {
+function deriveEvidenceRole(
+  item: Pick<SafetyReferenceItem, "item_type" | "source_id" | "evidence_role" | "kosha_guide">
+): "direct" | "supporting" {
+  if (item.kosha_guide) return "supporting";
+  if (item.evidence_role) return item.evidence_role;
   const directTypes = new Set([
     "construction-process",
     "machinery",
@@ -1506,6 +1539,22 @@ function deriveEvidenceRole(item: Pick<SafetyReferenceItem, "item_type" | "sourc
   if (directTypes.has(item.item_type)) return "direct";
   if (item.source_id.includes("law") || item.source_id.includes("regulation")) return "direct";
   return "supporting";
+}
+
+export function isSafetyReferenceRiskEligible(item: SafetyReferenceItem): boolean {
+  return !item.kosha_guide;
+}
+
+export function isSafetyReferenceDirectEligible(
+  item: Pick<SafetyReferenceItem, "kosha_guide">
+): boolean {
+  const guide = item.kosha_guide;
+  if (!guide) return true;
+  return guide.quality === "accepted"
+    && guide.lifecycle === "current"
+    && guide.bodyKind === "native"
+    && guide.anchors.length > 0
+    && guide.directEligible;
 }
 
 function compactText(value: string, maxLength = 96): string {
@@ -1763,6 +1812,59 @@ function referenceRiskDomain(item: SafetyReferenceItem): string {
               : `reference:${item.id}`;
 }
 
+const ROW_DOMAIN_GENERIC_TERMS = new Set([
+  "건설안전",
+  "기계안전",
+  "산업안전",
+  "기술지원규정",
+  "기술지침",
+  "작업",
+  "안전",
+  "관리",
+  "일반",
+  "기준",
+  "규정",
+  "지침",
+  "예방",
+  "점검",
+  "조치",
+  "통제",
+  "확인",
+  "직접",
+  "근거"
+]);
+
+function referenceRowDomainTerms(item: SafetyReferenceItem): Set<string> {
+  return new Set([
+    item.title,
+    item.category || "",
+    item.subcategory || "",
+    ...item.keywords,
+    ...item.risk_tags
+  ].flatMap((field) => extractFallbackTerms(field))
+    .map((term) => normalizeMatchText(term))
+    .filter((term) => !ROW_DOMAIN_GENERIC_TERMS.has(term)));
+}
+
+export function hasStrongSafetyReferenceRowOverlap(
+  directReference: SafetyReferenceItem,
+  supportingReference: SafetyReferenceItem
+): boolean {
+  const directDomain = referenceRiskDomain(directReference);
+  const supportingDomain = referenceRiskDomain(supportingReference);
+  if (!directDomain.startsWith("reference:") && directDomain === supportingDomain) return true;
+
+  const directTerms = referenceRowDomainTerms(directReference);
+  const supportingTerms = referenceRowDomainTerms(supportingReference);
+  let overlap = 0;
+  for (const term of directTerms) {
+    if (!supportingTerms.has(term)) continue;
+    overlap += 1;
+    if (overlap >= 2) return true;
+  }
+  return false;
+}
+
 function referenceDomainSpecificity(domain: string, item: SafetyReferenceItem): number {
   const title = normalizeMatchText(item.title);
   switch (domain) {
@@ -1880,6 +1982,46 @@ export function mergeSafetyReferenceHybridResults(input: {
   filterByEvidenceRole(input.vectorItems, input.evidenceRole).forEach((item) => add(item, "vector"));
   filterByEvidenceRole(input.rankedItems, input.evidenceRole).forEach((item) => add(item, "ranked"));
   return Array.from(byId.values()).slice(0, input.limit);
+}
+
+export function mergeLocalAndRemoteSafetyReferenceResults(input: {
+  localItems: SafetyReferenceItem[];
+  remoteItems: SafetyReferenceItem[];
+  remoteRetrievalMode?: SafetyReferenceRetrievalMode;
+  limit: number;
+}): { items: SafetyReferenceItem[]; retrievalMode: SafetyReferenceRetrievalMode } {
+  const remoteById = new Map<string, SafetyReferenceItem>();
+  input.remoteItems.forEach((item) => remoteById.set(item.id, normalizeReferenceItem(item)));
+  const remoteItems = [...remoteById.values()];
+  const localItems = input.localItems
+    .filter((item) => !remoteById.has(item.id))
+    .map(normalizeReferenceItem);
+  const items: SafetyReferenceItem[] = [];
+  for (let index = 0; items.length < input.limit && (index < remoteItems.length || index < localItems.length); index += 1) {
+    const remote = remoteItems[index];
+    if (remote && items.length < input.limit) items.push(remote);
+    const local = localItems[index];
+    if (local && items.length < input.limit) items.push(local);
+  }
+
+  const returnedLocal = items.filter((item) => !remoteById.has(item.id));
+  const returnedRemote = items.some((item) => remoteById.has(item.id));
+  const localMode: SafetyReferenceRetrievalMode = returnedLocal.some((item) => item.retrieval_source === "local-hybrid")
+    ? "local-hybrid"
+    : returnedLocal.some((item) => item.retrieval_source === "local-ranked")
+      ? "local-ranked"
+      : "local-tag";
+  const remoteMode = input.remoteRetrievalMode === "rest-ilike" || input.remoteRetrievalMode === "hybrid-vector-rpc"
+    ? input.remoteRetrievalMode
+    : "ranked-rpc";
+  return {
+    items,
+    retrievalMode: returnedRemote && returnedLocal.length
+      ? "hybrid-local-supabase"
+      : returnedRemote
+        ? remoteMode
+        : localMode
+  };
 }
 
 function buildRestUrl(config: SupabaseConfig, table: string, params: URLSearchParams): string {
@@ -2202,14 +2344,44 @@ async function countRows(config: SupabaseConfig, spec: CountSpec): Promise<numbe
   return parseContentRange(response.headers.get("content-range"));
 }
 
-export async function searchSafetyReferences(options: {
+export type SafetyReferenceSearchOptions = {
   query: string;
   limit?: number;
   itemType?: string;
   sourceId?: string;
   riskTag?: string;
   evidenceRole?: "direct" | "supporting";
-}): Promise<SafetyReferenceSearchResult> {
+};
+
+export function deriveSafetyReferenceRetrievalModeFromItems(
+  items: readonly SafetyReferenceItem[],
+  fallback: SafetyReferenceRetrievalMode = "unconfigured"
+): SafetyReferenceRetrievalMode {
+  if (!items.length) return "unconfigured";
+  const hasLocal = items.some((item) => item.retrieval_source === "local-tag"
+    || item.retrieval_source === "local-ranked"
+    || item.retrieval_source === "local-hybrid");
+  const hasRemote = items.some((item) => item.retrieval_source === "rest"
+    || item.retrieval_source === "ranked"
+    || item.retrieval_source === "vector"
+    || item.retrieval_source === "hybrid");
+  if (hasLocal && hasRemote) return "hybrid-local-supabase";
+  if (hasLocal) {
+    if (items.some((item) => item.retrieval_source === "local-hybrid")) return "local-hybrid";
+    if (items.some((item) => item.retrieval_source === "local-ranked")) return "local-ranked";
+    return "local-tag";
+  }
+  if (hasRemote) {
+    if (items.some((item) => item.retrieval_source === "hybrid" || item.retrieval_source === "vector")) {
+      return "hybrid-vector-rpc";
+    }
+    if (items.some((item) => item.retrieval_source === "ranked")) return "ranked-rpc";
+    return "rest-ilike";
+  }
+  return fallback;
+}
+
+export async function searchSafetyReferences(options: SafetyReferenceSearchOptions): Promise<SafetyReferenceSearchResult> {
   const config = getSupabaseConfig();
   const query = options.query.trim();
   const limit = Math.min(Math.max(options.limit || 12, 1), 50);
