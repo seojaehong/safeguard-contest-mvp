@@ -202,6 +202,9 @@ export function loadingEvidenceFindings(row, resolvedWorkspaceRows) {
   if (!String(row.visiblePrimaryContent ?? "").includes("작업 화면을 준비하고 있습니다")) {
     findings.push("loading probe content was not present at capture");
   }
+  if (row.visibleOutsideBoundary) {
+    findings.push("resolved workspace content remained visible during loading capture");
+  }
   if (!/^[0-9a-f]{64}$/u.test(String(row.screenshotSha256 ?? ""))) {
     findings.push("loading screenshot digest was not captured");
   }
@@ -338,6 +341,9 @@ async function capture(page, options) {
       const style = getComputedStyle(element);
       return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
     };
+    const loadingBoundary = document.querySelector('[data-audit-boundary="loading"]');
+    const visibleOutsideBoundary = Boolean(loadingBoundary && [...document.querySelectorAll("main")]
+      .some((element) => !loadingBoundary.contains(element) && visible(element)));
     const renderedControls = [...document.querySelectorAll("button, input, select, a.button")].filter(visible).map((element, index) => {
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
@@ -368,6 +374,7 @@ async function capture(page, options) {
         letterSpacing: headingStyle.letterSpacing,
       } : null,
       visiblePrimaryContent: primaryText.replace(/\s+/g, " ").slice(0, 240),
+      visibleOutsideBoundary,
       workspaceTheme: document.querySelector(".command-center-shell.workspace-theme-night")
         ? "Night"
         : document.querySelector(".command-center-shell.workspace-theme-day")
@@ -403,7 +410,8 @@ async function capture(page, options) {
     bodyFont: metrics.bodyFont, bodyFontSize: metrics.bodyFontSize, bodyFontWeight: metrics.bodyFontWeight,
     bodyLineHeight: metrics.bodyLineHeight, bodyLetterSpacing: metrics.bodyLetterSpacing,
     productFontLoaded: metrics.productFontLoaded, primaryHeading: metrics.primaryHeading,
-    visiblePrimaryContent: metrics.visiblePrimaryContent, workspaceTheme: metrics.workspaceTheme, screenshot, screenshotSha256,
+    visiblePrimaryContent: metrics.visiblePrimaryContent, visibleOutsideBoundary: metrics.visibleOutsideBoundary,
+    workspaceTheme: metrics.workspaceTheme, screenshot, screenshotSha256,
     boundaryMarker: metrics.boundaryMarker, renderedControls: metrics.renderedControls,
     keySurfaces: metrics.keySurfaces, geometryFingerprint: metrics.geometryFingerprint,
     documentTypography: metrics.documentTypography,
@@ -519,7 +527,7 @@ async function main() {
   }));
   const generatedSurfaceRows = [
     { ...documentPreview, surface: "document-preview" },
-    { surface: "pdf-export", route: "generated:pdf-export", requestedUrl: `${baseUrl}/api/export/pdf?format=html`, finalUrl: `${baseUrl}/api/export/pdf?format=html`, status: pdfResponse.status(), expectedStatuses: [200], expectedFinalPath: "/api/export/pdf", viewport: "desktop-1440", theme: "Document", consoleErrors: [], pageErrors: [], renderedControls: [], keySurfaces: [], boundaryMarker: "", geometryFingerprint: "", fallbackKind: "none", ...pdfMetrics, screenshot: pdfScreenshot, screenshotSha256: pdfScreenshotSha256, limitation: "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests." },
+    { surface: "pdf-export", route: "generated:pdf-export", requestedUrl: `${baseUrl}/api/export/pdf?format=html`, finalUrl: `${baseUrl}/api/export/pdf?format=html`, status: pdfResponse.status(), expectedStatuses: [200], expectedFinalPath: "/api/export/pdf", viewport: "desktop-1440", theme: "Document", consoleErrors: [], pageErrors: [], renderedControls: [], keySurfaces: [], boundaryMarker: "", geometryFingerprint: "", fallbackKind: "none", visibleOutsideBoundary: false, ...pdfMetrics, screenshot: pdfScreenshot, screenshotSha256: pdfScreenshotSha256, limitation: "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests." },
   ];
   await browser.close();
 
