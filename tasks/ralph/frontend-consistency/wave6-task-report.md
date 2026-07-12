@@ -68,4 +68,30 @@ Coverage issues stayed at 0. No expected counts, audit code, semantic allowlists
 - Full static audit remains RED at 2,307. This wave does not claim static PASS or a 108-row PASS.
 - The authoritative backend advanced separately to UI-neutral `3b0edfe`; this branch was deliberately not rebased or integrated.
 - A separate visible-layout blocker remains outside Wave 6 ownership: `workspace-layout-regression` production geometry reports desktop composer bottom +12px at test line 563 and mobile submit +10px at line 946. It requires a later bounded viewport TDD wave; no Wave 6 typography rule was used to mask it.
-- The browser hover exercise confirms the real hover target and rendered card are present; opacity was not used as the acceptance because overlapping graph/nav hit targets made that state assertion nondeterministic. Typography and overflow are asserted from actual rendered elements.
+- The initial browser hover check only exercised the target; the reviewer fix below supersedes it with a deterministic computed opacity and geometry assertion.
+
+## Reviewer fix follow-up
+
+Source fix commit: `5aea3a9` (`fix: expand ontology typography matrix`).
+
+The reviewer acceptance gaps were converted into a stricter production contract:
+
+- `/ontology` now uses an explicit exhaustive table of actually rendered selector families. Each support, HUD, component-title, caption, and table selector is checked for computed font family, size, weight, line-height, and tracking at all six Day/Night viewport combinations.
+- The restored `/workspace` shared preview now runs at Day/Night for 1440x900, 390x844, and 1440x320. Each combination checks complete component-title, caption, table, and HUD tuples plus horizontal overflow.
+- The component-title assertion includes the previously omitted `-0.3px` computed tracking value; table assertions include tracking and product font family.
+- The hover contract now proves a real interaction transition: the rendered card starts at opacity 0, the row is hovered, the test waits for computed opacity 1, then verifies nonzero geometry and horizontal viewport intersection.
+
+Enhanced TDD RED proof:
+
+- The expanded matrix first failed because `.operation-memory-actions button` computed as Pretendard 14px/520/16px/0 instead of the HUD tuple Geist Mono 11px/700/16px/0.88px.
+- The fix narrowly excludes buttons inside `.operation-memory-preview` from the document skin's generic `!important` typography rule. No parser, allowlist, product component, or route behavior changed.
+- A selector for `.operation-memory-popover strong` was removed from the rendered-family table after the production sample proved that family is not instantiated in the current preview graph. It remains covered by the static scoped contract; browser claims are limited to actually rendered elements.
+
+Fresh fix verification:
+
+- Focused contract command — PASS (1 passed, opt-in matrix skipped without its flag).
+- `npm.cmd run typecheck` — PASS.
+- `npm.cmd run build` — PASS, 27/27 generated.
+- Opt-in production matrix — PASS, 1/1 in 66.30s across 12 route/theme/viewport cases.
+- Source-bound static audit — expected RED 2,307, coverage issues 0; totals and categories are unchanged from the original Wave 6 evidence.
+- Fix evidence artifact: `evaluation/frontend-ontology-typography-wave6-2026-07-12/source-5aea3a9/frontend-consistency-audit.json`.
