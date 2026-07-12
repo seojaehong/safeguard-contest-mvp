@@ -19267,7 +19267,7 @@ body:has(.safeclaw-landing) :is(
     grid-template-columns: minmax(0, 1fr) minmax(118px, 32%);
     gap: 12px;
     align-items: start;
-    padding: var(--space-4) var(--space-3);
+    padding: var(--space-1) var(--space-3);
   }
 
   .safeclaw-page-decision-action {
@@ -20286,6 +20286,15 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-card:nth-last-child(-n + 2),
 .command-center-shell.workspace-theme-night .workspace-input-page .evidence-readiness-card:nth-last-child(-n + 2) {
   border-bottom: 0;
+}
+
+@media (min-width: 901px) {
+  .command-center-shell.workspace-theme-day .linear-workspace-layout,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout {
+    border: 0;
+    outline: 1px solid var(--workspace-rule);
+    outline-offset: -1px;
+  }
 }
 
 @media (max-width: 900px) {
