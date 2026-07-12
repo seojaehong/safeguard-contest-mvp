@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-07-12T02:14:46.5710073Z",
+  "status": "integration_verified_review_pending",
+  "baseCommit": "7def9dddb222204b81376eadca7a4e28cf2ce909",
+  "integratedHead": "8caf81bb3304ca7c56e2ed864426a0647560f733",
+  "sourceReviewedCommit": "4859fb10d3115fb812dae7322b14b53b7a750c7b",
+  "wholeBranchMerge": false,
+  "databaseMutation": false,
+  "liveAgentTurn": false,
+  "verification": {
+    "openclawTestFiles": 8,
+    "openclawTestsPassed": 87,
+    "openclawTestsFailed": 0,
+    "typecheck": "pass",
+    "build": "pass",
+    "staticPages": 27,
+    "diffCheck": "pass"
+  },
+  "existingFrontendGate": {
+    "testsPassed": 44,
+    "testsSkipped": 1,
+    "testsFailed": 9,
+    "ownersTouchedByOpenClawDiff": false,
+    "status": "separate_remediation_required"
+  }
+}
