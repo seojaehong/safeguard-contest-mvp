@@ -10,10 +10,10 @@
   "focusOutline": "rgb(108, 111, 247)",
   "horizontalOverflow": 0,
   "controlHeights": [
-    60,
-    60,
-    60,
-    60
+    62,
+    62,
+    62,
+    62
   ],
   "controlRadii": [
     "8px",
@@ -21,7 +21,7 @@
     "8px",
     "8px"
   ],
-  "accentText": "rgb(139, 141, 252)",
+  "accentText": "rgb(181, 183, 255)",
   "heroColumnCount": 1,
   "heroCtaHeight": 44,
   "heroCtaRadius": "8px",
@@ -80,8 +80,8 @@
     ],
     "control": [
       "14px",
-      "700",
-      "20px",
+      "500",
+      "22.4px",
       "normal"
     ]
   },
