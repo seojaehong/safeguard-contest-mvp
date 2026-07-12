@@ -6,7 +6,7 @@
    - Environments: .env.local
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 18.2s
+ ✓ Compiled successfully in 14.8s
    Linting and checking validity of types ...
    Collecting page data ...
    Generating static pages (0/27) ...
@@ -18,7 +18,7 @@
    Collecting build traces ...
 
 Route (app)                                     Size  First Load JS
-┌ ƒ /                                        2.87 kB         109 kB
+┌ ƒ /                                        2.88 kB         109 kB
 ├ ○ /_not-found                                242 B         103 kB
 ├ ○ /.well-known/agent.json                    242 B         103 kB
 ├ ƒ /api/agent/chat                            242 B         103 kB
@@ -57,38 +57,38 @@ Route (app)                                     Size  First Load JS
 ├ ƒ /api/workpacks/[id]/operation-graph        242 B         103 kB
 ├ ƒ /api/workpacks/[id]/read-confirmations     242 B         103 kB
 ├ ƒ /api/workpacks/[id]/share-sessions         242 B         103 kB
-├ ○ /archive                                 7.47 kB         174 kB
-├ ƒ /ask                                      2.4 kB         108 kB
+├ ○ /archive                                  7.5 kB         174 kB
+├ ƒ /ask                                     2.43 kB         108 kB
 ├ ○ /auth/callback                           1.47 kB         168 kB
 ├ ƒ /demo                                    4.92 kB         111 kB
-├ ○ /dispatch                                  197 B         224 kB
-├ ○ /documents                                 188 B         224 kB
-├ ƒ /dryrun                                  2.44 kB         108 kB
-├ ƒ /evidence                                  197 B         224 kB
+├ ○ /dispatch                                  197 B         225 kB
+├ ○ /documents                                 188 B         225 kB
+├ ƒ /dryrun                                  2.46 kB         108 kB
+├ ƒ /evidence                                  197 B         225 kB
 ├ ○ /evidence-file                           4.77 kB         205 kB
-├ ○ /home                                    5.43 kB         111 kB
+├ ○ /home                                    5.45 kB         111 kB
 ├ ƒ /interpretation/[id]                       242 B         103 kB
-├ ƒ /knowledge                               2.79 kB         109 kB
-├ ƒ /knowledge/[section]/[slug]              2.44 kB         108 kB
+├ ƒ /knowledge                               2.81 kB         109 kB
+├ ƒ /knowledge/[section]/[slug]              2.46 kB         108 kB
 ├ ƒ /law/[id]                                  242 B         103 kB
 ├ ○ /login                                   2.22 kB         169 kB
-├ ƒ /ontology                                2.67 kB         134 kB
-├ ƒ /ops/api                                 2.44 kB         108 kB
+├ ƒ /ontology                                2.69 kB         134 kB
+├ ƒ /ops/api                                 2.46 kB         108 kB
 ├ ƒ /precedent/[id]                            242 B         103 kB
-├ ○ /preview                                 2.44 kB         108 kB
+├ ○ /preview                                 2.46 kB         108 kB
 ├ ○ /prototype                                 242 B         103 kB
 ├ ƒ /reports                                   17 kB         218 kB
-├ ○ /roadmap                                 2.44 kB         108 kB
-├ ƒ /search                                  2.66 kB         109 kB
-├ ○ /settings                                3.73 kB         171 kB
-├ ƒ /settings/ai-connect                      8.5 kB         175 kB
+├ ○ /roadmap                                 2.46 kB         108 kB
+├ ƒ /search                                  2.69 kB         109 kB
+├ ○ /settings                                3.77 kB         171 kB
+├ ƒ /settings/ai-connect                     8.52 kB         175 kB
 ├ ○ /sitemap.xml                               242 B         103 kB
-├ ○ /tbm                                     2.44 kB         108 kB
-├ ○ /trust                                   2.44 kB         108 kB
-├ ○ /why                                     2.44 kB         108 kB
+├ ○ /tbm                                     2.46 kB         108 kB
+├ ○ /trust                                   2.46 kB         108 kB
+├ ○ /why                                     2.46 kB         108 kB
 ├ ○ /worker                                  1.61 kB         142 kB
-├ ○ /workers                                   197 B         224 kB
-└ ƒ /workspace                               34.7 kB         272 kB
+├ ○ /workers                                   197 B         225 kB
+└ ƒ /workspace                                 35 kB         273 kB
 + First Load JS shared by all                 103 kB
   ├ chunks/1255-d90f22433f14e976.js          46.2 kB
   ├ chunks/4bd1b696-f785427dddbba9fb.js      54.2 kB

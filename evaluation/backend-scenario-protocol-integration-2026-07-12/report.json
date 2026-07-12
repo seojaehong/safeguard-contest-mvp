@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T07:55:00Z",
+  "generatedAt": "2026-07-12T08:01:30.9796971Z",
   "status": "integrated_verified",
-  "baseSha": "31a44c0d972c46a47c94ad387eeeff39528d1be9",
-  "integratedHead": "3eb4569ef15f0eaf43b74c49b9021d714f005206",
+  "baseSha": "18db10d4730e4ebf93c9da440c951809142d6259",
+  "integratedHead": "7c9beccd031100d3848f74826744313dfcbb0872",
+  "verifiedAfterUpstreamRebase": true,
   "sources": {
     "scenario": "1235c080239589fe3923e3b84641e12e29fcbddf",
     "protocol": "363093ab06dffe887d4aa6189cadf55b8d5c4171"
@@ -30,19 +31,20 @@
       "command": "npm.cmd run build",
       "exitCode": 0,
       "staticPages": "27/27",
-      "buildId": "MWI2I4NZwQDqZluIxRL7x",
+      "buildId": "zHyoQsKPAo422u4SgiukW",
       "log": "evaluation/backend-scenario-protocol-integration-2026-07-12/build.log"
     },
     "diffCheckExitCode": 0,
     "runtimeProtocolConsumerCount": 0,
-    "changedFileCount": 25,
+    "changedFileCount": 34,
     "databaseMigrationChanges": 0,
     "environmentChanges": 0
   },
   "screenshotProtection": {
     "trackedFiles": 16,
     "hashes": "evaluation/backend-scenario-protocol-integration-2026-07-12/protected-screenshot-hashes.json",
-    "restorationRequiredAfterPush": true
+    "restorationRequiredAfterPush": false,
+    "restoredHashMismatches": 0
   },
   "runtime": {
     "remoteProtocolWired": false,

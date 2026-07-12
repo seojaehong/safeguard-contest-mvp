@@ -4,9 +4,9 @@
 
 Status: `integrated_verified`
 
-Base: `31a44c0d972c46a47c94ad387eeeff39528d1be9`
+Base after the final upstream rebase: `18db10d4730e4ebf93c9da440c951809142d6259` (frontend launch gate merge)
 
-Integrated head: `3eb4569ef15f0eaf43b74c49b9021d714f005206`
+Verified source head: `7c9beccd031100d3848f74826744313dfcbb0872`
 
 The independently approved scenario contamination fix and signed remote protocol were integrated as two disjoint commit ranges. The scenario report timestamp was moved after its final diff-check log, closing the only non-blocking P3 metadata finding.
 
@@ -14,10 +14,10 @@ The independently approved scenario contamination fix and signed remote protocol
 
 - Focused integration: 8 files, 145/145 tests passed.
 - Strict typecheck: exit 0.
-- Production build: exit 0, static pages 27/27, build ID `MWI2I4NZwQDqZluIxRL7x`.
+- Production build after the upstream rebase: exit 0, static pages 27/27, build ID `zHyoQsKPAo422u4SgiukW`.
 - Diff check: exit 0.
 - Runtime protocol imports/calls outside the pure module and tests: 0.
 - DB migration and environment-file changes: 0.
-- Existing module-shell screenshots: 16 files protected by the recorded SHA-256 manifest.
+- Existing module-shell screenshots: 16 files restored after push with 0 SHA-256 mismatches.
 
 Raw evidence is stored in this directory. The protocol remains intentionally unwired and `remoteDemoReady` remains false; this integration must not be described as remote sidecar execution readiness.
