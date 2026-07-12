@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 
 import { describe, expect, it } from "vitest";
 
@@ -17,6 +17,9 @@ const keyring: RemoteEngineKeyring = { current: currentKey, next: nextKey };
 const issuedAt = "2026-07-12T03:00:00.000Z";
 const expiresAt = "2026-07-12T03:05:00.000Z";
 const now = new Date("2026-07-12T03:01:00.000Z");
+const maxBodyBytes = 16_384;
+const maxHeaderCount = 32;
+const maxHeaderBytes = 8_192;
 
 function request(overrides: Partial<RemoteEngineRequestV1> = {}): RemoteEngineRequestV1 {
   return {
@@ -47,6 +50,46 @@ function signed(
   });
 }
 
+function rawSigned(
+  body: string,
+  overrides: {
+    method?: string;
+    path?: string;
+    key?: typeof currentKey;
+    nonce?: string;
+    audience?: string;
+    timestamp?: string;
+  } = {},
+) {
+  const method = overrides.method ?? "POST";
+  const path = overrides.path ?? "/v1/engine/run";
+  const key = overrides.key ?? currentKey;
+  const nonce = overrides.nonce ?? "nonce-001";
+  const audience = overrides.audience ?? "openclaw-sidecar";
+  const timestamp = overrides.timestamp ?? issuedAt;
+  const bodyHash = createHash("sha256").update(body, "utf8").digest("hex");
+  const canonicalRequest = [
+    "v1", method, path, key.keyId, timestamp, nonce, audience, bodyHash,
+  ].join("\n");
+  return {
+    body,
+    canonicalRequest,
+    headers: {
+      "x-safeclaw-protocol-version": "v1",
+      "x-safeclaw-method": method,
+      "x-safeclaw-path": path,
+      "x-safeclaw-key-id": key.keyId,
+      "x-safeclaw-timestamp": timestamp,
+      "x-safeclaw-nonce": nonce,
+      "x-safeclaw-audience": audience,
+      "x-safeclaw-body-sha256": bodyHash,
+      "x-safeclaw-signature": createHmac("sha256", key.secret)
+        .update(canonicalRequest, "utf8")
+        .digest("hex"),
+    },
+  };
+}
+
 function verify(
   input: ReturnType<typeof signed> = signed(),
   overrides: Partial<Parameters<typeof verifyRemoteEngineRequest>[0]> = {},
@@ -64,12 +107,14 @@ function verify(
 }
 
 function expectCode(run: () => unknown, code: RemoteEngineProtocolError["code"]): void {
-  expect(run).toThrowError(RemoteEngineProtocolError);
+  let thrown: unknown;
   try {
     run();
   } catch (error) {
-    expect(error).toMatchObject({ code });
+    thrown = error;
   }
+  expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
+  expect(thrown).toMatchObject({ code });
 }
 
 describe("remote engine signed protocol v1", () => {
@@ -100,6 +145,30 @@ describe("remote engine signed protocol v1", () => {
       "nonce-001", "openclaw-sidecar", bodyHash,
     ].join("\n"));
     expect(result.headers["x-safeclaw-signature"]).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("matches an independent fixed HMAC-SHA256 known-answer vector", () => {
+    const result = signRemoteEngineRequest({
+      method: "POST",
+      path: "/v1/engine/run",
+      body: request({
+        requestId: "kat-request",
+        userId: "kat-user",
+        organizationId: "kat-org",
+        siteId: "kat-site",
+        prompt: "Known answer",
+        allowedToolIntents: ["read:context"],
+      }),
+      key: { keyId: "kat-key", secret: "0123456789abcdef0123456789abcdef" },
+      nonce: "kat-nonce",
+    });
+
+    expect(result.headers["x-safeclaw-body-sha256"]).toBe(
+      "8bec4442443786d93432f8f891fe2d68b9c3c9df070557eaec37da125f4814ec",
+    );
+    expect(result.headers["x-safeclaw-signature"]).toBe(
+      "c813d308c038bc92b64fc5541d33ec7a85131e763546fddb334d40ee351bd45e",
+    );
   });
 
   it.each([
@@ -149,6 +218,134 @@ describe("remote engine signed protocol v1", () => {
     expectCode(() => verify(input), "PROTOCOL_KEY_UNKNOWN");
   });
 
+  it.each([
+    ["maxFutureSkewMs", Number.NaN],
+    ["maxFutureSkewMs", Number.POSITIVE_INFINITY],
+    ["maxFutureSkewMs", 0],
+    ["maxFutureSkewMs", -1],
+    ["maxFutureSkewMs", 60_001],
+    ["maxTtlMs", Number.NaN],
+    ["maxTtlMs", Number.POSITIVE_INFINITY],
+    ["maxTtlMs", 0],
+    ["maxTtlMs", -1],
+    ["maxTtlMs", 300_001],
+  ] as const)("rejects invalid verifier policy %s=%s", (field, value) => {
+    expectCode(() => verify(signed(), { [field]: value }), "PROTOCOL_POLICY_INVALID");
+  });
+
+  it("bounds unsigned and correctly signed raw body bytes before protocol work", () => {
+    const oversized = `{\"padding\":\"${"x".repeat(maxBodyBytes)}\"}`;
+    expect(Buffer.byteLength(oversized, "utf8")).toBeGreaterThan(maxBodyBytes);
+
+    expectCode(
+      () => verifyRemoteEngineRequest({
+        method: "POST",
+        path: "/v1/engine/run",
+        body: oversized,
+        headers: {},
+        expectedAudience: "openclaw-sidecar",
+        keyring,
+        now,
+      }),
+      "PROTOCOL_BODY_TOO_LARGE",
+    );
+    expectCode(() => verify(rawSigned(oversized)), "PROTOCOL_BODY_TOO_LARGE");
+  });
+
+  it("bounds serialized UTF-8 body bytes before signing", () => {
+    expectCode(
+      () => signed(request({ prompt: "한".repeat(6_000) })),
+      "PROTOCOL_BODY_TOO_LARGE",
+    );
+  });
+
+  it("bounds raw header count and aggregate bytes", () => {
+    const input = signed();
+    const tooMany = { ...input.headers };
+    for (let index = 0; index <= maxHeaderCount - Object.keys(input.headers).length; index += 1) {
+      tooMany[`x-padding-${index}`] = "x";
+    }
+    expect(Object.keys(tooMany).length).toBeGreaterThan(maxHeaderCount);
+    expectCode(() => verify(input, { headers: tooMany }), "PROTOCOL_HEADERS_TOO_LARGE");
+
+    const tooLarge = { ...input.headers, "x-padding": "x".repeat(maxHeaderBytes) };
+    expectCode(() => verify(input, { headers: tooLarge }), "PROTOCOL_HEADERS_TOO_LARGE");
+  });
+
+  it("collects Record headers once instead of rescanning for every protocol field", () => {
+    const input = signed();
+    let scans = 0;
+    const headers = new Proxy(input.headers, {
+      ownKeys(target) {
+        scans += 1;
+        return Reflect.ownKeys(target);
+      },
+    });
+
+    expect(verify(input, { headers }).requestId).toBe("req-001");
+    expect(scans).toBe(1);
+  });
+
+  it.each(["post", "POST ", "ＰＯＳＴ", "POſT"])("rejects non-canonical method %s in signer and verifier", (method) => {
+    expectCode(() => signed(request(), { method }), "PROTOCOL_METHOD_INVALID");
+    expectCode(() => verify(signed(), { method }), "PROTOCOL_METHOD_INVALID");
+  });
+
+  it.each([
+    "//v1/engine/run",
+    "/v1//engine/run",
+    "/v1/./engine/run",
+    "/v1/../engine/run",
+    "/v1/engine/run?mode=1",
+    "/v1/engine/run#fragment",
+    "/v1\\engine\\run",
+    "/v1/engine/\0run",
+    "/v1/engine/%72un",
+    "/v1/engine/ru\u0301n",
+    "/v1/engine/rún",
+  ])("rejects non-canonical path %j in signer and verifier", (path) => {
+    expectCode(() => signed(request(), { path }), "PROTOCOL_PATH_INVALID");
+    expectCode(() => verify(signed(), { path }), "PROTOCOL_PATH_INVALID");
+  });
+
+  it("accepts only the strict shared canonical method and path form", () => {
+    const input = signed(request(), { method: "POST", path: "/v1.0/engine-run_1~draft" });
+    expect(verify(input, { path: "/v1.0/engine-run_1~draft" }).requestId).toBe("req-001");
+  });
+
+  it("rejects case-insensitive duplicate protocol headers from Record and Headers", () => {
+    const input = signed();
+    const recordHeaders = {
+      ...input.headers,
+      "X-SafeClaw-Key-Id": currentKey.keyId,
+    };
+    expectCode(() => verify(input, { headers: recordHeaders }), "PROTOCOL_HEADER_DUPLICATE");
+
+    const webHeaders = new Headers(Object.entries(input.headers));
+    webHeaders.append("X-SafeClaw-Key-Id", currentKey.keyId);
+    expectCode(() => verify(input, { headers: webHeaders }), "PROTOCOL_HEADER_DUPLICATE");
+  });
+
+  it("rejects duplicate JSON members before last-wins interpretation", () => {
+    const duplicateBody = serializeRemoteEngineRequest(request()).replace(
+      '{"requestId":"req-001"',
+      '{"requestId":"req-001","requestId":"req-evil"',
+    );
+    expectCode(() => verify(rawSigned(duplicateBody)), "PROTOCOL_BODY_DUPLICATE_MEMBER");
+  });
+
+  it("rejects a colliding current/next key-id configuration", () => {
+    expectCode(
+      () => verify(signed(), {
+        keyring: {
+          current: currentKey,
+          next: { keyId: currentKey.keyId, secret: "different-next-secret".repeat(2) },
+        },
+      }),
+      "PROTOCOL_KEYRING_INVALID",
+    );
+  });
+
   it("rejects body tampering and bad signatures with distinct stable codes", () => {
     const input = signed();
     expectCode(
@@ -196,8 +393,7 @@ describe("remote engine signed protocol v1", () => {
       "PROTOCOL_BODY_MALFORMED",
     );
     const credentialBody = JSON.stringify({ ...request(), bearerToken: "secret" });
-    const input = signed();
-    expectCode(() => verify(input, { body: credentialBody }), "PROTOCOL_BODY_TAMPERED");
+    expectCode(() => verify(rawSigned(credentialBody)), "PROTOCOL_BODY_MALFORMED");
   });
 
   it("does not implement replay state and returns the nonce for a durable atomic store", () => {
