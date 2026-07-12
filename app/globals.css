@@ -10199,7 +10199,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .ai-connect-tabs button strong {
-  margin-bottom: 10px;
+  margin-bottom: var(--space-2);
   font-size: var(--text-control);
   font-weight: 700;
   line-height: var(--leading-control);
@@ -10331,7 +10331,7 @@ body:has(.safeclaw-landing) :is(
 .ai-connect-section-head > strong {
   border-radius: var(--radius-control);
   white-space: nowrap;
-  padding: 7px 10px;
+  padding: var(--space-2) var(--space-3);
   font-size: var(--text-caption);
   font-weight: 600;
   line-height: var(--leading-caption);
@@ -10620,7 +10620,7 @@ body:has(.safeclaw-landing) :is(
   font-weight: 700;
   line-height: var(--leading-control);
   letter-spacing: var(--tracking-body);
-  padding: 9px 11px;
+  padding: var(--space-2) var(--space-3);
   text-decoration: none;
   letter-spacing: var(--tracking-body);
 }
@@ -10746,7 +10746,7 @@ body:has(.safeclaw-landing) :is(
   font-weight: 600;
   line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
-  padding: 5px 7px;
+  padding: var(--space-1) var(--space-2);
 }
 
 .ai-connect-sif-operator-checklist li.done > span {
@@ -10908,7 +10908,7 @@ body:has(.safeclaw-landing) :is(
   border-radius: var(--radius-control);
   background: rgba(246, 245, 239, 0.08);
   color: rgba(246, 245, 239, 0.72);
-  padding: 5px 8px;
+  padding: var(--space-1) var(--space-2);
   font-size: var(--text-caption);
   font-weight: 600;
   line-height: var(--leading-caption);
@@ -11043,7 +11043,7 @@ body:has(.safeclaw-landing) :is(
 
 .ai-connect-token-items article > span {
   border-radius: var(--radius-control);
-  padding: 7px 10px;
+  padding: var(--space-2) var(--space-3);
   font-size: var(--text-caption);
   font-weight: 600;
   line-height: var(--leading-caption);
