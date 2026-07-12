@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "safeclaw-kosha-body-integration/v1",
+  "generatedAt": "2026-07-12T10:03:11.1734603+09:00",
+  "branch": "feature/backend-harness-gate",
+  "baseSha": "84c04cd98c05b16f207e37be848d57de852f9509",
+  "integratedProductSha": "1ecd68664b2c5aa6f438f0c07c72b830c3ea3d93",
+  "sourceCommits": [
+    "628bccad1c97c194a26824ce3b5a39d26a24a21a",
+    "f8314855ffa3aae58bf47d7c4caf6b54a46f78d5",
+    "86281992cec1e96028d99f081ee125fd52452ae0",
+    "408fbdb8305c9ff68461461c451f7efb26b12edc",
+    "b5e5dbde51a8c1a5f87a640de08eaa87a5d21832",
+    "a06acc4d6aaf0229277fca3717ffad90f415e50b"
+  ],
+  "review": {
+    "spec": "pass",
+    "codeQuality": "pass",
+    "findings": 0
+  },
+  "tests": {
+    "suiteRun1": { "passed": 44, "failed": 0, "elapsedSeconds": 6.281 },
+    "suiteRun2": { "passed": 44, "failed": 0, "elapsedSeconds": 6.503 },
+    "focusedSchemaPolicy": { "passed": 4, "failed": 0 },
+    "diffCheck": "pass"
+  },
+  "externalSnapshot": {
+    "mutated": false,
+    "currentSha256": "071dbcbd8a1b9666139d235f14078f92e1ce13d232bc1884b95e594f1b49168b",
+    "snapshotId": "bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51",
+    "items": 1040,
+    "chunks": 20520,
+    "success": 1039,
+    "ocrBoundary": 1,
+    "hardFailures": 0,
+    "launchReady": false
+  },
+  "preservation": {
+    "trackedScreenshotCount": 16,
+    "screenshotHashMismatches": 0,
+    "databaseMutation": false
+  },
+  "offlineHarness": {
+    "integrated": false,
+    "reason": "expanded product-contract review remains rejected"
+  }
+}
