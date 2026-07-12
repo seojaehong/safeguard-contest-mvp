@@ -485,8 +485,14 @@ function inferCustomWorkName(question: string) {
 
 function inferSpecialContext(question: string): string[] {
   const notes: string[] = [];
-  if (/외국인/.test(question)) notes.push("외국인 근로자 포함 — 쉬운 한국어와 다국어 안내로 이해 여부를 확인");
-  if (/신규/.test(question)) notes.push("신규 작업자 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인");
+  const foreignWorkerCount = question.match(/외국인\s*(?:근로자|작업자)?\s*(\d+)\s*명/)?.[1];
+  const newWorkerCount = question.match(/신규\s*(?:투입자|근로자|작업자)?\s*(\d+)\s*명/)?.[1];
+  if (/외국인/.test(question)) {
+    notes.push(`${foreignWorkerCount ? `외국인 근로자 ${foreignWorkerCount}명 포함` : "외국인 근로자 포함"} — 쉬운 한국어와 다국어 안내로 이해 여부를 확인`);
+  }
+  if (/신규/.test(question)) {
+    notes.push(`${newWorkerCount ? `신규 투입자 ${newWorkerCount}명 포함` : "신규 작업자 포함"} — 작업중지 기준과 보호구 착용을 별도 복창 확인`);
+  }
   if (/화재감시자/.test(question)) notes.push("화재감시자 지정 — 화기작업 중 불티 비산과 가연물 상태를 상시 확인");
   if (/우천|젖음|비|강수/.test(question)) notes.push("우천·젖은 바닥 조건 — 미끄럼과 보행/장비 동선 분리 확인");
   if (/강풍|돌풍/.test(question)) notes.push("강풍 조건 — 작업중지 기준과 대피 위치를 작업 전 공유");
