@@ -19811,12 +19811,12 @@ body:has(.safeclaw-landing) :is(
   min-width: 0;
   min-height: 44px;
   display: grid;
-  gap: 2px;
+  gap: var(--space-1);
   border: 1px solid var(--workspace-rule);
   border-radius: var(--radius-control);
   background: var(--workspace-surface-1);
   color: var(--workspace-muted);
-  padding: 9px 12px;
+  padding: var(--space-2) var(--space-3);
   text-align: left;
   cursor: pointer;
 }
@@ -19862,7 +19862,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-notes {
   display: grid;
   gap: 8px;
-  margin-top: 22px;
+  margin-top: var(--space-6);
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-facts p {
@@ -19932,7 +19932,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span {
   min-width: 0;
   border-right: 1px solid var(--workspace-rule);
-  padding: 14px 16px;
+  padding: var(--space-3) var(--space-4);
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table strong:last-child,
@@ -19961,7 +19961,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span em {
   display: block;
-  margin-top: 6px;
+  margin-top: var(--space-2);
   color: var(--workspace-subtle);
   font-style: normal;
   font-size: var(--text-caption);
@@ -19979,7 +19979,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-rail .safeclaw-report-groups {
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group {
@@ -19987,11 +19987,11 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid var(--workspace-rule);
   border-radius: var(--radius-control);
   background: var(--workspace-surface-1);
-  padding: 18px;
+  padding: var(--space-4);
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-rail .safeclaw-report-group {
-  padding: 14px;
+  padding: var(--space-3);
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group > span {
@@ -20004,8 +20004,8 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group div {
   display: grid;
-  gap: 10px;
-  margin-top: 14px;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group p {
@@ -20052,21 +20052,22 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-action {
     width: 100%;
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-3);
     border-top: 1px solid var(--workspace-rule);
     border-left: 0;
-    padding-top: 12px;
+    padding-top: var(--space-3);
     padding-left: 0;
   }
 
-  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command,
-  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a {
-    width: 100%;
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command {
+    width: auto;
     min-width: 0;
   }
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a {
+    width: auto;
+    max-width: 176px;
     white-space: normal;
     overflow-wrap: anywhere;
     text-align: center;
@@ -20089,7 +20090,7 @@ body:has(.safeclaw-landing) :is(
   }
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table > div {
-    padding: 14px;
+    padding: var(--space-3);
   }
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span {
@@ -20115,6 +20116,6 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-facts p,
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-notes p {
     grid-template-columns: 1fr;
-    gap: 6px;
+    gap: var(--space-2);
   }
 }

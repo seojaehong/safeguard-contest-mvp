@@ -1,0 +1,22 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/reports-design-remediation.test.ts -t overrides Reports controls without changing shared button selectors --maxWorkers=1 --no-file-parallelism --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-static-contract-v2
+
+ ↓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > keeps the final-launch stylesheet free of important declarations
+ ↓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > preserves shared final-launch Reports rules below the route override
+ ↓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > uses the canonical Reports typography and interaction tuples
+ ↓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > exposes route and pressed-state semantics without broad primary-button capture
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > overrides Reports controls without changing shared button selectors 37ms
+ ↓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'day' 'desktop'
+ ↓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'night' 'desktop'
+ ↓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'day' 'mobile'
+ ↓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'night' 'mobile'
+ ↓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > captures deterministic empty and fail-closed server-error states
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 9 skipped (10)
+   Start at  22:20:31
+   Duration  2.08s (transform 214ms, setup 0ms, import 1.31s, tests 39ms, environment 0ms)

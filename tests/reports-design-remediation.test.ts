@@ -56,6 +56,19 @@ function declarationsFor(source: string, selector: string): Record<string, strin
   return result;
 }
 
+function blockBody(source: string, blockStart: string): string {
+  const start = source.indexOf(blockStart);
+  expect(start, `${blockStart} block`).toBeGreaterThanOrEqual(0);
+  const openingBrace = source.indexOf("{", start);
+  let depth = 0;
+  for (let index = openingBrace; index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    if (source[index] === "}") depth -= 1;
+    if (depth === 0) return source.slice(openingBrace + 1, index);
+  }
+  throw new Error(`Unclosed CSS block: ${blockStart}`);
+}
+
 function parseRgbTriplet(value: string): [number, number, number] {
   const match = value.match(/\d+(?:\.\d+)?/gu);
   if (!match || match.length < 3) throw new Error(`Unsupported color: ${value}`);
@@ -147,6 +160,8 @@ describe("Reports Wave 1 static design contract", () => {
 
   it("overrides Reports controls without changing shared button selectors", () => {
     const css = fs.readFileSync(cssPath, "utf8");
+    const reportsLayer = css.slice(css.indexOf("/* Reports: canonical route layer"));
+    const mobileReportsCss = blockBody(reportsLayer, "@media (max-width: 900px)");
     expect(declarationsFor(
       css,
       '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button'
@@ -160,6 +175,20 @@ describe("Reports Wave 1 static design contract", () => {
     )).toMatchObject({
       "min-height": "44px",
       "border-radius": "var(--radius-control)"
+    });
+    expect(declarationsFor(
+      mobileReportsCss,
+      '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a'
+    )).toMatchObject({
+      "width": "auto",
+      "max-width": "176px"
+    });
+    expect(declarationsFor(
+      mobileReportsCss,
+      '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-action'
+    )).toMatchObject({
+      "grid-template-columns": "minmax(0, 1fr) auto",
+      "gap": "var(--space-3)"
     });
   });
 });
@@ -289,8 +318,9 @@ describe("Reports Wave 1 browser design contract", () => {
       const hero = document.querySelector(".safeclaw-page-decision-header");
       const heroMeta = document.querySelector(".safeclaw-page-decision-action > div:first-child");
       const heroCta = document.querySelector(".safeclaw-module-principal-command a");
+      const content = document.querySelector(".safeclaw-module-content > *");
       if (!selectedControl) throw new Error("Selected report period was not rendered");
-      if (!hero || !heroMeta || !heroCta) throw new Error("Reports hero geometry targets were not rendered");
+      if (!hero || !heroMeta || !heroCta || !content) throw new Error("Reports hero geometry targets were not rendered");
       const heroMetaRect = heroMeta.getBoundingClientRect();
       const heroCtaRect = heroCta.getBoundingClientRect();
       const heroCtaStyle = getComputedStyle(heroCta);
@@ -305,6 +335,7 @@ describe("Reports Wave 1 browser design contract", () => {
         heroCtaBackground: heroCtaStyle.backgroundColor,
         heroCtaColor: heroCtaStyle.color,
         heroCtaClipped: heroCta.scrollWidth > heroCta.clientWidth + 1,
+        contentTop: Math.round(content.getBoundingClientRect().top),
         heroMetaCtaOverlap: !(
           heroMetaRect.bottom <= heroCtaRect.top
           || heroCtaRect.bottom <= heroMetaRect.top
@@ -342,6 +373,7 @@ describe("Reports Wave 1 browser design contract", () => {
       expect(metrics.heroColumnCount).toBe(1);
       expect(metrics.heroCtaClipped).toBe(false);
       expect(metrics.heroMetaCtaOverlap).toBe(false);
+      expect(metrics.contentTop).toBeLessThanOrEqual(387);
     } else {
       expect(metrics.heroColumnCount).toBe(2);
       expect(metrics.heroCtaClipped).toBe(false);
