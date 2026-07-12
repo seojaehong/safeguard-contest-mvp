@@ -9953,7 +9953,6 @@ body:has(.safeclaw-landing) :is(
   max-width: 940px;
   margin: 0;
   color: rgba(246, 245, 239, 0.68);
-  font-size: 14px;
   font-weight: 690;
   line-height: 1.72;
 }
@@ -9964,7 +9963,6 @@ body:has(.safeclaw-landing) :is(
   background: rgba(255, 255, 255, 0.05);
   color: var(--os-panel-text);
   font-family: var(--font-hud);
-  font-size: 12px;
   font-weight: 850;
   padding: 1px 6px;
 }
@@ -9988,7 +9986,6 @@ body:has(.safeclaw-landing) :is(
 .ontology-operation-flow span {
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 10px;
   font-weight: 950;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -9996,14 +9993,12 @@ body:has(.safeclaw-landing) :is(
 
 .ontology-operation-flow strong {
   color: var(--os-panel-text);
-  font-size: 16px;
   font-weight: 860;
   line-height: 1.35;
 }
 
 .ontology-operation-flow small {
   color: rgba(246, 245, 239, 0.56);
-  font-size: 12px;
   font-weight: 710;
   line-height: 1.55;
 }
@@ -10024,7 +10019,6 @@ body:has(.safeclaw-landing) :is(
   max-width: 760px;
   margin: 0;
   color: rgba(246, 245, 239, 0.68);
-  font-size: 14px;
   font-weight: 690;
   line-height: 1.7;
 }
@@ -10042,7 +10036,6 @@ body:has(.safeclaw-landing) :is(
   background: rgba(255, 255, 255, 0.05);
   color: var(--os-panel-text);
   font-family: var(--font-hud);
-  font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.04em;
   padding: 9px 12px;
@@ -10056,7 +10049,6 @@ body:has(.safeclaw-landing) :is(
 .operation-memory-message {
   margin: -4px 0 0;
   color: rgba(255, 220, 46, 0.78);
-  font-size: 12px;
   font-weight: 760;
 }
 
@@ -10095,7 +10087,6 @@ body:has(.safeclaw-landing) :is(
   background: rgba(8, 8, 8, 0.58);
   color: rgba(246, 245, 239, 0.62);
   font-family: var(--font-hud);
-  font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.04em;
   padding: 5px 8px;
@@ -10182,7 +10173,6 @@ body:has(.safeclaw-landing) :is(
 .operation-memory-detail dt {
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 10px;
   font-weight: 950;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -10190,14 +10180,12 @@ body:has(.safeclaw-landing) :is(
 
 .operation-memory-point strong {
   color: var(--os-panel-text);
-  font-size: 12px;
   font-weight: 860;
   line-height: 1.32;
 }
 
 .operation-memory-point small {
   color: rgba(246, 245, 239, 0.48);
-  font-size: 11px;
   font-weight: 760;
 }
 
@@ -10227,7 +10215,6 @@ body:has(.safeclaw-landing) :is(
 
 .operation-memory-popover strong {
   color: var(--os-panel-text);
-  font-size: 16px;
   font-weight: 880;
   line-height: 1.35;
 }
@@ -10237,7 +10224,6 @@ body:has(.safeclaw-landing) :is(
 .operation-memory-inline-card p {
   margin: 0;
   color: rgba(246, 245, 239, 0.66);
-  font-size: 12px;
   font-weight: 720;
   line-height: 1.55;
 }
@@ -10260,7 +10246,6 @@ body:has(.safeclaw-landing) :is(
   min-width: 0;
   margin: 0;
   color: var(--os-panel-text);
-  font-size: 12px;
   font-weight: 740;
   overflow-wrap: anywhere;
 }
@@ -10290,7 +10275,6 @@ body:has(.safeclaw-landing) :is(
 .operation-memory-inline-card li span {
   color: var(--os-panel-text);
   font-family: var(--font-base);
-  font-size: 12px;
   font-weight: 760;
   letter-spacing: 0;
   text-transform: none;
@@ -10317,7 +10301,6 @@ body:has(.safeclaw-landing) :is(
 
 .operation-memory-detail > strong {
   color: var(--os-panel-text);
-  font-size: 18px;
   font-weight: 880;
   letter-spacing: -0.01em;
   line-height: 1.34;
@@ -10362,14 +10345,12 @@ body:has(.safeclaw-landing) :is(
 
 .operation-memory-list-item strong {
   color: var(--os-panel-text);
-  font-size: 14px;
   font-weight: 820;
   line-height: 1.38;
 }
 
 .operation-memory-list-item small {
   color: rgba(246, 245, 239, 0.48);
-  font-size: 12px;
   font-weight: 700;
 }
 
@@ -10389,7 +10370,6 @@ body:has(.safeclaw-landing) :is(
   max-width: 860px;
   margin: 0;
   color: rgba(246, 245, 239, 0.66);
-  font-size: 14px;
   font-weight: 680;
   line-height: 1.65;
 }
@@ -10493,7 +10473,6 @@ body:has(.safeclaw-landing) :is(
 .ontology-graph-legend span {
   color: rgba(246, 245, 239, 0.54);
   font-family: var(--font-hud);
-  font-size: 10px;
   font-weight: 950;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -10501,14 +10480,12 @@ body:has(.safeclaw-landing) :is(
 
 .ontology-graph-point strong {
   color: var(--os-panel-text);
-  font-size: 12px;
   font-weight: 860;
   line-height: 1.28;
 }
 
 .ontology-graph-point small {
   color: rgba(246, 245, 239, 0.46);
-  font-size: 11px;
   font-weight: 760;
 }
 
@@ -10540,7 +10517,6 @@ body:has(.safeclaw-landing) :is(
 .ontology-graph-popover li b {
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 10px;
   font-weight: 950;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -10548,14 +10524,12 @@ body:has(.safeclaw-landing) :is(
 
 .ontology-graph-popover strong {
   color: var(--os-panel-text);
-  font-size: 16px;
   font-weight: 880;
 }
 
 .ontology-graph-popover p {
   margin: 0;
   color: rgba(246, 245, 239, 0.66);
-  font-size: 12px;
   font-weight: 720;
   line-height: 1.5;
 }
@@ -10579,7 +10553,6 @@ body:has(.safeclaw-landing) :is(
 .ontology-graph-popover li span {
   color: var(--os-panel-text);
   font-family: var(--font-base);
-  font-size: 12px;
   font-weight: 760;
   letter-spacing: 0;
   text-transform: none;
@@ -10602,7 +10575,6 @@ body:has(.safeclaw-landing) :is(
   background: rgba(255, 255, 255, 0.04);
   color: rgba(246, 245, 239, 0.62);
   font-family: var(--font-hud);
-  font-size: 11px;
   font-weight: 860;
   letter-spacing: 0.02em;
   padding: 7px 9px;
@@ -10656,7 +10628,6 @@ body:has(.safeclaw-landing) :is(
 .ontology-hover-card > span {
   color: rgba(246, 245, 239, 0.54);
   font-family: var(--font-hud);
-  font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -10664,14 +10635,12 @@ body:has(.safeclaw-landing) :is(
 
 .ontology-node-row strong {
   color: var(--os-panel-text);
-  font-size: 16px;
   font-weight: 820;
   line-height: 1.35;
 }
 
 .ontology-node-row small {
   color: rgba(246, 245, 239, 0.48);
-  font-size: 12px;
   font-weight: 700;
 }
 
@@ -10701,14 +10670,12 @@ body:has(.safeclaw-landing) :is(
 
 .ontology-hover-card strong {
   color: var(--os-panel-text);
-  font-size: 18px;
   font-weight: 880;
 }
 
 .ontology-hover-card p {
   margin: 0;
   color: rgba(246, 245, 239, 0.68);
-  font-size: 13px;
   font-weight: 720;
   line-height: 1.5;
 }
@@ -10732,7 +10699,6 @@ body:has(.safeclaw-landing) :is(
 .ontology-hover-card li b {
   color: var(--os-yellow);
   font-family: var(--font-hud);
-  font-size: 11px;
   font-weight: 950;
   letter-spacing: 0.04em;
 }
@@ -10741,7 +10707,6 @@ body:has(.safeclaw-landing) :is(
   max-width: 220px;
   color: var(--os-panel-text);
   font-family: var(--font-base);
-  font-size: 13px;
   font-weight: 760;
   letter-spacing: 0;
   text-align: right;
@@ -10766,7 +10731,6 @@ body:has(.safeclaw-landing) :is(
 .ontology-kind-list strong {
   color: var(--os-panel-text);
   font-family: var(--font-hud);
-  font-size: 14px;
   font-weight: 950;
 }
 
@@ -17379,7 +17343,14 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink) !important;
 }
 
-.safeclaw-module-shell .safeclaw-module-content :is(h2, h3, strong) {
+.safeclaw-module-shell .safeclaw-module-content :is(h2, h3, strong):not(
+  .ontology-operation-flow strong,
+  .operation-memory-popover strong,
+  .operation-memory-detail > strong,
+  .ontology-graph-popover strong,
+  .ontology-node-row strong,
+  .ontology-hover-card strong
+) {
   color: var(--workspace-ink) !important;
   letter-spacing: 0 !important;
 }
@@ -17912,4 +17883,234 @@ h3 {
   font-weight: 500;
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
+}
+/* Ontology typography roles: keep the rendered exploration surfaces on the
+   shared product scale while preserving HUD telemetry as mono text. */
+.ontology-operation-loop p,
+.operation-memory-copy p,
+.ontology-graph-shell > p,
+.operation-memory-list-item strong {
+  font-family: var(--font-product);
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.ontology-operation-loop code,
+.ontology-operation-flow span,
+.operation-memory-copy button,
+.operation-memory-actions button,
+.operation-memory-stats span,
+.operation-memory-point > span,
+.operation-memory-list-item span,
+.operation-memory-detail > span,
+.operation-memory-inline-card > span,
+.operation-memory-popover > span,
+.operation-memory-popover li b,
+.operation-memory-detail li b,
+.operation-memory-inline-card li b,
+.operation-memory-popover dt,
+.operation-memory-detail dt,
+.ontology-graph-point > span,
+.ontology-graph-legend span,
+.ontology-graph-popover > span,
+.ontology-graph-popover li b,
+.ontology-graph-stats span,
+.ontology-node-row span,
+.ontology-map-column > span,
+.ontology-kind-list span,
+.ontology-hover-card > span,
+.ontology-hover-card li b {
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+}
+
+.ontology-operation-flow strong,
+.operation-memory-popover strong,
+.operation-memory-detail > strong,
+.ontology-graph-popover strong,
+.ontology-node-row strong,
+.ontology-hover-card strong {
+  font-family: var(--font-product);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
+.ontology-operation-flow small,
+.operation-memory-message,
+.operation-memory-point strong,
+.operation-memory-point small,
+.operation-memory-popover p,
+.operation-memory-detail p,
+.operation-memory-inline-card p,
+.operation-memory-list-item small,
+.ontology-graph-point strong,
+.ontology-graph-point small,
+.ontology-graph-popover p,
+.ontology-node-row small {
+  font-family: var(--font-product);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.operation-memory-popover dd,
+.operation-memory-detail dd,
+.operation-memory-popover li span,
+.operation-memory-detail li span,
+.operation-memory-inline-card li span,
+.ontology-graph-popover li span,
+.ontology-hover-card p,
+.ontology-hover-card li span {
+  font-family: var(--font-product);
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
+}
+
+.ontology-kind-list strong {
+  font-family: var(--font-product);
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+/* Route scopes win over the document/workspace skin without changing the
+   role definitions above. */
+.safeclaw-module-shell.module-variant-document :is(
+  .ontology-operation-loop p,
+  .operation-memory-copy p,
+  .ontology-graph-shell > p,
+  .operation-memory-list-item strong
+) {
+  font-family: var(--font-product);
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell.module-variant-document :is(
+  .ontology-operation-loop code,
+  .ontology-operation-flow span,
+  .operation-memory-copy button,
+  .operation-memory-actions button,
+  .operation-memory-stats span,
+  .operation-memory-point > span,
+  .operation-memory-list-item span,
+  .operation-memory-detail > span,
+  .operation-memory-inline-card > span,
+  .operation-memory-popover > span,
+  .operation-memory-popover li b,
+  .operation-memory-detail li b,
+  .operation-memory-inline-card li b,
+  .operation-memory-popover dt,
+  .operation-memory-detail dt,
+  .ontology-graph-point > span,
+  .ontology-graph-legend span,
+  .ontology-graph-popover > span,
+  .ontology-graph-popover li b,
+  .ontology-graph-stats span,
+  .ontology-node-row span,
+  .ontology-map-column > span,
+  .ontology-kind-list span,
+  .ontology-hover-card > span,
+  .ontology-hover-card li b
+) {
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+}
+
+.safeclaw-module-shell.module-variant-document :is(
+  .ontology-operation-flow strong,
+  .operation-memory-popover strong,
+  .operation-memory-detail > strong,
+  .ontology-graph-popover strong,
+  .ontology-node-row strong,
+  .ontology-hover-card strong
+) {
+  font-family: var(--font-product);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
+.safeclaw-module-shell.module-variant-document :is(
+  .ontology-operation-flow small,
+  .operation-memory-message,
+  .operation-memory-point strong,
+  .operation-memory-point small,
+  .operation-memory-popover p,
+  .operation-memory-detail p,
+  .operation-memory-inline-card p,
+  .operation-memory-list-item small,
+  .ontology-graph-point strong,
+  .ontology-graph-point small,
+  .ontology-graph-popover p,
+  .ontology-node-row small
+) {
+  font-family: var(--font-product);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell.module-variant-document :is(
+  .operation-memory-popover dd,
+  .operation-memory-detail dd,
+  .operation-memory-popover li span,
+  .operation-memory-detail li span,
+  .operation-memory-inline-card li span,
+  .ontology-graph-popover li span,
+  .ontology-hover-card p,
+  .ontology-hover-card li span
+) {
+  font-family: var(--font-product);
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .workspace-operation-memory .operation-memory-detail > strong {
+  font-family: var(--font-product);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
+}
+
+.command-center-shell .workspace-operation-memory .operation-memory-list-item small {
+  font-family: var(--font-product);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+body .safeclaw-module-shell.module-variant-document .ontology-operation-flow strong,
+body .safeclaw-module-shell.module-variant-document .operation-memory-popover strong,
+body .safeclaw-module-shell.module-variant-document .operation-memory-detail > strong,
+body .safeclaw-module-shell.module-variant-document .ontology-graph-popover strong,
+body .safeclaw-module-shell.module-variant-document .ontology-node-row strong,
+body .safeclaw-module-shell.module-variant-document .ontology-hover-card strong {
+  font-family: var(--font-product);
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
