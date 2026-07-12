@@ -1,62 +1,68 @@
 # Reports release RED remediation
 
 - Branch: `fix/release-reports-red-remediation`
-- Exact base: `a1dbedb64e177a4909584274eaad87484aa732f4`
-- Scope: Reports test-owned files and evaluation evidence only
-- Result: PASS
+- Base: `a1dbedb64e177a4909584274eaad87484aa732f4`
+- Scope: Reports test fixture and evaluation evidence only
+- Product code changes: none
+- Result: PASS after review remediation
 
 ## Root cause
 
-This was not a render timing race. Two diagnostic RED runs reached the same settled state after the explicit local switch:
+The failed full-suite test did not reveal an optimistic export path. The local
+workpack fixture used a fixed `2026-07-10` timestamp while the product correctly
+filters the default report to the current KST week. Once that timestamp moved
+outside the active week, the explicit browser-local switch settled to
+`data-download-readiness="empty"` and all five export buttons remained disabled.
 
-- provenance: `browser_local`
-- local marker: visible
-- server error panel: removed
-- download readiness: `empty`
-- disabled exports: `5/5`
-- readiness detail: `No report matches the selected conditions`
+The first correction replaced the stale timestamp and waited on the real
+`ready` state. Independent review then found a remaining boundary flake: fixture
+creation and browser rendering could still straddle Monday 00:00 KST.
 
-The local workpack passed `inspectStoredCurrentWorkpack`, but the browser fixture overrode `savedAt` with `2026-07-10T08:00:00.000Z`. Once the KST weekly boundary advanced, `buildReportSnapshot` correctly excluded that workpack from the default weekly report. The test therefore described a current local workpack while supplying a prior-period timestamp.
+## Review remediation
 
-## Remediation
+The regression now uses one fixed midweek reference instant for both sides of
+the contract:
 
-The browser fixture now preserves the real current-workpack contract by retaining the builder-generated current RFC3339 timestamp. After switching, the test waits on the real `data-download-readiness="ready"` condition before asserting that all five exports are enabled. No arbitrary sleep was added, and no production Reports logic changed.
+- the stored workpack receives the same RFC3339 `savedAt` value;
+- Playwright fixes the browser `Date` to that instant before navigation;
+- the test still begins in the blocked no-session server state;
+- exports are checked only after the explicit local switch reaches the real
+  `data-download-readiness="ready"` condition.
+
+`week-boundary-red.log` proves the test fails when the browser clock is fixed
+but the workpack retains a mismatched real-time timestamp. The matching
+`week-boundary-green.log` proves the shared reference instant closes that gap.
+No arbitrary sleep or product-side bypass was added.
 
 ## Fail-closed preservation
 
-Initial server authority remains blocking:
+The four-file reporting suite confirms:
 
-- no-session: the server error panel is visible, local data is not exposed, and all five exports are disabled before explicit switch
-- HTTP 401: blocked with no local switch when no valid local workpack exists
-- HTTP 404: blocked with no local switch when no valid local workpack exists
-- malformed legacy payload: blocked without exposing local data or exports
-
-The full reporting run also retained sample-preview download blocking and reporting helper validation. Exports become available only after an explicit switch to a validated, current-period local workpack whose snapshot resolves to `ready`.
+- no-session server authority remains blocking before an explicit switch;
+- HTTP 401 and 404 responses remain blocked without a valid local workpack;
+- malformed server payloads do not expose local exports;
+- all five exports remain disabled for empty or invalid report snapshots;
+- a validated local workpack becomes available only after an explicit switch.
 
 ## Verification
 
 | Gate | Result |
 | --- | --- |
-| Diagnostic RED run 1 | exit 1, readiness `empty`, exports disabled `5/5` |
-| Diagnostic RED run 2 | exit 1, same settled state |
-| Focused GREEN run 1 | exit 0, `1/1` selected test |
-| Focused GREEN run 2 | exit 0, `1/1` selected test |
-| All reporting tests | exit 0, `4/4` files, `71/71` tests |
+| Boundary RED | expected exit 1, `ready` selector timed out |
+| Boundary GREEN | `1/1` selected test passed |
+| Main focused review | `1/1` selected test passed |
+| All reporting tests | `4/4` files, `71/71` tests passed |
 | Strict typecheck | exit 0 |
 
-Fresh command logs:
+Evidence:
 
-- `focused-pass-1.log`
-- `focused-pass-2.log`
-- `reporting-tests.log`
-- `typecheck.log`
-
-## Git sync
-
-`git fetch origin --prune` completed successfully and confirmed that the remediation branch did not yet exist on the remote. An explicit `git pull --rebase origin feat/backend-release-integration-v2` attempted to replay the local integration history and stopped on conflicts in files outside this task's ownership, including `app/globals.css`. The rebase was aborted without resolving or staging any conflict. HEAD and its parent were restored exactly to the remediation commit and requested base, so the branch is published as a new non-force push without rewriting the authoritative local base.
+- `week-boundary-red.log`
+- `week-boundary-green.log`
+- `main-focused-review.log`
+- `reporting-tests-review-remediation.log`
+- `typecheck-review-remediation.log`
 
 ## Changed files
 
 - `tests/reports-download-center.test.ts`
-- `evaluation/release-reports-red-remediation-2026-07-12/report.md`
-- `evaluation/release-reports-red-remediation-2026-07-12/report.json`
+- `evaluation/release-reports-red-remediation-2026-07-12/*`
