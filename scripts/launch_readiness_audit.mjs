@@ -8,6 +8,7 @@ const outDir = process.env.SAFETYGUARD_OUT_DIR || path.join(process.cwd(), "eval
 const timeoutMs = Number.parseInt(process.env.SAFETYGUARD_AUDIT_TIMEOUT_MS || "60000", 10);
 const runDispatch = process.env.SAFETYGUARD_AUDIT_DISPATCH === "true";
 const outputFile = process.env.SAFETYGUARD_AUDIT_OUTPUT || "api-connection-audit.json";
+const outputPath = path.join(outDir, outputFile);
 
 function loadEnvFile(filePath) {
   if (!fs.existsSync(filePath)) return;
@@ -30,6 +31,7 @@ const question = process.env.SAFETYGUARD_AUDIT_QUESTION ||
   "도시가스공사 열수송관 굴착공사. 작업자 7명, 외국인 근로자 2명, 신규 투입자 1명, 이동식 크레인과 굴착기 사용, 매설물 확인 필요. 오늘 작업 전 문서팩을 만들어줘.";
 
 fs.mkdirSync(outDir, { recursive: true });
+fs.rmSync(outputPath, { force: true });
 
 function hasEnv(name) {
   return Boolean(process.env[name]?.trim());
@@ -39,6 +41,20 @@ function connectionLabel(mode) {
   if (mode === "live") return "연결됨";
   if (mode === "fallback") return "일부 근거 보류";
   return "연결 점검 필요";
+}
+
+function errorMessage(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+async function writeJsonLine(stream, value) {
+  const output = `${JSON.stringify(value, null, 2)}\n`;
+  await new Promise((resolve, reject) => {
+    stream.write(output, "utf8", (error) => {
+      if (error) reject(error);
+      else resolve();
+    });
+  });
 }
 
 async function fetchJson(url, init = {}) {
@@ -139,54 +155,69 @@ function buildAuditRows(result) {
   ];
 }
 
-const startedAt = Date.now();
-const ask = await fetchJson(`${baseUrl}/api/ask`, {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ question })
-});
-
-let dispatchResult = null;
-if (runDispatch) {
-  dispatchResult = await fetchJson(`${baseUrl}/api/workflow/dispatch`, {
+try {
+  const startedAt = Date.now();
+  const ask = await fetchJson(`${baseUrl}/api/ask`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      channels: ["email"],
-      recipients: [],
-      operatorNote: "SafeGuard launch readiness smoke",
-      workpack: {
-        message: "SafeGuard launch readiness smoke",
-        documents: ask.parsed?.deliverables || {},
-        status: ask.parsed?.status || {}
-      }
-    })
+    body: JSON.stringify({ question })
   });
+
+  let dispatchResult = null;
+  if (runDispatch) {
+    dispatchResult = await fetchJson(`${baseUrl}/api/workflow/dispatch`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        channels: ["email"],
+        recipients: [],
+        operatorNote: "SafeGuard launch readiness smoke",
+        workpack: {
+          message: "SafeGuard launch readiness smoke",
+          documents: ask.parsed?.deliverables || {},
+          status: ask.parsed?.status || {}
+        }
+      })
+    });
+  }
+
+  const audit = {
+    generatedAt: new Date().toISOString(),
+    baseUrl,
+    elapsedMs: Date.now() - startedAt,
+    apiAskStatus: ask.response.status,
+    apiAskOk: ask.response.ok,
+    dispatchStatus: dispatchResult?.response.status ?? null,
+    dispatchOk: dispatchResult?.response.ok ?? null,
+    scenario: ask.parsed?.scenario || null,
+    documents: documentStatus(ask.parsed),
+    connections: buildAuditRows(ask.parsed),
+    userFacingStatusPolicy: "연결됨 / 일부 근거 보류 / 연결 점검 필요",
+    rawStatusDetail: ask.parsed?.status?.detail || ""
+  };
+
+  fs.writeFileSync(outputPath, JSON.stringify(audit, null, 2));
+  await writeJsonLine(process.stdout, {
+    generatedAt: audit.generatedAt,
+    baseUrl: audit.baseUrl,
+    apiAskOk: audit.apiAskOk,
+    dispatchOk: audit.dispatchOk,
+    elapsedMs: audit.elapsedMs,
+    connectionSummary: audit.connections.map((item) => `${item.name}: ${item.liveStatus}`)
+  });
+
+  process.exitCode = ask.response.ok ? 0 : 1;
+} catch (error) {
+  let cleanupError = null;
+  try {
+    fs.rmSync(outputPath, { force: true });
+  } catch (outputError) {
+    cleanupError = errorMessage(outputError);
+  }
+  await writeJsonLine(process.stderr, {
+    error: "Launch readiness audit failed",
+    detail: errorMessage(error),
+    outputCleanupError: cleanupError
+  });
+  process.exitCode = 1;
 }
-
-const audit = {
-  generatedAt: new Date().toISOString(),
-  baseUrl,
-  elapsedMs: Date.now() - startedAt,
-  apiAskStatus: ask.response.status,
-  apiAskOk: ask.response.ok,
-  dispatchStatus: dispatchResult?.response.status ?? null,
-  dispatchOk: dispatchResult?.response.ok ?? null,
-  scenario: ask.parsed?.scenario || null,
-  documents: documentStatus(ask.parsed),
-  connections: buildAuditRows(ask.parsed),
-  userFacingStatusPolicy: "연결됨 / 일부 근거 보류 / 연결 점검 필요",
-  rawStatusDetail: ask.parsed?.status?.detail || ""
-};
-
-fs.writeFileSync(path.join(outDir, outputFile), JSON.stringify(audit, null, 2));
-console.log(JSON.stringify({
-  generatedAt: audit.generatedAt,
-  baseUrl: audit.baseUrl,
-  apiAskOk: audit.apiAskOk,
-  dispatchOk: audit.dispatchOk,
-  elapsedMs: audit.elapsedMs,
-  connectionSummary: audit.connections.map((item) => `${item.name}: ${item.liveStatus}`)
-}, null, 2));
-
-process.exit(ask.response.ok ? 0 : 1);
