@@ -19,6 +19,7 @@ type HarnessOptions = {
   tempRoot?: string;
   makeTempDirectory?: (prefix: string) => string;
   onTemporaryDirectory?: (directory: string) => void;
+  environment?: Readonly<Record<string, string | undefined>>;
 };
 
 export type IsolatedNextBrowserHarness = {
@@ -169,7 +170,7 @@ export async function startIsolatedNextBrowserHarness(
         [path.join(nextModule, "dist", "bin", "next"), "start", "-H", "127.0.0.1", "-p", String(port)],
         {
           cwd: process.cwd(),
-          env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" },
+          env: { ...process.env, ...options.environment, NEXT_TELEMETRY_DISABLED: "1" },
           windowsHide: true
         }
       )
@@ -213,7 +214,7 @@ export async function startIsolatedNextBrowserHarness(
         });
       `], {
         cwd: tempPaths?.temporaryDirectory,
-        env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" },
+        env: { ...process.env, ...options.environment, NEXT_TELEMETRY_DISABLED: "1" },
         windowsHide: true
       });
   } catch (error) {

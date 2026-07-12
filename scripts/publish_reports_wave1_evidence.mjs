@@ -13,6 +13,10 @@ import {
 const root = process.cwd();
 const evidenceDirectory = path.join(root, REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR);
 const manifestPath = path.join(evidenceDirectory, REPORTS_WAVE1_BUILD_MANIFEST_FILENAME);
+const browserEvidenceEnvironment = {
+  NEXT_PUBLIC_SUPABASE_URL: "https://reports-wave1-evidence.supabase.co",
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: "reports-wave1-evidence-anon-key",
+};
 
 function run(command, args, env = {}) {
   const result = spawnSync(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", command, ...args], {
@@ -31,7 +35,7 @@ function run(command, args, env = {}) {
   }
 }
 
-run("npm.cmd", ["run", "build"]);
+run("npm.cmd", ["run", "build"], browserEvidenceEnvironment);
 const manifest = writeReportsWave1BuildManifest({
   root,
   buildDirectory: path.join(root, ".next"),
@@ -48,6 +52,7 @@ run("npm.cmd", [
   "--maxWorkers=1",
   "--reporter=verbose",
 ], {
+  ...browserEvidenceEnvironment,
   SAFECLAW_HARNESS_MODE: "prod",
   SAFECLAW_PRODUCTION_BUILD_MANIFEST: manifestPath,
   SAFECLAW_REPORTS_WAVE1_PUBLISH: "1",

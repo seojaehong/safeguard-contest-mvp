@@ -23,7 +23,7 @@ export const REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES = [
   "scripts/reports_wave1_publish_support.mjs",
 ];
 export const REPORTS_WAVE1_PUBLISHER = "safeclaw-reports-wave1-explicit-publish";
-export const REPORTS_WAVE1_SOURCE_IDENTITY_ALGORITHM = "git-head-blob-oids-sha256-v1";
+export const REPORTS_WAVE1_SOURCE_IDENTITY_ALGORITHM = "git-head-runtime-contract-blob-oids-sha256-v2";
 
 const LOCAL_SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".css", ".json"];
 const SPECIAL_LOCAL_IMPORTS = new Map([
@@ -106,6 +106,71 @@ function moduleSpecifiers(relativePath, source) {
   return [...specifiers];
 }
 
+function runtimeReferenceTemplates(relativePath, source) {
+  if (/\.(?:css|json)$/u.test(relativePath)) return [];
+  const sourceFile = ts.createSourceFile(relativePath, source.toString("utf8"), ts.ScriptTarget.Latest, true);
+  const references = new Set();
+  const visit = (node) => {
+    if (ts.isStringLiteralLike(node)) {
+      references.add(node.text);
+    } else if (ts.isTemplateExpression(node)) {
+      references.add([
+        node.head.text,
+        ...node.templateSpans.flatMap((span) => ["${*}", span.literal.text]),
+      ].join(""));
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return [...references].filter((reference) => reference.startsWith("/") && !reference.startsWith("//"));
+}
+
+function runtimePathSegments(reference) {
+  const pathname = reference.split(/[?#]/u, 1)[0];
+  return pathname.split("/").filter(Boolean).map((segment) => segment.includes("${*}") ? "*" : segment);
+}
+
+function routeContract(relativePath) {
+  const segments = normalizeRelative(relativePath).split("/");
+  if (segments.shift() !== "app") return null;
+  const fileName = segments.pop();
+  if (!fileName || !/^(?:page|route)\.(?:ts|tsx|js|jsx|mjs)$/u.test(fileName)) return null;
+  return {
+    relativePath,
+    segments: segments.filter((segment) => !/^\(.+\)$/u.test(segment) && !segment.startsWith("@")),
+  };
+}
+
+function routeMatchesReference(routeSegments, referenceSegments) {
+  const catchAllIndex = routeSegments.findIndex((segment) => /^\[\[?\.\.\./u.test(segment));
+  if (catchAllIndex === -1 && routeSegments.length !== referenceSegments.length) return false;
+  if (catchAllIndex !== -1 && referenceSegments.length < catchAllIndex) return false;
+  const comparedLength = catchAllIndex === -1 ? routeSegments.length : catchAllIndex;
+  for (let index = 0; index < comparedLength; index += 1) {
+    const routeSegment = routeSegments[index];
+    const referenceSegment = referenceSegments[index];
+    if (referenceSegment === "*" || /^\[[^\]]+\]$/u.test(routeSegment)) continue;
+    if (routeSegment !== referenceSegment) return false;
+  }
+  return true;
+}
+
+function resolveRuntimeContracts(reference, trackedFiles, routeContracts) {
+  const result = [];
+  if (!reference.includes("${*}")) {
+    const pathname = reference.split(/[?#]/u, 1)[0];
+    const publicFile = normalizeIdentityRelative(`public${pathname}`);
+    if (trackedFiles.has(publicFile)) result.push(publicFile);
+  }
+  const referenceSegments = runtimePathSegments(reference);
+  for (const contract of routeContracts) {
+    if (routeMatchesReference(contract.segments, referenceSegments)) {
+      result.push(contract.relativePath);
+    }
+  }
+  return result;
+}
+
 function resolveLocalImport(importer, specifier, trackedFiles) {
   const specialFiles = SPECIAL_LOCAL_IMPORTS.get(specifier);
   if (specialFiles) return [...specialFiles];
@@ -134,8 +199,10 @@ function resolveLocalImport(importer, specifier, trackedFiles) {
 
 export function collectReportsWave1ProductFiles(root, commitSha = resolveGitHeadSha(root)) {
   const trackedFiles = listGitTree(root, commitSha);
+  const routeContracts = [...trackedFiles.keys()].map(routeContract).filter(Boolean);
   const pending = [...REPORTS_WAVE1_PRODUCT_ENTRY_FILES];
   const sourceFiles = new Set();
+  const runtimeContractFiles = new Set();
 
   while (pending.length) {
     const relativePath = normalizeIdentityRelative(pending.shift());
@@ -145,6 +212,11 @@ export function collectReportsWave1ProductFiles(root, commitSha = resolveGitHead
     }
     sourceFiles.add(relativePath);
     const source = fs.readFileSync(path.join(root, relativePath));
+    for (const reference of runtimeReferenceTemplates(relativePath, source)) {
+      for (const contractFile of resolveRuntimeContracts(reference, trackedFiles, routeContracts)) {
+        runtimeContractFiles.add(contractFile);
+      }
+    }
     for (const specifier of moduleSpecifiers(relativePath, source)) {
       for (const dependency of resolveLocalImport(relativePath, specifier, trackedFiles)) {
         if (!sourceFiles.has(dependency)) pending.push(dependency);
@@ -152,7 +224,7 @@ export function collectReportsWave1ProductFiles(root, commitSha = resolveGitHead
     }
   }
 
-  return [...sourceFiles].sort();
+  return [...new Set([...sourceFiles, ...runtimeContractFiles])].sort();
 }
 
 function assertIdentityFilesClean(root, relativeFiles) {

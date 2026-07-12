@@ -5,7 +5,7 @@ declare module "@/scripts/reports_wave1_publish_support.mjs" {
   export const REPORTS_WAVE1_PRODUCT_RELATIVE_FILES: string[];
   export const REPORTS_WAVE1_PUBLISHER_RELATIVE_FILES: string[];
   export const REPORTS_WAVE1_PUBLISHER: string;
-  export const REPORTS_WAVE1_SOURCE_IDENTITY_ALGORITHM: string;
+  export const REPORTS_WAVE1_SOURCE_IDENTITY_ALGORITHM: "git-head-runtime-contract-blob-oids-sha256-v2";
 
   export function listFilesRecursively(directory: string): string[];
   export function digestFiles(baseDirectory: string, files: string[]): string;

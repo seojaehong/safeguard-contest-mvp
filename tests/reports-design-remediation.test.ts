@@ -19,6 +19,9 @@ const root = process.cwd();
 const cssPath = path.join(root, "app", "globals.css");
 const componentPath = path.join(root, "components", "ReportsDownloadCenter.tsx");
 const shellPath = path.join(root, "components", "SafeClawModuleShell.tsx");
+const reportsWave1TestSupabaseUrl = "https://reports-wave1-evidence.supabase.co";
+const reportsWave1TestAuthStorageKey = "sb-reports-wave1-evidence-auth-token";
+const reportsWave1TestAccessToken = "reports-wave1-evidence-access-token";
 const defaultProductionBuildManifestPath = path.join(
   root,
   REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR,
@@ -244,7 +247,11 @@ async function startReportsHarness(): Promise<IsolatedNextBrowserHarness> {
         slug: "reports-design-wave-1",
         initialPath: "/reports",
         portSalt,
-        mode
+        mode,
+        environment: {
+          NEXT_PUBLIC_SUPABASE_URL: reportsWave1TestSupabaseUrl,
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "reports-wave1-evidence-anon-key"
+        }
       });
     } catch (error) {
       lastError = error;
@@ -436,6 +443,7 @@ describe("Reports Wave 1 browser design contract", () => {
     await empty.close();
 
     const serverErrorResults: Array<Record<string, unknown>> = [];
+    const expectedServerErrorMessage = "서버 작업팩 조회 중 검증용 오류가 발생했습니다.";
     for (const scenario of [
       { theme: "day" as const, width: 1440, height: 900, label: "desktop" as const },
       { theme: "night" as const, width: 1440, height: 900, label: "desktop" as const },
@@ -443,11 +451,28 @@ describe("Reports Wave 1 browser design contract", () => {
       { theme: "night" as const, width: 390, height: 844, label: "mobile" as const }
     ]) {
       const serverError = await browser.newPage({ viewport: { width: scenario.width, height: scenario.height } });
+      await serverError.addInitScript(({ expectedOrigin, authStorageKey, accessToken }) => {
+        if (window.location.origin !== expectedOrigin) return;
+        window.localStorage.setItem(authStorageKey, JSON.stringify({
+          access_token: accessToken,
+          refresh_token: "reports-wave1-evidence-refresh-token",
+          expires_at: 4_102_444_800,
+          token_type: "bearer"
+        }));
+      }, {
+        expectedOrigin: baseUrl,
+        authStorageKey: reportsWave1TestAuthStorageKey,
+        accessToken: reportsWave1TestAccessToken
+      });
+      let routeHitCount = 0;
+      let authorizationHeader = "";
       await serverError.route("**/api/workpacks/wave-1-error", async (route) => {
+        routeHitCount += 1;
+        authorizationHeader = route.request().headers().authorization || "";
         await route.fulfill({
           status: 500,
           contentType: "application/json",
-          body: JSON.stringify({ ok: false, message: "Wave 1 deterministic server error" })
+          body: JSON.stringify({ ok: false, message: expectedServerErrorMessage })
         });
       });
       await serverError.goto(`${baseUrl}/reports?theme=${scenario.theme}&workpackId=wave-1-error`, {
@@ -455,6 +480,10 @@ describe("Reports Wave 1 browser design contract", () => {
       });
       const errorState = serverError.getByLabel("서버 작업팩 오류 상태");
       await errorState.waitFor({ state: "visible" });
+      expect(routeHitCount).toBeGreaterThan(0);
+      expect(authorizationHeader).toBe(`Bearer ${reportsWave1TestAccessToken}`);
+      expect(await errorState.getByRole("heading", { name: "서버 저장 작업팩을 열지 못했습니다." }).count()).toBe(1);
+      expect(await errorState.getByText(expectedServerErrorMessage, { exact: true }).count()).toBe(1);
       const downloads = errorState.getByLabel("리포트 다운로드").getByRole("button");
       expect(await downloads.count()).toBe(5);
       for (const button of await downloads.all()) expect(await button.isDisabled()).toBe(true);
@@ -515,6 +544,7 @@ describe("Reports Wave 1 browser design contract", () => {
       serverErrorResults.push({
         harnessMode: harness?.mode ?? "dev",
         ...scenario,
+        routeHitCount,
         disabledDownloadCount: await downloads.count(),
         state: "server-error",
         ...metrics

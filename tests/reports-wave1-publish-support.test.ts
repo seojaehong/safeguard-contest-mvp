@@ -17,6 +17,8 @@ import {
 } from "@/scripts/reports_wave1_publish_support.mjs";
 
 const root = process.cwd();
+// Fresh Git fixtures and CRLF clones exceed Vitest's 5s default on Windows.
+const WINDOWS_GIT_PROVENANCE_TIMEOUT_MS = 30_000;
 
 function createFixtureBuild(rootDirectory: string): string {
   const buildDirectory = path.join(rootDirectory, ".next");
@@ -72,6 +74,7 @@ function createReportsGitFixture(prefix = "safeclaw-wave1-git-"): string {
       "",
     ].join("\n"),
     "app/not-found.tsx": "export default function NotFoundPage() { return null; }\n",
+    "app/api/workpacks/[id]/route.ts": "export async function GET() { return Response.json({ ok: true }); }\n",
     "app/reports/page.tsx": [
       "import { ReportsDownloadCenter } from \"@/components/ReportsDownloadCenter\";",
       "import { SafeClawModuleShell } from \"@/components/SafeClawModuleShell\";",
@@ -80,12 +83,15 @@ function createReportsGitFixture(prefix = "safeclaw-wave1-git-"): string {
     ].join("\n"),
     "components/ReportsDownloadCenter.tsx": [
       "import { buildSampleWorkpack } from \"@/lib/sample-workpack\";",
-      "export function ReportsDownloadCenter() { return buildSampleWorkpack(); }",
+      "export function ReportsDownloadCenter() {",
+      "  void fetch(`/api/workpacks/${encodeURIComponent(\"fixture\")}`);",
+      "  return buildSampleWorkpack();",
+      "}",
       "",
     ].join("\n"),
     "components/SafeClawModuleShell.tsx": [
       "import { getModuleNavModel } from \"@/lib/module-navigation\";",
-      "export function SafeClawModuleShell() { return getModuleNavModel(); }",
+      "export function SafeClawModuleShell() { return getModuleNavModel() ?? <img src=\"/brand/ClawMark.svg\" alt=\"\" />; }",
       "",
     ].join("\n"),
     "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx":
@@ -95,6 +101,7 @@ function createReportsGitFixture(prefix = "safeclaw-wave1-git-"): string {
     "lib/module-navigation.ts": "export function getModuleNavModel() { return null; }\n",
     "lib/sample-workpack.ts": "export function buildSampleWorkpack() { return \"sample-v1\"; }\n",
     "next.config.mjs": "export default {};\n",
+    "public/brand/ClawMark.svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0 0h1v1H0z\" /></svg>\n",
     "scripts/publish_reports_wave1_evidence.mjs": "console.log(\"publish fixture\");\n",
     "scripts/reports_wave1_publish_support.mjs": "export const fixture = true;\n",
   };
@@ -120,6 +127,8 @@ describe("Reports Wave 1 publish support", () => {
       "lib/reporting-downloads.ts",
       "lib/sample-workpack.ts",
       "lib/module-navigation.ts",
+      "app/api/workpacks/[id]/route.ts",
+      "public/brand/ClawMark.svg",
     ]));
   });
 
@@ -132,7 +141,7 @@ describe("Reports Wave 1 publish support", () => {
     ]) {
       expect(() => runGit(root, ["cat-file", "-e", `${identity.sourceSha}:${publisherPath}`])).not.toThrow();
     }
-  });
+  }, WINDOWS_GIT_PROVENANCE_TIMEOUT_MS);
 
   it("produces the same identity for clean LF and CRLF checkouts", () => {
     const sourceRoot = createReportsGitFixture("safeclaw-wave1-eol-source-");
@@ -156,7 +165,7 @@ describe("Reports Wave 1 publish support", () => {
       fs.rmSync(sourceRoot, { recursive: true, force: true });
       fs.rmSync(cloneRoot, { recursive: true, force: true });
     }
-  });
+  }, WINDOWS_GIT_PROVENANCE_TIMEOUT_MS);
 
   it.each([
     {
@@ -197,33 +206,45 @@ describe("Reports Wave 1 publish support", () => {
     }
   });
 
-  it("rejects a stale build after only a transitive Reports dependency changes", () => {
+  it("rejects stale builds after isolated dependency, public asset, and API route commits", () => {
     const fixtureRoot = createReportsGitFixture("safeclaw-wave1-stale-dependency-");
     const buildDirectory = createFixtureBuild(fixtureRoot);
     const manifestPath = path.join(fixtureRoot, REPORTS_WAVE1_BUILD_MANIFEST_FILENAME);
+    const mutations = [
+      {
+        relativePath: "lib/sample-workpack.ts",
+        content: "export function buildSampleWorkpack() { return \"sample-v2\"; }\n",
+      },
+      {
+        relativePath: "public/brand/ClawMark.svg",
+        content: "<svg xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M0 0h2v2H0z\" /></svg>\n",
+      },
+      {
+        relativePath: "app/api/workpacks/[id]/route.ts",
+        content: "export async function GET() { return Response.json({ ok: false }, { status: 500 }); }\n",
+      },
+    ] as const;
 
     try {
-      writeReportsWave1BuildManifest({
-        root: fixtureRoot,
-        buildDirectory,
-        outputPath: manifestPath,
-      });
-      writeFixtureFile(
-        fixtureRoot,
-        "lib/sample-workpack.ts",
-        "export function buildSampleWorkpack() { return \"sample-v2\"; }\n",
-      );
-      commitFixture(fixtureRoot, "test: mutate dependency", ["lib/sample-workpack.ts"]);
+      for (const mutation of mutations) {
+        writeReportsWave1BuildManifest({
+          root: fixtureRoot,
+          buildDirectory,
+          outputPath: manifestPath,
+        });
+        writeFixtureFile(fixtureRoot, mutation.relativePath, mutation.content);
+        commitFixture(fixtureRoot, `test: mutate ${mutation.relativePath}`, [mutation.relativePath]);
 
-      expect(() => validateReportsWave1BuildManifest({
-        root: fixtureRoot,
-        manifestPath,
-        expectedBuildDirectory: buildDirectory,
-      })).toThrow(/source SHA mismatch|source identity mismatch/u);
+        expect(() => validateReportsWave1BuildManifest({
+          root: fixtureRoot,
+          manifestPath,
+          expectedBuildDirectory: buildDirectory,
+        }), mutation.relativePath).toThrow(/source SHA mismatch|source identity mismatch/u);
+      }
     } finally {
       fs.rmSync(fixtureRoot, { recursive: true, force: true });
     }
-  });
+  }, WINDOWS_GIT_PROVENANCE_TIMEOUT_MS);
 
   it("defaults browser evidence output to unique temp directories and publishes only explicitly", () => {
     const first = resolveReportsWave1OutputDirectory({ root, env: {} });
@@ -348,5 +369,5 @@ describe("Reports Wave 1 publish support", () => {
     })).toThrow(/source SHA mismatch/u);
 
     fs.rmSync(tempRoot, { recursive: true, force: true });
-  });
+  }, WINDOWS_GIT_PROVENANCE_TIMEOUT_MS);
 });
