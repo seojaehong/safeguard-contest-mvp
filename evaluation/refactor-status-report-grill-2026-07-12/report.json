@@ -1,0 +1,413 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T23:29:43+09:00",
+  "scope": {
+    "sourceReport": "C:\\Users\\iceam\\Downloads\\SafeClaw (safeguard-contest-mvp) 전면 리팩토링 현황 점검 보고서.md",
+    "sourceReportSha256": "AA5111EFA12229F881AB0C6DFE14F02266319A4262B34C2138AE26F36FFB7F2D",
+    "staleBase": "ba6fd220ec17caa018513d39965e17105486ec3b",
+    "evaluatedHead": "ae6b88ad59b2e251f47d2d6b2be79d657681c027",
+    "mergeBase": "c7ec5e0bd040f3661f2371136774173a3ba1cc29",
+    "staleBaseIsAncestor": false,
+    "leftRightCommitCount": {
+      "staleOnly": 3,
+      "currentOnly": 379
+    },
+    "productCodeModified": false,
+    "databaseModified": false
+  },
+  "classificationDefinitions": {
+    "adopt": "Supported by current code or evidence and safe to carry forward.",
+    "hold": "Partly true or useful, but incomplete, ambiguous, or gated.",
+    "reject": "Materially false, superseded, or contrary to the current architecture decision.",
+    "needs-current-verification": "Static repository evidence cannot establish the current live state."
+  },
+  "summary": {
+    "claimCount": 26,
+    "adopt": 10,
+    "hold": 7,
+    "reject": 8,
+    "needs-current-verification": 1,
+    "verdict": "Buildable but not launch-clean. The stale report cannot be adopted as current truth."
+  },
+  "freshVerification": {
+    "frontendStaticAudit": {
+      "command": "npm.cmd run audit:frontend-consistency",
+      "status": "fail",
+      "sourceSha": "ae6b88ad59b2e251f47d2d6b2be79d657681c027",
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "cssLines": 20121,
+      "importantDeclarations": 0,
+      "coverageIssues": 0,
+      "violationCount": 9,
+      "violationRules": {
+        "line-height-tier": 6,
+        "typography-tuple": 3
+      }
+    },
+    "focusedTests": {
+      "status": "fail",
+      "filesPassed": 11,
+      "filesFailed": 2,
+      "testsPassed": 107,
+      "testsFailed": 2,
+      "failedContracts": [
+        "Reports spacing residuals",
+        "/reports 390px contentTop 410 exceeds maximum 387"
+      ],
+      "hookFailure": "module-shell cleanup timed out after the product assertion failed"
+    },
+    "fullSerialTests": {
+      "command": "npm.cmd test -- --maxWorkers=1 --no-file-parallelism",
+      "status": "fail",
+      "filesPassed": 124,
+      "filesFailed": 7,
+      "filesSkipped": 5,
+      "testsPassed": 1197,
+      "testsFailed": 9,
+      "testsSkipped": 7
+    },
+    "standaloneLaunchAuditTest": {
+      "status": "fail",
+      "testsPassed": 3,
+      "testsFailed": 1,
+      "evidence": "tests/launch-readiness-audit.test.ts:125-151 sets a 75ms request timeout"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "pass",
+      "note": "Passed after restoring lockfile-declared packages missing from local node_modules; no tracked file changed."
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "status": "pass",
+      "staticPages": 27
+    },
+    "frontendFinalEvidence": {
+      "claimedSourceSha": "92eea81f3c550cc3f110711221a1e4251e1533e8",
+      "isAncestorOfEvaluatedHead": false,
+      "status": "not-current-head-evidence"
+    },
+    "browserEnginesObserved": [
+      "chromium"
+    ]
+  },
+  "claims": [
+    {
+      "id": "C01",
+      "sourceLines": [11],
+      "claim": "Commercial B2B architecture and design are perfectly combined.",
+      "staleBaseAssessment": "unsupported",
+      "disposition": "reject",
+      "currentTruth": "Commercial foundations exist, but current frontend and test gates are RED and the accepted ADR names unimplemented work.",
+      "evidence": ["docs/adr/0001-agent-runtime-boundary.md:7-22", "freshVerification.frontendStaticAudit", "freshVerification.fullSerialTests"]
+    },
+    {
+      "id": "C02",
+      "sourceLines": [13],
+      "claim": "The stale architecture/phase documents are current and faithfully translated into code.",
+      "staleBaseAssessment": "partial",
+      "disposition": "reject",
+      "currentTruth": "The named documents exist at ba6fd22 but not at ae6b88a; ADR 0001 and the long-term roadmap are current authority and explicitly defer work.",
+      "evidence": ["ba6fd22:docs/ARCHITECTURE_DECISIONS.md", "ba6fd22:docs/PHASE_EXECUTION_PLAN.md", "docs/adr/0001-agent-runtime-boundary.md:24-52", "docs/agent-runtime-long-term-roadmap.md:5-12"]
+    },
+    {
+      "id": "C03",
+      "sourceLines": [13, 22],
+      "claim": "The field-command-center brand direction exists.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "The field-instrument direction and steel/hazard tokens exist; this does not establish complete application.",
+      "evidence": ["CONTEXT.md:63-67", "app/globals.css:56-69"]
+    },
+    {
+      "id": "C04",
+      "sourceLines": [22],
+      "claim": "The UI is fully converted to one steel/hazard-yellow design system.",
+      "staleBaseAssessment": "partial",
+      "disposition": "reject",
+      "currentTruth": "Tokens exist, but current audits fail and DESIGN.md still defines a different Field Green/Warm Clay/Paper palette.",
+      "evidence": ["DESIGN.md:15-25", "app/globals.css:56-69", "freshVerification.frontendStaticAudit"]
+    },
+    {
+      "id": "C05",
+      "sourceLines": [22],
+      "claim": "All numbers use tabular numerals.",
+      "staleBaseAssessment": "unsupported",
+      "disposition": "reject",
+      "currentTruth": "The CSS rule targets named classes and attributes only; no exhaustive coverage contract exists.",
+      "evidence": ["app/globals.css:184-192"]
+    },
+    {
+      "id": "C06",
+      "sourceLines": [23],
+      "claim": "The current sidebar has 15 items grouped as operations, execution, and system.",
+      "staleBaseAssessment": "supported",
+      "disposition": "reject",
+      "currentTruth": "That was stale-base truth. Current navigation intentionally has six primary destinations plus contextual children.",
+      "evidence": ["ba6fd22:components/SafeClawModuleShell.tsx:28-47", "commit:c33aafd", "lib/module-navigation.ts:16-77", "tests/module-shell-navigation.test.ts:15-52"]
+    },
+    {
+      "id": "C07",
+      "sourceLines": [24],
+      "claim": "Landing immediately enters the workspace.",
+      "staleBaseAssessment": "partial",
+      "disposition": "hold",
+      "currentTruth": "Query/scenario requests redirect and direct CTAs exist, but the root route remains a substantial landing page.",
+      "evidence": ["app/page.tsx:4-13", "components/SafeClawLanding.tsx:70-99"]
+    },
+    {
+      "id": "C08",
+      "sourceLines": [27, 28],
+      "claim": "TBM fullscreen remains planned.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "The route is planned and sample-backed rather than a persisted meeting flow.",
+      "evidence": ["app/tbm/page.tsx:5-30"]
+    },
+    {
+      "id": "C09",
+      "sourceLines": [27, 29],
+      "claim": "Worker mobile remains planned.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "The route is planned; acknowledgement is local state and persistence is described as future.",
+      "evidence": ["app/worker/page.tsx:8-68"]
+    },
+    {
+      "id": "C10",
+      "sourceLines": [30],
+      "claim": "Settings remains planned.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "The top-level route is planned although some subfeatures exist.",
+      "evidence": ["app/settings/page.tsx:14-35"]
+    },
+    {
+      "id": "C11",
+      "sourceLines": [30],
+      "claim": "Ontology is partial or planned.",
+      "staleBaseAssessment": "partial",
+      "disposition": "needs-current-verification",
+      "currentTruth": "The route loads a published graph and has a bundled published-seed fallback; its runtime badge depends on current Supabase state.",
+      "evidence": ["app/ontology/page.tsx:35-90"]
+    },
+    {
+      "id": "C12",
+      "sourceLines": [31],
+      "claim": "Mobile and cross-browser validation is still needed.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "Chromium coverage exists, but Firefox/WebKit coverage does not and /reports fails at 390px.",
+      "evidence": ["evaluation/module-shell-harness-remediation-2026-07-12/report.md:47-49", "scripts/frontend_consistency_browser_audit.mjs:7", "tests/helpers/isolated-next-browser-harness.ts:5"]
+    },
+    {
+      "id": "C13",
+      "sourceLines": [36],
+      "claim": "The custom stateless direct-tool loop is the active architecture.",
+      "staleBaseAssessment": "supported",
+      "disposition": "hold",
+      "currentTruth": "The loop exists as tested compatibility code, but the active route now uses the broker/EngineAdapter path.",
+      "evidence": ["lib/agent-loop.ts:1-5", "lib/agent-loop.ts:18-83", "lib/agent-loop.ts:307-374", "app/api/agent/chat/route.ts:1-10"]
+    },
+    {
+      "id": "C14",
+      "sourceLines": [37],
+      "claim": "The quality contract defines ready, degraded, and blocked states over required outputs.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "Current code aggregates evidence, structured output, ontology, DB harness, and persistence states.",
+      "evidence": ["lib/quality-contract.ts:3-40", "lib/quality-contract.ts:238-324"]
+    },
+    {
+      "id": "C15",
+      "sourceLines": [38],
+      "claim": "Deliverable integrity checks length, required terms, and placeholders.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "The policy implements those checks and blocks on detected issues.",
+      "evidence": ["lib/deliverable-integrity-policy.ts:1-8", "lib/deliverable-integrity-policy.ts:50-87", "lib/deliverable-integrity-policy.ts:109-168"]
+    },
+    {
+      "id": "C16",
+      "sourceLines": [41],
+      "claim": "Vertex is default and Claude is fallback.",
+      "staleBaseAssessment": "unsupported",
+      "disposition": "reject",
+      "currentTruth": "Vertex is default. Claude is optional primary when explicitly selected; Vertex is the fallback after Claude failure.",
+      "evidence": ["lib/ai-provider-policy.ts:1-27", "lib/ai-deliverables.ts:131-161"]
+    },
+    {
+      "id": "C17",
+      "sourceLines": [41],
+      "claim": "Local Hermes routing must be added now.",
+      "staleBaseAssessment": "partial",
+      "disposition": "hold",
+      "currentTruth": "Hermes is a future gated PoC/promotion target, not current launch work.",
+      "evidence": ["lib/engine-adapter.ts:3", "lib/engine-adapter.ts:77-83", "docs/adr/0001-agent-runtime-boundary.md:38-52", "docs/adr/0001-agent-runtime-boundary.md:73-115"]
+    },
+    {
+      "id": "C18",
+      "sourceLines": [46],
+      "claim": "Migration 002 perfectly designs tenant isolation.",
+      "staleBaseAssessment": "unsupported",
+      "disposition": "reject",
+      "currentTruth": "The hierarchy exists, but nullable ownership/references, cross-table consistency, and the null-org dispatch policy prevent a perfect-isolation claim.",
+      "evidence": ["supabase/migrations/002_workspace_productization.sql:3-57", "supabase/migrations/002_workspace_productization.sql:76-90", "supabase/migrations/002_workspace_productization.sql:183-200"]
+    },
+    {
+      "id": "C19",
+      "sourceLines": [47],
+      "claim": "Ontology defines seven node kinds and seven edge relations.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "The enums are present and tested.",
+      "evidence": ["lib/ontology/schema.ts:8-20", "tests/ontology-schema.test.ts:14-30"]
+    },
+    {
+      "id": "C20",
+      "sourceLines": [47],
+      "claim": "Zod itself enforces non-empty cited_uids.",
+      "staleBaseAssessment": "partial",
+      "disposition": "hold",
+      "currentTruth": "Zod validates citation syntax but allows an empty array; graph assembly and upsert enforce non-empty provenance later.",
+      "evidence": ["lib/ontology/schema.ts:94-116", "supabase/migrations/008_safety_ontology.sql:9-27", "lib/ontology/graph-store.ts:73-115", "lib/ontology/graph-store.ts:235-279"]
+    },
+    {
+      "id": "C21",
+      "sourceLines": [50],
+      "claim": "The ontology seed is insufficient.",
+      "staleBaseAssessment": "partial",
+      "disposition": "hold",
+      "currentTruth": "The seed has 171 nodes and 182 edges from 190 source rows and covers common hazards, but has no Accident nodes and no defined coverage acceptance matrix.",
+      "evidence": ["lib/ontology/seed/core-triples.json", "tests/ontology-seed.test.ts:8-45"]
+    },
+    {
+      "id": "C22",
+      "sourceLines": [51],
+      "claim": "A complete RLS audit is needed.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "Policies exist, but two-tenant executable evidence, legacy-table RLS, null-org dispatch behavior, and cross-table consistency remain unproven.",
+      "evidence": ["supabase/migrations/001_init.sql:1-16", "supabase/migrations/002_workspace_productization.sql:99-200", "docs/agent-runtime-long-term-roadmap.md:55-64", "docs/agent-runtime-long-term-roadmap.md:94-97"]
+    },
+    {
+      "id": "C23",
+      "sourceLines": [57],
+      "claim": "TBM and Worker backend integration should be the first action.",
+      "staleBaseAssessment": "not-applicable",
+      "disposition": "hold",
+      "currentTruth": "The work is unfinished, but priority depends on launch scope; the last committed production probe also found required commercial tables absent.",
+      "evidence": ["app/tbm/page.tsx:13", "app/worker/page.tsx:33", "evaluation/crunch/production-commercial-tables-probe-2026-07-10.md:8-21"]
+    },
+    {
+      "id": "C24",
+      "sourceLines": [58],
+      "claim": "Five accident types are the most important ontology expansion.",
+      "staleBaseAssessment": "not-applicable",
+      "disposition": "hold",
+      "currentTruth": "Expansion is sensible, but priority is unsupported without a task/hazard/article/control/accident coverage analysis.",
+      "evidence": ["lib/ontology/seed/core-triples.json", "tests/ontology-seed.test.ts:39-45"]
+    },
+    {
+      "id": "C25",
+      "sourceLines": [59],
+      "claim": "A Hermes adapter branch should be prewired now.",
+      "staleBaseAssessment": "not-applicable",
+      "disposition": "reject",
+      "currentTruth": "EngineAdapter already exists and the accepted ADR requires tenant, ledger, parity, attestation, license, and operations gates before Hermes promotion.",
+      "evidence": ["lib/engine-adapter.ts:20-26", "docs/adr/0001-agent-runtime-boundary.md:73-115"]
+    },
+    {
+      "id": "C26",
+      "sourceLines": [13],
+      "claim": "Agent-loop logic and deliverable-integrity policy are structurally separated.",
+      "staleBaseAssessment": "supported",
+      "disposition": "adopt",
+      "currentTruth": "The separation is sound, with the correction that the active agent path now runs through a fail-closed broker/adapter.",
+      "evidence": ["lib/agent-loop.ts", "lib/claw-tools.ts", "lib/deliverable-integrity-policy.ts", "app/api/agent/chat/route.ts:1-10"]
+    }
+  ],
+  "launchBlockers": [
+    {
+      "id": "LB01",
+      "status": "blocking",
+      "title": "Current frontend gate is RED",
+      "evidence": ["freshVerification.frontendStaticAudit", "freshVerification.fullSerialTests"]
+    },
+    {
+      "id": "LB02",
+      "status": "blocking",
+      "title": "/reports fails the 390px first-viewport contract",
+      "evidence": ["tests/module-shell-design-regression.test.ts:347-350", "evaluation/module-shell-harness-remediation-2026-07-12/report.md:47-49"]
+    },
+    {
+      "id": "LB03",
+      "status": "blocking",
+      "title": "Production agent execution is intentionally fail-closed",
+      "evidence": ["lib/openclaw-broker-route.ts:56-68", "evaluation/openclaw-current-integration-2026-07-12/report.md:5-13"]
+    },
+    {
+      "id": "LB04",
+      "status": "needs-current-verification",
+      "title": "Commercial persistence production state is stale",
+      "evidence": ["supabase/migrations/010_commercial_operations.sql:1-3", "evaluation/crunch/production-commercial-tables-probe-2026-07-10.md:8-21"]
+    },
+    {
+      "id": "LB05",
+      "status": "blocking",
+      "title": "Tenant isolation lacks end-to-end proof",
+      "evidence": ["supabase/migrations/001_init.sql:1-16", "supabase/migrations/002_workspace_productization.sql:183-200"]
+    },
+    {
+      "id": "LB06",
+      "status": "blocking",
+      "title": "No source-bound all-green frontend evidence exists for ae6b88a",
+      "evidence": ["freshVerification.frontendFinalEvidence"]
+    },
+    {
+      "id": "LB07",
+      "status": "conditional",
+      "title": "TBM, Worker, and Settings are planned routes",
+      "evidence": ["app/tbm/page.tsx:13", "app/worker/page.tsx:33", "app/settings/page.tsx:20"]
+    }
+  ],
+  "missingTests": [
+    "Two-organization Supabase/Postgres RLS matrix across anon, auth, and service roles.",
+    "Null-org dispatch, cross-organization site references, and legacy-table exposure.",
+    "Storage-object policy and concurrent duplicate read-confirmation behavior for migration 010.",
+    "Firefox and WebKit responsive/browser execution.",
+    "Persistence-backed TBM and Worker end-to-end flows.",
+    "Live site-bound OpenClaw sidecar with MCP scope, allowlist, effect authorization, abort, and tenant separation.",
+    "Source-bound current-HEAD browser audit after CSS and Reports fixes.",
+    "Ontology domain coverage matrix, not only seed integrity.",
+    "Non-empty cited_uids at schema or DDL boundary.",
+    "Stable Windows launch-audit lifecycle without a 75ms fixture timeout.",
+    "Exhaustive tabular-numeral coverage."
+  ],
+  "unresolvedUserDecisions": [
+    {
+      "decision": "Whether TBM, Worker, and Settings are in launch scope.",
+      "recommendation": "Do not advertise planned routes as complete; exclude or relabel them until persistence-backed flows exist."
+    },
+    {
+      "decision": "Whether to approve a corrected production commercial-persistence migration.",
+      "recommendation": "Split commercial persistence from embeddings and require uniqueness, storage, tenant-consistency, rollback, and RLS evidence before application."
+    },
+    {
+      "decision": "Which browser families are launch-supported.",
+      "recommendation": "Require WebKit for mobile launch claims and add Firefox as a smoke gate."
+    }
+  ],
+  "resolvedWithoutUserInput": [
+    "Hermes is deferred by the accepted ADR; no new architecture decision is needed now.",
+    "The current navigation is six primary destinations, not the stale 15-item grouped rail.",
+    "The active agent route uses the broker/EngineAdapter path, not the legacy direct Anthropic loop.",
+    "Vertex is default; Claude is optional primary with Vertex fallback.",
+    "No product code or database change was required for this analysis."
+  ],
+  "artifactValidation": {
+    "jsonParse": "pass",
+    "gitDiffCheck": "pass"
+  }
+}
