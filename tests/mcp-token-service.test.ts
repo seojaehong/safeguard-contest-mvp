@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createClient } from "@supabase/supabase-js";
 
-import { hashToken } from "@/lib/mcp-auth";
+import { MCP_TOOL_NAMES, hashToken } from "@/lib/mcp-auth";
 import {
   DEFAULT_MCP_SCOPES,
   MCP_ENDPOINT_URL,
@@ -58,6 +58,11 @@ describe("buildMcpTokenInsert", () => {
       scopes: [...DEFAULT_MCP_SCOPES],
     });
     expect(insert as unknown as Record<string, unknown>).not.toHaveProperty("plaintextToken");
+  });
+
+  it("issues explicit SafeClaw tool scopes instead of a future-expanding wildcard", () => {
+    expect(DEFAULT_MCP_SCOPES).toEqual(MCP_TOOL_NAMES.map((toolName) => `tools:${toolName}`));
+    expect(DEFAULT_MCP_SCOPES).not.toContain("tools:*");
   });
 });
 

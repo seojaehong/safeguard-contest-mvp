@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MCP_TOOL_NAMES,
+  McpToolScopeError,
   asAuthContext,
   buildDbContext,
   buildEnvContext,
   computeEnablement,
   decideAuthContext,
   hashToken,
+  isMcpToolAllowed,
   matchesLegacyToken,
   normalizeScopes,
   parseLegacyTokens,
+  requireMcpToolScope,
   type McpTokenRow,
 } from "@/lib/mcp-auth";
 
@@ -51,11 +55,68 @@ describe("normalizeScopes", () => {
     expect(normalizeScopes(["tools:read", "tools:write"])).toEqual(["tools:read", "tools:write"]);
   });
 
-  it("falls back to the default for non-arrays, empties, and non-strings", () => {
-    expect(normalizeScopes(null)).toEqual(["tools:*"]);
-    expect(normalizeScopes([])).toEqual(["tools:*"]);
-    expect(normalizeScopes([1, 2])).toEqual(["tools:*"]);
-    expect(normalizeScopes("tools:*")).toEqual(["tools:*"]);
+  it("fails closed for malformed or empty DB scope values", () => {
+    expect(normalizeScopes(null)).toEqual([]);
+    expect(normalizeScopes([])).toEqual([]);
+    expect(normalizeScopes([1, 2])).toEqual([]);
+    expect(normalizeScopes("tools:*")).toEqual([]);
+  });
+
+  it("keeps only known scopes, trims them, and removes duplicates", () => {
+    expect(normalizeScopes([
+      " tools:get_weather_signals ",
+      "tools:unknown_future_tool",
+      "tools:get_weather_signals",
+      "tools:read",
+    ])).toEqual(["tools:get_weather_signals", "tools:read"]);
+  });
+});
+
+describe("MCP tool scope enforcement", () => {
+  const context = (scopes: string[]) => ({
+    siteId: "site-1",
+    orgId: "org-1",
+    scopes,
+    source: "db" as const,
+    tokenId: "token-1",
+  });
+
+  it("allows explicit tool scopes and the legacy operator wildcard", () => {
+    expect(isMcpToolAllowed(context(["tools:get_weather_signals"]), "get_weather_signals")).toBe(true);
+    expect(isMcpToolAllowed(context(["tools:get_weather_signals"]), "generate_safety_docpack")).toBe(false);
+    expect(isMcpToolAllowed(context(["tools:*"]), "generate_safety_docpack")).toBe(true);
+  });
+
+  it("maps read and write roles to their bounded tool sets", () => {
+    expect(isMcpToolAllowed(context(["tools:read"]), "query_safety_knowledge")).toBe(true);
+    expect(isMcpToolAllowed(context(["tools:read"]), "generate_reviewed_safety_docpack")).toBe(false);
+    expect(isMcpToolAllowed(context(["tools:write"]), "generate_reviewed_safety_docpack")).toBe(true);
+    expect(isMcpToolAllowed(context(["tools:write"]), "get_weather_signals")).toBe(false);
+  });
+
+  it("fails closed when auth context or an allowed scope is missing", () => {
+    expect(isMcpToolAllowed(null, "get_weather_signals")).toBe(false);
+    expect(isMcpToolAllowed(context([]), "get_weather_signals")).toBe(false);
+    expect(() => requireMcpToolScope(null, "get_weather_signals")).toThrow(McpToolScopeError);
+    expect(() => requireMcpToolScope(context([]), "get_weather_signals")).toThrowError(
+      expect.objectContaining({ code: "MCP_TOOL_FORBIDDEN" }),
+    );
+  });
+
+  it("defines one stable unique name for every exposed SafeClaw MCP tool", () => {
+    expect(new Set(MCP_TOOL_NAMES).size).toBe(MCP_TOOL_NAMES.length);
+    expect(MCP_TOOL_NAMES).toEqual([
+      "run_safeclaw_harness_agent",
+      "generate_reviewed_safety_docpack",
+      "generate_safety_docpack",
+      "get_weather_signals",
+      "validate_safety_citations",
+      "sanitize_emergency_contacts",
+      "search_accident_cases",
+      "get_evidence_mapping",
+      "query_safety_knowledge",
+      "qa_review_docpack",
+    ]);
   });
 });
 
@@ -86,7 +147,7 @@ describe("buildDbContext", () => {
 
   it("nulls missing site/org and normalizes bad scopes", () => {
     const ctx = buildDbContext({ id: "t", site_id: null, org_id: null, scopes: "oops", disabled: false });
-    expect(ctx).toEqual({ siteId: null, orgId: null, scopes: ["tools:*"], source: "db", tokenId: "t" });
+    expect(ctx).toEqual({ siteId: null, orgId: null, scopes: [], source: "db", tokenId: "t" });
   });
 });
 

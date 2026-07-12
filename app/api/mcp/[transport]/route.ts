@@ -32,8 +32,10 @@ import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import {
   asAuthContext,
   isMcpEnabled,
+  requireMcpToolScope,
   resolveMcpAuth,
   type McpAuthContext,
+  type McpToolName,
 } from "@/lib/mcp-auth";
 import {
   buildAccidentCasesResult,
@@ -61,6 +63,10 @@ const log = createLogger("mcp-route");
 function readAuthContext(extra: unknown): McpAuthContext | null {
   const authInfo = (extra as { authInfo?: { extra?: unknown } } | undefined)?.authInfo;
   return asAuthContext(authInfo?.extra);
+}
+
+function readAuthorizedToolContext(extra: unknown, toolName: McpToolName): McpAuthContext {
+  return requireMcpToolScope(readAuthContext(extra), toolName);
 }
 
 // 평문 토큰(AuthInfo.token)은 절대 로그하지 않는다 — 컨텍스트 요약만 남긴다.
@@ -246,7 +252,7 @@ function registerTools(server: McpServer): void {
     },
     async ({ question }, extra) => {
       try {
-        const authContext = readAuthContext(extra);
+        const authContext = readAuthorizedToolContext(extra, "run_safeclaw_harness_agent");
         logToolContext("run_safeclaw_harness_agent", authContext);
 
         const [direct, sif, supporting] = await Promise.all([
@@ -317,7 +323,7 @@ function registerTools(server: McpServer): void {
     },
     async ({ question, task, mode, includeFull }, extra) => {
       try {
-        const authContext = readAuthContext(extra);
+        const authContext = readAuthorizedToolContext(extra, "generate_reviewed_safety_docpack");
         logToolContext("generate_reviewed_safety_docpack", authContext);
 
         const reviewTask = resolveReviewTaskLabel(task, question);
@@ -377,7 +383,7 @@ function registerTools(server: McpServer): void {
     },
     async ({ question, mode, includeFull }, extra) => {
       try {
-        const authContext = readAuthContext(extra);
+        const authContext = readAuthorizedToolContext(extra, "generate_safety_docpack");
         logToolContext("generate_safety_docpack", authContext);
 
         const response = await runAsk(question, { aiMode: mode ?? "full" });
@@ -424,7 +430,7 @@ function registerTools(server: McpServer): void {
     async ({ region }, extra) => {
       try {
         // 향후 확장점: authContext.siteId로 사이트 기본 지역 프리필/조회 로깅 등에 활용.
-        logToolContext("get_weather_signals", readAuthContext(extra));
+        logToolContext("get_weather_signals", readAuthorizedToolContext(extra, "get_weather_signals"));
         const signal = await fetchWeatherSignal(region);
         return toToolResult(buildWeatherResult(region, signal));
       } catch (error) {
@@ -446,7 +452,10 @@ function registerTools(server: McpServer): void {
     async ({ text }, extra) => {
       try {
         // 향후 확장점: authContext로 사이트별 인용 화이트리스트 확장 가능.
-        logToolContext("validate_safety_citations", readAuthContext(extra));
+        logToolContext(
+          "validate_safety_citations",
+          readAuthorizedToolContext(extra, "validate_safety_citations"),
+        );
         return toToolResult(validateCitations(text));
       } catch (error) {
         return toToolError(error);
@@ -467,7 +476,10 @@ function registerTools(server: McpServer): void {
     async ({ text }, extra) => {
       try {
         // 향후 확장점: authContext로 사이트별 비상 연락처 세트 주입 가능.
-        logToolContext("sanitize_emergency_contacts", readAuthContext(extra));
+        logToolContext(
+          "sanitize_emergency_contacts",
+          readAuthorizedToolContext(extra, "sanitize_emergency_contacts"),
+        );
         return toToolResult(buildSanitizeContactsResult(text));
       } catch (error) {
         return toToolError(error);
@@ -488,7 +500,7 @@ function registerTools(server: McpServer): void {
     async ({ keyword }, extra) => {
       try {
         // 향후 확장점: authContext.siteId로 사이트 업종별 재해사례 가중치 부여 가능.
-        logToolContext("search_accident_cases", readAuthContext(extra));
+        logToolContext("search_accident_cases", readAuthorizedToolContext(extra, "search_accident_cases"));
         const result = await fetchAccidentCases(keyword);
         return toToolResult(buildAccidentCasesResult(keyword, result));
       } catch (error) {
@@ -513,7 +525,7 @@ function registerTools(server: McpServer): void {
     async ({ docType }, extra) => {
       try {
         // 향후 확장점: authContext로 조직별 증빙 파일철 구성 로깅 가능.
-        logToolContext("get_evidence_mapping", readAuthContext(extra));
+        logToolContext("get_evidence_mapping", readAuthorizedToolContext(extra, "get_evidence_mapping"));
         return toToolResult(buildEvidenceMappingResult(docType));
       } catch (error) {
         return toToolError(error);
@@ -534,7 +546,7 @@ function registerTools(server: McpServer): void {
     async ({ query }, extra) => {
       try {
         // 향후 확장점: authContext.siteId로 사이트 업종별 조회 로깅 가능.
-        logToolContext("query_safety_knowledge", readAuthContext(extra));
+        logToolContext("query_safety_knowledge", readAuthorizedToolContext(extra, "query_safety_knowledge"));
         return toToolResult(await querySafetyKnowledge(query));
       } catch (error) {
         return toToolError(error);
@@ -558,7 +570,7 @@ function registerTools(server: McpServer): void {
     async ({ task, document_text }, extra) => {
       try {
         // 향후 확장점: authContext.siteId로 사이트별 검수 로깅 가능.
-        logToolContext("qa_review_docpack", readAuthContext(extra));
+        logToolContext("qa_review_docpack", readAuthorizedToolContext(extra, "qa_review_docpack"));
         return toToolResult(await reviewDocpack(task, document_text));
       } catch (error) {
         return toToolError(error);

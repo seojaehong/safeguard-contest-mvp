@@ -40,6 +40,52 @@ export interface McpTokenRow {
 
 const DEFAULT_SCOPES = ["tools:*"] as const;
 
+export const MCP_TOOL_NAMES = [
+  "run_safeclaw_harness_agent",
+  "generate_reviewed_safety_docpack",
+  "generate_safety_docpack",
+  "get_weather_signals",
+  "validate_safety_citations",
+  "sanitize_emergency_contacts",
+  "search_accident_cases",
+  "get_evidence_mapping",
+  "query_safety_knowledge",
+  "qa_review_docpack",
+] as const;
+
+export type McpToolName = (typeof MCP_TOOL_NAMES)[number];
+
+const READ_TOOL_NAMES: ReadonlySet<McpToolName> = new Set([
+  "run_safeclaw_harness_agent",
+  "get_weather_signals",
+  "validate_safety_citations",
+  "sanitize_emergency_contacts",
+  "search_accident_cases",
+  "get_evidence_mapping",
+  "query_safety_knowledge",
+  "qa_review_docpack",
+]);
+const WRITE_TOOL_NAMES: ReadonlySet<McpToolName> = new Set([
+  "generate_reviewed_safety_docpack",
+  "generate_safety_docpack",
+]);
+const KNOWN_MCP_SCOPES = new Set<string>([
+  ...DEFAULT_SCOPES,
+  "tools:read",
+  "tools:write",
+  ...MCP_TOOL_NAMES.map((toolName) => `tools:${toolName}`),
+]);
+const MAX_SCOPE_LENGTH = 128;
+
+export class McpToolScopeError extends Error {
+  readonly code = "MCP_TOOL_FORBIDDEN";
+
+  constructor() {
+    super("이 토큰은 해당 도구를 사용할 수 없습니다.");
+    this.name = "McpToolScopeError";
+  }
+}
+
 // ── 순수부 (vitest 대상) ────────────────────────────────────────────────────
 
 /** 토큰 평문(트림)의 sha256 hex. DB 저장 해시·조회 키와 반드시 동일 규칙이어야 한다. */
@@ -63,12 +109,36 @@ export function matchesLegacyToken(token: string, legacyTokens: Set<string>): bo
   return legacyTokens.has(token.trim());
 }
 
-/** scopes 컬럼(jsonb)을 문자열 배열로 정규화한다. 형태가 어긋나면 기본값. */
+/** scopes 컬럼(jsonb)을 알려진 권한만 남겨 정규화한다. 형태가 어긋나면 권한 없음. */
 export function normalizeScopes(value: unknown): string[] {
-  if (Array.isArray(value) && value.every((s) => typeof s === "string") && value.length > 0) {
-    return value as string[];
+  if (!Array.isArray(value)) return [];
+  const normalized: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string") continue;
+    const scope = item.trim();
+    if (!scope || scope.length > MAX_SCOPE_LENGTH || !KNOWN_MCP_SCOPES.has(scope)) continue;
+    if (!normalized.includes(scope)) normalized.push(scope);
   }
-  return [...DEFAULT_SCOPES];
+  return normalized;
+}
+
+export function isMcpToolAllowed(
+  context: McpAuthContext | null | undefined,
+  toolName: McpToolName,
+): boolean {
+  if (!context) return false;
+  const scopes = normalizeScopes(context.scopes);
+  if (scopes.includes("tools:*") || scopes.includes(`tools:${toolName}`)) return true;
+  if (scopes.includes("tools:read") && READ_TOOL_NAMES.has(toolName)) return true;
+  return scopes.includes("tools:write") && WRITE_TOOL_NAMES.has(toolName);
+}
+
+export function requireMcpToolScope(
+  context: McpAuthContext | null | undefined,
+  toolName: McpToolName,
+): McpAuthContext {
+  if (!context || !isMcpToolAllowed(context, toolName)) throw new McpToolScopeError();
+  return context;
 }
 
 /** mcp_tokens 행 → 컨텍스트. 행이 없거나 disabled면 null(=DB 매칭 실패). */
@@ -117,7 +187,7 @@ export function asAuthContext(value: unknown): McpAuthContext | null {
   return {
     siteId: typeof v.siteId === "string" ? v.siteId : null,
     orgId: typeof v.orgId === "string" ? v.orgId : null,
-    scopes: v.scopes.filter((s): s is string => typeof s === "string"),
+    scopes: normalizeScopes(v.scopes),
     source: v.source,
     tokenId: typeof v.tokenId === "string" ? v.tokenId : null,
   };
