@@ -1,0 +1,74 @@
+repeat=1
+
+> safeclaw@0.1.0 test
+> vitest run tests/launch-readiness-audit.test.ts -t removes stale output and exits one when the request times out --maxWorkers=1 --no-file-parallelism --reporter=dot
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/launch-readiness-timeout-remediation
+
+--·-
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 3 skipped (4)
+   Start at  23:18:58
+   Duration  2.84s (transform 67ms, setup 0ms, import 153ms, tests 1.72s, environment 0ms)
+
+repeat=2
+
+> safeclaw@0.1.0 test
+> vitest run tests/launch-readiness-audit.test.ts -t removes stale output and exits one when the request times out --maxWorkers=1 --no-file-parallelism --reporter=dot
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/launch-readiness-timeout-remediation
+
+--·-
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 3 skipped (4)
+   Start at  23:19:05
+   Duration  3.03s (transform 64ms, setup 0ms, import 152ms, tests 1.87s, environment 0ms)
+
+repeat=3
+
+> safeclaw@0.1.0 test
+> vitest run tests/launch-readiness-audit.test.ts -t removes stale output and exits one when the request times out --maxWorkers=1 --no-file-parallelism --reporter=dot
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/launch-readiness-timeout-remediation
+
+--·-
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 3 skipped (4)
+   Start at  23:19:12
+   Duration  2.95s (transform 63ms, setup 0ms, import 146ms, tests 1.76s, environment 0ms)
+
+repeat=4
+
+> safeclaw@0.1.0 test
+> vitest run tests/launch-readiness-audit.test.ts -t removes stale output and exits one when the request times out --maxWorkers=1 --no-file-parallelism --reporter=dot
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/launch-readiness-timeout-remediation
+
+--·-
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 3 skipped (4)
+   Start at  23:19:18
+   Duration  2.70s (transform 61ms, setup 0ms, import 143ms, tests 1.65s, environment 0ms)
+
+repeat=5
+
+> safeclaw@0.1.0 test
+> vitest run tests/launch-readiness-audit.test.ts -t removes stale output and exits one when the request times out --maxWorkers=1 --no-file-parallelism --reporter=dot
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/launch-readiness-timeout-remediation
+
+--·-
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 3 skipped (4)
+   Start at  23:19:24
+   Duration  2.74s (transform 64ms, setup 0ms, import 138ms, tests 1.66s, environment 0ms)
