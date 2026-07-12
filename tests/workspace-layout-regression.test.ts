@@ -38,6 +38,7 @@ describe("workspace layout regression", () => {
     expect(harness?.mode).toBe("prod");
     const scenarios = [
       { width: 1440, height: 900, minHeight: 152, paddingTop: 22, paddingRight: 24, fontSize: 17, lineHeight: 29.92, resize: "vertical" },
+      { width: 1638, height: 510, minHeight: 124, paddingTop: 18, paddingRight: 18, fontSize: 15, lineHeight: 26.1, resize: "vertical" },
       { width: 1440, height: 500, minHeight: 124, paddingTop: 18, paddingRight: 18, fontSize: 15, lineHeight: 26.1, resize: "vertical" },
       { width: 1440, height: 410, minHeight: 124, paddingTop: 18, paddingRight: 18, fontSize: 14, lineHeight: 24.36, resize: "vertical" },
       { width: 1440, height: 360, minHeight: 116, paddingTop: 14, paddingRight: 15, fontSize: 14, lineHeight: 23.8, resize: "vertical" },
@@ -105,6 +106,47 @@ describe("workspace layout regression", () => {
           resize: scenario.resize,
         });
         expect(metrics.lineHeight).toBeCloseTo(scenario.lineHeight, 1);
+        await themedInput.fill("외벽 도장 작업의 추락 위험을 반영해 오늘 위험성평가와 TBM 기록을 만들어줘.");
+        const geometry = await page.evaluate(() => {
+          const readRect = (selector: string) => {
+            const element = document.querySelector(selector);
+            if (!(element instanceof HTMLElement)) throw new Error(`Missing geometry target: ${selector}`);
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return {
+              top: Math.round(rect.top),
+              bottom: Math.round(rect.bottom),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height),
+              display: style.display,
+              visibility: style.visibility,
+            };
+          };
+          const submit = document.querySelector(".composer-submit-button");
+          const attachment = document.querySelector(".composer-attach-button input[type='file']");
+          return {
+            viewportHeight: window.innerHeight,
+            viewportWidth: window.innerWidth,
+            scrollWidth: document.documentElement.scrollWidth,
+            composer: readRect(".input-composer-tray"),
+            submit: readRect(".composer-submit-button"),
+            attachment: readRect(".composer-attach-button"),
+            submitEnabled: submit instanceof HTMLButtonElement && !submit.disabled,
+            attachmentEnabled: attachment instanceof HTMLInputElement && !attachment.disabled,
+          };
+        });
+        expect(geometry.scrollWidth, `${theme} ${scenario.width}x${scenario.height} horizontal overflow`).toBeLessThanOrEqual(geometry.viewportWidth);
+        for (const [control, rect] of Object.entries({ composer: geometry.composer, submit: geometry.submit, attachment: geometry.attachment })) {
+          const requiredBottomInset = scenario.width <= 720 && control === "submit" ? 48 : scenario.width <= 720 ? 0 : 8;
+          expect(rect.width, `${theme} ${scenario.width}x${scenario.height} ${control} width`).toBeGreaterThan(0);
+          expect(rect.height, `${theme} ${scenario.width}x${scenario.height} ${control} height`).toBeGreaterThan(0);
+          expect(rect.display, `${theme} ${scenario.width}x${scenario.height} ${control} display`).not.toBe("none");
+          expect(rect.visibility, `${theme} ${scenario.width}x${scenario.height} ${control} visibility`).toBe("visible");
+          expect(rect.top, `${theme} ${scenario.width}x${scenario.height} ${control} top`).toBeGreaterThanOrEqual(0);
+          expect(rect.bottom, `${theme} ${scenario.width}x${scenario.height} ${control} bottom`).toBeLessThanOrEqual(geometry.viewportHeight - requiredBottomInset);
+        }
+        expect(geometry.submitEnabled).toBe(true);
+        expect(geometry.attachmentEnabled).toBe(true);
         await page.close();
       }
     }

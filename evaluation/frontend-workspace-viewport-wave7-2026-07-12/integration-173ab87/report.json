@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "backendBaseSha": "87798d15aea085284332942390f215f49f3399cf",
+  "integratedSourceSha": "173ab87",
+  "review": { "spec": "pass", "codeQuality": "pass", "findings": 0 },
+  "verification": {
+    "workspaceTests": { "files": 2, "tests": 20, "status": "pass" },
+    "desktopComposer": { "beforeBottom": 514, "afterBottom": 492, "maximum": 502 },
+    "mobileSubmit": { "beforeBottom": 806, "afterBottom": 796, "maximum": 796 },
+    "typecheck": "pass",
+    "build": { "staticPages": 27, "status": "pass" },
+    "productionBrowser": { "themeViewportCombinations": 14, "horizontalOverflow": 0, "status": "pass" },
+    "staticAudit": { "status": "fail", "violations": 2307, "important": 737, "coverageIssues": 0, "delta": 0 },
+    "audit108Rows": "not-run-static-prerequisite-red"
+  }
+}
