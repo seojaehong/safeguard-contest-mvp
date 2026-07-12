@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_OUTPUT = path.join(SCRIPT_DIR, "live-probe-result.json");
+const REQUEST_TIMEOUT_MS = 20_000;
 const TABLES = [
   "query_logs",
   "documents",
@@ -88,6 +89,7 @@ async function probeTable(baseUrl, key, table) {
   try {
     const response = await fetch(`${baseUrl}/rest/v1/${table}?select=*`, {
       method: "HEAD",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         apikey: key,
         Authorization: `Bearer ${key}`,
@@ -149,6 +151,7 @@ async function main() {
     tableCount: TABLES.length,
     credentialCount: credentials.length,
     expectedRequestCount: TABLES.length * credentials.length,
+    requestTimeoutMs: REQUEST_TIMEOUT_MS,
     requestMethodsAllowed: ["HEAD", "GET"],
     requestMethodsUsed: configured ? ["HEAD"] : [],
     secretSafety: {

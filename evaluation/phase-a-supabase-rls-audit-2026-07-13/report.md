@@ -247,7 +247,7 @@ Operator-table negative cases are separate: after corresponding command reachabi
 - Redacted result: `evaluation/phase-a-supabase-rls-audit-2026-07-13/live-probe-result.json`
 - Method: fixed 22-table inventory x service-role/anon credentials, HEAD only, `Prefer: count=exact`
 - Secret handling: no URL, host, key, response body, or exception text is printed or stored
-- Fail-closed behavior: missing configuration exits 2 with zero requests; any non-2xx/network result exits 1 after writing the redacted result
+- Fail-closed behavior: missing configuration exits 2 with zero requests; each request has a 20-second timeout; any non-2xx/network result exits 1 after writing the redacted result
 
 ### Executed result
 
@@ -255,14 +255,14 @@ Operator-table negative cases are separate: after corresponding command reachabi
 - Requests: 44 attempted of 44 expected; methods: HEAD 44, GET 0
 - HTTP statuses: 200 x 30, 206 x 4, 404 x 10
 - Existing-table observations: 17 tables returned 200/206 for both credentials
-- Missing-surface observations: the five migration-010 application tables returned 404 for both credentials (`workpack_share_sessions`, `workpack_read_confirmations`, `workpack_improvements`, `workpack_improvement_photos`, `safety_reference_embeddings`)
+- Missing-surface observations: the five migration-010 application table endpoints returned 404 for both credentials (`workpack_share_sessions`, `workpack_read_confirmations`, `workpack_improvements`, `workpack_improvement_photos`, `safety_reference_embeddings`); HEAD alone does not distinguish an absent relation from an unavailable PostgREST schema surface
 - Public catalog counts: `safety_reference_sources` 1,063 and `safety_reference_items` 9,920 for both credentials
 - `safety_reference_ingestion_runs`: 2 rows visible to both credentials
 - Nonempty tenant tables `organizations`, `sites`, `workers`, `workpacks`, `education_records`, and `dispatch_logs`: service-role counts were nonzero and anon counts were zero
 - `query_logs` and `documents`: both credentials reached SELECT via HEAD and observed zero rows
 - Tenant A/B auth fixtures: unavailable; authenticated cross-tenant cases not executed
 
-**Interpretation:** the selected target exposes SELECT endpoints for 17 application tables and lacks five migration-010 tables. HEAD count differences are observations, not a complete RLS or GRANT audit. The probe does not inspect `information_schema`/`pg_catalog` grants, mutation privileges, owners, FORCE flags, row bodies, policy definitions, or cross-tenant behavior. Effective grant catalog state and all authenticated negative cases remain **not verified**.
+**Interpretation:** the selected target exposes SELECT endpoints for 17 application tables, while five migration-010 table endpoints returned 404. The probe does not distinguish relation absence from PostgREST surface unavailability. HEAD count differences are observations, not a complete RLS or GRANT audit. The probe does not inspect `information_schema`/`pg_catalog` grants, mutation privileges, owners, FORCE flags, row bodies, policy definitions, or cross-tenant behavior. Effective grant catalog state and all authenticated negative cases remain **not verified**.
 
 ## Tests and typecheck
 

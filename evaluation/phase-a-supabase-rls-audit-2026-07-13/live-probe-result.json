@@ -1,6 +1,6 @@
 {
   "schemaVersion": "phase-a-supabase-rls-live-probe/v1",
-  "generatedAt": "2026-07-12T23:09:06.483Z",
+  "generatedAt": "2026-07-12T23:17:02.328Z",
   "probe": "supabase-rest-table-head-count-exact",
   "mode": "read-only",
   "mutationPerformed": false,
@@ -8,6 +8,7 @@
   "tableCount": 22,
   "credentialCount": 2,
   "expectedRequestCount": 44,
+  "requestTimeoutMs": 20000,
   "requestMethodsAllowed": [
     "HEAD",
     "GET"

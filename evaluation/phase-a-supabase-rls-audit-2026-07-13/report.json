@@ -1,6 +1,6 @@
 {
   "schemaVersion": "phase-a-supabase-rls-audit/v1",
-  "generatedAt": "2026-07-13T08:15:11.6804624+09:00",
+  "generatedAt": "2026-07-13T08:17:21.6562980+09:00",
   "audit": {
     "branch": "audit/phase-a-supabase-rls",
     "auditedRevision": "b39f813",
@@ -491,6 +491,7 @@
       "credentials": 2,
       "expectedRequests": 44,
       "attemptedRequests": 44,
+      "requestTimeoutMs": 20000,
       "methodCounts": { "HEAD": 44, "GET": 0 },
       "httpStatusCounts": { "200": 30, "206": 4, "404": 10 },
       "verifiedCrossTenantAssertions": 0
@@ -498,7 +499,8 @@
     "observations": {
       "tablesReturning200Or206ForBothCredentials": 17,
       "tablesReturning404ForBothCredentials": 5,
-      "missingTableNames": ["workpack_share_sessions", "workpack_read_confirmations", "workpack_improvements", "workpack_improvement_photos", "safety_reference_embeddings"],
+      "tableEndpointsReturning404": ["workpack_share_sessions", "workpack_read_confirmations", "workpack_improvements", "workpack_improvement_photos", "safety_reference_embeddings"],
+      "http404Interpretation": "Does not distinguish an absent relation from an unavailable PostgREST schema surface.",
       "publicCatalogCounts": { "safety_reference_sources": 1063, "safety_reference_items": 9920 },
       "safetyReferenceIngestionRunsCount": { "service_role": 2, "anon": 2 },
       "queryLogsCount": { "service_role": 0, "anon": 0 },
@@ -506,7 +508,7 @@
       "nonemptyTenantTablesWithServiceRowsAndZeroAnonRows": ["organizations", "sites", "workers", "workpacks", "education_records", "dispatch_logs"]
     },
     "grantInterpretation": "HEAD observed SELECT endpoint behavior only. It did not inspect direct, inherited, or default GRANT catalog entries and did not test INSERT, UPDATE, DELETE, or EXECUTE privileges.",
-    "interpretation": "The selected target exposes SELECT endpoints for 17 application tables and lacks five migration-010 application tables. The result does not prove policy definitions, FORCE state, ownership, mutation privileges, or cross-tenant isolation."
+    "interpretation": "The selected target exposes SELECT endpoints for 17 application tables while five migration-010 table endpoints return 404. The probe does not distinguish relation absence from PostgREST surface unavailability and does not prove policy definitions, FORCE state, ownership, mutation privileges, or cross-tenant isolation."
   },
   "findings": [
     {
