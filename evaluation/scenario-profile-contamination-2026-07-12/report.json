@@ -1,23 +1,37 @@
 {
-  "generatedAt": "2026-07-12T04:12:51.4146861Z",
-  "status": "review_pending",
-  "freshReviewRequired": true,
-  "product": {
-    "baseSha": "ac728ed9c452a9843e3a4ac417b060f35603cb1e",
-    "sha": "dd25e4f18e5db9ea7beed710fe9b2cd1ffa964d5",
-    "tree": "8d826a546050f230b1c8d3a104e4b6d3586ac6bb"
+  "generatedAt": "2026-07-12T07:37:32Z",
+  "status": "current_base_verified",
+  "freshReviewRequired": false,
+  "approval": {
+    "scope": "scenario-profile-contamination only",
+    "sourceProductSha": "dd25e4f18e5db9ea7beed710fe9b2cd1ffa964d5",
+    "evidenceSha": "fc0f3c6f53968b6cb3158d6c3e12ed3e7ee9c50e",
+    "bindingSha": "32f763f9b463435f3c33056ab7203d47beaf415b",
+    "independentReview": "SPEC PASS/CODE PASS",
+    "p0ThroughP3Findings": 0
   },
-  "evidence": {
-    "sha": "fc0f3c6f53968b6cb3158d6c3e12ed3e7ee9c50e",
-    "tree": "08991a63a80537357fd0203daf0c5a6ea8d17cc8",
-    "role": "authoritative_log_payload",
-    "distinctFromProductSha": true
+  "currentBase": {
+    "branch": "origin/feature/backend-harness-gate",
+    "sha": "31a44c0d972c46a47c94ad387eeeff39528d1be9"
+  },
+  "testedSource": {
+    "branch": "fix/scenario-profile-contamination",
+    "sha": "3e7eab3c5265c5f21fc6acd0e27872f8cc83bdb6",
+    "tree": "3d981358a98c12163461a4816cdb12e3f205077b",
+    "baseIsAncestor": true,
+    "rebaseResult": "approved nine-commit branch rebased without conflicts"
   },
   "scope": {
+    "changedSourceFiles": [
+      "lib/accident-cases.ts",
+      "lib/mock-data.ts",
+      "tests/accident-cases.test.ts",
+      "tests/scenario-inference.test.ts"
+    ],
     "database": false,
     "schema": false,
     "environment": false,
-    "ui": false,
+    "backendIntegration": false,
     "unrelatedEdits": false
   },
   "behaviorContracts": {
@@ -35,111 +49,53 @@
       ]
     }
   },
-  "tdd": {
-    "productionEditedAfterRed": true,
-    "mixedCleaningPriority": {
-      "red": {
-        "testFiles": 1,
-        "testsExecuted": 9,
-        "testsPassed": 8,
-        "testsFailed": 1,
-        "failure": "물류센터 바닥 세척 작업. 화학세제 사용. selected the logistics accident first",
-        "log": "evaluation/scenario-profile-contamination-2026-07-12/red-mixed-cleaning-priority.log"
-      },
-      "green": {
-        "testFiles": 1,
-        "testsPassed": 9,
-        "testsFailed": 0,
-        "log": "evaluation/scenario-profile-contamination-2026-07-12/green-mixed-cleaning-priority.log"
-      }
-    },
-    "launchSubgroupFacts": {
-      "red": {
-        "testFiles": 1,
-        "testsExecuted": 26,
-        "testsPassed": 25,
-        "testsFailed": 1,
-        "workerCountAssertionPassed": true,
-        "failure": "specialContext omitted the foreign-worker and new-worker counts",
-        "log": "evaluation/scenario-profile-contamination-2026-07-12/red-launch-subgroup-facts.log"
-      },
-      "green": {
-        "testFiles": 1,
-        "testsPassed": 26,
-        "testsFailed": 0,
-        "log": "evaluation/scenario-profile-contamination-2026-07-12/green-launch-subgroup-facts.log"
-      }
-    }
-  },
   "verification": {
     "focused": {
       "testFiles": 6,
-      "priorTests": 74,
-      "newTests": 2,
+      "expectedTests": 76,
+      "actualTests": 76,
       "testsPassed": 76,
       "testsFailed": 0,
-      "runnerPid": 51956,
-      "startedAt": "2026-07-12T03:48:16.9902782Z",
-      "finishedAt": "2026-07-12T03:48:29.0130706Z",
       "exitCode": 0,
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-focused-dd25e4f.log"
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-base-focused-3e7eab3.log"
     },
     "typecheck": {
-      "runnerPid": 40296,
-      "startedAt": "2026-07-12T03:48:16.9832168Z",
-      "finishedAt": "2026-07-12T03:48:49.5029193Z",
+      "command": "npm.cmd run typecheck",
       "exitCode": 0,
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-typecheck-dd25e4f.log"
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-base-typecheck-3e7eab3.log"
     },
-    "fullProductRangeDiffCheck": {
-      "baseSha": "ac728ed9c452a9843e3a4ac417b060f35603cb1e",
-      "targetProductSha": "dd25e4f18e5db9ea7beed710fe9b2cd1ffa964d5",
-      "command": "git diff --check ac728ed9c452a9843e3a4ac417b060f35603cb1e..dd25e4f18e5db9ea7beed710fe9b2cd1ffa964d5",
-      "runnerPid": 1924,
-      "startedAt": "2026-07-12T03:48:17.0557252Z",
-      "finishedAt": "2026-07-12T03:48:17.3922496Z",
+    "diffCheck": {
+      "command": "git diff --check 31a44c0d972c46a47c94ad387eeeff39528d1be9...3e7eab3c5265c5f21fc6acd0e27872f8cc83bdb6",
       "whitespaceFailures": 0,
       "exitCode": 0,
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-full-range-diff-ac728ed-to-dd25e4f.log"
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-base-diff-check-3e7eab3.log"
     },
     "build": {
-      "role": "authoritative",
-      "invocations": 1,
-      "cwd": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\scenario-profile-contamination",
-      "productSha": "dd25e4f18e5db9ea7beed710fe9b2cd1ffa964d5",
-      "productTree": "8d826a546050f230b1c8d3a104e4b6d3586ac6bb",
-      "runnerPid": 44220,
-      "waitStartedAt": "2026-07-12T03:59:43.6224594Z",
-      "waitFinishedAt": "2026-07-12T04:08:48.6024271Z",
-      "requiredGlobalZeroWindowSeconds": 180,
-      "globalZeroSampleStreak": 37,
-      "startedAt": "2026-07-12T04:08:49.3182894Z",
-      "finishedAt": "2026-07-12T04:10:02.1092180Z",
+      "command": "npm.cmd run build",
+      "invocationsThisTurn": 1,
       "globalNextBuildProcessCountBefore": 0,
-      "foreignBuildProcessCountDuring": 0,
-      "globalNextBuildProcessCountAfter": 0,
-      "monitorSamples": 96,
-      "nodeProcessCountBefore": 95,
-      "nodeProcessCountAfter": 90,
-      "compile": "Compiled successfully in 11.8s",
+      "waitSamples": 0,
+      "compile": "Compiled successfully in 22.1s",
       "staticPagesGenerated": "27/27",
+      "globalNextBuildProcessCountAfter": 0,
       "exitCode": 0,
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-authoritative-build-final-dd25e4f.log"
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-base-build-3e7eab3.log"
     }
   },
   "evidenceHygiene": {
-    "authoritativeLogCount": 8,
-    "supersededTrackedLogsRemoved": 16,
-    "ambiguousStalePassLogsRemaining": 0,
-    "authoritativeLogs": [
+    "removedStaleCurrentLogs": 4,
+    "currentBaseLogs": [
+      "evaluation/scenario-profile-contamination-2026-07-12/current-base-focused-3e7eab3.log",
+      "evaluation/scenario-profile-contamination-2026-07-12/current-base-typecheck-3e7eab3.log",
+      "evaluation/scenario-profile-contamination-2026-07-12/current-base-diff-check-3e7eab3.log",
+      "evaluation/scenario-profile-contamination-2026-07-12/current-base-build-3e7eab3.log"
+    ],
+    "historicalTddLogs": [
       "evaluation/scenario-profile-contamination-2026-07-12/red-mixed-cleaning-priority.log",
       "evaluation/scenario-profile-contamination-2026-07-12/green-mixed-cleaning-priority.log",
       "evaluation/scenario-profile-contamination-2026-07-12/red-launch-subgroup-facts.log",
-      "evaluation/scenario-profile-contamination-2026-07-12/green-launch-subgroup-facts.log",
-      "evaluation/scenario-profile-contamination-2026-07-12/current-focused-dd25e4f.log",
-      "evaluation/scenario-profile-contamination-2026-07-12/current-typecheck-dd25e4f.log",
-      "evaluation/scenario-profile-contamination-2026-07-12/current-full-range-diff-ac728ed-to-dd25e4f.log",
-      "evaluation/scenario-profile-contamination-2026-07-12/current-authoritative-build-final-dd25e4f.log"
-    ]
+      "evaluation/scenario-profile-contamination-2026-07-12/green-launch-subgroup-facts.log"
+    ],
+    "staleCurrentPassLogsRemaining": 0
   }
 }
