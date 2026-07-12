@@ -43,7 +43,7 @@ Hermes proof.
 | JSON syntax | PowerShell `ConvertFrom-Json` | Passed: 5 decisions, 5 checks |
 | Markdown local links and paths | PowerShell path and line-range assertion | Passed: 29 links |
 | Required decision phrases | PowerShell content assertions | Passed: 28 assertions |
-| Owned-path-only diff | `git status --short` assertion | Passed: 2 owned paths |
+| Owned-path-only diff | final commit-range assertion | Passed: 3 files across 2 owned roots |
 | Whitespace/errors | `git diff --cached --check` | Passed |
 
 No live endpoint, remote Hermes process, OAuth account, or production traffic
