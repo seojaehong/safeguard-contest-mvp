@@ -42,3 +42,12 @@
 - Third independent review: SPEC PASS / CODE QUALITY PASS, P0-P3 none for 6a5d57c..55eceaf.
 - Known separate W7 RED: scaled desktop composer bottom +12px and mobile submit +10px beyond viewport; do not mask with typography changes.
 - Next: integrate W6 onto current authoritative backend, then execute W7 viewport TDD.
+
+## 2026-07-12 W7 complete
+- RED: desktop 1638x510 composer 514px > 502px limit; mobile 390x844 submit 806px > 796px limit; expanded matrix also found Day 1440x500 502px > 492px limit.
+- Fixed: selector-scoped responsive page padding and composer margin only; no hiding, clipping, transforms, scaling, control-size reduction, or assertion loosening.
+- GREEN: desktop composer 492px <= 502px; mobile submit 796px <= 796px.
+- Verified: workspace suite 20, strict typecheck, build 27/27, production Day/Night x seven viewports 14/14, controls nonzero/visible/enabled, overflow 0.
+- Static: honest RED 2,307, coverage 0, exact delta 0 and important 737 unchanged.
+- Independent review after P3 documentation correction 0b4e6f4: SPEC PASS / CODE QUALITY PASS, P0-P3 none.
+- Next: integrate W7 onto current authoritative backend, then resume static typography/shape debt waves.
