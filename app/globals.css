@@ -19778,3 +19778,362 @@ body:has(.safeclaw-landing) :is(
     padding: var(--space-8) var(--space-4);
   }
 }
+
+
+/* Reports: canonical route layer after the shared C7, Documents, and W5 typography layers. */
+.safeclaw-module-shell[data-module-route="/reports"] {
+  --text-body: 15px;
+  --text-support: 14px;
+  --text-control: 14px;
+  --text-table: 13px;
+  --text-caption: 12px;
+  --leading-body: 1.6;
+  --leading-control: 20px;
+  --leading-table: 20px;
+  --leading-caption: 18px;
+  --tracking-body: 0;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  gap: 24px;
+  align-items: start;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-head .safeclaw-download-actions {
+  grid-column: 1 / -1;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-rail .safeclaw-report-controls,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-rail .safeclaw-report-groups {
+  margin-top: 12px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] {
+  --safeclaw-principal-command-min-height: 44px;
+  --safeclaw-principal-command-radius: 8px;
+  --safeclaw-principal-command-padding: 0 16px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button {
+  min-width: 0;
+  min-height: 44px;
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-1);
+  color: var(--workspace-muted);
+  padding: 9px 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button:hover:not([aria-pressed="true"]):not(:disabled) {
+  border-color: var(--workspace-rule-strong);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button:focus-visible {
+  outline: 2px solid var(--workspace-accent);
+  outline-offset: 2px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button[aria-pressed="true"] {
+  border-color: var(--workspace-accent);
+  background: var(--workspace-surface-3);
+  color: var(--workspace-accent-text);
+  box-shadow: inset 3px 0 0 var(--workspace-accent);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button:disabled {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-canvas);
+  color: var(--workspace-subtle);
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls strong {
+  color: inherit;
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls span {
+  color: inherit;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-facts,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-notes {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-facts p {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 16px;
+  margin: 0;
+  border-bottom: 1px solid var(--workspace-rule);
+  padding: 12px 0;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-notes p {
+  display: block;
+  margin: 0;
+  border-bottom: 1px solid var(--workspace-rule);
+  color: var(--workspace-muted);
+  padding: 12px 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-facts p:last-child,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-notes p:last-child {
+  border-bottom: 0;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-facts strong {
+  color: var(--workspace-subtle);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-facts span {
+  min-width: 0;
+  color: var(--workspace-muted);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table {
+  display: grid;
+  margin-top: 24px;
+  overflow: hidden;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-1);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table > div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr 1.2fr 1.2fr 0.9fr;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table > div + div {
+  border-top: 1px solid var(--workspace-rule);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table strong,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span {
+  min-width: 0;
+  border-right: 1px solid var(--workspace-rule);
+  padding: 14px 16px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table strong:last-child,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span:last-child {
+  border-right: 0;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table strong {
+  background: var(--workspace-surface-2);
+  color: var(--workspace-subtle);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span {
+  color: var(--workspace-muted);
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span em {
+  display: block;
+  margin-top: 6px;
+  color: var(--workspace-subtle);
+  font-style: normal;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-rail .safeclaw-report-groups {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group {
+  min-width: 0;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-1);
+  padding: 18px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-rail .safeclaw-report-group {
+  padding: 14px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group > span {
+  color: var(--workspace-accent-text);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group div {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group p {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group strong {
+  min-width: 0;
+  color: var(--workspace-ink);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group em {
+  min-width: 0;
+  color: var(--workspace-muted);
+  font-style: normal;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-download-note {
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+@media (max-width: 900px) {
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-header {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-action {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    border-top: 1px solid var(--workspace-rule);
+    border-left: 0;
+    padding-top: 12px;
+    padding-left: 0;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command,
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-head,
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-groups {
+    grid-template-columns: 1fr;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table,
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table > div,
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table strong,
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span {
+    display: block;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table > div:first-child {
+    display: none;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table > div {
+    padding: 14px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span {
+    border-right: 0;
+    padding: 8px 0;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span + span {
+    border-top: 1px solid var(--workspace-rule);
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table span::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    color: var(--workspace-subtle);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: var(--leading-caption);
+    letter-spacing: var(--tracking-body);
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-facts p,
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-notes p {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
