@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "4b532b50e8af84f958c513f6722ed55a379969e5",
+  "patchIdentity": "79805892b31b25935b700214e97e8af3b81aa188",
+  "route": "/demo",
+  "themeContract": {
+    "day": "light route",
+    "night": "unsupported",
+    "mediaPreferenceStabilityChecked": true
+  },
+  "inventory": {
+    "initialPrefixFindings": 64,
+    "renderedOwnedBefore": 48,
+    "renderedOwnedAfter": 0,
+    "nonRenderedSharedSource": 16,
+    "finalLedger": 17
+  },
+  "staticAudit": {
+    "before": 2127,
+    "after": 2080,
+    "delta": -47,
+    "importantDeclarations": 696,
+    "coverageIssues": 0,
+    "cssLines": 18411
+  },
+  "verification": {
+    "focusedTests": { "passed": 5, "failed": 0 },
+    "typecheck": "pass",
+    "buildStaticPages": { "passed": 27, "total": 27 },
+    "productionBrowser": { "passed": 1, "failed": 0, "lanes": 6 },
+    "horizontalOverflowFindings": 0,
+    "clippedControlFindings": 0
+  }
+}
