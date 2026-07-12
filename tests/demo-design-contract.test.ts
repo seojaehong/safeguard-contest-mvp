@@ -4,6 +4,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 import postcss from "postcss";
+import type { Rule } from "postcss";
 import { describe, expect, it } from "vitest";
 
 type Violation = {
@@ -111,34 +112,39 @@ function declarationSelectorsByLine(source: string, stripComments = false): Map<
   postcss.parse(parsedSource).walkDecls((declaration) => {
     const parent = declaration.parent;
     if (parent?.type === "rule" && declaration.source?.start?.line) {
-      selectors.set(declaration.source.start.line, parent.selector);
+      selectors.set(declaration.source.start.line, (parent as Rule).selector);
     }
   });
   return selectors;
 }
 
-function effectSelectorsByValue(source: string): Map<string, string> {
-  const selectors = new Map<string, string>();
-  postcss.parse(source).walkDecls((declaration) => {
-    const parent = declaration.parent;
-    if (parent?.type === "rule" && ["background", "background-image", "text-shadow"].includes(declaration.prop)) {
-      selectors.set(normalizeSelector(declaration.value), parent.selector);
-    }
+function effectRuleSelectorsByAuditLine(source: string): Map<number, string> {
+  const uncommented = source.replace(/\/\*[\s\S]*?\*\//gu, "");
+  const ruleStarts: Array<{ line: number; selector: string }> = [];
+  postcss.parse(uncommented).walkRules((rule) => {
+    if (rule.source?.start?.line) ruleStarts.push({ line: rule.source.start.line, selector: rule.selector });
   });
+  const selectors = new Map<number, string>();
+  for (const violationLine of Array.from({ length: uncommented.split(/\r?\n/u).length }, (_, index) => index + 1)) {
+    const nearest = ruleStarts
+      .filter((rule) => rule.line >= violationLine && rule.line - violationLine <= 3)
+      .sort((left, right) => left.line - right.line)[0];
+    if (nearest) selectors.set(violationLine, nearest.selector);
+  }
   return selectors;
 }
 
 function selectorEvidence(
   violation: Violation,
   rawDeclarationSelectors: ReadonlyMap<number, string>,
-  effectSelectors: ReadonlyMap<string, string>,
+  effectSelectors: ReadonlyMap<number, string>,
 ): string {
   if (violation.value?.includes(" => ")) return violation.value.split(" => ", 1)[0];
   if (violation.rule === "selector-role" && violation.value) {
     return violation.value.replace(/ ([a-z-]+): expected[\s\S]*$/u, "");
   }
   if (violation.rule === "decorative-gradient" || violation.rule === "decorative-text-shadow") {
-    return effectSelectors.get(normalizeSelector(violation.value ?? "")) ?? "";
+    return effectSelectors.get(violation.line) ?? "";
   }
   return rawDeclarationSelectors.get(violation.line) ?? "";
 }
@@ -171,7 +177,7 @@ function auditViolations(css: string): Violation[] {
 
 function inventoryViolations(css: string, violations: readonly Violation[]): Violation[] {
   const rawSelectors = declarationSelectorsByLine(css);
-  const effectSelectors = effectSelectorsByValue(css);
+  const effectSelectors = effectRuleSelectorsByAuditLine(css);
   return violations.filter((violation) =>
     selectorIsOwned(selectorEvidence(violation, rawSelectors, effectSelectors), inventoryPrefixes),
   );
@@ -179,7 +185,7 @@ function inventoryViolations(css: string, violations: readonly Violation[]): Vio
 
 function renderedViolations(css: string, violations: readonly Violation[]): Violation[] {
   const rawSelectors = declarationSelectorsByLine(css);
-  const effectSelectors = effectSelectorsByValue(css);
+  const effectSelectors = effectRuleSelectorsByAuditLine(css);
   return violations.filter((violation) =>
     selectorIsRenderedOwned(selectorEvidence(violation, rawSelectors, effectSelectors)),
   );
@@ -193,6 +199,28 @@ function staticClassManifest(source: string): string[] {
   return [...new Set(classValues.flatMap((value) => value.trim().split(/\s+/u)).filter(Boolean))].sort();
 }
 
+function declarationValue(source: string, selector: string, property: string): string | undefined {
+  let value: string | undefined;
+  postcss.parse(source).walkRules((rule) => {
+    if (!splitSelectorList(rule.selector).includes(selector)) return;
+    rule.walkDecls(property, (declaration) => { value = declaration.value; });
+  });
+  return value;
+}
+
+function expectTuple(
+  source: string,
+  selector: string,
+  tuple: readonly [string, string, string, string, string?],
+): void {
+  const [size, weight, leading, tracking, family] = tuple;
+  expect(declarationValue(source, selector, "font-size"), selector).toBe(size);
+  expect(declarationValue(source, selector, "font-weight"), selector).toBe(weight);
+  expect(declarationValue(source, selector, "line-height"), selector).toBe(leading);
+  expect(declarationValue(source, selector, "letter-spacing"), selector).toBe(tracking);
+  if (family) expect(declarationValue(source, selector, "font-family"), selector).toBe(family);
+}
+
 describe("demo design contract", () => {
   const css = fs.readFileSync(path.join(process.cwd(), "app", "globals.css"), "utf8");
   const demoPage = fs.readFileSync(path.join(process.cwd(), "app", "demo", "page.tsx"), "utf8");
@@ -203,29 +231,62 @@ describe("demo design contract", () => {
     expect(staticClassManifest(demoComponent)).toEqual([...expectedStaticClassManifest].sort());
     expect(demoComponent).not.toContain("mission-rail");
     expect(demoComponent).not.toContain("mission-step");
+    expect(`${demoPage}\n${demoComponent}`).not.toMatch(/(?:colorScheme|workspace-theme|data-theme|theme=)/u);
     expect(selectorIsOwned("body:has(.safeclaw-landing) .demo-stage-panel", renderedPrefixes)).toBe(false);
     expect(selectorIsOwned(".command-center-shell .demo-stage-panel", renderedPrefixes)).toBe(false);
     expect(selectorIsOwned(".safeclaw-module-shell .card", renderedPrefixes)).toBe(false);
   });
 
-  it("source-binds inventory 64 to rendered 47 plus 17 non-rendered or shared findings", () => {
+  it("leaves only the 17 non-rendered or explicitly split shared inventory findings", () => {
     const violations = auditViolations(css);
     const inventory = inventoryViolations(css, violations);
     const rendered = renderedViolations(css, violations);
-    expect(inventory).toHaveLength(64);
-    expect(violationCounts(inventory)).toEqual(expectedRedCounts);
-    expect(rendered).toHaveLength(47);
-    expect(violationCounts(rendered)).toEqual({
-      "decorative-box-shadow": 3,
+    expect(Object.values(expectedRedCounts).reduce((total, count) => total + count, 0)).toBe(64);
+    expect(inventory).toHaveLength(17);
+    expect(violationCounts(inventory)).toEqual({
       "decorative-gradient": 1,
-      "font-size-tier": 4,
-      "line-height-tier": 9,
-      "radius-tier": 15,
-      "tracking-tier": 4,
-      "typography-tuple": 11,
+      "font-size-tier": 3,
+      "line-height-tier": 1,
+      "radius-tier": 5,
+      "tracking-tier": 2,
+      "typography-tuple": 5,
     });
-    expect(inventory).toHaveLength(rendered.length + 17);
+    expect(rendered).toEqual([]);
   }, 20_000);
+
+  it("splits the shared progress selector without changing inline-progress", () => {
+    expect(declarationValue(css, ".inline-progress", "border-radius")).toBe("999px");
+    expect(declarationValue(css, ".demo-progress-track", "border-radius")).toBe("var(--radius-control)");
+    expect(css).not.toMatch(/\.demo-progress-track\s*,\s*\.inline-progress\s*\{[^}]*border-radius/gu);
+  });
+
+  it("scopes every rendered shared role and surface to the demo contract", () => {
+    const tuples = [
+      [".demo-mode-shell .brand-lockup strong", ["var(--text-component-title)", "700", "var(--leading-component-title)", "var(--tracking-component-title)"]],
+      [".demo-mode-shell .brand-lockup small", ["var(--text-caption)", "600", "var(--leading-caption)", "var(--tracking-body)"]],
+      [".demo-mode-shell .eyebrow", ["var(--text-hud)", "700", "var(--leading-hud)", "var(--tracking-hud)", "var(--font-hud)"]],
+      [".demo-mode-shell .api-pulse-grid strong", ["var(--text-component-title)", "700", "var(--leading-component-title)", "var(--tracking-component-title)"]],
+      [".demo-mode-shell .api-pulse-grid span", ["var(--text-caption)", "600", "var(--leading-caption)", "var(--tracking-body)"]],
+      [".demo-mode-shell .triad-card span", ["var(--text-caption)", "600", "var(--leading-caption)", "var(--tracking-body)"]],
+      [".demo-mode-shell .triad-card strong", ["var(--text-section-title)", "800", "var(--leading-section-title)", "var(--tracking-section-title)"]],
+      [".demo-mode-shell .triad-card p", ["var(--text-body)", "500", "var(--leading-body)", "var(--tracking-body)"]],
+      [".demo-mode-shell .language-wall span", ["var(--text-caption)", "600", "var(--leading-caption)", "var(--tracking-body)"]],
+      [".demo-mode-shell .language-wall p", ["var(--text-body)", "500", "var(--leading-body)", "var(--tracking-body)"]],
+      [".demo-mode-shell + .presenter-notes strong", ["var(--text-component-title)", "700", "var(--leading-component-title)", "var(--tracking-component-title)"]],
+      [".demo-mode-shell + .presenter-notes p", ["var(--text-body)", "500", "var(--leading-body)", "var(--tracking-body)"]],
+    ] as const;
+    for (const [selector, tuple] of tuples) expectTuple(css, selector, tuple);
+
+    for (const selector of [
+      ".demo-mode-shell .api-pulse-grid > div",
+      ".demo-mode-shell .triad-card",
+      ".demo-mode-shell .language-wall > div",
+      ".demo-mode-shell.demo-mode-shell .demo-screen.card",
+      ".demo-mode-shell + .presenter-notes.card",
+    ]) {
+      expect(declarationValue(css, selector, "border-radius"), selector).toBe("var(--radius-panel)");
+    }
+  });
 
   it("requires complete tokenized typography, radius, gradient, and shadow contracts", () => {
     const violations = auditViolations(css);

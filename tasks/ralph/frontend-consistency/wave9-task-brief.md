@@ -6,16 +6,20 @@ Base: authoritative frontend/backend integration `31a44c0`.
 
 Normalize the complete user-visible `/demo` surface rendered by
 `components/V2DemoExperience.tsx`. The original selector-prefix inventory is
-exactly 64 findings, but an exact JSX class manifest proves that only 47 are
+exactly 64 findings, but an exact JSX class manifest proves that only 48 are
 rendered by the owned selector alternatives:
 
 - rendered typography 28: tuple 11, font-size 4, line-height 9, tracking 4
-- rendered geometry and decoration 19: radius 15, decorative box-shadow 3,
-  decorative gradient 1
-- non-rendered/shared ledger 17: `.v2-hero` 11, `.mission-*` 4, and two
+- rendered geometry and decoration 20: radius 15, decorative box-shadow 3,
+  decorative gradient 2
+- non-rendered/shared ledger 16: `.v2-hero` 11, `.mission-*` 4, and one
   shared comma-group findings (`.v2-link-band` radius and `.inline-progress`
-  radius), plus the non-rendered `.v2-hero` gradient. These are not
+  radius), including the non-rendered `.v2-hero` gradient. These are not
   rendered-owned design-completion claims.
+
+After the mixed progress rule is split, the unchanged `.inline-progress`
+radius becomes its own explicit ledger finding. The final ledger therefore has
+17 findings while the repository-wide delta remains 47.
 
 The rendered family is limited to the `.v2-*`, `.demo-*`, and
 `.scenario-strip` alternatives whose root classes occur in
@@ -27,8 +31,8 @@ roles, and shared module/document/workspace selectors.
 ## Required process
 
 1. Write the focused selector-family contract first and observe the exact
-   inventory 64 = rendered 47 + non-rendered/shared 17 split, followed by a
-   rendered 47-to-0
+   inventory 64 = rendered 48 + non-rendered/shared 16 split, followed by a
+   rendered 48-to-0
    RED, without changing production CSS or the audit runner.
 2. Prove `V2DemoExperience.tsx` renders the three owned selector families and
    `/demo` mounts that component. Redirected/dead prototype CSS is out of scope.
@@ -46,11 +50,12 @@ roles, and shared module/document/workspace selectors.
    short 1440px viewport. Verify complete computed typography, geometry,
    controls, state contrast, and zero horizontal/vertical clipping.
 8. Run focused tests, strict typecheck, normal 27-route build, production
-   browser matrix, and static audit. Record the rendered 47-to-0 delta, retain
-   all 17 non-rendered/shared findings in the inventory ledger, and record the
+   browser matrix, and static audit. Record the rendered 48-to-0 delta, retain
+   the 16 source findings plus the explicitly split shared finding (17 final)
+   in the inventory ledger, and record the
    honest repository-wide residual RED. Splitting `.demo-progress-track` from
    `.inline-progress` leaves the shared source/computed style unchanged, so the
-   expected repository-wide delta is 46 rather than 47 (`2,127` to `2,081`).
+   expected repository-wide delta is 47 rather than 48 (`2,127` to `2,080`).
 
 ## Hard exclusions
 
