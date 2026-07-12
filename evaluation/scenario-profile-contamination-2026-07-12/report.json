@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-07-12T02:01:19.6192396Z",
+  "baseCommit": "4c2a35ec24a3be4ddb54cfe839c22fd779e55075",
+  "status": "implementation_verified_review_pending",
+  "databaseMutation": false,
+  "reproduction": {
+    "companyName": "도시가스공사",
+    "companyType": "서비스업",
+    "siteName": "광주 하남산단 공장 세척 구역",
+    "weatherNote": "실내 환기 제한, 화학물질 노출과 미끄럼 위험 동시 관리"
+  },
+  "result": {
+    "companyName": "도시가스공사",
+    "companyType": "건설업",
+    "siteName": "도시가스공사 열수송관 굴착공사 현장",
+    "riskAssessmentContains": [
+      "굴착면 붕괴"
+    ],
+    "riskAssessmentExcludes": [
+      "화학세제"
+    ]
+  },
+  "verification": {
+    "testFiles": 3,
+    "testsPassed": 40,
+    "testsFailed": 0,
+    "typecheck": "pass",
+    "diffCheck": "pass"
+  }
+}
