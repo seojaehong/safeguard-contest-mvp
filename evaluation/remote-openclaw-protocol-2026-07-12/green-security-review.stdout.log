@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/remote-engine-protocol.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/remote-openclaw-protocol
+
+
+ Test Files  1 passed (1)
+      Tests  54 passed (54)
+   Start at  12:33:48
+   Duration  648ms (transform 56ms, setup 0ms, import 86ms, tests 32ms, environment 0ms)
+
