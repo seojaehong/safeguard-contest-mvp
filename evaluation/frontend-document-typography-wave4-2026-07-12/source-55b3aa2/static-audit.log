@@ -1,0 +1,12 @@
+{
+  "outputPath": "evaluation\\frontend-audit-runner-port-v2-2026-07-11\\static-audit.json",
+  "status": "fail",
+  "counts": {
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "cssLines": 17813,
+    "importantDeclarations": 737
+  },
+  "coverageIssues": 0,
+  "violationCount": 2362
+}

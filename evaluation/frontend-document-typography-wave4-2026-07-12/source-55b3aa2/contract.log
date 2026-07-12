@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/document-typography-token-contract.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-document-typography-wave4
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  10:56:11
+   Duration  1.28s (transform 45ms, setup 0ms, import 93ms, tests 29ms, environment 0ms)
+

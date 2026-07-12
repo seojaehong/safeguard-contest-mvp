@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "4c2a35ec24a3be4ddb54cfe839c22fd779e55075",
+  "sourceSha": "55b3aa2241e44d8845bb8cfa9bd5eaa7e0be756a",
+  "status": "bounded-pass-full-audit-red",
+  "staticAudit": {
+    "status": "fail",
+    "violations": 2362,
+    "selectorRoleBefore": 57,
+    "selectorRoleAfter": 51,
+    "typographyTuple": 612,
+    "importantDeclarations": 737,
+    "coverageIssues": 0,
+    "pageFiles": 32,
+    "componentFiles": 23
+  },
+  "verification": {
+    "contract": { "files": 1, "tests": 2, "status": "pass" },
+    "typecheck": "pass",
+    "build": { "staticPages": 27, "status": "pass" },
+    "productionBrowser": { "files": 1, "tests": 1, "viewThemeCombinations": 4, "horizontalOverflow": 0, "status": "pass" },
+    "audit108Rows": "not-run-static-prerequisite-red"
+  }
+}

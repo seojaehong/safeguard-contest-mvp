@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-12T01:37:56.049Z",
-  "sourceSha": "384348db78eb5bb8fdecfc627c5b5b7737b8ff61",
-  "sourceIdentity": "01179d4a641feba1d750eeddf476f4e3816b48ed6c4cf49d77dcca0b885c9438",
+  "generatedAt": "2026-07-12T01:55:55.943Z",
+  "sourceSha": "55b3aa2241e44d8845bb8cfa9bd5eaa7e0be756a",
+  "sourceIdentity": "d42ee0a7074be4717ed5865c40bfb98a8c032d672d5d765683f4be54e9ffc832",
   "status": "fail",
   "counts": {
     "pageFiles": 32,
     "componentFiles": 23,
-    "cssLines": 17798,
+    "cssLines": 17813,
     "importantDeclarations": 737
   },
   "coverage": {
@@ -83,7 +83,7 @@
     "unexpectedRoutes": []
   },
   "coverageIssues": 0,
-  "violationCount": 2368,
+  "violationCount": 2362,
   "violations": [
     {
       "rule": "font-size-tier",
@@ -14130,42 +14130,6 @@
       "file": "app/globals.css",
       "line": 14364,
       "value": ".safeclaw-module-shell.module-variant-document .safeclaw-module-hero h1 letter-spacing: expected var(--tracking-page-title), received 0"
-    },
-    {
-      "rule": "selector-role",
-      "file": "app/globals.css",
-      "line": 14364,
-      "value": ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header h2 font-size: expected var(--text-page-title), received missing"
-    },
-    {
-      "rule": "selector-role",
-      "file": "app/globals.css",
-      "line": 14364,
-      "value": ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header h2 line-height: expected var(--leading-page-title), received missing"
-    },
-    {
-      "rule": "selector-role",
-      "file": "app/globals.css",
-      "line": 14364,
-      "value": ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-header h2 letter-spacing: expected var(--tracking-page-title), received 0"
-    },
-    {
-      "rule": "selector-role",
-      "file": "app/globals.css",
-      "line": 14364,
-      "value": ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-section-head h3 font-size: expected var(--text-section-title), received missing"
-    },
-    {
-      "rule": "selector-role",
-      "file": "app/globals.css",
-      "line": 14364,
-      "value": ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-section-head h3 line-height: expected var(--leading-section-title), received missing"
-    },
-    {
-      "rule": "selector-role",
-      "file": "app/globals.css",
-      "line": 14364,
-      "value": ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-section-head h3 letter-spacing: expected var(--tracking-section-title), received 0"
     },
     {
       "rule": "selector-role",
