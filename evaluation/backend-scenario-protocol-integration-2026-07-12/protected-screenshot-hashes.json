@@ -1,0 +1,66 @@
+[
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-documents-day.png",
+    "sha256": "82fa77836576c0b8e230f15e4f385481fafa640eccea773c45f1776dce8f3549"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-documents-night.png",
+    "sha256": "539dad5e927d227954589f0985854d0dddeecdd3bdee36afad369e5247c03b8b"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-ops-api-day.png",
+    "sha256": "0b3f8b7ed18ebd91b9e62385d6256eb35a8964a3021d5b06bae6ecafa233e0e3"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-ops-api-night.png",
+    "sha256": "e66258e0e9596f866eac5493905a895849ffa034dd87d16f543f6fd061548879"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-tbm-day.png",
+    "sha256": "fbce501a2c50b1d94747f83abe6a5e4203c8807dda2d1018c8fc98a4a8490aeb"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-tbm-night.png",
+    "sha256": "6b1f51dda2e4c05dbd03fcadd919e102a1d14f8e3eefa1fb72c8d83747960396"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-workers-day.png",
+    "sha256": "9f87b5196abf34195fa4620dd6d5b35819f8d984fa755b98fff3d87539b49640"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-workers-night.png",
+    "sha256": "f746aacfeafac90bc1dc12f462295f64fa52eb0f23d5a174cefabc2f26a430e0"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-documents-day.png",
+    "sha256": "200192a9351cf13f4c7f0b5c9ad74b19fafc2ae4f339c7232b9ec84170bb968c"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-documents-night.png",
+    "sha256": "f8bc34e7384b0f279a00b8ee0734889f336402194282758363763924947066ac"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-ops-api-day.png",
+    "sha256": "97b47f28f39dd643f3a89658ddb8b428129fdcec51c892b4f4bf903fc7e8d87e"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-ops-api-night.png",
+    "sha256": "675d5bddcfb4cdefd28acfed86cdd797753a73969a4d50022e281e89a095c507"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-tbm-day.png",
+    "sha256": "cb21f3e01fa9a71e44d8f6b178cfd518bba9959e8f18733c2a9e78231a8bc709"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-tbm-night.png",
+    "sha256": "65f40169aabbb06ba4919275a2c9555ddd7c49f4500c98f22cfed50014297eb0"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-workers-day.png",
+    "sha256": "393fad609b7dd8269380aeaf28f26d553e089661a3ceedf70b9f03cbf0a3d570"
+  },
+  {
+    "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-workers-night.png",
+    "sha256": "33661b2395f69ea64991c4130d4dfea022f47f01c7f13b1915bffa0b7597f2a0"
+  }
+]

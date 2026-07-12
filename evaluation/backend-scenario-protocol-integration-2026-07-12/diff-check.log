@@ -1,0 +1,2 @@
+COMMAND=git diff --check 31a44c0..HEAD
+EXIT_CODE=0
