@@ -1,0 +1,29 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/pdf-korean-font-integration.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation
+
+ ❯ tests/pdf-korean-font-integration.test.ts (8 tests | 1 failed) 1528ms
+     × renders readable Korean line geometry across each extracted line 185ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/pdf-korean-font-integration.test.ts > Korean PDF font integration > renders readable Korean line geometry across each extracted line
+AssertionError: 위험성평가표: expected 0 to be greater than 50
+ ❯ tests/pdf-korean-font-integration.test.ts:251:58
+    249|     expect(metrics.length).toBeGreaterThanOrEqual(10);
+    250|     for (const metric of metrics) {
+    251|       expect(metric.darkPixelsPerCharacter, metric.text).toBeGreaterTh…
+       |                                                          ^
+    252|       expect(metric.occupiedBucketRatio, metric.text).toBeGreaterThanO…
+    253|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  01:41:36
+   Duration  3.90s (transform 178ms, setup 0ms, import 1.54s, tests 1.53s, environment 0ms)

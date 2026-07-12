@@ -599,6 +599,152 @@ function wrapPdfLine(value: string, maxChars: number) {
   return lines.length ? lines : [""];
 }
 
+type TrueTypeTableRecord = {
+  tag: string;
+  data: Buffer;
+};
+
+function alignTrueTypeOffset(value: number) {
+  return (value + 3) & ~3;
+}
+
+function assertTrueTypeRange(font: Buffer, offset: number, length: number, label: string) {
+  if (
+    !Number.isSafeInteger(offset)
+    || !Number.isSafeInteger(length)
+    || offset < 0
+    || length < 0
+    || offset + length > font.length
+  ) {
+    throw new Error(`Invalid TrueType ${label} range`);
+  }
+}
+
+function calculateTrueTypeChecksum(value: Buffer) {
+  let checksum = 0;
+  const paddedLength = alignTrueTypeOffset(value.length);
+  for (let offset = 0; offset < paddedLength; offset += 4) {
+    let word = 0;
+    for (let index = 0; index < 4; index += 1) {
+      word = ((word << 8) | (value[offset + index] ?? 0)) >>> 0;
+    }
+    checksum = (checksum + word) >>> 0;
+  }
+  return checksum;
+}
+
+// fontkit emits short loca offsets for subsets, so source glyph records must end on 2-byte boundaries.
+function normalizeTrueTypeGlyphAlignment(font: Buffer) {
+  assertTrueTypeRange(font, 0, 12, "header");
+  const tableCount = font.readUInt16BE(4);
+  const directoryLength = 12 + tableCount * 16;
+  assertTrueTypeRange(font, 0, directoryLength, "table directory");
+
+  const tables: TrueTypeTableRecord[] = [];
+  const tablesByTag = new Map<string, TrueTypeTableRecord>();
+  for (let index = 0; index < tableCount; index += 1) {
+    const recordOffset = 12 + index * 16;
+    const tag = font.toString("ascii", recordOffset, recordOffset + 4);
+    const tableOffset = font.readUInt32BE(recordOffset + 8);
+    const tableLength = font.readUInt32BE(recordOffset + 12);
+    assertTrueTypeRange(font, tableOffset, tableLength, `table ${tag}`);
+    if (tablesByTag.has(tag)) throw new Error(`Duplicate TrueType table ${tag}`);
+    const record = { tag, data: font.subarray(tableOffset, tableOffset + tableLength) };
+    tables.push(record);
+    tablesByTag.set(tag, record);
+  }
+
+  const head = tablesByTag.get("head")?.data;
+  const maxp = tablesByTag.get("maxp")?.data;
+  const loca = tablesByTag.get("loca")?.data;
+  const glyf = tablesByTag.get("glyf")?.data;
+  if (!head || head.length < 54 || !maxp || maxp.length < 6 || !loca || !glyf) {
+    throw new Error("Required TrueType outline tables are missing");
+  }
+
+  const glyphCount = maxp.readUInt16BE(4);
+  const sourceLocaFormat = head.readInt16BE(50);
+  if (sourceLocaFormat !== 0 && sourceLocaFormat !== 1) {
+    throw new Error("Unsupported TrueType loca format");
+  }
+  const sourceLocaEntrySize = sourceLocaFormat === 0 ? 2 : 4;
+  assertTrueTypeRange(loca, 0, (glyphCount + 1) * sourceLocaEntrySize, "loca entries");
+
+  const sourceGlyphOffsets: number[] = [];
+  for (let index = 0; index <= glyphCount; index += 1) {
+    const entryOffset = index * sourceLocaEntrySize;
+    const glyphOffset = sourceLocaFormat === 0
+      ? loca.readUInt16BE(entryOffset) * 2
+      : loca.readUInt32BE(entryOffset);
+    const previousOffset = sourceGlyphOffsets[index - 1] ?? 0;
+    if (glyphOffset < previousOffset || glyphOffset > glyf.length) {
+      throw new Error("Invalid TrueType glyph offset");
+    }
+    sourceGlyphOffsets.push(glyphOffset);
+  }
+
+  const normalizedGlyphs: Buffer[] = [];
+  const normalizedGlyphOffsets = [0];
+  let normalizedGlyfLength = 0;
+  let requiresNormalization = false;
+  for (let index = 0; index < glyphCount; index += 1) {
+    const start = sourceGlyphOffsets[index];
+    const end = sourceGlyphOffsets[index + 1];
+    const glyph = glyf.subarray(start, end);
+    normalizedGlyphs.push(glyph);
+    normalizedGlyfLength += glyph.length;
+    if (glyph.length % 2 !== 0) {
+      normalizedGlyphs.push(Buffer.alloc(1));
+      normalizedGlyfLength += 1;
+      requiresNormalization = true;
+    }
+    normalizedGlyphOffsets.push(normalizedGlyfLength);
+  }
+  if (!requiresNormalization) return font;
+
+  const normalizedGlyf = Buffer.concat(normalizedGlyphs, normalizedGlyfLength);
+  const normalizedLocaFormat = normalizedGlyf.length / 2 <= 0xffff ? sourceLocaFormat : 1;
+  const normalizedLocaEntrySize = normalizedLocaFormat === 0 ? 2 : 4;
+  const normalizedLoca = Buffer.alloc((glyphCount + 1) * normalizedLocaEntrySize);
+  normalizedGlyphOffsets.forEach((offset, index) => {
+    if (normalizedLocaFormat === 0) normalizedLoca.writeUInt16BE(offset / 2, index * 2);
+    else normalizedLoca.writeUInt32BE(offset, index * 4);
+  });
+
+  const normalizedHead = Buffer.from(head);
+  normalizedHead.writeUInt32BE(0, 8);
+  normalizedHead.writeInt16BE(normalizedLocaFormat, 50);
+  const replacements = new Map<string, Buffer>([
+    ["glyf", normalizedGlyf],
+    ["loca", normalizedLoca],
+    ["head", normalizedHead]
+  ]);
+
+  let outputLength = alignTrueTypeOffset(directoryLength);
+  tables.forEach((table) => {
+    outputLength = alignTrueTypeOffset(outputLength + (replacements.get(table.tag) ?? table.data).length);
+  });
+  const output = Buffer.alloc(outputLength);
+  font.copy(output, 0, 0, 12);
+  let tableDataOffset = alignTrueTypeOffset(directoryLength);
+  let normalizedHeadOffset = -1;
+  tables.forEach((table, index) => {
+    const data = replacements.get(table.tag) ?? table.data;
+    const recordOffset = 12 + index * 16;
+    output.write(table.tag, recordOffset, 4, "ascii");
+    output.writeUInt32BE(calculateTrueTypeChecksum(data), recordOffset + 4);
+    output.writeUInt32BE(tableDataOffset, recordOffset + 8);
+    output.writeUInt32BE(data.length, recordOffset + 12);
+    data.copy(output, tableDataOffset);
+    if (table.tag === "head") normalizedHeadOffset = tableDataOffset;
+    tableDataOffset = alignTrueTypeOffset(tableDataOffset + data.length);
+  });
+  if (normalizedHeadOffset < 0) throw new Error("TrueType head table was not written");
+  const checksumAdjustment = (0xb1b0afba - calculateTrueTypeChecksum(output)) >>> 0;
+  output.writeUInt32BE(checksumAdjustment, normalizedHeadOffset + 8);
+  return output;
+}
+
 let embeddedPdfFonts: { regular: Buffer; bold: Buffer } | null = null;
 const regularPdfFontPath = path.join(process.cwd(), "public/fonts/NotoSansKR-Regular.ttf");
 const boldPdfFontPath = path.join(process.cwd(), "public/fonts/NotoSansKR-Bold.ttf");
@@ -616,8 +762,8 @@ function loadEmbeddedPdfFonts(): { regular: Buffer; bold: Buffer } {
   try {
     fs.accessSync(pdfFontLicensePath, fs.constants.R_OK);
     embeddedPdfFonts = {
-      regular: fs.readFileSync(regularPdfFontPath),
-      bold: fs.readFileSync(boldPdfFontPath)
+      regular: normalizeTrueTypeGlyphAlignment(fs.readFileSync(regularPdfFontPath)),
+      bold: normalizeTrueTypeGlyphAlignment(fs.readFileSync(boldPdfFontPath))
     };
   } catch (error) {
     throw new PdfFontAssetError(error);

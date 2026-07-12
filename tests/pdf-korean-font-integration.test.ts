@@ -183,6 +183,77 @@ describe("Korean PDF font integration", () => {
     await document.destroy();
   });
 
+  it("renders readable Korean line geometry across each extracted line", async () => {
+    const response = await POST(createRequest());
+    const binary = Buffer.from(await response.arrayBuffer());
+
+    Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const document = await pdfjs.getDocument({ data: new Uint8Array(binary) }).promise;
+    const page = await document.getPage(1);
+    const scale = 2;
+    const viewport = page.getViewport({ scale });
+    const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
+    const context = canvas.getContext("2d");
+    await page.render({
+      canvas: canvas as never,
+      canvasContext: context as never,
+      viewport
+    }).promise;
+    const textContent = await page.getTextContent();
+    const metrics: Array<{
+      text: string;
+      darkPixelsPerCharacter: number;
+      occupiedBucketRatio: number;
+    }> = [];
+
+    for (const item of textContent.items) {
+      if (!("str" in item)) continue;
+      const characters = Array.from(item.str);
+      const koreanCharacterCount = characters.filter((character) => /[\u3131-\u318E\uAC00-\uD7A3]/u.test(character)).length;
+      const nonWhitespaceCharacterCount = characters.filter((character) => !/\s/u.test(character)).length;
+      if (koreanCharacterCount < 4 || nonWhitespaceCharacterCount === 0) continue;
+
+      const transform = pdfjs.Util.transform(viewport.transform, item.transform);
+      const x = Math.max(0, Math.floor(transform[4]));
+      const fontHeight = Math.max(1, Math.ceil(Math.hypot(transform[2], transform[3])));
+      const y = Math.max(0, Math.floor(transform[5] - fontHeight * 1.2));
+      const width = Math.min(Math.max(1, Math.ceil(item.width * scale)), canvas.width - x);
+      const height = Math.min(Math.ceil(fontHeight * 1.5), canvas.height - y);
+      const pixels = context.getImageData(x, y, width, height).data;
+      const bucketCount = Math.min(nonWhitespaceCharacterCount, 32);
+      const bucketDarkPixels = Array.from({ length: bucketCount }, () => 0);
+      let darkPixels = 0;
+
+      for (let pixelY = 0; pixelY < height; pixelY += 1) {
+        for (let pixelX = 0; pixelX < width; pixelX += 1) {
+          const offset = (pixelY * width + pixelX) * 4;
+          if (
+            pixels[offset + 3] > 0
+            && (pixels[offset] < 200 || pixels[offset + 1] < 200 || pixels[offset + 2] < 200)
+          ) {
+            darkPixels += 1;
+            const bucket = Math.min(bucketCount - 1, Math.floor(pixelX * bucketCount / width));
+            bucketDarkPixels[bucket] += 1;
+          }
+        }
+      }
+
+      metrics.push({
+        text: item.str,
+        darkPixelsPerCharacter: darkPixels / nonWhitespaceCharacterCount,
+        occupiedBucketRatio: bucketDarkPixels.filter((count) => count >= 3).length / bucketCount
+      });
+    }
+
+    expect(metrics.length).toBeGreaterThanOrEqual(10);
+    for (const metric of metrics) {
+      expect(metric.darkPixelsPerCharacter, metric.text).toBeGreaterThan(45);
+      expect(metric.occupiedBucketRatio, metric.text).toBeGreaterThanOrEqual(0.75);
+    }
+    await document.destroy();
+  });
+
   it("preserves canonical structured risk rows in extracted binary PDF text", async () => {
     const structuredPayload = {
       ...payload,

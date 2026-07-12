@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-13T01:49:55+09:00",
+  "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\release-pdf-render-remediation",
+  "branch": "fix/release-pdf-render-remediation",
+  "base": "a1dbedb64e177a4909584274eaad87484aa732f4",
+  "status": "green-local",
+  "rootCause": {
+    "component": "@pdf-lib/fontkit TrueType subsetting",
+    "finding": "Short loca offsets rounded unpadded odd-length glyf records and corrupted subset glyph boundaries.",
+    "redFontParseErrors": {
+      "regular": 80,
+      "bold": 12
+    }
+  },
+  "red": {
+    "pdf": "red-route.pdf",
+    "sha256": "0B26D0A2C777DDEB131F0A6B9E9AA56A2F84898565A4F00548116CF5DB26B580",
+    "bytes": 16635,
+    "status": 200,
+    "contentType": "application/pdf",
+    "cacheControl": "no-store",
+    "pdfPrefix": "%PDF-",
+    "existingTestsPassed": 7,
+    "visualRegressionFailure": "위험성평가표: expected 0 to be greater than 50",
+    "renderers": {
+      "pymupdf": { "pages": 1, "darkPixels": 4532, "darkFraction": 0.002262, "rasterBands": 20 },
+      "pdfium": { "pages": 1, "darkPixels": 4847, "darkFraction": 0.002419, "rasterBands": 20 },
+      "poppler": { "pages": 1, "darkPixels": 4523, "darkFraction": 0.002257, "rasterBands": 20 }
+    }
+  },
+  "controls": {
+    "rawSubset": {
+      "pdf": "subset-draw-text-control.pdf",
+      "sha256": "52A15A60B6E246BE71FBBFF29F792669F33649C12D74C2597E5D66A8A8DAFABA",
+      "bytes": 10709,
+      "popplerDarkPixels": 1945,
+      "rasterBands": 12,
+      "readable": false
+    },
+    "alignedSubset": {
+      "pdf": "normalized-subset-draw-text-control.pdf",
+      "sha256": "51C1CCFE5F68A8F8B35C83770646D034F3B36FFD98D7FB8B24AD7DD2E4A151EF",
+      "bytes": 10724,
+      "popplerDarkPixels": 12298,
+      "rasterBands": 7,
+      "readable": true
+    }
+  },
+  "green": {
+    "pdf": "green-route.pdf",
+    "sha256": "F68D0AED05F6DDE0DD5D1064F71BE1B6090168DADD5881BFAD17BC783942717F",
+    "bytes": 16591,
+    "status": 200,
+    "contentType": "application/pdf",
+    "cacheControl": "no-store",
+    "utf8Filename": true,
+    "pdfPrefix": "%PDF-",
+    "underOneMiB": true,
+    "koreanExtraction": true,
+    "fontParse": {
+      "regular": { "glyphs": 118, "errors": 0 },
+      "bold": { "glyphs": 17, "errors": 0 }
+    },
+    "minimumMeasuredDarkPixelsPerCharacter": 49.95,
+    "minimumMeasuredHorizontalBucketOccupancy": 1.0,
+    "renderers": {
+      "pymupdf": { "pages": 1, "darkPixels": 23951, "darkFraction": 0.011952, "rasterBands": 13 },
+      "pdfium": { "pages": 1, "darkPixels": 25472, "darkFraction": 0.012711, "rasterBands": 13 },
+      "poppler": { "pages": 1, "darkPixels": 23927, "darkFraction": 0.011940, "rasterBands": 13 }
+    }
+  },
+  "contracts": {
+    "typedFontErrorBoundary": true,
+    "missingFontControlled500": true,
+    "invalidFontControlled500": true,
+    "nonFontErrorRethrow": true,
+    "regularAndBoldSubsets": true,
+    "toUnicode": true
+  },
+  "verification": {
+    "focusedPdfTests": { "files": 2, "passed": 12, "failed": 0 },
+    "typecheck": "passed",
+    "build": "passed",
+    "nft": {
+      "manifest": ".next/server/app/api/export/pdf/route.js.nft.json",
+      "fileCount": 11,
+      "fontAssets": [
+        "public/fonts/NotoSansKR-Regular.ttf",
+        "public/fonts/NotoSansKR-Bold.ttf",
+        "public/fonts/NotoSansKR-OFL.txt"
+      ]
+    }
+  },
+  "artifacts": {
+    "redRendered": "red-rendered/",
+    "greenRendered": "green-rendered/",
+    "rawSubsetControlRendered": "subset-control-rendered/",
+    "alignedSubsetControlRendered": "normalized-subset-control-rendered/",
+    "redVisualTestLog": "red-visual-regression-test.log",
+    "greenVisualTestLog": "green-visual-regression-test.log",
+    "focusedTestsLog": "focused-pdf-tests.log",
+    "typecheckLog": "typecheck.log",
+    "buildLog": "build.log"
+  }
+}
