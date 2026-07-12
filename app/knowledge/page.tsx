@@ -158,17 +158,17 @@ export default async function KnowledgePage() {
         <section className={`knowledge-status-grid ${styles.overview}`} aria-label="지식 DB 상태">
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>Built-in Wiki</span>
-            <strong>{hazardEntries.length}개 위험요인 · {formEntries.length}개 서식</strong>
+            <h2>{hazardEntries.length}개 위험요인 · {formEntries.length}개 서식</h2>
             <p>기본 위험요인과 서식 기준을 내장 위키로 관리하고, 현장 문서 보완 때 짧은 근거 요약만 보여줍니다.</p>
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>Runtime Knowledge</span>
-            <strong>근거 매칭 · 원본 누적 · AI 보완</strong>
+            <h2>근거 매칭 · 원본 누적 · AI 보완</h2>
             <p>현장 API 호출 결과는 원본 이벤트로 검증되고, 로그인 시 Supabase 지식 테이블에 누적됩니다.</p>
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>Knowledge Catalog</span>
-            <strong>{stats.items.toLocaleString("ko-KR")}개 항목 · {stats.sources.toLocaleString("ko-KR")}개 출처</strong>
+            <h2>{stats.items.toLocaleString("ko-KR")}개 항목 · {stats.sources.toLocaleString("ko-KR")}개 출처</h2>
             <p>{stats.message}</p>
           </article>
         </section>

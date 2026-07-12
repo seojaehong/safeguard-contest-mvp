@@ -37,7 +37,7 @@ export default function WhyPage() {
         {apiCards.map(([title, body]) => (
           <article key={title} className="api-proof-card">
             <i aria-hidden="true" />
-            <strong>{title}</strong>
+            <h2>{title}</h2>
             <p>{body}</p>
           </article>
         ))}
@@ -46,7 +46,7 @@ export default function WhyPage() {
       <section className="safeclaw-module-panel comparison-card">
         <div className="compact-head">
           <span className="eyebrow">비교</span>
-          <strong>대안별 차이</strong>
+          <h2>대안별 차이</h2>
         </div>
         <div className="comparison-table" role="table" aria-label="대안별 기능 비교">
           <div className="comparison-head" role="row">
@@ -65,7 +65,7 @@ export default function WhyPage() {
       </section>
 
       <section className="safeclaw-module-panel v2-link-band">
-        <strong>차별성을 실제 작업 흐름에서 확인하려면</strong>
+        <h2>차별성을 실제 작업 흐름에서 확인하려면</h2>
         <Link className="button" href="/workspace">작업공간 열기</Link>
       </section>
     </SafeClawModuleShell>

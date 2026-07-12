@@ -1,6 +1,6 @@
 export const frontendTypography = {
   fonts: {
-    product: '"Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif',
+    product: '"Noto Sans KR", "Malgun Gothic", system-ui, sans-serif',
     hud: '"Geist Mono", "Cascadia Mono", Consolas, monospace',
     multilingual:
       '"Noto Sans", "Noto Sans KR", "Noto Sans Thai", "Noto Sans Khmer", "Noto Sans Myanmar", "Noto Sans Devanagari", "Malgun Gothic", sans-serif',
@@ -83,6 +83,8 @@ export const frontendShape = {
   microRadius: "2px",
   controlRadius: "4px",
   panelRadius: "4px",
+  softRadius: "8px",
+  workbenchRadius: "12px",
   circleRadius: "50%",
   controlHeight: "44px",
   compactControlHeight: "36px",
@@ -123,6 +125,7 @@ export const userVisibleRoutes = [
   "/workers",
   "/workspace",
 ] as const;
+
 export const specialSurfaceFiles = [
   "app/not-found.tsx",
   "app/error.tsx",

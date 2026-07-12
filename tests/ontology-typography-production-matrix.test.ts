@@ -50,39 +50,33 @@ const renderedOntologyFamilies = {
   support: [
     ".ontology-operation-loop > p",
     ".ontology-graph-shell > p",
-    ".ontology-kind-list strong",
   ],
   hud: [
-    ".ontology-operation-loop code",
     ".ontology-operation-flow span",
     ".ontology-graph-point > span",
     ".ontology-graph-stats span",
     ".ontology-graph-legend span",
     ".ontology-node-row span",
-    ".ontology-map-column > span",
   ],
   componentTitle: [
     ".ontology-operation-flow strong",
     ".ontology-graph-popover strong",
     ".ontology-node-row strong",
-    ".ontology-hover-card strong",
   ],
   caption: [
     ".ontology-operation-flow small",
     ".ontology-graph-point strong",
     ".ontology-graph-point small",
-    ".ontology-graph-popover p",
     ".ontology-node-row small",
   ],
   table: [
-    ".ontology-graph-popover li span",
     ".ontology-hover-card p",
     ".ontology-hover-card li span",
   ],
 } as const;
 
 type OperationMemoryRoute = "ontology" | "workspace";
-type OperationMemoryRole = "support" | "hud" | "componentTitle" | "caption" | "table";
+type OperationMemoryRole = "support" | "supportCompact" | "action" | "hud" | "hudTracked" | "bodyTitle" | "caption";
 type OperationMemoryFamily = {
   selector: string;
   role: OperationMemoryRole;
@@ -92,29 +86,31 @@ type OperationMemoryFamily = {
 const bothRoutes = ["ontology", "workspace"] as const;
 const operationMemoryFamilies: readonly OperationMemoryFamily[] = [
   { selector: ".operation-memory-copy p", role: "support", routes: bothRoutes },
-  { selector: ".operation-memory-list-item strong", role: "support", routes: bothRoutes },
-  { selector: ".operation-memory-actions button", role: "hud", routes: ["ontology"] },
+  { selector: ".operation-memory-detail p", role: "support", routes: bothRoutes },
+  { selector: ".operation-memory-list-item strong", role: "supportCompact", routes: bothRoutes },
+  { selector: ".operation-memory-actions button", role: "action", routes: ["ontology"] },
   { selector: ".operation-memory-stats span", role: "hud", routes: bothRoutes },
   { selector: ".operation-memory-point > span", role: "hud", routes: bothRoutes },
   { selector: ".operation-memory-list-item span", role: "hud", routes: bothRoutes },
   { selector: ".operation-memory-detail > span", role: "hud", routes: bothRoutes },
-  { selector: ".operation-memory-detail dt", role: "hud", routes: bothRoutes },
-  { selector: ".operation-memory-detail li b", role: "hud", routes: bothRoutes },
-  { selector: ".operation-memory-detail > strong", role: "componentTitle", routes: bothRoutes },
+  { selector: ".operation-memory-detail dt", role: "hudTracked", routes: bothRoutes },
+  { selector: ".operation-memory-detail li b", role: "hudTracked", routes: bothRoutes },
+  { selector: ".operation-memory-detail > strong", role: "bodyTitle", routes: bothRoutes },
   { selector: ".operation-memory-point strong", role: "caption", routes: bothRoutes },
   { selector: ".operation-memory-point small", role: "caption", routes: bothRoutes },
-  { selector: ".operation-memory-detail p", role: "caption", routes: bothRoutes },
   { selector: ".operation-memory-list-item small", role: "caption", routes: bothRoutes },
-  { selector: ".operation-memory-detail dd", role: "table", routes: bothRoutes },
-  { selector: ".operation-memory-detail li span", role: "table", routes: bothRoutes },
+  { selector: ".operation-memory-detail dd", role: "caption", routes: bothRoutes },
+  { selector: ".operation-memory-detail li span", role: "caption", routes: bothRoutes },
 ];
 
 const roleMetrics: Record<OperationMemoryRole, TypographyMetric> = {
-  support: { firstFont: "Pretendard", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 },
-  hud: { firstFont: "Geist Mono", size: "11px", weight: "700", lineHeight: 16, tracking: 0.88 },
-  componentTitle: { firstFont: "Pretendard", size: "20px", weight: "700", lineHeight: 27, tracking: -0.3 },
-  caption: { firstFont: "Pretendard", size: "12px", weight: "600", lineHeight: 18, tracking: 0 },
-  table: { firstFont: "Pretendard", size: "13px", weight: "500", lineHeight: 20, tracking: 0 },
+  support: { firstFont: "Noto Sans KR", size: "15px", weight: "500", lineHeight: 24, tracking: 0 },
+  supportCompact: { firstFont: "Noto Sans KR", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 },
+  action: { firstFont: "Noto Sans KR", size: "14px", weight: "700", lineHeight: 20, tracking: 0 },
+  hud: { firstFont: "Geist Mono", size: "11px", weight: "700", lineHeight: 16, tracking: 0 },
+  hudTracked: { firstFont: "Geist Mono", size: "11px", weight: "700", lineHeight: 16, tracking: 0.88 },
+  bodyTitle: { firstFont: "Noto Sans KR", size: "17px", weight: "500", lineHeight: 28.05, tracking: 0 },
+  caption: { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 },
 };
 
 async function expectOperationMemoryFamilies(page: Page, route: OperationMemoryRoute): Promise<void> {
@@ -126,7 +122,17 @@ async function expectOperationMemoryFamilies(page: Page, route: OperationMemoryR
   }
   await page.locator(`${root} .operation-memory-detail li b`).first().waitFor({ state: "attached" });
   for (const family of operationMemoryFamilies.filter((entry) => entry.routes.includes(route))) {
-    await expectRole(page, [`${root} ${family.selector}`], roleMetrics[family.role]);
+    const workspaceRelaxedCaption = new Set([
+      ".operation-memory-detail p",
+      ".operation-memory-point small",
+      ".operation-memory-list-item small",
+    ]);
+    const expected = route === "workspace" && workspaceRelaxedCaption.has(family.selector)
+        ? { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 19.8, tracking: 0 }
+      : route === "workspace" && family.role === "support"
+        ? { firstFont: "Noto Sans KR", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 }
+        : roleMetrics[family.role];
+    await expectRole(page, [`${root} ${family.selector}`], expected);
   }
 }
 
@@ -205,11 +211,16 @@ productionMatrix("ontology typography production matrix", () => {
         await page.goto(`${harness.baseUrl}/ontology?theme=${theme}`, { waitUntil: "networkidle" });
         await page.locator(".safeclaw-module-shell[data-ready='true']").waitFor();
 
-        await expectRole(page, renderedOntologyFamilies.support, { firstFont: "Pretendard", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 });
-        await expectRole(page, renderedOntologyFamilies.hud, { firstFont: "Geist Mono", size: "11px", weight: "700", lineHeight: 16, tracking: 0.88 });
-        await expectRole(page, renderedOntologyFamilies.componentTitle, { firstFont: "Pretendard", size: "20px", weight: "700", lineHeight: 27, tracking: -0.3 });
-        await expectRole(page, renderedOntologyFamilies.caption, { firstFont: "Pretendard", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
-        await expectRole(page, renderedOntologyFamilies.table, { firstFont: "Pretendard", size: "13px", weight: "500", lineHeight: 20, tracking: 0 });
+        await expectRole(page, renderedOntologyFamilies.support, { firstFont: "Noto Sans KR", size: "15px", weight: "500", lineHeight: 24, tracking: 0 });
+        await expectRole(page, [".ontology-kind-list strong"], { firstFont: "Noto Sans KR", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 });
+        await expectRole(page, [".ontology-operation-loop code"], { firstFont: "Geist Mono", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
+        await expectRole(page, renderedOntologyFamilies.hud, { firstFont: "Geist Mono", size: "11px", weight: "700", lineHeight: 16, tracking: 0 });
+        await expectRole(page, [".ontology-map-column > span", ".ontology-graph-popover li span"], { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
+        await expectRole(page, renderedOntologyFamilies.componentTitle, { firstFont: "Noto Sans KR", size: "17px", weight: "500", lineHeight: 28.05, tracking: 0 });
+        await expectRole(page, [".ontology-hover-card strong"], { firstFont: "Noto Sans KR", size: "20px", weight: "700", lineHeight: 27, tracking: 0 });
+        await expectRole(page, renderedOntologyFamilies.caption, { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
+        await expectRole(page, [".ontology-graph-popover p"], { firstFont: "Noto Sans KR", size: "15px", weight: "500", lineHeight: 24, tracking: 0 });
+        await expectRole(page, renderedOntologyFamilies.table, { firstFont: "Noto Sans KR", size: "13px", weight: "500", lineHeight: 20, tracking: 0 });
         await expectOperationMemoryFamilies(page, "ontology");
 
         const nodeRow = page.locator(".ontology-node-row").filter({ has: page.locator(".ontology-hover-card") }).first();

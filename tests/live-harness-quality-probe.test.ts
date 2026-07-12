@@ -48,13 +48,13 @@ type ProbeModule = {
   renderMarkdownEvidence: (report: unknown) => string;
 };
 
+const SCRIPT_PATH = path.resolve(process.cwd(), "scripts/live_harness_quality_probe.mjs");
+
 const {
   CANONICAL_SCENARIO,
   evaluateHarnessResponse,
   renderMarkdownEvidence,
 } = rawProbeModule as unknown as ProbeModule;
-
-const SCRIPT_PATH = path.resolve(process.cwd(), "scripts/live_harness_quality_probe.mjs");
 
 function buildGoodFixture() {
   const packet = {

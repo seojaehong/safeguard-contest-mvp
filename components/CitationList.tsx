@@ -56,8 +56,8 @@ function evidenceRoleLabel(item: SearchResult) {
 export function CitationList({ citations, question }: { citations: SearchResult[]; question?: string }) {
   return (
     <div className="card list">
-      <div className="h3">근거 출처</div>
-      <div className="muted small">법령, 판례, 해석례를 나눠 현재 작업의 위험 판단과 산출물 문구를 뒷받침합니다. 법률 검토 최종 의견이 아니라 현장 문서 초안용 근거입니다.</div>
+      <h2 className="h3">근거 출처</h2>
+      <p className="muted small route-section-description">법령, 판례, 해석례를 나눠 현재 작업의 위험 판단과 산출물 문구를 뒷받침합니다. 법률 검토 최종 의견이 아니라 현장 문서 초안용 근거입니다.</p>
       {citationGroups.map((group) => {
         const groupItems = citations.filter((item) => item.type === group.type);
         if (!groupItems.length) return null;
@@ -79,7 +79,7 @@ export function CitationList({ citations, question }: { citations: SearchResult[
                     <span className="badge">새 탭</span>
                     {c.tags?.some((tag) => tag.includes("작업위험 매핑")) ? <span className="badge">작업위험 매핑</span> : null}
                   </div>
-                  <strong>{c.title}</strong>
+                  <h3 className="h3">{c.title}</h3>
                   <span className="muted">{c.summary}</span>
                   <span className="small relevance-note">문서 반영 위치: {citationDocumentMap[c.type].join(" · ")}</span>
                   <span className="small relevance-note">{describeRelevance(c, question)}</span>

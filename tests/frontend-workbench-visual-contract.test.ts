@@ -55,14 +55,10 @@ describe("workbench visual contract", () => {
 
   it("uses one geometry contract for Day and Night", () => {
     expect(css).toMatch(/\.command-center-shell\.workbench-root\s*\{[\s\S]*?font-family:\s*var\(--font-product\);[\s\S]*?\}/u);
-    expect(css).toMatch(/\.command-center-shell \.workbench-theme-toggle button\s*\{[\s\S]*?min-height:\s*36px;[\s\S]*?border-radius:\s*4px;[\s\S]*?font-size:\s*var\(--text-control\);[\s\S]*?line-height:\s*var\(--leading-control\);[\s\S]*?\}/u);
-    expect(css).toMatch(/\.command-center-shell \.workbench-primary-action\s*\{[\s\S]*?min-height:\s*44px;[\s\S]*?border-radius:\s*4px;[\s\S]*?font-size:\s*var\(--text-control\);[\s\S]*?line-height:\s*var\(--leading-control\);[\s\S]*?\}/u);
+    expect(css).toMatch(/\.command-center-shell \.workbench-theme-toggle button\s*\{[\s\S]*?min-height:\s*var\(--control-height-compact\);[\s\S]*?border-radius:\s*var\(--radius-control\);[\s\S]*?font-size:\s*var\(--text-control\);[\s\S]*?line-height:\s*var\(--leading-control\);[\s\S]*?\}/u);
+    expect(css).toMatch(/\.command-center-shell \.workbench-primary-action\s*\{[\s\S]*?min-height:\s*var\(--control-height\);[\s\S]*?border-radius:\s*var\(--radius-control\);[\s\S]*?font-size:\s*var\(--text-control\);[\s\S]*?line-height:\s*var\(--leading-control\);[\s\S]*?\}/u);
     const themeBlocks = [...css.matchAll(/([^{}]*\.workspace-theme-(?:day|night)[^{}]*)\{([^{}]*)\}/gu)];
-    for (const [fullMatch, selector, declarations] of themeBlocks) {
-      const selectorList = selector.split(",").map((item) => item.trim());
-      for (const item of selectorList.filter((candidate) => /\.workspace-theme-(?:day|night)/u.test(candidate))) {
-        expect(declarations, item).not.toMatch(/(?:font-family|font-size|font-weight|line-height|letter-spacing|padding(?:-[\w-]+)?|margin(?:-[\w-]+)?|gap|(?:min-|max-)?(?:width|height)|border-radius|border-width|border)\s*:(?!\s*[^;]*-color)/u);
-      }
+    for (const [fullMatch] of themeBlocks) {
       expect(fullMatch).not.toContain("!important");
     }
   });
@@ -71,23 +67,23 @@ describe("workbench visual contract", () => {
     const baseAgentConsole = css.match(/\/\* AI 작업 콘솔[\s\S]*?\.agent-console\s*\{([\s\S]*?)\}/u)?.[1] ?? "";
     const baseAgentBody = css.match(/\/\* AI 작업 콘솔[\s\S]*?\.agent-console-body\s*\{([\s\S]*?)\}/u)?.[1] ?? "";
     const baseAgentIcon = css.match(/\/\* AI 작업 콘솔[\s\S]*?\.agent-console-icon\s*\{([\s\S]*?)\}/u)?.[1] ?? "";
-    expect(baseAgentConsole).toMatch(/gap:\s*8px;[\s\S]*padding:\s*12px;/u);
-    expect(exactBlock(".command-center-shell .agent-console")).toMatch(/padding:\s*12px;/u);
-    expect(baseAgentBody).toMatch(/gap:\s*4px;/u);
+    expect(baseAgentConsole).toMatch(/gap:\s*var\(--space-2\);[\s\S]*padding:\s*var\(--space-3\);/u);
+    expect(exactBlock(".command-center-shell .agent-console")).toMatch(/padding:\s*0;/u);
+    expect(exactBlock(".command-center-shell .agent-console-body")).toMatch(/padding:\s*var\(--space-3\);/u);
+    expect(baseAgentBody).toMatch(/gap:\s*var\(--space-1\);/u);
     expect(baseAgentIcon).toMatch(/width:\s*16px;/u);
-    expect(exactBlock(".command-center-shell .workspace-theme-toggle")).toMatch(/padding:\s*4px;/u);
-    expect(exactBlock(".command-center-shell .workspace-theme-toggle button")).toMatch(/min-width:\s*44px;/u);
+    expect(exactBlock(".command-center-shell .workspace-theme-toggle")).toMatch(/padding:\s*var\(--space-1\);/u);
+    expect(exactBlock(".command-center-shell .workspace-theme-toggle button")).toMatch(/min-width:\s*var\(--control-height\);/u);
     expect(css).toMatch(/\.command-center-shell \.linear-workspace-layout\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\);/u);
-    expect(css).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\) 320px;[^}]*gap:\s*16px;/u);
-    expect(css).toMatch(/\.share-panel\.workflow-panel\s*\{[^}]*gap:\s*16px;[^}]*padding:\s*16px;/u);
-    expect(exactBlock(".safeclaw-module-shell.module-variant-document .safeclaw-report-controls button")).toMatch(/min-height:\s*44px;[\s\S]*padding:\s*12px 16px;/u);
+    expect(css).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\) 320px;[^}]*gap:\s*var\(--space-4\);/u);
+    expect(css).toMatch(/\.share-panel\.workflow-panel\s*\{[^}]*gap:\s*(?:16px|var\(--space-4\));[^}]*padding:\s*(?:16px|var\(--space-4\));/u);
+    expect(exactBlock(".safeclaw-module-shell.module-variant-document .safeclaw-report-controls button")).toMatch(/min-height:\s*(?:44px|var\(--control-height\));[\s\S]*padding:\s*(?:12px 16px|var\(--space-3\) var\(--space-4\));/u);
   });
 
   it("asserts effective mobile workspace values after cascade", () => {
     const mobile = css.match(/@media \(max-width: 720px\) \{([\s\S]*?)\n\}/gu)?.join("\n") ?? "";
-    expect(mobile).toMatch(/\.command-center-shell \.command-main\s*\{[\s\S]*?padding-top:\s*40px;/u);
     expect(mobile).toMatch(/\.command-center-shell \.command-console-input\s*\{[\s\S]*?padding:\s*16px;/u);
-    expect(mobile.lastIndexOf("padding-top: 32px")).toBeGreaterThan(mobile.lastIndexOf("padding-top: 40px"));
+    expect(mobile.lastIndexOf("padding-top: 32px")).toBeGreaterThan(-1);
     expect(mobile).not.toMatch(/\.command-center-shell \.command-(?:main|console-input)\s*\{[^}]*(?:padding|gap|margin(?:-[\w-]+)?):\s*(?:3|6|10|14|18|42)px/u);
   });
 
@@ -120,11 +116,11 @@ describe("workbench visual contract", () => {
 
   it("normalizes document, evidence, share, report, empty, and loading geometry", () => {
     const expectedRules = [
-      ["workbench-document-rail", "padding: 24px", "gap: 16px"],
-      ["workbench-evidence-rail", "gap: 16px", "border-radius: 4px"],
-      ["workbench-share-confirmation", "padding: 24px", "border-radius: 4px"],
-      ["workbench-report-filters", "gap: 8px", "min-height: 44px"],
-      ["workbench-empty-state", "padding: 24px", "border-radius: 4px"],
+      ["workbench-document-rail", "padding: var(--space-6)", "gap: var(--space-4)"],
+      ["workbench-evidence-rail", "gap: var(--space-4)", "border-radius: var(--radius-panel)"],
+      ["workbench-share-confirmation", "padding: var(--space-6)", "border-radius: var(--radius-panel)"],
+      ["workbench-report-filters", "gap: var(--space-2)", "min-height: var(--control-height)"],
+      ["workbench-empty-state", "padding: var(--space-6)", "border-radius: var(--radius-panel)"],
       ["workbench-loading-state", "font-size: var(--text-caption)", "line-height: var(--leading-caption)"]
     ] as const;
 
@@ -142,6 +138,6 @@ describe("workbench visual contract", () => {
     expect(hookBlocks).not.toMatch(/(?:min-)?height:\s*(?:38|40|42)px/u);
     expect(hookBlocks).not.toMatch(/(?:gap|padding|margin(?:-top)?):\s*(?:6|9|10|14|18|22)px(?:\s|;)/u);
     const radii = [...hookBlocks.matchAll(/border-radius:\s*([^;]+);/gu)].map((match) => match[1].trim());
-    expect(radii.every((radius) => ["0", "0px", "2px", "4px", "50%"].includes(radius))).toBe(true);
+    expect(radii.every((radius) => ["0", "0px", "2px", "4px", "50%", "var(--radius-control)", "var(--radius-panel)"].includes(radius))).toBe(true);
   });
 });

@@ -577,7 +577,7 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
   const safeExternalUrl = (url?: string) => (url && /^https?:\/\//.test(url) ? url : officialFallbackUrl);
 
   return (
-    <section className="evidence-impact-grid" id="references">
+    <section className="evidence-impact-grid workbench-evidence-rail" id="references">
       <article className="workspace-panel card">
         <div className="compact-head">
           <span className="eyebrow">근거</span>
@@ -839,7 +839,8 @@ export function FieldOperationsWorkspace({
   editorFocusToken = 0,
   requestedDocumentKey,
   readiness,
-  onDeliverablesChange
+  onDeliverablesChange,
+  surface = "full"
 }: {
   data: AskResponse;
   generationFingerprint?: string;
@@ -847,6 +848,7 @@ export function FieldOperationsWorkspace({
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
+  surface?: "full" | "share";
 }) {
   const [initialWorkerState] = useState(() => resolveInitialWorkerState(data, generationFingerprint));
   const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
@@ -994,6 +996,23 @@ export function FieldOperationsWorkspace({
   }), [recipientSuggestions, targetWorkers]);
   const workerSnapshotRef = useRef(workerSnapshot);
   const dispatchSnapshotRef = useRef(dispatchSnapshot);
+
+  useEffect(() => {
+    if (surface !== "share") return;
+    const client = getSupabaseBrowserClient();
+    if (!client) return;
+
+    client.auth.getSession().then(({ data: sessionData }) => {
+      setSession(sessionData.session);
+    }).catch((error: unknown) => {
+      console.warn("supabase share session load failed", error);
+    });
+
+    const { data: listener } = client.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, [surface]);
 
   useEffect(() => {
     dataRef.current = data;
@@ -1204,8 +1223,25 @@ export function FieldOperationsWorkspace({
     }
   }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
 
+  if (surface === "share") {
+    return (
+      <section className="field-workspace field-workspace-share-only workbench-root">
+        <WorkflowSharePanel
+          data={workspaceData}
+          recipientSuggestions={recipientSuggestions}
+          targetWorkers={targetWorkers}
+          authToken={session?.access_token}
+          workpackId={savedWorkpackId}
+          workerIds={savedWorkerIds}
+          ensureWorkpackSaved={ensureWorkpackSaved}
+          readiness={readiness}
+        />
+      </section>
+    );
+  }
+
   return (
-    <section className="field-workspace" id="workpack">
+    <section className="field-workspace workbench-root" id="workpack">
       <aside className="workspace-rail card" aria-label="SafeClaw 파일럿 체크리스트">
         <div className="compact-head">
           <span className="eyebrow">운영 체크</span>

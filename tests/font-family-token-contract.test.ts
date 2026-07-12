@@ -20,7 +20,8 @@ function someDeclarationFor(selector: string, declaration: string): boolean {
 
 describe("font family token contract", () => {
   it("routes every product font declaration through a semantic token", () => {
-    const literalFamilies = Array.from(css.matchAll(/font-family\s*:\s*([^;\r\n}]+)/gu))
+    const productRules = css.replace(/@font-face\s*\{[^}]*\}/gu, "");
+    const literalFamilies = Array.from(productRules.matchAll(/font-family\s*:\s*([^;\r\n}]+)/gu))
       .map((match) => match[1].trim().replace(/\s*!important$/u, ""))
       .filter((value) => !value.startsWith("var(") && value !== "inherit");
 

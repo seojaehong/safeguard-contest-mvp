@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default async function WorkspacePage({ searchParams }: { searchParams: Promise<{ q?: string; scenario?: string; theme?: string }> }) {
   const params = await searchParams;
   const selectedExample = fieldExamples.find((example) => example.id === params.scenario) || defaultFieldExample;
-  const q = params.q || selectedExample.question;
+  const q = params.q || (params.scenario ? selectedExample.question : "");
   const workspaceTheme = params.theme === "night" || params.theme === "dark" ? "night" : "day";
 
   return (

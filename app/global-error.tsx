@@ -11,8 +11,8 @@ export default function GlobalError({
     <html lang="ko">
       <body>
         <main className="container grid">
-          <section className="card list" data-audit-boundary="global-error">
-            <h1 className="h2">서비스에 일시적인 문제가 발생했습니다</h1>
+          <section className="card list special-state" data-audit-boundary="global-error">
+            <h1 className="special-state-title">서비스에 일시적인 문제가 발생했습니다</h1>
             <div className="muted">
               화면을 표시하는 중 오류가 발생했습니다. 아래 버튼으로 다시 시도해 주세요.
             </div>

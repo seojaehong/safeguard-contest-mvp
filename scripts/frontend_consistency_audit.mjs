@@ -129,6 +129,10 @@ const semanticRoleOverrides = {
   ".legal-reading-body": "longform",
   ".knowledge-detail-card p": "longform",
   ".knowledge-detail-card li": "longform",
+  ".command-center-shell.workspace-theme-day .field-workspace .document-textarea": "longform",
+  ".command-center-shell.workspace-theme-day .field-workspace .remediation-textarea": "longform",
+  ".safeclaw-module-shell.module-variant-document .document-textarea": "longform",
+  ".safeclaw-module-shell.module-variant-document .remediation-textarea": "longform",
   ".command-center-shell .command-primary": "control",
   ".safeclaw-module-primary": "control",
   ".safeclaw-module-actions a": "control",
@@ -233,6 +237,27 @@ allowEffect(
   "repeating-linear-gradient(-45deg, var(--hazard) 0, var(--hazard) 8px, var(--steel-1, #111114) 8px, var(--steel-1, #111114) 16px)",
   "documented hazard marking",
 );
+
+for (const [selector, value, reason] of [
+  [".command-center-shell .input-photo-candidates article.accepted", "inset 4px 0 0 var(--workspace-success)", "accepted photo rail"],
+  [".command-center-shell.workspace-theme-day .command-console-input:focus", "0 0 0 3px rgba(245, 197, 24, 0.22)", "keyboard focus ring"],
+  [".command-center-shell.workspace-theme-day .input-photo-candidates article.accepted", "inset 4px 0 0 #16a34a", "accepted photo rail"],
+  [".command-center-shell.workspace-theme-day .field-workspace .document-editor.editor-focus-cue", "0 0 0 3px rgba(108, 111, 247, 0.12)", "editor focus cue"],
+  [".command-center-shell.workspace-theme-day .field-workspace .doc-tab.active", "inset 4px 0 0 var(--workspace-accent)", "active document rail"],
+  [".command-center-shell.workspace-theme-day .field-workspace :is(.document-textarea, .remediation-textarea):focus", "0 0 0 3px rgba(108, 111, 247, 0.18)", "keyboard focus ring"],
+  [".safeclaw-module-shell.module-variant-document .doc-tab.active", "inset 4px 0 0 var(--workspace-accent)", "active document rail"],
+  [".safeclaw-module-shell.module-variant-document .template-card.active", "inset 4px 0 0 var(--workspace-accent)", "active template rail"],
+  [".safeclaw-module-shell.module-variant-document .document-textarea:focus", "0 0 0 3px rgba(108, 111, 247, 0.18)", "keyboard focus ring"],
+  [".safeclaw-module-shell.module-variant-document .remediation-textarea:focus", "0 0 0 3px rgba(108, 111, 247, 0.18)", "keyboard focus ring"],
+  [".command-center-shell.workspace-theme-night .field-workspace .document-editor.editor-focus-cue", "0 0 0 3px rgba(108, 111, 247, 0.22)", "editor focus cue"],
+  [".command-center-shell.workspace-theme-night .field-workspace .doc-tab.active", "inset 4px 0 0 var(--workspace-accent)", "active document rail"],
+  [".command-center-shell.workspace-theme-night .field-workspace :is(.document-textarea, .remediation-textarea):focus", "0 0 0 3px rgba(108, 111, 247, 0.24)", "keyboard focus ring"],
+  [".safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-rail a.active", "inset 4px 0 0 var(--workspace-accent)", "active navigation rail"],
+  [".safeclaw-module-shell .safeclaw-module-theme-toggle button.active", "inset 0 0 0 1px var(--workspace-rule-strong)", "selected theme indicator"],
+  [".safeclaw-module-shell.module-variant-document :is(.safeclaw-mobile-core-list, .safeclaw-mobile-remaining-list) button[aria-pressed=\"true\"]", "inset 4px 0 0 var(--workspace-accent)", "selected mobile document rail"],
+]) {
+  allowEffect(selector, "box-shadow", value, reason);
+}
 
 const selectorRoleContract = {
   body: {
@@ -364,6 +389,10 @@ function cssViolations(source) {
   ]);
 
   for (const match of source.matchAll(/font-family\s*:\s*([^;\r\n}]+)/g)) {
+    const blockStart = source.lastIndexOf("{", match.index);
+    const selectorStart = source.lastIndexOf("}", blockStart) + 1;
+    const enclosingSelector = source.slice(selectorStart, blockStart);
+    if (enclosingSelector.includes("@font-face")) continue;
     const value = match[1].trim().replace(/\s*!important$/, "");
     if (!value.startsWith("var(") && value !== "inherit") {
       violations.push({ rule: "font-family-token", file: "app/globals.css", line: lineNumber(source, match.index), value });
@@ -406,6 +435,7 @@ function cssViolations(source) {
   const allowedRadii = new Set([
     "0", "2px", "4px", "50%", "var(--radius-structural)", "var(--radius-micro)",
     "var(--radius-control)", "var(--radius-panel)", "var(--radius-circle)",
+    "var(--radius-soft)", "var(--radius-workbench)",
     "var(--radius-sm)", "var(--radius-md)", "var(--radius-lg)", "var(--r-xs)",
     "var(--r-sm)", "var(--r-md)", "var(--r-lg)", "var(--r-xl)",
   ]);

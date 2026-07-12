@@ -189,20 +189,20 @@ const channelOptions: Array<{
     label: "밴드",
     helper: "팀 채널 운영 승인이 없어 선택 불가",
     nextAction: "관리자 채널 승인 후 활성화",
-    badge: "잠김",
+    badge: "설정하면 사용할 수 있어요",
     enabled: false
   }
 ];
 const activeDispatchChannels: ActiveChannel[] = ["email", "sms", "kakao"];
 const EMPTY_SHARE_RECORDS: ShareRecordsState = {
   status: "idle",
-  message: "저장된 workpack ID가 생기면 공유 세션과 열람 이력을 조회합니다.",
+  message: "문서팩을 저장하면 공유와 열람 이력을 확인할 수 있습니다.",
   sessions: [],
   confirmations: []
 };
 const EMPTY_DISPATCH_RECORDS: DispatchRecordsState = {
   status: "idle",
-  message: "저장된 workpack ID가 생기면 전송 로그를 조회합니다.",
+  message: "문서팩을 저장하면 전송 이력을 확인할 수 있습니다.",
   logs: []
 };
 
@@ -307,11 +307,11 @@ export function buildDispatchLogDrafts(input: {
 }
 
 function formatSessionReuseReason(reason: ShareSessionReuseReason | null): string {
-  if (reason === "expiry_missing") return "expires_at이 없어 과거 세션을 재사용하지 않습니다.";
-  if (reason === "expiry_invalid") return "expires_at 형식이 올바르지 않아 세션을 재사용하지 않습니다.";
+  if (reason === "expiry_missing") return "이전 공유의 만료 시간을 확인할 수 없어 새로 준비합니다.";
+  if (reason === "expiry_invalid") return "이전 공유의 만료 시간이 올바르지 않아 새로 준비합니다.";
   if (reason === "expired") return "만료된 세션이라 재사용하지 않습니다.";
-  if (reason === "permission_not_ready") return "invited · anonymous false · viewer · workerSnapshot 조건을 모두 확인할 수 없습니다.";
-  if (reason === "recipient_mismatch") return "현재 대상과 저장된 recipient snapshot이 일치하지 않습니다.";
+  if (reason === "permission_not_ready") return "초대된 참여자의 열람 권한을 다시 확인해야 합니다.";
+  if (reason === "recipient_mismatch") return "현재 참여자와 이전에 저장한 참여자가 달라 새로 준비합니다.";
   return "현재 대상과 재사용 정책을 모두 충족한 세션이 아닙니다.";
 }
 
@@ -331,7 +331,7 @@ export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
   if (!input.authenticated) {
     storage = {
       label: "로그인 필요",
-      detail: "서버 workpack을 아직 만들지 않았습니다.",
+      detail: "로그인하면 문서팩과 전송 이력을 서버에 안전하게 저장합니다.",
       nextAction: "관리자 로그인"
     };
   } else if (!input.targetCount) {
@@ -342,27 +342,27 @@ export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
     };
   } else if (input.phase === "saving-workpack") {
     storage = {
-      label: "저장 ID 발급 중",
-      detail: "workpack과 worker UUID를 서버에 저장하고 있습니다.",
-      nextAction: "저장 완료 대기"
+      label: "문서팩 저장 중",
+      detail: "문서팩과 작업자 정보를 안전하게 저장하고 있습니다.",
+      nextAction: "잠시만 기다려 주세요"
     };
   } else if (authorityReady) {
     storage = {
       label: "저장됨",
-      detail: `workpack · worker UUID ${input.serverWorkerIdCount}명`,
-      nextAction: "공유 세션 확인"
+      detail: `문서팩 · 작업자 ${input.serverWorkerIdCount}명 저장`,
+      nextAction: "공유 설정 확인"
     };
   } else if (input.workpackId) {
     storage = {
-      label: "작업자 ID 대기",
-      detail: `대상 ${input.targetCount}명 · 서버 ID ${input.serverWorkerIdCount}명`,
+      label: "작업자 저장 확인",
+      detail: `대상 ${input.targetCount}명 · 저장 완료 ${input.serverWorkerIdCount}명`,
       nextAction: "작업자 저장 완료 후 다시 확인"
     };
   } else {
     storage = {
-      label: "저장 ID 대기",
-      detail: "workpack과 작업자 서버 ID가 아직 없습니다.",
-      nextAction: "전송 확인에서 서버 저장"
+      label: "전송 시 안전하게 저장",
+      detail: "문서팩과 작업자 정보는 전송 전에 저장됩니다.",
+      nextAction: "대상과 채널 확인"
     };
   }
 
@@ -370,15 +370,15 @@ export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
   let session: ShareStateDescriptor;
   if (input.phase === "creating-session") {
     session = {
-      label: "세션 생성 중",
-      detail: "초대 대상과 권한 snapshot을 저장하고 있습니다.",
-      nextAction: "세션 ID 발급 대기"
+      label: "공유 설정 중",
+      detail: "초대할 참여자와 열람 권한을 저장하고 있습니다.",
+      nextAction: "잠시만 기다려 주세요"
     };
   } else if (input.activeSession) {
     session = {
       label: input.sessionReusable ? `활성 · ${recipientCount}명` : `재사용 불가 · ${recipientCount}명`,
       detail: input.sessionReusable && isShareSessionPermissionReady(input.activeSession)
-        ? "초대 대상 snapshot · viewer 권한"
+        ? "초대된 참여자 · 열람 전용"
         : formatSessionReuseReason(input.sessionReuseReason),
       nextAction: input.shareRecordsStatus === "error"
         ? "세션 이력 다시 조회"
@@ -389,31 +389,31 @@ export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
   } else if (!authorityReady) {
     session = {
       label: "저장 후 생성",
-      detail: "workpack과 worker UUID가 있어야 세션을 만듭니다.",
-      nextAction: "저장 ID 확보"
+      detail: "문서팩과 작업자를 저장한 뒤 공유를 준비합니다.",
+      nextAction: "문서팩 저장"
     };
   } else if (input.shareRecordsStatus === "loading") {
     session = {
-      label: "세션 조회 중",
-      detail: "저장된 활성 세션을 확인하고 있습니다.",
-      nextAction: "조회 완료 대기"
+      label: "공유 이력 확인 중",
+      detail: "저장된 공유 설정을 확인하고 있습니다.",
+      nextAction: "잠시만 기다려 주세요"
     };
   } else if (input.shareRecordsStatus === "unconfigured") {
     session = {
-      label: "세션 저장소 미연결",
-      detail: "Supabase 공유 세션 저장소가 연결되지 않았습니다.",
-      nextAction: "서버 저장소 설정 확인"
+      label: "로그인 후 공유 가능",
+      detail: "로그인하면 공유 설정을 서버에 안전하게 저장합니다.",
+      nextAction: "로그인"
     };
   } else if (input.shareRecordsStatus === "error") {
     session = {
-      label: "세션 조회 실패",
-      detail: "활성 공유 세션을 확인하지 못했습니다.",
-      nextAction: "세션 이력 다시 조회"
+      label: "공유 이력 확인 필요",
+      detail: "이전 공유 이력을 불러오지 못했습니다.",
+      nextAction: "공유 이력 다시 확인"
     };
   } else {
     session = {
       label: "아직 없음",
-      detail: "전송 전 초대 대상 snapshot으로 생성합니다.",
+      detail: "전송 전에 선택한 참여자로 공유 설정을 만듭니다.",
       nextAction: "전송할 채널 확인"
     };
   }
@@ -421,58 +421,58 @@ export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
   let dispatch: ShareStateDescriptor;
   if (input.phase === "dispatching") {
     dispatch = {
-      label: "provider 응답 대기",
+      label: "채널 전송 중",
       detail: "채널별 전송 결과를 기다리고 있습니다.",
       nextAction: "전송 창을 닫지 않기"
     };
   } else if (input.phase === "saving-log") {
     dispatch = {
       label: "전송 결과 · 로그 저장 중",
-      detail: "provider 결과를 dispatch_logs에 저장하고 있습니다.",
-      nextAction: "로그 저장 완료 대기"
+      detail: "채널별 전송 결과를 안전하게 저장하고 있습니다.",
+      nextAction: "잠시만 기다려 주세요"
     };
   } else if (input.logSaveStatus === "duplicate-risk") {
     dispatch = {
       label: "저장 미확인 · 중복 가능",
-      detail: "서버 idempotency 지원이 없어 전송 로그 재시도를 중단했습니다.",
+      detail: "중복 전송을 막기 위해 자동 재시도를 중단했습니다.",
       nextAction: "관리자에게 저장 여부 대조 요청"
     };
   } else if (input.logSaveStatus === "error") {
     dispatch = {
       label: "로그 저장 실패",
-      detail: "provider 결과와 서버 로그 저장은 별도 상태입니다.",
+      detail: "전송 결과를 서버에 저장하지 못했습니다.",
       nextAction: "관리자에게 저장 상태 확인 요청"
     };
   } else if (input.dispatchRecordsStatus === "loading") {
     dispatch = {
-      label: "로그 조회 중",
-      detail: "현재 workpack의 전송 로그를 확인하고 있습니다.",
-      nextAction: "조회 완료 대기"
+      label: "전송 이력 확인 중",
+      detail: "현재 문서팩의 전송 이력을 확인하고 있습니다.",
+      nextAction: "잠시만 기다려 주세요"
     };
   } else if (input.dispatchLogCount > 0) {
     dispatch = {
       label: `저장 로그 ${input.dispatchLogCount}건`,
       detail: input.dispatchRecordsStatus === "error"
         ? "조회 오류 · 마지막 확인 기록 기준"
-        : "채널·provider 상태·실행 ID 저장",
+        : "채널과 전송 결과 저장",
       nextAction: input.dispatchRecordsStatus === "error" ? "전송 로그 다시 조회" : "채널별 결과 검토"
     };
   } else if (input.dispatchRecordsStatus === "unconfigured") {
     dispatch = {
-      label: "로그 저장소 미연결",
-      detail: "dispatch_logs 저장소가 연결되지 않았습니다.",
-      nextAction: "서버 저장소 설정 확인"
+      label: "로그인 후 이력 저장",
+      detail: "로그인하면 전송 이력을 서버에 안전하게 저장합니다.",
+      nextAction: "로그인"
     };
   } else if (input.dispatchRecordsStatus === "error") {
     dispatch = {
-      label: "로그 조회 실패",
+      label: "전송 이력 확인 필요",
       detail: "저장된 전송 로그를 확인하지 못했습니다.",
       nextAction: "전송 로그 다시 조회"
     };
   } else {
     dispatch = {
-      label: "최근 조회 로그 없음",
-      detail: "최근 100건 서버 조회 범위에 현재 workpack의 provider 결과가 없습니다.",
+      label: "첫 전송 전",
+      detail: "이 문서팩의 최근 전송 이력이 없습니다.",
       nextAction: "채널 선택 후 전송"
     };
   }
@@ -507,7 +507,7 @@ function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
 
 function formatChannelName(channel?: string) {
   const option = channelOptions.find((item) => item.key === channel);
-  return option?.label || channel || "채널";
+  return option?.label || "기타 채널";
 }
 
 function formatChannelStatus(status?: string, validationOnly = false) {
@@ -517,17 +517,16 @@ function formatChannelStatus(status?: string, validationOnly = false) {
   if (status === "unconfigured") return "설정 필요";
   if (status === "skipped") return "보류";
   if (status === "partial") return "일부 전송";
-  return status || "접수";
+  return "결과 확인 필요";
+}
+
+function customerSafeMessage(message: string | undefined, fallback: string) {
+  void message;
+  return fallback;
 }
 
 function formatChannelMeta(item: WorkflowDispatchChannelResult) {
-  const parts = [
-    item.provider,
-    typeof item.httpStatus === "number" ? `HTTP ${item.httpStatus}` : "",
-    item.message
-  ].filter((part): part is string => Boolean(part));
-
-  return parts.join(" · ");
+  return customerSafeMessage(item.message, "채널별 전송 결과를 확인해 주세요.");
 }
 
 function previewLines(message: string) {
@@ -1111,39 +1110,39 @@ export function WorkflowSharePanel({
     || !canResolveAuthority
   );
   const phaseLabel: Record<WorkflowSharePhase, string> = {
-    idle: "전송 확인",
-    "saving-workpack": "저장 ID 발급 중",
-    "creating-session": "공유 세션 생성 중",
-    dispatching: "provider 전송 중",
-    "saving-log": "전송 로그 저장 중"
+    idle: "문서팩 전송하기",
+    "saving-workpack": "문서팩 저장 중",
+    "creating-session": "공유 준비 중",
+    dispatching: "전송 중",
+    "saving-log": "전송 결과 저장 중"
   };
   const primaryLabel = isSending
     ? phaseLabel[phase]
     : !authToken
-      ? "관리자 로그인 필요"
+      ? "로그인하고 전송하기"
       : shareBlocked
-        ? "공유 잠김"
+        ? "보완 후 전송할 수 있어요"
         : !targetWorkers.length
           ? "작업자 선택 필요"
           : !canResolveAuthority
             ? "작업공간에서 저장 필요"
             : !effectiveAuthority
-              ? "저장 후 전송 확인"
-              : "전송 확인";
+              ? "저장 후 전송하기"
+              : "문서팩 전송하기";
   const permissionReady = Boolean(activeSession && isShareSessionPermissionReady(activeSession));
   const permissionLabel = activeSession
     ? permissionReady ? "초대된 사람만" : "서버 정책 확인 필요"
     : "기본: 초대된 사람만";
   const permissionDetail = activeSession
     ? permissionReady
-      ? "관리자 편집 · 작업자 viewer · 공개 링크 없음"
+      ? "관리자 편집 · 작업자 열람 전용 · 공개 링크 없음"
       : "현재 세션의 share scope와 익명 접근 정책을 확인해야 합니다."
-    : "새 세션 요청값 · invited · viewer · anonymous false";
+    : "초대된 참여자만 열람";
   const sessionDetail = shareRecords.status === "error" || shareRecords.status === "unconfigured"
-    ? shareRecords.message
+    ? "공유 설정을 불러오지 못했습니다. 잠시 후 다시 확인해 주세요."
     : statusModel.session.detail;
   const dispatchDetail = dispatchRecords.status === "error" || dispatchRecords.status === "unconfigured"
-    ? dispatchRecords.message
+    ? "전송 이력을 불러오지 못했습니다. 잠시 후 다시 확인해 주세요."
     : statusModel.dispatch.detail;
   const historyHasError = shareRecords.status === "error" || dispatchRecords.status === "error";
   const dispatchEvidenceSummary = buildShareEvidenceSummary({
@@ -1161,12 +1160,12 @@ export function WorkflowSharePanel({
     <article className={`share-panel workflow-panel ${styles.panel}`} id="dispatch">
       <header className="share-workflow-header">
         <div>
-          <span className="eyebrow">Share session</span>
+          <span className="eyebrow">현장 공유</span>
           <strong>현장 공유</strong>
-          <p>저장된 workpack과 초대 대상만 사용하고, provider 전송과 작업자 열람을 서로 다른 이력으로 확인합니다.</p>
+          <p>저장된 문서팩을 선택한 참여자에게 보내고 전송 결과와 열람 여부를 확인합니다.</p>
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태" aria-live="polite">
-          <span>{shareBlocked ? "locked" : sessionReady ? "active session" : storageReady ? "workpack saved" : "draft"}</span>
+          <span>{shareBlocked ? "보완 필요" : sessionReady ? "공유 가능" : storageReady ? "저장 완료" : "전송 준비"}</span>
           <strong>{shareBlocked ? readiness?.summary : isSending ? phaseLabel[phase] : statusModel.dispatch.label}</strong>
         </div>
       </header>
@@ -1220,7 +1219,7 @@ export function WorkflowSharePanel({
             ))}
           </div>
           <p className="channel-readiness-note">
-            카카오는 선택할 수 있지만 서버 승인·템플릿 검사에서 설정 필요로 반환될 수 있습니다. 밴드는 운영 승인 전까지 잠깁니다.
+            메일과 문자는 선택할 수 있으며, 전송 전에 참여자 연락처와 채널 설정을 확인합니다. 카카오와 밴드는 설정을 마치면 사용할 수 있어요.
           </p>
         </section>
 
@@ -1257,7 +1256,7 @@ export function WorkflowSharePanel({
             })}
           </div>
           <p className="channel-readiness-note">
-            미리보기는 검토·복사용입니다. 실제 provider 메시지는 저장된 작업팩과 작업자 언어 스냅샷에서 서버가 생성합니다.
+            미리보기는 검토·복사용입니다. 실제 전송 문구는 저장된 문서팩과 작업자 언어에 맞춰 만듭니다.
           </p>
         </section>
 
@@ -1271,7 +1270,7 @@ export function WorkflowSharePanel({
             <div className="recipient-chip-list" aria-label="선택된 공유 대상">
               {targetWorkers.map((worker) => (
                 <span key={`${worker.displayName}-${worker.languageCode}`} className="recipient-chip">
-                  {worker.displayName} · {worker.languageLabel} · viewer
+                  {worker.displayName} · {worker.languageLabel} · 열람 전용
                 </span>
               ))}
             </div>
@@ -1287,10 +1286,10 @@ export function WorkflowSharePanel({
               ))}
             </div>
           ) : targetWorkers.length ? (
-            <p className="muted small">선택 대상의 채널 연락처가 없습니다. 서버 preflight에서 해당 채널 전송이 거부될 수 있습니다.</p>
+            <p className="muted small">선택한 참여자의 연락처가 없어 해당 채널로 전송할 수 없습니다.</p>
           ) : null}
           <p className="muted small">
-            공유 세션에는 서버에 저장된 worker UUID와 연락처 snapshot만 들어갑니다. 직접 입력 문자열은 확인 대상으로 승격하지 않습니다.
+            저장된 작업자와 연락처만 전송 대상에 포함합니다.
           </p>
         </section>
 
@@ -1311,18 +1310,19 @@ export function WorkflowSharePanel({
       </div>
 
       {!authToken ? (
-        <p className="share-inline-note">
-          현재는 로컬 공유 초안입니다. 관리자 로그인 전에는 workpack, 공유 세션, 전송 로그, 열람 확인을 서버 상태로 표시하지 않습니다.
-        </p>
+        <div className="share-inline-note">
+          <p>로그인하면 문서팩과 전송·열람 이력이 서버에 안전하게 저장됩니다.</p>
+          <a className="button secondary" href="/login">로그인</a>
+        </div>
       ) : !archiveWorkpackId ? (
         <p className="share-inline-note">
-          저장 ID 대기 · 전송을 확정하면 workpack과 선택 작업자를 먼저 저장합니다. 다음 행동 · 대상과 채널을 확인하세요.
+          전송을 확정하면 문서팩과 선택한 작업자를 먼저 안전하게 저장합니다.
         </p>
       ) : null}
 
       {shareBlocked ? (
-        <section className="share-readiness-warning" aria-label="공유 잠김 사유" role="status">
-          <span>공유 잠김</span>
+        <section className="share-readiness-warning" aria-label="공유 전 보완 항목" role="status">
+          <span>전송 전 확인</span>
           <strong>{readiness?.summary || "공유 전 보완 필요"}</strong>
           <ul>
             {shareDisabledReasons.map((reason) => <li key={reason}>{reason}</li>)}
@@ -1333,13 +1333,13 @@ export function WorkflowSharePanel({
 
       <section className="share-permission-grid" aria-label="실제 저장 및 공유 이력 상태" aria-live="polite">
         <section>
-          <span>Workpack</span>
+          <span>문서팩 저장</span>
           <strong>{statusModel.storage.label}</strong>
           <p>{statusModel.storage.detail}</p>
           <small>다음 행동 · {statusModel.storage.nextAction}</small>
         </section>
         <section>
-          <span>Share session</span>
+          <span>공유 설정</span>
           <strong>{statusModel.session.label}</strong>
           <p>{sessionDetail}</p>
           <small>다음 행동 · {statusModel.session.nextAction}</small>
@@ -1347,20 +1347,20 @@ export function WorkflowSharePanel({
         <section>
           <span>전송 로그</span>
           <strong>{statusModel.dispatch.label}</strong>
-          <p>{logSaveState.status === "error" || logSaveState.status === "duplicate-risk" ? logSaveState.message : dispatchDetail}</p>
+          <p>{logSaveState.status === "error" || logSaveState.status === "duplicate-risk" ? customerSafeMessage(logSaveState.message, "전송 결과 저장 상태를 확인해 주세요.") : dispatchDetail}</p>
           <small>다음 행동 · {statusModel.dispatch.nextAction}</small>
         </section>
         <section>
           <span>열람 확인</span>
           <strong>{statusModel.acknowledgment.label}</strong>
-          <p>{shareRecords.status === "error" ? `${statusModel.acknowledgment.detail} · ${shareRecords.message}` : statusModel.acknowledgment.detail}</p>
+          <p>{shareRecords.status === "error" ? "열람 확인 이력을 불러오지 못했습니다. 잠시 후 다시 확인해 주세요." : statusModel.acknowledgment.detail}</p>
           <small>다음 행동 · {statusModel.acknowledgment.nextAction}</small>
         </section>
       </section>
 
       <section className="message-preview-panel" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)}>
         <div className="compact-head">
-          <span className="eyebrow">Preview only</span>
+          <span className="eyebrow">메시지 미리보기</span>
           <strong>{formatMessagePreviewHeading(data, selectedMessageTarget)}</strong>
         </div>
         <div className="message-preview-lines">
@@ -1381,7 +1381,7 @@ export function WorkflowSharePanel({
         ) : null}
         <button
           type="button"
-          className="button"
+          className="button command-primary workbench-primary-action"
           onClick={() => setIsConfirming(true)}
           disabled={primaryDisabled}
         >
@@ -1391,37 +1391,37 @@ export function WorkflowSharePanel({
       </div>
 
       {isConfirming ? (
-        <div className="dispatch-confirm-panel" role="dialog" aria-modal="false" aria-label="현장 전파 전 확인">
+        <div className="dispatch-confirm-panel workbench-share-confirmation" role="dialog" aria-modal="false" aria-label="현장 전파 전 확인">
           <div className="compact-head">
             <span className="eyebrow">전송 전 확인</span>
             <strong>{activeChannelLabel}</strong>
           </div>
           <div className="dispatch-confirm-grid">
             <div><span>대상</span><strong>{recipientLabel}</strong></div>
-            <div><span>권한</span><strong>초대된 사람만 · viewer</strong></div>
+            <div><span>권한</span><strong>초대된 사람만 · 열람 전용</strong></div>
             <div><span>언어</span><strong>{languageLabel}</strong></div>
           </div>
           <p className="muted small">미리보기 {targetLabel} · {languageBasis}</p>
           <div className="dispatch-evidence-ledger" aria-label="전송 과정의 저장 확인과 기록 계획">
             <article className={storageReady ? "ready" : "warn"}>
-              <span>Workpack</span>
-              <strong>{storageReady ? "저장 ID 사용" : "먼저 저장"}</strong>
-              <small>{storageReady ? `${effectiveAuthority?.workerIds.length || 0}명의 worker UUID 확인` : "workpack과 worker UUID 발급 후 진행"}</small>
+              <span>문서팩 저장</span>
+              <strong>{storageReady ? "저장된 문서팩 사용" : "먼저 안전하게 저장"}</strong>
+              <small>{storageReady ? `${effectiveAuthority?.workerIds.length || 0}명의 작업자 확인` : "문서팩과 작업자 정보를 저장한 뒤 진행"}</small>
             </article>
             <article className={sessionReady ? "ready" : "pending"}>
-              <span>Share session</span>
-              <strong>{sessionReady ? "활성 세션 재사용" : "초대 snapshot 생성"}</strong>
-              <small>anonymous false · viewer 권한 · 선택 작업자만</small>
+              <span>공유 설정</span>
+              <strong>{sessionReady ? "기존 공유 설정 사용" : "참여자별 공유 설정 생성"}</strong>
+              <small>선택한 작업자만 열람 가능</small>
             </article>
             <article className="pending">
               <span>전송 로그</span>
-              <strong>provider 응답 후 저장</strong>
-              <small>안정 요청 키 포함 · 서버 중복 방지 지원 전에는 실패 시 재시도 중단</small>
+              <strong>전송 결과를 안전하게 저장</strong>
+              <small>중복 전송을 막고 결과를 안전하게 보관</small>
             </article>
             <article className="pending">
               <span>열람 확인</span>
               <strong>관리자 표시와 분리</strong>
-              <small>현재 관리자 Bearer 기록은 admin_marked이며 작업자 확인 집계에서 제외</small>
+              <small>관리자 확인과 작업자 열람 확인을 구분해 보관</small>
             </article>
           </div>
           <p className="channel-readiness-note">
@@ -1429,7 +1429,7 @@ export function WorkflowSharePanel({
           </p>
           {selectedMessageTarget !== "manager" ? (
             <p className="channel-readiness-note">
-              외국어 미리보기는 검토·복사용이며 provider 전송본 자체로 저장하지 않습니다.
+              외국어 미리보기는 검토·복사용이며 실제 전송 결과와 구분해 보관합니다.
             </p>
           ) : null}
           <div className="command-actions">
@@ -1446,25 +1446,23 @@ export function WorkflowSharePanel({
       {result ? (
         <div className={resultClassName}>
           <p>
-            {result.message}
-            {result.workflowRunId ? ` 실행 ID: ${result.workflowRunId}` : ""}
-            {resultSource === "dispatch" && shareSessionId ? ` 공유 세션 ID: ${shareSessionId}` : ""}
+            {customerSafeMessage(result.message, "채널별 전송 결과를 확인해 주세요.")}
           </p>
           {validationOnlyResult ? (
-            <p>Fixture·검증 전용 응답입니다. 실제 provider 전송, 운영 로그, 열람 확인으로 간주하지 않습니다.</p>
+            <p>미리 확인용 응답입니다. 실제 전송이나 열람 이력으로 저장하지 않습니다.</p>
           ) : null}
           {result.duplicateRisk ? (
             <p role="alert">
               {result.providerCalled === true
-                ? "Provider 호출 후 응답을 확정하지 못했습니다. 실제 발송 가능성이 있으므로 재전송하지 말고 요청 키로 대조하세요."
-                : "영속 provider idempotency를 보장할 수 없어 실제 전송을 시작하지 않았습니다. 서버 중복방지 계약이 준비될 때까지 재전송하지 마세요."}
+                ? "전송 결과를 확정하지 못했습니다. 실제 발송되었을 수 있으므로 재전송하지 말고 관리자에게 확인하세요."
+                : "중복 전송을 안전하게 막을 수 없어 전송을 시작하지 않았습니다. 관리자에게 확인해 주세요."}
             </p>
           ) : null}
           {resultSource === "dispatch" ? (
-            <p>전송 로그 · {logSaveState.message} 열람 확인 · {statusModel.acknowledgment.label}, 전송 완료와 별도 기록.</p>
+            <p>전송 이력 · {customerSafeMessage(logSaveState.message, "저장 상태를 확인해 주세요.")} 열람 확인 · {statusModel.acknowledgment.label}, 전송 완료와 별도 기록.</p>
           ) : null}
           {result.channelResults?.length ? (
-            <div className="workflow-channel-results" aria-label="채널별 provider 전송 결과">
+            <div className="workflow-channel-results" aria-label="채널별 전송 결과">
               {result.channelResults.map((item, index) => (
                 <div
                   key={`${item.channel || "channel"}-${index}`}

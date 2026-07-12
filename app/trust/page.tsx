@@ -30,7 +30,7 @@ export default function TrustPage() {
       <section className="safeclaw-module-grid two trust-grid">
         {trustItems.map(([title, body]) => (
           <article key={title}>
-            <strong>{title}</strong>
+            <h2>{title}</h2>
             <p>{body}</p>
           </article>
         ))}
@@ -39,7 +39,7 @@ export default function TrustPage() {
       <section className="safeclaw-module-panel interview-card">
         <div className="compact-head">
           <span className="eyebrow">인터뷰 스크립트</span>
-          <strong>검증할 질문</strong>
+          <h2>검증할 질문</h2>
         </div>
         <div className="interview-question-list">
           {interviewQuestions.map((question, index) => (

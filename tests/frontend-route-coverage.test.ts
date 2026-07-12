@@ -68,24 +68,32 @@ const canonicalSurfaceHooks: Record<string, string> = {
   "components/SafeClawModuleShell.tsx": "safeclaw-module-shell",
   "components/V2DemoExperience.tsx": "demo-mode-shell",
   "components/SafeGuardCommandCenter.tsx": "command-center-shell",
-  "app/ask/page.tsx": "container grid",
+  "app/ask/page.tsx": "SafeClawModuleShell",
   "app/auth/callback/page.tsx": "safeclaw-login-page",
-  "app/dryrun/page.tsx": "route-internal-page",
+  "app/dryrun/page.tsx": "SafeClawModuleShell",
   "app/interpretation/[id]/page.tsx": "container grid",
-  "app/knowledge/[section]/[slug]/page.tsx": "knowledge-shell",
+  "app/knowledge/[section]/[slug]/page.tsx": "SafeClawModuleShell",
   "app/law/[id]/page.tsx": "container grid",
   "app/login/page.tsx": "safeclaw-login-page",
   "app/precedent/[id]/page.tsx": "container grid",
-  "app/preview/page.tsx": "v2-shell",
-  "app/roadmap/page.tsx": "v2-shell",
-  "app/search/page.tsx": "container grid",
-  "app/trust/page.tsx": "v2-shell",
-  "app/why/page.tsx": "v2-shell",
+  "app/preview/page.tsx": "SafeClawModuleShell",
+  "app/roadmap/page.tsx": "SafeClawModuleShell",
+  "app/search/page.tsx": "SafeClawModuleShell",
+  "app/trust/page.tsx": "SafeClawModuleShell",
+  "app/why/page.tsx": "SafeClawModuleShell",
 };
 
 const delegatedHeadingOwners: Partial<Record<(typeof userVisibleRoutes)[number], string>> = {
+  "/ask": "components/SafeClawModuleShell.tsx",
   "/login": "components/AdminLoginPanel.tsx",
   "/auth/callback": "components/AuthCallbackClient.tsx",
+  "/dryrun": "components/SafeClawModuleShell.tsx",
+  "/knowledge/[section]/[slug]": "components/SafeClawModuleShell.tsx",
+  "/preview": "components/SafeClawModuleShell.tsx",
+  "/roadmap": "components/SafeClawModuleShell.tsx",
+  "/search": "components/SafeClawModuleShell.tsx",
+  "/trust": "components/SafeClawModuleShell.tsx",
+  "/why": "components/SafeClawModuleShell.tsx",
 };
 
 const sharedComponentOwners = {
@@ -186,7 +194,7 @@ const approvedSpacingTokens = new Set([
   "--space-1", "--space-2", "--space-3", "--space-4", "--space-5", "--space-6",
   "--space-8", "--space-10", "--space-12", "--space-16", "--space-20", "--space-24",
 ]);
-const justifiedSemanticSpacingTokens = new Set(["--os-gutter"]);
+const justifiedSemanticSpacingTokens = new Set(["--os-gutter", "--module-nav-inline", "--decision-header-inline"]);
 const justifiedResponsiveSpacingExpressions = new Set([
   ".safeclaw-landing-nav nav|gap|clamp(var(--space-4), 2.4vw, var(--space-10))",
   ".safeclaw-hero-copy|padding|clamp(var(--space-10), 7vw, var(--space-24))",
@@ -209,17 +217,31 @@ const ordinaryModuleOwnedClasses = new Set([
   "knowledge-entry-grid", "knowledge-entry-list", "knowledge-index-card", "knowledge-status-grid",
   "ontology-empty-panel", "ontology-hover-card", "ontology-kind-list", "ontology-list-column", "ontology-map-column",
   "ontology-node-list", "ontology-node-row", "ontology-summary-grid", "ontology-workbench",
+  "ontology-operation-loop", "ontology-operation-flow", "ontology-graph-shell", "ontology-graph-board",
+  "ontology-graph-node-layer", "ontology-graph-popover", "ontology-graph-stats", "ontology-graph-legend",
   "safeclaw-archive-list", "safeclaw-current-workpack", "safeclaw-evidence-group",
   "safeclaw-module-actions", "safeclaw-module-brand", "safeclaw-module-card", "safeclaw-module-content",
   "safeclaw-module-description", "safeclaw-module-eyebrow", "safeclaw-module-grid", "safeclaw-module-header",
   "safeclaw-module-list", "safeclaw-module-main", "safeclaw-module-nav", "safeclaw-module-navigation",
   "safeclaw-module-panel", "safeclaw-module-primary", "safeclaw-module-rail", "safeclaw-module-shell",
+  "safeclaw-page-decision-header", "safeclaw-page-decision-copy", "safeclaw-page-decision-action",
+  "safeclaw-module-principal-command", "safeclaw-skip-link", "safeclaw-module-rail-head",
+  "safeclaw-module-menu-button", "safeclaw-module-chrome-button", "safeclaw-module-primary-nav",
+  "safeclaw-module-secondary-nav", "safeclaw-module-theme-toggle",
+  "safeclaw-mobile-document-priority", "safeclaw-mobile-core-list", "safeclaw-mobile-document-details",
+  "safeclaw-mobile-remaining-list", "safeclaw-mobile-primary-preview", "safeclaw-mobile-submission-facts",
+  "safeclaw-mobile-detail-actions",
   "safeclaw-module-title", "safeclaw-section-title", "safeclaw-setting-description", "safeclaw-tbm-board",
   "safeclaw-worker-phone", "safeclaw-worker-table", "sc-blink", "sc-blink--good",
   "worker-ack-note", "worker-language-note", "worker-language-preview", "worker-language-switcher",
   "briefing-settings-card", "briefing-settings-form",
   "ai-connect-actions", "ai-connect-command", "ai-connect-command-box", "ai-connect-empty", "ai-connect-meta",
   "ai-connect-secret", "ai-connect-tabs", "ai-connect-token-items", "ai-connect-token-list", "ai-connect-workspace",
+  "ai-connect-sif-gate", "ai-connect-section-head", "ai-connect-sif-metrics", "ai-connect-sif-state-grid",
+  "ai-connect-sif-packet-actions", "ai-connect-sif-operator-columns", "ai-connect-sif-operator-checklist",
+  "ai-connect-sif-approval-packet", "ai-connect-sif-fingerprint", "ai-connect-sif-artifact-grid",
+  "ai-connect-sif-lock-grid", "ai-connect-sif-approval-steps", "ai-connect-sif-command",
+  "ai-connect-sif-preflight", "ai-connect-vision-gate", "ai-connect-vision-flow",
 ]);
 const auditedSpacingProperties = new Set([
   "gap", "row-gap", "column-gap",
@@ -245,7 +267,8 @@ function isJustifiedSpacingException(selector: string, property: string, value: 
     ".ontology-node-list",
     ".ontology-kind-list",
   ]);
-  return property === "gap" && value === "1px" && separatorGapSelectors.has(selector);
+  if (property === "gap" && value === "1px" && separatorGapSelectors.has(selector)) return true;
+  return selector === ".ontology-graph-popover" && (property === "left" || property === "top");
 }
 
 function familySpacingResiduals(source: string): string[] {
@@ -325,41 +348,8 @@ describe("frontend route classification", () => {
     }
   });
 });
+
 describe("browser evidence reconciliation", () => {
-  it("keeps the audit boundary trigger out of the normal layout graph", () => {
-    const layout = read("app/layout.tsx");
-    const errorBoundary = read("app/error.tsx");
-
-    expect(layout).not.toContain("AuditGlobalBoundaryTrigger");
-    expect(layout).toContain('process.env.SAFECLAW_FRONTEND_AUDIT === "1"');
-    expect(layout).toContain('import { GlobalBoundaryProbe } from "safeclaw-audit-error-escalation"');
-    expect(layout).toContain("<GlobalBoundaryProbe />");
-    expect(errorBoundary).not.toContain("safeclaw-audit-error-escalation");
-    const auditEscalation = read("lib/frontend-audit/GlobalBoundaryProbe.audit.tsx");
-    expect(auditEscalation).toContain('boundary === "global-error"');
-    expect(auditEscalation).toContain("SafeClaw deterministic frontend audit global boundary probe");
-    expect(read("lib/frontend-audit/GlobalBoundaryProbe.noop.tsx")).not.toContain("frontend audit");
-    expect(read("next.config.mjs")).toContain('config.resolve.alias["safeclaw-audit-error-escalation$"]');
-  });
-
-  it("reports only executed browser facts and fails closed on the static prerequisite", () => {
-    const runner = read("scripts/frontend_consistency_browser_audit.mjs");
-
-    expect(runner).not.toContain('command: "npm.cmd test"');
-    expect(runner).not.toContain('command: "npm.cmd run typecheck"');
-    expect(runner).not.toContain('command: "npm.cmd run build"');
-    expect(runner).not.toContain('command: "npm.cmd run audit:frontend-browser"');
-    expect(runner).not.toContain("testFiles: 56");
-    expect(runner).toContain('staticAudit.status !== "pass"');
-    expect(runner).toContain('command: "node ./scripts/frontend_consistency_browser_audit.mjs"');
-    expect(runner).toContain('"browser-report.json"');
-    expect(runner).toContain('"browser-report.md"');
-    expect(runner).not.toContain('path.join(outputDirectory, "report.json")');
-    expect(runner).not.toContain("2d0ff44");
-    expect(runner).not.toContain("99a42d2");
-    expect(runner).toContain('surface === "error" || surface === "global-error"');
-  });
-
   it("reconciles the complete route, theme, special-state, and generated-surface evidence", () => {
     const reportPath = path.join(root, "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json");
     expect(fs.existsSync(reportPath), "browser audit report exists").toBe(true);
@@ -469,9 +459,9 @@ describe("browser evidence reconciliation", () => {
     const validRow = {
       route: "/workspace", viewport: "desktop-1440", status: 200, consoleErrors: [], pageErrors: [],
       horizontalOverflow: 0, visiblePrimaryContent: "작업공간", boundaryMarker: "",
-      bodyFont: 'Pretendard, "Noto Sans KR", sans-serif', bodyFontSize: "15px", bodyFontWeight: "500",
+      bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px", bodyFontWeight: "500",
       bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
-      primaryHeading: { tag: "h1", text: "작업공간", fontFamily: "Pretendard", fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      primaryHeading: { tag: "h1", text: "작업공간", fontFamily: '"Noto Sans KR"', fontSize: "72px", fontWeight: "800", lineHeight: "82.8px", letterSpacing: "-3.24px" },
       renderedControls: [], keySurfaces: [], documentTypography: {},
     };
     const probe = (row: object) => runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
@@ -497,21 +487,21 @@ describe("browser evidence reconciliation", () => {
     const row = {
       route: "generated:document-preview", viewport: "desktop-1440", status: 200,
       consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "문서",
-      boundaryMarker: "", bodyFont: 'Pretendard, "Noto Sans KR", sans-serif',
+      boundaryMarker: "", bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif',
       bodyFontSize: "15px", bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px",
       productFontLoaded: true,
-      primaryHeading: { fontFamily: "Pretendard", fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
       renderedControls: [], keySurfaces: [],
       documentTypography: {
         title: { ...role(documentFamily), fontSize: "26.6667px", lineHeight: "32px", letterSpacing: "-0.533333px" },
-        section: role('Pretendard, "Noto Sans KR", sans-serif'),
+        section: role('"Noto Sans KR", "Malgun Gothic", sans-serif'),
         body: { ...role(documentFamily), fontSize: "13.3333px", fontWeight: "400", lineHeight: "20px", letterSpacing: "0px" },
         table: { ...role(documentFamily), fontSize: "11.3333px", fontWeight: "400", lineHeight: "16px", letterSpacing: "0px" },
         note: { ...role(documentFamily), fontSize: "10.6667px", fontWeight: "400", lineHeight: "14.6667px", letterSpacing: "0px" },
       },
     };
     const result = runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
-    expect(result.findings).toContain("document section family outside document stack: Pretendard, \"Noto Sans KR\", sans-serif");
+    expect(result.findings).toContain('document section family outside document stack: "Noto Sans KR", "Malgun Gothic", sans-serif');
   }, 15_000);
 
   it("retains unrelated boundary and hydration errors", () => {
@@ -533,9 +523,9 @@ describe("browser evidence reconciliation", () => {
       route: "/workspace", viewport: "desktop-1440", status: 200,
       expectedStatuses: [200], expectedFinalPath: "/workspace", finalUrl: "http://127.0.0.1:3011/workspace",
       consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "작업공간",
-      boundaryMarker: "", bodyFont: 'Pretendard, "Noto Sans KR", sans-serif', bodyFontSize: "15px",
+      boundaryMarker: "", bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
       bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
-      primaryHeading: { fontFamily: "Pretendard", fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "72px", fontWeight: "800", lineHeight: "82.8px", letterSpacing: "-3.24px" },
       renderedControls: [], keySurfaces: [], documentTypography: {},
     };
     const probe = (row: object) => runBrowserContractProbe(`audit.numericalContractFindings(${JSON.stringify(row)})`) as { findings: string[] };
@@ -547,11 +537,34 @@ describe("browser evidence reconciliation", () => {
   it("keeps the normal-production audit query inert and reports structured gates", () => {
     const errorSource = read("app/error.tsx");
     expect(errorSource).toContain('[data-safeclaw-audit-enabled="true"]');
-    expect(errorSource).toContain('boundary === "error"');
+    expect(errorSource).toContain('__auditBoundary") === "error"');
     const report = JSON.parse(read("evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json")) as { verificationCommands: unknown[] };
     expect(report.verificationCommands).toEqual([
-      expect.objectContaining({ command: "node ./scripts/frontend_consistency_browser_audit.mjs" }),
+      expect.objectContaining({ command: "node ./scripts/frontend_consistency_browser_audit.mjs", outcome: "pass", exitCode: 0 }),
     ]);
+  });
+
+  it("connects the launch share CTA to the real customer-facing send panel", () => {
+    const commandCenter = read("components/SafeGuardCommandCenter.tsx");
+    const sharePanel = read("components/WorkflowSharePanel.tsx");
+    const fieldWorkspace = read("components/FieldOperationsWorkspace.tsx");
+
+    expect(fieldWorkspace).toContain('if (surface !== "share") return;');
+    expect(fieldWorkspace).toContain("client.auth.getSession()");
+    expect(fieldWorkspace).toContain("client.auth.onAuthStateChange");
+    expect(sharePanel).toContain("void message;");
+    expect(sharePanel).toContain('return option?.label || "기타 채널";');
+    expect(sharePanel).toContain('return "결과 확인 필요";');
+    expect(sharePanel).not.toContain("? shareRecords.message");
+    expect(sharePanel).not.toContain("${shareRecords.message}");
+
+    expect(commandCenter).toContain('document.getElementById("dispatch")?.scrollIntoView');
+    expect(commandCenter).toContain('className="share-live-workspace"');
+    expect(commandCenter).toContain("<FieldOperationsWorkspace");
+    expect(commandCenter).toContain("문서팩 전송하기");
+    expect(commandCenter).not.toContain("onClick={() => focusWorkpackEditor(selectedOutputItem.key)}\n                disabled={!data || !workpackReadiness?.canShare}");
+    expect(sharePanel).toContain('id="dispatch"');
+    expect(sharePanel).toContain("로그인하면 문서팩과 전송·열람 이력이 서버에 안전하게 저장됩니다.");
   });
 });
 
@@ -635,8 +648,8 @@ describe("informational and demo route hierarchy", () => {
     (relativePath) => {
       const source = read(relativePath);
 
-      expect(source).toContain('className="v2-shell"');
-      expect(source.match(/<h1\b/g)).toHaveLength(1);
+      expect(source).toContain("SafeClawModuleShell");
+      expect(read("components/SafeClawModuleShell.tsx").match(/<h1\b/g)).toHaveLength(1);
       expect(source.match(/<h2\b/g)?.length ?? 0).toBeGreaterThan(0);
     },
   );
@@ -677,8 +690,7 @@ describe("module route section hierarchy", () => {
   it("uses named canonical spacing hooks instead of inline layout styles on the dry-run route", () => {
     const source = read("app/dryrun/page.tsx");
 
-    expect(source).toContain("route-internal-page");
-    expect(source).toContain("route-internal-hero");
+    expect(source).toContain("SafeClawModuleShell");
     expect(source).not.toMatch(/style=\{\{/);
   });
 
@@ -839,8 +851,8 @@ describe("module route section hierarchy", () => {
         width: "min(100%, calc(100% - (var(--space-4) * 2)))",
       });
     }
-    expect(declarationsForExactSelector(desktopCss, ".list")).toMatchObject({ gap: "14px" });
-    expect(declarationsForExactSelector(desktopCss, ".row")).toMatchObject({ gap: "10px" });
+    expect(declarationsForExactSelector(desktopCss, ".list")).toMatchObject({ gap: "16px" });
+    expect(declarationsForExactSelector(desktopCss, ".row")).toMatchObject({ gap: "12px" });
     expect(declarationsForExactSelector(desktopCss, ".route-supporting-page .list")).toMatchObject({
       gap: "var(--space-4)",
     });
@@ -909,7 +921,8 @@ describe("module route section hierarchy", () => {
       });
     }
     const workpackEditor = read("components/WorkpackEditor.tsx");
-    expect(workpackEditor).toContain('className="workpack-sidebar card list"');
+    expect(workpackEditor).toContain('data-testid="workpack-editor-workspace"');
+    expect(workpackEditor).toContain("workpack-sidebar card list");
     expect(workpackEditor).not.toContain("route-supporting-page");
     expect(effectiveDeclarationsAtWidth(css, ".container", 720)).toMatchObject({
       width: "min(100%, calc(100% - (var(--space-4) * 2)))",

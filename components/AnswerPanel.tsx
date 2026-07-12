@@ -13,7 +13,7 @@ export function AnswerPanel({ data }: { data: AskResponse }) {
   return (
     <div className="card list">
       <div className="row">
-      <div className="h3">문서팩 판단 요약</div>
+        <h2 className="h3">문서팩 판단 요약</h2>
         <span className="badge">{modeLabel}</span>
       </div>
       <p className="lead">{data.status.summary}</p>
@@ -22,7 +22,7 @@ export function AnswerPanel({ data }: { data: AskResponse }) {
       </ul>
       <pre>{answerForDisplay}</pre>
       <hr />
-      <div className="h3">실무 체크포인트</div>
+      <h2 className="h3">실무 체크포인트</h2>
       <ul>
         {data.practicalPoints.map((p) => <li key={p}>{p}</li>)}
       </ul>

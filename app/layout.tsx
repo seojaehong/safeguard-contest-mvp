@@ -29,24 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko">
       <head>
         {/* Preconnect to font CDNs — cuts 300-600ms DNS+TCP setup from critical path */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
         {/* Font loading keeps standard stylesheet links so React dev overlay stays clean. */}
-
-        {/* Pretendard (primary KR font) */}
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link
-          rel="preload"
-          as="style"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
-        />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
-        />
 
         {/* Geist Mono + Noto Sans core/KR (above-fold fonts) */}
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
@@ -70,8 +56,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* noscript fallback */}
         <noscript>
-          {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-          <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
           {/* eslint-disable-next-line @next/next/no-page-custom-font */}
           <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700;800;900&family=Noto+Sans:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800&family=Noto+Sans+Khmer:wght@400;600;700;800&family=Noto+Sans+Myanmar:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" />
         </noscript>

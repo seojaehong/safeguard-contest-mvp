@@ -214,7 +214,7 @@ export default async function OntologyPage() {
             <div className="ontology-list-column">
               <div className="compact-head">
                 <span className="eyebrow">List Ontology</span>
-                <strong>노드 리스트</strong>
+                <h2 className="safeclaw-section-title">노드 리스트</h2>
               </div>
               <div className="ontology-node-list">
                 {model.list.map((item) => {

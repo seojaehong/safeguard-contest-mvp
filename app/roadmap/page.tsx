@@ -30,14 +30,14 @@ export default function RoadmapPage() {
         {roadmap.map(([label, title, body]) => (
           <article key={label} className="roadmap-item">
             <span>{label}</span>
-            <strong>{title}</strong>
+            <h2>{title}</h2>
             <p>{body}</p>
           </article>
         ))}
       </section>
 
       <section className="safeclaw-module-panel v2-link-band">
-        <strong>첫 화면에서 바로 열어야 할 곳은 작업공간입니다.</strong>
+        <h2>첫 화면에서 바로 열어야 할 곳은 작업공간입니다.</h2>
         <Link className="button" href="/workspace">작업공간 열기</Link>
       </section>
     </SafeClawModuleShell>
