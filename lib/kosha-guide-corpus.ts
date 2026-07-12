@@ -600,13 +600,21 @@ function directEligibility(record: KoshaGuideCorpusRecord): boolean {
     && sha256Text(normalizeNativeBody(record.nativeBody)) === record.provenance.bodyHash;
 }
 
-export function searchKoshaGuideCorpus(corpus: KoshaGuideCorpusReady, query: string, limit: number): KoshaGuideCorpusSearchResult {
+export function searchKoshaGuideCorpus(
+  corpus: KoshaGuideCorpusReady,
+  query: string,
+  limit: number,
+  itemType?: string
+): KoshaGuideCorpusSearchResult {
   const queryTokens = tokenize(query);
   if (!queryTokens.length) return { retrievalMode: null, items: [] };
-  const tagCandidates = corpus.indexedRecords
+  const indexedRecords = itemType
+    ? corpus.indexedRecords.filter((candidate) => candidate.record.itemType === itemType)
+    : corpus.indexedRecords;
+  const tagCandidates = indexedRecords
     .map((candidate) => ({ candidate, score: countMatches(queryTokens, candidate.tagText) }))
     .filter((candidate) => candidate.score > 0);
-  const bodyCandidates = corpus.indexedRecords
+  const bodyCandidates = indexedRecords
     .map((candidate) => ({ candidate, score: countMatches(queryTokens, candidate.bodyText) }))
     .filter((candidate) => candidate.score > 0);
   const merged = new Map<string, KoshaGuideCorpusHit>();

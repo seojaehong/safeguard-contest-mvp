@@ -1670,6 +1670,7 @@ export function withRetrievalSource(
 export function mergeLocalAndRemoteSafetyReferenceResults(input: {
   localItems: SafetyReferenceItem[];
   remoteItems: SafetyReferenceItem[];
+  remoteRetrievalMode?: SafetyReferenceRetrievalMode;
   limit: number;
 }): { items: SafetyReferenceItem[]; retrievalMode: SafetyReferenceRetrievalMode } {
   const remoteById = new Map<string, SafetyReferenceItem>();
@@ -1685,13 +1686,22 @@ export function mergeLocalAndRemoteSafetyReferenceResults(input: {
     const local = localItems[index];
     if (local && items.length < input.limit) items.push(local);
   }
-  const localMode = localItems.some((item) => item.retrieval_source === "local-hybrid")
+  const returnedLocalItems = items.filter((item) => !remoteById.has(item.id));
+  const hasReturnedRemote = items.some((item) => remoteById.has(item.id));
+  const localMode = returnedLocalItems.some((item) => item.retrieval_source === "local-hybrid")
     ? "local-hybrid"
-    : localItems.some((item) => item.retrieval_source === "local-ranked")
+    : returnedLocalItems.some((item) => item.retrieval_source === "local-ranked")
       ? "local-ranked"
       : "local-tag";
+  const remoteMode = input.remoteRetrievalMode === "rest-ilike" || input.remoteRetrievalMode === "hybrid-vector-rpc"
+    ? input.remoteRetrievalMode
+    : "ranked-rpc";
   return {
     items,
-    retrievalMode: remoteItems.length && localItems.length ? "hybrid-local-supabase" : remoteItems.length ? "ranked-rpc" : localMode
+    retrievalMode: hasReturnedRemote && returnedLocalItems.length
+      ? "hybrid-local-supabase"
+      : hasReturnedRemote
+        ? remoteMode
+        : localMode
   };
 }

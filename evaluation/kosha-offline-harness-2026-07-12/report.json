@@ -1,64 +1,88 @@
 {
   "date": "2026-07-12",
   "branch": "feat/kosha-offline-harness",
-  "base_commit": "84c04cd98c05b16f207e37be848d57de852f9509",
-  "head_before_remediation": "2a8c68a318d12266189cc79d44ed2fd58acdeebd",
-  "status": "serial_gates_passed_build_exit_unobservable",
-  "artifact": {
-    "root": "C:/Users/iceam/dev/safeclaw-local-artifacts/kosha-corpus-body-recovery-2026-07-12-v3",
+  "remediation_start": "bffb05fca441ce0ca355d0b1813ffe24666a16c4",
+  "status": "passed",
+  "scope": [
+    "local-kosha-supporting-evidence-policy",
+    "final-returned-item-retrieval-mode",
+    "pre-score-item-type-filter"
+  ],
+  "external_v3_corpus": {
+    "path": "C:/Users/iceam/dev/safeclaw-local-artifacts/kosha-corpus-body-recovery-2026-07-12-v3",
     "read_only": true,
-    "snapshot_id": "bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51",
-    "manifest_sha256": "f90262fc98c190243d80124b5e8711866d3372b3affef7d294c881ed194806d2",
-    "items_inventory": 1040,
-    "searchable_items": 1039,
-    "chunks": 20520,
-    "failure_ledger_rows": 1,
-    "jsonl_bytes": 79424591
+    "modified": false
   },
   "remediation": {
-    "hybrid_merge": "Remote Supabase results are deduplicated, reserved, and interleaved with local KOSHA results under the limit; mixed results report hybrid-local-supabase.",
-    "policy_boundary": "Canonical SIF title, domain-control, alias, operational metadata, and relevance policy now live in safety-reference-policy; client is pure re-export and server retains IO.",
-    "evidence_roles": "KOSHA supporting provenance and directEligible remain explicit; supporting KOSHA is not classified as DB direct evidence.",
-    "item_type": "Local results require exact technical itemType matching; sif-case never serves the local corpus and regulations do not return guidelines.",
-    "streaming_limit": "Opened JSONL descriptors are fstat-checked during and after every streamed chunk, including post-open growth.",
-    "provenance": "local-tag/local-ranked/local-hybrid and ranked provenance are preserved in search results and DB harness source counts.",
-    "fixtures": "Default harness fixtures are synthetic temp snapshots; real v3 tests are conditional and read-only."
+    "evidence_role": "Local kosha_guide items remain supporting; directEligible is metadata only.",
+    "risk_rows": "KOSHA guide items cannot independently create risk rows from evidenceRef and may only attach a supporting page reference to a row grounded by a non-KOSHA reference.",
+    "retrieval_mode": "Mode is derived from final returned sources and preserves rest-ilike, ranked-rpc, or hybrid-vector-rpc when no local item survives.",
+    "item_type": "The local itemType predicate is applied before scoring and limit."
+  },
+  "tdd": {
+    "initial_red": {
+      "tests": 26,
+      "failed": 5,
+      "passed": 21,
+      "expected_failure_categories": 3
+    },
+    "direct_eligible_red": {
+      "expected": "supporting",
+      "received": "direct"
+    },
+    "bounded_green": {
+      "tests": 26,
+      "passed": 26,
+      "failed": 0
+    },
+    "invalidated_expanded_attempt": {
+      "reason": "An over-broad evidence_role filter blocked five established non-KOSHA SIF risk-row tests.",
+      "failed": 5
+    }
   },
   "verification": {
-    "parallel_run": {
-      "status": "invalidated",
-      "reason": "A prior expanded Vitest invocation used the default parallel worker behavior and was interrupted because this worktree has known OOM risk. It is not used as evidence."
+    "serial_vitest_options": [
+      "--maxWorkers=1",
+      "--no-file-parallelism"
+    ],
+    "original8": {
+      "passed": 8,
+      "failed": 0,
+      "exit_code": 0
     },
-    "worker_cleanup": {
-      "worktree_vitest_processes_after_cleanup": 0,
-      "reports_reviewer_or_other_worktrees_touched": false
-    },
-    "serial_vitest_options": ["--maxWorkers=1", "--no-file-parallelism"],
-    "original8": { "tests": 8, "exit_code": 0 },
     "expanded113": {
-      "tests": 113,
+      "passed": 113,
+      "failed": 0,
+      "components": [7, 1, 19, 43, 5, 31, 3, 3, 1],
+      "exit_code": 0
+    },
+    "corpus34": {
+      "passed": 34,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "additional_impacted": {
+      "passed": 41,
+      "failed": 0,
       "components": {
-        "original": 8,
-        "offline_harness_expanded": 19,
-        "safety_reference_hybrid": 43,
-        "safety_reference_relevance": 5,
-        "commercial_harness": 31,
-        "generation_evidence_operation_routes": 3,
-        "ontology_operation_memory": 3,
-        "workpack_remediate_route": 1
+        "generation-trace-privacy": 2,
+        "photo-vision-analysis": 39
       },
       "exit_code": 0
     },
-    "corpus_audit34": { "tests": 34, "exit_code": 0 },
-    "typecheck": { "command": "npm.cmd run typecheck", "exit_code": 0 },
-    "final_build": {
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "exit_code": 0
+    },
+    "production_build": {
       "command": "npm.cmd run build",
+      "worktree_build_processes_before": 0,
       "attempts": 1,
-      "compiled_successfully_output_observed": true,
-      "build_id_present": true,
-      "routes_manifest_present": true,
-      "build_manifest_present": true,
-      "exit_code": "unobservable_after_execution_channel_interruption"
-    }
+      "compiled_successfully": true,
+      "static_pages_generated": 27,
+      "static_pages_total": 27,
+      "exit_code": 0
+    },
+    "log": "evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log"
   }
 }

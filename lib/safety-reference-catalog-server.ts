@@ -38,7 +38,7 @@ function buildLocalItem(hit: KoshaGuideCorpusHit): SafetyReferenceItem {
     primary_documents: record.tags.primaryDocuments,
     controls: record.tags.controls,
     source_url: null,
-    evidence_role: hit.directEligible ? "direct" : "supporting",
+    evidence_role: "supporting",
     retrieval_source: hit.retrievalMode,
     display_title: `${record.version} ${record.title}`,
     display_summary: record.anchors[0]?.excerpt || record.nativeBody.slice(0, 140),
@@ -63,11 +63,10 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
     ? await loadKoshaGuideCorpus(options.offlineCorpus)
     : { status: "unconfigured" as const, rootDir: null, failures: [] as [] };
   const localHits = localCorpus.status === "ready"
-    ? searchKoshaGuideCorpus(localCorpus, query, options.evidenceRole === "direct" ? Math.min(limit * 3, 50) : limit).items
+    ? searchKoshaGuideCorpus(localCorpus, query, limit, options.itemType).items
     : [];
   const localItems = localHits
-    .filter((item) => !options.evidenceRole || (options.evidenceRole === "direct" ? item.directEligible : !item.directEligible))
-    .filter((item) => !options.itemType || item.record.itemType === options.itemType)
+    .filter(() => !options.evidenceRole || options.evidenceRole === "supporting")
     .map(buildLocalItem);
   const remote = await searchRemoteSafetyReferences(options);
   if (!remote.configured) {
@@ -100,6 +99,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
   const merged = mergeLocalAndRemoteSafetyReferenceResults({
     localItems,
     remoteItems: remote.items,
+    remoteRetrievalMode: remote.retrievalMode,
     limit
   });
   return {

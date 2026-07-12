@@ -721,8 +721,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
 }
 
 export function isSafetyReferenceRiskEligible(item: SafetyReferenceItem): boolean {
-  if (!item.kosha_guide) return true;
-  return item.kosha_guide.directEligible || Boolean(item.kosha_guide.evidenceRef);
+  return !item.kosha_guide;
 }
 
 function filterByEvidenceRole(

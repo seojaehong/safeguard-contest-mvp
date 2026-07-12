@@ -2,32 +2,40 @@
 
 - Date: 2026-07-12
 - Branch: `feat/kosha-offline-harness`
-- Review base: `84c04cd98c05b16f207e37be848d57de852f9509`
-- Head before remediation: `2a8c68a318d12266189cc79d44ed2fd58acdeebd`
-- Read-only v3 JSONL total: 79,424,591 bytes
+- Remediation start: `bffb05fca441ce0ca355d0b1813ffe24666a16c4`
+- Scope: bounded local KOSHA evidence policy, final-result retrieval mode, pre-limit item-type filtering
+- External v3 corpus: read-only and unchanged
+- Verification log: `evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log`
 
 ## Remediation
 
-- The hybrid merge now deduplicates by ID, reserves/interleaves successful Supabase results under the requested limit, and reports `hybrid-local-supabase` when both sources contribute.
-- Canonical SIF labels, domain controls, aliases, relevance, and operational metadata are shared by `lib/safety-reference-policy.ts`; the client boundary contains no server IO.
-- Local KOSHA evidence preserves `evidence_role`, `directEligible`, page anchors, and local retrieval provenance through search and the DB harness. Supporting KOSHA is never classified as direct DB evidence.
-- Local corpus retrieval applies exact technical `itemType` matching. `sif-case` receives no local KOSHA and regulations never receive guidelines.
-- The loader checks the opened descriptor's size before and after each streamed chunk, rejecting post-open growth beyond 48 MiB.
-- Default test fixtures are synthetic temporary snapshots. The real v3 test remains conditional, read-only, and corpus-independent by default.
+- Every local `kosha_guide` item remains `evidence_role=supporting`. Corpus integrity may still set `kosha_guide.directEligible`, but that value is metadata only and does not promote the item to direct evidence.
+- A local KOSHA item cannot independently create a risk row merely because it has an `evidenceRef`. A matching page reference may be attached as a supporting source only after a non-KOSHA reference grounds the row.
+- Local `evidenceRole=direct` searches do not return KOSHA items, including corpus records whose `directEligible` metadata is true.
+- Local/remote retrieval mode is calculated from the final returned items. If local candidates are deduplicated or truncated out, the actual remote mode remains `rest-ilike`, `ranked-rpc`, or `hybrid-vector-rpc`.
+- Local corpus `itemType` filtering now runs before scoring and limit application, so a `technical-support-regulation` result is not starved by a higher-ranked guideline at `limit=1`.
 
-## Verification
+## TDD Evidence
 
-The earlier default-parallel expanded Vitest invocation was interrupted because this worktree has a known OOM risk. It is invalidated and is not evidence. Only the following serial runs count:
+Tests were changed before production code. The first bounded RED run executed 26 tests and failed 5 for the intended semantics:
 
-| Gate | Command mode | Result |
-| --- | --- | --- |
-| original | `--maxWorkers=1 --no-file-parallelism` | 8 passed, exit 0 |
-| expanded | same, one Vitest process per file | 113 passed, exit 0 |
-| corpus audit | same | 34 passed, exit 0 |
-| typecheck | `npm.cmd run typecheck` | exit 0 |
+- remote retrieval mode was hard-coded or marked hybrid from pre-limit candidates;
+- local KOSHA remained risk-row eligible and created an independent row;
+- regulation lookup returned zero items at `limit=1` because guideline scoring consumed the slot.
 
-The expanded total is `8 + 19 + 43 + 5 + 31 + 3 + 3 + 1 = 113`.
+The `directEligible=true` fixture then failed with `evidence_role=direct`, confirming that metadata was incorrectly promoting local evidence. After the minimal fixes, the two bounded harness files passed 26/26. A first expanded attempt exposed an over-broad filter that blocked five established non-KOSHA SIF risk-row tests; that attempt is invalidated. The filter was narrowed to `kosha_guide` only and the complete expanded gate was rerun from the beginning.
 
-## Build Status
+## Final Verification
 
-Exactly one `npm.cmd run build` was launched. `Compiled successfully` was observed and `BUILD_ID`, routes manifest, and build manifest were created after its processes exited. The execution channel did not return the final exit-code line, so this is artifact/process evidence only, not an asserted build exit-code PASS. No second build was launched.
+All Vitest runs used `--maxWorkers=1 --no-file-parallelism`.
+
+| Gate | Final result | Exit |
+| --- | ---: | ---: |
+| original | 8/8 passed | 0 |
+| expanded | 113/113 passed | 0 |
+| corpus audit | 34/34 passed | 0 |
+| additional impacted risk/search | 41/41 passed | 0 |
+| strict typecheck | passed | 0 |
+| sequential production build | passed, attempt 1/1 | 0 |
+
+The final expanded composition is `7 + 1 + 19 + 43 + 5 + 31 + 3 + 3 + 1 = 113`. The additional impacted tests are `generation-trace-privacy` 2 and `photo-vision-analysis` 39. Before the build, the number of build processes scoped to this worktree was 0. The sole build compiled successfully, generated 27/27 static pages, and returned exit 0.

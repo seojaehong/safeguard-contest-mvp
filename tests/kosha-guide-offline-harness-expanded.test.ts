@@ -9,7 +9,11 @@ import { buildDbHarnessPacket } from "@/lib/db-harness";
 import { loadKoshaGuideCorpus, resetKoshaGuideCorpusCacheForTests } from "@/lib/kosha-guide-corpus";
 import { buildSafetyReferenceRiskRows } from "@/lib/search";
 import { deriveSafetyReferenceOperationalView as deriveClientView, getSafetyReferenceDisplayTitle as getClientTitle } from "@/lib/safety-reference-catalog-client";
-import { deriveSafetyReferenceOperationalView as deriveServerView, getSafetyReferenceDisplayTitle as getServerTitle } from "@/lib/safety-reference-catalog";
+import {
+  deriveSafetyReferenceOperationalView as deriveServerView,
+  getSafetyReferenceDisplayTitle as getServerTitle,
+  isSafetyReferenceRiskEligible
+} from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { mergeLocalAndRemoteSafetyReferenceResults, type SafetyReferenceItem } from "@/lib/safety-reference-policy";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
@@ -32,7 +36,11 @@ async function withNoSupabase<T>(run: () => Promise<T>): Promise<T> {
   }
 }
 
-function item(id: string, itemType: "technical-guideline" | "technical-support-regulation"): JsonRecord {
+function item(
+  id: string,
+  itemType: "technical-guideline" | "technical-support-regulation",
+  state: "current" | "stale" = "stale"
+): JsonRecord {
   const body = itemType === "technical-guideline"
     ? "작업 전 환기와 작업발판 상태를 확인한다."
     : "규정에 따라 작업 전 안전조치를 확인한다.";
@@ -44,7 +52,7 @@ function item(id: string, itemType: "technical-guideline" | "technical-support-r
     category: "건설안전",
     body,
     normalized_text_sha256: SHA(body),
-    state: "stale",
+    state,
     stable_key: `${id}-stable`,
     version_key: id,
     source_key: "kosha-synthetic",
@@ -64,7 +72,7 @@ function chunk(itemId: string, text: string): JsonRecord {
   };
 }
 
-function writeFixture(): string {
+function writeFixture(state: "current" | "stale" = "stale"): string {
   const rootDir = mkdtempSync(join(tmpdir(), "kosha-expanded-"));
   tempDirs.push(rootDir);
   const snapshotId = "synthetic-v3";
@@ -72,8 +80,8 @@ function writeFixture(): string {
   const snapshotDir = join(rootDir, snapshotPath);
   mkdirSync(snapshotDir, { recursive: true });
   const items = [
-    item("kosha-guideline", "technical-guideline"),
-    item("kosha-regulation", "technical-support-regulation")
+    item("kosha-guideline", "technical-guideline", state),
+    item("kosha-regulation", "technical-support-regulation", state)
   ];
   const chunks = [
     chunk("kosha-guideline", "작업 전 환기와 작업발판 상태를 확인한다."),
@@ -148,6 +156,17 @@ describe("KOSHA offline harness expanded regressions", () => {
     expect(result.items.map((value) => value.id)).toEqual(["remote-first", "local-only", "shared"]);
     expect(result.items.find((value) => value.id === "shared")?.evidence_role).toBe("direct");
     expect(result.retrievalMode).toBe("hybrid-local-supabase");
+
+    for (const remoteRetrievalMode of ["rest-ilike", "ranked-rpc", "hybrid-vector-rpc"] as const) {
+      const remoteOnly = mergeLocalAndRemoteSafetyReferenceResults({
+        localItems: [reference("shared", "supporting")],
+        remoteItems: [reference("shared")],
+        remoteRetrievalMode,
+        limit: 1
+      });
+      expect(remoteOnly.items.map((value) => value.id)).toEqual(["shared"]);
+      expect(remoteOnly.retrievalMode).toBe(remoteRetrievalMode);
+    }
   });
 
   it.each([
@@ -155,7 +174,7 @@ describe("KOSHA offline harness expanded regressions", () => {
     ["local-tag-only", ["local-1"], [], 1, ["local-1"], "local-tag"],
     ["local-ranked-only", ["local-1"], [], 1, ["local-1"], "local-ranked"],
     ["local-hybrid-only", ["local-1"], [], 1, ["local-1"], "local-hybrid"],
-    ["single-slot-reserves-remote", ["local-1"], ["remote-1"], 1, ["remote-1"], "hybrid-local-supabase"],
+    ["single-slot-returns-actual-remote-mode", ["local-1"], ["remote-1"], 1, ["remote-1"], "ranked-rpc"],
     ["two-slots-interleave", ["local-1"], ["remote-1"], 2, ["remote-1", "local-1"], "hybrid-local-supabase"],
     ["three-slots-preserve-two-ranked", ["local-1"], ["remote-1", "remote-2"], 3, ["remote-1", "local-1", "remote-2"], "hybrid-local-supabase"],
     ["four-slots-interleave-both-sources", ["local-1", "local-2"], ["remote-1", "remote-2"], 4, ["remote-1", "local-1", "remote-2", "local-2"], "hybrid-local-supabase"],
@@ -182,15 +201,23 @@ describe("KOSHA offline harness expanded regressions", () => {
     expect(new Set(result.items.map((item) => item.id)).size).toBe(result.items.length);
   });
 
-  it("keeps local supporting KOSHA out of direct evidence and mandatory risk rows", async () => {
-    const rootDir = writeFixture();
+  it("keeps local KOSHA supporting-only and attaches it only to an independently grounded direct risk row", async () => {
+    const rootDir = writeFixture("current");
     const loaded = await loadKoshaGuideCorpus({ rootDir });
     expect(loaded.status === "blocked" ? loaded.failures : []).toEqual([]);
     expect(loaded.status).toBe("ready");
     const result = await withNoSupabase(() => searchSafetyReferences({ query: "작업", limit: 2, offlineCorpus: { rootDir } }));
     const local = result.items.find((value) => value.kosha_guide);
     expect(local?.evidence_role).toBe("supporting");
-    expect(local?.kosha_guide?.directEligible).toBe(false);
+    expect(local?.kosha_guide?.directEligible).toBe(true);
+    expect(local && isSafetyReferenceRiskEligible(local)).toBe(false);
+    const directOnly = await withNoSupabase(() => searchSafetyReferences({
+      query: "작업",
+      evidenceRole: "direct",
+      limit: 2,
+      offlineCorpus: { rootDir }
+    }));
+    expect(directOnly.items.some((value) => value.kosha_guide !== undefined)).toBe(false);
 
     const packet = buildDbHarnessPacket({
       question: "작업",
@@ -199,8 +226,14 @@ describe("KOSHA offline harness expanded regressions", () => {
     });
     expect(packet.directEvidence.some((value) => value.kosha_guide !== undefined)).toBe(false);
     expect(packet.retrievalContract.mode).toBe("local-ranked");
-    const rows = buildSafetyReferenceRiskRows(buildMockAskResponse("작업", mockSearchResults, "mock", "test"), result.items, "맑음", "작업");
-    expect(rows.every((row) => !row.evidenceRefs.includes("DB 하네스 직접근거"))).toBe(true);
+    const response = buildMockAskResponse("작업", mockSearchResults, "mock", "test");
+    expect(buildSafetyReferenceRiskRows(response, result.items, "맑음", "작업")).toEqual([]);
+
+    const direct = reference("direct-ground", "direct");
+    const groundedRows = buildSafetyReferenceRiskRows(response, [direct, ...result.items], "맑음", "작업");
+    const directGroundedRows = groundedRows.filter((row) => row.evidenceRefs.includes("DB 하네스 직접근거"));
+    expect(directGroundedRows).toHaveLength(1);
+    expect(directGroundedRows[0]?.evidenceRefs).toContain(local?.kosha_guide?.evidenceRef);
   });
 
   it("honors local itemType exactly: SIF yields none and regulations never yield guidelines", async () => {
@@ -209,7 +242,7 @@ describe("KOSHA offline harness expanded regressions", () => {
     expect(loaded.status === "blocked" ? loaded.failures : []).toEqual([]);
     expect(loaded.status).toBe("ready");
     const sif = await withNoSupabase(() => searchSafetyReferences({ query: "작업", itemType: "sif-case", offlineCorpus: { rootDir } }));
-    const regulation = await withNoSupabase(() => searchSafetyReferences({ query: "작업", itemType: "technical-support-regulation", offlineCorpus: { rootDir } }));
+    const regulation = await withNoSupabase(() => searchSafetyReferences({ query: "작업", itemType: "technical-support-regulation", limit: 1, offlineCorpus: { rootDir } }));
 
     expect(sif.items).toEqual([]);
     expect(regulation.items).toHaveLength(1);

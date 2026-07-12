@@ -354,6 +354,9 @@ export function buildSafetyReferenceRiskRows(
     .filter(isSafetyReferenceRiskEligible)
     .filter(includesRiskAssessmentDocument)
     .filter((item) => item.title || item.summary || item.controls.length);
+  const supportingKoshaReferences = references.filter((item) =>
+    item.evidence_role === "supporting" && Boolean(item.kosha_guide?.evidenceRef)
+  );
   const rankedEligibleReferences = filterAndRankSafetyReferencesByQuery(
     rankQuery,
     [...eligibleReferences],
@@ -375,16 +378,18 @@ export function buildSafetyReferenceRiskRows(
     const dedupeKey = `${hazard}|${control}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
+    const supportingEvidenceRefs = filterAndRankSafetyReferencesByQuery(
+      `${rankQuery} ${displayTitle} ${hazard} ${control}`,
+      [...supportingKoshaReferences],
+      supportingKoshaReferences.length
+    ).map((supporting) => supporting.kosha_guide?.evidenceRef).filter((ref): ref is string => Boolean(ref));
     const evidenceRefs = [
-      ...(item.kosha_guide?.evidenceRef
-        ? [item.kosha_guide.evidenceRef]
-        : [
-          item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
-          item.source_kind_label || item.item_type || "safety_reference_items",
-          displayTitle,
-          item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
-          item.source_url || ""
-        ])
+      "DB 하네스 직접근거",
+      item.source_kind_label || item.item_type || "safety_reference_items",
+      displayTitle,
+      item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
+      item.source_url || "",
+      ...supportingEvidenceRefs
     ].filter(Boolean);
     const candidateRow = buildRiskRow({
       location,

@@ -265,7 +265,7 @@ describe("KOSHA v3 offline harness", () => {
     expect(orphan.status === "blocked" && orphan.failures).toContain("orphan:chunk:kosha-orphan-item");
   }, 20_000);
 
-  it("keeps v3 KOSHA as supporting evidence, preserves its same-page evidenceRef into TBM, and never exposes a score", async () => {
+  it("keeps v3 KOSHA as supporting metadata and carries its same-page evidenceRef only through a direct risk row", async () => {
     const rootDir = writeFixture();
     const result = await withNoSupabase(() => searchSafetyReferences({ query: "작업", limit: 3, offlineCorpus: { rootDir } }));
     expect(result.ok).toBe(true);
@@ -274,11 +274,28 @@ describe("KOSHA v3 offline harness", () => {
     expect(result.items[0]?.kosha_guide?.evidenceRef).toMatch(/p\.\d+/u);
     expect("score" in (result.items[0] || {})).toBe(false);
     const response = buildMockAskResponse("작업", mockSearchResults, "mock", "test");
-    const rows = buildSafetyReferenceRiskRows(response, result.items, "강풍", "작업");
+    expect(buildSafetyReferenceRiskRows(response, result.items, "강풍", "작업")).toEqual([]);
+    const directReference = {
+      id: "direct-ground",
+      source_id: "supabase-test",
+      item_type: "construction-process",
+      category: "건설안전",
+      subcategory: null,
+      title: "작업 직접 근거",
+      summary: "작업 전 안전조치를 확인한다.",
+      keywords: ["작업"],
+      risk_tags: ["추락"],
+      primary_documents: ["위험성평가표", "TBM 브리핑"],
+      controls: ["작업 전 안전조치 확인"],
+      evidence_role: "direct" as const,
+      retrieval_source: "ranked" as const
+    };
+    const rows = buildSafetyReferenceRiskRows(response, [directReference, ...result.items], "강풍", "작업");
     const links = buildTbmRiskLinks(rows, "강풍");
     const evidenceRefs = new Set(result.items.map((item) => item.kosha_guide?.evidenceRef).filter((ref): ref is string => Boolean(ref)));
     const anchoredRow = rows.find((row) => row.evidenceRefs.some((ref) => evidenceRefs.has(ref)));
     expect(anchoredRow).toBeDefined();
+    expect(anchoredRow?.evidenceRefs).toContain("DB 하네스 직접근거");
     expect(links.some((link) => link.evidenceRefs.some((ref) => anchoredRow?.evidenceRefs.includes(ref)))).toBe(true);
   }, 20_000);
 
