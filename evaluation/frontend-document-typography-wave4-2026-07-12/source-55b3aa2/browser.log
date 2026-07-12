@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/document-typography-production-matrix.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-document-typography-wave4
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  10:57:57
+   Duration  24.79s (transform 79ms, setup 0ms, import 718ms, tests 23.19s, environment 0ms)
+
