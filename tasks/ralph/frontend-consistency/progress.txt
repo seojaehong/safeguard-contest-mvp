@@ -27,3 +27,9 @@
 - Fixed: final specificity-aware Day/Night role rules now override every legacy responsive branch; matrix asserts size, weight, leading, tracking and font family where applicable.
 - Verified: standard Day/Night, short-height 1440x320 Day/Night, live Documents table, and 390px overflow matrix PASS.
 - Next: regenerate source-bound evidence and request fresh independent re-review.
+
+## 2026-07-12 W5 complete
+- Fresh re-review: SPEC PASS / CODE QUALITY PASS, P0-P3 none for 7def9dd..01857b2.
+- Confirmed: final cascade follows all short-height overrides and preserves Day/Night specificity.
+- Confirmed: production evidence covers size, weight, leading, tracking, role font family, and overflow.
+- Next: selectively integrate onto authoritative c4a11c6 and regenerate destination evidence.

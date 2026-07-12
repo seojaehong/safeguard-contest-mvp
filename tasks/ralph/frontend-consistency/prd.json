@@ -29,8 +29,8 @@
       "id": "W5",
       "title": "Split mixed typography roles",
       "priority": 2,
-      "status": "in_progress",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "All five mixed-typography-role findings are resolved by semantic selector separation",
         "Computed browser typography remains role-correct"
