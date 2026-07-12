@@ -1,8 +1,9 @@
 {
-  "generatedAt": "2026-07-12T02:14:46.5710073Z",
-  "status": "integration_verified_review_pending",
-  "baseCommit": "7def9dddb222204b81376eadca7a4e28cf2ce909",
-  "integratedHead": "8caf81bb3304ca7c56e2ed864426a0647560f733",
+  "generatedAt": "2026-07-12T02:38:39.9920416Z",
+  "status": "current_base_verified",
+  "baseCommit": "6a5d57cd42518569a244df59875db963a1281fb5",
+  "integratedCodeHead": "3bd8fe3a09aaf7c34bad715d2c7f21664f315190",
+  "verificationEvidenceParent": "0ea2185b3cd305d310569cfe1a98c9b6365de96a",
   "sourceReviewedCommit": "4859fb10d3115fb812dae7322b14b53b7a750c7b",
   "wholeBranchMerge": false,
   "databaseMutation": false,
@@ -16,11 +17,11 @@
     "staticPages": 27,
     "diffCheck": "pass"
   },
-  "existingFrontendGate": {
+  "priorFrontendGate": {
     "testsPassed": 44,
     "testsSkipped": 1,
     "testsFailed": 9,
     "ownersTouchedByOpenClawDiff": false,
-    "status": "separate_remediation_required"
+    "status": "historical_separate_remediation_evidence"
   }
 }
