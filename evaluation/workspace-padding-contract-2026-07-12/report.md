@@ -4,6 +4,8 @@
 
 최신 backend `693ec41bc330baa2933d25bff824885356bd8bcb` 위로 재베이스한 소스 HEAD `4a700c233d0c742970330e6f666b71582e3211c6`에서 PASS했다.
 
+최초 evidence commit은 `f8d46120f539942b91f7e8ffd9125d62a1ec6ee2`다.
+
 - 변경 파일: `app/globals.css`, `tests/workspace-input-css-contract.test.ts`
 - DB, 환경변수, migration 변경: 0
 - final production build: 27/27, BUILD_ID `WIEPy5P-dm17UtXVMpY2i`
