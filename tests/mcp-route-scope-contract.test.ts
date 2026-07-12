@@ -1,11 +1,11 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { MCP_TOOL_NAMES } from "@/lib/mcp-auth";
+import { MCP_TOOL_NAMES, type McpAuthContext } from "@/lib/mcp-auth";
 import { registerScopedTool } from "@/lib/mcp-scoped-tool";
 import type { McpToolResult } from "@/lib/mcp-tools";
 
@@ -29,22 +29,57 @@ function walk(node: ts.Node, visit: (candidate: ts.Node) => void): void {
   ts.forEachChild(node, (child) => walk(child, visit));
 }
 
-function callName(call: ts.CallExpression): string | null {
-  if (ts.isIdentifier(call.expression)) return call.expression.text;
-  if (ts.isPropertyAccessExpression(call.expression)) return call.expression.name.text;
+function calledMemberName(expression: ts.LeftHandSideExpression): string | null {
+  if (ts.isPropertyAccessExpression(expression)) return expression.name.text;
+  if (
+    ts.isElementAccessExpression(expression) &&
+    expression.argumentExpression &&
+    (ts.isStringLiteral(expression.argumentExpression) ||
+      ts.isNoSubstitutionTemplateLiteral(expression.argumentExpression))
+  ) {
+    return expression.argumentExpression.text;
+  }
   return null;
 }
 
-function hasCall(node: ts.Node, expectedName: string): boolean {
-  let found = false;
-  walk(node, (candidate) => {
-    if (ts.isCallExpression(candidate) && callName(candidate) === expectedName) found = true;
-  });
-  return found;
+function createCheckedSource(source: string): {
+  checker: ts.TypeChecker;
+  sourceFile: ts.SourceFile;
+} {
+  const fileName = "route.ts";
+  const sourceFile = ts.createSourceFile(
+    fileName,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+  const options: ts.CompilerOptions = {
+    module: ts.ModuleKind.ESNext,
+    noLib: true,
+    noResolve: true,
+    target: ts.ScriptTarget.Latest,
+  };
+  const host: ts.CompilerHost = {
+    fileExists: (candidate) => candidate === fileName,
+    getCanonicalFileName: (candidate) => candidate,
+    getCurrentDirectory: () => "",
+    getDefaultLibFileName: () => "lib.d.ts",
+    getDirectories: () => [],
+    getNewLine: () => "\n",
+    getSourceFile: (candidate) => candidate === fileName ? sourceFile : undefined,
+    readFile: (candidate) => candidate === fileName ? source : undefined,
+    useCaseSensitiveFileNames: () => true,
+    writeFile: () => undefined,
+  };
+  const program = ts.createProgram([fileName], options, host);
+  const checkedSourceFile = program.getSourceFile(fileName);
+  if (!checkedSourceFile) throw new Error("route analysis source was not created");
+  return { checker: program.getTypeChecker(), sourceFile: checkedSourceFile };
 }
 
 function analyzeRouteRegistrations(source: string): RouteRegistrationAnalysis {
-  const sourceFile = ts.createSourceFile("route.ts", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const { checker, sourceFile } = createCheckedSource(source);
   const analysis: RouteRegistrationAnalysis = {
     canonicalImportCount: 0,
     directRegisterToolCalls: 0,
@@ -54,17 +89,57 @@ function analyzeRouteRegistrations(source: string): RouteRegistrationAnalysis {
     nonLiteralScopedToolCalls: 0,
     scopedToolNames: [],
   };
+  let canonicalImportIdentifier: ts.Identifier | undefined;
+  let canonicalImportSymbol: ts.Symbol | undefined;
+  let serverParameterIdentifier: ts.Identifier | undefined;
+  let serverParameterSymbol: ts.Symbol | undefined;
+
+  walk(sourceFile, (node) => {
+    if (
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier) &&
+      node.moduleSpecifier.text === "@/lib/mcp-scoped-tool" &&
+      node.importClause?.namedBindings &&
+      ts.isNamedImports(node.importClause.namedBindings)
+    ) {
+      for (const element of node.importClause.namedBindings.elements) {
+        const importedName = element.propertyName?.text ?? element.name.text;
+        if (importedName !== "registerScopedTool") continue;
+        canonicalImportIdentifier = element.name;
+        canonicalImportSymbol = checker.getSymbolAtLocation(element.name);
+        if (!element.propertyName && element.name.text === "registerScopedTool") {
+          analysis.canonicalImportCount += 1;
+        }
+      }
+    }
+    if (
+      ts.isFunctionDeclaration(node) &&
+      node.name?.text === "registerTools" &&
+      node.parameters[0] &&
+      ts.isIdentifier(node.parameters[0].name)
+    ) {
+      serverParameterIdentifier = node.parameters[0].name;
+      serverParameterSymbol = checker.getSymbolAtLocation(node.parameters[0].name);
+    }
+  });
 
   walk(sourceFile, (node) => {
     if (!ts.isCallExpression(node)) return;
-    if (
-      ts.isPropertyAccessExpression(node.expression) &&
-      node.expression.name.text === "registerTool"
-    ) {
+    const memberName = calledMemberName(node.expression);
+    if (memberName === "registerTool") {
       analysis.directRegisterToolCalls += 1;
       return;
     }
-    if (callName(node) !== "registerScopedTool") return;
+    if (memberName === "registerScopedTool") {
+      analysis.alternateScopedToolCalls += 1;
+      return;
+    }
+    if (
+      !ts.isIdentifier(node.expression) ||
+      !canonicalImportSymbol ||
+      checker.getSymbolAtLocation(node.expression) !== canonicalImportSymbol
+    ) return;
+
     const toolName = node.arguments[1];
     if (!toolName || !ts.isStringLiteral(toolName)) {
       analysis.nonLiteralScopedToolCalls += 1;
@@ -73,11 +148,35 @@ function analyzeRouteRegistrations(source: string): RouteRegistrationAnalysis {
     analysis.scopedToolNames.push(toolName.text);
   });
 
+  walk(sourceFile, (node) => {
+    if (!ts.isIdentifier(node)) return;
+    const symbol = checker.getSymbolAtLocation(node);
+    if (canonicalImportSymbol && symbol === canonicalImportSymbol) {
+      const isImportDeclarationName = node === canonicalImportIdentifier;
+      const isDirectCanonicalCall = ts.isCallExpression(node.parent) && node.parent.expression === node;
+      if (!isImportDeclarationName && !isDirectCanonicalCall) {
+        analysis.registrationAliasReferences += 1;
+      }
+    }
+    if (!serverParameterSymbol || symbol !== serverParameterSymbol) return;
+    if (node === serverParameterIdentifier) return;
+    const isCanonicalServerArgument =
+      ts.isCallExpression(node.parent) &&
+      node.parent.arguments[0] === node &&
+      ts.isIdentifier(node.parent.expression) &&
+      canonicalImportSymbol !== undefined &&
+      checker.getSymbolAtLocation(node.parent.expression) === canonicalImportSymbol;
+    if (!isCanonicalServerArgument) analysis.serverReferenceViolations += 1;
+  });
+
   return analysis;
 }
 
 function captureScopedTool(
-  handler: (args: { region: string }) => McpToolResult | Promise<McpToolResult>,
+  handler: (
+    args: { region: string },
+    authContext: McpAuthContext,
+  ) => McpToolResult | Promise<McpToolResult>,
 ): CapturedToolCallback {
   let captured: CapturedToolCallback | undefined;
   const server = {
@@ -107,48 +206,6 @@ function parseToolError(result: McpToolResult): Record<string, unknown> {
   return JSON.parse(text) as Record<string, unknown>;
 }
 
-function wrapperGuardsBeforeWorkAndLogs(source: string): boolean {
-  const sourceFile = ts.createSourceFile("mcp-scoped-tool.ts", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
-  let wrapper: ts.FunctionDeclaration | undefined;
-  walk(sourceFile, (node) => {
-    if (ts.isFunctionDeclaration(node) && node.name?.text === "registerScopedTool") wrapper = node;
-  });
-  if (!wrapper?.body) return false;
-
-  let registration: ts.CallExpression | undefined;
-  walk(wrapper.body, (node) => {
-    if (
-      ts.isCallExpression(node) &&
-      ts.isPropertyAccessExpression(node.expression) &&
-      node.expression.name.text === "registerTool"
-    ) {
-      registration = node;
-    }
-  });
-  if (!registration) return false;
-
-  const callback = registration.arguments[2];
-  if (!callback || (!ts.isArrowFunction(callback) && !ts.isFunctionExpression(callback))) return false;
-  if (!ts.isBlock(callback.body)) return false;
-
-  const firstStatement = callback.body.statements[0];
-  if (!firstStatement || !ts.isTryStatement(firstStatement)) return false;
-  const firstGuardedStatement = firstStatement.tryBlock.statements[0];
-  if (!firstGuardedStatement || !hasCall(firstGuardedStatement, "readAuthorizedToolContext")) return false;
-
-  const handlerStatementIndex = firstStatement.tryBlock.statements.findIndex((statement) =>
-    hasCall(statement, "handler"),
-  );
-  if (handlerStatementIndex <= 0) return false;
-
-  const catchClause = firstStatement.catchClause;
-  return Boolean(
-    catchClause &&
-    hasCall(catchClause.block, "error") &&
-    hasCall(catchClause.block, "toToolError"),
-  );
-}
-
 describe("MCP route scope contract", () => {
   it("routes every literal registered tool through the central scoped wrapper", () => {
     const route = readFileSync(join(process.cwd(), "app/api/mcp/[transport]/route.ts"), "utf8");
@@ -163,39 +220,20 @@ describe("MCP route scope contract", () => {
     expect(analysis.scopedToolNames).toEqual([...MCP_TOOL_NAMES]);
   });
 
-  it("makes authorization the wrapper callback's first executable work and logs internal errors", () => {
-    const wrapperPath = join(process.cwd(), "lib/mcp-scoped-tool.ts");
-    const wrapperSource = existsSync(wrapperPath) ? readFileSync(wrapperPath, "utf8") : "";
-
-    expect(wrapperGuardsBeforeWorkAndLogs(wrapperSource)).toBe(true);
-  });
-
-  it("does not accept comment, dynamic-name, direct-registration, or after-work bypasses", () => {
+  it("does not accept comment, dynamic-name, or direct-registration bypasses", () => {
     const bypassRoute = `
+      import { registerScopedTool } from "@/lib/mcp-scoped-tool";
       // registerScopedTool(server, "comment_only", {}, handler)
-      registerScopedTool(server, dynamicToolName, {}, handler);
-      server.registerTool("direct_tool", {}, handler);
+      function registerTools(server) {
+        registerScopedTool(server, dynamicToolName, {}, handler);
+        server.registerTool("direct_tool", {}, handler);
+      }
     `;
     const routeAnalysis = analyzeRouteRegistrations(bypassRoute);
     expect(routeAnalysis.scopedToolNames).toEqual([]);
     expect(routeAnalysis.nonLiteralScopedToolCalls).toBe(1);
     expect(routeAnalysis.directRegisterToolCalls).toBe(1);
-
-    const afterWorkWrapper = `
-      function registerScopedTool(server, toolName, config, handler) {
-        server.registerTool(toolName, config, async (args, extra) => {
-          try {
-            await handler(args);
-            const context = readAuthorizedToolContext(extra, toolName);
-            return context;
-          } catch (error) {
-            log.error("failed", error);
-            return toToolError(error);
-          }
-        });
-      }
-    `;
-    expect(wrapperGuardsBeforeWorkAndLogs(afterWorkWrapper)).toBe(false);
+    expect(routeAnalysis.serverReferenceViolations).toBe(1);
   });
 
   it("rejects an aliased registration invoked before the authorization guard", () => {
@@ -223,6 +261,20 @@ describe("MCP route scope contract", () => {
     const analysis = analyzeRouteRegistrations(alternateObject);
 
     expect(analysis.alternateScopedToolCalls).toBe(1);
+    expect(analysis.scopedToolNames).toEqual([]);
+  });
+
+  it("rejects a computed registration method on the MCP server", () => {
+    const dynamicRegistration = `
+      import { registerScopedTool } from "@/lib/mcp-scoped-tool";
+      function registerTools(server) {
+        const method = "registerTool";
+        server[method]("get_weather_signals", {}, handler);
+      }
+    `;
+    const analysis = analyzeRouteRegistrations(dynamicRegistration);
+
+    expect(analysis.serverReferenceViolations).toBe(1);
     expect(analysis.scopedToolNames).toEqual([]);
   });
 });
@@ -263,8 +315,10 @@ describe("registerScopedTool behavior", () => {
 
   it("calls the handler exactly once with an authorized context", async () => {
     let handlerCallCount = 0;
-    const callback = captureScopedTool((_args) => {
+    let receivedContext: McpAuthContext | undefined;
+    const callback = captureScopedTool((_args, authContext) => {
       handlerCallCount += 1;
+      receivedContext = authContext;
       return { content: [{ type: "text", text: "authorized" }] };
     });
 
@@ -284,6 +338,13 @@ describe("registerScopedTool behavior", () => {
     );
 
     expect(handlerCallCount).toBe(1);
+    expect(receivedContext).toEqual({
+      siteId: "site-1",
+      orgId: "org-1",
+      scopes: ["tools:get_weather_signals"],
+      source: "db",
+      tokenId: "token-1",
+    });
     expect(result).toEqual({ content: [{ type: "text", text: "authorized" }] });
   });
 });
