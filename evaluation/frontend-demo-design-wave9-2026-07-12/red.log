@@ -5,8 +5,8 @@
 
  RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-demo-design-wave9
 
- ❯ tests/demo-design-contract.test.ts (3 tests | 1 failed) 10969ms
-     × requires complete tokenized typography, radius, gradient, and shadow contracts 2637ms
+ ❯ tests/demo-design-contract.test.ts (3 tests | 1 failed) 7253ms
+     × requires complete tokenized typography, radius, gradient, and shadow contracts 3286ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -19,27 +19,27 @@ AssertionError: expected { 'decorative-box-shadow': 3, …(6) } to deeply equal 
 - {}
 + {
 +   "decorative-box-shadow": 3,
-+   "decorative-gradient": 2,
-+   "font-size-tier": 7,
-+   "line-height-tier": 10,
-+   "radius-tier": 18,
-+   "tracking-tier": 6,
-+   "typography-tuple": 14,
++   "decorative-gradient": 1,
++   "font-size-tier": 4,
++   "line-height-tier": 9,
++   "radius-tier": 15,
++   "tracking-tier": 4,
++   "typography-tuple": 11,
 + }
 
- ❯ tests/demo-design-contract.test.ts:134:62
-    132|
-    133|   it("requires complete tokenized typography, radius, gradient, and sh…
-    134|     expect(violationCounts(runAudit(css, renderedPrefixes))).toEqual({…
-       |                                                              ^
-    135|   }, 20_000);
-    136| });
+ ❯ tests/demo-design-contract.test.ts:232:66
+    230|   it("requires complete tokenized typography, radius, gradient, and sh…
+    231|     const violations = auditViolations(css);
+    232|     expect(violationCounts(renderedViolations(css, violations))).toEqu…
+       |                                                                  ^
+    233|   }, 20_000);
+    234| });
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
 
 
  Test Files  1 failed (1)
       Tests  1 failed | 2 passed (3)
-   Start at  16:30:40
-   Duration  11.62s (transform 28ms, setup 0ms, import 79ms, tests 10.97s, environment 0ms)
+   Start at  16:37:57
+   Duration  8.29s (transform 55ms, setup 0ms, import 152ms, tests 7.25s, environment 0ms)
 

@@ -15,6 +15,37 @@ type Violation = {
 
 const renderedPrefixes = [".v2-", ".demo-", ".scenario-strip"] as const;
 const inventoryPrefixes = [...renderedPrefixes, ".mission-"] as const;
+const expectedStaticClassManifest = [
+  "api-pulse-grid",
+  "brand-lockup",
+  "brand-mark",
+  "card",
+  "demo-document-list",
+  "demo-evidence-map",
+  "demo-generated-pack",
+  "demo-hero-grid",
+  "demo-input-card",
+  "demo-mode-badges",
+  "demo-mode-shell",
+  "demo-progress-track",
+  "demo-result-brief",
+  "demo-screen",
+  "demo-screen-top",
+  "demo-section-heading",
+  "demo-stage-list",
+  "demo-stage-panel",
+  "eyebrow",
+  "foreign",
+  "language-wall",
+  "presenter-notes",
+  "primary-triad-grid",
+  "risk",
+  "scenario-strip",
+  "tbm",
+  "triad-card",
+  "v2-shell",
+  "v2-nav",
+] as const;
 
 const targetRules = new Set([
   "font-family-token",
@@ -51,9 +82,33 @@ function selectorIsOwned(selector: string, prefixes: readonly string[]): boolean
   return prefixes.some((prefix) => normalized.includes(prefix));
 }
 
-function declarationSelectorsByLine(source: string): Map<number, string> {
+function splitSelectorList(selectorList: string): string[] {
+  const selectors: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let index = 0; index < selectorList.length; index += 1) {
+    if (selectorList[index] === "(") depth += 1;
+    if (selectorList[index] === ")") depth -= 1;
+    if (selectorList[index] === "," && depth === 0) {
+      selectors.push(selectorList.slice(start, index));
+      start = index + 1;
+    }
+  }
+  selectors.push(selectorList.slice(start));
+  return selectors.map(normalizeSelector).filter(Boolean);
+}
+
+function selectorIsRenderedOwned(selectorList: string): boolean {
+  return splitSelectorList(selectorList).some((selector) =>
+    selectorIsOwned(selector, renderedPrefixes)
+    && expectedStaticClassManifest.some((root) => selector.includes(`.${root}`)),
+  );
+}
+
+function declarationSelectorsByLine(source: string, stripComments = false): Map<number, string> {
+  const parsedSource = stripComments ? source.replace(/\/\*[\s\S]*?\*\//gu, "") : source;
   const selectors = new Map<number, string>();
-  postcss.parse(source).walkDecls((declaration) => {
+  postcss.parse(parsedSource).walkDecls((declaration) => {
     const parent = declaration.parent;
     if (parent?.type === "rule" && declaration.source?.start?.line) {
       selectors.set(declaration.source.start.line, parent.selector);
@@ -62,12 +117,30 @@ function declarationSelectorsByLine(source: string): Map<number, string> {
   return selectors;
 }
 
-function selectorEvidence(violation: Violation, declarationSelectors: ReadonlyMap<number, string>): string {
+function effectSelectorsByValue(source: string): Map<string, string> {
+  const selectors = new Map<string, string>();
+  postcss.parse(source).walkDecls((declaration) => {
+    const parent = declaration.parent;
+    if (parent?.type === "rule" && ["background", "background-image", "text-shadow"].includes(declaration.prop)) {
+      selectors.set(normalizeSelector(declaration.value), parent.selector);
+    }
+  });
+  return selectors;
+}
+
+function selectorEvidence(
+  violation: Violation,
+  rawDeclarationSelectors: ReadonlyMap<number, string>,
+  effectSelectors: ReadonlyMap<string, string>,
+): string {
   if (violation.value?.includes(" => ")) return violation.value.split(" => ", 1)[0];
   if (violation.rule === "selector-role" && violation.value) {
     return violation.value.replace(/ ([a-z-]+): expected[\s\S]*$/u, "");
   }
-  return declarationSelectors.get(violation.line) ?? "";
+  if (violation.rule === "decorative-gradient" || violation.rule === "decorative-text-shadow") {
+    return effectSelectors.get(normalizeSelector(violation.value ?? "")) ?? "";
+  }
+  return rawDeclarationSelectors.get(violation.line) ?? "";
 }
 
 function violationCounts(violations: readonly Violation[]): Record<string, number> {
@@ -79,7 +152,7 @@ function violationCounts(violations: readonly Violation[]): Record<string, numbe
   );
 }
 
-function runAudit(css: string, prefixes: readonly string[]): Violation[] {
+function auditViolations(css: string): Violation[] {
   const declarationSelectors = declarationSelectorsByLine(css);
   const outputPath = path.join(os.tmpdir(), `safeclaw-demo-design-${process.pid}.json`);
   const result = spawnSync(process.execPath, [path.join(process.cwd(), "scripts", "frontend_consistency_audit.mjs")], {
@@ -91,10 +164,33 @@ function runAudit(css: string, prefixes: readonly string[]): Violation[] {
 
   const report = JSON.parse(fs.readFileSync(outputPath, "utf8")) as { violations: Violation[] };
   fs.rmSync(outputPath, { force: true });
-  return report.violations.filter((violation) => {
-    if (violation.file !== "app/globals.css" || !targetRules.has(violation.rule)) return false;
-    return selectorIsOwned(selectorEvidence(violation, declarationSelectors), prefixes);
-  });
+  return report.violations.filter((violation) =>
+    violation.file === "app/globals.css" && targetRules.has(violation.rule),
+  );
+}
+
+function inventoryViolations(css: string, violations: readonly Violation[]): Violation[] {
+  const rawSelectors = declarationSelectorsByLine(css);
+  const effectSelectors = effectSelectorsByValue(css);
+  return violations.filter((violation) =>
+    selectorIsOwned(selectorEvidence(violation, rawSelectors, effectSelectors), inventoryPrefixes),
+  );
+}
+
+function renderedViolations(css: string, violations: readonly Violation[]): Violation[] {
+  const rawSelectors = declarationSelectorsByLine(css);
+  const effectSelectors = effectSelectorsByValue(css);
+  return violations.filter((violation) =>
+    selectorIsRenderedOwned(selectorEvidence(violation, rawSelectors, effectSelectors)),
+  );
+}
+
+function staticClassManifest(source: string): string[] {
+  const classValues = [
+    ...Array.from(source.matchAll(/className="([^"]+)"/gu), (match) => match[1]),
+    ...Array.from(source.matchAll(/className=\{`([^`]+)`\}/gu), (match) => match[1].split("${", 1)[0]),
+  ];
+  return [...new Set(classValues.flatMap((value) => value.trim().split(/\s+/u)).filter(Boolean))].sort();
 }
 
 describe("demo design contract", () => {
@@ -104,9 +200,7 @@ describe("demo design contract", () => {
 
   it("binds the /demo route to the complete rendered selector ownership", () => {
     expect(demoPage).toContain("<V2DemoExperience");
-    for (const renderedFamily of ["v2-shell", "demo-stage-panel", "scenario-strip"]) {
-      expect(demoComponent, `V2DemoExperience must render .${renderedFamily}`).toContain(renderedFamily);
-    }
+    expect(staticClassManifest(demoComponent)).toEqual([...expectedStaticClassManifest].sort());
     expect(demoComponent).not.toContain("mission-rail");
     expect(demoComponent).not.toContain("mission-step");
     expect(selectorIsOwned("body:has(.safeclaw-landing) .demo-stage-panel", renderedPrefixes)).toBe(false);
@@ -114,23 +208,27 @@ describe("demo design contract", () => {
     expect(selectorIsOwned(".safeclaw-module-shell .card", renderedPrefixes)).toBe(false);
   });
 
-  it("source-binds inventory 64 to rendered 60 plus four dead mission findings", () => {
-    const inventoryViolations = runAudit(css, inventoryPrefixes);
-    const renderedViolations = runAudit(css, renderedPrefixes);
-    expect(inventoryViolations).toHaveLength(64);
-    expect(violationCounts(inventoryViolations)).toEqual(expectedRedCounts);
-    expect(renderedViolations).toHaveLength(60);
-    expect(violationCounts(renderedViolations)).toEqual({
-      ...expectedRedCounts,
-      "radius-tier": 18,
-      "typography-tuple": 14,
+  it("source-binds inventory 64 to rendered 47 plus 17 non-rendered or shared findings", () => {
+    const violations = auditViolations(css);
+    const inventory = inventoryViolations(css, violations);
+    const rendered = renderedViolations(css, violations);
+    expect(inventory).toHaveLength(64);
+    expect(violationCounts(inventory)).toEqual(expectedRedCounts);
+    expect(rendered).toHaveLength(47);
+    expect(violationCounts(rendered)).toEqual({
+      "decorative-box-shadow": 3,
+      "decorative-gradient": 1,
+      "font-size-tier": 4,
+      "line-height-tier": 9,
+      "radius-tier": 15,
+      "tracking-tier": 4,
+      "typography-tuple": 11,
     });
-    expect(violationCounts(inventoryViolations.filter((violation) =>
-      selectorEvidence(violation, declarationSelectorsByLine(css)).includes(".mission-"),
-    ))).toEqual({ "radius-tier": 2, "typography-tuple": 2 });
+    expect(inventory).toHaveLength(rendered.length + 17);
   }, 20_000);
 
   it("requires complete tokenized typography, radius, gradient, and shadow contracts", () => {
-    expect(violationCounts(runAudit(css, renderedPrefixes))).toEqual({});
+    const violations = auditViolations(css);
+    expect(violationCounts(renderedViolations(css, violations))).toEqual({});
   }, 20_000);
 });
