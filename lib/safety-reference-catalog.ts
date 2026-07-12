@@ -30,6 +30,7 @@ export type SafetyReferenceItem = {
     stableDocumentKey: string;
     version: string;
     quality: "accepted" | "review_required";
+    lifecycle: "current" | "stale" | "retired";
     bodyKind: "native" | "unknown";
     anchors: Array<{ page: number; excerpt: string }>;
     evidenceRef: string | null;
@@ -490,6 +491,16 @@ function genericOperationalView(item: SafetyReferenceItem): SafetyReferenceOpera
 }
 
 export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem): SafetyReferenceOperationalView {
+  if (!isSafetyReferenceDirectEligible(item)) {
+    const controls = item.controls.map((control) => control.trim()).filter(Boolean);
+    return {
+      hazard: `검토 필요: ${compactText(getSafetyReferenceDisplayTitle(item), 64)} 근거 상태 미확정`,
+      controls: controls.length
+        ? controls
+        : ["근거 원문과 현행 여부를 검토한 뒤 현장 통제대책으로 확정"],
+      reviewRequired: true
+    };
+  }
   const text = operationalIdentityText(item);
   const incidentText = operationalIncidentText(item);
   const accidentType = extractOperationalAccidentType(incidentText);
@@ -1532,6 +1543,18 @@ function deriveEvidenceRole(
 
 export function isSafetyReferenceRiskEligible(item: SafetyReferenceItem): boolean {
   return !item.kosha_guide;
+}
+
+export function isSafetyReferenceDirectEligible(
+  item: Pick<SafetyReferenceItem, "kosha_guide">
+): boolean {
+  const guide = item.kosha_guide;
+  if (!guide) return true;
+  return guide.quality === "accepted"
+    && guide.lifecycle === "current"
+    && guide.bodyKind === "native"
+    && guide.anchors.length > 0
+    && guide.directEligible;
 }
 
 function compactText(value: string, maxLength = 96): string {

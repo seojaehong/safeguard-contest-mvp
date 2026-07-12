@@ -53,6 +53,7 @@ function buildLocalItem(hit: KoshaGuideCorpusHit): SafetyReferenceItem {
       stableDocumentKey: record.stableDocumentKey,
       version: record.version,
       quality: record.quality,
+      lifecycle: record.provenance.lifecycle,
       bodyKind: record.bodyKind,
       anchors: record.anchors,
       evidenceRef: hit.evidenceRef,

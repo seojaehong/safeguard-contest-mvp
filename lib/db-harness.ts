@@ -9,6 +9,7 @@ import {
   deriveSafetyReferenceRetrievalModeFromItems,
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplayTitle,
+  isSafetyReferenceDirectEligible,
   isSafetyReferenceCompatibleWithQuery
 } from "@/lib/safety-reference-catalog";
 
@@ -53,6 +54,12 @@ export type HarnessPhotoHazardEvidence = {
   sourceUrl?: string | null;
   itemType?: string;
   evidenceRole?: "direct" | "supporting";
+  stableDocumentKey?: string;
+  anchor?: { page: number; excerpt: string };
+  quality?: "accepted" | "review_required";
+  lifecycle?: "current" | "stale" | "retired";
+  directEligible?: boolean;
+  reviewRequired?: boolean;
   retrievals?: Array<{
     channel: "direct" | "sif" | "supporting";
     query: string;
@@ -180,6 +187,7 @@ function includesDocument(item: SafetyReferenceItem, document: string) {
 function uniqueDocuments(items: SafetyReferenceItem[], improvements: HarnessImprovement[]) {
   const documents = new Set<string>();
   for (const item of items) {
+    if (!isSafetyReferenceDirectEligible(item)) continue;
     item.primary_documents.forEach((document) => documents.add(document));
     item.reflected_documents?.forEach((document) => documents.add(document));
   }
@@ -199,7 +207,9 @@ function buildDocumentCoverage(input: {
     const evidenceTypes: DbHarnessDocumentCoverage["evidenceTypes"] = [];
     if (input.directEvidence.some((item) => includesDocument(item, document))) evidenceTypes.push("directEvidence");
     if (input.sifCases.some((item) => includesDocument(item, document))) evidenceTypes.push("sifCase");
-    if (input.supportingEvidence.some((item) => includesDocument(item, document))) evidenceTypes.push("supportingEvidence");
+    if (input.supportingEvidence.some((item) => (
+      isSafetyReferenceDirectEligible(item) && includesDocument(item, document)
+    ))) evidenceTypes.push("supportingEvidence");
     if (input.improvements.some((item) => item.reflectedDocuments.includes(document))) evidenceTypes.push("improvementMemory");
     return {
       document,
@@ -446,6 +456,19 @@ function parsePhotoHazardEvidence(value: unknown): HarnessPhotoHazardEvidence | 
       .map(parsePhotoHazardEvidenceRetrieval)
       .filter((item): item is NonNullable<HarnessPhotoHazardEvidence["retrievals"]>[number] => item !== null)
     : undefined;
+  const anchor = isRecord(value.anchor)
+    && typeof value.anchor.page === "number"
+    && Number.isInteger(value.anchor.page)
+    && value.anchor.page > 0
+    && readString(value.anchor.excerpt)
+    ? { page: value.anchor.page, excerpt: readString(value.anchor.excerpt) }
+    : undefined;
+  const quality = value.quality === "accepted" || value.quality === "review_required"
+    ? value.quality
+    : undefined;
+  const lifecycle = value.lifecycle === "current" || value.lifecycle === "stale" || value.lifecycle === "retired"
+    ? value.lifecycle
+    : undefined;
   return {
     sourceId,
     sourceType,
@@ -455,6 +478,12 @@ function parsePhotoHazardEvidence(value: unknown): HarnessPhotoHazardEvidence | 
     sourceUrl: typeof value.sourceUrl === "string" ? value.sourceUrl : null,
     itemType: readString(value.itemType) || undefined,
     evidenceRole,
+    stableDocumentKey: readString(value.stableDocumentKey) || undefined,
+    anchor,
+    quality,
+    lifecycle,
+    directEligible: typeof value.directEligible === "boolean" ? value.directEligible : undefined,
+    reviewRequired: typeof value.reviewRequired === "boolean" ? value.reviewRequired : undefined,
     retrievals: retrievals?.length ? retrievals : undefined
   };
 }
@@ -488,10 +517,23 @@ function parsePhotoHazardProvenance(value: unknown): HarnessPhotoHazardProvenanc
       .filter((item): item is HarnessPhotoHazardEvidence => item !== null)
       .slice(0, 8)
     : undefined;
+  const reviewRequiredEvidenceIds = new Set((evidence || [])
+    .filter((item) => (
+      item.reviewRequired === true
+      || item.quality === "review_required"
+      || (item.lifecycle !== undefined && item.lifecycle !== "current")
+      || item.directEligible === false
+    ))
+    .map((item) => item.sourceId));
   const confirmedControls = Array.isArray(value.confirmedControls)
     ? value.confirmedControls
       .map(parsePhotoHazardControl)
       .filter((item): item is HarnessPhotoHazardControl => item !== null)
+      .map((item) => ({
+        ...item,
+        evidenceSourceIds: item.evidenceSourceIds.filter((sourceId) => !reviewRequiredEvidenceIds.has(sourceId))
+      }))
+      .filter((item) => item.evidenceSourceIds.length > 0)
       .slice(0, 8)
     : undefined;
   return {

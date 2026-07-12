@@ -2,6 +2,7 @@ import type { HarnessImprovement } from "@/lib/db-harness";
 import { buildOperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import {
   getSafetyReferenceDisplayTitle,
+  isSafetyReferenceDirectEligible,
   type SafetyReferenceItem
 } from "@/lib/safety-reference-catalog";
 
@@ -236,7 +237,13 @@ export function buildWorkpackLearningJsonl(input: WorkpackLearningInput) {
       evidenceRole: reference.evidence_role,
       sourceUrl: reference.source_url,
       retrievalSource: reference.retrieval_source || "not-recorded",
-      retrievalMode: referenceRetrievalLabel(reference)
+      retrievalMode: referenceRetrievalLabel(reference),
+      stableDocumentKey: reference.kosha_guide?.stableDocumentKey,
+      anchor: reference.kosha_guide?.anchors[0],
+      quality: reference.kosha_guide?.quality,
+      lifecycle: reference.kosha_guide?.lifecycle,
+      directEligible: reference.kosha_guide?.directEligible,
+      reviewRequired: !isSafetyReferenceDirectEligible(reference)
     })),
     ...input.improvements.map((improvement) => event(input, "improvement", {
       improvementId: improvement.id,
@@ -321,6 +328,14 @@ export function buildWorkpackLearningMarkdown(input: WorkpackLearningInput) {
     lines.push(`  - type: ${reference.item_type}`);
     lines.push(`  - retrieval: ${referenceRetrievalLabel(reference)}`);
     if (reference.evidence_role) lines.push(`  - role: ${reference.evidence_role}`);
+    if (reference.kosha_guide) {
+      lines.push(`  - stableDocumentKey: ${reference.kosha_guide.stableDocumentKey}`);
+      lines.push(`  - quality: ${reference.kosha_guide.quality}`);
+      lines.push(`  - lifecycle: ${reference.kosha_guide.lifecycle}`);
+      lines.push(`  - directEligible: ${reference.kosha_guide.directEligible}`);
+      const anchor = reference.kosha_guide.anchors[0];
+      if (anchor) lines.push(`  - anchor: p.${anchor.page} ${anchor.excerpt}`);
+    }
     lines.push(`  - documents: ${reference.primary_documents.join(", ") || "없음"}`);
     if (reference.reflected_documents?.length) lines.push(`  - reflected: ${reference.reflected_documents.join(", ")}`);
     lines.push(`  - controls: ${reference.controls.join(" / ") || "없음"}`);

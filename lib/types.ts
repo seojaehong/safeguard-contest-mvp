@@ -551,8 +551,25 @@ export type AskResponse = {
         primaryDocuments: string[];
         controls: string[];
         evidenceRoleLabel?: string;
+        evidenceRole?: "direct" | "supporting";
         sourceKindLabel?: string;
         operationSignalLabel?: string;
+        stableDocumentKey?: string;
+        anchor?: { page: number; excerpt: string };
+        retrievalSource?: "rest" | "ranked" | "vector" | "hybrid" | "local-tag" | "local-ranked" | "local-hybrid";
+        retrievalMode?:
+          | "unconfigured"
+          | "rest-ilike"
+          | "ranked-rpc"
+          | "hybrid-vector-rpc"
+          | "hybrid-local-supabase"
+          | "local-tag"
+          | "local-ranked"
+          | "local-hybrid";
+        quality?: "accepted" | "review_required";
+        lifecycle?: "current" | "stale" | "retired";
+        directEligible?: boolean;
+        reviewRequired?: boolean;
       }>;
     };
   };
