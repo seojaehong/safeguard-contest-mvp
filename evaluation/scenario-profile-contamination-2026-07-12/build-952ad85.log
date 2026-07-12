@@ -1,11 +1,16 @@
-BUILD_PROVENANCE_VERSION=1
+BUILD_PROVENANCE_VERSION=2
 CWD=C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\scenario-profile-contamination
-SOURCE_HEAD=6ce31d17f3bb212a542da0c9a9fe873315812585
+SOURCE_HEAD=952ad85db207d384f6451e45ced28c3293d27745
+SOURCE_TREE=f1ae350fdb412ef4c2dc7d43b7d5ae2c0c525f78
+RUNNER_PID=49452
+RUNNER_PROCESS_SNAPSHOT={"ProcessId":49452,"ParentProcessId":5548,"CreationDate":"2026-07-12T12:26:24.288872+09:00","CommandLine":"\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -Command \"try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}\n$log='evaluation\\scenario-profile-contamination-2026-07-12\\build-952ad85.log'\n$command='npm.cmd run build'\n$cwd=(Get-Location).Path\n$sourceHead=(git rev-parse HEAD).Trim()\n$sourceTree=(git rev-parse 'HEAD^{tree}').Trim()\n$runner=Get-CimInstance Win32_Process -Filter \\\"ProcessId = $PID\\\" | Select-Object ProcessId,ParentProcessId,CreationDate,CommandLine\nfunction Get-NextBuildProcesses {\n  @(Get-CimInstance Win32_Process | Where-Object {\n    $_.CommandLine -match '(?i)(next(?:\\.cmd)?\\s+build|next[\\\\/]dist[\\\\/]bin[\\\\/]next[^\\r\\n]*\\sbuild)'\n  } | Select-Object ProcessId,ParentProcessId,CreationDate,CommandLine)\n}\nfunction Convert-SnapshotJson([object[]]$Items) {\n  if ($Items.Count -eq 0) { return '[]' }\n  return ($Items | ConvertTo-Json -Compress)\n}\n$before=@(Get-NextBuildProcesses)\n$sameBefore=@($before | Where-Object { $_.CommandLine -like '*scenario-profile-contamination*' })\n$nodeBefore=@(Get-CimInstance Win32_Process -Filter \\\"Name = 'node.exe'\\\")\n$started=(Get-Date).ToUniversalTime().ToString('o')\n$trackedCleanBefore=((git status --porcelain --untracked-files=no).Count -eq 0)\n@(\n  'BUILD_PROVENANCE_VERSION=2'\n  \\\"CWD=$cwd\\\"\n  \\\"SOURCE_HEAD=$sourceHead\\\"\n  \\\"SOURCE_TREE=$sourceTree\\\"\n  \\\"RUNNER_PID=$PID\\\"\n  \\\"RUNNER_PROCESS_SNAPSHOT=$(Convert-SnapshotJson -Items @($runner))\\\"\n  \\\"COMMAND=$command\\\"\n  \\\"STARTED_AT_UTC=$started\\\"\n  \\\"TRACKED_WORKTREE_CLEAN_BEFORE=$($trackedCleanBefore.ToString().ToLowerInvariant())\\\"\n  \\\"PROCESS_SNAPSHOT_BEFORE=$(Convert-SnapshotJson -Items $before)\\\"\n  \\\"NEXT_BUILD_PROCESS_COUNT_BEFORE=$($before.Count)\\\"\n  \\\"SAME_WORKTREE_BUILD_PROCESS_COUNT_BEFORE=$($sameBefore.Count)\\\"\n  \\\"NODE_PROCESS_COUNT_BEFORE=$($nodeBefore.Count)\\\"\n) | Set-Content -LiteralPath $log -Encoding utf8\nif ($sameBefore.Count -ne 0) {\n  @(\n    'BUILD_STARTED=false'\n    \\\"FINISHED_AT_UTC=$((Get-Date).ToUniversalTime().ToString('o'))\\\"\n    'EXIT_CODE=70'\n  ) | Add-Content -LiteralPath $log -Encoding utf8\n  Get-Content -LiteralPath $log\n  exit 70\n}\n& npm.cmd run build 2>&1 | Tee-Object -FilePath $log -Append\n$code=$LASTEXITCODE\n$after=@(Get-NextBuildProcesses)\n$sameAfter=@($after | Where-Object { $_.CommandLine -like '*scenario-profile-contamination*' })\n$nodeAfter=@(Get-CimInstance Win32_Process -Filter \\\"Name = 'node.exe'\\\")\n@(\n  \\\"PROCESS_SNAPSHOT_AFTER=$(Convert-SnapshotJson -Items $after)\\\"\n  \\\"NEXT_BUILD_PROCESS_COUNT_AFTER=$($after.Count)\\\"\n  \\\"SAME_WORKTREE_BUILD_PROCESS_COUNT_AFTER=$($sameAfter.Count)\\\"\n  \\\"NODE_PROCESS_COUNT_AFTER=$($nodeAfter.Count)\\\"\n  \\\"FINISHED_AT_UTC=$((Get-Date).ToUniversalTime().ToString('o'))\\\"\n  \\\"EXIT_CODE=$code\\\"\n) | Add-Content -LiteralPath $log -Encoding utf8\nexit $code\""}
 COMMAND=npm.cmd run build
-STARTED_AT_UTC=2026-07-12T03:01:34.4698216Z
-PROCESS_SNAPSHOT_BEFORE=[]
-NEXT_BUILD_PROCESS_COUNT_BEFORE=0
+STARTED_AT_UTC=2026-07-12T03:26:27.2733432Z
+TRACKED_WORKTREE_CLEAN_BEFORE=true
+PROCESS_SNAPSHOT_BEFORE=[{"ProcessId":47588,"ParentProcessId":43220,"CreationDate":"2026-07-12T12:24:30.638674+09:00","CommandLine":"C:\\WINDOWS\\system32\\cmd.exe /d /s /c next build"},{"ProcessId":40724,"ParentProcessId":47588,"CreationDate":"2026-07-12T12:24:30.747352+09:00","CommandLine":"\"node\"   \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-offline-current-integration\\node_modules\\.bin\\\\..\\next\\dist\\bin\\next\" build"}]
+NEXT_BUILD_PROCESS_COUNT_BEFORE=2
 SAME_WORKTREE_BUILD_PROCESS_COUNT_BEFORE=0
+NODE_PROCESS_COUNT_BEFORE=113
 
 > safeclaw@0.1.0 build
 > next build
@@ -13,7 +18,7 @@ SAME_WORKTREE_BUILD_PROCESS_COUNT_BEFORE=0
    ▲ Next.js 15.5.20
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 12.7s
+ ✓ Compiled successfully in 13.2s
    Linting and checking validity of types ...
    Collecting page data ...
    Generating static pages (0/27) ...
@@ -107,5 +112,6 @@ Route (app)                                     Size  First Load JS
 PROCESS_SNAPSHOT_AFTER=[]
 NEXT_BUILD_PROCESS_COUNT_AFTER=0
 SAME_WORKTREE_BUILD_PROCESS_COUNT_AFTER=0
-FINISHED_AT_UTC=2026-07-12T03:02:48.7529379Z
+NODE_PROCESS_COUNT_AFTER=112
+FINISHED_AT_UTC=2026-07-12T03:27:49.6995075Z
 EXIT_CODE=0

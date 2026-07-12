@@ -1,6 +1,8 @@
 {
-  "generatedAt": "2026-07-12T03:03:45.9838007Z",
-  "startingHead": "6ce31d17f3bb212a542da0c9a9fe873315812585",
+  "generatedAt": "2026-07-12T03:28:45.0523188Z",
+  "reviewBaseHead": "2a9c817114390575e1be176ff3be622b655581fe",
+  "sourceHead": "952ad85db207d384f6451e45ced28c3293d27745",
+  "sourceTree": "f1ae350fdb412ef4c2dc7d43b7d5ae2c0c525f78",
   "status": "review_pending",
   "freshReviewRequired": true,
   "databaseMutation": false,
@@ -10,82 +12,97 @@
     "environment": false,
     "ui": false
   },
+  "findings": {
+    "p1AccidentLeakage": {
+      "status": "remediated_review_pending",
+      "logisticsFallbackIndexes": [1, 0, 4],
+      "facilityFallbackIndexes": [4, 1, 0],
+      "chemicalCleaningFallbackIndexes": [3, 1, 0],
+      "genuineChemicalCleaningPreserved": true
+    },
+    "p2EvidenceProvenance": {
+      "status": "remediated_review_pending",
+      "staleBuildLogRemoved": "evaluation/scenario-profile-contamination-2026-07-12/build27.log",
+      "staleWorkingDiffLogRemoved": "evaluation/scenario-profile-contamination-2026-07-12/diff-check-final.log",
+      "priorEofWhitespaceFailuresRemoved": 4
+    }
+  },
   "tdd": {
     "productionEditedAfterRed": true,
     "red": {
       "testFiles": 1,
-      "testsExecuted": 26,
-      "testsPassed": 22,
-      "testsFailed": 4,
+      "testsExecuted": 7,
+      "testsPassed": 5,
+      "testsFailed": 2,
       "failedCases": [
-        "안산건설 굴착 작업 inferred 경기 안산 from the company token",
-        "하남산단관리 굴착 작업 inferred 광주 하남산단 from the company token",
-        "강원상사 굴착 작업 lost the company identity",
-        "제주개발 굴착 작업 lost the company identity"
+        "물류센터 지게차 상하차 작업 returned a chemical-cleaning accident",
+        "지하 기계실 점검 작업 returned a chemical-cleaning accident"
       ],
-      "standaloneLocationCasesPassed": 5,
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/red-token-boundary-final.log"
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/red-accident-branch-leakage.log"
     },
     "green": {
       "testFiles": 2,
-      "testsPassed": 31,
+      "testsPassed": 33,
       "testsFailed": 0,
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/green-token-boundary-final.log"
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/green-accident-branch-leakage.log"
     }
   },
-  "tokenBoundaryContract": {
-    "companyIdentityCases": [
-      "안산건설 굴착 작업",
-      "하남산단관리 굴착 작업",
-      "강원상사 굴착 작업",
-      "제주개발 굴착 작업"
-    ],
-    "standaloneLocationCases": [
-      "안산",
-      "광주 하남산단",
-      "강원",
-      "제주",
-      "세종"
-    ],
-    "implementation": "exact normalized standalone-token sets and token-sequence matching",
-    "adHocNegativeCompanyList": false
-  },
-  "closedContracts": {
-    "excavationProfileId": "construction-excavation",
-    "canonicalCleaningSiteName": "광주 하남산단 청소 현장",
-    "accidentLeakageFocused": true,
-    "workDescriptorCompanyRejectionFocused": true
-  },
   "verification": {
-    "focusedTestFiles": 6,
-    "baselineTests": 63,
-    "newTests": 9,
-    "testsPassed": 72,
-    "testsFailed": 0,
-    "focusedLog": "evaluation/scenario-profile-contamination-2026-07-12/focused63-plus9.log",
-    "typecheck": "pass",
-    "typecheckExitCode": 0,
-    "typecheckLog": "evaluation/scenario-profile-contamination-2026-07-12/typecheck-final.log",
-    "diffCheck": "pass",
-    "diffCheckExitCode": 0,
-    "diffCheckNotes": "LF-to-CRLF conversion notices only",
-    "diffCheckLog": "evaluation/scenario-profile-contamination-2026-07-12/diff-check-final.log",
+    "focused": {
+      "testFiles": 6,
+      "baselineTests": 72,
+      "newTests": 2,
+      "testsPassed": 74,
+      "testsFailed": 0,
+      "command": "npm.cmd test -- tests/scenario-inference.test.ts tests/accident-cases.test.ts tests/briefing.test.ts tests/workpack-generation-evidence-route.test.ts tests/generation-evidence.test.ts tests/workpack-readiness.test.ts --maxWorkers=1 --no-file-parallelism",
+      "startedAt": "2026-07-12T03:25:07.2923187Z",
+      "finishedAt": "2026-07-12T03:25:24.9492246Z",
+      "runnerPid": 6640,
+      "exitCode": 0,
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/focused72-plus2-postcommit.log"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "startedAt": "2026-07-12T03:25:07.2729182Z",
+      "finishedAt": "2026-07-12T03:25:42.2283764Z",
+      "runnerPid": 33736,
+      "exitCode": 0,
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/typecheck-952ad85.log"
+    },
+    "exactRangeDiffCheck": {
+      "baseHead": "2a9c817114390575e1be176ff3be622b655581fe",
+      "targetHead": "952ad85db207d384f6451e45ced28c3293d27745",
+      "targetTree": "f1ae350fdb412ef4c2dc7d43b7d5ae2c0c525f78",
+      "command": "git diff --check 2a9c817114390575e1be176ff3be622b655581fe..952ad85db207d384f6451e45ced28c3293d27745",
+      "startedAt": "2026-07-12T03:25:07.8635882Z",
+      "finishedAt": "2026-07-12T03:25:08.9446492Z",
+      "runnerPid": 41244,
+      "exitCode": 0,
+      "whitespaceFailures": 0,
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/diff-check-2a9c817-to-952ad85.log"
+    },
     "build": {
       "result": "pass",
-      "runs": 1,
+      "runsForSourceHead": 1,
       "cwd": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\scenario-profile-contamination",
-      "sourceHead": "6ce31d17f3bb212a542da0c9a9fe873315812585",
+      "sourceHead": "952ad85db207d384f6451e45ced28c3293d27745",
+      "sourceTree": "f1ae350fdb412ef4c2dc7d43b7d5ae2c0c525f78",
       "command": "npm.cmd run build",
-      "startedAt": "2026-07-12T03:01:34.4698216Z",
-      "finishedAt": "2026-07-12T03:02:48.7529379Z",
-      "nextBuildProcessCountBefore": 0,
+      "startedAt": "2026-07-12T03:26:27.2733432Z",
+      "finishedAt": "2026-07-12T03:27:49.6995075Z",
+      "runnerPid": 49452,
+      "nextBuildProcessCountBefore": 2,
       "sameWorktreeBuildProcessCountBefore": 0,
+      "otherWorktreeBuildPidsBefore": [47588, 40724],
       "nextBuildProcessCountAfter": 0,
       "sameWorktreeBuildProcessCountAfter": 0,
+      "nodeProcessCountBefore": 113,
+      "nodeProcessCountAfter": 112,
+      "trackedWorktreeCleanBefore": true,
       "exitCode": 0,
-      "compile": "Compiled successfully in 12.7s",
+      "compile": "Compiled successfully in 13.2s",
       "staticPagesGenerated": "27/27",
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/build27.log"
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/build-952ad85.log"
     }
   }
 }
