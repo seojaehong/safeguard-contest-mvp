@@ -3,23 +3,23 @@
 > vitest run tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism
 
 
- RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/mcp-scope-red-proof
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/mcp-scope-red-proof
 
- ❯ tests/mcp-tools.test.ts (25 tests | 1 failed) 62ms
-     × toToolError preserves a stable public code without exposing extra fields 22ms
- ❯ tests/mcp-token-service.test.ts (19 tests | 2 failed) 71ms
-     × issues explicit SafeClaw tool scopes instead of a future-expanding wildcard 5ms
-     × keeps the operator CLI on the same explicit tool contract 16ms
- ❯ tests/mcp-auth.test.ts (23 tests | 7 failed) 22ms
-     × fails closed for malformed or empty DB scope values 7ms
+ ❯ tests/mcp-token-service.test.ts (19 tests | 2 failed) 65ms
+     × issues explicit SafeClaw tool scopes instead of a future-expanding wildcard 4ms
+     × keeps the operator CLI on the same explicit tool contract 15ms
+ ❯ tests/mcp-tools.test.ts (25 tests | 1 failed) 52ms
+     × toToolError preserves a stable public code without exposing extra fields 16ms
+ ❯ tests/mcp-auth.test.ts (23 tests | 7 failed) 28ms
+     × fails closed for malformed or empty DB scope values 10ms
      × keeps only known scopes, trims them, and removes duplicates 2ms
      × allows explicit tool scopes and the legacy operator wildcard 1ms
-     × maps read and write roles to their bounded tool sets 0ms
+     × maps read and write roles to their bounded tool sets 1ms
      × fails closed when auth context or an allowed scope is missing 0ms
      × defines one stable unique name for every exposed SafeClaw MCP tool 0ms
      × nulls missing site/org and normalizes bad scopes 2ms
- ❯ tests/mcp-route-scope-contract.test.ts (1 test | 1 failed) 7ms
-     × authorizes every registered tool before its handler performs work 5ms
+ ❯ tests/mcp-route-scope-contract.test.ts (1 test | 1 failed) 9ms
+     × authorizes every registered tool before its handler performs work 7ms
 
 ⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -292,5 +292,5 @@ AssertionError: expected { error: '도구 권한이 없습니다.' } to deeply e
 
  Test Files  4 failed (4)
       Tests  11 failed | 57 passed (68)
-   Start at  12:54:27
-   Duration  4.58s (transform 420ms, setup 0ms, import 928ms, tests 162ms, environment 1ms)
+   Start at  16:34:07
+   Duration  4.53s (transform 373ms, setup 0ms, import 889ms, tests 153ms, environment 1ms)

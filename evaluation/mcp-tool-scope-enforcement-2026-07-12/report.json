@@ -1,14 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T03:53:43.3808119Z",
+  "generatedAt": "2026-07-12T07:39:59.0725793Z",
   "status": "review_pending",
-  "baseSha": "87798d15aea085284332942390f215f49f3399cf",
-  "productCommit": "1051f18b8cff86d3b87461d862dcb141f39ad429",
+  "baseSha": "31a44c0d972c46a47c94ad387eeeff39528d1be9",
+  "productCommit": "8fe1fc2084a4ce7b8d6115053e5f84d58a85c3c9",
   "productCommits": [
-    "ebef495df600419a21e02838c4aa1554152db233",
-    "1051f18b8cff86d3b87461d862dcb141f39ad429"
+    "ad25f99aca3251c9f5866f490b5f5b6392d51000",
+    "8fe1fc2084a4ce7b8d6115053e5f84d58a85c3c9"
   ],
-  "documentationCommit": "894942c72868f052119f423de6009caf631695ee",
+  "documentationCommit": "f18686c3f069881342787ab73f1320cbbfadf9ed",
+  "documentationCommits": [
+    "848b23c4f629118985f052766720aa7f36a06bee",
+    "f18686c3f069881342787ab73f1320cbbfadf9ed"
+  ],
   "scope": {
     "registeredToolCount": 10,
     "databaseSchemaChanged": false,
@@ -17,7 +21,7 @@
   },
   "red": {
     "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
-    "proofTree": "1051f18b8cff86d3b87461d862dcb141f39ad429 with production files restored from 87798d15aea085284332942390f215f49f3399cf",
+    "proofTree": "8fe1fc2084a4ce7b8d6115053e5f84d58a85c3c9 with production files restored from 31a44c0d972c46a47c94ad387eeeff39528d1be9",
     "testFilesFailed": 4,
     "testsFailed": 11,
     "testsPassed": 57,
@@ -40,14 +44,16 @@
     "command": "npm.cmd run build",
     "exitCode": 0,
     "staticPages": "27/27",
-    "buildId": "lDN0C9snqjJuwzXd2_U1r",
+    "buildId": "Fe2cUnGZBCZ221uM8PfJO",
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/build.log"
   },
   "dependencySync": {
     "command": "npm.cmd install",
     "exitCode": 0,
     "packageJsonChanged": false,
-    "packageLockChanged": false
+    "packageLockChanged": false,
+    "vitestVersion": "4.1.10",
+    "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/dependency-sync.log"
   },
   "contracts": {
     "malformedDatabaseScopes": "deny_all",
