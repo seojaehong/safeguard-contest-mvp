@@ -10,6 +10,7 @@ const root = process.cwd();
 const auditScript = path.join(root, "scripts", "launch_readiness_audit.mjs");
 const testRoot = path.join(root, "evaluation", ".launch-readiness-audit-tests");
 const childDeadlineMs = 5_000;
+const auditRequestTimeoutMs = 1_000;
 const delayedStdoutPreload = `data:text/javascript,${encodeURIComponent(`
   const originalWrite = process.stdout.write.bind(process.stdout);
   process.stdout.write = function delayedWrite(chunk, encoding, callback) {
@@ -128,7 +129,7 @@ function buildChildEnv(baseUrl: string, outDir: string): NodeJS.ProcessEnv {
     SAFETYGUARD_AUDIT_DISPATCH: "false",
     SAFETYGUARD_AUDIT_OUTPUT: "audit.json",
     SAFETYGUARD_AUDIT_QUESTION: "Local fixture launch readiness question",
-    SAFETYGUARD_AUDIT_TIMEOUT_MS: "75",
+    SAFETYGUARD_AUDIT_TIMEOUT_MS: String(auditRequestTimeoutMs),
     SAFETYGUARD_BASE_URL: baseUrl,
     SAFETYGUARD_OUT_DIR: outDir,
   };
