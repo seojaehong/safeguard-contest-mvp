@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/mixed-typography-role-contract.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-mixed-typography-wave5
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  11:23:32
+   Duration  3.82s (transform 38ms, setup 0ms, import 70ms, tests 3.13s, environment 0ms)
+
