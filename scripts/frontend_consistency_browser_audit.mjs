@@ -111,6 +111,14 @@ function safeName(value) {
   return normalized.replace(/[^a-zA-Z0-9가-힣_-]+/g, "-");
 }
 
+export function workspaceThemeRequestedPath(theme) {
+  const normalizedTheme = String(theme).toLowerCase();
+  if (normalizedTheme !== "day" && normalizedTheme !== "night") {
+    throw new Error(`Unsupported workspace audit theme: ${theme}`);
+  }
+  return `/workspace?scenario=seoul-construction-windy&theme=${normalizedTheme}`;
+}
+
 function relativeScreenshot(name) {
   return `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/${name}.jpg`;
 }
@@ -188,6 +196,10 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
   if (row.consoleErrors.length) findings.push(`${row.consoleErrors.length} unexpected console error(s)`);
   if (row.pageErrors.length) findings.push(`${row.pageErrors.length} unexpected page error(s)`);
   if (row.horizontalOverflow > 2) findings.push(`${row.horizontalOverflow}px horizontal overflow`);
+  if (row.route === "/workspace" && (row.theme === "Day" || row.theme === "Night")
+    && row.workspaceTheme !== row.theme) {
+    findings.push(`workspace rendered ${row.workspaceTheme || "unknown"} theme, expected ${row.theme}`);
+  }
   if (!row.visiblePrimaryContent) findings.push("missing visible primary content");
   const expectedFont = documentRole ? /^"?Malgun Gothic"?/i : /^"?Noto Sans KR"?/i;
   if (!expectedFont.test(row.bodyFont)) findings.push(`body font outside ${documentRole ? "document" : "product"} role: ${row.bodyFont}`);
@@ -322,6 +334,11 @@ async function capture(page, options) {
         letterSpacing: headingStyle.letterSpacing,
       } : null,
       visiblePrimaryContent: primaryText.replace(/\s+/g, " ").slice(0, 240),
+      workspaceTheme: document.querySelector(".command-center-shell.workspace-theme-night")
+        ? "Night"
+        : document.querySelector(".command-center-shell.workspace-theme-day")
+          ? "Day"
+          : null,
       boundaryMarker: document.querySelector("[data-audit-boundary]")?.getAttribute("data-audit-boundary") ?? "",
       renderedControls,
       keySurfaces,
@@ -352,7 +369,7 @@ async function capture(page, options) {
     bodyFont: metrics.bodyFont, bodyFontSize: metrics.bodyFontSize, bodyFontWeight: metrics.bodyFontWeight,
     bodyLineHeight: metrics.bodyLineHeight, bodyLetterSpacing: metrics.bodyLetterSpacing,
     productFontLoaded: metrics.productFontLoaded, primaryHeading: metrics.primaryHeading,
-    visiblePrimaryContent: metrics.visiblePrimaryContent, screenshot,
+    visiblePrimaryContent: metrics.visiblePrimaryContent, workspaceTheme: metrics.workspaceTheme, screenshot,
     boundaryMarker: metrics.boundaryMarker, renderedControls: metrics.renderedControls,
     keySurfaces: metrics.keySurfaces, geometryFingerprint: metrics.geometryFingerprint,
     documentTypography: metrics.documentTypography,
@@ -385,7 +402,7 @@ async function main() {
           ? "No authentication code is supplied in the deterministic audit environment; the pending callback fallback is captured."
           : "";
       routeRows.push(await capture(page, {
-        route, requestedPath, viewport, theme: route === "/workspace" ? "Night" : "Product",
+        route, requestedPath, viewport, theme: route === "/workspace" ? "Day" : "Product",
         name: `route-${safeName(route)}-${viewport.name}`,
         limitation: authFallback || (route === "/interpretation/[id]" ? "No checked-in interpretation fixture; deterministic missing-record fallback captured." : ""),
         fallbackKind: authFallback || route === "/interpretation/[id]" ? "expected-deterministic-fallback" : "none",
@@ -399,7 +416,7 @@ async function main() {
   for (const theme of ["Day", "Night"]) {
     for (const viewport of viewports) {
       workspaceThemeRows.push(await capture(page, {
-        route: "/workspace", requestedPath: `/workspace?scenario=seoul-construction-windy${theme === "Day" ? "&theme=day" : ""}`,
+        route: "/workspace", requestedPath: workspaceThemeRequestedPath(theme),
         viewport, theme, name: `workspace-${theme.toLowerCase()}-${viewport.name}`,
       }));
     }

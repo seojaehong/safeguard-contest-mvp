@@ -380,10 +380,12 @@ describe("browser evidence reconciliation", () => {
     expect(report.workspaceThemeRows).toHaveLength(viewports.length * 2);
     for (const theme of ["Day", "Night"]) {
       for (const viewport of viewports) {
-        expect(
-          report.workspaceThemeRows.find((item) => item.theme === theme && item.viewport === viewport),
-          `workspace ${theme} ${viewport}`,
-        ).toBeDefined();
+        const row = report.workspaceThemeRows.find((item) => item.theme === theme && item.viewport === viewport);
+        expect(row, `workspace ${theme} ${viewport}`).toBeDefined();
+        expect(String(row?.requestedUrl), `workspace ${theme} ${viewport} requested URL`).toContain(
+          `theme=${theme.toLowerCase()}`,
+        );
+        expect(row?.workspaceTheme, `workspace ${theme} ${viewport} rendered theme`).toBe(theme);
       }
     }
     expect(report.specialSurfaceRows.map((row) => row.surface).sort()).toEqual([
@@ -457,7 +459,8 @@ describe("browser evidence reconciliation", () => {
 
   it("rejects independent exact typography and unloaded-font mutations", () => {
     const validRow = {
-      route: "/workspace", viewport: "desktop-1440", status: 200, consoleErrors: [], pageErrors: [],
+      route: "/workspace", viewport: "desktop-1440", theme: "Night", workspaceTheme: "Night",
+      status: 200, consoleErrors: [], pageErrors: [],
       horizontalOverflow: 0, visiblePrimaryContent: "작업공간", boundaryMarker: "",
       bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px", bodyFontWeight: "500",
       bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
@@ -473,10 +476,20 @@ describe("browser evidence reconciliation", () => {
       { bodyLineHeight: "23px" },
       { bodyLetterSpacing: "1px" },
       { productFontLoaded: false },
+      { workspaceTheme: "Day" },
     ]) {
       expect(probe({ ...validRow, ...mutation }).findings, JSON.stringify(mutation)).not.toEqual([]);
     }
   }, 30_000);
+
+  it("builds explicit Day and Night workspace audit routes", () => {
+    expect(runBrowserContractProbe("audit.workspaceThemeRequestedPath('Day')")).toBe(
+      "/workspace?scenario=seoul-construction-windy&theme=day",
+    );
+    expect(runBrowserContractProbe("audit.workspaceThemeRequestedPath('Night')")).toBe(
+      "/workspace?scenario=seoul-construction-windy&theme=night",
+    );
+  });
 
   it("rejects a product font leaking into any generated-document role", () => {
     const role = (fontFamily: string) => ({
