@@ -61,7 +61,13 @@ describe("workspace layout regression", () => {
       ".workspace-input-page .input-helper",
       ".workspace-input-page .input-composer-tray",
       ".workspace-input-page .composer-attach-button",
+      ".workspace-input-page .composer-submit-button",
       ".workspace-input-page .field-brief-chip-row",
+      ".workspace-input-page .field-brief-chip-row span:nth-child(1)",
+      ".workspace-input-page .field-brief-chip-row span:nth-child(2)",
+      ".workspace-input-page .field-brief-chip-row span:nth-child(3)",
+      ".workspace-input-page .field-brief-chip-row span:nth-child(4)",
+      ".workspace-input-page .field-brief-chip-row span:nth-child(5)",
       ".workspace-input-page .evidence-readiness-rail",
       ".workspace-input-page .evidence-readiness-card:nth-child(1)",
       ".workspace-input-page .evidence-readiness-card:nth-child(2)",
@@ -69,7 +75,11 @@ describe("workspace layout regression", () => {
       ".workspace-input-page .evidence-readiness-card:nth-child(4)",
       ".workspace-input-page .evidence-readiness-card:nth-child(5)",
       ".workspace-input-page .advanced-settings",
+      ".workspace-input-page .advanced-settings .ai-mode-toggle",
+      ".workspace-input-page .advanced-settings .ai-mode-option",
       ".workspace-input-page .quick-scenario-chips",
+      ".workspace-input-page .quick-scenario-chip-list",
+      ".workspace-input-page .quick-chip",
     ] as const;
 
     async function readTheme(
@@ -81,19 +91,45 @@ describe("workspace layout regression", () => {
         viewport: { width: viewport.width, height: viewport.height },
       });
       try {
+        let resolveWeatherRequest: (() => void) | null = null;
+        const weatherRequest = new Promise<void>((resolve) => {
+          resolveWeatherRequest = resolve;
+        });
         await page.route("**/api/weather?**", async (route) => {
           await route.fulfill({
             status: 200,
             contentType: "application/json",
-            body: JSON.stringify({ ok: true, weather: null }),
+            body: JSON.stringify({
+              ok: true,
+              weather: {
+                source: "kma",
+                mode: "fallback",
+                locationLabel: "서울 성수동",
+                summary: "강풍",
+                actions: [],
+                detail: "Deterministic workspace geometry fixture",
+              },
+            }),
           });
+          resolveWeatherRequest?.();
         });
         await page.goto(
           `${baseUrl}/workspace?scenario=seoul-construction-windy&theme=${theme}`,
           { waitUntil: "networkidle" },
         );
+        await weatherRequest;
+        await page.waitForFunction(() => {
+          const weatherChip = document.querySelector(".field-brief-chip-row")?.textContent ?? "";
+          const weatherStatus = document.querySelector(".evidence-readiness-card:last-child strong")?.textContent ?? "";
+          return weatherChip.includes("강풍") && weatherStatus !== "확인 중";
+        });
         await page.evaluate(async () => {
           await document.fonts.ready;
+          document.querySelectorAll<HTMLDetailsElement>(
+            ".workspace-input-page .advanced-settings, .workspace-input-page .quick-scenario-chips",
+          ).forEach((details) => {
+            details.open = true;
+          });
           await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
         });
 
@@ -108,14 +144,18 @@ describe("workspace layout regression", () => {
               selector,
               x: round(rect.x),
               y: round(rect.y),
-              width: round(rect.width),
-              height: round(rect.height),
-              display: style.display,
-              gridTemplateColumns: style.gridTemplateColumns,
-              gap: style.gap,
-              padding: [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft],
-              borderRadius: style.borderRadius,
-              fontSize: style.fontSize,
+            width: round(rect.width),
+            height: round(rect.height),
+            display: style.display,
+            minWidth: style.minWidth,
+            text: element.textContent?.replace(/\s+/gu, " ").trim() ?? "",
+            gridTemplateColumns: style.gridTemplateColumns,
+            gap: style.gap,
+            padding: [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft],
+            borderWidth: [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth],
+            borderRadius: style.borderRadius,
+            fontSize: style.fontSize,
+            fontWeight: style.fontWeight,
               lineHeight: style.lineHeight,
               letterSpacing: style.letterSpacing,
             };
@@ -140,6 +180,37 @@ describe("workspace layout regression", () => {
       const day = await readTheme("day", viewport);
       const night = await readTheme("night", viewport);
       expect(day.geometry, `${viewport.label} Day/Night geometry`).toEqual(night.geometry);
+      const nightMetric = (selector: string) => {
+        const metric = night.geometry.find((item) => item.selector === selector);
+        if (!metric) throw new Error(`Missing Night baseline metric: ${selector}`);
+        return metric;
+      };
+      expect(nightMetric(".command-topbar").borderRadius, `${viewport.label} Night topbar`).toBe("4px");
+      expect(nightMetric(".workspace-theme-toggle").borderRadius, `${viewport.label} Night toggle`).toBe("4px");
+      expect(
+        nightMetric(".workspace-theme-toggle button:nth-child(1)").minWidth,
+        `${viewport.label} Night toggle button`,
+      ).toBe(viewport.label === "desktop-compact" ? "46px" : "44px");
+      expect(nightMetric(".linear-workspace-layout").gap, `${viewport.label} Night workspace gap`).toBe(
+        viewport.label === "mobile" ? "0px" : "0px 16px",
+      );
+      expect(nightMetric(".workspace-side-nav").borderRadius, `${viewport.label} Night side navigation`).toBe("0px");
+      expect(nightMetric(".linear-workspace-layout .command-main").borderRadius, `${viewport.label} Night main`).toBe("0px");
+      expect(nightMetric(".workspace-input-page .command-console-input").borderRadius, `${viewport.label} Night input`).toBe("4px");
+      expect(
+        nightMetric(".workspace-input-page .field-brief-chip-row span:nth-child(1)"),
+        `${viewport.label} Night field chip`,
+      ).toMatchObject({ borderRadius: "4px", padding: ["8px", "16px", "8px", "16px"] });
+      expect(nightMetric(".workspace-input-page .composer-submit-button"), `${viewport.label} Night primary action`).toMatchObject({
+        borderRadius: "8px",
+        fontWeight: "700",
+      });
+      expect(nightMetric(".workspace-input-page .advanced-settings"), `${viewport.label} Night advanced settings`).toMatchObject({
+        borderRadius: "4px",
+      });
+      expect(nightMetric(".workspace-input-page .quick-scenario-chips"), `${viewport.label} Night examples`).toMatchObject({
+        borderRadius: "4px",
+      });
       expect(day.colors.shell, `${viewport.label} shell theme color`).not.toBe(night.colors.shell);
       expect(day.colors.primary, `${viewport.label} primary theme color`).not.toBe(night.colors.primary);
     }
