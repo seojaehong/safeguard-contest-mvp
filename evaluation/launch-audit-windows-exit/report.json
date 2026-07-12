@@ -1,0 +1,75 @@
+{
+  "generatedAt": "2026-07-12T11:06:06.8572701+09:00",
+  "branch": "fix/launch-audit-windows-exit",
+  "base": "4c2a35ec24a3be4ddb54cfe839c22fd779e55075",
+  "runtime": {
+    "platform": "win32",
+    "node": "v24.12.0",
+    "libuv": "1.51.0",
+    "undici": "7.16.0"
+  },
+  "verdict": "pass",
+  "rootCause": {
+    "trigger": "process.exit() immediately after report and summary writes",
+    "mechanism": "forced termination entered teardown while a libuv async sender could still reach a closing handle",
+    "nativeAssertion": "!(handle->flags & UV_HANDLE_CLOSING)",
+    "observedExitCode": -1073740791,
+    "observedExitStatusHex": "0xC0000409",
+    "apiResponseWasValid": true,
+    "baselineApiAskStatus": 200,
+    "upstreamFix": {
+      "commit": "ea493f19895bc0cc90b28b48a4e204bc139c48d3",
+      "title": "win: fix race condition in uv_async_send",
+      "url": "https://github.com/libuv/libuv/commit/ea493f19895bc0cc90b28b48a4e204bc139c48d3"
+    }
+  },
+  "tdd": {
+    "red": {
+      "testFilesFailed": 1,
+      "testsFailed": 4,
+      "successStdoutBytes": 0,
+      "staleTimeoutOutputReproduced": true
+    },
+    "green": {
+      "testFilesPassed": 1,
+      "testsPassed": 4,
+      "cases": [
+        "success",
+        "http-failure",
+        "timeout",
+        "malformed-json"
+      ]
+    }
+  },
+  "fixtureE2e": {
+    "childExitCode": 0,
+    "childSignal": null,
+    "deadlineExceeded": false,
+    "durationMs": 627,
+    "stdoutJsonDocuments": 1,
+    "stderrBytes": 0,
+    "outputFiles": 1,
+    "outputValid": true,
+    "summaryValid": true,
+    "requestPaths": [
+      "/api/ask"
+    ],
+    "dispatchRequests": 0
+  },
+  "verification": {
+    "log": "evaluation/launch-audit-windows-exit/verification.txt",
+    "focusedTestsExitCode": 0,
+    "typecheckExitCode": 0,
+    "temporaryDebugDirectoriesRemaining": 0,
+    "packageLockChanged": false
+  },
+  "safeguards": {
+    "loopbackOnly": true,
+    "dispatchEnabled": false,
+    "paidProvidersCalled": false,
+    "databaseTouched": false,
+    "envFilesTouched": false,
+    "otherWorktreesTouched": false
+  },
+  "residualRuntimeCaveat": "The exact native assertion is timing-sensitive on Node.js v24.12.0. The deterministic regression exposes the forced-exit lifecycle defect through queued stdout and verifies natural handle cleanup; other programs on libuv 1.51.0 can retain the upstream runtime race."
+}
