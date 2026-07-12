@@ -65,6 +65,20 @@
       "files": ["app/globals.css", "tests/workspace-layout-regression.test.ts"]
     },
     {
+      "id": "W8",
+      "title": "AI connect complete route design contract",
+      "priority": 5,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "All AI-connect-owned typography, radius, important, and decorative-gradient findings are eliminated without audit exemptions",
+        "Base and document-variant cascades resolve to the same semantic contract",
+        "Authenticated and stable unauthenticated production states are both verified at Day/Night desktop, 390px, and short-height",
+        "Code, textarea, semantic state colors, controls, and responsive columns remain readable and usable with overflow zero"
+      ],
+      "files": ["app/globals.css", "tests", "evaluation/frontend-ai-connect-design-wave8-2026-07-12"]
+    },
+    {
       "id": "FINAL",
       "title": "Prove complete frontend consistency",
       "priority": 99,
