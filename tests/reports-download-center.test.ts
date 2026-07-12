@@ -117,7 +117,11 @@ async function installAuthSession(context: BrowserContext): Promise<void> {
   });
 }
 
-async function installLocalWorkpack(context: BrowserContext, marker: string): Promise<void> {
+async function installLocalWorkpack(
+  context: BrowserContext,
+  marker: string,
+  savedAt: string
+): Promise<void> {
   const response = buildMockAskResponse(
     "브라우저 로컬 작업팩",
     mockSearchResults.slice(0, 2),
@@ -132,7 +136,8 @@ async function installLocalWorkpack(context: BrowserContext, marker: string): Pr
         siteName: "브라우저 최근 현장",
         workSummary: marker
       }
-    })
+    }),
+    savedAt
   };
   await context.addInitScript(({ expectedOrigin, workpackKey, workpackJson }) => {
     if (window.location.origin !== expectedOrigin) return;
@@ -331,10 +336,12 @@ describe("reports download center remount behavior", () => {
 
   it("keeps a no-session server request blocked until the user explicitly switches to a valid local workpack", async () => {
     if (!browser) throw new Error("Browser was not started");
+    const referenceNow = new Date("2026-07-09T12:00:00+09:00");
     const localMarker = "LOCAL_SWITCH_SENTINEL";
     const context = await browser.newContext();
-    await installLocalWorkpack(context, localMarker);
+    await installLocalWorkpack(context, localMarker, referenceNow.toISOString());
     const page = await context.newPage();
+    await page.clock.setFixedTime(referenceNow);
 
     try {
       await page.goto(`${baseUrl}/reports?workpackId=server-no-session`, { waitUntil: "networkidle" });
