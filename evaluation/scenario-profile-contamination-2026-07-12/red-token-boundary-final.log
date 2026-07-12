@@ -1,0 +1,85 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/scenario-inference.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/scenario-profile-contamination
+
+ ❯ tests/scenario-inference.test.ts (26 tests | 4 failed) 31ms
+     × does not infer an embedded region from a company token: 안산건설 굴착 작업 9ms
+     × does not infer an embedded region from a company token: 하남산단관리 굴착 작업 1ms
+     × does not infer an embedded region from a company token: 강원상사 굴착 작업 1ms
+     × does not infer an embedded region from a company token: 제주개발 굴착 작업 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/scenario-inference.test.ts > inferScenario > does not infer an embedded region from a company token: 안산건설 굴착 작업
+AssertionError: expected '경기 안산 열수송관 굴착공사 현장' to be '안산건설 열수송관 굴착공사 현장' // Object.is equality
+
+Expected: "안산건설 열수송관 굴착공사 현장"
+Received: "경기 안산 열수송관 굴착공사 현장"
+
+ ❯ tests/scenario-inference.test.ts:101:31
+     99|
+    100|     expect(scenario.companyName).toBe(companyName);
+    101|     expect(scenario.siteName).toBe(`${companyName} 열수송관 굴착공사 현장`);
+       |                               ^
+    102|   });
+    103|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/scenario-inference.test.ts > inferScenario > does not infer an embedded region from a company token: 하남산단관리 굴착 작업
+AssertionError: expected '광주 하남산단 열수송관 굴착공사 현장' to be '하남산단관리 열수송관 굴착공사 현장' // Object.is equality
+
+Expected: "하남산단관리 열수송관 굴착공사 현장"
+Received: "광주 하남산단 열수송관 굴착공사 현장"
+
+ ❯ tests/scenario-inference.test.ts:101:31
+     99|
+    100|     expect(scenario.companyName).toBe(companyName);
+    101|     expect(scenario.siteName).toBe(`${companyName} 열수송관 굴착공사 현장`);
+       |                               ^
+    102|   });
+    103|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/scenario-inference.test.ts > inferScenario > does not infer an embedded region from a company token: 강원상사 굴착 작업
+AssertionError: expected '현장 업체' to be '강원상사' // Object.is equality
+
+Expected: "강원상사"
+Received: "현장 업체"
+
+ ❯ tests/scenario-inference.test.ts:100:34
+     98|     const scenario = inferScenario(question);
+     99|
+    100|     expect(scenario.companyName).toBe(companyName);
+       |                                  ^
+    101|     expect(scenario.siteName).toBe(`${companyName} 열수송관 굴착공사 현장`);
+    102|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/scenario-inference.test.ts > inferScenario > does not infer an embedded region from a company token: 제주개발 굴착 작업
+AssertionError: expected '현장 업체' to be '제주개발' // Object.is equality
+
+Expected: "제주개발"
+Received: "현장 업체"
+
+ ❯ tests/scenario-inference.test.ts:100:34
+     98|     const scenario = inferScenario(question);
+     99|
+    100|     expect(scenario.companyName).toBe(companyName);
+       |                                  ^
+    101|     expect(scenario.siteName).toBe(`${companyName} 열수송관 굴착공사 현장`);
+    102|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 22 passed (26)
+   Start at  11:59:05
+   Duration  849ms (transform 155ms, setup 0ms, import 205ms, tests 31ms, environment 0ms)
+

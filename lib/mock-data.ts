@@ -354,12 +354,81 @@ function inferWorkerCount(question: string) {
   return allCounts.length ? Math.max(...allCounts) : 5;
 }
 
-// Place-name tokens that appear as region/site prefixes in this app's own
-// scenario data (see fieldScenarioProfiles siteNames and inferSiteName rules
-// below), plus the top-level administrative regions. A bare mention of one
-// of these must never be mistaken for a company name.
-const knownLocationTokens =
-  /^(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주|성수동|성수|남동공단|안산|해운대|하남산단|달서구)/;
+const topLevelRegionTokens = new Set([
+  "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기",
+  "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"
+]);
+
+type SpecificLocationRule = {
+  aliases: string[][];
+  locationPrefix: string;
+  siteName: string;
+};
+
+const knownSpecificLocationRules: SpecificLocationRule[] = [
+  {
+    aliases: [["서울", "성수동"], ["서울성수동"], ["성수동"]],
+    locationPrefix: "서울 성수동",
+    siteName: "서울 성수동 근린생활시설 현장"
+  },
+  {
+    aliases: [["인천", "남동공단"], ["인천남동공단"], ["남동공단"]],
+    locationPrefix: "인천 남동공단",
+    siteName: "인천 남동공단 물류센터"
+  },
+  {
+    aliases: [["경기", "안산"], ["경기안산"], ["안산"]],
+    locationPrefix: "경기 안산",
+    siteName: "경기 안산 제조공장"
+  },
+  {
+    aliases: [["부산", "해운대"], ["부산해운대"], ["해운대"]],
+    locationPrefix: "부산 해운대",
+    siteName: "부산 해운대 시설관리 현장"
+  },
+  {
+    aliases: [["광주", "하남산단"], ["광주하남산단"], ["하남산단"]],
+    locationPrefix: "광주 하남산단",
+    siteName: "광주 하남산단 청소 현장"
+  },
+  {
+    aliases: [["대구", "달서구"], ["대구달서구"], ["달서구"]],
+    locationPrefix: "대구 달서구",
+    siteName: "대구 달서구 창고 현장"
+  }
+];
+
+const knownStandaloneLocationTokens = new Set([
+  ...topLevelRegionTokens,
+  "성수동", "성수", "서울성수동", "남동공단", "인천남동공단", "안산", "경기안산",
+  "해운대", "부산해운대", "하남산단", "광주하남산단", "달서구", "대구달서구"
+]);
+
+const nonCompanyLeadTokens = new Set(["오늘", "작업", "현장"]);
+
+function normalizeStandaloneToken(token: string) {
+  return token.replace(/^[^가-힣A-Za-z0-9]+|[^가-힣A-Za-z0-9]+$/g, "");
+}
+
+function tokenizeStandaloneTerms(question: string) {
+  return question
+    .split(/\s+/)
+    .map(normalizeStandaloneToken)
+    .filter((token) => token.length > 0);
+}
+
+function containsTokenSequence(tokens: string[], sequence: string[]) {
+  return tokens.some((_, startIndex) =>
+    sequence.every((token, offset) => tokens[startIndex + offset] === token)
+  );
+}
+
+function findSpecificLocationRule(question: string) {
+  const tokens = tokenizeStandaloneTerms(question);
+  return knownSpecificLocationRules.find((rule) =>
+    rule.aliases.some((alias) => containsTokenSequence(tokens, alias))
+  );
+}
 
 const workDescriptorCompanyNames = /^(?:굴착|보수|굴착보수|열수송관굴착|도로굴착보수)공사$/;
 
@@ -375,10 +444,10 @@ function inferCompanyName(question: string) {
     if (!isWorkDescriptorCompanyName(candidate)) return candidate;
   }
 
-  const firstToken = trimmed.split(/\s+/)[0];
+  const firstToken = normalizeStandaloneToken(trimmed.split(/\s+/)[0] || "");
   const looksLikeBarePlaceName =
     firstToken &&
-    (knownLocationTokens.test(firstToken) || /(서울|인천|경기|부산|대구|광주|대전|울산|오늘|작업|현장)/.test(firstToken));
+    (knownStandaloneLocationTokens.has(firstToken) || nonCompanyLeadTokens.has(firstToken));
   if (firstToken && !looksLikeBarePlaceName && !isWorkDescriptorCompanyName(firstToken)) {
     return firstToken.replace(/[,.]$/, "");
   }
@@ -395,23 +464,11 @@ function hasExcavationWorkIdentity(question: string) {
   return excavationWorkIdentityPatterns.some((pattern) => pattern.test(question));
 }
 
-const knownSpecificLocationRules: Array<[RegExp, string]> = [
-  [/서울\s*성수동|성수동/, "서울 성수동"],
-  [/인천\s*남동공단|남동공단/, "인천 남동공단"],
-  [/경기\s*안산|안산/, "경기 안산"],
-  [/부산\s*해운대|해운대/, "부산 해운대"],
-  [/광주\s*하남산단|하남산단/, "광주 하남산단"],
-  [/대구\s*달서구|달서구/, "대구 달서구"]
-];
-
 function inferKnownLocationPrefix(question: string) {
-  const specificLocation = knownSpecificLocationRules.find(([pattern]) => pattern.test(question));
-  if (specificLocation) return specificLocation[1];
+  const specificLocation = findSpecificLocationRule(question);
+  if (specificLocation) return specificLocation.locationPrefix;
 
-  const topLevelRegion = question.match(
-    /(?:^|[\s,.])(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)(?=$|[\s,.])/
-  );
-  return topLevelRegion?.[1] || null;
+  return tokenizeStandaloneTerms(question).find((token) => topLevelRegionTokens.has(token)) || null;
 }
 
 function inferCustomWorkName(question: string) {
@@ -439,17 +496,8 @@ function inferSpecialContext(question: string): string[] {
 function inferSiteName(question: string, fallback: string) {
   if (hasExcavationWorkIdentity(question)) return fallback;
 
-  const siteRules: Array<[RegExp, string]> = [
-    [/서울\s*성수동|성수동/, "서울 성수동 근린생활시설 현장"],
-    [/인천\s*남동공단|남동공단/, "인천 남동공단 물류센터"],
-    [/경기\s*안산|안산/, "경기 안산 제조공장"],
-    [/부산\s*해운대|해운대/, "부산 해운대 시설관리 현장"],
-    [/광주\s*하남산단|하남산단/, "광주 하남산단 청소 현장"],
-    [/대구\s*달서구|달서구/, "대구 달서구 창고 현장"]
-  ];
-
-  const matchedRule = siteRules.find(([pattern]) => pattern.test(question));
-  if (matchedRule) return matchedRule[1];
+  const matchedRule = findSpecificLocationRule(question);
+  if (matchedRule) return matchedRule.siteName;
   return fallback;
 }
 

@@ -89,6 +89,31 @@ describe("inferScenario", () => {
     expect(scenario.siteName).toContain("굴착");
   });
 
+  it.each([
+    ["안산건설 굴착 작업", "안산건설"],
+    ["하남산단관리 굴착 작업", "하남산단관리"],
+    ["강원상사 굴착 작업", "강원상사"],
+    ["제주개발 굴착 작업", "제주개발"]
+  ])("does not infer an embedded region from a company token: %s", (question, companyName) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.companyName).toBe(companyName);
+    expect(scenario.siteName).toBe(`${companyName} 열수송관 굴착공사 현장`);
+  });
+
+  it.each([
+    ["안산 굴착 작업", "경기 안산"],
+    ["광주 하남산단 굴착 작업", "광주 하남산단"],
+    ["강원 굴착 작업", "강원"],
+    ["제주 굴착 작업", "제주"],
+    ["세종 굴착 작업", "세종"]
+  ])("preserves a standalone excavation location: %s", (question, location) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.companyName).toBe("현장 업체");
+    expect(scenario.siteName).toBe(`${location} 열수송관 굴착공사 현장`);
+  });
+
   it("does not let the canonical Gwangju cleaning location overwrite excavation identity", () => {
     const excavation = inferScenario("광주 하남산단 열수송관 굴착공사");
     const cleaning = inferScenario("클린온 광주 하남산단 공장 바닥 세척 작업. 화학세제 사용.");

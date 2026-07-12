@@ -1,3 +1,11 @@
+BUILD_PROVENANCE_VERSION=1
+CWD=C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\scenario-profile-contamination
+SOURCE_HEAD=6ce31d17f3bb212a542da0c9a9fe873315812585
+COMMAND=npm.cmd run build
+STARTED_AT_UTC=2026-07-12T03:01:34.4698216Z
+PROCESS_SNAPSHOT_BEFORE=[]
+NEXT_BUILD_PROCESS_COUNT_BEFORE=0
+SAME_WORKTREE_BUILD_PROCESS_COUNT_BEFORE=0
 
 > safeclaw@0.1.0 build
 > next build
@@ -5,7 +13,7 @@
    ▲ Next.js 15.5.20
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 14.7s
+ ✓ Compiled successfully in 12.7s
    Linting and checking validity of types ...
    Collecting page data ...
    Generating static pages (0/27) ...
@@ -75,7 +83,7 @@ Route (app)                                     Size  First Load JS
 ├ ƒ /precedent/[id]                            240 B         103 kB
 ├ ○ /preview                                 2.44 kB         108 kB
 ├ ○ /prototype                                 240 B         103 kB
-├ ƒ /reports                                   17 kB         217 kB
+├ ƒ /reports                                   17 kB         218 kB
 ├ ○ /roadmap                                 2.44 kB         108 kB
 ├ ƒ /search                                  2.66 kB         109 kB
 ├ ○ /settings                                3.74 kB         171 kB
@@ -95,3 +103,9 @@ Route (app)                                     Size  First Load JS
 
 ○  (Static)   prerendered as static content
 ƒ  (Dynamic)  server-rendered on demand
+
+PROCESS_SNAPSHOT_AFTER=[]
+NEXT_BUILD_PROCESS_COUNT_AFTER=0
+SAME_WORKTREE_BUILD_PROCESS_COUNT_AFTER=0
+FINISHED_AT_UTC=2026-07-12T03:02:48.7529379Z
+EXIT_CODE=0
