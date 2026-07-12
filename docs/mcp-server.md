@@ -50,10 +50,14 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
   토큰 무중단). Supabase 서비스 롤 미설정 시엔 env만으로 동작한다(회귀 없음).
 - 활성화 조건도 확장됐다: env 토큰이 있거나 **Supabase 서비스 롤이 설정**되면 MCP 계층이
   켜진다(DB 전용 운영 시에도 `501`이 아니라 정상 동작).
-- 컨텍스트는 도구 핸들러의 `extra.authInfo.extra`로 전달되며, 모든 등록 도구가 작업을
-  시작하기 전에 `scopes`를 집행한다. 권한이 없거나 컨텍스트가 누락되면 MCP 오류
-  `MCP_TOOL_FORBIDDEN`으로 종료한다. DB의 scope 값이 비어 있거나 잘못된 형식이면
-  `tools:*`로 승격하지 않고 무권한으로 처리한다.
+- 컨텍스트는 도구 핸들러의 `extra.authInfo.extra`로 전달되며, 중앙 `registerScopedTool`
+  wrapper가 모든 등록 도구의 작업보다 먼저 `scopes`를 집행한다. 권한이 없거나 컨텍스트가
+  누락되면 고정 공개 오류 `MCP_TOOL_FORBIDDEN`으로 종료한다. DB scope 배열에 비문자열,
+  trim 후 빈 문자열, 과도한 길이, 알 수 없는 scope가 하나라도 있으면 일부 유효 scope도
+  보존하지 않고 배열 전체를 무권한으로 처리한다.
+- 권한 오류가 아닌 내부 예외는 서버 logger에 기록하되, MCP caller에는 고정 공개 오류
+  `MCP_TOOL_INTERNAL_ERROR`와 일반 메시지만 반환한다. transport/Supabase 오류 본문, 내부
+  코드, secret 필드는 공개 응답에 포함하지 않는다.
 - 지원 scope는 정확한 `tools:<tool_name>`, 제한된 `tools:read`/`tools:write`, 기존 DB·env
   운영자 호환용 `tools:*`다. 신규 웹/CLI 발급 토큰은 현재 등록된 10개 도구의 정확한 scope를
   저장하므로, 나중에 새 도구가 추가되어도 기존 토큰에 자동으로 권한이 생기지 않는다.

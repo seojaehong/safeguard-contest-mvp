@@ -4,43 +4,46 @@
 
 Status: `review_pending`
 
-Product commits: `ad25f99aca3251c9f5866f490b5f5b6392d51000`, `8fe1fc2084a4ce7b8d6115053e5f84d58a85c3c9`
+Independent review: `pending`
 
-Documentation commits: `848b23c4f629118985f052766720aa7f36a06bee`, `f18686c3f069881342787ab73f1320cbbfadf9ed`
+- Authoritative base: `24c19c17cc8c932a333fdae8785426218e57ae15`
+- Remediation RED test commit: `7054bb03f6e367d43cd3cf872937336eee8a5031`
+- Remediation product commit: `8c62499e5da2e260defe5d5656a45a166bb0f533`
 
-Base: `31a44c0d972c46a47c94ad387eeeff39528d1be9`
+The branch is rebased onto the authoritative backend containing the scenario/protocol and frontend launch changes. It does not include the separate future KOSHA branch and makes no DB, migration, env, or data change.
 
-This patch makes the existing `mcp_tokens.scopes` field an enforced authorization boundary. It does not change the database schema, mutate database rows, enable the remote sidecar, or change OpenClaw runtime selection.
+## Security Behavior
 
-## Behavior
+- `normalizeScopes` grants permissions only when every array member is a known non-empty string after trimming. Any malformed, mixed-type, whitespace-empty, overlong, or unknown member denies the entire array.
+- All 10 MCP tools register through typed `registerScopedTool`. Its executable callback authorizes before handler work, logs non-authorization exceptions with the repository logger, and owns safe error conversion.
+- Authorization callers receive only `MCP_TOOL_FORBIDDEN` and `도구 권한이 없습니다.`.
+- Other failures receive only `MCP_TOOL_INTERNAL_ERROR` and `도구 실행 중 오류가 발생했습니다.`. Transport messages, Supabase-like bodies, internal codes, and secret fields are absent from caller payloads.
+- The TypeScript AST contract rejects direct registration, dynamic tool names, comment-only matches, and handler-before-guard fixtures.
 
-- Every one of the 10 registered SafeClaw MCP tools checks its authenticated context before doing work.
-- A database token can use `tools:<exact_tool_name>`, bounded `tools:read` or `tools:write`, or the existing operator wildcard `tools:*`.
-- Malformed, empty, mixed-type, and unknown-only database scope values now resolve to no permissions instead of silently becoming `tools:*`.
-- New tokens receive the current 10 explicit tool scopes. A future tool is not automatically granted to an old token.
-- The operator CLI and the authenticated API use one shared immutable tool contract; neither new-token path writes `tools:*`.
-- Missing context or denied scope returns the stable public code `MCP_TOOL_FORBIDDEN` as an MCP tool error.
-- Internal transport codes such as `ECONNRESET` are not promoted to public MCP error codes.
+## TDD Provenance
 
-## TDD Evidence
+The remediation RED is exact and reachable in Git:
 
-The auditable RED tree used the committed tests from `8fe1fc2` while restoring the affected production files from base `31a44c0`. RED and GREEN both used Vitest `4.1.10`.
+- Commit: `7054bb03f6e367d43cd3cf872937336eee8a5031`
+- Tree: `b31bd661f823a8f996b5074052c2fe611e10ca87`
+- Parent: `8bab30603699711cc7048c7b3018e2191188102d`
+- Command blob: `c15be0f9bf72331844c89d68dc23a7ca0affafcc`
+- Count blob: `4cd8ceb60c4348e1444a14ca1432dfd78bae5344`
+- Log blob: `baf18a3ed7099c78c5843149b22b250d18abee9d`
+- RED result: 4 files, 71 tests; 65 passed and 6 failed, exit 1.
 
-- RED: 4 files failed, 11 tests failed, 57 passed, exit 1.
-- GREEN: 4 files passed, 68 tests passed, exit 0.
-- Strict typecheck: exit 0.
-- Production build: exit 0, static generation 27/27, build ID `Fe2cUnGZBCZ221uM8PfJO`.
-- Dependency sync: `npm.cmd install`, package and lock hashes unchanged; GREEN, typecheck, and build were rerun after sync.
-- `git diff --check`: exit 0.
+The earlier feature `red-test.log` is retained only as **historical reconstructed evidence**. It was produced by restoring selected production files against the old base and does not identify an exact reachable RED tree. No exact-tree claim is made for it.
 
-Raw logs:
+## Final Gates
 
-- `evaluation/mcp-tool-scope-enforcement-2026-07-12/red-test.log`
-- `evaluation/mcp-tool-scope-enforcement-2026-07-12/green-test.log`
-- `evaluation/mcp-tool-scope-enforcement-2026-07-12/typecheck.log`
-- `evaluation/mcp-tool-scope-enforcement-2026-07-12/build.log`
-- `evaluation/mcp-tool-scope-enforcement-2026-07-12/dependency-sync.log`
+- Focused MCP tests: 4 files passed, 71 tests passed, exit 0.
+- Strict typecheck: `npm.cmd run typecheck`, exit 0.
+- Diff check: `git diff --check 24c19c17cc8c932a333fdae8785426218e57ae15 --`, exit 0.
+- Build preflight: global Node build processes `0`.
+- Sequential production build: one invocation after preflight, exit 0, static generation `27/27`, build ID `ZJRVHMPheqa6pINj2wz-S`. It ran before the verified metadata-only `e040ce0` to `24c19c1` rebase and was not repeated, preserving the requested single build invocation.
 
-## Compatibility And Residual Risk
+Logs are in `evaluation/mcp-tool-scope-enforcement-2026-07-12/`: `remediation-red-test.log`, `green-test.log`, `typecheck.log`, `diff-check.log`, `build-preflight.log`, and `build.log`.
 
-Existing database tokens explicitly carrying `tools:*` remain full-trust. Legacy `SAFECLAW_MCP_TOKENS` also remain operator-level wildcard credentials. Migration `007_mcp_tokens.sql` still defines a wildcard column default; product and CLI inserts now bypass it with explicit scopes, but changing that database default requires a separately approved migration. These compatibility paths must not be used as the dedicated sidecar credential. The signed remote transport, sidecar tool allowlist, and durable atomic nonce replay store remain separate fail-closed gates.
+## Residual Risk
+
+Existing DB tokens and legacy env credentials that explicitly carry `tools:*` remain full-trust for compatibility. Migration `007_mcp_tokens.sql` still has a wildcard default; changing it remains approval-gated. The separate KOSHA work is not integrated.

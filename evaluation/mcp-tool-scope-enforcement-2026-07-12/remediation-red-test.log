@@ -147,4 +147,3 @@ AssertionError: expected { Object (error) } to deeply equal { …(2) }
       Tests  6 failed | 65 passed (71)
    Start at  16:59:38
    Duration  4.27s (transform 440ms, setup 0ms, import 1.30s, tests 141ms, environment 0ms)
-
