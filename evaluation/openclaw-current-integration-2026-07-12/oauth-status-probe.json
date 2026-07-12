@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-07-12T02:44:26.5448360Z",
+  "sourceCommit": "99ca98cd7abd30f3fca33ca85f29972d9e7e80b1",
+  "profile": "safeclaw",
+  "agent": "main",
+  "command": "openclaw --profile safeclaw models status --agent main --json",
+  "readOnly": true,
+  "agentTurnExecuted": false,
+  "resolvedDefault": "openai/gpt-5.5",
+  "openAi": {
+    "providerStatus": "ok",
+    "oauthProfileCount": 1,
+    "oauthCount": 1,
+    "tokenCount": 0,
+    "apiKeyCount": 0,
+    "runtimeRouteStatus": "usable"
+  }
+}
