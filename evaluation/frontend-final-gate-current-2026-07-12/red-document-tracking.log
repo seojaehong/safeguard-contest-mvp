@@ -1,0 +1,41 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/documents-editor-layout.test.ts -t keeps the opened submission preview contained
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-final-gate-current
+
+ ❯ tests/documents-editor-layout.test.ts (20 tests | 1 failed | 19 skipped) 15328ms
+     × keeps the opened submission preview contained 6866ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/documents-editor-layout.test.ts > documents editor layout > keeps the opened submission preview contained
+AssertionError: expected { title: +0, section: +0 } to deeply equal { title: NumberCloseTo{…}, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "section": NumberCloseTo -0.186667 (5 digits),
+-   "title": NumberCloseTo -0.533334 (5 digits),
++   "section": 0,
++   "title": 0,
+  }
+
+ ❯ tests/documents-editor-layout.test.ts:904:8
+    902|       title: metrics.documentTitleLetterSpacing,
+    903|       section: metrics.sectionTitleLetterSpacing
+    904|     }).toEqual({
+       |        ^
+    905|       title: expect.closeTo(-0.533334, 5),
+    906|       section: expect.closeTo(-0.186667, 5)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 19 skipped (20)
+   Start at  17:29:26
+   Duration  17.06s (transform 195ms, setup 0ms, import 1.11s, tests 15.33s, environment 0ms)
+
