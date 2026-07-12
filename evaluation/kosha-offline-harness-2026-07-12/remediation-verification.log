@@ -1,0 +1,714 @@
+**********************
+PowerShell transcript start
+Start time: 20260712111231
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; if (Test-Path -LiteralPath $log) { throw "Verification log already exists: $log" }; Start-Transcript -Path $log | Out-Null; npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts --maxWorkers=1 --no-file-parallelism; $code=$LASTEXITCODE; Stop-Transcript | Out-Null; exit $code
+Process ID: 39600
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+
+**********************
+PowerShell transcript end
+End time: 20260712111250
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712111302
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; $files=@('tests/kosha-guide-offline-harness.test.ts','tests/kosha-guide-provenance-gate.test.ts','tests/kosha-guide-offline-harness-expanded.test.ts','tests/safety-reference-hybrid.test.ts','tests/safety-reference-relevance.test.ts','tests/commercial-harness.test.ts','tests/generation-evidence-operation-routes.test.ts','tests/ontology-operation-memory.test.ts','tests/workpack-remediate-route.test.ts'); Start-Transcript -Path $log -Append | Out-Null; $code=0; foreach($file in $files){ Write-Output "EXPANDED_FILE=$file"; npm.cmd test -- $file --maxWorkers=1 --no-file-parallelism; if($LASTEXITCODE -ne 0){ $code=$LASTEXITCODE; break } }; Stop-Transcript | Out-Null; exit $code
+Process ID: 37056
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+EXPANDED_FILE=tests/kosha-guide-offline-harness.test.ts
+
+EXPANDED_FILE=tests/kosha-guide-provenance-gate.test.ts
+
+EXPANDED_FILE=tests/kosha-guide-offline-harness-expanded.test.ts
+
+EXPANDED_FILE=tests/safety-reference-hybrid.test.ts
+
+EXPANDED_FILE=tests/safety-reference-relevance.test.ts
+
+EXPANDED_FILE=tests/commercial-harness.test.ts
+
+**********************
+PowerShell transcript end
+End time: 20260712111401
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712111419
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; Start-Transcript -Path $log -Append | Out-Null; npm.cmd test -- tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism; $code=$LASTEXITCODE; Stop-Transcript | Out-Null; exit $code
+Process ID: 38328
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+
+**********************
+PowerShell transcript end
+End time: 20260712111427
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712111438
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; $files=@('tests/kosha-guide-offline-harness.test.ts','tests/kosha-guide-provenance-gate.test.ts','tests/kosha-guide-offline-harness-expanded.test.ts','tests/safety-reference-hybrid.test.ts','tests/safety-reference-relevance.test.ts','tests/commercial-harness.test.ts','tests/generation-evidence-operation-routes.test.ts','tests/ontology-operation-memory.test.ts','tests/workpack-remediate-route.test.ts'); Start-Transcript -Path $log -Append | Out-Null; Write-Output 'EXPANDED113_FINAL_RERUN'; $code=0; foreach($file in $files){ Write-Output "EXPANDED_FILE=$file"; npm.cmd test -- $file --maxWorkers=1 --no-file-parallelism; if($LASTEXITCODE -ne 0){ $code=$LASTEXITCODE; break } }; Stop-Transcript | Out-Null; exit $code
+Process ID: 35752
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+EXPANDED113_FINAL_RERUN
+EXPANDED_FILE=tests/kosha-guide-offline-harness.test.ts
+
+EXPANDED_FILE=tests/kosha-guide-provenance-gate.test.ts
+
+EXPANDED_FILE=tests/kosha-guide-offline-harness-expanded.test.ts
+
+EXPANDED_FILE=tests/safety-reference-hybrid.test.ts
+
+EXPANDED_FILE=tests/safety-reference-relevance.test.ts
+
+EXPANDED_FILE=tests/commercial-harness.test.ts
+
+EXPANDED_FILE=tests/generation-evidence-operation-routes.test.ts
+
+EXPANDED_FILE=tests/ontology-operation-memory.test.ts
+
+EXPANDED_FILE=tests/workpack-remediate-route.test.ts
+
+**********************
+PowerShell transcript end
+End time: 20260712111528
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712111535
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; Start-Transcript -Path $log -Append | Out-Null; Write-Output 'CORPUS34_FINAL'; npm.cmd test -- tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --no-file-parallelism; $code=$LASTEXITCODE; Stop-Transcript | Out-Null; exit $code
+Process ID: 41732
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+CORPUS34_FINAL
+
+**********************
+PowerShell transcript end
+End time: 20260712111538
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712111550
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; $files=@('tests/generation-trace-privacy.test.ts','tests/photo-vision-analysis.test.ts'); Start-Transcript -Path $log -Append | Out-Null; Write-Output 'ADDITIONAL_IMPACTED_FINAL'; $code=0; foreach($file in $files){ Write-Output "IMPACTED_FILE=$file"; npm.cmd test -- $file --maxWorkers=1 --no-file-parallelism; if($LASTEXITCODE -ne 0){ $code=$LASTEXITCODE; break } }; Stop-Transcript | Out-Null; exit $code
+Process ID: 3900
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+ADDITIONAL_IMPACTED_FINAL
+IMPACTED_FILE=tests/generation-trace-privacy.test.ts
+
+IMPACTED_FILE=tests/photo-vision-analysis.test.ts
+
+**********************
+PowerShell transcript end
+End time: 20260712111601
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712111608
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; Start-Transcript -Path $log -Append | Out-Null; Write-Output 'TYPECHECK_FINAL'; npm.cmd run typecheck; $code=$LASTEXITCODE; Stop-Transcript | Out-Null; exit $code
+Process ID: 33312
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+TYPECHECK_FINAL
+
+**********************
+PowerShell transcript end
+End time: 20260712111632
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712111654
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; Start-Transcript -Path $log -Append | Out-Null; Write-Output 'PRODUCTION_BUILD_FINAL_ATTEMPT=1'; npm.cmd run build; $code=$LASTEXITCODE; Write-Output "PRODUCTION_BUILD_EXIT_CODE=$code"; Stop-Transcript | Out-Null; exit $code
+Process ID: 4212
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+PRODUCTION_BUILD_FINAL_ATTEMPT=1
+
+PRODUCTION_BUILD_EXIT_CODE=0
+**********************
+PowerShell transcript end
+End time: 20260712111813
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712113816
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; Start-Transcript -Path $log -Append | Out-Null; Write-Output 'P1_ROW_RELEVANCE_RED'; npm.cmd test -- tests/kosha-guide-offline-harness-expanded.test.ts -t "caps row-specific supporting KOSHA" --maxWorkers=1 --no-file-parallelism; $code=$LASTEXITCODE; Write-Output "P1_ROW_RELEVANCE_RED_EXIT_CODE=$code"; Stop-Transcript | Out-Null; exit $code
+Process ID: 48916
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+P1_ROW_RELEVANCE_RED
+
+P1_ROW_RELEVANCE_RED_EXIT_CODE=1
+**********************
+PowerShell transcript end
+End time: 20260712113823
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712113846
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; Start-Transcript -Path $log -Append | Out-Null; Write-Output 'P1_ROW_RELEVANCE_RED_CONFIRMED'; npm.cmd test -- tests/kosha-guide-offline-harness-expanded.test.ts -t "caps row-specific supporting KOSHA" --maxWorkers=1 --no-file-parallelism; $code=$LASTEXITCODE; Write-Output "P1_ROW_RELEVANCE_RED_CONFIRMED_EXIT_CODE=$code"; Stop-Transcript | Out-Null; exit $code
+Process ID: 35068
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+P1_ROW_RELEVANCE_RED_CONFIRMED
+
+P1_ROW_RELEVANCE_RED_CONFIRMED_EXIT_CODE=1
+**********************
+PowerShell transcript end
+End time: 20260712113850
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712113913
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; Start-Transcript -Path $log -Append | Out-Null; Write-Output 'P1_ROW_RELEVANCE_RED_MULTIPLE_UNRELATED'; npm.cmd test -- tests/kosha-guide-offline-harness-expanded.test.ts -t "caps row-specific supporting KOSHA" --maxWorkers=1 --no-file-parallelism; $code=$LASTEXITCODE; Write-Output "P1_ROW_RELEVANCE_RED_MULTIPLE_UNRELATED_EXIT_CODE=$code"; Stop-Transcript | Out-Null; exit $code
+Process ID: 48376
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+P1_ROW_RELEVANCE_RED_MULTIPLE_UNRELATED
+
+P1_ROW_RELEVANCE_RED_MULTIPLE_UNRELATED_EXIT_CODE=1
+**********************
+PowerShell transcript end
+End time: 20260712113918
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712114115
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; Start-Transcript -Path $log -Append | Out-Null; Write-Output 'P1_ROW_RELEVANCE_GREEN'; npm.cmd test -- tests/kosha-guide-offline-harness-expanded.test.ts -t "caps row-specific supporting KOSHA" --maxWorkers=1 --no-file-parallelism; $code=$LASTEXITCODE; Write-Output "P1_ROW_RELEVANCE_GREEN_EXIT_CODE=$code"; Stop-Transcript | Out-Null; exit $code
+Process ID: 12088
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+P1_ROW_RELEVANCE_GREEN
+
+P1_ROW_RELEVANCE_GREEN_EXIT_CODE=1
+**********************
+PowerShell transcript end
+End time: 20260712114124
+**********************
+**********************
+PowerShell transcript start
+Start time: 20260712114155
+Username: WIN-IH8RLR0KKTB\iceam
+RunAs User: WIN-IH8RLR0KKTB\iceam
+Configuration Name:
+Machine: WIN-IH8RLR0KKTB (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$log='evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log'; Start-Transcript -Path $log -Append | Out-Null; Write-Output 'P1_ROW_RELEVANCE_GREEN_RETRY'; npm.cmd test -- tests/kosha-guide-offline-harness-expanded.test.ts -t "caps row-specific supporting KOSHA" --maxWorkers=1 --no-file-parallelism; $code=$LASTEXITCODE; Write-Output "P1_ROW_RELEVANCE_GREEN_RETRY_EXIT_CODE=$code"; Stop-Transcript | Out-Null; exit $code
+Process ID: 21264
+PSVersion: 7.5.8
+PSEdition: Core
+GitCommitId: 7.5.8
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+P1_ROW_RELEVANCE_GREEN_RETRY
+
+P1_ROW_RELEVANCE_GREEN_RETRY_EXIT_CODE=0
+**********************
+PowerShell transcript end
+End time: 20260712114201
+**********************
+
+===== P1_BOUNDED26 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts -t ^(?!.*caps row-specific supporting KOSHA).*$ --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  2 passed (2)
+      Tests  26 passed | 1 skipped (27)
+   Start at  11:43:11
+   Duration  14.53s (transform 1.17s, setup 0ms, import 2.97s, tests 9.66s, environment 1ms)
+
+P1_BOUNDED26_EXIT_CODE=0
+
+===== P1_ORIGINAL8 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  11:43:29
+   Duration  24.54s (transform 2.54s, setup 0ms, import 3.77s, tests 18.71s, environment 1ms)
+
+P1_ORIGINAL8_EXIT_CODE=0
+
+===== P1_NEW1 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness-expanded.test.ts -t caps row-specific supporting KOSHA --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 19 skipped (20)
+   Start at  11:43:57
+   Duration  3.05s (transform 1.20s, setup 0ms, import 2.10s, tests 33ms, environment 0ms)
+
+P1_NEW1_EXIT_CODE=0
+
+===== P1_EXPANDED113 =====
+P1_EXPANDED_FILE=tests/kosha-guide-offline-harness.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  11:44:17
+   Duration  8.34s (transform 996ms, setup 0ms, import 1.88s, tests 5.75s, environment 0ms)
+
+P1_EXPANDED_FILE=tests/kosha-guide-provenance-gate.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-provenance-gate.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  11:44:27
+   Duration  4.80s (transform 86ms, setup 0ms, import 128ms, tests 3.95s, environment 0ms)
+
+P1_EXPANDED_FILE=tests/kosha-guide-offline-harness-expanded.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness-expanded.test.ts -t ^(?!.*caps row-specific supporting KOSHA).*$ --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  19 passed | 1 skipped (20)
+   Start at  11:44:35
+   Duration  2.08s (transform 695ms, setup 0ms, import 1.33s, tests 171ms, environment 0ms)
+
+P1_EXPANDED_FILE=tests/safety-reference-hybrid.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/safety-reference-hybrid.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  43 passed (43)
+   Start at  11:44:39
+   Duration  1.05s (transform 161ms, setup 0ms, import 201ms, tests 282ms, environment 0ms)
+
+P1_EXPANDED_FILE=tests/safety-reference-relevance.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/safety-reference-relevance.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  11:44:42
+   Duration  742ms (transform 107ms, setup 0ms, import 143ms, tests 10ms, environment 0ms)
+
+P1_EXPANDED_FILE=tests/commercial-harness.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  31 passed (31)
+   Start at  11:44:45
+   Duration  7.50s (transform 749ms, setup 0ms, import 1.32s, tests 5.61s, environment 0ms)
+
+P1_EXPANDED_FILE=tests/generation-evidence-operation-routes.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/generation-evidence-operation-routes.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  11:44:54
+   Duration  1.18s (transform 333ms, setup 0ms, import 409ms, tests 165ms, environment 0ms)
+
+P1_EXPANDED_FILE=tests/ontology-operation-memory.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/ontology-operation-memory.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  11:44:57
+   Duration  755ms (transform 136ms, setup 0ms, import 172ms, tests 20ms, environment 0ms)
+
+P1_EXPANDED_FILE=tests/workpack-remediate-route.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-remediate-route.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  11:45:00
+   Duration  955ms (transform 228ms, setup 0ms, import 364ms, tests 30ms, environment 0ms)
+
+P1_EXPANDED113_EXIT_CODE=0
+
+===== P1_CORPUS34 =====
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  34 passed (34)
+   Start at  11:45:15
+   Duration  1.08s (transform 203ms, setup 0ms, import 264ms, tests 77ms, environment 0ms)
+
+P1_CORPUS34_EXIT_CODE=0
+
+===== P1_IMPACT41 =====
+P1_IMPACT_FILE=tests/generation-trace-privacy.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/generation-trace-privacy.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  11:45:18
+   Duration  4.85s (transform 953ms, setup 0ms, import 1.70s, tests 2.42s, environment 0ms)
+
+P1_IMPACT_FILE=tests/photo-vision-analysis.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/photo-vision-analysis.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-harness
+
+
+ Test Files  1 passed (1)
+      Tests  39 passed (39)
+   Start at  11:45:26
+   Duration  1.21s (transform 336ms, setup 0ms, import 420ms, tests 111ms, environment 0ms)
+
+P1_IMPACT41_EXIT_CODE=0
+
+===== P1_STRICT_TYPECHECK =====
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+P1_STRICT_TYPECHECK_EXIT_CODE=0
+
+===== P1_SEQUENTIAL_BUILD_ATTEMPT_1_OF_1 =====
+P1_BUILD_PROCESSES_BEFORE=0
+
+> safeclaw@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.20
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 12.9s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/27) ...
+   Generating static pages (6/27)
+   Generating static pages (13/27)
+   Generating static pages (20/27)
+ ✓ Generating static pages (27/27)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                     Size  First Load JS
+┌ ƒ /                                        2.86 kB         109 kB
+├ ○ /_not-found                                240 B         103 kB
+├ ○ /.well-known/agent.json                    240 B         103 kB
+├ ƒ /api/agent/chat                            240 B         103 kB
+├ ƒ /api/ask                                   240 B         103 kB
+├ ƒ /api/ask/stream                            240 B         103 kB
+├ ƒ /api/briefing/run                          240 B         103 kB
+├ ƒ /api/briefing/settings                     240 B         103 kB
+├ ƒ /api/dispatch-logs                         240 B         103 kB
+├ ƒ /api/education-records                     240 B         103 kB
+├ ƒ /api/export/hwp                            240 B         103 kB
+├ ƒ /api/export/hwpx-template                  240 B         103 kB
+├ ƒ /api/export/pdf                            240 B         103 kB
+├ ƒ /api/export/xlsx                           240 B         103 kB
+├ ƒ /api/input-photos/hazard-analysis          240 B         103 kB
+├ ƒ /api/knowledge/ingest                      240 B         103 kB
+├ ƒ /api/knowledge/match                       240 B         103 kB
+├ ƒ /api/knowledge/regenerate                  240 B         103 kB
+├ ƒ /api/mcp-tokens                            240 B         103 kB
+├ ƒ /api/mcp-tokens/[id]                       240 B         103 kB
+├ ƒ /api/mcp/[transport]                       240 B         103 kB
+├ ƒ /api/ontology/graph                        240 B         103 kB
+├ ƒ /api/safety-reference/search               240 B         103 kB
+├ ƒ /api/safety-reference/status               240 B         103 kB
+├ ƒ /api/search                                240 B         103 kB
+├ ƒ /api/sif-embedding-gate/approval-packet    240 B         103 kB
+├ ƒ /api/sif-embedding-gate/status             240 B         103 kB
+├ ƒ /api/weather                               240 B         103 kB
+├ ƒ /api/workers                               240 B         103 kB
+├ ƒ /api/workflow/dispatch                     240 B         103 kB
+├ ƒ /api/workpack/remediate                    240 B         103 kB
+├ ƒ /api/workpacks                             240 B         103 kB
+├ ƒ /api/workpacks/[id]                        240 B         103 kB
+├ ƒ /api/workpacks/[id]/improvements           240 B         103 kB
+├ ƒ /api/workpacks/[id]/learning-export        240 B         103 kB
+├ ƒ /api/workpacks/[id]/operation-graph        240 B         103 kB
+├ ƒ /api/workpacks/[id]/read-confirmations     240 B         103 kB
+├ ƒ /api/workpacks/[id]/share-sessions         240 B         103 kB
+├ ○ /archive                                 7.47 kB         174 kB
+├ ƒ /ask                                      2.4 kB         108 kB
+├ ○ /auth/callback                           1.47 kB         168 kB
+├ ƒ /demo                                    4.92 kB         111 kB
+├ ○ /dispatch                                  197 B         224 kB
+├ ○ /documents                                 188 B         224 kB
+├ ƒ /dryrun                                  2.44 kB         108 kB
+├ ƒ /evidence                                  197 B         224 kB
+├ ○ /evidence-file                           4.77 kB         204 kB
+├ ○ /home                                    5.43 kB         111 kB
+├ ƒ /interpretation/[id]                       240 B         103 kB
+├ ƒ /knowledge                               2.79 kB         109 kB
+├ ƒ /knowledge/[section]/[slug]              2.44 kB         108 kB
+├ ƒ /law/[id]                                  240 B         103 kB
+├ ○ /login                                   2.22 kB         169 kB
+├ ƒ /ontology                                2.67 kB         134 kB
+├ ƒ /ops/api                                 2.44 kB         108 kB
+├ ƒ /precedent/[id]                            240 B         103 kB
+├ ○ /preview                                 2.44 kB         108 kB
+├ ○ /prototype                                 240 B         103 kB
+├ ƒ /reports                                   17 kB         216 kB
+├ ○ /roadmap                                 2.44 kB         108 kB
+├ ƒ /search                                  2.66 kB         109 kB
+├ ○ /settings                                3.74 kB         171 kB
+├ ƒ /settings/ai-connect                      8.5 kB         175 kB
+├ ○ /sitemap.xml                               240 B         103 kB
+├ ○ /tbm                                     2.44 kB         108 kB
+├ ○ /trust                                   2.44 kB         108 kB
+├ ○ /why                                     2.44 kB         108 kB
+├ ○ /worker                                  1.61 kB         140 kB
+├ ○ /workers                                   197 B         224 kB
+└ ƒ /workspace                               33.8 kB         272 kB
++ First Load JS shared by all                 103 kB
+  ├ chunks/1255-d90f22433f14e976.js          46.2 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js      54.2 kB
+  └ other shared chunks (total)              2.19 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+P1_SEQUENTIAL_BUILD_EXIT_CODE=0
+
+===== P1_FINAL_DIFF_CHECK =====
+warning: in the working copy of 'evaluation/kosha-offline-harness-2026-07-12/report.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/kosha-offline-harness-2026-07-12/report.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/safety-reference-catalog.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/safety-reference-policy.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/search.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/kosha-guide-offline-harness-expanded.test.ts', LF will be replaced by CRLF the next time Git touches it
+P1_FINAL_DIFF_CHECK_EXIT_CODE=0

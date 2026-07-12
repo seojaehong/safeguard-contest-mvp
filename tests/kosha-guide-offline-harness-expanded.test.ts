@@ -140,6 +140,29 @@ function reference(id: string, role: "direct" | "supporting" = "direct"): Safety
   };
 }
 
+function supportingKoshaReference(
+  id: string,
+  evidenceRef: string,
+  overrides: Partial<SafetyReferenceItem>
+): SafetyReferenceItem {
+  return {
+    ...reference(id, "supporting"),
+    ...overrides,
+    id,
+    evidence_role: "supporting",
+    kosha_guide: {
+      referenceId: id,
+      stableDocumentKey: `${id}-stable`,
+      version: "2026",
+      quality: "accepted",
+      bodyKind: "native",
+      anchors: [{ page: 1, excerpt: overrides.summary || id }],
+      evidenceRef,
+      directEligible: true
+    }
+  };
+}
+
 afterEach(() => {
   resetKoshaGuideCorpusCacheForTests();
   while (tempDirs.length) rmSync(tempDirs.pop() as string, { recursive: true, force: true });
@@ -234,6 +257,99 @@ describe("KOSHA offline harness expanded regressions", () => {
     const directGroundedRows = groundedRows.filter((row) => row.evidenceRefs.includes("DB 하네스 직접근거"));
     expect(directGroundedRows).toHaveLength(1);
     expect(directGroundedRows[0]?.evidenceRefs).toContain(local?.kosha_guide?.evidenceRef);
+  });
+
+  it("caps row-specific supporting KOSHA and rejects broad or duplicate evidence refs", () => {
+    const response = buildMockAskResponse("지게차 하역 작업", mockSearchResults, "mock", "test");
+    const direct = {
+      ...reference("forklift-direct", "direct"),
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "지게차 하역 중 보행자 동선 충돌 직접 근거",
+      summary: "지게차 운행경로와 보행자 통행 동선이 겹쳐 충돌할 수 있다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      controls: ["지게차 동선과 보행 동선 분리 및 신호수 배치", "후진 경보 확인"]
+    } satisfies SafetyReferenceItem;
+    const primaryRef = "KOSHA 근거 forklift-primary p.1: 지게차와 보행자 동선을 분리한다.";
+    const relevant = [
+      supportingKoshaReference("forklift-primary", primaryRef, {
+        category: "기계안전",
+        subcategory: "지게차",
+        title: "지게차 보행자 동선 충돌 예방 지침",
+        summary: "지게차와 보행자 통행 동선을 분리하고 충돌 위험을 통제한다.",
+        keywords: ["지게차", "보행자", "동선", "충돌"],
+        risk_tags: ["충돌"],
+        controls: ["지게차 동선과 보행 동선 분리"]
+      }),
+      supportingKoshaReference("forklift-inspection", "KOSHA 근거 forklift-inspection p.1: 지게차 후진 경보를 확인한다.", {
+        category: "기계안전",
+        subcategory: "지게차",
+        title: "지게차 후진 충돌 예방 점검 지침",
+        summary: "지게차 후진 경보와 보행자 접근 통제를 확인한다.",
+        keywords: ["지게차", "후진", "보행자", "충돌"],
+        risk_tags: ["충돌"],
+        controls: ["후진 경보 확인", "보행자 접근 통제"]
+      }),
+      supportingKoshaReference("forklift-loading", "KOSHA 근거 forklift-loading p.1: 지게차 하역구역을 통제한다.", {
+        category: "운반하역",
+        subcategory: "지게차",
+        title: "지게차 하역구역 동선 관리 지침",
+        summary: "지게차 하역구역의 보행자 동선과 충돌 위험을 통제한다.",
+        keywords: ["지게차", "하역", "보행자", "동선"],
+        risk_tags: ["충돌"],
+        controls: ["하역구역 출입 통제"]
+      })
+    ];
+    const duplicate = supportingKoshaReference("forklift-primary-copy", primaryRef, {
+      category: "기계안전",
+      subcategory: "지게차",
+      title: "지게차 보행자 충돌 예방 지침 사본",
+      summary: "지게차와 보행자 통행 동선을 분리한다.",
+      keywords: ["지게차", "보행자", "충돌"],
+      risk_tags: ["충돌"],
+      controls: ["지게차 동선 분리"]
+    });
+    const unrelated = [
+      supportingKoshaReference("broad-loading", "KOSHA 근거 broad-loading p.1: 화물 적재 상태를 확인한다.", {
+        category: "물류일반",
+        subcategory: "적재",
+        title: "하역 작업 안전 관리 일반 지침",
+        summary: "화물 적재 높이와 결속 상태를 확인한다.",
+        keywords: ["하역", "적재"],
+        risk_tags: ["낙하"],
+        controls: ["화물 결속 상태 확인"]
+      }),
+      supportingKoshaReference("broad-crane", "KOSHA 근거 broad-crane p.1: 인양 신호수를 배치한다.", {
+        category: "건설기계",
+        subcategory: "크레인",
+        title: "크레인 인양 작업 안전 관리 지침",
+        summary: "크레인 인양 반경을 통제하고 신호수를 배치한다.",
+        keywords: ["크레인", "인양", "신호수"],
+        risk_tags: ["낙하"],
+        controls: ["인양 신호수 배치"]
+      })
+    ];
+
+    const rows = buildSafetyReferenceRiskRows(
+      response,
+      [direct, ...relevant, duplicate, ...unrelated],
+      "맑음",
+      "작업 안전 관리 하역 신호수"
+    );
+    const directRow = rows.find((row) => row.evidenceRefs.includes("DB 하네스 직접근거"));
+    const supportingRefs = directRow?.evidenceRefs.filter((ref) => ref.startsWith("KOSHA 근거 ")) || [];
+
+    expect(directRow).toBeDefined();
+    expect(supportingRefs).not.toEqual(expect.arrayContaining([
+      "KOSHA 근거 broad-loading p.1: 화물 적재 상태를 확인한다.",
+      "KOSHA 근거 broad-crane p.1: 인양 신호수를 배치한다."
+    ]));
+    expect(supportingRefs).toHaveLength(2);
+    expect(supportingRefs).toContain(primaryRef);
+    expect(new Set(supportingRefs).size).toBe(supportingRefs.length);
+    expect(supportingRefs.every((ref) => ref.includes("forklift-"))).toBe(true);
   });
 
   it("honors local itemType exactly: SIF yields none and regulations never yield guidelines", async () => {

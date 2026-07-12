@@ -11,6 +11,7 @@ import {
   getSafetyReferenceDisplayTitle,
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceOperationalIncidentOverview,
+  hasStrongSafetyReferenceRowOverlap,
   isSafetyReferenceCompatibleWithQuery,
   normalizeReferenceItem,
   parseContentRange,
@@ -38,6 +39,7 @@ export {
   getSafetyReferenceDisplayTitle,
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceOperationalIncidentOverview,
+  hasStrongSafetyReferenceRowOverlap,
   isSafetyReferenceCompatibleWithQuery,
   readSafetyReferenceLimit,
   scoreSafetyReferenceQueryMatch

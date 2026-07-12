@@ -1575,6 +1575,58 @@ function referenceRiskDomain(item: SafetyReferenceItem): string {
               : `reference:${item.id}`;
 }
 
+const ROW_DOMAIN_GENERIC_TERMS = new Set([
+  "건설안전",
+  "기계안전",
+  "산업안전",
+  "기술지원규정",
+  "기술지침",
+  "일반",
+  "기준",
+  "규정",
+  "지침",
+  "예방",
+  "점검",
+  "조치",
+  "통제",
+  "확인",
+  "직접",
+  "근거"
+]);
+
+function referenceRowDomainTerms(item: SafetyReferenceItem): Set<string> {
+  const fields = [
+    item.title,
+    item.category || "",
+    item.subcategory || "",
+    ...item.keywords,
+    ...item.risk_tags
+  ];
+  return new Set(fields
+    .flatMap((field) => extractFallbackTerms(field))
+    .map((term) => normalizeMatchText(term))
+    .filter((term) => !ROW_DOMAIN_GENERIC_TERMS.has(term)));
+}
+
+export function hasStrongSafetyReferenceRowOverlap(
+  directReference: SafetyReferenceItem,
+  supportingReference: SafetyReferenceItem
+): boolean {
+  const directDomain = referenceRiskDomain(directReference);
+  const supportingDomain = referenceRiskDomain(supportingReference);
+  if (!directDomain.startsWith("reference:") && directDomain === supportingDomain) return true;
+
+  const directTerms = referenceRowDomainTerms(directReference);
+  const supportingTerms = referenceRowDomainTerms(supportingReference);
+  let overlapCount = 0;
+  for (const term of directTerms) {
+    if (!supportingTerms.has(term)) continue;
+    overlapCount += 1;
+    if (overlapCount >= 2) return true;
+  }
+  return false;
+}
+
 function referenceDomainSpecificity(domain: string, item: SafetyReferenceItem): number {
   const title = normalizeMatchText(item.title);
   switch (domain) {

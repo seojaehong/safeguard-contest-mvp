@@ -9,6 +9,7 @@ import {
   deriveSafetyReferenceOperationalView,
   filterAndRankSafetyReferencesByQuery,
   getSafetyReferenceDisplayTitle,
+  hasStrongSafetyReferenceRowOverlap,
   SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
   SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE,
   isSafetyReferenceRiskEligible,
@@ -335,6 +336,9 @@ function includesRiskAssessmentDocument(item: SafetyReferenceItem): boolean {
   );
 }
 
+// Two refs preserve a primary guide plus one complementary source without turning a direct row into a bibliography.
+const MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW = 2;
+
 export function buildSafetyReferenceRiskRows(
   response: AskResponse,
   references: readonly SafetyReferenceItem[],
@@ -378,11 +382,15 @@ export function buildSafetyReferenceRiskRows(
     const dedupeKey = `${hazard}|${control}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
-    const supportingEvidenceRefs = filterAndRankSafetyReferencesByQuery(
+    const rowRelevantSupportingKosha = supportingKoshaReferences.filter((supporting) =>
+      hasStrongSafetyReferenceRowOverlap(item, supporting)
+    );
+    const supportingEvidenceRefs = Array.from(new Set(filterAndRankSafetyReferencesByQuery(
       `${rankQuery} ${displayTitle} ${hazard} ${control}`,
-      [...supportingKoshaReferences],
-      supportingKoshaReferences.length
-    ).map((supporting) => supporting.kosha_guide?.evidenceRef).filter((ref): ref is string => Boolean(ref));
+      [...rowRelevantSupportingKosha],
+      rowRelevantSupportingKosha.length
+    ).map((supporting) => supporting.kosha_guide?.evidenceRef).filter((ref): ref is string => Boolean(ref))))
+      .slice(0, MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW);
     const evidenceRefs = [
       "DB 하네스 직접근거",
       item.source_kind_label || item.item_type || "safety_reference_items",

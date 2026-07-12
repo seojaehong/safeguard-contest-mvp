@@ -2,22 +2,31 @@
   "date": "2026-07-12",
   "branch": "feat/kosha-offline-harness",
   "remediation_start": "bffb05fca441ce0ca355d0b1813ffe24666a16c4",
+  "p1_remediation_start": "690bfcb56385dd1fb563103a1a38cde77f6e82c6",
   "status": "passed",
   "scope": [
     "local-kosha-supporting-evidence-policy",
     "final-returned-item-retrieval-mode",
-    "pre-score-item-type-filter"
+    "pre-score-item-type-filter",
+    "per-row-kosha-evidence-cap-and-relevance"
   ],
   "external_v3_corpus": {
     "path": "C:/Users/iceam/dev/safeclaw-local-artifacts/kosha-corpus-body-recovery-2026-07-12-v3",
     "read_only": true,
-    "modified": false
+    "modified": false,
+    "jsonl_total_bytes": 79424591
   },
   "remediation": {
     "evidence_role": "Local kosha_guide items remain supporting; directEligible is metadata only.",
     "risk_rows": "KOSHA guide items cannot independently create risk rows from evidenceRef and may only attach a supporting page reference to a row grounded by a non-KOSHA reference.",
     "retrieval_mode": "Mode is derived from final returned sources and preserves rest-ilike, ranked-rpc, or hybrid-vector-rpc when no local item survives.",
-    "item_type": "The local itemType predicate is applied before scoring and limit."
+    "item_type": "The local itemType predicate is applied before scoring and limit.",
+    "row_specific_relevance": "Supporting KOSHA attaches only when its recognized risk domain matches the direct row or at least two non-generic identity terms overlap. Generic terms such as 작업, 안전, and 관리 do not establish relevance.",
+    "per_row_cap": {
+      "value": 2,
+      "rationale": "Preserves a primary guide plus one complementary source without turning one direct row into a broad bibliography."
+    },
+    "deduplication": "Supporting KOSHA evidenceRef values are deduplicated before the per-row cap."
   },
   "tdd": {
     "initial_red": {
@@ -38,6 +47,22 @@
     "invalidated_expanded_attempt": {
       "reason": "An over-broad evidence_role filter blocked five established non-KOSHA SIF risk-row tests.",
       "failed": 5
+    },
+    "p1_row_relevance_red": {
+      "test": "caps row-specific supporting KOSHA and rejects broad or duplicate evidence refs",
+      "expected_refs": 2,
+      "received_refs": 6,
+      "unrelated_refs_attached": [
+        "broad-loading",
+        "broad-crane"
+      ],
+      "duplicate_ref_attached": "forklift-primary",
+      "exit_code": 1
+    },
+    "p1_row_relevance_green": {
+      "passed": 1,
+      "failed": 0,
+      "exit_code": 0
     }
   },
   "verification": {
@@ -45,6 +70,12 @@
       "--maxWorkers=1",
       "--no-file-parallelism"
     ],
+    "bounded26": {
+      "passed": 26,
+      "failed": 0,
+      "new_test_excluded": 1,
+      "exit_code": 0
+    },
     "original8": {
       "passed": 8,
       "failed": 0,
@@ -54,6 +85,11 @@
       "passed": 113,
       "failed": 0,
       "components": [7, 1, 19, 43, 5, 31, 3, 3, 1],
+      "exit_code": 0
+    },
+    "new_row_relevance": {
+      "passed": 1,
+      "failed": 0,
       "exit_code": 0
     },
     "corpus34": {
@@ -74,6 +110,15 @@
       "command": "npm.cmd run typecheck",
       "exit_code": 0
     },
+    "pull_rebase_autostash": {
+      "branch": "feat/kosha-offline-harness",
+      "result": "Already up to date.",
+      "exit_code": 0
+    },
+    "diff_check": {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
     "production_build": {
       "command": "npm.cmd run build",
       "worktree_build_processes_before": 0,
@@ -81,7 +126,8 @@
       "compiled_successfully": true,
       "static_pages_generated": 27,
       "static_pages_total": 27,
-      "exit_code": 0
+      "exit_code": 0,
+      "native_output_captured": true
     },
     "log": "evaluation/kosha-offline-harness-2026-07-12/remediation-verification.log"
   }
