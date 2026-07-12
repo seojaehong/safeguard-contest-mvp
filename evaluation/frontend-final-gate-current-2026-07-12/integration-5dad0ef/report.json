@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "5dad0ef502beada45eeddb13efc76fbb68e82a5e",
+  "status": "pass",
+  "mappedCommits": {
+    "773bd4e": "06cebe9",
+    "92eea81": "70b025a",
+    "7cb0dd5": "5dad0ef"
+  },
+  "review": {
+    "spec": "pass",
+    "codeQualityEvidence": "pass",
+    "p0": 0,
+    "p1": 0,
+    "p2": 0,
+    "p3": 0
+  },
+  "static": {
+    "violations": 0,
+    "importantDeclarations": 0,
+    "coverageIssues": 0,
+    "pages": 32,
+    "components": 23
+  },
+  "browser": {
+    "rows": 108,
+    "passed": 108,
+    "failed": 0,
+    "findings": 0,
+    "recovered": 0
+  },
+  "tests": {
+    "destinationDocuments": 20,
+    "fullSerialFilesPassed": 120,
+    "fullSerialTestsPassed": 1124
+  },
+  "typecheck": "pass",
+  "auditBuildPages": 27,
+  "auditMarkerCount": 1,
+  "protectedScreenshotCount": 16,
+  "protectedScreenshotMismatch": 0
+}
