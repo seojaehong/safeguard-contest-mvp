@@ -318,6 +318,55 @@ describe("Reports Wave 1 publish support", () => {
     }
   });
 
+  it("records the static-audit process exit in raw evidence from the same invocation", () => {
+    const evidenceDirectory = path.join(root, REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR);
+    const report = JSON.parse(fs.readFileSync(path.join(evidenceDirectory, "report.json"), "utf8")) as {
+      freshChecks?: Array<{ name?: unknown; evidence?: unknown }>;
+    };
+    const staticCheck = report.freshChecks?.find((check) => check.name === "fresh-static-audit");
+    if (!staticCheck || typeof staticCheck.evidence !== "string") {
+      throw new Error("Reports Wave 1 report is missing the raw static-audit evidence path");
+    }
+
+    const rawEvidence = fs.readFileSync(path.resolve(evidenceDirectory, staticCheck.evidence), "utf8");
+    const lines = rawEvidence.trimEnd().split(/\r?\n/u);
+    const metadataLine = lines.at(-1);
+    if (!metadataLine?.startsWith('{"recordType":"fresh-static-audit-post-process"')) {
+      throw new Error("Raw static-audit evidence is missing machine-readable post-process metadata");
+    }
+
+    const stdout = JSON.parse(lines.slice(0, -1).join("\n")) as {
+      outputPath?: unknown;
+      status?: unknown;
+      counts?: { importantDeclarations?: unknown };
+      coverageIssues?: unknown;
+      violationCount?: unknown;
+    };
+    const metadata = JSON.parse(metadataLine) as {
+      recordType?: unknown;
+      auditProcessExit?: unknown;
+      outputPath?: unknown;
+      status?: unknown;
+      sourceSha?: unknown;
+      sourceIdentity?: unknown;
+      violationCount?: unknown;
+      importantDeclarations?: unknown;
+      coverageIssues?: unknown;
+    };
+
+    expect(metadata).toMatchObject({
+      recordType: "fresh-static-audit-post-process",
+      auditProcessExit: 0,
+      sourceSha: expect.stringMatching(/^[0-9a-f]{40}$/u),
+      sourceIdentity: expect.stringMatching(/^[0-9a-f]{64}$/u),
+    });
+    expect(metadata.outputPath).toBe(stdout.outputPath);
+    expect(metadata.status).toBe(stdout.status);
+    expect(metadata.violationCount).toBe(stdout.violationCount);
+    expect(metadata.importantDeclarations).toBe(stdout.counts?.importantDeclarations);
+    expect(metadata.coverageIssues).toBe(stdout.coverageIssues);
+  });
+
   it("writes explicit build manifests and rejects stale or mismatched production builds", () => {
     const tempRoot = createReportsGitFixture("safeclaw-wave1-manifest-");
     const buildDirectory = createFixtureBuild(tempRoot);
