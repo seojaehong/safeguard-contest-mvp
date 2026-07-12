@@ -12,8 +12,8 @@
       "id": "W4",
       "title": "Canonical document heading typography",
       "priority": 1,
-      "status": "in_progress",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Work document h2 resolves to page-title tokens and section h3 resolves to section-title tokens",
         "Desktop and 390px production browser checks show no overflow",

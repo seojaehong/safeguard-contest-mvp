@@ -3,3 +3,11 @@
 - Current audit: RED 2,368; font-size 192, line-height 235, tracking 128, tuple 612, mixed-role 5, selector-role 57, important 737.
 - Learned: font-family-token is closed at 0, but full consistency and the 108-row audit are not complete.
 - Next: write the final-cascade document heading contract first and observe RED before CSS changes.
+
+## 2026-07-12 W4 complete
+- Changed: final-cascade semantic tokens for rendered sample-report workdoc h2/h3; contract and production matrix tests.
+- Verified: contract 2/2, strict typecheck, normal build 27/27, sample report Day/Night at 1440/390 with overflow 0.
+- Static: honest RED 2,368 -> 2,362; selector-role 57 -> 51; tuple 612 and important 737 unchanged; coverage 0.
+- Review: SPEC PASS / CODE QUALITY PASS, P0-P3 none for 4c2a35e..3ff6ed4.
+- Learned: `.safeclaw-module-hero` is legacy CSS with no TSX renderer; do not claim it as a visible browser target.
+- Next: W5 mixed typography role separation, then AI-connect/ontology typography clusters.
