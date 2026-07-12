@@ -17,8 +17,8 @@ import {
 } from "@/scripts/reports_wave1_publish_support.mjs";
 
 const root = process.cwd();
-// Fresh Git fixtures and CRLF clones exceed Vitest's 5s default on Windows.
-const WINDOWS_GIT_PROVENANCE_TIMEOUT_MS = 30_000;
+// Fresh runtime graph scans, Git fixtures, and CRLF clones can exceed Vitest's 5s default on Windows.
+const WINDOWS_REPORTS_WAVE1_TIMEOUT_MS = 30_000;
 
 function createFixtureBuild(rootDirectory: string): string {
   const buildDirectory = path.join(rootDirectory, ".next");
@@ -130,7 +130,7 @@ describe("Reports Wave 1 publish support", () => {
       "app/api/workpacks/[id]/route.ts",
       "public/brand/ClawMark.svg",
     ]));
-  });
+  }, WINDOWS_REPORTS_WAVE1_TIMEOUT_MS);
 
   it("anchors product provenance to a commit containing the publisher scripts", () => {
     const identity = getReportsWave1ProductIdentity(root);
@@ -141,7 +141,7 @@ describe("Reports Wave 1 publish support", () => {
     ]) {
       expect(() => runGit(root, ["cat-file", "-e", `${identity.sourceSha}:${publisherPath}`])).not.toThrow();
     }
-  }, WINDOWS_GIT_PROVENANCE_TIMEOUT_MS);
+  }, WINDOWS_REPORTS_WAVE1_TIMEOUT_MS);
 
   it("produces the same identity for clean LF and CRLF checkouts", () => {
     const sourceRoot = createReportsGitFixture("safeclaw-wave1-eol-source-");
@@ -165,7 +165,7 @@ describe("Reports Wave 1 publish support", () => {
       fs.rmSync(sourceRoot, { recursive: true, force: true });
       fs.rmSync(cloneRoot, { recursive: true, force: true });
     }
-  }, WINDOWS_GIT_PROVENANCE_TIMEOUT_MS);
+  }, WINDOWS_REPORTS_WAVE1_TIMEOUT_MS);
 
   it.each([
     {
@@ -244,7 +244,7 @@ describe("Reports Wave 1 publish support", () => {
     } finally {
       fs.rmSync(fixtureRoot, { recursive: true, force: true });
     }
-  }, WINDOWS_GIT_PROVENANCE_TIMEOUT_MS);
+  }, WINDOWS_REPORTS_WAVE1_TIMEOUT_MS);
 
   it("defaults browser evidence output to unique temp directories and publishes only explicitly", () => {
     const first = resolveReportsWave1OutputDirectory({ root, env: {} });
@@ -369,5 +369,5 @@ describe("Reports Wave 1 publish support", () => {
     })).toThrow(/source SHA mismatch/u);
 
     fs.rmSync(tempRoot, { recursive: true, force: true });
-  }, WINDOWS_GIT_PROVENANCE_TIMEOUT_MS);
+  }, WINDOWS_REPORTS_WAVE1_TIMEOUT_MS);
 });

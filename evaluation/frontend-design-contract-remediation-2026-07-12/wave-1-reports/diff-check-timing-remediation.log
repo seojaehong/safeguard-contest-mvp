@@ -1,0 +1,13 @@
+COMMAND:
+Set-Location "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation"
+git diff --check
+
+START: 2026-07-12T11:48:42.1754486+09:00
+
+warning: in the working copy of 'evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/report.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/report.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/reports-wave1-publish-support.test.ts', LF will be replaced by CRLF the next time Git touches it
+
+EXIT: 0
+ELAPSED_MS: 672
+END: 2026-07-12T11:48:42.9352544+09:00

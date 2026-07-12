@@ -1,0 +1,46 @@
+COMMAND:
+Set-Location "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation"
+npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose
+
+START: 2026-07-12T11:42:46.9503371+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-design-contract-remediation
+
+ ✓ tests/isolated-next-browser-harness.test.ts > isolated next browser harness > uses unique OS temp dist dirs, cleans them on stop, and releases the same port salt 53405ms
+ ✓ tests/isolated-next-browser-harness.test.ts > isolated next browser harness > cleans the unique temp dist dir when startup never becomes ready 7457ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > removes exactly 27 physical important declarations from the Reports family 23ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > isolates Reports selectors from the preserved Documents blocks 49ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > uses the canonical Reports typography and interaction tuples 212ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > exposes route and pressed-state semantics without broad primary-button capture 8ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > splits the shared button radius selector so Reports controls compute to 8px 53ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'day' 'desktop' 8287ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'night' 'desktop' 3951ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'day' 'mobile' 3592ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'night' 'mobile' 3508ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > captures deterministic empty and fail-closed server-error states 15765ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > covers the complete Reports runtime dependency graph 1152ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > anchors product provenance to a commit containing the publisher scripts 1483ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > produces the same identity for clean LF and CRLF checkouts 4281ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > fails closed when an identity file is 'dirty' 1576ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > fails closed when an identity file is 'staged' 1605ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > fails closed when an identity file is 'untracked' 1589ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > rejects stale builds after isolated dependency, public asset, and API route commits 14909ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > defaults browser evidence output to unique temp directories and publishes only explicitly 7ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > cleans routine Reports output while preserving explicit publish output 15ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > documents a hermetic PowerShell static-audit command 2ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > writes explicit build manifests and rejects stale or mismatched production builds 6759ms
+
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
+   Start at  11:42:50
+   Duration  156.58s (transform 420ms, setup 0ms, import 3.12s, tests 150.99s, environment 0ms)
+
+
+EXIT: 0
+ELAPSED_MS: 159799
+END: 2026-07-12T11:45:26.8279365+09:00

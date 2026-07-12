@@ -12,7 +12,7 @@
     "Source identity hashes canonical Git HEAD blob OIDs and fails closed when an identity file is dirty, staged, untracked, or missing.",
     "Manifest schema 2 verifies source file coverage, product and publisher commit ancestry, publisher script presence, BUILD_ID, and build digest before next start.",
     "The server-error browser contract installs a deterministic bearer session, proves the intercepted HTTP500 route was hit, verifies exact user copy, and keeps five exports disabled.",
-    "Only Git-backed provenance tests receive a bounded 30-second Windows timeout; the documented focused command is unchanged.",
+    "The runtime dependency graph and Git-backed provenance tests receive bounded 30-second Windows timeouts; the documented focused command is unchanged and no global testTimeout is configured.",
     "Routine Reports evidence and isolated Next dev dist output use unique OS temp roots and clean on normal stop and startup failure.",
     "The documented PowerShell static-audit command now allocates a random temp file and restores environment state while deleting the file in finally."
   ],
@@ -61,6 +61,55 @@
       }
     },
     {
+      "name": "timing-contract-prefix-red-attempt",
+      "status": "not-reproduced",
+      "command": [
+        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
+        "npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/fresh-focused-reports-tests-timing-contract-red.log",
+      "result": {
+        "exitCode": 0,
+        "passed": 23,
+        "failed": 0,
+        "reportedDurationSeconds": 157.46,
+        "elapsedMs": 160670
+      },
+      "note": "The requested pre-fix 5s default failure did not reproduce on this machine under the exact documented 23-test serial command; the passing result is preserved honestly and is not normalized into RED."
+    },
+    {
+      "name": "timing-contract-green-1",
+      "status": "pass",
+      "command": [
+        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
+        "npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/fresh-focused-reports-tests-timing-contract-green-1.log",
+      "result": {
+        "exitCode": 0,
+        "passed": 23,
+        "failed": 0,
+        "reportedDurationSeconds": 154.94,
+        "elapsedMs": 158025
+      }
+    },
+    {
+      "name": "timing-contract-green-2",
+      "status": "pass",
+      "command": [
+        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
+        "npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose"
+      ],
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/fresh-focused-reports-tests-timing-contract-green-2.log",
+      "result": {
+        "exitCode": 0,
+        "passed": 23,
+        "failed": 0,
+        "reportedDurationSeconds": 156.58,
+        "elapsedMs": 159799
+      }
+    },
+    {
       "name": "fresh-static-audit",
       "status": "fail",
       "command": [
@@ -98,7 +147,26 @@
       "command": [
         "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
         "npm.cmd run typecheck"
-      ]
+      ],
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/typecheck-timing-remediation.log",
+      "result": {
+        "exitCode": 0,
+        "elapsedMs": 26102
+      }
+    },
+    {
+      "name": "diff-check",
+      "status": "pass",
+      "command": [
+        "Set-Location \"C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation\"",
+        "git diff --check"
+      ],
+      "log": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/diff-check-timing-remediation.log",
+      "result": {
+        "exitCode": 0,
+        "elapsedMs": 672,
+        "warning": "Git emitted Windows LF-to-CRLF working-copy warnings for the touched report/test files."
+      }
     },
     {
       "name": "sequential-build-publish",
@@ -152,6 +220,11 @@
   "committedEvidence": [
     "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/report.md",
     "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/report.json",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/fresh-focused-reports-tests-timing-contract-red.log",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/fresh-focused-reports-tests-timing-contract-green-1.log",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/fresh-focused-reports-tests-timing-contract-green-2.log",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/typecheck-timing-remediation.log",
+    "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/diff-check-timing-remediation.log",
     "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/static-audit.json",
     "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/red-static-audit.json",
     "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-wave1-build-manifest.json",
@@ -202,5 +275,39 @@
       "server-error-night-mobile-390"
     ],
     "explicitPublishRequiredForCommittedEvidence": true
+  },
+  "timingContractRemediation": {
+    "scope": "Final Reports Wave 1 evidence/test remediation only.",
+    "codeChange": "Added a bounded per-test timeout to the Reports Wave 1 runtime dependency graph test; no global testTimeout was configured.",
+    "preFixRedAttempt": {
+      "status": "not-reproduced",
+      "exitCode": 0,
+      "passed": 23,
+      "failed": 0,
+      "elapsedMs": 160670
+    },
+    "greenRuns": [
+      {
+        "exitCode": 0,
+        "passed": 23,
+        "failed": 0,
+        "elapsedMs": 158025
+      },
+      {
+        "exitCode": 0,
+        "passed": 23,
+        "failed": 0,
+        "elapsedMs": 159799
+      }
+    ],
+    "typecheck": {
+      "exitCode": 0,
+      "elapsedMs": 26102
+    },
+    "diffCheck": {
+      "exitCode": 0,
+      "elapsedMs": 672
+    },
+    "supersededLocalLogs": "Earlier local-only single-file/failing/static/browser logs in this folder are superseded for final PASS/count evidence by the committed timing-contract logs."
   }
 }

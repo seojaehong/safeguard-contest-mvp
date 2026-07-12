@@ -15,7 +15,7 @@
 - Identity hashes canonical Git HEAD blob OIDs, so clean LF and CRLF checkouts agree. Dirty, staged, untracked, or missing identity files fail closed.
 - Manifest schema 2 verifies source coverage, publisher script presence at both provenance SHAs, commit ancestry, `BUILD_ID`, and build digest before `next start`.
 - The server-error browser contract installs a deterministic bearer session, proves the intercepted HTTP500 route was hit, checks the exact user copy, and keeps all five exports disabled.
-- Only Git-backed provenance tests receive a bounded 30-second Windows timeout; the documented focused command remains unchanged.
+- The runtime dependency graph and Git-backed provenance tests receive bounded 30-second Windows timeouts; the documented focused command remains unchanged and no global `testTimeout` is configured.
 - Routine Reports evidence and isolated Next dev output use unique OS temp roots. Cleanup runs after normal stop and startup failure.
 - The reusable PowerShell static-audit command uses a random temp file and restores environment state while deleting the file in `finally`.
 
@@ -122,6 +122,27 @@ node .\scripts\publish_reports_wave1_evidence.mjs
 - `reports-sample-night-mobile-metrics.json`
 - `reports-state-metrics.json`
 
+## Final timing contract remediation
+
+The only code change in the final Reports Wave 1 remediation is in `tests/reports-wave1-publish-support.test.ts`: the line 116 runtime dependency graph test now has the same bounded per-test Windows timeout as the Git fixture/provenance tests. No global `testTimeout`, CSS/UI, DB, env, browser harness, build script, product, browser, or identity implementation was changed.
+
+Exact focused 23-test serial command used for all timing-contract runs:
+
+```powershell
+Set-Location "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation"
+npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose
+```
+
+- Pre-fix RED attempt log: `fresh-focused-reports-tests-timing-contract-red.log`
+- Pre-fix RED result: not reproduced on this machine; the exact command exited `0` with `23 passed (23)`, duration `157.46s`, elapsed `160670ms`. This is preserved as evidence and was not normalized into a failing result.
+- GREEN run 1 log: `fresh-focused-reports-tests-timing-contract-green-1.log`
+- GREEN run 1 result: exit `0`, `23 passed (23)`, duration `154.94s`, elapsed `158025ms`.
+- GREEN run 2 log: `fresh-focused-reports-tests-timing-contract-green-2.log`
+- GREEN run 2 result: exit `0`, `23 passed (23)`, duration `156.58s`, elapsed `159799ms`.
+- Typecheck log: `typecheck-timing-remediation.log`, command `npm.cmd run typecheck`, exit `0`, elapsed `26102ms`.
+- Diff-check log: `diff-check-timing-remediation.log`, command `git diff --check`, exit `0`, elapsed `672ms`; Git emitted Windows LF-to-CRLF working-copy warnings for the touched report/test files.
+- Superseded local-only logs in this folder, including earlier single-file/failing/static/browser logs, are not used for final PASS counts. The committed timing-contract logs above are the fresh-focused evidence for this remediation.
+
 ## Gate summary
 
 - Published evidence is anchored to `45449b2 / RED 2367 / 725 / coverage 0`
@@ -133,3 +154,4 @@ node .\scripts\publish_reports_wave1_evidence.mjs
 - Static-audit and isolated Next residual counts are both `0`; the prior fixed static-audit temp file was removed after exact-path validation
 - Visual inspection passed for all Day/Night sample and authenticated server-error captures at desktop and 390px
 - Explicit publish is the only path that refreshes committed Reports Wave 1 evidence
+- Final timing remediation keeps the documented focused command at `23 passed (23)` in two consecutive GREEN runs and preserves the non-reproduced pre-fix RED attempt honestly.

@@ -1,0 +1,14 @@
+COMMAND:
+Set-Location "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation"
+npm.cmd run typecheck
+
+START: 2026-07-12T11:48:01.4067826+09:00
+
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+
+EXIT: 0
+ELAPSED_MS: 26102
+END: 2026-07-12T11:48:27.5810886+09:00

@@ -1,0 +1,46 @@
+COMMAND:
+Set-Location "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation"
+npm.cmd test -- tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose
+
+START: 2026-07-12T11:36:01.2214135+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/reports-wave1-publish-support.test.ts tests/isolated-next-browser-harness.test.ts tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-design-contract-remediation
+
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > covers the complete Reports runtime dependency graph 1756ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > anchors product provenance to a commit containing the publisher scripts 2438ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > produces the same identity for clean LF and CRLF checkouts 6800ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > fails closed when an identity file is 'dirty' 2565ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > fails closed when an identity file is 'staged' 2006ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > fails closed when an identity file is 'untracked' 2013ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > rejects stale builds after isolated dependency, public asset, and API route commits 19111ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > defaults browser evidence output to unique temp directories and publishes only explicitly 5ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > cleans routine Reports output while preserving explicit publish output 14ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > documents a hermetic PowerShell static-audit command 2ms
+ ✓ tests/reports-wave1-publish-support.test.ts > Reports Wave 1 publish support > writes explicit build manifests and rejects stale or mismatched production builds 7475ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > removes exactly 27 physical important declarations from the Reports family 31ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > isolates Reports selectors from the preserved Documents blocks 28ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > uses the canonical Reports typography and interaction tuples 154ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > exposes route and pressed-state semantics without broad primary-button capture 5ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > splits the shared button radius selector so Reports controls compute to 8px 26ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'day' 'desktop' 7408ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'night' 'desktop' 4543ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'day' 'mobile' 4104ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps sample Reports stable in 'night' 'mobile' 4148ms
+ ✓ tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > captures deterministic empty and fail-closed server-error states 20598ms
+ ✓ tests/isolated-next-browser-harness.test.ts > isolated next browser harness > uses unique OS temp dist dirs, cleans them on stop, and releases the same port salt 40074ms
+ ✓ tests/isolated-next-browser-harness.test.ts > isolated next browser harness > cleans the unique temp dist dir when startup never becomes ready 10743ms
+
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
+   Start at  11:36:04
+   Duration  157.46s (transform 326ms, setup 0ms, import 2.73s, tests 151.87s, environment 1ms)
+
+
+EXIT: 0
+ELAPSED_MS: 160670
+END: 2026-07-12T11:38:41.9781244+09:00
