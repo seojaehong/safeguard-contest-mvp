@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import ts from "typescript";
 
 const root = process.cwd();
 const outputPath = path.resolve(
@@ -32,6 +33,71 @@ function contractRoutes(source) {
   const match = source.match(/export const userVisibleRoutes = \[([\s\S]*?)\] as const;/);
   if (!match) throw new Error("userVisibleRoutes contract was not found");
   return [...match[1].matchAll(/"([^"]+)"/g)].map((entry) => entry[1]);
+}
+
+function contractLiteral(source, exportName) {
+  const sourceFile = ts.createSourceFile(
+    contractPath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+  const declarations = sourceFile.statements
+    .filter(ts.isVariableStatement)
+    .flatMap((statement) => [...statement.declarationList.declarations]);
+  const declaration = declarations.find(
+    (candidate) => ts.isIdentifier(candidate.name) && candidate.name.text === exportName,
+  );
+  if (!declaration?.initializer) throw new Error(`${exportName} contract was not found`);
+
+  function literalValue(input) {
+    let node = input;
+    while (
+      ts.isAsExpression(node)
+      || ts.isParenthesizedExpression(node)
+      || ts.isSatisfiesExpression(node)
+    ) {
+      node = node.expression;
+    }
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+    if (ts.isNumericLiteral(node)) return Number(node.text);
+    if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
+    if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
+    if (node.kind === ts.SyntaxKind.NullKeyword) return null;
+    if (ts.isArrayLiteralExpression(node)) return node.elements.map(literalValue);
+    if (ts.isObjectLiteralExpression(node)) {
+      return Object.fromEntries(node.properties.map((property) => {
+        if (!ts.isPropertyAssignment(property)) {
+          throw new Error(`${exportName} contains a non-literal property`);
+        }
+        const propertyName = ts.isIdentifier(property.name)
+          || ts.isStringLiteral(property.name)
+          || ts.isNumericLiteral(property.name)
+          ? property.name.text
+          : undefined;
+        if (!propertyName) throw new Error(`${exportName} contains an unsupported property name`);
+        return [propertyName, literalValue(property.initializer)];
+      }));
+    }
+    throw new Error(`${exportName} contains an unsupported literal value`);
+  }
+
+  return literalValue(declaration.initializer);
+}
+
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+const contract = fs.readFileSync(contractPath, "utf8");
+const frontendScopedTypography = contractLiteral(contract, "frontendScopedTypography");
+if (
+  !isRecord(frontendScopedTypography)
+  || !isRecord(frontendScopedTypography.selectors)
+  || !isRecord(frontendScopedTypography.roles)
+) {
+  throw new Error("frontendScopedTypography contract is malformed");
 }
 
 function lineNumber(source, offset) {
@@ -72,8 +138,45 @@ function normalizeEffectValue(value) {
     .trim();
 }
 
+function cssAtRuleRanges(source, prefix) {
+  const ranges = [];
+  const stack = [];
+  let segmentStart = 0;
+  let quote = "";
+  let escaped = false;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === quote) quote = "";
+      continue;
+    }
+    if (character === "\"" || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === "{") {
+      stack.push({ header: source.slice(segmentStart, index).trim(), start: index });
+      segmentStart = index + 1;
+      continue;
+    }
+    if (character !== "}") continue;
+    const block = stack.pop();
+    if (!block) throw new Error("Unbalanced CSS closing brace");
+    if (block.header.startsWith(prefix)) {
+      ranges.push({ context: normalizeSelector(block.header), start: block.start, end: index });
+    }
+    segmentStart = index + 1;
+  }
+  if (stack.length) throw new Error("Unbalanced CSS opening brace");
+  return ranges;
+}
+
 function cssRuleBlocks(source) {
   const uncommented = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  const mediaRanges = cssAtRuleRanges(uncommented, "@media");
   return [...uncommented.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
     selectors: splitSelectorList(match[1]),
     declarations: Object.fromEntries(
@@ -83,6 +186,10 @@ function cssRuleBlocks(source) {
       ]),
     ),
     line: lineNumber(uncommented, match.index),
+    contexts: mediaRanges
+      .filter((range) => range.start < match.index && match.index < range.end)
+      .sort((left, right) => left.start - right.start)
+      .map((range) => range.context),
   }));
 }
 
@@ -112,6 +219,49 @@ const typographyRoles = {
 
 function selectorText(rule) {
   return rule.selectors.join(", ");
+}
+
+const typographyDeclarationProperties = new Set([
+  "font-family",
+  "font-size",
+  "font-weight",
+  "line-height",
+  "letter-spacing",
+]);
+
+function scopedTypographyRole(rule) {
+  const matches = Object.entries(frontendScopedTypography.roles).filter(([roleName, role]) => {
+    if (
+      !isRecord(role)
+      || typeof role.selectorRole !== "string"
+      || typeof role.context !== "string"
+      || !isRecord(role.declarations)
+    ) {
+      throw new Error(`frontendScopedTypography role ${roleName} is malformed`);
+    }
+    const selectors = frontendScopedTypography.selectors[role.selectorRole];
+    if (!Array.isArray(selectors) || selectors.some((selector) => typeof selector !== "string")) {
+      throw new Error(`frontendScopedTypography selector role ${role.selectorRole} is malformed`);
+    }
+    const exactContext = rule.contexts.length === 1
+      && rule.contexts[0] === normalizeSelector(role.context);
+    const exactSelectors = selectors.length === rule.selectors.length
+      && selectors.every((selector, index) => normalizeSelector(selector) === rule.selectors[index]);
+    const actualTypographyDeclarations = Object.entries(rule.declarations).filter(
+      ([property]) => typographyDeclarationProperties.has(property),
+    );
+    const exactDeclarations = actualTypographyDeclarations.length === Object.keys(role.declarations).length
+      && Object.entries(role.declarations).every(
+        ([property, value]) => typeof value === "string" && rule.declarations[property] === value,
+      );
+    return exactContext && exactSelectors && exactDeclarations;
+  });
+  if (matches.length > 1) {
+    throw new Error(`Ambiguous scoped typography roles: ${matches.map(([roleName]) => roleName).join(", ")}`);
+  }
+  if (!matches.length) return undefined;
+  const [name, role] = matches[0];
+  return { name, ...role };
 }
 
 function isInteractiveSelector(selector) {
@@ -413,10 +563,12 @@ function cssViolations(source) {
     "var(--leading-longform)", "var(--leading-control)", "var(--leading-table)",
     "var(--leading-caption)", "var(--leading-hud)",
   ]);
-  for (const match of source.matchAll(/line-height\s*:\s*([^;\r\n}]+)/g)) {
-    const value = match[1].trim();
-    if (!allowedLineHeights.has(value)) {
-      violations.push({ rule: "line-height-tier", file: "app/globals.css", line: lineNumber(source, match.index), value });
+  for (const rule of rules) {
+    const value = rule.declarations["line-height"]?.trim();
+    if (!value || allowedLineHeights.has(value)) continue;
+    const scopedRole = scopedTypographyRole(rule);
+    if (scopedRole?.declarations["line-height"] !== value) {
+      violations.push({ rule: "line-height-tier", file: "app/globals.css", line: rule.line, value });
     }
   }
 
@@ -464,7 +616,11 @@ function cssViolations(source) {
   for (const rule of rules) {
     const fontSize = rule.declarations["font-size"];
     if (fontSize) {
-      const roleNames = rule.selectors.map((selector) => expectedTypographyRole(rule, selector));
+      const scopedRole = scopedTypographyRole(rule);
+      const hasScopedTuple = scopedRole && Object.hasOwn(scopedRole.declarations, "font-size");
+      const roleNames = hasScopedTuple
+        ? rule.selectors.map(() => `scoped:${scopedRole.name}`)
+        : rule.selectors.map((selector) => expectedTypographyRole(rule, selector));
       const definedRoles = roleNames.filter(Boolean);
       const mixedRoles = new Set(definedRoles).size > 1;
       const hasUnmappedRole = roleNames.some((roleName) => !roleName);
@@ -477,8 +633,8 @@ function cssViolations(source) {
         });
       }
       const roleName = mixedRoles || hasUnmappedRole ? undefined : roleNames[0];
-      const role = roleName ? typographyRoles[roleName] : undefined;
-      const expected = role ? {
+      const role = roleName && !hasScopedTuple ? typographyRoles[roleName] : undefined;
+      const expected = hasScopedTuple ? scopedRole.declarations : role ? {
         "font-size": role.size,
         "font-weight": role.weight,
         "line-height": role.lineHeight,
@@ -550,7 +706,6 @@ function cssViolations(source) {
 }
 
 const css = fs.readFileSync(cssPath, "utf8");
-const contract = fs.readFileSync(contractPath, "utf8");
 const pageFiles = listFiles(path.join(root, "app"), (filePath) => path.basename(filePath) === "page.tsx");
 const componentFiles = listFiles(path.join(root, "components"), (filePath) => filePath.endsWith(".tsx"));
 const discoveredRoutes = pageFiles.map(toRoute).sort();
