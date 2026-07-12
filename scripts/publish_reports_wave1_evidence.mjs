@@ -14,8 +14,8 @@ const root = process.cwd();
 const evidenceDirectory = path.join(root, REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR);
 const manifestPath = path.join(evidenceDirectory, REPORTS_WAVE1_BUILD_MANIFEST_FILENAME);
 const browserEvidenceEnvironment = {
-  NEXT_PUBLIC_SUPABASE_URL: "https://reports-wave1-evidence.supabase.co",
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: "reports-wave1-evidence-anon-key",
+  NEXT_PUBLIC_SUPABASE_URL: "https://wave8-fixture.supabase.co",
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: "wave8-public-anon-key",
 };
 
 function run(command, args, env = {}) {
