@@ -11930,7 +11930,7 @@ body:has(.safeclaw-landing) :is(
 
 .ontology-kind-list strong {
   color: var(--os-panel-text);
-  font-family: var(--font-hud);
+  font-family: var(--font-base);
   font-size: var(--text-support);
   font-weight: 500;
   line-height: var(--leading-body);
@@ -15165,6 +15165,11 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .workspace-operation-memory {
   min-width: 0;
+}
+
+.command-center-shell .workspace-operation-memory .operation-memory-copy p {
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
 }
 
 .command-center-shell .workspace-operation-memory .operation-memory-point {
