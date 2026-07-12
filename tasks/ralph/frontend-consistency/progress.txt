@@ -1,0 +1,5 @@
+## 2026-07-12 W4 start
+- Base: authoritative backend 4c2a35e; remote parity confirmed.
+- Current audit: RED 2,368; font-size 192, line-height 235, tracking 128, tuple 612, mixed-role 5, selector-role 57, important 737.
+- Learned: font-family-token is closed at 0, but full consistency and the 108-row audit are not complete.
+- Next: write the final-cascade document heading contract first and observe RED before CSS changes.
