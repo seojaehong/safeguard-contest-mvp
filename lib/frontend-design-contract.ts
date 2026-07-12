@@ -63,6 +63,66 @@ export const frontendTypography = {
   ] as const,
 } as const;
 
+export const frontendScopedTypography = {
+  selectors: {
+    workspaceInput: [
+      ".command-center-shell.workspace-theme-day .workspace-input-page .command-console-input",
+      ".command-center-shell.workspace-theme-night .workspace-input-page .command-console-input",
+    ],
+  },
+  roles: {
+    workspaceInputDesktop: {
+      selectorRole: "workspaceInput",
+      context: "@media (min-width: 901px)",
+      declarations: {
+        "line-height": "1.76",
+      },
+    },
+    workspaceInputShort: {
+      selectorRole: "workspaceInput",
+      context: "@media (min-width: 901px) and (max-height: 560px)",
+      declarations: {
+        "font-size": "var(--text-body)",
+        "line-height": "1.74",
+      },
+    },
+    workspaceInputCompact: {
+      selectorRole: "workspaceInput",
+      context: "@media (min-width: 901px) and (max-height: 430px)",
+      declarations: {
+        "font-size": "var(--text-control)",
+        "font-weight": "500",
+        "line-height": "1.74",
+        "letter-spacing": "var(--tracking-body)",
+      },
+    },
+    workspaceInputExtraCompact: {
+      selectorRole: "workspaceInput",
+      context: "@media (min-width: 901px) and (max-height: 380px)",
+      declarations: {
+        "line-height": "1.7",
+      },
+    },
+    workspaceInputMinimum: {
+      selectorRole: "workspaceInput",
+      context: "@media (min-width: 901px) and (max-height: 340px)",
+      declarations: {
+        "line-height": "1.7",
+      },
+    },
+    workspaceInputMobile: {
+      selectorRole: "workspaceInput",
+      context: "@media (max-width: 720px)",
+      declarations: {
+        "font-size": "var(--text-body)",
+        "font-weight": "500",
+        "line-height": "1.68",
+        "letter-spacing": "var(--tracking-body)",
+      },
+    },
+  },
+} as const;
+
 export const frontendSpacing = {
   1: "4px",
   2: "8px",

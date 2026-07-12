@@ -6,6 +6,7 @@ import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 
 import {
+  frontendScopedTypography,
   frontendShape,
   frontendSpacing,
   frontendTypography,
@@ -81,6 +82,29 @@ type TypographyRole = keyof typeof typographyRoles;
 
 function selectorText(rule: CssRule): string {
   return rule.selectors.join(", ");
+}
+
+const typographyDeclarationProperties = new Set([
+  "font-family",
+  "font-size",
+  "font-weight",
+  "line-height",
+  "letter-spacing",
+]);
+
+function scopedTypographyRole(rule: CssRule) {
+  return Object.values(frontendScopedTypography.roles).find((role) => {
+    const selectors = frontendScopedTypography.selectors[role.selectorRole];
+    const actualTypographyDeclarations = Object.entries(rule.declarations).filter(
+      ([property]) => typographyDeclarationProperties.has(property),
+    );
+    return selectors.length === rule.selectors.length
+      && selectors.every((selector, index) => selector === rule.selectors[index])
+      && actualTypographyDeclarations.length === Object.keys(role.declarations).length
+      && Object.entries(role.declarations).every(
+        ([property, value]) => rule.declarations[property] === value,
+      );
+  });
 }
 
 function isInteractiveSelector(selector: string): boolean {
@@ -454,12 +478,19 @@ describe("frontend design contract", () => {
     }
   });
 
-  it("assigns a complete canonical typography tuple to every font-size rule", () => {
+  it("binds every font-size rule to a canonical tuple or exact scoped override", () => {
     const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
     expect(css).not.toMatch(/font-size:\s*(?:11px|12px|13px|14px|15px|17px|20px|var\(--t-|clamp\()/);
     const sizedRules = ruleBlocks(css).filter((rule) => rule.declarations["font-size"]);
     expect(sizedRules.length).toBeGreaterThan(0);
     for (const rule of sizedRules) {
+      const scopedRole = scopedTypographyRole(rule);
+      if (scopedRole && "font-size" in scopedRole.declarations) {
+        expect(rule.declarations, `${selectorText(rule)} => scoped`).toMatchObject(
+          scopedRole.declarations,
+        );
+        continue;
+      }
       const roleNames = rule.selectors.map((selector) => expectedTypographyRole(rule, selector));
       expect(roleNames, `${selectorText(rule)} => ${rule.declarations["font-size"]}`).not.toContain(undefined);
       expect(new Set(roleNames).size, `${selectorText(rule)} => mixed roles ${roleNames.join(", ")}`).toBe(1);
@@ -473,6 +504,48 @@ describe("frontend design contract", () => {
         ...(roleName === "hud" ? { "font-family": typographyRoles.hud.fontFamily } : {}),
       });
     }
+  });
+
+  it("keeps noncanonical workspace typography bound to exact scoped roles", () => {
+    const roles = Object.entries(frontendScopedTypography.roles);
+    expect(roles.map(([roleName]) => roleName)).toEqual([
+      "workspaceInputDesktop",
+      "workspaceInputShort",
+      "workspaceInputCompact",
+      "workspaceInputExtraCompact",
+      "workspaceInputMinimum",
+      "workspaceInputMobile",
+    ]);
+
+    const declarations = (values: Readonly<Record<string, string>>): string => Object.entries(values)
+      .map(([property, value]) => `${property}: ${value};`)
+      .join(" ");
+    const approvedCss = roles.map(([, role]) => {
+      const selectors = frontendScopedTypography.selectors[role.selectorRole].join(",\n");
+      return `${role.context} { ${selectors} { ${declarations(role.declarations)} } }`;
+    }).join("\n");
+    const clonedCss = roles.map(([roleName, role]) =>
+      `${role.context} { .workspace-input-clone-${roleName} { ${declarations(role.declarations)} } }`,
+    ).join("\n");
+    const shortRole = frontendScopedTypography.roles.workspaceInputShort;
+    const wrongContextCss = `
+      @media (min-width: 901px) and (max-height: 561px) {
+        ${frontendScopedTypography.selectors[shortRole.selectorRole].join(",\n")} {
+          ${declarations(shortRole.declarations)}
+        }
+      }
+    `;
+    const relevantRules = new Set(["line-height-tier", "typography-tuple"]);
+
+    expect(runAudit(approvedCss).report.violations.filter(
+      (violation) => relevantRules.has(violation.rule),
+    )).toEqual([]);
+    expect(runAudit(clonedCss).report.violations.filter(
+      (violation) => violation.rule === "line-height-tier",
+    )).toHaveLength(roles.length);
+    expect(runAudit(wrongContextCss).report.violations.map(
+      (violation) => violation.rule,
+    )).toContain("line-height-tier");
   });
 
   it("disables every infinite animation and smooth scrolling for reduced motion", () => {
