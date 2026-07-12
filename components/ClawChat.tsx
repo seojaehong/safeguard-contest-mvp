@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   createClawChatRequestSession,
   type ClawChatRequestSession,
@@ -71,7 +71,7 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
     if (node) node.scrollTop = node.scrollHeight;
   }, [turns]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     requestSession.synchronizeContext(authToken, selectedSiteId);
   }, [authToken, requestSession, selectedSiteId]);
 
@@ -97,8 +97,9 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
       ]);
 
       const updateAssistant = (updater: (turn: Extract<ClawTurn, { role: "assistant" }>) => Extract<ClawTurn, { role: "assistant" }>) => {
-        if (requestController.signal.aborted) return;
+        if (!requestSession.isCurrent(requestController)) return;
         setTurns((current) => {
+          if (!requestSession.isCurrent(requestController)) return current;
           const next = [...current];
           for (let i = next.length - 1; i >= 0; i -= 1) {
             const turn = next[i];

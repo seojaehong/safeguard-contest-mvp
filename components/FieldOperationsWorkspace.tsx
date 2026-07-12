@@ -4,7 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState, startTransition } fr
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { ClawChat } from "@/components/ClawChat";
-import { reportClawContextLoadFailure } from "@/lib/claw-chat-session";
+import {
+  createClawContextRequestSession,
+  reportClawContextLoadFailure,
+  resolveClawContextViewState,
+  type ClawContextRequestSession,
+  type ClawContextSiteOption as ClawSiteOption,
+  type ClawContextStatus,
+  type ClawContextViewState,
+} from "@/lib/claw-chat-session";
 import { OperationMemoryGraphViewer } from "@/components/OperationMemoryPreview";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
 import {
@@ -64,8 +72,6 @@ type WorkspaceSaveSnapshot = {
   workerMap: Record<string, string>;
 };
 
-type ClawSiteOption = { id: string; name: string };
-type ClawContextStatus = "login-required" | "loading" | "ready" | "unavailable";
 type ClawContextResponse = { sites?: ClawSiteOption[] };
 
 function resolveInitialWorkerState(data: AskResponse, generationFingerprint?: string): InitialWorkerState {
@@ -849,9 +855,22 @@ export function FieldOperationsWorkspace({
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
   const lastEditorValuesRef = useRef<WorkpackDocumentValues | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [clawSiteOptions, setClawSiteOptions] = useState<ClawSiteOption[]>([]);
-  const [selectedClawSiteId, setSelectedClawSiteId] = useState<string | null>(null);
-  const [clawContextStatus, setClawContextStatus] = useState<ClawContextStatus>("login-required");
+  const activeClawAuthToken = session?.access_token;
+  const [clawContextState, setClawContextState] = useState<ClawContextViewState>({
+    authToken: null,
+    siteOptions: [],
+    selectedSiteId: null,
+    status: "login-required",
+  });
+  const clawContextRequestSessionRef = useRef<ClawContextRequestSession | null>(null);
+  if (!clawContextRequestSessionRef.current) {
+    clawContextRequestSessionRef.current = createClawContextRequestSession();
+  }
+  const clawContextRequestSession = clawContextRequestSessionRef.current;
+  const activeClawContext = resolveClawContextViewState(activeClawAuthToken, clawContextState);
+  const clawSiteOptions = activeClawContext.siteOptions;
+  const selectedClawSiteId = activeClawContext.selectedSiteId;
+  const clawContextStatus: ClawContextStatus = activeClawContext.status;
   const [workers, setWorkers] = useState<WorkerProfile[]>(initialWorkerState.workers);
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(initialWorkerState.selectedWorkerIds);
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
@@ -867,19 +886,27 @@ export function FieldOperationsWorkspace({
   });
 
   useEffect(() => {
-    const token = session?.access_token;
+    const token = activeClawAuthToken;
     if (!token) {
-      setClawSiteOptions([]);
-      setSelectedClawSiteId(null);
-      setClawContextStatus("login-required");
+      setClawContextState({
+        authToken: null,
+        siteOptions: [],
+        selectedSiteId: null,
+        status: "login-required",
+      });
       return;
     }
 
-    const controller = new AbortController();
-    setClawContextStatus("loading");
+    const contextRequest = clawContextRequestSession.begin(token);
+    setClawContextState({
+      authToken: token,
+      siteOptions: [],
+      selectedSiteId: null,
+      status: "loading",
+    });
     fetch("/api/agent/context", {
       headers: { authorization: `Bearer ${token}` },
-      signal: controller.signal,
+      signal: contextRequest.signal,
     })
       .then(async (response) => {
         if (!response.ok) throw new Error(`agent context request failed (${response.status})`);
@@ -891,26 +918,38 @@ export function FieldOperationsWorkspace({
             typeof site?.id === "string" && typeof site.name === "string"
           ))
           : [];
-        if (sites.length === 0) {
-          setClawSiteOptions([]);
-          setSelectedClawSiteId(null);
-          setClawContextStatus("unavailable");
-          return;
-        }
-        setClawSiteOptions(sites);
-        setSelectedClawSiteId((current) => sites.some((site) => site.id === current) ? current : sites[0].id);
-        setClawContextStatus("ready");
+        clawContextRequestSession.commit(contextRequest, () => {
+          setClawContextState({
+            authToken: token,
+            siteOptions: sites,
+            selectedSiteId: sites[0]?.id ?? null,
+            status: sites.length > 0 ? "ready" : "unavailable",
+          });
+        });
       })
       .catch(() => {
-        if (controller.signal.aborted) return;
-        reportClawContextLoadFailure();
-        setClawSiteOptions([]);
-        setSelectedClawSiteId(null);
-        setClawContextStatus("unavailable");
+        if (contextRequest.signal.aborted) return;
+        clawContextRequestSession.commit(contextRequest, () => {
+          reportClawContextLoadFailure();
+          setClawContextState({
+            authToken: token,
+            siteOptions: [],
+            selectedSiteId: null,
+            status: "unavailable",
+          });
+        });
       });
 
-    return () => controller.abort();
-  }, [session?.access_token]);
+    return () => clawContextRequestSession.cancel(contextRequest);
+  }, [activeClawAuthToken, clawContextRequestSession]);
+  useEffect(() => () => clawContextRequestSession.dispose(), [clawContextRequestSession]);
+
+  const selectClawSite = useCallback((siteId: string) => {
+    setClawContextState((current) => {
+      const active = resolveClawContextViewState(activeClawAuthToken, current);
+      return { ...active, selectedSiteId: siteId };
+    });
+  }, [activeClawAuthToken]);
   const workspaceData = useMemo<AskResponse>(() => (
     editedDeliverables
       ? { ...data, deliverables: { ...data.deliverables, ...editedDeliverables } }
@@ -1202,7 +1241,7 @@ export function FieldOperationsWorkspace({
           authToken={session?.access_token}
           siteOptions={clawSiteOptions}
           selectedSiteId={selectedClawSiteId}
-          onSiteChange={setSelectedClawSiteId}
+          onSiteChange={selectClawSite}
           contextStatus={clawContextStatus}
         />
         <AdminAccessPanel session={session} storageSnapshot={storageSnapshot} onSessionChange={setSession} />

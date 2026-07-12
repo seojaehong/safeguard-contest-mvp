@@ -105,7 +105,55 @@ describe("OpenClaw chat routing", () => {
       "-m",
       "성수동 외벽 도장 작업"
     ]);
-    expect(buildOpenClawStatusArgs(config)).toEqual(["--profile", "safeclaw", "models", "status", "--json"]);
+    expect(buildOpenClawStatusArgs(config)).toEqual([
+      "--profile",
+      "safeclaw",
+      "models",
+      "status",
+      "--agent",
+      "main",
+      "--json",
+    ]);
+  });
+
+  it("queries OAuth status for the exact configured agent and preserves child abort semantics", async () => {
+    const module = await import("@/lib/openclaw-chat") as typeof import("@/lib/openclaw-chat") & {
+      createOpenClawOAuthStatusChecker?: (dependencies: {
+        spawnProcess: ReturnType<typeof vi.fn>;
+      }) => (
+        config: ReturnType<typeof resolveOpenClawChatConfig>,
+        signal?: AbortSignal,
+      ) => Promise<unknown>;
+    };
+    expect(module.createOpenClawOAuthStatusChecker).toBeTypeOf("function");
+    if (!module.createOpenClawOAuthStatusChecker) return;
+
+    const child = Object.assign(new EventEmitter(), {
+      stdout: new PassThrough(),
+      stderr: new PassThrough(),
+      kill: vi.fn(() => true),
+    });
+    const spawnProcess = vi.fn(() => child);
+    const checkOAuth = module.createOpenClawOAuthStatusChecker({ spawnProcess });
+    const controller = new AbortController();
+    const reason = new Error("preflight cancelled");
+    const config = resolveOpenClawChatConfig({ OPENCLAW_AGENT: "field-operations" });
+    const check = checkOAuth(config, controller.signal);
+    let settled = false;
+    void check.catch(() => { settled = true; });
+
+    expect(spawnProcess).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.arrayContaining(["--agent", "field-operations"]),
+      expect.objectContaining({ shell: false }),
+    );
+    controller.abort(reason);
+    await Promise.resolve();
+    expect(child.kill).toHaveBeenCalledTimes(1);
+    expect(settled).toBe(false);
+
+    child.emit("close", null, "SIGTERM");
+    await expect(check).rejects.toBe(reason);
   });
 
   it("ignores legacy chat provider flags and keeps the OpenClaw OAuth runtime", () => {
@@ -231,6 +279,42 @@ describe("OpenClaw chat routing", () => {
     expect(assertOAuth).not.toHaveBeenCalled();
   });
 
+  it("propagates the availability abort signal into the OAuth preflight", async () => {
+    const context: BrokerRequestContext = {
+      userId: "user-1",
+      organizationId: "org-1",
+      siteId: "site-1",
+      site: { siteName: "성수 현장", region: null, briefingQuestion: null },
+    };
+    let observedSignal: AbortSignal | undefined;
+    const assertOAuth = vi.fn(async (_config, signal?: AbortSignal) => {
+      if (!signal) throw new Error("missing OAuth abort signal");
+      observedSignal = signal;
+      await new Promise<void>((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+      });
+      throw new Error("unreachable");
+    });
+    const engine = createLocalOpenClawAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "local-openclaw", OPENCLAW_LOCAL: "1" },
+      runtimeCapability: async () => true,
+      verifySiteBinding: async () => true,
+      verifyExecutionAttestation: async () => true,
+      assertOAuth,
+      runChat: vi.fn(async () => undefined),
+    });
+    const controller = new AbortController();
+    const reason = new Error("request cancelled");
+
+    const preflight = engine.checkAvailability(context, controller.signal);
+    void preflight.catch(() => undefined);
+    await vi.waitFor(() => expect(observedSignal).toBeDefined());
+    controller.abort(reason);
+
+    await expect(preflight).rejects.toBe(reason);
+    expect(observedSignal?.aborted).toBe(true);
+  });
+
   it("does not let a later preflight overwrite another site's runnable context", async () => {
     const contextA: BrokerRequestContext = {
       userId: "user-1",
@@ -306,7 +390,13 @@ describe("OpenClaw chat routing", () => {
               },
             ],
             runtimeAuthRoutes: [
-              { provider: "openai", runtime: "codex", authProvider: "openai", status: "usable" },
+              {
+                provider: "openai",
+                runtime: "codex",
+                authProvider: "openai",
+                status: "usable",
+                effective: { kind: "profiles", detail: "agent auth store" },
+              },
             ],
             oauth: {
               providers: [
@@ -331,6 +421,67 @@ describe("OpenClaw chat routing", () => {
       authProvider: "openai/oauth",
       model: "openai/gpt-5.5",
     });
+  });
+
+  it("rejects mixed OpenAI OAuth and token credentials", () => {
+    const config = resolveOpenClawChatConfig({});
+    expect(() => parseOpenClawOAuthStatusOutput(JSON.stringify({
+      defaultModel: "openai/gpt-5.5",
+      resolvedDefault: "openai/gpt-5.5",
+      auth: {
+        providers: [{
+          provider: "openai",
+          profiles: { count: 2, oauth: 1, token: 1, apiKey: 0 },
+        }],
+        runtimeAuthRoutes: [{
+          provider: "openai",
+          runtime: "codex",
+          authProvider: "openai",
+          status: "usable",
+          effective: { kind: "profiles", detail: "agent auth store" },
+        }],
+        oauth: {
+          providers: [{
+            provider: "openai",
+            status: "ok",
+            effectiveProfiles: [
+              { provider: "openai", type: "oauth", status: "ok", source: "store" },
+              { provider: "openai", type: "token", status: "static", source: "store" },
+            ],
+          }],
+        },
+      },
+    }), config)).toThrow("OpenClaw safeclaw profile is not ready for OpenAI OAuth chat");
+  });
+
+  it("rejects a usable runtime route whose effective credential path is not OAuth profiles", () => {
+    const config = resolveOpenClawChatConfig({});
+    expect(() => parseOpenClawOAuthStatusOutput(JSON.stringify({
+      defaultModel: "openai/gpt-5.5",
+      resolvedDefault: "openai/gpt-5.5",
+      auth: {
+        providers: [{
+          provider: "openai",
+          profiles: { count: 1, oauth: 1, token: 0, apiKey: 0 },
+        }],
+        runtimeAuthRoutes: [{
+          provider: "openai",
+          runtime: "codex",
+          authProvider: "openai",
+          status: "usable",
+          effective: { kind: "env", detail: "OPENAI_API_KEY" },
+        }],
+        oauth: {
+          providers: [{
+            provider: "openai",
+            status: "ok",
+            effectiveProfiles: [
+              { provider: "openai", type: "oauth", status: "ok", source: "store" },
+            ],
+          }],
+        },
+      },
+    }), config)).toThrow("OpenClaw safeclaw profile is not ready for OpenAI OAuth chat");
   });
 
   it("rejects OpenAI API-key-only status for the Claw chat route", () => {

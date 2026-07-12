@@ -4,7 +4,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { BrokerError, type BrokerRequestContext } from "@/lib/engine-adapter";
 import {
   createSupabaseAdminClient,
-  getWorkspaceUser,
   type WorkspaceDatabase,
   type WorkspaceUser,
 } from "@/lib/supabase-admin";
@@ -49,8 +48,43 @@ export type BrokerAuthorization<TClient> = {
   ) => Promise<BrokerRequestContext>;
 };
 
+function readBearerToken(headers: Headers): string | null {
+  const match = /^Bearer\s+(\S+)$/i.exec(headers.get("authorization")?.trim() ?? "");
+  return match?.[1] ?? null;
+}
+
 function hasBearerToken(headers: Headers): boolean {
-  return /^Bearer\s+\S+$/i.test(headers.get("authorization")?.trim() ?? "");
+  return readBearerToken(headers) !== null;
+}
+
+function isInvalidCredentialError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const status = "status" in error ? (error as { status?: unknown }).status : undefined;
+  return status === 400 || status === 401 || status === 403 || status === 422;
+}
+
+export type BrokerAuthLookupClient = {
+  auth: {
+    getUser: (token: string) => Promise<{
+      data: { user: { id: string; email?: string | null } | null };
+      error: unknown;
+    }>;
+  };
+};
+
+export async function authenticateBrokerWorkspaceUser(
+  client: BrokerAuthLookupClient,
+  headers: Headers,
+): Promise<WorkspaceUser | null> {
+  const token = readBearerToken(headers);
+  if (!token) return null;
+  const { data, error } = await client.auth.getUser(token);
+  if (error) {
+    if (isInvalidCredentialError(error)) return null;
+    throw error;
+  }
+  if (!data.user) return null;
+  return { id: data.user.id, email: data.user.email ?? null };
 }
 
 export function createBrokerAuthorization<TClient>(
@@ -58,22 +92,39 @@ export function createBrokerAuthorization<TClient>(
 ): BrokerAuthorization<TClient> {
   return {
     authenticate: async (request) => {
-    if (!hasBearerToken(request.headers)) throw new BrokerError("AUTH_REQUIRED", 401);
-    const client = dependencies.createClient();
-    if (!client) throw new BrokerError("AUTH_BACKEND_UNAVAILABLE", 503);
-    const user = await dependencies.authenticate(client, request.headers);
-    if (!user) throw new BrokerError("AUTH_INVALID", 401);
+      if (!hasBearerToken(request.headers)) throw new BrokerError("AUTH_REQUIRED", 401);
+      let client: TClient | null;
+      try {
+        client = dependencies.createClient();
+      } catch (error) {
+        throw new BrokerError("AUTH_BACKEND_UNAVAILABLE", 503, error);
+      }
+      if (!client) throw new BrokerError("AUTH_BACKEND_UNAVAILABLE", 503);
+      let user: WorkspaceUser | null;
+      try {
+        user = await dependencies.authenticate(client, request.headers);
+      } catch (error) {
+        if (error instanceof BrokerError) throw error;
+        throw new BrokerError("AUTH_BACKEND_UNAVAILABLE", 503, error);
+      }
+      if (!user) throw new BrokerError("AUTH_INVALID", 401);
       return { client, user };
     },
     resolveOwnedSite: async (authentication, requestedSiteId) => {
-    if (!requestedSiteId?.trim()) throw new BrokerError("SITE_CONTEXT_REQUIRED", 400);
-      const context = await dependencies.findOwnedSite(
-        authentication.client,
-        authentication.user,
-        requestedSiteId.trim(),
-      );
-    if (!context) throw new BrokerError("SITE_FORBIDDEN", 403);
-    return context;
+      if (!requestedSiteId?.trim()) throw new BrokerError("SITE_CONTEXT_REQUIRED", 400);
+      let context: BrokerRequestContext | null;
+      try {
+        context = await dependencies.findOwnedSite(
+          authentication.client,
+          authentication.user,
+          requestedSiteId.trim(),
+        );
+      } catch (error) {
+        if (error instanceof BrokerError) throw error;
+        throw new BrokerError("SITE_BACKEND_UNAVAILABLE", 503, error);
+      }
+      if (!context) throw new BrokerError("SITE_FORBIDDEN", 403);
+      return context;
     },
   };
 }
@@ -156,7 +207,7 @@ export type ListOwnedBrokerSites = (
 
 const brokerAuthorization = createBrokerAuthorization({
   createClient: createSupabaseAdminClient,
-  authenticate: getWorkspaceUser,
+  authenticate: authenticateBrokerWorkspaceUser,
   findOwnedSite,
 });
 
@@ -174,9 +225,14 @@ export const resolveBrokerRequestContext: ResolveBrokerContext = Object.assign(r
   resolveOwnedSite: resolveOwnedBrokerSite,
 });
 
-export const listOwnedBrokerSites: ListOwnedBrokerSites = async (authentication) => (
-  findOwnedSites(
-    authentication.client as SupabaseClient<WorkspaceDatabase>,
-    authentication.user,
-  )
-);
+export const listOwnedBrokerSites: ListOwnedBrokerSites = async (authentication) => {
+  try {
+    return await findOwnedSites(
+      authentication.client as SupabaseClient<WorkspaceDatabase>,
+      authentication.user,
+    );
+  } catch (error) {
+    if (error instanceof BrokerError) throw error;
+    throw new BrokerError("SITE_BACKEND_UNAVAILABLE", 503, error);
+  }
+};

@@ -95,6 +95,68 @@ describe("engine adapter policy", () => {
     await expect(guarded.run(runInput())).resolves.toBeUndefined();
   });
 
+  it("counts availability preflight against the same maxConcurrent run slot", async () => {
+    const firstPreflight = deferred();
+    let activePreflights = 0;
+    let maxActivePreflights = 0;
+    let preflightCalls = 0;
+    const base: EngineAdapter = {
+      id: "preflight-blocking",
+      capabilities: [],
+      checkAvailability: async () => {
+        preflightCalls += 1;
+        activePreflights += 1;
+        maxActivePreflights = Math.max(maxActivePreflights, activePreflights);
+        try {
+          if (preflightCalls === 1) await firstPreflight.promise;
+        } finally {
+          activePreflights -= 1;
+        }
+      },
+      run: vi.fn(async () => undefined),
+    };
+    const guarded = createGuardedEngineAdapter(base, { maxConcurrent: 1, timeoutMs: 5_000 });
+
+    const activeCheck = guarded.checkAvailability(context);
+    await vi.waitFor(() => expect(activePreflights).toBe(1));
+    const competingCheck = guarded.checkAvailability(context);
+    const competingRun = guarded.run(runInput());
+    firstPreflight.resolve();
+    await expect(activeCheck).resolves.toBeUndefined();
+
+    await expect(competingCheck).rejects.toMatchObject({ code: "ENGINE_BUSY", status: 503 });
+    await expect(competingRun).rejects.toMatchObject({ code: "ENGINE_BUSY", status: 503 });
+    expect(maxActivePreflights).toBe(1);
+  });
+
+  it("forwards caller aborts into availability preflight and releases the slot", async () => {
+    let observedSignal: AbortSignal | undefined;
+    const base: EngineAdapter = {
+      id: "preflight-abort-aware",
+      capabilities: [],
+      checkAvailability: async (_context, signal) => {
+        if (!signal) throw new Error("missing preflight signal");
+        observedSignal = signal;
+        await new Promise<void>((_resolve, reject) => {
+          signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+        });
+      },
+      run: vi.fn(async () => undefined),
+    };
+    const guarded = createGuardedEngineAdapter(base, { maxConcurrent: 1, timeoutMs: 5_000 });
+    const controller = new AbortController();
+    const reason = new BrokerError("ENGINE_EXECUTION_FAILED", 500);
+
+    const preflight = guarded.checkAvailability(context, controller.signal);
+    void preflight.catch(() => undefined);
+    await vi.waitFor(() => expect(observedSignal).toBeDefined());
+    controller.abort(reason);
+
+    await expect(preflight).rejects.toBe(reason);
+    expect(observedSignal?.aborted).toBe(true);
+    await expect(guarded.run(runInput())).resolves.toBeUndefined();
+  });
+
   it("keeps the concurrency slot occupied until aborted execution confirms close", async () => {
     const childClosed = deferred();
     let abortObserved = false;
