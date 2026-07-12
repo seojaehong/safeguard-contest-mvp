@@ -3,10 +3,10 @@
 > vitest run tests/pdf-font-failure.test.ts
 
 
- RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation
+ RUN  v4.1.10 .
 
 
  Test Files  1 passed (1)
-      Tests  4 passed (4)
-   Start at  01:44:10
-   Duration  1.83s (transform 156ms, setup 0ms, import 741ms, tests 269ms, environment 0ms)
+      Tests  5 passed (5)
+   Start at  07:52:33
+   Duration  2.16s (transform 169ms, setup 0ms, import 935ms, tests 363ms, environment 0ms)

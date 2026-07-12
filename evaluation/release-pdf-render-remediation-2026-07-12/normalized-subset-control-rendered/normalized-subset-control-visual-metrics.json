@@ -1,11 +1,11 @@
 {
-  "input_pdf": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-draw-text-control.pdf",
+  "input_pdf": "evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-draw-text-control.pdf",
   "input_bytes": 10724,
   "dpi": 144,
   "renderers": {
     "pymupdf": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-pymupdf-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-pymupdf-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 12309,
@@ -86,7 +86,7 @@
     ],
     "pdfium": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-pdfium-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-pdfium-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 13184,
@@ -167,7 +167,7 @@
     ],
     "poppler": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-poppler-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-poppler-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 12298,

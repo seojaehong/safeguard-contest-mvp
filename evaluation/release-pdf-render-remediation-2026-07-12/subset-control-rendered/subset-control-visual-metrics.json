@@ -1,11 +1,11 @@
 {
-  "input_pdf": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/subset-draw-text-control.pdf",
+  "input_pdf": "evaluation/release-pdf-render-remediation-2026-07-12/subset-draw-text-control.pdf",
   "input_bytes": 10709,
   "dpi": 144,
   "renderers": {
     "pymupdf": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-pymupdf-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-pymupdf-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 1929,
@@ -131,7 +131,7 @@
     ],
     "pdfium": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-pdfium-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-pdfium-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 2085,
@@ -248,7 +248,7 @@
     ],
     "poppler": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-poppler-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-poppler-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 1945,

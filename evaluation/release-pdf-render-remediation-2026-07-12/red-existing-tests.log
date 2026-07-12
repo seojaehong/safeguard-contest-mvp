@@ -3,7 +3,7 @@
 > vitest run tests/pdf-korean-font-integration.test.ts
 
 
- RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation
+ RUN  v4.1.10 .
 
 
  Test Files  1 passed (1)

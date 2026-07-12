@@ -1,22 +1,22 @@
 {
-  "input_pdf": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-route.pdf",
-  "input_bytes": 16620,
+  "input_pdf": "evaluation/release-pdf-render-remediation-2026-07-12/green-route.pdf",
+  "input_bytes": 16744,
   "dpi": 144,
   "renderers": {
     "pymupdf": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-pymupdf-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-pymupdf-page-1.png",
         "width": 1190,
         "height": 1684,
-        "dark_pixels": 23940,
-        "dark_fraction": 0.011946346234455778,
+        "dark_pixels": 23939,
+        "dark_fraction": 0.011945847222499452,
         "bbox": [
           85,
           106,
           970,
           698
         ],
-        "active_row_count": 269,
+        "active_row_count": 274,
         "line_bands": [
           {
             "top": 106,
@@ -28,10 +28,10 @@
             "width": 213
           },
           {
-            "top": 207,
+            "top": 206,
             "bottom": 220,
-            "height": 14,
-            "dark_pixels": 1925,
+            "height": 15,
+            "dark_pixels": 1927,
             "x_min": 85,
             "x_max": 521,
             "width": 437
@@ -65,9 +65,9 @@
           },
           {
             "top": 343,
-            "bottom": 361,
-            "height": 19,
-            "dark_pixels": 1003,
+            "bottom": 363,
+            "height": 21,
+            "dark_pixels": 1007,
             "x_min": 85,
             "x_max": 260,
             "width": 176
@@ -110,9 +110,9 @@
           },
           {
             "top": 584,
-            "bottom": 599,
-            "height": 16,
-            "dark_pixels": 2573,
+            "bottom": 600,
+            "height": 17,
+            "dark_pixels": 2580,
             "x_min": 85,
             "x_max": 559,
             "width": 475
@@ -128,9 +128,9 @@
           },
           {
             "top": 682,
-            "bottom": 697,
-            "height": 16,
-            "dark_pixels": 4401,
+            "bottom": 698,
+            "height": 17,
+            "dark_pixels": 4406,
             "x_min": 85,
             "x_max": 970,
             "width": 886
@@ -140,18 +140,18 @@
     ],
     "pdfium": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-pdfium-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-pdfium-page-1.png",
         "width": 1190,
         "height": 1684,
-        "dark_pixels": 25456,
-        "dark_fraction": 0.012702848360246712,
+        "dark_pixels": 25450,
+        "dark_fraction": 0.012699854288508753,
         "bbox": [
           84,
           106,
           970,
           698
         ],
-        "active_row_count": 270,
+        "active_row_count": 275,
         "line_bands": [
           {
             "top": 106,
@@ -163,10 +163,10 @@
             "width": 215
           },
           {
-            "top": 207,
-            "bottom": 220,
-            "height": 14,
-            "dark_pixels": 2033,
+            "top": 206,
+            "bottom": 221,
+            "height": 16,
+            "dark_pixels": 2035,
             "x_min": 85,
             "x_max": 521,
             "width": 437
@@ -200,9 +200,9 @@
           },
           {
             "top": 343,
-            "bottom": 361,
-            "height": 19,
-            "dark_pixels": 1085,
+            "bottom": 363,
+            "height": 21,
+            "dark_pixels": 1089,
             "x_min": 85,
             "x_max": 260,
             "width": 176
@@ -263,9 +263,9 @@
           },
           {
             "top": 682,
-            "bottom": 697,
-            "height": 16,
-            "dark_pixels": 4733,
+            "bottom": 698,
+            "height": 17,
+            "dark_pixels": 4739,
             "x_min": 84,
             "x_max": 970,
             "width": 887
@@ -275,7 +275,7 @@
     ],
     "poppler": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-poppler-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-poppler-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 23908,
@@ -286,7 +286,7 @@
           970,
           698
         ],
-        "active_row_count": 270,
+        "active_row_count": 274,
         "line_bands": [
           {
             "top": 106,
@@ -298,10 +298,10 @@
             "width": 213
           },
           {
-            "top": 207,
+            "top": 206,
             "bottom": 220,
-            "height": 14,
-            "dark_pixels": 1913,
+            "height": 15,
+            "dark_pixels": 1917,
             "x_min": 85,
             "x_max": 521,
             "width": 437
@@ -335,9 +335,9 @@
           },
           {
             "top": 343,
-            "bottom": 361,
-            "height": 19,
-            "dark_pixels": 978,
+            "bottom": 363,
+            "height": 21,
+            "dark_pixels": 982,
             "x_min": 85,
             "x_max": 260,
             "width": 176
@@ -398,9 +398,9 @@
           },
           {
             "top": 682,
-            "bottom": 697,
-            "height": 16,
-            "dark_pixels": 4434,
+            "bottom": 698,
+            "height": 17,
+            "dark_pixels": 4439,
             "x_min": 85,
             "x_max": 970,
             "width": 886

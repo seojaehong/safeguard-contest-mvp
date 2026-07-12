@@ -94,6 +94,19 @@ describe.sequential("PDF font asset failures", () => {
     );
   });
 
+  it("logs and rethrows non-font embed failures without using the font error contract", async () => {
+    const embedFailure = new Error("deterministic PDF embed reference failure");
+    vi.spyOn(PDFDocument.prototype, "embedFont").mockRejectedValueOnce(embedFailure);
+    const logger = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(POST(createRequest())).rejects.toBe(embedFailure);
+    expect(logger).toHaveBeenCalledWith("PDF export failed", embedFailure);
+    expect(logger).not.toHaveBeenCalledWith(
+      "PDF export font assets are unavailable or invalid",
+      embedFailure
+    );
+  });
+
   it("keeps HTML export available when binary font assets are unavailable", async () => {
     vi.spyOn(fs, "accessSync").mockImplementation(() => {
       throw new Error("font unavailable");

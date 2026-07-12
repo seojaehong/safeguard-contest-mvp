@@ -1,11 +1,11 @@
 {
-  "input_pdf": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/red-route.pdf",
+  "input_pdf": "evaluation/release-pdf-render-remediation-2026-07-12/red-route.pdf",
   "input_bytes": 16635,
   "dpi": 144,
   "renderers": {
     "pymupdf": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-pymupdf-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-pymupdf-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 4532,
@@ -203,7 +203,7 @@
     ],
     "pdfium": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-pdfium-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-pdfium-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 4847,
@@ -401,7 +401,7 @@
     ],
     "poppler": [
       {
-        "path": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-pdf-render-remediation/evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-poppler-page-1.png",
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-poppler-page-1.png",
         "width": 1190,
         "height": 1684,
         "dark_pixels": 4523,

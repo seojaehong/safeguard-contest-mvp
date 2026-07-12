@@ -17,6 +17,7 @@ const packageJsonPath = path.join(root, "package.json");
 const packageLockPath = path.join(root, "package-lock.json");
 const gitignorePath = path.join(root, ".gitignore");
 const routePath = path.join(root, "app/api/export/pdf/route.ts");
+const evidencePath = path.join(root, "evaluation/release-pdf-render-remediation-2026-07-12");
 const fontPaths = [
   path.join(root, "public/fonts/NotoSansKR-Regular.ttf"),
   path.join(root, "public/fonts/NotoSansKR-Bold.ttf")
@@ -54,6 +55,23 @@ function createRequest(format?: "html"): NextRequest {
 }
 
 describe("Korean PDF font integration", () => {
+  it("keeps committed PDF evidence free of local absolute paths", () => {
+    const evidenceFiles = fs.readdirSync(evidencePath, { recursive: true, withFileTypes: true })
+      .filter((entry) => entry.isFile())
+      .map((entry) => path.join(entry.parentPath, entry.name));
+    const leakedPaths = evidenceFiles.flatMap((filePath) => {
+      const content = fs.readFileSync(filePath).toString("latin1");
+      const hasLocalPath = /\.(?:json|log|md)$/u.test(filePath)
+        ? /(?:[A-Za-z]:[\\/]|[/\\]Users[/\\]|[/\\]home[/\\])/u.test(content)
+        : /(?:[A-Za-z]:[\\/]Users[\\/]|[/\\](?:Users|home)[/\\]|[A-Za-z]:[\\/][^\r\n\0]{0,240}\.worktrees[\\/])/u.test(content);
+      return hasLocalPath
+        ? [path.relative(root, filePath).replaceAll("\\", "/")]
+        : [];
+    });
+
+    expect(leakedPaths).toEqual([]);
+  });
+
   it("declares deterministic PDF dependencies and tracks the generated lock", () => {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
       dependencies?: Record<string, string>;
