@@ -9,6 +9,8 @@
 - Production route theme: light only; no Night contract exists
 - Browser: six light-route/media-preference viewport lanes PASS
 - Full evidence: `evaluation/frontend-demo-design-wave9-2026-07-12/source-4b532b5/report.md`
+- Review remediation: `9bcb9c0` with final evidence at
+  `evaluation/frontend-demo-design-wave9-2026-07-12/source-9bcb9c0/report.md`
 
 This wave is complete only for the bounded `/demo` rendered composition. The
 repository-wide static audit and 108-row product audit remain RED/pending.

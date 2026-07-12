@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "9bcb9c0b28706bf558d6ea4e10652b0f9ce6f68a",
+  "patchIdentity": "e99dbf6c2bbcf34c297b2f32cbf4f38f21448c29",
+  "supersedes": "evaluation/frontend-demo-design-wave9-2026-07-12/source-4b532b5/report.json",
+  "staticAudit": {
+    "violationCount": 2080,
+    "importantDeclarations": 696,
+    "coverageIssues": 0,
+    "cssLines": 18423
+  },
+  "assertions": {
+    "exactRoleTuples": true,
+    "tupleMutationNegativeFixture": true,
+    "interactiveControlFourEdgeFit": true,
+    "criticalSurfaceFourEdgeIntersection": true,
+    "normalTextMinimumContrast": 4.5,
+    "nonTextIndicatorMinimumContrast": 3,
+    "semanticStateDifference": true
+  },
+  "verification": {
+    "focusedPassed": 7,
+    "typecheck": "pass",
+    "buildStaticPages": 27,
+    "productionTestsPassed": 2,
+    "productionLanes": 6
+  },
+  "themeClaim": "light route only; no Night product theme contract"
+}
