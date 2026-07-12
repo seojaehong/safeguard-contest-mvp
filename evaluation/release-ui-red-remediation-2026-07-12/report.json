@@ -4,10 +4,12 @@
   "generatedAt": "2026-07-13",
   "branch": "fix/release-ui-red-remediation",
   "baseSha": "a1dbedb64e177a4909584274eaad87484aa732f4",
+  "reviewedCommit": "5168797157d3b48576851836fa8f6f7af12d437d",
   "rootCauses": [
     "desktop workspace border consumed one pixel inside the grid box",
     "mobile workspace test required a gap where the product contract is exact adjacency",
-    "mobile module decision header vertical padding delayed content by 24 pixels"
+    "mobile module decision header vertical padding delayed content by 24 pixels",
+    "mobile adjacency comparison rounded DOMRect edges to integers and could mask subpixel drift"
   ],
   "metrics": {
     "desktopWorkspace": {
@@ -17,8 +19,10 @@
       "afterSideBottom": 639.047
     },
     "mobileWorkspace": {
-      "sideBottom": 260.047,
-      "mainTop": 260.047,
+      "sideBottom": 260.046875,
+      "mainTop": 260.046875,
+      "adjacencyToleranceCssPixels": 0.01,
+      "rejectedRegressionDriftCssPixels": 0.2,
       "horizontalOverflow": 0
     },
     "mobileModuleContentTop": {
@@ -30,9 +34,13 @@
   },
   "verification": {
     "moduleShell": { "passed": 4, "failed": 0 },
-    "workspaceLayout": { "passed": 21, "skipped": 1, "failed": 0 },
+    "adjacencyContractRed": { "failedAsExpected": 1, "filteredOrSkipped": 22 },
+    "adjacencyContractSyntheticGreen": { "passed": 1, "filteredOrSkipped": 22, "failed": 0 },
+    "adjacencyContractBrowserGreen": { "passed": 1, "filteredOrSkipped": 22, "failed": 0 },
+    "workspaceLayout": { "passed": 22, "skipped": 1, "failed": 0 },
     "designContracts": { "passed": 25, "failed": 0 },
     "typecheck": "pass",
+    "diffCheck": "pass",
     "staticAudit": {
       "pages": 32,
       "components": 23,
