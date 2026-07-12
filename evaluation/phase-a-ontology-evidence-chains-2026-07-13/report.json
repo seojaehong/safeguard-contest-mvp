@@ -1,0 +1,120 @@
+{
+  "phase": "A",
+  "generatedAt": "2026-07-13T08:20:38.6664740+09:00",
+  "branch": "feat/phase-a-ontology-evidence-chains",
+  "base": "b39f8135e784f69aac12d947cf6a734aa429a3c5",
+  "contractVersion": "phase-a-evidence-chains/1.0.0",
+  "status": "implemented_not_published",
+  "counts": {
+    "canonicalChains": 3,
+    "controls": 9,
+    "selectedSif": 7,
+    "reviewOnlySif": 1,
+    "selectedKosha": 7,
+    "lawArticles": 10,
+    "materializationTargets": 18,
+    "nodeKinds": 7,
+    "edgeRelations": 7
+  },
+  "invariants": {
+    "publishedOnlyRuntimeGraph": true,
+    "exactTaskFailClosed": true,
+    "publishedGraphLawFailClosed": true,
+    "citedUidParserReused": true,
+    "reviewStatesUnchanged": true,
+    "koshaAsLaw": false,
+    "sifCreatesDuty": false,
+    "fieldHistoryWeatherAuthority": "scope_only",
+    "llmRole": "naturalize_only",
+    "humanConfirmationRequired": true,
+    "providerFallback": "preserve_current_provider_fallback",
+    "fulfillsDuty": "partial_evidence_only"
+  },
+  "corpusState": {
+    "sif": {
+      "prepared": true,
+      "embedded": false,
+      "uploaded": false,
+      "ontologyPromoted": false
+    },
+    "kosha": {
+      "launchReady": false,
+      "bodyMissingCount": 1,
+      "downloadProvenance": "incomplete",
+      "selectedResolution": "review_required"
+    }
+  },
+  "excludedEvidence": [
+    {
+      "id": "kosha-60492776122f8b433994fc10",
+      "reason": "missing_empty_body"
+    }
+  ],
+  "reviewOnlyEvidence": [
+    {
+      "id": "sif-아카이브-건설업-01985",
+      "reviewState": "draft",
+      "autoConfirm": false
+    }
+  ],
+  "lawVerification": {
+    "verifiedOn": "2026-07-13",
+    "currentEffectiveDate": "2026-03-02",
+    "instrument": "산업안전보건기준에 관한 규칙",
+    "officialCurrentFullText": "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lspttninfSeq=153999",
+    "article200DirectSurfaceEffectiveDate": "2025-09-01",
+    "article200CurrentTextCrossChecked": true,
+    "articles": [
+      { "articleNo": "42", "url": "https://law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1024005275" },
+      { "articleNo": "43", "url": "https://www.law.go.kr/lsLinkCommonInfo.do?lsJoLnkSeq=1028063341" },
+      { "articleNo": "44", "url": "https://law.go.kr/lsLinkCommonInfo.do?lsJoLnkSeq=1016700539" },
+      { "articleNo": "92", "url": "https://www.law.go.kr/LSW/lsSideInfoP.do?docCls=jo&joBrNo=00&joNo=0092&lsiSeq=273603&urlMode=lsScJoRltInfoR" },
+      { "articleNo": "200", "url": "https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000727229" },
+      { "articleNo": "301", "url": "https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1024005221" },
+      { "articleNo": "302", "url": "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1030668033" },
+      { "articleNo": "319", "url": "https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029038625" },
+      { "articleNo": "321", "url": "https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029038625" },
+      { "articleNo": "323", "url": "https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029038625" }
+    ]
+  },
+  "verification": {
+    "requestedBaseline": { "filesPassed": 5, "testsPassed": 41, "statedTests": 68, "reproducedStatedCount": false },
+    "focused": { "filesPassed": 2, "testsPassed": 31, "status": "pass" },
+    "finalCombinedGate": {
+      "filesPassed": 4,
+      "testsPassed": 88,
+      "status": "pass",
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"
+    },
+    "ontology": { "filesPassed": 10, "filesSkipped": 1, "testsPassed": 83, "testsSkipped": 1, "status": "pass" },
+    "mcpTools": { "filesPassed": 1, "testsPassed": 26, "status": "pass" },
+    "dbHarness": { "filesPassed": 1, "testsPassed": 31, "status": "pass" },
+    "typecheck": {
+      "status": "pass",
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log"
+    },
+    "diffCheck": { "status": "pass" },
+    "fullSuite": {
+      "status": "fail_unrelated_ui",
+      "durationSeconds": 903.55,
+      "filesPassed": 129,
+      "filesFailed": 3,
+      "filesSkipped": 5,
+      "testsPassed": 1231,
+      "testsFailed": 5,
+      "testsSkipped": 7,
+      "failedFiles": [
+        "tests/workspace-layout-regression.test.ts",
+        "tests/frontend-route-coverage.test.ts",
+        "tests/module-shell-design-regression.test.ts"
+      ]
+    }
+  },
+  "publication": {
+    "dbPublished": false,
+    "supabaseMutated": false,
+    "schemaChanged": false,
+    "migrationAdded": false,
+    "generatedCoreSeedStatsChanged": false
+  }
+}

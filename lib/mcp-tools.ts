@@ -14,6 +14,10 @@ import {
   type HarnessWorkpackMemory,
 } from "./db-harness";
 import type { QaReviewResult } from "./ontology/qa-review";
+import type {
+  EvidenceChainPack,
+  EvidenceChainResolution,
+} from "./ontology/evidence-chain";
 import { gateCitations } from "./law-citation-gate";
 import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
 import { getEvidenceLabel, SMSA_ARTICLE_MAP, type SmsaEvidenceLabel } from "./smsa-mapping";
@@ -527,8 +531,10 @@ export function buildEvidenceMappingResult(docType?: string): EvidenceMappingRes
 
 // ── query_safety_knowledge ────────────────────────────────────────────────
 
-/** 안전 지식 그래프 조회 결과의 출처 표기(고정 문자열). */
-export const ONTOLOGY_PROVENANCE = "법제처 검증 시드 v1";
+/** 안전 지식 그래프 조회 결과의 계층형 출처 표기(고정 문자열). */
+export const ONTOLOGY_PROVENANCE = "SafeClaw 계층형 안전근거 계약 phase-a/v1";
+/** 기존 core graph 출처 필드의 호환용 값. */
+export const CORE_ONTOLOGY_PROVENANCE = "법제처 검증 시드 v1";
 
 export type KnowledgeArticleView = {
   label: string;
@@ -556,12 +562,17 @@ export type SafetyKnowledgeFound = {
   duties: string[];
   dutiesNote: string;
   provenance: string;
+  coreProvenance: string;
+  evidenceContract: EvidenceChainPack | null;
+  evidenceChainState: "resolved" | "unverified" | "not_registered" | "not_evaluated";
 };
 
 export type SafetyKnowledgeNotFound = {
   found: false;
   message: string;
   registeredTasks: string[];
+  evidenceContract: null;
+  evidenceChainState: "unverified" | "not_registered" | "not_evaluated";
 };
 
 export type SafetyKnowledgeResult = SafetyKnowledgeFound | SafetyKnowledgeNotFound;
@@ -581,13 +592,28 @@ function articleView(node: OntologyNode): KnowledgeArticleView {
 export function buildSafetyKnowledgeResult(
   query: string,
   result: KnowledgeResult | null,
-  registeredTasks: string[]
+  registeredTasks: string[],
+  evidenceResolution?: EvidenceChainResolution,
 ): SafetyKnowledgeResult {
+  const evidenceChainState = evidenceResolution
+    ? evidenceResolution.resolved
+      ? "resolved"
+      : evidenceResolution.reason === "not_registered"
+        ? "not_registered"
+        : "unverified"
+    : "not_evaluated";
   if (!result) {
+    const notFoundEvidenceState =
+      evidenceChainState === "resolved" ? "unverified" : evidenceChainState;
     return {
       found: false,
-      message: `'${query}'은(는) 등록된 작업유형·위험요인이 아닙니다. 아래 등록된 작업유형 중 하나로 다시 조회하거나, 검증된 조문 없이 답할 때는 validate_safety_citations로 자체 검증하세요.`,
+      message:
+        evidenceResolution && !evidenceResolution.resolved && evidenceResolution.reason !== "not_registered"
+          ? evidenceResolution.message
+          : `'${query}'은(는) 등록된 작업유형·위험요인이 아닙니다. 아래 등록된 작업유형 중 하나로 다시 조회하거나, 검증된 조문 없이 답할 때는 validate_safety_citations로 자체 검증하세요.`,
       registeredTasks,
+      evidenceContract: null,
+      evidenceChainState: notFoundEvidenceState,
     };
   }
   return {
@@ -604,5 +630,8 @@ export function buildSafetyKnowledgeResult(
     duties: result.duties.map((d) => d.label),
     dutiesNote: DUTIES_NOTE,
     provenance: ONTOLOGY_PROVENANCE,
+    coreProvenance: CORE_ONTOLOGY_PROVENANCE,
+    evidenceContract: evidenceResolution?.resolved ? evidenceResolution.pack : null,
+    evidenceChainState,
   };
 }
