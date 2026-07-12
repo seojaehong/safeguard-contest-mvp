@@ -1,0 +1,462 @@
+{
+  "schemaVersion": "phase-a-supabase-rls-live-probe/v1",
+  "generatedAt": "2026-07-12T23:09:06.483Z",
+  "probe": "supabase-rest-table-head-count-exact",
+  "mode": "read-only",
+  "mutationPerformed": false,
+  "failClosed": true,
+  "tableCount": 22,
+  "credentialCount": 2,
+  "expectedRequestCount": 44,
+  "requestMethodsAllowed": [
+    "HEAD",
+    "GET"
+  ],
+  "requestMethodsUsed": [
+    "HEAD"
+  ],
+  "secretSafety": {
+    "urlStored": false,
+    "hostStored": false,
+    "keyStored": false,
+    "responseBodyStored": false,
+    "exceptionTextStored": false
+  },
+  "configuration": {
+    "envFileLoaded": true,
+    "supabaseUrlPresent": true,
+    "nextPublicSupabaseUrlPresent": true,
+    "urlValuesEqual": false,
+    "serviceRoleKeyPresent": true,
+    "anonKeyPresent": true
+  },
+  "status": "blocked",
+  "reason": "one_or_more_requests_failed",
+  "attemptedRequestCount": 44,
+  "statusCounts": {
+    "200": 30,
+    "206": 4,
+    "404": 10
+  },
+  "liveAssertionsVerified": 0,
+  "results": [
+    {
+      "table": "query_logs",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "documents",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "organizations",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 4,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "sites",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 6,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "workers",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 5,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "workpacks",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 5,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "education_records",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 4,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "dispatch_logs",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 6,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "daily_entries",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "knowledge_events",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "knowledge_regeneration_runs",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "safety_reference_sources",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 206,
+          "count": 1063,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 206,
+          "count": 1063,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "safety_reference_items",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 206,
+          "count": 9920,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 206,
+          "count": 9920,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "safety_reference_ingestion_runs",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 2,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 2,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "mcp_tokens",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 1,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 0,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "safety_ontology_nodes",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 171,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 166,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "safety_ontology_edges",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 182,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 200,
+          "count": 169,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "workpack_share_sessions",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "workpack_read_confirmations",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "workpack_improvements",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "workpack_improvement_photos",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        }
+      }
+    },
+    {
+      "table": "safety_reference_embeddings",
+      "credentials": {
+        "service_role": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        },
+        "anon": {
+          "attempted": true,
+          "method": "HEAD",
+          "status": 404,
+          "count": null,
+          "networkError": false
+        }
+      }
+    }
+  ]
+}

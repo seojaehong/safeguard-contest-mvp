@@ -1,15 +1,22 @@
 {
   "schemaVersion": "phase-a-supabase-rls-audit/v1",
-  "generatedAt": "2026-07-13T07:51:40.0852176+09:00",
+  "generatedAt": "2026-07-13T08:15:11.6804624+09:00",
   "audit": {
     "branch": "audit/phase-a-supabase-rls",
     "auditedRevision": "b39f813",
     "mode": "read-only",
-    "status": "red-remediation-required-live-unverified",
+    "status": "red-remediation-required-live-partial",
     "dbMutationPerformed": false,
     "schemaMutationPerformed": false,
     "dataMutationPerformed": false,
-    "secretsIncluded": false
+    "secretsIncluded": false,
+    "authorizationSemantics": {
+      "objectCommandPrivilegeRequiredBeforeRls": true,
+      "crudPolicyCoverageMeaning": "Row policy presence and acceptance/visibility only after the corresponding object command privilege makes the command reachable.",
+      "effectiveGrantCatalogState": "live-unverified",
+      "mutationPrivilegeState": "live-unverified",
+      "selectEndpointObservation": "HEAD observed endpoint behavior but did not identify the direct, inherited, or default GRANT source."
+    }
   },
   "counts": {
     "migrationFiles": 9,
@@ -19,13 +26,15 @@
     "totalInventoriedTableObjects": 23,
     "applicationClassification": {
       "tenant": 13,
-      "public": 6,
-      "operator": 3
+      "public": 5,
+      "operator": 3,
+      "unclassified": 1
     },
     "allObjectClassification": {
       "tenant": 13,
-      "public": 6,
-      "operator": 4
+      "public": 5,
+      "operator": 4,
+      "unclassified": 1
     },
     "rlsEnabledApplicationTables": 20,
     "rlsMissingApplicationTables": 2,
@@ -45,8 +54,8 @@
       "P3": 2,
       "total": 9
     },
-    "liveReadOnlyRequests": 50,
-    "liveHttp401Responses": 50,
+    "liveReadOnlyRequests": 44,
+    "liveHttpStatusCounts": { "200": 30, "206": 4, "404": 10 },
     "liveVerifiedPolicyAssertions": 0,
     "crossTenantRuntimeCasesExecuted": 0
   },
@@ -74,15 +83,15 @@
       "using": null,
       "withCheck": null,
       "tenantPredicateSource": null,
-      "serviceRoleBypassExposure": "No runtime table call found; Data API exposure depends on grants because RLS is absent.",
+      "serviceRoleBypassExposure": "No runtime table call found. Object command privilege determines reachability; with RLS absent, there is no row-policy boundary after reachability.",
       "concerns": ["query_text can contain sensitive user content", "no migration GRANT or REVOKE makes effective privileges source-unknown"],
       "evidence": ["supabase/migrations/001_init.sql:1-6"]
     },
     {
       "schema": "public",
       "table": "documents",
-      "classification": "public",
-      "classificationDetail": "legacy unscoped document catalog; intent undocumented",
+      "classification": "unclassified",
+      "classificationDetail": "legacy unscoped table; public/operator intent is undocumented",
       "tenantScoped": false,
       "rls": "not-enabled-in-migrations",
       "forceRls": false,
@@ -90,7 +99,7 @@
       "using": null,
       "withCheck": null,
       "tenantPredicateSource": null,
-      "serviceRoleBypassExposure": "No runtime table call found; Data API exposure depends on grants because RLS is absent.",
+      "serviceRoleBypassExposure": "No runtime table call found. Object command privilege determines reachability; with RLS absent, there is no row-policy boundary after reachability.",
       "concerns": ["body and citation exposure is not explicitly authorized", "writes are not policy-controlled"],
       "evidence": ["supabase/migrations/001_init.sql:8-17"]
     },
@@ -188,7 +197,7 @@
       "withCheck": "same as using",
       "tenantPredicateSource": "dispatch_logs.organization_id with null escape",
       "serviceRoleBypassExposure": "Archive GET owner-filters organization IDs; POST derives organization/site but accepts workpackId without ownership lookup.",
-      "relationshipConcerns": ["site_id", "workpack_id", "organization_id null rows are global to any role with privileges"],
+      "relationshipConcerns": ["site_id", "workpack_id", "if a role has the corresponding object command privilege, the policy accepts organization_id null rows"],
       "evidence": ["supabase/migrations/002_workspace_productization.sql:76-91", "supabase/migrations/002_workspace_productization.sql:104", "supabase/migrations/002_workspace_productization.sql:183-200", "app/api/dispatch-logs/route.ts:73-111", "app/api/dispatch-logs/route.ts:192-208"]
     },
     {
@@ -252,7 +261,7 @@
       "using": "true",
       "withCheck": null,
       "tenantPredicateSource": null,
-      "serviceRoleBypassExposure": "Server ingestion/search paths can bypass RLS; public SELECT is intentional in migration.",
+      "serviceRoleBypassExposure": "Server ingestion/search paths can bypass RLS; migration intent is a using(true) SELECT row policy after object privilege reachability.",
       "concerns": [],
       "evidence": ["supabase/migrations/004_safety_reference_catalog.sql:1-14", "supabase/migrations/004_safety_reference_catalog.sql:58", "supabase/migrations/004_safety_reference_catalog.sql:62-64"]
     },
@@ -269,7 +278,7 @@
       "using": "true",
       "withCheck": null,
       "tenantPredicateSource": null,
-      "serviceRoleBypassExposure": "Server ingestion/search paths can bypass RLS; public SELECT is intentional in migration.",
+      "serviceRoleBypassExposure": "Server ingestion/search paths can bypass RLS; migration intent is a using(true) SELECT row policy after object privilege reachability.",
       "concerns": [],
       "evidence": ["supabase/migrations/004_safety_reference_catalog.sql:16-32", "supabase/migrations/004_safety_reference_catalog.sql:59", "supabase/migrations/004_safety_reference_catalog.sql:66-68"]
     },
@@ -286,7 +295,7 @@
       "using": "true",
       "withCheck": null,
       "tenantPredicateSource": null,
-      "serviceRoleBypassExposure": "Operator ingestion uses privileged paths; public can read report_path and details.",
+      "serviceRoleBypassExposure": "Operator ingestion uses privileged paths. If SELECT object privilege is granted, the using(true) policy makes report_path and details row-visible; live HEAD observed two anon-visible rows without bodies.",
       "concerns": ["report_path and arbitrary details may expose operator metadata"],
       "evidence": ["supabase/migrations/004_safety_reference_catalog.sql:34-45", "supabase/migrations/004_safety_reference_catalog.sql:60", "supabase/migrations/004_safety_reference_catalog.sql:70-72"]
     },
@@ -456,13 +465,18 @@
     { "table": "workpack_improvement_photos", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign improvement_id/workpack_id", "reason": "tenant A/B auth fixtures unavailable" }
   ],
   "liveProbe": {
-    "status": "unavailable-credentials-or-target-rejected",
+    "status": "blocked-partial-surface-observed",
+    "scriptPath": "evaluation/phase-a-supabase-rls-audit-2026-07-13/live_rls_head_probe.mjs",
+    "resultPath": "evaluation/phase-a-supabase-rls-audit-2026-07-13/live-probe-result.json",
     "valuesRedacted": true,
     "mutationPerformed": false,
+    "failClosed": true,
     "fixtureShape": {
       "worktreeEnvFile": false,
       "mainCheckoutEnvFile": true,
-      "urlPresent": true,
+      "supabaseUrlPresent": true,
+      "nextPublicSupabaseUrlPresent": true,
+      "urlValuesEqual": false,
       "serviceRoleKeyPresent": true,
       "anonKeyPresent": true,
       "tenantAAuthTokenPresent": false,
@@ -470,34 +484,40 @@
       "authEmailPasswordPresent": false
     },
     "tableHeadProbe": {
-      "commandExitCode": 0,
+      "commandExitCode": 1,
+      "probeStatus": "blocked",
+      "reason": "one_or_more_requests_failed",
       "tables": 22,
       "credentials": 2,
-      "requests": 44,
-      "httpStatusCounts": { "401": 44 },
-      "countsReturned": 0,
-      "verifiedAssertions": 0
+      "expectedRequests": 44,
+      "attemptedRequests": 44,
+      "methodCounts": { "HEAD": 44, "GET": 0 },
+      "httpStatusCounts": { "200": 30, "206": 4, "404": 10 },
+      "verifiedCrossTenantAssertions": 0
     },
-    "credentialMatrix": {
-      "commandExitCode": 0,
-      "urlVariablesEqual": true,
-      "restRequests": 4,
-      "authHealthRequests": 2,
-      "httpStatusCounts": { "401": 6 },
-      "verifiedAssertions": 0
+    "observations": {
+      "tablesReturning200Or206ForBothCredentials": 17,
+      "tablesReturning404ForBothCredentials": 5,
+      "missingTableNames": ["workpack_share_sessions", "workpack_read_confirmations", "workpack_improvements", "workpack_improvement_photos", "safety_reference_embeddings"],
+      "publicCatalogCounts": { "safety_reference_sources": 1063, "safety_reference_items": 9920 },
+      "safetyReferenceIngestionRunsCount": { "service_role": 2, "anon": 2 },
+      "queryLogsCount": { "service_role": 0, "anon": 0 },
+      "documentsCount": { "service_role": 0, "anon": 0 },
+      "nonemptyTenantTablesWithServiceRowsAndZeroAnonRows": ["organizations", "sites", "workers", "workpacks", "education_records", "dispatch_logs"]
     },
-    "interpretation": "HTTP 401 does not prove table absence, RLS state, policy denial, FORCE state, grants, ownership, or cross-tenant isolation."
+    "grantInterpretation": "HEAD observed SELECT endpoint behavior only. It did not inspect direct, inherited, or default GRANT catalog entries and did not test INSERT, UPDATE, DELETE, or EXECUTE privileges.",
+    "interpretation": "The selected target exposes SELECT endpoints for 17 application tables and lacks five migration-010 application tables. The result does not prove policy definitions, FORCE state, ownership, mutation privileges, or cross-tenant isolation."
   },
   "findings": [
     {
       "id": "P1-01",
       "priority": "P1",
-      "title": "Two exposed-schema tables have no RLS declaration",
+      "title": "Two legacy exposed-schema tables have no RLS declaration",
       "tables": ["query_logs", "documents"],
       "evidence": ["supabase/migrations/001_init.sql:1-17"],
-      "impact": "Table privileges alone control query text and document rows; current and future Data API grants can expose reads or writes without row policy.",
+      "impact": "If the corresponding object command privilege is granted, query text and document rows have no RLS row boundary for that command.",
       "remediation": "Decide retire/operator/public intent, enable RLS, and add explicit least-privilege policies or revoke Data API privileges in an approved migration.",
-      "liveValidation": "not-verified-401"
+      "liveValidation": "HEAD observed anon SELECT endpoint reachability with zero rows for both tables; mutation privileges and effective GRANT catalog source remain unverified."
     },
     {
       "id": "P1-02",
@@ -505,9 +525,9 @@
       "title": "dispatch_logs has a role-agnostic global-null CRUD branch",
       "tables": ["dispatch_logs"],
       "evidence": ["supabase/migrations/002_workspace_productization.sql:76-90", "supabase/migrations/002_workspace_productization.sql:183-200"],
-      "impact": "Any role with table privileges can read and mutate null-organization rows containing contacts, failures, and payloads.",
+      "impact": "If a role has the corresponding SELECT, INSERT, UPDATE, or DELETE object privilege, the applicable policy accepts null-organization rows for that command.",
       "remediation": "Require organization_id for tenant rows; separate operator/global events; scope tenant policies to authenticated and split CRUD.",
-      "liveValidation": "not-verified-401"
+      "liveValidation": "HEAD observed six service-role rows and zero anon-visible rows; null-row existence and mutation privileges were not tested."
     },
     {
       "id": "P1-03",
@@ -515,7 +535,14 @@
       "title": "Tenant policies do not enforce same-organization relationships and service-role child queries trust them",
       "tables": ["workers", "workpacks", "education_records", "dispatch_logs", "daily_entries", "knowledge_events", "knowledge_regeneration_runs", "workpack_share_sessions", "workpack_read_confirmations", "workpack_improvements", "workpack_improvement_photos"],
       "evidence": ["supabase/migrations/002_workspace_productization.sql:21-90", "supabase/migrations/002_workspace_productization.sql:132-200", "supabase/migrations/003_knowledge_runtime.sql:1-63", "supabase/migrations/003_knowledge_runtime.sql:77-126", "supabase/migrations/010_commercial_operations.sql:21-86", "supabase/migrations/010_commercial_operations.sql:161-227", "app/api/education-records/route.ts:31-56", "app/api/dispatch-logs/route.ts:192-208", "app/api/workpacks/[id]/share-sessions/route.ts:34-55", "app/api/workpacks/[id]/read-confirmations/route.ts:32-42", "app/api/workpacks/[id]/improvements/route.ts:187-197"],
-      "impact": "Owned rows can reference foreign-tenant UUIDs, creating inconsistent chains and cross-tenant content injection through privileged child reads.",
+      "provenEvidence": [
+        "The schema allows organization_id/related-ID mismatch when ordinary FK existence checks pass because row policies validate only organization_id.",
+        "Education and dispatch APIs accept request-supplied workpack/worker related IDs without specific ownership validation.",
+        "Commercial child reads validate an owned parent and then query children by workpack_id without an additional organization_id predicate."
+      ],
+      "conditionalImpact": "If an authenticated role has INSERT/UPDATE object privilege, knows a foreign related UUID, and satisfies its own organization predicate, a mismatched relationship can be accepted. If such a row exists and matches a privileged child query, it could be included in that response.",
+      "crossTenantResponseInjectionReproduced": false,
+      "severityRationale": "P1 retained because the proven schema gap and privileged query shape can combine at a tenant boundary; exploitability remains conditional on unverified privileges, UUID knowledge, and row existence.",
       "remediation": "Add same-tenant relational constraints or checks; add organization/site predicates to privileged child queries; re-own request-supplied IDs.",
       "liveValidation": "not-executed-no-two-tenant-fixtures"
     },
@@ -525,19 +552,19 @@
       "title": "History-like tenant tables receive unrestricted owner UPDATE and DELETE",
       "tables": ["education_records", "dispatch_logs", "daily_entries", "knowledge_events", "knowledge_regeneration_runs", "workpack_read_confirmations"],
       "evidence": ["supabase/migrations/002_workspace_productization.sql:166-200", "supabase/migrations/003_knowledge_runtime.sql:77-126", "supabase/migrations/010_commercial_operations.sql:178-193"],
-      "impact": "Authenticated owners can rewrite or delete education, dispatch, evidence, regeneration, and read-confirmation history directly through the Data API.",
+      "impact": "If authenticated has the corresponding UPDATE or DELETE object privilege, the owner FOR ALL policy permits matching history-like rows to be rewritten or deleted.",
       "remediation": "Split policies by command and retain only required writes; constrain state transitions and retention deletes.",
-      "liveValidation": "not-executed-no-auth-fixture"
+      "liveValidation": "UPDATE/DELETE object privileges and mutations were not tested."
     },
     {
       "id": "P2-02",
       "priority": "P2",
-      "title": "Ingestion-run operational metadata is public",
+      "title": "Ingestion-run operational metadata has an unrestricted SELECT row policy",
       "tables": ["safety_reference_ingestion_runs"],
       "evidence": ["supabase/migrations/004_safety_reference_catalog.sql:34-45", "supabase/migrations/004_safety_reference_catalog.sql:70-72"],
-      "impact": "Internal report paths, failure details, and arbitrary operation metadata may be exposed.",
+      "impact": "If anon/authenticated has SELECT object privilege, internal report paths, failure details, and arbitrary operation metadata are row-visible.",
       "remediation": "Make the table operator-only or expose a sanitized public view.",
-      "liveValidation": "not-verified-401"
+      "liveValidation": "HEAD observed two rows visible to both service-role and anon credentials; row bodies and effective GRANT catalog entries were not inspected."
     },
     {
       "id": "P2-03",
@@ -547,7 +574,7 @@
       "evidence": ["supabase/migrations/007_mcp_tokens.sql:14-24", "app/api/mcp-tokens/route.ts:214-253"],
       "impact": "Privileged paths can create orphaned, unscoped, or site/organization-mismatched credential rows.",
       "remediation": "Add organization FK, valid-scope constraints, and site-to-organization consistency enforcement in an approved migration.",
-      "liveValidation": "not-verified-401"
+      "liveValidation": "HEAD observed one service-role row and zero anon-visible rows; privileged write constraints were not tested."
     },
     {
       "id": "P2-04",
@@ -555,9 +582,9 @@
       "title": "Published ontology edges do not require published endpoint nodes",
       "tables": ["safety_ontology_edges", "safety_ontology_nodes"],
       "evidence": ["supabase/migrations/008_safety_ontology.sql:20-29", "supabase/migrations/008_safety_ontology.sql:43-45"],
-      "impact": "A published edge can reveal unpublished node identifiers, relations, citations, or metadata.",
+      "impact": "If the caller has SELECT object privilege, a published edge can be row-visible and reveal unpublished node identifiers, relations, citations, or metadata.",
       "remediation": "Require both endpoint nodes to be published in workflow and SELECT enforcement, or expose a security-invoker published-only join view.",
-      "liveValidation": "not-verified-401"
+      "liveValidation": "HEAD observed 182 service-role and 169 anon-visible edge rows; endpoint-node publication consistency was not inspected."
     },
     {
       "id": "P3-01",
@@ -565,9 +592,9 @@
       "title": "Tenant policies omit explicit roles and FORCE RLS",
       "tables": ["organizations", "sites", "workers", "workpacks", "education_records", "dispatch_logs", "daily_entries", "knowledge_events", "knowledge_regeneration_runs", "workpack_share_sessions", "workpack_read_confirmations", "workpack_improvements", "workpack_improvement_photos"],
       "evidence": ["supabase/migrations/002_workspace_productization.sql:99-200", "supabase/migrations/003_knowledge_runtime.sql:73-126", "supabase/migrations/004_safety_reference_catalog.sql:58-72", "supabase/migrations/007_mcp_tokens.sql:32-33", "supabase/migrations/008_safety_ontology.sql:35-45", "supabase/migrations/010_commercial_operations.sql:155-231"],
-      "impact": "Role intent is implicit and table-owner SQL remains outside RLS; FORCE would not control service_role BYPASSRLS.",
+      "impact": "Role intent is implicit; object command privilege is still required before policy evaluation, and table-owner SQL remains outside RLS. FORCE would not control service_role BYPASSRLS.",
       "remediation": "Use explicit TO roles and authenticated checks; separately evaluate FORCE for owner defense in depth.",
-      "liveValidation": "not-verified-401"
+      "liveValidation": "Policy roles, owners, FORCE flags, and effective GRANT catalog entries were not inspected live."
     },
     {
       "id": "P3-02",
@@ -575,87 +602,94 @@
       "title": "Service-only RPC intent is not reflected in grants or function hardening",
       "tables": ["safety_reference_embeddings", "safety_reference_items"],
       "evidence": ["supabase/migrations/010_commercial_operations.sql:109-153", "supabase/migrations/010_commercial_operations.sql:229-231"],
-      "impact": "Function reachability and namespace behavior rely on defaults even though current RLS prevents non-bypass embedding rows.",
+      "impact": "If a role has EXECUTE privilege, function reachability and namespace behavior rely on defaults even though invoker RLS prevents non-bypass embedding rows.",
       "remediation": "Schema-qualify relations, explicitly use invoker semantics, pin search_path, and revoke/grant EXECUTE to the intended roles.",
-      "liveValidation": "not-verified-401"
+      "liveValidation": "The embedding table returned 404 and effective EXECUTE grants were not inspected."
     }
   ],
   "commandResults": [
     {
       "id": "repo-preflight",
-      "command": "git status --short --branch; git rev-parse --show-toplevel; git branch --show-current; git remote -v",
+      "command": "git status --short --branch and git log -3 --oneline --decorate",
       "exitCode": 0,
-      "result": "clean worktree on audit/phase-a-supabase-rls at expected path"
+      "result": "clean tracking worktree on audit/phase-a-supabase-rls at 31c28f4 before review-evidence edits"
     },
     {
-      "id": "migration-line-count",
-      "command": "Get-ChildItem supabase\\migrations\\*.sql | ... Get-Content ... Count",
+      "id": "probe-syntax",
+      "command": "node --check evaluation/phase-a-supabase-rls-audit-2026-07-13/live_rls_head_probe.mjs",
       "exitCode": 0,
-      "result": "9 files, 760 total lines"
+      "result": "syntax valid"
     },
     {
-      "id": "static-rls-policy-scan",
-      "command": "rg create table/RLS/policy/function/grant/revoke patterns under supabase/migrations",
+      "id": "probe-fail-closed-no-env",
+      "command": "live_rls_head_probe.mjs --no-env-file with all Supabase variables blank and a temporary output",
       "exitCode": 0,
-      "result": "22 application tables, 20 RLS enabled, 20 policies, 0 FORCE, 0 explicit grants/revokes"
+      "result": "wrapper pass; probe exit 2; blocked; required_configuration_unavailable; zero requests; no secret fields stored"
     },
     {
-      "id": "fixture-shape-check",
-      "command": "PowerShell key-name-only .env.local presence check",
-      "exitCode": 0,
-      "result": "main env has URL/service/anon names; no auth token or two-tenant fixture; values redacted"
-    },
-    {
-      "id": "live-table-probe-first-attempt",
-      "command": "inline Node Supabase REST HEAD probe",
+      "id": "reproducible-live-head-probe",
+      "command": "node evaluation/phase-a-supabase-rls-audit-2026-07-13/live_rls_head_probe.mjs",
       "exitCode": 1,
-      "result": "syntax error before network activity; no secret values printed"
+      "result": "fail-closed blocked result after 44 HEAD requests; statuses 200 x30, 206 x4, 404 x10; redacted result written"
     },
     {
-      "id": "live-table-probe-corrected",
-      "command": "inline Node 22-table x service/anon REST HEAD count=exact probe",
+      "id": "report-probe-consistency",
+      "command": "PowerShell JSON classification, authorization semantics, probe inventory, and probe count validator",
       "exitCode": 0,
-      "result": "44 read-only requests; all HTTP 401; zero live assertions verified"
+      "result": "23 objects; all-object classes tenant/public/operator/unclassified 13/5/4/1; application classes 13/5/3/1; documents unclassified; probe inventory exact; 44 requests"
     },
     {
-      "id": "redacted-url-key-matrix",
-      "command": "inline Node redacted URL/key and auth health status matrix",
+      "id": "source-evidence-line-validation",
+      "command": "PowerShell report.json evidence file and line-range validator",
       "exitCode": 0,
-      "result": "6 read-only requests; all HTTP 401; URL variable values equal; values redacted"
+      "result": "all 23 inventory evidence rows and all 9 finding evidence rows reference existing in-range source lines"
     },
     {
-      "id": "artifact-structure-validation",
-      "command": "inline Node JSON/count/source-evidence validator",
-      "exitCode": 0,
-      "result": "JSON parsed; 23 inventory rows, 13 tenant rows, 20 RLS tables, 20 policies, 9 findings, 13 matrix rows, and 118 evidence references validated"
-    },
-    {
-      "id": "artifact-secret-pattern-scan",
-      "command": "rg credential and project-host patterns under the owned artifact directory",
+      "id": "rejected-claim-scan",
+      "command": "rg stale 401-only, malformed-inline, unconditional privilege, and reproduced-injection claims",
       "exitCode": 1,
       "result": "no matches; rg uses exit 1 for an empty result set"
     },
     {
-      "id": "git-diff-check-first",
-      "command": "git diff --cached --check",
+      "id": "probe-mutation-pattern-scan",
+      "command": "rg POST/PUT/PATCH/DELETE and database mutation call patterns in live_rls_head_probe.mjs",
       "exitCode": 1,
-      "result": "four Markdown line-break trailing spaces found and removed before final verification"
+      "result": "no matches; probe uses HEAD only"
     },
     {
-      "id": "git-diff-check-after-whitespace-fix",
+      "id": "artifact-secret-pattern-scan",
+      "command": "rg JWT, Supabase secret/publishable key, project host, and env assignment patterns in the audit artifact directory",
+      "exitCode": 1,
+      "result": "no matches; rg uses exit 1 for an empty result set"
+    },
+    {
+      "id": "git-diff-check",
       "command": "git diff --cached --check",
       "exitCode": 0,
-      "result": "no whitespace errors"
+      "result": "no whitespace errors; staged scope contains only report.md, report.json, live_rls_head_probe.mjs, and live-probe-result.json"
     }
   ],
   "testExecution": {
-    "focusedUnitTests": {
-      "status": "not-run",
-      "reason": "No code or test file changed; approved audit used source analysis and read-only probes."
+    "probeSyntax": {
+      "status": "passed",
+      "command": "node --check evaluation/phase-a-supabase-rls-audit-2026-07-13/live_rls_head_probe.mjs"
+    },
+    "probeFailClosed": {
+      "status": "passed",
+      "probeExitCode": 2,
+      "reason": "required_configuration_unavailable",
+      "attemptedRequestCount": 0,
+      "secretFieldsStored": false
+    },
+    "probeLiveRun": {
+      "status": "blocked-as-designed",
+      "probeExitCode": 1,
+      "attemptedRequestCount": 44,
+      "resultPath": "evaluation/phase-a-supabase-rls-audit-2026-07-13/live-probe-result.json"
     },
     "strictTypecheck": {
       "status": "not-run",
-      "reason": "No code or test file changed."
+      "reason": "No application TypeScript or test file changed; evaluation .mjs was checked and behavior-tested directly."
     },
     "authenticatedCrossTenant": {
       "status": "not-executed",

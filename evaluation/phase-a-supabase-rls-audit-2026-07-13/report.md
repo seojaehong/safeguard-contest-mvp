@@ -10,13 +10,13 @@ DB/schema/data mutations: **none**
 
 **Status: RED for remediation planning; live enforcement unverified.**
 
-The migrations define 22 application tables and touch one Supabase-managed table. All 13 tenant-scoped application tables enable RLS, and their owner policies provide source-level CRUD coverage. That coverage is not sufficient to close the tenant boundary:
+The migrations define 22 application tables and touch one Supabase-managed table. All 13 tenant-scoped application tables enable RLS, and their owner policies provide source-level CRUD policy coverage after a role has the corresponding object command privilege. Policy coverage is not proof that a role can reach a command, and it is not sufficient to close the tenant boundary:
 
-- `query_logs` and `documents` are in the exposed `public` schema with no RLS declaration.
-- `dispatch_logs` intentionally accepts `organization_id is null`; because the `FOR ALL` policy has no `TO` restriction, the null branch is visible and writable to every role that has table privileges.
+- `query_logs` and legacy/unclassified `documents` are in the exposed `public` schema with no RLS declaration.
+- `dispatch_logs` intentionally accepts `organization_id is null`; if a role has the corresponding SELECT/INSERT/UPDATE/DELETE privilege, the `FOR ALL` policy does not reject null-organization rows.
 - Child policies check only the row's `organization_id`. They do not prove that related `site_id`, `workpack_id`, `worker_id`, `daily_entry_id`, `share_session_id`, or `improvement_id` belongs to the same organization.
 - User-facing server routes use a service-role client. RLS is bypassed, so route predicates and relational integrity are the effective boundary.
-- The available local Supabase URL/key pairs all returned HTTP 401. No live RLS or cross-tenant result is marked PASS.
+- The reproducible live probe made 44 HEAD requests and failed closed with 30 HTTP 200, 4 HTTP 206, and 10 HTTP 404 responses. No authenticated cross-tenant result is marked PASS.
 
 ## Scope and method
 
@@ -26,6 +26,13 @@ Source evidence covered all 9 files under `supabase/migrations` (760 lines), all
 - https://supabase.com/docs/guides/api/securing-your-api
 - https://www.postgresql.org/docs/current/sql-createpolicy.html
 - https://www.postgresql.org/docs/current/sql-altertable.html
+
+Authorization evidence is interpreted in this order:
+
+1. Object command privilege (direct/inherited/default GRANT or equivalent platform reachability) determines whether a role can issue SELECT, INSERT, UPDATE, DELETE, or EXECUTE.
+2. Once a command is reachable, RLS policy determines which rows are visible or accepted through `USING` and `WITH CHECK`.
+3. The migrations contain no explicit GRANT/REVOKE statements. Effective grant catalog state and all mutation privileges remain live-unverified. HEAD responses only observe SELECT endpoint behavior; they do not identify the underlying GRANT source.
+4. Service-role/BYPASSRLS paths do not use tenant RLS as their row boundary.
 
 No migration was applied. No insert, update, delete, upload, token issuance, sign-in, or RPC call was performed.
 
@@ -39,8 +46,9 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 | Supabase-managed tables touched | 1 |
 | Total inventoried table objects | 23 |
 | Tenant-scoped application tables | 13 |
-| Public/catalog application tables | 6 |
+| Public/catalog application tables | 5 |
 | Operator-only application tables | 3 |
+| Legacy/unclassified application tables | 1 |
 | Operator/platform managed tables | 1 |
 | Application tables with RLS enabled | 20 |
 | Application tables without migration RLS | 2 |
@@ -60,8 +68,8 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 
 | Table | Class | RLS | FORCE | Policy posture | Source evidence |
 |---|---|---|---|---|---|
-| `query_logs` | operator/legacy | no | no | none; table privileges decide access | `supabase/migrations/001_init.sql:1-6` |
-| `documents` | public/legacy, intent undocumented | no | no | none; table privileges decide access | `supabase/migrations/001_init.sql:8-17` |
+| `query_logs` | operator/legacy | no | no | no row policy; object privilege determines command reachability | `supabase/migrations/001_init.sql:1-6` |
+| `documents` | legacy/unclassified | no | no | no row policy; object privilege determines command reachability | `supabase/migrations/001_init.sql:8-17` |
 | `organizations` | tenant | yes | no | owner SELECT plus owner `FOR ALL` | `supabase/migrations/002_workspace_productization.sql:3-9`, `:99`, `:106-113` |
 | `sites` | tenant | yes | no | owner via `organization_id`, `FOR ALL` | `supabase/migrations/002_workspace_productization.sql:11-19`, `:100`, `:115-130` |
 | `workers` | tenant | yes | no | owner via `organization_id`, `FOR ALL` | `supabase/migrations/002_workspace_productization.sql:21-42`, `:101`, `:132-147` |
@@ -71,12 +79,12 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 | `daily_entries` | tenant | yes | no | owner via `organization_id`, `FOR ALL` | `supabase/migrations/003_knowledge_runtime.sql:1-19`, `:73`, `:77-92` |
 | `knowledge_events` | tenant | yes | no | owner via `organization_id`, `FOR ALL` | `supabase/migrations/003_knowledge_runtime.sql:21-44`, `:74`, `:94-109` |
 | `knowledge_regeneration_runs` | tenant | yes | no | owner via `organization_id`, `FOR ALL` | `supabase/migrations/003_knowledge_runtime.sql:46-64`, `:75`, `:111-126` |
-| `safety_reference_sources` | public catalog | yes | no | public SELECT only | `supabase/migrations/004_safety_reference_catalog.sql:1-14`, `:58`, `:62-64` |
-| `safety_reference_items` | public catalog | yes | no | public SELECT only | `supabase/migrations/004_safety_reference_catalog.sql:16-32`, `:59`, `:66-68` |
-| `safety_reference_ingestion_runs` | public operational metadata | yes | no | public SELECT only | `supabase/migrations/004_safety_reference_catalog.sql:34-45`, `:60`, `:70-72` |
+| `safety_reference_sources` | public catalog | yes | no | SELECT row policy `using (true)`; object privilege still required | `supabase/migrations/004_safety_reference_catalog.sql:1-14`, `:58`, `:62-64` |
+| `safety_reference_items` | public catalog | yes | no | SELECT row policy `using (true)`; object privilege still required | `supabase/migrations/004_safety_reference_catalog.sql:16-32`, `:59`, `:66-68` |
+| `safety_reference_ingestion_runs` | public operational metadata | yes | no | SELECT row policy `using (true)`; object privilege still required | `supabase/migrations/004_safety_reference_catalog.sql:34-45`, `:60`, `:70-72` |
 | `mcp_tokens` | operator-only, tenant-bound | yes | no | no policies; default deny for non-bypass roles | `supabase/migrations/007_mcp_tokens.sql:14-24`, `:32-33` |
-| `safety_ontology_nodes` | public catalog, published subset | yes | no | public SELECT where published | `supabase/migrations/008_safety_ontology.sql:9-18`, `:35`, `:39-41` |
-| `safety_ontology_edges` | public catalog, published subset | yes | no | public SELECT where published | `supabase/migrations/008_safety_ontology.sql:20-29`, `:36`, `:43-45` |
+| `safety_ontology_nodes` | public catalog, published subset | yes | no | SELECT row policy where published; object privilege still required | `supabase/migrations/008_safety_ontology.sql:9-18`, `:35`, `:39-41` |
+| `safety_ontology_edges` | public catalog, published subset | yes | no | SELECT row policy where published; object privilege still required | `supabase/migrations/008_safety_ontology.sql:20-29`, `:36`, `:43-45` |
 | `workpack_share_sessions` | tenant | yes | no | owner via `organization_id`, `FOR ALL` | `supabase/migrations/010_commercial_operations.sql:21-34`, `:155`, `:161-176` |
 | `workpack_read_confirmations` | tenant | yes | no | owner via `organization_id`, `FOR ALL` | `supabase/migrations/010_commercial_operations.sql:36-49`, `:156`, `:178-193` |
 | `workpack_improvements` | tenant | yes | no | owner via `organization_id`, `FOR ALL` | `supabase/migrations/010_commercial_operations.sql:51-69`, `:157`, `:195-210` |
@@ -86,7 +94,7 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 
 ## Tenant CRUD and predicate matrix
 
-`FOR ALL` supplies SELECT/DELETE visibility through `USING`, INSERT acceptance through `WITH CHECK`, and both expressions for UPDATE. “Covered” below means a source policy exists; it is not a live PASS.
+If the role first has the corresponding object command privilege, `FOR ALL` supplies SELECT/DELETE row visibility through `USING`, INSERT row acceptance through `WITH CHECK`, and both expressions for UPDATE. “Covered” below means only that a source row policy exists. It does not establish a GRANT, command reachability, or a live PASS.
 
 | Tenant table | SELECT | INSERT | UPDATE | DELETE | `USING` / `WITH CHECK` | Tenant predicate source | Service-role exposure |
 |---|---|---|---|---|---|---|---|
@@ -125,7 +133,7 @@ The owner policies validate only the row's `organization_id`. The following null
 ## Operator, ownership, function, and FORCE concerns
 
 - **Service-role bypass:** `createSupabaseAdminClient()` always uses `SUPABASE_SERVICE_ROLE_KEY` (`lib/supabase-admin.ts:594-604`). `getWorkspaceUser()` validates the bearer token (`:607-618`) but does not replace the database Authorization role with that user. All subsequent queries remain privileged.
-- **Manual route boundary:** the main commercial helper first resolves owned organizations and an owned workpack (`lib/workpack-commercial-store.ts:175-208`). Child queries then commonly filter only by `workpack_id`, so poisoned cross-organization references can cross the service-layer boundary.
+- **Manual route boundary:** the main commercial helper first resolves owned organizations and an owned workpack (`lib/workpack-commercial-store.ts:175-208`). Child queries then commonly filter only by `workpack_id`. If a mismatched child row already exists, those predicates alone do not prove it will be excluded; no cross-tenant response inclusion was reproduced.
 - **MCP operator table:** `mcp_tokens` intentionally has RLS with no policy (`supabase/migrations/007_mcp_tokens.sql:32-33`). Runtime reads and `last_used_at` writes use service role (`lib/mcp-auth.ts:217-238`). User-facing token routes add manual owner filters (`app/api/mcp-tokens/route.ts:98-151`, `:214-253`; `[id]/route.ts:67-89`).
 - **FORCE RLS:** none of the 20 RLS-enabled application tables uses `FORCE ROW LEVEL SECURITY`. This leaves table-owner SQL paths outside policy enforcement. FORCE would not remove service-role/BYPASSRLS exposure, so it is defense in depth rather than the primary service-layer fix.
 - **Function posture:** `match_safety_reference_embeddings` is SQL, stable, and not `SECURITY DEFINER` (`supabase/migrations/010_commercial_operations.sql:109-150`). The migration does not schema-qualify its relations, pin `search_path`, or revoke default function execution even though the comment says service-role only (`:152-153`). RLS `using (false)` on the embedding table currently blocks non-bypass rows.
@@ -141,7 +149,7 @@ No P0 finding was proven from source or live evidence.
 
 **Evidence:** `query_logs` and `documents` are created in `public` without a following RLS statement (`supabase/migrations/001_init.sql:1-17`). The complete migration policy scan contains no policy, GRANT, or REVOKE for either table.
 
-**Impact:** if current or future Data API grants allow `anon` or `authenticated`, query text and document bodies are controlled only by table privileges, with no row or write boundary. Current grants could not be verified live.
+**Impact:** if the corresponding object command privilege is granted to `anon` or `authenticated`, query text and document rows have no RLS row boundary for that command. Live HEAD observed anon SELECT endpoint reachability with zero rows for both tables, but effective grant catalog source and every mutation privilege remain unverified.
 
 **Bounded remediation proposal:** in a future approved migration, decide whether each table is retired, operator-only, or intentionally public; enable RLS; add explicit least-privilege `TO` policies or revoke Data API privileges. Do not infer public intent from the table name.
 
@@ -149,15 +157,15 @@ No P0 finding was proven from source or live evidence.
 
 **Evidence:** `organization_id` is nullable (`supabase/migrations/002_workspace_productization.sql:76-90`). The `FOR ALL` policy allows `organization_id is null` in both `USING` and `WITH CHECK` and has no `TO authenticated` restriction (`:183-200`).
 
-**Impact:** every role with table privileges can read, insert, update, or delete null-organization dispatch rows. Those rows may contain `target_contact`, failure details, and payload data.
+**Impact:** if a role has the corresponding SELECT, INSERT, UPDATE, or DELETE object privilege, the applicable policy accepts null-organization rows for that command. Those rows may contain `target_contact`, failure details, and payload data. The live HEAD probe observed six service-role rows and zero anon-visible rows; it did not establish whether null-organization rows exist or test mutation privileges.
 
 **Bounded remediation proposal:** make tenant dispatch rows require `organization_id`; move true operator/global events to a separate operator-only table or an explicit service-only policy; scope tenant policies to `authenticated`; split write/delete rights according to product need.
 
 ### P1-03: Tenant policies do not enforce same-organization relationships, and service-role child queries trust them
 
-**Evidence:** child tables carry independent `organization_id` plus related IDs (`supabase/migrations/002_workspace_productization.sql:21-90`, `supabase/migrations/003_knowledge_runtime.sql:1-63`, `supabase/migrations/010_commercial_operations.sql:21-86`), while every owner `WITH CHECK` only resolves the row's `organization_id` (`supabase/migrations/002_workspace_productization.sql:132-200`, `supabase/migrations/003_knowledge_runtime.sql:77-126`, `supabase/migrations/010_commercial_operations.sql:161-227`). The education and dispatch APIs accept request-supplied related IDs without re-owning them (`app/api/education-records/route.ts:31-56`, `app/api/dispatch-logs/route.ts:192-208`). Commercial reads validate the parent workpack, then query children by `workpack_id` only (`app/api/workpacks/[id]/share-sessions/route.ts:34-55`, `app/api/workpacks/[id]/read-confirmations/route.ts:32-42`, `app/api/workpacks/[id]/improvements/route.ts:187-197`).
+**Proven schema/API evidence:** child tables carry independent `organization_id` plus related IDs (`supabase/migrations/002_workspace_productization.sql:21-90`, `supabase/migrations/003_knowledge_runtime.sql:1-63`, `supabase/migrations/010_commercial_operations.sql:21-86`), while every owner `WITH CHECK` only resolves the row's `organization_id` (`supabase/migrations/002_workspace_productization.sql:132-200`, `supabase/migrations/003_knowledge_runtime.sql:77-126`, `supabase/migrations/010_commercial_operations.sql:161-227`). The schema therefore allows an `organization_id`/related-ID mismatch when ordinary FK existence checks pass. The education and dispatch APIs accept request-supplied `workpackId` and worker-map IDs without specific ownership validation of those related rows (`app/api/education-records/route.ts:31-56`, `app/api/dispatch-logs/route.ts:192-208`). Commercial reads validate the parent workpack, then query children by `workpack_id` only (`app/api/workpacks/[id]/share-sessions/route.ts:34-55`, `app/api/workpacks/[id]/read-confirmations/route.ts:32-42`, `app/api/workpacks/[id]/improvements/route.ts:187-197`).
 
-**Impact:** a user who can reach the Data API and knows another tenant UUID can create a row owned by their own organization but referencing another tenant's site/workpack/worker. With service-role child reads, this can inject cross-tenant content into another tenant's response or create inconsistent audit chains.
+**Conditional impact, not reproduced:** if an authenticated role has INSERT/UPDATE object privilege, knows a foreign related UUID, and can satisfy the row's own-organization predicate, the policy and FK shape can accept a mismatched relationship. If such a mismatched child row exists and matches a service-role child query, that row could be included because those queries do not add an `organization_id` predicate. Direct privilege reachability, mismatch creation, and cross-tenant response inclusion were not executed or reproduced. P1 is retained because the proven schema gap and privileged query shape can combine at a tenant boundary, while exploitability remains conditional on those unverified prerequisites.
 
 **Bounded remediation proposal:** add approved same-tenant relational enforcement, preferably composite tenant FKs/unique keys or narrowly scoped validation functions plus `WITH CHECK`; add `organization_id` and, where applicable, `site_id` filters to service-role child queries; re-own all request-supplied related IDs before writes.
 
@@ -165,15 +173,15 @@ No P0 finding was proven from source or live evidence.
 
 **Evidence:** `education_records`, `dispatch_logs`, `daily_entries`, `knowledge_events`, `knowledge_regeneration_runs`, and `workpack_read_confirmations` all use `FOR ALL` owner policies (`supabase/migrations/002_workspace_productization.sql:166-200`, `003_knowledge_runtime.sql:77-126`, `010_commercial_operations.sql:178-193`).
 
-**Impact:** an authenticated owner can directly rewrite or delete records that appear to serve as education, dispatch, evidence, regeneration, or read-confirmation history, even where the application UI exposes only create/read behavior.
+**Impact:** if authenticated has the corresponding UPDATE or DELETE object privilege, the owner `FOR ALL` policy permits matching rows to be rewritten or deleted even where the application UI exposes only create/read behavior. Effective UPDATE/DELETE grants were not tested or inspected live.
 
 **Bounded remediation proposal:** split policies by command. Keep only required SELECT/INSERT; restrict UPDATE to explicit state transitions/columns and DELETE to a documented retention workflow or operator role.
 
 ### P2-02: Ingestion-run operational metadata is public
 
-**Evidence:** `safety_reference_ingestion_runs` includes `report_path` and arbitrary `details` (`supabase/migrations/004_safety_reference_catalog.sql:34-45`) and grants public SELECT through `using (true)` (`:70-72`).
+**Evidence:** `safety_reference_ingestion_runs` includes `report_path` and arbitrary `details` (`supabase/migrations/004_safety_reference_catalog.sql:34-45`) and has a SELECT row policy `using (true)` (`supabase/migrations/004_safety_reference_catalog.sql:70-72`). The policy does not itself grant SELECT.
 
-**Impact:** internal paths, failure details, and ingestion operations may be exposed even though source/item catalog rows are the intended public data.
+**Impact:** if anon/authenticated has SELECT object privilege, internal paths, failure details, and ingestion operations are row-visible. The live HEAD probe observed two anon-visible rows but did not retrieve row bodies or inspect the effective GRANT catalog.
 
 **Bounded remediation proposal:** move ingestion runs to operator-only access or expose a sanitized view containing only deliberate public status fields.
 
@@ -187,9 +195,9 @@ No P0 finding was proven from source or live evidence.
 
 ### P2-04: Published ontology edges do not require published endpoint nodes
 
-**Evidence:** edges independently carry `review_state`, `src`, `dst`, `cited_uids`, and `meta` (`supabase/migrations/008_safety_ontology.sql:20-29`). Public SELECT checks only `safety_ontology_edges.review_state = 'published'` (`supabase/migrations/008_safety_ontology.sql:43-45`); it does not require both referenced node rows to be published.
+**Evidence:** edges independently carry `review_state`, `src`, `dst`, `cited_uids`, and `meta` (`supabase/migrations/008_safety_ontology.sql:20-29`). The SELECT row policy checks only `safety_ontology_edges.review_state = 'published'` (`supabase/migrations/008_safety_ontology.sql:43-45`); it does not require both referenced node rows to be published.
 
-**Impact:** a prematurely published edge can reveal unpublished node identifiers, relationships, citations, or metadata even while the node rows themselves remain hidden.
+**Impact:** if the caller has SELECT object privilege, a prematurely published edge can be row-visible and reveal unpublished node identifiers, relationships, citations, or metadata even while the node rows themselves remain hidden.
 
 **Bounded remediation proposal:** enforce endpoint publication in the publishing workflow and in the edge SELECT predicate, or expose a security-invoker view that joins only published edges to published source and destination nodes.
 
@@ -197,7 +205,7 @@ No P0 finding was proven from source or live evidence.
 
 **Evidence:** all 20 policies omit `TO`; all 20 RLS-enabled application tables omit `FORCE ROW LEVEL SECURITY`. The policy statements are at `supabase/migrations/002_workspace_productization.sql:106-200`, `003_knowledge_runtime.sql:77-126`, `004_safety_reference_catalog.sql:62-72`, `008_safety_ontology.sql:39-45`, and `010_commercial_operations.sql:161-231`.
 
-**Impact:** standard owner predicates currently fail closed for unauthenticated `auth.uid() = null`, but their intent is implicit and the `dispatch_logs` null branch becomes reachable to PUBLIC. Table-owner SQL remains outside RLS.
+**Impact:** standard owner predicates evaluate false for unauthenticated `auth.uid() = null`, but their role intent is implicit. The `dispatch_logs` null branch applies to PUBLIC after command reachability is established by object privilege. Table-owner SQL remains outside RLS.
 
 **Bounded remediation proposal:** use explicit `TO authenticated` for tenant policies, explicit public roles for catalog reads, and `auth.uid() is not null`; evaluate FORCE RLS for table-owner defense in depth without treating it as a service-role control.
 
@@ -205,13 +213,13 @@ No P0 finding was proven from source or live evidence.
 
 **Evidence:** `match_safety_reference_embeddings` uses unqualified relations and has no explicit `SECURITY INVOKER`, `SET search_path`, GRANT, or REVOKE (`supabase/migrations/010_commercial_operations.sql:109-153`). The comment says it is called only by service-role harness code (`:152-153`).
 
-**Impact:** current RLS prevents non-bypass rows, but function reachability and namespace behavior are left to defaults and platform configuration.
+**Impact:** if a role has EXECUTE privilege, current invoker RLS prevents non-bypass embedding rows, but function reachability and namespace behavior are left to defaults and platform configuration. Effective EXECUTE grants were not inspected live.
 
 **Bounded remediation proposal:** schema-qualify relations, explicitly declare invoker semantics, pin an appropriate search path, and revoke/grant EXECUTE to match the intended caller set.
 
 ## Cross-tenant negative-test matrix
 
-No tenant A/B auth tokens or credentials are present. Every runtime cell is therefore **NOT EXECUTED**, never PASS. The matrix records what a future approved fixture must attempt without changing the expected denial semantics.
+No tenant A/B auth tokens or credentials are present. Every runtime cell is therefore **NOT EXECUTED**, never PASS. Each case first requires the corresponding object command privilege; the matrix records the expected row-policy denial only after that reachability condition.
 
 | Table | Tenant-B SELECT by tenant A | Tenant-B INSERT | Tenant-B UPDATE | Tenant-B DELETE | Additional negative case | Runtime status |
 |---|---|---|---|---|---|---|
@@ -229,32 +237,39 @@ No tenant A/B auth tokens or credentials are present. Every runtime cell is ther
 | `workpack_improvements` | deny | foreign `organization_id` deny | deny | deny | owned org plus B workpack must deny | not executed: no A/B auth fixtures |
 | `workpack_improvement_photos` | deny | foreign `organization_id` deny | deny | deny | owned org plus B improvement/workpack must deny | not executed: no A/B auth fixtures |
 
-Operator-table negative cases are separate: anon/authenticated access to `mcp_tokens` and `safety_reference_embeddings` should return no rows and reject writes; service-role access is intentionally privileged. Those cases were not authenticated-live-tested because every configured key/URL combination returned 401.
+Operator-table negative cases are separate: after corresponding command reachability, `mcp_tokens` and `safety_reference_embeddings` policies should expose no rows to non-bypass roles and reject writes. The HEAD probe observed one service-role `mcp_tokens` row and zero anon-visible rows. `safety_reference_embeddings` returned 404 for both credentials. No mutation privilege or authenticated-user case was tested.
 
 ## Live read-only probe
 
-### Available fixture shape
+### Reproducible artifacts
 
-- Worktree `.env.local`: absent.
-- Main checkout `.env.local`: present.
-- URL, service-role key, and anon key names: present.
-- Tenant A auth token: absent.
-- Tenant B auth token: absent.
-- Auth email/password fixture: absent.
-- Values were never printed or stored in artifacts.
+- Probe: `evaluation/phase-a-supabase-rls-audit-2026-07-13/live_rls_head_probe.mjs`
+- Redacted result: `evaluation/phase-a-supabase-rls-audit-2026-07-13/live-probe-result.json`
+- Method: fixed 22-table inventory x service-role/anon credentials, HEAD only, `Prefer: count=exact`
+- Secret handling: no URL, host, key, response body, or exception text is printed or stored
+- Fail-closed behavior: missing configuration exits 2 with zero requests; any non-2xx/network result exits 1 after writing the redacted result
 
-### Executed results
+### Executed result
 
-1. Initial inline Node probe: exit 1 before network activity due an invalid regular-expression escape. No data or secret value was printed.
-2. Corrected table probe: exit 0; 22 tables x 2 credentials = 44 non-mutating HEAD requests; all 44 returned HTTP 401; no count was available.
-3. Redacted URL/key matrix: exit 0; both URL variables were equal; 4 URL/key REST combinations and 2 auth-health requests were executed; all 6 returned HTTP 401.
+- Script exit: 1 (`blocked`, as designed because not all requests succeeded)
+- Requests: 44 attempted of 44 expected; methods: HEAD 44, GET 0
+- HTTP statuses: 200 x 30, 206 x 4, 404 x 10
+- Existing-table observations: 17 tables returned 200/206 for both credentials
+- Missing-surface observations: the five migration-010 application tables returned 404 for both credentials (`workpack_share_sessions`, `workpack_read_confirmations`, `workpack_improvements`, `workpack_improvement_photos`, `safety_reference_embeddings`)
+- Public catalog counts: `safety_reference_sources` 1,063 and `safety_reference_items` 9,920 for both credentials
+- `safety_reference_ingestion_runs`: 2 rows visible to both credentials
+- Nonempty tenant tables `organizations`, `sites`, `workers`, `workpacks`, `education_records`, and `dispatch_logs`: service-role counts were nonzero and anon counts were zero
+- `query_logs` and `documents`: both credentials reached SELECT via HEAD and observed zero rows
+- Tenant A/B auth fixtures: unavailable; authenticated cross-tenant cases not executed
 
-**Interpretation:** the checked-in migration source is auditable, but the local URL/key set did not provide a usable live target. A 401 is not evidence that a table is absent, RLS is enabled, a policy denies access, or cross-tenant isolation passes. Live policy state, grants, owners, FORCE flags, and row visibility remain **not verified**.
+**Interpretation:** the selected target exposes SELECT endpoints for 17 application tables and lacks five migration-010 tables. HEAD count differences are observations, not a complete RLS or GRANT audit. The probe does not inspect `information_schema`/`pg_catalog` grants, mutation privileges, owners, FORCE flags, row bodies, policy definitions, or cross-tenant behavior. Effective grant catalog state and all authenticated negative cases remain **not verified**.
 
 ## Tests and typecheck
 
-- Focused unit tests: not run because no code or test file was changed; the approved audit used source analysis and read-only probes only.
-- Strict typecheck: not run because no code or test file was changed.
+- Probe syntax: `node --check` passed.
+- Probe fail-closed test: with all Supabase variables blank and `--no-env-file`, exit 2, `blocked`, zero requests, and no secret fields stored.
+- Probe live run: exit 1 after all 44 HEAD requests, with a redacted result written.
+- Strict typecheck: not run because no application TypeScript or test file changed; the evaluation `.mjs` probe is validated by Node syntax and behavior tests.
 - Authenticated cross-tenant tests: not executed because two isolated auth fixtures are unavailable.
 - Mutating CRUD probes: not executed by design.
 
