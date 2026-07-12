@@ -1,0 +1,82 @@
+{
+  "date": "2026-07-12",
+  "branch": "feat/remote-openclaw-protocol",
+  "base": "3b0edfe48c29e603f3156440362fca9304ef4d1a",
+  "phase": 1,
+  "scope": "pure signed remote engine protocol only",
+  "runtimeWiringAdded": false,
+  "runtimeChanged": false,
+  "remoteDemoReady": false,
+  "schemaChanges": 0,
+  "dataMutations": 0,
+  "environmentChanges": 0,
+  "request": {
+    "version": "v1",
+    "fieldCount": 9,
+    "credentialFields": 0,
+    "maxPromptLength": 12000,
+    "maxToolIntents": 32,
+    "maxToolIntentLength": 128
+  },
+  "cryptography": {
+    "bodyHash": "SHA-256",
+    "signature": "HMAC-SHA256",
+    "signatureComparison": "constant-time",
+    "canonicalFieldCount": 8,
+    "keySlots": ["current", "next"]
+  },
+  "stableErrorCodes": [
+    "PROTOCOL_HEADER_MISSING",
+    "PROTOCOL_HEADER_MALFORMED",
+    "PROTOCOL_VERSION_UNSUPPORTED",
+    "PROTOCOL_KEY_UNKNOWN",
+    "PROTOCOL_BODY_MALFORMED",
+    "PROTOCOL_BODY_TAMPERED",
+    "PROTOCOL_METHOD_MISMATCH",
+    "PROTOCOL_PATH_MISMATCH",
+    "PROTOCOL_AUDIENCE_MISMATCH",
+    "PROTOCOL_ISSUED_AT_FUTURE",
+    "PROTOCOL_EXPIRED",
+    "PROTOCOL_TTL_TOO_LONG",
+    "PROTOCOL_BODY_HASH_INVALID",
+    "PROTOCOL_SIGNATURE_INVALID"
+  ],
+  "tdd": {
+    "red": {
+      "command": "npm.cmd test -- tests/remote-engine-protocol.test.ts",
+      "exitCode": 1,
+      "failedSuites": 1,
+      "reason": "protocol production module absent"
+    },
+    "green": {
+      "command": "npm.cmd test -- tests/remote-engine-protocol.test.ts",
+      "files": 1,
+      "passed": 20,
+      "failed": 0
+    }
+  },
+  "verification": {
+    "relatedTests": {
+      "command": "npm.cmd test -- tests/engine-adapter.test.ts tests/remote-engine-protocol.test.ts",
+      "files": 2,
+      "passed": 29,
+      "failed": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "passed"
+    },
+    "build27": {
+      "command": "npm.cmd run build",
+      "status": "passed",
+      "staticPages": 27
+    },
+    "diffCheck": "passed",
+    "fullSuite": "not run"
+  },
+  "openRisks": [
+    "durable atomic nonce replay storage is required before runtime dispatch",
+    "key provisioning and operational rotation are outside Phase 1",
+    "transport, sidecar enforcement, and end-to-end remote execution are not implemented"
+  ]
+}
