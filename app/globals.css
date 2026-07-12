@@ -15169,7 +15169,9 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .workspace-operation-memory .operation-memory-copy p {
   font-size: var(--text-support);
+  font-weight: 500;
   line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .workspace-operation-memory .operation-memory-point {
