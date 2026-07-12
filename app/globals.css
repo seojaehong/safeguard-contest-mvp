@@ -16324,12 +16324,12 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink);
 }
 
-.safeclaw-module-shell.module-variant-document .ai-connect-tabs button:not(.active):hover {
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button:not(.active):not(.secondary):not(.ghost):not(.document-tab):not(.template-tab):hover {
   border-color: var(--workspace-rule-strong);
   background: var(--workspace-surface-2);
 }
 
-.safeclaw-module-shell.module-variant-document .ai-connect-tabs button.active:hover {
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button.active:not(.secondary):not(.ghost):not(.document-tab):not(.template-tab):hover {
   border-color: var(--workspace-accent);
   background: var(--workspace-surface-3);
 }
