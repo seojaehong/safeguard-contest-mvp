@@ -48,6 +48,38 @@ describe("inferScenario", () => {
     expect(scenario.weatherNote).not.toContain("화학물질");
     expect(response.deliverables.riskAssessmentDraft).toContain("굴착면 붕괴");
     expect(response.deliverables.riskAssessmentDraft).not.toContain("화학세제");
+    expect(JSON.stringify(response.externalData.accidentCases)).not.toMatch(/화학|세척|세제/);
+  });
+
+  it.each([
+    "굴착기 정비 작업",
+    "열수송관 밸브 점검 작업"
+  ])("keeps equipment or service maintenance outside excavation: %s", (question) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.profile.id).toBe("custom-maintenance");
+    expect(scenario.profile.workName).not.toContain("굴착공사");
+  });
+
+  it.each([
+    "열수송관 굴착공사",
+    "굴착 작업",
+    "도로 굴착 보수 작업",
+    "터파기 작업"
+  ])("selects excavation only from excavation work identity: %s", (question) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.profile.id).toBe("construction-excavation");
+    expect(scenario.profile.workName).toContain("굴착");
+  });
+
+  it("does not let the canonical Gwangju cleaning location overwrite excavation identity", () => {
+    const excavation = inferScenario("광주 하남산단 열수송관 굴착공사");
+    const cleaning = inferScenario("클린온 광주 하남산단 공장 바닥 세척 작업. 화학세제 사용.");
+
+    expect(excavation.siteName).toContain("굴착");
+    expect(excavation.siteName).not.toContain("청소");
+    expect(cleaning.siteName).toBe("광주 하남산단 청소 현장");
   });
 
   it("still selects the chemical-cleaning profile from work identity terms", () => {
