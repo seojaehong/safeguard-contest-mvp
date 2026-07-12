@@ -20,3 +20,10 @@
 - Verified: W5 contract 1/1, strict typecheck, normal build 27/27, production workspace/document role matrix 1/1 PASS.
 - Known unrelated RED: existing frontend-design-contract stops at `.command-primary` legacy 14px/560/0 tuple; preserved for a later wave.
 - Next: source-bound evidence and independent review.
+
+## 2026-07-12 W5 review remediation
+- Review: REJECT P1 responsive role regrouping at 1440x320; P2 browser omitted leading/tracking tuple evidence.
+- RED: expanded production matrix observed caption 18.6px leading from a later day/compact override.
+- Fixed: final specificity-aware Day/Night role rules now override every legacy responsive branch; matrix asserts size, weight, leading, tracking and font family where applicable.
+- Verified: standard Day/Night, short-height 1440x320 Day/Night, live Documents table, and 390px overflow matrix PASS.
+- Next: regenerate source-bound evidence and request fresh independent re-review.

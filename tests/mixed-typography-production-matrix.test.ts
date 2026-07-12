@@ -41,6 +41,8 @@ productionMatrix("mixed typography production matrix", () => {
             firstFont: style.fontFamily.split(",")[0].trim().replace(/^['"]|['"]$/gu, ""),
             size: style.fontSize,
             weight: style.fontWeight,
+            lineHeight: Number.parseFloat(style.lineHeight),
+            tracking: Number.parseFloat(style.letterSpacing) || 0,
           };
         };
         return {
@@ -53,13 +55,47 @@ productionMatrix("mixed typography production matrix", () => {
           overflow: document.documentElement.scrollWidth - window.innerWidth,
         };
       });
-      expect(metrics.brand).toMatchObject({ firstFont: "Pretendard", size: "12px", weight: "600" });
-      expect(metrics.hud).toMatchObject({ firstFont: "Geist Mono", size: "11px", weight: "700" });
-      expect(metrics.control).toMatchObject({ size: "14px", weight: "700" });
-      expect(metrics.caption).toMatchObject({ size: "12px", weight: "600" });
-      expect(metrics.support).toMatchObject({ size: "14px", weight: "500" });
-      expect(metrics.sourceHud).toMatchObject({ firstFont: "Geist Mono", size: "11px", weight: "700" });
+      expect(metrics.brand).toMatchObject({ firstFont: "Pretendard", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
+      expect(metrics.hud).toMatchObject({ firstFont: "Geist Mono", size: "11px", weight: "700", lineHeight: 16 });
+      expect(metrics.hud.tracking).toBeCloseTo(0.88, 2);
+      expect(metrics.control).toMatchObject({ size: "14px", weight: "700", lineHeight: 20, tracking: 0 });
+      expect(metrics.caption).toMatchObject({ size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
+      expect(metrics.support).toMatchObject({ size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 });
+      expect(metrics.sourceHud).toMatchObject({ firstFont: "Geist Mono", size: "11px", weight: "700", lineHeight: 16 });
+      expect(metrics.sourceHud.tracking).toBeCloseTo(0.88, 2);
       expect(metrics.overflow).toBeLessThanOrEqual(0);
+      await page.close();
+    }
+
+    for (const theme of ["day", "night"] as const) {
+      const page = await browser.newPage({ viewport: { width: 1440, height: 320 } });
+      await page.goto(`${harness.baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
+      const compactMetrics = await page.evaluate(() => {
+        const read = (selector: string) => {
+          const element = document.querySelector(selector);
+          if (!element) throw new Error(`Missing compact typography target: ${selector}`);
+          const style = getComputedStyle(element);
+          return {
+            size: style.fontSize,
+            weight: style.fontWeight,
+            lineHeight: Number.parseFloat(style.lineHeight),
+            tracking: Number.parseFloat(style.letterSpacing) || 0,
+          };
+        };
+        return {
+          control: read(".command-center-shell .workspace-side-group button span"),
+          caption: read(".command-center-shell .workspace-side-group button small"),
+          support: read(".command-center-shell .workspace-source-status b"),
+          sourceHud: read(".command-center-shell .workspace-source-status small"),
+          overflow: document.documentElement.scrollWidth - window.innerWidth,
+        };
+      });
+      expect(compactMetrics.control).toEqual({ size: "14px", weight: "700", lineHeight: 20, tracking: 0 });
+      expect(compactMetrics.caption).toEqual({ size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
+      expect(compactMetrics.support).toEqual({ size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 });
+      expect(compactMetrics.sourceHud).toMatchObject({ size: "11px", weight: "700", lineHeight: 16 });
+      expect(compactMetrics.sourceHud.tracking).toBeCloseTo(0.88, 2);
+      expect(compactMetrics.overflow).toBeLessThanOrEqual(0);
       await page.close();
     }
 
@@ -71,13 +107,13 @@ productionMatrix("mixed typography production matrix", () => {
       const cell = preview.querySelector("td");
       if (!header || !cell) throw new Error("Missing safety form table typography targets");
       return {
-        header: { size: getComputedStyle(header).fontSize, weight: getComputedStyle(header).fontWeight },
-        cell: { size: getComputedStyle(cell).fontSize, weight: getComputedStyle(cell).fontWeight },
+        header: { size: getComputedStyle(header).fontSize, weight: getComputedStyle(header).fontWeight, lineHeight: getComputedStyle(header).lineHeight, tracking: Number.parseFloat(getComputedStyle(header).letterSpacing) || 0 },
+        cell: { size: getComputedStyle(cell).fontSize, weight: getComputedStyle(cell).fontWeight, lineHeight: getComputedStyle(cell).lineHeight, tracking: Number.parseFloat(getComputedStyle(cell).letterSpacing) || 0 },
         overflow: document.documentElement.scrollWidth - window.innerWidth,
       };
     });
-    expect(tableMetrics.header).toEqual({ size: "12px", weight: "700" });
-    expect(tableMetrics.cell).toEqual({ size: "12px", weight: "600" });
+    expect(tableMetrics.header).toEqual({ size: "12px", weight: "700", lineHeight: "18px", tracking: 0 });
+    expect(tableMetrics.cell).toEqual({ size: "12px", weight: "600", lineHeight: "18px", tracking: 0 });
     expect(tableMetrics.overflow).toBeLessThanOrEqual(0);
     await documentPage.close();
 

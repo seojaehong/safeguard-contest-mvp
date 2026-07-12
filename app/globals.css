@@ -17862,3 +17862,54 @@ h3 {
   line-height: var(--leading-section-title);
   letter-spacing: var(--tracking-section-title);
 }
+
+/* Mixed-role families stay semantic after every legacy responsive override. */
+.safety-form-preview th {
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.safety-form-preview td,
+.command-center-shell .brand-lockup small,
+.command-center-shell .workspace-side-group button small,
+.command-center-shell.workspace-theme-day .workspace-side-group button small,
+.command-center-shell .document-evidence-panel article em {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .brand-lockup small {
+  font-family: var(--font-product);
+}
+
+.command-center-shell .topbar-status span,
+.command-center-shell .step-copy small,
+.command-center-shell .workspace-source-status small,
+.command-center-shell.workspace-theme-day .workspace-source-status small,
+.command-center-shell .document-review-status-strip span {
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-weight: 700;
+  line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
+}
+
+.command-center-shell .workspace-side-group button span,
+.command-center-shell.workspace-theme-day .workspace-side-group button span {
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .workspace-source-status b,
+.command-center-shell.workspace-theme-day .workspace-source-status b {
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
