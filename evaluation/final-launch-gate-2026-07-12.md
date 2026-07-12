@@ -2,8 +2,8 @@
 
 ## Bound source
 
-- Source commit: `fa368b7f2b2eafc6bb461b84ceb63355723f8c30`
-- Integration base: `1ecd68664b2c5aa6f438f0c07c72b830c3ea3d93`
+- Source commit: `c6fdc5326710337bb9763056fed8979f57dca2b4`
+- Integrated backend base: `87798d15aea085284332942390f215f49f3399cf` via merge commit `5647f68`
 - Isolated branch: `fix/final-launch-gate`
 
 ## User-visible remediation
@@ -19,12 +19,12 @@
 ## Gate evidence
 
 - TypeScript: `npm.cmd run typecheck` — pass.
-- Full Vitest suite: 110 files passed; 974 tests passed; 1 intentional skip; 0 failures.
+- Full Vitest suite (serial browser-safe run): 117 files passed, 4 files skipped; 1,028 tests passed, 5 intentional skips; 0 failures.
 - Production build: 27 static pages generated; pass.
-- Static frontend audit: 32 pages, 23 components, 19,643 CSS lines, 0 `!important`, 0 coverage issues, 0 violations.
+- Static frontend audit: 32 pages, 23 components, 19,650 CSS lines, 0 `!important`, 0 coverage issues, 0 violations.
 - Browser audit: 108/108 rows passed, 108 screenshots, 0 findings, 0 recovery rows.
-- Audit bundle: build `c--SuHNyKnafscldtvJ3S`, marker count 1, pass.
-- Normal bundle: build `DvsFqTNzXvrA--9VRYhED`, marker count 0, pass.
+- The post-backend typography delta was additionally verified in the production browser matrix across ontology/workspace, Day/Night, desktop/mobile, popovers, and compact operation-memory roles.
+- Normal bundle: build `nYtYsjsMDMOirIX5gxREX`, marker count 0, pass.
 - PDF and live-harness coverage are included in the full suite; the previously uncollectable live-harness test now passes 3/3.
 
 ## Screenshot-specific proof

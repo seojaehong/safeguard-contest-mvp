@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T02:53:12.845Z",
+  "generatedAt": "2026-07-12T03:30:12.405Z",
   "mode": "audit",
   "buildDirectory": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\final-launch-gate\\.next",
-  "buildId": "c--SuHNyKnafscldtvJ3S",
-  "sourceSha": "fa368b7f2b2eafc6bb461b84ceb63355723f8c30",
-  "sourceIdentity": "032424fa8e0931ae41fff9f18c09f036bb43b9cb2301f96d276356711f2c2e3c",
-  "buildIdentity": "1478a6d0f07359f739ca6c9c461a90f9dbd4d588bde654fbb532733ba8f62987",
-  "chunkCount": 97,
+  "buildId": "ulfT5aIJgEoHZ7-ed0_Lf",
+  "sourceSha": "187348cafc22f9ce642b5e40e34224a9ffa30cf9",
+  "sourceIdentity": "c9e1146db43d5f132b5aa006da88978f0148faa138f1ed9c953e9e66b3b47125",
+  "buildIdentity": "63c62340ce4a022ae29a69ff478bac2ab13ce660598965ddfc293dbcb926a240",
+  "chunkCount": 98,
   "markerCount": 1,
   "markerFiles": [
     "static/chunks/app/layout-4e8c8859234efa17.js"
