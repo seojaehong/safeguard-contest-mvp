@@ -9,7 +9,8 @@
   "red": {
     "stalePlaceholder": "오늘 작업 내용을 한 줄로 입력하세요.",
     "filledBottomDeltaPx": 147.9375,
-    "protectedCompactRegressionsCaught": 4
+    "protectedCompactRegressionsCaught": 4,
+    "restoreContextRegressionCaught": true
   },
   "green": {
     "targetedBrowserTestsPassed": 2,

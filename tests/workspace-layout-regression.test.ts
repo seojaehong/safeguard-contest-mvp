@@ -602,6 +602,21 @@ describe("workspace layout regression", () => {
     await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
 
     const input = page.locator("#field-command-input");
+    expect((await input.inputValue()).length).toBeGreaterThan(0);
+    expect(await page.getByRole("button", { name: "예시로 되돌리기" }).count()).toBe(1);
+    expect(await page.locator(".workspace-current-brief").count()).toBe(1);
+    expect(await page.locator(".workspace-source-status").count()).toBe(1);
+
+    await page.locator(".quick-scenario-chips summary").click();
+    await page.locator(".quick-chip").nth(1).click();
+    const secondExampleQuestion = await input.inputValue();
+    expect(secondExampleQuestion.length).toBeGreaterThan(0);
+    await input.fill(`${secondExampleQuestion} 수정`);
+    expect(await page.getByRole("button", { name: "예시로 되돌리기" }).count()).toBe(1);
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "예시로 되돌리기" }).click();
+    expect(await input.inputValue()).toBe(secondExampleQuestion);
+
     await input.fill("");
 
     expect(await input.inputValue()).toBe("");
@@ -617,6 +632,10 @@ describe("workspace layout regression", () => {
     const page = await browser.newPage({ viewport: { width: 1560, height: 700 } });
     await page.addInitScript((storageKey) => window.localStorage.removeItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY);
     await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
+
+    expect((await page.locator("#field-command-input").inputValue()).length).toBeGreaterThan(0);
+    expect(await page.locator(".workspace-current-brief").count()).toBe(1);
+    expect(await page.locator(".workspace-source-status").count()).toBe(1);
 
     const metrics = await page.evaluate(() => {
       const side = document.querySelector<HTMLElement>(".workspace-side-nav");

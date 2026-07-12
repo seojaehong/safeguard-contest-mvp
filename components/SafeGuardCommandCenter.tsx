@@ -1882,8 +1882,11 @@ export function SafeGuardCommandCenter({
               className="textarea command-console-input"
               value={question}
               onChange={(event) => {
-                setQuestion(event.target.value);
-                setSelectedExampleId(null);
+                const nextQuestion = event.target.value;
+                setQuestion(nextQuestion);
+                if (!nextQuestion.trim()) {
+                  setSelectedExampleId(null);
+                }
                 setData(null);
                 setState("idle");
                 setWorkspacePage("input");

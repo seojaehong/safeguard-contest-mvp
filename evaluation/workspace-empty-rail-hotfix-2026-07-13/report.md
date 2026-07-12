@@ -16,6 +16,7 @@ The input used a persistent placeholder even when its value was empty, and the r
 - `SafeGuardCommandCenter.tsx`
   - Uses an empty placeholder because the field already has a visible label, heading, description, and helper text.
   - Renders `예시로 되돌리기` only while an example remains selected.
+  - Preserves the selected example while non-empty edits are made, then detaches it only when the input is fully cleared.
 - `globals.css`
   - Applies the final stretch/no-independent-scroll rail owner from `680px` upward instead of `721px`.
   - Leaves the existing ultra-short presentation rules below `680px` intact.
@@ -30,6 +31,7 @@ RED:
 - Empty input still exposed `오늘 작업 내용을 한 줄로 입력하세요.`.
 - Filled rail bottom delta was `147.9375px`.
 - A first broad override also broke four protected ultra-short presentation cases, so the media boundary was narrowed.
+- Independent review found that the first visibility fix dropped restore context on every edit; the state transition now covers second-example select, edit, restore, and clear.
 
 GREEN:
 
