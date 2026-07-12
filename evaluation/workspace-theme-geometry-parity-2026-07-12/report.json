@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
   "baseSha": "f5cac0feedeb188c86b4e7b2aaa52f3ab79ca5b6",
+  "testedProductSha": "c017ac6e675b777b40b91fc78a1a9722dbf67d88",
   "branch": "fix/workspace-theme-geometry-parity",
-  "status": "pass_pending_integrated_108_row_audit",
+  "status": "pass_pending_fresh_review_and_integrated_108_row_audit",
   "scope": {
     "productFiles": [
       "app/globals.css"
@@ -39,8 +40,21 @@
     },
     "diffCheck": "pass"
   },
+  "reviewRemediation": {
+    "initialVerdict": "reject",
+    "closedInProductSha": "c017ac6e675b777b40b91fc78a1a9722dbf67d88",
+    "runtimeCoverageAdded": [
+      "field chip children",
+      "primary action",
+      "opened advanced settings",
+      "opened example presets",
+      "text and border metrics",
+      "Night baseline values"
+    ],
+    "staticAuditSourceSha": "c017ac6e675b777b40b91fc78a1a9722dbf67d88"
+  },
   "pending": [
-    "independent code review",
+    "fresh independent re-review",
     "selective integration into authoritative release branch",
     "integrated audit build",
     "integrated 108-row browser audit",

@@ -3,6 +3,7 @@
 ## Scope
 
 - Base: `f5cac0feedeb188c86b4e7b2aaa52f3ab79ca5b6`
+- Tested product SHA: `c017ac6e675b777b40b91fc78a1a9722dbf67d88`
 - Branch: `fix/workspace-theme-geometry-parity`
 - Product rule: Day and Night use the same Night/Linear geometry. Theme-specific CSS may change paint and focus treatment, not layout geometry.
 - Database, API, harness, ontology, and generated-document contracts were not changed.
@@ -19,7 +20,7 @@ The Night workspace inherited the shared `.command-center-shell` geometry while 
 
 ### GREEN
 
-The final geometry owner now applies the same structural declarations to both themes and preserves the existing palette/focus rules. The browser contract passes at:
+The final geometry owner now applies the same structural declarations to both themes and preserves the existing palette/focus rules. The browser contract compares computed text, borders, padding, radius, typography, and placement for the topbar, navigation, composer, five field chips, five evidence cards, primary action, and opened advanced/example panels. It passes at:
 
 - 1440x900 desktop
 - 1024x900 tablet
@@ -30,6 +31,15 @@ The final geometry owner now applies the same structural declarations to both th
 
 The same test also verifies that the shell and primary action colors remain different between Day and Night.
 
+## Independent Review Remediation
+
+The first independent review rejected `f060a57` because the test did not inspect field-chip children or opened details surfaces and the static audit still identified the base SHA. Product commit `c017ac6` closes those gaps:
+
+- Field chips, primary action, opened advanced settings, AI options, opened examples, quick actions, text, border widths, font weight, and minimum width are now part of the runtime fingerprint.
+- Night baseline values are asserted directly, including the 4px topbar/toggle/input geometry, 44px normal toggle minimum width, 46px compact minimum width, 16px desktop column gap, zero mobile gap, 8px primary-action radius, and 4px opened-panel radius.
+- Weather is a deterministic intercepted fixture and the test waits for the completed weather state before measuring.
+- The static audit was regenerated from product SHA `c017ac6e675b777b40b91fc78a1a9722dbf67d88`.
+
 ## Verification
 
 - Theme geometry browser contract: 1/1 passed; 21 unrelated tests skipped by name filter.
@@ -37,7 +47,7 @@ The same test also verifies that the shell and primary action colors remain diff
 - Workspace input, workbench visual, and frontend design contracts: 3 files, 34/34 tests passed.
 - Strict TypeScript check: passed.
 - Production build: 27/27 static pages generated.
-- Static frontend audit: 32 pages, 23 product components, 0 coverage issues, 0 violations, 0 important declarations.
+- Static frontend audit at product SHA `c017ac6`: 32 pages, 23 product components, 0 coverage issues, 0 violations, 0 important declarations.
 - `git diff --check`: passed.
 
 ## Integration Gate
