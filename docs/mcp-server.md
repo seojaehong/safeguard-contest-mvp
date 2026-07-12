@@ -50,10 +50,17 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
   토큰 무중단). Supabase 서비스 롤 미설정 시엔 env만으로 동작한다(회귀 없음).
 - 활성화 조건도 확장됐다: env 토큰이 있거나 **Supabase 서비스 롤이 설정**되면 MCP 계층이
   켜진다(DB 전용 운영 시에도 `501`이 아니라 정상 동작).
-- 컨텍스트는 도구 핸들러의 `extra.authInfo.extra`로 전달된다. `generate_safety_docpack`은
+- 컨텍스트는 도구 핸들러의 `extra.authInfo.extra`로 전달되며, 모든 등록 도구가 작업을
+  시작하기 전에 `scopes`를 집행한다. 권한이 없거나 컨텍스트가 누락되면 MCP 오류
+  `MCP_TOOL_FORBIDDEN`으로 종료한다. DB의 scope 값이 비어 있거나 잘못된 형식이면
+  `tools:*`로 승격하지 않고 무권한으로 처리한다.
+- 지원 scope는 정확한 `tools:<tool_name>`, 제한된 `tools:read`/`tools:write`, 기존 DB·env
+  운영자 호환용 `tools:*`다. 신규 웹/CLI 발급 토큰은 현재 등록된 10개 도구의 정확한 scope를
+  저장하므로, 나중에 새 도구가 추가되어도 기존 토큰에 자동으로 권한이 생기지 않는다.
+- `generate_safety_docpack`은
   `siteId`가 있으면 결과 workpack을 해당 사이트로 귀속 저장하고, 성패와 무관하게
   `attribution`(`{siteId, orgId, workpackId, saved}`) 메타를 응답에 기록한다. 나머지 도구는
-  현재 컨텍스트 로깅만 하며 향후 확장점 주석을 달아 두었다.
+  사이트/조직 컨텍스트 안에서 조회·검수 작업을 수행한다.
 - `last_used_at`은 fire-and-forget으로 갱신한다(응답 경로를 막지 않는다).
 
 #### 토큰 발급
@@ -79,8 +86,8 @@ stdout에 **한 번만** 출력되며 복구 불가다.
 ```bash
 # .env.local의 SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY를 사용한다.
 node scripts/issue-mcp-token.mjs "부평 파일럿 - 안전관리자" "부평공장"   # 사이트 귀속
-node scripts/issue-mcp-token.mjs "운영자 전체신뢰"                        # 사이트 미귀속
-# npm 스크립트로도 동일: npm run token:mcp -- "<label>" ["<site name>"]
+node scripts/issue-mcp-token.mjs "운영자 미귀속"                         # 사이트 미귀속, 현재 10개 도구만
+# npm 스크립트로도 동일: npm.cmd run token:mcp -- "<label>" ["<site name>"]
 ```
 
 출력된 평문 토큰을 그대로 `Authorization: Bearer <token>`으로 쓰면 된다(접속 방법 동일).
@@ -177,4 +184,4 @@ Agent Card](https://a2a-protocol.org)를 정적 JSON으로 서빙한다. 국내 
 description에 "MCP 도구 계층은 공개되어 있으나 A2A task 엔드포인트는 아직 없고 로드맵
 단계"라는 점을 명시해, 실제로 없는 기능을 있는 것처럼 보이지 않게 한다.
 
-로컬 dev에서 활성화하려면 `SAFECLAW_MCP_TOKENS=<token> npm run dev`로 기동한다.
+Windows 로컬 dev에서는 `$env:SAFECLAW_MCP_TOKENS="<token>"; npm.cmd run dev`로 기동한다.
