@@ -9113,8 +9113,8 @@ body:has(.safeclaw-landing) :is(
 
 /* 내 AI 연결 (/settings/ai-connect) — 기존 모듈 셸 안에서 쓰는 고급 연결 표면. */
 .ai-connect-workspace {
-  --ai-connect-code-background: #090a0b;
-  --ai-connect-code-ink: #f7f8f8;
+  --ai-connect-code-background: var(--steel-0);
+  --ai-connect-code-ink: var(--paper-0);
   --module-control-radius: var(--radius-control);
   --module-control-weight: 700;
   display: grid;
@@ -9203,6 +9203,7 @@ body:has(.safeclaw-landing) :is(
 .ai-connect-meta dd {
   margin: 8px 0 0;
   color: var(--os-text, #f6f5ef);
+  font-family: var(--font-hud);
   font-size: var(--text-table);
   font-weight: 500;
   line-height: var(--leading-table);
@@ -9973,6 +9974,13 @@ body:has(.safeclaw-landing) :is(
 
 .ai-connect-token-items article p {
   margin: 6px 0 0;
+}
+
+.ai-connect-token-items article strong {
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .ai-connect-token-items article > span {
@@ -14695,8 +14703,8 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .doc-tab, .template-card, .safeclaw-module-chrome-button)):hover,
 .safeclaw-module-shell.module-variant-document .button:not(.secondary):hover,
 .safeclaw-module-shell.module-variant-document .safeclaw-module-primary:hover {
-  border-color: var(--workspace-accent-hover) !important;
-  background: var(--workspace-accent-hover) !important;
+  border-color: var(--module-primary-hover-border, var(--workspace-accent-hover)) !important;
+  background: var(--module-primary-hover-background, var(--workspace-accent-hover)) !important;
 }
 
 .safeclaw-module-shell.module-variant-document button.secondary,
@@ -14807,6 +14815,8 @@ body:has(.safeclaw-landing) :is(
   --module-primary-background: var(--workspace-surface-1);
   --module-primary-border: var(--workspace-rule);
   --module-primary-color: var(--workspace-muted);
+  --module-primary-hover-background: var(--workspace-surface-2);
+  --module-primary-hover-border: var(--workspace-rule-strong);
   min-height: 96px;
   border: 1px solid var(--workspace-rule);
   border-radius: var(--radius-control);
@@ -14820,6 +14830,8 @@ body:has(.safeclaw-landing) :is(
   --module-primary-background: rgba(108, 111, 247, 0.12);
   --module-primary-border: rgba(108, 111, 247, 0.5);
   --module-primary-color: var(--workspace-ink);
+  --module-primary-hover-background: var(--workspace-surface-3);
+  --module-primary-hover-border: var(--workspace-accent);
   border-color: rgba(108, 111, 247, 0.5);
   background: rgba(108, 111, 247, 0.12);
   color: var(--workspace-ink);
@@ -14942,6 +14954,15 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink);
 }
 
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-verdict > span {
+  color: var(--workspace-ink);
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-packet-actions a {
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+}
+
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-metrics dt,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-command span,
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-state-grid p,
@@ -15004,6 +15025,10 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard.ready {
   border-color: rgba(108, 111, 247, 0.48);
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard.active {
+  border-color: var(--workspace-success);
 }
 
 .safeclaw-module-shell.module-variant-document .ai-connect-sif-next-gate {

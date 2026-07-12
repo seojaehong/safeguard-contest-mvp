@@ -12,6 +12,11 @@ type Violation = {
   value?: string;
 };
 
+type CssRule = {
+  declarations: string;
+  selectors: string[];
+};
+
 const targetRules = new Set([
   "font-family-token",
   "font-size-tier",
@@ -58,9 +63,75 @@ function violationCounts(violations: readonly Violation[]): Record<string, numbe
   }, {});
 }
 
+function cssRules(source: string): CssRule[] {
+  const uncommentedSource = source.replace(/\/\*[\s\S]*?\*\//gu, "");
+  return Array.from(uncommentedSource.matchAll(/([^{}]+)\{([^{}]*)\}/gu), (match) => ({
+    declarations: match[2].replace(/\s+/gu, " ").trim(),
+    selectors: match[1]
+      .split(",")
+      .map((selector) => selector.replace(/\s+/gu, " ").trim()),
+  }));
+}
+
+function declarationsFor(source: string, selector: string): string[] {
+  const normalizedSelector = selector.replace(/\s+/gu, " ").trim();
+  return cssRules(source)
+    .filter((rule) => rule.selectors.includes(normalizedSelector))
+    .map((rule) => rule.declarations);
+}
+
+function expectDeclaration(source: string, selector: string, declaration: string): void {
+  expect(
+    declarationsFor(source, selector).some((declarations) => declarations.includes(declaration)),
+    `${selector} must include ${declaration}`,
+  ).toBe(true);
+}
+
 describe("AI connect design contract", () => {
+  const css = fs.readFileSync(path.join(process.cwd(), "app", "globals.css"), "utf8");
+
+  it("maps AI code surfaces through existing global color tokens", () => {
+    expectDeclaration(css, ".ai-connect-workspace", "--ai-connect-code-background: var(--steel-0)");
+    expectDeclaration(css, ".ai-connect-workspace", "--ai-connect-code-ink: var(--paper-0)");
+    expect(declarationsFor(css, ".ai-connect-workspace").join(" ")).not.toMatch(
+      /--ai-connect-code-(?:background|ink):\s*#/u,
+    );
+  });
+
+  it("uses document-theme text tokens on the rendered Day surfaces", () => {
+    expectDeclaration(
+      css,
+      ".safeclaw-module-shell.module-variant-document .ai-connect-sif-packet-actions a",
+      "color: var(--workspace-ink)",
+    );
+    expectDeclaration(
+      css,
+      ".safeclaw-module-shell.module-variant-document .ai-connect-sif-verdict > span",
+      "color: var(--workspace-ink)",
+    );
+  });
+
+  it("keeps the final document vector active state semantic", () => {
+    expectDeclaration(
+      css,
+      ".safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard.active",
+      "border-color: var(--workspace-success)",
+    );
+  });
+
+  it("assigns the rendered token label a complete component-title tuple", () => {
+    const selector = ".ai-connect-token-items article strong";
+    for (const declaration of [
+      "font-size: var(--text-component-title)",
+      "font-weight: 700",
+      "line-height: var(--leading-component-title)",
+      "letter-spacing: var(--tracking-component-title)",
+    ] as const) {
+      expectDeclaration(css, selector, declaration);
+    }
+  });
+
   it("keeps the complete AI connect selector family free of audit findings", () => {
-    const css = fs.readFileSync(path.join(process.cwd(), "app", "globals.css"), "utf8");
     const rawTargetLines = targetRuleLines(css);
     const uncommentedTargetLines = targetRuleLines(css.replace(/\/\*[\s\S]*?\*\//gu, ""));
     expect(rawTargetLines.size).toBeGreaterThan(0);

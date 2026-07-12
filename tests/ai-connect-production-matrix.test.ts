@@ -227,6 +227,7 @@ const roleChecks: readonly { selectors: readonly string[]; expected: TypographyM
       ".ai-connect-sif-approval-packet strong",
       ".ai-connect-sif-approval-steps strong",
       ".ai-connect-sif-preflight strong",
+      ".ai-connect-token-items article strong",
     ],
     expected: { firstFont: "Pretendard", size: "20px", weight: "700", lineHeight: 27, tracking: -0.3 },
   },
@@ -252,7 +253,11 @@ const roleChecks: readonly { selectors: readonly string[]; expected: TypographyM
     expected: { firstFont: "Pretendard", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 },
   },
   {
-    selectors: [".ai-connect-meta dd", ".ai-connect-sif-metrics dd"],
+    selectors: [".ai-connect-meta dd"],
+    expected: { firstFont: "Geist Mono", size: "13px", weight: "500", lineHeight: 20, tracking: 0 },
+  },
+  {
+    selectors: [".ai-connect-sif-metrics dd"],
     expected: { firstFont: "Pretendard", size: "13px", weight: "500", lineHeight: 20, tracking: 0 },
   },
   {
@@ -331,6 +336,28 @@ async function readPaint(page: Page, selector: string): Promise<string> {
     const style = getComputedStyle(element);
     return [style.color, style.backgroundColor, style.borderColor].join("|");
   });
+}
+
+async function readSurfacePaint(page: Page, selector: string): Promise<string> {
+  return page.locator(selector).first().evaluate((element) => {
+    const style = getComputedStyle(element);
+    return [style.backgroundColor, style.borderColor].join("|");
+  });
+}
+
+async function readTokenColor(page: Page, selector: string, token: string): Promise<string> {
+  return page.locator(selector).first().evaluate((element, cssToken) => {
+    const probe = document.createElement("span");
+    probe.style.color = `var(${cssToken})`;
+    element.appendChild(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  }, token);
+}
+
+async function readElementColor(page: Page, selector: string, property: "backgroundColor" | "borderTopColor"): Promise<string> {
+  return page.locator(selector).first().evaluate((element, cssProperty) => getComputedStyle(element)[cssProperty], property);
 }
 
 async function expectVisibleControls(page: Page, selector: string): Promise<void> {
@@ -413,23 +440,44 @@ productionMatrix("AI connect production matrix", () => {
           .not.toBe(await readPaint(page, ".ai-connect-sif-approval-steps li.blocked > span"));
         expect(await readPaint(page, ".ai-connect-tabs button.active"))
           .not.toBe(await readPaint(page, ".ai-connect-tabs button:not(.active)"));
+        const activeTab = page.locator(".ai-connect-tabs button.active").first();
+        const inactiveTab = page.locator(".ai-connect-tabs button:not(.active)").first();
+        await inactiveTab.hover();
+        const inactiveHoverPaint = await readSurfacePaint(page, ".ai-connect-tabs button:not(.active)");
+        expect(await readElementColor(page, ".ai-connect-tabs button:not(.active)", "borderTopColor"))
+          .toBe(await readTokenColor(page, ".ai-connect-workspace", "--workspace-rule-strong"));
+        expect(await readElementColor(page, ".ai-connect-tabs button:not(.active)", "backgroundColor"))
+          .toBe(await readTokenColor(page, ".ai-connect-workspace", "--workspace-surface-2"));
+        await activeTab.hover();
+        const activeHoverPaint = await readSurfacePaint(page, ".ai-connect-tabs button.active");
+        expect(await readElementColor(page, ".ai-connect-tabs button.active", "borderTopColor"))
+          .toBe(await readTokenColor(page, ".ai-connect-workspace", "--workspace-accent"));
+        expect(await readElementColor(page, ".ai-connect-tabs button.active", "backgroundColor"))
+          .toBe(await readTokenColor(page, ".ai-connect-workspace", "--workspace-surface-3"));
+        expect(activeHoverPaint).not.toBe(inactiveHoverPaint);
         const vectorGuard = page.locator(".ai-connect-sif-vector-guard");
         expect(await vectorGuard.getAttribute("class")).toContain("locked");
-        const lockedVectorPaint = await readPaint(page, ".ai-connect-sif-vector-guard.locked");
         await vectorGuard.evaluate((element) => element.classList.replace("locked", "active"));
-        expect(await readPaint(page, ".ai-connect-sif-vector-guard.active")).not.toBe(lockedVectorPaint);
+        expect(await readElementColor(page, ".ai-connect-sif-vector-guard.active", "borderTopColor"))
+          .toBe(await readTokenColor(page, ".ai-connect-workspace", "--workspace-success"));
 
-        for (const selector of [
-          ".ai-connect-secret textarea",
-          ".ai-connect-command-box pre",
-          ".ai-connect-sif-next-gate code",
-          ".ai-connect-sif-command pre",
+        for (const { foregroundSelector, surfaceSelector } of [
+          { foregroundSelector: ".ai-connect-secret textarea", surfaceSelector: ".ai-connect-secret textarea" },
+          { foregroundSelector: ".ai-connect-command-box pre", surfaceSelector: ".ai-connect-command-box pre" },
+          { foregroundSelector: ".ai-connect-sif-next-gate code", surfaceSelector: ".ai-connect-sif-next-gate code" },
+          { foregroundSelector: ".ai-connect-sif-command pre", surfaceSelector: ".ai-connect-sif-command pre" },
+          { foregroundSelector: ".ai-connect-sif-packet-actions a", surfaceSelector: ".ai-connect-sif-packet-actions a" },
+          { foregroundSelector: ".ai-connect-sif-verdict > span", surfaceSelector: ".ai-connect-sif-verdict" },
         ] as const) {
-          const colors = await page.locator(selector).first().evaluate((element) => {
+          const foreground = await page.locator(foregroundSelector).first().evaluate((element) => getComputedStyle(element).color);
+          const background = await page.locator(surfaceSelector).first().evaluate((element) => {
             const style = getComputedStyle(element);
-            return { foreground: style.color, background: style.backgroundColor };
+            return style.backgroundColor;
           });
-          expect(contrastRatio(colors.foreground, colors.background), `${selector} ${theme}`).toBeGreaterThanOrEqual(4.5);
+          expect(
+            contrastRatio(foreground, background),
+            `${foregroundSelector} on ${surfaceSelector} ${theme}`,
+          ).toBeGreaterThanOrEqual(4.5);
         }
 
         const columns = await page.evaluate(() => ({
@@ -453,7 +501,12 @@ productionMatrix("AI connect production matrix", () => {
       { width: 390, height: 844 },
     ] as const) {
       for (const theme of ["day", "night"] as const) {
-        const page = await browser.newPage({ viewport });
+        const context = await browser.newContext({ viewport });
+        const storageBeforeNavigation = await context.storageState();
+        expect(
+          storageBeforeNavigation.origins.flatMap((origin) => origin.localStorage).some((entry) => entry.name === AUTH_STORAGE_KEY),
+        ).toBe(false);
+        const page = await context.newPage();
         const probe = await installNetworkFixtures(page);
         await page.goto(`${harness.baseUrl}/settings/ai-connect?theme=${theme}`, { waitUntil: "networkidle" });
         await page.locator(`.safeclaw-module-shell[data-ready='true'][data-theme='${theme}'] .ai-connect-empty`).waitFor({ state: "visible" });
@@ -474,7 +527,7 @@ productionMatrix("AI connect production matrix", () => {
         });
         await expectVisibleControls(page, ".ai-connect-empty a");
         expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
-        await page.close();
+        await context.close();
       }
     }
   }, 90_000);
