@@ -101,12 +101,12 @@ export function matchesLegacyToken(token: string, legacyTokens: Set<string>): bo
 
 /** scopes 컬럼(jsonb)을 알려진 권한만 남겨 정규화한다. 형태가 어긋나면 권한 없음. */
 export function normalizeScopes(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
+  if (!Array.isArray(value) || value.length === 0) return [];
   const normalized: string[] = [];
   for (const item of value) {
-    if (typeof item !== "string") continue;
+    if (typeof item !== "string") return [];
     const scope = item.trim();
-    if (!scope || scope.length > MAX_SCOPE_LENGTH || !KNOWN_MCP_SCOPES.has(scope)) continue;
+    if (!scope || scope.length > MAX_SCOPE_LENGTH || !KNOWN_MCP_SCOPES.has(scope)) return [];
     if (!normalized.includes(scope)) normalized.push(scope);
   }
   return normalized;

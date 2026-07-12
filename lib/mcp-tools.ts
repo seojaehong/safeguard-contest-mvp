@@ -40,15 +40,16 @@ export function toToolResult(payload: unknown): McpToolResult {
 
 /** 도구 실행 실패를 MCP 오류 응답(isError)으로 매핑한다. */
 export function toToolError(error: unknown): McpToolResult {
-  const message = error instanceof Error ? error.message : String(error);
   const rawCode = typeof error === "object" && error !== null && "code" in error
     ? (error as { code?: unknown }).code
     : undefined;
-  const code = rawCode === "MCP_TOOL_FORBIDDEN" ? rawCode : undefined;
+  const payload = rawCode === "MCP_TOOL_FORBIDDEN"
+    ? { code: "MCP_TOOL_FORBIDDEN", error: "도구 권한이 없습니다." }
+    : { code: "MCP_TOOL_INTERNAL_ERROR", error: "도구 실행 중 오류가 발생했습니다." };
   return {
     content: [{
       type: "text",
-      text: JSON.stringify(code ? { code, error: message } : { error: message }, null, 2),
+      text: JSON.stringify(payload, null, 2),
     }],
     isError: true,
   };
