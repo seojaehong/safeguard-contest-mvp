@@ -1,0 +1,65 @@
+{
+  "artifact": "phase-a-hermes-adr",
+  "date": "2026-07-13",
+  "status": "verified",
+  "scope": {
+    "architectureOnly": true,
+    "codeOrProviderImplementation": false,
+    "databaseChanges": false,
+    "liveHermesProofClaimed": false
+  },
+  "decisions": [
+    {
+      "id": "ADR-PA-001",
+      "name": "product_fact_and_effect_authority",
+      "result": "safeclaw_mcp_db_evidence_harness_remains_authoritative"
+    },
+    {
+      "id": "ADR-PA-002",
+      "name": "isolated_versioned_engine_adapter",
+      "result": "runtime_is_experimental_adapter_not_core_or_provider_branch"
+    },
+    {
+      "id": "ADR-PA-003",
+      "name": "evidence_and_obligation_boundary",
+      "result": "sif_then_kosha_then_current_law_with_separate_obligation_classification"
+    },
+    {
+      "id": "ADR-PA-004",
+      "name": "grounded_generation_provider_and_human_gates",
+      "result": "naturalize_only_provider_fallback_confirmation_and_publication_gates_remain"
+    },
+    {
+      "id": "ADR-PA-005",
+      "name": "oauth_experiment_and_service_auth",
+      "result": "bounded_representative_local_oauth_poc_and_service_auth_for_commercial_traffic"
+    }
+  ],
+  "verification": [
+    {
+      "check": "json_syntax",
+      "status": "passed",
+      "evidence": "5 decisions and 5 verification entries parsed"
+    },
+    {
+      "check": "markdown_local_links",
+      "status": "passed",
+      "evidence": "29 local links and referenced line ranges resolved"
+    },
+    {
+      "check": "required_decision_assertions",
+      "status": "passed",
+      "evidence": "28 required architecture phrases present"
+    },
+    {
+      "check": "owned_path_only_diff",
+      "status": "passed",
+      "evidence": "2 changed paths, both within assigned ownership"
+    },
+    {
+      "check": "git_diff_check",
+      "status": "passed",
+      "evidence": "git diff --cached --check exited 0"
+    }
+  ]
+}
