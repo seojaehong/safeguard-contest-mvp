@@ -21,7 +21,7 @@ export interface EngineAdapter {
   readonly id: string;
   /** Execution capabilities stay empty until the sidecar enforces an attested allowlist. */
   readonly capabilities: readonly [];
-  checkAvailability(context: BrokerRequestContext): Promise<void>;
+  checkAvailability(context: BrokerRequestContext, signal?: AbortSignal): Promise<void>;
   run(input: EngineRunInput): Promise<void>;
 }
 
@@ -31,6 +31,7 @@ export type BrokerErrorCode =
   | "AUTH_BACKEND_UNAVAILABLE"
   | "SITE_CONTEXT_REQUIRED"
   | "SITE_FORBIDDEN"
+  | "SITE_BACKEND_UNAVAILABLE"
   | "ENGINE_UNAVAILABLE"
   | "ENGINE_RUNTIME_UNAVAILABLE"
   | "ENGINE_SITE_BINDING_UNPROVEN"
@@ -45,6 +46,7 @@ const PUBLIC_MESSAGES: Record<BrokerErrorCode, string> = {
   AUTH_BACKEND_UNAVAILABLE: "인증 서비스를 사용할 수 없습니다.",
   SITE_CONTEXT_REQUIRED: "현장 컨텍스트가 필요합니다.",
   SITE_FORBIDDEN: "이 현장에 접근할 수 없습니다.",
+  SITE_BACKEND_UNAVAILABLE: "현장 정보를 확인할 수 없습니다.",
   ENGINE_UNAVAILABLE: "에이전트 엔진을 사용할 수 없습니다.",
   ENGINE_RUNTIME_UNAVAILABLE: "에이전트 실행 환경을 사용할 수 없습니다.",
   ENGINE_SITE_BINDING_UNPROVEN: "현장 연결을 확인할 수 없어 실행하지 않았습니다.",
@@ -106,39 +108,52 @@ export function createGuardedEngineAdapter(
   const timeoutMs = positiveInt(options.timeoutMs ?? 240_000, 240_000);
   let active = 0;
 
+  async function runInSlot(
+    callerSignal: AbortSignal | undefined,
+    operation: (signal: AbortSignal) => Promise<void>,
+  ): Promise<void> {
+    if (callerSignal?.aborted) {
+      throw callerSignal.reason instanceof BrokerError
+        ? callerSignal.reason
+        : new BrokerError("ENGINE_EXECUTION_FAILED", 500, callerSignal.reason);
+    }
+    if (active >= maxConcurrent) throw new BrokerError("ENGINE_BUSY", 503);
+    active += 1;
+    const controller = new AbortController();
+    const abortFromCaller = (): void => controller.abort(callerSignal?.reason);
+    callerSignal?.addEventListener("abort", abortFromCaller, { once: true });
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    let timeoutError: BrokerError | null = null;
+
+    try {
+      timeout = setTimeout(() => {
+        timeoutError = new BrokerError("ENGINE_TIMEOUT", 503);
+        controller.abort(timeoutError);
+      }, timeoutMs);
+      await operation(controller.signal);
+      if (timeoutError) throw timeoutError;
+    } catch (error) {
+      if (timeoutError) throw timeoutError;
+      throw error;
+    } finally {
+      if (timeout) clearTimeout(timeout);
+      callerSignal?.removeEventListener("abort", abortFromCaller);
+      active -= 1;
+    }
+  }
+
   return {
     id: adapter.id,
     capabilities: adapter.capabilities,
-    checkAvailability: (context) => adapter.checkAvailability(context),
+    checkAvailability: (context, signal) => runInSlot(
+      signal,
+      (guardedSignal) => adapter.checkAvailability(context, guardedSignal),
+    ),
     async run(input): Promise<void> {
-      if (input.signal.aborted) {
-        throw input.signal.reason instanceof BrokerError
-          ? input.signal.reason
-          : new BrokerError("ENGINE_EXECUTION_FAILED", 500);
-      }
-      if (active >= maxConcurrent) throw new BrokerError("ENGINE_BUSY", 503);
-      active += 1;
-      const controller = new AbortController();
-      const abortFromCaller = (): void => controller.abort(input.signal.reason);
-      input.signal.addEventListener("abort", abortFromCaller, { once: true });
-      let timeout: ReturnType<typeof setTimeout> | undefined;
-      let timeoutError: BrokerError | null = null;
-
-      try {
-        timeout = setTimeout(() => {
-          timeoutError = new BrokerError("ENGINE_TIMEOUT", 503);
-          controller.abort(timeoutError);
-        }, timeoutMs);
-        await adapter.run({ ...input, signal: controller.signal });
-        if (timeoutError) throw timeoutError;
-      } catch (error) {
-        if (timeoutError) throw timeoutError;
-        throw error;
-      } finally {
-        if (timeout) clearTimeout(timeout);
-        input.signal.removeEventListener("abort", abortFromCaller);
-        active -= 1;
-      }
+      await runInSlot(
+        input.signal,
+        (guardedSignal) => adapter.run({ ...input, signal: guardedSignal }),
+      );
     },
   };
 }

@@ -116,7 +116,7 @@ export function createAgentChatPost(dependencies: AgentChatRouteDependencies) {
     }
 
     try {
-      await dependencies.engine.checkAvailability(context);
+      await dependencies.engine.checkAvailability(context, request.signal);
     } catch (error) {
       const brokerError = error instanceof BrokerError
         ? error

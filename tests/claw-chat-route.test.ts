@@ -8,7 +8,10 @@ import {
   type BrokerRequestContext,
   type EngineAdapter,
 } from "@/lib/engine-adapter";
-import { createBrokerContextResolver } from "@/lib/openclaw-broker-auth";
+import {
+  createBrokerAuthorization,
+  createBrokerContextResolver,
+} from "@/lib/openclaw-broker-auth";
 import { createRateLimiter } from "@/lib/rate-limit";
 
 const validContext: BrokerRequestContext = {
@@ -242,6 +245,47 @@ describe("/api/agent/chat broker boundary", () => {
     expect(engine.run).not.toHaveBeenCalled();
   });
 
+  it("classifies authentication backend failures as a stable 503", async () => {
+    const authorization = createBrokerAuthorization({
+      createClient: () => ({ marker: "client" }),
+      authenticate: async () => {
+        throw new Error("auth network unavailable");
+      },
+      findOwnedSite: async () => validContext,
+    });
+
+    await expect(authorization.authenticate(request({ token: "valid-token" }))).rejects.toMatchObject({
+      code: "AUTH_BACKEND_UNAVAILABLE",
+      status: 503,
+    });
+  });
+
+  it("distinguishes invalid Supabase auth from an auth backend outage", async () => {
+    const module = await import("@/lib/openclaw-broker-auth") as typeof import("@/lib/openclaw-broker-auth") & {
+      authenticateBrokerWorkspaceUser?: (
+        client: { auth: { getUser: (token: string) => Promise<unknown> } },
+        headers: Headers,
+      ) => Promise<unknown>;
+    };
+    expect(module.authenticateBrokerWorkspaceUser).toBeTypeOf("function");
+    if (!module.authenticateBrokerWorkspaceUser) return;
+
+    const headers = new Headers({ authorization: "Bearer supplied-token" });
+    const invalidClient = {
+      auth: {
+        getUser: vi.fn(async () => ({ data: { user: null }, error: { status: 401, code: "bad_jwt" } })),
+      },
+    };
+    const outageClient = {
+      auth: {
+        getUser: vi.fn(async () => ({ data: { user: null }, error: { status: 503, code: "service_unavailable" } })),
+      },
+    };
+
+    await expect(module.authenticateBrokerWorkspaceUser(invalidClient, headers)).resolves.toBeNull();
+    await expect(module.authenticateBrokerWorkspaceUser(outageClient, headers)).rejects.toBeDefined();
+  });
+
   it("returns 400 when an authenticated request has no site context", async () => {
     const engine = adapter();
     const post = createAgentChatPost({ resolveContext: resolver(), engine });
@@ -264,6 +308,25 @@ describe("/api/agent/chat broker boundary", () => {
     expect(engine.run).not.toHaveBeenCalled();
   });
 
+  it("classifies owned-site backend failures as a stable 503 instead of forbidden", async () => {
+    const engine = adapter();
+    const resolveContext = createBrokerContextResolver({
+      createClient: () => ({ marker: "client" }),
+      authenticate: async () => ({ id: validContext.userId, email: "owner@example.com" }),
+      findOwnedSite: async () => {
+        throw new Error("site database unavailable");
+      },
+    });
+    const post = createAgentChatPost({ resolveContext, engine });
+
+    const response = await post(request({ token: "valid-token", siteId: validContext.siteId }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ code: "SITE_BACKEND_UNAVAILABLE" });
+    expect(engine.checkAvailability).not.toHaveBeenCalled();
+    expect(engine.run).not.toHaveBeenCalled();
+  });
+
   it("lets a valid site member reach the adapter with user, organization, and site context", async () => {
     const engine = adapter();
     const post = createAgentChatPost({ resolveContext: resolver(), engine });
@@ -272,7 +335,7 @@ describe("/api/agent/chat broker boundary", () => {
     const body = await response.text();
 
     expect(response.status).toBe(200);
-    expect(engine.checkAvailability).toHaveBeenCalledWith(validContext);
+    expect(engine.checkAvailability).toHaveBeenCalledWith(validContext, expect.any(AbortSignal));
     expect(engine.run).toHaveBeenCalledWith(expect.objectContaining({ context: validContext }));
     expect(body).toContain("adapter reached");
     expect(body).toContain("\"kind\":\"final\"");

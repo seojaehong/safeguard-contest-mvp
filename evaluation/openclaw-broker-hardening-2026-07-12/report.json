@@ -1,12 +1,8 @@
 {
   "date": "2026-07-12",
   "branch": "fix/openclaw-broker-hardening",
-  "productSeries": [
-    "c1891cd5935bc3647b943bf771bfebaf271e5afa",
-    "0b8799e38275f09b74d0e691fddc6271f23b3f01",
-    "a94f94acec4e2610fb6846822da7f500121f8e66"
-  ],
-  "scope": "exactly three independently confirmed OpenClaw release blockers",
+  "reviewBase": "170cf785f90c2440454344b6fc215a825fdd6e76",
+  "scope": "fresh independent OpenClaw broker security review findings",
   "integration": "same-branch follow-up only; controller will selectively cherry-pick after review",
   "schemaChanges": 0,
   "dataMutations": 0,
@@ -14,37 +10,41 @@
   "oauthInvocations": 0,
   "liveDeployments": 0,
   "controls": {
-    "chatContextIsolation": "authToken or siteId changes abort the active fetch/SSE controller, clear turns, and prevent aborted requests from updating later turns",
-    "rateLimits": "coarse IP pre-auth limiter retained; authenticated user limiter now runs immediately after authentication and before body parsing or owned-site lookup",
-    "fieldWorkspaceLogging": "owned-site context load failures emit only CLAW_CONTEXT_LOAD_FAILED with no raw Error or object"
+    "oauthAgentBinding": "models status receives the exact configured agent and mixed token/API-key or effective non-profile routes are rejected",
+    "contextPreAuthLimit": "GET /api/agent/context applies a coarse IP limit before Supabase authentication",
+    "browserContextIsolation": "token-tagged view state hides old sites immediately and only the active request generation can commit ready state",
+    "engineConcurrency": "availability/OAuth preflight and execution share one maxConcurrent slot with abort propagation and child-close release",
+    "backendOutages": "auth and site backend failures return stable 503 codes while actual invalid/forbidden outcomes remain 401/403",
+    "securityOrder": "coarse pre-auth limit, authentication, fine identity limit, body parsing, site validation"
   },
   "tdd": {
-    "chatContextRed": {
-      "command": "npm.cmd test -- tests/openclaw-broker-ui-context.test.ts",
-      "passed": 4,
-      "failed": 1,
-      "failure": "expected active AbortSignal to be aborted, received false"
-    },
-    "authenticatedLimiterRed": {
-      "command": "npm.cmd test -- tests/claw-chat-route.test.ts tests/openclaw-broker-ui-context.test.ts",
-      "passed": 16,
-      "failed": 2,
-      "failure": "body and owned-site work preceded fine-limit; quota-following request returned 200 instead of 429"
-    },
-    "fieldLoggingRed": {
-      "command": "npm.cmd test -- tests/openclaw-broker-ui-context.test.ts",
-      "passed": 5,
-      "failed": 1,
-      "failure": "stable logging function was absent"
-    }
+    "command": "npm.cmd test -- tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/engine-adapter.test.ts tests/openclaw-broker-ui-context.test.ts",
+    "passed": 38,
+    "failed": 14,
+    "errors": 2
   },
   "verification": {
-    "focusedTestCommand": "npm.cmd test -- tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/engine-adapter.test.ts tests/openclaw-broker-ui-context.test.ts",
-    "focusedFiles": 4,
-    "focusedPassed": 40,
-    "focusedFailed": 0,
+    "prior40FileSet": {
+      "files": 4,
+      "passed": 52,
+      "failed": 0,
+      "log": "evaluation/openclaw-broker-hardening-2026-07-12/prior40-plus-new.stdout.log"
+    },
+    "expanded75FileSet": {
+      "files": 8,
+      "passed": 87,
+      "failed": 0,
+      "log": "evaluation/openclaw-broker-hardening-2026-07-12/expanded75-plus-new.stdout.log"
+    },
+    "newSecurityTests": {
+      "passed": 12,
+      "failed": 0,
+      "skippedPrior": 40,
+      "log": "evaluation/openclaw-broker-hardening-2026-07-12/new-security-tests.stdout.log"
+    },
     "typecheckCommand": "npm.cmd run typecheck",
     "typecheck": "passed",
+    "typecheckLog": "evaluation/openclaw-broker-hardening-2026-07-12/typecheck.stdout.log",
     "buildCommand": "npm.cmd run build",
     "build": "passed",
     "buildStaticPages": 27,

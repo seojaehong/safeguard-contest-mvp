@@ -117,7 +117,15 @@ export function hasLocalOpenClawCapability(config: OpenClawChatConfig): boolean 
 }
 
 export function buildOpenClawStatusArgs(config: OpenClawChatConfig): string[] {
-  return ["--profile", config.profile, "models", "status", "--json"];
+  return [
+    "--profile",
+    config.profile,
+    "models",
+    "status",
+    "--agent",
+    config.agent,
+    "--json",
+  ];
 }
 
 export function buildOpenClawChatArgs(
@@ -199,7 +207,8 @@ function hasOpenAiOauthProfile(auth: JsonRecord | null): boolean {
     const provider = asRecord(providerValue);
     if (asString(provider?.provider) !== "openai") return false;
     if (asString(provider?.status) !== "ok") return false;
-    return asArray(provider?.effectiveProfiles).some((profileValue) => {
+    const effectiveProfiles = asArray(provider?.effectiveProfiles);
+    return effectiveProfiles.length > 0 && effectiveProfiles.every((profileValue) => {
       const profile = asRecord(profileValue);
       return asString(profile?.provider) === "openai"
         && asString(profile?.type) === "oauth"
@@ -214,13 +223,20 @@ function hasOnlyOpenAiOauthProfile(auth: JsonRecord | null): boolean {
     .map((providerValue) => asRecord(providerValue))
     .find((provider) => asString(provider?.provider) === "openai");
   const profiles = asRecord(openAi?.profiles);
-  return asNumber(profiles?.oauth) > 0 && asNumber(profiles?.apiKey) === 0;
+  const oauthCount = asNumber(profiles?.oauth);
+  return oauthCount > 0
+    && asNumber(profiles?.count) === oauthCount
+    && asNumber(profiles?.token) === 0
+    && asNumber(profiles?.apiKey) === 0;
 }
 
 function hasUsableOpenAiRuntime(auth: JsonRecord | null): boolean {
   return asArray(auth?.runtimeAuthRoutes).some((routeValue) => {
     const route = asRecord(routeValue);
-    return asString(route?.provider) === "openai" && asString(route?.status) === "usable";
+    const effective = asRecord(route?.effective);
+    return asString(route?.provider) === "openai"
+      && asString(route?.status) === "usable"
+      && asString(effective?.kind) === "profiles";
   });
 }
 
@@ -260,53 +276,96 @@ export function parseOpenClawOAuthStatusOutput(
   };
 }
 
-export async function assertOpenClawOpenAiOAuth(config: OpenClawChatConfig): Promise<OpenClawOAuthStatus> {
+export type OpenClawSpawnProcess = (
+  command: string,
+  args: string[],
+  options: ReturnType<typeof resolveSpawnOptions>,
+) => ChildProcessWithoutNullStreams;
+
+export type AssertOpenClawOpenAiOAuth = (
+  config: OpenClawChatConfig,
+  signal?: AbortSignal,
+) => Promise<OpenClawOAuthStatus>;
+
+export function createOpenClawOAuthStatusChecker(dependencies: {
+  spawnProcess?: OpenClawSpawnProcess;
+} = {}): AssertOpenClawOpenAiOAuth {
+  const spawnProcess = dependencies.spawnProcess ?? spawn;
+
+  return async function checkOpenClawOAuthStatus(
+    config: OpenClawChatConfig,
+    signal?: AbortSignal,
+  ): Promise<OpenClawOAuthStatus> {
+    return await new Promise<OpenClawOAuthStatus>((resolve, reject) => {
+      if (signal?.aborted) {
+        reject(signal.reason ?? new BrokerError("ENGINE_EXECUTION_FAILED", 500));
+        return;
+      }
+
+      const command = resolveOpenClawCommand(config, buildOpenClawStatusArgs(config));
+      const child = spawnProcess(command.command, command.args, resolveSpawnOptions());
+      let stdout = "";
+      let closeObserved = false;
+      let terminationError: unknown = null;
+      const terminate = (error: unknown): void => {
+        if (terminationError || closeObserved) return;
+        terminationError = error;
+        child.kill();
+      };
+      const abort = (): void => terminate(
+        signal?.reason ?? new BrokerError("ENGINE_EXECUTION_FAILED", 500),
+      );
+      signal?.addEventListener("abort", abort, { once: true });
+      const timeout = setTimeout(() => {
+        terminate(new Error(`OpenClaw OAuth status check timed out after ${OAUTH_STATUS_TIMEOUT_MS}ms`));
+      }, OAUTH_STATUS_TIMEOUT_MS);
+
+      child.stdout.on("data", (chunk: Buffer) => {
+        stdout += chunk.toString();
+      });
+      child.stderr.on("data", () => undefined);
+      child.on("error", (error) => terminate(error));
+      child.on("close", (code, closeSignal) => {
+        if (closeObserved) return;
+        closeObserved = true;
+        clearTimeout(timeout);
+        signal?.removeEventListener("abort", abort);
+        if (terminationError) {
+          reject(terminationError);
+          return;
+        }
+        if (code !== 0) {
+          reject(new Error(
+            `OpenClaw OAuth status check failed (code=${code ?? "null"}, signal=${closeSignal ?? "none"})`,
+          ));
+          return;
+        }
+        try {
+          resolve(parseOpenClawOAuthStatusOutput(stdout, config));
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  };
+}
+
+const checkOpenClawOAuthStatus = createOpenClawOAuthStatusChecker();
+
+export async function assertOpenClawOpenAiOAuth(
+  config: OpenClawChatConfig,
+  signal?: AbortSignal,
+): Promise<OpenClawOAuthStatus> {
+  if (signal?.aborted) {
+    throw signal.reason ?? new BrokerError("ENGINE_EXECUTION_FAILED", 500);
+  }
   const key = `${config.bin}|${config.profile}|${config.agent}|${config.model}|${config.requiredAuthProvider}`;
   const now = Date.now();
   if (oauthStatusCache && oauthStatusCache.key === key && oauthStatusCache.expiresAt > now) {
     return oauthStatusCache.status;
   }
 
-  const status = await new Promise<OpenClawOAuthStatus>((resolve, reject) => {
-    const command = resolveOpenClawCommand(config, buildOpenClawStatusArgs(config));
-    const child = spawn(command.command, command.args, resolveSpawnOptions());
-    let stdout = "";
-    let closeObserved = false;
-    let terminationError: unknown = null;
-    const timeout = setTimeout(() => {
-      if (terminationError || closeObserved) return;
-      terminationError = new Error(`OpenClaw OAuth status check timed out after ${OAUTH_STATUS_TIMEOUT_MS}ms`);
-      child.kill();
-    }, OAUTH_STATUS_TIMEOUT_MS);
-
-    child.stdout.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString();
-    });
-    child.stderr.on("data", () => undefined);
-    child.on("error", (error) => {
-      if (terminationError || closeObserved) return;
-      terminationError = error;
-      child.kill();
-    });
-    child.on("close", (code, signal) => {
-      if (closeObserved) return;
-      closeObserved = true;
-      clearTimeout(timeout);
-      if (terminationError) {
-        reject(terminationError);
-        return;
-      }
-      if (code !== 0) {
-        reject(new Error(`OpenClaw OAuth status check failed (code=${code ?? "null"}, signal=${signal ?? "none"})`));
-        return;
-      }
-      try {
-        resolve(parseOpenClawOAuthStatusOutput(stdout, config));
-      } catch (error) {
-        reject(error);
-      }
-    });
-  });
+  const status = await checkOpenClawOAuthStatus(config, signal);
 
   oauthStatusCache = { key, expiresAt: now + OAUTH_STATUS_CACHE_MS, status };
   return status;
@@ -315,12 +374,6 @@ export async function assertOpenClawOpenAiOAuth(config: OpenClawChatConfig): Pro
 export function createOpenClawBrokerSessionKey(): string {
   return `broker-${randomUUID()}`;
 }
-
-export type OpenClawSpawnProcess = (
-  command: string,
-  args: string[],
-  options: ReturnType<typeof resolveSpawnOptions>,
-) => ChildProcessWithoutNullStreams;
 
 export function createOpenClawChatRunner(dependencies: {
   spawnProcess?: OpenClawSpawnProcess;
@@ -397,7 +450,7 @@ export type LocalOpenClawAdapterDependencies = {
     context: BrokerRequestContext,
     config: OpenClawChatConfig,
   ) => boolean | Promise<boolean>;
-  assertOAuth?: typeof assertOpenClawOpenAiOAuth;
+  assertOAuth?: AssertOpenClawOpenAiOAuth;
   runChat?: typeof runOpenClawChat;
 };
 
@@ -409,7 +462,10 @@ export function createLocalOpenClawAdapter(
   const runChat = dependencies.runChat ?? runOpenClawChat;
   const runtimeCapability = dependencies.runtimeCapability ?? hasLocalOpenClawCapability;
 
-  async function assertRunnableContext(context: BrokerRequestContext): Promise<void> {
+  async function assertRunnableContext(
+    context: BrokerRequestContext,
+    signal?: AbortSignal,
+  ): Promise<void> {
     if (resolveEngineMode(dependencies.env) !== "local-openclaw" || !config.local) {
       throw new BrokerError("ENGINE_UNAVAILABLE", 503);
     }
@@ -422,17 +478,17 @@ export function createLocalOpenClawAdapter(
     if (!await (dependencies.verifyExecutionAttestation?.(context, config) ?? false)) {
       throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
     }
-    await assertOAuth(config);
+    await assertOAuth(config, signal);
   }
 
   return {
     id: "local-openclaw",
     capabilities: [],
-    async checkAvailability(context): Promise<void> {
-      await assertRunnableContext(context);
+    async checkAvailability(context, signal): Promise<void> {
+      await assertRunnableContext(context, signal);
     },
     async run(input): Promise<void> {
-      await assertRunnableContext(input.context);
+      await assertRunnableContext(input.context, input.signal);
       await runChat({
         config,
         prompt: input.prompt,

@@ -4,7 +4,7 @@
 
 **Goal:** Close the unauthenticated OpenClaw spawn path with schema-free tenant binding and fail-closed engine selection.
 
-**Architecture:** Move request policy and runtime execution behind testable dependencies. Authenticate through existing Supabase helpers, authorize an explicit owner-scoped site, then invoke a guarded adapter whose default production implementation is unavailable.
+**Architecture:** Move request policy and runtime execution behind testable dependencies. After the coarse pre-auth limiter, authenticate through Supabase, apply the fine authenticated-identity limiter, authorize an explicit owner-scoped site, then invoke a guarded adapter whose default production implementation is unavailable.
 
 **Tech Stack:** Next.js route handlers, TypeScript strict mode, Supabase, Vitest, Node child processes.
 
@@ -70,3 +70,12 @@
 - [x] Remove effect metadata as an enforcement claim; expose no executable capabilities and fail local execution closed pending sidecar authorization.
 - [x] Add coarse pre-auth IP and authenticated identity limits, child-close ordering, already-aborted, and stable-code-only logging tests.
 - [x] Record focused tests, strict typecheck, normal build, and final whitespace gate. The full suite remains intentionally unrun.
+
+### Fresh independent security review corrections
+
+- [x] Bind `models status` to the exact execution agent and reject mixed or effective non-OAuth credential paths.
+- [x] Put `/api/agent/context` behind a coarse pre-auth IP limiter.
+- [x] Make browser auth changes hide old site options immediately and reject aborted or stale context generations.
+- [x] Count availability/OAuth preflight and execution against the same `maxConcurrent` slot with caller abort propagation.
+- [x] Reserve `401`/`403` for actual invalid/forbidden outcomes and map auth/site backend outages to stable `503` codes.
+- [x] Document the authentication -> fine limiter -> site validation order.
