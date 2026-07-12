@@ -2,18 +2,33 @@
 
 import { useEffect, useState } from "react";
 
+import WorkspaceLoading from "../../app/workspace/loading";
+
 export function GlobalBoundaryProbe() {
-  const [shouldThrow, setShouldThrow] = useState(false);
+  const [auditSurface, setAuditSurface] = useState<"none" | "global-error" | "loading">("none");
 
   useEffect(() => {
     const boundary = new URLSearchParams(window.location.search).get("__auditBoundary");
     if (boundary === "global-error") {
-      setShouldThrow(true);
+      setAuditSurface("global-error");
+    } else if (boundary === "loading") {
+      setAuditSurface("loading");
     }
   }, []);
 
-  if (shouldThrow) {
+  if (auditSurface === "global-error") {
     throw new globalThis.Error("SafeClaw deterministic frontend audit global boundary probe");
+  }
+
+  if (auditSurface === "loading") {
+    return (
+      <div
+        data-audit-boundary="loading"
+        style={{ position: "fixed", inset: 0, zIndex: 2147483647, overflow: "auto", background: "var(--bg)" }}
+      >
+        <WorkspaceLoading />
+      </div>
+    );
   }
 
   return null;

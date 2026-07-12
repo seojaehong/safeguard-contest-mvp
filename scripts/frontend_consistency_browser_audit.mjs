@@ -39,6 +39,22 @@ const viewports = [
   { name: "mobile-390", width: 390, height: 844 },
 ];
 
+export function browserAuditRowContract() {
+  const routeRows = routes.length * viewports.length;
+  const workspaceThemeRows = 2 * viewports.length;
+  const specialSurfaceRows = 4;
+  const generatedSurfaceRows = 2;
+  return {
+    routes: routes.length,
+    viewports: viewports.length,
+    routeRows,
+    workspaceThemeRows,
+    specialSurfaceRows,
+    generatedSurfaceRows,
+    totalRows: routeRows + workspaceThemeRows + specialSurfaceRows + generatedSurfaceRows,
+  };
+}
+
 fs.mkdirSync(screenshotDirectory, { recursive: true });
 
 function listFiles(directory, predicate) {
@@ -51,7 +67,7 @@ function listFiles(directory, predicate) {
   return files;
 }
 
-function currentSourceIdentity() {
+export function currentSourceIdentity() {
   const identityFiles = [
     path.join(root, "app", "globals.css"),
     path.join(root, "lib", "frontend-design-contract.ts"),
@@ -72,26 +88,26 @@ function currentSourceIdentity() {
     identity.update("\0");
   }
   return {
-    digest: identity.digest("hex"),
+    sourceSha: execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(),
+    sourceIdentity: identity.digest("hex"),
     newestMtime: Math.max(...identityFiles.map((file) => fs.statSync(file).mtimeMs)),
   };
 }
 
-function loadStaticAuditPrerequisite() {
-  if (!fs.existsSync(staticAuditPath)) {
-    throw new Error(`Static audit prerequisite is missing: ${path.relative(root, staticAuditPath)}`);
+export function validateStaticAuditPrerequisite(staticAudit, source, { now, reportMtime }) {
+  if (!/^[0-9a-f]{40}$/u.test(source.sourceSha)
+    || !/^[0-9a-f]{64}$/u.test(source.sourceIdentity)
+    || !Number.isFinite(source.newestMtime)) {
+    throw new Error("Current frontend source identity is invalid.");
   }
-  const staticAudit = JSON.parse(fs.readFileSync(staticAuditPath, "utf8"));
-  const source = currentSourceIdentity();
-  const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
   const generatedAt = Date.parse(staticAudit.generatedAt);
   if (staticAudit.schemaVersion !== 2
-    || staticAudit.sourceSha !== sourceSha
-    || staticAudit.sourceIdentity !== source.digest
+    || staticAudit.sourceSha !== source.sourceSha
+    || staticAudit.sourceIdentity !== source.sourceIdentity
     || !Number.isFinite(generatedAt)
     || generatedAt < source.newestMtime
-    || generatedAt > Date.now() + 60_000
-    || fs.statSync(staticAuditPath).mtimeMs < source.newestMtime) {
+    || generatedAt > now + 60_000
+    || reportMtime < source.newestMtime) {
     throw new Error("Static audit prerequisite is stale.");
   }
   if (staticAudit.status !== "pass"
@@ -103,7 +119,30 @@ function loadStaticAuditPrerequisite() {
       `Static audit prerequisite failed: status=${staticAudit.status}, violations=${staticAudit.violationCount}, coverage=${staticAudit.coverageIssues}, pages=${staticAudit.counts?.pageFiles}, components=${staticAudit.counts?.componentFiles}`,
     );
   }
-  return staticAudit;
+  return { staticAudit, sourceSha: source.sourceSha, sourceIdentity: source.sourceIdentity };
+}
+
+export function browserReportProvenance(validatedPrerequisite) {
+  return {
+    sourceSha: validatedPrerequisite.sourceSha,
+    sourceIdentity: validatedPrerequisite.sourceIdentity,
+    staticAudit: {
+      sourceSha: validatedPrerequisite.staticAudit.sourceSha,
+      sourceIdentity: validatedPrerequisite.staticAudit.sourceIdentity,
+    },
+  };
+}
+
+function loadStaticAuditPrerequisite() {
+  if (!fs.existsSync(staticAuditPath)) {
+    throw new Error(`Static audit prerequisite is missing: ${path.relative(root, staticAuditPath)}`);
+  }
+  const staticAudit = JSON.parse(fs.readFileSync(staticAuditPath, "utf8"));
+  const source = currentSourceIdentity();
+  return validateStaticAuditPrerequisite(staticAudit, source, {
+    now: Date.now(),
+    reportMtime: fs.statSync(staticAuditPath).mtimeMs,
+  });
 }
 
 function safeName(value) {
@@ -140,7 +179,7 @@ function expectedHeadingTuple(row, documentRole) {
   if (documentRole) return { role: "document-title", size: 28, weight: 700, lineHeight: 43.4, tracking: -1.12 };
   const width = { "desktop-1440": 1440, "tablet-1024": 1024, "mobile-390": 390 }[row.viewport];
   if (!width) return null;
-  const displaySurface = row.route === "/" || row.route === "/workspace" || row.route === "/prototype" || row.route === "special:loading";
+  const displaySurface = row.route === "/" || row.route === "/workspace" || row.route === "/prototype";
   if (displaySurface && width > 720) {
     const size = Math.min(72, Math.max(44, width * 0.06));
     return { role: "display", size, weight: 800, lineHeight: size * 1.15, tracking: size * -0.045 };
@@ -181,6 +220,26 @@ const transientHydration418 = /^Minified React error #418; visit https:\/\/react
 
 export function shouldRetryTransientHydration(pageErrors, consoleErrors) {
   return pageErrors.length === 1 && consoleErrors.length === 0 && transientHydration418.test(pageErrors[0]);
+}
+
+export function loadingEvidenceFindings(row, resolvedWorkspaceRows) {
+  const findings = [];
+  if (row.boundaryMarker !== "loading") findings.push("loading probe marker was not present at capture");
+  if (row.fallbackKind !== "deterministic-audit-probe") findings.push("loading row was not produced by the deterministic audit probe");
+  if (!String(row.visiblePrimaryContent ?? "").includes("작업 화면을 준비하고 있습니다")) {
+    findings.push("loading probe content was not present at capture");
+  }
+  if (!/^[0-9a-f]{64}$/u.test(String(row.screenshotSha256 ?? ""))) {
+    findings.push("loading screenshot digest was not captured");
+  }
+  const resolvedDigests = resolvedWorkspaceRows
+    .map((resolvedRow) => resolvedRow.screenshotSha256)
+    .filter((digest) => /^[0-9a-f]{64}$/u.test(String(digest ?? "")));
+  if (resolvedDigests.length === 0) findings.push("resolved workspace comparison evidence was not provided");
+  if (resolvedDigests.includes(row.screenshotSha256)) {
+    findings.push("loading screenshot duplicates resolved workspace evidence");
+  }
+  return findings;
 }
 
 export function numericalContractFindings(row, { documentRole = false, expectedBoundary = "" } = {}) {
@@ -288,7 +347,9 @@ async function capture(page, options) {
     pageErrors.push(navigationError);
   }
   const screenshot = relativeScreenshot(name);
-  await page.screenshot({ path: path.join(root, screenshot), type: "jpeg", quality: 68, fullPage: true });
+  const screenshotPath = path.join(root, screenshot);
+  await page.screenshot({ path: screenshotPath, type: "jpeg", quality: 68, fullPage: true });
+  const screenshotSha256 = crypto.createHash("sha256").update(fs.readFileSync(screenshotPath)).digest("hex");
   const metrics = await page.evaluate(() => {
     const bodyStyle = getComputedStyle(document.body);
     const typographyTuple = (element) => {
@@ -369,7 +430,7 @@ async function capture(page, options) {
     bodyFont: metrics.bodyFont, bodyFontSize: metrics.bodyFontSize, bodyFontWeight: metrics.bodyFontWeight,
     bodyLineHeight: metrics.bodyLineHeight, bodyLetterSpacing: metrics.bodyLetterSpacing,
     productFontLoaded: metrics.productFontLoaded, primaryHeading: metrics.primaryHeading,
-    visiblePrimaryContent: metrics.visiblePrimaryContent, workspaceTheme: metrics.workspaceTheme, screenshot,
+    visiblePrimaryContent: metrics.visiblePrimaryContent, workspaceTheme: metrics.workspaceTheme, screenshot, screenshotSha256,
     boundaryMarker: metrics.boundaryMarker, renderedControls: metrics.renderedControls,
     keySurfaces: metrics.keySurfaces, geometryFingerprint: metrics.geometryFingerprint,
     documentTypography: metrics.documentTypography,
@@ -389,7 +450,9 @@ async function capture(page, options) {
 }
 
 async function main() {
-  const staticAudit = loadStaticAuditPrerequisite();
+  const validatedPrerequisite = loadStaticAuditPrerequisite();
+  const staticAudit = validatedPrerequisite.staticAudit;
+  const provenance = browserReportProvenance(validatedPrerequisite);
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ locale: "ko-KR", colorScheme: "dark", reducedMotion: "reduce" });
   const page = await context.newPage();
@@ -426,13 +489,13 @@ async function main() {
     ["not-found", "/__frontend-audit-not-found__", "Actual Next.js not-found boundary.", "not-found"],
     ["error", "/dryrun?__auditBoundary=error", "Actual app/error boundary exercised by an environment-gated deterministic server throw.", "error"],
     ["global-error", "/dryrun?__auditBoundary=global-error", "Actual app/global-error boundary exercised by an environment-gated root-layout client throw.", "global-error"],
-    ["loading", "/workspace?scenario=seoul-construction-windy", "Loading is transient in the production build; source contract is covered and the resolved workspace surface is captured.", ""],
+    ["loading", "/workspace?scenario=seoul-construction-windy&__auditBoundary=loading", "Audit-only probe renders the checked-in workspace loading component over the resolved route. This verifies the loading surface, not production transition timing.", "loading"],
   ];
   const specialSurfaceRows = [];
   for (const [surface, requestedPath, limitation, expectedBoundary] of specialDefinitions) {
     const row = await capture(page, {
       route: `special:${surface}`, requestedPath, viewport: viewports[0], theme: "Product",
-      name: `special-${surface}`, limitation, fallbackKind: surface === "loading" ? "expected-transient-resolution" : "none",
+      name: `special-${surface}`, limitation, fallbackKind: surface === "loading" ? "deterministic-audit-probe" : "none",
       expectedBoundary,
       expectedStatuses: surface === "not-found"
         ? [404]
@@ -458,7 +521,9 @@ async function main() {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.setContent(pdfHtml, { waitUntil: "domcontentloaded" });
   const pdfScreenshot = relativeScreenshot("generated-pdf-export");
-  await page.screenshot({ path: path.join(root, pdfScreenshot), type: "jpeg", quality: 75, fullPage: true });
+  const pdfScreenshotPath = path.join(root, pdfScreenshot);
+  await page.screenshot({ path: pdfScreenshotPath, type: "jpeg", quality: 75, fullPage: true });
+  const pdfScreenshotSha256 = crypto.createHash("sha256").update(fs.readFileSync(pdfScreenshotPath)).digest("hex");
   const pdfMetrics = await page.evaluate(() => ({
     horizontalOverflow: document.documentElement.scrollWidth - innerWidth,
     bodyFont: getComputedStyle(document.body).fontFamily,
@@ -481,11 +546,29 @@ async function main() {
   }));
   const generatedSurfaceRows = [
     { ...documentPreview, surface: "document-preview" },
-    { surface: "pdf-export", route: "generated:pdf-export", requestedUrl: `${baseUrl}/api/export/pdf?format=html`, finalUrl: `${baseUrl}/api/export/pdf?format=html`, status: pdfResponse.status(), expectedStatuses: [200], expectedFinalPath: "/api/export/pdf", viewport: "desktop-1440", theme: "Document", consoleErrors: [], pageErrors: [], renderedControls: [], keySurfaces: [], boundaryMarker: "", geometryFingerprint: "", fallbackKind: "none", ...pdfMetrics, screenshot: pdfScreenshot, limitation: "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests." },
+    { surface: "pdf-export", route: "generated:pdf-export", requestedUrl: `${baseUrl}/api/export/pdf?format=html`, finalUrl: `${baseUrl}/api/export/pdf?format=html`, status: pdfResponse.status(), expectedStatuses: [200], expectedFinalPath: "/api/export/pdf", viewport: "desktop-1440", theme: "Document", consoleErrors: [], pageErrors: [], renderedControls: [], keySurfaces: [], boundaryMarker: "", geometryFingerprint: "", fallbackKind: "none", ...pdfMetrics, screenshot: pdfScreenshot, screenshotSha256: pdfScreenshotSha256, limitation: "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests." },
   ];
   await browser.close();
 
   const allRows = [...routeRows, ...workspaceThemeRows, ...specialSurfaceRows, ...generatedSurfaceRows];
+  const rowContract = browserAuditRowContract();
+  const actualRowCounts = {
+    routes: routes.length,
+    routeRows: routeRows.length,
+    workspaceThemeRows: workspaceThemeRows.length,
+    specialSurfaceRows: specialSurfaceRows.length,
+    generatedSurfaceRows: generatedSurfaceRows.length,
+    totalRows: allRows.length,
+  };
+  for (const [name, expected] of Object.entries(rowContract)) {
+    if (name === "viewports") continue;
+    if (actualRowCounts[name] !== expected) {
+      throw new Error(`Browser audit row contract mismatch: ${name}=${actualRowCounts[name]}, expected ${expected}`);
+    }
+  }
+  const resolvedWorkspaceRows = [...routeRows, ...workspaceThemeRows].filter(
+    (row) => row.route === "/workspace" && row.viewport === viewports[0].name,
+  );
   for (const viewport of viewports) {
     const day = workspaceThemeRows.find((row) => row.viewport === viewport.name && row.theme === "Day");
     const night = workspaceThemeRows.find((row) => row.viewport === viewport.name && row.theme === "Night");
@@ -495,9 +578,12 @@ async function main() {
     }
   }
   for (const row of allRows) {
-    const expectedBoundary = row.route.startsWith("special:") && ["not-found", "error", "global-error"].includes(row.surface) ? row.surface : "";
+    const expectedBoundary = row.route.startsWith("special:") && ["not-found", "error", "global-error", "loading"].includes(row.surface) ? row.surface : "";
     const documentRole = row.surface === "pdf-export";
     const contractChecks = numericalContractFindings(row, { documentRole, expectedBoundary });
+    if (row.surface === "loading") {
+      contractChecks.findings.push(...loadingEvidenceFindings(row, resolvedWorkspaceRows));
+    }
     if (row.geometryMismatch) contractChecks.findings.push("Workspace Day/Night geometry fingerprint differs");
     contractChecks.passed = contractChecks.findings.length === 0;
     row.contractChecks = contractChecks;
@@ -511,9 +597,14 @@ async function main() {
     { command: "node ./scripts/frontend_consistency_browser_audit.mjs", outcome: failedRows.length ? "fail" : "pass", exitCode: failedRows.length ? 1 : 0, rows: allRows.length, failedRows: failedRows.length, findings: findings.length, recoveredRows: recoveredRows.length },
   ];
   const report = {
-    schemaVersion: 2, generatedAt: new Date().toISOString(), baseUrl,
+    schemaVersion: 3, generatedAt: new Date().toISOString(), baseUrl,
+    sourceSha: provenance.sourceSha,
+    sourceIdentity: provenance.sourceIdentity,
+    rowContract,
     totals: { routes: routes.length, routeRows: routeRows.length, workspaceThemeRows: workspaceThemeRows.length, specialSurfaceRows: specialSurfaceRows.length, generatedSurfaceRows: generatedSurfaceRows.length, screenshots: allRows.length, successes: allRows.length - failedRows.length, failedRows: failedRows.length, recoveredRows: recoveredRows.length, findingCount: findings.length, failures: failedRows.length, elapsedMs: Date.now() - startedAt },
     staticAudit: {
+      sourceSha: provenance.staticAudit.sourceSha,
+      sourceIdentity: provenance.staticAudit.sourceIdentity,
       command: "npm.cmd run audit:frontend-consistency",
       reportPath: path.relative(root, staticAuditPath).replaceAll("\\", "/"),
       status: staticAudit.status,
@@ -533,7 +624,7 @@ async function main() {
   };
   fs.writeFileSync(path.join(outputDirectory, "browser-report.json"), `${JSON.stringify(report, null, 2)}\n`);
   const gateLines = verificationCommands.map((gate) => `- \`${gate.command}\`: ${gate.outcome}, exit ${gate.exitCode}${gate.testFiles ? `, ${gate.testFiles} files/${gate.tests} tests` : ""}${gate.buildId ? `, build ${gate.buildId}` : ""}${gate.pages ? `, ${gate.pages} pages/${gate.components} components, coverage ${gate.coverageIssues}, violations ${gate.violations}` : ""}${gate.rows ? `, ${gate.rows} rows, failed ${gate.failedRows}, findings ${gate.findings}` : ""}`).join("\n");
-  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Routes: ${report.totals.routes}/32\n- Route matrix: ${report.totals.routeRows}/96\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/6\n- Special surfaces: ${report.totals.specialSurfaceRows}/4\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/2\n- Screenshots: ${report.totals.screenshots}\n- Successful rows: ${report.totals.successes}\n- Failed rows: ${report.totals.failedRows}\n- Recovered transient rows: ${report.totals.recoveredRows}\n- Findings: ${report.totals.findingCount}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Executed verification\n\n${gateLines}\n\n## Scope\n\nThis report contains browser facts measured by this invocation only. External test, typecheck, build, and integration results are not provided. The validated static prerequisite is recorded separately in the JSON report.\n\n## Findings\n\n${findings.length ? findings.map((item) => `- ${item}`).join("\n") : "None."}\n`;
+  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Source SHA: ${report.sourceSha}\n- Source identity: ${report.sourceIdentity}\n- Routes: ${report.totals.routes}/${report.rowContract.routes}\n- Route matrix: ${report.totals.routeRows}/${report.rowContract.routeRows}\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/${report.rowContract.workspaceThemeRows}\n- Special surfaces: ${report.totals.specialSurfaceRows}/${report.rowContract.specialSurfaceRows}\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/${report.rowContract.generatedSurfaceRows}\n- Total rows: ${report.totals.screenshots}/${report.rowContract.totalRows}\n- Successful rows: ${report.totals.successes}\n- Failed rows: ${report.totals.failedRows}\n- Recovered transient rows: ${report.totals.recoveredRows}\n- Findings: ${report.totals.findingCount}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Executed verification\n\n${gateLines}\n\n## Scope\n\nThis report contains browser facts measured by this invocation only. External test, typecheck, build, and integration results are not provided. The validated static prerequisite identity is recorded separately in the JSON report.\n\n## Findings\n\n${findings.length ? findings.map((item) => `- ${item}`).join("\n") : "None."}\n`;
   fs.writeFileSync(path.join(outputDirectory, "browser-report.md"), markdown);
   if (failedRows.length) {
     console.error(JSON.stringify(report.totals, null, 2));
