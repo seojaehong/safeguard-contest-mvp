@@ -33,6 +33,118 @@ describe("workspace layout regression", () => {
     await harness?.stop();
   }, 30_000);
 
+  it("keeps Day and Night workspace geometry identical while preserving distinct theme colors", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const viewports = [
+      { width: 1440, height: 900, label: "desktop" },
+      { width: 1024, height: 900, label: "tablet" },
+      { width: 390, height: 844, label: "mobile" },
+      { width: 1440, height: 500, label: "desktop-short" },
+      { width: 1024, height: 600, label: "tablet-short" },
+      { width: 1440, height: 320, label: "desktop-compact" },
+    ] as const;
+    const selectors = [
+      ".command-topbar",
+      ".workspace-theme-toggle",
+      ".workspace-theme-toggle button:nth-child(1)",
+      ".workspace-theme-toggle button:nth-child(2)",
+      ".linear-workspace-layout",
+      ".workspace-side-nav",
+      ".workspace-side-group:first-child",
+      ".workspace-side-group:first-child button:nth-of-type(1)",
+      ".linear-workspace-layout .command-main",
+      ".workspace-input-page",
+      ".workspace-input-page .command-copy",
+      ".workspace-input-page .command-copy .eyebrow",
+      ".workspace-input-page .command-console",
+      ".workspace-input-page .command-console-input",
+      ".workspace-input-page .input-helper",
+      ".workspace-input-page .input-composer-tray",
+      ".workspace-input-page .composer-attach-button",
+      ".workspace-input-page .field-brief-chip-row",
+      ".workspace-input-page .evidence-readiness-rail",
+      ".workspace-input-page .evidence-readiness-card:nth-child(1)",
+      ".workspace-input-page .evidence-readiness-card:nth-child(2)",
+      ".workspace-input-page .evidence-readiness-card:nth-child(3)",
+      ".workspace-input-page .evidence-readiness-card:nth-child(4)",
+      ".workspace-input-page .evidence-readiness-card:nth-child(5)",
+      ".workspace-input-page .advanced-settings",
+      ".workspace-input-page .quick-scenario-chips",
+    ] as const;
+
+    async function readTheme(
+      theme: "day" | "night",
+      viewport: (typeof viewports)[number],
+    ) {
+      if (!browser) throw new Error("Browser was not started");
+      const page = await browser.newPage({
+        viewport: { width: viewport.width, height: viewport.height },
+      });
+      try {
+        await page.route("**/api/weather?**", async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ ok: true, weather: null }),
+          });
+        });
+        await page.goto(
+          `${baseUrl}/workspace?scenario=seoul-construction-windy&theme=${theme}`,
+          { waitUntil: "networkidle" },
+        );
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        });
+
+        return await page.evaluate((targets) => {
+          const round = (value: number) => Math.round(value * 10) / 10;
+          const geometry = targets.map((selector) => {
+            const element = document.querySelector<HTMLElement>(selector);
+            if (!element) throw new Error(`Missing theme geometry target: ${selector}`);
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return {
+              selector,
+              x: round(rect.x),
+              y: round(rect.y),
+              width: round(rect.width),
+              height: round(rect.height),
+              display: style.display,
+              gridTemplateColumns: style.gridTemplateColumns,
+              gap: style.gap,
+              padding: [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft],
+              borderRadius: style.borderRadius,
+              fontSize: style.fontSize,
+              lineHeight: style.lineHeight,
+              letterSpacing: style.letterSpacing,
+            };
+          });
+          const shell = document.querySelector<HTMLElement>(".command-center-shell");
+          const primary = document.querySelector<HTMLElement>(".composer-submit-button");
+          if (!shell || !primary) throw new Error("Missing workspace theme color targets");
+          return {
+            geometry,
+            colors: {
+              shell: getComputedStyle(shell).backgroundColor,
+              primary: getComputedStyle(primary).backgroundColor,
+            },
+          };
+        }, selectors);
+      } finally {
+        await page.close();
+      }
+    }
+
+    for (const viewport of viewports) {
+      const day = await readTheme("day", viewport);
+      const night = await readTheme("night", viewport);
+      expect(day.geometry, `${viewport.label} Day/Night geometry`).toEqual(night.geometry);
+      expect(day.colors.shell, `${viewport.label} shell theme color`).not.toBe(night.colors.shell);
+      expect(day.colors.primary, `${viewport.label} primary theme color`).not.toBe(night.colors.primary);
+    }
+  }, 180_000);
+
   workspaceInputProductionMatrix("preserves the exact Day and Night textarea cascade at every responsive band", async () => {
     if (!browser) throw new Error("Browser was not started");
     expect(harness?.mode).toBe("prod");

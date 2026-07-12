@@ -20119,3 +20119,245 @@ body:has(.safeclaw-landing) :is(
     gap: var(--space-2);
   }
 }
+
+/* Workspace theme geometry parity: Day and Night share the Night/Linear
+   structure. Theme-specific rules above this owner may change only color,
+   border color, background, and focus treatment. */
+.command-center-shell.workspace-theme-day .command-topbar,
+.command-center-shell.workspace-theme-night .command-topbar {
+  border-radius: 4px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-theme-toggle,
+.command-center-shell.workspace-theme-night .workspace-theme-toggle {
+  gap: 4px;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-theme-toggle button,
+.command-center-shell.workspace-theme-night .workspace-theme-toggle button {
+  min-width: 58px;
+  border-radius: var(--radius-soft);
+  padding: 8px 12px;
+}
+
+.command-center-shell.workspace-theme-day .linear-workspace-layout,
+.command-center-shell.workspace-theme-night .linear-workspace-layout {
+  row-gap: 0;
+  column-gap: 16px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 4px;
+  background: var(--workspace-surface-1);
+  overflow: hidden;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-nav,
+.command-center-shell.workspace-theme-night .workspace-side-nav {
+  gap: 20px;
+  border: 0;
+  border-right: 1px solid var(--workspace-rule);
+  border-radius: 0;
+  padding: 16px 12px;
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group,
+.command-center-shell.workspace-theme-night .workspace-side-group {
+  gap: 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group > span,
+.command-center-shell.workspace-theme-night .workspace-side-group > span {
+  padding: 0 8px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group button,
+.command-center-shell.workspace-theme-day .workspace-source-status p,
+.command-center-shell.workspace-theme-night .workspace-side-group button,
+.command-center-shell.workspace-theme-night .workspace-source-status p {
+  min-height: 50px;
+  gap: 12px;
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-current-brief,
+.command-center-shell.workspace-theme-night .workspace-current-brief {
+  border-top: 1px solid var(--workspace-rule);
+  border-right: 0;
+  border-bottom: 1px solid var(--workspace-rule);
+  border-left: 0;
+  padding: 16px 12px;
+}
+
+.command-center-shell.workspace-theme-day .linear-workspace-layout .command-main,
+.command-center-shell.workspace-theme-night .linear-workspace-layout .command-main {
+  border: 0;
+  border-radius: 0;
+  background: var(--workspace-canvas);
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
+.command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: clamp(32px, 7vh, 76px) 0 0;
+  box-shadow: none;
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .command-copy,
+.command-center-shell.workspace-theme-night .workspace-input-page .command-copy,
+.command-center-shell.workspace-theme-day .workspace-input-page .command-console,
+.command-center-shell.workspace-theme-night .workspace-input-page .command-console,
+.command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-rail,
+.command-center-shell.workspace-theme-night .workspace-input-page .evidence-readiness-rail {
+  width: min(760px, 100%);
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .command-copy .eyebrow,
+.command-center-shell.workspace-theme-night .workspace-input-page .command-copy .eyebrow {
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
+.command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
+  border-radius: 4px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .input-helper,
+.command-center-shell.workspace-theme-night .workspace-input-page .input-helper {
+  line-height: var(--leading-body);
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .composer-attach-button,
+.command-center-shell.workspace-theme-night .workspace-input-page .composer-attach-button {
+  border-radius: var(--r-lg);
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .field-brief-chip-row,
+.command-center-shell.workspace-theme-night .workspace-input-page .field-brief-chip-row {
+  margin-top: 20px;
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-card,
+.command-center-shell.workspace-theme-night .workspace-input-page .evidence-readiness-card {
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .command-center-shell.workspace-theme-day .linear-workspace-layout,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-nav,
+  .command-center-shell.workspace-theme-night .workspace-side-nav {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--workspace-rule);
+    border-radius: 0;
+  }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .command-main,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .command-main {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .command-center-shell.workspace-theme-day > .command-topbar,
+  .command-center-shell.workspace-theme-day > .command-viewport,
+  .command-center-shell.workspace-theme-night > .command-topbar,
+  .command-center-shell.workspace-theme-night > .command-viewport {
+    width: min(100% - 20px, 1280px);
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-nav,
+  .command-center-shell.workspace-theme-night .workspace-side-nav {
+    padding: 12px;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-group:first-child button,
+  .command-center-shell.workspace-theme-night .workspace-side-group:first-child button {
+    min-height: 48px;
+    padding: 12px;
+  }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    gap: 16px;
+    padding: var(--space-4) 18px var(--space-5);
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-input-page .evidence-readiness-card,
+  .command-center-shell.workspace-theme-night .workspace-input-page .evidence-readiness-card {
+    min-height: 44px;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1200px) and (max-height: 640px) {
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    padding: 20px clamp(24px, 4vw, 42px) 24px;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 560px) {
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    padding: 0 clamp(28px, 4vw, 48px) 20px;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 340px) {
+  .command-center-shell.workspace-theme-day > .command-topbar,
+  .command-center-shell.workspace-theme-day > .command-viewport,
+  .command-center-shell.workspace-theme-night > .command-topbar,
+  .command-center-shell.workspace-theme-night > .command-viewport {
+    width: min(100% - 16px, 1360px);
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-theme-toggle button,
+  .command-center-shell.workspace-theme-night .workspace-theme-toggle button {
+    min-width: 46px;
+    padding: 4px 8px;
+  }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout {
+    column-gap: 8px;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-nav,
+  .command-center-shell.workspace-theme-night .workspace-side-nav {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-group,
+  .command-center-shell.workspace-theme-night .workspace-side-group {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .command-center-shell.workspace-theme-day .workspace-side-group button,
+  .command-center-shell.workspace-theme-day .workspace-source-status p,
+  .command-center-shell.workspace-theme-night .workspace-side-group button,
+  .command-center-shell.workspace-theme-night .workspace-source-status p {
+    min-height: 40px;
+    gap: 8px;
+    padding: 8px;
+  }
+}
