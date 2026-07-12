@@ -14,6 +14,9 @@
 import { createHash } from "node:crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { createLogger } from "@/lib/logger";
+import { MCP_TOOL_NAMES } from "@/lib/mcp-tool-contract.mjs";
+
+export { MCP_TOOL_NAMES } from "@/lib/mcp-tool-contract.mjs";
 
 const log = createLogger("mcp-auth");
 
@@ -39,19 +42,6 @@ export interface McpTokenRow {
 }
 
 const DEFAULT_SCOPES = ["tools:*"] as const;
-
-export const MCP_TOOL_NAMES = [
-  "run_safeclaw_harness_agent",
-  "generate_reviewed_safety_docpack",
-  "generate_safety_docpack",
-  "get_weather_signals",
-  "validate_safety_citations",
-  "sanitize_emergency_contacts",
-  "search_accident_cases",
-  "get_evidence_mapping",
-  "query_safety_knowledge",
-  "qa_review_docpack",
-] as const;
 
 export type McpToolName = (typeof MCP_TOOL_NAMES)[number];
 
