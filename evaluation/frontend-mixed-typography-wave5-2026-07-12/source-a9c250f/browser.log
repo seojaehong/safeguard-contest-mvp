@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/mixed-typography-production-matrix.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-mixed-typography-wave5
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  11:13:41
+   Duration  25.32s (transform 60ms, setup 0ms, import 561ms, tests 24.06s, environment 0ms)
+
