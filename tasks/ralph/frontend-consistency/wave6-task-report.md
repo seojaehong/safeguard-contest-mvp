@@ -95,3 +95,29 @@ Fresh fix verification:
 - Opt-in production matrix — PASS, 1/1 in 66.30s across 12 route/theme/viewport cases.
 - Source-bound static audit — expected RED 2,307, coverage issues 0; totals and categories are unchanged from the original Wave 6 evidence.
 - Fix evidence artifact: `evaluation/frontend-ontology-typography-wave6-2026-07-12/source-5aea3a9/frontend-consistency-audit.json`.
+
+## Second reviewer fix: exhaustive operation-memory manifest
+
+Source test commit: `a7f21cc` (`test: exhaust operation memory typography matrix`).
+
+The production matrix now has one route-aware `operationMemoryFamilies` manifest derived from `components/OperationMemoryPreview.tsx`. It is reused for `/ontology` and restored `/workspace` at Day/Night × 1440x900, 390x844, and 1440x320. Every instantiated family receives a complete computed tuple assertion.
+
+Manifest coverage:
+
+- Support: `.operation-memory-copy p`, `.operation-memory-list-item strong`.
+- HUD: `.operation-memory-actions button` on `/ontology`, plus shared `.operation-memory-stats span`, `.operation-memory-point > span`, `.operation-memory-list-item span`, `.operation-memory-detail > span`, `.operation-memory-detail dt`, and `.operation-memory-detail li b`.
+- Component title: `.operation-memory-detail > strong`.
+- Caption: `.operation-memory-point strong`, `.operation-memory-point small`, `.operation-memory-detail p`, `.operation-memory-list-item small`.
+- Table: `.operation-memory-detail dd`, `.operation-memory-detail li span`.
+
+The workspace fixture now uses the existing DB-harness builders with one minimal direct reference. The matrix selects a real related node before checking conditional detail rows, so `detail li b` and `detail li span` are rendered product DOM rather than synthetic test markup.
+
+Conditional families not instantiated by either fixture remain out of browser claims: `.operation-memory-message`, `.operation-memory-popover *`, and `.operation-memory-inline-card *`. They remain covered by the static scoped typography contract. `.compact-head` and `.eyebrow` are intentionally outside this manifest because they are shared unscoped component classes, not `.operation-memory-*` families in the Wave 6 scope.
+
+Second-review TDD evidence:
+
+- RED: restored workspace timed out on the newly required `.operation-memory-detail li b`, exposing that the original canonical sample had no DB harness relations.
+- GREEN: the relation-bearing fixture and active-node traversal instantiate the family on both routes; the 12-case opt-in matrix passes 1/1 in 72.71s.
+- Focused contract PASS; strict typecheck PASS; production build PASS with 27/27 generated.
+- Source-bound static audit remains expected RED 2,307 with coverage issues 0 and unchanged category totals.
+- Evidence artifact: `evaluation/frontend-ontology-typography-wave6-2026-07-12/source-a7f21cc/frontend-consistency-audit.json`.
