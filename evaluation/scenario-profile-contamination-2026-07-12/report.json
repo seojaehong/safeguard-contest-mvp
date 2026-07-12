@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-12T02:44:16.8115078Z",
-  "startingHead": "e6ffbcfe5f3ef59590fd7b842ec82cd38cfc38a0",
+  "generatedAt": "2026-07-12T03:03:45.9838007Z",
+  "startingHead": "6ce31d17f3bb212a542da0c9a9fe873315812585",
   "status": "review_pending",
   "freshReviewRequired": true,
   "databaseMutation": false,
@@ -12,87 +12,80 @@
   },
   "tdd": {
     "productionEditedAfterRed": true,
-    "initialGwangjuRed": {
+    "red": {
       "testFiles": 1,
-      "testsExecuted": 14,
-      "testsPassed": 13,
-      "testsFailed": 1,
-      "failureReason": "companyName was inferred as 굴착공사",
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/red-location-company.log"
-    },
-    "expandedRed": {
-      "testFiles": 1,
-      "testsExecuted": 17,
-      "testsPassed": 13,
+      "testsExecuted": 26,
+      "testsPassed": 22,
       "testsFailed": 4,
-      "failureReasons": [
-        "굴착공사 was inferred as a company name",
-        "보수공사 was inferred as a company name",
-        "세종 was not preserved in the excavation site name",
-        "광주 하남산단 excavation inferred 굴착공사 as the company name"
+      "failedCases": [
+        "안산건설 굴착 작업 inferred 경기 안산 from the company token",
+        "하남산단관리 굴착 작업 inferred 광주 하남산단 from the company token",
+        "강원상사 굴착 작업 lost the company identity",
+        "제주개발 굴착 작업 lost the company identity"
       ],
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/red-location-company-expanded.log"
+      "standaloneLocationCasesPassed": 5,
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/red-token-boundary-final.log"
     },
     "green": {
       "testFiles": 2,
-      "testsPassed": 22,
+      "testsPassed": 31,
       "testsFailed": 0,
-      "log": "evaluation/scenario-profile-contamination-2026-07-12/green-location-company.log"
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/green-token-boundary-final.log"
     }
   },
-  "askResponseContract": {
-    "companyName": "도시가스공사",
-    "companyType": "건설업",
-    "profileId": "construction-excavation",
-    "siteName": "도시가스공사 열수송관 굴착공사 현장",
-    "riskAssessmentContains": [
-      "굴착면 붕괴"
+  "tokenBoundaryContract": {
+    "companyIdentityCases": [
+      "안산건설 굴착 작업",
+      "하남산단관리 굴착 작업",
+      "강원상사 굴착 작업",
+      "제주개발 굴착 작업"
     ],
-    "riskAssessmentExcludes": [
-      "화학세제"
-    ],
-    "accidentCaseExcludes": [
-      "화학",
-      "세척",
-      "세제"
-    ]
-  },
-  "classificationMatrix": {
-    "nonExcavation": [
-      "굴착기 정비 작업",
-      "열수송관 밸브 점검 작업"
-    ],
-    "excavation": [
-      "열수송관 굴착공사",
-      "굴착 작업",
-      "도로 굴착 보수 작업",
-      "터파기 작업"
-    ],
-    "rejectedCompanyDescriptors": [
-      "굴착공사",
-      "보수공사"
-    ],
-    "preservedExcavationLocations": [
+    "standaloneLocationCases": [
+      "안산",
       "광주 하남산단",
+      "강원",
+      "제주",
       "세종"
     ],
-    "canonicalCleaningSiteName": "광주 하남산단 청소 현장"
+    "implementation": "exact normalized standalone-token sets and token-sequence matching",
+    "adHocNegativeCompanyList": false
+  },
+  "closedContracts": {
+    "excavationProfileId": "construction-excavation",
+    "canonicalCleaningSiteName": "광주 하남산단 청소 현장",
+    "accidentLeakageFocused": true,
+    "workDescriptorCompanyRejectionFocused": true
   },
   "verification": {
     "focusedTestFiles": 6,
-    "baselineTests": 60,
-    "newTests": 3,
-    "testsPassed": 63,
+    "baselineTests": 63,
+    "newTests": 9,
+    "testsPassed": 72,
     "testsFailed": 0,
-    "focusedLog": "evaluation/scenario-profile-contamination-2026-07-12/focused60-plus3.log",
+    "focusedLog": "evaluation/scenario-profile-contamination-2026-07-12/focused63-plus9.log",
     "typecheck": "pass",
-    "typecheckLog": "evaluation/scenario-profile-contamination-2026-07-12/typecheck.log",
-    "build": "pass",
-    "buildRuns": 1,
-    "staticPagesGenerated": "27/27",
-    "buildLog": "evaluation/scenario-profile-contamination-2026-07-12/build27.log",
+    "typecheckExitCode": 0,
+    "typecheckLog": "evaluation/scenario-profile-contamination-2026-07-12/typecheck-final.log",
     "diffCheck": "pass",
+    "diffCheckExitCode": 0,
     "diffCheckNotes": "LF-to-CRLF conversion notices only",
-    "diffCheckLog": "evaluation/scenario-profile-contamination-2026-07-12/diff-check.log"
+    "diffCheckLog": "evaluation/scenario-profile-contamination-2026-07-12/diff-check-final.log",
+    "build": {
+      "result": "pass",
+      "runs": 1,
+      "cwd": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\scenario-profile-contamination",
+      "sourceHead": "6ce31d17f3bb212a542da0c9a9fe873315812585",
+      "command": "npm.cmd run build",
+      "startedAt": "2026-07-12T03:01:34.4698216Z",
+      "finishedAt": "2026-07-12T03:02:48.7529379Z",
+      "nextBuildProcessCountBefore": 0,
+      "sameWorktreeBuildProcessCountBefore": 0,
+      "nextBuildProcessCountAfter": 0,
+      "sameWorktreeBuildProcessCountAfter": 0,
+      "exitCode": 0,
+      "compile": "Compiled successfully in 12.7s",
+      "staticPagesGenerated": "27/27",
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/build27.log"
+    }
   }
 }
