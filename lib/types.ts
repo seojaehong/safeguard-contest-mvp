@@ -520,7 +520,15 @@ export type AskResponse = {
       query: string;
       count: number;
       totalItems: number;
-      retrievalMode?: "unconfigured" | "rest-ilike" | "ranked-rpc" | "hybrid-vector-rpc";
+      retrievalMode?:
+        | "unconfigured"
+        | "rest-ilike"
+        | "ranked-rpc"
+        | "hybrid-vector-rpc"
+        | "hybrid-local-supabase"
+        | "local-tag"
+        | "local-ranked"
+        | "local-hybrid";
       vectorSearch?: {
         enabled: boolean;
         attempted: boolean;

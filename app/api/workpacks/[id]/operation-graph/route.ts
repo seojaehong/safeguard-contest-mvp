@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { HarnessImprovement } from "@/lib/db-harness";
 import { buildOperationMemoryGraph } from "@/lib/ontology/operation-memory";
-import { searchSafetyReferences } from "@/lib/safety-reference-catalog";
+import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import {
   buildGenerationEvidenceComparison,
   generationEvidenceReferences,

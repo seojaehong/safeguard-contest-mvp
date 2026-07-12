@@ -17,10 +17,10 @@ import {
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
-  searchSafetyReferences,
   type SafetyReferenceItem,
   type SafetyReferenceSearchResult
 } from "@/lib/safety-reference-catalog";
+import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 
 const log = createLogger("photo-vision");
 

@@ -115,6 +115,9 @@ export type DbHarnessRetrievalContract = {
     ranked: number;
     vector: number;
     hybrid: number;
+    localTag: number;
+    localRanked: number;
+    localHybrid: number;
   };
   message: string;
 };
@@ -222,7 +225,10 @@ function countRetrievalSources(items: SafetyReferenceItem[]) {
     rest: items.filter((item) => item.retrieval_source === "rest").length,
     ranked: items.filter((item) => item.retrieval_source === "ranked").length,
     vector: items.filter((item) => item.retrieval_source === "vector").length,
-    hybrid: items.filter((item) => item.retrieval_source === "hybrid").length
+    hybrid: items.filter((item) => item.retrieval_source === "hybrid").length,
+    localTag: items.filter((item) => item.retrieval_source === "local-tag").length,
+    localRanked: items.filter((item) => item.retrieval_source === "local-ranked").length,
+    localHybrid: items.filter((item) => item.retrieval_source === "local-hybrid").length
   };
 }
 
@@ -577,7 +583,7 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
     "역할: LLM은 DB harness가 고정한 근거를 문장화만 한다.",
     "근거 권위: safety_reference_items, SIF 사례, 작업 개선 이력 DB 하네스가 원천이다.",
     `검색 경로: ${packet.retrievalContract.mode} / vector=${packet.retrievalContract.vector.ready ? "ready" : packet.retrievalContract.vector.reason}`,
-    `검색 출처: direct ${packet.retrievalContract.sourceCounts.directEvidence}, SIF ${packet.retrievalContract.sourceCounts.sifCases}, supporting ${packet.retrievalContract.sourceCounts.supportingEvidence}, hybrid ${packet.retrievalContract.sourceCounts.hybrid}, vector ${packet.retrievalContract.sourceCounts.vector}, ranked ${packet.retrievalContract.sourceCounts.ranked}, rest ${packet.retrievalContract.sourceCounts.rest}`,
+    `검색 출처: direct ${packet.retrievalContract.sourceCounts.directEvidence}, SIF ${packet.retrievalContract.sourceCounts.sifCases}, supporting ${packet.retrievalContract.sourceCounts.supportingEvidence}, localHybrid ${packet.retrievalContract.sourceCounts.localHybrid}, localRanked ${packet.retrievalContract.sourceCounts.localRanked}, localTag ${packet.retrievalContract.sourceCounts.localTag}, hybrid ${packet.retrievalContract.sourceCounts.hybrid}, vector ${packet.retrievalContract.sourceCounts.vector}, ranked ${packet.retrievalContract.sourceCounts.ranked}, rest ${packet.retrievalContract.sourceCounts.rest}`,
     "제공자 재시도: 모델/제공자 재시도는 문장화 실패 복구에만 허용하며 새 근거·새 위험요인을 추가할 수 없다.",
     "누락 정책: 근거가 없으면 보강 필요로 표시하고 산문으로 메우지 않는다.",
     "금지: 근거 없는 위험요인, 문서 반영 위치, 확인 이력을 새로 만들지 않는다.",

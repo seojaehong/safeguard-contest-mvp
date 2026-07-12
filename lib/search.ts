@@ -9,13 +9,15 @@ import {
   deriveSafetyReferenceOperationalView,
   filterAndRankSafetyReferencesByQuery,
   getSafetyReferenceDisplayTitle,
+  hasStrongSafetyReferenceRowOverlap,
+  isSafetyReferenceRiskEligible,
   SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
   SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE,
-  searchSafetyReferences,
   type SafetyReferenceItem,
   type SafetyReferenceRetrievalMode,
   type SafetyReferenceSearchResult
 } from "./safety-reference-catalog";
+import { searchSafetyReferences } from "./safety-reference-catalog-server";
 import { loadLegalDetail, searchLegalSources } from "./legal-sources";
 import { summarizeLegalSourceMix } from "./legal-sources";
 import { fetchWeatherSignal } from "./weather";
@@ -334,6 +336,8 @@ function includesRiskAssessmentDocument(item: SafetyReferenceItem): boolean {
   );
 }
 
+const MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW = 2;
+
 export function buildSafetyReferenceRiskRows(
   response: AskResponse,
   references: readonly SafetyReferenceItem[],
@@ -350,8 +354,12 @@ export function buildSafetyReferenceRiskRows(
     response.riskSummary.topRisk
   ].filter(Boolean).join(" ");
   const eligibleReferences = references
+    .filter(isSafetyReferenceRiskEligible)
     .filter(includesRiskAssessmentDocument)
     .filter((item) => item.title || item.summary || item.controls.length);
+  const supportingKoshaReferences = references.filter((item) =>
+    item.evidence_role === "supporting" && Boolean(item.kosha_guide?.evidenceRef)
+  );
   const rankedEligibleReferences = filterAndRankSafetyReferencesByQuery(
     rankQuery,
     [...eligibleReferences],
@@ -373,12 +381,20 @@ export function buildSafetyReferenceRiskRows(
     const dedupeKey = `${hazard}|${control}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
+    const supportingEvidenceRefs = Array.from(new Set(filterAndRankSafetyReferencesByQuery(
+      `${rankQuery} ${displayTitle} ${hazard} ${control}`,
+      supportingKoshaReferences.filter((supporting) => hasStrongSafetyReferenceRowOverlap(item, supporting)),
+      supportingKoshaReferences.length
+    ).map((supporting) => supporting.kosha_guide?.evidenceRef)
+      .filter((ref): ref is string => Boolean(ref))))
+      .slice(0, MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW);
     const evidenceRefs = [
-      item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
+      "DB 하네스 직접근거",
       item.source_kind_label || item.item_type || "safety_reference_items",
       displayTitle,
       item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
-      item.source_url || ""
+      item.source_url || "",
+      ...supportingEvidenceRefs
     ].filter(Boolean);
     const candidateRow = buildRiskRow({
       location,
