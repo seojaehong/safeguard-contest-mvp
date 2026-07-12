@@ -1,0 +1,13 @@
+{
+  "outputPath": "..\\..\\..\\..\\AppData\\Local\\Temp\\vl4vm0uv.ydc",
+  "status": "pass",
+  "counts": {
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "cssLines": 20135,
+    "importantDeclarations": 0
+  },
+  "coverageIssues": 0,
+  "violationCount": 0
+}
+{"recordType":"fresh-static-audit-post-process","auditProcessExit":0,"outputPath":"..\\..\\..\\..\\AppData\\Local\\Temp\\vl4vm0uv.ydc","status":"pass","sourceSha":"c541b916abf2a499328fb76b2fc9583dc1031e32","sourceIdentity":"9082e35bd324a3528882df714d524002cb8eb8e91e40feab17cb9f9169f3b9a3","violationCount":0,"importantDeclarations":0,"coverageIssues":0,"rules":{}}
