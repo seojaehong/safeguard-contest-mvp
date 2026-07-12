@@ -2,14 +2,17 @@
   "date": "2026-07-12",
   "workingDirectory": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-design-contract-remediation",
   "branch": "feat/frontend-design-contract-remediation",
-  "publishedSourceAnchorCommit": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
+  "publishedSourceAnchorCommit": "45449b29225b408dc5d6147ad2950cef4f52bc3c",
   "uiProductBaselineCommit": "6af13474726d8c3f7f992f6a2f94ef9aa687011e",
-  "publisherCommit": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
-  "commitRelation": "The Reports UI product files remain unchanged from 6af1347. Canonical product identity and publisher provenance are anchored to 5c5943a, the clean commit that contains both publisher scripts.",
+  "publisherCommit": "45449b29225b408dc5d6147ad2950cef4f52bc3c",
+  "commitRelation": "The Reports UI product files remain unchanged from 6af1347. Canonical product identity and publisher provenance are anchored to 45449b2, the clean code commit that closes the final Reports Wave 1 review findings.",
   "changes": [
-    "Reports source identity now follows the complete local import graph from Next config, root route boundaries, layout, and /reports through all direct and transitive product files.",
+    "Reports source identity now follows the complete local import graph plus statically discoverable route and public-asset contracts through 58 committed files.",
+    "Runtime closure includes public/brand/ClawMark.svg, app/api/workpacks/[id]/route.ts, layout assets, and existing routes referenced by the Reports shell.",
     "Source identity hashes canonical Git HEAD blob OIDs and fails closed when an identity file is dirty, staged, untracked, or missing.",
     "Manifest schema 2 verifies source file coverage, product and publisher commit ancestry, publisher script presence, BUILD_ID, and build digest before next start.",
+    "The server-error browser contract installs a deterministic bearer session, proves the intercepted HTTP500 route was hit, verifies exact user copy, and keeps five exports disabled.",
+    "Only Git-backed provenance tests receive a bounded 30-second Windows timeout; the documented focused command is unchanged.",
     "Routine Reports evidence and isolated Next dev dist output use unique OS temp roots and clean on normal stop and startup failure.",
     "The documented PowerShell static-audit command now allocates a random temp file and restores environment state while deleting the file in finally."
   ],
@@ -17,10 +20,10 @@
     {
       "file": "tests/reports-wave1-publish-support.test.ts",
       "covers": [
-        "complete /reports dependency graph",
+        "complete /reports import, route, and public-asset closure",
         "canonical LF and CRLF identity parity",
         "dirty, staged, and untracked identity rejection",
-        "dependency-only stale build rejection",
+        "dependency-only, asset-only, and API-route-only stale build rejection",
         "publisher script provenance",
         "routine output cleanup and explicit publish preservation",
         "hermetic PowerShell static-audit command"
@@ -39,6 +42,7 @@
       "file": "tests/reports-design-remediation.test.ts",
       "covers": [
         "prod Reports mode validates the explicit build manifest before browser startup",
+        "authenticated intercepted HTTP500 with exact copy, positive route-hit count, and five disabled exports",
         "routine evidence output cleanup after browser completion and initialization failure"
       ]
     }
@@ -83,7 +87,7 @@
         "coverageIssues": 0,
         "pageFiles": 32,
         "componentFiles": 23,
-        "sourceSha": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
+        "sourceSha": "45449b29225b408dc5d6147ad2950cef4f52bc3c",
         "sourceIdentity": "a97db33b5224bc80e4a0555a72af4553cc092029ac1ddde76320cd64bb1a6db7"
       },
       "note": "The audit remains honestly RED outside Wave 1 scope. The random temp file was removed in finally; the parsed result was explicitly copied into the two bounded static evidence files."
@@ -111,14 +115,20 @@
         "browserSkipped": 5,
         "manifest": "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-wave1-build-manifest.json",
         "manifestSchemaVersion": 2,
-        "publisherCommitSha": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
-        "productSourceSha": "5c5943ad799638009d8718d1b91c0b7be7cb5ac3",
-        "productSourceIdentityAlgorithm": "git-head-blob-oids-sha256-v1",
-        "productSourceIdentity": "d7a58d8792f1e8e0881768d6bb442bda7da0f9ad846af10faca1de129854b80e",
-        "productSourceFileCount": 31,
-        "buildId": "tuRcrMczwFV1FXjudqjtA",
-        "buildIdentity": "d2040486cf657cd1ea7d39e00653d7725755a6fd0f93ef46fa8bcaaa2f024453",
+        "publisherCommitSha": "45449b29225b408dc5d6147ad2950cef4f52bc3c",
+        "productSourceSha": "45449b29225b408dc5d6147ad2950cef4f52bc3c",
+        "productSourceIdentityAlgorithm": "git-head-runtime-contract-blob-oids-sha256-v2",
+        "productSourceIdentity": "1f7907b3e481b69068dbd655f9576e61aa058d660a4e5c5d5aa2cf1e5ee6757d",
+        "productSourceFileCount": 58,
+        "buildId": "sH60Lo-jbBsGwKRQ5r2y_",
+        "buildIdentity": "8bede43499eb31c5e4ed5a7f6ee4981d35bae3a392fae8d1d478be1908857ce8",
         "buildFileCount": 427,
+        "authenticatedServerError": {
+          "scenarioCount": 4,
+          "routeHitCounts": [1, 1, 1, 1],
+          "exactUserCopy": "서버 작업팩 조회 중 검증용 오류가 발생했습니다.",
+          "disabledExportCounts": [5, 5, 5, 5]
+        },
         "visualContracts": {
           "sample": [
             "day-desktop-1440x900",
@@ -161,13 +171,19 @@
     "evaluation/frontend-design-contract-remediation-2026-07-12/wave-1-reports/reports-state-metrics.json"
   ],
   "gateSummary": {
-    "publishedProductEvidence": "honest-5c5943a-red2367-725-coverage0",
-    "completeProductSourceFileCount": 31,
+    "publishedProductEvidence": "honest-45449b2-red2367-725-coverage0",
+    "completeProductSourceFileCount": 58,
+    "runtimeIdentityIncludesClawMark": true,
+    "runtimeIdentityIncludesWorkpackRoute": true,
+    "assetOnlyAndRouteOnlyStaleManifestRejected": true,
+    "authenticatedServerErrorRouteHitCounts": [1, 1, 1, 1],
+    "authenticatedServerErrorDisabledExportCounts": [5, 5, 5, 5],
     "canonicalCrossEolIdentity": true,
     "dirtyStagedUntrackedFailClosed": true,
     "prodModeFailsClosed": true,
     "defaultRoutineOutputIsTemp": true,
     "newRoutineTempResidualCount": 0,
+    "preExistingReportsTempResidualCount": 3,
     "staticAuditTempResidualCount": 0,
     "isolatedNextTempResidualCount": 0,
     "isolatedNextCleanup": [
@@ -177,9 +193,13 @@
     "staticAuditTempCleanup": "try-finally",
     "visualInspection": [
       "sample-day-desktop",
+      "sample-night-desktop",
+      "sample-day-mobile-390",
       "sample-night-mobile-390",
+      "server-error-day-desktop",
       "server-error-night-desktop",
-      "server-error-day-mobile-390"
+      "server-error-day-mobile-390",
+      "server-error-night-mobile-390"
     ],
     "explicitPublishRequiredForCommittedEvidence": true
   }

@@ -5,21 +5,25 @@
 - Working directory: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\frontend-design-contract-remediation`
 - Branch: `feat/frontend-design-contract-remediation`
 - Reports UI baseline commit: `6af13474726d8c3f7f992f6a2f94ef9aa687011e`
-- Published source anchor and publisher commit: `5c5943ad799638009d8718d1b91c0b7be7cb5ac3`
+- Published source anchor and publisher commit: `45449b29225b408dc5d6147ad2950cef4f52bc3c`
 - The UI product files remain unchanged. The manifest source anchor moved to the clean commit that contains both publisher scripts.
 
 ## What changed
 
-- Reports source identity follows the complete local import graph from Next config, root boundaries, layout, and `/reports` through 31 direct and transitive product files.
+- Reports source identity follows the complete local import graph plus statically discoverable route and public-asset contracts through 58 committed files.
+- Runtime closure includes `public/brand/ClawMark.svg`, `app/api/workpacks/[id]/route.ts`, layout assets, and existing routes referenced by the Reports shell.
 - Identity hashes canonical Git HEAD blob OIDs, so clean LF and CRLF checkouts agree. Dirty, staged, untracked, or missing identity files fail closed.
 - Manifest schema 2 verifies source coverage, publisher script presence at both provenance SHAs, commit ancestry, `BUILD_ID`, and build digest before `next start`.
+- The server-error browser contract installs a deterministic bearer session, proves the intercepted HTTP500 route was hit, checks the exact user copy, and keeps all five exports disabled.
+- Only Git-backed provenance tests receive a bounded 30-second Windows timeout; the documented focused command remains unchanged.
 - Routine Reports evidence and isolated Next dev output use unique OS temp roots. Cleanup runs after normal stop and startup failure.
 - The reusable PowerShell static-audit command uses a random temp file and restores environment state while deleting the file in `finally`.
 
 ## Added regression coverage
 
 - `tests/reports-wave1-publish-support.test.ts`
-  - complete `/reports` dependency graph and dependency-only stale build rejection
+  - complete `/reports` import, route, and public-asset closure
+  - dependency-only, asset-only, and API-route-only stale build rejection
   - LF/CRLF clean-checkout identity parity
   - dirty, staged, and untracked identity rejection
   - publisher script provenance
@@ -31,6 +35,7 @@
   - same port salt reuse after stop
 - `tests/reports-design-remediation.test.ts`
   - prod mode now validates `reports-wave1-build-manifest.json` before the harness starts
+  - authenticated intercepted HTTP500 with exact copy, positive route-hit count, and five disabled exports
   - routine output cleanup is retained through initialization and teardown
 
 ## Fresh checks run in this turn
@@ -65,7 +70,7 @@ if ($auditExitCode -ne 1) { throw "Expected the bounded frontend audit to remain
 ```
 
 - Result: exit `1`, `violationCount=2367`, `importantDeclarations=725`, `coverageIssues=0`
-- Source: `5c5943ad799638009d8718d1b91c0b7be7cb5ac3`, identity `a97db33b5224bc80e4a0555a72af4553cc092029ac1ddde76320cd64bb1a6db7`
+- Source: `45449b29225b408dc5d6147ad2950cef4f52bc3c`, identity `a97db33b5224bc80e4a0555a72af4553cc092029ac1ddde76320cd64bb1a6db7`
 - The random temp file was removed in `finally`; the parsed result was explicitly copied into the two bounded static evidence files.
 
 Typecheck:
@@ -87,12 +92,13 @@ node .\scripts\publish_reports_wave1_evidence.mjs
 - Result: `pass`
 - Build executions: `1`, Next `15.5.20`, static pages `27/27`
 - Manifest: schema `2`, `reports-wave1-build-manifest.json`
-- Publisher and product source SHA: `5c5943ad799638009d8718d1b91c0b7be7cb5ac3`
-- Product identity: `git-head-blob-oids-sha256-v1`, 31 files, `d7a58d8792f1e8e0881768d6bb442bda7da0f9ad846af10faca1de129854b80e`
-- Manifest build ID: `tuRcrMczwFV1FXjudqjtA`
-- Build identity: `d2040486cf657cd1ea7d39e00653d7725755a6fd0f93ef46fa8bcaaa2f024453`, 427 files
+- Publisher and product source SHA: `45449b29225b408dc5d6147ad2950cef4f52bc3c`
+- Product identity: `git-head-runtime-contract-blob-oids-sha256-v2`, 58 files, `1f7907b3e481b69068dbd655f9576e61aa058d660a4e5c5d5aa2cf1e5ee6757d`
+- Manifest build ID: `sH60Lo-jbBsGwKRQ5r2y_`
+- Build identity: `8bede43499eb31c5e4ed5a7f6ee4981d35bae3a392fae8d1d478be1908857ce8`, 427 files
 - Published browser contract: `5 passed`, `5 skipped`
 - Captured contracts: sample Day/Night at `1440x900` and `390x844`; server-error Day/Night at both viewports; empty Day desktop
+- Authenticated server-error evidence: route hit count `1` in each of four captures, exact copy `서버 작업팩 조회 중 검증용 오류가 발생했습니다.`, and five disabled exports in each capture
 
 ## Committed evidence
 
@@ -118,10 +124,12 @@ node .\scripts\publish_reports_wave1_evidence.mjs
 
 ## Gate summary
 
-- Published evidence is anchored to `5c5943a / RED 2367 / 725 / coverage 0`
+- Published evidence is anchored to `45449b2 / RED 2367 / 725 / coverage 0`
+- Asset-only and route-only committed changes invalidate a stale manifest while canonical Git/EOL/dirty gates remain green
 - Prod mode fails closed on incomplete source coverage, dirty identity files, invalid provenance, or stale build identity
 - Clean LF and CRLF checkouts produce the same source identity
 - Routine Reports runs created `0` new temp residual directories; isolated Next cleanup passed normal-stop and startup-failure paths
+- Three Reports temp directories created at 04:02-04:25 predated this run and were left untouched; they are not counted as new residuals
 - Static-audit and isolated Next residual counts are both `0`; the prior fixed static-audit temp file was removed after exact-path validation
-- Visual inspection passed for Day desktop, Night 390, Night desktop error, and Day 390 error evidence
+- Visual inspection passed for all Day/Night sample and authenticated server-error captures at desktop and 390px
 - Explicit publish is the only path that refreshes committed Reports Wave 1 evidence
