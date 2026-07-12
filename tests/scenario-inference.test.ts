@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { inferScenario } from "@/lib/mock-data";
+import { buildMockAskResponse, inferScenario } from "@/lib/mock-data";
 
 describe("inferScenario", () => {
   it("classifies an explicit '제조공장' site as 제조업, not 물류업, even when action verbs like 상하차 co-occur", () => {
@@ -30,5 +30,33 @@ describe("inferScenario", () => {
   it("preserves an explicitly named company from the question", () => {
     const scenario = inferScenario("그린메탈 공장에서 용접 작업, 작업자 5명");
     expect(scenario.companyName).toBe("그린메탈");
+  });
+
+  it("keeps an excavation job out of a profile matched only by worker attributes", () => {
+    const question =
+      "도시가스공사 열수송관 굴착공사. 작업자 7명, 외국인 근로자 2명, 신규 투입자 1명, 이동식 크레인과 굴착기 사용, 매설물 확인 필요. 오늘 작업 전 문서팩을 만들어줘.";
+    const scenario = inferScenario(question);
+    const response = buildMockAskResponse(question, [], "mock", "test");
+
+    expect(scenario.companyName).toBe("도시가스공사");
+    expect(scenario.companyType).toBe("건설업");
+    expect(scenario.siteName).toContain("굴착");
+    expect(scenario.siteName).not.toContain("광주 하남산단");
+    expect(scenario.profile.workName).toContain("굴착");
+    expect(scenario.profile.hazards.join(" ")).toMatch(/붕괴|매몰/);
+    expect(scenario.profile.hazards.join(" ")).toContain("매설물");
+    expect(scenario.weatherNote).not.toContain("화학물질");
+    expect(response.deliverables.riskAssessmentDraft).toContain("굴착면 붕괴");
+    expect(response.deliverables.riskAssessmentDraft).not.toContain("화학세제");
+  });
+
+  it("still selects the chemical-cleaning profile from work identity terms", () => {
+    const scenario = inferScenario(
+      "클린온 공장 바닥 세척 작업. 외국인 근로자 3명, 화학세제 사용과 환기 제한, 미끄럼 위험."
+    );
+
+    expect(scenario.profile.id).toBe("cleaning-chemical");
+    expect(scenario.companyType).toBe("서비스업");
+    expect(scenario.profile.hazards.join(" ")).toContain("화학세제");
   });
 });

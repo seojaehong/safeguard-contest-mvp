@@ -377,7 +377,10 @@ function inferCompanyName(question: string) {
   return "현장 업체";
 }
 
+const excavationWorkPattern = /굴착|터파기|열수송관/;
+
 function inferCustomWorkName(question: string) {
+  if (excavationWorkPattern.test(question)) return "열수송관 굴착공사";
   if (/배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question)) {
     return "지하 기계실 배수펌프 점검";
   }
@@ -413,8 +416,47 @@ function inferSiteName(question: string, fallback: string) {
   return fallback;
 }
 
+function buildExcavationScenarioProfile(companyName: string): ScenarioProfile {
+  return {
+    id: "construction-excavation",
+    companyName,
+    companyType: "건설업",
+    siteName: `${companyName} 열수송관 굴착공사 현장`,
+    workName: "열수송관 굴착공사",
+    processName: "지하 매설물 확인, 굴착기 굴착, 이동식 크레인 양중, 토사 적치와 굴착면 통제",
+    weatherNote: "옥외 굴착 조건, 굴착면 붕괴·매설물 접촉·중장비 작업반경 확인 필요",
+    riskLevel: "상",
+    topRisk: "굴착면 붕괴로 작업자가 매몰되거나 굴착기·이동식 크레인이 지하 매설물과 작업자를 접촉할 위험",
+    hazards: [
+      "굴착면 붕괴와 토사 유입으로 인한 매몰",
+      "도면·탐사·시험굴착 미흡으로 인한 지하 매설물 파손",
+      "굴착기 회전반경 또는 이동식 크레인 양중 구역에서 충돌·낙하"
+    ],
+    actions: [
+      "매설물 도면 확인과 탐사 후 시험굴착으로 위치를 표시하고 관리 주체와 작업 허가를 확인",
+      "굴착 깊이와 지반 상태에 맞는 굴착면 기울기·흙막이·토사 이격거리를 확보하고 출입을 통제",
+      "굴착기와 이동식 크레인 작업반경을 분리하고 신호수·아웃트리거·인양 경로를 작업 전 확인"
+    ],
+    educationName: "열수송관 굴착공사 전 붕괴·매설물·중장비 충돌 예방 교육",
+    educationTargets: "굴착 작업자, 굴착기·이동식 크레인 운전자, 신호수, 신규·외국인 근로자",
+    questions: [
+      "매설물 도면·탐사·시험굴착 결과와 굴착 허가를 누가 최종 확인했는가?",
+      "굴착면 붕괴 징후와 즉시 대피·작업중지 기준을 전원이 알고 있는가?",
+      "굴착기·크레인 작업반경과 신호수 위치, 작업자 대기구역을 분리했는가?"
+    ],
+    educationPoints: [
+      "매설물 위치 확인과 시험굴착 완료 전 기계굴착 금지",
+      "균열·토사 흘러내림·용수 발생 시 즉시 작업중지 후 굴착면 밖으로 대피",
+      "중장비 작업반경 출입 금지와 신호수 단일 지시체계 준수"
+    ],
+    keywords: ["굴착", "터파기", "열수송관", "매설물", "굴착기", "크레인"]
+  };
+}
+
 function buildCustomScenarioProfile(question: string): ScenarioProfile {
   const companyName = inferCompanyName(question);
+  if (excavationWorkPattern.test(question)) return buildExcavationScenarioProfile(companyName);
+
   const isPumpConfinedSpace = /배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question);
   const isLeakMaintenance = /누수|비가\s*새|천장/.test(question);
   const workName = inferCustomWorkName(question);
@@ -542,6 +584,8 @@ const explicitIndustryNounRules: Array<[RegExp, string]> = [
   [/창고/, "warehouse-heat"]
 ];
 
+const profileContextOnlyKeywords = new Set(["외국인", "신규", "고령", "숙련"]);
+
 function pickExplicitIndustryProfile(question: string) {
   const matchedRule = explicitIndustryNounRules.find(([pattern]) => pattern.test(question));
   if (!matchedRule) return null;
@@ -551,7 +595,7 @@ function pickExplicitIndustryProfile(question: string) {
 function pickScenarioProfile(question: string) {
   const normalized = question.trim().toLowerCase();
 
-  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question)) {
+  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question) || excavationWorkPattern.test(question)) {
     return buildCustomScenarioProfile(question);
   }
 
@@ -560,7 +604,10 @@ function pickScenarioProfile(question: string) {
 
   const scored = fieldScenarioProfiles.map((profile) => ({
     profile,
-    score: profile.keywords.reduce((acc, keyword) => acc + (normalized.includes(keyword.toLowerCase()) ? 1 : 0), 0)
+    score: profile.keywords.reduce(
+      (acc, keyword) => acc + (!profileContextOnlyKeywords.has(keyword) && normalized.includes(keyword.toLowerCase()) ? 1 : 0),
+      0
+    )
   }));
 
   scored.sort((a, b) => b.score - a.score);
