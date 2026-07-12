@@ -54,7 +54,7 @@
     {
       "check": "owned_path_only_diff",
       "status": "passed",
-      "evidence": "2 changed paths, both within assigned ownership"
+      "evidence": "3 changed files across 2 assigned ownership roots"
     },
     {
       "check": "git_diff_check",
