@@ -56,7 +56,7 @@ describe("workspace input CSS contract", () => {
       ["font-size: var(--text-control)", "font-weight: 500", "line-height: 1.74", "letter-spacing: var(--tracking-body)"],
       ["min-height: 116px", "padding: 14px 15px", "line-height: 1.7"],
       ["min-height: 108px", "padding: 14px 12px", "line-height: 1.7"],
-      ["min-height: 142px", "padding: 16px", "font-size: var(--text-body)", "line-height: var(--leading-body)", "font-weight: 500", "letter-spacing: var(--tracking-body)"],
+      ["min-height: 142px", "padding: 16px", "font-size: var(--text-body)", "line-height: var(--leading-body-lg)", "font-weight: 500", "letter-spacing: var(--tracking-body)"],
     ]);
   });
 
@@ -72,6 +72,9 @@ describe("workspace input CSS contract", () => {
     );
     expect(css.slice(documentFocus)).not.toMatch(
       /\.command-center-shell\.workspace-theme-day \.workspace-input-page \.command-console-input,\s*\.command-center-shell\.workspace-theme-night \.workspace-input-page \.command-console-input\s*\{\s*min-height:\s*118px;\s*\}/u,
+    );
+    expect(css.slice(documentFocus)).not.toMatch(
+      /\.command-center-shell\.workspace-theme-day \.workspace-input-page \.command-console-input,\s*\.command-center-shell\.workspace-theme-night \.workspace-input-page \.command-console-input\s*\{\s*min-height:\s*150px;/u,
     );
   });
 });
