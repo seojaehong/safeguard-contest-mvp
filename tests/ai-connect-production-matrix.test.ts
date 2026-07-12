@@ -380,7 +380,7 @@ async function expectVisibleControls(page: Page, selector: string): Promise<void
     expect(metric.display).not.toBe("none");
     expect(metric.visibility).toBe("visible");
     expect(metric.opacity).toBeGreaterThan(0);
-    expect(metric.radius).toBe("4px");
+    expect(metric.radius).toBe("8px");
   }
 }
 

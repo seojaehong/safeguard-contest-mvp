@@ -16324,6 +16324,16 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink);
 }
 
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button:not(.active):hover {
+  border-color: var(--workspace-rule-strong);
+  background: var(--workspace-surface-2);
+}
+
+.safeclaw-module-shell.module-variant-document .ai-connect-tabs button.active:hover {
+  border-color: var(--workspace-accent);
+  background: var(--workspace-surface-3);
+}
+
 .safeclaw-module-shell.module-variant-document .ai-connect-section-head span,
 .safeclaw-module-shell.module-variant-document .ai-connect-meta dt,
 .safeclaw-module-shell.module-variant-document .ai-connect-secret label,
