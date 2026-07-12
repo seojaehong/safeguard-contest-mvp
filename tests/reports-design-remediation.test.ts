@@ -112,7 +112,6 @@ describe("Reports Wave 1 static design contract", () => {
       [`${scope} .safeclaw-report-group > span`]: ["var(--text-caption)", "600", "var(--leading-caption)"],
       [`${scope} .safeclaw-report-group strong`]: ["var(--text-body)", "500", "var(--leading-body)"],
       [`${scope} .safeclaw-report-group em`]: ["var(--text-support)", "500", "var(--leading-body)"],
-      [`${scope} .safeclaw-report-controls strong`]: ["var(--text-control)", "700", "var(--leading-control)"],
       [`${scope} .safeclaw-report-controls span`]: ["var(--text-caption)", "600", "var(--leading-caption)"],
       [`${scope} .safeclaw-download-note`]: ["var(--text-caption)", "600", "var(--leading-caption)"]
     } as const;
@@ -153,14 +152,14 @@ describe("Reports Wave 1 static design contract", () => {
       '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button'
     )).toMatchObject({
       "min-height": "44px",
-      "border-radius": "8px"
+      "border-radius": "var(--radius-control)"
     });
     expect(declarationsFor(
       css,
       '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a'
     )).toMatchObject({
       "min-height": "44px",
-      "border-radius": "8px"
+      "border-radius": "var(--radius-control)"
     });
   });
 });
@@ -359,7 +358,7 @@ describe("Reports Wave 1 browser design contract", () => {
       groupLabel: ["12px", "600", "18px", "normal"],
       groupBody: ["15px", "500", "24px", "normal"],
       groupMeta: ["14px", "500", "22.4px", "normal"],
-      control: ["14px", "700", "20px", "normal"]
+      control: ["14px", "500", "22.4px", "normal"]
     });
 
     fs.writeFileSync(

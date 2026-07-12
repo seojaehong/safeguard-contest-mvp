@@ -19817,7 +19817,7 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a {
   min-height: 44px;
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   padding: 0 16px;
 }
 
@@ -19827,7 +19827,7 @@ body:has(.safeclaw-landing) :is(
   display: grid;
   gap: 2px;
   border: 1px solid var(--workspace-rule);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--workspace-surface-1);
   color: var(--workspace-muted);
   padding: 9px 12px;
@@ -19850,7 +19850,6 @@ body:has(.safeclaw-landing) :is(
   border-color: var(--workspace-accent);
   background: var(--workspace-surface-3);
   color: var(--workspace-accent-text);
-  box-shadow: inset 3px 0 0 var(--workspace-accent);
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button:disabled {
@@ -19863,10 +19862,6 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls strong {
   color: inherit;
-  font-size: var(--text-control);
-  font-weight: 700;
-  line-height: var(--leading-control);
-  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls span {
@@ -19933,7 +19928,7 @@ body:has(.safeclaw-landing) :is(
   margin-top: 24px;
   overflow: hidden;
   border: 1px solid var(--workspace-rule);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--workspace-surface-1);
 }
 
@@ -20004,7 +19999,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-group {
   min-width: 0;
   border: 1px solid var(--workspace-rule);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--workspace-surface-1);
   padding: 18px;
 }
