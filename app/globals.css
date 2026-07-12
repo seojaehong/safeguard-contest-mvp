@@ -18393,7 +18393,7 @@ body:has(.safeclaw-landing) :is(
     min-height: 142px;
     padding: 16px;
     font-size: var(--text-body);
-    line-height: var(--leading-body);
+    line-height: var(--leading-body-lg);
     font-weight: 500;
     letter-spacing: var(--tracking-body);
 }
@@ -19662,12 +19662,6 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
     padding-top: var(--space-4);
     padding-bottom: var(--space-5);
-  }
-
-  .command-center-shell.workspace-theme-day .workspace-input-page .command-console-input,
-  .command-center-shell.workspace-theme-night .workspace-input-page .command-console-input {
-    min-height: 150px;
-    line-height: var(--leading-body-lg);
   }
 
   .command-center-shell.workspace-theme-day .workspace-input-page .input-helper,
