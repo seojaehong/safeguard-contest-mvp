@@ -1,12 +1,14 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-12T08:13:43.2430481Z",
+  "generatedAt": "2026-07-12T08:36:39.5707302Z",
   "status": "review_pending",
   "independentReview": "pending",
   "authoritativeBaseSha": "24c19c17cc8c932a333fdae8785426218e57ae15",
   "testCommit": "7054bb03f6e367d43cd3cf872937336eee8a5031",
   "productCommit": "8c62499e5da2e260defe5d5656a45a166bb0f533",
   "productTree": "f9c25285d64a2517499c1e65604d71b40a3abe5a",
+  "secondReviewProductCommit": "4ad5455ff5c4f4d0eb3a23d07c07e6d746cd09e0",
+  "secondReviewProductTree": "ce1929401294f8186a039cb80ade4a61708f18d2",
   "featureProductCommits": [
     "b4dcc156cd3c44885a8a331e417956d5459a494e",
     "dd1bc82ddf5dcb010be731ff6d2c77a12d1216ea",
@@ -46,6 +48,28 @@
     "countsFile": "evaluation/mcp-tool-scope-enforcement-2026-07-12/remediation-red-counts.json",
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/remediation-red-test.log"
   },
+  "secondReviewRed": {
+    "provenance": "exact_reachable_git_commit",
+    "commit": "4d70cf0727e74778b08c6f7ce86395fdeb9f5573",
+    "tree": "09e6d551c71f5ffe024caae08dda5412ebf5a223",
+    "parent": "9e15d0d8c324d3451256bc15ddea21c23f8680a0",
+    "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
+    "testFilesTotal": 4,
+    "testFilesPassed": 3,
+    "testFilesFailed": 1,
+    "testsTotal": 77,
+    "testsPassed": 73,
+    "testsFailed": 4,
+    "exitCode": 1,
+    "gitBlobs": {
+      "command": "c15be0f9bf72331844c89d68dc23a7ca0affafcc",
+      "counts": "106c88793c495e22fefea7d498a858a9c0cac095",
+      "log": "6207eaec9f745a6bbb3a3c46e694b3ed83e7be9b"
+    },
+    "commandFile": "evaluation/mcp-tool-scope-enforcement-2026-07-12/second-review-red-command.txt",
+    "countsFile": "evaluation/mcp-tool-scope-enforcement-2026-07-12/second-review-red-counts.json",
+    "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/second-review-red-test.log"
+  },
   "originalFeatureRed": {
     "provenance": "historical_reconstructed",
     "exactReachableTree": false,
@@ -60,13 +84,14 @@
   "green": {
     "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
     "testFilesPassed": 4,
-    "testsPassed": 71,
+    "testsPassed": 77,
     "exitCode": 0,
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/green-test.log"
   },
   "typecheck": {
     "command": "npm.cmd run typecheck",
     "strict": true,
+    "checkedAt": "2026-07-12T08:42:04.4915693Z",
     "exitCode": 0,
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/typecheck.log"
   },
@@ -77,20 +102,16 @@
   },
   "build": {
     "preflightGlobalBuildProcesses": 0,
+    "preflightCheckedAt": "2026-07-12T08:35:02.5366276Z",
     "preflightLog": "evaluation/mcp-tool-scope-enforcement-2026-07-12/build-preflight.log",
     "command": "npm.cmd run build",
     "sequentialInvocationCountAfterPreflight": 1,
-    "validatedBeforeMetadataOnlyRebaseBaseSha": "e040ce0dad0d74c9f7a068fa5a0e5c6a2ff4771b",
     "finalAuthoritativeBaseSha": "24c19c17cc8c932a333fdae8785426218e57ae15",
-    "metadataOnlyRebaseFiles": [
-      "evaluation/backend-scenario-protocol-integration-2026-07-12/report.json",
-      "evaluation/backend-scenario-protocol-integration-2026-07-12/report.md"
-    ],
-    "rerunAfterMetadataOnlyRebase": false,
-    "rerunReason": "Not rerun because the authoritative delta was metadata-only and the requested build invocation count was exactly one.",
+    "buildIdCapturedFrom": ".next/BUILD_ID",
+    "rawLogBuildIdLine": "BUILD_ID=3LSgmr24ZIYtKNMRLz_25",
     "exitCode": 0,
     "staticPages": "27/27",
-    "buildId": "ZJRVHMPheqa6pINj2wz-S",
+    "buildId": "3LSgmr24ZIYtKNMRLz_25",
     "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/build.log"
   },
   "contracts": {
@@ -100,7 +121,12 @@
     "existingWildcardCompatibility": true,
     "unknownFutureToolsAutoGranted": false,
     "allToolRegistrationsUseCentralScopedWrapper": true,
+    "canonicalScopedWrapperImportCount": 1,
+    "registeredCanonicalToolNames": 10,
+    "directOrAlternateRegistrationPaths": 0,
     "authorizationGuardRunsBeforeHandlerWork": true,
+    "deniedOrMissingAuthHandlerCalls": 0,
+    "authorizedHandlerCalls": 1,
     "authorizationPublicCode": "MCP_TOOL_FORBIDDEN",
     "internalPublicCode": "MCP_TOOL_INTERNAL_ERROR",
     "internalExceptionsServerLogged": true,
@@ -120,6 +146,19 @@
     "tests/mcp-route-scope-contract.test.ts",
     "tests/mcp-token-service.test.ts",
     "tests/mcp-tools.test.ts"
+  ],
+  "secondReviewChangedFiles": [
+    "tests/mcp-route-scope-contract.test.ts",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/build-preflight.log",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/build.log",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/diff-check.log",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/green-test.log",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/report.json",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/report.md",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/second-review-red-command.txt",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/second-review-red-counts.json",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/second-review-red-test.log",
+    "evaluation/mcp-tool-scope-enforcement-2026-07-12/typecheck.log"
   ],
   "remainingRisks": [
     "Existing database tokens that already carry tools:* remain full-trust for compatibility.",
