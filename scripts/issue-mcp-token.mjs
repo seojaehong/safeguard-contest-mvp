@@ -15,6 +15,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import { MCP_TOOL_SCOPES } from "../lib/mcp-tool-contract.mjs";
 
 try {
   process.loadEnvFile(path.join(process.cwd(), ".env.local"));
@@ -66,7 +67,7 @@ const { data, error } = await client
     label,
     site_id: siteId,
     org_id: orgId,
-    scopes: ["tools:*"],
+    scopes: [...MCP_TOOL_SCOPES],
   })
   .select("id")
   .single();

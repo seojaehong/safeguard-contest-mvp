@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createClient } from "@supabase/supabase-js";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import { MCP_TOOL_NAMES, hashToken } from "@/lib/mcp-auth";
 import {
@@ -63,6 +65,14 @@ describe("buildMcpTokenInsert", () => {
   it("issues explicit SafeClaw tool scopes instead of a future-expanding wildcard", () => {
     expect(DEFAULT_MCP_SCOPES).toEqual(MCP_TOOL_NAMES.map((toolName) => `tools:${toolName}`));
     expect(DEFAULT_MCP_SCOPES).not.toContain("tools:*");
+  });
+
+  it("keeps the operator CLI on the same explicit tool contract", () => {
+    const script = readFileSync(join(process.cwd(), "scripts/issue-mcp-token.mjs"), "utf8");
+
+    expect(script).toContain('import { MCP_TOOL_SCOPES } from "../lib/mcp-tool-contract.mjs";');
+    expect(script).toContain("scopes: [...MCP_TOOL_SCOPES]");
+    expect(script).not.toContain('scopes: ["tools:*"]');
   });
 });
 
