@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-11T20:53:21.057Z",
-  "sourceSha": "5e4712454bf350f9d963461d56d42ee8b87fd8d8",
-  "sourceIdentity": "373b42cd514c89ef9b5b85d235458550f15eafd6851e89ebcd19f01d492c71dd",
+  "generatedAt": "2026-07-12T01:31:27.822Z",
+  "sourceSha": "c03e9bb64e4d49b7552e4585629cff3acd19a2d4",
+  "sourceIdentity": "77b06de89593f4fdaf5ba7a63aeec605295e5b80b312758f7a6f70b28f8a9fd7",
   "status": "fail",
   "counts": {
     "pageFiles": 32,
@@ -83,98 +83,8 @@
     "unexpectedRoutes": []
   },
   "coverageIssues": 0,
-  "violationCount": 2383,
+  "violationCount": 2368,
   "violations": [
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 9179,
-      "value": "ui-monospace, SFMono-Regular, Consolas, \"Liberation Mono\", monospace"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 9198,
-      "value": "ui-monospace, SFMono-Regular, Consolas, \"Liberation Mono\", monospace"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 9483,
-      "value": "ui-monospace, SFMono-Regular, Consolas, \"Liberation Mono\", monospace"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 9686,
-      "value": "ui-monospace, SFMono-Regular, Consolas, \"Liberation Mono\", monospace"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 9718,
-      "value": "ui-monospace, SFMono-Regular, Consolas, \"Liberation Mono\", monospace"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 9826,
-      "value": "ui-monospace, SFMono-Regular, Consolas, \"Liberation Mono\", monospace"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 13358,
-      "value": "\"Pretendard\", \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 13644,
-      "value": "\"Noto Sans KR\", \"Pretendard\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 13790,
-      "value": "\"Noto Sans KR\", \"Pretendard\", var(--font-multilingual)"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 14111,
-      "value": "\"Pretendard\", \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 14117,
-      "value": "\"Pretendard\", \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 14228,
-      "value": "Inter, \"Pretendard\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 14551,
-      "value": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 15017,
-      "value": "\"Pretendard\", \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
-    },
-    {
-      "rule": "font-family-token",
-      "file": "app/globals.css",
-      "line": 15301,
-      "value": "\"Pretendard\", \"Noto Sans KR\", \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
-    },
     {
       "rule": "font-size-tier",
       "file": "app/globals.css",
@@ -12077,13 +11987,13 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 9133,
-      "value": ".ai-connect-meta dd => unmapped: {\"margin\":\"8px 0 0\",\"color\":\"var(--os-text, #f6f5ef)\",\"font-family\":\"ui-monospace, SFMono-Regular, Consolas, \\\"Liberation Mono\\\", monospace\",\"font-size\":\"0.82rem\",\"overflow-wrap\":\"anywhere\"}"
+      "value": ".ai-connect-meta dd => unmapped: {\"margin\":\"8px 0 0\",\"color\":\"var(--os-text, #f6f5ef)\",\"font-family\":\"var(--font-hud)\",\"font-size\":\"0.82rem\",\"overflow-wrap\":\"anywhere\"}"
     },
     {
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 9148,
-      "value": ".ai-connect-secret textarea, .ai-connect-command-box pre => unmapped: {\"width\":\"100%\",\"border\":\"1px solid rgba(255, 220, 46, 0.32)\",\"border-radius\":\"6px\",\"background\":\"#0b0c10\",\"color\":\"#f6f5ef\",\"font-family\":\"ui-monospace, SFMono-Regular, Consolas, \\\"Liberation Mono\\\", monospace\",\"font-size\":\"0.82rem\",\"line-height\":\"1.6\"}"
+      "value": ".ai-connect-secret textarea, .ai-connect-command-box pre => unmapped: {\"width\":\"100%\",\"border\":\"1px solid rgba(255, 220, 46, 0.32)\",\"border-radius\":\"6px\",\"background\":\"#0b0c10\",\"color\":\"#f6f5ef\",\"font-family\":\"var(--font-hud)\",\"font-size\":\"0.82rem\",\"line-height\":\"1.6\"}"
     },
     {
       "rule": "typography-tuple",
@@ -12203,7 +12113,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 9433,
-      "value": ".ai-connect-sif-next-gate code, .ai-connect-sif-next-gate pre => unmapped: {\"border\":\"1px solid rgba(246, 245, 239, 0.14)\",\"border-radius\":\"6px\",\"background\":\"rgba(0, 0, 0, 0.24)\",\"color\":\"rgba(246, 245, 239, 0.88)\",\"padding\":\"10px\",\"font-family\":\"ui-monospace, SFMono-Regular, Consolas, \\\"Liberation Mono\\\", monospace\",\"font-size\":\"0.78rem\",\"overflow-wrap\":\"anywhere\",\"white-space\":\"pre-wrap\"}"
+      "value": ".ai-connect-sif-next-gate code, .ai-connect-sif-next-gate pre => unmapped: {\"border\":\"1px solid rgba(246, 245, 239, 0.14)\",\"border-radius\":\"6px\",\"background\":\"rgba(0, 0, 0, 0.24)\",\"color\":\"rgba(246, 245, 239, 0.88)\",\"padding\":\"10px\",\"font-family\":\"var(--font-hud)\",\"font-size\":\"0.78rem\",\"overflow-wrap\":\"anywhere\",\"white-space\":\"pre-wrap\"}"
     },
     {
       "rule": "typography-tuple",
@@ -12269,7 +12179,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 9641,
-      "value": ".ai-connect-sif-fingerprint code => unmapped: {\"color\":\"rgba(255, 220, 46, 0.86)\",\"font-family\":\"ui-monospace, SFMono-Regular, Consolas, \\\"Liberation Mono\\\", monospace\",\"font-size\":\"0.72rem\",\"overflow-wrap\":\"anywhere\"}"
+      "value": ".ai-connect-sif-fingerprint code => unmapped: {\"color\":\"rgba(255, 220, 46, 0.86)\",\"font-family\":\"var(--font-hud)\",\"font-size\":\"0.72rem\",\"overflow-wrap\":\"anywhere\"}"
     },
     {
       "rule": "typography-tuple",
@@ -12281,7 +12191,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 9673,
-      "value": ".ai-connect-sif-artifact-grid code => unmapped: {\"color\":\"rgba(255, 220, 46, 0.86)\",\"font-family\":\"ui-monospace, SFMono-Regular, Consolas, \\\"Liberation Mono\\\", monospace\",\"font-size\":\"0.72rem\",\"overflow-wrap\":\"anywhere\"}"
+      "value": ".ai-connect-sif-artifact-grid code => unmapped: {\"color\":\"rgba(255, 220, 46, 0.86)\",\"font-family\":\"var(--font-hud)\",\"font-size\":\"0.72rem\",\"overflow-wrap\":\"anywhere\"}"
     },
     {
       "rule": "typography-tuple",
@@ -12317,7 +12227,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 9776,
-      "value": ".ai-connect-sif-command pre => unmapped: {\"margin\":\"0\",\"border\":\"1px solid rgba(255, 220, 46, 0.32)\",\"border-radius\":\"6px\",\"background\":\"#0b0c10\",\"color\":\"#f6f5ef\",\"padding\":\"16px\",\"font-family\":\"ui-monospace, SFMono-Regular, Consolas, \\\"Liberation Mono\\\", monospace\",\"font-size\":\"0.82rem\",\"line-height\":\"1.6\",\"overflow-wrap\":\"anywhere\",\"white-space\":\"pre-wrap\"}"
+      "value": ".ai-connect-sif-command pre => unmapped: {\"margin\":\"0\",\"border\":\"1px solid rgba(255, 220, 46, 0.32)\",\"border-radius\":\"6px\",\"background\":\"#0b0c10\",\"color\":\"#f6f5ef\",\"padding\":\"16px\",\"font-family\":\"var(--font-hud)\",\"font-size\":\"0.82rem\",\"line-height\":\"1.6\",\"overflow-wrap\":\"anywhere\",\"white-space\":\"pre-wrap\"}"
     },
     {
       "rule": "typography-tuple",
@@ -13241,7 +13151,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 13594,
-      "value": ".command-center-shell.workspace-theme-day .command-copy h1 => unmapped: {\"max-width\":\"680px\",\"color\":\"#111318\",\"font-family\":\"\\\"Noto Sans KR\\\", \\\"Pretendard\\\", system-ui, -apple-system, BlinkMacSystemFont, \\\"Segoe UI\\\", sans-serif\",\"font-size\":\"clamp(36px, 4vw, 56px)\",\"font-weight\":\"760\",\"letter-spacing\":\"0\",\"line-height\":\"1.12\"}"
+      "value": ".command-center-shell.workspace-theme-day .command-copy h1 => unmapped: {\"max-width\":\"680px\",\"color\":\"#111318\",\"font-family\":\"var(--font-product)\",\"font-size\":\"clamp(36px, 4vw, 56px)\",\"font-weight\":\"760\",\"letter-spacing\":\"0\",\"line-height\":\"1.12\"}"
     },
     {
       "rule": "typography-tuple",
@@ -13289,7 +13199,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 13738,
-      "value": ".command-center-shell.workspace-theme-day .document-workbench .document-preview-pane pre => table: {\"border-color\":\"#e3e7ee\",\"border-radius\":\"10px\",\"background\":\"#fbfcfe\",\"color\":\"#20242b\",\"font-family\":\"\\\"Noto Sans KR\\\", \\\"Pretendard\\\", var(--font-multilingual)\",\"font-size\":\"13px\",\"line-height\":\"1.92\"}"
+      "value": ".command-center-shell.workspace-theme-day .document-workbench .document-preview-pane pre => table: {\"border-color\":\"#e3e7ee\",\"border-radius\":\"10px\",\"background\":\"#fbfcfe\",\"color\":\"#20242b\",\"font-family\":\"var(--font-document)\",\"font-size\":\"13px\",\"line-height\":\"1.92\"}"
     },
     {
       "rule": "decorative-box-shadow",
@@ -13325,7 +13235,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 14067,
-      "value": ".command-center-shell .command-copy h1, .command-center-shell.workspace-theme-day .command-copy h1 => unmapped: {\"max-width\":\"780px\",\"font-family\":\"\\\"Pretendard\\\", \\\"Noto Sans KR\\\", \\\"Noto Sans\\\", system-ui, -apple-system, BlinkMacSystemFont, \\\"Segoe UI\\\", sans-serif\",\"font-size\":\"58px\",\"font-weight\":\"860\",\"letter-spacing\":\"0px\",\"line-height\":\"1.12\",\"word-break\":\"keep-all\",\"text-wrap\":\"balance\"}"
+      "value": ".command-center-shell .command-copy h1, .command-center-shell.workspace-theme-day .command-copy h1 => unmapped: {\"max-width\":\"780px\",\"font-family\":\"var(--font-product)\",\"font-size\":\"58px\",\"font-weight\":\"860\",\"letter-spacing\":\"0px\",\"line-height\":\"1.12\",\"word-break\":\"keep-all\",\"text-wrap\":\"balance\"}"
     },
     {
       "rule": "typography-tuple",
@@ -13433,7 +13343,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 14501,
-      "value": ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list code, .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-evidence code => caption: {\"color\":\"var(--workspace-muted) !important\",\"font-family\":\"ui-monospace, \\\"SF Mono\\\", Menlo, Consolas, monospace\",\"font-size\":\"12px\"}"
+      "value": ".safeclaw-module-shell.module-variant-document .safeclaw-workdoc-list code, .safeclaw-module-shell.module-variant-document .safeclaw-workdoc-evidence code => caption: {\"color\":\"var(--workspace-muted) !important\",\"font-family\":\"var(--font-hud)\",\"font-size\":\"12px\"}"
     },
     {
       "rule": "typography-tuple",
@@ -13523,7 +13433,7 @@
       "rule": "typography-tuple",
       "file": "app/globals.css",
       "line": 14966,
-      "value": ".command-center-shell .workspace-input-page .command-copy h1, .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 => unmapped: {\"font-family\":\"\\\"Pretendard\\\", \\\"Noto Sans KR\\\", \\\"Noto Sans\\\", system-ui, -apple-system, BlinkMacSystemFont, \\\"Segoe UI\\\", sans-serif\",\"font-size\":\"clamp(52px, 5.2vw, 68px)\",\"font-weight\":\"900\",\"line-height\":\"1.12\",\"letter-spacing\":\"0\",\"font-optical-sizing\":\"auto\",\"text-rendering\":\"geometricPrecision\",\"text-wrap\":\"balance\"}"
+      "value": ".command-center-shell .workspace-input-page .command-copy h1, .command-center-shell.workspace-theme-day .workspace-input-page .command-copy h1 => unmapped: {\"font-family\":\"var(--font-product)\",\"font-size\":\"clamp(52px, 5.2vw, 68px)\",\"font-weight\":\"900\",\"line-height\":\"1.12\",\"letter-spacing\":\"0\",\"font-optical-sizing\":\"auto\",\"text-rendering\":\"geometricPrecision\",\"text-wrap\":\"balance\"}"
     },
     {
       "rule": "typography-tuple",
