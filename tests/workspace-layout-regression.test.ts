@@ -16,6 +16,18 @@ let baseUrl = "";
 let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
 const workspaceInputProductionMatrix = process.env.WORKSPACE_INPUT_PROD_MATRIX === "1" ? it : it.skip;
+const CSS_PIXEL_ADJACENCY_TOLERANCE = 0.01;
+
+function areCssPixelEdgesAdjacent(sideBottom: number, mainTop: number): boolean {
+  return Math.abs(sideBottom - mainTop) <= CSS_PIXEL_ADJACENCY_TOLERANCE;
+}
+
+describe("mobile workspace adjacency contract", () => {
+  it("rejects a 0.2 CSS-pixel overlap or gap", () => {
+    expect(areCssPixelEdgesAdjacent(260.4, 260.2)).toBe(false);
+    expect(areCssPixelEdgesAdjacent(260.2, 260.4)).toBe(false);
+  });
+});
 
 describe("workspace layout regression", () => {
   beforeAll(async () => {
@@ -1189,10 +1201,10 @@ describe("workspace layout regression", () => {
         const rect = element.getBoundingClientRect();
         const style = getComputedStyle(element);
         return {
-          top: Math.round(rect.top),
-          bottom: Math.round(rect.bottom),
-          left: Math.round(rect.left),
-          right: Math.round(rect.right),
+          top: rect.top,
+          bottom: rect.bottom,
+          left: rect.left,
+          right: rect.right,
           width: Math.round(rect.width),
           height: Math.round(rect.height),
           display: style.display,
@@ -1220,7 +1232,10 @@ describe("workspace layout regression", () => {
     });
 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth);
-    expect(metrics.sideNav.bottom).toBe(metrics.main.top);
+    expect(
+      areCssPixelEdgesAdjacent(metrics.sideNav.bottom, metrics.main.top),
+      `mobile sidebar/main drift exceeded ${CSS_PIXEL_ADJACENCY_TOLERANCE} CSS px: ${metrics.sideNav.bottom} vs ${metrics.main.top}`,
+    ).toBe(true);
     expect(metrics.description.display).toBe("none");
     expect(metrics.heading.fontSize).toBeLessThanOrEqual(34);
     expect(metrics.textarea.top).toBeGreaterThanOrEqual(metrics.heading.bottom + 28);
