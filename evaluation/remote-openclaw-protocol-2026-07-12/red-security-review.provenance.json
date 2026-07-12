@@ -1,6 +1,10 @@
 {
   "purpose": "auditable RED evidence for the second independent security review finding set",
   "branch": "feat/remote-openclaw-protocol",
+  "originalApprovedBase": "3b0edfe48c29e603f3156440362fca9304ef4d1a",
+  "currentIntegrationBase": "31a44c0d972c46a47c94ad387eeeff39528d1be9",
+  "approvedSourceFinal": "1ad409f6a2f896b333777b8ab950a613178de21d",
+  "rebasedProtocolFinal": "0c3cbe246a208306e62913907ac3ff33f744750c",
   "productionParentCommit": "c3fa528fbd2ac90e07c67e9d63c9d636ab04fc3c",
   "testOnlyCommit": "6086418e832243d10d63ceacd2b409c7fbb75ed9",
   "testOnlyTree": "277f480d25b9b60ac246794796da1c43855f50e4",

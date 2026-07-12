@@ -1,10 +1,13 @@
 {
   "date": "2026-07-12",
   "branch": "feat/remote-openclaw-protocol",
-  "base": "3b0edfe48c29e603f3156440362fca9304ef4d1a",
+  "base": "31a44c0d972c46a47c94ad387eeeff39528d1be9",
+  "originalApprovedBase": "3b0edfe48c29e603f3156440362fca9304ef4d1a",
+  "approvedSourceFinal": "1ad409f6a2f896b333777b8ab950a613178de21d",
+  "rebasedProtocolFinal": "0c3cbe246a208306e62913907ac3ff33f744750c",
   "phase": 1,
   "scope": "pure signed remote engine protocol only",
-  "securityReviewDisposition": "second finding set remediated; third independent review pending",
+  "securityReviewDisposition": "third independent review SPEC PASS and CODE PASS; P0-P3 findings 0",
   "runtimeWiringAdded": false,
   "runtimeChanged": false,
   "remoteDemoReady": false,
@@ -94,7 +97,7 @@
       "passed": 60,
       "failed": 0,
       "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/green-security-review.stdout.log",
-      "rawLogGitBlob": "41603c9ea841f5ebb8012ca45e9b92aeeb9b3a80"
+      "rawLogGitBlob": "5d3895959292072f485e71e9844b09e00e01538b"
     }
   },
   "verification": {
@@ -104,7 +107,7 @@
       "passed": 69,
       "failed": 0,
       "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/related-engine-tests.stdout.log",
-      "rawLogGitBlob": "149b4138e2ddaca77c5696cd7f3ad4920f765c5b"
+      "rawLogGitBlob": "44b947c558e09261226fcc97c527d40df767c7d6"
     },
     "typecheck": {
       "command": "npm.cmd run typecheck",
@@ -118,14 +121,17 @@
       "staticPages": 27,
       "sequentialRuns": 1,
       "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/build-security-review.stdout.log",
-      "rawLogGitBlob": "cfdf13962a28eb5d0124f96befaa1a557534e9fc"
+      "rawLogGitBlob": "cfc986957177f579c463423d881185b8e7a66fd9",
+      "globalNextBuildProcessesBeforeStart": 0
     },
     "diffCheck": "passed",
+    "diffChangedFiles": 11,
     "runtimeWiringSearchMatches": 0,
+    "runtimeImportCallRefs": 0,
     "fullSuite": "not run"
   },
   "reviewHandoff": {
-    "thirdIndependentReview": "pending",
+    "thirdIndependentReview": "SPEC PASS; CODE PASS; P0-P3 findings 0",
     "nonceReplayClaimed": false,
     "remoteDemoReadyClaimed": false
   },
