@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "baseSha": "924e497cce1af4cfd8642c98cb754991050da3b1",
+  "testedProductSha": "fb90f219d8d851e118aa21660811a74d1a32b66b",
   "status": "pass_pending_integrated_browser_gate",
   "red": {
     "staticViolations": 9,
@@ -29,5 +30,13 @@
     "integrated module-shell mobile browser regression",
     "production build",
     "final 108-row browser audit"
+  ],
+  "artifacts": [
+    "exact-fb90f21-static-58.log",
+    "exact-fb90f21-reports-static.log",
+    "exact-fb90f21-static-audit.log",
+    "exact-fb90f21-typecheck.log",
+    "exact-fb90f21-diff-check.log",
+    "exact-fb90f21-evidence.json"
   ]
 }

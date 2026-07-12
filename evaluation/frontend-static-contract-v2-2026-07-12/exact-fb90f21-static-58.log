@@ -1,0 +1,71 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/frontend-route-coverage.test.ts tests/frontend-design-contract.test.ts tests/ai-connect-design-contract.test.ts tests/ontology-typography-role-contract.test.ts tests/mixed-typography-role-contract.test.ts --maxWorkers=1 --no-file-parallelism --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-static-contract-v2
+
+ ✓ tests/frontend-route-coverage.test.ts > frontend route classification > discovers every page and assigns each route to exactly one family 23ms
+ ✓ tests/frontend-route-coverage.test.ts > frontend route classification > gives every rendered route a semantic title and its canonical surface hook 17ms
+ ✓ tests/frontend-route-coverage.test.ts > frontend route classification > verifies every delegated route still renders its declared surface owner 12ms
+ ✓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence 60ms
+ ✓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > proves actual named framework boundaries and numerical rendered contracts 15ms
+ ✓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > keeps total reconciliation correct when one failed row has multiple findings 0ms
+ ✓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects independent exact typography and unloaded-font mutations 5319ms
+ ✓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects a product font leaking into any generated-document role 1088ms
+ ✓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > retains unrelated boundary and hydration errors 6798ms
+ ✓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects unexpected HTTP status and final URL mutations 3852ms
+ ✓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > keeps the normal-production audit query inert and reports structured gates 9ms
+ ✓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > connects the launch share CTA to the real customer-facing send panel 3ms
+ ✓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > renders knowledge Markdown as compact semantic prose, lists, and links 1ms
+ ✓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > filters isolated punctuation artifacts from legal body sections 39ms
+ ✓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses one semantic page title followed by semantic sections in app/law/[id]/page.tsx 7ms
+ ✓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses one semantic page title followed by semantic sections in app/precedent/[id]/page.tsx 1ms
+ ✓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses one semantic page title followed by semantic sections in app/interpretation/[id]/page.tsx 1ms
+ ✓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > binds legal prose and preformatted bodies to the long-form reading contract 82ms
+ ✓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses semantic section and result headings on ask and search surfaces 5ms
+ ✓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section headings and the landing family hook in app/why/page.tsx 2ms
+ ✓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section headings and the landing family hook in app/trust/page.tsx 1ms
+ ✓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section headings and the landing family hook in app/roadmap/page.tsx 1ms
+ ✓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section and card headings throughout the demo 2ms
+ ✓ tests/frontend-route-coverage.test.ts > module route section hierarchy > promotes knowledge and settings section labels to semantic headings 2ms
+ ✓ tests/frontend-route-coverage.test.ts > module route section hierarchy > keeps landing, preview, and ontology sections sequential 2ms
+ ✓ tests/frontend-route-coverage.test.ts > module route section hierarchy > uses named canonical spacing hooks instead of inline layout styles on the dry-run route 1ms
+ ✓ tests/frontend-route-coverage.test.ts > module route section hierarchy > binds route-family body, card, control, V2, demo, and legacy geometry to exact selectors 1590ms
+ ✓ tests/frontend-route-coverage.test.ts > module route section hierarchy > binds landing and ordinary module internals to canonical roles and spacing 1494ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > defines the four deliberate typography roles 3ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > uses the fixed 4px spacing rhythm and contextual radius rules 2ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > preserves true-circle geometry on every named circular role 127ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > inventories every browser and generated-document surface 9ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > declares every semantic CSS token 5ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > applies the canonical product type and interaction foundation 332ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > keeps canonical controls and active states effective without important declarations 292ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > maps scoped module and document selectors to complete semantic type roles 469ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > assigns control, native table, and mixed HUD selectors to their actual roles 202ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > keeps base and document module actions on the control tuple 116ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > binds every font-size rule to a canonical tuple or exact scoped override 132ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > keeps noncanonical workspace typography bound to exact scoped roles 4000ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > disables every infinite animation and smooth scrolling for reduced motion 4ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > rejects decorative effects and semantic role mismatches in selector-aware audit fixtures 1419ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > normalizes important suffixes without duplicating valid typography findings 1324ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > preserves source line references across multiline CSS comments 1294ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > rejects malformed values on exact functional-effect selectors 1431ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > rejects incomplete or mismatched typography tuples in audit fixtures 1451ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > classifies interactive 14px and table-header rules by semantics before their current token 1328ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > rejects ambiguous class controls and mixed selector-list roles 1299ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > rejects table-sized base module actions before token-size classification 1249ms
+ ✓ tests/frontend-design-contract.test.ts > frontend design contract > applies the canonical product type and interaction foundation 3ms
+ ✓ tests/ai-connect-design-contract.test.ts > AI connect design contract > does not accept a longer CSS property as an exact declaration match 4ms
+ ✓ tests/ai-connect-design-contract.test.ts > AI connect design contract > maps AI code surfaces through existing global color tokens 77ms
+ ✓ tests/ai-connect-design-contract.test.ts > AI connect design contract > uses document-theme text tokens on the rendered Day surfaces 32ms
+ ✓ tests/ai-connect-design-contract.test.ts > AI connect design contract > keeps the final document vector active state semantic 16ms
+ ✓ tests/ai-connect-design-contract.test.ts > AI connect design contract > assigns the rendered token label a complete component-title tuple 64ms
+ ✓ tests/ai-connect-design-contract.test.ts > AI connect design contract > keeps the complete AI connect selector family free of audit findings 4578ms
+ ✓ tests/mixed-typography-role-contract.test.ts > mixed typography role contract > keeps every CSS rule on one semantic typography role 4078ms
+ ✓ tests/ontology-typography-role-contract.test.ts > ontology typography role contract > maps rendered ontology and operation-memory selectors to semantic typography roles 3051ms
+
+ Test Files  5 passed (5)
+      Tests  58 passed (58)
+   Start at  22:19:29
+   Duration  52.98s (transform 188ms, setup 0ms, import 354ms, tests 48.84s, environment 1ms)
+

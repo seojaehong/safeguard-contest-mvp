@@ -25,6 +25,8 @@ At base `924e497`:
 
 ## GREEN evidence
 
+- Exact tested product/test SHA: `fb90f219d8d851e118aa21660811a74d1a32b66b`
+
 - `npm.cmd run audit:frontend-consistency`
   - 32 page files
   - 23 component files
@@ -39,6 +41,15 @@ At base `924e497`:
 - `npm.cmd run typecheck`: passed after `npm.cmd ci`
 - package and lockfile source diff after dependency sync: none
 - `git diff --check`: passed; only Windows line-ending warnings
+
+Raw evidence:
+
+- `exact-fb90f21-static-58.log`
+- `exact-fb90f21-reports-static.log`
+- `exact-fb90f21-static-audit.log`
+- `exact-fb90f21-typecheck.log`
+- `exact-fb90f21-diff-check.log`
+- `exact-fb90f21-evidence.json`
 
 ## Contract boundaries
 
