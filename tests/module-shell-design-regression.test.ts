@@ -11,6 +11,7 @@ let harness: IsolatedNextBrowserHarness | null = null;
 
 const desktopRoutes = ["/home", "/documents", "/evidence", "/reports", "/settings/ai-connect"] as const;
 const mobileRoutes = ["/home", "/documents", "/reports", "/settings/ai-connect"] as const;
+const warmRoutes = ["/home", "/documents", "/evidence", "/reports", "/settings/ai-connect", "/workspace"] as const;
 const workspaceAccent = {
   day: "#f5c518",
   night: "#6c6ff7"
@@ -76,34 +77,48 @@ function auditMetrics(label: string, value: unknown): void {
 async function readWorkspaceMetrics(theme: ModuleTheme, viewport: Viewport): Promise<WorkspaceMetrics> {
   if (!browser) throw new Error("Browser was not started");
   const page = await browser.newPage({ viewport });
-  const response = await page.goto(`${baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
-  if (!response?.ok()) {
-    const body = response ? await response.text() : "no response";
-    throw new Error(
-      `Workspace audit route failed: ${response?.status() ?? "unknown"} ${body}\n${harness?.readServerOutput().slice(-20_000) ?? ""}`
-    );
-  }
-  const metrics = await page.evaluate((currentTheme) => {
-    const shell = document.querySelector(".command-center-shell");
-    const rail = document.querySelector(".workspace-side-nav");
-    const nav = document.querySelector(".command-topbar");
-    const main = document.querySelector(".workspace-step-page.workspace-input-page");
-    const h1 = document.querySelector(".workspace-step-page.workspace-input-page h1");
-    if (!shell || !rail || !nav || !main || !h1) {
-      throw new Error(`Missing workspace audit target for ${currentTheme}`);
+  try {
+    const response = await page.goto(`${baseUrl}/workspace?theme=${theme}`, { waitUntil: "networkidle" });
+    if (!response?.ok()) {
+      const body = response ? (await response.text()).slice(0, 2_000) : "no response";
+      throw new Error(
+        `Workspace audit route failed: ${response?.status() ?? "unknown"} ${body}\n${harness?.readServerOutput() ?? ""}`
+      );
     }
-    return {
-      theme: currentTheme,
-      accent: getComputedStyle(shell).getPropertyValue("--workspace-accent").trim(),
-      railRadius: getComputedStyle(rail).borderRadius,
-      navRadius: getComputedStyle(nav).borderRadius,
-      mainStartTop: Math.round(main.getBoundingClientRect().top),
-      h1FontSize: Number.parseFloat(getComputedStyle(h1).fontSize),
-      horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 1
-    };
-  }, theme);
-  await page.close();
-  return metrics;
+    return await page.evaluate((currentTheme) => {
+      const shell = document.querySelector(".command-center-shell");
+      const rail = document.querySelector(".workspace-side-nav");
+      const nav = document.querySelector(".command-topbar");
+      const main = document.querySelector(".workspace-step-page.workspace-input-page");
+      const h1 = document.querySelector(".workspace-step-page.workspace-input-page h1");
+      if (!shell || !rail || !nav || !main || !h1) {
+        throw new Error(`Missing workspace audit target for ${currentTheme}`);
+      }
+      return {
+        theme: currentTheme,
+        accent: getComputedStyle(shell).getPropertyValue("--workspace-accent").trim(),
+        railRadius: getComputedStyle(rail).borderRadius,
+        navRadius: getComputedStyle(nav).borderRadius,
+        mainStartTop: Math.round(main.getBoundingClientRect().top),
+        h1FontSize: Number.parseFloat(getComputedStyle(h1).fontSize),
+        horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 1
+      };
+    }, theme);
+  } finally {
+    await page.close();
+  }
+}
+
+async function warmModuleRoutes(): Promise<void> {
+  for (const route of warmRoutes) {
+    const response = await fetch(`${baseUrl}${route}?theme=day`);
+    if (!response.ok) {
+      const body = (await response.text()).slice(0, 2_000);
+      throw new Error(
+        `Module audit warm-up failed (${route}): ${response.status} ${body}\n${harness?.readServerOutput() ?? ""}`
+      );
+    }
+  }
 }
 
 async function readModuleMetrics(
@@ -116,35 +131,36 @@ async function readModuleMetrics(
   const page = await browser.newPage({ viewport });
   const runtimeErrors: string[] = [];
   page.on("pageerror", (error) => runtimeErrors.push(error.stack ?? error.message));
-  page.on("console", (message) => {
-    if (message.type() === "error") runtimeErrors.push(message.text());
-  });
-  const response = await page.goto(`${baseUrl}${route}?theme=${theme}`, { waitUntil: "networkidle" });
-  if (!response?.ok()) {
-    const body = response ? await response.text() : "no response";
-    throw new Error(
-      `Module audit route failed (${route}): ${response?.status() ?? "unknown"} ${body}\n${harness?.readServerOutput().slice(-20_000) ?? ""}`
-    );
-  }
   try {
-    await page.locator(".safeclaw-module-shell[data-ready='true']").waitFor({ state: "attached" });
-  } catch (error) {
-    const body = await page.locator("body").innerText().catch(() => "body unavailable");
-    throw new Error(
-      `Module audit target missing (${route}). Browser errors: ${runtimeErrors.join(" | ")}\nBody: ${body.slice(0, 2_000)}\n${harness?.readServerOutput().slice(-20_000) ?? ""}`,
-      { cause: error }
-    );
-  }
-  if (options.loadSampleReport) {
-    await page.getByRole("button", { name: "샘플 미리보기" }).click();
-    await page.locator(".safeclaw-workdoc-shell").waitFor({ state: "visible" });
-  }
-  if (options.openMenu) {
-    await page.getByRole("button", { name: "메뉴" }).click();
-    await page.locator("#safeclaw-module-navigation.open").waitFor({ state: "visible" });
-  }
-  await page.locator(".safeclaw-module-principal-command a").focus();
-  const metrics = await page.evaluate(({ currentRoute, currentTheme }) => {
+    const response = await page.goto(`${baseUrl}${route}?theme=${theme}`, { waitUntil: "networkidle" });
+    if (!response?.ok()) {
+      const body = response ? (await response.text()).slice(0, 2_000) : "no response";
+      throw new Error(
+        `Module audit route failed (${route}): ${response?.status() ?? "unknown"} ${body}\n${harness?.readServerOutput() ?? ""}`
+      );
+    }
+    try {
+      await page.locator(".safeclaw-module-shell[data-ready='true']").waitFor({ state: "attached" });
+    } catch (error) {
+      const body = await page.locator("body").innerText().catch(() => "body unavailable");
+      throw new Error(
+        `Module audit target missing (${route}). Browser errors: ${runtimeErrors.join(" | ")}\nBody: ${body.slice(0, 2_000)}\n${harness?.readServerOutput() ?? ""}`,
+        { cause: error }
+      );
+    }
+    if (runtimeErrors.length) {
+      throw new Error(`Module audit runtime failed (${route}): ${runtimeErrors.join(" | ")}`);
+    }
+    if (options.loadSampleReport) {
+      await page.getByRole("button", { name: "샘플 미리보기" }).click();
+      await page.locator(".safeclaw-workdoc-shell").waitFor({ state: "visible" });
+    }
+    if (options.openMenu) {
+      await page.getByRole("button", { name: "메뉴" }).click();
+      await page.locator("#safeclaw-module-navigation.open").waitFor({ state: "visible" });
+    }
+    await page.locator(".safeclaw-module-principal-command a").focus();
+    return await page.evaluate(({ currentRoute, currentTheme }) => {
     const shell = document.querySelector(".safeclaw-module-shell");
     const rail = document.querySelector(".safeclaw-module-rail");
     const nav = document.querySelector(".safeclaw-module-nav");
@@ -236,9 +252,10 @@ async function readModuleMetrics(
       documentIndexButtonBackground: documentIndexButton ? getComputedStyle(documentIndexButton).backgroundColor : null,
       horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 1
     };
-  }, { currentRoute: route, currentTheme: theme });
-  await page.close();
-  return metrics;
+    }, { currentRoute: route, currentTheme: theme });
+  } finally {
+    await page.close();
+  }
 }
 
 describe("module shell design regression", () => {
@@ -250,6 +267,7 @@ describe("module shell design regression", () => {
     });
     baseUrl = harness.baseUrl;
     browser = harness.browser;
+    await warmModuleRoutes();
   }, 90_000);
 
   afterAll(async () => {

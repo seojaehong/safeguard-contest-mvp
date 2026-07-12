@@ -6,9 +6,10 @@
 - Product source changes: none
 - Test infrastructure changes:
   - make the temporary Next config resolve its project root inside the temporary project
-  - copy the runtime data directories used by isolated routes
+  - link read-only runtime asset directories while copying only application source directories
   - expose bounded server diagnostics to browser assertions
-  - prove concurrent `/documents`, `/workspace`, and `/home` requests remain healthy
+  - warm cold development compilations deterministically, then prove concurrent `/documents`, `/workspace`, and `/home` browser runtimes remain healthy
+  - close every Playwright page on success and failure
 
 ## RED evidence
 
@@ -19,13 +20,15 @@ The integrated module-shell suite initially failed all four tests. The isolated 
 
 Concurrent first compilation also reproduced `__webpack_modules__[moduleId] is not a function` while the project root was split.
 
+The first independent review rejected the initial patch because its concurrency test checked HTTP only, diagnostics were bounded only by callers, error paths delayed page cleanup, and about 40 MB of runtime assets were copied per harness. The current revision closes all four findings.
+
 ## GREEN evidence
 
 - `npm.cmd test -- tests/isolated-next-browser-harness.test.ts --maxWorkers=1 --no-file-parallelism --reporter=verbose`
   - 1 file, 2 tests passed
-  - concurrent `/documents`, `/workspace`, `/home` HTTP 200 contract included
+  - concurrent `/documents`, `/workspace`, `/home` HTTP 200, target hydration, and zero `pageerror` contract included
 - `npm.cmd test -- tests/module-shell-design-regression.test.ts -t "uses the workspace daylight shell" --maxWorkers=1 --no-file-parallelism --reporter=verbose`
-  - 1 selected test passed with five module routes requested concurrently
+  - 1 selected test passed with five warmed module routes rendered concurrently and runtime errors asserted
 - `npm.cmd run typecheck`
   - passed
 - `git diff --check`
@@ -34,4 +37,3 @@ Concurrent first compilation also reproduced `__webpack_modules__[moduleId] is n
 ## Remaining integration gate
 
 The complete module-shell file must be rerun after the separate mobile Reports spacing patch is integrated. The previously hidden product RED is `/reports` at 390px: content top `410`, contract maximum `387`. This report does not claim that separate CSS issue is fixed.
-

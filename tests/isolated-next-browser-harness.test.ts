@@ -43,15 +43,37 @@ describe("isolated next browser harness", () => {
         "report.json"
       ))).toBe(true);
       expect(first.readServerOutput()).toContain("SAFECLAW_TEST_SERVER_READY");
-      const routeResponses = await Promise.all(
-        ["/documents?theme=day", "/workspace?theme=day", "/home?theme=day"]
-          .map(async (route) => {
-            const response = await fetch(`${firstBaseUrl}${route}`);
-            return { route, response, body: await response.text() };
-          })
+      const routeContracts = [
+        { route: "/documents?theme=day", selector: ".safeclaw-module-shell[data-ready='true']" },
+        { route: "/workspace?theme=day", selector: ".command-center-shell" },
+        { route: "/home?theme=day", selector: ".safeclaw-module-shell[data-ready='true']" }
+      ];
+      for (const { route } of routeContracts) {
+        const response = await fetch(`${firstBaseUrl}${route}`);
+        expect(response.status, `warm ${route}`).toBe(200);
+      }
+      const routeResults = await Promise.all(
+        routeContracts.map(async ({ route, selector }) => {
+          const page = await first!.browser.newPage({ viewport: { width: 1280, height: 800 } });
+          const runtimeErrors: string[] = [];
+          page.on("pageerror", (error) => runtimeErrors.push(error.stack ?? error.message));
+          try {
+            const response = await page.goto(`${firstBaseUrl}${route}`, { waitUntil: "networkidle" });
+            await page.locator(selector).waitFor({ state: "attached" });
+            return {
+              route,
+              status: response?.status() ?? 0,
+              runtimeErrors,
+              body: (await page.locator("body").innerText()).slice(0, 2_000)
+            };
+          } finally {
+            await page.close();
+          }
+        })
       );
-      for (const { route, response, body } of routeResponses) {
-        expect(response.status, route).toBe(200);
+      for (const { route, status, runtimeErrors, body } of routeResults) {
+        expect(status, route).toBe(200);
+        expect(runtimeErrors, route).toEqual([]);
         expect(body, route).not.toContain("Internal browser harness error");
       }
       await first.stop();
