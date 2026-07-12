@@ -2,7 +2,7 @@
 > vitest run tests/frontend-route-coverage.test.ts -t browser evidence reconciliation
 
 
- RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/release-audit-evidence-remediation
+ RUN  v4.1.10 <local-user-root>/dev/safeguard-contest-mvp/<worktree-root>/release-audit-evidence-remediation
 
 
  Test Files  1 passed (1)
