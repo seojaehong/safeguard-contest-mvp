@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { EventEmitter } from "node:events";
 import fs from "node:fs";
 import path from "node:path";
-import fontkit from "@pdf-lib/fontkit";
+import fontkit, { type Font, type SubsetStream } from "@pdf-lib/fontkit";
 import {
   PDFDocument,
   beginText,
@@ -604,6 +605,8 @@ type TrueTypeTableRecord = {
   data: Buffer;
 };
 
+const trueTypeChecksumMagic = 0xb1b0afba;
+
 function alignTrueTypeOffset(value: number) {
   return (value + 3) & ~3;
 }
@@ -632,6 +635,86 @@ function calculateTrueTypeChecksum(value: Buffer) {
   }
   return checksum;
 }
+
+class PdfFontSubsetError extends Error {
+  constructor(readonly source: unknown) {
+    super("PDF font subset is invalid");
+    this.name = "PdfFontSubsetError";
+  }
+}
+
+function repairTrueTypeChecksums(value: Uint8Array) {
+  const font = Buffer.from(value);
+  assertTrueTypeRange(font, 0, 12, "subset header");
+  const tableCount = font.readUInt16BE(4);
+  assertTrueTypeRange(font, 0, 12 + tableCount * 16, "subset table directory");
+
+  let headOffset = -1;
+  const tableRecords: Array<{ recordOffset: number; tag: string; offset: number; length: number }> = [];
+  for (let index = 0; index < tableCount; index += 1) {
+    const recordOffset = 12 + index * 16;
+    const tag = font.toString("ascii", recordOffset, recordOffset + 4);
+    const offset = font.readUInt32BE(recordOffset + 8);
+    const length = font.readUInt32BE(recordOffset + 12);
+    assertTrueTypeRange(font, offset, length, `subset table ${tag}`);
+    if (tag === "head") {
+      assertTrueTypeRange(font, offset, 12, "subset head table");
+      headOffset = offset;
+    }
+    tableRecords.push({ recordOffset, tag, offset, length });
+  }
+  if (headOffset < 0) throw new Error("TrueType subset head table is missing");
+
+  font.writeUInt32BE(0, headOffset + 8);
+  tableRecords.forEach(({ recordOffset, offset, length }) => {
+    const table = font.subarray(offset, offset + length);
+    font.writeUInt32BE(calculateTrueTypeChecksum(table), recordOffset + 4);
+  });
+  const checksumAdjustment = (trueTypeChecksumMagic - calculateTrueTypeChecksum(font)) >>> 0;
+  font.writeUInt32BE(checksumAdjustment, headOffset + 8);
+  if (calculateTrueTypeChecksum(font) !== trueTypeChecksumMagic) {
+    throw new Error("TrueType subset checksum repair failed");
+  }
+  return font;
+}
+
+type ErrorAwareSubsetStream = {
+  on(eventType: "data", callback: (data: Uint8Array) => unknown): ErrorAwareSubsetStream;
+  on(eventType: "end", callback: () => unknown): ErrorAwareSubsetStream;
+  on(eventType: "error", callback: (error: unknown) => unknown): ErrorAwareSubsetStream;
+};
+
+function createChecksumCorrectingSubsetStream(source: SubsetStream): SubsetStream {
+  const output = new EventEmitter();
+  const chunks: Buffer[] = [];
+  const errorAwareSource = source as unknown as ErrorAwareSubsetStream;
+  errorAwareSource
+    .on("data", (data) => chunks.push(Buffer.from(data)))
+    .on("end", () => {
+      try {
+        output.emit("data", repairTrueTypeChecksums(Buffer.concat(chunks)));
+        output.emit("end");
+      } catch (error) {
+        output.emit("error", new PdfFontSubsetError(error));
+      }
+    })
+    .on("error", (error) => output.emit("error", new PdfFontSubsetError(error)));
+  return output as unknown as SubsetStream;
+}
+
+const checksumCorrectingFontkit = {
+  create(fontData: Uint8Array, postscriptName?: string): Font {
+    const font = fontkit.create(fontData, postscriptName);
+    const createSubset = font.createSubset.bind(font);
+    font.createSubset = () => {
+      const subset = createSubset();
+      const encodeStream = subset.encodeStream.bind(subset);
+      subset.encodeStream = () => createChecksumCorrectingSubsetStream(encodeStream());
+      return subset;
+    };
+    return font;
+  }
+};
 
 // fontkit emits short loca offsets for subsets, so source glyph records must end on 2-byte boundaries.
 function normalizeTrueTypeGlyphAlignment(font: Buffer) {
@@ -836,7 +919,7 @@ async function buildBinaryPdf(
 ) {
   const fonts = loadEmbeddedPdfFonts();
   const pdf = await PDFDocument.create();
-  pdf.registerFontkit(fontkit);
+  pdf.registerFontkit(checksumCorrectingFontkit);
   const [regularFont, boldFont] = await (async () => {
     try {
       return [
@@ -879,7 +962,12 @@ async function buildBinaryPdf(
     );
     y -= typography.leading;
   });
-  return Buffer.from(await pdf.save({ useObjectStreams: false }));
+  try {
+    return Buffer.from(await pdf.save({ useObjectStreams: false }));
+  } catch (error) {
+    if (error instanceof PdfFontSubsetError) throw new PdfFontAssetError(error.source);
+    throw error;
+  }
 }
 
 export async function POST(request: NextRequest) {

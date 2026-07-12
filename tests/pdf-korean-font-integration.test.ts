@@ -5,6 +5,12 @@ import { createCanvas, DOMMatrix, ImageData, Path2D } from "@napi-rs/canvas";
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 import { POST } from "@/app/api/export/pdf/route";
+import {
+  SFNT_CHECKSUM_MAGIC,
+  extractFinalFontFile2Streams,
+  validateSfntChecksums
+} from "@/tests/helpers/pdf-font-checksum";
+import { measureRasterGeometry } from "@/tests/helpers/pdf-visual-geometry";
 
 const root = process.cwd();
 const packageJsonPath = path.join(root, "package.json");
@@ -183,6 +189,22 @@ describe("Korean PDF font integration", () => {
     await document.destroy();
   });
 
+  it("embeds checksum-valid final FontFile2 subsets", async () => {
+    const response = await POST(createRequest());
+    const fonts = await extractFinalFontFile2Streams(new Uint8Array(await response.arrayBuffer()));
+
+    expect(fonts).toHaveLength(2);
+    for (const [index, font] of fonts.entries()) {
+      const validation = validateSfntChecksums(font);
+      const invalidTables = validation.tableChecksums.filter((table) => table.stored !== table.calculated);
+      expect(invalidTables, `FontFile2 ${index + 1} table checksums`).toEqual([]);
+      expect(validation.actualCheckSumAdjustment, `FontFile2 ${index + 1} checkSumAdjustment`)
+        .toBe(validation.expectedCheckSumAdjustment);
+      expect(validation.wholeFontChecksum, `FontFile2 ${index + 1} whole checksum`)
+        .toBe(SFNT_CHECKSUM_MAGIC);
+    }
+  });
+
   it("renders readable Korean line geometry across each extracted line", async () => {
     const response = await POST(createRequest());
     const binary = Buffer.from(await response.arrayBuffer());
@@ -250,6 +272,72 @@ describe("Korean PDF font integration", () => {
     for (const metric of metrics) {
       expect(metric.darkPixelsPerCharacter, metric.text).toBeGreaterThan(45);
       expect(metric.occupiedBucketRatio, metric.text).toBeGreaterThanOrEqual(0.75);
+    }
+    await document.destroy();
+  });
+
+  it("covers short regular and bold Korean labels and detects an erased-label mutation", async () => {
+    const response = await POST(createRequest());
+    const binary = Buffer.from(await response.arrayBuffer());
+
+    Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const document = await pdfjs.getDocument({ data: new Uint8Array(binary) }).promise;
+    const page = await document.getPage(1);
+    const scale = 2;
+    const viewport = page.getViewport({ scale });
+    const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
+    const context = canvas.getContext("2d");
+    await page.render({
+      canvas: canvas as never,
+      canvasContext: context as never,
+      viewport
+    }).promise;
+    const textContent = await page.getTextContent();
+    const targets = [
+      { label: "작성자", sourceText: "작성자:", role: "regular" },
+      { label: "검토", sourceText: "검토:", role: "regular" },
+      { label: "승인", sourceText: "승인:", role: "regular" },
+      { label: "위험수준", sourceText: "위험수준:", role: "bold" },
+      { label: "확인 항목", sourceText: "확인 항목", role: "bold" }
+    ] as const;
+
+    for (const target of targets) {
+      const item = textContent.items.find((candidate) => "str" in candidate && candidate.str.includes(target.sourceText));
+      expect(item, `${target.role} label ${target.label}`).toBeDefined();
+      if (!item || !("str" in item)) continue;
+
+      const transform = pdfjs.Util.transform(viewport.transform, item.transform);
+      const x = Math.max(0, Math.floor(transform[4]));
+      const fontHeight = Math.max(1, Math.ceil(Math.hypot(transform[2], transform[3])));
+      const y = Math.max(0, Math.floor(transform[5] - fontHeight * 1.2));
+      const itemWidth = Math.max(1, Math.ceil(item.width * scale));
+      const labelWidth = Math.ceil(fontHeight * (Array.from(target.label).length + 0.75));
+      const width = Math.min(itemWidth, labelWidth, canvas.width - x);
+      const height = Math.min(Math.ceil(fontHeight * 1.5), canvas.height - y);
+      const image = context.getImageData(x, y, width, height);
+      const koreanCharacterCount = Array.from(target.label)
+        .filter((character) => /[\u3131-\u318E\uAC00-\uD7A3]/u.test(character)).length;
+      const geometry = measureRasterGeometry(image.data, width, height, koreanCharacterCount);
+
+      expect(geometry.darkPixelsPerCharacter, target.label).toBeGreaterThan(60);
+      expect(geometry.occupiedBucketRatio, target.label).toBeGreaterThanOrEqual(0.75);
+
+      if (target.label === "승인") {
+        const mutated = new Uint8ClampedArray(image.data);
+        const erasedWidth = Math.ceil(width / 2);
+        for (let pixelY = 0; pixelY < height; pixelY += 1) {
+          for (let pixelX = 0; pixelX < erasedWidth; pixelX += 1) {
+            const offset = (pixelY * width + pixelX) * 4;
+            mutated[offset] = 255;
+            mutated[offset + 1] = 255;
+            mutated[offset + 2] = 255;
+            mutated[offset + 3] = 255;
+          }
+        }
+        const mutatedGeometry = measureRasterGeometry(mutated, width, height, koreanCharacterCount);
+        expect(mutatedGeometry.occupiedBucketRatio).toBeLessThan(0.75);
+      }
     }
     await document.destroy();
   });

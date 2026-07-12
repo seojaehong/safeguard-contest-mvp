@@ -1,0 +1,6 @@
+font=/NotoSansKR-Regular-7098480789 bytes=15331 table_mismatches=[]
+actual_adjustment=0x700B8193 expected_adjustment=0x700B8193
+whole_checksum=0xB1B0AFBA expected=0xB1B0AFBA valid=True
+font=/NotoSansKR-Bold-9742682568 bytes=2529 table_mismatches=[]
+actual_adjustment=0xECB13FC4 expected_adjustment=0xECB13FC4
+whole_checksum=0xB1B0AFBA expected=0xB1B0AFBA valid=True

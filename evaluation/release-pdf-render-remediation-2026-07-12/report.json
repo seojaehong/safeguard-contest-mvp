@@ -1,56 +1,51 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-07-13T01:49:55+09:00",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-13T07:32:32+09:00",
   "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\release-pdf-render-remediation",
   "branch": "fix/release-pdf-render-remediation",
-  "base": "a1dbedb64e177a4909584274eaad87484aa732f4",
-  "status": "green-local",
-  "rootCause": {
-    "component": "@pdf-lib/fontkit TrueType subsetting",
-    "finding": "Short loca offsets rounded unpadded odd-length glyf records and corrupted subset glyph boundaries.",
-    "redFontParseErrors": {
-      "regular": 80,
-      "bold": 12
-    }
+  "initialBase": "a1dbedb64e177a4909584274eaad87484aa732f4",
+  "parentRemediation": "f17dcebcc5700463b0691817aa6be424b0a5a7ee",
+  "status": "green-local-visual-and-binary",
+  "rootCauses": {
+    "visual": "Short loca offsets rounded unpadded odd-length glyf records and corrupted subset glyph boundaries.",
+    "binary": "The final fontkit subset serializer emitted zero sfnt table checksums and a stale checkSumAdjustment."
   },
-  "red": {
+  "initialVisualRed": {
     "pdf": "red-route.pdf",
     "sha256": "0B26D0A2C777DDEB131F0A6B9E9AA56A2F84898565A4F00548116CF5DB26B580",
     "bytes": 16635,
-    "status": 200,
-    "contentType": "application/pdf",
-    "cacheControl": "no-store",
-    "pdfPrefix": "%PDF-",
-    "existingTestsPassed": 7,
-    "visualRegressionFailure": "위험성평가표: expected 0 to be greater than 50",
+    "fontParseErrors": { "regular": 80, "bold": 12 },
     "renderers": {
       "pymupdf": { "pages": 1, "darkPixels": 4532, "darkFraction": 0.002262, "rasterBands": 20 },
       "pdfium": { "pages": 1, "darkPixels": 4847, "darkFraction": 0.002419, "rasterBands": 20 },
       "poppler": { "pages": 1, "darkPixels": 4523, "darkFraction": 0.002257, "rasterBands": 20 }
     }
   },
-  "controls": {
-    "rawSubset": {
-      "pdf": "subset-draw-text-control.pdf",
-      "sha256": "52A15A60B6E246BE71FBBFF29F792669F33649C12D74C2597E5D66A8A8DAFABA",
-      "bytes": 10709,
-      "popplerDarkPixels": 1945,
-      "rasterBands": 12,
-      "readable": false
-    },
-    "alignedSubset": {
-      "pdf": "normalized-subset-draw-text-control.pdf",
-      "sha256": "51C1CCFE5F68A8F8B35C83770646D034F3B36FFD98D7FB8B24AD7DD2E4A151EF",
-      "bytes": 10724,
-      "popplerDarkPixels": 12298,
-      "rasterBands": 7,
-      "readable": true
-    }
-  },
-  "green": {
-    "pdf": "green-route.pdf",
+  "visualOnlyF17dceb": {
+    "pdf": "visual-only-green-f17dceb.pdf",
     "sha256": "F68D0AED05F6DDE0DD5D1064F71BE1B6090168DADD5881BFAD17BC783942717F",
     "bytes": 16591,
+    "visuallyReadable": true,
+    "binaryValid": false,
+    "fonts": {
+      "regular": {
+        "tableChecksumFields": "all-zero",
+        "actualCheckSumAdjustment": "580468FC",
+        "expectedCheckSumAdjustment": "20C770A3",
+        "wholeFontChecksum": "E8EDA813"
+      },
+      "bold": {
+        "tableChecksumFields": "all-zero",
+        "actualCheckSumAdjustment": "247C03A9",
+        "expectedCheckSumAdjustment": "4C31A975",
+        "wholeFontChecksum": "89FB09EE"
+      }
+    }
+  },
+  "finalGreen": {
+    "pdf": "green-route.pdf",
+    "sha256": "23D3A9950FE572D37108126F3FA2EAE1D54CD914473CDE670D2F06C49573D3A1",
+    "bytes": 16620,
     "status": 200,
     "contentType": "application/pdf",
     "cacheControl": "no-store",
@@ -58,17 +53,35 @@
     "pdfPrefix": "%PDF-",
     "underOneMiB": true,
     "koreanExtraction": true,
-    "fontParse": {
-      "regular": { "glyphs": 118, "errors": 0 },
-      "bold": { "glyphs": 17, "errors": 0 }
+    "fonts": {
+      "regular": {
+        "glyphs": 117,
+        "parseErrors": 0,
+        "tableChecksumMismatches": 0,
+        "actualCheckSumAdjustment": "700B8193",
+        "expectedCheckSumAdjustment": "700B8193",
+        "wholeFontChecksum": "B1B0AFBA"
+      },
+      "bold": {
+        "glyphs": 17,
+        "parseErrors": 0,
+        "tableChecksumMismatches": 0,
+        "actualCheckSumAdjustment": "ECB13FC4",
+        "expectedCheckSumAdjustment": "ECB13FC4",
+        "wholeFontChecksum": "B1B0AFBA"
+      }
     },
-    "minimumMeasuredDarkPixelsPerCharacter": 49.95,
-    "minimumMeasuredHorizontalBucketOccupancy": 1.0,
     "renderers": {
-      "pymupdf": { "pages": 1, "darkPixels": 23951, "darkFraction": 0.011952, "rasterBands": 13 },
-      "pdfium": { "pages": 1, "darkPixels": 25472, "darkFraction": 0.012711, "rasterBands": 13 },
-      "poppler": { "pages": 1, "darkPixels": 23927, "darkFraction": 0.011940, "rasterBands": 13 }
+      "pymupdf": { "pages": 1, "darkPixels": 23940, "darkFraction": 0.011946, "rasterBands": 13 },
+      "pdfium": { "pages": 1, "darkPixels": 25456, "darkFraction": 0.012703, "rasterBands": 13 },
+      "poppler": { "pages": 1, "darkPixels": 23908, "darkFraction": 0.011930, "rasterBands": 13 }
     }
+  },
+  "visualRegression": {
+    "generalKoreanLineGeometry": true,
+    "shortRegularLabels": ["작성자", "검토", "승인"],
+    "shortBoldLabels": ["위험수준", "확인 항목"],
+    "erasedApprovalMutationDetected": true
   },
   "contracts": {
     "typedFontErrorBoundary": true,
@@ -76,10 +89,11 @@
     "invalidFontControlled500": true,
     "nonFontErrorRethrow": true,
     "regularAndBoldSubsets": true,
-    "toUnicode": true
+    "toUnicode": true,
+    "pdfXrefPostProcessing": false
   },
   "verification": {
-    "focusedPdfTests": { "files": 2, "passed": 12, "failed": 0 },
+    "focusedPdfTests": { "files": 2, "passed": 14, "failed": 0 },
     "typecheck": "passed",
     "build": "passed",
     "nft": {
@@ -93,12 +107,11 @@
     }
   },
   "artifacts": {
-    "redRendered": "red-rendered/",
-    "greenRendered": "green-rendered/",
-    "rawSubsetControlRendered": "subset-control-rendered/",
-    "alignedSubsetControlRendered": "normalized-subset-control-rendered/",
-    "redVisualTestLog": "red-visual-regression-test.log",
-    "greenVisualTestLog": "green-visual-regression-test.log",
+    "initialRedRendered": "red-rendered/",
+    "visualOnlyBinaryRedPdf": "visual-only-green-f17dceb.pdf",
+    "checksumRedLog": "checksum-red-f17dceb.log",
+    "finalGreenRendered": "green-rendered/",
+    "checksumGreenLog": "checksum-green-final.log",
     "focusedTestsLog": "focused-pdf-tests.log",
     "typecheckLog": "typecheck.log",
     "buildLog": "build.log"
