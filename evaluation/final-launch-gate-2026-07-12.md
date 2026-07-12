@@ -2,7 +2,7 @@
 
 ## Bound source
 
-- Source commit: `0ec343bc2179276a22588917af2fcca711e4c70c`
+- Source commit: `fe564c6f1d0e161ca24a0632d3f3e45b2d3be0df`
 - Integrated backend base: `31a44c0d972c46a47c94ad387eeeff39528d1be9` via merge commit `10d996c`
 - Isolated branch: `fix/final-launch-gate`
 
@@ -27,7 +27,7 @@
 - The final workspace viewport integration passed its 21 focused layout/typography tests with one intentional production-only skip.
 - The synchronized AI connect surface passed 6 static design contracts and its 2-row authenticated/unauthenticated Day/Night production browser matrix.
 - GitHub CI now installs Chromium and serializes isolated Next browser suites instead of racing a shared build directory.
-- Normal bundle: build `LBJi1DR_HOm51Q9yaoSgM`, marker count 0, pass.
+- Normal bundle: build `3YkoQr2WunKCGNoap6Aqq`, marker count 0, pass.
 - PDF and live-harness coverage are included in the full suite; the previously uncollectable live-harness test now passes 3/3.
 
 ## Screenshot-specific proof
