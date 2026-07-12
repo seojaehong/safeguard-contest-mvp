@@ -52,7 +52,7 @@ describe("workspace input CSS contract", () => {
     expect(textareaBlocks).toEqual([
       ["box-sizing: border-box"],
       ["display: block", "min-height: 152px", "padding: 22px 24px", "overflow-y: auto", "line-height: 1.76", "resize: vertical"],
-      ["min-height: 124px", "padding: 18px", "line-height: 1.74"],
+      ["min-height: 124px", "padding: 18px", "font-size: var(--text-body)", "line-height: 1.74"],
       ["font-size: var(--text-body)", "font-weight: 500", "line-height: var(--leading-body)", "letter-spacing: var(--tracking-body)"],
       ["min-height: 116px", "padding: 14px 15px", "line-height: 1.7"],
       ["min-height: 108px", "padding: 14px 12px", "line-height: 1.7"],
@@ -69,6 +69,9 @@ describe("workspace input CSS contract", () => {
     expect(documentFocus).toBeGreaterThan(submissionGuard);
     expect(css.slice(documentFocus)).not.toMatch(
       /\.command-center-shell\.workspace-theme-day \.workspace-input-page \.command-console-input,\s*\.command-center-shell\.workspace-theme-night \.workspace-input-page \.command-console-input\s*\{\s*line-height:\s*var\(--leading-longform\);\s*\}/u,
+    );
+    expect(css.slice(documentFocus)).not.toMatch(
+      /\.command-center-shell\.workspace-theme-day \.workspace-input-page \.command-console-input,\s*\.command-center-shell\.workspace-theme-night \.workspace-input-page \.command-console-input\s*\{\s*min-height:\s*118px;\s*\}/u,
     );
   });
 });
