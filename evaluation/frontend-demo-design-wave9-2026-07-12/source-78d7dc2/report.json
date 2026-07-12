@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "78d7dc25a9693551822c30b48a95e1b9b7e50a87",
+  "patchIdentity": "9f3dca8ad9146681a38939607be839d8227fe46b",
+  "supersedes": "evaluation/frontend-demo-design-wave9-2026-07-12/source-9bcb9c0/report.json",
+  "clipping": {
+    "interactiveFourEdgeFit": true,
+    "criticalSurfaceViewportIntersectionPx": 44,
+    "hiddenClipScrollHeightChecked": true,
+    "hiddenClipDescendantBoundsChecked": true,
+    "negativeFixture": true,
+    "findings": 0
+  },
+  "contrast": {
+    "ancestorBackdropComposite": true,
+    "independentWhiteComposite": false,
+    "negativeFixture": true,
+    "normalTextMinimum": 4.5,
+    "nonTextMinimum": 3,
+    "findings": 0
+  },
+  "verification": {
+    "focusedPassed": 7,
+    "typecheck": "pass",
+    "buildStaticPages": 27,
+    "productionPassed": 2,
+    "productionLanes": 6,
+    "staticViolations": 2080,
+    "importantDeclarations": 696,
+    "coverageIssues": 0
+  }
+}
