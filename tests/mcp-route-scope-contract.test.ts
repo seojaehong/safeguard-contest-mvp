@@ -1,15 +1,28 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 
 import { MCP_TOOL_NAMES } from "@/lib/mcp-auth";
+import { registerScopedTool } from "@/lib/mcp-scoped-tool";
+import type { McpToolResult } from "@/lib/mcp-tools";
 
 type RouteRegistrationAnalysis = {
+  canonicalImportCount: number;
   directRegisterToolCalls: number;
+  alternateScopedToolCalls: number;
+  registrationAliasReferences: number;
+  serverReferenceViolations: number;
   nonLiteralScopedToolCalls: number;
   scopedToolNames: string[];
 };
+
+type CapturedToolCallback = (
+  args: { region: string },
+  extra: unknown,
+) => Promise<McpToolResult>;
 
 function walk(node: ts.Node, visit: (candidate: ts.Node) => void): void {
   visit(node);
@@ -33,7 +46,11 @@ function hasCall(node: ts.Node, expectedName: string): boolean {
 function analyzeRouteRegistrations(source: string): RouteRegistrationAnalysis {
   const sourceFile = ts.createSourceFile("route.ts", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   const analysis: RouteRegistrationAnalysis = {
+    canonicalImportCount: 0,
     directRegisterToolCalls: 0,
+    alternateScopedToolCalls: 0,
+    registrationAliasReferences: 0,
+    serverReferenceViolations: 0,
     nonLiteralScopedToolCalls: 0,
     scopedToolNames: [],
   };
@@ -57,6 +74,37 @@ function analyzeRouteRegistrations(source: string): RouteRegistrationAnalysis {
   });
 
   return analysis;
+}
+
+function captureScopedTool(
+  handler: (args: { region: string }) => McpToolResult | Promise<McpToolResult>,
+): CapturedToolCallback {
+  let captured: CapturedToolCallback | undefined;
+  const server = {
+    registerTool(
+      _name: string,
+      _config: unknown,
+      callback: CapturedToolCallback,
+    ): object {
+      captured = callback;
+      return {};
+    },
+  };
+
+  registerScopedTool(
+    server as unknown as McpServer,
+    "get_weather_signals",
+    { inputSchema: { region: z.string() } },
+    handler,
+  );
+  if (!captured) throw new Error("registerScopedTool did not register a callback");
+  return captured;
+}
+
+function parseToolError(result: McpToolResult): Record<string, unknown> {
+  const text = result.content[0]?.text;
+  if (!text) throw new Error("tool result did not contain text");
+  return JSON.parse(text) as Record<string, unknown>;
 }
 
 function wrapperGuardsBeforeWorkAndLogs(source: string): boolean {
@@ -106,7 +154,11 @@ describe("MCP route scope contract", () => {
     const route = readFileSync(join(process.cwd(), "app/api/mcp/[transport]/route.ts"), "utf8");
     const analysis = analyzeRouteRegistrations(route);
 
+    expect(analysis.canonicalImportCount).toBe(1);
     expect(analysis.directRegisterToolCalls).toBe(0);
+    expect(analysis.alternateScopedToolCalls).toBe(0);
+    expect(analysis.registrationAliasReferences).toBe(0);
+    expect(analysis.serverReferenceViolations).toBe(0);
     expect(analysis.nonLiteralScopedToolCalls).toBe(0);
     expect(analysis.scopedToolNames).toEqual([...MCP_TOOL_NAMES]);
   });
@@ -144,5 +196,112 @@ describe("MCP route scope contract", () => {
       }
     `;
     expect(wrapperGuardsBeforeWorkAndLogs(afterWorkWrapper)).toBe(false);
+  });
+
+  it("rejects an aliased registration invoked before the authorization guard", () => {
+    const aliasBeforeGuard = `
+      import { registerScopedTool } from "@/lib/mcp-scoped-tool";
+      function registerTools(server) {
+        const invoke = registerScopedTool;
+        invoke(server, "get_weather_signals", {}, handler);
+        readAuthorizedToolContext(extra, "get_weather_signals");
+      }
+    `;
+    const analysis = analyzeRouteRegistrations(aliasBeforeGuard);
+
+    expect(analysis.registrationAliasReferences).toBe(1);
+    expect(analysis.scopedToolNames).toEqual([]);
+  });
+
+  it("rejects registration through an alternate object's registerScopedTool", () => {
+    const alternateObject = `
+      import { registerScopedTool } from "@/lib/mcp-scoped-tool";
+      function registerTools(server) {
+        registrar.registerScopedTool(server, "get_weather_signals", {}, handler);
+      }
+    `;
+    const analysis = analyzeRouteRegistrations(alternateObject);
+
+    expect(analysis.alternateScopedToolCalls).toBe(1);
+    expect(analysis.scopedToolNames).toEqual([]);
+  });
+});
+
+describe("registerScopedTool behavior", () => {
+  it.each([
+    ["missing", undefined],
+    [
+      "denied",
+      {
+        authInfo: {
+          extra: {
+            siteId: "site-1",
+            orgId: "org-1",
+            scopes: ["tools:generate_safety_docpack"],
+            source: "db",
+            tokenId: "token-1",
+          },
+        },
+      },
+    ],
+  ])("does not call the handler when authorization is %s", async (_label, extra) => {
+    let handlerCallCount = 0;
+    const callback = captureScopedTool(() => {
+      handlerCallCount += 1;
+      return { content: [{ type: "text", text: "unexpected" }] };
+    });
+
+    const result = await callback({ region: "서울" }, extra);
+
+    expect(handlerCallCount).toBe(0);
+    expect(result.isError).toBe(true);
+    expect(parseToolError(result)).toEqual({
+      code: "MCP_TOOL_FORBIDDEN",
+      error: "도구 권한이 없습니다.",
+    });
+  });
+
+  it("calls the handler exactly once with an authorized context", async () => {
+    let handlerCallCount = 0;
+    const callback = captureScopedTool((_args) => {
+      handlerCallCount += 1;
+      return { content: [{ type: "text", text: "authorized" }] };
+    });
+
+    const result = await callback(
+      { region: "서울" },
+      {
+        authInfo: {
+          extra: {
+            siteId: "site-1",
+            orgId: "org-1",
+            scopes: ["tools:get_weather_signals"],
+            source: "db",
+            tokenId: "token-1",
+          },
+        },
+      },
+    );
+
+    expect(handlerCallCount).toBe(1);
+    expect(result).toEqual({ content: [{ type: "text", text: "authorized" }] });
+  });
+});
+
+describe("MCP remediation evidence", () => {
+  it("binds the committed raw build log to the report build ID", () => {
+    const evidenceDir = join(
+      process.cwd(),
+      "evaluation/mcp-tool-scope-enforcement-2026-07-12",
+    );
+    const buildLog = readFileSync(join(evidenceDir, "build.log"), "utf8");
+    const report = JSON.parse(
+      readFileSync(join(evidenceDir, "report.json"), "utf8"),
+    ) as { build?: { buildId?: unknown; staticPages?: unknown } };
+    const loggedBuildId = /^BUILD_ID=(\S+)$/m.exec(buildLog)?.[1];
+
+    expect(loggedBuildId).toBeTypeOf("string");
+    expect(report.build?.buildId).toBe(loggedBuildId);
+    expect(report.build?.staticPages).toBe("27/27");
   });
 });
