@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/accident-cases.test.ts tests/scenario-inference.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/scenario-profile-contamination
+
+
+ Test Files  2 passed (2)
+      Tests  33 passed (33)
+   Start at  12:22:16
+   Duration  2.06s (transform 226ms, setup 0ms, import 348ms, tests 32ms, environment 0ms)
