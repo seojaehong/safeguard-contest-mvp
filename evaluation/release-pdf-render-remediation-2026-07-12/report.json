@@ -1,17 +1,19 @@
 {
-  "schemaVersion": 2,
-  "generatedAt": "2026-07-13T07:32:32+09:00",
-  "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\release-pdf-render-remediation",
+  "schemaVersion": 3,
+  "generatedAt": "2026-07-13T08:00:09+09:00",
+  "repositoryRoot": ".",
   "branch": "fix/release-pdf-render-remediation",
   "initialBase": "a1dbedb64e177a4909584274eaad87484aa732f4",
   "parentRemediation": "f17dcebcc5700463b0691817aa6be424b0a5a7ee",
-  "status": "green-local-visual-and-binary",
+  "checksumRemediation": "c27ec3f645936bae4f21c2b8e09c12d435b548ec",
+  "status": "green-local-visual-binary-error-boundary-evidence",
   "rootCauses": {
     "visual": "Short loca offsets rounded unpadded odd-length glyf records and corrupted subset glyph boundaries.",
-    "binary": "The final fontkit subset serializer emitted zero sfnt table checksums and a stale checkSumAdjustment."
+    "binary": "The final fontkit subset serializer emitted zero sfnt table checksums and a stale checkSumAdjustment.",
+    "errorBoundary": "c27ec3f classified every pdf.embedFont exception as a font asset failure, including unrelated document/reference failures."
   },
   "initialVisualRed": {
-    "pdf": "red-route.pdf",
+    "pdf": "evaluation/release-pdf-render-remediation-2026-07-12/red-route.pdf",
     "sha256": "0B26D0A2C777DDEB131F0A6B9E9AA56A2F84898565A4F00548116CF5DB26B580",
     "bytes": 16635,
     "fontParseErrors": { "regular": 80, "bold": 12 },
@@ -22,7 +24,7 @@
     }
   },
   "visualOnlyF17dceb": {
-    "pdf": "visual-only-green-f17dceb.pdf",
+    "pdf": "evaluation/release-pdf-render-remediation-2026-07-12/visual-only-green-f17dceb.pdf",
     "sha256": "F68D0AED05F6DDE0DD5D1064F71BE1B6090168DADD5881BFAD17BC783942717F",
     "bytes": 16591,
     "visuallyReadable": true,
@@ -43,9 +45,9 @@
     }
   },
   "finalGreen": {
-    "pdf": "green-route.pdf",
-    "sha256": "23D3A9950FE572D37108126F3FA2EAE1D54CD914473CDE670D2F06C49573D3A1",
-    "bytes": 16620,
+    "pdf": "evaluation/release-pdf-render-remediation-2026-07-12/green-route.pdf",
+    "sha256": "16A9696D0C0B0FC501D675AECCA033195DD65E9294757720796FCA839B523029",
+    "bytes": 16744,
     "status": 200,
     "contentType": "application/pdf",
     "cacheControl": "no-store",
@@ -55,11 +57,11 @@
     "koreanExtraction": true,
     "fonts": {
       "regular": {
-        "glyphs": 117,
+        "glyphs": 119,
         "parseErrors": 0,
         "tableChecksumMismatches": 0,
-        "actualCheckSumAdjustment": "700B8193",
-        "expectedCheckSumAdjustment": "700B8193",
+        "actualCheckSumAdjustment": "B5E6A6C3",
+        "expectedCheckSumAdjustment": "B5E6A6C3",
         "wholeFontChecksum": "B1B0AFBA"
       },
       "bold": {
@@ -72,8 +74,8 @@
       }
     },
     "renderers": {
-      "pymupdf": { "pages": 1, "darkPixels": 23940, "darkFraction": 0.011946, "rasterBands": 13 },
-      "pdfium": { "pages": 1, "darkPixels": 25456, "darkFraction": 0.012703, "rasterBands": 13 },
+      "pymupdf": { "pages": 1, "darkPixels": 23939, "darkFraction": 0.011946, "rasterBands": 13 },
+      "pdfium": { "pages": 1, "darkPixels": 25450, "darkFraction": 0.012700, "rasterBands": 13 },
       "poppler": { "pages": 1, "darkPixels": 23908, "darkFraction": 0.011930, "rasterBands": 13 }
     }
   },
@@ -83,17 +85,25 @@
     "shortBoldLabels": ["위험수준", "확인 항목"],
     "erasedApprovalMutationDetected": true
   },
+  "errorBoundaryRegression": {
+    "embedStageNonFontFailureWasRedOnC27ec3f": true,
+    "fontReadParseSubsetFailuresControlled500": true,
+    "unrelatedEmbedFailureLoggedAndRethrown": true,
+    "broadMessageMatching": false
+  },
   "contracts": {
     "typedFontErrorBoundary": true,
     "missingFontControlled500": true,
     "invalidFontControlled500": true,
-    "nonFontErrorRethrow": true,
+    "createStageNonFontErrorRethrow": true,
+    "embedStageNonFontErrorRethrow": true,
     "regularAndBoldSubsets": true,
     "toUnicode": true,
     "pdfXrefPostProcessing": false
   },
   "verification": {
-    "focusedPdfTests": { "files": 2, "passed": 14, "failed": 0 },
+    "focusedPdfTests": { "files": 2, "passed": 16, "failed": 0 },
+    "evidenceAbsolutePathScan": { "passed": true, "matches": 0 },
     "typecheck": "passed",
     "build": "passed",
     "nft": {
@@ -107,13 +117,15 @@
     }
   },
   "artifacts": {
-    "initialRedRendered": "red-rendered/",
-    "visualOnlyBinaryRedPdf": "visual-only-green-f17dceb.pdf",
-    "checksumRedLog": "checksum-red-f17dceb.log",
-    "finalGreenRendered": "green-rendered/",
-    "checksumGreenLog": "checksum-green-final.log",
-    "focusedTestsLog": "focused-pdf-tests.log",
-    "typecheckLog": "typecheck.log",
-    "buildLog": "build.log"
+    "initialRedRendered": "evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/",
+    "visualOnlyBinaryRedPdf": "evaluation/release-pdf-render-remediation-2026-07-12/visual-only-green-f17dceb.pdf",
+    "checksumRedLog": "evaluation/release-pdf-render-remediation-2026-07-12/checksum-red-f17dceb.log",
+    "embedBoundaryRedLog": "evaluation/release-pdf-render-remediation-2026-07-12/embed-boundary-red-c27ec3f.log",
+    "evidencePathRedLog": "evaluation/release-pdf-render-remediation-2026-07-12/evidence-path-scan-red-c27ec3f.log",
+    "finalGreenRendered": "evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/",
+    "checksumGreenLog": "evaluation/release-pdf-render-remediation-2026-07-12/checksum-green-final.log",
+    "focusedTestsLog": "evaluation/release-pdf-render-remediation-2026-07-12/focused-pdf-tests.log",
+    "typecheckLog": "evaluation/release-pdf-render-remediation-2026-07-12/typecheck.log",
+    "buildLog": "evaluation/release-pdf-render-remediation-2026-07-12/build.log"
   }
 }

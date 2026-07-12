@@ -1,11 +1,12 @@
 # PDF visual and binary release blocker remediation
 
-- Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\release-pdf-render-remediation`
+- Repository root: `.`
 - Branch: `fix/release-pdf-render-remediation`
 - Initial base: `a1dbedb64e177a4909584274eaad87484aa732f4`
 - Parent remediation: `f17dcebcc5700463b0691817aa6be424b0a5a7ee`
+- Checksum remediation: `c27ec3f645936bae4f21c2b8e09c12d435b548ec`
 - Scope: `app/api/export/pdf/route.ts`, PDF tests/helpers, and this evaluation package only
-- Local verdict: visual GREEN and final embedded sfnt binary GREEN
+- Local verdict: visual, final embedded sfnt binary, error-boundary, and evidence-path gates GREEN
 
 ## Initial visual RED
 
@@ -43,7 +44,7 @@ The first hypothesis was confirmed: `@pdf-lib/fontkit` emits short `loca` offset
 
 ## Independent binary rejection of f17dceb
 
-The first remediation was visually correct but not binary-complete. Read-only validation of the actual final `FontFile2` streams in `visual-only-green-f17dceb.pdf` found:
+The first remediation was visually correct but not binary-complete. Read-only validation of the actual final `FontFile2` streams in `evaluation/release-pdf-render-remediation-2026-07-12/visual-only-green-f17dceb.pdf` found:
 
 | Font | Table checksum fields | Actual adjustment | Expected adjustment | Whole checksum |
 | --- | --- | --- | --- | --- |
@@ -52,7 +53,7 @@ The first remediation was visually correct but not binary-complete. Read-only va
 
 This established a second, separate root cause: fontkit creates a new subset after source normalization and its final TTF serializer writes zero table directory checksums while leaving a stale `head.checkSumAdjustment`.
 
-## Final boundary fix
+## Final subset boundary fix
 
 The route now wraps `Font.createSubset().encodeStream()`, the final sfnt boundary immediately before pdf-lib compresses the `FontFile2` stream:
 
@@ -64,6 +65,21 @@ The route now wraps `Font.createSubset().encodeStream()`, the final sfnt boundar
 - Wraps repair failures in a typed font-subset error that feeds the existing controlled font `500` boundary only.
 
 The pre-fontkit glyph alignment remains necessary for visual correctness. The final stream hook adds binary correctness.
+
+## Independent error-boundary rejection of c27ec3f
+
+The c27 checksum remediation incorrectly wrapped every `pdf.embedFont` exception in `PdfFontAssetError`. A new regression forced a deterministic document/reference failure from `PDFDocument.prototype.embedFont`; before this remediation the route returned the controlled `PDF_FONT_ASSET_UNAVAILABLE` response instead of logging and rethrowing the original non-font error.
+
+The error boundary is now limited to operations that prove an asset problem:
+
+- Font file/license access, reads, TrueType normalization, and explicit fontkit parse/subset preflight map to `PdfFontAssetError`.
+- Final subset stream and checksum-repair failures retain the typed `PdfFontSubsetError` mapping.
+- `PDFDocument.create`, `registerFontkit`, `embedFont`, page/reference operations, and unrelated `save` failures reach the general `PDF export failed` log and rethrow unchanged.
+- No pdf-lib message matching or unstable external error classes are used.
+
+## Evidence path hygiene
+
+An automated recursive assertion scans every committed file, including PDF and PNG evidence, in `evaluation/release-pdf-render-remediation-2026-07-12/` using a byte-preserving representation. Text evidence rejects every drive-letter, Windows user, or POSIX user absolute path; binary evidence rejects user-directory and `.worktrees` signatures without treating random compressed bytes as paths. All recorded artifact paths are now repository-relative.
 
 ## TDD gates
 
@@ -84,47 +100,54 @@ The added P3 test explicitly measures:
 
 It also erases half of the `승인` label raster in memory and confirms the geometry gate rejects the mutation.
 
+### Embed-stage non-font gate
+
+The new regression injects an unrelated failure directly at `PDFDocument.prototype.embedFont`. It was RED against c27ec3f because the request resolved to a controlled font `500`; it now confirms the original error is logged by the general PDF boundary and rethrown unchanged.
+
 ## Final visual and binary GREEN
 
 The latest route response preserves the release contract:
 
 - Status `200`, `application/pdf`, `no-store`, UTF-8 filename, `%PDF-`
-- Size `16,620` bytes
+- Size `16,744` bytes
 - Korean text extraction retained
 - `/CIDFontType2`, `/FontFile2`, `/ToUnicode`, Regular/Bold subsets retained
-- FontTools subset parse errors: Regular `0/117`, Bold `0/17`
+- FontTools subset parse errors: Regular `0/119`, Bold `0/17`
 
 Final sfnt validation:
 
 | Font | Table mismatches | Actual adjustment | Expected adjustment | Whole checksum |
 | --- | ---: | --- | --- | --- |
-| Regular | 0 | `700B8193` | `700B8193` | `B1B0AFBA` |
+| Regular | 0 | `B5E6A6C3` | `B5E6A6C3` | `B1B0AFBA` |
 | Bold | 0 | `ECB13FC4` | `ECB13FC4` | `B1B0AFBA` |
 
 Three independent renderers produced readable, aligned Korean text after binary repair:
 
 | Renderer | Pages | Dark pixels | Dark fraction | Raster bands |
 | --- | ---: | ---: | ---: | ---: |
-| PyMuPDF | 1 | 23,940 | 0.011946 | 13 |
-| PDFium | 1 | 25,456 | 0.012703 | 13 |
+| PyMuPDF | 1 | 23,939 | 0.011946 | 13 |
+| PDFium | 1 | 25,450 | 0.012700 | 13 |
 | Poppler | 1 | 23,908 | 0.011930 | 13 |
 
 Verification:
 
-- Focused PDF tests: `14/14` passed
+- Focused PDF tests: `16/16` passed
+- Evidence absolute-path scan: passed with `0` matches
 - TypeScript: `tsc --noEmit --incremental false` passed
 - Production build: `next build` passed
 - NFT route manifest: `11` files, including both Noto TTF files and the OFL license
 
 ## Evidence paths
 
-- Initial visual RED PDF and renders: `red-route.pdf`, `red-rendered/`
-- f17 visual-only/binary-RED PDF: `visual-only-green-f17dceb.pdf`
-- f17 checksum RED: `checksum-red-f17dceb.log`
-- Final visual+binary GREEN PDF: `green-route.pdf`
-- Final GREEN renders and metrics: `green-rendered/`
-- Final checksum GREEN: `checksum-green-final.log`
-- Raw/aligned subset controls: `subset-control-rendered/`, `normalized-subset-control-rendered/`
-- Focused suite: `focused-pdf-tests.log`
-- Font structure: `red-subset-font-validation.log`, `green-subset-font-validation.log`
-- Typecheck/build: `typecheck.log`, `build.log`
+- Initial visual RED PDF and renders: `evaluation/release-pdf-render-remediation-2026-07-12/red-route.pdf`, `evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/`
+- f17 visual-only/binary-RED PDF: `evaluation/release-pdf-render-remediation-2026-07-12/visual-only-green-f17dceb.pdf`
+- f17 checksum RED: `evaluation/release-pdf-render-remediation-2026-07-12/checksum-red-f17dceb.log`
+- c27 embed-boundary RED: `evaluation/release-pdf-render-remediation-2026-07-12/embed-boundary-red-c27ec3f.log`
+- c27 evidence-path RED: `evaluation/release-pdf-render-remediation-2026-07-12/evidence-path-scan-red-c27ec3f.log`
+- Final visual+binary GREEN PDF: `evaluation/release-pdf-render-remediation-2026-07-12/green-route.pdf`
+- Final GREEN renders and metrics: `evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/`
+- Final checksum GREEN: `evaluation/release-pdf-render-remediation-2026-07-12/checksum-green-final.log`
+- Raw/aligned subset controls: `evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/`, `evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/`
+- Focused suite: `evaluation/release-pdf-render-remediation-2026-07-12/focused-pdf-tests.log`
+- Font structure: `evaluation/release-pdf-render-remediation-2026-07-12/red-subset-font-validation.log`, `evaluation/release-pdf-render-remediation-2026-07-12/green-subset-font-validation.log`
+- Typecheck/build: `evaluation/release-pdf-render-remediation-2026-07-12/typecheck.log`, `evaluation/release-pdf-render-remediation-2026-07-12/build.log`

@@ -840,14 +840,28 @@ class PdfFontAssetError extends Error {
   }
 }
 
+function assertEmbeddablePdfFont(fontData: Buffer): void {
+  const font = fontkit.create(fontData);
+  if (!Number.isSafeInteger(font.unitsPerEm) || font.unitsPerEm <= 0 || font.numGlyphs <= 0) {
+    throw new Error("PDF font metrics are invalid");
+  }
+  if (!font.hasGlyphForCodePoint(0xac00)) {
+    throw new Error("PDF font does not contain the required Korean glyphs");
+  }
+  const subset = font.createSubset();
+  subset.includeGlyph(font.glyphForCodePoint(0xac00));
+  subset.includeGlyph(font.glyphForCodePoint(0x41));
+}
+
 function loadEmbeddedPdfFonts(): { regular: Buffer; bold: Buffer } {
   if (embeddedPdfFonts) return embeddedPdfFonts;
   try {
     fs.accessSync(pdfFontLicensePath, fs.constants.R_OK);
-    embeddedPdfFonts = {
-      regular: normalizeTrueTypeGlyphAlignment(fs.readFileSync(regularPdfFontPath)),
-      bold: normalizeTrueTypeGlyphAlignment(fs.readFileSync(boldPdfFontPath))
-    };
+    const regular = normalizeTrueTypeGlyphAlignment(fs.readFileSync(regularPdfFontPath));
+    const bold = normalizeTrueTypeGlyphAlignment(fs.readFileSync(boldPdfFontPath));
+    assertEmbeddablePdfFont(regular);
+    assertEmbeddablePdfFont(bold);
+    embeddedPdfFonts = { regular, bold };
   } catch (error) {
     throw new PdfFontAssetError(error);
   }
@@ -920,16 +934,8 @@ async function buildBinaryPdf(
   const fonts = loadEmbeddedPdfFonts();
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(checksumCorrectingFontkit);
-  const [regularFont, boldFont] = await (async () => {
-    try {
-      return [
-        await pdf.embedFont(fonts.regular, { subset: true }),
-        await pdf.embedFont(fonts.bold, { subset: true })
-      ] as const;
-    } catch (error) {
-      throw new PdfFontAssetError(error);
-    }
-  })();
+  const regularFont = await pdf.embedFont(fonts.regular, { subset: true });
+  const boldFont = await pdf.embedFont(fonts.bold, { subset: true });
   const page = pdf.addPage([595, 842]);
   const regularFontKey = page.node.newFontDictionary(regularFont.name, regularFont.ref);
   const boldFontKey = page.node.newFontDictionary(boldFont.name, boldFont.ref);
