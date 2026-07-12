@@ -233,6 +233,23 @@ describe("remote engine signed protocol v1", () => {
     expectCode(() => verify(signed(), { [field]: value }), "PROTOCOL_POLICY_INVALID");
   });
 
+  it.each(["maxFutureSkewMs", "maxTtlMs"] as const)(
+    "rejects runtime null instead of applying the %s default",
+    (field) => {
+      const overrides = { [field]: null } as unknown as Partial<
+        Parameters<typeof verifyRemoteEngineRequest>[0]
+      >;
+      expectCode(() => verify(signed(), overrides), "PROTOCOL_POLICY_INVALID");
+    },
+  );
+
+  it("applies verifier policy defaults only to undefined", () => {
+    expect(verify(signed(), {
+      maxFutureSkewMs: undefined,
+      maxTtlMs: undefined,
+    }).requestId).toBe("req-001");
+  });
+
   it("bounds unsigned and correctly signed raw body bytes before protocol work", () => {
     const oversized = `{\"padding\":\"${"x".repeat(maxBodyBytes)}\"}`;
     expect(Buffer.byteLength(oversized, "utf8")).toBeGreaterThan(maxBodyBytes);
@@ -259,6 +276,29 @@ describe("remote engine signed protocol v1", () => {
     );
   });
 
+  it("rejects lone surrogates before distinct bodies can share UTF-8 hash and HMAC bytes", () => {
+    const canonicalBody = serializeRemoteEngineRequest(request());
+    const bodyD800 = canonicalBody.replace("Inspect the confined-space permit.", "\uD800");
+    const bodyD801 = canonicalBody.replace("Inspect the confined-space permit.", "\uD801");
+    const hash = (body: string): string => createHash("sha256").update(body, "utf8").digest("hex");
+
+    expect(bodyD800).not.toBe(bodyD801);
+    expect(hash(bodyD800)).toBe(hash(bodyD801));
+    const reusedSignature = rawSigned(bodyD800);
+    expectCode(() => verify(reusedSignature), "PROTOCOL_UNICODE_INVALID");
+    expectCode(
+      () => verify(reusedSignature, { body: bodyD801 }),
+      "PROTOCOL_UNICODE_INVALID",
+    );
+    expectCode(
+      () => signed(request({ prompt: "\uD800" })),
+      "PROTOCOL_UNICODE_INVALID",
+    );
+
+    const paired = signed(request({ prompt: "\uD83D\uDE00" }));
+    expect(verify(paired).request.prompt).toBe("😀");
+  });
+
   it("bounds raw header count and aggregate bytes", () => {
     const input = signed();
     const tooMany = { ...input.headers };
@@ -270,6 +310,46 @@ describe("remote engine signed protocol v1", () => {
 
     const tooLarge = { ...input.headers, "x-padding": "x".repeat(maxHeaderBytes) };
     expectCode(() => verify(input, { headers: tooLarge }), "PROTOCOL_HEADERS_TOO_LARGE");
+  });
+
+  it("accepts raw header tuples within the pre-fold line limit and rejects excess or duplicates", () => {
+    const input = signed();
+    const withinLimit: Parameters<typeof verifyRemoteEngineRequest>[0]["headers"] = [
+      ...Object.entries(input.headers),
+      ...Array.from({ length: 8 }, (_, index): [string, string] => [`x-raw-${index}`, "x"]),
+    ];
+    expect(verify(input, { headers: withinLimit }).requestId).toBe("req-001");
+
+    const tooMany: Parameters<typeof verifyRemoteEngineRequest>[0]["headers"] = [
+      ...Object.entries(input.headers),
+      ...Array.from({ length: 24 }, (_, index): [string, string] => [`x-raw-${index}`, "x"]),
+    ];
+    expectCode(() => verify(input, { headers: tooMany }), "PROTOCOL_HEADERS_TOO_LARGE");
+
+    const duplicate: Parameters<typeof verifyRemoteEngineRequest>[0]["headers"] = [
+      ...Object.entries(input.headers),
+      ["X-SafeClaw-Key-Id", currentKey.keyId],
+    ];
+    expectCode(() => verify(input, { headers: duplicate }), "PROTOCOL_HEADER_DUPLICATE");
+  });
+
+  it("treats WHATWG Headers count as folded normalized entries, not raw lines", () => {
+    const input = signed();
+    const folded = new Headers(Object.entries(input.headers));
+    for (let index = 0; index < 40; index += 1) folded.append("x-folded", "x");
+
+    expect(Array.from(folded.keys())).toHaveLength(10);
+    expect(folded.get("x-folded")?.split(",")).toHaveLength(40);
+    expect(verify(input, { headers: folded }).requestId).toBe("req-001");
+
+    const tooManyNormalized = new Headers(Object.entries(input.headers));
+    for (let index = 0; index < 24; index += 1) {
+      tooManyNormalized.set(`x-normalized-${index}`, "x");
+    }
+    expectCode(
+      () => verify(input, { headers: tooManyNormalized }),
+      "PROTOCOL_HEADERS_TOO_LARGE",
+    );
   });
 
   it("collects Record headers once instead of rescanning for every protocol field", () => {
