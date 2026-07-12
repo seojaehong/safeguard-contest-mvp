@@ -595,9 +595,26 @@ describe("workspace layout regression", () => {
     await page.close();
   }, 90_000);
 
+  it("removes stale example affordances after clearing the input", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1560, height: 700 } });
+    await page.addInitScript((storageKey) => window.localStorage.removeItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY);
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
+
+    const input = page.locator("#field-command-input");
+    await input.fill("");
+
+    expect(await input.inputValue()).toBe("");
+    expect(await input.getAttribute("placeholder")).toBe("");
+    expect(await page.getByRole("button", { name: "예시로 되돌리기" }).count()).toBe(0);
+    expect(await page.locator(".workspace-current-brief").count()).toBe(0);
+    expect(await page.locator(".workspace-source-status").count()).toBe(0);
+    await page.close();
+  }, 90_000);
+
   it("keeps a filled workspace rail aligned without an independent desktop scrollbar", async () => {
     if (!browser) throw new Error("Browser was not started");
-    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const page = await browser.newPage({ viewport: { width: 1560, height: 700 } });
     await page.addInitScript((storageKey) => window.localStorage.removeItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY);
     await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
 

@@ -1,0 +1,57 @@
+{
+  "status": "pass",
+  "baseSha": "449c357",
+  "scope": [
+    "empty-input-placeholder",
+    "example-restore-visibility",
+    "desktop-rail-alignment"
+  ],
+  "red": {
+    "stalePlaceholder": "오늘 작업 내용을 한 줄로 입력하세요.",
+    "filledBottomDeltaPx": 147.9375,
+    "protectedCompactRegressionsCaught": 4
+  },
+  "green": {
+    "targetedBrowserTestsPassed": 2,
+    "workspaceBrowserTestsPassed": 23,
+    "workspaceBrowserTestsSkipped": 1,
+    "typecheck": "pass",
+    "buildStaticPages": 27,
+    "diffCheck": "pass"
+  },
+  "browser": {
+    "viewport": {
+      "width": 1560,
+      "height": 700
+    },
+    "filled": {
+      "bottomDeltaPx": 0,
+      "sideOverflowY": "visible",
+      "sideHasIndependentScroll": false
+    },
+    "cleared": {
+      "inputValueLength": 0,
+      "placeholder": "",
+      "restoreButtonCount": 0,
+      "currentBriefCount": 0,
+      "sourceStatusCount": 0,
+      "bottomDeltaPx": 0,
+      "sideOverflowY": "visible",
+      "sideHasIndependentScroll": false,
+      "horizontalOverflow": false
+    }
+  },
+  "artifacts": {
+    "metrics": "evaluation/workspace-empty-rail-hotfix-2026-07-13/browser-metrics.json",
+    "filledScreenshot": {
+      "path": "evaluation/workspace-empty-rail-hotfix-2026-07-13/filled-1560x700.png",
+      "sha256": "A49313DC81892EB0070BAA12EEBBE505BA782E758D33C95855F0B3D317D15CE0"
+    },
+    "clearedScreenshot": {
+      "path": "evaluation/workspace-empty-rail-hotfix-2026-07-13/cleared-1560x700.png",
+      "sha256": "0B102098DFEAB6EEAB4BE53135994DE78DC18F5DBA54AEE756728E98ADFCDE9E"
+    }
+  },
+  "databaseChanged": false,
+  "schemaChanged": false
+}
