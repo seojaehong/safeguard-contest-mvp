@@ -6,6 +6,8 @@ Status: `review_pending`
 
 Product commits: `ebef495df600419a21e02838c4aa1554152db233`, `1051f18b8cff86d3b87461d862dcb141f39ad429`
 
+Documentation commit: `894942c72868f052119f423de6009caf631695ee`
+
 Base: `87798d15aea085284332942390f215f49f3399cf`
 
 This patch makes the existing `mcp_tokens.scopes` field an enforced authorization boundary. It does not change the database schema, mutate database rows, enable the remote sidecar, or change OpenClaw runtime selection.
