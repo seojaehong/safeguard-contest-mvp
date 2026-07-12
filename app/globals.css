@@ -18393,7 +18393,7 @@ body:has(.safeclaw-landing) :is(
     min-height: 142px;
     padding: 16px;
     font-size: var(--text-body);
-    line-height: var(--leading-body-lg);
+    line-height: 1.68;
     font-weight: 500;
     letter-spacing: var(--tracking-body);
 }
