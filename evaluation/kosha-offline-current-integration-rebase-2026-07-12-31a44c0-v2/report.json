@@ -1,0 +1,191 @@
+{
+  "date": "2026-07-12",
+  "branch": "feat/kosha-offline-current-integration",
+  "currentBase": "31a44c0d972c46a47c94ad387eeeff39528d1be9",
+  "status": "passed",
+  "commits": {
+    "product": "b7e609b948bed4b5334f0801b2e05f0742b9aa6b"
+  },
+  "verification": {
+    "targeted": {
+      "exitCode": 0,
+      "files": {
+        "passed": 11,
+        "skipped": 0,
+        "failed": 0,
+        "total": 11
+      },
+      "tests": {
+        "passed": 84,
+        "skipped": 0,
+        "failed": 0,
+        "total": 84
+      }
+    },
+    "sourceGates": [
+      {
+        "label": "NEW_REGRESSION1",
+        "exitCode": 0,
+        "files": {
+          "passed": 1,
+          "skipped": 0,
+          "failed": 0,
+          "total": 1
+        },
+        "tests": {
+          "passed": 1,
+          "skipped": 0,
+          "failed": 0,
+          "total": 1
+        }
+      },
+      {
+        "label": "BOUNDED26",
+        "exitCode": 0,
+        "files": {
+          "passed": 2,
+          "skipped": 0,
+          "failed": 0,
+          "total": 2
+        },
+        "tests": {
+          "passed": 26,
+          "skipped": 0,
+          "failed": 0,
+          "total": 26
+        }
+      },
+      {
+        "label": "ORIGINAL8",
+        "exitCode": 0,
+        "files": {
+          "passed": 2,
+          "skipped": 0,
+          "failed": 0,
+          "total": 2
+        },
+        "tests": {
+          "passed": 8,
+          "skipped": 0,
+          "failed": 0,
+          "total": 8
+        }
+      },
+      {
+        "label": "EXPANDED113",
+        "exitCode": 0,
+        "files": {
+          "passed": 9,
+          "skipped": 0,
+          "failed": 0,
+          "total": 9
+        },
+        "tests": {
+          "passed": 113,
+          "skipped": 0,
+          "failed": 0,
+          "total": 113
+        }
+      },
+      {
+        "label": "CORPUS34",
+        "exitCode": 0,
+        "files": {
+          "passed": 1,
+          "skipped": 0,
+          "failed": 0,
+          "total": 1
+        },
+        "tests": {
+          "passed": 34,
+          "skipped": 0,
+          "failed": 0,
+          "total": 34
+        }
+      },
+      {
+        "label": "IMPACT41",
+        "exitCode": 0,
+        "files": {
+          "passed": 2,
+          "skipped": 0,
+          "failed": 0,
+          "total": 2
+        },
+        "tests": {
+          "passed": 41,
+          "skipped": 0,
+          "failed": 0,
+          "total": 41
+        }
+      }
+    ],
+    "currentScopedContracts": {
+      "exitCode": 0,
+      "files": {
+        "passed": 28,
+        "skipped": 1,
+        "failed": 0,
+        "total": 29
+      },
+      "tests": {
+        "passed": 255,
+        "skipped": 1,
+        "failed": 0,
+        "total": 256
+      }
+    },
+    "typecheck": {
+      "exitCode": 0
+    },
+    "diffCheck": {
+      "exitCode": 0
+    },
+    "build": {
+      "exitCode": 0,
+      "matchingProcessesBefore": 0,
+      "compiledSuccessfully": true,
+      "staticPagesGenerated": 27,
+      "staticPagesTotal": 27
+    }
+  },
+  "integrity": {
+    "externalV3": {
+      "fileCount": 6,
+      "totalBytes": 79572222,
+      "allHashIdentical": true,
+      "integrationAccess": "read-only"
+    },
+    "forbiddenChangeCount": 0,
+    "clientCorpusImportViolationCount": 0,
+    "serverWrapperImportCount": 4
+  },
+  "gitSync": {
+    "remoteFeatureCompare": "3\t23",
+    "remoteFeatureCherry": [
+      "> b7e609b (HEAD -> feat/kosha-offline-current-integration) fix: preserve kosha current review provenance",
+      "= 24e253e chore: record kosha integration evidence",
+      "= ae9bede feat: integrate kosha offline supporting evidence",
+      "= 4c5b107 test: port kosha offline contracts",
+      "> 31a44c0 (origin/feature/backend-harness-gate, feature/backend-harness-gate) chore: verify AI connect design integration",
+      "> e55f672 chore: close AI connect design wave ledger",
+      "> ef3341e chore: record AI connect wave 8 evidence",
+      "> f02b7bb test: harden AI connect color contract",
+      "> f8136a6 fix: preserve AI connect semantic states",
+      "> f8d92e0 feat: normalize AI connect design surface",
+      "> 447c267 chore: verify workspace viewport integration",
+      "> 173ab87 chore: close workspace viewport wave ledger",
+      "> 8bd9126 docs: clarify workspace compact cascade",
+      "> beaa0ae docs: record wave 7 viewport evidence",
+      "> 97a036a fix: keep workspace actions inside viewport",
+      "> 87798d1 chore: verify ontology typography integration",
+      "> 6a582a3 chore: close ontology typography wave ledger",
+      "> f2688e9 chore: record exhaustive matrix evidence",
+      "> 57f3b7d test: exhaust operation memory typography matrix",
+      "> 9e417bb chore: record ontology matrix fix evidence",
+      "> 584fd01 fix: expand ontology typography matrix",
+      "> dc9667a chore: record ontology typography evidence",
+      "> 455cdd5 feat: normalize ontology typography roles"
+    ]
+  }
+}
