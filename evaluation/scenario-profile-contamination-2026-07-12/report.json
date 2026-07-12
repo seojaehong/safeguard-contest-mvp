@@ -1,7 +1,8 @@
 {
-  "generatedAt": "2026-07-12T02:22:09.7865374Z",
-  "remediatesCommit": "ac728ed9c452a9843e3a4ac417b060f35603cb1e",
-  "status": "implementation_verified",
+  "generatedAt": "2026-07-12T02:44:16.8115078Z",
+  "startingHead": "e6ffbcfe5f3ef59590fd7b842ec82cd38cfc38a0",
+  "status": "review_pending",
+  "freshReviewRequired": true,
   "databaseMutation": false,
   "scope": {
     "database": false,
@@ -11,21 +12,32 @@
   },
   "tdd": {
     "productionEditedAfterRed": true,
-    "red": {
-      "testFiles": 2,
-      "testsExecuted": 19,
-      "testsPassed": 14,
-      "testsFailed": 5,
+    "initialGwangjuRed": {
+      "testFiles": 1,
+      "testsExecuted": 14,
+      "testsPassed": 13,
+      "testsFailed": 1,
+      "failureReason": "companyName was inferred as 굴착공사",
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/red-location-company.log"
+    },
+    "expandedRed": {
+      "testFiles": 1,
+      "testsExecuted": 17,
+      "testsPassed": 13,
+      "testsFailed": 4,
       "failureReasons": [
-        "worker attribute selected a chemical-cleaning fallback accident",
-        "equipment or service maintenance selected excavation",
-        "cleaning location label overwrote excavation"
-      ]
+        "굴착공사 was inferred as a company name",
+        "보수공사 was inferred as a company name",
+        "세종 was not preserved in the excavation site name",
+        "광주 하남산단 excavation inferred 굴착공사 as the company name"
+      ],
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/red-location-company-expanded.log"
     },
     "green": {
       "testFiles": 2,
-      "testsPassed": 19,
-      "testsFailed": 0
+      "testsPassed": 22,
+      "testsFailed": 0,
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/green-location-company.log"
     }
   },
   "askResponseContract": {
@@ -33,35 +45,17 @@
     "companyType": "건설업",
     "profileId": "construction-excavation",
     "siteName": "도시가스공사 열수송관 굴착공사 현장",
-    "profileWorkNameContains": [
-      "굴착"
-    ],
-    "profileHazardsContain": [
-      "붕괴 또는 매몰",
-      "매설물"
-    ],
-    "weatherNoteExcludes": [
-      "화학물질"
-    ],
     "riskAssessmentContains": [
       "굴착면 붕괴"
     ],
     "riskAssessmentExcludes": [
       "화학세제"
     ],
-    "accidentCases": {
-      "mode": "fallback",
-      "titles": [
-        "이동식 비계 작업 중 추락 재해사례",
-        "지게차 후진 중 보행자 충돌 재해사례",
-        "용접 불티에 의한 화재 재해사례"
-      ],
-      "excludes": [
-        "화학",
-        "세척",
-        "세제"
-      ]
-    }
+    "accidentCaseExcludes": [
+      "화학",
+      "세척",
+      "세제"
+    ]
   },
   "classificationMatrix": {
     "nonExcavation": [
@@ -74,24 +68,31 @@
       "도로 굴착 보수 작업",
       "터파기 작업"
     ],
-    "canonicalCleaningSiteName": "광주 하남산단 청소 현장",
-    "workerAttributesExcludedFromAccidentIdentity": [
-      "외국인",
-      "신규",
-      "고령",
-      "숙련"
-    ]
+    "rejectedCompanyDescriptors": [
+      "굴착공사",
+      "보수공사"
+    ],
+    "preservedExcavationLocations": [
+      "광주 하남산단",
+      "세종"
+    ],
+    "canonicalCleaningSiteName": "광주 하남산단 청소 현장"
   },
   "verification": {
     "focusedTestFiles": 6,
-    "testsPassed": 60,
+    "baselineTests": 60,
+    "newTests": 3,
+    "testsPassed": 63,
     "testsFailed": 0,
+    "focusedLog": "evaluation/scenario-profile-contamination-2026-07-12/focused60-plus3.log",
     "typecheck": "pass",
+    "typecheckLog": "evaluation/scenario-profile-contamination-2026-07-12/typecheck.log",
     "build": "pass",
     "buildRuns": 1,
-    "sameWorktreeBuildProcessBeforeRun": false,
+    "staticPagesGenerated": "27/27",
+    "buildLog": "evaluation/scenario-profile-contamination-2026-07-12/build27.log",
     "diffCheck": "pass",
-    "diffCheckNotes": "line-ending conversion notices only"
-  },
-  "historyQualification": "This report records commands observed during this remediation and does not independently verify ordering in the earlier rejected commit."
+    "diffCheckNotes": "LF-to-CRLF conversion notices only",
+    "diffCheckLog": "evaluation/scenario-profile-contamination-2026-07-12/diff-check.log"
+  }
 }

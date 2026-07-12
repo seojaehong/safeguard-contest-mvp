@@ -1,0 +1,86 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/scenario-inference.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/scenario-profile-contamination
+
+ ❯ tests/scenario-inference.test.ts (17 tests | 4 failed) 34ms
+     × does not infer a work descriptor as the company name: 굴착공사 작업자 5명 7ms
+     × does not infer a work descriptor as the company name: 보수공사 배수펌프 점검 작업 1ms
+     × preserves a top-level region in an excavation site name 3ms
+     × does not let the canonical Gwangju cleaning location overwrite excavation identity 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/scenario-inference.test.ts > inferScenario > does not infer a work descriptor as the company name: 굴착공사 작업자 5명
+AssertionError: expected '굴착공사' not to match /^(굴착|보수)공사$/
+
+- Expected:
+/^(굴착|보수)공사$/
+
++ Received:
+"굴착공사"
+
+ ❯ tests/scenario-inference.test.ts:82:38
+     80|     const scenario = inferScenario(question);
+     81|
+     82|     expect(scenario.companyName).not.toMatch(/^(굴착|보수)공사$/);
+       |                                      ^
+     83|   });
+     84|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/scenario-inference.test.ts > inferScenario > does not infer a work descriptor as the company name: 보수공사 배수펌프 점검 작업
+AssertionError: expected '보수공사' not to match /^(굴착|보수)공사$/
+
+- Expected:
+/^(굴착|보수)공사$/
+
++ Received:
+"보수공사"
+
+ ❯ tests/scenario-inference.test.ts:82:38
+     80|     const scenario = inferScenario(question);
+     81|
+     82|     expect(scenario.companyName).not.toMatch(/^(굴착|보수)공사$/);
+       |                                      ^
+     83|   });
+     84|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/scenario-inference.test.ts > inferScenario > preserves a top-level region in an excavation site name
+AssertionError: expected '굴착공사 열수송관 굴착공사 현장' to contain '세종'
+
+Expected: "세종"
+Received: "굴착공사 열수송관 굴착공사 현장"
+
+ ❯ tests/scenario-inference.test.ts:88:31
+     86|     const scenario = inferScenario("세종 열수송관 굴착공사");
+     87|
+     88|     expect(scenario.siteName).toContain("세종");
+       |                               ^
+     89|     expect(scenario.siteName).toContain("굴착");
+     90|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/scenario-inference.test.ts > inferScenario > does not let the canonical Gwangju cleaning location overwrite excavation identity
+AssertionError: expected '굴착공사' not to be '굴착공사' // Object.is equality
+ ❯ tests/scenario-inference.test.ts:96:40
+     94|     const cleaning = inferScenario("클린온 광주 하남산단 공장 바닥 세척 작업. 화학세제 사용."…
+     95|
+     96|     expect(excavation.companyName).not.toBe("굴착공사");
+       |                                        ^
+     97|     expect(excavation.siteName).toContain("광주 하남산단");
+     98|     expect(excavation.siteName).toContain("굴착");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 13 passed (17)
+   Start at  11:37:29
+   Duration  1.19s (transform 161ms, setup 0ms, import 216ms, tests 34ms, environment 0ms)

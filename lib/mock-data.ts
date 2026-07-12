@@ -359,18 +359,27 @@ function inferWorkerCount(question: string) {
 // below), plus the top-level administrative regions. A bare mention of one
 // of these must never be mistaken for a company name.
 const knownLocationTokens =
-  /^(서울|인천|경기|부산|대구|광주|대전|울산|세종|성수동|성수|남동공단|안산|해운대|하남산단|달서구)/;
+  /^(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주|성수동|성수|남동공단|안산|해운대|하남산단|달서구)/;
+
+const workDescriptorCompanyNames = /^(?:굴착|보수|굴착보수|열수송관굴착|도로굴착보수)공사$/;
+
+function isWorkDescriptorCompanyName(candidate: string) {
+  return workDescriptorCompanyNames.test(candidate.replace(/\s+/g, ""));
+}
 
 function inferCompanyName(question: string) {
   const trimmed = question.trim();
-  const companyMatch = trimmed.match(/([가-힣A-Za-z0-9]+(?:테크인씨|테크이엔씨|엔지니어링|주식회사|건설|산업|전기|설비|이엔씨|테크|관리|로지스|메탈|창고|시설|기업|공사|㈜))/);
-  if (companyMatch) return companyMatch[1].replace(/^㈜/, "").trim();
+  const companyMatches = trimmed.matchAll(/([가-힣A-Za-z0-9]+(?:테크인씨|테크이엔씨|엔지니어링|주식회사|건설|산업|전기|설비|이엔씨|테크|관리|로지스|메탈|창고|시설|기업|공사|㈜))/g);
+  for (const companyMatch of companyMatches) {
+    const candidate = companyMatch[1].replace(/^㈜/, "").trim();
+    if (!isWorkDescriptorCompanyName(candidate)) return candidate;
+  }
 
   const firstToken = trimmed.split(/\s+/)[0];
   const looksLikeBarePlaceName =
     firstToken &&
     (knownLocationTokens.test(firstToken) || /(서울|인천|경기|부산|대구|광주|대전|울산|오늘|작업|현장)/.test(firstToken));
-  if (firstToken && !looksLikeBarePlaceName) {
+  if (firstToken && !looksLikeBarePlaceName && !isWorkDescriptorCompanyName(firstToken)) {
     return firstToken.replace(/[,.]$/, "");
   }
 
@@ -384,6 +393,25 @@ const excavationWorkIdentityPatterns = [
 
 function hasExcavationWorkIdentity(question: string) {
   return excavationWorkIdentityPatterns.some((pattern) => pattern.test(question));
+}
+
+const knownSpecificLocationRules: Array<[RegExp, string]> = [
+  [/서울\s*성수동|성수동/, "서울 성수동"],
+  [/인천\s*남동공단|남동공단/, "인천 남동공단"],
+  [/경기\s*안산|안산/, "경기 안산"],
+  [/부산\s*해운대|해운대/, "부산 해운대"],
+  [/광주\s*하남산단|하남산단/, "광주 하남산단"],
+  [/대구\s*달서구|달서구/, "대구 달서구"]
+];
+
+function inferKnownLocationPrefix(question: string) {
+  const specificLocation = knownSpecificLocationRules.find(([pattern]) => pattern.test(question));
+  if (specificLocation) return specificLocation[1];
+
+  const topLevelRegion = question.match(
+    /(?:^|[\s,.])(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)(?=$|[\s,.])/
+  );
+  return topLevelRegion?.[1] || null;
 }
 
 function inferCustomWorkName(question: string) {
@@ -425,12 +453,15 @@ function inferSiteName(question: string, fallback: string) {
   return fallback;
 }
 
-function buildExcavationScenarioProfile(companyName: string): ScenarioProfile {
+function buildExcavationScenarioProfile(question: string, companyName: string): ScenarioProfile {
+  const locationPrefix = inferKnownLocationPrefix(question);
+  const sitePrefix = locationPrefix || (companyName !== "현장 업체" ? companyName : "");
+
   return {
     id: "construction-excavation",
     companyName,
     companyType: "건설업",
-    siteName: `${companyName} 열수송관 굴착공사 현장`,
+    siteName: `${sitePrefix ? `${sitePrefix} ` : ""}열수송관 굴착공사 현장`,
     workName: "열수송관 굴착공사",
     processName: "지하 매설물 확인, 굴착기 굴착, 이동식 크레인 양중, 토사 적치와 굴착면 통제",
     weatherNote: "옥외 굴착 조건, 굴착면 붕괴·매설물 접촉·중장비 작업반경 확인 필요",
@@ -464,7 +495,7 @@ function buildExcavationScenarioProfile(companyName: string): ScenarioProfile {
 
 function buildCustomScenarioProfile(question: string): ScenarioProfile {
   const companyName = inferCompanyName(question);
-  if (hasExcavationWorkIdentity(question)) return buildExcavationScenarioProfile(companyName);
+  if (hasExcavationWorkIdentity(question)) return buildExcavationScenarioProfile(question, companyName);
 
   const isPumpConfinedSpace = /배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question);
   const isLeakMaintenance = /누수|비가\s*새|천장/.test(question);
