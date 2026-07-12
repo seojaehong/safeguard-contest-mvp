@@ -22,7 +22,7 @@ The controls were correctly sized and remained in normal document flow. The fina
 
 The selector-scoped fix is limited to `app/globals.css`:
 
-- For desktop height <=560px, the existing page padding declaration is consolidated to `0 clamp(28px, 4vw, 48px) 20px`, and composer top margin becomes `0`.
+- For desktop height <=560px, the existing page padding declaration is consolidated to `0 clamp(28px, 4vw, 48px) 20px`. The composer top margin is `0` from 431px through 560px; the later <=430px compact rule deliberately restores `8px`, and the 410/360/320 production cases still satisfy the viewport bounds.
 - For mobile width <=720px, page padding becomes `10px 18px 28px`.
 
 No controls were hidden or removed. No transforms, scaling, new clipping, overflow masking, tolerance changes, parser changes, allowlist changes, route-inventory changes, Reports changes, backend contracts, package files, or `SafeGuardCommandCenter.tsx` were touched. W4-W6 typography and ontology selectors remain unchanged.
