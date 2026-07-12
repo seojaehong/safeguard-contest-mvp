@@ -2,8 +2,8 @@
 
 ## Bound source
 
-- Source commit: `c6fdc5326710337bb9763056fed8979f57dca2b4`
-- Integrated backend base: `87798d15aea085284332942390f215f49f3399cf` via merge commit `5647f68`
+- Source commit: `f971cf2a3fff15e21964548a173dc9991a641188`
+- Integrated backend base: `447c267cb14eb4e22e081fa14313c7e96de495bf` via merge commit `f971cf2`
 - Isolated branch: `fix/final-launch-gate`
 
 ## User-visible remediation
@@ -24,7 +24,8 @@
 - Static frontend audit: 32 pages, 23 components, 19,650 CSS lines, 0 `!important`, 0 coverage issues, 0 violations.
 - Browser audit: 108/108 rows passed, 108 screenshots, 0 findings, 0 recovery rows.
 - The post-backend typography delta was additionally verified in the production browser matrix across ontology/workspace, Day/Night, desktop/mobile, popovers, and compact operation-memory roles.
-- Normal bundle: build `nYtYsjsMDMOirIX5gxREX`, marker count 0, pass.
+- The final workspace viewport integration passed its 21 focused layout/typography tests with one intentional production-only skip.
+- Normal bundle: build `PVHO6lEgHUyZ-dCSbm72j`, marker count 0, pass.
 - PDF and live-harness coverage are included in the full suite; the previously uncollectable live-harness test now passes 3/3.
 
 ## Screenshot-specific proof
