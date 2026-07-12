@@ -45,6 +45,14 @@ function digestFiles(baseDirectory, files) {
   return hash.digest("hex");
 }
 
+function safeRepositoryPath(repositoryRoot, absolutePath) {
+  const relativePath = path.relative(repositoryRoot, absolutePath);
+  if (path.isAbsolute(relativePath) || relativePath === ".." || relativePath.startsWith(`..${path.sep}`)) {
+    return "<external-build-directory>";
+  }
+  return (relativePath || ".").replaceAll("\\", "/");
+}
+
 const chunkFiles = listJavaScript(staticDirectory);
 const buildIdPath = path.join(buildDirectory, "BUILD_ID");
 if (!fs.existsSync(buildIdPath)) throw new Error(`Missing BUILD_ID: ${buildIdPath}`);
@@ -54,12 +62,12 @@ const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encodi
 const { sourceIdentity } = canonicalFrontendSourceIdentity(root);
 const buildIdentity = digestFiles(buildDirectory, [buildIdPath, ...chunkFiles]);
 const markerFiles = chunkFiles.filter((file) => fs.readFileSync(file, "utf8").includes(marker));
-const passed = mode === "normal" ? markerFiles.length === 0 : markerFiles.length > 0;
+const passed = mode === "normal" ? markerFiles.length === 0 : markerFiles.length === 1;
 const report = {
   schemaVersion: 1,
   generatedAt: new Date().toISOString(),
   mode,
-  buildDirectory,
+  buildDirectory: safeRepositoryPath(root, buildDirectory),
   buildId,
   sourceSha,
   sourceIdentity,
