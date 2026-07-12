@@ -80,34 +80,76 @@ function declarationsFor(source: string, selector: string): string[] {
     .map((rule) => rule.declarations);
 }
 
-function expectDeclaration(source: string, selector: string, declaration: string): void {
+function declarationValuesFor(source: string, selector: string, property: string): string[] {
+  return declarationsFor(source, selector).flatMap((declarations) => declarations
+    .split(";")
+    .map((declaration) => {
+      const separator = declaration.indexOf(":");
+      if (separator === -1) return null;
+      return {
+        property: declaration.slice(0, separator).trim(),
+        value: declaration.slice(separator + 1).trim(),
+      };
+    })
+    .filter((declaration): declaration is { property: string; value: string } => declaration !== null)
+    .filter((declaration) => declaration.property === property)
+    .map((declaration) => declaration.value));
+}
+
+function expectDeclaration(source: string, selector: string, property: string, value: string): void {
   expect(
-    declarationsFor(source, selector).some((declarations) => declarations.includes(declaration)),
-    `${selector} must include ${declaration}`,
-  ).toBe(true);
+    declarationValuesFor(source, selector, property),
+    `${selector} must include exact ${property}: ${value}`,
+  ).toContain(value);
+}
+
+function expectDeclaredProperty(source: string, selector: string, property: string): void {
+  expect(
+    declarationValuesFor(source, selector, property),
+    `${selector} must declare ${property}`,
+  ).not.toEqual([]);
+}
+
+function expectNoHexValue(source: string, selector: string, property: string): void {
+  expect(
+    declarationValuesFor(source, selector, property).some((value) => /^#/u.test(value)),
+    `${selector} ${property} must not use a hardcoded hex value`,
+  ).toBe(false);
 }
 
 describe("AI connect design contract", () => {
   const css = fs.readFileSync(path.join(process.cwd(), "app", "globals.css"), "utf8");
 
+  it("does not accept a longer CSS property as an exact declaration match", () => {
+    expect(() => expectDeclaration(
+      ".probe { background-color: var(--workspace-ink); }",
+      ".probe",
+      "color",
+      "var(--workspace-ink)",
+    )).toThrow();
+  });
+
   it("maps AI code surfaces through existing global color tokens", () => {
-    expectDeclaration(css, ".ai-connect-workspace", "--ai-connect-code-background: var(--steel-0)");
-    expectDeclaration(css, ".ai-connect-workspace", "--ai-connect-code-ink: var(--paper-0)");
-    expect(declarationsFor(css, ".ai-connect-workspace").join(" ")).not.toMatch(
-      /--ai-connect-code-(?:background|ink):\s*#/u,
-    );
+    expectDeclaredProperty(css, ":root", "--steel-0");
+    expectDeclaredProperty(css, ":root", "--paper-0");
+    expectDeclaration(css, ".ai-connect-workspace", "--ai-connect-code-background", "var(--steel-0)");
+    expectDeclaration(css, ".ai-connect-workspace", "--ai-connect-code-ink", "var(--paper-0)");
+    expectNoHexValue(css, ".ai-connect-workspace", "--ai-connect-code-background");
+    expectNoHexValue(css, ".ai-connect-workspace", "--ai-connect-code-ink");
   });
 
   it("uses document-theme text tokens on the rendered Day surfaces", () => {
     expectDeclaration(
       css,
       ".safeclaw-module-shell.module-variant-document .ai-connect-sif-packet-actions a",
-      "color: var(--workspace-ink)",
+      "color",
+      "var(--workspace-ink)",
     );
     expectDeclaration(
       css,
       ".safeclaw-module-shell.module-variant-document .ai-connect-sif-verdict > span",
-      "color: var(--workspace-ink)",
+      "color",
+      "var(--workspace-ink)",
     );
   });
 
@@ -115,19 +157,20 @@ describe("AI connect design contract", () => {
     expectDeclaration(
       css,
       ".safeclaw-module-shell.module-variant-document .ai-connect-sif-vector-guard.active",
-      "border-color: var(--workspace-success)",
+      "border-color",
+      "var(--workspace-success)",
     );
   });
 
   it("assigns the rendered token label a complete component-title tuple", () => {
     const selector = ".ai-connect-token-items article strong";
-    for (const declaration of [
-      "font-size: var(--text-component-title)",
-      "font-weight: 700",
-      "line-height: var(--leading-component-title)",
-      "letter-spacing: var(--tracking-component-title)",
+    for (const [property, value] of [
+      ["font-size", "var(--text-component-title)"],
+      ["font-weight", "700"],
+      ["line-height", "var(--leading-component-title)"],
+      ["letter-spacing", "var(--tracking-component-title)"],
     ] as const) {
-      expectDeclaration(css, selector, declaration);
+      expectDeclaration(css, selector, property, value);
     }
   });
 
