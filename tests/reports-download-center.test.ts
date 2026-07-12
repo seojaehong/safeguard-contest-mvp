@@ -132,8 +132,7 @@ async function installLocalWorkpack(context: BrowserContext, marker: string): Pr
         siteName: "브라우저 최근 현장",
         workSummary: marker
       }
-    }),
-    savedAt: "2026-07-10T08:00:00.000Z"
+    })
   };
   await context.addInitScript(({ expectedOrigin, workpackKey, workpackJson }) => {
     if (window.location.origin !== expectedOrigin) return;
@@ -351,6 +350,9 @@ describe("reports download center remount behavior", () => {
       expect(await browserProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
       expect(await page.getByText(localMarker, { exact: true }).count()).toBeGreaterThan(0);
       expect(await page.getByLabel("서버 작업팩 오류 상태").count()).toBe(0);
+      await page.locator('[aria-label="다운로드 준비 상태"][data-download-readiness="ready"]').waitFor({
+        state: "visible"
+      });
       const exportButtons = page.getByLabel("리포트 다운로드").getByRole("button");
       for (const button of await exportButtons.all()) {
         expect(await button.isEnabled()).toBe(true);
