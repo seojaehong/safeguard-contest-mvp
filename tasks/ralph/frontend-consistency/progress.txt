@@ -51,3 +51,12 @@
 - Static: honest RED 2,307, coverage 0, exact delta 0 and important 737 unchanged.
 - Independent review after P3 documentation correction 0b4e6f4: SPEC PASS / CODE QUALITY PASS, P0-P3 none.
 - Next: integrate W7 onto current authoritative backend, then resume static typography/shape debt waves.
+
+## 2026-07-12 W8 complete
+- Recomputed RED: AI selector ownership was 180, not stale 177 (tuple45, size42, line14, tracking6, important41, radius27, gradient5).
+- Source series: 1f116f1, reviewer remediation a3b3d90, exact-parser hardening 3e23004; evidence 1ccb373.
+- Static: honest RED 2,307 -> 2,127; AI-owned residual 0; coverage 0.
+- Verified: authenticated Day/Night x 1440/390/short-height, stable unauth Day/Night desktop/390, 61 rendered selector families, semantic states/hover, six contrast surfaces, columns, controls, radii, overflow.
+- Regression: font/W4-W6/W7 contracts, W7 layout 18, typecheck, build 27/27 all PASS.
+- Fresh review after five product P2 fixes and exact-parser P2 fix: SPEC PASS / CODE QUALITY PASS, P0-P3 none.
+- Next: integrate W8 onto current authoritative backend, then continue global radius/important/decorative/selector debt.

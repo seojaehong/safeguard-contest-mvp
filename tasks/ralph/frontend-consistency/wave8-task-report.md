@@ -2,7 +2,7 @@
 
 ## Status
 
-Wave 8 is complete at reviewed source `3e23004`. The authenticated and unauthenticated `/settings/ai-connect` surfaces now use complete semantic typography, radius, state, hover, and contrast contracts across the base and document cascades. Fresh review is CLEAN with no actionable P0-P2 findings.
+Wave 8 is complete at reviewed source `3e23004`. The authenticated and unauthenticated `/settings/ai-connect` surfaces now use complete semantic typography, radius, state, hover, and contrast contracts across the base and document cascades. Fresh review is SPEC PASS / CODE QUALITY PASS with no P0-P3 findings.
 
 The implementation is split across:
 
@@ -48,7 +48,7 @@ Unauthenticated Day and Night run at desktop and 390px. Every lane creates a fre
 - Strict typecheck: PASS.
 - Normal dummy-environment production build: PASS, 27/27 generated.
 - Authenticated/unauthenticated production matrix: PASS, 2/2.
-- Fresh review: CLEAN, no actionable P0-P2.
+- Fresh review: SPEC PASS / CODE QUALITY PASS, P0-P3 none.
 
 The combined W4-W7 command did not return while the long workspace browser file was included. It was terminated after more than 180 seconds and rerun as split suites; every split suite passed.
 
