@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workspace-layout-regression.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workspace-padding-contract-fix
+
+
+ Test Files  1 passed (1)
+      Tests  21 passed (21)
+   Start at  18:53:18
+   Duration  116.91s (transform 324ms, setup 0ms, import 764ms, tests 115.44s, environment 0ms)
+

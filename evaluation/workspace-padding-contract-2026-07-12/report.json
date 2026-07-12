@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "baseHead": "693ec41bc330baa2933d25bff824885356bd8bcb",
+  "verifiedSourceHead": "4a700c233d0c742970330e6f666b71582e3211c6",
+  "evidenceCommit": null,
+  "scope": {
+    "changedFiles": [
+      "app/globals.css",
+      "tests/workspace-input-css-contract.test.ts"
+    ],
+    "databaseChanges": 0,
+    "environmentChanges": 0,
+    "migrationChanges": 0
+  },
+  "contract": {
+    "desktop": {
+      "default": "22px 24px / 17px / 1.76",
+      "height560": "18px / 15px / 1.74",
+      "height430": "18px / 14px / 1.74",
+      "height380": "14px 15px / 14px / 1.70",
+      "height340": "14px 12px / 14px / 1.70"
+    },
+    "mobile": "16px / 15px / 1.68 / min-height 142px"
+  },
+  "tddEvidence": {
+    "initialStaticRed": "2 failed, 1 passed",
+    "cascadeOwnerRed": "2 failed, 1 passed",
+    "height430Red": "1 failed, 2 passed",
+    "mobileOwnerRed": "2 failed, 1 passed",
+    "mobileLineHeightRed": "1 failed, 2 passed",
+    "finalStaticGreen": "3 passed"
+  },
+  "finalGates": {
+    "staticContract": {
+      "command": "npm.cmd test -- tests/workspace-input-css-contract.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": "pass",
+      "files": 1,
+      "tests": 3,
+      "log": "static-contract-final.log"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "pass",
+      "log": "typecheck-final.log"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "result": "pass",
+      "generatedPages": 27,
+      "buildId": "WIEPy5P-dm17UtXVMpY2i",
+      "log": "build-final.log"
+    },
+    "productionMatrix": {
+      "command": "$env:WORKSPACE_INPUT_PROD_MATRIX='1'; npm.cmd test -- tests/workspace-layout-regression.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": "pass",
+      "files": 1,
+      "tests": 21,
+      "themes": ["day", "night"],
+      "viewports": ["1440x900", "1638x510", "1440x500", "1440x410", "1440x360", "1440x320", "390x844"],
+      "log": "prod-layout-matrix-final.log"
+    },
+    "diffCheck": {
+      "command": "git diff --check",
+      "result": "pass",
+      "log": "diff-check-final.log"
+    }
+  },
+  "provenance": {
+    "rebasedOntoCurrentBackend": true,
+    "supersededBuildsAreNotReleaseEvidence": true,
+    "finalBuildPrecededFinalProductionMatrix": true
+  },
+  "limitations": [
+    "This report verifies the isolated workspace padding branch, not the final KOSHA, MCP, Reports combined head.",
+    "The final combined branch still requires full serial tests, PDF gates, static audit, and 108-row browser audit."
+  ]
+}
