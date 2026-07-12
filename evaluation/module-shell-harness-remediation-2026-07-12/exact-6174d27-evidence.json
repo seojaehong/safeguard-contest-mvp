@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "testedSha": "6174d27",
+  "baseSha": "924e497cce1af4cfd8642c98cb754991050da3b1",
+  "checks": [
+    {
+      "name": "isolated harness browser runtime",
+      "command": "npm.cmd test -- tests/isolated-next-browser-harness.test.ts --maxWorkers=1 --no-file-parallelism --reporter=verbose",
+      "exitCode": 0,
+      "passed": 2,
+      "failed": 0,
+      "log": "exact-6174d27-harness.log"
+    },
+    {
+      "name": "parallel module desktop render",
+      "command": "npm.cmd test -- tests/module-shell-design-regression.test.ts -t uses the workspace daylight shell --maxWorkers=1 --no-file-parallelism --reporter=verbose",
+      "exitCode": 0,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 3,
+      "log": "exact-6174d27-module-desktop.log"
+    },
+    {
+      "name": "strict typecheck",
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "log": "exact-6174d27-typecheck.log"
+    },
+    {
+      "name": "exact range diff check",
+      "command": "git diff --check 924e497cce1af4cfd8642c98cb754991050da3b1..6174d27",
+      "exitCode": 0,
+      "log": "exact-6174d27-diff-check.log"
+    }
+  ]
+}

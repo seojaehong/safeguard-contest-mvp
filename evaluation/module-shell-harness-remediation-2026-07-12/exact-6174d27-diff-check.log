@@ -1,0 +1,2 @@
+command=git diff --check 924e497cce1af4cfd8642c98cb754991050da3b1..6174d27
+exitCode=0

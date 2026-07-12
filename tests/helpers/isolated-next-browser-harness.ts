@@ -2,13 +2,14 @@ import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:chil
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 import { chromium, type Browser } from "playwright";
 
 type ServerExit = {
   code: number | null;
   signal: NodeJS.Signals | null;
 };
+
+const MAX_SERVER_OUTPUT_CHARS = 20_000;
 
 type HarnessOptions = {
   slug: string;
@@ -28,6 +29,7 @@ export type IsolatedNextBrowserHarness = {
   mode: "dev" | "prod";
   temporaryDirectory?: string;
   distDirectory?: string;
+  readServerOutput: () => string;
   stop: () => Promise<void>;
 };
 
@@ -91,7 +93,7 @@ export async function startIsolatedNextBrowserHarness(
   const mode = options.mode ?? "dev";
   const port = 20_000 + ((process.pid * 97 + options.portSalt) % 30_000);
   const baseUrl = `http://127.0.0.1:${port}`;
-  const output: string[] = [];
+  let serverOutput = "";
   let serverExit: ServerExit | null = null;
   let ready = false;
   const nextModule = resolveNextModule();
@@ -111,6 +113,10 @@ export async function startIsolatedNextBrowserHarness(
       throw new Error(`Refusing to remove unexpected browser harness temp directory: ${temporaryDirectory}`);
     }
     fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+  };
+
+  const appendServerOutput = (value: string): void => {
+    serverOutput = `${serverOutput}${value}`.slice(-MAX_SERVER_OUTPUT_CHARS);
   };
 
   if (mode === "dev") {
@@ -133,13 +139,14 @@ export async function startIsolatedNextBrowserHarness(
     try {
       const sourceRoot = process.cwd();
       const directoryLinkType = process.platform === "win32" ? "junction" : "dir";
-      for (const directoryName of ["app", "components", "data", "lib", "types"]) {
-        const sourceDirectory = path.join(sourceRoot, directoryName);
+      const copiedDirectories = ["app", "components", "data", "lib", "types"];
+      for (const relativeDirectory of copiedDirectories) {
+        const sourceDirectory = path.join(sourceRoot, relativeDirectory);
         if (fs.existsSync(sourceDirectory)) {
-          fs.cpSync(sourceDirectory, path.join(temporaryDirectory, directoryName), { recursive: true });
+          fs.cpSync(sourceDirectory, path.join(temporaryDirectory, relativeDirectory), { recursive: true });
         }
       }
-      for (const directoryName of ["node_modules", "public"]) {
+      for (const directoryName of ["evaluation", "knowledge", "node_modules", "public", "templates"]) {
         const sourceDirectory = path.join(sourceRoot, directoryName);
         if (fs.existsSync(sourceDirectory)) {
           fs.symlinkSync(sourceDirectory, path.join(temporaryDirectory, directoryName), directoryLinkType);
@@ -149,10 +156,13 @@ export async function startIsolatedNextBrowserHarness(
         const sourceFile = path.join(sourceRoot, fileName);
         if (fs.existsSync(sourceFile)) fs.copyFileSync(sourceFile, path.join(temporaryDirectory, fileName));
       }
-      const sourceConfigUrl = pathToFileURL(path.join(sourceRoot, "next.config.mjs")).href;
+      fs.copyFileSync(
+        path.join(sourceRoot, "next.config.mjs"),
+        path.join(temporaryDirectory, "source-next.config.mjs")
+      );
       fs.writeFileSync(
         path.join(temporaryDirectory, "next.config.mjs"),
-        `import sourceConfig from ${JSON.stringify(sourceConfigUrl)};\n\nexport default { ...sourceConfig, distDir: "dist" };\n`,
+        `import sourceConfig from "./source-next.config.mjs";\n\nexport default { ...sourceConfig, distDir: "dist" };\n`,
         "utf8",
       );
       options.onTemporaryDirectory?.(temporaryDirectory);
@@ -223,10 +233,10 @@ export async function startIsolatedNextBrowserHarness(
   }
   server.stdout.on("data", (chunk: Buffer) => {
     const value = chunk.toString();
-    output.push(value);
+    appendServerOutput(value);
     if (value.includes("SAFECLAW_TEST_SERVER_READY") || value.includes("Ready in")) ready = true;
   });
-  server.stderr.on("data", (chunk: Buffer) => output.push(chunk.toString()));
+  server.stderr.on("data", (chunk: Buffer) => appendServerOutput(chunk.toString()));
   server.on("exit", (code, signal) => {
     serverExit = { code, signal };
   });
@@ -235,7 +245,7 @@ export async function startIsolatedNextBrowserHarness(
   try {
     while (Date.now() - startedAt < timeoutMs) {
       if (serverExit) {
-        throw new Error(`Isolated Next server exited before readiness: ${JSON.stringify(serverExit)}\n${output.slice(-30).join("")}`);
+        throw new Error(`Isolated Next server exited before readiness: ${JSON.stringify(serverExit)}\n${serverOutput}`);
       }
       if (ready) {
         try {
@@ -268,6 +278,7 @@ export async function startIsolatedNextBrowserHarness(
               mode,
               temporaryDirectory: tempPaths?.temporaryDirectory,
               distDirectory: tempPaths?.distDirectory,
+              readServerOutput: () => serverOutput,
               stop,
             };
           }
@@ -291,5 +302,5 @@ export async function startIsolatedNextBrowserHarness(
   } finally {
     cleanupTemporaryDirectory();
   }
-  throw new Error(`Timed out waiting for ${baseUrl}${options.initialPath}\n${output.slice(-30).join("")}`);
+  throw new Error(`Timed out waiting for ${baseUrl}${options.initialPath}\n${serverOutput}`);
 }

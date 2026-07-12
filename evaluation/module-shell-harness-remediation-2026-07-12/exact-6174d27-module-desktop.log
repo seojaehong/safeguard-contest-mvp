@@ -1,0 +1,17 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/module-shell-design-regression.test.ts -t uses the workspace daylight shell --maxWorkers=1 --no-file-parallelism --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/module-shell-harness-remediation
+
+ ✓ tests/module-shell-design-regression.test.ts > module shell design regression > uses the workspace daylight shell on core module desktop pages 13631ms
+ ↓ tests/module-shell-design-regression.test.ts > module shell design regression > uses the workspace Day and Night accents for module focus, active navigation, and primary commands
+ ↓ tests/module-shell-design-regression.test.ts > module shell design regression > keeps mobile module navigation compact enough for the page title to appear early
+ ↓ tests/module-shell-design-regression.test.ts > module shell design regression > keeps the module rail in the desktop shell above the unified 900px breakpoint
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 3 skipped (4)
+   Start at  22:03:40
+   Duration  43.96s (transform 84ms, setup 0ms, import 675ms, tests 42.54s, environment 0ms)
+

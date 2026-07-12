@@ -1,0 +1,15 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/isolated-next-browser-harness.test.ts --maxWorkers=1 --no-file-parallelism --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/module-shell-harness-remediation
+
+ ✓ tests/isolated-next-browser-harness.test.ts > isolated next browser harness > uses unique OS temp dist dirs, cleans them on stop, and releases the same port salt 43820ms
+ ✓ tests/isolated-next-browser-harness.test.ts > isolated next browser harness > cleans the unique temp dist dir when startup never becomes ready 10501ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  22:02:26
+   Duration  55.65s (transform 78ms, setup 0ms, import 590ms, tests 54.32s, environment 0ms)
+
