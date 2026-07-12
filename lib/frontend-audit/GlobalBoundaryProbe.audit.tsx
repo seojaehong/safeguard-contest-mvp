@@ -26,15 +26,15 @@ export function GlobalBoundaryProbe() {
         && element !== probeElement
         && element.tagName !== "SCRIPT",
     );
-    const priorHidden = siblings.map((element) => element.hidden);
+    const priorDisplay = siblings.map((element) => element.style.display);
     const priorHtmlOverflow = document.documentElement.style.overflow;
     const priorBodyOverflow = document.body.style.overflow;
-    siblings.forEach((element) => { element.hidden = true; });
+    siblings.forEach((element) => { element.style.display = "none"; });
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
 
     return () => {
-      siblings.forEach((element, index) => { element.hidden = priorHidden[index]; });
+      siblings.forEach((element, index) => { element.style.display = priorDisplay[index]; });
       document.documentElement.style.overflow = priorHtmlOverflow;
       document.body.style.overflow = priorBodyOverflow;
     };
