@@ -52,6 +52,7 @@ function localReference(
       stableDocumentKey: `${id}-stable`,
       version: "2026",
       quality: "accepted",
+      lifecycle: "current",
       bodyKind: "native",
       anchors: [{ page: 1, excerpt: `${id} 지게차 근거` }],
       evidenceRef: `KOSHA 근거 ${id} p.1: 지게차 근거`,

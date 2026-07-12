@@ -31,6 +31,13 @@ describe("current-base KOSHA lifecycle quality", () => {
     expect(lifecycleCounts).toEqual({ stale: 1038, retired: 1 });
     expect(loaded.records.every((record) => record.quality === "review_required")).toBe(true);
     expect(loaded.records.every((record) => !isKoshaGuideDirectEvidenceAccepted(record))).toBe(true);
+
+    const dc13 = loaded.records.find((record) => record.version === "D-C-13-2026");
+    expect(dc13).toMatchObject({
+      version: "D-C-13-2026",
+      quality: "review_required",
+      provenance: { lifecycle: "stale" }
+    });
   }, 20_000);
 
   it("accepts valid current records while stale and retired remain review-required", async () => {
@@ -41,6 +48,7 @@ describe("current-base KOSHA lifecycle quality", () => {
       const expectedQuality = lifecycle === "current" ? "accepted" : "review_required";
       const expectedDirect = lifecycle === "current";
       expect(new Set(loaded.records.map((record) => record.quality))).toEqual(new Set([expectedQuality]));
+      expect(new Set(loaded.records.map((record) => record.provenance.lifecycle))).toEqual(new Set([lifecycle]));
       expect(loaded.records.every((record) => isKoshaGuideDirectEvidenceAccepted(record) === expectedDirect)).toBe(true);
     }
   });

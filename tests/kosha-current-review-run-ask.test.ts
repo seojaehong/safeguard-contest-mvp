@@ -59,6 +59,7 @@ function retrievalReference(
         stableDocumentKey: `${id}-stable`,
         version: "2026",
         quality: "accepted" as const,
+        lifecycle: "current" as const,
         bodyKind: "native" as const,
         anchors: [{ page: 1, excerpt: "지게차 동선 분리" }],
         evidenceRef: `KOSHA 근거 ${id} p.1: 지게차 동선 분리`,
@@ -147,6 +148,54 @@ describe("current-base runAsk retrieval provenance", () => {
     expect(response.dbHarness?.packet.retrievalContract.sourceCounts).toMatchObject({
       ranked: 1,
       localRanked: 1
+    });
+  }, 30_000);
+
+  it("surfaces D-C-13 current-unverified as review-required with stable provenance", async () => {
+    const remote = retrievalReference("remote-ranked-guide", "ranked");
+    const local = retrievalReference("d-c-13-current-unverified", "local-ranked");
+    remote.title = "외벽 작업발판 안전난간 직접 근거";
+    remote.summary = "외벽 작업발판과 안전난간 상태를 확인한다.";
+    remote.keywords = ["외벽", "도장", "작업발판", "안전난간"];
+    remote.controls = ["외벽 작업발판과 안전난간 상태 확인"];
+    local.title = "D-C-13-2026 외벽도장보수공사 안전 기술지원규정";
+    local.summary = "외벽 작업발판과 안전난간 상태를 확인한다.";
+    local.keywords = ["외벽", "도장", "작업발판", "안전난간"];
+    local.controls = ["외벽 작업발판과 안전난간 상태 확인"];
+    local.kosha_guide = {
+      referenceId: "d-c-13-current-unverified",
+      stableDocumentKey: "D-C-13",
+      version: "D-C-13-2026",
+      quality: "review_required",
+      lifecycle: "stale",
+      bodyKind: "native",
+      anchors: [{ page: 7, excerpt: "외벽 작업발판과 안전난간 상태를 확인한다." }],
+      evidenceRef: "KOSHA 근거 D-C-13-2026 p.7: 외벽 작업발판과 안전난간 상태를 확인한다.",
+      directEligible: false
+    };
+    mocks.searchSafetyReferences.mockImplementation(async (options: { query: string; itemType?: string }) => {
+      if (options.itemType === "technical-support-regulation") {
+        return searchResult("ranked-rpc", [remote], options.query);
+      }
+      if (options.itemType === "technical-guideline") {
+        return searchResult("local-ranked", [local], options.query);
+      }
+      return searchResult("unconfigured", [], options.query);
+    });
+
+    const response = await runAsk("외벽 도장 작업발판 안전난간", { aiMode: "enhanced" });
+    const surfaced = response.externalData.safetyReference?.items.find((item) => item.id === local.id);
+
+    expect(response.externalData.safetyReference?.retrievalMode).toBe("hybrid-local-supabase");
+    expect(surfaced).toMatchObject({
+      id: "d-c-13-current-unverified",
+      stableDocumentKey: "D-C-13",
+      anchor: { page: 7, excerpt: "외벽 작업발판과 안전난간 상태를 확인한다." },
+      retrievalSource: "local-ranked",
+      retrievalMode: "hybrid-local-supabase",
+      quality: "review_required",
+      lifecycle: "stale",
+      directEligible: false
     });
   }, 30_000);
 });

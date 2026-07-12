@@ -11,19 +11,30 @@ import { buildWorkpackLearningFile } from "@/lib/workpack-learning-export";
 
 function localReference(): SafetyReferenceItem {
   return {
-    id: "local-ranked-reference",
-    source_id: "kosha-guide-offline:local-ranked-reference",
-    item_type: "technical-guideline",
+    id: "d-c-13-current-unverified",
+    source_id: "kosha-guide-offline:D-C-13",
+    item_type: "technical-support-regulation",
     category: "건설",
     subcategory: null,
-    title: "외벽 작업 안전 KOSHA 지침",
+    title: "D-C-13-2026 외벽 작업 안전 기술지원규정",
     summary: "외벽 작업발판 상태를 확인한다.",
     keywords: ["외벽", "작업발판"],
     risk_tags: ["추락"],
     primary_documents: ["위험성평가표", "TBM 브리핑"],
     controls: ["작업발판 상태 확인"],
     evidence_role: "supporting",
-    retrieval_source: "local-ranked"
+    retrieval_source: "local-ranked",
+    kosha_guide: {
+      referenceId: "d-c-13-current-unverified",
+      stableDocumentKey: "D-C-13",
+      version: "D-C-13-2026",
+      quality: "review_required",
+      lifecycle: "stale",
+      bodyKind: "native",
+      anchors: [{ page: 7, excerpt: "외벽 작업발판 상태를 확인한다." }],
+      evidenceRef: "KOSHA 근거 D-C-13-2026 p.7: 외벽 작업발판 상태를 확인한다.",
+      directEligible: false
+    }
   };
 }
 
@@ -64,11 +75,32 @@ describe("current-base photo and learning provenance", () => {
             authority: "safeclaw-db-mcp",
             status: "confirmed",
             evidence: [{
+              sourceId: "trusted-direct-reference",
+              sourceType: "safeclaw-db",
+              title: "외벽 작업발판 직접 근거",
+              excerpt: "외벽 작업발판과 안전난간 상태를 확인한다.",
+              evidenceRole: "direct",
+              retrievals: [{
+                channel: "direct",
+                query: "외벽 작업",
+                mode: "ranked-rpc",
+                source: "ranked",
+                vectorAttempted: false,
+                vectorOk: false,
+                vectorModel: "text-embedding-3-small"
+              }]
+            }, {
               sourceId: "local-kosha-guide",
               sourceType: "safeclaw-db",
-              title: "지게차 동선 KOSHA 지침",
-              excerpt: "보행 동선을 분리한다.",
+              title: "D-C-13-2026 외벽 작업 안전 기술지원규정",
+              excerpt: "외벽 작업발판 상태를 확인한다.",
               evidenceRole: "supporting",
+              stableDocumentKey: "D-C-13",
+              anchor: { page: 7, excerpt: "외벽 작업발판 상태를 확인한다." },
+              quality: "review_required",
+              lifecycle: "stale",
+              directEligible: false,
+              reviewRequired: true,
               retrievals: [
                 {
                   channel: "supporting",
@@ -91,8 +123,8 @@ describe("current-base photo and learning provenance", () => {
               ]
             }],
             confirmedControls: [{
-              text: "지게차 동선과 보행 동선 분리",
-              evidenceSourceIds: ["local-kosha-guide"]
+              text: "외벽 작업발판과 안전난간 상태 확인",
+              evidenceSourceIds: ["trusted-direct-reference", "local-kosha-guide"]
             }],
             confirmedAt: "2026-07-12T00:00:00.000Z",
             errorMessage: null
@@ -119,12 +151,26 @@ describe("current-base photo and learning provenance", () => {
     });
     const serialized: unknown = JSON.parse(JSON.stringify(improvements));
     const parsedMemory = parseHarnessMemoryInput({ improvements: serialized });
-    const retrievals = parsedMemory.improvements[0]?.photoHazardProvenance?.evidence?.[0]?.retrievals;
+    const storedProvenance = parsedMemory.improvements[0]?.photoHazardProvenance;
+    const storedReviewEvidence = storedProvenance?.evidence?.find((item) => item.sourceId === "local-kosha-guide");
+    const retrievals = storedReviewEvidence?.retrievals;
 
     expect(retrievals).toEqual([
       expect.objectContaining({ mode: "local-ranked", source: "local-ranked" }),
       expect.objectContaining({ mode: "hybrid-local-supabase", source: "local-hybrid" })
     ]);
+    expect(storedReviewEvidence).toMatchObject({
+      stableDocumentKey: "D-C-13",
+      anchor: { page: 7, excerpt: "외벽 작업발판 상태를 확인한다." },
+      quality: "review_required",
+      lifecycle: "stale",
+      directEligible: false,
+      reviewRequired: true
+    });
+    expect(storedProvenance?.confirmedControls).toEqual([{
+      text: "외벽 작업발판과 안전난간 상태 확인",
+      evidenceSourceIds: ["trusted-direct-reference"]
+    }]);
   });
 
   it("exports local reference and photo provenance without not-recorded fallbacks", () => {
@@ -145,6 +191,12 @@ describe("current-base photo and learning provenance", () => {
           title: reference.title,
           excerpt: reference.summary,
           evidenceRole: "supporting",
+          stableDocumentKey: reference.kosha_guide?.stableDocumentKey,
+          anchor: reference.kosha_guide?.anchors[0],
+          quality: reference.kosha_guide?.quality,
+          lifecycle: reference.kosha_guide?.lifecycle,
+          directEligible: reference.kosha_guide?.directEligible,
+          reviewRequired: true,
           retrievals: [{
             channel: "supporting",
             query: "외벽 작업",
@@ -173,9 +225,17 @@ describe("current-base photo and learning provenance", () => {
     const jsonl = buildWorkpackLearningFile(input, "jsonl");
 
     expect(markdown.content).toContain("retrieval: local-ranked");
+    expect(markdown.content).toContain("quality: review_required");
+    expect(markdown.content).toContain("lifecycle: stale");
+    expect(markdown.content).toContain("directEligible: false");
     expect(markdown.content).toContain("photoRetrieval: hybrid-local-supabase/local-ranked");
     expect(jsonl.content).toContain('"retrievalSource":"local-ranked"');
     expect(jsonl.content).toContain('"retrievalMode":"local-ranked"');
+    expect(jsonl.content).toContain('"stableDocumentKey":"D-C-13"');
+    expect(jsonl.content).toContain('"quality":"review_required"');
+    expect(jsonl.content).toContain('"lifecycle":"stale"');
+    expect(jsonl.content).toContain('"directEligible":false');
+    expect(jsonl.content).toContain('"reviewRequired":true');
     expect(jsonl.content).toContain('"photoHazardProvenance"');
     expect(jsonl.content).toContain('"mode":"hybrid-local-supabase"');
     expect(jsonl.content).not.toContain("not-recorded");

@@ -51,6 +51,7 @@ describe("current-base KOSHA provenance review regressions", () => {
         stableDocumentKey: "forklift-local-stable",
         version: "2026",
         quality: "accepted",
+        lifecycle: "current",
         bodyKind: "native",
         anchors: [{ page: 1, excerpt: "지게차와 보행자 동선을 분리한다." }],
         evidenceRef: localEvidenceRef,
@@ -73,6 +74,45 @@ describe("current-base KOSHA provenance review regressions", () => {
     expect(supportingRow?.evidenceRefs).toContain("DB 하네스 보조근거");
     expect(supportingRow?.evidenceRefs).not.toContain("DB 하네스 직접근거");
     expect(supportingRow?.evidenceRefs.some((item) => item.startsWith("KOSHA 근거 "))).toBe(false);
+  });
+
+  it.each([
+    ["stale", "D-C-13-2026", "d-c-13-current-unverified"],
+    ["retired", "KOSHA-RETIRED-1", "retired-reference-1"]
+  ] as const)("does not attach %s review-required local evidence to a direct risk row", (lifecycle, version, stableDocumentKey) => {
+    const direct = reference();
+    const reviewRequired = reference({
+      id: `${version}-local`,
+      source_id: `kosha-guide-offline:${stableDocumentKey}`,
+      item_type: "technical-support-regulation",
+      title: `${version} 외벽 작업 안전 기술지원규정`,
+      evidence_role: "supporting",
+      retrieval_source: "local-ranked",
+      kosha_guide: {
+        referenceId: `${version}-local`,
+        stableDocumentKey,
+        version,
+        quality: "review_required",
+        lifecycle,
+        bodyKind: "native",
+        anchors: [{ page: 1, excerpt: "외벽 작업발판과 안전난간 상태를 확인한다." }],
+        evidenceRef: `KOSHA 근거 ${version} p.1: 외벽 작업발판과 안전난간 상태를 확인한다.`,
+        directEligible: false
+      }
+    });
+    const response = buildMockAskResponse("지게차 보행자 동선 충돌", mockSearchResults, "mock", "test");
+
+    const rows = buildSafetyReferenceRiskRows(
+      response,
+      [direct, reviewRequired],
+      "맑음",
+      "지게차 보행자 동선 충돌"
+    );
+    const directRow = rows.find((row) => row.evidenceRefs.includes(direct.title));
+
+    expect(directRow).toBeDefined();
+    expect(directRow?.evidenceRefs).not.toContain(reviewRequired.kosha_guide?.evidenceRef);
+    expect(directRow?.evidenceRefs.some((item) => item.includes(version))).toBe(false);
   });
 
   it("infers DB packet local and hybrid-local modes from final references", () => {

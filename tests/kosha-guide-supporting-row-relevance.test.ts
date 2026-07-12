@@ -38,6 +38,7 @@ function supporting(
       stableDocumentKey: `${id}-stable`,
       version: "2026",
       quality: "accepted",
+      lifecycle: "current",
       bodyKind: "native",
       anchors: [{ page: 1, excerpt: overrides.summary ?? id }],
       evidenceRef,
