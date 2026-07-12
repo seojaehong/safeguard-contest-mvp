@@ -3,53 +3,48 @@
 ## Status
 
 - Status: `review_pending`
-- Review base: `2a9c817114390575e1be176ff3be622b655581fe`
-- Verified source HEAD: `952ad85db207d384f6451e45ced28c3293d27745`
-- Verified source tree: `f1ae350fdb412ef4c2dc7d43b7d5ae2c0c525f78`
-- Database, schema, environment, and UI changes: none
+- Product SHA: `dd25e4f18e5db9ea7beed710fe9b2cd1ffa964d5`
+- Product tree: `8d826a546050f230b1c8d3a104e4b6d3586ac6bb`
+- Evidence SHA: `fc0f3c6f53968b6cb3158d6c3e12ed3e7ee9c50e`
+- Evidence tree: `08991a63a80537357fd0203daf0c5a6ea8d17cc8`
+- Database, schema, environment, UI, and unrelated changes: none
 - Fresh review is required before changing this status.
 
-## P1 Accident Leakage
+## Behavior
 
-The logistics branch now returns fallback indexes `[1, 0, 4]`. The facility branch returns `[4, 1, 0]`. Neither branch includes the chemical-cleaning case at index `3`. The genuine chemical-cleaning branch remains `[3, 1, 0]`.
+- Genuine `세척` / `화학` / `청소` work identity is evaluated before logistics, manufacturing, or facility domain tokens.
+- `물류센터 바닥 세척 작업. 화학세제 사용.` and the equivalent mechanical-room cleaning input select the chemical-cleaning accident first.
+- Pure logistics/forklift and pure facility/mechanical-room inputs remain free of chemical-cleaning leakage.
+- The launch scenario preserves `workerCount: 7` and records `외국인 근로자 2명`, `신규 투입자 1명` in `specialContext`.
 
-- RED: 1 file, 7 tests, 5 passed, 2 failed
-- RED failures: `물류센터 지게차 상하차 작업`, `지하 기계실 점검 작업`
-- RED log: `evaluation/scenario-profile-contamination-2026-07-12/red-accident-branch-leakage.log`
-- GREEN: 2 files, 33 passed, 0 failed
-- GREEN log: `evaluation/scenario-profile-contamination-2026-07-12/green-accident-branch-leakage.log`
+## TDD
 
-## P2 Evidence
-
-- Removed stale `build27.log`, which was bound to `6ce31d1`.
-- Removed stale `diff-check-final.log`, which recorded a working-tree check instead of an exact commit range.
-- Removed the four EOF blank-line failures from the previously committed test/typecheck artifacts.
-- Every new verification log records CWD, source HEAD/tree, runner PID, command, UTC timestamps, and exit code.
+- Mixed cleaning RED: 1 file, 9 tests, 8 passed, 1 failed
+- Mixed cleaning GREEN: 1 file, 9/9 passed
+- Launch facts RED: 1 file, 26 tests, 25 passed, 1 failed; `workerCount === 7` already passed and counted subgroup facts failed
+- Launch facts GREEN: 1 file, 26/26 passed
+- RED/GREEN logs are included in the authoritative log set below.
 
 ## Verification
 
-- Focused tests: 6 files, existing 72 plus 2 new, 74/74 passed
-- Focused command: `npm.cmd test -- tests/scenario-inference.test.ts tests/accident-cases.test.ts tests/briefing.test.ts tests/workpack-generation-evidence-route.test.ts tests/generation-evidence.test.ts tests/workpack-readiness.test.ts --maxWorkers=1 --no-file-parallelism`
-- Focused log: `evaluation/scenario-profile-contamination-2026-07-12/focused72-plus2-postcommit.log`
+- Focused tests: 6 files, previous 74 plus 2 new, 76/76 passed
 - Strict typecheck: exit 0
-- Typecheck log: `evaluation/scenario-profile-contamination-2026-07-12/typecheck-952ad85.log`
-- Exact-range diff-check: `git diff --check 2a9c817114390575e1be176ff3be622b655581fe..952ad85db207d384f6451e45ced28c3293d27745`, exit 0, zero whitespace failures
-- Exact-range log: `evaluation/scenario-profile-contamination-2026-07-12/diff-check-2a9c817-to-952ad85.log`
+- Full product range: `git diff --check ac728ed9c452a9843e3a4ac417b060f35603cb1e..dd25e4f18e5db9ea7beed710fe9b2cd1ffa964d5`, zero failures
+- Authoritative build: one invocation, compile success, static `27/27`, exit 0
+- Global Next build counts before/during/after: `0 / 0 / 0`
+- Global zero window before build: 180 seconds, 37 samples
+- Build monitor samples: 96
 
-## Build Provenance
+## Evidence Hygiene
 
-- Build runs for source HEAD: exactly 1
-- CWD: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\scenario-profile-contamination`
-- Source HEAD: `952ad85db207d384f6451e45ced28c3293d27745`
-- Source tree: `f1ae350fdb412ef4c2dc7d43b7d5ae2c0c525f78`
-- Runner PID: `49452`
-- Command: `npm.cmd run build`
-- Started: `2026-07-12T03:26:27.2733432Z`
-- Finished: `2026-07-12T03:27:49.6995075Z`
-- Same-worktree build process count before/after: `0` / `0`
-- Other-worktree build PIDs observed before start: `47588`, `40724`
-- Node process count before/after: `113` / `112`
-- Exit code: `0`
-- Compile: `Compiled successfully in 13.2s`
-- Static generation: `27/27`
-- Build log: `evaluation/scenario-profile-contamination-2026-07-12/build-952ad85.log`
+- Removed 16 superseded tracked logs from earlier review rounds.
+- Current authoritative logs: 8
+- Ambiguous stale PASS logs remaining: 0
+- `red-mixed-cleaning-priority.log`
+- `green-mixed-cleaning-priority.log`
+- `red-launch-subgroup-facts.log`
+- `green-launch-subgroup-facts.log`
+- `current-focused-dd25e4f.log`
+- `current-typecheck-dd25e4f.log`
+- `current-full-range-diff-ac728ed-to-dd25e4f.log`
+- `current-authoritative-build-final-dd25e4f.log`
