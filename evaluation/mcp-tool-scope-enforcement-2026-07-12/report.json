@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T03:38:38.1657855Z",
+  "status": "review_pending",
+  "baseSha": "87798d15aea085284332942390f215f49f3399cf",
+  "productCommit": "ebef495df600419a21e02838c4aa1554152db233",
+  "scope": {
+    "registeredToolCount": 10,
+    "databaseSchemaChanged": false,
+    "databaseDataChanged": false,
+    "runtimeSidecarEnabled": false
+  },
+  "red": {
+    "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
+    "proofTree": "ebef495df600419a21e02838c4aa1554152db233 with production files restored from 87798d15aea085284332942390f215f49f3399cf",
+    "testFilesFailed": 4,
+    "testsFailed": 10,
+    "testsPassed": 57,
+    "exitCode": 1,
+    "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/red-test.log"
+  },
+  "green": {
+    "command": "npm.cmd test -- tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism",
+    "testFilesPassed": 4,
+    "testsPassed": 67,
+    "exitCode": 0,
+    "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/green-test.log"
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "exitCode": 0,
+    "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/typecheck.log"
+  },
+  "build": {
+    "command": "npm.cmd run build",
+    "exitCode": 0,
+    "staticPages": "27/27",
+    "buildId": "OOOHOIpiuidXKnMRyy61A",
+    "log": "evaluation/mcp-tool-scope-enforcement-2026-07-12/build.log"
+  },
+  "dependencySync": {
+    "command": "npm.cmd install",
+    "exitCode": 0,
+    "packageJsonChanged": false,
+    "packageLockChanged": false
+  },
+  "contracts": {
+    "malformedDatabaseScopes": "deny_all",
+    "newTokenScopes": "explicit_registered_tools",
+    "legacyEnvironmentTokenScope": "tools:*",
+    "existingWildcardCompatibility": true,
+    "unknownFutureToolsAutoGranted": false,
+    "missingAuthContext": "MCP_TOOL_FORBIDDEN",
+    "internalErrorCodesExposed": false
+  },
+  "changedFiles": [
+    "app/api/mcp/[transport]/route.ts",
+    "lib/mcp-auth.ts",
+    "lib/mcp-token-service.ts",
+    "lib/mcp-tools.ts",
+    "tests/mcp-auth.test.ts",
+    "tests/mcp-token-service.test.ts",
+    "tests/mcp-tools.test.ts",
+    "tests/mcp-route-scope-contract.test.ts"
+  ],
+  "remainingRisks": [
+    "Existing database tokens that already carry tools:* remain full-trust for compatibility.",
+    "Legacy SAFECLAW_MCP_TOKENS remain operator-level wildcard credentials.",
+    "Signed remote sidecar transport and durable replay protection are still disabled and outside this patch."
+  ]
+}

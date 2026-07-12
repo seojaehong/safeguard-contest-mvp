@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/mcp-tool-scope-enforcement
+
+
+ Test Files  4 passed (4)
+      Tests  67 passed (67)
+   Start at  12:34:39
+   Duration  4.52s (transform 355ms, setup 0ms, import 917ms, tests 98ms, environment 1ms)
