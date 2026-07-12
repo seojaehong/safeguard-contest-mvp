@@ -3,7 +3,8 @@
   "generatedAt": "2026-07-12T08:01:30.9796971Z",
   "status": "integrated_verified",
   "baseSha": "18db10d4730e4ebf93c9da440c951809142d6259",
-  "integratedHead": "7c9beccd031100d3848f74826744313dfcbb0872",
+  "verifiedSourceHead": "7c9beccd031100d3848f74826744313dfcbb0872",
+  "evidenceCommit": "e040ce0dad0d74c9f7a068fa5a0e5c6a2ff4771b",
   "verifiedAfterUpstreamRebase": true,
   "sources": {
     "scenario": "1235c080239589fe3923e3b84641e12e29fcbddf",

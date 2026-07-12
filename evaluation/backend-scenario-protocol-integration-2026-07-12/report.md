@@ -8,6 +8,8 @@ Base after the final upstream rebase: `18db10d4730e4ebf93c9da440c951809142d6259`
 
 Verified source head: `7c9beccd031100d3848f74826744313dfcbb0872`
 
+Evidence commit before this metadata-only clarification: `e040ce0dad0d74c9f7a068fa5a0e5c6a2ff4771b`
+
 The independently approved scenario contamination fix and signed remote protocol were integrated as two disjoint commit ranges. The scenario report timestamp was moved after its final diff-check log, closing the only non-blocking P3 metadata finding.
 
 ## Verification
