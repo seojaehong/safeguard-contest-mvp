@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "a3a92b618194152ad6372840394c02cf2d2f580a",
+  "testedProductSha": "253e5e0d45dc263db6bc571b49f6b12ddb3dfebd",
+  "status": "pass_pending_integrated_108_row_audit",
+  "red": {
+    "desktopDayNightSha256": "72D3E26863D45BE50BED7E328F3676669DA820D3C86265F9B43D0325C18A0143",
+    "mobileDayNightSha256": "D87732294C55A0D16CA06F5FB6C1E4544DB0682CA86A9F0DAD8A4217A0DF0DF4",
+    "nightUrlExplicit": false,
+    "renderedThemeRecorded": false,
+    "renderedThemeValidated": false
+  },
+  "change": {
+    "nightUrlExplicit": true,
+    "renderedThemeRecorded": true,
+    "renderedThemeValidated": true,
+    "productUiFilesChanged": 0
+  },
+  "green": {
+    "focusedTestsPassed": 2,
+    "focusedTestsFailed": 0,
+    "typecheck": "pass",
+    "diffCheck": "pass"
+  },
+  "deferred": [
+    "integrated 108-row browser audit",
+    "distinct Day and Night screenshot hashes",
+    "full serial suite",
+    "normal and audit production builds"
+  ],
+  "artifacts": [
+    "red-focused.log",
+    "red-stale-browser-evidence.log",
+    "exact-253e5e0-focused.log",
+    "exact-253e5e0-typecheck.log"
+  ]
+}
