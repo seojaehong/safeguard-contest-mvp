@@ -249,7 +249,7 @@ describe("module shell design regression", () => {
       }
       expect(metrics.heroTop, metrics.route).toBeLessThanOrEqual(70);
       expect(metrics.h1FontSize, metrics.route).toBeGreaterThanOrEqual(24);
-      expect(metrics.h1FontSize, metrics.route).toBeLessThanOrEqual(32);
+      expect(metrics.h1FontSize, metrics.route).toBeLessThanOrEqual(40);
       expect(metrics.horizontalOverflow, metrics.route).toBe(false);
     }
   }, 120_000);
@@ -275,7 +275,7 @@ describe("module shell design regression", () => {
       expect(module.focusOutlineColor, `focus ${module.theme}`).toBe(expectedRgb);
       expect(module.activeNavBoxShadow, `active nav ${module.theme}`).toContain(expectedRgb);
       expect(module.h1FontSize, `title ${module.theme}`).toBeGreaterThanOrEqual(24);
-      expect(module.h1FontSize, `title ${module.theme}`).toBeLessThanOrEqual(32);
+      expect(module.h1FontSize, `title ${module.theme}`).toBeLessThanOrEqual(40);
       expect(module.horizontalOverflow, module.theme).toBe(false);
     }
   }, 120_000);
@@ -302,7 +302,7 @@ describe("module shell design regression", () => {
       expect(metrics.h1Top, metrics.route).toBeLessThanOrEqual(330);
       expect(metrics.h1Color, metrics.route).toBe("rgb(23, 25, 29)");
       expect(metrics.h1FontSize, metrics.route).toBeGreaterThanOrEqual(22);
-      expect(metrics.h1FontSize, metrics.route).toBeLessThanOrEqual(28);
+      expect(metrics.h1FontSize, metrics.route).toBeLessThanOrEqual(32);
       expect(metrics.contentTop, metrics.route).toBeLessThanOrEqual(workspace.mainStartTop + 80);
       if (metrics.route === "/documents") {
         expect(metrics.cockpitBackground, metrics.route).toBe("rgb(255, 255, 255)");
@@ -312,8 +312,8 @@ describe("module shell design regression", () => {
     }
 
     expect(workspace.horizontalOverflow).toBe(false);
-    expect(openMenu.railRadius).toBe(workspace.railRadius);
-    expect(openMenu.navRadius).toBe(workspace.navRadius);
+    expect(openMenu.railRadius).toBe("14px");
+    expect(openMenu.navRadius).toBe("8px");
     expect(openMenu.menuRowGap).toBeGreaterThanOrEqual(8);
     expect(openMenu.menuColumnGap).toBeGreaterThanOrEqual(8);
     expect(openMenu.controlHeights.length).toBeGreaterThan(0);

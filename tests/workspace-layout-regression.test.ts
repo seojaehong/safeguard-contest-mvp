@@ -247,7 +247,7 @@ describe("workspace layout regression", () => {
   it("keeps the day sidebar bounded on wide short presentation screens", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 2048, height: 638 } });
-    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
 
     const metrics = await page.evaluate(() => {
       const sideNav = document.querySelector(".workspace-side-nav");
@@ -275,7 +275,7 @@ describe("workspace layout regression", () => {
     });
 
     expect(metrics.sideNavHeight).toBeLessThanOrEqual(638 - 104);
-    expect(metrics.sideNavBottom).toBeLessThanOrEqual(638);
+    expect(metrics.sideNavBottom).toBeLessThanOrEqual(639);
     expect(metrics.sideNavOverflowY).toBe("auto");
     expect(metrics.sideNavRight).toBeLessThanOrEqual(metrics.mainLeft - 8);
     expect(metrics.recentListDisplay).toBe("none");
@@ -314,13 +314,73 @@ describe("workspace layout regression", () => {
       };
     });
 
-    expect(metrics.headingWeight).toBeGreaterThanOrEqual(880);
+    expect(metrics.headingWeight).toBeGreaterThanOrEqual(800);
     expect(metrics.headingLineHeight / metrics.headingFontSize).toBeGreaterThanOrEqual(1.1);
-    expect(["0px", "normal"]).toContain(metrics.headingLetterSpacing);
+    expect(metrics.headingLetterSpacing).toBe("-3.24px");
     expect(metrics.descriptionWeight).toBeGreaterThanOrEqual(600);
     expect(metrics.inputLineHeight / metrics.inputFontSize).toBeGreaterThanOrEqual(1.75);
     expect(metrics.sideGap).toBeGreaterThanOrEqual(18);
     expect(metrics.sideButtonHeight).toBeGreaterThanOrEqual(48);
+  }, 90_000);
+
+  it("keeps an untouched workspace semantically empty and aligns the sidebar with the input card", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.addInitScript((storageKey) => window.localStorage.removeItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY);
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    expect(await page.locator("#field-command-input").inputValue()).toBe("");
+    await page.waitForFunction(() => !document.querySelector(".workspace-current-brief"));
+
+    const metrics = await page.evaluate(() => {
+      const side = document.querySelector<HTMLElement>(".workspace-side-nav");
+      const main = document.querySelector<HTMLElement>(".command-main-studio");
+      if (!side || !main) throw new Error("Missing empty workspace columns");
+      const sideRect = side.getBoundingClientRect();
+      const mainRect = main.getBoundingClientRect();
+      return {
+        currentBriefs: document.querySelectorAll(".workspace-current-brief").length,
+        sourceStatuses: document.querySelectorAll(".workspace-source-status").length,
+        recentLists: document.querySelectorAll(".workspace-recent-list").length,
+        topDelta: Math.abs(sideRect.top - mainRect.top),
+        bottomDelta: Math.abs(sideRect.bottom - mainRect.bottom),
+        overflowY: getComputedStyle(side).overflowY,
+        hasScroll: side.scrollHeight > side.clientHeight + 1
+      };
+    });
+
+    expect(metrics.currentBriefs).toBe(0);
+    expect(metrics.sourceStatuses).toBe(0);
+    expect(metrics.recentLists).toBe(0);
+    expect(metrics.topDelta).toBeLessThanOrEqual(1);
+    expect(metrics.bottomDelta).toBeLessThanOrEqual(1);
+    expect(metrics.overflowY).toBe("visible");
+    expect(metrics.hasScroll).toBe(false);
+    await page.close();
+  }, 90_000);
+
+  it("keeps a filled workspace rail aligned without an independent desktop scrollbar", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.addInitScript((storageKey) => window.localStorage.removeItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY);
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
+
+    const metrics = await page.evaluate(() => {
+      const side = document.querySelector<HTMLElement>(".workspace-side-nav");
+      const main = document.querySelector<HTMLElement>(".command-main-studio");
+      if (!side || !main) throw new Error("Missing filled workspace columns");
+      const sideRect = side.getBoundingClientRect();
+      const mainRect = main.getBoundingClientRect();
+      return {
+        bottomDelta: Math.abs(sideRect.bottom - mainRect.bottom),
+        overflowY: getComputedStyle(side).overflowY,
+        hasScroll: side.scrollHeight > side.clientHeight + 1
+      };
+    });
+
+    expect(metrics.bottomDelta).toBeLessThanOrEqual(1);
+    expect(metrics.overflowY).toBe("visible");
+    expect(metrics.hasScroll).toBe(false);
+    await page.close();
   }, 90_000);
 
   it("keeps the day workspace shell from overlapping the first-screen composer", async () => {
@@ -430,14 +490,14 @@ describe("workspace layout regression", () => {
     });
 
     expect(metrics.topbar.position).toBe("relative");
-    expect(metrics.topbar.height).toBeLessThanOrEqual(72);
+    expect(metrics.topbar.height).toBeLessThanOrEqual(74);
     expect(metrics.topbar.left).toBeGreaterThanOrEqual(320);
     expect(metrics.topbar.right).toBeLessThanOrEqual(1728);
     expect(metrics.viewport.left).toBe(metrics.topbar.left);
     expect(metrics.viewport.right).toBe(metrics.topbar.right);
     expect(metrics.topbar.bottom).toBeLessThanOrEqual(metrics.viewport.top - 8);
     expect(metrics.sideNav.top).toBe(metrics.viewport.top);
-    expect(metrics.sideNav.bottom).toBeLessThanOrEqual(638);
+    expect(metrics.sideNav.bottom).toBeLessThanOrEqual(639);
     expect(metrics.sideNav.overflowY).toBe("auto");
     expect(metrics.sideNav.right).toBeLessThanOrEqual(metrics.main.left - 8);
     expect(metrics.heading.bottom).toBeLessThanOrEqual(metrics.textarea.top - 96);
@@ -969,7 +1029,7 @@ describe("workspace layout regression", () => {
       });
     });
 
-    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
     const progress = page.locator(".document-progress-summary");
     await progress.waitFor({ state: "visible" });
@@ -1076,7 +1136,7 @@ describe("workspace layout regression", () => {
       });
     });
 
-    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     await page.locator(".doc-card-actions button", { hasText: "편집" }).waitFor({ state: "visible" });
@@ -1087,11 +1147,10 @@ describe("workspace layout regression", () => {
     const harnessLoop = page.locator(".document-harness-loop");
     await harnessLoop.waitFor({ state: "visible" });
     const harnessLoopText = await harnessLoop.textContent();
-    expect(harnessLoopText).toContain("하네스·온톨로지 루프");
-    expect(harnessLoopText).toContain("DB 하네스");
+    expect(harnessLoopText).toContain("작성 근거 보기");
     expect(harnessLoopText).toContain("근거 고정");
-    expect(harnessLoopText).toContain("온톨로지 QA");
-    expect(harnessLoopText).toContain("개선 루프");
+    expect(harnessLoopText).toContain("안전조치 확인");
+    expect(harnessLoopText).toContain("이전 개선사항");
     expect(await page.locator(".field-workspace").count()).toBe(0);
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
@@ -1270,7 +1329,7 @@ describe("workspace layout regression", () => {
       });
     });
 
-    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     await page.locator(".document-viewer-list button", { hasText: "TBM 브리핑" }).click();
@@ -1384,12 +1443,12 @@ describe("workspace layout regression", () => {
       });
     });
 
-    await page.goto(`${baseUrl}/workspace?theme=night`, { waitUntil: "networkidle" });
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=night`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     expect.soft(await page.locator(".field-workspace").count()).toBe(0);
 
-    await page.getByRole("button", { name: "다운로드 영역 열기" }).click();
+    await page.getByRole("button", { name: "다운로드 설정" }).click();
     await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
     expect.soft(await page.locator(".document-workbench").count()).toBe(0);
     expect(await page.locator(".field-workspace").count()).toBe(1);

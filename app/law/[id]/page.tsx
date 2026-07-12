@@ -12,6 +12,7 @@ function parseLawBody(body: string): LawBodySection[] {
 
   for (const rawLine of body.split(/\r?\n/)) {
     const line = rawLine.trimEnd();
+    if (line.trim() === ".") continue;
     const sectionMatch = line.match(/^\[([^\]]+)\]$/);
     if (sectionMatch) {
       if (current.lines.length) sections.push(current);
@@ -50,25 +51,25 @@ export default async function LawDetailPage({ params }: { params: Promise<{ id: 
   const sections = parseLawBody(item.body);
 
   return (
-    <main className="container grid">
+    <main className="container grid legal-detail-page route-supporting-page">
       <div className="row">
         <span className="badge">법령 상세</span>
         {item.citation ? <span className="badge">{item.citation}</span> : null}
         {item.sourceLabel ? <span className="badge">{item.sourceLabel}</span> : null}
       </div>
       <section className="card list">
-        <div className="h2">{item.title}</div>
+        <h1 className="title small-title">{item.title}</h1>
         <div className="muted">{item.summary}</div>
         <hr />
-        <div className="h3">핵심 포인트</div>
+        <h2 className="h2">핵심 포인트</h2>
         <ul>{item.points.map((p) => <li key={p}>{p}</li>)}</ul>
         <hr />
-        <div className="h3">법령 전문 및 문서 반영</div>
+        <h2 className="h2">법령 전문 및 문서 반영</h2>
         <div className="muted small">Law.go 상세 호출이 조문을 반환하면 전체 조문을 표시합니다. 상세 호출이 실패한 경우에만 기초 조문 스냅샷과 원문 출처를 함께 표시합니다.</div>
         <div className="law-body-viewer">
           {sections.map((section) => (
             <section className="law-body-section" key={section.title}>
-              <div className="law-section-title">{section.title}</div>
+              <h3 className="law-section-title">{section.title}</h3>
               <div className="law-section-lines">
                 {section.lines.map((line, lineIndex) => (
                   <p className={lineClassName(line)} key={`${section.title}-${lineIndex}`}>

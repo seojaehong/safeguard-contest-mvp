@@ -842,7 +842,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
     }
     const isCalmEmpty = missingCurrent && !loadError;
     return (
-      <section className="safeclaw-module-panel" aria-label={isCalmEmpty ? "리포트 빈 상태" : "리포트 데이터 오류"}>
+      <section className="safeclaw-module-panel workbench-empty-state" aria-label={isCalmEmpty ? "리포트 빈 상태" : "리포트 데이터 오류"}>
         <span>{isCalmEmpty ? "데이터 출처 · 없음" : "리포트 오류"}</span>
         <h2>{isCalmEmpty ? "최근 작업팩이 없습니다." : "현재 작업을 불러오지 못했습니다."}</h2>
         <p>{isCalmEmpty ? "작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요." : loadError}</p>
@@ -933,7 +933,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
 
           <section>
             <span>필터 {activeFilterCount ? `${activeFilterCount}` : ""}</span>
-            <div className="safeclaw-report-facts" aria-label="리포트 필터">
+            <div className="safeclaw-report-facts workbench-report-filters" aria-label="리포트 필터">
               <p>
                 <strong>공정</strong>
                 <select

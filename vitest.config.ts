@@ -11,5 +11,10 @@ export default defineConfig({
   test: {
     include: ["tests/**/*.test.ts"],
     environment: "node",
+    server: {
+      deps: {
+        external: [/live_harness_quality_probe\.mjs$/],
+      },
+    },
   },
 });

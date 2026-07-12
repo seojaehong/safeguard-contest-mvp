@@ -42,11 +42,11 @@ function PageDecisionHeader({
   command
 }: PageDecisionHeaderProps) {
   return (
-    <header className="safeclaw-page-decision-header" data-testid="page-decision-header">
+    <header className="safeclaw-page-decision-header safeclaw-module-header" data-testid="page-decision-header">
       <div className="safeclaw-page-decision-copy">
         <span className="safeclaw-module-eyebrow">{eyebrow}</span>
-        <h1>{title}</h1>
-        <p>{description}</p>
+        <h1 className="safeclaw-module-title">{title}</h1>
+        <p className="safeclaw-module-description">{description}</p>
       </div>
       <aside className="safeclaw-page-decision-action" aria-label="현재 모듈 결정">
         <div>
@@ -126,7 +126,7 @@ export function SafeClawModuleShell({
         <p>현장 안전 문서팩</p>
         <nav
           id="safeclaw-module-navigation"
-          className={mobileNavOpen ? "open" : ""}
+          className={`safeclaw-module-navigation${mobileNavOpen ? " open" : ""}`}
           aria-label="SafeClaw 운영 메뉴"
         >
           <section className="safeclaw-module-primary-nav">

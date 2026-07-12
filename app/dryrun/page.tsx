@@ -15,13 +15,8 @@ export default async function DryrunPage({
   searchParams: Promise<{ __auditBoundary?: string }>;
 }) {
   const query = await searchParams;
-  if (process.env.SAFECLAW_FRONTEND_AUDIT === "1"
-    && (query.__auditBoundary === "error" || query.__auditBoundary === "global-error")) {
-    throw new Error(
-      query.__auditBoundary === "error"
-        ? "SafeClaw deterministic frontend audit error boundary probe"
-        : "SafeClaw deterministic frontend audit global boundary seed",
-    );
+  if (process.env.SAFECLAW_FRONTEND_AUDIT === "1" && query.__auditBoundary === "error") {
+    throw new Error("SafeClaw deterministic frontend audit error boundary probe");
   }
 
   const snapshot = getLatestDryrunSnapshot();

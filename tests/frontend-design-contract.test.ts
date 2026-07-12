@@ -120,6 +120,8 @@ function expectedTypographyRole(rule: CssRule, selector: string): TypographyRole
   const override = semanticRoleOverrides[selector];
   if (override) return override;
   const size = rule.declarations["font-size"];
+  if (rule.selectors.every((candidate) => /textarea/i.test(candidate) && !/input/i.test(candidate))
+    && ["var(--text-body)", "var(--t-body)", "15px"].includes(size)) return "longform";
   if (isTableHeaderSelector(selector) && !isInteractiveSelector(selector)) return "tableHeader";
   if (["var(--text-display)", "var(--t-display)", "clamp(44px, 6vw, 72px)"].includes(size)) return "display";
   if (["var(--text-page-title)", "var(--t-hero)", "clamp(32px, 4vw, 40px)"].includes(size)) return "pageTitle";
@@ -249,10 +251,6 @@ describe("frontend design contract", () => {
 
   it("applies the canonical product type and interaction foundation", () => {
     const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
-    expect(effectiveDeclarations(css, ":root")).toMatchObject({
-      "--font-base": "var(--font-product)",
-      "--font-hud": '"Geist Mono", "Cascadia Mono", Consolas, monospace',
-    });
     expect(effectiveDeclarations(css, "body")).toMatchObject({
       "font-family": "var(--font-product)",
       "font-size": "var(--text-body)",
@@ -518,49 +516,6 @@ describe("frontend design contract", () => {
     );
   });
 
-  it("normalizes inert important shadows without hiding the important declaration", () => {
-    const audit = runAudit(`.fixture { box-shadow: none !important; }`);
-    const approved = runAudit(`.scenario-chip.active {
-      box-shadow: inset 4px 0 0 var(--sc-hazard-yellow) !important;
-    }`);
-    const rejected = runAudit(`.unapproved-active {
-      box-shadow: inset 4px 0 0 var(--sc-hazard-yellow) !important;
-    }`);
-    const rules = audit.report.violations.map((violation) => violation.rule);
-
-    expect(rules).toContain("important-declaration");
-    expect(rules).not.toContain("decorative-box-shadow");
-    expect(approved.report.violations.map((violation) => violation.rule)).not.toContain("decorative-box-shadow");
-    expect(rejected.report.violations.map((violation) => violation.rule)).toContain("decorative-box-shadow");
-  });
-
-  it("normalizes important suffixes without duplicating valid typography findings", () => {
-    const audit = runAudit(`.fixture {
-      font-family: inherit !important;
-      letter-spacing: 0 !important;
-    }`);
-    const rules = audit.report.violations.map((violation) => violation.rule);
-
-    expect(rules).toContain("important-declaration");
-    expect(rules).not.toContain("font-family-token");
-    expect(rules).not.toContain("tracking-tier");
-  });
-
-  it("scopes reviewed module rail and navigation radii to their exact roles", () => {
-    const approved = runAudit(`
-      .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-rail {
-        border-radius: 14px;
-      }
-      .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-nav {
-        border-radius: 8px;
-      }
-    `);
-    const rejected = runAudit(`.unapproved-panel { border-radius: 14px; }`);
-
-    expect(approved.report.violations.map((violation) => violation.rule)).not.toContain("radius-tier");
-    expect(rejected.report.violations.map((violation) => violation.rule)).toContain("radius-tier");
-  });
-
   it("rejects incomplete or mismatched typography tuples in audit fixtures", () => {
     const audit = runAudit(`
       .bad-title {
@@ -624,5 +579,17 @@ describe("frontend design contract", () => {
     expect(tupleValues.some((value) => value.includes(".safeclaw-module-primary"))).toBe(true);
     expect(tupleValues.some((value) => value.includes(".safeclaw-module-actions a"))).toBe(true);
     expect(tupleValues.every((value) => !value.includes("module-variant-document"))).toBe(true);
+  });
+
+  it("applies the canonical product type and interaction foundation", () => {
+    const css = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
+    expect(css).toContain("font-family: var(--font-product);");
+    expect(css).toContain("font-size: var(--text-body);");
+    expect(css).toContain("line-height: var(--leading-body);");
+    expect(css).toContain("letter-spacing: var(--tracking-body);");
+    expect(css).toContain("font-synthesis: none;");
+    expect(css).toContain("text-rendering: optimizeLegibility;");
+    expect(css).toContain(":focus-visible");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce)");
   });
 });

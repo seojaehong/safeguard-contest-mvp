@@ -51,7 +51,7 @@ export default function PreviewPage() {
       <section className="safeclaw-module-panel secondary-docs-card">
         <div className="compact-head">
           <span className="eyebrow">보조 산출물</span>
-          <strong>접어서 제공하는 8종</strong>
+          <h2 className="safeclaw-section-title">접어서 제공하는 8종</h2>
         </div>
         <div className="secondary-doc-grid">
           {secondaryDocs.map((doc) => <span key={doc}>{doc}</span>)}

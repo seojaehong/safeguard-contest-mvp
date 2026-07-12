@@ -7,21 +7,21 @@ export default async function InterpretationDetailPage({ params }: { params: Pro
   if (!item || item.type !== "interpretation") return notFound();
 
   return (
-    <main className="container grid">
+    <main className="container grid legal-detail-page route-supporting-page">
       <div className="row">
         <span className="badge">해석례 상세</span>
         {item.citation ? <span className="badge">{item.citation}</span> : null}
         {item.sourceLabel ? <span className="badge">{item.sourceLabel}</span> : null}
       </div>
       <section className="card list">
-        <div className="h2">{item.title}</div>
+        <h1 className="title small-title">{item.title}</h1>
         <div className="muted">{item.summary}</div>
         <hr />
-        <div className="h3">실무 포인트</div>
+        <h2 className="h2">실무 포인트</h2>
         <ul>{item.points.map((p) => <li key={p}>{p}</li>)}</ul>
         <hr />
-        <div className="h3">요약 본문</div>
-        <pre>{item.body}</pre>
+        <h2 className="h2">요약 본문</h2>
+        <pre className="legal-reading-body">{item.body}</pre>
         {item.sourceUrl ? <a className="button secondary" href={item.sourceUrl} target="_blank">원문 출처</a> : null}
       </section>
     </main>
