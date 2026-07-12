@@ -1,6 +1,8 @@
 {
   "schemaVersion": 1,
   "sourceSha": "78d7dc25a9693551822c30b48a95e1b9b7e50a87",
+  "staticArtifactSourceSha": "78d7dc25a9693551822c30b48a95e1b9b7e50a87",
+  "staticArtifactSourceIdentity": "ec723bb1d5b40d84b7e01b4a2407f535fdcb2d591e794cb3c3aa478992f47164",
   "patchIdentity": "9f3dca8ad9146681a38939607be839d8227fe46b",
   "supersedes": "evaluation/frontend-demo-design-wave9-2026-07-12/source-9bcb9c0/report.json",
   "clipping": {

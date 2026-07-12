@@ -3,6 +3,11 @@
 Source commit: `78d7dc25a9693551822c30b48a95e1b9b7e50a87`  
 Patch identity: `9f3dca8ad9146681a38939607be839d8227fe46b`
 
+The static artifact was regenerated from a detached checkout of the exact
+source commit. Its embedded `sourceSha` is
+`78d7dc25a9693551822c30b48a95e1b9b7e50a87` and its source identity is
+`ec723bb1d5b40d84b7e01b4a2407f535fdcb2d591e794cb3c3aa478992f47164`.
+
 This evidence supersedes the clipping and contrast assertions in
 `source-9bcb9c0`.
 
