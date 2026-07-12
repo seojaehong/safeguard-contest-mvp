@@ -60,3 +60,15 @@
 - Regression: font/W4-W6/W7 contracts, W7 layout 18, typecheck, build 27/27 all PASS.
 - Fresh review after five product P2 fixes and exact-parser P2 fix: SPEC PASS / CODE QUALITY PASS, P0-P3 none.
 - Next: integrate W8 onto current authoritative backend, then continue global radius/important/decorative/selector debt.
+
+## 2026-07-12 FINAL complete
+- Latest current-head audit first exposed an honest RED at 24c19c1: 106/108 rows, two failed rows, four findings.
+- TDD restored generated document title/section tracking from 0/0 to -0.533333px/-0.186667px with three selector-only WorkpackEditor lines; globals, PDF/export, runner, package, and backend contracts stayed untouched.
+- The global-error RED was traced to an audit bundle with marker 0 after incremental normal-build reuse. A path-verified clean audit build produced marker 1; the normal clean build produced marker 0.
+- Destination static: violations 0, important 0, coverage 0, 32 pages, 23 components.
+- Destination browser: actual 108/108, failed 0, findings 0, recovered 0, screenshots 108.
+- Full browser-safe serial suite: 120 files PASS + 5 skipped, 1,124 tests PASS + 7 skipped; independent reviewer reproduced the same result.
+- Strict typecheck and both 27/27 production builds PASS.
+- Independent review: SPEC PASS / CODE QUALITY+EVIDENCE PASS, P0-P3 0.
+- Authoritative mapped series: 06cebe9, 70b025a, 5dad0ef; destination evidence 0901d2a. Protected screenshots 16 mismatch 0.
+- Completion evidence: evaluation/frontend-final-gate-current-2026-07-12/report.md/json and integration-5dad0ef/report.md/json.

@@ -1,6 +1,6 @@
 {
   "feature": "frontend consistency completion",
-  "branchName": "feat/frontend-document-typography-wave4",
+  "branchName": "feature/backend-harness-gate",
   "qualityChecks": [
     "npm.cmd test -- tests/document-typography-token-contract.test.ts",
     "node scripts/frontend_consistency_audit.mjs",
@@ -82,14 +82,17 @@
       "id": "FINAL",
       "title": "Prove complete frontend consistency",
       "priority": 99,
-      "status": "todo",
-      "passes": false,
+      "status": "done",
+      "passes": true,
       "acceptance": [
         "Static audit violations are exactly zero with coverage issues zero",
         "Actual 108-row production audit has failed rows zero and findings zero",
         "Full tests, strict typecheck, normal and audit builds pass"
       ],
-      "files": ["evaluation/frontend-consistency-audit-2026-07-11"]
+      "files": [
+        "evaluation/frontend-audit-runner-port-v2-2026-07-11",
+        "evaluation/frontend-final-gate-current-2026-07-12"
+      ]
     }
   ]
 }
