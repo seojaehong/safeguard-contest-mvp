@@ -56,7 +56,7 @@ describe("workspace input CSS contract", () => {
       ["font-size: var(--text-control)", "font-weight: 500", "line-height: 1.74", "letter-spacing: var(--tracking-body)"],
       ["min-height: 116px", "padding: 14px 15px", "line-height: 1.7"],
       ["min-height: 108px", "padding: 14px 12px", "line-height: 1.7"],
-      ["min-height: 142px", "padding: 16px", "font-size: var(--text-body)", "line-height: var(--leading-body-lg)", "font-weight: 500", "letter-spacing: var(--tracking-body)"],
+      ["min-height: 142px", "padding: 16px", "font-size: var(--text-body)", "line-height: 1.68", "font-weight: 500", "letter-spacing: var(--tracking-body)"],
     ]);
   });
 
