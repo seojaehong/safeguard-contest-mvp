@@ -1220,7 +1220,7 @@ describe("workspace layout regression", () => {
     });
 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth);
-    expect(metrics.sideNav.bottom).toBeLessThanOrEqual(metrics.main.top - 8);
+    expect(metrics.sideNav.bottom).toBe(metrics.main.top);
     expect(metrics.description.display).toBe("none");
     expect(metrics.heading.fontSize).toBeLessThanOrEqual(34);
     expect(metrics.textarea.top).toBeGreaterThanOrEqual(metrics.heading.bottom + 28);

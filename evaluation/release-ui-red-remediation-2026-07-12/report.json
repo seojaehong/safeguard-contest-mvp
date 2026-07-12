@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "pass",
+  "generatedAt": "2026-07-13",
+  "branch": "fix/release-ui-red-remediation",
+  "baseSha": "a1dbedb64e177a4909584274eaad87484aa732f4",
+  "rootCauses": [
+    "desktop workspace border consumed one pixel inside the grid box",
+    "mobile workspace test required a gap where the product contract is exact adjacency",
+    "mobile module decision header vertical padding delayed content by 24 pixels"
+  ],
+  "metrics": {
+    "desktopWorkspace": {
+      "beforeSideTop": 118.047,
+      "afterSideTop": 117.047,
+      "beforeSideBottom": 640.047,
+      "afterSideBottom": 639.047
+    },
+    "mobileWorkspace": {
+      "sideBottom": 260.047,
+      "mainTop": 260.047,
+      "horizontalOverflow": 0
+    },
+    "mobileModuleContentTop": {
+      "home": { "before": 328.969, "after": 304.969 },
+      "documents": { "before": 351.359, "after": 327.359 },
+      "reports": { "before": 359.578, "after": 335.578 },
+      "settingsAiConnect": { "before": 327.0, "after": 303.0 }
+    }
+  },
+  "verification": {
+    "moduleShell": { "passed": 4, "failed": 0 },
+    "workspaceLayout": { "passed": 21, "skipped": 1, "failed": 0 },
+    "designContracts": { "passed": 25, "failed": 0 },
+    "typecheck": "pass",
+    "staticAudit": {
+      "pages": 32,
+      "components": 23,
+      "coverageIssues": 0,
+      "violations": 0
+    },
+    "horizontalOverflow": 0
+  },
+  "excludedGeneratedFiles": "output/playwright/2026-07-10/module-shell-hardening/*.png"
+}
