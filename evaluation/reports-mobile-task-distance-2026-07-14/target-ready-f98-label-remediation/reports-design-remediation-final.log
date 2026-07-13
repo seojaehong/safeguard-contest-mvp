@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/reports-mobile-task-distance
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  05:48:55
+   Duration  148.71s (transform 645ms, setup 0ms, import 2.24s, tests 144.45s, environment 0ms)
+
+FINAL_EVIDENCE_EXIT_CODE=0
