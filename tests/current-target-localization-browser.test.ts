@@ -10,6 +10,8 @@ import {
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
+import { buildOperationMemoryGraph } from "@/lib/ontology/operation-memory";
+import { buildOperationMemoryVisualizationModel } from "@/lib/ontology/operation-memory-visualization";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 import {
   startIsolatedNextBrowserHarness,
@@ -78,6 +80,23 @@ let harness: IsolatedNextBrowserHarness | null = null;
 let browser: Browser | null = null;
 let outputDirectory = "";
 let temporaryOutputDirectory = false;
+const hydrationRestoreRuns: Array<{
+  run: number;
+  firstReadIndex: number;
+  eventKinds: Array<"read" | "write">;
+  writeWorkerIds: string[][];
+  noWriteBeforeRestore: boolean;
+  allWritesPreservedRestoredWorker: boolean;
+}> = [];
+let timestampNullChecks: {
+  validGeneratedAtInput: string;
+  validGeneratedAtCanonical: string;
+  validReadAtInput: string;
+  validReadAtPresentation: string;
+  invalidGeneratedAtInput: string;
+  invalidGeneratedAtCanonical: null;
+  invalidGeneratedAtPresentation: string;
+} | null = null;
 
 function buildId(): string | null {
   const buildIdPath = path.join(root, ".next", "BUILD_ID");
@@ -190,6 +209,27 @@ describe("current target localization browser matrix", () => {
   }, 120_000);
 
   afterAll(async () => {
+    if (outputDirectory) {
+      fs.writeFileSync(
+        path.join(outputDirectory, "browser-contracts.json"),
+        `${JSON.stringify({
+          capturedAt: new Date().toISOString(),
+          sourceSha,
+          buildId: buildId(),
+          harnessMode: harness?.mode || null,
+          hydrationRestore: {
+            runs: hydrationRestoreRuns,
+            runCount: hydrationRestoreRuns.length,
+            allRunsReadBeforeWrite: hydrationRestoreRuns.every((run) => run.noWriteBeforeRestore),
+            allWritesPreservedRestoredWorker: hydrationRestoreRuns.every(
+              (run) => run.allWritesPreservedRestoredWorker
+            )
+          },
+          timestampNullChecks
+        }, null, 2)}\n`,
+        "utf8"
+      );
+    }
     await harness?.stop();
     if (temporaryOutputDirectory && outputDirectory) {
       fs.rmSync(outputDirectory, { recursive: true, force: true });
@@ -268,7 +308,7 @@ describe("current target localization browser matrix", () => {
     await page.close();
   }, 120_000);
 
-  it.each([1, 2])("restores the canonical worker snapshot without a pre-restore write (run %i)", async () => {
+  it.each([1, 2])("restores the canonical worker snapshot without a pre-restore write (run %i)", async (run) => {
     if (!browser || !harness) throw new Error("Browser harness was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     const restoredWorker = {
@@ -340,8 +380,73 @@ describe("current target localization browser matrix", () => {
       writes.every((event) => event.workerIds.length === 1 && event.workerIds[0] === restoredWorker.id),
       JSON.stringify(events)
     ).toBe(true);
+    hydrationRestoreRuns.push({
+      run,
+      firstReadIndex: firstRead,
+      eventKinds: events.map((event) => event.kind),
+      writeWorkerIds: writes.map((event) => event.workerIds),
+      noWriteBeforeRestore: !events.slice(0, firstRead).some((event) => event.kind === "write"),
+      allWritesPreservedRestoredWorker: writes.every(
+        (event) => event.workerIds.length === 1 && event.workerIds[0] === restoredWorker.id
+      )
+    });
     await page.close();
   }, 120_000);
+
+  it("records valid RFC3339 timestamps and the invalid generated-at null boundary", () => {
+    const validGeneratedAt = "2026-07-11T16:40:00+09:00";
+    const validReadAt = "2026-07-11T17:05:00+09:00";
+    const invalidGeneratedAt = "2026-07-11 16:40:00";
+    const validGraph = buildOperationMemoryGraph({
+      workpack: { id: "timestamp-valid", question: "시각 경계 확인", generatedAt: validGeneratedAt },
+      references: [],
+      improvements: [],
+      confirmations: [{ displayName: "김확인", languageCode: "ko", readAt: validReadAt }]
+    });
+    const invalidGraph = buildOperationMemoryGraph({
+      workpack: { id: "timestamp-invalid", question: "무효 시각 확인", generatedAt: invalidGeneratedAt },
+      references: [],
+      improvements: [],
+      confirmations: []
+    });
+    const validModel = buildOperationMemoryVisualizationModel(validGraph);
+    const invalidModel = buildOperationMemoryVisualizationModel(invalidGraph);
+    const validWorkpackNode = validGraph.nodes.find((node) => node.kind === "Workpack");
+    const validAckNode = validGraph.nodes.find((node) => node.kind === "Ack");
+    const invalidWorkpackNode = invalidGraph.nodes.find((node) => node.kind === "Workpack");
+    const validGeneratedAtCanonical = validWorkpackNode?.meta.generatedAt;
+    const validReadAtPresentation = validModel.hoverCards
+      .find((card) => card.id === validAckNode?.id)
+      ?.metaRows.find((row) => row.key === "readAt")
+      ?.value;
+    const invalidGeneratedAtCanonical = invalidWorkpackNode?.meta.generatedAt;
+    const invalidGeneratedAtPresentation = invalidModel.hoverCards
+      .find((card) => card.id === invalidWorkpackNode?.id)
+      ?.metaRows.find((row) => row.key === "generatedAt")
+      ?.value;
+
+    expect(validGeneratedAtCanonical).toBe(validGeneratedAt);
+    expect(validReadAtPresentation).toBe(validReadAt);
+    expect(invalidGeneratedAtCanonical).toBeNull();
+    expect(invalidGeneratedAtPresentation).toBe("생성 시각 확인 전");
+    if (
+      typeof validGeneratedAtCanonical !== "string"
+      || typeof validReadAtPresentation !== "string"
+      || invalidGeneratedAtCanonical !== null
+      || typeof invalidGeneratedAtPresentation !== "string"
+    ) {
+      throw new Error("Timestamp/null browser evidence did not satisfy its typed contract");
+    }
+    timestampNullChecks = {
+      validGeneratedAtInput: validGeneratedAt,
+      validGeneratedAtCanonical,
+      validReadAtInput: validReadAt,
+      validReadAtPresentation,
+      invalidGeneratedAtInput: invalidGeneratedAt,
+      invalidGeneratedAtCanonical,
+      invalidGeneratedAtPresentation
+    };
+  });
 
   it.each(routes.flatMap((contract) => (
     (["day", "night"] as const).flatMap((theme) => (
@@ -539,6 +644,42 @@ describe("current target localization browser matrix", () => {
         }
       }
       const ontologySurfaceRect = ontologySurface?.getBoundingClientRect();
+      const geometry = (element: Element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          x: Number(rect.x.toFixed(2)),
+          y: Number(rect.y.toFixed(2)),
+          width: Number(rect.width.toFixed(2)),
+          height: Number(rect.height.toFixed(2))
+        };
+      };
+      const staticOntologyNodes = ontologyNodes.map((node) => ({
+        id: node.dataset.nodeId || "",
+        accessibleName: node.getAttribute("aria-label") || "",
+        visibleLabel: (node.textContent || "").trim().replace(/\s+/gu, " "),
+        degree: Number(node.dataset.degree),
+        reviewRequired: node.dataset.reviewRequired === "true",
+        geometry: geometry(node)
+      }));
+      const staticOntologyEdges = ontologyEdges.map((edge) => ({
+        sourceId: edge.dataset.sourceId || "",
+        targetId: edge.dataset.targetId || "",
+        relationLabel: edge.dataset.relationLabel || "",
+        accessibleName: edge.getAttribute("aria-label") || "",
+        visibleLabel: (edge.textContent || "").trim().replace(/\s+/gu, " "),
+        geometry: geometry(edge)
+      }));
+      const operationRelationEdges = relationLines.map((line) => ({
+        sourceId: line.dataset.sourceId || "",
+        targetId: line.dataset.targetId || "",
+        accessibleName: line.getAttribute("aria-label") || "",
+        geometry: {
+          x1: Number(line.getAttribute("x1")),
+          y1: Number(line.getAttribute("y1")),
+          x2: Number(line.getAttribute("x2")),
+          y2: Number(line.getAttribute("y2"))
+        }
+      }));
       const clippedOntologyNodeCount = ontologySurfaceRect
         ? ontologyNodes.filter((node) => {
             const rect = node.getBoundingClientRect();
@@ -595,8 +736,11 @@ describe("current target localization browser matrix", () => {
         operationNodeOccupancy: boardRect && boardRect.width > 0 && boardRect.height > 0
           ? visibleNodeArea / (boardRect.width * boardRect.height)
           : 0,
+        operationRelationEdges,
         staticOntologyNodeCount: ontologyNodes.length,
         staticOntologyEdgeCount: ontologyEdges.length,
+        staticOntologyNodes,
+        staticOntologyEdges,
         inaccessibleOntologyNodeCount,
         inaccessibleOntologyEdgeCount,
         disconnectedOntologyNodeCount,
@@ -661,8 +805,15 @@ describe("current target localization browser matrix", () => {
       visibleOperationNodeCount: metrics.visibleOperationNodeCount,
       clippedOperationNodeCount: metrics.clippedOperationNodeCount,
       operationNodeOccupancy: metrics.operationNodeOccupancy,
+      operationRelationEdges: metrics.operationRelationEdges,
       staticOntologyNodeCount: metrics.staticOntologyNodeCount,
       staticOntologyEdgeCount: metrics.staticOntologyEdgeCount,
+      staticOntologyNodes: metrics.staticOntologyNodes,
+      staticOntologyEdges: metrics.staticOntologyEdges,
+      staticOntologyAccessibilityContract: {
+        nodeIdsAndKoreanNamesComplete: metrics.inaccessibleOntologyNodeCount === 0,
+        edgeEndpointIdsAndKoreanNamesComplete: metrics.inaccessibleOntologyEdgeCount === 0
+      },
       inaccessibleOntologyNodeCount: metrics.inaccessibleOntologyNodeCount,
       inaccessibleOntologyEdgeCount: metrics.inaccessibleOntologyEdgeCount,
       disconnectedOntologyNodeCount: metrics.disconnectedOntologyNodeCount,
