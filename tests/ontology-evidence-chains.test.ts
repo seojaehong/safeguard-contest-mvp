@@ -9,6 +9,7 @@ import {
   recordNaturalizedEvidenceChainQuality,
   resolveEvidenceChain,
   resolveEvidenceCitations,
+  verifyEvidenceMaterialization,
   type ControlEvidenceSource,
   type ObligationClassification,
 } from "@/lib/ontology/evidence-chain";
@@ -199,7 +200,7 @@ describe("Phase A canonical evidence-chain registry", () => {
         graphArticleNodeId: "Article_기준규칙_172",
         layer: "published_graph",
         officialUrl:
-          "https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000727233",
+          "https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1016700327",
       }),
     ]);
     expect(pack.controls).toEqual([
@@ -693,13 +694,46 @@ describe("published runtime gate and provenance", () => {
 });
 
 describe("pipeline and document materialization contract", () => {
-  test("materializes controls and evidence deterministically into risk-assessment and TBM targets", () => {
+  test("executes graph, SIF, KOSHA, and current-law assembly in authority order", () => {
+    const stages: string[] = [];
+
+    resolveEvidenceChain(publishedGraph, "전기작업", {
+      onAssemblyStage: (stage) => stages.push(stage),
+    });
+
+    expect(stages).toEqual([
+      "task_graph",
+      "sif_accident",
+      "kosha_guidance",
+      "current_law",
+    ]);
+    expect(requireReviewRequired("전기작업").assemblyTrace).toEqual(stages);
+  });
+
+  test("fails closed at the graph stage without consulting later evidence layers", () => {
+    const stages: string[] = [];
+    const graphWithoutTask: OntologyGraph = {
+      ...publishedGraph,
+      nodes: publishedGraph.nodes.filter((node) => node.node_id !== "Task_electrical_work"),
+    };
+
+    expect(resolveEvidenceChain(graphWithoutTask, "전기작업", {
+      onAssemblyStage: (stage) => stages.push(stage),
+    })).toMatchObject({
+      resolved: false,
+      reason: "published_task_missing",
+    });
+    expect(stages).toEqual(["task_graph"]);
+  });
+
+  test("keeps deterministic document targets as plans rather than materialization claims", () => {
     const first = requireReviewRequired("전기작업");
     const second = requireReviewRequired("전기작업");
 
-    expect(first.materialization).toEqual(second.materialization);
-    expect(first.materialization).toHaveLength(first.controls.length);
-    for (const mapping of first.materialization) {
+    expect(first.materializationTargets).toEqual(second.materializationTargets);
+    expect(first.materializationTargets).toHaveLength(first.controls.length);
+    expect(first).not.toHaveProperty("materialization");
+    for (const mapping of first.materializationTargets) {
       expect(mapping.targets.map((target) => target.document)).toEqual(["risk_assessment", "tbm"]);
       expect(mapping.targets.every((target) => target.rowOrSection.length > 0)).toBe(true);
       expect(mapping.lawCitedUids.every((uid) => uid.startsWith("law:"))).toBe(true);
@@ -715,6 +749,72 @@ describe("pipeline and document materialization contract", () => {
         expect(source.bridgeResolution).toBe("unresolved");
       }
     }
+  });
+
+  test("records only document lines containing both a Control and cited evidence", () => {
+    const pack = requireReviewRequired("차량계·기계 인접작업");
+    const lawUid = "law:산업안전보건기준에 관한 규칙:제172조";
+    const controlLabel = pack.controls[0]?.label;
+    if (!controlLabel) throw new Error("expected vehicle contact Control");
+
+    const records = verifyEvidenceMaterialization({
+      evidenceChainState: "resolved",
+      pack,
+      documents: {
+        riskAssessmentDraft: `위험성평가\n${controlLabel} | ${lawUid}`,
+        tbmBriefing: `TBM\n${controlLabel} - ${lawUid}`,
+      },
+    });
+
+    expect(records).toEqual([
+      expect.objectContaining({
+        materialized: true,
+        controlId: "vehicle-contact-prevention",
+        documentKey: "riskAssessmentDraft",
+        citedUids: [lawUid],
+        location: expect.objectContaining({ kind: "line", lineNumber: 2 }),
+      }),
+      expect.objectContaining({
+        materialized: true,
+        controlId: "vehicle-contact-prevention",
+        documentKey: "tbmBriefing",
+        citedUids: [lawUid],
+        location: expect.objectContaining({ kind: "line", lineNumber: 2 }),
+      }),
+    ]);
+  });
+
+  test("does not claim materialization for review-required or unmatched output", () => {
+    const pack = requireReviewRequired("차량계·기계 인접작업");
+    const lawUid = "law:산업안전보건기준에 관한 규칙:제172조";
+    const controlLabel = pack.controls[0]?.label;
+    if (!controlLabel) throw new Error("expected vehicle contact Control");
+
+    expect(verifyEvidenceMaterialization({
+      evidenceChainState: "review_required",
+      pack,
+      documents: { riskAssessmentDraft: `${controlLabel} | ${lawUid}` },
+    })).toEqual([]);
+    expect(verifyEvidenceMaterialization({
+      evidenceChainState: "resolved",
+      pack,
+      documents: { riskAssessmentDraft: `${controlLabel}만 있고 인용 근거는 없음` },
+    })).toEqual([]);
+
+    const reviewRequiredPack = requireReviewRequired("전기작업");
+    const reviewRequiredControl = reviewRequiredPack.controls[0];
+    const reviewRequiredLawUid = reviewRequiredControl?.lawEvidence[0]?.citedUid;
+    if (!reviewRequiredControl || !reviewRequiredLawUid) {
+      throw new Error("expected review-required electrical Control evidence");
+    }
+    expect(reviewRequiredControl.obligation.classification).toBe("review_required");
+    expect(verifyEvidenceMaterialization({
+      evidenceChainState: "resolved",
+      pack: reviewRequiredPack,
+      documents: {
+        riskAssessmentDraft: `${reviewRequiredControl.label} | ${reviewRequiredLawUid}`,
+      },
+    })).toEqual([]);
   });
 
   test("uses field history and weather only as applicability context", () => {

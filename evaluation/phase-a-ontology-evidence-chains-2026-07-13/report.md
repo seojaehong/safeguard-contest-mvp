@@ -1,11 +1,10 @@
 # Phase A ontology evidence chains remediation report
 
 - Date: 2026-07-13 (Asia/Seoul)
-- Branch: `feat/phase-a-ontology-evidence-chains`
-- Base: `b39f8135e784f69aac12d947cf6a734aa429a3c5`
-- Rejected commits remediated: `8e6cf05e501edb4ecccce7a8c92e87b9ec7fb88d`, `91aab7f466fac84018441b496d07f84e43ff0dd4`
-- Contract: `phase-a-evidence-chains/1.2.0`
-- Status: second-review remediation complete, awaiting fresh independent review
+- Branch: `fix/phase-a-ontology-review`
+- Base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
+- Contract: `phase-a-evidence-chains/1.3.0`
+- Status: independent-review findings remediated, awaiting re-review
 - Runtime/DB publication: not performed
 - Schema, migration, Supabase data, generated core seed: unchanged
 
@@ -16,6 +15,10 @@ Phase A remains a versioned code-owned evidence registry and result DTO over the
 The pipeline remains:
 
 `input -> exact canonical Task/alias -> published subgraph -> SIF/KOSHA/law pack -> naturalize_only -> passed quality check -> human confirm`
+
+The resolver and generation tool now expose the actual authority sequence separately:
+
+`Task/published graph -> SIF/Accident -> KOSHA guidance -> current law validation -> generated-document materialization inspection`
 
 | Chain | Canonical Task | Hazard | SIF | Active chunks | Review-only chunks | Current law | Controls |
 |---|---|---|---:|---:|---:|---|---:|
@@ -78,7 +81,9 @@ SIF-only evidence returns `review_required`; there is no fifth `neither` state.
 - Human confirmation rejects both pending and failed quality checks; only `passed` quality can be confirmed.
 - Existing provider fallback and DB harness `naturalize_only` behavior are unchanged.
 - MCP `provenance` remains the backward-compatible `법제처 검증 시드 v1`; the layered pack is returned separately in `evidenceContract`, with `evidenceChainState=review_required` while the KOSHA bridge is unresolved.
-- Materialization remains deterministic: 9 controls create 18 risk-assessment/TBM targets and retain production item UID, local item ID, local chunk ID, exact SHA-256, page/location, and unresolved bridge state without inventing a chunk citation.
+- Planning remains deterministic: 9 controls create 18 risk-assessment/TBM targets and retain production item UID, local item ID, local chunk ID, exact SHA-256, page/location, and unresolved bridge state without inventing a chunk citation.
+- Planned targets are `materializationTargets`; they are not completion claims. `verifiedRecords` are created only after exact inspection of a generated risk-assessment/TBM line containing both the Control label and at least one planned `cited_uid`.
+- `review_required`, unverified, unpublished, unmatched, or Control-level `review_required` output always produces zero verified materialization records. Human confirmation remains pending in the tool result.
 
 ## Reviewer remediation
 
@@ -102,6 +107,14 @@ SIF-only evidence returns `review_required`; there is no fifth `neither` state.
 | R2-2 machine chunks used `manual:*` | Removed chunk `manual:*` citations. Local item/chunk/page/location/SHA are structured unresolved provenance only. |
 | R2-3 unmapped guidance was active | Split mapped `guidance` from `reviewOnlyGuidance`; active citations and naturalizer fixed pack exclude C-74/C-48/D-C-4/B-M-37 review-only records. |
 
+## Independent Phase A review remediation
+
+| Finding | Remediation |
+|---|---|
+| A-1 resolver was law-first | Reordered actual operations to published Task/graph, SIF/Accident, KOSHA, then current law. `assemblyTrace` and fail-closed tests prove later layers are not consulted after graph failure. |
+| A-2 plans were reported as materialized | Renamed the resolver output to `materializationTargets`. The MCP generation path now resolves the evidence pack before `runAsk`, inspects the actual generated document instance afterward, and emits separate `verifiedRecords` with document key, line number, excerpt, Control, and exact cited UIDs. |
+| A-3 Article 172 used an obsolete surface | Updated the registry and tests to the official `2026-03-02` Article 172 surface at `lsJoLnkSeq=1016700327`. |
+
 ## Official law verification
 
 The current `산업안전보건기준에 관한 규칙` was checked as effective `2026-03-02` under 고용노동부령 제450호.
@@ -109,20 +122,21 @@ The current `산업안전보건기준에 관한 규칙` was checked as effective
 - [Article 42](https://law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1024005275)
 - [Article 43](https://www.law.go.kr/lsLinkCommonInfo.do?lsJoLnkSeq=1028063341)
 - [Article 44](https://law.go.kr/lsLinkCommonInfo.do?lsJoLnkSeq=1016700539)
-- [Article 172](https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000727233)
+- [Article 172](https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1016700327)
 - [Article 301](https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1024005221)
 - [Article 302](https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1030668033)
 - [Articles 319, 321, 323 current page](https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029038625)
 - [Current full text](https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lspttninfSeq=153999)
 
-The Article 172 direct surface identifies the correct vehicle-type material-handling provision; the current full-text surface supplies the instrument-wide `2026-03-02` effective date.
+The Article 172 direct surface identifies `접촉의 방지`: paragraph 1 prohibits worker entry into contact-risk areas during vehicle-type material handling unless a work director or guide person is assigned, and paragraph 2 requires the operator to follow that direction. The same official surface states the instrument is effective `2026-03-02`.
 
 ## Verification
 
 - TDD RED after independent review: 17 focused failures reproduced the original defects.
 - Sidecar reconciliation RED: 7 failures reproduced missing chunk-level mappings; bridge/status RED added 4 further focused failures before implementation.
 - Second-review TDD RED: 22 failures reproduced unsafe core state and unsplit/fake-citation provenance before implementation.
-- Focused ontology/MCP/commercial/DB harness, serial: 4 files passed, 104 tests passed.
+- Independent-review TDD RED: 10 failing assertions were observed across three RED cycles for sequence, fail-closed behavior, materialization separation, Control-level review gating, MCP output, and Article 172.
+- Focused ontology/generation/MCP/commercial/DB harness, serial: 5 files passed, 122 tests passed.
 - Strict TypeScript: passed.
 - Previous full suite is informational only and was not rerun for this remediation: 125 files passed, 7 failed, 5 skipped; 1229 tests passed, 7 failed, 22 skipped. Failures were outside owned ontology/MCP/test/report files.
 - Full-suite failed suites: `knowledge-page-layout`, `product-module-shell`, and `reports-download-center` due missing `.next/prerender-manifest.json` or hook timeout during concurrent dev-server tests.
@@ -135,4 +149,4 @@ Logs:
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log`
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log`
 
-No DB publication, migration, schema change, Supabase mutation, generated seed change, or UI/output artifact is included. This remediation does not self-approve; fresh independent review remains required.
+No DB publication, migration, schema change, Supabase mutation, generated seed change, or UI change is included. This remediation does not self-approve; fresh independent re-review remains required.

@@ -1,12 +1,11 @@
-
 > safeclaw@0.1.0 test
-> vitest run tests/ontology-evidence-chains.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism
+> vitest run tests/ontology-evidence-chains.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/mcp-route-scope-contract.test.ts --maxWorkers=1 --no-file-parallelism
 
 
- RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-evidence-chains
+ RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
 
 
- Test Files  4 passed (4)
-      Tests  104 passed (104)
-   Start at  09:47:30
-   Duration  14.01s (transform 1.07s, setup 0ms, import 2.05s, tests 9.07s, environment 0ms)
+ Test Files  5 passed (5)
+      Tests  122 passed (122)
+   Start at  19:10:48
+   Duration  17.98s (transform 2.11s, setup 0ms, import 4.63s, tests 6.82s, environment 2ms)

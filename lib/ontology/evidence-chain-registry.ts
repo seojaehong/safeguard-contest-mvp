@@ -1,6 +1,6 @@
 import type { ReviewState } from "@/lib/ontology/schema";
 
-export const EVIDENCE_CHAIN_CONTRACT_VERSION = "phase-a-evidence-chains/1.2.0" as const;
+export const EVIDENCE_CHAIN_CONTRACT_VERSION = "phase-a-evidence-chains/1.3.0" as const;
 export const CURRENT_LAW_EFFECTIVE_DATE = "2026-03-02" as const;
 
 export const SIF_CORPUS_STATE = Object.freeze({
@@ -155,7 +155,7 @@ const LAW_EVIDENCE_BY_ARTICLE: Readonly<Record<string, LawEvidenceRecord>> = Obj
     title: "안전보건규칙 제172조(접촉의 방지)",
     citedUid: "law:산업안전보건기준에 관한 규칙:제172조",
     officialUrl:
-      "https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000727233",
+      "https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1016700327",
     effectiveDate: CURRENT_LAW_EFFECTIVE_DATE,
     graphArticleNodeId: "Article_기준규칙_172",
     layer: "published_graph",

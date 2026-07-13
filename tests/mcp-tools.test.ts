@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { AskResponse } from "@/lib/types";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
+import type { SafetyKnowledgeResult } from "@/lib/mcp-tools";
 import { OFFICIAL_CONTACTS } from "@/lib/safety-contacts";
 import {
   buildAccidentCasesResult,
@@ -87,6 +88,52 @@ describe("buildDocpackResult", () => {
     expect(withLabels.evidenceLabels).toBeDefined();
     const withoutLabels = buildDocpackResult(makeAskResponse());
     expect(withoutLabels.evidenceLabels).toBeUndefined();
+  });
+
+  it("reports plans but no verified materialization for review-required evidence", () => {
+    const evidence = {
+      found: true,
+      evidenceChainState: "review_required",
+      evidenceContract: {
+        assemblyTrace: ["task_graph", "sif_accident", "kosha_guidance", "current_law"],
+        controls: [{ controlId: "fall-control", label: "작업발판 설치" }],
+        materializationTargets: [{
+          controlId: "fall-control",
+          controlLabel: "작업발판 설치",
+          lawCitedUids: ["law:산업안전보건기준에 관한 규칙:제42조"],
+          guidanceCitedUids: [],
+          sifCitedUids: [],
+          targets: [{
+            document: "risk_assessment",
+            rowOrSection: "추락 위험 감소대책",
+            stableKey: "fall:risk:control",
+          }],
+        }],
+        pipeline: { humanConfirmationRequired: true },
+      },
+    } as unknown as SafetyKnowledgeResult;
+
+    const result = buildDocpackResult(makeAskResponse({
+      deliverables: {
+        ...makeAskResponse().deliverables,
+        riskAssessmentDraft:
+          "작업발판 설치 | law:산업안전보건기준에 관한 규칙:제42조",
+      },
+    }), false, evidence);
+
+    expect(result.evidenceMaterialization).toMatchObject({
+      evidenceChainState: "review_required",
+      operationSequence: [
+        "task_graph",
+        "sif_accident",
+        "kosha_guidance",
+        "current_law",
+        "document_materialization",
+      ],
+      humanConfirmation: { required: true, status: "pending" },
+      verifiedRecords: [],
+    });
+    expect(result.evidenceMaterialization?.plannedTargets).toHaveLength(1);
   });
 });
 

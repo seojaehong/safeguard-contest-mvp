@@ -58,7 +58,7 @@ export type EvidenceMaterializationTarget = {
   stableKey: string;
 };
 
-export type EvidenceMaterialization = {
+export type EvidenceMaterializationPlan = {
   controlId: string;
   controlLabel: string;
   applicabilityCondition: string;
@@ -81,6 +81,26 @@ export type EvidenceMaterialization = {
   targets: [EvidenceMaterializationTarget, EvidenceMaterializationTarget];
 };
 
+export type EvidenceMaterializationDocumentKey =
+  | "riskAssessmentDraft"
+  | "tbmBriefing"
+  | "tbmLogDraft";
+
+export type EvidenceMaterializationRecord = {
+  materialized: true;
+  stableKey: string;
+  controlId: string;
+  controlLabel: string;
+  documentKey: EvidenceMaterializationDocumentKey;
+  plannedLocation: string;
+  citedUids: string[];
+  location: {
+    kind: "line";
+    lineNumber: number;
+    excerpt: string;
+  };
+};
+
 export type ResolvedEvidenceControl = {
   controlId: string;
   graphControlNodeId: string;
@@ -96,6 +116,7 @@ export type ResolvedEvidenceControl = {
 
 export type EvidenceChainPack = {
   contractVersion: typeof EVIDENCE_CHAIN_CONTRACT_VERSION;
+  assemblyTrace: EvidenceAssemblyStage[];
   chainId: EvidenceChainDefinition["chainId"];
   chainLabel: string;
   task: {
@@ -121,7 +142,7 @@ export type EvidenceChainPack = {
     fieldHistory: string[];
     weather: string[];
   };
-  materialization: EvidenceMaterialization[];
+  materializationTargets: EvidenceMaterializationPlan[];
   provenance: {
     runtimeGraph: {
       scope: "published_only";
@@ -205,11 +226,25 @@ export type EvidenceChainResolution =
 
 export type EvidenceChainResolveOptions = {
   guidanceResolutions?: Readonly<Record<string, EvidenceReviewStatus>>;
+  onAssemblyStage?: (stage: EvidenceAssemblyStage) => void;
   applicability?: {
     fieldHistory?: readonly string[];
     weather?: readonly string[];
   };
 };
+
+export type EvidenceAssemblyStage =
+  | "task_graph"
+  | "sif_accident"
+  | "kosha_guidance"
+  | "current_law";
+
+export type EvidenceChainState =
+  | "resolved"
+  | "review_required"
+  | "unverified"
+  | "not_registered"
+  | "not_evaluated";
 
 export type ResolvedEvidenceCitation = {
   citedUid: string;
@@ -358,11 +393,11 @@ function applyGuidanceResolution(
   return override ? { ...clone, ...override } : clone;
 }
 
-function materialize(
+function planMaterializationTargets(
   definition: EvidenceChainDefinition,
   controls: readonly ResolvedEvidenceControl[],
   sifEvidence: readonly SifEvidenceRecord[],
-): EvidenceMaterialization[] {
+): EvidenceMaterializationPlan[] {
   const sifCitedUids = sifEvidence.map((source) => source.citedUid);
   return controls.map((control, index) => {
     const sourceDefinition = definition.controls[index];
@@ -403,6 +438,60 @@ function materialize(
       ],
     };
   });
+}
+
+const MATERIALIZATION_DOCUMENT_KEYS: Readonly<
+  Record<EvidenceMaterializationTarget["document"], readonly EvidenceMaterializationDocumentKey[]>
+> = {
+  risk_assessment: ["riskAssessmentDraft"],
+  tbm: ["tbmBriefing", "tbmLogDraft"],
+};
+
+export function verifyEvidenceMaterialization(input: {
+  evidenceChainState: EvidenceChainState;
+  pack: Pick<EvidenceChainPack, "materializationTargets">;
+  documents: Partial<Record<EvidenceMaterializationDocumentKey, string>>;
+}): EvidenceMaterializationRecord[] {
+  if (input.evidenceChainState !== "resolved") return [];
+
+  const records: EvidenceMaterializationRecord[] = [];
+  for (const plan of input.pack.materializationTargets) {
+    if (plan.obligation.classification === "review_required") continue;
+    const plannedCitedUids = [
+      ...plan.lawCitedUids,
+      ...plan.guidanceCitedUids,
+      ...plan.sifCitedUids,
+    ];
+    for (const target of plan.targets) {
+      for (const documentKey of MATERIALIZATION_DOCUMENT_KEYS[target.document]) {
+        const document = input.documents[documentKey];
+        if (!document) continue;
+        const lines = document.split(/\r?\n/);
+        for (const [index, rawLine] of lines.entries()) {
+          const line = rawLine.normalize("NFC");
+          if (!line.includes(plan.controlLabel.normalize("NFC"))) continue;
+          const citedUids = plannedCitedUids.filter((citedUid) => line.includes(citedUid));
+          if (citedUids.length === 0) continue;
+          records.push({
+            materialized: true,
+            stableKey: target.stableKey,
+            controlId: plan.controlId,
+            controlLabel: plan.controlLabel,
+            documentKey,
+            plannedLocation: target.rowOrSection,
+            citedUids,
+            location: {
+              kind: "line",
+              lineNumber: index + 1,
+              excerpt: rawLine.trim(),
+            },
+          });
+          break;
+        }
+      }
+    }
+  }
+  return records;
 }
 
 function requireLaw(articleNo: string): LawEvidenceRecord {
@@ -486,6 +575,13 @@ export function resolveEvidenceChain(
     };
   }
 
+  const assemblyTrace: EvidenceAssemblyStage[] = [];
+  const recordAssemblyStage = (stage: EvidenceAssemblyStage): void => {
+    assemblyTrace.push(stage);
+    options.onAssemblyStage?.(stage);
+  };
+
+  recordAssemblyStage("task_graph");
   const runtime = publishedRuntimeGraph(graph);
   const task = runtime.nodes.find(
     (node) =>
@@ -541,27 +637,6 @@ export function resolveEvidenceChain(
     };
   }
 
-  const law = matched.definition.lawArticles.map(requireLaw);
-  const missingPublishedLaw = law.find(
-    (source) =>
-      source.layer === "published_graph" &&
-      (!source.graphArticleNodeId ||
-        !runtime.nodes.some(
-          (node) => node.node_id === source.graphArticleNodeId && node.kind === "Article",
-        )),
-  );
-  if (missingPublishedLaw) {
-    return {
-      resolved: false,
-      published: false,
-      graphPublicationState: "unverified",
-      inferenceState: "unverified",
-      reason: "published_law_missing",
-      message: `제${missingPublishedLaw.articleNo}조 Article이 published 부분그래프에 없어 evidence chain을 게시하지 않습니다.`,
-      candidateChainId: matched.definition.chainId,
-      canonicalTaskLabel: matched.definition.canonicalTaskLabel,
-    };
-  }
   for (const controlDefinition of matched.definition.controls) {
     const controlNode = runtime.nodes.find(
       (node) =>
@@ -597,12 +672,51 @@ export function resolveEvidenceChain(
         canonicalTaskLabel: matched.definition.canonicalTaskLabel,
       };
     }
+  }
+
+  recordAssemblyStage("sif_accident");
+  const hazardPriority = [...matched.definition.sif].sort(
+    (left, right) => left.rank - right.rank || left.itemId.localeCompare(right.itemId, "ko"),
+  );
+  const reviewOnlyEvidence = matched.definition.reviewOnlyEvidence.map((source) => ({ ...source }));
+
+  recordAssemblyStage("kosha_guidance");
+  const allGuidance = matched.definition.guidance.map((source) =>
+    applyGuidanceResolution(source, options.guidanceResolutions),
+  );
+  const guidance = allGuidance.filter((source) => source.registryMapping === "mapped");
+  const reviewOnlyGuidance = allGuidance.filter((source) => source.registryMapping !== "mapped");
+  const guidanceStatus = aggregateGuidanceStatus(guidance);
+
+  recordAssemblyStage("current_law");
+  const law = matched.definition.lawArticles.map(requireLaw);
+  const missingPublishedLaw = law.find(
+    (source) =>
+      source.layer === "published_graph" &&
+      (!source.graphArticleNodeId ||
+        !runtime.nodes.some(
+          (node) => node.node_id === source.graphArticleNodeId && node.kind === "Article",
+        )),
+  );
+  if (missingPublishedLaw) {
+    return {
+      resolved: false,
+      published: false,
+      graphPublicationState: "unverified",
+      inferenceState: "unverified",
+      reason: "published_law_missing",
+      message: `제${missingPublishedLaw.articleNo}조 Article이 published 부분그래프에 없어 evidence chain을 게시하지 않습니다.`,
+      candidateChainId: matched.definition.chainId,
+      canonicalTaskLabel: matched.definition.canonicalTaskLabel,
+    };
+  }
+  for (const controlDefinition of matched.definition.controls) {
     for (const articleNo of controlDefinition.lawArticles) {
       const lawSource = law.find((source) => source.articleNo === articleNo);
       const hasControlLawEdge = lawSource?.graphArticleNodeId
         ? runtime.edges.some(
             (edge) =>
-              edge.src === controlNode.node_id &&
+              edge.src === controlDefinition.graphControlNodeId &&
               edge.rel === "mandatedBy" &&
               edge.dst === lawSource.graphArticleNodeId,
           )
@@ -621,20 +735,11 @@ export function resolveEvidenceChain(
       }
     }
   }
-  const allGuidance = matched.definition.guidance.map((source) =>
-    applyGuidanceResolution(source, options.guidanceResolutions),
-  );
-  const guidance = allGuidance.filter((source) => source.registryMapping === "mapped");
-  const reviewOnlyGuidance = allGuidance.filter((source) => source.registryMapping !== "mapped");
   const controls = resolveControls(matched.definition, law, guidance);
-  const hazardPriority = [...matched.definition.sif].sort(
-    (left, right) => left.rank - right.rank || left.itemId.localeCompare(right.itemId, "ko"),
-  );
-  const reviewOnlyEvidence = matched.definition.reviewOnlyEvidence.map((source) => ({ ...source }));
-  const guidanceStatus = aggregateGuidanceStatus(guidance);
 
   const pack: EvidenceChainPack = {
     contractVersion: EVIDENCE_CHAIN_CONTRACT_VERSION,
+    assemblyTrace: [...assemblyTrace],
     chainId: matched.definition.chainId,
     chainLabel: matched.definition.label,
     task: {
@@ -660,7 +765,11 @@ export function resolveEvidenceChain(
       fieldHistory: [...(options.applicability?.fieldHistory ?? [])],
       weather: [...(options.applicability?.weather ?? [])],
     },
-    materialization: [],
+    materializationTargets: planMaterializationTargets(
+      matched.definition,
+      controls,
+      hazardPriority,
+    ),
     provenance: {
       runtimeGraph: {
         scope: "published_only",
@@ -710,8 +819,6 @@ export function resolveEvidenceChain(
       providerFallback: "preserve_current_provider_fallback",
     },
   };
-  pack.materialization = materialize(matched.definition, controls, hazardPriority);
-
   if (guidanceStatus.resolution === "unresolved") {
     return {
       resolved: false,

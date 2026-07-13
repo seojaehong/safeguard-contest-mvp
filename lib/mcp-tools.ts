@@ -16,8 +16,13 @@ import {
 import type { QaReviewResult } from "./ontology/qa-review";
 import {
   splitEvidenceChainPack,
+  verifyEvidenceMaterialization,
   type ActiveEvidenceChainPack,
+  type EvidenceAssemblyStage,
   type EvidenceChainDiagnostics,
+  type EvidenceMaterializationDocumentKey,
+  type EvidenceMaterializationPlan,
+  type EvidenceMaterializationRecord,
   type EvidenceChainResolution,
 } from "./ontology/evidence-chain";
 import { gateCitations } from "./law-citation-gate";
@@ -96,6 +101,13 @@ export type DocpackResult = {
   evidenceLabels?: Record<string, SmsaEvidenceLabel>;
   documents: Record<string, DocpackDocumentPreview | string>;
   fullDocumentsNote: string;
+  evidenceMaterialization?: {
+    evidenceChainState: SafetyKnowledgeResult["evidenceChainState"];
+    operationSequence: Array<EvidenceAssemblyStage | "document_materialization">;
+    plannedTargets: EvidenceMaterializationPlan[];
+    verifiedRecords: EvidenceMaterializationRecord[];
+    humanConfirmation: { required: true; status: "pending" };
+  };
 };
 
 export type ReviewedDocpackResult = {
@@ -153,13 +165,21 @@ export function resolveReviewTaskLabel(task: string, question: string): string {
  * - includeFull=false(기본): 각 문서는 앞 500자 프리뷰 + 총길이 메타만.
  * - includeFull=true: 각 문서 전체 본문.
  */
-export function buildDocpackResult(response: AskResponse, includeFull = false): DocpackResult {
+export function buildDocpackResult(
+  response: AskResponse,
+  includeFull = false,
+  evidence?: SafetyKnowledgeResult,
+): DocpackResult {
   const deliverables = response.deliverables as unknown as Record<string, unknown>;
   const documents: Record<string, DocpackDocumentPreview | string> = {};
+  const materializationDocuments: Partial<Record<EvidenceMaterializationDocumentKey, string>> = {};
 
   for (const key of DOCPACK_DOCUMENT_KEYS) {
     const value = deliverables[key];
     if (typeof value !== "string" || value.length === 0) continue;
+    if (key === "riskAssessmentDraft" || key === "tbmBriefing" || key === "tbmLogDraft") {
+      materializationDocuments[key] = value;
+    }
     if (includeFull) {
       documents[key] = value;
     } else {
@@ -183,6 +203,22 @@ export function buildDocpackResult(response: AskResponse, includeFull = false): 
   if (response.evidenceLabels) {
     result.evidenceLabels = response.evidenceLabels;
   }
+  if (evidence?.found && evidence.evidenceContract) {
+    result.evidenceMaterialization = {
+      evidenceChainState: evidence.evidenceChainState,
+      operationSequence: [
+        ...evidence.evidenceContract.assemblyTrace,
+        "document_materialization",
+      ],
+      plannedTargets: evidence.evidenceContract.materializationTargets,
+      verifiedRecords: verifyEvidenceMaterialization({
+        evidenceChainState: evidence.evidenceChainState,
+        pack: evidence.evidenceContract,
+        documents: materializationDocuments,
+      }),
+      humanConfirmation: { required: true, status: "pending" },
+    };
+  }
   return result;
 }
 
@@ -194,13 +230,14 @@ export function buildReviewedDocpackResult(
   response: AskResponse,
   qa: QaReviewResult,
   reviewTask: string,
-  includeFull = false
+  includeFull = false,
+  evidence?: SafetyKnowledgeResult,
 ): ReviewedDocpackResult {
   return {
     engine: "safeclaw-runAsk",
     qualityPipeline: ["generate_safety_docpack", "qa_review_docpack"],
     reviewTask,
-    docpack: buildDocpackResult(response, includeFull),
+    docpack: buildDocpackResult(response, includeFull, evidence),
     qa,
     openClawUsageNote:
       "이 응답은 SafeClaw 문서 엔진(/api/ask runAsk) 산출물을 QA 검수 계층으로 다시 확인한 결과입니다. OpenClaw는 이 페이로드를 최종 답변의 근거로 사용하세요.",
