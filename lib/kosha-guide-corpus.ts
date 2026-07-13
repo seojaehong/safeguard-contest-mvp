@@ -106,6 +106,12 @@ type ManifestSnapshot = {
     chunks: number;
     failureLedger: number;
   };
+  reviewedOcrCandidates: ReviewedOcrCandidateBinding[];
+};
+
+type ReviewedOcrCandidateBinding = {
+  itemId: string;
+  candidateSha256: string;
 };
 
 type RawItem = {
@@ -120,6 +126,8 @@ type RawItem = {
   versionKey: string;
   sourceKey: string;
   extractionStatus: string;
+  bodyOrigin: "native" | "human-reviewed-ocr";
+  reviewedOcrCandidateSha256: string | null;
 };
 
 type RawChunk = {
@@ -176,6 +184,93 @@ function isSha256(value: string): boolean {
   return /^[a-f0-9]{64}$/iu.test(value);
 }
 
+function readCanonicalSha256(value: unknown): string | null {
+  return typeof value === "string" && /^[a-f0-9]{64}$/u.test(value) ? value : null;
+}
+
+function readCanonicalIdentifier(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 && value.trim() === value ? value : null;
+}
+
+function hasExactKeys(value: Record<string, unknown>, expected: readonly string[]): boolean {
+  const keys = Object.keys(value);
+  return keys.length === expected.length && expected.every((key) => Object.prototype.hasOwnProperty.call(value, key));
+}
+
+function isRfc3339(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(?:Z|[+-](\d{2}):(\d{2}))$/u.exec(value);
+  if (!match) return false;
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, offsetHourText, offsetMinuteText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const offsetHour = Number(offsetHourText ?? 0);
+  const offsetMinute = Number(offsetMinuteText ?? 0);
+  if (month < 1 || month > 12 || hour > 23 || minute > 59 || second > 59 || offsetHour > 23 || offsetMinute > 59) return false;
+  return day >= 1 && day <= new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function parseReviewedOcrProvenance(value: unknown): { candidateSha256: string } | null {
+  if (!isRecord(value) || !hasExactKeys(value, [
+    "candidate_sha256",
+    "content_sha256",
+    "attestation_sha256",
+    "attestation_schema",
+    "reviewed_by",
+    "reviewed_at",
+    "generator_script_sha256",
+    "pages"
+  ])) return null;
+  const hashes = [
+    value.candidate_sha256,
+    value.content_sha256,
+    value.attestation_sha256,
+    value.generator_script_sha256
+  ];
+  if (!hashes.every((hash) => readCanonicalSha256(hash) !== null)) return null;
+  if (value.attestation_schema !== "safeclaw-kosha-ocr-review-attestation/v1") return null;
+  const reviewedBy = readCanonicalIdentifier(value.reviewed_by);
+  const reviewedAt = typeof value.reviewed_at === "string" ? value.reviewed_at : "";
+  if (!reviewedBy || !isRfc3339(reviewedAt)) return null;
+  if (!Array.isArray(value.pages) || !value.pages.length) return null;
+  const validPages = value.pages.every((page, index) => {
+    if (!isRecord(page) || !hasExactKeys(page, [
+      "page_number",
+      "image_sha256",
+      "text_sha256",
+      "response_id",
+      "model"
+    ])) return false;
+    return readInteger(page.page_number) === index + 1
+      && readCanonicalSha256(page.image_sha256) !== null
+      && readCanonicalSha256(page.text_sha256) !== null
+      && readCanonicalIdentifier(page.response_id) !== null
+      && readCanonicalIdentifier(page.model) !== null;
+  });
+  const candidateSha256 = readCanonicalSha256(value.candidate_sha256);
+  return validPages && candidateSha256 ? { candidateSha256 } : null;
+}
+
+function parseReviewedOcrCandidateBindings(generationPolicy: unknown): ReviewedOcrCandidateBinding[] | null {
+  if (generationPolicy === undefined) return [];
+  if (!isRecord(generationPolicy)) return null;
+  const declared = generationPolicy.reviewed_ocr_candidates;
+  if (declared === undefined) return [];
+  if (!Array.isArray(declared) || !declared.length) return null;
+  const bindings: ReviewedOcrCandidateBinding[] = [];
+  for (const value of declared) {
+    if (!isRecord(value) || !hasExactKeys(value, ["item_id", "candidate_sha256"])) return null;
+    const itemId = readCanonicalIdentifier(value.item_id);
+    const candidateSha256 = readCanonicalSha256(value.candidate_sha256);
+    if (!itemId || !candidateSha256) return null;
+    bindings.push({ itemId, candidateSha256 });
+  }
+  return bindings;
+}
+
 function sha256(value: Uint8Array | string): string {
   return createHash("sha256").update(value).digest("hex");
 }
@@ -208,7 +303,8 @@ function parseManifest(value: unknown): ManifestSnapshot | null {
   const counts = isRecord(value.counts) ? value.counts : null;
   const hashes = isRecord(value.output_hashes) ? value.output_hashes : null;
   const identity = isRecord(value.source_identity) ? value.source_identity : null;
-  if (!counts || !hashes || !identity) return null;
+  const reviewedOcrCandidates = parseReviewedOcrCandidateBindings(value.generation_policy);
+  if (!counts || !hashes || !identity || !reviewedOcrCandidates) return null;
   const parsed: ManifestSnapshot = {
     snapshotId: readString(value.snapshot_id),
     reproducibilityHash: readString(value.reproducibility_hash).toLowerCase(),
@@ -224,7 +320,8 @@ function parseManifest(value: unknown): ManifestSnapshot | null {
       success: readInteger(counts.success) ?? -1,
       chunks: readInteger(counts.chunks) ?? -1,
       failureLedger: readInteger(counts.failure_ledger) ?? -1
-    }
+    },
+    reviewedOcrCandidates
   };
   if (!parsed.snapshotId || Object.values(parsed.counts).some((count) => count < 0)) return null;
   if (![parsed.reproducibilityHash, parsed.sourceIdentitySha256, parsed.generationPolicySha256, ...Object.values(parsed.hashes)].every(isSha256)) return null;
@@ -235,6 +332,17 @@ function parseItem(value: unknown): RawItem | null {
   if (!isRecord(value) || value.schema_version !== "safeclaw-kosha-body-corpus/v2") return null;
   const itemType = value.item_type;
   if (itemType !== "technical-guideline" && itemType !== "technical-support-regulation") return null;
+  let bodyOrigin: RawItem["bodyOrigin"];
+  let reviewedOcrCandidateSha256: string | null = null;
+  if (value.body_origin === undefined && value.reviewed_ocr_provenance === undefined) {
+    bodyOrigin = "native";
+  } else {
+    if (value.body_origin !== "human-reviewed-ocr") return null;
+    const provenance = parseReviewedOcrProvenance(value.reviewed_ocr_provenance);
+    if (!provenance) return null;
+    bodyOrigin = "human-reviewed-ocr";
+    reviewedOcrCandidateSha256 = provenance.candidateSha256;
+  }
   const body = readRawString(value.body) ?? "";
   const parsed: RawItem = {
     itemId: readString(value.item_id),
@@ -247,9 +355,16 @@ function parseItem(value: unknown): RawItem | null {
     stableKey: readString(value.stable_key),
     versionKey: readString(value.version_key),
     sourceKey: readString(value.source_key),
-    extractionStatus: readString(value.extraction_status)
+    extractionStatus: readString(value.extraction_status),
+    bodyOrigin,
+    reviewedOcrCandidateSha256
   };
   if (!parsed.itemId || !parsed.title || !parsed.category || !parsed.state || !parsed.stableKey || !parsed.versionKey || !parsed.sourceKey || !parsed.extractionStatus || !isSha256(parsed.bodyHash)) return null;
+  if (parsed.bodyOrigin === "human-reviewed-ocr") {
+    if (parsed.extractionStatus !== "success" || !readCanonicalSha256(value.normalized_text_sha256)) return null;
+    const normalizedBody = normalizeText(parsed.body);
+    if (!normalizedBody || sha256(normalizedBody) !== parsed.bodyHash) return null;
+  }
   return parsed;
 }
 
@@ -431,7 +546,7 @@ function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): Kos
     title: item.title,
     category: item.category,
     nativeBody: normalizedBody,
-    bodyKind: validBody ? "native" : "unknown",
+    bodyKind: validBody && item.bodyOrigin === "native" ? "native" : "unknown",
     quality,
     provenance: {
       sourceId: item.sourceKey,
@@ -455,6 +570,40 @@ function validateSnapshot(current: CurrentSnapshot, manifest: ManifestSnapshot):
   if (current.snapshotId !== manifest.snapshotId || current.reproducibilityHash !== manifest.reproducibilityHash) throw new CorpusGateError("identity:snapshot");
   if (current.sourceIdentitySha256 !== manifest.sourceIdentitySha256) throw new CorpusGateError("identity:source");
   if (current.generationPolicySha256 !== manifest.generationPolicySha256) throw new CorpusGateError("identity:policy");
+}
+
+function validateReviewedOcrBindings(
+  manifest: ManifestSnapshot,
+  items: ReadonlyMap<string, RawItem>,
+  chunksByItem: ReadonlyMap<string, RawChunk[]>,
+  failedIds: ReadonlySet<string>
+): void {
+  const bindingsByItem = new Map<string, ReviewedOcrCandidateBinding>();
+  for (const binding of manifest.reviewedOcrCandidates) {
+    if (bindingsByItem.has(binding.itemId)) {
+      throw new CorpusGateError(`ocr:binding:duplicate:${binding.itemId}`);
+    }
+    bindingsByItem.set(binding.itemId, binding);
+  }
+  for (const binding of manifest.reviewedOcrCandidates) {
+    const item = items.get(binding.itemId);
+    if (!item || item.bodyOrigin !== "human-reviewed-ocr") {
+      throw new CorpusGateError(`ocr:binding:orphan:${binding.itemId}`);
+    }
+  }
+  for (const item of items.values()) {
+    if (item.bodyOrigin !== "human-reviewed-ocr") continue;
+    const binding = bindingsByItem.get(item.itemId);
+    if (!binding) throw new CorpusGateError(`ocr:binding:missing:${item.itemId}`);
+    if (binding.candidateSha256 !== item.reviewedOcrCandidateSha256) {
+      throw new CorpusGateError(`ocr:binding:mismatch:${item.itemId}`);
+    }
+    if (failedIds.has(item.itemId)) throw new CorpusGateError(`ocr:item:failed:${item.itemId}`);
+    const chunks = chunksByItem.get(item.itemId) ?? [];
+    if (!chunks.some((chunk) => Boolean(normalizeText(chunk.text)))) {
+      throw new CorpusGateError(`ocr:anchor:missing:${item.itemId}`);
+    }
+  }
 }
 
 async function loadUncached(rootDir: string, current: CurrentSnapshot, hooks?: KoshaGuideCorpusLookup["testHooks"]): Promise<KoshaGuideCorpusLoadResult> {
@@ -489,6 +638,7 @@ async function loadUncached(rootDir: string, current: CurrentSnapshot, hooks?: K
       list.push(chunk);
       chunksByItem.set(chunk.itemId, list);
     }
+    validateReviewedOcrBindings(manifest, items, chunksByItem, failedIds);
     const records = [...items.values()]
       .filter((item) => !failedIds.has(item.itemId))
       .map((item) => buildRecord(item, chunksByItem.get(item.itemId) ?? [], current.snapshotId));
