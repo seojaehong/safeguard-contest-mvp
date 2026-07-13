@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "safeclaw-spec-review-evidence/v1",
+  "status": "HOLD_PENDING_INDEPENDENT_PASS",
+  "reviewStatus": "pending",
+  "reviewedClaim": false,
+  "branch": "feat/workpack-share-v2",
+  "sourceBase": "7509d84d37e4ccef7e6ed38f24f6f6b7c44415b7",
+  "candidate": "39cd58082267867c864a7deaf0b916e7f47c5b68",
+  "candidateParent": "7509d84d37e4ccef7e6ed38f24f6f6b7c44415b7",
+  "candidateChangedFiles": [
+    "evaluation/workpack-share-v2-2026-07-13/spec.json",
+    "evaluation/workpack-share-v2-2026-07-13/spec.md"
+  ],
+  "candidateEvidence": {
+    "sourceBaseResolves": true,
+    "candidateResolves": true,
+    "candidateDirectParentIsSourceBase": true,
+    "candidateScopeExact": true
+  },
+  "evidenceCommitContract": {
+    "recordsOwnCommitSha": false,
+    "requiredParent": "39cd58082267867c864a7deaf0b916e7f47c5b68",
+    "changedFiles": [
+      "evaluation/workpack-share-v2-2026-07-13/review-evidence.json"
+    ]
+  },
+  "independentReview": {
+    "status": "pending",
+    "passClaim": false,
+    "requiredAction": "Run a fresh independent review against the exact candidate SHA."
+  }
+}
