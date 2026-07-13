@@ -1,17 +1,20 @@
 # SafeClaw 공유 화면 v2 제품 명세
 
 - Spec ID: workpack-share-v2-2026-07-13
-- Revision: independent-review-remediation-6
-- 상태: HOLD_PENDING_FRESH_REVIEW
+- Revision: independent-review-remediation-7
+- 상태: SPEC_REVIEW_ONLY
+- Implementation status: IMPLEMENTATION_BLOCKED
+- Browser/TDD status: IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD
+- Browser executions: 0
 - Review status: pending
 - 기준 branch: feat/workpack-share-v2
-- Source base: 8804e33421d4b7ea75dd32022acf728f7adb5c43
+- Source base: 353a41be1be2028c61d9fa2096bd8be5ac4cfad8
 - Candidate evidence: evaluation/workpack-share-v2-2026-07-13/review-evidence.json의 full candidate SHA
-- Review claim: 없음. candidate와 source base는 machine-resolvable해야 하고 fresh independent review는 pending입니다.
+- Review claim: 구조와 identity만 검증했습니다. semantic PASS, implementation-ready, browser PASS claim은 없으며 fresh independent review는 pending입니다.
 - 쓰기 범위: spec candidate commit은 evaluation/workpack-share-v2-2026-07-13/spec.md, spec.json, validate-spec.cjs만, 후속 evidence-only commit은 review-evidence.json만 수정합니다.
 - 제품 Job: 오늘 문서팩을 선택된 오늘 참여자에게 보냅니다.
 - 화면 순서: 대상 -> 채널 -> 현지화 미리보기 -> 전송
-- 구현 상태: 이 revision은 명세만 수정합니다. 제품 코드, 테스트, DB, CSS, package, lock을 수정하거나 구현을 시작하지 않습니다.
+- 구현 상태: 이 revision은 명세만 수정합니다. 제품 코드, 테스트, DB, CSS, package, lock을 수정하거나 구현을 시작하지 않습니다. 실제 Playwright RED와 fresh independent review 전에는 어떤 implementation wave도 시작할 수 없습니다.
 
 ## 1. Current Truth And Decisions
 
@@ -28,6 +31,7 @@
 | generation-evidence.ts, /api/workpacks | responseContentDigest가 원본 deliverables를 포함한 응답 전체를 봉인하고 저장 때 다시 검증합니다. | 원본 deliverables를 수정하지 않고 별도 server-signed reviewed localization envelope를 인증 route로 저장합니다. |
 | workflow dispatch route | provider와 Kakao 환경 설정은 현재 dispatch 시점에 검사합니다. | Settings 소유 server resolver를 session 전에 호출하고 dispatch 검사는 defense-in-depth로 유지합니다. |
 | foreignWorkerLanguages | 언어별 본문 줄만 있고 review/provenance/source binding이 없습니다. | Share가 번역하지 않고 문서 편집 owner가 저장한 server-signed envelope만 소비합니다. |
+| browser handoff d3ad865 | 베트남어 선택에서 본문 3줄만 번역되고 `[SafeClaw 베트남어 안전공지]`, 현장, 작업, 핵심 위험 label/value가 한국어로 남았습니다. | 부분 번역이며 ready가 아닙니다. 전체 locale completeness가 충족될 때까지 review_required, session=0, dispatch=0입니다. |
 | d3ad865, 391x844 | share 약 3836px, overlap, 44px 미만 target 15개가 확인됐습니다. | 391x844를 고정 mobile gate로 사용합니다. |
 | d3ad865 베트남어 | 본문 3줄만 번역되고 제목과 meta label/value는 한국어입니다. | 부분 번역은 review_required이며 전송 완료 번역으로 취급하지 않습니다. |
 
@@ -201,6 +205,14 @@ type TodayParticipantSnapshotV2 = {
 - localStorage snapshot은 복원 cache이며 server worker UUID나 auth authority를 만들지 않습니다.
 
 ### 4.2 Channels And Reporting Group
+
+Dispatch channel catalog:
+
+| Channel ID | Owner | Share contract |
+|---|---|---|
+| email | Settings and server resolver | resolved availability only |
+| sms | Settings and server resolver | resolved availability only |
+| kakao | Settings, approval state, and server resolver | approved resolved availability only |
 
 ~~~ts
 type DispatchChannel = "email" | "sms" | "kakao";
@@ -551,7 +563,7 @@ type DispatchResultStripV2 = {
 
 ### 5.1 Exact Common Gates
 
-| 항목 | GREEN |
+| 항목 | Planned acceptance |
 |---|---|
 | Touch target | 모든 interactive hit rect가 44x44 CSS px 이상입니다. |
 | Touch gap | 인접 interactive rect의 최소 간격이 8px 이상입니다. |
@@ -590,431 +602,70 @@ taskDistancePx = primary.getBoundingClientRect().top - shareRoot.getBoundingClie
 
 ### 5.3 Text Zoom 200%
 
-각 browser case는 normal_100과 computed_text_200 두 mode로 실행합니다. canonical application tokens가 fixed px이므로 root font 변경은 delivery로 인정하지 않습니다. computed_text_200은 모든 representative node의 100% computed font-size와 line-height를 어떠한 mutation보다 먼저 immutable baseline으로 캡처하고, 각 node에 그 baseline의 정확히 2배를 한 번만 적용해 layout reflow를 일으킵니다. 조상을 먼저 변경한 뒤 descendant computed style을 읽는 순차 scaling은 금지합니다.
+구현 후 각 browser case는 normal_100과 computed_text_200 두 mode로 실행해야 합니다. canonical application tokens가 fixed px이므로 root font 변경은 delivery로 인정하지 않습니다. computed_text_200은 모든 representative node의 100% computed font-size와 line-height를 어떠한 mutation보다 먼저 immutable baseline으로 캡처하고, 각 node에 그 baseline의 정확히 2배를 한 번만 적용해 layout reflow를 일으켜야 합니다. 조상을 먼저 변경한 뒤 descendant computed style을 읽는 순차 scaling은 금지합니다.
 
-Executable invariant table:
+Planned browser requirement table (human normative, unexecuted):
 
-| Invariant ID | Normative value |
-|---|---|
-| representative_source | complete derived visible text-leaf owners plus visible interactables with rendered text |
-| ancestor_traversal | each representative itself through every parentElement until documentElement HTML |
-| device_scale_factor | 1 |
-| device_pixel_ratio | 1 |
-| visual_viewport_scale | 1 |
-| configured_css_viewport | exact equality |
-| immutable_baseline_passes | 1 before any style mutation |
-| text_scaling_passes | 1 from immutable per-node baselines |
-| font_and_line_ratio | 1.9..2.1 for every representative |
-| genuine_fresh_dom_runs | 2 |
-| same_dom_repeated_runs | 0 |
-| nested_scroll_result | empty array |
-| body_scroll_region_roots | exactly 1 |
-| preview_scroll_region_roots | exactly 1 |
+| Requirement ID | Normative value | Current evidence |
+|---|---|---|
+| representative_source | complete derived visible text-leaf owners plus visible interactables with rendered text | browser execution 0 |
+| immutable_baseline | capture every representative computed font-size and numeric line-height before any mutation | browser execution 0 |
+| text_scaling | apply each representative's immutable baseline exactly once; every font-size and line-height ratio is 1.9..2.1 | browser execution 0 |
+| ancestor_inspection | inspect each representative itself and every internal/outer ancestor through documentElement | browser execution 0 |
+| prohibited_delivery | root-font-only change, CSS transform, CSS zoom, device/page/browser scale, viewport change, and screenshot scale | browser execution 0 |
+| scale_invariants | deviceScaleFactor=1, devicePixelRatio=1, visualViewport.scale=1, configured CSS viewport exact | browser execution 0 |
+| reflow | at least one real localized preview text leaf has increased line count and rendered height | browser execution 0 |
+| fresh_dom_runs | run each genuine case twice from two fresh production fixture DOMs; same-DOM cumulative evaluation is forbidden | browser execution 0 |
+| viewport_matrix | Day/Night at 1440x1000 and 391x844 | browser execution 0 |
+| scroll_regions | exactly one body region root and one preview region root | browser execution 0 |
+| browser_execution_count | 0 | IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD |
 
 Geometry coverage table:
 
-| Coverage set | Derived source | Independent expected-count contract |
+| Coverage set | Derived source | Required implementation expectation |
 |---|---|---|
-| visibleElements | share root plus every descendant whose computed box is visible | static fixture manifest exact positive count |
-| interactables | every visible native or ARIA interactive element derived from visibleElements | static fixture manifest exact positive count |
-| textLeaves | every non-empty visible DOM Text node, deduplicated to its owning HTMLElement | static fixture manifest exact positive count |
-| ownerMappings | every visibleElements entry resolved through nearest mandatory data-share-owner | exact equality with visibleElements count and static owner allowlist |
-| scrollRegionMappings | every visibleElements entry resolved through nearest mandatory data-share-scroll-region | exact body/preview counts from static fixture manifest |
+| visibleElements | literal census `[root, ...root.querySelectorAll("*")]` filtered to rendered visible boxes | non-empty exact fixture count declared before render |
+| interactables | every visible native or ARIA interactive element derived from visibleElements | non-empty exact fixture count |
+| textLeaves | every non-empty visible DOM Text node, deduplicated to its owning HTMLElement | non-empty exact fixture count |
+| ownerMappings | every visibleElements entry resolved through nearest mandatory data-share-owner | count equals visibleElements and owner is allowlisted |
+| scrollRegionMappings | every visibleElements entry resolved through nearest mandatory data-share-scroll-region | every visible element belongs to exactly one body or preview region |
 
-`WORKPACK_SHARE_GEOMETRY_COVERAGE`는 `tests/fixtures/workpack-share-v2.ts`에 fixture ID별 exact positive integer counts, exact owner allowlist, `body`와 `preview` 두 required region, required text owner, meaning owner를 렌더링 전에 정적으로 선언합니다. DOM 측정 결과로 expectation을 생성하거나 갱신하면 contract failure입니다. `data-share-owner`와 `data-share-scroll-region`은 optional probe marker가 아니라 모든 visible element가 해석할 수 있어야 하는 production ownership mapping입니다. 개별 font/overlap/reflow marker는 사용하지 않습니다.
+The future browser census must begin with the literal `[root, ...root.querySelectorAll("*")]` construction. `querySelectorAll("*")` supplies descendants only, the explicit first item supplies the share root, and the test must fail unless identity deduplication proves the root occurs exactly once. An empty visible census is a failure, and rendered DOM results may never be used to invent or update expected counts.
 
-<!-- normative-code:accessibility-and-geometry/v3 -->
-~~~ts
-type TextMetrics = {
-  fontSizePx: number;
-  lineHeightPx: number;
-  lineCount: number;
-  heightPx: number;
-};
+Exactly one body scroll-region root and one preview scroll-region root are required. Every visible element must resolve to exactly one nearest region owner: the share root and visible nodes outside the preview subtree belong to `body`; the preview root and its visible subtree belong to `preview`. A preview descendant cannot also be counted as body-owned. The document is the sole vertical scroll owner; either region becoming an independent vertical scroll container is a failure.
 
-type GeometryCoverageExpectation = {
-  counts: {
-    visibleElements: number;
-    interactables: number;
-    textLeaves: number;
-    ownerMappings: number;
-    bodyMappings: number;
-    previewMappings: number;
-  };
-  owners: readonly string[];
-  requiredTextOwners: readonly string[];
-  meaningOwners: readonly string[];
-  requiredScrollRegions: readonly ["body", "preview"];
-  reflowProbeMinCharacters: number;
-};
+Geometry failure categories:
 
-test.use({ deviceScaleFactor: 1 });
-async function assertComputedText200(
-  page: Page,
-  testInfo: TestInfo,
-  fixtureId: WorkpackShareFixtureId
-) {
-  expect(testInfo.project.use.deviceScaleFactor).toBe(1);
-  const configuredViewport = page.viewportSize();
-  if (!configuredViewport) throw new Error("The browser case must configure an explicit viewport");
-  const expectation: GeometryCoverageExpectation = WORKPACK_SHARE_GEOMETRY_COVERAGE[fixtureId];
-  expect(expectation).toBeDefined();
-  for (const count of Object.values(expectation.counts)) {
-    expect(Number.isInteger(count) && count > 0).toBe(true);
-  }
-  expect(expectation.owners.length).toBeGreaterThan(0);
-  expect(expectation.requiredTextOwners.length).toBeGreaterThan(0);
-  expect(expectation.meaningOwners.length).toBeGreaterThan(0);
-  expect(expectation.requiredScrollRegions).toEqual(["body", "preview"]);
-
-  const browserScaleInvariant = await page.evaluate(() => ({
-    devicePixelRatio: window.devicePixelRatio,
-    visualViewportScale: window.visualViewport?.scale ?? 1,
-    cssViewportWidth: document.documentElement.clientWidth
-  }));
-  expect(browserScaleInvariant.devicePixelRatio).toBe(1);
-  expect(browserScaleInvariant.visualViewportScale).toBe(1);
-  expect(browserScaleInvariant.cssViewportWidth).toBe(configuredViewport.width);
-
-  const result = await page.locator("[data-share-root]").evaluate(async (rootNode, expected) => {
-    const root = rootNode as HTMLElement;
-    const interactiveSelector = [
-      "a[href]",
-      "button",
-      "input",
-      "select",
-      "textarea",
-      "summary",
-      "[role=button]",
-      "[role=link]",
-      "[role=checkbox]",
-      "[role=radio]",
-      "[role=switch]",
-      "[tabindex]:not([tabindex='-1'])"
-    ].join(",");
-    const isVisible = (element: HTMLElement) => {
-      const style = getComputedStyle(element);
-      const rect = element.getBoundingClientRect();
-      return style.display !== "none" && style.visibility !== "hidden" &&
-        style.opacity !== "0" && rect.width > 0 && rect.height > 0;
-    };
-    const allElements = [root, ...root.querySelectorAll<HTMLElement>("*")];
-    const visibleElements = allElements.filter(isVisible);
-    const interactables = visibleElements.filter((element) => element.matches(interactiveSelector));
-    const textLeafSet = new Set<HTMLElement>();
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-      const value = node.textContent?.replace(/\s+/gu, " ").trim() ?? "";
-      const owner = node.parentElement;
-      if (value && owner && !owner.matches("script,style,noscript") && isVisible(owner)) {
-        textLeafSet.add(owner);
-      }
-    }
-    const textLeaves = [...textLeafSet];
-    const withinRootClosest = (element: HTMLElement, selector: string) => {
-      const match = element.closest<HTMLElement>(selector);
-      return match && (match === root || root.contains(match)) ? match : null;
-    };
-    const coverage = visibleElements.map((element, index) => {
-      const owner = withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner;
-      const scrollRegion = withinRootClosest(
-        element,
-        "[data-share-scroll-region]"
-      )?.dataset.shareScrollRegion;
-      if (!owner || !scrollRegion) {
-        throw new Error(`Unmapped visible element at derived index ${index}`);
-      }
-      if (!expected.owners.includes(owner)) {
-        throw new Error(`Unexpected geometry owner: ${owner}`);
-      }
-      if (!expected.requiredScrollRegions.includes(scrollRegion as "body" | "preview")) {
-        throw new Error(`Unexpected scroll region: ${scrollRegion}`);
-      }
-      return { element, owner, scrollRegion };
-    });
-    const regionRoots = Object.fromEntries(expected.requiredScrollRegions.map((region) => [
-      region,
-      root.querySelectorAll(`[data-share-scroll-region="${region}"]`).length
-    ]));
-    if (regionRoots.body !== 1 || regionRoots.preview !== 1) {
-      throw new Error(`Required body/preview region roots missing: ${JSON.stringify(regionRoots)}`);
-    }
-    const actualCounts = {
-      visibleElements: visibleElements.length,
-      interactables: interactables.length,
-      textLeaves: textLeaves.length,
-      ownerMappings: coverage.length,
-      bodyMappings: coverage.filter((entry) => entry.scrollRegion === "body").length,
-      previewMappings: coverage.filter((entry) => entry.scrollRegion === "preview").length
-    };
-    for (const [key, count] of Object.entries(actualCounts)) {
-      if (count <= 0 || count !== expected.counts[key as keyof typeof actualCounts]) {
-        throw new Error(`Geometry expected-count mismatch for ${key}: ${count}`);
-      }
-    }
-    if (actualCounts.ownerMappings !== actualCounts.visibleElements) {
-      throw new Error("Every visible element must have ownership and scroll-region coverage");
-    }
-    const actualOwners = [...new Set(coverage.map((entry) => entry.owner))].sort();
-    const expectedOwners = [...expected.owners].sort();
-    if (JSON.stringify(actualOwners) !== JSON.stringify(expectedOwners)) {
-      throw new Error("Geometry owner allowlist coverage mismatch");
-    }
-    const textOwners = new Set(textLeaves.map((element) =>
-      withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner
-    ));
-    for (const owner of expected.requiredTextOwners) {
-      if (!textOwners.has(owner)) throw new Error(`Missing required text owner: ${owner}`);
-    }
-
-  const readMetrics = (element: HTMLElement): TextMetrics => {
-    const style = getComputedStyle(element);
-    const range = document.createRange();
-    range.selectNodeContents(element);
-    const lineTops = new Set(
-      [...range.getClientRects()].map((rect) => Math.round(rect.top * 100) / 100)
-    );
-    return {
-      fontSizePx: Number.parseFloat(style.fontSize),
-      lineHeightPx: Number.parseFloat(style.lineHeight),
-      lineCount: lineTops.size,
-      heightPx: element.getBoundingClientRect().height
-    };
-  };
-
-  await document.fonts.ready;
-  const representatives = [...new Set([
-    ...textLeaves,
-    ...interactables.filter((element) => {
-      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
-        return Boolean(element.value || element.placeholder || element.getAttribute("aria-label"));
-      }
-      return Boolean(element.innerText.trim() || element.getAttribute("aria-label"));
-    })
-  ])];
-  if (representatives.length === 0) throw new Error("Derived representative set is empty");
-  if (root.getAttribute("data-share-text-scale-run") !== null) {
-    throw new Error("Repeated computed_text_200 evaluation requires a fresh production fixture DOM");
-  }
-
-  const rootFontSizeBefore = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
-  const rootInlineFontBefore = document.documentElement.style.fontSize;
-
-  // Capture every computed baseline before the first style mutation.
-  const immutableBaselines = representatives.map((element, index) => {
-    const before = readMetrics(element);
-    if (!Number.isFinite(before.fontSizePx) || before.fontSizePx <= 0 ||
-        !Number.isFinite(before.lineHeightPx) || before.lineHeightPx <= 0) {
-      throw new Error(`Non-numeric representative metrics at index ${index}`);
-    }
-    return {
-      element,
-      key: `derived-representative:${visibleElements.indexOf(element)}:${index}`,
-      before
-    };
-  });
-
-  const representativePaths = immutableBaselines.map((baseline) => {
-    const mechanisms = [];
-    for (let element: Element | null = baseline.element; element; element = element.parentElement) {
-      const style = getComputedStyle(element);
-      mechanisms.push({
-        tag: element.tagName,
-        transform: style.transform,
-        zoom: style.getPropertyValue("zoom") || "1"
-      });
-      if (element === document.documentElement) break;
-    }
-    if (mechanisms.at(-1)?.tag !== "HTML") {
-      throw new Error(`Representative path does not reach document root: ${baseline.key}`);
-    }
-    for (const mechanism of mechanisms) {
-      if (mechanism.transform !== "none" || mechanism.zoom !== "1") {
-        throw new Error(`Forbidden scale mechanism on ${baseline.key}/${mechanism.tag}`);
-      }
-    }
-    return { key: baseline.key, mechanisms };
-  });
-
-  root.setAttribute("data-share-text-scale-run", "computed_text_200/v2");
-  const scaled = new Set<HTMLElement>();
-  for (const baseline of immutableBaselines) {
-    if (scaled.has(baseline.element)) throw new Error(`Duplicate scaling: ${baseline.key}`);
-    baseline.element.style.setProperty(
-      "font-size",
-      `${baseline.before.fontSizePx * 2}px`,
-      "important"
-    );
-    baseline.element.style.setProperty(
-      "line-height",
-      `${baseline.before.lineHeightPx * 2}px`,
-      "important"
-    );
-    scaled.add(baseline.element);
-  }
-
-  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-  const nodes = immutableBaselines.map((baseline) => ({
-    key: baseline.key,
-    before: baseline.before,
-    after: readMetrics(baseline.element)
-  }));
-  const probeBaseline = immutableBaselines.find((baseline) => {
-    const owner = withinRootClosest(baseline.element, "[data-share-owner]")?.dataset.shareOwner;
-    return owner === "preview-body" &&
-      (baseline.element.textContent?.trim().length ?? 0) >= expected.reflowProbeMinCharacters;
-  });
-  const probe = nodes.find((node) => node.key === probeBaseline?.key);
-  if (!probe) throw new Error("The natural preview-body reflow probe is missing");
-
-  const collisionNodes = [...new Set([
-    ...interactables,
-    ...textLeaves.filter((textElement) =>
-      !interactables.some((interactive) => interactive.contains(textElement))
-    )
-  ])];
-  const overlapPairs: string[] = [];
-  for (let left = 0; left < collisionNodes.length; left += 1) {
-    for (let right = left + 1; right < collisionNodes.length; right += 1) {
-      const a = collisionNodes[left];
-      const b = collisionNodes[right];
-      if (a.contains(b) || b.contains(a)) continue;
-      const ar = a.getBoundingClientRect();
-      const br = b.getBoundingClientRect();
-      const intersectionWidth = Math.min(ar.right, br.right) - Math.max(ar.left, br.left);
-      const intersectionHeight = Math.min(ar.bottom, br.bottom) - Math.max(ar.top, br.top);
-      if (intersectionWidth > 0.5 && intersectionHeight > 0.5) {
-        overlapPairs.push(`${left}:${right}`);
-      }
-    }
-  }
-  const clippedText = textLeaves.filter((element) => {
-    const style = getComputedStyle(element);
-    const clipsX = ["hidden", "clip"].includes(style.overflowX) &&
-      element.scrollWidth > element.clientWidth + 1;
-    const clipsY = ["hidden", "clip"].includes(style.overflowY) &&
-      element.scrollHeight > element.clientHeight + 1;
-    const lineClamp = style.getPropertyValue("-webkit-line-clamp");
-    return clipsX || clipsY || style.textOverflow === "ellipsis" ||
-      (lineClamp !== "" && lineClamp !== "none");
-  }).map((element) => withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner);
-  const nestedScroll = visibleElements.filter((element) => {
-    const style = getComputedStyle(element);
-    return ["auto", "scroll"].includes(style.overflowY) &&
-      element.scrollHeight > element.clientHeight + 1;
-  }).map((element) => withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner);
-  const undersizedTargets = interactables.filter((element) => {
-    const rect = element.getBoundingClientRect();
-    return rect.width < 44 || rect.height < 44;
-  }).map((element) => withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner);
-
-  return {
-    nodes,
-    probe,
-    coverageCounts: actualCounts,
-    overlapPairs,
-    clippedText,
-    nestedScroll,
-    undersizedTargets,
-    documentHorizontalOverflowPx:
-      document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    shareHorizontalOverflowPx: root.scrollWidth - root.clientWidth,
-    scaledCount: scaled.size,
-    rootFontSizeBefore,
-    rootFontSizeAfter: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
-    rootInlineFontBefore,
-    rootInlineFontAfter: document.documentElement.style.fontSize,
-    representativePaths,
-    rootTransform: getComputedStyle(document.documentElement).transform,
-    shareTransform: getComputedStyle(root).transform,
-    rootZoom: getComputedStyle(document.documentElement).getPropertyValue("zoom") || "1",
-    shareZoom: getComputedStyle(root).getPropertyValue("zoom") || "1"
-  };
-  }, expectation);
-
-expect(result.coverageCounts).toEqual(expectation.counts);
-expect(result.scaledCount).toBe(result.nodes.length);
-for (const node of result.nodes) {
-  const fontRatio = node.after.fontSizePx / node.before.fontSizePx;
-  const lineRatio = node.after.lineHeightPx / node.before.lineHeightPx;
-  expect(fontRatio, node.key).toBeGreaterThanOrEqual(1.9);
-  expect(fontRatio, node.key).toBeLessThanOrEqual(2.1);
-  expect(lineRatio, node.key).toBeGreaterThanOrEqual(1.9);
-  expect(lineRatio, node.key).toBeLessThanOrEqual(2.1);
-}
-expect(result.probe.after.lineCount).toBeGreaterThan(result.probe.before.lineCount);
-expect(result.probe.after.heightPx).toBeGreaterThan(result.probe.before.heightPx);
-expect(result.rootFontSizeAfter).toBeCloseTo(result.rootFontSizeBefore, 5);
-expect(result.rootInlineFontAfter).toBe(result.rootInlineFontBefore);
-expect([result.rootTransform, result.shareTransform]).toEqual(["none", "none"]);
-expect([result.rootZoom, result.shareZoom]).toEqual(["1", "1"]);
-expect(result.representativePaths.every(
-  (path) => path.mechanisms.at(-1)?.tag === "HTML" && path.mechanisms.every(
-    (mechanism) => mechanism.transform === "none" && mechanism.zoom === "1"
-  )
-)).toBe(true);
-expect(result.overlapPairs).toEqual([]);
-expect(result.clippedText).toEqual([]);
-expect(result.nestedScroll).toEqual([]);
-expect(result.undersizedTargets).toEqual([]);
-expect(result.documentHorizontalOverflowPx).toBeLessThanOrEqual(0);
-expect(result.shareHorizontalOverflowPx).toBeLessThanOrEqual(0);
-}
-
-for (const independentRun of [1, 2]) {
-  await page.goto(caseUrl);
-  await settleProductionFixture(page, fixtureId);
-  expect(await page.locator("[data-share-root]").getAttribute("data-share-text-scale-run")).toBeNull();
-  await assertComputedText200(page, testInfo, fixtureId);
-}
-await expect(assertComputedText200(page, testInfo, fixtureId)).rejects.toThrow(
-  "Repeated computed_text_200 evaluation requires a fresh production fixture DOM"
-);
-~~~
-
-- representative는 complete derived textLeaves와 rendered-text interactables의 합집합입니다. data-share-font-node, data-share-font-role, data-share-overlap-node, data-share-reflow-probe가 0개여도 coverage가 줄지 않으며 이 marker들을 검사 근거로 사용하면 contract failure입니다.
-- `baselineCaptureBeforeAnyMutation=true`이며 representativePaths는 각 derived representative 자체, 모든 internal wrapper, share root, outer body, document root HTML을 빠짐없이 포함합니다. root 하나의 ancestor path만 검사하는 결과는 contract failure입니다.
-- overlap은 derived textLeaves와 interactables에서 containment를 정규화한 complete collision set으로 검사하고, clipping은 complete textLeaves로 검사합니다. 위 geometry block은 200% 적용 뒤 Day/Night desktop/mobile 모든 case에서 실행합니다.
-- reflow probe는 mandatory owner mapping `preview-body` 아래 실제 localized text leaf에서 text length threshold로 도출합니다. 별도 marker나 test-only element를 삽입하지 않습니다.
-- 모든 node의 100% computed font-size와 line-height는 첫 mutation 전에 finite positive px로 캡처되어야 합니다. line-height=normal이면 contract failure이며 제품 token을 명시적 line-height로 고친 뒤 다시 측정합니다.
-- scale은 immutableBaselines second pass에서 node당 정확히 한 번만 적용합니다. 모든 node의 font/line ratio upper bound 2.1이 ancestor 누적 4x/8x를 차단합니다.
-- page.setViewportSize는 mode 적용 전에 desktop 1440x1000 또는 mobile 391x844로 고정하고 mode 도중 바꾸지 않습니다.
-- browser context deviceScaleFactor, window.devicePixelRatio, window.visualViewport.scale은 각각 정확히 1이고 documentElement.clientWidth는 configured viewport width와 같아야 합니다. CSS transform, CSS zoom, browser/device/page scale, viewport 변경, screenshot 확대·축소를 delivery로 사용하지 않습니다.
-- fixture는 production resolver/action으로 목표 state에 도달한 뒤 text override를 적용하고 document.fonts.ready와 두 animation frame을 기다립니다. screenshot은 증거 보조일 뿐이며 사용 시 scale="css"로만 캡처합니다.
-- genuine positive는 동일 case를 fresh production fixture DOM으로 두 번 새로 열어 각각 baseline 1x -> computed text 2x를 검증합니다. 첫 DOM marker가 남은 상태의 repeated evaluation은 즉시 실패하며 4x 누적을 측정 성공으로 취급하지 않습니다.
-- 200%에서는 고정 total height, body height, task distance 상한을 적용하지 않습니다. normal_100 task-distance gate와 별도 결과로 기록합니다.
-
-- 모든 representative node font-size/line-height ratio 1.9 이상 2.1 이하
-- representative probe line count 증가와 rendered height 증가
-- overlap 0
-- text clipping 0
-- document와 share root horizontal overflow 0
-- interactive target 44x44 CSS px 이상
-- target -> channel -> preview -> memo -> primary DOM/focus order 유지
-- preview expand/collapse와 primary가 keyboard로 동작
-- document-only vertical scroll
-- 앞뒤 content를 가리는 fixed CTA 없음
-- share body와 preview nested vertical scroll 0
-
-Negative fixture contract:
-
-| Fixture ID | DOM or browser mutation | Required result |
+| Category ID | Human normative failure condition | Required future browser result |
 |---|---|---|
-| internal_wrapper_transform | representative와 share root 사이 wrapper에 transform:scale(2) | fail before text mutation |
-| internal_zoom | representative와 share root 사이 wrapper에 zoom:2 | fail before text mutation |
-| outer_transform | share root 바깥 body wrapper에 transform:scale(2) | fail before text mutation |
-| repeated_evaluation | fresh DOM에서 한 번 성공한 helper를 reload 없이 다시 호출 | fail on data-share-text-scale-run marker |
-| device_scale_factor | context deviceScaleFactor와 devicePixelRatio를 2로 설정 | fail before text mutation |
-| page_zoom | visualViewport.scale 또는 CSS viewport width를 configured viewport와 다르게 설정 | fail before text mutation |
+| empty_census | complete visible census has zero entries or any required derived set has no expected positive count | fail |
+| unmapped_owner | any relevant visible element lacks an allowlisted owner or exactly one scroll-region mapping | fail |
+| overlap | non-contained visible text/interactable collision has positive unintended overlap | fail |
+| cross_parent_overlap | visible nodes under different parent owners collide after containment normalization | fail |
+| text_clipping | a complete text leaf is clipped by its own box | fail |
+| clipping_ancestor | any internal or outer ancestor clips a representative text leaf | fail |
+| nested_scroll | body or preview becomes an independent vertical scroll container | fail |
+| horizontal_overflow | document or share root has horizontal overflow | fail |
+| fixed_obstruction | fixed content obscures preceding or following content or the primary action | fail |
+| sticky_obstruction | sticky content obscures preceding or following content or the primary action | fail |
 
-Geometry coverage fixture contract:
+Additional planned browser requirements:
 
-| Geometry fixture ID | DOM ownership mutation | Required result |
-|---|---|---|
-| marker_removal | body/preview ownership and scroll-region mappings removed from the derived visible set | fail on unmapped visible element or missing required region |
-| partial_marker | one derived visible text leaf loses resolvable owner or scroll-region mapping | fail before geometry assertions |
+- Derived representatives do not depend on optional font, overlap, or reflow markers.
+- A real localized text leaf under the `preview-body` owner must prove wrapping and height growth; no test-only probe is inserted.
+- Every baseline must be a finite positive pixel value. A computed `line-height: normal` is a failure until product CSS supplies a measurable line-height.
+- The upper ratio bound blocks cumulative 4x or 8x scaling.
+- Each viewport is fixed before measurement and is unchanged throughout the mode.
+- Production fixture routes and actions establish state before text scaling; fonts and layout settling are awaited by the future Playwright test.
+- At 200%, fixed page-height and task-distance ceilings do not apply.
+- All representatives satisfy the 1.9..2.1 font-size and line-height ratios.
+- At least one representative has increased line count and rendered height.
+- Unintended overlap, text clipping, horizontal overflow, nested vertical scroll, fixed obstruction, and sticky obstruction are all zero.
+- Interactive targets remain at least 44x44 CSS px.
+- Target -> channel -> preview -> memo -> primary DOM and focus order remains intact.
+- Preview expansion and primary action remain keyboard operable.
 
-`tests/workpack-share-v2-browser.test.ts`는 위 여섯 zoom negative fixture와 두 geometry coverage fixture를 실제 DOM/browser case로 실행하고, genuine fresh-DOM positive와 complete geometry positive를 각각 두 번 실행합니다. spec validator의 contract fixtures는 이 실패/성공 산술만 검증하며 128개 browser case 실행을 주장하지 않습니다.
+These are human normative requirements, not pseudo-code and not execution evidence. This revision ran zero browser cases. Actual acceptance requires implementation-time Playwright tests in `tests/workpack-share-v2-browser.test.ts`, two fresh-DOM runs, the full 128-case matrix, and fresh independent review.
 
 ### 5.4 Mobile Priority
 
@@ -1031,7 +682,7 @@ Geometry coverage fixture contract:
 
 권한 장문, channel setup, worker input, Before/After, 전체 history는 mobile Share에 렌더링하지 않습니다.
 
-## 6. Real Browser RED/GREEN Matrix
+## 6. Planned Real Browser Acceptance Matrix (Unexecuted)
 
 ### 6.1 Environments
 
@@ -1045,13 +696,13 @@ Geometry coverage fixture contract:
 | Zoom ID | Delivery | Task-distance gate |
 |---|---|---:|
 | normal_100 | browser default root font | yes |
-| computed_text_200 | 5.3의 page.evaluate computed application text font-size/line-height 2x | no |
+| computed_text_200 | future Playwright test applies each representative's immutable computed application font-size/line-height baseline at 2x | no |
 
-case ID는 {envId}:{fixtureId}:{zoomId}이며 모든 fixture를 두 zoom mode에서 실행합니다.
+Planned case ID는 {envId}:{fixtureId}:{zoomId}이며 구현 후 모든 fixture를 두 zoom mode에서 실행해야 합니다. 이 revision의 실제 browser 실행은 0입니다.
 
 ### 6.2 Fixture Ingress Contract
 
-모든 fixture는 tests/helpers/isolated-next-browser-harness.ts와 Playwright Chromium을 사용합니다.
+구현 시 모든 fixture는 tests/helpers/isolated-next-browser-harness.ts와 Playwright Chromium을 사용해야 합니다.
 
 허용되는 입력:
 
@@ -1075,7 +726,7 @@ current workpack cache는 문서와 snapshot 복원 입력으로만 사용할 �
 
 ### 6.3 Fixtures
 
-| Fixture ID | Production resolver input/action | 핵심 GREEN |
+| Fixture ID | Production resolver input/action | Planned result |
 |---|---|---|
 | empty | selectedWorkerIds=[] | route-back/primary 각 1개인 오늘 참여자 선택, /workers next route, worker mutation request 0 |
 | selected | channel 미선택 | Share channel focus action, session request 0 |
@@ -1098,7 +749,7 @@ current workpack cache는 문서와 snapshot 복원 입력으로만 사용할 �
 
 ### 6.4 Request And Routing Assertions
 
-browser test는 request log를 수집해 다음을 검사합니다.
+미래의 실제 browser test는 request log를 수집해 다음을 검사해야 합니다. 아래 항목은 계획된 acceptance이며 이 revision에서 실행되지 않았습니다.
 
 1. workpack GET의 signed envelope와 canonicalWorkpackRevision만 production parser/readiness로 들어가며 local mutation은 0입니다.
 2. 선택 channel 뒤 POST /api/settings/channels/resolve body는 workpackId, revision, recipients, channels와 deep equality입니다.
@@ -1125,13 +776,13 @@ browser test는 request log를 수집해 다음을 검사합니다.
 23. computed_text_200은 각 representative text node에서 document root까지 모든 internal/outer ancestor의 transform과 zoom을 검사합니다.
 24. context deviceScaleFactor, window.devicePixelRatio, visualViewport.scale은 1이고 CSS viewport width는 configured viewport와 같아야 합니다.
 25. fresh production DOM positive를 두 번 독립 실행하며 같은 DOM repeated evaluation과 internal wrapper transform/zoom, outer transform fixture는 실패합니다.
-26. server authority auto loop는 12개 SupportedLanguageCode를 각각 선택하고 title, metadata labels, metadata values, body를 렌더링해 script allowlist와 non-ko Hangul residual 0을 검사합니다.
-27. manual loop도 12개 option을 각각 실제 선택하고 같은 surface를 검사하되 recipient language, dispatch language와 DispatchPlan digest는 바뀌지 않습니다.
+26. server authority auto loop는 12개 SupportedLanguageCode를 각각 선택하고 title, site, task, core-risk, body, action과 그 metadata label/value를 렌더링해 language policy와 non-ko Korean residual 0을 검사합니다.
+27. manual loop도 12개 option을 각각 실제 선택하고 같은 completeness surface를 검사하되 recipient language, dispatch language와 DispatchPlan digest는 바뀌지 않습니다.
 28. invalid locale CTA는 exact static workers owner route이며 raw locale와 language query 보간 0, share-session/dispatch 0입니다.
 29. geometry는 share root의 complete visibleElements/interactables/textLeaves를 도출해 static exact positive counts, owner mapping, body/preview mapping과 각각 한 region root를 검사합니다. 누락 또는 부분 mapping은 실패합니다.
-30. fixture별 meaning owner는 localized visible text와 accessible name을 가지며 emoji는 유일한 의미가 될 수 없습니다.
+30. fixture별 meaning owner는 localized visible text와 accessible name을 가지며 ⚠️, 🧱, 🌬️, 🚧 emoji는 장식 전용이고 유일한 의미가 될 수 없습니다.
 
-### 6.5 Vietnamese And Language Gates
+### 6.5 All-Language Browser Requirements (Unexecuted)
 
 ready fixture family는 각 SupportedLanguageCode recipient와 review route가 저장한 source-matching, approved, server-signed envelope 12개를 workpack GET mock으로 제공합니다. 언어 loop는 fixture ID를 추가하지 않고 각 ready browser case 내부의 table-driven assertion으로 실행하므로 128 case 산술은 변하지 않습니다.
 
@@ -1161,6 +812,17 @@ Localized surface coverage:
 | metadataValues | preview-metadata owner dd elements | required non-empty set | required non-empty set | language policy or neutral identifier |
 | body | preview-body owner | required non-empty | required non-empty | language policy |
 
+Locale completeness surface inventory:
+
+| Completeness surface ID | Required localized content | Korean residue for non-ko target | Missing/partial result |
+|---|---|---:|---|
+| title | full outbound title and subject | 0 | review_required; session 0; dispatch 0 |
+| site | site metadata label and value | 0 | review_required; session 0; dispatch 0 |
+| task | task metadata label and value | 0 | review_required; session 0; dispatch 0 |
+| coreRisk | core-risk metadata label and value | 0 | review_required; session 0; dispatch 0 |
+| body | every outbound body line | 0 | review_required; session 0; dispatch 0 |
+| action | visible action label and accessible action name | 0 | review_required; session 0; dispatch 0 |
+
 Language authority cases:
 
 | Case ID | Preview authority | Dispatch authority | Required result |
@@ -1170,141 +832,33 @@ Language authority cases:
 | invalid_locale | none | none | review_required; exact static workers owner CTA; no language query/raw interpolation; session 0; dispatch 0 |
 | semantic_meaning | localized visible text | not applicable | accessible icon plus visible text or visible text-only; emoji is never sole meaning |
 
-Neutral identifiers are only URL/email, ASCII uppercase/digit IDs, dates, times and punctuation tokens recognized by the executable allowlist. They do not permit arbitrary fallback prose. Every non-`ko` title, metadata label, metadata value and body has Hangul residual count 0. Vietnamese retains the stricter named title/site/task/core-risk/body residual-0 assertions from the reviewed artifact contract.
+Default language UI contract:
 
-<!-- normative-code:language-matrix/v2 -->
-~~~ts
-const SUPPORTED_LANGUAGE_CASES = [
-  { code: "ko", allowedLetter: /[\p{Script_Extensions=Hangul}\p{Script_Extensions=Han}]/u },
-  { code: "vi", allowedLetter: /\p{Script_Extensions=Latin}/u },
-  { code: "zh", allowedLetter: /\p{Script_Extensions=Han}/u },
-  { code: "th", allowedLetter: /\p{Script_Extensions=Thai}/u },
-  { code: "uz", allowedLetter: /\p{Script_Extensions=Latin}/u },
-  { code: "mn", allowedLetter: /\p{Script_Extensions=Cyrillic}/u },
-  { code: "ne", allowedLetter: /\p{Script_Extensions=Devanagari}/u },
-  { code: "km", allowedLetter: /\p{Script_Extensions=Khmer}/u },
-  { code: "id", allowedLetter: /\p{Script_Extensions=Latin}/u },
-  { code: "my", allowedLetter: /\p{Script_Extensions=Myanmar}/u },
-  { code: "tl", allowedLetter: /\p{Script_Extensions=Latin}/u },
-  { code: "en", allowedLetter: /\p{Script_Extensions=Latin}/u }
-] as const satisfies readonly {
-  code: SupportedLanguageCode;
-  allowedLetter: RegExp;
-}[];
+| Control ID | Visible count | Authority | Required behavior |
+|---|---:|---|---|
+| autoSelection | 1 | allowlisted server recipient locale | selects the initial localized preview |
+| manualDropdown | 1 | operator preview override only | contains all 12 locale options without changing dispatch authority |
+| localizedPreview | 1 | selected auto or manual preview locale | renders one complete selected-language artifact |
+| languageCardGrid | 0 | none | no per-language card, button wall, or parallel preview |
 
-const LOCALIZED_SURFACES = [
-  { id: "title", selector: '[data-share-owner="preview-title"]' },
-  { id: "metadataLabels", selector: '[data-share-owner="preview-metadata"] dt' },
-  { id: "metadataValues", selector: '[data-share-owner="preview-metadata"] dd' },
-  { id: "body", selector: '[data-share-owner="preview-body"]' }
-] as const;
+Decorative emoji semantics:
 
-const HANGUL = /\p{Script_Extensions=Hangul}/gu;
-const LETTER_OR_MARK = /[\p{L}\p{M}]/u;
-const EMOJI = /\p{Extended_Pictographic}/gu;
-const NEUTRAL_IDENTIFIER = /^(?:https?:\/\/\S+|[^\s@]+@[^\s@]+|[A-Z0-9][A-Z0-9._:/-]*|\d[\d.:/-]*)$/u;
+| Symbol | Allowed role | Required semantic presentation | Accessibility contract |
+|---|---|---|---|
+| ⚠️ | decorative only | standard warning icon plus localized visible text | emoji aria-hidden; icon has localized accessible label matching the visible meaning |
+| 🧱 | decorative only | standard barrier icon plus localized visible text | emoji aria-hidden; icon has localized accessible label matching the visible meaning |
+| 🌬️ | decorative only | standard ventilation icon plus localized visible text | emoji aria-hidden; icon has localized accessible label matching the visible meaning |
+| 🚧 | decorative only | standard work-zone icon plus localized visible text | emoji aria-hidden; icon has localized accessible label matching the visible meaning |
 
-async function assertLocalizedSurfaceContract(
-  page: Page,
-  languageCase: (typeof SUPPORTED_LANGUAGE_CASES)[number]
-) {
-  const collected: Record<(typeof LOCALIZED_SURFACES)[number]["id"], string[]> = {
-    title: [],
-    metadataLabels: [],
-    metadataValues: [],
-    body: []
-  };
-  for (const surface of LOCALIZED_SURFACES) {
-    const locator = page.locator(surface.selector);
-    const count = await locator.count();
-    expect(count, `${languageCase.code}/${surface.id}`).toBeGreaterThan(0);
-    collected[surface.id] = (await locator.allTextContents())
-      .map((value) => value.replace(/\s+/gu, " ").trim())
-      .filter(Boolean);
-    expect(collected[surface.id].length, `${languageCase.code}/${surface.id}`).toBe(count);
-    for (const text of collected[surface.id]) {
-      if (languageCase.code !== "ko") {
-        expect(text.match(HANGUL) ?? [], `${languageCase.code}/${surface.id}`).toHaveLength(0);
-      }
-      for (const token of text.split(/\s+/u)) {
-        if (NEUTRAL_IDENTIFIER.test(token)) continue;
-        for (const character of token) {
-          if (LETTER_OR_MARK.test(character)) {
-            expect(
-              languageCase.allowedLetter.test(character),
-              `${languageCase.code}/${surface.id}/${character}`
-            ).toBe(true);
-          }
-        }
-      }
-    }
-  }
-  expect(collected.title.join(" ")).not.toBe("");
-  expect(collected.metadataLabels.join(" ")).not.toBe("");
-  expect(collected.metadataValues.join(" ")).not.toBe("");
-  expect(collected.body.join(" ")).not.toBe("");
-}
+Neutral identifiers are only URL/email, ASCII uppercase/digit IDs, dates, times and punctuation tokens listed in the reviewed language policy. They do not permit arbitrary fallback prose. Every non-`ko` title, metadata label, metadata value and body has Hangul residual count 0. Vietnamese retains the stricter named title/site/task/core-risk/body residual-0 assertions from the reviewed artifact contract.
 
-async function assertEmojiIsNotSoleMeaning(page: Page, fixtureId: WorkpackShareFixtureId) {
-  const meaningOwners = WORKPACK_SHARE_GEOMETRY_COVERAGE[fixtureId].meaningOwners;
-  expect(meaningOwners.length).toBeGreaterThan(0);
-  for (const owner of meaningOwners) {
-    const meaning = page.locator(`[data-share-owner="${owner}"]`);
-    await expect(meaning).toBeVisible();
-    const visibleText = (await meaning.innerText()).replace(/\s+/gu, " ").trim();
-    const nonEmojiText = visibleText.replace(EMOJI, "").trim();
-    expect(nonEmojiText, owner).not.toBe("");
-    const accessibleName = (await meaning.getAttribute("aria-label"))?.trim() || visibleText;
-    expect(accessibleName, owner).not.toBe("");
-  }
-}
-
-for (const autoLanguage of SUPPORTED_LANGUAGE_CASES) {
-  await page.goto(readyCaseUrl({ recipientLanguage: autoLanguage.code }));
-  await settleProductionFixture(page, "ready");
-  const authority = await readServerResolvedShareAuthority(page);
-  expect(authority.recipientLanguage).toBe(autoLanguage.code);
-  expect(authority.dispatchLanguage).toBe(autoLanguage.code);
-  await expect(page.getByRole("combobox", { name: "미리보기 언어" })).toHaveValue(autoLanguage.code);
-  await expect(page.locator("[data-share-preview]")).toHaveAttribute("lang", autoLanguage.code);
-  await assertLocalizedSurfaceContract(page, autoLanguage);
-  await assertEmojiIsNotSoleMeaning(page, "ready");
-}
-
-for (const manualLanguage of SUPPORTED_LANGUAGE_CASES) {
-  await page.goto(readyCaseUrl({ recipientLanguage: "vi" }));
-  await settleProductionFixture(page, "ready");
-  const before = await readServerResolvedShareAuthority(page);
-  await page.getByRole("combobox", { name: "미리보기 언어" }).selectOption(manualLanguage.code);
-  await expect(page.locator("[data-share-preview]")).toHaveAttribute("lang", manualLanguage.code);
-  await assertLocalizedSurfaceContract(page, manualLanguage);
-  await assertEmojiIsNotSoleMeaning(page, "ready");
-  const after = await readServerResolvedShareAuthority(page);
-  expect(after.recipientLanguage).toBe(before.recipientLanguage);
-  expect(after.dispatchLanguage).toBe(before.dispatchLanguage);
-  expect(after.dispatchPlanDigest).toBe(before.dispatchPlanDigest);
-}
-
-for (const invalidLocale of [null, "", "xx", "vi-VN", "ko|vi"] as const) {
-  await page.goto(reviewRequiredCaseUrl({ invalidLocale }));
-  await settleProductionFixture(page, "review_required");
-  const canonicalShareReturn = "/workspace?step=share&theme=day";
-  const expectedOwnerHref = `/workers?focus=language&next=${encodeURIComponent(canonicalShareReturn)}`;
-  const ownerCta = page.getByRole("link", { name: "작업자 언어 확인" });
-  await expect(ownerCta).toHaveAttribute("href", expectedOwnerHref);
-  const actualOwnerUrl = new URL(await ownerCta.getAttribute("href") ?? "", "https://safeclaw.invalid");
-  expect(actualOwnerUrl.searchParams.has("language")).toBe(false);
-  expect(actualOwnerUrl.searchParams.get("next")).toBe(canonicalShareReturn);
-  expect(requestLog.shareSession).toHaveLength(0);
-  expect(requestLog.dispatch).toHaveLength(0);
-  await expect(page.locator("[data-share-state]")).toHaveAttribute("data-share-state", "review_required");
-}
-~~~
+No executable example is normative in this section. A future implementation must exercise all language rows with real Playwright selection and rendered-DOM assertions; this spec records zero browser executions.
 
 - dropdown은 하나이고 option 순서는 ko, vi, zh, th, uz, mn, ne, km, id, my, tl, en입니다.
 - allowlisted server parser가 auto-resolved recipient/dispatch language를 결정하고, manual dropdown은 preview만 바꿉니다.
 - preview override 전후 recipient language, dispatch language와 DispatchPlan digest는 같습니다.
 - Vietnamese title/subject, site label/value, task label/value, core-risk label/value, body 전체의 Korean residual count는 각각 0입니다.
+- 선택한 모든 non-`ko` 전송본은 title, site, task, core-risk, body, action 전체에서 한국어 metadata label과 한국어 value 잔존이 0이어야 합니다.
 - Korean-only non-ko title/site/task/core-risk/body value가 없습니다.
 - structural emoji가 outbound artifact에 없고, 모든 상태/위험 의미는 accessible icon+visible text 또는 visible text-only입니다. icon-only와 emoji-only meaning count는 0입니다.
 - provenance, reviewer, reviewedAt, generationRevision, sourceDocumentDigest, artifactRevision, artifactDigest, signature를 검사합니다.
@@ -1316,6 +870,8 @@ for (const invalidLocale of [null, "", "xx", "vi-VN", "ko|vi"] as const) {
 ## 7. Implementation Waves
 
 모든 implementation wave는 export, ontology, KOSHA, document-editor workstream이 통합된 FINAL_INTEGRATED_SHA에서 새 branch와 새 worktree를 만든 뒤에만 시작합니다. 이 spec branch에서 구현하지 않습니다.
+
+현재 gate는 `IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD`입니다. fresh independent spec review가 이 human normative contract를 승인하고, 구현 branch에서 실제 Playwright RED를 먼저 관찰하기 전에는 Wave 0을 포함한 어떤 implementation wave도 시작할 수 없습니다. spec validator 결과는 이 gate를 해제하지 않습니다.
 
 ### Wave 0. Integrated Base Gate
 
@@ -1432,7 +988,7 @@ npm.cmd run audit:frontend-consistency
 git diff --check
 ~~~
 
-Exit: 128개 Chromium case, 12-language auto/manual localization과 channel authority, request order/payload, stage-specific CTA routing, normal task distance, executable computed_text_200 reflow, complete geometry coverage가 GREEN입니다.
+Exit: 실제 Playwright가 128개 Chromium case를 실행해 12-language auto/manual localization과 channel authority, request order/payload, stage-specific CTA routing, normal task distance, computed_text_200 real reflow, complete geometry coverage를 모두 만족한 실행 증거를 남기고 fresh independent implementation review를 받습니다.
 
 Authority assertion이 실패하면 Wave 3에서 server file을 고치지 않고 Wave 1을 다시 엽니다. UI geometry/semantics failure만 conditional fix files에서 수정합니다.
 
@@ -1487,162 +1043,87 @@ Non-goals:
 저장 성공을 법적 증빙, 접수 성공을 전달 또는 열람 완료, 부분 번역을 번역 완료로 표현하지 않습니다.
 제품 런타임은 기존 session/log storage API를 사용하지만 이 revision은 호출하거나 저장 구조를 바꾸지 않습니다.
 
-## 9. Executable Structural MD/JSON Parity
+## 9. Spec-Only Structural Verification
 
-`evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs`가 유일한 parity validator입니다. validator는 embedded JSON, 전체 Markdown hash, `parityManifest`, `normativeParity`를 authority로 사용하지 않습니다. 실제 Markdown front matter, section heading, route/state/blocker/failure/fixture/environment table, TypeScript type/union, authority/fallback 문장, language/script/surface/geometry invariant table, Wave heading/order/exact file list를 구조적으로 파싱해 spec.json의 해당 계약과 비교합니다. 추가로 사람용 table에서 독립적으로 도출한 요구사항을 유지한 채 두 normative executable code block 전체를 CRLF->LF 정규화 SHA-256으로 결속하므로 code 내부의 ancestor traversal, DSF, nested-scroll, fresh-DOM, language loop 또는 CTA 한 줄 변경도 실패합니다.
+`evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs` is a deliberately narrow spec-review tool. It may establish only the following facts:
 
-TDD contract:
+| Validator concern | Allowed assertion |
+|---|---|
+| candidate/evidence identity | full source and candidate SHAs resolve, candidate parent is source, evidence parent is candidate, and actual diff-tree scope is exact |
+| JSON structure | required objects, fields, types, non-empty contract arrays, exact enum members, counts, and arithmetic relationships are present |
+| human Markdown structure | front metadata, required headings, table row identities, exact counts, and selected scalar values agree with JSON |
+| browser semantics | not evaluated; browser executions remain 0 |
+| implementation readiness | blocked; validator cannot release the implementation gate |
+| review outcome | SPEC_REVIEW_ONLY; fresh independent manual review remains required |
 
-1. RED source `69a022ac2a03ed509022d12d219b1483c9d0cbe7`의 embedded validator false-green count는 아래 original mutation list length에서 13으로 도출하며, 과거 prose의 12는 오기입니다.
-2. RED source `8804e33421d4b7ea75dd32022acf728f7adb5c43`에서 reviewer attack harness의 semantic Markdown 12개와 evidence 1개가 모두 exit 0으로 false-green임을 먼저 관찰했습니다.
-3. GREEN candidate의 full matrix는 surface omission과 expected-count 약화까지 추가한 semantic Markdown 19개와 evidence 1개를 포함하며, 모든 MD/JSON/evidence mutation은 원본 file을 쓰지 않는 memory copy에서 exit 1이어야 합니다.
-4. 사람용 invariant/language/coverage table은 JSON 의미 모델과 비교하고, accessibility/geometry 및 language normative code block 전체는 CRLF를 LF로 정규화한 SHA-256으로 결속합니다. token presence만으로 승인하지 않습니다.
-5. computed text와 complete geometry positive는 각각 fresh fixture 두 개에서 exit 0이어야 하고, zoom 6개와 geometry 2개 negative fixture는 각각 exit 1이어야 합니다.
-6. REFACTOR 뒤 JSON parse, exact commit scope, source/candidate parent, evidence-only parent와 changedFiles exact diff-tree, git diff --check를 다시 검사합니다.
+The validator must not treat embedded mirrors, prose-authored code, hashes of code blocks, token presence, or synthetic geometry/zoom models as semantic authority. It does not execute application code, a browser, Playwright, DOM measurement, language rendering, provider calls, or database operations. It must never emit an implementation-ready or browser-pass claim.
 
-Original MD-only mutation modes:
+Structural Markdown parity must derive data from the actual human sections and tables: revision/status metadata, route ownership, state and blocker catalogs, channels, runtime configuration, supported-language policy, localized surfaces, language authority, accessibility requirements, geometry sets and failure categories, environments, zoom modes, fixtures, and Wave heading/order/exact-file ownership. A duplicated embedded metadata object is not evidence.
 
-- revision
-- authority
-- wave_heading
-- wave_order
-- route
-- state
-- blocker
-- channel
-- language
-- fixture
-- one_send_job
-- locale_fallback
-- evidence_binding
+The full JSON structural schema must reject missing or empty required contract collections. In particular it requires all 12 supported languages and both auto/manual authority contracts; the four structural localized groups and the exact title/site/task/core-risk/body/action completeness inventory; zero Korean metadata labels and values for every non-ko target; the static invalid-locale CTA and zero session/dispatch fallback rule; the exact ⚠️/🧱/🌬️/🚧 decorative inventory with standard icon, localized text, and accessible-label semantics; all geometry failure categories; the explicit root-once census and body/preview ownership rules; all runtime configuration keys and rotation fields; one send job and one primary action; all fail-closed blockers; 4 environments, 16 fixtures, 2 zoom modes, and 128 planned cases; and browser execution count 0.
 
-Semantic MD-only mutation modes:
-
-- ancestor_traversal_removed
-- device_scale_factor_2
-- nested_scroll_inverted
-- fresh_dom_once
-- unknown_locale_cta_parameterized
-- language_matrix_single
-- non_target_hangul_allowed
-- auto_selection_client_authority
-- manual_override_dispatch_authority
-- emoji_only_semantics
-- manual_language_matrix_single
-- language_title_omitted
-- language_metadata_labels_omitted
-- language_metadata_values_omitted
-- language_body_omitted
-- invalid_locale_session_allowed
-- geometry_marker_removal
-- geometry_partial_marker
-- geometry_expected_counts_empty
-
-Language contract mutation subset:
-
-- unknown_locale_cta_parameterized
-- language_matrix_single
-- non_target_hangul_allowed
-- auto_selection_client_authority
-- manual_override_dispatch_authority
-- emoji_only_semantics
-- manual_language_matrix_single
-- language_title_omitted
-- language_metadata_labels_omitted
-- language_metadata_values_omitted
-- language_body_omitted
-- invalid_locale_session_allowed
-
-JSON-only mutation modes:
+Structural Markdown mutation modes:
 
 - revision
-- authority
-- wave_order
-- route
-- state
-- blocker
-- channel
-- language
-- fixture
+- review_status
+- implementation_status
+- browser_status
+- route_row
+- state_row
+- blocker_row
+- channel_row
+- language_row
+- localized_surface
+- invalid_locale
+- emoji_semantics
+- geometry_category
+- scroll_root
+- runtime_config
 - one_send_job
-- locale_fallback
-- evidence_binding
-- zoom_ancestor
-- zoom_device_scale_factor
-- zoom_nested_scroll
-- zoom_fresh_dom
-- language_auto_count
-- language_manual_count
-- language_surface
-- language_hangul
-- language_manual_authority
-- language_invalid_cta
-- language_emoji
-- geometry_coverage
-- geometry_regions
-- geometry_expected_counts
-- accessibility_executable_hash
-- language_executable_hash
+- wave_order
+- planned_case_count
+- handoff_observation
+- locale_completeness
+- emoji_inventory
+- default_language_ui
 
-Evidence mutation modes:
+Structural JSON mutation modes:
+
+- missing_status
+- missing_implementation_status
+- missing_browser_status
+- empty_languages
+- missing_auto_contract
+- missing_manual_contract
+- empty_localized_surfaces
+- invalid_cta_interpolation
+- emoji_semantics
+- empty_geometry_categories
+- missing_geometry_category
+- empty_runtime_config
+- missing_rotation
+- multi_send_job
+- empty_blockers
+- planned_case_count
+- browser_execution_nonzero
+- implementation_unblocked
+- empty_locale_completeness
+- empty_emoji_inventory
+- fallback_unblocked
+- default_language_ui
+
+Identity mutation modes:
 
 - contradictory_changed_files
+- candidate_parent
+- candidate_scope
+- browser_executed_claim
+- semantic_pass_claim
 
-Zoom contract modes:
+The validator derives each mutation count from its own exported mode array and compares it with the corresponding JSON count. Every listed mutation operates on an in-memory copy and must exit 1 without modifying the source files. There are no zoom-positive, geometry-positive, or synthetic browser fixture commands.
 
-- positive_twice
-- internal_wrapper_transform
-- internal_zoom
-- outer_transform
-- repeated_evaluation
-- device_scale_factor
-- page_zoom
+Candidate preparation runs `node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --skip-evidence` twice for structural JSON/Markdown checks only. After the evidence-only child commit, the normal validator runs twice and verifies identity as well. Each structural Markdown, structural JSON, and identity mutation is run twice. JSON parse, Node syntax check, `git diff --check`, exact candidate/evidence scope, pull --rebase, remote SHA equality, and clean worktree are separate delivery checks.
 
-Geometry coverage modes:
+The evidence manifest proves only source/candidate identity, commit parentage, exact changed-file scopes, and the honest unexecuted state. It contains `SPEC_REVIEW_ONLY`, `IMPLEMENTATION_BLOCKED`, `IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD`, browser executions 0, semantic-pass claim false, implementation-ready claim false, and browser-pass claim false. It never claims its own commit SHA.
 
-- positive_twice
-- marker_removal
-- partial_marker
-
-Candidate 전에는 evidence chain만 건너뛰고 구조 계약을 실행합니다.
-
-~~~powershell
-node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --skip-evidence
-~~~
-
-Evidence-only commit 뒤 최종 정상 명령은 두 번 실행합니다.
-
-~~~powershell
-node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs
-~~~
-
-각 mutation과 negative fixture는 다음 형태로 실행하고 Node exit code가 정확히 1인지 wrapper가 확인합니다.
-
-~~~powershell
-node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --md-mutation revision
-node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --json-mutation revision
-node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --evidence-mutation contradictory_changed_files
-node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --zoom-fixture internal_wrapper_transform
-node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --geometry-fixture marker_removal
-~~~
-
-Completion gate:
-
-- spec.json과 review-evidence.json JSON parse
-- structural validator normal 2회 exit 0
-- MD-only mutation 32개 각각 2회 exit 1
-- JSON-only mutation 28개 각각 2회 exit 1
-- evidence mutation 1개 각각 2회 exit 1
-- language contract mutation subset 12개 각각 2회 exit 1
-- zoom positive_twice 2회 exit 0
-- zoom negative fixture 6개 각각 2회 exit 1
-- geometry positive_twice 2회 exit 0
-- geometry negative fixture 2개 각각 2회 exit 1
-- candidate direct parent = full sourceBase SHA
-- candidate changed files = spec.md, spec.json, validate-spec.cjs
-- evidence-only HEAD direct parent = candidate
-- evidence-only changed file = review-evidence.json
-- evidence manifest는 evidence commit SHA를 기록하지 않으므로 self-reference 없음
-- git pull --rebase, push, remote SHA match, clean worktree
-- 128은 4 environment x 16 fixture x 2 zoom mode 산술 계약이며 spec-only validator는 browser case 실행을 주장하지 않음
-- final status는 fresh independent review 전까지 HOLD_PENDING_FRESH_REVIEW
+Completion of this spec-only verification does not approve implementation. The planned browser arithmetic remains 4 environments x 16 fixtures x 2 zoom modes = 128, while actual browser execution remains 0. The final boundary is `SPEC_REVIEW_ONLY` / `IMPLEMENTATION_BLOCKED` / `IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD` until fresh independent review.
