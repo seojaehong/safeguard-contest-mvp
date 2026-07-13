@@ -19904,6 +19904,43 @@ body:has(.safeclaw-landing) :is(
   --tracking-body: 0;
 }
 
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-rail a.safeclaw-module-brand strong {
+  display: block;
+  min-width: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-primary-nav a strong,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-primary-nav a small {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-copy {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-copy h1,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-copy p {
+  margin: 0;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-rail {
+  position: relative;
+  top: auto;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-nav {
+  position: relative;
+  top: auto;
+}
+
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-head {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
@@ -20168,16 +20205,44 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
-.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell button,
-.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell select,
-.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell input:not([type="checkbox"]),
-.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell summary {
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-core-summary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin-top: var(--space-2);
+  border-top: 1px solid var(--workspace-rule);
+  border-bottom: 1px solid var(--workspace-rule);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-core-summary p {
+  min-width: 0;
+  border: 0;
+  border-right: 1px solid var(--workspace-rule);
+  border-radius: 0;
+  background: transparent;
+  padding: var(--space-2);
+  text-align: center;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-core-summary p:last-child {
+  border-right: 0;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-core-summary strong,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-core-summary span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] button,
+.safeclaw-module-shell[data-module-route="/reports"] a[href],
+.safeclaw-module-shell[data-module-route="/reports"] select,
+.safeclaw-module-shell[data-module-route="/reports"] input:not([type="checkbox"]):not([type="hidden"]),
+.safeclaw-module-shell[data-module-route="/reports"] summary {
   min-block-size: 44px;
   min-height: 44px;
 }
 
-.safeclaw-module-shell[data-module-route="/reports"] .workbench-report-filters select,
-.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-custom-range input {
+.safeclaw-module-shell[data-module-route="/reports"] .workbench-report-filters select {
   width: 100%;
   max-width: 100%;
   padding-block: var(--space-2);
@@ -20214,7 +20279,7 @@ body:has(.safeclaw-landing) :is(
   grid-column: 1;
   grid-row: 1;
   border: 1px solid var(--workspace-rule);
-  border-radius: 4px;
+  border-radius: var(--radius-control);
   background: var(--workspace-surface-1);
 }
 
@@ -20315,6 +20380,20 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell[data-module-route="/reports"] .workbench-report-filters p {
     gap: 4px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-core-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-core-summary p {
+    border-right: 0;
+    border-bottom: 1px solid var(--workspace-rule);
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-core-summary p:last-child {
+    grid-column: 1 / -1;
+    border-bottom: 0;
   }
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table,
