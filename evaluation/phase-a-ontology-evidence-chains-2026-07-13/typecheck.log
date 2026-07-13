@@ -1,3 +1,5 @@
 
 > safeclaw@0.1.0 typecheck
 > tsc --noEmit --incremental false
+RESULT=PASS
+PRODUCT_CANDIDATE=35283baaf3aad4e14fa20da4df803b4cc3c046f2

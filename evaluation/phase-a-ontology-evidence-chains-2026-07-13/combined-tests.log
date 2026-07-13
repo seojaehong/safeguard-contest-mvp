@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/command-center-phase-a-review.test.ts tests/command-center-request-lifecycle.test.ts tests/document-export-localization.test.ts tests/documents-editor-layout.test.ts tests/editor-export-integrity.test.ts tests/editor-first-state.test.ts tests/export-error-contract.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-current-review-photo-storage.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-guide-corpus-audit.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/workspace-generation-progress.test.ts tests/workspace-input-css-contract.test.ts tests/workspace-layout-regression.test.ts tests/workspace-operation-graph.test.ts tests/workspace-pages.test.ts tests/workspace-workers.test.ts tests/xlsx-export-route.test.ts tests/phase-a-document-authority.test.ts tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  28 passed (28)
+      Tests  290 passed | 1 skipped (291)
+   Start at  03:57:41
+   Duration  300.31s (transform 1.76s, setup 0ms, import 10.13s, tests 272.70s, environment 3ms)
