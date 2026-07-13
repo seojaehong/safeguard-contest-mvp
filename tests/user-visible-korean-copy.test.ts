@@ -37,6 +37,8 @@ const forbiddenUserFacingCopy: Record<string, readonly string[]> = {
     "hash not recorded"
   ],
   "lib/reporting-downloads.ts": ["As-Is", "To-Be"],
+  "components/ReportsDownloadCenter.tsx": ["As-Is", "To-Be", "Before/After"],
+  "app/reports/page.tsx": ["As-Is", "To-Be"],
   "app/ontology/page.tsx": [
     "Graph unavailable",
     "Graph Ontology",
@@ -136,5 +138,14 @@ describe("user-visible Korean copy contract", () => {
     const currentWorkpack = read("components/CurrentWorkpackModules.tsx");
     expect(currentWorkpack).toContain("providerStatus");
     expect(read("app/ontology/page.tsx")).toContain("/api/workpacks/[id]/operation-graph");
+  });
+
+  it("uses Korean before-and-after labels on the Reports page and download center", () => {
+    const page = read("app/reports/page.tsx");
+    const center = read("components/ReportsDownloadCenter.tsx");
+    expect(page).toContain("위험성평가 개선 전/개선 후");
+    expect(center).toContain("위험 개선 전/개선 후");
+    expect(center).toContain("개선 전/개선 후 사진만 포함");
+    expect(center).toContain("개선 전/개선 후 사진 포함 승인");
   });
 });
