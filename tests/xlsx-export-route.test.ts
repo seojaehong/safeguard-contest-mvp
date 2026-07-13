@@ -249,6 +249,46 @@ describe("/api/export/xlsx structured contract", () => {
     expect(longTextRowHeight).toBeLessThanOrEqual(90);
   });
 
+  it("spans wide risk confirmation items so short Korean labels do not wrap vertically", async () => {
+    const response = await POST(xlsxRequest({
+      mode: "single",
+      title: "위험성평가표",
+      scenario,
+      profile: { ...riskProfile, confirmationRows: ["작업 전 확인"] },
+      rows: [],
+      structuredRiskRows: [{
+        location: "외벽",
+        process: "도장",
+        task: "이동식 비계 작업",
+        equipment: "이동식 비계",
+        hazard: "발판에서 추락",
+        fourM: "Man",
+        accidentType: "fall",
+        currentControls: "난간 확인",
+        likelihood: 3,
+        severity: 4,
+        riskLevel: "high",
+        additionalControls: "작업 전 점검",
+        verificationStatus: "planned"
+      }]
+    }));
+
+    const workbook = await loadWorkbook(response);
+    const worksheet = workbook.getWorksheet("위험성평가표");
+    if (!worksheet) throw new Error("Missing 위험성평가표 worksheet");
+    const confirmationCell = findCellByText(worksheet, "□ 작업 전 확인");
+    if (!confirmationCell) throw new Error("Missing confirmation cell");
+
+    expect(confirmationCell.address).toBe("A4");
+    expect(confirmationCell.isMerged).toBe(true);
+    expect(worksheet.getCell("S4").master.address).toBe("A4");
+    expect(confirmationCell.alignment).toMatchObject({
+      vertical: "middle",
+      horizontal: "center",
+      wrapText: true
+    });
+  });
+
   it("keeps workpack sheets consistent with single-sheet print and body styles", async () => {
     const document = {
       title: "작업계획서",

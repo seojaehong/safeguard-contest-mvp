@@ -1318,10 +1318,17 @@ export async function buildXlsxForDocument(input: XlsxBuildInput): Promise<Buffe
   if (profile.confirmationRows?.length) {
     const items = profile.confirmationRows.slice(0, 6);
     items.forEach((item, idx) => {
-      ws.getCell(row, idx + 1).value = `□ ${item}`;
-      ws.getCell(row, idx + 1).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+      const startColumn = isStructuredRiskSheet
+        ? Math.floor((idx * lastColumn) / items.length) + 1
+        : idx + 1;
+      const endColumn = isStructuredRiskSheet
+        ? Math.floor(((idx + 1) * lastColumn) / items.length)
+        : startColumn;
+      if (endColumn > startColumn) ws.mergeCells(row, startColumn, row, endColumn);
+      ws.getCell(row, startColumn).value = `□ ${item}`;
+      ws.getCell(row, startColumn).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
     });
-    applyBorders(ws, `A${row}:F${row}`);
+    applyBorders(ws, `A${row}:${lastColumnLetter}${row}`);
     ws.getRow(row).height = 26;
     row += 1;
   }
