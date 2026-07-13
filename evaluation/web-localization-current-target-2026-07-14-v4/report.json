@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 4,
+  "generatedAt": "2026-07-14T01:53:45.2054970+09:00",
+  "sourceSha": "804833c4291ef01360928ee59b19e903a3b928bb",
+  "buildId": "3SDIsG6fFJGmHXCzsM3Ej",
+  "harnessMode": "prod",
+  "selectiveIntegration": {
+    "anchors": [
+      "aca2f1d",
+      "14dc197",
+      "188b3b3"
+    ],
+    "codeCandidate": "804833c4291ef01360928ee59b19e903a3b928bb",
+    "supersededEvidence": [
+      "1835d9f",
+      "1cd4d36",
+      "f15e88d"
+    ]
+  },
+  "tdd": {
+    "red": [
+      {
+        "gate": "operation-memory localization and canonical timestamp boundary",
+        "failed": 2,
+        "passed": 3,
+        "detail": "Raw photo_analysis, analyzed, vision_ocr, and before/after copy reached display rows; invalid display copy reached canonical generatedAt."
+      },
+      {
+        "gate": "canonical workspace worker restore",
+        "failed": 2,
+        "skipped": 20,
+        "detail": "Observed read/read/read, then a default worker write, then the restored worker write."
+      },
+      {
+        "gate": "operation-memory relationship geometry",
+        "failed": 6,
+        "passed": 10,
+        "skipped": 6,
+        "detail": "Desktop and mobile graph cards overlapped before bounded map slots and stable card geometry were applied."
+      },
+      {
+        "gate": "operation-memory semantic caption typography",
+        "failed": 1,
+        "passed": 0,
+        "detail": "The connection-count caption initially inherited the HUD font after its semantic relocation."
+      }
+    ],
+    "green": {
+      "focusedLocalizationExportOntology": {
+        "testFiles": 7,
+        "passed": 97,
+        "failed": 0
+      },
+      "developmentBrowser": {
+        "passed": 22,
+        "failed": 0
+      },
+      "canonicalRestoreRuns": {
+        "passed": 2,
+        "failed": 0,
+        "noWriteBeforeRestore": true,
+        "allWritesPreservedRestoredWorker": true
+      },
+      "strictTypecheckExitCode": 0,
+      "ontologyTypographyRoleContract": {
+        "passed": 1,
+        "failed": 0
+      },
+      "ontologyTypographyProductionMatrix": {
+        "passed": 1,
+        "failed": 0
+      },
+      "productionBrowser": {
+        "passed": 22,
+        "failed": 0
+      }
+    }
+  },
+  "build": {
+    "framework": "Next.js 15.5.20",
+    "compiled": true,
+    "staticPagesGenerated": 27,
+    "staticPagesExpected": 27,
+    "exitCode": 0
+  },
+  "browserMatrix": {
+    "routes": [
+      "/reports",
+      "/ontology",
+      "/knowledge",
+      "/workspace"
+    ],
+    "themes": [
+      "day",
+      "night"
+    ],
+    "viewports": [
+      {
+        "label": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      {
+        "label": "mobile",
+        "width": 391,
+        "height": 844
+      }
+    ],
+    "screenshots": 16,
+    "metricFiles": 16,
+    "allMetrics": {
+      "maximumHorizontalOverflow": 0,
+      "maximumOverlapCount": 0,
+      "maximumUnnamedInteractiveCount": 0,
+      "issueOverlayDetected": false,
+      "recoverableHydrationErrors": 0
+    }
+  },
+  "operationMemoryGeometry": {
+    "ontology": {
+      "relationLines": 7,
+      "visibleNodes": 7,
+      "inaccessibleRelations": 0,
+      "zeroLengthRelations": 0,
+      "missingConnectedNodes": 0,
+      "clippedNodes": 0,
+      "desktopOccupancy": 0.12904218253983596,
+      "mobileOccupancy": 0.2534255185417976
+    },
+    "workspace": {
+      "relationLines": 3,
+      "visibleNodes": 4,
+      "inaccessibleRelations": 0,
+      "zeroLengthRelations": 0,
+      "missingConnectedNodes": 0,
+      "clippedNodes": 0,
+      "desktopOccupancy": 0.0861186335894618,
+      "mobileOccupancy": 0.17794559340942245
+    }
+  },
+  "canonicalBoundaries": {
+    "knownMetadataValuesLocalizedAtRenderBoundary": true,
+    "unknownMetadataUsesNeutralReviewLabel": true,
+    "rawCanonicalMetadataPreserved": true,
+    "invalidGeneratedAtStoredAsNull": true,
+    "generatedAtDisplayFallbackPresentationOnly": true,
+    "jsonlAsIsToBeKeysPreserved": true
+  },
+  "hydration": {
+    "deterministicModelRegression": "Server/client visualization models remain equal when locale collation is perturbed.",
+    "developmentBrowserResult": "GREEN: no recoverable hydration errors.",
+    "productionBrowserResult": "GREEN: no recoverable hydration errors across all 16 route captures."
+  },
+  "pendingIndependentItems": [
+    {
+      "surface": "reports",
+      "status": "PENDING_EXTERNAL_COMPACTNESS_REVIEW",
+      "detail": "The localization and geometry matrix found no overlap or overflow, but this remediation did not change or independently approve reports compactness."
+    }
+  ],
+  "verdict": "HOLD_PENDING_FRESH_REVIEW"
+}

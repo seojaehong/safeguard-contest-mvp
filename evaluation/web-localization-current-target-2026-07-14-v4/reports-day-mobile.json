@@ -1,0 +1,23 @@
+{
+  "sourceSha": "804833c4291ef01360928ee59b19e903a3b928bb",
+  "buildId": "3SDIsG6fFJGmHXCzsM3Ej",
+  "harnessMode": "prod",
+  "route": "/reports",
+  "theme": "day",
+  "viewport": {
+    "label": "mobile",
+    "width": 391,
+    "height": 844
+  },
+  "horizontalOverflow": 0,
+  "overlapCount": 0,
+  "unnamedInteractiveCount": 0,
+  "issueOverlayDetected": false,
+  "relationLineCount": 0,
+  "inaccessibleRelationCount": 0,
+  "zeroLengthRelationCount": 0,
+  "missingConnectedNodeCount": 0,
+  "visibleOperationNodeCount": 0,
+  "clippedOperationNodeCount": 0,
+  "operationNodeOccupancy": 0
+}
