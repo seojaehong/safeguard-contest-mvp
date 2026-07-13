@@ -1,4 +1,5 @@
 import type { AskResponse, QualityContract, QualityContractItem, QualityContractStatus } from "./types";
+import { assessPhaseAReviewAuthority } from "./phase-a-review";
 
 const REQUIRED_EVIDENCE_KEYS = [
   "riskAssessmentDraft",
@@ -80,6 +81,16 @@ function modeItem(response: AskResponse): QualityContractItem {
 }
 
 function ontologyItem(response: AskResponse): QualityContractItem {
+  const phaseA = assessPhaseAReviewAuthority(response.phaseAReview);
+  if (!phaseA.authoritative) {
+    return {
+      key: "ontology",
+      label: "안전조치 검수",
+      status: "blocked",
+      detail: `${phaseA.reason}. Phase A 검증 실적과 사람 확인 전에는 기존 온톨로지 QA를 진단 정보로만 사용합니다.`
+    };
+  }
+
   const matches = response.externalData.safetyKnowledge?.matches ?? [];
   const qa = response.ontologyQa?.result;
   if (qa?.reviewable) {

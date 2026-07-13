@@ -10,6 +10,8 @@ import {
 } from "@/lib/workpack-ontology-qa";
 import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
+import { assembleGraph } from "@/lib/ontology/graph-store";
+import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 
 vi.mock("@/lib/ontology/qa-review-tool", () => ({
   reviewDocpack: vi.fn()
@@ -48,6 +50,11 @@ const qaMissing: QaReviewFound = {
   advisory: "검수 고지"
 };
 
+const publishedGraphSnapshot = assembleGraph(
+  SEED_NODES.filter((node) => node.review_state === "published"),
+  SEED_EDGES.filter((edge) => edge.review_state === "published")
+);
+
 describe("web workpack ontology QA", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -73,6 +80,46 @@ describe("web workpack ontology QA", () => {
     expect(reviewDocpack).toHaveBeenCalledWith("용접", expect.stringContaining("화재감시자"));
     expect(reviewed.ontologyQa?.reviewTask).toBe("용접");
     expect(reviewed.ontologyQa?.result.reviewable).toBe(true);
+  });
+
+  it("reuses the caller's published graph snapshot instead of loading a different QA graph", async () => {
+    const response = buildMockAskResponse(
+      "안산 공장 용접 작업",
+      mockSearchResults.slice(0, 2),
+      "live",
+      "test"
+    );
+
+    const reviewed = await attachWebOntologyQa(
+      response,
+      "안산 공장 용접 작업",
+      publishedGraphSnapshot
+    );
+
+    expect(reviewDocpack).not.toHaveBeenCalled();
+    expect(reviewed.ontologyQa?.result.reviewable).toBe(true);
+    expect(reviewed.ontologyQa?.reviewTask).toBe("용접");
+  });
+
+  it("does not retry graph loading after request preflight produced no snapshot", async () => {
+    const response = buildMockAskResponse(
+      "안산 공장 용접 작업",
+      mockSearchResults.slice(0, 2),
+      "live",
+      "test"
+    );
+
+    const reviewed = await attachWebOntologyQa(
+      response,
+      "안산 공장 용접 작업",
+      null
+    );
+
+    expect(reviewDocpack).not.toHaveBeenCalled();
+    expect(reviewed.ontologyQa?.result).toMatchObject({
+      reviewable: false,
+      errorCode: "ontology_qa_failed"
+    });
   });
 
   it("attaches review verdicts without mutating the source response", () => {

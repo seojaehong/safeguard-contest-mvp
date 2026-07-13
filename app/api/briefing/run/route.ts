@@ -20,6 +20,7 @@ import { createSupabaseAdminClient, type WorkspaceDatabase } from "@/lib/supabas
 import { saveAskResponseAsWorkpack } from "@/lib/workpack-store";
 import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
 import { createLogger } from "@/lib/logger";
+import { assessPhaseAReviewAuthority } from "@/lib/phase-a-review";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // enhanced 모드 N개 사이트 순차 생성 여유
@@ -145,11 +146,16 @@ export async function GET(request: NextRequest) {
         message += "save: skipped (Supabase not configured) ";
       }
 
-      const operatorNote = buildBriefingOperatorNote(site.name, weatherSummary);
-      const workpack = buildBriefingDispatchWorkpack(response, site.name, workpackId);
-      const emailResult = await sendBriefingEmail(operatorNote, workpack, site.email);
-      emailed = emailResult.sent;
-      message += emailResult.message;
+      const phaseAAuthority = assessPhaseAReviewAuthority(response.phaseAReview);
+      if (!phaseAAuthority.authoritative) {
+        message += `email: blocked (Phase A: ${phaseAAuthority.reason})`;
+      } else {
+        const operatorNote = buildBriefingOperatorNote(site.name, weatherSummary);
+        const workpack = buildBriefingDispatchWorkpack(response, site.name, workpackId);
+        const emailResult = await sendBriefingEmail(operatorNote, workpack, site.email);
+        emailed = emailResult.sent;
+        message += emailResult.message;
+      }
     } catch (siteError) {
       message += `generate: failed (${siteError instanceof Error ? siteError.message : "unknown error"})`;
       log.error("briefing run: site failed", { site: site.name, error: siteError });

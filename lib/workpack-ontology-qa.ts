@@ -1,5 +1,11 @@
 import type { AskResponse } from "./types";
-import type { MissingControl, QaReviewFound, QaReviewResult } from "./ontology/qa-review";
+import type { OntologyGraph } from "./ontology/graph-store";
+import {
+  reviewDocumentCoverage,
+  type MissingControl,
+  type QaReviewFound,
+  type QaReviewResult,
+} from "./ontology/qa-review";
 import { resolveReviewTaskLabel } from "./mcp-tools";
 import { reviewDocpack } from "./ontology/qa-review-tool";
 import { createLogger } from "@/lib/logger";
@@ -171,7 +177,11 @@ function qaErrorResult(
   };
 }
 
-export async function attachWebOntologyQa(response: AskResponse, question: string): Promise<AskResponse> {
+export async function attachWebOntologyQa(
+  response: AskResponse,
+  question: string,
+  graphSnapshot?: OntologyGraph | null,
+): Promise<AskResponse> {
   const reviewTask = resolveReviewTaskLabel("일반 작업", question);
   const source = buildOntologyQaSource(response);
 
@@ -184,15 +194,30 @@ export async function attachWebOntologyQa(response: AskResponse, question: strin
     );
   }
 
+  if (graphSnapshot === null) {
+    return attachOntologyQaResult(
+      response,
+      reviewTask,
+      qaErrorResult(
+        "이 요청의 Phase A graph snapshot을 확보하지 못해 안전조치 검수를 보류했습니다.",
+        ONTOLOGY_QA_FAILURE_CODE,
+      ),
+      source.documentKeys,
+    );
+  }
+
   try {
-    const result = await reviewDocpack(reviewTask, source.text);
+    const review = graphSnapshot
+      ? (documentText: string) => reviewDocumentCoverage(reviewTask, documentText, graphSnapshot)
+      : (documentText: string) => reviewDocpack(reviewTask, documentText);
+    const result = await review(source.text);
     if (!needsRemediation(result)) {
       return attachOntologyQaResult(response, reviewTask, result, source.documentKeys);
     }
 
     const remediated = applyOntologyQaRemediation(response, reviewTask, result);
     const remediatedSource = buildOntologyQaSource(remediated);
-    const rereviewed = await reviewDocpack(reviewTask, remediatedSource.text);
+    const rereviewed = await review(remediatedSource.text);
     return attachOntologyQaResult(remediated, reviewTask, rereviewed, remediatedSource.documentKeys);
   } catch (error) {
     log.warn("ontology QA failed", {

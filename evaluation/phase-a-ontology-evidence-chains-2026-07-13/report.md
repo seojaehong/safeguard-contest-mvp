@@ -4,8 +4,8 @@
 - Branch: `fix/phase-a-ontology-review`
 - Base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
 - Contract: `phase-a-evidence-chains/1.3.0`
-- Status: release-review HOLD candidate, awaiting fresh independent review
-- Generated: `2026-07-13T22:49:40.5186259+09:00`, after focused and typecheck logs completed
+- Status: Integration HOLD candidate, awaiting fresh independent review
+- Generated: `2026-07-13T23:48:08.1796214+09:00`, after focused and typecheck logs completed
 - Runtime/DB publication: not performed
 - Schema, migration, Supabase data, generated core seed: unchanged
 
@@ -174,6 +174,18 @@ Chosen compatibility behavior: unresolved or unavailable Phase A evidence does n
 
 This is a review candidate, not a release-completion claim. `launchReady` remains false and no production SIF or KOSHA registry record was promoted.
 
+## Integration HOLD remediation
+
+| Finding | Candidate change awaiting independent review |
+|---|---|
+| Integration-1 pending Phase A did not gate readiness/share | A single Phase A authority check now requires resolved grounding, `verified=true`, nonzero deterministic materialization, and completed human confirmation. `qualityContract`, workpack readiness, command-center status, and share controls all consume that result; legacy coverage QA remains diagnostic and cannot produce ready/pass/shareable state. |
+| Integration-2 briefing and storage lost pending semantics | Briefing email, dispatch payload, and workpack persistence retain `phaseAReview`, zero verified records, and human-pending state. Automatic briefing dispatch fails closed. Pending law/KOSHA/KOSHA-education/accident results are empty in authoritative evidence fields and remain only under an explicitly non-authoritative diagnostic block. |
+| Integration-3 ontology lookup could hang | Pure `lib/ontology-deadline-policy.ts` owns ontology-only budgets. Grounding preflight and Supabase graph fetch use bounded `AbortSignal` deadlines, never inherit Vertex/deliverables timeout environment variables, and log only fixed error type/code. Template/enhanced/full continue with explicit missing, unverified, human-pending grounding after timeout. |
+| Integration-4 one request loaded changing graphs repeatedly | Successful public, MCP, and Claw requests load one published graph snapshot and pass the exact object through generation and post-generation QA. A failed preflight passes an explicit `null` snapshot sentinel, so QA does not issue a second graph load. |
+| Integration-5 report authority/order drift | The actual prompt order is fixed `naturalize_only` security policy first, then one JSON-serialized untrusted block, then conditioned persona/context. This report now records legacy QA as diagnostic only. |
+
+This remains an Integration HOLD candidate. No launch or integration completion is claimed before a new independent review.
+
 ## Official law verification
 
 The current `산업안전보건기준에 관한 규칙` was checked as effective `2026-03-02` under 고용노동부령 제450호.
@@ -205,7 +217,8 @@ The Article 172 direct surface identifies `접촉의 방지`: paragraph 1 prohib
 - Phase A generation-grounding TDD RED: 8 tests failed and 11 passed in one 19-test serial run, covering handler payload binding, provider prompt order, resolved/review-required/missing states, and zero-record unsupported citations.
 - Closed-harness TDD RED: 16 failures were reproduced across five narrow runs: 10/56 at answer/document/MCP/handler seams, 2/2 at the actual Claw tool seam, 1/3 for grounded raw-citation mapping, 1/8 for a remaining generic legal instruction, and 2/11 for literal delimiter-token duplication inside serialized malicious input.
 - Fresh release-HOLD TDD RED: 8 product failures across five runs: omitted grounding 1/4, JSON/SSE call sites 3/4, QA authority 2/31, KOSHA-ready plus draft SIF resolver 1/1, and forced-resolved SIF post-check 1/2. A separate App Router TSX import-analysis limitation was corrected to the repo's source-contract test style and is not counted as a product RED.
-- Focused ontology/generation/MCP/commercial/DB harness plus production/provider/Claw/public handlers and fallback compatibility, serial: 15 files passed, 224 tests passed. This includes all prior 213 focused tests and 11 added or expanded HOLD regressions.
+- Integration-HOLD TDD RED: 35 product assertions failed across 12 narrow contract runs, plus one missing-policy-module RED suite. These covered quality/readiness/UI/share, briefing/dispatch/storage, bounded fallback, exact snapshot reuse, MCP/Claw wiring, pending KOSHA diagnostics, and failed-preflight no-reload behavior.
+- Focused ontology/generation/MCP/commercial/DB harness plus quality/readiness/UI, briefing/storage, deadline, snapshot, production/provider/Claw/public handlers and fallback compatibility, serial: 25 files passed, 297 tests passed.
 - Strict TypeScript: passed.
 - Previous full suite is informational only and was not rerun for this remediation: 125 files passed, 7 failed, 5 skipped; 1229 tests passed, 7 failed, 22 skipped. Failures were outside owned ontology/MCP/test/report files.
 - Full-suite failed suites: `knowledge-page-layout`, `product-module-shell`, and `reports-download-center` due missing `.next/prerender-manifest.json` or hook timeout during concurrent dev-server tests.
@@ -218,8 +231,8 @@ Logs:
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log`
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log`
 
-Log provenance: focused log completed `2026-07-13T13:49:34.8156333Z`; typecheck log completed `2026-07-13T13:49:34.8186390Z`; this report was generated afterward.
+Log provenance: focused log completed `2026-07-13T14:45:01.3442548Z`; typecheck log completed `2026-07-13T14:45:09.0852966Z`; this report was generated afterward.
 
 This report, `report.json`, and both verification logs are tracked artifacts committed on this branch.
 
-No DB publication, migration, schema change, Supabase mutation, generated seed change, or UI change is included. This remediation does not self-approve; fresh independent re-review remains required.
+No DB publication, migration, schema change, Supabase mutation, or generated seed change is included. The command-center UI readiness/evidence surface changed only to expose and enforce Phase A pending state. This remediation does not self-approve; fresh independent re-review remains required.

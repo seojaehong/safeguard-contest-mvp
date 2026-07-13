@@ -53,6 +53,7 @@ import {
   type WorkspaceStepStatus
 } from "@/lib/workspace-pages";
 import { buildGenerationProgressState } from "@/lib/workspace-generation-progress";
+import { buildPhaseAReviewUiState } from "@/lib/phase-a-review";
 import {
   applyWorkpackDeliverablesChange,
   assessWorkpackReadiness,
@@ -450,11 +451,12 @@ function modeCopy(mode: IntegrationMode | "unconfigured" | undefined) {
 
 function workpackHasReviewWarnings(data: AskResponse | null) {
   if (!data) return false;
+  const phaseAReview = buildPhaseAReviewUiState(data.phaseAReview);
   const qa = data.ontologyQa?.result;
   const missingControls = qa?.reviewable ? qa.missing.controls.length : 0;
   const qualityBlocked = data.qualityContract ? data.qualityContract.overall !== "ready" : false;
   const harnessMissing = Boolean(data.dbHarness?.summary.missingEvidence.length);
-  return missingControls > 0 || qualityBlocked || harnessMissing;
+  return !phaseAReview.authoritative || missingControls > 0 || qualityBlocked || harnessMissing;
 }
 
 function buildReadinessRail(
@@ -470,6 +472,7 @@ function buildReadinessRail(
   const generated = Boolean(data);
   const generating = state === "generating";
   const weatherMode = data?.externalData.weather.mode || liveWeather?.mode;
+  const phaseAReview = buildPhaseAReviewUiState(data?.phaseAReview);
 
   return [
     {
@@ -493,15 +496,11 @@ function buildReadinessRail(
     {
       key: "ontology",
       label: "위험요인-조치 그래프",
-      status: ontologyReviewable
-        ? data?.ontologyQa?.result.verdict || "검수됨"
-        : generated ? "검수 보류" : "생성 후 검수",
-      detail: ontologyReviewable
-        ? "작업유형, 위험요인, 감소대책, 조문 경로를 문서 본문과 대조했습니다."
+      status: generated ? phaseAReview.status : "생성 후 검수",
+      detail: generated
+        ? `${phaseAReview.detail}${ontologyReviewable ? " 기존 온톨로지 QA는 진단 정보입니다." : ""}`
         : "승인된 작업 이력과 안전조치 기준으로 누락 항목을 확인합니다.",
-      tone: ontologyReviewable
-        ? data?.ontologyQa?.result.verdict === "통과" ? "ready" : "warn"
-        : generated ? "warn" : "pending"
+      tone: generated ? phaseAReview.tone : "pending"
     },
     {
       key: "history",
@@ -525,7 +524,8 @@ function buildGenerationStages(data: AskResponse | null, state: GenerationState)
   const generated = Boolean(data);
   const qa = data?.ontologyQa?.result;
   const missingControls = qa?.reviewable ? qa.missing.controls.length : 0;
-  const qualityReady = data?.qualityContract?.overall === "ready";
+  const phaseAReview = buildPhaseAReviewUiState(data?.phaseAReview);
+  const qualityReady = data?.qualityContract?.overall === "ready" && phaseAReview.authoritative;
   const harnessReady = data?.dbHarness
     ? data.dbHarness.summary.missingEvidence.length === 0
     : generated;
@@ -548,7 +548,9 @@ function buildGenerationStages(data: AskResponse | null, state: GenerationState)
     {
       label: "안전조치 검수",
       detail: generated
-        ? missingControls
+        ? !phaseAReview.authoritative
+          ? phaseAReview.detail
+          : missingControls
           ? `누락 조치 ${missingControls}건 확인 필요`
           : qualityReady ? "누락 조치 대조 완료" : "품질 보강 항목 확인 필요"
         : "작업유형 그래프 준비",
@@ -606,6 +608,7 @@ function buildDocumentHarnessLoop(
   const harnessSurface = data.dbHarness ? buildDbHarnessSurfaceContract(data.dbHarness.packet) : null;
   const qa = data.ontologyQa?.result;
   const missingControls = qa?.reviewable ? qa.missing.controls.length : 0;
+  const phaseAReview = buildPhaseAReviewUiState(data.phaseAReview);
   const improvementMemory = data.dbHarness?.summary.improvementMemory ?? 0;
   const workpackMemory = data.dbHarness?.summary.workpackMemory ?? 0;
   const firstImprovement = data.dbHarness?.packet.improvementMemory[0];
@@ -627,15 +630,13 @@ function buildDocumentHarnessLoop(
     {
       key: "ontology",
       label: "안전조치 확인",
-      status: qa?.reviewable
-        ? missingControls ? "보완 반영 확인" : qa.verdict
-        : data.qualityContract?.ontology.status ? qualityStatusCopy(data.qualityContract.ontology.status) : "검수 보류",
-      detail: qa?.reviewable
+      status: phaseAReview.status,
+      detail: phaseAReview.authoritative && qa?.reviewable
         ? missingControls
           ? `${missingControls}개 안전조치를 문서 보강 섹션과 대조합니다.`
-          : "필수 안전조치가 문서팩에 반영됐습니다."
-        : data.qualityContract?.ontology.detail || "승인된 작업유형 기준과 문서를 대조합니다.",
-      tone: qa?.reviewable ? missingControls ? "warn" : "ready" : data.qualityContract?.ontology.status === "ready" ? "ready" : "warn"
+          : "Phase A 근거와 문서 반영 위치를 사람이 확인했습니다."
+        : `${phaseAReview.detail}. 기존 온톨로지 QA는 진단 정보입니다.`,
+      tone: phaseAReview.authoritative && !missingControls ? "ready" : "warn"
     },
     {
       key: "memory",
@@ -696,6 +697,7 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
   }
 
   const documentTitle = outputItems.find((item) => item.key === key)?.title || "선택 문서";
+  const phaseAReview = buildPhaseAReviewUiState(data.phaseAReview);
   const evidenceLabel = data.evidenceLabels?.[key];
   const referenceItems = data.externalData.safetyReference?.items || [];
   const directReference = referenceItems.find((item) =>
@@ -740,17 +742,21 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
 
   if (evidenceLabel || directReference || lawCitation) {
     items.push({
-      label: "직접 근거",
+      label: phaseAReview.authoritative ? "직접 근거" : "검토 대기 근거",
       value: evidenceLabel
         ? formatEvidenceBadge(evidenceLabel.article)
         : safetyReferenceEvidenceTitle(directReference) || lawCitation?.title || "원문 확인 권장",
-      detail: directReference?.operationSignalLabel
-        || directReference?.shortSummary
-        || evidenceLabel?.purpose
-        || lawCitation?.summary
-        || "법령·공식자료 원문과 문서 본문을 함께 확인하세요.",
-      meta: evidenceLabel ? "법령 조항" : directReference?.sourceKindLabel || lawCitation?.sourceLabel || "원문 확인 권장",
-      tone: evidenceLabel || directReference ? "ready" : "warn",
+      detail: phaseAReview.authoritative
+        ? directReference?.operationSignalLabel
+          || directReference?.shortSummary
+          || evidenceLabel?.purpose
+          || lawCitation?.summary
+          || "법령·공식자료 원문과 문서 본문을 함께 확인하세요."
+        : `${phaseAReview.detail}. 원문은 검토 후보로만 표시됩니다.`,
+      meta: phaseAReview.authoritative
+        ? evidenceLabel ? "법령 조항" : directReference?.sourceKindLabel || lawCitation?.sourceLabel || "원문 확인 권장"
+        : "검증 전 · 발송 불가",
+      tone: phaseAReview.authoritative && Boolean(evidenceLabel || directReference) ? "ready" : "warn",
       href: lawCitation?.sourceUrl
     });
   }
@@ -767,11 +773,13 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
 
   if (koshaReference) {
     items.push({
-      label: "공식자료",
+      label: phaseAReview.authoritative ? "공식자료" : "검토 대기 KOSHA 자료",
       value: koshaReference.title,
-      detail: koshaReference.summary || koshaReference.impact,
-      meta: koshaReference.agency || "KOSHA",
-      tone: koshaReference.verified === false ? "warn" : "ready",
+      detail: phaseAReview.authoritative
+        ? koshaReference.summary || koshaReference.impact
+        : `${phaseAReview.detail}. 기술지침은 검토 후보이며 법적 의무 근거가 아닙니다.`,
+      meta: phaseAReview.authoritative ? koshaReference.agency || "KOSHA" : "검증 전 · 발송 불가",
+      tone: phaseAReview.authoritative && koshaReference.verified !== false ? "ready" : "warn",
       href: koshaReference.url
     });
   }
@@ -800,14 +808,14 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
 
   items.push({
       label: "안전조치 검수",
-      value: qa?.reviewable ? qa.verdict : "원문 확인 권장",
-      detail: qa?.reviewable
+      value: phaseAReview.authoritative && qa?.reviewable ? qa.verdict : phaseAReview.status,
+      detail: phaseAReview.authoritative && qa?.reviewable
         ? missingControls.length
           ? missingControls.slice(0, 2).map((item) => item.control).join(" · ")
           : "필수 안전조치가 문서 본문에 반영됐습니다."
-        : "검증된 작업유형 기준과 원문을 함께 확인하세요.",
+        : `${phaseAReview.detail}. 기존 QA 결과는 진단 정보입니다.`,
       meta: data.qualityContract ? qualityStatusCopy(data.qualityContract.overall) : "검수 대기",
-      tone: qa?.reviewable ? missingControls.length ? "warn" : "ready" : "warn"
+      tone: phaseAReview.authoritative && qa?.reviewable && !missingControls.length ? "ready" : "warn"
     });
 
   if (!evidenceLabel) {
@@ -815,8 +823,8 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
       label: "원문 확인",
       value: "원문 확인 권장",
       detail: "제출 전 선택 문서의 법령·공식자료 원문과 현장 조건을 한 번 더 대조하세요.",
-      meta: data.mode === "live" ? "근거 연결됨" : "보조 근거",
-      tone: qa?.reviewable ? missingControls.length ? "warn" : "ready" : "pending"
+      meta: phaseAReview.authoritative && data.mode === "live" ? "근거 연결됨" : "검토 대기",
+      tone: phaseAReview.authoritative && qa?.reviewable && !missingControls.length ? "ready" : "warn"
     });
   }
 

@@ -6,13 +6,29 @@
 // (lib/ontology/knowledge-tool.ts와 동일 패턴).
 
 import { loadGraph } from "@/lib/ontology/graph-store";
+import type { OntologyGraph } from "@/lib/ontology/graph-store";
 import { reviewDocumentCoverage, type QaReviewResult } from "@/lib/ontology/qa-review";
 
 /**
  * 안전 문서 본문을 작업유형의 법정 필수 조치 목록과 대조해 누락을 검출한다.
  * published 부분그래프만 사용. 그래프 조회 실패는 예외로 던져 호출부의 도구 오류 처리에 위임한다.
  */
-export async function reviewDocpack(task: string, documentText: string): Promise<QaReviewResult> {
+export async function reviewDocpack(
+  task: string,
+  documentText: string,
+  graphSnapshot?: OntologyGraph | null,
+): Promise<QaReviewResult> {
+  if (graphSnapshot === null) {
+    return {
+      reviewable: false,
+      errorCode: "ontology_qa_failed",
+      message: "이 요청의 Phase A graph snapshot을 확보하지 못해 안전조치 검수를 보류했습니다.",
+      registeredTasks: [],
+    };
+  }
+  if (graphSnapshot) {
+    return reviewDocumentCoverage(task, documentText, graphSnapshot);
+  }
   const loaded = await loadGraph("published");
   if (!loaded.ok || !loaded.graph) {
     throw new Error(loaded.message || "안전 온톨로지 그래프를 조회할 수 없습니다.");

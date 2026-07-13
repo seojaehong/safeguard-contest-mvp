@@ -14,6 +14,12 @@ import {
   type OntologyNode,
   type OntologyEdge
 } from "@/lib/ontology/schema";
+import {
+  isOntologyDeadlineError,
+  withOntologyDeadline,
+  type OntologyDeadlineCode,
+} from "@/lib/ontology/deadline";
+import { resolveOntologyGraphTimeoutMs } from "@/lib/ontology-deadline-policy";
 
 export type OntologyGraph = {
   nodes: OntologyNode[];
@@ -41,6 +47,12 @@ export type GraphLoadResult = {
   scope: GraphScope;
   graph: OntologyGraph | null;
   message: string;
+  errorCode?: OntologyDeadlineCode | "ontology_graph_load_failed";
+};
+
+export type GraphLoadOptions = {
+  timeoutMs?: number;
+  signal?: AbortSignal;
 };
 
 export type UpsertResult = {
@@ -151,7 +163,12 @@ function extractEdgeKey(raw: unknown): string {
   return `${extractId(raw, "src")}|${extractId(raw, "rel")}|${extractId(raw, "dst")}`;
 }
 
-async function fetchRows(config: SupabaseConfig, table: string, scope: GraphScope): Promise<unknown[]> {
+async function fetchRows(
+  config: SupabaseConfig,
+  table: string,
+  scope: GraphScope,
+  signal: AbortSignal,
+): Promise<unknown[]> {
   const params = new URLSearchParams();
   params.set("select", "*");
   params.set("limit", "10000");
@@ -161,11 +178,13 @@ async function fetchRows(config: SupabaseConfig, table: string, scope: GraphScop
       apikey: config.serviceRoleKey,
       Authorization: `Bearer ${config.serviceRoleKey}`
     },
-    cache: "no-store"
+    cache: "no-store",
+    signal
   });
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`${table} 조회 실패: ${response.status} ${body}`);
+    const error = new Error(`${table} request failed with status ${response.status}.`);
+    error.name = "OntologyGraphFetchError";
+    throw error;
   }
   const data = (await response.json()) as unknown;
   return Array.isArray(data) ? data : [];
@@ -175,7 +194,10 @@ async function fetchRows(config: SupabaseConfig, table: string, scope: GraphScop
  * Supabase에서 그래프를 읽어 조립한다.
  * scope "published": anon 노출 경로 — published만. "all": 운영/검증용(서비스롤 전제).
  */
-export async function loadGraph(scope: GraphScope = "published"): Promise<GraphLoadResult> {
+export async function loadGraph(
+  scope: GraphScope = "published",
+  options: GraphLoadOptions = {},
+): Promise<GraphLoadResult> {
   const config = getSupabaseConfig();
   if (!config) {
     return {
@@ -187,10 +209,19 @@ export async function loadGraph(scope: GraphScope = "published"): Promise<GraphL
     };
   }
   try {
-    const [rawNodes, rawEdges] = await Promise.all([
-      fetchRows(config, "safety_ontology_nodes", scope),
-      fetchRows(config, "safety_ontology_edges", scope)
-    ]);
+    const [rawNodes, rawEdges] = await withOntologyDeadline(
+      (signal) => Promise.all([
+        fetchRows(config, "safety_ontology_nodes", scope, signal),
+        fetchRows(config, "safety_ontology_edges", scope, signal)
+      ]),
+      {
+        timeoutMs: resolveOntologyGraphTimeoutMs(
+          options.timeoutMs,
+          process.env.ONTOLOGY_GRAPH_TIMEOUT_MS,
+        ),
+        signal: options.signal,
+      },
+    );
     return {
       ok: true,
       configured: true,
@@ -199,12 +230,20 @@ export async function loadGraph(scope: GraphScope = "published"): Promise<GraphL
       message: `안전 온톨로지 그래프 조회 완료 (scope=${scope}).`
     };
   } catch (error) {
+    const errorCode = isOntologyDeadlineError(error)
+      ? error.code
+      : "ontology_graph_load_failed";
     return {
       ok: false,
       configured: true,
       scope,
       graph: null,
-      message: error instanceof Error ? error.message : "온톨로지 그래프 조회 중 오류가 발생했습니다."
+      message: errorCode === "ontology_deadline_exceeded"
+        ? "온톨로지 그래프 조회 제한시간을 초과했습니다."
+        : errorCode === "ontology_request_aborted"
+          ? "온톨로지 그래프 조회가 중단되었습니다."
+          : "온톨로지 그래프 조회 중 오류가 발생했습니다.",
+      errorCode
     };
   }
 }

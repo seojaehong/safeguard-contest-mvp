@@ -152,6 +152,16 @@ function makeLiveStructuredResponse(): AskResponse {
 
   return {
     ...base,
+    phaseAReview: {
+      verdict: "통과",
+      verified: true,
+      evidenceChainState: "resolved",
+      groundingStatus: "resolved",
+      outputStatus: "grounded_draft",
+      verifiedRecords: 1,
+      humanConfirmation: { required: true, status: "confirmed" },
+      actionableReason: "확인 완료"
+    },
     mode: "live",
     externalData: {
       ...base.externalData,
@@ -245,7 +255,7 @@ describe("qualityContract", () => {
     expect(response.qualityContract?.overall).toBe("blocked");
     expect(response.qualityContract?.fallback.hasFallback).toBe(true);
     expect(response.qualityContract?.evidence.mappedCount).toBe(response.qualityContract?.evidence.requiredCount);
-    expect(response.qualityContract?.ontology.status).toBe("degraded");
+    expect(response.qualityContract?.ontology.status).toBe("blocked");
     expect(response.qualityContract?.structured.status).toBe("blocked");
     expect(response.qualityContract?.dbHarness.status).toBe("blocked");
     expect(response.qualityContract?.structured.detail).not.toContain("fallback");
@@ -272,6 +282,27 @@ describe("qualityContract", () => {
     expect(contract.dbHarness.retrievalContract?.source).toBe("safety_reference_items");
     expect(contract.dbHarness.documentCoverage.every((item) => item.covered)).toBe(true);
     expect(contract.persistence.status).toBe("ready");
+  });
+
+  it("blocks a legacy ontology QA pass while Phase A evidence remains human-pending", () => {
+    const response = makeLiveStructuredResponse();
+    response.phaseAReview = {
+      verdict: "검토 필요",
+      verified: false,
+      evidenceChainState: "review_required",
+      groundingStatus: "review_required",
+      outputStatus: "review_required_draft",
+      verifiedRecords: 0,
+      humanConfirmation: { required: true, status: "pending" },
+      actionableReason: "Phase A 근거와 문서 반영 위치를 확인하세요."
+    };
+
+    const contract = buildQualityContract(response, "2026-07-08T00:00:00.000Z");
+
+    expect(contract.overall).toBe("blocked");
+    expect(contract.ontology.status).toBe("blocked");
+    expect(contract.ontology.detail).toContain("Phase A");
+    expect(contract.ontology.detail).toContain("사람 확인");
   });
 
   it("does not mark the DB harness ready when required SIF evidence is missing", () => {

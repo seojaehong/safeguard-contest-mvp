@@ -63,6 +63,73 @@ function generatedResponse(question: string, riskAssessmentDraft = "검증용 �
 }
 
 describe("production ontology docpack handler", () => {
+  test.each(["template", "enhanced", "full"] as const)(
+    "continues %s generation when the snapshot resolver never settles",
+    async (mode) => {
+      let capturedOptions: unknown;
+      const output = await handleGenerateSafetyDocpack(
+        { question: "끝나지 않는 ontology lookup", mode, includeFull: true },
+        {
+          querySafetyKnowledge: async () => {
+            throw new Error("legacy lookup must not run");
+          },
+          resolveSafetyKnowledgeSnapshot: () => new Promise(() => undefined),
+          phaseAGroundingTimeoutMs: 10,
+          runAsk: async (input, options) => {
+            capturedOptions = options;
+            return generatedResponse(input);
+          },
+        },
+      );
+
+      expect(capturedOptions).toMatchObject({
+        aiMode: mode,
+        phaseAGrounding: {
+          groundingStatus: "missing",
+          evidenceChainState: "not_evaluated",
+          allowedCitedUids: [],
+        },
+        phaseAGraphSnapshot: null,
+      });
+      expect(output.publishedGraphSnapshot).toBeNull();
+      expect(output.docpack.evidenceMaterialization).toMatchObject({
+        verifiedRecords: [],
+        humanConfirmation: { required: true, status: "pending" },
+      });
+    },
+    500,
+  );
+
+  test("reuses one published graph snapshot for generation and reviewed QA", async () => {
+    const question = "차량계 하역운반기계 인접 작업";
+    const evidence = buildPublishedSafetyKnowledge(publishedGraph, question);
+    const querySafetyKnowledge = vi.fn(async (): Promise<SafetyKnowledgeResult> => {
+      throw new Error("duplicate graph lookup");
+    });
+    let capturedOptions: unknown;
+
+    const output = await handleGenerateSafetyDocpack(
+      { question, mode: "enhanced", includeFull: true },
+      {
+        querySafetyKnowledge,
+        resolveSafetyKnowledgeSnapshot: vi.fn(async () => ({
+          evidence,
+          graphSnapshot: publishedGraph,
+        })),
+        runAsk: async (input, options) => {
+          capturedOptions = options;
+          return generatedResponse(input);
+        },
+      },
+    );
+
+    expect(querySafetyKnowledge).not.toHaveBeenCalled();
+    expect(capturedOptions).toMatchObject({
+      phaseAGraphSnapshot: publishedGraph,
+    });
+    expect(output.publishedGraphSnapshot).toBe(publishedGraph);
+  });
+
   test.each([
     ["고소 작업대 작업", "고소작업"],
     ["차량계·기계 인접작업", "지게차 상하차"],

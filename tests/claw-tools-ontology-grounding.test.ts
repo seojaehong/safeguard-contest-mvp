@@ -1,16 +1,19 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { assembleGraph } from "@/lib/ontology/graph-store";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
 
 const mocks = vi.hoisted(() => ({
   querySafetyKnowledge: vi.fn(),
+  resolveSafetyKnowledgeSnapshot: vi.fn(),
   reviewDocpack: vi.fn(),
   runAsk: vi.fn(),
 }));
 
 vi.mock("@/lib/ontology/knowledge-tool", () => ({
   querySafetyKnowledge: mocks.querySafetyKnowledge,
+  resolveSafetyKnowledgeSnapshot: mocks.resolveSafetyKnowledgeSnapshot,
 }));
 
 vi.mock("@/lib/ontology/qa-review-tool", () => ({
@@ -48,6 +51,7 @@ describe("claw ontology generation handlers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.querySafetyKnowledge.mockRejectedValue(new Error("PRIVATE_ONTOLOGY_FAILURE"));
+    mocks.resolveSafetyKnowledgeSnapshot.mockRejectedValue(new Error("PRIVATE_ONTOLOGY_FAILURE"));
     mocks.runAsk.mockImplementation(async (question: string) => response(question));
     mocks.reviewDocpack.mockResolvedValue(passingQa());
   });
@@ -60,16 +64,23 @@ describe("claw ontology generation handlers", () => {
       includeFull: true,
     });
 
-    expect(mocks.querySafetyKnowledge).toHaveBeenCalledTimes(1);
+    expect(mocks.resolveSafetyKnowledgeSnapshot).toHaveBeenCalledTimes(1);
+    expect(mocks.querySafetyKnowledge).not.toHaveBeenCalled();
     expect(mocks.runAsk).toHaveBeenCalledWith(
       "등록되지 않은 해체 작업",
       expect.objectContaining({
         aiMode: "enhanced",
+        phaseAGraphSnapshot: null,
         phaseAGrounding: expect.objectContaining({
           groundingStatus: "missing",
           evidencePack: null,
         }),
       }),
+    );
+    expect(mocks.reviewDocpack).toHaveBeenCalledWith(
+      "지게차 상하차",
+      expect.any(String),
+      null,
     );
     expect(result).toMatchObject({
       reviewStatus: {
@@ -99,7 +110,8 @@ describe("claw ontology generation handlers", () => {
       includeFull: true,
     });
 
-    expect(mocks.querySafetyKnowledge).toHaveBeenCalledTimes(1);
+    expect(mocks.resolveSafetyKnowledgeSnapshot).toHaveBeenCalledTimes(1);
+    expect(mocks.querySafetyKnowledge).not.toHaveBeenCalled();
     expect(mocks.runAsk).toHaveBeenCalledWith(
       "등록되지 않은 해체 작업",
       expect.objectContaining({
@@ -118,5 +130,37 @@ describe("claw ontology generation handlers", () => {
         humanConfirmation: { required: true, status: "pending" },
       },
     });
+  });
+
+  test("reuses the resolver graph snapshot for generation and reviewed QA", async () => {
+    const graphSnapshot = assembleGraph([], []);
+    mocks.resolveSafetyKnowledgeSnapshot.mockResolvedValue({
+      evidence: {
+        found: false,
+        message: "Phase A Task 미등록",
+        registeredTasks: [],
+        evidenceContract: null,
+        evidenceDiagnostics: null,
+        evidenceChainState: "not_registered",
+      },
+      graphSnapshot,
+    });
+
+    await executeClawTool("generate_reviewed_safety_docpack", {
+      question: "등록되지 않은 해체 작업",
+      task: "지게차 상하차",
+      mode: "full",
+      includeFull: true,
+    });
+
+    expect(mocks.runAsk).toHaveBeenCalledWith(
+      "등록되지 않은 해체 작업",
+      expect.objectContaining({ phaseAGraphSnapshot: graphSnapshot }),
+    );
+    expect(mocks.reviewDocpack).toHaveBeenCalledWith(
+      "지게차 상하차",
+      expect.any(String),
+      graphSnapshot,
+    );
   });
 });

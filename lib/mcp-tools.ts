@@ -33,6 +33,9 @@ import { createLogger } from "./logger";
 import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
 import { getEvidenceLabel, SMSA_ARTICLE_MAP, type SmsaEvidenceLabel } from "./smsa-mapping";
 import type { KnowledgeResult } from "./ontology/query";
+import type { GraphLoadOptions, OntologyGraph } from "./ontology/graph-store";
+import { isOntologyDeadlineError, withOntologyDeadline } from "./ontology/deadline";
+import { resolvePhaseAGroundingTimeoutMs } from "./ontology-deadline-policy";
 import type { OntologyNode } from "./ontology/schema";
 import type {
   SafetyReferenceItem,
@@ -308,12 +311,24 @@ export type GenerateSafetyDocpackHandlerInput = {
 };
 
 export type GenerateSafetyDocpackHandlerDependencies = {
-  querySafetyKnowledge: (query: string) => Promise<SafetyKnowledgeResult>;
+  querySafetyKnowledge: (
+    query: string,
+    options?: GraphLoadOptions,
+  ) => Promise<SafetyKnowledgeResult>;
+  resolveSafetyKnowledgeSnapshot?: (
+    query: string,
+    options?: GraphLoadOptions,
+  ) => Promise<{
+    evidence: SafetyKnowledgeResult;
+    graphSnapshot: OntologyGraph;
+  }>;
+  phaseAGroundingTimeoutMs?: number;
   runAsk: (
     question: string,
     options: {
       aiMode: "template" | "enhanced" | "full";
       phaseAGrounding: PhaseAGenerationGrounding;
+      phaseAGraphSnapshot?: OntologyGraph | null;
     },
   ) => Promise<AskResponse>;
 };
@@ -322,6 +337,7 @@ export type GenerateSafetyDocpackHandlerOutput = {
   evidenceQuery: string;
   evidence: SafetyKnowledgeResult;
   phaseAGrounding: PhaseAGenerationGrounding;
+  publishedGraphSnapshot: OntologyGraph | null;
   response: AskResponse;
   docpack: DocpackResult;
 };
@@ -334,11 +350,36 @@ export async function handleGenerateSafetyDocpack(
   const task = input.task?.trim() ?? "";
   const evidenceQuery = resolveEvidenceTaskLabel(task, question) || question || task;
   let evidence: SafetyKnowledgeResult;
+  let publishedGraphSnapshot: OntologyGraph | null = null;
+  const groundingTimeoutMs = resolvePhaseAGroundingTimeoutMs(
+    dependencies.phaseAGroundingTimeoutMs,
+    process.env.PHASE_A_GROUNDING_TIMEOUT_MS,
+  );
   try {
-    evidence = await dependencies.querySafetyKnowledge(evidenceQuery);
+    const snapshot = await withOntologyDeadline(
+      async (signal) => {
+        if (dependencies.resolveSafetyKnowledgeSnapshot) {
+          return dependencies.resolveSafetyKnowledgeSnapshot(evidenceQuery, {
+            signal,
+            timeoutMs: groundingTimeoutMs,
+          });
+        }
+        return {
+          evidence: await dependencies.querySafetyKnowledge(evidenceQuery, {
+            signal,
+            timeoutMs: groundingTimeoutMs,
+          }),
+          graphSnapshot: null,
+        };
+      },
+      { timeoutMs: groundingTimeoutMs },
+    );
+    evidence = snapshot.evidence;
+    publishedGraphSnapshot = snapshot.graphSnapshot;
   } catch (error) {
     log.error("Phase A ontology lookup unavailable; continuing with missing grounding", {
       errorType: error instanceof Error ? error.name : typeof error,
+      errorCode: isOntologyDeadlineError(error) ? error.code : "ontology_lookup_failed",
     });
     evidence = {
       found: false,
@@ -356,11 +397,13 @@ export async function handleGenerateSafetyDocpack(
   const response = await dependencies.runAsk(question, {
     aiMode: input.mode ?? "full",
     phaseAGrounding,
+    phaseAGraphSnapshot: publishedGraphSnapshot,
   });
   return {
     evidenceQuery,
     evidence,
     phaseAGrounding,
+    publishedGraphSnapshot,
     response,
     docpack: buildDocpackResult(response, input.includeFull ?? false, evidence, phaseAGrounding),
   };

@@ -9,6 +9,7 @@ import {
   buildPhaseAGenerationGrounding,
   type PhaseAGenerationGrounding,
 } from "./ontology/evidence-chain";
+import type { OntologyGraph } from "./ontology/graph-store";
 import {
   deriveSafetyReferenceOperationalView,
   deriveSafetyReferenceRetrievalModeFromItems,
@@ -1352,6 +1353,8 @@ export type RunAskOptions = {
   harnessMemory?: HarnessMemoryInput;
   /** Fixed Phase A ontology pack and allow-list bound before any provider generation. */
   phaseAGrounding?: PhaseAGenerationGrounding;
+  /** Published graph snapshot that produced phaseAGrounding; reused by post-generation QA. */
+  phaseAGraphSnapshot?: OntologyGraph | null;
   /** Task D-2a: SSE progress callback for the AI console. Defaults to no-op. */
   onProgress?: OnAskProgress;
 };
@@ -1365,7 +1368,7 @@ function attachPhaseAReview(
     : grounding.groundingStatus === "review_required"
       ? "Phase A SIF/KOSHA/법령 source resolution을 완료한 뒤 다시 검수하세요."
       : "canonical Task 매핑과 ontology availability를 확인한 뒤 다시 검수하세요.";
-  return {
+  return attachQualityContract({
     ...response,
     phaseAReview: {
       verdict: "검토 필요",
@@ -1377,7 +1380,7 @@ function attachPhaseAReview(
       humanConfirmation: { required: true, status: "pending" },
       actionableReason,
     },
-  };
+  });
 }
 
 function summarizeDbHarnessPacket(packet: ReturnType<typeof buildDbHarnessPacket>): NonNullable<AskResponse["dbHarness"]>["summary"] {
@@ -2332,7 +2335,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       }
     };
 
-    const withOntologyQa = await attachWebOntologyQa(withMcpDetail, question);
+    const withOntologyQa = await attachWebOntologyQa(
+      withMcpDetail,
+      question,
+      options.phaseAGraphSnapshot,
+    );
     const finalResponse = attachQualityContract(withOntologyQa);
     const finalDeliverablesTrace = finalizeDeliverablesTrace(finalResponse, deliverablesExecutionTrace);
     return attachPhaseAReview({

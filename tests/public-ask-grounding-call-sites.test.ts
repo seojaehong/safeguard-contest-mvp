@@ -4,28 +4,38 @@ import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { assembleGraph } from "@/lib/ontology/graph-store";
 
 const mocks = vi.hoisted(() => ({
   querySafetyKnowledge: vi.fn(),
+  resolveSafetyKnowledgeSnapshot: vi.fn(),
   runAsk: vi.fn(),
+  isLiveDispatchEnabled: vi.fn(),
+  postWebhookWithTimeout: vi.fn(),
+  resolveWebhookConfig: vi.fn(),
 }));
 
 vi.mock("@/lib/search", () => ({
   runAsk: mocks.runAsk,
 }));
 
-vi.mock("@/lib/ontology/knowledge-tool", () => ({
-  querySafetyKnowledge: mocks.querySafetyKnowledge,
-}));
+vi.mock("@/lib/ontology/knowledge-tool", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/ontology/knowledge-tool")>();
+  return {
+    ...actual,
+    querySafetyKnowledge: mocks.querySafetyKnowledge,
+    resolveSafetyKnowledgeSnapshot: mocks.resolveSafetyKnowledgeSnapshot,
+  };
+});
 
 vi.mock("@/lib/supabase-admin", () => ({
   createSupabaseAdminClient: () => null,
 }));
 
 vi.mock("@/lib/n8n-webhook", () => ({
-  isLiveDispatchEnabled: () => false,
-  postWebhookWithTimeout: vi.fn(),
-  resolveWebhookConfig: () => ({ url: null, token: null }),
+  isLiveDispatchEnabled: mocks.isLiveDispatchEnabled,
+  postWebhookWithTimeout: mocks.postWebhookWithTimeout,
+  resolveWebhookConfig: mocks.resolveWebhookConfig,
 }));
 
 function missingKnowledge() {
@@ -39,6 +49,8 @@ function missingKnowledge() {
   };
 }
 
+const graphSnapshot = assembleGraph([], []);
+
 describe("public ask Phase A grounding call sites", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -49,6 +61,16 @@ describe("public ask Phase A grounding call sites", () => {
       email: "safety@example.com",
     }]);
     mocks.querySafetyKnowledge.mockResolvedValue(missingKnowledge());
+    mocks.resolveSafetyKnowledgeSnapshot.mockResolvedValue({
+      evidence: missingKnowledge(),
+      graphSnapshot,
+    });
+    mocks.isLiveDispatchEnabled.mockReturnValue(true);
+    mocks.resolveWebhookConfig.mockReturnValue({
+      url: "https://dispatch.example.test/webhook",
+      token: "dispatch-test-token"
+    });
+    mocks.postWebhookWithTimeout.mockResolvedValue({ ok: true });
     mocks.runAsk.mockImplementation(async (question: string) =>
       buildMockAskResponse(question, mockSearchResults.slice(0, 2), "mock", "grounded call-site test")
     );
@@ -75,7 +97,14 @@ describe("public ask Phase A grounding call sites", () => {
     }));
 
     expect(response.status).toBe(200);
-    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("등록되지 않은 설비 점검");
+    expect(mocks.resolveSafetyKnowledgeSnapshot).toHaveBeenCalledWith(
+      "등록되지 않은 설비 점검",
+      expect.objectContaining({
+        signal: expect.any(AbortSignal),
+        timeoutMs: expect.any(Number),
+      }),
+    );
+    expect(mocks.querySafetyKnowledge).not.toHaveBeenCalled();
     expect(mocks.runAsk).toHaveBeenCalledWith(
       "등록되지 않은 설비 점검",
       expect.objectContaining({
@@ -84,7 +113,23 @@ describe("public ask Phase A grounding call sites", () => {
           groundingStatus: "missing",
           generationPolicy: expect.objectContaining({ llmRole: "naturalize_only" }),
         }),
+        phaseAGraphSnapshot: graphSnapshot,
       }),
     );
+  });
+
+  it("fails closed before automatic dispatch when Phase A review is missing", async () => {
+    const { GET } = await import("@/app/api/briefing/run/route");
+    const response = await GET(new NextRequest("http://localhost/api/briefing/run", {
+      headers: { authorization: "Bearer briefing-test-secret" },
+    }));
+    const body = await response.json() as {
+      results: Array<{ emailed: boolean; message?: string }>;
+    };
+
+    expect(body.results[0]).toMatchObject({ emailed: false });
+    expect(body.results[0]?.message).toContain("Phase A");
+    expect(body.results[0]?.message).toContain("blocked");
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 });

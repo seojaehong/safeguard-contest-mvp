@@ -6,7 +6,11 @@
 // lib/ontology/query.ts, lib/mcp-tools.ts에 있고 여기서는 배선만 담당한다.
 
 import { resolveEvidenceChain } from "@/lib/ontology/evidence-chain";
-import { loadGraph, type OntologyGraph } from "@/lib/ontology/graph-store";
+import {
+  loadGraph,
+  type GraphLoadOptions,
+  type OntologyGraph,
+} from "@/lib/ontology/graph-store";
 import { queryKnowledge, listTaskLabels } from "@/lib/ontology/query";
 import { buildSafetyKnowledgeResult, type SafetyKnowledgeResult } from "@/lib/mcp-tools";
 
@@ -33,15 +37,45 @@ export function buildPublishedSafetyKnowledge(
   );
 }
 
+export type SafetyKnowledgeSnapshot = {
+  evidence: SafetyKnowledgeResult;
+  graphSnapshot: OntologyGraph;
+};
+
+export class OntologyKnowledgeUnavailableError extends Error {
+  readonly code: "ontology_graph_unavailable" | "ontology_graph_load_failed" | "ontology_deadline_exceeded" | "ontology_request_aborted";
+
+  constructor(code: OntologyKnowledgeUnavailableError["code"]) {
+    super("Published ontology graph is unavailable.");
+    this.name = "OntologyKnowledgeUnavailableError";
+    this.code = code;
+  }
+}
+
+export async function resolveSafetyKnowledgeSnapshot(
+  query: string,
+  options: GraphLoadOptions = {},
+): Promise<SafetyKnowledgeSnapshot> {
+  const loaded = await loadGraph("published", options);
+  if (!loaded.ok || !loaded.graph) {
+    throw new OntologyKnowledgeUnavailableError(
+      loaded.errorCode ?? "ontology_graph_unavailable",
+    );
+  }
+  return {
+    evidence: buildPublishedSafetyKnowledge(loaded.graph, query),
+    graphSnapshot: loaded.graph,
+  };
+}
+
 /**
  * 작업유형/위험요인 라벨로 검증된 안전 지식(위험요인→안전조치→법조문→중처법 의무)을 조회한다.
  * published 부분그래프만 사용. 그래프 조회 실패(미설정/네트워크)는 예외로 던져 호출부의
  * 도구 오류 처리(toToolError / tool_result is_error)에 위임한다.
  */
-export async function querySafetyKnowledge(query: string): Promise<SafetyKnowledgeResult> {
-  const loaded = await loadGraph("published");
-  if (!loaded.ok || !loaded.graph) {
-    throw new Error(loaded.message || "안전 온톨로지 그래프를 조회할 수 없습니다.");
-  }
-  return buildPublishedSafetyKnowledge(loaded.graph, query);
+export async function querySafetyKnowledge(
+  query: string,
+  options: GraphLoadOptions = {},
+): Promise<SafetyKnowledgeResult> {
+  return (await resolveSafetyKnowledgeSnapshot(query, options)).evidence;
 }
