@@ -24,6 +24,7 @@ const root = process.cwd();
 const cssPath = path.join(root, "app", "globals.css");
 const componentPath = path.join(root, "components", "ReportsDownloadCenter.tsx");
 const shellPath = path.join(root, "components", "SafeClawModuleShell.tsx");
+const reportingDownloadsPath = path.join(root, "lib", "reporting-downloads.ts");
 const reportsWave1TestSupabaseUrl = "https://wave8-fixture.supabase.co";
 const reportsWave1TestAuthStorageKey = "sb-wave8-fixture-auth-token";
 const reportsWave1TestAccessToken = "reports-wave1-evidence-access-token";
@@ -34,8 +35,8 @@ const defaultProductionBuildManifestPath = path.join(
 );
 const reportsTaskDistanceEvidenceRelativeDir = path.join(
   "evaluation",
-  "reports-mobile-task-distance-2026-07-13",
-  "fresh-review-round-3-2026-07-14"
+  "reports-mobile-task-distance-2026-07-14",
+  "target-ready-f98-label-remediation"
 );
 
 type EvidenceIdentity = {
@@ -206,11 +207,17 @@ describe("Reports Wave 1 static design contract", () => {
 
   it("exposes route and pressed-state semantics without broad primary-button capture", () => {
     const component = fs.readFileSync(componentPath, "utf8");
+    const reportingDownloads = fs.readFileSync(reportingDownloadsPath, "utf8");
     const shell = fs.readFileSync(shellPath, "utf8");
     const css = fs.readFileSync(cssPath, "utf8");
+    const legacyPhotoTerm = ["Before", "After"].join("/");
 
     expect(shell).toContain("data-module-route={activeHref}");
     expect(component).toMatch(/className="safeclaw-report-period-control"[\s\S]*aria-pressed=\{period === option\.value\}/u);
+    expect(component).toContain("개선 전/개선 후 사진 포함 승인");
+    expect(component).not.toContain(legacyPhotoTerm);
+    expect(reportingDownloads).toContain("개선 전/개선 후 사진");
+    expect(reportingDownloads).not.toContain(legacyPhotoTerm);
     expect(css).toContain('.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-controls button[aria-pressed="true"]');
   });
 

@@ -276,7 +276,7 @@ export type ImprovementReportItem = {
   asIs: string;
   toBe: string;
   reflectedDocuments: string[];
-  sourceLabel: "Before/After 사진" | "관리자 메모";
+  sourceLabel: "개선 전/개선 후 사진" | "관리자 메모";
   hasPhotoPair: boolean;
   photoApproved: boolean;
   photoNames: string[];
@@ -470,7 +470,7 @@ const REPORT_LEARNING_GOVERNANCE = {
   modelFineTuning: false,
   nextUse: [
     "관리자 검토 후 다음 위험성평가와 TBM 생성 시 과거 개선사항으로 조회합니다.",
-    "Before/After 사진 개선은 승인된 항목만 공식 운영 이력으로 승격합니다."
+    "개선 전/개선 후 사진은 승인된 항목만 공식 운영 이력으로 승격합니다."
   ],
   guardrails: [
     "이 파일은 모델 파인튜닝 산출물이 아닙니다.",
@@ -683,7 +683,7 @@ function normalizeImprovement(
     asIs,
     toBe,
     reflectedDocuments: uniqueStrings(item.reflectedDocuments),
-    sourceLabel: hasPhotoPair ? "Before/After 사진" : "관리자 메모",
+    sourceLabel: hasPhotoPair ? "개선 전/개선 후 사진" : "관리자 메모",
     hasPhotoPair,
     photoApproved,
     photoNames,
@@ -764,7 +764,7 @@ function buildNotes(
         ? "이 리포트는 서버에 저장된 해당 작업팩만 기준으로 생성됩니다."
         : "이 리포트는 현재 브라우저의 최신 작업팩과 저장된 개선사항 후보만 기준으로 생성됩니다.",
     "위험행의 기간 포함 여부는 행별 생성시각이 아닌 작업팩 저장시각을 기준으로 판단합니다.",
-    "Before/After 사진은 이 화면에서 포함 승인한 항목만 다운로드 산출물에 기록됩니다."
+    "개선 전/개선 후 사진은 이 화면에서 포함 승인한 항목만 다운로드 산출물에 기록됩니다."
   ];
   if (!workpack.data.structured?.riskAssessmentRows.length) {
     notes.push("구조화 위험성평가 행이 없어서 핵심 위험 요약으로 대체했습니다.");
@@ -1076,8 +1076,8 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
     `- 위험성평가 행: ${snapshot.summary.riskRows}건`,
     `- 고위험 행: ${snapshot.summary.highRiskRows}건`,
     `- 개선사항 후보: ${snapshot.summary.improvements}건`,
-    `- Before/After 사진 후보: ${snapshot.summary.photoCandidates}건`,
-    `- 승인된 Before/After 사진: ${snapshot.summary.photoImprovements}건`,
+    `- 개선 전/개선 후 사진 후보: ${snapshot.summary.photoCandidates}건`,
+    `- 승인된 개선 전/개선 후 사진: ${snapshot.summary.photoImprovements}건`,
     "",
     "## 위험성평가 As-Is / To-Be",
     ""
@@ -1276,8 +1276,8 @@ export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
     `- 위험성평가 행: ${snapshot.summary.riskRows}건`,
     `- 고위험 행: ${snapshot.summary.highRiskRows}건`,
     `- 개선사항: ${snapshot.summary.improvements}건`,
-    `- Before/After 사진 후보: ${snapshot.summary.photoCandidates}건`,
-    `- 승인된 Before/After 사진: ${snapshot.summary.photoImprovements}건`,
+    `- 개선 전/개선 후 사진 후보: ${snapshot.summary.photoCandidates}건`,
+    `- 승인된 개선 전/개선 후 사진: ${snapshot.summary.photoImprovements}건`,
     "",
     "## 위험 이벤트",
     ""
