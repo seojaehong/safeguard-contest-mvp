@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-07-13T04:58:16.758Z",
+  "sourceSha": "b321f0c881b475a517f2c16db801baed36b36692",
+  "buildId": "hoG-ToEwbicsoxHE6Fwnp",
+  "nftPath": ".next/server/app/api/export/pdf/route.js.nft.json",
+  "fileCount": 57,
+  "notoRegularCount": 1,
+  "notoBoldCount": 1,
+  "licenseCount": 1,
+  "matches": {
+    "notoRegular": [
+      "../../../../../../public/fonts/NotoSansKR-Regular.ttf"
+    ],
+    "notoBold": [
+      "../../../../../../public/fonts/NotoSansKR-Bold.ttf"
+    ],
+    "license": [
+      "../../../../../../public/fonts/NotoSansKR-OFL.txt"
+    ]
+  }
+}

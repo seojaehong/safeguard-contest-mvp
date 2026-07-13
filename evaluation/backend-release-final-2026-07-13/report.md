@@ -2,15 +2,18 @@
 
 ## Release Identity
 
-- Source SHA: `45df617d6eced74bc5e9673104aa306338612ce6`
+- Source SHA: `b321f0c881b475a517f2c16db801baed36b36692`
+- Source identity: `19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b`
 - Branch: `feat/backend-release-integration-v2`
 - Verification date: `2026-07-13`
+- Verification status: pass
+- Launch readiness: blocked by the separately listed RLS and production-provenance gates
 - Database/schema/data mutation: none
 - Protected screenshot changes committed: none
 
 ## User-Reported Workspace Regression
 
-The empty-input and desktop rail regressions are closed in the integrated source.
+The empty-input residue and desktop rail-height regressions are closed in the integrated source.
 
 - Empty textarea value: `0` characters
 - Empty placeholder: none
@@ -27,28 +30,28 @@ Evidence: `evaluation/workspace-empty-rail-hotfix-2026-07-13/`.
 
 ## Integrated Test Gates
 
-- Full serial suite: `132` files passed, `5` skipped; `1270` tests passed, `7` skipped.
+- Full serial suite: `132` files passed, `5` skipped; `1,282` tests passed, `7` skipped.
 - Full suite command: `npm.cmd test -- --maxWorkers=1 --no-file-parallelism`.
-- Full suite duration: `878.27s`.
+- Full suite duration: `894.92s`.
 - Strict TypeScript typecheck: passed.
-- Phase A ontology/MCP gate: `4` files, `104` tests passed.
-- PDF focused gate: `2` files, `16` tests passed.
-- Frontend audit reconciliation: `2` files, `41` tests passed.
+- PDF focused gate: `2` files, `22` tests passed.
+- Isolated browser-harness remediation: `1` file, `3` tests passed.
+- Frontend browser audit: `108/108` rows passed.
 
-The earlier `final-full-tests-45df617.log` is intentionally non-authoritative: it was stopped after the audit source identity correctly rejected stale browser evidence. `final-full-tests-post-audit-45df617.log` is the authoritative full-suite result.
+The authoritative source gate is `final-full-tests-b321f0c.log`. Earlier source logs are superseded.
 
 ## Frontend Evidence Gate
 
 - Static audit: `32` page files, `23` product component files, `0` coverage issues, `0` violations.
-- Normal production build: `27/27`, audit marker `0`.
-- Audit production build: `27/27`, audit marker exactly `1`.
+- Normal production build: `27/27`, build ID `hoG-ToEwbicsoxHE6Fwnp`, audit marker `0`.
+- Audit production build: `27/27`, build ID `WtOGHIYNjzirknfb9uTs3`, audit marker exactly `1`.
 - Browser rows: `96` route + `6` workspace theme + `4` special surface + `2` generated surface = `108`.
 - Browser result: `108/108` successes.
 - Failed rows, findings, recovered rows: `0 / 0 / 0`.
-- Canonical source identity: `a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb`.
-- Forbidden local/worktree path scan: `0` matches.
+- Canonical source identity: `19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b`.
+- Forbidden local/worktree path scan: `0` matches after evidence sanitization.
 
-The final normal build was repeated after the full suite because isolated browser tests replace `.next`. The post-test build completed `27/27` and the bundle contract again returned marker `0`.
+The normal build was repeated from a clean `.next` after the full suite because browser tests replace build artifacts. The post-test build completed `27/27` and the bundle contract again returned marker `0`.
 
 ## PDF Runtime Gate
 
@@ -56,13 +59,23 @@ The final normal build was repeated after the full suite because isolated browse
 - Content type: `application/pdf`.
 - Content disposition: attachment with UTF-8 filename.
 - Cache control: `no-store`.
-- Output size: `16,276 bytes`, below `1 MiB`.
+- Output size: `20,513 bytes`, below `1 MiB`.
 - PDF magic: `%PDF-`.
-- Render: `1` page, `1190x1684`, `38,160` non-white pixels.
-- Extracted text length: `405`; Korean title, risk, and control text present.
-- NFT: `57` traced files.
-- Required NFT assets: Noto Sans KR Regular `1`, Bold `1`, OFL license `1`.
-- Missing/invalid font controlled error and non-font rethrow behavior: covered by the `16/16` focused PDF gate.
+- Combined TBM fixture: `32` linked risk-assessment rows + `32` TBM delivery rows.
+- Long-form render: `2` pages; first and last pages are `1190x1684` with `108,251 / 74,114` non-white pixels.
+- Extracted text length: `2,616`; title, risk sentinel, TBM sentinel/detail, both provenance labels, approval line, and disclaimer are present.
+- NFT: `57` traced files; Noto Sans KR Regular `1`, Bold `1`, OFL license `1`.
+- Missing/invalid font controlled error, non-font rethrow, pagination, row merging, and export budgets: covered by `22/22` focused tests.
+- TBM exports preserve both `riskRows` and TBM-specific `rows`; neither source silently replaces the other.
+- Fail-closed resource budgets: request `262,144` bytes, input rows `128`, string field `4,000` Unicode characters, render lines `512`, PDF pages `8`.
+- Over-limit requests return deterministic HTTP `413` with `PDF_EXPORT_LIMIT_EXCEEDED`; content is not silently truncated.
+- Direct POST provenance records source SHA, source identity, build ID, exact request artifact and SHA-256, and response SHA-256.
+
+## Browser Harness Reliability
+
+- The isolated Next.js harness probes a bounded loopback range and now retries server startup on `EADDRINUSE` or `EACCES`.
+- A regression test claims the selected port after probe but before Next starts, verifies the failed attempt is cleaned, and verifies the second port starts successfully.
+- This closes the probe/start time-of-check-to-time-of-use race without weakening the serial full-suite gate.
 
 ## Phase A Ontology
 
@@ -70,6 +83,8 @@ The final normal build was repeated after the full suite because isolated browse
 - Controls: `9`; SIF references: `7`; KOSHA production documents: `9`.
 - KOSHA local chunks: `13` (`8` active, `5` review-only).
 - Direct control mappings: `11`; law articles: `9`; materialization targets: `18`.
+- Review-only SIF evidence is excluded from active citations, naturalization, and MCP evidence contracts.
+- A failed quality contract invalidates a prior human confirmation and returns it to pending.
 - Core resolver state: `resolved=false`, `published=false`, `graphPublicationState=published`, `inferenceState=review_required`.
 - Reason: persistent production-row/local-chunk provenance bridge and corpus launch gate are not ready.
 - KOSHA remains technical guidance, SIF remains risk-priority evidence, and only current law supplies statutory mandate evidence.
@@ -84,21 +99,24 @@ The final normal build was repeated after the full suite because isolated browse
 
 ## Working Tree Boundary
 
-Sixteen pre-existing `output/playwright/2026-07-10/module-shell-hardening/*.png` changes remain unstaged and are excluded from every release commit. All final evaluation artifacts are path-sanitized and contain no local username or worktree path.
+Sixteen pre-existing `output/playwright/2026-07-10/module-shell-hardening/*.png` changes remain unstaged and are excluded from every release commit. Final evaluation artifacts are path-sanitized and contain no local username or worktree path.
 
 ## Primary Evidence
 
-- `final-full-tests-post-audit-45df617.log`
-- `final-evidence-validation-45df617.json`
-- `final-typecheck-45df617.log`
-- `final-audit-focused-45df617.log`
-- `final-static-audit-45df617.log`
-- `final-build-normal-45df617.log`
-- `final-build-audit-45df617.log`
-- `final-browser-audit-108-45df617.log`
-- `final-build-post-tests-45df617.log`
-- `final-pdf-focused-45df617.log`
-- `final-pdf-nft-45df617.json`
-- `final-direct-post-45df617.json`
-- `final-direct-post-45df617-render.json`
-- `final-direct-post-45df617-render.png`
+- `final-full-tests-b321f0c.log`
+- `final-evidence-validation-b321f0c.json`
+- `final-typecheck-b321f0c.log`
+- `final-pdf-focused-b321f0c.log`
+- `final-isolated-harness-remediation-b321f0c.log`
+- `final-static-audit-b321f0c.log`
+- `final-build-normal-b321f0c.log`
+- `final-build-audit-b321f0c.log`
+- `final-browser-audit-108-b321f0c.log`
+- `final-build-post-tests-b321f0c.log`
+- `final-bundle-normal-post-tests-b321f0c.log`
+- `final-pdf-nft-b321f0c.json`
+- `final-direct-post-b321f0c-request.json`
+- `final-direct-post-b321f0c.json`
+- `final-direct-post-b321f0c-render.json`
+- `final-direct-post-b321f0c-first.png`
+- `final-direct-post-b321f0c-last.png`

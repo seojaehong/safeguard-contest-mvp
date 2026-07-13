@@ -1,6 +1,6 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-13T01:35:51.264Z",
+  "generatedAt": "2026-07-13T04:59:00.000Z",
   "verificationStatus": "pass",
   "launchReadiness": "not_evaluated_here",
   "supersedes": {
@@ -9,8 +9,8 @@
     "staticViolations": 2444,
     "browserAudit": "not_run"
   },
-  "sourceSha": "45df617d6eced74bc5e9673104aa306338612ce6",
-  "sourceIdentity": "a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb",
+  "sourceSha": "b321f0c881b475a517f2c16db801baed36b36692",
+  "sourceIdentity": "19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b",
   "staticAudit": {
     "status": "pass",
     "pageFiles": 32,
@@ -24,7 +24,7 @@
     "normal": {
       "status": "pass",
       "staticPages": 27,
-      "buildId": "nJTlGA4TIREL_IJPusibN",
+      "buildId": "hoG-ToEwbicsoxHE6Fwnp",
       "chunkCount": 98,
       "markerCount": 0,
       "artifact": "bundle-normal.json"
@@ -32,7 +32,7 @@
     "audit": {
       "status": "pass",
       "staticPages": 27,
-      "buildId": "0T2-WIgD5QN5EoEJi-box",
+      "buildId": "WtOGHIYNjzirknfb9uTs3",
       "chunkCount": 98,
       "markerCount": 1,
       "markerFile": "static/chunks/app/layout-4a08a2eec725a6bc.js",
@@ -52,9 +52,13 @@
     "screenshots": 108,
     "artifact": "browser-report.json"
   },
-  "focusedTests": {
-    "filesPassed": 2,
-    "testsPassed": 41,
+  "evidenceOnlyDescendantContract": {
+    "testsPassed": 3,
+    "status": "pass"
+  },
+  "fullSuite": {
+    "filesPassed": 132,
+    "testsPassed": 1282,
     "status": "pass"
   },
   "databaseChanged": false,

@@ -5,8 +5,8 @@
     "RLS audit findings require an approved migration and authenticated cross-tenant verification.",
     "Phase A ontology production provenance bridge remains unresolved."
   ],
-  "sourceSha": "45df617d6eced74bc5e9673104aa306338612ce6",
-  "sourceIdentity": "a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb",
+  "sourceSha": "b321f0c881b475a517f2c16db801baed36b36692",
+  "sourceIdentity": "19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b",
   "branch": "feat/backend-release-integration-v2",
   "verificationDate": "2026-07-13",
   "workspaceRegression": {
@@ -25,25 +25,20 @@
     "fullSuite": {
       "filesPassed": 132,
       "filesSkipped": 5,
-      "testsPassed": 1270,
+      "testsPassed": 1282,
       "testsSkipped": 7,
-      "durationSeconds": 878.27,
+      "durationSeconds": 894.92,
       "status": "pass"
     },
     "typecheck": "pass",
-    "ontologyFocused": {
-      "filesPassed": 4,
-      "testsPassed": 104,
-      "status": "pass"
-    },
     "pdfFocused": {
       "filesPassed": 2,
-      "testsPassed": 16,
+      "testsPassed": 22,
       "status": "pass"
     },
-    "frontendAuditFocused": {
-      "filesPassed": 2,
-      "testsPassed": 41,
+    "isolatedHarnessFocused": {
+      "filesPassed": 1,
+      "testsPassed": 3,
       "status": "pass"
     },
     "staticAudit": {
@@ -55,8 +50,10 @@
     },
     "builds": {
       "normalPages": 27,
+      "normalBuildId": "hoG-ToEwbicsoxHE6Fwnp",
       "normalMarkerCount": 0,
       "auditPages": 27,
+      "auditBuildId": "WtOGHIYNjzirknfb9uTs3",
       "auditMarkerCount": 1,
       "postTestNormalPages": 27,
       "postTestNormalMarkerCount": 0,
@@ -79,20 +76,46 @@
     "statusCode": 200,
     "contentType": "application/pdf",
     "cacheControl": "no-store",
-    "byteLength": 16276,
+    "byteLength": 20513,
     "underOneMiB": true,
-    "pages": 1,
+    "pages": 2,
     "renderWidth": 1190,
     "renderHeight": 1684,
-    "nonwhitePixels": 38160,
-    "extractedTextLength": 405,
+    "firstPageNonwhitePixels": 108251,
+    "lastPageNonwhitePixels": 74114,
+    "extractedTextLength": 2616,
     "containsKoreanTitle": true,
-    "containsRisk": true,
-    "containsControl": true,
+    "containsRiskSentinel": true,
+    "containsTbmSentinel": true,
+    "containsTbmDetail": true,
+    "containsRiskLinkLabel": true,
+    "containsTbmDeliveryLabel": true,
+    "containsApproval": true,
+    "containsDisclaimer": true,
+    "riskRows": 32,
+    "tbmRows": 32,
     "nftFiles": 57,
     "nftRegular": 1,
     "nftBold": 1,
-    "nftLicense": 1
+    "nftLicense": 1,
+    "requestArtifact": "final-direct-post-b321f0c-request.json",
+    "requestSha256": "f09c47a8d9c87de205003d92bc0697d3bc36326dc6a23eaf54567e2eba91e40e",
+    "responseSha256": "c69d831625d56b55518f60e8f620309f35ed50a2ec8393fa238cfc3add559106",
+    "resourceBudgets": {
+      "requestBytes": 262144,
+      "inputRows": 128,
+      "stringCharacters": 4000,
+      "renderLines": 512,
+      "pdfPages": 8,
+      "overLimitStatusCode": 413,
+      "overLimitCode": "PDF_EXPORT_LIMIT_EXCEEDED"
+    }
+  },
+  "browserHarness": {
+    "portBindAttempts": 8,
+    "retriesEaddrinuse": true,
+    "retriesEacces": true,
+    "raceRegressionPassed": true
   },
   "ontology": {
     "canonicalChains": 3,
@@ -108,7 +131,9 @@
     "resolved": false,
     "published": false,
     "graphPublicationState": "published",
-    "inferenceState": "review_required"
+    "inferenceState": "review_required",
+    "reviewOnlyActiveEvidenceExcluded": true,
+    "failedQualityInvalidatesConfirmation": true
   },
   "boundaries": {
     "databaseChanged": false,

@@ -1,9 +1,11 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-13T01:15:10.617Z",
-  "baseUrl": "http://127.0.0.1:3047",
-  "sourceSha": "45df617d6eced74bc5e9673104aa306338612ce6",
-  "sourceIdentity": "a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb",
+  "generatedAt": "2026-07-13T04:37:23.568Z",
+  "baseUrl": "http://127.0.0.1:3050",
+  "sourceSha": "b321f0c881b475a517f2c16db801baed36b36692",
+  "sourceIdentity": "19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b",
+  "evidenceHead": "b321f0c881b475a517f2c16db801baed36b36692",
+  "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 32,
     "viewports": 3,
@@ -25,11 +27,11 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 121184
+    "elapsedMs": 124434
   },
   "staticAudit": {
-    "sourceSha": "45df617d6eced74bc5e9673104aa306338612ce6",
-    "sourceIdentity": "a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb",
+    "sourceSha": "b321f0c881b475a517f2c16db801baed36b36692",
+    "sourceIdentity": "19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
@@ -70,8 +72,8 @@
   "routeRows": [
     {
       "route": "/",
-      "requestedUrl": "http://127.0.0.1:3047/",
-      "finalUrl": "http://127.0.0.1:3047/",
+      "requestedUrl": "http://127.0.0.1:3050/",
+      "finalUrl": "http://127.0.0.1:3050/",
       "status": 200,
       "expectedStatuses": [
         200
@@ -168,8 +170,8 @@
     },
     {
       "route": "/",
-      "requestedUrl": "http://127.0.0.1:3047/",
-      "finalUrl": "http://127.0.0.1:3047/",
+      "requestedUrl": "http://127.0.0.1:3050/",
+      "finalUrl": "http://127.0.0.1:3050/",
       "status": 200,
       "expectedStatuses": [
         200
@@ -266,8 +268,8 @@
     },
     {
       "route": "/",
-      "requestedUrl": "http://127.0.0.1:3047/",
-      "finalUrl": "http://127.0.0.1:3047/",
+      "requestedUrl": "http://127.0.0.1:3050/",
+      "finalUrl": "http://127.0.0.1:3050/",
       "status": 200,
       "expectedStatuses": [
         200
@@ -364,8 +366,8 @@
     },
     {
       "route": "/archive",
-      "requestedUrl": "http://127.0.0.1:3047/archive",
-      "finalUrl": "http://127.0.0.1:3047/archive",
+      "requestedUrl": "http://127.0.0.1:3050/archive",
+      "finalUrl": "http://127.0.0.1:3050/archive",
       "status": 200,
       "expectedStatuses": [
         200
@@ -489,8 +491,8 @@
     },
     {
       "route": "/archive",
-      "requestedUrl": "http://127.0.0.1:3047/archive",
-      "finalUrl": "http://127.0.0.1:3047/archive",
+      "requestedUrl": "http://127.0.0.1:3050/archive",
+      "finalUrl": "http://127.0.0.1:3050/archive",
       "status": 200,
       "expectedStatuses": [
         200
@@ -614,8 +616,8 @@
     },
     {
       "route": "/archive",
-      "requestedUrl": "http://127.0.0.1:3047/archive",
-      "finalUrl": "http://127.0.0.1:3047/archive",
+      "requestedUrl": "http://127.0.0.1:3050/archive",
+      "finalUrl": "http://127.0.0.1:3050/archive",
       "status": 200,
       "expectedStatuses": [
         200
@@ -739,8 +741,8 @@
     },
     {
       "route": "/ask",
-      "requestedUrl": "http://127.0.0.1:3047/ask?q=추락",
-      "finalUrl": "http://127.0.0.1:3047/ask?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3050/ask?q=추락",
+      "finalUrl": "http://127.0.0.1:3050/ask?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -827,8 +829,8 @@
     },
     {
       "route": "/ask",
-      "requestedUrl": "http://127.0.0.1:3047/ask?q=추락",
-      "finalUrl": "http://127.0.0.1:3047/ask?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3050/ask?q=추락",
+      "finalUrl": "http://127.0.0.1:3050/ask?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -915,8 +917,8 @@
     },
     {
       "route": "/ask",
-      "requestedUrl": "http://127.0.0.1:3047/ask?q=추락",
-      "finalUrl": "http://127.0.0.1:3047/ask?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3050/ask?q=추락",
+      "finalUrl": "http://127.0.0.1:3050/ask?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1003,8 +1005,8 @@
     },
     {
       "route": "/auth/callback",
-      "requestedUrl": "http://127.0.0.1:3047/auth/callback",
-      "finalUrl": "http://127.0.0.1:3047/auth/callback",
+      "requestedUrl": "http://127.0.0.1:3050/auth/callback",
+      "finalUrl": "http://127.0.0.1:3050/auth/callback",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1058,8 +1060,8 @@
     },
     {
       "route": "/auth/callback",
-      "requestedUrl": "http://127.0.0.1:3047/auth/callback",
-      "finalUrl": "http://127.0.0.1:3047/auth/callback",
+      "requestedUrl": "http://127.0.0.1:3050/auth/callback",
+      "finalUrl": "http://127.0.0.1:3050/auth/callback",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1113,8 +1115,8 @@
     },
     {
       "route": "/auth/callback",
-      "requestedUrl": "http://127.0.0.1:3047/auth/callback",
-      "finalUrl": "http://127.0.0.1:3047/auth/callback",
+      "requestedUrl": "http://127.0.0.1:3050/auth/callback",
+      "finalUrl": "http://127.0.0.1:3050/auth/callback",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1168,8 +1170,8 @@
     },
     {
       "route": "/demo",
-      "requestedUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
-      "finalUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "requestedUrl": "http://127.0.0.1:3050/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "finalUrl": "http://127.0.0.1:3050/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1304,8 +1306,8 @@
     },
     {
       "route": "/demo",
-      "requestedUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
-      "finalUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "requestedUrl": "http://127.0.0.1:3050/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "finalUrl": "http://127.0.0.1:3050/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1440,8 +1442,8 @@
     },
     {
       "route": "/demo",
-      "requestedUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
-      "finalUrl": "http://127.0.0.1:3047/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "requestedUrl": "http://127.0.0.1:3050/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
+      "finalUrl": "http://127.0.0.1:3050/demo?scenario=seoul-construction-windy&step=0&mode=offline&speed=fast",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1576,8 +1578,8 @@
     },
     {
       "route": "/dispatch",
-      "requestedUrl": "http://127.0.0.1:3047/dispatch",
-      "finalUrl": "http://127.0.0.1:3047/dispatch",
+      "requestedUrl": "http://127.0.0.1:3050/dispatch",
+      "finalUrl": "http://127.0.0.1:3050/dispatch",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1674,8 +1676,8 @@
     },
     {
       "route": "/dispatch",
-      "requestedUrl": "http://127.0.0.1:3047/dispatch",
-      "finalUrl": "http://127.0.0.1:3047/dispatch",
+      "requestedUrl": "http://127.0.0.1:3050/dispatch",
+      "finalUrl": "http://127.0.0.1:3050/dispatch",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1772,8 +1774,8 @@
     },
     {
       "route": "/dispatch",
-      "requestedUrl": "http://127.0.0.1:3047/dispatch",
-      "finalUrl": "http://127.0.0.1:3047/dispatch",
+      "requestedUrl": "http://127.0.0.1:3050/dispatch",
+      "finalUrl": "http://127.0.0.1:3050/dispatch",
       "status": 200,
       "expectedStatuses": [
         200
@@ -1870,8 +1872,8 @@
     },
     {
       "route": "/documents",
-      "requestedUrl": "http://127.0.0.1:3047/documents",
-      "finalUrl": "http://127.0.0.1:3047/documents",
+      "requestedUrl": "http://127.0.0.1:3050/documents",
+      "finalUrl": "http://127.0.0.1:3050/documents",
       "status": 200,
       "expectedStatuses": [
         200
@@ -2276,8 +2278,8 @@
     },
     {
       "route": "/documents",
-      "requestedUrl": "http://127.0.0.1:3047/documents",
-      "finalUrl": "http://127.0.0.1:3047/documents",
+      "requestedUrl": "http://127.0.0.1:3050/documents",
+      "finalUrl": "http://127.0.0.1:3050/documents",
       "status": 200,
       "expectedStatuses": [
         200
@@ -2605,8 +2607,8 @@
     },
     {
       "route": "/documents",
-      "requestedUrl": "http://127.0.0.1:3047/documents",
-      "finalUrl": "http://127.0.0.1:3047/documents",
+      "requestedUrl": "http://127.0.0.1:3050/documents",
+      "finalUrl": "http://127.0.0.1:3050/documents",
       "status": 200,
       "expectedStatuses": [
         200
@@ -2934,8 +2936,8 @@
     },
     {
       "route": "/dryrun",
-      "requestedUrl": "http://127.0.0.1:3047/dryrun",
-      "finalUrl": "http://127.0.0.1:3047/dryrun",
+      "requestedUrl": "http://127.0.0.1:3050/dryrun",
+      "finalUrl": "http://127.0.0.1:3050/dryrun",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3042,8 +3044,8 @@
     },
     {
       "route": "/dryrun",
-      "requestedUrl": "http://127.0.0.1:3047/dryrun",
-      "finalUrl": "http://127.0.0.1:3047/dryrun",
+      "requestedUrl": "http://127.0.0.1:3050/dryrun",
+      "finalUrl": "http://127.0.0.1:3050/dryrun",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3150,8 +3152,8 @@
     },
     {
       "route": "/dryrun",
-      "requestedUrl": "http://127.0.0.1:3047/dryrun",
-      "finalUrl": "http://127.0.0.1:3047/dryrun",
+      "requestedUrl": "http://127.0.0.1:3050/dryrun",
+      "finalUrl": "http://127.0.0.1:3050/dryrun",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3258,8 +3260,8 @@
     },
     {
       "route": "/evidence",
-      "requestedUrl": "http://127.0.0.1:3047/evidence",
-      "finalUrl": "http://127.0.0.1:3047/evidence",
+      "requestedUrl": "http://127.0.0.1:3050/evidence",
+      "finalUrl": "http://127.0.0.1:3050/evidence",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3366,8 +3368,8 @@
     },
     {
       "route": "/evidence",
-      "requestedUrl": "http://127.0.0.1:3047/evidence",
-      "finalUrl": "http://127.0.0.1:3047/evidence",
+      "requestedUrl": "http://127.0.0.1:3050/evidence",
+      "finalUrl": "http://127.0.0.1:3050/evidence",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3474,8 +3476,8 @@
     },
     {
       "route": "/evidence",
-      "requestedUrl": "http://127.0.0.1:3047/evidence",
-      "finalUrl": "http://127.0.0.1:3047/evidence",
+      "requestedUrl": "http://127.0.0.1:3050/evidence",
+      "finalUrl": "http://127.0.0.1:3050/evidence",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3582,8 +3584,8 @@
     },
     {
       "route": "/evidence-file",
-      "requestedUrl": "http://127.0.0.1:3047/evidence-file",
-      "finalUrl": "http://127.0.0.1:3047/evidence-file",
+      "requestedUrl": "http://127.0.0.1:3050/evidence-file",
+      "finalUrl": "http://127.0.0.1:3050/evidence-file",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3690,8 +3692,8 @@
     },
     {
       "route": "/evidence-file",
-      "requestedUrl": "http://127.0.0.1:3047/evidence-file",
-      "finalUrl": "http://127.0.0.1:3047/evidence-file",
+      "requestedUrl": "http://127.0.0.1:3050/evidence-file",
+      "finalUrl": "http://127.0.0.1:3050/evidence-file",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3798,8 +3800,8 @@
     },
     {
       "route": "/evidence-file",
-      "requestedUrl": "http://127.0.0.1:3047/evidence-file",
-      "finalUrl": "http://127.0.0.1:3047/evidence-file",
+      "requestedUrl": "http://127.0.0.1:3050/evidence-file",
+      "finalUrl": "http://127.0.0.1:3050/evidence-file",
       "status": 200,
       "expectedStatuses": [
         200
@@ -3906,8 +3908,8 @@
     },
     {
       "route": "/home",
-      "requestedUrl": "http://127.0.0.1:3047/home",
-      "finalUrl": "http://127.0.0.1:3047/home",
+      "requestedUrl": "http://127.0.0.1:3050/home",
+      "finalUrl": "http://127.0.0.1:3050/home",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4004,8 +4006,8 @@
     },
     {
       "route": "/home",
-      "requestedUrl": "http://127.0.0.1:3047/home",
-      "finalUrl": "http://127.0.0.1:3047/home",
+      "requestedUrl": "http://127.0.0.1:3050/home",
+      "finalUrl": "http://127.0.0.1:3050/home",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4102,8 +4104,8 @@
     },
     {
       "route": "/home",
-      "requestedUrl": "http://127.0.0.1:3047/home",
-      "finalUrl": "http://127.0.0.1:3047/home",
+      "requestedUrl": "http://127.0.0.1:3050/home",
+      "finalUrl": "http://127.0.0.1:3050/home",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4200,8 +4202,8 @@
     },
     {
       "route": "/interpretation/[id]",
-      "requestedUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
-      "finalUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
+      "requestedUrl": "http://127.0.0.1:3050/interpretation/audit-missing-interpretation",
+      "finalUrl": "http://127.0.0.1:3050/interpretation/audit-missing-interpretation",
       "status": 404,
       "expectedStatuses": [
         404
@@ -4274,8 +4276,8 @@
     },
     {
       "route": "/interpretation/[id]",
-      "requestedUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
-      "finalUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
+      "requestedUrl": "http://127.0.0.1:3050/interpretation/audit-missing-interpretation",
+      "finalUrl": "http://127.0.0.1:3050/interpretation/audit-missing-interpretation",
       "status": 404,
       "expectedStatuses": [
         404
@@ -4348,8 +4350,8 @@
     },
     {
       "route": "/interpretation/[id]",
-      "requestedUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
-      "finalUrl": "http://127.0.0.1:3047/interpretation/audit-missing-interpretation",
+      "requestedUrl": "http://127.0.0.1:3050/interpretation/audit-missing-interpretation",
+      "finalUrl": "http://127.0.0.1:3050/interpretation/audit-missing-interpretation",
       "status": 404,
       "expectedStatuses": [
         404
@@ -4422,8 +4424,8 @@
     },
     {
       "route": "/knowledge",
-      "requestedUrl": "http://127.0.0.1:3047/knowledge",
-      "finalUrl": "http://127.0.0.1:3047/knowledge",
+      "requestedUrl": "http://127.0.0.1:3050/knowledge",
+      "finalUrl": "http://127.0.0.1:3050/knowledge",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4499,8 +4501,8 @@
     },
     {
       "route": "/knowledge",
-      "requestedUrl": "http://127.0.0.1:3047/knowledge",
-      "finalUrl": "http://127.0.0.1:3047/knowledge",
+      "requestedUrl": "http://127.0.0.1:3050/knowledge",
+      "finalUrl": "http://127.0.0.1:3050/knowledge",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4576,8 +4578,8 @@
     },
     {
       "route": "/knowledge",
-      "requestedUrl": "http://127.0.0.1:3047/knowledge",
-      "finalUrl": "http://127.0.0.1:3047/knowledge",
+      "requestedUrl": "http://127.0.0.1:3050/knowledge",
+      "finalUrl": "http://127.0.0.1:3050/knowledge",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4653,8 +4655,8 @@
     },
     {
       "route": "/knowledge/[section]/[slug]",
-      "requestedUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
-      "finalUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
+      "requestedUrl": "http://127.0.0.1:3050/knowledge/hazards/fall-scaffold",
+      "finalUrl": "http://127.0.0.1:3050/knowledge/hazards/fall-scaffold",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4741,8 +4743,8 @@
     },
     {
       "route": "/knowledge/[section]/[slug]",
-      "requestedUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
-      "finalUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
+      "requestedUrl": "http://127.0.0.1:3050/knowledge/hazards/fall-scaffold",
+      "finalUrl": "http://127.0.0.1:3050/knowledge/hazards/fall-scaffold",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4829,8 +4831,8 @@
     },
     {
       "route": "/knowledge/[section]/[slug]",
-      "requestedUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
-      "finalUrl": "http://127.0.0.1:3047/knowledge/hazards/fall-scaffold",
+      "requestedUrl": "http://127.0.0.1:3050/knowledge/hazards/fall-scaffold",
+      "finalUrl": "http://127.0.0.1:3050/knowledge/hazards/fall-scaffold",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4917,8 +4919,8 @@
     },
     {
       "route": "/law/[id]",
-      "requestedUrl": "http://127.0.0.1:3047/law/law-osha-main",
-      "finalUrl": "http://127.0.0.1:3047/law/law-osha-main",
+      "requestedUrl": "http://127.0.0.1:3050/law/law-osha-main",
+      "finalUrl": "http://127.0.0.1:3050/law/law-osha-main",
       "status": 200,
       "expectedStatuses": [
         200
@@ -4991,8 +4993,8 @@
     },
     {
       "route": "/law/[id]",
-      "requestedUrl": "http://127.0.0.1:3047/law/law-osha-main",
-      "finalUrl": "http://127.0.0.1:3047/law/law-osha-main",
+      "requestedUrl": "http://127.0.0.1:3050/law/law-osha-main",
+      "finalUrl": "http://127.0.0.1:3050/law/law-osha-main",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5065,8 +5067,8 @@
     },
     {
       "route": "/law/[id]",
-      "requestedUrl": "http://127.0.0.1:3047/law/law-osha-main",
-      "finalUrl": "http://127.0.0.1:3047/law/law-osha-main",
+      "requestedUrl": "http://127.0.0.1:3050/law/law-osha-main",
+      "finalUrl": "http://127.0.0.1:3050/law/law-osha-main",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5139,8 +5141,8 @@
     },
     {
       "route": "/login",
-      "requestedUrl": "http://127.0.0.1:3047/login",
-      "finalUrl": "http://127.0.0.1:3047/login",
+      "requestedUrl": "http://127.0.0.1:3050/login",
+      "finalUrl": "http://127.0.0.1:3050/login",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5194,8 +5196,8 @@
     },
     {
       "route": "/login",
-      "requestedUrl": "http://127.0.0.1:3047/login",
-      "finalUrl": "http://127.0.0.1:3047/login",
+      "requestedUrl": "http://127.0.0.1:3050/login",
+      "finalUrl": "http://127.0.0.1:3050/login",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5249,8 +5251,8 @@
     },
     {
       "route": "/login",
-      "requestedUrl": "http://127.0.0.1:3047/login",
-      "finalUrl": "http://127.0.0.1:3047/login",
+      "requestedUrl": "http://127.0.0.1:3050/login",
+      "finalUrl": "http://127.0.0.1:3050/login",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5304,8 +5306,8 @@
     },
     {
       "route": "/ontology",
-      "requestedUrl": "http://127.0.0.1:3047/ontology",
-      "finalUrl": "http://127.0.0.1:3047/ontology",
+      "requestedUrl": "http://127.0.0.1:3050/ontology",
+      "finalUrl": "http://127.0.0.1:3050/ontology",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5529,8 +5531,8 @@
     },
     {
       "route": "/ontology",
-      "requestedUrl": "http://127.0.0.1:3047/ontology",
-      "finalUrl": "http://127.0.0.1:3047/ontology",
+      "requestedUrl": "http://127.0.0.1:3050/ontology",
+      "finalUrl": "http://127.0.0.1:3050/ontology",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5754,8 +5756,8 @@
     },
     {
       "route": "/ontology",
-      "requestedUrl": "http://127.0.0.1:3047/ontology",
-      "finalUrl": "http://127.0.0.1:3047/ontology",
+      "requestedUrl": "http://127.0.0.1:3050/ontology",
+      "finalUrl": "http://127.0.0.1:3050/ontology",
       "status": 200,
       "expectedStatuses": [
         200
@@ -5979,8 +5981,8 @@
     },
     {
       "route": "/ops/api",
-      "requestedUrl": "http://127.0.0.1:3047/ops/api",
-      "finalUrl": "http://127.0.0.1:3047/ops/api",
+      "requestedUrl": "http://127.0.0.1:3050/ops/api",
+      "finalUrl": "http://127.0.0.1:3050/ops/api",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6077,8 +6079,8 @@
     },
     {
       "route": "/ops/api",
-      "requestedUrl": "http://127.0.0.1:3047/ops/api",
-      "finalUrl": "http://127.0.0.1:3047/ops/api",
+      "requestedUrl": "http://127.0.0.1:3050/ops/api",
+      "finalUrl": "http://127.0.0.1:3050/ops/api",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6175,8 +6177,8 @@
     },
     {
       "route": "/ops/api",
-      "requestedUrl": "http://127.0.0.1:3047/ops/api",
-      "finalUrl": "http://127.0.0.1:3047/ops/api",
+      "requestedUrl": "http://127.0.0.1:3050/ops/api",
+      "finalUrl": "http://127.0.0.1:3050/ops/api",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6273,8 +6275,8 @@
     },
     {
       "route": "/precedent/[id]",
-      "requestedUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
-      "finalUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
+      "requestedUrl": "http://127.0.0.1:3050/precedent/prec-subcontract-safety",
+      "finalUrl": "http://127.0.0.1:3050/precedent/prec-subcontract-safety",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6347,8 +6349,8 @@
     },
     {
       "route": "/precedent/[id]",
-      "requestedUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
-      "finalUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
+      "requestedUrl": "http://127.0.0.1:3050/precedent/prec-subcontract-safety",
+      "finalUrl": "http://127.0.0.1:3050/precedent/prec-subcontract-safety",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6421,8 +6423,8 @@
     },
     {
       "route": "/precedent/[id]",
-      "requestedUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
-      "finalUrl": "http://127.0.0.1:3047/precedent/prec-subcontract-safety",
+      "requestedUrl": "http://127.0.0.1:3050/precedent/prec-subcontract-safety",
+      "finalUrl": "http://127.0.0.1:3050/precedent/prec-subcontract-safety",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6495,8 +6497,8 @@
     },
     {
       "route": "/preview",
-      "requestedUrl": "http://127.0.0.1:3047/preview",
-      "finalUrl": "http://127.0.0.1:3047/preview",
+      "requestedUrl": "http://127.0.0.1:3050/preview",
+      "finalUrl": "http://127.0.0.1:3050/preview",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6583,8 +6585,8 @@
     },
     {
       "route": "/preview",
-      "requestedUrl": "http://127.0.0.1:3047/preview",
-      "finalUrl": "http://127.0.0.1:3047/preview",
+      "requestedUrl": "http://127.0.0.1:3050/preview",
+      "finalUrl": "http://127.0.0.1:3050/preview",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6671,8 +6673,8 @@
     },
     {
       "route": "/preview",
-      "requestedUrl": "http://127.0.0.1:3047/preview",
-      "finalUrl": "http://127.0.0.1:3047/preview",
+      "requestedUrl": "http://127.0.0.1:3050/preview",
+      "finalUrl": "http://127.0.0.1:3050/preview",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6759,8 +6761,8 @@
     },
     {
       "route": "/prototype",
-      "requestedUrl": "http://127.0.0.1:3047/prototype",
-      "finalUrl": "http://127.0.0.1:3047/workspace",
+      "requestedUrl": "http://127.0.0.1:3050/prototype",
+      "finalUrl": "http://127.0.0.1:3050/workspace",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6790,7 +6792,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-prototype-desktop-1440.jpg",
-      "screenshotSha256": "9906f01690549bee42983e19db596d8fb366493095f8eb44c71e82b085cd7365",
+      "screenshotSha256": "a1413c627acea0f898255575b7f291588e7997f6865e59be96ff0a7a8aeb0105",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -6907,7 +6909,7 @@
         }
       ],
       "keySurfaces": [],
-      "geometryFingerprint": "[[\"MAIN\",\"command-center-shell workbench-root workspace-theme\",0,0,1440,1141,\"grid\",\"12px\",\"0px\",\"64px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"command-topbar workspace-command-topbar\",40,12,1360,73,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"A\",\"brand-lockup safeclaw-lockup\",53,25,140,47,\"flex\",\"0px\",\"12px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"IMG\",\"brand-mark\",53,32.5,32,32,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-top-title\",217,26.3,863.7,44.4,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-theme-toggle workbench-theme-toggle\",1104.7,25.5,126.3,46,\"flex\",\"4px\",\"4px\",\"4px\",\"4px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",1109.7,30.5,50.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"BUTTON\",\"\",1164,30.5,62,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"topbar-status\",1255,25.5,132,46,\"grid\",\"4px\",\"0px\",\"4px\",\"16px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"command-viewport linear-workspace-layout\",40,117,1360,959.9,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ASIDE\",\"workspace-side-nav is-empty\",40,117,264,959.9,\"grid\",\"16px\",\"12px\",\"16px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-side-group\",52,133,239,204,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",52,163,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot\",65,180,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",52,225,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",65,242,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",52,287,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",65,304,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"SECTION\",\"command-main card command-main-studio workspace-view-input\",320,117,1080,959.9,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"workspace-step-page workspace-input-page\",320,117,980,959.9,\"grid\",\"70px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"command-copy\",430,187,760,160.5,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"eyebrow\",430,189,85.1,20,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"FORM\",\"command-console\",430,395.6,760,621.4,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"console-head\",430,395.6,760,20,\"flex\",\"0px\",\"4px\",\"0px\",\"4px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"counter\",1142.4,396.6,43.6,18,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"TEXTAREA\",\"textarea command-console-input\",430,431.6,760,152,\"block\",\"22px\",\"24px\",\"22px\",\"24px\",\"4px\",\"17px\",\"29.92px\",\"normal\"],[\"P\",\"input-helper\",430,615.6,760,22.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"DIV\",\"input-composer-tray\",430,666,760,68,\"flex\",\"8px\",\"8px\",\"8px\",\"8px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"composer-attach-button\",439,681,75.9,38,\"flex\",\"8px\",\"12px\",\"8px\",\"12px\",\"12px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"composer-attachment-status\",526.9,679,369.8,42,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"composer-mode-label\",908.7,675,84.3,50,\"flex\",\"0px\",\"12px\",\"0px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button command-primary composer-submit-button workbench-primary-action\",1005,677,176,46,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"field-brief-chip-row\",430,770,760,38,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"evidence-readiness-rail\",430,824,760,141,\"grid\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",430,836,181,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",623,836,181,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",816,836,181,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",1009,836,181,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",430,910,181,43,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DETAILS\",\"advanced-settings\",430,993,760,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"FIELDSET\",\"ai-mode-toggle\",432,1029,756,132.6,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",445,1059,238,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option selected\",691,1059,238,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",937,1059,238,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"DETAILS\",\"quick-scenario-chips\",320,1053,760,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"quick-scenario-chip-list\",320,1089,760,80,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"quick-chip\",320,1089,169.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",497.3,1089,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",685.6,1089,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",873.9,1089,187.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",320,1133,202.4,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",530.4,1133,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"MAIN\",\"command-center-shell workbench-root workspace-theme\",0,0,1440,1089,\"grid\",\"12px\",\"0px\",\"64px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"command-topbar workspace-command-topbar\",40,12,1360,73,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"A\",\"brand-lockup safeclaw-lockup\",53,25,140,47,\"flex\",\"0px\",\"12px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"IMG\",\"brand-mark\",53,32.5,32,32,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-top-title\",217,26.3,863.7,44.4,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-theme-toggle workbench-theme-toggle\",1104.7,25.5,126.3,46,\"flex\",\"4px\",\"4px\",\"4px\",\"4px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",1109.7,30.5,50.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"BUTTON\",\"\",1164,30.5,62,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"topbar-status\",1255,25.5,132,46,\"grid\",\"4px\",\"0px\",\"4px\",\"16px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"command-viewport linear-workspace-layout\",40,117,1360,908,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ASIDE\",\"workspace-side-nav is-empty\",40,117,264,908,\"grid\",\"16px\",\"12px\",\"16px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-side-group\",52,133,239,204,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",52,163,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot\",65,180,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",52,225,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",65,242,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",52,287,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",65,304,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"SECTION\",\"command-main card command-main-studio workspace-view-input\",320,117,1080,908,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"workspace-step-page workspace-input-page\",320,117,980,885.9,\"grid\",\"70px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"command-copy\",430,187,760,160.5,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"eyebrow\",430,189,85.1,20,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"FORM\",\"command-console\",430,395.6,760,547.4,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"console-head\",430,395.6,760,20,\"flex\",\"0px\",\"4px\",\"0px\",\"4px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"counter\",1142.4,396.6,43.6,18,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"TEXTAREA\",\"textarea command-console-input\",430,431.6,760,152,\"block\",\"22px\",\"24px\",\"22px\",\"24px\",\"4px\",\"17px\",\"29.92px\",\"normal\"],[\"P\",\"input-helper\",430,615.6,760,22.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"DIV\",\"input-composer-tray\",430,666,760,68,\"flex\",\"8px\",\"8px\",\"8px\",\"8px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"composer-attach-button\",439,681,75.9,38,\"flex\",\"8px\",\"12px\",\"8px\",\"12px\",\"12px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"composer-attachment-status\",526.9,679,369.8,42,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"composer-mode-label\",908.7,675,84.3,50,\"flex\",\"0px\",\"12px\",\"0px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button command-primary composer-submit-button workbench-primary-action\",1005,677,176,46,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"evidence-readiness-rail\",430,750,760,141,\"grid\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",430,762,181,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",623,762,181,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",816,762,181,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",1009,762,181,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",430,836,181,43,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DETAILS\",\"advanced-settings\",430,919,760,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"FIELDSET\",\"ai-mode-toggle\",432,955,756,132.6,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",445,985,238,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option selected\",691,985,238,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",937,985,238,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"DETAILS\",\"quick-scenario-chips\",320,979,760,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"quick-scenario-chip-list\",320,1015,760,80,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"quick-chip\",320,1015,169.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",497.3,1015,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",685.6,1015,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",873.9,1015,187.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",320,1059,202.4,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",530.4,1059,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -6927,8 +6929,8 @@
     },
     {
       "route": "/prototype",
-      "requestedUrl": "http://127.0.0.1:3047/prototype",
-      "finalUrl": "http://127.0.0.1:3047/workspace",
+      "requestedUrl": "http://127.0.0.1:3050/prototype",
+      "finalUrl": "http://127.0.0.1:3050/workspace",
       "status": 200,
       "expectedStatuses": [
         200
@@ -6958,7 +6960,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-prototype-tablet-1024.jpg",
-      "screenshotSha256": "3f4419e0e3f910dbd9fddcaae14371a6f36756f4385168a556d8ddb5c6088a76",
+      "screenshotSha256": "7c7edfcd5dde23cd99ced7776a195c8f040f1a2b5456f0bd7cc3289a3df12a60",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -7075,7 +7077,7 @@
         }
       ],
       "keySurfaces": [],
-      "geometryFingerprint": "[[\"MAIN\",\"command-center-shell workbench-root workspace-theme\",0,0,1024,1121.8,\"grid\",\"12px\",\"0px\",\"64px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"command-topbar workspace-command-topbar\",16,12,992,73,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"A\",\"brand-lockup safeclaw-lockup\",29,25,140,47,\"flex\",\"0px\",\"12px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"IMG\",\"brand-mark\",29,32.5,32,32,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-top-title\",193,26.3,495.7,44.4,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-theme-toggle workbench-theme-toggle\",712.7,25.5,126.3,46,\"flex\",\"4px\",\"4px\",\"4px\",\"4px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",717.7,30.5,50.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"BUTTON\",\"\",772,30.5,62,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"topbar-status\",863,25.5,132,46,\"grid\",\"4px\",\"0px\",\"4px\",\"16px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"command-viewport linear-workspace-layout\",16,117,992,940.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ASIDE\",\"workspace-side-nav is-empty\",16,117,264,940.8,\"grid\",\"16px\",\"12px\",\"16px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-side-group\",28,133,239,204,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",28,163,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot\",41,180,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",28,225,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",41,242,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",28,287,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",41,304,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"SECTION\",\"command-main card command-main-studio workspace-view-input\",296,117,712,940.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"workspace-step-page workspace-input-page\",296,117,712,940.8,\"grid\",\"63px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"command-copy\",296,180,712,148.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"eyebrow\",296,182,85.1,20,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"FORM\",\"command-console\",296,376.4,712,621.4,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"console-head\",296,376.4,712,20,\"flex\",\"0px\",\"4px\",\"0px\",\"4px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"counter\",960.4,377.4,43.6,18,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"TEXTAREA\",\"textarea command-console-input\",296,412.4,712,152,\"block\",\"22px\",\"24px\",\"22px\",\"24px\",\"4px\",\"17px\",\"29.92px\",\"normal\"],[\"P\",\"input-helper\",296,596.4,712,22.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"DIV\",\"input-composer-tray\",296,646.8,712,68,\"flex\",\"8px\",\"8px\",\"8px\",\"8px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"composer-attach-button\",305,661.8,75.9,38,\"flex\",\"8px\",\"12px\",\"8px\",\"12px\",\"12px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"composer-attachment-status\",392.9,659.8,328.3,42,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"composer-mode-label\",733.2,655.8,77.8,50,\"flex\",\"0px\",\"12px\",\"0px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button command-primary composer-submit-button workbench-primary-action\",823,657.8,176,46,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"field-brief-chip-row\",296,750.8,712,38,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"evidence-readiness-rail\",296,804.8,712,141,\"grid\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",296,816.8,169,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",477,816.8,169,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",658,816.8,169,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",839,816.8,169,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",296,890.8,169,43,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DETAILS\",\"advanced-settings\",296,973.8,712,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"FIELDSET\",\"ai-mode-toggle\",298,1009.8,708,152.4,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",311,1039.8,222,109.4,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option selected\",541,1039.8,222,109.4,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",771,1039.8,222,109.4,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"DETAILS\",\"quick-scenario-chips\",296,1033.8,712,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"quick-scenario-chip-list\",296,1069.8,712,80,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"quick-chip\",296,1069.8,169.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",473.3,1069.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",661.6,1069.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",296,1113.8,187.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",491.3,1113.8,202.4,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",701.7,1113.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"MAIN\",\"command-center-shell workbench-root workspace-theme\",0,0,1024,1047.8,\"grid\",\"12px\",\"0px\",\"64px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"command-topbar workspace-command-topbar\",16,12,992,73,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"A\",\"brand-lockup safeclaw-lockup\",29,25,140,47,\"flex\",\"0px\",\"12px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"IMG\",\"brand-mark\",29,32.5,32,32,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-top-title\",193,26.3,495.7,44.4,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-theme-toggle workbench-theme-toggle\",712.7,25.5,126.3,46,\"flex\",\"4px\",\"4px\",\"4px\",\"4px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",717.7,30.5,50.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"BUTTON\",\"\",772,30.5,62,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"topbar-status\",863,25.5,132,46,\"grid\",\"4px\",\"0px\",\"4px\",\"16px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"command-viewport linear-workspace-layout\",16,117,992,866.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ASIDE\",\"workspace-side-nav is-empty\",16,117,264,866.8,\"grid\",\"16px\",\"12px\",\"16px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-side-group\",28,133,239,204,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",28,163,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot\",41,180,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",28,225,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",41,242,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",28,287,239,50,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",41,304,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"SECTION\",\"command-main card command-main-studio workspace-view-input\",296,117,712,866.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"workspace-step-page workspace-input-page\",296,117,712,866.8,\"grid\",\"63px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"command-copy\",296,180,712,148.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"eyebrow\",296,182,85.1,20,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"FORM\",\"command-console\",296,376.4,712,547.4,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"console-head\",296,376.4,712,20,\"flex\",\"0px\",\"4px\",\"0px\",\"4px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"counter\",960.4,377.4,43.6,18,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"TEXTAREA\",\"textarea command-console-input\",296,412.4,712,152,\"block\",\"22px\",\"24px\",\"22px\",\"24px\",\"4px\",\"17px\",\"29.92px\",\"normal\"],[\"P\",\"input-helper\",296,596.4,712,22.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"DIV\",\"input-composer-tray\",296,646.8,712,68,\"flex\",\"8px\",\"8px\",\"8px\",\"8px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"composer-attach-button\",305,661.8,75.9,38,\"flex\",\"8px\",\"12px\",\"8px\",\"12px\",\"12px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"composer-attachment-status\",392.9,659.8,328.3,42,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"composer-mode-label\",733.2,655.8,77.8,50,\"flex\",\"0px\",\"12px\",\"0px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button command-primary composer-submit-button workbench-primary-action\",823,657.8,176,46,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"evidence-readiness-rail\",296,730.8,712,141,\"grid\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",296,742.8,169,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",477,742.8,169,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",658,742.8,169,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",839,742.8,169,62,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",296,816.8,169,43,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DETAILS\",\"advanced-settings\",296,899.8,712,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"FIELDSET\",\"ai-mode-toggle\",298,935.8,708,152.4,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",311,965.8,222,109.4,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option selected\",541,965.8,222,109.4,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",771,965.8,222,109.4,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"DETAILS\",\"quick-scenario-chips\",296,959.8,712,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"quick-scenario-chip-list\",296,995.8,712,80,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"quick-chip\",296,995.8,169.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",473.3,995.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",661.6,995.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",296,1039.8,187.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",491.3,1039.8,202.4,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",701.7,1039.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -7095,8 +7097,8 @@
     },
     {
       "route": "/prototype",
-      "requestedUrl": "http://127.0.0.1:3047/prototype",
-      "finalUrl": "http://127.0.0.1:3047/workspace",
+      "requestedUrl": "http://127.0.0.1:3050/prototype",
+      "finalUrl": "http://127.0.0.1:3050/workspace",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7126,7 +7128,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-prototype-mobile-390.jpg",
-      "screenshotSha256": "0dac957e5407d2c1fc41f9cbb91035c592b7788d96b7c3a81b501d50ca6ab0bb",
+      "screenshotSha256": "ade349ddb6340a3c8316f4816efee7ee3e5c708479e2159290128f7147febc0b",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -7243,7 +7245,7 @@
         }
       ],
       "keySurfaces": [],
-      "geometryFingerprint": "[[\"MAIN\",\"command-center-shell workbench-root workspace-theme\",0,0,390,1355.8,\"grid\",\"12px\",\"0px\",\"64px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"command-topbar workspace-command-topbar\",10,12,370,112,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"A\",\"brand-lockup safeclaw-lockup\",23,25,344,28,\"flex\",\"0px\",\"12px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"IMG\",\"brand-mark\",23,26,26,26,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-theme-toggle workbench-theme-toggle\",23,65,344,46,\"flex\",\"4px\",\"4px\",\"4px\",\"4px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",28,70,50.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"BUTTON\",\"\",82.3,70,62,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"SECTION\",\"command-viewport linear-workspace-layout\",10,156,370,1135.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ASIDE\",\"workspace-side-nav is-empty\",11,157,368,103,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-side-group\",23,169,344,78,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",23,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot\",36,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",141.7,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",154.7,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",260.3,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",273.3,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"SECTION\",\"command-main card command-main-studio workspace-view-input\",11,260,368,1030.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"workspace-step-page workspace-input-page\",11,260,368,1030.8,\"grid\",\"16px\",\"18px\",\"20px\",\"18px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"command-copy\",29,276,332,80.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"eyebrow\",29,278,85.1,20,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"FORM\",\"command-console\",29,372.8,332,846,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"console-head\",29,372.8,332,20,\"flex\",\"0px\",\"4px\",\"0px\",\"4px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"counter\",313.4,373.8,43.6,18,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"TEXTAREA\",\"textarea command-console-input\",29,404.8,332,142,\"block\",\"16px\",\"16px\",\"16px\",\"16px\",\"4px\",\"15px\",\"25.2px\",\"normal\"],[\"DIV\",\"input-composer-tray\",29,566.8,332,182,\"grid\",\"8px\",\"8px\",\"8px\",\"8px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"composer-attach-button\",38,575.8,314,38,\"flex\",\"8px\",\"12px\",\"8px\",\"12px\",\"12px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"composer-attachment-status\",38,621.8,314,20,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"composer-mode-label\",38,649.8,314,36,\"flex\",\"0px\",\"12px\",\"0px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button command-primary composer-submit-button workbench-primary-action\",38,693.8,314,46,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"field-brief-chip-row\",29,780.8,332,88,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"evidence-readiness-rail\",29,880.8,332,290,\"grid\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,892.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,948.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1004.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1060.8,332,43,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1115.8,332,43,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DETAILS\",\"advanced-settings\",29,1194.8,332,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"FIELDSET\",\"ai-mode-toggle\",31,1230.8,328,308,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",44,1260.8,302,69.8,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option selected\",44,1338.6,302,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",44,1436.2,302,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"DETAILS\",\"quick-scenario-chips\",29,1246.8,332,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"quick-scenario-chip-list\",29,1282.8,332,256,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1282.8,169.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1326.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1370.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1414.8,187.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1458.8,202.4,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1502.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"MAIN\",\"command-center-shell workbench-root workspace-theme\",0,0,390,1235.8,\"grid\",\"12px\",\"0px\",\"64px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"command-topbar workspace-command-topbar\",10,12,370,112,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"A\",\"brand-lockup safeclaw-lockup\",23,25,344,28,\"flex\",\"0px\",\"12px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"IMG\",\"brand-mark\",23,26,26,26,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-theme-toggle workbench-theme-toggle\",23,65,344,46,\"flex\",\"4px\",\"4px\",\"4px\",\"4px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",28,70,50.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"BUTTON\",\"\",82.3,70,62,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"SECTION\",\"command-viewport linear-workspace-layout\",10,156,370,1015.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ASIDE\",\"workspace-side-nav is-empty\",11,157,368,103,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-side-group\",23,169,344,78,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",23,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot\",36,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",141.7,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",154.7,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",260.3,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",273.3,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"SECTION\",\"command-main card command-main-studio workspace-view-input\",11,260,368,910.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"workspace-step-page workspace-input-page\",11,260,368,910.8,\"grid\",\"16px\",\"18px\",\"20px\",\"18px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"command-copy\",29,276,332,80.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"eyebrow\",29,278,85.1,20,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"FORM\",\"command-console\",29,372.8,332,726,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"console-head\",29,372.8,332,20,\"flex\",\"0px\",\"4px\",\"0px\",\"4px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"counter\",313.4,373.8,43.6,18,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"TEXTAREA\",\"textarea command-console-input\",29,404.8,332,142,\"block\",\"16px\",\"16px\",\"16px\",\"16px\",\"4px\",\"15px\",\"25.2px\",\"normal\"],[\"DIV\",\"input-composer-tray\",29,566.8,332,182,\"grid\",\"8px\",\"8px\",\"8px\",\"8px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"composer-attach-button\",38,575.8,314,38,\"flex\",\"8px\",\"12px\",\"8px\",\"12px\",\"12px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"composer-attachment-status\",38,621.8,314,20,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"composer-mode-label\",38,649.8,314,36,\"flex\",\"0px\",\"12px\",\"0px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button command-primary composer-submit-button workbench-primary-action\",38,693.8,314,46,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"evidence-readiness-rail\",29,760.8,332,290,\"grid\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,772.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,828.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,884.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,940.8,332,43,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,995.8,332,43,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DETAILS\",\"advanced-settings\",29,1074.8,332,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"FIELDSET\",\"ai-mode-toggle\",31,1110.8,328,308,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",44,1140.8,302,69.8,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option selected\",44,1218.6,302,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",44,1316.2,302,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"DETAILS\",\"quick-scenario-chips\",29,1126.8,332,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"quick-scenario-chip-list\",29,1162.8,332,256,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1162.8,169.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1206.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1250.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1294.8,187.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1338.8,202.4,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1382.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -7263,8 +7265,8 @@
     },
     {
       "route": "/reports",
-      "requestedUrl": "http://127.0.0.1:3047/reports",
-      "finalUrl": "http://127.0.0.1:3047/reports",
+      "requestedUrl": "http://127.0.0.1:3050/reports",
+      "finalUrl": "http://127.0.0.1:3050/reports",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7358,8 +7360,8 @@
     },
     {
       "route": "/reports",
-      "requestedUrl": "http://127.0.0.1:3047/reports",
-      "finalUrl": "http://127.0.0.1:3047/reports",
+      "requestedUrl": "http://127.0.0.1:3050/reports",
+      "finalUrl": "http://127.0.0.1:3050/reports",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7453,8 +7455,8 @@
     },
     {
       "route": "/reports",
-      "requestedUrl": "http://127.0.0.1:3047/reports",
-      "finalUrl": "http://127.0.0.1:3047/reports",
+      "requestedUrl": "http://127.0.0.1:3050/reports",
+      "finalUrl": "http://127.0.0.1:3050/reports",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7548,8 +7550,8 @@
     },
     {
       "route": "/roadmap",
-      "requestedUrl": "http://127.0.0.1:3047/roadmap",
-      "finalUrl": "http://127.0.0.1:3047/roadmap",
+      "requestedUrl": "http://127.0.0.1:3050/roadmap",
+      "finalUrl": "http://127.0.0.1:3050/roadmap",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7643,8 +7645,8 @@
     },
     {
       "route": "/roadmap",
-      "requestedUrl": "http://127.0.0.1:3047/roadmap",
-      "finalUrl": "http://127.0.0.1:3047/roadmap",
+      "requestedUrl": "http://127.0.0.1:3050/roadmap",
+      "finalUrl": "http://127.0.0.1:3050/roadmap",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7738,8 +7740,8 @@
     },
     {
       "route": "/roadmap",
-      "requestedUrl": "http://127.0.0.1:3047/roadmap",
-      "finalUrl": "http://127.0.0.1:3047/roadmap",
+      "requestedUrl": "http://127.0.0.1:3050/roadmap",
+      "finalUrl": "http://127.0.0.1:3050/roadmap",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7833,8 +7835,8 @@
     },
     {
       "route": "/search",
-      "requestedUrl": "http://127.0.0.1:3047/search?q=추락",
-      "finalUrl": "http://127.0.0.1:3047/search?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3050/search?q=추락",
+      "finalUrl": "http://127.0.0.1:3050/search?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -7935,8 +7937,8 @@
     },
     {
       "route": "/search",
-      "requestedUrl": "http://127.0.0.1:3047/search?q=추락",
-      "finalUrl": "http://127.0.0.1:3047/search?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3050/search?q=추락",
+      "finalUrl": "http://127.0.0.1:3050/search?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8037,8 +8039,8 @@
     },
     {
       "route": "/search",
-      "requestedUrl": "http://127.0.0.1:3047/search?q=추락",
-      "finalUrl": "http://127.0.0.1:3047/search?q=%EC%B6%94%EB%9D%BD",
+      "requestedUrl": "http://127.0.0.1:3050/search?q=추락",
+      "finalUrl": "http://127.0.0.1:3050/search?q=%EC%B6%94%EB%9D%BD",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8139,8 +8141,8 @@
     },
     {
       "route": "/settings",
-      "requestedUrl": "http://127.0.0.1:3047/settings",
-      "finalUrl": "http://127.0.0.1:3047/settings",
+      "requestedUrl": "http://127.0.0.1:3050/settings",
+      "finalUrl": "http://127.0.0.1:3050/settings",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8216,8 +8218,8 @@
     },
     {
       "route": "/settings",
-      "requestedUrl": "http://127.0.0.1:3047/settings",
-      "finalUrl": "http://127.0.0.1:3047/settings",
+      "requestedUrl": "http://127.0.0.1:3050/settings",
+      "finalUrl": "http://127.0.0.1:3050/settings",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8293,8 +8295,8 @@
     },
     {
       "route": "/settings",
-      "requestedUrl": "http://127.0.0.1:3047/settings",
-      "finalUrl": "http://127.0.0.1:3047/settings",
+      "requestedUrl": "http://127.0.0.1:3050/settings",
+      "finalUrl": "http://127.0.0.1:3050/settings",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8370,8 +8372,8 @@
     },
     {
       "route": "/settings/ai-connect",
-      "requestedUrl": "http://127.0.0.1:3047/settings/ai-connect",
-      "finalUrl": "http://127.0.0.1:3047/settings/ai-connect",
+      "requestedUrl": "http://127.0.0.1:3050/settings/ai-connect",
+      "finalUrl": "http://127.0.0.1:3050/settings/ai-connect",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8465,8 +8467,8 @@
     },
     {
       "route": "/settings/ai-connect",
-      "requestedUrl": "http://127.0.0.1:3047/settings/ai-connect",
-      "finalUrl": "http://127.0.0.1:3047/settings/ai-connect",
+      "requestedUrl": "http://127.0.0.1:3050/settings/ai-connect",
+      "finalUrl": "http://127.0.0.1:3050/settings/ai-connect",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8560,8 +8562,8 @@
     },
     {
       "route": "/settings/ai-connect",
-      "requestedUrl": "http://127.0.0.1:3047/settings/ai-connect",
-      "finalUrl": "http://127.0.0.1:3047/settings/ai-connect",
+      "requestedUrl": "http://127.0.0.1:3050/settings/ai-connect",
+      "finalUrl": "http://127.0.0.1:3050/settings/ai-connect",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8655,8 +8657,8 @@
     },
     {
       "route": "/tbm",
-      "requestedUrl": "http://127.0.0.1:3047/tbm",
-      "finalUrl": "http://127.0.0.1:3047/tbm",
+      "requestedUrl": "http://127.0.0.1:3050/tbm",
+      "finalUrl": "http://127.0.0.1:3050/tbm",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8743,8 +8745,8 @@
     },
     {
       "route": "/tbm",
-      "requestedUrl": "http://127.0.0.1:3047/tbm",
-      "finalUrl": "http://127.0.0.1:3047/tbm",
+      "requestedUrl": "http://127.0.0.1:3050/tbm",
+      "finalUrl": "http://127.0.0.1:3050/tbm",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8831,8 +8833,8 @@
     },
     {
       "route": "/tbm",
-      "requestedUrl": "http://127.0.0.1:3047/tbm",
-      "finalUrl": "http://127.0.0.1:3047/tbm",
+      "requestedUrl": "http://127.0.0.1:3050/tbm",
+      "finalUrl": "http://127.0.0.1:3050/tbm",
       "status": 200,
       "expectedStatuses": [
         200
@@ -8919,8 +8921,8 @@
     },
     {
       "route": "/trust",
-      "requestedUrl": "http://127.0.0.1:3047/trust",
-      "finalUrl": "http://127.0.0.1:3047/trust",
+      "requestedUrl": "http://127.0.0.1:3050/trust",
+      "finalUrl": "http://127.0.0.1:3050/trust",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9007,8 +9009,8 @@
     },
     {
       "route": "/trust",
-      "requestedUrl": "http://127.0.0.1:3047/trust",
-      "finalUrl": "http://127.0.0.1:3047/trust",
+      "requestedUrl": "http://127.0.0.1:3050/trust",
+      "finalUrl": "http://127.0.0.1:3050/trust",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9095,8 +9097,8 @@
     },
     {
       "route": "/trust",
-      "requestedUrl": "http://127.0.0.1:3047/trust",
-      "finalUrl": "http://127.0.0.1:3047/trust",
+      "requestedUrl": "http://127.0.0.1:3050/trust",
+      "finalUrl": "http://127.0.0.1:3050/trust",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9183,8 +9185,8 @@
     },
     {
       "route": "/why",
-      "requestedUrl": "http://127.0.0.1:3047/why",
-      "finalUrl": "http://127.0.0.1:3047/why",
+      "requestedUrl": "http://127.0.0.1:3050/why",
+      "finalUrl": "http://127.0.0.1:3050/why",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9214,7 +9216,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-desktop-1440.jpg",
-      "screenshotSha256": "36e8e0ea96900b06551313e9af58c86e068442a18427ec8804f575acfab0b700",
+      "screenshotSha256": "38235d9c229bded9cdbd57af6d21fb0e20c92a1374811e25da03cddeb312f8c5",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -9288,8 +9290,8 @@
     },
     {
       "route": "/why",
-      "requestedUrl": "http://127.0.0.1:3047/why",
-      "finalUrl": "http://127.0.0.1:3047/why",
+      "requestedUrl": "http://127.0.0.1:3050/why",
+      "finalUrl": "http://127.0.0.1:3050/why",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9393,8 +9395,8 @@
     },
     {
       "route": "/why",
-      "requestedUrl": "http://127.0.0.1:3047/why",
-      "finalUrl": "http://127.0.0.1:3047/why",
+      "requestedUrl": "http://127.0.0.1:3050/why",
+      "finalUrl": "http://127.0.0.1:3050/why",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9498,8 +9500,8 @@
     },
     {
       "route": "/worker",
-      "requestedUrl": "http://127.0.0.1:3047/worker",
-      "finalUrl": "http://127.0.0.1:3047/worker",
+      "requestedUrl": "http://127.0.0.1:3050/worker",
+      "finalUrl": "http://127.0.0.1:3050/worker",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9624,8 +9626,8 @@
     },
     {
       "route": "/worker",
-      "requestedUrl": "http://127.0.0.1:3047/worker",
-      "finalUrl": "http://127.0.0.1:3047/worker",
+      "requestedUrl": "http://127.0.0.1:3050/worker",
+      "finalUrl": "http://127.0.0.1:3050/worker",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9750,8 +9752,8 @@
     },
     {
       "route": "/worker",
-      "requestedUrl": "http://127.0.0.1:3047/worker",
-      "finalUrl": "http://127.0.0.1:3047/worker",
+      "requestedUrl": "http://127.0.0.1:3050/worker",
+      "finalUrl": "http://127.0.0.1:3050/worker",
       "status": 200,
       "expectedStatuses": [
         200
@@ -9876,8 +9878,8 @@
     },
     {
       "route": "/workers",
-      "requestedUrl": "http://127.0.0.1:3047/workers",
-      "finalUrl": "http://127.0.0.1:3047/workers",
+      "requestedUrl": "http://127.0.0.1:3050/workers",
+      "finalUrl": "http://127.0.0.1:3050/workers",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10079,8 +10081,8 @@
     },
     {
       "route": "/workers",
-      "requestedUrl": "http://127.0.0.1:3047/workers",
-      "finalUrl": "http://127.0.0.1:3047/workers",
+      "requestedUrl": "http://127.0.0.1:3050/workers",
+      "finalUrl": "http://127.0.0.1:3050/workers",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10282,8 +10284,8 @@
     },
     {
       "route": "/workers",
-      "requestedUrl": "http://127.0.0.1:3047/workers",
-      "finalUrl": "http://127.0.0.1:3047/workers",
+      "requestedUrl": "http://127.0.0.1:3050/workers",
+      "finalUrl": "http://127.0.0.1:3050/workers",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10485,8 +10487,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10688,8 +10690,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy",
       "status": 200,
       "expectedStatuses": [
         200
@@ -10891,8 +10893,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11068,8 +11070,8 @@
   "workspaceThemeRows": [
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=day",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=day",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11271,8 +11273,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=day",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=day",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11474,8 +11476,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=day",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=day",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=day",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11649,8 +11651,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=night",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=night",
       "status": 200,
       "expectedStatuses": [
         200
@@ -11852,8 +11854,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=night",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=night",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12055,8 +12057,8 @@
     },
     {
       "route": "/workspace",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&theme=night",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=night",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&theme=night",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12232,8 +12234,8 @@
   "specialSurfaceRows": [
     {
       "route": "special:not-found",
-      "requestedUrl": "http://127.0.0.1:3047/__frontend-audit-not-found__",
-      "finalUrl": "http://127.0.0.1:3047/__frontend-audit-not-found__",
+      "requestedUrl": "http://127.0.0.1:3050/__frontend-audit-not-found__",
+      "finalUrl": "http://127.0.0.1:3050/__frontend-audit-not-found__",
       "status": 404,
       "expectedStatuses": [
         404
@@ -12307,8 +12309,8 @@
     },
     {
       "route": "special:error",
-      "requestedUrl": "http://127.0.0.1:3047/dryrun?__auditBoundary=error",
-      "finalUrl": "http://127.0.0.1:3047/dryrun?__auditBoundary=error",
+      "requestedUrl": "http://127.0.0.1:3050/dryrun?__auditBoundary=error",
+      "finalUrl": "http://127.0.0.1:3050/dryrun?__auditBoundary=error",
       "status": 500,
       "expectedStatuses": [
         500
@@ -12382,8 +12384,8 @@
     },
     {
       "route": "special:global-error",
-      "requestedUrl": "http://127.0.0.1:3047/dryrun?__auditBoundary=global-error",
-      "finalUrl": "http://127.0.0.1:3047/dryrun?__auditBoundary=global-error",
+      "requestedUrl": "http://127.0.0.1:3050/dryrun?__auditBoundary=global-error",
+      "finalUrl": "http://127.0.0.1:3050/dryrun?__auditBoundary=global-error",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12457,8 +12459,8 @@
     },
     {
       "route": "special:loading",
-      "requestedUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&__auditBoundary=loading",
-      "finalUrl": "http://127.0.0.1:3047/workspace?scenario=seoul-construction-windy&__auditBoundary=loading",
+      "requestedUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&__auditBoundary=loading",
+      "finalUrl": "http://127.0.0.1:3050/workspace?scenario=seoul-construction-windy&__auditBoundary=loading",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12488,7 +12490,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/special-loading.jpg",
-      "screenshotSha256": "b8a9dd69cc7c080f7ab5997d792c340376dda691ee32e15ab096dd8e5f43593b",
+      "screenshotSha256": "524b19d8f519d627368f4d00ecbbcce0740bf426bcf058b812f065b50538392a",
       "boundaryMarker": "loading",
       "renderedControls": [],
       "keySurfaces": [
@@ -12503,7 +12505,7 @@
           ]
         }
       ],
-      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.4,20.2,33.7,33.7,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.2,20,33.9,33.9,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -12526,8 +12528,8 @@
   "generatedSurfaceRows": [
     {
       "route": "generated:document-preview",
-      "requestedUrl": "http://127.0.0.1:3047/documents",
-      "finalUrl": "http://127.0.0.1:3047/documents",
+      "requestedUrl": "http://127.0.0.1:3050/documents",
+      "finalUrl": "http://127.0.0.1:3050/documents",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12934,8 +12936,8 @@
     {
       "surface": "pdf-export",
       "route": "generated:pdf-export",
-      "requestedUrl": "http://127.0.0.1:3047/api/export/pdf?format=html",
-      "finalUrl": "http://127.0.0.1:3047/api/export/pdf?format=html",
+      "requestedUrl": "http://127.0.0.1:3050/api/export/pdf?format=html",
+      "finalUrl": "http://127.0.0.1:3050/api/export/pdf?format=html",
       "status": 200,
       "expectedStatuses": [
         200
@@ -12967,7 +12969,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 13. 오전 10:15:10 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 13. 오후 1:37:23 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13011,7 +13013,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "46aa534efa18429538da1b713650acf94fb6d37d0b0927262bcd789eb3f77c1d",
+      "screenshotSha256": "ad1b02084645a3da72dd84979faea4df7d604212da274ecab7148ace654be4d4",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,

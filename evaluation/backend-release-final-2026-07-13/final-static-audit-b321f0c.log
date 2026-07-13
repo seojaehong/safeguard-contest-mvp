@@ -1,0 +1,18 @@
+
+> safeclaw@0.1.0 audit:frontend-consistency
+> node ./scripts/frontend_consistency_audit.mjs
+
+{
+  "outputPath": "evaluation\\frontend-audit-runner-port-v2-2026-07-11\\static-audit.json",
+  "status": "pass",
+  "counts": {
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "cssLines": 20397,
+    "importantDeclarations": 0
+  },
+  "coverageIssues": 0,
+  "violationCount": 0
+}
+
+EXIT_CODE=0

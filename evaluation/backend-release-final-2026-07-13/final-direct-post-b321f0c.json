@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-07-13T04:57:40.601Z",
+  "sourceSha": "b321f0c881b475a517f2c16db801baed36b36692",
+  "sourceIdentity": "19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b",
+  "buildId": "hoG-ToEwbicsoxHE6Fwnp",
+  "requestArtifact": "evaluation/backend-release-final-2026-07-13/final-direct-post-b321f0c-request.json",
+  "requestSha256": "f09c47a8d9c87de205003d92bc0697d3bc36326dc6a23eaf54567e2eba91e40e",
+  "responseSha256": "c69d831625d56b55518f60e8f620309f35ed50a2ec8393fa238cfc3add559106",
+  "status": 200,
+  "contentType": "application/pdf",
+  "contentDisposition": "attachment; filename=\"safeclaw-document.pdf\"; filename*=UTF-8''%EA%B0%80%EC%98%A8%ED%85%8C%ED%81%AC-TBM-%EC%9D%BC%EC%A7%80.pdf",
+  "cacheControl": "no-store",
+  "byteLength": 20513,
+  "underOneMiB": true,
+  "pageFixtureRiskRows": 32,
+  "pageFixtureTbmRows": 32,
+  "expectedRiskSentinel": "위험성평가연결보존확인",
+  "expectedTbmSentinel": "마지막행보존확인",
+  "expectedTbmDetail": "작업중지복창행",
+  "pdfMagic": "%PDF-"
+}

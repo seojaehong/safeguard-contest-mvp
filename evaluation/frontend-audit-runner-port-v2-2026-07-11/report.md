@@ -2,14 +2,14 @@
 
 ## Verdict
 
-**Verification PASS for source `45df617d6eced74bc5e9673104aa306338612ce6`.**
+**Verification PASS for source `b321f0c881b475a517f2c16db801baed36b36692`.**
 
 This report supersedes the earlier blocked port report from 2026-07-11. That historical state had 2,444 unresolved static findings and did not run the 108-row browser audit. The integrated remediation now has a zero-violation static prerequisite and a complete browser run.
 
 ## Source Identity
 
-- Source SHA: `45df617d6eced74bc5e9673104aa306338612ce6`
-- Source identity: `a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb`
+- Source SHA: `b321f0c881b475a517f2c16db801baed36b36692`
+- Source identity: `19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b`
 - Product pages: `32`
 - Product components: `23`
 - Database/schema/data mutation: none
@@ -29,7 +29,7 @@ The earlier blocked classification remains available in Git history. It is not t
 Normal build:
 
 - Static pages: `27/27`
-- Build ID: `nJTlGA4TIREL_IJPusibN`
+- Build ID: `hoG-ToEwbicsoxHE6Fwnp`
 - Chunks: `98`
 - Audit markers: `0`
 - Artifact: `bundle-normal.json`
@@ -37,7 +37,7 @@ Normal build:
 Audit build:
 
 - Static pages: `27/27`
-- Build ID: `0T2-WIgD5QN5EoEJi-box`
+- Build ID: `WtOGHIYNjzirknfb9uTs3`
 - Chunks: `98`
 - Audit markers: exactly `1`
 - Marker file: `static/chunks/app/layout-4a08a2eec725a6bc.js`
@@ -60,7 +60,8 @@ The browser runner consumed the passing static report with the same source SHA a
 
 ## Test Evidence
 
-- Frontend audit focused regression: `2` files, `41` tests passed.
+- Evidence-only descendant contract: `3` tests passed.
+- Final full serial suite: `132` files and `1,282` tests passed.
 - Strict TypeScript typecheck: passed.
 - Final normal build after the full suite: `27/27`, audit markers `0`.
 - Curated release evidence: `evaluation/backend-release-final-2026-07-13/`.
