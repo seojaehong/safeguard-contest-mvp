@@ -1,0 +1,111 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/reporting-downloads.test.ts -t renders As-Is/To-Be markdown
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/reports-mobile-task-distance
+
+ ❯ tests/reporting-downloads.test.ts (39 tests | 1 failed | 38 skipped) 28ms
+     × renders As-Is/To-Be markdown without external submission wording 27ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/reporting-downloads.test.ts > reporting downloads > renders As-Is/To-Be markdown without external submission wording
+AssertionError: expected '# 서울 성수동 주간 리포트\n\n생성시각: 2026. 07. 08…' to contain '개선 전/개선 후 사진 포함 승인'
+
+- Expected
++ Received
+
+- 개선 전/개선 후 사진 포함 승인
++ # 서울 성수동 주간 리포트
++
++ 생성시각: 2026. 07. 08. 오후 09:00
++
++ ## 적용 조건
++
++ - 기간: 주간 리포트
++ - 분류: 전체
++
++ ## 데이터 범위
++
++ - scope: current_browser
++ - mode: browser_local
++ - workpackSavedAt: 2026-07-08T08:00:00.000Z
++ - workpackGeneratedAt: 2026-07-13T22:32:00.556Z
++ - riskRowTimeBasis: workpack_saved_at
++ - limitations: current_browser_only, not_full_operational_history, risk_rows_share_workpack_timestamp
++
++ ## 현장 요약
++
++ - 회사: 세이프건설
++ - 현장: 서울 성수동
++ - 작업: 외벽 도장
++ - 인원: 5명
++ - 기상/조건: 오후 강풍 예보
++
++ ## 핵심 지표
++
++ - 위험성평가 행: 1건
++ - 고위험 행: 1건
++ - 개선사항 후보: 1건
++ - 개선 전/개선 후 사진 후보: 1건
++ - 승인된 개선 전/개선 후 사진: 1건
++
++ ## 위험성평가 As-Is / To-Be
++
++ ### 1. 이동식 비계 작업 · 추락 위험 [상]
++ - As-Is: 작업 전 비계 상태 육안 확인
++ - To-Be: 난간 보강, 바퀴 잠금, 안전대 체결 사진을 작업 전 확인
++ - 담당/기한: 현장소장 · 2026-07-08
++ - 확인: TBM 확인 및 개선 전/개선 후 사진 기록
++ - 근거: riskAssessmentDraft, tbmBriefing
++
++ ## 오늘/기간 개선사항
++
++ ### 2026. 07. 08. 오후 05:30 · 추락 위험
++ - 출처: 개선 전/개선 후 사진
++ - As-Is: 개선 전 사진: before-scaffold.jpg
++ - To-Be: 비계 난간과 바퀴 잠금 상태를 보강하고 TBM에서 재확인 / 개선 후 사진: after-guardrail.jpg
++ - 반영 문서: 위험성평가표, TBM 브리핑, TBM 기록
++ - 사진: before-scaffold.jpg, after-guardrail.jpg
++
++ ## 분류별 요약
++
++ ### 공정별
++ - 외벽 도장: 위험 1건, 고위험 1건, 개선 1건
++
++ ### 작업별
++ - 이동식 비계 작업: 위험 1건, 고위험 1건, 개선 1건
++
++ ### 위험등급별
++ - 상: 위험 1건, 고위험 1건, 개선 1건
++
++ ### 문서반영별
++ - 위험성평가표: 위험 1건, 고위험 0건, 개선 1건
++ - TBM 브리핑: 위험 1건, 고위험 0건, 개선 1건
++ - TBM 기록: 위험 1건, 고위험 0건, 개선 1건
++
++ ## 확인 메모
++
++ - 이 리포트는 현재 브라우저의 최신 작업팩과 저장된 개선사항 후보만 기준으로 생성됩니다.
++ - 위험행의 기간 포함 여부는 행별 생성시각이 아닌 작업팩 저장시각을 기준으로 판단합니다.
++ - 개선 전/개선 후 사진은 이 화면에서 포함 승인한 항목만 다운로드 산출물에 기록됩니다.
++
+
+ ❯ tests/reporting-downloads.test.ts:926:22
+    924|
+    925|     expect(markdown).toContain("## 위험성평가 As-Is / To-Be");
+    926|     expect(markdown).toContain(exactPhotoApprovalBoundary);
+       |                      ^
+    927|     expect(json).toContain(exactPhotoApprovalBoundary);
+    928|     expect(markdown).toContain("before-scaffold.jpg");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 38 skipped (39)
+   Start at  07:31:59
+   Duration  826ms (transform 158ms, setup 0ms, import 198ms, tests 28ms, environment 0ms)
+
+EXIT_CODE=1

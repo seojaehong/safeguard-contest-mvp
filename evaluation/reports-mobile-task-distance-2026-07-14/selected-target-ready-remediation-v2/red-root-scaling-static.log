@@ -1,0 +1,60 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/reports-design-remediation.test.ts -t uses the canonical Reports typography
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/reports-mobile-task-distance
+
+ ❯ tests/reports-design-remediation.test.ts (11 tests | 1 failed | 10 skipped) 23ms
+     × uses the canonical Reports typography and interaction tuples 21ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > uses the canonical Reports typography and interaction tuples
+AssertionError: expected { '--text-body': '15px', …(9) } to match object { …(13) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "--leading-caption": "1.5",
+-   "--leading-control": "1.428571",
+-   "--leading-hud": "1.454545",
+-   "--leading-table": "1.538462",
+-   "--text-body": "0.9375rem",
+-   "--text-body-lg": "1.0625rem",
+-   "--text-caption": "0.75rem",
+-   "--text-control": "0.875rem",
+-   "--text-hud": "0.6875rem",
+-   "--text-support": "0.875rem",
+-   "--text-table": "0.8125rem",
+-   "font-size": "var(--text-body)",
+-   "line-height": "var(--leading-body)",
++   "--leading-caption": "18px",
++   "--leading-control": "20px",
++   "--leading-table": "20px",
++   "--text-body": "15px",
++   "--text-caption": "12px",
++   "--text-control": "14px",
++   "--text-support": "14px",
++   "--text-table": "13px",
+  }
+
+ ❯ tests/reports-design-remediation.test.ts:204:41
+    202|     } as const;
+    203|
+    204|     expect(declarationsFor(css, scope)).toMatchObject({
+       |                                         ^
+    205|       "font-size": "var(--text-body)",
+    206|       "line-height": "var(--leading-body)",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 skipped (11)
+   Start at  07:32:09
+   Duration  1.59s (transform 307ms, setup 0ms, import 1.00s, tests 23ms, environment 0ms)
+
+EXIT_CODE=1
