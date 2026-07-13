@@ -2225,7 +2225,13 @@ export function WorkpackEditor({
 
   function updateValue(value: string) {
     pendingChangeRef.current = { source: "user-edit", requiresRevalidation: true };
-    setValues((current) => ({ ...current, [selected.key]: value }));
+    setValues((current) => {
+      const next = { ...current, [selected.key]: value };
+      for (const document of documentMeta) {
+        next[document.key] = applyPhaseADocumentAuthorityMarker(next[document.key], undefined);
+      }
+      return next;
+    });
     setDirtyDocumentKeys((current) => current.includes(selected.key) ? current : [...current, selected.key]);
     setLastEditedAt(new Date());
   }

@@ -377,6 +377,12 @@ describe("Phase A product remediation browser contract", () => {
     const editedText = `[EDIT_REQUIRES_REVALIDATION]\n${await editor.inputValue()}`;
     await editor.fill(editedText);
     await expect.poll(async () => await authorityMarker.textContent()).toContain("법령 근거: 검토 필요");
+    await expect.poll(async () => await editor.inputValue()).not.toContain("법령 근거: 연결됨");
+    await expect.poll(async () => await editor.inputValue()).not.toContain("공식자료 확인 완료");
+    const connectionStatus = page.locator(".result-ribbon article", { hasText: "연결 상태" });
+    await expect.poll(async () => await connectionStatus.locator("strong").textContent()).toContain("편집 후 재검수 필요");
+    const pendingEditedText = await editor.inputValue();
+    expect(pendingEditedText).toContain("EDIT_REQUIRES_REVALIDATION");
 
     const exportPanel = page.getByTestId("editor-export-panel");
     await exportPanel.evaluate((element) => {
@@ -404,7 +410,7 @@ describe("Phase A product remediation browser contract", () => {
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     await openEditor(page);
-    expect(await page.locator(".document-textarea").inputValue()).toBe(editedText);
+    expect(await page.locator(".document-textarea").inputValue()).toBe(pendingEditedText);
     expect(await page.locator(".phase-a-authority-marker").first().textContent()).toContain("법령 근거: 검토 필요");
 
     if (EVIDENCE_DIRECTORY) {

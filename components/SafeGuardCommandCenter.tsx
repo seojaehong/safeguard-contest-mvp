@@ -2338,8 +2338,12 @@ export function SafeGuardCommandCenter({
                 </article>
                 <article>
                   <span>연결 상태</span>
-                  <strong>{data.status.summary}</strong>
-                  <small className="muted">{workpackReadiness && !workpackReadiness.canShare ? workpackReadiness.summary : statusDetailCopy(state)}</small>
+                  <strong>{workpackReadiness && !workpackReadiness.canShare ? workpackReadiness.summary : data.status.summary}</strong>
+                  <small className="muted">
+                    {workpackReadiness && !workpackReadiness.canShare
+                      ? workpackReadiness.reasons[0] || workpackReadiness.summary
+                      : statusDetailCopy(state)}
+                  </small>
                 </article>
               </section>
               <section className="action-strip">
