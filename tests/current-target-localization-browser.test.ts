@@ -18,6 +18,7 @@ type RouteContract = {
   pathname: "/reports" | "/ontology" | "/knowledge" | "/workspace";
   readyRole: "article" | "region";
   readyName: string;
+  geometryScope: string;
   forbiddenPattern: RegExp;
 };
 
@@ -36,6 +37,7 @@ const routes: RouteContract[] = [
     pathname: "/reports",
     readyRole: "article",
     readyName: "작업문서형 리포트",
+    geometryScope: "main",
     forbiddenPattern: /\b(?:As-Is|To-Be|Before\/After)\b/u
   },
   {
@@ -43,6 +45,7 @@ const routes: RouteContract[] = [
     pathname: "/ontology",
     readyRole: "region",
     readyName: "옵시디언형 온톨로지 그래프",
+    geometryScope: "main",
     forbiddenPattern: /\b(?:Task|Hazard|Control|Article|Document|Accident|Duty|Nodes|Edges|Gate|Fallback)\b|Graph unavailable/u
   },
   {
@@ -50,6 +53,7 @@ const routes: RouteContract[] = [
     pathname: "/knowledge",
     readyRole: "region",
     readyName: "지식 DB 상태",
+    geometryScope: "main",
     forbiddenPattern: /Built-in Wiki|Runtime Knowledge|Knowledge Catalog|KOSHA Technical Support|KOSHA Reference Library|\b(?:Index|Hazards|Forms|Schema)\b/u
   },
   {
@@ -57,6 +61,7 @@ const routes: RouteContract[] = [
     pathname: "/workspace",
     readyRole: "region",
     readyName: "작업 이력 그래프",
+    geometryScope: ".workspace-operation-memory",
     forbiddenPattern: /\b(?:Ack\s+Node|Operation Ontology)\b/u
   }
 ];
@@ -241,7 +246,7 @@ describe("current target localization browser matrix", () => {
     const page = await browser.newPage({ viewport: { width, height } });
     const recoverableErrors = collectRecoverableHydrationErrors(page);
     await prepareRoute(page, contract, theme);
-    const metrics = await page.evaluate(({ meaningfulSelector, issueSource, issueFlags }) => {
+    const metrics = await page.evaluate(({ meaningfulSelector, issueSource, issueFlags, scopeSelector }) => {
       const clippingValues = new Set(["auto", "clip", "hidden", "scroll"]);
       const visibleRect = (element: HTMLElement) => {
         const rect = element.getBoundingClientRect();
@@ -266,7 +271,9 @@ describe("current target localization browser matrix", () => {
         if (right - left <= 0 || bottom - top <= 0) return null;
         return { left, right, top, bottom };
       };
-      const overlapTargets = [...document.querySelectorAll<HTMLElement>(meaningfulSelector)]
+      const scope = document.querySelector<HTMLElement>(scopeSelector);
+      if (!scope) throw new Error(`Missing geometry scope: ${scopeSelector}`);
+      const overlapTargets = [...scope.querySelectorAll<HTMLElement>(meaningfulSelector)]
         .filter((element) => {
           const style = getComputedStyle(element);
           const rect = element.getBoundingClientRect();
@@ -329,7 +336,8 @@ describe("current target localization browser matrix", () => {
     }, {
       meaningfulSelector,
       issueSource: issueOverlayPattern.source,
-      issueFlags: issueOverlayPattern.flags
+      issueFlags: issueOverlayPattern.flags,
+      scopeSelector: contract.geometryScope
     });
 
     expect(metrics.horizontalOverflow).toBe(0);
