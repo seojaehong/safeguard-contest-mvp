@@ -9066,17 +9066,6 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
-.safeclaw-report-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
-  gap: 24px;
-  align-items: start;
-}
-
-.safeclaw-report-head .safeclaw-download-actions {
-  grid-column: 1 / -1;
-}
-
 .safeclaw-report-controls {
   display: grid;
   gap: 12px;
@@ -9422,7 +9411,6 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-workdoc-shell,
   .safeclaw-workdoc-meta,
   .safeclaw-document-cockpit,
-  .safeclaw-report-head,
   .safeclaw-module-grid,
   .safeclaw-module-grid.four,
   .safeclaw-module-grid.three,
@@ -19941,17 +19929,6 @@ body:has(.safeclaw-landing) :is(
   top: auto;
 }
 
-.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
-  gap: 24px;
-  align-items: start;
-}
-
-.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-head .safeclaw-download-actions {
-  grid-column: 1 / -1;
-}
-
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-rail .safeclaw-report-controls,
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-rail .safeclaw-report-groups {
   margin-top: 12px;
@@ -20237,7 +20214,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell[data-module-route="/reports"] a[href],
 .safeclaw-module-shell[data-module-route="/reports"] select,
 .safeclaw-module-shell[data-module-route="/reports"] input:not([type="checkbox"]):not([type="hidden"]),
-.safeclaw-module-shell[data-module-route="/reports"] summary {
+.safeclaw-module-shell[data-module-route="/reports"] summary,
+.safeclaw-module-shell[data-module-route="/reports"] [tabindex]:not([tabindex="-1"]) {
+  min-inline-size: 44px;
+  min-width: 44px;
   min-block-size: 44px;
   min-height: 44px;
 }
@@ -20362,7 +20342,6 @@ body:has(.safeclaw-landing) :is(
     text-align: center;
   }
 
-  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-head,
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-groups {
     grid-template-columns: 1fr;
   }
