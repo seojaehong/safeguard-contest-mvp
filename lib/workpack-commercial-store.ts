@@ -10,6 +10,7 @@ import {
   type ServerShareRecipientsResult,
   type ShareRecipientInput
 } from "@/lib/workpack-commercial";
+import { parseShareDispatchBinding, type ShareDispatchBindingV1 } from "@/lib/channel-availability";
 
 export type StoredWorkpackShareAuthority = {
   workpack: AskResponse | null;
@@ -68,14 +69,21 @@ export type WorkpackOperationContext = {
   workpackId: string;
   question: string;
   generatedAt: string;
+  updatedAt: string;
+  evidenceSummary: unknown;
   shareAuthority: StoredWorkpackShareAuthority;
 };
 
 export type ActiveOwnedShareSession = {
   id: string;
+  organizationId: string;
+  siteId: string | null;
   workpackId: string;
+  createdBy: string;
   recipients: ShareRecipientInput[];
   expiresAt: string | null;
+  accessPolicy: Record<string, unknown>;
+  dispatchBinding: ShareDispatchBindingV1 | null;
 };
 
 export type ActiveOwnedShareSessionResult = {
@@ -117,7 +125,7 @@ export async function loadActiveOwnedShareSession(
 ): Promise<ActiveOwnedShareSessionResult> {
   const { data, error } = await client
     .from("workpack_share_sessions")
-    .select("id,organization_id,site_id,workpack_id,recipients_snapshot,status,expires_at,created_by")
+    .select("id,organization_id,site_id,workpack_id,recipients_snapshot,access_policy,status,expires_at,created_by")
     .eq("id", input.shareSessionId)
     .eq("workpack_id", input.workpackId)
     .eq("organization_id", input.organizationId)
@@ -151,14 +159,25 @@ export async function loadActiveOwnedShareSession(
   if (!recipients.length) {
     return { ok: false, status: 409, message: "공유 세션의 서버 작업자 snapshot을 확인할 수 없습니다." };
   }
+  const accessPolicy = typeof data.access_policy === "object"
+    && data.access_policy !== null
+    && !Array.isArray(data.access_policy)
+    ? data.access_policy as Record<string, unknown>
+    : null;
+  const dispatchBinding = parseShareDispatchBinding(accessPolicy?.dispatchBinding);
 
   return {
     ok: true,
     session: {
       id: data.id,
+      organizationId: data.organization_id,
+      siteId: data.site_id,
       workpackId: data.workpack_id,
+      createdBy: data.created_by,
       recipients,
-      expiresAt: data.expires_at
+      expiresAt: data.expires_at,
+      accessPolicy: accessPolicy || {},
+      dispatchBinding
     }
   };
 }
@@ -202,7 +221,7 @@ export async function loadOwnedWorkpackOperationContext(
 
   const { data: workpack, error: workpackError } = await client
     .from("workpacks")
-    .select("id,organization_id,site_id,question,scenario,deliverables,evidence_summary,status,created_at")
+    .select("id,organization_id,site_id,question,scenario,deliverables,evidence_summary,status,created_at,updated_at")
     .eq("id", workpackId)
     .in("organization_id", organizationIds)
     .maybeSingle();
@@ -232,6 +251,8 @@ export async function loadOwnedWorkpackOperationContext(
       workpackId: workpack.id,
       question: workpack.question,
       generatedAt: workpack.created_at,
+      updatedAt: workpack.updated_at,
+      evidenceSummary: workpack.evidence_summary,
       shareAuthority: assessStoredWorkpackShareAuthority({
         question: workpack.question,
         scenario: workpack.scenario,

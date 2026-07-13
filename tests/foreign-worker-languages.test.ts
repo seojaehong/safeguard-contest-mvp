@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { reconcileLanguages } from "@/lib/foreign-worker";
+import {
+  parseSupportedLanguageCode,
+  reconcileLanguages,
+  resolveAuthoritativeRecipientLocale,
+  SUPPORTED_LANGUAGE_CODES
+} from "@/lib/foreign-worker";
 import type { ForeignWorkerLanguage } from "@/lib/types";
 
 function lang(code: string, label: string, nativeLabel: string): ForeignWorkerLanguage {
@@ -67,5 +72,33 @@ describe("reconcileLanguages", () => {
     const result = reconcileLanguages(briefing, transmission, claimed);
 
     expect(result.map((l) => l.code)).toEqual(["en", "vi"]);
+  });
+});
+
+describe("Share locale authority", () => {
+  it("exposes the exact 12-code allowlist without region aliases", () => {
+    expect(SUPPORTED_LANGUAGE_CODES).toEqual([
+      "ko", "vi", "zh", "th", "uz", "mn", "ne", "km", "id", "my", "tl", "en"
+    ]);
+  });
+
+  it("normalizes only surrounding whitespace and ASCII case", () => {
+    expect(parseSupportedLanguageCode(" VI ")).toEqual({ status: "supported", locale: "vi" });
+    expect(parseSupportedLanguageCode("vi-VN")).toEqual({ status: "invalid", reason: "malformed_region_tag" });
+    expect(parseSupportedLanguageCode("xx")).toEqual({ status: "invalid", reason: "unsupported" });
+    expect(parseSupportedLanguageCode(" ")).toEqual({ status: "invalid", reason: "missing" });
+  });
+
+  it("requires all three server locale sources to agree exactly", () => {
+    expect(resolveAuthoritativeRecipientLocale({
+      workerLanguageCode: "vi",
+      recipientLanguageCode: "vi",
+      snapshotLanguageCode: "vi"
+    })).toEqual({ status: "supported", locale: "vi" });
+    expect(resolveAuthoritativeRecipientLocale({
+      workerLanguageCode: "vi",
+      recipientLanguageCode: "vi",
+      snapshotLanguageCode: "ko"
+    })).toEqual({ status: "invalid", reason: "conflict" });
   });
 });

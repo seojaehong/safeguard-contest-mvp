@@ -1,5 +1,60 @@
 import { AskResponse, ForeignWorkerLanguage } from "./types";
 
+export const SUPPORTED_LANGUAGE_CODES = [
+  "ko",
+  "vi",
+  "zh",
+  "th",
+  "uz",
+  "mn",
+  "ne",
+  "km",
+  "id",
+  "my",
+  "tl",
+  "en"
+] as const;
+
+export type SupportedLanguageCode = (typeof SUPPORTED_LANGUAGE_CODES)[number];
+
+export type SupportedLanguageCodeResult =
+  | { status: "supported"; locale: SupportedLanguageCode }
+  | { status: "invalid"; reason: "missing" | "unsupported" | "malformed_region_tag" | "conflict" };
+
+const SUPPORTED_LANGUAGE_SET = new Set<string>(SUPPORTED_LANGUAGE_CODES);
+
+export function parseSupportedLanguageCode(value: unknown): SupportedLanguageCodeResult {
+  if (typeof value !== "string" || !value.trim()) {
+    return { status: "invalid", reason: "missing" };
+  }
+  const normalized = value.trim().toLowerCase();
+  if (normalized.includes("-") || normalized.includes("_")) {
+    return { status: "invalid", reason: "malformed_region_tag" };
+  }
+  if (!SUPPORTED_LANGUAGE_SET.has(normalized)) {
+    return { status: "invalid", reason: "unsupported" };
+  }
+  return { status: "supported", locale: normalized as SupportedLanguageCode };
+}
+
+export function resolveAuthoritativeRecipientLocale(input: {
+  workerLanguageCode: unknown;
+  recipientLanguageCode: unknown;
+  snapshotLanguageCode: unknown;
+}): SupportedLanguageCodeResult {
+  const worker = parseSupportedLanguageCode(input.workerLanguageCode);
+  if (worker.status === "invalid") return worker;
+  const recipient = parseSupportedLanguageCode(input.recipientLanguageCode);
+  if (recipient.status === "invalid") return recipient;
+  const snapshot = parseSupportedLanguageCode(input.snapshotLanguageCode);
+  if (snapshot.status === "invalid") return snapshot;
+  const locales = [worker.locale, recipient.locale, snapshot.locale];
+  if (new Set(locales).size !== 1) {
+    return { status: "invalid", reason: "conflict" };
+  }
+  return { status: "supported", locale: locales[0] };
+}
+
 type BriefingInput = {
   question: string;
   scenario: AskResponse["scenario"];

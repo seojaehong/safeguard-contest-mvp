@@ -4,9 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildDbHarnessPacket } from "@/lib/db-harness";
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import { buildMockAskResponse } from "@/lib/mock-data";
+import {
+  buildReviewedLocalizationEnvelope,
+  resolveReviewedLocalizationAuthority,
+  type LocalizedDispatchArtifactDraft
+} from "@/lib/reviewed-localization-envelope";
 import type { AskResponse } from "@/lib/types";
+import { buildWorkpackEvidenceSummary } from "@/lib/workpack-store";
 
 const SECRET = "workpack-route-generation-evidence-secret";
+const REVIEW_SECRET = "localization-secret-abcdefghijklmnopqrstuvwxyz-03";
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
   getWorkspaceUser: vi.fn(),
@@ -91,15 +98,85 @@ function fakeClient() {
   return { client, inserted: () => inserted };
 }
 
+function vietnameseArtifact(): LocalizedDispatchArtifactDraft {
+  return {
+    artifactId: "artifact-vi-1",
+    targetLocale: "vi",
+    localized: {
+      subject: "Thông báo an toàn SafeClaw",
+      metadata: {
+        siteLabel: "Công trường",
+        siteValue: "Seongsu",
+        taskLabel: "Công việc",
+        taskValue: "Sơn tường ngoài",
+        coreRiskLabel: "Rủi ro chính",
+        coreRiskValue: "Ngã cao"
+      },
+      bodyLines: ["Kiểm tra lan can trước khi làm việc.", "Dừng việc khi có gió mạnh."],
+      semanticRiskLabels: ["Nguy cơ ngã", "Dừng việc và báo cáo"]
+    },
+    provenance: {
+      method: "human",
+      provider: null,
+      modelOrVersion: null,
+      generatedAt: "2026-07-14T00:01:00.000Z"
+    }
+  };
+}
+
+function detailClient(workpack: Record<string, unknown>) {
+  return {
+    from(table: string) {
+      if (table === "organizations") {
+        return {
+          select() {
+            return {
+              eq: async () => ({ data: [{ id: "org-1" }], error: null })
+            };
+          }
+        };
+      }
+      if (table === "workpacks") {
+        return {
+          select() {
+            return {
+              eq() {
+                return {
+                  in() {
+                    return {
+                      maybeSingle: async () => ({ data: workpack, error: null })
+                    };
+                  }
+                };
+              }
+            };
+          }
+        };
+      }
+      throw new Error(`Unexpected table ${table}`);
+    }
+  };
+}
+
 describe("workpack generation evidence save gate", () => {
   beforeEach(() => {
     process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = SECRET;
+    process.env.SAFECLAW_CHANNEL_CONFIG_REVISION = "7";
+    process.env.SAFECLAW_CHANNEL_CONFIG_DIGEST_KEY_ID = "channel-key-2026-07";
+    process.env.SAFECLAW_CHANNEL_AVAILABILITY_SECRET = "availability-secret-abcdefghijklmnopqrstuvwxyz-01";
+    process.env.SAFECLAW_CHANNEL_CONFIG_BINDING_SECRET = "binding-secret-abcdefghijklmnopqrstuvwxyz-02";
+    process.env.SAFECLAW_REVIEWED_LOCALIZATION_SECRET = REVIEW_SECRET;
     mocks.getWorkspaceUser.mockResolvedValue({ id: "user-1", email: "user@example.com" });
     mocks.ensureWorkspaceContext.mockResolvedValue({ organizationId: "org-1", siteId: "site-1" });
   });
 
   afterEach(() => {
     delete process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET;
+    delete process.env.SAFECLAW_CHANNEL_CONFIG_REVISION;
+    delete process.env.SAFECLAW_CHANNEL_CONFIG_DIGEST_KEY_ID;
+    delete process.env.SAFECLAW_CHANNEL_AVAILABILITY_SECRET;
+    delete process.env.SAFECLAW_CHANNEL_CONFIG_BINDING_SECRET;
+    delete process.env.SAFECLAW_REVIEWED_LOCALIZATION_SECRET;
     vi.clearAllMocks();
   });
 
@@ -212,5 +289,72 @@ describe("workpack generation evidence save gate", () => {
     expect(response.status).toBe(503);
     expect(body.code).toBe("generation_evidence_secret_unconfigured");
     expect(fake.inserted()).toBeNull();
+  });
+
+  it("returns only server-verified localization envelopes with the canonical revision", async () => {
+    const sealed = attachGenerationEvidence(responseWithHarness(), {
+      secret: SECRET,
+      generatedAt: "2026-07-14T00:00:00.000Z"
+    });
+    const validEnvelope = buildReviewedLocalizationEnvelope({
+      workpackId: "workpack-1",
+      response: sealed,
+      artifact: vietnameseArtifact(),
+      artifactRevision: 1,
+      decision: "approved",
+      reviewerId: "reviewer-1",
+      reviewerDisplayName: "reviewer@example.com",
+      reviewedAt: "2026-07-14T00:02:00.000Z",
+      signedAt: "2026-07-14T00:02:00.000Z",
+      secret: REVIEW_SECRET
+    });
+    const evidenceSummary = {
+      ...buildWorkpackEvidenceSummary(sealed, sealed.generationEvidence?.snapshot),
+      reviewedLocalizationEnvelopes: {
+        vi: validEnvelope,
+        en: { ...validEnvelope, targetLocale: "en", signature: "0".repeat(64) }
+      }
+    };
+    const expected = resolveReviewedLocalizationAuthority({
+      workpackId: "workpack-1",
+      response: sealed,
+      reviewedEnvelopes: evidenceSummary.reviewedLocalizationEnvelopes,
+      recipients: [],
+      secret: REVIEW_SECRET
+    });
+    if (!expected.ok) throw new Error("localization authority must resolve");
+    mocks.createSupabaseAdminClient.mockReturnValue(detailClient({
+      id: "workpack-1",
+      organization_id: "org-1",
+      site_id: "site-1",
+      question: sealed.question,
+      scenario: sealed.scenario,
+      deliverables: sealed.deliverables,
+      evidence_summary: evidenceSummary,
+      worker_summary: {},
+      status: sealed.status,
+      created_at: "2026-07-14T00:00:00.000Z",
+      updated_at: "2026-07-14T00:03:00.000Z"
+    }));
+    const { GET } = await import("@/app/api/workpacks/[id]/route");
+
+    const response = await GET({ headers: new Headers({ authorization: "Bearer test-token" }) } as NextRequest, {
+      params: Promise.resolve({ id: "workpack-1" })
+    });
+    const body = await response.json() as {
+      shareLocalization?: {
+        ok?: boolean;
+        canonicalWorkpackRevision?: string;
+        reviewedEnvelopes?: Record<string, unknown>;
+      };
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.shareLocalization).toMatchObject({
+      ok: true,
+      canonicalWorkpackRevision: expected.canonicalWorkpackRevision,
+      reviewedEnvelopes: { vi: expect.objectContaining({ targetLocale: "vi" }) }
+    });
+    expect(body.shareLocalization?.reviewedEnvelopes).not.toHaveProperty("en");
   });
 });

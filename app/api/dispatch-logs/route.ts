@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
-import { isRecord, parseScenarioContext, readString } from "@/lib/workspace-api";
+import { createSupabaseAdminClient, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
+import { isRecord, readString } from "@/lib/workspace-api";
+import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
 
 export const dynamic = "force-dynamic";
 
@@ -184,16 +185,27 @@ export async function POST(request: NextRequest) {
   const parsed = await request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const logs = parseDispatchLogs(body.logs);
-  const workpackId = readString(body.workpackId) || null;
+  const workpackId = readString(body.workpackId);
   if (!logs.length) {
-    return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: "저장할 전파 이력이 없습니다." }, { status: 400 });
+    return NextResponse.json({ ok: false, configured: true, savedCount: 0, logIds: [], message: "저장할 전파 이력이 없습니다." }, { status: 400 });
   }
-
-  const context = await ensureWorkspaceContext(client, user, parseScenarioContext(body.scenario));
+  if (!workpackId) {
+    return NextResponse.json({ ok: false, configured: true, savedCount: 0, logIds: [], message: "전파 이력의 작업팩 ID를 확인해 주세요." }, { status: 400 });
+  }
+  const owned = await loadOwnedWorkpackOperationContext(client, user, workpackId);
+  if (!owned.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      savedCount: 0,
+      logIds: [],
+      message: owned.message
+    }, { status: owned.status });
+  }
   const rows = logs.map((log) => ({
-    organization_id: context.organizationId,
-    site_id: context.siteId,
-    workpack_id: workpackId,
+    organization_id: owned.context.organizationId,
+    site_id: owned.context.siteId,
+    workpack_id: owned.context.workpackId,
     channel: log.channel,
     target_label: log.targetLabel || null,
     target_contact: log.targetContact || null,
@@ -205,12 +217,35 @@ export async function POST(request: NextRequest) {
     payload: toJson(log.payload || {})
   }));
 
-  const { error } = await client.from("dispatch_logs").insert(rows);
+  const { data, error } = await client.from("dispatch_logs").insert(rows).select("id");
 
   if (error) {
     console.error("dispatch logs save failed", error);
-    return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: "전파 이력 저장에 실패했습니다." }, { status: 500 });
+    return NextResponse.json({ ok: false, configured: true, savedCount: 0, logIds: [], message: "전파 이력 저장에 실패했습니다." }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, configured: true, savedCount: rows.length, message: "전파 이력을 저장했습니다." });
+  const logIds = (data || []).flatMap((item) => (
+    typeof item.id === "string" && item.id.trim() ? [item.id] : []
+  ));
+  if (logIds.length !== rows.length) {
+    console.error("dispatch logs save returned incomplete row identities", {
+      expected: rows.length,
+      actual: logIds.length
+    });
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      savedCount: 0,
+      logIds: [],
+      message: "전파 이력 ID를 확인하지 못해 저장 완료로 처리하지 않았습니다."
+    }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    ok: true,
+    configured: true,
+    savedCount: rows.length,
+    logIds,
+    message: "전파 이력을 저장했습니다."
+  });
 }

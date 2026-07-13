@@ -10,7 +10,16 @@ const mocks = vi.hoisted(() => ({
   loadActiveOwnedShareSession: vi.fn(),
   postWebhookWithTimeout: vi.fn(),
   resolveWebhookConfig: vi.fn(),
-  isLiveDispatchEnabled: vi.fn()
+  isLiveDispatchEnabled: vi.fn(),
+  readWorkpackShareServerConfig: vi.fn(),
+  readReviewedLocalizationEnvelopes: vi.fn(),
+  resolveReviewedLocalizationAuthority: vi.fn(),
+  buildChannelRuntimeConfiguration: vi.fn(),
+  resolveServerChannelAvailability: vi.fn(),
+  verifyChannelAvailabilityToken: vi.fn(),
+  buildShareDispatchBinding: vi.fn(),
+  buildShareRecipientDigest: vi.fn(),
+  validateShareDispatchBinding: vi.fn()
 }));
 
 vi.mock("@/lib/supabase-admin", () => ({
@@ -29,6 +38,24 @@ vi.mock("@/lib/n8n-webhook", () => ({
   postWebhookWithTimeout: mocks.postWebhookWithTimeout,
   resolveWebhookConfig: mocks.resolveWebhookConfig,
   isLiveDispatchEnabled: mocks.isLiveDispatchEnabled
+}));
+
+vi.mock("@/lib/workpack-share-server-config", () => ({
+  readWorkpackShareServerConfig: mocks.readWorkpackShareServerConfig
+}));
+
+vi.mock("@/lib/reviewed-localization-envelope", () => ({
+  readReviewedLocalizationEnvelopes: mocks.readReviewedLocalizationEnvelopes,
+  resolveReviewedLocalizationAuthority: mocks.resolveReviewedLocalizationAuthority
+}));
+
+vi.mock("@/lib/channel-availability", () => ({
+  buildChannelRuntimeConfiguration: mocks.buildChannelRuntimeConfiguration,
+  resolveServerChannelAvailability: mocks.resolveServerChannelAvailability,
+  verifyChannelAvailabilityToken: mocks.verifyChannelAvailabilityToken,
+  buildShareDispatchBinding: mocks.buildShareDispatchBinding,
+  buildShareRecipientDigest: mocks.buildShareRecipientDigest,
+  validateShareDispatchBinding: mocks.validateShareDispatchBinding
 }));
 
 vi.mock("@/lib/api-guard", () => ({
@@ -68,6 +95,33 @@ const serverWorkpack = {
   status: {}
 };
 
+const channelResolution = {
+  ok: true,
+  version: "channel-availability/v1",
+  workpackId: WORKPACK_ID,
+  canonicalWorkpackRevision: "a".repeat(64),
+  recipientDigest: "d".repeat(64),
+  requestedChannels: ["email", "sms"],
+  dispatchMode: "fixture",
+  channels: [
+    { channel: "email", configured: true, approved: true, available: true, recipientCount: 1, reasonCode: "available", ownerRoute: "/settings" },
+    { channel: "sms", configured: true, approved: true, available: true, recipientCount: 1, reasonCode: "available", ownerRoute: "/settings" }
+  ],
+  configurationVersion: "channel-configuration/v2",
+  configurationRevision: 7,
+  configurationDigestKeyId: "channel-key-2026-07",
+  configurationDigest: "e".repeat(64),
+  resolvedAt: "2026-07-14T00:00:00.000Z",
+  expiresAt: "2099-01-01T00:00:00.000Z",
+  availabilityToken: "signed-token",
+  ready: true
+};
+
+const dispatchBinding = {
+  version: "share-dispatch-binding/v1",
+  marker: "server-created-binding"
+};
+
 function jsonRequest(path: string, body: unknown) {
   return new NextRequest(`http://localhost${path}`, {
     method: "POST",
@@ -88,6 +142,7 @@ function ownedContext() {
       workpackId: WORKPACK_ID,
       question: "server workpack",
       generatedAt: "2026-07-10T00:00:00.000Z",
+      evidenceSummary: {},
       shareAuthority: {
         workpack: serverWorkpack,
         readiness: { canShare: true, status: "ready", summary: "공유 준비됨", reasons: [] }
@@ -101,9 +156,14 @@ function activeSession() {
     ok: true,
     session: {
       id: SESSION_ID,
+      organizationId: "org-1",
+      siteId: "site-1",
       workpackId: WORKPACK_ID,
+      createdBy: "user-1",
       recipients: [serverRecipient],
-      expiresAt: "2099-01-01T00:00:00.000Z"
+      expiresAt: "2099-01-01T00:00:00.000Z",
+      accessPolicy: { dispatchBinding },
+      dispatchBinding
     }
   };
 }
@@ -119,7 +179,8 @@ function makeShareInsertClient() {
             inserted = value;
             return {
               select() {
-                return { single: async () => ({ data: { id: SESSION_ID }, error: null }) };
+                const row = value as { id?: string; expires_at?: string };
+                return { single: async () => ({ data: { id: row.id, expires_at: row.expires_at }, error: null }) };
               }
             };
           }
@@ -163,6 +224,31 @@ beforeEach(() => {
   mocks.resolveWebhookConfig.mockReturnValue({ url: "https://n8n.example/webhook", token: "secret" });
   mocks.isLiveDispatchEnabled.mockReturnValue(true);
   mocks.postWebhookWithTimeout.mockResolvedValue({ ok: true, workflowRunId: "run-1", channelResults: [] });
+  mocks.readWorkpackShareServerConfig.mockReturnValue({
+    ok: true,
+    config: {
+      channelConfigurationRevision: 7,
+      channelConfigurationDigestKeyId: "channel-key-2026-07",
+      channelAvailabilitySecret: "availability-secret-abcdefghijklmnopqrstuvwxyz-01",
+      channelConfigurationBindingSecret: "binding-secret-abcdefghijklmnopqrstuvwxyz-02",
+      reviewedLocalizationSecret: "localization-secret-abcdefghijklmnopqrstuvwxyz-03"
+    }
+  });
+  mocks.readReviewedLocalizationEnvelopes.mockReturnValue({});
+  mocks.resolveReviewedLocalizationAuthority.mockReturnValue({
+    ok: true,
+    canonicalWorkpackRevision: "a".repeat(64),
+    normalizedWorkpackDigest: "b".repeat(64),
+    localePayloadDigest: "c".repeat(64),
+    dispatchRecipients: [],
+    verifiedEnvelopes: {}
+  });
+  mocks.buildChannelRuntimeConfiguration.mockReturnValue({ dispatchMode: "fixture" });
+  mocks.resolveServerChannelAvailability.mockReturnValue(channelResolution);
+  mocks.verifyChannelAvailabilityToken.mockReturnValue({ ok: true, resolution: channelResolution });
+  mocks.buildShareDispatchBinding.mockReturnValue(dispatchBinding);
+  mocks.buildShareRecipientDigest.mockReturnValue("d".repeat(64));
+  mocks.validateShareDispatchBinding.mockReturnValue({ ok: true, binding: dispatchBinding });
 });
 
 describe("share session route authority", () => {
@@ -176,24 +262,32 @@ describe("share session route authority", () => {
         workerId: WORKER_ID,
         displayName: "Forged Name",
         workerSnapshot: { phone: "010-9999-9999" }
-      }]
+      }],
+      channels: ["email", "sms"],
+      canonicalWorkpackRevision: "a".repeat(64),
+      availabilityToken: "signed-token"
     }), { params: Promise.resolve({ id: WORKPACK_ID }) });
 
     expect(response.status).toBe(200);
     expect(mocks.loadServerShareRecipients).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       requestedWorkerIds: [WORKER_ID]
     }));
-    expect(fake.inserted()).toMatchObject({ recipients_snapshot: [serverRecipient] });
+    expect(fake.inserted()).toMatchObject({
+      id: expect.stringMatching(/^[0-9a-f-]{36}$/i),
+      recipients_snapshot: [serverRecipient],
+      access_policy: expect.objectContaining({ dispatchBinding })
+    });
     const inserted = fake.inserted() as {
       expires_at?: string;
       status: string;
       share_scope: string;
-      access_policy: { anonymousAllowed?: boolean };
+      access_policy: { anonymousAllowed?: boolean; dispatchBinding?: unknown };
       recipients_snapshot: Array<typeof serverRecipient>;
     };
     expect(Date.parse(inserted.expires_at || "")).toBeGreaterThan(Date.now());
     const body = await response.json() as { expiresAt?: string };
     expect(body.expiresAt).toBe(inserted.expires_at);
+    expect(body).toMatchObject({ shareSessionId: (fake.inserted() as { id: string }).id });
     expect(evaluateShareSessionReuse({
       id: SESSION_ID,
       status: inserted.status,
@@ -205,6 +299,33 @@ describe("share session route authority", () => {
       workpackId: WORKPACK_ID,
       workerIds: [WORKER_ID]
     }, 1, Date.now())).toEqual({ reusable: true });
+  });
+
+  it("stops before provider dispatch when the persisted session binding is stale", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.validateShareDispatchBinding.mockReturnValueOnce({
+      ok: false,
+      reasonCode: "channel_configuration_changed"
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["email", "sms"],
+      operatorNote: "server authority"
+    }));
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      ok: false,
+      state: "stale",
+      reasonCode: "channel_configuration_changed",
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 });
 

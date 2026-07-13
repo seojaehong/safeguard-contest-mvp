@@ -1,4 +1,9 @@
 import { buildPhotoAnalysisCandidate } from "@/lib/operation-improvements";
+import {
+  parseSupportedLanguageCode,
+  resolveAuthoritativeRecipientLocale
+} from "@/lib/foreign-worker";
+import type { ShareDispatchBindingV1 } from "@/lib/channel-availability";
 
 type ShareRecipientRole = "viewer" | "editor";
 type ShareScope = "invited" | "organization";
@@ -49,6 +54,7 @@ export type ShareSessionDraft = {
     anonymousAllowed: false;
     manualLanguageSwitchAllowed: true;
     requireKnownWorkerSnapshot: true;
+    dispatchBinding?: ShareDispatchBindingV1;
   };
   status: "active";
   created_by: string | null;
@@ -191,11 +197,22 @@ export function buildServerShareRecipients(input: {
     return { ok: false, message: "현재 작업팩 조직 또는 현장 밖의 작업자는 공유 대상이 될 수 없습니다." };
   }
 
+  const invalidLocaleWorker = workerIds
+    .map((workerId) => workersById.get(workerId))
+    .find((worker) => parseSupportedLanguageCode(worker?.language_code).status !== "supported");
+  if (invalidLocaleWorker) {
+    return { ok: false, message: "공유 대상 작업자의 언어 코드를 작업자 명부에서 확인해 주세요." };
+  }
+
   return {
     ok: true,
     recipients: workerIds.map((workerId) => {
       const worker = workersById.get(workerId) as ServerWorkerRow;
-      const languageCode = cleanLanguageCode(worker.language_code || undefined);
+      const parsedLanguageCode = parseSupportedLanguageCode(worker.language_code);
+      if (parsedLanguageCode.status !== "supported") {
+        throw new Error("validated server worker locale unexpectedly became invalid");
+      }
+      const languageCode = parsedLanguageCode.locale;
       return {
         workerId: worker.id,
         displayName: worker.display_name,
@@ -236,10 +253,16 @@ export function parseShareSessionRecipients(value: unknown): ShareRecipientInput
       : null;
     if (!UUID_PATTERN.test(workerId) || !displayName || !workerSnapshot || !hasSnapshot(workerSnapshot)) return [];
     if (workerSnapshot.workerId !== workerId || workerSnapshot.displayName !== displayName) return [];
+    const locale = resolveAuthoritativeRecipientLocale({
+      workerLanguageCode: workerSnapshot.languageCode,
+      recipientLanguageCode: record.languageCode,
+      snapshotLanguageCode: workerSnapshot.languageCode
+    });
+    if (locale.status !== "supported") return [];
     recipients.push({
       workerId,
       displayName,
-      languageCode: cleanLanguageCode(typeof record.languageCode === "string" ? record.languageCode : undefined),
+      languageCode: locale.locale,
       role: record.role === "editor" ? "editor" : "viewer",
       workerSnapshot
     });
@@ -291,6 +314,7 @@ export function buildShareSessionDraft(input: {
   createdBy: string | null;
   recipients?: ShareRecipientInput[];
   shareScope?: ShareScope;
+  dispatchBinding?: ShareDispatchBindingV1;
 }): ShareSessionDraft {
   return {
     organization_id: input.organizationId,
@@ -313,7 +337,8 @@ export function buildShareSessionDraft(input: {
     access_policy: {
       anonymousAllowed: false,
       manualLanguageSwitchAllowed: true,
-      requireKnownWorkerSnapshot: true
+      requireKnownWorkerSnapshot: true,
+      ...(input.dispatchBinding ? { dispatchBinding: input.dispatchBinding } : {})
     },
     status: "active",
     created_by: input.createdBy

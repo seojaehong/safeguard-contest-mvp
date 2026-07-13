@@ -6,8 +6,20 @@ import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admi
 import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
 import {
   loadActiveOwnedShareSession,
-  loadOwnedWorkpackOperationContext
+  loadOwnedWorkpackOperationContext,
+  loadServerShareRecipients
 } from "@/lib/workpack-commercial-store";
+import {
+  buildChannelRuntimeConfiguration,
+  buildShareRecipientDigest,
+  resolveServerChannelAvailability,
+  validateShareDispatchBinding
+} from "@/lib/channel-availability";
+import {
+  readReviewedLocalizationEnvelopes,
+  resolveReviewedLocalizationAuthority
+} from "@/lib/reviewed-localization-envelope";
+import { readWorkpackShareServerConfig } from "@/lib/workpack-share-server-config";
 
 export const dynamic = "force-dynamic";
 
@@ -310,14 +322,113 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, message: activeSession.message }, { status: activeSession.status });
   }
 
+  const serverConfig = readWorkpackShareServerConfig(process.env);
+  if (!serverConfig.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: false,
+      state: "stale",
+      reasonCode: "channel_configuration_changed",
+      providerCalled: false,
+      invalidConfigurationKeys: serverConfig.invalidKeys,
+      message: "전송 binding을 검증할 서버 설정이 준비되지 않았습니다."
+    }, { status: 503 });
+  }
+  const sessionWorkerIds = activeSession.session.recipients.flatMap((recipient) => (
+    recipient.workerId ? [recipient.workerId] : []
+  ));
+  const currentRecipients = await loadServerShareRecipients(client, {
+    organizationId: owned.context.organizationId,
+    siteId: owned.context.siteId,
+    requestedWorkerIds: sessionWorkerIds
+  });
+  if (!currentRecipients.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      state: "review_required",
+      reasonCode: "recipient_locale_invalid",
+      providerCalled: false,
+      message: currentRecipients.message
+    }, { status: 409 });
+  }
+  const localization = resolveReviewedLocalizationAuthority({
+    workpackId: owned.context.workpackId,
+    response: owned.context.shareAuthority.workpack,
+    reviewedEnvelopes: readReviewedLocalizationEnvelopes(owned.context.evidenceSummary),
+    recipients: currentRecipients.recipients,
+    secret: serverConfig.config.reviewedLocalizationSecret
+  });
+  if (!localization.ok) {
+    return NextResponse.json({
+      ...localization,
+      configured: true,
+      state: "review_required",
+      providerCalled: false
+    }, { status: 409 });
+  }
+  const runtime = buildChannelRuntimeConfiguration({
+    environment: process.env,
+    liveDispatch: isLiveDispatchEnabled(),
+    relayEndpoint: webhookConfig.url || null,
+    relayCredential: webhookConfig.token || null
+  });
+  const currentChannelResolution = resolveServerChannelAvailability({
+    config: serverConfig.config,
+    runtime,
+    userId: user.id,
+    organizationId: owned.context.organizationId,
+    siteId: owned.context.siteId,
+    workpackId: owned.context.workpackId,
+    canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
+    recipients: currentRecipients.recipients,
+    requestedChannels: channels as WorkpackDispatchChannel[],
+    now: new Date()
+  });
+  if (!currentChannelResolution.ok) {
+    return NextResponse.json({
+      ...currentChannelResolution,
+      configured: true,
+      state: "stale",
+      providerCalled: false
+    }, { status: 409 });
+  }
+  const bindingValidation = validateShareDispatchBinding({
+    binding: activeSession.session.dispatchBinding,
+    sessionIdentity: {
+      shareSessionId: activeSession.session.id,
+      organizationId: activeSession.session.organizationId,
+      siteId: activeSession.session.siteId,
+      workpackId: activeSession.session.workpackId,
+      createdBy: activeSession.session.createdBy
+    },
+    localization,
+    recipientSnapshotDigest: buildShareRecipientDigest(currentRecipients.recipients),
+    channelResolution: currentChannelResolution
+  });
+  if (!bindingValidation.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      state: bindingValidation.reasonCode === "translation_incomplete" ? "review_required" : "stale",
+      reasonCode: bindingValidation.reasonCode,
+      providerCalled: false,
+      message: "공유 세션 생성 후 전송 조건이 변경되어 provider 호출을 시작하지 않았습니다."
+    }, { status: 409 });
+  }
+
   const contactValidation = validateDispatchContacts({
     channels: channels as WorkpackDispatchChannel[],
-    recipients: activeSession.session.recipients
+    recipients: currentRecipients.recipients
   });
   if (!contactValidation.ok) {
     return NextResponse.json({ ok: false, configured: true, message: contactValidation.message }, { status: 409 });
   }
-  const recipients = activeSession.session.recipients.map((recipient) => recipient.workerSnapshot || {});
+  const localizedByWorkerId = new Map(localization.dispatchRecipients.map((recipient) => [recipient.workerId, recipient]));
+  const recipients = currentRecipients.recipients.map((recipient) => ({
+    ...(recipient.workerSnapshot || {}),
+    localizedDispatch: recipient.workerId ? localizedByWorkerId.get(recipient.workerId) || null : null
+  }));
 
   if (isLiveDispatchEnabled() && !PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED) {
     return NextResponse.json({

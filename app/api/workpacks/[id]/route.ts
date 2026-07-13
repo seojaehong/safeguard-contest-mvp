@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
+import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
+import {
+  readReviewedLocalizationEnvelopes,
+  resolveReviewedLocalizationAuthority
+} from "@/lib/reviewed-localization-envelope";
 import { buildReopenData } from "@/lib/workpack-store";
+import { readWorkpackShareServerConfig } from "@/lib/workpack-share-server-config";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +117,47 @@ export async function GET(request: NextRequest, context: RouteContext) {
     evidenceSummary: workpack.evidence_summary,
     status: workpack.status
   });
+  const shareLocalization = (() => {
+    if (!reopen.data) {
+      return {
+        ok: false as const,
+        reasonCode: "workpack_unavailable" as const
+      };
+    }
+    const generationVerification = verifyAskResponseGenerationEvidence(
+      reopen.data,
+      process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET
+    );
+    if (!generationVerification.ok) {
+      return {
+        ok: false as const,
+        reasonCode: "generation_evidence_invalid" as const,
+        code: generationVerification.code
+      };
+    }
+    const serverConfig = readWorkpackShareServerConfig(process.env);
+    if (!serverConfig.ok) {
+      return {
+        ok: false as const,
+        reasonCode: "configuration_unresolved" as const,
+        invalidConfigurationKeys: serverConfig.invalidKeys
+      };
+    }
+    const authority = resolveReviewedLocalizationAuthority({
+      workpackId: workpack.id,
+      response: reopen.data,
+      reviewedEnvelopes: readReviewedLocalizationEnvelopes(workpack.evidence_summary),
+      recipients: [],
+      secret: serverConfig.config.reviewedLocalizationSecret
+    });
+    if (!authority.ok) return authority;
+    return {
+      ok: true as const,
+      canonicalWorkpackRevision: authority.canonicalWorkpackRevision,
+      normalizedWorkpackDigest: authority.normalizedWorkpackDigest,
+      reviewedEnvelopes: authority.verifiedEnvelopes
+    };
+  })();
 
   return NextResponse.json({
     ok: true,
@@ -128,6 +175,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       updatedAt: workpack.updated_at,
       reopenData: reopen.data
     },
+    shareLocalization,
     blockers: reopen.blockers,
     message: reopen.data
       ? "저장된 문서팩 상세를 불러왔습니다."
