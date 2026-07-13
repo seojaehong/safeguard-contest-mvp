@@ -9,9 +9,17 @@ import {
   buildXlsxForDocument
 } from "@/lib/xlsx-builder";
 import { parseStructuredRiskAssessmentRows } from "@/lib/risk-assessment-renderer";
+import {
+  normalizePendingPhaseAAuthorityText,
+  normalizePhaseAAuthorityValue,
+} from "@/lib/phase-a-review";
+import { buildExportErrorPayload, buildSafeExportErrorContext } from "@/lib/export-error";
+import { createLogger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+const log = createLogger("export/xlsx");
 
 type SheetRow = {
   document: string;
@@ -76,12 +84,12 @@ function parseRows(value: unknown, fallbackDoc: string): SheetRow[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((item): SheetRow[] => {
     if (!isRecord(item)) return [];
-    const content = readString(item.content);
+    const content = normalizePendingPhaseAAuthorityText(readString(item.content));
     if (!content && readString(item.item) === "") return [];
     return [{
-      document: readString(item.document, fallbackDoc),
-      section: readString(item.section, "본문"),
-      item: readString(item.item, "확인"),
+      document: normalizePendingPhaseAAuthorityText(readString(item.document, fallbackDoc)),
+      section: normalizePendingPhaseAAuthorityText(readString(item.section, "본문")),
+      item: normalizePendingPhaseAAuthorityText(readString(item.item, "확인")),
       content
     }];
   });
@@ -179,10 +187,11 @@ export async function POST(request: NextRequest) {
     if (mode === "workPlanStructured" || mode === "permitInspectionStructured" || mode === "tbmBriefingStructured" || mode === "tbmLogStructured" || mode === "educationRecordStructured") {
       if (!isRecord(body.structured)) {
         return NextResponse.json(
-          { ok: false, error: "structured must be a non-array object for structured xlsx export" },
+          buildExportErrorPayload("XLSX_STRUCTURED_PAYLOAD_INVALID"),
           { status: 400, headers: { "cache-control": "no-store" } }
         );
       }
+      const structured = normalizePhaseAAuthorityValue(body.structured, undefined);
       const fallbackTitle = structuredFallbackTitle(mode);
       const editedRows = [
         ...pendingAuthorityRows(fallbackTitle),
@@ -190,26 +199,26 @@ export async function POST(request: NextRequest) {
       ];
 
       if (mode === "workPlanStructured") {
-        const buffer = await buildWorkPlanStructuredXlsx(scenario, body.structured, { editedRows });
+        const buffer = await buildWorkPlanStructuredXlsx(scenario, structured, { editedRows });
         return xlsxResponse(buffer, `${scenario.companyName}-작업계획서`, "safeclaw-work-plan");
       }
 
       if (mode === "permitInspectionStructured") {
-        const buffer = await buildPermitInspectionStructuredXlsx(scenario, body.structured, { editedRows });
+        const buffer = await buildPermitInspectionStructuredXlsx(scenario, structured, { editedRows });
         return xlsxResponse(buffer, `${scenario.companyName}-안전작업허가-확인서`, "safeclaw-work-permit");
       }
 
       if (mode === "tbmBriefingStructured") {
-        const buffer = await buildTbmBriefingStructuredXlsx(scenario, body.structured, { editedRows });
+        const buffer = await buildTbmBriefingStructuredXlsx(scenario, structured, { editedRows });
         return xlsxResponse(buffer, `${scenario.companyName}-TBM-브리핑`, "safeclaw-tbm-briefing");
       }
 
       if (mode === "tbmLogStructured") {
-        const buffer = await buildTbmLogStructuredXlsx(scenario, body.structured, { editedRows });
+        const buffer = await buildTbmLogStructuredXlsx(scenario, structured, { editedRows });
         return xlsxResponse(buffer, `${scenario.companyName}-TBM-일지`, "safeclaw-tbm-log");
       }
 
-      const buffer = await buildEducationRecordStructuredXlsx(scenario, body.structured, { editedRows });
+      const buffer = await buildEducationRecordStructuredXlsx(scenario, structured, { editedRows });
       return xlsxResponse(buffer, `${scenario.companyName}-안전보건교육-기록`, "safeclaw-education-record");
     }
 
@@ -244,9 +253,10 @@ export async function POST(request: NextRequest) {
     const buffer = await buildXlsxForDocument({ title, rows, profile, scenario, structuredRiskRows });
     return xlsxResponse(buffer, `${scenario.companyName}-${title}`, "safeclaw-document");
   } catch (error) {
+    log.error("export_failed", buildSafeExportErrorContext(error, "XLSX_EXPORT_FAILED"));
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "xlsx build failed" },
-      { status: 500 }
+      buildExportErrorPayload("XLSX_EXPORT_FAILED"),
+      { status: 500, headers: { "cache-control": "no-store" } }
     );
   }
 }

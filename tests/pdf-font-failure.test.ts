@@ -38,7 +38,18 @@ async function expectControlledFontFailure(response: Response): Promise<void> {
   expect(response.headers.get("cache-control")).toBe("no-store");
   await expect(response.json()).resolves.toEqual({
     ok: false,
-    error: "PDF_FONT_ASSET_UNAVAILABLE"
+    code: "PDF_FONT_ASSET_UNAVAILABLE",
+    message: "PDF 글꼴 자산을 확인하지 못해 문서를 만들지 못했습니다."
+  });
+}
+
+async function expectControlledPdfFailure(response: Response): Promise<void> {
+  expect(response.status).toBe(500);
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  await expect(response.json()).resolves.toEqual({
+    ok: false,
+    code: "PDF_EXPORT_FAILED",
+    message: "PDF 문서를 만들지 못했습니다."
   });
 }
 
@@ -60,10 +71,10 @@ describe.sequential("PDF font asset failures", () => {
     const logger = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expectControlledFontFailure(await POST(createRequest()));
-    expect(logger).toHaveBeenCalledWith(
-      "PDF export font assets are unavailable or invalid",
-      expect.objectContaining({ code: "ENOENT" })
-    );
+    const logged = logger.mock.calls.flat().map(String).join("\n");
+    expect(logged).toContain('"errorType":"PdfFontAssetError"');
+    expect(logged).toContain('"errorCode":"PDF_FONT_ASSET_UNAVAILABLE"');
+    expect(logged).not.toContain("NotoSansKR-Regular.ttf");
   });
 
   it("logs and returns controlled JSON 500 when a traced font is invalid", async () => {
@@ -75,36 +86,36 @@ describe.sequential("PDF font asset failures", () => {
     const logger = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await expectControlledFontFailure(await POST(createRequest()));
-    expect(logger).toHaveBeenCalledWith(
-      "PDF export font assets are unavailable or invalid",
-      expect.any(Error)
-    );
+    const logged = logger.mock.calls.flat().map(String).join("\n");
+    expect(logged).toContain('"errorType":"PdfFontAssetError"');
+    expect(logged).toContain('"errorCode":"PDF_FONT_ASSET_UNAVAILABLE"');
+    expect(logged).not.toContain("not-a-valid-ttf");
   });
 
-  it("logs and rethrows non-font PDF build failures without using the font error contract", async () => {
-    const buildFailure = new Error("deterministic PDF create failure");
+  it("returns a safe code for non-font PDF build failures without leaking internals", async () => {
+    const buildFailure = new Error("C:\\private\\pdf-create secret-pdf-token");
     vi.spyOn(PDFDocument, "create").mockRejectedValueOnce(buildFailure);
     const logger = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    await expect(POST(createRequest())).rejects.toBe(buildFailure);
-    expect(logger).toHaveBeenCalledWith("PDF export failed", buildFailure);
-    expect(logger).not.toHaveBeenCalledWith(
-      "PDF export font assets are unavailable or invalid",
-      buildFailure
-    );
+    await expectControlledPdfFailure(await POST(createRequest()));
+    const logged = logger.mock.calls.flat().map(String).join("\n");
+    expect(logged).toContain('"errorType":"Error"');
+    expect(logged).toContain('"errorCode":"PDF_EXPORT_FAILED"');
+    expect(logged).not.toContain("private");
+    expect(logged).not.toContain("secret-pdf-token");
   });
 
-  it("logs and rethrows non-font embed failures without using the font error contract", async () => {
-    const embedFailure = new Error("deterministic PDF embed reference failure");
+  it("returns a safe code for non-font embed failures without leaking internals", async () => {
+    const embedFailure = new Error("C:\\private\\font-reference secret-font-token");
     vi.spyOn(PDFDocument.prototype, "embedFont").mockRejectedValueOnce(embedFailure);
     const logger = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    await expect(POST(createRequest())).rejects.toBe(embedFailure);
-    expect(logger).toHaveBeenCalledWith("PDF export failed", embedFailure);
-    expect(logger).not.toHaveBeenCalledWith(
-      "PDF export font assets are unavailable or invalid",
-      embedFailure
-    );
+    await expectControlledPdfFailure(await POST(createRequest()));
+    const logged = logger.mock.calls.flat().map(String).join("\n");
+    expect(logged).toContain('"errorType":"Error"');
+    expect(logged).toContain('"errorCode":"PDF_EXPORT_FAILED"');
+    expect(logged).not.toContain("private");
+    expect(logged).not.toContain("secret-font-token");
   });
 
   it("keeps HTML export available when binary font assets are unavailable", async () => {

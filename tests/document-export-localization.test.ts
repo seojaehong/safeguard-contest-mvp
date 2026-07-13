@@ -183,7 +183,14 @@ describe("localized editable document exports", () => {
         profile: { layout: "risk" },
         scenario: { companyName: "테스트 건설", siteName: "제1현장", workSummary: "비계 작업", workerCount: 4 },
         structuredRiskRows: [
-          { unitTask: "비계 조립", hazard: "추락", riskLevel: "high", additionalControls: "생명줄 설치", status: "planned" },
+          {
+            unitTask: "비계 조립",
+            hazard: "추락",
+            currentControls: "KOSHA 자료: 연결됨",
+            riskLevel: "high",
+            additionalControls: "조치가 연결됨 / 배관이 연결됨",
+            status: "planned"
+          },
           { unitTask: "전기 점검", hazard: "감전", riskLevel: "medium", additionalControls: "잠금 표지", status: "done" },
           { unitTask: "자재 정리", hazard: "전도", riskLevel: "low", additionalControls: "통로 확보", status: "needsReview" }
         ]
@@ -210,6 +217,9 @@ describe("localized editable document exports", () => {
         expect(values).toContain(localized);
       }
       expect(values).not.toMatch(/\b(?:high|medium|low|planned|done|needsReview)\b/u);
+      expect(values).not.toContain("KOSHA 자료: 연결됨");
+      expect(values).not.toContain("조치가 연결됨");
+      expect(values).toContain("배관이 연결됨");
     } finally {
       reloaded.free();
     }
@@ -243,7 +253,14 @@ describe("localized editable document exports", () => {
         riskLevel: "low",
         scenario: { companyName: "테스트 건설", siteName: "제1현장", workSummary: "비계 작업", workerCount: 4 },
         structuredRiskRows: [
-          { unitTask: "비계 조립", hazard: "추락", riskLevel: "high", additionalControls: "생명줄 설치", status: "planned" },
+          {
+            unitTask: "비계 조립",
+            hazard: "추락",
+            currentControls: "KOSHA 자료: 연결됨",
+            riskLevel: "high",
+            additionalControls: "조치가 연결됨 / 배관이 연결됨",
+            status: "planned"
+          },
           { unitTask: "전기 점검", hazard: "감전", riskLevel: "medium", additionalControls: "잠금 표지", status: "done" },
           { unitTask: "자재 정리", hazard: "전도", riskLevel: "low", additionalControls: "통로 확보", status: "needsReview" }
         ]
@@ -257,5 +274,8 @@ describe("localized editable document exports", () => {
       expect(html).toContain(`>${localized}</td>`);
     }
     expect(html).not.toMatch(/>\s*(?:high|medium|low|planned|done|needsReview)\s*</u);
+    expect(html).not.toContain("KOSHA 자료: 연결됨");
+    expect(html).not.toContain("조치가 연결됨");
+    expect(html).toContain("배관이 연결됨");
   });
 });

@@ -178,8 +178,15 @@ function makeLiveStructuredResponse(): AskResponse {
       humanConfirmation: {
         required: true,
         status: "confirmed",
-        reviewerId: "reviewer-001",
-        confirmedAt: "2026-07-14T03:00:00.000Z",
+        confirmationId: "11111111-1111-4111-8111-111111111111",
+        confirmedAt: "2026-07-13T18:00:00.000Z",
+        issuedBy: "safeclaw_server",
+        workpackId: "22222222-2222-4222-8222-222222222222",
+        reviewer: {
+          principalType: "authenticated_workspace_user",
+          userId: "reviewer-001",
+          sessionFingerprint: `sha256:${"a".repeat(64)}`,
+        },
         chainId: phaseAPlanBinding.chainId,
         planDigest: phaseAPlanDigest,
       },

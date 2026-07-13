@@ -18,9 +18,17 @@ import {
   parseStructuredRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
+import {
+  normalizePendingPhaseAAuthorityText,
+  normalizePhaseAAuthorityValue,
+} from "@/lib/phase-a-review";
+import { buildExportErrorPayload, buildSafeExportErrorContext } from "@/lib/export-error";
+import { createLogger } from "@/lib/logger";
 import type { AccidentType, FourM } from "@/lib/risk-assessment-schema";
 
 export const dynamic = "force-dynamic";
+
+const log = createLogger("export/pdf");
 
 const MAX_PDF_REQUEST_BYTES = 256 * 1024;
 const MAX_PDF_ROWS = 128;
@@ -232,12 +240,12 @@ function parseRows(value: unknown, documentTitle: string): PdfRow[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((item): PdfRow[] => {
     if (!isRecord(item)) return [];
-    const content = readString(item.content);
+    const content = normalizePendingPhaseAAuthorityText(readString(item.content));
     if (!content) return [];
     return [{
-      document: readString(item.document, documentTitle),
-      section: readString(item.section, "본문"),
-      item: readString(item.item, "확인"),
+      document: normalizePendingPhaseAAuthorityText(readString(item.document, documentTitle)),
+      section: normalizePendingPhaseAAuthorityText(readString(item.section, "본문")),
+      item: normalizePendingPhaseAAuthorityText(readString(item.item, "확인")),
       content
     }];
   });
@@ -745,7 +753,7 @@ function buildPdfReadyHtml(
 }
 
 function normalizePdfText(value: string) {
-  return value.replace(/공식자료 기반/g, "공식자료 연결 후보").replace(/\s+/g, " ").trim();
+  return normalizePendingPhaseAAuthorityText(value).replace(/\s+/g, " ").trim();
 }
 
 function wrapPdfLine(value: string, maxChars: number) {
@@ -1217,11 +1225,14 @@ export async function POST(request: NextRequest) {
     const scenario = parseScenario(body.scenario);
     const rows = parseRows(body.rows, title);
     const riskRows = parseRows(body.riskRows, "위험성평가표");
-    const structuredRiskRows = parseRiskRowsFromBody(body);
+    const structuredRiskRows = normalizePhaseAAuthorityValue(
+      parseRiskRowsFromBody(body),
+      undefined,
+    );
     const bodyRows = rows.length ? rows : parseBodyText(body.documentText, title);
     assertParsedPdfRowBudget([bodyRows, riskRows, structuredRiskRows]);
     const riskLevel = readString(body.riskLevel, "확인");
-    const topRisk = readString(body.topRisk, "");
+    const topRisk = normalizePendingPhaseAAuthorityText(readString(body.topRisk, ""));
     const requestedFormat = request.nextUrl.searchParams.get("format");
     const wantsHtml = requestedFormat === "html";
     const wantsBinaryPdf = !wantsHtml;
@@ -1233,14 +1244,20 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         if (error instanceof PdfExportLimitError) throw error;
         if (error instanceof PdfFontAssetError) {
-          console.error("PDF export font assets are unavailable or invalid", error.source);
+          log.error(
+            "export_failed",
+            buildSafeExportErrorContext(error, "PDF_FONT_ASSET_UNAVAILABLE"),
+          );
           return NextResponse.json(
-            { ok: false, error: "PDF_FONT_ASSET_UNAVAILABLE" },
+            buildExportErrorPayload("PDF_FONT_ASSET_UNAVAILABLE"),
             { status: 500, headers: { "cache-control": "no-store" } }
           );
         }
-        console.error("PDF export failed", error);
-        throw error;
+        log.error("export_failed", buildSafeExportErrorContext(error, "PDF_EXPORT_FAILED"));
+        return NextResponse.json(
+          buildExportErrorPayload("PDF_EXPORT_FAILED"),
+          { status: 500, headers: { "cache-control": "no-store" } },
+        );
       }
       const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
       return new NextResponse(new Uint8Array(pdf), {
@@ -1260,7 +1277,7 @@ export async function POST(request: NextRequest) {
       topRisk,
       riskRows,
       structuredRiskRows,
-    ).replace(/공식자료 기반/g, "공식자료 연결 후보");
+    );
     const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.html`;
     const encodedFileName = encodeURIComponent(fileName);
 
@@ -1273,6 +1290,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof PdfExportLimitError) return pdfExportLimitResponse();
-    throw error;
+    log.error("export_failed", buildSafeExportErrorContext(error, "PDF_EXPORT_FAILED"));
+    return NextResponse.json(
+      buildExportErrorPayload("PDF_EXPORT_FAILED"),
+      { status: 500, headers: { "cache-control": "no-store" } },
+    );
   }
 }

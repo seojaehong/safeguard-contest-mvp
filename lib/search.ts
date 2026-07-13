@@ -14,7 +14,10 @@ import {
   type PhaseAGenerationGrounding,
   type PhaseAGenerationSnapshot,
 } from "./ontology/evidence-chain";
-import { applyPhaseADocumentAuthorityMarker } from "./phase-a-review";
+import {
+  applyPhaseADocumentAuthorityMarker,
+  normalizePhaseAAuthorityValue,
+} from "./phase-a-review";
 import type { OntologyGraph } from "./ontology/graph-store";
 import {
   deriveSafetyReferenceOperationalView,
@@ -1427,13 +1430,26 @@ function attachPhaseAReview(
     humanConfirmation: { required: true, status: "pending" },
     actionableReason,
   };
-  const deliverables = { ...response.deliverables };
+  const deliverables = normalizePhaseAAuthorityValue(
+    { ...response.deliverables },
+    phaseAReview,
+  );
   for (const key of TEXT_DELIVERABLE_KEYS) {
     deliverables[key] = applyPhaseADocumentAuthorityMarker(deliverables[key], phaseAReview);
   }
 
   return attachQualityContract({
     ...response,
+    answer: applyPhaseADocumentAuthorityMarker(response.answer, phaseAReview),
+    practicalPoints: normalizePhaseAAuthorityValue(response.practicalPoints, phaseAReview),
+    riskSummary: normalizePhaseAAuthorityValue(response.riskSummary, phaseAReview),
+    structured: response.structured
+      ? normalizePhaseAAuthorityValue(response.structured, phaseAReview)
+      : undefined,
+    status: {
+      ...response.status,
+      summary: "Phase A 근거 검토 필요",
+    },
     deliverables,
     phaseAReview,
   });

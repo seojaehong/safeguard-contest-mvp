@@ -393,12 +393,21 @@ export type PhaseAReview = {
     | {
         required: true;
         status: "confirmed";
-        reviewerId: string;
+        confirmationId: string;
         confirmedAt: string;
+        issuedBy: "safeclaw_server";
+        workpackId: string;
+        reviewer: PhaseAReviewerPrincipal;
         chainId: PhaseAPlanBinding["chainId"];
         planDigest: string;
       };
   actionableReason: string;
+};
+
+export type PhaseAReviewerPrincipal = {
+  principalType: "authenticated_workspace_user";
+  userId: string;
+  sessionFingerprint: string;
 };
 
 export type AskResponse = {

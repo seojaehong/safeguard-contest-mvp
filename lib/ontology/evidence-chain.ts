@@ -905,16 +905,7 @@ export type NaturalizedEvidenceChain = {
     required: true;
     status: "pending" | "passed" | "failed";
   };
-  humanConfirmation:
-    | { required: true; status: "pending" }
-    | {
-        required: true;
-        status: "confirmed";
-        reviewerId: string;
-        confirmedAt: string;
-        chainId: EvidenceChainDefinition["chainId"];
-        planDigest: string;
-      };
+  humanConfirmation: { required: true; status: "pending" };
 };
 
 function reviewRequired(statement: string): ControlObligation {
@@ -1787,39 +1778,6 @@ export function recordNaturalizedEvidenceChainQuality(
   return {
     ...naturalized,
     qualityCheck: { required: true, status },
-    humanConfirmation:
-      status === "failed"
-        ? { required: true, status: "pending" }
-        : naturalized.humanConfirmation,
-  };
-}
-
-export function confirmNaturalizedEvidenceChain(
-  naturalized: NaturalizedEvidenceChain,
-  confirmation: { reviewerId: string; confirmedAt: string },
-): NaturalizedEvidenceChain {
-  if (naturalized.qualityCheck.status !== "passed") {
-    throw new Error("human confirmation 전에 quality check status가 passed여야 합니다.");
-  }
-  const reviewerId = confirmation.reviewerId.trim();
-  const confirmedAt = confirmation.confirmedAt.trim();
-  const parsedConfirmedAt = Date.parse(confirmedAt);
-  if (
-    !reviewerId ||
-    !Number.isFinite(parsedConfirmedAt) ||
-    new Date(parsedConfirmedAt).toISOString() !== confirmedAt
-  ) {
-    throw new Error("human confirmation에는 reviewerId와 confirmedAt이 필요합니다.");
-  }
-  return {
-    ...naturalized,
-    humanConfirmation: {
-      required: true,
-      status: "confirmed",
-      reviewerId,
-      confirmedAt,
-      chainId: naturalized.planBinding.chainId,
-      planDigest: naturalized.planBinding.planDigest,
-    },
+    humanConfirmation: { required: true, status: "pending" },
   };
 }

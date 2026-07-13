@@ -321,6 +321,8 @@ describe("generation trace failure privacy", () => {
       verifiedRecords: 0,
       humanConfirmation: { required: true, status: "pending" },
     });
+    expect(response.answer).toContain("법령 근거: 검토 필요");
+    expect(response.answer).not.toContain("법령 근거: 연결됨");
   }, 30_000);
 
   it("keeps the public template path provider-free and explicitly human-pending", async () => {

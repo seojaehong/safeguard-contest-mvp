@@ -206,8 +206,15 @@ describe("workpack store persistence contract", () => {
       humanConfirmation: {
         required: true,
         status: "confirmed",
-        reviewerId: "",
+        confirmationId: "not-a-confirmation-id",
         confirmedAt: "not-a-time",
+        issuedBy: "safeclaw_server",
+        workpackId: "not-a-workpack-id",
+        reviewer: {
+          principalType: "authenticated_workspace_user",
+          userId: "",
+          sessionFingerprint: "not-a-session-fingerprint",
+        },
         chainId: "work-at-height-fall",
         planDigest: `sha256:${"d".repeat(64)}`,
       },

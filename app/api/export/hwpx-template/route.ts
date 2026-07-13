@@ -6,9 +6,13 @@ import {
   TEMPLATE_LABELS,
   type HwpxTemplateKind
 } from "@/lib/hwpx-template";
+import { buildExportErrorPayload, buildSafeExportErrorContext } from "@/lib/export-error";
+import { createLogger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+const log = createLogger("export/hwpx-template");
 
 function sanitizeFileName(value: string) {
   return value
@@ -39,8 +43,8 @@ export async function GET(request: NextRequest) {
 
   if (!isValidTemplateKind(kind)) {
     return NextResponse.json(
-      { ok: false, error: `지원하지 않는 양식 종류입니다: ${kind}`, valid: Object.keys(TEMPLATE_LABELS) },
-      { status: 400 }
+      { ...buildExportErrorPayload("HWPX_TEMPLATE_KIND_INVALID"), valid: Object.keys(TEMPLATE_LABELS) },
+      { status: 400, headers: { "cache-control": "no-store" } }
     );
   }
 
@@ -56,9 +60,10 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
+    log.error("export_failed", buildSafeExportErrorContext(error, "HWPX_EXPORT_FAILED"));
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "HWPX 양식을 만들지 못했습니다." },
-      { status: 500 }
+      buildExportErrorPayload("HWPX_EXPORT_FAILED"),
+      { status: 500, headers: { "cache-control": "no-store" } }
     );
   }
 }

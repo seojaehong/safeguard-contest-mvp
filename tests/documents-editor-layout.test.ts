@@ -417,7 +417,7 @@ describe("documents editor layout", () => {
       .toBe("");
   }, 90_000);
 
-  it("exports an explicitly empty workPermitDraft without regenerating structured permit content", async () => {
+  it("exports an explicitly empty workPermitDraft with only the pending authority marker", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const sample = buildSampleWorkpack();
@@ -435,9 +435,19 @@ describe("documents editor layout", () => {
 
     const { payload, workbook } = await exportSelectedXlsx(page);
 
-    expect(payload).toMatchObject({ mode: "single", edited: true, rows: [] });
+    expect(payload).toMatchObject({
+      mode: "single",
+      edited: true,
+      rows: [
+        { item: "법령 근거", content: "검토 필요" },
+        { content: "공식자료 연결 후보" },
+      ],
+    });
     expect(workbook.worksheets.map((worksheet) => worksheet.name)).toEqual(["안전작업허가 확인서"]);
     const workbookText = readWorkbookText(workbook);
+    expect(workbookText).toContain("법령 근거");
+    expect(workbookText).toContain("검토 필요");
+    expect(workbookText).toContain("공식자료 연결 후보");
     expect(workbookText).not.toContain("허가 기본정보");
     expect(workbookText).not.toContain("작업 전 허가조건");
   }, 90_000);

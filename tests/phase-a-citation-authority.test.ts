@@ -11,7 +11,7 @@ type PlanBinding = PhaseAPlanBinding;
 
 type PhaseAReviewWithCoverage = Omit<
   PhaseAReview,
-  "materializationCoverage" | "humanConfirmation"
+  "materializationCoverage"
 > & {
   planBinding: PlanBinding;
   materializationCoverage: {
@@ -24,16 +24,6 @@ type PhaseAReviewWithCoverage = Omit<
     materializedStableKeys: string[];
     unresolvedStableKeys: string[];
   };
-  humanConfirmation:
-    | { required: true; status: "pending" }
-    | {
-        required: true;
-        status: "confirmed";
-        reviewerId: string;
-        confirmedAt: string;
-        chainId: PlanBinding["chainId"];
-        planDigest: string;
-      };
 };
 
 type ConfirmedHumanConfirmation = Extract<
@@ -48,8 +38,15 @@ const planDigest = planBinding.planDigest;
 const confirmedHumanConfirmation: ConfirmedHumanConfirmation = {
   required: true,
   status: "confirmed",
-  reviewerId: "reviewer-001",
-  confirmedAt: "2026-07-14T03:00:00.000Z",
+  confirmationId: "11111111-1111-4111-8111-111111111111",
+  confirmedAt: "2026-07-13T18:00:00.000Z",
+  issuedBy: "safeclaw_server",
+  workpackId: "22222222-2222-4222-8222-222222222222",
+  reviewer: {
+    principalType: "authenticated_workspace_user",
+    userId: "reviewer-001",
+    sessionFingerprint: `sha256:${"a".repeat(64)}`,
+  },
   chainId: planBinding.chainId,
   planDigest,
 };
@@ -200,7 +197,7 @@ describe("Phase A citation authority UI", () => {
   });
 
   it.each([
-    ["blank reviewer", { reviewerId: "" }],
+    ["blank reviewer", { reviewer: { ...confirmedHumanConfirmation.reviewer, userId: "" } }],
     ["invalid time", { confirmedAt: "not-an-iso-timestamp" }],
     ["different plan", { planDigest: `sha256:${"b".repeat(64)}` }],
   ] as const)("rejects human confirmation bound to %s", (_label, override) => {

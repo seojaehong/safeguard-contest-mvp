@@ -6,7 +6,6 @@ import {
   buildPhaseAGenerationGrounding,
   buildCanonicalPhaseAPlanBinding,
   classifyControlObligation,
-  confirmNaturalizedEvidenceChain,
   naturalizeEvidenceChain,
   recordNaturalizedEvidenceChainQuality,
   resolveEvidenceChain,
@@ -15,6 +14,7 @@ import {
   type ControlEvidenceSource,
   type ObligationClassification,
 } from "@/lib/ontology/evidence-chain";
+import * as evidenceChainModule from "@/lib/ontology/evidence-chain";
 import {
   EVIDENCE_CHAIN_CONTRACT_VERSION,
   EXCLUDED_KOSHA_ITEM_IDS,
@@ -1291,56 +1291,22 @@ describe("pipeline and document materialization contract", () => {
     const naturalized = naturalizeEvidenceChain(requireReviewRequired("전기작업"), "고정 근거팩 문장화 결과");
     expect(naturalized.humanConfirmation).toEqual({ required: true, status: "pending" });
 
-    expect(() =>
-      confirmNaturalizedEvidenceChain(naturalized, {
-        reviewerId: "safety-reviewer-1",
-        confirmedAt: "2026-07-12T23:00:00.000Z",
-      }),
-    ).toThrow(/quality check.*passed/i);
-
     const failed = recordNaturalizedEvidenceChainQuality(naturalized, "failed");
-    expect(() =>
-      confirmNaturalizedEvidenceChain(failed, {
-        reviewerId: "safety-reviewer-1",
-        confirmedAt: "2026-07-12T23:00:00.000Z",
-      }),
-    ).toThrow(/quality check.*passed/i);
+    expect(failed.humanConfirmation).toEqual({ required: true, status: "pending" });
 
     const passed = recordNaturalizedEvidenceChainQuality(naturalized, "passed");
-
-    const confirmed = confirmNaturalizedEvidenceChain(passed, {
-      reviewerId: "safety-reviewer-1",
-      confirmedAt: "2026-07-12T23:00:00.000Z",
-    });
-    expect(confirmed.humanConfirmation).toEqual(expect.objectContaining({
-      required: true,
-      status: "confirmed",
-      reviewerId: "safety-reviewer-1",
-      confirmedAt: "2026-07-12T23:00:00.000Z",
-      chainId: confirmed.planBinding.chainId,
-      planDigest: confirmed.planBinding.planDigest,
-    }));
-    expect(confirmed.qualityCheck).toEqual({ required: true, status: "passed" });
+    expect(passed.humanConfirmation).toEqual({ required: true, status: "pending" });
+    expect(passed.qualityCheck).toEqual({ required: true, status: "passed" });
+    expect(evidenceChainModule).not.toHaveProperty("confirmNaturalizedEvidenceChain");
   });
 
   test("revokes human confirmation when a later quality check fails", () => {
     const naturalized = naturalizeEvidenceChain(requireReviewRequired("전기작업"), "고정 근거팩 문장화 결과");
     const passed = recordNaturalizedEvidenceChainQuality(naturalized, "passed");
-    const confirmed = confirmNaturalizedEvidenceChain(passed, {
-      reviewerId: "safety-reviewer-1",
-      confirmedAt: "2026-07-12T23:00:00.000Z",
-    });
-
-    const failed = recordNaturalizedEvidenceChainQuality(confirmed, "failed");
+    const failed = recordNaturalizedEvidenceChainQuality(passed, "failed");
 
     expect(failed.qualityCheck).toEqual({ required: true, status: "failed" });
     expect(failed.humanConfirmation).toEqual({ required: true, status: "pending" });
-    expect(() =>
-      confirmNaturalizedEvidenceChain(failed, {
-        reviewerId: "safety-reviewer-2",
-        confirmedAt: "2026-07-13T00:00:00.000Z",
-      }),
-    ).toThrow(/quality check.*passed/i);
   });
 
   test("isolates and freezes the fixed evidence pack across confirmation", () => {
@@ -1348,16 +1314,12 @@ describe("pipeline and document materialization contract", () => {
     const originalLabel = sourcePack.controls[0]?.label;
     const naturalized = naturalizeEvidenceChain(sourcePack, "고정 근거팩 문장화 결과");
     const passed = recordNaturalizedEvidenceChainQuality(naturalized, "passed");
-    const confirmed = confirmNaturalizedEvidenceChain(passed, {
-      reviewerId: "safety-reviewer-1",
-      confirmedAt: "2026-07-12T23:00:00.000Z",
-    });
 
     if (sourcePack.controls[0]) sourcePack.controls[0].label = "mutated after confirmation";
-    expect(confirmed.fixedPack.controls[0]?.label).toBe(originalLabel);
-    expect(Object.isFrozen(confirmed.fixedPack)).toBe(true);
-    expect(Object.isFrozen(confirmed.fixedPack.controls)).toBe(true);
-    expect(Object.isFrozen(confirmed.fixedPack.controls[0])).toBe(true);
+    expect(passed.fixedPack.controls[0]?.label).toBe(originalLabel);
+    expect(Object.isFrozen(passed.fixedPack)).toBe(true);
+    expect(Object.isFrozen(passed.fixedPack.controls)).toBe(true);
+    expect(Object.isFrozen(passed.fixedPack.controls[0])).toBe(true);
   });
 
   test("builds query_safety_knowledge as a layered evidence contract while retaining core fields", () => {

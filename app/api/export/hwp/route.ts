@@ -8,9 +8,17 @@ import {
   resolveRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
+import {
+  normalizePendingPhaseAAuthorityText,
+  normalizePhaseAAuthorityValue,
+} from "@/lib/phase-a-review";
+import { buildExportErrorPayload, buildSafeExportErrorContext } from "@/lib/export-error";
+import { createLogger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+const log = createLogger("export/hwp");
 
 type SheetRow = {
   document: string;
@@ -68,7 +76,7 @@ function readString(value: unknown, fallback = "") {
 }
 
 function pendingAuthorityText(value: string): string {
-  return value.replace(/공식자료 기반/g, "공식자료 연결 후보");
+  return normalizePendingPhaseAAuthorityText(value);
 }
 
 function readNumber(value: unknown, fallback = 0) {
@@ -247,12 +255,12 @@ function buildHwpBuffer(args: {
     const colCount = cols.length;
     const bodyRows: string[][] = riskRows.length
       ? riskRows.map((riskRow) => [
-        riskRow.unitTask,
-        riskRow.hazard,
-        riskRow.currentControls || "현장 확인",
+        pendingAuthorityText(riskRow.unitTask),
+        pendingAuthorityText(riskRow.hazard),
+        pendingAuthorityText(riskRow.currentControls || "현장 확인"),
         localizeRiskLevel(riskRow.riskLevel),
-        riskRow.additionalControls,
-        `${riskRow.owner || "작업반장"} / ${riskRow.dueDate || "작업 전"}`,
+        pendingAuthorityText(riskRow.additionalControls),
+        pendingAuthorityText(`${riskRow.owner || "작업반장"} / ${riskRow.dueDate || "작업 전"}`),
         localizeVerificationStatus(riskRow.verificationStatus || riskRow.status)
       ])
       : rows.map((r, idx) => [
@@ -305,7 +313,9 @@ export async function POST(request: NextRequest) {
   const rows = parseRows(body.rows, title);
   const profile = parseProfile(body.profile);
   const scenario = parseScenario(body.scenario);
-  const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
+  const structuredRiskRows = body.edited === true
+    ? []
+    : normalizePhaseAAuthorityValue(parseRiskRowsFromBody(body), undefined);
   const authorityMarker = "법령 근거: 검토 필요\n공식자료 연결 후보";
 
   try {
@@ -326,9 +336,10 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
+    log.error("export_failed", buildSafeExportErrorContext(error, "HWP_EXPORT_FAILED"));
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "HWP 문서를 만들지 못했습니다." },
-      { status: 500 }
+      buildExportErrorPayload("HWP_EXPORT_FAILED"),
+      { status: 500, headers: { "cache-control": "no-store" } }
     );
   }
 }

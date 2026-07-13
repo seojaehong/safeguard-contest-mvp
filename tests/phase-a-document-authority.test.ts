@@ -59,9 +59,9 @@ describe("Phase A pending document authority marker", () => {
         },
         rows: [{
           document: "위험성평가표",
-          section: "추락 위험 감소대책",
-          item: "작업발판",
-          content: "공식자료 기반 조치가 연결됨",
+          section: "KOSHA 자료: 연결됨",
+          item: "조치가 연결됨",
+          content: "공식자료 기반 조치가 연결됨\n배관이 연결됨",
         }],
       }),
     }));
@@ -71,6 +71,9 @@ describe("Phase A pending document authority marker", () => {
     expect(html).toContain("법령 근거: 검토 필요");
     expect(html).toContain("공식자료 연결 후보");
     expect(html).not.toContain("SafeClaw 공식자료 기반 현장 검토용 출력 초안");
+    expect(html).not.toContain("KOSHA 자료: 연결됨");
+    expect(html).not.toContain("조치가 연결됨");
+    expect(html).toContain("배관이 연결됨");
   });
 
   it("injects the pending marker into an actual structured TBM XLSX", async () => {
@@ -88,11 +91,17 @@ describe("Phase A pending document authority marker", () => {
         },
         structured: {
           meta: { dateTime: "2026-07-14 08:00", place: "테스트 현장", leader: "반장" },
-          todayWork: { name: "고소작업", location: "외벽", personnel: "2명", equipment: "작업대", weather: "맑음" },
-          hazards: ["추락", "낙하"],
+          todayWork: { name: "고소작업", location: "배관이 연결됨", time: "08:00 - 17:00", equipment: ["작업대"] },
+          hazards: [
+            { category: "Management", description: "KOSHA 자료: 연결됨" },
+            {
+              category: "Machine",
+              description: "evidence status: official / KOSHA·고용노동부 공식 자료 URL 3건 확인",
+            },
+          ],
           measures: [
-            { hazardRef: 1, measure: "난간 확인", owner: "반장", verification: "사진" },
-            { hazardRef: 2, measure: "하부 통제", owner: "반장", verification: "표지" },
+            { hazardRef: 1, action: "조치가 연결됨", owner: "반장" },
+            { hazardRef: 2, action: "source: connected / 하부 통제", owner: "반장" },
           ],
           stopCriteria: ["난간 미설치", "강풍"],
           confirmTopics: ["난간", "보호구", "통제"],
@@ -110,31 +119,54 @@ describe("Phase A pending document authority marker", () => {
         row.eachCell((cell) => values.push(cell.text));
       });
     });
-    expect(values.join("\n")).toContain("법령 근거: 검토 필요");
-    expect(values.join("\n")).toContain("공식자료 연결 후보");
+    const workbookText = values.join("\n");
+    expect(workbookText).toContain("법령 근거: 검토 필요");
+    expect(workbookText).toContain("공식자료 연결 후보");
+    expect(workbookText).not.toContain("KOSHA 자료: 연결됨");
+    expect(workbookText).not.toContain("조치가 연결됨");
+    expect(workbookText).not.toMatch(/\b(?:official|connected|mandated)\b/i);
+    expect(workbookText).not.toContain("공식 자료 URL 3건 확인");
+    expect(workbookText).toContain("배관이 연결됨");
   });
 
   it("wires the same marker through editor preview and HWP export requests", () => {
     const editor = read("components/WorkpackEditor.tsx");
     const currentModules = read("components/CurrentWorkpackModules.tsx");
     const hwpRoute = read("app/api/export/hwp/route.ts");
+    const hwpBuilder = read("lib/hwp-table-builder.ts");
 
     expect(editor).toContain("buildPhaseADocumentAuthorityMarker(data.phaseAReview)");
     expect(editor).toContain("phaseADocumentAuthorityMarker");
     expect(editor).toContain("selectedExportText");
     expect(editor).toContain("applyPhaseADocumentAuthorityMarker(selectedText, data.phaseAReview)");
+    expect(editor).toContain("const selectedRows = buildRowsForDocument(selected, authoritySafeValues)");
+    expect(editor).toContain("const riskAssessmentRows = buildRowsForDocument(riskAssessmentMeta, authoritySafeValues)");
     expect(editor).toContain("authorityMarker: phaseADocumentAuthorityMarker");
     expect(currentModules).toContain("applyPhaseADocumentAuthorityMarker(storedDraft, data.phaseAReview)");
     expect(hwpRoute).toContain("법령 근거: 검토 필요");
     expect(hwpRoute).toContain("공식자료 연결 후보");
     expect(hwpRoute).not.toContain("(공식자료 기반 표 양식)");
+    expect(hwpBuilder).toContain("법령 근거: 검토 필요");
+    expect(hwpBuilder).toContain("공식자료 연결 후보");
+    expect(hwpBuilder).not.toContain("(공식자료 기반 표 양식)");
   });
 
   it("removes a misleading connected bullet while preserving the editable body", () => {
     const body = [
       "[연결 상태 요약]",
       "- 법령 근거: 연결됨",
+      "- KOSHA 자료: 연결됨",
+      "- 조치가 연결됨",
+      "- 법령 의무: mandated",
+      "- 법령상 의무로 확정됨",
+      "- KOSHA 자료: verified",
+      "- 조치 상태: official",
+      "- 공식자료 확인 완료",
+      "- evidence status: official",
+      "- source: connected",
+      "- KOSHA·고용노동부 공식 자료 URL 3건 확인",
       "- 공식자료 기반 조치 문구",
+      "배관이 연결됨",
       "작업자가 수정한 제출 본문",
     ].join("\n");
 
@@ -144,6 +176,16 @@ describe("Phase A pending document authority marker", () => {
     expect(marked).toContain("공식자료 연결 후보 조치 문구");
     expect(marked).toContain("작업자가 수정한 제출 본문");
     expect(marked).not.toContain("법령 근거: 연결됨");
+    expect(marked).not.toContain("KOSHA 자료: 연결됨");
+    expect(marked).not.toContain("조치가 연결됨");
+    expect(marked).not.toContain("법령 의무: mandated");
+    expect(marked).not.toContain("의무로 확정됨");
+    expect(marked).not.toContain("verified");
+    expect(marked).not.toContain("official");
+    expect(marked).not.toContain("connected");
+    expect(marked).not.toContain("공식 자료 URL 3건 확인");
+    expect(marked).not.toContain("공식자료 확인 완료");
+    expect(marked).toContain("배관이 연결됨");
     expect(body).toContain("법령 근거: 연결됨");
   });
 

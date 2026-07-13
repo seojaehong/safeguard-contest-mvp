@@ -107,7 +107,12 @@ export async function buildHwpWithTables(input: HwpBuildInput): Promise<Blob> {
     document.createBlankDocument();
 
     // 1) Title text
-    document.insertText(0, 0, 0, `${title}(공식자료 기반 표 양식)\nSafeClaw · 현장 검토 후 사용\n\n`);
+    document.insertText(
+      0,
+      0,
+      0,
+      `${title}(공식자료 연결 후보 표 양식)\n법령 근거: 검토 필요\n공식자료 연결 후보\nSafeClaw · 현장 검토 후 사용\n\n`
+    );
 
     // 2) Metadata table (4 col x 2 row)
     {

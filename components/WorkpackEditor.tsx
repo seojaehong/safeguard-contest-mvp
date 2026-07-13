@@ -1967,6 +1967,16 @@ export function WorkpackEditor({
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
+  const authoritySafeValues = useMemo(() => {
+    const next = { ...values };
+    for (const document of documentMeta) {
+      next[document.key] = applyPhaseADocumentAuthorityMarker(
+        values[document.key],
+        data.phaseAReview,
+      );
+    }
+    return next;
+  }, [data.phaseAReview, values]);
   const selectedHasIntentionalEmptyPermitDraft = selected.key === "workPermitDraft"
     && selectedText === ""
     && (
@@ -1977,9 +1987,9 @@ export function WorkpackEditor({
     || selectedText !== initialValues[selected.key]
     || selectedHasIntentionalEmptyPermitDraft;
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
-  const selectedRows = buildRowsForDocument(selected, values);
+  const selectedRows = buildRowsForDocument(selected, authoritySafeValues);
   const riskAssessmentMeta = documentMeta.find((item) => item.key === "riskAssessmentDraft") || documentMeta[1];
-  const riskAssessmentRows = buildRowsForDocument(riskAssessmentMeta, values);
+  const riskAssessmentRows = buildRowsForDocument(riskAssessmentMeta, authoritySafeValues);
   const selectedFormProfile = getSafetyFormProfile(selected.key);
   const rubricEvaluation = useMemo(() => evaluatePublicSafetyRubric(values), [values]);
   const selectedRubricItems = useMemo(() => {
@@ -1993,16 +2003,6 @@ export function WorkpackEditor({
   const phaseAState = buildPhaseAReviewUiState(data.phaseAReview);
   const phaseADocumentAuthorityMarker = buildPhaseADocumentAuthorityMarker(data.phaseAReview);
   const selectedExportText = applyPhaseADocumentAuthorityMarker(selectedText, data.phaseAReview);
-  const authoritySafeValues = useMemo(() => {
-    const next = { ...values };
-    for (const document of documentMeta) {
-      next[document.key] = applyPhaseADocumentAuthorityMarker(
-        values[document.key],
-        data.phaseAReview,
-      );
-    }
-    return next;
-  }, [data.phaseAReview, values]);
   const harnessSummary = data.dbHarness?.summary;
   const harnessPacket = data.dbHarness?.packet;
   const selectedCoverage = useMemo(() => {

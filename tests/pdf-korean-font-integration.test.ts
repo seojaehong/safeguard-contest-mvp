@@ -165,9 +165,11 @@ describe("Korean PDF font integration", () => {
       expect(source).toContain(`path.join(process.cwd(), "${asset}")`);
     }
     expect(source).toContain("class PdfFontAssetError extends Error");
-    expect(source).toContain('console.error("PDF export font assets are unavailable or invalid", error.source)');
-    expect(source).toContain('console.error("PDF export failed", error)');
-    expect(source).toContain('error: "PDF_FONT_ASSET_UNAVAILABLE"');
+    expect(source).toContain('buildSafeExportErrorContext(error, "PDF_FONT_ASSET_UNAVAILABLE")');
+    expect(source).toContain('buildExportErrorPayload("PDF_FONT_ASSET_UNAVAILABLE")');
+    expect(source).toContain('buildSafeExportErrorContext(error, "PDF_EXPORT_FAILED")');
+    expect(source).toContain('buildExportErrorPayload("PDF_EXPORT_FAILED")');
+    expect(source).not.toContain("console.error(");
   });
 
   it("maps title, section, body, table, and note roles to Regular and Bold subsets", () => {
@@ -253,17 +255,24 @@ describe("Korean PDF font integration", () => {
     await document.destroy();
   });
 
-  it("paginates long content and preserves the final row and document footer", async () => {
+  it("preserves pending authority, fonts, pagination, localized risk rows, signatures, and the footer together", async () => {
     const sentinel = "마지막행보존확인";
     const longPayload = {
       ...payload,
-      rows: Array.from({ length: 64 }, (_, index) => ({
-        document: "위험성평가표",
-        section: "전체 위험요인",
-        item: `위험요인 ${index + 1}`,
-        content: index === 63
+      rows: [],
+      structuredRiskRows: Array.from({ length: 32 }, (_, index) => ({
+        id: `R-${index + 1}`,
+        process: "배관 공정",
+        unitTask: `작업 단계 ${index + 1}`,
+        hazard: `위험요인 ${index + 1}`,
+        currentControls: "작업 전 현재조치 확인",
+        riskLevel: (["high", "medium", "low"] as const)[index % 3],
+        additionalControls: index === 31
           ? `${sentinel} 최종 감소대책을 현장에서 확인합니다.`
-          : `작업 단계 ${index + 1}의 위험요인과 감소대책을 현장에서 확인합니다.`
+          : `감소대책 ${index + 1}을 현장에서 확인합니다.`,
+        owner: "작업반장",
+        dueDate: "작업 전",
+        status: (["planned", "done", "needsReview"] as const)[index % 3],
       }))
     };
     const response = await POST(new NextRequest("http://localhost/api/export/pdf", {
@@ -273,10 +282,16 @@ describe("Korean PDF font integration", () => {
     }));
 
     expect(response.status).toBe(200);
+    const binary = Buffer.from(await response.arrayBuffer());
+    const source = binary.toString("binary");
+    expect(source).toContain("/FontFile2");
+    expect(source).toMatch(/\/BaseFont \/NotoSansKR-Regular-[A-Z0-9]+/u);
+    expect(source).toMatch(/\/BaseFont \/NotoSansKR-Bold-[A-Z0-9]+/u);
+
     Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
     const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
     const document = await pdfjs.getDocument({
-      data: new Uint8Array(await response.arrayBuffer())
+      data: new Uint8Array(binary)
     }).promise;
     expect(document.numPages).toBeGreaterThan(1);
 
@@ -292,10 +307,19 @@ describe("Korean PDF font integration", () => {
       expect(pageText).toContain("위험성평가표 · 가온테크");
       expect(pageText).toContain(`${index + 1} / ${document.numPages}쪽`);
     });
-    expect(extractedPages.at(-1)).toContain(sentinel);
-    expect(extractedPages.at(-1)).toContain("작성자");
-    expect(extractedPages.at(-1)).toContain("승인");
-    expect(extractedPages.at(-1)).toContain("본 출력물은 공식자료 기반 현장 검토용 초안입니다.");
+    const extracted = extractedPages.join(" ");
+    const compact = extracted.replace(/\s+/gu, "");
+    expect(compact).toContain(sentinel);
+    for (const value of ["작성자", "검토", "승인", "조치예정", "조치완료", "검토필요"]) {
+      expect(compact).toContain(value);
+    }
+    for (const value of ["위험성:가능성확인/중대성확인/상", "위험성:가능성확인/중대성확인/중", "위험성:가능성확인/중대성확인/하"]) {
+      expect(compact).toContain(value);
+    }
+    expect(compact).toContain("법령근거:검토필요/공식자료연결후보");
+    expect(compact).toContain("본출력물은검토필요초안입니다.");
+    expect(extracted).not.toContain("공식자료 기반");
+    expect(extracted).not.toMatch(/\b(?:high|medium|low|planned|done|needsReview)\b/u);
     await document.destroy();
   });
 
