@@ -158,7 +158,15 @@ function makeLiveStructuredResponse(): AskResponse {
       evidenceChainState: "resolved",
       groundingStatus: "resolved",
       outputStatus: "grounded_draft",
-      verifiedRecords: 1,
+      verifiedRecords: 2,
+      materializationCoverage: {
+        status: "complete",
+        expectedRecordCount: 2,
+        materializedRecordCount: 2,
+        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        materializedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        unresolvedStableKeys: []
+      },
       humanConfirmation: { required: true, status: "confirmed" },
       actionableReason: "확인 완료"
     },
@@ -293,6 +301,14 @@ describe("qualityContract", () => {
       groundingStatus: "review_required",
       outputStatus: "review_required_draft",
       verifiedRecords: 0,
+      materializationCoverage: {
+        status: "missing",
+        expectedRecordCount: 2,
+        materializedRecordCount: 0,
+        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        materializedStableKeys: [],
+        unresolvedStableKeys: ["chain:risk:control", "chain:tbm:control"]
+      },
       humanConfirmation: { required: true, status: "pending" },
       actionableReason: "Phase A 근거와 문서 반영 위치를 확인하세요."
     };
@@ -303,6 +319,28 @@ describe("qualityContract", () => {
     expect(contract.ontology.status).toBe("blocked");
     expect(contract.ontology.detail).toContain("Phase A");
     expect(contract.ontology.detail).toContain("사람 확인");
+  });
+
+  it("blocks quality readiness when only 1/N planned stableKeys materialized", () => {
+    const response = makeLiveStructuredResponse();
+    response.phaseAReview = {
+      ...response.phaseAReview!,
+      verifiedRecords: 1,
+      materializationCoverage: {
+        status: "partial",
+        expectedRecordCount: 2,
+        materializedRecordCount: 1,
+        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        materializedStableKeys: ["chain:risk:control"],
+        unresolvedStableKeys: ["chain:tbm:control"],
+      },
+    } as NonNullable<AskResponse["phaseAReview"]>;
+
+    const contract = buildQualityContract(response, "2026-07-08T00:00:00.000Z");
+
+    expect(contract.overall).toBe("blocked");
+    expect(contract.ontology.status).toBe("blocked");
+    expect(contract.ontology.detail).toContain("1/2");
   });
 
   it("does not mark the DB harness ready when required SIF evidence is missing", () => {

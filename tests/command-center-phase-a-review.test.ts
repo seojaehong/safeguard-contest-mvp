@@ -12,6 +12,14 @@ const pendingReview: PhaseAReview = {
   groundingStatus: "review_required",
   outputStatus: "review_required_draft",
   verifiedRecords: 0,
+  materializationCoverage: {
+    status: "missing",
+    expectedRecordCount: 1,
+    materializedRecordCount: 0,
+    expectedStableKeys: ["chain:risk:control"],
+    materializedStableKeys: [],
+    unresolvedStableKeys: ["chain:risk:control"],
+  },
   humanConfirmation: { required: true, status: "pending" },
   actionableReason: "Phase A source resolution을 완료하세요."
 };

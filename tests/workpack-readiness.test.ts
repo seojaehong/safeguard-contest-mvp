@@ -58,7 +58,15 @@ function makeResponse(): AskResponse {
       evidenceChainState: "resolved",
       groundingStatus: "resolved",
       outputStatus: "grounded_draft",
-      verifiedRecords: 1,
+      verifiedRecords: 2,
+      materializationCoverage: {
+        status: "complete",
+        expectedRecordCount: 2,
+        materializedRecordCount: 2,
+        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        materializedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        unresolvedStableKeys: []
+      },
       humanConfirmation: { required: true, status: "confirmed" },
       actionableReason: "확인 완료"
     },
@@ -173,6 +181,14 @@ describe("workpack readiness", () => {
       groundingStatus: "review_required",
       outputStatus: "review_required_draft",
       verifiedRecords: 0,
+      materializationCoverage: {
+        status: "missing",
+        expectedRecordCount: 2,
+        materializedRecordCount: 0,
+        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        materializedStableKeys: [],
+        unresolvedStableKeys: ["chain:risk:control", "chain:tbm:control"]
+      },
       humanConfirmation: { required: true, status: "pending" },
       actionableReason: "Phase A 근거와 문서 반영 위치를 확인하세요."
     };
@@ -182,6 +198,28 @@ describe("workpack readiness", () => {
     expect(readiness.canShare).toBe(false);
     expect(readiness.status).toBe("blocked");
     expect(readiness.reasons).toContain("Phase A 근거 및 사람 확인 미완료");
+  });
+
+  it("blocks sharing when only 1/N required stableKeys are materialized", () => {
+    const response = makeResponse();
+    response.phaseAReview = {
+      ...response.phaseAReview!,
+      verifiedRecords: 1,
+      materializationCoverage: {
+        status: "partial",
+        expectedRecordCount: 2,
+        materializedRecordCount: 1,
+        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        materializedStableKeys: ["chain:risk:control"],
+        unresolvedStableKeys: ["chain:tbm:control"],
+      },
+    } as NonNullable<AskResponse["phaseAReview"]>;
+
+    const readiness = assessWorkpackReadiness(response);
+
+    expect(readiness.canShare).toBe(false);
+    expect(readiness.status).toBe("blocked");
+    expect(readiness.reasons.join(" / ")).toContain("1/2");
   });
 
   it("allows sharing after Phase A materialization and human confirmation are complete", () => {

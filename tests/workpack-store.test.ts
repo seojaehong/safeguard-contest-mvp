@@ -62,6 +62,14 @@ function makeStoredResponse() {
       groundingStatus: "review_required" as const,
       outputStatus: "review_required_draft" as const,
       verifiedRecords: 0,
+      materializationCoverage: {
+        status: "missing" as const,
+        expectedRecordCount: 1,
+        materializedRecordCount: 0,
+        expectedStableKeys: ["chain:risk:control"],
+        materializedStableKeys: [],
+        unresolvedStableKeys: ["chain:risk:control"],
+      },
       humanConfirmation: { required: true as const, status: "pending" as const },
       actionableReason: "Phase A 근거와 문서 반영 위치를 확인하세요."
     },

@@ -88,7 +88,7 @@ const BASE_SYSTEM_PROMPT = `당신은 "클로(Claw)", 이 사업장의 상주 AI
 원칙:
 - 하네스 기반 검토, DB 근거 고정, OpenClaw 시연용 검증을 요청받으면 run_safeclaw_harness_agent를 먼저 호출합니다. 이 도구가 반환한 근거·개선 이력·작업 이력을 벗어나 새 위험요인이나 이력을 만들지 않습니다.
 - 사실 근거는 반드시 도구로 확인합니다. 오늘·내일 날씨/기상 위험은 get_weather_signals, 유사 재해사례는 search_accident_cases, 문서팩 초안과 검수가 함께 필요하면 generate_reviewed_safety_docpack을 호출합니다.
-- 법조문이 필요한 질문(특정 작업의 규정·근거 조문)은 먼저 query_safety_knowledge로 검증된 조문을 조회하고, 조회 결과의 구체 조번호(예: 기준규칙 제619조)를 근거로 답합니다. 이 도구에서 근거를 찾지 못했을 때만 일반 지식으로 답하되 반드시 validate_safety_citations로 검증합니다.
+- 법조문이 필요한 질문은 query_safety_knowledge 결과를 후보 자료로만 사용합니다. 이 결과만으로 확정 조문이나 법적 의무를 말하지 말고, validate_safety_citations와 Phase A 전체 문서 반영·사람 확인을 거치지 않은 내용은 검토 필요로 표시합니다.
 - 법 조문(예: 제38조)을 답변에 인용할 때는, 최종 답변을 쓰기 전에 먼저 validate_safety_citations 도구로 그 문장을 검증하는 단계를 거칩니다. 검증에서 제거된(확인되지 않은) 조문은 최종 답변에서도 빼고 "산업안전보건법령" 같은 일반 표현으로 대체합니다. 검증하지 않은 조문 번호를 최종 답변에 그대로 쓰지 않습니다.
 - 비상 연락처·기관 전화번호를 답에 넣기 전에는 sanitize_emergency_contacts로 정화합니다.
 - 이미 생성된 문서 본문만 따로 검토할 때는 qa_review_docpack으로 누락을 확인합니다.
@@ -229,7 +229,7 @@ export const CLAW_TOOLS: Anthropic.Tool[] = [
   {
     name: "query_safety_knowledge",
     description:
-      "작업유형(용접·밀폐공간 등)이나 위험요인으로, 법제처 검증된 위험요인→안전조치→법조문→중처법 의무 연결을 조회할 때 호출. 조문 인용 전 이 도구로 근거를 확보하라.",
+      "작업유형이나 위험요인에서 SIF·KOSHA·법령 연결 후보를 조회하는 진단 도구다. 결과는 검토 필요이며 전체 문서 반영과 사람 확인 전에는 확정 근거나 법적 의무 판단으로 사용하지 않는다.",
     input_schema: {
       type: "object",
       properties: {
@@ -263,7 +263,7 @@ const TOOL_ACTION_LABELS: Record<string, string> = {
   generate_safety_docpack: "안전 문서팩 생성",
   generate_reviewed_safety_docpack: "검수 포함 안전 문서팩 생성",
   get_evidence_mapping: "중처법 증빙 매핑 조회",
-  query_safety_knowledge: "검증된 안전 지식 조회",
+  query_safety_knowledge: "안전 지식 후보 조회",
   qa_review_docpack: "문서 QA 검수",
 };
 

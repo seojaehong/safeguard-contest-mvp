@@ -160,6 +160,7 @@ export function buildBriefingEmail(response: AskResponse, siteName: string, work
   const subject = `오늘의 안전 브리핑 — ${siteName}`;
   const phaseAAuthority = assessPhaseAReviewAuthority(response.phaseAReview);
   const phaseAReview = response.phaseAReview;
+  const materializationCoverage = phaseAReview?.materializationCoverage;
 
   const weatherSummary = firstNonEmpty(
     response.externalData?.weather?.summary,
@@ -192,7 +193,8 @@ export function buildBriefingEmail(response: AskResponse, siteName: string, work
     "",
     "[Phase A 근거 검토]",
     `- 상태: ${phaseAAuthority.authoritative ? "확인 완료" : "검토 필요"}`,
-    `- 검증된 문서 반영 ${phaseAReview?.verifiedRecords ?? 0}건`,
+    `- 문서 반영 ${materializationCoverage?.materializedRecordCount ?? 0}/${materializationCoverage?.expectedRecordCount ?? 0}`,
+    `- 미해결 stableKey ${materializationCoverage?.unresolvedStableKeys.length ?? 0}건`,
     `- 사람 확인 ${phaseAReview?.humanConfirmation.status === "confirmed" ? "완료" : "대기"}`,
     `- 다음 조치: ${phaseAAuthority.authoritative ? "확인된 범위에서 공유 가능" : phaseAReview?.actionableReason || phaseAAuthority.reason}`,
     "",

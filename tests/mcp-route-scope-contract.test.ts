@@ -213,6 +213,12 @@ describe("MCP route scope contract", () => {
     expect(route).toContain("resolveSafetyKnowledgeSnapshot");
     expect(route).toContain("publishedGraphSnapshot");
     expect(route).toContain("buildDiagnosticQaReviewResult");
+    expect(route).toContain("buildSafetyKnowledgeCandidateResult");
+    expect(route).toMatch(
+      /buildSafetyKnowledgeCandidateResult\(await querySafetyKnowledge\(query\)\)/,
+    );
+    expect(route).toContain("안전 지식 연결 후보 조회");
+    expect(route).not.toContain("법제처 검증된");
     expect(route).toMatch(
       /toToolResult\(\s*buildDiagnosticQaReviewResult\(\s*await reviewDocpack\(task, document_text\)\s*\)\s*,?\s*\)/,
     );

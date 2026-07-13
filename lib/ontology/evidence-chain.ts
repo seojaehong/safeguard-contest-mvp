@@ -105,6 +105,15 @@ export type EvidenceMaterializationRecord = {
   };
 };
 
+export type EvidenceMaterializationCoverage = {
+  status: "complete" | "partial" | "missing";
+  expectedRecordCount: number;
+  materializedRecordCount: number;
+  expectedStableKeys: string[];
+  materializedStableKeys: string[];
+  unresolvedStableKeys: string[];
+};
+
 export type ResolvedEvidenceControl = {
   controlId: string;
   graphControlNodeId: string;
@@ -781,6 +790,7 @@ export function verifyEvidenceMaterialization(input: {
   if (input.evidenceChainState !== "resolved") return [];
 
   const records: EvidenceMaterializationRecord[] = [];
+  const materializedStableKeys = new Set<string>();
   for (const plan of input.pack.materializationTargets) {
     const control = input.pack.controls.find(
       (candidate) => candidate.controlId === plan.controlId,
@@ -839,6 +849,8 @@ export function verifyEvidenceMaterialization(input: {
     if (allowedEvidence.length === 0) continue;
 
     for (const target of plan.targets) {
+      if (materializedStableKeys.has(target.stableKey)) continue;
+      documentSearch:
       for (const documentKey of MATERIALIZATION_DOCUMENT_KEYS[target.document]) {
         const document = input.documents[documentKey];
         if (!document) continue;
@@ -853,7 +865,21 @@ export function verifyEvidenceMaterialization(input: {
           const citedEvidence = allowedEvidence.filter((source) =>
             citationTokens.has(source.citedUid.normalize("NFC"))
           );
-          if (citedEvidence.length === 0) continue;
+          const citedRoles = new Set(citedEvidence.map((source) => source.role));
+          const satisfiesSourceRoles = (() => {
+            switch (control.obligation.classification) {
+              case "statutory_mandate":
+                return citedRoles.has("current_law_mandate");
+              case "technical_guidance_only":
+                return citedRoles.has("kosha_technical_guidance");
+              case "statutory_mandate_with_guidance":
+                return citedRoles.has("current_law_mandate") &&
+                  citedRoles.has("kosha_technical_guidance");
+              case "review_required":
+                return false;
+            }
+          })();
+          if (!satisfiesSourceRoles) continue;
           records.push({
             materialized: true,
             stableKey: target.stableKey,
@@ -869,12 +895,44 @@ export function verifyEvidenceMaterialization(input: {
               excerpt: rawLine.trim(),
             },
           });
-          break;
+          materializedStableKeys.add(target.stableKey);
+          break documentSearch;
         }
       }
     }
   }
   return records;
+}
+
+export function buildEvidenceMaterializationCoverage(input: {
+  plannedTargets: readonly EvidenceMaterializationPlan[];
+  verifiedRecords: readonly EvidenceMaterializationRecord[];
+}): EvidenceMaterializationCoverage {
+  const expectedStableKeys = Array.from(new Set(
+    input.plannedTargets.flatMap((plan) => plan.targets.map((target) => target.stableKey)),
+  ));
+  const expectedSet = new Set(expectedStableKeys);
+  const verifiedSet = new Set(
+    input.verifiedRecords
+      .map((record) => record.stableKey)
+      .filter((stableKey) => expectedSet.has(stableKey)),
+  );
+  const materializedStableKeys = expectedStableKeys.filter((stableKey) => verifiedSet.has(stableKey));
+  const unresolvedStableKeys = expectedStableKeys.filter((stableKey) => !verifiedSet.has(stableKey));
+  const status = expectedStableKeys.length > 0 && unresolvedStableKeys.length === 0
+    ? "complete"
+    : materializedStableKeys.length > 0
+      ? "partial"
+      : "missing";
+
+  return {
+    status,
+    expectedRecordCount: expectedStableKeys.length,
+    materializedRecordCount: materializedStableKeys.length,
+    expectedStableKeys,
+    materializedStableKeys,
+    unresolvedStableKeys,
+  };
 }
 
 function requireLaw(articleNo: string): LawEvidenceRecord {

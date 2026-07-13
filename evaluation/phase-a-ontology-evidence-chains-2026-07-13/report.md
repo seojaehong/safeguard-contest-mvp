@@ -4,8 +4,8 @@
 - Branch: `fix/phase-a-ontology-review`
 - Base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
 - Contract: `phase-a-evidence-chains/1.3.0`
-- Status: Authority-leak remediation candidate, awaiting fresh independent review
-- Generated: `2026-07-14T00:35:19.9906632+09:00`, after focused and typecheck logs completed
+- Status: Full-materialization authority remediation candidate, awaiting fresh independent review
+- Generated: `2026-07-14T01:19:49.7892024+09:00`, after focused and typecheck logs completed
 - Runtime/DB publication: not performed
 - Schema, migration, Supabase data, generated core seed: unchanged
 
@@ -81,9 +81,10 @@ SIF-only evidence returns `review_required`; there is no fifth `neither` state.
 - Naturalization deep-clones and recursively freezes the active fixed pack. `reviewOnlyGuidance` is removed from that packet and preserved separately for operator review. Mutation of the source pack after confirmation does not alter the confirmed pack.
 - Human confirmation rejects both pending and failed quality checks; only `passed` quality can be confirmed.
 - Existing provider fallback and DB harness `naturalize_only` behavior are unchanged.
-- MCP `provenance` remains the backward-compatible `법제처 검증 시드 v1`; the layered pack is returned separately in `evidenceContract`, with `evidenceChainState=review_required` while the KOSHA bridge is unresolved.
+- Standalone `query_safety_knowledge` no longer returns the fixed `법제처 검증 시드 v1` provenance or the internal evidence pack. It returns candidate-marked controls/articles/duties, actual SIF/KOSHA/law cited-UID provenance, `authority=review_required`, and `evidenceChainState=review_required`.
 - Planning remains deterministic: 9 controls create 18 risk-assessment/TBM targets and retain production item UID, local item ID, local chunk ID, exact SHA-256, page/location, and unresolved bridge state without inventing a chunk citation.
-- Planned targets are `materializationTargets`; they are not completion claims. `verifiedRecords` are created only after exact inspection of a generated risk-assessment/TBM line containing both the Control label and a Control-scoped current-law Article UID or verified KOSHA technical-guidance UID.
+- Planned targets are `materializationTargets`; they are not completion claims. `verifiedRecords` are created only after exact inspection of a generated risk-assessment/TBM line containing the Control label and the source roles required by that Control classification. `statutory_mandate` requires current law, `technical_guidance_only` requires KOSHA, and `statutory_mandate_with_guidance` requires both at that document location.
+- Authority requires the complete unique planned stableKey set. A partial `1/N` result remains `review_required`, duplicate document hits cannot inflate coverage, and `PhaseAReview` carries expected, materialized, and unresolved stableKey lists plus exact counts.
 - Evidence UIDs must appear as complete, Unicode-aware citation tokens. Ordinary ASCII/Korean punctuation and quotes may delimit a UID; Unicode letters, marks, numbers, Hangul, `_`, `-`, and `/` remain continuation characters. A colon is punctuation only when it is not joined to another continuation character. Article `제172조` still does not match `제172조의2`, and KOSHA UID prefix/suffix collisions do not materialize a Control.
 - SIF evidence remains `hazard_priority_only` and can never materialize a Control, even when a SIF UID appears on the same generated line as the Control label. Wrong-source and different-line citations also produce no record.
 - `review_required`, unverified, unpublished, unmatched, or Control-level `review_required` output always produces zero verified materialization records. Human confirmation remains pending in the tool result.
@@ -100,7 +101,7 @@ SIF-only evidence returns `review_required`; there is no fifth `neither` state.
 | P1-6 quality and mutability | Confirmation requires passed quality; fixed packs are cloned and recursively frozen; mutation isolation is tested. |
 | P2-7 fifth classification | Removed `neither`; compile-time test locks the exact four-state union; SIF-only is `review_required`. |
 | P2-8 Article 44 overgeneralized | Condition now includes height at least 2 metres and actual safety-belt wearing. |
-| P2-9 MCP provenance regression | Restored original `provenance` semantics and retained the evidence-chain DTO as a separate field. |
+| P2-9 MCP provenance regression | Superseded by the external candidate-only projection: provenance is assembled from the resolved SIF/KOSHA/law references, while authority remains `review_required` until the complete Phase A materialization contract and human confirmation are satisfied. |
 
 ## Second review remediation
 
@@ -156,7 +157,7 @@ This remediation intentionally preserves the template fast path (no provider cal
 |---|---|
 | P1-H untrusted text could escape the grounding boundary | Every grounded answer/document provider prompt now starts with the immutable `naturalize_only` security policy, followed by exactly one delimited JSON block. The original question, search context, scenario, Task/Control/source labels, and follow-on risk rows remain JSON data and are never appended raw after the boundary. Boundary characters inside JSON strings are Unicode-escaped, so injection-shaped delimiter text cannot create or duplicate a boundary while `JSON.parse` still restores the exact input. |
 | P1-H generic persona instructions could request outside citations | Grounded persona, schema, emergency, legal, and KOSHA instructions now require the Phase A allow-list or `현장 확인 필요`; the legacy generic citation instructions remain only on ungrounded paths. The optional raw legal-citation mapper is skipped when Phase A grounding is present. |
-| P1-H QA verdict could conflict with grounding state | Legacy QA is retained only as a nested diagnostic and is never authoritative. Top-level reviewed status additionally requires resolved grounding, passing coverage/quality, nonzero deterministic materialization, and completed human confirmation. The current pending flow therefore remains `검토 필요` and not verified. |
+| P1-H QA verdict could conflict with grounding state | Legacy QA is retained only as a nested diagnostic and is never authoritative. Top-level reviewed status additionally requires resolved grounding, passing coverage/quality, complete unique planned stableKey materialization, and completed human confirmation. The current pending flow therefore remains `검토 필요` and not verified. |
 | P1-H ontology lookup failure aborted generation | Lookup exceptions are logged without exception text or secrets and become explicit missing Phase A grounding. Template mode stays deterministic and provider-free; enhanced/full provider fallback remains reachable, but the returned docpack is marked review-required and unverified. No published ontology fallback is synthesized. |
 | P1-H the provider pack was not mutation-proof | The complete grounding object, including the pack, allowed evidence, citation UIDs, and materialization targets, is structured-cloned and recursively frozen before `runAsk`. A handler-seam mutation test verifies that source and frozen-object mutation attempts cannot alter either the provider prompt or deterministic post-check. |
 | P1-H Claw generation bypassed the grounded handler | Both reviewed and plain Claw document tools now call the same production grounding handler, including the ontology-failure behavior and reconciled reviewed status. |
@@ -169,7 +170,7 @@ Chosen compatibility behavior: unresolved or unavailable Phase A evidence does n
 |---|---|
 | HOLD-1 public/general `runAsk` callers bypassed Phase A | Enumerated every production invocation. JSON ask, SSE ask, the `/ask` page call path, and briefing now use one grounded wrapper; MCP continues through its grounded handler. The wrapper resolves ontology before `runAsk`, converts lookup failure or an unmatched Task to explicit missing grounding without leaking error text, and `runAsk` itself also defaults omitted grounding to the secured missing object. The legacy raw citation-mapping branch was removed. |
 | HOLD-1 provider/template compatibility | Enhanced/full generation remains reachable through the fixed policy and one JSON boundary. Template remains provider-free. Every public `AskResponse` carries `phaseAReview` with `검토 필요`, `verified=false`, zero verified records, and human confirmation pending. JSON/SSE and briefing are exercised through actual handlers; the App Router page is covered by a source call-site contract because this Vitest configuration preserves TSX. |
-| HOLD-2 legacy QA could become authoritative | `qa.authoritative` is always false. Passing legacy QA alone cannot produce a top-level pass. The gate requires resolved grounding, nonzero deterministic materialization, and completed human confirmation in addition to coverage/quality. Tests cover both nonzero records with human pending and zero records; both remain `검토 필요`. |
+| HOLD-2 legacy QA could become authoritative | `qa.authoritative` is always false. Passing legacy QA alone cannot produce a top-level pass. The gate requires resolved grounding, complete unique planned stableKey materialization, and completed human confirmation in addition to coverage/quality. Tests cover complete records with human pending, partial/zero records, and duplicate records; all remain `검토 필요` unless the full authority contract is met. |
 | HOLD-3 draft SIF could enter a resolved allow-list | `hazard_priority_only` retains its limited role but now also requires `verified|published` and exact `resolved` state. With a test-only ready KOSHA gate and unchanged draft SIF registry data, the actual resolver returns `review_required`; allowed evidence and verified materialization remain empty. A caller-forced resolved state is downgraded before post-check. |
 
 This is a review candidate, not a release-completion claim. `launchReady` remains false and no production SIF or KOSHA registry record was promoted.
@@ -178,7 +179,7 @@ This is a review candidate, not a release-completion claim. `launchReady` remain
 
 | Finding | Candidate change awaiting independent review |
 |---|---|
-| Integration-1 pending Phase A did not gate readiness/share | A single Phase A authority check now requires resolved grounding, `verified=true`, nonzero deterministic materialization, and completed human confirmation. `qualityContract`, workpack readiness, command-center status, and share controls all consume that result; legacy coverage QA remains diagnostic and cannot produce ready/pass/shareable state. |
+| Integration-1 pending Phase A did not gate readiness/share | A single Phase A authority check now requires resolved grounding, `verified=true`, complete unique planned stableKey materialization, and completed human confirmation. `qualityContract`, workpack readiness, command-center status, and share controls all consume that result; legacy coverage QA remains diagnostic and cannot produce ready/pass/shareable state. |
 | Integration-2 briefing and storage lost pending semantics | Briefing email, dispatch payload, and workpack persistence retain `phaseAReview`, zero verified records, and human-pending state. Automatic briefing dispatch fails closed. Pending law/KOSHA/KOSHA-education/accident results are empty in authoritative evidence fields and remain only under an explicitly non-authoritative diagnostic block. |
 | Integration-3 ontology lookup could hang | Pure `lib/ontology-deadline-policy.ts` owns ontology-only budgets. Grounding preflight and Supabase graph fetch use bounded `AbortSignal` deadlines, never inherit Vertex/deliverables timeout environment variables, and log only fixed error type/code. Template/enhanced/full continue with explicit missing, unverified, human-pending grounding after timeout. |
 | Integration-4 one request loaded changing graphs repeatedly | Successful public, MCP, and Claw requests load one published graph snapshot and pass the exact object through generation and post-generation QA. A failed preflight passes an explicit `null` snapshot sentinel, so QA does not issue a second graph load. |
@@ -191,9 +192,23 @@ This remains an Integration HOLD candidate. No launch or integration completion 
 | Finding | Candidate change awaiting independent review |
 |---|---|
 | P1-1 standalone legacy QA exposed an authoritative-looking pass | Both the MCP route and direct Claw tool now wrap the complete legacy coverage result under `qa.authority=diagnostic_only`. The external result has no top-level legacy `verdict`; its `reviewStatus` is always `review_required`, `검토 필요`, `verified=false`, `authoritative=false`, and human-confirmation `pending`. Tool descriptions also direct authority-seeking consumers to `generate_reviewed_safety_docpack` plus human confirmation. |
-| P1-2 ask and reused citation UI promoted pending evidence | `AnswerPanel`, `CitationList`, `FieldOperationsWorkspace`, and `CurrentWorkpackModules` now consume the same Phase A authority projection. Pending, review-required, or missing state preserves every citation/link while labeling it `근거 검토 필요`, `연결 후보`, `보조 후보`, or `법제처 확인 후보`. Answer summary/status notes, DB harness counts, citation locations, and TBM/education locations also remain candidate-only. `근거 연결됨`, `직접 근거`, and `법제처 인용` appear only when resolved grounding, verified output, nonzero materialization, and completed human confirmation all hold. |
+| P1-2 ask and reused citation UI promoted pending evidence | `AnswerPanel`, `CitationList`, `FieldOperationsWorkspace`, `CurrentWorkpackModules`, and the workpack editor evidence panel consume the same Phase A authority projection. Pending, review-required, or missing state preserves every citation/link while labeling it `근거 검토 필요`, `연결 후보`, `보조 후보`, or `법제처 확인 후보`. Answer summary/status notes, DB harness counts, citation locations, and TBM/education locations also remain candidate-only. `근거 연결됨`, `직접 근거`, and `법제처 인용` appear only when resolved grounding, verified output, complete planned stableKey materialization, and completed human confirmation all hold. |
 
 This change does not make standalone coverage QA authoritative and does not infer per-citation materialization from raw law/KOSHA retrieval. It changes authority copy/state wiring only. `launchReady` remains false, and another fresh independent review is required before integration.
+
+## Full materialization and knowledge-tool remediation
+
+| Finding | Candidate change awaiting independent review |
+|---|---|
+| P1-1 partial materialization could authorize output | `PhaseAReview.materializationCoverage` now records the exact unique planned stableKey set, materialized set, unresolved set, and counts. Authority, quality readiness, workpack sharing, reviewed MCP output, and UI copy require complete set equality; `1/N`, malformed counts, extra keys, and duplicate keys fail closed. |
+| P1-1 mandate-plus-guidance accepted one source role | Deterministic document inspection now checks the classification-specific role set on the same Control line. A combined mandate/guidance Control requires both current-law `mandatedBy` evidence and verified KOSHA technical guidance. SIF remains hazard priority only. |
+| P1-2 fallback document text used live retrieval as authority | `runAsk` attaches deterministic materialization coverage before quality evaluation and reconciles every generated summary to the Phase A authority result. Pending/missing summaries say `법령 근거: 검토 필요`; the same text reaches `CurrentWorkpackModules`, `WorkpackEditor`, briefing email, and dispatch documents. |
+| P1-3 standalone knowledge query looked validated | MCP and Claw now project query results through a candidate-only DTO. Controls, articles, and duties are marked candidate; provenance is built from actual SIF/KOSHA/law UIDs; the internal evidence pack is not exposed; found and not-found outputs both remain `review_required`. Agent instructions and descriptors no longer call this output law.go.kr-validated or direct authority. |
+| P1-4 prior authority fixes regressed | Focused tests retain nested `diagnostic_only` standalone QA, pending citation labels, unresolved-SIF gating, timeout/snapshot reuse, and public grounding boundaries. |
+
+Scope accounting is explicit: the independent review observed 59 branch-diff files at `c51c6c1`. The current branch diff is 61 files because this remediation newly places `components/WorkpackEditor.tsx` and `tests/ontology-knowledge-tool.test.ts` in the base-to-branch diff. `typecheck.log` was regenerated, but its content is unchanged from the tracked artifact and therefore does not add a diff file. The focused verification command still contains 28 test files; that number is not a branch-diff count.
+
+This remains a HOLD candidate. It is not an integration or launch completion claim.
 
 ## Official law verification
 
@@ -228,7 +243,9 @@ The Article 172 direct surface identifies `접촉의 방지`: paragraph 1 prohib
 - Fresh release-HOLD TDD RED: 8 product failures across five runs: omitted grounding 1/4, JSON/SSE call sites 3/4, QA authority 2/31, KOSHA-ready plus draft SIF resolver 1/1, and forced-resolved SIF post-check 1/2. A separate App Router TSX import-analysis limitation was corrected to the repo's source-contract test style and is not counted as a product RED.
 - Integration-HOLD TDD RED: 35 product assertions failed across 12 narrow contract runs, plus one missing-policy-module RED suite. These covered quality/readiness/UI/share, briefing/dispatch/storage, bounded fallback, exact snapshot reuse, MCP/Claw wiring, pending KOSHA diagnostics, and failed-preflight no-reload behavior.
 - Fresh authority-leak TDD RED: 11 product assertions failed across five narrow runs: standalone MCP/Claw authority 2/13, pending/ready/missing shared citation UI and call-site wiring 4/4, Claw tool-schema authority copy 1/18, AnswerPanel detail/location copy 3/8, and AnswerPanel top-level summary 1/4. A TSX direct-import parser limitation and one test-regex formatting mismatch were test-harness issues and are not counted as product RED.
-- Focused ontology/generation/MCP/commercial/DB harness plus quality/readiness/UI, briefing/storage, deadline, snapshot, production/provider/Claw/public handlers and fallback compatibility, serial: 28 files passed, 325 tests passed.
+- Full-materialization representative RED: 5 product tests failed and 92 passed in a 97-test serial run, reproducing one-sided mandate/guidance materialization, duplicate stableKey inflation, and partial/duplicate authority acceptance.
+- Expanded authority/tool RED: 18 product assertions failed and 191 passed across 12 files; one TSX direct-import parser suite error was a test-harness issue and was replaced with the repo's source-contract style. Additional fail-closed candidate and editor-copy runs each reproduced 1 expected failure.
+- Focused ontology/generation/MCP/commercial/DB harness plus quality/readiness/UI, briefing/storage, deadline, snapshot, production/provider/Claw/public handlers and fallback compatibility, serial: 28 files passed, 337 tests passed.
 - Additional frontend evidence probe: 36 tests passed and 1 provenance assertion failed because the separately tracked browser-audit `sourceIdentity` predates these owned TSX label changes. That external browser audit bundle was not regenerated outside this remediation artifact scope.
 - Strict TypeScript: passed.
 - Previous full suite is informational only and was not rerun for this remediation: 125 files passed, 7 failed, 5 skipped; 1229 tests passed, 7 failed, 22 skipped. Failures were outside owned ontology/MCP/test/report files.
@@ -242,7 +259,7 @@ Logs:
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log`
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log`
 
-Log provenance: focused log completed `2026-07-13T15:35:06.2203267Z`; typecheck log completed `2026-07-13T15:35:06.2233372Z`; this report was generated afterward.
+Log provenance: focused log completed `2026-07-13T16:17:20.0227034Z`; typecheck log completed `2026-07-13T16:17:30.9832625Z`; the frontend provenance probe then retained 36 passes and the single expected stale-identity RED at line 693. This report was generated afterward.
 
 This report, `report.json`, and both verification logs are tracked artifacts committed on this branch.
 

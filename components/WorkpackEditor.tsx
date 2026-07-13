@@ -10,6 +10,7 @@ import {
   type RubricEvaluationItem
 } from "@/lib/safety-document-rubric";
 import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
+import { buildPhaseAReviewUiState } from "@/lib/phase-a-review";
 import styles from "./WorkpackEditor.module.css";
 
 declare global {
@@ -1984,6 +1985,7 @@ export function WorkpackEditor({
   const selectedQualityIssues = selectedRubricItems.filter((item) => item.status !== "fulfilled").length;
   const totalQualityIssues = rubricEvaluation.summary.total - rubricEvaluation.summary.fulfilled;
   const selectedEvidenceLabel = data.evidenceLabels?.[selected.key];
+  const phaseAState = buildPhaseAReviewUiState(data.phaseAReview);
   const harnessSummary = data.dbHarness?.summary;
   const harnessPacket = data.dbHarness?.packet;
   const selectedCoverage = useMemo(() => {
@@ -1995,21 +1997,27 @@ export function WorkpackEditor({
     const references = [
       ...(harnessPacket?.directEvidence || []).map((item) => ({
         id: `direct-${item.id}`,
-        badge: item.evidence_role_label || "직접 근거",
+        badge: phaseAState.authoritative
+          ? item.evidence_role_label || "직접 근거"
+          : phaseAState.directEvidenceLabel,
         title: item.display_title || item.title,
         summary: item.display_summary || item.short_summary || item.summary,
         href: item.source_url || null
       })),
       ...(harnessPacket?.sifCases || []).map((item) => ({
         id: `sif-${item.id}`,
-        badge: item.source_kind_label || "SIF 사례",
+        badge: phaseAState.authoritative
+          ? item.source_kind_label || "SIF 사례"
+          : "SIF 위험 우선순위 후보",
         title: item.display_title || item.title,
         summary: item.display_summary || item.short_summary || item.summary,
         href: item.source_url || null
       })),
       ...(harnessPacket?.supportingEvidence || []).map((item) => ({
         id: `support-${item.id}`,
-        badge: item.evidence_role_label || "보조 근거",
+        badge: phaseAState.authoritative
+          ? item.evidence_role_label || "보조 근거"
+          : phaseAState.supportingEvidenceLabel,
         title: item.display_title || item.title,
         summary: item.display_summary || item.short_summary || item.summary,
         href: item.source_url || null
@@ -2024,7 +2032,13 @@ export function WorkpackEditor({
       summary: citation.citation || citation.summary,
       href: citation.sourceUrl || null
     }));
-  }, [data.citations, harnessPacket]);
+  }, [
+    data.citations,
+    harnessPacket,
+    phaseAState.authoritative,
+    phaseAState.directEvidenceLabel,
+    phaseAState.supportingEvidenceLabel,
+  ]);
   const evidenceStats = useMemo(() => {
     const directEvidenceCount = harnessSummary?.directEvidence ?? 0;
     const sifCaseCount = harnessSummary?.sifCases ?? 0;
@@ -2032,9 +2046,11 @@ export function WorkpackEditor({
 
     return [
       {
-        label: "직접 근거",
+        label: phaseAState.directEvidenceLabel,
         value: directEvidenceCount,
-        description: selectedEvidenceLabel?.article || "문서 라벨 미지정"
+        description: phaseAState.authoritative
+          ? selectedEvidenceLabel?.article || "문서 라벨 미지정"
+          : "법령 연결 후보"
       },
       {
         label: "유사사례",
@@ -2042,12 +2058,19 @@ export function WorkpackEditor({
         description: harnessSummary ? "DB 하네스 기준" : "현재 페이지 기준"
       },
       {
-        label: "인용/보조",
+        label: phaseAState.supportingEvidenceLabel,
         value: harnessSummary ? supportingEvidenceCount + data.citations.length : data.citations.length,
         description: `${data.citations.length.toLocaleString("ko-KR")}건 화면 인용`
       }
     ];
-  }, [data.citations.length, harnessSummary, selectedEvidenceLabel]);
+  }, [
+    data.citations.length,
+    harnessSummary,
+    phaseAState.authoritative,
+    phaseAState.directEvidenceLabel,
+    phaseAState.supportingEvidenceLabel,
+    selectedEvidenceLabel,
+  ]);
 
   useEffect(() => {
     onDeliverablesChangeRef.current = onDeliverablesChange;
@@ -2660,7 +2683,7 @@ export function WorkpackEditor({
               <div className={styles.sectionHeading}>
                 <div>
                   <span className="eyebrow">생성 근거</span>
-                  <strong>{selected.title}에 연결된 근거</strong>
+                  <strong>{selected.title}의 {phaseAState.evidenceHeading}</strong>
                 </div>
                 <a className="knowledge-link" href="/knowledge">지식 DB</a>
               </div>
@@ -2694,7 +2717,9 @@ export function WorkpackEditor({
               )}
               {selectedCoverage ? (
                 <p className="muted small">
-                  {selectedCoverage.document} 커버리지: {selectedCoverage.covered ? "연결됨" : "보강 필요"}
+                  {selectedCoverage.document} 커버리지: {selectedCoverage.covered
+                    ? phaseAState.connectionLabel
+                    : "보강 필요"}
                   {selectedCoverage.evidenceTypes.length ? ` · ${selectedCoverage.evidenceTypes.join(" · ")}` : ""}
                 </p>
               ) : null}

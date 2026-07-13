@@ -137,11 +137,19 @@ describe("CLAW_TOOLS", () => {
       expect(tool.input_schema.type).toBe("object");
     }
     const standaloneQa = CLAW_TOOLS.find((tool) => tool.name === "qa_review_docpack");
+    const standaloneKnowledge = CLAW_TOOLS.find((tool) => tool.name === "query_safety_knowledge");
     expect(standaloneQa?.description).toContain("진단 전용");
     expect(standaloneQa?.description).toContain("승인");
     expect(standaloneQa?.description).toContain("generate_reviewed_safety_docpack");
+    expect(standaloneKnowledge?.description).toContain("연결 후보");
+    expect(standaloneKnowledge?.description).toContain("검토 필요");
+    expect(standaloneKnowledge?.description).not.toContain("법제처 검증");
+    expect(standaloneKnowledge?.description).not.toContain("검증된");
+    expect(buildSystemPrompt()).toContain("후보 자료로만 사용");
+    expect(buildSystemPrompt()).not.toContain("query_safety_knowledge로 검증된 조문");
     expect(toolLabel("run_safeclaw_harness_agent", "start")).toBe("DB 하네스 근거 고정 중");
     expect(toolLabel("generate_reviewed_safety_docpack", "start")).toBe("검수 포함 안전 문서팩 생성 중");
+    expect(toolLabel("query_safety_knowledge", "start")).toBe("안전 지식 후보 조회 중");
   });
 });
 

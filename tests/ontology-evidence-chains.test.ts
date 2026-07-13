@@ -81,6 +81,47 @@ function requireVerifiedGuidanceMaterializationFixture() {
   };
 }
 
+function requireMandateWithGuidanceMaterializationFixture() {
+  const sourcePack = requireReviewRequired("고소작업");
+  const sourceControl = sourcePack.controls.find(
+    (control) => control.lawEvidence.length > 0 && control.guidanceEvidence.length > 0,
+  );
+  const sourcePlan = sourcePack.materializationTargets.find(
+    (plan) => plan.controlId === sourceControl?.controlId,
+  );
+  const law = sourceControl?.lawEvidence[0];
+  const sourceGuidance = sourceControl?.guidanceEvidence[0];
+  if (!sourceControl || !sourcePlan || !law || !sourceGuidance) {
+    throw new Error("expected Control with law and KOSHA guidance");
+  }
+  const guidance = {
+    ...sourceGuidance,
+    reviewState: "verified" as const,
+    resolution: "resolved" as const,
+  };
+  const obligation = classifyControlObligation([law, guidance]);
+  expect(obligation.classification).toBe("statutory_mandate_with_guidance");
+  return {
+    control: {
+      ...sourceControl,
+      guidanceEvidence: [guidance],
+      guidanceStatus: "verified" as const,
+      guidanceReviewRequired: false,
+      obligation,
+    },
+    plan: {
+      ...sourcePlan,
+      obligation,
+      lawCitedUids: [law.citedUid],
+      guidanceCitedUids: [guidance.citedUid],
+      guidanceStatus: "verified" as const,
+      guidanceReviewRequired: false,
+    },
+    law,
+    guidance,
+  };
+}
+
 const publishedLaw: ControlEvidenceSource = {
   sourceType: "law",
   relation: "mandatedBy",
@@ -970,6 +1011,62 @@ describe("pipeline and document materialization contract", () => {
     ]);
   });
 
+  test.each([
+    ["law only", "law"],
+    ["KOSHA guidance only", "guidance"],
+  ] as const)(
+    "does not materialize mandate-with-guidance from %s",
+    (_label, source) => {
+      const { control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
+      const citedUid = source === "law" ? law.citedUid : guidance.citedUid;
+
+      expect(verifyEvidenceMaterialization({
+        evidenceChainState: "resolved",
+        pack: { controls: [control], materializationTargets: [plan] },
+        documents: {
+          riskAssessmentDraft: `${plan.controlLabel} | ${citedUid}`,
+        },
+      })).toEqual([]);
+    },
+  );
+
+  test("materializes mandate-with-guidance only when law and KOSHA provenance share the Control location", () => {
+    const { control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
+
+    expect(verifyEvidenceMaterialization({
+      evidenceChainState: "resolved",
+      pack: { controls: [control], materializationTargets: [plan] },
+      documents: {
+        riskAssessmentDraft: `${plan.controlLabel} | ${law.citedUid} | ${guidance.citedUid}`,
+      },
+    })).toEqual([
+      expect.objectContaining({
+        stableKey: plan.targets[0].stableKey,
+        citedEvidence: expect.arrayContaining([
+          { citedUid: law.citedUid, role: "current_law_mandate" },
+          { citedUid: guidance.citedUid, role: "kosha_technical_guidance" },
+        ]),
+      }),
+    ]);
+  });
+
+  test("does not let duplicate document hits inflate one planned stableKey", () => {
+    const { control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
+    const line = `${plan.controlLabel} | ${law.citedUid} | ${guidance.citedUid}`;
+
+    const records = verifyEvidenceMaterialization({
+      evidenceChainState: "resolved",
+      pack: { controls: [control], materializationTargets: [plan] },
+      documents: {
+        tbmBriefing: line,
+        tbmLogDraft: line,
+      },
+    });
+
+    expect(records).toHaveLength(1);
+    expect(records[0]?.stableKey).toBe(plan.targets[1].stableKey);
+  });
+
   test.each(["prefix", "suffix"] as const)(
     "does not materialize KOSHA guidance when the allowed UID is a %s of another token",
     (collision) => {
@@ -1148,8 +1245,14 @@ describe("pipeline and document materialization contract", () => {
 
     expect(payload.task).toBe("전기 작업");
     expect(payload.hazards.length).toBeGreaterThan(0);
-    expect(payload.provenance).toBe("법제처 검증 시드 v1");
-    expect(payload.coreProvenance).toBe("법제처 검증 시드 v1");
+    expect(payload.provenance).toMatchObject({
+      authority: "candidate_only",
+      source: "phase_a_evidence_pack",
+      sifCitedUids: expect.arrayContaining([expect.stringMatching(/^ref:safety_reference_items:sif-/)]),
+      koshaCitedUids: expect.arrayContaining([expect.stringMatching(/^ref:safety_reference_items:technical-support-/)]),
+      lawCitedUids: expect.arrayContaining([expect.stringMatching(/^law:/)]),
+    });
+    expect(payload).not.toHaveProperty("coreProvenance");
     expect(payload.evidenceContract?.contractVersion).toBe(EVIDENCE_CHAIN_CONTRACT_VERSION);
     expect(payload.evidenceContract?.pipeline.llmRole).toBe("naturalize_only");
     expect(payload.evidenceContract?.pipeline.humanConfirmationRequired).toBe(true);

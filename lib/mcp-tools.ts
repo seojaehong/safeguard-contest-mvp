@@ -15,6 +15,7 @@ import {
 } from "./db-harness";
 import type { QaReviewResult } from "./ontology/qa-review";
 import {
+  buildEvidenceMaterializationCoverage,
   buildPhaseAGenerationGrounding,
   splitEvidenceChainPack,
   resolveEvidenceTaskLabel,
@@ -23,6 +24,7 @@ import {
   type EvidenceAssemblyStage,
   type EvidenceChainDiagnostics,
   type EvidenceMaterializationDocumentKey,
+  type EvidenceMaterializationCoverage,
   type EvidenceMaterializationPlan,
   type EvidenceMaterializationRecord,
   type EvidenceChainResolution,
@@ -127,6 +129,7 @@ export type DocpackResult = {
     operationSequence: Array<EvidenceAssemblyStage | "document_materialization">;
     plannedTargets: EvidenceMaterializationPlan[];
     verifiedRecords: EvidenceMaterializationRecord[];
+    coverage: EvidenceMaterializationCoverage;
     humanConfirmation: { required: true; status: "pending" | "confirmed" };
   };
 };
@@ -286,6 +289,13 @@ export function buildDocpackResult(
           ? "KOSHA/법령 source resolution을 완료한 뒤 다시 생성·검수하세요."
           : "canonical Task 매핑과 ontology availability를 확인한 뒤 다시 생성하세요.",
     };
+    const verifiedRecords = phaseAGrounding.evidencePack
+      ? verifyEvidenceMaterialization({
+          evidenceChainState: phaseAGrounding.evidenceChainState,
+          pack: phaseAGrounding.evidencePack,
+          documents: materializationDocuments,
+        })
+      : [];
     result.evidenceMaterialization = {
       evidenceChainState: phaseAGrounding.evidenceChainState,
       operationSequence: [
@@ -293,16 +303,19 @@ export function buildDocpackResult(
         "document_materialization",
       ],
       plannedTargets: phaseAGrounding.materializationTargets,
-      verifiedRecords: phaseAGrounding.evidencePack
-        ? verifyEvidenceMaterialization({
-            evidenceChainState: phaseAGrounding.evidenceChainState,
-            pack: phaseAGrounding.evidencePack,
-            documents: materializationDocuments,
-          })
-        : [],
+      verifiedRecords,
+      coverage: buildEvidenceMaterializationCoverage({
+        plannedTargets: phaseAGrounding.materializationTargets,
+        verifiedRecords,
+      }),
       humanConfirmation: { required: true, status: "pending" },
     };
   } else if (evidence?.found && evidence.evidenceContract) {
+    const verifiedRecords = verifyEvidenceMaterialization({
+      evidenceChainState: evidence.evidenceChainState,
+      pack: evidence.evidenceContract,
+      documents: materializationDocuments,
+    });
     result.evidenceMaterialization = {
       evidenceChainState: evidence.evidenceChainState,
       operationSequence: [
@@ -310,10 +323,10 @@ export function buildDocpackResult(
         "document_materialization",
       ],
       plannedTargets: evidence.evidenceContract.materializationTargets,
-      verifiedRecords: verifyEvidenceMaterialization({
-        evidenceChainState: evidence.evidenceChainState,
-        pack: evidence.evidenceContract,
-        documents: materializationDocuments,
+      verifiedRecords,
+      coverage: buildEvidenceMaterializationCoverage({
+        plannedTargets: evidence.evidenceContract.materializationTargets,
+        verifiedRecords,
       }),
       humanConfirmation: { required: true, status: "pending" },
     };
@@ -442,12 +455,15 @@ export function buildReviewedDocpackResult(
   const groundingStatus = phaseAGrounding?.groundingStatus ?? "missing";
   const docpack = buildDocpackResult(response, includeFull, evidence, phaseAGrounding);
   const qaPassed = qa.reviewable && qa.verdict === "통과";
-  const verifiedRecords = docpack.evidenceMaterialization?.verifiedRecords ?? [];
+  const materializationCoverage = docpack.evidenceMaterialization?.coverage;
   const humanConfirmation = docpack.evidenceMaterialization?.humanConfirmation ?? {
     required: true as const,
     status: "pending" as const,
   };
-  const hasVerifiedMaterialization = verifiedRecords.length > 0;
+  const hasVerifiedMaterialization = materializationCoverage?.status === "complete" &&
+    materializationCoverage.expectedRecordCount > 0 &&
+    materializationCoverage.materializedRecordCount === materializationCoverage.expectedRecordCount &&
+    materializationCoverage.unresolvedStableKeys.length === 0;
   const humanConfirmationCompleted = humanConfirmation.status === "confirmed";
   const authoritativePass = groundingStatus === "resolved" &&
     qaPassed &&
@@ -848,19 +864,35 @@ export function buildEvidenceMappingResult(docType?: string): EvidenceMappingRes
 
 // ── query_safety_knowledge ────────────────────────────────────────────────
 
-/** 기존 query_safety_knowledge provenance 필드의 호환용 고정 값. */
-export const ONTOLOGY_PROVENANCE = "법제처 검증 시드 v1";
-export const CORE_ONTOLOGY_PROVENANCE = "법제처 검증 시드 v1";
-
 export type KnowledgeArticleView = {
+  authority: "candidate";
   label: string;
   articleNo?: string;
   law?: string;
 };
 
+export type KnowledgeArticleCandidate = {
+  authority: "candidate";
+  label: string;
+};
+
 export type KnowledgeControlView = {
+  authority: "candidate";
   control: string;
-  articles: string[];
+  articles: KnowledgeArticleCandidate[];
+};
+
+export type KnowledgeDutyView = {
+  authority: "candidate";
+  label: string;
+};
+
+export type SafetyKnowledgeProvenance = {
+  authority: "candidate_only";
+  source: "phase_a_evidence_pack" | "published_graph_candidates";
+  sifCitedUids: string[];
+  koshaCitedUids: string[];
+  lawCitedUids: string[];
 };
 
 /** duties가 단독 충족이 아니라 이행 증빙의 일부임을 명시하는 고정 문구. */
@@ -875,10 +907,9 @@ export type SafetyKnowledgeFound = {
   controls: KnowledgeControlView[];
   articles: KnowledgeArticleView[];
   accidents: string[];
-  duties: string[];
+  duties: KnowledgeDutyView[];
   dutiesNote: string;
-  provenance: string;
-  coreProvenance: string;
+  provenance: SafetyKnowledgeProvenance;
   evidenceContract: ActiveEvidenceChainPack | null;
   evidenceDiagnostics: EvidenceChainDiagnostics | null;
   evidenceChainState: "resolved" | "review_required" | "unverified" | "not_registered" | "not_evaluated";
@@ -899,7 +930,49 @@ function articleView(node: OntologyNode): KnowledgeArticleView {
   const meta = node.meta as Record<string, unknown>;
   const articleNo = typeof meta.article_no === "string" ? meta.article_no : undefined;
   const law = typeof meta.law === "string" ? meta.law : undefined;
-  return { label: node.label, articleNo, law };
+  return { authority: "candidate", label: node.label, articleNo, law };
+}
+
+function uniqueCitedUids(values: readonly string[]): string[] {
+  return Array.from(new Set(values));
+}
+
+function buildKnowledgeProvenance(
+  result: KnowledgeResult,
+  evidencePack: ActiveEvidenceChainPack | null,
+): SafetyKnowledgeProvenance {
+  if (evidencePack) {
+    return {
+      authority: "candidate_only",
+      source: "phase_a_evidence_pack",
+      sifCitedUids: uniqueCitedUids(
+        evidencePack.hazardPriority.map((source) => source.citedUid),
+      ),
+      koshaCitedUids: uniqueCitedUids(
+        evidencePack.guidance.map((source) => source.citedUid),
+      ),
+      lawCitedUids: uniqueCitedUids(
+        evidencePack.law.map((source) => source.citedUid),
+      ),
+    };
+  }
+  return {
+    authority: "candidate_only",
+    source: "published_graph_candidates",
+    sifCitedUids: uniqueCitedUids(
+      result.accidents.flatMap((node) => node.cited_uids),
+    ),
+    koshaCitedUids: uniqueCitedUids(
+      result.documents
+        .flatMap((node) => node.cited_uids)
+        .filter((citedUid) => citedUid.startsWith("ref:")),
+    ),
+    lawCitedUids: uniqueCitedUids(
+      result.articles
+        .flatMap((node) => node.cited_uids)
+        .filter((citedUid) => citedUid.startsWith("law:")),
+    ),
+  };
 }
 
 /**
@@ -932,7 +1005,7 @@ export function buildSafetyKnowledgeResult(
       message:
         evidenceResolution && !evidenceResolution.resolved && evidenceResolution.reason !== "not_registered"
           ? evidenceResolution.message
-          : `'${query}'은(는) 등록된 작업유형·위험요인이 아닙니다. 아래 등록된 작업유형 중 하나로 다시 조회하거나, 검증된 조문 없이 답할 때는 validate_safety_citations로 자체 검증하세요.`,
+          : `'${query}'은(는) 등록된 작업유형·위험요인이 아닙니다. 아래 등록된 작업유형 중 하나로 다시 조회하고, 조문 후보는 validate_safety_citations로 별도 확인하세요.`,
       registeredTasks,
       evidenceContract: null,
       evidenceDiagnostics: null,
@@ -948,17 +1021,118 @@ export function buildSafetyKnowledgeResult(
     task: result.task?.label ?? null,
     hazards: result.hazards.map((h) => h.label),
     controls: result.controls.map((c) => ({
+      authority: "candidate",
       control: c.control.label,
-      articles: c.articles.map((a) => a.label),
+      articles: c.articles.map((a) => ({ authority: "candidate", label: a.label })),
     })),
     articles: result.articles.map(articleView),
     accidents: result.accidents.map((a) => a.label),
-    duties: result.duties.map((d) => d.label),
+    duties: result.duties.map((d) => ({ authority: "candidate", label: d.label })),
     dutiesNote: DUTIES_NOTE,
-    provenance: ONTOLOGY_PROVENANCE,
-    coreProvenance: CORE_ONTOLOGY_PROVENANCE,
+    provenance: buildKnowledgeProvenance(result, evidencePack?.activePack ?? null),
     evidenceContract: evidencePack?.activePack ?? null,
     evidenceDiagnostics: evidencePack?.diagnostics ?? null,
     evidenceChainState,
+  };
+}
+
+export type SafetyKnowledgeMaterializationAuthority = {
+  status: "review_required";
+  authoritative: false;
+  expectedStableKeys: string[];
+  materializedStableKeys: [];
+  unresolvedStableKeys: string[];
+  humanConfirmation: { required: true; status: "pending" };
+};
+
+export type SafetyKnowledgeCandidateResult =
+  | (Omit<
+      SafetyKnowledgeFound,
+      "evidenceContract" | "evidenceDiagnostics" | "evidenceChainState"
+    > & {
+      authority: "review_required";
+      authoritative: false;
+      evidenceChainState: "review_required";
+      candidateNotice: string;
+      materializationAuthority: SafetyKnowledgeMaterializationAuthority;
+    })
+  | (Omit<SafetyKnowledgeNotFound, "evidenceChainState"> & {
+      authority: "review_required";
+      authoritative: false;
+      evidenceChainState: "review_required";
+      candidateNotice: string;
+      materializationAuthority: SafetyKnowledgeMaterializationAuthority;
+    });
+
+export function buildSafetyKnowledgeCandidateResult(
+  result: SafetyKnowledgeResult,
+): SafetyKnowledgeCandidateResult {
+  const candidateNotice =
+    "연결 후보입니다. Phase A 전체 문서 반영과 지정된 사람의 확인 전에는 확정 근거나 법적 의무 판단으로 사용하지 마세요.";
+  if (!result.found) {
+    return {
+      ...result,
+      authority: "review_required",
+      authoritative: false,
+      evidenceChainState: "review_required",
+      candidateNotice,
+      materializationAuthority: {
+        status: "review_required",
+        authoritative: false,
+        expectedStableKeys: [],
+        materializedStableKeys: [],
+        unresolvedStableKeys: [],
+        humanConfirmation: { required: true, status: "pending" },
+      },
+    };
+  }
+
+  const expectedStableKeys = Array.from(new Set(
+    result.evidenceContract?.materializationTargets.flatMap(
+      (plan) => plan.targets.map((target) => target.stableKey),
+    ) ?? [],
+  ));
+  const controls = result.controls.map((control) => ({
+    ...control,
+    authority: "candidate" as const,
+    articles: control.articles.map((article) => (
+      typeof article === "string"
+        ? { authority: "candidate" as const, label: article }
+        : { ...article, authority: "candidate" as const }
+    )),
+  }));
+  const articles = result.articles.map((article) => ({
+    ...article,
+    authority: "candidate" as const,
+  }));
+  const duties = result.duties.map((duty) => (
+    typeof duty === "string"
+      ? { authority: "candidate" as const, label: duty }
+      : { ...duty, authority: "candidate" as const }
+  ));
+  const {
+    evidenceContract: _evidenceContract,
+    evidenceDiagnostics: _evidenceDiagnostics,
+    evidenceChainState: _evidenceChainState,
+    ...candidate
+  } = result;
+
+  return {
+    ...candidate,
+    controls,
+    articles,
+    duties,
+    authority: "review_required",
+    authoritative: false,
+    evidenceChainState: "review_required",
+    candidateNotice,
+    materializationAuthority: {
+      status: "review_required",
+      authoritative: false,
+      expectedStableKeys,
+      materializedStableKeys: [],
+      unresolvedStableKeys: [...expectedStableKeys],
+      humanConfirmation: { required: true, status: "pending" },
+    },
   };
 }
