@@ -6333,6 +6333,8 @@ ul {
   color: var(--muted);
   font-size: var(--text-caption);
   font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .editor-operations-disclosure[open] > summary::after {
