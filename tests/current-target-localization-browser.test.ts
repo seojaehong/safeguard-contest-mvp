@@ -13,34 +13,40 @@ type Theme = "day" | "night";
 type RouteContract = {
   name: "reports" | "ontology" | "knowledge";
   pathname: "/reports" | "/ontology" | "/knowledge";
-  readySelector: string;
-  overlapSelector: string;
+  readyRole: "article" | "region";
+  readyName: string;
   forbiddenPattern: RegExp;
 };
 
 const root = process.cwd();
 const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
 const issueOverlayPattern = /(?<![\p{L}\p{N}_])(?:(?:\d+|N)\s+Issues?|Issues?\s*(?:\(\s*(?:\d+|N)\s*\)|:\s*(?:\d+|N)|\s+(?:\d+|N)))(?![\p{L}\p{N}_])/iu;
+const meaningfulSelector = [
+  "main h1", "main h2", "main h3", "main h4", "main p", "main span", "main strong", "main small",
+  "main label", "main a", "main button", "main input", "main select", "main textarea", "main summary",
+  "main dt", "main dd", "main li", "main [role='button']", "main [role='checkbox']", "main [role='radio']",
+  "main [role='tab']", "main [role='note']"
+].join(",");
 const routes: RouteContract[] = [
   {
     name: "reports",
     pathname: "/reports",
-    readySelector: ".safeclaw-workdoc-shell",
-    overlapSelector: ".safeclaw-workdoc > section",
+    readyRole: "article",
+    readyName: "작업문서형 리포트",
     forbiddenPattern: /\b(?:As-Is|To-Be|Before\/After)\b/u
   },
   {
     name: "ontology",
     pathname: "/ontology",
-    readySelector: ".ontology-graph-shell",
-    overlapSelector: ".ontology-summary-grid > article",
-    forbiddenPattern: /\b(?:Task|Hazard|Control|Article|Document|Accident|Nodes|Edges|Gate|Fallback)\b|Graph unavailable/u
+    readyRole: "region",
+    readyName: "옵시디언형 온톨로지 그래프",
+    forbiddenPattern: /\b(?:Task|Hazard|Control|Article|Document|Accident|Duty|Nodes|Edges|Gate|Fallback)\b|Graph unavailable/u
   },
   {
     name: "knowledge",
     pathname: "/knowledge",
-    readySelector: "[data-knowledge-surface]",
-    overlapSelector: "[data-knowledge-surface] > section",
+    readyRole: "region",
+    readyName: "지식 DB 상태",
     forbiddenPattern: /Built-in Wiki|Runtime Knowledge|Knowledge Catalog|KOSHA Technical Support|KOSHA Reference Library|\b(?:Index|Hazards|Forms|Schema)\b/u
   }
 ];
@@ -60,12 +66,12 @@ function buildId(): string | null {
 }
 
 async function prepareRoute(page: Page, contract: RouteContract, theme: Theme): Promise<void> {
-  await page.goto(`${harness?.baseUrl}${contract.pathname}?theme=${theme}`, { waitUntil: "networkidle" });
-  await page.locator(".safeclaw-module-shell[data-ready='true']").waitFor({ state: "attached" });
+  if (!harness) throw new Error("Browser harness was not started");
+  await page.goto(`${harness.baseUrl}${contract.pathname}?theme=${theme}`, { waitUntil: "networkidle" });
   if (contract.name === "reports") {
     await page.getByRole("button", { name: "샘플 미리보기" }).click();
   }
-  await page.locator(contract.readySelector).waitFor({ state: "visible" });
+  await page.getByRole(contract.readyRole, { name: contract.readyName }).waitFor({ state: "visible" });
 }
 
 describe("current target localization browser matrix", () => {
@@ -82,6 +88,16 @@ describe("current target localization browser matrix", () => {
       mode: process.env.SAFECLAW_HARNESS_MODE === "prod" ? "prod" : "dev"
     });
     browser = harness.browser;
+    if (process.env.SAFECLAW_LOCALIZATION_EVIDENCE_DIR) {
+      const expectedBuildId = process.env.SAFECLAW_EXPECTED_BUILD_ID?.trim();
+      const expectedSourceSha = process.env.SAFECLAW_EXPECTED_SOURCE_SHA?.trim();
+      const currentBuildId = buildId();
+      expect(harness.mode).toBe("prod");
+      expect(expectedBuildId).toBeTruthy();
+      expect(expectedSourceSha).toBe(sourceSha);
+      expect(currentBuildId).toBeTruthy();
+      expect(currentBuildId).toBe(expectedBuildId);
+    }
   }, 120_000);
 
   afterAll(async () => {
@@ -98,6 +114,34 @@ describe("current target localization browser matrix", () => {
     expect(issueOverlayPattern.test("문제가 없습니다.")).toBe(false);
   });
 
+  it.each(viewports)("keeps operation memory controls separated on $label", async ({ width, height }) => {
+    if (!browser) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width, height } });
+    await prepareRoute(page, routes[1], "day");
+    const operationRegion = page.getByRole("region", { name: "오늘 작업 메모리 맵" });
+    const controls = await operationRegion.getByRole("button").all();
+    const boxes = await Promise.all(controls.map(async (control) => ({
+      name: await control.getAttribute("aria-label") || await control.innerText(),
+      box: await control.boundingBox()
+    })));
+    const overlaps: string[] = [];
+    for (let left = 0; left < boxes.length; left += 1) {
+      const leftBox = boxes[left].box;
+      if (!leftBox) continue;
+      for (let right = left + 1; right < boxes.length; right += 1) {
+        const rightBox = boxes[right].box;
+        if (!rightBox) continue;
+        const overlapWidth = Math.min(leftBox.x + leftBox.width, rightBox.x + rightBox.width)
+          - Math.max(leftBox.x, rightBox.x);
+        const overlapHeight = Math.min(leftBox.y + leftBox.height, rightBox.y + rightBox.height)
+          - Math.max(leftBox.y, rightBox.y);
+        if (overlapWidth > 2 && overlapHeight > 2) overlaps.push(`${boxes[left].name} <> ${boxes[right].name}`);
+      }
+    }
+    expect(overlaps, overlaps.slice(0, 10).join("\n")).toEqual([]);
+    await page.close();
+  }, 120_000);
+
   it.each(routes.flatMap((contract) => (
     (["day", "night"] as const).flatMap((theme) => (
       viewports.map((viewport) => ({ contract, theme, ...viewport }))
@@ -106,20 +150,62 @@ describe("current target localization browser matrix", () => {
     if (!browser || !harness) throw new Error("Browser harness was not started");
     const page = await browser.newPage({ viewport: { width, height } });
     await prepareRoute(page, contract, theme);
-    const metrics = await page.evaluate(({ overlapSelector, issueSource, issueFlags }) => {
-      const overlapTargets = [...document.querySelectorAll<HTMLElement>(overlapSelector)]
+    const metrics = await page.evaluate(({ meaningfulSelector, issueSource, issueFlags }) => {
+      const clippingValues = new Set(["auto", "clip", "hidden", "scroll"]);
+      const visibleRect = (element: HTMLElement) => {
+        const rect = element.getBoundingClientRect();
+        let left = Math.max(0, rect.left);
+        let right = Math.min(window.innerWidth, rect.right);
+        let top = Math.max(0, rect.top);
+        let bottom = Math.min(document.documentElement.scrollHeight, rect.bottom);
+        let parent = element.parentElement;
+        while (parent && parent !== document.body) {
+          const style = getComputedStyle(parent);
+          const parentRect = parent.getBoundingClientRect();
+          if (clippingValues.has(style.overflowX)) {
+            left = Math.max(left, parentRect.left);
+            right = Math.min(right, parentRect.right);
+          }
+          if (clippingValues.has(style.overflowY)) {
+            top = Math.max(top, parentRect.top);
+            bottom = Math.min(bottom, parentRect.bottom);
+          }
+          parent = parent.parentElement;
+        }
+        if (right - left <= 0 || bottom - top <= 0) return null;
+        return { left, right, top, bottom };
+      };
+      const overlapTargets = [...document.querySelectorAll<HTMLElement>(meaningfulSelector)]
         .filter((element) => {
+          const style = getComputedStyle(element);
           const rect = element.getBoundingClientRect();
-          return rect.width > 0 && rect.height > 0;
+          return element.getAttribute("aria-hidden") !== "true"
+            && element.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })
+            && style.display !== "none"
+            && style.visibility !== "hidden"
+            && Number(style.opacity) > 0
+            && rect.width > 0
+            && rect.height > 0;
         });
       const overlapPairs: string[] = [];
+      const describeElement = (element: HTMLElement) => {
+        const name = element.getAttribute("aria-label") || element.textContent || "";
+        return `${element.tagName.toLowerCase()}[${name.trim().replace(/\s+/gu, " ").slice(0, 48)}]`;
+      };
       for (let left = 0; left < overlapTargets.length; left += 1) {
-        const leftRect = overlapTargets[left].getBoundingClientRect();
+        const leftElement = overlapTargets[left];
+        const leftRect = visibleRect(leftElement);
+        if (!leftRect) continue;
         for (let right = left + 1; right < overlapTargets.length; right += 1) {
-          const rightRect = overlapTargets[right].getBoundingClientRect();
+          const rightElement = overlapTargets[right];
+          if (leftElement.contains(rightElement) || rightElement.contains(leftElement)) continue;
+          const rightRect = visibleRect(rightElement);
+          if (!rightRect) continue;
           const overlapWidth = Math.min(leftRect.right, rightRect.right) - Math.max(leftRect.left, rightRect.left);
           const overlapHeight = Math.min(leftRect.bottom, rightRect.bottom) - Math.max(leftRect.top, rightRect.top);
-          if (overlapWidth > 1 && overlapHeight > 1) overlapPairs.push(`${left}:${right}`);
+          if (overlapWidth > 2 && overlapHeight > 2) {
+            overlapPairs.push(`${describeElement(leftElement)} <> ${describeElement(rightElement)}`);
+          }
         }
       }
       const unnamedInteractiveCount = [...document.querySelectorAll<HTMLElement>(
@@ -144,18 +230,19 @@ describe("current target localization browser matrix", () => {
       return {
         horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
         overlapCount: overlapPairs.length,
+        overlapPairs: overlapPairs.slice(0, 20),
         unnamedInteractiveCount,
         issueOverlayDetected: issuePattern.test(overlayCorpus),
         bodyText: document.body.innerText
       };
     }, {
-      overlapSelector: contract.overlapSelector,
+      meaningfulSelector,
       issueSource: issueOverlayPattern.source,
       issueFlags: issueOverlayPattern.flags
     });
 
     expect(metrics.horizontalOverflow).toBe(0);
-    expect(metrics.overlapCount).toBe(0);
+    expect(metrics.overlapPairs, metrics.overlapPairs.join("\n")).toEqual([]);
     expect(metrics.unnamedInteractiveCount).toBe(0);
     expect(metrics.issueOverlayDetected).toBe(false);
     expect(metrics.bodyText).not.toMatch(contract.forbiddenPattern);

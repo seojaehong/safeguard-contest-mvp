@@ -10,6 +10,7 @@ import {
 import { buildOperationMemoryGraph, type OperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import {
   buildOperationMemoryVisualizationModel,
+  operationKindLabel,
   operationRelationLabel
 } from "@/lib/ontology/operation-memory-visualization";
 import type { HarnessImprovement } from "@/lib/db-harness";
@@ -48,7 +49,7 @@ const sampleImprovement: HarnessImprovement = {
   id: "sample-improvement-before-after",
   taskLabel: "성수동 외벽 도장",
   hazardLabel: "추락",
-  improvementText: "Before 사진의 난간 누락 구간을 보강하고 After 사진에서 출입통제선을 확인",
+  improvementText: "개선 전 사진의 난간 누락 구간을 보강하고 개선 후 사진에서 출입통제선을 확인",
   reflectedDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
   sourceType: "photo_analysis",
   visionStatus: "analyzed",
@@ -75,7 +76,7 @@ function downloadTextFile(fileName: string, contentType: string, content: string
 
 export function OperationMemoryGraphViewer({
   graph,
-  eyebrow = "Operation Graph",
+  eyebrow = "작업 이력 그래프",
   title,
   description,
   actions,
@@ -128,52 +129,49 @@ export function OperationMemoryGraphViewer({
       {statusMessage ? <p className="operation-memory-message" role="status">{statusMessage}</p> : null}
 
       <div className="operation-memory-grid">
-        <div className="operation-memory-board" aria-label="Workpack operation memory map">
+        <div className="operation-memory-board" aria-label="작업 이력 노드 선택" style={{ padding: "64px 16px 16px" }}>
           <div className="operation-memory-stats" aria-label="작업 이력 그래프 통계">
             <span>노드 {model.stats.visibleNodes}/{model.stats.totalNodes}</span>
             <span>관계 {model.stats.visibleEdges}/{model.stats.totalEdges}</span>
             <span>확인 {graph.summary.ackCount}</span>
           </div>
-          <svg viewBox="0 0 100 100" role="img" aria-label="작업팩, 위험, 개선, 근거, 확인 연결 지도">
-            {model.map.edges.map((edge) => (
-              <line
-                key={edge.id}
-                x1={edge.x1}
-                y1={edge.y1}
-                x2={edge.x2}
-                y2={edge.y2}
-                className={`operation-memory-edge relation-${edge.rel}`}
-              />
-            ))}
-            {model.map.nodes.map((node) => (
-              <circle
-                key={node.id}
-                cx={node.x}
-                cy={node.y}
-                r={node.size}
-                className={`operation-memory-svg-node kind-${node.kind}${node.id === activeNodeId ? " is-active" : ""}`}
-              />
-            ))}
-          </svg>
-          <div className="operation-memory-node-layer">
+          <div
+            className="operation-memory-node-layer"
+            style={{
+              position: "relative",
+              inset: "auto",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))",
+              gap: "12px",
+              alignContent: "start"
+            }}
+          >
             {model.map.nodes.map((node) => {
               const isActive = node.id === activeNodeId;
               return (
                 <article
                   key={node.id}
                   className={`operation-memory-point kind-${node.kind}${isActive ? " is-active" : ""}`}
-                  style={{ left: `${node.x}%`, top: `${node.y}%` }}
+                  style={{
+                    position: "relative",
+                    left: "auto",
+                    top: "auto",
+                    minWidth: 0,
+                    maxWidth: "none",
+                    transform: "none"
+                  }}
                   role="button"
                   tabIndex={0}
                   aria-pressed={isActive}
+                  aria-label={`${operationKindLabel(node.kind)}: ${node.label}`}
                   onClick={() => selectNode(node.id)}
                   onMouseEnter={() => selectNode(node.id)}
                   onFocus={() => selectNode(node.id)}
                   onKeyDown={(event) => selectNodeWithKey(event, node.id)}
                 >
-                  <span>{node.kind}</span>
+                  <span>{operationKindLabel(node.kind)}</span>
                   <strong>{node.label}</strong>
-                  <small>{node.degree} links</small>
+                  <small>{node.degree}개 연결</small>
                 </article>
               );
             })}
@@ -221,9 +219,9 @@ export function OperationMemoryGraphViewer({
                   className={`operation-memory-list-item${isActive ? " is-active" : ""}`}
                   onClick={() => selectNode(item.id)}
                 >
-                  <span>{item.kind}</span>
+                  <span>{operationKindLabel(item.kind)}</span>
                   <strong>{item.label}</strong>
-                  <small>out {item.outgoingCount} · in {item.incomingCount}</small>
+                  <small>나가는 관계 {item.outgoingCount} · 들어오는 관계 {item.incomingCount}</small>
                 </button>
               );
             })}
@@ -318,7 +316,7 @@ export function OperationMemoryPreview() {
         <>
           {preview.mode === "local"
             ? "워크스페이스에서 보관한 최근 개선사항을 관리자 검토용 작업 이력 그래프로 재구성했습니다."
-            : "아직 로컬 개선 후보가 없어 Before/After 개선 루프 샘플을 보여줍니다."}
+            : "아직 로컬 개선 후보가 없어 개선 전/개선 후 개선 루프 샘플을 보여줍니다."}
           {" "}MD/JSONL/Obsidian 노트는 다음 위험성평가와 TBM 생성에서 DB 하네스가 먼저 조회할 후보입니다.
         </>
       )}

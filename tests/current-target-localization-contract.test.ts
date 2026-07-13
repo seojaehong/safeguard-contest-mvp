@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { KIND_KO, NODE_KINDS } from "@/lib/ontology/schema";
+import { SEED_NODES } from "@/lib/ontology/seed/core-triples";
 
 const root = process.cwd();
 
@@ -22,12 +24,22 @@ describe("current target user-visible Korean localization", () => {
 
   it("renders ontology kinds and status labels through Korean presentation labels", () => {
     const source = read("app/ontology/page.tsx");
+    const seedKinds = new Set(SEED_NODES.map((node) => node.kind));
+    const publishedKinds = new Set([...NODE_KINDS, ...seedKinds]);
+    const nodeKindStart = source.indexOf("function nodeKindLabel");
+    const nodeKindEnd = source.indexOf("\n}", nodeKindStart);
+    const nodeKindFunction = source.slice(nodeKindStart, nodeKindEnd);
 
-    expect(source).toContain("function nodeKindLabel(value: string)");
-    expect(source).toContain("{nodeKindLabel(node.kind)}");
+    expect(source).toContain("function nodeKindLabel(value: NodeKind)");
+    expect(source).toContain("return KIND_KO[value]");
+    expect(nodeKindFunction).not.toContain("return value;");
+    expect(source).not.toContain("<span>{node.kind}</span>");
+    expect(source).not.toContain("<span>{item.kind}</span>");
+    expect(source).toContain("{nodeKindLabel(item.kind)}");
     expect(source).toContain("nodeKindLabel(kind)");
-    for (const label of ["작업", "위험요인", "조치", "법령 조문", "문서", "재해사례"]) {
-      expect(source).toContain(`return \"${label}\"`);
+    expect(seedKinds.has("Duty")).toBe(true);
+    for (const kind of publishedKinds) {
+      expect(KIND_KO[kind]).toMatch(/[가-힣]/u);
     }
     for (const userFacingEnglish of [
       ">Graph unavailable<",
@@ -39,6 +51,17 @@ describe("current target user-visible Korean localization", () => {
     ]) {
       expect(source).not.toContain(userFacingEnglish);
     }
+  });
+
+  it("fails closed when production browser evidence drifts from its build", () => {
+    const source = read("tests/current-target-localization-browser.test.ts");
+
+    expect(source).toContain("Task|Hazard|Control|Article|Document|Accident|Duty");
+    expect(source).toContain("SAFECLAW_EXPECTED_BUILD_ID");
+    expect(source).toContain("meaningfulSelector");
+    expect(source).toContain("leftElement.contains(rightElement)");
+    expect(source).toContain('expect(harness.mode).toBe("prod")');
+    expect(source).toContain("expect(currentBuildId).toBe(expectedBuildId)");
   });
 
   it("uses Korean status and section labels on the Knowledge surface", () => {

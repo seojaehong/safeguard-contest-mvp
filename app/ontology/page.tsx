@@ -2,19 +2,14 @@ import Link from "next/link";
 import { OperationMemoryPreview } from "@/components/OperationMemoryPreview";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { assembleGraph, loadGraph } from "@/lib/ontology/graph-store";
+import { KIND_KO, NODE_KINDS, type NodeKind } from "@/lib/ontology/schema";
 import { SEED_EDGES, SEED_NODES, SEED_STATS } from "@/lib/ontology/seed/core-triples";
 import { buildOntologyVisualizationModel } from "@/lib/ontology/visualization";
 
 export const dynamic = "force-dynamic";
 
-function nodeKindLabel(value: string) {
-  if (value === "Task") return "작업";
-  if (value === "Hazard") return "위험요인";
-  if (value === "Control") return "조치";
-  if (value === "Article") return "법령 조문";
-  if (value === "Document") return "문서";
-  if (value === "Accident") return "재해사례";
-  return value;
+function nodeKindLabel(value: NodeKind) {
+  return KIND_KO[value];
 }
 
 function relationLabel(value: string) {
@@ -51,7 +46,6 @@ export default async function OntologyPage() {
   const graph = result.graph || fallbackGraph;
   const model = graph ? buildOntologyVisualizationModel(graph) : null;
   const isSeedFallback = !result.ok && Boolean(fallbackGraph);
-  const hoverCardsById = new Map(model?.hoverCards.map((card) => [card.id, card]) || []);
   const status = result.ok ? "live" : graph ? "partial" : result.configured ? "partial" : "planned";
   const mappedTo = graph
     ? `${graph.counts.nodes.toLocaleString("ko-KR")}개 노드 · ${graph.counts.edges.toLocaleString("ko-KR")}개 관계${isSeedFallback ? " · 내장 공개 시드" : ""}`
@@ -144,7 +138,7 @@ export default async function OntologyPage() {
             </div>
             <p>
               공개 노드 중 연결도가 높은 항목을 먼저 배치합니다. 노드에 마우스를 올리면 관련 위험요인,
-              조치, 법령, 문서 관계가 펼침 카드로 표시됩니다. 맵은 복잡도를 낮추기 위해 일부만 배치하고,
+              조치, 법령, 문서 관계를 색상 범례와 아래 목록에서 확인할 수 있습니다. 맵은 복잡도를 낮추기 위해 일부만 배치하고,
               왼쪽 리스트는 전체 노드를 보존합니다.
             </p>
             <div className="ontology-graph-board">
@@ -172,39 +166,6 @@ export default async function OntologyPage() {
                   </g>
                 ))}
               </svg>
-              <div className="ontology-graph-node-layer" aria-hidden="false">
-                {model.map.nodes.map((node) => {
-                  const card = hoverCardsById.get(node.id);
-                  return (
-                    <article
-                      key={node.id}
-                      className={`ontology-graph-point kind-${node.kind}`}
-                      style={{ left: `${node.x}%`, top: `${node.y}%` }}
-                      tabIndex={0}
-                    >
-                      <span>{nodeKindLabel(node.kind)}</span>
-                      <strong>{node.label}</strong>
-                      <small>{node.degree}개 연결</small>
-                      {card ? (
-                        <aside className="ontology-graph-popover" role="note">
-                          <span>{card.subtitle}</span>
-                          <strong>{card.title}</strong>
-                          {card.excerpt ? <small>{card.excerpt}</small> : null}
-                          <p>근거 {card.evidenceCount}개 · 연결 {card.related.length}개</p>
-                          <ul>
-                            {card.related.slice(0, 4).map((related) => (
-                              <li key={`${card.id}-map-${related.direction}-${related.rel}-${related.sourceId}-${related.targetId}`}>
-                                <b>{relationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
-                                <span>{relatedLabel(related)}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </aside>
-                      ) : null}
-                    </article>
-                  );
-                })}
-              </div>
             </div>
             <div className="ontology-graph-stats" aria-label="온톨로지 그래프 표시 범위">
               <span>맵 노드 {model.stats.visibleNodes.toLocaleString("ko-KR")}/{model.stats.totalNodes.toLocaleString("ko-KR")}</span>
@@ -214,7 +175,7 @@ export default async function OntologyPage() {
               ) : null}
             </div>
             <div className="ontology-graph-legend" aria-label="그래프 범례">
-              {["Task", "Hazard", "Control", "Article", "Document", "Accident"].map((kind) => (
+              {NODE_KINDS.map((kind) => (
                 <span key={kind} className={`kind-${kind}`}>{nodeKindLabel(kind)}</span>
               ))}
             </div>
@@ -267,10 +228,10 @@ export default async function OntologyPage() {
                 그래프에 보이지 않는 노드도 리스트와 API 응답에는 남아 있어 근거 추적이 끊기지 않습니다.
               </p>
               <div className="ontology-kind-list">
-                {Object.entries(graph.counts.nodes_by_kind).map(([kind, count]) => (
+                {NODE_KINDS.map((kind) => (
                   <div key={kind}>
                     <span>{nodeKindLabel(kind)}</span>
-                    <strong>{count.toLocaleString("ko-KR")}</strong>
+                    <strong>{graph.counts.nodes_by_kind[kind].toLocaleString("ko-KR")}</strong>
                   </div>
                 ))}
               </div>
