@@ -19,9 +19,11 @@ export function buildPublishedSafetyKnowledge(
   query: string,
 ): SafetyKnowledgeResult {
   const evidenceResolution = resolveEvidenceChain(graph, query);
+  const hasPublishedGraphPack =
+    evidenceResolution.graphPublicationState === "published" && "pack" in evidenceResolution;
   const failClosed =
-    !evidenceResolution.resolved && evidenceResolution.reason !== "not_registered";
-  const coreQuery = evidenceResolution.resolved ? evidenceResolution.pack.task.label : query;
+    !hasPublishedGraphPack && evidenceResolution.reason !== "not_registered";
+  const coreQuery = hasPublishedGraphPack ? evidenceResolution.pack.task.label : query;
   const result = failClosed ? null : queryKnowledge(graph, coreQuery);
   return buildSafetyKnowledgeResult(
     query,

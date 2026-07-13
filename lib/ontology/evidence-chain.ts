@@ -72,7 +72,7 @@ export type EvidenceMaterialization = {
     productionItemId: string;
     snapshotItemId: string;
     chunkId: string;
-    chunkCitedUid: string;
+    chunkSha256: string;
     page: number;
     location: string;
     bridgeResolution: "unresolved";
@@ -113,6 +113,7 @@ export type EvidenceChainPack = {
   hazardPriority: SifEvidenceRecord[];
   reviewOnlyEvidence: SifEvidenceRecord[];
   guidance: KoshaGuidanceRecord[];
+  reviewOnlyGuidance: KoshaGuidanceRecord[];
   law: LawEvidenceRecord[];
   controls: ResolvedEvidenceControl[];
   applicability: {
@@ -170,12 +171,23 @@ export type EvidenceChainResolution =
   | {
       resolved: true;
       published: true;
+      graphPublicationState: "published";
       inferenceState: "verified";
       pack: EvidenceChainPack;
     }
   | {
       resolved: false;
       published: false;
+      graphPublicationState: "published";
+      inferenceState: "review_required";
+      reason: "evidence_chain_review_required";
+      message: string;
+      pack: EvidenceChainPack;
+    }
+  | {
+      resolved: false;
+      published: false;
+      graphPublicationState: "unverified";
       inferenceState: "unverified";
       reason:
         | "not_registered"
@@ -204,8 +216,11 @@ export type ResolvedEvidenceCitation = {
   parsed: ParsedCitedUid | null;
 };
 
+export type NaturalizerEvidencePack = Omit<EvidenceChainPack, "reviewOnlyGuidance">;
+
 export type NaturalizedEvidenceChain = {
-  fixedPack: EvidenceChainPack;
+  fixedPack: NaturalizerEvidencePack;
+  reviewOnlyGuidance: KoshaGuidanceRecord[];
   naturalizedText: string;
   llmRole: "naturalize_only";
   providerFallback: "preserve_current_provider_fallback";
@@ -357,7 +372,7 @@ function materialize(
         productionItemId: source.productionItemId,
         snapshotItemId: source.itemId,
         chunkId: source.chunk.chunkId,
-        chunkCitedUid: source.chunk.chunkCitedUid,
+        chunkSha256: source.chunk.chunkSha256,
         page: source.chunk.page,
         location: source.chunk.location,
         bridgeResolution: source.provenanceBridge,
@@ -426,6 +441,14 @@ function resolveControls(
 }
 
 function aggregateGuidanceStatus(guidance: readonly KoshaGuidanceRecord[]): EvidenceReviewStatus {
+  if (
+    !KOSHA_CORPUS_STATE.launchReady ||
+    KOSHA_CORPUS_STATE.bodyMissingCount > 0 ||
+    KOSHA_CORPUS_STATE.downloadProvenance === "incomplete" ||
+    KOSHA_CORPUS_STATE.productionChunkBridge === "absent"
+  ) {
+    return { reviewState: "draft", resolution: "unresolved" };
+  }
   if (guidance.some((source) => source.resolution === "unresolved" || source.reviewState === "draft")) {
     return { reviewState: "draft", resolution: "unresolved" };
   }
@@ -445,6 +468,7 @@ export function resolveEvidenceChain(
     return {
       resolved: false,
       published: false,
+      graphPublicationState: "unverified",
       inferenceState: "unverified",
       reason: "not_registered",
       message: "입력과 정확히 일치하는 Phase A canonical Task 또는 alias가 없어 evidence chain을 게시하지 않습니다.",
@@ -462,6 +486,7 @@ export function resolveEvidenceChain(
     return {
       resolved: false,
       published: false,
+      graphPublicationState: "unverified",
       inferenceState: "unverified",
       reason: "published_task_missing",
       message: "canonical Task가 published 부분그래프에 정확히 존재하지 않아 추론 결과를 게시하지 않습니다.",
@@ -477,6 +502,7 @@ export function resolveEvidenceChain(
     return {
       resolved: false,
       published: false,
+      graphPublicationState: "unverified",
       inferenceState: "unverified",
       reason: "published_hazard_missing",
       message: "canonical Hazard가 published 부분그래프에 존재하지 않아 evidence chain을 게시하지 않습니다.",
@@ -495,6 +521,7 @@ export function resolveEvidenceChain(
     return {
       resolved: false,
       published: false,
+      graphPublicationState: "unverified",
       inferenceState: "unverified",
       reason: "published_task_hazard_edge_missing",
       message: "canonical Task-entailsHazard-Hazard published 간선이 없어 evidence chain을 게시하지 않습니다.",
@@ -516,6 +543,7 @@ export function resolveEvidenceChain(
     return {
       resolved: false,
       published: false,
+      graphPublicationState: "unverified",
       inferenceState: "unverified",
       reason: "published_law_missing",
       message: `제${missingPublishedLaw.articleNo}조 Article이 published 부분그래프에 없어 evidence chain을 게시하지 않습니다.`,
@@ -532,6 +560,7 @@ export function resolveEvidenceChain(
       return {
         resolved: false,
         published: false,
+        graphPublicationState: "unverified",
         inferenceState: "unverified",
         reason: "published_control_missing",
         message: `${controlDefinition.controlId} Control이 published 부분그래프에 없어 evidence chain을 게시하지 않습니다.`,
@@ -549,6 +578,7 @@ export function resolveEvidenceChain(
       return {
         resolved: false,
         published: false,
+        graphPublicationState: "unverified",
         inferenceState: "unverified",
         reason: "published_hazard_control_edge_missing",
         message: `${controlDefinition.controlId}의 Hazard-mitigatedBy-Control published 간선이 없어 evidence chain을 게시하지 않습니다.`,
@@ -570,6 +600,7 @@ export function resolveEvidenceChain(
         return {
           resolved: false,
           published: false,
+          graphPublicationState: "unverified",
           inferenceState: "unverified",
           reason: "published_control_law_edge_missing",
           message: `${controlDefinition.controlId}의 Control-mandatedBy-Article 제${articleNo}조 published 간선이 없어 evidence chain을 게시하지 않습니다.`,
@@ -579,9 +610,11 @@ export function resolveEvidenceChain(
       }
     }
   }
-  const guidance = matched.definition.guidance.map((source) =>
+  const allGuidance = matched.definition.guidance.map((source) =>
     applyGuidanceResolution(source, options.guidanceResolutions),
   );
+  const guidance = allGuidance.filter((source) => source.registryMapping === "mapped");
+  const reviewOnlyGuidance = allGuidance.filter((source) => source.registryMapping !== "mapped");
   const controls = resolveControls(matched.definition, law, guidance);
   const hazardPriority = [...matched.definition.sif].sort(
     (left, right) => left.rank - right.rank || left.itemId.localeCompare(right.itemId, "ko"),
@@ -608,6 +641,7 @@ export function resolveEvidenceChain(
     hazardPriority,
     reviewOnlyEvidence,
     guidance,
+    reviewOnlyGuidance,
     law,
     controls,
     applicability: {
@@ -667,9 +701,23 @@ export function resolveEvidenceChain(
   };
   pack.materialization = materialize(matched.definition, controls, hazardPriority);
 
+  if (guidanceStatus.resolution === "unresolved") {
+    return {
+      resolved: false,
+      published: false,
+      graphPublicationState: "published",
+      inferenceState: "review_required",
+      reason: "evidence_chain_review_required",
+      message:
+        "published 그래프 경로는 확인되었으나 KOSHA production/local provenance bridge 또는 corpus gate가 미해결이어서 조립된 evidence chain을 게시하지 않습니다.",
+      pack,
+    };
+  }
+
   return {
     resolved: true,
     published: true,
+    graphPublicationState: "published",
     inferenceState: "verified",
     pack,
   };
@@ -682,7 +730,6 @@ export function resolveEvidenceCitations(pack: EvidenceChainPack): ResolvedEvide
   }
   for (const source of pack.guidance) {
     citedUids.add(source.citedUid);
-    if (source.chunk.chunkCitedUid) citedUids.add(source.chunk.chunkCitedUid);
   }
   for (const source of pack.law) citedUids.add(source.citedUid);
   return Array.from(citedUids)
@@ -698,8 +745,8 @@ function deepFreeze(value: unknown): void {
   Object.freeze(value);
 }
 
-function immutableEvidencePack(pack: EvidenceChainPack): EvidenceChainPack {
-  const clone = structuredClone(pack);
+function immutableClone<Value>(value: Value): Value {
+  const clone = structuredClone(value);
   deepFreeze(clone);
   return clone;
 }
@@ -708,8 +755,10 @@ export function naturalizeEvidenceChain(
   fixedPack: EvidenceChainPack,
   naturalizedText: string,
 ): NaturalizedEvidenceChain {
+  const { reviewOnlyGuidance, ...activePack } = fixedPack;
   return {
-    fixedPack: immutableEvidencePack(fixedPack),
+    fixedPack: immutableClone(activePack),
+    reviewOnlyGuidance: immutableClone(reviewOnlyGuidance),
     naturalizedText,
     llmRole: "naturalize_only",
     providerFallback: "preserve_current_provider_fallback",

@@ -1,11 +1,14 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-13T09:26:45.2198759+09:00",
+  "generatedAt": "2026-07-13T09:45:09.1383850+09:00",
   "branch": "feat/phase-a-ontology-evidence-chains",
   "base": "b39f8135e784f69aac12d947cf6a734aa429a3c5",
-  "rejectedCommit": "8e6cf05e501edb4ecccce7a8c92e87b9ec7fb88d",
-  "contractVersion": "phase-a-evidence-chains/1.1.0",
-  "status": "remediated_awaiting_independent_review",
+  "rejectedCommits": [
+    "8e6cf05e501edb4ecccce7a8c92e87b9ec7fb88d",
+    "91aab7f466fac84018441b496d07f84e43ff0dd4"
+  ],
+  "contractVersion": "phase-a-evidence-chains/1.2.0",
+  "status": "second_review_remediated_awaiting_independent_review",
   "counts": {
     "canonicalChains": 3,
     "controls": 9,
@@ -13,6 +16,10 @@
     "reviewOnlySif": 1,
     "koshaProductionDocuments": 9,
     "koshaLocalChunks": 13,
+    "koshaActiveProductionDocuments": 5,
+    "koshaReviewOnlyProductionDocuments": 4,
+    "koshaActiveChunks": 8,
+    "koshaReviewOnlyChunks": 5,
     "koshaControlMappings": 11,
     "koshaUnmappedChunks": 5,
     "lawArticles": 9,
@@ -57,7 +64,9 @@
       "productionItemId": "technical-support-01-0043-c-74-2015-건설공사의-고소작업대-안전보건작업지침",
       "localItemId": "kosha-a3c8a491f835c6eaf5109705",
       "chunkId": "kosha-chunk-470a9a64364fcf013b0127ff",
+      "chunkSha256": "57d4bb7f3c28241c9abf545e95626ec48b17e6a915838460d196a3e2232d3f08",
       "page": 11,
+      "lane": "review_only",
       "mapping": "direct_support_missing",
       "controlIds": []
     },
@@ -66,7 +75,9 @@
       "productionItemId": "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
       "localItemId": "kosha-07e82640daba8e37ebb73cdb",
       "chunkId": "kosha-chunk-784b7f55fa7a16fe52255cec",
+      "chunkSha256": "ec3800145a730fba64d74992fca73ce4c1144a90d891fd31b0ab70993c4f9579",
       "page": 19,
+      "lane": "active",
       "mapping": "mapped",
       "controlIds": ["fall-work-platform"]
     },
@@ -75,7 +86,9 @@
       "productionItemId": "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
       "localItemId": "kosha-07e82640daba8e37ebb73cdb",
       "chunkId": "kosha-chunk-dd07e81d5176bd73484f685e",
+      "chunkSha256": "edf92ba7b5251b3018f6277f5e0f9868a6675b446f17eec186745d7d4f623d9c",
       "page": 58,
+      "lane": "active",
       "mapping": "mapped",
       "controlIds": ["fall-anchor"]
     },
@@ -84,7 +97,9 @@
       "productionItemId": "technical-support-06-0001-a-g-1-2025-추락방호망-설치-기술지원규정-수직형-추락방망-설치",
       "localItemId": "kosha-1cad3b4b264aa96277dcfae8",
       "chunkId": "kosha-chunk-57c50cf2248cf860969982a4",
+      "chunkSha256": "34a6098735ce5e53d9c457b1846f088fd9874ddc4a4daeefa909fc62cd3b471e",
       "page": 7,
+      "lane": "active",
       "mapping": "mapped",
       "controlIds": ["fall-work-platform", "fall-opening-guard"]
     },
@@ -93,7 +108,9 @@
       "productionItemId": "technical-support-01-0024-c-48-2022-건설기계-안전보건작업지침",
       "localItemId": "kosha-2817664393f505499a71d63d",
       "chunkId": "kosha-chunk-1602e569f8fbe9c789d06cbc",
+      "chunkSha256": "2f05b1f423792951f2397da45c975b454943a4daca83152011e8a4c51448d0f6",
       "page": 4,
+      "lane": "review_only",
       "mapping": "task_scope_mismatch",
       "controlIds": []
     },
@@ -102,7 +119,9 @@
       "productionItemId": "technical-support-01-0070-d-c-4-2025-굴착기-안전보건작업-기술지원규정",
       "localItemId": "kosha-32d7faa3ac4ef74e48d959d4",
       "chunkId": "kosha-chunk-318945791a391ef2ab83fc8b",
+      "chunkSha256": "4874d14bc74995c3a2503a875c8e47a8141cf59450a64d37bbe573785549f805",
       "page": 20,
+      "lane": "review_only",
       "mapping": "task_scope_mismatch",
       "controlIds": []
     },
@@ -111,7 +130,9 @@
       "productionItemId": "technical-support-02-0033-b-m-37-2026-회전기계-등의-끼임-절단재해-예방을-위한-기술지원규정",
       "localItemId": "kosha-c6bba4fd3e9a9305c1edce41",
       "chunkId": "kosha-chunk-9a5c5df7fc303f229134ead0",
+      "chunkSha256": "d984bea7fade1b122a07135e652a1c789f4df86391a80701e2acae7792d866cd",
       "page": 15,
+      "lane": "review_only",
       "mapping": "registry_control_missing",
       "controlIds": []
     },
@@ -120,7 +141,9 @@
       "productionItemId": "technical-support-02-0033-b-m-37-2026-회전기계-등의-끼임-절단재해-예방을-위한-기술지원규정",
       "localItemId": "kosha-c6bba4fd3e9a9305c1edce41",
       "chunkId": "kosha-chunk-6f5898c423e8425d84201656",
+      "chunkSha256": "71069aa99bfd07f52fc7b8568f9ce172c589a7919ad06424d709d5c1abe32122",
       "page": 40,
+      "lane": "review_only",
       "mapping": "task_scope_mismatch",
       "controlIds": []
     },
@@ -129,7 +152,9 @@
       "productionItemId": "technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
       "localItemId": "kosha-7161ec0c8b05f2cccbe519b3",
       "chunkId": "kosha-chunk-c300b03bbb724268225a73f7",
+      "chunkSha256": "a9b5b5cb5b7294517b3954ead3cc755996a7f6e2e7f45792d97cf017a93894db",
       "page": 9,
+      "lane": "active",
       "mapping": "mapped",
       "controlIds": ["electrical-deenergized-isolation"]
     },
@@ -138,7 +163,9 @@
       "productionItemId": "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
       "localItemId": "kosha-a8a1ea385da644ac8f48149f",
       "chunkId": "kosha-chunk-7f40eb9fd888ee9a78bde37e",
+      "chunkSha256": "32df4dffa73b6d65c948e86827c09b248d3c334bcea99104f0f264ce991b1315",
       "page": 7,
+      "lane": "active",
       "mapping": "mapped",
       "controlIds": ["electrical-live-part-guarding"]
     },
@@ -147,7 +174,9 @@
       "productionItemId": "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
       "localItemId": "kosha-a8a1ea385da644ac8f48149f",
       "chunkId": "kosha-chunk-ddd57dc246a2ae6e93f5aa14",
+      "chunkSha256": "8dbc8188c089319d2acfa517423d24c71e985a1af6a454bd4be16dd93682b1a1",
       "page": 15,
+      "lane": "active",
       "mapping": "mapped",
       "controlIds": ["electrical-live-part-guarding", "electrical-live-work-distance"]
     },
@@ -156,7 +185,9 @@
       "productionItemId": "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
       "localItemId": "kosha-a8a1ea385da644ac8f48149f",
       "chunkId": "kosha-chunk-1828d0072421b7434a65cdba",
+      "chunkSha256": "9432bd17f6b94f83abe2e465aad9d8bf3db3964a59460affce32e17e608d0ede",
       "page": 16,
+      "lane": "active",
       "mapping": "mapped",
       "controlIds": ["electrical-live-work-distance", "electrical-insulating-ppe"]
     },
@@ -165,7 +196,9 @@
       "productionItemId": "technical-support-09-0022-b-e-9-2026-접지설비에-관한-기술지원규정",
       "localItemId": "kosha-7e511f17893129148a46714c",
       "chunkId": "kosha-chunk-77d92b287dac21705c7eff74",
+      "chunkSha256": "36994d9b5831140ede9247ca39324f3964a53ea1482edaf5ab48ca9ba9d85174",
       "page": 10,
+      "lane": "active",
       "mapping": "mapped",
       "controlIds": ["electrical-grounding"]
     }
@@ -191,7 +224,32 @@
     "providerFallback": "preserve_current_provider_fallback",
     "fulfillsDuty": "partial_evidence_only",
     "mcpProvenance": "법제처 검증 시드 v1",
-    "mcpEvidenceChainField": "evidenceContract"
+    "mcpEvidenceChainField": "evidenceContract",
+    "coreResolverAssembledChainState": "review_required",
+    "graphPublicationState": "published",
+    "machineExtractedChunkCitations": false,
+    "localRecoveryProvenanceFields": [
+      "snapshotItemId",
+      "chunkId",
+      "chunkSha256",
+      "page",
+      "location"
+    ],
+    "reviewOnlyGuidanceExcludedFromActiveCitations": true,
+    "reviewOnlyGuidanceExcludedFromNaturalizerFixedPack": true
+  },
+  "resolverState": {
+    "publishedGraph": {
+      "graphPublicationState": "published",
+      "requiredEndpointsAndEdgesValidated": true
+    },
+    "assembledEvidenceChain": {
+      "resolved": false,
+      "published": false,
+      "inferenceState": "review_required",
+      "reason": "evidence_chain_review_required"
+    },
+    "hostileGuidanceOverridesCanPromote": false
   },
   "obligationClassifications": [
     "statutory_mandate",
@@ -235,11 +293,14 @@
     { "finding": "P1-2", "status": "fixed", "summary": "chunk-level direct mappings added; unsupported chunks remain explicitly unmapped" },
     { "finding": "P1-3", "status": "fixed", "summary": "published endpoints and all three directed edge types are required" },
     { "finding": "P1-4", "status": "fixed", "summary": "global corpus and absent bridge gate dominate all overrides" },
-    { "finding": "P1-5", "status": "fixed", "summary": "production IDs, local item IDs, local chunk IDs, and page/location are separate" },
+    { "finding": "P1-5", "status": "fixed", "summary": "production citations and structured local item/chunk/page/SHA provenance are separate" },
     { "finding": "P1-6", "status": "fixed", "summary": "quality must pass before confirmation; fixed pack is cloned and recursively frozen" },
     { "finding": "P2-7", "status": "fixed", "summary": "public classification union contains exactly four states; SIF-only is review_required" },
     { "finding": "P2-8", "status": "fixed", "summary": "Article 44 condition includes height at least 2 metres and safety-belt wearing" },
-    { "finding": "P2-9", "status": "fixed", "summary": "legacy MCP provenance semantics restored; evidence chain is separate" }
+    { "finding": "P2-9", "status": "fixed", "summary": "legacy MCP provenance semantics restored; evidence chain is separate" },
+    { "finding": "R2-1", "status": "fixed", "summary": "core resolver returns review_required while graphPublicationState remains published" },
+    { "finding": "R2-2", "status": "fixed", "summary": "machine-extracted chunks are structured local SHA provenance and never manual cited_uids" },
+    { "finding": "R2-3", "status": "fixed", "summary": "unmapped guidance is review-only and excluded from active citations and naturalizer fixed pack" }
   ],
   "lawVerification": {
     "verifiedOn": "2026-07-13",
@@ -262,11 +323,12 @@
     "tddRed": {
       "independentReviewFailures": 17,
       "sidecarMappingFailures": 7,
-      "bridgeAndStatusFailures": 4
+      "bridgeAndStatusFailures": 4,
+      "secondReviewFailures": 22
     },
     "focused": {
       "filesPassed": 4,
-      "testsPassed": 103,
+      "testsPassed": 104,
       "status": "pass",
       "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"
@@ -278,6 +340,7 @@
     },
     "diffCheck": { "status": "pass" },
     "fullSuite": {
+      "informationalOnlyNotRerunForSecondRemediation": true,
       "status": "fail_unrelated_ui_reports",
       "durationSeconds": 206.95,
       "filesPassed": 125,

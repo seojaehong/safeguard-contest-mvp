@@ -595,10 +595,10 @@ export function buildSafetyKnowledgeResult(
   evidenceResolution?: EvidenceChainResolution,
 ): SafetyKnowledgeResult {
   const evidenceChainState = evidenceResolution
-    ? evidenceResolution.resolved
-      ? evidenceResolution.pack.provenance.guidanceOverlay.resolution === "unresolved"
-        ? "review_required"
-        : "resolved"
+    ? evidenceResolution.inferenceState === "review_required"
+      ? "review_required"
+      : evidenceResolution.resolved
+        ? "resolved"
       : evidenceResolution.reason === "not_registered"
         ? "not_registered"
         : "unverified"
@@ -634,7 +634,9 @@ export function buildSafetyKnowledgeResult(
     dutiesNote: DUTIES_NOTE,
     provenance: ONTOLOGY_PROVENANCE,
     coreProvenance: CORE_ONTOLOGY_PROVENANCE,
-    evidenceContract: evidenceResolution?.resolved ? evidenceResolution.pack : null,
+    evidenceContract: evidenceResolution && "pack" in evidenceResolution
+      ? evidenceResolution.pack
+      : null,
     evidenceChainState,
   };
 }
