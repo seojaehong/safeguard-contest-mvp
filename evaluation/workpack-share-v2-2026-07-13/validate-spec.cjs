@@ -76,12 +76,63 @@ const WAVE_NAMES = [
   "Real Browser Gate"
 ];
 
+const ROUTE_CONTRACT = [
+  { id: "R1", purpose: "roster registration, update, and quick add", ownerRoute: "/workers", returnPath: "/workers?next={encoded shareReturn}", exclusionSemantics: "Share is read-only; roster and quick-add mutation requests are 0" },
+  { id: "R2", purpose: "today participant snapshot selection", ownerRoute: "/workspace?step=input, /workers", returnPath: "/workers?next={encoded shareReturn}", exclusionSemantics: "Share does not mutate or persist the participant snapshot" },
+  { id: "R3", purpose: "current workpack send orchestration", ownerRoute: "/workspace?step=share", returnPath: "/workspace?step=share&theme={theme}", exclusionSemantics: "only the single session-then-dispatch action is send-capable" },
+  { id: "R4", purpose: "localization generation, edit, review, and signed persistence", ownerRoute: "document-editor:foreignWorkerTransmission, /api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review", returnPath: "/workspace?step=document&document=foreignWorkerTransmission&language={validatedSupportedCode}&returnStep=share&theme={theme}", exclusionSemantics: "Share cannot generate, edit, approve, sign, or persist localization" },
+  { id: "R5", purpose: "email, sms, and kakao configuration, approval, and availability", ownerRoute: "/settings, /api/settings/channels/resolve", returnPath: "/settings?next={encoded shareReturn}", exclusionSemantics: "Share exposes no secret, channel setup, template approval, or sender input" },
+  { id: "R6", purpose: "organization reporting recipient group", ownerRoute: "/settings", returnPath: "/settings?next={encoded shareReturn}", exclusionSemantics: "reporting recipients never change worker count or own the send primary" },
+  { id: "R7", purpose: "dispatch request and channel results", ownerRoute: "/dispatch", returnPath: "/dispatch", exclusionSemantics: "Share shows only a compact result strip and links only with persisted log IDs" },
+  { id: "R8", purpose: "session, save, and read history", ownerRoute: "/archive", returnPath: "/archive", exclusionSemantics: "Share contains no session, save, or full-history panel" },
+  { id: "R9", purpose: "Before/After improvement history", ownerRoute: "/reports, /archive", returnPath: "not_available_from_share_body", exclusionSemantics: "improvement and history panels are excluded from Share" },
+  { id: "R10", purpose: "login and canonical return", ownerRoute: "/login, /auth/callback, /workspace", returnPath: "/login?next={encoded shareReturn}", exclusionSemantics: "unvalidated next, step, document, language, or returnStep is forbidden" },
+  { id: "R11", purpose: "invitation access policy", ownerRoute: "share-session API, /settings policy", returnPath: "/settings?next={encoded shareReturn}", exclusionSemantics: "no public link or worker provisioning; compact policy info only" }
+];
+
+const SCREEN_SECTION_CONTRACT = [
+  { order: 1, id: "workpack_status", role: "status", content: "문서팩 이름과 readiness 한 줄", actionNodeId: "document_link" },
+  { order: 2, id: "target", role: "target_summary", content: "오늘 참여자 N명과 최대 3명 이름", actionNodeId: "target_owner_link" },
+  { order: 3, id: "channel", role: "channel_selection", content: "메일, 문자, 승인된 카카오 선택과 수신 가능 수", actionNodeId: "channel_controls" },
+  { order: 4, id: "localized_preview", role: "localized_preview", content: "자동 해석 언어, option 12개 dropdown, 검토 artifact 미리보기", actionNodeId: "language_dropdown" },
+  { order: 5, id: "operator_note", role: "optional_input", content: "선택 전달 메모", actionNodeId: "operator_note_input" },
+  { order: 6, id: "result_strip", role: "result_status", content: "accepted, failed, unknown 채널/request 요약", actionNodeId: "history_link" },
+  { order: 7, id: "primary_action", role: "primary_action", content: "현재 state의 primary 하나", actionNodeId: "primary_send" }
+];
+
+const CTA_CONTRACT = [
+  { id: "document_link", sectionId: "workpack_status", kind: "secondary_navigation", sendCapable: false, maximumVisibleCount: 1 },
+  { id: "target_owner_link", sectionId: "target", kind: "secondary_navigation", sendCapable: false, maximumVisibleCount: 1 },
+  { id: "channel_controls", sectionId: "channel", kind: "selection_control", sendCapable: false, maximumVisibleCount: 1 },
+  { id: "language_dropdown", sectionId: "localized_preview", kind: "preview_control", sendCapable: false, maximumVisibleCount: 1 },
+  { id: "operator_note_input", sectionId: "operator_note", kind: "input_control", sendCapable: false, maximumVisibleCount: 1 },
+  { id: "history_link", sectionId: "result_strip", kind: "conditional_navigation", sendCapable: false, maximumVisibleCount: 1 },
+  { id: "primary_send", sectionId: "primary_action", kind: "primary_send", sendCapable: true, maximumVisibleCount: 1 }
+];
+
+const SAFE_COMMANDS = [
+  { id: "candidate_structure", executable: "node", arguments: [FILES.validator, "--skip-evidence"], stage: "candidate before evidence", requiredRuns: "2" },
+  { id: "evidence_identity", executable: "node", arguments: [FILES.validator], stage: "evidence child", requiredRuns: "2" },
+  { id: "markdown_mutation", executable: "node", arguments: [FILES.validator, "--skip-evidence", "--md-mutation", "{allowlistedMode}"], stage: "candidate mutation matrix", requiredRuns: "2 each" },
+  { id: "json_mutation", executable: "node", arguments: [FILES.validator, "--skip-evidence", "--json-mutation", "{allowlistedMode}"], stage: "candidate mutation matrix", requiredRuns: "2 each" },
+  { id: "identity_mutation", executable: "node", arguments: [FILES.validator, "--identity-mutation", "{allowlistedMode}"], stage: "evidence mutation matrix", requiredRuns: "2 each" },
+  { id: "validator_syntax", executable: "node", arguments: ["--check", FILES.validator], stage: "final static check", requiredRuns: "1" }
+];
+
+const REVIEW_ATTACKS = [
+  { id: "md_route_owner", reviewedCandidate: "0c6603adf7159dc98df6b6b365d3a03cddb65be1", observedBaselineExit: 0, requiredRemediatedExit: 1 },
+  { id: "json_route_owner", reviewedCandidate: "0c6603adf7159dc98df6b6b365d3a03cddb65be1", observedBaselineExit: 0, requiredRemediatedExit: 1 },
+  { id: "secondary_send_injection", reviewedCandidate: "0c6603adf7159dc98df6b6b365d3a03cddb65be1", observedBaselineExit: 0, requiredRemediatedExit: 1 },
+  { id: "forged_validation_command", reviewedCandidate: "0c6603adf7159dc98df6b6b365d3a03cddb65be1", observedBaselineExit: 0, requiredRemediatedExit: 1 }
+];
+
 const MD_MUTATIONS = [
   "revision", "review_status", "implementation_status", "browser_status", "route_row",
   "state_row", "blocker_row", "channel_row", "language_row", "localized_surface",
   "invalid_locale", "emoji_semantics", "geometry_category", "scroll_root",
   "runtime_config", "one_send_job", "wave_order", "planned_case_count",
-  "handoff_observation", "locale_completeness", "emoji_inventory", "default_language_ui"
+  "handoff_observation", "locale_completeness", "emoji_inventory", "default_language_ui",
+  "route_owner", "screen_section_relabel", "documented_command_forgery"
 ];
 const JSON_MUTATIONS = [
   "missing_status", "missing_implementation_status", "missing_browser_status",
@@ -90,11 +141,13 @@ const JSON_MUTATIONS = [
   "empty_geometry_categories", "missing_geometry_category", "empty_runtime_config",
   "missing_rotation", "multi_send_job", "empty_blockers", "planned_case_count",
   "browser_execution_nonzero", "implementation_unblocked", "empty_locale_completeness",
-  "empty_emoji_inventory", "fallback_unblocked", "default_language_ui"
+  "empty_emoji_inventory", "fallback_unblocked", "default_language_ui", "route_owner",
+  "screen_section_injection", "screen_section_relabel", "screen_section_removal",
+  "cta_inventory_injection", "command_identity_forgery"
 ];
 const IDENTITY_MUTATIONS = [
   "contradictory_changed_files", "candidate_parent", "candidate_scope",
-  "browser_executed_claim", "semantic_pass_claim"
+  "browser_executed_claim", "semantic_pass_claim", "evidence_command_forgery"
 ];
 const TOP_KEYS = [
   "schemaVersion", "specId", "revision", "status", "implementationStatus",
@@ -210,7 +263,7 @@ function assertSchema(spec) {
 
   ensure(spec.schemaVersion === "safeclaw-workpack-share-v2-product-spec/v3", "schemaVersion mismatch");
   ensure(spec.specId === "workpack-share-v2-2026-07-13", "specId mismatch");
-  ensure(spec.revision === "independent-review-remediation-7", "revision mismatch");
+  ensure(spec.revision === "independent-review-remediation-8", "revision mismatch");
   ensure(spec.status === "SPEC_REVIEW_ONLY", "status must be SPEC_REVIEW_ONLY");
   ensure(spec.implementationStatus === "IMPLEMENTATION_BLOCKED", "implementation must be blocked");
   ensure(spec.browserTddStatus === "IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD", "browser TDD status mismatch");
@@ -218,7 +271,7 @@ function assertSchema(spec) {
 
   const metadata = object(spec.metadata, "metadata");
   ensure(metadata.branch === "feat/workpack-share-v2", "branch mismatch");
-  ensure(/^[0-9a-f]{40}$/.test(metadata.sourceBase), "sourceBase must be a full SHA");
+  ensure(metadata.sourceBase === "1d4938675cee330dd7bfa1cdb040b27bf24fceba", "sourceBase mismatch");
   ensure(metadata.reviewStatus === "pending" && metadata.reviewedClaim === false, "review must remain pending");
   ensure(metadata.specOnly === true && metadata.implementationStarted === false, "metadata must remain spec-only");
   ensure(metadata.browserSemanticValidationAllowed === false, "validator cannot claim browser semantics");
@@ -244,10 +297,20 @@ function assertSchema(spec) {
   ensure(typeof product.job === "string", "product job must be one scalar");
   exact(product.screenSequence, ["target", "channel", "localized_preview", "send"], "screen sequence");
   ensure(product.onePrimaryPerScreen === true, "one primary action is required");
-  ensure(product.screenSections.filter(function isPrimary(item) { return item.id === "primary_action"; }).length === 1, "one primary section required");
+  exact(product.screenSections, SCREEN_SECTION_CONTRACT, "complete screenSections contract");
+  exact(product.ctaInventory, CTA_CONTRACT, "complete CTA inventory");
+  unique(itemIds(product.screenSections, "screenSections"), "screen section IDs");
+  unique(itemIds(product.ctaInventory, "ctaInventory"), "CTA IDs");
+  exact(product.screenSections.map(function sectionOrder(entry) { return entry.order; }), [1, 2, 3, 4, 5, 6, 7], "screen section order");
+  exact(product.screenSections.map(function sectionAction(entry) { return entry.actionNodeId; }), product.ctaInventory.map(function ctaId(entry) { return entry.id; }), "section action-node references");
+  const sendActions = product.ctaInventory.filter(function sendCapable(entry) { return entry.sendCapable; });
+  ensure(sendActions.length === 1, "exactly one send-capable CTA is required");
+  ensure(sendActions[0].id === "primary_send" && sendActions[0].sectionId === "primary_action" && sendActions[0].kind === "primary_send", "send-capable CTA must be the primary action");
+  ensure(product.ctaInventory.filter(function secondarySend(entry) { return !entry.sendCapable && entry.kind.includes("send"); }).length === 0, "secondary or duplicate send CTA is forbidden");
   ensure(product.excludedFromShareBody.includes("Before/After history"), "improvement history must be excluded");
   ensure(product.excludedFromShareBody.includes("full dispatch history"), "dispatch history panel must be excluded");
 
+  exact(spec.routeOwnership, ROUTE_CONTRACT, "complete route ownership contract");
   exact(itemIds(spec.routeOwnership, "routeOwnership"), ROUTES, "route IDs");
   unique(itemIds(spec.routeOwnership, "routeOwnership"), "route IDs");
 
@@ -525,6 +588,24 @@ function assertSchema(spec) {
   const parity = object(spec.parityCheck, "parity check");
   ensure(parity.status === "SPEC_REVIEW_ONLY" && parity.implementationStatus === "IMPLEMENTATION_BLOCKED", "parity status mismatch");
   ensure(parity.browserTddStatus === "IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD", "parity browser status mismatch");
+  const commandContract = object(parity.commandContract, "validation command contract");
+  exact(commandContract.documentedCommands, SAFE_COMMANDS, "documented validation commands");
+  exact(commandContract.evidenceCommandIdentity, {
+    candidateCommandId: "candidate_structure",
+    evidenceCommandId: "evidence_identity",
+    executable: "node",
+    validatorPath: FILES.validator
+  }, "evidence command identity");
+  ensure(commandContract.arbitrarySpecTextExecutionAllowed === false, "arbitrary spec command execution must be false");
+  ensure(commandContract.documentedCommandRowsExecutedByValidator === false, "validator must not execute documented rows");
+  ensure(commandContract.shellBuiltinsAllowed === false, "shell builtins must be forbidden");
+  commandContract.documentedCommands.forEach(function safeCommand(entry) {
+    ensure(entry.executable === "node", "documented executable must be node");
+    array(entry.arguments, "documented command arguments").forEach(function safeArgument(argument) {
+      ensure(!/[;&|<>]/.test(argument), "documented command argument contains a shell metacharacter");
+    });
+  });
+  exact(parity.reviewAttackTddRecord, REVIEW_ATTACKS, "review attack TDD record");
   const execution = object(parity.executionContract, "execution contract");
   exact(execution.markdownMutationModes, MD_MUTATIONS, "Markdown mutation modes");
   exact(execution.jsonMutationModes, JSON_MUTATIONS, "JSON mutation modes");
@@ -694,6 +775,27 @@ function assertMarkdown(markdown, spec) {
     prior = index;
   });
 
+  assertRows(
+    tableAfter(markdown, "### 2.1 Share Body").rows,
+    SCREEN_SECTION_CONTRACT.map(function screenSectionRow(entry) {
+      return [entry.order, entry.id, entry.role, entry.content, entry.actionNodeId];
+    }),
+    "Markdown screenSections table"
+  );
+  assertRows(
+    tableAfter(markdown, "CTA inventory:").rows,
+    CTA_CONTRACT.map(function ctaRow(entry) {
+      return [entry.id, entry.sectionId, entry.kind, entry.sendCapable ? "yes" : "no", entry.maximumVisibleCount];
+    }),
+    "Markdown CTA inventory"
+  );
+  assertRows(
+    tableAfter(markdown, "### 2.2 Route Ownership").rows,
+    ROUTE_CONTRACT.map(function routeRow(entry) {
+      return [entry.id, entry.purpose, entry.ownerRoute, entry.returnPath, entry.exclusionSemantics];
+    }),
+    "Markdown complete route ownership"
+  );
   exact(tableIds(tableAfter(markdown, "### 2.2 Route Ownership"), "routes"), ROUTES, "Markdown route IDs");
   exact(tableIds(tableAfter(markdown, "## 3. State Machine And CTA Authority"), "states"), STATES, "Markdown state IDs");
   exact(
@@ -780,6 +882,20 @@ function assertMarkdown(markdown, spec) {
     }),
     "Markdown emoji inventory"
   );
+  assertRows(
+    tableAfter(markdown, "Documented validation command contract:").rows,
+    SAFE_COMMANDS.map(function commandRow(entry) {
+      return [entry.id, entry.executable, entry.arguments.join(" "), entry.stage, entry.requiredRuns];
+    }),
+    "Markdown documented validation commands"
+  );
+  assertRows(
+    tableAfter(markdown, "Review attack TDD record:").rows,
+    REVIEW_ATTACKS.map(function reviewAttackRow(entry) {
+      return [entry.id, entry.reviewedCandidate, entry.observedBaselineExit, entry.requiredRemediatedExit];
+    }),
+    "Markdown review attack TDD record"
+  );
 
   ensure(markdown.includes("browser handoff d3ad865"), "Markdown handoff observation missing");
   ensure(markdown.includes("부분 번역이며 ready가 아닙니다."), "Markdown partial translation classification missing");
@@ -817,7 +933,7 @@ function replaceOnce(source, search, replacement, mode) {
 function mutateMarkdown(markdown, mode) {
   switch (mode) {
     case "revision":
-      return replaceOnce(markdown, "- Revision: independent-review-remediation-7", "- Revision: independent-review-remediation-x", mode);
+      return replaceOnce(markdown, "- Revision: independent-review-remediation-8", "- Revision: independent-review-remediation-x", mode);
     case "review_status":
       return replaceOnce(markdown, "- 상태: SPEC_REVIEW_ONLY", "- 상태: REVIEWED", mode);
     case "implementation_status":
@@ -825,7 +941,7 @@ function mutateMarkdown(markdown, mode) {
     case "browser_status":
       return replaceOnce(markdown, "- Browser/TDD status: IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD", "- Browser/TDD status: BROWSER_COMPLETE", mode);
     case "route_row":
-      return replaceOnce(markdown, "| R1 | roster 등록, 수정, quick add |", "| RX | roster 등록, 수정, quick add |", mode);
+      return replaceOnce(markdown, "| R1 | roster registration, update, and quick add |", "| RX | roster registration, update, and quick add |", mode);
     case "state_row":
       return replaceOnce(markdown, "| blocked | readiness.canShare=false", "| blocked_changed | readiness.canShare=false", mode);
     case "blocker_row":
@@ -860,6 +976,12 @@ function mutateMarkdown(markdown, mode) {
       return replaceOnce(markdown, "| ⚠️ | decorative only |", "| ❓ | decorative only |", mode);
     case "default_language_ui":
       return replaceOnce(markdown, "| manualDropdown | 1 | operator preview override only |", "| manualDropdown | 12 | operator preview override only |", mode);
+    case "route_owner":
+      return replaceOnce(markdown, "| R1 | roster registration, update, and quick add | /workers |", "| R1 | roster registration, update, and quick add | /workspace?step=share |", mode);
+    case "screen_section_relabel":
+      return replaceOnce(markdown, "| 7 | primary_action | primary_action |", "| 7 | primary_action | secondary_send |", mode);
+    case "documented_command_forgery":
+      return replaceOnce(markdown, "| candidate_structure | node |", "| candidate_structure | Write-Output |", mode);
     default:
       fail("unsupported Markdown mutation: " + mode);
   }
@@ -894,6 +1016,12 @@ function mutateJson(spec, mode) {
     case "empty_emoji_inventory": mutated.browserGate.languageGate.emojiSemantics = []; break;
     case "fallback_unblocked": mutated.browserGate.languageGate.fallbackContract.dispatchRequestCount = 1; break;
     case "default_language_ui": mutated.browserGate.languageGate.defaultUiControls = []; break;
+    case "route_owner": mutated.routeOwnership[0].ownerRoute = "/workspace?step=share"; break;
+    case "screen_section_injection": mutated.product.screenSections.push({ order: 8, id: "secondary_send", role: "secondary_send", content: "duplicate send", actionNodeId: "secondary_send" }); break;
+    case "screen_section_relabel": mutated.product.screenSections[6].role = "secondary_send"; break;
+    case "screen_section_removal": mutated.product.screenSections.pop(); break;
+    case "cta_inventory_injection": mutated.product.ctaInventory.push({ id: "secondary_send", sectionId: "primary_action", kind: "secondary_send", sendCapable: true, maximumVisibleCount: 1 }); break;
+    case "command_identity_forgery": mutated.parityCheck.commandContract.documentedCommands[0].executable = "Write-Output"; break;
     default: fail("unsupported JSON mutation: " + mode);
   }
   return mutated;
@@ -907,6 +1035,7 @@ function mutateEvidence(evidence, mode) {
     case "candidate_scope": mutated.candidateChangedFiles.push("app/globals.css"); break;
     case "browser_executed_claim": mutated.browserExecutions = 128; break;
     case "semantic_pass_claim": mutated.semanticPassClaim = true; break;
+    case "evidence_command_forgery": mutated.validationCommandIdentity.candidateTokens[0] = "Write-Output"; break;
     default: fail("unsupported identity mutation: " + mode);
   }
   return mutated;
@@ -923,6 +1052,13 @@ function assertIdentity(evidence, spec) {
   ensure(evidence.semanticPassClaim === false, "semantic claim must be false");
   ensure(evidence.implementationReadyClaim === false, "implementation-ready claim must be false");
   ensure(evidence.browserPassClaim === false, "browser claim must be false");
+  exact(evidence.validationCommandIdentity, {
+    candidateCommandId: "candidate_structure",
+    candidateTokens: ["node", FILES.validator, "--skip-evidence"],
+    evidenceCommandId: "evidence_identity",
+    evidenceTokens: ["node", FILES.validator],
+    arbitrarySpecTextExecuted: false
+  }, "evidence validation command identity");
   ensure(evidence.branch === spec.metadata.branch && evidence.sourceBase === spec.metadata.sourceBase, "evidence branch/source mismatch");
   ensure(/^[0-9a-f]{40}$/.test(evidence.candidate), "candidate must be full SHA");
   ensure(evidence.candidateParent === evidence.sourceBase, "candidate parent declaration mismatch");

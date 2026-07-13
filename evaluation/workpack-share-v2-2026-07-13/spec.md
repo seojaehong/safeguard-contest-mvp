@@ -1,14 +1,14 @@
 # SafeClaw 공유 화면 v2 제품 명세
 
 - Spec ID: workpack-share-v2-2026-07-13
-- Revision: independent-review-remediation-7
+- Revision: independent-review-remediation-8
 - 상태: SPEC_REVIEW_ONLY
 - Implementation status: IMPLEMENTATION_BLOCKED
 - Browser/TDD status: IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD
 - Browser executions: 0
 - Review status: pending
 - 기준 branch: feat/workpack-share-v2
-- Source base: 353a41be1be2028c61d9fa2096bd8be5ac4cfad8
+- Source base: 1d4938675cee330dd7bfa1cdb040b27bf24fceba
 - Candidate evidence: evaluation/workpack-share-v2-2026-07-13/review-evidence.json의 full candidate SHA
 - Review claim: 구조와 identity만 검증했습니다. semantic PASS, implementation-ready, browser PASS claim은 없으며 fresh independent review는 pending입니다.
 - 쓰기 범위: spec candidate commit은 evaluation/workpack-share-v2-2026-07-13/spec.md, spec.json, validate-spec.cjs만, 후속 evidence-only commit은 review-evidence.json만 수정합니다.
@@ -51,15 +51,27 @@
 
 ### 2.1 Share Body
 
-| 순서 | 영역 | 표시 | Share가 할 수 있는 일 |
-|---:|---|---|---|
-| 1 | workpack_status | 문서팩 이름과 readiness 한 줄 | 문서 보기 route 이동 |
-| 2 | target | 오늘 참여자 N명과 최대 3명 이름 | owner route로 돌아가기 |
-| 3 | channel | 메일, 문자, 승인된 카카오의 선택 및 수신 가능 수 | 준비된 채널 선택 |
-| 4 | localized_preview | 자동 해석 언어, option 12개 dropdown, 검토 artifact 미리보기 | preview 언어만 변경 |
-| 5 | operator_note | 선택 전달 메모 | 메모 입력 |
-| 6 | result_strip | accepted, failed, unknown 채널/request 요약 | persistedLogIds>0일 때만 이력 route 이동 |
-| 7 | primary_action | 현재 state의 primary 하나 | resolver가 정한 action 하나 |
+| Order | Section ID | Role | Content | Action node ID |
+|---:|---|---|---|---|
+| 1 | workpack_status | status | 문서팩 이름과 readiness 한 줄 | document_link |
+| 2 | target | target_summary | 오늘 참여자 N명과 최대 3명 이름 | target_owner_link |
+| 3 | channel | channel_selection | 메일, 문자, 승인된 카카오 선택과 수신 가능 수 | channel_controls |
+| 4 | localized_preview | localized_preview | 자동 해석 언어, option 12개 dropdown, 검토 artifact 미리보기 | language_dropdown |
+| 5 | operator_note | optional_input | 선택 전달 메모 | operator_note_input |
+| 6 | result_strip | result_status | accepted, failed, unknown 채널/request 요약 | history_link |
+| 7 | primary_action | primary_action | 현재 state의 primary 하나 | primary_send |
+
+CTA inventory:
+
+| Action node ID | Section ID | Kind | Send capable | Maximum visible count |
+|---|---|---|---:|---:|
+| document_link | workpack_status | secondary_navigation | no | 1 |
+| target_owner_link | target | secondary_navigation | no | 1 |
+| channel_controls | channel | selection_control | no | 1 |
+| language_dropdown | localized_preview | preview_control | no | 1 |
+| operator_note_input | operator_note | input_control | no | 1 |
+| history_link | result_strip | conditional_navigation | no | 1 |
+| primary_send | primary_action | primary_send | yes | 1 |
 
 Share body에는 번호 장식, worker form, quick add, worker drawer, channel setup, 공개 링크 생성, 중복 CTA, confirmation modal, 내부 preview scroll을 두지 않습니다.
 SafeGuardCommandCenter가 화면 제목 하나를 소유하고 WorkflowSharePanel은 제목, 로그인 prompt, preview를 반복하지 않습니다. [data-share-preview]는 하나이며 logged_out도 하단 primary 외 로그인 CTA를 만들지 않습니다.
@@ -67,19 +79,19 @@ SafeGuardCommandCenter가 화면 제목 하나를 소유하고 WorkflowSharePane
 
 ### 2.2 Route Ownership
 
-| ID | 기능 | Owner | Share 계약 |
-|---|---|---|---|
-| R1 | roster 등록, 수정, quick add | /workers | Share는 읽기만 합니다. |
-| R2 | 오늘 참여자 선택 snapshot | /workspace?step=input, /workers | Share는 snapshot을 변경하지 않습니다. |
-| R3 | 현재 문서팩 전송 orchestration | /workspace?step=share | session 생성과 dispatch action만 소유합니다. |
-| R4 | 번역 생성, 수정, 검토, 서명 저장 | foreignWorkerTransmission editor + authenticated review route | Share는 서버가 검증한 approved envelope만 소비합니다. |
-| R5 | email, sms, kakao 설정·승인·availability | /settings + server channel resolver | Share는 secret 없는 resolved availability와 검증 토큰만 소비합니다. |
-| R6 | organization reporting recipient group | /settings | 작업자 N명과 분리된 결과만 표시합니다. |
-| R7 | 전송 request/channel 결과 | /dispatch | Share는 compact result strip만 표시합니다. |
-| R8 | session, 저장, 열람 이력 | /archive | 기존 ID와 row를 삭제하지 않습니다. |
-| R9 | Before/After 개선 이력 | /reports, /archive | Share body에서 제거합니다. |
-| R10 | 로그인과 복귀 | /login, /auth/callback, /workspace | 검증된 next와 step query를 사용합니다. |
-| R11 | invitation access policy | session API, /settings policy | invited, viewer, anonymous false, expiry를 유지하고 compact info popover에서 Settings로 연결하며 public link를 만들지 않습니다. |
+| ID | Purpose | Owner route | Return path | Exclusion semantics |
+|---|---|---|---|---|
+| R1 | roster registration, update, and quick add | /workers | /workers?next={encoded shareReturn} | Share is read-only; roster and quick-add mutation requests are 0 |
+| R2 | today participant snapshot selection | /workspace?step=input, /workers | /workers?next={encoded shareReturn} | Share does not mutate or persist the participant snapshot |
+| R3 | current workpack send orchestration | /workspace?step=share | /workspace?step=share&theme={theme} | only the single session-then-dispatch action is send-capable |
+| R4 | localization generation, edit, review, and signed persistence | document-editor:foreignWorkerTransmission, /api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review | /workspace?step=document&document=foreignWorkerTransmission&language={validatedSupportedCode}&returnStep=share&theme={theme} | Share cannot generate, edit, approve, sign, or persist localization |
+| R5 | email, sms, and kakao configuration, approval, and availability | /settings, /api/settings/channels/resolve | /settings?next={encoded shareReturn} | Share exposes no secret, channel setup, template approval, or sender input |
+| R6 | organization reporting recipient group | /settings | /settings?next={encoded shareReturn} | reporting recipients never change worker count or own the send primary |
+| R7 | dispatch request and channel results | /dispatch | /dispatch | Share shows only a compact result strip and links only with persisted log IDs |
+| R8 | session, save, and read history | /archive | /archive | Share contains no session, save, or full-history panel |
+| R9 | Before/After improvement history | /reports, /archive | not_available_from_share_body | improvement and history panels are excluded from Share |
+| R10 | login and canonical return | /login, /auth/callback, /workspace | /login?next={encoded shareReturn} | unvalidated next, step, document, language, or returnStep is forbidden |
+| R11 | invitation access policy | share-session API, /settings policy | /settings?next={encoded shareReturn} | no public link or worker provisioning; compact policy info only |
 
 ### 2.3 Workspace Return Contract
 
@@ -1058,9 +1070,31 @@ Non-goals:
 
 The validator must not treat embedded mirrors, prose-authored code, hashes of code blocks, token presence, or synthetic geometry/zoom models as semantic authority. It does not execute application code, a browser, Playwright, DOM measurement, language rendering, provider calls, or database operations. It must never emit an implementation-ready or browser-pass claim.
 
-Structural Markdown parity must derive data from the actual human sections and tables: revision/status metadata, route ownership, state and blocker catalogs, channels, runtime configuration, supported-language policy, localized surfaces, language authority, accessibility requirements, geometry sets and failure categories, environments, zoom modes, fixtures, and Wave heading/order/exact-file ownership. A duplicated embedded metadata object is not evidence.
+Structural Markdown parity must derive data from the actual human sections and tables: revision/status metadata; every route ID, purpose, owner route, return path, and exclusion semantic; every screen section and CTA inventory row; state and blocker catalogs; channels; runtime configuration; supported-language policy; localized surfaces; language authority; accessibility requirements; geometry sets and failure categories; environments; zoom modes; fixtures; validation command rows; and Wave heading/order/exact-file ownership. A duplicated embedded metadata object is not evidence.
 
-The full JSON structural schema must reject missing or empty required contract collections. In particular it requires all 12 supported languages and both auto/manual authority contracts; the four structural localized groups and the exact title/site/task/core-risk/body/action completeness inventory; zero Korean metadata labels and values for every non-ko target; the static invalid-locale CTA and zero session/dispatch fallback rule; the exact ⚠️/🧱/🌬️/🚧 decorative inventory with standard icon, localized text, and accessible-label semantics; all geometry failure categories; the explicit root-once census and body/preview ownership rules; all runtime configuration keys and rotation fields; one send job and one primary action; all fail-closed blockers; 4 environments, 16 fixtures, 2 zoom modes, and 128 planned cases; and browser execution count 0.
+The full JSON structural schema must reject missing or empty required contract collections. In particular it requires all 11 complete route rows; the exact seven section IDs/orders/roles/action-node references; the exact CTA inventory with one send-capable primary and zero secondary or duplicate send actions; all 12 supported languages and both auto/manual authority contracts; the four structural localized groups and the exact title/site/task/core-risk/body/action completeness inventory; zero Korean metadata labels and values for every non-ko target; the static invalid-locale CTA and zero session/dispatch fallback rule; the exact ⚠️/🧱/🌬️/🚧 decorative inventory with standard icon, localized text, and accessible-label semantics; all geometry failure categories; the explicit root-once census and body/preview ownership rules; all runtime configuration keys and rotation fields; all fail-closed blockers; 4 environments, 16 fixtures, 2 zoom modes, and 128 planned cases; and browser execution count 0.
+
+Documented validation command contract:
+
+| Command ID | Executable token | Argument tokens | Stage | Required runs |
+|---|---|---|---|---:|
+| candidate_structure | node | evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --skip-evidence | candidate before evidence | 2 |
+| evidence_identity | node | evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs | evidence child | 2 |
+| markdown_mutation | node | evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --skip-evidence --md-mutation {allowlistedMode} | candidate mutation matrix | 2 each |
+| json_mutation | node | evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --skip-evidence --json-mutation {allowlistedMode} | candidate mutation matrix | 2 each |
+| identity_mutation | node | evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --identity-mutation {allowlistedMode} | evidence mutation matrix | 2 each |
+| validator_syntax | node | --check evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs | final static check | 1 |
+
+The validator compares these rows with a fixed internal token-and-argument allowlist. It never passes Markdown or JSON command text to a shell or process API. `Write-Output`, shell builtins, separators, redirections, substituted executables, extra arguments, and arbitrary spec-authored text are not allowed command identities.
+
+Review attack TDD record:
+
+| Attack ID | Reviewed candidate | Observed baseline exit | Required remediated exit |
+|---|---|---:|---:|
+| md_route_owner | 0c6603adf7159dc98df6b6b365d3a03cddb65be1 | 0 | 1 |
+| json_route_owner | 0c6603adf7159dc98df6b6b365d3a03cddb65be1 | 0 | 1 |
+| secondary_send_injection | 0c6603adf7159dc98df6b6b365d3a03cddb65be1 | 0 | 1 |
+| forged_validation_command | 0c6603adf7159dc98df6b6b365d3a03cddb65be1 | 0 | 1 |
 
 Structural Markdown mutation modes:
 
@@ -1086,6 +1120,9 @@ Structural Markdown mutation modes:
 - locale_completeness
 - emoji_inventory
 - default_language_ui
+- route_owner
+- screen_section_relabel
+- documented_command_forgery
 
 Structural JSON mutation modes:
 
@@ -1111,6 +1148,12 @@ Structural JSON mutation modes:
 - empty_emoji_inventory
 - fallback_unblocked
 - default_language_ui
+- route_owner
+- screen_section_injection
+- screen_section_relabel
+- screen_section_removal
+- cta_inventory_injection
+- command_identity_forgery
 
 Identity mutation modes:
 
@@ -1119,10 +1162,11 @@ Identity mutation modes:
 - candidate_scope
 - browser_executed_claim
 - semantic_pass_claim
+- evidence_command_forgery
 
 The validator derives each mutation count from its own exported mode array and compares it with the corresponding JSON count. Every listed mutation operates on an in-memory copy and must exit 1 without modifying the source files. There are no zoom-positive, geometry-positive, or synthetic browser fixture commands.
 
-Candidate preparation runs `node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --skip-evidence` twice for structural JSON/Markdown checks only. After the evidence-only child commit, the normal validator runs twice and verifies identity as well. Each structural Markdown, structural JSON, and identity mutation is run twice. JSON parse, Node syntax check, `git diff --check`, exact candidate/evidence scope, pull --rebase, remote SHA equality, and clean worktree are separate delivery checks.
+Candidate preparation uses the `candidate_structure` command identity twice. After the evidence-only child commit, `evidence_identity` runs twice. Every structural Markdown, structural JSON, and identity mutation uses only its corresponding allowlisted command identity and runs twice per mode. JSON parse, Node syntax check, `git diff --check`, exact candidate/evidence scope, pull --rebase, remote SHA equality, and clean worktree are separate delivery checks.
 
 The evidence manifest proves only source/candidate identity, commit parentage, exact changed-file scopes, and the honest unexecuted state. It contains `SPEC_REVIEW_ONLY`, `IMPLEMENTATION_BLOCKED`, `IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD`, browser executions 0, semantic-pass claim false, implementation-ready claim false, and browser-pass claim false. It never claims its own commit SHA.
 

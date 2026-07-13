@@ -1,14 +1,14 @@
 {
   "schemaVersion": "safeclaw-workpack-share-v2-product-spec/v3",
   "specId": "workpack-share-v2-2026-07-13",
-  "revision": "independent-review-remediation-7",
+  "revision": "independent-review-remediation-8",
   "status": "SPEC_REVIEW_ONLY",
   "implementationStatus": "IMPLEMENTATION_BLOCKED",
   "browserTddStatus": "IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD",
   "browserExecutions": 0,
   "metadata": {
     "branch": "feat/workpack-share-v2",
-    "sourceBase": "353a41be1be2028c61d9fa2096bd8be5ac4cfad8",
+    "sourceBase": "1d4938675cee330dd7bfa1cdb040b27bf24fceba",
     "reviewEvidenceManifest": "evaluation/workpack-share-v2-2026-07-13/review-evidence.json",
     "reviewStatus": "pending",
     "reviewedClaim": false,
@@ -186,44 +186,102 @@
       {
         "order": 1,
         "id": "workpack_status",
+        "role": "status",
         "content": "문서팩 이름과 readiness 한 줄",
-        "shareAction": "문서 보기 route 이동"
+        "actionNodeId": "document_link"
       },
       {
         "order": 2,
         "id": "target",
+        "role": "target_summary",
         "content": "오늘 참여자 N명과 최대 3명 이름",
-        "shareAction": "owner route로 돌아가기"
+        "actionNodeId": "target_owner_link"
       },
       {
         "order": 3,
         "id": "channel",
+        "role": "channel_selection",
         "content": "메일, 문자, 승인된 카카오 선택과 수신 가능 수",
-        "shareAction": "준비된 채널 선택"
+        "actionNodeId": "channel_controls"
       },
       {
         "order": 4,
         "id": "localized_preview",
-        "content": "자동 해석 언어, 12개 option dropdown, 검토 artifact",
-        "shareAction": "미리보기 언어만 변경"
+        "role": "localized_preview",
+        "content": "자동 해석 언어, option 12개 dropdown, 검토 artifact 미리보기",
+        "actionNodeId": "language_dropdown"
       },
       {
         "order": 5,
         "id": "operator_note",
+        "role": "optional_input",
         "content": "선택 전달 메모",
-        "shareAction": "메모 입력"
+        "actionNodeId": "operator_note_input"
       },
       {
         "order": 6,
         "id": "result_strip",
+        "role": "result_status",
         "content": "accepted, failed, unknown 채널/request 요약",
-        "shareAction": "persistedLogIds>0일 때만 이력 route 이동"
+        "actionNodeId": "history_link"
       },
       {
         "order": 7,
         "id": "primary_action",
+        "role": "primary_action",
         "content": "현재 state의 primary 하나",
-        "shareAction": "resolver가 정한 action 하나"
+        "actionNodeId": "primary_send"
+      }
+    ],
+    "ctaInventory": [
+      {
+        "id": "document_link",
+        "sectionId": "workpack_status",
+        "kind": "secondary_navigation",
+        "sendCapable": false,
+        "maximumVisibleCount": 1
+      },
+      {
+        "id": "target_owner_link",
+        "sectionId": "target",
+        "kind": "secondary_navigation",
+        "sendCapable": false,
+        "maximumVisibleCount": 1
+      },
+      {
+        "id": "channel_controls",
+        "sectionId": "channel",
+        "kind": "selection_control",
+        "sendCapable": false,
+        "maximumVisibleCount": 1
+      },
+      {
+        "id": "language_dropdown",
+        "sectionId": "localized_preview",
+        "kind": "preview_control",
+        "sendCapable": false,
+        "maximumVisibleCount": 1
+      },
+      {
+        "id": "operator_note_input",
+        "sectionId": "operator_note",
+        "kind": "input_control",
+        "sendCapable": false,
+        "maximumVisibleCount": 1
+      },
+      {
+        "id": "history_link",
+        "sectionId": "result_strip",
+        "kind": "conditional_navigation",
+        "sendCapable": false,
+        "maximumVisibleCount": 1
+      },
+      {
+        "id": "primary_send",
+        "sectionId": "primary_action",
+        "kind": "primary_send",
+        "sendCapable": true,
+        "maximumVisibleCount": 1
       }
     ],
     "excludedFromShareBody": [
@@ -263,88 +321,80 @@
   "routeOwnership": [
     {
       "id": "R1",
-      "capability": "roster registration, update, quick add",
-      "owner": "/workers",
-      "shareContract": "read_only"
+      "purpose": "roster registration, update, and quick add",
+      "ownerRoute": "/workers",
+      "returnPath": "/workers?next={encoded shareReturn}",
+      "exclusionSemantics": "Share is read-only; roster and quick-add mutation requests are 0"
     },
     {
       "id": "R2",
-      "capability": "today participant selection snapshot",
-      "owner": [
-        "/workspace?step=input",
-        "/workers"
-      ],
-      "shareContract": "no_snapshot_mutation"
+      "purpose": "today participant snapshot selection",
+      "ownerRoute": "/workspace?step=input, /workers",
+      "returnPath": "/workers?next={encoded shareReturn}",
+      "exclusionSemantics": "Share does not mutate or persist the participant snapshot"
     },
     {
       "id": "R3",
-      "capability": "current workpack send orchestration",
-      "owner": "/workspace?step=share",
-      "shareContract": "create_session_then_dispatch"
+      "purpose": "current workpack send orchestration",
+      "ownerRoute": "/workspace?step=share",
+      "returnPath": "/workspace?step=share&theme={theme}",
+      "exclusionSemantics": "only the single session-then-dispatch action is send-capable"
     },
     {
       "id": "R4",
-      "capability": "translation generation, edit, review, signed persistence",
-      "owner": [
-        "document-editor:foreignWorkerTransmission",
-        "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review"
-      ],
-      "shareContract": "consume_server_verified_approved_envelope_only"
+      "purpose": "localization generation, edit, review, and signed persistence",
+      "ownerRoute": "document-editor:foreignWorkerTransmission, /api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review",
+      "returnPath": "/workspace?step=document&document=foreignWorkerTransmission&language={validatedSupportedCode}&returnStep=share&theme={theme}",
+      "exclusionSemantics": "Share cannot generate, edit, approve, sign, or persist localization"
     },
     {
       "id": "R5",
-      "capability": "email, sms, kakao configuration, approval, availability",
-      "owner": [
-        "/settings",
-        "/api/settings/channels/resolve"
-      ],
-      "shareContract": "consume_secret_free_resolution_and_token_only"
+      "purpose": "email, sms, and kakao configuration, approval, and availability",
+      "ownerRoute": "/settings, /api/settings/channels/resolve",
+      "returnPath": "/settings?next={encoded shareReturn}",
+      "exclusionSemantics": "Share exposes no secret, channel setup, template approval, or sender input"
     },
     {
       "id": "R6",
-      "capability": "organization reporting recipient group",
-      "owner": "/settings",
-      "shareContract": "show_result_separate_from_worker_count"
+      "purpose": "organization reporting recipient group",
+      "ownerRoute": "/settings",
+      "returnPath": "/settings?next={encoded shareReturn}",
+      "exclusionSemantics": "reporting recipients never change worker count or own the send primary"
     },
     {
       "id": "R7",
-      "capability": "dispatch request and channel results",
-      "owner": "/dispatch",
-      "shareContract": "compact_result_strip_only"
+      "purpose": "dispatch request and channel results",
+      "ownerRoute": "/dispatch",
+      "returnPath": "/dispatch",
+      "exclusionSemantics": "Share shows only a compact result strip and links only with persisted log IDs"
     },
     {
       "id": "R8",
-      "capability": "session, save, read history",
-      "owner": "/archive",
-      "shareContract": "preserve_existing_ids_and_rows"
+      "purpose": "session, save, and read history",
+      "ownerRoute": "/archive",
+      "returnPath": "/archive",
+      "exclusionSemantics": "Share contains no session, save, or full-history panel"
     },
     {
       "id": "R9",
-      "capability": "Before/After improvement history",
-      "owner": [
-        "/reports",
-        "/archive"
-      ],
-      "shareContract": "removed_from_share_body"
+      "purpose": "Before/After improvement history",
+      "ownerRoute": "/reports, /archive",
+      "returnPath": "not_available_from_share_body",
+      "exclusionSemantics": "improvement and history panels are excluded from Share"
     },
     {
       "id": "R10",
-      "capability": "login and return",
-      "owner": [
-        "/login",
-        "/auth/callback",
-        "/workspace"
-      ],
-      "shareContract": "validated_next_and_step_query"
+      "purpose": "login and canonical return",
+      "ownerRoute": "/login, /auth/callback, /workspace",
+      "returnPath": "/login?next={encoded shareReturn}",
+      "exclusionSemantics": "unvalidated next, step, document, language, or returnStep is forbidden"
     },
     {
       "id": "R11",
-      "capability": "invitation access policy",
-      "owner": [
-        "share-session API",
-        "/settings policy"
-      ],
-      "shareContract": "invited_viewer_anonymous_false_expiring_compact_info_popover_to_settings_no_public_link"
+      "purpose": "invitation access policy",
+      "ownerRoute": "share-session API, /settings policy",
+      "returnPath": "/settings?next={encoded shareReturn}",
+      "exclusionSemantics": "no public link or worker provisioning; compact policy info only"
     }
   ],
   "returnContract": {
@@ -2867,6 +2917,109 @@
       "browser pass",
       "browser behavior proved"
     ],
+    "commandContract": {
+      "documentedCommands": [
+        {
+          "id": "candidate_structure",
+          "executable": "node",
+          "arguments": [
+            "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs",
+            "--skip-evidence"
+          ],
+          "stage": "candidate before evidence",
+          "requiredRuns": "2"
+        },
+        {
+          "id": "evidence_identity",
+          "executable": "node",
+          "arguments": [
+            "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs"
+          ],
+          "stage": "evidence child",
+          "requiredRuns": "2"
+        },
+        {
+          "id": "markdown_mutation",
+          "executable": "node",
+          "arguments": [
+            "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs",
+            "--skip-evidence",
+            "--md-mutation",
+            "{allowlistedMode}"
+          ],
+          "stage": "candidate mutation matrix",
+          "requiredRuns": "2 each"
+        },
+        {
+          "id": "json_mutation",
+          "executable": "node",
+          "arguments": [
+            "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs",
+            "--skip-evidence",
+            "--json-mutation",
+            "{allowlistedMode}"
+          ],
+          "stage": "candidate mutation matrix",
+          "requiredRuns": "2 each"
+        },
+        {
+          "id": "identity_mutation",
+          "executable": "node",
+          "arguments": [
+            "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs",
+            "--identity-mutation",
+            "{allowlistedMode}"
+          ],
+          "stage": "evidence mutation matrix",
+          "requiredRuns": "2 each"
+        },
+        {
+          "id": "validator_syntax",
+          "executable": "node",
+          "arguments": [
+            "--check",
+            "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs"
+          ],
+          "stage": "final static check",
+          "requiredRuns": "1"
+        }
+      ],
+      "evidenceCommandIdentity": {
+        "candidateCommandId": "candidate_structure",
+        "evidenceCommandId": "evidence_identity",
+        "executable": "node",
+        "validatorPath": "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs"
+      },
+      "arbitrarySpecTextExecutionAllowed": false,
+      "documentedCommandRowsExecutedByValidator": false,
+      "shellBuiltinsAllowed": false
+    },
+    "reviewAttackTddRecord": [
+      {
+        "id": "md_route_owner",
+        "reviewedCandidate": "0c6603adf7159dc98df6b6b365d3a03cddb65be1",
+        "observedBaselineExit": 0,
+        "requiredRemediatedExit": 1
+      },
+      {
+        "id": "json_route_owner",
+        "reviewedCandidate": "0c6603adf7159dc98df6b6b365d3a03cddb65be1",
+        "observedBaselineExit": 0,
+        "requiredRemediatedExit": 1
+      },
+      {
+        "id": "secondary_send_injection",
+        "reviewedCandidate": "0c6603adf7159dc98df6b6b365d3a03cddb65be1",
+        "observedBaselineExit": 0,
+        "requiredRemediatedExit": 1
+      },
+      {
+        "id": "forged_validation_command",
+        "reviewedCandidate": "0c6603adf7159dc98df6b6b365d3a03cddb65be1",
+        "observedBaselineExit": 0,
+        "requiredRemediatedExit": 1
+      }
+    ],
     "executionContract": {
       "normalRunsRequired": 2,
       "markdownMutationModes": [
@@ -2891,9 +3044,12 @@
         "handoff_observation",
         "locale_completeness",
         "emoji_inventory",
-        "default_language_ui"
+        "default_language_ui",
+        "route_owner",
+        "screen_section_relabel",
+        "documented_command_forgery"
       ],
-      "markdownMutationModeCount": 22,
+      "markdownMutationModeCount": 25,
       "markdownMutationRunsRequiredEach": 2,
       "markdownMutationExpectedExitCode": 1,
       "jsonMutationModes": [
@@ -2918,9 +3074,15 @@
         "empty_locale_completeness",
         "empty_emoji_inventory",
         "fallback_unblocked",
-        "default_language_ui"
+        "default_language_ui",
+        "route_owner",
+        "screen_section_injection",
+        "screen_section_relabel",
+        "screen_section_removal",
+        "cta_inventory_injection",
+        "command_identity_forgery"
       ],
-      "jsonMutationModeCount": 22,
+      "jsonMutationModeCount": 28,
       "jsonMutationRunsRequiredEach": 2,
       "jsonMutationExpectedExitCode": 1,
       "identityMutationModes": [
@@ -2928,9 +3090,10 @@
         "candidate_parent",
         "candidate_scope",
         "browser_executed_claim",
-        "semantic_pass_claim"
+        "semantic_pass_claim",
+        "evidence_command_forgery"
       ],
-      "identityMutationModeCount": 5,
+      "identityMutationModeCount": 6,
       "identityMutationRunsRequiredEach": 2,
       "identityMutationExpectedExitCode": 1,
       "browserCasesExecutedBySpecValidation": 0,
@@ -2945,11 +3108,11 @@
     "jsonParseRequired": true,
     "nodeSyntaxCheckRequired": true,
     "structuralValidationRunsRequired": 2,
-    "markdownMutationModesRequired": 22,
+    "markdownMutationModesRequired": 25,
     "markdownMutationRunsRequiredEach": 2,
-    "jsonMutationModesRequired": 22,
+    "jsonMutationModesRequired": 28,
     "jsonMutationRunsRequiredEach": 2,
-    "identityMutationModesRequired": 5,
+    "identityMutationModesRequired": 6,
     "identityMutationRunsRequiredEach": 2,
     "plannedBrowserCases": 128,
     "actualBrowserCasesExecuted": 0,
