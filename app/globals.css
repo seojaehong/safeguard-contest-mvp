@@ -20168,6 +20168,70 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell > .safeclaw-workdoc-rail {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-preview {
+  min-width: 0;
+  grid-column: 1;
+  grid-row: 1;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 4px;
+  background: var(--workspace-surface-1);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-preview > summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  color: var(--workspace-ink);
+  font-size: var(--text-control);
+  font-weight: 600;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  cursor: pointer;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-preview > summary:focus-visible {
+  outline: 2px solid var(--workspace-accent);
+  outline-offset: 2px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-preview[open] > summary {
+  border-bottom: 1px solid var(--workspace-rule);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-preview > .safeclaw-workdoc {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-secondary-tools {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--workspace-rule);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-secondary-tools > summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
+  cursor: pointer;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-secondary-tools > summary:focus-visible {
+  outline: 2px solid var(--workspace-accent);
+  outline-offset: 2px;
+}
+
 @media (max-width: 900px) {
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-header {
     grid-template-columns: 1fr;
@@ -20200,6 +20264,21 @@ body:has(.safeclaw-landing) :is(
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-head,
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-groups {
     grid-template-columns: 1fr;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell > .safeclaw-workdoc-rail,
+  .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-preview {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .workbench-report-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .safeclaw-module-shell[data-module-route="/reports"] .workbench-report-filters p {
+    gap: 4px;
   }
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-table,
