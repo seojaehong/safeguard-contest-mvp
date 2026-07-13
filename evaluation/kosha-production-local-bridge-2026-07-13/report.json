@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "safeclaw-kosha-production-local-bridge-audit/v1",
+  "generatedAt": "2026-07-13T08:14:25.192Z",
+  "readOnly": true,
+  "humanConfirmation": "pending",
+  "dbMutationPerformed": false,
+  "item_count": 1,
+  "success_count": 1,
+  "failure_count": 0,
+  "chunk_count": 0,
+  "elapsed_seconds": 17.543,
+  "productionRead": {
+    "method": "GET",
+    "source": "env-configured-supabase",
+    "httpStatus": 200,
+    "credentialRole": "service_role",
+    "deploymentIdentityProven": false
+  },
+  "snapshotIntegrity": "verified",
+  "candidate": {
+    "schemaVersion": "safeclaw-kosha-production-local-bridge-candidate/v1",
+    "production": {
+      "id": "technical-support-09-0016-b-e-3-2025-변전실-등의-양압유지에-관한-기술지원규정",
+      "sourceId": "kosha-technical-support-regulations-2025",
+      "tuple": {
+        "zipFile": "[2025] 기술지원규정(전기안전분야).zip",
+        "internalPath": "B-E-3-2025 변전실 등의 양압유지에 관한 기술지원규정.pdf"
+      }
+    },
+    "local": {
+      "snapshotId": "bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51",
+      "itemId": "kosha-60492776122f8b433994fc10",
+      "rawSha256": "24aee7bdb72a1d69159122329267eed2fd68dc607d35d5270eeb6b326513a3c9",
+      "itemSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "reviewedCandidateContentSha256": null,
+    "chunks": [],
+    "humanConfirmation": "pending",
+    "readOnly": true,
+    "dbMutationPerformed": false
+  },
+  "environment": {
+    "envFileConfigured": true,
+    "envFileLoaded": true
+  }
+}

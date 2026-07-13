@@ -341,6 +341,52 @@ export type KoshaVisibleStatus = KoshaSupabaseVisibleExpectation & {
   canonicalRowSha256: null;
 };
 
+export type KoshaBridgeSnapshotIntegrity = {
+  currentSnapshotId: string;
+  currentReproducibilityHash: string;
+  manifestSnapshotId: string;
+  manifestReproducibilityHash: string;
+  currentManifestSha256: string;
+  manifestFileSha256: string;
+  manifestItemsSha256: string;
+  itemsFileSha256: string;
+  manifestChunksSha256: string;
+  chunksFileSha256: string;
+};
+
+export type KoshaProductionLocalBridgeInput = {
+  productionRows: unknown[];
+  localItems: unknown[];
+  localChunks: unknown[];
+  reviewedCandidates?: unknown[];
+  snapshot: KoshaBridgeSnapshotIntegrity;
+};
+
+export type KoshaProductionLocalBridgeCandidate = {
+  schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v1";
+  production: {
+    id: string;
+    sourceId: string;
+    tuple: { zipFile: string; internalPath: string };
+  };
+  local: {
+    snapshotId: string;
+    itemId: string;
+    rawSha256: string;
+    itemSha256: string;
+  };
+  reviewedCandidateContentSha256: string | null;
+  chunks: Array<{
+    chunkId: string;
+    sha256: string;
+    pageStart: number;
+    pageEnd: number;
+  }>;
+  humanConfirmation: "pending";
+  readOnly: true;
+  dbMutationPerformed: false;
+};
+
 export const KOSHA_GUIDE_REFRESH_PLAN = {
   mode: "read-only-plan",
   mutationPerformed: false,
@@ -379,6 +425,156 @@ function readString(value: unknown): string {
 
 function readNonNegativeInteger(value: unknown): number | null {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : null;
+}
+
+function isSha256(value: string): boolean {
+  return /^[0-9a-f]{64}$/u.test(value);
+}
+
+function assertKoshaBridgeSnapshotIntegrity(snapshot: KoshaBridgeSnapshotIntegrity): void {
+  const snapshotIds = [
+    snapshot.currentSnapshotId,
+    snapshot.currentReproducibilityHash,
+    snapshot.manifestSnapshotId,
+    snapshot.manifestReproducibilityHash
+  ];
+  if (!snapshotIds.every(isSha256) || new Set(snapshotIds).size !== 1) {
+    throw new Error("kosha-bridge-snapshot-id-mismatch");
+  }
+  if (
+    !isSha256(snapshot.currentManifestSha256) ||
+    !isSha256(snapshot.manifestFileSha256) ||
+    snapshot.currentManifestSha256 !== snapshot.manifestFileSha256
+  ) {
+    throw new Error("kosha-bridge-manifest-hash-mismatch");
+  }
+  if (
+    !isSha256(snapshot.manifestItemsSha256) ||
+    !isSha256(snapshot.itemsFileSha256) ||
+    snapshot.manifestItemsSha256 !== snapshot.itemsFileSha256
+  ) {
+    throw new Error("kosha-bridge-items-hash-mismatch");
+  }
+  if (
+    !isSha256(snapshot.manifestChunksSha256) ||
+    !isSha256(snapshot.chunksFileSha256) ||
+    snapshot.manifestChunksSha256 !== snapshot.chunksFileSha256
+  ) {
+    throw new Error("kosha-bridge-chunks-hash-mismatch");
+  }
+}
+
+export function buildKoshaProductionLocalBridgeCandidate(
+  input: KoshaProductionLocalBridgeInput
+): KoshaProductionLocalBridgeCandidate {
+  assertKoshaBridgeSnapshotIntegrity(input.snapshot);
+  if (input.productionRows.length !== 1) {
+    throw new Error(`kosha-bridge-production-match-count:${input.productionRows.length}`);
+  }
+  const production = input.productionRows[0];
+  if (!isRecord(production)) throw new Error("kosha-bridge-production-row-invalid");
+  const productionId = readString(production.id);
+  const productionSourceId = readString(production.source_id);
+  if (!productionId || !productionSourceId) {
+    throw new Error("kosha-bridge-production-identity-missing");
+  }
+  const payload = isRecord(production.payload) ? production.payload : null;
+  const zipFile = payload?.zipFile;
+  const internalPath = payload?.internalPath;
+  if (typeof zipFile !== "string" || !zipFile || typeof internalPath !== "string" || !internalPath) {
+    throw new Error("kosha-bridge-production-tuple-missing");
+  }
+
+  const localMatches = input.localItems.filter((item): item is Record<string, unknown> =>
+    isRecord(item) && item.source_zip === zipFile && item.source_member === internalPath
+  );
+  if (localMatches.length !== 1) {
+    throw new Error(`kosha-bridge-local-match-count:${localMatches.length}`);
+  }
+  const localItem = localMatches[0];
+  const itemId = readString(localItem.item_id);
+  const rawSha256 = readString(localItem.raw_sha256).toLowerCase();
+  const itemSha256 = readString(localItem.normalized_text_sha256).toLowerCase();
+  if (!itemId) throw new Error("kosha-bridge-local-item-id-missing");
+  if (!isSha256(rawSha256)) throw new Error("kosha-bridge-local-raw-hash-invalid");
+  if (!isSha256(itemSha256)) throw new Error("kosha-bridge-local-item-hash-invalid");
+
+  const chunks: KoshaProductionLocalBridgeCandidate["chunks"] = [];
+  const allChunkIds = new Set<string>();
+  for (const chunk of input.localChunks) {
+    if (!isRecord(chunk)) continue;
+    const chunkId = readString(chunk.chunk_id);
+    if (chunkId) {
+      if (allChunkIds.has(chunkId)) throw new Error(`kosha-bridge-duplicate-chunk-id:${chunkId}`);
+      allChunkIds.add(chunkId);
+    }
+    const carriesProductionTuple = chunk.source_zip === zipFile && chunk.source_member === internalPath;
+    if (carriesProductionTuple && chunk.item_id !== itemId) {
+      throw new Error(`kosha-bridge-chunk-item-mismatch:${chunkId || "missing"}`);
+    }
+    if (chunk.item_id !== itemId) continue;
+    if (!chunkId) throw new Error("kosha-bridge-chunk-id-missing");
+    if (!carriesProductionTuple) {
+      throw new Error(`kosha-bridge-chunk-tuple-mismatch:${chunkId}`);
+    }
+    const sha256 = readString(chunk.chunk_sha256).toLowerCase();
+    if (!isSha256(sha256)) throw new Error(`kosha-bridge-chunk-hash-invalid:${chunkId}`);
+    const pageStart = readNonNegativeInteger(chunk.page_start) ?? 0;
+    const pageEnd = readNonNegativeInteger(chunk.page_end) ?? 0;
+    if (pageStart < 1 || pageEnd < pageStart) {
+      throw new Error(`kosha-bridge-chunk-page-range-invalid:${chunkId}`);
+    }
+    chunks.push({ chunkId, sha256, pageStart, pageEnd });
+  }
+  chunks.sort((left, right) =>
+    left.pageStart - right.pageStart ||
+    left.pageEnd - right.pageEnd ||
+    codepointCompare(left.chunkId, right.chunkId)
+  );
+
+  const matchingReviewedCandidates = (input.reviewedCandidates || []).filter((candidate) =>
+    isRecord(candidate) && isRecord(candidate.source) && candidate.source.item_id === itemId
+  );
+  if (matchingReviewedCandidates.length > 1) {
+    throw new Error(`kosha-bridge-reviewed-candidate-match-count:${matchingReviewedCandidates.length}`);
+  }
+  const reviewedCandidate = matchingReviewedCandidates[0];
+  const reviewedSource = isRecord(reviewedCandidate) && isRecord(reviewedCandidate.source)
+    ? reviewedCandidate.source
+    : null;
+  if (reviewedSource && readString(reviewedSource.raw_sha256).toLowerCase() !== rawSha256) {
+    throw new Error("kosha-bridge-reviewed-candidate-raw-hash-mismatch");
+  }
+  const review = isRecord(reviewedCandidate) && isRecord(reviewedCandidate.review)
+    ? reviewedCandidate.review
+    : null;
+  let reviewedCandidateContentSha256: string | null = null;
+  if (review?.state === "verified" && review.human_confirmed === true) {
+    reviewedCandidateContentSha256 = readString(review.content_sha256).toLowerCase();
+    if (!isSha256(reviewedCandidateContentSha256)) {
+      throw new Error("kosha-bridge-reviewed-candidate-content-hash-invalid");
+    }
+  }
+
+  return {
+    schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v1",
+    production: {
+      id: productionId,
+      sourceId: productionSourceId,
+      tuple: { zipFile, internalPath }
+    },
+    local: {
+      snapshotId: input.snapshot.currentSnapshotId,
+      itemId,
+      rawSha256,
+      itemSha256
+    },
+    reviewedCandidateContentSha256,
+    chunks,
+    humanConfirmation: "pending",
+    readOnly: true,
+    dbMutationPerformed: false
+  };
 }
 
 function decodeQuality(value: string): number {

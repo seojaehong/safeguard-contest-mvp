@@ -1,5 +1,14 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -10,6 +19,7 @@ import {
   auditKoshaGuideRows,
   auditKoshaRetrievalScenario,
   buildKoshaArchiveInventory,
+  buildKoshaProductionLocalBridgeCandidate,
   buildKoshaOfficialDownloadUrl,
   compareKoshaInventoryToOfficial,
   decodeKoshaArchiveEntryName,
@@ -24,7 +34,8 @@ import {
   toKoshaStableDocumentKey,
   type KoshaArchiveEntry,
   type KoshaGuideAuditManifest,
-  type KoshaOfficialGuideRecord
+  type KoshaOfficialGuideRecord,
+  type KoshaProductionLocalBridgeInput
 } from "@/lib/kosha-guide-corpus-audit";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
@@ -51,6 +62,15 @@ function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenc
     retrieval_source: "rest",
     ...overrides
   };
+}
+
+function runKoshaAuditScript(arguments_: string[]) {
+  return spawnSync(process.execPath, ["scripts/audit_kosha_guides.mjs", ...arguments_], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    timeout: 30_000,
+    windowsHide: true
+  });
 }
 
 function archiveEntry(overrides: Partial<KoshaArchiveEntry> = {}): KoshaArchiveEntry {
@@ -107,7 +127,475 @@ describe("KOSHA GUIDE identity", () => {
   });
 });
 
+describe("KOSHA GUIDE production/local bridge", () => {
+  const snapshotId = "a".repeat(64);
+  const rawSha256 = "e".repeat(64);
+  const itemSha256 = "f".repeat(64);
+  const reviewedContentSha256 = "1".repeat(64);
+  const tuple = {
+    zipFile: "[2025] technical.zip",
+    internalPath: "B-E-3-2025 exact.pdf"
+  };
+
+  function bridgeInput(): KoshaProductionLocalBridgeInput {
+    return {
+      productionRows: [{
+        id: "production-1",
+        source_id: "kosha-production",
+        title: "A title that is never used for matching",
+        payload: tuple
+      }],
+      localItems: [{
+        item_id: "local-1",
+        source_zip: tuple.zipFile,
+        source_member: tuple.internalPath,
+        raw_sha256: rawSha256,
+        normalized_text_sha256: itemSha256
+      }],
+      localChunks: [
+        {
+          chunk_id: "chunk-2",
+          chunk_sha256: "3".repeat(64),
+          item_id: "local-1",
+          source_zip: tuple.zipFile,
+          source_member: tuple.internalPath,
+          page_start: 3,
+          page_end: 4
+        },
+        {
+          chunk_id: "chunk-1",
+          chunk_sha256: "2".repeat(64),
+          item_id: "local-1",
+          source_zip: tuple.zipFile,
+          source_member: tuple.internalPath,
+          page_start: 1,
+          page_end: 2
+        }
+      ],
+      reviewedCandidates: [{
+        source: { item_id: "local-1", raw_sha256: rawSha256 },
+        review: {
+          state: "verified",
+          human_confirmed: true,
+          content_sha256: reviewedContentSha256
+        }
+      }],
+      snapshot: {
+        currentSnapshotId: snapshotId,
+        currentReproducibilityHash: snapshotId,
+        manifestSnapshotId: snapshotId,
+        manifestReproducibilityHash: snapshotId,
+        currentManifestSha256: "b".repeat(64),
+        manifestFileSha256: "b".repeat(64),
+        manifestItemsSha256: "c".repeat(64),
+        itemsFileSha256: "c".repeat(64),
+        manifestChunksSha256: "d".repeat(64),
+        chunksFileSha256: "d".repeat(64)
+      }
+    };
+  }
+
+  it("builds a pending read-only candidate from an exact provenance tuple", () => {
+    const candidate = buildKoshaProductionLocalBridgeCandidate(bridgeInput());
+
+    expect(candidate).toEqual({
+      schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v1",
+      production: {
+        id: "production-1",
+        sourceId: "kosha-production",
+        tuple
+      },
+      local: {
+        snapshotId,
+        itemId: "local-1",
+        rawSha256,
+        itemSha256
+      },
+      reviewedCandidateContentSha256: reviewedContentSha256,
+      chunks: [
+        { chunkId: "chunk-1", sha256: "2".repeat(64), pageStart: 1, pageEnd: 2 },
+        { chunkId: "chunk-2", sha256: "3".repeat(64), pageStart: 3, pageEnd: 4 }
+      ],
+      humanConfirmation: "pending",
+      readOnly: true,
+      dbMutationPerformed: false
+    });
+  });
+
+  it.each([
+    ["currentReproducibilityHash", "kosha-bridge-snapshot-id-mismatch"],
+    ["manifestSnapshotId", "kosha-bridge-snapshot-id-mismatch"],
+    ["manifestReproducibilityHash", "kosha-bridge-snapshot-id-mismatch"],
+    ["manifestFileSha256", "kosha-bridge-manifest-hash-mismatch"],
+    ["itemsFileSha256", "kosha-bridge-items-hash-mismatch"],
+    ["chunksFileSha256", "kosha-bridge-chunks-hash-mismatch"]
+  ] as Array<[keyof KoshaProductionLocalBridgeInput["snapshot"], string]>) (
+    "fails closed when snapshot integrity field %s drifts",
+    (field, expectedError) => {
+      const input = bridgeInput();
+      input.snapshot[field] = "9".repeat(64);
+
+      expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(expectedError);
+    }
+  );
+
+  it.each([0, 2])("rejects %i production tuple matches", (count) => {
+    const input = bridgeInput();
+    input.productionRows = Array.from({ length: count }, () => input.productionRows[0]);
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      `kosha-bridge-production-match-count:${count}`
+    );
+  });
+
+  it("rejects a missing production tuple", () => {
+    const input = bridgeInput();
+    input.productionRows = [{ id: "production-1", source_id: "kosha-production", payload: {
+      zipFile: tuple.zipFile
+    } }];
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-production-tuple-missing"
+    );
+  });
+
+  it("never falls back to a matching title when the provenance tuple differs", () => {
+    const input = bridgeInput();
+    input.localItems = [{
+      ...(input.localItems[0] as Record<string, unknown>),
+      title: "A title that is never used for matching",
+      source_member: "different.pdf"
+    }];
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-local-match-count:0"
+    );
+  });
+
+  it("does not trim or normalize either side of the provenance tuple", () => {
+    const input = bridgeInput();
+    input.productionRows = [{
+      ...(input.productionRows[0] as Record<string, unknown>),
+      payload: { ...tuple, internalPath: `${tuple.internalPath} ` }
+    }];
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-local-match-count:0"
+    );
+  });
+
+  it("rejects multiple exact local tuple matches", () => {
+    const input = bridgeInput();
+    input.localItems.push({ ...(input.localItems[0] as Record<string, unknown>), item_id: "local-2" });
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-local-match-count:2"
+    );
+  });
+
+  it.each([
+    ["raw_sha256", "kosha-bridge-local-raw-hash-invalid"],
+    ["normalized_text_sha256", "kosha-bridge-local-item-hash-invalid"]
+  ])("rejects an invalid local %s", (field, expectedError) => {
+    const input = bridgeInput();
+    (input.localItems[0] as Record<string, unknown>)[field] = "not-a-sha256";
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(expectedError);
+  });
+
+  it("rejects a reviewed candidate bound to a different raw source hash", () => {
+    const input = bridgeInput();
+    const reviewedCandidate = input.reviewedCandidates?.[0] as Record<string, unknown>;
+    (reviewedCandidate.source as Record<string, unknown>).raw_sha256 = "9".repeat(64);
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-reviewed-candidate-raw-hash-mismatch"
+    );
+  });
+
+  it("rejects multiple reviewed candidates for one exact local item", () => {
+    const input = bridgeInput();
+    input.reviewedCandidates?.push(input.reviewedCandidates[0]);
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-reviewed-candidate-match-count:2"
+    );
+  });
+
+  it("rejects a verified candidate without a valid content hash", () => {
+    const input = bridgeInput();
+    const reviewedCandidate = input.reviewedCandidates?.[0] as Record<string, unknown>;
+    (reviewedCandidate.review as Record<string, unknown>).content_sha256 = "invalid";
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-reviewed-candidate-content-hash-invalid"
+    );
+  });
+
+  it("rejects missing production identity fields", () => {
+    const input = bridgeInput();
+    input.productionRows = [{ source_id: "", payload: tuple }];
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-production-identity-missing"
+    );
+  });
+
+  it.each([
+    ["hash", { chunk_sha256: "invalid" }, "kosha-bridge-chunk-hash-invalid:chunk-2"],
+    ["tuple", { source_member: "different.pdf" }, "kosha-bridge-chunk-tuple-mismatch:chunk-2"],
+    ["page range", { page_start: 0 }, "kosha-bridge-chunk-page-range-invalid:chunk-2"],
+    ["id", { chunk_id: "" }, "kosha-bridge-chunk-id-missing"]
+  ])("rejects a local chunk with invalid %s", (_label, override, expectedError) => {
+    const input = bridgeInput();
+    input.localChunks[0] = {
+      ...(input.localChunks[0] as Record<string, unknown>),
+      ...override
+    };
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(expectedError);
+  });
+
+  it("rejects duplicate chunk IDs for the matched local item", () => {
+    const input = bridgeInput();
+    (input.localChunks[0] as Record<string, unknown>).chunk_id = "chunk-1";
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-duplicate-chunk-id:chunk-1"
+    );
+  });
+
+  it("rejects an exact-tuple chunk bound to a different local item", () => {
+    const input = bridgeInput();
+    input.localChunks.push({
+      ...(input.localChunks[0] as Record<string, unknown>),
+      chunk_id: "misbound-chunk",
+      item_id: "different-item"
+    });
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-chunk-item-mismatch:misbound-chunk"
+    );
+  });
+
+  it("rejects a duplicate chunk ID carried by a different item and tuple", () => {
+    const input = bridgeInput();
+    input.localChunks.push({
+      ...(input.localChunks[0] as Record<string, unknown>),
+      item_id: "different-item",
+      source_zip: "unrelated.zip",
+      source_member: "unrelated.pdf"
+    });
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-duplicate-chunk-id:chunk-2"
+    );
+  });
+});
+
 describe("KOSHA GUIDE read-only runner contract", () => {
+  it("documents the dedicated reviewed-candidate root and rejected path forms", () => {
+    const result = runKoshaAuditScript(["--help"]);
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("--reviewed-candidate <relative-path>");
+    expect(result.stdout).toContain("<local-corpus-root>/reviewed-ocr-candidates");
+    expect(result.stdout).toContain("absolute paths, parent traversal, and symlink escapes are rejected");
+  });
+
+  it("rejects an absolute reviewed-candidate path before corpus or network reads", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "kosha-bridge-candidate-absolute-"));
+    const corpusRoot = join(fixtureRoot, "corpus");
+    const outsideCandidate = join(fixtureRoot, "outside-candidate.json");
+    mkdirSync(corpusRoot, { recursive: true });
+    writeFileSync(outsideCandidate, "{}", "utf8");
+
+    try {
+      const result = runKoshaAuditScript([
+        "--bridge-only",
+        "--local-corpus-root",
+        corpusRoot,
+        "--bridge-zip-file",
+        "fixture.zip",
+        "--bridge-internal-path",
+        "fixture.pdf",
+        "--reviewed-candidate",
+        outsideCandidate,
+        "--output-dir",
+        join(fixtureRoot, "output")
+      ]);
+
+      expect(result.status).not.toBe(0);
+      expect(`${result.stdout}${result.stderr}`).toContain(
+        "kosha-bridge-reviewed-candidate-absolute-path"
+      );
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 40_000);
+
+  it("rejects parent traversal in a reviewed-candidate path", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "kosha-bridge-candidate-traversal-"));
+    const corpusRoot = join(fixtureRoot, "corpus");
+    mkdirSync(corpusRoot, { recursive: true });
+
+    try {
+      const result = runKoshaAuditScript([
+        "--bridge-only",
+        "--local-corpus-root",
+        corpusRoot,
+        "--bridge-zip-file",
+        "fixture.zip",
+        "--bridge-internal-path",
+        "fixture.pdf",
+        "--reviewed-candidate",
+        "../outside-candidate.json",
+        "--output-dir",
+        join(fixtureRoot, "output")
+      ]);
+
+      expect(result.status).not.toBe(0);
+      expect(`${result.stdout}${result.stderr}`).toContain(
+        "kosha-bridge-reviewed-candidate-parent-traversal"
+      );
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 40_000);
+
+  it("rejects a reviewed-candidate symlink escape from its approved root", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "kosha-bridge-candidate-symlink-"));
+    const corpusRoot = join(fixtureRoot, "corpus");
+    const approvedRoot = join(corpusRoot, "reviewed-ocr-candidates");
+    const outsideRoot = join(fixtureRoot, "outside");
+    mkdirSync(approvedRoot, { recursive: true });
+    mkdirSync(outsideRoot, { recursive: true });
+    writeFileSync(join(outsideRoot, "candidate.json"), "{}", "utf8");
+    symlinkSync(outsideRoot, join(approvedRoot, "escape"), "junction");
+
+    try {
+      const result = runKoshaAuditScript([
+        "--bridge-only",
+        "--local-corpus-root",
+        corpusRoot,
+        "--bridge-zip-file",
+        "fixture.zip",
+        "--bridge-internal-path",
+        "fixture.pdf",
+        "--reviewed-candidate",
+        "escape/candidate.json",
+        "--output-dir",
+        join(fixtureRoot, "output")
+      ]);
+
+      expect(result.status).not.toBe(0);
+      expect(`${result.stdout}${result.stderr}`).toContain(
+        "kosha-bridge-path-outside-root:reviewed-candidate"
+      );
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 40_000);
+
+  it("rejects a reviewed-candidate path that is not a regular file", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "kosha-bridge-candidate-file-"));
+    const corpusRoot = join(fixtureRoot, "corpus");
+    mkdirSync(join(corpusRoot, "reviewed-ocr-candidates", "candidate-dir"), { recursive: true });
+
+    try {
+      const result = runKoshaAuditScript([
+        "--bridge-only",
+        "--local-corpus-root",
+        corpusRoot,
+        "--bridge-zip-file",
+        "fixture.zip",
+        "--bridge-internal-path",
+        "fixture.pdf",
+        "--reviewed-candidate",
+        "candidate-dir",
+        "--output-dir",
+        join(fixtureRoot, "output")
+      ]);
+
+      expect(result.status).not.toBe(0);
+      expect(`${result.stdout}${result.stderr}`).toContain(
+        "kosha-bridge-reviewed-candidate-not-regular-file"
+      );
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 40_000);
+
+  it("rejects a traversal snapshot pointer before reading outside the corpus root", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "kosha-bridge-traversal-"));
+    const corpusRoot = join(fixtureRoot, "corpus");
+    const outsideRoot = join(fixtureRoot, "outside");
+    mkdirSync(corpusRoot, { recursive: true });
+    mkdirSync(outsideRoot, { recursive: true });
+    writeFileSync(join(outsideRoot, "manifest.json"), "EXTERNAL_FILE_MUST_NOT_BE_READ", "utf8");
+    writeFileSync(join(corpusRoot, "current.json"), JSON.stringify({
+      snapshot_id: "../../outside",
+      snapshot_path: "snapshots/../../outside",
+      reproducibility_hash: "../../outside",
+      manifest: {
+        path: "snapshots/../../outside/manifest.json",
+        sha256: "0".repeat(64),
+        size_bytes: 30
+      }
+    }), "utf8");
+
+    try {
+      const result = spawnSync(process.execPath, [
+        "scripts/audit_kosha_guides.mjs",
+        "--bridge-only",
+        "--local-corpus-root",
+        corpusRoot,
+        "--bridge-zip-file",
+        "fixture.zip",
+        "--bridge-internal-path",
+        "fixture.pdf",
+        "--output-dir",
+        join(fixtureRoot, "output")
+      ], {
+        cwd: process.cwd(),
+        encoding: "utf8",
+        timeout: 30_000,
+        windowsHide: true
+      });
+      const output = `${result.stdout}${result.stderr}`;
+
+      expect(result.status).not.toBe(0);
+      expect(output).toContain("kosha-bridge-current-snapshot-id-invalid");
+      expect(output).not.toContain("EXTERNAL_FILE_MUST_NOT_BE_READ");
+      expect(output).not.toContain("Unexpected token");
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 40_000);
+
+  it("keeps production/local bridge artifacts free of machine paths and secret values", () => {
+    const artifactRoot = resolve(
+      process.cwd(),
+      "evaluation/kosha-production-local-bridge-2026-07-13"
+    );
+    const artifacts = ["report.json", "report.md", "audit.log"]
+      .map((fileName) => readFileSync(join(artifactRoot, fileName), "utf8"))
+      .join("\n");
+    const secretEnvironmentKeys = [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "OPENAI_API_KEY"
+    ];
+
+    expect(artifacts).not.toMatch(/[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/]/u);
+    expect(artifacts).not.toMatch(/\b(?:sb_secret_|sk-(?:proj-)?)[A-Za-z0-9_-]{16,}\b/u);
+    expect(artifacts).not.toMatch(/\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/u);
+    for (const key of secretEnvironmentKeys) {
+      const value = process.env[key];
+      if (value && value.length >= 8) expect(artifacts).not.toContain(value);
+    }
+  });
+
   it("selects provenance payload without requesting a non-schema item URL column or mutation method", () => {
     const script = readFileSync(resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"), "utf8");
     const fieldSelection = script.match(/const fields = \[([\s\S]+?)\]\.join\(","\);/u)?.[1] || "";
@@ -120,6 +608,26 @@ describe("KOSHA GUIDE read-only runner contract", () => {
     expect(script).toContain('id: "local-pdf-empty-output"');
     expect(script).toContain('localParse: {');
     expect(script).toContain('parseEmptyOutputCount');
+  });
+
+  it("keeps the production/local bridge bounded to exact-tuple GET reads", () => {
+    const script = readFileSync(resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"), "utf8");
+    const bridgeFetch = script.match(
+      /async function fetchProductionBridgeRows[\s\S]+?\n\}\n/u
+    )?.[0] || "";
+
+    expect(script).toContain('"--bridge-only"');
+    expect(script).toContain('"--local-corpus-root"');
+    expect(script).toContain('"--bridge-zip-file"');
+    expect(script).toContain('"--bridge-internal-path"');
+    expect(script).toContain('"--reviewed-candidate"');
+    expect(bridgeFetch).toContain('"payload->>zipFile"');
+    expect(bridgeFetch).toContain('"payload->>internalPath"');
+    expect(bridgeFetch).not.toContain("title.ilike");
+    expect(bridgeFetch).not.toMatch(/method:\s*"(?:POST|PATCH|PUT|DELETE)"/u);
+    expect(script).toContain("buildKoshaProductionLocalBridgeCandidate");
+    expect(script).toContain('humanConfirmation: "pending"');
+    expect(script).toContain("dbMutationPerformed: false");
   });
 
   it("derives Markdown readiness from the JSON conclusion and avoids machine-specific defaults", () => {
