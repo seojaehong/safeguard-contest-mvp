@@ -349,7 +349,7 @@ async function fetchProductionBridgeRows(zipFile, internalPath, fetchJsonWithRet
     };
     const { response, payload } = await fetchJsonWithRetry(
       url,
-      { headers },
+      { method: "GET", headers },
       `Supabase ${credential.role} production/local bridge GET`
     );
     attempts.push({ role: credential.role, httpStatus: response.status });
@@ -374,6 +374,7 @@ function formatBridgeMarkdown(report) {
 - requestMethod: ${report.productionRead.method}
 - dbMutationPerformed: ${report.dbMutationPerformed}
 - humanConfirmation: ${report.humanConfirmation}
+- launchReadiness: ${report.launchReadiness}
 
 ## Exact tuple
 
@@ -449,6 +450,7 @@ async function runProductionLocalBridgeAudit({
     readOnly: true,
     humanConfirmation: "pending",
     dbMutationPerformed: false,
+    launchReadiness: false,
     item_count: 1,
     success_count: 1,
     failure_count: 0,

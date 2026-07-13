@@ -235,8 +235,11 @@ def _item_id(entry: LocalPdfEntry) -> str:
 def _load_reviewed_ocr_candidates(
     paths: Sequence[Path] | None,
 ) -> dict[str, ReviewedOcrCandidate]:
+    declared_paths = list(paths or ())
+    if len(declared_paths) > 1:
+        raise RuntimeError("exactly one reviewed OCR candidate may be declared")
     candidates: dict[str, ReviewedOcrCandidate] = {}
-    for declared_path in paths or ():
+    for declared_path in declared_paths:
         path = declared_path.resolve()
         if not path.is_file():
             raise RuntimeError(f"reviewed OCR candidate does not exist: {path}")
@@ -688,16 +691,35 @@ def _build_generation_policy(
     resource_limits: ResourceLimits,
     reviewed_ocr_candidates: Sequence[ReviewedOcrCandidate],
 ) -> tuple[dict[str, object], str]:
-    reviewed_candidate_policy = [
-        {
-            "item_id": candidate.item_id,
-            "candidate_sha256": candidate.file_sha256,
-        }
-        for candidate in sorted(
-            reviewed_ocr_candidates,
-            key=lambda value: (value.item_id, value.file_sha256),
+    reviewed_candidate_policy: list[dict[str, object]] = []
+    for candidate in sorted(
+        reviewed_ocr_candidates,
+        key=lambda value: (value.item_id, value.file_sha256),
+    ):
+        review = candidate.payload.get("review")
+        if not isinstance(review, dict):
+            raise RuntimeError(
+                f"validated reviewed OCR candidate review is missing: {candidate.item_id}"
+            )
+        content_sha256 = review.get("content_sha256")
+        if (
+            not isinstance(content_sha256, str)
+            or not recover_kosha_ocr_boundary.SHA256_PATTERN.fullmatch(content_sha256)
+        ):
+            raise RuntimeError(
+                f"validated reviewed OCR candidate content hash is invalid: "
+                f"{candidate.item_id}"
+            )
+        reviewed_candidate_policy.append(
+            {
+                "item_id": candidate.item_id,
+                "candidate_sha256": candidate.file_sha256,
+                "content_sha256": content_sha256,
+                "attestation_sha256": _sha256_bytes(
+                    _canonical_json(review).encode("utf-8")
+                ),
+            }
         )
-    ]
     policy: dict[str, object] = {
         "schema_version": CORPUS_SCHEMA_VERSION,
         "extractor_version": EXTRACTOR_VERSION,
@@ -2259,7 +2281,7 @@ def parse_args() -> argparse.Namespace:
         "--reviewed-ocr-candidate",
         action="append",
         default=[],
-        help="Reviewed OCR candidate JSON to validate and import; repeat for multiple items.",
+        help="One reviewed OCR candidate JSON to validate and import.",
     )
     parser.add_argument(
         "--trusted-ocr-reviewer-id",

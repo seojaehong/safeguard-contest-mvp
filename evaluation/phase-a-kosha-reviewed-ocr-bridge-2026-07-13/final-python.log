@@ -1,0 +1,9 @@
+...................invalid pdf header: b'not a'
+EOF marker not found
+..........invalid pdf header: b'not a'
+EOF marker not found
+................................
+----------------------------------------------------------------------
+Ran 61 tests in 10.946s
+
+OK

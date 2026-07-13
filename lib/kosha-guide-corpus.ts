@@ -112,6 +112,8 @@ type ManifestSnapshot = {
 type ReviewedOcrCandidateBinding = {
   itemId: string;
   candidateSha256: string;
+  contentSha256: string;
+  attestationSha256: string;
 };
 
 type RawItem = {
@@ -128,6 +130,8 @@ type RawItem = {
   extractionStatus: string;
   bodyOrigin: "native" | "human-reviewed-ocr";
   reviewedOcrCandidateSha256: string | null;
+  reviewedOcrContentSha256: string | null;
+  reviewedOcrAttestationSha256: string | null;
 };
 
 type RawChunk = {
@@ -213,7 +217,11 @@ function isRfc3339(value: string): boolean {
   return day >= 1 && day <= new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
 
-function parseReviewedOcrProvenance(value: unknown): { candidateSha256: string } | null {
+function parseReviewedOcrProvenance(value: unknown): {
+  candidateSha256: string;
+  contentSha256: string;
+  attestationSha256: string;
+} | null {
   if (!isRecord(value) || !hasExactKeys(value, [
     "candidate_sha256",
     "content_sha256",
@@ -251,7 +259,11 @@ function parseReviewedOcrProvenance(value: unknown): { candidateSha256: string }
       && readCanonicalIdentifier(page.model) !== null;
   });
   const candidateSha256 = readCanonicalSha256(value.candidate_sha256);
-  return validPages && candidateSha256 ? { candidateSha256 } : null;
+  const contentSha256 = readCanonicalSha256(value.content_sha256);
+  const attestationSha256 = readCanonicalSha256(value.attestation_sha256);
+  return validPages && candidateSha256 && contentSha256 && attestationSha256
+    ? { candidateSha256, contentSha256, attestationSha256 }
+    : null;
 }
 
 function parseReviewedOcrCandidateBindings(generationPolicy: unknown): ReviewedOcrCandidateBinding[] | null {
@@ -262,11 +274,18 @@ function parseReviewedOcrCandidateBindings(generationPolicy: unknown): ReviewedO
   if (!Array.isArray(declared) || !declared.length) return null;
   const bindings: ReviewedOcrCandidateBinding[] = [];
   for (const value of declared) {
-    if (!isRecord(value) || !hasExactKeys(value, ["item_id", "candidate_sha256"])) return null;
+    if (!isRecord(value) || !hasExactKeys(value, [
+      "item_id",
+      "candidate_sha256",
+      "content_sha256",
+      "attestation_sha256"
+    ])) return null;
     const itemId = readCanonicalIdentifier(value.item_id);
     const candidateSha256 = readCanonicalSha256(value.candidate_sha256);
-    if (!itemId || !candidateSha256) return null;
-    bindings.push({ itemId, candidateSha256 });
+    const contentSha256 = readCanonicalSha256(value.content_sha256);
+    const attestationSha256 = readCanonicalSha256(value.attestation_sha256);
+    if (!itemId || !candidateSha256 || !contentSha256 || !attestationSha256) return null;
+    bindings.push({ itemId, candidateSha256, contentSha256, attestationSha256 });
   }
   return bindings;
 }
@@ -334,6 +353,8 @@ function parseItem(value: unknown): RawItem | null {
   if (itemType !== "technical-guideline" && itemType !== "technical-support-regulation") return null;
   let bodyOrigin: RawItem["bodyOrigin"];
   let reviewedOcrCandidateSha256: string | null = null;
+  let reviewedOcrContentSha256: string | null = null;
+  let reviewedOcrAttestationSha256: string | null = null;
   if (value.body_origin === undefined && value.reviewed_ocr_provenance === undefined) {
     bodyOrigin = "native";
   } else {
@@ -342,6 +363,8 @@ function parseItem(value: unknown): RawItem | null {
     if (!provenance) return null;
     bodyOrigin = "human-reviewed-ocr";
     reviewedOcrCandidateSha256 = provenance.candidateSha256;
+    reviewedOcrContentSha256 = provenance.contentSha256;
+    reviewedOcrAttestationSha256 = provenance.attestationSha256;
   }
   const body = readRawString(value.body) ?? "";
   const parsed: RawItem = {
@@ -357,7 +380,9 @@ function parseItem(value: unknown): RawItem | null {
     sourceKey: readString(value.source_key),
     extractionStatus: readString(value.extraction_status),
     bodyOrigin,
-    reviewedOcrCandidateSha256
+    reviewedOcrCandidateSha256,
+    reviewedOcrContentSha256,
+    reviewedOcrAttestationSha256
   };
   if (!parsed.itemId || !parsed.title || !parsed.category || !parsed.state || !parsed.stableKey || !parsed.versionKey || !parsed.sourceKey || !parsed.extractionStatus || !isSha256(parsed.bodyHash)) return null;
   if (parsed.bodyOrigin === "human-reviewed-ocr") {
@@ -535,7 +560,7 @@ function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): Kos
     .slice(0, 2)
     .map((sentence) => sentence.slice(0, 180));
   const lifecycle = item.state === "current" ? "current" : item.state === "retired" ? "retired" : "stale";
-  const quality = validBody && anchors.length > 0 && lifecycle === "current"
+  const quality = validBody && item.bodyOrigin === "native" && anchors.length > 0 && lifecycle === "current"
     ? "accepted"
     : "review_required";
   return {
@@ -597,6 +622,12 @@ function validateReviewedOcrBindings(
     if (!binding) throw new CorpusGateError(`ocr:binding:missing:${item.itemId}`);
     if (binding.candidateSha256 !== item.reviewedOcrCandidateSha256) {
       throw new CorpusGateError(`ocr:binding:mismatch:${item.itemId}`);
+    }
+    if (
+      binding.contentSha256 !== item.reviewedOcrContentSha256 ||
+      binding.attestationSha256 !== item.reviewedOcrAttestationSha256
+    ) {
+      throw new CorpusGateError(`ocr:binding:provenance-mismatch:${item.itemId}`);
     }
     if (failedIds.has(item.itemId)) throw new CorpusGateError(`ocr:item:failed:${item.itemId}`);
     const chunks = chunksByItem.get(item.itemId) ?? [];
@@ -692,6 +723,7 @@ function directEligible(record: KoshaGuideCorpusRecord): boolean {
 }
 
 function evidenceRef(record: KoshaGuideCorpusRecord): string | null {
+  if (record.bodyKind === "unknown") return null;
   const anchor = record.anchors[0];
   if (!anchor) return null;
   return `KOSHA 근거 ${record.version} p.${anchor.page}: ${anchor.excerpt}`;

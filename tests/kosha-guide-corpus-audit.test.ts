@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   mkdirSync,
   mkdtempSync,
@@ -73,6 +74,10 @@ function runKoshaAuditScript(arguments_: string[]) {
   });
 }
 
+function sha256(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
 function archiveEntry(overrides: Partial<KoshaArchiveEntry> = {}): KoshaArchiveEntry {
   return {
     zipFile: "[2025] 기술지원규정(전기안전분야).zip",
@@ -130,12 +135,36 @@ describe("KOSHA GUIDE identity", () => {
 describe("KOSHA GUIDE production/local bridge", () => {
   const snapshotId = "a".repeat(64);
   const rawSha256 = "e".repeat(64);
-  const itemSha256 = "f".repeat(64);
-  const reviewedContentSha256 = "1".repeat(64);
+  const itemBody = "검토 전 로컬 본문";
+  const itemSha256 = sha256(itemBody);
+  const firstChunkText = "첫 번째 청크";
+  const secondChunkText = "두 번째 청크";
   const tuple = {
     zipFile: "[2025] technical.zip",
     internalPath: "B-E-3-2025 exact.pdf"
   };
+
+  function reviewedCandidate(reviewState: "draft" | "verified" = "verified"): Record<string, unknown> {
+    const immutableContent = {
+      source: { item_id: "local-1", raw_sha256: rawSha256 }
+    };
+    const contentSha256 = sha256(JSON.stringify(immutableContent));
+    return {
+      ...immutableContent,
+      review: reviewState === "verified"
+        ? {
+            state: "verified",
+            human_confirmed: true,
+            content_sha256: contentSha256
+          }
+        : {
+            state: "draft",
+            human_confirmed: false,
+            reviewed_by: null,
+            reviewed_at: null
+          }
+    };
+  }
 
   function bridgeInput(): KoshaProductionLocalBridgeInput {
     return {
@@ -150,36 +179,32 @@ describe("KOSHA GUIDE production/local bridge", () => {
         source_zip: tuple.zipFile,
         source_member: tuple.internalPath,
         raw_sha256: rawSha256,
-        normalized_text_sha256: itemSha256
+        normalized_text_sha256: itemSha256,
+        body: itemBody
       }],
       localChunks: [
         {
           chunk_id: "chunk-2",
-          chunk_sha256: "3".repeat(64),
+          chunk_sha256: sha256(secondChunkText),
           item_id: "local-1",
           source_zip: tuple.zipFile,
           source_member: tuple.internalPath,
           page_start: 3,
-          page_end: 4
+          page_end: 4,
+          text: secondChunkText
         },
         {
           chunk_id: "chunk-1",
-          chunk_sha256: "2".repeat(64),
+          chunk_sha256: sha256(firstChunkText),
           item_id: "local-1",
           source_zip: tuple.zipFile,
           source_member: tuple.internalPath,
           page_start: 1,
-          page_end: 2
+          page_end: 2,
+          text: firstChunkText
         }
       ],
-      reviewedCandidates: [{
-        source: { item_id: "local-1", raw_sha256: rawSha256 },
-        review: {
-          state: "verified",
-          human_confirmed: true,
-          content_sha256: reviewedContentSha256
-        }
-      }],
+      reviewedCandidates: [reviewedCandidate()],
       snapshot: {
         currentSnapshotId: snapshotId,
         currentReproducibilityHash: snapshotId,
@@ -197,6 +222,9 @@ describe("KOSHA GUIDE production/local bridge", () => {
 
   it("builds a pending read-only candidate from an exact provenance tuple", () => {
     const candidate = buildKoshaProductionLocalBridgeCandidate(bridgeInput());
+    const expectedContentSha256 = sha256(JSON.stringify({
+      source: { item_id: "local-1", raw_sha256: rawSha256 }
+    }));
 
     expect(candidate).toEqual({
       schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v1",
@@ -211,15 +239,30 @@ describe("KOSHA GUIDE production/local bridge", () => {
         rawSha256,
         itemSha256
       },
-      reviewedCandidateContentSha256: reviewedContentSha256,
+      reviewedCandidateContentSha256: expectedContentSha256,
       chunks: [
-        { chunkId: "chunk-1", sha256: "2".repeat(64), pageStart: 1, pageEnd: 2 },
-        { chunkId: "chunk-2", sha256: "3".repeat(64), pageStart: 3, pageEnd: 4 }
+        { chunkId: "chunk-1", sha256: sha256(firstChunkText), pageStart: 1, pageEnd: 2 },
+        { chunkId: "chunk-2", sha256: sha256(secondChunkText), pageStart: 3, pageEnd: 4 }
       ],
       humanConfirmation: "pending",
       readOnly: true,
-      dbMutationPerformed: false
+      dbMutationPerformed: false,
+      launchReadiness: false
     });
+  });
+
+  it("records a deterministic content hash for the current draft without accepting it", () => {
+    const input = bridgeInput();
+    input.reviewedCandidates = [reviewedCandidate("draft")];
+
+    const candidate = buildKoshaProductionLocalBridgeCandidate(input);
+
+    expect(candidate.reviewedCandidateContentSha256).toBe(sha256(JSON.stringify({
+      source: { item_id: "local-1", raw_sha256: rawSha256 }
+    })));
+    expect(candidate.humanConfirmation).toBe("pending");
+    expect(candidate.launchReadiness).toBe(false);
+    expect(candidate.dbMutationPerformed).toBe(false);
   });
 
   it.each([
@@ -303,6 +346,15 @@ describe("KOSHA GUIDE production/local bridge", () => {
     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(expectedError);
   });
 
+  it("rejects a local item content hash mismatch", () => {
+    const input = bridgeInput();
+    (input.localItems[0] as Record<string, unknown>).body = "변조된 본문";
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-local-item-hash-mismatch"
+    );
+  });
+
   it("rejects a reviewed candidate bound to a different raw source hash", () => {
     const input = bridgeInput();
     const reviewedCandidate = input.reviewedCandidates?.[0] as Record<string, unknown>;
@@ -329,6 +381,16 @@ describe("KOSHA GUIDE production/local bridge", () => {
 
     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
       "kosha-bridge-reviewed-candidate-content-hash-invalid"
+    );
+  });
+
+  it("rejects a verified candidate whose declared content hash does not match its bytes", () => {
+    const input = bridgeInput();
+    const reviewed = input.reviewedCandidates?.[0] as Record<string, unknown>;
+    (reviewed.review as Record<string, unknown>).content_sha256 = "1".repeat(64);
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-reviewed-candidate-content-hash-mismatch"
     );
   });
 
@@ -362,6 +424,15 @@ describe("KOSHA GUIDE production/local bridge", () => {
 
     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
       "kosha-bridge-duplicate-chunk-id:chunk-1"
+    );
+  });
+
+  it("rejects a local chunk content hash mismatch", () => {
+    const input = bridgeInput();
+    (input.localChunks[0] as Record<string, unknown>).text = "변조된 청크";
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-chunk-content-hash-mismatch:chunk-2"
     );
   });
 
