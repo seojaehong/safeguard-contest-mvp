@@ -139,6 +139,16 @@ SIF-only evidence returns `review_required`; there is no fifth `neither` state.
 |---|---|
 | CB-P2 fixed delimiter whitelist rejected ordinary punctuation | Replaced the punctuation whitelist with exact UID matching plus Unicode-aware continuation classification. Periods, commas, semicolons, terminal colons, brackets, ASCII/smart quotes, `，`, `。`, and `、` delimit citations; Unicode letters/marks/numbers, Hangul, ASCII alphanumerics, `_-/`, joined colons, and non-punctuation symbols remain non-boundaries. |
 
+## Phase A generation grounding remediation
+
+| Finding | Remediation |
+|---|---|
+| P1-G `handleGenerateSafetyDocpack` resolved the ontology pack but called `runAsk` with only question and mode | The actual handler now passes a structured `phaseAGrounding` object containing the exact pack, allowed Task/Hazard/Control content, exact cited UIDs and source roles, obligation classifications, materialization targets, and `generationPolicy.llmRole=naturalize_only`. |
+| P1-G provider prompts could draft before seeing the fixed pack | Both the answer provider and all full-mode document provider prompts now begin with a one-line JSON-serialized untrusted evidence block, followed by fixed naturalization instructions, before the existing persona and context. Labels containing quotes, newlines, or delimiter text remain escaped JSON data. |
+| P1-G unresolved or missing evidence could look grounded | Demo generation continues, but the MCP docpack explicitly reports `review_required_draft` or `missing_evidence_draft`; citation allow-lists and deterministic verified records remain empty and human confirmation remains pending. Missing Tasks receive no pack, allowed content, citation, or target fallback. |
+
+This remediation intentionally preserves the template fast path (no provider call), enhanced-mode deterministic document bodies, and the existing Anthropic/Vertex/OpenAI fallback order. When those modes invoke an answer provider, its prompt receives the same Phase A block. Full mode also binds the block into every document provider prompt. Deterministic document-location inspection remains post-generation and does not infer materialization from prompt inclusion.
+
 ## Official law verification
 
 The current `산업안전보건기준에 관한 규칙` was checked as effective `2026-03-02` under 고용노동부령 제450호.
@@ -167,7 +177,8 @@ The Article 172 direct surface identifies `접촉의 방지`: paragraph 1 prohib
 - Citation-boundary P2 TDD RED cycle 1: 8 punctuation tests failed and 86 tests passed in a 94-test run; all original continuation negatives remained green.
 - Citation-boundary P2 TDD RED cycle 2: 2 broad-symbol boundary tests failed and 94 tests passed in a 96-test run.
 - Citation-boundary P2 targeted GREEN: 2 files passed, 96 tests passed.
-- Focused ontology/generation/MCP/commercial/DB harness plus production handler, serial: 6 files passed, 169 tests passed.
+- Phase A generation-grounding TDD RED: 8 tests failed and 11 passed in one 19-test serial run, covering handler payload binding, provider prompt order, resolved/review-required/missing states, and zero-record unsupported citations.
+- Focused ontology/generation/MCP/commercial/DB harness plus production/provider handlers and fallback compatibility, serial: 11 files passed, 203 tests passed. This includes all prior 169 focused tests.
 - Strict TypeScript: passed.
 - Previous full suite is informational only and was not rerun for this remediation: 125 files passed, 7 failed, 5 skipped; 1229 tests passed, 7 failed, 22 skipped. Failures were outside owned ontology/MCP/test/report files.
 - Full-suite failed suites: `knowledge-page-layout`, `product-module-shell`, and `reports-download-center` due missing `.next/prerender-manifest.json` or hook timeout during concurrent dev-server tests.

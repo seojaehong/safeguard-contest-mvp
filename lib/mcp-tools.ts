@@ -15,6 +15,7 @@ import {
 } from "./db-harness";
 import type { QaReviewResult } from "./ontology/qa-review";
 import {
+  buildPhaseAGenerationGrounding,
   splitEvidenceChainPack,
   resolveEvidenceTaskLabel,
   verifyEvidenceMaterialization,
@@ -25,6 +26,7 @@ import {
   type EvidenceMaterializationPlan,
   type EvidenceMaterializationRecord,
   type EvidenceChainResolution,
+  type PhaseAGenerationGrounding,
 } from "./ontology/evidence-chain";
 import { gateCitations } from "./law-citation-gate";
 import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
@@ -104,6 +106,15 @@ export type DocpackResult = {
   fullDocumentsNote: string;
   evidenceContract?: ActiveEvidenceChainPack;
   evidenceChainState?: SafetyKnowledgeResult["evidenceChainState"];
+  ontologyGrounding?: {
+    evidenceChainState: SafetyKnowledgeResult["evidenceChainState"];
+    groundingStatus: PhaseAGenerationGrounding["groundingStatus"];
+    outputStatus: PhaseAGenerationGrounding["generationPolicy"]["outputStatus"];
+    verified: boolean;
+    allowedCitedUids: string[];
+    generationPolicy: PhaseAGenerationGrounding["generationPolicy"];
+    notice: string;
+  };
   evidenceMaterialization?: {
     evidenceChainState: SafetyKnowledgeResult["evidenceChainState"];
     operationSequence: Array<EvidenceAssemblyStage | "document_materialization">;
@@ -172,6 +183,7 @@ export function buildDocpackResult(
   response: AskResponse,
   includeFull = false,
   evidence?: SafetyKnowledgeResult,
+  phaseAGrounding?: PhaseAGenerationGrounding,
 ): DocpackResult {
   const deliverables = response.deliverables as unknown as Record<string, unknown>;
   const documents: Record<string, DocpackDocumentPreview | string> = {};
@@ -209,6 +221,38 @@ export function buildDocpackResult(
   if (evidence?.found && evidence.evidenceContract) {
     result.evidenceContract = evidence.evidenceContract;
     result.evidenceChainState = evidence.evidenceChainState;
+  }
+  if (phaseAGrounding) {
+    const isResolved = phaseAGrounding.groundingStatus === "resolved";
+    result.evidenceChainState = phaseAGrounding.evidenceChainState;
+    result.ontologyGrounding = {
+      evidenceChainState: phaseAGrounding.evidenceChainState,
+      groundingStatus: phaseAGrounding.groundingStatus,
+      outputStatus: phaseAGrounding.generationPolicy.outputStatus,
+      verified: isResolved,
+      allowedCitedUids: phaseAGrounding.allowedCitedUids,
+      generationPolicy: phaseAGrounding.generationPolicy,
+      notice: isResolved
+        ? "Phase A 고정 evidence pack이 provider 호출 전에 결합된 검토용 초안입니다. 문서 위치별 실적은 결정적 검사 후에도 사람 확인 대기 상태입니다."
+        : "검토 필요 초안입니다. Phase A 근거가 해결·검증되지 않았으므로 grounded 또는 verified 산출물로 사용하지 마세요.",
+    };
+    result.evidenceMaterialization = {
+      evidenceChainState: phaseAGrounding.evidenceChainState,
+      operationSequence: [
+        ...(phaseAGrounding.evidencePack?.assemblyTrace ?? []),
+        "document_materialization",
+      ],
+      plannedTargets: phaseAGrounding.materializationTargets,
+      verifiedRecords: phaseAGrounding.evidencePack
+        ? verifyEvidenceMaterialization({
+            evidenceChainState: phaseAGrounding.evidenceChainState,
+            pack: phaseAGrounding.evidencePack,
+            documents: materializationDocuments,
+          })
+        : [],
+      humanConfirmation: { required: true, status: "pending" },
+    };
+  } else if (evidence?.found && evidence.evidenceContract) {
     result.evidenceMaterialization = {
       evidenceChainState: evidence.evidenceChainState,
       operationSequence: [
@@ -238,13 +282,17 @@ export type GenerateSafetyDocpackHandlerDependencies = {
   querySafetyKnowledge: (query: string) => Promise<SafetyKnowledgeResult>;
   runAsk: (
     question: string,
-    options: { aiMode: "template" | "enhanced" | "full" },
+    options: {
+      aiMode: "template" | "enhanced" | "full";
+      phaseAGrounding: PhaseAGenerationGrounding;
+    },
   ) => Promise<AskResponse>;
 };
 
 export type GenerateSafetyDocpackHandlerOutput = {
   evidenceQuery: string;
   evidence: SafetyKnowledgeResult;
+  phaseAGrounding: PhaseAGenerationGrounding;
   response: AskResponse;
   docpack: DocpackResult;
 };
@@ -257,14 +305,20 @@ export async function handleGenerateSafetyDocpack(
   const task = input.task?.trim() ?? "";
   const evidenceQuery = resolveEvidenceTaskLabel(task, question) || question || task;
   const evidence = await dependencies.querySafetyKnowledge(evidenceQuery);
+  const phaseAGrounding = buildPhaseAGenerationGrounding({
+    evidenceChainState: evidence.evidenceChainState,
+    evidencePack: evidence.found ? evidence.evidenceContract : null,
+  });
   const response = await dependencies.runAsk(question, {
     aiMode: input.mode ?? "full",
+    phaseAGrounding,
   });
   return {
     evidenceQuery,
     evidence,
+    phaseAGrounding,
     response,
-    docpack: buildDocpackResult(response, input.includeFull ?? false, evidence),
+    docpack: buildDocpackResult(response, input.includeFull ?? false, evidence, phaseAGrounding),
   };
 }
 
@@ -278,12 +332,13 @@ export function buildReviewedDocpackResult(
   reviewTask: string,
   includeFull = false,
   evidence?: SafetyKnowledgeResult,
+  phaseAGrounding?: PhaseAGenerationGrounding,
 ): ReviewedDocpackResult {
   return {
     engine: "safeclaw-runAsk",
     qualityPipeline: ["generate_safety_docpack", "qa_review_docpack"],
     reviewTask,
-    docpack: buildDocpackResult(response, includeFull, evidence),
+    docpack: buildDocpackResult(response, includeFull, evidence, phaseAGrounding),
     qa,
     openClawUsageNote:
       "이 응답은 SafeClaw 문서 엔진(/api/ask runAsk) 산출물을 QA 검수 계층으로 다시 확인한 결과입니다. OpenClaw는 이 페이로드를 최종 답변의 근거로 사용하세요.",

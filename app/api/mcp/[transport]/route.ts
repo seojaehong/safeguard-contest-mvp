@@ -290,7 +290,7 @@ function registerTools(server: McpServer): void {
           { question, task, mode, includeFull },
           { querySafetyKnowledge, runAsk },
         );
-        const { evidence, response } = generated;
+        const { evidence, phaseAGrounding, response } = generated;
         const qaSource =
           response.deliverables.riskAssessmentDraft ||
           response.deliverables.tbmBriefing ||
@@ -304,6 +304,7 @@ function registerTools(server: McpServer): void {
           reviewTask,
           includeFull ?? false,
           evidence,
+          phaseAGrounding,
         ) as Record<string, unknown>;
 
         if (authContext?.siteId) {
