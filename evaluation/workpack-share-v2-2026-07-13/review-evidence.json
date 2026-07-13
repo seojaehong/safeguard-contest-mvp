@@ -9,10 +9,24 @@
   "semanticPassClaim": false,
   "implementationReadyClaim": false,
   "browserPassClaim": false,
+  "validationCommandIdentity": {
+    "candidateCommandId": "candidate_structure",
+    "candidateTokens": [
+      "node",
+      "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs",
+      "--skip-evidence"
+    ],
+    "evidenceCommandId": "evidence_identity",
+    "evidenceTokens": [
+      "node",
+      "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs"
+    ],
+    "arbitrarySpecTextExecuted": false
+  },
   "branch": "feat/workpack-share-v2",
-  "sourceBase": "353a41be1be2028c61d9fa2096bd8be5ac4cfad8",
-  "candidate": "0c6603adf7159dc98df6b6b365d3a03cddb65be1",
-  "candidateParent": "353a41be1be2028c61d9fa2096bd8be5ac4cfad8",
+  "sourceBase": "1d4938675cee330dd7bfa1cdb040b27bf24fceba",
+  "candidate": "e7f976b71dcd9489b992ca13fa1750bf4f82948e",
+  "candidateParent": "1d4938675cee330dd7bfa1cdb040b27bf24fceba",
   "candidateChangedFiles": [
     "evaluation/workpack-share-v2-2026-07-13/spec.md",
     "evaluation/workpack-share-v2-2026-07-13/spec.json",
@@ -27,7 +41,7 @@
   },
   "evidenceCommitContract": {
     "recordsOwnCommitSha": false,
-    "requiredParent": "0c6603adf7159dc98df6b6b365d3a03cddb65be1",
+    "requiredParent": "e7f976b71dcd9489b992ca13fa1750bf4f82948e",
     "changedFiles": [
       "evaluation/workpack-share-v2-2026-07-13/review-evidence.json"
     ]
@@ -49,6 +63,6 @@
   },
   "independentReview": {
     "status": "pending",
-    "requiredAction": "Perform a fresh independent manual spec review of candidate 0c6603adf7159dc98df6b6b365d3a03cddb65be1; later browser implementation requires real Playwright tests."
+    "requiredAction": "Perform a fresh independent manual spec review of candidate e7f976b71dcd9489b992ca13fa1750bf4f82948e; later browser implementation requires real Playwright tests."
   }
 }
