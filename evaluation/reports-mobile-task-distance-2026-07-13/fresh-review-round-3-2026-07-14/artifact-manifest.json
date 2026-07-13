@@ -1,0 +1,926 @@
+{
+  "schemaVersion": 1,
+  "productCandidateSha": "0ee7e773f8c79b754d91c6670048ce86786f2f8a",
+  "buildId": "9gZI6o5hIAcujcjFZEAEB",
+  "generatedAt": "2026-07-13T18:48:16.893Z",
+  "measurementCommandIdentity": "SAFECLAW_HARNESS_MODE=prod SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE=1 npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 (evidence pass 2 of 2)",
+  "manifestPurpose": "Verify every replacement artifact against stale evidence trees and bind the selected round to the exact product build and measurement command.",
+  "replacementDirectory": "evaluation/reports-mobile-task-distance-2026-07-13/fresh-review-round-3-2026-07-14",
+  "replacementArtifactCount": 34,
+  "allReplacementFilesCompared": true,
+  "identitySidecarCount": 9,
+  "staleSources": [
+    {
+      "commit": "429f0ff",
+      "label": "initial evidence",
+      "artifactCount": 19
+    },
+    {
+      "commit": "b7adabf",
+      "label": "fresh-review evidence",
+      "artifactCount": 41
+    },
+    {
+      "commit": "6f7ee77",
+      "label": "prohibited round-2 evidence",
+      "artifactCount": 67
+    }
+  ],
+  "staleArtifactComparisons": 4318,
+  "identicalContent": [
+    {
+      "path": "reports-server-error-day-mobile.png",
+      "sha256": "3ea1be43a700cdfb4cac038ef0d48c7206f169ea3768a2b0c7e11f04e8ec424b",
+      "staleHashMatches": [
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence",
+          "path": "evaluation/reports-mobile-task-distance-2026-07-13/fresh-review-round-2-2026-07-14/reports-server-error-day-mobile.png"
+        }
+      ],
+      "explanation": "Byte-identical rendering is legitimate where unaffected visual pixels remain stable; the replacement is freshly bound by its identity sidecar and this manifest."
+    },
+    {
+      "path": "reports-server-error-night-mobile.png",
+      "sha256": "47889aa0eda689a37252be46a581eef984e047c94218048b93d1b199ee26b98a",
+      "staleHashMatches": [
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence",
+          "path": "evaluation/reports-mobile-task-distance-2026-07-13/fresh-review-round-2-2026-07-14/reports-server-error-night-mobile.png"
+        }
+      ],
+      "explanation": "Byte-identical rendering is legitimate where unaffected visual pixels remain stable; the replacement is freshly bound by its identity sidecar and this manifest."
+    }
+  ],
+  "identicalContentSummary": "2 replacement artifact(s) are byte-identical; each entry records the legitimate stability reason and fresh identity binding.",
+  "entries": [
+    {
+      "path": "report.json",
+      "bytes": 4601,
+      "sha256": "5f7eea8b8c2c4547ccc8dd7b0a7e303f3bffe9defc9c3f167986cedb062fc2b7",
+      "identityBinding": {
+        "method": "embedded-fields",
+        "sidecar": "report.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "report.md",
+      "bytes": 4092,
+      "sha256": "4bad3015dc8fb4d326b73c9ba53f2ec576326617d025ffef8f646dc9c3faf8df",
+      "identityBinding": {
+        "method": "embedded-text",
+        "sidecar": "report.md"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-build-manifest.json",
+      "bytes": 3311,
+      "sha256": "1a2a9ae5d08f045cbf5be52ab4b5ac5a3be3ad8c7d9fdc669ed59b16b1691a7f",
+      "identityBinding": {
+        "method": "embedded-fields",
+        "sidecar": "reports-build-manifest.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-download-ready-day-desktop-disclosures-open.png",
+      "bytes": 305225,
+      "sha256": "78b7e0b416e239b9db52ce195b0a80a885978b776ce35601a453e3d654451c38",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-download-ready-task-distance-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-download-ready-day-desktop-text-reflow-200.png",
+      "bytes": 563327,
+      "sha256": "ddce4c43ad33a02b5b9a0d3a99c2cc572bdd3e06468a317e08aa06c66da1bf37",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-download-ready-task-distance-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-download-ready-day-mobile-disclosures-open.png",
+      "bytes": 277560,
+      "sha256": "838d8fca683e375744f3015d2afd1a588819cc78133c7eb03425c10d77d59813",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-download-ready-task-distance-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-download-ready-day-mobile-text-reflow-200.png",
+      "bytes": 502608,
+      "sha256": "433a681eed905f7696a7e3a1bf2be0b3c68b35d849968b397c899cb8625b7a03",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-download-ready-task-distance-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-download-ready-night-desktop-disclosures-open.png",
+      "bytes": 308015,
+      "sha256": "f3703270f195881e5235f07d69e85f8987b48d3539b96468e24d45f64c12d573",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-download-ready-task-distance-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-download-ready-night-desktop-text-reflow-200.png",
+      "bytes": 563687,
+      "sha256": "3d4f7181ab1b13a40e5f4e770b5d29aab1aaf289cd3864925b91fd3e7b659b4d",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-download-ready-task-distance-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-download-ready-night-mobile-disclosures-open.png",
+      "bytes": 282008,
+      "sha256": "20027304d1c2efe7b302c812b0a8978c605c2024956d079651a0deddb20eae30",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-download-ready-task-distance-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-download-ready-night-mobile-text-reflow-200.png",
+      "bytes": 503509,
+      "sha256": "ac76da6848d1c303734a7966797533b344fad7b1e9a09cd63da3bf1bd7bbeb94",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-download-ready-task-distance-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-download-ready-task-distance-metrics.json",
+      "bytes": 108948,
+      "sha256": "97354ce4a2a8752659dd47c0e1ece49934693be04d96bdf1826c0a2b7e6fb85b",
+      "identityBinding": {
+        "method": "embedded-fields",
+        "sidecar": "reports-download-ready-task-distance-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-empty-day-desktop.png",
+      "bytes": 71507,
+      "sha256": "28ea3d06c6eb4477e0d8b261b973da4456b0a1b150d3f251902050e47190ef51",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-empty-day-mobile.png",
+      "bytes": 45873,
+      "sha256": "26a0a7f62f9175bc234a1cc1f72ee4319ea5cb868ac49bde9ceea5e0f7deb4d0",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-empty-night-desktop.png",
+      "bytes": 72207,
+      "sha256": "399812be9eca86d504dc82af0e3e1d1c381c4d130abc2729402235bd3bc3116e",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-empty-night-mobile.png",
+      "bytes": 46540,
+      "sha256": "65927b388a05a5cf336e733a78b4da3e150eaa09e939953167583cf10e927138",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-interactive-target-matrix.json",
+      "bytes": 118829,
+      "sha256": "e825ff30d59f9173ce00ef8b6df1d0d7ddc06a602371a3cb6c3473088dc1f45e",
+      "identityBinding": {
+        "method": "embedded-fields",
+        "sidecar": "reports-interactive-target-matrix.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-loading-day-desktop.png",
+      "bytes": 70698,
+      "sha256": "d898626f83aee792210183e087aad0d84161e0f79bfd77de588361f30a5e251d",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-loading-day-mobile.png",
+      "bytes": 44845,
+      "sha256": "6d9715f8cfa0a5a7f28726481cbcbd26e04193c42641d10d07c1b24fd20e487c",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-loading-night-desktop.png",
+      "bytes": 71230,
+      "sha256": "30e11d672bbe8d3c9cfb6e05648c557954f3a7b05771ffa7416c21a93cfafddc",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-loading-night-mobile.png",
+      "bytes": 45476,
+      "sha256": "6c27d4f10a637560467cc081764dad4555f2d3bb32ded28aeec401a3aea724f5",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-sample-day-desktop-metrics.json",
+      "bytes": 7825,
+      "sha256": "30488237f90f026515916d8baae7815c8196f90552ce4c7726b631660ce0edb7",
+      "identityBinding": {
+        "method": "embedded-fields",
+        "sidecar": "reports-sample-day-desktop-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-sample-day-desktop.png",
+      "bytes": 127524,
+      "sha256": "88dcf33fd6ab8c6e02fb58089c012ed18fefae6bd61c634fe1b606919b126aa5",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-sample-day-desktop-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-sample-day-mobile-metrics.json",
+      "bytes": 6734,
+      "sha256": "7104ee70fc2f8e0fb55382d39d1c1484046586fe10351c46e616c8729e0df991",
+      "identityBinding": {
+        "method": "embedded-fields",
+        "sidecar": "reports-sample-day-mobile-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-sample-day-mobile.png",
+      "bytes": 95233,
+      "sha256": "835c155e67c92f1be039afe9ee24856665caed7d1c6cc2b9871b9e0af946515d",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-sample-day-mobile-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-sample-night-desktop-metrics.json",
+      "bytes": 7826,
+      "sha256": "cf1328739f836dc104e252f04a1f76c14b018ab65b666fe5ac2f0798a236c72e",
+      "identityBinding": {
+        "method": "embedded-fields",
+        "sidecar": "reports-sample-night-desktop-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-sample-night-desktop.png",
+      "bytes": 128254,
+      "sha256": "83276dfe5c86ad390a087b46a0eaa81586f9a533d761908006a9d685d32fd8cb",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-sample-night-desktop-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-sample-night-mobile-metrics.json",
+      "bytes": 6735,
+      "sha256": "f3517720c7c0cde54edfca8e0aaf8e927b1ddb6c460dce122cfbdb145c845c32",
+      "identityBinding": {
+        "method": "embedded-fields",
+        "sidecar": "reports-sample-night-mobile-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-sample-night-mobile.png",
+      "bytes": 97039,
+      "sha256": "238546965b5716a73ab703cf121d8800d64df8075bdfb57a22d41278b8727e87",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-sample-night-mobile-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-server-error-day-desktop.png",
+      "bytes": 89841,
+      "sha256": "3d8e3ade86fa8d77558b177a291e634023c96882f08c607c47cac516cfd3da9b",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-server-error-day-mobile.png",
+      "bytes": 64661,
+      "sha256": "3ea1be43a700cdfb4cac038ef0d48c7206f169ea3768a2b0c7e11f04e8ec424b",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence",
+          "path": "evaluation/reports-mobile-task-distance-2026-07-13/fresh-review-round-2-2026-07-14/reports-server-error-day-mobile.png"
+        }
+      ],
+      "identicalContentExplanation": "Byte-identical rendering is legitimate where unaffected visual pixels remain stable; the replacement is freshly bound by its identity sidecar and this manifest."
+    },
+    {
+      "path": "reports-server-error-night-desktop.png",
+      "bytes": 90703,
+      "sha256": "ae4811d22f7c06f3a39cfd3658749310c98d5ec970c68390f8361786eaf10c4f",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    },
+    {
+      "path": "reports-server-error-night-mobile.png",
+      "bytes": 65628,
+      "sha256": "47889aa0eda689a37252be46a581eef984e047c94218048b93d1b199ee26b98a",
+      "identityBinding": {
+        "method": "identity-sidecar-and-manifest",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence",
+          "path": "evaluation/reports-mobile-task-distance-2026-07-13/fresh-review-round-2-2026-07-14/reports-server-error-night-mobile.png"
+        }
+      ],
+      "identicalContentExplanation": "Byte-identical rendering is legitimate where unaffected visual pixels remain stable; the replacement is freshly bound by its identity sidecar and this manifest."
+    },
+    {
+      "path": "reports-state-metrics.json",
+      "bytes": 34367,
+      "sha256": "c0dd570245f4a8243e9b50f7ddcda206e08e95d962f033d8ac43294fe74c46ca",
+      "identityBinding": {
+        "method": "embedded-fields",
+        "sidecar": "reports-state-metrics.json"
+      },
+      "staleDirectoriesCompared": [
+        {
+          "commit": "429f0ff",
+          "label": "initial evidence"
+        },
+        {
+          "commit": "b7adabf",
+          "label": "fresh-review evidence"
+        },
+        {
+          "commit": "6f7ee77",
+          "label": "prohibited round-2 evidence"
+        }
+      ],
+      "staleHashMatches": [],
+      "identicalContentExplanation": null
+    }
+  ],
+  "self": {
+    "path": "artifact-manifest.json",
+    "hashExcluded": true,
+    "reason": "A final manifest cannot contain its own final SHA-256 without changing that SHA-256; its identity fields and evidence commit provide the binding."
+  }
+}
