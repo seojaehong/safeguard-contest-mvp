@@ -65,6 +65,8 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 | `SECURITY DEFINER` functions | 0 |
 | Triggers | 0 |
 | Explicit GRANT/REVOKE statements | 0 |
+| Cross-tenant negative cases inventoried | 14 |
+| Cross-tenant runtime cases executed | 0 |
 
 `storage.buckets` is counted once as a managed operator object because migration 010 inserts a private bucket. `storage.objects` is counted separately as an application-used managed tenant-data boundary, not as a migration-created or migration-touched table. Neither is counted among the 22 application tables.
 
@@ -152,7 +154,7 @@ The owner policies validate only the row's `organization_id`. The tenant-relatio
 
 No P0 finding was proven from source or live evidence.
 
-### P1-01: Two exposed-schema tables have no RLS declaration
+### P1-01: Two legacy exposed-schema tables have no RLS declaration
 
 **Evidence:** `query_logs` and `documents` are created in `public` without a following RLS statement (`supabase/migrations/001_init.sql:1-17`). The complete migration policy scan contains no policy, GRANT, or REVOKE for either table.
 
@@ -168,7 +170,7 @@ No P0 finding was proven from source or live evidence.
 
 **Bounded remediation proposal:** make tenant dispatch rows require `organization_id`; move true operator/global events to a separate operator-only table or an explicit service-only policy; scope tenant policies to `authenticated`; split write/delete rights according to product need.
 
-### P1-03: Tenant policies do not enforce same-organization relationships, and service-role child queries trust them
+### P1-03: Tenant policies do not enforce same-organization relationships and service-role child queries trust them
 
 **Proven schema/API evidence:** child tables carry independent `organization_id` plus related IDs (`supabase/migrations/002_workspace_productization.sql:21-90`, `supabase/migrations/003_knowledge_runtime.sql:1-63`, `supabase/migrations/010_commercial_operations.sql:21-86`), while every owner `WITH CHECK` only resolves the row's `organization_id` (`supabase/migrations/002_workspace_productization.sql:132-200`, `supabase/migrations/003_knowledge_runtime.sql:77-126`, `supabase/migrations/010_commercial_operations.sql:161-227`). The schema therefore allows an `organization_id`/related-ID mismatch when ordinary FK existence checks pass. The education and dispatch APIs accept request-supplied `workpackId` and worker-map IDs without specific ownership validation of those related rows (`app/api/education-records/route.ts:31-56`, `app/api/dispatch-logs/route.ts:192-208`). Commercial reads validate the parent workpack, then query children by `workpack_id` only (`app/api/workpacks/[id]/share-sessions/route.ts:34-55`, `app/api/workpacks/[id]/read-confirmations/route.ts:32-42`, `app/api/workpacks/[id]/improvements/route.ts:187-197`).
 
@@ -184,7 +186,7 @@ No P0 finding was proven from source or live evidence.
 
 **Bounded remediation proposal:** split policies by command. Keep only required SELECT/INSERT; restrict UPDATE to explicit state transitions/columns and DELETE to a documented retention workflow or operator role.
 
-### P2-02: Ingestion-run operational metadata is public
+### P2-02: Ingestion-run operational metadata has an unrestricted SELECT row policy
 
 **Evidence:** `safety_reference_ingestion_runs` includes `report_path` and arbitrary `details` (`supabase/migrations/004_safety_reference_catalog.sql:34-45`) and has a SELECT row policy `using (true)` (`supabase/migrations/004_safety_reference_catalog.sql:70-72`). The policy does not itself grant SELECT.
 
@@ -226,24 +228,24 @@ No P0 finding was proven from source or live evidence.
 
 ## Cross-tenant negative-test matrix
 
-No tenant A/B auth tokens or credentials are present. Every runtime cell is therefore **NOT EXECUTED**, never PASS. Each case first requires the corresponding object command privilege; the matrix records the expected row-policy denial only after that reachability condition.
+No tenant A/B auth tokens or credentials are present. All 14 cases have `executionStatus = not_executed`; none is PASS or an executed denial. The four command columns record only the expected outcome (`deny`) after the corresponding object command privilege makes that command reachable.
 
-| Table/boundary | Tenant-B SELECT by tenant A | Tenant-B INSERT | Tenant-B UPDATE | Tenant-B DELETE | Tenant-relationship negative case | Actor-identity negative case | Runtime status |
+| Table/boundary | Expected SELECT | Expected INSERT | Expected UPDATE | Expected DELETE | Tenant-relationship negative case | Actor-identity negative case | Execution status |
 |---|---|---|---|---|---|---|---|
-| `organizations` | deny | owner spoof deny | deny | deny | change `owner_id` to B must deny | not separate: `owner_id` is the ownership/auth predicate, not audit attribution | not executed: no A/B auth fixtures |
-| `sites` | deny | foreign `organization_id` deny | deny | deny | no secondary tenant relation | none | not executed: no A/B auth fixtures |
-| `workers` | deny | foreign `organization_id` deny | deny | deny | owned org plus B `site_id` must deny | none | not executed: no A/B auth fixtures |
-| `workpacks` | deny | foreign `organization_id` deny | deny | deny | owned org plus B `site_id` must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | not executed: no A/B auth fixtures |
-| `education_records` | deny | foreign `organization_id` deny | deny | deny | owned org plus B workpack/worker must deny | none | not executed: no A/B auth fixtures |
-| `dispatch_logs` | deny | foreign `organization_id` deny | deny | deny | null `organization_id` must deny; source policy currently allows | none | not executed: no A/B auth fixtures |
-| `daily_entries` | deny | foreign `organization_id` deny | deny | deny | owned org plus B site/workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | not executed: no A/B auth fixtures |
-| `knowledge_events` | deny | foreign `organization_id` deny | deny | deny | owned org plus B daily/workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | not executed: no A/B auth fixtures |
-| `knowledge_regeneration_runs` | deny | foreign `organization_id` deny | deny | deny | if `raw_event_ids` are trusted event references, owned org plus B daily/workpack or any B/nonexistent array element must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | not executed: no A/B auth fixtures |
-| `workpack_share_sessions` | deny | foreign `organization_id` deny | deny | deny | owned org plus B workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | not executed: no A/B auth fixtures |
-| `workpack_read_confirmations` | deny | foreign `organization_id` deny | deny | deny | owned org plus B share/worker must deny | none | not executed: no A/B auth fixtures |
-| `workpack_improvements` | deny | foreign `organization_id` deny | deny | deny | owned org plus B workpack must deny | B `created_by`/`approved_by` must reject if attribution is trusted; source policy does not check them | not executed: no A/B auth fixtures |
-| `workpack_improvement_photos` | deny | foreign `organization_id` deny | deny | deny | owned org plus B improvement/workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | not executed: no A/B auth fixtures |
-| `storage.objects` | deny foreign object/list | deny upload to B prefix | deny overwrite/move to B prefix | deny delete from B prefix | A token must not list/read/write/delete B's object or spoof `organizations/{B}`; metadata/object tenant IDs must agree | none in managed object row | not executed: no A/B auth fixtures; Storage API and live catalog not probed |
+| `organizations` | deny | deny | deny | deny | change `owner_id` to B must deny | not separate: `owner_id` is the ownership/auth predicate, not audit attribution | `not_executed`: no A/B auth fixtures |
+| `sites` | deny | deny | deny | deny | no secondary tenant relation | none | `not_executed`: no A/B auth fixtures |
+| `workers` | deny | deny | deny | deny | owned org plus B `site_id` must deny | none | `not_executed`: no A/B auth fixtures |
+| `workpacks` | deny | deny | deny | deny | owned org plus B `site_id` must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `education_records` | deny | deny | deny | deny | owned org plus B workpack/worker must deny | none | `not_executed`: no A/B auth fixtures |
+| `dispatch_logs` | deny | deny | deny | deny | null `organization_id` must deny; source policy currently allows | none | `not_executed`: no A/B auth fixtures |
+| `daily_entries` | deny | deny | deny | deny | owned org plus B site/workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `knowledge_events` | deny | deny | deny | deny | owned org plus B daily/workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `knowledge_regeneration_runs` | deny | deny | deny | deny | if `raw_event_ids` are trusted event references, owned org plus B daily/workpack or any B/nonexistent array element must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `workpack_share_sessions` | deny | deny | deny | deny | owned org plus B workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `workpack_read_confirmations` | deny | deny | deny | deny | owned org plus B share/worker must deny | none | `not_executed`: no A/B auth fixtures |
+| `workpack_improvements` | deny | deny | deny | deny | owned org plus B workpack must deny | B `created_by`/`approved_by` must reject if attribution is trusted; source policy does not check them | `not_executed`: no A/B auth fixtures |
+| `workpack_improvement_photos` | deny | deny | deny | deny | owned org plus B improvement/workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `storage.objects` | deny | deny | deny | deny | A token must not list/read/write/delete B's object or spoof `organizations/{B}`; metadata/object tenant IDs must agree | `unverified/not_assessed`: managed object row actor identity and object ownership were not inspected in the live catalog | `not_executed`: no A/B auth fixtures; Storage API and live catalog not probed |
 
 Operator-table negative cases are separate: after corresponding command reachability, `mcp_tokens` and `safety_reference_embeddings` policies should expose no rows to non-bypass roles and reject writes. The HEAD probe observed one service-role `mcp_tokens` row and zero anon-visible rows. `safety_reference_embeddings` returned 404 for both credentials. No mutation privilege or authenticated-user case was tested.
 
