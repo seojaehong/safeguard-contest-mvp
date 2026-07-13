@@ -1,14 +1,10 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-13T09:45:09.1383850+09:00",
-  "branch": "feat/phase-a-ontology-evidence-chains",
-  "base": "b39f8135e784f69aac12d947cf6a734aa429a3c5",
-  "rejectedCommits": [
-    "8e6cf05e501edb4ecccce7a8c92e87b9ec7fb88d",
-    "91aab7f466fac84018441b496d07f84e43ff0dd4"
-  ],
-  "contractVersion": "phase-a-evidence-chains/1.2.0",
-  "status": "second_review_remediated_awaiting_independent_review",
+  "generatedAt": "2026-07-13T19:09:26.9823541+09:00",
+  "branch": "fix/phase-a-ontology-review",
+  "base": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
+  "contractVersion": "phase-a-evidence-chains/1.3.0",
+  "status": "independent_review_remediated_awaiting_rereview",
   "counts": {
     "canonicalChains": 3,
     "controls": 9,
@@ -236,7 +232,17 @@
       "location"
     ],
     "reviewOnlyGuidanceExcludedFromActiveCitations": true,
-    "reviewOnlyGuidanceExcludedFromNaturalizerFixedPack": true
+    "reviewOnlyGuidanceExcludedFromNaturalizerFixedPack": true,
+    "assemblyOrder": [
+      "task_graph",
+      "sif_accident",
+      "kosha_guidance",
+      "current_law",
+      "document_materialization"
+    ],
+    "plannedTargetsSeparatedFromVerifiedRecords": true,
+    "reviewRequiredMaterializationRecords": 0,
+    "humanConfirmationPreserved": true
   },
   "resolverState": {
     "publishedGraph": {
@@ -300,7 +306,10 @@
     { "finding": "P2-9", "status": "fixed", "summary": "legacy MCP provenance semantics restored; evidence chain is separate" },
     { "finding": "R2-1", "status": "fixed", "summary": "core resolver returns review_required while graphPublicationState remains published" },
     { "finding": "R2-2", "status": "fixed", "summary": "machine-extracted chunks are structured local SHA provenance and never manual cited_uids" },
-    { "finding": "R2-3", "status": "fixed", "summary": "unmapped guidance is review-only and excluded from active citations and naturalizer fixed pack" }
+    { "finding": "R2-3", "status": "fixed", "summary": "unmapped guidance is review-only and excluded from active citations and naturalizer fixed pack" },
+    { "finding": "A-1", "status": "fixed", "summary": "actual resolver order is graph, SIF, KOSHA, then current law with fail-closed stage tests" },
+    { "finding": "A-2", "status": "fixed", "summary": "planned targets are separate from generated-document verified records; review-required output records zero" },
+    { "finding": "A-3", "status": "fixed", "summary": "Article 172 points to the official 2026-03-02 surface lsJoLnkSeq 1016700327" }
   ],
   "lawVerification": {
     "verifiedOn": "2026-07-13",
@@ -311,7 +320,7 @@
       { "articleNo": "42", "url": "https://law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1024005275" },
       { "articleNo": "43", "url": "https://www.law.go.kr/lsLinkCommonInfo.do?lsJoLnkSeq=1028063341" },
       { "articleNo": "44", "url": "https://law.go.kr/lsLinkCommonInfo.do?lsJoLnkSeq=1016700539" },
-      { "articleNo": "172", "url": "https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000727233" },
+      { "articleNo": "172", "url": "https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1016700327", "title": "접촉의 방지", "paragraphs": 2 },
       { "articleNo": "301", "url": "https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1024005221" },
       { "articleNo": "302", "url": "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1030668033" },
       { "articleNo": "319", "url": "https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029038625" },
@@ -324,11 +333,13 @@
       "independentReviewFailures": 17,
       "sidecarMappingFailures": 7,
       "bridgeAndStatusFailures": 4,
-      "secondReviewFailures": 22
+      "secondReviewFailures": 22,
+      "independentPhaseARemediationFailures": 10,
+      "independentPhaseARedCycles": 3
     },
     "focused": {
-      "filesPassed": 4,
-      "testsPassed": 104,
+      "filesPassed": 5,
+      "testsPassed": 122,
       "status": "pass",
       "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"
@@ -340,7 +351,7 @@
     },
     "diffCheck": { "status": "pass" },
     "fullSuite": {
-      "informationalOnlyNotRerunForSecondRemediation": true,
+      "informationalOnlyNotRerunForIndependentRemediation": true,
       "status": "fail_unrelated_ui_reports",
       "durationSeconds": 206.95,
       "filesPassed": 125,
