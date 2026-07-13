@@ -40,4 +40,3 @@ The browser regression suite also covers an untouched empty route and the exampl
 - `empty-day-1560x700.png`
 - `filled-day-1560x700.png`
 - `cleared-keyboard-day-1560x700.png`
-
