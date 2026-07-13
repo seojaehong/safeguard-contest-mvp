@@ -249,44 +249,77 @@ describe("/api/export/xlsx structured contract", () => {
     expect(longTextRowHeight).toBeLessThanOrEqual(90);
   });
 
-  it("spans wide risk confirmation items so short Korean labels do not wrap vertically", async () => {
+  it("spans one to six wide risk confirmation items without gaps or overlap", async () => {
+    const structuredRiskRows = [{
+      location: "외벽",
+      process: "도장",
+      task: "이동식 비계 작업",
+      equipment: "이동식 비계",
+      hazard: "발판에서 추락",
+      fourM: "Man",
+      accidentType: "fall",
+      currentControls: "난간 확인",
+      likelihood: 3,
+      severity: 4,
+      riskLevel: "high",
+      additionalControls: "작업 전 점검",
+      verificationStatus: "planned"
+    }];
+
+    for (let itemCount = 1; itemCount <= 6; itemCount += 1) {
+      const confirmationRows = Array.from({ length: itemCount }, (_, index) => `확인 ${index + 1}`);
+      const response = await POST(xlsxRequest({
+        mode: "single",
+        title: "위험성평가표",
+        scenario,
+        profile: { ...riskProfile, confirmationRows },
+        rows: [],
+        structuredRiskRows
+      }));
+      const workbook = await loadWorkbook(response);
+      const worksheet = workbook.getWorksheet("위험성평가표");
+      if (!worksheet) throw new Error("Missing 위험성평가표 worksheet");
+      const firstCell = findCellByText(worksheet, "□ 확인 1");
+      if (!firstCell) throw new Error("Missing first confirmation cell");
+      const confirmationRow = firstCell.row;
+
+      for (let itemIndex = 0; itemIndex < itemCount; itemIndex += 1) {
+        const startColumn = Math.floor((itemIndex * 19) / itemCount) + 1;
+        const endColumn = Math.floor(((itemIndex + 1) * 19) / itemCount);
+        const master = worksheet.getCell(confirmationRow, startColumn);
+        expect(master.text).toBe(`□ 확인 ${itemIndex + 1}`);
+        expect(master.alignment).toMatchObject({ vertical: "middle", horizontal: "center", wrapText: true });
+        expect(master.border.top?.style).toBe("thin");
+        expect(master.border.bottom?.style).toBe("thin");
+        for (let column = startColumn; column <= endColumn; column += 1) {
+          expect(worksheet.getCell(confirmationRow, column).master.address).toBe(master.address);
+        }
+      }
+      expect(worksheet.getCell(confirmationRow, 1).master.address).toBe(firstCell.address);
+      expect(worksheet.getCell(confirmationRow, 19).master.text).toBe(`□ 확인 ${itemCount}`);
+    }
+  });
+
+  it("keeps generic six-column confirmation items unmerged", async () => {
+    const confirmationRows = Array.from({ length: 6 }, (_, index) => `확인 ${index + 1}`);
     const response = await POST(xlsxRequest({
       mode: "single",
-      title: "위험성평가표",
+      title: "일반 점검표",
       scenario,
-      profile: { ...riskProfile, confirmationRows: ["작업 전 확인"] },
-      rows: [],
-      structuredRiskRows: [{
-        location: "외벽",
-        process: "도장",
-        task: "이동식 비계 작업",
-        equipment: "이동식 비계",
-        hazard: "발판에서 추락",
-        fourM: "Man",
-        accidentType: "fall",
-        currentControls: "난간 확인",
-        likelihood: 3,
-        severity: 4,
-        riskLevel: "high",
-        additionalControls: "작업 전 점검",
-        verificationStatus: "planned"
-      }]
+      profile: { ...riskProfile, layout: "generic", confirmationRows },
+      rows: [{ document: "일반 점검표", section: "점검", item: "항목", content: "내용" }]
     }));
-
     const workbook = await loadWorkbook(response);
-    const worksheet = workbook.getWorksheet("위험성평가표");
-    if (!worksheet) throw new Error("Missing 위험성평가표 worksheet");
-    const confirmationCell = findCellByText(worksheet, "□ 작업 전 확인");
-    if (!confirmationCell) throw new Error("Missing confirmation cell");
+    const worksheet = workbook.getWorksheet("일반 점검표");
+    if (!worksheet) throw new Error("Missing 일반 점검표 worksheet");
+    const firstCell = findCellByText(worksheet, "□ 확인 1");
+    if (!firstCell) throw new Error("Missing generic confirmation cell");
 
-    expect(confirmationCell.address).toBe("A4");
-    expect(confirmationCell.isMerged).toBe(true);
-    expect(worksheet.getCell("S4").master.address).toBe("A4");
-    expect(confirmationCell.alignment).toMatchObject({
-      vertical: "middle",
-      horizontal: "center",
-      wrapText: true
-    });
+    for (let column = 1; column <= 6; column += 1) {
+      const cell = worksheet.getCell(firstCell.row, column);
+      expect(cell.text).toBe(`□ 확인 ${column}`);
+      expect(cell.isMerged).toBe(false);
+    }
   });
 
   it("keeps workpack sheets consistent with single-sheet print and body styles", async () => {
