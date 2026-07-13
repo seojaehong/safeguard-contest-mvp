@@ -1,0 +1,27 @@
+CANDIDATE_SHA=534a0ea55ae3f3f4de15aa52c2e26b2794ef4604
+BUILD_ID=qhU1pj4ss3rFtDiv3LFJI
+SELECTED_CANDIDATE_BUILDS=1 SUPERSEDED_BUILDS=3
+ROUTE_JSON_COUNT=16
+SCREENSHOT_COUNT=16
+ONTOLOGY_VARIANTS=4 NODES_PER_VARIANT=32 EDGES_PER_VARIANT=27
+WORKSPACE_VARIANTS=4 OPERATION_EDGES_PER_VARIANT=3
+HYDRATION_RESTORE_RUNS=2
+TIMESTAMP_VALID_PRESERVED=True
+TIMESTAMP_INVALID_CANONICAL_NULL=True
+CONTRAST /knowledge|day|desktop min=5.37 low=0
+CONTRAST /knowledge|day|mobile min=5.37 low=0
+CONTRAST /knowledge|night|desktop min=4.98 low=0
+CONTRAST /knowledge|night|mobile min=4.98 low=0
+CONTRAST /ontology|day|desktop min=1.05 low=399
+CONTRAST /ontology|day|mobile min=1.05 low=399
+CONTRAST /ontology|night|desktop min=1.21 low=28
+CONTRAST /ontology|night|mobile min=1.62 low=7
+CONTRAST /reports|day|desktop min=1.63 low=1
+CONTRAST /reports|day|mobile min=1.63 low=1
+CONTRAST /reports|night|desktop min=4 low=0
+CONTRAST /reports|night|mobile min=4 low=0
+CONTRAST /workspace|day|desktop min=5.59 low=0
+CONTRAST /workspace|day|mobile min=5.53 low=0
+CONTRAST /workspace|night|desktop min=1.1 low=1
+CONTRAST /workspace|night|mobile min=1.1 low=1
+VALIDATION_ERRORS=0

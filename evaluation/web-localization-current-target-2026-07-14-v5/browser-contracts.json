@@ -1,0 +1,72 @@
+{
+  "capturedAt": "2026-07-13T18:20:40.493Z",
+  "sourceSha": "534a0ea55ae3f3f4de15aa52c2e26b2794ef4604",
+  "buildId": "qhU1pj4ss3rFtDiv3LFJI",
+  "harnessMode": "prod",
+  "hydrationRestore": {
+    "runs": [
+      {
+        "run": 1,
+        "firstReadIndex": 0,
+        "eventKinds": [
+          "read",
+          "read",
+          "write",
+          "read",
+          "write",
+          "write"
+        ],
+        "writeWorkerIds": [
+          [
+            "worker-canonical-restored"
+          ],
+          [
+            "worker-canonical-restored"
+          ],
+          [
+            "worker-canonical-restored"
+          ]
+        ],
+        "noWriteBeforeRestore": true,
+        "allWritesPreservedRestoredWorker": true
+      },
+      {
+        "run": 2,
+        "firstReadIndex": 0,
+        "eventKinds": [
+          "read",
+          "read",
+          "write",
+          "read",
+          "write",
+          "write"
+        ],
+        "writeWorkerIds": [
+          [
+            "worker-canonical-restored"
+          ],
+          [
+            "worker-canonical-restored"
+          ],
+          [
+            "worker-canonical-restored"
+          ]
+        ],
+        "noWriteBeforeRestore": true,
+        "allWritesPreservedRestoredWorker": true
+      }
+    ],
+    "runCount": 2,
+    "allRunsReadBeforeWrite": true,
+    "allWritesPreservedRestoredWorker": true
+  },
+  "timestampNullChecks": {
+    "validGeneratedAtInput": "2026-07-11T16:40:00+09:00",
+    "validGeneratedAtCanonical": "2026-07-11T16:40:00+09:00",
+    "validReadAtInput": "2026-07-11T17:05:00+09:00",
+    "validReadAtPresentation": "2026-07-11T17:05:00+09:00",
+    "invalidGeneratedAtInput": "2026-07-11 16:40:00",
+    "invalidGeneratedAtCanonical": null,
+    "invalidGeneratedAtPresentation": "생성 시각 확인 전"
+  }
+}

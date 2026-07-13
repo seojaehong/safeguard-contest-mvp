@@ -1,0 +1,894 @@
+{
+  "capturedAt": "2026-07-13T18:19:49.961Z",
+  "sourceSha": "534a0ea55ae3f3f4de15aa52c2e26b2794ef4604",
+  "buildId": "qhU1pj4ss3rFtDiv3LFJI",
+  "harnessMode": "prod",
+  "route": "/ontology",
+  "theme": "night",
+  "viewport": {
+    "label": "desktop",
+    "width": 1440,
+    "height": 1000
+  },
+  "recoverableHydrationErrorCount": 0,
+  "horizontalOverflow": 0,
+  "overlapCount": 0,
+  "unnamedInteractiveCount": 0,
+  "issueOverlayDetected": false,
+  "minimumTextContrast": 1.2115722073120834,
+  "lowContrastCount": 28,
+  "lowContrastSamples": [
+    {
+      "element": "button[작업팩성수동 외벽 도장나가는 관계 3 · 들어오는 관계 0]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "span[작업팩]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "strong[성수동 외벽 도장]",
+      "ratio": 2.8172946874922067
+    },
+    {
+      "element": "small[나가는 관계 3 · 들어오는 관계 0]",
+      "ratio": 1.2115722073120834
+    },
+    {
+      "element": "button[위험추락나가는 관계 2 · 들어오는 관계 2]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "span[위험]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "strong[추락]",
+      "ratio": 2.8172946874922067
+    },
+    {
+      "element": "small[나가는 관계 2 · 들어오는 관계 2]",
+      "ratio": 1.2115722073120834
+    },
+    {
+      "element": "button[개선개선 전 사진의 난간 누락 구간을 보강하고 개선 후 사진에서 출입통제선을 확인나가는]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "span[개선]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "strong[개선 전 사진의 난간 누락 구간을 보강하고 개선 후 사진에서 출입통제선을 확인]",
+      "ratio": 2.8172946874922067
+    },
+    {
+      "element": "small[나가는 관계 1 · 들어오는 관계 1]",
+      "ratio": 1.2115722073120834
+    },
+    {
+      "element": "button[근거외벽 도장 중 작업발판 단부 추락 사례나가는 관계 1 · 들어오는 관계 1]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "span[근거]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "strong[외벽 도장 중 작업발판 단부 추락 사례]",
+      "ratio": 2.8172946874922067
+    },
+    {
+      "element": "small[나가는 관계 1 · 들어오는 관계 1]",
+      "ratio": 1.2115722073120834
+    },
+    {
+      "element": "button[조치안전대 체결 및 작업반경 출입통제나가는 관계 0 · 들어오는 관계 1]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "span[조치]",
+      "ratio": 2.9975389572014555
+    },
+    {
+      "element": "strong[안전대 체결 및 작업반경 출입통제]",
+      "ratio": 2.8172946874922067
+    },
+    {
+      "element": "small[나가는 관계 0 · 들어오는 관계 1]",
+      "ratio": 1.2115722073120834
+    }
+  ],
+  "relationLineCount": 0,
+  "inaccessibleRelationCount": 0,
+  "zeroLengthRelationCount": 0,
+  "missingConnectedNodeCount": 0,
+  "visibleOperationNodeCount": 0,
+  "clippedOperationNodeCount": 0,
+  "operationNodeOccupancy": 0,
+  "operationRelationEdges": [],
+  "staticOntologyNodeCount": 32,
+  "staticOntologyEdgeCount": 27,
+  "staticOntologyNodes": [
+    {
+      "id": "Hazard_추락",
+      "accessibleName": "위험요인 추락, 노드 ID Hazard_추락",
+      "visibleLabel": "위험요인추락노드 ID Hazard_추락 · 연결 12개",
+      "degree": 12,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 302,
+        "y": 1885.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_감전_직접_간접_접촉",
+      "accessibleName": "위험요인 감전(직접·간접 접촉), 노드 ID Hazard_감전_직접_간접_접촉",
+      "visibleLabel": "위험요인감전(직접·간접 접촉)노드 ID Hazard_감전_직접_간접_접촉 · 연결 7개",
+      "degree": 7,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 572,
+        "y": 1885.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_산소결핍_질식",
+      "accessibleName": "위험요인 산소결핍 질식, 노드 ID Hazard_산소결핍_질식",
+      "visibleLabel": "위험요인산소결핍 질식노드 ID Hazard_산소결핍_질식 · 연결 7개",
+      "degree": 7,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 842,
+        "y": 1885.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_비계_붕괴_도괴",
+      "accessibleName": "위험요인 비계 붕괴·도괴, 노드 ID Hazard_비계_붕괴_도괴",
+      "visibleLabel": "위험요인비계 붕괴·도괴노드 ID Hazard_비계_붕괴_도괴 · 연결 6개",
+      "degree": 6,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 1112,
+        "y": 1885.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Document_workPlan",
+      "accessibleName": "문서종 작업계획서, 노드 ID Document_workPlan",
+      "visibleLabel": "문서종작업계획서노드 ID Document_workPlan · 연결 6개",
+      "degree": 6,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 302,
+        "y": 2016.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Task_welding",
+      "accessibleName": "작업유형 용접, 노드 ID Task_welding",
+      "visibleLabel": "작업유형용접노드 ID Task_welding · 연결 5개",
+      "degree": 5,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 572,
+        "y": 2016.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Task_material_handling",
+      "accessibleName": "작업유형 하역·운반, 노드 ID Task_material_handling",
+      "visibleLabel": "작업유형하역·운반노드 ID Task_material_handling · 연결 5개",
+      "degree": 5,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 842,
+        "y": 2016.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_화물_낙하_하적단_붕괴",
+      "accessibleName": "위험요인 화물 낙하·하적단 붕괴, 노드 ID Hazard_화물_낙하_하적단_붕괴",
+      "visibleLabel": "위험요인화물 낙하·하적단 붕괴노드 ID Hazard_화물_낙하_하적단_붕괴 · 연결 5개",
+      "degree": 5,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 1112,
+        "y": 2016.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Article_기준규칙_32",
+      "accessibleName": "법조문 기준규칙 제32조(보호구의 지급 등), 노드 ID Article_기준규칙_32",
+      "visibleLabel": "법조문기준규칙 제32조(보호구의 지급 등)노드 ID Article_기준규칙_32 · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 302,
+        "y": 2147.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Task_spray_painting",
+      "accessibleName": "작업유형 도장(스프레이), 노드 ID Task_spray_painting",
+      "visibleLabel": "작업유형도장(스프레이)노드 ID Task_spray_painting · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 572,
+        "y": 2147.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Task_confined_space",
+      "accessibleName": "작업유형 밀폐공간 작업, 노드 ID Task_confined_space",
+      "visibleLabel": "작업유형밀폐공간 작업노드 ID Task_confined_space · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 842,
+        "y": 2147.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_불티에_의한_화재_폭발",
+      "accessibleName": "위험요인 불티에 의한 화재·폭발, 노드 ID Hazard_불티에_의한_화재_폭발",
+      "visibleLabel": "위험요인불티에 의한 화재·폭발노드 ID Hazard_불티에_의한_화재_폭발 · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 1112,
+        "y": 2147.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_유기용제_중독_급성_만성",
+      "accessibleName": "위험요인 유기용제 중독(급성·만성), 노드 ID Hazard_유기용제_중독_급성_만성",
+      "visibleLabel": "위험요인유기용제 중독(급성·만성)노드 ID Hazard_유기용제_중독_급성_만성 · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 302,
+        "y": 2278.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Task_electrical_work",
+      "accessibleName": "작업유형 전기 작업, 노드 ID Task_electrical_work",
+      "visibleLabel": "작업유형전기 작업노드 ID Task_electrical_work · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 572,
+        "y": 2278.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Task_forklift_loading",
+      "accessibleName": "작업유형 지게차 상하차, 노드 ID Task_forklift_loading",
+      "visibleLabel": "작업유형지게차 상하차노드 ID Task_forklift_loading · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 842,
+        "y": 2278.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_폭발_인화성_증기_가스",
+      "accessibleName": "위험요인 폭발(인화성 증기·가스), 노드 ID Hazard_폭발_인화성_증기_가스",
+      "visibleLabel": "위험요인폭발(인화성 증기·가스)노드 ID Hazard_폭발_인화성_증기_가스 · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 1112,
+        "y": 2278.48,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_하물_낙하",
+      "accessibleName": "위험요인 하물 낙하, 노드 ID Hazard_하물_낙하",
+      "visibleLabel": "위험요인하물 낙하노드 ID Hazard_하물_낙하 · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 302,
+        "y": 2409.48,
+        "width": 262,
+        "height": 101.13
+      }
+    },
+    {
+      "id": "Task_hot_work",
+      "accessibleName": "작업유형 화기 작업, 노드 ID Task_hot_work",
+      "visibleLabel": "작업유형화기 작업노드 ID Task_hot_work · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 572,
+        "y": 2409.48,
+        "width": 262,
+        "height": 101.13
+      }
+    },
+    {
+      "id": "Hazard_화재",
+      "accessibleName": "위험요인 화재, 노드 ID Hazard_화재",
+      "visibleLabel": "위험요인화재노드 ID Hazard_화재 · 연결 4개",
+      "degree": 4,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 842,
+        "y": 2409.48,
+        "width": 262,
+        "height": 101.13
+      }
+    },
+    {
+      "id": "Task_work_at_height",
+      "accessibleName": "작업유형 고소작업, 노드 ID Task_work_at_height",
+      "visibleLabel": "작업유형고소작업노드 ID Task_work_at_height · 연결 3개",
+      "degree": 3,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 1112,
+        "y": 2409.48,
+        "width": 262,
+        "height": 101.13
+      }
+    },
+    {
+      "id": "Hazard_낙하물_화물_마스트",
+      "accessibleName": "위험요인 낙하물(화물·마스트), 노드 ID Hazard_낙하물_화물_마스트",
+      "visibleLabel": "위험요인낙하물(화물·마스트)노드 ID Hazard_낙하물_화물_마스트 · 연결 3개",
+      "degree": 3,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 302,
+        "y": 2518.61,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Task_scaffold_erection",
+      "accessibleName": "작업유형 비계 조립·해체, 노드 ID Task_scaffold_erection",
+      "visibleLabel": "작업유형비계 조립·해체노드 ID Task_scaffold_erection · 연결 3개",
+      "degree": 3,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 572,
+        "y": 2518.61,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Document_riskAssessment",
+      "accessibleName": "문서종 위험성평가, 노드 ID Document_riskAssessment",
+      "visibleLabel": "문서종위험성평가노드 ID Document_riskAssessment · 연결 3개",
+      "degree": 3,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 842,
+        "y": 2518.61,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_전도_넘어짐_굴러떨어짐",
+      "accessibleName": "위험요인 전도(넘어짐·굴러떨어짐), 노드 ID Hazard_전도_넘어짐_굴러떨어짐",
+      "visibleLabel": "위험요인전도(넘어짐·굴러떨어짐)노드 ID Hazard_전도_넘어짐_굴러떨어짐 · 연결 3개",
+      "degree": 3,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 1112,
+        "y": 2518.61,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Hazard_충돌_협착_끼임",
+      "accessibleName": "위험요인 충돌·협착(끼임), 노드 ID Hazard_충돌_협착_끼임",
+      "visibleLabel": "위험요인충돌·협착(끼임)노드 ID Hazard_충돌_협착_끼임 · 연결 3개",
+      "degree": 3,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 302,
+        "y": 2649.61,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Task_crane_lifting",
+      "accessibleName": "작업유형 크레인 양중, 노드 ID Task_crane_lifting",
+      "visibleLabel": "작업유형크레인 양중노드 ID Task_crane_lifting · 연결 3개",
+      "degree": 3,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 572,
+        "y": 2649.61,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Control_화재감시자_배치",
+      "accessibleName": "안전조치 화재감시자 배치, 노드 ID Control_화재감시자_배치",
+      "visibleLabel": "안전조치화재감시자 배치노드 ID Control_화재감시자_배치 · 연결 3개",
+      "degree": 3,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 842,
+        "y": 2649.61,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Control_2인_이상_취급_시_신호방법_지정",
+      "accessibleName": "안전조치 2인 이상 취급 시 신호방법 지정, 노드 ID Control_2인_이상_취급_시_신호방법_지정",
+      "visibleLabel": "안전조치2인 이상 취급 시 신호방법 지정노드 ID Control_2인_이상_취급_시_신호방법_지정 · 연결 2개",
+      "degree": 2,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 1112,
+        "y": 2649.61,
+        "width": 262,
+        "height": 123
+      }
+    },
+    {
+      "id": "Control_가연성물질_별도_보관_격리",
+      "accessibleName": "안전조치 가연성물질 별도 보관·격리, 노드 ID Control_가연성물질_별도_보관_격리",
+      "visibleLabel": "안전조치가연성물질 별도 보관·격리노드 ID Control_가연성물질_별도_보관_격리 · 연결 2개",
+      "degree": 2,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 302,
+        "y": 2780.61,
+        "width": 262,
+        "height": 147
+      }
+    },
+    {
+      "id": "Control_가연성물질_별도_보관_화재예방_배치구조",
+      "accessibleName": "안전조치 가연성물질 별도 보관·화재예방 배치구조, 노드 ID Control_가연성물질_별도_보관_화재예방_배치구조",
+      "visibleLabel": "안전조치가연성물질 별도 보관·화재예방 배치구조노드 ID Control_가연성물질_별도_보관_화재예방_배치구조 · 연결 2개",
+      "degree": 2,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 572,
+        "y": 2780.61,
+        "width": 262,
+        "height": 147
+      }
+    },
+    {
+      "id": "Control_감시인_외부_배치_및_연락설비",
+      "accessibleName": "안전조치 감시인 외부 배치 및 연락설비, 노드 ID Control_감시인_외부_배치_및_연락설비",
+      "visibleLabel": "안전조치감시인 외부 배치 및 연락설비노드 ID Control_감시인_외부_배치_및_연락설비 · 연결 2개",
+      "degree": 2,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 842,
+        "y": 2780.61,
+        "width": 262,
+        "height": 147
+      }
+    },
+    {
+      "id": "Control_강관비계_구조_기둥_간격_띠장_적재하중",
+      "accessibleName": "안전조치 강관비계 구조(기둥 간격·띠장·적재하중), 노드 ID Control_강관비계_구조_기둥_간격_띠장_적재하중",
+      "visibleLabel": "안전조치강관비계 구조(기둥 간격·띠장·적재하중)노드 ID Control_강관비계_구조_기둥_간격_띠장_적재하중 · 연결 2개",
+      "degree": 2,
+      "reviewRequired": false,
+      "geometry": {
+        "x": 1112,
+        "y": 2780.61,
+        "width": 262,
+        "height": 147
+      }
+    }
+  ],
+  "staticOntologyEdges": [
+    {
+      "sourceId": "Hazard_불티에_의한_화재_폭발",
+      "targetId": "Control_가연성물질_별도_보관_격리",
+      "relationLabel": "안전조치로 저감",
+      "accessibleName": "불티에 의한 화재·폭발, 출발 ID Hazard_불티에_의한_화재_폭발에서 가연성물질 별도 보관·격리, 도착 ID Control_가연성물질_별도_보관_격리로 안전조치로 저감",
+      "visibleLabel": "출발불티에 의한 화재·폭발노드 ID Hazard_불티에_의한_화재_폭발안전조치로 저감도착가연성물질 별도 보관·격리노드 ID Control_가연성물질_별도_보관_격리",
+      "geometry": {
+        "x": 302,
+        "y": 2993.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Hazard_불티에_의한_화재_폭발",
+      "targetId": "Control_화재감시자_배치",
+      "relationLabel": "안전조치로 저감",
+      "accessibleName": "불티에 의한 화재·폭발, 출발 ID Hazard_불티에_의한_화재_폭발에서 화재감시자 배치, 도착 ID Control_화재감시자_배치로 안전조치로 저감",
+      "visibleLabel": "출발불티에 의한 화재·폭발노드 ID Hazard_불티에_의한_화재_폭발안전조치로 저감도착화재감시자 배치노드 ID Control_화재감시자_배치",
+      "geometry": {
+        "x": 302,
+        "y": 3096.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Hazard_비계_붕괴_도괴",
+      "targetId": "Control_강관비계_구조_기둥_간격_띠장_적재하중",
+      "relationLabel": "안전조치로 저감",
+      "accessibleName": "비계 붕괴·도괴, 출발 ID Hazard_비계_붕괴_도괴에서 강관비계 구조(기둥 간격·띠장·적재하중), 도착 ID Control_강관비계_구조_기둥_간격_띠장_적재하중로 안전조치로 저감",
+      "visibleLabel": "출발비계 붕괴·도괴노드 ID Hazard_비계_붕괴_도괴안전조치로 저감도착강관비계 구조(기둥 간격·띠장·적재하중)노드 ID Control_강관비계_구조_기둥_간격_띠장_적재하중",
+      "geometry": {
+        "x": 302,
+        "y": 3199.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Hazard_산소결핍_질식",
+      "targetId": "Control_감시인_외부_배치_및_연락설비",
+      "relationLabel": "안전조치로 저감",
+      "accessibleName": "산소결핍 질식, 출발 ID Hazard_산소결핍_질식에서 감시인 외부 배치 및 연락설비, 도착 ID Control_감시인_외부_배치_및_연락설비로 안전조치로 저감",
+      "visibleLabel": "출발산소결핍 질식노드 ID Hazard_산소결핍_질식안전조치로 저감도착감시인 외부 배치 및 연락설비노드 ID Control_감시인_외부_배치_및_연락설비",
+      "geometry": {
+        "x": 302,
+        "y": 3302.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Hazard_화재",
+      "targetId": "Control_가연성물질_별도_보관_화재예방_배치구조",
+      "relationLabel": "안전조치로 저감",
+      "accessibleName": "화재, 출발 ID Hazard_화재에서 가연성물질 별도 보관·화재예방 배치구조, 도착 ID Control_가연성물질_별도_보관_화재예방_배치구조로 안전조치로 저감",
+      "visibleLabel": "출발화재노드 ID Hazard_화재안전조치로 저감도착가연성물질 별도 보관·화재예방 배치구조노드 ID Control_가연성물질_별도_보관_화재예방_배치구조",
+      "geometry": {
+        "x": 302,
+        "y": 3405.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Hazard_화재",
+      "targetId": "Control_화재감시자_배치",
+      "relationLabel": "안전조치로 저감",
+      "accessibleName": "화재, 출발 ID Hazard_화재에서 화재감시자 배치, 도착 ID Control_화재감시자_배치로 안전조치로 저감",
+      "visibleLabel": "출발화재노드 ID Hazard_화재안전조치로 저감도착화재감시자 배치노드 ID Control_화재감시자_배치",
+      "geometry": {
+        "x": 302,
+        "y": 3508.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_confined_space",
+      "targetId": "Hazard_산소결핍_질식",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "밀폐공간 작업, 출발 ID Task_confined_space에서 산소결핍 질식, 도착 ID Hazard_산소결핍_질식로 위험요인 수반",
+      "visibleLabel": "출발밀폐공간 작업노드 ID Task_confined_space위험요인 수반도착산소결핍 질식노드 ID Hazard_산소결핍_질식",
+      "geometry": {
+        "x": 302,
+        "y": 3611.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_crane_lifting",
+      "targetId": "Hazard_하물_낙하",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "크레인 양중, 출발 ID Task_crane_lifting에서 하물 낙하, 도착 ID Hazard_하물_낙하로 위험요인 수반",
+      "visibleLabel": "출발크레인 양중노드 ID Task_crane_lifting위험요인 수반도착하물 낙하노드 ID Hazard_하물_낙하",
+      "geometry": {
+        "x": 302,
+        "y": 3714.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_electrical_work",
+      "targetId": "Document_workPlan",
+      "relationLabel": "문서화",
+      "accessibleName": "전기 작업, 출발 ID Task_electrical_work에서 작업계획서, 도착 ID Document_workPlan로 문서화",
+      "visibleLabel": "출발전기 작업노드 ID Task_electrical_work문서화도착작업계획서노드 ID Document_workPlan",
+      "geometry": {
+        "x": 302,
+        "y": 3817.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_electrical_work",
+      "targetId": "Hazard_감전_직접_간접_접촉",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "전기 작업, 출발 ID Task_electrical_work에서 감전(직접·간접 접촉), 도착 ID Hazard_감전_직접_간접_접촉로 위험요인 수반",
+      "visibleLabel": "출발전기 작업노드 ID Task_electrical_work위험요인 수반도착감전(직접·간접 접촉)노드 ID Hazard_감전_직접_간접_접촉",
+      "geometry": {
+        "x": 302,
+        "y": 3920.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_forklift_loading",
+      "targetId": "Document_workPlan",
+      "relationLabel": "문서화",
+      "accessibleName": "지게차 상하차, 출발 ID Task_forklift_loading에서 작업계획서, 도착 ID Document_workPlan로 문서화",
+      "visibleLabel": "출발지게차 상하차노드 ID Task_forklift_loading문서화도착작업계획서노드 ID Document_workPlan",
+      "geometry": {
+        "x": 302,
+        "y": 4023.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_forklift_loading",
+      "targetId": "Hazard_낙하물_화물_마스트",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "지게차 상하차, 출발 ID Task_forklift_loading에서 낙하물(화물·마스트), 도착 ID Hazard_낙하물_화물_마스트로 위험요인 수반",
+      "visibleLabel": "출발지게차 상하차노드 ID Task_forklift_loading위험요인 수반도착낙하물(화물·마스트)노드 ID Hazard_낙하물_화물_마스트",
+      "geometry": {
+        "x": 302,
+        "y": 4126.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_forklift_loading",
+      "targetId": "Hazard_전도_넘어짐_굴러떨어짐",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "지게차 상하차, 출발 ID Task_forklift_loading에서 전도(넘어짐·굴러떨어짐), 도착 ID Hazard_전도_넘어짐_굴러떨어짐로 위험요인 수반",
+      "visibleLabel": "출발지게차 상하차노드 ID Task_forklift_loading위험요인 수반도착전도(넘어짐·굴러떨어짐)노드 ID Hazard_전도_넘어짐_굴러떨어짐",
+      "geometry": {
+        "x": 302,
+        "y": 4229.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_forklift_loading",
+      "targetId": "Hazard_충돌_협착_끼임",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "지게차 상하차, 출발 ID Task_forklift_loading에서 충돌·협착(끼임), 도착 ID Hazard_충돌_협착_끼임로 위험요인 수반",
+      "visibleLabel": "출발지게차 상하차노드 ID Task_forklift_loading위험요인 수반도착충돌·협착(끼임)노드 ID Hazard_충돌_협착_끼임",
+      "geometry": {
+        "x": 302,
+        "y": 4332.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_hot_work",
+      "targetId": "Document_workPlan",
+      "relationLabel": "문서화",
+      "accessibleName": "화기 작업, 출발 ID Task_hot_work에서 작업계획서, 도착 ID Document_workPlan로 문서화",
+      "visibleLabel": "출발화기 작업노드 ID Task_hot_work문서화도착작업계획서노드 ID Document_workPlan",
+      "geometry": {
+        "x": 302,
+        "y": 4435.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_hot_work",
+      "targetId": "Hazard_폭발_인화성_증기_가스",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "화기 작업, 출발 ID Task_hot_work에서 폭발(인화성 증기·가스), 도착 ID Hazard_폭발_인화성_증기_가스로 위험요인 수반",
+      "visibleLabel": "출발화기 작업노드 ID Task_hot_work위험요인 수반도착폭발(인화성 증기·가스)노드 ID Hazard_폭발_인화성_증기_가스",
+      "geometry": {
+        "x": 302,
+        "y": 4538.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_hot_work",
+      "targetId": "Hazard_화재",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "화기 작업, 출발 ID Task_hot_work에서 화재, 도착 ID Hazard_화재로 위험요인 수반",
+      "visibleLabel": "출발화기 작업노드 ID Task_hot_work위험요인 수반도착화재노드 ID Hazard_화재",
+      "geometry": {
+        "x": 302,
+        "y": 4641.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_material_handling",
+      "targetId": "Document_workPlan",
+      "relationLabel": "문서화",
+      "accessibleName": "하역·운반, 출발 ID Task_material_handling에서 작업계획서, 도착 ID Document_workPlan로 문서화",
+      "visibleLabel": "출발하역·운반노드 ID Task_material_handling문서화도착작업계획서노드 ID Document_workPlan",
+      "geometry": {
+        "x": 302,
+        "y": 4744.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_material_handling",
+      "targetId": "Hazard_화물_낙하_하적단_붕괴",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "하역·운반, 출발 ID Task_material_handling에서 화물 낙하·하적단 붕괴, 도착 ID Hazard_화물_낙하_하적단_붕괴로 위험요인 수반",
+      "visibleLabel": "출발하역·운반노드 ID Task_material_handling위험요인 수반도착화물 낙하·하적단 붕괴노드 ID Hazard_화물_낙하_하적단_붕괴",
+      "geometry": {
+        "x": 302,
+        "y": 4847.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_scaffold_erection",
+      "targetId": "Hazard_비계_붕괴_도괴",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "비계 조립·해체, 출발 ID Task_scaffold_erection에서 비계 붕괴·도괴, 도착 ID Hazard_비계_붕괴_도괴로 위험요인 수반",
+      "visibleLabel": "출발비계 조립·해체노드 ID Task_scaffold_erection위험요인 수반도착비계 붕괴·도괴노드 ID Hazard_비계_붕괴_도괴",
+      "geometry": {
+        "x": 302,
+        "y": 4950.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_scaffold_erection",
+      "targetId": "Hazard_추락",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "비계 조립·해체, 출발 ID Task_scaffold_erection에서 추락, 도착 ID Hazard_추락로 위험요인 수반",
+      "visibleLabel": "출발비계 조립·해체노드 ID Task_scaffold_erection위험요인 수반도착추락노드 ID Hazard_추락",
+      "geometry": {
+        "x": 302,
+        "y": 5053.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_spray_painting",
+      "targetId": "Document_riskAssessment",
+      "relationLabel": "문서화",
+      "accessibleName": "도장(스프레이), 출발 ID Task_spray_painting에서 위험성평가, 도착 ID Document_riskAssessment로 문서화",
+      "visibleLabel": "출발도장(스프레이)노드 ID Task_spray_painting문서화도착위험성평가노드 ID Document_riskAssessment",
+      "geometry": {
+        "x": 302,
+        "y": 5156.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_spray_painting",
+      "targetId": "Hazard_유기용제_중독_급성_만성",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "도장(스프레이), 출발 ID Task_spray_painting에서 유기용제 중독(급성·만성), 도착 ID Hazard_유기용제_중독_급성_만성로 위험요인 수반",
+      "visibleLabel": "출발도장(스프레이)노드 ID Task_spray_painting위험요인 수반도착유기용제 중독(급성·만성)노드 ID Hazard_유기용제_중독_급성_만성",
+      "geometry": {
+        "x": 302,
+        "y": 5259.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_welding",
+      "targetId": "Document_workPlan",
+      "relationLabel": "문서화",
+      "accessibleName": "용접, 출발 ID Task_welding에서 작업계획서, 도착 ID Document_workPlan로 문서화",
+      "visibleLabel": "출발용접노드 ID Task_welding문서화도착작업계획서노드 ID Document_workPlan",
+      "geometry": {
+        "x": 302,
+        "y": 5362.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_welding",
+      "targetId": "Hazard_불티에_의한_화재_폭발",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "용접, 출발 ID Task_welding에서 불티에 의한 화재·폭발, 도착 ID Hazard_불티에_의한_화재_폭발로 위험요인 수반",
+      "visibleLabel": "출발용접노드 ID Task_welding위험요인 수반도착불티에 의한 화재·폭발노드 ID Hazard_불티에_의한_화재_폭발",
+      "geometry": {
+        "x": 302,
+        "y": 5465.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_work_at_height",
+      "targetId": "Document_riskAssessment",
+      "relationLabel": "문서화",
+      "accessibleName": "고소작업, 출발 ID Task_work_at_height에서 위험성평가, 도착 ID Document_riskAssessment로 문서화",
+      "visibleLabel": "출발고소작업노드 ID Task_work_at_height문서화도착위험성평가노드 ID Document_riskAssessment",
+      "geometry": {
+        "x": 302,
+        "y": 5568.61,
+        "width": 1072,
+        "height": 95
+      }
+    },
+    {
+      "sourceId": "Task_work_at_height",
+      "targetId": "Hazard_추락",
+      "relationLabel": "위험요인 수반",
+      "accessibleName": "고소작업, 출발 ID Task_work_at_height에서 추락, 도착 ID Hazard_추락로 위험요인 수반",
+      "visibleLabel": "출발고소작업노드 ID Task_work_at_height위험요인 수반도착추락노드 ID Hazard_추락",
+      "geometry": {
+        "x": 302,
+        "y": 5671.61,
+        "width": 1072,
+        "height": 95
+      }
+    }
+  ],
+  "staticOntologyAccessibilityContract": {
+    "nodeIdsAndKoreanNamesComplete": true,
+    "edgeEndpointIdsAndKoreanNamesComplete": true
+  },
+  "inaccessibleOntologyNodeCount": 0,
+  "inaccessibleOntologyEdgeCount": 0,
+  "disconnectedOntologyNodeCount": 0,
+  "unmarkedDisconnectedOntologyNodeCount": 0,
+  "staticOntologyNodeOverlapCount": 0,
+  "staticOntologyNodeOverlapPairs": [],
+  "clippedOntologyNodeCount": 0
+}

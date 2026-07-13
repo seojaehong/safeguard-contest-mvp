@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/current-target-localization-contract.test.ts tests/reporting-downloads.test.ts tests/reports-download-center.test.ts tests/operation-memory-visualization.test.ts tests/workspace-operation-graph.test.ts tests/ontology-typography-production-matrix.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/web-localization-current-target
+
+
+ Test Files  5 passed | 1 skipped (6)
+      Tests  68 passed | 1 skipped (69)
+   Start at  03:13:17
+   Duration  47.06s (transform 3.14s, setup 0ms, import 5.81s, tests 43.61s, environment 1ms)
+

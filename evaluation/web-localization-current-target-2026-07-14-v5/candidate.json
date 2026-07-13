@@ -1,0 +1,17 @@
+{
+  "capturedAt": "2026-07-14T03:16:43.5300614+09:00",
+  "branch": "fix/web-localization-current-target",
+  "sourceSha": "534a0ea55ae3f3f4de15aa52c2e26b2794ef4604",
+  "buildId": "qhU1pj4ss3rFtDiv3LFJI",
+  "buildCommand": "npm.cmd run build",
+  "selectedCandidateBuildCount": 1,
+  "supersededBuildCount": 3,
+  "finalCandidateSequence": [
+    "focused-tests",
+    "strict-typecheck",
+    "production-build",
+    "production-typography-matrix",
+    "production-browser"
+  ],
+  "note": "Only this SHA/build ID is selected; earlier build logs are isolated under superseded/"
+}

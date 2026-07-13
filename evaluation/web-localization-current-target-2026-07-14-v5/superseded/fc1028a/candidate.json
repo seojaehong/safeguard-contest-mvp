@@ -1,0 +1,9 @@
+{
+  "capturedAt": "2026-07-14T02:51:18.7803272+09:00",
+  "branch": "fix/web-localization-current-target",
+  "sourceSha": "fc1028a8af793ccf0e83d115a4ee9e09e7a6d4e1",
+  "buildId": "fFNb9jYAusj2IKDY2TvfM",
+  "buildCommand": "npm.cmd run build",
+  "buildCount": 1,
+  "note": "Final candidate build; superseded preflight artifacts are isolated under superseded/"
+}

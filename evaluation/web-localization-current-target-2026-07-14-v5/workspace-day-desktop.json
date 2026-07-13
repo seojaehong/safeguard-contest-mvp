@@ -1,0 +1,78 @@
+{
+  "capturedAt": "2026-07-13T18:20:26.320Z",
+  "sourceSha": "534a0ea55ae3f3f4de15aa52c2e26b2794ef4604",
+  "buildId": "qhU1pj4ss3rFtDiv3LFJI",
+  "harnessMode": "prod",
+  "route": "/workspace",
+  "theme": "day",
+  "viewport": {
+    "label": "desktop",
+    "width": 1440,
+    "height": 1000
+  },
+  "recoverableHydrationErrorCount": 0,
+  "horizontalOverflow": 0,
+  "overlapCount": 0,
+  "unnamedInteractiveCount": 0,
+  "issueOverlayDetected": false,
+  "minimumTextContrast": 5.591864347078552,
+  "lowContrastCount": 0,
+  "lowContrastSamples": [],
+  "relationLineCount": 3,
+  "inaccessibleRelationCount": 0,
+  "zeroLengthRelationCount": 0,
+  "missingConnectedNodeCount": 0,
+  "visibleOperationNodeCount": 4,
+  "clippedOperationNodeCount": 0,
+  "operationNodeOccupancy": 0.0861186335894618,
+  "operationRelationEdges": [
+    {
+      "sourceId": "workpack:current-세이프건설-서울-성수동-근린생활시설-외벽-도장-작업",
+      "targetId": "evidence:current-target-operation-memory-reference",
+      "accessibleName": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업에서 이동식 비계 추락 예방 지침로 근거",
+      "geometry": {
+        "x1": 50,
+        "y1": 50,
+        "x2": 84.6,
+        "y2": 65
+      }
+    },
+    {
+      "sourceId": "evidence:current-target-operation-memory-reference",
+      "targetId": "hazard:fall",
+      "accessibleName": "이동식 비계 추락 예방 지침에서 fall로 위험",
+      "geometry": {
+        "x1": 84.6,
+        "y1": 65,
+        "x2": 50,
+        "y2": 20
+      }
+    },
+    {
+      "sourceId": "hazard:fall",
+      "targetId": "control:난간과-작업발판-상태-확인",
+      "accessibleName": "fall에서 난간과 작업발판 상태 확인로 조치",
+      "geometry": {
+        "x1": 50,
+        "y1": 20,
+        "x2": 15.4,
+        "y2": 65
+      }
+    }
+  ],
+  "staticOntologyNodeCount": 0,
+  "staticOntologyEdgeCount": 0,
+  "staticOntologyNodes": [],
+  "staticOntologyEdges": [],
+  "staticOntologyAccessibilityContract": {
+    "nodeIdsAndKoreanNamesComplete": true,
+    "edgeEndpointIdsAndKoreanNamesComplete": true
+  },
+  "inaccessibleOntologyNodeCount": 0,
+  "inaccessibleOntologyEdgeCount": 0,
+  "disconnectedOntologyNodeCount": 0,
+  "unmarkedDisconnectedOntologyNodeCount": 0,
+  "staticOntologyNodeOverlapCount": 0,
+  "staticOntologyNodeOverlapPairs": [],
+  "clippedOntologyNodeCount": 0
+}

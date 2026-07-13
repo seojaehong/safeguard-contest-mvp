@@ -1,0 +1,38 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/current-target-localization-browser.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/web-localization-current-target
+
+ ❯ tests/current-target-localization-browser.test.ts (23 tests | 23 skipped) 1952ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/current-target-localization-browser.test.ts > current target localization browser matrix
+Error: Isolated Next server exited before readiness: {"code":1,"signal":null}
+   ▲ Next.js 15.5.20
+   - Local:        http://127.0.0.1:24139
+   - Network:      http://127.0.0.1:24139
+
+ ✓ Starting...
+[TypeError: routesManifest.dataRoutes is not iterable]
+
+ ❯ startIsolatedNextBrowserHarnessAttempt tests/helpers/isolated-next-browser-harness.ts:284:15
+    282|     while (Date.now() - startedAt < timeoutMs) {
+    283|       if (serverExit) {
+    284|         throw new Error(`Isolated Next server exited before readiness:…
+       |               ^
+    285|       }
+    286|       if (ready) {
+ ❯ startIsolatedNextBrowserHarness tests/helpers/isolated-next-browser-harness.ts:354:14
+ ❯ tests/current-target-localization-browser.test.ts:173:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  23 skipped (23)
+   Start at  02:48:05
+   Duration  3.76s (transform 303ms, setup 0ms, import 1.10s, tests 1.95s, environment 0ms)
+

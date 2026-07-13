@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/current-target-localization-browser.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/web-localization-current-target
+
+
+ Test Files  1 passed (1)
+      Tests  23 passed (23)
+   Start at  02:51:37
+   Duration  147.28s (transform 410ms, setup 0ms, import 1.17s, tests 145.30s, environment 0ms)
+

@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 5,
+  "generatedAt": "2026-07-14T03:21:46.6835309+09:00",
+  "verdict": "HOLD_FOR_INDEPENDENT_REVIEW",
+  "candidate": {
+    "sourceSha": "534a0ea55ae3f3f4de15aa52c2e26b2794ef4604",
+    "buildId": "qhU1pj4ss3rFtDiv3LFJI",
+    "harnessMode": "prod",
+    "selectedCandidateBuildCount": 1,
+    "supersededBuildCount": 3
+  },
+  "newProductCommits": [
+    "fc1028a8af793ccf0e83d115a4ee9e09e7a6d4e1",
+    "6d0b4dd8c0a54b235169217f9d0d2fcd170636c3",
+    "534a0ea55ae3f3f4de15aa52c2e26b2794ef4604"
+  ],
+  "lineage": {
+    "integrationTarget": "77d86416116b91809e1e0508c72564e06c8c31bc",
+    "minimalCherryPickOrder": [
+      "aca2f1db878e8597fd946ce99cabc9ecd4fe0345",
+      "14dc197e9c253c45a5ea79476acddbf6ac0f1a33",
+      "188b3b38de48c102f199cfd0942a93d59d56d7fa",
+      "d9aae1291ef0ef3ae66f86bbc4203b3482d0a655",
+      "828f1d81a83df589405d7bb292cc858614b5dc14",
+      "534a0ea55ae3f3f4de15aa52c2e26b2794ef4604",
+      "804833c4291ef01360928ee59b19e903a3b928bb",
+      "fc1028a8af793ccf0e83d115a4ee9e09e7a6d4e1",
+      "6d0b4dd8c0a54b235169217f9d0d2fcd170636c3",
+      "EVIDENCE_COMMIT"
+    ],
+    "simulatedCherryPick": {
+      "result": "SUCCESS",
+      "simulatedHead": "e592b8ea4d614eb61831ad24802bfbcbe326cba9",
+      "typographyContract": "ontology-hover-card strong tracking -0.3",
+      "ownedFileDiffCountAgainstCandidate": 0
+    },
+    "supersededEvidenceNotSelected": [
+      "1835d9fd703f84b8209f718bdc97cf3e7de55dea",
+      "1cd4d3691e62d4f5a4bace0a0c13e00197ed1a25",
+      "f15e88d46994768543b1071d99940b1e968db9d8",
+      "2fb3cc8c6b8f3610a8bfccf1859717a848cc17df"
+    ],
+    "normalizationCommitNotSelected": "4431de17b4b3f33713b70dd609e5ec9828448d12"
+  },
+  "changedProductFiles": [
+    "app/ontology/page.tsx",
+    "lib/ontology/operation-memory-visualization.ts",
+    "lib/reporting-downloads.ts",
+    "tests/current-target-localization-browser.test.ts",
+    "tests/current-target-localization-contract.test.ts",
+    "tests/operation-memory-visualization.test.ts",
+    "tests/ontology-typography-production-matrix.test.ts",
+    "tests/reporting-downloads.test.ts"
+  ],
+  "tests": {
+    "focused": {
+      "command": "npm.cmd test -- tests/current-target-localization-contract.test.ts tests/reporting-downloads.test.ts tests/reports-download-center.test.ts tests/operation-memory-visualization.test.ts tests/workspace-operation-graph.test.ts tests/ontology-typography-production-matrix.test.ts",
+      "filesPassed": 5,
+      "filesSkipped": 1,
+      "testsPassed": 68,
+      "testsSkipped": 1,
+      "failed": 0
+    },
+    "strictTypecheck": {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
+    },
+    "typographyProduction": {
+      "command": "$env:ONTOLOGY_TYPOGRAPHY_PROD_MATRIX='1'; npm.cmd test -- tests/ontology-typography-production-matrix.test.ts",
+      "filesPassed": 1,
+      "testsPassed": 1,
+      "failed": 0
+    },
+    "productionBrowser": {
+      "command": "$env:SAFECLAW_HARNESS_MODE='prod'; npm.cmd test -- tests/current-target-localization-browser.test.ts",
+      "filesPassed": 1,
+      "testsPassed": 24,
+      "failed": 0
+    },
+    "tddRedGates": [
+      "static ontology selector and endpoint accessibility",
+      "report source provenance raw enum leakage",
+      "governance corpus raw enum leakage",
+      "unknown period, risk, and improvement status leakage",
+      "unknown operation-memory metadata key/value leakage",
+      "known improvement status presentation"
+    ]
+  },
+  "build": {
+    "command": "npm.cmd run build",
+    "framework": "Next.js 15.5.20",
+    "compiled": true,
+    "staticPagesGenerated": 27,
+    "staticPagesExpected": 27,
+    "exitCode": 0
+  },
+  "browserMatrix": {
+    "routes": ["/ontology", "/knowledge", "/reports", "/workspace"],
+    "themes": ["day", "night"],
+    "viewports": [
+      { "label": "desktop", "width": 1440, "height": 1000 },
+      { "label": "mobile", "width": 391, "height": 844 }
+    ],
+    "screenshots": 16,
+    "routeMetricFiles": 16,
+    "contractSidecars": 1,
+    "maximumHorizontalOverflow": 0,
+    "maximumOverlapCount": 0,
+    "maximumUnnamedInteractiveCount": 0,
+    "recoverableHydrationErrors": 0,
+    "issueOverlayDetected": false
+  },
+  "staticOntology": {
+    "variants": 4,
+    "nodesPerVariant": 32,
+    "edgesPerVariant": 27,
+    "inaccessibleNodes": 0,
+    "inaccessibleEdges": 0,
+    "unmarkedDisconnectedNodes": 0,
+    "nodeOverlapPairs": 0,
+    "clippedNodes": 0,
+    "nodeEvidence": ["id", "accessibleName", "visibleLabel", "degree", "reviewRequired", "geometry"],
+    "edgeEvidence": ["sourceId", "targetId", "relationLabel", "accessibleName", "visibleLabel", "geometry"]
+  },
+  "operationMemory": {
+    "workspaceVariants": 4,
+    "edgesPerVariant": 3,
+    "inaccessibleEdges": 0,
+    "zeroLengthEdges": 0,
+    "missingConnectedNodes": 0,
+    "clippedNodes": 0
+  },
+  "hydrationAndTimestamps": {
+    "restoreRuns": 2,
+    "allRunsReadBeforeWrite": true,
+    "allWritesPreservedRestoredWorker": true,
+    "validGeneratedAtPreserved": true,
+    "validReadAtPreserved": true,
+    "invalidGeneratedAtCanonicalNull": true,
+    "invalidGeneratedAtPresentation": "생성 시각 확인 전"
+  },
+  "presentationBoundaries": {
+    "knownTypedValuesMapped": true,
+    "unknownTypedValuesNeutralized": true,
+    "unknownRawValuesExcludedFromUserOutputs": true,
+    "canonicalJsonValuesPreserved": true,
+    "reportsFailClosedCovered": true,
+    "koreanBeforeAfterCovered": true
+  },
+  "contrastObservations": [
+    { "route": "/knowledge", "dayMinimum": 5.37, "nightMinimum": 4.98, "maximumLowContrastCount": 0 },
+    { "route": "/ontology", "dayMinimum": 1.05, "nightMinimum": 1.21, "maximumLowContrastCount": 399 },
+    { "route": "/reports", "dayMinimum": 1.63, "nightMinimum": 4.0, "maximumLowContrastCount": 1 },
+    { "route": "/workspace", "dayMinimum": 5.53, "nightMinimum": 1.1, "maximumLowContrastCount": 1 }
+  ],
+  "reviewRequired": [
+    "Independent reviewer must decide the branch outcome.",
+    "Low-contrast samples recorded in route sidecars remain open because app/globals.css was outside remediation ownership.",
+    "Three pre-candidate builds are retained as superseded execution history; only one final candidate build is selected."
+  ],
+  "forbiddenScopeChanged": false,
+  "finalSelectionExcludesSupersededScreenshots": true
+}

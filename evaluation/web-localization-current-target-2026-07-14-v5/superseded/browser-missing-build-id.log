@@ -1,0 +1,38 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/current-target-localization-browser.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/web-localization-current-target
+
+ ❯ tests/current-target-localization-browser.test.ts (23 tests | 23 skipped) 1417ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/current-target-localization-browser.test.ts > current target localization browser matrix
+Error: Isolated Next server exited before readiness: {"code":1,"signal":null}
+   ▲ Next.js 15.5.20
+   - Local:        http://127.0.0.1:31515
+   - Network:      http://127.0.0.1:31515
+
+ ✓ Starting...
+[Error: Could not find a production build in the '.next' directory. Try building your app with 'next build' before starting the production server. https://nextjs.org/docs/messages/production-start-no-build-id]
+
+ ❯ startIsolatedNextBrowserHarnessAttempt tests/helpers/isolated-next-browser-harness.ts:284:15
+    282|     while (Date.now() - startedAt < timeoutMs) {
+    283|       if (serverExit) {
+    284|         throw new Error(`Isolated Next server exited before readiness:…
+       |               ^
+    285|       }
+    286|       if (ready) {
+ ❯ startIsolatedNextBrowserHarness tests/helpers/isolated-next-browser-harness.ts:354:14
+ ❯ tests/current-target-localization-browser.test.ts:173:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  23 skipped (23)
+   Start at  02:47:08
+   Duration  3.12s (transform 329ms, setup 0ms, import 912ms, tests 1.42s, environment 0ms)
+
