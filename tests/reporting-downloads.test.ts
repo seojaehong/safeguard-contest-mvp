@@ -905,7 +905,7 @@ describe("reporting downloads", () => {
     expect(csv).toContain(snapshot.source.workpackSavedAt);
   });
 
-  it("renders As-Is/To-Be markdown without external submission wording", () => {
+  it("renders Korean before-and-after markdown without external submission wording", () => {
     const exactPhotoApprovalBoundary = "개선 전/개선 후 사진 포함 승인";
     const legacyPhotoTerm = new RegExp(["Before", "After"].join("\\s*/\\s*"), "iu");
     const snapshot = buildReportSnapshot({
@@ -944,6 +944,7 @@ describe("reporting downloads", () => {
     const csv = buildReportCsv(snapshot);
 
     expect(csv.startsWith("\uFEFF구분,현장")).toBe(true);
+    expect(csv).toContain("개선 전,개선 후");
     expect(csv).toContain("위험성평가");
     expect(csv).toContain("개선사항");
     expect(csv).toContain("난간 보강");
