@@ -1,19 +1,20 @@
 {
   "schemaVersion": "safeclaw-workpack-share-v2-product-spec/v2",
   "specId": "workpack-share-v2-2026-07-13",
-  "revision": "independent-review-remediation-2",
+  "revision": "independent-review-remediation-3",
   "status": "HOLD_PENDING_INDEPENDENT_PASS",
   "metadata": {
     "branch": "feat/workpack-share-v2",
-    "remediationParent": "04b465bbe7131847cc01628cf72f592ff21bf14a",
-    "reviewRange": "59f4812..next-candidate",
+    "sourceBase": "7509d84d37e4ccef7e6ed38f24f6f6b7c44415b7",
+    "reviewEvidenceManifest": "evaluation/workpack-share-v2-2026-07-13/review-evidence.json",
     "reviewStatus": "pending",
-    "originalBase": "59f48123da62fb405e639da03912aa1ed6c000b9",
+    "reviewedClaim": false,
     "specOnly": true,
-    "writeFiles": [
+    "candidateWriteFiles": [
       "evaluation/workpack-share-v2-2026-07-13/spec.md",
       "evaluation/workpack-share-v2-2026-07-13/spec.json"
     ],
+    "evidenceOnlyWriteFile": "evaluation/workpack-share-v2-2026-07-13/review-evidence.json",
     "forbiddenEdits": [
       "product code",
       "tests",
@@ -60,11 +61,26 @@
       ]
     },
     "currentSessionApi": {
+      "route": "app/api/workpacks/[id]/share-sessions/route.ts",
       "createsAfterAdminAuth": true,
       "returns": [
         "shareSessionId",
         "expiresAt"
-      ]
+      ],
+      "currentJsonbFields": [
+        "recipients_snapshot",
+        "access_policy"
+      ],
+      "currentAccessPolicyShape": "JSON object with static access policy keys",
+      "dispatchCurrentlyReadsAccessPolicy": false,
+      "requiredChange": "persist and require access_policy.dispatchBinding generated entirely by the server"
+    },
+    "currentCommercialLocaleParser": {
+      "file": "lib/workpack-commercial.ts",
+      "function": "cleanLanguageCode",
+      "currentMissingFallback": "ko",
+      "currentAllowlistEnforced": false,
+      "requiredChange": "allowlisted result parser with review_required for missing, unsupported, partial, or conflicting locale evidence"
     },
     "currentDispatchChannels": [
       "email",
@@ -452,7 +468,7 @@
       },
       {
         "id": "review_required",
-        "entry": "requiresRevalidation=true or required signed localization envelope or participant snapshot needs review",
+        "entry": "requiresRevalidation=true, required signed localization envelope needs review, authoritative locale is missing unsupported partial or conflicting, or participant snapshot needs review",
         "primaryLabel": "review reason catalog label",
         "enabled": true,
         "action": "specific review owner route"
@@ -502,7 +518,7 @@
       },
       {
         "id": "stale",
-        "entry": "canonicalWorkpackRevision, signed envelope, participant, or channel token mismatch",
+        "entry": "non-locale workpack revision or digest, session identity, participant snapshot, or channel configuration binding mismatch",
         "primaryLabel": "변경사항 다시 확인",
         "enabled": true,
         "action": "stale reason owner route"
@@ -535,9 +551,19 @@
       },
       {
         "from": "sending",
-        "event": "freshness mismatch",
+        "event": "non-locale server binding freshness mismatch",
         "to": "stale",
-        "dispatchRequestCount": 0
+        "sessionState": "created",
+        "providerDispatchCount": 0,
+        "dispatchLogInsertCount": 0
+      },
+      {
+        "from": "sending",
+        "event": "locale payload or allowlist mismatch after session reload",
+        "to": "review_required",
+        "sessionState": "created",
+        "providerDispatchCount": 0,
+        "dispatchLogInsertCount": 0
       },
       {
         "from": "sending",
@@ -624,9 +650,9 @@
       {
         "id": "translation_missing",
         "state": "review_required",
-        "owner": "document-editor:foreignWorkerTransmission",
+        "owner": "document-editor:foreignWorkerTransmission or worker locale owner",
         "label": "번역본 검토",
-        "action": "open requested language artifact review",
+        "action": "open requested language artifact review, or repair missing unsupported partial or conflicting worker locale without fallback",
         "returnRoute": "/workspace?step=document&document=foreignWorkerTransmission&language={code}&returnStep=share&theme={theme}"
       },
       {
@@ -823,11 +849,23 @@
         "requestedChannels",
         "dispatchMode",
         "channels",
-        "configurationRevision",
+        "configurationVersion",
+        "configurationDigest",
         "resolvedAt",
         "expiresAt",
         "availabilityToken"
       ],
+      "configuration": {
+        "version": "channel-configuration/v1",
+        "digestAlgorithm": "canonical JSON SHA-256",
+        "digestInputs": [
+          "dispatch mode",
+          "provider and relay configured booleans",
+          "sender and template approval booleans",
+          "persistent idempotency policy"
+        ],
+        "secretValuesIncluded": false
+      },
       "token": {
         "algorithm": "HMAC-SHA256",
         "secret": "SAFECLAW_CHANNEL_AVAILABILITY_SECRET",
@@ -841,7 +879,8 @@
           "recipientDigest",
           "requestedChannels",
           "dispatchMode",
-          "configurationRevision",
+          "configurationVersion",
+          "configurationDigest",
           "resolvedAt",
           "expiresAt"
         ],
@@ -899,6 +938,56 @@
       "tl",
       "en"
     ],
+    "localeParser": {
+      "serverAuthoritative": true,
+      "normalization": "trim and ASCII lowercase only",
+      "allowlist": [
+        "ko",
+        "vi",
+        "zh",
+        "th",
+        "uz",
+        "mn",
+        "ne",
+        "km",
+        "id",
+        "my",
+        "tl",
+        "en"
+      ],
+      "acceptedShape": "exact allowlisted code",
+      "rejectedReasons": [
+        "missing",
+        "unsupported",
+        "partial",
+        "conflict"
+      ],
+      "forbiddenCoercions": [
+        "prefix match",
+        "alias substitution",
+        "region tag truncation",
+        "first two character truncation",
+        "Korean fallback for a non-Korean target",
+        "English fallback"
+      ],
+      "authoritativeInputsMustAgree": [
+        "workers.language_code",
+        "recipients_snapshot.languageCode",
+        "recipients_snapshot.workerSnapshot.languageCode"
+      ],
+      "invalidState": "review_required",
+      "invalidBeforeSession": {
+        "shareSessionRequestCount": 0,
+        "dispatchRequestCount": 0
+      },
+      "invalidAfterSessionReload": {
+        "sessionState": "created",
+        "providerDispatchCount": 0,
+        "dispatchLogInsertCount": 0
+      },
+      "koreanAllowedOnlyWhenAuthoritativeLocaleIsExactlyKo": true,
+      "manualPreviewOverrideChangesAuthority": false
+    },
     "localizedDispatchArtifact": {
       "artifactTypeName": "LocalizedDispatchArtifact",
       "artifactVersion": "localized-dispatch-artifact/v1",
@@ -1097,6 +1186,8 @@
         "alwaysVisibleChipCount": 0,
         "dropdownCount": 1,
         "optionCount": 12,
+        "automaticSelection": "allowlisted server recipient locale",
+        "manualSelectionPurpose": "preview only",
         "previewOverrideChangesRecipientLanguage": false,
         "previewOverrideChangesRecipientDigest": false,
         "previewOverrideChangesWorkpackRevision": false,
@@ -1119,6 +1210,146 @@
         "signature"
       ],
       "fixtureAuthority": "mock review and workpack GET route responses parsed by production resolver; no direct object attachment"
+    },
+    "sessionDispatchBinding": {
+      "version": "share-dispatch-binding/v1",
+      "serverAuthoritative": true,
+      "storage": "workpack_share_sessions.access_policy.dispatchBinding",
+      "existingJsonbSafe": true,
+      "existingJsonbEvidence": [
+        "supabase/migrations/010_commercial_operations.sql defines access_policy as a JSONB object",
+        "lib/workpack-commercial.ts buildShareSessionDraft writes an object",
+        "current readers consume known policy keys and can preserve an additional nested key"
+      ],
+      "sessionIdentity": [
+        "shareSessionId",
+        "organizationId",
+        "siteId",
+        "workpackId",
+        "createdBy"
+      ],
+      "fields": [
+        "version",
+        "sessionIdentity",
+        "canonicalWorkpackRevision",
+        "normalizedWorkpackDigest",
+        "recipientSnapshotDigest",
+        "requestedChannels",
+        "channelConfigurationVersion",
+        "channelConfigurationDigest",
+        "localePayloadDigest",
+        "createdAt",
+        "bindingDigest"
+      ],
+      "digestContracts": {
+        "normalizedWorkpackDigest": "sha256(canonical normalizeDispatchWorkpack(current server workpack payload))",
+        "recipientSnapshotDigest": "sha256(canonical complete server recipients sorted by workerId including locale and selected-channel contacts)",
+        "requestedChannels": "deduplicated canonical email,sms,kakao order",
+        "channelConfiguration": "channel-configuration/v1 plus current server configuration digest",
+        "localePayloadDigest": "sha256(canonical per-recipient targetLocale, artifactDigest, and localized payload sorted by workerId)",
+        "bindingDigest": "sha256(canonical binding fields excluding bindingDigest)"
+      },
+      "sessionCreate": {
+        "identityGeneratedBeforeInsert": "crypto.randomUUID()",
+        "rowIdEqualsBindingSessionId": true,
+        "createdAtSource": "server clock",
+        "clientDigestAuthority": false,
+        "atomicInsertFields": [
+          "id",
+          "recipients_snapshot",
+          "access_policy policy keys",
+          "access_policy.dispatchBinding"
+        ],
+        "partialInsertMayReturnSuccess": false,
+        "preSessionMismatch": {
+          "stage": "session_create",
+          "shareSessionCreated": false,
+          "shareSessionId": null,
+          "dispatchRequestCount": 0
+        }
+      },
+      "dispatchReload": {
+        "clientFieldsAreLookupOnly": [
+          "workpackId",
+          "shareSessionId",
+          "channels"
+        ],
+        "reloads": [
+          "session recipients_snapshot and access_policy.dispatchBinding",
+          "current workpack and reviewed envelopes",
+          "current worker rows",
+          "current channel configuration",
+          "current locale payloads"
+        ],
+        "exactComparisons": [
+          "session identity against row, auth user, and request lookup",
+          "canonicalWorkpackRevision",
+          "normalizedWorkpackDigest",
+          "recipientSnapshotDigest",
+          "requestedChannels",
+          "channelConfigurationVersion",
+          "channelConfigurationDigest",
+          "localePayloadDigest",
+          "bindingDigest"
+        ],
+        "clientStateAuthority": false,
+        "providerCallAfterMismatch": false,
+        "dispatchLogInsertAfterMismatch": false,
+        "automaticRetryAfterMismatch": false
+      },
+      "mismatchOutcomes": [
+        {
+          "reasonCode": "session_binding_missing_or_malformed",
+          "state": "stale",
+          "session": "created",
+          "providerDispatchCount": 0,
+          "dispatchLogInsertCount": 0
+        },
+        {
+          "reasonCode": "session_identity_mismatch",
+          "state": "stale",
+          "session": "created",
+          "providerDispatchCount": 0,
+          "dispatchLogInsertCount": 0
+        },
+        {
+          "reasonCode": "workpack_revision_or_digest_changed",
+          "state": "stale",
+          "session": "created",
+          "providerDispatchCount": 0,
+          "dispatchLogInsertCount": 0
+        },
+        {
+          "reasonCode": "recipient_snapshot_changed",
+          "state": "stale",
+          "session": "created",
+          "providerDispatchCount": 0,
+          "dispatchLogInsertCount": 0
+        },
+        {
+          "reasonCode": "channel_configuration_changed",
+          "state": "stale",
+          "session": "created",
+          "providerDispatchCount": 0,
+          "dispatchLogInsertCount": 0
+        },
+        {
+          "reasonCode": "locale_payload_changed",
+          "state": "review_required",
+          "session": "created",
+          "providerDispatchCount": 0,
+          "dispatchLogInsertCount": 0
+        },
+        {
+          "reasonCode": "locale_missing_unsupported_partial_or_conflict",
+          "state": "review_required",
+          "session": "created",
+          "providerDispatchCount": 0,
+          "dispatchLogInsertCount": 0
+        }
+      ],
+      "databaseMigrationRequired": false,
+      "migrationApprovalGate": "stop and request explicit approval if access_policy is not an object, rejects unknown keys, or cannot atomically persist and reload the binding; never substitute recipients_snapshot metadata or client state"
     },
     "adapterContract": {
       "preserve": [
@@ -1162,9 +1393,10 @@
       "at least one today participant",
       "each recipient has server worker UUID",
       "selected channel contact is present",
+      "each authoritative recipient locale is an exact allowlisted code with no source conflict",
       "authenticated channel resolution is unexpired and all selected channels are available",
       "required non-Korean signed envelopes are server-verified, approved, and source-matching",
-      "canonicalWorkpackRevision, participant digest, and channel token bindings equal validated values",
+      "canonicalWorkpackRevision, participant digest, channel configuration version and digest, and token bindings equal validated values",
       "admin auth session exists",
       "online",
       "no unresolved duplicate risk"
@@ -1174,7 +1406,7 @@
       "recipient snapshot and digest",
       "selected channels",
       "availabilityToken",
-      "idempotency attempt scope"
+      "idempotency attempt scope for UI duplicate-click prevention only"
     ],
     "createSession": {
       "method": "POST",
@@ -1190,8 +1422,10 @@
         "original generationEvidence",
         "required reviewed localization envelopes",
         "canonicalWorkpackRevision",
+        "allowlisted locale result for every recipient",
         "availability token signature and bindings",
-        "current resolveServerChannelAvailability result"
+        "current resolveServerChannelAvailability result",
+        "server-generated ShareDispatchBindingV1"
       ],
       "unresolvedOrUnavailableInsertCount": 0,
       "unresolvedOrUnavailableDispatchCount": 0,
@@ -1202,7 +1436,7 @@
       ],
       "atomicBeforeDispatch": true,
       "atomicScope": [
-        "one share session row containing complete recipients_snapshot and access_policy"
+        "one share session row containing complete recipients_snapshot and access_policy.dispatchBinding"
       ],
       "partialBindingCanReturnSuccess": false,
       "onPartialBinding": "fail route and make zero dispatch requests"
@@ -1233,6 +1467,9 @@
         "operatorNote"
       ],
       "requiresNewSessionId": true,
+      "requiresServerBindingReloadBeforeProvider": true,
+      "bindingMismatchProviderDispatchCount": 0,
+      "bindingMismatchDispatchLogInsertCount": 0,
       "channelChecksPreservedAsDefenseInDepth": true,
       "forbiddenPayloadAdditions": [
         "worker form values",
@@ -1241,13 +1478,21 @@
       ]
     },
     "betweenStepsFreshnessGate": {
+      "authority": "server reload and exact comparison against access_policy.dispatchBinding",
+      "clientStateAuthority": false,
       "inputs": [
+        "session identity",
         "canonicalWorkpackRevision",
-        "reviewed localization envelope set",
-        "recipientDigest",
-        "channel configurationRevision"
+        "normalizedWorkpackDigest",
+        "recipientSnapshotDigest",
+        "requestedChannels",
+        "channelConfigurationVersion",
+        "channelConfigurationDigest",
+        "localePayloadDigest",
+        "bindingDigest"
       ],
-      "onChange": "stop before dispatch and enter stale"
+      "onWorkpackRecipientChannelOrIdentityChange": "session remains created; provider dispatch count 0; log insert count 0; enter stale",
+      "onLocaleChangeOrInvalidLocale": "session remains created; provider dispatch count 0; log insert count 0; enter review_required"
     },
     "saveChannelLog": {
       "route": "/api/dispatch-logs adapter",
@@ -1400,13 +1645,27 @@
       "contentTruncatedByFixedPageHeight": false
     },
     "zoom200": {
-      "id": "root_font_200",
+      "id": "computed_text_200",
       "zoomPercent": 200,
-      "delivery": "after production fixture state settles, page.evaluate reads computed root font size and sets documentElement font-size to baseRootFontPx * 2 with important",
-      "verification": "expect.poll computed root font size equals baseRootFontPx * 2",
+      "delivery": "after production fixture state settles, capture each share application text element's computed font-size and numeric line-height, then page.evaluate applies 2x px inline overrides to those same elements",
+      "rootFontChangeAccepted": false,
+      "representativeProbeSelector": "[data-share-reflow-probe]",
+      "representativeProbeSurface": "natural localized preview text from the reviewed fixture artifact",
+      "testOnlyProbeInsertionAllowed": false,
+      "probeRequiresNumericComputedLineHeight": true,
+      "fontSizeRatioMin": 1.9,
+      "lineHeightRatioMin": 1.9,
+      "wrappingAssertion": "after lineCount > before lineCount",
+      "heightAssertion": "after rendered height > before rendered height",
       "deviceScaleFactor": 1,
       "deviceScaleFactorUsedForZoom": false,
+      "cssTransformUsedForZoom": false,
+      "cssZoomUsedForZoom": false,
+      "browserOrDeviceScaleUsedForZoom": false,
+      "screenshotScalingUsedForZoom": false,
+      "optionalScreenshotScale": "css",
       "viewportSetBeforeDelivery": true,
+      "viewportChangesDuringMode": 0,
       "exactViewports": [
         "1440x1000",
         "391x844"
@@ -1414,6 +1673,10 @@
       "fixedHeightCeiling": false,
       "fixedTaskDistanceCeiling": false,
       "required": [
+        "representative computed font-size ratio at least 1.9",
+        "representative computed line-height ratio at least 1.9",
+        "representative text line count increases",
+        "representative rendered height increases",
         "zero overlap",
         "zero text clipping",
         "zero horizontal overflow",
@@ -1422,6 +1685,7 @@
         "keyboard preview expand and collapse",
         "keyboard primary action",
         "document-only vertical scroll",
+        "zero nested vertical scroll in share body and preview",
         "no fixed CTA obscuring content"
       ]
     },
@@ -1498,11 +1762,14 @@
         "taskDistanceGate": true
       },
       {
-        "id": "root_font_200",
-        "delivery": "page.evaluate computed root font multiplied by 2 after fixture state settles",
-        "verification": "expect.poll computed root font equals base times 2",
+        "id": "computed_text_200",
+        "delivery": "page.evaluate doubles captured computed application text font-size and numeric line-height values after fixture state settles",
+        "verification": "representative font-size and line-height ratios are at least 1.9, line count and rendered height increase, and geometry remains clean",
         "deviceScaleFactor": 1,
         "deviceScaleFactorUsedForZoom": false,
+        "transformUsedForZoom": false,
+        "cssZoomUsedForZoom": false,
+        "screenshotScalingUsedForZoom": false,
         "taskDistanceGate": false
       }
     ],
@@ -1562,13 +1829,15 @@
       {
         "id": "review_required",
         "entry": "production_resolver",
-        "resolverInput": "required signed envelope missing, stale, rejected, malformed, or signature invalid in workpack GET",
+        "resolverInput": "table-driven required envelope missing, stale, rejected, malformed, or invalid; plus locale missing, xx, vi-VN, or conflicting server sources",
         "actions": [
           "activate 번역본 검토"
         ],
         "assertions": [
           "document editor route",
           "returnStep=share",
+          "automatic Korean fallback count 0 for non-Korean target",
+          "outbound locale payload count 0 for invalid locale",
           "session request count 0",
           "dispatch request count 0"
         ]
@@ -1737,14 +2006,19 @@
       {
         "id": "stale",
         "entry": "production_resolver",
-        "resolverInput": "canonicalWorkpackRevision, signed envelope, recipient digest, or channel token mismatch",
+        "resolverInput": "table-driven pre-session mismatch plus post-session server reload mismatch for session identity, workpack revision or digest, recipient snapshot, or channel configuration",
         "actions": [
-          "open canonical share URL"
+          "open canonical share URL",
+          "for post-session variants resolve session success then alter one mocked authoritative server input before dispatch preflight"
         ],
         "assertions": [
           "previous preview hidden",
           "previous session and result hidden",
-          "specific owner route"
+          "specific reasonCode and owner route",
+          "pre-session mismatch has session request count 0 and dispatch request count 0",
+          "post-session mismatch keeps session created",
+          "post-session provider dispatch count 0",
+          "post-session dispatch log insert count 0"
         ]
       }
     ],
@@ -1752,7 +2026,7 @@
     "caseCountFormula": "4 environments * 16 fixtures * 2 zoom modes",
     "caseCountByZoom": {
       "normal_100": 64,
-      "root_font_200": 64
+      "computed_text_200": 64
     },
     "requestAssertions": [
       "signed localization envelope and canonicalWorkpackRevision enter only through workpack GET production parser",
@@ -1763,6 +2037,9 @@
       "first send POST after click is /api/workpacks/{id}/share-sessions",
       "session body deep-equals recipients, channels, canonicalWorkpackRevision, and availabilityToken",
       "dispatch occurs only after valid session success and uses new shareSessionId",
+      "dispatch reloads access_policy.dispatchBinding and current server workpack, recipients, channel configuration, and locale payloads before any provider call",
+      "every session identity, workpack revision and digest, recipient snapshot digest, channel configuration version and digest, locale payload digest, requested channel, and binding digest comparison is exact",
+      "post-session binding mismatch preserves the created session and yields provider dispatch count 0 and dispatch log insert count 0",
       "session failure dispatch count is 0, primary is 초대 세션 다시 시도, and /dispatch href count is 0",
       "selected approved Kakao remains in resolver, session, and dispatch channels",
       "dispatch body deep-equals fixture workpackId, new shareSessionId, idempotencyKey, selected channels, and operatorNote",
@@ -1776,10 +2053,13 @@
       "owner CTAs have actual URL and next",
       "auth callback restores /workspace?step=share&theme={theme}",
       "production resolver opens share after return",
+      "invalid locale variants produce review_required with automatic Korean fallback count 0, outbound payload count 0, session request count 0, and dispatch request count 0",
       "visible primary count is 1",
       "screen title, login action, and localized preview counts are each at most 1",
       "normal_100 rect and task-distance gates pass",
-      "root_font_200 exact viewport has zero overlap, clipping, and horizontal overflow with correct DOM order"
+      "computed_text_200 doubles actual computed representative font-size and line-height by at least 1.9x",
+      "computed_text_200 representative localized text wraps to more lines and grows in rendered height",
+      "computed_text_200 exact viewport has zero overlap, clipping, horizontal overflow, nested scroll, or incorrect DOM order"
     ],
     "layoutAssertions": [
       "normal_100 task distance only",
@@ -1789,9 +2069,11 @@
       "horizontal overflow",
       "nested scroll",
       "preview row cap",
-      "root_font_200 delivered by page.evaluate, not deviceScaleFactor",
-      "root_font_200 at exact viewports has zero overlap, text clipping, and horizontal overflow",
-      "root_font_200 DOM and focus order"
+      "computed_text_200 delivered by per-element computed text overrides, not root font, transform, CSS zoom, deviceScaleFactor, viewport changes, or screenshot scaling",
+      "computed_text_200 representative font-size and line-height ratios are each at least 1.9",
+      "computed_text_200 representative text line count and rendered height increase",
+      "computed_text_200 at exact viewports has zero overlap, text clipping, horizontal overflow, or nested scroll",
+      "computed_text_200 DOM and focus order"
     ],
     "languageGate": {
       "readyFixtureLanguage": "vi",
@@ -1812,11 +2094,23 @@
         "en"
       ],
       "autoResolvedDispatchLanguage": "vi",
+      "autoResolutionAuthority": "allowlisted server locale parser",
+      "manualDropdownPurpose": "preview override only",
       "previewOverrideKeepsRecipientLanguage": true,
       "previewOverrideKeepsDispatchPlanDigest": true,
       "hangulResidueAllowedInNonKoreanArtifact": false,
+      "vietnameseKoreanResidualZeroSurfaces": [
+        "title and subject",
+        "site label and value",
+        "task label and value",
+        "core-risk label and value",
+        "entire body"
+      ],
       "koreanOnlyMetadataValueAllowed": false,
       "structuralEmojiAllowed": false,
+      "meaningSemantics": "text-only or accessible icon plus same-meaning visible text",
+      "iconOnlyMeaningAllowed": false,
+      "emojiOnlyMeaningAllowed": false,
       "requiredProvenanceAndReviewFields": [
         "provenance",
         "reviewerId",
@@ -1827,7 +2121,10 @@
         "artifactDigest",
         "signature"
       ],
-      "partialBodyOrEnglishFallbackState": "review_required",
+      "partialBodyEnglishOrUnknownLocaleFallbackState": "review_required",
+      "invalidLocaleSessionRequestCount": 0,
+      "invalidLocaleDispatchRequestCount": 0,
+      "nonKoreanTargetKoreanFallbackAllowed": false,
       "allTwelveLanguagesUseSameCompletenessContract": true
     },
     "providerCallsAllowed": false,
@@ -1866,6 +2163,8 @@
           "lib/workspace-pages.ts",
           "components/WorkflowSharePolicy.ts",
           "lib/workflow-share-client.ts",
+          "lib/workpack-commercial.ts",
+          "lib/workpack-commercial-store.ts",
           "lib/channel-availability.ts",
           "app/api/settings/channels/resolve/route.ts",
           "app/api/workpacks/[id]/share-sessions/route.ts",
@@ -1874,6 +2173,7 @@
           "tests/workspace-pages.test.ts",
           "tests/workflow-share-client.test.ts",
           "tests/workflow-share-panel-behavior.test.ts",
+          "tests/workpack-commercial.test.ts",
           "tests/channel-availability.test.ts",
           "tests/channel-availability-route.test.ts",
           "tests/dispatch-logs-route.test.ts",
@@ -1887,11 +2187,11 @@
           "tests/dispatch-logs-route.test.ts"
         ],
         "commands": [
-          "npm.cmd test -- tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts tests/workspace-pages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts --maxWorkers=1 --no-file-parallelism",
+          "npm.cmd test -- tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-commercial.test.ts tests/workspace-pages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts --maxWorkers=1 --no-file-parallelism",
           "npm.cmd run typecheck",
           "git diff --check"
         ],
-        "exit": "revalidation precedence, exact CTA strings, authenticated channel resolver token, unresolved or unavailable session count zero, stage-specific failure CTA, Kakao union, and dispatch defense-in-depth pass",
+        "exit": "revalidation precedence, exact CTA strings, authenticated channel resolver token, allowlisted locale parser, atomic access_policy.dispatchBinding insert and reload, exact server freshness comparisons, pre-session mismatch session count zero, post-session mismatch created session with provider and log counts zero, stage-specific failure CTA, Kakao union, and dispatch defense-in-depth pass",
         "rollback": "git revert <wave-1-sha>; do not revert DB rows or other workstream commits"
       },
       {
@@ -1979,7 +2279,7 @@
           "npm.cmd run audit:frontend-consistency",
           "git diff --check"
         ],
-        "exit": "128 Chromium cases, localization and channel authority, request order and payload, stage-specific CTA routes, normal task distance, root_font_200 delivery, and Vietnamese gates pass",
+        "exit": "128 Chromium cases, localization and channel authority, request order and payload, stage-specific CTA routes, normal task distance, computed_text_200 reflow delivery, and Vietnamese gates pass",
         "rollback": "git revert <wave-4-sha>; no real provider or DB mutation rollback exists"
       }
     ]
@@ -2021,9 +2321,10 @@
   "parityManifest": {
     "status": "HOLD_PENDING_INDEPENDENT_PASS",
     "review": {
-      "remediationParent": "04b465bbe7131847cc01628cf72f592ff21bf14a",
-      "reviewRange": "59f4812..next-candidate",
-      "reviewStatus": "pending"
+      "sourceBase": "7509d84d37e4ccef7e6ed38f24f6f6b7c44415b7",
+      "evidenceManifest": "evaluation/workpack-share-v2-2026-07-13/review-evidence.json",
+      "reviewStatus": "pending",
+      "reviewedClaim": false
     },
     "sequence": [
       "target",
@@ -2070,7 +2371,26 @@
     "channelResolver": {
       "route": "/api/settings/channels/resolve",
       "tokenTtlSeconds": 120,
-      "sessionBeforeResolvedAvailable": false
+      "sessionBeforeResolvedAvailable": false,
+      "configurationVersion": "channel-configuration/v1",
+      "configurationDigestRequired": true
+    },
+    "sessionDispatchBinding": {
+      "storage": "workpack_share_sessions.access_policy.dispatchBinding",
+      "serverGenerated": true,
+      "dispatchReloadsAndComparesAllFields": true,
+      "clientStateAuthority": false,
+      "preSessionMismatchSessionCount": 0,
+      "postSessionMismatchSessionState": "created",
+      "postSessionMismatchProviderDispatchCount": 0,
+      "postSessionMismatchLogInsertCount": 0
+    },
+    "localeParser": {
+      "allowlistCount": 12,
+      "invalidState": "review_required",
+      "invalidSessionCount": 0,
+      "invalidDispatchCount": 0,
+      "nonKoreanKoreanFallbackAllowed": false
     },
     "channels": [
       "email",
@@ -2084,9 +2404,14 @@
     "zoom200FixedHeightCeiling": false,
     "zoomModes": [
       "normal_100",
-      "root_font_200"
+      "computed_text_200"
     ],
-    "zoom200Delivery": "page_evaluate_root_font_2x",
+    "zoom200Delivery": "page_evaluate_computed_text_font_and_line_height_2x",
+    "zoom200MinComputedRatios": {
+      "fontSize": 1.9,
+      "lineHeight": 1.9
+    },
+    "zoom200RequiresWrapAndHeightChange": true,
     "fixtureIngress": "production_resolver_inputs_and_mocked_routes",
     "browserFixtureIds": [
       "empty",
@@ -2128,8 +2453,8 @@
     "location": "spec.md section 9",
     "runtime": "PowerShell plus node",
     "tddStyle": {
-      "redBaseline": "04b465b fails assertions for remediation metadata, signed envelope persistence, server channel resolver, revalidation precedence, session failure CTA, two zoom modes, and 128 cases",
-      "greenCandidate": "embedded command passes the same assertions plus MD/JSON manifest equality",
+      "redBaseline": "7509d84d37e4ccef7e6ed38f24f6f6b7c44415b7 fails assertions for machine-resolvable candidate evidence, computed text reflow, server session-dispatch binding, and allowlisted locale fail-closed behavior",
+      "greenCandidate": "embedded command passes the new assertions, MD/JSON manifest equality, resolvable full SHAs, and exact two-file candidate plus one-file evidence scopes",
       "refactorGate": [
         "JSON parse",
         "forbidden contradiction scan",
@@ -2144,17 +2469,20 @@
       "exact CTA strings",
       "reviewed localization envelope persistence and immutable generation seal",
       "authenticated channel resolver and token before session",
+      "server-generated access_policy.dispatchBinding and exact dispatch reload comparisons",
+      "allowlisted locale parser with no Korean fallback for non-Korean targets",
       "revalidation precedence before generic blocked",
       "stage-specific failure CTA and persisted history gate",
       "session lifecycle order",
       "zero dispatch on session failure",
       "email sms kakao channel union",
       "391x844 and 1440x1000 viewports",
-      "root_font_200 delivery without deviceScaleFactor and no fixed height ceiling",
+      "computed_text_200 actual font-size and line-height ratios, wrap and height change, and forbidden scale mechanisms",
       "128-case matrix arithmetic",
       "production resolver fixture ingress",
       "all blocking reason owner action return routes",
       "localized artifact editor and authenticated persistence authority",
+      "machine-resolvable source base and candidate refs with exact commit scopes",
       "forbidden contradiction scan"
     ],
     "expectedResult": "PARITY_PASS"
@@ -2163,9 +2491,12 @@
     "jsonParse": "PASS required",
     "mdJsonParity": "PARITY_PASS required",
     "gitDiffCheck": "PASS required",
-    "changedFiles": [
+    "candidateCommitChangedFiles": [
       "evaluation/workpack-share-v2-2026-07-13/spec.md",
       "evaluation/workpack-share-v2-2026-07-13/spec.json"
+    ],
+    "evidenceCommitChangedFiles": [
+      "evaluation/workpack-share-v2-2026-07-13/review-evidence.json"
     ],
     "commitRequired": true,
     "pullRebaseRequired": true,
