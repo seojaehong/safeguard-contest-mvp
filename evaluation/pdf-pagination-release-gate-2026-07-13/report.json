@@ -4,6 +4,23 @@
   "branch": "fix/pdf-pagination-release-gate",
   "status": "pass",
   "databaseChanges": false,
+  "budgets": {
+    "requestBytes": 262144,
+    "combinedRows": 128,
+    "fieldCharacters": 4000,
+    "renderLines": 512,
+    "pages": 8,
+    "overBudgetBehavior": "reject_without_truncation"
+  },
+  "payloadTooLargeResponse": {
+    "status": 413,
+    "cacheControl": "no-store",
+    "body": {
+      "ok": false,
+      "code": "PDF_EXPORT_LIMIT_EXCEEDED",
+      "message": "PDF 내보내기 요청이 허용된 크기 한도를 초과했습니다."
+    }
+  },
   "regressionFixture": {
     "inputRows": 64,
     "pageAssertion": ">1",
@@ -12,21 +29,37 @@
     "firstPageTitleExtractable": true,
     "lastPageApprovalAndDisclaimerExtractable": true
   },
+  "preservedErrorContracts": {
+    "fontAssetFailure": {
+      "status": 500,
+      "error": "PDF_FONT_ASSET_UNAVAILABLE"
+    },
+    "nonFontFailures": "logged_and_rethrown"
+  },
   "tdd": {
-    "red": {
-      "command": "npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t \"paginates long content\"",
+    "budgetRed": {
+      "command": "npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t \"rejects\"",
       "result": "expected_failure",
       "testFilesFailed": 1,
-      "testsFailed": 1,
-      "actualPages": 1
+      "testsFailed": 4,
+      "actualStatus": 200,
+      "expectedStatus": 413
     },
-    "green": {
+    "budgetGreen": {
+      "command": "npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t \"rejects\"",
+      "result": "pass",
+      "testFilesPassed": 1,
+      "testsPassed": 4,
+      "testsFailed": 0,
+      "testsSkipped": 12
+    },
+    "paginationGreen": {
       "command": "npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t \"paginates long content\"",
       "result": "pass",
       "testFilesPassed": 1,
       "testsPassed": 1,
       "testsFailed": 0,
-      "testsSkipped": 11
+      "testsSkipped": 15
     }
   },
   "verification": [
@@ -34,9 +67,9 @@
       "command": "npm.cmd test -- tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts",
       "exitCode": 0,
       "testFilesPassed": 2,
-      "testsPassed": 17,
+      "testsPassed": 21,
       "testsFailed": 0,
-      "integrationTests": 12,
+      "integrationTests": 16,
       "fontFailureTests": 5
     },
     {
@@ -47,7 +80,7 @@
     {
       "command": "npm.cmd run build",
       "exitCode": 0,
-      "compileSeconds": 33.9,
+      "compileSeconds": 10.8,
       "staticPagesGenerated": 27,
       "staticPagesExpected": 27
     },
