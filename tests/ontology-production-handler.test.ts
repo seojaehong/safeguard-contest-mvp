@@ -45,6 +45,7 @@ function generatedResponse(question: string, riskAssessmentDraft = "검증용 �
 describe("production ontology docpack handler", () => {
   test.each([
     ["고소 작업대 작업", "고소작업"],
+    ["차량계·기계 인접작업", "지게차 상하차"],
     ["차량계 하역운반기계 인접 작업", "지게차 상하차"],
     ["전기 설비 작업", "전기 작업"],
   ])("preserves '%s' through the actual evidence handler", async (question, canonicalTask) => {

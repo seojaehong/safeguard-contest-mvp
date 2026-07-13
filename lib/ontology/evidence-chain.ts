@@ -459,6 +459,39 @@ const MATERIALIZATION_DOCUMENT_KEYS: Readonly<
   tbm: ["tbmBriefing", "tbmLogDraft"],
 };
 
+const EVIDENCE_CITATION_BOUNDARY = /[\s|,;()[\]{}<>"'`]/u;
+
+function isEvidenceCitationBoundary(character: string | undefined): boolean {
+  return character === undefined || EVIDENCE_CITATION_BOUNDARY.test(character);
+}
+
+function extractEvidenceCitationTokens(
+  line: string,
+  allowedCitedUids: readonly string[],
+): ReadonlySet<string> {
+  const tokens = new Set<string>();
+  for (const rawCitedUid of allowedCitedUids) {
+    const citedUid = rawCitedUid.normalize("NFC");
+    if (!parseCitedUid(citedUid)) continue;
+
+    let searchFrom = 0;
+    while (searchFrom <= line.length - citedUid.length) {
+      const start = line.indexOf(citedUid, searchFrom);
+      if (start < 0) break;
+      const end = start + citedUid.length;
+      if (
+        isEvidenceCitationBoundary(line[start - 1]) &&
+        isEvidenceCitationBoundary(line[end])
+      ) {
+        tokens.add(citedUid);
+        break;
+      }
+      searchFrom = start + 1;
+    }
+  }
+  return tokens;
+}
+
 export function verifyEvidenceMaterialization(input: {
   evidenceChainState: EvidenceChainState;
   pack: Pick<EvidenceChainPack, "controls" | "materializationTargets">;
@@ -532,7 +565,13 @@ export function verifyEvidenceMaterialization(input: {
         for (const [index, rawLine] of lines.entries()) {
           const line = rawLine.normalize("NFC");
           if (!line.includes(plan.controlLabel.normalize("NFC"))) continue;
-          const citedEvidence = allowedEvidence.filter((source) => line.includes(source.citedUid));
+          const citationTokens = extractEvidenceCitationTokens(
+            line,
+            allowedEvidence.map((source) => source.citedUid),
+          );
+          const citedEvidence = allowedEvidence.filter((source) =>
+            citationTokens.has(source.citedUid.normalize("NFC"))
+          );
           if (citedEvidence.length === 0) continue;
           records.push({
             materialized: true,

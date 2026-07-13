@@ -42,6 +42,45 @@ function requireReviewRequired(input: string) {
   return resolution.pack;
 }
 
+function requireVerifiedGuidanceMaterializationFixture() {
+  const sourcePack = requireReviewRequired("고소작업");
+  const sourceControl = sourcePack.controls.find(
+    (control) => control.controlId === "fall-work-platform",
+  );
+  const sourcePlan = sourcePack.materializationTargets.find(
+    (plan) => plan.controlId === "fall-work-platform",
+  );
+  const sourceGuidance = sourceControl?.guidanceEvidence[0];
+  if (!sourceControl || !sourcePlan || !sourceGuidance) {
+    throw new Error("expected fall Control guidance");
+  }
+  const resolvedGuidance = {
+    ...sourceGuidance,
+    reviewState: "verified" as const,
+    resolution: "resolved" as const,
+  };
+  const obligation = classifyControlObligation([resolvedGuidance]);
+  return {
+    control: {
+      ...sourceControl,
+      lawEvidence: [],
+      guidanceEvidence: [resolvedGuidance],
+      guidanceStatus: "verified" as const,
+      guidanceReviewRequired: false,
+      obligation,
+    },
+    plan: {
+      ...sourcePlan,
+      obligation,
+      lawCitedUids: [],
+      guidanceCitedUids: [resolvedGuidance.citedUid],
+      guidanceStatus: "verified" as const,
+      guidanceReviewRequired: false,
+    },
+    guidance: resolvedGuidance,
+  };
+}
+
 const publishedLaw: ControlEvidenceSource = {
   sourceType: "law",
   relation: "mandatedBy",
@@ -786,6 +825,21 @@ describe("pipeline and document materialization contract", () => {
     ]);
   });
 
+  test("does not materialize Article 172 from an Article 172-2 citation token", () => {
+    const pack = requireReviewRequired("차량계·기계 인접작업");
+    const plan = pack.materializationTargets[0];
+    const lawUid = plan?.lawCitedUids[0];
+    if (!plan || !lawUid) throw new Error("expected vehicle current-law plan");
+
+    expect(verifyEvidenceMaterialization({
+      evidenceChainState: "resolved",
+      pack,
+      documents: {
+        riskAssessmentDraft: `${plan.controlLabel} | ${lawUid}의2`,
+      },
+    })).toEqual([]);
+  });
+
   test("never materializes a Control from SIF-only or different-line evidence", () => {
     const pack = requireReviewRequired("차량계·기계 인접작업");
     const plan = pack.materializationTargets[0];
@@ -806,57 +860,43 @@ describe("pipeline and document materialization contract", () => {
   });
 
   test("records verified Control-scoped KOSHA guidance with its technical role", () => {
-    const sourcePack = requireReviewRequired("고소작업");
-    const sourceControl = sourcePack.controls.find(
-      (control) => control.controlId === "fall-work-platform",
-    );
-    const sourcePlan = sourcePack.materializationTargets.find(
-      (plan) => plan.controlId === "fall-work-platform",
-    );
-    const sourceGuidance = sourceControl?.guidanceEvidence[0];
-    if (!sourceControl || !sourcePlan || !sourceGuidance) {
-      throw new Error("expected fall Control guidance");
-    }
-    const verifiedGuidance = {
-      ...sourceGuidance,
-      reviewState: "verified" as const,
-      resolution: "resolved" as const,
-    };
-    const obligation = classifyControlObligation([verifiedGuidance]);
-    const control = {
-      ...sourceControl,
-      lawEvidence: [],
-      guidanceEvidence: [verifiedGuidance],
-      guidanceStatus: "verified" as const,
-      guidanceReviewRequired: false,
-      obligation,
-    };
-    const plan = {
-      ...sourcePlan,
-      obligation,
-      lawCitedUids: [],
-      guidanceCitedUids: [verifiedGuidance.citedUid],
-      guidanceStatus: "verified" as const,
-      guidanceReviewRequired: false,
-    };
+    const { control, plan, guidance } = requireVerifiedGuidanceMaterializationFixture();
 
     expect(verifyEvidenceMaterialization({
       evidenceChainState: "resolved",
       pack: { controls: [control], materializationTargets: [plan] },
       documents: {
-        riskAssessmentDraft: `${plan.controlLabel} | ${verifiedGuidance.citedUid}`,
+        riskAssessmentDraft: `${plan.controlLabel} | ${guidance.citedUid}`,
       },
     })).toEqual([
       expect.objectContaining({
         controlId: "fall-work-platform",
-        citedUids: [verifiedGuidance.citedUid],
+        citedUids: [guidance.citedUid],
         citedEvidence: [{
-          citedUid: verifiedGuidance.citedUid,
+          citedUid: guidance.citedUid,
           role: "kosha_technical_guidance",
         }],
       }),
     ]);
   });
+
+  test.each(["prefix", "suffix"] as const)(
+    "does not materialize KOSHA guidance when the allowed UID is a %s of another token",
+    (collision) => {
+      const { control, plan, guidance } = requireVerifiedGuidanceMaterializationFixture();
+      const collidingUid = collision === "prefix"
+        ? `${guidance.citedUid}-supplement`
+        : `ref:safety_reference_items:archive-${guidance.citedUid}`;
+
+      expect(verifyEvidenceMaterialization({
+        evidenceChainState: "resolved",
+        pack: { controls: [control], materializationTargets: [plan] },
+        documents: {
+          riskAssessmentDraft: `${plan.controlLabel} | ${collidingUid}`,
+        },
+      })).toEqual([]);
+    },
+  );
 
   test("does not claim materialization for review-required or unmatched output", () => {
     const pack = requireReviewRequired("차량계·기계 인접작업");
