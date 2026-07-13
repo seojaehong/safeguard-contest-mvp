@@ -1,31 +1,31 @@
 {
-  "schemaVersion": "2.0.0",
+  "schemaVersion": "2.1.0",
   "kind": "safeclaw-spec-review-evidence/v1",
-  "capturedAt": "2026-07-13T18:08:03.934Z",
+  "capturedAt": "2026-07-13T18:45:22.766Z",
   "branch": "feat/workpack-document-editors-v2",
-  "candidateCommit": "248fc9504874f9bdc13ba5a802ddae8f521671e0",
-  "candidateParent": "ee8e314489f9326d68080cf7bca3cee86226f9de",
+  "candidateCommit": "0a9b2d93678ecfef2c711b4f293db6e1ba30d132",
+  "candidateParent": "75b522e8ee49f86482300a5bb3e3ae4ff0dc09ac",
   "sourceBase": "d3ad86530bc786d8024206cc5b7c7db60c055278",
   "currentIntegrationTarget": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
   "mergeBase": "d3ad86530bc786d8024206cc5b7c7db60c055278",
   "candidateArtifacts": [
     {
       "path": "evaluation/workpack-document-editors-v2-2026-07-13/spec.md",
-      "gitBlob": "2adfb3540594db1d6d2f4fed471df83e1dc7dbbe",
-      "sha256": "d54f3396498e0eaaeb27bc7707d9a3c553c824cc6b3280222b07db2b8edad12e",
-      "bytes": 345657
+      "gitBlob": "166c41bce665bb43cda0cb589870153c643244c6",
+      "sha256": "6bc57448f0472330cee9f01d8f64999e03d3f78c4269c061ef36c71a673b3b2f",
+      "bytes": 345402
     },
     {
       "path": "evaluation/workpack-document-editors-v2-2026-07-13/spec.json",
-      "gitBlob": "9c71f7f90b8616a65df162372e77cbf8932c0559",
-      "sha256": "f79090e38943fa5e992c03766d8ae8087bce003ae3931d9b421532c2158b383f",
-      "bytes": 248294
+      "gitBlob": "bdf3374af5175fcdbe9567cb42df2b690a6eddb0",
+      "sha256": "945ee139302a9a959b2c3751ac2348aa864fe372ac9d1851195412a3639c0b57",
+      "bytes": 248786
     },
     {
       "path": "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs",
-      "gitBlob": "b444fc0b44c081758d7e2acfbb276a137c5dac92",
-      "sha256": "3c134a6fd2cdbd83752b98a33a74784b9431d852e31727363bb7cfa58e3f0dd1",
-      "bytes": 77568
+      "gitBlob": "4e433be11059e038dc48fb291d687b272c2369cd",
+      "sha256": "7a96257950b7c10efa9d61a00cdf0e179a4bba3e051c3a21f43205669b3c4487",
+      "bytes": 67680
     }
   ],
   "targetBlobs": [
@@ -314,7 +314,7 @@
       "git -C <watched-worktree> status --short --branch",
       "recompute changed-path intersection against exact owned/readOnly/test/blocked-authority paths",
       "re-run target blob source-shape checks",
-      "record command log and snapshot JSON in implementation evidence"
+      "after approval, record the refreshed snapshot through the separately reviewed post-approval process"
     ],
     "amendmentPolicy": {
       "noAmendment": [
@@ -332,33 +332,36 @@
       "localResolution": "Intersecting work pauses only the affected file/wave for owner coordination. It does not globally block unrelated work; the global program is already blocked by approval gates."
     },
     "integrationOrder": [
-      "Obtain fresh independent spec PASS and externally evidenced user DB authority approval; otherwise stop before Wave 0.",
-      "Require the approved target SHA and migration/RPC proposal digest to match the external approval manifest.",
+      "Obtain fresh independent spec PASS and explicit user DB authority approval outside repository-authored evidence; otherwise stop before Wave 0.",
+      "After explicit user approval outside repository-authored evidence, design and independently review a post-approval authority/verifier contract bound to the then-current target and proposal.",
       "Refresh intersections and resolve only affected symbols with their owners.",
       "Never copy whole files, directories, worktree outputs, caches, screenshots, or another task's evidence.",
-      "Run implementation mode with immutable approval, command, artifact, and raw browser evidence."
+      "Until that later verifier exists, run the current implementation mode only as a fail-closed assertion and expect IMPLEMENTATION_BLOCKED_PENDING_USER_DB_APPROVAL."
     ]
   },
   "behaviorExecution": {
     "executed": false,
-    "reason": "Spec-review evidence binds declarations, conflict snapshot, and immutable target source shapes only; no browser, export, save, share, photo, DB, migration, RPC, or product behavior was executed."
+    "reason": "Spec-review evidence binds declarations, the conflict snapshot, and immutable target blob identities only; no source-shape behavior, browser, export, save, share, photo, DB, migration, RPC, or product behavior was executed."
   },
   "implementationExecution": {
     "executed": false,
-    "reason": "The entire implementation program including Wave 0 remains BLOCKED_PENDING_USER_DB_APPROVAL; no implementation artifact or command receipt is claimed."
+    "reason": "The entire implementation program including Wave 0 remains BLOCKED_PENDING_USER_DB_APPROVAL; implementation mode accepts no claimed gate, approval, receipt, artifact, sidecar, or success path."
   },
   "reviewClaims": [
     "candidate JSON parses",
+    "all 19 JSON domains satisfy recursive object, array, scalar, and relationship validation",
     "complete structural Markdown and generated human requirements match canonical JSON",
     "outside Markdown prose is normalized and hash-bound",
     "candidate and evidence commits have disjoint exact scopes",
     "candidate and target blobs are loaded from immutable commits",
-    "conflict snapshot is copied byte-semantically from the candidate contract",
-    "source-shape, registry, codec, wave ownership, trust schema, and browser negative fixtures are mechanically validated"
+    "conflict snapshot is copied byte-semantically from the candidate contract with non-empty watched refs",
+    "12 document primary actions and non-empty field arrays, photo-event relationships, codec references, wave blocking, and strict RFC3339 timestamps are mechanically validated",
+    "browser executions are zero and implementation mode is unconditionally blocked"
   ],
   "notClaims": [
     "fresh independent reviewer PASS",
     "explicit user DB migration/RPC approval",
+    "repository authentication of a Codex/user approval event",
     "implementation readiness",
     "product or browser behavior PASS",
     "export round-trip PASS",
