@@ -1,5 +1,6 @@
 import { spawn, spawnSync, type ChildProcessWithoutNullStreams } from "node:child_process";
 import fs from "node:fs";
+import { createServer } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { chromium, type Browser } from "playwright";
@@ -47,6 +48,36 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+function probeLoopbackPort(port: number): Promise<number | null> {
+  return new Promise((resolve, reject) => {
+    const probe = createServer();
+    probe.unref();
+    probe.once("error", (error: NodeJS.ErrnoException) => {
+      if (error.code === "EACCES" || error.code === "EADDRINUSE") {
+        resolve(null);
+        return;
+      }
+      reject(error);
+    });
+    probe.listen(port, "127.0.0.1", () => {
+      const address = probe.address();
+      const selectedPort = typeof address === "object" && address ? address.port : null;
+      probe.close((error) => error ? reject(error) : resolve(selectedPort));
+    });
+  });
+}
+
+async function resolveLoopbackPort(preferredPort: number): Promise<number> {
+  for (let offset = 0; offset < 512; offset += 1) {
+    const candidate = 20_000 + ((preferredPort - 20_000 + offset) % 20_000);
+    const available = await probeLoopbackPort(candidate);
+    if (available !== null) return available;
+  }
+  const fallback = await probeLoopbackPort(0);
+  if (fallback === null) throw new Error("Unable to allocate an isolated Next.js loopback port");
+  return fallback;
+}
+
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs);
@@ -91,7 +122,8 @@ export async function startIsolatedNextBrowserHarness(
 
   const timeoutMs = options.timeoutMs ?? 90_000;
   const mode = options.mode ?? "dev";
-  const port = 20_000 + ((process.pid * 97 + options.portSalt) % 30_000);
+  const preferredPort = 20_000 + ((process.pid * 97 + options.portSalt) % 20_000);
+  const port = await resolveLoopbackPort(preferredPort);
   const baseUrl = `http://127.0.0.1:${port}`;
   let serverOutput = "";
   let serverExit: ServerExit | null = null;
