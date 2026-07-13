@@ -1,5 +1,10 @@
 {
-  "status": "pass",
+  "verificationStatus": "pass",
+  "launchReadiness": "blocked",
+  "launchBlockers": [
+    "RLS audit findings require an approved migration and authenticated cross-tenant verification.",
+    "Phase A ontology production provenance bridge remains unresolved."
+  ],
   "sourceSha": "45df617d6eced74bc5e9673104aa306338612ce6",
   "sourceIdentity": "a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb",
   "branch": "feat/backend-release-integration-v2",
@@ -8,6 +13,7 @@
     "emptyInputLength": 0,
     "emptyPlaceholder": "",
     "emptyRestoreButtonCount": 0,
+    "emptyAutoTagRowCount": 0,
     "emptyCurrentBriefCount": 0,
     "emptySourceStatusCount": 0,
     "filledBottomDeltaPx": 0,

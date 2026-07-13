@@ -1,104 +1,70 @@
-# SafeClaw frontend audit runner selective port v2
+# SafeClaw Frontend Audit Runner V2 Final Reconciliation
 
 ## Verdict
 
-**BLOCKED / REJECT for integration.** The harness port is present, but the full static contract remains RED and the 108-row browser audit was not run.
+**Verification PASS for source `45df617d6eced74bc5e9673104aa306338612ce6`.**
 
-- Authoritative base: `826352719eab692ed9c5c638bfd9b2db691e95b9`
-- Read-only source: `44c27e9153d1c33b6b18a70854ee9240336bb1ae`
-- Current backend integration head to review against: `b30c0d81f30881a0e63d0de6080a75a152290ac2`
-- Output: `evaluation/frontend-audit-runner-port-v2-2026-07-11`
-- Next.js: `15.5.20`
-- DB writes/migrations/uploads: none
+This report supersedes the earlier blocked port report from 2026-07-11. That historical state had 2,444 unresolved static findings and did not run the 108-row browser audit. The integrated remediation now has a zero-violation static prerequisite and a complete browser run.
 
-## RED / GREEN
+## Source Identity
 
-Initial TDD RED:
+- Source SHA: `45df617d6eced74bc5e9673104aa306338612ce6`
+- Source identity: `a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb`
+- Product pages: `32`
+- Product components: `23`
+- Database/schema/data mutation: none
 
-- Command: `npm.cmd test -- tests/frontend-design-contract.test.ts tests/frontend-route-coverage.test.ts tests/frontend-shared-surfaces.test.ts tests/frontend-workbench-visual-contract.test.ts`
-- Result: 4 files failed; 19 failed and 4 passed before the contract module was ported.
-- Log: `red-static-tests.log`
+## Static Contract
 
-Full-contract RED after port:
+- Status: pass
+- Coverage issues: `0`
+- Violations: `0`
+- Important declarations: `0`
+- Artifact: `static-audit.json`
 
-- Same focused four-file command.
-- Result: 4 files failed; 48 failed and 22 passed (70 total).
-- Source-only expectations include excluded `SafeGuardCommandCenter.tsx`, workbench geometry, source CSS tokens, and source route hierarchy.
-- Log: `focused-contract-tests.log`
+The earlier blocked classification remains available in Git history. It is not the current integration verdict.
 
-Focused parser/role GREEN:
+## Production Bundles
 
-- Command: `npm.cmd test -- tests/frontend-design-contract.test.ts -t "normalizes inert important shadows|scopes reviewed module rail"`
-- Result: 1 file passed; 2 passed and 18 skipped.
-- The same inset shadow and 14px radius remain rejected outside exact approved selectors.
-- Log: `parser-contract-final.log`
+Normal build:
 
-## Static Contract Classification
+- Static pages: `27/27`
+- Build ID: `nJTlGA4TIREL_IJPusibN`
+- Chunks: `98`
+- Audit markers: `0`
+- Artifact: `bundle-normal.json`
 
-Original source audit: `status=fail`, 2,488 violations, 32 pages, 24 components, zero route coverage issues.
+Audit build:
 
-After removing the globally shipped audit trigger from `components/`, current product inventory is 32 pages and 23 product components. The audit-only probe lives under `lib/frontend-audit/` and is included explicitly in the source-identity digest without inflating the product component count.
+- Static pages: `27/27`
+- Build ID: `0T2-WIgD5QN5EoEJi-box`
+- Chunks: `98`
+- Audit markers: exactly `1`
+- Marker file: `static/chunks/app/layout-4a08a2eec725a6bc.js`
+- Artifact: `bundle-audit.json`
 
-| Family | Original | Parser false positive | Valid current scoped role | Unresolved blocker | Representative evidence |
-|---|---:|---:|---:|---:|---|
-| important-declaration | 752 | 0 | 0 | 752 | line 145, `!important` |
-| typography-tuple | 612 | 0 | 0 | 612 | line 98, `.hud-label` incomplete HUD tuple |
-| radius-tier | 290 | 0 | 2 | 288 | approved only: module rail 14px and nav 8px; other 8/14 values remain RED |
-| line-height-tier | 235 | 0 | 0 | 235 | line 285, `1.66` |
-| font-size-tier | 192 | 0 | 0 | 192 | line 347, `clamp(52px, 8vw, 118px)` |
-| tracking-tier | 147 | 0 | 0 | 147 | line 110, `0.16em` |
-| decorative-box-shadow | 101 | 38 | 4 | 59 | 38 `none !important`; approved inset cues at lines 211, 255, 6803, 8449; residual line 691 |
-| selector-role | 71 | 0 | 0 | 71 | line 106, body `--font-base` vs `--font-product` |
-| decorative-gradient | 53 | 0 | 0 | 53 | line 361, repeating grid gradient |
-| font-family-token | 28 | 0 | 0 | 28 | line 9115, direct monospace stack |
-| mixed-typography-role | 5 | 0 | 0 | 5 | line 5138, grouped `th, td` resolves to two roles |
-| decorative-text-shadow | 2 | 0 | 0 | 2 | line 539, four-direction text outline |
-| **Total** | **2,488** | **38** | **6** | **2,444** | exact reconciliation |
+## Browser Contract
 
-The post-normalization runner reports 2,444 unresolved violations: radius 288 and box-shadow 59, with all other family counts unchanged. The unresolved bucket is not asserted to be uniformly genuine: typography tuple, selector-role, and mixed-role families require cascade and grouped-selector adjudication in a separate frontend remediation task. No broad thresholds, wildcard allowlists, reduced routes, or weakened browser expectations were introduced.
+- Route rows: `96`
+- Workspace theme rows: `6`
+- Special-surface rows: `4`
+- Generated-surface rows: `2`
+- Total: `108/108`
+- Failed rows: `0`
+- Findings: `0`
+- Recovered rows: `0`
+- Screenshots: `108`
+- Artifact: `browser-report.json`
 
-## Build And Typecheck
+The browser runner consumed the passing static report with the same source SHA and source identity. It did not fabricate external test, typecheck, or build outcomes.
 
-- `npm.cmd ci`: local worktree install; package and lock remained unchanged.
-- `npm.cmd run typecheck`: PASS after local install. Log: `typecheck-after-ci.log`.
-- Early build attempts were race-contaminated and are preserved in `build27-after-ci.log` and `build27-exitcode.log`.
-- Clean final: resolved and removed only this worktree's `.next`, then ran one build with no competing Next process.
-- Root-boundary remediation reran both builds sequentially after safely removing only this worktree's `.next`.
-- Provenance-bound normal build: PASS, Next 15.5.20, static pages 27/27, BUILD_ID `tFT43oHhkysWDqeWCmhdU`; all 97 static JS chunks contain zero audit probe markers. Logs: `build-normal-provenance.log`, `bundle-normal.json`.
-- Provenance-bound audit build: PASS, Next 15.5.20, static pages 27/27, BUILD_ID `MVWMaosATWmDNyIm1URTO`; exactly one probe marker appears in `static/chunks/app/layout-6a0a9a9b3dfa7576.js`. Logs: `build-audit-provenance.log`, `bundle-audit.json`.
-- Both bundle artifacts record source SHA `cbbafe40b010c3ee46b307eb29a0928d4622296b`, matching source identity `52eb4299f1a3f8ec78936282b821e447d260e19e54298d2b695dfacb178b53bc`, plus a mode-specific build identity digest.
+## Test Evidence
 
-## Browser Audit
+- Frontend audit focused regression: `2` files, `41` tests passed.
+- Strict TypeScript typecheck: passed.
+- Final normal build after the full suite: `27/27`, audit markers `0`.
+- Curated release evidence: `evaluation/backend-release-final-2026-07-13/`.
 
-The full 108-row audit was not run. Static status is still RED with 2,444 unresolved violations, and the browser runner correctly fails closed on that prerequisite. No claim is made for routes96 + themes6 + special4 + generated2 = 108, failedRows, findings, or recoveredRows.
+## Boundary
 
-The audit-only framework boundary probes were run separately on the v2 audit build:
-
-- The first 3011 start failed with `EADDRINUSE`; that port belonged to a different worktree and no result from it was accepted.
-- An isolated v2 server was verified on port 3021 by listening PID, command line, worktree path, and BUILD_ID.
-- `/dryrun?__auditBoundary=error`: HTTP 500; exactly one visible `[data-audit-boundary="error"]`; expected Korean title and deterministic console marker.
-- `/dryrun?__auditBoundary=global-error`: HTTP 500; exactly one visible `[data-audit-boundary="global-error"]`; expected Korean title and deterministic probe error from the audit-only layout chunk.
-- A rejected intermediate design that rethrew inside `app/error` remained on the ordinary error boundary and emitted repeated errors. It was replaced by the virtual root-layout probe. Only the owned 3021 listener was stopped; the other worktree's 3011 server was preserved.
-
-## Ported Files
-
-Harness and contract:
-
-- `scripts/frontend_consistency_audit.mjs`
-- `scripts/frontend_consistency_browser_audit.mjs`
-- `lib/frontend-design-contract.ts`
-- four candidate frontend test files
-- `package.json` script `audit:frontend-consistency`
-
-Minimal audit-only support:
-
-- `app/dryrun/page.tsx`
-- `app/error.tsx`
-- `app/global-error.tsx`
-- `app/layout.tsx`
-- `app/not-found.tsx`
-- `lib/frontend-audit/GlobalBoundaryProbe.audit.tsx`
-- `lib/frontend-audit/GlobalBoundaryProbe.noop.tsx`
-- `types/audit-error-escalation.d.ts`
-
-Hard-excluded files were not modified. Integration onto `b30c0d8` requires conflict review because this branch intentionally remains based on `8263527`.
+This is a frontend verification verdict, not a product launch-readiness verdict. Phase A ontology provenance and RLS findings remain separately gated.

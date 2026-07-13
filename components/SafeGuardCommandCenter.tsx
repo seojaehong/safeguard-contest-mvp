@@ -1939,13 +1939,15 @@ export function SafeGuardCommandCenter({
                 {busy ? "근거 확인 중" : "안전 문서 생성"}
               </button>
             </div>
-            <div className="field-brief-chip-row" aria-label="자동 인식 현장 요약">
-              <span>{fieldBrief.siteName}</span>
-              <span>{fieldBrief.industry}</span>
-              <span>{weatherBrief.summary}</span>
-              <span>{fieldBrief.workerCount}</span>
-              <span>{fieldBrief.foreignWorkerSignal}</span>
-            </div>
+            {hasOperatorInput ? (
+              <div className="field-brief-chip-row" aria-label="자동 인식 현장 요약">
+                <span>{fieldBrief.siteName}</span>
+                <span>{fieldBrief.industry}</span>
+                <span>{weatherBrief.summary}</span>
+                <span>{fieldBrief.workerCount}</span>
+                <span>{fieldBrief.foreignWorkerSignal}</span>
+              </div>
+            ) : null}
             {inputHazardPhotos.length ? (
               <section className="input-photo-hazard-panel" aria-label="현장 사진 위험요인 후보">
                 <div className="input-photo-preview-grid" aria-label="첨부된 현장 사진">

@@ -1,197 +1,62 @@
 {
-  "schemaVersion": 2,
-  "generatedAt": "2026-07-11T22:25:00+09:00",
-  "verdict": "blocked",
-  "baseSha": "826352719eab692ed9c5c638bfd9b2db691e95b9",
-  "sourceSha": "44c27e9153d1c33b6b18a70854ee9240336bb1ae",
-  "integrationHead": "b30c0d81f30881a0e63d0de6080a75a152290ac2",
+  "schemaVersion": 3,
+  "generatedAt": "2026-07-13T01:35:51.264Z",
+  "verificationStatus": "pass",
+  "launchReadiness": "not_evaluated_here",
+  "supersedes": {
+    "generatedAt": "2026-07-11T22:25:00+09:00",
+    "verdict": "blocked",
+    "staticViolations": 2444,
+    "browserAudit": "not_run"
+  },
+  "sourceSha": "45df617d6eced74bc5e9673104aa306338612ce6",
+  "sourceIdentity": "a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb",
   "staticAudit": {
-    "originalViolations": 2488,
-    "postNormalizationViolations": 2444,
-    "status": "fail",
-    "routeCoverageIssues": 0,
-    "currentInventory": {
-      "pageFiles": 32,
-      "productComponentFiles": 23,
-      "auditProbeIncludedInSourceIdentity": true
-    },
-    "classification": {
-      "parserFalsePositive": 38,
-      "validCurrentScopedRole": 6,
-      "unresolvedBlocking": 2444
-    },
-    "families": [
-      {
-        "rule": "important-declaration",
-        "original": 752,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 752
-      },
-      {
-        "rule": "typography-tuple",
-        "original": 612,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 612
-      },
-      {
-        "rule": "radius-tier",
-        "original": 290,
-        "parser": 0,
-        "valid": 2,
-        "unresolved": 288
-      },
-      {
-        "rule": "line-height-tier",
-        "original": 235,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 235
-      },
-      {
-        "rule": "font-size-tier",
-        "original": 192,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 192
-      },
-      {
-        "rule": "tracking-tier",
-        "original": 147,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 147
-      },
-      {
-        "rule": "decorative-box-shadow",
-        "original": 101,
-        "parser": 38,
-        "valid": 4,
-        "unresolved": 59
-      },
-      {
-        "rule": "selector-role",
-        "original": 71,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 71
-      },
-      {
-        "rule": "decorative-gradient",
-        "original": 53,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 53
-      },
-      {
-        "rule": "font-family-token",
-        "original": 28,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 28
-      },
-      {
-        "rule": "mixed-typography-role",
-        "original": 5,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 5
-      },
-      {
-        "rule": "decorative-text-shadow",
-        "original": 2,
-        "parser": 0,
-        "valid": 0,
-        "unresolved": 2
-      }
-    ]
-  },
-  "tests": {
-    "initialRed": {
-      "filesFailed": 4,
-      "failed": 19,
-      "passed": 4
-    },
-    "fullFocused": {
-      "filesFailed": 4,
-      "failed": 48,
-      "passed": 22
-    },
-    "parserRegression": {
-      "filesPassed": 1,
-      "passed": 2,
-      "skipped": 18
-    }
-  },
-  "typecheck": {
     "status": "pass",
-    "command": "npm.cmd run typecheck",
-    "log": "typecheck-after-ci.log"
+    "pageFiles": 32,
+    "productComponentFiles": 23,
+    "coverageIssues": 0,
+    "violations": 0,
+    "importantDeclarations": 0,
+    "artifact": "static-audit.json"
   },
-  "build": {
-    "status": "pass",
-    "command": "npm.cmd run build",
-    "nextVersion": "15.5.20",
-    "staticPages": "27/27",
-    "exitCode": 0,
-    "buildId": "MVWMaosATWmDNyIm1URTO",
-    "sourceSha": "cbbafe40b010c3ee46b307eb29a0928d4622296b",
-    "sourceIdentity": "52eb4299f1a3f8ec78936282b821e447d260e19e54298d2b695dfacb178b53bc",
-    "log": "build-audit-provenance.log",
-    "normalBundle": {
+  "builds": {
+    "normal": {
       "status": "pass",
-      "buildId": "tFT43oHhkysWDqeWCmhdU",
-      "buildIdentity": "ff6ed7fb8c46d06aa0b2be3cee40e4870c63fd6ee055c6b0be8f5eef550e3fba",
-      "chunkCount": 97,
+      "staticPages": 27,
+      "buildId": "nJTlGA4TIREL_IJPusibN",
+      "chunkCount": 98,
       "markerCount": 0,
-      "log": "bundle-normal.json"
+      "artifact": "bundle-normal.json"
     },
-    "auditBundle": {
+    "audit": {
       "status": "pass",
-      "buildId": "MVWMaosATWmDNyIm1URTO",
-      "buildIdentity": "6193766193b283597626811c9a8cb2cb857c9ce551c9c243808a7db83b8b0421",
-      "chunkCount": 97,
+      "staticPages": 27,
+      "buildId": "0T2-WIgD5QN5EoEJi-box",
+      "chunkCount": 98,
       "markerCount": 1,
-      "markerFile": "static/chunks/app/layout-6a0a9a9b3dfa7576.js",
-      "log": "bundle-audit.json"
+      "markerFile": "static/chunks/app/layout-4a08a2eec725a6bc.js",
+      "artifact": "bundle-audit.json"
     }
   },
   "browserAudit": {
-    "status": "not-run",
-    "expectedRows": 108,
-    "routeRows": 96,
-    "themeRows": 6,
-    "specialRows": 4,
-    "generatedRows": 2,
-    "failedRows": null,
-    "findings": null,
-    "recoveredRows": null,
-    "reason": "Static audit remains RED with 2444 unresolved blockers."
-  },
-  "boundaryProbe": {
     "status": "pass",
-    "port": 3021,
-    "provenanceVerified": true,
-    "discardedAttempts": [
-      "3011 EADDRINUSE from another worktree",
-      "app/error self-throw stayed on ordinary error boundary"
-    ],
-    "rows": [
-      {
-        "mode": "error",
-        "httpStatus": 500,
-        "selector": "[data-audit-boundary=\"error\"]",
-        "count": 1
-      },
-      {
-        "mode": "global-error",
-        "httpStatus": 500,
-        "selector": "[data-audit-boundary=\"global-error\"]",
-        "count": 1
-      }
-    ]
+    "routeRows": 96,
+    "workspaceThemeRows": 6,
+    "specialSurfaceRows": 4,
+    "generatedSurfaceRows": 2,
+    "successes": 108,
+    "failedRows": 0,
+    "findings": 0,
+    "recoveredRows": 0,
+    "screenshots": 108,
+    "artifact": "browser-report.json"
   },
-  "hardExclusionsModified": [],
-  "dbChanges": false
+  "focusedTests": {
+    "filesPassed": 2,
+    "testsPassed": 41,
+    "status": "pass"
+  },
+  "databaseChanged": false,
+  "schemaChanged": false
 }

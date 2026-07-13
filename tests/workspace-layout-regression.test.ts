@@ -588,6 +588,7 @@ describe("workspace layout regression", () => {
     expect(metrics.currentBriefs).toBe(0);
     expect(metrics.sourceStatuses).toBe(0);
     expect(metrics.recentLists).toBe(0);
+    expect(await page.locator(".field-brief-chip-row").count()).toBe(0);
     expect(metrics.topDelta).toBeLessThanOrEqual(1);
     expect(metrics.bottomDelta).toBeLessThanOrEqual(1);
     expect(metrics.overflowY).toBe("visible");
@@ -624,6 +625,7 @@ describe("workspace layout regression", () => {
     expect(await page.getByRole("button", { name: "예시로 되돌리기" }).count()).toBe(0);
     expect(await page.locator(".workspace-current-brief").count()).toBe(0);
     expect(await page.locator(".workspace-source-status").count()).toBe(0);
+    expect(await page.locator(".field-brief-chip-row").count()).toBe(0);
     await page.close();
   }, 90_000);
 

@@ -3,6 +3,7 @@
 ## Scope
 
 - Remove the sentence-like placeholder after an example is cleared.
+- Remove the example-derived auto-tag row when no operator input or workpack remains.
 - Hide the example restore action when there is no selected example.
 - Keep the filled desktop sidebar and workspace canvas aligned on the shorter viewport reported by the user.
 - Preserve the existing compact presentation behavior below the normal desktop-height boundary.
@@ -16,6 +17,7 @@ The input used a persistent placeholder even when its value was empty, and the r
 - `SafeGuardCommandCenter.tsx`
   - Uses an empty placeholder because the field already has a visible label, heading, description, and helper text.
   - Renders `예시로 되돌리기` only while an example remains selected.
+  - Renders the auto-recognition chip row only while operator input or a generated workpack exists.
   - Preserves the selected example while non-empty edits are made, then detaches it only when the input is fully cleared.
 - `globals.css`
   - Applies the final stretch/no-independent-scroll rail owner from `680px` upward instead of `721px`.
@@ -36,6 +38,7 @@ RED:
 GREEN:
 
 - Targeted browser regressions: `2 passed`.
+- Empty-state coverage includes the visible-chip `1440x900` geometry and the reported `1560x700` short desktop geometry.
 - Full workspace browser regressions: `23 passed`, `1 skipped`.
 - Strict TypeScript typecheck: passed.
 - Next production build: `27/27` static pages generated.
@@ -58,6 +61,7 @@ Cleared state:
 - Input length: `0`
 - Placeholder: empty
 - Restore action count: `0`
+- Auto-recognition chip row count: `0`
 - Current-work and source-status blocks: `0 / 0`
 - Sidebar/main bottom: `788.984375px / 788.984375px`
 - Bottom delta: `0px`

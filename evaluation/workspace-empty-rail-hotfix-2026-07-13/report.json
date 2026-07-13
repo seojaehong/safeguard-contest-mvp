@@ -3,6 +3,7 @@
   "baseSha": "449c357",
   "scope": [
     "empty-input-placeholder",
+    "empty-auto-tag-row",
     "example-restore-visibility",
     "desktop-rail-alignment"
   ],
@@ -34,6 +35,7 @@
       "inputValueLength": 0,
       "placeholder": "",
       "restoreButtonCount": 0,
+      "autoTagRowCount": 0,
       "currentBriefCount": 0,
       "sourceStatusCount": 0,
       "bottomDeltaPx": 0,

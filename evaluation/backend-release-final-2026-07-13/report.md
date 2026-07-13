@@ -15,6 +15,7 @@ The empty-input and desktop rail regressions are closed in the integrated source
 - Empty textarea value: `0` characters
 - Empty placeholder: none
 - Empty restore action count: `0`
+- Empty auto-recognition chip row count: `0`
 - Empty current-work/source-status blocks: `0 / 0`
 - Filled `1560x700` sidebar/main bottom delta: `0px`
 - Cleared `1560x700` sidebar/main bottom delta: `0px`
