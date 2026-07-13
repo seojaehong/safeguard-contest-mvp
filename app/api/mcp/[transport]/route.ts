@@ -38,10 +38,10 @@ import {
 import { registerScopedTool } from "@/lib/mcp-scoped-tool";
 import {
   buildAccidentCasesResult,
-  buildDocpackResult,
   buildEvidenceMappingResult,
   buildHarnessAgentResult,
   buildReviewedDocpackResult,
+  handleGenerateSafetyDocpack,
   buildSanitizeContactsResult,
   buildWeatherResult,
   resolveReviewTaskLabel,
@@ -286,8 +286,11 @@ function registerTools(server: McpServer): void {
     },
     async ({ question, task, mode, includeFull }, authContext) => {
         const reviewTask = resolveReviewTaskLabel(task, question);
-        const evidence = await querySafetyKnowledge(reviewTask);
-        const response = await runAsk(question, { aiMode: mode ?? "full" });
+        const generated = await handleGenerateSafetyDocpack(
+          { question, task, mode, includeFull },
+          { querySafetyKnowledge, runAsk },
+        );
+        const { evidence, response } = generated;
         const qaSource =
           response.deliverables.riskAssessmentDraft ||
           response.deliverables.tbmBriefing ||
@@ -345,14 +348,12 @@ function registerTools(server: McpServer): void {
       },
     },
     async ({ question, mode, includeFull }, authContext) => {
-        const evidenceTask = resolveReviewTaskLabel("", question);
-        const evidence = await querySafetyKnowledge(evidenceTask);
-        const response = await runAsk(question, { aiMode: mode ?? "full" });
-        const result = buildDocpackResult(
-          response,
-          includeFull ?? false,
-          evidence,
-        ) as Record<string, unknown>;
+        const generated = await handleGenerateSafetyDocpack(
+          { question, mode, includeFull },
+          { querySafetyKnowledge, runAsk },
+        );
+        const { response } = generated;
+        const result = generated.docpack as Record<string, unknown>;
 
         // 테넌트 귀속: 토큰에 siteId가 있으면 결과 workpack을 해당 사이트로 저장 시도하고,
         // 저장 성패와 무관하게 site_id/org_id를 결과 meta에 기록한다(스펙 ① 폴백).
