@@ -163,7 +163,8 @@ function finalizeWorksheet(
     });
     if ((row.height ?? 0) <= 48) row.height = estimateRowHeight(ws, row.number, row.height ?? 24);
   });
-  ws.pageSetup.paperSize = options.wide ? 8 : 9;
+  // ExcelJS omits A3 (OOXML paperSize 8) from its enum even though Excel supports it.
+  ws.pageSetup.paperSize = (options.wide ? 8 : 9) as ExcelJS.PaperSize;
   ws.pageSetup.orientation = "landscape";
   ws.pageSetup.fitToPage = true;
   ws.pageSetup.fitToWidth = options.wide ? 2 : 1;

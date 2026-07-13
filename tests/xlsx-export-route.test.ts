@@ -244,7 +244,7 @@ describe("/api/export/xlsx structured contract", () => {
     if (!longTextCell) throw new Error("Missing long wrapped control cell");
     expect(longTextCell.alignment?.wrapText).toBe(true);
     expect(longTextCell.alignment?.vertical).toBe("top");
-    const longTextRowHeight = worksheet.getRow(longTextCell.row).height;
+    const longTextRowHeight = worksheet.getRow(longTextCell.fullAddress.row).height;
     expect(longTextRowHeight).toBeGreaterThan(48);
     expect(longTextRowHeight).toBeLessThanOrEqual(90);
   });
@@ -339,8 +339,8 @@ describe("/api/export/xlsx structured contract", () => {
     const contentCell = findCellByText(worksheet, "작업구역 통제 후 순차 작업");
     const singleContentCell = findCellByText(singleWorksheet, "작업구역 통제 후 순차 작업");
     if (!contentCell || !singleContentCell) throw new Error("Missing workpack body row");
-    const row = contentCell.row;
-    const singleRow = singleContentCell.row;
+    const row = contentCell.fullAddress.row;
+    const singleRow = singleContentCell.fullAddress.row;
 
     [1, 5].forEach((column) => {
       expect(worksheet.getCell(row, column).alignment).toEqual(singleWorksheet.getCell(singleRow, column).alignment);
@@ -371,7 +371,7 @@ describe("/api/export/xlsx structured contract", () => {
     const bodySection = findCellByText(worksheet, narrowSection);
     if (!bodySection) throw new Error("Missing narrow body section");
 
-    expect(worksheet.getRow(bodySection.row).height).toBeGreaterThan(24);
+    expect(worksheet.getRow(bodySection.fullAddress.row).height).toBeGreaterThan(24);
     expect(worksheet.getRow(1).height).toBeLessThan(90);
   });
 
