@@ -1,17 +1,18 @@
 command=npm.cmd test -- tests/ontology-evidence-chains.test.ts
-startedAt=2026-07-13T16:16:17.5429951Z
+startedAt=2026-07-13T17:09:23.9049168Z
+
 
 > safeclaw@0.1.0 test
 > vitest run tests/ontology-evidence-chains.test.ts
 
 
- RUN  v4.1.10 <repo-root>
+ RUN  v4.1.9 <repo-root>
 
 
  Test Files  1 passed (1)
       Tests  45 passed (45)
-   Start at  01:16:20
-   Duration  1.25s (transform 345ms, setup 0ms, import 470ms, tests 54ms, environment 0ms)
+   Start at  02:09:26
+   Duration  1.29s (transform 393ms, setup 0ms, import 517ms, tests 62ms, environment 0ms)
 
-wallElapsedSeconds=3.992
+wallElapsedSeconds=3.802
 exitCode=0

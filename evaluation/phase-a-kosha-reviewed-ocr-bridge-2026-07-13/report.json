@@ -1,6 +1,6 @@
 {
-  "schemaVersion": "safeclaw-phase-a-kosha-reviewed-ocr-bridge-evaluation/v4",
-  "generatedAt": "2026-07-14T01:17:14.6173766+09:00",
+  "schemaVersion": "safeclaw-phase-a-kosha-reviewed-ocr-bridge-evaluation/v5",
+  "generatedAt": "2026-07-14T02:12:40.1330448+09:00",
   "status": "HOLD_PENDING_FRESH_REVIEW",
   "launchReadiness": false,
   "readOnly": true,
@@ -9,43 +9,69 @@
   "apiMutationPerformed": false,
   "schemaMutationPerformed": false,
   "migrationPerformed": false,
+  "dataMutationPerformed": false,
   "packageOrLockMutationPerformed": false,
   "networkRequestPerformed": false,
   "productionGetPerformed": false,
+  "corpusImportPerformed": false,
   "gitScope": {
-    "branchMergeBase": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
-    "reviewedHead": "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
-    "reviewedHeadDelta": {
-      "range": "02295b5..3ed9be8",
-      "commitCount": 15,
-      "fileCount": 42
+    "integrationTargetSha": "77d86416116b91809e1e0508c72564e06c8c31bc",
+    "candidateBaseSha": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+    "candidateSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+    "evidenceParentCandidateSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+    "candidateSeries": [
+      "38cbc9176453368237d85cb56903f782f9c09823",
+      "8e3b42492135799536913af9d1d6427256ad2ae4",
+      "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+      "c7261b7d632e1778f3280f059d1e122308817635",
+      "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f"
+    ],
+    "candidateApplyCommand": {
+      "executable": "git",
+      "args": [
+        "cherry-pick",
+        "38cbc9176453368237d85cb56903f782f9c09823",
+        "8e3b42492135799536913af9d1d6427256ad2ae4",
+        "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+        "c7261b7d632e1778f3280f059d1e122308817635",
+        "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f"
+      ]
     },
-    "integrationTarget": {
-      "commit": "77d86416116b91809e1e0508c72564e06c8c31bc",
-      "containsAncestorThrough": "d3ad86530bc786d8024206cc5b7c7db60c055278",
-      "unrelatedAncestorCommitCount": 12
+    "candidateScope": {
+      "baseExclusiveSha": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+      "tipInclusiveSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+      "commitCount": 5,
+      "fileCount": 31,
+      "outOfScopeCount": 0,
+      "pathAllowlistVerified": true,
+      "fileListCommand": {
+        "executable": "git",
+        "args": [
+          "diff",
+          "--name-only",
+          "d3ad86530bc786d8024206cc5b7c7db60c055278",
+          "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+          "--"
+        ]
+      }
     },
-    "currentBranchDelta": {
-      "range": "02295b5..NEW_HEAD",
-      "commitCount": 16,
-      "fileCount": 45
+    "latestRemediationScope": {
+      "baseExclusiveSha": "38cbc9176453368237d85cb56903f782f9c09823",
+      "tipInclusiveSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+      "commitCount": 4,
+      "fileCount": 27
     },
-    "selectiveCandidate": {
-      "bridgeRange": "38cbc91^..NEW_HEAD",
-      "bridgeCommitCount": 4,
-      "bridgeFileCount": 30,
-      "latestRemediationRange": "38cbc91..NEW_HEAD",
-      "latestRemediationCommitCount": 3,
-      "latestRemediationFileCount": 26,
-      "cherryPickSeries": [
-        "38cbc91",
-        "8e3b424",
-        "3ed9be8",
-        "NEW_HEAD"
-      ],
-      "wholesaleBranchMergeRecommended": false,
-      "candidatePathScopeVerified": true
-    }
+    "productRemediationCommit": {
+      "sha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+      "fileCount": 3
+    },
+    "evidenceCommitPolicy": {
+      "referencesExactParentCandidate": true,
+      "parentCandidateSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+      "selfShaEmbedded": false,
+      "evaluationOnly": true
+    },
+    "wholesaleBranchMergeRecommended": false
   },
   "source": {
     "artifactLabel": "kosha-corpus-body-recovery-2026-07-13-fixed-v1",
@@ -109,6 +135,7 @@
     "candidateAttestationSha256": "9dbb03c1ddd14dfc293b800cc4d4762244996b3cac050545d813add30d97d57d",
     "reviewState": "draft",
     "humanConfirmed": false,
+    "generatorPresent": true,
     "renderDpiPresent": true,
     "renderDpi": 180,
     "renderDpiAuthorizesImport": false,
@@ -121,6 +148,10 @@
     "modified": false
   },
   "remediation": {
+    "ordinaryCiUsesBranchHistory": false,
+    "ordinaryCiUsesLocalIntegrationRef": false,
+    "candidatePathAllowlistWeakened": false,
+    "evaluationOnlyScopeValidator": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/validate-kosha-bridge-evidence.mjs",
     "snapshotVerifiedBeforeEnvCredentialAndFetch": true,
     "successFlagWrittenOnlyWithSuccessfulBridgeArtifact": true,
     "semanticSourceAndPolicyCanonicalizationUnified": true,
@@ -128,11 +159,13 @@
     "sameItemCandidateCollisionRejected": true,
     "duplicateCandidateAttestationRejected": true,
     "auditFailureStackSerialized": false,
-    "evaluationAbsolutePathMatchCount": 0,
+    "artifactScanContentFirst": true,
+    "binaryArtifactExclusionRule": "positive-byte-signature-only",
+    "utf8TextSkippedByExtension": false,
+    "unreadableUnknownTextFailsClosed": true,
+    "absolutePathMatchCount": 0,
     "rawSecretOrHmacMatchCount": 0,
-    "allChangedEvaluationTextArtifactsScanned": true,
-    "unreadableTextArtifactCount": 0,
-    "binaryArtifactExclusionRule": "explicit-extension-to-mime-map"
+    "sensitiveDigestLabelMatchCount": 0
   },
   "snapshotIntegritySmoke": {
     "resultPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/result.json",
@@ -145,28 +178,46 @@
     "snapshotIntegrityVerifiedBeforeFetchRecorded": false,
     "networkRequestPerformed": false
   },
+  "integrationSimulation": {
+    "status": "pass",
+    "resultPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/integration-simulation.json",
+    "integrationTargetSha": "77d86416116b91809e1e0508c72564e06c8c31bc",
+    "candidateParentSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+    "seriesAppliedCleanly": true,
+    "targetExistingPathsPreserved": true,
+    "candidateFileCount": 31,
+    "outOfScopeCount": 0,
+    "testCount": 233,
+    "passedCount": 233,
+    "failedCount": 0,
+    "frameworkDurationAggregateSeconds": 55.896,
+    "verificationWallElapsedAggregateSeconds": 87.451,
+    "strictTypecheckPassed": true,
+    "diffCheckPassed": true,
+    "temporaryWorktreeRemoved": true
+  },
   "verification": {
     "red": {
-      "reviewRound": {
-        "testCount": 106,
-        "passedCount": 92,
-        "expectedFailureCount": 14,
-        "frameworkDurationSeconds": 39.29,
-        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/review-red-typescript.txt"
+      "branchDependentIntegration": {
+        "testCount": 120,
+        "passedCount": 119,
+        "expectedFailureCount": 1,
+        "frameworkDurationSeconds": 41.64,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/review-round-6-red-integration.txt"
       },
-      "python": {
-        "testCount": 4,
-        "passedCount": 0,
-        "expectedFailureCount": 4,
-        "elapsedSeconds": 1.186,
-        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/red-python.log"
+      "contentFirstScanner": {
+        "selectedTestCount": 8,
+        "passedCount": 1,
+        "expectedFailureCount": 7,
+        "skippedCount": 103,
+        "frameworkDurationSeconds": 1.49,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/review-round-6-red-scanner.txt"
       },
-      "typescript": {
-        "testCount": 91,
-        "passedCount": 86,
-        "expectedFailureCount": 5,
-        "frameworkDurationSeconds": 47.597,
-        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/red-typescript.log"
+      "reportReconciliation": {
+        "expectedFailureCount": 3,
+        "expectedFrameworkDurationSeconds": 54.603,
+        "recordedStaleFrameworkDurationSeconds": 57.345,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/review-round-6-red-report.txt"
       }
     },
     "final": {
@@ -174,56 +225,65 @@
         "testCount": 64,
         "passedCount": 64,
         "failedCount": 0,
-        "frameworkDurationSeconds": 10.833,
-        "commandWallElapsedSeconds": 12.192,
-        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-python.log"
+        "frameworkDurationSeconds": 10.647,
+        "commandWallElapsedSeconds": 12.439,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-python.log",
+        "canonicalLfSha256": "6f5ce064f42bac7cdb2a159b24e4320dd37a17dc5efdfd80e196fba6090f7f60"
       },
       "typescriptFocused": {
-        "testCount": 120,
-        "passedCount": 120,
+        "testCount": 124,
+        "passedCount": 124,
         "failedCount": 0,
-        "preexistingTestCount": 106,
-        "newRemediationTestCount": 14,
-        "newScannerTestCount": 10,
-        "frameworkDurationSeconds": 42.52,
-        "commandWallElapsedSeconds": 45.493,
-        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typescript.log"
+        "previousFocusedTestCount": 120,
+        "netAddedTestCount": 4,
+        "frameworkDurationSeconds": 40.84,
+        "commandWallElapsedSeconds": 43.388,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typescript.log",
+        "canonicalLfSha256": "617bd231548b0430cff76e098caf5917f943f87559338fee442f5396b0fb22ab"
       },
       "ontologyEvidenceRegression": {
         "testCount": 45,
         "passedCount": 45,
         "failedCount": 0,
-        "frameworkDurationSeconds": 1.25,
-        "commandWallElapsedSeconds": 3.992,
+        "frameworkDurationSeconds": 1.29,
+        "commandWallElapsedSeconds": 3.802,
         "naturalizeOnlyPreserved": true,
         "failClosedPreserved": true,
-        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-ontology-regression.log"
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-ontology-regression.log",
+        "canonicalLfSha256": "5d18b1609a2d112e4ed9e664bed145fa525e8137164105535fce1aa8a071d295"
       },
       "strictTypecheck": {
         "passed": true,
-        "commandWallElapsedSeconds": 31.528,
-        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typecheck.log"
+        "commandWallElapsedSeconds": 23.181,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typecheck.log",
+        "canonicalLfSha256": "016359ec698e15e7d08ddd9d9f5653bc0365ae3744480e3e5f02b2653e1f3d6b"
       },
       "pathScanner": {
-        "textArtifactCount": 21,
+        "finalArtifactFileCount": 33,
+        "textArtifactCount": 33,
         "binaryExcludedCount": 0,
         "unreadableTextArtifactCount": 0,
         "absolutePathMatchCount": 0,
+        "credentialOrTokenMatchCount": 0,
         "rawSecretOrHmacMatchCount": 0,
-        "scope": "all changed UTF-8 evaluation artifacts in 38cbc91^..NEW_HEAD",
-        "coveredByTypescriptFocused": true
+        "sensitiveDigestLabelMatchCount": 0,
+        "scope": "all task evaluation artifacts",
+        "contentFirst": true,
+        "failClosed": true
       },
       "gitDiffCheck": {
-        "passed": true
+        "passed": true,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-diff-check.log"
       },
       "totals": {
-        "testCount": 229,
-        "passedCount": 229,
+        "testCount": 233,
+        "passedCount": 233,
         "failedCount": 0,
-        "frameworkOrCommandTestElapsedSeconds": 57.345,
-        "testCommandWallElapsedSeconds": 61.677,
-        "verificationCommandWallElapsedSecondsBeforeDiffCheck": 93.205
-      }
+        "frameworkDurationAggregateSeconds": 52.777,
+        "testCommandWallElapsedAggregateSeconds": 59.629,
+        "verificationCommandWallElapsedAggregateSeconds": 82.81
+      },
+      "textHashCanonicalization": "utf8-crlf-to-lf"
     }
   },
   "concerns": [

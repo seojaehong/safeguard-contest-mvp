@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "safeclaw-kosha-bridge-evidence-validator/v1",
+  "status": "pass",
+  "integrationTargetSha": "77d86416116b91809e1e0508c72564e06c8c31bc",
+  "candidateSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+  "candidateSeries": [
+    "38cbc9176453368237d85cb56903f782f9c09823",
+    "8e3b42492135799536913af9d1d6427256ad2ae4",
+    "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+    "c7261b7d632e1778f3280f059d1e122308817635",
+    "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f"
+  ],
+  "candidateScope": {
+    "commitCount": 5,
+    "fileCount": 31,
+    "paths": [
+      "data/safety-knowledge/kosha-body-corpus.schema.json",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/candidate-regression.json",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-ontology-regression.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-python.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typecheck.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typescript.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/p2-red-typescript.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/record-zero-work-resume.mjs",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/red-python.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/red-typescript.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/report.json",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/report.md",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/review-red-typescript.txt",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-generation.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/audit.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/fixed-final/audit.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/fixed-final/console.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/result.json",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/stale-final/audit.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/stale-final/console.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-resume.log",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/validate-kosha-bridge-evidence.mjs",
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/zero-work-resume-command.json",
+      "lib/kosha-guide-corpus-audit.ts",
+      "lib/kosha-guide-corpus.ts",
+      "scripts/audit_kosha_guides.mjs",
+      "scripts/snapshot_kosha_guide_corpus.py",
+      "scripts/tests/test_recover_kosha_ocr_boundary.py",
+      "scripts/tests/test_snapshot_kosha_guide_corpus.py",
+      "tests/kosha-guide-corpus-audit.test.ts",
+      "tests/kosha-guide-offline-harness.test.ts"
+    ],
+    "outOfScopeCount": 0
+  },
+  "targetExistingPaths": [
+    "app/api/export/hwp/route.ts",
+    "lib/xlsx-builder.ts",
+    "tests/xlsx-export-route.test.ts"
+  ],
+  "report": {
+    "path": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/report.json",
+    "expectedFrameworkDurationSeconds": 52.777
+  },
+  "artifactScan": {
+    "root": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13",
+    "fileCount": 33,
+    "binaryArtifactCount": 0,
+    "violationCount": 0,
+    "violations": []
+  },
+  "errors": [],
+  "networkRequestPerformed": false,
+  "productionGetPerformed": false,
+  "dbMutationPerformed": false,
+  "corpusImportPerformed": false,
+  "launchReadiness": false
+}

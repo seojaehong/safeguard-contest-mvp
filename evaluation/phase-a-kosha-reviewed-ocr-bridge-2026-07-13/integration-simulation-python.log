@@ -1,5 +1,9 @@
+integrationTargetSha=77d86416116b91809e1e0508c72564e06c8c31bc
+candidateParentSha=c75acc06e3b4cc64f4a23e2f2ba46da62f65278f
+simulatedHeadSha=5b61eb2e30cc5487fb9d4716b439e8c0a3e1cdbd
 command=python -m unittest scripts.tests.test_recover_kosha_ocr_boundary scripts.tests.test_snapshot_kosha_guide_corpus
-startedAt=2026-07-13T17:08:12.0189955Z
+cwd=.
+startedAt=2026-07-13T17:04:05.1186759Z
 
 ...................invalid pdf header: b'not a'
 EOF marker not found
@@ -7,9 +11,9 @@ EOF marker not found
 EOF marker not found
 .................................
 ----------------------------------------------------------------------
-Ran 64 tests in 10.647s
+Ran 64 tests in 10.866s
 
 OK
 
-wallElapsedSeconds=12.439
+wallElapsedSeconds=12.502
 exitCode=0

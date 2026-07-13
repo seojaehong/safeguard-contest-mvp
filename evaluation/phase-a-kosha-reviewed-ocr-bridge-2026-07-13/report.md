@@ -1,27 +1,37 @@
-# Phase A KOSHA reviewed OCR bridge HOLD remediation
+# Phase A KOSHA reviewed OCR bridge remediation
 
 - Status: **HOLD_PENDING_FRESH_REVIEW**
 - Launch readiness: **false**
-- DB/Supabase/API/schema/migration mutation: **false**
+- DB/Supabase/API/schema/migration/data/package/lock mutation: **false**
 - Production GET performed: **false**
 
-## Selective integration scope
+## Immutable selective candidate
 
-The branch merge-base against `feat/phase-a-release-integration-v2` is `02295b5`. At reviewed head `3ed9be8`, the branch delta from that base is 15 commits and 42 files. Twelve of those commits are unrelated OAuth/RLS/XLSX ancestors through `d3ad865`; integration target `77d8641` already contains that ancestor tip.
+Integration target: `77d86416116b91809e1e0508c72564e06c8c31bc`
 
-Do not merge this branch wholesale. The selective KOSHA candidate is exactly:
+Product/remediation candidate: `c75acc06e3b4cc64f4a23e2f2ba46da62f65278f`
+
+The executable product series is:
 
 ```text
-git cherry-pick 38cbc91 8e3b424 3ed9be8 NEW_HEAD
+git cherry-pick 38cbc9176453368237d85cb56903f782f9c09823 8e3b42492135799536913af9d1d6427256ad2ae4 3ed9be8d14b24047a8615ce1ef08361fcd0e40aa c7261b7d632e1778f3280f059d1e122308817635 c75acc06e3b4cc64f4a23e2f2ba46da62f65278f
 ```
 
-The complete bridge range is `38cbc91^..NEW_HEAD`: 4 commits and 30 files. The remediation-only range after the initial bridge commit is `38cbc91..NEW_HEAD`: 3 commits and 26 files. A committed path gate rejects any candidate file outside the assigned KOSHA source, tests, schema, or this task's evaluation directory. `NEW_HEAD` denotes the single commit containing this report; its immutable SHA is reported after push.
+The candidate starts after `d3ad86530bc786d8024206cc5b7c7db60c055278`, contains 5 commits and 31 files, and has zero out-of-scope paths. The remediation after the initial bridge commit contains 4 commits and 27 files. The product commit itself changes 3 files. A wholesale branch merge is not recommended.
 
-## Fixed snapshot truth
+This report is committed as evaluation-only evidence. It records its exact parent candidate SHA and intentionally does not embed its own commit SHA. The final evidence commit SHA must be appended to the series only after that commit exists.
 
-The historical fixed generator rebuilt the offline corpus from the local ZIP source in 1,929.811 seconds. Its exact core Python command was recovered from the actual session tool-call evidence; the 32-minute generation was not rerun in this remediation.
+## Integration simulation
 
-A fresh recorded zero-work resume completed with 2.422 seconds of script-reported validation time and 6.113 seconds of recorder wall time. It exited 0 with `processed_this_run=0`, and the current, manifest, and four snapshot output hashes were byte-identical before and after. The machine-readable command record is `zero-work-resume-command.json`; it contains ordered arguments, path aliases, environment presence flags, input/output hashes, timing, and exit code without absolute paths or secret values.
+The exact five-commit series above was cherry-picked without conflict onto target `77d86416116b91809e1e0508c72564e06c8c31bc` in a temporary detached worktree. These target-owned files remained present:
+
+- `app/api/export/hwp/route.ts`
+- `lib/xlsx-builder.ts`
+- `tests/xlsx-export-route.test.ts`
+
+The simulated tree passed Python 64/64, focused TypeScript 124/124, ontology 45/45, strict typecheck, and `git diff --check`. The temporary worktree was clean and removed. The machine-readable result and original-to-simulated SHA map are in `integration-simulation.json`.
+
+## Snapshot truth
 
 | Measure | Actual |
 |---|---:|
@@ -32,57 +42,46 @@ A fresh recorded zero-work resume completed with 2.422 seconds of script-reporte
 | Chunks | 20,520 |
 | Reviewed OCR imports | 0 |
 
-The fixed identities all recompute exactly:
+The fixed source identity is `1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d`, generation policy identity is `54840fedece9d4b347ad7fd88808866f7ca1b41c5a08b9c6ca47b284c9411b1f`, snapshot identity is `976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282`, and manifest SHA-256 is `702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519`.
 
-| Identity | SHA-256 |
-|---|---|
-| Source | `1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d` |
-| Generation policy | `54840fedece9d4b347ad7fd88808866f7ca1b41c5a08b9c6ca47b284c9411b1f` |
-| Snapshot | `976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282` |
-| Manifest | `702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519` |
+The historical full generation took 1,929.811 seconds. Its command is recorded only because actual session tool-call evidence was recoverable; it was not independently rerun. The freshly recorded zero-work resume processed 0 items, took 2.422 seconds in the snapshot script and 6.113 seconds wall time, and left current, manifest, and all four output hashes unchanged.
 
-The fixed `items.jsonl`, `chunks.jsonl`, and `failures.jsonl` hashes match the prior bytes. `checkpoint.json` changed because the fixed source and policy identities are now bound into a newly generated checkpoint; no hash constant was overwritten.
+## Candidate truth
 
-## Stale snapshot finding
+B-E-3 remains `draft`, `human_confirmed=false`, and rejected with `ocr_candidate_not_human_confirmed`. It has `render_dpi=180`; DPI alone does not authorize OCR acceptance or import. The corpus item remains `boundary`, with no body, 0 chunks, and 0 imports. The candidate was not edited or promoted.
 
-The prior artifact declared source `6d13d26f...`, but its parsed manifest material recomputes to `419fd79e...`. Keeping the prior declared policy while replacing only that source identity produces the reviewer-observed snapshot `18b4b4e0...`.
+## Smoke truth
 
-Applying the same semantic canonicalization to policy as well yields policy `8e41acbf...` and full stale-artifact snapshot `f2f1991f...`. The fixed generator therefore rebuilt source, policy, checkpoint, manifest, and current pointer together instead of patching the intermediate `18b4b4e0...` value.
+| Case | First terminal code | Credential check | GET |
+|---|---|---:|---:|
+| Stale snapshot + missing credential | `kosha-bridge-manifest-source-identity-mismatch` | no | no |
+| Fixed snapshot + missing credential | `supabase-read-credentials-unavailable` | yes | no |
 
-## P1 smoke order
+Neither failed run records `snapshotIntegrityVerifiedBeforeFetch=true`. No successful production GET is claimed.
 
-| Case | First terminal code | Credential check | GET | Elapsed |
-|---|---|---:|---:|---:|
-| Stale snapshot + missing credential | `kosha-bridge-manifest-source-identity-mismatch` | no | no | 14.892s |
-| Fixed snapshot + missing credential | `supabase-read-credentials-unavailable` | yes | no | 13.538s |
+## Scanner and CI remediation
 
-Neither failed run records `snapshotIntegrityVerifiedBeforeFetch=true`. That field is emitted only after a successful GET and bridge artifact build; no successful production run is claimed here.
+Ordinary tests no longer read branch history or a local integration ref. Candidate path tests use explicit fixtures and retain the KOSHA path allowlist. The evaluation-only validator receives immutable target, candidate, and commit inputs.
 
-## Candidate and multiplicity
-
-The unchanged B-E-3 candidate is still `draft`, `human_confirmed=false`, and rejected with `ocr_candidate_not_human_confirmed`. Its exact file/content/attestation hashes remain unchanged. The fixed corpus item remains `boundary`, with no body, zero chunks, and zero imports. The candidate source has `render_dpi=180`; DPI metadata alone does not authorize review acceptance or import. The candidate was not edited or promoted.
-
-Snapshot import now permits reviewed candidates for distinct item IDs. It fails closed on two candidates for the same item and on a duplicate canonical attestation. Tests cover the two-item success and both collision paths.
-
-## Privacy
-
-Audit failures serialize only `fatal_type` and `fatal_code`, never a stack. The committed scanner now covers all 21 changed UTF-8 evaluation artifacts in `38cbc91^..NEW_HEAD`, including `.log`, `.json`, `.md`, `.txt`, and `.mjs`. It found zero absolute path, credential value, token, configured-secret, or raw HMAC matches. Explicit binary MIME/extension exclusions are allowed; invalid or unreadable text fails closed.
+Artifact scanning is content-first: strict UTF-8 decoding is attempted regardless of extension, and only positive binary byte signatures are excluded. Drive, UNC, common POSIX absolute paths, credential/token values, raw HMAC values, sensitive digest labels, and configured secret values fail closed. Safe public IDs and content-addressed digests remain explicit allowed cases.
 
 ## Verification
 
-| Check | Passed | Failed | Elapsed |
+| Check | Passed | Failed | Framework / wall |
 |---|---:|---:|---:|
-| Focused Python | 64 | 0 | 10.833s framework / 12.192s wall |
-| Focused TypeScript | 120 | 0 | 42.520s framework / 45.493s wall |
-| Ontology evidence regression | 45 | 0 | 1.250s framework / 3.992s wall |
-| Strict TypeScript typecheck | yes | no | 31.528s command wall |
+| Focused Python | 64 | 0 | 10.647s / 12.439s |
+| Focused TypeScript | 124 | 0 | 40.840s / 43.388s |
+| Ontology evidence regression | 45 | 0 | 1.290s / 3.802s |
+| Strict TypeScript typecheck | yes | no | n/a / 23.181s |
 | `git diff --check` | yes | no | n/a |
 
-Final automated test total: **229 passed, 0 failed**. Focused TypeScript is the prior 106 tests plus 14 new remediation tests, including 10 scanner cases. The fresh review RED is separate in `review-red-typescript.txt`: 14 expected failures and 92 passes out of 106 tests before implementation. Earlier task RED logs remain unchanged.
+Final automated test total: **233 passed, 0 failed**. The test framework aggregate is mechanically reconciled as `10.647 + 40.840 + 1.290 = 52.777` seconds. Test command wall time is 59.629 seconds; wall time including typecheck is 82.810 seconds. Framework and wall aggregates are intentionally separate.
+
+Fresh RED evidence is separate for the branch-dependent integration failure, seven content-first scanner failures, and three stale report assertions. The final scanner covers all 33 task evaluation artifacts and reports zero path, credential, token, configured-secret, raw-HMAC, or sensitive-digest violations.
 
 ## Remaining hold
 
-- Fresh independent review is required. No integration approval is claimed.
+- Fresh independent review is required; no integration approval is claimed.
 - B-E-3 remains unconfirmed and unimported.
 - One OCR boundary remains, so `launchReadiness=false`.
 - No production GET or deployment identity was established.

@@ -1,0 +1,22 @@
+integrationTargetSha=77d86416116b91809e1e0508c72564e06c8c31bc
+candidateParentSha=c75acc06e3b4cc64f4a23e2f2ba46da62f65278f
+simulatedHeadSha=5b61eb2e30cc5487fb9d4716b439e8c0a3e1cdbd
+command=npm.cmd test -- tests/ontology-evidence-chains.test.ts
+cwd=.
+startedAt=2026-07-13T17:05:24.3914480Z
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/ontology-evidence-chains.test.ts
+
+
+ RUN  v4.1.10 <simulation-worktree>
+
+
+ Test Files  1 passed (1)
+      Tests  45 passed (45)
+   Start at  02:05:27
+   Duration  1.50s (transform 496ms, setup 0ms, import 651ms, tests 76ms, environment 0ms)
+
+wallElapsedSeconds=4.637
+exitCode=0
