@@ -1,5 +1,5 @@
 {
-  "harnessMode": "prod",
+  "harnessMode": "dev",
   "theme": "night",
   "viewport": {
     "width": 1440,
@@ -85,5 +85,6 @@
       "normal"
     ]
   },
-  "overlapCount": 0
+  "overlapCount": 0,
+  "contentTop": 233
 }

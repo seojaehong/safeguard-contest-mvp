@@ -1,12 +1,12 @@
 {
-  "harnessMode": "prod",
+  "harnessMode": "dev",
   "empty": {
     "horizontalOverflow": 0,
     "state": "empty"
   },
   "serverError": [
     {
-      "harnessMode": "prod",
+      "harnessMode": "dev",
       "theme": "day",
       "width": 1440,
       "height": 900,
@@ -26,7 +26,7 @@
       "overlayVisible": false
     },
     {
-      "harnessMode": "prod",
+      "harnessMode": "dev",
       "theme": "night",
       "width": 1440,
       "height": 900,
@@ -46,7 +46,7 @@
       "overlayVisible": false
     },
     {
-      "harnessMode": "prod",
+      "harnessMode": "dev",
       "theme": "day",
       "width": 390,
       "height": 844,
@@ -66,7 +66,7 @@
       "overlayVisible": false
     },
     {
-      "harnessMode": "prod",
+      "harnessMode": "dev",
       "theme": "night",
       "width": 390,
       "height": 844,

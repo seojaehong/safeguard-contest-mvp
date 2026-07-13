@@ -1,87 +1,50 @@
 {
-  "schemaVersion": 2,
-  "status": "done_with_one_backend_red",
-  "generatedAt": "2026-07-12T17:31:41.3687137+09:00",
-  "authoritativeBackendSha": "24c19c17cc8c932a333fdae8785426218e57ae15",
-  "productSourceSha": "02b4598ef7bab4c57eb8550f59be024ae66cdcd3",
-  "buildId": "pfWi4QTypPEcr5mHBK9P-",
-  "buildIdentity": "025ce0a3592e150a49e27abcbe751c2424ed0baadd176f3ac528e85072ea3637",
-  "buildFileCount": 431,
-  "preservation": {
-    "scenarioProtocolDeltaFiles": 0,
-    "w7W8TestFilesExactToBackend": true,
-    "reportsCssStrategy": "Preserve the complete final-launch stylesheet and append only data-module-route=/reports overrides."
+  "schemaVersion": 3,
+  "status": "pass_for_executed_development_gates",
+  "generatedAt": "2026-07-13T22:15:06.2863189+09:00",
+  "sourceBranch": "fix/export-web-deep-remediation",
+  "productSourceSha": "0c58b1bee22cacd3dd04f08554aed06d1934d833",
+  "harnessMode": "dev",
+  "scope": {
+    "userVisibleComparisonLabels": "Korean",
+    "internalDataKeysPreserved": ["asIs", "toBe"],
+    "productionBuildClaimed": false,
+    "audit108Claimed": false
   },
   "gates": {
-    "exactReports": { "files": 3, "passed": 24, "failed": 0 },
-    "destinationReports": { "files": 3, "passed": 51, "failed": 0 },
-    "focusedStatic": { "files": 6, "passed": 14, "failed": 0 },
-    "strictTypecheck": { "status": "pass" },
-    "broadFrontendContract": { "files": 1, "passed": 19, "failed": 0, "delta": 0 },
-    "staticAudit": { "status": "pass", "violations": 0, "importantDeclarations": 0, "coverageIssues": 0 },
-    "productionBuild": { "status": "pass", "staticPages": 27, "concurrentBuildCount": 0, "authoritativeBuildRunsAfterFinalRebase": 1 },
-    "reportsProductionBrowser": { "files": 1, "passed": 5, "failed": 0, "skippedStatic": 5 },
-    "workspaceW7": {
-      "files": 2,
-      "passed": 22,
-      "failed": 1,
-      "remainingRed": "At 1440x900 Day, preserved backend test expects textarea vertical padding 22px while the final-launch production CSS computes 24px. Reports route CSS does not match /workspace."
-    },
-    "aiConnectW8": { "files": 1, "passed": 2, "failed": 0 }
+    "userVisibleKoreanCopy": { "files": 1, "passed": 7, "failed": 0 },
+    "focusedReports": { "files": 3, "passed": 56, "failed": 0 },
+    "reportsBrowserDesign": { "files": 1, "passed": 10, "failed": 0 },
+    "knowledgeBrowserLayout": { "files": 1, "passed": 4, "failed": 0 },
+    "strictTypecheck": { "status": "pass" }
   },
-  "freshChecks": [
-    {
-      "name": "fresh-static-audit",
-      "command": [
-        "$evidenceDirectory = Join-Path (Get-Location) \"evaluation/reports-wave1-evidence-contract-2026-07-12\"",
-        "New-Item -ItemType Directory -Path $evidenceDirectory -Force | Out-Null",
-        "$rawLog = Join-Path $evidenceDirectory \"static-audit.log\"",
-        "$tempJson = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())",
-        "$hadOutputPath = Test-Path Env:OUTPUT_PATH",
-        "$previousOutputPath = $env:OUTPUT_PATH",
-        "try {",
-        "  $env:OUTPUT_PATH = $tempJson",
-        "  $auditOutput = & node .\\scripts\\frontend_consistency_audit.mjs 2>&1",
-        "  $auditExit = $LASTEXITCODE",
-        "  $stdout = ($auditOutput -join [Environment]::NewLine) | ConvertFrom-Json",
-        "  $report = Get-Content -Raw -LiteralPath $tempJson | ConvertFrom-Json",
-        "  $rules = [ordered]@{}",
-        "  $report.violations | Group-Object rule | Sort-Object Name | ForEach-Object { $rules[$_.Name] = $_.Count }",
-        "  $postProcess = [ordered]@{ recordType = \"fresh-static-audit-post-process\"; auditProcessExit = $auditExit; outputPath = $stdout.outputPath; status = $report.status; sourceSha = $report.sourceSha; sourceIdentity = $report.sourceIdentity; violationCount = $report.violationCount; importantDeclarations = $report.counts.importantDeclarations; coverageIssues = $report.coverageIssues; rules = $rules }",
-        "  $auditOutput | Set-Content -LiteralPath $rawLog -Encoding utf8",
-        "  ($postProcess | ConvertTo-Json -Depth 6 -Compress) | Add-Content -LiteralPath $rawLog -Encoding utf8",
-        "  $auditOutput",
-        "  $postProcess | ConvertTo-Json -Depth 6",
-        "  if ($auditExit -ne 0) { throw \"Expected static audit PASS exit 0, got $auditExit\" }",
-        "} finally {",
-        "  if ($hadOutputPath) { $env:OUTPUT_PATH = $previousOutputPath } else { Remove-Item Env:OUTPUT_PATH -ErrorAction SilentlyContinue }",
-        "  Remove-Item -LiteralPath $tempJson -Force -ErrorAction SilentlyContinue",
-        "}"
-      ],
-      "result": {
-        "status": "pass",
-        "auditProcessExit": 0,
-        "sourceSha": "c541b916abf2a499328fb76b2fc9583dc1031e32",
-        "sourceIdentity": "9082e35bd324a3528882df714d524002cb8eb8e91e40feab17cb9f9169f3b9a3",
-        "violationCount": 0,
-        "importantDeclarations": 0,
-        "coverageIssues": 0
-      },
-      "evidence": "../reports-wave1-evidence-contract-2026-07-12/static-audit.log"
-    }
-  ],
   "reportsBrowserMetrics": {
     "scenarios": 4,
     "themes": ["day", "night"],
-    "viewports": ["desktop", "390px mobile"],
+    "viewports": ["1440x900", "390x844"],
     "horizontalOverflow": 0,
     "minimumControlHeight": 62,
     "heroCtaHeight": 44,
     "controlRadius": "8px",
     "overlapCount": 0,
-    "routeIsolation": "pass"
+    "heroCtaClipped": false,
+    "heroMetaCtaOverlap": false,
+    "mobileContentTop": {
+      "measurement": "page top before hover or focus auto-scroll",
+      "minimumAllowed": 0,
+      "maximumAllowed": 387,
+      "day": 352,
+      "night": 352
+    }
   },
-  "remainingRed": [
-    "W7 workspace production matrix: 1 backend-owned padding expectation drift; 22 assertions pass."
-  ]
+  "stateMetrics": {
+    "emptyHorizontalOverflow": 0,
+    "serverErrorScenarios": 4,
+    "disabledDownloadCountPerScenario": 5,
+    "horizontalOverflow": 0,
+    "readinessOccluded": false,
+    "overlayVisible": false
+  },
+  "remainingRed": [],
+  "deferredIntegrationGates": ["production build", "108-row audit"]
 }
