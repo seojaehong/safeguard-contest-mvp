@@ -1,4 +1,4 @@
-verificationStartedAt=2026-07-13T23:09:10.0000000Z
+verificationStartedAt=2026-07-13T23:56:33.562Z
 mode=read-only
 noMutation=true
 PASS report.json parses
@@ -6,43 +6,59 @@ PASS report source/base SHA equals audited revision f45bba17bcce0d8ebb2690f82d01
 PASS audited source SHA is an ancestor of the audit-artifact worktree HEAD
 PASS launchReadiness is boolean false
 PASS top-level noMutation is boolean true
-PASS all mutation flags are false
+PASS all report mutation flags are false
 PASS elapsed timing fields are finalized and internally consistent
-PASS final report and probe syntax statuses are passed
+PASS final report and preserved probe syntax statuses are passed
+PASS migration counts are 9 files and 760 lines
 PASS inventory counts are 24 boundaries and 22 application tables
+PASS tenant-scoped application table count is 13
 PASS RLS enabled/missing/FORCE counts are 20/2/0
 PASS policy counts are 20 total, 13 FOR ALL, 7 SELECT-only, 0 explicit role
 PASS finding counts are P0/P1/P2/P3 0/3/4/3
 PASS negative matrix has 14 cases, 0 executed, 56 expected denies
+PASS tenant/admin service-role API counts are 21 = 19 direct + 2 broker-mediated
+PASS preserved probe counts are 44 = 30/4/10 with zero verified assertions
 PASS all 10 finding titles match Markdown exactly
-PASS P1-03 cites external workpackId input and service-role insert; no client DB INSERT is required for that route attempt
+PASS P1-03 records no client DB INSERT requirement for the route attempt
 PASS P1-03 records external UUID knowledge and cross-tenant inclusion as unproven
-PASS P2-03 traces DB token site/org context into a siteId-only MCP memory read and records no reproduced cross-tenant read
-PASS P3-03 records the empty-provenance publish gap and no current violating row proven
+PASS P2-03 records no reproduced cross-tenant memory read
+PASS P3-03 records no current violating row proven
 PASS Markdown reports the finalized elapsed values
 PASS all 136 JSON source evidence references resolve in range
-PASS all 166 Markdown full/shorthand source citations resolve in range
-PASS all 21 service-role tenant/admin API entry points exist: 19 direct and 2 broker-mediated
-PASS six public/global service-role API routes and two server pages exist: eight public HTTP surfaces total
-PASS fresh live probe records 44 HEAD and zero verified tenant assertions
-PASS fresh live status counts are 200/206/404 = 30/4/10
+PASS all 176 Markdown full/shorthand source citations resolve in range
+PASS all 14 static census source references resolve in range
+PASS public service-role counts are 6 API + 5 pages = 11 HTTP surfaces
+PASS report service-role inventory enumerates the exact 6 API files and 5 page files
+PASS completeness validator enumerates all 11 public HTTP paths
+PASS all 6 public API source files contain their service-role-backed helper calls
+PASS all 5 public page source files contain their service-role-backed helper calls
+PASS getSafetyReferenceStats reaches service-role REST countRows
+PASS Markdown table explicitly lists all 11 surfaces and evidence for all 5 pages
+PASS static audit log records the exact 6+5=11 census
+PASS static audit log records recalculated reference counts
+PASS audited product, migration, and test source is unchanged
+PASS typecheck and focused-test reuse has explicit unchanged-product provenance
+PASS preserved focused-test log records 10 files and 82 tests passed
+PASS preserved strict typecheck success log is present
+PASS probe source passes node --check
+PASS probe source contains HEAD only and no mutating call pattern
 PASS all four probe artifacts have mutationPerformed=false
-PASS all four probe artifacts store no URL, host, key, body, or exception text
-PASS probe syntax passes node --check
-PASS probe source contains no mutating method or database mutation call pattern
-PASS audit artifacts contain no JWT, project host, or key assignment pattern
-PASS working changes are confined to the requested audit artifact directory
+PASS all four probe artifacts store no URL, host, key, body, exception, or auth field
+PASS audit artifacts contain no JWT, project host, key assignment, or bearer secret pattern
+PASS working changes are confined to 4 files within the exact five-file audit allowlist
+PASS focused-tests.log remains unchanged
+PASS no production code, migration, DB/schema/data, or secret file is changed
 PASS restored node_modules remains gitignored
-PASS strict typecheck success log present
-PASS focused test log records 10 files and 82 tests passed
+PASS audit contract remains noMutation=true, launchReadiness=false, remediationApplied=false
 jsonEvidenceReferenceCount=136
-markdownSourceCitationCount=166
+markdownSourceCitationCount=176
+staticCensusSourceReferenceCount=14
 serviceRoleTenantAdminEntryPoints=21
 serviceRoleTenantAdminDirectEntryPoints=19
 serviceRoleTenantAdminBrokerEntryPoints=2
 publicGlobalServiceRoleApiRoutes=6
-publicGlobalServiceRoleServerPageSurfaces=2
-publicGlobalServiceRoleHttpSurfaces=8
+publicGlobalServiceRoleServerPageSurfaces=5
+publicGlobalServiceRoleHttpSurfaces=11
 expectedCrossTenantDenyAssertions=56
 verificationFailures=0
-verificationFinishedAt=2026-07-13T23:09:25.2562404Z
+verificationFinishedAt=2026-07-13T23:56:34.995Z

@@ -88,8 +88,8 @@
     "serviceRoleTenantAdminDirectEntryPoints": 19,
     "serviceRoleTenantAdminBrokerEntryPoints": 2,
     "publicGlobalServiceRoleApiRoutes": 6,
-    "publicGlobalServiceRoleServerPageSurfaces": 2,
-    "publicGlobalServiceRoleHttpSurfaces": 8,
+    "publicGlobalServiceRoleServerPageSurfaces": 5,
+    "publicGlobalServiceRoleHttpSurfaces": 11,
     "focusedTestFiles": 10,
     "focusedTests": 82
   },
@@ -1509,7 +1509,7 @@
     {
       "id": "final-report-verification",
       "exitCode": 0,
-      "result": "0 failures; 136 JSON evidence references and 166 Markdown source citations, 21 tenant/admin service-role API routes (19 direct, 2 broker-mediated), 6 public/global API routes, 8 public HTTP surfaces, 14 negative cases, and 56 expected denies validated; secret and mutation scans clear"
+      "result": "0 failures; 136 JSON evidence references and 176 Markdown source citations, 21 tenant/admin service-role API routes (19 direct, 2 broker-mediated), 6 public/global API routes, 5 public server pages, 11 public HTTP surfaces, 14 negative cases, and 56 expected denies validated; secret and mutation scans clear"
     }
   ],
   "testExecution": {
@@ -1535,8 +1535,21 @@
       "serviceRoleTenantAdminDirectEntryPoints": 19,
       "serviceRoleTenantAdminBrokerEntryPoints": 2,
       "publicGlobalServiceRoleApiRoutes": 6,
-      "publicGlobalServiceRoleServerPageSurfaces": 2,
-      "publicGlobalServiceRoleHttpSurfaces": 8,
+      "publicGlobalServiceRoleServerPageSurfaces": 5,
+      "publicGlobalServiceRoleHttpSurfaces": 11,
+      "publicGlobalServiceRoleHttpSurfacePathsValidated": [
+        "/api/safety-reference/search",
+        "/api/safety-reference/status",
+        "/api/ontology/graph",
+        "/api/ask",
+        "/api/ask/stream",
+        "/api/workpack/remediate",
+        "/ask",
+        "/ontology",
+        "/evidence",
+        "/knowledge",
+        "/ops/api"
+      ],
       "logPath": "evaluation/supabase-rls-audit-2026-07-14/logs/verification.log"
     },
     "probeSyntax": {
@@ -1560,7 +1573,9 @@
     "strictTypecheck": {
       "status": "passed",
       "command": "npm.cmd run typecheck",
-      "logPath": "evaluation/supabase-rls-audit-2026-07-14/logs/typecheck.log"
+      "logPath": "evaluation/supabase-rls-audit-2026-07-14/logs/typecheck.log",
+      "remediationRerun": false,
+      "provenance": "Existing success log reused because the second remediation changes audit evidence only and audited product, migration, and test source is unchanged."
     },
     "focusedContractTests": {
       "status": "passed",
@@ -1568,7 +1583,9 @@
       "tests": 82,
       "command": "npm.cmd test -- <10 focused test files>",
       "logPath": "evaluation/supabase-rls-audit-2026-07-14/logs/focused-tests.log",
-      "interpretation": "Static/unit route-contract coverage only; not authenticated live tenant A/B enforcement."
+      "interpretation": "Static/unit route-contract coverage only; not authenticated live tenant A/B enforcement.",
+      "remediationRerun": false,
+      "provenance": "Existing 10-file/82-test success log retained without regeneration because the second remediation changes audit evidence only and audited product, migration, and test source is unchanged."
     },
     "authenticatedCrossTenant": {
       "status": "not-executed",
@@ -1673,10 +1690,13 @@
     ],
     "publicServerPageSurfaces": [
       "app/ask/page.tsx",
-      "app/ontology/page.tsx"
+      "app/ontology/page.tsx",
+      "app/evidence/page.tsx",
+      "app/knowledge/page.tsx",
+      "app/ops/api/page.tsx"
     ],
-    "publicHttpSurfaceCount": 8,
-    "interpretation": "The 21 tenant/admin API routes rely on application authorization rather than tenant RLS. Separately, 6 public/global API routes and 2 server pages use service-role-backed global reads; those 8 public HTTP surfaces are not tenant/admin routes."
+    "publicHttpSurfaceCount": 11,
+    "interpretation": "The 21 tenant/admin API routes rely on application authorization rather than tenant RLS. Separately, 6 public/global API routes and 5 server pages use service-role-backed global reads; those 11 public HTTP surfaces are not tenant/admin routes."
   },
   "logs": {
     "staticAudit": "evaluation/supabase-rls-audit-2026-07-14/logs/static-audit.log",
