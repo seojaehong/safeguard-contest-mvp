@@ -105,8 +105,8 @@
   "validation": {
     "markdownLinks": {
       "status": "pass",
-      "checked": 60,
-      "lineFragments": 59,
+      "checked": 61,
+      "lineFragments": 60,
       "failures": 0
     },
     "requiredTerms": {
