@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
+import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
+
 const mocks = vi.hoisted(() => ({
   openAiCreate: vi.fn(),
   vertexGenerate: vi.fn()
@@ -73,5 +75,27 @@ describe("answer generation trace", () => {
     const logged = errorSpy.mock.calls.flat().map(String).join("\n");
     expect(logged).not.toContain("PII_MARKER");
     expect(logged).not.toContain("worker=Kim");
+  });
+
+  test("binds the Phase A JSON block before answer naturalization", async () => {
+    const { generateAnswer } = await import("@/lib/ai");
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_registered",
+      evidencePack: null,
+    });
+
+    await generateAnswer("등록되지 않은 작업", [], {
+      traceId: "trace-answer-phase-a-grounding",
+      phaseAGrounding,
+    });
+
+    const request = mocks.openAiCreate.mock.calls[0]?.[0] as { input?: unknown } | undefined;
+    expect(typeof request?.input).toBe("string");
+    if (typeof request?.input !== "string") throw new Error("expected OpenAI prompt input");
+    expect(request.input.startsWith("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>\n")).toBe(true);
+    expect(request.input).toContain(JSON.stringify(phaseAGrounding));
+    expect(request.input.indexOf("<<<END_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>"))
+      .toBeLessThan(request.input.indexOf("[PHASE A FIXED NATURALIZATION INSTRUCTIONS]"));
+    expect(request.input).toContain("missing이면 모든 문서를 검토 필요 초안");
   });
 });

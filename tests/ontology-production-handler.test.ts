@@ -50,6 +50,7 @@ describe("production ontology docpack handler", () => {
     ["전기 설비 작업", "전기 작업"],
   ])("preserves '%s' through the actual evidence handler", async (question, canonicalTask) => {
     const calls: string[] = [];
+    let runAskOptions: unknown;
     const output = await handleGenerateSafetyDocpack(
       { question, mode: "template", includeFull: false },
       {
@@ -57,8 +58,9 @@ describe("production ontology docpack handler", () => {
           calls.push(`evidence:${query}`);
           return buildPublishedSafetyKnowledge(publishedGraph, query);
         },
-        runAsk: async (input): Promise<AskResponse> => {
+        runAsk: async (input, options): Promise<AskResponse> => {
           calls.push(`generate:${input}`);
+          runAskOptions = options;
           return generatedResponse(input);
         },
       },
@@ -67,6 +69,24 @@ describe("production ontology docpack handler", () => {
     expect(output.evidenceQuery).toBe(canonicalTask);
     expect(calls).toEqual([`evidence:${canonicalTask}`, `generate:${question}`]);
     expect(output.docpack.evidenceContract?.task.label).toBe(canonicalTask);
+    expect(runAskOptions).toMatchObject({
+      aiMode: "template",
+      phaseAGrounding: {
+        evidenceChainState: "review_required",
+        groundingStatus: "review_required",
+        evidencePack: output.docpack.evidenceContract,
+        generationPolicy: {
+          llmRole: "naturalize_only",
+          outputStatus: "review_required_draft",
+        },
+        materializationTargets: output.docpack.evidenceContract?.materializationTargets,
+      },
+    });
+    expect(output.docpack.ontologyGrounding).toMatchObject({
+      groundingStatus: "review_required",
+      outputStatus: "review_required_draft",
+      verified: false,
+    });
     expect(output.docpack.evidenceMaterialization).toMatchObject({
       evidenceChainState: "review_required",
       verifiedRecords: [],
@@ -141,17 +161,51 @@ describe("production ontology docpack handler", () => {
       evidenceChainState: "resolved",
     };
 
+    let runAskQuestion: string | undefined;
+    let runAskOptions: unknown;
     const output = await handleGenerateSafetyDocpack(
       { question, mode: "template", includeFull: true },
       {
         querySafetyKnowledge: async () => resolvedKnowledge,
-        runAsk: async (input) => generatedResponse(
-          input,
-          `${plan.controlLabel} | ${lawUid}`,
-        ),
+        runAsk: async (input, options) => {
+          runAskQuestion = input;
+          runAskOptions = options;
+          return generatedResponse(
+            input,
+            `${plan.controlLabel} | ${lawUid}`,
+          );
+        },
       },
     );
 
+    expect(runAskQuestion).toBe(question);
+    expect(runAskOptions).toMatchObject({
+      aiMode: "template",
+      phaseAGrounding: {
+        evidenceChainState: "resolved",
+        groundingStatus: "resolved",
+        evidencePack: resolvedKnowledge.evidenceContract,
+        allowedEvidence: expect.arrayContaining([
+          expect.objectContaining({
+            citedUid: lawUid,
+            sourceRole: "current_law_mandate",
+            controlId: plan.controlId,
+            obligationClassification: plan.obligation.classification,
+          }),
+        ]),
+        generationPolicy: {
+          llmRole: "naturalize_only",
+          outputStatus: "grounded_draft",
+        },
+        materializationTargets: resolvedKnowledge.evidenceContract?.materializationTargets,
+      },
+    });
+    expect(JSON.stringify(runAskOptions)).toContain(lawUid);
+    expect(output.docpack.ontologyGrounding).toMatchObject({
+      groundingStatus: "resolved",
+      outputStatus: "grounded_draft",
+      verified: true,
+    });
     expect(output.docpack.evidenceMaterialization).toMatchObject({
       evidenceChainState: "resolved",
       humanConfirmation: { required: true, status: "pending" },
@@ -243,19 +297,109 @@ describe("production ontology docpack handler", () => {
     const lawUid = plan?.lawCitedUids[0];
     if (!plan || !lawUid) throw new Error("expected vehicle current-law plan");
 
+    let runAskOptions: unknown;
     const output = await handleGenerateSafetyDocpack(
       { question, mode: "template", includeFull: true },
       {
         querySafetyKnowledge: async () => knowledge,
+        runAsk: async (input, options) => {
+          runAskOptions = options;
+          return generatedResponse(
+            input,
+            `${plan.controlLabel} | ${lawUid}`,
+          );
+        },
+      },
+    );
+
+    expect(runAskOptions).toMatchObject({
+      phaseAGrounding: {
+        evidenceChainState: "review_required",
+        groundingStatus: "review_required",
+        evidencePack: knowledge.evidenceContract,
+        allowedEvidence: [],
+        generationPolicy: {
+          llmRole: "naturalize_only",
+          outputStatus: "review_required_draft",
+        },
+      },
+    });
+    expect(output.docpack.ontologyGrounding).toMatchObject({
+      groundingStatus: "review_required",
+      outputStatus: "review_required_draft",
+      verified: false,
+    });
+    expect(output.docpack.evidenceMaterialization).toMatchObject({
+      evidenceChainState: "review_required",
+      verifiedRecords: [],
+      humanConfirmation: { required: true, status: "pending" },
+    });
+  });
+
+  test("marks a missing Task evidence pack before generation instead of silently grounding it", async () => {
+    const question = "등록되지 않은 해체 작업";
+    let runAskOptions: unknown;
+
+    const output = await handleGenerateSafetyDocpack(
+      { question, mode: "template", includeFull: true },
+      {
+        querySafetyKnowledge: async (query) => buildPublishedSafetyKnowledge(publishedGraph, query),
+        runAsk: async (input, options) => {
+          runAskOptions = options;
+          return generatedResponse(input, "등록되지 않은 통제 | law:unsupported");
+        },
+      },
+    );
+
+    expect(output.evidence.found).toBe(false);
+    expect(runAskOptions).toMatchObject({
+      phaseAGrounding: {
+        evidenceChainState: "not_registered",
+        groundingStatus: "missing",
+        evidencePack: null,
+        allowedEvidence: [],
+        materializationTargets: [],
+        generationPolicy: {
+          llmRole: "naturalize_only",
+          outputStatus: "missing_evidence_draft",
+        },
+      },
+    });
+    expect(output.docpack.ontologyGrounding).toMatchObject({
+      groundingStatus: "missing",
+      outputStatus: "missing_evidence_draft",
+      verified: false,
+    });
+    expect(output.docpack.evidenceMaterialization).toMatchObject({
+      evidenceChainState: "not_registered",
+      verifiedRecords: [],
+      humanConfirmation: { required: true, status: "pending" },
+    });
+  });
+
+  test("does not materialize an unsupported citation from a resolved provider draft", async () => {
+    const question = "차량계 하역운반기계 인접 작업";
+    const knowledge = requireKnowledge(question);
+    const plan = knowledge.evidenceContract?.materializationTargets[0];
+    if (!plan) throw new Error("expected vehicle materialization plan");
+    const resolvedKnowledge: SafetyKnowledgeFound = {
+      ...knowledge,
+      evidenceChainState: "resolved",
+    };
+
+    const output = await handleGenerateSafetyDocpack(
+      { question, mode: "template", includeFull: true },
+      {
+        querySafetyKnowledge: async () => resolvedKnowledge,
         runAsk: async (input) => generatedResponse(
           input,
-          `${plan.controlLabel} | ${lawUid}`,
+          `${plan.controlLabel} | law:산업안전보건기준에관한규칙:제999조`,
         ),
       },
     );
 
     expect(output.docpack.evidenceMaterialization).toMatchObject({
-      evidenceChainState: "review_required",
+      evidenceChainState: "resolved",
       verifiedRecords: [],
       humanConfirmation: { required: true, status: "pending" },
     });

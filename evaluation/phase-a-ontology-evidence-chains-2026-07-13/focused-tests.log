@@ -1,12 +1,12 @@
 
 > safeclaw@0.1.0 test
-> vitest run tests/ontology-evidence-chains.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/mcp-route-scope-contract.test.ts tests/ontology-production-handler.test.ts --maxWorkers=1 --no-file-parallelism
+> vitest run tests/ontology-evidence-chains.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/mcp-route-scope-contract.test.ts tests/ontology-production-handler.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/generation-trace-privacy.test.ts tests/kosha-current-review-run-ask.test.ts tests/ai-deliverables-prompts.test.ts --maxWorkers=1 --no-file-parallelism
 
 
  RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
 
 
- Test Files  6 passed (6)
-      Tests  169 passed (169)
-   Start at  20:45:59
-   Duration  20.69s (transform 2.78s, setup 0ms, import 6.25s, tests 7.09s, environment 1ms)
+ Test Files  11 passed (11)
+      Tests  203 passed (203)
+   Start at  21:30:40
+   Duration  34.89s (transform 2.41s, setup 0ms, import 8.06s, tests 15.25s, environment 4ms)

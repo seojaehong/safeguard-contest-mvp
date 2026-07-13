@@ -4,6 +4,10 @@ import { buildMockAskResponse } from "./mock-data";
 import { generateWithVertex } from "./vertex/client";
 import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
 import { createLogger } from "@/lib/logger";
+import {
+  buildPhaseAGenerationPrompt,
+  type PhaseAGenerationGrounding,
+} from "@/lib/ontology/evidence-chain";
 
 const log = createLogger("ai");
 
@@ -157,7 +161,11 @@ function trimCitationText(text: string, maxLength: number) {
   return `${text.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
-function buildPrompt(question: string, citations: SearchResult[]) {
+function buildPrompt(
+  question: string,
+  citations: SearchResult[],
+  phaseAGrounding?: PhaseAGenerationGrounding,
+) {
   const trimmedQuestion = trimCitationText(question.trim(), 220);
   const compactCitations = citations.slice(0, 4).map((citation, index) => {
     const title = trimCitationText(citation.title, 60);
@@ -167,6 +175,7 @@ function buildPrompt(question: string, citations: SearchResult[]) {
   });
 
   return [
+    ...(phaseAGrounding ? [buildPhaseAGenerationPrompt(phaseAGrounding), ""] : []),
     "당신은 산업안전 실무용 코파일럿이다.",
     "사용자가 현장 조건을 제공하면, 법정 제출 최종본이 아니라 현장 검토용 초안을 바로 작성하라.",
     "현장 실측값이 부족하다는 이유로 생성을 거절하지 말고, 부족한 항목은 '현장 확인 필요'로 표시하라.",
@@ -298,7 +307,7 @@ export async function enhanceLegalEvidenceMappings(question: string, citations: 
 export async function generateAnswer(
   question: string,
   citations: SearchResult[],
-  options: { traceId: string }
+  options: { traceId: string; phaseAGrounding?: PhaseAGenerationGrounding }
 ): Promise<AnswerGenerationResult> {
   if (!isVertexConfigured() && !openAiApiKey) {
     const trace = { provider: "mock", model: null, fallbackUsed: false } as const;
@@ -318,7 +327,7 @@ export async function generateAnswer(
     };
   }
 
-  const prompt = buildPrompt(question, citations);
+  const prompt = buildPrompt(question, citations, options.phaseAGrounding);
 
   const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
