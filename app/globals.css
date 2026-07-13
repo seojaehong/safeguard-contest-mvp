@@ -7470,6 +7470,10 @@ ul {
     gap: 16px;
   }
 
+  .field-workspace-editor-focus {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .workspace-canvas {
     grid-column: 1;
     grid-row: 1;

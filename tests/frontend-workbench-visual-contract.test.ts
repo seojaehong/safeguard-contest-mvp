@@ -102,6 +102,9 @@ describe("workbench visual contract", () => {
     expect(tabletRule).toMatch(/\.workspace-canvas\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*1;/u);
     expect(tabletRule).toMatch(/\.workspace-side\s*\{[^}]*grid-column:\s*2;[^}]*grid-row:\s*1;/u);
     expect(tabletRule).toMatch(/\.workspace-rail\s*\{[^}]*grid-column:\s*1 \/ -1;[^}]*grid-row:\s*2;/u);
+    expect(tabletRule).toMatch(
+      /\.field-workspace-editor-focus\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);/u,
+    );
     expect(mobileRule).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*1fr;/u);
     expect(mobileRule).toMatch(/:is\(\.workspace-rail, \.workspace-canvas, \.workspace-side\)\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*auto;/u);
     expect(tabletStart).toBeGreaterThan(css.indexOf("@media (max-width: 1120px)"));

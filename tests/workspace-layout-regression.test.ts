@@ -1574,6 +1574,26 @@ describe("workspace layout regression", () => {
     expect(metrics.focusMessage.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
     expect(String(collapsedActiveElementClass)).toContain("document-textarea");
 
+    await page.setViewportSize({ width: 1024, height: 900 });
+    await page.evaluate(async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    });
+    const tabletMetrics = await page.evaluate(() => {
+      const fieldWorkspace = document.querySelector<HTMLElement>(".field-workspace-editor-focus");
+      const canvas = document.querySelector<HTMLElement>(".workspace-canvas");
+      if (!fieldWorkspace || !canvas) throw new Error("Missing tablet editor layout targets");
+      return {
+        viewportWidth: window.innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        columns: getComputedStyle(fieldWorkspace).gridTemplateColumns.split(" ").filter(Boolean),
+        fieldWorkspaceWidth: fieldWorkspace.getBoundingClientRect().width,
+        canvasWidth: canvas.getBoundingClientRect().width,
+      };
+    });
+    expect(tabletMetrics.scrollWidth).toBeLessThanOrEqual(tabletMetrics.viewportWidth + 1);
+    expect(tabletMetrics.columns).toHaveLength(1);
+    expect(tabletMetrics.canvasWidth).toBeGreaterThanOrEqual(Math.floor(tabletMetrics.fieldWorkspaceWidth * 0.98));
+
     await operationsDisclosure.locator(":scope > summary").click();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(async () => {
