@@ -943,8 +943,8 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "개선상태",
     "담당자",
     "위험요인",
-    "As-Is",
-    "To-Be",
+    "개선 전",
+    "개선 후",
     "반영문서",
     "근거",
     "승인사진",
@@ -1079,14 +1079,14 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
     `- 개선 전/개선 후 사진 후보: ${snapshot.summary.photoCandidates}건`,
     `- 승인된 개선 전/개선 후 사진: ${snapshot.summary.photoImprovements}건`,
     "",
-    "## 위험성평가 As-Is / To-Be",
+    "## 위험성평가 개선 전 / 개선 후",
     ""
   ];
 
   snapshot.riskRows.forEach((row) => {
     lines.push(`### ${row.index}. ${row.task} · ${row.hazard} [${row.riskLevelLabel}]`);
-    lines.push(`- As-Is: ${row.currentControls}`);
-    lines.push(`- To-Be: ${row.additionalControls}`);
+    lines.push(`- 개선 전: ${row.currentControls}`);
+    lines.push(`- 개선 후: ${row.additionalControls}`);
     lines.push(`- 담당/기한: ${row.owner} · ${row.due}`);
     lines.push(`- 확인: ${row.verification}`);
     lines.push(`- 근거: ${row.evidenceRefs.join(", ") || "현장 확인"}`);
@@ -1099,8 +1099,8 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
     snapshot.improvements.forEach((item) => {
       lines.push(`### ${formatDate(item.createdAt)} · ${item.hazardLabel}`);
       lines.push(`- 출처: ${item.sourceLabel}`);
-      lines.push(`- As-Is: ${item.asIs}`);
-      lines.push(`- To-Be: ${item.toBe}`);
+      lines.push(`- 개선 전: ${item.asIs}`);
+      lines.push(`- 개선 후: ${item.toBe}`);
       lines.push(`- 반영 문서: ${item.reflectedDocuments.join(", ") || "확인 필요"}`);
       if (item.photoNames.length) lines.push(`- 사진: ${item.photoNames.join(", ")}`);
       lines.push("");
