@@ -1,0 +1,422 @@
+{
+  "schemaVersion": "3.0.0",
+  "kind": "safeclaw-spec-review-evidence/v1",
+  "capturedAt": "2026-07-13T22:03:27.314Z",
+  "branch": "feat/workpack-document-editors-v2-target-ready-v2",
+  "candidateCommit": "99b1af5385e0b5eaa9ff479761ecea944f0958ab",
+  "candidateParent": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "sourceBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "currentIntegrationTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "mergeBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "candidateArtifacts": [
+    {
+      "path": "evaluation/workpack-document-editors-v2-2026-07-13/spec.md",
+      "gitBlob": "e803be72429cb917a9351e20e450dcc12929969d",
+      "sha256": "ad82f75e97f2f5ed59a8b7c71b0550dee0097a3a3f9d6f36ba104a1858409798",
+      "bytes": 348408
+    },
+    {
+      "path": "evaluation/workpack-document-editors-v2-2026-07-13/spec.json",
+      "gitBlob": "046c6395a66c1943df142098656a91cb3b0aa0c4",
+      "sha256": "bcaa08b03868d8ed2a5f88e9fc3ff95073d8560dfa27db324afd6d0995ae05c9",
+      "bytes": 248858
+    },
+    {
+      "path": "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs",
+      "gitBlob": "0ff5015c7eadda6b3173cb1dc10a3222a8a64c5d",
+      "sha256": "295fc39c63705fa1d0072e16c68817d536a9373b2798cd7dfeed2ae28dfe36b1",
+      "bytes": 98751
+    }
+  ],
+  "targetBlobs": [
+    {
+      "path": "components/WorkpackEditor.tsx",
+      "gitBlob": "359ae50fb654a2c3a472983dc5ba0d927a4b716a",
+      "sha256": "f89b4bd145aeeb1c73314204dbcc5c0decacb25ac03a7a613283d5a739156740",
+      "bytes": 141326
+    },
+    {
+      "path": "lib/risk-assessment-schema.ts",
+      "gitBlob": "54fd0e5ef3fdd0c31a83ef7ea4ca858da23b8e35",
+      "sha256": "68601198eecc8e3a4fc62ada069b634c7b25c2d9902b8afb301faf56aa321927",
+      "bytes": 10229
+    },
+    {
+      "path": "lib/safety-reference-catalog.ts",
+      "gitBlob": "350b1eed8e2e6761ce4da3e667f63ad398757531",
+      "sha256": "a533567acc08fc8435e9875d88306caca4899037b464c5c02c39ec100fa61479",
+      "bytes": 123571
+    },
+    {
+      "path": "lib/ontology/evidence-chain-registry.ts",
+      "gitBlob": "740120b9d11e5f25da6ed98aefc8e1c5b801cf78",
+      "sha256": "cf364b0656cd1b4137f423df2d33cf8d1625f55081040c73b64b5112945a4e32",
+      "bytes": 26047
+    },
+    {
+      "path": "lib/generation-evidence.ts",
+      "gitBlob": "a6517ec8edac3f06375e201b54f4bbc397b9982d",
+      "sha256": "377a59a57402a3a75337f255d75214af946094ee686108f8a840eef39e49497c",
+      "bytes": 8293
+    },
+    {
+      "path": "app/api/workpacks/route.ts",
+      "gitBlob": "78eb800c1b982a7356f4751189098ce201539101",
+      "sha256": "8d29489c2f70a5ca962189103b7be092ccded7925e3a96ce53d3bfc2491cdd8c",
+      "bytes": 8407
+    },
+    {
+      "path": "supabase/migrations/002_workspace_productization.sql",
+      "gitBlob": "c88950d636b0da7bc36278ccb4170417c0fdb177",
+      "sha256": "bf00e55aed5dd7d2d37072ec331d0c50a33cc08d8be898cc4b96542e7e886e1c",
+      "bytes": 6401
+    },
+    {
+      "path": "app/api/workpacks/[id]/improvements/route.ts",
+      "gitBlob": "00e7c8a88134f8636cae5d98949eafe5b0ba1a1a",
+      "sha256": "b94630d4bce8e3aff9abeec0b9e90df9e958da2c09a48fc9380ca1ded57162f5",
+      "bytes": 13466
+    },
+    {
+      "path": "app/api/workpacks/[id]/share-sessions/route.ts",
+      "gitBlob": "8ed0713940bc246f523b2e9c29af071882ed2cde",
+      "sha256": "7e6e7d2c4996852db0599c6234a8db480fc2c426a0020742d513c9d573407f6f",
+      "bytes": 6235
+    },
+    {
+      "path": "app/api/workflow/dispatch/route.ts",
+      "gitBlob": "b797f93332a8fef77a49a58f2d9772042014ee27",
+      "sha256": "a7aa246fc2077b15d7c8241e7daa23f288294a028afe576f9f9beaae3481a819",
+      "bytes": 16029
+    },
+    {
+      "path": "app/api/export/hwp/route.ts",
+      "gitBlob": "3732b3177cdf811147bda87951f29257bb5fa327",
+      "sha256": "fe24d1f91bfa9a978011c8ae89f6e1e0fc50154a6cb21874c0c29a60aece5031",
+      "bytes": 11756
+    },
+    {
+      "path": "app/api/export/pdf/route.ts",
+      "gitBlob": "08140acf24dc468ccb4894c9fff3af1ca277adfe",
+      "sha256": "baecf4ec5d04d5f91e5845a3489da9fbcaac61f307336276e18fc8b4288cfd6c",
+      "bytes": 53007
+    },
+    {
+      "path": "app/api/export/xlsx/route.ts",
+      "gitBlob": "7d09b692b4fc00c424d2cdde72e584b5216e1ed9",
+      "sha256": "fe817c558c69c045c451cf3b903fa1c6e53e145de08137cccd4db40b87f88030",
+      "bytes": 9373
+    },
+    {
+      "path": "app/api/export/hwpx-template/route.ts",
+      "gitBlob": "db17d136793641440a40154e8da0341f1a9e7ea9",
+      "sha256": "240bbfd822fda580f9ed4edb363a764a907f4f4dab6d0662a5239410a75aaaf9",
+      "bytes": 2030
+    }
+  ],
+  "refSnapshot": {
+    "snapshotId": "CONFLICT-SNAPSHOT-2026-07-14T03:03:57.9752330+09:00",
+    "capturedAt": "2026-07-14T03:03:57.9752330+09:00",
+    "captureMethod": [
+      [
+        "git",
+        "fetch",
+        "origin",
+        "--prune"
+      ],
+      [
+        "git",
+        "worktree",
+        "list",
+        "--porcelain"
+      ],
+      [
+        "git",
+        "-C",
+        "<worktree>",
+        "status",
+        "--short",
+        "--branch"
+      ],
+      [
+        "git",
+        "-C",
+        "<worktree>",
+        "rev-parse",
+        "HEAD"
+      ],
+      [
+        "git",
+        "-C",
+        "<worktree>",
+        "rev-parse",
+        "@{u}"
+      ],
+      [
+        "git",
+        "-C",
+        "<worktree>",
+        "rev-list",
+        "--left-right",
+        "--count",
+        "@{u}...HEAD"
+      ],
+      [
+        "git",
+        "diff",
+        "--name-only",
+        "<merge-base>...<head>",
+        "--",
+        "<planned ownership paths>"
+      ]
+    ],
+    "binding": "This is a mechanically captured, timestamped local+remote ref/worktree snapshot, not a perpetual live-state claim. review-evidence.json copies the exact facts and binds candidate/target blobs.",
+    "sourceBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "currentIntegrationTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "heads": [
+      {
+        "id": "integration",
+        "localRef": "feat/phase-a-evidence-integration",
+        "localHead": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "remoteRef": "origin/feat/phase-a-evidence-integration",
+        "remoteHead": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "aheadBehind": [
+          0,
+          0
+        ],
+        "worktreeState": "clean",
+        "dirtyPaths": [],
+        "relevantDirtyPaths": [],
+        "committedPlannedOverlap": [
+          "app/api/export/hwp/route.ts",
+          "app/api/export/hwpx-template/route.ts",
+          "app/api/export/pdf/route.ts",
+          "lib/hwpx-template.ts"
+        ],
+        "targetSourceDeltaFrom77d": [],
+        "overlapHunks": [
+          "components/WorkpackEditor.tsx: downloadXlsx, printPdf, downloadHwp, buildHwpxWithRhwp, downloadHwpx current call sites",
+          "app/api/export/hwp/route.ts: binary POST",
+          "app/api/export/pdf/route.ts: HTML POST path",
+          "app/api/export/xlsx/route.ts: structured POST modes"
+        ],
+        "decision": "Bound integration target. Any target source blob change requires a new candidate/evidence pair."
+      },
+      {
+        "id": "ontology",
+        "localRef": "fix/phase-a-ontology-review",
+        "localHead": "9539f04896698f548bd01e33ff24ab70415bc68e",
+        "remoteRef": "origin/fix/phase-a-ontology-review",
+        "remoteHead": "9539f04896698f548bd01e33ff24ab70415bc68e",
+        "aheadBehind": [
+          0,
+          0
+        ],
+        "reviewState": "rejected_candidate_remediated_to_unreviewed_clean_head",
+        "worktreeState": "clean",
+        "dirtyPaths": [],
+        "relevantDirtyPaths": [],
+        "committedPlannedOverlap": [
+          "components/CurrentWorkpackModules.tsx",
+          "components/WorkpackEditor.tsx",
+          "app/api/export/hwp/route.ts",
+          "app/api/export/pdf/route.ts",
+          "app/api/export/xlsx/route.ts",
+          "lib/quality-contract.ts",
+          "lib/search.ts",
+          "lib/types.ts",
+          "lib/workpack-ontology-qa.ts",
+          "lib/workpack-readiness.ts",
+          "lib/workpack-store.ts"
+        ],
+        "decision": "The prior rejected/remediating head advanced to a clean unreviewed remediation commit. Do not consume intersecting committed hunks; this pauses only affected future files until owner resolution."
+      },
+      {
+        "id": "reports",
+        "localRef": "fix/reports-mobile-task-distance",
+        "localHead": "6f7ee770d5f764fd408b5eb3d3c19b6ce63c5c57",
+        "remoteRef": "origin/fix/reports-mobile-task-distance",
+        "remoteHead": "6f7ee770d5f764fd408b5eb3d3c19b6ce63c5c57",
+        "aheadBehind": [
+          0,
+          0
+        ],
+        "reviewState": "remediation_evidence_head_unreviewed",
+        "worktreeState": "clean",
+        "dirtyPaths": [],
+        "relevantDirtyPaths": [],
+        "productCommit": "986b7fbd5067da25eb4a5fd5997803675a8df541",
+        "evidenceCommit": "6f7ee770d5f764fd408b5eb3d3c19b6ce63c5c57",
+        "productHunks": [
+          "app/globals.css",
+          "components/ReportsDownloadCenter.tsx",
+          "tests/reports-design-remediation.test.ts"
+        ],
+        "committedPlannedOverlap": [
+          "app/api/export/hwp/route.ts",
+          "app/api/export/hwpx-template/route.ts",
+          "app/api/export/pdf/route.ts",
+          "lib/hwpx-template.ts"
+        ],
+        "decision": "The current head is evidence-only over the product commit. Inherited export overlap is resolved symbol-by-symbol only if Wave 5 starts; report CSS/tests remain another owner's files."
+      },
+      {
+        "id": "web",
+        "localRef": "fix/web-localization-current-target",
+        "localHead": "6d0b4dd8c0a54b235169217f9d0d2fcd170636c3",
+        "remoteRef": "origin/fix/web-localization-current-target",
+        "remoteHead": "2fb3cc8c6b8f3610a8bfccf1859717a848cc17df",
+        "aheadBehind": [
+          0,
+          2
+        ],
+        "reviewState": "active_remediation",
+        "worktreeState": "ahead_two_with_untracked_evidence_only",
+        "dirtyPaths": [
+          "evaluation/web-localization-current-target-2026-07-14-v5/"
+        ],
+        "relevantDirtyPaths": [],
+        "committedPlannedOverlap": [],
+        "decision": "Two local remediation commits and untracked evidence are disjoint from declared editor ownership and do not block. Recheck only if their changed-path intersection becomes non-empty."
+      },
+      {
+        "id": "editor-first-ui",
+        "localRef": "feature/editor-first-ui-v2",
+        "localHead": "57b778e8dfa2c7ef896ba19911b79f537354439a",
+        "remoteRef": "origin/feature/editor-first-ui-v2",
+        "remoteHead": "57b778e8dfa2c7ef896ba19911b79f537354439a",
+        "aheadBehind": [
+          0,
+          0
+        ],
+        "worktreeState": "dirty_image_only",
+        "dirtyPaths": [
+          "output/playwright/2026-07-10/module-shell-hardening/desktop-tbm-night.png",
+          "output/playwright/2026-07-10/module-shell-hardening/desktop-workers-night.png"
+        ],
+        "relevantDirtyPaths": [],
+        "committedPlannedOverlap": [
+          "app/api/export/hwp/route.ts",
+          "app/api/export/xlsx/route.ts",
+          "components/CurrentWorkpackModules.tsx",
+          "components/WorkpackEditor.module.css",
+          "components/WorkpackEditor.tsx",
+          "lib/types.ts",
+          "lib/xlsx-builder.ts",
+          "tests/documents-editor-layout.test.ts",
+          "tests/editor-export-integrity.test.ts",
+          "tests/xlsx-export-route.test.ts"
+        ],
+        "decision": "Images do not block. Committed overlapping symbols require owner-level comparison; no wholesale merge or file copy."
+      },
+      {
+        "id": "share-session-ui",
+        "localRef": "feature/share-session-ui-v2",
+        "localHead": "76a67c55cff0f50cb0f230a5ca49a260a7989055",
+        "remoteRef": null,
+        "remoteHead": null,
+        "worktreeState": "clean_local_only",
+        "dirtyPaths": [],
+        "relevantDirtyPaths": [],
+        "committedPlannedOverlap": [
+          "app/api/workflow/dispatch/route.ts",
+          "app/api/workpacks/[id]/share-sessions/route.ts",
+          "tests/workpack-share-authority-routes.test.ts"
+        ],
+        "decision": "Local-only stale candidate; server share work remains blocked and cannot be integrated."
+      },
+      {
+        "id": "workpack-share-v2",
+        "localRef": "feat/workpack-share-v2",
+        "localHead": "8804e33421d4b7ea75dd32022acf728f7adb5c43",
+        "remoteRef": "origin/feat/workpack-share-v2",
+        "remoteHead": "8804e33421d4b7ea75dd32022acf728f7adb5c43",
+        "aheadBehind": [
+          0,
+          0
+        ],
+        "worktreeState": "dirty_evaluation_spec_only",
+        "dirtyPaths": [
+          "evaluation/workpack-share-v2-2026-07-13/spec.json",
+          "evaluation/workpack-share-v2-2026-07-13/spec.md",
+          "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs"
+        ],
+        "relevantDirtyPaths": [],
+        "committedPlannedOverlap": [
+          "app/api/export/hwp/route.ts",
+          "app/api/export/hwpx-template/route.ts",
+          "app/api/export/pdf/route.ts",
+          "lib/hwpx-template.ts"
+        ],
+        "decision": "Remote is current; another owner has dirty evaluation-only remediation. Do not copy it. Recheck inherited export lineage only if Wave 5 starts; share routes remain approval-blocked."
+      }
+    ],
+    "freshRecheck": [
+      "FETCH_REMOTE_REFS",
+      "RESOLVE_WATCHED_REFS_TO_FULL_SHA",
+      "ENUMERATE_WORKTREES",
+      "CAPTURE_WATCHED_WORKTREE_STATUS",
+      "RECOMPUTE_DECLARED_PATH_INTERSECTIONS",
+      "REBIND_TARGET_BLOBS",
+      "RECORD_POST_APPROVAL_SNAPSHOT_ONLY_AFTER_SEPARATE_REVIEW"
+    ],
+    "amendmentPolicy": {
+      "noAmendment": [
+        "head or dirty changes whose recomputed intersection with planned owned/readOnly/test/blocked-authority paths is empty",
+        "generated logs, caches, screenshots, or evaluation evidence outside this contract",
+        "normal parallel commits that leave currentIntegrationTarget and target source blob hashes unchanged"
+      ],
+      "amendmentAndFreshReview": [
+        "currentIntegrationTarget changes",
+        "any targetBlobPaths blob changes",
+        "a competing changed/dirty path begins intersecting a planned write or authority path",
+        "write ownership or integration order changes",
+        "approval proposal digest, approval event, or authority boundary changes"
+      ],
+      "localResolution": "Intersecting work pauses only the affected file/wave for owner coordination. It does not globally block unrelated work; the global program is already blocked by approval gates."
+    },
+    "integrationOrder": [
+      "Obtain fresh independent spec PASS and explicit user DB authority approval outside repository-authored evidence; otherwise stop before Wave 0.",
+      "After explicit user approval outside repository-authored evidence, design and independently review a post-approval authority/verifier contract bound to the then-current target and proposal.",
+      "Refresh intersections and resolve only affected symbols with their owners.",
+      "Never copy whole files, directories, worktree outputs, caches, screenshots, or another task's evidence.",
+      "Until that later verifier exists, run the current implementation mode only as a fail-closed assertion and expect IMPLEMENTATION_BLOCKED_PENDING_USER_DB_APPROVAL."
+    ]
+  },
+  "behaviorExecution": {
+    "executed": false,
+    "reason": "SPEC_REVIEW_DOES_NOT_EXECUTE_PRODUCT_OR_BROWSER_BEHAVIOR"
+  },
+  "implementationExecution": {
+    "executed": false,
+    "reason": "IMPLEMENTATION_MODE_IS_UNCONDITIONALLY_BLOCKED"
+  },
+  "reviewClaims": {
+    "kind": "safeclaw-spec-review-declarations/v1",
+    "scope": "SPEC_STRUCTURE_IDENTITY_PARITY_ONLY",
+    "executionCount": 0,
+    "browserExecutionCount": 0,
+    "implementationExecutionCount": 0,
+    "facts": [
+      "CANDIDATE_JSON_PARSE_DECLARED",
+      "STRUCTURAL_19_DOMAIN_SCHEMA_DECLARED",
+      "MARKDOWN_PARITY_DECLARED",
+      "IMMUTABLE_IDENTITY_DECLARED",
+      "SIX_WAVES_BLOCKED_DECLARED"
+    ]
+  },
+  "notClaims": {
+    "kind": "safeclaw-unexecuted-scope/v1",
+    "executionCount": 0,
+    "facts": [
+      "BROWSER_BEHAVIOR_UNEXECUTED",
+      "EXPORT_ROUND_TRIP_UNEXECUTED",
+      "IMPLEMENTATION_TESTS_UNEXECUTED",
+      "SERVER_REVISION_AUTHORITY_BLOCKED",
+      "PHOTO_CONFIRMATION_PERSISTENCE_BLOCKED",
+      "SHARE_FRESHNESS_ENFORCEMENT_BLOCKED",
+      "INDEPENDENT_REVIEW_OUTSIDE_ARTIFACT",
+      "USER_DB_APPROVAL_OUTSIDE_REPOSITORY"
+    ]
+  }
+}
