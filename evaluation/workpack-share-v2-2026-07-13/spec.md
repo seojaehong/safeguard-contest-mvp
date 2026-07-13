@@ -1,14 +1,14 @@
 # SafeClaw 공유 화면 v2 제품 명세
 
 - Spec ID: workpack-share-v2-2026-07-13
-- Revision: independent-review-remediation-4
+- Revision: independent-review-remediation-5
 - 상태: HOLD_PENDING_FRESH_REVIEW
 - Review status: pending
 - 기준 branch: feat/workpack-share-v2
-- Source base: 384c06f9fdf48d8a24831b46a96c5c317ebc6827
+- Source base: 69a022ac2a03ed509022d12d219b1483c9d0cbe7
 - Candidate evidence: evaluation/workpack-share-v2-2026-07-13/review-evidence.json의 full candidate SHA
 - Review claim: 없음. candidate와 source base는 machine-resolvable해야 하고 fresh independent review는 pending입니다.
-- 쓰기 범위: spec candidate commit은 evaluation/workpack-share-v2-2026-07-13/spec.md, spec.json만, 후속 evidence-only commit은 review-evidence.json만 수정합니다.
+- 쓰기 범위: spec candidate commit은 evaluation/workpack-share-v2-2026-07-13/spec.md, spec.json, validate-spec.cjs만, 후속 evidence-only commit은 review-evidence.json만 수정합니다.
 - 제품 Job: 오늘 문서팩을 선택된 오늘 참여자에게 보냅니다.
 - 화면 순서: 대상 -> 채널 -> 현지화 미리보기 -> 전송
 - 구현 상태: 이 revision은 명세만 수정합니다. 제품 코드, 테스트, DB, CSS, package, lock을 수정하거나 구현을 시작하지 않습니다.
@@ -285,7 +285,23 @@ type NormalizedChannelConfigurationIdentity = {
 
 지원 언어 code는 ko, vi, zh, th, uz, mn, ne, km, id, my, tl, en입니다.
 
-### 4.2.1 Allowlisted Locale Parser
+### 4.2.1 Server Runtime Configuration Sources
+
+Wave 1은 기존에 없는 typed seam `lib/workpack-share-server-config.ts`를 만들고 첫 줄에서 `import "server-only"`를 사용합니다. `readWorkpackShareServerConfig(process.env)`는 resolver, share-session creation, dispatch preflight, localization envelope verification이 호출할 때마다 아래 값을 strict parse합니다. 빈 문자열, placeholder, 32-byte 미만 secret, 0 이하 revision, 공백 key ID는 configuration unresolved입니다.
+
+| Environment key | Kind | Server source | Rotation | Missing or invalid |
+|---|---|---|---|---|
+| SAFECLAW_CHANNEL_CONFIG_REVISION | positive monotonic integer | server process.env through typed config module | increment for endpoint, sender, template, provider, relay, approval, credential, or idempotency change | unresolved, ready=false, session=0 |
+| SAFECLAW_CHANNEL_CONFIG_DIGEST_KEY_ID | non-secret key identifier | server process.env through typed config module | change atomically with SAFECLAW_CHANNEL_CONFIG_BINDING_SECRET | unresolved, ready=false, session=0 |
+| SAFECLAW_CHANNEL_AVAILABILITY_SECRET | server-only secret at least 32 bytes | server process.env through typed config module | reject every prior availability token and require a new resolver run | 503, token absent, ready=false, session=0 |
+| SAFECLAW_CHANNEL_CONFIG_BINDING_SECRET | server-only secret at least 32 bytes | server process.env through typed config module | change digest key ID and revision, reject prior binding digests, no old-key grace | 503, configuration unresolved, ready=false, session=0 |
+| SAFECLAW_REVIEWED_LOCALIZATION_SECRET | server-only secret at least 32 bytes | server process.env through typed config module | invalidate prior envelopes, require re-review and re-sign, produce a new canonical revision before session | 503, localization review write=0, readiness blocked, session=0 |
+
+`.env.example`에는 위 다섯 이름과 빈 placeholder만 추가하고 실제 secret, digest, sender key 또는 endpoint credential을 넣지 않습니다. typed module은 secret 값을 client module이 import하지 못하게 하고 HTTP response로 never returns, serializes, or logs secret values into JSONB or logs. 반환하는 public identity는 revision, configurationDigestKeyId, HMAC digest뿐입니다.
+
+`tests/workpack-share-server-config.test.ts`는 다섯 값의 valid parse, blank/placeholder/short-secret rejection, positive monotonic revision, non-secret key ID, three-secret redaction, process.env 재조회, rotation fail-closed를 검사합니다. binding secret rotation은 key ID와 revision을 함께 바꾸고 old-key grace가 없습니다. availability secret rotation은 기존 token을 모두 거부합니다. localization secret rotation은 기존 envelope를 무효화하고 re-review/re-sign으로 새 canonicalWorkpackRevision을 만든 뒤에만 새 session을 허용합니다.
+
+### 4.2.2 Allowlisted Locale Parser
 
 ~~~ts
 type SupportedLanguageCode = "ko" | "vi" | "zh" | "th" | "uz" | "mn" | "ne" | "km" | "id" | "my" | "tl" | "en";
@@ -473,7 +489,7 @@ ready는 다음 pre-session guard가 모두 참인 상태입니다.
 2. today participant가 1명 이상이며 server worker UUID와 선택 channel 연락처가 있습니다.
 3. 선택 channel이 1개 이상이고 authenticated server ChannelAvailabilityResolution이 resolved, unexpired이며 모두 available=true입니다.
 4. 필요한 모든 non-Korean ReviewedLocalizationEnvelope가 server-verified, source-matching, approved입니다.
-5. canonicalWorkpackRevision, participant sourceRevision/digest, channel configurationVersion/digest와 token binding이 validated 값과 같습니다.
+5. canonicalWorkpackRevision, participant sourceRevision/digest, channel configurationVersion/revision/digestKeyId/digest와 token binding이 validated 값과 같습니다.
 6. 관리자 auth session이 있습니다.
 7. online이며 unresolved duplicate risk가 없습니다.
 8. 아직 share session이나 recipient invitation artifact를 만들지 않았어도 됩니다.
@@ -584,6 +600,20 @@ type TextMetrics = {
   heightPx: number;
 };
 
+test.use({ deviceScaleFactor: 1 });
+async function assertComputedText200(page: Page, testInfo: TestInfo) {
+expect(testInfo.project.use.deviceScaleFactor).toBe(1);
+const configuredViewport = page.viewportSize();
+if (!configuredViewport) throw new Error("The browser case must configure an explicit viewport");
+const browserScaleInvariant = await page.evaluate(() => ({
+  devicePixelRatio: window.devicePixelRatio,
+  visualViewportScale: window.visualViewport?.scale ?? 1,
+  cssViewportWidth: document.documentElement.clientWidth
+}));
+expect(browserScaleInvariant.devicePixelRatio).toBe(1);
+expect(browserScaleInvariant.visualViewportScale).toBe(1);
+expect(browserScaleInvariant.cssViewportWidth).toBe(configuredViewport.width);
+
 const zoomResult = await page.locator("[data-share-root]").evaluate(async (root) => {
   const requiredRoles = [
     "status",
@@ -623,6 +653,9 @@ const zoomResult = await page.locator("[data-share-root]").evaluate(async (root)
   if (root instanceof HTMLElement && representatives.includes(root)) {
     throw new Error("The share root is not a representative text node");
   }
+  if (root.getAttribute("data-share-text-scale-run") !== null) {
+    throw new Error("Repeated computed_text_200 evaluation requires a fresh production fixture DOM");
+  }
 
   const rootFontSizeBefore = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
   const rootInlineFontBefore = document.documentElement.style.fontSize;
@@ -641,6 +674,29 @@ const zoomResult = await page.locator("[data-share-root]").evaluate(async (root)
     };
   });
 
+  const representativePaths = immutableBaselines.map((baseline) => {
+    const mechanisms = [];
+    for (let element: Element | null = baseline.element; element; element = element.parentElement) {
+      const style = getComputedStyle(element);
+      mechanisms.push({
+        tag: element.tagName,
+        transform: style.transform,
+        zoom: style.getPropertyValue("zoom") || "1"
+      });
+      if (element === document.documentElement) break;
+    }
+    if (mechanisms.at(-1)?.tag !== "HTML") {
+      throw new Error(`Representative path does not reach document root: ${baseline.key}`);
+    }
+    for (const mechanism of mechanisms) {
+      if (mechanism.transform !== "none" || mechanism.zoom !== "1") {
+        throw new Error(`Forbidden scale mechanism on ${baseline.key}/${mechanism.tag}`);
+      }
+    }
+    return { key: baseline.key, mechanisms };
+  });
+
+  root.setAttribute("data-share-text-scale-run", "computed_text_200/v2");
   const scaled = new Set<HTMLElement>();
   for (const baseline of immutableBaselines) {
     if (scaled.has(baseline.element)) throw new Error(`Duplicate scaling: ${baseline.key}`);
@@ -669,16 +725,6 @@ const zoomResult = await page.locator("[data-share-root]").evaluate(async (root)
   );
   if (!probe) throw new Error("The natural preview-body reflow probe is missing");
 
-  const ancestorScaleMechanisms = [];
-  for (let element: Element | null = root; element; element = element.parentElement) {
-    const style = getComputedStyle(element);
-    ancestorScaleMechanisms.push({
-      tag: element.tagName,
-      transform: style.transform,
-      zoom: style.getPropertyValue("zoom") || "1"
-    });
-  }
-
   return {
     nodes,
     probe,
@@ -687,7 +733,7 @@ const zoomResult = await page.locator("[data-share-root]").evaluate(async (root)
     rootFontSizeAfter: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
     rootInlineFontBefore,
     rootInlineFontAfter: document.documentElement.style.fontSize,
-    ancestorScaleMechanisms,
+    representativePaths,
     rootTransform: getComputedStyle(document.documentElement).transform,
     shareTransform: getComputedStyle(root).transform,
     rootZoom: getComputedStyle(document.documentElement).getPropertyValue("zoom") || "1",
@@ -710,8 +756,10 @@ expect(zoomResult.rootFontSizeAfter).toBeCloseTo(zoomResult.rootFontSizeBefore, 
 expect(zoomResult.rootInlineFontAfter).toBe(zoomResult.rootInlineFontBefore);
 expect([zoomResult.rootTransform, zoomResult.shareTransform]).toEqual(["none", "none"]);
 expect([zoomResult.rootZoom, zoomResult.shareZoom]).toEqual(["1", "1"]);
-expect(zoomResult.ancestorScaleMechanisms.every(
-  (mechanism) => mechanism.transform === "none" && mechanism.zoom === "1"
+expect(zoomResult.representativePaths.every(
+  (path) => path.mechanisms.at(-1)?.tag === "HTML" && path.mechanisms.every(
+    (mechanism) => mechanism.transform === "none" && mechanism.zoom === "1"
+  )
 )).toBe(true);
 
 const geometryResult = await page.locator("[data-share-root]").evaluate((root) => {
@@ -776,16 +824,30 @@ expect(geometryResult.clippedText).toEqual([]);
 expect(geometryResult.nestedScroll).toEqual([]);
 expect(geometryResult.documentHorizontalOverflowPx).toBeLessThanOrEqual(0);
 expect(geometryResult.shareHorizontalOverflowPx).toBeLessThanOrEqual(0);
+
+}
+
+for (const independentRun of [1, 2]) {
+  await page.goto(caseUrl);
+  await settleProductionFixture(page, fixtureId);
+  expect(await page.locator("[data-share-root]").getAttribute("data-share-text-scale-run")).toBeNull();
+  await assertComputedText200(page, testInfo);
+}
+await expect(assertComputedText200(page, testInfo)).rejects.toThrow(
+  "Repeated computed_text_200 evaluation requires a fresh production fixture DOM"
+);
 ~~~
 
 - 모든 representative node는 data-share-font-node와 required data-share-font-role을 사용합니다. role coverage가 하나라도 빠지면 test가 즉시 실패하며 한 node만 표시해 false green을 만들 수 없습니다.
+- `baselineCaptureBeforeAnyMutation=true`이며 representativePaths는 각 text node 자체, 모든 internal wrapper, share root, outer body, document root HTML을 빠짐없이 포함합니다. root 하나의 ancestor path만 검사하는 결과는 contract failure입니다.
 - data-share-overlap-node는 서로 포함하지 않는 visible leaf text/interactive surface에만 붙입니다. nested marker 자체도 failure이며 위 geometry block은 200% 적용 뒤 Day/Night desktop/mobile 모든 case에서 실행합니다.
 - [data-share-reflow-probe]는 preview-body role의 실제 localized preview text block이며 fixture가 desktop에서도 200%에서 줄바꿈이 증가할 만큼 긴 검토된 문장을 제공합니다. 별도 test-only element를 삽입하지 않습니다.
 - 모든 node의 100% computed font-size와 line-height는 첫 mutation 전에 finite positive px로 캡처되어야 합니다. line-height=normal이면 contract failure이며 제품 token을 명시적 line-height로 고친 뒤 다시 측정합니다.
 - scale은 immutableBaselines second pass에서 node당 정확히 한 번만 적용합니다. 모든 node의 font/line ratio upper bound 2.1이 ancestor 누적 4x/8x를 차단합니다.
 - page.setViewportSize는 mode 적용 전에 desktop 1440x1000 또는 mobile 391x844로 고정하고 mode 도중 바꾸지 않습니다.
-- browser context deviceScaleFactor는 정확히 1입니다. CSS transform, CSS zoom, browser/device scale, viewport 변경, screenshot 확대·축소를 delivery로 사용하지 않습니다.
+- browser context deviceScaleFactor, window.devicePixelRatio, window.visualViewport.scale은 각각 정확히 1이고 documentElement.clientWidth는 configured viewport width와 같아야 합니다. CSS transform, CSS zoom, browser/device/page scale, viewport 변경, screenshot 확대·축소를 delivery로 사용하지 않습니다.
 - fixture는 production resolver/action으로 목표 state에 도달한 뒤 text override를 적용하고 document.fonts.ready와 두 animation frame을 기다립니다. screenshot은 증거 보조일 뿐이며 사용 시 scale="css"로만 캡처합니다.
+- genuine positive는 동일 case를 fresh production fixture DOM으로 두 번 새로 열어 각각 baseline 1x -> computed text 2x를 검증합니다. 첫 DOM marker가 남은 상태의 repeated evaluation은 즉시 실패하며 4x 누적을 측정 성공으로 취급하지 않습니다.
 - 200%에서는 고정 total height, body height, task distance 상한을 적용하지 않습니다. normal_100 task-distance gate와 별도 결과로 기록합니다.
 
 - 모든 representative node font-size/line-height ratio 1.9 이상 2.1 이하
@@ -799,6 +861,19 @@ expect(geometryResult.shareHorizontalOverflowPx).toBeLessThanOrEqual(0);
 - document-only vertical scroll
 - 앞뒤 content를 가리는 fixed CTA 없음
 - share body와 preview nested vertical scroll 0
+
+Negative fixture contract:
+
+| Fixture ID | DOM or browser mutation | Required result |
+|---|---|---|
+| internal_wrapper_transform | representative와 share root 사이 wrapper에 transform:scale(2) | fail before text mutation |
+| internal_zoom | representative와 share root 사이 wrapper에 zoom:2 | fail before text mutation |
+| outer_transform | share root 바깥 body wrapper에 transform:scale(2) | fail before text mutation |
+| repeated_evaluation | fresh DOM에서 한 번 성공한 helper를 reload 없이 다시 호출 | fail on data-share-text-scale-run marker |
+| device_scale_factor | context deviceScaleFactor와 devicePixelRatio를 2로 설정 | fail before text mutation |
+| page_zoom | visualViewport.scale 또는 CSS viewport width를 configured viewport와 다르게 설정 | fail before text mutation |
+
+`tests/workpack-share-v2-browser.test.ts`는 위 여섯 negative fixture를 실제 DOM/browser case로 실행하고, genuine fresh-DOM positive를 두 번 실행합니다. spec validator의 contract fixtures는 이 실패/성공 산술만 검증하며 128개 browser case 실행을 주장하지 않습니다.
 
 ### 5.4 Mobile Priority
 
@@ -906,6 +981,9 @@ browser test는 request log를 수집해 다음을 검사합니다.
 20. normal_100은 task distance를 포함한 공통 geometry를 검사합니다. computed_text_200은 Day/Night desktop/mobile 각 exact viewport에서 모든 representative computed font-size/line-height ratio 1.9 이상 2.1 이하, line count와 rendered height 증가, overlap/clipping/horizontal overflow/nested scroll 0, DOM/focus order를 검사합니다.
 21. review_required의 missing/unsupported/malformed/conflicting locale variant는 /workers?focus=language owner, language query count 0, auto locale/outbound payload/Korean fallback/share-session/dispatch 0을 검사합니다. supported vi + missing/partial/stale/conflicting envelope variant는 validated vi document route와 share-session/dispatch 0을 검사합니다.
 22. stale의 post-session variant는 session row가 created인 상태에서 각 binding reasonCode별 provider dispatch와 log insert가 0임을 검사합니다.
+23. computed_text_200은 각 representative text node에서 document root까지 모든 internal/outer ancestor의 transform과 zoom을 검사합니다.
+24. context deviceScaleFactor, window.devicePixelRatio, visualViewport.scale은 1이고 CSS viewport width는 configured viewport와 같아야 합니다.
+25. fresh production DOM positive를 두 번 독립 실행하며 같은 DOM repeated evaluation과 internal wrapper transform/zoom, outer transform fixture는 실패합니다.
 
 ### 6.5 Vietnamese And Language Gates
 
@@ -946,7 +1024,9 @@ Rollback: 구현을 시작하지 않습니다. 다른 worktree나 branch를 수�
 
 Exact files:
 
+- .env.example
 - lib/types.ts
+- lib/workpack-share-server-config.ts (new)
 - lib/reviewed-localization-envelope.ts (new)
 - lib/foreign-worker.ts
 - lib/current-workpack.ts
@@ -962,6 +1042,7 @@ Exact files:
 - app/api/workflow/dispatch/route.ts
 - app/api/dispatch-logs/route.ts
 - tests/reviewed-localization-envelope.test.ts (new)
+- tests/workpack-share-server-config.test.ts (new)
 - tests/reviewed-localization-route.test.ts (new)
 - tests/workpack-generation-evidence-route.test.ts
 - tests/workpack-share-authority.test.ts
@@ -973,12 +1054,12 @@ Exact files:
 - tests/workpack-share-authority-routes.test.ts
 
 ~~~powershell
-npm.cmd test -- tests/reviewed-localization-envelope.test.ts tests/reviewed-localization-route.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/foreign-worker-languages.test.ts tests/workpack-commercial.test.ts tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --no-file-parallelism
+npm.cmd test -- tests/workpack-share-server-config.test.ts tests/reviewed-localization-envelope.test.ts tests/reviewed-localization-route.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/foreign-worker-languages.test.ts tests/workpack-commercial.test.ts tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --no-file-parallelism
 npm.cmd run typecheck
 git diff --check
 ~~~
 
-Exit: 이 wave만으로 generationEvidence/deliverables 불변, authenticated signed envelope, canonicalWorkpackRevision, localePayloadDigest, readiness, allowlisted locale parser, channel configuration v2 monotonic revision/HMAC identity, access_policy.dispatchBinding atomic insert/reload, 모든 server freshness value exact compare가 GREEN입니다. invalid pre-session locale/translation은 session=0/dispatch=0이고 post-session mismatch는 session=created/provider dispatch=0/log insert=0입니다. UI component 구현에 의존하지 않습니다.
+Exit: 이 wave만으로 placeholder-only `.env.example`, typed server-only runtime config와 rotation test, generationEvidence/deliverables 불변, authenticated signed envelope, canonicalWorkpackRevision, localePayloadDigest, readiness, allowlisted locale parser, channel configuration v2 monotonic revision/HMAC identity, access_policy.dispatchBinding atomic insert/reload, 모든 server freshness value exact compare가 GREEN입니다. invalid pre-session locale/translation은 session=0/dispatch=0이고 post-session mismatch는 session=created/provider dispatch=0/log insert=0입니다. UI component 구현에 의존하지 않습니다.
 
 Rollback: git revert <wave-1-sha>. DB row나 다른 workstream commit을 되돌리지 않습니다.
 
@@ -1093,567 +1174,75 @@ Non-goals:
 저장 성공을 법적 증빙, 접수 성공을 전달 또는 열람 완료, 부분 번역을 번역 완료로 표현하지 않습니다.
 제품 런타임은 기존 session/log storage API를 사용하지만 이 revision은 호출하거나 저장 구조를 바꾸지 않습니다.
 
-## 9. Executable MD/JSON Parity
+## 9. Executable Structural MD/JSON Parity
 
-TDD-style consistency 순서는 다음과 같습니다.
+`evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs`가 유일한 parity validator입니다. validator는 embedded JSON, Markdown hash, `parityManifest`, `normativeParity`를 authority로 사용하지 않습니다. 실제 Markdown front matter, section heading, route/state/blocker/failure/fixture/environment table, TypeScript type/union, authority/fallback 문장, Wave heading/order/exact file list를 구조적으로 파싱해 spec.json의 해당 계약과 비교합니다.
 
-1. RED: sourceBase 384c06f9fdf48d8a24831b46a96c5c317ebc6827은 immutable per-node text baseline, secret-safe channel configuration identity, split locale remediation, dependency-ordered wave, full normative parity assertion을 통과하지 못해야 합니다.
-2. GREEN: spec candidate commit 뒤 evidence-only commit이 review-evidence.json에 exact full candidate/sourceBase SHA를 기록하고, embedded command가 MD/JSON equality, resolvable refs, direct parent, exact commit scope를 모두 통과해야 합니다.
-3. REFACTOR: 중복 문구를 줄인 뒤에도 JSON parse, forbidden contradiction scan, 2-file candidate scope, 1-file evidence scope, git diff --check를 다시 통과해야 합니다.
+TDD contract:
 
-아래 manifest는 spec.json의 parityManifest와 byte-for-byte JSON 의미가 같아야 합니다.
+1. RED source `69a022ac2a03ed509022d12d219b1483c9d0cbe7`의 embedded validator는 실제 Markdown만 revision, server authority, Wave, route/state/blocker/channel/language/fixture, one-send job, locale fallback, evidence binding으로 바꾼 12개 case를 모두 exit 0으로 잘못 승인했습니다.
+2. GREEN candidate는 standalone structural validator의 정상 실행 2회가 exit 0이어야 합니다.
+3. 각 MD-only mutation은 원본 file을 쓰지 않고 memory copy에만 적용하며 모두 exit 1이어야 합니다.
+4. computed text positive는 fresh production fixture DOM 두 개에서 각각 2x/reflow로 exit 0이어야 하고, 여섯 negative fixture는 각각 exit 1이어야 합니다.
+5. REFACTOR 뒤 JSON parse, exact commit scope, source/candidate parent, evidence-only parent, git diff --check를 다시 검사합니다.
 
-<!-- PARITY_MANIFEST_START -->
-~~~json
-{
-  "status": "HOLD_PENDING_FRESH_REVIEW",
-  "review": {
-    "sourceBase": "384c06f9fdf48d8a24831b46a96c5c317ebc6827",
-    "evidenceManifest": "evaluation/workpack-share-v2-2026-07-13/review-evidence.json",
-    "reviewStatus": "pending",
-    "reviewedClaim": false
-  },
-  "sequence": [
-    "target",
-    "channel",
-    "localized_preview",
-    "send"
-  ],
-  "ownership": {
-    "shareMutatesWorkers": false,
-    "rosterOwner": "/workers",
-    "todaySnapshotOwners": [
-      "/workspace?step=input",
-      "/workers"
-    ],
-    "translationOwner": "document-editor:foreignWorkerTransmission",
-    "translationPersistenceOwner": "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review",
-    "channelSetupOwner": "/settings"
-  },
-  "cta": {
-    "no_recipients": "오늘 참여자 선택",
-    "logged_out": "로그인하고 전송",
-    "ready": "{N}명에게 전송",
-    "recipient_locale_invalid": "작업자 언어 확인",
-    "translation_incomplete": "번역본 보완",
-    "translation_not_reviewed": "번역본 검토",
-    "translation_rejected": "번역본 수정",
-    "workpack_revalidation": "문서 다시 검수",
-    "session_create_failed": "초대 세션 다시 시도"
-  },
-  "lifecycle": [
-    "validate_reviewed_localization",
-    "resolve_channels",
-    "create_session",
-    "dispatch",
-    "save_channel_log"
-  ],
-  "sessionFailureDispatchCount": 0,
-  "sessionFailureHistoryAllowed": false,
-  "revalidationBeforeBlocked": true,
-  "historyRequiresPersistedLog": true,
-  "localizationPersistence": {
-    "mode": "separate_server_signed_review_envelope",
-    "storage": "evidence_summary.reviewedLocalizationEnvelopes",
-    "originalDeliverablesMutable": false,
-    "originalGenerationEvidenceMutable": false
-  },
-  "channelResolver": {
-    "route": "/api/settings/channels/resolve",
-    "tokenTtlSeconds": 120,
-    "sessionBeforeResolvedAvailable": false,
-    "configurationVersion": "channel-configuration/v2",
-    "configurationRevisionRequired": true,
-    "configurationDigestKeyIdRequired": true,
-    "configurationDigestRequired": true,
-    "configurationDigestAlgorithm": "HMAC-SHA256",
-    "configuredOrApprovedBooleansAloneSufficient": false,
-    "secretIdentityFieldsExposed": false
-  },
-  "sessionDispatchBinding": {
-    "storage": "workpack_share_sessions.access_policy.dispatchBinding",
-    "serverGenerated": true,
-    "dispatchReloadsAndComparesAllFields": true,
-    "clientStateAuthority": false,
-    "preSessionMismatchSessionCount": 0,
-    "postSessionMismatchSessionState": "created",
-    "postSessionMismatchProviderDispatchCount": 0,
-    "postSessionMismatchLogInsertCount": 0
-  },
-  "localeParser": {
-    "allowlistCount": 12,
-    "invalidState": "review_required",
-    "invalidSessionCount": 0,
-    "invalidDispatchCount": 0,
-    "nonKoreanKoreanFallbackAllowed": false,
-    "invalidOwnerRoute": "/workers?focus=language&next={encoded shareReturn}",
-    "invalidOwnerRouteInterpolatesLanguageCode": false,
-    "translationOwnerRoute": "/workspace?step=document&document=foreignWorkerTransmission&language={validatedSupportedCode}&returnStep=share&theme={theme}"
-  },
-  "channels": [
-    "email",
-    "sms",
-    "kakao"
-  ],
-  "viewports": {
-    "desktop": "1440x1000",
-    "mobile": "391x844"
-  },
-  "zoom200FixedHeightCeiling": false,
-  "zoomModes": [
-    "normal_100",
-    "computed_text_200"
-  ],
-  "zoom200Delivery": "page_evaluate_computed_text_font_and_line_height_2x",
-  "zoom200MinComputedRatios": {
-    "fontSize": 1.9,
-    "lineHeight": 1.9
-  },
-  "zoom200MaxComputedRatios": {
-    "fontSize": 2.1,
-    "lineHeight": 2.1
-  },
-  "zoom200BaselineCaptureBeforeAnyMutation": true,
-  "zoom200ScalingPassCount": 1,
-  "zoom200CumulativeScalingAllowed": false,
-  "zoom200RequiresWrapAndHeightChange": true,
-  "fixtureIngress": "production_resolver_inputs_and_mocked_routes",
-  "browserFixtureIds": [
-    "empty",
-    "selected",
-    "channel_unavailable",
-    "review_required",
-    "workpack_revalidation",
-    "logged_out",
-    "blocked",
-    "ready",
-    "sending",
-    "result_accepted",
-    "result_partial",
-    "fail_session",
-    "fail_dispatch",
-    "fail_dispatch_unpersisted",
-    "offline",
-    "stale"
-  ],
-  "browserCaseCount": 128,
-  "languageCodes": [
-    "ko",
-    "vi",
-    "zh",
-    "th",
-    "uz",
-    "mn",
-    "ne",
-    "km",
-    "id",
-    "my",
-    "tl",
-    "en"
-  ],
-  "implementationWaveOrder": [
-    "Integrated Base Gate",
-    "Authority Foundation And Session Binding",
-    "Return Resolver, Share IA, And Owner Routes",
-    "Real Browser Gate"
-  ],
-  "implementationExactFileOwnershipDuplicates": 0,
-  "publicLinkAllowed": false,
-  "databaseMigrationCount": 0
-}
-~~~
-<!-- PARITY_MANIFEST_END -->
+MD-only mutation modes:
 
-아래 metadata는 `normativeParity` 자신을 제외한 spec.json의 모든 최상위 key를 포함합니다. object key는 재귀 정렬하고 array 순서는 유지한 JSON UTF-8 값의 SHA-256이므로 revision, authority, Wave를 포함한 어느 normative field라도 달라지면 검증은 exit 1이어야 합니다.
+- revision
+- authority
+- wave_heading
+- wave_order
+- route
+- state
+- blocker
+- channel
+- language
+- fixture
+- one_send_job
+- locale_fallback
+- evidence_binding
 
-<!-- NORMATIVE_METADATA_START -->
-~~~json
-{
-  "version": "full-top-level-normative-parity/v1",
-  "canonicalization": "recursive lexicographic object-key sort; array order preserved; JSON.stringify UTF-8",
-  "hashAlgorithm": "SHA-256",
-  "coveredTopLevelKeys": [
-    "accessibility",
-    "browserGate",
-    "claimRules",
-    "completionGate",
-    "dataContracts",
-    "evidence",
-    "implementation",
-    "metadata",
-    "nonGoals",
-    "ownership",
-    "parityCheck",
-    "parityManifest",
-    "product",
-    "resultContract",
-    "returnContract",
-    "revision",
-    "routeOwnership",
-    "runtimePersistenceClarification",
-    "schemaVersion",
-    "sendLifecycle",
-    "specId",
-    "stateMachine",
-    "status",
-    "userCopy"
-  ],
-  "sectionDigests": {
-    "accessibility": "a8e17a1d14a5d3bd6af218b8f500c80cfa934ff70e643c9ab55c0ba6b74545ce",
-    "browserGate": "51250ede63a97ca5d09f0426282bb860af3443d1ddaab208b150c4a9080f6ea7",
-    "claimRules": "54daacd22aa050004e4b172faa707699b581bd57ca50e0da9ec212b0ae8fcd64",
-    "completionGate": "73ed12cc94560f14329b0694f581068bd42a0133084959c91a387b6036dced68",
-    "dataContracts": "d8137d209edde7bf623aea1b35057f0627e29ca8863cf261cafabbd2ea07b324",
-    "evidence": "1affe2ff17198bb8e4f12ab0c51578f76ca11ece7d4453489e5285457f81b17d",
-    "implementation": "b11afa5a31fd8337cb8b1884c7be0ad299b49c0a09dccb5c6986b21ddec7fb3e",
-    "metadata": "5dd4069cf7bd263e23a31059ae5bdc5c6023c2d246061ed2c04db0d7f6051bb4",
-    "nonGoals": "f34f9b3b299d9bea03767210bca598519caca514209b46ac4110ed95192f83c0",
-    "ownership": "bdf91e899507fd8d2d8302086d45e5cab90f4b003305b183b718466ddf904250",
-    "parityCheck": "93ed47667bf16fc3fb7589cb551dbbf375be5f835e81ad93f802d58c9ee6d4de",
-    "parityManifest": "7e638a9aff64ceb4398928243ce46d77e85f68e5d85f2451f595510795f8a693",
-    "product": "ab1bd230e96a6567ab775bfbe026da18d89ad0a5e05f64a680fc614724d82784",
-    "resultContract": "f1de88c8b20f614e31f435e40aea80d14123a10aa9a2e5eedb97c5bb40e79bcd",
-    "returnContract": "b87223cc368531cc1be5f212db74d6fedd6f0caa5d75d1fb0f7ccb2fd9d9f2c3",
-    "revision": "6a654292bc538b79fda7a981ecc56bfe9b84e0e8bdbffc9f61582f5acf4500c8",
-    "routeOwnership": "0cdfb886cafc2914f255fd9eec430ca3903ab289572f7af7260f91c014afad05",
-    "runtimePersistenceClarification": "1b1546322c04e368a1b7e93f191c46177783bde7572aebd4c28a300ac34809c9",
-    "schemaVersion": "22cca817e3cf2f337148c4506ce9edda3bd99993eb2f9d2ea21899bbb4d778ab",
-    "sendLifecycle": "61d63f986a6a5b4fb9abb9d98aa7488b5ac2d47e32148421c07023b3268d723d",
-    "specId": "d778e3bcc7ee6fc6a3af22ed618e109f6a33cce9b3d19cab4f25a93a17c96fdf",
-    "stateMachine": "10431ba4ac039f79e3d8942636fb00b27076638349490260a5d48066d40b5548",
-    "status": "652fa2ff4ca908a78412c08b40c49a9715cf1f974a2862a90103c60fa1d6fc65",
-    "userCopy": "80490d82a54cc8674e1f73bbd4b8cc86d28ee81aae281301e7236f0090d15592"
-  }
-}
-~~~
-<!-- NORMATIVE_METADATA_END -->
+Zoom contract modes:
 
-Windows PowerShell parity command:
+- positive_twice: fresh production fixture DOM 두 개를 각각 한 번 평가하고 exit 0
+- internal_wrapper_transform: exit 1
+- internal_zoom: exit 1
+- outer_transform: exit 1
+- repeated_evaluation: exit 1
+- device_scale_factor: exit 1
+- page_zoom: exit 1
+
+Candidate 전에는 evidence chain만 건너뛰고 구조 계약을 실행합니다.
 
 ~~~powershell
-@'
-const assert = require("node:assert/strict");
-const childProcess = require("node:child_process");
-const crypto = require("node:crypto");
-const fs = require("node:fs");
-
-const md = fs.readFileSync("evaluation/workpack-share-v2-2026-07-13/spec.md", "utf8");
-const spec = JSON.parse(fs.readFileSync("evaluation/workpack-share-v2-2026-07-13/spec.json", "utf8"));
-const deliberateMismatch = process.env.SPEC_PARITY_MUTATION || "none";
-if (deliberateMismatch === "revision") {
-  spec.revision = `${spec.revision}-deliberate-mismatch`;
-} else if (deliberateMismatch === "authority") {
-  spec.dataContracts.sessionDispatchBinding.serverAuthoritative = false;
-} else if (deliberateMismatch === "wave") {
-  spec.implementation.waves.find((wave) => wave.id === 1).name = "Deliberately Mismatched Wave";
-} else {
-  assert.equal(deliberateMismatch, "none", `Unknown SPEC_PARITY_MUTATION: ${deliberateMismatch}`);
-}
-const evidencePath = "evaluation/workpack-share-v2-2026-07-13/review-evidence.json";
-const reviewEvidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
-const git = (...args) => childProcess.execFileSync("git", args, { encoding: "utf8" }).trim();
-const sortedLines = (value) => value.split(/\r?\n/u).filter(Boolean).sort();
-const fullSha = /^[0-9a-f]{40}$/u;
-const match = md.match(/<!-- PARITY_MANIFEST_START -->\s*~~~json\s*([\s\S]*?)\s*~~~\s*<!-- PARITY_MANIFEST_END -->/u);
-assert.ok(match, "Markdown parity manifest is missing");
-const markdownManifest = JSON.parse(match[1]);
-assert.deepEqual(markdownManifest, spec.parityManifest);
-
-const normativeMatch = md.match(/<!-- NORMATIVE_METADATA_START -->\s*~~~json\s*([\s\S]*?)\s*~~~\s*<!-- NORMATIVE_METADATA_END -->/u);
-assert.ok(normativeMatch, "Markdown normative metadata is missing");
-const markdownNormativeMetadata = JSON.parse(normativeMatch[1]);
-const canonicalize = (value) => {
-  if (Array.isArray(value)) return value.map(canonicalize);
-  if (value && typeof value === "object") {
-    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
-  }
-  return value;
-};
-const canonicalHash = (value) => crypto
-  .createHash("sha256")
-  .update(JSON.stringify(canonicalize(value)))
-  .digest("hex");
-const coveredTopLevelKeys = Object.keys(spec).filter((key) => key !== "normativeParity").sort();
-const computedNormativeMetadata = {
-  version: "full-top-level-normative-parity/v1",
-  canonicalization: "recursive lexicographic object-key sort; array order preserved; JSON.stringify UTF-8",
-  hashAlgorithm: "SHA-256",
-  coveredTopLevelKeys,
-  sectionDigests: Object.fromEntries(coveredTopLevelKeys.map((key) => [key, canonicalHash(spec[key])]))
-};
-assert.deepEqual(markdownNormativeMetadata, spec.normativeParity);
-assert.deepEqual(spec.normativeParity, computedNormativeMetadata);
-
-assert.equal(spec.schemaVersion, "safeclaw-workpack-share-v2-product-spec/v2");
-assert.equal(spec.specId, "workpack-share-v2-2026-07-13");
-assert.equal(spec.revision, "independent-review-remediation-4");
-assert.equal(spec.status, "HOLD_PENDING_FRESH_REVIEW");
-assert.equal(spec.metadata.sourceBase, "384c06f9fdf48d8a24831b46a96c5c317ebc6827");
-assert.equal(spec.metadata.reviewEvidenceManifest, evidencePath);
-assert.equal(spec.metadata.reviewStatus, "pending");
-assert.equal(spec.metadata.reviewedClaim, false);
-assert.equal(Object.hasOwn(spec.metadata, ["review", "Range"].join("")), false);
-assert.equal(Object.hasOwn(spec.metadata, "reviewedCommit"), false);
-assert.match(reviewEvidence.sourceBase, fullSha);
-assert.match(reviewEvidence.candidate, fullSha);
-assert.equal(reviewEvidence.sourceBase, spec.metadata.sourceBase);
-assert.equal(reviewEvidence.reviewStatus, "pending");
-assert.equal(reviewEvidence.reviewedClaim, false);
-git("cat-file", "-e", `${reviewEvidence.sourceBase}^{commit}`);
-git("cat-file", "-e", `${reviewEvidence.candidate}^{commit}`);
-assert.equal(git("rev-parse", `${reviewEvidence.candidate}^`), reviewEvidence.sourceBase);
-assert.equal(git("rev-parse", "HEAD^"), reviewEvidence.candidate);
-assert.deepEqual(
-  sortedLines(git("diff-tree", "--no-commit-id", "--name-only", "-r", reviewEvidence.candidate)),
-  [...spec.metadata.candidateWriteFiles].sort()
-);
-assert.deepEqual(
-  sortedLines(git("diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD")),
-  [spec.metadata.evidenceOnlyWriteFile]
-);
-assert.equal(spec.product.screenSequence.join(">"), "target>channel>localized_preview>send");
-assert.equal(spec.product.singletonSurfaces.localizedPreviewMaxCount, 1);
-assert.equal(spec.product.singletonSurfaces.loggedOutAdditionalLoginCtaCount, 0);
-assert.equal(spec.ownership.shareCanMutateRoster, false);
-assert.equal(spec.ownership.shareCanMutateTodaySnapshot, false);
-assert.equal(spec.ownership.shareCanCreateWorkers, false);
-assert.equal(spec.ownership.noRecipientsPrimaryCount, 1);
-assert.equal(spec.evidence.currentQualityFallback.localStorageMayOverrideReadiness, false);
-assert.deepEqual(spec.routeOwnership.map((route) => route.id), ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11"]);
-assert.deepEqual(spec.returnContract.implementationOwners, ["app/workspace/page.tsx", "components/SafeGuardCommandCenter.tsx", "lib/workspace-pages.ts"]);
-assert.equal(spec.stateMachine.primaryCta.logged_out, "로그인하고 전송");
-assert.equal(spec.stateMachine.primaryCta.ready, "{N}명에게 전송");
-assert.equal(spec.stateMachine.primaryCta.recipient_locale_invalid, "작업자 언어 확인");
-assert.equal(spec.stateMachine.primaryCta.translation_incomplete, "번역본 보완");
-assert.equal(spec.stateMachine.primaryCta.translation_not_reviewed, "번역본 검토");
-assert.equal(spec.stateMachine.primaryCta.translation_rejected, "번역본 수정");
-assert.equal(spec.stateMachine.primaryCta.workpack_revalidation, "문서 다시 검수");
-assert.ok(spec.stateMachine.precedence.indexOf("workpack_revalidation") < spec.stateMachine.precedence.indexOf("blocked"));
-assert.equal(spec.stateMachine.revalidationDecisionRule.evaluateBeforeGenericBlocked, true);
-assert.equal(spec.stateMachine.states.find((state) => state.id === "no_recipients").routeBackControlCount, 1);
-assert.equal(spec.stateMachine.nonBlockingStatus.mayOwnPrimary, false);
-assert.equal(spec.stateMachine.transitions.find((transition) => transition.event === "session failure").dispatchRequestCount, 0);
-assert.equal(spec.stateMachine.failureCta.session_create_failed.primaryLabel, "초대 세션 다시 시도");
-assert.equal(spec.stateMachine.failureCta.session_create_failed.historyHrefAllowed, false);
-assert.equal(spec.stateMachine.failureCta.dispatch_failed_log_persisted.route, "/dispatch");
-assert.ok(Object.values(spec.stateMachine.failureCta).every((failure) =>
-  failure.historyHrefAllowed ? failure.persistedDispatchLog === true : failure.route !== "/dispatch"
-));
-assert.deepEqual(spec.dataContracts.dispatchChannels, ["email", "sms", "kakao"]);
-assert.equal(spec.dataContracts.channelAvailability.route, "/api/settings/channels/resolve");
-assert.equal(spec.dataContracts.channelAvailability.token.ttlSeconds, 120);
-assert.equal(spec.dataContracts.channelAvailability.unresolvedOrUnavailableSessionRequestCount, 0);
-assert.equal(spec.dataContracts.channelAvailability.dispatchDefenseInDepthPreserved, true);
-assert.equal(spec.dataContracts.channelAvailability.serverChecks.persistentIdempotencyPolicy, true);
-assert.equal(spec.dataContracts.channelAvailability.dispatchRouteUsesSameServerFunction, true);
-assert.ok(spec.dataContracts.channelAvailability.responseFields.includes("configurationVersion"));
-assert.ok(spec.dataContracts.channelAvailability.responseFields.includes("configurationRevision"));
-assert.ok(spec.dataContracts.channelAvailability.responseFields.includes("configurationDigestKeyId"));
-assert.ok(spec.dataContracts.channelAvailability.responseFields.includes("configurationDigest"));
-assert.equal(spec.dataContracts.channelAvailability.configuration.version, "channel-configuration/v2");
-assert.equal(spec.dataContracts.channelAvailability.configuration.revisionType, "positive monotonic integer");
-assert.match(spec.dataContracts.channelAvailability.configuration.digestAlgorithm, /^HMAC-SHA256/u);
-assert.equal(spec.dataContracts.channelAvailability.configuration.configuredOrApprovedBooleansAloneSufficient, false);
-assert.equal(spec.dataContracts.channelAvailability.configuration.rawIdentityFieldsExposed, false);
-assert.deepEqual(spec.dataContracts.channelAvailability.configuration.recomputedAt, ["resolver", "share-session creation", "dispatch preflight"]);
-assert.match(spec.dataContracts.channelAvailability.configuration.rotation.bindingSecretRotation, /key ID and digest/u);
-assert.match(spec.dataContracts.channelAvailability.configuration.rotation.existingSessionAfterIdentityOrKeyRotation, /provider dispatch count 0/u);
-for (const field of ["configurationRevision", "configurationDigestKeyId", "configurationDigest"]) {
-  assert.ok(spec.dataContracts.channelAvailability.token.bindings.includes(field), `availability token missing ${field}`);
-  assert.ok(spec.dataContracts.sessionDispatchBinding.fields.includes(`channel${field[0].toUpperCase()}${field.slice(1)}`), `dispatch binding missing channel ${field}`);
-}
-assert.deepEqual(spec.dataContracts.localeParser.allowlist, spec.dataContracts.supportedLanguageCodes);
-assert.equal(spec.dataContracts.localeParser.invalidState, "review_required");
-assert.equal(spec.dataContracts.localeParser.invalidBeforeSession.shareSessionRequestCount, 0);
-assert.equal(spec.dataContracts.localeParser.invalidBeforeSession.dispatchRequestCount, 0);
-assert.equal(spec.dataContracts.localeParser.koreanAllowedOnlyWhenAuthoritativeLocaleIsExactlyKo, true);
-assert.equal(spec.dataContracts.localeParser.blockers.recipientLocaleInvalid.primaryLabel, "작업자 언어 확인");
-assert.equal(spec.dataContracts.localeParser.blockers.recipientLocaleInvalid.ownerRoute, "/workers?focus=language&next={encoded shareReturn}");
-assert.equal(spec.dataContracts.localeParser.blockers.recipientLocaleInvalid.languageCodeInterpolationAllowed, false);
-assert.equal(spec.dataContracts.localeParser.blockers.translationIncomplete.primaryLabel, "번역본 보완");
-assert.equal(spec.dataContracts.localeParser.blockers.translationIncomplete.requiresSupportedAllowlistedLocale, true);
-assert.match(spec.dataContracts.localeParser.blockers.translationIncomplete.ownerRoute, /\{validatedSupportedCode\}/u);
-assert.equal(spec.dataContracts.localeParser.stageActions.length, 6);
-assert.ok(spec.dataContracts.localeParser.stageActions.every((action) =>
-  action.state === "review_required" && action.providerDispatchCount === 0 && action.dispatchLogInsertCount === 0
-));
-assert.ok(spec.dataContracts.localeParser.stageActions.filter((action) => action.stage !== "dispatch_reload").every((action) =>
-  action.sessionRowsCreated === 0 && /explicitly start a new attempt/u.test(action.retry)
-));
-assert.ok(spec.dataContracts.localeParser.stageActions.filter((action) => action.stage === "dispatch_reload").every((action) =>
-  action.sessionState === "created" && action.newSessionRowsCreated === 0 && action.automaticRetryCount === 0
-));
-assert.equal(spec.dataContracts.localizedDispatchArtifact.serverAuthority.route, "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review");
-assert.equal(spec.dataContracts.localizedDispatchArtifact.persistence.mode, "separate_server_signed_review_envelope");
-assert.equal(spec.dataContracts.localizedDispatchArtifact.persistence.originalDeliverablesMutable, false);
-assert.equal(spec.dataContracts.localizedDispatchArtifact.persistence.originalGenerationEvidenceMutable, false);
-assert.equal(spec.dataContracts.localizedDispatchArtifact.persistence.clientOrLocalMutationAllowed, false);
-assert.equal(spec.dataContracts.localizedDispatchArtifact.reviewRouteContract.mergeEnvelopeIntoDeliverablesBeforeGenerationVerification, false);
-assert.ok(spec.dataContracts.localizedDispatchArtifact.reviewRouteContract.clientCannotSet.includes("reviewedAt"));
-assert.equal(spec.dataContracts.localizedDispatchArtifact.reviewWrite.expectedWorkpackRevisionRequired, true);
-assert.equal(spec.dataContracts.localizedDispatchArtifact.reviewWrite.newEnvelopeSigned, true);
-assert.equal(spec.dataContracts.localizedDispatchArtifact.reviewWrite.routeWritesUpdatedAt, "server clock");
-assert.ok(spec.dataContracts.localizedDispatchArtifact.artifactDigest.bindings.includes("reviewedAt"));
-assert.equal(spec.dataContracts.sessionDispatchBinding.storage, "workpack_share_sessions.access_policy.dispatchBinding");
-assert.equal(spec.dataContracts.sessionDispatchBinding.serverAuthoritative, true);
-assert.equal(spec.dataContracts.sessionDispatchBinding.existingJsonbSafe, true);
-assert.equal(spec.dataContracts.sessionDispatchBinding.dispatchReload.clientStateAuthority, false);
-assert.equal(spec.dataContracts.sessionDispatchBinding.databaseMigrationRequired, false);
-assert.match(spec.dataContracts.sessionDispatchBinding.migrationApprovalGate, /explicit approval/u);
-assert.ok(spec.dataContracts.sessionDispatchBinding.dispatchReload.exactComparisons.includes("channelConfigurationRevision"));
-assert.ok(spec.dataContracts.sessionDispatchBinding.dispatchReload.exactComparisons.includes("channelConfigurationDigestKeyId"));
-assert.ok(spec.dataContracts.sessionDispatchBinding.dispatchReload.exactComparisons.includes("channelConfigurationDigest"));
-assert.ok(spec.dataContracts.sessionDispatchBinding.mismatchOutcomes.every((outcome) =>
-  outcome.session === "created" && outcome.providerDispatchCount === 0 && outcome.dispatchLogInsertCount === 0
-));
-assert.deepEqual(spec.sendLifecycle.order, ["validate_reviewed_localization", "resolve_channels", "create_session", "dispatch", "save_channel_log"]);
-assert.deepEqual(Object.keys(spec.sendLifecycle.createSession.requestBody), ["recipients", "channels", "canonicalWorkpackRevision", "availabilityToken"]);
-assert.deepEqual(spec.sendLifecycle.createSession.atomicScope, ["one share session row containing complete recipients_snapshot and access_policy.dispatchBinding"]);
-assert.equal(spec.sendLifecycle.onSessionFailure.dispatchRequestCount, 0);
-assert.equal(spec.sendLifecycle.onSessionFailure.historyHrefCount, 0);
-assert.equal(spec.resultContract.recipientLevelDeliveredPersistence, false);
-assert.equal(spec.resultContract.historyRequiresPersistedLog, true);
-assert.equal(spec.resultContract.persistenceProof.savedCountAloneIsAuthority, false);
-assert.equal(spec.resultContract.persistenceProof.databaseMigrationRequired, false);
-assert.equal(spec.accessibility.viewports.mobile, "391x844");
-assert.equal(spec.accessibility.zoom200.fixedHeightCeiling, false);
-assert.equal(spec.accessibility.zoom200.deviceScaleFactorUsedForZoom, false);
-assert.equal(spec.accessibility.zoom200.rootFontChangeAccepted, false);
-assert.equal(spec.accessibility.zoom200.cssTransformUsedForZoom, false);
-assert.equal(spec.accessibility.zoom200.cssZoomUsedForZoom, false);
-assert.equal(spec.accessibility.zoom200.screenshotScalingUsedForZoom, false);
-assert.equal(spec.accessibility.zoom200.baselineCaptureBeforeAnyMutation, true);
-assert.equal(spec.accessibility.zoom200.baselineImmutable, true);
-assert.equal(spec.accessibility.zoom200.scalingPassCount, 1);
-assert.equal(spec.accessibility.zoom200.ancestorThenDescendantComputedRecaptureAllowed, false);
-assert.equal(spec.accessibility.zoom200.cumulativeScalingAllowed, false);
-assert.equal(spec.accessibility.zoom200.ratioAssertionsApplyToEveryRepresentativeNode, true);
-assert.ok(spec.accessibility.zoom200.fontSizeRatioMin >= 1.9);
-assert.ok(spec.accessibility.zoom200.fontSizeRatioMax <= 2.1);
-assert.ok(spec.accessibility.zoom200.lineHeightRatioMin >= 1.9);
-assert.ok(spec.accessibility.zoom200.lineHeightRatioMax <= 2.1);
-assert.equal(spec.accessibility.zoom200.deviceScaleFactor, 1);
-assert.match(spec.accessibility.zoom200.wrappingAssertion, /lineCount/u);
-assert.match(spec.accessibility.zoom200.heightAssertion, /height/u);
-assert.match(spec.accessibility.zoom200.delivery, /page\.evaluate/u);
-assert.equal(spec.browserGate.fixtureIngress, "production_resolver_inputs_and_mocked_routes");
-assert.deepEqual(spec.browserGate.zoomModes.map((mode) => mode.id), ["normal_100", "computed_text_200"]);
-assert.equal(spec.browserGate.environments.length * spec.browserGate.fixtures.length * spec.browserGate.zoomModes.length, 128);
-assert.equal(spec.browserGate.caseCount, 128);
-assert.equal(spec.browserGate.caseCountByZoom.normal_100 + spec.browserGate.caseCountByZoom.computed_text_200, 128);
-assert.ok(spec.browserGate.fixtures.every((fixture) => fixture.entry === "production_resolver"));
-assert.deepEqual(spec.browserGate.fixtures.map((fixture) => fixture.id), spec.parityManifest.browserFixtureIds);
-assert.deepEqual(spec.browserGate.environments.map((env) => env.viewport), ["1440x1000", "1440x1000", "391x844", "391x844"]);
-assert.ok(spec.browserGate.fixtures.find((fixture) => fixture.id === "workpack_revalidation").assertions.includes("generic 문서 보완 primary absent"));
-assert.ok(spec.browserGate.fixtures.find((fixture) => fixture.id === "fail_session").assertions.includes("/dispatch href count 0"));
-assert.ok(spec.browserGate.fixtures.find((fixture) => fixture.id === "fail_dispatch_unpersisted").assertions.includes("/dispatch href count 0"));
-assert.ok(spec.stateMachine.blockingReasons.every((reason) => reason.owner && reason.action && reason.returnRoute));
-assert.equal(spec.dataContracts.localizedDispatchArtifact.owner, "document-editor:foreignWorkerTransmission");
-assert.equal(spec.dataContracts.localizedDispatchArtifact.shareMayGenerate, false);
-assert.equal(spec.dataContracts.localizedDispatchArtifact.languageUi.optionCount, 12);
-assert.equal(spec.browserGate.languageGate.nonKoreanTargetKoreanFallbackAllowed, false);
-assert.equal(spec.browserGate.languageGate.invalidLocaleSessionRequestCount, 0);
-assert.equal(spec.browserGate.languageGate.invalidLocaleDispatchRequestCount, 0);
-assert.equal(spec.browserGate.languageGate.vietnameseKoreanResidualZeroSurfaces.length, 5);
-assert.equal(spec.browserGate.languageGate.iconOnlyMeaningAllowed, false);
-assert.equal(spec.browserGate.languageGate.emojiOnlyMeaningAllowed, false);
-assert.equal(spec.sendLifecycle.invitationPolicy.publicLinkAllowed, false);
-assert.equal(spec.parityManifest.databaseMigrationCount, 0);
-assert.equal(spec.routeOwnership.length, 11);
-assert.equal(spec.stateMachine.states.length, 12);
-assert.equal(spec.stateMachine.blockingReasons.length, 11);
-assert.equal(spec.browserGate.fixtures.length, 16);
-assert.equal(spec.parityManifest.languageCodes.length, 12);
-assert.deepEqual(spec.implementation.waves.map((wave) => wave.id), [0, 1, 2, 3]);
-assert.deepEqual(spec.implementation.waves.map((wave) => wave.name), [
-  "Integrated Base Gate",
-  "Authority Foundation And Session Binding",
-  "Return Resolver, Share IA, And Owner Routes",
-  "Real Browser Gate"
-]);
-const waveOne = spec.implementation.waves.find((wave) => wave.id === 1);
-const waveTwo = spec.implementation.waves.find((wave) => wave.id === 2);
-const waveThree = spec.implementation.waves.find((wave) => wave.id === 3);
-const waveOneFiles = waveOne.exactFiles;
-for (const file of [
-  "lib/types.ts",
-  "lib/reviewed-localization-envelope.ts",
-  "lib/foreign-worker.ts",
-  "lib/current-workpack.ts",
-  "lib/workpack-store.ts",
-  "lib/workpack-commercial.ts",
-  "lib/workpack-commercial-store.ts",
-  "lib/workpack-readiness.ts",
-  "lib/channel-availability.ts",
-  "app/api/settings/channels/resolve/route.ts",
-  "app/api/workpacks/[id]/route.ts",
-  "app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route.ts",
-  "app/api/workpacks/[id]/share-sessions/route.ts",
-  "app/api/workflow/dispatch/route.ts",
-  "app/api/dispatch-logs/route.ts"
-]) assert.ok(waveOneFiles.includes(file), `Wave 1 missing freshness owner: ${file}`);
-assert.match(waveOne.exit, /no UI component implementation is required/u);
-assert.match(waveTwo.exit, /does not edit Wave 1 server files/u);
-assert.match(waveThree.exit, /reopens Wave 1/u);
-const exactFileOwners = new Map();
-for (const wave of spec.implementation.waves) {
-  for (const file of wave.exactFiles || []) {
-    assert.equal(exactFileOwners.has(file), false, `duplicate exactFiles owner: ${file}`);
-    exactFileOwners.set(file, wave.id);
-  }
-}
-assert.ok(spec.implementation.waves.every((wave) =>
-  ![...(wave.exactFiles || []), ...(wave.conditionalFixFiles || [])].includes("app/globals.css")
-));
-
-const forbidden = [
-  ["quick add", "drawer"].join(" "),
-  ["로그인하고", "계속합니다"].join(" "),
-  ["선택한 {N}명에게", "전송합니다"].join(" "),
-  ["390", "x844"].join(""),
-  ["mobileReadyBody", "MaxPx"].join(""),
-  ["explicit component", "state"].join(" "),
-  ["2ad", "ca4e"].join(""),
-  ["root", "_font_200"].join(""),
-  ["59f4812", "..next-candidate"].join(""),
-  ["channel-configuration", "/v1"].join(""),
-  ["independent-review-remediation", "-2"].join(""),
-  ["independent-review-remediation", "-3"].join(""),
-  ["7509d84", "d37e4ccef7e6ed38f24f6f6b7c44415b7"].join(""),
-  ["browserCaseCount", "52"].join(String.fromCharCode(34, 58, 32))
-];
-for (const value of forbidden) {
-  assert.equal(md.includes(value), false, "Forbidden Markdown contradiction: " + value);
-  assert.equal(JSON.stringify(spec).includes(value), false, "Forbidden JSON contradiction: " + value);
-}
-
-console.log(JSON.stringify({
-  result: "PARITY_PASS",
-  routes: spec.routeOwnership.length,
-  states: spec.stateMachine.states.length,
-  blockers: spec.stateMachine.blockingReasons.length,
-  channels: spec.dataContracts.dispatchChannels.length,
-  fixtures: spec.browserGate.fixtures.length,
-  zoomModes: spec.browserGate.zoomModes.length,
-  browserCases: spec.parityManifest.browserCaseCount,
-  languages: spec.parityManifest.languageCodes.length,
-  normativeSections: spec.normativeParity.coveredTopLevelKeys.length,
-  deliberateMismatch,
-  sourceBase: reviewEvidence.sourceBase,
-  candidate: reviewEvidence.candidate
-}, null, 2));
-'@ | node
+node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --skip-evidence
 ~~~
 
-Completion gate for this spec revision:
+Evidence-only commit 뒤 최종 정상 명령은 두 번 실행합니다.
 
-- JSON parse passes.
-- `SPEC_PARITY_MUTATION`을 비운 parity command를 두 번 실행하고 각 실행이 PARITY_PASS를 출력합니다.
-- 같은 embedded command를 `SPEC_PARITY_MUTATION=revision`, `authority`, `wave`로 각각 두 번 실행하며 각 Node process가 expected exit 1이어야 합니다. mutation은 읽은 JSON의 memory copy에만 적용하고 파일을 쓰지 않습니다.
-- git diff --check passes.
-- sourceBase와 candidate가 full 40-character SHA이고 git cat-file로 resolve됩니다.
-- candidate의 direct parent는 sourceBase이며 candidate commit은 spec.md/spec.json 두 파일만 변경합니다.
-- evidence-only HEAD의 parent는 candidate이며 review-evidence.json 한 파일만 변경합니다. evidence manifest는 evidence commit 자체 SHA를 기록하지 않아 self-reference가 없습니다.
-- pull --rebase, 두 conventional commit, push, remote SHA match, clean worktree가 확인됩니다.
-- 128은 4 environment x 16 fixture x 2 zoom mode의 산술 계약이며 이 spec-only 검증은 browser case를 실행했다고 주장하지 않습니다.
-- final status remains HOLD_PENDING_FRESH_REVIEW until a fresh independent review passes.
+~~~powershell
+node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs
+~~~
+
+각 mutation과 negative fixture는 다음 형태로 실행하고 Node exit code가 정확히 1인지 wrapper가 확인합니다.
+
+~~~powershell
+node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --md-mutation revision
+node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --zoom-fixture internal_wrapper_transform
+~~~
+
+Completion gate:
+
+- spec.json과 review-evidence.json JSON parse
+- structural validator normal 2회 exit 0
+- MD-only mutation 13개 각각 2회 exit 1
+- zoom positive_twice 2회 exit 0
+- zoom negative fixture 6개 각각 2회 exit 1
+- candidate direct parent = full sourceBase SHA
+- candidate changed files = spec.md, spec.json, validate-spec.cjs
+- evidence-only HEAD direct parent = candidate
+- evidence-only changed file = review-evidence.json
+- evidence manifest는 evidence commit SHA를 기록하지 않으므로 self-reference 없음
+- git pull --rebase, push, remote SHA match, clean worktree
+- 128은 4 environment x 16 fixture x 2 zoom mode 산술 계약이며 spec-only validator는 browser case 실행을 주장하지 않음
+- final status는 fresh independent review 전까지 HOLD_PENDING_FRESH_REVIEW

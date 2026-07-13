@@ -1,18 +1,19 @@
 {
   "schemaVersion": "safeclaw-workpack-share-v2-product-spec/v2",
   "specId": "workpack-share-v2-2026-07-13",
-  "revision": "independent-review-remediation-4",
+  "revision": "independent-review-remediation-5",
   "status": "HOLD_PENDING_FRESH_REVIEW",
   "metadata": {
     "branch": "feat/workpack-share-v2",
-    "sourceBase": "384c06f9fdf48d8a24831b46a96c5c317ebc6827",
+    "sourceBase": "69a022ac2a03ed509022d12d219b1483c9d0cbe7",
     "reviewEvidenceManifest": "evaluation/workpack-share-v2-2026-07-13/review-evidence.json",
     "reviewStatus": "pending",
     "reviewedClaim": false,
     "specOnly": true,
     "candidateWriteFiles": [
       "evaluation/workpack-share-v2-2026-07-13/spec.md",
-      "evaluation/workpack-share-v2-2026-07-13/spec.json"
+      "evaluation/workpack-share-v2-2026-07-13/spec.json",
+      "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs"
     ],
     "evidenceOnlyWriteFile": "evaluation/workpack-share-v2-2026-07-13/review-evidence.json",
     "forbiddenEdits": [
@@ -975,6 +976,61 @@
         "provider credential"
       ]
     },
+    "serverRuntimeConfiguration": {
+      "module": "lib/workpack-share-server-config.ts",
+      "test": "tests/workpack-share-server-config.test.ts",
+      "environmentExample": ".env.example",
+      "serverOnlyImportRequired": true,
+      "reader": "readWorkpackShareServerConfig(process.env) on every resolver, session-create, dispatch-preflight, and localization-envelope verification path",
+      "environment": [
+        {
+          "key": "SAFECLAW_CHANNEL_CONFIG_REVISION",
+          "kind": "positive monotonic integer",
+          "source": "server process.env through typed config module",
+          "rotation": "increment for endpoint, sender, template, provider, relay, approval, credential, or idempotency change",
+          "missing": "unresolved, ready=false, session=0"
+        },
+        {
+          "key": "SAFECLAW_CHANNEL_CONFIG_DIGEST_KEY_ID",
+          "kind": "non-secret key identifier",
+          "source": "server process.env through typed config module",
+          "rotation": "change atomically with SAFECLAW_CHANNEL_CONFIG_BINDING_SECRET",
+          "missing": "unresolved, ready=false, session=0"
+        },
+        {
+          "key": "SAFECLAW_CHANNEL_AVAILABILITY_SECRET",
+          "kind": "server-only secret at least 32 bytes",
+          "source": "server process.env through typed config module",
+          "rotation": "reject every prior availability token and require a new resolver run",
+          "missing": "503, token absent, ready=false, session=0"
+        },
+        {
+          "key": "SAFECLAW_CHANNEL_CONFIG_BINDING_SECRET",
+          "kind": "server-only secret at least 32 bytes",
+          "source": "server process.env through typed config module",
+          "rotation": "change digest key ID and revision, reject prior binding digests, no old-key grace",
+          "missing": "503, configuration unresolved, ready=false, session=0"
+        },
+        {
+          "key": "SAFECLAW_REVIEWED_LOCALIZATION_SECRET",
+          "kind": "server-only secret at least 32 bytes",
+          "source": "server process.env through typed config module",
+          "rotation": "invalidate prior envelopes, require re-review and re-sign, produce a new canonical revision before session",
+          "missing": "503, localization review write=0, readiness blocked, session=0"
+        }
+      ],
+      "secretNames": [
+        "SAFECLAW_CHANNEL_AVAILABILITY_SECRET",
+        "SAFECLAW_CHANNEL_CONFIG_BINDING_SECRET",
+        "SAFECLAW_REVIEWED_LOCALIZATION_SECRET"
+      ],
+      "digestKeyIdSecret": false,
+      "placeholdersOnlyInEnvExample": true,
+      "clientImportAllowed": false,
+      "httpResponseExposureAllowed": false,
+      "logExposureAllowed": false,
+      "jsonbSecretPersistenceAllowed": false
+    },
     "reportingRecipientGroup": {
       "owner": "/settings",
       "separateFromWorkerRecipients": true,
@@ -1801,6 +1857,13 @@
       "scalingPassCount": 1,
       "ancestorThenDescendantComputedRecaptureAllowed": false,
       "cumulativeScalingAllowed": false,
+      "pathTraversalFromEveryRepresentativeToDocumentRoot": true,
+      "representativeAndEveryAncestorScaleInspection": true,
+      "internalWrapperTransformAllowed": false,
+      "internalWrapperZoomAllowed": false,
+      "repeatedEvaluationWithoutFreshDomAllowed": false,
+      "positiveFreshDomRunsRequired": 2,
+      "applicationMarker": "data-share-text-scale-run=computed_text_200/v2",
       "representativeNodeSelector": "[data-share-font-node][data-share-font-role]",
       "requiredRepresentativeRoles": [
         "status",
@@ -1827,6 +1890,9 @@
       "wrappingAssertion": "after lineCount > before lineCount",
       "heightAssertion": "after rendered height > before rendered height",
       "deviceScaleFactor": 1,
+      "devicePixelRatio": 1,
+      "visualViewportScale": 1,
+      "cssViewportWidthMustEqualConfiguredViewport": true,
       "deviceScaleFactorUsedForZoom": false,
       "cssTransformUsedForZoom": false,
       "cssZoomUsedForZoom": false,
@@ -1841,6 +1907,14 @@
       ],
       "fixedHeightCeiling": false,
       "fixedTaskDistanceCeiling": false,
+      "negativeFixtureIds": [
+        "internal_wrapper_transform",
+        "internal_zoom",
+        "outer_transform",
+        "repeated_evaluation",
+        "device_scale_factor",
+        "page_zoom"
+      ],
       "required": [
         "every representative computed font-size ratio is between 1.9 and 2.1",
         "every representative computed line-height ratio is between 1.9 and 2.1",
@@ -1941,7 +2015,13 @@
         "baselineCaptureBeforeAnyMutation": true,
         "scaleEachNodeExactlyOnce": true,
         "ratioUpperBoundPreventsFourOrEightTimes": true,
+        "inspectEveryRepresentativePathToDocumentRoot": true,
+        "repeatedEvaluationRequiresFreshProductionFixtureDom": true,
+        "positiveFreshDomRunsRequired": 2,
         "deviceScaleFactor": 1,
+        "devicePixelRatio": 1,
+        "visualViewportScale": 1,
+        "cssViewportWidthEqualsConfiguredViewport": true,
         "deviceScaleFactorUsedForZoom": false,
         "transformUsedForZoom": false,
         "cssZoomUsedForZoom": false,
@@ -2237,6 +2317,9 @@
       "screen title, login action, and localized preview counts are each at most 1",
       "normal_100 rect and task-distance gates pass",
       "computed_text_200 captures all immutable baselines before mutation and scales every representative node exactly once",
+      "computed_text_200 inspects transform and zoom on every representative path through all internal and outer ancestors to document root",
+      "computed_text_200 asserts context deviceScaleFactor, devicePixelRatio, and visualViewport scale equal 1 and CSS viewport width equals configured viewport",
+      "computed_text_200 passes twice only on independent fresh production DOM and rejects repeated evaluation on the same DOM",
       "computed_text_200 keeps every representative font-size and line-height ratio within 1.9x through 2.1x and leaves root font unchanged",
       "computed_text_200 representative localized text wraps to more lines and grows in rendered height",
       "computed_text_200 exact viewport has zero overlap, clipping, horizontal overflow, nested scroll, or incorrect DOM order"
@@ -2250,6 +2333,9 @@
       "nested scroll",
       "preview row cap",
       "computed_text_200 delivered by per-element computed text overrides, not root font, transform, CSS zoom, deviceScaleFactor, viewport changes, or screenshot scaling",
+      "computed_text_200 checks every representative path to document root and rejects internal wrapper transform, internal zoom, and outer transform",
+      "computed_text_200 asserts deviceScaleFactor devicePixelRatio visualViewport scale and CSS viewport width invariants",
+      "computed_text_200 rejects repeated evaluation without a fresh production DOM marker reset",
       "computed_text_200 every representative font-size and line-height ratio is between 1.9 and 2.1 with no cumulative 4x or 8x scaling",
       "computed_text_200 representative text line count and rendered height increase",
       "computed_text_200 at exact viewports has zero overlap, text clipping, horizontal overflow, or nested scroll",
@@ -2351,7 +2437,9 @@
         "id": 1,
         "name": "Authority Foundation And Session Binding",
         "exactFiles": [
+          ".env.example",
           "lib/types.ts",
+          "lib/workpack-share-server-config.ts",
           "lib/reviewed-localization-envelope.ts",
           "lib/foreign-worker.ts",
           "lib/current-workpack.ts",
@@ -2367,6 +2455,7 @@
           "app/api/workflow/dispatch/route.ts",
           "app/api/dispatch-logs/route.ts",
           "tests/reviewed-localization-envelope.test.ts",
+          "tests/workpack-share-server-config.test.ts",
           "tests/reviewed-localization-route.test.ts",
           "tests/workpack-generation-evidence-route.test.ts",
           "tests/workpack-share-authority.test.ts",
@@ -2378,22 +2467,24 @@
           "tests/workpack-share-authority-routes.test.ts"
         ],
         "newFiles": [
+          "lib/workpack-share-server-config.ts",
           "lib/reviewed-localization-envelope.ts",
           "lib/channel-availability.ts",
           "app/api/settings/channels/resolve/route.ts",
           "app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route.ts",
           "tests/reviewed-localization-envelope.test.ts",
+          "tests/workpack-share-server-config.test.ts",
           "tests/reviewed-localization-route.test.ts",
           "tests/channel-availability.test.ts",
           "tests/channel-availability-route.test.ts",
           "tests/dispatch-logs-route.test.ts"
         ],
         "commands": [
-          "npm.cmd test -- tests/reviewed-localization-envelope.test.ts tests/reviewed-localization-route.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/foreign-worker-languages.test.ts tests/workpack-commercial.test.ts tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --no-file-parallelism",
+          "npm.cmd test -- tests/workpack-share-server-config.test.ts tests/reviewed-localization-envelope.test.ts tests/reviewed-localization-route.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/foreign-worker-languages.test.ts tests/workpack-commercial.test.ts tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --no-file-parallelism",
           "npm.cmd run typecheck",
           "git diff --check"
         ],
-        "exit": "this wave alone makes generationEvidence and deliverables immutable, authenticated signed localization envelopes, canonicalWorkpackRevision, localePayloadDigest, readiness, the allowlisted locale parser, channel configuration v2 monotonic revision and HMAC identity, atomic access_policy.dispatchBinding insert and reload, and every server freshness exact comparison GREEN; invalid pre-session locale or translation creates zero sessions and dispatches, while a post-session mismatch preserves session=created with provider dispatch=0 and log insert=0; no UI component implementation is required",
+        "exit": "this wave alone makes the typed server-only runtime config and placeholder-only env contract, generationEvidence and deliverables immutability, authenticated signed localization envelopes, canonicalWorkpackRevision, localePayloadDigest, readiness, the allowlisted locale parser, channel configuration v2 monotonic revision and HMAC identity, atomic access_policy.dispatchBinding insert and reload, and every server freshness exact comparison GREEN; invalid pre-session locale or translation creates zero sessions and dispatches, while a post-session mismatch preserves session=created with provider dispatch=0 and log insert=0; no UI component implementation is required",
         "rollback": "git revert <wave-1-sha>; do not revert DB rows or other workstream commits"
       },
       {
@@ -2493,278 +2584,81 @@
     "acceptedMeansRecipientRead": false,
     "partialLocalizationMeansComplete": false
   },
-  "normativeParity": {
-    "version": "full-top-level-normative-parity/v1",
-    "canonicalization": "recursive lexicographic object-key sort; array order preserved; JSON.stringify UTF-8",
-    "hashAlgorithm": "SHA-256",
-    "coveredTopLevelKeys": [
-      "accessibility",
-      "browserGate",
-      "claimRules",
-      "completionGate",
-      "dataContracts",
-      "evidence",
-      "implementation",
-      "metadata",
-      "nonGoals",
-      "ownership",
-      "parityCheck",
-      "parityManifest",
-      "product",
-      "resultContract",
-      "returnContract",
-      "revision",
-      "routeOwnership",
-      "runtimePersistenceClarification",
-      "schemaVersion",
-      "sendLifecycle",
-      "specId",
-      "stateMachine",
-      "status",
-      "userCopy"
-    ],
-    "sectionDigests": {
-      "accessibility": "a8e17a1d14a5d3bd6af218b8f500c80cfa934ff70e643c9ab55c0ba6b74545ce",
-      "browserGate": "51250ede63a97ca5d09f0426282bb860af3443d1ddaab208b150c4a9080f6ea7",
-      "claimRules": "54daacd22aa050004e4b172faa707699b581bd57ca50e0da9ec212b0ae8fcd64",
-      "completionGate": "73ed12cc94560f14329b0694f581068bd42a0133084959c91a387b6036dced68",
-      "dataContracts": "d8137d209edde7bf623aea1b35057f0627e29ca8863cf261cafabbd2ea07b324",
-      "evidence": "1affe2ff17198bb8e4f12ab0c51578f76ca11ece7d4453489e5285457f81b17d",
-      "implementation": "b11afa5a31fd8337cb8b1884c7be0ad299b49c0a09dccb5c6986b21ddec7fb3e",
-      "metadata": "5dd4069cf7bd263e23a31059ae5bdc5c6023c2d246061ed2c04db0d7f6051bb4",
-      "nonGoals": "f34f9b3b299d9bea03767210bca598519caca514209b46ac4110ed95192f83c0",
-      "ownership": "bdf91e899507fd8d2d8302086d45e5cab90f4b003305b183b718466ddf904250",
-      "parityCheck": "93ed47667bf16fc3fb7589cb551dbbf375be5f835e81ad93f802d58c9ee6d4de",
-      "parityManifest": "7e638a9aff64ceb4398928243ce46d77e85f68e5d85f2451f595510795f8a693",
-      "product": "ab1bd230e96a6567ab775bfbe026da18d89ad0a5e05f64a680fc614724d82784",
-      "resultContract": "f1de88c8b20f614e31f435e40aea80d14123a10aa9a2e5eedb97c5bb40e79bcd",
-      "returnContract": "b87223cc368531cc1be5f212db74d6fedd6f0caa5d75d1fb0f7ccb2fd9d9f2c3",
-      "revision": "6a654292bc538b79fda7a981ecc56bfe9b84e0e8bdbffc9f61582f5acf4500c8",
-      "routeOwnership": "0cdfb886cafc2914f255fd9eec430ca3903ab289572f7af7260f91c014afad05",
-      "runtimePersistenceClarification": "1b1546322c04e368a1b7e93f191c46177783bde7572aebd4c28a300ac34809c9",
-      "schemaVersion": "22cca817e3cf2f337148c4506ce9edda3bd99993eb2f9d2ea21899bbb4d778ab",
-      "sendLifecycle": "61d63f986a6a5b4fb9abb9d98aa7488b5ac2d47e32148421c07023b3268d723d",
-      "specId": "d778e3bcc7ee6fc6a3af22ed618e109f6a33cce9b3d19cab4f25a93a17c96fdf",
-      "stateMachine": "10431ba4ac039f79e3d8942636fb00b27076638349490260a5d48066d40b5548",
-      "status": "652fa2ff4ca908a78412c08b40c49a9715cf1f974a2862a90103c60fa1d6fc65",
-      "userCopy": "80490d82a54cc8674e1f73bbd4b8cc86d28ee81aae281301e7236f0090d15592"
-    }
-  },
-  "parityManifest": {
-    "status": "HOLD_PENDING_FRESH_REVIEW",
-    "review": {
-      "sourceBase": "384c06f9fdf48d8a24831b46a96c5c317ebc6827",
-      "evidenceManifest": "evaluation/workpack-share-v2-2026-07-13/review-evidence.json",
-      "reviewStatus": "pending",
-      "reviewedClaim": false
-    },
-    "sequence": [
-      "target",
-      "channel",
-      "localized_preview",
-      "send"
-    ],
-    "ownership": {
-      "shareMutatesWorkers": false,
-      "rosterOwner": "/workers",
-      "todaySnapshotOwners": [
-        "/workspace?step=input",
-        "/workers"
-      ],
-      "translationOwner": "document-editor:foreignWorkerTransmission",
-      "translationPersistenceOwner": "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review",
-      "channelSetupOwner": "/settings"
-    },
-    "cta": {
-      "no_recipients": "오늘 참여자 선택",
-      "logged_out": "로그인하고 전송",
-      "ready": "{N}명에게 전송",
-      "recipient_locale_invalid": "작업자 언어 확인",
-      "translation_incomplete": "번역본 보완",
-      "translation_not_reviewed": "번역본 검토",
-      "translation_rejected": "번역본 수정",
-      "workpack_revalidation": "문서 다시 검수",
-      "session_create_failed": "초대 세션 다시 시도"
-    },
-    "lifecycle": [
-      "validate_reviewed_localization",
-      "resolve_channels",
-      "create_session",
-      "dispatch",
-      "save_channel_log"
-    ],
-    "sessionFailureDispatchCount": 0,
-    "sessionFailureHistoryAllowed": false,
-    "revalidationBeforeBlocked": true,
-    "historyRequiresPersistedLog": true,
-    "localizationPersistence": {
-      "mode": "separate_server_signed_review_envelope",
-      "storage": "evidence_summary.reviewedLocalizationEnvelopes",
-      "originalDeliverablesMutable": false,
-      "originalGenerationEvidenceMutable": false
-    },
-    "channelResolver": {
-      "route": "/api/settings/channels/resolve",
-      "tokenTtlSeconds": 120,
-      "sessionBeforeResolvedAvailable": false,
-      "configurationVersion": "channel-configuration/v2",
-      "configurationRevisionRequired": true,
-      "configurationDigestKeyIdRequired": true,
-      "configurationDigestRequired": true,
-      "configurationDigestAlgorithm": "HMAC-SHA256",
-      "configuredOrApprovedBooleansAloneSufficient": false,
-      "secretIdentityFieldsExposed": false
-    },
-    "sessionDispatchBinding": {
-      "storage": "workpack_share_sessions.access_policy.dispatchBinding",
-      "serverGenerated": true,
-      "dispatchReloadsAndComparesAllFields": true,
-      "clientStateAuthority": false,
-      "preSessionMismatchSessionCount": 0,
-      "postSessionMismatchSessionState": "created",
-      "postSessionMismatchProviderDispatchCount": 0,
-      "postSessionMismatchLogInsertCount": 0
-    },
-    "localeParser": {
-      "allowlistCount": 12,
-      "invalidState": "review_required",
-      "invalidSessionCount": 0,
-      "invalidDispatchCount": 0,
-      "nonKoreanKoreanFallbackAllowed": false,
-      "invalidOwnerRoute": "/workers?focus=language&next={encoded shareReturn}",
-      "invalidOwnerRouteInterpolatesLanguageCode": false,
-      "translationOwnerRoute": "/workspace?step=document&document=foreignWorkerTransmission&language={validatedSupportedCode}&returnStep=share&theme={theme}"
-    },
-    "channels": [
-      "email",
-      "sms",
-      "kakao"
-    ],
-    "viewports": {
-      "desktop": "1440x1000",
-      "mobile": "391x844"
-    },
-    "zoom200FixedHeightCeiling": false,
-    "zoomModes": [
-      "normal_100",
-      "computed_text_200"
-    ],
-    "zoom200Delivery": "page_evaluate_computed_text_font_and_line_height_2x",
-    "zoom200MinComputedRatios": {
-      "fontSize": 1.9,
-      "lineHeight": 1.9
-    },
-    "zoom200MaxComputedRatios": {
-      "fontSize": 2.1,
-      "lineHeight": 2.1
-    },
-    "zoom200BaselineCaptureBeforeAnyMutation": true,
-    "zoom200ScalingPassCount": 1,
-    "zoom200CumulativeScalingAllowed": false,
-    "zoom200RequiresWrapAndHeightChange": true,
-    "fixtureIngress": "production_resolver_inputs_and_mocked_routes",
-    "browserFixtureIds": [
-      "empty",
-      "selected",
-      "channel_unavailable",
-      "review_required",
-      "workpack_revalidation",
-      "logged_out",
-      "blocked",
-      "ready",
-      "sending",
-      "result_accepted",
-      "result_partial",
-      "fail_session",
-      "fail_dispatch",
-      "fail_dispatch_unpersisted",
-      "offline",
-      "stale"
-    ],
-    "browserCaseCount": 128,
-    "languageCodes": [
-      "ko",
-      "vi",
-      "zh",
-      "th",
-      "uz",
-      "mn",
-      "ne",
-      "km",
-      "id",
-      "my",
-      "tl",
-      "en"
-    ],
-    "implementationWaveOrder": [
-      "Integrated Base Gate",
-      "Authority Foundation And Session Binding",
-      "Return Resolver, Share IA, And Owner Routes",
-      "Real Browser Gate"
-    ],
-    "implementationExactFileOwnershipDuplicates": 0,
-    "publicLinkAllowed": false,
-    "databaseMigrationCount": 0
-  },
   "parityCheck": {
-    "location": "spec.md section 9",
-    "runtime": "PowerShell plus node",
+    "location": "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs",
+    "runtime": "node invoked from PowerShell",
     "tddStyle": {
-      "redBaseline": "384c06f9fdf48d8a24831b46a96c5c317ebc6827 fails the fresh-review assertions for immutable per-node text baselines, secret-safe channel configuration identity, split locale remediation, dependency-ordered waves, and full normative parity",
-      "greenCandidate": "embedded command passes parityManifest and full normative metadata equality, deliberate revision authority and wave mismatch rejection, resolvable full SHAs, and exact two-file candidate plus one-file evidence scopes",
+      "redBaseline": "69a022ac2a03ed509022d12d219b1483c9d0cbe7 embedded validator false-greened all 12 in-memory Markdown-only mutations",
+      "greenCandidate": "standalone parser derives actual Markdown metadata, headings, tables, TypeScript contracts, authority clauses, fallback clauses, and Wave file ownership and compares them to canonical JSON",
       "refactorGate": [
         "JSON parse",
-        "forbidden contradiction scan",
+        "structural Markdown mutation rejection",
+        "zoom contract fixture rejection",
         "changed-file scope",
         "git diff --check"
       ]
     },
     "covers": [
-      "embedded manifest deep equality",
-      "full top-level normative section digest equality including revision authority and implementation waves",
-      "route ownership",
-      "screen sequence",
-      "exact CTA strings",
-      "reviewed localization envelope persistence and immutable generation seal",
-      "authenticated channel resolver and token before session",
-      "server-generated access_policy.dispatchBinding and exact dispatch reload comparisons",
-      "allowlisted locale parser with no Korean fallback for non-Korean targets",
-      "revalidation precedence before generic blocked",
-      "stage-specific failure CTA and persisted history gate",
-      "session lifecycle order",
-      "zero dispatch on session failure",
-      "email sms kakao channel union",
-      "391x844 and 1440x1000 viewports",
-      "computed_text_200 actual font-size and line-height ratios, wrap and height change, and forbidden scale mechanisms",
-      "128-case matrix arithmetic",
-      "production resolver fixture ingress",
-      "all blocking reason owner action return routes",
-      "localized artifact editor and authenticated persistence authority",
-      "machine-resolvable source base and candidate refs with exact commit scopes",
-      "forbidden contradiction scan"
+      "front matter revision status branch source evidence job and screen sequence",
+      "top-level section heading structure",
+      "share body route state blocker failure environment fixture and Wave tables",
+      "DispatchChannel SupportedLanguageCode envelope request and dispatch binding TypeScript contracts",
+      "server-only runtime configuration source and rotation table",
+      "server authority generation evidence immutability locale fallback and one-send clauses",
+      "computed text per-representative path device and page scale invariants",
+      "computed text fresh-DOM positives and negative fixtures",
+      "Vietnamese residual-zero and nonexclusive emoji semantics",
+      "exact counts for routes states blockers channels languages fixtures and browser case arithmetic",
+      "machine-resolvable source candidate evidence parents and exact commit scopes"
     ],
-    "expectedResult": "PARITY_PASS",
+    "expectedResult": "STRUCTURAL_PARITY_OK",
     "executionContract": {
       "normalRunsRequired": 2,
-      "deliberateMismatchModes": [
+      "markdownMutationModes": [
         "revision",
         "authority",
-        "wave"
+        "wave_heading",
+        "wave_order",
+        "route",
+        "state",
+        "blocker",
+        "channel",
+        "language",
+        "fixture",
+        "one_send_job",
+        "locale_fallback",
+        "evidence_binding"
       ],
-      "runsRequiredPerMismatchMode": 2,
-      "deliberateMismatchExpectedExitCode": 1,
+      "markdownMutationRunsRequiredEach": 2,
+      "markdownMutationExpectedExitCode": 1,
+      "zoomPositiveFreshDomRunsRequired": 2,
+      "zoomNegativeFixtureModes": [
+        "internal_wrapper_transform",
+        "internal_zoom",
+        "outer_transform",
+        "repeated_evaluation",
+        "device_scale_factor",
+        "page_zoom"
+      ],
+      "zoomNegativeRunsRequiredEach": 2,
+      "zoomNegativeExpectedExitCode": 1,
       "browserCasesExecutedBySpecValidation": 0
     }
   },
   "completionGate": {
     "jsonParse": "PASS required",
-    "mdJsonParity": "PARITY_PASS required",
+    "mdJsonParity": "STRUCTURAL_PARITY_OK required",
     "normalParityRunsRequired": 2,
-    "deliberateRevisionAuthorityWaveMismatchRunsRequiredEach": 2,
+    "markdownMutationModesRequired": 13,
+    "markdownMutationRunsRequiredEach": 2,
+    "zoomPositiveFreshDomRunsRequired": 2,
+    "zoomNegativeFixtureModesRequired": 6,
+    "zoomNegativeRunsRequiredEach": 2,
     "gitDiffCheck": "PASS required",
     "candidateCommitChangedFiles": [
       "evaluation/workpack-share-v2-2026-07-13/spec.md",
-      "evaluation/workpack-share-v2-2026-07-13/spec.json"
+      "evaluation/workpack-share-v2-2026-07-13/spec.json",
+      "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs"
     ],
     "evidenceCommitChangedFiles": [
       "evaluation/workpack-share-v2-2026-07-13/review-evidence.json"
