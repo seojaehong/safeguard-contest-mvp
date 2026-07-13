@@ -385,6 +385,7 @@ export type KoshaProductionLocalBridgeCandidate = {
   humanConfirmation: "pending";
   readOnly: true;
   dbMutationPerformed: false;
+  launchReadiness: false;
 };
 
 export const KOSHA_GUIDE_REFRESH_PLAN = {
@@ -429,6 +430,28 @@ function readNonNegativeInteger(value: unknown): number | null {
 
 function isSha256(value: string): boolean {
   return /^[0-9a-f]{64}$/u.test(value);
+}
+
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => canonicalJson(item)).join(",")}]`;
+  }
+  if (isRecord(value)) {
+    return `{${Object.keys(value)
+      .sort(codepointCompare)
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .join(",")}}`;
+  }
+  const encoded = JSON.stringify(value);
+  if (encoded === undefined) throw new Error("kosha-bridge-candidate-content-invalid");
+  return encoded;
+}
+
+function corpusBodySha256(value: unknown): string {
+  const body = typeof value === "string" ? value : "";
+  return createHash("sha256")
+    .update(body.normalize("NFKC").replace(/\s+/gu, " ").trim())
+    .digest("hex");
 }
 
 function assertKoshaBridgeSnapshotIntegrity(snapshot: KoshaBridgeSnapshotIntegrity): void {
@@ -498,6 +521,9 @@ export function buildKoshaProductionLocalBridgeCandidate(
   if (!itemId) throw new Error("kosha-bridge-local-item-id-missing");
   if (!isSha256(rawSha256)) throw new Error("kosha-bridge-local-raw-hash-invalid");
   if (!isSha256(itemSha256)) throw new Error("kosha-bridge-local-item-hash-invalid");
+  if (corpusBodySha256(localItem.body) !== itemSha256) {
+    throw new Error("kosha-bridge-local-item-hash-mismatch");
+  }
 
   const chunks: KoshaProductionLocalBridgeCandidate["chunks"] = [];
   const allChunkIds = new Set<string>();
@@ -519,6 +545,11 @@ export function buildKoshaProductionLocalBridgeCandidate(
     }
     const sha256 = readString(chunk.chunk_sha256).toLowerCase();
     if (!isSha256(sha256)) throw new Error(`kosha-bridge-chunk-hash-invalid:${chunkId}`);
+    const chunkText = typeof chunk.text === "string" ? chunk.text : "";
+    const chunkContentSha256 = createHash("sha256").update(chunkText).digest("hex");
+    if (!chunkText || chunkContentSha256 !== sha256) {
+      throw new Error(`kosha-bridge-chunk-content-hash-mismatch:${chunkId}`);
+    }
     const pageStart = readNonNegativeInteger(chunk.page_start) ?? 0;
     const pageEnd = readNonNegativeInteger(chunk.page_end) ?? 0;
     if (pageStart < 1 || pageEnd < pageStart) {
@@ -549,9 +580,25 @@ export function buildKoshaProductionLocalBridgeCandidate(
     ? reviewedCandidate.review
     : null;
   let reviewedCandidateContentSha256: string | null = null;
-  if (review?.state === "verified" && review.human_confirmed === true) {
-    reviewedCandidateContentSha256 = readString(review.content_sha256).toLowerCase();
-    if (!isSha256(reviewedCandidateContentSha256)) {
+  if (isRecord(reviewedCandidate)) {
+    const immutableContent = Object.fromEntries(
+      Object.entries(reviewedCandidate).filter(([key]) => key !== "review")
+    );
+    reviewedCandidateContentSha256 = createHash("sha256")
+      .update(canonicalJson(immutableContent))
+      .digest("hex");
+    const declaredContentSha256 = readString(review?.content_sha256).toLowerCase();
+    if (declaredContentSha256 && !isSha256(declaredContentSha256)) {
+      throw new Error("kosha-bridge-reviewed-candidate-content-hash-invalid");
+    }
+    if (declaredContentSha256 && declaredContentSha256 !== reviewedCandidateContentSha256) {
+      throw new Error("kosha-bridge-reviewed-candidate-content-hash-mismatch");
+    }
+    if (
+      review?.state === "verified" &&
+      review.human_confirmed === true &&
+      !declaredContentSha256
+    ) {
       throw new Error("kosha-bridge-reviewed-candidate-content-hash-invalid");
     }
   }
@@ -573,7 +620,8 @@ export function buildKoshaProductionLocalBridgeCandidate(
     chunks,
     humanConfirmation: "pending",
     readOnly: true,
-    dbMutationPerformed: false
+    dbMutationPerformed: false,
+    launchReadiness: false
   };
 }
 

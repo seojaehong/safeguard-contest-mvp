@@ -1,0 +1,143 @@
+
+ RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
+
+ ❯ tests/kosha-guide-offline-harness.test.ts (14 tests | 1 failed) 4053ms
+     × searches reviewed OCR as supporting-only without direct or mandate eligibility 49ms
+ ❯ tests/kosha-guide-corpus-audit.test.ts (72 tests | 5 failed) 15733ms
+     × builds a pending read-only candidate from an exact provenance tuple 17ms
+     × records a deterministic content hash for the current draft without accepting it 2ms
+     × rejects a local item content hash mismatch 2ms
+     × rejects a verified candidate whose declared content hash does not match its bytes 1ms
+     × rejects a local chunk content hash mismatch 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > builds a pending read-only candidate from an exact provenance tuple
+AssertionError: expected { …(8) } to deeply equal { …(9) }
+
+- Expected
++ Received
+
+@@ -13,11 +13,10 @@
+        "sha256": "258276ee9c6abc77fd704fe32cdcfac64ac32656fc7d961b27c8aed6fe816a3c",
+      },
+    ],
+    "dbMutationPerformed": false,
+    "humanConfirmation": "pending",
+-   "launchReadiness": false,
+    "local": {
+      "itemId": "local-1",
+      "itemSha256": "efe9259293bd02f2fb06d9ec5d31bcb19edc93484f2235337361399bbf18acf6",
+      "rawSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "snapshotId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:229:23
+    227|     }));
+    228|
+    229|     expect(candidate).toEqual({
+       |                       ^
+    230|       schemaVersion: "safeclaw-kosha-production-local-bridge-candidate…
+    231|       production: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > records a deterministic content hash for the current draft without accepting it
+AssertionError: expected null to be '496c1c1b6a7e81d5e06108f510d62210abf46…' // Object.is equality
+
+- Expected:
+"496c1c1b6a7e81d5e06108f510d62210abf46e29b1925ed6a475eb8d658cc123"
+
++ Received:
+null
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:260:54
+    258|     const candidate = buildKoshaProductionLocalBridgeCandidate(input);
+    259|
+    260|     expect(candidate.reviewedCandidateContentSha256).toBe(sha256(JSON.…
+       |                                                      ^
+    261|       source: { item_id: "local-1", raw_sha256: rawSha256 }
+    262|     })));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a local item content hash mismatch
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:353:67
+    351|     (input.localItems[0] as Record<string, unknown>).body = "변조된 본문";
+    352|
+    353|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    354|       "kosha-bridge-local-item-hash-mismatch"
+    355|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a verified candidate whose declared content hash does not match its bytes
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:392:67
+    390|     (reviewed.review as Record<string, unknown>).content_sha256 = "1".…
+    391|
+    392|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    393|       "kosha-bridge-reviewed-candidate-content-hash-mismatch"
+    394|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a local chunk content hash mismatch
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:434:67
+    432|     (input.localChunks[0] as Record<string, unknown>).text = "변조된 청크";
+    433|
+    434|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    435|       "kosha-bridge-chunk-content-hash-mismatch:chunk-2"
+    436|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  tests/kosha-guide-offline-harness.test.ts > KOSHA v3 offline harness on current architecture > searches reviewed OCR as supporting-only without direct or mandate eligibility
+AssertionError: expected 'KOSHA 근거 KOSHA-GUIDE-2026 p.1: 고소작업대 …' to be null
+
+- Expected:
+null
+
++ Received:
+"KOSHA 근거 KOSHA-GUIDE-2026 p.1: 고소작업대 전도 방지를 위해 아웃트리거 설치 상태를 확인한다."
+
+ ❯ tests/kosha-guide-offline-harness.test.ts:337:47
+    335|     expect(localSearch.items).toHaveLength(1);
+    336|     expect(localSearch.items[0]?.directEligible).toBe(false);
+    337|     expect(localSearch.items[0]?.evidenceRef).toBeNull();
+       |                                               ^
+    338|
+    339|     const result = await withNoSupabase(() => searchSafetyReferences({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 80 passed (86)
+   Start at  22:28:55
+   Duration  16.81s (transform 1.10s, setup 0ms, import 2.20s, tests 19.79s, environment 0ms)

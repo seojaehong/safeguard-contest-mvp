@@ -73,6 +73,19 @@ function reviewedOcrProvenance(): JsonRecord {
   };
 }
 
+function reviewedOcrBinding(
+  itemId: string,
+  candidateSha256 = REVIEWED_OCR_CANDIDATE_SHA256
+): JsonRecord {
+  const provenance = reviewedOcrProvenance();
+  return {
+    item_id: itemId,
+    candidate_sha256: candidateSha256,
+    content_sha256: provenance.content_sha256,
+    attestation_sha256: provenance.attestation_sha256
+  };
+}
+
 function canonicalizeJson(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonicalizeJson);
   if (!value || typeof value !== "object") return value;
@@ -320,20 +333,19 @@ describe("KOSHA v3 offline harness on current architecture", () => {
 
   it("searches reviewed OCR as supporting-only without direct or mandate eligibility", async () => {
     const { rootDir, itemId, body } = createReviewedOcrSnapshot();
-    writeReviewedOcrManifestBindings(rootDir, [{
-      item_id: itemId,
-      candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-    }]);
+    writeReviewedOcrManifestBindings(rootDir, [reviewedOcrBinding(itemId)]);
 
     const loaded = await loadKoshaGuideCorpus({ rootDir });
     expect(loaded.status).toBe("ready");
     if (loaded.status !== "ready") return;
     expect(loaded.records[0]?.nativeBody).toBe(body);
     expect(loaded.records[0]?.bodyKind).toBe("unknown");
+    expect(loaded.records[0]?.quality).toBe("review_required");
     expect(loaded.records[0] && isKoshaGuideDirectEvidenceAccepted(loaded.records[0])).toBe(false);
     const localSearch = searchKoshaGuideCorpus(loaded, "고소작업대 전도 방지", 3);
     expect(localSearch.items).toHaveLength(1);
     expect(localSearch.items[0]?.directEligible).toBe(false);
+    expect(localSearch.items[0]?.evidenceRef).toBeNull();
 
     const result = await withNoSupabase(() => searchSafetyReferences({
       query: "고소작업대 전도 방지",
@@ -345,6 +357,7 @@ describe("KOSHA v3 offline harness on current architecture", () => {
     expect(result.items[0]?.evidence_role).toBe("supporting");
     expect(result.items[0]?.kosha_guide?.bodyKind).toBe("unknown");
     expect(result.items[0]?.kosha_guide?.directEligible).toBe(false);
+    expect(result.items[0]?.kosha_guide?.evidenceRef).toBeNull();
     const response = buildMockAskResponse("고소작업대 전도 방지", mockSearchResults, "mock", "test");
     expect(buildSafetyReferenceRiskRows(response, result.items, "맑음", "고소작업대 전도 방지")).toEqual([]);
   });
@@ -358,23 +371,33 @@ describe("KOSHA v3 offline harness on current architecture", () => {
     );
 
     const mismatch = createReviewedOcrSnapshot();
-    writeReviewedOcrManifestBindings(mismatch.rootDir, [{
-      item_id: mismatch.itemId,
-      candidate_sha256: sha256("different reviewed OCR candidate")
-    }]);
+    writeReviewedOcrManifestBindings(mismatch.rootDir, [reviewedOcrBinding(
+      mismatch.itemId,
+      sha256("different reviewed OCR candidate")
+    )]);
     const mismatchResult = await loadKoshaGuideCorpus({ rootDir: mismatch.rootDir });
     expect(mismatchResult.status).toBe("blocked");
     expect(mismatchResult.status === "blocked" && mismatchResult.failures).toContain(
       `ocr:binding:mismatch:${mismatch.itemId}`
     );
+
+    const provenanceMismatch = createReviewedOcrSnapshot();
+    writeReviewedOcrManifestBindings(provenanceMismatch.rootDir, [{
+      ...reviewedOcrBinding(provenanceMismatch.itemId),
+      content_sha256: sha256("different reviewed OCR content")
+    }]);
+    const provenanceMismatchResult = await loadKoshaGuideCorpus({
+      rootDir: provenanceMismatch.rootDir
+    });
+    expect(provenanceMismatchResult.status).toBe("blocked");
+    expect(
+      provenanceMismatchResult.status === "blocked" && provenanceMismatchResult.failures
+    ).toContain(`ocr:binding:provenance-mismatch:${provenanceMismatch.itemId}`);
   });
 
   it("rejects duplicate and extra orphan manifest candidate bindings", async () => {
     const duplicate = createReviewedOcrSnapshot();
-    const duplicateBinding = {
-      item_id: duplicate.itemId,
-      candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-    };
+    const duplicateBinding = reviewedOcrBinding(duplicate.itemId);
     writeReviewedOcrManifestBindings(duplicate.rootDir, [duplicateBinding, duplicateBinding]);
     const duplicateResult = await loadKoshaGuideCorpus({ rootDir: duplicate.rootDir });
     expect(duplicateResult.status).toBe("blocked");
@@ -384,14 +407,11 @@ describe("KOSHA v3 offline harness on current architecture", () => {
 
     const orphan = createReviewedOcrSnapshot();
     writeReviewedOcrManifestBindings(orphan.rootDir, [
-      {
-        item_id: orphan.itemId,
-        candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-      },
-      {
-        item_id: "kosha-orphan-reviewed-ocr",
-        candidate_sha256: sha256("orphan reviewed OCR candidate")
-      }
+      reviewedOcrBinding(orphan.itemId),
+      reviewedOcrBinding(
+        "kosha-orphan-reviewed-ocr",
+        sha256("orphan reviewed OCR candidate")
+      )
     ]);
     const orphanResult = await loadKoshaGuideCorpus({ rootDir: orphan.rootDir });
     expect(orphanResult.status).toBe("blocked");
@@ -430,28 +450,21 @@ describe("KOSHA v3 offline harness on current architecture", () => {
 
   it("rejects reviewed OCR body hash drift, non-success status, and missing anchors", async () => {
     const bodyHashDrift = createReviewedOcrSnapshot({ bodyHash: sha256("different OCR body") });
-    writeReviewedOcrManifestBindings(bodyHashDrift.rootDir, [{
-      item_id: bodyHashDrift.itemId,
-      candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-    }]);
+    writeReviewedOcrManifestBindings(bodyHashDrift.rootDir, [
+      reviewedOcrBinding(bodyHashDrift.itemId)
+    ]);
     const bodyHashResult = await loadKoshaGuideCorpus({ rootDir: bodyHashDrift.rootDir });
     expect(bodyHashResult.status).toBe("blocked");
     expect(bodyHashResult.status === "blocked" && bodyHashResult.failures).toContain("schema:items.jsonl");
 
     const boundary = createReviewedOcrSnapshot({ extractionStatus: "boundary" });
-    writeReviewedOcrManifestBindings(boundary.rootDir, [{
-      item_id: boundary.itemId,
-      candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-    }]);
+    writeReviewedOcrManifestBindings(boundary.rootDir, [reviewedOcrBinding(boundary.itemId)]);
     const boundaryResult = await loadKoshaGuideCorpus({ rootDir: boundary.rootDir });
     expect(boundaryResult.status).toBe("blocked");
     expect(boundaryResult.status === "blocked" && boundaryResult.failures).toContain("schema:items.jsonl");
 
     const anchorless = createReviewedOcrSnapshot({ chunks: [] });
-    writeReviewedOcrManifestBindings(anchorless.rootDir, [{
-      item_id: anchorless.itemId,
-      candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-    }]);
+    writeReviewedOcrManifestBindings(anchorless.rootDir, [reviewedOcrBinding(anchorless.itemId)]);
     const anchorlessResult = await loadKoshaGuideCorpus({ rootDir: anchorless.rootDir });
     expect(anchorlessResult.status).toBe("blocked");
     expect(anchorlessResult.status === "blocked" && anchorlessResult.failures).toContain(
@@ -459,10 +472,7 @@ describe("KOSHA v3 offline harness on current architecture", () => {
     );
 
     const blankAnchor = createReviewedOcrSnapshot({ chunks: [reviewedOcrChunk("   ")] });
-    writeReviewedOcrManifestBindings(blankAnchor.rootDir, [{
-      item_id: blankAnchor.itemId,
-      candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-    }]);
+    writeReviewedOcrManifestBindings(blankAnchor.rootDir, [reviewedOcrBinding(blankAnchor.itemId)]);
     const blankAnchorResult = await loadKoshaGuideCorpus({ rootDir: blankAnchor.rootDir });
     expect(blankAnchorResult.status).toBe("blocked");
     expect(blankAnchorResult.status === "blocked" && blankAnchorResult.failures).toContain(
@@ -485,10 +495,9 @@ describe("KOSHA v3 offline harness on current architecture", () => {
       const malformedPage = createReviewedOcrSnapshot({
         provenance: { ...provenance, pages: [{ ...validPage, ...override }] }
       });
-      writeReviewedOcrManifestBindings(malformedPage.rootDir, [{
-        item_id: malformedPage.itemId,
-        candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-      }]);
+      writeReviewedOcrManifestBindings(malformedPage.rootDir, [
+        reviewedOcrBinding(malformedPage.itemId)
+      ]);
       const malformedPageResult = await loadKoshaGuideCorpus({ rootDir: malformedPage.rootDir });
       expect(malformedPageResult.status, label).toBe("blocked");
       expect(
@@ -498,10 +507,9 @@ describe("KOSHA v3 offline harness on current architecture", () => {
     }
 
     const missingProvenance = createReviewedOcrSnapshot({ includeProvenance: false });
-    writeReviewedOcrManifestBindings(missingProvenance.rootDir, [{
-      item_id: missingProvenance.itemId,
-      candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-    }]);
+    writeReviewedOcrManifestBindings(missingProvenance.rootDir, [
+      reviewedOcrBinding(missingProvenance.itemId)
+    ]);
     const missingProvenanceResult = await loadKoshaGuideCorpus({ rootDir: missingProvenance.rootDir });
     expect(missingProvenanceResult.status).toBe("blocked");
     expect(missingProvenanceResult.status === "blocked" && missingProvenanceResult.failures).toContain("schema:items.jsonl");
@@ -514,10 +522,9 @@ describe("KOSHA v3 offline harness on current architecture", () => {
     const extraProvenanceField = createReviewedOcrSnapshot({
       provenance: { ...reviewedOcrProvenance(), unexpected: true }
     });
-    writeReviewedOcrManifestBindings(extraProvenanceField.rootDir, [{
-      item_id: extraProvenanceField.itemId,
-      candidate_sha256: REVIEWED_OCR_CANDIDATE_SHA256
-    }]);
+    writeReviewedOcrManifestBindings(extraProvenanceField.rootDir, [
+      reviewedOcrBinding(extraProvenanceField.itemId)
+    ]);
     const extraFieldResult = await loadKoshaGuideCorpus({ rootDir: extraProvenanceField.rootDir });
     expect(extraFieldResult.status).toBe("blocked");
     expect(extraFieldResult.status === "blocked" && extraFieldResult.failures).toContain("schema:items.jsonl");

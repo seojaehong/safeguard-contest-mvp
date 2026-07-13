@@ -377,10 +377,17 @@
     "reviewedOcrCandidatePolicy": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["item_id", "candidate_sha256"],
+      "required": [
+        "item_id",
+        "candidate_sha256",
+        "content_sha256",
+        "attestation_sha256"
+      ],
       "properties": {
         "item_id": { "type": "string", "minLength": 1 },
-        "candidate_sha256": { "$ref": "#/$defs/sha256" }
+        "candidate_sha256": { "$ref": "#/$defs/sha256" },
+        "content_sha256": { "$ref": "#/$defs/sha256" },
+        "attestation_sha256": { "$ref": "#/$defs/sha256" }
       }
     },
     "generationPolicy": {

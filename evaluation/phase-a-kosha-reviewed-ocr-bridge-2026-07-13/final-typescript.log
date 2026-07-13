@@ -1,0 +1,8 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
+
+
+ Test Files  2 passed (2)
+      Tests  86 passed (86)
+   Start at  22:41:12
+   Duration  20.01s (transform 1.22s, setup 0ms, import 2.17s, tests 22.91s, environment 0ms)

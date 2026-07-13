@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import tempfile
 import unittest
 from unittest import mock
@@ -57,6 +58,28 @@ def current_generator_sha256() -> str:
 
 
 class RecoverKoshaOcrBoundaryTests(unittest.TestCase):
+    def test_current_b_e_3_draft_candidate_remains_rejected(self) -> None:
+        candidate_path = (
+            Path(__file__).resolve().parents[2]
+            / "evaluation"
+            / "kosha-ocr-boundary-recovery-2026-07-13"
+            / "B-E-3-2025-candidate.json"
+        )
+        candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+        source = candidate["source"]
+
+        self.assertEqual(candidate["review"]["state"], "draft")
+        self.assertFalse(candidate["review"]["human_confirmed"])
+        with self.assertRaisesRegex(
+            recover_kosha_ocr_boundary.OcrBoundaryError,
+            "ocr_candidate_not_human_confirmed",
+        ):
+            recover_kosha_ocr_boundary.validate_reviewed_candidate(
+                candidate,
+                expected_item_id=source["item_id"],
+                expected_raw_sha256=source["raw_sha256"],
+            )
+
     def test_builds_a_draft_candidate_with_page_and_source_hashes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             source = Path(tmp) / "B-E-3-2025.pdf"
