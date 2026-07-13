@@ -1,0 +1,1198 @@
+{
+  "schemaVersion": "1.0.0",
+  "artifact": "workpack-document-editors-v2",
+  "date": "2026-07-13",
+  "repository": "safeguard-contest-mvp",
+  "branch": "feat/workpack-document-editors-v2",
+  "baseCommit": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+  "scope": {
+    "owner": "design-contract-only",
+    "allowedFiles": [
+      "evaluation/workpack-document-editors-v2-2026-07-13/spec.md",
+      "evaluation/workpack-document-editors-v2-2026-07-13/spec.json"
+    ],
+    "forbiddenChanges": [
+      "production code",
+      "tests",
+      "package files",
+      "CSS",
+      "database schemas or migrations",
+      "export routes or builders",
+      "existing evidence"
+    ]
+  },
+  "problemStatement": "The current editor renders twelve labels through one shared tabpanel and one string textarea. The next implementation must provide document-specific structured editing without creating twelve duplicated editor implementations.",
+  "productFlow": [
+    "input",
+    "documents",
+    "share"
+  ],
+  "priorities": [
+    "risk-assessment",
+    "tbm-briefing",
+    "tbm-log",
+    "visible-evidence-citations",
+    "before-after-improvement-photos",
+    "worker-and-share-confirmation"
+  ],
+  "designRules": {
+    "visualDirection": "restrained Linear/Codex-like workbench",
+    "themes": [
+      "day",
+      "night"
+    ],
+    "minimumControlHeightPx": 44,
+    "baseGapPx": 8,
+    "horizontalOverflowAllowed": false,
+    "nestedDecorativeCardsAllowed": false,
+    "progressiveDisclosureRequired": true,
+    "evidenceCitationsVisible": true,
+    "mobileBreakpointBehavior": "single-column editor with document selector, sticky document actions, stacked field labels, and tables transformed into row editors"
+  },
+  "documentOrder": [
+    "workpackSummaryDraft",
+    "riskAssessmentDraft",
+    "workPlanDraft",
+    "workPermitDraft",
+    "tbmBriefing",
+    "tbmLogDraft",
+    "safetyEducationRecordDraft",
+    "emergencyResponseDraft",
+    "photoEvidenceDraft",
+    "foreignWorkerBriefing",
+    "foreignWorkerTransmission",
+    "kakaoMessage"
+  ],
+  "architecture": {
+    "components": [
+      {
+        "name": "WorkpackEditor",
+        "responsibility": "Own hydration, selected document, draft state, validation summaries, persistence commands, and export projection orchestration."
+      },
+      {
+        "name": "DocumentNavigator",
+        "responsibility": "Render the desktop document list and mobile select with status, issue count, and unsaved indicators."
+      },
+      {
+        "name": "DocumentEditorShell",
+        "responsibility": "Provide one accessible tabpanel, title, description, state banner, action bar, and evidence rail slot."
+      },
+      {
+        "name": "DocumentEditorRegistry",
+        "responsibility": "Map each DocumentKey to an editor specification and typed render function; reject missing keys at compile time."
+      },
+      {
+        "name": "EvidenceCitationRail",
+        "responsibility": "Display linked evidence references, broken-reference state, and add or remove controls without hiding citations in a modal."
+      },
+      {
+        "name": "ExportCompatibilityBridge",
+        "responsibility": "Create deterministic legacy strings and existing structured route payloads from normalized draft state without modifying export implementations."
+      }
+    ],
+    "sharedPrimitives": [
+      "FieldGroup",
+      "TextField",
+      "TextAreaField",
+      "DateTimeField",
+      "SelectField",
+      "ChecklistField",
+      "EditableRowList",
+      "ResponsiveDataGrid",
+      "PeoplePicker",
+      "LanguageVariantEditor",
+      "EvidenceReferencePicker",
+      "BeforeAfterPhotoPair",
+      "ConfirmationStatusList",
+      "ValidationSummary",
+      "DocumentActionBar"
+    ],
+    "reuseDecision": {
+      "rule": "Reuse layout, field, row-list, evidence, people, language, confirmation, and command primitives only where interaction and data shape match.",
+      "notAllowed": "Twelve copy-pasted components that differ only in labels, or one universal schema form that erases document-specific workflow.",
+      "documentSpecificLayer": "Each document owns a typed specification, required fields, row schema, validation, interactions, and export projection. Thin document wrappers are allowed when they compose shared primitives and encode domain behavior.",
+      "risks": [
+        "An overly generic form renderer hides domain sequencing and makes validation messages vague.",
+        "Duplicated editor components drift in keyboard behavior, mobile layout, persistence, and accessibility.",
+        "Reusing mutable structured objects across documents can cause cross-document edits.",
+        "Index-based row identity can make citations and exports nondeterministic after reorder."
+      ],
+      "mitigations": [
+        "Use exhaustive DocumentKey registries and discriminated unions.",
+        "Keep stable row IDs in draft state and translate IDs to deterministic export order only at the bridge.",
+        "Centralize commands and persistence while keeping per-document validators and projections explicit.",
+        "Test primitives once and each document contract through focused behavior tests."
+      ]
+    }
+  },
+  "typeContract": {
+    "strictTypeScript": true,
+    "anyAllowed": false,
+    "documentEnvelopeFields": [
+      "version",
+      "documentKey",
+      "content",
+      "legacyText",
+      "evidenceRefs",
+      "updatedAt",
+      "sourceFingerprint"
+    ],
+    "draftVersion": 2,
+    "stableIdentity": "All repeatable rows and evidence links use stable string IDs in draft state.",
+    "unknownInputPolicy": "Parse persisted unknown values with type guards; invalid subtrees fall back independently and produce a recoverable warning."
+  },
+  "adapter": {
+    "name": "adaptWorkpackToEditorDraftV2",
+    "inputSources": [
+      "local structured draft v2",
+      "local legacy draft v1 string values",
+      "generated structured fields",
+      "generated deliverable strings",
+      "document defaults"
+    ],
+    "precedence": [
+      "valid v2 document content",
+      "dirty v1 string value for that document",
+      "generated structured source for that document",
+      "generated deliverable string",
+      "empty typed default"
+    ],
+    "backwardCompatibility": [
+      "Preserve every current string deliverable as legacyText even when structured parsing succeeds.",
+      "Preserve unparsed text in an expandable Original text section instead of dropping it.",
+      "Treat an explicitly empty permit string as intentional empty state and do not regenerate it.",
+      "Do not write database records or migrations; drafts remain in the current local persistence boundary.",
+      "Keep the current generation fingerprint in the storage key and document envelope.",
+      "Mark documents migrated from v1 as dirty only when their v1 dirty key was present."
+    ],
+    "output": {
+      "draft": "WorkpackEditorDraftV2",
+      "warnings": "AdapterWarning[]",
+      "sourceByDocument": "Record<DocumentKey, AdapterSource>"
+    },
+    "localStorage": {
+      "writeVersion": 2,
+      "readVersions": [
+        1,
+        2
+      ],
+      "recoveryDebounceMs": 500,
+      "crossTabPolicy": "Never silently overwrite. Show a conflict banner with Keep mine and Load newer commands."
+    }
+  },
+  "stateModel": {
+    "documentStates": [
+      "pristine",
+      "editing",
+      "locally-saved",
+      "invalid",
+      "conflicted",
+      "offline-pending",
+      "read-only"
+    ],
+    "transitions": [
+      {
+        "from": "pristine",
+        "event": "EDIT",
+        "to": "editing"
+      },
+      {
+        "from": "locally-saved",
+        "event": "EDIT",
+        "to": "editing"
+      },
+      {
+        "from": "editing",
+        "event": "SAVE_VALID",
+        "to": "locally-saved"
+      },
+      {
+        "from": "editing",
+        "event": "SAVE_INVALID",
+        "to": "invalid"
+      },
+      {
+        "from": "editing",
+        "event": "STORAGE_CONFLICT",
+        "to": "conflicted"
+      },
+      {
+        "from": "editing",
+        "event": "OFFLINE_SAVE",
+        "to": "offline-pending"
+      },
+      {
+        "from": "invalid",
+        "event": "EDIT",
+        "to": "editing"
+      },
+      {
+        "from": "conflicted",
+        "event": "KEEP_MINE",
+        "to": "editing"
+      },
+      {
+        "from": "conflicted",
+        "event": "LOAD_NEWER",
+        "to": "locally-saved"
+      },
+      {
+        "from": "offline-pending",
+        "event": "ONLINE",
+        "to": "locally-saved"
+      }
+    ],
+    "commands": {
+      "save": "Persist the full normalized v2 draft locally. Incomplete drafts may save, but review, export, and share remain blocked by errors.",
+      "cancel": "Restore the selected document to its last explicit save checkpoint after confirmation when edits exist.",
+      "undo": "Undo the last transaction in the selected document only.",
+      "redo": "Redo the last undone transaction in the selected document only.",
+      "historyLimitTransactions": 50,
+      "textTransactionWindowMs": 750,
+      "keyboard": [
+        "Ctrl+S save",
+        "Ctrl+Z undo",
+        "Ctrl+Y redo",
+        "Ctrl+Shift+Z redo"
+      ]
+    }
+  },
+  "validation": {
+    "levels": [
+      "error",
+      "warning",
+      "info"
+    ],
+    "blocking": {
+      "localSave": [],
+      "review": [
+        "error"
+      ],
+      "export": [
+        "error"
+      ],
+      "share": [
+        "error",
+        "stale-readiness-after-user-edit",
+        "missing-required-worker-confirmation"
+      ]
+    },
+    "presentation": "Show inline issues at fields and rows, a document issue count in navigation, and a focusable summary that moves focus to the selected issue."
+  },
+  "exportCompatibility": {
+    "implementationChangeAllowed": false,
+    "determinismDefinition": "The same normalized draft, source fingerprint, and stable row order produce the same route mode and semantic payload. Existing builders may still add runtime metadata, so binary byte equality is outside this task.",
+    "projections": [
+      {
+        "documentKey": "workpackSummaryDraft",
+        "routeMode": "single",
+        "structuredPayload": null,
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "riskAssessmentDraft",
+        "routeMode": "single",
+        "structuredPayload": "structuredRiskRows",
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "workPlanDraft",
+        "routeMode": "workPlanStructured",
+        "structuredPayload": "workPlanStructured",
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "workPermitDraft",
+        "routeMode": "permitInspectionStructured",
+        "structuredPayload": "permitInspectionStructured",
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "tbmBriefing",
+        "routeMode": "tbmBriefingStructured",
+        "structuredPayload": "tbmBriefingStructured",
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "tbmLogDraft",
+        "routeMode": "tbmLogStructured",
+        "structuredPayload": "tbmLogStructured",
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "safetyEducationRecordDraft",
+        "routeMode": "educationRecordStructured",
+        "structuredPayload": "educationRecordStructured",
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "emergencyResponseDraft",
+        "routeMode": "single",
+        "structuredPayload": null,
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "photoEvidenceDraft",
+        "routeMode": "single",
+        "structuredPayload": null,
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "foreignWorkerBriefing",
+        "routeMode": "single",
+        "structuredPayload": null,
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "foreignWorkerTransmission",
+        "routeMode": "single",
+        "structuredPayload": null,
+        "legacyTextRequired": true
+      },
+      {
+        "documentKey": "kakaoMessage",
+        "routeMode": "single",
+        "structuredPayload": null,
+        "legacyTextRequired": true
+      }
+    ],
+    "normalization": [
+      "Trim trailing whitespace but preserve intentional paragraph breaks.",
+      "Serialize repeaters in visible stable order.",
+      "Map risk row stable IDs to contiguous export indices at projection time.",
+      "Sort evidence references by visible row order and then reference ID.",
+      "Never project UI-only state such as focus, collapsed sections, history, or validation messages."
+    ]
+  },
+  "documents": [
+    {
+      "key": "workpackSummaryDraft",
+      "title": "점검결과 요약",
+      "editor": "SummaryEditor",
+      "family": "narrative-with-findings",
+      "purpose": "Give reviewers a compact overview with traceable findings and follow-up status.",
+      "fields": [
+        { "name": "inspectionTitle", "type": "string", "required": true },
+        { "name": "siteName", "type": "string", "required": true },
+        { "name": "inspectionDate", "type": "date", "required": true },
+        { "name": "inspectorNames", "type": "string[]", "required": true },
+        { "name": "overallResult", "type": "pass|conditional|fail", "required": true },
+        { "name": "summary", "type": "string", "required": true },
+        { "name": "nextAction", "type": "string", "required": false }
+      ],
+      "repeaters": [
+        {
+          "name": "findings",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "category",
+            "finding",
+            "severity",
+            "owner",
+            "dueDate",
+            "status",
+            "evidenceRefIds"
+          ]
+        }
+      ],
+      "interactions": [
+        "Filter findings by status.",
+        "Jump from a finding citation to its evidence item.",
+        "Collapse completed findings after the first open finding."
+      ],
+      "validation": [
+        "At least one finding or an explicit no-findings reason is required.",
+        "Open findings require owner and due date.",
+        "Every cited evidence ID must resolve."
+      ]
+    },
+    {
+      "key": "riskAssessmentDraft",
+      "title": "위험성평가표",
+      "editor": "RiskAssessmentEditor",
+      "family": "structured-risk-grid",
+      "purpose": "Edit hazards, controls, ownership, verification, and evidence as first-class rows.",
+      "fields": [
+        { "name": "assessmentTitle", "type": "string", "required": true },
+        { "name": "assessmentDate", "type": "date", "required": true },
+        { "name": "assessorNames", "type": "string[]", "required": true },
+        { "name": "methodNote", "type": "string", "required": false }
+      ],
+      "repeaters": [
+        {
+          "name": "rows",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "location",
+            "process",
+            "task",
+            "equipment",
+            "hazard",
+            "hazard4M",
+            "accidentType",
+            "existingControls",
+            "likelihood",
+            "severity",
+            "riskLevel",
+            "additionalControls",
+            "owner",
+            "dueDate",
+            "verificationMethod",
+            "reason",
+            "evidenceRefIds"
+          ]
+        }
+      ],
+      "interactions": [
+        "Add, duplicate, reorder, and remove rows with stable IDs.",
+        "Edit desktop rows in a grid and mobile rows in a sequential row editor.",
+        "Show row-level evidence citations without opening a separate inspector.",
+        "Derive TBM candidates from selected risk rows without mutating TBM drafts automatically.",
+        "Confirm destructive row removal when evidence or downstream links exist."
+      ],
+      "validation": [
+        "Hazard, current controls, risk inputs, additional controls, owner, and verification method are required per row.",
+        "Due date is required when additional controls remain open.",
+        "Risk level must match the current risk schema normalization.",
+        "Evidence references must resolve and reasons cannot be citation-only placeholders."
+      ]
+    },
+    {
+      "key": "workPlanDraft",
+      "title": "작업계획서",
+      "editor": "WorkPlanEditor",
+      "family": "plan-with-steps",
+      "purpose": "Define work scope, roles, equipment, sequence, controls, and approval.",
+      "fields": [
+        { "name": "workName", "type": "string", "required": true },
+        { "name": "location", "type": "string", "required": true },
+        { "name": "startAt", "type": "datetime", "required": true },
+        { "name": "endAt", "type": "datetime", "required": true },
+        { "name": "supervisor", "type": "person", "required": true },
+        { "name": "crew", "type": "person[]", "required": true },
+        { "name": "equipment", "type": "string[]", "required": false },
+        { "name": "ppe", "type": "string[]", "required": true },
+        { "name": "approval", "type": "approval", "required": true }
+      ],
+      "repeaters": [
+        {
+          "name": "steps",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "sequence",
+            "task",
+            "hazard",
+            "control",
+            "responsiblePerson",
+            "evidenceRefIds"
+          ]
+        }
+      ],
+      "interactions": [
+        "Reorder work steps and renumber only in the export projection.",
+        "Import selected risk rows as draft step hazards with source links.",
+        "Reveal approval and contingency details after core scope is complete."
+      ],
+      "validation": [
+        "End time must be after start time.",
+        "Every step requires task, hazard, control, and responsible person.",
+        "Supervisor and at least one crew member are required.",
+        "Approval cannot be marked complete with unresolved errors."
+      ]
+    },
+    {
+      "key": "workPermitDraft",
+      "title": "안전작업허가 확인서",
+      "editor": "PermitInspectionEditor",
+      "family": "permit-checklist",
+      "purpose": "Confirm permit applicability, controls, inspection results, and authorization without regenerating an explicitly empty permit.",
+      "fields": [
+        { "name": "applicability", "type": "required|not-required|undetermined", "required": true },
+        { "name": "permitType", "type": "string", "required": false },
+        { "name": "workLocation", "type": "string", "required": false },
+        { "name": "validFrom", "type": "datetime", "required": false },
+        { "name": "validUntil", "type": "datetime", "required": false },
+        { "name": "issuer", "type": "person", "required": false },
+        { "name": "receiver", "type": "person", "required": false },
+        { "name": "notRequiredReason", "type": "string", "required": false }
+      ],
+      "repeaters": [
+        {
+          "name": "checks",
+          "minimumRows": 0,
+          "rowFields": [
+            "id",
+            "category",
+            "item",
+            "result",
+            "note",
+            "inspector",
+            "checkedAt",
+            "evidenceRefIds"
+          ]
+        }
+      ],
+      "interactions": [
+        "Selecting not required hides permit fields and requires a reason.",
+        "Selecting required reveals permit identity, validity, signers, and checklist.",
+        "Bulk mark applies only to currently visible unchecked rows and remains one undo transaction."
+      ],
+      "validation": [
+        "Required permits need type, validity, issuer, receiver, and at least one check.",
+        "Validity end must be after validity start.",
+        "Failed checks require a note and evidence or follow-up action.",
+        "Not-required permits require a plain-language reason."
+      ]
+    },
+    {
+      "key": "tbmBriefing",
+      "title": "TBM/작업 전 안전점검회의",
+      "editor": "TbmBriefingEditor",
+      "family": "briefing-agenda",
+      "purpose": "Prepare a risk-led pre-work briefing with worker comprehension checks.",
+      "fields": [
+        { "name": "meetingTitle", "type": "string", "required": true },
+        { "name": "scheduledAt", "type": "datetime", "required": true },
+        { "name": "location", "type": "string", "required": true },
+        { "name": "facilitator", "type": "person", "required": true },
+        { "name": "targetWorkers", "type": "person[]", "required": true },
+        { "name": "workScope", "type": "string", "required": true },
+        { "name": "stopWorkSignal", "type": "string", "required": true },
+        { "name": "emergencyContact", "type": "string", "required": true }
+      ],
+      "repeaters": [
+        {
+          "name": "topics",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "riskRowId",
+            "topic",
+            "hazard",
+            "control",
+            "workerCheckQuestion",
+            "evidenceRefIds"
+          ]
+        }
+      ],
+      "interactions": [
+        "Import selected risk rows as briefing topics with stable source links.",
+        "Reorder agenda topics without changing source risk order.",
+        "Preview worker-facing concise wording separately from facilitator notes.",
+        "Record per-worker language needs before printing or transmission."
+      ],
+      "validation": [
+        "At least one target worker and one briefing topic are required.",
+        "Each topic needs hazard, control, and comprehension question.",
+        "Every linked riskRowId must resolve or be explicitly detached.",
+        "Workers needing another language must have an available language variant before share."
+      ]
+    },
+    {
+      "key": "tbmLogDraft",
+      "title": "TBM 기록",
+      "editor": "TbmLogEditor",
+      "family": "attendance-and-confirmation-log",
+      "purpose": "Record the meeting that actually occurred, discussed risks, worker questions, and confirmations.",
+      "fields": [
+        { "name": "briefingDocumentId", "type": "string", "required": false },
+        { "name": "heldAt", "type": "datetime", "required": true },
+        { "name": "location", "type": "string", "required": true },
+        { "name": "facilitator", "type": "person", "required": true },
+        { "name": "workStartDecision", "type": "approved|conditional|stopped", "required": true },
+        { "name": "decisionNote", "type": "string", "required": false }
+      ],
+      "repeaters": [
+        {
+          "name": "discussedTopics",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "briefingTopicId",
+            "topic",
+            "discussionNote",
+            "workerQuestion",
+            "action",
+            "owner",
+            "evidenceRefIds"
+          ]
+        },
+        {
+          "name": "confirmations",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "workerId",
+            "workerName",
+            "language",
+            "attendanceStatus",
+            "understood",
+            "confirmedAt",
+            "confirmationMethod",
+            "note"
+          ]
+        }
+      ],
+      "interactions": [
+        "Start from a briefing snapshot but never auto-sync later briefing edits.",
+        "Mark attendance and understanding per worker.",
+        "Require an explanation path when a worker does not understand.",
+        "Create an action from a discussion item without silently editing the risk assessment."
+      ],
+      "validation": [
+        "Held time, facilitator, decision, discussed topic, and worker confirmations are required.",
+        "Attended workers require an understanding result and confirmation method.",
+        "Not-understood results require note, follow-up action, and owner.",
+        "Stopped or conditional decisions require a decision note."
+      ]
+    },
+    {
+      "key": "safetyEducationRecordDraft",
+      "title": "안전보건교육 기록",
+      "editor": "EducationRecordEditor",
+      "family": "attendance-and-confirmation-log",
+      "purpose": "Record education content, instructor, duration, attendance, assessment, and acknowledgment.",
+      "fields": [
+        { "name": "educationType", "type": "string", "required": true },
+        { "name": "title", "type": "string", "required": true },
+        { "name": "startedAt", "type": "datetime", "required": true },
+        { "name": "endedAt", "type": "datetime", "required": true },
+        { "name": "location", "type": "string", "required": true },
+        { "name": "instructor", "type": "person", "required": true },
+        { "name": "materials", "type": "evidenceRef[]", "required": false }
+      ],
+      "repeaters": [
+        {
+          "name": "topics",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "topic",
+            "method",
+            "durationMinutes",
+            "evidenceRefIds"
+          ]
+        },
+        {
+          "name": "attendees",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "workerId",
+            "workerName",
+            "language",
+            "attendanceStatus",
+            "assessmentResult",
+            "confirmedAt",
+            "confirmationMethod",
+            "note"
+          ]
+        }
+      ],
+      "interactions": [
+        "Reuse people and confirmation primitives used by TBM log.",
+        "Keep education topic and duration editing distinct from TBM discussion editing.",
+        "Reveal assessment details only when assessment is required."
+      ],
+      "validation": [
+        "End time must be after start time.",
+        "Topic durations must be positive and cannot exceed the total session duration without warning.",
+        "At least one attendee and topic are required.",
+        "Attended workers require confirmation."
+      ]
+    },
+    {
+      "key": "emergencyResponseDraft",
+      "title": "비상대응 절차",
+      "editor": "EmergencyProcedureEditor",
+      "family": "ordered-procedure",
+      "purpose": "Define scenario-specific triggers, immediate actions, communication, evacuation, and accountability.",
+      "fields": [
+        { "name": "procedureTitle", "type": "string", "required": true },
+        { "name": "siteName", "type": "string", "required": true },
+        { "name": "alarmMethod", "type": "string", "required": true },
+        { "name": "assemblyPoint", "type": "string", "required": true },
+        { "name": "emergencyContacts", "type": "contact[]", "required": true },
+        { "name": "accountabilityOwner", "type": "person", "required": true }
+      ],
+      "repeaters": [
+        {
+          "name": "scenarios",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "scenario",
+            "trigger",
+            "immediateActions",
+            "shutdownActions",
+            "evacuationRoute",
+            "rescueRestrictions",
+            "responsibleRole",
+            "evidenceRefIds"
+          ]
+        }
+      ],
+      "interactions": [
+        "Edit each scenario as an ordered step list.",
+        "Keep critical alarm, assembly, and contact fields always visible.",
+        "Progressively reveal scenario details and references."
+      ],
+      "validation": [
+        "At least one scenario, emergency contact, alarm method, and assembly point are required.",
+        "Each scenario requires trigger, immediate actions, and responsible role.",
+        "Phone-like contact values must pass the existing display-safe normalization."
+      ]
+    },
+    {
+      "key": "photoEvidenceDraft",
+      "title": "사진/증빙",
+      "editor": "PhotosEvidenceEditor",
+      "family": "evidence-and-improvement",
+      "purpose": "Organize auditable evidence and pair improvement Before and After photos.",
+      "fields": [
+        { "name": "captionPolicy", "type": "string", "required": false },
+        { "name": "siteTimezone", "type": "string", "required": true }
+      ],
+      "repeaters": [
+        {
+          "name": "evidenceItems",
+          "minimumRows": 0,
+          "rowFields": [
+            "id",
+            "assetRef",
+            "kind",
+            "caption",
+            "capturedAt",
+            "location",
+            "capturedBy",
+            "source",
+            "linkedDocumentKeys",
+            "linkedRowIds"
+          ]
+        },
+        {
+          "name": "improvementPairs",
+          "minimumRows": 0,
+          "rowFields": [
+            "id",
+            "findingId",
+            "beforeAssetId",
+            "afterAssetId",
+            "improvementDescription",
+            "completedAt",
+            "verifiedBy",
+            "verificationNote"
+          ]
+        }
+      ],
+      "interactions": [
+        "Add metadata to existing asset references without changing the storage schema.",
+        "Pair Before and After items side by side on desktop and sequentially on mobile.",
+        "Open backlinks showing every document and row citing an item.",
+        "Prevent deletion of a cited item until links are removed or reassigned."
+      ],
+      "validation": [
+        "Every evidence item needs caption, timestamp, and source.",
+        "Improvement pairs require both Before and After assets.",
+        "After capture time cannot precede Before capture time.",
+        "Broken document or row links block export and share."
+      ]
+    },
+    {
+      "key": "foreignWorkerBriefing",
+      "title": "외국인 근로자 출력본",
+      "editor": "ForeignWorkerPrintEditor",
+      "family": "language-variant",
+      "purpose": "Prepare printable worker-facing safety content in selected languages with comprehension confirmation fields.",
+      "fields": [
+        { "name": "sourceDocumentKeys", "type": "DocumentKey[]", "required": true },
+        { "name": "languages", "type": "string[]", "required": true },
+        { "name": "targetWorkers", "type": "person[]", "required": true },
+        { "name": "titleByLanguage", "type": "Record<string,string>", "required": true },
+        { "name": "bodyByLanguage", "type": "Record<string,string>", "required": true },
+        { "name": "confirmationLabelByLanguage", "type": "Record<string,string>", "required": true },
+        { "name": "includeQr", "type": "boolean", "required": true }
+      ],
+      "repeaters": [],
+      "interactions": [
+        "Edit source language and translations side by side on wide screens and by language tabs on mobile.",
+        "Show missing and stale translation indicators per language.",
+        "Preview print page breaks without embedding a full export implementation."
+      ],
+      "validation": [
+        "Each target worker must map to an included language.",
+        "Every selected language needs title, body, and confirmation label.",
+        "A source-content edit marks dependent translations stale until reviewed."
+      ]
+    },
+    {
+      "key": "foreignWorkerTransmission",
+      "title": "외국인 근로자 전송본",
+      "editor": "ForeignWorkerTransmissionEditor",
+      "family": "language-variant-with-delivery",
+      "purpose": "Prepare concise language-specific digital messages and track intended recipients and confirmation state.",
+      "fields": [
+        { "name": "sourceDocumentKeys", "type": "DocumentKey[]", "required": true },
+        { "name": "recipients", "type": "person[]", "required": true },
+        { "name": "channel", "type": "sms|messenger|link|other", "required": true },
+        { "name": "messageByLanguage", "type": "Record<string,string>", "required": true },
+        { "name": "linkLabelByLanguage", "type": "Record<string,string>", "required": false },
+        { "name": "confirmationPromptByLanguage", "type": "Record<string,string>", "required": true },
+        { "name": "expiresAt", "type": "datetime", "required": false }
+      ],
+      "repeaters": [
+        {
+          "name": "deliveryIntents",
+          "minimumRows": 1,
+          "rowFields": [
+            "id",
+            "workerId",
+            "language",
+            "destinationMasked",
+            "deliveryStatus",
+            "readStatus",
+            "understandingStatus",
+            "confirmedAt"
+          ]
+        }
+      ],
+      "interactions": [
+        "Preview per-recipient language and message length.",
+        "Keep provider dispatch status separate from worker read and understanding confirmations.",
+        "Never expose full private destinations in the editor after hydration."
+      ],
+      "validation": [
+        "Every recipient needs language, masked destination, and message.",
+        "A source-content edit marks dependent messages stale.",
+        "Share is blocked when required understanding confirmation is missing.",
+        "Expiry must be in the future when provided."
+      ]
+    },
+    {
+      "key": "kakaoMessage",
+      "title": "현장 공유 메시지",
+      "editor": "FieldShareMessageEditor",
+      "family": "share-message",
+      "purpose": "Compose a short field message with audience, linked documents, action request, and acknowledgment requirements.",
+      "fields": [
+        { "name": "audience", "type": "person-or-group[]", "required": true },
+        { "name": "channel", "type": "string", "required": true },
+        { "name": "subject", "type": "string", "required": true },
+        { "name": "message", "type": "string", "required": true },
+        { "name": "linkedDocumentKeys", "type": "DocumentKey[]", "required": true },
+        { "name": "actionRequired", "type": "string", "required": false },
+        { "name": "acknowledgmentRequired", "type": "boolean", "required": true },
+        { "name": "acknowledgmentDueAt", "type": "datetime", "required": false }
+      ],
+      "repeaters": [
+        {
+          "name": "recipientConfirmations",
+          "minimumRows": 0,
+          "rowFields": [
+            "id",
+            "recipientId",
+            "deliveryStatus",
+            "readStatus",
+            "acknowledgmentStatus",
+            "acknowledgedAt"
+          ]
+        }
+      ],
+      "interactions": [
+        "Insert stable links to selected documents and visible evidence citations.",
+        "Preview message by channel without sending from the editor.",
+        "Show dispatch, read, and acknowledgment as separate status columns.",
+        "Reveal acknowledgment deadline only when acknowledgment is required."
+      ],
+      "validation": [
+        "Audience, subject, message, channel, and at least one linked document are required.",
+        "Acknowledgment due time is required when acknowledgment is required.",
+        "Share remains blocked after any edit until current readiness checks are rerun.",
+        "Broken document or evidence links block share."
+      ]
+    }
+  ],
+  "systemStates": {
+    "empty": "Show a document-specific empty state with one primary creation command and preserve explicit empty permit intent.",
+    "loading": "Use stable-height skeletons for navigator and current editor; do not display editable stale values during hydration.",
+    "error": "Keep the last recoverable draft visible, announce the error, and offer Retry or Restore generated source.",
+    "offline": "Allow local editing and local save, label the draft offline-pending, and disable network-dependent evidence fetch, export, and share.",
+    "conflict": "Pause autosave and require Keep mine or Load newer; never merge free text automatically.",
+    "readOnly": "Expose selection, copying, evidence navigation, and export eligibility reason while hiding edit commands."
+  },
+  "accessibility": {
+    "standard": "WCAG 2.2 AA",
+    "requirements": [
+      "One tablist and one active tabpanel on desktop; native select navigation on mobile.",
+      "All controls have programmatic labels, descriptions, and error associations.",
+      "Validation summary and save state updates use polite live regions; destructive errors use assertive announcement only when necessary.",
+      "Grid editing has a complete non-grid mobile alternative and does not require pointer gestures.",
+      "Drag reorder always has Move up and Move down buttons.",
+      "Focus returns predictably after row add, remove, undo, cancel, and conflict resolution.",
+      "Color is never the only indicator of severity, dirty state, confirmation, or citation health.",
+      "Day and Night themes meet contrast requirements for text, controls, focus rings, disabled states, and validation indicators.",
+      "Reduced-motion preference removes nonessential transitions.",
+      "Touch targets are at least 44 by 44 CSS pixels."
+    ]
+  },
+  "responsive": {
+    "desktop": "Two-column navigator and editor workbench; evidence rail may share the editor column only when minimum field width is preserved.",
+    "tablet": "Collapsible navigator with full-width editor; complex tables switch to row-detail mode before overflow.",
+    "mobile": "Single column, document select, stacked fields, row editors, full-width 44px commands, sticky action bar that does not cover content.",
+    "overflowGate": "No page, tabpanel, field, table, citation, status string, or action bar may cause horizontal overflow at 390x844 or 1440x1000."
+  },
+  "implementationWaves": [
+    {
+      "wave": 0,
+      "name": "adapter-and-shell",
+      "documents": [],
+      "deliverables": [
+        "strict v2 draft types",
+        "v1-to-v2 adapter",
+        "document registry",
+        "shared shell and commands",
+        "legacy export projection boundary"
+      ],
+      "tddGates": [
+        "v1 dirty strings survive migration without loss",
+        "explicit empty permit remains empty",
+        "unknown persisted subtrees recover independently",
+        "all DocumentKey values are registered exhaustively",
+        "save, cancel, undo, redo, conflict, and offline transitions are deterministic"
+      ]
+    },
+    {
+      "wave": 1,
+      "name": "risk-and-tbm-first",
+      "documents": [
+        "riskAssessmentDraft",
+        "tbmBriefing",
+        "tbmLogDraft"
+      ],
+      "deliverables": [
+        "genuinely structured risk row editing",
+        "risk-linked TBM briefing topics",
+        "briefing-snapshot TBM log",
+        "worker attendance, understanding, and confirmation",
+        "visible evidence citations"
+      ],
+      "tddGates": [
+        "risk rows add, duplicate, reorder, remove, validate, undo, and project deterministically",
+        "TBM briefing imports selected risks with stable links and does not mutate risk rows",
+        "TBM log snapshots briefing topics and does not silently resync",
+        "worker not-understood state requires follow-up action and owner",
+        "existing XLSX modes and structured payload shapes remain unchanged",
+        "desktop grid and mobile row editor produce equivalent normalized content"
+      ]
+    },
+    {
+      "wave": 2,
+      "name": "controlled-work-documents",
+      "documents": [
+        "workPlanDraft",
+        "workPermitDraft",
+        "safetyEducationRecordDraft"
+      ],
+      "deliverables": [
+        "ordered work steps",
+        "permit applicability and checklist",
+        "education topics, attendance, assessment, and confirmation"
+      ],
+      "tddGates": [
+        "current structured route payloads round-trip through the adapter",
+        "permit required and not-required branches validate independently",
+        "people and confirmation primitives behave consistently across TBM and education",
+        "stale structured source never overwrites user-edited prose or fields"
+      ]
+    },
+    {
+      "wave": 3,
+      "name": "review-and-evidence",
+      "documents": [
+        "workpackSummaryDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft"
+      ],
+      "deliverables": [
+        "traceable summary findings",
+        "ordered emergency scenarios",
+        "evidence backlinks",
+        "Before and After improvement pairs"
+      ],
+      "tddGates": [
+        "broken citations block export and share",
+        "cited evidence cannot be removed silently",
+        "Before and After chronology and required metadata validate",
+        "critical emergency fields remain visible under progressive disclosure"
+      ]
+    },
+    {
+      "wave": 4,
+      "name": "worker-output-and-share",
+      "documents": [
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ],
+      "deliverables": [
+        "language variants",
+        "translation staleness",
+        "recipient delivery intent",
+        "separate delivery, read, understanding, and acknowledgment states"
+      ],
+      "tddGates": [
+        "every recipient maps to an available language",
+        "source edits mark translations stale",
+        "private destinations stay masked",
+        "share is blocked until readiness and required confirmations pass",
+        "editor preview never dispatches a message"
+      ]
+    },
+    {
+      "wave": 5,
+      "name": "full-regression",
+      "documents": [
+        "workpackSummaryDraft",
+        "riskAssessmentDraft",
+        "workPlanDraft",
+        "workPermitDraft",
+        "tbmBriefing",
+        "tbmLogDraft",
+        "safetyEducationRecordDraft",
+        "emergencyResponseDraft",
+        "photoEvidenceDraft",
+        "foreignWorkerBriefing",
+        "foreignWorkerTransmission",
+        "kakaoMessage"
+      ],
+      "deliverables": [
+        "cross-document navigation and persistence regression",
+        "theme parity",
+        "responsive and accessibility audit",
+        "existing export compatibility regression"
+      ],
+      "tddGates": [
+        "all twelve editors retain independent structured state across reload",
+        "no document loses legacy source text",
+        "all route mode selections remain compatible",
+        "no horizontal overflow in the browser matrix",
+        "keyboard-only edit, save, cancel, undo, and evidence navigation pass"
+      ]
+    }
+  ],
+  "browserMatrix": [
+    {
+      "browser": "Chromium",
+      "viewport": "1440x1000",
+      "themes": [
+        "day",
+        "night"
+      ],
+      "required": true
+    },
+    {
+      "browser": "Chromium",
+      "viewport": "390x844",
+      "themes": [
+        "day",
+        "night"
+      ],
+      "required": true
+    },
+    {
+      "browser": "Firefox",
+      "viewport": "1440x1000",
+      "themes": [
+        "day",
+        "night"
+      ],
+      "required": true
+    },
+    {
+      "browser": "Firefox",
+      "viewport": "390x844",
+      "themes": [
+        "day",
+        "night"
+      ],
+      "required": true
+    },
+    {
+      "browser": "WebKit",
+      "viewport": "1440x1000",
+      "themes": [
+        "day",
+        "night"
+      ],
+      "required": true
+    },
+    {
+      "browser": "WebKit",
+      "viewport": "390x844",
+      "themes": [
+        "day",
+        "night"
+      ],
+      "required": true
+    },
+    {
+      "browser": "Chromium",
+      "viewport": "1280x720",
+      "themes": [
+        "day",
+        "night"
+      ],
+      "required": true
+    },
+    {
+      "browser": "Chromium",
+      "viewport": "320x568",
+      "themes": [
+        "day",
+        "night"
+      ],
+      "required": true
+    }
+  ],
+  "regressionGates": [
+    "Only one active editor tabpanel exists and its accessible name matches the selected document.",
+    "All twelve document keys remain reachable by keyboard and mobile select.",
+    "All interactive controls meet the 44px target gate.",
+    "No horizontal overflow occurs at any required viewport.",
+    "Day and Night layouts have identical geometry and complete semantic states.",
+    "Local reload restores independent content, row order, citations, dirty flags, and selection.",
+    "User edits continue to invalidate readiness and block share until revalidation.",
+    "Legacy string deliverables remain available to current generic exporters.",
+    "Existing structured export route modes and payload field names do not change.",
+    "Risk, TBM briefing, and TBM log are demonstrably structured and cannot pass through one textarea-only interaction.",
+    "Before and After evidence pairs retain both asset references and verification metadata.",
+    "Delivery, read, understanding, and acknowledgment statuses never collapse into one boolean.",
+    "No database, migration, export implementation, or existing evidence change is required."
+  ],
+  "nonGoals": [
+    "database or JSONB schema changes",
+    "server-side draft update API",
+    "export route or builder implementation changes",
+    "message provider dispatch",
+    "automatic machine translation",
+    "new evidence upload storage",
+    "redesign outside WorkpackEditor"
+  ],
+  "ambiguities": [
+    {
+      "topic": "deterministic export",
+      "resolution": "This contract guarantees deterministic semantic route payloads. Byte-for-byte XLSX, PDF, or HWP output is not guaranteed because current builders may include runtime metadata.",
+      "blocking": false,
+      "followUpScope": "A separate export implementation task is required if binary byte equality is a product requirement."
+    },
+    {
+      "topic": "server persistence",
+      "resolution": "Structured drafts remain local and project through existing workpack and export surfaces. No server update contract is introduced because DB and migration changes are excluded.",
+      "blocking": false,
+      "followUpScope": "A later persistence task may define a server update API after explicit schema approval."
+    }
+  ]
+}
