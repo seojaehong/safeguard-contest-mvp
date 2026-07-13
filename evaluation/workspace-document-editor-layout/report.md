@@ -9,7 +9,7 @@
 
 ## Production browser result
 
-Tested source commit: `2f1f80e8fbdb006e0c1e9af084103e5eb9be8cee`
+Tested source commit: `1060dab08ffc42b5efd1a38ab569ef42691d033b`
 
 | Viewport | Theme | Default page height | Expanded tools height | Canvas width | Role / phone width | Header overlap | Export overlap |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -26,8 +26,14 @@ Expanded component bounds also passed the focused limits: compact header maximum
 
 - Static workbench and Claw contracts: 19/19 passed
 - Generated document edit browser regression: 1/1 passed at desktop and mobile geometry assertions
+- Tablet editor regression: 1024px resolves to one grid track with a full-width canvas and no horizontal overflow
+- Frontend static consistency audit: 0 violations and 0 coverage issues
+- Production browser consistency audit: 108/108 rows passed with 0 findings
 - Strict TypeScript typecheck: passed
 - Next production build: 27/27 static pages generated
+- Audit bundle marker contract: audit mode 1, normal mode 0
 - Production browser matrix: 4/4 rows passed, including expanded operation controls
+
+The repository-wide test command completed with 1,268 passed, 10 skipped, and 12 failed. One newly exposed disclosure typography contract was fixed and the final focused contract group passed 44/44 afterward. The remaining failures were stale audit identity checks and parallel browser/fixture timeouts; they are not represented as a full-suite pass here.
 
 Machine-readable metrics are in `report.json`. Screenshots are stored beside this report.
