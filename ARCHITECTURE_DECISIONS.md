@@ -44,7 +44,7 @@ The status terms are time-scoped:
 | AD-01 | `ADOPTED` | SafeClaw MCP, DB, and Evidence Harness remain the system of record and effect authority. | Current invariant |
 | AD-02 | `ADOPTED` | A SafeClaw-owned, isolated, versioned `EngineAdapter` is the only allowed future planner-runtime seam. | Architecture seam only |
 | AD-03 | `ADOPTED` | Engine selection stays distinct from `ai-provider-policy` model selection and preserves existing provider fallback behavior. | Current invariant |
-| AD-04 | `ADOPTED` | Fixed evidence, `naturalize_only`, human confirmation, tenant isolation, approval/effect receipts, and deterministic exports remain mandatory across every adapter. | Current invariants plus promotion prerequisites |
+| AD-04 | `ADOPTED` | Every future adapter is required to preserve fixed evidence, `naturalize_only`, human confirmation, tenant isolation, approval/effect receipts, and deterministic exports. Human-confirmation and approval-receipt binding for authoritative exports remains a deferred promotion prerequisite. | Required architecture invariant; export binding is not implemented |
 | AD-05 | `ADOPTED` | Phase A uses SIF -> KOSHA Guide -> current law and the four explicit obligation classifications. | Phase A contract |
 | AD-06 | `ADOPTED` | Phase B is a design contract for public, organization, and site knowledge layers; reviewed promotion; usage/billing ledger; service authentication; job queue; and a shared stateless worker pool. GPT OAuth is representative PoC scope only. | Design only; implementation not authorized |
 | DE-01 | `DEFERRED` | Any future reconsideration of wholesale Hermes/OpenClaw core replacement waits for all re-entry evidence and a separate ADR. | No active-plan work |
@@ -89,6 +89,16 @@ the deferred architecture complete:
   missing evidence for review
   ([`lib/db-harness.ts:133-157`](lib/db-harness.ts#L133-L157),
   [`lib/db-harness.ts:337-348`](lib/db-harness.ts#L337-L348)).
+- Current export proof is narrower. The editor maps the current selected text
+  into rows and propagates edited rows to XLSX, HWP, and HWPX builders
+  ([`components/WorkpackEditor.tsx:1319-1324`](components/WorkpackEditor.tsx#L1319-L1324),
+  [`components/WorkpackEditor.tsx:1970-1974`](components/WorkpackEditor.tsx#L1970-L1974),
+  [`components/WorkpackEditor.tsx:2298-2376`](components/WorkpackEditor.tsx#L2298-L2376),
+  [`components/WorkpackEditor.tsx:2434-2438`](components/WorkpackEditor.tsx#L2434-L2438)).
+  The XLSX and HWP routes build from request rows but accept no human-confirmation
+  record or approval-receipt input
+  ([`app/api/export/xlsx/route.ts:163-232`](app/api/export/xlsx/route.ts#L163-L232),
+  [`app/api/export/hwp/route.ts:291-301`](app/api/export/hwp/route.ts#L291-L301)).
 
 These seams do not prove the Phase B promotion gates. In particular, the
 legacy environment MCP token remains unbound and fully trusted
@@ -253,14 +263,29 @@ Ontology reads exposed to external consumers remain published-only
 ([`app/api/ontology/graph/route.ts:1-18`](app/api/ontology/graph/route.ts#L1-L18),
 [`lib/ontology/graph-store.ts:154-178`](lib/ontology/graph-store.ts#L154-L178)).
 
-PDF, XLSX, HWPX, and other submission- or operation-facing exports remain
-deterministic materializations of confirmed structured state. A runtime or
-model may propose or naturalize content before confirmation, but it may not
-replace the export builders, silently regenerate authoritative fields, or
-change an export during engine failover. The Phase B cost contract already
-keeps retrieval, obligation classification, and exports in deterministic code
-where practical
-([`phase-b-organization-knowledge-and-engine-plan.md:153-165`](docs/phase-b-organization-knowledge-and-engine-plan.md#L153-L165)).
+The implemented export proof is limited to deterministic mapping and edit
+propagation for the current selected rows. Tests show edited rows reaching the
+XLSX payload and replacing stale structured rows, and show edited rows reaching
+the XLSX and HWP requests
+([`tests/editor-export-integrity.test.ts:32-84`](tests/editor-export-integrity.test.ts#L32-L84),
+[`tests/workspace-layout-regression.test.ts:1770-1790`](tests/workspace-layout-regression.test.ts#L1770-L1790)).
+They do not prove that an export is bound to a human-confirmation record or an
+approval receipt. The Phase A ontology remediation separately confirms and
+freezes a quality-passed evidence pack, but that evidence-pack gate is not wired
+to the export paths
+([`phase-a-ontology-evidence-chains-2026-07-13/report.md:71-81`](evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.md#L71-L81)).
+
+The long-term REQUIRED invariant is that PDF, XLSX, HWP/HWPX, and other
+authoritative submission- or operation-facing exports are deterministic
+materializations of human-confirmed structured state and carry a verifiable
+approval/confirmation receipt binding. That binding is UNIMPLEMENTED and
+DEFERRED as a planner-promotion prerequisite; no current export test proves it.
+A runtime or model may propose or naturalize content before confirmation, but
+it may not replace the export builders, silently regenerate authoritative
+fields, or change an export during engine failover. The Phase B cost contract
+requires deterministic retrieval, obligation classification, and exports where
+practical, but does not establish confirmation binding
+([`phase-b-organization-knowledge-and-engine-plan.md:153-167`](docs/phase-b-organization-knowledge-and-engine-plan.md#L153-L167)).
 
 ## ADR-PA-005: OAuth Experiment and Commercial Service Authentication
 
@@ -333,6 +358,9 @@ only when all of the following are reproducible and accepted:
 - a complete intent -> approval -> effect -> receipt audit trail;
 - provenance showing that output uses the same fixed harness evidence and
   obligation classification;
+- authoritative-export tests proving each export is generated from the
+  human-confirmed structured state and is linked to its approval/confirmation
+  receipt;
 - provider failover tests proving the existing provider policy remains
   independent of runtime selection;
 - service-authentication, secret rotation, license, security, observability,
@@ -397,6 +425,8 @@ the disabled or current Evidence Harness path when any of the following occurs:
   confirmation is bypassed;
 - an effect is duplicated, lacks an approval/receipt link, or cannot be
   reconciled from SafeClaw durable state;
+- an authoritative export lacks a verifiable human-confirmation and
+  approval-receipt binding, including during resume or failover;
 - cancellation, timeout, worker termination, resume, or provider failover
   produces an unreconstructable terminal state;
 - credential exposure, unbounded usage, license incompatibility, or an
@@ -436,18 +466,21 @@ require converting runtime-owned data back into product truth.
 
 Phase A records the authority, evidence, adapter, authentication, and rollback
 contracts. It does not implement or authorize Phase B step 6. Phase B remains
-an approved design with implementation deferred, cannot widen Phase A or
-trigger a database change by itself, and requires separate approval for any
-migration, traffic cutover, or representative GPT OAuth proof of concept
-([`phase-b-organization-knowledge-and-engine-plan.md:3-26`](docs/phase-b-organization-knowledge-and-engine-plan.md#L3-L26)).
+an approved design with implementation deferred and cannot widen Phase A or
+trigger a database change by itself. Any database migration, billing schema,
+data backfill, or production traffic cutover requires separate explicit
+approval
+([`phase-b-organization-knowledge-and-engine-plan.md:27-29`](docs/phase-b-organization-knowledge-and-engine-plan.md#L27-L29)).
 
-The Phase B entry gate requires the Phase A ADR, reviewed provenance, read-only
-RLS audit, tenant-isolation and rollback plans, service-auth policy, and
-explicit database migration approval
-([`phase-b-organization-knowledge-and-engine-plan.md:174-186`](docs/phase-b-organization-knowledge-and-engine-plan.md#L174-L186)).
+The Phase B entry-gate prerequisite list requires reviewed Phase A ontology and
+provenance evidence, the read-only RLS audit, the Hermes ADR, explicit database
+migration approval, tenant-isolation and rollback test plans, and an agreed
+usage-cap and service-authentication policy
+([`phase-b-organization-knowledge-and-engine-plan.md:188-193`](docs/phase-b-organization-knowledge-and-engine-plan.md#L188-L193)).
 The representative GPT OAuth proof of concept remains Phase B delivery-order
 step 6 and may begin only after that entry gate and its separate explicit
-approval are accepted.
+approval are accepted
+([`phase-b-organization-knowledge-and-engine-plan.md:24-27`](docs/phase-b-organization-knowledge-and-engine-plan.md#L24-L27)).
 
 ## Explicit Non-Goals
 

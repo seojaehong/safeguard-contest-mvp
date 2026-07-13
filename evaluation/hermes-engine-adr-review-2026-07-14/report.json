@@ -1,6 +1,6 @@
 {
   "reportId": "hermes-engine-adr-review-2026-07-14",
-  "generatedAt": "2026-07-14T06:52:29.1180011+09:00",
+  "generatedAt": "2026-07-14T07:23:43.2417281+09:00",
   "status": "ready_for_fresh_review",
   "selfApproved": false,
   "freshReviewRequired": true,
@@ -23,11 +23,15 @@
       "lib/mcp-scoped-tool.ts",
       "lib/mcp-tools.ts",
       "app/api/mcp/[transport]/route.ts",
+      "app/api/export/xlsx/route.ts",
+      "app/api/export/hwp/route.ts",
+      "components/WorkpackEditor.tsx",
       "lib/openclaw-broker-route.ts",
       "lib/openclaw-chat.ts",
       "tests/engine-adapter.test.ts",
       "tests/editor-export-integrity.test.ts",
-      "tests/tbm-deterministic-structures.test.ts"
+      "tests/tbm-deterministic-structures.test.ts",
+      "tests/workspace-layout-regression.test.ts"
     ]
   },
   "artifacts": [
@@ -80,7 +84,7 @@
     {
       "id": "U-07",
       "status": "open",
-      "item": "Hermes or fork and OpenClaw parity, recovery, duplicate-effect defense, and deterministic export parity are not proven."
+      "item": "Current exports prove selected and edited row propagation only. Human-confirmation and approval-receipt binding for authoritative exports is not implemented; engine parity, recovery, duplicate-effect defense, and deterministic export parity are also not proven."
     },
     {
       "id": "U-08",
@@ -91,19 +95,26 @@
   "noCodeChange": true,
   "noDbMutation": true,
   "noDbMigration": true,
+  "changeDeclarationEvidence": {
+    "noCodeChange": "repository_diff_verifiable",
+    "noDbMutation": "author_task_execution_declaration_not_independently_proven_by_repository_diff",
+    "noDbMigration": "repository_diff_verifiable"
+  },
   "runtimeExperimentRun": false,
   "gptOauthAttempted": false,
   "validation": {
     "markdownLinks": {
       "status": "pass",
-      "checked": 41,
-      "lineFragments": 40,
+      "checked": 60,
+      "lineFragments": 59,
       "failures": 0
     },
     "requiredTerms": {
       "status": "pass",
-      "checked": 21,
-      "missing": 0
+      "checked": 28,
+      "missing": 0,
+      "forbiddenChecked": 2,
+      "forbiddenPresent": 0
     },
     "decisionCounts": {
       "status": "pass",
@@ -114,20 +125,32 @@
     },
     "jsonParity": {
       "status": "pass",
-      "unresolved": 8
+      "unresolved": 8,
+      "checks": 14,
+      "failures": 0
     },
     "scope": {
       "status": "pass",
       "changedPaths": 3,
       "unexpectedPaths": 0
     },
-    "noCodeOrDbDiff": {
+    "noCodeOrUiOrPackageDiff": {
       "status": "pass",
       "forbiddenPaths": 0
     },
+    "noDbMigrationDiff": {
+      "status": "pass",
+      "forbiddenPaths": 0
+    },
+    "noDbMutationExecution": {
+      "status": "declared",
+      "basis": "author_task_execution_declaration",
+      "independentlyProvenByRepositoryDiff": false
+    },
     "diffCheck": {
       "status": "pass",
-      "whitespaceFailures": 0
+      "whitespaceFailures": 0,
+      "baseSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191"
     }
   }
 }
