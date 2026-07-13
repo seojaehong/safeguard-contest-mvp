@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { AskResponse } from "@/lib/types";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import type { SafetyKnowledgeResult } from "@/lib/mcp-tools";
-import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
+import {
+  buildPhaseAGenerationGrounding,
+  type PhaseAGenerationGrounding,
+} from "@/lib/ontology/evidence-chain";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
@@ -69,6 +72,27 @@ function makePhaseAGrounding(evidenceChainState: "resolved" | "review_required")
     evidenceChainState,
     evidencePack,
   });
+}
+
+function focusGroundingOnFirstPlan(
+  grounding: PhaseAGenerationGrounding,
+): PhaseAGenerationGrounding {
+  const plan = grounding.materializationTargets[0];
+  const control = grounding.evidencePack?.controls.find(
+    (candidate) => candidate.controlId === plan?.controlId,
+  );
+  if (!plan || !control || !grounding.evidencePack) {
+    throw new Error("expected focused materialization plan");
+  }
+  return {
+    ...grounding,
+    evidencePack: {
+      ...grounding.evidencePack,
+      controls: [control],
+      materializationTargets: [plan],
+    },
+    materializationTargets: [plan],
+  };
 }
 
 function passingQaReview(): QaReviewFound {
@@ -175,13 +199,21 @@ describe("buildDocpackResult", () => {
       ],
       humanConfirmation: { required: true, status: "pending" },
       verifiedRecords: [],
+      coverage: {
+        status: "missing",
+        expectedRecordCount: 1,
+        materializedRecordCount: 0,
+        expectedStableKeys: ["fall:risk:control"],
+        materializedStableKeys: [],
+        unresolvedStableKeys: ["fall:risk:control"],
+      },
     });
     expect(result.evidenceMaterialization?.plannedTargets).toHaveLength(1);
   });
 });
 
 describe("buildReviewedDocpackResult", () => {
-  it("keeps legacy QA non-authoritative while human confirmation is pending", () => {
+  it("keeps a 1/N materialization non-authoritative before the human gate", () => {
     const qaReview = passingQaReview();
     const phaseAGrounding = makePhaseAGrounding("resolved");
     const target = phaseAGrounding.materializationTargets[0];
@@ -208,7 +240,7 @@ describe("buildReviewedDocpackResult", () => {
       verdict: "검토 필요",
       verified: false,
       groundingStatus: "resolved",
-      reasonCode: "human_confirmation_pending",
+      reasonCode: "verified_materialization_missing",
       humanConfirmation: { required: true, status: "pending" },
     });
     expect(result.qa).toMatchObject({
@@ -216,14 +248,57 @@ describe("buildReviewedDocpackResult", () => {
       diagnostic: qaReview,
     });
     expect(result.docpack.evidenceMaterialization?.verifiedRecords.length).toBeGreaterThan(0);
+    expect(result.docpack.evidenceMaterialization).toMatchObject({
+      coverage: {
+        status: "partial",
+        materializedRecordCount: 1,
+      },
+    });
     expect(result.docpack.documents.riskAssessmentDraft).toMatchObject({
       totalLength: 650,
       truncated: true,
     });
     expect(result.openClawUsageNote).toContain("검토 필요");
-    expect(result.openClawUsageNote).toContain("pending");
     expect(result.openClawUsageNote).toContain("verified 근거로 사용하지 마세요");
     expect(result.openClawUsageNote).not.toContain("최종 답변의 근거로 사용");
+  });
+
+  it("recognizes full stableKey coverage without bypassing human confirmation", () => {
+    const qaReview = passingQaReview();
+    const phaseAGrounding = focusGroundingOnFirstPlan(makePhaseAGrounding("resolved"));
+    const target = phaseAGrounding.materializationTargets[0];
+    const lawUid = target?.lawCitedUids[0];
+    if (!target || !lawUid) throw new Error("expected focused materialization target");
+    const line = `${target.controlLabel} | ${lawUid}`;
+
+    const result = buildReviewedDocpackResult(
+      makeAskResponse({
+        deliverables: {
+          ...makeAskResponse().deliverables,
+          riskAssessmentDraft: line,
+          tbmBriefing: line,
+        },
+      }),
+      qaReview,
+      "지게차 상하차",
+      false,
+      undefined,
+      phaseAGrounding,
+    );
+
+    expect(result.docpack.evidenceMaterialization).toMatchObject({
+      coverage: {
+        status: "complete",
+        expectedRecordCount: 2,
+        materializedRecordCount: 2,
+        unresolvedStableKeys: [],
+      },
+    });
+    expect(result.reviewStatus).toMatchObject({
+      verdict: "검토 필요",
+      verified: false,
+      reasonCode: "human_confirmation_pending",
+    });
   });
 
   it("keeps a passing legacy QA non-authoritative when verified records are zero", () => {

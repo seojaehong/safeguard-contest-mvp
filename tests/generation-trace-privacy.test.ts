@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
+import { buildBriefingDispatchWorkpack } from "@/lib/briefing";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
 import { runAsk } from "@/lib/search";
@@ -287,7 +288,26 @@ describe("generation trace failure privacy", () => {
       groundingStatus: "missing",
       outputStatus: "missing_evidence_draft",
       verifiedRecords: 0,
+      materializationCoverage: {
+        status: "missing",
+        expectedRecordCount: 0,
+        materializedRecordCount: 0,
+        expectedStableKeys: [],
+        materializedStableKeys: [],
+        unresolvedStableKeys: [],
+      },
       humanConfirmation: { required: true, status: "pending" },
     });
+    expect(response.deliverables.workpackSummaryDraft).toContain("법령 근거: 검토 필요");
+    expect(response.deliverables.workpackSummaryDraft).not.toContain("법령 근거: 연결됨");
+
+    const dispatch = buildBriefingDispatchWorkpack(response, "테스트 현장");
+    expect(dispatch).toMatchObject({
+      reviewAuthority: { authoritative: false },
+      documents: {
+        workpackSummaryDraft: expect.stringContaining("법령 근거: 검토 필요"),
+      },
+    });
+    expect(JSON.stringify(dispatch)).not.toContain("법령 근거: 연결됨");
   });
 });

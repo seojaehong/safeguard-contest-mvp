@@ -14,6 +14,14 @@ const pendingReview: PhaseAReview = {
   groundingStatus: "review_required",
   outputStatus: "review_required_draft",
   verifiedRecords: 0,
+  materializationCoverage: {
+    status: "missing",
+    expectedRecordCount: 1,
+    materializedRecordCount: 0,
+    expectedStableKeys: ["chain:risk:control"],
+    materializedStableKeys: [],
+    unresolvedStableKeys: ["chain:risk:control"],
+  },
   humanConfirmation: { required: true, status: "pending" },
   actionableReason: "Phase A source resolution과 사람 확인이 필요합니다.",
 };
@@ -25,6 +33,14 @@ const readyReview: PhaseAReview = {
   groundingStatus: "resolved",
   outputStatus: "grounded_draft",
   verifiedRecords: 1,
+  materializationCoverage: {
+    status: "complete",
+    expectedRecordCount: 1,
+    materializedRecordCount: 1,
+    expectedStableKeys: ["chain:risk:control"],
+    materializedStableKeys: ["chain:risk:control"],
+    unresolvedStableKeys: [],
+  },
   humanConfirmation: { required: true, status: "confirmed" },
   actionableReason: "Phase A 근거와 문서 반영 실적을 사람이 확인했습니다.",
 };

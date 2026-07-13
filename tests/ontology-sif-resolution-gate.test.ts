@@ -20,6 +20,7 @@ import {
 } from "@/lib/ontology/evidence-chain";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
+import * as mcpTools from "@/lib/mcp-tools";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 
 const publishedGraph = assembleGraph(
@@ -58,6 +59,17 @@ describe("Phase A SIF resolution gate", () => {
     if (!knowledge.found || !knowledge.evidenceContract) {
       throw new Error("expected review-required evidence contract");
     }
+    const projector = Reflect.get(mcpTools, "buildSafetyKnowledgeCandidateResult");
+    expect(typeof projector).toBe("function");
+    if (typeof projector !== "function") {
+      throw new Error("standalone knowledge projection is missing");
+    }
+    expect(projector(knowledge)).toMatchObject({
+      found: true,
+      authority: "review_required",
+      authoritative: false,
+      evidenceChainState: "review_required",
+    });
     const grounding = buildPhaseAGenerationGrounding({
       evidenceChainState: knowledge.evidenceChainState,
       evidencePack: knowledge.evidenceContract,

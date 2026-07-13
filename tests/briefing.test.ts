@@ -14,18 +14,27 @@ import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import type { AskResponse } from "@/lib/types";
 
 function withPendingPhaseAReview(response: AskResponse): AskResponse {
+  const phaseAReview = {
+    verdict: "검토 필요" as const,
+    verified: false,
+    evidenceChainState: "review_required" as const,
+    groundingStatus: "review_required" as const,
+    outputStatus: "review_required_draft" as const,
+    verifiedRecords: 0,
+    materializationCoverage: {
+      status: "missing",
+      expectedRecordCount: 2,
+      materializedRecordCount: 0,
+      expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+      materializedStableKeys: [],
+      unresolvedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+    },
+    humanConfirmation: { required: true as const, status: "pending" as const },
+    actionableReason: "SIF/KOSHA/법령 source resolution을 완료하세요.",
+  } as NonNullable<AskResponse["phaseAReview"]>;
   return {
     ...response,
-    phaseAReview: {
-      verdict: "검토 필요",
-      verified: false,
-      evidenceChainState: "review_required",
-      groundingStatus: "review_required",
-      outputStatus: "review_required_draft",
-      verifiedRecords: 0,
-      humanConfirmation: { required: true, status: "pending" },
-      actionableReason: "SIF/KOSHA/법령 source resolution을 완료하세요."
-    }
+    phaseAReview,
   };
 }
 
@@ -117,7 +126,8 @@ describe("buildBriefingEmail", () => {
 
     expect(email.body).toContain("[Phase A 근거 검토]");
     expect(email.body).toContain("검토 필요");
-    expect(email.body).toContain("검증된 문서 반영 0건");
+    expect(email.body).toContain("문서 반영 0/2");
+    expect(email.body).toContain("미해결 stableKey 2건");
     expect(email.body).toContain("사람 확인 대기");
   });
 });

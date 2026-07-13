@@ -69,7 +69,7 @@ export async function resolveSafetyKnowledgeSnapshot(
 }
 
 /**
- * 작업유형/위험요인 라벨로 검증된 안전 지식(위험요인→안전조치→법조문→중처법 의무)을 조회한다.
+ * 작업유형/위험요인 라벨로 안전 지식 연결 후보를 조회한다.
  * published 부분그래프만 사용. 그래프 조회 실패(미설정/네트워크)는 예외로 던져 호출부의
  * 도구 오류 처리(toToolError / tool_result is_error)에 위임한다.
  */

@@ -6,9 +6,12 @@ import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import {
+  buildEvidenceMaterializationCoverage,
   buildPhaseAGenerationGrounding,
+  verifyEvidenceMaterialization,
   type PhaseAGenerationGrounding,
 } from "./ontology/evidence-chain";
+import { assessPhaseAReviewAuthority } from "./phase-a-review";
 import type { OntologyGraph } from "./ontology/graph-store";
 import {
   deriveSafetyReferenceOperationalView,
@@ -1363,23 +1366,53 @@ function attachPhaseAReview(
   response: AskResponse,
   grounding: PhaseAGenerationGrounding,
 ): AskResponse {
+  const verifiedMaterialization = grounding.evidencePack
+    ? verifyEvidenceMaterialization({
+        evidenceChainState: grounding.evidenceChainState,
+        pack: grounding.evidencePack,
+        documents: {
+          riskAssessmentDraft: response.deliverables.riskAssessmentDraft,
+          tbmBriefing: response.deliverables.tbmBriefing,
+          tbmLogDraft: response.deliverables.tbmLogDraft,
+        },
+      })
+    : [];
+  const materializationCoverage = buildEvidenceMaterializationCoverage({
+    plannedTargets: grounding.materializationTargets,
+    verifiedRecords: verifiedMaterialization,
+  });
   const actionableReason = grounding.groundingStatus === "resolved"
     ? "결정적 문서 materialization 검사와 지정된 사람의 최종 확인이 필요합니다."
     : grounding.groundingStatus === "review_required"
       ? "Phase A SIF/KOSHA/법령 source resolution을 완료한 뒤 다시 검수하세요."
       : "canonical Task 매핑과 ontology availability를 확인한 뒤 다시 검수하세요.";
+  const phaseAReview: NonNullable<AskResponse["phaseAReview"]> = {
+    verdict: "검토 필요",
+    verified: false,
+    evidenceChainState: grounding.evidenceChainState,
+    groundingStatus: grounding.groundingStatus,
+    outputStatus: grounding.generationPolicy.outputStatus,
+    verifiedRecords: materializationCoverage.materializedRecordCount,
+    materializationCoverage,
+    humanConfirmation: { required: true, status: "pending" },
+    actionableReason,
+  };
+  const authoritative = assessPhaseAReviewAuthority(phaseAReview).authoritative;
+  const deliverables = { ...response.deliverables };
+  const lawEvidenceLabel = authoritative ? "연결됨" : "검토 필요";
+  for (const key of TEXT_DELIVERABLE_KEYS) {
+    deliverables[key] = deliverables[key]
+      .replace(/법령 근거:\s*연결됨/g, `법령 근거: ${lawEvidenceLabel}`)
+      .replace(/법령 근거:\s*일부 근거 보류/g, `법령 근거: ${lawEvidenceLabel}`);
+  }
+  if (!/법령 근거:\s*/.test(deliverables.workpackSummaryDraft)) {
+    deliverables.workpackSummaryDraft = `${deliverables.workpackSummaryDraft.trim()}\n\n[Phase A 근거 상태]\n- 법령 근거: ${lawEvidenceLabel}`;
+  }
+
   return attachQualityContract({
     ...response,
-    phaseAReview: {
-      verdict: "검토 필요",
-      verified: false,
-      evidenceChainState: grounding.evidenceChainState,
-      groundingStatus: grounding.groundingStatus,
-      outputStatus: grounding.generationPolicy.outputStatus,
-      verifiedRecords: 0,
-      humanConfirmation: { required: true, status: "pending" },
-      actionableReason,
-    },
+    deliverables,
+    phaseAReview,
   });
 }
 

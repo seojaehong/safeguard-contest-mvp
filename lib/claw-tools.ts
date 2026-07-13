@@ -12,6 +12,7 @@ import {
   buildEvidenceMappingResult,
   buildHarnessAgentResult,
   buildReviewedDocpackResult,
+  buildSafetyKnowledgeCandidateResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
   handleGenerateSafetyDocpack,
@@ -146,7 +147,9 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
       return buildEvidenceMappingResult(typeof docType === "string" ? docType : undefined);
     }
     case "query_safety_knowledge": {
-      return querySafetyKnowledge(asString(input, "query"));
+      return buildSafetyKnowledgeCandidateResult(
+        await querySafetyKnowledge(asString(input, "query")),
+      );
     }
     case "qa_review_docpack": {
       const diagnostic = await reviewDocpack(

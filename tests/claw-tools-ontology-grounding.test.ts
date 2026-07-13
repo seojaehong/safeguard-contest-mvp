@@ -131,6 +131,52 @@ describe("claw ontology generation handlers", () => {
     });
   });
 
+  test("projects standalone knowledge as candidate-only for Claw consumers", async () => {
+    mocks.querySafetyKnowledge.mockResolvedValue({
+      found: true,
+      matchedBy: "task",
+      task: "고소작업",
+      hazards: ["추락"],
+      controls: [{
+        control: "작업발판 설치",
+        articles: ["산업안전보건기준에 관한 규칙 제42조"],
+      }],
+      articles: [{
+        label: "산업안전보건기준에 관한 규칙 제42조",
+        articleNo: "42",
+      }],
+      accidents: ["고소작업 추락 사례"],
+      duties: ["안전보건관리체계 이행"],
+      dutiesNote: "단독 충족 아님",
+      provenance: {
+        authority: "candidate_only",
+        source: "phase_a_evidence_pack",
+        sifCitedUids: ["ref:safety_reference_items:sif-00323"],
+        koshaCitedUids: ["ref:safety_reference_items:technical-support-d-c-7"],
+        lawCitedUids: ["law:산업안전보건기준에 관한 규칙:제42조"],
+      },
+      evidenceContract: { materializationTargets: [] },
+      evidenceDiagnostics: null,
+      evidenceChainState: "resolved",
+    });
+
+    const result = await executeClawTool("query_safety_knowledge", {
+      query: "고소작업",
+    });
+
+    expect(result).toMatchObject({
+      found: true,
+      authority: "review_required",
+      authoritative: false,
+      evidenceChainState: "review_required",
+      controls: [expect.objectContaining({ authority: "candidate" })],
+      articles: [expect.objectContaining({ authority: "candidate" })],
+      duties: [expect.objectContaining({ authority: "candidate" })],
+    });
+    expect(result).not.toHaveProperty("evidenceContract");
+    expect(JSON.stringify(result)).not.toContain("법제처 검증");
+  });
+
   test("routes the plain docpack tool through missing Phase A grounding", async () => {
     const result = await executeClawTool("generate_safety_docpack", {
       question: "등록되지 않은 해체 작업",

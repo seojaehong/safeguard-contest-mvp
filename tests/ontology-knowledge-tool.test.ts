@@ -5,9 +5,9 @@ import { queryKnowledge, matchHazardNodes, listTaskLabels } from "@/lib/ontology
 import { SEED_NODES, SEED_EDGES } from "@/lib/ontology/seed/core-triples";
 import {
   buildSafetyKnowledgeResult,
-  CORE_ONTOLOGY_PROVENANCE,
-  ONTOLOGY_PROVENANCE,
 } from "@/lib/mcp-tools";
+import * as mcpTools from "@/lib/mcp-tools";
+import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 
 // published 게이트 재현: published 부분그래프만으로 조회한다(draft 미노출 불변식).
 const graph = assembleGraph(
@@ -54,24 +54,102 @@ describe("queryKnowledge — 미등록", () => {
 });
 
 describe("buildSafetyKnowledgeResult — 도구 페이로드 정형화", () => {
-  test("매칭 성공: provenance + 조번호/제목 + 안전조치별 조문", () => {
+  test("매칭 성공: actual source provenance + candidate 조번호/안전조치", () => {
     const result = queryKnowledge(graph, "밀폐공간");
     const payload = buildSafetyKnowledgeResult("밀폐공간", result, listTaskLabels(graph));
     expect(payload.found).toBe(true);
     if (!payload.found) throw new Error("unreachable");
-    expect(payload.provenance).toBe(ONTOLOGY_PROVENANCE);
-    expect(payload.provenance).toBe("법제처 검증 시드 v1");
-    expect(payload.coreProvenance).toBe(CORE_ONTOLOGY_PROVENANCE);
-    expect(payload.coreProvenance).toBe("법제처 검증 시드 v1");
+    expect(payload.provenance).toMatchObject({
+      authority: "candidate_only",
+      source: "published_graph_candidates",
+      sifCitedUids: expect.any(Array),
+      koshaCitedUids: expect.any(Array),
+      lawCitedUids: expect.any(Array),
+    });
+    expect(JSON.stringify(payload)).not.toContain("법제처 검증 시드 v1");
+    expect(payload).not.toHaveProperty("coreProvenance");
     expect(payload.task).toBe("밀폐공간 작업");
     // articles: 조번호(article_no) + 제목(label) 병기
     const a619 = payload.articles.find((a) => a.articleNo === "619");
     expect(a619).toBeDefined();
     expect(a619!.label).toContain("제619조");
+    expect(a619).toMatchObject({ authority: "candidate" });
     // controls: 각 안전조치에 조문 라벨 배열
     expect(payload.controls.some((c) => c.articles.length > 0)).toBe(true);
+    expect(payload.controls.every((control) => (
+      "authority" in control && control.authority === "candidate"
+    ))).toBe(true);
+    expect(payload.duties.every((duty) => (
+      typeof duty === "object" && duty !== null && "authority" in duty && duty.authority === "candidate"
+    ))).toBe(true);
     // duties는 단독 충족이 아니라 이행 증빙 일부임을 명시
     expect(payload.dutiesNote).toContain("단독 충족 아님");
+  });
+
+  test("projects the standalone tool as review-required without leaking the internal evidence pack", () => {
+    const internal = buildPublishedSafetyKnowledge(graph, "고소작업");
+    expect(internal.found).toBe(true);
+    if (!internal.found) throw new Error("expected published graph candidate");
+    const projector = Reflect.get(mcpTools, "buildSafetyKnowledgeCandidateResult");
+    expect(typeof projector).toBe("function");
+    if (typeof projector !== "function") {
+      throw new Error("standalone knowledge projection is missing");
+    }
+
+    const external = projector(internal) as Record<string, unknown>;
+
+    expect(external).toMatchObject({
+      found: true,
+      authority: "review_required",
+      authoritative: false,
+      evidenceChainState: "review_required",
+      provenance: {
+        authority: "candidate_only",
+        source: "phase_a_evidence_pack",
+        sifCitedUids: expect.arrayContaining([
+          expect.stringMatching(/^ref:safety_reference_items:sif-/),
+        ]),
+        koshaCitedUids: expect.arrayContaining([
+          expect.stringMatching(/^ref:safety_reference_items:technical-support-/),
+        ]),
+        lawCitedUids: expect.arrayContaining([
+          expect.stringMatching(/^law:/),
+        ]),
+      },
+    });
+    expect(external).not.toHaveProperty("evidenceContract");
+    const serialized = JSON.stringify(external).toLowerCase();
+    expect(serialized).not.toContain("법제처 검증");
+    expect(serialized).not.toContain("verified");
+    expect(serialized).not.toContain("validated");
+    expect(serialized).not.toContain("direct");
+  });
+
+  test("fails closed with review-required authority when no knowledge candidate resolves", () => {
+    const internal = buildSafetyKnowledgeResult(
+      "우주유영",
+      null,
+      listTaskLabels(graph),
+    );
+    const projector = Reflect.get(mcpTools, "buildSafetyKnowledgeCandidateResult");
+    if (typeof projector !== "function") {
+      throw new Error("standalone knowledge projection is missing");
+    }
+
+    expect(projector(internal)).toMatchObject({
+      found: false,
+      authority: "review_required",
+      authoritative: false,
+      evidenceChainState: "review_required",
+      materializationAuthority: {
+        status: "review_required",
+        authoritative: false,
+        expectedStableKeys: [],
+        materializedStableKeys: [],
+        unresolvedStableKeys: [],
+        humanConfirmation: { required: true, status: "pending" },
+      },
+    });
   });
 
   test("매칭 실패(result=null): 미등록 안내 + 등록된 Task 목록", () => {

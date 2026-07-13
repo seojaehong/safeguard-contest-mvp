@@ -45,6 +45,7 @@ import {
   buildEvidenceMappingResult,
   buildHarnessAgentResult,
   buildReviewedDocpackResult,
+  buildSafetyKnowledgeCandidateResult,
   handleGenerateSafetyDocpack,
   buildSanitizeContactsResult,
   buildWeatherResult,
@@ -472,15 +473,17 @@ function registerTools(server: McpServer): void {
   registerScopedTool(server,
     "query_safety_knowledge",
     {
-      title: "검증된 안전 지식 그래프 조회",
+      title: "안전 지식 연결 후보 조회",
       description:
-        "작업유형(용접·밀폐공간 등)이나 위험요인으로, 법제처 검증된 위험요인→안전조치→법조문→중처법 의무 연결을 조회할 때 호출. 조문 인용 전 이 도구로 근거를 확보하라.",
+        "작업유형이나 위험요인에서 SIF·KOSHA·법령 연결 후보를 조회하는 진단 도구. 결과는 검토 필요 상태이며, 전체 문서 반영과 사람 확인 전에는 확정 근거나 법적 의무 판단으로 사용하지 않는다.",
       inputSchema: {
         query: z.string().describe("작업유형 또는 위험요인 라벨 (예: 밀폐공간, 용접, 산소결핍 질식)"),
       },
     },
     async ({ query }) => {
-      return toToolResult(await querySafetyKnowledge(query));
+      return toToolResult(
+        buildSafetyKnowledgeCandidateResult(await querySafetyKnowledge(query)),
+      );
     }
   );
 

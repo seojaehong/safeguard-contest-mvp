@@ -2,7 +2,10 @@ import type { RiskAssessmentRow, RiskAssessmentValidationIssue } from "./risk-as
 import type { SmsaEvidenceLabel } from "./smsa-mapping";
 import type { QaReviewResult } from "./ontology/qa-review";
 import type { DbHarnessPacket } from "./db-harness";
-import type { PhaseAGenerationGrounding } from "./ontology/evidence-chain";
+import type {
+  EvidenceMaterializationCoverage,
+  PhaseAGenerationGrounding,
+} from "./ontology/evidence-chain";
 
 export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
@@ -382,6 +385,7 @@ export type PhaseAReview = {
   groundingStatus: PhaseAGenerationGrounding["groundingStatus"];
   outputStatus: PhaseAGenerationGrounding["generationPolicy"]["outputStatus"];
   verifiedRecords: number;
+  materializationCoverage: EvidenceMaterializationCoverage;
   humanConfirmation: { required: true; status: "pending" | "confirmed" };
   actionableReason: string;
 };
