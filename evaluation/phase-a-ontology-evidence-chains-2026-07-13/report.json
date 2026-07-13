@@ -1,13 +1,13 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-13T22:49:40.5186259+09:00",
+  "generatedAt": "2026-07-13T23:48:08.1796214+09:00",
   "branch": "fix/phase-a-ontology-review",
   "base": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
   "contractVersion": "phase-a-evidence-chains/1.3.0",
-  "status": "release_review_hold_candidate_awaiting_fresh_independent_review",
+  "status": "integration_hold_candidate_awaiting_fresh_independent_review",
   "provenance": {
-    "focusedLogCompletedAt": "2026-07-13T13:49:34.8156333Z",
-    "typecheckLogCompletedAt": "2026-07-13T13:49:34.8186390Z",
+    "focusedLogCompletedAt": "2026-07-13T14:45:01.3442548Z",
+    "typecheckLogCompletedAt": "2026-07-13T14:45:09.0852966Z",
     "reportGeneratedAfterFreshVerification": true
   },
   "counts": {
@@ -30,7 +30,7 @@
     "obligationClassifications": 4
   },
   "generationHarness": {
-    "verifiedScope": "actual answer, document, JSON/SSE, briefing, MCP, and Claw handler seams plus ask-page source call-site contract",
+    "verifiedScope": "actual answer, document, JSON/SSE, briefing, MCP, Claw, quality/readiness/share, storage, and post-generation QA seams plus ask-page and command-center source contracts",
     "fixedNaturalizeOnlyPolicyFirst": true,
     "singleJsonSerializedUntrustedInputBlock": true,
     "delimiterCharactersUnicodeEscapedInsideJson": true,
@@ -51,7 +51,14 @@
     "currentReviewedFlowAuthoritativePass": false,
     "authoritativePassRequiresResolvedQaMaterializationAndHumanConfirmation": true,
     "draftOrUnresolvedSifExcludedFromResolvedAllowList": true,
-    "forcedResolvedSifStateDowngradedBeforePostCheck": true
+    "forcedResolvedSifStateDowngradedBeforePostCheck": true,
+    "phaseAReviewGatesQualityReadinessUiAndShare": true,
+    "automaticBriefingDispatchFailsClosedWhilePending": true,
+    "pendingLawAndKoshaEvidenceDiagnosticOnly": true,
+    "ontologyTimeoutPolicyIndependentFromProviderTimeouts": true,
+    "ontologyGroundingAndGraphLoadAbortable": true,
+    "publishedGraphLoadsPerSuccessfulRequest": 1,
+    "failedPreflightRetriesGraphDuringPostQa": false
   },
   "chains": [
     {
@@ -244,12 +251,13 @@
     "sifCreatesDuty": false,
     "fieldHistoryWeatherAuthority": "scope_only",
     "llmRole": "naturalize_only",
-    "qualityPassedBeforeHumanConfirm": true,
+    "qualityContractReadyBeforeHumanConfirm": false,
     "fixedPackDeepFrozen": true,
     "fixedPackDeepFrozenTestedAtProviderAndPostCheckSeams": true,
     "untrustedProviderInputJsonOnly": true,
     "reviewRequiredNeverAuthoritativeQaPass": true,
     "legacyQaAuthoritative": false,
+    "legacyCoverageQaDiagnosticOnly": true,
     "currentHumanConfirmationState": "pending",
     "authoritativePassRequiresNonzeroVerifiedRecords": true,
     "authoritativePassRequiresCompletedHumanConfirmation": true,
@@ -311,9 +319,9 @@
       "generationPolicy.llmRole"
     ],
     "promptOrder": [
-      "untrusted_phase_a_json",
-      "fixed_naturalize_only_instructions",
-      "existing_persona_and_context"
+      "fixed_naturalize_only_security_policy",
+      "single_untrusted_phase_a_json_block",
+      "conditioned_persona_and_context"
     ],
     "resolvedBehavior": "answer provider and full-mode document providers receive the fixed pack before generation; deterministic materialization inspection remains post-generation",
     "reviewRequiredBehavior": "generation remains demo-usable but output is explicitly review_required_draft, allowed citation records are empty, verifiedRecords stays zero, and human confirmation stays pending",
@@ -397,7 +405,12 @@
     { "finding": "P1-H", "status": "fixed", "summary": "the immutable naturalize-only policy precedes one JSON untrusted block; reviewed QA is reconciled with grounding state; ontology failures fail closed while preserving template and provider fallback behavior" },
     { "finding": "HOLD-1", "status": "candidate_fix_awaiting_independent_review", "summary": "all enumerated public runAsk call sites resolve and pass Phase A grounding; omitted or unavailable ontology becomes explicit missing grounding and never selects the legacy raw prompt" },
     { "finding": "HOLD-2", "status": "candidate_fix_awaiting_independent_review", "summary": "legacy QA is always diagnostic; current human-pending reviewed output remains not verified even with passing QA and nonzero materialization" },
-    { "finding": "HOLD-3", "status": "candidate_fix_awaiting_independent_review", "summary": "draft or unresolved SIF keeps the resolver and forced generation state review-required even when the KOSHA test gate is ready" }
+    { "finding": "HOLD-3", "status": "candidate_fix_awaiting_independent_review", "summary": "draft or unresolved SIF keeps the resolver and forced generation state review-required even when the KOSHA test gate is ready" },
+    { "finding": "INTEGRATION-HOLD-1", "status": "candidate_fix_awaiting_independent_review", "summary": "Phase A authority now directly gates quality, workpack readiness, UI status, and share eligibility; legacy coverage QA remains diagnostic" },
+    { "finding": "INTEGRATION-HOLD-2", "status": "candidate_fix_awaiting_independent_review", "summary": "briefing email, dispatch payload, and workpack persistence preserve zero records and pending human confirmation; automatic dispatch is blocked and raw law/KOSHA data is diagnostic only" },
+    { "finding": "INTEGRATION-HOLD-3", "status": "candidate_fix_awaiting_independent_review", "summary": "ontology-only deadline policy bounds and aborts grounding preflight and Supabase graph fetch without inheriting Vertex or deliverables timeout settings" },
+    { "finding": "INTEGRATION-HOLD-4", "status": "candidate_fix_awaiting_independent_review", "summary": "one published graph snapshot is reused by generation and post-generation QA; a failed preflight uses a null sentinel and is not retried by QA" },
+    { "finding": "INTEGRATION-HOLD-5", "status": "candidate_fix_awaiting_independent_review", "summary": "report prompt order and legacy QA authority now match the fixed-policy-first production code" }
   ],
   "lawVerification": {
     "verifiedOn": "2026-07-13",
@@ -456,11 +469,28 @@
         { "failed": 2, "passed": 29, "total": 31 },
         { "failed": 1, "passed": 0, "total": 1 },
         { "failed": 1, "passed": 1, "total": 2 }
+      ],
+      "integrationHoldProductFailuresAcrossRuns": 35,
+      "integrationHoldModuleResolutionRedSuites": 1,
+      "integrationHoldRedRuns": [
+        { "failed": 3, "passed": 8, "total": 11, "scope": "quality_and_readiness" },
+        { "failed": 2, "passed": 0, "total": 2, "scope": "command_center_ui" },
+        { "failed": 2, "passed": 22, "total": 24, "scope": "briefing_email_and_dispatch" },
+        { "failed": 5, "passed": 3, "total": 8, "scope": "workpack_storage" },
+        { "failed": 1, "passed": 2, "total": 3, "scope": "automatic_briefing_dispatch" },
+        { "failed": 4, "passed": 4, "total": 8, "scope": "grounding_and_graph_deadlines" },
+        { "failed": 0, "passed": 0, "total": 0, "failedSuites": 1, "scope": "missing_deadline_policy_module" },
+        { "failed": 2, "passed": 11, "total": 13, "scope": "web_generation_snapshot_reuse" },
+        { "failed": 1, "passed": 16, "total": 17, "scope": "mcp_handler_snapshot_reuse" },
+        { "failed": 4, "passed": 8, "total": 12, "scope": "claw_and_mcp_snapshot_wiring" },
+        { "failed": 3, "passed": 0, "total": 3, "scope": "mcp_handler_never_settling_resolver" },
+        { "failed": 1, "passed": 0, "total": 1, "scope": "pending_kosha_dispatch_classification" },
+        { "failed": 7, "passed": 23, "total": 30, "scope": "failed_preflight_null_snapshot_sentinel" }
       ]
     },
     "focused": {
-      "filesPassed": 15,
-      "testsPassed": 224,
+      "filesPassed": 25,
+      "testsPassed": 297,
       "status": "pass",
       "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"
@@ -506,7 +536,7 @@
     "schemaChanged": false,
     "migrationAdded": false,
     "generatedCoreSeedStatsChanged": false,
-    "uiChanged": false,
+    "uiChanged": true,
     "outputArtifactsCommitted": true
   },
   "approval": {

@@ -6,12 +6,19 @@ import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
 import { runAsk } from "@/lib/search";
 import type { SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
 import type { SearchResult } from "@/lib/types";
+import { assembleGraph } from "@/lib/ontology/graph-store";
+import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 
 const mocks = vi.hoisted(() => ({
   enhanceLegalEvidenceMappings: vi.fn(),
   generateAllDeliverablesWithDiagnostics: vi.fn(),
   generateAnswer: vi.fn(),
-  searchSafetyReferences: vi.fn()
+  searchSafetyReferences: vi.fn(),
+  attachWebOntologyQa: vi.fn()
+}));
+
+vi.mock("@/lib/workpack-ontology-qa", () => ({
+  attachWebOntologyQa: mocks.attachWebOntologyQa
 }));
 
 vi.mock("@/lib/ai", async (importOriginal) => {
@@ -79,6 +86,7 @@ describe("generation trace failure privacy", () => {
         fallbackUsed: false
       }
     }));
+    mocks.attachWebOntologyQa.mockImplementation(async (response: unknown) => response);
   });
 
   afterEach(() => {
@@ -204,6 +212,30 @@ describe("generation trace failure privacy", () => {
       "RAW_MAPPING_PROMPT_MUST_NOT_RUN",
       expect.any(Array),
       expect.objectContaining({ phaseAGrounding }),
+    );
+  }, 30_000);
+
+  it("passes the exact grounding graph snapshot into post-generation ontology QA", async () => {
+    mocks.searchSafetyReferences.mockResolvedValue(successfulSafetyReferenceSearch());
+    const graphSnapshot = assembleGraph(
+      SEED_NODES.filter((node) => node.review_state === "published"),
+      SEED_EDGES.filter((edge) => edge.review_state === "published")
+    );
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_evaluated",
+      evidencePack: null
+    });
+
+    await runAsk("SNAPSHOT_REUSE_FOR_QA", {
+      aiMode: "enhanced",
+      phaseAGrounding,
+      phaseAGraphSnapshot: graphSnapshot
+    });
+
+    expect(mocks.attachWebOntologyQa).toHaveBeenCalledWith(
+      expect.any(Object),
+      "SNAPSHOT_REUSE_FOR_QA",
+      graphSnapshot
     );
   }, 30_000);
 

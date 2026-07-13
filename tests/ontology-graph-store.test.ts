@@ -1,7 +1,13 @@
-import { describe, expect, test } from "vitest";
-import { assembleGraph, ADVISORY_NOTICE } from "@/lib/ontology/graph-store";
+import { afterEach, describe, expect, test, vi } from "vitest";
+import { assembleGraph, ADVISORY_NOTICE, loadGraph } from "@/lib/ontology/graph-store";
 
 const MANUAL = "manual:온톨로지_시드트리플_감수용_v1";
+
+afterEach(() => {
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  vi.unstubAllGlobals();
+});
 
 function node(nodeId: string, kind: string, citedUids: string[] = [MANUAL]) {
   return {
@@ -68,4 +74,28 @@ describe("assembleGraph — provenance 게이트", () => {
     // 정렬 안정성 (node_id 기준)
     expect(graph.nodes.map((n) => n.node_id)).toEqual(["Control_c", "Hazard_b", "Task_a"]);
   });
+});
+
+describe("loadGraph — bounded published snapshot", () => {
+  test("aborts never-settling Supabase fetches and returns a sanitized deadline result", async () => {
+    process.env.SUPABASE_URL = "https://ontology.example.test";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "PRIVATE_GRAPH_KEY";
+    const signals: AbortSignal[] = [];
+    vi.stubGlobal("fetch", vi.fn((_url: string | URL | Request, init?: RequestInit) => {
+      if (init?.signal) signals.push(init.signal);
+      return new Promise<Response>(() => undefined);
+    }));
+
+    const result = await loadGraph("published", { timeoutMs: 10 });
+
+    expect(result).toMatchObject({
+      ok: false,
+      configured: true,
+      graph: null,
+      errorCode: "ontology_deadline_exceeded"
+    });
+    expect(result.message).not.toContain("PRIVATE_GRAPH_KEY");
+    expect(signals).toHaveLength(2);
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
+  }, 500);
 });

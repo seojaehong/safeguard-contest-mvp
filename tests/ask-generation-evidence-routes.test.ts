@@ -3,10 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildDbHarnessPacket } from "@/lib/db-harness";
 import { buildMockAskResponse } from "@/lib/mock-data";
+import { assembleGraph } from "@/lib/ontology/graph-store";
 import type { AskResponse } from "@/lib/types";
 
 const mocks = vi.hoisted(() => ({
   querySafetyKnowledge: vi.fn(),
+  resolveSafetyKnowledgeSnapshot: vi.fn(),
   runAsk: vi.fn(),
 }));
 
@@ -14,9 +16,16 @@ vi.mock("@/lib/search", () => ({
   runAsk: mocks.runAsk
 }));
 
-vi.mock("@/lib/ontology/knowledge-tool", () => ({
-  querySafetyKnowledge: mocks.querySafetyKnowledge,
-}));
+vi.mock("@/lib/ontology/knowledge-tool", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/ontology/knowledge-tool")>();
+  return {
+    ...actual,
+    querySafetyKnowledge: mocks.querySafetyKnowledge,
+    resolveSafetyKnowledgeSnapshot: mocks.resolveSafetyKnowledgeSnapshot,
+  };
+});
+
+const graphSnapshot = assembleGraph([], []);
 
 function responseWithHarness(): AskResponse {
   const question = "성수동 외벽 도장 작업";
@@ -83,14 +92,16 @@ function request(path: string): NextRequest {
 describe("ask generation evidence routes", () => {
   beforeEach(() => {
     process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = "ask-route-generation-evidence-secret";
-    mocks.querySafetyKnowledge.mockResolvedValue({
+    const evidence = {
       found: false,
       message: "Phase A Task 미등록",
       registeredTasks: [],
       evidenceContract: null,
       evidenceDiagnostics: null,
-      evidenceChainState: "not_registered",
-    });
+      evidenceChainState: "not_registered" as const,
+    };
+    mocks.querySafetyKnowledge.mockResolvedValue(evidence);
+    mocks.resolveSafetyKnowledgeSnapshot.mockResolvedValue({ evidence, graphSnapshot });
     mocks.runAsk.mockResolvedValue(responseWithHarness());
   });
 
@@ -113,7 +124,14 @@ describe("ask generation evidence routes", () => {
     expect(body.generationEvidence?.snapshot.generationTrace).toEqual(body.generationTrace);
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("[api/ask] safeclaw_generation_trace"));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"traceId":"trace-ask-route-test"'));
-    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("성수동 외벽 도장 작업");
+    expect(mocks.resolveSafetyKnowledgeSnapshot).toHaveBeenCalledWith(
+      "성수동 외벽 도장 작업",
+      expect.objectContaining({
+        signal: expect.any(AbortSignal),
+        timeoutMs: expect.any(Number),
+      }),
+    );
+    expect(mocks.querySafetyKnowledge).not.toHaveBeenCalled();
     expect(mocks.runAsk).toHaveBeenCalledWith(
       "성수동 외벽 도장 작업",
       expect.objectContaining({
@@ -126,6 +144,7 @@ describe("ask generation evidence routes", () => {
             outputStatus: "missing_evidence_draft",
           }),
         }),
+        phaseAGraphSnapshot: graphSnapshot,
       }),
     );
     logSpy.mockRestore();
@@ -139,7 +158,10 @@ describe("ask generation evidence routes", () => {
     expect(body).toContain('"kind":"final"');
     expect(body).toContain('"version":"safeclaw-generation-evidence/v1"');
     expect(body).toContain('"algorithm":"HMAC-SHA256"');
-    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("성수동 외벽 도장 작업");
+    expect(mocks.resolveSafetyKnowledgeSnapshot).toHaveBeenCalledWith(
+      "성수동 외벽 도장 작업",
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(mocks.runAsk).toHaveBeenCalledWith(
       "성수동 외벽 도장 작업",
       expect.objectContaining({
@@ -147,6 +169,7 @@ describe("ask generation evidence routes", () => {
           groundingStatus: "missing",
           generationPolicy: expect.objectContaining({ llmRole: "naturalize_only" }),
         }),
+        phaseAGraphSnapshot: graphSnapshot,
         onProgress: expect.any(Function),
       }),
     );
@@ -155,7 +178,7 @@ describe("ask generation evidence routes", () => {
   it("keeps the JSON route available with explicit missing grounding when ontology lookup throws", async () => {
     const secret = "PRIVATE_ROUTE_ONTOLOGY_FAILURE";
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    mocks.querySafetyKnowledge.mockRejectedValueOnce(new Error(secret));
+    mocks.resolveSafetyKnowledgeSnapshot.mockRejectedValueOnce(new Error(secret));
 
     const { POST } = await import("@/app/api/ask/route");
     const response = await POST(request("/api/ask"));

@@ -55,6 +55,16 @@ function makeStoredResponse() {
   return {
     ...response,
     generationMode: "enhanced" as const,
+    phaseAReview: {
+      verdict: "검토 필요" as const,
+      verified: false,
+      evidenceChainState: "review_required" as const,
+      groundingStatus: "review_required" as const,
+      outputStatus: "review_required_draft" as const,
+      verifiedRecords: 0,
+      humanConfirmation: { required: true as const, status: "pending" as const },
+      actionableReason: "Phase A 근거와 문서 반영 위치를 확인하세요."
+    },
     ontologyQa: {
       reviewTask: "외벽 도장",
       result: qaPass,
@@ -124,6 +134,7 @@ describe("workpack store persistence contract", () => {
     const summary = buildWorkpackEvidenceSummary(response);
 
     expect(summary.qualityContract).toEqual(response.qualityContract);
+    expect(summary.phaseAReview).toEqual(response.phaseAReview);
     expect(summary.ontologyQa).toEqual(response.ontologyQa);
     expect(summary.evidenceLabels).toEqual(response.evidenceLabels);
     expect(summary.structured).toEqual(response.structured);
@@ -141,6 +152,7 @@ describe("workpack store persistence contract", () => {
     });
 
     expect(selected.qualityContract).toEqual(response.qualityContract);
+    expect(selected.phaseAReview).toEqual(response.phaseAReview);
     expect(selected.ontologyQa).toEqual(response.ontologyQa);
     expect(selected.evidenceLabels).toEqual(response.evidenceLabels);
     expect(selected.riskSummary).toEqual(response.riskSummary);
@@ -159,6 +171,7 @@ describe("workpack store persistence contract", () => {
 
     expect(reopen.blockers).toEqual([]);
     expect(reopen.data?.qualityContract).toEqual(response.qualityContract);
+    expect(reopen.data?.phaseAReview).toEqual(response.phaseAReview);
     expect(reopen.data?.ontologyQa).toEqual(response.ontologyQa);
     expect(reopen.data?.evidenceLabels).toEqual(response.evidenceLabels);
     expect(reopen.data?.structured).toEqual(response.structured);

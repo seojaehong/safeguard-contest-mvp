@@ -11,6 +11,23 @@ import {
   type BriefingSiteRow
 } from "@/lib/briefing";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import type { AskResponse } from "@/lib/types";
+
+function withPendingPhaseAReview(response: AskResponse): AskResponse {
+  return {
+    ...response,
+    phaseAReview: {
+      verdict: "검토 필요",
+      verified: false,
+      evidenceChainState: "review_required",
+      groundingStatus: "review_required",
+      outputStatus: "review_required_draft",
+      verifiedRecords: 0,
+      humanConfirmation: { required: true, status: "pending" },
+      actionableReason: "SIF/KOSHA/법령 source resolution을 완료하세요."
+    }
+  };
+}
 
 describe("parseBriefingSites", () => {
   it("returns an empty list when BRIEFING_SITES is unset", () => {
@@ -93,6 +110,15 @@ describe("buildBriefingEmail", () => {
   it("falls back to the evidence-file link when no workpackId is provided", () => {
     const email = buildBriefingEmail(response, "안산 제조공장", null);
     expect(email.body).toContain("/evidence-file");
+  });
+
+  it("makes pending Phase A verification and human confirmation visible in the email", () => {
+    const email = buildBriefingEmail(withPendingPhaseAReview(response), "안산 제조공장");
+
+    expect(email.body).toContain("[Phase A 근거 검토]");
+    expect(email.body).toContain("검토 필요");
+    expect(email.body).toContain("검증된 문서 반영 0건");
+    expect(email.body).toContain("사람 확인 대기");
   });
 });
 
@@ -211,5 +237,25 @@ describe("buildBriefingDispatchWorkpack", () => {
     const workpack = buildBriefingDispatchWorkpack(response, "안산 제조공장", "wp-123");
     expect(workpack.message).toContain("[기상 요약]");
     expect(workpack.message).toContain("/documents?workpackId=wp-123");
+  });
+
+  it("preserves pending Phase A state without promoting raw law or KOSHA results", () => {
+    const pending = withPendingPhaseAReview(response);
+    const workpack = buildBriefingDispatchWorkpack(pending, "안산 제조공장", "wp-123");
+
+    expect(workpack.phaseAReview).toEqual(pending.phaseAReview);
+    expect(workpack.evidence).toMatchObject({
+      authoritative: false,
+      citations: [],
+      kosha: [],
+      koshaEducation: [],
+      accidentCases: [],
+      diagnostic: {
+        citations: pending.citations.slice(0, 5),
+        kosha: pending.externalData.kosha.references.slice(0, 3),
+        koshaEducation: pending.externalData.koshaEducation.recommendations.slice(0, 3),
+        accidentCases: pending.externalData.accidentCases.cases.slice(0, 3)
+      }
+    });
   });
 });

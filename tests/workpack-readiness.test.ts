@@ -52,6 +52,16 @@ const readyQuality: QualityContract = {
 function makeResponse(): AskResponse {
   return {
     ...buildMockAskResponse("성수동 외벽 도장 작업", mockSearchResults.slice(0, 3), "live", "test"),
+    phaseAReview: {
+      verdict: "통과",
+      verified: true,
+      evidenceChainState: "resolved",
+      groundingStatus: "resolved",
+      outputStatus: "grounded_draft",
+      verifiedRecords: 1,
+      humanConfirmation: { required: true, status: "confirmed" },
+      actionableReason: "확인 완료"
+    },
     qualityContract: readyQuality,
     ontologyQa: {
       reviewTask: "외벽 도장",
@@ -144,7 +154,37 @@ describe("workpack readiness", () => {
     expect(readiness.reasons.join(" / ")).toContain("결재·서명 placeholder 확인 필요");
   });
 
-  it("allows sharing only when quality, ontology, DB harness, and placeholders are clean", () => {
+  it("does not let a legacy ontology QA pass become share authority", () => {
+    const response = makeResponse();
+    response.phaseAReview = undefined;
+    const readiness = assessWorkpackReadiness(response);
+
+    expect(readiness.canShare).toBe(false);
+    expect(readiness.status).toBe("blocked");
+    expect(readiness.reasons).toContain("Phase A 근거 검토 정보 확인 필요");
+  });
+
+  it("blocks sharing while Phase A has zero verified records and human confirmation is pending", () => {
+    const response = makeResponse();
+    response.phaseAReview = {
+      verdict: "검토 필요",
+      verified: false,
+      evidenceChainState: "review_required",
+      groundingStatus: "review_required",
+      outputStatus: "review_required_draft",
+      verifiedRecords: 0,
+      humanConfirmation: { required: true, status: "pending" },
+      actionableReason: "Phase A 근거와 문서 반영 위치를 확인하세요."
+    };
+
+    const readiness = assessWorkpackReadiness(response);
+
+    expect(readiness.canShare).toBe(false);
+    expect(readiness.status).toBe("blocked");
+    expect(readiness.reasons).toContain("Phase A 근거 및 사람 확인 미완료");
+  });
+
+  it("allows sharing after Phase A materialization and human confirmation are complete", () => {
     const readiness = assessWorkpackReadiness(makeResponse());
 
     expect(readiness.canShare).toBe(true);
@@ -175,6 +215,7 @@ describe("workpack readiness", () => {
     const readiness = assessWorkpackReadiness(edited, { requiresRevalidation: true });
 
     expect(edited.ontologyQa).toBeUndefined();
+    expect(edited.phaseAReview).toBeUndefined();
     expect(edited.qualityContract).toBeUndefined();
     expect(edited.dbHarness).toBeUndefined();
     expect(readiness.canShare).toBe(false);

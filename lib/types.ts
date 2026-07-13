@@ -375,18 +375,20 @@ export type GenerationEvidenceError = {
   message: string;
 };
 
+export type PhaseAReview = {
+  verdict: "통과" | "검토 필요";
+  verified: boolean;
+  evidenceChainState: PhaseAGenerationGrounding["evidenceChainState"];
+  groundingStatus: PhaseAGenerationGrounding["groundingStatus"];
+  outputStatus: PhaseAGenerationGrounding["generationPolicy"]["outputStatus"];
+  verifiedRecords: number;
+  humanConfirmation: { required: true; status: "pending" | "confirmed" };
+  actionableReason: string;
+};
+
 export type AskResponse = {
   question: string;
-  phaseAReview?: {
-    verdict: "검토 필요";
-    verified: false;
-    evidenceChainState: PhaseAGenerationGrounding["evidenceChainState"];
-    groundingStatus: PhaseAGenerationGrounding["groundingStatus"];
-    outputStatus: PhaseAGenerationGrounding["generationPolicy"]["outputStatus"];
-    verifiedRecords: 0;
-    humanConfirmation: { required: true; status: "pending" };
-    actionableReason: string;
-  };
+  phaseAReview?: PhaseAReview;
   answer: string;
   practicalPoints: string[];
   citations: SearchResult[];

@@ -28,7 +28,10 @@ import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
 import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
-import { querySafetyKnowledge } from "@/lib/ontology/knowledge-tool";
+import {
+  querySafetyKnowledge,
+  resolveSafetyKnowledgeSnapshot,
+} from "@/lib/ontology/knowledge-tool";
 import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import {
   isMcpEnabled,
@@ -288,16 +291,20 @@ function registerTools(server: McpServer): void {
         const reviewTask = resolveReviewTaskLabel(task, question);
         const generated = await handleGenerateSafetyDocpack(
           { question, task, mode, includeFull },
-          { querySafetyKnowledge, runAsk },
+          { querySafetyKnowledge, resolveSafetyKnowledgeSnapshot, runAsk },
         );
-        const { evidence, phaseAGrounding, response } = generated;
+        const { evidence, phaseAGrounding, publishedGraphSnapshot, response } = generated;
         const qaSource =
           response.deliverables.riskAssessmentDraft ||
           response.deliverables.tbmBriefing ||
           response.deliverables.workPlanDraft ||
           response.deliverables.safetyEducationRecordDraft ||
           "";
-        const qa = await reviewDocpack(reviewTask, qaSource);
+        const qa = await reviewDocpack(
+          reviewTask,
+          qaSource,
+          publishedGraphSnapshot,
+        );
         const result = buildReviewedDocpackResult(
           response,
           qa,
@@ -351,7 +358,7 @@ function registerTools(server: McpServer): void {
     async ({ question, mode, includeFull }, authContext) => {
         const generated = await handleGenerateSafetyDocpack(
           { question, mode, includeFull },
-          { querySafetyKnowledge, runAsk },
+          { querySafetyKnowledge, resolveSafetyKnowledgeSnapshot, runAsk },
         );
         const { response } = generated;
         const result = generated.docpack as Record<string, unknown>;

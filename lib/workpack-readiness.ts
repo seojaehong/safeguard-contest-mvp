@@ -1,4 +1,5 @@
 import type { AskResponse } from "./types";
+import { assessPhaseAReviewAuthority } from "./phase-a-review";
 
 export type WorkpackReadinessStatus = "ready" | "blocked";
 
@@ -62,6 +63,7 @@ export function applyWorkpackDeliverablesChange(
 
   return {
     ...nextResponse,
+    phaseAReview: undefined,
     ontologyQa: undefined,
     qualityContract: undefined,
     dbHarness: undefined
@@ -72,8 +74,10 @@ export function assessWorkpackReadiness(
   response: AskResponse,
   options: WorkpackReadinessOptions = {}
 ): WorkpackReadiness {
+  const phaseA = assessPhaseAReviewAuthority(response.phaseAReview);
   const reasons = [
     ...(options.requiresRevalidation ? ["편집된 문서 재검수 필요"] : []),
+    ...(!phaseA.authoritative ? [phaseA.reason] : []),
     ...(!response.ontologyQa
       ? ["안전조치 검수 정보 확인 필요"]
       : hasOntologyReviewBlocker(response) ? ["안전조치 검수 미통과"] : []),

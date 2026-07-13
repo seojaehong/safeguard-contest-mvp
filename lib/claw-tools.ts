@@ -19,7 +19,10 @@ import {
   validateCitations,
   type WeatherSignalLike,
 } from "./mcp-tools";
-import { querySafetyKnowledge } from "./ontology/knowledge-tool";
+import {
+  querySafetyKnowledge,
+  resolveSafetyKnowledgeSnapshot,
+} from "./ontology/knowledge-tool";
 import { reviewDocpack } from "./ontology/qa-review-tool";
 import type { SafetyReferenceItem } from "./safety-reference-catalog";
 import { searchSafetyReferences } from "./safety-reference-catalog-server";
@@ -110,10 +113,14 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
       const includeFull = asIncludeFull(input);
       const generated = await handleGenerateSafetyDocpack(
         { question, task: taskInput, mode, includeFull },
-        { querySafetyKnowledge, runAsk },
+        { querySafetyKnowledge, resolveSafetyKnowledgeSnapshot, runAsk },
       );
-      const { evidence, phaseAGrounding, response } = generated;
-      const qa = await reviewDocpack(task, selectQaDocumentText(response));
+      const { evidence, phaseAGrounding, publishedGraphSnapshot, response } = generated;
+      const qa = await reviewDocpack(
+        task,
+        selectQaDocumentText(response),
+        publishedGraphSnapshot,
+      );
       return buildReviewedDocpackResult(
         response,
         qa,
@@ -129,7 +136,7 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
       const includeFull = asIncludeFull(input);
       const generated = await handleGenerateSafetyDocpack(
         { question, mode, includeFull },
-        { querySafetyKnowledge, runAsk },
+        { querySafetyKnowledge, resolveSafetyKnowledgeSnapshot, runAsk },
       );
       return generated.docpack;
     }

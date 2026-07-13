@@ -6,6 +6,7 @@
 // Supabase/네트워크 의존성 없음 — vitest로 바로 검증 가능.
 
 import type { AskResponse } from "@/lib/types";
+import { assessPhaseAReviewAuthority } from "@/lib/phase-a-review";
 
 export type BriefingSite = {
   name: string;
@@ -157,6 +158,8 @@ function documentPackLink(workpackId?: string | null): string {
  */
 export function buildBriefingEmail(response: AskResponse, siteName: string, workpackId?: string | null): BriefingEmail {
   const subject = `오늘의 안전 브리핑 — ${siteName}`;
+  const phaseAAuthority = assessPhaseAReviewAuthority(response.phaseAReview);
+  const phaseAReview = response.phaseAReview;
 
   const weatherSummary = firstNonEmpty(
     response.externalData?.weather?.summary,
@@ -186,6 +189,12 @@ export function buildBriefingEmail(response: AskResponse, siteName: string, work
     "",
     "[즉시 조치]",
     actionsText,
+    "",
+    "[Phase A 근거 검토]",
+    `- 상태: ${phaseAAuthority.authoritative ? "확인 완료" : "검토 필요"}`,
+    `- 검증된 문서 반영 ${phaseAReview?.verifiedRecords ?? 0}건`,
+    `- 사람 확인 ${phaseAReview?.humanConfirmation.status === "confirmed" ? "완료" : "대기"}`,
+    `- 다음 조치: ${phaseAAuthority.authoritative ? "확인된 범위에서 공유 가능" : phaseAReview?.actionableReason || phaseAAuthority.reason}`,
     "",
     "[문서팩 링크]",
     link
@@ -217,6 +226,11 @@ export function buildBriefingDispatchWorkpack(
   workpackId?: string | null
 ): Record<string, unknown> {
   const email = buildBriefingEmail(response, siteName, workpackId);
+  const phaseAAuthority = assessPhaseAReviewAuthority(response.phaseAReview);
+  const citations = response.citations.slice(0, 5);
+  const kosha = response.externalData.kosha.references.slice(0, 3);
+  const koshaEducation = response.externalData.koshaEducation.recommendations.slice(0, 3);
+  const accidentCases = response.externalData.accidentCases.cases.slice(0, 3);
 
   return {
     companyName: response.scenario.companyName,
@@ -225,6 +239,11 @@ export function buildBriefingDispatchWorkpack(
     riskLevel: response.riskSummary.riskLevel,
     topRisk: response.riskSummary.topRisk,
     immediateActions: response.riskSummary.immediateActions,
+    phaseAReview: response.phaseAReview,
+    reviewAuthority: {
+      authoritative: phaseAAuthority.authoritative,
+      reason: phaseAAuthority.reason
+    },
     message: email.body,
     messageTarget: "manager",
     messageLanguage: {
@@ -246,12 +265,22 @@ export function buildBriefingDispatchWorkpack(
       foreignWorkerLanguages: response.deliverables.foreignWorkerLanguages
     },
     evidence: {
-      citations: response.citations.slice(0, 5),
+      authoritative: phaseAAuthority.authoritative,
+      citations: phaseAAuthority.authoritative ? citations : [],
       weather: response.externalData.weather,
       training: response.externalData.training.recommendations.slice(0, 3),
-      koshaEducation: response.externalData.koshaEducation.recommendations.slice(0, 3),
-      kosha: response.externalData.kosha.references.slice(0, 3),
-      accidentCases: response.externalData.accidentCases.cases.slice(0, 3)
+      koshaEducation: phaseAAuthority.authoritative ? koshaEducation : [],
+      kosha: phaseAAuthority.authoritative ? kosha : [],
+      accidentCases: phaseAAuthority.authoritative ? accidentCases : [],
+      diagnostic: phaseAAuthority.authoritative
+        ? undefined
+        : {
+            citations,
+            kosha,
+            koshaEducation,
+            accidentCases,
+            ontologyQa: response.ontologyQa
+          }
     },
     targetWorkers: [],
     status: response.status

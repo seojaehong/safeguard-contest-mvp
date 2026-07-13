@@ -28,6 +28,7 @@ export type McpDocpackAttribution = {
 
 export type WorkpackEvidenceSummary = {
   answer: string;
+  phaseAReview?: AskResponse["phaseAReview"];
   practicalPoints: string[];
   citations: AskResponse["citations"];
   sourceMix: AskResponse["sourceMix"] | null;
@@ -75,6 +76,7 @@ export function buildWorkpackEvidenceSummary(
 ): WorkpackEvidenceSummary {
   return {
     answer: response.answer,
+    phaseAReview: response.phaseAReview,
     practicalPoints: response.practicalPoints,
     citations: response.citations,
     sourceMix: response.sourceMix || null,
@@ -156,6 +158,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
     ? evidence.generationMode
     : undefined;
   const qualityContract = readJsonObject(evidence.qualityContract);
+  const phaseAReview = readJsonObject(evidence.phaseAReview);
   const ontologyQa = readJsonObject(evidence.ontologyQa);
   const evidenceLabels = readJsonObject(evidence.evidenceLabels);
   const structured = readJsonObject(evidence.structured);
@@ -171,6 +174,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
     data: {
       question: input.question,
       answer: readString(evidence.answer, "저장된 문서팩 상세입니다. 원문 답변은 이전 저장 형식에 없을 수 있습니다."),
+      phaseAReview: phaseAReview ? phaseAReview as AskResponse["phaseAReview"] : undefined,
       practicalPoints: readStringArray(evidence.practicalPoints),
       citations: Array.isArray(evidence.citations) ? evidence.citations as AskResponse["citations"] : [],
       sourceMix: isRecord(evidence.sourceMix) ? evidence.sourceMix as AskResponse["sourceMix"] : undefined,
