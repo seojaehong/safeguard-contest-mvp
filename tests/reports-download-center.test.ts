@@ -256,7 +256,7 @@ describe("reports download center remount behavior", () => {
       expect(stickyBox.y).toBeGreaterThanOrEqual(0);
       expect(stickyBox.y).toBeLessThan(720);
 
-      const approval = page.getByLabel("Before/After 사진 포함 승인");
+      const approval = page.getByLabel("개선 전/개선 후 사진 포함 승인");
       await approval.waitFor({ state: "visible" });
       expect(await approval.isChecked()).toBe(false);
 
@@ -264,7 +264,7 @@ describe("reports download center remount behavior", () => {
       expect(await approval.isChecked()).toBe(true);
 
       await page.reload({ waitUntil: "networkidle" });
-      const remountedApproval = page.getByLabel("Before/After 사진 포함 승인");
+      const remountedApproval = page.getByLabel("개선 전/개선 후 사진 포함 승인");
       await remountedApproval.waitFor({ state: "visible" });
       expect(await remountedApproval.isChecked()).toBe(false);
     } finally {

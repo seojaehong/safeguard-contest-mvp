@@ -352,7 +352,7 @@ function DownloadActions({
   return (
     <div className="safeclaw-download-actions" aria-label="리포트 다운로드">
       <p className="safeclaw-download-note">
-        승인한 Before/After 사진만 포함해 개선 리포트와 운영 메모리를 분리합니다.
+        승인한 개선 전/개선 후 사진만 포함해 개선 리포트와 운영 메모리를 분리합니다.
       </p>
       <p
         className={downloadState.status === "error" ? "export-error" : "safeclaw-download-note"}
@@ -453,7 +453,7 @@ function ReportStatePanel({ viewState }: { viewState: ReportViewState }) {
         </div>
         <div className="safeclaw-report-notes">
           <p>우측에서 기간과 필터를 조정하면 리포트를 다시 준비합니다.</p>
-          <p>사진 파일명은 Before/After 포함 승인 전까지 산출물에 들어가지 않습니다.</p>
+          <p>사진 파일명은 개선 전/개선 후 포함 승인 전까지 산출물에 들어가지 않습니다.</p>
         </div>
       </section>
     </article>
@@ -539,7 +539,7 @@ function ReportDocument({
       <section className="safeclaw-workdoc-section">
         <div className="safeclaw-workdoc-section-head">
           <span>02</span>
-          <h3>위험 As-Is/To-Be</h3>
+          <h3>위험 개선 전/개선 후</h3>
         </div>
         <div className="safeclaw-report-table" role="table" aria-label="위험성평가 리포트">
           <div role="row">
@@ -586,7 +586,7 @@ function ReportDocument({
                     checked={item.photoApproved}
                     onChange={() => onTogglePhotoApproval(item.id)}
                   />
-                  Before/After 사진 포함 승인
+                  개선 전/개선 후 사진 포함 승인
                 </label>
               ) : null}
             </article>

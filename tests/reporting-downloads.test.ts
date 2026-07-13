@@ -905,7 +905,7 @@ describe("reporting downloads", () => {
     expect(csv).toContain(snapshot.source.workpackSavedAt);
   });
 
-  it("renders As-Is/To-Be markdown without external submission wording", () => {
+  it("renders improvement comparison markdown without external submission wording", () => {
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
       improvements,
@@ -919,8 +919,8 @@ describe("reporting downloads", () => {
     });
     const markdown = buildReportMarkdown(snapshot);
 
-    expect(markdown).toContain("## 위험성평가 As-Is / To-Be");
-    expect(markdown).toContain("Before/After 사진");
+    expect(markdown).toContain("## 위험성평가 개선 전 / 개선 후");
+    expect(markdown).toContain("개선 전/개선 후 사진");
     expect(markdown).toContain("before-scaffold.jpg");
     expect(markdown).not.toContain("KRAS");
     expect(markdown).not.toContain("자동 제출");
@@ -983,7 +983,7 @@ describe("reporting downloads", () => {
     expect(events.map((event) => event.eventType)).toContain("classification_group");
     expect(events.find((event) => event.eventType === "improvement")?.payload).toMatchObject({
       hazardLabel: "추락 위험",
-      sourceLabel: "Before/After 사진"
+      sourceLabel: "개선 전/개선 후 사진"
     });
     expect(events.find((event) => event.eventType === "governance")?.payload).toMatchObject({
       authority: "operator_review_corpus",
@@ -1007,10 +1007,43 @@ describe("reporting downloads", () => {
     expect(markdown).toContain("authority: operator_review_corpus");
     expect(markdown).toContain("재생성 가능한 코퍼스");
     expect(markdown).toContain("## 개선 이벤트");
-    expect(markdown).toContain("Before/After 사진");
+    expect(markdown).toContain("개선 전/개선 후 사진");
     expect(markdown).toContain("## 분류 인덱스");
     expect(markdown).not.toContain("파인튜닝 완료");
     expect(markdown).not.toContain("학습 완료");
+  });
+
+  it("uses Korean improvement boundaries in CSV and Markdown while preserving corpus event keys", () => {
+    const localizedRiskRow: RiskAssessmentRow = {
+      ...riskRow,
+      verification: "TBM 확인 및 개선 전/개선 후 사진 기록"
+    };
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack([localizedRiskRow]),
+      improvements,
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const csv = buildReportCsv(snapshot);
+    const reportMarkdown = buildReportMarkdown(snapshot);
+    const corpusMarkdown = buildReportLearningMarkdown(snapshot);
+    const events = buildReportLearningJsonl(snapshot)
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as { eventType: string; payload: Record<string, unknown> });
+
+    for (const presentation of [csv, reportMarkdown, corpusMarkdown]) {
+      expect(presentation).not.toMatch(/\b(?:As-Is|To-Be|Before\/After)\b/u);
+      expect(presentation).toContain("개선 전");
+      expect(presentation).toContain("개선 후");
+    }
+    const riskEvent = events.find((event) => event.eventType === "risk_row");
+    const improvementEvent = events.find((event) => event.eventType === "improvement");
+    expect(riskEvent?.payload).toHaveProperty("asIs");
+    expect(riskEvent?.payload).toHaveProperty("toBe");
+    expect(improvementEvent?.payload).toHaveProperty("asIs");
+    expect(improvementEvent?.payload).toHaveProperty("toBe");
+    expect(improvementEvent?.payload.sourceLabel).toBe("개선 전/개선 후 사진");
   });
 
   it("parses local improvement history defensively", () => {
