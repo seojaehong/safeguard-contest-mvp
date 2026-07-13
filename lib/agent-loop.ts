@@ -241,7 +241,7 @@ export const CLAW_TOOLS: Anthropic.Tool[] = [
   {
     name: "qa_review_docpack",
     description:
-      "생성된 안전 문서(위험성평가·TBM 등) 본문을 작업유형의 법정 필수 조치 목록과 대조해 누락을 검출한다. 문서 초안을 만들었거나 사용자가 문서 검토를 요청하면 호출해 전파·저장 전 자기 검수한다.",
+      "생성된 안전 문서(위험성평가·TBM 등) 본문을 작업유형의 필수 조치 목록과 대조하는 진단 전용 도구다. 단독 결과는 승인이나 verified 근거가 아니며, 권위 있는 검수에는 generate_reviewed_safety_docpack과 사람 확인이 필요하다.",
     input_schema: {
       type: "object",
       properties: {

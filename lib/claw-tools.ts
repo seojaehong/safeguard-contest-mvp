@@ -8,6 +8,7 @@ import { fetchAccidentCases } from "./accident-cases";
 import type { AiMode } from "./ai-deliverables";
 import {
   buildAccidentCasesResult,
+  buildDiagnosticQaReviewResult,
   buildEvidenceMappingResult,
   buildHarnessAgentResult,
   buildReviewedDocpackResult,
@@ -148,7 +149,11 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
       return querySafetyKnowledge(asString(input, "query"));
     }
     case "qa_review_docpack": {
-      return reviewDocpack(asString(input, "task"), asString(input, "document_text"));
+      const diagnostic = await reviewDocpack(
+        asString(input, "task"),
+        asString(input, "document_text"),
+      );
+      return buildDiagnosticQaReviewResult(diagnostic);
     }
     default:
       throw new Error(`알 수 없는 도구: ${name}`);

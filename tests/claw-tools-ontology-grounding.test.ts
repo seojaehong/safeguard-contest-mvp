@@ -103,6 +103,34 @@ describe("claw ontology generation handlers", () => {
     expect(JSON.stringify(result)).not.toContain("최종 답변의 근거로 사용");
   });
 
+  test("wraps standalone legacy QA as diagnostic-only review-required output", async () => {
+    const result = await executeClawTool("qa_review_docpack", {
+      task: "지게차 상하차",
+      document_text: "끼임 출입통제 산업안전보건기준에 관한 규칙 제172조",
+    });
+
+    expect(mocks.reviewDocpack).toHaveBeenCalledWith(
+      "지게차 상하차",
+      "끼임 출입통제 산업안전보건기준에 관한 규칙 제172조",
+    );
+    expect(result).not.toHaveProperty("verdict");
+    expect(result).toMatchObject({
+      authority: "diagnostic_only",
+      reviewStatus: {
+        status: "review_required",
+        verdict: "검토 필요",
+        verified: false,
+        authoritative: false,
+        reasonCode: "phase_a_authority_contract_missing",
+        humanConfirmation: { required: true, status: "pending" },
+      },
+      qa: {
+        authority: "diagnostic_only",
+        diagnostic: { verdict: "통과" },
+      },
+    });
+  });
+
   test("routes the plain docpack tool through missing Phase A grounding", async () => {
     const result = await executeClawTool("generate_safety_docpack", {
       question: "등록되지 않은 해체 작업",

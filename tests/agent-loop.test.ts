@@ -136,6 +136,10 @@ describe("CLAW_TOOLS", () => {
     for (const tool of CLAW_TOOLS) {
       expect(tool.input_schema.type).toBe("object");
     }
+    const standaloneQa = CLAW_TOOLS.find((tool) => tool.name === "qa_review_docpack");
+    expect(standaloneQa?.description).toContain("진단 전용");
+    expect(standaloneQa?.description).toContain("승인");
+    expect(standaloneQa?.description).toContain("generate_reviewed_safety_docpack");
     expect(toolLabel("run_safeclaw_harness_agent", "start")).toBe("DB 하네스 근거 고정 중");
     expect(toolLabel("generate_reviewed_safety_docpack", "start")).toBe("검수 포함 안전 문서팩 생성 중");
   });

@@ -1,4 +1,5 @@
-import { SearchResult } from "@/lib/types";
+import { buildPhaseAReviewUiState, type PhaseAReviewUiState } from "@/lib/phase-a-review";
+import type { PhaseAReview, SearchResult } from "@/lib/types";
 import Link from "next/link";
 import type { Route } from "next";
 
@@ -20,7 +21,10 @@ function getCitationHref(item: SearchResult): Route {
   return `/interpretation/${item.id}` as Route;
 }
 
-function describeRelevance(item: SearchResult, question?: string) {
+function describeRelevance(item: SearchResult, question: string | undefined, authoritative: boolean) {
+  if (!authoritative) {
+    return "현재 작업과의 관련성을 Phase A 근거 계약으로 확인하기 전까지 연결 후보로만 표시합니다.";
+  }
   const normalizedQuestion = (question || "").toLowerCase();
   const tags = item.tags || [];
 
@@ -42,22 +46,42 @@ function describeRelevance(item: SearchResult, question?: string) {
   return "현재 작업 조건과 유사한 위험 판단 기준을 빠르게 확인하기 위한 근거입니다.";
 }
 
-function sourceStatusLabel(item: SearchResult) {
+function sourceStatusLabel(item: SearchResult, phaseAState: PhaseAReviewUiState) {
+  if (!phaseAState.authoritative) {
+    return item.sourceSystem === "lawgo" ? phaseAState.lawCitationLabel : "출처 확인 후보";
+  }
   if (item.sourceSystem === "lawgo") return "법제처 인용";
   if (item.sourceSystem === "korean-law-mcp") return "추가 근거";
   return "기본 근거";
 }
 
-function evidenceRoleLabel(item: SearchResult) {
-  if (item.type === "law") return "직접 근거";
-  return "보조 근거";
+function evidenceRoleLabel(item: SearchResult, phaseAState: PhaseAReviewUiState) {
+  if (item.type === "law") return phaseAState.directEvidenceLabel;
+  return phaseAState.supportingEvidenceLabel;
 }
 
-export function CitationList({ citations, question }: { citations: SearchResult[]; question?: string }) {
+export function CitationList({
+  citations,
+  question,
+  phaseAReview,
+}: {
+  citations: SearchResult[];
+  question?: string;
+  phaseAReview?: PhaseAReview;
+}) {
+  const phaseAState = buildPhaseAReviewUiState(phaseAReview);
+
   return (
     <div className="card list">
-      <h2 className="h3">근거 출처</h2>
-      <p className="muted small route-section-description">법령, 판례, 해석례를 나눠 현재 작업의 위험 판단과 산출물 문구를 뒷받침합니다. 법률 검토 최종 의견이 아니라 현장 문서 초안용 근거입니다.</p>
+      <div className="row">
+        <h2 className="h3">근거 출처</h2>
+        <span className="badge">{phaseAState.connectionLabel}</span>
+      </div>
+      <p className="muted small route-section-description">
+        {phaseAState.authoritative
+          ? "법령, 판례, 해석례를 나눠 현재 작업의 위험 판단과 산출물 문구를 뒷받침합니다. 법률 검토 최종 의견이 아니라 현장 문서 초안용 근거입니다."
+          : "표시된 출처는 연결 후보입니다. Phase A 근거 확인과 문서 반영 실적의 사람 확인 전에는 직접 근거나 확정 인용으로 사용하지 않습니다."}
+      </p>
       {citationGroups.map((group) => {
         const groupItems = citations.filter((item) => item.type === group.type);
         if (!groupItems.length) return null;
@@ -74,15 +98,17 @@ export function CitationList({ citations, question }: { citations: SearchResult[
                 <Link key={c.id} href={href} className="list citation-item" target="_blank" rel="noopener noreferrer">
                   <div className="row">
                     <span className="badge">{c.sourceLabel}</span>
-                    <span className="badge">{evidenceRoleLabel(c)}</span>
-                    <span className="badge">{sourceStatusLabel(c)}</span>
+                    <span className="badge">{evidenceRoleLabel(c, phaseAState)}</span>
+                    <span className="badge">{sourceStatusLabel(c, phaseAState)}</span>
                     <span className="badge">새 탭</span>
                     {c.tags?.some((tag) => tag.includes("작업위험 매핑")) ? <span className="badge">작업위험 매핑</span> : null}
                   </div>
                   <h3 className="h3">{c.title}</h3>
                   <span className="muted">{c.summary}</span>
-                  <span className="small relevance-note">문서 반영 위치: {citationDocumentMap[c.type].join(" · ")}</span>
-                  <span className="small relevance-note">{describeRelevance(c, question)}</span>
+                  <span className="small relevance-note">
+                    {phaseAState.authoritative ? "문서 반영 위치" : phaseAState.reflectionLabel}: {citationDocumentMap[c.type].join(" · ")}
+                  </span>
+                  <span className="small relevance-note">{describeRelevance(c, question, phaseAState.authoritative)}</span>
                 </Link>
               );
             })}

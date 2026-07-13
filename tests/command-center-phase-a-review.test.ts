@@ -18,7 +18,7 @@ const pendingReview: PhaseAReview = {
 
 describe("SafeGuardCommandCenter Phase A review surface", () => {
   it("projects pending Phase A evidence as a visible warning instead of a QA pass", () => {
-    expect(buildPhaseAReviewUiState(pendingReview)).toEqual({
+    expect(buildPhaseAReviewUiState(pendingReview)).toMatchObject({
       authoritative: false,
       status: "검토 필요",
       detail: "Phase A 근거 및 사람 확인 미완료",

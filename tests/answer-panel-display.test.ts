@@ -5,6 +5,58 @@ import {
   sanitizeAnswerForDisplay,
   type AnswerPanelPublicStatusInput
 } from "@/lib/answer-panel-display";
+import type { PhaseAReview } from "@/lib/types";
+
+const pendingReview: PhaseAReview = {
+  verdict: "검토 필요",
+  verified: false,
+  evidenceChainState: "review_required",
+  groundingStatus: "review_required",
+  outputStatus: "review_required_draft",
+  verifiedRecords: 0,
+  humanConfirmation: { required: true, status: "pending" },
+  actionableReason: "Phase A source resolution과 사람 확인이 필요합니다.",
+};
+
+const readyReview: PhaseAReview = {
+  verdict: "통과",
+  verified: true,
+  evidenceChainState: "resolved",
+  groundingStatus: "resolved",
+  outputStatus: "grounded_draft",
+  verifiedRecords: 1,
+  humanConfirmation: { required: true, status: "confirmed" },
+  actionableReason: "Phase A 근거와 문서 반영 실적을 사람이 확인했습니다.",
+};
+
+function statusInput(
+  phaseAReview?: PhaseAReview,
+): AnswerPanelPublicStatusInput & { phaseAReview?: PhaseAReview } {
+  return {
+    phaseAReview,
+    status: {
+      lawgo: "live",
+      weather: "fallback",
+      kosha: "live",
+      work24: "mock"
+    },
+    externalData: {
+      safetyReference: {
+        mode: "live",
+        count: 42
+      }
+    },
+    dbHarness: {
+      summary: {
+        directEvidence: 3,
+        sifCases: 2
+      }
+    },
+    qualityContract: {
+      summary: "근거와 문서 반영 위치를 확인했습니다."
+    }
+  };
+}
 
 describe("answer panel display copy", () => {
   it("removes internal provider and fallback diagnostics from visible answer text", () => {
@@ -23,36 +75,26 @@ describe("answer panel display copy", () => {
     expect(sanitized).not.toMatch(/OpenAI|OPENAI_API_KEY|fallback|timeout|retry|graceful/i);
   });
 
-  it("builds public status notes without exposing raw status detail text", () => {
-    const input: AnswerPanelPublicStatusInput = {
-      status: {
-        lawgo: "live",
-        weather: "fallback",
-        kosha: "live",
-        work24: "mock"
-      },
-      externalData: {
-        safetyReference: {
-          mode: "live",
-          count: 42
-        }
-      },
-      dbHarness: {
-        summary: {
-          directEvidence: 3,
-          sifCases: 2
-        }
-      },
-      qualityContract: {
-        summary: "근거와 문서 반영 위치를 확인했습니다."
-      }
-    };
+  it.each([
+    ["pending", pendingReview],
+    ["missing", undefined],
+  ] as const)("fails closed for %s Phase A status notes", (_state, review) => {
+    const notes = buildAnswerPanelStatusNotes(statusInput(review)).join(" / ");
 
-    const notes = buildAnswerPanelStatusNotes(input).join(" / ");
+    expect(notes).toContain("법령 근거: 연결 후보");
+    expect(notes).toContain("KOSHA 자료: 연결 후보");
+    expect(notes).toContain("기상 신호: 보조 근거로 표시");
+    expect(notes).toContain("DB 하네스: 연결 후보 3건 · SIF 위험 우선순위 후보 2건");
+    expect(notes).not.toContain("법령 근거: 연결됨");
+    expect(notes).not.toContain("직접 근거");
+    expect(notes).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
+  });
+
+  it("uses connected and direct status notes only for confirmed Phase A authority", () => {
+    const notes = buildAnswerPanelStatusNotes(statusInput(readyReview)).join(" / ");
 
     expect(notes).toContain("법령 근거: 연결됨");
-    expect(notes).toContain("기상 신호: 보조 근거로 표시");
+    expect(notes).toContain("KOSHA 자료: 연결됨");
     expect(notes).toContain("DB 하네스: 직접 근거 3건 · SIF 사례 2건");
-    expect(notes).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
   });
 });

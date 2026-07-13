@@ -18,6 +18,7 @@ import {
   type CurrentDispatchSnapshot,
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
+import { buildPhaseAReviewUiState, type PhaseAReviewUiState } from "@/lib/phase-a-review";
 import type { AskResponse } from "@/lib/types";
 import { applyWorkpackDeliverablesChange } from "@/lib/workpack-readiness";
 import {
@@ -650,14 +651,14 @@ function normalizeEvidenceSummary(summary: string) {
   return excerpt(summary, 110);
 }
 
-function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+function buildEvidenceCards(data: AskResponse, phaseAState: PhaseAReviewUiState): EvidenceCard[] {
   const weatherCard: EvidenceCard = {
     id: "weather-current",
     title: `${data.externalData.weather.locationLabel} 기상 위험`,
     summary: data.externalData.weather.summary,
     sourceLabel: "기상청",
     role: "supporting",
-    roleLabel: "현장 조건 보조 근거",
+    roleLabel: phaseAState.authoritative ? "현장 조건 보조 근거" : phaseAState.supportingEvidenceLabel,
     reflectedDocuments: ["위험성평가표", "작업계획서", "TBM 브리핑"],
     reflectionLabel: "위험성평가표 · 작업계획서 · TBM 브리핑에 작업중지/보호구 확인 기준으로 반영",
     href: "/weather"
@@ -669,7 +670,7 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
       summary: item.fitReason || item.reason,
       sourceLabel: item.institution,
       role: "supporting" as const,
-      roleLabel: "교육 편성 보조 근거",
+      roleLabel: phaseAState.authoritative ? "교육 편성 보조 근거" : phaseAState.supportingEvidenceLabel,
       reflectedDocuments: ["안전보건교육 기록", "외국인 브리핑"],
       reflectionLabel: "안전보건교육 기록 · 외국인 브리핑에 교육 주제와 이해 확인으로 반영",
       href: item.url
@@ -680,7 +681,7 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
       summary: item.fitReason || item.reason,
       sourceLabel: item.provider,
       role: "supporting" as const,
-      roleLabel: "후속교육 보조 근거",
+      roleLabel: phaseAState.authoritative ? "후속교육 보조 근거" : phaseAState.supportingEvidenceLabel,
       reflectedDocuments: ["안전보건교육 기록", "관리자 후속교육"],
       reflectionLabel: "안전보건교육 기록 · 관리자 후속교육에 교육 주제와 확인 질문으로 반영",
       href: item.url
@@ -695,7 +696,7 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
       summary,
       sourceLabel: item.agency || "KOSHA",
       role: "direct",
-      roleLabel: "문서 문구 직접 근거",
+      roleLabel: phaseAState.authoritative ? "문서 문구 직접 근거" : phaseAState.directEvidenceLabel,
       reflectedDocuments,
       reflectionLabel: buildReflectionLabel(reflectedDocuments, summary),
       href: item.url
@@ -710,7 +711,9 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
       summary: item.summary,
       sourceLabel: item.service,
       role,
-      roleLabel: role === "direct" ? "공공 API 직접 근거" : "사례 기반 보조 근거",
+      roleLabel: phaseAState.authoritative
+        ? role === "direct" ? "공공 API 직접 근거" : "사례 기반 보조 근거"
+        : role === "direct" ? phaseAState.directEvidenceLabel : phaseAState.supportingEvidenceLabel,
       reflectedDocuments,
       reflectionLabel: buildReflectionLabel(reflectedDocuments, item.summary),
       href: item.url
@@ -722,27 +725,40 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
     summary: item.preventionPoint,
     sourceLabel: item.sourceType === "fatal-accident" ? "중대재해 사례" : "재해사례",
     role: "supporting",
-    roleLabel: "사례 기반 보조 근거",
+    roleLabel: phaseAState.authoritative ? "사례 기반 보조 근거" : phaseAState.supportingEvidenceLabel,
     reflectedDocuments: ["위험성평가표", "TBM 브리핑", "비상대응 절차"],
     reflectionLabel: "위험성평가표 · TBM 브리핑 · 비상대응 절차에 유사사고 예방 포인트로 반영",
     href: item.sourceUrl || "/knowledge"
   }));
-  const knowledgeCards = (data.externalData.safetyKnowledge?.matches || []).map((item): EvidenceCard => ({
-    id: `knowledge-${item.id}`,
-    title: item.title,
-    summary: item.shortSummary || item.controls.slice(0, 2).join(" / ") || item.sourceTitles.join(" / "),
-    sourceLabel: "안전 지식 DB",
-    role: item.evidenceRole || "direct",
-    roleLabel: item.roleLabel || "내장 지식 직접 근거",
-    reflectedDocuments: mapDocumentLabels(item.primaryDocuments, ["위험성평가표", "TBM 브리핑"]),
-    reflectionLabel: item.documentReflectionLabel || buildReflectionLabel(mapDocumentLabels(item.primaryDocuments, ["위험성평가표", "TBM 브리핑"]), item.controls[0] || item.title),
-    href: "/knowledge"
-  }));
+  const knowledgeCards = (data.externalData.safetyKnowledge?.matches || []).map((item): EvidenceCard => {
+    const role = item.evidenceRole || "direct";
+    return {
+      id: `knowledge-${item.id}`,
+      title: item.title,
+      summary: item.shortSummary || item.controls.slice(0, 2).join(" / ") || item.sourceTitles.join(" / "),
+      sourceLabel: "안전 지식 DB",
+      role,
+      roleLabel: phaseAState.authoritative
+        ? item.roleLabel || "내장 지식 직접 근거"
+        : role === "direct" ? phaseAState.directEvidenceLabel : phaseAState.supportingEvidenceLabel,
+      reflectedDocuments: mapDocumentLabels(item.primaryDocuments, ["위험성평가표", "TBM 브리핑"]),
+      reflectionLabel: item.documentReflectionLabel || buildReflectionLabel(mapDocumentLabels(item.primaryDocuments, ["위험성평가표", "TBM 브리핑"]), item.controls[0] || item.title),
+      href: "/knowledge"
+    };
+  });
 
   return [weatherCard, ...koshaCards, ...openApiCards, ...accidentCards, ...trainingCards, ...knowledgeCards];
 }
 
-function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard[] }) {
+function EvidenceCardList({
+  title,
+  cards,
+  phaseAState,
+}: {
+  title: string;
+  cards: EvidenceCard[];
+  phaseAState: PhaseAReviewUiState;
+}) {
   const visibleCards = cards.slice(0, 6);
   const hiddenCount = cards.length - visibleCards.length;
 
@@ -761,7 +777,11 @@ function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard
             </div>
             <strong>{item.title}</strong>
             <small>{normalizeEvidenceSummary(item.summary)}</small>
-            <small>반영 라벨: {item.reflectionLabel}</small>
+            <small>
+              {phaseAState.reflectionLabel}: {phaseAState.authoritative
+                ? item.reflectionLabel
+                : item.reflectedDocuments.join(" · ")}
+            </small>
           </a>
         ))}
       </div>
@@ -982,7 +1002,8 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
 
 export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
-  const evidenceCards = buildEvidenceCards(current.data);
+  const phaseAState = buildPhaseAReviewUiState(current.data.phaseAReview);
+  const evidenceCards = buildEvidenceCards(current.data, phaseAState);
   const directEvidence = evidenceCards.filter((item) => item.role === "direct");
   const supportingEvidence = evidenceCards.filter((item) => item.role === "supporting");
 
@@ -991,14 +1012,16 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
       <CurrentWorkpackBanner isCurrent={current.isCurrent} savedAt={current.savedAt} />
       <section className="safeclaw-module-grid two">
         <article className="safeclaw-module-panel">
-          <span>문서 반영 근거</span>
-          <h2>직접 근거와 보조 근거</h2>
-          <p>법령·KOSHA 공식 기준은 문서 문구를 직접 뒷받침하고, 재해사례·기상·후속교육은 현장 판단을 보조하는 근거로 분리합니다.</p>
-          {directEvidence.length ? <EvidenceCardList title="직접 근거" cards={directEvidence} /> : null}
-          {supportingEvidence.length ? <EvidenceCardList title="보조 근거" cards={supportingEvidence} /> : null}
+          <span>{phaseAState.connectionLabel}</span>
+          <h2>{phaseAState.evidenceHeading}</h2>
+          <p>{phaseAState.authoritative
+            ? "법령·KOSHA 공식 기준은 문서 문구를 직접 뒷받침하고, 재해사례·기상·후속교육은 현장 판단을 보조하는 근거로 분리합니다."
+            : "표시된 자료는 연결 후보입니다. Phase A 근거 확인과 문서 반영 실적의 사람 확인 전에는 확정 근거로 공유하지 않습니다."}</p>
+          {directEvidence.length ? <EvidenceCardList title={phaseAState.directEvidenceLabel} cards={directEvidence} phaseAState={phaseAState} /> : null}
+          {supportingEvidence.length ? <EvidenceCardList title={phaseAState.supportingEvidenceLabel} cards={supportingEvidence} phaseAState={phaseAState} /> : null}
           {!evidenceCards.length ? <a href="/knowledge">공식자료는 지식 DB와 작업공간 근거 패널에서 확인합니다.</a> : null}
         </article>
-        <CitationList citations={current.data.citations} question={current.data.question} />
+        <CitationList citations={current.data.citations} question={current.data.question} phaseAReview={current.data.phaseAReview} />
       </section>
     </>
   );

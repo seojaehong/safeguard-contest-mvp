@@ -1,6 +1,8 @@
-import type { AskResponse, IntegrationMode } from "@/lib/types";
+import { buildPhaseAReviewUiState } from "@/lib/phase-a-review";
+import type { AskResponse, IntegrationMode, PhaseAReview } from "@/lib/types";
 
 export type AnswerPanelPublicStatusInput = {
+  phaseAReview?: PhaseAReview;
   status: Pick<AskResponse["status"], "lawgo" | "weather" | "kosha" | "work24">;
   externalData: {
     safetyReference?: Pick<NonNullable<AskResponse["externalData"]["safetyReference"]>, "mode" | "count">;
@@ -51,10 +53,11 @@ export function sanitizeAnswerForDisplay(answer: string) {
 }
 
 export function buildAnswerPanelStatusNotes(data: AnswerPanelPublicStatusInput) {
+  const phaseAState = buildPhaseAReviewUiState(data.phaseAReview);
   const notes = [
-    `법령 근거: ${publicModeLabel(data.status.lawgo)}`,
+    `법령 근거: ${phaseAState.authoritative ? publicModeLabel(data.status.lawgo) : phaseAState.directEvidenceLabel}`,
     `기상 신호: ${publicModeLabel(data.status.weather)}`,
-    `KOSHA 자료: ${publicModeLabel(data.status.kosha)}`,
+    `KOSHA 자료: ${phaseAState.authoritative ? publicModeLabel(data.status.kosha) : phaseAState.directEvidenceLabel}`,
     `후속 교육: ${publicModeLabel(data.status.work24)}`
   ];
 
@@ -62,18 +65,20 @@ export function buildAnswerPanelStatusNotes(data: AnswerPanelPublicStatusInput) 
   if (safetyReference) {
     notes.push(
       safetyReference.count > 0
-        ? `안전지식 DB: ${safetyReference.count.toLocaleString("ko-KR")}건 반영 후보`
-        : `안전지식 DB: ${publicModeLabel(safetyReference.mode)}`
+        ? `안전지식 DB: ${safetyReference.count.toLocaleString("ko-KR")}건 ${phaseAState.authoritative ? "반영 후보" : "연결 후보"}`
+        : `안전지식 DB: ${phaseAState.authoritative ? publicModeLabel(safetyReference.mode) : "검토 필요"}`
     );
   }
 
   if (data.dbHarness) {
     const summary = data.dbHarness.summary;
-    notes.push(`DB 하네스: 직접 근거 ${summary.directEvidence}건 · SIF 사례 ${summary.sifCases}건`);
+    notes.push(phaseAState.authoritative
+      ? `DB 하네스: 직접 근거 ${summary.directEvidence}건 · SIF 사례 ${summary.sifCases}건`
+      : `DB 하네스: ${phaseAState.directEvidenceLabel} ${summary.directEvidence}건 · SIF 위험 우선순위 후보 ${summary.sifCases}건`);
   }
 
   if (data.qualityContract) {
-    notes.push(`품질 검수: ${data.qualityContract.summary}`);
+    notes.push(`품질 검수: ${phaseAState.authoritative ? data.qualityContract.summary : phaseAState.detail}`);
   }
 
   return notes;

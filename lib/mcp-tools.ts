@@ -157,6 +157,24 @@ export type ReviewedDocpackResult = {
   openClawUsageNote: string;
 };
 
+export type DiagnosticQaReviewResult = {
+  authority: "diagnostic_only";
+  reviewStatus: {
+    status: "review_required";
+    verdict: "검토 필요";
+    verified: false;
+    authoritative: false;
+    groundingStatus: "missing";
+    reasonCode: "phase_a_authority_contract_missing";
+    actionableReason: string;
+    humanConfirmation: { required: true; status: "pending" };
+  };
+  qa: {
+    authority: "diagnostic_only";
+    diagnostic: QaReviewResult;
+  };
+};
+
 const REGISTERED_QA_TASK_LABELS = [
   "고소작업",
   "도장(스프레이)",
@@ -478,6 +496,29 @@ export function buildReviewedDocpackResult(
     openClawUsageNote: authoritativePass
       ? "Phase A grounding, QA coverage, verified materialization, 지정된 사람의 최종 확인이 모두 완료된 결과입니다."
       : `검토 필요: ${actionableReason} 이 응답을 grounded 또는 verified 근거로 사용하지 마세요.`,
+  };
+}
+
+export function buildDiagnosticQaReviewResult(
+  diagnostic: QaReviewResult,
+): DiagnosticQaReviewResult {
+  return {
+    authority: "diagnostic_only",
+    reviewStatus: {
+      status: "review_required",
+      verdict: "검토 필요",
+      verified: false,
+      authoritative: false,
+      groundingStatus: "missing",
+      reasonCode: "phase_a_authority_contract_missing",
+      actionableReason:
+        "이 단독 QA는 문서 커버리지 진단만 제공합니다. Phase A 근거 materialization과 지정된 사람의 확인을 포함한 검수 문서팩을 생성하세요.",
+      humanConfirmation: { required: true, status: "pending" },
+    },
+    qa: {
+      authority: "diagnostic_only",
+      diagnostic,
+    },
   };
 }
 

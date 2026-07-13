@@ -10,6 +10,7 @@ import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 import { OFFICIAL_CONTACTS } from "@/lib/safety-contacts";
 import {
   buildAccidentCasesResult,
+  buildDiagnosticQaReviewResult,
   buildDocpackResult,
   buildReviewedDocpackResult,
   buildHarnessAgentResult,
@@ -554,6 +555,27 @@ describe("buildAccidentCasesResult", () => {
 });
 
 describe("tool result helpers", () => {
+  it("serializes standalone QA as a diagnostic-only fail-closed MCP contract", () => {
+    const result = toToolResult(buildDiagnosticQaReviewResult(passingQaReview()));
+    const payload = JSON.parse(result.content[0].text) as Record<string, unknown>;
+
+    expect(payload).not.toHaveProperty("verdict");
+    expect(payload).toMatchObject({
+      authority: "diagnostic_only",
+      reviewStatus: {
+        status: "review_required",
+        verdict: "검토 필요",
+        verified: false,
+        authoritative: false,
+        humanConfirmation: { required: true, status: "pending" },
+      },
+      qa: {
+        authority: "diagnostic_only",
+        diagnostic: { verdict: "통과" },
+      },
+    });
+  });
+
   it("toToolResult wraps payload as JSON text content", () => {
     const result = toToolResult({ a: 1 });
     expect(result.content[0].type).toBe("text");
