@@ -43,16 +43,6 @@ async function expectControlledFontFailure(response: Response): Promise<void> {
   });
 }
 
-async function expectControlledPdfFailure(response: Response): Promise<void> {
-  expect(response.status).toBe(500);
-  expect(response.headers.get("cache-control")).toBe("no-store");
-  await expect(response.json()).resolves.toEqual({
-    ok: false,
-    code: "PDF_EXPORT_FAILED",
-    message: "PDF 문서를 만들지 못했습니다."
-  });
-}
-
 describe.sequential("PDF font asset failures", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -92,28 +82,57 @@ describe.sequential("PDF font asset failures", () => {
     expect(logged).not.toContain("not-a-valid-ttf");
   });
 
-  it("returns a safe code for non-font PDF build failures without leaking internals", async () => {
-    const buildFailure = new Error("C:\\private\\pdf-create secret-pdf-token");
-    vi.spyOn(PDFDocument, "create").mockRejectedValueOnce(buildFailure);
-    const logger = vi.spyOn(console, "error").mockImplementation(() => undefined);
+  it("logs and rethrows non-font create, page, and save failures", async () => {
+    const cases: Array<{
+      label: string;
+      install: (failure: Error) => void;
+    }> = [
+      {
+        label: "create",
+        install: (failure) => {
+          vi.spyOn(PDFDocument, "create").mockRejectedValueOnce(failure);
+        },
+      },
+      {
+        label: "page",
+        install: (failure) => {
+          vi.spyOn(PDFDocument.prototype, "addPage").mockImplementationOnce(() => {
+            throw failure;
+          });
+        },
+      },
+      {
+        label: "save",
+        install: (failure) => {
+          vi.spyOn(PDFDocument.prototype, "save").mockRejectedValueOnce(failure);
+        },
+      },
+    ];
 
-    await expectControlledPdfFailure(await POST(createRequest()));
-    const logged = logger.mock.calls.flat().map(String).join("\n");
-    expect(logged).toContain('"errorType":"Error"');
-    expect(logged).toContain('"errorCode":"PDF_EXPORT_FAILED"');
-    expect(logged).not.toContain("private");
-    expect(logged).not.toContain("secret-pdf-token");
+    for (const testCase of cases) {
+      const failure = new Error(`C:\\private\\pdf-${testCase.label} secret-pdf-token`);
+      testCase.install(failure);
+      const logger = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+      await expect(POST(createRequest())).rejects.toBe(failure);
+      const logged = logger.mock.calls.flat().map(String).join("\n");
+      expect(logged).toContain('"errorType":"Error"');
+      expect(logged).toContain('"errorCode":"PDF_EXPORT_FAILED"');
+      expect(logged).not.toContain("private");
+      expect(logged).not.toContain("secret-pdf-token");
+      vi.restoreAllMocks();
+    }
   });
 
-  it("returns a safe code for non-font embed failures without leaking internals", async () => {
+  it("maps a typed font embed failure to the controlled font response", async () => {
     const embedFailure = new Error("C:\\private\\font-reference secret-font-token");
     vi.spyOn(PDFDocument.prototype, "embedFont").mockRejectedValueOnce(embedFailure);
     const logger = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    await expectControlledPdfFailure(await POST(createRequest()));
+    await expectControlledFontFailure(await POST(createRequest()));
     const logged = logger.mock.calls.flat().map(String).join("\n");
-    expect(logged).toContain('"errorType":"Error"');
-    expect(logged).toContain('"errorCode":"PDF_EXPORT_FAILED"');
+    expect(logged).toContain('"errorType":"PdfFontAssetError"');
+    expect(logged).toContain('"errorCode":"PDF_FONT_ASSET_UNAVAILABLE"');
     expect(logged).not.toContain("private");
     expect(logged).not.toContain("secret-font-token");
   });

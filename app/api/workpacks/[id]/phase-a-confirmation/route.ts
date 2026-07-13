@@ -86,6 +86,25 @@ function errorType(error: unknown): string {
   return error instanceof Error ? error.name : typeof error;
 }
 
+function nextWorkpackRevision(currentRevision: string, now: Date): string {
+  const currentRevisionMs = Date.parse(currentRevision);
+  const nextRevisionMs = Number.isFinite(currentRevisionMs)
+    ? Math.max(now.getTime(), currentRevisionMs + 1)
+    : now.getTime();
+  return new Date(nextRevisionMs).toISOString();
+}
+
+function revisionConflictResponse(confirmationId?: string) {
+  return NextResponse.json({
+    ok: false,
+    code: "phase_a_confirmation_revision_conflict",
+    ...(confirmationId ? { confirmationId } : {}),
+    message: confirmationId
+      ? "다른 요청이 먼저 확인을 저장했습니다. 반환된 확인 ID로 멱등 재시도하세요."
+      : "다른 요청이 먼저 작업팩을 변경했습니다. 최신 상태를 다시 확인하세요.",
+  }, { status: 409, headers: { "cache-control": "no-store" } });
+}
+
 export async function POST(request: NextRequest, context: RouteContext) {
   const client = createSupabaseAdminClient();
   if (!client) {
@@ -152,18 +171,30 @@ export async function POST(request: NextRequest, context: RouteContext) {
   }
 
   try {
+    const wasAlreadyConfirmed = stored.phaseAReview.humanConfirmation.status === "confirmed";
+    const confirmationNow = new Date();
     const confirmedReview = issuePhaseAReviewConfirmation({
       review: stored.phaseAReview,
       workpackId: owned.context.workpackId,
       principal,
       requestedBinding: parsed,
       requestedConfirmationId: parsed.confirmationId,
-      now: new Date(),
+      now: confirmationNow,
       createConfirmationId: randomUUID,
     });
+    if (wasAlreadyConfirmed) {
+      return NextResponse.json({
+        ok: true,
+        confirmationId: confirmedReview.humanConfirmation.status === "confirmed"
+          ? confirmedReview.humanConfirmation.confirmationId
+          : null,
+        phaseAReview: confirmedReview,
+        message: "기존 Phase A 확인을 멱등하게 재사용했습니다.",
+      }, { headers: { "cache-control": "no-store" } });
+    }
     const confirmedAt = confirmedReview.humanConfirmation.status === "confirmed"
       ? confirmedReview.humanConfirmation.confirmedAt
-      : new Date().toISOString();
+      : confirmationNow.toISOString();
     const confirmedResponse = attachQualityContract({
       ...stored,
       answer: applyPhaseADocumentAuthorityMarker(stored.answer, confirmedReview),
@@ -198,15 +229,16 @@ export async function POST(request: NextRequest, context: RouteContext) {
       evidence_summary: toJson(evidenceSummary),
       quality_contract: toJson(resealed.qualityContract ?? {}),
       status: toJson(resealed.status),
-      updated_at: confirmedAt,
+      updated_at: nextWorkpackRevision(owned.context.revision, confirmationNow),
     };
-    const { error } = await client
+    const { data: persisted, error } = await client
       .from("workpacks")
       .update(update)
       .eq("id", owned.context.workpackId)
       .eq("organization_id", owned.context.organizationId)
+      .eq("updated_at", owned.context.revision)
       .select("id")
-      .single();
+      .maybeSingle();
     if (error) {
       log.error("persist_failed", {
         errorType: errorType(error),
@@ -217,6 +249,41 @@ export async function POST(request: NextRequest, context: RouteContext) {
         code: "phase_a_confirmation_persist_failed",
         message: "Phase A 확인 결과를 저장하지 못했습니다.",
       }, { status: 500, headers: { "cache-control": "no-store" } });
+    }
+    if (!persisted) {
+      const concurrent = await loadOwnedWorkpackOperationContext(client, user, id);
+      if (!concurrent.ok) return revisionConflictResponse();
+      const concurrentStored = concurrent.context.shareAuthority.workpack;
+      const concurrentEvidence = concurrentStored
+        ? verifyAskResponseGenerationEvidence(concurrentStored, secret)
+        : null;
+      const concurrentConfirmation = concurrentStored?.phaseAReview?.humanConfirmation;
+      if (
+        concurrentEvidence?.ok &&
+        concurrentStored?.phaseAReview &&
+        concurrentConfirmation?.status === "confirmed"
+      ) {
+        try {
+          issuePhaseAReviewConfirmation({
+            review: concurrentStored.phaseAReview,
+            workpackId: concurrent.context.workpackId,
+            principal,
+            requestedBinding: parsed,
+            requestedConfirmationId: concurrentConfirmation.confirmationId,
+            now: confirmationNow,
+            createConfirmationId: randomUUID,
+          });
+          return revisionConflictResponse(concurrentConfirmation.confirmationId);
+        } catch (conflictError) {
+          log.warn("revision_conflict_binding_mismatch", {
+            errorType: errorType(conflictError),
+            errorCode: conflictError instanceof PhaseAConfirmationError
+              ? conflictError.code
+              : "phase_a_confirmation_conflict_validation_failed",
+          });
+        }
+      }
+      return revisionConflictResponse();
     }
 
     return NextResponse.json({

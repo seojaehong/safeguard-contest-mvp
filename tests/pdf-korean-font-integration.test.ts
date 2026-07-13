@@ -168,7 +168,8 @@ describe("Korean PDF font integration", () => {
     expect(source).toContain('buildSafeExportErrorContext(error, "PDF_FONT_ASSET_UNAVAILABLE")');
     expect(source).toContain('buildExportErrorPayload("PDF_FONT_ASSET_UNAVAILABLE")');
     expect(source).toContain('buildSafeExportErrorContext(error, "PDF_EXPORT_FAILED")');
-    expect(source).toContain('buildExportErrorPayload("PDF_EXPORT_FAILED")');
+    expect(source).not.toContain('buildExportErrorPayload("PDF_EXPORT_FAILED")');
+    expect(source).toContain("throw error;");
     expect(source).not.toContain("console.error(");
   });
 

@@ -1150,8 +1150,19 @@ async function buildBinaryPdf(
   const fonts = loadEmbeddedPdfFonts();
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(checksumCorrectingFontkit);
-  const regularFont = await pdf.embedFont(fonts.regular, { subset: true });
-  const boldFont = await pdf.embedFont(fonts.bold, { subset: true });
+  let embeddedFonts: {
+    regular: Awaited<ReturnType<typeof pdf.embedFont>>;
+    bold: Awaited<ReturnType<typeof pdf.embedFont>>;
+  };
+  try {
+    embeddedFonts = {
+      regular: await pdf.embedFont(fonts.regular, { subset: true }),
+      bold: await pdf.embedFont(fonts.bold, { subset: true }),
+    };
+  } catch (error) {
+    throw new PdfFontAssetError(error);
+  }
+  const { regular: regularFont, bold: boldFont } = embeddedFonts;
   const createPage = () => {
     const page = pdf.addPage([595, 842]);
     return {
@@ -1253,11 +1264,7 @@ export async function POST(request: NextRequest) {
             { status: 500, headers: { "cache-control": "no-store" } }
           );
         }
-        log.error("export_failed", buildSafeExportErrorContext(error, "PDF_EXPORT_FAILED"));
-        return NextResponse.json(
-          buildExportErrorPayload("PDF_EXPORT_FAILED"),
-          { status: 500, headers: { "cache-control": "no-store" } },
-        );
+        throw error;
       }
       const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
       return new NextResponse(new Uint8Array(pdf), {
@@ -1291,9 +1298,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof PdfExportLimitError) return pdfExportLimitResponse();
     log.error("export_failed", buildSafeExportErrorContext(error, "PDF_EXPORT_FAILED"));
-    return NextResponse.json(
-      buildExportErrorPayload("PDF_EXPORT_FAILED"),
-      { status: 500, headers: { "cache-control": "no-store" } },
-    );
+    throw error;
   }
 }

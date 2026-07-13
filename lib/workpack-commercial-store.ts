@@ -68,6 +68,7 @@ export type WorkpackOperationContext = {
   workpackId: string;
   question: string;
   generatedAt: string;
+  revision: string;
   shareAuthority: StoredWorkpackShareAuthority;
 };
 
@@ -202,7 +203,7 @@ export async function loadOwnedWorkpackOperationContext(
 
   const { data: workpack, error: workpackError } = await client
     .from("workpacks")
-    .select("id,organization_id,site_id,question,scenario,deliverables,evidence_summary,status,created_at")
+    .select("id,organization_id,site_id,question,scenario,deliverables,evidence_summary,status,created_at,updated_at")
     .eq("id", workpackId)
     .in("organization_id", organizationIds)
     .maybeSingle();
@@ -232,6 +233,7 @@ export async function loadOwnedWorkpackOperationContext(
       workpackId: workpack.id,
       question: workpack.question,
       generatedAt: workpack.created_at,
+      revision: workpack.updated_at,
       shareAuthority: assessStoredWorkpackShareAuthority({
         question: workpack.question,
         scenario: workpack.scenario,

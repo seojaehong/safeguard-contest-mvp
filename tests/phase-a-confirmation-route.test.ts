@@ -98,22 +98,37 @@ function request(body: unknown, token = "authenticated-session-token"): NextRequ
   });
 }
 
-function makeUpdateClient() {
+function makeUpdateClient(onCommit?: (payload: Record<string, unknown>) => void) {
   let updateCount = 0;
   let updated: Record<string, unknown> | null = null;
-  const query = {
-    eq() { return query; },
-    select() { return query; },
-    single: async () => ({ data: { id: WORKPACK_ID }, error: null }),
-  };
+  let revision = "2026-07-13T18:00:00.000Z";
   return {
     client: {
       from(table: string) {
         if (table !== "workpacks") throw new Error(`unexpected table ${table}`);
         return {
           update(payload: Record<string, unknown>) {
-            updateCount += 1;
-            updated = payload;
+            let expectedRevision: string | null = null;
+            const commit = () => {
+              updateCount += 1;
+              updated = payload;
+              const nextRevision = Reflect.get(payload, "updated_at");
+              if (typeof nextRevision !== "string") throw new Error("expected updated_at revision");
+              revision = nextRevision;
+              onCommit?.(payload);
+              return { data: { id: WORKPACK_ID }, error: null };
+            };
+            const query = {
+              eq(column: string, value: unknown) {
+                if (column === "updated_at") expectedRevision = String(value);
+                return query;
+              },
+              select() { return query; },
+              single: async () => commit(),
+              maybeSingle: async () => expectedRevision === revision
+                ? commit()
+                : { data: null, error: null },
+            };
             return query;
           },
         };
@@ -121,6 +136,25 @@ function makeUpdateClient() {
     },
     updateCount: () => updateCount,
     updated: () => updated,
+    revision: () => revision,
+  };
+}
+
+function ownedContext(stored: AskResponse, revision: string) {
+  return {
+    ok: true as const,
+    context: {
+      organizationId: "org-1",
+      siteId: "site-1",
+      workpackId: WORKPACK_ID,
+      question: stored.question,
+      generatedAt: "2026-07-13T18:00:00.000Z",
+      revision,
+      shareAuthority: {
+        workpack: stored,
+        readiness: { canShare: false, status: "blocked" as const, summary: "확인 대기", reasons: [] },
+      },
+    },
   };
 }
 
@@ -139,20 +173,9 @@ describe("Phase A confirmation route", () => {
     let stored = responseReadyForConfirmation();
     const fake = makeUpdateClient();
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
-    mocks.loadOwnedWorkpackOperationContext.mockImplementation(async () => ({
-      ok: true,
-      context: {
-        organizationId: "org-1",
-        siteId: "site-1",
-        workpackId: WORKPACK_ID,
-        question: stored.question,
-        generatedAt: "2026-07-13T18:00:00.000Z",
-        shareAuthority: {
-          workpack: stored,
-          readiness: { canShare: false, status: "blocked", summary: "확인 대기", reasons: [] },
-        },
-      },
-    }));
+    mocks.loadOwnedWorkpackOperationContext.mockImplementation(async () => (
+      ownedContext(stored, fake.revision())
+    ));
     const { POST } = await import("@/app/api/workpacks/[id]/phase-a-confirmation/route");
     const binding = stored.phaseAReview?.planBinding;
     if (!binding) throw new Error("expected plan binding");
@@ -207,6 +230,76 @@ describe("Phase A confirmation route", () => {
       confirmationId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
     }), { params: Promise.resolve({ id: WORKPACK_ID }) });
     expect(replay.status).toBe(409);
+    expect(fake.updateCount()).toBe(1);
+  });
+
+  it("allows only one CAS winner for concurrent first confirmations and retries from the stored ID", async () => {
+    let stored = responseReadyForConfirmation();
+    const fake = makeUpdateClient((payload) => {
+      const reopened = buildReopenData({
+        question: stored.question,
+        scenario: stored.scenario,
+        deliverables: Reflect.get(payload, "deliverables"),
+        evidenceSummary: Reflect.get(payload, "evidence_summary"),
+        status: Reflect.get(payload, "status"),
+      });
+      if (!reopened.data) throw new Error(`failed to reopen CAS winner: ${reopened.blockers.join(", ")}`);
+      stored = reopened.data;
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+
+    let initialLoadCount = 0;
+    let releaseInitialLoads: () => void = () => undefined;
+    const initialLoadsReady = new Promise<void>((resolve) => {
+      releaseInitialLoads = resolve;
+    });
+    mocks.loadOwnedWorkpackOperationContext.mockImplementation(async () => {
+      const snapshot = stored;
+      const revision = fake.revision();
+      if (initialLoadCount < 2) {
+        initialLoadCount += 1;
+        if (initialLoadCount === 2) releaseInitialLoads();
+        await initialLoadsReady;
+      }
+      return ownedContext(snapshot, revision);
+    });
+
+    const { POST } = await import("@/app/api/workpacks/[id]/phase-a-confirmation/route");
+    const binding = stored.phaseAReview?.planBinding;
+    if (!binding) throw new Error("expected plan binding");
+    const requestBody = { chainId: binding.chainId, planDigest: binding.planDigest };
+
+    const responses = await Promise.all([
+      POST(request(requestBody), { params: Promise.resolve({ id: WORKPACK_ID }) }),
+      POST(request(requestBody), { params: Promise.resolve({ id: WORKPACK_ID }) }),
+    ]);
+    const bodies = await Promise.all(responses.map(async (response) => ({
+      status: response.status,
+      body: await response.json() as {
+        ok?: boolean;
+        code?: string;
+        confirmationId?: string;
+      },
+    })));
+
+    expect(bodies.map(({ status }) => status).sort()).toEqual([200, 409]);
+    const success = bodies.find(({ status }) => status === 200)?.body;
+    const conflict = bodies.find(({ status }) => status === 409)?.body;
+    expect(success?.confirmationId).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(conflict).toMatchObject({
+      ok: false,
+      code: "phase_a_confirmation_revision_conflict",
+      confirmationId: success?.confirmationId,
+    });
+    expect(fake.updateCount()).toBe(1);
+
+    const retry = await POST(request({
+      ...requestBody,
+      confirmationId: conflict?.confirmationId,
+    }), { params: Promise.resolve({ id: WORKPACK_ID }) });
+    const retryBody = await retry.json() as { confirmationId?: string };
+    expect(retry.status).toBe(200);
+    expect(retryBody.confirmationId).toBe(success?.confirmationId);
     expect(fake.updateCount()).toBe(1);
   });
 });
