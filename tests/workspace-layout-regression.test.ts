@@ -1437,6 +1437,13 @@ describe("workspace layout regression", () => {
     expect(await page.locator(".document-workbench").count()).toBe(0);
     expect(await page.locator(".field-workspace").count()).toBe(1);
 
+    const operationsDisclosure = page.locator(".editor-operations-disclosure");
+    expect(await operationsDisclosure.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
+    const collapsedScrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    const collapsedActiveElementClass = await page.evaluate(() => document.activeElement?.className || "");
+    await operationsDisclosure.locator(":scope > summary").click();
+    await page.locator(".workspace-side").waitFor({ state: "visible" });
+
     const metrics = await page.evaluate(() => {
       function readRect(selector: string) {
         const element = document.querySelector(selector);
@@ -1476,9 +1483,33 @@ describe("workspace layout regression", () => {
       const mobilePicker = document.querySelector('select[aria-label="편집 문서 선택"]')?.parentElement;
       if (!desktopTabs || !mobilePicker) throw new Error("Missing responsive document navigation");
 
+      const heights = (selector: string) => Array.from(
+        document.querySelectorAll<HTMLElement>(selector),
+        (element) => element.getBoundingClientRect().height,
+      );
+      const maxHeight = (selector: string) => Math.max(0, ...heights(selector));
+      const compactHeadOverlaps = Array.from(document.querySelectorAll<HTMLElement>(".field-workspace .compact-head"))
+        .filter((head) => {
+          const eyebrow = head.querySelector<HTMLElement>(".eyebrow");
+          const title = head.querySelector<HTMLElement>("strong");
+          if (!eyebrow || !title) return false;
+          const eyebrowRect = eyebrow.getBoundingClientRect();
+          const titleRect = title.getBoundingClientRect();
+          return eyebrowRect.left < titleRect.right - 0.01
+            && eyebrowRect.right > titleRect.left + 0.01
+            && eyebrowRect.top < titleRect.bottom - 0.01
+            && eyebrowRect.bottom > titleRect.top + 0.01;
+        }).map((head) => head.textContent?.replace(/\s+/gu, " ").trim() || "unknown");
+      const workerLabels = Array.from(document.querySelectorAll<HTMLLabelElement>(".worker-edit-grid label"));
+      const roleControl = workerLabels.find((label) => label.querySelector("span")?.textContent?.trim() === "역할")?.querySelector<HTMLElement>("select");
+      const phoneControl = workerLabels.find((label) => label.querySelector("span")?.textContent?.trim() === "휴대폰")?.querySelector<HTMLElement>("input");
+      if (!roleControl || !phoneControl) throw new Error("Missing worker role or phone control");
+
       return {
         viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
         scrollWidth: document.documentElement.scrollWidth,
+        scrollHeight: document.documentElement.scrollHeight,
         activeElementClass: document.activeElement?.className || "",
         fieldWorkspace,
         rail,
@@ -1490,21 +1521,44 @@ describe("workspace layout regression", () => {
         textarea,
         activeTab,
         focusMessage,
+        compactHeadOverlaps,
+        largestCompactHeadHeight: maxHeight(".field-workspace .compact-head"),
+        impactListHeight: maxHeight(".impact-list"),
+        citationGroupHeight: maxHeight(".citation-group"),
+        sharePanelHeight: maxHeight(".share-panel"),
+        roleControlWidth: roleControl.getBoundingClientRect().width,
+        phoneControlWidth: phoneControl.getBoundingClientRect().width,
+        loginRequiredMessageCount: Array.from(document.querySelectorAll("p")).filter((element) => element.textContent?.includes("로그인 후 소유 현장을 연결하면")).length,
+        clawGreetingCount: Array.from(document.querySelectorAll("p")).filter((element) => element.textContent?.includes("안녕하세요, 클로입니다")).length,
         desktopTabsDisplay: getComputedStyle(desktopTabs).display,
         mobilePickerDisplay: getComputedStyle(mobilePicker).display
       };
     });
 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+    expect(collapsedScrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 6);
+    expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 10);
     expect(metrics.fieldWorkspace.display).toBe("grid");
-    expect(metrics.rail.left).toBeGreaterThanOrEqual(metrics.fieldWorkspace.left);
-    expect(metrics.rail.right).toBeLessThanOrEqual(metrics.fieldWorkspace.right);
-    expect(metrics.rail.bottom).toBeLessThanOrEqual(Math.min(metrics.canvas.top, metrics.side.top) - 12);
-    expect(metrics.canvas.right).toBeLessThanOrEqual(metrics.side.left - 12);
+    expect(await page.locator(".field-workspace-editor-focus").count()).toBe(1);
+    expect(await page.locator(".workspace-rail").count()).toBe(1);
+    expect(await page.locator(".workspace-side").count()).toBe(1);
+    expect(metrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(metrics.fieldWorkspace.width * 0.98));
+    expect(metrics.rail.top).toBeGreaterThanOrEqual(metrics.canvas.bottom + 12);
+    expect(metrics.side.top).toBeGreaterThanOrEqual(metrics.rail.bottom + 12);
+    expect(metrics.side.width).toBeGreaterThanOrEqual(Math.floor(metrics.fieldWorkspace.width * 0.95));
+    expect(metrics.compactHeadOverlaps).toEqual([]);
+    expect(metrics.largestCompactHeadHeight).toBeLessThanOrEqual(160);
+    expect(metrics.impactListHeight).toBeLessThanOrEqual(2000);
+    expect(metrics.citationGroupHeight).toBeLessThanOrEqual(2000);
+    expect(metrics.sharePanelHeight).toBeLessThanOrEqual(3000);
+    expect(metrics.roleControlWidth).toBeGreaterThanOrEqual(240);
+    expect(metrics.phoneControlWidth).toBeGreaterThanOrEqual(240);
+    expect(metrics.loginRequiredMessageCount).toBe(1);
+    expect(metrics.clawGreetingCount).toBe(0);
     expect(metrics.shell.display).toBe("grid");
-    expect(metrics.navigator.bottom).toBeLessThanOrEqual(metrics.editor.top - 12);
-    expect(metrics.desktopTabsDisplay).toBe("none");
-    expect(metrics.mobilePickerDisplay).not.toBe("none");
+    expect(metrics.navigator.right).toBeLessThanOrEqual(metrics.editor.left - 12);
+    expect(metrics.desktopTabsDisplay).not.toBe("none");
+    expect(metrics.mobilePickerDisplay).toBe("none");
     expect(metrics.shell.backgroundColor).toBe("rgba(0, 0, 0, 0)");
     expect(metrics.editor.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
@@ -1514,11 +1568,79 @@ describe("workspace layout regression", () => {
     expect(metrics.textarea.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
     expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
-    expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.shell.width * 0.78));
+    expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.editor.width * 0.8));
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
     expect(metrics.focusMessage.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
-    expect(String(metrics.activeElementClass)).toContain("document-textarea");
+    expect(String(collapsedActiveElementClass)).toContain("document-textarea");
+
+    await page.setViewportSize({ width: 1024, height: 900 });
+    await page.evaluate(async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    });
+    const tabletMetrics = await page.evaluate(() => {
+      const fieldWorkspace = document.querySelector<HTMLElement>(".field-workspace-editor-focus");
+      const canvas = document.querySelector<HTMLElement>(".workspace-canvas");
+      if (!fieldWorkspace || !canvas) throw new Error("Missing tablet editor layout targets");
+      return {
+        viewportWidth: window.innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        columns: getComputedStyle(fieldWorkspace).gridTemplateColumns.split(" ").filter(Boolean),
+        fieldWorkspaceWidth: fieldWorkspace.getBoundingClientRect().width,
+        canvasWidth: canvas.getBoundingClientRect().width,
+      };
+    });
+    expect(tabletMetrics.scrollWidth).toBeLessThanOrEqual(tabletMetrics.viewportWidth + 1);
+    expect(tabletMetrics.columns).toHaveLength(1);
+    expect(tabletMetrics.canvasWidth).toBeGreaterThanOrEqual(Math.floor(tabletMetrics.fieldWorkspaceWidth * 0.98));
+
+    await operationsDisclosure.locator(":scope > summary").click();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    });
+    const mobileCollapsedScrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    await operationsDisclosure.locator(":scope > summary").click();
+    await page.locator('[data-testid="editor-export-panel"] > summary').click();
+    const mobileMetrics = await page.evaluate(() => {
+      const editorSurface = document.querySelector<HTMLElement>(".document-editor-surface");
+      const fieldWorkspace = document.querySelector<HTMLElement>(".field-workspace-editor-focus");
+      const canvas = document.querySelector<HTMLElement>(".workspace-canvas");
+      const exportPanel = document.querySelector<HTMLElement>('[data-testid="editor-export-panel"]');
+      const exportButtons = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-testid="editor-export-panel"] [class*="primaryExports"] > button'),
+      );
+      if (!editorSurface || !fieldWorkspace || !canvas || !exportPanel || exportButtons.length !== 3) {
+        throw new Error("Missing mobile editor geometry target");
+      }
+      const toRect = (element: HTMLElement) => {
+        const rect = element.getBoundingClientRect();
+        return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, width: rect.width };
+      };
+      return {
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        scrollWidth: document.documentElement.scrollWidth,
+        scrollHeight: document.documentElement.scrollHeight,
+        editorSurface: toRect(editorSurface),
+        fieldWorkspace: toRect(fieldWorkspace),
+        canvas: toRect(canvas),
+        exportPanel: toRect(exportPanel),
+        exportButtons: exportButtons.map(toRect),
+      };
+    });
+    expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.viewportWidth + 1);
+    expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 9);
+    expect(mobileMetrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(mobileMetrics.fieldWorkspace.width * 0.98));
+    for (const button of mobileMetrics.exportButtons) {
+      expect(button.left).toBeGreaterThanOrEqual(mobileMetrics.exportPanel.left);
+      expect(button.right).toBeLessThanOrEqual(mobileMetrics.exportPanel.right);
+    }
+    for (let index = 1; index < mobileMetrics.exportButtons.length; index += 1) {
+      expect(mobileMetrics.exportButtons[index].top).toBeGreaterThanOrEqual(
+        mobileMetrics.exportButtons[index - 1].bottom - CSS_PIXEL_ADJACENCY_TOLERANCE,
+      );
+    }
 
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
