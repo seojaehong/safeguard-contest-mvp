@@ -1,0 +1,16 @@
+{
+  "sourceSha": "828f1d81a83df589405d7bb292cc858614b5dc14",
+  "buildId": "VbocAQ76jmTTF8YaAnKC3",
+  "harnessMode": "prod",
+  "route": "/workspace",
+  "theme": "day",
+  "viewport": {
+    "label": "desktop",
+    "width": 1440,
+    "height": 1000
+  },
+  "horizontalOverflow": 0,
+  "overlapCount": 0,
+  "unnamedInteractiveCount": 0,
+  "issueOverlayDetected": false
+}

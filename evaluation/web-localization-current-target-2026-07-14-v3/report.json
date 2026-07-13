@@ -1,0 +1,36 @@
+{
+  "sourceSha": "828f1d81a83df589405d7bb292cc858614b5dc14",
+  "buildId": "VbocAQ76jmTTF8YaAnKC3",
+  "harnessMode": "prod",
+  "browserMatrix": {
+    "testsPassed": 20,
+    "testsFailed": 0,
+    "routes": ["/reports", "/ontology", "/knowledge", "/workspace"],
+    "themes": ["day", "night"],
+    "viewports": [
+      { "label": "desktop", "width": 1440, "height": 1000 },
+      { "label": "mobile", "width": 391, "height": 844 }
+    ],
+    "screenshots": 16,
+    "metricFiles": 16,
+    "allMetrics": {
+      "horizontalOverflow": 0,
+      "overlapCount": 0,
+      "unnamedInteractiveCount": 0,
+      "issueOverlayDetected": false
+    }
+  },
+  "hydration": {
+    "initialDevResult": "RED: recoverable hydration error reproduced after OperationMemoryPreview before ontology-workbench",
+    "regression": "locale-collation perturbation preserves the complete operation-memory visualization model",
+    "productionBrowserResult": "GREEN: no recoverable hydration errors across the browser matrix"
+  },
+  "pendingIndependentItems": [
+    {
+      "surface": "reports",
+      "status": "PENDING_EXTERNAL_COMPACTNESS_REVIEW",
+      "detail": "This remediation did not change reports layout. Do not interpret the route-localization matrix PASS as an independent compactness approval."
+    }
+  ],
+  "verdict": "HOLD_PENDING_INDEPENDENT_PASS"
+}
