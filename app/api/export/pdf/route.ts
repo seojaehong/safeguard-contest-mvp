@@ -899,8 +899,8 @@ function buildPdfContentLines(
     ? structuredRiskRowsToPdfRows(structuredRiskRows, title)
     : [];
   const sourceRows = canonicalRiskRows.length
-    ? canonicalRiskRows.slice(0, 18)
-    : kind === "tbm" && riskRows.length ? riskRows.slice(0, 8) : (rows.length ? rows.slice(0, 18) : [{ document: title, section: "본문", item: "확인", content: "문서 본문을 현장에서 확인하세요." }]);
+    ? canonicalRiskRows
+    : kind === "tbm" && riskRows.length ? riskRows : (rows.length ? rows : [{ document: title, section: "본문", item: "확인", content: "문서 본문을 현장에서 확인하세요." }]);
   if (kind === "tbm") {
     lines.push({ text: "위험성평가표 위험요인과 오늘 기상/환경 신호를 TBM 전달사항으로 연결합니다.", role: "table" });
     lines.push({ text: `오늘 기상/환경 신호: ${scenario.weatherNote}`, role: "table", gap: 8 });
@@ -909,7 +909,7 @@ function buildPdfContentLines(
     const prefix = kind === "tbm"
       ? `${index + 1}. [위험성평가표 → TBM] `
       : `${index + 1}. [${row.section}] ${row.item}: `;
-    wrapPdfLine(`${prefix}${row.content}`, 42).slice(0, 3).forEach((line, lineIndex) => {
+    wrapPdfLine(`${prefix}${row.content}`, 42).forEach((line, lineIndex) => {
       lines.push({ text: lineIndex === 0 ? line : `   ${line}`, role: "table" });
     });
   });
@@ -936,9 +936,6 @@ async function buildBinaryPdf(
   pdf.registerFontkit(checksumCorrectingFontkit);
   const regularFont = await pdf.embedFont(fonts.regular, { subset: true });
   const boldFont = await pdf.embedFont(fonts.bold, { subset: true });
-  const page = pdf.addPage([595, 842]);
-  const regularFontKey = page.node.newFontDictionary(regularFont.name, regularFont.ref);
-  const boldFontKey = page.node.newFontDictionary(boldFont.name, boldFont.ref);
   const roles = {
     title: { font: "F2", size: 20, leading: 24, tracking: -0.4 },
     section: { font: "F2", size: 14, leading: 18, tracking: -0.14 },
@@ -946,18 +943,33 @@ async function buildBinaryPdf(
     table: { font: "F1", size: 8.5, leading: 12, tracking: 0 },
     note: { font: "F1", size: 8, leading: 11, tracking: 0 }
   } as const;
+  const createPage = () => {
+    const page = pdf.addPage([595, 842]);
+    return {
+      page,
+      regularFontKey: page.node.newFontDictionary(regularFont.name, regularFont.ref),
+      boldFontKey: page.node.newFontDictionary(boldFont.name, boldFont.ref)
+    };
+  };
+  let pageState = createPage();
   let y = 790;
-  buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows, structuredRiskRows).forEach((line) => {
+  for (const line of buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows, structuredRiskRows)) {
     const typography = roles[line.role];
-    if (line.gap) y -= line.gap;
+    const gap = line.gap || 0;
+    const blankLineHeight = line.text ? 0 : typography.leading;
+    if (y - gap - blankLineHeight < 48) {
+      pageState = createPage();
+      y = 790;
+    } else {
+      y -= gap;
+    }
     if (!line.text) {
       y -= typography.leading;
-      return;
+      continue;
     }
-    if (y < 48) return;
     const font = typography.font === "F2" ? boldFont : regularFont;
-    const fontKey = typography.font === "F2" ? boldFontKey : regularFontKey;
-    page.pushOperators(
+    const fontKey = typography.font === "F2" ? pageState.boldFontKey : pageState.regularFontKey;
+    pageState.page.pushOperators(
       beginText(),
       setFontAndSize(fontKey, typography.size),
       setLineHeight(typography.leading),
@@ -967,7 +979,7 @@ async function buildBinaryPdf(
       endText()
     );
     y -= typography.leading;
-  });
+  }
   try {
     return Buffer.from(await pdf.save({ useObjectStreams: false }));
   } catch (error) {
