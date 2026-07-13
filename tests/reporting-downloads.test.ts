@@ -39,7 +39,7 @@ const riskRow: RiskAssessmentRow = {
   additionalControls: "난간 보강, 바퀴 잠금, 안전대 체결 사진을 작업 전 확인",
   owner: "현장소장",
   due: "2026-07-08",
-  verification: "TBM 확인 및 Before/After 사진 기록",
+  verification: "TBM 확인 및 개선 전/개선 후 사진 기록",
   verificationStatus: "planned",
   verificationDate: "2026-07-08",
   verificationChecker: "안전관리자",
@@ -113,7 +113,7 @@ const improvements: OperationImprovement[] = [
     },
     beforePhotoName: "before-scaffold.jpg",
     afterPhotoName: "after-guardrail.jpg",
-    photoAnalysisSummary: "Before/After 사진 비교 후보",
+    photoAnalysisSummary: "개선 전/개선 후 사진 비교 후보",
     sourceType: "photo_analysis",
     visionProvider: "openai",
     visionModel: "gpt-4.1-mini",
@@ -920,7 +920,7 @@ describe("reporting downloads", () => {
     const markdown = buildReportMarkdown(snapshot);
 
     expect(markdown).toContain("## 위험성평가 As-Is / To-Be");
-    expect(markdown).toContain("Before/After 사진");
+    expect(markdown).toContain("개선 전/개선 후 사진");
     expect(markdown).toContain("before-scaffold.jpg");
     expect(markdown).not.toContain("KRAS");
     expect(markdown).not.toContain("자동 제출");
@@ -983,7 +983,7 @@ describe("reporting downloads", () => {
     expect(events.map((event) => event.eventType)).toContain("classification_group");
     expect(events.find((event) => event.eventType === "improvement")?.payload).toMatchObject({
       hazardLabel: "추락 위험",
-      sourceLabel: "Before/After 사진"
+      sourceLabel: "개선 전/개선 후 사진"
     });
     expect(events.find((event) => event.eventType === "governance")?.payload).toMatchObject({
       authority: "operator_review_corpus",
@@ -1007,7 +1007,7 @@ describe("reporting downloads", () => {
     expect(markdown).toContain("authority: operator_review_corpus");
     expect(markdown).toContain("재생성 가능한 코퍼스");
     expect(markdown).toContain("## 개선 이벤트");
-    expect(markdown).toContain("Before/After 사진");
+    expect(markdown).toContain("개선 전/개선 후 사진");
     expect(markdown).toContain("## 분류 인덱스");
     expect(markdown).not.toContain("파인튜닝 완료");
     expect(markdown).not.toContain("학습 완료");
@@ -1039,6 +1039,6 @@ describe("reporting downloads", () => {
       siteSignals: ["비계", "단부"],
       visionEvidence: "after-guardrail.jpg에서 난간 보강 확인"
     });
-    expect(memory.visionSummary).toContain("Before/After 사진 비교 후보");
+    expect(memory.visionSummary).toContain("개선 전/개선 후 사진 비교 후보");
   });
 });
