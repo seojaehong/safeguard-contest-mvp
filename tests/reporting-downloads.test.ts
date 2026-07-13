@@ -769,24 +769,93 @@ describe("reporting downloads", () => {
       workpackGeneratedAt: generatedAt
     });
     expect(sampleSnapshot.source.riskRowTimeBasis).toBe("workpack_saved_at");
-    for (const [snapshot, scope, limitation] of [
-      [localSnapshot, "current_browser", "current_browser_only"],
-      [serverSnapshot, "server_workpack", "server_saved_workpack_only"],
-      [sampleSnapshot, "sample_preview", "sample_data_only"]
+    for (const [snapshot, scope, mode, limitation] of [
+      [localSnapshot, "현재 브라우저 작업팩", "브라우저 로컬 저장", "현재 브라우저 작업팩만 포함"],
+      [serverSnapshot, "서버 저장 작업팩", "서버 저장", "서버 저장 작업팩 1건만 포함"],
+      [sampleSnapshot, "샘플 미리보기", "샘플 미리보기", "샘플 데이터만 포함"]
     ] as const) {
-      for (const exported of [
+      expect(buildReportJson(snapshot)).toContain(snapshot.source.scope);
+      expect(buildReportJson(snapshot)).toContain(snapshot.source.mode);
+      expect(buildReportJson(snapshot)).toContain("workpack_saved_at");
+      for (const presented of [
         buildReportCsv(snapshot),
-        buildReportJson(snapshot),
         buildReportMarkdown(snapshot),
         buildReportLearningJsonl(snapshot),
         buildReportLearningMarkdown(snapshot)
       ]) {
-        expect(exported).toContain(scope);
-        expect(exported).toContain(snapshot.source.workpackSavedAt);
-        expect(exported).toContain(generatedAt);
-        expect(exported).toContain("workpack_saved_at");
-        expect(exported).toContain(limitation);
+        expect(presented).toContain(scope);
+        expect(presented).toContain(mode);
+        expect(presented).toContain("작업팩 저장 시각");
+        expect(presented).toContain(limitation);
+        expect(presented).toContain(snapshot.source.workpackSavedAt);
+        expect(presented).toContain(generatedAt);
+        expect(presented).not.toMatch(/current_browser|server_workpack|sample_preview|browser_local|server_saved|workpack_saved_at|current_browser_only|server_saved_workpack_only|sample_data_only/u);
       }
+    }
+  });
+
+  it("neutralizes unknown typed source values at every user-output boundary", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const unknownSnapshot = {
+      ...snapshot,
+      source: {
+        ...snapshot.source,
+        mode: "future_report_mode",
+        scope: "future_report_scope",
+        riskRowTimeBasis: "future_time_basis",
+        limitations: ["future_report_limitation"]
+      }
+    } as unknown as typeof snapshot;
+    const rawTokens = /future_report_mode|future_report_scope|future_time_basis|future_report_limitation/u;
+
+    expect(buildReportJson(unknownSnapshot)).toMatch(rawTokens);
+    for (const presented of [
+      buildReportCsv(unknownSnapshot),
+      buildReportMarkdown(unknownSnapshot),
+      buildReportLearningJsonl(unknownSnapshot),
+      buildReportLearningMarkdown(unknownSnapshot)
+    ]) {
+      expect(presented).toContain("분류 검토 필요");
+      expect(presented).not.toMatch(rawTokens);
+    }
+  });
+
+  it("neutralizes unknown period, risk, and improvement enums in every presentation", () => {
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack(),
+      improvements: [improvements[0]],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+    const unknownSnapshot = {
+      ...snapshot,
+      period: "future_period",
+      filters: {
+        riskLevel: "future_risk_level",
+        improvementStatus: "future_improvement_status"
+      },
+      riskRows: snapshot.riskRows.map((row) => ({ ...row, riskLevel: "future_risk_level" })),
+      improvements: snapshot.improvements.map((item) => ({
+        ...item,
+        improvementStatus: "future_improvement_status"
+      }))
+    } as unknown as typeof snapshot;
+    const rawTokens = /future_period|future_risk_level|future_improvement_status/u;
+
+    expect(buildReportJson(unknownSnapshot)).toMatch(rawTokens);
+    for (const presented of [
+      buildReportCsv(unknownSnapshot),
+      buildReportMarkdown(unknownSnapshot),
+      buildReportLearningJsonl(unknownSnapshot),
+      buildReportLearningMarkdown(unknownSnapshot)
+    ]) {
+      expect(presented).toContain("분류 검토 필요");
+      expect(presented).not.toMatch(rawTokens);
     }
   });
 
@@ -899,9 +968,10 @@ describe("reporting downloads", () => {
 
     expect(snapshot.riskRows).toEqual([]);
     expect(snapshot.improvements).toEqual([]);
-    expect(csv).toContain("current_browser");
-    expect(csv).toContain("current_browser_only");
-    expect(csv).toContain("workpack_saved_at");
+    expect(csv).toContain("현재 브라우저 작업팩");
+    expect(csv).toContain("현재 브라우저 작업팩만 포함");
+    expect(csv).toContain("작업팩 저장 시각");
+    expect(csv).not.toMatch(/current_browser|workpack_saved_at|source_metadata/u);
     expect(csv).toContain(snapshot.source.workpackSavedAt);
   });
 
@@ -941,6 +1011,50 @@ describe("reporting downloads", () => {
     expect(csv).toContain("난간 보강");
   });
 
+  it("presents every known risk and improvement enum across user exports", () => {
+    const lowRiskRow: RiskAssessmentRow = {
+      ...riskRow,
+      location: "인천 정비동",
+      process: "정비",
+      task: "공구 점검",
+      hazard: "낙하 위험",
+      riskLevel: "low"
+    };
+    const statuses = [
+      ["candidate", "후보"],
+      ["approved", "승인됨"],
+      ["rejected", "반려됨"],
+      ["reflected", "반영됨"],
+      ["proposed", "제안됨"],
+      ["in_progress", "진행 중"],
+      ["on_hold", "보류됨"],
+      ["completed", "완료됨"],
+      ["verified", "검증됨"]
+    ] as const;
+    const snapshot = buildReportSnapshot({
+      workpack: makeWorkpack([riskRow, electricalRow, lowRiskRow]),
+      improvements: statuses.map(([status], index) => ({
+        ...improvements[0],
+        id: `known-status-${index}`,
+        status
+      })),
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z")
+    });
+
+    for (const presented of [
+      buildReportCsv(snapshot),
+      buildReportMarkdown(snapshot),
+      buildReportLearningJsonl(snapshot),
+      buildReportLearningMarkdown(snapshot)
+    ]) {
+      for (const label of ["상", "중", "하"]) expect(presented).toContain(label);
+      for (const [, label] of statuses) expect(presented).toContain(label);
+      for (const [value] of statuses) expect(presented).not.toContain(`"${value}"`);
+      expect(presented).not.toMatch(/"(?:high|medium|low)"/u);
+    }
+  });
+
   it("neutralizes formula-capable values in every CSV cell", () => {
     const maliciousRisk: RiskAssessmentRow = {
       ...riskRow,
@@ -976,21 +1090,26 @@ describe("reporting downloads", () => {
       .split("\n")
       .map((line) => JSON.parse(line) as { eventType: string; payload: Record<string, unknown> });
 
-    expect(events.map((event) => event.eventType)).toContain("period_summary");
-    expect(events.map((event) => event.eventType)).toContain("governance");
-    expect(events.map((event) => event.eventType)).toContain("risk_row");
-    expect(events.map((event) => event.eventType)).toContain("improvement");
-    expect(events.map((event) => event.eventType)).toContain("classification_group");
-    expect(events.find((event) => event.eventType === "improvement")?.payload).toMatchObject({
+    expect(events.map((event) => event.eventType)).toContain("기간 요약");
+    expect(events.map((event) => event.eventType)).toContain("운영 기준");
+    expect(events.map((event) => event.eventType)).toContain("위험행");
+    expect(events.map((event) => event.eventType)).toContain("개선사항");
+    expect(events.map((event) => event.eventType)).toContain("분류 그룹");
+    expect(events.find((event) => event.eventType === "개선사항")?.payload).toMatchObject({
       hazardLabel: "추락 위험",
+      improvementStatus: "후보",
       sourceLabel: "개선 전/개선 후 사진"
     });
-    expect(events.find((event) => event.eventType === "governance")?.payload).toMatchObject({
-      authority: "operator_review_corpus",
+    expect(events.find((event) => event.eventType === "위험행")?.payload.riskLevel).toBe("상");
+    expect(events.find((event) => event.eventType === "운영 기준")?.payload).toMatchObject({
+      authority: "운영자 검토 코퍼스",
       runtimeAuthority: false,
       modelFineTuning: false
     });
-    expect(events.some((event) => event.eventType === "classification_group" && event.payload.groupType === "risk_level")).toBe(true);
+    expect(buildReportLearningJsonl(snapshot)).not.toContain("operator_review_corpus");
+    expect(events.every((event) => (event as { period?: string }).period === "주간")).toBe(true);
+    expect(events.some((event) => event.eventType === "분류 그룹" && event.payload.groupType === "위험등급")).toBe(true);
+    expect(buildReportLearningJsonl(snapshot)).not.toMatch(/period_summary|risk_row|classification_group|risk_level|\bweekly\b|\bhigh\b|\bcandidate\b/u);
   });
 
   it("exports a readable operation corpus markdown without fine-tuning claims", () => {
@@ -1004,7 +1123,8 @@ describe("reporting downloads", () => {
 
     expect(markdown).toContain("운영 코퍼스");
     expect(markdown).toContain("## 운영 메모리 계약");
-    expect(markdown).toContain("authority: operator_review_corpus");
+    expect(markdown).toContain("권한: 운영자 검토 코퍼스");
+    expect(markdown).not.toContain("operator_review_corpus");
     expect(markdown).toContain("재생성 가능한 코퍼스");
     expect(markdown).toContain("## 개선 이벤트");
     expect(markdown).toContain("개선 전/개선 후 사진");
@@ -1037,8 +1157,8 @@ describe("reporting downloads", () => {
       expect(presentation).toContain("개선 전");
       expect(presentation).toContain("개선 후");
     }
-    const riskEvent = events.find((event) => event.eventType === "risk_row");
-    const improvementEvent = events.find((event) => event.eventType === "improvement");
+    const riskEvent = events.find((event) => event.eventType === "위험행");
+    const improvementEvent = events.find((event) => event.eventType === "개선사항");
     expect(riskEvent?.payload).toHaveProperty("asIs");
     expect(riskEvent?.payload).toHaveProperty("toBe");
     expect(improvementEvent?.payload).toHaveProperty("asIs");

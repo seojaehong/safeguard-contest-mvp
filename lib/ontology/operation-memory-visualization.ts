@@ -5,6 +5,7 @@ import type {
   OperationMemoryNodeKind
 } from "@/lib/ontology/operation-memory";
 import type { HarnessImprovement } from "@/lib/db-harness";
+import { EDGE_RELS, REL_KO, type EdgeRel } from "@/lib/ontology/schema";
 import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 
 export type OperationMemoryListItem = {
@@ -79,6 +80,13 @@ export type OperationMemoryVisualizationModel = {
 const MAX_OPERATION_MAP_NODES = 9;
 const MAX_OPERATION_MAP_EDGES = 36;
 
+export function ontologyRelationLabel(value: unknown): string {
+  if (typeof value !== "string" || !EDGE_RELS.includes(value as EdgeRel)) {
+    return "분류 검토 필요";
+  }
+  return REL_KO[value as EdgeRel];
+}
+
 export function operationKindLabel(kind: OperationMemoryNodeKind) {
   if (kind === "Workpack") return "작업팩";
   if (kind === "Evidence") return "근거";
@@ -108,27 +116,57 @@ function compareStableText(left: string, right: string) {
   return 0;
 }
 
-function metaLabel(key: string) {
-  if (key === "sourceId") return "원본 ID";
-  if (key === "generatedAt") return "생성 시각";
-  if (key === "referenceItemId") return "근거 ID";
-  if (key === "itemType") return "근거 유형";
-  if (key === "evidenceRole") return "근거 역할";
-  if (key === "source") return "출처";
-  if (key === "improvementId") return "개선 ID";
-  if (key === "sourceType") return "수집 방식";
-  if (key === "visionStatus") return "이미지 상태";
-  if (key === "analysisMode") return "분석 방식";
-  if (key === "photoPairAttached") return "개선 전/개선 후";
-  if (key === "visionLabel") return "이미지 분석";
-  if (key === "visionModel") return "분석 모델";
-  if (key === "photoCount") return "사진 수";
-  if (key === "sourcePhotos") return "원본 사진";
-  if (key === "siteSignals") return "현장 신호";
-  if (key === "photoEvidence") return "사진 근거";
-  if (key === "languageCode") return "언어";
-  if (key === "readAt") return "확인 시각";
-  return key;
+type OperationMemoryMetadataKey =
+  | "sourceId"
+  | "generatedAt"
+  | "reflectedDocuments"
+  | "referenceItemId"
+  | "itemType"
+  | "rawTitle"
+  | "displayTitle"
+  | "evidenceRole"
+  | "source"
+  | "improvementId"
+  | "sourceType"
+  | "visionStatus"
+  | "analysisMode"
+  | "photoPairAttached"
+  | "visionLabel"
+  | "visionModel"
+  | "photoCount"
+  | "sourcePhotos"
+  | "siteSignals"
+  | "photoEvidence"
+  | "languageCode"
+  | "readAt";
+
+const operationMemoryMetadataLabels = {
+  sourceId: "원본 ID",
+  generatedAt: "생성 시각",
+  reflectedDocuments: "반영 문서",
+  referenceItemId: "근거 ID",
+  itemType: "근거 유형",
+  rawTitle: "원본 제목",
+  displayTitle: "표시 제목",
+  evidenceRole: "근거 역할",
+  source: "출처",
+  improvementId: "개선 ID",
+  sourceType: "수집 방식",
+  visionStatus: "이미지 상태",
+  analysisMode: "분석 방식",
+  photoPairAttached: "개선 전/개선 후",
+  visionLabel: "이미지 분석",
+  visionModel: "분석 모델",
+  photoCount: "사진 수",
+  sourcePhotos: "원본 사진",
+  siteSignals: "현장 신호",
+  photoEvidence: "사진 근거",
+  languageCode: "언어",
+  readAt: "확인 시각"
+} satisfies Record<OperationMemoryMetadataKey, string>;
+
+function isOperationMemoryMetadataKey(key: string): key is OperationMemoryMetadataKey {
+  return Object.prototype.hasOwnProperty.call(operationMemoryMetadataLabels, key);
 }
 
 type ImprovementSourceType = HarnessImprovement["sourceType"];
@@ -190,9 +228,10 @@ function mappedValue(value: string, labels: Readonly<Record<string, string>>): s
   return labels[value] || "분류 검토 필요";
 }
 
-function metaValue(key: string, raw: string | number | boolean | null) {
-  if (key === "generatedAt") {
-    return typeof raw === "string" && isRfc3339OffsetTimestamp(raw) ? raw : "생성 시각 확인 전";
+function metaValue(key: OperationMemoryMetadataKey, raw: string | number | boolean | null) {
+  if (key === "generatedAt" || key === "readAt") {
+    if (typeof raw === "string" && isRfc3339OffsetTimestamp(raw)) return raw;
+    return key === "generatedAt" ? "생성 시각 확인 전" : "확인 시각 확인 전";
   }
   if (typeof raw === "boolean") return raw ? "예" : "아니오";
   if (typeof raw === "string") {
@@ -222,6 +261,7 @@ function metaValue(key: string, raw: string | number | boolean | null) {
 
 function metaRows(node: OperationMemoryNode): OperationMemoryHoverCard["metaRows"] {
   const priority = new Map([
+    ["reviewRequired", -1],
     ["visionLabel", 0],
     ["visionStatus", 1],
     ["analysisMode", 2],
@@ -233,10 +273,16 @@ function metaRows(node: OperationMemoryNode): OperationMemoryHoverCard["metaRows
     ["visionModel", 8]
   ]);
   return Object.entries(node.meta)
-    .flatMap(([label, raw]) => {
-      if (typeof raw === "undefined" || raw === "" || (raw === null && label !== "generatedAt")) return [];
-      return [{ key: label, label: metaLabel(label), value: metaValue(label, raw) }];
+    .flatMap(([key, raw]) => {
+      if (!isOperationMemoryMetadataKey(key)) {
+        return [{ key: "reviewRequired", label: "분류 검토 필요", value: "분류 검토 필요" }];
+      }
+      if (typeof raw === "undefined" || raw === "" || (raw === null && key !== "generatedAt" && key !== "readAt")) {
+        return [];
+      }
+      return [{ key, label: operationMemoryMetadataLabels[key], value: metaValue(key, raw) }];
     })
+    .filter((row, index, rows) => row.key !== "reviewRequired" || rows.findIndex((item) => item.key === row.key) === index)
     .sort((a, b) => {
       const priorityDelta = (priority.get(a.key) ?? 100) - (priority.get(b.key) ?? 100);
       if (priorityDelta !== 0) return priorityDelta;

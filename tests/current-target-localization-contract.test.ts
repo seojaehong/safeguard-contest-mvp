@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { KIND_KO, NODE_KINDS } from "@/lib/ontology/schema";
+import { EDGE_RELS, KIND_KO, NODE_KINDS } from "@/lib/ontology/schema";
 import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import {
   buildOperationMemoryVisualizationModel,
+  ontologyRelationLabel,
   operationKindLabel
 } from "@/lib/ontology/operation-memory-visualization";
 import { SEED_NODES } from "@/lib/ontology/seed/core-triples";
@@ -42,6 +43,15 @@ describe("current target user-visible Korean localization", () => {
       expect(KIND_KO[kind]).toMatch(/[가-힣]/u);
       expect(KIND_KO[kind]).not.toBe(kind);
     }
+  });
+
+  it("presents every ontology relation in Korean and neutralizes unknown values", () => {
+    for (const relation of EDGE_RELS) {
+      expect(ontologyRelationLabel(relation)).toMatch(/[가-힣]/u);
+      expect(ontologyRelationLabel(relation)).not.toBe(relation);
+    }
+
+    expect(ontologyRelationLabel("future_relation_token")).toBe("분류 검토 필요");
   });
 
   it("keeps canonical operation-memory kinds while presenting Korean user labels", () => {

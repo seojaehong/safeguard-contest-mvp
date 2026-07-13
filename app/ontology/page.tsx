@@ -2,6 +2,7 @@ import Link from "next/link";
 import { OperationMemoryPreview } from "@/components/OperationMemoryPreview";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { assembleGraph, loadGraph } from "@/lib/ontology/graph-store";
+import { ontologyRelationLabel } from "@/lib/ontology/operation-memory-visualization";
 import { KIND_KO, NODE_KINDS, type NodeKind } from "@/lib/ontology/schema";
 import { SEED_EDGES, SEED_NODES, SEED_STATS } from "@/lib/ontology/seed/core-triples";
 import { buildOntologyVisualizationModel } from "@/lib/ontology/visualization";
@@ -10,18 +11,6 @@ export const dynamic = "force-dynamic";
 
 function nodeKindLabel(value: NodeKind) {
   return KIND_KO[value];
-}
-
-function relationLabel(value: string) {
-  if (value === "entailsHazard") return "위험";
-  if (value === "mitigatedBy") return "조치";
-  if (value === "mandatedBy") return "법령";
-  if (value === "documentedIn") return "문서";
-  if (value === "evidencedBy") return "사례";
-  if (value === "fulfillsDuty") return "의무";
-  if (value === "basedOnArticle") return "조문 근거";
-  if (value === "relatedTo") return "관련";
-  return value;
 }
 
 function relatedLabel(related: { direction?: "outgoing" | "incoming"; sourceLabel: string; targetLabel: string }) {
@@ -50,6 +39,10 @@ export default async function OntologyPage() {
   const mappedTo = graph
     ? `${graph.counts.nodes.toLocaleString("ko-KR")}개 노드 · ${graph.counts.edges.toLocaleString("ko-KR")}개 관계${isSeedFallback ? " · 내장 공개 시드" : ""}`
     : "공개 그래프 조회 대기";
+  const staticNodes = model?.map.nodes || [];
+  const staticEdges = model?.map.edges || [];
+  const staticNodeById = new Map(staticNodes.map((node) => [node.id, node]));
+  const reviewRequiredCount = staticNodes.filter((node) => node.degree === 0).length;
 
   return (
     <SafeClawModuleShell
@@ -137,39 +130,108 @@ export default async function OntologyPage() {
               <strong>작업 이력 그래프 맵</strong>
             </div>
             <p>
-              공개 노드 중 연결도가 높은 항목을 먼저 배치합니다. 노드에 마우스를 올리면 관련 위험요인,
-              조치, 법령, 문서 관계를 색상 범례와 아래 목록에서 확인할 수 있습니다. 맵은 복잡도를 낮추기 위해 일부만 배치하고,
-              왼쪽 리스트는 전체 노드를 보존합니다.
+              공개 노드 중 연결도가 높은 항목과 실제 관계의 출발·도착 ID를 함께 표시합니다.
+              연결이 없는 표시 노드는 검토 필요 상태로 구분하고, 아래 목록은 전체 공개 노드를 보존합니다.
             </p>
-            <div className="ontology-graph-board">
-              <svg viewBox="0 0 100 100" role="img" aria-label="작업, 위험요인, 조치, 법령, 문서 연결 지도">
-                <defs>
-                  <radialGradient id="ontology-node-glow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="rgba(255, 220, 46, 0.85)" />
-                    <stop offset="100%" stopColor="rgba(255, 220, 46, 0)" />
-                  </radialGradient>
-                </defs>
-                {model.map.edges.map((edge) => (
-                  <line
-                    key={edge.id}
-                    x1={edge.x1}
-                    y1={edge.y1}
-                    x2={edge.x2}
-                    y2={edge.y2}
-                    className={`ontology-graph-edge relation-${edge.rel}`}
-                  />
-                ))}
-                {model.map.nodes.map((node) => (
-                  <g key={node.id} className={`ontology-graph-svg-node kind-${node.kind}`}>
-                    <circle cx={node.x} cy={node.y} r={node.size + 3.2} className="node-glow" />
-                    <circle cx={node.x} cy={node.y} r={node.size} />
-                  </g>
-                ))}
-              </svg>
+            <div
+              className="ontology-graph-board ontology-static-surface"
+              style={{ display: "grid", gap: "20px", minHeight: "auto", overflow: "visible", padding: "16px" }}
+            >
+              <section aria-label="정적 온톨로지 노드 인덱스" style={{ display: "grid", gap: "10px", minWidth: 0 }}>
+                <div className="compact-head">
+                  <span className="eyebrow">노드 인덱스</span>
+                  <strong>{staticNodes.length.toLocaleString("ko-KR")}개 표시</strong>
+                </div>
+                <ul
+                  style={{
+                    display: "grid",
+                    gap: "8px",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+                    listStyle: "none",
+                    margin: 0,
+                    padding: 0
+                  }}
+                >
+                  {staticNodes.map((node) => {
+                    const reviewRequired = node.degree === 0;
+                    return (
+                      <li
+                        key={node.id}
+                        className={`ontology-static-node kind-${node.kind}`}
+                        data-node-id={node.id}
+                        data-degree={node.degree}
+                        data-review-required={reviewRequired ? "true" : "false"}
+                        aria-label={`${nodeKindLabel(node.kind)} ${node.label}, 노드 ID ${node.id}${reviewRequired ? ", 연결 검토 필요" : ""}`}
+                        style={{
+                          borderBottom: "1px solid rgba(246, 245, 239, 0.16)",
+                          display: "grid",
+                          gap: "4px",
+                          minWidth: 0,
+                          overflowWrap: "anywhere",
+                          padding: "10px 2px"
+                        }}
+                      >
+                        <span>{nodeKindLabel(node.kind)}</span>
+                        <strong>{node.label}</strong>
+                        <small>노드 ID {node.id} · 연결 {node.degree}개</small>
+                        {reviewRequired ? <b>연결 검토 필요</b> : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+
+              <section aria-label="정적 온톨로지 관계 목록" style={{ display: "grid", gap: "10px", minWidth: 0 }}>
+                <div className="compact-head">
+                  <span className="eyebrow">관계 목록</span>
+                  <strong>{staticEdges.length.toLocaleString("ko-KR")}개 표시</strong>
+                </div>
+                <ol style={{ display: "grid", gap: "8px", listStyle: "none", margin: 0, padding: 0 }}>
+                  {staticEdges.map((edge) => {
+                    const source = staticNodeById.get(edge.sourceId);
+                    const target = staticNodeById.get(edge.targetId);
+                    const relation = ontologyRelationLabel(edge.rel);
+                    const sourceLabel = source?.label || "분류 검토 필요";
+                    const targetLabel = target?.label || "분류 검토 필요";
+                    return (
+                      <li
+                        key={edge.id}
+                        className="ontology-static-edge"
+                        data-source-id={edge.sourceId}
+                        data-target-id={edge.targetId}
+                        data-relation-label={relation}
+                        aria-label={`${sourceLabel}, 출발 ID ${edge.sourceId}에서 ${targetLabel}, 도착 ID ${edge.targetId}로 ${relation}`}
+                        style={{
+                          alignItems: "stretch",
+                          borderBottom: "1px solid rgba(246, 245, 239, 0.16)",
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "8px",
+                          minWidth: 0,
+                          padding: "10px 2px"
+                        }}
+                      >
+                        <span style={{ display: "grid", flex: "1 1 220px", gap: "3px", minWidth: 0, overflowWrap: "anywhere" }}>
+                          <b>출발</b>
+                          <strong>{sourceLabel}</strong>
+                          <small>노드 ID {edge.sourceId}</small>
+                        </span>
+                        <b style={{ alignSelf: "center", flex: "0 1 auto", overflowWrap: "anywhere" }}>{relation}</b>
+                        <span style={{ display: "grid", flex: "1 1 220px", gap: "3px", minWidth: 0, overflowWrap: "anywhere" }}>
+                          <b>도착</b>
+                          <strong>{targetLabel}</strong>
+                          <small>노드 ID {edge.targetId}</small>
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </section>
             </div>
             <div className="ontology-graph-stats" aria-label="온톨로지 그래프 표시 범위">
               <span>맵 노드 {model.stats.visibleNodes.toLocaleString("ko-KR")}/{model.stats.totalNodes.toLocaleString("ko-KR")}</span>
               <span>맵 관계 {model.stats.visibleEdges.toLocaleString("ko-KR")}/{model.stats.totalEdges.toLocaleString("ko-KR")}</span>
+              <span>연결 검토 {reviewRequiredCount.toLocaleString("ko-KR")}개</span>
               {model.stats.hiddenNodes > 0 ? (
                 <span>리스트 보존 {model.stats.hiddenNodes.toLocaleString("ko-KR")}개</span>
               ) : null}
@@ -206,7 +268,7 @@ export default async function OntologyPage() {
                           <ul>
                             {card.related.slice(0, 5).map((related) => (
                               <li key={`${card.id}-${related.direction}-${related.rel}-${related.sourceId}-${related.targetId}`}>
-                                <b>{relationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
+                                <b>{ontologyRelationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
                                 <span>{relatedLabel(related)}</span>
                               </li>
                             ))}

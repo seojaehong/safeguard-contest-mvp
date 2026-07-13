@@ -24,14 +24,25 @@ export type ReportPhotoApproval = {
 
 export type ReportSourceMode = "browser_local" | "server_saved" | "sample";
 
+export type ReportSourceScope = "current_browser" | "server_workpack" | "sample_preview";
+
+export type ReportRiskRowTimeBasis = "workpack_saved_at";
+
+export type ReportSourceLimitation =
+  | "current_browser_only"
+  | "server_saved_workpack_only"
+  | "sample_data_only"
+  | "not_full_operational_history"
+  | "risk_rows_share_workpack_timestamp";
+
 export type ReportSourceMetadata = {
   mode: ReportSourceMode;
-  scope: "current_browser" | "server_workpack" | "sample_preview";
+  scope: ReportSourceScope;
   workpackId?: string;
   workpackSavedAt: string;
   workpackGeneratedAt?: string;
-  riskRowTimeBasis: "workpack_saved_at";
-  limitations: string[];
+  riskRowTimeBasis: ReportRiskRowTimeBasis;
+  limitations: ReportSourceLimitation[];
 };
 
 export type ReportProvenancePresentation = {
@@ -442,6 +453,13 @@ const PERIOD_LABELS: Record<ReportPeriod, string> = {
   custom: "사용자 기간 리포트"
 };
 
+const REPORT_PERIOD_PRESENTATION_LABELS = {
+  daily: "일간",
+  weekly: "주간",
+  monthly: "월간",
+  custom: "사용자 지정"
+} satisfies Record<ReportPeriod, string>;
+
 const RISK_LEVEL_LABELS: Record<RiskLevel, string> = {
   high: "상",
   medium: "중",
@@ -459,6 +477,136 @@ const IMPROVEMENT_STATUS_LABELS: Record<ReportImprovementStatus, string> = {
   completed: "완료됨",
   verified: "검증됨"
 };
+
+const REPORT_LEARNING_EVENT_TYPE_LABELS = {
+  governance: "운영 기준",
+  period_summary: "기간 요약",
+  workpack: "작업팩",
+  risk_row: "위험행",
+  improvement: "개선사항",
+  classification_group: "분류 그룹"
+} satisfies Record<ReportLearningEvent["eventType"], string>;
+
+type ReportClassificationGroupType = "process" | "task" | "risk_level" | "document";
+
+const REPORT_CLASSIFICATION_GROUP_LABELS = {
+  process: "공정",
+  task: "작업",
+  risk_level: "위험등급",
+  document: "문서"
+} satisfies Record<ReportClassificationGroupType, string>;
+
+const REPORT_SOURCE_MODE_LABELS = {
+  browser_local: "브라우저 로컬 저장",
+  server_saved: "서버 저장",
+  sample: "샘플 미리보기"
+} satisfies Record<ReportSourceMode, string>;
+
+const REPORT_SOURCE_SCOPE_LABELS = {
+  current_browser: "현재 브라우저 작업팩",
+  server_workpack: "서버 저장 작업팩",
+  sample_preview: "샘플 미리보기"
+} satisfies Record<ReportSourceScope, string>;
+
+const REPORT_RISK_ROW_TIME_BASIS_LABELS = {
+  workpack_saved_at: "작업팩 저장 시각"
+} satisfies Record<ReportRiskRowTimeBasis, string>;
+
+const REPORT_SOURCE_LIMITATION_LABELS = {
+  current_browser_only: "현재 브라우저 작업팩만 포함",
+  server_saved_workpack_only: "서버 저장 작업팩 1건만 포함",
+  sample_data_only: "샘플 데이터만 포함",
+  not_full_operational_history: "전체 운영 이력 미포함",
+  risk_rows_share_workpack_timestamp: "위험행은 작업팩 저장 시각 공유"
+} satisfies Record<ReportSourceLimitation, string>;
+
+const PRESENTATION_REVIEW_REQUIRED = "분류 검토 필요";
+
+type ReportLearningMemoryScope = "period_operation_memory_export";
+type ReportLearningAuthority = "operator_review_corpus";
+type ReportLearningPromotionStatus = "draft_candidate";
+
+const REPORT_LEARNING_MEMORY_SCOPE_LABELS = {
+  period_operation_memory_export: "기간별 작업 이력 메모리 내보내기"
+} satisfies Record<ReportLearningMemoryScope, string>;
+
+const REPORT_LEARNING_AUTHORITY_LABELS = {
+  operator_review_corpus: "운영자 검토 코퍼스"
+} satisfies Record<ReportLearningAuthority, string>;
+
+const REPORT_LEARNING_PROMOTION_STATUS_LABELS = {
+  draft_candidate: "검토 전 후보"
+} satisfies Record<ReportLearningPromotionStatus, string>;
+
+function presentTypedValue<T extends string>(value: unknown, labels: Readonly<Record<T, string>>): string {
+  if (typeof value !== "string" || !Object.prototype.hasOwnProperty.call(labels, value)) {
+    return PRESENTATION_REVIEW_REQUIRED;
+  }
+  return labels[value as T];
+}
+
+function presentReportSource(source: ReportSourceMetadata) {
+  return {
+    mode: presentTypedValue(source.mode, REPORT_SOURCE_MODE_LABELS),
+    scope: presentTypedValue(source.scope, REPORT_SOURCE_SCOPE_LABELS),
+    riskRowTimeBasis: presentTypedValue(source.riskRowTimeBasis, REPORT_RISK_ROW_TIME_BASIS_LABELS),
+    limitations: source.limitations.map((value) => presentTypedValue(value, REPORT_SOURCE_LIMITATION_LABELS))
+  };
+}
+
+function presentLearningGovernance() {
+  return {
+    ...REPORT_LEARNING_GOVERNANCE,
+    memoryScope: presentTypedValue(REPORT_LEARNING_GOVERNANCE.memoryScope, REPORT_LEARNING_MEMORY_SCOPE_LABELS),
+    authority: presentTypedValue(REPORT_LEARNING_GOVERNANCE.authority, REPORT_LEARNING_AUTHORITY_LABELS),
+    promotionStatus: presentTypedValue(
+      REPORT_LEARNING_GOVERNANCE.promotionStatus,
+      REPORT_LEARNING_PROMOTION_STATUS_LABELS
+    )
+  };
+}
+
+function presentReportFilters(filters: unknown): Record<string, unknown> {
+  if (!isRecord(filters)) return {};
+  return {
+    ...filters,
+    ...(Object.prototype.hasOwnProperty.call(filters, "riskLevel")
+      ? { riskLevel: presentTypedValue(filters.riskLevel, RISK_LEVEL_LABELS) }
+      : {}),
+    ...(Object.prototype.hasOwnProperty.call(filters, "improvementStatus")
+      ? { improvementStatus: presentTypedValue(filters.improvementStatus, IMPROVEMENT_STATUS_LABELS) }
+      : {})
+  };
+}
+
+function presentLearningPayload(event: ReportLearningEvent): Record<string, unknown> {
+  if (event.eventType === "governance") return presentLearningGovernance();
+  if (event.eventType === "period_summary") {
+    return {
+      ...event.payload,
+      filters: presentReportFilters(event.payload.filters)
+    };
+  }
+  if (event.eventType === "risk_row") {
+    return {
+      ...event.payload,
+      riskLevel: presentTypedValue(event.payload.riskLevel, RISK_LEVEL_LABELS)
+    };
+  }
+  if (event.eventType === "improvement") {
+    return {
+      ...event.payload,
+      improvementStatus: presentTypedValue(event.payload.improvementStatus, IMPROVEMENT_STATUS_LABELS)
+    };
+  }
+  if (event.eventType === "classification_group") {
+    return {
+      ...event.payload,
+      groupType: presentTypedValue(event.payload.groupType, REPORT_CLASSIFICATION_GROUP_LABELS)
+    };
+  }
+  return event.payload;
+}
 
 const KST_OFFSET_MILLISECONDS = 9 * 60 * 60 * 1000;
 
@@ -934,6 +1082,7 @@ function toCsv(rows: Array<Array<string | number>>) {
 }
 
 export function buildReportCsv(snapshot: ReportSnapshot) {
+  const source = presentReportSource(snapshot.source);
   const header = [
     "구분",
     "현장",
@@ -968,22 +1117,22 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "",
     "",
     "",
-    "source_metadata",
+    "출처 메타데이터",
     "",
-    snapshot.source.scope,
-    snapshot.source.mode,
+    source.scope,
+    source.mode,
     snapshot.source.workpackId || "",
     snapshot.source.workpackSavedAt,
     snapshot.source.workpackGeneratedAt || "",
-    snapshot.source.riskRowTimeBasis,
-    snapshot.source.limitations.join(" · ")
+    source.riskRowTimeBasis,
+    source.limitations.join(" · ")
   ];
   const riskRows = snapshot.riskRows.map((row): Array<string | number> => [
     "위험성평가",
     row.siteName,
     row.process,
     row.task,
-    row.riskLevelLabel,
+    presentTypedValue(row.riskLevel, RISK_LEVEL_LABELS),
     "",
     row.assignee,
     row.hazard,
@@ -992,21 +1141,21 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "위험성평가표 · TBM",
     row.evidenceRefs.join(" · "),
     "",
-    snapshot.source.scope,
-    snapshot.source.mode,
+    source.scope,
+    source.mode,
     snapshot.source.workpackId || "",
     snapshot.source.workpackSavedAt,
     snapshot.source.workpackGeneratedAt || "",
-    snapshot.source.riskRowTimeBasis,
-    snapshot.source.limitations.join(" · ")
+    source.riskRowTimeBasis,
+    source.limitations.join(" · ")
   ]);
   const improvementRows = snapshot.improvements.map((item): Array<string | number> => [
     "개선사항",
     item.siteName,
     item.process,
     item.task,
-    item.riskLevelLabel,
-    item.improvementStatusLabel,
+    item.riskLevel ? presentTypedValue(item.riskLevel, RISK_LEVEL_LABELS) : "",
+    presentTypedValue(item.improvementStatus, IMPROVEMENT_STATUS_LABELS),
     item.assignee,
     item.hazardLabel,
     item.asIs,
@@ -1014,28 +1163,26 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     item.reflectedDocuments.join(" · "),
     item.sourceLabel,
     item.photoNames.join(" · "),
-    snapshot.source.scope,
-    snapshot.source.mode,
+    source.scope,
+    source.mode,
     snapshot.source.workpackId || "",
     snapshot.source.workpackSavedAt,
     snapshot.source.workpackGeneratedAt || "",
-    snapshot.source.riskRowTimeBasis,
-    snapshot.source.limitations.join(" · ")
+    source.riskRowTimeBasis,
+    source.limitations.join(" · ")
   ]);
   return toCsv([header, metadataRow, ...riskRows, ...improvementRows]);
 }
 
 function reportFilterLines(snapshot: ReportSnapshot) {
   const filters = snapshot.filters;
-  const riskLevelLabel = snapshot.facets.riskLevels.find((option) => option.value === filters.riskLevel)?.label;
-  const improvementStatusLabel = snapshot.facets.improvementStatuses.find(
-    (option) => option.value === filters.improvementStatus
-  )?.label;
   return [
     filters.process ? `- 공정: ${filters.process}` : "",
     filters.task ? `- 작업: ${filters.task}` : "",
-    filters.riskLevel ? `- 위험등급: ${riskLevelLabel || filters.riskLevel}` : "",
-    filters.improvementStatus ? `- 개선상태: ${improvementStatusLabel || filters.improvementStatus}` : "",
+    filters.riskLevel ? `- 위험등급: ${presentTypedValue(filters.riskLevel, RISK_LEVEL_LABELS)}` : "",
+    filters.improvementStatus
+      ? `- 개선상태: ${presentTypedValue(filters.improvementStatus, IMPROVEMENT_STATUS_LABELS)}`
+      : "",
     filters.site ? `- 현장: ${filters.site}` : "",
     filters.assignee ? `- 담당자: ${filters.assignee}` : ""
   ].filter(Boolean);
@@ -1043,6 +1190,7 @@ function reportFilterLines(snapshot: ReportSnapshot) {
 
 export function buildReportMarkdown(snapshot: ReportSnapshot) {
   const filterLines = reportFilterLines(snapshot);
+  const source = presentReportSource(snapshot.source);
   const lines = [
     `# ${snapshot.title}`,
     "",
@@ -1055,13 +1203,13 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
     "",
     "## 데이터 범위",
     "",
-    `- scope: ${snapshot.source.scope}`,
-    `- mode: ${snapshot.source.mode}`,
+    `- 데이터 범위: ${source.scope}`,
+    `- 데이터 모드: ${source.mode}`,
     ...(snapshot.source.workpackId ? [`- workpackId: ${snapshot.source.workpackId}`] : []),
     `- workpackSavedAt: ${snapshot.source.workpackSavedAt}`,
     `- workpackGeneratedAt: ${snapshot.source.workpackGeneratedAt || "unavailable"}`,
-    `- riskRowTimeBasis: ${snapshot.source.riskRowTimeBasis}`,
-    `- limitations: ${snapshot.source.limitations.join(", ")}`,
+    `- 위험행 시간 기준: ${source.riskRowTimeBasis}`,
+    `- 데이터 제한: ${source.limitations.join(", ")}`,
     "",
     "## 현장 요약",
     "",
@@ -1084,7 +1232,7 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
   ];
 
   snapshot.riskRows.forEach((row) => {
-    lines.push(`### ${row.index}. ${row.task} · ${row.hazard} [${row.riskLevelLabel}]`);
+    lines.push(`### ${row.index}. ${row.task} · ${row.hazard} [${presentTypedValue(row.riskLevel, RISK_LEVEL_LABELS)}]`);
     lines.push(`- 개선 전: ${row.currentControls}`);
     lines.push(`- 개선 후: ${row.additionalControls}`);
     lines.push(`- 담당/기한: ${row.owner} · ${row.due}`);
@@ -1099,6 +1247,7 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
     snapshot.improvements.forEach((item) => {
       lines.push(`### ${formatDate(item.createdAt)} · ${item.hazardLabel}`);
       lines.push(`- 출처: ${item.sourceLabel}`);
+      lines.push(`- 상태: ${presentTypedValue(item.improvementStatus, IMPROVEMENT_STATUS_LABELS)}`);
       lines.push(`- 개선 전: ${item.asIs}`);
       lines.push(`- 개선 후: ${item.toBe}`);
       lines.push(`- 반영 문서: ${item.reflectedDocuments.join(", ") || "확인 필요"}`);
@@ -1235,36 +1384,47 @@ function buildLearningEvents(snapshot: ReportSnapshot): ReportLearningEvent[] {
 }
 
 export function buildReportLearningJsonl(snapshot: ReportSnapshot) {
-  return `${buildLearningEvents(snapshot).map((event) => JSON.stringify(event)).join("\n")}\n`;
+  return `${buildLearningEvents(snapshot).map((event) => JSON.stringify({
+    ...event,
+    eventType: presentTypedValue(event.eventType, REPORT_LEARNING_EVENT_TYPE_LABELS),
+    period: presentTypedValue(event.period, REPORT_PERIOD_PRESENTATION_LABELS),
+    source: {
+      ...event.source,
+      ...presentReportSource(event.source)
+    },
+    payload: presentLearningPayload(event)
+  })).join("\n")}\n`;
 }
 
 export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
+  const source = presentReportSource(snapshot.source);
+  const governance = presentLearningGovernance();
   const lines = [
     `# ${snapshot.title} 운영 코퍼스`,
     "",
     `- generatedAt: ${formatDate(snapshot.generatedAt)}`,
-    `- period: ${snapshot.period}`,
+    `- 기간: ${presentTypedValue(snapshot.period, REPORT_PERIOD_PRESENTATION_LABELS)}`,
     `- dateRange: ${snapshot.dateRange.start}..${snapshot.dateRange.end}`,
-    `- filters: ${JSON.stringify(snapshot.filters)}`,
+    `- 적용 조건: ${JSON.stringify(presentReportFilters(snapshot.filters))}`,
     `- siteName: ${snapshot.scenario.siteName}`,
     `- workSummary: ${snapshot.scenario.workSummary}`,
-    `- sourceScope: ${snapshot.source.scope}`,
-    `- sourceMode: ${snapshot.source.mode}`,
+    `- 데이터 범위: ${source.scope}`,
+    `- 데이터 모드: ${source.mode}`,
     ...(snapshot.source.workpackId ? [`- workpackId: ${snapshot.source.workpackId}`] : []),
     `- workpackSavedAt: ${snapshot.source.workpackSavedAt}`,
     `- workpackGeneratedAt: ${snapshot.source.workpackGeneratedAt || "unavailable"}`,
-    `- riskRowTimeBasis: ${snapshot.source.riskRowTimeBasis}`,
-    `- sourceLimitations: ${snapshot.source.limitations.join(", ")}`,
+    `- 위험행 시간 기준: ${source.riskRowTimeBasis}`,
+    `- 데이터 제한: ${source.limitations.join(", ")}`,
     "",
     "## 운영 메모리 계약",
     "",
-    `- scope: ${REPORT_LEARNING_GOVERNANCE.memoryScope}`,
-    `- authority: ${REPORT_LEARNING_GOVERNANCE.authority}`,
-    `- promotionStatus: ${REPORT_LEARNING_GOVERNANCE.promotionStatus}`,
-    `- runtimeAuthority: ${REPORT_LEARNING_GOVERNANCE.runtimeAuthority ? "yes" : "no"}`,
-    `- modelFineTuning: ${REPORT_LEARNING_GOVERNANCE.modelFineTuning ? "yes" : "no"}`,
-    `- nextUse: ${REPORT_LEARNING_GOVERNANCE.nextUse.join(" / ")}`,
-    `- guardrails: ${REPORT_LEARNING_GOVERNANCE.guardrails.join(" / ")}`,
+    `- 범위: ${governance.memoryScope}`,
+    `- 권한: ${governance.authority}`,
+    `- 승격 상태: ${governance.promotionStatus}`,
+    `- 실행 기준 권한: ${governance.runtimeAuthority ? "예" : "아니오"}`,
+    `- 모델 미세조정: ${governance.modelFineTuning ? "예" : "아니오"}`,
+    `- 다음 사용: ${governance.nextUse.join(" / ")}`,
+    `- 보호 기준: ${governance.guardrails.join(" / ")}`,
     "",
     "## 재사용 목적",
     "",
@@ -1286,7 +1446,7 @@ export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
   snapshot.riskRows.forEach((row) => {
     lines.push(`### ${row.process} / ${row.task}`);
     lines.push(`- 위험요인: ${row.hazard}`);
-    lines.push(`- 위험등급: ${row.riskLevelLabel}`);
+    lines.push(`- 위험등급: ${presentTypedValue(row.riskLevel, RISK_LEVEL_LABELS)}`);
     lines.push(`- 개선 전: ${row.currentControls}`);
     lines.push(`- 개선 후: ${row.additionalControls}`);
     lines.push(`- 근거: ${row.evidenceRefs.join(", ") || "현장 확인"}`);
@@ -1298,6 +1458,7 @@ export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
     snapshot.improvements.forEach((item) => {
       lines.push(`### ${formatDate(item.createdAt)} / ${item.hazardLabel}`);
       lines.push(`- 출처: ${item.sourceLabel}`);
+      lines.push(`- 상태: ${presentTypedValue(item.improvementStatus, IMPROVEMENT_STATUS_LABELS)}`);
       lines.push(`- 개선 전: ${item.asIs}`);
       lines.push(`- 개선 후: ${item.toBe}`);
       lines.push(`- 반영 문서: ${item.reflectedDocuments.join(", ") || "확인 필요"}`);

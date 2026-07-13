@@ -96,6 +96,70 @@ describe("buildOperationMemoryVisualizationModel", () => {
     ]));
   });
 
+  it("presents every known typed metadata value without changing canonical storage", () => {
+    const graph = buildOperationMemoryGraph({
+      workpack: {
+        id: "wp-known-metadata",
+        question: "알려진 메타데이터 분류 검사",
+        generatedAt: "2026-07-09T00:00:00.000Z"
+      },
+      references: [],
+      improvements: [improvement("imp-known-metadata")],
+      confirmations: []
+    });
+    const node = graph.nodes.find((item) => item.kind === "Improvement");
+    if (!node) throw new Error("Expected operation-memory improvement fixture node");
+    const cases = [
+      ["sourceType", "manual", "수기 입력"],
+      ["sourceType", "photo_analysis", "개선 사진 분석"],
+      ["sourceType", "operator_note", "작업자 메모"],
+      ["visionStatus", "analyzed", "분석 완료"],
+      ["visionStatus", "unconfigured", "분석 설정 필요"],
+      ["visionStatus", "failed", "분석 실패"],
+      ["analysisMode", "vision_ocr", "이미지·문자 인식 분석"],
+      ["analysisMode", "photo_pair_unanalyzed", "개선 전/개선 후 사진 미분석"],
+      ["analysisMode", "manual_text", "수기 입력"],
+      ["itemType", "sif-case", "중대위험 사례"],
+      ["itemType", "technical-guideline", "기술 지침"],
+      ["itemType", "technical-support-regulation", "기술지원 규정"],
+      ["itemType", "machinery", "기계 안전 자료"],
+      ["itemType", "kosha-guide", "KOSHA 가이드"],
+      ["itemType", "guide", "안전 가이드"],
+      ["itemType", "guideline", "안전 지침"],
+      ["itemType", "source", "원문 근거"],
+      ["evidenceRole", "direct", "직접 근거"],
+      ["evidenceRole", "supporting", "보조 근거"],
+      ["source", "safety_reference_items", "안전 근거 카탈로그"],
+      ["source", "manual", "수기 입력"],
+      ["source", "photo_analysis", "개선 사진 분석"],
+      ["source", "operator_note", "작업자 메모"],
+      ["languageCode", "ko", "한국어"],
+      ["languageCode", "vi", "베트남어"],
+      ["languageCode", "zh", "중국어"],
+      ["languageCode", "mn", "몽골어"],
+      ["languageCode", "th", "태국어"],
+      ["languageCode", "tl", "타갈로그어"],
+      ["languageCode", "uz", "우즈베크어"],
+      ["languageCode", "km", "크메르어"],
+      ["languageCode", "id", "인도네시아어"],
+      ["languageCode", "ne", "네팔어"],
+      ["visionLabel", "vision/OCR 분석 완료", "이미지·문자 인식 분석 완료"],
+      ["visionLabel", "수기 개선사항", "수기 개선사항"],
+      ["visionModel", "gpt-4.1-mini", "이미지 분석 모델"],
+      ["visionModel", "gemini-2.5-flash", "이미지 분석 모델"]
+    ] as const;
+
+    for (const [key, value, expected] of cases) {
+      node.meta = { [key]: value };
+      const row = buildOperationMemoryVisualizationModel(graph)
+        .hoverCards.find((card) => card.id === node.id)
+        ?.metaRows[0];
+      expect(row?.value, `${key}=${value}`).toBe(expected);
+      expect(node.meta[key], `${key} canonical`).toBe(value);
+      if (value !== expected) expect(row?.value).not.toBe(value);
+    }
+  });
+
   it("uses a neutral display label for unknown metadata without changing canonical values", () => {
     const graph = buildOperationMemoryGraph({
       workpack: {
@@ -112,23 +176,34 @@ describe("buildOperationMemoryVisualizationModel", () => {
     if (!improvementNode || !workpackNode) throw new Error("Expected operation-memory fixture nodes");
     improvementNode.meta.sourceType = "future_machine_token";
     improvementNode.meta.analysisMode = "future_analysis_mode";
+    workpackNode.meta.future_metadata_key = "future_metadata_value";
 
     const model = buildOperationMemoryVisualizationModel(graph);
     const card = model.hoverCards.find((item) => item.id === improvementNode.id);
     const generatedAt = model.hoverCards
       .find((item) => item.id === workpackNode.id)
       ?.metaRows.find((row) => row.key === "generatedAt");
+    const unknownMetadata = model.hoverCards
+      .find((item) => item.id === workpackNode.id)
+      ?.metaRows.find((row) => row.key === "reviewRequired");
 
     expect(improvementNode.meta).toMatchObject({
       sourceType: "future_machine_token",
       analysisMode: "future_analysis_mode"
     });
+    expect(workpackNode.meta.future_metadata_key).toBe("future_metadata_value");
     expect(card?.metaRows).toEqual(expect.arrayContaining([
       { key: "sourceType", label: "수집 방식", value: "분류 검토 필요" },
       { key: "analysisMode", label: "분석 방식", value: "분류 검토 필요" }
     ]));
     expect(workpackNode.meta.generatedAt).toBeNull();
     expect(generatedAt).toEqual({ key: "generatedAt", label: "생성 시각", value: "생성 시각 확인 전" });
+    expect(unknownMetadata).toEqual({
+      key: "reviewRequired",
+      label: "분류 검토 필요",
+      value: "분류 검토 필요"
+    });
+    expect(JSON.stringify(model.hoverCards)).not.toMatch(/future_metadata_key|future_metadata_value/u);
   });
 
   it("keeps fire controls and energy isolation visible in evidence and control nodes", () => {

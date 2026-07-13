@@ -231,6 +231,33 @@ describe("current target localization browser matrix", () => {
     await page.close();
   }, 120_000);
 
+  it("exposes the actual static ontology nodes and relation endpoints", async () => {
+    if (!browser) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    await prepareRoute(page, routes[1], "day");
+    const surface = page.getByRole("region", { name: "옵시디언형 온톨로지 그래프" });
+    const nodes = surface.locator(".ontology-static-node");
+    const edges = surface.locator(".ontology-static-edge");
+
+    expect(await nodes.count()).toBeGreaterThan(0);
+    expect(await edges.count()).toBeGreaterThan(0);
+    expect(await nodes.evaluateAll((items) => items.every((item) => Boolean(
+      item.getAttribute("data-node-id")
+      && item.getAttribute("aria-label")?.match(/[가-힣]/u)
+      && item.textContent?.match(/[가-힣]/u)
+    )))).toBe(true);
+    expect(await edges.evaluateAll((items) => items.every((item) => Boolean(
+      item.getAttribute("data-source-id")
+      && item.getAttribute("data-target-id")
+      && item.getAttribute("aria-label")?.match(/[가-힣]/u)
+    )))).toBe(true);
+    expect(await nodes.evaluateAll((items) => items.every((item) => {
+      const degree = Number(item.getAttribute("data-degree"));
+      return degree > 0 || item.getAttribute("data-review-required") === "true";
+    }))).toBe(true);
+    await page.close();
+  }, 120_000);
+
   it("hydrates the workspace operation-memory surface without recoverable errors", async () => {
     if (!browser) throw new Error("Browser harness was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -329,7 +356,7 @@ describe("current target localization browser matrix", () => {
       await page.locator(".operation-memory-list-item").filter({ hasText: "개선" }).first()
         .evaluate((element) => (element as HTMLElement).click());
     }
-    const metrics = await page.evaluate(({ meaningfulSelector, issueSource, issueFlags, scopeSelector }) => {
+    const metrics = await page.evaluate(({ meaningfulSelector, issueSource, issueFlags, scopeSelector, surfaceName }) => {
       const clippingValues = new Set(["auto", "clip", "hidden", "scroll"]);
       const visibleRect = (element: HTMLElement) => {
         const rect = element.getBoundingClientRect();
@@ -408,10 +435,63 @@ describe("current target localization browser matrix", () => {
         if (element.shadowRoot?.textContent) shadowText.push(element.shadowRoot.textContent);
       });
       const overlayCorpus = [document.body.innerText, ...shadowText].join("\n");
-      const operationBoard = scope.querySelector<HTMLElement>(".operation-memory-board");
-      const relationLines = [...scope.querySelectorAll<SVGLineElement>(".operation-memory-edge")];
-      const operationNodes = [...scope.querySelectorAll<HTMLElement>(".operation-memory-point")]
-        .filter((node) => node.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }));
+      type Color = { r: number; g: number; b: number; a: number };
+      const parseColor = (value: string): Color | null => {
+        const parts = value.match(/[\d.]+/gu)?.map(Number) || [];
+        if (parts.length < 3 || parts.slice(0, 3).some((part) => !Number.isFinite(part))) return null;
+        return { r: parts[0], g: parts[1], b: parts[2], a: Number.isFinite(parts[3]) ? parts[3] : 1 };
+      };
+      const composite = (front: Color, back: Color): Color => {
+        const alpha = front.a + back.a * (1 - front.a);
+        if (alpha <= 0) return { r: 255, g: 255, b: 255, a: 1 };
+        return {
+          r: (front.r * front.a + back.r * back.a * (1 - front.a)) / alpha,
+          g: (front.g * front.a + back.g * back.a * (1 - front.a)) / alpha,
+          b: (front.b * front.a + back.b * back.a * (1 - front.a)) / alpha,
+          a: alpha
+        };
+      };
+      const effectiveBackground = (element: HTMLElement): Color => {
+        const chain: HTMLElement[] = [];
+        let current: HTMLElement | null = element;
+        while (current) {
+          chain.push(current);
+          current = current.parentElement;
+        }
+        return chain.reverse().reduce((background, item) => {
+          const color = parseColor(getComputedStyle(item).backgroundColor);
+          return color && color.a > 0 ? composite(color, background) : background;
+        }, { r: 255, g: 255, b: 255, a: 1 });
+      };
+      const luminance = (color: Color): number => {
+        const channel = (value: number) => {
+          const normalized = value / 255;
+          return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+        };
+        return 0.2126 * channel(color.r) + 0.7152 * channel(color.g) + 0.0722 * channel(color.b);
+      };
+      const contrastSamples = overlapTargets.flatMap((element) => {
+        if (!element.textContent?.trim()) return [];
+        const foreground = parseColor(getComputedStyle(element).color);
+        if (!foreground) return [];
+        const background = effectiveBackground(element);
+        const renderedForeground = composite(foreground, background);
+        const lighter = Math.max(luminance(renderedForeground), luminance(background));
+        const darker = Math.min(luminance(renderedForeground), luminance(background));
+        return [{ element: describeElement(element), ratio: (lighter + 0.05) / (darker + 0.05) }];
+      });
+      const lowContrastSamples = contrastSamples.filter((sample) => sample.ratio < 3);
+
+      const operationBoard = surfaceName === "workspace"
+        ? scope.querySelector<HTMLElement>(".operation-memory-board")
+        : null;
+      const relationLines = operationBoard
+        ? [...operationBoard.querySelectorAll<SVGLineElement>(".operation-memory-edge")]
+        : [];
+      const operationNodes = operationBoard
+        ? [...operationBoard.querySelectorAll<HTMLElement>(".operation-memory-point")]
+          .filter((node) => node.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }))
+        : [];
       const visibleOperationNodeIds = new Set(operationNodes.flatMap((node) => {
         const nodeId = node.dataset.nodeId;
         return nodeId ? [nodeId] : [];
@@ -433,6 +513,66 @@ describe("current target localization browser matrix", () => {
               || rect.bottom > boardRect.bottom + 1;
           }).length
         : operationNodes.length;
+
+      const ontologySurface = surfaceName === "ontology"
+        ? scope.querySelector<HTMLElement>(".ontology-static-surface")
+        : null;
+      const ontologyNodes = ontologySurface
+        ? [...ontologySurface.querySelectorAll<HTMLElement>(".ontology-static-node")]
+          .filter((node) => node.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }))
+        : [];
+      const ontologyEdges = ontologySurface
+        ? [...ontologySurface.querySelectorAll<HTMLElement>(".ontology-static-edge")]
+          .filter((edge) => edge.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }))
+        : [];
+      const ontologyNodeIds = new Set(ontologyNodes.flatMap((node) => node.dataset.nodeId ? [node.dataset.nodeId] : []));
+      const ontologyNodeOverlapPairs: string[] = [];
+      for (let left = 0; left < ontologyNodes.length; left += 1) {
+        const leftRect = ontologyNodes[left].getBoundingClientRect();
+        for (let right = left + 1; right < ontologyNodes.length; right += 1) {
+          const rightRect = ontologyNodes[right].getBoundingClientRect();
+          const overlapWidth = Math.min(leftRect.right, rightRect.right) - Math.max(leftRect.left, rightRect.left);
+          const overlapHeight = Math.min(leftRect.bottom, rightRect.bottom) - Math.max(leftRect.top, rightRect.top);
+          if (overlapWidth > 2 && overlapHeight > 2) {
+            ontologyNodeOverlapPairs.push(`${ontologyNodes[left].dataset.nodeId} <> ${ontologyNodes[right].dataset.nodeId}`);
+          }
+        }
+      }
+      const ontologySurfaceRect = ontologySurface?.getBoundingClientRect();
+      const clippedOntologyNodeCount = ontologySurfaceRect
+        ? ontologyNodes.filter((node) => {
+            const rect = node.getBoundingClientRect();
+            return rect.left < ontologySurfaceRect.left - 1
+              || rect.right > ontologySurfaceRect.right + 1
+              || rect.top < ontologySurfaceRect.top - 1
+              || rect.bottom > ontologySurfaceRect.bottom + 1;
+          }).length
+        : ontologyNodes.length;
+      const inaccessibleOntologyNodeCount = ontologyNodes.filter((node) => (
+        !node.dataset.nodeId
+        || !node.getAttribute("aria-label")?.match(/[가-힣]/u)
+        || !node.textContent?.match(/[가-힣]/u)
+      )).length;
+      const inaccessibleOntologyEdgeCount = ontologyEdges.filter((edge) => {
+        const sourceId = edge.dataset.sourceId || "";
+        const targetId = edge.dataset.targetId || "";
+        const accessibleName = edge.getAttribute("aria-label") || "";
+        const relationLabel = edge.dataset.relationLabel || "";
+        return !sourceId
+          || !targetId
+          || !ontologyNodeIds.has(sourceId)
+          || !ontologyNodeIds.has(targetId)
+          || !accessibleName.includes(sourceId)
+          || !accessibleName.includes(targetId)
+          || !accessibleName.match(/[가-힣]/u)
+          || !relationLabel.match(/[가-힣]/u)
+          || !edge.textContent?.includes(sourceId)
+          || !edge.textContent?.includes(targetId);
+      }).length;
+      const disconnectedOntologyNodeCount = ontologyNodes.filter((node) => Number(node.dataset.degree) === 0).length;
+      const unmarkedDisconnectedOntologyNodeCount = ontologyNodes.filter((node) => (
+        Number(node.dataset.degree) === 0 && node.dataset.reviewRequired !== "true"
+      )).length;
       return {
         horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
         overlapCount: overlapPairs.length,
@@ -440,6 +580,11 @@ describe("current target localization browser matrix", () => {
         unnamedInteractiveCount,
         issueOverlayDetected: issuePattern.test(overlayCorpus),
         bodyText: document.body.innerText,
+        minimumTextContrast: contrastSamples.length
+          ? Math.min(...contrastSamples.map((sample) => sample.ratio))
+          : null,
+        lowContrastCount: lowContrastSamples.length,
+        lowContrastSamples: lowContrastSamples.slice(0, 20),
         relationLineCount: relationLines.length,
         inaccessibleRelationCount: relationLines.filter((line) => !line.getAttribute("aria-label")).length,
         zeroLengthRelationCount: relationLines.filter((line) => line.getTotalLength() <= 0).length,
@@ -449,13 +594,23 @@ describe("current target localization browser matrix", () => {
         clippedOperationNodeCount,
         operationNodeOccupancy: boardRect && boardRect.width > 0 && boardRect.height > 0
           ? visibleNodeArea / (boardRect.width * boardRect.height)
-          : 0
+          : 0,
+        staticOntologyNodeCount: ontologyNodes.length,
+        staticOntologyEdgeCount: ontologyEdges.length,
+        inaccessibleOntologyNodeCount,
+        inaccessibleOntologyEdgeCount,
+        disconnectedOntologyNodeCount,
+        unmarkedDisconnectedOntologyNodeCount,
+        staticOntologyNodeOverlapCount: ontologyNodeOverlapPairs.length,
+        staticOntologyNodeOverlapPairs: ontologyNodeOverlapPairs.slice(0, 20),
+        clippedOntologyNodeCount
       };
     }, {
       meaningfulSelector,
       issueSource: issueOverlayPattern.source,
       issueFlags: issueOverlayPattern.flags,
-      scopeSelector: contract.geometryScope
+      scopeSelector: contract.geometryScope,
+      surfaceName: contract.name
     });
 
     expect(metrics.horizontalOverflow).toBe(0);
@@ -464,7 +619,16 @@ describe("current target localization browser matrix", () => {
     expect(metrics.issueOverlayDetected).toBe(false);
     expect(metrics.bodyText).not.toMatch(contract.forbiddenPattern);
     expect(recoverableErrors).toEqual([]);
-    if (contract.name === "ontology" || contract.name === "workspace") {
+    if (contract.name === "ontology") {
+      expect(metrics.staticOntologyNodeCount).toBeGreaterThan(0);
+      expect(metrics.staticOntologyEdgeCount).toBeGreaterThan(0);
+      expect(metrics.inaccessibleOntologyNodeCount).toBe(0);
+      expect(metrics.inaccessibleOntologyEdgeCount).toBe(0);
+      expect(metrics.unmarkedDisconnectedOntologyNodeCount).toBe(0);
+      expect(metrics.staticOntologyNodeOverlapPairs, metrics.staticOntologyNodeOverlapPairs.join("\n")).toEqual([]);
+      expect(metrics.clippedOntologyNodeCount).toBe(0);
+    }
+    if (contract.name === "workspace") {
       expect(metrics.relationLineCount).toBeGreaterThan(0);
       expect(metrics.inaccessibleRelationCount).toBe(0);
       expect(metrics.zeroLengthRelationCount).toBe(0);
@@ -475,23 +639,37 @@ describe("current target localization browser matrix", () => {
     }
 
     const evidence = {
+      capturedAt: new Date().toISOString(),
       sourceSha,
       buildId: buildId(),
       harnessMode: harness.mode,
       route: contract.pathname,
       theme,
       viewport: { label, width, height },
+      recoverableHydrationErrorCount: recoverableErrors.length,
       horizontalOverflow: metrics.horizontalOverflow,
       overlapCount: metrics.overlapCount,
       unnamedInteractiveCount: metrics.unnamedInteractiveCount,
       issueOverlayDetected: metrics.issueOverlayDetected,
+      minimumTextContrast: metrics.minimumTextContrast,
+      lowContrastCount: metrics.lowContrastCount,
+      lowContrastSamples: metrics.lowContrastSamples,
       relationLineCount: metrics.relationLineCount,
       inaccessibleRelationCount: metrics.inaccessibleRelationCount,
       zeroLengthRelationCount: metrics.zeroLengthRelationCount,
       missingConnectedNodeCount: metrics.missingConnectedNodeCount,
       visibleOperationNodeCount: metrics.visibleOperationNodeCount,
       clippedOperationNodeCount: metrics.clippedOperationNodeCount,
-      operationNodeOccupancy: metrics.operationNodeOccupancy
+      operationNodeOccupancy: metrics.operationNodeOccupancy,
+      staticOntologyNodeCount: metrics.staticOntologyNodeCount,
+      staticOntologyEdgeCount: metrics.staticOntologyEdgeCount,
+      inaccessibleOntologyNodeCount: metrics.inaccessibleOntologyNodeCount,
+      inaccessibleOntologyEdgeCount: metrics.inaccessibleOntologyEdgeCount,
+      disconnectedOntologyNodeCount: metrics.disconnectedOntologyNodeCount,
+      unmarkedDisconnectedOntologyNodeCount: metrics.unmarkedDisconnectedOntologyNodeCount,
+      staticOntologyNodeOverlapCount: metrics.staticOntologyNodeOverlapCount,
+      staticOntologyNodeOverlapPairs: metrics.staticOntologyNodeOverlapPairs,
+      clippedOntologyNodeCount: metrics.clippedOntologyNodeCount
     };
     fs.writeFileSync(
       path.join(outputDirectory, `${contract.name}-${theme}-${label}.json`),
