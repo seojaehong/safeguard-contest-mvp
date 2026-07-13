@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 
 import { POST } from "@/app/api/export/xlsx/route";
+import { ACCIDENT_TYPE_VALUES } from "@/lib/risk-assessment-schema";
 
 type XlsxLoadBuffer = Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0];
 
@@ -80,6 +81,23 @@ const riskProfile = {
   confirmationRows: ["현장 확인"],
   approvalLabels: ["작성", "검토", "승인"]
 };
+
+const accidentLabels = new Map([
+  ["fall", "추락"],
+  ["slip", "미끄러짐"],
+  ["struckBy", "맞음"],
+  ["caughtIn", "끼임"],
+  ["cut", "베임"],
+  ["burn", "화상"],
+  ["electricShock", "감전"],
+  ["chemicalExposure", "화학물질 노출"],
+  ["asphyxiation", "질식"],
+  ["heatIllness", "온열질환"],
+  ["traffic", "교통사고"],
+  ["collapse", "붕괴"],
+  ["fireExplosion", "화재·폭발"],
+  ["other", "기타"]
+] as const);
 
 describe("/api/export/xlsx structured contract", () => {
   it("keeps schema-first TBM exports on the structured workbook contract after edits", async () => {
@@ -256,6 +274,112 @@ describe("/api/export/xlsx structured contract", () => {
       row.eachCell({ includeEmpty: false }, (cell) => {
         expect(cell.font.name, `${worksheet.name}!${cell.address}`).toBe("Malgun Gothic");
       });
+    });
+  });
+
+  it("localizes every canonical accident type only in the typed accident column", async () => {
+    const structuredRiskRows = [...accidentLabels.keys()].map((accidentType, index) => ({
+      location: index === 0 ? "Machine" : "외벽",
+      process: index === 0 ? "planned" : "도장",
+      task: `위험작업 ${index + 1}`,
+      hazard: `위험요인 ${index + 1}`,
+      fourM: "Management",
+      accidentType,
+      currentControls: index === 0 ? "현장 structured JSON 원문" : "현장 통제",
+      additionalControls: index === 0 ? "high" : "추가 안전조치",
+      owner: index === 0 ? "other" : "관리감독자",
+      verificationStatus: "planned"
+    }));
+    const response = await POST(xlsxRequest({
+      mode: "single",
+      title: "위험성평가표",
+      scenario,
+      profile: riskProfile,
+      rows: [],
+      structuredRiskRows
+    }));
+
+    expect(response.status).toBe(200);
+    const workbook = await loadWorkbook(response);
+    const worksheet = workbook.getWorksheet("위험성평가표");
+    if (!worksheet) throw new Error("Missing 위험성평가표 worksheet");
+    const accidentHeader = findCellByText(worksheet, "재해유형");
+    if (!accidentHeader) throw new Error("Missing accident type header");
+    const renderedAccidents = [...accidentLabels.values()].map((_, index) => (
+      worksheet.getCell(accidentHeader.row + index + 1, accidentHeader.col).text
+    ));
+
+    expect([...accidentLabels.keys()]).toEqual([...ACCIDENT_TYPE_VALUES]);
+    expect(renderedAccidents).toEqual([...accidentLabels.values()]);
+    expect(worksheet.getCell(accidentHeader.row + 1, 2).text).toBe("Machine");
+    expect(worksheet.getCell(accidentHeader.row + 1, 3).text).toBe("planned");
+    expect(worksheet.getCell(accidentHeader.row + 1, 9).text).toBe("현장 structured JSON 원문");
+    expect(worksheet.getCell(accidentHeader.row + 1, 13).text).toBe("high");
+    expect(worksheet.getCell(accidentHeader.row + 1, 14).text).toBe("other");
+  });
+
+  it("centers workpack controls while keeping body text top-left and wrapped", async () => {
+    const response = await POST(xlsxRequest({
+      mode: "workpack",
+      scenario,
+      documents: [{
+        title: "작업계획서",
+        profile: { ...riskProfile, layout: "generic" },
+        rows: [{ document: "작업계획서", section: "작업 개요", item: "작업순서", content: "작업구역 통제 후 순차 작업" }]
+      }]
+    }));
+    const workbook = await loadWorkbook(response);
+    const worksheet = workbook.getWorksheet("작업계획서");
+    if (!worksheet) throw new Error("Missing 작업계획서 worksheet");
+    const contentCell = findCellByText(worksheet, "작업구역 통제 후 순차 작업");
+    if (!contentCell) throw new Error("Missing workpack body row");
+    const row = contentCell.row;
+
+    [1, 5, 6].forEach((column) => {
+      expect(worksheet.getCell(row, column).alignment).toMatchObject({ vertical: "middle", horizontal: "center" });
+    });
+    [2, 3, 4].forEach((column) => {
+      expect(worksheet.getCell(row, column).alignment).toMatchObject({ vertical: "top", horizontal: "left", wrapText: true });
+    });
+  });
+
+  it("uses actual column and merged-span widths when estimating row heights", async () => {
+    const narrowSection = "좁은열에서두줄이필요한섹션명";
+    const longTitle = "긴 제목 ".repeat(18).trim();
+    const response = await POST(xlsxRequest({
+      mode: "single",
+      title: longTitle,
+      scenario,
+      profile: { ...riskProfile, layout: "generic", subtitle: "인쇄용 문서" },
+      rows: [{ document: longTitle, section: narrowSection, item: "점검", content: "확인" }]
+    }));
+    const workbook = await loadWorkbook(response);
+    const worksheet = workbook.worksheets[0];
+    const bodySection = findCellByText(worksheet, narrowSection);
+    if (!bodySection) throw new Error("Missing narrow body section");
+
+    expect(worksheet.getRow(bodySection.row).height).toBeGreaterThan(24);
+    expect(worksheet.getRow(1).height).toBeLessThan(90);
+  });
+
+  it("applies the default Korean font to styled empty editable cells", async () => {
+    const response = await POST(xlsxRequest({
+      mode: "educationRecordStructured",
+      scenario,
+      structured: { educationName: "신규자교육", curriculum: [] }
+    }));
+    const workbook = await loadWorkbook(response);
+    const worksheet = workbook.getWorksheet("안전보건교육");
+    if (!worksheet) throw new Error("Missing education worksheet");
+    const attendeeHeader = findCellByText(worksheet, "성명");
+    if (!attendeeHeader) throw new Error("Missing attendee header");
+    const editableRow = attendeeHeader.row + 1;
+
+    [2, 3, 6].forEach((column) => {
+      const cell = worksheet.getCell(editableRow, column);
+      expect(cell.text).toBe("");
+      expect(cell.font.name).toBe("Malgun Gothic");
+      expect(cell.border).toBeDefined();
     });
   });
 });
